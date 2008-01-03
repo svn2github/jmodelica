@@ -1,0 +1,7 @@
+aspect Arrays {
+	
+	syn lazy ArraySubscripts ComponentDecl.arraySubscripts() =
+		hasVarArraySubscripts()? getVarArraySubscripts():
+			null;
+
+}

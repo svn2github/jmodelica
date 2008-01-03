@@ -1,0 +1,480 @@
+import java.util.HashSet;
+import java.util.ArrayList;
+
+aspect RootAccess {
+	
+	inh lazy Root ASTNode.retrieveRoot();
+	eq SourceRoot.getProgram().retrieveRoot() = this;
+	eq FlatRoot.getFClass().retrieveRoot() = this;
+	syn lazy Root ASTNode.root() = retrieveRoot();
+	eq Root.root() = this;
+	
+	syn lazy List ASTNode.emptyList() = root().emptyList();
+	eq Root.emptyList() = getEmptyList();
+	syn lazy List Root.getEmptyList() = new List();
+	
+	syn lazy HashSet ASTNode.emptyHashSet() = root().emptyHashSet();
+	eq Root.emptyHashSet() = getEmptyHashSet();
+	syn lazy HashSet Root.getEmptyHashSet() = new HashSet(4);
+	
+	syn lazy ArrayList ASTNode.emptyArrayList() = root().emptyArrayList();
+	eq Root.emptyArrayList() = getEmptyArrayList();
+	syn lazy ArrayList Root.getEmptyArrayList() = new ArrayList();
+	
+	syn lazy ModelicaParser Root.modelicaParser() = new ModelicaParser();
+	syn lazy FlatModelicaParser Root.flatModelicaParser() = new FlatModelicaParser();
+	
+}
+
+aspect DebugPrint {
+
+	public int ASTNode.printLevel = 1;
+	public void ASTNode.debugPrint(Object msg) {
+		if (printLevel>0)
+			System.out.println(msg);
+	}
+	
+}
+
+aspect NodeMethods {
+
+  public void ASTNode.setStart(int start) {
+    this.start = start;  
+  } 
+ 
+  public int ASTNode.beginLine() { return getLine(getStart()); }
+  public int ASTNode.beginColumn() { return getColumn(getStart()); }
+
+	public String ASTNode.getNodeName() {
+		return dump();
+	}
+	
+	public String IdDecl.getNodeName() {
+		return dump() + ": '" + getID() + "'";
+	}
+
+	public String Access.getNodeName() {
+		return dump() + ": '" + getID() + "'";
+	}
+	
+	public String RealLitExp.getNodeName() {
+		return dump() + ": " + getUNSIGNED_NUMBER();
+	}
+	
+	public String InstComponent.getNodeName() {
+		return dump() + ": '" + getComponentDecl().getClassName().qualifiedName() + " " + getComponentDecl().getName().getID() + "'";
+	}
+
+}
+
+aspect FileNames {
+
+	syn lazy String ASTNode.fileName() = retrieveFileName();
+	eq FullClassDecl.fileName() = getFileName().equals("")? retrieveFileName(): getFileName();
+	eq Root.fileName() = getFileName();
+	
+	inh lazy String ASTNode.retrieveFileName();
+	eq SourceRoot.getProgram().retrieveFileName() = getFileName();
+	eq FlatRoot.getFClass().retrieveFileName() = getFileName();
+	
+	eq FullClassDecl.getEquation().retrieveFileName() = getFileName().equals("")? retrieveFileName(): getFileName();
+	eq FullClassDecl.getAlgorithm().retrieveFileName() = getFileName().equals("")? retrieveFileName(): getFileName();
+	eq FullClassDecl.getSuper().retrieveFileName() = getFileName().equals("")? retrieveFileName(): getFileName();
+	eq FullClassDecl.getImport().retrieveFileName() = getFileName().equals("")? retrieveFileName(): getFileName();
+	eq FullClassDecl.getClassDecl().retrieveFileName() = getFileName().equals("")? retrieveFileName(): getFileName();
+	eq FullClassDecl.getComponentDecl().retrieveFileName() = getFileName().equals("")? retrieveFileName(): getFileName();
+	eq FullClassDecl.getAnnotation().retrieveFileName() = getFileName().equals("")? retrieveFileName(): getFileName();
+	eq FullClassDecl.getExternalClause().retrieveFileName() = getFileName().equals("")? retrieveFileName(): getFileName();
+	
+	private String Root.fName = "";
+	public void Root.setFileName(String fName) { this.fName = fName; }
+	public String Root.getFileName() {return fName; }
+
+	private String FullClassDecl.fName = "";
+	public void FullClassDecl.setFileName(String fName) { this.fName = fName; }
+	public String FullClassDecl.getFileName() {return fName; }
+	
+	
+	
+
+}
+	
+aspect Names {
+  // simple names
+  syn String Access.name() = getID();
+  syn String ParseAccess.name() = getID();
+  syn String ClassAccess.name() = getID();
+  syn String AmbiguousAccess.name() = getID();
+  syn String ComponentAccess.name() = getID();
+  syn String IdDecl.name() = getID();
+  syn String Dot.name() = getLeft().name() + "." + getRight().name();
+  
+  syn lazy String Access.qualifiedName() = getID();
+  eq Dot.qualifiedName() = getLeft().qualifiedName() + "." + getRight().qualifiedName();
+  
+  syn String ClassDecl.name();
+  eq BaseClassDecl.name() = getName().getID();
+  eq BuiltInClassDecl.name() = getName().getID();
+  //eq LibNode.name() = getName();
+  
+  syn String ComponentDecl.name() = getName().getID();
+  
+  syn String ClassDecl.qualifiedName();
+  eq BaseClassDecl.qualifiedName() = classNamePrefix().equals("")? 
+                                                  name(): classNamePrefix() + "." + name();
+  inh String BaseClassDecl.classNamePrefix();
+  eq FullClassDecl.getClassDecl().classNamePrefix() = classNamePrefix().equals("")?
+                                                      name(): classNamePrefix() + "." + name();
+  eq BuiltInClassDecl.qualifiedName() = getName().getID();
+  
+  eq SourceRoot.getProgram().classNamePrefix() = "";
+  
+  syn String ClassDecl.primitiveName();
+  eq BaseClassDecl.primitiveName() = getName().getID();
+  eq BuiltInClassDecl.primitiveName() = getName().getID();
+  
+  eq FullClassDecl.primitiveName() {
+  	if (getNumSuper()==1 && getSuper(0).getSuper().myClassDecl().finalClass().isPrimitive())
+  		return getSuper(0).getSuper().myClassDecl().finalClass().primitiveName();
+  	else 
+  		return getName().getID();
+  }
+  
+  inh BaseClassDecl ASTNode.enclosingClassDecl();
+  eq SourceRoot.getProgram().enclosingClassDecl() = null;
+
+  eq FullClassDecl.getEquation().enclosingClassDecl() = this; 
+  eq FullClassDecl.getAlgorithm().enclosingClassDecl() = this; 
+  eq FullClassDecl.getSuper().enclosingClassDecl() = this;  
+  eq FullClassDecl.getImport().enclosingClassDecl() = this; 
+  eq FullClassDecl.getClassDecl().enclosingClassDecl() = this; 
+  eq FullClassDecl.getComponentDecl().enclosingClassDecl() = this; 
+  eq FullClassDecl.getAnnotation().enclosingClassDecl() = this; 
+  eq FullClassDecl.getExternalClause().enclosingClassDecl() = this; 	
+
+  eq ShortClassDecl.getClassModification().enclosingClassDecl() = this;
+  
+  eq ExtendClassDecl.getClassModification().enclosingClassDecl() = this;
+  eq ExtendClassDecl.getComposition().enclosingClassDecl() = this;
+  
+  
+   	/**
+	 * Access method for the last Access of a qualified or
+	 * unqualified name.
+	 */ 
+	syn Access Access.getLastAccess() = this;
+    eq Dot.getLastAccess() = getRight().getLastAccess();
+    
+    /**
+     * Access method for the first Access of a qualified or
+     * unqualified name.
+     */
+    syn Access Access.getFirstAccess() = this;
+    eq Dot.getFirstAccess() = getLeft().getFirstAccess();
+   
+   	inh Access Access.getNextAccess();
+   	eq Dot.getLeft().getNextAccess() = getRight().getFirstAccess();
+   	eq SourceRoot.getProgram().getNextAccess() = null;
+   	
+   	/**
+   	 * stripFirstAccess removes the first access in a qualified
+   	 * name. If the name is not qualified, null is returned. 
+   	 */
+   	public Access Access.stripFirstAccess() {
+   		return null;
+   	}
+   	
+   	public Access Dot.stripFirstAccess() {
+		// A right skewed Dot three is stipped by
+		//getRight().myDecl();
+		return (Access)getRight().fullCopy();
+	}
+   	
+   	syn ArraySubscripts Access.arraySubscripts() = null;
+   	syn ArraySubscripts ParseAccess.arraySubscripts() = 
+   	   hasArraySubscripts()? getArraySubscripts(): null;
+   	syn ArraySubscripts ComponentAccess.arraySubscripts() = 
+   	   hasArraySubscripts()? getArraySubscripts(): null;
+   	syn ArraySubscripts AmbiguousAccess.arraySubscripts() = 
+   	   hasArraySubscripts()? getArraySubscripts(): null;
+
+	syn boolean Access.isQualified() = false;
+	eq Dot.isQualified() = true;
+}
+
+aspect FlatNames {
+	
+	public FQName.FQName(String name) {
+		this(new List().add(new FQNamePart(name,new Opt())));
+	}
+
+	public FQName.FQName(FQName fqname) {
+		this((List)fqname.getFQNamePartList().fullCopy());
+	}
+
+	public FQName FQName.append(Access access,FQName prefix) {
+		Access fa = access.getFirstAccess();
+		addFQNamePart(new FQNamePart(fa.name(),
+			                  fa.arraySubscripts()!=null? new Opt(fa.arraySubscripts().flatten(prefix)):new Opt()));
+		while (fa.getNextAccess()!=null) {
+			fa = fa.getNextAccess();
+			addFQNamePart(new FQNamePart(fa.name(),
+			                  fa.arraySubscripts()!=null? new Opt(fa.arraySubscripts().flatten(prefix)):new Opt()));
+		}
+		return this;
+	}
+
+	public FQName FQName.append(String name) {
+		addFQNamePart(new FQNamePart(name, new Opt()));
+		return this;
+	}
+
+	public FQName FQName.append(FQName fqname) {
+		for (int i=0;i<fqname.getNumFQNamePart();i++)
+			addFQNamePart((FQNamePart)fqname.getFQNamePart(i).fullCopy());
+		return this;
+	}
+
+	syn lazy FQName InstNode.getFQNamePrefix() {
+		FQName prefix = retrieveFQName();
+		FQName myName = prefix!=null? new FQName(prefix):
+		                              new FQName();
+		return myName;	
+	}
+	
+	syn lazy FQName InstNode.getFQName() = getFQNamePrefix();
+	
+	eq InstComponent.getFQName() {
+		FQName prefix = retrieveFQName();
+		FQName myName = prefix!=null? new FQName(prefix):
+		                              new FQName();
+		if (prefix!=null)
+			myName.addFQNamePart(new FQNamePart(name(),arraySubscripts()!=null? 
+		                                new Opt(arraySubscripts().flatten(prefix)): new Opt()));
+		else
+			myName.addFQNamePart(new FQNamePart(name(),arraySubscripts()!=null? 
+		                                new Opt(arraySubscripts().flatten(new FQName())): new Opt()));
+		
+		return myName;
+	}
+
+	inh lazy FQName InstNode.retrieveFQName();
+	eq InstComponent.getInstNode().retrieveFQName() = getFQName();
+	eq InstRoot.getInstNode().retrieveFQName() = null;
+	eq SourceRoot.getProgram().retrieveFQName() = null;
+
+	syn lazy String FQName.name() {
+		StringBuffer str = new StringBuffer();
+		for (int i=0;i<getNumFQNamePart();i++) {
+			str.append(getFQNamePart(i).getName());
+			if (i<getNumFQNamePart()-1)
+				str.append(".");
+		}
+		return str.toString();
+	}
+	syn String FQNamePart.name() = getName();
+
+	syn lazy FArraySubscripts FQName.fArraySubscripts() = 
+		getFQNamePart(getNumFQNamePart()-1).hasFArraySubscripts()?
+			getFQNamePart(getNumFQNamePart()-1).getFArraySubscripts():
+				null;  
+
+	syn String FIdUse.name() = getID();
+	eq FIdUseQualified.name() = getFQName().name();
+
+	syn FArraySubscripts FIdUse.fArraySubscripts() = null;
+	eq FIdUseQualified.fArraySubscripts() = getFQName().fArraySubscripts();
+
+	syn String FIdDecl.name() = getFQName().name();
+	
+	syn String FClass.name() = getFQName().name();
+	syn String FVariable.name() = getFQName().name();
+    syn FArraySubscripts FVariable.fArraySubscripts() = getFQName().fArraySubscripts();
+
+	boolean FIdUseQualified.rewritten = false;
+	rewrite FIdUseQualified {
+		when (!rewritten && fArraySubscripts()!=null)
+			to FIdUseArray {
+			    debugPrint("rewrite FIdUseQualified");
+				FIdUseArray id =  new FIdUseArray("",getFQName());
+				id.rewritten = true;
+				return id;
+			}
+	}
+
+}
+
+aspect Visibility {
+	
+	syn boolean BaseClassDecl.isPublic() = getVisibilityType().isPublic();
+	syn boolean ComponentDecl.isPublic() = getVisibilityType().isPublic();
+
+	syn boolean BaseClassDecl.isProtected() = getVisibilityType().isProtected();
+	syn boolean ComponentDecl.isProtected() = getVisibilityType().isProtected();
+
+	syn boolean VisibilityType.isPublic() = false;
+	eq PublicVisibilityType.isPublic() = true;
+
+	syn boolean VisibilityType.isProtected() = false;
+	eq ProtectedVisibilityType.isProtected() = true;
+	
+}
+
+aspect ComponentDeclMethods {
+   	/**
+   	 * Check if a ComponentDecl is declared parameter.
+   	 */
+   	syn boolean ComponentDecl.isFlow() {
+   	
+   		if (hasTypePrefixFlow())
+   			return true;
+   	
+   		return false;
+   	}
+
+   	/**
+   	 * Check if a ComponentDecl is declared parameter.
+   	 */
+   	syn boolean ComponentDecl.isParameter() {
+   	
+   		if (hasTypePrefixOther())
+   			if (getTypePrefixOther() instanceof Parameter)
+   				return true;
+   	
+   		return false;
+   	}
+   	  
+   	/**
+   	 * Check if a ComponentDecl is declared inner.
+   	 */
+   	syn boolean ComponentDecl.isInner() {
+		return hasInner();
+   	}
+   	
+   	/**
+   	 * Check if a ComponentDecl is declared outer.
+   	 */
+   	syn boolean ComponentDecl.isOuter() {
+		return hasOuter();
+   	}
+   	
+   	
+   	 /**
+   	 * Check if a ComponentDecl is declared constant.
+   	 */
+   	syn boolean ComponentDecl.isConstant() {
+   	
+   		if (hasTypePrefixOther())
+   			if (getTypePrefixOther() instanceof Constant)
+   				return true;
+   	
+   		return false;
+   	}
+   	
+   	/**
+   	 * Check if a ComponentDecl is declared discrete.
+   	 */
+   	syn boolean ComponentDecl.isDiscrete() {
+   	
+   		if (hasTypePrefixOther())
+   			if (getTypePrefixOther() instanceof Discrete)
+   				return true;
+   	
+   		return false;
+   	}
+   	
+   	/**
+   	 * Check if a ComponentDecl is declared discrete.
+   	 */
+   	syn boolean ComponentDecl.isInput() {
+   	
+   		if (hasTypePrefixInputOutput())
+   			if (getTypePrefixInputOutput() instanceof Input)
+   				return true;
+   		if (myClass().isInput())
+   			return true;
+   		
+   		return false;
+   	}
+   	
+   	/**
+   	 * Check if a ComponentDecl is declared discrete.
+   	 */
+   	syn boolean ComponentDecl.isOutput() {
+   	
+   		if (hasTypePrefixInputOutput())
+   			if (getTypePrefixInputOutput() instanceof Output)
+   				return true;
+	    if (myClass().isOutput())
+   			return true;
+	    
+   	
+   		return false;
+   	}
+
+}
+
+aspect ShortClassUtil {
+
+	syn ClassDecl ClassDecl.finalClass() = this;
+	eq ShortClassDecl.finalClass() = getClassName().myClassDecl().finalClass();
+
+	syn boolean ClassDecl.isInput() = false;
+	eq ShortClassDecl.isInput() {
+		if (hasTypePrefixInputOutput())
+   			if (getTypePrefixInputOutput() instanceof Input)
+   				return true;
+		return getClassName().myClassDecl().isInput();
+		
+	}
+	
+	syn boolean ClassDecl.isOutput() = false;
+	eq ShortClassDecl.isOutput() {
+		if (hasTypePrefixInputOutput())
+   			if (getTypePrefixInputOutput() instanceof Output)
+   				return true;
+		return getClassName().myClassDecl().isOutput();
+		
+	}
+
+}
+
+aspect AllElements {
+
+	syn lazy HashSet ClassDecl.allLocalClassDecl() = emptyHashSet();
+	eq ShortClassDecl.allLocalClassDecl() = finalClass().allLocalClassDecl();
+	eq FullClassDecl.allLocalClassDecl() {
+		HashSet set = new HashSet();
+		for (int i=0;i<numLocalClassDecl();i++) 
+			set.add(localClassDecl(i));
+		for (int i=0;i<getNumSuper();i++)
+			set.addAll(getSuper(i).getSuper().myClassDecl().allLocalClassDecl());
+		return set;
+	}
+	
+    syn lazy HashSet ClassDecl.allLocalComponentDecl() = emptyHashSet();
+	eq ShortClassDecl.allLocalComponentDecl() = finalClass().allLocalComponentDecl();
+	eq FullClassDecl.allLocalComponentDecl() {
+		debugPrint("<<<FullClassDecl.allLocalComponentDecl(): ");
+		HashSet set = new HashSet();
+		for (int i=0;i<getNumComponentDecl();i++) 
+			set.add(getComponentDecl(i));
+		for (int i=0;i<getNumSuper();i++)
+			set.addAll(getSuper(i).getSuper().myClassDecl().allLocalComponentDecl());
+		return set;
+	}
+	
+}
+
+aspect Math {
+	public boolean FFunctionCall.rewrittenToExp = false;
+	rewrite FFunctionCall {
+		when (getName().name().equals("Modelica.Math.sin") && 
+		      !rewrittenToExp)
+		      to FFunctionCall {
+		      	rewrittenToExp = true;
+		      	return new FFunctionCall(new FIdUse("sin"),new List().add(getArgs(0)));
+		      }
+	}
+
+}

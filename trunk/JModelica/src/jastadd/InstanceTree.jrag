@@ -1,0 +1,311 @@
+aspect InstantiationTree {
+	
+	// This rewrite eliminates CompositeModifications as children of
+	// InstModifications, which simplifies implementation.
+	public boolean InstModification.rewritten = false;
+	rewrite InstModification in InstNode.getMergedEnvironment(){
+		when(!rewritten)
+		to List {
+			if (getModification() instanceof CompleteModification) {  
+			    debugPrint("xxxxxxxxx rewrite InstModification in InstNode.getMergedEnvironment()");
+				List l = new List();
+				CompleteModification cm = (CompleteModification)getModification();
+				for (int i=0;i<cm.getClassModification().getNumArgument();i++)
+					l.add(new InstModification(getInstNode(),cm.getClassModification().getArgument(i)));
+				if (cm.hasValueModification())
+					l.add(new InstModification(getInstNode(),cm.getValueModification()));
+				return l;
+		} if (getModification() instanceof ClassModification) { 
+			    debugPrint("yyyyy rewrite InstModification in InstNode.getMergedEnvironment()");
+				List l = new List();
+				ClassModification cm = (ClassModification)getModification();
+				for (int i=0;i<cm.getNumArgument();i++)
+					l.add(new InstModification(getInstNode(),cm.getArgument(i)));
+				return l;
+		} else {
+			this.rewritten = true;
+			return new List().add(this);
+		}
+		}
+	}
+	
+	
+
+	syn lazy List InstNode.getMergedEnvironmentList() {
+		debugPrint("InstNode.getMergedEnvironmentList()");
+		// Retrieve modifications upwards
+		List env = nameScope()? myEnvironment(name()): myEnvironment();
+		//env.dumpTree("<>");
+		// Add modifications in this node
+//		if (modificationTree()!=null)
+//			env.add(new InstModification(this,modificationTree()));
+		for (int i=0;i<localModifications().size();i++)
+			env.add(new InstModification(this,(Modification)localModifications().get(i)));
+
+/*			
+		debugPrint("§§§§§§§§§§§§§§§§§§§§§§§§§§§");
+		debugPrint(modificationTree());
+		if (localModifications().getNumChild()==0)
+			debugPrint("**");
+		for (int i=0;i<localModifications().getNumChild();i++)
+			debugPrint("** "+localModifications().getChild(i));
+	*/
+	  	debugPrint(getNodeName());
+	  	//env.dumpTree("#");
+	  	if (env.getNumChild()>0)
+	  		debugPrint("# "+((InstModification)env.getChild(0)).getModification().getClass().getName());
+		return env;
+	}
+		
+	inh lazy List InstNode.myEnvironment();
+	inh lazy List InstNode.myEnvironment(String name);
+	
+	eq InstNode.getInstNode().myEnvironment() {
+		debugPrint("InstNode.getInstNode().myEnvironment()");
+		List env = new List();
+		for (int i=0;i<getNumMergedEnvironment();i++)
+			env.add(new InstModification(getMergedEnvironment(i).getInstNode(),
+			                             getMergedEnvironment(i).getModification()));
+		return env;
+	}
+	
+	eq InstNode.getInstNode().myEnvironment(String name) =
+	  localMyEnvironment(name);
+	
+	syn List InstNode.localMyEnvironment(String name) {
+	    if(!is$Final) throw new Error("Node is not final");
+		debugPrint("InstNode.getInstNode().myEnvironment(): " + name);
+		List env = new List();
+		debugPrint("*****: "+getNumMergedEnvironment());
+		for (int i=0;i<getNumMergedEnvironment();i++) {
+			//getMergedEnvironment(i).getModification().dumpTree("----");
+			Modification m = getMergedEnvironment(i).getModification().matchModification(name);
+			if (m!=null)
+				env.add(new InstModification(getMergedEnvironment(i).getInstNode(),m));
+		}
+		return env;
+	}
+	
+	syn lazy Modification Modification.matchModification(String name) = null;
+	eq CompleteModification.matchModification(String name) {
+		for (int i=0;i<getClassModification().getNumArgument();i++)
+			if (getClassModification().getArgument(i).matchModification(name)!=null)
+				return getClassModification().getArgument(i).matchModification(name);
+		return null;
+	}
+	
+	eq ComponentModification.matchModification(String name) {
+		debugPrint("ComponentModification.matchModification: " + name);
+		if (name.equals(getName().getID()))
+			return getModification();
+		return null;
+	}
+	
+	eq BaseClassDecl.getInstRoot().myEnvironment() = root().emptyList();
+	eq BaseClassDecl.getInstRoot().myEnvironment(String name) = root().emptyList();
+	
+	// Definition of the NTA representing the root of the 
+	// instantiation tree
+	syn InstRoot BaseClassDecl.getInstRoot() = new InstRoot(this);
+
+	syn lazy List InstNode.getInstNodeList() {
+	
+		List l = new List();
+		List comps = components();
+		List supers = superClasses();	
+		
+		
+		debugPrint("InstNode.getInstNodeList: " +getClass().getName());
+	
+		debugPrint("########################################");
+		debugPrint("Environment:");
+		String s = "";
+		for (int i=0;i<getNumMergedEnvironment();i++) {
+		    s += getMergedEnvironment(i).getInstNode().getNodeName() + " -- ";
+			s += getMergedEnvironment(i).getModification().prettyPrint("") + "\n";
+		}
+		debugPrint(s);
+		if(printLevel>0)
+			getMergedEnvironmentList().dumpTree("");
+		debugPrint("########################################");
+		
+		
+		for (int i=0;i<comps.getNumChild();i++) {
+			ComponentDecl cd = (ComponentDecl)comps.getChild(i);
+			l.add(cd.newInstComponent());
+		}				
+	
+		for (int i=0;i<supers.getNumChild();i++) {
+			l.add(((ExtendsClause)supers.getChild(i)).newInstExtends());
+		}
+		return l;
+	}
+
+
+	// Attribute for building an InstComposite node based
+	// on a ComponentDecl
+	public InstComponent ComponentDecl.newInstComponent() {
+	   return myClass().newInstComponent(this);
+	}
+	
+	// Dispatch w.r.t. class type
+	public abstract InstComponent ClassDecl.newInstComponent(ComponentDecl cd);
+
+	public InstComponent BaseClassDecl.newInstComponent(ComponentDecl cd) {
+		if (!extendsPrimitive())
+			return new InstComposite(cd);
+		else {
+			return new InstPrimitive(cd);
+		}
+	}
+	
+	public InstComponent ShortClassDecl.newInstComponent(ComponentDecl cd) {
+		return getClassName().myClassDecl().newInstComponent(cd);
+	}
+	
+	public InstComponent PrimitiveClassDecl.newInstComponent(ComponentDecl cd) {
+		return new InstPrimitive(cd);
+	}
+	
+	public InstComponent BuiltInClassDecl.newInstComponent(ComponentDecl cd) {
+		return null;
+	}
+	
+	// Build an InstExtends
+	public InstExtends ExtendsClause.newInstExtends() {
+		return new InstExtends(this);
+	}
+
+	syn boolean ClassDecl.extendsPrimitive() = false;
+	eq ShortClassDecl.extendsPrimitive() = finalClass().extendsPrimitive();
+	eq FullClassDecl.extendsPrimitive(){
+		return (getNumSuper()==1 && getSuper(0).getSuper().myClassDecl().finalClass().isPrimitive());
+	}
+	
+	// The following attributes defines a generic interface
+	// for InstNodes	
+	// Just to avoid casts... (Is this a good idea? yes.)
+	syn lazy List ClassDecl.equations() = root().emptyList();
+	eq FullClassDecl.equations() = getEquationList();
+	eq ShortClassDecl.equations() = getClassName().myClassDecl().equations();
+	
+	syn lazy List ClassDecl.superClasses() = root().emptyList();
+	eq FullClassDecl.superClasses() = getSuperList();
+	eq ShortClassDecl.superClasses() = getClassName().myClassDecl().superClasses();
+	
+	syn lazy List ClassDecl.components() = root().emptyList();
+	eq FullClassDecl.components() = getComponentDeclList();
+	eq ShortClassDecl.components() = getClassName().myClassDecl().components();
+	
+	syn boolean InstNode.nameScope() = false;
+	eq InstComponent.nameScope() = true;
+
+    syn String InstNode.name() = "";
+    eq InstComponent.name() = getComponentDecl().name();
+
+	/*
+	syn lazy Modification InstNode.modificationTree() = null;
+	eq InstComponent.modificationTree() = getComponentDecl().hasModification()? getComponentDecl().getModification():null;
+	eq InstExtends.modificationTree() = getExtendsClause().hasClassModification()? getExtendsClause().getClassModification():null;
+	*/
+	
+	syn lazy ArrayList InstNode.localModifications() = new ArrayList();
+	eq InstComponent.localModifications() {
+		ArrayList l = new ArrayList();
+		if (getComponentDecl().hasModification())
+			l.add(getComponentDecl().getModification());
+		// This is to take modifiers short class declarations into account
+		ArrayList classMods = getComponentDecl().myClass().classModifications();
+		for (int i = 0;i<classMods.size();i++)
+			l.add(classMods.get(i));	
+		// This is to take into account the case when we instantiate a
+		// component based on a class which inherits from a primitive type
+//		if (getComponentDecl().myClass().extendsPrimitive()) {
+//			if (getComponentDecl().myClass().getSuper(0).hasClassModification())	
+//				l.add(getComponentDecl().myClass().getSuper(0).getSuper().getClassModification());	
+//		}
+		
+		return l;
+	}
+
+	eq InstExtends.localModifications() {
+		ArrayList l = new ArrayList();
+		if (getExtendsClause().hasClassModification())
+			l.add(getExtendsClause().getClassModification());
+		// This is to take modifiers short class declarations into account
+		ArrayList classMods = getExtendsClause().getSuper().myClassDecl().classModifications();
+		for (int i = 0;i<classMods.size();i++)
+			l.add(classMods.get(i));	
+		return l;
+	}
+
+	syn lazy ArrayList ClassDecl.classModifications() = new ArrayList();
+	eq FullClassDecl.classModifications() {
+		if (!extendsPrimitive())
+			return new ArrayList();
+		else {
+		    // Add (optional) modification on the ExtendsClause
+			ArrayList l = new ArrayList();
+			if (getSuper(0).hasClassModification())
+				l.add(getSuper(0).getClassModification());
+			// If we inherit from a ShortClassDecl there might be additional
+			// modifications	
+			ArrayList classMods = getSuper(0).getSuper().myClassDecl().classModifications();
+			for (int i = 0;i<classMods.size();i++)
+				l.add(classMods.get(i));		
+			return l;
+		}
+		
+	}
+	
+	eq ShortClassDecl.classModifications() {
+		ArrayList l = new ArrayList();
+		if (hasClassModification())
+			l.add(getClassModification());
+		ArrayList classMods = getClassName().myClassDecl().classModifications();
+		for (int i = 0;i<classMods.size();i++)
+			l.add(classMods.get(i));	
+		return l;
+	}
+	
+	syn List InstNode.equations();
+	eq InstRoot.equations() = getClassDecl().equations();
+	eq InstComponent.equations() = getComponentDecl().myClass().equations();
+	eq InstExtends.equations() = getExtendsClause().getSuper().myClassDecl().equations();
+	
+	syn lazy List InstNode.components();
+	eq InstRoot.components() = getClassDecl().components();
+	eq InstComponent.components() = getComponentDecl().myClass().components();
+	eq InstExtends.components() = getExtendsClause().getSuper().myClassDecl().components();
+	
+	syn lazy List InstNode.superClasses();
+	eq InstRoot.superClasses() = getClassDecl().superClasses();
+	eq InstComponent.superClasses() = getComponentDecl().myClass().superClasses();
+	eq InstExtends.superClasses() = getExtendsClause().getSuper().myClassDecl().superClasses();
+	
+}
+
+aspect InstanceDumpTree {
+
+	// Some basic dump routines
+	public void InstNode.dumpTree(String indent) {
+		System.out.println(indent + dump());
+		getInstNodeList().dumpTree(indent + " ");
+	}
+	
+	public void InstComposite.dumpTree(String indent) {
+		System.out.println(indent + dump()
+		                      + ": " + 
+		                      getComponentDecl().myClass().name() + " "+
+		                      getComponentDecl().name());
+		//getComponentDecl().dumpTree("");
+		getInstNodeList().dumpTree(indent + " ");
+	}
+	
+	public void InstPrimitive.dumpTree(String indent) {
+		System.out.println(indent + dump()
+							  + ": " + 
+		                      getComponentDecl().myClass().name() + " "+
+		                      getComponentDecl().name());
+	}
+}

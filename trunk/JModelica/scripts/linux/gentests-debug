@@ -1,0 +1,10 @@
+#!/bin/sh
+
+JAR_DIR=/local/home/jakesson/workspace/JModelicaAJ
+
+java -classpath $JAR_DIR/bin/jmodelica-debug.jar:$JAR_DIR/tools/aspectjrt.jar org.jmodelica.test.ast.JunitGenerator "$@"
+
+
+#java -Xmx800m -DMODELICA_LIB="$MODELICA_LIB" -DIPOPT="$IPOPT" -classpath $OPTIMI
+#CA_DIR/optimica.jar:$OPTIMICA_DIR/tools/beaver.jar  OptimicaCodeGen "$@"
+

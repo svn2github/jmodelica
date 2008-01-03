@@ -1,0 +1,226 @@
+import java.io.*;
+
+
+aspect Library {
+
+	eq LibClassDecl.memberClass(String name) {
+		HashSet set = new HashSet();
+		set.addAll(super.memberClass(name));
+		for (int i=0;i<getNumLibNode();i++) {
+			if (getLibNode(i).getName().equals(name)) {
+				set.add(getLibNode(i).getClassDecl());
+			}
+		}
+		
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+
+	eq LibClassDecl.numLocalClassDecl() = getNumClassDecl() + getNumLibNode();
+	eq LibClassDecl.localClassDecl(int i) = 
+		i<getNumClassDecl()? getClassDecl(i): getLibNode(i-getNumClassDecl()).getClassDecl();
+
+	eq LibClassDecl.getLibNode().lookupClass(String name) = genericLookupClass(name);
+	eq LibClassDecl.getLibNode().lookupComponent(String name) = genericLookupComponent(name);
+
+	syn lazy ClassDecl LibNode.getClassDecl() = createClassDecl();
+
+	syn lazy ClassDecl LibNode.createClassDecl() {
+		
+		/* If structured
+		 		a. Read all files
+		 		b. Check for package.mo
+		 		c. Parse package.mo
+		 		d. Read all .mo files
+		 		e. Add LibNodes to the LibClassDecl
+		 		f. Return the LibClassDecl
+		   If unstructured
+		   		a. Parse the .mo file
+		   		b. Return the resulting FullClassDecl  	 
+		*/
+	
+		if (getStructured()) {
+			String dirName = getFileName();
+			try {
+				File baseDir = new File(dirName);
+				
+				File[] allFiles = baseDir.listFiles();
+				if (allFiles==null) {
+					System.out.println("Error reading library library!");
+					System.exit(0);
+				} 
+				
+				
+				boolean package_mo_present = false;
+				for (int i=0;i<allFiles.length;i++) {
+	   				if (allFiles[i].toString().length()>10)
+	   					if (allFiles[i].toString().substring(allFiles[i].toString().length()-10).equals("package.mo"))
+	   						package_mo_present = true;
+	   			}
+				
+				if (package_mo_present) {
+		
+		   			SourceRoot sr = root().modelicaParser().parseFile(dirName+"/package.mo");
+		   			FullClassDecl fcd = (FullClassDecl)sr.getProgram().getElement(0);
+		   			LibClassDecl lcd = new LibClassDecl(fcd);
+		   			lcd.setFileName(dirName+"/package.mo");
+	   				   			
+		   			/* Obtain a list of all files
+	   				   get the corresponding package for each file
+	   				   and add to list of TypeDefs */
+	   			
+	   				List libnodes = new List();
+	   			
+	   				File[] filesUnStructured = baseDir.listFiles(new UnStructuredEntriesFilenameFilter());
+	   				debugPrint("Scanning directory: " + dirName);
+	   				debugPrint(" Unstructured entries: ");
+	   				for (int i=0;i<filesUnStructured.length;i++) {
+	   					debugPrint("*** " + filesUnStructured[i].getName().substring(0,filesUnStructured[i].getName().length()-3));
+	   					debugPrint("  "+filesUnStructured[i]);
+	   					//fcd.addTypeDef(getLibraryUnStructured(filesUnStructured[i].toString()));
+	   					libnodes.add(new LibNode(filesUnStructured[i].toString(),
+	   				                         filesUnStructured[i].getName().substring(0,filesUnStructured[i].getName().length()-3),
+	   				                         false));	
+	   				}
+	   				File[] dirs = baseDir.listFiles();
+	   				debugPrint(" Structured entries: ");
+		   			for (int i=0;i<dirs.length;i++) {
+		   				if (dirs[i].isDirectory()){
+		   					debugPrint("  " +dirs[i]);
+		   					debugPrint("*** " + dirs[i].getName());
+		   					libnodes.add(new LibNode(dirs[i].toString(),
+		   				                         dirs[i].getName(),
+		   				                         true));
+						}
+	   			
+		   			}
+	   			
+					lcd.setLibNodeList(libnodes);
+	   				return lcd;
+	   			}
+	   		} catch (Error e){
+		    	System.out.println("In file: '"+ dirName+"/package.mo"+ "':");
+				System.err.println(e.getMessage());
+		        System.exit(1);
+	   		} catch (Exception e) {System.out.println(e.toString());
+	   		                       e.printStackTrace();
+	   		                       System.exit(0);}
+	   		
+			
+		} else {
+			SourceRoot sr = root().modelicaParser().parseFile(getFileName());
+		  	FullClassDecl fcd = (FullClassDecl)sr.getProgram().getElement(0);
+		  	fcd.setFileName(getFileName());
+			return fcd;
+		}
+		return null;
+	}
+	
+	public LibClassDecl.LibClassDecl(FullClassDecl fcd) {
+		assignFields(fcd);            
+	}
+	
+	public void LibClassDecl.assignFields(FullClassDecl fcd) {
+		setVisibilityType(fcd.getVisibilityType());
+		setEncapsulatedOpt(fcd.getEncapsulatedOpt());
+		setPartialOpt(fcd.getPartialOpt());
+		setRestriction(fcd.getRestriction());
+		setName(fcd.getName());
+		setRedeclareOpt(fcd.getRedeclareOpt());
+		setFinalOpt(fcd.getFinalOpt());
+		setInnerOpt(fcd.getInnerOpt());
+		setOuterOpt(fcd.getOuterOpt());
+		setReplaceableOpt(fcd.getReplaceableOpt());
+		setConstrainingClauseOpt(fcd.getConstrainingClauseOpt());
+	    setConstrainingClauseCommentOpt(fcd.getConstrainingClauseCommentOpt());
+		setStringCommentOpt(fcd.getStringCommentOpt());
+		setEquationList(fcd.getEquationList());
+		setAlgorithmList(fcd.getAlgorithmList());
+		setSuperList(fcd.getSuperList());
+		setImportList(fcd.getImportList());
+		setClassDeclList(fcd.getClassDeclList());
+		setComponentDeclList(fcd.getComponentDeclList());
+		setAnnotationList(fcd.getAnnotationList());
+		setExternalClauseOpt(fcd.getExternalClauseOpt());
+		setEndName(fcd.getEndName());		                     
+	}
+	
+	eq LibClassDecl.getLibNode().enclosingClassDecl() = this; 	
+	eq LibClassDecl.getLibNode().classNamePrefix() = classNamePrefix().equals("")?
+                                                      name(): classNamePrefix() + "." + name();
+                                                      
+	public LibClassDecl FullClassDecl.createLibClassDecl() {
+		return new LibClassDecl(this);
+	}
+	
+	syn lazy List Program.getLibNodeList() {
+		//LibNode ln =  new LibNode("/local/home/jakesson/Modelica_2_2_lite/Modelica","Modelica",true);
+		LibNode ln =  new LibNode("/work/jakesson/software_tools/Modelica_std_lib_2.2/Modelica_2_2_lite/Modelica","Modelica",true);
+		return new List().add(ln);
+	}
+	
+	class UnStructuredEntriesFilenameFilter implements FilenameFilter {
+	
+			public boolean accept(File dir, String name) {
+				//System.out.println(" * " +name);
+				
+				if (name.equals("package.mo"))
+					return false;
+					
+				if (name.length()<=3)
+					return false;
+					 
+				if (name.substring(name.length()-3,name.length()).equals(".mo")) {
+					return true;
+				} else { 
+					return false;
+				}	
+			}
+		
+		}
+		
+	
+/*
+	public class LibList extends List {
+		
+		public int numClassDeclsFromPackage;
+		
+		public ASTNode getChild(int i) {
+			if (i<numClassDeclsFromPackage)
+				return super.getChild(i);
+			else {
+				return ((LibNode)super.getChild(i)).getClassDecl();
+			}
+		}
+	
+	}
+*/
+	
+
+
+/*
+	syn lazy List LibClassDecl.getClassDeclList() {
+		return new LibList();
+	}
+*/
+/*
+	syn lazy List Program.getLibraryList() {
+		List lib = new List();
+		
+		DirLibNode dln = new DirLibNode("Modelica","/work/jakesson/software_tools/Modelica_std_lib_2.2/Modelica_2_2_lite/Modelica/");
+		
+		lib.add(dln);
+		return lib;
+	}
+
+	syn lazy ClassDecl LibNode.getClassDecl() {
+		return null;
+	}
+
+	public InstComponent LibNode.newInstComponent(ComponentDecl cd) {
+	  return getClassDecl().newInstComponent(cd);
+	}
+	*/
+}

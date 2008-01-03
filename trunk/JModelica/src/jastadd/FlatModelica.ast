@@ -1,0 +1,124 @@
+FlatRoot : Root ::= FClass;
+FClass ::= FQName 
+           FVariable* 
+           FEquationBlock*;
+
+FEquationBlock ::= FAbstractEquation*;
+
+FVariable ::= [FTypePrefixFlow] 
+              [FTypePrefixOther] 
+              [FTypePrefixInputOutput]
+              Type:FIdUse  
+              FAttribute*
+              [BindingExp:FExp]
+              [FStringComment]
+              FQName;
+
+FQName ::= FQNamePart*;
+FQNamePart ::= <Name:String> [FArraySubscripts];
+
+FAttribute ::= Type:FIdUse
+               Name:FIdDecl 			   
+               [Value:FExp]
+               <AttributeSet:boolean>
+               [FEach]
+               [FFinal]
+               FAttribute*;
+
+FEach ::=;
+FFinal ::=;
+
+abstract FTypePrefix;
+abstract FTypePrefixFlow : FTypePrefix;
+FFlow : FTypePrefixFlow::=;
+abstract FTypePrefixOther : FTypePrefix;
+FDiscrete : FTypePrefixOther::=;
+FParameter : FTypePrefixOther::=;
+FConstant : FTypePrefixOther::=;
+abstract FTypePrefixInputOutput : FTypePrefix;
+FInput : FTypePrefixInputOutput::=;
+FOutput : FTypePrefixInputOutput::=;
+
+FStringComment ::= <Comment:String>;
+
+FArraySubscripts ::= FSubscript*;
+abstract FSubscript;
+FColonSubscript : FSubscript::=;
+FExpSubscript : FSubscript ::= FExp;
+
+abstract FExp;
+abstract FAbstractEquation;
+FEquation : FAbstractEquation ::= Left:FExp Right:FExp;
+
+abstract FBinExp : FExp ::= Left:FExp Right:FExp;
+FArtmBinExp : FBinExp;
+FAddExp : FArtmBinExp::=;
+FSubExp : FArtmBinExp::=;
+FMulExp : FArtmBinExp::=;
+FMulExpMM : FMulExp::=;
+FMulExpVM : FMulExp::=;
+FMulExpMV : FMulExp::=;
+FMulExpVV : FMulExp::=;
+FDivExp : FArtmBinExp::=;
+FPowExp : FExp::= Base:FExp Exponent:FExp; 
+FNegExp : FExp::= FExp;
+
+abstract FLogBinExp : FBinExp;
+FLtExp : FLogBinExp;
+FLeqExp : FLogBinExp;
+FGtExp : FLogBinExp;
+FGeqExp : FLogBinExp;
+FEqExp : FLogBinExp;
+FNeqExp : FLogBinExp;
+FNotExp : FExp ::= FExp;
+FOrExp : FLogBinExp;
+FAndExp : FLogBinExp;
+
+FRealLitExp : FExp ::= <UNSIGNED_NUMBER>;
+
+FFunctionCall : FExp ::= Name:FIdUse Args:FExp*;
+
+FSumRedExp : FExp ::= FExp FForIndex;
+FForIndex ::= FIdDecl [FExp];
+
+FDer : FExp ::= FIdUse;
+
+FScalar : FExp ::= FExp;
+FTranspose : FExp ::= FExp;
+FIdentity : FFunctionCall;
+FOnes : FFunctionCall;
+FZeros : FFunctionCall;
+
+FSumExp : FExp ::= FExp;
+
+FForClauseE : FAbstractEquation ::= FForIndex* ForEqns:FAbstractEquation*;
+
+FIfExp : FExp ::= IfExp:FExp ThenExp:FExp FElseIfExp* ElseExp:FExp;
+FElseIfExp : FExp ::= IfExp:FExp ThenExp:FExp;
+
+FIdDecl ::= FQName;
+FIdUse : FExp ::= <ID>;
+FIdUseQualified : FIdUse ::= FQName;
+FIdUseArray : FIdUseQualified ::=;
+// The flat model does not contain qualified names, but is modeled
+// as such in order to keep track of name parts and array indices, 
+// which in turn enables different output on different formats.
+//FDot : FIdUse ::= Left:FIdUse Right:FIdUse; 
+FStringLitExp : FExp ::= <String>;
+//FBooleanLitExp : FExp ::= <Val:boolean>;
+abstract FBooleanLitExp : FExp ::=;
+FBooleanLitExpTrue : FBooleanLitExp;
+FBooleanLitExpFalse : FBooleanLitExp;
+
+FArrayConstructor : FExp ::= FExp*;
+FMatrix : FExp ::= FExpList*;
+FExpList : FExp ::= FExp*;
+
+FRangeExp : FExp ::= FExp*;
+
+FNoExp : FExp::=;
+
+FTimeExp : FExp;
+
+// Built in functions
+FSizeExp : FExp ::= FIdUse Dim:FExp;

@@ -1,0 +1,109 @@
+import org.jmodelica.test.ast.*;
+
+
+aspect TestFramework {
+
+	public boolean ASTNode.collectTestCases(TestSuite ts, String className) {
+		debugPrint("ASTNode.collectTestCases");
+		for (int i=0;i<getNumChild();i++)
+			if (getChild(i).collectTestCases(ts,className))
+				return true;
+		return false;
+	}
+
+	public boolean FullClassDecl.collectTestCases(TestSuite ts, String className) {
+		debugPrint("FullClassDecl.collectTestCases: "+ qualifiedName() + " looking for " + className);
+		if (qualifiedName().equals(className)) {
+		    debugPrint("FullClassDecl.collectTestCases: found "+className);
+			collectTestCases(ts);
+			return true;
+		}
+		return getClassDeclList().collectTestCases(ts,className);
+	}
+
+	public void ASTNode.collectTestCases(TestSuite ts) {
+		collectTestCasesEM("JModelica",ts);
+	}
+
+	public void ASTNode.collectTestCasesEM(String name, TestSuite ts) {
+		for (int i=0;i<getNumChild();i++)
+			getChild(i).collectTestCasesEM(name,ts);
+	}
+	
+	public void ASTNode.collectTestCasesFC(String name, TestSuite ts) {
+		for (int i=0;i<getNumChild();i++)
+			getChild(i).collectTestCasesFC(name,ts);
+	}
+	
+	public void ASTNode.collectTestCasesNA(String name, TestSuite ts) {
+		for (int i=0;i<getNumChild();i++)
+			getChild(i).collectTestCasesNA(name,ts);
+	}
+/*
+	public void Annotation.collectTestCasesEM(String name, TestSuite ts) {
+		getClassModification().collectTestCasesEM(name,ts);
+	}
+	*/
+	public void ElementModification.collectTestCasesEM(String name, TestSuite ts) {
+		debugPrint("+ElementModification.collectTestCasesEM: "+ getName().qualifiedName() + " looking for: "+name);
+		if (name.equals(getName().qualifiedName())) {
+			if (name.equals("JModelica"))  
+				getModification().collectTestCasesEM("unitTesting",ts);
+			else if (name.equals("unitTesting"))
+				getModification().collectTestCasesFC("JModelica.UnitTesting",ts);
+		}
+	}
+
+	public void FunctionCall.collectTestCasesFC(String name, TestSuite ts) {
+		debugPrint("+FunctionCall.collectTestCasesFC: " + name);
+		if (name.equals(getName().qualifiedName())) {
+			if (name.equals("JModelica.UnitTesting"))
+				getFunctionArguments().collectTestCasesNA("testCase",ts);
+			else if (name.equals("JModelica.UnitTesting.FlatteningTestCase")) {
+				FlatteningTestCase ftc = new FlatteningTestCase();
+				for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
+					NamedArgument na = getFunctionArguments().getNamedArgument(i);
+					if (na.getName().name().equals("name"))
+						ftc.setName(((StringLitExp)na.getExp()).getSTRING());
+					else if (na.getName().name().equals("description"))
+						ftc.setDescription(((StringLitExp)na.getExp()).getSTRING());	
+					else if (na.getName().name().equals("flatModel"))
+						ftc.setFlatModel((((StringLitExp)na.getExp()).getSTRING()).replace("\\\"","\""));		
+						//ftc.setFlatModel((((StringLitExp)na.getExp()).getSTRING()));		
+				}
+				debugPrint(">>>>>>>>");
+				debugPrint(ftc.getFlatModel());
+				ftc.setSourceFileName(root().fileName());
+				ftc.setClassName(enclosingClassDecl().qualifiedName());
+				ts.add(ftc);
+			}
+			else if (name.equals("JModelica.UnitTesting.ErrorTestCase")) {
+				ErrorTestCase etc = new ErrorTestCase();
+				for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
+					NamedArgument na = getFunctionArguments().getNamedArgument(i);
+					if (na.getName().name().equals("name"))
+						etc.setName(((StringLitExp)na.getExp()).getSTRING());
+					else if (na.getName().name().equals("description"))
+						etc.setDescription(((StringLitExp)na.getExp()).getSTRING());	
+					else if (na.getName().name().equals("errorMessage"))
+						etc.setErrorMessage(((StringLitExp)na.getExp()).getSTRING());		
+				}
+				etc.setSourceFileName(root().fileName());
+				etc.setClassName(enclosingClassDecl().qualifiedName());
+				ts.add(etc);
+			}
+		}
+	}
+
+	public void NamedArgument.collectTestCasesNA(String name, TestSuite ts) {
+		debugPrint("+NamedArgument.collectTestCasesNA: "+name);
+		if (name.equals(getName().qualifiedName())) {
+			if (name.equals("testCase")) {
+				getExp().collectTestCasesFC("JModelica.UnitTesting.FlatteningTestCase",ts);
+				getExp().collectTestCasesFC("JModelica.UnitTesting.ErrorTestCase",ts);
+			}
+		}
+	
+	}
+
+}

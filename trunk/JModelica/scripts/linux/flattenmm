@@ -1,0 +1,7 @@
+#!/bin/sh
+
+JAR_DIR=/home/jakesson/projects/DymolaOptimization/miniModelica/JModelicaAJ
+
+java -Xmx2500M -classpath $JAR_DIR/bin/jmodelica.jar:$JAR_DIR/tools/aspectjrt.jar org.jmodelica.applications.FlattenModelHotStart "$@"
+
+

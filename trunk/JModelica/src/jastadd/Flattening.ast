@@ -1,0 +1,10 @@
+abstract InstNode ::= /InstNode*/ /MergedEnvironment:InstModification*/ /FQName/;
+InstRoot : InstNode ::= <ClassDecl:ClassDecl>;
+abstract InstComponent : InstNode ::= <ComponentDecl:ComponentDecl> ;
+InstComposite : InstComponent;
+InstPrimitive : InstComponent;
+InstExtends : InstNode ::= <ExtendsClause:ExtendsClause>;
+
+//InstReplacingComponent : InstComponent ::= <OriginalDecl:ComponentDecl>;
+InstModification ::= <InstNode:InstNode> <Modification:Modification>;
+

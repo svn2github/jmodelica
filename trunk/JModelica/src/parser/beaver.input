@@ -1,0 +1,8 @@
+%right RPAREN;
+%right NOT;
+%left AND;
+%left OR;
+%left LT, LEQ, GT, GEQ, EQ, NEQ;
+%left MULT, DIV;
+%left PLUS, MINUS;
+
