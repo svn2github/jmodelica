@@ -151,10 +151,8 @@
   <!-- TARGET clean -->
   <target name="clean" depends="cleanGen">
     <!-- Delete all classfiles in dir and recursively in subdirectories -->
-    <delete>
-      <fileset dir="bin" includes="**/*.*"/>
-    </delete>
-  	<delete dir = "doc/junit-reports"/>
+  	<delete dir = "bin"/>
+  	<delete dir = "doc"/>
   	<delete dir="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
   </target>
 
