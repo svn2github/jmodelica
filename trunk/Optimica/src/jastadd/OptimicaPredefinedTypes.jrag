@@ -1,0 +1,31 @@
+import org.jmodelica.parser.*;
+aspect OptimicaPredefinedTypes {
+
+	/**
+	 * This attribute defines the NTA for predefined types
+	 * which contains a list of predefined PrimitiveClassDef:s.
+	 */
+	refine PredefinedTypes eq Program.getPredefinedTypeList() {
+        debugPrint("Optimica: Program.getPredefinedTypeList()");
+		List l = PredefinedTypes.Program.getPredefinedTypeList();
+		for (int i=0;i<l.getNumChild();i++) {
+			PrimitiveClassDecl cd = (PrimitiveClassDecl)l.getChild(i);
+			if (cd.name().equals("Real")) {
+			    ComponentDecl compDecl = new ComponentDecl(true,
+				                                      "RealType",
+				                                      "initialGuess",
+				                                      ""); 
+				cd.addComponentDecl(compDecl);
+				compDecl = new ComponentDecl(true,
+				                                      "BooleanType",
+				                                      "free",
+				                                      ""); 
+				cd.addComponentDecl(compDecl);
+			}
+		}		
+		return l;
+	}
+	
+
+
+}

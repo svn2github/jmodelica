@@ -1,0 +1,16 @@
+aspect OptimicaExpressions {
+
+	rewrite FunctionCall {
+		when (((getName() instanceof Dot)? ((Dot)getName()).getLeft()!=null: true) && 
+		      getName().getLastAccess() instanceof ComponentAccess &&
+		      hasFunctionArguments() &&
+		      getFunctionArguments().getNumExp()==1)
+		 to InstantValue {
+		 	InstantValue iv = new InstantValue(getName(),
+		 	    getFunctionArguments().getExp(0));
+		 	iv.setStart(getStart());
+		 	return iv;
+		 }
+	}
+
+}

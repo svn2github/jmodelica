@@ -1,0 +1,153 @@
+aspect OptimicaPrettyPrint {
+
+	public void OptClassDecl.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
+ 		str.append(indent + getRestriction().toString());
+ 		str.append(" " + getName().getID());
+ 		if (hasClassModification()) {
+ 			str.append(" ");
+ 			p.toString(getClassModification(),str,"",o);
+ 		}
+		str.append("\n");
+		
+ 		// Print all local classes
+ 		int numPubClass = 0;
+// 		str.append(indent + "public\n");
+ 		for (int i=0;i<getNumClassDecl();i++)
+ 			if (((BaseClassDecl)getClassDecl(i)).isPublic()) {
+ 			 	numPubClass++;
+	 			p.toString(getClassDecl(i),str,indent+"  ",o);
+	 			str.append(";\n\n");
+			}
+			
+		if (getNumClassDecl()-numPubClass>0) {	
+	 		str.append(indent + "protected\n");
+ 			for (int i=0;i<getNumClassDecl();i++)
+ 				if (((BaseClassDecl)getClassDecl(i)).isProtected()) {
+		 			p.toString(getClassDecl(i),str,indent+"  ",o);
+		 			str.append(";\n\n");
+		 		}
+		}
+			
+		// Print all extends clauses
+ 		for (int i=0;i<getNumSuper();i++) {
+ 			p.toString(getSuper(i),str,indent+"  ",o);
+ 			str.append(";\n");
+		} 			
+			
+ 		// Print all components
+ 		int numPubComp = 0;
+// 		str.append(indent + "public\n");
+ 		for (int i=0;i<getNumComponentDecl();i++)
+ 			if (getComponentDecl(i).isPublic()) {
+ 			 	numPubComp++;
+	 			p.toString(getComponentDecl(i),str,indent+"  ",o);
+	 			str.append(";\n");
+			}
+			
+		if (getNumComponentDecl()-numPubComp>0) {	
+	 		str.append(indent + "protected\n");
+ 			for (int i=0;i<getNumComponentDecl();i++)
+ 				if (getComponentDecl(i).isProtected()) {
+		 			p.toString(getComponentDecl(i),str,indent+"  ",o);
+		 			str.append(";\n");
+			}
+		}	
+		
+		if (getNumEquation()>0) {
+			str.append(indent + "equation\n");
+			for (int i=0;i<getNumEquation();i++) {
+				str.append(indent + "  ");
+				p.toString(getEquation(i),str,indent,o);
+				str.append(";\n");
+			}
+		}
+		
+		if (getNumConstraint()>0) {
+			str.append(indent + "constraint\n");
+			for (int i=0;i<getNumConstraint();i++) {
+				str.append(indent + "  ");
+				p.toString(getConstraint(i),str,indent,o);
+				str.append(";\n");
+			}
+		}
+		
+		str.append(indent + "end " + getName().getID());
+	} 
+	
+	public void Constraint.prettyPrint(Printer p,StringBuffer str, String indent, Object o) {
+		p.toString(getLeft(),str,indent,o);
+		str.append(op());
+		p.toString(getRight(),str,indent,o);
+	}
+
+	syn String Constraint.op();
+	eq ConstraintEq.op() = "=";
+	eq ConstraintLeq.op() = "<=";
+	eq ConstraintGeq.op() = ">=";
+
+	eq OptimizationClass.toString() = "optimization";
+
+	public void InstantValue.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
+		//debugPrint("FFunctionCall.prettyPrint:");
+		str.append(getName().getID());
+		str.append("(");
+			p.toString(getArg(),str,"",o);
+		str.append(")");
+	}
+
+
+}
+
+aspect FlatOptimicaPrettyPrint {
+	public void FOptClass.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
+		str.append(indent+"optimization "+ name());
+		getFAttributeList().prettyPrintFAttributeList(str,p,o);
+		str.append("\n");
+		
+		for (int i=0;i<getNumFVariable();i++) {
+			debugPrint("FClass.prettyPrint(): FVariable: " + getFVariable(i).name() + " is$Final: " + is$Final);
+	  		p.toString(getFVariable(i),str,indent+" ",o);
+	  		str.append(";\n");  
+		}
+		str.append(indent + "equation \n");
+	  	for (int i=0;i<getNumFEquationBlock();i++) {
+			for (int j=0;j<getFEquationBlock(i).getNumFAbstractEquation();j++) {
+				//debugPrint("FClass.prettyPrint(): Equation nr: " + j);
+	  			p.toString(getFEquationBlock(i).getFAbstractEquation(j),str, indent+" ",o);
+				str.append(";\n");
+			}
+		}
+		str.append(indent + "constraint \n");
+	  	for (int j=0;j<getNumFConstraint();j++) {
+			//debugPrint("FClass.prettyPrint(): Equation nr: " + j);
+	  		p.toString(getFConstraint(j),str, indent+" ",o);
+			str.append(";\n");
+		}
+		str.append(indent);
+  		str.append("end ");
+  		str.append(name());
+  		str.append(";\n");
+	}
+
+	public void FConstraint.prettyPrint(Printer p,StringBuffer str, String indent, Object o) {
+		str.append(indent);
+		p.toString(getLeft(),str,indent,o);
+		str.append(op());
+		p.toString(getRight(),str,indent,o);
+	}
+
+	syn String FConstraint.op();
+	eq FConstraintEq.op() = "=";
+	eq FConstraintLeq.op() = "<=";
+	eq FConstraintGeq.op() = ">=";
+	
+	public void FInstantValue.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
+		//debugPrint("FFunctionCall.prettyPrint:");
+		str.append(getName().name());
+		str.append("(");
+			p.toString(getArg(),str,"",o);
+		str.append(")");
+	}
+	
+	
+}

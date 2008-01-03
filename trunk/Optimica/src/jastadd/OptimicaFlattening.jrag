@@ -1,0 +1,69 @@
+aspect OptimicaFlattening {
+
+	public InstNode OptClassDecl.findFlatten(String className, FClass fc) {
+		FOptClass foc = (FOptClass)fc;
+		//System.out.println("Model.instantiate: "+getFullClassName() +" : " +getClassName());
+   		if (className.equals(qualifiedName())) {
+  	 		foc.setFQName(new FQName(qualifiedName())); 
+  	 		InstRoot r = getInstRoot();
+			//r.dumpTree("");
+			foc.addFEquationBlock(new FEquationBlock(new List()));
+			r.flatten(fc);
+			foc.genConnectionEquations();
+			if (hasClassModification()) {
+				List attr = new List();
+				getClassModification().collectAttributes(attr,new FQName(new List()));
+				foc.setFAttributeList(attr);
+			}
+			return r;	
+   		} else {
+  			return getClassDeclList().findFlatten(className,fc);
+   		}  	
+	}
+
+
+	refine Flattening public void InstNode.flatten(FClass fc) {
+		List l = equations();
+		for (int i=0;i<l.getNumChild();i++) {
+		   ((AbstractEquation)l.getChild(i)).flatten(getFQName(),fc);
+		}
+		List lc = constraints();
+		for (int i=0;i<lc.getNumChild();i++) {
+		   ((Constraint)lc.getChild(i)).flatten(getFQName(),fc);
+		}
+		getInstNodeList().flatten(fc);
+	}
+	
+
+	syn lazy List ClassDecl.constraints() = root().emptyList();
+	eq OptClassDecl.constraints() = getConstraintList();
+	eq ShortClassDecl.constraints() = getClassName().myClassDecl().constraints();
+	
+	syn List InstNode.constraints();
+	eq InstRoot.constraints() = getClassDecl().constraints();
+	eq InstComponent.constraints() = getComponentDecl().myClass().constraints();
+	eq InstExtends.constraints() = getExtendsClause().getSuper().myClassDecl().constraints();
+	
+
+    public void Constraint.flatten(FQName prefix, FClass fc) {}
+
+	public void ConstraintEq.flatten(FQName prefix, FClass fc) {
+		FOptClass foc = (FOptClass)fc;
+		foc.addFConstraint(new FConstraintEq(getLeft().flatten(prefix),getRight().flatten(prefix)));
+	}
+
+	public void ConstraintLeq.flatten(FQName prefix, FClass fc) {
+		FOptClass foc = (FOptClass)fc;
+		foc.addFConstraint(new FConstraintLeq(getLeft().flatten(prefix),getRight().flatten(prefix)));
+	}
+
+	public void ConstraintGeq.flatten(FQName prefix, FClass fc) {
+		FOptClass foc = (FOptClass)fc;
+		foc.addFConstraint(new FConstraintGeq(getLeft().flatten(prefix),getRight().flatten(prefix)));
+	}
+
+	public FExp InstantValue.flatten(FQName prefix) {
+		return new FInstantValue(new FIdUseQualified("",new FQName().append(getName(),prefix)),
+		   getArg().flatten(prefix));
+	}
+}

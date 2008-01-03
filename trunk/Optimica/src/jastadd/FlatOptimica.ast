@@ -1,0 +1,8 @@
+FOptClass: FClass ::= FConstraint* FAttribute*;
+
+abstract FConstraint ::= Left:FExp Right:FExp;
+FConstraintEq : FConstraint;
+FConstraintLeq : FConstraint;
+FConstraintGeq : FConstraint;
+
+FInstantValue : FExp ::= Name:FIdUse Arg:FExp;

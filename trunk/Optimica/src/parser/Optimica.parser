@@ -1,0 +1,44 @@
+BaseClassDecl base_class_decl =               
+  encapsulated? 
+  partial? 
+  OPTIMIZATION
+  id_decl.start 
+  class_modification?
+  string_comment? 
+  composition 
+  END ID.end   {:  return new PN_OptClassDecl(new UnknownVisibilityType(),
+                                             encapsulated,
+                                             partial,
+                                             new OptimizationClass(),
+                                             start,
+                                             new Opt(),
+                                             new Opt(),
+                                             new Opt(),
+                                             new Opt(),
+                                             new Opt(),
+                                             new Opt(),
+                                             new Opt(),
+                                             string_comment,
+                                             composition,
+                                             end,
+                                             class_modification); :}
+;
+Clause composition_clause = constraint_clause;
+
+ConstraintClause constraint_clause = 
+  CONSTRAINT
+  oconstraint_list {: return new ConstraintClause(oconstraint_list); :}
+  ;
+  
+List oconstraint_list =
+              {: return new List(); :}
+  |oconstraint                           {: return new List().add(oconstraint); :}
+  | oconstraint_list oconstraint  {: oconstraint_list.add(oconstraint); 
+                                                 return oconstraint_list; :}
+   ;  
+  
+Constraint oconstraint =
+  artm_exp.a ASSIGN artm_exp.b SEMICOLON{: return new ConstraintEq(a,b); :}
+  |  artm_exp.a LEQ artm_exp.b SEMICOLON{: return new ConstraintLeq(a,b); :}
+  |  artm_exp.a GEQ artm_exp.b SEMICOLON{: return new ConstraintGeq(a,b); :}
+  ;

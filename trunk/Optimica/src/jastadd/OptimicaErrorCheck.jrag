@@ -1,0 +1,10 @@
+aspect OptimicaErrorCheck {
+
+  	public void OptClassDecl.collectErrors(ErrorManager em) {
+    	super.collectErrors(em);
+    	getConstraintList().collectErrors(em);
+    	getClassModificationOpt().collectErrors(em);
+  	}
+
+
+}

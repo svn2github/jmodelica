@@ -1,0 +1,7 @@
+aspect OptimicaDumpTree {
+  public void Constraint.dumpTree(String indent) {
+  	debugPrint("** Constraint.dumpTree");
+  	super.dumpTree(indent);
+  }
+
+}

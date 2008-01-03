@@ -1,0 +1,14 @@
+OptClassDecl : FullClassDecl ::= [ClassModification] Constraint* /ClassAttribute:ComponentDecl*/;
+PN_OptClassDecl : PN_FullClassDecl ::= [ClassModification];
+
+ConstraintClause : Clause ::= Constraint*;
+
+abstract Constraint ::= Left:Exp Right:Exp;
+
+ConstraintEq : Constraint;
+ConstraintLeq : Constraint;
+ConstraintGeq : Constraint;
+
+OptimizationClass : Restriction ::=;
+
+InstantValue : Exp ::= Name:Access Arg:Exp;
