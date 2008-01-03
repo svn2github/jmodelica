@@ -9,7 +9,7 @@
 
   <project name="Optimica" default="build" basedir=".">
 
-  <property name = "jmodelica_path" value="../JModelicaAJ"/>
+  <property name = "jmodelica_path" value="../JModelica"/>
 	
   <!-- "package" is the directory where generated files will be stored -->
   <property name="ast_package" value="org.jmodelica.ast"/>
@@ -53,7 +53,6 @@
   <target name="build" depends="compile-ast">
     <!-- compile all java files in srcdir and recursively in subdirectories -->
     <!-- you can use the jikes compiler by changing javac1.4 to jikes -->
-  	<mkdir dir="bin"/>
   	<!--
 	<iajc outjar="bin/jmodelica-debug.jar"
 		classpath="${tools}/junit-4.4.jar:${tools}/aspectjrt.jar">
@@ -78,6 +77,7 @@
 
 	
   <target name="compile-ast" depends="gen,gen-parser">
+  	<mkdir dir="bin"/>
   	<javac compiler="javac1.5" debug="true" destdir="bin">
   		<src path="${base_output}"/> 
   		<src path="${default_src_dir}"/>
