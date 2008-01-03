@@ -49,7 +49,6 @@
   <target name="build" depends="compile-ast">
     <!-- compile all java files in srcdir and recursively in subdirectories -->
     <!-- you can use the jikes compiler by changing javac1.4 to jikes -->
-  	<mkdir dir="bin"/>
   	<!--
 	<iajc outjar="bin/jmodelica-debug.jar"
 		classpath="${tools}/junit-4.4.jar:${tools}/aspectjrt.jar">
@@ -75,6 +74,7 @@
 
 	
   <target name="compile-ast" depends="gen,gen-parser">
+	<mkdir dir="bin"/>
   	<javac compiler="javac1.5" debug="true" destdir="bin">
   		<src path="${base_output}"/> 
   		<src path="${default_src_dir}"/>
@@ -138,10 +138,8 @@
   <!-- TARGET clean -->
   <target name="clean" depends="cleanGen">
     <!-- Delete all classfiles in dir and recursively in subdirectories -->
-    <delete>
-      <fileset dir="bin" includes="**/*.*"/>
-    </delete>
-  	<delete dir = "doc/junit-reports"/>
+  	<delete dir = "bin"/>
+  	<delete dir = "doc"/>
   	<delete dir="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
   </target>
 
