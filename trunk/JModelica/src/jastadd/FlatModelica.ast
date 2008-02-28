@@ -8,11 +8,17 @@ FEquationBlock ::= FAbstractEquation*;
 FVariable ::= [FTypePrefixFlow] 
               [FTypePrefixOther] 
               [FTypePrefixInputOutput]
-              Type:FIdUse  
+              Type:FPrimitiveType  
               FAttribute*
               [BindingExp:FExp]
               [FStringComment]
               FQName;
+
+abstract FPrimitiveType;
+FRealType : FPrimitiveType ::=;
+FIntegerType : FPrimitiveType ::=; 
+FStringType : FPrimitiveType ::=;
+FBooleanType : FPrimitiveType ::=;
 
 FQName ::= FQNamePart*;
 FQNamePart ::= <Name:String> [FArraySubscripts];
@@ -32,6 +38,9 @@ abstract FTypePrefix;
 abstract FTypePrefixFlow : FTypePrefix;
 FFlow : FTypePrefixFlow::=;
 abstract FTypePrefixOther : FTypePrefix;
+// Continuous is not a valid prefix.  We will use it to identify 
+// expressions that are neither parameters nor constants.
+FContinuous : FTypePrefixOther::=;
 FDiscrete : FTypePrefixOther::=;
 FParameter : FTypePrefixOther::=;
 FConstant : FTypePrefixOther::=;
@@ -51,6 +60,8 @@ abstract FAbstractEquation;
 FEquation : FAbstractEquation ::= Left:FExp Right:FExp;
 
 abstract FBinExp : FExp ::= Left:FExp Right:FExp;
+abstract FUnaryExp : FExp ::= FExp;
+
 FArtmBinExp : FBinExp;
 FAddExp : FArtmBinExp::=;
 FSubExp : FArtmBinExp::=;
@@ -61,7 +72,7 @@ FMulExpMV : FMulExp::=;
 FMulExpVV : FMulExp::=;
 FDivExp : FArtmBinExp::=;
 FPowExp : FExp::= Base:FExp Exponent:FExp; 
-FNegExp : FExp::= FExp;
+FNegExp : FUnaryExp ::=;
 
 abstract FLogBinExp : FBinExp;
 FLtExp : FLogBinExp;
@@ -70,7 +81,7 @@ FGtExp : FLogBinExp;
 FGeqExp : FLogBinExp;
 FEqExp : FLogBinExp;
 FNeqExp : FLogBinExp;
-FNotExp : FExp ::= FExp;
+FNotExp : FUnaryExp ::=;
 FOrExp : FLogBinExp;
 FAndExp : FLogBinExp;
 
@@ -83,23 +94,24 @@ FForIndex ::= FIdDecl [FExp];
 
 FDer : FExp ::= FIdUse;
 
-FScalar : FExp ::= FExp;
-FTranspose : FExp ::= FExp;
+FScalar : FUnaryExp ::=;
+FTranspose : FUnaryExp ::=;
 FIdentity : FFunctionCall;
 FOnes : FFunctionCall;
 FZeros : FFunctionCall;
 
-FSumExp : FExp ::= FExp;
+FSumExp : FUnaryExp ::=;
 
 FForClauseE : FAbstractEquation ::= FForIndex* ForEqns:FAbstractEquation*;
 
 FIfExp : FExp ::= IfExp:FExp ThenExp:FExp FElseIfExp* ElseExp:FExp;
 FElseIfExp : FExp ::= IfExp:FExp ThenExp:FExp;
 
+FIdUseExp : FExp ::= FIdUse;
+
 FIdDecl ::= FQName;
-FIdUse : FExp ::= <ID>;
+FIdUse ::= <ID>;
 FIdUseQualified : FIdUse ::= FQName;
-FIdUseArray : FIdUseQualified ::=;
 // The flat model does not contain qualified names, but is modeled
 // as such in order to keep track of name parts and array indices, 
 // which in turn enables different output on different formats.

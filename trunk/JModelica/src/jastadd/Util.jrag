@@ -274,33 +274,14 @@ aspect FlatNames {
 	}
 	syn String FQNamePart.name() = getName();
 
-	syn lazy FArraySubscripts FQName.fArraySubscripts() = 
-		getFQNamePart(getNumFQNamePart()-1).hasFArraySubscripts()?
-			getFQNamePart(getNumFQNamePart()-1).getFArraySubscripts():
-				null;  
-
 	syn String FIdUse.name() = getID();
 	eq FIdUseQualified.name() = getFQName().name();
-
-	syn FArraySubscripts FIdUse.fArraySubscripts() = null;
-	eq FIdUseQualified.fArraySubscripts() = getFQName().fArraySubscripts();
 
 	syn String FIdDecl.name() = getFQName().name();
 	
 	syn String FClass.name() = getFQName().name();
 	syn String FVariable.name() = getFQName().name();
-    syn FArraySubscripts FVariable.fArraySubscripts() = getFQName().fArraySubscripts();
 
-	boolean FIdUseQualified.rewritten = false;
-	rewrite FIdUseQualified {
-		when (!rewritten && fArraySubscripts()!=null)
-			to FIdUseArray {
-			    debugPrint("rewrite FIdUseQualified");
-				FIdUseArray id =  new FIdUseArray("",getFQName());
-				id.rewritten = true;
-				return id;
-			}
-	}
 
 }
 
@@ -322,7 +303,7 @@ aspect Visibility {
 
 aspect ComponentDeclMethods {
    	/**
-   	 * Check if a ComponentDecl is declared parameter.
+   	 * Check if a ComponentDecl is declared flow.
    	 */
    	syn boolean ComponentDecl.isFlow() {
    	

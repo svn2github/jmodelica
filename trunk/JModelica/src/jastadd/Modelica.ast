@@ -288,7 +288,9 @@ OutputExpressionList : Exp ::= Exp*;
 
 IdDecl ::=<ID>;
 
-abstract Access : Exp ::= <ID>;
+AccessExp : Exp ::= Access;
+
+abstract Access ::= <ID>;
 Dot : Access ::= Left:Access Right:Access;
 
 ParseAccess : Access ::= [ArraySubscripts];

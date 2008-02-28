@@ -888,7 +888,7 @@ Exp primary =
   | STRING.s               {: return new StringLitExp(s); :}
   | MINUS primary       {: return new NegExp(primary); :}
   | PLUS primary        {: return primary; :}
-  | parse_access              {: return parse_access; :}
+  | access_expression   {: return access_expression; :}
   | LPAREN exp.a RPAREN {: return a; :}
   | LPAREN arg_list RPAREN {: return new OutputExpressionList(arg_list); :}
   | function_call {: return function_call; :}
@@ -978,7 +978,9 @@ StringComment string_comment =
 //   | BREAK {: return new IdDecl("break"); // This is insane, but is needed to parse
 //                                          // Modelica.exp in the standard library 2.2 :}
    ;
-   
+
+ AccessExp access_expression =
+   parse_access {: return new AccessExp(parse_access); :};
    
  Access parse_access = 
    parse_access_single   {: return parse_access_single; :}

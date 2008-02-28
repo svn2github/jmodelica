@@ -418,7 +418,7 @@ aspect PrettyPrint {
 	eq AddExp.isAddOrSub() = true;
 	eq SubExp.isAddOrSub() = true;
 	syn boolean Exp.isPrimary() = false;
-	eq ComponentAccess.isPrimary() = true;
+	eq AccessExp.isPrimary() = true;
 	eq RealLitExp.isPrimary() = true;
 
 	public void LogBinExp.prettyPrint(Printer p,StringBuffer str, String indent, Object o) {
@@ -460,8 +460,11 @@ aspect PrettyPrint {
 	eq Discrete.toString() = "discrete";
 	eq Constant.toString() = "constant";
 	
-
-
+	syn String FPrimitiveType.toString();
+	eq FRealType.toString() = "Real";
+	eq FIntegerType.toString() = "Integer";
+	eq FStringType.toString() = "String";
+	eq FBooleanType.toString() = "Boolean";	
 
 }
 
@@ -502,18 +505,14 @@ aspect FlattPrettyPrint {
 				str.append(" ");
 			}
 			
-			str.append(getType().name());
+			str.append(getType());
 			str.append(" ");
-			str.append(name());
-			if (fArraySubscripts()!=null)
-				p.toString(fArraySubscripts(),str,"",o);
-			//str.append(getFullName());
-			//str.append(getName().getID());
+			p.toString(getFQName(),str,"",o);
 		
 	    	getFAttributeList().prettyPrintFAttributeList(str,p,o);
 	    	
 	   if (hasBindingExp()) {
-				str.append("=");
+				str.append(" = ");
 				p.toString(getBindingExp(),str,indent,o);
 			}
 	    	
@@ -564,11 +563,25 @@ aspect FlattPrettyPrint {
 		    			str.append(getName().name());
 		    			getFAttributeList().prettyPrintFAttributeList(str,p,o);
 		    			if (hasValue()) {
-		    				str.append("=");
+		    				str.append(" = ");
 	    					p.toString(getValue(),str,"",o);
 						}
 	}
 
+    public void FQNamePart.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
+    	str.append(getName());
+		if (hasFArraySubscripts())
+			p.toString(getFArraySubscripts(),str,indent,o);				    	
+    }
+    
+    public void FQName.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
+		for (int i = 0; i < getNumFQNamePart(); i++) {
+			p.toString(getFQNamePart(i),str,indent,o);
+			if (i<getNumFQNamePart()-1)
+				str.append(".");
+		}    	
+    }
+    
     public void FArraySubscripts.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
 		if (getNumFSubscript()>0) {
 			str.append("[");
@@ -600,99 +613,87 @@ aspect FlattPrettyPrint {
 	public void FEquation.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
 		str.append(indent);
     	p.toString(getLeft(),str,indent,o);
-   		str.append("=");
+   		str.append(" = ");
    		p.toString(getRight(),str,indent,o);
 	}
 	
 	public void FAddExp.prettyPrint(Printer p,StringBuffer str, String indent, Object o) {
 		p.toString(getLeft(),str,indent,o);
 		if(!(getRight() instanceof FNegExp)) 
-			str.append("+");
+			str.append(" + ");
 		p.toString(getRight(),str,indent,o);
 	}
 		
 	public void FSubExp.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
 		p.toString(getLeft(),str,indent,o);
-		str.append("-");
+		str.append(" - ");
 //		if (getRight().isAddOrSub()) {
-			str.append("(");
+			str.append("( ");
 			p.toString(getRight(),str,indent,o);
-			str.append(")");
+			str.append(" )");
 //		} else
 //			p.toString(getRight(),str,indent,o);
 	}
 		
 	public void FMulExp.prettyPrint(Printer p,StringBuffer str, String indent, Object o) {
-//		if (getLeft().isAddOrSub()) {
-			str.append("(");
-			p.toString(getLeft(),str,indent,o);
-			str.append(")");
-//		} else
-//			p.toString(getLeft(),str,indent,o);	
-		str.append("*");
-//		if (getRight().isAddOrSub()) {
-			str.append("(");
-			p.toString(getRight(),str,indent,o);
-			str.append(")");
-//		} else
-//			p.toString(getRight(),str,indent,o);
+		str.append("( ");
+		p.toString(getLeft(),str,indent,o);
+		str.append(" )");
+		str.append(" * ");
+		str.append("( ");
+		p.toString(getRight(),str,indent,o);
+		str.append(" )");
 	}
 		
 	public void FDivExp.prettyPrint(Printer p, StringBuffer str, String indent, Object o){
-//		if (getLeft().isAddOrSub()) {
-			str.append("(");
-			p.toString(getLeft(),str,indent,o);
-			str.append(")");
-//		} else
-//			p.toString(getLeft(),str,indent,o);
-		str.append("/");	
-		str.append("(");
+		str.append("( ");
+		p.toString(getLeft(),str,indent,o);
+		str.append(" )");
+		str.append(" / ");	
+		str.append("( ");
 		p.toString(getRight(),str,indent,o);
-		str.append(")");
+		str.append(" )");
 	}
 		
 	public void FPowExp.prettyPrint(Printer p, StringBuffer str, String indent, Object o){
 		if (!(getBase().isPrimary())) {
-			str.append("(");
+			str.append("( ");
 			p.toString(getBase(),str,indent,o);
-			str.append(")");
+			str.append(" )");
 		} else
 			p.toString(getBase(),str,indent,o);
-		str.append("^");
+		str.append(" ^ ");
 		if (!(getExponent().isPrimary())) {
-			str.append("(");
+			str.append("( ");
 			p.toString(getExponent(),str,indent,o);
-			str.append(")");
+			str.append(" )");
 		} else
 			p.toString(getExponent(),str,indent,o);
 	}
 		
 	public void FNegExp.prettyPrint(Printer p,StringBuffer str, String indent, Object o){
-		str.append("-");
+		str.append(" - ");
 //		if (getFExp().isAddOrSub()) {
-			str.append("(");
+			str.append("( ");
 			p.toString(getFExp(),str,indent,o);
-			str.append(")");
+			str.append(" )");
 //		} else
 //			p.toString(getFExp(),str,indent,o);
 	}
 	
 	public void FLogBinExp.prettyPrint(Printer p,StringBuffer str, String indent, Object o) {
-		//str.append("((");
 		p.toString(getLeft(),str,indent,o);
-		//str.append(")"+op()+"(");
 		str.append(op());
 		p.toString(getRight(),str,indent,o);
-		//str.append("))");
 	}
 	
 	syn String FLogBinExp.op();
-	eq FLtExp.op() = "<";
-	eq FLeqExp.op() = "<=";
-	eq FGtExp .op() = ">";
-	eq FGeqExp.op() = ">=";
-	eq FEqExp.op() = "==";
-	eq FNeqExp.op() = "<>";
+	eq FLtExp.op() = " < ";
+	eq FLeqExp.op() = " <= ";
+	eq FGtExp .op() = " > ";
+	eq FGeqExp.op() = " >= ";
+	eq FEqExp.op() = " == ";
+	eq FNeqExp.op() = " <> ";
 	eq FOrExp.op() = " or ";
 	eq FAndExp.op() = " and ";
 	
@@ -748,12 +749,12 @@ aspect FlattPrettyPrint {
 		debugPrint("FIdUse.prettyPrint(): " + name());
 		str.append(name());
 	}
-	
-	public void FIdUseArray.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
-		str.append(name());
-		p.toString(fArraySubscripts(),str,"",o);
-	}
-	
+
+	public void FIdUseQualified.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
+		debugPrint("FIdUseQualified.prettyPrint(): " + name());
+		p.toString(getFQName(),str,"",o);		
+	}	
+		
 	public void FDer.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
 		debugPrint("FDer.prettyPrint");
 		str.append("der(");
@@ -861,7 +862,7 @@ aspect FlattPrettyPrint {
 	eq FAddExp.isAddOrSub() = true;
 	eq FSubExp.isAddOrSub() = true;
 	syn boolean FExp.isPrimary() = false;
-	eq FIdUse.isPrimary() = true;
+	eq FIdUseExp.isPrimary() = true;
 	eq FRealLitExp.isPrimary() = true;
 
 	syn String FTypePrefixFlow.toString() = "flow";
@@ -872,6 +873,7 @@ aspect FlattPrettyPrint {
 	eq FParameter.toString() = "parameter";
 	eq FDiscrete.toString() = "discrete";
 	eq FConstant.toString() = "constant";
+	eq FContinuous.toString() = "";	
 	
 	syn String Restriction.toString();
 	eq Model.toString() = "model";

@@ -61,7 +61,7 @@ aspect Flattening {
 		
 		fv.setFAttributeList(attr);
 		
-		// FIXME: Make sure that prefices specified in short class declarations are propagated
+		// FIXME: Make sure that prefixes specified in short class declarations are propagated
 		if (getComponentDecl().isFlow())
 			fv.setFTypePrefixFlow(new FFlow());
 		if (getComponentDecl().isInput())
@@ -135,11 +135,25 @@ aspect Flattening {
 
 aspect FlatVariables {
 
-  public FVariable.FVariable(String type, FQName fqname) {
+   public static FPrimitiveType FVariable.primitiveType(String type) {
+	  if (type.equals("Real")) {
+		  return new FRealType();
+     } else if (type.equals("Integer")) {
+	  return new FIntegerType();
+    } else if (type.equals("Boolean")) {
+		  return new FBooleanType();
+	  } else if (type.equals("String")) {
+		  return new FStringType();
+	  } else {
+		  return null;
+	  }
+  }
+ 
+  public FVariable.FVariable(String type, FQName fqname) {	  
   	this(new Opt(),
   	      new Opt(),
   	      new Opt(),
-  	      new FIdUse(type),
+  	      primitiveType(type),
   	      new List(),
   	      new Opt(),
   	      new Opt(),
@@ -150,7 +164,7 @@ aspect FlatVariables {
   	this(new Opt(),
   	      new Opt(),
   	      new Opt(),
-  	      new FIdUse(type),
+  	      primitiveType(type),
   	      new List(),
   	      new Opt(bexp),
   	      new Opt(),
@@ -196,11 +210,15 @@ aspect FlatExpressions {
 	public FExp Exp.flatten(FQName prefix) {
 		return null;
 	}
+
+	public FExp AccessExp.flatten(FQName prefix) {
+		return new FIdUseExp(new FIdUseQualified("", getAccess().flatten(prefix)));
+	}
 	
-	public FExp Access.flatten(FQName prefix) { 
+	public FQName Access.flatten(FQName prefix) { 
 		FQName myName = new FQName(prefix);
 		myName.append(this,prefix);
-		return new FIdUseQualified("",myName);
+		return myName;
 	}
 
 	public FExp ArrayConstructor.flatten(FQName prefix) {

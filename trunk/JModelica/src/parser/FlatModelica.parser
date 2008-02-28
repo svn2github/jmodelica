@@ -122,7 +122,7 @@ FVariable fvariable =
 	ftype_prefix_flow? 
     ftype_prefix_other? 
     ftype_prefix_input_output? 
-	fid_use
+	fprimitive_type
 	fqname
 	fattributes?
 	bexp?
@@ -133,7 +133,7 @@ FVariable fvariable =
 						fattr = (List)fattributes.getChild(0);
 						
 					return new FVariable(ftype_prefix_flow,ftype_prefix_other,
-	                                    ftype_prefix_input_output,fid_use,fattr,bexp,fstring_comment,fqname); :}
+	                                    ftype_prefix_input_output,fprimitive_type,fattr,bexp,fstring_comment,fqname); :}
 	;
   
 FQName fqname =
@@ -252,6 +252,14 @@ FExp fprimary =
   | fid_use_qualified        {: return fid_use_qualified; :} 
   | LPAREN fexp.a RPAREN {: return a; :}
   | TIME {: return new FTimeExp(); :}
+  ;
+
+FPrimitiveType fprimitive_type =
+  ID.name {: if (name.equals("Real")) return new FRealType(); 
+  	else if (name.equals("Boolean")) return new FBooleanType();
+  	else if (name.equals("String")) return new FStringType();
+  	else if (name.equals("Integer")) return new FIntegerType();
+  	else return null; :}
   ;
   
 FIdUse fid_use =
