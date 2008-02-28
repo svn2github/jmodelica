@@ -1,0 +1,41 @@
+import java.util.Collection;
+
+aspect FlatAPI {
+
+	coll ArrayList FClass.parameters() [new ArrayList()] with add;
+	FVariable contributes
+ 		this when isParameter()
+	to FClass.parameters() for fclass();
+
+	inh FClass FVariable.fclass();
+	inh FClass FIdUseExp.fclass();
+	eq FClass.getChild().fclass() = this;
+	eq Root.getChild().fclass() = null; 
+	
+
+	coll ArrayList FClass.structuralParameters() [new ArrayList()] with add;
+	FIdUseExp contributes
+		myFV() when inArraySubscripts()
+	to FClass.structuralParameters() for fclass();
+	
+
+}
+
+aspect NameAnalysis {
+	
+	inh FVariable FIdUse.lookupFV(String name);
+	eq FClass.getChild().lookupFV(String name) = memberFV(name);
+	eq Root.getChild().lookupFV(String name) = null;
+
+
+	syn lazy FVariable FClass.memberFV(String name) {
+		for (int i=0;i<getNumFVariable();i++){
+			if (getFVariable(i).name().equals(name))
+				return getFVariable(i);
+		}
+		return null; // This should never happen if the front-end is ok.
+	}
+
+	syn lazy FVariable FIdUse.myFV() = lookupFV(name());
+	syn lazy FVariable FIdUseExp.myFV() = getFIdUse().lookupFV(name());
+}

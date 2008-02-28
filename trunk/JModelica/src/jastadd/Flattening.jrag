@@ -16,6 +16,8 @@ aspect Flattening {
 	// Check if the FullClassDecl matches the name of class to be flattened. 
 	public InstNode FullClassDecl.findFlatten(String className, FClass fc) {
 		debugPrint("FullClassDecl.findFlatten: "+name());
+		FlatRoot fr = new FlatRoot();
+		fr.setFClass(fc);
 		//System.out.println("Model.instantiate: "+getFullClassName() +" : " +getClassName());
    		if (className.equals(qualifiedName())) {
   	 		fc.setFQName(new FQName(qualifiedName())); 
@@ -169,6 +171,14 @@ aspect FlatVariables {
   	      new Opt(bexp),
   	      new Opt(),
   	      new FQName(fqname));
+  }
+  
+  syn boolean FVariable.isParameter() {
+  		if (hasFTypePrefixOther())
+   			if (getFTypePrefixOther() instanceof FParameter)
+   				return true;
+   	
+   		return false;
   }
   
 }
