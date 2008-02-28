@@ -25,7 +25,7 @@ public class FlattenModel {
 		      
 		      SourceRoot sr = (SourceRoot)parser.parse(scanner);
 		      
-		      sr.dumpTree("");
+		      //sr.dumpTree("");
 		      
 		      sr.setFileName(name);
 		      
@@ -94,7 +94,7 @@ public class FlattenModel {
 		    		  System.exit(0);
 		    	  }
 		    	  instTime = System.currentTimeMillis();
-		    	  fc.dumpTree("");
+		    	 //fc.dumpTree("");
 		    	  fc.prettyPrint(str,"");
 		    	  System.out.println(str.toString());
 		    	  printTime = System.currentTimeMillis();
