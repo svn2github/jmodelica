@@ -74,7 +74,7 @@ aspect Connections {
 		
 		
 		for (int i=0; i<l.size();i++) {
-			HashSet h = (HashSet)(l.get(i));
+			LinkedHashSet h = (LinkedHashSet)(l.get(i));
 			
 			ConnectionSetEntry csee[] = new ConnectionSetEntry[1];
 			csee = (ConnectionSetEntry[])h.toArray(csee);
@@ -117,7 +117,7 @@ aspect Connections {
 
 		// Generate equations for flow variables of connectors not
 		// appearing as inside.
-		HashSet notInsideConnectedFlowVars = connectionSetManager.getNotInsideConnectedFlowVars();		
+		LinkedHashSet notInsideConnectedFlowVars = connectionSetManager.getNotInsideConnectedFlowVars();		
 		for (Iterator iter=notInsideConnectedFlowVars.iterator();iter.hasNext();) {
 			ConnectionSetEntry cse = (ConnectionSetEntry)iter.next();
 				getFEquationBlock(0).addFAbstractEquation(new FEquation(new FIdUseExp(new FIdUseQualified("",(FQName)cse.getFQName().fullCopy())),new FRealLitExp("0")));
@@ -159,7 +159,7 @@ aspect Connections {
 				*/	
 	}
 
-	public class MyHashSet extends HashSet {
+	public class MyLinkedHashSet extends LinkedHashSet {
 	
 		public boolean add(Object o) {
 			ConnectionSetEntry cse = (ConnectionSetEntry)o;
@@ -172,18 +172,18 @@ aspect Connections {
 	public class ConnectionSetManager {
 	
 		private ArrayList list = new ArrayList();
-		private MyHashSet notInsideConnectedFlowVars = new MyHashSet();
-		private HashSet insideConnectedFlowVars = new HashSet();
+		private MyLinkedHashSet notInsideConnectedFlowVars = new MyLinkedHashSet();
+		private LinkedHashSet insideConnectedFlowVars = new LinkedHashSet();
 		
 		public ArrayList getConnectionSetList() {
 			return list;
 		}
 		
-		public HashSet getNotInsideConnectedFlowVars() {
+		public LinkedHashSet getNotInsideConnectedFlowVars() {
 			return notInsideConnectedFlowVars;
 		}
 		
-		public HashSet getInsideConnectedFlowVars() {
+		public LinkedHashSet getInsideConnectedFlowVars() {
 			return insideConnectedFlowVars;
 		}
 		
@@ -215,8 +215,8 @@ aspect Connections {
 					insideConnectedFlowVars.add(cse2);
 				}	
 			
-			HashSet h1 = getConnectionSet(cse1);
-			HashSet h2 = getConnectionSet(cse2);
+			LinkedHashSet h1 = getConnectionSet(cse1);
+			LinkedHashSet h2 = getConnectionSet(cse2);
 			
 			//System.out.println("ConnectionSetManager.addVars");
 			
@@ -229,7 +229,7 @@ aspect Connections {
 				list.remove(h2);
 			} else {
 				//System.out.println("ConnectionSetManager.addVars: about to create a new Hash set");
-				HashSet h = new HashSet();
+				LinkedHashSet h = new LinkedHashSet();
 				h.add(cse1);
 				//System.out.println("ConnectionSetManager.addVars: cse1 added");
 				h.add(cse2);
@@ -241,10 +241,10 @@ aspect Connections {
 			
 		}
 	
-		public HashSet getConnectionSet(ConnectionSetEntry cse) {
+		public LinkedHashSet getConnectionSet(ConnectionSetEntry cse) {
 			for (int i=0;i<list.size();i++) {
-				if (((HashSet)(list.get(i))).contains(cse))
-					return (HashSet)list.get(i);
+				if (((LinkedHashSet)(list.get(i))).contains(cse))
+					return (LinkedHashSet)list.get(i);
 			}
 			return null;
 		}
@@ -256,7 +256,7 @@ aspect Connections {
 			
 			// Print connection sets 
 			for(int i=0;i<list.size();i++) {
-				HashSet h = (HashSet)(list.get(i));
+				LinkedHashSet h = (LinkedHashSet)(list.get(i));
 				str.append("Connection set (");
 				Iterator it = h.iterator();
 				if (((ConnectionSetEntry)it.next()).isFlow())

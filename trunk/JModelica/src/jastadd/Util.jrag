@@ -28,7 +28,7 @@ aspect RootAccess {
 
 aspect DebugPrint {
 
-	public int ASTNode.printLevel = 1;
+	public int ASTNode.printLevel = 0;
 	public void ASTNode.debugPrint(Object msg) {
 		if (printLevel>0)
 			System.out.println(msg);
@@ -427,7 +427,7 @@ aspect AllElements {
 	syn lazy HashSet ClassDecl.allLocalClassDecl() = emptyHashSet();
 	eq ShortClassDecl.allLocalClassDecl() = finalClass().allLocalClassDecl();
 	eq FullClassDecl.allLocalClassDecl() {
-		HashSet set = new HashSet();
+		LinkedHashSet set = new LinkedHashSet(); // This is to get the same order every time
 		for (int i=0;i<numLocalClassDecl();i++) 
 			set.add(localClassDecl(i));
 		for (int i=0;i<getNumSuper();i++)
@@ -439,7 +439,7 @@ aspect AllElements {
 	eq ShortClassDecl.allLocalComponentDecl() = finalClass().allLocalComponentDecl();
 	eq FullClassDecl.allLocalComponentDecl() {
 		debugPrint("<<<FullClassDecl.allLocalComponentDecl(): ");
-		HashSet set = new HashSet();
+		LinkedHashSet set = new LinkedHashSet();
 		for (int i=0;i<getNumComponentDecl();i++) 
 			set.add(getComponentDecl(i));
 		for (int i=0;i<getNumSuper();i++)
