@@ -3,6 +3,8 @@ import org.jmodelica.ast.*;
 import java.io.*;
 import org.jmodelica.parser.*;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 public class FlatAnalyzer {
 	
@@ -96,20 +98,39 @@ public class FlatAnalyzer {
 		    	  }
 		    	  instTime = System.currentTimeMillis();
 		    	 //fc.dumpTree("");
-		    	  fc.prettyPrint(str,"");
+		    	  fc.prettyPrint(str,"");  
 		    	  System.out.println(str.toString());	  
 		    	  printTime = System.currentTimeMillis();
+		    	 
+		    	  Collection<FVariable> variables = fc.variables();
+		    	  System.out.println("Variables, ("+variables.size()+"):");
+		    	  for (Iterator<FVariable> iter=variables.iterator();iter.hasNext();)
+		    		  System.out.println(iter.next().prettyPrint("   "));
 		    	  
-		    	  ArrayList parameters = fc.parameters();
+		    	  Collection<FVariable> parameters = fc.parameters();
 		    	  System.out.println("Parameters, ("+parameters.size()+"):");
-		    	  for (int i=0;i<parameters.size();i++)
-		    		  System.out.println(((FVariable)parameters.get(i)).prettyPrint("   "));
-
+		    	  for (Iterator<FVariable> iter=parameters.iterator();iter.hasNext();)
+		    		  System.out.println(iter.next().prettyPrint("   "));
 		    	  
-		    	  ArrayList sParameters = fc.structuralParameters();
+		    	  Collection<FVariable> sParameters = fc.structuralParameters();
 		    	  System.out.println("Structural parameters, ("+sParameters.size()+"):");
-		    	  for (int i=0;i<sParameters.size();i++)
-		    		  System.out.println(((FVariable)sParameters.get(i)).prettyPrint("   "));
+		    	  for (Iterator<FVariable> iter=sParameters.iterator();iter.hasNext();)
+		    		  System.out.println(iter.next().prettyPrint("   "));
+		    	  
+		    	  Collection<Collection> varIncidence = fc.variableIncidence();
+		    	  System.out.println("Variable Incidence");
+		    	  int ind=0;
+		    	  for (Iterator<Collection> iter=varIncidence.iterator();iter.hasNext();) {
+		    		  Collection c = iter.next();
+		    		  //System.out.print(fv.prettyPrint("   ")+": ");
+			    	  System.out.print("Variable: "+ind+": ");
+			    	  ind++;
+		    		  for (Iterator<FEquation> iter2=c.iterator();iter2.hasNext();) {
+			    		  FEquation fe = iter2.next();
+			    		  System.out.print(fe.getParent().getIndexOfChild(fe) + " ");
+			    	  }
+			    	  System.out.println("");
+		    	  }
 
 		      }
 		

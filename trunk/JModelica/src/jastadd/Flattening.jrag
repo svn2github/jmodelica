@@ -181,6 +181,16 @@ aspect FlatVariables {
    		return false;
   }
   
+    syn boolean FVariable.isVariable() {
+  		if (!hasFTypePrefixOther())
+  			return true;
+  		if (hasFTypePrefixOther())
+   			if (getFTypePrefixOther() instanceof FContinuous || getFTypePrefixOther() instanceof FDiscrete)
+   				return true;
+   	
+   		return false;
+  }
+  
 }
 
 aspect InstNodeInterface {

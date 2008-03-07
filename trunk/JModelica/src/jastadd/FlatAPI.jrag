@@ -1,24 +1,51 @@
 import java.util.Collection;
+import java.util.LinkedHashSet;
 
 aspect FlatAPI {
 
-	coll ArrayList FClass.parameters() [new ArrayList()] with add;
+	coll Collection<FVariable> FClass.parameters() [new LinkedHashSet<FVariable>()] with add;
 	FVariable contributes
  		this when isParameter()
-	to FClass.parameters() for fclass();
-
-	inh FClass FVariable.fclass();
-	inh FClass FIdUseExp.fclass();
-	eq FClass.getChild().fclass() = this;
-	eq Root.getChild().fclass() = null; 
+	to FClass.parameters() for myFClass();
 	
+	coll Collection<FVariable> FClass.variables() [new LinkedHashSet<FVariable>()] with add;
+	FVariable contributes
+ 		this when isVariable()
+	to FClass.variables() for myFClass();
 
-	coll ArrayList FClass.structuralParameters() [new ArrayList()] with add;
+	coll Collection<FVariable> FClass.structuralParameters() [new LinkedHashSet<FVariable>()] with add;
 	FIdUseExp contributes
 		myFV() when inArraySubscripts()
-	to FClass.structuralParameters() for fclass();
-	
+	to FClass.structuralParameters() for myFClass();
 
+	coll Collection<FEquation> FVariable.variableIncidence() [new LinkedHashSet<FEquation>()] with add;
+    FIdUseExp contributes
+		myFEquation() when inFEquation()
+	to FVariable.variableIncidence() for myFV();
+	
+	syn lazy ArrayList<Collection> FClass.variableIncidence() {
+		ArrayList<Collection> l = new ArrayList<Collection>();
+		for (FVariable fv : variables()) {
+           l.add(fv.variableIncidence());
+       } 
+		return l;
+	
+	}
+	
+	inh boolean FExp.inFEquation();
+	eq FEquation.getChild().inFEquation()=true;
+	eq Root.getChild().inFEquation()=false;
+	
+	inh FEquation FExp.myFEquation();
+	eq FEquation.getChild().myFEquation()=this;
+	eq Root.getChild().myFEquation()=null;
+	
+	inh FClass FVariable.myFClass();
+	inh FClass FIdUseExp.myFClass();
+	eq FClass.getChild().myFClass() = this;
+	eq Root.getChild().myFClass() = null; 
+
+	
 }
 
 aspect NameAnalysis {
