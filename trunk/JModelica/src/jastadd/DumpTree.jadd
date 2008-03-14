@@ -138,6 +138,7 @@ aspect DumpTreeBasic {
       getChild(i).dumpTreeBasic(indent + "  ");
   }
   
+  
   public void IdDecl.dumpTreeBasic(String indent) {
   	System.out.println(indent + dumpBasic() + " at line: " + getLine(getStart()) + " decl name: " + getID());
   }
@@ -160,7 +161,6 @@ aspect DumpTreeBasic {
   	if (getNumChild()>0)
   		super.dumpTreeBasic(indent);
   }
-  
   
   public void RealLitExp.dumpTreeBasic(String indent) {
   	System.out.println(indent+dumpBasic() + " " + getUNSIGNED_NUMBER());

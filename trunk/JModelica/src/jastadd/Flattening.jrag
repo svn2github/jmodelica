@@ -22,7 +22,8 @@ aspect Flattening {
    		if (className.equals(qualifiedName())) {
   	 		fc.setFQName(new FQName(qualifiedName())); 
   	 		InstRoot r = getInstRoot();
-			//r.dumpTree("");
+			r.dumpTree("");
+			r.printIVarAccesses("");
 			fc.addFEquationBlock(new FEquationBlock(new List()));
 			r.flatten(fc);
 			fc.genConnectionEquations();
@@ -48,6 +49,11 @@ aspect Flattening {
 	}
 	
 	public void InstPrimitive.flatten(FClass fc) {
+		fc.addFVariable(createFVariable());
+	}
+	
+	
+	public FVariable InstPrimitive.createFVariable() {
 		FExp e = myBindingExp();
 		List attr = new List();
 		for (int i=0;i<getNumMergedEnvironment();i++) {
@@ -80,7 +86,8 @@ aspect Flattening {
 		if (getComponentDecl().getComment().hasStringComment())
 			fv.setFStringComment(new FStringComment(getComponentDecl().getComment().getStringComment().getComment()));
 		
-		fc.addFVariable(fv);
+		return fv;
+		
 		
 	}
 	

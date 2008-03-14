@@ -106,7 +106,7 @@ aspect InstantiationTree {
 	
 	// Definition of the NTA representing the root of the 
 	// instantiation tree
-	syn InstRoot BaseClassDecl.getInstRoot() = new InstRoot(this);
+	syn InstRoot BaseClassDecl.getInstRoot() = new InstRoot(new List(),this);
 
 	syn lazy List InstNode.getInstNodeList() {
 	
@@ -153,9 +153,9 @@ aspect InstantiationTree {
 
 	public InstComponent BaseClassDecl.newInstComponent(ComponentDecl cd) {
 		if (!extendsPrimitive())
-			return new InstComposite(cd);
+			return new InstComposite(new List(),cd);
 		else {
-			return new InstPrimitive(cd);
+			return new InstPrimitive(new List(),cd);
 		}
 	}
 	
@@ -164,7 +164,7 @@ aspect InstantiationTree {
 	}
 	
 	public InstComponent PrimitiveClassDecl.newInstComponent(ComponentDecl cd) {
-		return new InstPrimitive(cd);
+		return new InstPrimitive(new List(),cd);
 	}
 	
 	public InstComponent BuiltInClassDecl.newInstComponent(ComponentDecl cd) {
@@ -173,7 +173,7 @@ aspect InstantiationTree {
 	
 	// Build an InstExtends
 	public InstExtends ExtendsClause.newInstExtends() {
-		return new InstExtends(this);
+		return new InstExtends(new List(),this);
 	}
 
 	syn boolean ClassDecl.extendsPrimitive() = false;
@@ -293,6 +293,8 @@ aspect InstanceDumpTree {
 		getInstNodeList().dumpTree(indent + " ");
 	}
 	
+
+	
 	public void InstComposite.dumpTree(String indent) {
 		System.out.println(indent + dump()
 		                      + ": " + 
@@ -308,4 +310,24 @@ aspect InstanceDumpTree {
 		                      getComponentDecl().myClass().name() + " "+
 		                      getComponentDecl().name());
 	}
+	
+}
+
+aspect InstancePrettyPrint {
+
+	public String InstNode.prettyPrint(String indent) {
+		String str = getClass().getName();
+		str = indent + str.substring(str.lastIndexOf('.')+1);
+		return str;
+
+	}
+	public String InstPrimitive.prettyPrint(String indent) {
+		String str = getClass().getName();
+		str = indent+str.substring(str.lastIndexOf('.')+1);
+		str+= ": " + getComponentDecl().myClass().name() + " "+
+		                      getComponentDecl().name();
+		return str;
+
+	}
+
 }

@@ -70,7 +70,7 @@ aspect Connections {
 		debugPrint("<<<FClass.genConnectionEquations()");
 		ArrayList l = connectionSetManager.getConnectionSetList();
 		debugPrint("<<<FClass.genConnectionEquations(): "+ l.size() + " sets in manager");
-		getConnectionSetManager().printConnectionSets();
+		//getConnectionSetManager().printConnectionSets();
 		
 		
 		for (int i=0; i<l.size();i++) {

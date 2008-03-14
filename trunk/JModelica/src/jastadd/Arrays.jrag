@@ -6,6 +6,6 @@ aspect Arrays {
 			
 	inh boolean FIdUseExp.inArraySubscripts();
 	eq FArraySubscripts.getChild().inArraySubscripts() = true;
-	eq FlatRoot.getChild().inArraySubscripts() = false;
+	eq Root.getChild().inArraySubscripts() = false;
 
 }

@@ -1,4 +1,4 @@
-abstract InstNode ::= /InstNode*/ /MergedEnvironment:InstModification*/ /FQName/;
+abstract InstNode ::= /InstNode*/ /MergedEnvironment:InstModification*/ /FQName/ FExp*;
 InstRoot : InstNode ::= <ClassDecl:ClassDecl>;
 abstract InstComponent : InstNode ::= <ComponentDecl:ComponentDecl> ;
 InstComposite : InstComponent;

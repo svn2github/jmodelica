@@ -48,21 +48,22 @@ aspect FlatAPI {
 	
 }
 
-aspect NameAnalysis {
+aspect FlatNameAnalysis {
 	
-	inh FVariable FIdUse.lookupFV(String name);
-	eq FClass.getChild().lookupFV(String name) = memberFV(name);
-	eq Root.getChild().lookupFV(String name) = null;
+	inh FVariable FIdUse.lookupFV(FQName fqname);
+	eq FClass.getChild().lookupFV(FQName fqname) = memberFV(fqname);
+	eq Root.getChild().lookupFV(FQName fqname) = null;
 
 
-	syn lazy FVariable FClass.memberFV(String name) {
+	syn lazy FVariable FClass.memberFV(FQName fqname) {
 		for (int i=0;i<getNumFVariable();i++){
-			if (getFVariable(i).name().equals(name))
+			if (getFVariable(i).name().equals(fqname.name()))
 				return getFVariable(i);
 		}
 		return null; // This should never happen if the front-end is ok.
 	}
 
-	syn lazy FVariable FIdUse.myFV() = lookupFV(name());
-	syn lazy FVariable FIdUseExp.myFV() = getFIdUse().lookupFV(name());
+	syn lazy FVariable FIdUse.myFV() = null;
+	eq FIdUseQualified.myFV() = lookupFV(getFQName());
+	syn lazy FVariable FIdUseExp.myFV() = getFIdUse().myFV();
 }
