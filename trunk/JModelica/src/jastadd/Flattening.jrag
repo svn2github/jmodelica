@@ -16,13 +16,11 @@ aspect Flattening {
 	// Check if the FullClassDecl matches the name of class to be flattened. 
 	public InstNode FullClassDecl.findFlatten(String className, FClass fc) {
 		debugPrint("FullClassDecl.findFlatten: "+name());
-		FlatRoot fr = new FlatRoot();
-		fr.setFClass(fc);
 		//System.out.println("Model.instantiate: "+getFullClassName() +" : " +getClassName());
    		if (className.equals(qualifiedName())) {
   	 		fc.setFQName(new FQName(qualifiedName())); 
   	 		InstRoot r = getInstRoot();
-			r.dumpTree("");
+			//r.dumpTree("");
 			r.printIVarAccesses("");
 			fc.addFEquationBlock(new FEquationBlock(new List()));
 			r.flatten(fc);
@@ -62,10 +60,11 @@ aspect Flattening {
 		
 		//attr.dumpTree("*** ");
 		FVariable fv = null;
+		String primitiveName = getComponentDecl().myClass().finalClass().primitiveName();
 		if (e!=null)
-			fv = new FVariable(getComponentDecl().myClass().finalClass().primitiveName(),getFQName(),e);
+			fv = new FVariable(primitiveType(primitiveName),getFQName(),e);
 		else
-			fv = new FVariable(getComponentDecl().myClass().finalClass().primitiveName(),getFQName());
+			fv = new FVariable(primitiveType(primitiveName),getFQName());
 		
 		fv.setFAttributeList(attr);
 		
@@ -144,36 +143,37 @@ aspect Flattening {
 
 aspect FlatVariables {
 
-   public static FPrimitiveType FVariable.primitiveType(String type) {
+  public FPrimitiveType ASTNode.primitiveType(String type) {
 	  if (type.equals("Real")) {
-		  return new FRealType();
+		  return fRealType();
      } else if (type.equals("Integer")) {
-	  return new FIntegerType();
+		  return fIntegerType();
     } else if (type.equals("Boolean")) {
-		  return new FBooleanType();
+		  return fBooleanType();
 	  } else if (type.equals("String")) {
-		  return new FStringType();
+		  return fStringType();
 	  } else {
-		  return null;
+		  error("Type " + type + " is not a primitive type");
+		  return fRealType();
 	  }
   }
  
-  public FVariable.FVariable(String type, FQName fqname) {	  
+  public FVariable.FVariable(FPrimitiveType type, FQName fqname) {	  
   	this(new Opt(),
   	      new Opt(),
   	      new Opt(),
-  	      primitiveType(type),
+  	      type,
   	      new List(),
   	      new Opt(),
   	      new Opt(),
   	      new FQName(fqname));
   }
   
-  public FVariable.FVariable(String type, FQName fqname, FExp bexp) {
+  public FVariable.FVariable(FPrimitiveType type, FQName fqname, FExp bexp) {
   	this(new Opt(),
   	      new Opt(),
   	      new Opt(),
-  	      primitiveType(type),
+  	      type,
   	      new List(),
   	      new Opt(bexp),
   	      new Opt(),
@@ -307,7 +307,7 @@ aspect FlatExpressions {
 	public FExp SubExp.flatten(FQName prefix) { return new FSubExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
 	public FExp MulExp.flatten(FQName prefix) { return new FMulExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
 	public FExp DivExp.flatten(FQName prefix) { return new FDivExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
-	public FExp PowExp.flatten(FQName prefix) { return new FPowExp(getBase().flatten(prefix),getExponent().flatten(prefix)); }
+	public FExp PowExp.flatten(FQName prefix) { return new FPowExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
 	public FExp NegExp.flatten(FQName prefix) { return new FNegExp(getExp().flatten(prefix)); }
 
 	public FExp LtExp.flatten(FQName prefix) { return new FLtExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }

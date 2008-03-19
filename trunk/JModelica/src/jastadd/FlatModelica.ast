@@ -5,7 +5,10 @@ FClass ::= FQName
 
 FEquationBlock ::= FAbstractEquation*;
 
-FVariable ::= [FTypePrefixFlow] 
+abstract FAbstractVariable;
+FUndefVariable : FAbstractVariable;
+
+FVariable : FAbstractVariable ::= [FTypePrefixFlow] 
               [FTypePrefixOther] 
               [FTypePrefixInputOutput]
               Type:FPrimitiveType  
@@ -39,7 +42,7 @@ abstract FTypePrefixFlow : FTypePrefix;
 FFlow : FTypePrefixFlow::=;
 abstract FTypePrefixOther : FTypePrefix;
 // Continuous is not a valid prefix.  We will use it to identify 
-// expressions that are neither parameters nor constants.
+// expressions that are not parameters, constants, or discrete.
 FContinuous : FTypePrefixOther::=;
 FDiscrete : FTypePrefixOther::=;
 FParameter : FTypePrefixOther::=;
@@ -62,7 +65,7 @@ FEquation : FAbstractEquation ::= Left:FExp Right:FExp;
 abstract FBinExp : FExp ::= Left:FExp Right:FExp;
 abstract FUnaryExp : FExp ::= FExp;
 
-FArtmBinExp : FBinExp;
+abstract FArtmBinExp : FBinExp;
 FAddExp : FArtmBinExp::=;
 FSubExp : FArtmBinExp::=;
 FMulExp : FArtmBinExp::=;
@@ -71,7 +74,7 @@ FMulExpVM : FMulExp::=;
 FMulExpMV : FMulExp::=;
 FMulExpVV : FMulExp::=;
 FDivExp : FArtmBinExp::=;
-FPowExp : FExp::= Base:FExp Exponent:FExp; 
+FPowExp : FArtmBinExp::=;
 FNegExp : FUnaryExp ::=;
 
 abstract FLogBinExp : FBinExp;
@@ -92,7 +95,7 @@ FFunctionCall : FExp ::= Name:FIdUse Args:FExp*;
 FSumRedExp : FExp ::= FExp FForIndex;
 FForIndex ::= FIdDecl [FExp];
 
-FDer : FExp ::= FIdUse;
+FDer : FExp ::= FIdUseExp;
 
 FScalar : FUnaryExp ::=;
 FTranspose : FUnaryExp ::=;
@@ -133,4 +136,4 @@ FNoExp : FExp::=;
 FTimeExp : FExp;
 
 // Built in functions
-FSizeExp : FExp ::= FIdUse Dim:FExp;
+FSizeExp : FExp ::= FIdUseExp Dim:FExp;

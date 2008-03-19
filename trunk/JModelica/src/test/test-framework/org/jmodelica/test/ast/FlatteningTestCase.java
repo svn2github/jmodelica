@@ -82,21 +82,36 @@ public class FlatteningTestCase extends TestCase {
 	public boolean testMe() {
 		SourceRoot sr = parser.parseFile(getSourceFileName());
 		sr.setFileName(getSourceFileName());
-	    ErrorManager errM = new ErrorManager();
-	    if (!sr.checkErrors(getClassName(),errM)){
-	    	System.out.println("***** Class not found!");
-	    	return false;
-	    }
-	    if (errM.getNumErrors()>0) {
+		//sr.retrieveFullClassDecl("NameTests.ImportTest1").dumpTree("");
+	    if (sr.checkErrorsInClass(getClassName())) {
 	    	System.out.println("***** Errors in Class!");
 	    	return false;
 	    }
-		FClass fc = new FClass();
+	    FlatRoot flatRoot = new FlatRoot();
+	    //flatRoot.setFileName(name);
+	    FClass fc = new FClass();
+	    flatRoot.setFClass(fc);
+	    
+		//FClass fc = new FClass();
 		sr.findFlatten(getClassName(), fc);
+		/*if (fc.errorCheck()) {
+	    	System.out.println("***** Errors in Class!");
+	    	return false;			
+		}*/
 		System.out.println(fc.prettyPrint(""));
 		System.out.println(getFlatModel());
 		TokenTester tt = new TokenTester();
-		return tt.test(fc.prettyPrint(""),getFlatModel());
+		
+		boolean result =  tt.test(fc.prettyPrint(""),getFlatModel());
+		if (!result) {
+			System.out.println(fc.prettyPrint("").equals(getFlatModel()));
+			sr.retrieveFullClassDecl("NameTests.ImportTest1").dumpTree("");
+			fc.dumpTreeBasic("");
+			try {
+     			System.in.read();
+			} catch (Exception e){}
+		}
+		return result;
 	}
 	
 	/**

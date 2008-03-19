@@ -15,7 +15,7 @@ aspect FlatAPI {
 
 	coll Collection<FVariable> FClass.structuralParameters() [new LinkedHashSet<FVariable>()] with add;
 	FIdUseExp contributes
-		myFV() when inArraySubscripts()
+		(FVariable)myFV() when inArraySubscripts()
 	to FClass.structuralParameters() for myFClass();
 
 	coll Collection<FEquation> FVariable.variableIncidence() [new LinkedHashSet<FEquation>()] with add;
@@ -48,6 +48,7 @@ aspect FlatAPI {
 	
 }
 
+/*
 aspect FlatNameAnalysis {
 	
 	inh FVariable FIdUse.lookupFV(FQName fqname);
@@ -67,3 +68,5 @@ aspect FlatNameAnalysis {
 	eq FIdUseQualified.myFV() = lookupFV(getFQName());
 	syn lazy FVariable FIdUseExp.myFV() = getFIdUse().myFV();
 }
+
+*/

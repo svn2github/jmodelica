@@ -254,7 +254,7 @@ AddExp : ArtmBinExp::=;
 SubExp : ArtmBinExp::=;
 MulExp : ArtmBinExp::=;
 DivExp : ArtmBinExp::=;
-PowExp : Exp::= Base:Exp Exponent:Exp; // Easy to make parser take care of this: should be a Primary
+PowExp : ArtmBinExp::=; // Easy to make parser take care of this: should be a Primary
 NegExp : Exp::= Exp;
 
 RealLitExp : Exp ::= <UNSIGNED_NUMBER>;

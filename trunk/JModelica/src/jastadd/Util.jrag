@@ -275,12 +275,11 @@ aspect FlatNames {
 	syn String FQNamePart.name() = getName();
 
 	syn String FIdUse.name() = getID();
-	eq FIdUseQualified.name() = getFQName().name();
 	syn String FIdUseExp.name() = getFIdUse().name();
+	eq FIdUseQualified.name() = getFQName().name();
 	
 	syn String FIdDecl.name() = getFQName().name();
 
-	
 	syn String FClass.name() = getFQName().name();
 	syn String FVariable.name() = getFQName().name();
 

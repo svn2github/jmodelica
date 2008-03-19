@@ -1,32 +1,22 @@
 aspect NameCheck {
 
-	public void ASTNode.nameCheck(ErrorManager em) {}
+	public void ASTNode.nameCheck() {}
 
-	public void AmbiguousAccess.nameCheck(ErrorManager em) {
+	public void AmbiguousAccess.nameCheck() {
     	debugPrint("****************" + getID() + " " + beginLine());
-     	error(em,"Cannot find class or component declaration for "+qualifiedName());
+     	error("Cannot find class or component declaration for "+qualifiedName());
   	}
 	
-	public void ComponentAccess.nameCheck(ErrorManager em) {
+	public void ComponentAccess.nameCheck() {
 		debugPrint("****************" + getID() + " " + beginLine());
 		if (myComponentDecl().isUnknown()) 
-       		error(em,"The component "+qualifiedName()+" is undeclared");
+       		error("The component "+qualifiedName()+" is undeclared");
     }
     
-    public void ClassAccess.nameCheck(ErrorManager em) {
+    public void ClassAccess.nameCheck() {
     	debugPrint("****************" + getID() + " " + beginLine());
 		if (myClassDecl().isUnknown()) 
-       		error(em,"The class "+qualifiedName()+" is undeclared");
+       		error("The class "+qualifiedName()+" is undeclared");
     }
     
-    /*
-    public void Dot.nameCheck(ErrorManager em) {
-		ErrorManager tmpem = new ErrorManager();
-		getLeft().nameCheck(tmpem);
-		getRight().nameCheck(tmpem);
-		if (tmpem.getNumErrors()>0)
-			error(em,"Cannot find "+qualifiedName());	
-	}
-	*/
-	
 }

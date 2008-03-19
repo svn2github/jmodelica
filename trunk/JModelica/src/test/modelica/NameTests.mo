@@ -277,7 +277,7 @@ end ImportTest4;
 model ImportTest5
    annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FlatteningTestCase(name="ImportTest5",
-        description="Test circular dependency between imort and extends: import of class that becomes visible through inheritance",
+        description="Test circular dependency between import and extends: import of class that becomes visible through inheritance",
                                                flatModel=
 "
 fclass NameTests.ImportTest5

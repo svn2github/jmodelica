@@ -73,7 +73,14 @@ public class ErrorTestCase extends TestCase {
 	public boolean testMe() {
 		SourceRoot sr = parser.parseFile(getSourceFileName());
 		sr.setFileName(getSourceFileName());
-	    ErrorManager errM = new ErrorManager();
+	   
+		if (sr.errorCheck()) {
+	    	System.out.println("***** Errors in Class!");
+	    	return false;
+	    }
+		
+		/*
+		ErrorManager errM = new ErrorManager();
 	    //System.out.println(sr.checkErrors(getClassName(),errM));
 	    //System.out.println(getClassName());
 	    //StringBuffer str0 = new StringBuffer();
@@ -82,6 +89,7 @@ public class ErrorTestCase extends TestCase {
 	    	return false;
 	    if (errM.getNumErrors()==0)
 	    	return false;
+	    */
 	    //StringBuffer str = new StringBuffer();
 	    //errM.printErrors(str);
 	    //System.out.println(str.toString());

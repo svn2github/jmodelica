@@ -32,44 +32,19 @@ public class FlatAnalyzer {
 		      
 		      sr.setFileName(name);
 		      
-		      /*
-		      StringBuffer str2 = new StringBuffer();
-		      p._prettyPrint(str2,"");
-		      p.debugPrint("Pretty Printing of original program finished");
-		      System.out.println(str2.toString());
-		      
-		      p.setFName(name);
-		      reader.close();
-		      */
+		     
 		      long parseTime = System.currentTimeMillis();
 		      
+		      System.out.println("Checking for errors...");	      
+		      if (sr.checkErrorsInClass(cl)) {
+	    		  System.exit(0);
+	    	  }
 		      
-		      
-		     // p.getLibrary(0).trigImportAccess();
-		      
-		      //p.getLibrary(0).prettyPrintLibrary("");
-		      
-		      //p.getLibrary(0).dumpTree("");
-		      /*
-		      System.out.println("Checking for errors in Standard Lib...");	      
-		      ErrorManager errMsl = new ErrorManager();
-		      p.getLibrary(0).collectErrors(errMsl);
-		      errMsl.printErrors();
-		      */
-		      
-		      
-		      //p.getLibrary(0).dumpTree("");
-		      /*
-		      BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
-				try {
-					keyboard.readLine();
-				} catch (Exception e) { e.printStackTrace();}
-				*/
-		     
-		      //p.dumpTree("");  
-
+		      long errcheckTime = System.currentTimeMillis();
 		      
 		      System.out.println("Checking for errors...");	      
+		     
+		      /*
 		      ErrorManager errM = new ErrorManager();
 		      if (!sr.checkErrors(cl,errM)) {
 	    		  System.out.println("Error:");
@@ -80,22 +55,26 @@ public class FlatAnalyzer {
 		      errM.printErrors();
 		      
 		      long errcheckTime = System.currentTimeMillis();
-		      
+		      */
 		    
 		      
 		      long printTime = System.currentTimeMillis();
 		      long instTime = System.currentTimeMillis();
 		      
-		      FClass fc = new FClass();
-	    	  StringBuffer str = new StringBuffer();
-		      if (errM.getNumErrors()==0) {
-		    	  System.out.println("Flattening starts...");
-		    	  InstNode ir = sr.findFlatten(cl,fc);
-		    	  if (ir==null) {
-		    		  System.out.println("Error:");
-		    		  System.out.println("   Did not find the class: " + cl);
-		    		  System.exit(0);
-		    	  }
+		      
+		    	  FlatRoot flatRoot = new FlatRoot();
+			      flatRoot.setFileName(name);
+			      FClass fc = new FClass();
+			      flatRoot.setFClass(fc);
+		    	  StringBuffer str = new StringBuffer();
+			    	  System.out.println("Flattening starts...");
+			    	  InstNode ir = sr.findFlatten(cl,fc);
+			    	  if (ir==null) {
+			    		  System.out.println("Error:");
+			    		  System.out.println("   Did not find the class: " + cl);
+			    		  System.exit(0);
+			    	  }
+		    	  
 		    	  instTime = System.currentTimeMillis();
 		    	 //fc.dumpTree("");
 		    	  fc.prettyPrint(str,"");  
@@ -132,7 +111,7 @@ public class FlatAnalyzer {
 			    	  System.out.println("");
 		    	  }
 
-		      }
+		      
 		
 		      System.err.println("Parse time:         " + ((double)(parseTime-startTime))/1000.0);
 		      System.err.println("Error check time:   " + ((double)(errcheckTime-parseTime))/1000.0);

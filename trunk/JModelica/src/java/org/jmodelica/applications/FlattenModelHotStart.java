@@ -1,5 +1,6 @@
 package org.jmodelica.applications;
 import org.jmodelica.ast.*;
+
 import java.io.*;
 import org.jmodelica.parser.*;
 
@@ -41,40 +42,13 @@ public class FlattenModelHotStart{
 		      long parseTime = System.currentTimeMillis();
 		      
 		      
-		      
-		     // p.getLibrary(0).trigImportAccess();
-		      
-		      //p.getLibrary(0).prettyPrintLibrary("");
-		      
-		      //p.getLibrary(0).dumpTree("");
-		      /*
-		      System.out.println("Checking for errors in Standard Lib...");	      
-		      ErrorManager errMsl = new ErrorManager();
-		      p.getLibrary(0).collectErrors(errMsl);
-		      errMsl.printErrors();
-		      */
-		      
-		      
-		      //p.getLibrary(0).dumpTree("");
-		      /*
-		      BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
-				try {
-					keyboard.readLine();
-				} catch (Exception e) { e.printStackTrace();}
-				*/
-		     
 		      //p.dumpTree("");  
 
 		      
 		      System.out.println("Checking for errors...");	      
-		      ErrorManager errM = new ErrorManager();
-		      if (!sr.checkErrors(cl,errM)) {
-	    		  System.out.println("Error:");
-	    		  System.out.println("   Did not find the class: " + cl);
+		      if (sr.checkErrorsInClass(cl)) {
 	    		  System.exit(0);
 	    	  }
-		      
-		      errM.printErrors();
 		      
 		      long errcheckTime = System.currentTimeMillis();
 		      
@@ -85,7 +59,6 @@ public class FlattenModelHotStart{
 		      
 		      FClass fc = new FClass();
 	    	  StringBuffer str = new StringBuffer();
-		      if (errM.getNumErrors()==0) {
 		    	  System.out.println("Flattening starts...");
 		    	  InstNode ir = sr.findFlatten(cl,fc);
 		    	  if (ir==null) {
@@ -98,7 +71,6 @@ public class FlattenModelHotStart{
 		    	  fc.prettyPrint(str,"");
 		    	  System.out.println(str.toString());
 		    	  printTime = System.currentTimeMillis();
-		      }
 		
 		      System.err.println("Parse time:         " + ((double)(parseTime-startTime))/1000.0);
 		      System.err.println("Error check time:   " + ((double)(errcheckTime-parseTime))/1000.0);
@@ -137,17 +109,10 @@ public class FlattenModelHotStart{
 			      */
 			      long parseTime2 = System.currentTimeMillis();
 			      
-			      
-			      			      
 			      System.out.println("Checking for errors...");	      
-			      ErrorManager errM2 = new ErrorManager();
-			      if (!sr.checkErrors(cl,errM2)) {
-		    		  System.out.println("Error:");
-		    		  System.out.println("   Did not find the class: " + cl);
+		    	  if (sr.errorCheck()) {
 		    		  System.exit(0);
 		    	  }
-			      
-			      errM.printErrors();
 			      
 			      long errcheckTime2 = System.currentTimeMillis();
 			     
@@ -156,20 +121,22 @@ public class FlattenModelHotStart{
 			      
 			      FClass fc2 = new FClass();
 		    	  str = new StringBuffer();
-			      if (errM2.getNumErrors()==0) {
 			    	  System.out.println("Flattening starts...");
-			    	  InstNode ir = sr.findFlatten(cl,fc2);
+		    	  ir = sr.findFlatten(cl,fc2);
 			    	  if (ir==null) {
 			    		  System.out.println("Error:");
 			    		  System.out.println("   Did not find the class: " + cl);
 			    		  System.exit(0);
 			    	  }
+		    	  System.out.println("Checking for errors...");	      
+		    	  if (fc2.errorCheck()) {
+		    		  System.exit(0);
+		    	  }		    	  		    	 
 			    	  instTime2 = System.currentTimeMillis();
 			    	  //fc.dumpTree("");
 			    	  fc2.prettyPrint(str,"");
 			    	  System.out.println(str.toString());
 			    	  printTime2 = System.currentTimeMillis();
-			      }
 			
 			      System.err.println("Parse time:         " + ((double)(parseTime2-startTime2))/1000.0);
 			      System.err.println("Error check time:   " + ((double)(errcheckTime2-parseTime2))/1000.0);

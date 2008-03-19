@@ -294,19 +294,19 @@ aspect PrettyPrint {
 	}
 		
 	public void PowExp.prettyPrint(Printer p, StringBuffer str, String indent, Object o){
-		if (!(getBase().isPrimary())) {
+		if (!(getLeft().isPrimary())) {
 			str.append("(");
-			p.toString(getBase(),str,indent,o);
+			p.toString(getLeft(),str,indent,o);
 			str.append(")");
 		} else
-			p.toString(getBase(),str,indent,o);
+			p.toString(getLeft(),str,indent,o);
 		str.append("^");
-		if (!(getExponent().isPrimary())) {
+		if (!(getRight().isPrimary())) {
 			str.append("(");
-			p.toString(getExponent(),str,indent,o);
+			p.toString(getRight(),str,indent,o);
 			str.append(")");
 		} else
-			p.toString(getExponent(),str,indent,o);
+			p.toString(getRight(),str,indent,o);
 	}
 		
 	public void NegExp.prettyPrint(Printer p,StringBuffer str, String indent, Object o){
@@ -513,7 +513,9 @@ aspect FlattPrettyPrint {
 	    	
 	   if (hasBindingExp()) {
 				str.append(" = ");
-				p.toString(getBindingExp(),str,indent,o);
+				FExp bindingExp = getBindingExp();
+				p.toString(bindingExp,str,indent,o);
+				
 			}
 	    	
 	    if (hasFStringComment()) {
@@ -521,6 +523,20 @@ aspect FlattPrettyPrint {
 	    	str.append(getFStringComment().getComment());
 	    	str.append("\"");
 	    }
+	    
+	     if (hasBindingExp()) {
+ 		     FExp bindingExp = getBindingExp();
+				FlatStaticValue value = bindingExp.value();
+				if (value instanceof IntegerStaticValue) {
+					IntegerStaticValue iValue = (IntegerStaticValue) value;
+					str.append(" /*(" + iValue.getValue() + ")*/");
+				} else if (value instanceof RealStaticValue) {
+					RealStaticValue rValue = (RealStaticValue) value;
+					str.append(" /*(" + rValue.getValue() + ")*/");					
+				}
+			}
+	    
+		
 		}
 
 	
@@ -656,19 +672,19 @@ aspect FlattPrettyPrint {
 	}
 		
 	public void FPowExp.prettyPrint(Printer p, StringBuffer str, String indent, Object o){
-		if (!(getBase().isPrimary())) {
+		if (!(getLeft().isPrimary())) {
 			str.append("( ");
-			p.toString(getBase(),str,indent,o);
+			p.toString(getLeft(),str,indent,o);
 			str.append(" )");
 		} else
-			p.toString(getBase(),str,indent,o);
+			p.toString(getLeft(),str,indent,o);
 		str.append(" ^ ");
-		if (!(getExponent().isPrimary())) {
+		if (!(getRight().isPrimary())) {
 			str.append("( ");
-			p.toString(getExponent(),str,indent,o);
+			p.toString(getRight(),str,indent,o);
 			str.append(" )");
 		} else
-			p.toString(getExponent(),str,indent,o);
+			p.toString(getRight(),str,indent,o);
 	}
 		
 	public void FNegExp.prettyPrint(Printer p,StringBuffer str, String indent, Object o){
@@ -758,7 +774,7 @@ aspect FlattPrettyPrint {
 	public void FDer.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
 		debugPrint("FDer.prettyPrint");
 		str.append("der(");
-		p.toString(getFIdUse(),str,indent,o);
+		p.toString(getFIdUseExp(),str,indent,o);
 		str.append(")");
 	}
 	
@@ -824,7 +840,7 @@ aspect FlattPrettyPrint {
 	
 	public void FSizeExp.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
 		str.append("size(");
-		p.toString(getFIdUse(),str,"",o);
+		p.toString(getFIdUseExp(),str,"",o);
 		str.append(",");
 		p.toString(getDim(),str,"",o);
 		str.append(")");
