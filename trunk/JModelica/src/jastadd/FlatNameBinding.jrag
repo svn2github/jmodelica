@@ -1,0 +1,50 @@
+import java.util.HashMap;
+
+aspect FlatNameBinding {
+	
+	inh FAbstractVariable FIdUse.lookupFV(FQName fqname);
+	syn lazy FAbstractVariable FIdUse.myFV() = null;
+	eq FIdUseQualified.myFV() = lookupFV(getFQName());
+	
+	syn lazy FAbstractVariable FIdUseExp.myFV() = getFIdUse().myFV();
+	//inh FAbstractVariable FIdUseExp.lookupFV(FQName fqname);
+	inh FAbstractVariable FEquationBlock.lookupFV(FQName fqname);
+	inh FAbstractVariable FVariable.lookupFV(FQName fqname);
+	
+	/* It appears that SourceRoot can contain flattened expressions */
+	/* Is this OK? Yes, it is ok since InstRoot is defined as an NTA */
+	/* of FullClassDecl */
+
+	eq Root.getChild().lookupFV(FQName fqname) {
+		return null;
+	}
+
+	eq FClass.getFVariable(int index).lookupFV(FQName fqname) {
+		FVariable variable = (FVariable) fullyQualifiedVariablesMap().get(fqname.name());
+		if (variable == null) {
+			error("Undefined variable " + fqname.name());
+			return new FUndefVariable();
+		} else {
+			return variable;
+		}		
+	}
+	
+	eq FClass.getFEquationBlock(int index).lookupFV(FQName fqname) {
+		FVariable variable = (FVariable) fullyQualifiedVariablesMap().get(fqname.name());
+		if (variable == null) {
+			error("Undefined variable " + fqname.name());
+			return new FUndefVariable();
+		} else {
+			return variable;
+		}
+	}	
+			
+	syn lazy HashMap FClass.fullyQualifiedVariablesMap() {
+		HashMap map = new HashMap();
+		for(int k = 0; k < getNumFVariable(); k++) {
+			map.put(getFVariable(k).getFQName().name(),getFVariable(k));
+		}
+		return map;
+	}
+	
+}
