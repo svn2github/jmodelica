@@ -1,0 +1,15 @@
+abstract AbstractFlatType ;
+
+// FlatTypes consist of all valid types in a flat Modelica program
+FlatType : AbstractFlatType ::= FPrimitiveType <NumberDimensions:int> ;
+
+// The EmptyType is the type associated with the empty expression.
+// This is a valid type, but it has not valid operators defined on it.
+EmptyType : AbstractFlatType ;
+
+// The BrokenType is used to signify any type errors.
+// When an expression has a BrokenType in one of its subexpressions,
+// then the type of the super expression should be the BrokenType.
+// The super expression should not throw an error. It is the job
+// of the originating faulty subexpression to throw an error.
+BrokenType : AbstractFlatType ;

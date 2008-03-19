@@ -1,0 +1,201 @@
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.ArrayList;
+
+aspect ErrorCheck {
+
+  public String ASTNode.errorPrefix() {
+    return fileName() + ":\n" + "  *** Semantic Error: ";
+  }
+  public String ASTNode.warningPrefix() {
+    return fileName() + ":\n" + "  *** WARNING: ";
+  }
+
+  protected static final int ASTNode.ERRORS = 0;
+  protected static final int ASTNode.WARNINGS = 1;  
+  protected ArrayList[] ASTNode.problems = new ArrayList[2];  
+  
+  class Problem implements Comparable {
+    public int compareTo(Object o) {
+      if(o instanceof Problem) {
+        Problem other = (Problem)o;
+        if(!fileName.equals(other.fileName))
+          return fileName.compareTo(other.fileName);
+        return message.compareTo(other.message);
+      }
+      return 0;
+    }
+    public static class Severity {
+      public static final Severity ERROR = new Severity();
+      public static final Severity WARNING = new Severity();
+      private Severity() { }
+    }
+    public static class Kind {
+      public static final Kind OTHER = new Kind();
+      public static final Kind LEXICAL = new Kind();
+      public static final Kind SYNTACTIC = new Kind();
+      public static final Kind SEMANTIC = new Kind();
+      private Kind() { }
+    }
+    protected int beginLine = 0;
+    protected int beginColumn = 0;
+    public int beginLine() { return beginLine; }
+    public void setBeginLine(int beginLine) { this.beginLine = beginLine; }
+    public int beginColumn() { return beginColumn; }
+    public void setBeginColumn(int beginColumn) { this.beginColumn = beginColumn; }
+  
+    protected String fileName;
+    public String fileName() { return fileName; }
+    public void setFileName(String fileName) { this.fileName = fileName; }
+    protected String message;
+    public String message() { return message; }
+    protected Severity severity = Severity.ERROR;
+    public Severity severity() { return severity; }
+    protected Kind kind = Kind.OTHER;
+    public Kind kind() { return kind; }
+    
+    public Problem(String fileName, String message) {
+      this.fileName = fileName;
+      this.message = message;
+    }
+    public Problem(String fileName, String message, Severity severity) {
+      this(fileName, message);
+      this.severity = severity;
+    }
+    public Problem(String fileName, String message, Severity severity, Kind kind) {
+        this(fileName, message, severity);
+        this.kind = kind;
+    }    
+    public Problem(String fileName, String message, Severity severity, Kind kind, int beginLine, int beginColumn) {
+        this(fileName, message, severity);
+        this.kind = kind;
+        this.beginLine = beginLine;
+        this.beginColumn = beginColumn;
+    }    
+  
+  
+    public String toString() {
+      String s = "";
+      String lineData = "at line "+beginLine+", column "+beginColumn+":\n";
+      if(this.kind == Kind.LEXICAL)
+        s = "Lexical error "+lineData;
+      else if(this.kind == Kind.SYNTACTIC)
+        s = "Syntactic error "+lineData;
+      else if(this.kind == Kind.SEMANTIC)
+        s = "Semantic error "+lineData;
+      return "In file '"+fileName + "':\n" + s +"  "+ message;
+    }
+  }
+
+  protected void ASTNode.error(String s) {
+	  if (problems[ERRORS] == null) {
+		  problems[ERRORS] = new ArrayList(1);
+	  }
+	  problems[ERRORS].add(new Problem(fileName(), s, Problem.Severity.ERROR, Problem.Kind.SEMANTIC,beginLine(),beginColumn()));
+  }
+
+  protected void ASTNode.warning(String s) {
+	  if (problems[WARNINGS] == null) {
+		  problems[WARNINGS] = new ArrayList(1);
+	  }	  
+	  problems[WARNINGS].add(new Problem(fileName(), "WARNING: " + s, Problem.Severity.WARNING));
+  }
+
+  
+  public void ASTNode.collectErrors(ArrayList[] allProblems) {
+	  nameCheck();
+	  typeCheck();	  
+	  if (problems[ERRORS] != null)
+	  	allProblems[ERRORS].addAll(problems[ERRORS]);
+	  if (problems[WARNINGS] != null)	  
+		  allProblems[WARNINGS].addAll(problems[WARNINGS]);
+	  for(int i = 0; i < getNumChild(); i++) {
+		  getChild(i).collectErrors(allProblems);
+	  }
+  }
+
+  
+  public boolean ASTNode.errorCheck() {
+	ArrayList[] allProblems = new ArrayList[2];
+	for(int i = 0; i < allProblems.length; i++) {
+		allProblems[i] = new ArrayList();
+	}
+	collectErrors(allProblems);
+    Collection allErrors = allProblems[ERRORS];
+    Collection allWarnings = allProblems[WARNINGS];
+    if (!allWarnings.isEmpty()) {
+    	System.out.println("Warnings:");    
+    	for(Iterator iter = allWarnings.iterator(); iter.hasNext(); ) {
+    		Problem problem = (Problem) iter.next();
+    		System.out.println(problem);
+    	}
+    }
+    
+   if(allErrors.isEmpty())
+      return false;
+    System.out.println(allErrors.size() + " error(s) found...");
+    for(Iterator iter = allErrors.iterator(); iter.hasNext(); ) {
+      Problem problem = (Problem)iter.next();
+      System.out.println(problem);
+    }
+    return true;
+  }
+  
+
+    syn lazy FullClassDecl ASTNode.retrieveFullClassDecl(String className) {
+      for(int i = 0; i < getNumChild(); i++) {
+		  FullClassDecl fcd = getChild(i).retrieveFullClassDecl(className);
+	  	  if (fcd != null)
+	  	  	return fcd;
+	  }
+	  return null;
+    }   
+  	
+  	eq FullClassDecl.retrieveFullClassDecl(String className) {
+	   	if (className.equals(qualifiedName())) {
+	   		return this;
+		} else
+			return getClassDeclList().retrieveFullClassDecl(className);
+	}
+
+	/* We don't want to error check an entire model, just the classes
+	   that are used. */
+	public boolean SourceRoot.checkErrorsInClass(String className) {
+		FullClassDecl fcd = retrieveFullClassDecl(className);
+		if (fcd == null) {
+			System.out.println("Class "+ className + "not found");
+			return false;
+		} else
+			return fcd.errorCheck();
+	}
+	
+	boolean FullClassDecl.errorChecked = false;
+  	public void FullClassDecl.collectErrors(ArrayList[] allProblems) {
+    	debugPrint("ErrorChecking: " + qualifiedName());
+    	if (!errorChecked) {
+    	errorChecked = true;
+    	getEquationList().collectErrors(allProblems);
+    	getAlgorithmList().collectErrors(allProblems);
+    	getSuperList().collectErrors(allProblems);
+    	getImportList().collectErrors(allProblems);
+    	getComponentDeclList().collectErrors(allProblems);
+    	debugPrint("ErrorChecking: " + qualifiedName() + ": done with components");
+    	if (!(getName().getID().equals(getEndName())))
+    		error("The declaration and end names of a class should be the same");
+  		}
+  	}
+	
+	
+	public void ComponentDecl.collectErrors(ArrayList[] allProblems) {
+		super.collectErrors(allProblems);
+		if (getClassName().myClassDecl()!=null) {
+			debugPrint("ComponentDecl.collectErrors:  "  + prettyPrint("") + ": " + getClassName().myClassDecl().qualifiedName());
+			getClassName().myClassDecl().collectErrors(allProblems);
+		}
+	}
+	
+   // Don't error check annotation
+   public void Annotation.collectErrors(ArrayList[] allProblems) {}
+	
+  
+}

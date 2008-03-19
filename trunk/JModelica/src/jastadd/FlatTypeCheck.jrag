@@ -1,0 +1,18 @@
+aspect FlatTypeCheck {
+	
+  public void ASTNode.typeCheck() {
+  }
+  
+  public void FExp.typeCheck()	{
+	  this.type();
+  }
+	
+  public void FVariable.typeCheck() {	
+	  this.type();
+  }
+
+  public void FAbstractEquation.typeCheck() {
+	  this.type();
+  }
+  
+}

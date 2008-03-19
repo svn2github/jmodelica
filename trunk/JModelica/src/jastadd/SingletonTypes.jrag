@@ -1,0 +1,73 @@
+aspect BuiltinTypeSingletons {
+
+	public static final FBooleanType FBooleanType.singleton = new FBooleanType();
+	public static final FStringType FStringType.singleton = new FStringType();	
+	public static final FRealType FRealType.singleton = new FRealType();	
+	public static final FIntegerType FIntegerType.singleton = new FIntegerType();	
+	public static final EmptyType EmptyType.singleton = new EmptyType();
+	public static final BrokenType BrokenType.singleton = new BrokenType();	
+	
+	public static FBooleanType ASTNode.fBooleanType() {
+		return FBooleanType.singleton;
+	}
+	
+	public static FStringType ASTNode.fStringType() {
+		return FStringType.singleton;
+	}
+
+	public static FRealType ASTNode.fRealType() {
+		return FRealType.singleton;
+	}
+
+	public static FIntegerType ASTNode.fIntegerType() {
+		return FIntegerType.singleton;
+	}
+	
+	public static EmptyType ASTNode.emptyType() {
+		return EmptyType.singleton;
+	}
+	
+	public static BrokenType ASTNode.brokenType() {
+		return BrokenType.singleton;
+	}
+}
+
+aspect VariabilitySingletons {
+	
+	public static final FContinuous FContinuous.singleton = new FContinuous();	
+	public static final FDiscrete FDiscrete.singleton = new FDiscrete();	
+	public static final FParameter FParameter.singleton = new FParameter();
+	public static final FConstant FConstant.singleton = new FConstant();	
+	
+	public static FContinuous ASTNode.fContinuous() {
+		return FContinuous.singleton;
+	}
+
+	public static FDiscrete ASTNode.fDiscrete() {
+		return FDiscrete.singleton;
+	}	
+
+	public static FParameter ASTNode.fParameter() {
+		return FParameter.singleton;
+	}
+	
+	public static FConstant ASTNode.fConstant() {
+		return FConstant.singleton;
+	}
+}
+
+aspect ValueSingletons {
+
+	public static final NoStaticValue NoStaticValue.singleton = new NoStaticValue();
+	
+	public static NoStaticValue ASTNode.noStaticValue() {
+		return NoStaticValue.singleton;
+	}
+	
+	public static final BrokenStaticValue BrokenStaticValue.singleton = new BrokenStaticValue();
+	
+	public static BrokenStaticValue ASTNode.brokenStaticValue() {
+		return BrokenStaticValue.singleton;
+	}
+	
+}

@@ -1,0 +1,345 @@
+aspect ExpressionType {
+	
+	syn lazy AbstractFlatType FExp.type();	
+	syn lazy AbstractFlatType FVariable.type();	
+	syn lazy AbstractFlatType FAbstractEquation.type();
+	
+	// TODO: fix this expression for arrays
+	eq FVariable.type() {
+		FPrimitiveType primitiveType = getType();
+		if (hasBindingExp()) {
+			FExp bindingExp = getBindingExp();
+			AbstractFlatType bindingType = bindingExp.type();
+			if (bindingType instanceof FlatType) {
+				FlatType fBindingType = (FlatType) bindingType;
+				if (!fBindingType.getFPrimitiveType().equals(primitiveType)) {
+					error("The variable type and binding expression type do not match for variable " + this);
+				}
+			}
+		}
+		return(new FlatType(primitiveType, 0));
+	}
+
+	// TODO: FForIndex's are never type checked
+	
+	// TODO: does this equation need type checking?
+	eq FForClauseE.type() {
+		for (int j = 0; j < getNumForEqns();j++) {
+			getForEqns(j).type();
+		}
+		return(emptyType());
+	}
+	
+	eq FEquation.type() {
+		return(getLeft().type().combine(getRight().type(),getLeft(),getRight()));
+	}
+
+	eq FLogBinExp.type() = checkLogicalTyping();
+	eq FArtmBinExp.type() = checkArithmeticTyping();
+	
+	eq FAddExp.type() {
+		AbstractFlatType tryValue = tryArithmeticTyping();
+		if (tryValue.equals(emptyType())) {
+			FPrimitiveType leftPrimitive = getLeftPrimitive();
+			FPrimitiveType rightPrimitive = getRightPrimitive();
+			if (leftPrimitive.equals(fStringType()) &&
+				   rightPrimitive.equals(fStringType())) {
+				return new FlatType(fStringType(), 0);
+			} else {
+				error("The types " + getLeft() + " and " + getRight() +
+						"cannot be used on the operator " + this);
+				return brokenType();
+			}
+		} else {
+			return tryValue;
+		}
+	}	
+	
+	eq FAndExp.type() = checkBooleanLogicalTyping();
+	eq FOrExp.type() = checkBooleanLogicalTyping();
+	
+	eq FUnaryExp.type() = getFExp().type();
+
+	eq FRealLitExp.type() {
+		String stringValue = getUNSIGNED_NUMBER();
+		try {
+			Integer.parseInt(stringValue);
+			return new FlatType(fIntegerType(), 0);			
+		} catch(NumberFormatException formatException) {}
+		try {
+			Double.parseDouble(stringValue);
+			return new FlatType(fRealType(), 0);			
+		} catch(NumberFormatException formatException) {}
+		error(stringValue + " is not an integer value or a real value.");
+		return brokenType();
+	}
+	
+	eq FStringLitExp.type() = new FlatType(fStringType(), 0);
+	eq FBooleanLitExpTrue.type() = new FlatType(fBooleanType(), 0);
+	eq FBooleanLitExpFalse.type() = new FlatType(fBooleanType(), 0);
+
+	eq FTimeExp.type() = new FlatType(fRealType(), 0);
+
+	// TODO: Some error checking should be done here
+	// The expression must be a subtype of real
+	eq FDer.type() {
+		warning("Type checking not implemented on der expressions.");
+		return(getFIdUseExp().type());
+	}
+
+	eq FIfExp.type() {
+		AbstractFlatType total = getThenExp().type();
+		for (int i=0; i<getNumFElseIfExp(); i++) {
+			total = total.combine(getFElseIfExp(i).type(),getThenExp(),getFElseIfExp(i));
+		}
+		total = total.combine(getElseExp().type(),getThenExp(),getElseExp());
+		return total;
+	}
+	
+	eq FElseIfExp.type() = getThenExp().type();	
+	
+	// TODO: implement function call types
+	eq FFunctionCall.type() {
+		warning("Error on function call: " + this + ". The type system has not been implemented for function calls.");		
+		return brokenType();
+	}
+
+	// TODO: Array access expressions have a different type 
+	// than the original array declaration.
+	eq FIdUseExp.type() {
+		FAbstractVariable variable = this.myFV();
+		if (variable instanceof FVariable) {
+			FVariable fVariable = (FVariable) variable;
+			return(fVariable.type());			
+		} else {
+			error("Could not find declaration for variable " + this);
+			return brokenType();
+		}
+	}	
+
+	eq FExpList.type() {
+		if (getNumFExp() > 0) {
+			AbstractFlatType total = getFExp(0).type();			
+			for (int i = 1; i < getNumFExp(); i++) {
+				total = total.combine(getFExp(i).type(),getFExp(0),getFExp(i));
+			}
+			if (total instanceof FlatType) {
+				FlatType flatTotal = (FlatType) total;				
+				return new FlatType(flatTotal.getFPrimitiveType(), 1);
+			} else {
+				return total;
+			}
+		} else {
+			return emptyType();
+		}
+	}
+	
+	eq FMatrix.type() {
+		if (getNumFExpList() > 0) {
+			AbstractFlatType total = getFExpList(0).type();			
+			for (int i = 1; i < getNumFExpList(); i++) {
+				total = total.combine(getFExpList(i).type(),getFExpList(0),getFExpList(i));
+			}
+			if (total instanceof FlatType) {
+				FlatType flatTotal = (FlatType) total;
+				return new FlatType(flatTotal.getFPrimitiveType(), flatTotal.getNumberDimensions() + 1);
+			} else {
+				return total;
+			}
+		} else {
+			return emptyType();
+		}
+	}	
+	
+	eq FNoExp.type() {
+		return emptyType();
+	}
+	
+	eq FSumRedExp.type() {
+		return getFExp().type();
+	}
+
+	// TODO: type checking on this expression
+	eq FSizeExp.type() {
+		return new FlatType(fIntegerType(), 0);
+	}
+	
+	eq FArrayConstructor.type() {
+		if (getNumFExp() > 0) {
+			AbstractFlatType total = getFExp(0).type();			
+			for (int i = 1; i < getNumFExp(); i++) {
+				total = total.combine(getFExp(i).type(),getFExp(0),getFExp(i));
+			}
+			if (total instanceof FlatType) {
+				FlatType flatTotal = (FlatType) total;				
+				return new FlatType(flatTotal.getFPrimitiveType(), flatTotal.getNumberDimensions() + 1);
+			} else {
+				return total;
+			}
+		} else {
+			return emptyType();
+		}		
+	}
+
+	// TODO: type checking on range expressions
+	// See 3.4.4.5 of Modelica 2.2 Specification
+	eq FRangeExp.type() {
+		if (getNumFExp() > 0) {
+			AbstractFlatType total = getFExp(0).type();			
+			for (int i = 1; i < getNumFExp(); i++) {
+				total = total.combine(getFExp(i).type(),getFExp(0),getFExp(i));
+			}
+			if (total instanceof FlatType) {
+				FlatType flatTotal = (FlatType) total;			
+				return new FlatType(flatTotal.getFPrimitiveType(), 1);
+			} else {
+				return total;
+			}
+		} else {
+			return emptyType();
+		}		
+	}
+
+	FPrimitiveType FBinExp.getLeftPrimitive() {
+		AbstractFlatType leftType = getLeft().type();		
+		FlatType fLeftType = (FlatType) leftType;
+		FPrimitiveType leftPrimitive = fLeftType.getFPrimitiveType();
+		return leftPrimitive;
+	}
+
+	FPrimitiveType FBinExp.getRightPrimitive() {
+		AbstractFlatType rightType = getRight().type();
+		FlatType fRightType = (FlatType) rightType;
+		FPrimitiveType rightPrimitive = fRightType.getFPrimitiveType();
+		return rightPrimitive;		
+	}	
+	
+	AbstractFlatType FLogBinExp.checkBooleanLogicalTyping() {
+		if (!(getLeft().type() instanceof FlatType) ||
+			!(getRight().type() instanceof FlatType)) {
+			error("The types " + getLeft() + " and " + getRight() +
+					"cannot be used on the operator " + this);			
+			return brokenType();			
+		}			
+		boolean valid = false;
+		FPrimitiveType leftPrimitive = getLeftPrimitive();
+		FPrimitiveType rightPrimitive = getRightPrimitive();		
+		if (leftPrimitive.equals(rightPrimitive) &&
+			leftPrimitive.equals(fBooleanType())) {
+			valid = true;
+		}
+		if (valid) return new FlatType(fBooleanType(), 0);
+		else {
+			error("The types " + getLeft() + " and " + getRight() +
+					"cannot be used on the operator " + this);			
+			return brokenType();
+		}	
+	}
+	
+	AbstractFlatType FLogBinExp.checkLogicalTyping() {
+		if (!(getLeft().type() instanceof FlatType) ||
+			!(getRight().type() instanceof FlatType)) {
+			error("The types " + getLeft() + " and " + getRight() +
+					"cannot be used on the operator " + this);			
+			return brokenType();			
+		}
+		boolean valid = false;		
+		FPrimitiveType leftPrimitive = getLeftPrimitive();
+		FPrimitiveType rightPrimitive = getRightPrimitive();		
+		if (leftPrimitive.equals(rightPrimitive)) {
+			valid = true;
+		} else if (leftPrimitive.equals(fRealType()) ||
+				   rightPrimitive.equals(fRealType())) {
+			if ((leftPrimitive.equals(fIntegerType()) ||
+				leftPrimitive.equals(fRealType())) &&
+				(rightPrimitive.equals(fIntegerType()) ||
+				rightPrimitive.equals(fRealType()))) {
+					valid = true;
+			}
+		}
+		if (valid) return new FlatType(fBooleanType(), 0);
+		else {
+			error("The types " + getLeft() + " and " + getRight() +
+					"cannot be used on the operator " + this);			
+			return brokenType();
+		}
+	}
+	
+	AbstractFlatType FArtmBinExp.checkArithmeticTyping() {
+		AbstractFlatType tryValue = tryArithmeticTyping();	
+		if (tryValue.equals(emptyType())) {
+			error("The types " + getLeft() + " and " + getRight() +
+					"cannot be used on the operator " + this);			
+			return brokenType();			
+		} else {
+			return tryValue;
+		}		
+	}
+	
+	AbstractFlatType FArtmBinExp.tryArithmeticTyping() {
+		if (!(getLeft().type() instanceof FlatType) ||
+			!(getRight().type() instanceof FlatType)) {
+			error("The types " + getLeft() + " and " + getRight() +
+					"cannot be used on the operator " + this);			
+			return brokenType();			
+		}		
+		FPrimitiveType leftPrimitive = getLeftPrimitive();
+		FPrimitiveType rightPrimitive = getRightPrimitive();		
+		if (leftPrimitive.equals(fIntegerType()) && 
+			rightPrimitive.equals(fIntegerType())) {
+				return new FlatType(fIntegerType(), 0);
+		} else if (leftPrimitive.equals(fRealType()) ||
+				   rightPrimitive.equals(fRealType())) {
+				if ((leftPrimitive.equals(fIntegerType()) ||
+					leftPrimitive.equals(fRealType())) &&
+					(rightPrimitive.equals(fIntegerType()) ||
+					rightPrimitive.equals(fRealType()))) {
+					return new FlatType(fRealType(), 0);
+				} else {
+					error("The types " + getLeft() + " and " + getRight() +
+							"cannot be used on the operator " + this);					
+					return brokenType();				
+				}
+		}
+		return emptyType();
+	}	
+	
+	
+   	public abstract AbstractFlatType AbstractFlatType.combine(AbstractFlatType other, FExp thisExp, FExp otherExp);
+	
+	public AbstractFlatType BrokenType.combine(AbstractFlatType other, FExp thisExp, FExp otherExp) {
+		return this;
+	}
+	
+	public AbstractFlatType EmptyType.combine(AbstractFlatType other, FExp thisExp, FExp otherExp) {
+		if (other instanceof EmptyType) {
+			return this;
+		} else if (other instanceof FlatType) {
+			otherExp.error("The types " + thisExp + " and " + otherExp + " do not match.");		
+			return brokenType();	
+		} else {
+			return brokenType();
+		}
+	}
+   	
+   	public AbstractFlatType FlatType.combine(AbstractFlatType other, FExp thisExp, FExp otherExp) {
+   		if (other instanceof FlatType) {
+   			FlatType fOther = (FlatType) other;
+   			if (!this.getFPrimitiveType().getClass().equals(fOther.getFPrimitiveType().getClass())) {
+   				thisExp.error("The types " + thisExp + " and " + otherExp + " do not match.");
+   				return (brokenType());
+   			}
+   			if (this.getNumberDimensions() != fOther.getNumberDimensions()) {
+   				thisExp.error("The dimensions " + thisExp + " and " + otherExp + " do not match."); 
+   				return (brokenType());   			
+   			}
+   			return this;
+   		} else if (other instanceof EmptyType) {
+				thisExp.error("The types " + thisExp + " and " + otherExp + " do not match.");
+				return (brokenType());
+   		} else {
+			return (brokenType());
+   		}
+	}			
+	
+}

@@ -1,0 +1,8 @@
+abstract FlatStaticValue ; 
+
+NoStaticValue : FlatStaticValue ;
+BrokenStaticValue : FlatStaticValue ;
+IntegerStaticValue : FlatStaticValue ::= <Value:int>;
+RealStaticValue : FlatStaticValue ::= <Value:double>;
+StringStaticValue : FlatStaticValue ::= <Value:String>;
+BooleanStaticValue : FlatStaticValue ::= <Value:boolean>;

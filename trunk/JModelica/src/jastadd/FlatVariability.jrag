@@ -1,0 +1,138 @@
+aspect FlatVariability {
+	
+	syn lazy FTypePrefixOther FExp.variability();
+	syn lazy FTypePrefixOther FVariable.variability();
+
+	eq FVariable.variability() {
+   		if (hasFTypePrefixOther()) {
+   			return(getFTypePrefixOther());
+   		} else if ((getType() instanceof FIntegerType) ||
+   			(getType() instanceof FStringType) ||
+   			(getType() instanceof FBooleanType)) {
+   			return(fDiscrete());
+   		} else {
+   			return fContinuous();
+   		}
+	}
+	
+	eq FBinExp.variability() = getLeft().variability().combine(getRight().variability());
+	eq FUnaryExp.variability() = getFExp().variability();
+	
+	eq FRealLitExp.variability() = fConstant();
+	eq FStringLitExp.variability() = fConstant();
+	eq FBooleanLitExpTrue.variability() = fConstant();
+	eq FBooleanLitExpFalse.variability() = fConstant();	
+
+	eq FNoExp.variability() = fConstant();
+	
+	eq FTimeExp.variability() = fContinuous();
+		
+	eq FDer.variability() {
+		if (getFIdUseExp().variability() instanceof FContinuous)
+			return fContinuous();
+		else if (getFIdUseExp().variability() instanceof FDiscrete) {
+			error("Cannot apply der operator to discrete expression " + this);
+			return fContinuous();
+		}
+		else
+			return fConstant();
+	}
+	
+	eq FIfExp.variability() {
+		FTypePrefixOther total = getThenExp().variability();
+		for (int i=0; i<getNumFElseIfExp(); i++) {
+			total = total.combine(getFElseIfExp(i).variability());
+		}
+		total = total.combine(getElseExp().variability());
+		return total;
+	}
+	
+	eq FElseIfExp.variability() = getThenExp().variability();
+
+	eq FSizeExp.variability() = getFIdUseExp().variability();
+
+	eq FMatrix.variability() {
+		FTypePrefixOther total = fConstant();
+		for (int i=0; i<getNumFExpList(); i++) {
+			total = total.combine(getFExpList(i).variability());
+		}
+		return total;
+	}
+	
+	eq FExpList.variability() {
+		FTypePrefixOther total = fConstant();		
+		for (int i=0; i<getNumFExp(); i++) {
+			total = total.combine(getFExp(i).variability());
+		}
+		return total;
+	}
+	
+	eq FFunctionCall.variability() {
+		FTypePrefixOther total = fConstant();
+		for (int i=0; i< getNumArgs(); i++) {
+			total = total.combine(getArgs(i).variability());
+		}
+		return total;
+	}
+	
+	eq FIdUseExp.variability() {
+		FAbstractVariable variable = this.myFV();
+		if (variable instanceof FVariable) {
+			FVariable fVariable = (FVariable) variable;
+			return(fVariable.variability());
+		} else {
+			return (fContinuous());
+		}
+	}
+	
+	eq FSumRedExp.variability() {
+		return(getFExp().variability().combine(getFForIndex().variability()));
+	}
+
+	// TODO: Take care of IDENT in range-expr without the 'in rang-expr'
+	syn FTypePrefixOther FForIndex.variability() {
+		if (hasFExp()) {
+			return getFExp().variability();
+		} else {
+			return null;
+		}
+	}
+
+	eq FRangeExp.variability() {
+		FTypePrefixOther total = fConstant();
+		for (int i=0; i<getNumFExp(); i++) {
+			total = total.combine(getFExp(i).variability());
+		}
+		return total;		
+	}
+	
+	eq FArrayConstructor.variability() {
+		FTypePrefixOther total = fConstant();
+		for (int i=0; i<getNumFExp(); i++) {
+			total = total.combine(getFExp(i).variability());
+		}
+		return total;		
+	}	
+	
+   	public FTypePrefixOther FTypePrefixOther.combine(FTypePrefixOther other) {   			
+   		if (this instanceof FContinuous) {
+   			return this;
+   		} else if (other instanceof FContinuous) {
+   			return other;
+   		// neither is a continuous variable
+   		} else if (this instanceof FDiscrete) {
+   			return this;
+   		} else if (other instanceof FDiscrete) {
+   			return other;
+   	   		// neither is a continuous variable or discrete variable   			
+   		} else if (this instanceof FParameter) {
+   			return this;
+   		} else if (other instanceof FParameter) {
+   			return other;
+   		// neither is a continuous variable, discrete variable, or a parameter value
+   		} else {
+   			return this;
+   		}
+	}	
+	
+}
