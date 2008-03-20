@@ -1,8 +1,8 @@
 abstract InstNode ::= /InstNode*/ /MergedEnvironment:InstModification*/ /FQName/ FExp*;
-InstRoot : InstNode ::= <ClassDecl:ClassDecl>;
+InstRoot : InstNode ::= <ClassDecl:ClassDecl> /FPrimitiveType*/;
 abstract InstComponent : InstNode ::= <ComponentDecl:ComponentDecl> ;
 InstComposite : InstComponent;
-InstPrimitive : InstComponent;
+InstPrimitive : InstComponent ::= /FVariable/;
 InstExtends : InstNode ::= <ExtendsClause:ExtendsClause>;
 
 //InstReplacingComponent : InstComponent ::= <OriginalDecl:ComponentDecl>;

@@ -1,7 +1,8 @@
 FlatRoot : Root ::= FClass;
 FClass ::= FQName 
            FVariable* 
-           FEquationBlock*;
+           FEquationBlock*
+           FPrimitiveType*;
 
 FEquationBlock ::= FAbstractEquation*;
 
@@ -12,6 +13,7 @@ FVariable : FAbstractVariable ::= [FTypePrefixFlow]
               [FTypePrefixOther] 
               [FTypePrefixInputOutput]
               Type:FPrimitiveType  
+              /* Type:FTypeAccess */ // The child Type:FPrimitiveType would be replaced by this access
               FAttribute*
               [BindingExp:FExp]
               [FStringComment]
@@ -114,6 +116,9 @@ FIdUseExp : FExp ::= FIdUse;
 
 FIdDecl ::= FQName;
 FIdUse ::= <ID>;
+
+FTypeAccess : FIdUse; // New type access
+
 FIdUseQualified : FIdUse ::= FQName;
 // The flat model does not contain qualified names, but is modeled
 // as such in order to keep track of name parts and array indices, 

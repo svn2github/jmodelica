@@ -1,3 +1,69 @@
+aspect BuiltInFlatTypes {
+
+	syn lazy List InstRoot.getFPrimitiveTypeList() {
+		List l = new List();
+		l.add(new FBooleanType());
+		l.add(new FStringType());
+		l.add(new FRealType());
+		l.add(new FIntegerType());
+//		l.add(new EmptyType());    // EmptyType is not an FPrimitiveType, which it probably should be.
+//		l.add(new BrokenType());
+		return l;
+	}
+	
+	/* Ok, this is quick and dirty, but it shows the principle:
+	   the singleton FPrimitiveTypes: should be in a tree. 
+	   The odd names are just to avoid conflicts with the existing code.*/
+
+	syn FBooleanType InstRoot.f_BooleanType() = (FBooleanType)getFPrimitiveType(0);
+	syn FStringType InstRoot.f_StringType() = (FStringType)getFPrimitiveType(1);
+	syn FRealType InstRoot.f_RealType() = (FRealType)getFPrimitiveType(2);
+	syn FIntegerType InstRoot.f_IntegerType() = (FIntegerType)getFPrimitiveType(3);
+	
+	syn FBooleanType FClass.f_BooleanType() = (FBooleanType)getFPrimitiveType(0);
+	syn FStringType FClass.f_StringType() = (FStringType)getFPrimitiveType(1);
+	syn FRealType FClass.f_RealType() = (FRealType)getFPrimitiveType(2);
+	syn FIntegerType FClass.f_IntegerType() = (FIntegerType)getFPrimitiveType(3);
+
+	syn FPrimitiveType FTypeAccess.myFType() = lookupFType(getID());
+	
+	inh FPrimitiveType FTypeAccess.lookupFType(String name);
+	
+	eq InstRoot.getChild().lookupFType(String name) {
+		if (name.equals("Boolean"))
+			return f_BooleanType();
+	 	else if (name.equals("String"))
+	 		return f_StringType();
+	 	else if (name.equals("Real"))
+	 		return f_RealType();
+	 	else if (name.equals("Integer"))
+	 		return f_IntegerType();
+	 	else
+	 		return null;
+	}
+
+	eq FClass.getChild().lookupFType(String name) {
+		if (name.equals("Boolean"))
+			return f_BooleanType();
+	 	else if (name.equals("String"))
+	 		return f_StringType();
+	 	else if (name.equals("Real"))
+	 		return f_RealType();
+	 	else if (name.equals("Integer"))
+	 		return f_IntegerType();
+	 	else
+	 		return null;
+	}
+
+	
+	eq Root.getChild().lookupFType(String name) = null;
+
+
+	
+	
+}
+
+
 aspect BuiltinTypeSingletons {
 
 
@@ -7,6 +73,8 @@ aspect BuiltinTypeSingletons {
 	public static final FIntegerType FIntegerType.singleton = new FIntegerType();	
 	public static final EmptyType EmptyType.singleton = new EmptyType();
 	public static final BrokenType BrokenType.singleton = new BrokenType();	
+	
+	
 	
 	public static FBooleanType ASTNode.fBooleanType() {
 		return FBooleanType.singleton;
@@ -31,6 +99,7 @@ aspect BuiltinTypeSingletons {
 	public static BrokenType ASTNode.brokenType() {
 		return BrokenType.singleton;
 	}
+	
 }
 
 aspect VariabilitySingletons {

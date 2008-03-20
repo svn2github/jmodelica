@@ -7,9 +7,14 @@ FlatType : AbstractFlatType ::= FPrimitiveType <NumberDimensions:int> ;
 // This is a valid type, but it has not valid operators defined on it.
 EmptyType : AbstractFlatType ;
 
+//FEmptyType : FPrimitiveType;
+
 // The BrokenType is used to signify any type errors.
 // When an expression has a BrokenType in one of its subexpressions,
 // then the type of the super expression should be the BrokenType.
 // The super expression should not throw an error. It is the job
 // of the originating faulty subexpression to throw an error.
 BrokenType : AbstractFlatType ;
+
+//FBrokenType : FPrimitiveType;
+

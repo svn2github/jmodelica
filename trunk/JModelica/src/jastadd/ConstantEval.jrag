@@ -1,8 +1,12 @@
 aspect LookupInstance {
 
 
-	eq InstRoot.getChild().lookupFV(FQName fqname) = retrieveFV(fqname,0); 
-
+	eq InstRoot.getChild().lookupFV(FQName fqname) { 
+	
+		debugPrint(">>>InstRoot.getChild().lookupFV(): looking for: " + fqname.name());
+		return retrieveFV(fqname,0); 
+    }
+    
 	syn FVariable InstNode.retrieveFV(FQName fqname, int nI) {
 		for (int i=0;i<getNumInstNode();i++) {
 			if (getInstNode(i).nameScope()) {
@@ -19,7 +23,7 @@ aspect LookupInstance {
 		return null;
 	}
 
-	eq InstPrimitive.retrieveFV(FQName fqname, int nI) = createFVariable();
+	eq InstPrimitive.retrieveFV(FQName fqname, int nI) = getFVariable();
 	
 
 	syn lazy InstPrimitive FQName.myIDecl() = lookupIDecl(this);
