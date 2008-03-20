@@ -1,0 +1,72 @@
+import java.util.Collection;
+import java.util.LinkedHashSet;
+
+aspect FlatAPI {
+
+	coll Collection<FVariable> FClass.parameters() [new LinkedHashSet<FVariable>()] with add;
+	FVariable contributes
+ 		this when isParameter()
+	to FClass.parameters() for myFClass();
+	
+	coll Collection<FVariable> FClass.variables() [new LinkedHashSet<FVariable>()] with add;
+	FVariable contributes
+ 		this when isVariable()
+	to FClass.variables() for myFClass();
+
+	coll Collection<FVariable> FClass.structuralParameters() [new LinkedHashSet<FVariable>()] with add;
+	FIdUseExp contributes
+		(FVariable)myFV() when inArraySubscripts()
+	to FClass.structuralParameters() for myFClass();
+
+	coll Collection<FEquation> FVariable.variableIncidence() [new LinkedHashSet<FEquation>()] with add;
+    FIdUseExp contributes
+		myFEquation() when inFEquation()
+	to FVariable.variableIncidence() for myFV();
+	
+	syn lazy ArrayList<Collection> FClass.variableIncidence() {
+		ArrayList<Collection> l = new ArrayList<Collection>();
+		for (FVariable fv : variables()) {
+           l.add(fv.variableIncidence());
+       } 
+		return l;
+	
+	}
+	
+	inh boolean FExp.inFEquation();
+	eq FEquation.getChild().inFEquation()=true;
+	eq Root.getChild().inFEquation()=false;
+	
+	inh FEquation FExp.myFEquation();
+	eq FEquation.getChild().myFEquation()=this;
+	eq Root.getChild().myFEquation()=null;
+	
+	inh FClass FVariable.myFClass();
+	inh FClass FIdUseExp.myFClass();
+	eq FClass.getChild().myFClass() = this;
+	eq Root.getChild().myFClass() = null; 
+
+	
+}
+
+/*
+aspect FlatNameAnalysis {
+	
+	inh FVariable FIdUse.lookupFV(FQName fqname);
+	eq FClass.getChild().lookupFV(FQName fqname) = memberFV(fqname);
+	eq Root.getChild().lookupFV(FQName fqname) = null;
+
+
+	syn lazy FVariable FClass.memberFV(FQName fqname) {
+		for (int i=0;i<getNumFVariable();i++){
+			if (getFVariable(i).name().equals(fqname.name()))
+				return getFVariable(i);
+		}
+		return null; // This should never happen if the front-end is ok.
+	}
+
+	syn lazy FVariable FIdUse.myFV() = null;
+	eq FIdUseQualified.myFV() = lookupFV(getFQName());
+	syn lazy FVariable FIdUseExp.myFV() = getFIdUse().myFV();
+}
+
+*/

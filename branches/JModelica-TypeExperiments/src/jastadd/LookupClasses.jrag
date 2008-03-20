@@ -1,0 +1,469 @@
+aspect LookupClasses {
+
+	syn HashSet Access.lookupClass() circular [emptyHashSet()]{
+	 	debugPrint("** Access.lookupClass(): "+name());
+	 	return lookupClass(name());
+	}
+
+	eq Dot.lookupClass() {
+       debugPrint("** Dot.lookupClass(): "+name());
+	   return getRight().lookupClass();
+    }
+    
+	inh HashSet Access.lookupClass(String name) circular [emptyHashSet()];
+	inh HashSet FullClassDecl.lookupClass(String name);
+	
+	eq FullClassDecl.getChild().lookupClass(String name) = genericLookupClass(name); 
+	/*eq FullClassDecl.getEquation().lookupClass(String name) = genericLookupClass(name); 
+	eq FullClassDecl.getAlgorithm().lookupClass(String name) = genericLookupClass(name); 
+	*/
+	eq FullClassDecl.getSuper(int i).lookupClass(String name) {
+	  HashSet h = superLookupClass(name);
+	  return h;
+	}  
+	/*eq FullClassDecl.getImport().lookupClass(String name) = genericLookupClass(name); 
+	eq FullClassDecl.getClassDecl().lookupClass(String name) = genericLookupClass(name); 
+	eq FullClassDecl.getComponentDecl().lookupClass(String name) = genericLookupClass(name); 
+	eq FullClassDecl.getAnnotation().lookupClass(String name) = genericLookupClass(name); 
+	eq FullClassDecl.getExternalClause().lookupClass(String name) = genericLookupClass(name); 	
+	*/
+	
+	eq SourceRoot.getProgram().lookupClass(String name) = emptyHashSet();
+	
+	syn lazy HashSet Program.lookupElementClass(String name) {
+		HashSet set = new HashSet(4);
+		for (int j=0;j<getNumElement();j++) {    
+			if (getElement(j) instanceof BaseClassDecl) {
+				if (((BaseClassDecl)getElement(j)).matchClassDecl(name))
+					//debugPrint(((BaseClassDecl)getElement(j)).getName().name());
+					set.add(getElement(j));
+			}
+		}
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+	
+	syn lazy HashSet Program.lookupPredefinedType(String name) {
+		HashSet set = new HashSet(4);
+		for (int i=0;i<getNumPredefinedType();i++) {
+			BaseClassDecl pcd = (BaseClassDecl)getPredefinedType(i);
+			//debugPrint("PredefinedType: "+pcd.getName().name());
+			if (pcd.matchClassDecl(name))
+		 		set.add(pcd);
+		}
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+
+	syn lazy HashSet Program.lookupBuiltInFunction(String name) {
+		HashSet set = new HashSet(4);
+		for (int i=0;i<getNumBuiltInFunction();i++) {
+			ClassDecl pcd = getBuiltInFunction(i);
+			if (pcd.matchClassDecl(name))
+		 		set.add(pcd);
+		}
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+	
+	syn lazy HashSet Program.lookupLibrary(String name) {
+		HashSet set = new HashSet(4);
+		for (int i=0;i<getNumLibNode();i++) {
+			if (getLibNode(i).getName().equals(name))
+				set.add(getLibNode(i).getClassDecl());
+		}
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+	
+	eq Program.getElement().lookupClass(String name) = genericLookupClass(name);
+	eq Program.getLibNode().lookupClass(String name) = genericLookupClass(name);
+	
+	eq Program.getPredefinedType().lookupClass(String name) {
+		HashSet set = new HashSet(4);
+		for (int i=0;i<getNumBuiltInType();i++) {
+			ClassDecl pcd = getBuiltInType(i);
+			if (pcd.matchClassDecl(name))
+		 		set.add(pcd);
+		}	
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+	
+	syn lazy  HashSet Program.genericLookupClass(String name) {
+	    debugPrint("Program.genericLookupClass(String name) looking for: " + name);
+		HashSet set = new HashSet(4);
+		
+		if (lookupElementClass(name).size()>0)
+			set.addAll(lookupElementClass(name));
+		
+		if (lookupPredefinedType(name).size()>0)
+			set.addAll(lookupPredefinedType(name));
+		
+		if (lookupBuiltInFunction(name).size()>0)
+			set.addAll(lookupBuiltInFunction(name));
+		
+		if (lookupLibrary(name).size()>0)
+			set.addAll(lookupLibrary(name));
+	
+		debugPrint("Program.getElement(int i).lookupClass: " + 
+		            name + " matches: " + set.size());
+
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+	
+	eq Dot.getRight().lookupClass(String name) {
+		return getLeft().qualifiedLookupClass(name);
+	}
+	
+	syn HashSet Access.qualifiedLookupClass(String name) circular [emptyHashSet()] = emptyHashSet();	
+	eq ClassAccess.qualifiedLookupClass(String name) {
+	/*
+		HashSet set = lookupClass();
+		if (set.size()>0)
+			return ((ClassDecl)set.iterator().next()).memberClass(name);
+		else
+			return emptyHashSet();
+		*/
+		return myClassDecl().memberClass(name);
+	}
+
+	syn HashSet FullClassDecl.lookupClassInImport(String name) circular [emptyHashSet()]{
+		HashSet h;
+		for (int i=0;i<getNumImport();i++) {
+	    	h = getImport(i).lookupClassInImport(name);
+	    	if (h.size()>0)
+	    	   return h;
+	    }
+	    return emptyHashSet();
+	}
+		
+	syn lazy HashSet FullClassDecl.genericLookupClass(String name){
+	
+		HashSet set = new HashSet(4);
+		
+		set.addAll(memberClass(name));
+	
+		if (lookupClassInImport(name).size()>0)
+			set.addAll(lookupClassInImport(name));
+	
+		if (set.size()>0)
+			return set;
+		else
+			return lookupClass(name);
+	}
+	
+	
+	syn HashSet FullClassDecl.superLookupClass(String name) circular [emptyHashSet()]{
+	
+		HashSet set = new HashSet();
+		
+	    debugPrint("FullClassDecl.superLookupClass ("+ name() +") looking for: "+name);
+
+		if (lookupClassInImport(name).size()>0)
+				set.addAll(lookupClassInImport(name));
+		
+		if (set.size()==0)
+			debugPrint("FullClassDecl.superLookupClass ("+ name() +") looking for: "+name +" not found in imports");
+		else
+			debugPrint("FullClassDecl.superLookupClass ("+ name() +") looking for: "+name +" found in imports");
+		
+		for (int i=0;i<getNumClassDecl();i++) {
+			if (getClassDecl(i).matchClassDecl(name)) {
+				debugPrint("FullClassDecl.memberClass: (" +
+	 	                        getName().getID() + ") found: " + name);
+				set.add(getClassDecl(i));
+			}
+		}		
+	
+		if (set.size()>0)
+			return set;
+		else
+			return lookupClass(name);
+	}
+	
+	syn HashSet ClassDecl.memberClass(String name) circular [emptyHashSet()] = emptyHashSet();
+	
+	eq FullClassDecl.memberClass(String name) {
+		HashSet set = new HashSet();
+		
+		debugPrint("*FullClassDecl.memberClass ("+ name() +") looking for: "+name);
+		
+		for (int i=0;i<getNumClassDecl();i++) {
+			if (getClassDecl(i).matchClassDecl(name)) {
+				debugPrint("FullClassDecl.memberClass: (" +
+	 	                        getName().getID() + ") found: " + name);
+				set.add(getClassDecl(i));
+			}
+		}
+	/*
+		if (set.size()>0)
+			return set;
+	*/
+		for (int i=0;i<getNumSuper();i++) {
+			debugPrint("*FullClassDecl.memberClass ("+ name() +") looking for: "+name +" checking in super class: "+getSuper(i).getSuper().name());
+			HashSet h = getSuper(i).getSuper().lookupClass();
+			if (h.size()==1)
+				set.addAll(((ClassDecl)h.iterator().next()).memberClass(name));
+			
+			//if (getSuper(i).getSuper().myClassDecl()!=null)
+			//	set.addAll(getSuper(i).getSuper().myClassDecl().memberClass(name));
+		}
+		
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+	
+	eq ShortClassDecl.memberClass(String name) = myClass().memberClass(name);
+	
+	syn lazy ClassDecl ShortClassDecl.myClass() circular [unknownClassDecl()] = getClassName().myClassDecl();
+	
+	syn boolean ClassDecl.matchClassDecl(String name) = false;
+	eq BuiltInClassDecl.matchClassDecl(String name) = getName().name().equals(name); 
+	eq BaseClassDecl.matchClassDecl(String name) = getName().name().equals(name);
+	
+	// This attribute should to be circular due to lookup in import-statements
+	// If the lookup is triggered by lookup of A in 'extends A', and
+	// there are import statements, evaluation might get back to the 
+	// ClassAccess A when when looking up the ClassAccess to import.
+	// See NameTests.ImportTest1 for an example. 
+	syn lazy ClassDecl Access.myClassDecl() circular [unknownClassDecl()] {
+
+		 debugPrint("Access.myClassDecl()");
+		 return unknownClassDecl();
+	}
+	eq ClassAccess.myClassDecl()  {
+	    debugPrint("ClassAccess.myClassDecl(): " + name());
+		HashSet set = lookupClass(name());
+		if (set.size() > 0)
+			return (ClassDecl)set.iterator().next();
+		else
+			return unknownClassDecl();
+	}
+	eq Dot.myClassDecl() {
+    	debugPrint("Dot.myClassDecl()");
+	 	return getRight().myClassDecl();
+	}	
+}
+
+aspect LookupImport {
+
+	// Type lookup mechanism for lookup of names in ImportClauses, in which 
+	// case lookup starts at the top level.
+	inh HashSet ImportClause.lookupImportClass(String name) circular [emptyHashSet()];
+	
+	eq SourceRoot.getProgram().lookupImportClass(String name) = emptyHashSet();
+	
+	eq ImportClause.getPackageName().lookupClass(String name) {
+	 	debugPrint("#ImportClause.getPackageName().lookupClass: " + name);	
+	 	HashSet h = lookupImportClass(name);
+ 	 	//debugPrint("#ImportClause.getPackageName().lookupClass: " + name +" done");
+	 	return h;
+	}
+	
+	/*
+	eq ImportClause.getPackageName().lookupComponent(String name) {
+		debugPrint("ImportClause.getPackageName().lookupComponent: " + name);
+		return emptyHashSet();
+    }
+    	*/
+    	
+	eq Program.getElement().lookupImportClass(String name) {
+		HashSet set = new HashSet(4);
+		
+		if (lookupElementClass(name).size()>0)
+			set.addAll(lookupElementClass(name));
+	
+		if (lookupLibrary(name).size()>0)
+			set.addAll(lookupLibrary(name));
+		
+
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+	
+	eq Program.getLibNode().lookupImportClass(String name) {
+		HashSet set = new HashSet(4);
+
+		if (lookupLibrary(name).size()>0)
+			set.addAll(lookupLibrary(name));
+			
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+	
+	syn HashSet ImportClause.lookupClassInImport(String name) circular [emptyHashSet()];
+	
+	eq ImportClauseQualified.lookupClassInImport(String name)   {
+	    debugPrint("ImportClauseQualified.lookupTypeInImport, looking for: "+ name);
+	    if (name.equals(getPackageName().getLastAccess().getID())) {
+		  debugPrint("ImportClauseQualified.lookupTypeInImport, found "+ name);
+   		  return getPackageName().lookupClass();
+		} else
+			return emptyHashSet();
+	}
+	
+	eq ImportClauseUnqualified.lookupClassInImport(String name)  {
+
+	    debugPrint("ImportClauseUnQualified.lookupClassInImport, looking for: "+ name);
+	    
+	    /*
+		HashSet set = getPackageName().lookupClass();
+		if (set.size()>0) {
+			return ((ClassDecl)set.iterator().next()).memberClass(name);
+ 		} else
+			return emptyHashSet();
+		*/
+		return getPackageName().myClassDecl().memberClass(name);
+		
+	}
+	
+	eq ImportClauseRename.lookupClassInImport(String name)  {
+	    debugPrint("ImportClauseRename.lookupTypeInImport (" + getIdDecl().getID() +") looking for: "+ name);
+	    //debugPrint(getPackageName().type());	
+		//getPackageName().type().dumpTree(""); 
+		//getPackageName().getID();
+	    //getPackageName().dumpTree("");
+	    
+		// Does the alias name match?
+		if (name.equals(getIdDecl().getID())) {
+			return getPackageName().lookupClass();
+			
+		} else
+			return emptyHashSet();
+	}
+	
+}
+
+aspect LocalClasses {
+
+	syn ClassDecl ClassDecl.localClassDecl(int i) = null;
+	eq FullClassDecl.localClassDecl(int i) = getClassDecl(i);
+	
+	syn int ClassDecl.numLocalClassDecl() = 0;
+	eq FullClassDecl.numLocalClassDecl() = getNumClassDecl();
+
+}
+
+aspect LookupClassesInModifications {
+
+       
+	/*
+	  Name analysis for modification differs from ordinary name analyis. While the right
+	  hand side of an element modification is looked up in the normal lexical scope, the 
+	  left hand side is looked up in the Class (ClassDef) of the component on which the 
+	  modification is acting. Consequently, a new inherited attribute of ElementModification
+	  defining this lookup mechanism is introduced: lookupClassInClass. 
+	  */
+
+    /**
+     * The inherited attribute lookupClassInClass defines the lookup mechanism for
+     * left hand component references in modifications.
+     */
+	inh HashSet ElementModification.lookupClassInClass(String name);
+	
+	/**
+	 * Lookup of the left hand component reference of an ElementModification is
+	 * performed by lookupClassInClass. 
+	 */ 
+	eq ElementModification.getName().lookupClass(String name) { 
+	    debugPrint("ElementModification.getName().lookupComponent(" +name +"): in "+ getName().getID());
+	    return lookupClassInClass(name);
+	}
+	
+	/**
+	 * For a ComponentDecl, lookupClassInClass access the Class of the component and
+	 * initiates the ordinary lookup mechanism in the corresponding ClassDef.
+	 */     
+	eq ComponentDecl.getModification().lookupClassInClass(String name) {
+	
+		ClassDecl compClass = getClassName().myClassDecl();
+		
+	    if (compClass!=null) {
+			return compClass.memberClass(name);
+		}
+		return emptyHashSet();
+	}
+
+	/**
+	 * For ElementModification, lookupClassInClass retreives the Class of the 
+	 * left hand component reference and initiates the memberLookup
+	 * mechanism in the corresponding Class.
+	 */
+	eq ElementModification.getModification().lookupClassInClass(String name) {
+    
+    	debugPrint("ElementModification.getModification().lookupClassInClass("+name+") in: "+getName().getID());
+    
+    	ClassDecl c = getName().myClassDecl();
+    	    	
+    	if (c != null) {
+    		return c.memberClass(name);
+    	}
+    	return emptyHashSet();
+    }
+    
+	/**
+	 * For ExtendsClause, the name lookupClassInClass proceeds by retreiving the 
+	 * Class of the super class and initiate the memberLookup mechanism.
+	 */
+	eq ExtendsClause.getClassModification().lookupClassInClass(String name) {
+	
+		debugPrint("ExtendsClause.getClassModification().lookupClassInClass("+name+") in: "+getSuper().getID());
+	
+		ClassDecl superClass = getSuper().myClassDecl();
+			
+	    if (superClass!=null) {
+			return superClass.memberClass(name);
+		}
+		return emptyHashSet();
+	}
+	
+	/**
+	 * Definition of the lookupClassInClass attribute for ShortClassDecl.
+	 */
+	eq ShortClassDecl.getClassModification().lookupClassInClass(String name) {
+	
+		ClassDecl Class = getClassName().myClassDecl();
+    	    	
+    	if (Class != null) {
+    		return Class.memberClass(name);
+    	}
+    	return emptyHashSet();
+	
+	}
+	
+	/**
+	 * Name lookup for component redeclarations in modifiers is performed by
+	 * lookupClassInClass.
+	 */
+	inh HashSet ClassRedeclare.lookupClassInClass(String name);
+	eq ClassRedeclare.getName().lookupClass(String name) = lookupClassInClass(name);
+	
+	/**
+	 * Terminating equation for attribute lookupClassInClass.
+	 */
+	eq SourceRoot.getProgram().lookupClassInClass(String name) {return emptyHashSet();}
+	  
+}
+
+
+

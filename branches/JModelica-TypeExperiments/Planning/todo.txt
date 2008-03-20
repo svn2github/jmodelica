@@ -1,0 +1,119 @@
+------------------------------------------------------------
+Task: Expression type analysis framework
+
+Priority: 
+
+Status:
+
+Description:
+Develop the type analysis framework to function both in the
+instance hieararcy and in the flat representation. Also,
+type computation and type checking should be separate.
+
+Type analysis that for expressions with parametric variability 
+expressions to be a part of a type definition. 
+
+------------------------------------------------------------
+Task: Develop new tests for expression type analysis framework
+
+Priority: 
+
+Status:
+
+Description:
+Type checking requires new test cases, and more importantly
+new test mechanisms. Ideally, we would like to assert that 
+a given expression in a model has a certain type.
+
+Introduce new ExpTypeTestCase in test class hiearchy?
+
+------------------------------------------------------------
+Task: Upgrade the front-end to Modelica 3.0
+
+Priority: 
+
+Status:
+
+Description:
+Modelica 3.0 contains some new/changed syntactic constructs
+that needs to be implemented, primarily in the parser. May
+require changes in the AST definition.
+
+------------------------------------------------------------
+Task: Type checking of composite classes
+
+Priority: 
+
+Status:
+
+Description:
+Several type tests need to be implemented in the front-end,
+including subtype checking and balanced classes constraints.
+
+------------------------------------------------------------
+Task: Better support for annotations
+
+Priority: 
+
+Status:
+
+Description:
+Annotations are currently not managed in a good way. One option
+is to apply rewrites to annotations in order to specialize them
+into dedicated AST-nodes. The test-framework may serve as a 
+good example.
+
+------------------------------------------------------------
+Task: Improve test framework
+
+Priority: 
+
+Status:
+
+Description:
+The test framework needs to be improved:
+
+- Introduce test annotations that follow the rules for
+  vendor specific annotations.
+- Optimize the execution of test-cases: currently parsers etc
+  are created for each test case?
+- Propagate more test information to the generated html-test reports.
+
+------------------------------------------------------------
+Task: Fix a bug in the parser
+
+Priority: 
+
+Status:
+
+Description:
+The precedence of the of ^ operator is not correct
+  -(x+2)^2 -> (-(x+2))^2
+
+Possibly, the grammar should be rewritten so that it does
+not relay on the beaver directives %RIGHT %LEFT for
+determining precedence. Removing this would also 
+make build.xml cleaner since it would eliminate the need
+to do a 'cat' operation in order to insert the precedence
+directives.
+
+------------------------------------------------------------
+Task: Improve the debug-printout framework
+
+Priority: 
+
+Status:
+
+Description:
+Previously, AspectJ has been considered for debug-printouts,
+but it was found that it is difficult to achieve fine-grained
+control of where error printouts are generated. Also, the 
+compilation time for weaving AspectJ aspects into the jar-file
+was not neglectable. The upside is of course cleaner code. Should
+AspectJ be evaluated more thoroughly? 
+
+If not AspectJ, the debugPrint framework should be upgraded, 
+at least to support a number of flags, which can be turned on
+and off in order to control different classes of error printouts:
+name analysis, type checking etc.
+
