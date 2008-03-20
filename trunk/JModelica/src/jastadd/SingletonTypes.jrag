@@ -1,5 +1,6 @@
 aspect BuiltinTypeSingletons {
 
+
 	public static final FBooleanType FBooleanType.singleton = new FBooleanType();
 	public static final FStringType FStringType.singleton = new FStringType();	
 	public static final FRealType FRealType.singleton = new FRealType();	
