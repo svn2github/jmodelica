@@ -57,16 +57,16 @@ public class TestSuite {
 		str.append("import org.jmodelica.test.ast.*;\n");
 		str.append("\n");
 		str.append("public class " + name + " {\n\n");
-		str.append("  TestSuite ts;\n\n");
+		str.append("  static TestSuite ts;\n\n");
 		
-		str.append("  @Before public void setUp() {\n");
+		str.append("  @BeforeClass public static void setUp() {\n");
 		str.append("    ts = new TestSuite(\"" + testFile
 				   + "\",\"" + getName() + "\");\n");
 		str.append("  }\n\n");
 		for (int i=0;i<l.size();i++) {
 			get(i).dumpJunit(str,i);
 		}
-		str.append("  @After public void tearDown() {\n");
+		str.append("  @AfterClass public static void tearDown() {\n");
 		str.append("    ts = null;\n");
 		str.append("  }\n\n");
 		str.append("}\n\n");

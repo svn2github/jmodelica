@@ -75,9 +75,17 @@ The test framework needs to be improved:
 
 - Introduce test annotations that follow the rules for
   vendor specific annotations.
+
 - Optimize the execution of test-cases: currently parsers etc
   are created for each test case?
+*** DONE 20080326
+
 - Propagate more test information to the generated html-test reports.
+  The way to do this is to create a custom formatter and
+  give it to the ant task. Then the style-sheet in ant has to be
+  updated. Notice that this is all done based on Ant functionality
+  and not Junit.
+
 
 ------------------------------------------------------------
 Task: Fix a bug in the parser

@@ -1,0 +1,5 @@
+AUnitTesting : Annotation ::= ATestCase*;
+
+abstract ATestCase : Annotation;
+AFlatteningTestCase : ATestCase ::= <Name:String> <Description:String> <FlatModel:String>;
+AErrorTestCase : ATestCase ::= <Name:String> <Description:String> <ErrorMessage:String>;
