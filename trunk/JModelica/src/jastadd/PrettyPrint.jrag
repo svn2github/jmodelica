@@ -477,6 +477,16 @@ aspect FlattPrettyPrint {
 	  		p.toString(getFVariable(i),str,indent+" ",o);
 	  		str.append(";\n");  
 		}
+
+		if (getNumFInitialEquation()>0)
+			str.append(indent + "initial equation \n");
+	    for (int j=0;j<getNumFInitialEquation();j++) {
+			debugPrint("FClass.prettyPrint(): Equation nr: " + j);
+	  		p.toString(getFInitialEquation(j),str, indent+" ",o);
+			str.append(";\n");
+		}
+	
+		
 		str.append(indent + "equation \n");
 	  	for (int i=0;i<getNumFEquationBlock();i++) {
 			for (int j=0;j<getFEquationBlock(i).getNumFAbstractEquation();j++) {

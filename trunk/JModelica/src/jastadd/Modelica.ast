@@ -207,9 +207,10 @@ Annotation ::= ClassModification;
 
 abstract AbstractExp;
 abstract Exp : AbstractExp;
-//abstract Exp;
-abstract AbstractEquation ::= [Initial] Comment;
-Initial::=;
+
+abstract AbstractEquationModifier;
+abstract AbstractEquation ::= [AbstractEquationModifier] Comment;
+Initial : AbstractEquationModifier ::=;
 Equation : AbstractEquation ::= Left:Exp Right:Exp;
 EquationAnnotation : AbstractEquation ::= Annotation;
 ConnectClause : AbstractEquation ::= Comment Connector1:Access Connector2:Access;

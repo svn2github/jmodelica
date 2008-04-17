@@ -432,4 +432,27 @@ equation
 end DerTest1;
 
 
+model InitialEquationTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="InitialEquationTest1",
+        description="Test flattening of initial equations",flatModel=
+"
+fclass NameTests.InitialEquationTest1
+ Real x;
+initial equation 
+ x = 1;
+equation 
+ der(x) = 1;
+end NameTests.InitialEquationTest1;
+")})));
+  
+  Real x;
+  initial equation
+  x = 1;
+  equation
+  der(x)=1;
+  
+end InitialEquationTest1;
+
+
 end NameTests;

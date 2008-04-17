@@ -227,7 +227,11 @@ aspect FlatExpressions {
 	public void AbstractEquation.flatten(FQName prefix, FClass fc) {}
 
 	public void Equation.flatten(FQName prefix, FClass fc) {
-		fc.getFEquationBlock(0).addFAbstractEquation(new FEquation(getLeft().flatten(prefix),getRight().flatten(prefix)));
+	    if (isInitial()) {
+	    	fc.addFInitialEquation(new FEquation(getLeft().flatten(prefix),getRight().flatten(prefix)));
+		} else {
+			fc.getFEquationBlock(0).addFAbstractEquation(new FEquation(getLeft().flatten(prefix),getRight().flatten(prefix)));
+	    }
 	}
 
 	public FArraySubscripts ArraySubscripts.flatten(FQName prefix) {

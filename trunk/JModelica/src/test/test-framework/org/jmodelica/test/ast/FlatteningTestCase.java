@@ -103,14 +103,14 @@ public class FlatteningTestCase extends TestCase {
 		TokenTester tt = new TokenTester();
 		
 		boolean result =  tt.test(fc.prettyPrint(""),getFlatModel());
-		if (!result) {
+		/*if (!result) {
 			System.out.println(fc.prettyPrint("").equals(getFlatModel()));
 			sr.retrieveFullClassDecl("NameTests.ImportTest1").dumpTree("");
 			fc.dumpTreeBasic("");
 			try {
      			System.in.read();
 			} catch (Exception e){}
-		}
+		}*/
 		return result;
 	}
 	

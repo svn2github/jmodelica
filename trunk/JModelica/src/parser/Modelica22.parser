@@ -462,8 +462,8 @@ TypePrefix type_prefix_flow =
 EquationClause equation_clause =
   EQUATION abstract_equation*  {:  return new EquationClause(abstract_equation); :}
   | INITIAL_EQUATION abstract_equation*  {:  //System.out.println("equation_clause"); 
-  												     for (int i=0;i<abstract_equation.getNumChild();i++)
-  												     	((AbstractEquation)abstract_equation.getChild(i)).setInitial(new Initial()); 
+  					     for (int i=0;i<abstract_equation.getNumChild();i++)
+  					     	((AbstractEquation)abstract_equation.getChild(i)).setAbstractEquationModifier(new Initial()); 
                                                  return new EquationClause(abstract_equation); :}
   ;  
 

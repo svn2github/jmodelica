@@ -394,6 +394,14 @@ aspect ComponentDeclMethods {
    		return false;
    	}
 
+	syn boolean AbstractEquation.isInitial() {
+		if (hasAbstractEquationModifier())
+			if (getAbstractEquationModifier() instanceof Initial)
+				return true;
+		return false;
+	
+	}
+
 }
 
 aspect ShortClassUtil {
