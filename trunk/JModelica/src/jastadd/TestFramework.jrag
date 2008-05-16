@@ -1,7 +1,47 @@
 import org.jmodelica.test.ast.*;
 
-
 aspect TestFramework {
+	
+	
+	public boolean ASTNode.collectTestCases(TestSuite ts, String className) {
+		debugPrint("ASTNode.collectTestCases");
+		for (int i=0;i<getNumChild();i++)
+			if (getChild(i).collectTestCases(ts,className))
+				return true;
+		return false;
+	}
+
+	public boolean FullClassDecl.collectTestCasesActive = false;
+	
+	public boolean FullClassDecl.collectTestCases(TestSuite ts, String className) {
+		debugPrint("FullClassDecl.collectTestCases: "+ qualifiedName() + " looking for " + className);
+		if (qualifiedName().equals(className)) {
+		    debugPrint("FullClassDecl.collectTestCases: found "+className);
+		    collectTestCasesActive = true;
+			Collection<TestCase> tcs = testCases();
+			collectTestCasesActive = false;
+			for (Iterator<TestCase> iter=tcs.iterator();iter.hasNext();)
+				ts.add(iter.next());
+			return true;
+		}
+		return getClassDeclList().collectTestCases(ts,className);
+	}
+
+	coll Collection<TestCase> FullClassDecl.testCases() [new LinkedHashSet<TestCase>()] with add root FullClassDecl;
+	
+	AFlatteningTestCase contributes
+ 	   createFlatteningTestCase()
+	to FullClassDecl.testCases() for callingFullClassDecl();
+
+
+	inh FullClassDecl ASTNode.callingFullClassDecl();
+	eq Root.getChild().callingFullClassDecl() = null;
+	eq FullClassDecl.getChild().callingFullClassDecl() {
+		debugPrint("FullClassDecl.getChild().callingFullClassDecl(): " + collectTestCasesActive);
+		return collectTestCasesActive? this: callingFullClassDecl();
+	}
+
+/*
 
 	public boolean ASTNode.collectTestCases(TestSuite ts, String className) {
 		debugPrint("ASTNode.collectTestCases");
@@ -39,11 +79,7 @@ aspect TestFramework {
 		for (int i=0;i<getNumChild();i++)
 			getChild(i).collectTestCasesNA(name,ts);
 	}
-/*
-	public void Annotation.collectTestCasesEM(String name, TestSuite ts) {
-		getClassModification().collectTestCasesEM(name,ts);
-	}
-	*/
+
 	public void ElementModification.collectTestCasesEM(String name, TestSuite ts) {
 		debugPrint("+ElementModification.collectTestCasesEM: "+ getName().qualifiedName() + " looking for: "+name);
 		if (name.equals(getName().qualifiedName())) {
@@ -105,5 +141,5 @@ aspect TestFramework {
 		}
 	
 	}
-
+*/
 }

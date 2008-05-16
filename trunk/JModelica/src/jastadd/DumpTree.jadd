@@ -1,4 +1,4 @@
- aspect DumpTree {
+aspect DumpTree {
 /* 	
  	public void FullClassDecl.dumpTree(String indent) {
  		getImportList().dumpTree(indent);
@@ -11,7 +11,8 @@
      	//debugPrint("*** ASTNode.dumpTree(): " + toString());
     	System.out.println(indent + dump() + " at line: " + beginLine());
     	for(int i = 0; i < getNumChild(); i++)
-      		getChild(i).dumpTree(indent + "  ");
+    		if (getChild(i) instanceof ASTNode)
+	      		getChild(i).dumpTree(indent + "  ");
   	}
   
   	/**
@@ -134,8 +135,9 @@ aspect DumpTreeBasic {
  
   public void ASTNode.dumpTreeBasic(String indent) {
     System.out.println(indent + dumpBasic() + " at line: " + getLine(getStart()));
-    for(int i = 0; i < getNumChild(); i++)
-      getChild(i).dumpTreeBasic(indent + "  ");
+    for(int i = 0; i < getNumChild(); i++) 
+   		if (getChild(i) instanceof ASTNode)
+      		getChild(i).dumpTreeBasic(indent + "  ");
   }
   
   

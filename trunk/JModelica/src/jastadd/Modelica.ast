@@ -203,7 +203,9 @@ abstract ElementRedeclare : NamedModification ::= [Replaceable] [ConstrainingCla
 ClassRedeclare : ElementRedeclare ::= BaseClassDecl;
 ComponentRedeclare : ElementRedeclare ::= BaseComponentDecl;
 
-Annotation ::= ClassModification;
+abstract Annotation;
+
+ParseAnnotation : Annotation  ::= ClassModification;
 
 abstract AbstractExp;
 abstract Exp : AbstractExp;

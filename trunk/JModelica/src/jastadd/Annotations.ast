@@ -1,5 +1,5 @@
 AUnitTesting : Annotation ::= ATestCase*;
 
-abstract ATestCase : Annotation;
-AFlatteningTestCase : ATestCase ::= <Name:String> <Description:String> <FlatModel:String>;
-AErrorTestCase : ATestCase ::= <Name:String> <Description:String> <ErrorMessage:String>;
+abstract ATestCase;
+AFlatteningTestCase : ATestCase ::= Name:StringLitExp Description:StringLitExp FlatModel:StringLitExp;
+AErrorTestCase : ATestCase ::= Name:StringLitExp Description:StringLitExp ErrorMessage:StringLitExp;

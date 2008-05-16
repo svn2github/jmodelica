@@ -1,9 +1,8 @@
 package NameTests 
   
-  
-  
-  model NameTest0
-   annotation(__JModelica_UnitTesting(tests={FlatteningTestCase(name="NameTest0",
+model NameTest0
+ 
+annotation(__JModelica(UnitTesting(tests={FlatteningTestCase(name="NameTest0_Flattening",
                                                description="Basic test of name lookup",
                                                flatModel=
 "fclass NameTests.NameTest0
@@ -11,9 +10,14 @@ package NameTests
 equation
   x=1;
 end NameTests.NameTest0;
-")}));
+")})));
 
     Real x;
+    parameter Real p1 = 2.5;
+    parameter Real p2 = 2*p1 annotation(__JModelica(UnitTesting(
+             tests = {EvaluationTestCase(name="NameTest0_Eval1",
+                                         description="Basic test of static evaluation",
+                                         result = 5)})));
   equation
     x=1;
   end NameTest1;

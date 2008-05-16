@@ -665,7 +665,7 @@ Argument argument =
 
 
 Annotation annotation = 
-  ANNOTATION class_modification    {: return new Annotation(class_modification); :}
+  ANNOTATION class_modification    {: return new ParseAnnotation(class_modification); :}
   ;  
    
    

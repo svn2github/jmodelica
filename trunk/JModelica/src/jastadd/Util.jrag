@@ -28,7 +28,7 @@ aspect RootAccess {
 
 aspect DebugPrint {
 
-	public int ASTNode.printLevel = 1;
+	public int ASTNode.printLevel = 0;
 	public void ASTNode.debugPrint(Object msg) {
 		if (printLevel>0)
 			System.out.println(msg);
@@ -128,6 +128,8 @@ aspect Names {
   eq BuiltInClassDecl.qualifiedName() = getName().getID();
   
   eq SourceRoot.getProgram().classNamePrefix() = "";
+  
+  syn String FunctionCall.name() = getName().name();
   
   syn String ClassDecl.primitiveName();
   eq BaseClassDecl.primitiveName() = getName().getID();
