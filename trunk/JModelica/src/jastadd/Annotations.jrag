@@ -1,0 +1,68 @@
+aspect TestAnnotations {
+
+	rewrite ParseAnnotation {
+		when (testCases().size() > 0)
+			to AUnitTesting {
+				Collection<FunctionCall> h = testCases();
+				AUnitTesting ut = new AUnitTesting();
+				for (Iterator<FunctionCall> iter = h.iterator(); iter.hasNext();) {
+				    FunctionCall f = iter.next();
+					FunctionArguments fa = f.getFunctionArguments();
+				    if (f.name().equals("FlatteningTestCase")) {
+						AFlatteningTestCase tc = new AFlatteningTestCase();
+						//for (int i=0;i<fa.getNumExp();i++) {
+						//	tc.setChild(((StringLitExp)fa.getExp(i)).getSTRING(),i);
+						//}
+						for (int i=0;i<fa.getNumNamedArgument();i++) {
+							if (fa.getNamedArgument(i).getName().name().equals("name")) {
+								debugPrint("### rewrite ParseAnnotation: name found");
+								//tc.setName(((StringLitExp)fa.getNamedArgument(i).getExp()).getSTRING());
+								tc.setName(((StringLitExp)fa.getNamedArgument(i).getExp()).fullCopy());
+							} else if (fa.getNamedArgument(i).getName().name().equals("description")) {
+								debugPrint("### rewrite ParseAnnotation: description found");
+								//tc.setDescription(((StringLitExp)fa.getNamedArgument(i).getExp()).getSTRING());
+								tc.setDescription(((StringLitExp)fa.getNamedArgument(i).getExp()).fullCopy());
+							} else if (fa.getNamedArgument(i).getName().name().equals("flatModel")) {
+								debugPrint("### rewrite ParseAnnotation: flatModel found");
+								//tc.setFlatModel(((StringLitExp)fa.getNamedArgument(i).getExp()).getSTRING());	
+								tc.setFlatModel(((StringLitExp)fa.getNamedArgument(i).getExp()).fullCopy());	
+							}
+						}
+						//debugPrint("### rewrite ParseAnnotation: check name: "+tc.getName());
+						//debugPrint("### rewrite ParseAnnotation: check description: "+tc.getDescription());
+						//debugPrint("### rewrite ParseAnnotation: check flatModel: "+tc.getFlatModel());
+
+						//tc.dumpTreeBasic("");
+						ut.addATestCase(tc);	
+					}
+					
+				}
+			return ut;
+			}
+	
+	}
+
+	coll Collection<FunctionCall> Annotation.testCases() [new LinkedHashSet<FunctionCall>()] with add root ParseAnnotation;
+	 
+	FunctionCall contributes
+ 	   this when (hasTestCaseName())
+	to Annotation.testCases() for myAnnotation();
+
+	inh Annotation ASTNode.myAnnotation();
+	eq Annotation.getChild().myAnnotation() = this;
+	eq FClass.getChild().myAnnotation() = null;
+	eq Root.getChild().myAnnotation() = null;
+
+	syn boolean FunctionCall.hasTestCaseName() = 
+		(name().equals("FlatteningTestCase") || name().equals("ErrorTestCase"));
+	
+	syn String AFlatteningTestCase.name() = getName().getSTRING();
+	syn String AFlatteningTestCase.description() = getDescription().getSTRING();
+	syn String AFlatteningTestCase.flatModel() = getFlatModel().getSTRING();
+	
+    public FlatteningTestCase AFlatteningTestCase.createFlatteningTestCase() {
+       return new FlatteningTestCase(name(),description(),root().fileName(),enclosingClassDecl().qualifiedName(),flatModel(),false);
+    }
+
+
+}
