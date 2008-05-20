@@ -553,7 +553,7 @@ Argument argument =
    constraining_clause? 
    {: 			ParseAccess pa = new ParseAccess(comp_name.getID(),array_subscripts);
    				pa.setStart(comp_name.getStart());
-   				ComponentRedeclare cdr = new ComponentRedeclare(each,
+   				PN_ComponentRedeclare cdr = new PN_ComponentRedeclare(each,
                                         final_,
                                         pa,
                                         new Opt(replaceable),
@@ -597,7 +597,7 @@ Argument argument =
    comment
    {: ParseAccess pa = new ParseAccess(comp_name.getID(),array_subscripts);
    				pa.setStart(comp_name.getStart());
-   				ComponentRedeclare cdr = new ComponentRedeclare(each,
+   				PN_ComponentRedeclare cdr = new PN_ComponentRedeclare(each,
                                         final_,
                                         pa,
                                         new Opt(),
@@ -641,7 +641,7 @@ Argument argument =
    modification? 
    comment
    constraining_clause? 
-   {: return new ComponentRedeclare(each,
+   {: return new PN_ComponentRedeclare(each,
                                         final_,
                                         new ParseAccess(comp_name.getID(),array_subscripts),
                                         new Opt(replaceable),

@@ -8,3 +8,5 @@ InstExtends : InstNode ::= <ExtendsClause:ExtendsClause>;
 //InstReplacingComponent : InstComponent ::= <OriginalDecl:ComponentDecl>;
 InstModification ::= <InstNode:InstNode> <Modification:Modification>;
 
+InstReplacingComponent : InstComponent ::= <OriginalDecl:ComponentDecl>;
+

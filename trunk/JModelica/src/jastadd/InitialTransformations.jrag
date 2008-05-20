@@ -24,7 +24,7 @@
   	eq SourceRoot.getProgram().visibility() = new PublicVisibilityType(); 
   	
   	eq ClassRedeclare.getBaseClassDecl().visibility() = new PublicVisibilityType();
-  	eq ComponentRedeclare.getBaseComponentDecl().visibility() = new PublicVisibilityType();
+  	eq ComponentRedeclare.getComponentDecl().visibility() = new PublicVisibilityType();
   
    	/**
      * Rewrite the PN_FullClassDecl to a FullClassDecl including visibility info.
@@ -159,6 +159,15 @@
  		 	return c;
  		}
    	}
+   	
+     rewrite PN_ComponentRedeclare {
+   		to ComponentRedeclare {
+ 	       ComponentRedeclare c = new ComponentRedeclare(getEachOpt(),getFinalOpt(), getName(), getReplaceableOpt(), getConstrainingClauseOpt(), (ComponentDecl)getBaseComponentDecl());
+ 		   c.setStart(getStart());
+ 		   return c;
+ 		}
+   	} 	
+   	
    
   	/**
    	 * Eliminate the PublicElementList nodes. Creation of a new list

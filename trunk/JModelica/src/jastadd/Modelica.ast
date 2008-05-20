@@ -201,7 +201,9 @@ abstract ElementModification : NamedModification ::= [Modification] [StringComme
 ComponentModification : ElementModification; 
 abstract ElementRedeclare : NamedModification ::= [Replaceable] [ConstrainingClause];
 ClassRedeclare : ElementRedeclare ::= BaseClassDecl;
-ComponentRedeclare : ElementRedeclare ::= BaseComponentDecl;
+PN_ComponentRedeclare : ElementRedeclare ::= BaseComponentDecl;
+ComponentRedeclare : ElementRedeclare ::= ComponentDecl;
+
 
 abstract Annotation;
 

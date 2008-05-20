@@ -2,7 +2,7 @@ import org.jmodelica.test.ast.*;
 
 aspect TestFramework {
 	
-	
+/*	
 	public boolean ASTNode.collectTestCases(TestSuite ts, String className) {
 		debugPrint("ASTNode.collectTestCases");
 		for (int i=0;i<getNumChild();i++)
@@ -40,8 +40,8 @@ aspect TestFramework {
 		debugPrint("FullClassDecl.getChild().callingFullClassDecl(): " + collectTestCasesActive);
 		return collectTestCasesActive? this: callingFullClassDecl();
 	}
+*/
 
-/*
 
 	public boolean ASTNode.collectTestCases(TestSuite ts, String className) {
 		debugPrint("ASTNode.collectTestCases");
@@ -141,5 +141,5 @@ aspect TestFramework {
 		}
 	
 	}
-*/
+
 }

@@ -25,7 +25,7 @@ public class FlattenModel {
 		      
 		      SourceRoot sr = (SourceRoot)parser.parse(scanner);
 		      
-		      sr.dumpTree("");
+		      //sr.dumpTree("");
 		      
 		      sr.setFileName(name);
 		      
@@ -60,6 +60,9 @@ public class FlattenModel {
 		    		  System.out.println("   Did not find the class: " + cl);
 		    		  System.exit(0);
 		    	  }
+		    	  ir.dumpTree("");
+		    	  
+		    	  ir.errorCheck();
 	    	  /*
 		      System.out.println("Checking for errors...");	      
 	    	  if (fc.errorCheck()) {

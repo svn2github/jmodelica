@@ -150,6 +150,7 @@ aspect LookupComponentsInModifications {
      * left hand component references in modifications.
      */
 	inh HashSet ElementModification.lookupComponentInClass(String name);
+	inh HashSet NamedModification.lookupComponentInClass(String name);
 	
 	/**
 	 * Lookup of the left hand component reference of an ElementModification is
@@ -159,6 +160,14 @@ aspect LookupComponentsInModifications {
 	    debugPrint("ElementModification.getName().lookupComponent(" +name +"): in "+ getName().getID());
 	    return lookupComponentInClass(name);
 	}
+	
+
+	eq NamedModification.getName().lookupComponent(String name) { 
+	    debugPrint("NamedModification.getName().lookupComponent(" +name +"): in "+ getName().getID());
+	    return lookupComponentInClass(name);
+	}
+	
+	
 	
 	/**
 	 * For a ComponentDecl, lookupComponentInClass access the Class of the component and
