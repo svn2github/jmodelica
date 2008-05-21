@@ -1,9 +1,13 @@
 abstract InstNode ::= /InstNode*/ /MergedEnvironment:InstModification*/ /FQName/ FExp*;
-InstRoot : InstNode ::= <ClassDecl:ClassDecl> /FPrimitiveType*/;
+abstract InstRoot : InstNode ::= /FPrimitiveType*/;
+InstClassRoot : InstRoot ::= <ClassDecl:ClassDecl>;
+InstConstrainingClauseRoot : InstRoot ::=<ConstrainingClause:ConstrainingClause>;
 abstract InstComponent : InstNode ::= <ComponentDecl:ComponentDecl> ;
 InstComposite : InstComponent;
 InstPrimitive : InstComponent ::= /FVariable/;
 InstExtends : InstNode ::= <ExtendsClause:ExtendsClause>;
+
+InstConstrainingClause : InstNode ::= <ConstrainingClause:ConstrainingClause>;
 
 //InstReplacingComponent : InstComponent ::= <OriginalDecl:ComponentDecl>;
 InstModification ::= <InstNode:InstNode> <Modification:Modification>;

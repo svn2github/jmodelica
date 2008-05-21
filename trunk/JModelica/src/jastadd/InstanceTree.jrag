@@ -1,5 +1,18 @@
 aspect InstantiationTree {
 	
+	// This is actually an new kind of NTA that is defined directely in code.
+    syn nta InstConstrainingClause InstComposite.instConstrainingClause() {
+       return new InstConstrainingClause(new List(),getComponentDecl().getConstrainingClause());
+    }
+
+    syn nta InstConstrainingClause InstReplacingComponent.instConstrainingClause() {
+       return new InstConstrainingClause(new List(),getComponentDecl().getConstrainingClause());
+    }
+
+    syn nta InstConstrainingClause InstReplacingComponent.originalInstConstrainingClause() {
+       return new InstConstrainingClause(new List(),getOriginalDecl().getConstrainingClause());
+    }
+	
 	// This rewrite eliminates CompositeModifications as children of
 	// InstModifications, which simplifies implementation.
 	public boolean InstModification.rewritten = false;
@@ -58,7 +71,7 @@ aspect InstantiationTree {
 	}
 
 
-
+    
 		
 		
 		
@@ -91,6 +104,18 @@ aspect InstantiationTree {
 		return env;
 	}
 	
+	eq InstReplacingComponent.originalInstConstrainingClause().myEnvironment() = new List();
+    
+    eq ConstrainingClause.constrainingClauseInstRoot().myEnvironment()  {
+    	List l = new List();
+    	if (hasClassModification()) {
+			for (int i=0;i<getClassModification().getNumArgument();i++)
+			  // TODO: should it be constrainingClauseInstRoot().getInstNode(0) (then circular!!!)
+		      l.add(new InstModification(constrainingClauseInstRoot(),getClassModification().getArgument(i)));
+    		
+    	}
+    	return l;
+    }
 	
 	
 	syn lazy Modification Modification.matchModification(String name) = null;
@@ -137,7 +162,9 @@ aspect InstantiationTree {
 	
 	// Definition of the NTA representing the root of the 
 	// instantiation tree
-	syn InstRoot BaseClassDecl.getInstRoot() = new InstRoot(new List(),this);
+	syn InstRoot BaseClassDecl.getInstRoot() = new InstClassRoot(new List(),this);
+	syn nta InstConstrainingClauseRoot ConstrainingClause.constrainingClauseInstRoot() = new InstConstrainingClauseRoot(new List(),this);
+
 
 	syn lazy List InstNode.getInstNodeList() {
 	
@@ -275,6 +302,13 @@ aspect InstantiationTree {
 		
 	}
 	
+    eq InstConstrainingClause.localModifications() {
+		ArrayList l = new ArrayList();
+		if (getConstrainingClause().hasClassModification())
+			l.add(getConstrainingClause().getClassModification());
+		return l;
+	}
+	
 	eq InstReplacingComponent.localModifications() {
 		ArrayList l = new ArrayList();
 		if (getOriginalDecl().hasModification())
@@ -330,20 +364,26 @@ aspect InstantiationTree {
 	}
 	
 	syn List InstNode.equations();
-	eq InstRoot.equations() = getClassDecl().equations();
+	eq InstClassRoot.equations() = getClassDecl().equations();
 	eq InstComponent.equations() = getComponentDecl().myClass().equations();
 	eq InstExtends.equations() = getExtendsClause().getSuper().myClassDecl().equations();
+	eq InstConstrainingClause.equations() = getConstrainingClause().getAccess().myClassDecl().equations();
+	eq InstConstrainingClauseRoot.equations() = getConstrainingClause().getAccess().myClassDecl().equations();
 	
 	syn lazy List InstNode.components();
-	eq InstRoot.components() = getClassDecl().components();
+	eq InstClassRoot.components() = getClassDecl().components();
 	eq InstComponent.components() = getComponentDecl().myClass().components();
 	eq InstExtends.components() = getExtendsClause().getSuper().myClassDecl().components();
+	eq InstConstrainingClause.components() = getConstrainingClause().getAccess().myClassDecl().components();
+	eq InstConstrainingClauseRoot.components() = getConstrainingClause().getAccess().myClassDecl().components();
+
 	
 	syn lazy List InstNode.superClasses();
-	eq InstRoot.superClasses() = getClassDecl().superClasses();
+	eq InstClassRoot.superClasses() = getClassDecl().superClasses();
 	eq InstComponent.superClasses() = getComponentDecl().myClass().superClasses();
 	eq InstExtends.superClasses() = getExtendsClause().getSuper().myClassDecl().superClasses();
-	
+	eq InstConstrainingClause.superClasses() = getConstrainingClause().getAccess().myClassDecl().superClasses();
+    eq InstConstrainingClauseRoot.superClasses() = getConstrainingClause().getAccess().myClassDecl().superClasses();
 }
 
 aspect InstanceDumpTree {

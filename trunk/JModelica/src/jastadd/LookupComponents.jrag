@@ -167,6 +167,9 @@ aspect LookupComponentsInModifications {
 	    return lookupComponentInClass(name);
 	}
 	
+	eq ConstrainingClause.getClassModification().lookupComponentInClass(String name) {
+		return getAccess().myClassDecl().memberComponent(name);
+	}
 	
 	
 	/**

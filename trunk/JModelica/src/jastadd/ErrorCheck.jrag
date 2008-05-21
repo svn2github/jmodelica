@@ -112,8 +112,9 @@ aspect ErrorCheck {
   public boolean ASTNode.errorCheck() {
     ArrayList allErrors = root().errors;
     ArrayList allWarnings = root().warnings;
-    collectErrors();    
+    collectErrors();  
     if (!allWarnings.isEmpty()) {
+    	System.out.println("");        	
     	System.out.println("Warnings:");    
     	for(Iterator iter = allWarnings.iterator(); iter.hasNext(); ) {
     		Problem problem = (Problem) iter.next();
@@ -122,11 +123,13 @@ aspect ErrorCheck {
     }
    if(allErrors.isEmpty())
       return false;
+    System.out.println("");        	
     System.out.println(allErrors.size() + " error(s) found...");
     for(Iterator iter = allErrors.iterator(); iter.hasNext(); ) {
       Problem problem = (Problem)iter.next();
       System.out.println(problem);
     }
+
     return true;
   }
  

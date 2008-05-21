@@ -57,13 +57,27 @@ aspect Types {
              if (subType.compDecl.myClass()== superType.compDecl.myClass())
              	return true;
            }  else if ((compDecl.myClass() instanceof FullClassDecl)) {
-         	  for (ComponentDecl superTypeComponent : ((FullClassDecl)compDecl.myClass()).getComponentDecls()) {
+         
+              FullClassDecl superClassDecl = (FullClassDecl)superType.compDecl.myClass();
+              ArrayList<InstModification> superEnv = superType.env;
+              
+              if (compDecl.hasConstrainingClause()) {
+              	ClassDecl cd_tmp = compDecl.getConstrainingClause().getAccess().myClassDecl();
+              	if (cd_tmp instanceof FullClassDecl) {
+              		superClassDecl = (FullClassDecl)cd_tmp;
+                    superEnv = new ArrayList<InstModification>();
+	                for (InstModification im : (List<InstModification>)compDecl.getConstrainingClause().constrainingClauseInstRoot().getInstNode(0).myEnvironment()) {
+	    	          superEnv.add(im);
+	                } 
+                 }
+              }	
+         	  for (ComponentDecl superTypeComponent : superClassDecl.getComponentDecls()) {
            		  String cdName = superTypeComponent.name();
            		  HashSet set = subType.compDecl.myClass().memberComponent(cdName);
            	   if (set.size()!=1)
            	   	return false;
            	   ComponentDecl subTypeComponent = (ComponentDecl)set.iterator().next();	
-           	   Type superTypeComponentType = type(superTypeComponent,superType.env);
+           	   Type superTypeComponentType = type(superTypeComponent,superEnv);
            	   Type subTypeComponentType = type(subTypeComponent,subType.env);	
            	   if (!subTypeComponentType.subType(superTypeComponentType))
            	   	return false;
@@ -72,8 +86,13 @@ aspect Types {
            	
            return true;
         }
+        
+        
+   		public static Type type(ComponentDecl cd) {
+           return type(cd,new ArrayList<InstModification>());
+        }
        
-   		public Type type(ComponentDecl cd, ArrayList<InstModification> env) {
+   		public static Type type(ComponentDecl cd, ArrayList<InstModification> env) {
    		   	  	  	  	 
    		  ComponentDecl replacingComponent = cd; 
    		  	  	 
@@ -102,12 +121,32 @@ aspect Types {
    
 	class ClassType extends Type{
 	
-		BaseClassDecl classDecl;
+		ClassDecl classDecl;
 		
-		public ClassType(BaseClassDecl classDecl, ArrayList<InstModification> env) {
+		public ClassType(ClassDecl classDecl, ArrayList<InstModification> env) {
 	      this.classDecl = classDecl;
 	      this.env = env;
 		}
+
+		public ClassType(ClassDecl classDecl) {
+	      this(classDecl,new ArrayList<InstModification>());
+		}
+
+       public String toString() {
+           StringBuffer str = new StringBuffer();
+           str.append(classDecl.name());
+           str.append("\nEnv=");
+           for (InstModification im : env) { 
+	           str.append(im.getModification().prettyPrint("")+"\n");
+	       }
+           return str.toString();
+         
+        }
+           
+        public String name() {
+           return classDecl.name();
+        }
+ 
 
         public boolean subType(Type t) {
            return t.superTypeClassType(this);
@@ -115,11 +154,29 @@ aspect Types {
         
         public boolean superTypeClassType(ClassType t) {
            if (t == this) return true;
-           return false;
-           
+           if (!(classDecl instanceof FullClassDecl) || 
+               !(t.classDecl instanceof FullClassDecl))
+               	return false;
+           FullClassDecl superClassDecl = (FullClassDecl)classDecl;
+           FullClassDecl subClassDecl = (FullClassDecl)t.classDecl;
+           for (ComponentDecl superTypeComponent : superClassDecl.getComponentDecls()) {
+           		String cdName = superTypeComponent.name();
+           		HashSet set = subClassDecl.memberComponent(cdName);
+           	    if (set.size()!=1)
+           	   	  return false;
+           	    ComponentDecl subTypeComponent = (ComponentDecl)set.iterator().next();	
+           	    Type superTypeComponentType = ComponentType.type(superTypeComponent);
+           	     Type subTypeComponentType = ComponentType.type(subTypeComponent);	
+           	   if (!subTypeComponentType.subType(superTypeComponentType))
+           	   	return false;
+           	  }
+            // TODO: check local classes.
+            return true;
+            
+    
         }
 
-	
+	    
 	   
 	   /*
 	   
@@ -141,8 +198,7 @@ aspect Types {
          if (replacingCD==null)
             replacingCD = classDecl.memberComponent(name);
 	     
-	     ArrayList<InstModification> newEnv = new ArrayList<InstModification>();
-	     
+	     ArrayList<InstModification> newEnv = new ArrayList<InstModification>();    
 	     for (InstModification im : env) {
 			Modification m = im.getModification().matchModification(name);
 			if (m!=null)
@@ -157,20 +213,80 @@ aspect Types {
 	    
 	}
 
-   
+
+    public void InstComposite.typeCheck() {
+       
+       if (getComponentDecl().hasConstrainingClause()) {
+       // First type check the constraining clause itself by building the instance tree.
+          instConstrainingClause().collectErrors();
+                  
+          // Then type check the constraining clause in relation to the declaration itself.
+          ClassType subType = new ClassType(getComponentDecl().myClass());
+          ClassType superType = new ClassType(getComponentDecl().getConstrainingClause().getAccess().myClassDecl());
+          if (!subType.subType(superType))
+        	   getComponentDecl().error("'" + subType.name()+ "'"+ " is not a subtype of " + "'"+superType.name()+"'");    
+       }
+       
+       
+    } 
 
 	public void InstReplacingComponent.typeCheck() {
+	    /*
+	       This is questionable. Rather, the original declaration should actually
+	       have been checked previously, when the enclosing class decl is checked in 
+	       an empty environment.
+	    */
+		if (getOriginalDecl().hasConstrainingClause()) { 
+          // First type check the constraining clause itself by building the instance tree.
+          originalInstConstrainingClause().collectErrors();
+          ArrayList<InstModification> env = new ArrayList<InstModification>();
+	      for (InstModification im : (List<InstModification>)originalInstConstrainingClause().myEnvironment()) {
+	    	 env.add(im);
+	      } 
+
+
+	         // Then type check the constraining clause in relation to the declaration itself.
+          ClassType subType = new ClassType(getOriginalDecl().myClass());
+          ClassType superType = new ClassType(getOriginalDecl().getConstrainingClause().getAccess().myClassDecl(),env);
+          if (!subType.subType(superType))
+        	   getOriginalDecl().error("'" + subType.name()+ "'"+ " is not a subtype of " + "'"+superType.name()+"'");    
+       }
+ 
+	
+	   
+	   if (getComponentDecl().hasConstrainingClause()) { 
+          // First type check the constraining clause itself by building the instance tree.
+          instConstrainingClause().collectErrors();
+
+	         // Then type check the constraining clause in relation to the declaration itself.
+          ClassType subType = new ClassType(getComponentDecl().myClass());
+          ClassType superType = new ClassType(getComponentDecl().getConstrainingClause().getAccess().myClassDecl());
+          if (!subType.subType(superType))
+        	   getComponentDecl().error("'" + subType.name()+ "'"+ " is not a subtype of " + "'"+superType.name()+"'");    
+       }
+ 
+	
+	
 	    ArrayList<InstModification> env = new ArrayList<InstModification>();
 	    for (InstModification im : (List<InstModification>)myEnvironment(name())) {
 	    	env.add(im);
 	    }
-		//ComponentType subType = new ComponentType(getComponentDecl(),env);
-        ComponentType superType = new ComponentType(getOriginalDecl(),new ArrayList<InstModification>());
+
         for (InstModification im : (List<InstModification>)myEnvironment()) {
 	   	 if (im.getModification().matchRedeclare(name())!=null) {
-				ComponentType subType = new ComponentType(im.getModification().matchRedeclare(name()),env);
-		        if (!subType.subType(superType))
-        	        subType.compDecl.error("'" + subType.name()+ "'"+ " is not a subtype of " + "'"+superType.name()+"'");    
+	   	        ComponentDecl replacingDecl = im.getModification().matchRedeclare(name());
+	   	        if (replacingDecl.hasConstrainingClause()) {
+    	   	          ClassType superType = new ClassType(getOriginalDecl().myClass());	
+	                  ClassType subType = new ClassType(replacingDecl.getConstrainingClause().getAccess().myClassDecl());
+	   	            if (!subType.subType(superType))
+        	         replacingDecl.getConstrainingClause().error("'" + subType.name()+ "'"+ " is not a subtype of " + "'"+superType.name()+"'");    
+			          
+	   	        } else {
+                  ComponentType superType = new ComponentType(getOriginalDecl(),new ArrayList<InstModification>());
+				  ComponentType subType = new ComponentType(replacingDecl,env);
+		          if (!subType.subType(superType))
+        	         subType.compDecl.error("'" + subType.name()+ "'"+ " is not a subtype of " + "'"+superType.name()+"'");    
+			    }
 			}
 	   }	
        
@@ -187,6 +303,21 @@ aspect Types {
 	   str.append("InstReplacingComponent:\n");
 	   str.append(" Replacing decl: " + getComponentDecl().prettyPrint("") + "\n");
 	   str.append(" Original decl:  " + getOriginalDecl().prettyPrint("") + "\n");
+	   str.append(" myEnvironment():\n");
+	   for (InstModification im : (List<InstModification>)myEnvironment()) {
+	   	 str.append("  "+im.getModification().prettyPrint("")+"\n");
+	   }
+	   str.append(" mergedEnvironment():\n");
+	   for (InstModification im : (List<InstModification>)getMergedEnvironments()) {
+	   	 str.append("  "+im.getModification().prettyPrint("")+"\n");
+	   }	
+	   return str.toString();	
+	}
+	
+    public String InstConstrainingClause.toString() {
+	   StringBuffer str = new StringBuffer();
+	   str.append("InstConstrainingClause:\n");
+	   str.append(" ConstrainingClause: " + getConstrainingClause().prettyPrint("") + "\n");
 	   str.append(" myEnvironment():\n");
 	   for (InstModification im : (List<InstModification>)myEnvironment()) {
 	   	 str.append("  "+im.getModification().prettyPrint("")+"\n");

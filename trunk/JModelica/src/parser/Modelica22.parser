@@ -557,7 +557,6 @@ Argument argument =
                                         final_,
                                         pa,
                                         new Opt(replaceable),
-                                        constraining_clause,
                                         new PN_ComponentClause(new Opt(new Redeclare()),
                                                                new Opt(),
                                                                new Opt(),
@@ -569,7 +568,7 @@ Argument argument =
                                                                class_access,
                                                                new Opt(),
                                                                new List().add(new PN_ComponentDecl(comp_name,array_subscripts,modification,new Opt(),comment)),
-                                                               new Opt(),
+                                                               constraining_clause,
                                                                new Comment(new Opt(),new Opt()))); 
                                          return cdr; :}
   |REDECLARE 
@@ -600,7 +599,6 @@ Argument argument =
    				PN_ComponentRedeclare cdr = new PN_ComponentRedeclare(each,
                                         final_,
                                         pa,
-                                        new Opt(),
                                         new Opt(),
                                         new PN_ComponentClause(new Opt(new Redeclare()),
                                                                new Opt(),
@@ -645,7 +643,6 @@ Argument argument =
                                         final_,
                                         new ParseAccess(comp_name.getID(),array_subscripts),
                                         new Opt(replaceable),
-                                        constraining_clause,
                                         new PN_ComponentClause(new Opt(new Redeclare()),
                                                                new Opt(),
                                                                new Opt(),
@@ -657,7 +654,7 @@ Argument argument =
                                                                class_access,
                                                                new Opt(),
                                                                new List().add(new PN_ComponentDecl(comp_name,array_subscripts,modification,new Opt(),comment)),
-                                                               new Opt(),
+                                                               constraining_clause,
                                                                new Comment(new Opt(),new Opt()))); :}                                                      
    ;
 

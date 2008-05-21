@@ -199,8 +199,8 @@ abstract NamedModification : Argument ::= Name:Access;
 abstract ElementModification : NamedModification ::= [Modification] [StringComment];
 // ClassModification : ElementModification; // is a(M.x=3) valid if M is a class?
 ComponentModification : ElementModification; 
-abstract ElementRedeclare : NamedModification ::= [Replaceable] [ConstrainingClause];
-ClassRedeclare : ElementRedeclare ::= BaseClassDecl;
+abstract ElementRedeclare : NamedModification ::= [Replaceable];
+ClassRedeclare : ElementRedeclare ::= [ConstrainingClause] BaseClassDecl;
 PN_ComponentRedeclare : ElementRedeclare ::= BaseComponentDecl;
 ComponentRedeclare : ElementRedeclare ::= ComponentDecl;
 

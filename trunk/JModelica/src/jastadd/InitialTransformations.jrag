@@ -162,7 +162,7 @@
    	
      rewrite PN_ComponentRedeclare {
    		to ComponentRedeclare {
- 	       ComponentRedeclare c = new ComponentRedeclare(getEachOpt(),getFinalOpt(), getName(), getReplaceableOpt(), getConstrainingClauseOpt(), (ComponentDecl)getBaseComponentDecl());
+ 	       ComponentRedeclare c = new ComponentRedeclare(getEachOpt(),getFinalOpt(), getName(), getReplaceableOpt(), (ComponentDecl)getBaseComponentDecl());
  		   c.setStart(getStart());
  		   return c;
  		}

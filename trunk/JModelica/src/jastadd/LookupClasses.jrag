@@ -233,6 +233,7 @@ aspect LookupClasses {
 	
 	syn lazy ClassDecl ShortClassDecl.myClass() circular [unknownClassDecl()] = getClassName().myClassDecl();
 	
+	
 	syn boolean ClassDecl.matchClassDecl(String name) = false;
 	eq BuiltInClassDecl.matchClassDecl(String name) = getName().name().equals(name); 
 	eq BaseClassDecl.matchClassDecl(String name) = getName().name().equals(name);

@@ -62,7 +62,8 @@ public class FlattenModel {
 		    	  }
 		    	  ir.dumpTree("");
 		    	  
-		    	  ir.errorCheck();
+		    	  if (ir.errorCheck())
+		    		  System.exit(0);
 	    	  /*
 		      System.out.println("Checking for errors...");	      
 	    	  if (fc.errorCheck()) {

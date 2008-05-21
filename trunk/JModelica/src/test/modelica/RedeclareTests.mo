@@ -2,6 +2,8 @@ package RedeclareTests
 
 model RedeclareTestOx1 "Basic redeclare test"
  
+ // This is perfectly ok.
+ 
   model A
     Real x=1;
   end A;
@@ -27,6 +29,8 @@ model RedeclareTestOx2_Err "Basic redeclare test, errouneous"
     C c(redeclare A b)
    component 'A b' is not a subtype of component 'B a'.
    
+   
+   
  
 */
  
@@ -42,12 +46,14 @@ model RedeclareTestOx2_Err "Basic redeclare test, errouneous"
    model C
      replaceable B b;
    end C;
- 
+   // Here is the error
    C c(redeclare A b);
  
 end RedeclareTestOx2_Err;
  
 model RedeclareTestOx3 "Redeclare deeper into instance hierarchy."
+ 
+  // Perfectly ok.
  
   model A
     Real x=1;
@@ -212,6 +218,7 @@ end RedeclareTestOx65_Err;
  
 model RedeclareTestOx7_Err 
     "Redeclare deeper into instance hierarchy and redeclaration of a replacing component, Errouneous?"
+  // This is based on replaceable types and is not tested here.
  
   model A
     Real x=1;
@@ -262,7 +269,7 @@ model RedeclareTestOx8 "Constraining clause example"
    model D
      replaceable C c extends B;
    end D;
- 
+   // Ok, since the constraining clause of C c is B.
    D d(redeclare B c);
  
 end RedeclareTestOx8;
@@ -276,7 +283,7 @@ model RedeclareTestOx9_Err "Constraining clause example, errouneous"
    Redeclared declaration located in class D.
    replaceable C c extends B;
    Instance name of redeclared original declaration: d.c   
- 
+   TODO: the check is correct, but the error message is not correct.
 */
  
   model A
@@ -301,6 +308,35 @@ model RedeclareTestOx9_Err "Constraining clause example, errouneous"
    D d(redeclare A c);
  
 end RedeclareTestOx9_Err;
+
+model RedeclareTestOx95_Err "Constraining clause example, errouneous"
+ /*
+  Should give an error message like
+ 
+*/
+ 
+  model A
+    Real x=1;
+  end A;
+ 
+  model B
+   Real x=2;
+   Real y=3;
+  end B;
+ 
+  model C
+   Real x=2;
+   Real y=3;
+   Real z=4;
+  end C;
+ 
+   model D
+     replaceable B b extends C;
+   end D;
+ 
+   D d;
+ 
+end RedeclareTestOx95_Err;
  
 model RedeclareTestOx10 "Constraining clause example."
  
@@ -368,10 +404,89 @@ model RedeclareTestOx11_Err "Constraining clause example."
    model E
      replaceable D d extends D(redeclare replaceable B c extends A);
    end E;
- 
+   
+   // This should be ok.
    E e(redeclare D d(redeclare A c));
  
 end RedeclareTestOx11_Err;
+ 
+ model RedeclareTestOx115_Err "Constraining clause example."
+ 
+/*
+  Should give an error message like
+  In file 'src/test/modelica/RedeclareTests.mo':
+Semantic error at line 431, column 32:
+  'B' is not a subtype of 'C'
+*/
+ 
+  model A
+    Real x=1;
+  end A;
+ 
+  model B
+   Real x=2;
+   Real y=3;
+  end B;
+ 
+  model C
+   Real x=2;
+   Real y=3;
+   Real z=4;
+  end C;
+ 
+   model D
+     replaceable B c;
+   end D;
+ 
+   model E
+     replaceable D d extends D(redeclare replaceable B c extends C);
+   end E;
+  
+ 
+   E e;
+ 
+end RedeclareTestOx115_Err;
+
+ model RedeclareTestOx116_Err "Constraining clause example."
+ 
+/*
+  Should give an error message like
+  In file 'src\test\modelica\RedeclareTests.mo':
+Semantic error at line 470, column 58:
+  'A' is not a subtype of 'B'
+  
+ 
+ 
+ */
+ 
+  model A
+    Real x=1;
+  end A;
+ 
+  model B
+   Real x=2;
+   Real y=3;
+  end B;
+ 
+  model C
+   Real x=2;
+   Real y=3;
+   Real z=4;
+  end C;
+ 
+   model D
+     replaceable B c;
+   end D;
+ 
+   model E 
+     // This is anb error because the constraining clause of C c extends A is not a subtype of B c
+     replaceable D d extends D(redeclare replaceable C c extends A);
+   end E;
+  
+ 
+   E e;
+ 
+end RedeclareTestOx116_Err;
  
 model RedeclareTestOx12 "Constraining clause example."
  
