@@ -71,6 +71,7 @@ aspect Types {
 	                } 
                  }
               }	
+              
          	  for (ComponentDecl superTypeComponent : superClassDecl.getComponentDecls()) {
            		  String cdName = superTypeComponent.name();
            		  HashSet set = subType.compDecl.myClass().memberComponent(cdName);
@@ -361,7 +362,10 @@ aspect Types {
 
 
 
-
+    public String InstModification.toString() {
+    	return getModification().prettyPrint("");
+    
+    }
 
 }
 

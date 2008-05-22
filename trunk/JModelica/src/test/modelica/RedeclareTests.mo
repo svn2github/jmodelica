@@ -1,6 +1,16 @@
 package RedeclareTests
 
 model RedeclareTestOx1 "Basic redeclare test"
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTestOx1",
+                                               description="Basic redeclares.",
+                                               flatModel=
+"fclass RedeclareTests.RedeclareTestOx1
+ Real c.a.x = 2 /*(2)*/;
+ Real c.a.y = 3 /*(3)*/;
+equation
+end RedeclareTests.RedeclareTestOx1;
+")})));
  
  // This is perfectly ok.
  
@@ -21,7 +31,21 @@ model RedeclareTestOx1 "Basic redeclare test"
  
 end RedeclareTestOx1;
  
-model RedeclareTestOx2_Err "Basic redeclare test, errouneous"
+model RedeclareTestOx2_Err "Basic redeclare test, errounous"
+ 
+ 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx2_Err",
+        description="Test basic redeclares. Error caused by failed subtype test in component redeclaration.",
+                                               errorMessage=
+"
+1 error(s) found...
+In file 'src/test/modelica/RedeclareTests.mo':
+Semantic error at line 71, column 8:
+  'redeclare A b' is not a subtype of 'replaceable B b'
+
+  "
+  )})));
  
 /*
   Should give an error message like
@@ -52,6 +76,19 @@ model RedeclareTestOx2_Err "Basic redeclare test, errouneous"
 end RedeclareTestOx2_Err;
  
 model RedeclareTestOx3 "Redeclare deeper into instance hierarchy."
+
+  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTestOx3",
+        description="Basic test of redeclares.",
+                                               flatModel=
+"fclass RedeclareTests.RedeclareTestOx3
+ Real d.c.a.x = 2 /*(2)*/;
+ Real d.c.a.y = 3 /*(3)*/;
+equation 
+end RedeclareTests.RedeclareTestOx3;
+")})));
+
+
  
   // Perfectly ok.
  
@@ -402,10 +439,21 @@ model RedeclareTestOx11_Err "Constraining clause example."
    end D;
  
    model E
+     /* Component decl triggers tests:
+          1. The original decl:
+            1.2 Type check of the constraining clause
+                  'D(redeclare replaceable B c extends A)'
+                in the environment 
+                  {redeclare A c}
+                correponding to myEnvironment("d")
+                
+                ** Result **
+                 */
      replaceable D d extends D(redeclare replaceable B c extends A);
    end E;
    
    // This should be ok.
+   // This declaration does not trigger any tests
    E e(redeclare D d(redeclare A c));
  
 end RedeclareTestOx11_Err;
@@ -1043,7 +1091,7 @@ end RedeclareTest6;
 
 model RedeclareTest7
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest6",
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest7",
                                                description="Basic redeclares.",
                                                flatModel=
 "

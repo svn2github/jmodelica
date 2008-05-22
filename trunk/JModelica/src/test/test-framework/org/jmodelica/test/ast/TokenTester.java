@@ -70,7 +70,7 @@ public class TokenTester {
 			String cl = args[1];
 			Reader reader = new FileReader(moFile);
 			ModelicaScanner scanner = new ModelicaScanner(new BufferedReader(reader));
-			System.out.println("Parsing "+moFile+"...");
+			//System.out.println("Parsing "+moFile+"...");
 			sr = (SourceRoot)parser.parse(scanner);
 		} catch (Error e) {
 			System.out.println("In file: '"+moFile + "':");
@@ -83,12 +83,12 @@ public class TokenTester {
 		sr.setFileName(moFile);
 		
 		StringBuffer fm1_str = new StringBuffer();
-		fc1.prettyPrint(fm1_str, "");
+		//fc1.prettyPrint(fm1_str, "");
 
 		try {
 			Reader reader = new FileReader(mofFile);
 			FlatModelicaScanner scanner = new FlatModelicaScanner(new BufferedReader(reader));
-			System.out.println("Parsing "+mofFile+"...");
+			//System.out.println("Parsing "+mofFile+"...");
 			fr = (FlatRoot)fparser.parse(scanner);
 		} catch (Error e) {
 			System.out.println("In file: '"+mofFile + "':");
@@ -98,14 +98,15 @@ public class TokenTester {
 		
 		StringBuffer fm2_str = new StringBuffer();
 		fr.setFileName(mofFile);
-		fr.prettyPrint(fm2_str, "");
+		//fr.prettyPrint(fm2_str, "");
 		
 		TokenTester tt = new TokenTester();
 		boolean testSuccess = tt.test(fm1_str.toString(),fm2_str.toString());
-
+/*
 		if (testSuccess)
 			System.out.println("Test succeeded!");
 		else
 			System.out.println("Test failed!");
+*/
 	}
 }

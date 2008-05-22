@@ -24,8 +24,8 @@ public class JunitGenerator {
 		 */
 		JunitGenerator jg = new JunitGenerator(args[0],args[1]);
 		StringBuffer str = new StringBuffer();
-		jg.ts.printTests(str);
+		//jg.ts.printTests(str);
 		jg.ts.dumpJunit(args[0],args[2]);
-		System.out.println(str.toString());
+		//System.out.println(str.toString());
 	}
 }

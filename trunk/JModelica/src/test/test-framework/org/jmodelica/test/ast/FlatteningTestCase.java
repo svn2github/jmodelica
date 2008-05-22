@@ -43,7 +43,7 @@ public class FlatteningTestCase extends TestCase {
 	}
 
 	public void dump(StringBuffer str,String indent) {
-		str.append(indent+"FlatteningTestCase: ");
+		str.append(indent+"FlatteningTestCase: \n");
 		if (testMe())
 			str.append("PASS\n");
 		else
@@ -58,6 +58,20 @@ public class FlatteningTestCase extends TestCase {
 			str.append(indent+" Flat model file name: "+getFlatModelFileName()+"\n");
 		
 	}
+
+	public String toString() {
+		StringBuffer str = new StringBuffer();
+		str.append("FlatteningTestCase: \n");
+		str.append(" Name:                     "+getName()+"\n");
+		str.append(" Description:              "+getDescription()+"\n");
+		str.append(" Source file:              "+getSourceFileName()+"\n");
+		str.append(" Class name:               "+getClassName()+"\n");
+		if (!isResultOnFile())
+			str.append(" Flat model:\n"+getFlatModel()+"\n");
+		else
+			str.append(" Flat model file name: "+getFlatModelFileName()+"\n");
+		return str.toString();
+	}
 	
 	public boolean printTest(StringBuffer str) {
 		str.append("TestCase: " + getName() +": ");
@@ -71,9 +85,10 @@ public class FlatteningTestCase extends TestCase {
 	}
 	
 	public void dumpJunit(StringBuffer str, int index) {
-		StringBuffer strd=new StringBuffer();
-		dump(strd,"");
-		System.out.println(strd);
+		//StringBuffer strd=new StringBuffer();
+		//dump(strd,"");
+		testMe();
+		//System.out.println(strd);
 		str.append("  @Test public void " + getName() + "() {\n");
 		str.append("    assertTrue(ts.get("+index+").testMe());\n");
 	    str.append("  }\n\n");
@@ -83,8 +98,8 @@ public class FlatteningTestCase extends TestCase {
 		SourceRoot sr = parser.parseFile(getSourceFileName());
 		sr.setFileName(getSourceFileName());
 		//sr.retrieveFullClassDecl("NameTests.ImportTest1").dumpTree("");
-	    if (sr.checkErrorsInClass(getClassName())) {
-	    	System.out.println("***** Errors in Class!");
+		if (sr.checkErrorsInClass(getClassName())) {
+	    	//System.out.println("***** Errors in Class!");
 	    	return false;
 	    }
 	    FlatRoot flatRoot = new FlatRoot();
@@ -98,11 +113,13 @@ public class FlatteningTestCase extends TestCase {
 	    	System.out.println("***** Errors in Class!");
 	    	return false;			
 		}*/
-		System.out.println(fc.prettyPrint(""));
-		System.out.println(getFlatModel());
+		//System.out.println(fc.prettyPrint(""));
+		//System.out.println(getFlatModel());
 		TokenTester tt = new TokenTester();
+		String testModel = fc.prettyPrint("");
+		String correctModel = getFlatModel();
 		
-		boolean result =  tt.test(fc.prettyPrint(""),getFlatModel());
+		boolean result =  tt.test(testModel,correctModel);
 		/*if (!result) {
 			System.out.println(fc.prettyPrint("").equals(getFlatModel()));
 			sr.retrieveFullClassDecl("NameTests.ImportTest1").dumpTree("");

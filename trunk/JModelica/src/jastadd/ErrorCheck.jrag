@@ -108,30 +108,39 @@ aspect ErrorCheck {
 	  }
   }
 
-  
-  public boolean ASTNode.errorCheck() {
+
+  public boolean ASTNode.errorCheck(StringBuffer str) {
     ArrayList allErrors = root().errors;
     ArrayList allWarnings = root().warnings;
     collectErrors();  
     if (!allWarnings.isEmpty()) {
-    	System.out.println("");        	
-    	System.out.println("Warnings:");    
+    	str.append("\n");        	
+    	str.append("Warnings:\n");    
     	for(Iterator iter = allWarnings.iterator(); iter.hasNext(); ) {
     		Problem problem = (Problem) iter.next();
-    		System.out.println(problem);
+    		str.append(problem+"\n");
     	}
     }
    if(allErrors.isEmpty())
       return false;
-    System.out.println("");        	
-    System.out.println(allErrors.size() + " error(s) found...");
+    str.append("\n");        	
+    str.append(allErrors.size() + " error(s) found...\n");
     for(Iterator iter = allErrors.iterator(); iter.hasNext(); ) {
       Problem problem = (Problem)iter.next();
-      System.out.println(problem);
+      str.append(problem+"\n");
     }
-
+    
     return true;
   }
+  
+  public boolean ASTNode.errorCheck() {
+ 	StringBuffer str = new StringBuffer();
+ 	boolean errors = errorCheck(str);
+ 	System.out.println(str.toString());
+ 	return errors;
+  }
+
+
  
     syn lazy FullClassDecl ASTNode.retrieveFullClassDecl(String className) {
       for(int i = 0; i < getNumChild(); i++) {
@@ -159,6 +168,17 @@ aspect ErrorCheck {
 		} else
 			return fcd.errorCheck();
 	}
+
+	public boolean SourceRoot.checkErrorsInClass(String className,StringBuffer errorString) {
+		FullClassDecl fcd = retrieveFullClassDecl(className);
+		if (fcd == null) {
+			System.out.println("Class "+ className + "not found");
+			return false;
+		} else
+			return fcd.errorCheck(errorString);
+	}
+
+
 	
 	boolean FullClassDecl.errorChecked = false;
   	public void FullClassDecl.collectErrors() {

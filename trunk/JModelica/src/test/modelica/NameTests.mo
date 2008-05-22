@@ -149,11 +149,12 @@ class ExtendsTest3
         description="Test that local classes that becomes visible
                      through inheritance can not be used as super classes",
                                                errorMessage=
-"1 errors detected...
-In file 'tests/NameTests.mo':
-Error at line 163, column 11 :
-  The class D is undeclared"
-  )})));
+"
+1 error(s) found...
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 164, column 11:
+  The class D is undeclared
+"  )})));
   
   class C
     class D
@@ -232,10 +233,12 @@ model ImportTest3
       JModelica.UnitTesting.ErrorTestCase(name="ImportTest3",
         description="Test that only a class imported with qualified import is visible.",
                                                errorMessage=
-"1 errors detected...
+"
+1 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
-Error at line 239, column 3 :
-  The class B is undeclared"
+Semantic error at line 253, column 3:
+  The class B is undeclared
+  "
   )})));
   package P
     model A

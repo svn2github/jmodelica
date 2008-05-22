@@ -7,6 +7,10 @@ import org.jmodelica.parser.ModelicaParser;
 import org.jmodelica.parser.FlatModelicaParser;
 import org.jmodelica.ast.*;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
+
 /**
  * @author jakesson
  *
@@ -29,7 +33,7 @@ public class ErrorTestCase extends TestCase {
 	 */
 	@Override
 	public void dump(StringBuffer str, String indent) {
-		str.append(indent+"ErrorTestCase: ");
+		str.append(indent+"ErrorTestCase: \n");
 		if (testMe())
 			str.append("PASS\n");
 		else
@@ -41,11 +45,25 @@ public class ErrorTestCase extends TestCase {
 
 	}
 
+	public String toString() {
+		StringBuffer str = new StringBuffer();
+		str.append("ErrorTestCase: \n");
+		str.append(" Name:                     "+getName()+"\n");
+		str.append(" Description:              "+getDescription()+"\n");
+		str.append(" Source file:              "+getSourceFileName()+"\n");
+		str.append(" Class name:               "+getClassName()+"\n");
+		return str.toString();
+		
+	}
+
+	
+	
 	/* (non-Javadoc)
 	 * @see org.jmodelica.test.ast.TestCase#dumpJunit(java.lang.StringBuffer, int)
 	 */
 	@Override
 	public void dumpJunit(StringBuffer str, int index) {
+		testMe();
 		str.append("  @Test public void " + getName() + "() {\n");
 		str.append("    assertTrue(ts.get("+index+").testMe());\n");
 	    str.append("  }\n\n");
@@ -73,12 +91,23 @@ public class ErrorTestCase extends TestCase {
 	public boolean testMe() {
 		SourceRoot sr = parser.parseFile(getSourceFileName());
 		sr.setFileName(getSourceFileName());
-	   
-		if (sr.errorCheck()) {
-	    	System.out.println("***** Errors in Class!");
-	    	return false;
+	    StringBuffer str = new StringBuffer();
+	    if (sr.checkErrorsInClass(getClassName(),str)) {
+	    	String testErrorMsg = filterErrorMessages(str.toString());
+	    	String correctErrorMsg = filterErrorMessages(getErrorMessage());
+			if (testErrorMsg.equals(correctErrorMsg))
+	    		return true;
 	    }
-		
+	
+	  FClass fc = new FClass();  
+	  InstNode ir = sr.findFlatten(getClassName(),fc);
+  	  if (ir.errorCheck(str)) {
+	    	String testErrorMsg = filterErrorMessages(str.toString());
+	    	String correctErrorMsg = filterErrorMessages(getErrorMessage());
+	    	if (testErrorMsg.equals(correctErrorMsg))
+	    		return true;
+  	  }
+	    
 		/*
 		ErrorManager errM = new ErrorManager();
 	    //System.out.println(sr.checkErrors(getClassName(),errM));
@@ -96,11 +125,45 @@ public class ErrorTestCase extends TestCase {
 	    //System.out.println(errorMessage);
 	    //if (!errorMessage.equals(str.toString()))
 	    //	return false;
-	    return true;
+	    return false;
 	    		
 		
 	}
 
+	public String filterErrorMessages(String str) {
+		StringBuffer filteredStr = new StringBuffer();
+		BufferedReader origStr = new BufferedReader(new StringReader(str));
+		String line;
+		
+		try {
+			line = origStr.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return filteredStr.toString();
+		}
+		while (line!=null) {
+			try {
+			
+				line = origStr.readLine();
+				
+			if (line!=null && line.contains("Semantic error at line")) {
+	
+					line = origStr.readLine();
+				filteredStr.append(line+"\n");
+			
+			}
+			
+			} catch (IOException e) {
+				e.printStackTrace();
+				return filteredStr.toString();
+			}	
+
+			
+		}
+		
+	return filteredStr.toString();
+	}
+	
 	/**
 	 * @return the errorMessage
 	 */
