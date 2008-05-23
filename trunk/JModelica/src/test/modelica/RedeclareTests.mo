@@ -116,6 +116,20 @@ end RedeclareTestOx3;
 model RedeclareTestOx4_Err 
     "Redeclare deeper into instance hierarchy."
  
+  
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx4_Err",
+        description="Test basic redeclares. Error caused by failed subtype test in component redeclaration.",
+                                               errorMessage=
+"
+1 error(s) found...
+In file 'src/test/modelica/RedeclareTests.mo':
+Semantic error at line 159, column 10:
+  'redeclare A b' is not a subtype of 'replaceable B b'
+
+  "
+  )})));
+ 
 /*
   Should give an error message like
   Error in redeclaration in component:
@@ -152,6 +166,19 @@ end RedeclareTestOx4_Err;
 model RedeclareTestOx5 
     "Redeclare deeper into instance hierarchy and redeclaration of a replacing component."
  
+  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTestOx5",
+        description="Basic test of redeclares.",
+                                               flatModel=
+"fclass RedeclareTests.RedeclareTestOx5
+ Real e.d.a.x = 2 /*(2)*/;
+ Real e.d.a.y = 3 /*(3)*/;
+ Real e.d.a.z = 4 /*(4)*/;
+equation 
+end RedeclareTests.RedeclareTestOx5;
+")})));
+ 
+ 
   model A
     Real x=1;
   end A;
@@ -182,9 +209,10 @@ end RedeclareTestOx5;
 model RedeclareTestOx6_Err 
     "Redeclare deeper into instance hierarchy and redeclaration of a replacing component, Errouneous?"
  
+  
 /*
-  Should give an error message like
-   
+  This test case test tests lookup in a redeclared component and is currently
+  not supported.   
  
 */
  
@@ -212,12 +240,26 @@ model RedeclareTestOx6_Err
      Real q = d.a.z; // This should not be ok since the constraining class of component a is A.
    end E;
  
-   E e(d(redeclare B a)); // This redeclaration should be ok since B is not a subtype of A!
+   E e(d(redeclare B a)); // This redeclaration should be ok since B is a subtype of A!
  
 end RedeclareTestOx6_Err;
  
  model RedeclareTestOx65_Err 
     "Redeclare deeper into instance hierarchy and redeclaration of a replacing component, Errouneous?"
+ 
+ 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx65_Err",
+        description="Test basic redeclares. Error caused by failed subtype test in component redeclaration.",
+                                               errorMessage=
+"
+1 error(s) found...
+In file 'src/test/modelica/RedeclareTests.mo':
+Semantic error at line 276, column 10:
+  'redeclare replaceable A a' is not a subtype of 'replaceable B a'
+
+  "
+  )})));
  
 /*
   Should give an error message like
@@ -288,6 +330,18 @@ end RedeclareTestOx7_Err;
  
 model RedeclareTestOx8 "Constraining clause example"
  
+   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTestOx8",
+        description="Basic test of redeclares.",
+                                               flatModel=
+"fclass RedeclareTests.RedeclareTestOx8
+ Real d.c.x = 2 /*(2)*/;
+ Real d.c.y = 3 /*(3)*/;
+equation 
+end RedeclareTests.RedeclareTestOx8;
+")})));
+ 
+ 
   model A
     Real x=1;
   end A;
@@ -312,6 +366,23 @@ model RedeclareTestOx8 "Constraining clause example"
 end RedeclareTestOx8;
  
 model RedeclareTestOx9_Err "Constraining clause example, errouneous"
+ 
+ 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx9_Err",
+        description="Test basic redeclares. Error caused by failed subtype test in component redeclaration.",
+                                               errorMessage=
+"1 error(s) found...
+In file 'src/test/modelica/RedeclareTests.mo':
+Semantic error at line 399, column 8:
+  'redeclare A c' is not a subtype of 'replaceable C c extends B '
+
+  "
+  )})));
+ 
+ 
+ 
+ 
  /*
   Should give an error message like
   Error in redeclaration in component:
@@ -347,10 +418,20 @@ model RedeclareTestOx9_Err "Constraining clause example, errouneous"
 end RedeclareTestOx9_Err;
 
 model RedeclareTestOx95_Err "Constraining clause example, errouneous"
- /*
-  Should give an error message like
  
-*/
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx95_Err",
+        description="Check that the declaration is a subtype of the constraining clause",
+                                               errorMessage=
+"1 error(s) found...
+In file 'src/test/modelica/RedeclareTests.mo':
+Semantic error at line 448, column 10:
+  'B' is not a subtype of 'C'
+  "
+  )})));
+ 
+ 
+ 
  
   model A
     Real x=1;
@@ -376,6 +457,17 @@ model RedeclareTestOx95_Err "Constraining clause example, errouneous"
 end RedeclareTestOx95_Err;
  
 model RedeclareTestOx10 "Constraining clause example."
+ /* This is test case does not work currently!*/
+    annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTestOx10",
+        description="Basic test of redeclares.",
+                                               flatModel=
+"fclass RedeclareTests.RedeclareTestOx8
+
+end RedeclareTests.RedeclareTestOx8;
+")})));
+ 
+ 
  
   model A
     Real x=1;
@@ -399,7 +491,7 @@ model RedeclareTestOx10 "Constraining clause example."
    model E
      // This is actually ok since the replacing component does not have an
      // explicit constraining clause, in which case the constraining clause
-     // of the the constraining clause of the original declaration is used.
+     // of the original declaration is used.
      replaceable D d extends D(redeclare replaceable B c);
    end E;
  
@@ -408,7 +500,13 @@ model RedeclareTestOx10 "Constraining clause example."
 end RedeclareTestOx10;
  
 model RedeclareTestOx11_Err "Constraining clause example."
- 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx11_Err",
+        description="Check that the declaration is a subtype of the constraining clause",
+                                               errorMessage=
+"
+  "
+  )})));
 /*
   Should give an error message like
   Error in redeclaration in component:
@@ -459,7 +557,16 @@ model RedeclareTestOx11_Err "Constraining clause example."
 end RedeclareTestOx11_Err;
  
  model RedeclareTestOx115_Err "Constraining clause example."
- 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx115_Err",
+        description="Check that the declaration is a subtype of the constraining clause",
+                                               errorMessage=
+"1 error(s) found...
+In file 'src/test/modelica/RedeclareTests.mo':
+Semantic error at line 594, column 32:
+  'B' is not a subtype of 'C'
+  "
+  )})));
 /*
   Should give an error message like
   In file 'src/test/modelica/RedeclareTests.mo':
@@ -496,7 +603,16 @@ Semantic error at line 431, column 32:
 end RedeclareTestOx115_Err;
 
  model RedeclareTestOx116_Err "Constraining clause example."
- 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx116_Err",
+        description="Check that the declaration is a subtype of the constraining clause",
+                                               errorMessage=
+"1 error(s) found...
+In file 'src/test/modelica/RedeclareTests.mo':
+Semantic error at line 644, column 58:
+  'A' is not a subtype of 'B'
+  "
+  )})));
 /*
   Should give an error message like
   In file 'src\test\modelica\RedeclareTests.mo':
@@ -527,7 +643,7 @@ Semantic error at line 470, column 58:
    end D;
  
    model E 
-     // This is anb error because the constraining clause of C c extends A is not a subtype of B c
+     // This is an error because the constraining clause of C c extends A is not a subtype of B c
      replaceable D d extends D(redeclare replaceable C c extends A);
    end E;
   
