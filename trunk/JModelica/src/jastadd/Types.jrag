@@ -1,10 +1,10 @@
 aspect Types { 
 
-   /*	
+   
    public ClassType InstConstrainingClauseRoot.classType() {
-   		return new ClassType(getAccess().myClass(),getMergedEnvironment();
+   		return new ClassType(getConstrainingClause().getAccess().myClassDecl(),getMergedEnvironmentList());
    }
-   */
+   
 
    class Type {
       ArrayList<InstModification> env;
@@ -24,11 +24,40 @@ aspect Types {
         public String name() {
           return getClass().getName();
         }
-        
    }
+
+// Introduce?
+
+  class ConstrainingComponentType extends ComponentType {
+     
+   }
+   
+   class ConstrainingClassType extends ClassType {
+   
+   }
+
+   class PrimitiveComponentType extends ComponentType {
+   
+   }
+
+   class PrimitiveClassType extends ClassType{
+   
+   }
+   
+   class PrimitiveConstrainingComponentType extends PrimitiveComponentType {
+   
+   }
+   
+   class PrimitiveConstrainingClassType extends PrimitiveClassType {
+   
+   }
+
 
 	class ComponentType extends Type{
         ComponentDecl compDecl;
+        
+        public ComponentType() {
+   		}
         
         public ComponentType(ComponentDecl compDecl, ArrayList<InstModification> env) {
 	      this.compDecl = compDecl;
@@ -129,6 +158,10 @@ aspect Types {
 	class ClassType extends Type{
 	
 		ClassDecl classDecl;
+		
+	    public ClassType() {
+   		}
+ 
 		
 		public ClassType(ClassDecl classDecl, ArrayList<InstModification> env) {
 	      this.classDecl = classDecl;
