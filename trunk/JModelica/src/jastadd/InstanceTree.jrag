@@ -41,56 +41,6 @@ aspect InstantiationTree {
 	    }
 	}
 
-/*	
-	// This is actually an new kind of NTA that is defined directely in code.
-    syn nta InstConstrainingClause InstComposite.instConstrainingClause() {
-       return new InstConstrainingClause(new List(),getComponentDecl().getConstrainingClause());
-    }
-
-    syn nta InstConstrainingClause InstReplacingComponent.instConstrainingClause() {
-       return new InstConstrainingClause(new List(),getComponentDecl().getConstrainingClause());
-    }
-
-    syn nta InstConstrainingClause InstReplacingComponent.originalInstConstrainingClause() {
-       return new InstConstrainingClause(new List(),getOriginalDecl().getConstrainingClause());
-    }
-*/	
-	
-	// This rewrite eliminates CompositeModifications as children of
-	// InstModifications, which simplifies implementation.
-/*	public boolean InstModification.rewritten = false;
-	rewrite InstModification in InstNode.getMergedEnvironment(){
-		when(!rewritten)
-		to List {
-			if (getModification() instanceof CompleteModification) {  
-			    debugPrint("xxxxxxxxx rewrite InstModification in InstNode.getMergedEnvironment()");
-				List l = new List();
-				CompleteModification cm = (CompleteModification)getModification();
-				for (int i=0;i<cm.getClassModification().getNumArgument();i++) {
-					InstModification im = new InstModification(getInstNode(),cm.getClassModification().getArgument(i));
-				    l.addAll(im.expand());
-				} 
-				if (cm.hasValueModification())
-				   l.add(new InstModification(getInstNode(),cm.getValueModification()));
-				return l;
-		} if (getModification() instanceof ClassModification) { 
-			    debugPrint("yyyyy rewrite InstModification in InstNode.getMergedEnvironment()");
-				List l = new List();
-				ClassModification cm = (ClassModification)getModification();
-				for (int i=0;i<cm.getNumArgument();i++) {
-					InstModification im = new InstModification(getInstNode(),cm.getArgument(i));
-					l.addAll(im.expand());
-				}
-				return l;
-		} else {
-			this.rewritten = true;
-			return new List().add(this);
-		}
-		}
-		
-	}
-	*/
-	
 
     syn int InstNode.getNumMergedEnvironment() =
     	getMergedEnvironmentList().size();
@@ -153,9 +103,7 @@ aspect InstantiationTree {
 		}
 		return env;
 	}
-	
-//	eq InstReplacingComponent.originalInstConstrainingClause().myEnvironment() = new ArrayList<InstModification>();
-    
+   
     eq ConstrainingClause.instConstrainingClauseRoot().myEnvironment()  {
     	ArrayList<InstModification> l = new ArrayList<InstModification>();
     	if (hasClassModification()) {
@@ -312,12 +260,6 @@ aspect InstantiationTree {
 
     syn String InstNode.name() = "";
     eq InstComponent.name() = getComponentDecl().name();
-
-	/*
-	syn lazy Modification InstNode.modificationTree() = null;
-	eq InstComponent.modificationTree() = getComponentDecl().hasModification()? getComponentDecl().getModification():null;
-	eq InstExtends.modificationTree() = getExtendsClause().hasClassModification()? getExtendsClause().getClassModification():null;
-	*/
 	
 	syn lazy ArrayList<Modification> InstNode.localModifications() = new ArrayList<Modification>();
 	eq InstComponent.localModifications() {
@@ -339,14 +281,6 @@ aspect InstantiationTree {
 		
 	}
 
-/*	
-    eq InstConstrainingClause.localModifications() {
-		ArrayList<Modification> l = new ArrayList<Modification>();
-		if (getConstrainingClause().hasClassModification())
-			l.add(getConstrainingClause().getClassModification());
-		return l;
-	}
-*/
 	eq InstReplacingComponent.localModifications() {
 		ArrayList<Modification> l = new ArrayList<Modification>();
 		if (getOriginalDecl().hasModification())
@@ -359,8 +293,6 @@ aspect InstantiationTree {
 		return l;
 	}
 	
-	
-
 	eq InstExtends.localModifications() {
 		ArrayList<Modification> l = new ArrayList<Modification>();
 		if (getExtendsClause().hasClassModification())
@@ -405,14 +337,12 @@ aspect InstantiationTree {
 	eq InstClassRoot.equations() = getClassDecl().equations();
 	eq InstComponent.equations() = getComponentDecl().myClass().equations();
 	eq InstExtends.equations() = getExtendsClause().getSuper().myClassDecl().equations();
-//	eq InstConstrainingClause.equations() = getConstrainingClause().getAccess().myClassDecl().equations();
 	eq InstConstrainingClauseRoot.equations() = getConstrainingClause().getAccess().myClassDecl().equations();
 	
 	syn lazy List InstNode.components();
 	eq InstClassRoot.components() = getClassDecl().components();
 	eq InstComponent.components() = getComponentDecl().myClass().components();
 	eq InstExtends.components() = getExtendsClause().getSuper().myClassDecl().components();
-//	eq InstConstrainingClause.components() = getConstrainingClause().getAccess().myClassDecl().components();
 	eq InstConstrainingClauseRoot.components() = getConstrainingClause().getAccess().myClassDecl().components();
 
 	
@@ -420,7 +350,6 @@ aspect InstantiationTree {
 	eq InstClassRoot.superClasses() = getClassDecl().superClasses();
 	eq InstComponent.superClasses() = getComponentDecl().myClass().superClasses();
 	eq InstExtends.superClasses() = getExtendsClause().getSuper().myClassDecl().superClasses();
-//	eq InstConstrainingClause.superClasses() = getConstrainingClause().getAccess().myClassDecl().superClasses();
     eq InstConstrainingClauseRoot.superClasses() = getConstrainingClause().getAccess().myClassDecl().superClasses();
 }
 

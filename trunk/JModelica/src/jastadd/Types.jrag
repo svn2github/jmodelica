@@ -182,41 +182,6 @@ aspect Types {
             
     
         }
-
-	    
-	   
-	   /*
-	   
-	   public ArrayList<String> getMemberClassNames() {
-	   		ArrayList<String> nameList = new ArrayList<String>();
-	        for (ComponentDecl d : classDecl.getComponentDecls())
-	        	nameList.add(d.name()); 
-	        for (ClassDecl cd : classDecl.getClassDecls())
-	        	nameList.add(cd.name()); 
-            return nameList;
-	   } 
-
-       public ArrayList<String> getMemberComponentNames() {
-	  
-	  public ClassType getClassTypeOfComponent(String name) {
-	  	 
-	     // Find first component redeclare
-         ComponentDecl replacingCD = retrieveReplacingDecl(name);
-         if (replacingCD==null)
-            replacingCD = classDecl.memberComponent(name);
-	     
-	     ArrayList<InstModification> newEnv = new ArrayList<InstModification>();    
-	     for (InstModification im : env) {
-			Modification m = im.getModification().matchModification(name);
-			if (m!=null)
-				newEnv.add(new InstModification(im.getInstNode(),m));
-		}
-	     
-	     return new ClassType(replacingCD.myClassDecl(),newEnv);   
-	      
-	  }
-	  
-	  */
 	    
 	}
 
@@ -233,8 +198,6 @@ aspect Types {
           if (!subType.subType(superType))
         	   getComponentDecl().error("'" + subType.name()+ "'"+ " is not a subtype of " + "'"+superType.name()+"'");    
        }
-       
-       
     } 
 
 	public void InstReplacingComponent.typeCheck() {
@@ -247,10 +210,6 @@ aspect Types {
           // First type check the constraining clause itself by building the instance tree.
           getOriginalDecl().getConstrainingClause().instConstrainingClauseRoot().collectErrors();
           ArrayList<InstModification> env = (ArrayList<InstModification>)getOriginalDecl().getConstrainingClause().instConstrainingClauseRoot().myEnvironment().clone();
-	  //    for (InstModification im : (List<InstModification>)originalInstConstrainingClause().myEnvironment()) {
-	  //  	 env.add(im);
-	  //    } 
-
 
 	         // Then type check the constraining clause in relation to the declaration itself.
           ClassType subType = new ClassType(getOriginalDecl().myClass());
@@ -271,14 +230,9 @@ aspect Types {
           if (!subType.subType(superType))
         	   getComponentDecl().error("'" + subType.name()+ "'"+ " is not a subtype of " + "'"+superType.name()+"'");    
        }
- 
-	
 	
 	    ArrayList<InstModification> env = (ArrayList<InstModification>)myEnvironment(name()).clone();
-	//    for (InstModification im : (List<InstModification>)myEnvironment(name())) {
-	//    	env.add(im);
-	//    }
-
+	
         for (InstModification im : (ArrayList<InstModification>)myEnvironment()) {
 	   	 if (im.getModification().matchRedeclare(name())!=null) {
 	   	        ComponentDecl replacingDecl = im.getModification().matchRedeclare(name());
@@ -320,22 +274,7 @@ aspect Types {
 	   }	
 	   return str.toString();	
 	}
-/*	
-    public String InstConstrainingClause.toString() {
-	   StringBuffer str = new StringBuffer();
-	   str.append("InstConstrainingClause:\n");
-	   str.append(" ConstrainingClause: " + getConstrainingClause().prettyPrint("") + "\n");
-	   str.append(" myEnvironment():\n");
-	   for (InstModification im : (ArrayList<InstModification>)myEnvironment()) {
-	   	 str.append("  "+im.getModification().prettyPrint("")+"\n");
-	   }
-	   str.append(" mergedEnvironment():\n");
-	   for (InstModification im : (ArrayList<InstModification>)getMergedEnvironmentList()) {
-	   	 str.append("  "+im.getModification().prettyPrint("")+"\n");
-	   }	
-	   return str.toString();	
-	}
-*/
+
 	public String InstPrimitive.toString() {
 	   StringBuffer str = new StringBuffer();
 	   str.append("InstPrimitive:\n");
