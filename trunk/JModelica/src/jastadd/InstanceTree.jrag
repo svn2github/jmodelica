@@ -1,4 +1,46 @@
 aspect InstantiationTree {
+
+	class InstModification {
+	   private InstNode instNode;
+	   private Modification modification;
+	   
+	   public InstModification(InstNode instNode, Modification modification) {
+	   	  this.instNode = instNode;
+	   	  this.modification = modification;
+	  
+	   }
+	   
+	   public InstNode getInstNode() {
+	  	  return instNode; 
+	   }
+	   
+	   public Modification getModification() {
+	   	  return modification;
+	   }
+	  
+	   public ArrayList<InstModification> expand() { 	  
+	   	  ArrayList<InstModification> l = new ArrayList<InstModification>();
+	   	  if (getModification() instanceof CompleteModification) {  
+				CompleteModification cm = (CompleteModification)getModification();
+				for (int i=0;i<cm.getClassModification().getNumArgument();i++) {
+					InstModification im = new InstModification(getInstNode(),cm.getClassModification().getArgument(i));
+				    l.addAll(im.expand());
+				} if (cm.hasValueModification())
+					l.add(new InstModification(getInstNode(),cm.getValueModification()));
+				return l;
+			} if (getModification() instanceof ClassModification) { 
+				ClassModification cm = (ClassModification)getModification();
+				for (int i=0;i<cm.getNumArgument();i++) {
+					InstModification im = new InstModification(getInstNode(),cm.getArgument(i));
+					l.addAll(im.expand());
+				}
+				return l;
+		  } else {
+		     l.add(this);
+		  }
+		  return l;
+	    }
+	}
 	
 	// This is actually an new kind of NTA that is defined directely in code.
     syn nta InstConstrainingClause InstComposite.instConstrainingClause() {
@@ -15,7 +57,7 @@ aspect InstantiationTree {
 	
 	// This rewrite eliminates CompositeModifications as children of
 	// InstModifications, which simplifies implementation.
-	public boolean InstModification.rewritten = false;
+/*	public boolean InstModification.rewritten = false;
 	rewrite InstModification in InstNode.getMergedEnvironment(){
 		when(!rewritten)
 		to List {
@@ -23,64 +65,71 @@ aspect InstantiationTree {
 			    debugPrint("xxxxxxxxx rewrite InstModification in InstNode.getMergedEnvironment()");
 				List l = new List();
 				CompleteModification cm = (CompleteModification)getModification();
-				for (int i=0;i<cm.getClassModification().getNumArgument();i++)
-					l.add(new InstModification(getInstNode(),cm.getClassModification().getArgument(i)));
+				for (int i=0;i<cm.getClassModification().getNumArgument();i++) {
+					InstModification im = new InstModification(getInstNode(),cm.getClassModification().getArgument(i));
+				    l.addAll(im.expand());
+				} 
 				if (cm.hasValueModification())
-					l.add(new InstModification(getInstNode(),cm.getValueModification()));
+				   l.add(new InstModification(getInstNode(),cm.getValueModification()));
 				return l;
 		} if (getModification() instanceof ClassModification) { 
 			    debugPrint("yyyyy rewrite InstModification in InstNode.getMergedEnvironment()");
 				List l = new List();
 				ClassModification cm = (ClassModification)getModification();
-				for (int i=0;i<cm.getNumArgument();i++)
-					l.add(new InstModification(getInstNode(),cm.getArgument(i)));
+				for (int i=0;i<cm.getNumArgument();i++) {
+					InstModification im = new InstModification(getInstNode(),cm.getArgument(i));
+					l.addAll(im.expand());
+				}
 				return l;
 		} else {
 			this.rewritten = true;
 			return new List().add(this);
 		}
 		}
+		
 	}
-	
+	*/
 	
 
-	syn lazy List InstNode.getMergedEnvironmentList() {
+    syn int InstNode.getNumMergedEnvironment() =
+    	getMergedEnvironmentList().size();
+    
+    syn InstModification InstNode.getMergedEnvironment(int i) = 
+        getMergedEnvironmentList().get(i); 
+
+    /* getMergedEnvironment gives the environment applicable
+       to the children of the InstNode. It consists of the outer modifications
+       in the environment (with the name of the InstNode itself, if any,
+       removed merged with potential local modifications.
+    
+       TODO: Should this attribute be lazy? Probably yes
+    */   
+        
+	syn lazy ArrayList<InstModification> InstNode.getMergedEnvironmentList() {
 		debugPrint("InstNode.getMergedEnvironmentList()");
 		// Retrieve modifications upwards
-		List env = nameScope()? myEnvironment(name()): myEnvironment();
-		//env.dumpTree("<>");
-		// Add modifications in this node
-//		if (modificationTree()!=null)
-//			env.add(new InstModification(this,modificationTree()));
+		ArrayList<InstModification> env = nameScope()? myEnvironment(name()): myEnvironment();
 		for (int i=0;i<localModifications().size();i++)
 			env.add(new InstModification(this,(Modification)localModifications().get(i)));
+ 	    
+ 	    // Eliminate all CompleteModification:s and ClassModification:s
+ 	    ArrayList<InstModification> finalEnv = new ArrayList<InstModification>();
+		for (InstModification im : env) {
+		    if (im.getModification() instanceof CompleteModification || im.getModification() instanceof ClassModification) {
+				finalEnv.addAll(im.expand());
+			} else
+			    finalEnv.add(im);
+			
+		}
 
-/*			
-		debugPrint("§§§§§§§§§§§§§§§§§§§§§§§§§§§");
-		debugPrint(modificationTree());
-		if (localModifications().getNumChild()==0)
-			debugPrint("**");
-		for (int i=0;i<localModifications().getNumChild();i++)
-			debugPrint("** "+localModifications().getChild(i));
-	*/
-	  	debugPrint(getNodeName());
-	  	//env.dumpTree("#");
-	  	if (env.getNumChild()>0)
-	  		debugPrint("# "+((InstModification)env.getChild(0)).getModification().getClass().getName());
-		return env;
+		return finalEnv;
 	}
-
-
-    
 		
-		
-		
-	inh lazy List InstNode.myEnvironment();
-	inh lazy List InstNode.myEnvironment(String name);
+	inh lazy ArrayList<InstModification> InstNode.myEnvironment();
+	inh lazy ArrayList<InstModification> InstNode.myEnvironment(String name);
 	
 	eq InstNode.getInstNode().myEnvironment() {
-		debugPrint("InstNode.getInstNode().myEnvironment()");
-		List env = new List();
+		ArrayList<InstModification> env = new ArrayList<InstModification>();
 		for (int i=0;i<getNumMergedEnvironment();i++)
 			env.add(new InstModification(getMergedEnvironment(i).getInstNode(),
 			                             getMergedEnvironment(i).getModification()));
@@ -90,11 +139,11 @@ aspect InstantiationTree {
 	eq InstNode.getInstNode().myEnvironment(String name) =
 	  localMyEnvironment(name);
 	
-	syn List InstNode.localMyEnvironment(String name) {
+	syn ArrayList<InstModification> InstNode.localMyEnvironment(String name) {
 	    if(!is$Final) throw new Error("Node is not final");
 		debugPrint("InstNode.getInstNode().myEnvironment(): " + name);
-		List env = new List();
-		debugPrint("*****: "+getNumMergedEnvironment());
+		ArrayList<InstModification> env = new ArrayList<InstModification>();
+		//debugPrint("*****: "+getNumMergedEnvironment());
 		for (int i=0;i<getNumMergedEnvironment();i++) {
 			//getMergedEnvironment(i).getModification().dumpTree("----");
 			Modification m = getMergedEnvironment(i).getModification().matchModification(name);
@@ -104,13 +153,13 @@ aspect InstantiationTree {
 		return env;
 	}
 	
-	eq InstReplacingComponent.originalInstConstrainingClause().myEnvironment() = new List();
+	eq InstReplacingComponent.originalInstConstrainingClause().myEnvironment() = new ArrayList<InstModification>();
     
     eq ConstrainingClause.constrainingClauseInstRoot().myEnvironment()  {
-    	List l = new List();
+    	ArrayList<InstModification> l = new ArrayList<InstModification>();
     	if (hasClassModification()) {
 			for (int i=0;i<getClassModification().getNumArgument();i++)
-			  // TODO: should it be constrainingClauseInstRoot().getInstNode(0) (then circular!!!)
+			  // TODO: should it be constrainingClauseInstRoot().getInstNode(0)? (then circular!!!)
 		      l.add(new InstModification(constrainingClauseInstRoot(),getClassModification().getArgument(i)));
     		
     	}
@@ -147,18 +196,8 @@ aspect InstantiationTree {
 			return null;
 	}
 	
-	/*
-	eq CompositeModification.matchRedeclare(String name) {
-		for (int i=0;i<getNumModification();i++) {
-			if (getModification(i).matchRedeclare(name)!=null)
-				return getModification(i).matchRedeclare(name);
-		}
-		return null;
-	}
-	*/
-	
-	eq BaseClassDecl.getInstRoot().myEnvironment() = root().emptyList();
-	eq BaseClassDecl.getInstRoot().myEnvironment(String name) = root().emptyList();
+	eq BaseClassDecl.getInstRoot().myEnvironment() = new ArrayList<InstModification>();
+	eq BaseClassDecl.getInstRoot().myEnvironment(String name) = new ArrayList<InstModification>();
 	
 	// Definition of the NTA representing the root of the 
 	// instantiation tree
@@ -183,9 +222,6 @@ aspect InstantiationTree {
 			s += getMergedEnvironment(i).getModification().prettyPrint("") + "\n";
 		}
 		debugPrint(s);
-		if(printLevel>0)
-			getMergedEnvironmentList().dumpTree("");
-		debugPrint("########################################");
 		
 		
 		for (int i=0;i<comps.getNumChild();i++) {
@@ -282,13 +318,13 @@ aspect InstantiationTree {
 	eq InstExtends.modificationTree() = getExtendsClause().hasClassModification()? getExtendsClause().getClassModification():null;
 	*/
 	
-	syn lazy ArrayList InstNode.localModifications() = new ArrayList();
+	syn lazy ArrayList<Modification> InstNode.localModifications() = new ArrayList<Modification>();
 	eq InstComponent.localModifications() {
-		ArrayList l = new ArrayList();
+		ArrayList<Modification> l = new ArrayList<Modification>();
 		if (getComponentDecl().hasModification())
 			l.add(getComponentDecl().getModification());
 		// This is to take modifiers short class declarations into account
-		ArrayList classMods = getComponentDecl().myClass().classModifications();
+		ArrayList<Modification> classMods = getComponentDecl().myClass().classModifications();
 		for (int i = 0;i<classMods.size();i++)
 			l.add(classMods.get(i));	
 		// This is to take into account the case when we instantiate a
@@ -303,18 +339,18 @@ aspect InstantiationTree {
 	}
 	
     eq InstConstrainingClause.localModifications() {
-		ArrayList l = new ArrayList();
+		ArrayList<Modification> l = new ArrayList<Modification>();
 		if (getConstrainingClause().hasClassModification())
 			l.add(getConstrainingClause().getClassModification());
 		return l;
 	}
 	
 	eq InstReplacingComponent.localModifications() {
-		ArrayList l = new ArrayList();
+		ArrayList<Modification> l = new ArrayList<Modification>();
 		if (getOriginalDecl().hasModification())
 			l.add(getOriginalDecl().getModification());
 		// This is to take modifiers short class declarations into account
-		ArrayList classMods = getOriginalDecl().myClass().classModifications();
+		ArrayList<Modification> classMods = getOriginalDecl().myClass().classModifications();
 		for (int i = 0;i<classMods.size();i++)
 			l.add(classMods.get(i));	
 		
@@ -324,28 +360,28 @@ aspect InstantiationTree {
 	
 
 	eq InstExtends.localModifications() {
-		ArrayList l = new ArrayList();
+		ArrayList<Modification> l = new ArrayList<Modification>();
 		if (getExtendsClause().hasClassModification())
 			l.add(getExtendsClause().getClassModification());
 		// This is to take modifiers short class declarations into account
-		ArrayList classMods = getExtendsClause().getSuper().myClassDecl().classModifications();
+		ArrayList<Modification> classMods = getExtendsClause().getSuper().myClassDecl().classModifications();
 		for (int i = 0;i<classMods.size();i++)
 			l.add(classMods.get(i));	
 		return l;
 	}
 
-	syn lazy ArrayList ClassDecl.classModifications() = new ArrayList();
+	syn lazy ArrayList<Modification> ClassDecl.classModifications() = new ArrayList<Modification>();
 	eq FullClassDecl.classModifications() {
 		if (!extendsPrimitive())
-			return new ArrayList();
+			return new ArrayList<Modification>();
 		else {
 		    // Add (optional) modification on the ExtendsClause
-			ArrayList l = new ArrayList();
+			ArrayList<Modification> l = new ArrayList<Modification>();
 			if (getSuper(0).hasClassModification())
 				l.add(getSuper(0).getClassModification());
 			// If we inherit from a ShortClassDecl there might be additional
 			// modifications	
-			ArrayList classMods = getSuper(0).getSuper().myClassDecl().classModifications();
+			ArrayList<Modification> classMods = getSuper(0).getSuper().myClassDecl().classModifications();
 			for (int i = 0;i<classMods.size();i++)
 				l.add(classMods.get(i));		
 			return l;
@@ -354,10 +390,10 @@ aspect InstantiationTree {
 	}
 	
 	eq ShortClassDecl.classModifications() {
-		ArrayList l = new ArrayList();
+		ArrayList<Modification> l = new ArrayList<Modification>();
 		if (hasClassModification())
 			l.add(getClassModification());
-		ArrayList classMods = getClassName().myClassDecl().classModifications();
+		ArrayList<Modification> classMods = getClassName().myClassDecl().classModifications();
 		for (int i = 0;i<classMods.size();i++)
 			l.add(classMods.get(i));	
 		return l;

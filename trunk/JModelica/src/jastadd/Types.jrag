@@ -1,5 +1,11 @@
 aspect Types { 
 
+   /*	
+   public ClassType InstConstrainingClauseRoot.classType() {
+   		return new ClassType(getAccess().myClass(),getMergedEnvironment();
+   }
+   */
+
    class Type {
       ArrayList<InstModification> env;
 	
@@ -66,7 +72,7 @@ aspect Types {
               	if (cd_tmp instanceof FullClassDecl) {
               		superClassDecl = (FullClassDecl)cd_tmp;
                     superEnv = new ArrayList<InstModification>();
-	                for (InstModification im : (List<InstModification>)compDecl.getConstrainingClause().constrainingClauseInstRoot().getInstNode(0).myEnvironment()) {
+	                for (InstModification im : (ArrayList<InstModification>)compDecl.getConstrainingClause().constrainingClauseInstRoot().getInstNode(0).myEnvironment()) {
 	    	          superEnv.add(im);
 	                } 
                  }
@@ -240,10 +246,10 @@ aspect Types {
 		if (getOriginalDecl().hasConstrainingClause()) { 
           // First type check the constraining clause itself by building the instance tree.
           originalInstConstrainingClause().collectErrors();
-          ArrayList<InstModification> env = new ArrayList<InstModification>();
-	      for (InstModification im : (List<InstModification>)originalInstConstrainingClause().myEnvironment()) {
-	    	 env.add(im);
-	      } 
+          ArrayList<InstModification> env = (ArrayList<InstModification>)originalInstConstrainingClause().myEnvironment().clone();
+	  //    for (InstModification im : (List<InstModification>)originalInstConstrainingClause().myEnvironment()) {
+	  //  	 env.add(im);
+	  //    } 
 
 
 	         // Then type check the constraining clause in relation to the declaration itself.
@@ -268,12 +274,12 @@ aspect Types {
  
 	
 	
-	    ArrayList<InstModification> env = new ArrayList<InstModification>();
-	    for (InstModification im : (List<InstModification>)myEnvironment(name())) {
-	    	env.add(im);
-	    }
+	    ArrayList<InstModification> env = (ArrayList<InstModification>)myEnvironment(name()).clone();
+	//    for (InstModification im : (List<InstModification>)myEnvironment(name())) {
+	//    	env.add(im);
+	//    }
 
-        for (InstModification im : (List<InstModification>)myEnvironment()) {
+        for (InstModification im : (ArrayList<InstModification>)myEnvironment()) {
 	   	 if (im.getModification().matchRedeclare(name())!=null) {
 	   	        ComponentDecl replacingDecl = im.getModification().matchRedeclare(name());
 	   	        if (replacingDecl.hasConstrainingClause()) {
@@ -305,11 +311,11 @@ aspect Types {
 	   str.append(" Replacing decl: " + getComponentDecl().prettyPrint("") + "\n");
 	   str.append(" Original decl:  " + getOriginalDecl().prettyPrint("") + "\n");
 	   str.append(" myEnvironment():\n");
-	   for (InstModification im : (List<InstModification>)myEnvironment()) {
+	   for (InstModification im : (ArrayList<InstModification>)myEnvironment()) {
 	   	 str.append("  "+im.getModification().prettyPrint("")+"\n");
 	   }
 	   str.append(" mergedEnvironment():\n");
-	   for (InstModification im : (List<InstModification>)getMergedEnvironments()) {
+	   for (InstModification im : (ArrayList<InstModification>)getMergedEnvironmentList()) {
 	   	 str.append("  "+im.getModification().prettyPrint("")+"\n");
 	   }	
 	   return str.toString();	
@@ -320,11 +326,11 @@ aspect Types {
 	   str.append("InstConstrainingClause:\n");
 	   str.append(" ConstrainingClause: " + getConstrainingClause().prettyPrint("") + "\n");
 	   str.append(" myEnvironment():\n");
-	   for (InstModification im : (List<InstModification>)myEnvironment()) {
+	   for (InstModification im : (ArrayList<InstModification>)myEnvironment()) {
 	   	 str.append("  "+im.getModification().prettyPrint("")+"\n");
 	   }
 	   str.append(" mergedEnvironment():\n");
-	   for (InstModification im : (List<InstModification>)getMergedEnvironments()) {
+	   for (InstModification im : (ArrayList<InstModification>)getMergedEnvironmentList()) {
 	   	 str.append("  "+im.getModification().prettyPrint("")+"\n");
 	   }	
 	   return str.toString();	
@@ -335,11 +341,11 @@ aspect Types {
 	   str.append("InstPrimitive:\n");
 	   str.append(" Component decl: " + getComponentDecl().prettyPrint("") + "\n");
 	   str.append(" myEnvironment():\n");
-	   for (InstModification im : (List<InstModification>)myEnvironment()) {
+	   for (InstModification im : (ArrayList<InstModification>)myEnvironment()) {
 	   	 str.append("  "+im.getModification().prettyPrint("")+"\n");
 	   }
 	   str.append(" mergedEnvironment():\n");
-	   for (InstModification im : (List<InstModification>)getMergedEnvironments()) {
+	   for (InstModification im : (ArrayList<InstModification>)getMergedEnvironmentList()) {
 	   	 str.append("  "+im.getModification().prettyPrint("")+"\n");
 	   }	
 	   return str.toString();	
@@ -350,11 +356,11 @@ aspect Types {
 	   str.append("InstComposite:\n");
 	   str.append(" Component decl: " + getComponentDecl().prettyPrint("") + "\n");
 	   str.append(" myEnvironment():\n");
-	   for (InstModification im : (List<InstModification>)myEnvironment()) {
+	   for (InstModification im : (ArrayList<InstModification>)myEnvironment()) {
 	   	 str.append("  "+im.getModification().prettyPrint("")+"\n");
 	   }
 	   str.append(" mergedEnvironment():\n");
-	   for (InstModification im : (List<InstModification>)getMergedEnvironments()) {
+	   for (InstModification im : (ArrayList<InstModification>)getMergedEnvironmentList()) {
 	   	 str.append("  "+im.getModification().prettyPrint("")+"\n");
 	   }	
 	   return str.toString();	
