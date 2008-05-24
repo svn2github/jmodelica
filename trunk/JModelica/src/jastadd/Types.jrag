@@ -72,7 +72,7 @@ aspect Types {
               	if (cd_tmp instanceof FullClassDecl) {
               		superClassDecl = (FullClassDecl)cd_tmp;
                     superEnv = new ArrayList<InstModification>();
-	                for (InstModification im : (ArrayList<InstModification>)compDecl.getConstrainingClause().constrainingClauseInstRoot().getInstNode(0).myEnvironment()) {
+	                for (InstModification im : (ArrayList<InstModification>)compDecl.getConstrainingClause().instConstrainingClauseRoot().getInstNode(0).myEnvironment()) {
 	    	          superEnv.add(im);
 	                } 
                  }
@@ -225,7 +225,7 @@ aspect Types {
        
        if (getComponentDecl().hasConstrainingClause()) {
        // First type check the constraining clause itself by building the instance tree.
-          instConstrainingClause().collectErrors();
+          getComponentDecl().getConstrainingClause().instConstrainingClauseRoot().collectErrors();
                   
           // Then type check the constraining clause in relation to the declaration itself.
           ClassType subType = new ClassType(getComponentDecl().myClass());
@@ -245,8 +245,8 @@ aspect Types {
 	    */
 		if (getOriginalDecl().hasConstrainingClause()) { 
           // First type check the constraining clause itself by building the instance tree.
-          originalInstConstrainingClause().collectErrors();
-          ArrayList<InstModification> env = (ArrayList<InstModification>)originalInstConstrainingClause().myEnvironment().clone();
+          getOriginalDecl().getConstrainingClause().instConstrainingClauseRoot().collectErrors();
+          ArrayList<InstModification> env = (ArrayList<InstModification>)getOriginalDecl().getConstrainingClause().instConstrainingClauseRoot().myEnvironment().clone();
 	  //    for (InstModification im : (List<InstModification>)originalInstConstrainingClause().myEnvironment()) {
 	  //  	 env.add(im);
 	  //    } 
@@ -263,7 +263,7 @@ aspect Types {
 	   
 	   if (getComponentDecl().hasConstrainingClause()) { 
           // First type check the constraining clause itself by building the instance tree.
-          instConstrainingClause().collectErrors();
+          getComponentDecl().getConstrainingClause().instConstrainingClauseRoot().collectErrors();
 
 	         // Then type check the constraining clause in relation to the declaration itself.
           ClassType subType = new ClassType(getComponentDecl().myClass());
@@ -320,7 +320,7 @@ aspect Types {
 	   }	
 	   return str.toString();	
 	}
-	
+/*	
     public String InstConstrainingClause.toString() {
 	   StringBuffer str = new StringBuffer();
 	   str.append("InstConstrainingClause:\n");
@@ -335,7 +335,7 @@ aspect Types {
 	   }	
 	   return str.toString();	
 	}
-
+*/
 	public String InstPrimitive.toString() {
 	   StringBuffer str = new StringBuffer();
 	   str.append("InstPrimitive:\n");

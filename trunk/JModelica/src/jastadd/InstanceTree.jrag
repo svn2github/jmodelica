@@ -7,7 +7,6 @@ aspect InstantiationTree {
 	   public InstModification(InstNode instNode, Modification modification) {
 	   	  this.instNode = instNode;
 	   	  this.modification = modification;
-	  
 	   }
 	   
 	   public InstNode getInstNode() {
@@ -41,7 +40,8 @@ aspect InstantiationTree {
 		  return l;
 	    }
 	}
-	
+
+/*	
 	// This is actually an new kind of NTA that is defined directely in code.
     syn nta InstConstrainingClause InstComposite.instConstrainingClause() {
        return new InstConstrainingClause(new List(),getComponentDecl().getConstrainingClause());
@@ -54,6 +54,7 @@ aspect InstantiationTree {
     syn nta InstConstrainingClause InstReplacingComponent.originalInstConstrainingClause() {
        return new InstConstrainingClause(new List(),getOriginalDecl().getConstrainingClause());
     }
+*/	
 	
 	// This rewrite eliminates CompositeModifications as children of
 	// InstModifications, which simplifies implementation.
@@ -153,14 +154,14 @@ aspect InstantiationTree {
 		return env;
 	}
 	
-	eq InstReplacingComponent.originalInstConstrainingClause().myEnvironment() = new ArrayList<InstModification>();
+//	eq InstReplacingComponent.originalInstConstrainingClause().myEnvironment() = new ArrayList<InstModification>();
     
-    eq ConstrainingClause.constrainingClauseInstRoot().myEnvironment()  {
+    eq ConstrainingClause.instConstrainingClauseRoot().myEnvironment()  {
     	ArrayList<InstModification> l = new ArrayList<InstModification>();
     	if (hasClassModification()) {
 			for (int i=0;i<getClassModification().getNumArgument();i++)
-			  // TODO: should it be constrainingClauseInstRoot().getInstNode(0)? (then circular!!!)
-		      l.add(new InstModification(constrainingClauseInstRoot(),getClassModification().getArgument(i)));
+			  // TODO: should it be instConstrainingClauseRoot().getInstNode(0)? (then circular!!!)
+		      l.add(new InstModification(instConstrainingClauseRoot(),getClassModification().getArgument(i)));
     		
     	}
     	return l;
@@ -202,7 +203,7 @@ aspect InstantiationTree {
 	// Definition of the NTA representing the root of the 
 	// instantiation tree
 	syn InstRoot BaseClassDecl.getInstRoot() = new InstClassRoot(new List(),this);
-	syn nta InstConstrainingClauseRoot ConstrainingClause.constrainingClauseInstRoot() = new InstConstrainingClauseRoot(new List(),this);
+	syn nta InstConstrainingClauseRoot ConstrainingClause.instConstrainingClauseRoot() = new InstConstrainingClauseRoot(new List(),this);
 
 
 	syn lazy List InstNode.getInstNodeList() {
@@ -337,14 +338,15 @@ aspect InstantiationTree {
 		return l;
 		
 	}
-	
+
+/*	
     eq InstConstrainingClause.localModifications() {
 		ArrayList<Modification> l = new ArrayList<Modification>();
 		if (getConstrainingClause().hasClassModification())
 			l.add(getConstrainingClause().getClassModification());
 		return l;
 	}
-	
+*/
 	eq InstReplacingComponent.localModifications() {
 		ArrayList<Modification> l = new ArrayList<Modification>();
 		if (getOriginalDecl().hasModification())
@@ -403,14 +405,14 @@ aspect InstantiationTree {
 	eq InstClassRoot.equations() = getClassDecl().equations();
 	eq InstComponent.equations() = getComponentDecl().myClass().equations();
 	eq InstExtends.equations() = getExtendsClause().getSuper().myClassDecl().equations();
-	eq InstConstrainingClause.equations() = getConstrainingClause().getAccess().myClassDecl().equations();
+//	eq InstConstrainingClause.equations() = getConstrainingClause().getAccess().myClassDecl().equations();
 	eq InstConstrainingClauseRoot.equations() = getConstrainingClause().getAccess().myClassDecl().equations();
 	
 	syn lazy List InstNode.components();
 	eq InstClassRoot.components() = getClassDecl().components();
 	eq InstComponent.components() = getComponentDecl().myClass().components();
 	eq InstExtends.components() = getExtendsClause().getSuper().myClassDecl().components();
-	eq InstConstrainingClause.components() = getConstrainingClause().getAccess().myClassDecl().components();
+//	eq InstConstrainingClause.components() = getConstrainingClause().getAccess().myClassDecl().components();
 	eq InstConstrainingClauseRoot.components() = getConstrainingClause().getAccess().myClassDecl().components();
 
 	
@@ -418,7 +420,7 @@ aspect InstantiationTree {
 	eq InstClassRoot.superClasses() = getClassDecl().superClasses();
 	eq InstComponent.superClasses() = getComponentDecl().myClass().superClasses();
 	eq InstExtends.superClasses() = getExtendsClause().getSuper().myClassDecl().superClasses();
-	eq InstConstrainingClause.superClasses() = getConstrainingClause().getAccess().myClassDecl().superClasses();
+//	eq InstConstrainingClause.superClasses() = getConstrainingClause().getAccess().myClassDecl().superClasses();
     eq InstConstrainingClauseRoot.superClasses() = getConstrainingClause().getAccess().myClassDecl().superClasses();
 }
 

@@ -7,7 +7,7 @@ InstComposite : InstComponent;
 InstPrimitive : InstComponent ::= /FVariable/;
 InstExtends : InstNode ::= <ExtendsClause:ExtendsClause>;
 
-InstConstrainingClause : InstNode ::= <ConstrainingClause:ConstrainingClause>;
+//InstConstrainingClause : InstNode ::= <ConstrainingClause:ConstrainingClause>;
 
 //InstReplacingComponent : InstComponent ::= <OriginalDecl:ComponentDecl>;
 
