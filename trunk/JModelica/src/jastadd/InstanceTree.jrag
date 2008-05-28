@@ -1,5 +1,62 @@
 aspect InstantiationTree {
 
+
+    /**
+     * TODO: Is it a good idea to inherit? Should it be a component?
+     */
+    class Environment extends ArrayList<InstModification> {
+    
+        public Environment() {
+        	super();
+        }
+
+        /**
+         * Merge an outer modification into the environment: add it at the beginning.
+         */    
+    	public void mergeOuterModification(InstNode n, Modification outerMod) {
+    		InstModification im = new InstModification(n,outerMod);
+    		ArrayList<InstModification> outerMods = im.expand();
+    		addAll(0,outerMods);
+    	}
+
+        /**
+         * Merge an inner modification into the environment: add it last.
+         */    
+    	public void mergeInnerModification(InstNode n, Modification innerMod) {
+    		InstModification im = new InstModification(n,innerMod);
+    		ArrayList<InstModification> innerMods = im.expand();
+    		addAll(innerMods);    	
+    	}
+
+        /**
+         * Merge an outer environment: add it first.
+         */ 
+    	public void mergeOuterEnvironment(Environment outerEnv) {
+    		addAll(0,outerEnv);
+    	}
+
+        /**
+         * Merge an inner environment: add it last.
+         */
+    	public void mergeInnerEnvironment(Environment innerEnv) {
+    	   addAll(innerEnv);
+    	}
+
+        public Environment clone() {
+        	Environment env = new Environment();
+        	env.addAll(this);
+        	return env;
+        }
+    	
+    	/**
+    	 * TODO: implement!
+    	 */
+        public Environment peel(String name) {
+        	return new Environment();
+        }
+    
+    }
+
 	class InstModification {
 	   private InstNode instNode;
 	   private Modification modification;
@@ -54,58 +111,50 @@ aspect InstantiationTree {
        removed merged with potential local modifications.
     
        TODO: Should this attribute be lazy? Probably yes
+      
     */   
         
-	syn lazy ArrayList<InstModification> InstNode.getMergedEnvironmentList() {
+	syn lazy Environment InstNode.getMergedEnvironmentList() {
 		debugPrint("InstNode.getMergedEnvironmentList()");
 		// Retrieve modifications upwards
-		ArrayList<InstModification> env = nameScope()? myEnvironment(name()): myEnvironment();
+		Environment env = nameScope()? myEnvironment(name()): myEnvironment();
 		for (int i=0;i<localModifications().size();i++)
-			env.add(new InstModification(this,(Modification)localModifications().get(i)));
- 	    
- 	    // Eliminate all CompleteModification:s and ClassModification:s
- 	    ArrayList<InstModification> finalEnv = new ArrayList<InstModification>();
-		for (InstModification im : env) {
-		    if (im.getModification() instanceof CompleteModification || im.getModification() instanceof ClassModification) {
-				finalEnv.addAll(im.expand());
-			} else
-			    finalEnv.add(im);
-			
-		}
-
-		return finalEnv;
+			env.mergeInnerModification(this,(Modification)localModifications().get(i));
+  
+		return env;
 	}
 		
-	inh lazy ArrayList<InstModification> InstNode.myEnvironment();
-	inh lazy ArrayList<InstModification> InstNode.myEnvironment(String name);
+	inh lazy Environment InstNode.myEnvironment();
+	inh lazy Environment InstNode.myEnvironment(String name);
 	
 	eq InstNode.getInstNode().myEnvironment() {
-		ArrayList<InstModification> env = new ArrayList<InstModification>();
-		for (int i=0;i<getNumMergedEnvironment();i++)
-			env.add(new InstModification(getMergedEnvironment(i).getInstNode(),
-			                             getMergedEnvironment(i).getModification()));
+		Environment env = new Environment();
+		for (int i=0;i<getNumMergedEnvironment();i++)			
+			env.mergeInnerModification(getMergedEnvironment(i).getInstNode(),
+			                             getMergedEnvironment(i).getModification());
+			
 		return env;
 	}
 	
 	eq InstNode.getInstNode().myEnvironment(String name) =
 	  localMyEnvironment(name);
 	
-	syn ArrayList<InstModification> InstNode.localMyEnvironment(String name) {
+	syn Environment InstNode.localMyEnvironment(String name) {
 	    if(!is$Final) throw new Error("Node is not final");
 		debugPrint("InstNode.getInstNode().myEnvironment(): " + name);
-		ArrayList<InstModification> env = new ArrayList<InstModification>();
+		Environment env = new Environment();
 		//debugPrint("*****: "+getNumMergedEnvironment());
 		for (int i=0;i<getNumMergedEnvironment();i++) {
 			//getMergedEnvironment(i).getModification().dumpTree("----");
 			Modification m = getMergedEnvironment(i).getModification().matchModification(name);
 			if (m!=null)
-				env.add(new InstModification(getMergedEnvironment(i).getInstNode(),m));
+				env.mergeInnerModification(getMergedEnvironment(i).getInstNode(),m);
 		}
 		return env;
 	}
    
     eq ConstrainingClause.instConstrainingClauseRoot().myEnvironment()  {
-    	ArrayList<InstModification> l = new ArrayList<InstModification>();
+    	Environment l = new Environment();
     	if (hasClassModification()) {
 			for (int i=0;i<getClassModification().getNumArgument();i++)
 			  // TODO: should it be instConstrainingClauseRoot().getInstNode(0)? (then circular!!!)
@@ -145,8 +194,8 @@ aspect InstantiationTree {
 			return null;
 	}
 	
-	eq BaseClassDecl.getInstRoot().myEnvironment() = new ArrayList<InstModification>();
-	eq BaseClassDecl.getInstRoot().myEnvironment(String name) = new ArrayList<InstModification>();
+	eq BaseClassDecl.getInstRoot().myEnvironment() = new Environment();
+	eq BaseClassDecl.getInstRoot().myEnvironment(String name) = new Environment();
 	
 	// Definition of the NTA representing the root of the 
 	// instantiation tree
@@ -264,8 +313,18 @@ aspect InstantiationTree {
 	syn lazy ArrayList<Modification> InstNode.localModifications() = new ArrayList<Modification>();
 	eq InstComponent.localModifications() {
 		ArrayList<Modification> l = new ArrayList<Modification>();
+		// Add modifications of the declaration itself
 		if (getComponentDecl().hasModification())
 			l.add(getComponentDecl().getModification());
+	    // If there is a constraining clause, these modifications should be merged as well
+ 
+        // This is correct but obviously introduces problems in the type checking
+        // generate more test cases to check. 
+		//if (getComponentDecl().hasConstrainingClause() &&
+		//       getComponentDecl().getConstrainingClause().hasClassModification())
+
+
+			l.add(getComponentDecl().getConstrainingClause().getClassModification());	    
 		// This is to take modifiers short class declarations into account
 		ArrayList<Modification> classMods = getComponentDecl().myClass().classModifications();
 		for (int i = 0;i<classMods.size();i++)
