@@ -130,10 +130,12 @@ Task: Fix bug related to merging of modifications
 
 Fix the bug that modifiers of all replacing declarations in a 
 redeclaration chain is merged. Should be only those redeclarations that have
-an explicit constraining clause.
+an explicit constraining clause. This is done in the attribute myEnvironment(String name)
 
 ------------------------------------------------------------
 Task: Introduce class Environment.
+
+Status: done.
 
 The class Environment should be essentially an ArrayList<InstModification>
 but also contain mechanisms for merging of modifications and expanding

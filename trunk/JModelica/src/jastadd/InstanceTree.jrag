@@ -139,6 +139,8 @@ aspect InstantiationTree {
 	eq InstNode.getInstNode().myEnvironment(String name) =
 	  localMyEnvironment(name);
 	
+	// TODO: Make sure that modifications in intermediate redeclares are included
+	// Only if there is a constraining clause!
 	syn Environment InstNode.localMyEnvironment(String name) {
 	    if(!is$Final) throw new Error("Node is not final");
 		debugPrint("InstNode.getInstNode().myEnvironment(): " + name);
@@ -419,8 +421,6 @@ aspect InstanceDumpTree {
 		System.out.println(indent + dump());
 		getInstNodeList().dumpTree(indent + " ");
 	}
-	
-
 	
 	public void InstComposite.dumpTree(String indent) {
 		System.out.println(indent + dump()
