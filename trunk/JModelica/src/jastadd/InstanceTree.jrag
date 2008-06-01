@@ -54,6 +54,16 @@ aspect InstantiationTree {
         public Environment peel(String name) {
         	return new Environment();
         }
+        
+        public String toString() {
+           StringBuffer str = new StringBuffer();
+           str.append("{");
+           for (InstModification im : this) {
+           	  str.append("  " + im.getModification().prettyPrint("") + ",\n");
+           }
+           str.append("}\n");
+           return str.toString();
+        }
     
     }
 

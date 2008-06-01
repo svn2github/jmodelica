@@ -148,4 +148,14 @@ The name analysis framework should be updated to take into account also
 constraining clauses. This also requires that an environment is propagated
 in the name lookup, since constraining clauses may also be redeclared.
 
+------------------------------------------------------------
+Task: Implement peel in Environment
+
+Currently, the peeling of modifications: x.y -> y takes place outside of the
+Environment class. This should be fixed.
+
+------------------------------------------------------------
+Task: Implement InstReplacingComponent.declaredType and constrainingType
+
+This is the next step in the implementation of the new type framework.
 
