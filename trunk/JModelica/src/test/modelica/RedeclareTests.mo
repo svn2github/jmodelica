@@ -764,7 +764,7 @@ end RedeclareTest0;
 
 
 
-	model RedeclareTest1
+model RedeclareTest1
   
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest1",
@@ -774,7 +774,7 @@ end RedeclareTest0;
  fclass RedeclareTests.RedeclareTest1
  Real a.c2.x = 3 /*(3)*/;
  Real a.c2.y = 4 /*(4)*/;
- Real b.a.c2.x = 8 /*(8)*/;
+ Real b.a.c2.x = 5 /*(8)*/;
  Real b.a.c2.y = 4 /*(4)*/;
  Real b.a.c2.z = 9 /*(9)*/;
  Real b.aa.c2.x = 2 /*(2)*/;
@@ -803,7 +803,8 @@ end RedeclareTests.RedeclareTest1;
   end A;
   
   model B
-    // Try to access a parameter here as well
+    // Notice that the modifier 'x=8' is not merged since
+    // it redeclared and since there is no constraining clause  
     A a(redeclare replaceable C22 c2(x=8));
     A aa;
   end B;
@@ -884,44 +885,6 @@ model RedeclareTest3
                                                description="Basic redeclares.",
                                                flatModel=
 "
-/*
-fclass RedeclareTests.RedeclareTest3;
-  Real r = 0.1;
-  Real palette.q = 0.3;
-  Real palette.p.b = 0.001;
-  Real palette.p.c1.rr = 0;
-  Real palette.p.c1.r = 1;
-  Real palette.p.c1.g = 0.2;
-  Real palette.p.c1.b = palette.q;
-  Real palette.p.c2.rr = 0;
-  Real palette.p.c2.r = palette.p.c2.rr;
-  Real palette.p.c2.g = 0;
-  Real palette.p.c2.b = 1;
-  Real palette.p.c3.gg = 1;
-  Real palette.p.c3.rr = 0;
-  Real palette.p.c3.r = r;
-  Real palette.p.c3.g = palette.p.c3.gg;
-  Real palette.p.c3.b = 0.002;
-  Real palette.p.q = 0.4;
-  Real q = 0.3;
-  Real p.b = 0.001;
-  Real p.c1.rr = 0;
-  Real p.c1.r = 1;
-  Real p.c1.g = 0.1;
-  Real p.c1.b = 0.23;
-  Real p.c2.rr = 0;
-  Real p.c2.r = p.c2.rr;
-  Real p.c2.g = 0;
-  Real p.c2.b = 1;
-  Real p.c3.gg = 1;
-  Real p.c3.rr = 0;
-  Real p.c3.r = 0.56;
-  Real p.c3.g = 0.85;
-  Real p.c3.b = 0.24;
-  Real p.q = 0.4;
-equation 
-end RedeclareTests.RedeclareTest3;
-*/
 fclass RedeclareTests.RedeclareTest3
  Real r = 0.1 /*(0.1)*/;
  Real palette.q = 0.3 /*(0.3)*/;
@@ -929,7 +892,7 @@ fclass RedeclareTests.RedeclareTest3
  Real palette.p.c1.rr = 0 /*(0)*/;
  Real palette.p.c1.r = 1 /*(1)*/;
  Real palette.p.c1.g = 0.2 /*(0.2)*/;
- Real palette.p.c1.b = palette.q;
+ Real palette.p.c1.b = 0 /*(0)*/;
  Real palette.p.c2.rr = 0 /*(0)*/;
  Real palette.p.c2.r = palette.p.c2.rr;
  Real palette.p.c2.g = 0 /*(0)*/;
@@ -1014,43 +977,17 @@ end RedeclareTest3;
 
 
 model RedeclareTest4
-  
-  
+   
          annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest4",
                                                description="Basic redeclares.",
                                                flatModel=
 "
-/*
-fclass Cm1
-  Real c0_q = 0.3;
-  Real c0_p_c1_r = 1.0;
-  Real c0_p_c1_g = 0.2;
-  Real c0_p_c1_b = c0_q;
-  Real c0_p_c2_r = 0.0;
-  Real c0_p_c2_g = 0.0;
-  Real c0_p_c2_b = 1.0;
-  Real c0_p_c3_r = 0.1;
-  Real c0_p_c3_g = 1.0;
-  Real c0_p_c3_b = 0.0010;
-  Real q = 0.3;
-  Real p_c1_r = 1.0;
-  Real p_c1_g = 0.1;
-  Real p_c1_b = 0.23;
-  Real p_c2_r = 0.0;
-  Real p_c2_g = 0.0;
-  Real p_c2_b = 1.0;
-  Real p_c3_r = 0.56;
-  Real p_c3_g = 0.85;
-  Real p_c3_b = 0.24;
-equation 
-end Cm1;
-*/
 fclass RedeclareTests.RedeclareTest4
  Real c0.q = 0.3 /*(0.3)*/;
  Real c0.p.c1.r = 1 /*(1)*/;
  Real c0.p.c1.g = 0.2 /*(0.2)*/;
- Real c0.p.c1.b = c0.q;
+ Real c0.p.c1.b = 0 /*(0)*/;
  Real c0.p.c2.r = 0 /*(0)*/;
  Real c0.p.c2.g = 0 /*(0)*/;
  Real c0.p.c2.b = 1 /*(1)*/;
@@ -1123,7 +1060,7 @@ model RedeclareTest5
 "
 fclass RedeclareTests.RedeclareTest5
  Real u.c1.c2.x = 55 /*(55)*/;
- Real u.c1.c2.y = 44 /*(44)*/;
+ Real u.c1.c2.y = 4 /*(4)*/;
  Real u.c1.c2.z = 66 /*(66)*/;
 equation
 end RedeclareTests.RedeclareTest5;
@@ -1149,7 +1086,7 @@ model Unnamed
      Real y=33;
   end C222;
     
-  C1 c1(redeclare replaceable C222 c2(y=44),c2.x=2);
+  C1 c1(redeclare replaceable C222 c2(y=44,x=2));
     
 end Unnamed;
   
@@ -1273,6 +1210,350 @@ model RedeclareTest8
   A a(redeclare C22 c2);
   B b(a(redeclare C222 c2(z=9,y=4)));
 end RedeclareTest8;
+
+model RedeclareTest9
+  
+     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest9",
+                                               description="Basic redeclares.",
+                                               flatModel=
+"
+ fclass RedeclareTests.RedeclareTest9
+ Real a.c2.x = 3 /*(3)*/;
+ Real a.c2.y = 4 /*(4)*/;
+ Real b.a.c2.x = 8 /*(8)*/;
+ Real b.a.c2.y = 4 /*(4)*/;
+ Real b.a.c2.z = 9 /*(9)*/;
+ Real b.aa.c2.x = 2 /*(2)*/;
+equation
+end RedeclareTests.RedeclareTest9;
+")})));
+
+  
+  model C2
+    Real x=2;
+  end C2;
+  
+  model C22
+    Real x=3;
+    Real y=4;
+  end C22;
+  
+  model C222
+    Real x=5;
+    Real y=6;
+    Real z=7;
+  end C222;
+  
+  model A
+    replaceable C2 c2;
+  end A;
+  
+  model B
+    // Notice that the modifier 'x=8' is  merged since
+    // it appears in a constraining clause  
+    A a(redeclare replaceable C22 c2 extends C22(x=8));
+    A aa;
+  end B;
+  
+  A a(redeclare C22 c2);
+  B b(a(redeclare C222 c2(z=9,y=4)));
+end RedeclareTest9;
+
+
+model RedeclareTest10 
+  
+        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest10",
+                                               description="Basic redeclares.",
+                                               flatModel=
+"
+fclass RedeclareTests.RedeclareTest10
+ Real r = 0.1 /*(0.1)*/;
+ Real palette.q = 0.3 /*(0.3)*/;
+ Real palette.p.b = 0.001 /*(0.0010)*/;
+ Real palette.p.c1.rr = 0 /*(0)*/;
+ Real palette.p.c1.r = 1 /*(1)*/;
+ Real palette.p.c1.g = 0.2 /*(0.2)*/;
+ Real palette.p.c1.b = palette.q;
+ Real palette.p.c2.rr = 0 /*(0)*/;
+ Real palette.p.c2.r = palette.p.c2.rr;
+ Real palette.p.c2.g = 0 /*(0)*/;
+ Real palette.p.c2.b = 1 /*(1)*/;
+ Real palette.p.c3.gg = 1 /*(1)*/;
+ Real palette.p.c3.rr = 0 /*(0)*/;
+ Real palette.p.c3.r = r;
+ Real palette.p.c3.g = palette.p.c3.gg;
+ Real palette.p.c3.b = 0.002 /*(0.0020)*/;
+ Real palette.p.q = 0.4 /*(0.4)*/;
+ Real q = 0.3 /*(0.3)*/;
+ Real p.b = 0.001 /*(0.0010)*/;
+ Real p.c1.rr = 0 /*(0)*/;
+ Real p.c1.r = 1 /*(1)*/;
+ Real p.c1.g = 0.1 /*(0.1)*/;
+ Real p.c1.b = 0.23 /*(0.23)*/;
+ Real p.c2.rr = 0 /*(0)*/;
+ Real p.c2.r = p.c2.rr;
+ Real p.c2.g = 0 /*(0)*/;
+ Real p.c2.b = 1 /*(1)*/;
+ Real p.c3.gg = 1 /*(1)*/;
+ Real p.c3.rr = 0 /*(0)*/;
+ Real p.c3.r = 0.56 /*(0.56)*/;
+ Real p.c3.g = 0.85 /*(0.85)*/;
+ Real p.c3.b = 0.24 /*(0.24)*/;
+ Real p.q = 0.4 /*(0.4)*/;
+equation
+end RedeclareTests.RedeclareTest10;
+")})));
+  
+  
+  
+  extends C0.Colors.MyPalette(p(redeclare C0.Colors.Green c3(r=0.56,g=0.85,b=0.24),c1(b=0.23)));
+model C0 
+    
+  model Colors 
+  model Color 
+    Real rr = 0;
+    Real r=rr;
+    Real g=0;
+    Real b=0;
+  end Color;
+      
+  model Red 
+    extends Color(r=1);
+  end Red;
+      
+  model Green
+    extends Color(g=gg);
+    Real gg = 1; 
+  end Green;
+      
+  model Blue 
+    extends Color(b=1);
+  end Blue;
+      
+  model Palette 
+     Real b = 0.001;
+     replaceable Color c1;
+     replaceable Color c2;
+     replaceable Color c3(b=b);
+     Real q = 0.4;
+  end Palette;
+      
+  model MyPalette 
+        
+  Real q = 0.3;
+        
+  Palette p(redeclare replaceable Red c1 extends Red(g=0.1,b=q),redeclare replaceable Blue c2,
+            redeclare replaceable Green c3 extends Green(b=0.002));
+        
+  end MyPalette;
+      
+  end Colors;
+    
+end C0;
+  
+  Real r = 0.1;
+ C0.Colors.MyPalette palette(p(c3(r=r),redeclare C0.Colors.Red c1(g=0.2)));
+  
+end RedeclareTest10;
+
+model RedeclareTest11
+   
+         annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest11",
+                                               description="Basic redeclares.",
+                                               flatModel=
+"
+fclass RedeclareTests.RedeclareTest11
+ Real c0.q = 0.3 /*(0.3)*/;
+ Real c0.p.c1.r = 1 /*(1)*/;
+ Real c0.p.c1.g = 0.2 /*(0.2)*/;
+ Real c0.p.c1.b = c0.q;
+ Real c0.p.c2.r = 0 /*(0)*/;
+ Real c0.p.c2.g = 0 /*(0)*/;
+ Real c0.p.c2.b = 1 /*(1)*/;
+ Real c0.p.c3.r = 0.1 /*(0.1)*/;
+ Real c0.p.c3.g = 1 /*(1)*/;
+ Real c0.p.c3.b = 0.001 /*(0.0010)*/;
+ Real q = 0.3 /*(0.3)*/;
+ Real p.c1.r = 1 /*(1)*/;
+ Real p.c1.g = 0.1 /*(0.1)*/;
+ Real p.c1.b = 0.23 /*(0.23)*/;
+ Real p.c2.r = 0 /*(0)*/;
+ Real p.c2.g = 0 /*(0)*/;
+ Real p.c2.b = 1 /*(1)*/;
+ Real p.c3.r = 0.56 /*(0.56)*/;
+ Real p.c3.g = 0.85 /*(0.85)*/;
+ Real p.c3.b = 0.24 /*(0.24)*/;
+equation
+end RedeclareTests.RedeclareTest11;
+")})));
+  
+ 
+  extends C0(p(redeclare replaceable C0.Green c3 extends C0.Green(r=0.56,g=0.85,b=0.24),c1(b=0.23)));
+model C0 
+  
+  
+  model Color 
+    Real r=0;
+    Real g=0;
+    Real b=0;
+  end Color;
+  
+  model Red 
+    extends Color(r=1);
+  end Red;
+  
+  model Green 
+    extends Color(g=1);
+  end Green;
+  
+  model Blue 
+    extends Color(b=1);
+  end Blue;
+  
+  model Palette 
+     replaceable Color c1;
+     replaceable Color c2;
+     replaceable Color c3(b=0.001);
+  end Palette;
+  
+  Real q = 0.3;
+  
+  Palette p(redeclare replaceable Red c1 extends Red(g=0.1,b=q),
+            redeclare replaceable Blue c2,redeclare replaceable Green c3);
+  
+end C0;
+
+ C0 c0(p(c3(r=0.1),redeclare C0.Red c1(g=0.2)));
+
+  
+
+end RedeclareTest11;
+
+model RedeclareTest12
+  
+  
+    annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest12",
+                                               description="Basic redeclares.",
+                                               flatModel=
+"
+fclass RedeclareTests.RedeclareTest12
+ Real u.c1.c2.x = 55 /*(55)*/;
+ Real u.c1.c2.y = 44 /*(44)*/;
+ Real u.c1.c2.z = 66 /*(66)*/;
+equation
+end RedeclareTests.RedeclareTest12;
+")})));
+
+
+
+model Unnamed 
+  model C1 
+    model C2 
+      Real x=2;
+    end C2;
+    replaceable C2 c2(x=4);
+  end C1;
+    
+  model C22 
+     Real x=1;
+     Real y=3;
+  end C22;
+    
+  model C222 
+    Real x=11;
+     Real y=33;
+  end C222;
+    
+  C1 c1(redeclare replaceable C222 c2 extends C222(y=44,x=2));
+    
+end Unnamed;
+  
+model C222
+     Real x=2;
+     Real y=4;
+     Real z=6;
+end C222;
+ Unnamed u(c1(redeclare C222 c2(x=55,z=66)));
+
+end RedeclareTest12;
+
+model RedeclareTest13
+    annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest13",
+                                               description="Basic redeclares.",
+                                               flatModel=
+"
+fclass RedeclareTests.RedeclareTest13
+ Real c.b1.z = 3 /*(3)*/;
+ Real c.b1.x = 5 /*(5)*/;
+ Real c.b1.y = 4 /*(4)*/;
+ Real c.b2.z = 3 /*(3)*/;
+ Real c.b2.x = 5 /*(5)*/;
+ Real c.b2.y = 3 /*(3)*/;
+equation
+end RedeclareTests.RedeclareTest13;
+")})));
+
+
+	model A
+	  Real x=1;
+	  Real y=2;
+	end A;
+	
+	model B
+	  extends A;
+	  Real z = 3;
+	end B;
+	
+	model C
+	  replaceable B b1(x=5) extends B(x=3,y=4);
+	  replaceable B b2(x=5) extends B(y=3);
+    end C;
+    
+    C c;
+	
+end RedeclareTest13;
+
+model RedeclareTest14
+    annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest14",
+                                               description="Basic redeclares.",
+                                               flatModel=
+"
+fclass RedeclareTests.RedeclareTest14
+ Real c.b1.z = 3 /*(3)*/;
+ Real c.b1.x = 5 /*(5)*/;
+ Real c.b1.y = 4 /*(4)*/;
+ Real c.b2.z = 5 /*(5)*/;
+ Real c.b2.x = 1 /*(1)*/;
+ Real c.b2.y = 3 /*(3)*/;
+equation
+end RedeclareTests.RedeclareTest14;
+")})));
+
+
+	model A
+	  Real x=1;
+	  Real y=2;
+	end A;
+	
+	model B
+	  extends A;
+	  Real z = 3;
+	end B;
+	
+	model C
+	  replaceable B b1(x=5) extends B(x=3,y=4);
+	  replaceable B b2(x=5) extends B(y=3);
+    end C;
+    
+    C c(redeclare B b2(z=5));
+	
+end RedeclareTest14;
 
 
 end RedeclareTests;

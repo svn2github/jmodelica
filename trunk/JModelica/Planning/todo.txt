@@ -128,6 +128,8 @@ name analysis, type checking etc.
 ------------------------------------------------------------
 Task: Fix bug related to merging of modifications
 
+Status: done
+
 Fix the bug that modifiers of all replacing declarations in a 
 redeclaration chain is merged. Should be only those redeclarations that have
 an explicit constraining clause. This is done in the attribute myEnvironment(String name)

@@ -36,6 +36,31 @@ aspect Types {
       return type; 
    }
 
+
+   /**
+    * Returns a new ComponentType corresponding to the replacing component decl.
+    */
+/*   public ComponentType InstReplacingComponent.declaredType() {
+      ComponentType type =  new ComponentType(getComponentDecl());
+      
+      
+      
+      
+      // If the component decl has a modification, this is part of the type
+      if (getComponentDecl().hasModification())
+      	 type.env.mergeOuterModification(this,getComponentDecl().getModification());
+      
+      // If the component decl has a constraining clause with modifications
+      // this is part of the type.
+      if (getComponentDecl().hasConstrainingClause() &&
+           getComponentDecl().getConstrainingClause().hasClassModification())
+      	 type.env.mergeInnerModification(this,getComponentDecl().getConstrainingClause().getClassModification());           
+     
+      return type; 
+   }
+*/
+
+ 
    /**
     * Returns a new ConstrainingComponentType in a specified outer environment.
     * The input enviroment is cloned before the type is created.

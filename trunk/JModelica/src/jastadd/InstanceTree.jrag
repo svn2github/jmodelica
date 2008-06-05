@@ -2,7 +2,7 @@ aspect InstantiationTree {
 
 
     /**
-     * TODO: Is it a good idea to inherit? Should it be a component?
+     * TODO: Is it a good idea to inherit? Should env be a component?
      */
     class Environment extends ArrayList<InstModification> {
     
@@ -149,22 +149,32 @@ aspect InstantiationTree {
 	eq InstNode.getInstNode().myEnvironment(String name) =
 	  localMyEnvironment(name);
 	
-	// TODO: Make sure that modifications in intermediate redeclares are included
-	// Only if there is a constraining clause!
 	syn Environment InstNode.localMyEnvironment(String name) {
 	    if(!is$Final) throw new Error("Node is not final");
 		debugPrint("InstNode.getInstNode().myEnvironment(): " + name);
 		Environment env = new Environment();
-		//debugPrint("*****: "+getNumMergedEnvironment());
+	    boolean foundReplacing = false;
 		for (int i=0;i<getNumMergedEnvironment();i++) {
-			//getMergedEnvironment(i).getModification().dumpTree("----");
+		    // Find first ComponentRedeclare
+		    if (!foundReplacing && 
+		        getMergedEnvironment(i).getModification() instanceof  ComponentRedeclare &&
+		          ((ComponentRedeclare)getMergedEnvironment(i).getModification()).getName().getID().equals(name)) {
+		        foundReplacing = true;
+		        ComponentRedeclare cdr = (ComponentRedeclare)getMergedEnvironment(i).getModification();
+		        if (cdr.getName().getID().equals(name) && 
+		            cdr.getComponentDecl().hasModification()) 
+		    		env.mergeInnerModification(getMergedEnvironment(i).getInstNode(),
+		    		   cdr.getComponentDecl().getModification());
+		    }
+            // This merges modifications in the environment. For ComponentRedeclare:s
+            // only modifications in the constraining clause are merged.
 			Modification m = getMergedEnvironment(i).getModification().matchModification(name);
 			if (m!=null)
 				env.mergeInnerModification(getMergedEnvironment(i).getInstNode(),m);
 		}
 		return env;
 	}
-   
+
     eq ConstrainingClause.instConstrainingClauseRoot().myEnvironment()  {
     	Environment l = new Environment();
     	if (hasClassModification()) {
@@ -175,8 +185,7 @@ aspect InstantiationTree {
     	}
     	return l;
     }
-	
-	
+		
 	syn lazy Modification Modification.matchModification(String name) = null;
 	eq CompleteModification.matchModification(String name) {
 		for (int i=0;i<getClassModification().getNumArgument();i++)
@@ -192,9 +201,14 @@ aspect InstantiationTree {
 		return null;
 	}
 	
+	// Only add modifiers in constraining clauses
 	eq ComponentRedeclare.matchModification(String name) {
-		if (name.equals(getName().getID()) && getComponentDecl().hasModification())
-			return getComponentDecl().getModification();
+		if (name.equals(getName().getID()) && getComponentDecl().hasConstrainingClause() &&
+		    getComponentDecl().getConstrainingClause().hasClassModification())
+			return getComponentDecl().getConstrainingClause().getClassModification();
+//		if (name.equals(getName().getID()) && getComponentDecl().hasModification())
+//			return getComponentDecl().getModification();
+
 		return null;
 	}
 	
@@ -328,13 +342,11 @@ aspect InstantiationTree {
 		// Add modifications of the declaration itself
 		if (getComponentDecl().hasModification())
 			l.add(getComponentDecl().getModification());
-	    // If there is a constraining clause, these modifications should be merged as well
- 
-        // TODO: This is correct but obviously introduces problems in the type checking
-        // generate more test cases to check. 
-		//if (getComponentDecl().hasConstrainingClause() &&
-		//       getComponentDecl().getConstrainingClause().hasClassModification())
-		//	l.add(getComponentDecl().getConstrainingClause().getClassModification());	
+			
+	    // If there is a constraining clause, these modifications should be merged as well 
+		if (getComponentDecl().hasConstrainingClause() &&
+		       getComponentDecl().getConstrainingClause().hasClassModification())
+		  	l.add(getComponentDecl().getConstrainingClause().getClassModification());	
 		    
 		// This is to take modifiers short class declarations into account
 		ArrayList<Modification> classMods = getComponentDecl().myClass().classModifications();
@@ -353,8 +365,18 @@ aspect InstantiationTree {
 
 	eq InstReplacingComponent.localModifications() {
 		ArrayList<Modification> l = new ArrayList<Modification>();
-		if (getOriginalDecl().hasModification())
-			l.add(getOriginalDecl().getModification());
+		// If there is a constraining clase, return its modifications
+		if (getOriginalDecl().hasConstrainingClause()) {
+		  if (getOriginalDecl().getConstrainingClause().hasClassModification()) {
+			l.add(getOriginalDecl().getConstrainingClause().getClassModification());
+          }
+        } else {
+            // If no constraining clause, use the original declaration 
+            // and return its modifiers
+     		if (getOriginalDecl().hasModification())
+				l.add(getOriginalDecl().getModification());     
+        }
+
 		// This is to take modifiers short class declarations into account
 		ArrayList<Modification> classMods = getOriginalDecl().myClass().classModifications();
 		for (int i = 0;i<classMods.size();i++)
