@@ -92,7 +92,9 @@ Task: Fix a bug in the parser
 
 Priority: 
 
-Status:
+Status: Partially done. The expression bug is fixed in the front-end, but it remains to 
+        remove the precedence commants to beaver and to rewrite the
+        flat parser.
 
 Description:
 The precedence of the of ^ operator is not correct

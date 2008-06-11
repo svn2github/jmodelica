@@ -869,22 +869,40 @@ Exp relation =
   | artm_exp.a {: return a; :}	
   ;
   
-Exp artm_exp = 
-  primary {: return primary; :}
-  | artm_exp.a PLUS artm_exp.b {: return new AddExp(a,b); :} 
-  | artm_exp.a MINUS artm_exp.b {: return new SubExp(a,b); :}
-  | artm_exp.a MULT artm_exp.b {: return new MulExp(a,b); :}
-  | artm_exp.a DIV artm_exp.b {: return new DivExp(a,b); :}  
-  | primary.a POW primary.e {: return new PowExp(a,e); :}
-  ;
   
+  Exp artm_exp =
+   additive_exp {: return additive_exp; :}
+   ;
+
+  Exp additive_exp =
+     multiplicative_exp.e    {: return e; :}
+   | additive_exp.e1 PLUS multiplicative_exp.e2   {: return new AddExp(e1, e2); :}
+   | additive_exp.e1 MINUS multiplicative_exp.e2  {: return new SubExp(e1, e2); :}
+   ;
+
+  Exp multiplicative_exp =
+     unary_exp.e                                     {: return e; :}
+   | multiplicative_exp.e1 MULT unary_exp.e2  {: return new MulExp(e1, e2); :}
+   | multiplicative_exp.e1 DIV unary_exp.e2   {: return new DivExp(e1, e2); :}
+   ;
+
+
+Exp unary_exp =
+   pow_exp          {: return pow_exp; :}
+   | MINUS unary_exp       {: return new NegExp(unary_exp); :}
+   | PLUS unary_exp        {: return unary_exp; :}
+   ;
+
+Exp pow_exp =
+    primary {:return primary; :}
+    | primary.a POW primary.e {: return new PowExp(a,e); :}
+    ;
+
 Exp primary =        
    UNSIGNED_NUMBER.n    {: return new RealLitExp(n); :}
   | TRUE                {: return new BooleanLitExpTrue(); :}
   | FALSE                {: return new BooleanLitExpFalse(); :}
   | STRING.s               {: return new StringLitExp(s); :}
-  | MINUS primary       {: return new NegExp(primary); :}
-  | PLUS primary        {: return primary; :}
   | access_expression   {: return access_expression; :}
   | LPAREN exp.a RPAREN {: return a; :}
   | LPAREN arg_list RPAREN {: return new OutputExpressionList(arg_list); :}
@@ -894,8 +912,9 @@ Exp primary =
   | LBRACE function_arguments RBRACE {: return new ArrayConstructor(function_arguments); :}
   | TIME                {: return new TimeExp(); :}
   ;
-  
-FunctionCall function_call =
+
+ 
+ FunctionCall function_call =
   parse_access LPAREN function_arguments? RPAREN {: return new FunctionCall(parse_access,function_arguments); :}
   ;
   

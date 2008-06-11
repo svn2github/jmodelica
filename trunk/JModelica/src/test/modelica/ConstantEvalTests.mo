@@ -72,6 +72,11 @@ end ConstantEvalTests.CEvalTest2;
 	    M m;
 	end CEvalTest2;
 	
+model ExpressionTest1
+ Real x = -(1+2)^3;
+ Real y = 1+2-(1+4);
+ 
+end ExpressionTest1;
 	
 
 end ConstantEvalTests;
