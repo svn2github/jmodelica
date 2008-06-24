@@ -1,5 +1,169 @@
 aspect Types { 
 
+  /**
+    A type of a component or class is the following information:
+       1. Whether it is replaceable or not.
+       2. Whether the class itself or the class of the component is 
+          transitively non-replaceable (Section 6.2.1), and if not, 
+          the reference to replaceable class it refers to.
+       3. Whether it is a component or a class.
+       4. For each named public element of the class or component 
+          (including both local and inherited named elements) a tuple comprised of:
+             4.1. Name of the element.
+             4.2. Interface or type of the element. This might have 
+                  been modified by modifiers and is thus not necessarily 
+                  identical to the interface of the original declaration.
+       5. Additional information/attributes about the element:
+             5.1. The flow-attribute.
+             5.2. Declared variability (constant, parameter, discrete).
+             5.3. The attributes input and output.
+             5.4. The attributes inner and/or outer..
+             5.5. Whether the declaration is final, and in that case its 
+                  semantics contents.
+             5.6. Array sizes (if any).
+             5.7. Condition of conditional components (if any).
+             5.8. Which kind of specialized class.
+             5.9. For an enumeration type or component of enumeration type the 
+                  names of the enumeration literals in order.
+             5.10. Whether it is a built-in type and the built-in type 
+                   (RealType, IntegerType, StringType or BooleanType).
+
+      Notice that all this information can be changed by modifications. 
+
+	  All information is not applicable to both classes and components, according
+	  to the following table:
+	  	      
+       1.   (Replaceable)           Class/Component
+       2.   (TNR)                   Class/Component
+       3.   (Component or Class)    Class/Component
+       4.*. (Enclosed elements)     Class/Component
+       5.1. (Flow)                  Component
+       5.2. (Variability)           Component
+       5.3. (Input/Output)          Component 
+       5.4. (Inner/Outer)           Class/Component
+       5.5. (Final)                 Class/Component
+       5.6. (Array sizes)           Class/Component
+       5.7. (Cond. comp.)           Component
+       5.8. (What kind of class)    Class/Component
+       5.9. (Enumeration)           Class/Component
+       5.10.(Built-in type)         Class Component
+
+      Design I:
+      Do all type checking based on instance hierarchies. Example:
+      
+      package RedeclareTestOx1
+        model A
+          Real x=1;
+        end A;
+ 
+        model B
+          Real x=2;
+          Real y=3;
+        end B;
+ 
+        model C
+          replaceable A a;
+        end C;
+ 
+        C c(redeclare B a);
+ 
+      end RedeclareTestOx1;
+  
+      The corresponding instance tree is then 
+      
+              InstRoot
+                 |
+                 |
+        1.  InstComposite 'C c' getMergedEnvironment = {redeclare B a}
+                 |
+                 |
+         2.  InstReplacingComponent 'B a'
+             |                     |
+      InstPrimitive 'Real x'  InstPrimitive 'Real y'            
+
+      Type tests:
+      1. No type tests
+      2. Test that the instance tree rooted in 
+            InstReplacingComponent 'B a' 
+         is indeed a subtype of 
+            InstRoot 'replaceable A a'
+               |
+             InstPrimitive 'Real x'
+
+      Design II:
+      Introduce a class hierarchy for Types that encapsulates all this information.
+      We let 
+      
+      
+                               Type
+                                |
+               ------------------------------------
+               |                                   |
+          ComponentType                         ClassType
+               |                                   |
+   ------------------------                        |
+   |                       |                       |
+PrimitiveComponentType     |                       |
+   |                       |                       | 
+   |           ConstrainingComponentType           |
+   |                                               |
+ConstrainingPrimitiveComponentType                 |   
+                                                   |
+                                                   |
+                                        ------------------------
+                                        |                       |
+                                 PrimitiveClassType             |
+                                        |                       |
+                                        |              ConstrainingClassType
+                                        |            
+                            ConstrainingPrimitiveClassType
+                            
+         This design implies that points 3. (Class or Component) and 5.10. (
+         built-in type are encoded in the class hierarchy, in addition to whether
+         the type is a constraining type or not. In addition, since type tests are done              
+
+
+         The type then has the following interface:
+           
+         interface Type {
+               // 1.   (Replaceable)           Class/Component
+               public boolean isReplaceable();
+      
+               // 2.   (TNR)                   Class/Component
+               public boolean isTNR();
+
+               // 4.*. (Enclosed elements)     Class/Component                            
+               public Collection enclosedElements()
+
+               // 5.4. (Inner/Outer)           Class/Component
+               public 
+       5.5. (Final)                 Class/Component
+       5.6. (Array sizes)           Class/Component
+       5.7. (Cond. comp.)           Component
+       5.8. (What kind of class)    Class/Component
+       5.9. (Enumeration)           Class/Component
+       5.10.(Built-in type)         Class Component
+  
+  
+       
+           
+         
+         }
+
+     5.1. (Flow)                  Component
+       5.2. (Variability)           Component
+       5.3. (Input/Output)          Component 
+  
+
+
+
+
+
+
+
+  */
+
+
    public ClassType InstConstrainingClauseRoot.classType() {
    		return new ClassType(getConstrainingClause().getAccess().myClassDecl(),getMergedEnvironmentList());
    }
@@ -40,11 +204,9 @@ aspect Types {
    /**
     * Returns a new ComponentType corresponding to the replacing component decl.
     */
+
 /*   public ComponentType InstReplacingComponent.declaredType() {
       ComponentType type =  new ComponentType(getComponentDecl());
-      
-      
-      
       
       // If the component decl has a modification, this is part of the type
       if (getComponentDecl().hasModification())
@@ -109,7 +271,8 @@ aspect Types {
         public String name() {
           return getClass().getName();
         }
-                
+      
+                  
         
    }
 
