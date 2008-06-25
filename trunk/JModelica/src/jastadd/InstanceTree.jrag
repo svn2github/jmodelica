@@ -150,7 +150,7 @@ aspect InstantiationTree {
 	  localMyEnvironment(name);
 	
 	syn Environment InstNode.localMyEnvironment(String name) {
-	    if(!is$Final) throw new Error("Node is not final");
+	    if(!is$Final) throw new Error("Node '"+toString() +"' is not final\n**Parent: "+getParent().getParent().toString());
 		debugPrint("InstNode.getInstNode().myEnvironment(): " + name);
 		Environment env = new Environment();
 	    boolean foundReplacing = false;
@@ -252,7 +252,8 @@ aspect InstantiationTree {
 			ComponentDecl cd = (ComponentDecl)comps.getChild(i);
 			ComponentDecl replacingCD = retrieveReplacingComponent(cd.name());
 			if (replacingCD != null)
-				l.add(new InstReplacingComponent(new List<FExp>(),replacingCD,cd));
+			    // TODO: Add support for InstReplacingPrimitive
+				l.add(new InstReplacingComposite(new List<FExp>(),replacingCD,cd));
 			else
 				l.add(cd.newInstComponent());
 		}				
@@ -363,7 +364,7 @@ aspect InstantiationTree {
 		
 	}
 
-	eq InstReplacingComponent.localModifications() {
+	eq InstReplacingComposite.localModifications() {
 		ArrayList<Modification> l = new ArrayList<Modification>();
 		// If there is a constraining clase, return its modifications
 		if (getOriginalDecl().hasConstrainingClause()) {

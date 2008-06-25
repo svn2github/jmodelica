@@ -103,16 +103,27 @@ public class FlatteningTestCase extends TestCase {
 	    	return false;
 	    }
 	    FlatRoot flatRoot = new FlatRoot();
-	    //flatRoot.setFileName(name);
+	    flatRoot.setFileName(getSourceFileName());
 	    FClass fc = new FClass();
 	    flatRoot.setFClass(fc);
 	    
 		//FClass fc = new FClass();
-		sr.findFlatten(getClassName(), fc);
-		/*if (fc.errorCheck()) {
-	    	System.out.println("***** Errors in Class!");
-	    	return false;			
-		}*/
+	    InstNode ir = sr.findFlatten(getClassName(), fc);
+	    
+   	  	if (ir==null) {
+   		    return false;
+   	    }
+   	    
+   	  	StringBuffer str = new StringBuffer();
+   	    if (ir.errorCheck(str))
+   		 return false;
+		
+		
+		
+		//if (fc.errorCheck()) {
+	    	//System.out.println("***** Errors in Class!");
+	    //	return false;			
+		//}
 		//System.out.println(fc.prettyPrint(""));
 		//System.out.println(getFlatModel());
 		TokenTester tt = new TokenTester();

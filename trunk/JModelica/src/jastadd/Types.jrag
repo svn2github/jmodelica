@@ -1,5 +1,16 @@
 aspect Types { 
   
+   syn lazy List InstNode.getDynamicInstList() = new List();
+
+
+   syn lazy InstComposite InstNode.createDynamicInstComposite(ComponentDecl decl) {
+   	  InstComposite ic = new InstComposite(new List(),decl);
+   	  addDynamicInst(ic);
+   	  ic.is$Final(true); // TODO: Is this really ok...?
+   	  return ic;
+   }
+  
+  
    syn String InstNode.className() = "";
    syn String InstComponent.className() = getComponentDecl().myClass().name();
 
@@ -17,8 +28,16 @@ aspect Types {
        InstComposite superType = this;
    
        // Check that all elements (here: components) in superType are in subType 
-   
-   	   return false;
+       for (InstNode superTypeComponentInst : containedInstComponents()) {
+          HashSet<InstNode> set = subType.memberComponentInst(superTypeComponentInst.name());
+          if (set.size()!=1)
+          	return false;
+          InstNode subTypeComponentInst = set.iterator().next();
+          if (!subTypeComponentInst.subType(superTypeComponentInst))
+          	return false;
+	   }
+   	   
+   	   return true;
    }
    
    eq InstPrimitive.superTypePrimitiveComponentType(InstPrimitive subType) {
@@ -30,6 +49,53 @@ aspect Types {
    	      return false;
    }
 
+  syn lazy HashSet<InstNode> InstNode.memberComponentInst(String name) {
+     HashSet<InstNode> set = new HashSet<InstNode>(4);
+     for (InstNode node : containedInstComponents()) {
+     	// This is to take InstExtends into account
+     if (node.name().equals(name))
+        set.add(node);
+ 
+     }
+     return set;
+  }
+
+  syn lazy ArrayList<InstNode> InstNode.containedInstComponents() {
+  	ArrayList<InstNode> l = new ArrayList<InstNode>();
+    for (InstNode node : getInstNodes()) {
+       if (node instanceof InstExtends)
+       	  l.addAll(node.containedInstComponents());
+       else
+         l.add(node);
+    }
+    return l;
+  }
+  
+  public void InstComposite.typeCheck() {
+      
+  }
+  
+  public void InstReplacingComposite.typeCheck() {
+     // 1.  If the original declaration has a constraining clause,
+     //   1.1 Type check the constraining clause.
+     //   1.2 Check that the declaration is a subtype of the contstraining clause.
+     
+     
+         
+     // Check subtype condition for all applicable redeclarations. This may include checking
+     // of a chain of redeclarations.
+
+     InstComponent superType = createDynamicInstComposite(getOriginalDecl());
+     //InstNode superType = createDynamicInstConstrainingType(getOriginalDecl());
+     for (InstModification im : myEnvironment()) {
+	   	if (im.getModification().matchRedeclare(name())!=null) { 
+           InstComponent subType = im.getInstNode().createDynamicInstComposite(im.getModification().matchRedeclare(name()));
+           if (!subType.subType(superType))
+             subType.getComponentDecl().error("'" + subType.getComponentDecl().prettyPrint("")+ "'"+ " is not a subtype of " + 
+                "'"+superType.getComponentDecl().prettyPrint("")+"'");   	   
+	    }
+	 }
+  }
   
   /*
     
@@ -90,7 +156,8 @@ aspect Types {
    	      return false;
    }
 */
-	public String InstReplacingComponent.toString() {
+
+	public String InstReplacingComposite.toString() {
 	   StringBuffer str = new StringBuffer();
 	   str.append("InstReplacingComponent:\n");
 	   str.append(" Replacing decl: " + getComponentDecl().prettyPrint("") + "\n");

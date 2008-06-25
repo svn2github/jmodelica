@@ -559,7 +559,7 @@ ConstrainingPrimitiveComponentType                 |
 	    Environment env = (Environment)myEnvironment(name()).clone();
 	
         for (InstModification im : (Environment)myEnvironment()) {
-	   	 if (im.getModification().matchRedeclare(name())!=null) {
+	   	if (im.getModification().matchRedeclare(name())!=null) {
 	   	        ComponentDecl replacingDecl = im.getModification().matchRedeclare(name());
 	   	        if (replacingDecl.hasConstrainingClause()) {
     	   	          ClassType superType = new ClassType(getOriginalDecl().myClass());	

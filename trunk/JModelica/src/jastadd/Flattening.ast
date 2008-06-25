@@ -1,4 +1,4 @@
-abstract InstNode ::= /InstNode*/ /FQName/ FExp*;
+abstract InstNode ::= /InstNode*/ /FQName/ FExp* /DynamicInst:InstNode*/;
 abstract InstRoot : InstNode ::= /FPrimitiveType*/;
 InstClassRoot : InstRoot ::= <ClassDecl:ClassDecl>;
 InstConstrainingClauseRoot : InstRoot ::=<ConstrainingClause:ConstrainingClause>;
@@ -15,5 +15,8 @@ InstExtends : InstNode ::= <ExtendsClause:ExtendsClause>;
 // intrinsic attributes?? But then what about rewrites...
 //InstModification ::= <InstNode:InstNode> <Modification:Modification>;
 
-InstReplacingComponent : InstComponent ::= <OriginalDecl:ComponentDecl>;
+//InstReplacingComponent : InstComponent ::= <OriginalDecl:ComponentDecl>;
+
+InstReplacingComposite : InstComposite ::= <OriginalDecl:ComponentDecl>;
+InstReplacingPrimitive : InstPrimitive ::= <OriginalDecl:ComponentDecl>;
 

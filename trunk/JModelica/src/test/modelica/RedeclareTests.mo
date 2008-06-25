@@ -33,7 +33,6 @@ end RedeclareTestOx1;
  
 model RedeclareTestOx2_Err "Basic redeclare test, errounous"
  
- 
       annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx2_Err",
         description="Test basic redeclares. Error caused by failed subtype test in component redeclaration.",
