@@ -932,7 +932,7 @@ aspect FlattPrettyPrint {
 	eq Block.toString() = "block";
 	eq MClass.toString() = "class";
 	eq Connector.toString() = "connector";
-	eq Type.toString() = "type";
+	eq MType.toString() = "type";
 	eq MPackage.toString() = "package";
 	eq Function.toString() = "function";
 	eq Record.toString() = "record";

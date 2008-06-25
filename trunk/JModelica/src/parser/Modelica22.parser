@@ -226,7 +226,7 @@ Restriction restriction =
   | MODEL                            {: return new Model(); :}
   | BLOCK                            {: return new Block(); :}
   | CONNECTOR                            {: return new Connector(); :}
-  | TYPE                            {: return new Type(); :}
+  | TYPE                            {: return new MType(); :}
   | PACKAGE                            {: return new MPackage(); :}
   | FUNCTION                            {: return new Function(); :}
   | RECORD                            {: return new Record(); :}  
