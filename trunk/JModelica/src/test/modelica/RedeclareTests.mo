@@ -950,7 +950,7 @@ model RedeclareTest_Classes_1 "Redeclaration of classes example."
    end D;
  
    model E
-      D d(redeclare model myA = B);
+      D d(redeclare replaceable model myA = B);
    end E;
  
    E e;

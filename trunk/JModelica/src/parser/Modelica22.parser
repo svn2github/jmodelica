@@ -533,11 +533,11 @@ Argument argument =
    base_class_decl 
    constraining_clause? {:  ClassAccess pa = new ClassAccess(base_class_decl.getName().getID());
    							pa.setStart(base_class_decl.getName().getStart());
+   							base_class_decl.setConstrainingClauseOpt(constraining_clause);
    							ClassRedeclare cdr = new ClassRedeclare(each,
                                                          final_,
                                                          pa,
                                                          new Opt(replaceable),
-                                                         constraining_clause,
                                                          base_class_decl); :} 
   |each? 
    final_? 
@@ -580,7 +580,6 @@ Argument argument =
                                                       final_,
                                                       pa,
                                                       new Opt(),
-                                                      new Opt(),
                                                       base_class_decl);
                            return cdr; :}
   |REDECLARE
@@ -620,11 +619,11 @@ Argument argument =
    final_? 
    replaceable 
    base_class_decl 
-   constraining_clause? {: return new  ClassRedeclare(each,
+   constraining_clause? {:  base_class_decl.setConstrainingClauseOpt(constraining_clause);
+                             return new  ClassRedeclare(each,
                                                          final_,
                                                          new ClassAccess(base_class_decl.getName().getID()),
                                                          new Opt(replaceable),
-                                                         constraining_clause,
                                                          base_class_decl); :} 
   |REDECLARE
    each? 

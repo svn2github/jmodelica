@@ -123,7 +123,8 @@ aspect InstantiationTree {
        TODO: Should this attribute be lazy? Probably yes
       
     */   
-        
+    
+    // TODO: merge also class redeclaration modifications    
 	syn lazy Environment InstNode.getMergedEnvironmentList() {
 		debugPrint("InstNode.getMergedEnvironmentList()");
 		// Retrieve modifications upwards
@@ -174,19 +175,6 @@ aspect InstantiationTree {
 		}
 		return env;
 	}
-
-/*
-    eq ConstrainingClause.instConstrainingClauseRoot().myEnvironment()  {
-    	Environment l = new Environment();
-    	if (hasClassModification()) {
-			for (int i=0;i<getClassModification().getNumArgument();i++)
-			  // TODO: should it be instConstrainingClauseRoot().getInstNode(0)? (then circular!!!)
-		      l.add(new InstModification(instConstrainingClauseRoot(),getClassModification().getArgument(i)));
-    		
-    	}
-    	return l;
-    }
-*/	
 		
 	syn lazy Modification Modification.matchModification(String name) = null;
 	eq CompleteModification.matchModification(String name) {
@@ -214,13 +202,22 @@ aspect InstantiationTree {
 		return null;
 	}
 	
-	syn lazy ComponentDecl Modification.matchRedeclare(String name) = null;
-	eq ComponentRedeclare.matchRedeclare(String name) {
+	syn lazy ComponentDecl Modification.matchComponentRedeclare(String name) = null;
+	eq ComponentRedeclare.matchComponentRedeclare(String name) {
 		if (getName().getID().equals(name))
 			return getComponentDecl();
 		else
 			return null;
 	}
+	
+    syn lazy BaseClassDecl Modification.matchClassRedeclare(String name) = null;
+	eq ClassRedeclare.matchClassRedeclare(String name) {
+		if (getName().getID().equals(name))
+			return getBaseClassDecl();
+		else
+			return null;
+	}
+	
 	
 	eq BaseClassDecl.getInstRoot().myEnvironment() = new Environment();
 	eq BaseClassDecl.getInstRoot().myEnvironment(String name) = new Environment();
@@ -258,33 +255,25 @@ aspect InstantiationTree {
 				return cd.newInstComponent();   
     }
     
-    
-    
-/*    
-    public InstNode InstConstrComposite.createInstNode(ComponentDecl cd) {
-			ComponentDecl replacingCD = retrieveReplacingComponent(cd.name());
-			if (replacingCD != null)
-			    // TODO: Add support for InstReplacingPrimitive
-				 return new InstConstrReplacingComposite(new List<FExp>(),replacingCD,cd);
-			else
-				return cd.newInstConstrComponent();   
-    }
-*/
-
-   public InstNode InstNode.createInstNode(ExtendsClause ec) {
+       public InstNode InstNode.createInstNode(ExtendsClause ec) {
    		return ec.newInstExtends();
    }
-/*
-   public InstNode InstConstrExtends.createInstNode(ExtendsClause ec) {
-   		return ec.newInstConstrExtends();
-   }
-*/
+
 	eq InstPrimitive.getInstNodeList() = new List();
+
+    syn BaseClassDecl InstNode.retrieveReplacingClass(String name) {
+        for (int i=0;i<getNumMergedEnvironment();i++) {
+			if (getMergedEnvironment(i).getModification().matchClassRedeclare(name)!=null) {
+				return getMergedEnvironment(i).getModification().matchClassRedeclare(name);
+			}
+		}
+		return null;
+    }
 
 	syn ComponentDecl InstNode.retrieveReplacingComponent(String name) {
 		for (int i=0;i<getNumMergedEnvironment();i++) {
-			if (getMergedEnvironment(i).getModification().matchRedeclare(name)!=null) {
-				return getMergedEnvironment(i).getModification().matchRedeclare(name);
+			if (getMergedEnvironment(i).getModification().matchComponentRedeclare(name)!=null) {
+				return getMergedEnvironment(i).getModification().matchComponentRedeclare(name);
 			}
 		}
 		return null;
@@ -443,55 +432,53 @@ aspect InstantiationTree {
 		return l;
 	}
 	
-	syn List InstNode.equations();
-	eq InstClassRoot.equations() = getClassDecl().equations();
-	eq InstComponent.equations() { 
-	  if (!constrainingType())
-	    return getComponentDecl().myClass().equations();
-	  else {
-	     if (!getComponentDecl().hasConstrainingClause()) // Constraining clause same as original decl in this case
-	       return getComponentDecl().myClass().equations();
-	     else
-	       return getComponentDecl().getConstrainingClause().getAccess().myClassDecl().equations();
+	/**
+	 * classToExpand returns the class to expand for a particular InstComponent when taking
+	 * the environment into account.
+	 */
+	syn lazy ClassDecl InstComponent.classToExpand() {
+      ClassDecl classToExpand;
+	  
+	  if (retrieveReplacingClass(getComponentDecl().myClass().name())!=null) {
+	     classToExpand = retrieveReplacingClass(getComponentDecl().myClass().name());
+	  } else {
+	     classToExpand = getComponentDecl().myClass();
 	  }
+	     
+	     if (!constrainingType())
+	       return classToExpand;
+	     else {
+	        if (!getComponentDecl().hasConstrainingClause()) // Constraining clause same as original decl in this case
+	          return classToExpand;
+	        else {
+	          if (retrieveReplacingClass(getComponentDecl().getConstrainingClause().getAccess().myClassDecl().name())!=null) {
+	             classToExpand = retrieveReplacingClass(getComponentDecl().getConstrainingClause().getAccess().myClassDecl().name());
+	          } else {
+	             classToExpand = getComponentDecl().getConstrainingClause().getAccess().myClassDecl();
+	          }
+	          return classToExpand;
+	        }
+	     }
+	
 	}
 	
-	
+	syn List InstNode.equations();
+	eq InstClassRoot.equations() = getClassDecl().equations();
+	eq InstComponent.equations() = classToExpand().equations();
 	eq InstExtends.equations() = getExtendsClause().getSuper().myClassDecl().equations();
-//	eq InstConstrainingClauseRoot.equations() = getConstrainingClause().getAccess().myClassDecl().equations();
 	
 	syn lazy List InstNode.components();
 	eq InstClassRoot.components() = getClassDecl().components();
-	eq InstComponent.components() { 
-	  if (!constrainingType())
-	    return getComponentDecl().myClass().components();
-	  else {
-	     if (!getComponentDecl().hasConstrainingClause()) // Constraining clause same as original decl in this case
-	       return getComponentDecl().myClass().components();
-	     else
-	       return getComponentDecl().getConstrainingClause().getAccess().myClassDecl().components();
-	  }
-	}
+	// This attribute also needs to take into account that a class declaration
+	// may be redeclared.
+	eq InstComponent.components() = classToExpand().components();
 	eq InstExtends.components() = getExtendsClause().getSuper().myClassDecl().components();
-//	eq InstConstrainingClauseRoot.components() = getConstrainingClause().getAccess().myClassDecl().components();
-
 	
 	syn lazy List InstNode.superClasses();
 	eq InstClassRoot.superClasses() = getClassDecl().superClasses();
-	eq InstComponent.superClasses() { 
-	  if (!constrainingType())
-	    return getComponentDecl().myClass().superClasses();
-	  else {
-	     if (!getComponentDecl().hasConstrainingClause()) // Constraining clause same as original decl in this case
-	       return getComponentDecl().myClass().superClasses();
-	     else
-	       return getComponentDecl().getConstrainingClause().getAccess().myClassDecl().superClasses();
-	  }
-	}
-	
-	
+	eq InstComponent.superClasses() = classToExpand().superClasses();
 	eq InstExtends.superClasses() = getExtendsClause().getSuper().myClassDecl().superClasses();
-//    eq InstConstrainingClauseRoot.superClasses() = getConstrainingClause().getAccess().myClassDecl().superClasses();
+
 }
 
 aspect InstanceDumpTree {
@@ -538,33 +525,3 @@ aspect InstancePrettyPrint {
 	}
 
 }
-
-/*
-aspect InstanceConstructors {
-     public InstComposite.InstComposite(List l, ComponentDecl cd) {
-	     this(false,l,cd);
-	 }
-
-     public InstReplacingComposite.InstReplacingComposite(List l, ComponentDecl cd, ComponentDecl orig_cd) {
-	     this(false,l,cd,orig_cd);
-	 }
-
-     public InstPrimitive.InstPrimitive(List l, ComponentDecl cd) {
-	     this(false,l,cd);
-	 }
-
-     public InstReplacingPrimitive.InstReplacingPrimitive(List l, ComponentDecl cd, ComponentDecl orig_cd) {
-	     this(false,l,cd,orig_cd);
-	 }
-
-     public InstExtends.InstExtends(List l, ExtendsClause ec) {
-	     this(false,l,ec);
-	 }
-
-     public InstClassRoot.InstClassRoot(List l, BaseClassDecl bcd) {
-	     this(false,l,bcd);
-	 }
-
-
-}
-*/

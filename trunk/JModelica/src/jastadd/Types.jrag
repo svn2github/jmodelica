@@ -117,8 +117,8 @@ aspect Types {
      // subtype tests in redeclaration chains.     	
        for (int i=myEnvironment().size()-1;i>=0;i--) {
         InstModification im = myEnvironment().get(i);
-	   	if (im.getModification().matchRedeclare(name())!=null) { 
-           InstComponent constrainingSubType = im.getInstNode().createDynamicInstConstrainingComposite(im.getModification().matchRedeclare(name()));
+	   	if (im.getModification().matchComponentRedeclare(name())!=null) { 
+           InstComponent constrainingSubType = im.getInstNode().createDynamicInstConstrainingComposite(im.getModification().matchComponentRedeclare(name()));
                         
            // Check consistency of the redeclaring component
            if (constrainingSubType.getComponentDecl().hasConstrainingClause()) {
@@ -144,65 +144,6 @@ aspect Types {
 	 }
   }
   
-  /*
-    
-   interface Type {
- 	
-	  public boolean subType(Type t);  
-      public boolean superTypeComponentType(ComponentType subType);
-      public boolean superTypeClassType(ClassType subType);
-      public boolean superTypePrimitiveComponentType(PrimitiveComponentType subType);
-      //public boolean superTypePrimitiveClassType(PrimitiveClassType subType);
-      public String className();   
-   }
-
-   interface ClassType extends Type {
-   
-   }
-
-   interface ComponentType extends Type {
-   
-   }
-
-   interface PrimitiveComponentType extends Type {
-     
-   }
-
-   InstNode implements Type;
-   InstRoot implements ClassType;
-   InstComposite implements ComponentType;
-   InstPrimitive implements PrimitiveComponentType; 
-
-   syn String InstNode.className() = "";
-   syn String InstComponent.className() = getComponentDecl().myClass().name();
-
-   syn boolean InstNode.subType(Type t) = false;
-   syn boolean InstNode.superTypeComponentType(ComponentType subType) = false;
-   syn boolean InstNode.superTypeClassType(ClassType subType) = false;
-   syn boolean InstNode.superTypePrimitiveComponentType(PrimitiveComponentType subType) = false;
-   
-   eq InstComposite.subType(Type t) = t.superTypeComponentType(this);
-   eq InstPrimitive.subType(Type t) = t.superTypePrimitiveComponentType(this);
-
-   eq InstComposite.superTypeComponentType(ComponentType subType) {
-       if (subType == this) return true;
-       ComponentType superType = this;
-   
-       // Check that all elements (here: components) in superType are in subType 
-   
-   	   return false;
-   }
-   
-   eq InstPrimitive.superTypePrimitiveComponentType(PrimitiveComponentType subType) {
-       if (subType == this) return true;
-       PrimitiveComponentType superType = this;
-       if (subType.className().equals(superType.className()))
-       	  return true;
-       else   
-   	      return false;
-   }
-*/
-
 	public String InstReplacingComposite.toString() {
 	   StringBuffer str = new StringBuffer();
 	   str.append("InstReplacingComponent:\n");

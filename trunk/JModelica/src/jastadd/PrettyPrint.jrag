@@ -71,6 +71,22 @@ aspect PrettyPrint {
 	}
 	
 	// specialize behavior for A
+	
+	
+    public void ShortClassDecl.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
+	    str.append(indent + getRestriction().toString());
+ 		str.append(" " + getName().getID());
+	    str.append(" = ");
+	    str.append(getClassName().name());
+	    if (hasArraySubscripts())
+	    	p.toString(getArraySubscripts(),str,indent+"  ",o);
+	    if (hasClassModification())
+	    	p.toString(getClassModification(),str,indent+"  ",o);
+	    if (hasConstrainingClause())
+	    	p.toString(getConstrainingClause(),str,indent+"  ",o);
+	    
+	}
+	
 	public void FullClassDecl.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
  		str.append(indent + getRestriction().toString());
  		str.append(" " + getName().getID() + "\n");
@@ -251,7 +267,17 @@ aspect PrettyPrint {
 
 	}
 
-	
+	public void ClassRedeclare.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
+	    System.out.println("Hej");
+	    dumpTree("");
+		if (hasEach())
+			str.append(getEach().toString() + " ");
+		if (hasFinal())
+		 	str.append(getFinal().toString() + " ");
+		p.toString(getBaseClassDecl(),str,indent,o);
+		
+
+	}	
 
 	public void Opt.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
 		if (getNumChild()>0)
