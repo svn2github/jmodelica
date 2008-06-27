@@ -159,7 +159,14 @@ Currently, the peeling of modifications: x.y -> y takes place outside of the
 Environment class. This should be fixed.
 
 ------------------------------------------------------------
-Task: Implement InstReplacingComponent.declaredType and constrainingType
+Task: Fix bug in parser related to constraining clause
 
-This is the next step in the implementation of the new type framework.
+Currently, a redeclaration must contain the the keyword redeclare in order
+for a constraining clause to be accepted. However,
+'redeclare A extends B' is also valid and in this case, the replaceable keyword
+is inferred. The inference should probably be done in the parser.
+
+
+
+
 

@@ -175,6 +175,7 @@ aspect InstantiationTree {
 		return env;
 	}
 
+/*
     eq ConstrainingClause.instConstrainingClauseRoot().myEnvironment()  {
     	Environment l = new Environment();
     	if (hasClassModification()) {
@@ -185,6 +186,7 @@ aspect InstantiationTree {
     	}
     	return l;
     }
+*/	
 		
 	syn lazy Modification Modification.matchModification(String name) = null;
 	eq CompleteModification.matchModification(String name) {
@@ -226,7 +228,8 @@ aspect InstantiationTree {
 	// Definition of the NTA representing the root of the 
 	// instantiation tree
 	syn InstRoot BaseClassDecl.getInstRoot() = new InstClassRoot(new List(),this);
-	syn nta InstConstrainingClauseRoot ConstrainingClause.instConstrainingClauseRoot() = new InstConstrainingClauseRoot(new List(),this);
+
+//	syn nta InstConstrainingClauseRoot ConstrainingClause.instConstrainingClauseRoot() = new InstConstrainingClauseRoot(new List(),this);
 
 
 	syn lazy List InstNode.getInstNodeList() {
@@ -235,35 +238,47 @@ aspect InstantiationTree {
 		List comps = components();
 		List supers = superClasses();	
 		
-		
-		debugPrint("InstNode.getInstNodeList: " +getClass().getName());
-	
-		debugPrint("########################################");
-		debugPrint("Environment:");
-		String s = "";
-		for (int i=0;i<getNumMergedEnvironment();i++) {
-		    s += getMergedEnvironment(i).getInstNode().getNodeName() + " -- ";
-			s += getMergedEnvironment(i).getModification().prettyPrint("") + "\n";
-		}
-		debugPrint(s);
-		
-		
 		for (int i=0;i<comps.getNumChild();i++) {
 			ComponentDecl cd = (ComponentDecl)comps.getChild(i);
-			ComponentDecl replacingCD = retrieveReplacingComponent(cd.name());
-			if (replacingCD != null)
-			    // TODO: Add support for InstReplacingPrimitive
-				l.add(new InstReplacingComposite(new List<FExp>(),replacingCD,cd));
-			else
-				l.add(cd.newInstComponent());
+		    l.add(createInstNode(cd));
 		}				
 	
 		for (int i=0;i<supers.getNumChild();i++) {
-			l.add(((ExtendsClause)supers.getChild(i)).newInstExtends());
+			l.add(createInstNode(((ExtendsClause)supers.getChild(i))));
 		}
 		return l;
 	}
 
+    public InstNode InstNode.createInstNode(ComponentDecl cd) {
+			ComponentDecl replacingCD = retrieveReplacingComponent(cd.name());
+			if (replacingCD != null)
+			    // TODO: Add support for InstReplacingPrimitive
+				 return new InstReplacingComposite(new List<FExp>(),replacingCD,cd);
+			else
+				return cd.newInstComponent();   
+    }
+    
+    
+    
+/*    
+    public InstNode InstConstrComposite.createInstNode(ComponentDecl cd) {
+			ComponentDecl replacingCD = retrieveReplacingComponent(cd.name());
+			if (replacingCD != null)
+			    // TODO: Add support for InstReplacingPrimitive
+				 return new InstConstrReplacingComposite(new List<FExp>(),replacingCD,cd);
+			else
+				return cd.newInstConstrComponent();   
+    }
+*/
+
+   public InstNode InstNode.createInstNode(ExtendsClause ec) {
+   		return ec.newInstExtends();
+   }
+/*
+   public InstNode InstConstrExtends.createInstNode(ExtendsClause ec) {
+   		return ec.newInstConstrExtends();
+   }
+*/
 	eq InstPrimitive.getInstNodeList() = new List();
 
 	syn ComponentDecl InstNode.retrieveReplacingComponent(String name) {
@@ -327,6 +342,8 @@ aspect InstantiationTree {
 	eq FullClassDecl.superClasses() = getSuperList();
 	eq ShortClassDecl.superClasses() = getClassName().myClassDecl().superClasses();
 	
+	
+	// TODO: should Lists really be return here?
 	syn lazy List ClassDecl.components() = root().emptyList();
 	eq FullClassDecl.components() = getComponentDeclList();
 	eq ShortClassDecl.components() = getClassName().myClassDecl().components();
@@ -428,22 +445,53 @@ aspect InstantiationTree {
 	
 	syn List InstNode.equations();
 	eq InstClassRoot.equations() = getClassDecl().equations();
-	eq InstComponent.equations() = getComponentDecl().myClass().equations();
+	eq InstComponent.equations() { 
+	  if (!constrainingType())
+	    return getComponentDecl().myClass().equations();
+	  else {
+	     if (!getComponentDecl().hasConstrainingClause()) // Constraining clause same as original decl in this case
+	       return getComponentDecl().myClass().equations();
+	     else
+	       return getComponentDecl().getConstrainingClause().getAccess().myClassDecl().equations();
+	  }
+	}
+	
+	
 	eq InstExtends.equations() = getExtendsClause().getSuper().myClassDecl().equations();
-	eq InstConstrainingClauseRoot.equations() = getConstrainingClause().getAccess().myClassDecl().equations();
+//	eq InstConstrainingClauseRoot.equations() = getConstrainingClause().getAccess().myClassDecl().equations();
 	
 	syn lazy List InstNode.components();
 	eq InstClassRoot.components() = getClassDecl().components();
-	eq InstComponent.components() = getComponentDecl().myClass().components();
+	eq InstComponent.components() { 
+	  if (!constrainingType())
+	    return getComponentDecl().myClass().components();
+	  else {
+	     if (!getComponentDecl().hasConstrainingClause()) // Constraining clause same as original decl in this case
+	       return getComponentDecl().myClass().components();
+	     else
+	       return getComponentDecl().getConstrainingClause().getAccess().myClassDecl().components();
+	  }
+	}
 	eq InstExtends.components() = getExtendsClause().getSuper().myClassDecl().components();
-	eq InstConstrainingClauseRoot.components() = getConstrainingClause().getAccess().myClassDecl().components();
+//	eq InstConstrainingClauseRoot.components() = getConstrainingClause().getAccess().myClassDecl().components();
 
 	
 	syn lazy List InstNode.superClasses();
 	eq InstClassRoot.superClasses() = getClassDecl().superClasses();
-	eq InstComponent.superClasses() = getComponentDecl().myClass().superClasses();
+	eq InstComponent.superClasses() { 
+	  if (!constrainingType())
+	    return getComponentDecl().myClass().superClasses();
+	  else {
+	     if (!getComponentDecl().hasConstrainingClause()) // Constraining clause same as original decl in this case
+	       return getComponentDecl().myClass().superClasses();
+	     else
+	       return getComponentDecl().getConstrainingClause().getAccess().myClassDecl().superClasses();
+	  }
+	}
+	
+	
 	eq InstExtends.superClasses() = getExtendsClause().getSuper().myClassDecl().superClasses();
-    eq InstConstrainingClauseRoot.superClasses() = getConstrainingClause().getAccess().myClassDecl().superClasses();
+//    eq InstConstrainingClauseRoot.superClasses() = getConstrainingClause().getAccess().myClassDecl().superClasses();
 }
 
 aspect InstanceDumpTree {
@@ -490,3 +538,33 @@ aspect InstancePrettyPrint {
 	}
 
 }
+
+/*
+aspect InstanceConstructors {
+     public InstComposite.InstComposite(List l, ComponentDecl cd) {
+	     this(false,l,cd);
+	 }
+
+     public InstReplacingComposite.InstReplacingComposite(List l, ComponentDecl cd, ComponentDecl orig_cd) {
+	     this(false,l,cd,orig_cd);
+	 }
+
+     public InstPrimitive.InstPrimitive(List l, ComponentDecl cd) {
+	     this(false,l,cd);
+	 }
+
+     public InstReplacingPrimitive.InstReplacingPrimitive(List l, ComponentDecl cd, ComponentDecl orig_cd) {
+	     this(false,l,cd,orig_cd);
+	 }
+
+     public InstExtends.InstExtends(List l, ExtendsClause ec) {
+	     this(false,l,ec);
+	 }
+
+     public InstClassRoot.InstClassRoot(List l, BaseClassDecl bcd) {
+	     this(false,l,bcd);
+	 }
+
+
+}
+*/

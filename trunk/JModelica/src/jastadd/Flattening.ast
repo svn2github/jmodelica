@@ -1,11 +1,14 @@
-abstract InstNode ::= /InstNode*/ /FQName/ FExp* /DynamicInst:InstNode*/;
+abstract InstNode ::= /InstNode*/ /FQName/ FExp* /DynamicInst:InstNode*/ /DynamicInstConstraining:InstNode*/;
 abstract InstRoot : InstNode ::= /FPrimitiveType*/;
 InstClassRoot : InstRoot ::= <ClassDecl:ClassDecl>;
-InstConstrainingClauseRoot : InstRoot ::=<ConstrainingClause:ConstrainingClause>;
+//InstConstrainingClauseRoot : InstRoot ::=<ConstrainingClause:ConstrainingClause>;
 abstract InstComponent : InstNode ::= <ComponentDecl:ComponentDecl> ;
 InstComposite : InstComponent;
 InstPrimitive : InstComponent ::= /FVariable/;
 InstExtends : InstNode ::= <ExtendsClause:ExtendsClause>;
+
+
+
 
 //InstConstrainingClause : InstNode ::= <ConstrainingClause:ConstrainingClause>;
 
@@ -20,3 +23,11 @@ InstExtends : InstNode ::= <ExtendsClause:ExtendsClause>;
 InstReplacingComposite : InstComposite ::= <OriginalDecl:ComponentDecl>;
 InstReplacingPrimitive : InstPrimitive ::= <OriginalDecl:ComponentDecl>;
 
+
+/*
+InstConstrExtends : InstExtends;
+InstConstrComposite : InstComposite;
+InstConstrPrimitve : InstPrimitive;
+InstConstrReplacingComposite : InstReplacingComposite;
+InstConstrReplacingPrimitive : InstReplacingPrimitive;
+*/

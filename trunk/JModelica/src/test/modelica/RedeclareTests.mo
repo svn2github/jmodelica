@@ -424,9 +424,9 @@ model RedeclareTestOx95_Err "Constraining clause example, errouneous"
                                                errorMessage=
 "1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
-Semantic error at line 448, column 10:
-  'B' is not a subtype of 'C'
-  "
+Semantic error at line 450, column 10:
+  In the declaration 'replaceable B b extends C ', the declared class is not a subtype of the constraining class
+"
   )})));
  
  
@@ -456,14 +456,16 @@ Semantic error at line 448, column 10:
 end RedeclareTestOx95_Err;
  
 model RedeclareTestOx10 "Constraining clause example."
- /* This is test case does not work currently!*/
+ 
     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTestOx10",
         description="Basic test of redeclares.",
                                                flatModel=
-"fclass RedeclareTests.RedeclareTestOx8
-
-end RedeclareTests.RedeclareTestOx8;
+"fclass RedeclareTests.RedeclareTestOx10
+ Real e.d.c.x = 2 /*(2)*/;
+ Real e.d.c.y = 3 /*(3)*/;
+equation 
+end RedeclareTests.RedeclareTestOx10;
 ")})));
  
  
@@ -484,17 +486,17 @@ end RedeclareTests.RedeclareTestOx8;
   end C;
  
    model D
-     replaceable B c extends A;
+     replaceable B c extends B;
    end D;
  
    model E
      // This is actually ok since the replacing component does not have an
      // explicit constraining clause, in which case the constraining clause
      // of the original declaration is used.
-     replaceable D d extends D(redeclare replaceable B c);
+     replaceable D d extends D(redeclare replaceable C c);
    end E;
  
-   E e(redeclare D d(redeclare A c));
+   E e(redeclare D d(redeclare B c));
  
 end RedeclareTestOx10;
  
@@ -503,7 +505,10 @@ model RedeclareTestOx11_Err "Constraining clause example."
       JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx11_Err",
         description="Check that the declaration is a subtype of the constraining clause",
                                                errorMessage=
-"
+"1 error(s) found...
+In file 'src/test/modelica/RedeclareTests.mo':
+Semantic error at line 551, column 32:
+  'redeclare replaceable B c extends A ' is not a subtype of 'replaceable B c'
   "
   )})));
 /*
@@ -562,9 +567,9 @@ end RedeclareTestOx11_Err;
                                                errorMessage=
 "1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
-Semantic error at line 594, column 32:
-  'B' is not a subtype of 'C'
-  "
+Semantic error at line 601, column 69:
+  In the declaration 'redeclare replaceable B c extends C ', the declared class is not a subtype of the constraining class
+"
   )})));
 /*
   Should give an error message like
@@ -593,7 +598,7 @@ Semantic error at line 431, column 32:
    end D;
  
    model E
-     replaceable D d extends D(redeclare replaceable B c extends C);
+     replaceable D d(redeclare replaceable C c extends C) extends D(redeclare replaceable B c extends C);
    end E;
   
  
@@ -608,9 +613,9 @@ end RedeclareTestOx115_Err;
                                                errorMessage=
 "1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
-Semantic error at line 644, column 58:
-  'A' is not a subtype of 'B'
-  "
+Semantic error at line 651, column 32:
+  'redeclare replaceable C c extends A ' is not a subtype of 'replaceable B c'
+"
   )})));
 /*
   Should give an error message like
@@ -673,6 +678,19 @@ end RedeclareTestOx12;
  
 model RedeclareTestOx13 "Constraining clause example."
  
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTestOx13",
+        description="Check that the declaration is a subtype of the constraining clause",
+                                               flatModel=
+"fclass RedeclareTests.RedeclareTestOx13
+ Real e.d.c.x = 4 /*(4)*/;
+ Real e.d.c.y = 3 /*(3)*/;
+ Real e.d.c.z = 5 /*(5)*/;
+equation 
+end RedeclareTests.RedeclareTestOx13;
+"
+  )})));
+  
   model A
     Real x=1;
   end A;
@@ -693,13 +711,253 @@ model RedeclareTestOx13 "Constraining clause example."
    end D;
  
    model E
-     D d( redeclare replaceable B c(y=10) extends A);
+     D d( redeclare replaceable B c(y=10) extends A(x=4));
    end E;
  
-   E e(d(redeclare C c(z=3)));
+   E e(d(redeclare C c(z=5)));
  
 end RedeclareTestOx13;
+
+
+model RedeclareTest_Constr_14_Err "Constraining clause example."
  
+ 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTest_Constr_14_Err",
+        description="Check that the declaration is a subtype of the constraining clause",
+                                               errorMessage=
+"1 error(s) found...
+In file 'src/test/modelica/RedeclareTests.mo':
+Semantic error at line 752, column 10:
+  In the declaration 'redeclare replaceable B c extends C ', the declared class is not a subtype of the constraining class
+"
+  )})));
+  
+  
+  model A
+    Real x=1;
+  end A;
+ 
+  model B
+   Real x=2;
+   Real y=3;
+  end B;
+ 
+  model C
+   Real x=2;
+   Real y=3;
+   Real z=4;
+  end C;
+ 
+   model D
+     replaceable A c;
+   end D;
+ 
+   model E
+     // Here is the error: A is not a subtype of C
+     D d(redeclare replaceable B c extends C);
+   end E;
+ 
+   E e(d(redeclare C c));
+ 
+end RedeclareTest_Constr_14_Err;
+
+model RedeclareTest_Constr_15_Err "Constraining clause example."
+ 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTest_Constr_15_Err",
+        description="Check that the declaration is a subtype of the constraining clause",
+                                               errorMessage=
+"1 error(s) found...
+In file 'src/test/modelica/RedeclareTests.mo':
+Semantic error at line 790, column 10:
+  In the declaration 'redeclare replaceable B c extends C ', the declared class is not a subtype of the constraining class
+"
+  )})));
+  
+  model A
+    Real x=1;
+  end A;
+ 
+  model B
+   Real x=2;
+   Real y=3;
+  end B;
+ 
+  model C
+   Real x=2;
+   Real y=3;
+   Real z=4;
+  end C;
+ 
+   model D
+     replaceable A c;
+   end D;
+ 
+   model E
+     // Here is the error: B is not a subtype of C
+     D d(redeclare replaceable B c extends C);
+   end E;
+ 
+   E e(d(redeclare replaceable C c));
+ 
+end RedeclareTest_Constr_15_Err;
+
+model RedeclareTest_Constr_16_Err "Constraining clause example."
+ 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTest_Constr_16_Err",
+        description="Check that the declaration is a subtype of the constraining clause",
+                                               errorMessage=
+"1 error(s) found...
+In file 'src/test/modelica/RedeclareTests.mo':
+Semantic error at line 837, column 10:
+  'redeclare replaceable A c' is not a subtype of 'redeclare replaceable B c extends B '
+"
+  )})));
+  
+  model A
+    Real x=1;
+  end A;
+ 
+  model B
+   Real x=2;
+   Real y=3;
+  end B;
+ 
+  model C
+   Real x=2;
+   Real y=3;
+   Real z=4;
+  end C;
+ 
+   model D
+     replaceable A c;
+   end D;
+ 
+   model E
+     // Here is the error: B is not a subtype of C
+     D d(redeclare replaceable B c extends B);
+   end E;
+ 
+   E e(d(redeclare replaceable A c));
+ 
+end RedeclareTest_Constr_16_Err;
+
+model RedeclareTest_Constr_17_Err "Constraining clause example."
+ 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTest_Constr_17_Err",
+        description="Check that the declaration is a subtype of the constraining clause",
+                                               errorMessage=
+"1 error(s) found...
+In file 'src/test/modelica/RedeclareTests.mo':
+Semantic error at line 884, column 34:
+  'redeclare replaceable B c' is not a subtype of 'redeclare replaceable C c extends C '
+"
+  )})));
+  
+  model A
+    Real x=1;
+  end A;
+ 
+  model B
+   Real x=2;
+   Real y=3;
+  end B;
+ 
+  model C
+   Real x=2;
+   Real y=3;
+   Real z=4;
+  end C;
+ 
+   model D
+     replaceable A c;
+   end D;
+ 
+   model E
+     // Here is the error: B is not a subtype of C
+     replaceable D d(redeclare replaceable B c extends B);
+   end E;
+ 
+   E e(redeclare replaceable D d(redeclare replaceable B c) extends D(redeclare replaceable C c extends C));
+ 
+end RedeclareTest_Constr_17_Err;
+
+model RedeclareTest_Constr_18_Err "Constraining clause example."
+ 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTest_Constr_18_Err",
+        description="Check that the declaration is a subtype of the constraining clause",
+                                               errorMessage=
+"1 error(s) found...
+In file 'src/test/modelica/RedeclareTests.mo':
+Semantic error at line 918, column 32:
+  'redeclare replaceable B c' is not a subtype of 'replaceable C c extends C '
+"
+  )})));
+  
+  model A
+    Real x=1;
+  end A;
+ 
+  model B
+   Real x=2;
+   Real y=3;
+  end B;
+ 
+  model C
+   Real x=2;
+   Real y=3;
+   Real z=4;
+  end C;
+ 
+   model D
+     replaceable C c extends C;
+   end D;
+ 
+   model E
+     // Notice that the modifier in the constraining clause is applied to the declaration itself
+     // and is therefore type checked.
+     replaceable D d extends D(redeclare replaceable B c);
+   end E;
+ 
+   E e;
+ 
+end RedeclareTest_Constr_18_Err;
+
+model RedeclareTest_Classes_1 "Redeclaration of classes example."
+ 
+  model A
+    Real x=1;
+  end A;
+ 
+  model B
+   Real x=2;
+   Real y=3;
+  end B;
+ 
+  model C
+   Real x=2;
+   Real y=3;
+   Real z=4;
+  end C;
+ 
+   model D
+     replaceable model myA = A;
+     myA a;
+   end D;
+ 
+   model E
+      D d(redeclare model myA = B);
+   end E;
+ 
+   E e;
+ 
+end RedeclareTest_Classes_1;
+
+
 model RedeclareTestOx6b_Err
  model A
     Real x=1;
@@ -1533,7 +1791,6 @@ fclass RedeclareTests.RedeclareTest14
 equation
 end RedeclareTests.RedeclareTest14;
 ")})));
-
 
 	model A
 	  Real x=1;
