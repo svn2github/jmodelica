@@ -929,6 +929,21 @@ end RedeclareTest_Constr_18_Err;
 
 model RedeclareTest_Classes_1 "Redeclaration of classes example."
  
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest_Classes_1",
+        description="Test of parametrized classes.",
+                                               flatModel=
+"fclass RedeclareTests.RedeclareTest_Classes_1
+ Real e.d.a.x = 4 /*(4)*/;
+ Real e.d.a.y = 3 /*(3)*/;
+ Real e.d.a.z = 4 /*(4)*/;
+equation 
+end RedeclareTests.RedeclareTest_Classes_1;
+"
+  )})));
+ 
+ 
+ 
   model A
     Real x=1;
   end A;
@@ -946,11 +961,11 @@ model RedeclareTest_Classes_1 "Redeclaration of classes example."
  
    model D
      replaceable model myA = A;
-     myA a;
+     myA a(x=4);
    end D;
  
    model E
-      D d(redeclare replaceable model myA = B);
+      D d(redeclare replaceable model myA = C);
    end E;
  
    E e;

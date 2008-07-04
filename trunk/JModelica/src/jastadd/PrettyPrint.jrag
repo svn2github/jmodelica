@@ -268,8 +268,6 @@ aspect PrettyPrint {
 	}
 
 	public void ClassRedeclare.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
-	    System.out.println("Hej");
-	    dumpTree("");
 		if (hasEach())
 			str.append(getEach().toString() + " ");
 		if (hasFinal())

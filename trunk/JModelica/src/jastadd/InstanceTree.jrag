@@ -247,12 +247,31 @@ aspect InstantiationTree {
 	}
 
     public InstNode InstNode.createInstNode(ComponentDecl cd) {
-			ComponentDecl replacingCD = retrieveReplacingComponent(cd.name());
-			if (replacingCD != null)
+            // Check if the component is redeclared
+			ComponentDecl replacingComponent = retrieveReplacingComponent(cd.name());
+
+			if (replacingComponent != null) {
+               // Check if the class of the component is redeclared
+               ClassDecl classToExpand = retrieveReplacingClass(replacingComponent.myClass().name());
+			    if (classToExpand!=null) {
 			    // TODO: Add support for InstReplacingPrimitive
-				 return new InstReplacingComposite(new List<FExp>(),replacingCD,cd);
-			else
-				return cd.newInstComponent();   
+				 return new InstReplacingComposite(new List<FExp>(),replacingComponent,classToExpand,cd);
+			    } else {
+			     return new InstReplacingComposite(new List<FExp>(),replacingComponent,replacingComponent.myClass(),cd);
+			    }
+			} else {
+			    // Check if the class of the component is redeclared
+                ClassDecl classToExpand = retrieveReplacingClass(cd.myClass().name());
+			    if (classToExpand!=null) {
+			        return cd.newInstComponent(classToExpand);
+				} else {
+			
+					return cd.newInstComponent(cd.myClass());   
+  				}
+            }
+  
+            
+
     }
     
        public InstNode InstNode.createInstNode(ExtendsClause ec) {
@@ -282,8 +301,9 @@ aspect InstantiationTree {
 
 	// Attribute for building an InstComposite node based
 	// on a ComponentDecl
-	public InstComponent ComponentDecl.newInstComponent() {
-	   return myClass().newInstComponent(this);
+	public InstComponent ComponentDecl.newInstComponent(ClassDecl classToExpand) {
+	   //return myClass().newInstComponent(this);
+	   return classToExpand.newInstComponent(this);
 	}
 	
 	// Dispatch w.r.t. class type
@@ -291,9 +311,9 @@ aspect InstantiationTree {
 
 	public InstComponent BaseClassDecl.newInstComponent(ComponentDecl cd) {
 		if (!extendsPrimitive())
-			return new InstComposite(new List(),cd);
+			return new InstComposite(new List(),cd,this);
 		else {
-			return new InstPrimitive(new List(),cd);
+			return new InstPrimitive(new List(),cd,this);
 		}
 	}
 	
@@ -302,7 +322,7 @@ aspect InstantiationTree {
 	}
 	
 	public InstComponent PrimitiveClassDecl.newInstComponent(ComponentDecl cd) {
-		return new InstPrimitive(new List(),cd);
+		return new InstPrimitive(new List(),cd,this);
 	}
 	
 	public InstComponent BuiltInClassDecl.newInstComponent(ComponentDecl cd) {
@@ -437,7 +457,19 @@ aspect InstantiationTree {
 	 * the environment into account.
 	 */
 	syn lazy ClassDecl InstComponent.classToExpand() {
-      ClassDecl classToExpand;
+         ClassDecl classToExpand = getClassDecl();
+	     if (!constrainingType())
+	       return classToExpand;
+	     else {
+	        if (!getComponentDecl().hasConstrainingClause()) // Constraining clause same as original decl in this case
+	          return classToExpand;
+	        else {
+	          return getComponentDecl().getConstrainingClause().getAccess().myClassDecl();
+	        }
+	     }
+
+
+/*
 	  
 	  if (retrieveReplacingClass(getComponentDecl().myClass().name())!=null) {
 	     classToExpand = retrieveReplacingClass(getComponentDecl().myClass().name());
@@ -459,7 +491,7 @@ aspect InstantiationTree {
 	          return classToExpand;
 	        }
 	     }
-	
+	*/
 	}
 	
 	syn List InstNode.equations();

@@ -1,33 +1,15 @@
 abstract InstNode ::= /InstNode*/ /FQName/ FExp* /DynamicInst:InstNode*/ /DynamicInstConstraining:InstNode*/;
 abstract InstRoot : InstNode ::= /FPrimitiveType*/;
 InstClassRoot : InstRoot ::= <ClassDecl:ClassDecl>;
-//InstConstrainingClauseRoot : InstRoot ::=<ConstrainingClause:ConstrainingClause>;
-abstract InstComponent : InstNode ::= <ComponentDecl:ComponentDecl> ;
+
+// The class to expand may differ from the declared class of the component due to 
+// redeclaration of classes.
+abstract InstComponent : InstNode ::= <ComponentDecl:ComponentDecl> <ClassDecl:ClassDecl>;
 InstComposite : InstComponent;
 InstPrimitive : InstComponent ::= /FVariable/;
 InstExtends : InstNode ::= <ExtendsClause:ExtendsClause>;
 
 
-
-
-//InstConstrainingClause : InstNode ::= <ConstrainingClause:ConstrainingClause>;
-
-//InstReplacingComponent : InstComponent ::= <OriginalDecl:ComponentDecl>;
-
-// InstModification des not really have to be an ASTNode, since it only have
-// intrinsic attributes?? But then what about rewrites...
-//InstModification ::= <InstNode:InstNode> <Modification:Modification>;
-
-//InstReplacingComponent : InstComponent ::= <OriginalDecl:ComponentDecl>;
-
 InstReplacingComposite : InstComposite ::= <OriginalDecl:ComponentDecl>;
 InstReplacingPrimitive : InstPrimitive ::= <OriginalDecl:ComponentDecl>;
 
-
-/*
-InstConstrExtends : InstExtends;
-InstConstrComposite : InstComposite;
-InstConstrPrimitve : InstPrimitive;
-InstConstrReplacingComposite : InstReplacingComposite;
-InstConstrReplacingPrimitive : InstReplacingPrimitive;
-*/

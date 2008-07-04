@@ -12,14 +12,16 @@ aspect Types {
 
 
    syn lazy InstComposite InstNode.createDynamicInstComposite(ComponentDecl decl) {
-   	  InstComposite ic = new InstComposite(new List(),decl);
+      // TODO: Check for redeclares
+   	  InstComposite ic = new InstComposite(new List(),decl,decl.myClass());
    	  addDynamicInst(ic);
    	  ic.is$Final(true); // TODO: Is this really ok...?
    	  return ic;
    }
    
    syn lazy InstComposite InstNode.createDynamicInstConstrainingComposite(ComponentDecl decl) {
-   	  InstComposite ic = new InstComposite(new List(),decl);
+   	  // TODO: Check for redeclares
+   	  InstComposite ic = new InstComposite(new List(),decl,decl.myClass());
    	  addDynamicInstConstraining(ic);
    	  ic.is$Final(true); // TODO: Is this really ok...?
    	  return ic;
