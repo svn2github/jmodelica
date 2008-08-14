@@ -1826,5 +1826,106 @@ end RedeclareTests.RedeclareTest14;
 	
 end RedeclareTest14;
 
+class RedeclareTest15 "Test of merging of modifications in parametrized classes"
+ 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest15",
+        description="Test of parametrized classes.",
+                                               flatModel=
+"
+"
+  )})));
+ 
+  
+  model A
+    Real x=1;
+  end A;
+ 
+  model B
+   Real x=2;
+   Real y=3;
+  end B;
+  
+   model C
+     replaceable model myA = A(x=2);
+     myA a(x=4);
+   end C;
+ 
+   model D
+      C c(redeclare replaceable model myA = B(y=5));
+   end D;
+ 
+   D d;
+
+end RedeclareTest15;
+
+class RedeclareTest16 "Test of merging of modifications in parametrized classes"
+ 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest16",
+        description="Test of parametrized classes.",
+                                               flatModel=
+"
+"
+  )})));
+ 
+  
+  model A
+    Real x=1;
+  end A;
+ 
+  model B
+   Real x=2;
+   Real y=3;
+  end B;
+  
+  model C
+   Real x=2;
+   Real y=3;
+   Real z=4;
+  end C;
+
+   model D
+     replaceable A a(x=4);
+   
+   end D;
+ 
+   model E
+     replaceable model myB = B(x=6,y=4);
+     D d(redeclare replaceable myB a(x=5));
+   end E;
+ 
+   E e(redeclare model myB = C(z=6));
+
+end RedeclareTest16;
+
+
+
+model RedeclareTest17
+ 
+   package P
+   model A
+    Real x=1;
+   end A;
+ 
+     model B
+        Real x=2;
+        Real y=3;
+     end B;
+ 
+     model C
+        Real x=2;
+        Real y=3;
+        Real z=4;
+     end C;
+ 
+     replaceable model BB = B(x=3);
+   end P;
+ 
+   package PP = P(redeclare model BB = P.C(y=5));
+ 
+  PP.BB bb;
+ 
+end RedeclareTest17;
 
 end RedeclareTests;

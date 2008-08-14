@@ -74,6 +74,22 @@ aspect PrettyPrint {
 	
 	
     public void ShortClassDecl.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
+	    if (hasEncapsulated())
+	    	str.append("encapsulated ");
+	    if (hasPartial())
+	    	str.append("partial ");
+	    if (hasRedeclare())
+	    	str.append("redeclare ");
+	    if (hasFinal())
+	    	str.append("final ");
+	    if (hasInner())
+	    	str.append("inner ");
+	    if (hasOuter())
+	    	str.append("outer ");
+	    if (hasReplaceable())
+	    	str.append("replaceable ");
+	    
+	    
 	    str.append(indent + getRestriction().toString());
  		str.append(" " + getName().getID());
 	    str.append(" = ");
@@ -88,6 +104,22 @@ aspect PrettyPrint {
 	}
 	
 	public void FullClassDecl.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
+	    if (hasEncapsulated())
+	    	str.append("encapsulated ");
+	    if (hasPartial())
+	    	str.append("partial "); 		
+ 	    if (hasRedeclare())
+	    	str.append("redeclare ");
+	    if (hasFinal())
+	    	str.append("final ");
+	    if (hasInner())
+	    	str.append("inner ");
+	    if (hasOuter())
+	    	str.append("outer ");
+	    if (hasReplaceable())
+	    	str.append("replaceable ");
+	    
+ 		
  		str.append(indent + getRestriction().toString());
  		str.append(" " + getName().getID() + "\n");
 
@@ -960,5 +992,7 @@ aspect FlattPrettyPrint {
 	eq MPackage.toString() = "package";
 	eq Function.toString() = "function";
 	eq Record.toString() = "record";
+
+    syn String ComponentDecl.toString() = prettyPrint("");
 
 }

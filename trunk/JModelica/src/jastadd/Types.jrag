@@ -145,56 +145,6 @@ aspect Types {
 	    }
 	 }
   }
-  
-	public String InstReplacingComposite.toString() {
-	   StringBuffer str = new StringBuffer();
-	   str.append("InstReplacingComponent:\n");
-	   str.append(" Replacing decl: " + getComponentDecl().prettyPrint("") + "\n");
-	   str.append(" Original decl:  " + getOriginalDecl().prettyPrint("") + "\n");
-	   str.append(" myEnvironment():\n");
-	   str.append(myEnvironment().toString());
-	   str.append(" mergedEnvironment():\n");
-	   str.append(getMergedEnvironmentList().toString());
-	   //str.append(" Declared type:\n");
-	   //str.append(declaredType().toString());
-	   //str.append(" Constraining type:\n");
-	   //str.append(constrainingType().toString());
-	   return str.toString();	
-	}
-
-	public String InstPrimitive.toString() {
-	   StringBuffer str = new StringBuffer();
-	   str.append("InstPrimitive:\n");
-	   str.append(" Component decl: " + getComponentDecl().prettyPrint("") + "\n");
-	   str.append(" myEnvironment():\n");
-	   str.append(myEnvironment().toString());
-	   str.append(" mergedEnvironment():\n");
-	   str.append(getMergedEnvironmentList().toString());
-	   return str.toString();	
-	}
-
-	public String InstComposite.toString() {
-	   StringBuffer str = new StringBuffer();
-	   str.append("InstComposite:\n");
-	   str.append(" Component decl: " + getComponentDecl().prettyPrint("") + "\n");
-	   str.append(" myEnvironment():\n");
-	   str.append(myEnvironment().toString());
-	   str.append(" mergedEnvironment():\n");
-	   str.append(getMergedEnvironmentList().toString());
-	   //str.append(" Declared type:\n");
-	   //str.append(declaredType().toString());
-	   //str.append(" Constraining type:\n");
-	   //str.append(constrainingType().toString());
-	   
-	   return str.toString();	
-	}
-
-
-
-    public String InstModification.toString() {
-    	return getModification().prettyPrint("");
-    
-    }
 
 }
 

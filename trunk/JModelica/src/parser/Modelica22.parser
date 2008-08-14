@@ -534,10 +534,10 @@ Argument argument =
    constraining_clause? {:  ClassAccess pa = new ClassAccess(base_class_decl.getName().getID());
    							pa.setStart(base_class_decl.getName().getStart());
    							base_class_decl.setConstrainingClauseOpt(constraining_clause);
+   							base_class_decl.setReplaceable(replaceable);
    							ClassRedeclare cdr = new ClassRedeclare(each,
                                                          final_,
                                                          pa,
-                                                         new Opt(replaceable),
                                                          base_class_decl); :} 
   |each? 
    final_? 
@@ -556,7 +556,6 @@ Argument argument =
    				PN_ComponentRedeclare cdr = new PN_ComponentRedeclare(each,
                                         final_,
                                         pa,
-                                        new Opt(replaceable),
                                         new PN_ComponentClause(new Opt(new Redeclare()),
                                                                new Opt(),
                                                                new Opt(),
@@ -575,11 +574,11 @@ Argument argument =
    each? 
    final_?  
    base_class_decl {: ClassAccess pa = new ClassAccess(base_class_decl.getName().getID());
+                      base_class_decl.setRedeclare(new Redeclare());
    							pa.setStart(base_class_decl.getName().getStart());
    							ClassRedeclare cdr = new ClassRedeclare(each,
                                                       final_,
                                                       pa,
-                                                      new Opt(),
                                                       base_class_decl);
                            return cdr; :}
   |REDECLARE
@@ -598,7 +597,6 @@ Argument argument =
    				PN_ComponentRedeclare cdr = new PN_ComponentRedeclare(each,
                                         final_,
                                         pa,
-                                        new Opt(),
                                         new PN_ComponentClause(new Opt(new Redeclare()),
                                                                new Opt(),
                                                                new Opt(),
@@ -620,10 +618,10 @@ Argument argument =
    replaceable 
    base_class_decl 
    constraining_clause? {:  base_class_decl.setConstrainingClauseOpt(constraining_clause);
+                            base_class_decl.setReplaceable(replaceable);
                              return new  ClassRedeclare(each,
                                                          final_,
                                                          new ClassAccess(base_class_decl.getName().getID()),
-                                                         new Opt(replaceable),
                                                          base_class_decl); :} 
   |REDECLARE
    each? 
@@ -641,7 +639,6 @@ Argument argument =
    {: return new PN_ComponentRedeclare(each,
                                         final_,
                                         new ParseAccess(comp_name.getID(),array_subscripts),
-                                        new Opt(replaceable),
                                         new PN_ComponentClause(new Opt(new Redeclare()),
                                                                new Opt(),
                                                                new Opt(),

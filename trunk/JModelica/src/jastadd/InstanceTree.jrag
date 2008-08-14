@@ -64,6 +64,22 @@ aspect InstantiationTree {
            str.append("}\n");
            return str.toString();
         }
+        
+        public String toString(String indent) {
+           StringBuffer str = new StringBuffer();
+           str.append(indent+"{");
+           for (int i=0;i<size();i++) {
+              InstModification im = get(i);
+              if (i==0)
+              	str.append(im.getModification().prettyPrint(""));
+           	  else
+           	  	str.append(indent + " " +  im.getModification().prettyPrint(""));
+              if (i !=size()-1)
+              	str.append(",\n");
+           }
+           str.append("}\n");
+           return str.toString();
+        }
     
     }
 
@@ -109,6 +125,7 @@ aspect InstantiationTree {
 	}
 
 
+
     syn int InstNode.getNumMergedEnvironment() =
     	getMergedEnvironmentList().size();
     
@@ -118,7 +135,7 @@ aspect InstantiationTree {
     /* getMergedEnvironment gives the environment applicable
        to the children of the InstNode. It consists of the outer modifications
        in the environment (with the name of the InstNode itself, if any,
-       removed merged with potential local modifications.
+       removed) merged with potential local modifications.
     
        TODO: Should this attribute be lazy? Probably yes
       
@@ -128,37 +145,55 @@ aspect InstantiationTree {
 	syn lazy Environment InstNode.getMergedEnvironmentList() {
 		debugPrint("InstNode.getMergedEnvironmentList()");
 		// Retrieve modifications upwards
-		Environment env = nameScope()? myEnvironment(name()): myEnvironment();
+		Environment env = nameScope()? myEnvironment(name()).clone(): myEnvironment();
 		for (int i=0;i<localModifications().size();i++)
 			env.mergeInnerModification(this,(Modification)localModifications().get(i));
   
 		return env;
 	}
-		
+	
+	/**
+	 * myEnvironment represents the environment of the InstNode itself. It is defined
+	 * as an inherited attribute and is computed from the outer environment located at
+	 * ancestor InstNodes.
+	 */	
 	inh lazy Environment InstNode.myEnvironment();
 	inh lazy Environment InstNode.myEnvironment(String name);
 	
+	
+	/**
+	 * When no arguments are supplied to myEnvironment, the MergedEnvironment of the ancestor
+	 * InstNode is simply duplicated. This is typically the case for extends clauses.
+	 */
 	eq InstNode.getInstNode().myEnvironment() {
 		Environment env = new Environment();
 		for (int i=0;i<getNumMergedEnvironment();i++)			
 			env.mergeInnerModification(getMergedEnvironment(i).getInstNode(),
-			                             getMergedEnvironment(i).getModification());
-			
+			                             getMergedEnvironment(i).getModification());	
 		return env;
 	}
 	
-	eq InstNode.getInstNode().myEnvironment(String name) =
-	  localMyEnvironment(name);
+	/** 
+	 * When a string argument representing a component name is given as argument to myEnvironment,
+	 * the resulting environment consists only of modifications with a matching prefix. In effect, this 
+	 * results in a "peeling" operation, where the first name in a qualified name is removed, and the rest
+	 * of the modification is added to myEnvironment. The algorithm is somewhat complicated by component
+	 * redeclares that needs to be taken into account. 
+	 */
+	eq InstNode.getInstNode().myEnvironment(String name) = localMyEnvironment(name);
+	
 	
 	syn Environment InstNode.localMyEnvironment(String name) {
 	    if(!is$Final) throw new Error("Node '"+toString() +"' is not final\n**Parent: "+getParent().getParent().toString());
-		debugPrint("InstNode.getInstNode().myEnvironment(): " + name);
+		//System.out.println("InstNode.getInstNode().myEnvironment(): "+name() + " looking for " + name);
 		Environment env = new Environment();
 	    boolean foundReplacing = false;
 		for (int i=0;i<getNumMergedEnvironment();i++) {
-		    // Find first ComponentRedeclare
-		    if (!foundReplacing && 
-		        getMergedEnvironment(i).getModification() instanceof  ComponentRedeclare &&
+		    // Find first ComponentRedeclare: this is the replacing Component, and
+		    // its modifications should be included, not only those that resides in a constraining clause.
+		    // Notice that potential modifications in a constraining clause are added below in the call to
+		    // matchModification.
+		    if (!foundReplacing && getMergedEnvironment(i).getModification() instanceof  ComponentRedeclare &&
 		          ((ComponentRedeclare)getMergedEnvironment(i).getModification()).getName().getID().equals(name)) {
 		        foundReplacing = true;
 		        ComponentRedeclare cdr = (ComponentRedeclare)getMergedEnvironment(i).getModification();
@@ -173,6 +208,7 @@ aspect InstantiationTree {
 			if (m!=null)
 				env.mergeInnerModification(getMergedEnvironment(i).getInstNode(),m);
 		}
+		//System.out.println("| " + env.toString(""));
 		return env;
 	}
 		
@@ -212,7 +248,8 @@ aspect InstantiationTree {
 	
     syn lazy BaseClassDecl Modification.matchClassRedeclare(String name) = null;
 	eq ClassRedeclare.matchClassRedeclare(String name) {
-		if (getName().getID().equals(name))
+		//if (getName().getID().equals(name))
+		if (getBaseClassDecl().name().equals(name))
 			return getBaseClassDecl();
 		else
 			return null;
@@ -248,11 +285,14 @@ aspect InstantiationTree {
 
     public InstNode InstNode.createInstNode(ComponentDecl cd) {
             // Check if the component is redeclared
-			ComponentDecl replacingComponent = retrieveReplacingComponent(cd.name());
+            InstModification im = retrieveReplacingComponent(cd.name());
 
-			if (replacingComponent != null) {
-               // Check if the class of the component is redeclared
-               ClassDecl classToExpand = retrieveReplacingClass(replacingComponent.myClass().name());
+            // Check if the class of the component is redeclared
+			if (im != null) {
+		       ComponentDecl replacingComponent = im.getModification().matchComponentRedeclare(cd.name());
+		       // This is a bit tricky. The retrieveReplacingClass method should be invoked in the InstNode
+		       // ancestor InstNode of the InstNode for which the ComponentRedeclare is given.
+               ClassDecl classToExpand = im.getInstNode().ancestorInstNode().retrieveReplacingClass(replacingComponent.myClass().name());
 			    if (classToExpand!=null) {
 			    // TODO: Add support for InstReplacingPrimitive
 				 return new InstReplacingComposite(new List<FExp>(),replacingComponent,classToExpand,cd);
@@ -265,34 +305,46 @@ aspect InstantiationTree {
 			    if (classToExpand!=null) {
 			        return cd.newInstComponent(classToExpand);
 				} else {
-			
 					return cd.newInstComponent(cd.myClass());   
   				}
             }
-  
-            
-
     }
     
-       public InstNode InstNode.createInstNode(ExtendsClause ec) {
+   public InstNode InstNode.createInstNode(ExtendsClause ec) {
    		return ec.newInstExtends();
    }
 
+   inh InstNode InstNode.ancestorInstNode();
+//   eq InstRoot.getChild().ancestorInstNode() = null;
+   eq InstNode.getChild().ancestorInstNode() = this;
+   
+
 	eq InstPrimitive.getInstNodeList() = new List();
 
+    /**
+     * In order to retrieve a replacing class declaration, it is necessary to
+     * search in the MergedEnvironment() of the parent InstNode, which is equivalent to 
+     * searching the evironment myEnvironment() (notice, without argument.)
+     */
     syn BaseClassDecl InstNode.retrieveReplacingClass(String name) {
-        for (int i=0;i<getNumMergedEnvironment();i++) {
-			if (getMergedEnvironment(i).getModification().matchClassRedeclare(name)!=null) {
-				return getMergedEnvironment(i).getModification().matchClassRedeclare(name);
+        Environment env = getMergedEnvironmentList();
+        for (int i=0;i<env.size();i++) {
+			if (env.get(i).getModification().matchClassRedeclare(name)!=null) {
+				return env.get(i).getModification().matchClassRedeclare(name);
 			}
 		}
 		return null;
     }
 
-	syn ComponentDecl InstNode.retrieveReplacingComponent(String name) {
+    /**
+     * Notice that retrieveReplacingComponent returns an InstModification object so that
+     * this modification can be checked for class redeclarations which must be done at the
+     * correct ancestor InstNode.
+     */
+	syn InstModification InstNode.retrieveReplacingComponent(String name) {
 		for (int i=0;i<getNumMergedEnvironment();i++) {
 			if (getMergedEnvironment(i).getModification().matchComponentRedeclare(name)!=null) {
-				return getMergedEnvironment(i).getModification().matchComponentRedeclare(name);
+				return getMergedEnvironment(i);
 			}
 		}
 		return null;
@@ -518,6 +570,7 @@ aspect InstanceDumpTree {
 	// Some basic dump routines
 	public void InstNode.dumpTree(String indent) {
 		System.out.println(indent + dump());
+		System.out.println(toString(indent+"|"));
 		getInstNodeList().dumpTree(indent + " ");
 	}
 	
@@ -526,6 +579,8 @@ aspect InstanceDumpTree {
 		                      + ": " + 
 		                      getComponentDecl().myClass().name() + " "+
 		                      getComponentDecl().name());
+		System.out.println(toString(indent+"|"));
+
 		//getComponentDecl().dumpTree("");
 		getInstNodeList().dumpTree(indent + " ");
 	}
@@ -535,7 +590,92 @@ aspect InstanceDumpTree {
 							  + ": " + 
 		                      getComponentDecl().myClass().name() + " "+
 		                      getComponentDecl().name());
+		System.out.println(toString(indent+"|"));
+
 	}
+	
+ 	public String InstNode.toString() {
+		return toString("");
+    }
+	public String InstNode.toString(String indent) {
+	   StringBuffer str = new StringBuffer();
+	   str.append(indent+"InstNode:\n");
+	   str.append(indent+" myEnvironment():\n");
+	   str.append(myEnvironment().toString(indent+" "));
+	   str.append(indent+" myEnvironment('"+name()+"'):\n");
+	   str.append(myEnvironment(name()).toString(indent+" "));
+	   str.append(indent+" mergedEnvironment():\n");
+	   str.append(getMergedEnvironmentList().toString(indent+" "));
+	   return str.toString();	
+	}
+  
+  
+	public String InstReplacingComposite.toString() {
+		return toString("");
+    }
+	public String InstReplacingComposite.toString(String indent) {
+	   StringBuffer str = new StringBuffer();
+	   str.append(indent+"InstReplacingComponent:\n");
+	   str.append(indent+" Replacing decl: " + getComponentDecl().prettyPrint("") + "\n");
+	   str.append(indent+" Original decl:  " + getOriginalDecl().prettyPrint("") + "\n");
+	   str.append(indent+" myEnvironment():\n");
+	   str.append(myEnvironment().toString(indent+" "));
+	   str.append(indent+" myEnvironment('"+name()+"'):\n");
+	   str.append(myEnvironment(name()).toString(indent+" "));
+	   str.append(indent+" mergedEnvironment():\n");
+	   str.append(getMergedEnvironmentList().toString(indent+" "));
+	   //str.append(" Declared type:\n");
+	   //str.append(declaredType().toString());
+	   //str.append(" Constraining type:\n");
+	   //str.append(constrainingType().toString());
+	   return str.toString();	
+	}
+
+	public String InstPrimitive.toString() {
+		return toString("");
+    }
+	public String InstPrimitive.toString(String indent) {
+	   StringBuffer str = new StringBuffer();
+	   str.append(indent+"InstPrimitive:\n");
+	   str.append(indent+" Component decl: " + getComponentDecl().prettyPrint("") + "\n");
+	   str.append(indent+" myEnvironment():\n");
+	   str.append(myEnvironment().toString(indent+" "));
+	   str.append(indent+" myEnvironment('"+name()+"'):\n");
+	   str.append(myEnvironment(name()).toString(indent+" "));	   
+	   str.append(indent+" mergedEnvironment():\n");
+	   str.append(getMergedEnvironmentList().toString(indent+" "));
+	   return str.toString();	
+	}
+
+	public String InstComposite.toString() {
+		return toString("");
+    }
+	public String InstComposite.toString(String indent) {
+	   StringBuffer str = new StringBuffer();
+	   str.append(indent+"InstComposite:\n");
+	   str.append(indent+" Component decl: " + getComponentDecl().prettyPrint("") + "\n");
+	   str.append(indent+" myEnvironment():\n");
+	   str.append(myEnvironment().toString(indent+" "));
+	   str.append(indent+" myEnvironment('"+name()+"'):\n");
+	   str.append(myEnvironment(name()).toString(indent+" "));	   
+	   str.append(indent+" mergedEnvironment():\n");
+	   str.append(getMergedEnvironmentList().toString(indent+" "));
+	   //str.append(indent+" Declared type:\n");
+	   //str.append(indent+declaredType().toString());
+	   //str.append(indent+" Constraining type:\n");
+	   //str.append(indent+constrainingType().toString());
+	   
+	   return str.toString();	
+	}
+
+	public String InstModification.toString() {
+		return toString("");
+    }
+    public String InstModification.toString(String indent) {
+    	return getModification().prettyPrint(indent);
+    
+    }
+	
 	
 }
 
