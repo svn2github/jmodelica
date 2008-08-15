@@ -429,6 +429,12 @@ aspect ShortClassUtil {
 		
 	}
 
+   syn boolean BaseClassDecl.hasModification() = false;
+   eq ShortClassDecl.hasModification() = hasClassModification();
+   
+   syn Modification BaseClassDecl.getModification() = null;
+   eq ShortClassDecl.getModification() = getClassModification();
+
 }
 
 aspect AllElements {

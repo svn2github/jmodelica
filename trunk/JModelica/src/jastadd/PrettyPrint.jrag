@@ -994,5 +994,6 @@ aspect FlattPrettyPrint {
 	eq Record.toString() = "record";
 
     syn String ComponentDecl.toString() = prettyPrint("");
+    syn String Access.toString() = prettyPrint("");
 
 }

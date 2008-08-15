@@ -1865,7 +1865,12 @@ class RedeclareTest16 "Test of merging of modifications in parametrized classes"
       JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest16",
         description="Test of parametrized classes.",
                                                flatModel=
-"
+"fclass RedeclareTests.RedeclareTest16
+ Real e.d.a.x = 5 /*(5)*/;
+ Real e.d.a.y = 4 /*(4)*/;
+ Real e.d.a.z = 6 /*(6)*/;
+equation 
+end RedeclareTests.RedeclareTest16;
 "
   )})));
  
