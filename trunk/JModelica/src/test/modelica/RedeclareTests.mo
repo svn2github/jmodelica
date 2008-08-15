@@ -1938,8 +1938,7 @@ class RedeclareTest165
      D d(redeclare replaceable myB a(x=5));
    end E;
  
-   parameter Real p0 = 3;
-   model BB = B(u=p0);
+   model BB = B(u=1);
  
    E e(redeclare model myB = C(z=6));
  
