@@ -1899,7 +1899,46 @@ class RedeclareTest16 "Test of merging of modifications in parametrized classes"
 
 end RedeclareTest16;
 
-
+class RedeclareTest165 
+ 
+  model A
+    Real x=1;
+  end A;
+ 
+  model B
+   Real x=2;
+   Real y=3;
+   Real z=4;
+   Real u=5;
+   Real v=6;
+  end B;
+ 
+  model C
+   Real x=2;
+   Real y=3;
+   Real z=4;
+   Real u=5;
+   Real v=6;
+   Real w=7;
+  end C;
+ 
+   model D
+     replaceable A a(x=4);
+ 
+   end D;
+ 
+   model E
+     parameter Real pE = 5;
+     replaceable model myB = BB(x=6,y=pE);
+     D d(redeclare replaceable myB a(x=5));
+   end E;
+ 
+   parameter Real p0 = 3;
+   model BB = B(u=p0);
+ 
+   E e(redeclare model myB = C(z=6));
+ 
+end RedeclareTest165;
 
 model RedeclareTest17
  
