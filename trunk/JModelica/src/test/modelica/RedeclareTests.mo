@@ -1967,7 +1967,7 @@ model RedeclareTest17
  
    package PP = P(redeclare model BB = P.C(y=5));
  
-  PP.BB bb;
+  PP.BB bb(y=3);
  
 end RedeclareTest17;
 

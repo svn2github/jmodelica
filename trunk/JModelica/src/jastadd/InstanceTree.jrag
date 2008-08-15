@@ -338,7 +338,7 @@ aspect InstantiationTree {
 		       ComponentDecl replacingComponent = im.getModification().matchComponentRedeclare(cd.name());
 		       // This is a bit tricky. The retrieveReplacingClass method should be invoked in the InstNode
 		       // ancestor InstNode of the InstNode for which the ComponentRedeclare is given.
-               ClassDecl classToExpand = retrieveReplacingClass(replacingComponent.myClass().name());
+               ClassDecl classToExpand = retrieveReplacingClass(replacingComponent);
 			    if (classToExpand!=null) {
 			    // TODO: Add support for InstReplacingPrimitive
 				 return new InstReplacingComposite(new List<FExp>(),replacingComponent,classToExpand,cd);
@@ -347,13 +347,15 @@ aspect InstantiationTree {
 			    }
 			} else {
 			    // Check if the class of the component is redeclared
-                ClassDecl classToExpand = retrieveReplacingClass(cd.myClass().name());
+                ClassDecl classToExpand = retrieveReplacingClass(cd);
 			    if (classToExpand!=null) {
 			        return cd.newInstComponent(classToExpand);
 				} else {
 					return cd.newInstComponent(cd.myClass());   
   				}
             }
+ 	
+            
     }
     
    public InstNode InstNode.createInstNode(ExtendsClause ec) {
@@ -372,13 +374,34 @@ aspect InstantiationTree {
      * search in the MergedEnvironment() of the parent InstNode, which is equivalent to 
      * searching the evironment myEnvironment() (notice, without argument.)
      */
-    syn BaseClassDecl InstNode.retrieveReplacingClass(String name) {
+    syn BaseClassDecl InstNode.retrieveReplacingClass(ComponentDecl cd) {
+        String name = cd.myClass().name();    
         Environment env = getMergedEnvironmentList();
         for (int i=0;i<env.size();i++) {
 			if (env.get(i).getModification().matchClassRedeclare(name)!=null) {
 				return env.get(i).getModification().matchClassRedeclare(name);
 			}
 		}
+
+
+/* NO!! This does not work for hierarchical redeclarations of classes in packages.
+   In order to handle this, the new lookup-scheme based on types rather than classes
+   needs to be implemented.
+
+		// Ok, there was no ClassRedeclare in the Environment, but there may still be
+		// ClassRedeclares in package modifications.
+		Environment envCM = new Environment();
+		ArrayList<Modification> classMods = cd.getClassName().classModifications();
+	    for (int j = 0;j<classMods.size();j++)
+		   envCM.mergeInnerModification(this,
+		    		   	                classMods.get(j));
+
+		for (int i = 0;i<envCM.size();i++)
+		    if (envCM.get(i).getModification().matchClassRedeclare(cd.myClass().name())!=null) {
+				return envCM.get(i).getModification().matchClassRedeclare(cd.myClass().name());
+			}
+*/			
+			
 		return null;
     }
 
@@ -474,7 +497,7 @@ aspect InstantiationTree {
 		  	l.add(getComponentDecl().getConstrainingClause().getClassModification());	
 		    
 		// This is to take modifiers short class declarations into account
-		ArrayList<Modification> classMods = getComponentDecl().getClassName().classModifications();
+		ArrayList<Modification> classMods = getComponentDecl().myClass().classModifications();
 		for (int i = 0;i<classMods.size();i++)
 			l.add(classMods.get(i));	
 		// This is to take into account the case when we instantiate a
@@ -521,7 +544,7 @@ aspect InstantiationTree {
 		return l;
 	}
 
-    
+/*    
     syn ArrayList<Modification> Access.classModifications() {
     	ArrayList<Modification> classMods = new ArrayList<Modification>();
     	ClassAccess access = (ClassAccess)getFirstAccess();
@@ -531,6 +554,7 @@ aspect InstantiationTree {
     	}
     	return classMods;
     }
+*/
 
 	syn lazy ArrayList<Modification> ClassDecl.classModifications() = new ArrayList<Modification>();
 	eq FullClassDecl.classModifications() {
@@ -563,7 +587,7 @@ aspect InstantiationTree {
 	
 	/**
 	 * classToExpand returns the class to expand for a particular InstComponent when taking
-	 * the environment into account.
+	 * the environment into account. This method is used in type checking.
 	 */
 	syn lazy ClassDecl InstComponent.classToExpand() {
          ClassDecl classToExpand = getClassDecl();

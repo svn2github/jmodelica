@@ -995,5 +995,5 @@ aspect FlattPrettyPrint {
 
     syn String ComponentDecl.toString() = prettyPrint("");
     syn String Access.toString() = prettyPrint("");
-
+    syn String Modification.toString() = prettyPrint("");
 }

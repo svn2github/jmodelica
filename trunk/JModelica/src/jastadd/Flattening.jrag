@@ -131,6 +131,10 @@ aspect Flattening {
 			getChild(i).collectAttributes(attrs, prefix);
 	}
 
+	// This is just to avoid collecting ComponentModification:s that resides inside
+	// ClassRedeclares.
+    public void ClassRedeclare.collectAttributes(List attrs, FQName prefix) {}
+
 	public void ComponentModification.collectAttributes(List attrs, FQName prefix) {
         debugPrint("<<<<<<<<<<<ComponentModification.collectAttributes: "+getName());
 		if (hasModification()) {
