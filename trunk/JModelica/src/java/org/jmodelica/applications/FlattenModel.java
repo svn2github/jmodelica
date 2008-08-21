@@ -25,7 +25,8 @@ public class FlattenModel {
 		      
 		      SourceRoot sr = (SourceRoot)parser.parse(scanner);
 		      
-		      sr.dumpTree("");
+		      //sr.dumpTree("");
+		      
 		      
 		      sr.setFileName(name);
 		      sr.prettyPrint("");

@@ -292,11 +292,11 @@ aspect InstantiationTree {
 			return null;
 	}
 	
-    syn lazy BaseClassDecl Modification.matchClassRedeclare(String name) = null;
+    syn lazy ClassRedeclare Modification.matchClassRedeclare(String name) = null;
 	eq ClassRedeclare.matchClassRedeclare(String name) {
 		//if (getName().getID().equals(name))
 		if (getBaseClassDecl().name().equals(name))
-			return getBaseClassDecl();
+			return this;
 		else
 			return null;
 	}
@@ -336,9 +336,7 @@ aspect InstantiationTree {
             // Check if the class of the component is redeclared
 			if (im != null) {
 		       ComponentDecl replacingComponent = im.getModification().matchComponentRedeclare(cd.name());
-		       // This is a bit tricky. The retrieveReplacingClass method should be invoked in the InstNode
-		       // ancestor InstNode of the InstNode for which the ComponentRedeclare is given.
-               ClassDecl classToExpand = retrieveReplacingClass(replacingComponent);
+               ClassDecl classToExpand = retrieveReplacingClass(replacingComponent.myClass().name());
 			    if (classToExpand!=null) {
 			    // TODO: Add support for InstReplacingPrimitive
 				 return new InstReplacingComposite(new List<FExp>(),replacingComponent,classToExpand,cd);
@@ -347,7 +345,7 @@ aspect InstantiationTree {
 			    }
 			} else {
 			    // Check if the class of the component is redeclared
-                ClassDecl classToExpand = retrieveReplacingClass(cd);
+                ClassDecl classToExpand = retrieveReplacingClass(cd.myClass().name());
 			    if (classToExpand!=null) {
 			        return cd.newInstComponent(classToExpand);
 				} else {
@@ -369,17 +367,37 @@ aspect InstantiationTree {
 
 	eq InstPrimitive.getInstNodeList() = new List();
 
-    /**
-     * In order to retrieve a replacing class declaration, it is necessary to
-     * search in the MergedEnvironment() of the parent InstNode, which is equivalent to 
-     * searching the evironment myEnvironment() (notice, without argument.)
-     */
-    syn BaseClassDecl InstNode.retrieveReplacingClass(ComponentDecl cd) {
-        String name = cd.myClass().name();    
+    public BaseClassDecl InstNode.retrieveReplacingAliasClass(InstModification im) {
+		ClassRedeclare cr = (ClassRedeclare)im.getModification();
+		BaseClassDecl nextAliasClass = cr.getBaseClassDecl().nextAliasClass();
+		
+		BaseClassDecl replacingBaseClassDecl = null;
+		while (nextAliasClass != null) {
+			replacingBaseClassDecl = 
+		    	im.getInstNode().retrieveReplacingClass(nextAliasClass.name());
+			if (replacingBaseClassDecl==null) {
+				nextAliasClass = nextAliasClass.nextAliasClass();
+			} else {
+				nextAliasClass = null;
+			}
+			
+		}
+		
+		return replacingBaseClassDecl;
+
+    }
+
+    syn BaseClassDecl InstNode.retrieveReplacingClass(String name) {
+        //String name = cd.myClass().name();    
         Environment env = getMergedEnvironmentList();
         for (int i=0;i<env.size();i++) {
 			if (env.get(i).getModification().matchClassRedeclare(name)!=null) {
-				return env.get(i).getModification().matchClassRedeclare(name);
+			    ClassRedeclare cr = env.get(i).getModification().matchClassRedeclare(name);
+			    // Check if this class, in turn, is redeclared
+                BaseClassDecl bcdr = null;
+                if (cr.getBaseClassDecl().isAliasClass())
+                	bcdr = retrieveReplacingAliasClass(env.get(i));
+			    return bcdr!=null? bcdr: cr.getBaseClassDecl();
 			}
 		}
 

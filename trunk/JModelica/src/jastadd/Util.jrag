@@ -407,9 +407,15 @@ aspect ComponentDeclMethods {
 }
 
 aspect ShortClassUtil {
-
+    // TODO: rename this attribute to finalAliasClass
 	syn ClassDecl ClassDecl.finalClass() = this;
 	eq ShortClassDecl.finalClass() = getClassName().myClassDecl().finalClass();
+
+	syn BaseClassDecl BaseClassDecl.nextAliasClass() = null;
+	eq ShortClassDecl.nextAliasClass() = (BaseClassDecl)getClassName().myClassDecl();
+
+	syn boolean BaseClassDecl.isAliasClass() = false;
+	eq ShortClassDecl.isAliasClass() = true;
 
 	syn boolean ClassDecl.isInput() = false;
 	eq ShortClassDecl.isInput() {
@@ -417,7 +423,6 @@ aspect ShortClassUtil {
    			if (getTypePrefixInputOutput() instanceof Input)
    				return true;
 		return getClassName().myClassDecl().isInput();
-		
 	}
 	
 	syn boolean ClassDecl.isOutput() = false;

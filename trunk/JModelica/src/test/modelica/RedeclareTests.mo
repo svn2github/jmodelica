@@ -1832,7 +1832,11 @@ class RedeclareTest15 "Test of merging of modifications in parametrized classes"
       JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest15",
         description="Test of parametrized classes.",
                                                flatModel=
-"
+"fclass RedeclareTests.RedeclareTest15
+ Real d.c.a.x = 4 /*(4)*/;
+ Real d.c.a.y = 5 /*(5)*/;
+equation
+end RedeclareTests.RedeclareTest15;
 "
   )})));
  
@@ -1906,6 +1910,24 @@ end RedeclareTest16;
 
 class RedeclareTest165 
  
+       annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest165",
+        description="Test of parametrized classes.",
+                                               flatModel=
+"fclass RedeclareTests.RedeclareTest165
+ parameter Real e.pE = 5 /*(5)*/;
+ Real e.d.a.x = 5 /*(5)*/;
+ Real e.d.a.y = e.pE /*(5)*/;
+ Real e.d.a.z = 6 /*(6)*/;
+ Real e.d.a.u = 1 /*(1)*/;
+ Real e.d.a.v = 6 /*(6)*/;
+ Real e.d.a.w = 7 /*(7)*/;
+equation
+end RedeclareTests.RedeclareTest165;
+"
+  )})));
+ 
+ 
   model A
     Real x=1;
   end A;
@@ -1934,18 +1956,22 @@ class RedeclareTest165
  
    model E
      parameter Real pE = 5;
-     replaceable model myB = BB(x=6,y=pE);
+     replaceable model myB = BB(x=6,y=pE); // This access to B should be illegal since
+                                           // Redeclare165 is not a package.
      D d(redeclare replaceable myB a(x=5));
    end E;
  
-   model BB = B(u=1);
+   model BB = B(u=1); // This should render e.d.a.u = 1 but does not in Dymola 
+                      // where e.d.a.u = 5.
  
    E e(redeclare model myB = C(z=6));
  
 end RedeclareTest165;
 
 model RedeclareTest17
- 
+  
+  // This test does not pass due to limitations in the lookup framework.
+  
    package P
    model A
     Real x=1;
@@ -1970,5 +1996,113 @@ model RedeclareTest17
   PP.BB bb(y=3);
  
 end RedeclareTest17;
+
+class RedeclareTest18 "Test of merging of modifications in parametrized classes"
+ 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest18",
+        description="Test of parametrized classes.",
+                                               flatModel=
+"
+"
+  )})));
+ 
+  
+  model A
+    Real x=1;
+  end A;
+ 
+  model B
+   Real x=2;
+   Real y=3;
+  end B;
+  
+  model C
+   Real x=2;
+   Real y=3;
+   Real z=4;
+  end C;
+
+  model D
+   Real x=2;
+   Real y=3;
+   Real z=4;
+   Real w=5;
+  end D;
+
+   model E
+     replaceable A a(x=4);
+   
+   end E;
+ 
+   model F
+     replaceable model myB = B(x=6,y=4);
+     E e(redeclare replaceable myB a(x=5));
+   end F;
+ 
+   model G
+     replaceable model myC = C(y=7,z=4);
+     F f(redeclare model myB = myC);
+   end G;
+    
+   G g(redeclare model myC = D(z=6,w=5));
+
+end RedeclareTest18;
+
+class RedeclareTest19 "Test of merging of modifications in parametrized classes"
+ 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest19",
+        description="Test of parametrized classes.",
+                                               flatModel=
+"
+"
+  )})));
+ 
+  
+  model A
+    Real x=1;
+  end A;
+ 
+  model B
+   Real x=2;
+   Real y=3;
+  end B;
+  
+  model C
+   Real x=2;
+   Real y=3;
+   Real z=4;
+  end C;
+
+  model D
+   Real x=2;
+   Real y=3;
+   Real z=4;
+   Real w=5;
+  end D;
+
+   model E
+     replaceable A a(x=4);
+   
+   end E;
+ 
+   model F
+     replaceable model myB = B(x=6,y=4);
+     E e(redeclare replaceable myB a(x=5));
+   end F;
+ 
+   model G
+     replaceable model myC = C(y=7,z=4);
+     model myC2 = myC(y=10);
+     F f(redeclare model myB = myC2);
+   end G;
+    
+    
+   G g(redeclare model myC = D(z=6,w=5));
+
+end RedeclareTest19;
+
+
 
 end RedeclareTests;
