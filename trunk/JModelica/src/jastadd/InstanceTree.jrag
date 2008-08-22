@@ -212,7 +212,7 @@ aspect InstantiationTree {
 		    		   
 		    	}	   
 		    }
-		    
+		    /*
 		    if (!foundReplacingClass && getMergedEnvironment(i).getModification() instanceof  ClassRedeclare &&
 		          ((ClassRedeclare)getMergedEnvironment(i).getModification()).getName().getID().equals(className)) {
 		        foundReplacingClass = true;
@@ -224,6 +224,7 @@ aspect InstantiationTree {
 		    		   	                          classMods.get(j));
 		        } 
 		    }
+		    */
 		     
             // This merges modifications in the environment. For ComponentRedeclare:s
             // only modifications in the constraining clause are merged, see the corresponding
@@ -231,7 +232,8 @@ aspect InstantiationTree {
 			Modification m = getMergedEnvironment(i).getModification().matchModification(compName);
 			if (m!=null) 
 					env.mergeInnerModification(getMergedEnvironment(i).getInstNode(),m);
-					
+			
+			/*		
 			// This merges modifications in the environment. For ClassRedeclare:s
             // only modifications in the constraining clause are merged, see the corresponding
             // implementation of matchModification
@@ -245,7 +247,7 @@ aspect InstantiationTree {
 	        if (getMergedEnvironment(i).getModification() instanceof ClassRedeclare &&
 	            getMergedEnvironment(i).getInstNode() == this)
 	            	env.mergeInnerModification(getMergedEnvironment(i).getInstNode(),getMergedEnvironment(i).getModification());	
-	        
+	        */
 		}
 		env.mergeInnerEnvironment(envCM);
 		//System.out.println("| " + env.toString(""));
@@ -336,7 +338,7 @@ aspect InstantiationTree {
             // Check if the class of the component is redeclared
 			if (im != null) {
 		       ComponentDecl replacingComponent = im.getModification().matchComponentRedeclare(cd.name());
-               ClassDecl classToExpand = retrieveReplacingClass(replacingComponent.myClass().name());
+               ClassDecl classToExpand = im.getInstNode().retrieveReplacingClass(replacingComponent.myClass().name());
 			    if (classToExpand!=null) {
 			    // TODO: Add support for InstReplacingPrimitive
 				 return new InstReplacingComposite(new List<FExp>(),replacingComponent,classToExpand,cd);
@@ -352,8 +354,6 @@ aspect InstantiationTree {
 					return cd.newInstComponent(cd.myClass());   
   				}
             }
- 	
-            
     }
     
    public InstNode InstNode.createInstNode(ExtendsClause ec) {

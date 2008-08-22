@@ -2103,6 +2103,61 @@ class RedeclareTest19 "Test of merging of modifications in parametrized classes"
 
 end RedeclareTest19;
 
+class RedeclareTest20 "Test of merging of modifications in parametrized classes"
+ 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest20",
+        description="Test of parametrized classes.",
+                                               flatModel=
+"
+"
+  )})));
+ 
+  
+  model A
+    Real x=1;
+  end A;
+ 
+  model B
+   Real x=2;
+   Real y=3;
+  end B;
+  
+  model C
+   Real x=2;
+   Real y=3;
+   Real z=4;
+  end C;
+
+  model D
+   Real x=2;
+   Real y=3;
+   Real z=4;
+   Real w=5;
+  end D;
+
+   model E
+   
+     model myB = B(x=5);
+     myB b;
+     replaceable A a(x=4);
+   
+   end E;
+ 
+   model F
+     replaceable model myB = B(x=6,y=4);
+     E e(redeclare replaceable myB a(x=5));
+   end F;
+ 
+   model G
+     replaceable model myC = C(y=7,z=4);
+     model myC2 = myC(y=10);
+     F f(redeclare model myB = myC2);
+   end G;
+    
+   G g(redeclare model myC = D(z=6,w=5));
+
+end RedeclareTest20;
 
 
 end RedeclareTests;
