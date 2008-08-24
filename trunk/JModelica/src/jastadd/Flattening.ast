@@ -1,6 +1,12 @@
 abstract InstNode ::= /InstNode*/ /FQName/ FExp* /DynamicInst:InstNode*/ /DynamicInstConstraining:InstNode*/;
 abstract InstRoot : InstNode ::= /FPrimitiveType*/;
 InstClassRoot : InstRoot ::= <ClassDecl:ClassDecl>;
+InstProgramRoot : InstRoot ::= <Program:Program>;
+
+abstract InstClass : InstNode ::= <BaseClassDecl:BaseClassDecl>;
+InstFullClassDecl : InstClass;
+InstShortClassDecl : InstClass;
+InstPrimitiveClassDecl : InstClass;
 
 // The class to expand may differ from the declared class of the component due to 
 // redeclaration of classes.

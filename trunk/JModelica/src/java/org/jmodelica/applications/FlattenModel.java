@@ -31,6 +31,9 @@ public class FlattenModel {
 		      sr.setFileName(name);
 		      sr.prettyPrint("");
 		      
+		      InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
+		      ipr.dumpTree("");
+		      
 		      long parseTime = System.currentTimeMillis();
 		      
 		      System.out.println("Checking for errors...");	      

@@ -1,5 +1,5 @@
 // MiniModelica abstract grammar
-SourceRoot : Root ::= Program;
+SourceRoot : Root ::= Program ;
 
 Program ::= Element* 
             /UnknownClassDecl/
@@ -7,7 +7,8 @@ Program ::= Element*
             /PredefinedType:ClassDecl*/ 
             /BuiltInType:ClassDecl*/   
             /BuiltInFunction:ClassDecl*/
-            /LibNode*/;
+            /LibNode*/
+            /InstProgramRoot/;
 
 abstract ClassDecl : Element ::=;
 abstract BaseClassDecl : ClassDecl::=VisibilityType 

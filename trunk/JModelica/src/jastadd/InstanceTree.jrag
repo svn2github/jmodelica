@@ -306,6 +306,11 @@ aspect InstantiationTree {
 	
 	eq BaseClassDecl.getInstRoot().myEnvironment() = new Environment();
 	eq BaseClassDecl.getInstRoot().myEnvironment(String className, String compName) = new Environment();
+
+	eq Program.getInstProgramRoot().myEnvironment() = new Environment();
+	eq Program.getInstProgramRoot().myEnvironment(String className, String compName) = new Environment();
+	
+	
 	
 	// Definition of the NTA representing the root of the 
 	// instantiation tree
@@ -318,7 +323,15 @@ aspect InstantiationTree {
 	
 		List l = new List();
 		List comps = components();
+		List classes = classes();
 		List supers = superClasses();	
+		
+		for (int i=0;i<classes.getNumChild();i++) {
+			BaseClassDecl bcd = (BaseClassDecl)classes.getChild(i);
+		    l.add(createInstNode(bcd));
+		}				
+		
+		
 		
 		for (int i=0;i<comps.getNumChild();i++) {
 			ComponentDecl cd = (ComponentDecl)comps.getChild(i);
@@ -355,6 +368,10 @@ aspect InstantiationTree {
   				}
             }
     }
+    
+   public InstNode InstNode.createInstNode(BaseClassDecl bcd) {
+   		return bcd.newInstClass();
+   }    
     
    public InstNode InstNode.createInstNode(ExtendsClause ec) {
    		return ec.newInstExtends();
@@ -645,24 +662,66 @@ aspect InstantiationTree {
 	*/
 	}
 	
-	syn List InstNode.equations();
+	syn List InstNode.equations() = emptyList();
 	eq InstClassRoot.equations() = getClassDecl().equations();
 	eq InstComponent.equations() = classToExpand().equations();
 	eq InstExtends.equations() = getExtendsClause().getSuper().myClassDecl().equations();
 	
-	syn lazy List InstNode.components();
+	syn lazy List InstNode.components() = emptyList();
 	eq InstClassRoot.components() = getClassDecl().components();
 	// This attribute also needs to take into account that a class declaration
 	// may be redeclared.
 	eq InstComponent.components() = classToExpand().components();
 	eq InstExtends.components() = getExtendsClause().getSuper().myClassDecl().components();
+	eq InstClass.components() = getBaseClassDecl().components();
 	
-	syn lazy List InstNode.superClasses();
+	syn lazy List InstNode.superClasses() = emptyList();
 	eq InstClassRoot.superClasses() = getClassDecl().superClasses();
 	eq InstComponent.superClasses() = classToExpand().superClasses();
 	eq InstExtends.superClasses() = getExtendsClause().getSuper().myClassDecl().superClasses();
+    eq InstClass.superClasses() = getBaseClassDecl().superClasses();
+
+	syn lazy List InstNode.classes() = emptyList();
+	eq InstProgramRoot.classes() = getProgram().classes();
+	eq InstClass.classes() = getBaseClassDecl().classes();
+
 
 }
+
+aspect InstanceClasses {
+
+	syn lazy InstProgramRoot Program.getInstProgramRoot() {
+		return new InstProgramRoot(new List(), this);
+	}
+
+    public InstNode BaseClassDecl.newInstClass() {
+    	return null;
+    }    
+    public InstNode FullClassDecl.newInstClass() {
+    	return new InstFullClassDecl(new List(),this);
+    }
+    public InstNode ShortClassDecl.newInstClass() {
+    	return new InstShortClassDecl(new List(),this);
+    }
+    public InstNode PrimitiveClassDecl.newInstClass() {
+    	return new InstPrimitiveClassDecl(new List(),this);
+    }
+
+
+
+    syn lazy List BaseClassDecl.classes() = emptyList();
+    eq FullClassDecl.classes() = getClassDeclList();
+
+
+    
+    syn lazy List Program.classes() = getElementList();
+
+	syn FullClassDecl InstFullClassDecl.getFullClassDecl() = (FullClassDecl)getBaseClassDecl();
+	syn ShortClassDecl InstShortClassDecl.getShortClassDecl() = (ShortClassDecl)getBaseClassDecl();
+	syn PrimitiveClassDecl InstPrimitiveClassDecl.getPrimitiveClassDecl() = (PrimitiveClassDecl)getBaseClassDecl();
+
+}
+
 
 aspect InstanceDumpTree {
 
@@ -670,6 +729,16 @@ aspect InstanceDumpTree {
 	public void InstNode.dumpTree(String indent) {
 		System.out.println(indent + dump());
 		System.out.println(toString(indent+"|"));
+		getInstNodeList().dumpTree(indent + " ");
+	}
+	
+	public void InstClass.dumpTree(String indent) {
+		System.out.println(indent + dump()
+		                      + ": " + 
+		                      getBaseClassDecl().name());
+		System.out.println(toString(indent+"|"));
+
+		//getComponentDecl().dumpTree("");
 		getInstNodeList().dumpTree(indent + " ");
 	}
 	
