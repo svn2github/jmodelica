@@ -159,7 +159,7 @@ aspect InstantiationTree {
 	 */	
 	inh lazy Environment InstNode.myEnvironment();
 	syn Environment InstNode.myEnvironment(String compName) = myEnvironment("",compName);
-	eq InstComponent.myEnvironment(String compName) = myEnvironment(getComponentDecl().myClass().name(),compName);
+	eq InstComponentDecl.myEnvironment(String compName) = myEnvironment(getComponentDecl().myClass().name(),compName);
 	inh Environment InstNode.myEnvironment(String className, String compName); // TODO: Make sure this is lazy - removed for debugging
 	
 	
@@ -315,6 +315,7 @@ aspect InstantiationTree {
 	// Definition of the NTA representing the root of the 
 	// instantiation tree
 	syn InstRoot BaseClassDecl.getInstRoot() = new InstClassRoot(new List(),this);
+	syn InstRoot InstBaseClassDecl.getInstRoot() = new InstClassRoot(new List(),getBaseClassDecl());
 
 //	syn nta InstConstrainingClauseRoot ConstrainingClause.instConstrainingClauseRoot() = new InstConstrainingClauseRoot(new List(),this);
 
@@ -354,23 +355,23 @@ aspect InstantiationTree {
                ClassDecl classToExpand = im.getInstNode().retrieveReplacingClass(replacingComponent.myClass().name());
 			    if (classToExpand!=null) {
 			    // TODO: Add support for InstReplacingPrimitive
-				 return new InstReplacingComposite(new List<FExp>(),replacingComponent,classToExpand,cd);
+				 return new InstReplacingComposite(new List<FExp>(),cd.newInstClassAccess(),replacingComponent,classToExpand,cd);
 			    } else {
-			     return new InstReplacingComposite(new List<FExp>(),replacingComponent,replacingComponent.myClass(),cd);
+			     return new InstReplacingComposite(new List<FExp>(),cd.newInstClassAccess(),replacingComponent,replacingComponent.myClass(),cd);
 			    }
 			} else {
 			    // Check if the class of the component is redeclared
                 ClassDecl classToExpand = retrieveReplacingClass(cd.myClass().name());
 			    if (classToExpand!=null) {
-			        return cd.newInstComponent(classToExpand);
+			        return cd.newInstComponentDecl(classToExpand);
 				} else {
-					return cd.newInstComponent(cd.myClass());   
+					return cd.newInstComponentDecl(cd.myClass());   
   				}
             }
     }
     
    public InstNode InstNode.createInstNode(BaseClassDecl bcd) {
-   		return bcd.newInstClass();
+   		return bcd.newInstClassDecl();
    }    
     
    public InstNode InstNode.createInstNode(ExtendsClause ec) {
@@ -457,37 +458,37 @@ aspect InstantiationTree {
 
 	// Attribute for building an InstComposite node based
 	// on a ComponentDecl
-	public InstComponent ComponentDecl.newInstComponent(ClassDecl classToExpand) {
-	   //return myClass().newInstComponent(this);
-	   return classToExpand.newInstComponent(this);
+	public InstComponentDecl ComponentDecl.newInstComponentDecl(ClassDecl classToExpand) {
+	   //return myClass().newInstComponentDecl(this);
+	   return classToExpand.newInstComponentDecl(this);
 	}
 	
 	// Dispatch w.r.t. class type
-	public abstract InstComponent ClassDecl.newInstComponent(ComponentDecl cd);
+	public abstract InstComponentDecl ClassDecl.newInstComponentDecl(ComponentDecl cd);
 
-	public InstComponent BaseClassDecl.newInstComponent(ComponentDecl cd) {
-		if (!extendsPrimitive())
-			return new InstComposite(new List(),cd,this);
-		else {
-			return new InstPrimitive(new List(),cd,this);
+	public InstComponentDecl BaseClassDecl.newInstComponentDecl(ComponentDecl cd) {
+		if (!extendsPrimitive()){
+			return new InstComposite(new List(),cd.newInstClassAccess(),cd,this);
+		} else {
+			return new InstPrimitive(new List(),cd.newInstClassAccess(),cd,this);
 		}
 	}
 	
-	public InstComponent ShortClassDecl.newInstComponent(ComponentDecl cd) {
-		return getClassName().myClassDecl().newInstComponent(cd);
+	public InstComponentDecl ShortClassDecl.newInstComponentDecl(ComponentDecl cd) {
+		return getClassName().myClassDecl().newInstComponentDecl(cd);
 	}
 	
-	public InstComponent PrimitiveClassDecl.newInstComponent(ComponentDecl cd) {
-		return new InstPrimitive(new List(),cd,this);
+	public InstComponentDecl PrimitiveClassDecl.newInstComponentDecl(ComponentDecl cd) {
+		return new InstPrimitive(new List(),cd.newInstClassAccess(),cd,this);
 	}
 	
-	public InstComponent BuiltInClassDecl.newInstComponent(ComponentDecl cd) {
+	public InstComponentDecl BuiltInClassDecl.newInstComponentDecl(ComponentDecl cd) {
 		return null;
 	}
 	
 	// Build an InstExtends
 	public InstExtends ExtendsClause.newInstExtends() {
-		return new InstExtends(new List(),this);
+		return new InstExtends(new List(),getSuper().newInstAccess(),this);
 	}
 
 	syn boolean ClassDecl.extendsPrimitive() = false;
@@ -514,13 +515,15 @@ aspect InstantiationTree {
 	eq ShortClassDecl.components() = getClassName().myClassDecl().components();
 	
 	syn boolean InstNode.nameScope() = false;
-	eq InstComponent.nameScope() = true;
+	eq InstComponentDecl.nameScope() = true;
 
     syn String InstNode.name() = "";
-    eq InstComponent.name() = getComponentDecl().name();
+    eq InstComponentDecl.name() = getComponentDecl().name();
+    eq InstBaseClassDecl.name() = getBaseClassDecl().name();
+    eq InstBuiltInClassDecl.name() = getBuiltInClassDecl().name();
 	
 	syn lazy ArrayList<Modification> InstNode.localModifications() = new ArrayList<Modification>();
-	eq InstComponent.localModifications() {
+	eq InstComponentDecl.localModifications() {
 		ArrayList<Modification> l = new ArrayList<Modification>();
 		// Add modifications of the declaration itself
 		if (getComponentDecl().hasModification())
@@ -621,10 +624,10 @@ aspect InstantiationTree {
 	}
 	
 	/**
-	 * classToExpand returns the class to expand for a particular InstComponent when taking
+	 * classToExpand returns the class to expand for a particular InstComponentDecl when taking
 	 * the environment into account. This method is used in type checking.
 	 */
-	syn lazy ClassDecl InstComponent.classToExpand() {
+	syn lazy ClassDecl InstComponentDecl.classToExpand() {
          ClassDecl classToExpand = getClassDecl();
 	     if (!constrainingType())
 	       return classToExpand;
@@ -664,26 +667,26 @@ aspect InstantiationTree {
 	
 	syn List InstNode.equations() = emptyList();
 	eq InstClassRoot.equations() = getClassDecl().equations();
-	eq InstComponent.equations() = classToExpand().equations();
+	eq InstComponentDecl.equations() = classToExpand().equations();
 	eq InstExtends.equations() = getExtendsClause().getSuper().myClassDecl().equations();
 	
 	syn lazy List InstNode.components() = emptyList();
 	eq InstClassRoot.components() = getClassDecl().components();
 	// This attribute also needs to take into account that a class declaration
 	// may be redeclared.
-	eq InstComponent.components() = classToExpand().components();
+	eq InstComponentDecl.components() = classToExpand().components();
 	eq InstExtends.components() = getExtendsClause().getSuper().myClassDecl().components();
-	eq InstClass.components() = getBaseClassDecl().components();
+	eq InstBaseClassDecl.components() = getBaseClassDecl().components();
 	
 	syn lazy List InstNode.superClasses() = emptyList();
 	eq InstClassRoot.superClasses() = getClassDecl().superClasses();
-	eq InstComponent.superClasses() = classToExpand().superClasses();
+	eq InstComponentDecl.superClasses() = classToExpand().superClasses();
 	eq InstExtends.superClasses() = getExtendsClause().getSuper().myClassDecl().superClasses();
-    eq InstClass.superClasses() = getBaseClassDecl().superClasses();
+    eq InstBaseClassDecl.superClasses() = getBaseClassDecl().superClasses();
 
 	syn lazy List InstNode.classes() = emptyList();
 	eq InstProgramRoot.classes() = getProgram().classes();
-	eq InstClass.classes() = getBaseClassDecl().classes();
+	eq InstBaseClassDecl.classes() = getBaseClassDecl().classes();
 
 
 }
@@ -694,31 +697,89 @@ aspect InstanceClasses {
 		return new InstProgramRoot(new List(), this);
 	}
 
-    public InstNode BaseClassDecl.newInstClass() {
+    public InstNode BaseClassDecl.newInstClassDecl() {
     	return null;
     }    
-    public InstNode FullClassDecl.newInstClass() {
-    	return new InstFullClassDecl(new List(),this);
+    public InstNode FullClassDecl.newInstClassDecl() {
+    	InstFullClassDecl fcd = new InstFullClassDecl(new List(),this);
+    	fcd.setStart(getStart());
+    	return fcd;
     }
-    public InstNode ShortClassDecl.newInstClass() {
-    	return new InstShortClassDecl(new List(),this);
+    public InstNode ShortClassDecl.newInstClassDecl() {
+    	InstShortClassDecl scd =  new InstShortClassDecl(new List(),this,getClassName().newInstAccess());
+    	scd.setStart(getStart());
+    	return scd;
     }
-    public InstNode PrimitiveClassDecl.newInstClass() {
+    public InstNode PrimitiveClassDecl.newInstClassDecl() {
     	return new InstPrimitiveClassDecl(new List(),this);
     }
 
 
-
+	public InstAccess ComponentDecl.newInstClassAccess() {
+		return getClassName().newInstAccess();
+	}
+	public InstAccess Access.newInstAccess() {
+		InstAccess ia =  new InstParseAccess(getID());
+		ia.setStart(getStart());
+		return ia;
+	}
+	public InstAccess Dot.newInstAccess() {
+		InstAccess ia = new InstDot("",getLeft().newInstAccess(),getRight().newInstAccess());
+		ia.setStart(getStart());
+		return ia;
+	}	
+	
     syn lazy List BaseClassDecl.classes() = emptyList();
     eq FullClassDecl.classes() = getClassDeclList();
-
-
     
     syn lazy List Program.classes() = getElementList();
 
 	syn FullClassDecl InstFullClassDecl.getFullClassDecl() = (FullClassDecl)getBaseClassDecl();
 	syn ShortClassDecl InstShortClassDecl.getShortClassDecl() = (ShortClassDecl)getBaseClassDecl();
 	syn PrimitiveClassDecl InstPrimitiveClassDecl.getPrimitiveClassDecl() = (PrimitiveClassDecl)getBaseClassDecl();
+
+	ArrayList<InstClassDecl> InstNode.instClassDeclList;
+	ArrayList<InstComponentDecl> InstNode.instComponentDeclList;
+	ArrayList<InstExtends> InstNode.instExtendsList;
+	
+	boolean InstNode.instNodeListsComputed  = false;
+	public void InstNode.computeInstNodeLists() {
+		ArrayList<InstClassDecl> instClassDeclList = new ArrayList<InstClassDecl>();
+		ArrayList<InstComponentDecl> instComponentDeclList = new ArrayList<InstComponentDecl>();
+		ArrayList<InstExtends> instExtendsList = new ArrayList<InstExtends>();
+		
+		for (InstNode n : getInstNodes()) {
+			if (n instanceof InstClassDecl)
+				instClassDeclList.add((InstClassDecl)n);
+			else if (n instanceof InstComponentDecl)
+				instComponentDeclList.add((InstComponentDecl)n);
+			else if (n instanceof InstExtends)
+				instExtendsList.add((InstExtends)n);
+		}
+		this.instClassDeclList = instClassDeclList;
+		this.instComponentDeclList = instComponentDeclList;
+		this.instExtendsList = instExtendsList;
+		instNodeListsComputed = true;
+	}
+	
+	syn ArrayList<InstClassDecl> InstNode.instClassDecls() {
+		if (!instNodeListsComputed)
+			computeInstNodeLists();
+		return instClassDeclList;
+	}
+
+	syn ArrayList<InstComponentDecl> InstNode.instComponentDecls() {
+		if (!instNodeListsComputed)
+			computeInstNodeLists();
+		return instComponentDeclList;
+	}
+
+	syn ArrayList<InstExtends> InstNode.instExtends() {
+		if (!instNodeListsComputed)
+			computeInstNodeLists();
+		return instExtendsList;
+	}
+
 
 }
 
@@ -732,7 +793,7 @@ aspect InstanceDumpTree {
 		getInstNodeList().dumpTree(indent + " ");
 	}
 	
-	public void InstClass.dumpTree(String indent) {
+	public void InstBaseClassDecl.dumpTree(String indent) {
 		System.out.println(indent + dump()
 		                      + ": " + 
 		                      getBaseClassDecl().name());
@@ -747,6 +808,7 @@ aspect InstanceDumpTree {
 		                      + ": " + 
 		                      getComponentDecl().myClass().name() + " "+
 		                      getComponentDecl().name());
+        getClassName().dumpTree(indent + "|");
 		System.out.println(toString(indent+"|"));
 
 		//getComponentDecl().dumpTree("");
@@ -758,6 +820,8 @@ aspect InstanceDumpTree {
 							  + ": " + 
 		                      getComponentDecl().myClass().name() + " "+
 		                      getComponentDecl().name());
+	    getClassName().dumpTree(indent + "|");
+
 		System.out.println(toString(indent+"|"));
 
 	}
@@ -776,7 +840,6 @@ aspect InstanceDumpTree {
 	   str.append(getMergedEnvironmentList().toString(indent+" "));
 	   return str.toString();	
 	}
-  
   
 	public String InstReplacingComposite.toString() {
 		return toString("");
@@ -818,10 +881,11 @@ aspect InstanceDumpTree {
 	public String InstComposite.toString() {
 		return toString("");
     }
-	public String InstComposite.toString(String indent) {
+
+	public String InstFullClassDecl.toString(String indent) {
 	   StringBuffer str = new StringBuffer();
-	   str.append(indent+"InstComposite:\n");
-	   str.append(indent+" Component decl: " + getComponentDecl().prettyPrint("") + "\n");
+	   str.append(indent+"InstFullClassDecl:\n");
+	   str.append(indent+" Component decl: " + getFullClassDecl().name() + "\n");
 	   str.append(indent+" myEnvironment():\n");
 	   str.append(myEnvironment().toString(indent+" "));
 	   str.append(indent+" myEnvironment('"+name()+"'):\n");
@@ -836,6 +900,11 @@ aspect InstanceDumpTree {
 	   return str.toString();	
 	}
 
+	public String InstFullClassDecl.toString() {
+		return toString("");
+    }
+
+
 	public String InstModification.toString() {
 		return toString("");
     }
@@ -843,7 +912,6 @@ aspect InstanceDumpTree {
     	return getModification().prettyPrint(indent);
     
     }
-	
 	
 }
 

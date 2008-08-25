@@ -2,6 +2,44 @@ import java.util.ArrayList;
 
 aspect Flattening {
     
+    
+    public InstNode InstNode.findFlattenInst(String className,FClass fc) {
+    	for (InstClassDecl icd : instClassDecls()) {
+    		InstNode n = icd.findFlattenInst(className, fc);
+    		if (n!=null)
+    			return n;
+    	} 
+    	return null;
+    }
+    
+	
+	// Check if the InstFullClassDecl matches the name of class to be flattened. 
+	public InstNode InstFullClassDecl.findFlattenInst(String className, FClass fc) {
+	    String qwe = getFQName().name();
+   		if (className.equals(getFQName().name())) {
+  	 		fc.setFQName(new FQName(getFQName().name())); 
+  	 		InstRoot r = getInstRoot();
+  	 		
+  	 		/* Is this really a good idea? we are taking a subtree from
+  	 		   InstRoot and insert it into an FClass. The alternative is
+  	 		   to insert a fullCopy(), but then, what happens with 
+  	 		   cached reference attributes pointing at nodes in the
+  	 		   FPrimitiveTypeList? 
+  	 		*/
+			fc.setFPrimitiveTypeList(r.getFPrimitiveTypeList()); 
+			
+			//r.dumpTree("");
+			//r.printIVarAccesses("");
+			fc.addFEquationBlock(new FEquationBlock(new List()));
+			r.flatten(fc);
+			fc.genConnectionEquations();
+			return r;	
+   		} else {
+  			return super.findFlattenInst(className,fc);
+   		}  	
+	}	
+	
+    
 	// Generic traversal method to find the class to flatten.
 	public InstNode ASTNode.findFlatten(String className, FClass fc) {
 		InstNode n = null;
@@ -12,6 +50,8 @@ aspect Flattening {
      	}
      	return n;
 	}
+	
+	
 	
 	// Check if the FullClassDecl matches the name of class to be flattened. 
 	public InstNode FullClassDecl.findFlatten(String className, FClass fc) {
@@ -220,7 +260,7 @@ aspect FlatVariables {
 
 aspect InstNodeInterface {
 
-	syn ArraySubscripts InstComponent.arraySubscripts() = 
+	syn ArraySubscripts InstComponentDecl.arraySubscripts() = 
 		getComponentDecl().arraySubscripts()!=null?
 			getComponentDecl().arraySubscripts(): null;
 

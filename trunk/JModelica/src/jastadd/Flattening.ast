@@ -1,21 +1,41 @@
 abstract InstNode ::= /InstNode*/ /FQName/ FExp* /DynamicInst:InstNode*/ /DynamicInstConstraining:InstNode*/;
 abstract InstRoot : InstNode ::= /FPrimitiveType*/;
 InstClassRoot : InstRoot ::= <ClassDecl:ClassDecl>;
-InstProgramRoot : InstRoot ::= <Program:Program>;
+InstProgramRoot : InstRoot ::= <Program:Program>
+					           /InstUnknownClassDecl/
+                               /InstUnknownComponentDecl/
+                               /InstPredefinedType:InstClassDecl*/ 
+                               /InstBuiltInType:InstClassDecl*/   
+                               /InstBuiltInFunction:InstClassDecl*/;
 
-abstract InstClass : InstNode ::= <BaseClassDecl:BaseClassDecl>;
-InstFullClassDecl : InstClass;
-InstShortClassDecl : InstClass;
-InstPrimitiveClassDecl : InstClass;
+abstract InstClassDecl: InstNode;
+abstract InstBaseClassDecl : InstClassDecl ::= <BaseClassDecl:BaseClassDecl> /InstRoot/;
+InstFullClassDecl : InstBaseClassDecl ::= ;
+InstShortClassDecl : InstBaseClassDecl ::= ClassName:InstAccess;
+InstPrimitiveClassDecl : InstFullClassDecl;
+InstBuiltInClassDecl : InstClassDecl ::= <BuiltInClassDecl:BuiltInClassDecl>;
+InstUnknownClassDecl : InstFullClassDecl;
+
 
 // The class to expand may differ from the declared class of the component due to 
 // redeclaration of classes.
-abstract InstComponent : InstNode ::= <ComponentDecl:ComponentDecl> <ClassDecl:ClassDecl>;
-InstComposite : InstComponent;
-InstPrimitive : InstComponent ::= /FVariable/;
-InstExtends : InstNode ::= <ExtendsClause:ExtendsClause>;
+abstract InstComponentDecl : InstNode ::= ClassName:InstAccess <ComponentDecl:ComponentDecl> <ClassDecl:ClassDecl>;
+InstComposite : InstComponentDecl;
+InstPrimitive : InstComponentDecl ::= /FVariable/;
+InstUnknownComponentDecl : InstComponentDecl;
 
+InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause>;
 
 InstReplacingComposite : InstComposite ::= <OriginalDecl:ComponentDecl>;
 InstReplacingPrimitive : InstPrimitive ::= <OriginalDecl:ComponentDecl>;
+
+// Accesses in the instance tree
+abstract InstAccess ::= <ID>;
+InstDot : InstAccess ::= Left:InstAccess Right:InstAccess;
+
+InstParseAccess : InstAccess;// ::= [ArraySubscripts];
+InstClassAccess : InstAccess;
+InstAmbiguousAccess : InstAccess;// ::= [ArraySubscripts];
+
+InstComponentAccess : InstAccess;// ::= [ArraySubscripts];
 

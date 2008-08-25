@@ -380,7 +380,33 @@ aspect PredefinedTypes {
  	}
 }
 
+aspect InstPredefinedTypes {
+
+	syn lazy List InstProgramRoot.getInstPredefinedTypeList() {
+		List l = new List();
+		for (ClassDecl pcd : getProgram().getPredefinedTypes()) {
+			l.add(new InstPrimitiveClassDecl(new List(), (FullClassDecl)pcd));
+		}
+		return l;
+	}
+
+	syn lazy List InstProgramRoot.getInstBuiltInTypeList() {
+		List l = new List();
+		for (ClassDecl pcd : getProgram().getBuiltInTypes()) {
+			l.add(new InstBuiltInClassDecl(new List(), (BuiltInClassDecl)pcd));
+		}
+		return l;
+	}
+
+	syn lazy List InstProgramRoot.getInstBuiltInFunctionList() {
+		List l = new List();
+		for (ClassDecl bcd : getProgram().getBuiltInFunctions()) {
+			l.add(new InstFullClassDecl(new List(), (FullClassDecl)bcd));
+		}
+		return l;
+	}
+}
+
 aspect AnnotationTypes {
 	
-
 }

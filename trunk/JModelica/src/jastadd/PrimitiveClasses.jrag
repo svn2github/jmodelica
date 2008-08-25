@@ -64,5 +64,39 @@ aspect UnknownDeclarations {
 	eq PrimitiveClassDecl.isPrimitive() = true;
 	eq BuiltInClassDecl.isPrimitive() = true;
 	
+		
+
+		
+	syn lazy InstUnknownClassDecl SourceRoot.getInstUnknownClassDecl() = getProgram().getInstProgramRoot().getInstUnknownClassDecl();
+		
+
+	syn lazy InstUnknownComponentDecl SourceRoot.getInstUnknownComponentDecl() = getProgram().getInstProgramRoot().getInstUnknownComponentDecl();
+		
+
+	syn lazy InstUnknownClassDecl InstProgramRoot.getInstUnknownClassDecl() = 
+		new InstUnknownClassDecl(new List(),getProgram().getUnknownClassDecl());
+	syn lazy InstUnknownComponentDecl InstProgramRoot.getInstUnknownComponentDecl() = 
+	    new InstUnknownComponentDecl(new List(),new InstParseAccess("Unknown"),getProgram().getUnknownComponentDecl(),getProgram().getUnknownClassDecl());
+		
+	syn lazy InstUnknownClassDecl ASTNode.instUnknownClassDecl() = root().instUnknownClassDecl();
+	eq SourceRoot.instUnknownClassDecl() = getInstUnknownClassDecl();
+
+	syn lazy InstUnknownComponentDecl ASTNode.instUnknownComponentDecl() = root().instUnknownComponentDecl();
+	eq SourceRoot.instUnknownComponentDecl() = getInstUnknownComponentDecl();
+
+
+
+	syn lazy boolean InstClassDecl.isUnknown() = false;
+	eq InstUnknownClassDecl.isUnknown() = true;
+
+	syn lazy boolean InstComponentDecl.isUnknown() = false;
+	eq InstUnknownComponentDecl.isUnknown() = true;
+	
+	syn boolean InstClassDecl.isPrimitive() = false;
+	eq InstPrimitiveClassDecl.isPrimitive() = true;
+	eq InstBuiltInClassDecl.isPrimitive() = true;
+	
+		                    
+		                    
 		                            
 }

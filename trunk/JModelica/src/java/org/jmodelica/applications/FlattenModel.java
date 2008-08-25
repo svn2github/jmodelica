@@ -32,7 +32,7 @@ public class FlattenModel {
 		      sr.prettyPrint("");
 		      
 		      InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-		      ipr.dumpTree("");
+		      //ipr.dumpTree("");
 		      
 		      long parseTime = System.currentTimeMillis();
 		      
@@ -59,7 +59,7 @@ public class FlattenModel {
 		      flatRoot.setFClass(fc);
 	    	  StringBuffer str = new StringBuffer();
 		    	  System.out.println("Flattening starts...");
-		    	  InstNode ir = sr.findFlatten(cl,fc);
+		    	  InstNode ir = ipr.findFlattenInst(cl,fc);
 		    	  if (ir==null) {
 		    		  System.out.println("Error:");
 		    		  System.out.println("   Did not find the class: " + cl);

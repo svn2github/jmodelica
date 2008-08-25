@@ -61,7 +61,7 @@ aspect NodeMethods {
 		return dump() + ": " + getUNSIGNED_NUMBER();
 	}
 	
-	public String InstComponent.getNodeName() {
+	public String InstComponentDecl.getNodeName() {
 		return dump() + ": '" + getComponentDecl().getClassName().qualifiedName() + " " + getComponentDecl().getName().getID() + "'";
 	}
 
@@ -109,8 +109,19 @@ aspect Names {
   syn String IdDecl.name() = getID();
   syn String Dot.name() = getLeft().name() + "." + getRight().name();
   
+   // simple names of InstAccess:es
+  syn String InstAccess.name() = getID();
+  syn String InstParseAccess.name() = getID();
+  syn String InstClassAccess.name() = getID();
+  syn String InstAmbiguousAccess.name() = getID();
+  syn String InstComponentAccess.name() = getID();
+  syn String InstDot.name() = getLeft().name() + "." + getRight().name(); 
+  
   syn lazy String Access.qualifiedName() = getID();
   eq Dot.qualifiedName() = getLeft().qualifiedName() + "." + getRight().qualifiedName();
+  
+  syn lazy String InstAccess.qualifiedName() = getID();
+  eq InstDot.qualifiedName() = getLeft().qualifiedName() + "." + getRight().qualifiedName();
   
   syn String ClassDecl.name();
   eq BaseClassDecl.name() = getName().getID();
@@ -246,7 +257,7 @@ aspect FlatNames {
 	
 	syn lazy FQName InstNode.getFQName() = getFQNamePrefix();
 	
-	eq InstComponent.getFQName() {
+	eq InstComponentDecl.getFQName() {
 		FQName prefix = retrieveFQName();
 		FQName myName = prefix!=null? new FQName(prefix):
 		                              new FQName();
@@ -260,8 +271,20 @@ aspect FlatNames {
 		return myName;
 	}
 
+	eq InstClassDecl.getFQName() {
+		FQName prefix = retrieveFQName();
+		FQName myName = prefix!=null? new FQName(prefix):
+		                              new FQName();
+
+		myName.addFQNamePart(new FQNamePart(name(), new Opt()));
+		
+		return myName;
+	}
+
 	inh lazy FQName InstNode.retrieveFQName();
-	eq InstComponent.getInstNode().retrieveFQName() = getFQName();
+	eq InstComponentDecl.getInstNode().retrieveFQName() = getFQName();
+	eq InstClassDecl.getInstNode().retrieveFQName() = getFQName();
+	
 	eq InstRoot.getInstNode().retrieveFQName() = null;
 	eq SourceRoot.getProgram().retrieveFQName() = null;
 

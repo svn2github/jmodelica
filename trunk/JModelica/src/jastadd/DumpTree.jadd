@@ -129,6 +129,45 @@ aspect DumpTree {
 }
 
 
+aspect InstDumpTree {
+
+ 	public void InstClassAccess.dumpTree(String indent) {
+    	String s = indent + dump() +": "+getID() + " at line: " + beginLine()+ ", ClassDecl at: ";
+    	if (myInstClassDecl().isUnknown())
+    		s+="Unknown";
+    	else
+    		s+=	myInstClassDecl().beginLine();
+    	
+    	System.out.println(s);
+  } 
+  
+   	public void InstComponentAccess.dumpTree(String indent) {
+    	String s = indent + dump() +": "+getID() + " at line: " + beginLine()+ ", ComponentDecl at: ";
+/*    	if (myComponentDecl().isUnknown())
+    		s+="Unknown";
+    	else
+    		s+=	myComponentDecl().beginLine();
+    	*/	
+    	System.out.println(s);
+    	for(int i = 0; i < getNumChild(); i++)
+      		getChild(i).dumpTree(indent + "  ");
+    	
+   } 
+  
+	public void InstAccess.dumpTree(String indent) {
+  		String s = indent + dump() +": "+qualifiedName() + " at line: " + beginLine();
+  		System.out.println(s);
+   	}
+  
+ 
+  public void InstDot.dumpTree(String indent) {
+  	super.dumpTree(indent);
+  	getLeft().dumpTree(indent+" ");
+  	getRight().dumpTree(indent+" ");
+  }
+
+
+}
 
 
 aspect DumpTreeBasic {

@@ -1,0 +1,307 @@
+aspect InstLookupClasses {
+
+	syn HashSet InstAccess.lookupInstClass() circular [emptyHashSet()]{
+	 	return lookupInstClass(name());
+	}
+
+	eq InstDot.lookupInstClass() {
+	   return getRight().lookupInstClass();
+    }
+    
+	inh HashSet InstAccess.lookupInstClass(String name) circular [emptyHashSet()];
+	inh HashSet InstFullClassDecl.lookupInstClass(String name);
+	
+	eq InstFullClassDecl.getInstNode(int i).lookupInstClass(String name) {
+		if (getInstNode(i) instanceof InstExtends)
+			return superLookupInstClass(name);
+		else
+		 	return genericLookupInstClass(name); 
+	}
+
+	eq InstFullClassDecl.getInstRoot().lookupInstClass(String name) = genericLookupInstClass(name); 	
+
+
+	eq InstComponentDecl.getInstNode(int i).lookupInstClass(String name) {
+		if (getInstNode(i) instanceof InstExtends)
+			return myInstClass().superLookupInstClass(name);
+		else
+		 	return myInstClass().genericLookupInstClass(name); 
+	}
+
+/*	
+	eq InstFullClassDecl.getSuper(int i).lookupInstClass(String name) {
+	  HashSet h = superLookupInstClass(name);
+	  return h;
+	}  
+*/		
+	eq SourceRoot.getChild().lookupInstClass(String name) = emptyHashSet();
+
+	
+	syn lazy HashSet InstProgramRoot.lookupElementInstClass(String name) {
+		HashSet set = new HashSet(4);
+		for (InstClassDecl bcd : instClassDecls()) {
+			if (bcd.matchInstClassDecl(name))
+				set.add(bcd);	
+		}
+
+/*		
+		for (int j=0;j<getNumElement();j++) {    
+			if (getElement(j) instanceof BaseClassDecl) {
+				if (((BaseClassDecl)getElement(j)).matchClassDecl(name))
+					//debugPrint(((BaseClassDecl)getElement(j)).getName().name());
+					set.add(getElement(j));
+			}
+		}
+*/
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+	
+	syn lazy HashSet InstProgramRoot.lookupInstPredefinedType(String name) {
+		HashSet set = new HashSet(4);
+		for (InstClassDecl bcd : getInstPredefinedTypes()) {
+			if (bcd.matchInstClassDecl(name))
+				set.add(bcd);	
+		}
+	
+/*		for (int i=0;i<getNumPredefinedType();i++) {
+			BaseClassDecl pcd = (BaseClassDecl)getPredefinedType(i);
+			//debugPrint("PredefinedType: "+pcd.getName().name());
+			if (pcd.matchClassDecl(name))
+		 		set.add(pcd);
+		}
+*/		
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+
+
+	syn lazy HashSet InstProgramRoot.lookupInstBuiltInFunction(String name) {
+		HashSet set = new HashSet(4);
+		for (InstClassDecl bcd : getInstBuiltInFunctions()) {
+			if (bcd.matchInstClassDecl(name))
+				set.add(bcd);	
+		}		
+		
+		
+/*		for (int i=0;i<getNumBuiltInFunction();i++) {
+			ClassDecl pcd = getBuiltInFunction(i);
+			if (pcd.matchClassDecl(name))
+		 		set.add(pcd);
+		}
+*/
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+
+
+/*
+	syn lazy HashSet Program.lookupLibrary(String name) {
+		HashSet set = new HashSet(4);
+		for (int i=0;i<getNumLibNode();i++) {
+			if (getLibNode(i).getName().equals(name))
+				set.add(getLibNode(i).getClassDecl());
+		}
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+*/	
+	
+	eq InstProgramRoot.getChild().lookupInstClass(String name) = genericLookupInstClass(name);
+//	eq Program.getLibNode().lookupInstClass(String name) = genericLookupClass(name);
+	
+
+	eq InstProgramRoot.getInstPredefinedType().lookupInstClass(String name) {
+		HashSet set = new HashSet(4);
+		for (InstClassDecl bcd : getInstBuiltInTypes()) {
+			if (bcd.matchInstClassDecl(name))
+				set.add(bcd);	
+		}		
+		
+/*		
+		for (int i=0;i<getNumBuiltInType();i++) {
+			ClassDecl pcd = getBuiltInType(i);
+			if (pcd.matchClassDecl(name))
+		 		set.add(pcd);
+		}	
+*/
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+
+
+	syn lazy  HashSet InstProgramRoot.genericLookupInstClass(String name) {
+		HashSet set = new HashSet(4);
+		
+		if (lookupElementInstClass(name).size()>0)
+			set.addAll(lookupElementInstClass(name));
+		
+		if (lookupInstPredefinedType(name).size()>0)
+			set.addAll(lookupInstPredefinedType(name));
+		
+		if (lookupInstBuiltInFunction(name).size()>0)
+			set.addAll(lookupInstBuiltInFunction(name));
+		
+/*		if (lookupLibrary(name).size()>0)
+			set.addAll(lookupLibrary(name));
+*/
+
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+	
+	eq InstDot.getRight().lookupInstClass(String name) {
+		return getLeft().qualifiedLookupInstClass(name);
+	}
+	
+	syn HashSet InstAccess.qualifiedLookupInstClass(String name) circular [emptyHashSet()] = emptyHashSet();	
+	eq InstClassAccess.qualifiedLookupInstClass(String name) = myInstClassDecl().memberInstClass(name);
+
+/*
+	syn HashSet InstFullClassDecl.lookupInstClassInImport(String name) circular [emptyHashSet()]{
+		HashSet h;
+		for (int i=0;i<getNumImport();i++) {
+	    	h = getImport(i).lookupInstClassInImport(name);
+	    	if (h.size()>0)
+	    	   return h;
+	    }
+	    return emptyHashSet();
+	}
+*/
+		
+	syn lazy HashSet InstClassDecl.genericLookupInstClass(String name) = emptyHashSet();
+	eq InstFullClassDecl.genericLookupInstClass(String name) {
+	
+		HashSet set = new HashSet(4);
+		
+		set.addAll(memberInstClass(name));
+
+/*	
+		if (lookupInstClassInImport(name).size()>0)
+			set.addAll(lookupInstClassInImport(name));
+*/	
+		if (set.size()>0)
+			return set;
+		else
+			return lookupInstClass(name);
+	}
+	
+	
+	syn HashSet InstClassDecl.superLookupInstClass(String name) circular [emptyHashSet()] = emptyHashSet();
+	
+	eq InstFullClassDecl.superLookupInstClass(String name) {
+	
+		HashSet set = new HashSet();
+		
+/*
+		if (lookupInstClassInImport(name).size()>0)
+				set.addAll(lookupInstClassInImport(name));
+*/
+		
+		for (InstClassDecl icd : instClassDecls()) {
+			if (icd.matchInstClassDecl(name)) {
+					set.add(icd);
+			}
+		}		
+	
+		if (set.size()>0)
+			return set;
+		else
+			return lookupInstClass(name);
+	}
+	
+	syn HashSet InstClassDecl.memberInstClass(String name) circular [emptyHashSet()] = emptyHashSet();
+	
+	eq InstFullClassDecl.memberInstClass(String name) {
+		HashSet set = new HashSet();
+		
+		for (InstClassDecl icd : instClassDecls()) {
+			if (icd.matchInstClassDecl(name)) {
+				set.add(icd);
+			}
+		}
+	/*
+		if (set.size()>0)
+			return set;
+	*/
+		
+		
+		for (InstExtends ie : instExtends()) {
+			HashSet h = ie.getClassName().lookupInstClass();
+			if (h.size()==1)
+				set.addAll(((InstClassDecl)h.iterator().next()).memberInstClass(name));
+			
+			//if (getSuper(i).getSuper().myClassDecl()!=null)
+			//	set.addAll(getSuper(i).getSuper().myClassDecl().memberClass(name));
+		}
+		
+		
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+	
+	eq InstShortClassDecl.memberInstClass(String name) = myInstClass().memberInstClass(name);
+	
+	syn lazy InstClassDecl InstShortClassDecl.myInstClass() circular [instUnknownClassDecl()] = getClassName().myInstClassDecl();
+	
+	
+	syn boolean InstClassDecl.matchInstClassDecl(String name) = false;
+	eq InstBuiltInClassDecl.matchInstClassDecl(String name) = name().equals(name); 
+	eq InstBaseClassDecl.matchInstClassDecl(String name) = name().equals(name);
+	
+	// This attribute should to be circular due to lookup in import-statements
+	// If the lookup is triggered by lookup of A in 'extends A', and
+	// there are import statements, evaluation might get back to the 
+	// ClassAccess A when when looking up the ClassAccess to import.
+	// See NameTests.ImportTest1 for an example. 
+	syn lazy InstClassDecl InstAccess.myInstClassDecl() circular [instUnknownClassDecl()] {
+		 return instUnknownClassDecl();
+	}
+	eq InstClassAccess.myInstClassDecl()  {
+		HashSet set = lookupInstClass(name());
+		if (set.size() > 0)
+			return (InstClassDecl)set.iterator().next();
+		else
+			return instUnknownClassDecl();
+	}
+	eq InstDot.myInstClassDecl() {
+	 	return getRight().myInstClassDecl();
+	}	
+	
+	syn InstClassDecl InstComponentDecl.myInstClass() = getClassName().myInstClassDecl();
+	
+}
+
+//aspect InstLookupImport {
+//}
+
+
+aspect InstLocalClasses {
+
+	syn InstClassDecl InstClassDecl.localInstClassDecl(int i) = null;
+	eq InstFullClassDecl.localInstClassDecl(int i) = instClassDecls().get(i);
+	
+	syn int InstClassDecl.numLocalInstClassDecl() = 0;
+	eq InstFullClassDecl.numLocalInstClassDecl() = instClassDecls().size();
+
+}
+
+//aspect InstLookupClassesInModifications {
+//}
+
+
+
