@@ -116,8 +116,8 @@ aspect Types {
 
      // The environment should be traversed backwards in order to perform correct
      // subtype tests in redeclaration chains.     	
-       for (int i=myEnvironment().size()-1;i>=0;i--) {
-        InstModification im = myEnvironment().get(i);
+       for (int i=myEnvironment().getNumInstModification()-1;i>=0;i--) {
+        InstModification im = myEnvironment().getInstModification(i);
 	   	if (im.getModification().matchComponentRedeclare(name())!=null) { 
            InstComponentDecl constrainingSubType = im.getInstNode().createDynamicInstConstrainingComposite(im.getModification().matchComponentRedeclare(name()));
                         

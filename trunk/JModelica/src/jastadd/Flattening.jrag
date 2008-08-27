@@ -108,8 +108,8 @@ aspect Flattening {
 	syn lazy FVariable InstPrimitive.getFVariable() {
 		FExp e = myBindingExp();
 		List attr = new List();
-		for (int i=0;i<getNumMergedEnvironment();i++) {
-			getMergedEnvironment(i).getModification().collectAttributes(attr,getMergedEnvironment(i).getInstNode().getFQNamePrefix());
+		for (InstModification im : getMergedEnvironment().getInstModifications()) {
+			im.getModification().collectAttributes(attr,im.getInstNode().getFQNamePrefix());
 		}
 		
 		//attr.dumpTree("*** ");
@@ -145,14 +145,14 @@ aspect Flattening {
 	}
 	
 	syn FExp InstPrimitive.myBindingExp() {
-		debugPrint("InstPrimitive.myBindingExp(): getNumMergedEnvironment() = " + getNumMergedEnvironment());
+
 		// A value modification is usually found last in the env list
-		for (int i=0;i<getNumMergedEnvironment();i++) {
+		for (InstModification im : getMergedEnvironment().getInstModifications()) {
 			//System.out.println("**************");
 			//getMergedEnvironment(i).getModification().dumpTree("");
 			//System.out.println("**************");
-			if (getMergedEnvironment(i).getModification().hasValueMod()) {
-				return getMergedEnvironment(i).getModification().valueMod().flatten(getMergedEnvironment(i).getInstNode().getFQNamePrefix());
+			if (im.getModification().hasValueMod()) {
+				return im.getModification().valueMod().flatten(im.getInstNode().getFQNamePrefix());
 			}
 		}
 		return null;

@@ -18,7 +18,7 @@ aspect InstLookupClasses {
 		 	return genericLookupInstClass(name); 
 	}
 
-	eq InstFullClassDecl.getInstRoot().lookupInstClass(String name) = genericLookupInstClass(name); 	
+//	eq InstFullClassDecl.getInstRoot().lookupInstClass(String name) = genericLookupInstClass(name); 	
 
 
 	eq InstComponentDecl.getInstNode(int i).lookupInstClass(String name) {
@@ -256,7 +256,7 @@ aspect InstLookupClasses {
 	
 	eq InstShortClassDecl.memberInstClass(String name) = myInstClass().memberInstClass(name);
 	
-	syn lazy InstClassDecl InstShortClassDecl.myInstClass() circular [instUnknownClassDecl()] = getClassName().myInstClassDecl();
+	
 	
 	
 	syn boolean InstClassDecl.matchInstClassDecl(String name) = false;
@@ -282,8 +282,11 @@ aspect InstLookupClasses {
 	 	return getRight().myInstClassDecl();
 	}	
 	
-	syn InstClassDecl InstComponentDecl.myInstClass() = getClassName().myInstClassDecl();
-	
+	syn lazy InstClassDecl InstNode.myInstClass() circular [instUnknownClassDecl()] = instUnknownClassDecl(); 
+	eq InstComponentDecl.myInstClass() = getClassName().myInstClassDecl();
+	eq InstShortClassDecl.myInstClass()  = getClassName().myInstClassDecl();
+	eq InstClassDecl.myInstClass() = this;
+	eq InstExtends.myInstClass() = getClassName().myInstClassDecl();
 }
 
 //aspect InstLookupImport {

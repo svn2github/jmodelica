@@ -32,7 +32,7 @@ public class FlattenModel {
 		      sr.prettyPrint("");
 		      
 		      InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-		      //ipr.dumpTree("");
+		      ipr.dumpTree("");
 		      
 		      long parseTime = System.currentTimeMillis();
 		      

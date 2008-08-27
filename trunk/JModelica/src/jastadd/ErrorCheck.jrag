@@ -89,8 +89,8 @@ aspect ErrorCheck {
     }
   }
 
-  syn int ASTNode.lineNumber() = start != 0 ? beginLine() : getParent().lineNumber();
-  syn int ASTNode.columnNumber() = start != 0 ? beginColumn() : getParent().columnNumber();
+  syn int ASTNode.lineNumber() = (start != 0 || getParent()==null)? beginLine() : getParent().lineNumber();
+  syn int ASTNode.columnNumber() = (start != 0 || getParent()==null)? beginColumn() : getParent().columnNumber();
   protected void ASTNode.error(String s) {
       root().errors.add(new Problem(fileName(), s, Problem.Severity.ERROR, Problem.Kind.SEMANTIC,lineNumber(),columnNumber()));
   }
