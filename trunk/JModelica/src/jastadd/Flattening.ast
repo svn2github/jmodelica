@@ -43,10 +43,10 @@ InstComponentAccess : InstAccess;// ::= [ArraySubscripts];
 Environment ::= InstModification*;
 
 InstModification ::= <InstNode:InstNode> <Modification:Modification>;
-//InstValueModification : InstModification;
-//InstComponentModification : InstModification;
-//InstComponentRedeclare : InstModification;
-//InstClassRedeclare : InstModification;
+InstValueModification : InstModification ::= FExp;
+InstComponentModification : InstModification ::= InstComponentAccess;
+InstComponentRedeclare : InstModification ::= InstComponentDecl;
+InstClassRedeclare : InstModification ::= InstBaseClassDecl;
 
 
 
