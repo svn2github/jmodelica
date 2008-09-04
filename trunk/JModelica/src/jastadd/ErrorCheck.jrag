@@ -2,20 +2,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.ArrayList;
 
-aspect ErrorCheck {
 
-  public ArrayList<Problem> Root.errors = new ArrayList<Problem>();
-  public ArrayList<Problem> Root.warnings = new ArrayList<Problem>();
-  
-  public String ASTNode.errorPrefix() {
-    return fileName() + ":\n" + "  *** Semantic Error: ";
-  }
-  public String ASTNode.warningPrefix() {
-    return fileName() + ":\n" + "  *** WARNING: ";
-  }
-
-  protected static final int ASTNode.ERRORS = 0;
-  protected static final int ASTNode.WARNINGS = 1;  
   
   class Problem implements Comparable {
     public int compareTo(Object o) {
@@ -89,13 +76,29 @@ aspect ErrorCheck {
     }
   }
 
+aspect ErrorCheck {
+
+  public ArrayList<Problem> Root.errors = new ArrayList<Problem>();
+  public ArrayList<Problem> Root.warnings = new ArrayList<Problem>();
+  
+  public String ASTNode.errorPrefix() {
+    return fileName() + ":\n" + "  *** Semantic Error: ";
+  }
+  public String ASTNode.warningPrefix() {
+    return fileName() + ":\n" + "  *** WARNING: ";
+  }
+
+  static final int ASTNode.ERRORS = 0;
+  static final int ASTNode.WARNINGS = 1;  
+
+
   syn int ASTNode.lineNumber() = (start != 0 || getParent()==null)? beginLine() : getParent().lineNumber();
   syn int ASTNode.columnNumber() = (start != 0 || getParent()==null)? beginColumn() : getParent().columnNumber();
-  protected void ASTNode.error(String s) {
+  void ASTNode.error(String s) {
       root().errors.add(new Problem(fileName(), s, Problem.Severity.ERROR, Problem.Kind.SEMANTIC,lineNumber(),columnNumber()));
   }
 
-  protected void ASTNode.warning(String s) {
+  void ASTNode.warning(String s) {
 	 root().warnings.add(new Problem(fileName(), "WARNING: " + s, Problem.Severity.WARNING));
   }
 
@@ -210,10 +213,6 @@ aspect ErrorCheck {
    // Don't error check annotation
    public void Annotation.collectErrors() {}
    
-   
-   
-	
-  
 }
 
 

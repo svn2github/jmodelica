@@ -1,3 +1,5 @@
+import java.util.HashSet;
+
 aspect LookupComponents {
 
 	/* The HashSet is used in order to get all matching components.

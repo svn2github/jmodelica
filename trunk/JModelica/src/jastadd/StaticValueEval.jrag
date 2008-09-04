@@ -86,7 +86,7 @@ aspect StaticValue {
 		} else if (operator.equals("/")) {
 			retval = left / right;
 		} else if (operator.equals("^")) {
-			retval = (int) Math.pow((double) left,(double) right);
+			retval = (int) java.lang.Math.pow((double) left,(double) right);
 		} else {
 			error("Unknown operator " + operator);
 		}
@@ -104,7 +104,7 @@ aspect StaticValue {
 		} else if (operator.equals("/")) {
 			retval = left / right;
 		} else if (operator.equals("^")) {
-			retval = Math.pow(left, right);
+			retval = java.lang.Math.pow(left, right);
 		} else {
 			error("Unknown operator " + operator);
 		}

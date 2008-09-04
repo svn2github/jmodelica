@@ -25,12 +25,12 @@
   <property name="test_junit-gen_dir" value="src/test/junit-generated"/>
   <property name="test_benchmarks" value="src/test/benchmarks"/>
 	
-  <property name="beaver" value="src/third-party/beaver"/>
+  <property name="beaver" value="src/third-party/"/>
   <property name="applications" value="${default_src_dir}/org/jmodelica/applications"/> 
   <property name="debug" value="${default_src_dir}/org/jmodelica/debug"/> 
 	
   <!-- "jastadd" is an ant task class in jastadd2.jar -->
-  <taskdef classname="jastadd.JastAddTask" name="jastadd" classpath="${tools}/jastadd2.jar" />
+  <taskdef classname="jastadd.JastAddTask" name="jastadd" classpath="${tools}/jastadd3.jar" />
   <!-- "jflex" is an ant task class for the scanner generator in JFlex.jar -->
   <taskdef name="jflex" classname="JFlex.anttask.JFlexTask" classpath="${tools}/JFlex.jar"/>
   <!-- "beaver" is an ant task class for the parser generator in beaver.jar -->
@@ -73,7 +73,8 @@
     </target>
 
 	
-  <target name="compile-ast" depends="gen,gen-parser">
+  <target name="compile-ast" depends="gen">
+  <!--
 	<mkdir dir="bin"/>
   	<javac compiler="javac1.5" debug="true" destdir="bin">
   		<src path="${base_output}"/> 
@@ -84,19 +85,33 @@
   		<include name = "**/*.java"/>
   		<exclude name = "**/*junit*/**"/>
   		<exclude name = "**/*.aj"/>
-  	</javac>
+  	</javac>-->
   	</target>
 	
   <!-- TARGET gen -->
-  <target name="gen">
+  <target name="gen" depends="gen-parser">
     <!-- create a directory for the generated files -->
-    <mkdir dir="${base_output}"/>
+    <mkdir dir="bin"/>
     <!-- run jastadd to generate AST files -->
-    <jastadd package="${ast_package}" beaver="true" rewrite="true" outdir="${base_output}">
+    <jastadd package="${ast_package}" CacheCycle="false" ComponentCheck="false" WeaveInline="true" InhInASTNode="true" outdir="bin" verbose="true" classpath="lib/junit-4.4.jar">
+      <fileset dir="src/third-party/jastadd">
+        <include name="*.java"/>
+      </fileset>
     	<fileset dir="${ast}">
       	<include name="*.ast"/>
       	<include name="*.jadd"/>
       	<include name="*.jrag"/>
+      </fileset>
+      <fileset dir="src">
+      	<include name="java/**/*.java"/>
+      	<include name="java-generated/org/jmodelica/parser/*.java"/>
+        <include name="third-party/**/*.java"/>
+      	<include name="test/benchmarks/**/*.java"/>
+        <include name="test/junit-generated/**/*.java"/>
+      	<include name="test/test-framework/**/*.java"/>
+      </fileset>
+    	<fileset dir=".">
+      	<include name="Patch.jrag"/>
       </fileset>
     </jastadd>
   

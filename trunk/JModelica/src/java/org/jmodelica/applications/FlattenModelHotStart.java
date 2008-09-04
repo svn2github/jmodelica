@@ -4,6 +4,8 @@ import org.jmodelica.ast.*;
 import java.io.*;
 import org.jmodelica.parser.*;
 
+
+
 public class FlattenModelHotStart{
 	
 	  public static void main(String args[]) {

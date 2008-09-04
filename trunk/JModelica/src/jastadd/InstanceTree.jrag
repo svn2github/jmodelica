@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 aspect InstantiationTree {
 
    	// This rewrite eliminates CompositeModifications as children of
@@ -124,7 +126,7 @@ aspect InstantiationTree {
         public Environment Environment.duplicate() {
         	Environment env = new Environment();
          	for (InstModification im : getInstModifications())
-        		env.addInstModification(im.copy());
+        		env.addInstModification((InstModification)im.copy());
         	return env;
         }
     	

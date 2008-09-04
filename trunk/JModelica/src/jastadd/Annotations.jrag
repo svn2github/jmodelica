@@ -1,3 +1,8 @@
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import org.jmodelica.test.ast.*;
+
 aspect TestAnnotations {
 
 	rewrite ParseAnnotation {
@@ -17,15 +22,15 @@ aspect TestAnnotations {
 							if (fa.getNamedArgument(i).getName().name().equals("name")) {
 								debugPrint("### rewrite ParseAnnotation: name found");
 								//tc.setName(((StringLitExp)fa.getNamedArgument(i).getExp()).getSTRING());
-								tc.setName(((StringLitExp)fa.getNamedArgument(i).getExp()).fullCopy());
+								tc.setName((StringLitExp)((StringLitExp)fa.getNamedArgument(i).getExp()).fullCopy());
 							} else if (fa.getNamedArgument(i).getName().name().equals("description")) {
 								debugPrint("### rewrite ParseAnnotation: description found");
 								//tc.setDescription(((StringLitExp)fa.getNamedArgument(i).getExp()).getSTRING());
-								tc.setDescription(((StringLitExp)fa.getNamedArgument(i).getExp()).fullCopy());
+								tc.setDescription((StringLitExp)((StringLitExp)fa.getNamedArgument(i).getExp()).fullCopy());
 							} else if (fa.getNamedArgument(i).getName().name().equals("flatModel")) {
 								debugPrint("### rewrite ParseAnnotation: flatModel found");
 								//tc.setFlatModel(((StringLitExp)fa.getNamedArgument(i).getExp()).getSTRING());	
-								tc.setFlatModel(((StringLitExp)fa.getNamedArgument(i).getExp()).fullCopy());	
+								tc.setFlatModel((StringLitExp)((StringLitExp)fa.getNamedArgument(i).getExp()).fullCopy());	
 							}
 						}
 						//debugPrint("### rewrite ParseAnnotation: check name: "+tc.getName());

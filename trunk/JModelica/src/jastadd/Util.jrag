@@ -1,5 +1,7 @@
 import java.util.HashSet;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import org.jmodelica.parser.*;
 
 aspect RootAccess {
 	

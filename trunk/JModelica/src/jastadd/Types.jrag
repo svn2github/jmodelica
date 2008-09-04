@@ -1,3 +1,6 @@
+import java.util.HashSet;
+import java.util.ArrayList;
+
 aspect Types { 
  
    /* DynamicInstList contains type representations that are created

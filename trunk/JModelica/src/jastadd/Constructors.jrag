@@ -1,3 +1,5 @@
+import org.jmodelica.parser.*;
+
 aspect Constructors {
 
 	public ComponentDecl.ComponentDecl(boolean isParameter,

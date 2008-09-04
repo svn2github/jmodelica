@@ -57,14 +57,14 @@ aspect InstNameClassification {
 	/**
 	 * Helper class for definition of kinds.
 	 */
-/*	class Kind {
+/*	static class Kind {
    		static Kind CLASS_ACCESS = new Kind();
    		static Kind COMPONENT_ACCESS = new Kind();
    		static Kind AMBIGUOUS_ACCESS = new Kind();
 	}
 */
 }
-aspect ResolveAmbiguousNames {
+aspect InstResolveAmbiguousNames {
 	/**
 	 * This rewrite determines whether an InstAmbiguousAccess is a InstTypeAcces or a
 	 * InstComponentAccess by attempting type and component lookups respectively.

@@ -1,4 +1,4 @@
-aspect PrettyPrint {
+
 
 	// superclass to all classes that perform the dispatch
 	class Printer {
@@ -19,6 +19,8 @@ aspect PrettyPrint {
  			node._dumpTree(this, str, indent, o); 
  		}
 	}
+
+aspect PrettyPrint {
 	
 	public void ASTNode._dumpTree(StringBuffer str, String indent) {
  		_dumpTree(new DumpTreePrinter(),str,indent,null);

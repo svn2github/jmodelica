@@ -45,7 +45,7 @@ Environment ::= InstModification*;
 InstModification ::= <InstNode:InstNode> <Modification:Modification>;
 InstCompleteModification : InstModification;
 InstClassModification : InstModification;
-InstValueModification : InstModification ::= /FExp/;
+InstValueModification : InstModification ::=;// /FExp/;
 InstComponentModification : InstModification ::= ComponentName:InstAccess;
 InstComponentRedeclare : InstModification ::= ComponentName:InstAccess;
 InstClassRedeclare : InstModification ::= ClassName:InstAccess;

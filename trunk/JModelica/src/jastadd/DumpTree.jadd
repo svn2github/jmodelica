@@ -18,7 +18,7 @@ aspect DumpTree {
   	/**
   	 * 
   	 */
-  	protected String ASTNode.dump() {
+  	public String ASTNode.dump() {
     	//debugPrint("*** ASTNode.dump(): " + toString());
     	String str = getClass().getName();
 		return str.substring(str.lastIndexOf('.')+1);
@@ -208,7 +208,7 @@ aspect DumpTreeBasic {
   }
 	
   
-  protected String ASTNode.dumpBasic() {
+  public String ASTNode.dumpBasic() {
     String str = getClass().getName();
 	return str.substring(str.lastIndexOf('.')+1);
   }

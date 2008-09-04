@@ -1,5 +1,6 @@
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.ArrayList ;
 
 aspect Connections {
 
@@ -160,7 +161,7 @@ aspect Connections {
 				*/	
 	}
 
-	public class MyLinkedHashSet extends LinkedHashSet {
+	static public class MyLinkedHashSet extends LinkedHashSet {
 	
 		public boolean add(Object o) {
 			ConnectionSetEntry cse = (ConnectionSetEntry)o;
@@ -170,7 +171,7 @@ aspect Connections {
 		}
 	}
 
-	public class ConnectionSetManager {
+	static public class ConnectionSetManager {
 	
 		private ArrayList list = new ArrayList();
 		private MyLinkedHashSet notInsideConnectedFlowVars = new MyLinkedHashSet();
@@ -307,7 +308,7 @@ aspect Connections {
 	}
 
 	
-	public class ConnectionSetEntry implements Comparable{
+	static public class ConnectionSetEntry implements Comparable{
 	
 		private ComponentDecl cd;
 		private boolean outside;

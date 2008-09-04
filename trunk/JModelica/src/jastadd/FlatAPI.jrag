@@ -1,27 +1,28 @@
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.ArrayList;
 
 aspect FlatAPI {
 
-	coll Collection<FVariable> FClass.parameters() [new LinkedHashSet<FVariable>()] with add;
+	coll Collection<FVariable> FClass.parameters() [new LinkedHashSet<FVariable>()] with add root FlatRoot;
 	FVariable contributes
  		this when isParameter()
 	to FClass.parameters() for myFClass();
 	
-	coll Collection<FVariable> FClass.variables() [new LinkedHashSet<FVariable>()] with add;
+	coll Collection<FVariable> FClass.variables() [new LinkedHashSet<FVariable>()] with add root FlatRoot;
 	FVariable contributes
  		this when isVariable()
 	to FClass.variables() for myFClass();
 
-	coll Collection<FVariable> FClass.structuralParameters() [new LinkedHashSet<FVariable>()] with add;
+	coll Collection<FVariable> FClass.structuralParameters() [new LinkedHashSet<FVariable>()] with add root FlatRoot;
 	FIdUseExp contributes
 		(FVariable)myFV() when inArraySubscripts()
 	to FClass.structuralParameters() for myFClass();
 
-	coll Collection<FEquation> FVariable.variableIncidence() [new LinkedHashSet<FEquation>()] with add;
+	coll Collection<FEquation> FVariable.variableIncidence() [new LinkedHashSet<FEquation>()] with add root FlatRoot;
     FIdUseExp contributes
 		myFEquation() when inFEquation()
-	to FVariable.variableIncidence() for myFV();
+	to FVariable.variableIncidence() for (FVariable)myFV();
 	
 	syn lazy ArrayList<Collection> FClass.variableIncidence() {
 		ArrayList<Collection> l = new ArrayList<Collection>();

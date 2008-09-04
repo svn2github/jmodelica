@@ -1,3 +1,10 @@
+	class Kind {
+   		static Kind CLASS_ACCESS = new Kind();
+   		static Kind COMPONENT_ACCESS = new Kind();
+   		static Kind AMBIGUOUS_ACCESS = new Kind();
+	}
+
+
 aspect NameClassification {
 
 
@@ -111,11 +118,7 @@ aspect NameClassification {
 	/**
 	 * Helper class for definition of kinds.
 	 */
-	class Kind {
-   		static Kind CLASS_ACCESS = new Kind();
-   		static Kind COMPONENT_ACCESS = new Kind();
-   		static Kind AMBIGUOUS_ACCESS = new Kind();
-	}
+
 }
 aspect ResolveAmbiguousNames {
 	/**

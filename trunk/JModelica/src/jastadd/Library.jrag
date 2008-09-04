@@ -1,5 +1,5 @@
 import java.io.*;
-
+import java.util.HashSet;
 
 aspect Library {
 
@@ -161,7 +161,7 @@ aspect Library {
 		return new List().add(ln);
 	}
 	
-	class UnStructuredEntriesFilenameFilter implements FilenameFilter {
+	static class UnStructuredEntriesFilenameFilter implements FilenameFilter {
 	
 			public boolean accept(File dir, String name) {
 				//System.out.println(" * " +name);
