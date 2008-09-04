@@ -145,10 +145,7 @@
 	  	         </concat>
 	  	  	    <!-- generate the parser phase 2, translating .beaver to .java -->
 	  	  	    <beaver file="${parser_output}/FlatModelicaParser.beaver" terminalNames="yes" compress="no" useSwitch="yes"/>
-	 
-	
 	</target>
-	
 	
   <!-- TARGET clean -->
   <target name="clean" depends="cleanGen">

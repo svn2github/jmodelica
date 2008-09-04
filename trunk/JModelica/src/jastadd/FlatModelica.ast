@@ -3,7 +3,7 @@ FClass ::= FQName
            FVariable* 
            FInitialEquation:FAbstractEquation*
            FEquationBlock*
-           FPrimitiveType*; // This should probably be an NTA: not a good idea to move nodes
+           /FPrimitiveType*/; // This should probably be an NTA: not a good idea to move nodes
                             // from instance AST. Also: must work if FClass results from
                             // parsing of .mof file.
 

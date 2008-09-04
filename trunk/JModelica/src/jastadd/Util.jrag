@@ -142,6 +142,17 @@ aspect Names {
   
   eq SourceRoot.getProgram().classNamePrefix() = "";
   
+  syn String InstClassDecl.qualifiedName();
+  eq InstBaseClassDecl.qualifiedName() = instClassNamePrefix().equals("")? 
+                                                  name(): instClassNamePrefix() + "." + name();
+  inh String InstBaseClassDecl.instClassNamePrefix();
+  eq InstFullClassDecl.getInstNode().instClassNamePrefix() = instClassNamePrefix().equals("")?
+                                                      name(): instClassNamePrefix() + "." + name();
+  eq InstBuiltInClassDecl.qualifiedName() = name();
+  
+  eq SourceRoot.getChild().instClassNamePrefix() = "";
+  eq InstRoot.getChild().instClassNamePrefix() = "";
+  
   syn String FunctionCall.name() = getName().name();
   
   syn String ClassDecl.primitiveName();
@@ -273,29 +284,13 @@ aspect FlatNames {
 		return myName;
 	}
 
-	eq InstClassDecl.getFQName() {
-		FQName prefix = retrieveFQName();
-		FQName myName = prefix!=null? new FQName(prefix):
-		                              new FQName();
-
-		myName.addFQNamePart(new FQNamePart(name(), new Opt()));
-		
-		return myName;
-	}
-
-	eq InstClassRoot.getFQName() {
-	  return new FQName();
-	  
-	}
-	
-
+	eq InstClassDecl.getFQName() =new FQName();
 	inh lazy FQName InstNode.retrieveFQName();
 	eq InstComponentDecl.getInstNode().retrieveFQName() = getFQName();
-	eq InstClassDecl.getInstNode().retrieveFQName() = getFQName();
+	eq InstClassDecl.getInstNode().retrieveFQName() = null; //getFQName();
 	
 	eq InstRoot.getInstNode().retrieveFQName() = null;
 	eq SourceRoot.getProgram().retrieveFQName() = null;
-	eq InstClassRoot.getInstNode().retrieveFQName() = null;
 
 	
 	syn lazy String FQName.name() {
@@ -317,7 +312,6 @@ aspect FlatNames {
 
 	syn String FClass.name() = getFQName().name();
 	syn String FVariable.name() = getFQName().name();
-
 
 }
 

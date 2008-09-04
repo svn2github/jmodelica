@@ -1,5 +1,18 @@
 aspect BuiltInFlatTypes {
 
+
+	syn lazy List FClass.getFPrimitiveTypeList() {
+		List l = new List();
+		l.add(new FBooleanType());
+		l.add(new FStringType());
+		l.add(new FRealType());
+		l.add(new FIntegerType());
+//		l.add(new EmptyType());    // EmptyType is not an FPrimitiveType, which it probably should be.
+//		l.add(new BrokenType());
+		return l;
+	}
+
+
 	syn lazy List InstRoot.getFPrimitiveTypeList() {
 		List l = new List();
 		l.add(new FBooleanType());

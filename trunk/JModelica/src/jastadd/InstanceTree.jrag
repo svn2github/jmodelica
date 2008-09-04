@@ -350,7 +350,7 @@ aspect InstantiationTree {
 	// Definition of the NTA representing the root of the 
 	// instantiation tree
 	syn lazy InstRoot BaseClassDecl.getInstRoot() = new InstClassRoot(new List(),this);
-	syn lazy InstRoot InstBaseClassDecl.getInstRoot() = new InstClassRoot(new List(),getBaseClassDecl());
+//	syn lazy InstRoot InstBaseClassDecl.getInstRoot() = new InstClassRoot(new List(),getBaseClassDecl());
 
 //	syn nta InstConstrainingClauseRoot ConstrainingClause.instConstrainingClauseRoot() = new InstConstrainingClauseRoot(new List(),this);
 
@@ -716,6 +716,7 @@ aspect InstantiationTree {
 	eq InstClassRoot.equations() = getClassDecl().equations();
 	eq InstComponentDecl.equations() = classToExpand().equations();
 	eq InstExtends.equations() = getExtendsClause().getSuper().myClassDecl().equations();
+	eq InstFullClassDecl.equations() = getFullClassDecl().equations();
 	
 	syn lazy List InstNode.components() = emptyList();
 	eq InstClassRoot.components() = getClassDecl().components();

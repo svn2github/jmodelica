@@ -16,24 +16,21 @@ aspect Flattening {
 	// Check if the InstFullClassDecl matches the name of class to be flattened. 
 	public InstNode InstFullClassDecl.findFlattenInst(String className, FClass fc) {
 	    String qwe = getFQName().name();
-   		if (className.equals(getFQName().name())) {
-  	 		fc.setFQName(new FQName(getFQName().name())); 
-  	 		InstRoot r = getInstRoot();
-  	 		
-  	 		/* Is this really a good idea? we are taking a subtree from
-  	 		   InstRoot and insert it into an FClass. The alternative is
-  	 		   to insert a fullCopy(), but then, what happens with 
-  	 		   cached reference attributes pointing at nodes in the
-  	 		   FPrimitiveTypeList? 
-  	 		*/
-			fc.setFPrimitiveTypeList(r.getFPrimitiveTypeList()); 
-			
+   		if (className.equals(qualifiedName())) {
+  	 		fc.setFQName(new FQName(qualifiedName())); 
+  	 		//InstRoot r = getInstRoot();
+  	 				
 			//r.dumpTree("");
 			//r.printIVarAccesses("");
 			fc.addFEquationBlock(new FEquationBlock(new List()));
-			r.flatten(fc);
+			List l = equations();
+			for (int i=0;i<l.getNumChild();i++) {
+		       ((AbstractEquation)l.getChild(i)).flatten(getFQName(),fc);
+		    }
+			for (InstNode n : getInstNodes())
+				n.flatten(fc);
 			fc.genConnectionEquations();
-			return r;	
+			return this;	
    		} else {
   			return super.findFlattenInst(className,fc);
    		}  	

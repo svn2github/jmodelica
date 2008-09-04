@@ -10,7 +10,7 @@ InstProgramRoot : InstRoot ::= <Program:Program>
                                /InstBuiltInFunction:InstClassDecl*/;
 
 abstract InstClassDecl: InstNode;
-abstract InstBaseClassDecl : InstClassDecl ::= <BaseClassDecl:BaseClassDecl> /InstRoot/;
+abstract InstBaseClassDecl : InstClassDecl ::= <BaseClassDecl:BaseClassDecl>;
 InstFullClassDecl : InstBaseClassDecl ::= ;
 InstShortClassDecl : InstBaseClassDecl ::= ClassName:InstAccess;
 InstPrimitiveClassDecl : InstFullClassDecl;
