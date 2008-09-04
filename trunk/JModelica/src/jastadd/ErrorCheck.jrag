@@ -172,8 +172,8 @@ aspect ErrorCheck {
 	public boolean SourceRoot.checkErrorsInClass(String className,StringBuffer errorString) {
 		FullClassDecl fcd = retrieveFullClassDecl(className);
 		if (fcd == null) {
-			System.out.println("Class "+ className + "not found");
-			return false;
+			System.out.println("Class "+ className + " not found");
+			return true;
 		} else
 			return fcd.errorCheck(errorString);
 	}
@@ -196,17 +196,118 @@ aspect ErrorCheck {
   		}
   	}
 	
-	
+ 	
 	public void ComponentDecl.collectErrors() {
 		super.collectErrors();
 		if (getClassName().myClassDecl()!=null) {
-			debugPrint("ComponentDecl.collectErrors:  "  + prettyPrint("") + ": " + getClassName().myClassDecl().qualifiedName());
+		debugPrint("ComponentDecl.collectErrors:  "  + prettyPrint("") + ": " + getClassName().myClassDecl().qualifiedName());
 			getClassName().myClassDecl().collectErrors();
 		}
 	}
 	
+
+	
    // Don't error check annotation
    public void Annotation.collectErrors() {}
+   
+   
+   
 	
   
 }
+
+
+aspect InstanceErrorCheck {
+
+
+ // Error checking in instance tree
+    syn lazy InstFullClassDecl InstNode.retrieveInstFullClassDecl(String className) {
+      for(int i = 0; i < getNumInstNode(); i++) {
+		  InstFullClassDecl fcd = getInstNode(i).retrieveInstFullClassDecl(className);
+	  	  if (fcd != null)
+	  	  	return fcd;
+	  }
+	  return null;
+    }   
+  	
+  	
+  	
+  	eq InstFullClassDecl.retrieveInstFullClassDecl(String className) {
+	   	if (className.equals(getFQName().name())) {
+	   		return this;
+		} else
+			for (InstClassDecl icd : instClassDecls()) {
+				InstFullClassDecl fcd = icd.retrieveInstFullClassDecl(className);
+				if (fcd!=null) 
+					return fcd;
+			}
+		return null;
+	}
+/*
+	// We don't want to error check an entire model, just the classes
+	//   that are used. 
+	public boolean InstProgramRoot.checkErrorsInInstClass(String className) {
+		InstFullClassDecl fcd = retrieveInstFullClassDecl(className);
+		if (fcd == null) {
+			System.out.println("Class "+ className + " not found");
+			return true;
+		} else
+			return fcd.errorCheck();
+	}
+
+	public boolean InstProgramRoot.checkErrorsInClass(String className,StringBuffer errorString) {
+		InstFullClassDecl fcd = retrieveInstFullClassDecl(className);
+		if (fcd == null) {
+			System.out.println("Class "+ className + " not found");
+			return false;
+		} else
+			return fcd.errorCheck(errorString);
+	}
+
+	boolean InstFullClassDecl.errorChecked = false;
+  	public void InstFullClassDecl.collectErrors() {
+    	if (!errorChecked) {
+    	errorChecked = true;
+        for (InstClassDecl icd : instClassDecls())
+        	icd.collectErrors();
+        for (InstComponentDecl icd : instComponentDecls())
+        	icd.collectErrors();
+//    	getEquationList().collectErrors();
+//    	getAlgorithmList().collectErrors();
+//    	getSuperList().collectErrors();
+//    	getImportList().collectErrors();
+//    	getComponentDeclList().collectErrors();
+    	if (!(getFullClassDecl().getName().getID().equals(getFullClassDecl().getEndName())))
+    		error("The declaration and end names of a class should be the same");
+  		}
+  	}	
+	
+	public void InstComponentDecl.collectErrors() {
+		super.collectErrors();
+		getClassName().collectErrors();
+		if (!myInstClass().isUnknown()) {
+			myInstClass().collectErrors();
+		}
+	}
+	*/
+	
+	
+  public void InstNode.collectErrors() {
+	  nameCheck();
+	  typeCheck();	  
+	  for(InstNode n : getInstNodes()) {
+		  n.collectErrors();
+	  }
+
+  }
+  
+    public void InstClassDecl.collectErrors() {
+
+    }
+  
+
+
+
+}
+
+

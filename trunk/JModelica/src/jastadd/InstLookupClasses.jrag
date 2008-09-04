@@ -17,8 +17,18 @@ aspect InstLookupClasses {
 		else
 		 	return genericLookupInstClass(name); 
 	}
+    
+    // The InstRoot NTA has the same content as the InstFullClassDecl itself
+    // Lookup should therefore be propagated one step up.
+/*    eq InstClassRoot.getInstNode(int i).lookupInstClass(String name) {
+    	if (getParent() instanceof InstFullClassDecl)
+	    	return ((InstFullClassDecl)getParent()).lookupInstClass(name);
+    	else emptyHashSet();
+    }*/
+
 
 //	eq InstFullClassDecl.getInstRoot().lookupInstClass(String name) = genericLookupInstClass(name); 	
+
 
 
 	eq InstComponentDecl.getInstNode(int i).lookupInstClass(String name) {
@@ -27,6 +37,15 @@ aspect InstLookupClasses {
 		else
 		 	return myInstClass().genericLookupInstClass(name); 
 	}
+
+	eq InstExtends.getInstNode(int i).lookupInstClass(String name) {
+		if (getInstNode(i) instanceof InstExtends)
+			return getClassName().myInstClassDecl().superLookupInstClass(name);
+		else
+		 	return getClassName().myInstClassDecl().genericLookupInstClass(name); 
+	}
+
+
 
 /*	
 	eq InstFullClassDecl.getSuper(int i).lookupInstClass(String name) {

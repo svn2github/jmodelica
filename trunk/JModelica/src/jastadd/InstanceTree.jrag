@@ -382,6 +382,7 @@ aspect InstantiationTree {
 		return l;
 	}
 
+ 
     public InstNode InstNode.createInstNode(ComponentDecl cd) {
             // Check if the component is redeclared
             InstModification im = retrieveReplacingComponent(cd.name());
@@ -550,6 +551,10 @@ aspect InstantiationTree {
 	syn lazy List ClassDecl.components() = root().emptyList();
 	eq FullClassDecl.components() = getComponentDeclList();
 	eq ShortClassDecl.components() = getClassName().myClassDecl().components();
+	eq PrimitiveClassDecl.components() = emptyList();
+	
+	syn lazy List ClassDecl.classes() = emptyList();
+    eq FullClassDecl.classes() = getClassDeclList();
 	
 	syn boolean InstNode.nameScope() = false;
 	eq InstComponentDecl.nameScope() = true;
@@ -728,6 +733,7 @@ aspect InstantiationTree {
     eq InstBaseClassDecl.superClasses() = getBaseClassDecl().superClasses();
 
 	syn lazy List InstNode.classes() = emptyList();
+	eq InstClassRoot.classes() = getClassDecl().classes();
 	eq InstProgramRoot.classes() = getProgram().classes();
 	eq InstBaseClassDecl.classes() = getBaseClassDecl().classes();
     eq InstShortClassDecl.classes() = getClassName().myInstClassDecl().classes();
@@ -772,8 +778,7 @@ aspect InstanceClasses {
 		return ia;
 	}	
 	
-    syn lazy List BaseClassDecl.classes() = emptyList();
-    eq FullClassDecl.classes() = getClassDeclList();
+
     
     syn lazy List Program.classes() = getElementList();
 
@@ -840,6 +845,17 @@ aspect InstanceDumpTree {
 		System.out.println(indent + dump()
 		                      + ": " + 
 		                      getBaseClassDecl().name());
+		System.out.println(toString(indent+"|"));
+
+		//getComponentDecl().dumpTree("");
+		getInstNodeList().dumpTree(indent + " ");
+	}
+	
+	public void InstExtends.dumpTree(String indent) {
+		System.out.println(indent + dump()
+		                      + ": " + 
+		                      getExtendsClause().getSuper().name());
+        getClassName().dumpTree(indent + "|");
 		System.out.println(toString(indent+"|"));
 
 		//getComponentDecl().dumpTree("");
@@ -928,7 +944,7 @@ aspect InstanceDumpTree {
 	public String InstFullClassDecl.toString(String indent) {
 	   StringBuffer str = new StringBuffer();
 	   str.append(indent+"InstFullClassDecl:\n");
-	   str.append(indent+" Component decl: " + getFullClassDecl().name() + "\n");
+	   str.append(indent+" Class decl: " + getFullClassDecl().name() + "\n");
 	   str.append(indent+" myEnvironment():\n");
 	   str.append(myEnvironment().toString(indent+" "));
 	   str.append(indent+" myEnvironment('"+name()+"'):\n");

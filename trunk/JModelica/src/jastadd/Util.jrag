@@ -281,13 +281,21 @@ aspect FlatNames {
 		return myName;
 	}
 
+	eq InstClassRoot.getFQName() {
+	  return new FQName();
+	  
+	}
+	
+
 	inh lazy FQName InstNode.retrieveFQName();
 	eq InstComponentDecl.getInstNode().retrieveFQName() = getFQName();
 	eq InstClassDecl.getInstNode().retrieveFQName() = getFQName();
 	
 	eq InstRoot.getInstNode().retrieveFQName() = null;
 	eq SourceRoot.getProgram().retrieveFQName() = null;
+	eq InstClassRoot.getInstNode().retrieveFQName() = null;
 
+	
 	syn lazy String FQName.name() {
 		StringBuffer str = new StringBuffer();
 		for (int i=0;i<getNumFQNamePart();i++) {

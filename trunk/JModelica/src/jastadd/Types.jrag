@@ -147,16 +147,3 @@ aspect Types {
 
 }
 
-aspect TypeErrorCheck {
-
- 
-  public void InstNode.collectErrors() {
-	  nameCheck();
-	  typeCheck();	  
-	  for(InstNode n : getInstNodes()) {
-		  n.collectErrors();
-	  }
-  }
-
-
-}

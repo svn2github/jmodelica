@@ -89,13 +89,22 @@ aspect Flattening {
 		}
 	}
 
+//	public void InstClassRoot.flatten(FClass fc) {
+//		getInstNodeList().flatten(fc);
+//	}
+
 	public void InstNode.flatten(FClass fc) {
 		List l = equations();
 		for (int i=0;i<l.getNumChild();i++) {
 		   ((AbstractEquation)l.getChild(i)).flatten(getFQName(),fc);
 		}
+//		for (InstNode n : instComponentDecls())
+//			n.flatten(fc);
+
 		getInstNodeList().flatten(fc);
 	}
+	
+	public void InstClassDecl.flatten(FClass fc) {}
 	
 	
 	/* TODO: check if it is really a good idea to create FVariables

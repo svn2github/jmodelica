@@ -97,18 +97,20 @@ public class FlatteningTestCase extends TestCase {
 	public boolean testMe() {
 		SourceRoot sr = parser.parseFile(getSourceFileName());
 		sr.setFileName(getSourceFileName());
+	    InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 		//sr.retrieveFullClassDecl("NameTests.ImportTest1").dumpTree("");
 		if (sr.checkErrorsInClass(getClassName())) {
 	    	//System.out.println("***** Errors in Class!");
 	    	return false;
 	    }
+		
 	    FlatRoot flatRoot = new FlatRoot();
 	    flatRoot.setFileName(getSourceFileName());
 	    FClass fc = new FClass();
 	    flatRoot.setFClass(fc);
 	    
 		//FClass fc = new FClass();
-	    InstNode ir = sr.findFlatten(getClassName(), fc);
+	    InstNode ir = ipr.findFlattenInst(getClassName(), fc);
 	    
    	  	if (ir==null) {
    		    return false;
@@ -117,8 +119,6 @@ public class FlatteningTestCase extends TestCase {
    	  	StringBuffer str = new StringBuffer();
    	    if (ir.errorCheck(str))
    		 return false;
-		
-		
 		
 		//if (fc.errorCheck()) {
 	    	//System.out.println("***** Errors in Class!");

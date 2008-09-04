@@ -1,6 +1,7 @@
 abstract InstNode ::= /InstNode*/ /FQName/ FExp* /DynamicInst:InstNode*/ /DynamicInstConstraining:InstNode*/ /MergedEnvironment:Environment/;
 abstract InstRoot : InstNode ::= /FPrimitiveType*/;
 InstClassRoot : InstRoot ::= <ClassDecl:ClassDecl>;
+//InstFullClassDeclRoot :InstRoot ::= InstFullClassDecl;
 InstProgramRoot : InstRoot ::= <Program:Program>
 					           /InstUnknownClassDecl/
                                /InstUnknownComponentDecl/
@@ -38,7 +39,6 @@ InstClassAccess : InstAccess;
 InstAmbiguousAccess : InstAccess;// ::= [ArraySubscripts];
 
 InstComponentAccess : InstAccess;// ::= [ArraySubscripts];
-
 
 Environment ::= InstModification*;
 

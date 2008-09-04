@@ -48,7 +48,12 @@ public class FlattenModel {
 		      //if (sr.errorCheck()) {
 	    		  System.exit(0);
 	    	  }
-		      
+	/*	      
+		      if (ipr.checkErrorsInInstClass(cl)) {
+			      //if (sr.errorCheck()) {
+		    		  System.exit(0);
+		    	  }
+		*/      
 		      long errcheckTime = System.currentTimeMillis();
 		      
 		      long printTime = System.currentTimeMillis();
