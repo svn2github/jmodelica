@@ -295,7 +295,6 @@ aspect InstanceErrorCheck {
 	
 	public void InstComponentDecl.collectErrors() {
     if (!errorChecked) {
-    	errorChecked = true;
 		super.collectErrors();
 		getClassName().collectErrors();
 		if (!myInstClass().isUnknown()) {
@@ -306,7 +305,6 @@ aspect InstanceErrorCheck {
 	
 	public void InstExtends.collectErrors() {
     if (!errorChecked) {
-    	errorChecked = true;
 		super.collectErrors();
 		getClassName().collectErrors();
 		if (!getClassName().myInstClassDecl().isUnknown()) {
