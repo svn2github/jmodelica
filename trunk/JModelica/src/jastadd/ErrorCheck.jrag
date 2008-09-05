@@ -232,7 +232,7 @@ aspect InstanceErrorCheck {
   	
   	
   	eq InstFullClassDecl.retrieveInstFullClassDecl(String className) {
-	   	if (className.equals(getFQName().name())) {
+	   	if (className.equals(qualifiedName())) {
 	   		return this;
 		} else
 			for (InstClassDecl icd : instClassDecls()) {
@@ -242,7 +242,7 @@ aspect InstanceErrorCheck {
 			}
 		return null;
 	}
-/*
+
 	// We don't want to error check an entire model, just the classes
 	//   that are used. 
 	public boolean InstProgramRoot.checkErrorsInInstClass(String className) {
@@ -254,7 +254,7 @@ aspect InstanceErrorCheck {
 			return fcd.errorCheck();
 	}
 
-	public boolean InstProgramRoot.checkErrorsInClass(String className,StringBuffer errorString) {
+	public boolean InstProgramRoot.checkErrorsInInstClass(String className,StringBuffer errorString) {
 		InstFullClassDecl fcd = retrieveInstFullClassDecl(className);
 		if (fcd == null) {
 			System.out.println("Class "+ className + " not found");
@@ -263,14 +263,18 @@ aspect InstanceErrorCheck {
 			return fcd.errorCheck(errorString);
 	}
 
-	boolean InstFullClassDecl.errorChecked = false;
+	boolean InstNode.errorChecked = false;
   	public void InstFullClassDecl.collectErrors() {
     	if (!errorChecked) {
     	errorChecked = true;
-        for (InstClassDecl icd : instClassDecls())
-        	icd.collectErrors();
+ //       for (InstClassDecl icd : instClassDecls())
+ //       	icd.collectErrors();
         for (InstComponentDecl icd : instComponentDecls())
         	icd.collectErrors();
+        for (InstExtends ie : instExtends())
+        	ie.collectErrors();	
+        for (InstImport ii : getInstImports())
+        	ii.collectErrors();		
 //    	getEquationList().collectErrors();
 //    	getAlgorithmList().collectErrors();
 //    	getSuperList().collectErrors();
@@ -280,30 +284,54 @@ aspect InstanceErrorCheck {
     		error("The declaration and end names of a class should be the same");
   		}
   	}	
+  	
+	boolean InstImport.errorChecked = false;
+    public void InstImport.collectErrors() {
+    if (!errorChecked) {
+    	errorChecked = true;
+		getPackageName().collectErrors();
+		}
+	}
 	
 	public void InstComponentDecl.collectErrors() {
+    if (!errorChecked) {
+    	errorChecked = true;
 		super.collectErrors();
 		getClassName().collectErrors();
 		if (!myInstClass().isUnknown()) {
 			myInstClass().collectErrors();
 		}
+		}
 	}
-	*/
 	
+	public void InstExtends.collectErrors() {
+    if (!errorChecked) {
+    	errorChecked = true;
+		super.collectErrors();
+		getClassName().collectErrors();
+		if (!getClassName().myInstClassDecl().isUnknown()) {
+			getClassName().myInstClassDecl().collectErrors();
+		}
+		}
+	}	
 	
   public void InstNode.collectErrors() {
+    if (!errorChecked) {
+    	errorChecked = true;
 	  nameCheck();
 	  typeCheck();	  
 	  for(InstNode n : getInstNodes()) {
 		  n.collectErrors();
 	  }
-
+	}
   }
   
+  
+/*  
     public void InstClassDecl.collectErrors() {
 
     }
-  
+*/  
 
 
 

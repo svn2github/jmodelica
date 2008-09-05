@@ -831,7 +831,29 @@ aspect InstanceClasses {
 		return instExtendsList;
 	}
 
+    syn lazy List InstBaseClassDecl.getInstImportList() = emptyList();
+    
+    eq InstFullClassDecl.getInstImportList() {
+    	List l = new List();
+    	for (ImportClause ic : getFullClassDecl().getImports()) {
+    		InstImport iic = ic.newInstImport();
+    		iic.setStart(ic.getStart());
+    		l.add(iic);
+    	}
+    	return l;
+    }
 
+	public abstract InstImport ImportClause.newInstImport(); 
+	public InstImport ImportClauseQualified.newInstImport() {
+		return new InstImportQualified(getPackageName().newInstAccess(),this);
+	}
+	public InstImport ImportClauseUnqualified.newInstImport() {
+		return new InstImportUnqualified(getPackageName().newInstAccess(),this);
+	}
+	public InstImport ImportClauseRename.newInstImport() {
+		return new InstImportRename(getPackageName().newInstAccess(),this);
+	}
+	
 }
 
 
@@ -886,6 +908,10 @@ aspect InstanceDumpTree {
 
 		System.out.println(toString(indent+"|"));
 
+	}
+	
+	public String InstAccess.toString() {
+		return name();
 	}
 	
  	public String InstNode.toString() {

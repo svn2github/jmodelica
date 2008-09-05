@@ -32,15 +32,15 @@ aspect InstNameClassification {
 	 	return getRight().predKind();
 	}
 
-/*
-	eq ExtendsClause.getSuper().kind() = Kind.AMBIGUOUS_ACCESS;
-	eq FunctionCall.getName().kind() = Kind.AMBIGUOUS_ACCESS;
-	eq ImportClause.getPackageName().kind() = Kind.CLASS_ACCESS;
-	eq ImportClauseQualified.getPackageName().kind() = Kind.CLASS_ACCESS;
-	eq ClassRedeclare.getName().kind() = Kind.CLASS_ACCESS;
-	eq ComponentRedeclare.getName().kind() = Kind.COMPONENT_ACCESS;
-	eq ShortClassDecl.getClassName().kind() = Kind.CLASS_ACCESS;
-*/
+
+	eq InstExtends.getClassName().kind() = Kind.CLASS_ACCESS;
+//	eq FunctionCall.getName().kind() = Kind.AMBIGUOUS_ACCESS;
+	eq InstImport.getPackageName().kind() = Kind.CLASS_ACCESS;
+	eq InstClassRedeclare.getClassName().kind() = Kind.CLASS_ACCESS;
+	eq InstComponentRedeclare.getComponentName().kind() = Kind.COMPONENT_ACCESS;
+	eq InstShortClassDecl.getClassName().kind() = Kind.CLASS_ACCESS;
+	eq InstComponentDecl.getClassName().kind() = Kind.CLASS_ACCESS;	
+	
 	/**
 	 * The attribute predKind defines the kind for qualified
 	 * names.
@@ -83,12 +83,10 @@ aspect InstResolveAmbiguousNames {
     			t.setStart(getStart());
   	 			return t;
   			}
-  		rewritten = true;
-  		return this;
+  			rewritten = true;
+  			return this;
   		}
   	}
-
-
 }
 
 

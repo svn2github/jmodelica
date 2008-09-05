@@ -153,7 +153,7 @@ aspect LookupClasses {
 	    return emptyHashSet();
 	}
 		
-	syn lazy HashSet FullClassDecl.genericLookupClass(String name){
+	syn lazy HashSet FullClassDecl.genericLookupClass(String name) circular [emptyHashSet()]{
 	
 		HashSet set = new HashSet(4);
 		

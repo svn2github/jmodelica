@@ -90,8 +90,24 @@ public class ErrorTestCase extends TestCase {
 	@Override
 	public boolean testMe() {
 		SourceRoot sr = parser.parseFile(getSourceFileName());
-		sr.setFileName(getSourceFileName());
+		sr.setFileName(getSourceFileName());	    
+		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 	    StringBuffer str = new StringBuffer();
+	    if (ipr.checkErrorsInInstClass(getClassName(),str)) {
+	    	String testErrorMsg = filterErrorMessages(str.toString());
+	    	String correctErrorMsg = filterErrorMessages(getErrorMessage());
+//	    	System.out.println("**** " +getClassName());
+//	    	System.out.println(correctErrorMsg);
+//	    	System.out.println("*");
+//	    	System.out.println(testErrorMsg);
+//	    	System.out.println("*");
+			if (testErrorMsg.equals(correctErrorMsg))
+	    		return true;
+	    }
+	
+	    
+	    
+/*	    
 	    if (sr.checkErrorsInClass(getClassName(),str)) {
 	    	String testErrorMsg = filterErrorMessages(str.toString());
 	    	String correctErrorMsg = filterErrorMessages(getErrorMessage());
@@ -107,7 +123,7 @@ public class ErrorTestCase extends TestCase {
 	    	if (testErrorMsg.equals(correctErrorMsg))
 	    		return true;
   	  }
-	    
+*/	    
 		/*
 		ErrorManager errM = new ErrorManager();
 	    //System.out.println(sr.checkErrors(getClassName(),errM));

@@ -79,6 +79,29 @@ end A;
 
   end NameTest2;
 
+
+
+
+  model NameTest3_Err
+  
+  
+   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="NameTest3_Err",
+                                               description="Basic test of name lookup",
+                                               errorMessage=
+"
+1 error(s) found...
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 90, column 1:
+  The class A is undeclared
+  
+")})));
+
+A a;
+
+  end NameTest3_Err;
+
+
 class ExtendsTest1
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FlatteningTestCase(name="ExtendsTest1",
@@ -154,6 +177,7 @@ class ExtendsTest3
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 164, column 11:
   The class D is undeclared
+  
 "  )})));
   
   class C
@@ -226,6 +250,8 @@ end NameTests.ImportTest2;
   A a;
   extends A;
   
+  
+  
 end ImportTest2;
 
 model ImportTest3
@@ -276,9 +302,9 @@ end NameTests.ImportTest4;
     end A;
   end P;
   
-  import P = NameTests.ImportTest1.P;
-  P.A a;
-  extends P.A;
+  import PP = NameTests.ImportTest1.P;
+  PP.A a;
+  extends PP.A;
   
 end ImportTest4;
 
@@ -398,7 +424,7 @@ connector MyRealSignal
   
   extends SignalType(nominal=34);
   
-end RealSignal;
+end MyRealSignal;
   
   MyRealInput u(min=3);
   
@@ -426,7 +452,7 @@ connector MyRealSignal
   
   extends SignalType(max=2,start=2,nominal=2);
   
-end RealSignal;
+end MyRealSignal;
   
   MyRealInput u(nominal=4);
   

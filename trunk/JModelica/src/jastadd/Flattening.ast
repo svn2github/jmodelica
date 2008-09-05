@@ -10,13 +10,17 @@ InstProgramRoot : InstRoot ::= <Program:Program>
                                /InstBuiltInFunction:InstClassDecl*/;
 
 abstract InstClassDecl: InstNode;
-abstract InstBaseClassDecl : InstClassDecl ::= <BaseClassDecl:BaseClassDecl>;
+abstract InstBaseClassDecl : InstClassDecl ::= <BaseClassDecl:BaseClassDecl> /InstImport*/;
 InstFullClassDecl : InstBaseClassDecl ::= ;
 InstShortClassDecl : InstBaseClassDecl ::= ClassName:InstAccess;
 InstPrimitiveClassDecl : InstFullClassDecl;
 InstBuiltInClassDecl : InstClassDecl ::= <BuiltInClassDecl:BuiltInClassDecl>;
 InstUnknownClassDecl : InstFullClassDecl;
 
+abstract InstImport ::= PackageName:InstAccess <ImportClause:ImportClause>;
+InstImportQualified : InstImport;
+InstImportUnqualified : InstImport;
+InstImportRename : InstImport;
 
 // The class to expand may differ from the declared class of the component due to 
 // redeclaration of classes.

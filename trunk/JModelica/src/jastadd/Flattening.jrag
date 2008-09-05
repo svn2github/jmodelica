@@ -57,18 +57,7 @@ aspect Flattening {
    		if (className.equals(qualifiedName())) {
   	 		fc.setFQName(new FQName(qualifiedName())); 
   	 		InstRoot r = getInstRoot();
-  	 		
-  	 		/* Is this really a good idea? we are taking a subtree from
-  	 		   InstRoot and insert it into an FClass. The alternative is
-  	 		   to insert a fullCopy(), but then, what happens with 
-  	 		   cached reference attributes pointing at nodes in the
-  	 		   FPrimitiveTypeList? 
-  	 		*/
-			fc.setFPrimitiveTypeList(r.getFPrimitiveTypeList()); 
-			
-			
-			
-			//r.dumpTree("");
+ 			//r.dumpTree("");
 			//r.printIVarAccesses("");
 			fc.addFEquationBlock(new FEquationBlock(new List()));
 			r.flatten(fc);
@@ -86,23 +75,15 @@ aspect Flattening {
 		}
 	}
 
-//	public void InstClassRoot.flatten(FClass fc) {
-//		getInstNodeList().flatten(fc);
-//	}
-
 	public void InstNode.flatten(FClass fc) {
 		List l = equations();
 		for (int i=0;i<l.getNumChild();i++) {
 		   ((AbstractEquation)l.getChild(i)).flatten(getFQName(),fc);
 		}
-//		for (InstNode n : instComponentDecls())
-//			n.flatten(fc);
-
 		getInstNodeList().flatten(fc);
 	}
 	
 	public void InstClassDecl.flatten(FClass fc) {}
-	
 	
 	/* TODO: check if it is really a good idea to create FVariables
 	   and then to move them? better to do a fullCopy()? */

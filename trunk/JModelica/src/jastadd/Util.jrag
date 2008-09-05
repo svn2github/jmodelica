@@ -191,6 +191,9 @@ aspect Names {
 	syn Access Access.getLastAccess() = this;
     eq Dot.getLastAccess() = getRight().getLastAccess();
     
+    syn InstAccess InstAccess.getLastInstAccess() = this;
+    eq InstDot.getLastInstAccess() = getRight().getLastInstAccess();
+    
     /**
      * Access method for the first Access of a qualified or
      * unqualified name.

@@ -32,7 +32,7 @@ public class FlattenModel {
 		      sr.prettyPrint("");
 		      
 		      InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-		      ipr.dumpTree("");
+		      //ipr.dumpTree("");
 		      
 		      long parseTime = System.currentTimeMillis();
 		      
@@ -43,17 +43,33 @@ public class FlattenModel {
 		       *  TODO: fix this!!!
 		       *  
 		       */
+
+//		      ipr.dumpTree("");		      
+		      
+		      System.out.println("Inst checking:");
+		      boolean instErr = ipr.checkErrorsInInstClass(cl);
+		      System.out.println("Source checking:");
+		      boolean sourceErr = sr.checkErrorsInClass(cl);
+		      
+
+		      
+
+		      if (instErr || sourceErr)
+		    	  System.exit(0);
+		      
+		      
+/*		      
+		      if (ipr.checkErrorsInInstClass(cl)) {
+			      //if (sr.errorCheck()) {
+		    		  System.exit(0);
+		    	  }
 		      
 		      if (sr.checkErrorsInClass(cl)) {
 		      //if (sr.errorCheck()) {
 	    		  System.exit(0);
 	    	  }
-	/*	      
-		      if (ipr.checkErrorsInInstClass(cl)) {
-			      //if (sr.errorCheck()) {
-		    		  System.exit(0);
-		    	  }
-		*/      
+*/		      
+		      
 		      long errcheckTime = System.currentTimeMillis();
 		      
 		      long printTime = System.currentTimeMillis();
@@ -72,8 +88,8 @@ public class FlattenModel {
 		    	  }
 		    	  ir.dumpTree("");
 		    	  
-		    	  if (ir.errorCheck())
-		    		  System.exit(0);
+//		    	  if (ir.errorCheck())
+//		    		  System.exit(0);
 	    	  /*
 		      System.out.println("Checking for errors...");	      
 	    	  if (fc.errorCheck()) {

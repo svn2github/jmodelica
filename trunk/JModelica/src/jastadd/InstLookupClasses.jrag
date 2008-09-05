@@ -11,9 +11,9 @@ aspect InstLookupClasses {
     }
     
 	inh HashSet InstAccess.lookupInstClass(String name) circular [emptyHashSet()];
-	inh HashSet InstFullClassDecl.lookupInstClass(String name);
+	inh HashSet InstBaseClassDecl.lookupInstClass(String name);
 	
-	eq InstFullClassDecl.getInstNode(int i).lookupInstClass(String name) {
+	eq InstBaseClassDecl.getInstNode(int i).lookupInstClass(String name) {
 		if (getInstNode(i) instanceof InstExtends)
 			return superLookupInstClass(name);
 		else
@@ -190,47 +190,43 @@ aspect InstLookupClasses {
 	syn HashSet InstAccess.qualifiedLookupInstClass(String name) circular [emptyHashSet()] = emptyHashSet();	
 	eq InstClassAccess.qualifiedLookupInstClass(String name) = myInstClassDecl().memberInstClass(name);
 
-/*
-	syn HashSet InstFullClassDecl.lookupInstClassInImport(String name) circular [emptyHashSet()]{
+
+	syn HashSet InstBaseClassDecl.lookupInstClassInImport(String name) circular [emptyHashSet()]{
 		HashSet h;
-		for (int i=0;i<getNumImport();i++) {
-	    	h = getImport(i).lookupInstClassInImport(name);
+		for (InstImport ii : getInstImports()) {
+	    	h = ii.lookupInstClassInImport(name);
 	    	if (h.size()>0)
 	    	   return h;
 	    }
 	    return emptyHashSet();
 	}
-*/
+
 		
-	syn lazy HashSet InstClassDecl.genericLookupInstClass(String name) = emptyHashSet();
-	eq InstFullClassDecl.genericLookupInstClass(String name) {
+	syn lazy HashSet InstClassDecl.genericLookupInstClass(String name) circular [emptyHashSet()] = emptyHashSet();
+	eq InstBaseClassDecl.genericLookupInstClass(String name) {
 	
 		HashSet set = new HashSet(4);
 		
 		set.addAll(memberInstClass(name));
 
-/*	
 		if (lookupInstClassInImport(name).size()>0)
 			set.addAll(lookupInstClassInImport(name));
-*/	
+	
 		if (set.size()>0)
 			return set;
 		else
 			return lookupInstClass(name);
 	}
 	
-	
 	syn HashSet InstClassDecl.superLookupInstClass(String name) circular [emptyHashSet()] = emptyHashSet();
 	
-	eq InstFullClassDecl.superLookupInstClass(String name) {
+	eq InstBaseClassDecl.superLookupInstClass(String name) {
 	
 		HashSet set = new HashSet();
 		
-/*
 		if (lookupInstClassInImport(name).size()>0)
 				set.addAll(lookupInstClassInImport(name));
-*/
-		
+					
 		for (InstClassDecl icd : instClassDecls()) {
 			if (icd.matchInstClassDecl(name)) {
 					set.add(icd);
@@ -310,8 +306,71 @@ aspect InstLookupClasses {
 	eq InstExtends.myInstClass() = getClassName().myInstClassDecl();
 }
 
-//aspect InstLookupImport {
-//}
+aspect InstLookupImport {
+
+	inh HashSet InstImport.lookupImportInstClass(String name) circular [emptyHashSet()];
+	
+	eq InstRoot.getChild().lookupImportInstClass(String name) = emptyHashSet();
+	
+	eq InstImport.getPackageName().lookupInstClass(String name) {
+	 	HashSet h = lookupImportInstClass(name);
+	 	return h;
+	}
+	    	
+	eq InstProgramRoot.getChild().lookupImportInstClass(String name) {
+		HashSet set = new HashSet(4);
+		
+		if (lookupElementInstClass(name).size()>0)
+			set.addAll(lookupElementInstClass(name));
+	/*
+		if (lookupLibrary(name).size()>0)
+			set.addAll(lookupLibrary(name));
+    */
+
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+	
+	/*
+	eq Program.getLibNode().lookupImportClass(String name) {
+		HashSet set = new HashSet(4);
+
+		if (lookupLibrary(name).size()>0)
+			set.addAll(lookupLibrary(name));
+			
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+	*/
+	
+	syn HashSet InstImport.lookupInstClassInImport(String name) circular [emptyHashSet()];
+	
+	eq InstImportQualified.lookupInstClassInImport(String name)   {
+	    if (name.equals(getPackageName().getLastInstAccess().name())) {
+   		  return getPackageName().lookupInstClass();
+		} else
+			return emptyHashSet();
+	}
+	
+	eq InstImportUnqualified.lookupInstClassInImport(String name)  {
+		return getPackageName().myInstClassDecl().memberInstClass(name);
+	}
+	
+	eq InstImportRename.lookupInstClassInImport(String name)  {
+	    
+		// Does the alias name match?
+		if (name.equals(((ImportClauseRename)getImportClause()).getIdDecl().getID())) {
+			return getPackageName().lookupInstClass();
+			
+		} else
+			return emptyHashSet();
+	}
+	
+}
 
 
 aspect InstLocalClasses {
