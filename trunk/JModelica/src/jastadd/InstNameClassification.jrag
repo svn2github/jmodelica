@@ -36,10 +36,12 @@ aspect InstNameClassification {
 	eq InstExtends.getClassName().kind() = Kind.CLASS_ACCESS;
 //	eq FunctionCall.getName().kind() = Kind.AMBIGUOUS_ACCESS;
 	eq InstImport.getPackageName().kind() = Kind.CLASS_ACCESS;
+	eq InstComponentModification.getComponentName().kind() = Kind.COMPONENT_ACCESS;
 	eq InstClassRedeclare.getClassName().kind() = Kind.CLASS_ACCESS;
 	eq InstComponentRedeclare.getComponentName().kind() = Kind.COMPONENT_ACCESS;
 	eq InstShortClassDecl.getClassName().kind() = Kind.CLASS_ACCESS;
 	eq InstComponentDecl.getClassName().kind() = Kind.CLASS_ACCESS;	
+
 	
 	/**
 	 * The attribute predKind defines the kind for qualified

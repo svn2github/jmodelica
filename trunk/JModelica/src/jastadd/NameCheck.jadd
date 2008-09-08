@@ -24,12 +24,12 @@ aspect InstanceNameCheck {
      	error("Cannot find class or component declaration for "+qualifiedName());
   	}
 	
-/*	
+	
 	public void InstComponentAccess.nameCheck() {
-		if (myComponentDecl().isUnknown()) 
+		if (myInstComponentDecl().isUnknown()) 
        		error("The component "+qualifiedName()+" is undeclared");
     }
-  */
+  
     
     public void InstClassAccess.nameCheck() {
 		if (myInstClassDecl().isUnknown()) 

@@ -19,6 +19,7 @@ aspect InstLookupClasses {
 		else
 		 	return genericLookupInstClass(name); 
 	}
+
     
     // The InstRoot NTA has the same content as the InstFullClassDecl itself
     // Lookup should therefore be propagated one step up.
@@ -65,15 +66,6 @@ aspect InstLookupClasses {
 				set.add(bcd);	
 		}
 
-/*		
-		for (int j=0;j<getNumElement();j++) {    
-			if (getElement(j) instanceof BaseClassDecl) {
-				if (((BaseClassDecl)getElement(j)).matchClassDecl(name))
-					//debugPrint(((BaseClassDecl)getElement(j)).getName().name());
-					set.add(getElement(j));
-			}
-		}
-*/
 		if (set.size()>0)
 			return set;
 		else
@@ -86,14 +78,7 @@ aspect InstLookupClasses {
 			if (bcd.matchInstClassDecl(name))
 				set.add(bcd);	
 		}
-	
-/*		for (int i=0;i<getNumPredefinedType();i++) {
-			BaseClassDecl pcd = (BaseClassDecl)getPredefinedType(i);
-			//debugPrint("PredefinedType: "+pcd.getName().name());
-			if (pcd.matchClassDecl(name))
-		 		set.add(pcd);
-		}
-*/		
+
 		if (set.size()>0)
 			return set;
 		else
@@ -109,12 +94,6 @@ aspect InstLookupClasses {
 		}		
 		
 		
-/*		for (int i=0;i<getNumBuiltInFunction();i++) {
-			ClassDecl pcd = getBuiltInFunction(i);
-			if (pcd.matchClassDecl(name))
-		 		set.add(pcd);
-		}
-*/
 		if (set.size()>0)
 			return set;
 		else
@@ -147,13 +126,7 @@ aspect InstLookupClasses {
 				set.add(bcd);	
 		}		
 		
-/*		
-		for (int i=0;i<getNumBuiltInType();i++) {
-			ClassDecl pcd = getBuiltInType(i);
-			if (pcd.matchClassDecl(name))
-		 		set.add(pcd);
-		}	
-*/
+
 		if (set.size()>0)
 			return set;
 		else
@@ -285,25 +258,28 @@ aspect InstLookupClasses {
 	// there are import statements, evaluation might get back to the 
 	// ClassAccess A when when looking up the ClassAccess to import.
 	// See NameTests.ImportTest1 for an example. 
-	syn lazy InstClassDecl InstAccess.myInstClassDecl() circular [instUnknownClassDecl()] {
-		 return instUnknownClassDecl();
+	syn lazy InstClassDecl InstAccess.myInstClassDecl() circular [unknownInstClassDecl()] {
+		 return unknownInstClassDecl();
 	}
 	eq InstClassAccess.myInstClassDecl()  {
 		HashSet set = lookupInstClass(name());
 		if (set.size() > 0)
 			return (InstClassDecl)set.iterator().next();
 		else
-			return instUnknownClassDecl();
+			return unknownInstClassDecl();
 	}
 	eq InstDot.myInstClassDecl() {
 	 	return getRight().myInstClassDecl();
 	}	
 	
-	syn lazy InstClassDecl InstNode.myInstClass() circular [instUnknownClassDecl()] = instUnknownClassDecl(); 
+	syn lazy InstClassDecl InstNode.myInstClass() circular [unknownInstClassDecl()] = unknownInstClassDecl(); 
 	eq InstComponentDecl.myInstClass() = getClassName().myInstClassDecl();
 	eq InstShortClassDecl.myInstClass()  = getClassName().myInstClassDecl();
 	eq InstClassDecl.myInstClass() = this;
 	eq InstExtends.myInstClass() = getClassName().myInstClassDecl();
+	eq UnknownInstComponentDecl.myInstClass() = unknownInstClassDecl();	
+
+	
 }
 
 aspect InstLookupImport {

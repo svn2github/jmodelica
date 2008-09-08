@@ -1,0 +1,106 @@
+
+import java.util.HashSet;
+
+aspect InstLookupComponents {
+
+	inh lazy HashSet InstAccess.lookupInstComponent(String name);	
+	eq InstBaseClassDecl.getChild().lookupInstComponent(String name) = genericLookupInstComponent(name); 
+	eq InstDot.getRight().lookupInstComponent(String name) = getLeft().qualifiedLookupInstComponent(name);
+	eq InstRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
+	
+	syn lazy HashSet InstAccess.qualifiedLookupInstComponent(String name) = emptyHashSet();
+	eq InstComponentAccess.qualifiedLookupInstComponent(String name) = myInstComponentDecl().myInstClass().memberInstComponent(name);	
+	eq InstClassAccess.qualifiedLookupInstComponent(String name) = myInstClassDecl().memberInstComponent(name);
+	
+	syn lazy HashSet InstBaseClassDecl.genericLookupInstComponent(String name) {
+		HashSet h = memberInstComponent(name);
+		return h;
+	 }
+	
+	syn lazy HashSet InstClassDecl.memberInstComponent(String name) = emptyHashSet();
+	
+	eq InstBaseClassDecl.memberInstComponent(String name)  {
+	 		 	
+	 	HashSet set = new HashSet(4);
+		for (InstComponentDecl ic : instComponentDecls()) {
+			if (ic.matchInstComponentDecl(name))
+				set.add(ic);
+		}
+
+		for (InstExtends ie : instExtends()) {
+			HashSet h = ie.getClassName().lookupInstClass();
+			if (h.size()==1)
+				set.addAll(((InstClassDecl)h.iterator().next()).memberInstComponent(name));
+		}
+
+		if (set.size()>0) {
+			return set;
+		} else {
+			return emptyHashSet();
+		}
+	}
+	
+	eq InstShortClassDecl.memberInstComponent(String name) = myInstClass().memberInstComponent(name);
+	
+	/**
+	 * Simple matching of component names.
+	 */
+	syn boolean InstComponentDecl.matchInstComponentDecl(String name) = name().equals(name);
+	
+	syn lazy InstComponentDecl InstAccess.myInstComponentDecl() = unknownInstComponentDecl();
+	eq InstComponentAccess.myInstComponentDecl() {
+		HashSet set = lookupInstComponent(name());
+		if (set.size() > 0) {
+			return (InstComponentDecl)set.iterator().next();
+		} else
+			return unknownInstComponentDecl();
+	}
+	
+	eq InstDot.myInstComponentDecl() = getRight().myInstComponentDecl();
+		
+/*
+	inh HashSet ForClauseE.lookupComponent(String name);	
+	eq ForClauseE.getForEqns().lookupComponent(String name) {
+		HashSet set = new HashSet(4);
+		for (int i=0;i<getNumForIndex();i++) {
+			if (getForIndex(i).getForIndexDecl().matchComponentDecl(name)) {
+				set.add(getForIndex(i).getForIndexDecl());	
+				return set;
+			}
+		}
+		return lookupComponent(name);
+	}
+
+
+	inh HashSet SumRedExp.lookupComponent(String name);	
+	eq SumRedExp.getExp().lookupComponent(String name) {
+		debugPrint("SumRedExp.getExp().lookupComponent: "+ name);
+		HashSet set = new HashSet(4);
+		if (getForIndex().getForIndexDecl().matchComponentDecl(name)) {
+			set.add(getForIndex().getForIndexDecl());
+			return set;	
+		}
+		return lookupComponent(name);
+	}
+*/	
+	
+}
+
+
+
+aspect LookupInstComponentsInModifications {
+
+	eq InstComponentModification.getComponentName().lookupInstComponent(String name) = lookupInstComponentInInstClass(name);
+	eq InstComponentRedeclare.getComponentName().lookupInstComponent(String name) = lookupInstComponentInInstClass(name);
+	
+	inh HashSet InstModification.lookupInstComponentInInstClass(String name);
+	
+	eq InstComponentDecl.getMergedEnvironment().lookupInstComponentInInstClass(String name) = myInstClass().memberInstComponent(name);
+	eq InstExtends.getMergedEnvironment().lookupInstComponentInInstClass(String name) = myInstClass().memberInstComponent(name);
+	eq InstShortClassDecl.getMergedEnvironment().lookupInstComponentInInstClass(String name) = myInstClass().memberInstComponent(name);
+
+	eq InstRoot.getChild().lookupInstComponentInInstClass(String name) = emptyHashSet();
+ 
+}
+
+  

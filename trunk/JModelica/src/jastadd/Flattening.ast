@@ -3,8 +3,8 @@ abstract InstRoot : InstNode ::= /FPrimitiveType*/;
 InstClassRoot : InstRoot ::= <ClassDecl:ClassDecl>;
 //InstFullClassDeclRoot :InstRoot ::= InstFullClassDecl;
 InstProgramRoot : InstRoot ::= <Program:Program>
-					           /InstUnknownClassDecl/
-                               /InstUnknownComponentDecl/
+					           /UnknownInstClassDecl/
+                               /UnknownInstComponentDecl/
                                /InstPredefinedType:InstClassDecl*/ 
                                /InstBuiltInType:InstClassDecl*/   
                                /InstBuiltInFunction:InstClassDecl*/;
@@ -15,7 +15,7 @@ InstFullClassDecl : InstBaseClassDecl ::= ;
 InstShortClassDecl : InstBaseClassDecl ::= ClassName:InstAccess;
 InstPrimitiveClassDecl : InstFullClassDecl;
 InstBuiltInClassDecl : InstClassDecl ::= <BuiltInClassDecl:BuiltInClassDecl>;
-InstUnknownClassDecl : InstFullClassDecl;
+UnknownInstClassDecl : InstFullClassDecl;
 
 abstract InstImport ::= PackageName:InstAccess <ImportClause:ImportClause>;
 InstImportQualified : InstImport;
@@ -27,7 +27,7 @@ InstImportRename : InstImport;
 abstract InstComponentDecl : InstNode ::= ClassName:InstAccess <ComponentDecl:ComponentDecl> <ClassDecl:ClassDecl>;
 InstComposite : InstComponentDecl;
 InstPrimitive : InstComponentDecl ::= /FVariable/;
-InstUnknownComponentDecl : InstComponentDecl;
+UnknownInstComponentDecl : InstComponentDecl;
 
 InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause>;
 

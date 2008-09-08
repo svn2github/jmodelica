@@ -81,6 +81,26 @@ end A;
 
 
 
+  model NameTest3_Err
+  
+  
+   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="NameTest3_Err",
+                                               description="Basic test of name lookup",
+                                               errorMessage=
+"
+1 error(s) found...
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 90, column 1:
+  The class A is undeclared
+  
+")})));
+
+A a;
+
+  end NameTest3_Err;
+
+
 
 model NameTest4_Err
   
@@ -108,24 +128,30 @@ Semantic error at line 100, column 4:
 
   end NameTest4_Err;
 
-  model NameTest3_Err
+
+
+model NameTest5_Err
   
   
    annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="NameTest3_Err",
+      JModelica.UnitTesting.ErrorTestCase(name="NameTest5_Err",
                                                description="Basic test of name lookup",
                                                errorMessage=
 "
-1 error(s) found...
-In file 'src/test/modelica/NameTests.mo':
-Semantic error at line 90, column 1:
-  The class A is undeclared
-  
 ")})));
 
-A a;
+  model A
+    Real x = 4;
+  end A;
+  
+  A a;
+  Real y;
+equation
+  a.y = y;
+equation
+ 
 
-  end NameTest3_Err;
+  end NameTest5_Err;
 
 
 

@@ -1,6 +1,5 @@
 aspect LookupInstance {
 
-
 	eq InstRoot.getChild().lookupFV(FQName fqname) { 
 	
 		debugPrint(">>>InstRoot.getChild().lookupFV(): looking for: " + fqname.name());

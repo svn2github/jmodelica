@@ -354,7 +354,7 @@ aspect InstantiationTree {
 
 //	syn nta InstConstrainingClauseRoot ConstrainingClause.instConstrainingClauseRoot() = new InstConstrainingClauseRoot(new List(),this);
 
-//    syn lazy List InstPrimitiveClassDecl.getInstNodeList() = emptyList();
+    syn lazy List InstPrimitiveClassDecl.getInstNodeList() = emptyList();
 //    syn lazy List InstShortClassDecl.getInstNodeList() = getShortClassDecl().extendsPrimitive()? emptyList() : super.getInstNodeList();
 	
 	syn lazy List InstNode.getInstNodeList() {
@@ -553,7 +553,7 @@ aspect InstantiationTree {
 	syn lazy List ClassDecl.components() = root().emptyList();
 	eq FullClassDecl.components() = getComponentDeclList();
 	eq ShortClassDecl.components() = getClassName().myClassDecl().components();
-	eq PrimitiveClassDecl.components() = emptyList();
+	//eq PrimitiveClassDecl.components() = emptyList();
 	
 	syn lazy List ClassDecl.classes() = emptyList();
     eq FullClassDecl.classes() = getClassDeclList();

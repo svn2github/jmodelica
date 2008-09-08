@@ -336,6 +336,27 @@ end ModificationTests.ModTest_PM_12;")})));
   
 end ModTest_PM_12;
  
+model ModTest13_Err
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ModTest13_Err",
+        description="Test of lookup errors in modifications",
+                                               flatModel=
+"
+1 error(s) found...
+In file 'src/test/modelica/ModificationTests.mo':
+Semantic error at line 351, column 7:
+  Cannot find class or component declaration for y
+
+")})));
+
+  model A
+    Real x=2;
+  end A;
+
+  A a(y=3);
+
+end ModTest13_Err;
+ 
 
 model ShortClassDeclModTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

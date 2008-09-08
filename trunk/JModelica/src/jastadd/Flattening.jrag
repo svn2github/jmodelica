@@ -287,10 +287,12 @@ aspect FlatExpressions {
 		return null;
 	}
 
+
 	public FExp AccessExp.flatten(FQName prefix) {
 		return new FIdUseExp(new FIdUseQualified("", getAccess().flatten(prefix)));
 	}
-	
+
+
 	public FQName Access.flatten(FQName prefix) { 
 		FQName myName = new FQName(prefix);
 		myName.append(this,prefix);

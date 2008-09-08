@@ -284,6 +284,20 @@ aspect InstanceErrorCheck {
     		error("The declaration and end names of a class should be the same");
   		}
   	}	
+
+  public void InstNode.collectErrors() {
+    if (!errorChecked) {
+      errorChecked = true;
+	  nameCheck();
+	  typeCheck();	  
+	  for (InstModification im : getMergedEnvironment().getInstModifications()) {
+	  	im.collectErrors();
+	  }
+	  for(InstNode n : getInstNodes()) {
+		  n.collectErrors();
+	  }
+	}
+  }
   	
 	boolean InstImport.errorChecked = false;
     public void InstImport.collectErrors() {
@@ -315,17 +329,23 @@ aspect InstanceErrorCheck {
 		}
 	}	
 	
-  public void InstNode.collectErrors() {
-    if (!errorChecked) {
-      errorChecked = true;
-	  nameCheck();
-	  typeCheck();	  
-	  for(InstNode n : getInstNodes()) {
-		  n.collectErrors();
-	  }
+
+	public void InstModification.collectErrors() {}
+	public void InstComponentModification.collectErrors() {
+		getComponentName().collectErrors();
 	}
-  }
-  
+
+	public void InstComponentRedeclare.collectErrors() {
+		getComponentName().collectErrors();
+	}
+
+	public void InstClassRedeclare.collectErrors() {
+		getClassRedeclare().collectErrors();
+	}
+
+
+
+  	
   
 /*  
     public void InstClassDecl.collectErrors() {

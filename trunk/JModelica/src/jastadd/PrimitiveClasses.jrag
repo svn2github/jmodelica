@@ -67,30 +67,30 @@ aspect UnknownDeclarations {
 		
 
 		
-	syn lazy InstUnknownClassDecl SourceRoot.getInstUnknownClassDecl() = getProgram().getInstProgramRoot().getInstUnknownClassDecl();
+	syn lazy UnknownInstClassDecl SourceRoot.getUnknownInstClassDecl() = getProgram().getInstProgramRoot().getUnknownInstClassDecl();
 		
 
-	syn lazy InstUnknownComponentDecl SourceRoot.getInstUnknownComponentDecl() = getProgram().getInstProgramRoot().getInstUnknownComponentDecl();
+	syn lazy UnknownInstComponentDecl SourceRoot.getUnknownInstComponentDecl() = getProgram().getInstProgramRoot().getUnknownInstComponentDecl();
 		
 
-	syn lazy InstUnknownClassDecl InstProgramRoot.getInstUnknownClassDecl() = 
-		new InstUnknownClassDecl(new List(),getProgram().getUnknownClassDecl());
-	syn lazy InstUnknownComponentDecl InstProgramRoot.getInstUnknownComponentDecl() = 
-	    new InstUnknownComponentDecl(new List(),new InstParseAccess("Unknown"),getProgram().getUnknownComponentDecl(),getProgram().getUnknownClassDecl());
+	syn lazy UnknownInstClassDecl InstProgramRoot.getUnknownInstClassDecl() = 
+		new UnknownInstClassDecl(new List(),getProgram().getUnknownClassDecl());
+	syn lazy UnknownInstComponentDecl InstProgramRoot.getUnknownInstComponentDecl() = 
+	    new UnknownInstComponentDecl(new List(),new InstParseAccess("Unknown"),getProgram().getUnknownComponentDecl(),getProgram().getUnknownClassDecl());
 		
-	syn lazy InstUnknownClassDecl ASTNode.instUnknownClassDecl() = root().instUnknownClassDecl();
-	eq SourceRoot.instUnknownClassDecl() = getInstUnknownClassDecl();
+	syn lazy UnknownInstClassDecl ASTNode.unknownInstClassDecl() = root().unknownInstClassDecl();
+	eq SourceRoot.unknownInstClassDecl() = getUnknownInstClassDecl();
 
-	syn lazy InstUnknownComponentDecl ASTNode.instUnknownComponentDecl() = root().instUnknownComponentDecl();
-	eq SourceRoot.instUnknownComponentDecl() = getInstUnknownComponentDecl();
+	syn lazy UnknownInstComponentDecl ASTNode.unknownInstComponentDecl() = root().unknownInstComponentDecl();
+	eq SourceRoot.unknownInstComponentDecl() = getUnknownInstComponentDecl();
 
 
 
 	syn lazy boolean InstClassDecl.isUnknown() = false;
-	eq InstUnknownClassDecl.isUnknown() = true;
+	eq UnknownInstClassDecl.isUnknown() = true;
 
 	syn lazy boolean InstComponentDecl.isUnknown() = false;
-	eq InstUnknownComponentDecl.isUnknown() = true;
+	eq UnknownInstComponentDecl.isUnknown() = true;
 	
 	syn boolean InstClassDecl.isPrimitive() = false;
 	eq InstPrimitiveClassDecl.isPrimitive() = true;
