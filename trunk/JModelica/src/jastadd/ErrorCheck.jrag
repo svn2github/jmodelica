@@ -297,9 +297,10 @@ aspect InstanceErrorCheck {
     if (!errorChecked) {
 		super.collectErrors();
 		getClassName().collectErrors();
-		if (!myInstClass().isUnknown()) {
-			myInstClass().collectErrors();
-		}
+//      This leads to duplicate error messages.
+//		if (!myInstClass().isUnknown()) {
+//			myInstClass().collectErrors();
+//		}
 		}
 	}
 	
@@ -307,15 +308,16 @@ aspect InstanceErrorCheck {
     if (!errorChecked) {
 		super.collectErrors();
 		getClassName().collectErrors();
-		if (!getClassName().myInstClassDecl().isUnknown()) {
-			getClassName().myInstClassDecl().collectErrors();
-		}
+//      This leads to duplicate error messages.
+//		if (!getClassName().myInstClassDecl().isUnknown()) {
+//			getClassName().myInstClassDecl().collectErrors();
+//		}
 		}
 	}	
 	
   public void InstNode.collectErrors() {
     if (!errorChecked) {
-    	errorChecked = true;
+      errorChecked = true;
 	  nameCheck();
 	  typeCheck();	  
 	  for(InstNode n : getInstNodes()) {
