@@ -41,6 +41,9 @@ aspect InstNameClassification {
 	eq InstComponentRedeclare.getComponentName().kind() = Kind.COMPONENT_ACCESS;
 	eq InstShortClassDecl.getClassName().kind() = Kind.CLASS_ACCESS;
 	eq InstComponentDecl.getClassName().kind() = Kind.CLASS_ACCESS;	
+	eq IComponentModification.getName().kind() = Kind.COMPONENT_ACCESS;
+	eq IClassRedeclare.getName().kind() = Kind.CLASS_ACCESS;
+	eq IComponentRedeclare.getName().kind() = Kind.COMPONENT_ACCESS;
 
 	
 	/**

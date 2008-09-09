@@ -395,9 +395,19 @@ aspect InstantiationTree {
                ClassDecl classToExpand = im.getInstNode().retrieveReplacingClass(replacingComponent.myClass().name());
 			    if (classToExpand!=null) {
 			    // TODO: Add support for InstReplacingPrimitive
-				 return new InstReplacingComposite(new List<FExp>(),cd.newInstClassAccess(),replacingComponent,classToExpand,cd);
+				 InstReplacingComposite irc = new InstReplacingComposite(new List<FExp>(),cd.newInstClassAccess(),replacingComponent,classToExpand,new Opt(),new Opt(),cd);
+				 if (cd.hasModification())
+					irc.setIModification(cd.getModification().newIModification());
+				 if (cd.hasConstrainingClause())
+					irc.setInstConstraining(cd.getConstrainingClause().newInstConstraining());
+ 				 return irc;
 			    } else {
-			     return new InstReplacingComposite(new List<FExp>(),cd.newInstClassAccess(),replacingComponent,replacingComponent.myClass(),cd);
+			     InstReplacingComposite irc = new InstReplacingComposite(new List<FExp>(),cd.newInstClassAccess(),replacingComponent,replacingComponent.myClass(),new Opt(),new Opt(),cd);
+				 if (cd.hasModification())
+					irc.setIModification(cd.getModification().newIModification());
+				 if (cd.hasConstrainingClause())
+					irc.setInstConstraining(cd.getConstrainingClause().newInstConstraining());
+ 				 return irc;
 			    }
 			} else {
 			    // Check if the class of the component is redeclared
@@ -508,9 +518,20 @@ aspect InstantiationTree {
 
 	public InstComponentDecl BaseClassDecl.newInstComponentDecl(ComponentDecl cd) {
 		if (!extendsPrimitive()){
-			return new InstComposite(new List(),cd.newInstClassAccess(),cd,this);
+			InstComponentDecl icd = new InstComposite(new List(),cd.newInstClassAccess(),cd,this,new Opt(),new Opt());
+			if (cd.hasModification())
+				icd.setIModification(cd.getModification().newIModification());
+			if (cd.hasConstrainingClause())
+				icd.setInstConstraining(cd.getConstrainingClause().newInstConstraining());
+			return icd;
 		} else {
-			return new InstPrimitive(new List(),cd.newInstClassAccess(),cd,this);
+			InstPrimitive icd = new InstPrimitive(new List(),cd.newInstClassAccess(),cd,this,new Opt(),new Opt());
+			if (cd.hasModification())
+				icd.setIModification(cd.getModification().newIModification());
+			if (cd.hasConstrainingClause())
+				icd.setInstConstraining(cd.getConstrainingClause().newInstConstraining());
+			return icd;
+
 		}
 	}
 	
@@ -519,17 +540,70 @@ aspect InstantiationTree {
 	}
 	
 	public InstComponentDecl PrimitiveClassDecl.newInstComponentDecl(ComponentDecl cd) {
-		return new InstPrimitive(new List(),cd.newInstClassAccess(),cd,this);
+		InstPrimitive ipr = new InstPrimitive(new List(),cd.newInstClassAccess(),cd,this,new Opt(),new Opt());
+		if (cd.hasModification())
+			ipr.setIModification(cd.getModification().newIModification());
+		if (cd.hasConstrainingClause())
+			ipr.setInstConstraining(cd.getConstrainingClause().newInstConstraining());
+		return ipr;
 	}
 	
 	public InstComponentDecl BuiltInClassDecl.newInstComponentDecl(ComponentDecl cd) {
-		return new InstBuiltIn(new List(),cd.newInstClassAccess(),cd,this);
+		return new InstBuiltIn(new List(),cd.newInstClassAccess(),cd,this,new Opt(),new Opt());
 	}
 	
 	// Build an InstExtends
 	public InstExtends ExtendsClause.newInstExtends() {
-		return new InstExtends(new List(),getSuper().newInstAccess(),this);
+		InstExtends ie = new InstExtends(new List(),getSuper().newInstAccess(),this, new Opt());
+		if (hasClassModification())
+			ie.setIClassModification(getClassModification().newIModification());
+		return ie;
 	}
+
+	public InstConstraining ConstrainingClause.newInstConstraining() {
+	    Opt opt = hasClassModification()? new Opt(getClassModification().newIModification()) : new Opt();
+		return new InstConstraining(this,getAccess().newInstAccess(),opt);
+	}
+
+	public abstract IModification Modification.newIModification();
+	public ICompleteModification CompleteModification.newIModification() {
+		ICompleteModification icm = new ICompleteModification(this,getClassModification().newIModification(),new Opt());
+        if (hasValueModification())
+        	icm.setIValueModification(getValueModification().newIModification());
+        return icm;
+	}	
+	public IValueModification ValueModification.newIModification() {
+		return new IValueModification(this);
+	}
+	public IClassModification ClassModification.newIModification () {
+		List l = new List();
+		for (Argument a : getArguments()) {
+			l.add(a.newIModification());
+		}
+		return new IClassModification(this,l);
+	}
+	public IComponentModification ComponentModification.newIModification() {
+		IComponentModification icm = new IComponentModification(this,getName().newInstAccess(),new Opt());
+		if (hasModification())
+			icm.setIModification(getModification().newIModification());
+		return icm;
+	}
+	public IComponentRedeclare ComponentRedeclare.newIModification() {
+	    // TODO: Can this component be redeclared?
+		return new IComponentRedeclare(this,getName().newInstAccess(),getComponentDecl().newInstComponentDecl(getComponentDecl().myClass()));
+	}
+	public IComponentRedeclare PN_ComponentRedeclare.newIModification() {
+		return null; // This should never be called since all PN_ComponentRedeclare:s are rewritten	    
+	}	
+	
+	public IClassRedeclare ClassRedeclare.newIModification() {
+		return new IClassRedeclare(this,getName().newInstAccess(),getBaseClassDecl().newInstClassDecl());
+	}
+	
+	
+
+	
+
 
 	syn boolean ClassDecl.extendsPrimitive() = false;
 	eq ShortClassDecl.extendsPrimitive() = finalClass().extendsPrimitive();
@@ -749,21 +823,29 @@ aspect InstanceClasses {
 		return new InstProgramRoot(new List(), this);
 	}
 
-    public InstNode BaseClassDecl.newInstClassDecl() {
+    public InstBaseClassDecl BaseClassDecl.newInstClassDecl() {
     	return null;
     }    
-    public InstNode FullClassDecl.newInstClassDecl() {
-    	InstFullClassDecl fcd = new InstFullClassDecl(new List(),this);
+    public InstFullClassDecl FullClassDecl.newInstClassDecl() {
+    	InstFullClassDecl fcd = new InstFullClassDecl(new List(),this,new Opt());
+	  if (hasConstrainingClause())
+	    fcd.setInstConstraining(getConstrainingClause().newInstConstraining());
+
     	fcd.setStart(getStart());
     	return fcd;
     }
-    public InstNode ShortClassDecl.newInstClassDecl() {
-    	InstShortClassDecl scd =  new InstShortClassDecl(new List(),this,getClassName().newInstAccess());
+    public InstShortClassDecl ShortClassDecl.newInstClassDecl() {
+    	InstShortClassDecl scd =  new InstShortClassDecl(new List(),this, new Opt(), getClassName().newInstAccess(), new Opt());
+   	  if (hasClassModification())
+		scd.setIClassModification(getClassModification().newIModification());
+	  if (hasConstrainingClause())
+	    scd.setInstConstraining(getConstrainingClause().newInstConstraining());
+    	
     	scd.setStart(getStart());
     	return scd;
     }
-    public InstNode PrimitiveClassDecl.newInstClassDecl() {
-    	return new InstPrimitiveClassDecl(new List(),this);
+    public InstPrimitiveClassDecl PrimitiveClassDecl.newInstClassDecl() {
+    	return new InstPrimitiveClassDecl(new List(),this, new Opt());
     }
 
 

@@ -74,9 +74,9 @@ aspect UnknownDeclarations {
 		
 
 	syn lazy UnknownInstClassDecl InstProgramRoot.getUnknownInstClassDecl() = 
-		new UnknownInstClassDecl(new List(),getProgram().getUnknownClassDecl());
+		new UnknownInstClassDecl(new List(),getProgram().getUnknownClassDecl(), new Opt());
 	syn lazy UnknownInstComponentDecl InstProgramRoot.getUnknownInstComponentDecl() = 
-	    new UnknownInstComponentDecl(new List(),new InstParseAccess("Unknown"),getProgram().getUnknownComponentDecl(),getProgram().getUnknownClassDecl());
+	    new UnknownInstComponentDecl(new List(),new InstParseAccess("Unknown"),getProgram().getUnknownComponentDecl(),getProgram().getUnknownClassDecl(), new Opt(),new Opt());
 		
 	syn lazy UnknownInstClassDecl ASTNode.unknownInstClassDecl() = root().unknownInstClassDecl();
 	eq SourceRoot.unknownInstClassDecl() = getUnknownInstClassDecl();

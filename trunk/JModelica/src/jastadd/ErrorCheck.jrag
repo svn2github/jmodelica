@@ -290,7 +290,7 @@ aspect InstanceErrorCheck {
       errorChecked = true;
 	  nameCheck();
 	  typeCheck();	  
-//	  if (nameScope()) {
+/*
 		  for (InstModification im : getMergedEnvironment().getInstModifications()) {
 		    if (!nameScope()) {
 			    if (im.getInstNode() == this)
@@ -299,7 +299,7 @@ aspect InstanceErrorCheck {
 				im.collectErrors();
 			}
 		  }
-//      }
+*/
 	  for(InstNode n : getInstNodes()) {
 		  n.collectErrors();
 	  }
@@ -318,6 +318,11 @@ aspect InstanceErrorCheck {
     if (!errorChecked) {
 		super.collectErrors();
 		getClassName().collectErrors();
+		if (hasIModification())
+			getIModification().collectErrors();
+		if (hasInstConstraining())
+			getInstConstraining().collectErrors();
+		
 //      This leads to duplicate error messages.
 //		if (!myInstClass().isUnknown()) {
 //			myInstClass().collectErrors();
@@ -329,6 +334,9 @@ aspect InstanceErrorCheck {
     if (!errorChecked) {
 		super.collectErrors();
 		getClassName().collectErrors();
+		if (hasIClassModification())
+			getIClassModification().collectErrors();
+		
 //      This leads to duplicate error messages.
 //		if (!getClassName().myInstClassDecl().isUnknown()) {
 //			getClassName().myInstClassDecl().collectErrors();
@@ -349,7 +357,16 @@ aspect InstanceErrorCheck {
 	public void InstClassRedeclare.collectErrors() {
 		getClassRedeclare().collectErrors();
 	}
+/*
+	public void IComponentRedeclare.collectErrors() {
+		getName().collectErrors();
+	}
 
+	public void IClassRedeclare.collectErrors() {
+		getName().collectErrors();
+	}
+*/
+	
 
 
   	

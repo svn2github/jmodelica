@@ -15,7 +15,12 @@ aspect Types {
 
    syn lazy InstComposite InstNode.createDynamicInstComposite(ComponentDecl decl) {
       // TODO: Check for redeclares
-   	  InstComposite ic = new InstComposite(new List(),decl.newInstClassAccess(),decl,decl.myClass());
+   	  InstComposite ic = new InstComposite(new List(),decl.newInstClassAccess(),decl,decl.myClass(),new Opt(),new Opt());
+   	  if (decl.hasModification())
+		ic.setIModification(decl.getModification().newIModification());
+	  if (decl.hasConstrainingClause())
+	    ic.setInstConstraining(decl.getConstrainingClause().newInstConstraining());
+ 	 
    	  addDynamicInst(ic);
    	  ic.is$Final(true); // TODO: Is this really ok...?
    	  return ic;
@@ -23,7 +28,12 @@ aspect Types {
    
    syn lazy InstComposite InstNode.createDynamicInstConstrainingComposite(ComponentDecl decl) {
    	  // TODO: Check for redeclares
-   	  InstComposite ic = new InstComposite(new List(),decl.newInstClassAccess(),decl,decl.myClass());
+   	  InstComposite ic = new InstComposite(new List(),decl.newInstClassAccess(),decl,decl.myClass(),new Opt(), new Opt());
+      if (decl.hasModification())
+		ic.setIModification(decl.getModification().newIModification());
+	  if (decl.hasConstrainingClause())
+	    ic.setInstConstraining(decl.getConstrainingClause().newInstConstraining());
+   	  
    	  addDynamicInstConstraining(ic);
    	  ic.is$Final(true); // TODO: Is this really ok...?
    	  return ic;
@@ -107,10 +117,12 @@ aspect Types {
    	  	 // are applied to the declaration itself and is therefore also type checked.
    	     if (getComponentDecl().hasConstrainingClause()) {
          	InstComponentDecl superType = createDynamicInstConstrainingComposite(getComponentDecl());
-	     	InstComponentDecl declaredType = createDynamicInstComposite(getComponentDecl());
+	     	InstComponentDecl declaredType = createDynamicInstComposite(getComponentDecl()); 
     	 	if (!declaredType.subType(superType))
      			superType.getComponentDecl().error("In the declaration '" +declaredType.getComponentDecl().prettyPrint("") +"', the declared class is not a subtype of the constraining class");
   	 	}
+  	 	
+  	 	
   	 }
   }
   

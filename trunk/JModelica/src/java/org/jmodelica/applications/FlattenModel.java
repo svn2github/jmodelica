@@ -52,10 +52,10 @@ public class FlattenModel {
 		      boolean sourceErr = sr.checkErrorsInClass(cl);
 		      
 
-		      
+/*		      
 		      if (instErr || sourceErr)
 		    	  System.exit(0);
-
+*/
 		      
 /*		      
 		      if (ipr.checkErrorsInInstClass(cl)) {
