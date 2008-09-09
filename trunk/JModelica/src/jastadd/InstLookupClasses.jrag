@@ -361,92 +361,21 @@ aspect InstLocalClasses {
 
 aspect InstLookupClassesInModifications {
 
-	inh HashSet IElementModification.lookupInstClassInInstClass(String name);
-	
-	eq IElementModification.getName().lookupInstClass(String name) { 
-	    return lookupInstClassInInstClass(name);
-	}
-	
-	eq InstComponentDecl.getIModification().lookupInstClassInInstClass(String name) {
-	
-		return myInstClass().memberInstClass(name);
-		
-	/*
-		ClassDecl compClass = getClassName().myClassDecl();
-		
-	    if (compClass!=null) {
-			return compClass.memberClass(name);
-		}
-		return emptyHashSet();
-	*/
-	}
+	inh HashSet IElementModification.lookupInstClassInInstClass(String name);	
 
-	/**
-	 * For ElementModification, lookupClassInClass retreives the Class of the 
-	 * left hand component reference and initiates the memberLookup
-	 * mechanism in the corresponding Class.
-	 */
-	eq IElementModification.getIModification().lookupInstClassInInstClass(String name) {
-    
-    	return getName().myInstClassDecl().memberInstClass(name);
-    	
-    	/*
-    	debugPrint("ElementModification.getModification().lookupClassInClass("+name+") in: "+getName().getID());
-    
-    	ClassDecl c = getName().myClassDecl();
-    	    	
-    	if (c != null) {
-    		return c.memberClass(name);
-    	}
-    	return emptyHashSet();
-    	*/
-    }
-    
-	/**
-	 * For ExtendsClause, the name lookupClassInClass proceeds by retreiving the 
-	 * Class of the super class and initiate the memberLookup mechanism.
-	 */
-	eq InstExtends.getIClassModification().lookupInstClassInInstClass(String name) {
+	eq IElementModification.getName().lookupInstClass(String name) = lookupInstClassInInstClass(name);
+
+	eq InstComponentDecl.getIModification().lookupInstClassInInstClass(String name) = myInstClass().memberInstClass(name);		
+	eq IElementModification.getIModification().lookupInstClassInInstClass(String name) = getName().myInstClassDecl().memberInstClass(name);
+	eq InstExtends.getIClassModification().lookupInstClassInInstClass(String name) = getClassName().myInstClassDecl().memberInstClass(name);
 	
-		return getClassName().myInstClassDecl().memberInstClass(name);
+	eq InstShortClassDecl.getIClassModification().lookupInstClassInInstClass(String name) = getClassName().myInstClassDecl().memberInstClass(name);
 	
-		/*
-		debugPrint("ExtendsClause.getClassModification().lookupClassInClass("+name+") in: "+getSuper().getID());
-	
-		ClassDecl superClass = getSuper().myClassDecl();
-			
-	    if (superClass!=null) {
-			return superClass.memberClass(name);
-		}
-		return emptyHashSet();
-		*/
-	}
-	
-	/**
-	 * Definition of the lookupClassInClass attribute for ShortClassDecl.
-	 */
-	eq InstShortClassDecl.getIClassModification().lookupInstClassInInstClass(String name) {
-		return getClassName().myInstClassDecl().memberInstClass(name);
-	
-	/*
-		ClassDecl Class = getClassName().myClassDecl();
-    	    	
-    	if (Class != null) {
-    		return Class.memberClass(name);
-    	}
-    	return emptyHashSet();
-	*/
-	}
-	
-	/**
-	 * Name lookup for component redeclarations in modifiers is performed by
-	 * lookupClassInClass.
-	 */
 	inh HashSet IClassRedeclare.lookupInstClassInInstClass(String name);
 	eq IClassRedeclare.getName().lookupInstClass(String name) = lookupInstClassInInstClass(name);
 	
 	/**
-	 * Terminating equation for attribute lookupClassInClass.
+	 * Terminating equation for attribute lookupInstClassInInstClass.
 	 */
 	eq InstRoot.getChild().lookupInstClassInInstClass(String name) {return emptyHashSet();}
 	  

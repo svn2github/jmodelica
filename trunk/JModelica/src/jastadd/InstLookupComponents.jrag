@@ -119,135 +119,37 @@ aspect InstLookupComponents {
 
 aspect LookupInstComponentsInModifications {
       
-	/*
-	  Name analysis for modification differs from ordinary name analyis. While the right
-	  hand side of an element modification is looked up in the normal lexical scope, the 
-	  left hand side is looked up in the Class (ClassDef) of the component on which the 
-	  modification is acting. Consequently, a new inherited attribute of ElementModification
-	  defining this lookup mechanism is introduced: lookupComponentInClass. 
-	  */
 
     /**
-     * The inherited attribute lookupComponentInClass defines the lookup mechanism for
-     * left hand component references in modifications.
+     * The inherited attribute lookupInstComponentInInstElement defines 
+     * the lookup mechanism for left hand component references in modifications.
+     * InstComponents are looked up in InstComponentDecl:s sometimes and in InstClassDecl:s
+     * sometimes. TODO: this should probably be fixed.
+     * 
      */
-	inh HashSet IElementModification.lookupInstComponentInInstComponent(String name);
-	inh HashSet INamedModification.lookupInstComponentInInstComponent(String name);
+	inh HashSet IElementModification.lookupInstComponentInInstElement(String name);
+	inh HashSet INamedModification.lookupInstComponentInInstElement(String name);
 	
-	/**
-	 * Lookup of the left hand component reference of an ElementModification is
-	 * performed by lookupComponentInClass. 
-	 */ 
-	eq IElementModification.getName().lookupInstComponent(String name) { 
-	    return lookupInstComponentInInstComponent(name);
-	}
+	eq IElementModification.getName().lookupInstComponent(String name) = lookupInstComponentInInstElement(name);
 	
-
-	eq INamedModification.getName().lookupInstComponent(String name) { 
-	    return lookupInstComponentInInstComponent(name);
-	}
+	eq INamedModification.getName().lookupInstComponent(String name) = lookupInstComponentInInstElement(name);
 	
-	eq InstConstraining.getIClassModification().lookupInstComponentInInstComponent(String name) {
-		return getInstAccess().myInstClassDecl().memberInstComponent(name);
-	}
+	eq InstConstraining.getIClassModification().lookupInstComponentInInstElement(String name) = getInstAccess().myInstClassDecl().memberInstComponent(name);
+	     
+	eq InstComponentDecl.getIModification().lookupInstComponentInInstElement(String name) = memberInstComponent(name); 
 	
+	eq InstPrimitive.getIModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name); 
 	
-	/**
-	 * For a ComponentDecl, lookupComponentInClass access the Class of the component and
-	 * initiates the ordinary lookup mechanism in the corresponding ClassDef.
-	 */     
-	eq InstComponentDecl.getIModification().lookupInstComponentInInstComponent(String name) {
-	
-		return memberInstComponent(name); 
-	/*
-		ClassDecl compClass = getClassName().myClassDecl();
-		
-	    if (compClass!=null) {
-			return compClass.memberComponent(name);
-		}
-		return emptyHashSet();
-	*/
-	}
-	
-	eq InstPrimitive.getIModification().lookupInstComponentInInstComponent(String name) {
-	
-		return getClassName().myInstClassDecl().memberInstComponent(name); 
-	/*
-		ClassDecl compClass = getClassName().myClassDecl();
-		
-	    if (compClass!=null) {
-			return compClass.memberComponent(name);
-		}
-		return emptyHashSet();
-	*/
-	}
-	
-
-	/**
-	 * For ElementModification, lookupComponentInClass retreives the Class of the 
-	 * left hand component reference and initiates the memberLookup
-	 * mechanism in the corresponding Class.
-	 */
-	eq IElementModification.getIModification().lookupInstComponentInInstComponent(String name) {
+	eq IElementModification.getIModification().lookupInstComponentInInstElement(String name) = getName().myInstComponentDecl().memberInstComponent(name);
     
-    	return getName().myInstComponentDecl().memberInstComponent(name);
-    
-    	/*
-    	ClassDecl c = getName().myComponentDecl().myClass();
-    	    	
-    	if (c != null) {
-    		return c.memberComponent(name);
-    	}
-    	return emptyHashSet();
-        */
-    }
-    
-	/**
-	 * For ExtendsClause, the name lookupComponentInClass proceeds by retreiving the 
-	 * Class of the super class and initiate the memberLookup mechanism.
-	 */
-	eq InstExtends.getIClassModification().lookupInstComponentInInstComponent(String name) {
-		return memberInstComponent(name);
-
-	/*	
-		debugPrint("ExtendsClause.getClassModification().lookupComponentInClass("+name+") in: "+getSuper().getID());
+	eq InstExtends.getIClassModification().lookupInstComponentInInstElement(String name) = memberInstComponent(name);
 	
-		ClassDecl superClass = getSuper().myClassDecl();
-			
-	    if (superClass!=null) {
-			return superClass.memberComponent(name);
-		}
-		return emptyHashSet();
-	*/
-	}
+	eq InstShortClassDecl.getIClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name);
 	
-	/**
-	 * Definition of the lookupComponentInClass attribute for ShortClassDecl.
-	 */
-	eq InstShortClassDecl.getIClassModification().lookupInstComponentInInstComponent(String name) {
+	inh HashSet IComponentRedeclare.lookupInstComponentInInstElement(String name);
+	eq IComponentRedeclare.getName().lookupInstComponent(String name) = lookupInstComponentInInstElement(name);
 	
-		return getClassName().myInstClassDecl().memberInstComponent(name);
-	/*
-		ClassDecl Class = getClassName().myClassDecl();
-    	    	
-    	if (Class != null) {
-    		return Class.memberComponent(name);
-    	}
-    	return emptyHashSet();
-	*/
-	}
-	
-	/**
-	 * Name lookup for component redeclarations in modifiers is performed by
-	 * lookupComponentInClass.
-	 */
-	inh HashSet IComponentRedeclare.lookupInstComponentInInstComponent(String name);
-	eq IComponentRedeclare.getName().lookupInstComponent(String name) = lookupInstComponentInInstComponent(name);
-	
-	/**
-	 * Terminating equation for attribute lookupComponentInClass.
-	 */
-	eq InstRoot.getChild().lookupInstComponentInInstComponent(String name) {return emptyHashSet();}
+	eq InstRoot.getChild().lookupInstComponentInInstElement(String name) {return emptyHashSet();}
 	  
 }
 
