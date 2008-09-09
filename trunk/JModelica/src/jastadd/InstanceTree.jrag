@@ -354,7 +354,7 @@ aspect InstantiationTree {
 
 //	syn nta InstConstrainingClauseRoot ConstrainingClause.instConstrainingClauseRoot() = new InstConstrainingClauseRoot(new List(),this);
 
-    syn lazy List InstPrimitiveClassDecl.getInstNodeList() = emptyList();
+//    syn lazy List InstPrimitiveClassDecl.getInstNodeList() = emptyList();
 //    syn lazy List InstShortClassDecl.getInstNodeList() = getShortClassDecl().extendsPrimitive()? emptyList() : super.getInstNodeList();
 	
 	syn lazy List InstNode.getInstNodeList() {
@@ -423,7 +423,7 @@ aspect InstantiationTree {
    eq InstNode.getChild().ancestorInstNode() = this;
    
 
-	eq InstPrimitive.getInstNodeList() = new List();
+	eq InstPrimitive.getInstNodeList() = emptyList();
 
     public BaseClassDecl InstNode.retrieveReplacingAliasClass(InstModification im) {
 		ClassRedeclare cr = (ClassRedeclare)im.getModification();
@@ -523,7 +523,7 @@ aspect InstantiationTree {
 	}
 	
 	public InstComponentDecl BuiltInClassDecl.newInstComponentDecl(ComponentDecl cd) {
-		return null;
+		return new InstBuiltIn(new List(),cd.newInstClassAccess(),cd,this);
 	}
 	
 	// Build an InstExtends
@@ -727,7 +727,7 @@ aspect InstantiationTree {
 	eq InstExtends.components() = getExtendsClause().getSuper().myClassDecl().components();
 	eq InstBaseClassDecl.components() = getBaseClassDecl().components();
 	eq InstShortClassDecl.components() = getClassName().myInstClassDecl().components();
-	eq InstPrimitiveClassDecl.components() = emptyList();
+//	eq InstPrimitiveClassDecl.components() = emptyList();
 	
 	syn lazy List InstNode.superClasses() = emptyList();
 	eq InstClassRoot.superClasses() = getClassDecl().superClasses();

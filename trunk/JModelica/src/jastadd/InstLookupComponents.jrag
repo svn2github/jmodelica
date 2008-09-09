@@ -4,12 +4,13 @@ import java.util.HashSet;
 aspect InstLookupComponents {
 
 	inh lazy HashSet InstAccess.lookupInstComponent(String name);	
-	eq InstBaseClassDecl.getChild().lookupInstComponent(String name) = genericLookupInstComponent(name); 
+	eq InstBaseClassDecl.getChild().lookupInstComponent(String name) = genericLookupInstComponent(name); 	
+	eq InstNode.getChild().lookupInstComponent(String name) = memberInstComponent(name); 
 	eq InstDot.getRight().lookupInstComponent(String name) = getLeft().qualifiedLookupInstComponent(name);
 	eq InstRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
 	
 	syn lazy HashSet InstAccess.qualifiedLookupInstComponent(String name) = emptyHashSet();
-	eq InstComponentAccess.qualifiedLookupInstComponent(String name) = myInstComponentDecl().myInstClass().memberInstComponent(name);	
+	eq InstComponentAccess.qualifiedLookupInstComponent(String name) = myInstComponentDecl().memberInstComponent(name);	
 	eq InstClassAccess.qualifiedLookupInstComponent(String name) = myInstClassDecl().memberInstComponent(name);
 	
 	syn lazy HashSet InstBaseClassDecl.genericLookupInstComponent(String name) {
@@ -17,9 +18,31 @@ aspect InstLookupComponents {
 		return h;
 	 }
 	
-	syn lazy HashSet InstClassDecl.memberInstComponent(String name) = emptyHashSet();
+//	syn lazy HashSet InstClassDecl.memberInstComponent(String name) = emptyHashSet();
 	
-	eq InstBaseClassDecl.memberInstComponent(String name)  {
+	syn lazy HashSet InstNode.memberInstComponent(String name)  {
+	 		 	
+	 	HashSet set = new HashSet(4);
+		for (InstComponentDecl ic : instComponentDecls()) {
+			if (ic.matchInstComponentDecl(name))
+				set.add(ic);
+		}
+
+		for (InstExtends ie : instExtends()) {
+			set.addAll(ie.memberInstComponent(name));
+//			HashSet h = ie.getClassName().lookupInstClass();
+//			if (h.size()==1)
+//				set.addAll(((InstClassDecl)h.iterator().next()).memberInstComponent(name));
+		}
+
+		if (set.size()>0) {
+			return set;
+		} else {
+			return emptyHashSet();
+		}
+	}
+	/*
+	eq InstComponentDecl.memberInstComponent(String name)  {
 	 		 	
 	 	HashSet set = new HashSet(4);
 		for (InstComponentDecl ic : instComponentDecls()) {
@@ -39,7 +62,7 @@ aspect InstLookupComponents {
 			return emptyHashSet();
 		}
 	}
-	
+	*/
 	eq InstShortClassDecl.memberInstComponent(String name) = myInstClass().memberInstComponent(name);
 	
 	/**
@@ -95,9 +118,10 @@ aspect LookupInstComponentsInModifications {
 	
 	inh HashSet InstModification.lookupInstComponentInInstClass(String name);
 	
-	eq InstComponentDecl.getMergedEnvironment().lookupInstComponentInInstClass(String name) = myInstClass().memberInstComponent(name);
-	eq InstExtends.getMergedEnvironment().lookupInstComponentInInstClass(String name) = myInstClass().memberInstComponent(name);
-	eq InstShortClassDecl.getMergedEnvironment().lookupInstComponentInInstClass(String name) = myInstClass().memberInstComponent(name);
+	eq InstComponentDecl.getMergedEnvironment().lookupInstComponentInInstClass(String name) = memberInstComponent(name);
+	eq InstPrimitive.getMergedEnvironment().lookupInstComponentInInstClass(String name) = myInstClass().memberInstComponent(name);
+	eq InstExtends.getMergedEnvironment().lookupInstComponentInInstClass(String name) = memberInstComponent(name);
+	eq InstShortClassDecl.getMergedEnvironment().lookupInstComponentInInstClass(String name) = memberInstComponent(name);
 
 	eq InstRoot.getChild().lookupInstComponentInInstClass(String name) = emptyHashSet();
  

@@ -27,6 +27,7 @@ InstImportRename : InstImport;
 abstract InstComponentDecl : InstNode ::= ClassName:InstAccess <ComponentDecl:ComponentDecl> <ClassDecl:ClassDecl>;
 InstComposite : InstComponentDecl;
 InstPrimitive : InstComponentDecl ::= /FVariable/;
+InstBuiltIn : InstComponentDecl;
 UnknownInstComponentDecl : InstComponentDecl;
 
 InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause>;
@@ -53,4 +54,8 @@ InstValueModification : InstModification ::=;// /FExp/;
 InstComponentModification : InstModification ::= ComponentName:InstAccess;
 InstComponentRedeclare : InstModification ::= ComponentName:InstAccess;
 InstClassRedeclare : InstModification ::= ClassName:InstAccess;
+	
+	
+	
+	
 	

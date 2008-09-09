@@ -340,12 +340,12 @@ model ModTest13_Err
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.ErrorTestCase(name="ModTest13_Err",
         description="Test of lookup errors in modifications",
-                                               flatModel=
+                                               errorMessage=
 "
 1 error(s) found...
 In file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 351, column 7:
-  Cannot find class or component declaration for y
+  The component y is undeclared
 
 ")})));
 
@@ -356,6 +356,58 @@ Semantic error at line 351, column 7:
   A a(y=3);
 
 end ModTest13_Err;
+ 
+model ModTest14_Err
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ModTest14_Err",
+        description="Test of lookup errors in modifications",
+                                               errorMessage=
+"
+1 error(s) found...
+In file 'src/test/modelica/ModificationTests.mo':
+Semantic error at line 351, column 7:
+  The component y is undeclared
+
+")})));
+
+  model A
+    Real x=2;
+  end A;
+
+  extends A(y=3);
+
+end ModTest14_Err;
+
+model ModTest15_Err
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ModTest15_Err",
+        description="Test of lookup errors in modifications",
+                                               errorMessage=
+"
+1 error(s) found...
+In file 'src/test/modelica/ModificationTests.mo':
+Semantic error at line 404, column 7:
+  The component z is undeclared
+
+")})));
+
+  model A
+   Real x=4;
+    Real y=5;
+  end A;
+  
+  model B
+    extends A;
+  end B;
+  
+  model C
+    extends B(x=5,z=4);
+  end C;
+  
+  extends C(y=3);
+
+end ModTest15_Err;
+  
  
 
 model ShortClassDeclModTest1

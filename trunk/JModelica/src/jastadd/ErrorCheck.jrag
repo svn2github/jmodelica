@@ -290,9 +290,16 @@ aspect InstanceErrorCheck {
       errorChecked = true;
 	  nameCheck();
 	  typeCheck();	  
-	  for (InstModification im : getMergedEnvironment().getInstModifications()) {
-	  	im.collectErrors();
-	  }
+//	  if (nameScope()) {
+		  for (InstModification im : getMergedEnvironment().getInstModifications()) {
+		    if (!nameScope()) {
+			    if (im.getInstNode() == this)
+				  	im.collectErrors();
+			} else {
+				im.collectErrors();
+			}
+		  }
+//      }
 	  for(InstNode n : getInstNodes()) {
 		  n.collectErrors();
 	  }

@@ -1414,6 +1414,47 @@ end RedeclareTests.RedeclareTest6;
 
 end RedeclareTest6;
 
+model RedeclareTest65_Err
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTest65_Err",
+                                               description="Basic redeclare error.",
+                                               errorMessage=
+"
+1 error(s) found...
+In file 'src/test/modelica/ModificationTests.mo':
+Semantic error at line 404, column 7:
+  The component w is undeclared
+
+")})));
+  model C2
+    Real x=2;
+  end C2;
+  
+  model C22
+    Real x=3;
+    Real y=4;
+  end C22;
+  
+  model C222
+    Real x=5;
+    Real y=6;
+    Real z=7;
+  end C222;
+  
+  model A
+    replaceable C2 c2(x=55); 
+  end A;
+  
+  model B
+    A a(redeclare replaceable C22 c2(w=8));
+  end B;
+  
+  B b(a(redeclare C222 c2(z=9,y=4,x=6)));
+
+end RedeclareTest65_Err;
+
+
+
 model RedeclareTest7
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest7",
@@ -1532,6 +1573,140 @@ end RedeclareTests.RedeclareTest9;
   B b(a(redeclare C222 c2(z=9,y=4)));
 end RedeclareTest9;
 
+model RedeclareTest95_Err
+  
+     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTest95_Err",
+                                               description="Basic redeclares.",
+                                               errorMessage=
+"
+1 error(s) found...
+In file 'src/test/modelica/ModificationTests.mo':
+Semantic error at line 1609, column 7:
+  The component w is undeclared
+
+")})));
+
+  
+  model C2
+    Real x=2;
+  end C2;
+  
+  model C22
+    Real x=3;
+    Real y=4;
+  end C22;
+  
+  model C222
+    Real x=5;
+    Real y=6;
+    Real z=7;
+  end C222;
+  
+  model A
+    replaceable C2 c2;
+  end A;
+  
+  model B
+    // Notice that the modifier 'x=8' is  merged since
+    // it appears in a constraining clause  
+    A a(redeclare replaceable C22 c2 extends C22(w=8));
+    A aa;
+  end B;
+  
+  A a(redeclare C22 c2);
+  B b(a(redeclare C222 c2(z=9,y=4)));
+end RedeclareTest95_Err;
+
+model RedeclareTest96_Err
+  
+     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTest96_Err",
+                                               description="Basic redeclares.",
+                                               errorMessage=
+"
+1 error(s) found...
+In file 'src/test/modelica/ModificationTests.mo':
+Semantic error at line 1659, column 7:
+  The component w is undeclared
+
+")})));
+
+  
+  model C2
+    Real x=2;
+  end C2;
+  
+  model C22
+    Real x=3;
+    Real y=4;
+  end C22;
+  
+  model C222
+    Real x=5;
+    Real y=6;
+    Real z=7;
+  end C222;
+  
+  model A
+    replaceable C2 c2;
+  end A;
+  
+  model B
+    // Notice that the modifier 'x=8' is  merged since
+    // it appears in a constraining clause  
+    extends A(redeclare replaceable C22 c2(w=8));
+    A aa;
+  end B;
+  
+  A a(redeclare C22 c2);
+  B b(redeclare C222 c2(z=9,y=4));
+end RedeclareTest96_Err;
+
+model RedeclareTest97_Err
+  
+     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTest97_Err",
+                                               description="Basic redeclares.",
+                                               errorMessage=
+"
+1 error(s) found...
+In file 'src/test/modelica/ModificationTests.mo':
+Semantic error at line 1659, column 7:
+  The component w is undeclared
+
+")})));
+
+  
+  model C2
+    Real x=2;
+  end C2;
+  
+  model C22
+    Real x=3;
+    Real y=4;
+  end C22;
+  
+  model C222
+    Real x=5;
+    Real y=6;
+    Real z=7;
+  end C222;
+  
+  model A
+    replaceable C2 c2;
+  end A;
+  
+  model B
+    // Notice that the modifier 'x=8' is  merged since
+    // it appears in a constraining clause  
+    extends A(redeclare replaceable C22 c2 extends C22(w=8));
+    A aa;
+  end B;
+  
+  A a(redeclare C22 c2);
+  B b(redeclare C222 c2(z=9,y=4));
+end RedeclareTest97_Err;
 
 model RedeclareTest10 
   
