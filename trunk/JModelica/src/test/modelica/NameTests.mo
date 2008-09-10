@@ -156,6 +156,77 @@ equation
 
   end NameTest5_Err;
 
+model NameTest6_Err
+  
+  
+   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="NameTest6_Err",
+                                               description="Basic test of name lookup",
+                                               errorMessage=
+"
+
+
+
+")})));
+
+  model A
+    Real x = y;
+  end A;
+  
+  A a;
+equation
+ 
+
+  end NameTest6_Err;
+
+model NameTest7_Err
+  
+  
+   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="NameTest7_Err",
+                                               description="Basic test of name lookup",
+                                               errorMessage=
+"
+  1 error(s) found...
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 196, column 4:
+  The class B is undeclared
+
+")})));
+
+  model A
+    B x;
+  end A;
+  
+  A a1;
+  A a2;
+equation
+ 
+
+  end NameTest7_Err;
+
+model NameTest8_Err
+  
+  
+   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="NameTest8_Err",
+                                               description="Basic test of name lookup",
+                                               errorMessage=
+"
+  1 error(s) found...
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 196, column 4:
+  The class D is undeclared
+
+")})));
+  
+  model C = D;
+  
+  C c;
+equation
+ 
+
+  end NameTest8_Err;
 
 
 class ExtendsTest1
@@ -420,6 +491,7 @@ end NameTests.ShortClassDeclTest1;
 end ShortClassDeclTest1;
 
 
+
 model ShortClassDeclTest2
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FlatteningTestCase(name="ShortClassDeclTest2",
@@ -456,10 +528,29 @@ end NameTests.ShortClassDeclTest3;
   type MyReal = Real(min=-3);
   MyReal x(start=3);
 
-//  type MyReal2 = input Real;
-//  MyReal2 y;
-  
 end ShortClassDeclTest3;
+
+model ShortClassDeclTest35_Err
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ShortClassDeclTest35_Err",
+        description="Short class declaration of Real.",
+                                               errorMessage=
+"
+  2 error(s) found...
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 549, column 4:
+  The component q is undeclared
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 550, column 4:
+  The component t is undeclared
+
+")})));
+  
+  type MyReal = Real(min=-3,q=4);
+  MyReal x(start=3,t=5);
+
+end ShortClassDeclTest35_Err;
+
 
 model ShortClassDeclTest4
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

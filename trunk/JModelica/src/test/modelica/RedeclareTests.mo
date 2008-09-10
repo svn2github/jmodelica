@@ -505,11 +505,12 @@ model RedeclareTestOx11_Err "Constraining clause example."
       JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx11_Err",
         description="Check that the declaration is a subtype of the constraining clause",
                                                errorMessage=
-"1 error(s) found...
+"
+  2 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
-Semantic error at line 551, column 32:
+Semantic error at line 549, column 32:
   'redeclare replaceable B c extends A ' is not a subtype of 'replaceable B c'
-Semantic error at line 551, column 32:
+Semantic error at line 553, column 32:
   'redeclare A c' is not a subtype of 'replaceable B c'
 
   "

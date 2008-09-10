@@ -39,6 +39,7 @@ aspect Types {
   
    // This attribute is used to check if the instance tree should be built based only on constraining types
    inh boolean InstNode.constrainingType();
+   eq InstConstraining.getInstNode().constrainingType() = true;
    eq InstRoot.getChild().constrainingType() = false;
    eq InstNode.getDynamicInstConstraining().constrainingType() = true;
    eq BaseClassDecl.getInstRoot().constrainingType() = false;

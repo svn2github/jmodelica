@@ -10,6 +10,10 @@ import java.util.ArrayList;
         Problem other = (Problem)o;
         if(!fileName.equals(other.fileName))
           return fileName.compareTo(other.fileName);
+        if(!(beginLine == other.beginLine))
+          return beginLine > other.beginLine? 1 : -1;
+        if(!(beginColumn == other.beginColumn))
+          return beginColumn > other.beginColumn? 1 : -1;          
         return message.compareTo(other.message);
       }
       return 0;
@@ -85,7 +89,7 @@ aspect ErrorCheck {
     return fileName() + ":\n" + "  *** Semantic Error: ";
   }
   public String ASTNode.warningPrefix() {
-    return fileName() + ":\n" + "  *** WARNING: ";
+    return fileName() + ":\n" + "  *** Warning: ";
   }
 
   static final int ASTNode.ERRORS = 0;
@@ -94,8 +98,18 @@ aspect ErrorCheck {
 
   syn int ASTNode.lineNumber() = (start != 0 || getParent()==null)? beginLine() : getParent().lineNumber();
   syn int ASTNode.columnNumber() = (start != 0 || getParent()==null)? beginColumn() : getParent().columnNumber();
+ 
+ 
   void ASTNode.error(String s) {
-      root().errors.add(new Problem(fileName(), s, Problem.Severity.ERROR, Problem.Kind.SEMANTIC,lineNumber(),columnNumber()));
+      Problem newP = new Problem(fileName(), s, Problem.Severity.ERROR, Problem.Kind.SEMANTIC,lineNumber(),columnNumber());
+      boolean duplicate = false;
+      for (Problem p : root().errors) {
+      	if (newP.toString().equals(p.toString()))
+      		duplicate = true;
+      		break;
+      }
+      if (!duplicate)
+	      root().errors.add(newP);
   }
 
   void ASTNode.warning(String s) {
@@ -116,6 +130,8 @@ aspect ErrorCheck {
     ArrayList allErrors = root().errors;
     ArrayList allWarnings = root().warnings;
     collectErrors();  
+    java.util.Collections.sort(allErrors);
+    java.util.Collections.sort(allWarnings);
     if (!allWarnings.isEmpty()) {
     	str.append("\n");        	
     	str.append("Warnings:\n");    
@@ -290,16 +306,6 @@ aspect InstanceErrorCheck {
       errorChecked = true;
 	  nameCheck();
 	  typeCheck();	  
-/*
-		  for (InstModification im : getMergedEnvironment().getInstModifications()) {
-		    if (!nameScope()) {
-			    if (im.getInstNode() == this)
-				  	im.collectErrors();
-			} else {
-				im.collectErrors();
-			}
-		  }
-*/
 	  for(InstNode n : getInstNodes()) {
 		  n.collectErrors();
 	  }
@@ -323,10 +329,10 @@ aspect InstanceErrorCheck {
 		if (hasInstConstraining())
 			getInstConstraining().collectErrors();
 		
-//      This leads to duplicate error messages.
-//		if (!myInstClass().isUnknown()) {
-//			myInstClass().collectErrors();
-//		}
+//      This leads to duplicate error messages, ok, this is taken care of
+		if (!myInstClass().isUnknown()) {
+			myInstClass().collectErrors();
+		}
 		}
 	}
 	
@@ -337,13 +343,30 @@ aspect InstanceErrorCheck {
 		if (hasIClassModification())
 			getIClassModification().collectErrors();
 		
-//      This leads to duplicate error messages.
-//		if (!getClassName().myInstClassDecl().isUnknown()) {
-//			getClassName().myInstClassDecl().collectErrors();
-//		}
+		if (!getClassName().myInstClassDecl().isUnknown()) {
+			getClassName().myInstClassDecl().collectErrors();
+		}
 		}
 	}	
 	
+	
+	//public void InstPrimitiveClassDecl.collectErrors() {}
+
+	public void InstShortClassDecl.collectErrors() {
+	    if (!errorChecked) {
+		  super.collectErrors();
+		  getClassName().collectErrors();
+		if (hasIClassModification())
+			getIClassModification().collectErrors();
+		if (hasInstConstraining())
+			getInstConstraining().collectErrors();		  
+		if (!getClassName().myInstClassDecl().isUnknown())
+			  getClassName().myInstClassDecl().collectErrors();
+		}
+	}
+
+	public void InstBuiltIn.collectErrors() {}
+
 
 	public void InstModification.collectErrors() {}
 	public void InstComponentModification.collectErrors() {
@@ -355,6 +378,7 @@ aspect InstanceErrorCheck {
 	}
 
 	public void InstClassRedeclare.collectErrors() {
+	    super.collectErrors();
 		getClassRedeclare().collectErrors();
 	}
 
