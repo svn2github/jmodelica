@@ -9,12 +9,12 @@ InstProgramRoot : InstRoot ::= <Program:Program>
                                /InstBuiltInType:InstClassDecl*/   
                                /InstBuiltInFunction:InstClassDecl*/;
 
-abstract InstClassDecl: InstNode;
-abstract InstBaseClassDecl : InstClassDecl ::= <BaseClassDecl:BaseClassDecl> /InstImport*/ [InstConstraining];
+abstract InstClassDecl: InstNode ::= <ClassDecl:ClassDecl>;
+abstract InstBaseClassDecl : InstClassDecl ::=  /InstImport*/ [InstConstraining];
 InstFullClassDecl : InstBaseClassDecl ::= ;
 InstShortClassDecl : InstBaseClassDecl ::= ClassName:InstAccess [IClassModification];
 InstPrimitiveClassDecl : InstFullClassDecl;
-InstBuiltInClassDecl : InstClassDecl ::= <BuiltInClassDecl:BuiltInClassDecl>;
+InstBuiltInClassDecl : InstClassDecl ::= ;
 UnknownInstClassDecl : InstFullClassDecl;
 
 abstract InstImport ::= PackageName:InstAccess <ImportClause:ImportClause>;
@@ -22,7 +22,9 @@ InstImportQualified : InstImport;
 InstImportUnqualified : InstImport;
 InstImportRename : InstImport;
 
-InstConstraining ::= <ConstrainingClause:ConstrainingClause> InstAccess [IClassModification];
+abstract InstConstraining ::=  ClassName:InstAccess [IClassModification] /InstNode/;
+InstConstrainingClass : InstConstraining ::= <BaseClassDecl:BaseClassDecl>;
+InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl>;
 
 // The class to expand may differ from the declared class of the component due to 
 // redeclaration of classes.
@@ -49,7 +51,6 @@ InstComponentAccess : InstAccess;// ::= [ArraySubscripts];
 
 Environment ::= InstModification*;
 
-
 InstModification ::= <InstNode:InstNode> <Modification:Modification>;
 InstCompleteModification : InstModification;
 InstClassModification : InstModification;
@@ -71,7 +72,6 @@ abstract INamedModification : IArgument ::= Name:InstAccess;
 abstract IElementModification : INamedModification ::= [IModification];
 IComponentModification : IElementModification; 
 abstract IElementRedeclare : INamedModification;
-IClassRedeclare : IElementRedeclare ::= InstBaseClassDecl;
-IComponentRedeclare : IElementRedeclare ::= InstComponentDecl;
-	
+IClassRedeclare : IElementRedeclare ::= /InstBaseClassDecl/;
+IComponentRedeclare : IElementRedeclare ::= /InstComponentDecl/;
 	

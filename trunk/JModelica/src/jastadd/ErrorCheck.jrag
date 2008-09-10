@@ -357,15 +357,17 @@ aspect InstanceErrorCheck {
 	public void InstClassRedeclare.collectErrors() {
 		getClassRedeclare().collectErrors();
 	}
-/*
+
 	public void IComponentRedeclare.collectErrors() {
-		getName().collectErrors();
+		super.collectErrors();
+		getInstComponentDecl().collectErrors();
 	}
 
 	public void IClassRedeclare.collectErrors() {
-		getName().collectErrors();
+		super.collectErrors();
+		getInstBaseClassDecl().collectErrors();	
 	}
-*/
+
 	
 
 

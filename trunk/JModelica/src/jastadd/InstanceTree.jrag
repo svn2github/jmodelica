@@ -185,6 +185,8 @@ aspect InstantiationTree {
 		return env;
 	}
 	
+	
+	
 	// Wrapper functions
 //	syn int InstNode.getNumMergedEnvironment() = getMergedEnvironmentList().getNumInstModification();
 //    syn InstModification InstNode.getMergedEnvironment(int i) = getMergedEnvironmentList().getInstModification(i);
@@ -207,6 +209,11 @@ aspect InstantiationTree {
 	 */
 	eq InstNode.getInstNode().myEnvironment() = getMergedEnvironment().duplicate();
 	
+/*
+	eq InstShortClassDecl.getIClassModification().myEnvironment() = new Environment();
+	eq InstExtends.getIClassModification().myEnvironment() = new Environment();
+	eq InstComponentDecl.getIModification().myEnvironment() = new Environment();
+	*/
 	/** 
 	 * When a string argument representing a component name is given as argument to myEnvironment,
 	 * the resulting environment consists only of modifications with a matching prefix. In effect, this 
@@ -398,15 +405,13 @@ aspect InstantiationTree {
 				 InstReplacingComposite irc = new InstReplacingComposite(new List<FExp>(),cd.newInstClassAccess(),replacingComponent,classToExpand,new Opt(),new Opt(),cd);
 				 if (cd.hasModification())
 					irc.setIModification(cd.getModification().newIModification());
-				 if (cd.hasConstrainingClause())
-					irc.setInstConstraining(cd.getConstrainingClause().newInstConstraining());
+                    irc.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
  				 return irc;
 			    } else {
 			     InstReplacingComposite irc = new InstReplacingComposite(new List<FExp>(),cd.newInstClassAccess(),replacingComponent,replacingComponent.myClass(),new Opt(),new Opt(),cd);
 				 if (cd.hasModification())
 					irc.setIModification(cd.getModification().newIModification());
-				 if (cd.hasConstrainingClause())
-					irc.setInstConstraining(cd.getConstrainingClause().newInstConstraining());
+				 irc.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
  				 return irc;
 			    }
 			} else {
@@ -521,15 +526,13 @@ aspect InstantiationTree {
 			InstComponentDecl icd = new InstComposite(new List(),cd.newInstClassAccess(),cd,this,new Opt(),new Opt());
 			if (cd.hasModification())
 				icd.setIModification(cd.getModification().newIModification());
-			if (cd.hasConstrainingClause())
-				icd.setInstConstraining(cd.getConstrainingClause().newInstConstraining());
+			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
 			return icd;
 		} else {
 			InstPrimitive icd = new InstPrimitive(new List(),cd.newInstClassAccess(),cd,this,new Opt(),new Opt());
 			if (cd.hasModification())
 				icd.setIModification(cd.getModification().newIModification());
-			if (cd.hasConstrainingClause())
-				icd.setInstConstraining(cd.getConstrainingClause().newInstConstraining());
+			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
 			return icd;
 
 		}
@@ -543,8 +546,7 @@ aspect InstantiationTree {
 		InstPrimitive ipr = new InstPrimitive(new List(),cd.newInstClassAccess(),cd,this,new Opt(),new Opt());
 		if (cd.hasModification())
 			ipr.setIModification(cd.getModification().newIModification());
-		if (cd.hasConstrainingClause())
-			ipr.setInstConstraining(cd.getConstrainingClause().newInstConstraining());
+		ipr.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
 		return ipr;
 	}
 	
@@ -560,9 +562,37 @@ aspect InstantiationTree {
 		return ie;
 	}
 
-	public InstConstraining ConstrainingClause.newInstConstraining() {
-	    Opt opt = hasClassModification()? new Opt(getClassModification().newIModification()) : new Opt();
-		return new InstConstraining(this,getAccess().newInstAccess(),opt);
+	public Opt ComponentDecl.newInstConstrainingComponentOpt() {
+		if (hasConstrainingClause()) {
+	    	Opt opt = getConstrainingClause().hasClassModification()? new Opt(getConstrainingClause().getClassModification().newIModification()) : new Opt();
+			return new Opt(new InstConstrainingComponent(getConstrainingClause().getAccess().newInstAccess(),opt,this));
+		} else {
+			return new Opt();
+		}
+	}
+
+	public Opt BaseClassDecl.newInstConstrainingClassOpt() {
+		if (hasConstrainingClause()) {
+	    	Opt opt = getConstrainingClause().hasClassModification()? new Opt(getConstrainingClause().getClassModification().newIModification()) : new Opt();
+			return new Opt(new InstConstrainingClass(getConstrainingClause().getAccess().newInstAccess(),opt,this));
+		} else {
+			return new Opt();
+		}
+	}
+	
+    syn ConstrainingClause InstConstraining.getConstrainingClause();
+    eq InstConstrainingComponent.getConstrainingClause() = getComponentDecl().getConstrainingClause();
+    eq InstConstrainingClass.getConstrainingClause() = getBaseClassDecl().getConstrainingClause();
+
+	syn lazy InstNode InstConstraining.getInstNode();
+	eq InstConstrainingComponent.getInstNode() {
+		ClassDecl classToExpand = getClassName().myInstClassDecl().getClassDecl();
+		return getComponentDecl().newInstComponentDecl(classToExpand);
+	}
+
+	eq InstConstrainingClass.getInstNode() {
+		BaseClassDecl classToExpand = (BaseClassDecl)getClassName().myInstClassDecl().getClassDecl();
+		return classToExpand.newInstClassDecl();
 	}
 
 	public abstract IModification Modification.newIModification();
@@ -590,19 +620,33 @@ aspect InstantiationTree {
 	}
 	public IComponentRedeclare ComponentRedeclare.newIModification() {
 	    // TODO: Can this component be redeclared?
-		return new IComponentRedeclare(this,getName().newInstAccess(),getComponentDecl().newInstComponentDecl(getComponentDecl().myClass()));
+		return new IComponentRedeclare(this,getName().newInstAccess());
 	}
+	
+	
+	
 	public IComponentRedeclare PN_ComponentRedeclare.newIModification() {
 		return null; // This should never be called since all PN_ComponentRedeclare:s are rewritten	    
 	}	
 	
 	public IClassRedeclare ClassRedeclare.newIModification() {
-		return new IClassRedeclare(this,getName().newInstAccess(),getBaseClassDecl().newInstClassDecl());
+		return new IClassRedeclare(this,getName().newInstAccess());
 	}
 	
-	
+	syn lazy InstBaseClassDecl IClassRedeclare.getInstBaseClassDecl() {
+		return getClassRedeclare().getBaseClassDecl().newInstClassDecl();
+	}
 
+	syn lazy InstComponentDecl IComponentRedeclare.getInstComponentDecl() {
+		return getComponentRedeclare().getComponentDecl().newInstComponentDecl(getComponentRedeclare().getComponentDecl().myClass());
+	}
 	
+	syn CompleteModification ICompleteModification.getCompleteModification() = (CompleteModification)getModification();
+	syn ClassModification IClassModification.getClassModification() = (ClassModification)getModification();
+	syn ValueModification IValueModification.getValueModification() = (ValueModification)getModification();
+	syn ComponentModification IComponentModification.getComponentModification() = (ComponentModification)getModification();
+	syn ClassRedeclare IClassRedeclare.getClassRedeclare() = (ClassRedeclare)getModification();
+	syn ComponentRedeclare IComponentRedeclare.getComponentRedeclare() = (ComponentRedeclare)getModification();
 
 
 	syn boolean ClassDecl.extendsPrimitive() = false;
@@ -822,13 +866,13 @@ aspect InstanceClasses {
 		return new InstProgramRoot(new List(), this);
 	}
 
+ 
     public InstBaseClassDecl BaseClassDecl.newInstClassDecl() {
     	return null;
     }    
     public InstFullClassDecl FullClassDecl.newInstClassDecl() {
     	InstFullClassDecl fcd = new InstFullClassDecl(new List(),this,new Opt());
-	  if (hasConstrainingClause())
-	    fcd.setInstConstraining(getConstrainingClause().newInstConstraining());
+	    fcd.setInstConstrainingOpt(newInstConstrainingClassOpt());
 
     	fcd.setStart(getStart());
     	return fcd;
@@ -837,8 +881,7 @@ aspect InstanceClasses {
     	InstShortClassDecl scd =  new InstShortClassDecl(new List(),this, new Opt(), getClassName().newInstAccess(), new Opt());
    	  if (hasClassModification())
 		scd.setIClassModification(getClassModification().newIModification());
-	  if (hasConstrainingClause())
-	    scd.setInstConstraining(getConstrainingClause().newInstConstraining());
+	    scd.setInstConstrainingOpt(newInstConstrainingClassOpt());
     	
     	scd.setStart(getStart());
     	return scd;
@@ -912,6 +955,9 @@ aspect InstanceClasses {
 		return instExtendsList;
 	}
 
+	syn BaseClassDecl InstBaseClassDecl.getBaseClassDecl() = (BaseClassDecl)getClassDecl();
+	syn BuiltInClassDecl InstBuiltInClassDecl.getBuiltInClassDecl() = (BuiltInClassDecl)getClassDecl();
+			
     syn lazy List InstBaseClassDecl.getInstImportList() = emptyList();
     
     eq InstFullClassDecl.getInstImportList() {

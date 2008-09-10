@@ -509,6 +509,9 @@ model RedeclareTestOx11_Err "Constraining clause example."
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 551, column 32:
   'redeclare replaceable B c extends A ' is not a subtype of 'replaceable B c'
+Semantic error at line 551, column 32:
+  'redeclare A c' is not a subtype of 'replaceable B c'
+
   "
   )})));
 /*
@@ -541,21 +544,11 @@ Semantic error at line 551, column 32:
    end D;
  
    model E
-     /* Component decl triggers tests:
-          1. The original decl:
-            1.2 Type check of the constraining clause
-                  'D(redeclare replaceable B c extends A)'
-                in the environment 
-                  {redeclare A c}
-                correponding to myEnvironment("d")
-                
-                ** Result **
-                 */
+     // This is an error
      replaceable D d extends D(redeclare replaceable B c extends A);
    end E;
    
-   // This should be ok.
-   // This declaration does not trigger any tests
+   // This is another error
    E e(redeclare D d(redeclare A c));
  
 end RedeclareTestOx11_Err;

@@ -18,8 +18,7 @@ aspect Types {
    	  InstComposite ic = new InstComposite(new List(),decl.newInstClassAccess(),decl,decl.myClass(),new Opt(),new Opt());
    	  if (decl.hasModification())
 		ic.setIModification(decl.getModification().newIModification());
-	  if (decl.hasConstrainingClause())
-	    ic.setInstConstraining(decl.getConstrainingClause().newInstConstraining());
+	  ic.setInstConstrainingOpt(decl.newInstConstrainingComponentOpt());
  	 
    	  addDynamicInst(ic);
    	  ic.is$Final(true); // TODO: Is this really ok...?
@@ -31,8 +30,7 @@ aspect Types {
    	  InstComposite ic = new InstComposite(new List(),decl.newInstClassAccess(),decl,decl.myClass(),new Opt(), new Opt());
       if (decl.hasModification())
 		ic.setIModification(decl.getModification().newIModification());
-	  if (decl.hasConstrainingClause())
-	    ic.setInstConstraining(decl.getConstrainingClause().newInstConstraining());
+	  ic.setInstConstrainingOpt(decl.newInstConstrainingComponentOpt());
    	  
    	  addDynamicInstConstraining(ic);
    	  ic.is$Final(true); // TODO: Is this really ok...?
@@ -115,13 +113,21 @@ aspect Types {
      	typeChecked = true;
 	     // Notice that modifiers (including redeclarations) in a constraining clause
    	  	 // are applied to the declaration itself and is therefore also type checked.
+/*
    	     if (getComponentDecl().hasConstrainingClause()) {
          	InstComponentDecl superType = createDynamicInstConstrainingComposite(getComponentDecl());
 	     	InstComponentDecl declaredType = createDynamicInstComposite(getComponentDecl()); 
     	 	if (!declaredType.subType(superType))
      			superType.getComponentDecl().error("In the declaration '" +declaredType.getComponentDecl().prettyPrint("") +"', the declared class is not a subtype of the constraining class");
   	 	}
-  	 	
+*/
+		if (hasInstConstraining()) {
+		      InstNode superType = getInstConstraining().getInstNode();
+	     	  InstComponentDecl declaredType = this; 
+    	 	  if (!declaredType.subType(superType))
+     			declaredType.getComponentDecl().error("In the declaration '" +declaredType.getComponentDecl().prettyPrint("") +"', the declared class is not a subtype of the constraining class");
+		}
+  	
   	 	
   	 }
   }
@@ -134,9 +140,9 @@ aspect Types {
  	     InstComponentDecl superType = createDynamicInstConstrainingComposite(getOriginalDecl());
    	     if (getOriginalDecl().hasConstrainingClause()) {
    	        InstComponentDecl declaredType = createDynamicInstComposite(getOriginalDecl());
-         if (!declaredType.subType(superType))
-     	  superType.getComponentDecl().error("In the declaration '" +declaredType.getComponentDecl().prettyPrint("") +"', the declared class is not a subtype of the constraining class");
-        }
+         	if (!declaredType.subType(superType))
+     	  		superType.getComponentDecl().error("In the declaration '" +declaredType.getComponentDecl().prettyPrint("") +"', the declared class is not a subtype of the constraining class");
+         }
 
      // The environment should be traversed backwards in order to perform correct
      // subtype tests in redeclaration chains.     	

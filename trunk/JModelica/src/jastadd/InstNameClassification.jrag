@@ -44,7 +44,7 @@ aspect InstNameClassification {
 	eq IComponentModification.getName().kind() = Kind.COMPONENT_ACCESS;
 	eq IClassRedeclare.getName().kind() = Kind.CLASS_ACCESS;
 	eq IComponentRedeclare.getName().kind() = Kind.COMPONENT_ACCESS;
-
+    eq InstConstraining.getClassName().kind() = Kind.CLASS_ACCESS;
 	
 	/**
 	 * The attribute predKind defines the kind for qualified
