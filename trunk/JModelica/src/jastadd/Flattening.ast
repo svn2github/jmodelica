@@ -28,7 +28,7 @@ InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl>;
 
 // The class to expand may differ from the declared class of the component due to 
 // redeclaration of classes.
-abstract InstComponentDecl : InstNode ::= ClassName:InstAccess <ComponentDecl:ComponentDecl> <ClassDecl:ClassDecl> [IModification] [InstConstraining];
+abstract InstComponentDecl : InstNode ::= ClassName:InstAccess <ComponentDecl:ComponentDecl> <InstClassDecl:InstClassDecl> [IModification] [InstConstraining];
 InstComposite : InstComponentDecl;
 InstPrimitive : InstComponentDecl ::= /FVariable/;
 InstBuiltIn : InstComponentDecl;
@@ -36,8 +36,8 @@ UnknownInstComponentDecl : InstComponentDecl;
 
 InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause> [IClassModification];
 
-InstReplacingComposite : InstComposite ::= <OriginalDecl:ComponentDecl>;
-InstReplacingPrimitive : InstPrimitive ::= <OriginalDecl:ComponentDecl>;
+InstReplacingComposite : InstComposite ::= <OriginalInstDecl:InstComponentDecl>;
+InstReplacingPrimitive : InstPrimitive ::= <OriginalInstDecl:InstComponentDecl>;
 
 // Accesses in the instance tree
 abstract InstAccess ::= <ID>;
@@ -51,13 +51,17 @@ InstComponentAccess : InstAccess;// ::= [ArraySubscripts];
 
 Environment ::= InstModification*;
 
-InstModification ::= <InstNode:InstNode> <Modification:Modification>;
+// The intrinsic reference to the InstNode can be discussed here. In principle,
+// each IModification can be used to retrieve the corresponding InstNode, but it is probably
+// better for performance to keep an explicit reference.
+// It could be removed later.
+InstModification ::= <InstNode:InstNode> <IModification:IModification>;
 InstCompleteModification : InstModification;
 InstClassModification : InstModification;
 InstValueModification : InstModification ::=;// /FExp/;
-InstComponentModification : InstModification ::= ComponentName:InstAccess;
-InstComponentRedeclare : InstModification ::= ComponentName:InstAccess;
-InstClassRedeclare : InstModification ::= ClassName:InstAccess;
+InstComponentModification : InstModification ;
+InstComponentRedeclare : InstModification ;
+InstClassRedeclare : InstModification ;
 
 // These nodes are used to create instance copies of modification trees intended for
 // error checking.	
