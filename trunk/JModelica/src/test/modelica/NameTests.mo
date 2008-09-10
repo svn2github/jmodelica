@@ -228,6 +228,77 @@ equation
 
   end NameTest8_Err;
 
+model NameTest9_Err
+  
+   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="NameTest9_Err",
+                                               description="Test that names are looked up in constraining clauses.",
+                                               errorMessage=
+"
+  1 error(s) found...
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 196, column 4:
+  The component y is undeclared
+
+")})));
+
+  model A
+    Real x = 4;
+  end A;
+  
+  model B
+    Real x = 6;
+    Real y = 7;
+  end B;
+  
+  model C
+    replaceable B b extends A;
+  end C;
+
+  C c(b(y=3));
+
+  end NameTest9_Err;
+
+model NameTest10_Err
+  
+   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="NameTest10_Err",
+                                               description="Test that names are looked up in constraining clauses.",
+                                               errorMessage=
+"
+  1 error(s) found...
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 297, column 4:
+  The class B is undeclared
+
+")})));
+
+  package P1
+  model A
+    Real x = 4;
+  end A;
+    
+  end P1;
+
+  package P2
+  model A
+    Real x = 4;
+  end A;
+  
+  model B
+    Real x = 6;
+    Real y = 7;
+  end B;
+  
+  end P2;
+
+  replaceable package P = P2 extends P1;
+  
+  P.B b;
+  
+  end NameTest10_Err;
+
+
 
 class ExtendsTest1
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

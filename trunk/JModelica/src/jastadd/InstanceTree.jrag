@@ -955,6 +955,63 @@ aspect InstanceClasses {
 		return instExtendsList;
 	}
 
+	ArrayList<InstClassDecl> InstNode.constrainingInstClassDeclList;
+	ArrayList<InstComponentDecl> InstNode.constrainingInstComponentDeclList;
+	ArrayList<InstExtends> InstNode.constrainingInstExtendsList;
+	
+	boolean InstNode.constrainingInstNodeListsComputed  = false;
+	public void InstNode.computeConstrainingInstNodeLists() {
+	
+		if (hasInstConstraining()) {
+	
+			ArrayList<InstClassDecl> constrainingInstClassDeclList = new ArrayList<InstClassDecl>();
+			ArrayList<InstComponentDecl> constrainingInstComponentDeclList = new ArrayList<InstComponentDecl>();
+			ArrayList<InstExtends> constrainingInstExtendsList = new ArrayList<InstExtends>();
+		
+			InstNode n = getInstConstraining().getInstNode();
+			if (n instanceof InstClassDecl)
+				constrainingInstClassDeclList.add((InstClassDecl)n);
+			else if (n instanceof InstComponentDecl)
+				constrainingInstComponentDeclList.add((InstComponentDecl)n);
+
+			this.constrainingInstClassDeclList = constrainingInstClassDeclList;
+			this.constrainingInstComponentDeclList = constrainingInstComponentDeclList;
+			this.constrainingInstExtendsList = constrainingInstExtendsList;
+			
+		} else {
+			this.constrainingInstClassDeclList = instClassDecls();
+			this.constrainingInstComponentDeclList = instComponentDecls();
+			this.constrainingInstExtendsList = instExtends();
+		}
+		
+		constrainingInstNodeListsComputed = true;
+		
+	}
+	
+	syn ArrayList<InstClassDecl> InstNode.constrainingInstClassDecls() {
+		if (!constrainingInstNodeListsComputed)
+			computeConstrainingInstNodeLists();
+		return constrainingInstClassDeclList;
+	}
+
+	syn ArrayList<InstComponentDecl> InstNode.constrainingInstComponentDecls() {
+		if (!constrainingInstNodeListsComputed)
+			computeConstrainingInstNodeLists();
+		return constrainingInstComponentDeclList;
+	}
+
+	syn ArrayList<InstExtends> InstNode.constrainingInstExtends() {
+		if (!constrainingInstNodeListsComputed)
+			computeConstrainingInstNodeLists();
+		return constrainingInstExtendsList;
+	}
+
+	// TODO: this seems to be a trick? equations are added in InstComponentDecl and
+	// InstBaseClassDecl since they have nodes of type InstConstraining
+	syn boolean InstNode.hasInstConstraining() = false;
+	syn InstConstraining InstNode.getInstConstraining() = null;
+
+
 	syn BaseClassDecl InstBaseClassDecl.getBaseClassDecl() = (BaseClassDecl)getClassDecl();
 	syn BuiltInClassDecl InstBuiltInClassDecl.getBuiltInClassDecl() = (BuiltInClassDecl)getClassDecl();
 			

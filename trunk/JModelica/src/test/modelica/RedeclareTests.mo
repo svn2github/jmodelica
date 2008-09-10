@@ -652,6 +652,19 @@ end RedeclareTestOx116_Err;
  
 model RedeclareTestOx12 "Constraining clause example."
  
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTestOx12",
+        description="Check that the declaration is a subtype of the constraining clause",
+                                               flatModel=
+"
+fclass RedeclareTests.RedeclareTestOx12
+ Real d.c.x = 5 /*(5)*/;
+equation 
+end RedeclareTests.RedeclareTestOx12;
+
+"
+  )})));
+  
   model A
     Real x=1;
   end A;
@@ -663,7 +676,7 @@ model RedeclareTestOx12 "Constraining clause example."
  
    model D
      //Here the modifiers (x=3,y=3) are not used when the component is redeclared.
-     replaceable B c(x=3,y=3) extends A(x=5);
+     replaceable B c(x=3,y=5) extends A(x=5);
    end D;
  
    D d(redeclare A c);

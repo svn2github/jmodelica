@@ -180,7 +180,22 @@ aspect InstLookupClasses {
 	
 		HashSet set = new HashSet(4);
 		
-		set.addAll(memberInstClass(name));
+		// TODO: is it really ok to use memberInstClass here: names are then only looked up
+		// in constraining clauses.
+		
+		for (InstClassDecl icd : instClassDecls()) {
+			if (icd.matchInstClassDecl(name)) {
+				set.add(icd);
+			}
+		}
+		
+		for (InstExtends ie : instExtends()) {
+			HashSet h = ie.getClassName().lookupInstClass();
+			if (h.size()==1)
+				set.addAll(((InstClassDecl)h.iterator().next()).memberInstClass(name));
+		}
+
+
 
 		if (lookupInstClassInImport(name).size()>0)
 			set.addAll(lookupInstClassInImport(name));
@@ -212,29 +227,21 @@ aspect InstLookupClasses {
 			return lookupInstClass(name);
 	}
 	
-	syn HashSet InstClassDecl.memberInstClass(String name) circular [emptyHashSet()] = emptyHashSet();
+	syn HashSet InstNode.memberInstClass(String name) circular [emptyHashSet()] = emptyHashSet();
 	
 	eq InstFullClassDecl.memberInstClass(String name) {
 		HashSet set = new HashSet();
 		
-		for (InstClassDecl icd : instClassDecls()) {
+		for (InstClassDecl icd : constrainingInstClassDecls()) {
 			if (icd.matchInstClassDecl(name)) {
 				set.add(icd);
 			}
 		}
-	/*
-		if (set.size()>0)
-			return set;
-	*/
 		
-		
-		for (InstExtends ie : instExtends()) {
+		for (InstExtends ie : constrainingInstExtends()) {
 			HashSet h = ie.getClassName().lookupInstClass();
 			if (h.size()==1)
 				set.addAll(((InstClassDecl)h.iterator().next()).memberInstClass(name));
-			
-			//if (getSuper(i).getSuper().myClassDecl()!=null)
-			//	set.addAll(getSuper(i).getSuper().myClassDecl().memberClass(name));
 		}
 		
 		
@@ -244,9 +251,14 @@ aspect InstLookupClasses {
 			return emptyHashSet();
 	}
 	
-	eq InstShortClassDecl.memberInstClass(String name) = myInstClass().memberInstClass(name);
+	eq InstShortClassDecl.memberInstClass(String name) {
+		
+		if (hasInstConstraining())
+			return getInstConstraining().getInstNode().memberInstClass(name);
+		else
+		 	return myInstClass().memberInstClass(name);
 	
-	
+	}
 	
 	
 	syn boolean InstClassDecl.matchInstClassDecl(String name) = false;

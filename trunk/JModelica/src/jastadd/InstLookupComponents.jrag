@@ -6,6 +6,7 @@ aspect InstLookupComponents {
 	inh lazy HashSet InstAccess.lookupInstComponent(String name);	
 	eq InstBaseClassDecl.getChild().lookupInstComponent(String name) = genericLookupInstComponent(name); 	
 	eq InstNode.getChild().lookupInstComponent(String name) = memberInstComponent(name); 
+	
 	eq InstPrimitive.getChild().lookupInstComponent(String name) = myInstClass().memberInstComponent(name); 	
 	eq InstDot.getRight().lookupInstComponent(String name) = getLeft().qualifiedLookupInstComponent(name);
 	eq InstRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
@@ -19,21 +20,17 @@ aspect InstLookupComponents {
 		return h;
 	 }
 	
-//	syn lazy HashSet InstClassDecl.memberInstComponent(String name) = emptyHashSet();
 	
 	syn lazy HashSet InstNode.memberInstComponent(String name)  {
 	 		 	
 	 	HashSet set = new HashSet(4);
-		for (InstComponentDecl ic : instComponentDecls()) {
+		for (InstComponentDecl ic : constrainingInstComponentDecls()) {
 			if (ic.matchInstComponentDecl(name))
 				set.add(ic);
 		}
 
-		for (InstExtends ie : instExtends()) {
+		for (InstExtends ie : constrainingInstExtends()) {
 			set.addAll(ie.memberInstComponent(name));
-//			HashSet h = ie.getClassName().lookupInstClass();
-//			if (h.size()==1)
-//				set.addAll(((InstClassDecl)h.iterator().next()).memberInstComponent(name));
 		}
 
 		if (set.size()>0) {
@@ -134,16 +131,16 @@ aspect LookupInstComponentsInModifications {
 	
 	eq INamedModification.getName().lookupInstComponent(String name) = lookupInstComponentInInstElement(name);
 	
-	eq InstConstrainingClass.getIClassModification().lookupInstComponentInInstElement(String name) = getInstNode().memberInstComponent(name);
-	eq InstConstrainingComponent.getIClassModification().lookupInstComponentInInstElement(String name) = getInstNode().memberInstComponent(name);
+	eq InstConstrainingClass.getIClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name);
+	eq InstConstrainingComponent.getIClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name);
 	     
-	eq InstComponentDecl.getIModification().lookupInstComponentInInstElement(String name) = memberInstComponent(name); 
+	eq InstComponentDecl.getIModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name); 
 	
 	eq InstPrimitive.getIModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name); 
 	
 	eq IElementModification.getIModification().lookupInstComponentInInstElement(String name) = getName().myInstComponentDecl().memberInstComponent(name);
     
-	eq InstExtends.getIClassModification().lookupInstComponentInInstElement(String name) = memberInstComponent(name);
+	eq InstExtends.getIClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name);
 	
 	eq InstShortClassDecl.getIClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name);
 	
