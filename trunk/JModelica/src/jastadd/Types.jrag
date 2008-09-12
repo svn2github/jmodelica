@@ -6,13 +6,13 @@ aspect Types {
    /* DynamicInstList contains type representations that are created
       dynamically during type checking.
     */
-   syn lazy List InstNode.getDynamicInstList() = new List();
+//   syn lazy List InstNode.getDynamicInstList() = new List();
    
    /* DynamicInstConstrainingList contains type representations that are created
       dynamically during type checking and should be flattened as constraining types.
     */
-   syn lazy List InstNode.getDynamicInstConstrainingList() = new List();
-
+//   syn lazy List InstNode.getDynamicInstConstrainingList() = new List();
+/*
    syn lazy InstComposite InstNode.createDynamicInstComposite(ComponentDecl decl) {
       // TODO: Check for redeclares
    	  InstComposite ic = new InstComposite(new List(),decl.newInstClassAccess(),decl,decl.myClass(),new Opt(),new Opt());
@@ -36,13 +36,13 @@ aspect Types {
    	  ic.is$Final(true); // TODO: Is this really ok...?
    	  return ic;
    }
-  
+ */
    // This attribute is used to check if the instance tree should be built based only on constraining types
    inh boolean InstNode.constrainingType();
    eq InstConstraining.getInstNode().constrainingType() = true;
    eq InstRoot.getChild().constrainingType() = false;
-   eq InstNode.getDynamicInstConstraining().constrainingType() = true;
-   eq BaseClassDecl.getInstRoot().constrainingType() = false;
+//   eq InstNode.getDynamicInstConstraining().constrainingType() = true;
+
   
    syn String InstNode.className() = "";
    syn String InstComponentDecl.className() = getComponentDecl().myClass().name();
@@ -96,10 +96,10 @@ aspect Types {
 
   syn lazy ArrayList<InstNode> InstNode.containedInstComponents() {
   	ArrayList<InstNode> l = new ArrayList<InstNode>();
-    for (InstNode node : getInstNodes()) {
-       if (node instanceof InstExtends)
-       	  l.addAll(node.containedInstComponents());
-       else
+    for (InstNode node : getInstExtendss()) {
+       	 l.addAll(node.containedInstComponents());
+    }
+    for (InstNode node : getInstComponentDecls()) { 
          l.add(node);
     }
     return l;
@@ -134,6 +134,7 @@ aspect Types {
   }
   
   public void InstReplacingComposite.typeCheck() {
+  /*
      if (!typeChecked) {
      	typeChecked = true;
      
@@ -175,7 +176,7 @@ aspect Types {
 	    }
 	 }
   }
-
+*/
 }
 
 }

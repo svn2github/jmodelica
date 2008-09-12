@@ -22,8 +22,7 @@ abstract BaseClassDecl : ClassDecl::=VisibilityType
 	                                  [Outer]
 	                                  [Replaceable]
 	                                  [ConstrainingClause]
-                                      [ConstrainingClauseComment:Comment]
-                                      /InstRoot/;
+                                      [ConstrainingClauseComment:Comment];
 
 UnknownClassDecl : FullClassDecl::=;
 

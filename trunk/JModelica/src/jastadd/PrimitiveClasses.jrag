@@ -63,8 +63,6 @@ aspect UnknownDeclarations {
 	syn boolean ClassDecl.isPrimitive() = false;
 	eq PrimitiveClassDecl.isPrimitive() = true;
 	eq BuiltInClassDecl.isPrimitive() = true;
-	
-		
 
 		
 	syn lazy UnknownInstClassDecl SourceRoot.getUnknownInstClassDecl() = getProgram().getInstProgramRoot().getUnknownInstClassDecl();
@@ -74,9 +72,9 @@ aspect UnknownDeclarations {
 		
 
 	syn lazy UnknownInstClassDecl InstProgramRoot.getUnknownInstClassDecl() = 
-		new UnknownInstClassDecl(new List(),getProgram().getUnknownClassDecl(), new Opt());
+		new UnknownInstClassDecl(getProgram().getUnknownClassDecl(), new Opt());
 	syn lazy UnknownInstComponentDecl InstProgramRoot.getUnknownInstComponentDecl() = 
-	    new UnknownInstComponentDecl(new List(),new InstParseAccess("Unknown"),getProgram().getUnknownComponentDecl(),getProgram().getUnknownClassDecl(), new Opt(),new Opt());
+	    new UnknownInstComponentDecl(new InstParseAccess("Unknown"),getProgram().getUnknownComponentDecl(), new Opt(),new Opt());
 		
 	syn lazy UnknownInstClassDecl ASTNode.unknownInstClassDecl() = root().unknownInstClassDecl();
 	eq SourceRoot.unknownInstClassDecl() = getUnknownInstClassDecl();

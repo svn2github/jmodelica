@@ -4,7 +4,7 @@ aspect Flattening {
     
     
     public InstNode InstNode.findFlattenInst(String className,FClass fc) {
-    	for (InstClassDecl icd : instClassDecls()) {
+    	for (InstClassDecl icd : getInstClassDecls()) {
     		InstNode n = icd.findFlattenInst(className, fc);
     		if (n!=null)
     			return n;
@@ -23,11 +23,10 @@ aspect Flattening {
 			//r.dumpTree("");
 			//r.printIVarAccesses("");
 			fc.addFEquationBlock(new FEquationBlock(new List()));
-			List l = equations();
-			for (int i=0;i<l.getNumChild();i++) {
-		       ((AbstractEquation)l.getChild(i)).flatten(getFQName(),fc);
+			for (AbstractEquation ae : equations()) {
+		       ae.flatten(getFQName(),fc);
 		    }
-			for (InstNode n : getInstNodes())
+			for (InstComponentDecl n : getInstComponentDecls())
 				n.flatten(fc);
 			fc.genConnectionEquations();
 			return this;	
@@ -36,38 +35,7 @@ aspect Flattening {
    		}  	
 	}	
 	
-    
-	// Generic traversal method to find the class to flatten.
-	public InstNode ASTNode.findFlatten(String className, FClass fc) {
-		InstNode n = null;
-		for(int i = 0; i < getNumChild(); i++) {
-     		n = getChild(i).findFlatten(className,fc);
- 			if (n!=null)
- 				return n;
-     	}
-     	return n;
-	}
-	
-	
-	
-	// Check if the FullClassDecl matches the name of class to be flattened. 
-	public InstNode FullClassDecl.findFlatten(String className, FClass fc) {
-		debugPrint("FullClassDecl.findFlatten: "+name());
-		//System.out.println("Model.instantiate: "+getFullClassName() +" : " +getClassName());
-   		if (className.equals(qualifiedName())) {
-  	 		fc.setFQName(new FQName(qualifiedName())); 
-  	 		InstRoot r = getInstRoot();
- 			//r.dumpTree("");
-			//r.printIVarAccesses("");
-			fc.addFEquationBlock(new FEquationBlock(new List()));
-			r.flatten(fc);
-			fc.genConnectionEquations();
-			return r;	
-   		} else {
-  			return getClassDeclList().findFlatten(className,fc);
-   		}  	
-	}
-
+ 
 	// Generic method for flattening	
 	public void ASTNode.flatten(FClass fc) {
 		for (int i=0;i<getNumChild();i++) {
@@ -76,11 +44,11 @@ aspect Flattening {
 	}
 
 	public void InstNode.flatten(FClass fc) {
-		List l = equations();
-		for (int i=0;i<l.getNumChild();i++) {
-		   ((AbstractEquation)l.getChild(i)).flatten(getFQName(),fc);
+		for (AbstractEquation ae : equations()) {
+		   ae.flatten(getFQName(),fc);
 		}
-		getInstNodeList().flatten(fc);
+		getInstComponentDeclList().flatten(fc);
+		getInstExtendsList().flatten(fc);
 	}
 	
 	public void InstClassDecl.flatten(FClass fc) {}
@@ -95,8 +63,8 @@ aspect Flattening {
 	syn lazy FVariable InstPrimitive.getFVariable() {
 		FExp e = myBindingExp();
 		List attr = new List();
-		for (InstModification im : getMergedEnvironment().getInstModifications()) {
-			im.getModification().collectAttributes(attr,im.getInstNode().getFQNamePrefix());
+		for (IModification im : getMergedEnvironment()) {
+			im.getModification().collectAttributes(attr,im.myInstNode().getFQNamePrefix());
 		}
 		
 		//attr.dumpTree("*** ");
@@ -134,12 +102,12 @@ aspect Flattening {
 	syn FExp InstPrimitive.myBindingExp() {
 
 		// A value modification is usually found last in the env list
-		for (InstModification im : getMergedEnvironment().getInstModifications()) {
+		for (IModification im : getMergedEnvironment()) {
 			//System.out.println("**************");
 			//getMergedEnvironment(i).getModification().dumpTree("");
 			//System.out.println("**************");
 			if (im.getModification().hasValueMod()) {
-				return im.getModification().valueMod().flatten(im.getInstNode().getFQNamePrefix());
+				return im.getModification().valueMod().flatten(im.myInstNode().getFQNamePrefix());
 			}
 		}
 		return null;

@@ -20,7 +20,7 @@ end NameTests.NameTest0;
                                          result = 5)})));
   equation
     x=1;
-  end NameTest1;
+  end NameTest0;
 
   model NameTest2
    annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

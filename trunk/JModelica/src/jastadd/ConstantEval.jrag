@@ -1,11 +1,12 @@
 aspect LookupInstance {
 
+/*
 	eq InstRoot.getChild().lookupFV(FQName fqname) { 
 	
 		debugPrint(">>>InstRoot.getChild().lookupFV(): looking for: " + fqname.name());
 		return retrieveFV(fqname,0); 
     }
-    
+   
 	syn FVariable InstNode.retrieveFV(FQName fqname, int nI) {
 		for (int i=0;i<getNumInstNode();i++) {
 			if (getInstNode(i).nameScope()) {
@@ -23,7 +24,7 @@ aspect LookupInstance {
 	}
 
 	eq InstPrimitive.retrieveFV(FQName fqname, int nI) = getFVariable();
-	
+	*/
 
 	syn lazy InstPrimitive FQName.myIDecl() = lookupIDecl(this);
 	syn InstPrimitive FIdUse.myIDecl() = null;
@@ -33,7 +34,7 @@ aspect LookupInstance {
 	inh InstPrimitive FQName.lookupIDecl(FQName fqname);
 	eq Root.getChild().lookupIDecl(FQName fqname) = null;
 
-
+/*
 	eq InstRoot.getChild().lookupIDecl(FQName fqname) = retrieveIDecl(fqname,0); 
 
 	syn InstPrimitive InstNode.retrieveIDecl(FQName fqname, int nI) {
@@ -55,7 +56,7 @@ aspect LookupInstance {
 	}
 
 	eq InstPrimitive.retrieveIDecl(FQName fqname, int nI) = this;
-	
+	*/
 
 	syn InstPrimitive InstNode.instPrimitive() = null;
 	eq InstPrimitive.instPrimitive() = this;
@@ -68,6 +69,7 @@ aspect LookupInstance {
 
 aspect TestInstanceLookup {
 
+/*
 	public void ASTNode.printIVarAccesses(String indent) {    
 		for (int i=0;i<getNumChild();i++)
 			getChild(i).printIVarAccesses(indent);
@@ -91,5 +93,5 @@ aspect TestInstanceLookup {
 			}
 		}
 	}
-
+*/
 }

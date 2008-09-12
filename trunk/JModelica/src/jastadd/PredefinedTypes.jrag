@@ -385,7 +385,7 @@ aspect InstPredefinedTypes {
 	syn lazy List InstProgramRoot.getInstPredefinedTypeList() {
 		List l = new List();
 		for (ClassDecl pcd : getProgram().getPredefinedTypes()) {
-			l.add(new InstPrimitiveClassDecl(new List(), (FullClassDecl)pcd,new Opt()));
+			l.add(new InstPrimitiveClassDecl((FullClassDecl)pcd,new Opt()));
 		}
 		return l;
 	}
@@ -393,7 +393,7 @@ aspect InstPredefinedTypes {
 	syn lazy List InstProgramRoot.getInstBuiltInTypeList() {
 		List l = new List();
 		for (ClassDecl pcd : getProgram().getBuiltInTypes()) {
-			l.add(new InstBuiltInClassDecl(new List(), (BuiltInClassDecl)pcd));
+			l.add(new InstBuiltInClassDecl((BuiltInClassDecl)pcd));
 		}
 		return l;
 	}
@@ -401,7 +401,7 @@ aspect InstPredefinedTypes {
 	syn lazy List InstProgramRoot.getInstBuiltInFunctionList() {
 		List l = new List();
 		for (ClassDecl bcd : getProgram().getBuiltInFunctions()) {
-			l.add(new InstFullClassDecl(new List(), (FullClassDecl)bcd, new Opt()));
+			l.add(new InstFullClassDecl((FullClassDecl)bcd, new Opt()));
 		}
 		return l;
 	}

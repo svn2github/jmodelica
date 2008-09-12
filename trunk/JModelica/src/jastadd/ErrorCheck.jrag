@@ -237,8 +237,8 @@ aspect InstanceErrorCheck {
 
  // Error checking in instance tree
     syn lazy InstFullClassDecl InstNode.retrieveInstFullClassDecl(String className) {
-      for(int i = 0; i < getNumInstNode(); i++) {
-		  InstFullClassDecl fcd = getInstNode(i).retrieveInstFullClassDecl(className);
+      for(InstNode n : getInstClassDecls()) {
+		  InstFullClassDecl fcd = n.retrieveInstFullClassDecl(className);
 	  	  if (fcd != null)
 	  	  	return fcd;
 	  }
@@ -306,9 +306,14 @@ aspect InstanceErrorCheck {
       errorChecked = true;
 	  nameCheck();
 	  typeCheck();	  
-	  for(InstNode n : getInstNodes()) {
+	  for(InstNode n : getInstComponentDecls()) 
 		  n.collectErrors();
-	  }
+	  for(InstNode n : getInstClassDecls()) 
+		  n.collectErrors();
+	  for(InstNode n : getInstExtendss()) 
+		  n.collectErrors();
+
+	  
 	}
   }
   	
@@ -367,20 +372,6 @@ aspect InstanceErrorCheck {
 
 	public void InstBuiltIn.collectErrors() {}
 
-
-	public void InstModification.collectErrors() {}
-	public void InstComponentModification.collectErrors() {
-		getComponentName().collectErrors();
-	}
-
-	public void InstComponentRedeclare.collectErrors() {
-		getComponentName().collectErrors();
-	}
-
-	public void InstClassRedeclare.collectErrors() {
-	    super.collectErrors();
-		getClassRedeclare().collectErrors();
-	}
 
 	public void IComponentRedeclare.collectErrors() {
 		super.collectErrors();

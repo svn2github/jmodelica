@@ -146,8 +146,9 @@ aspect Names {
   eq InstBaseClassDecl.qualifiedName() = instClassNamePrefix().equals("")? 
                                                   name(): instClassNamePrefix() + "." + name();
   inh String InstBaseClassDecl.instClassNamePrefix();
-  eq InstFullClassDecl.getInstNode().instClassNamePrefix() = instClassNamePrefix().equals("")?
+  eq InstFullClassDecl.getInstClassDecl().instClassNamePrefix() = instClassNamePrefix().equals("")?
                                                       name(): instClassNamePrefix() + "." + name();
+
   eq InstBuiltInClassDecl.qualifiedName() = name();
   
   eq SourceRoot.getChild().instClassNamePrefix() = "";
@@ -287,12 +288,12 @@ aspect FlatNames {
 		return myName;
 	}
 
-	eq InstClassDecl.getFQName() =new FQName();
+	eq InstClassDecl.getFQName() = new FQName();
 	inh lazy FQName InstNode.retrieveFQName();
-	eq InstComponentDecl.getInstNode().retrieveFQName() = getFQName();
-	eq InstClassDecl.getInstNode().retrieveFQName() = null; //getFQName();
+	eq InstComponentDecl.getChild().retrieveFQName() = getFQName();
+	eq InstClassDecl.getChild().retrieveFQName() = null; //getFQName();
 	
-	eq InstRoot.getInstNode().retrieveFQName() = null;
+	eq InstRoot.getChild().retrieveFQName() = null;
 	eq SourceRoot.getProgram().retrieveFQName() = null;
 
 	
@@ -440,6 +441,9 @@ aspect ShortClassUtil {
     // TODO: rename this attribute to finalAliasClass
 	syn ClassDecl ClassDecl.finalClass() = this;
 	eq ShortClassDecl.finalClass() = getClassName().myClassDecl().finalClass();
+
+	syn InstClassDecl InstClassDecl.finalClass() = this;
+	eq InstShortClassDecl.finalClass() = getClassName().myInstClassDecl().finalClass();
 
 	syn BaseClassDecl BaseClassDecl.nextAliasClass() = null;
 	eq ShortClassDecl.nextAliasClass() = (BaseClassDecl)getClassName().myClassDecl();
