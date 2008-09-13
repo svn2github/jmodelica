@@ -52,7 +52,16 @@ ShortClassDecl : BaseClassDecl ::= [TypePrefixFlow]
                                 [ArraySubscripts] 
                                 [ClassModification] 
                                 Comment; 
-                                
+
+/*
+ShortClassDecl : BaseClassDecl ::= ExtendsClauseShortClass;
+
+ExtendsClauseShortClass : ExtendsClause ::= [TypePrefixFlow] 
+                                [TypePrefixOther]
+                                [TypePrefixInputOutput] 
+                                [ArraySubscripts] 
+                                Comment; 
+  */                          
 ExtendClassDecl : BaseClassDecl ::= [ClassModification] [StringComment] Composition  <EndName:String>;
                                    
 PrimitiveClassDecl : FullClassDecl::=;

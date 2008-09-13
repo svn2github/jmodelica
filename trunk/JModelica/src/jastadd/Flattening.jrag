@@ -22,13 +22,17 @@ aspect Flattening {
   	 				
 			//r.dumpTree("");
 			//r.printIVarAccesses("");
-			fc.addFEquationBlock(new FEquationBlock(new List()));
+			fc.addFEquationBlock(new FEquationBlock(new List()));			
 			for (AbstractEquation ae : equations()) {
 		       ae.flatten(getFQName(),fc);
 		    }
-			for (InstComponentDecl n : getInstComponentDecls())
-				n.flatten(fc);
+//			for (InstComponentDecl n : getInstComponentDecls())
+//				n.flatten(fc);
+			getInstComponentDeclList().flatten(fc);
+			getInstExtendsList().flatten(fc);
+           
 			fc.genConnectionEquations();
+
 			return this;	
    		} else {
   			return super.findFlattenInst(className,fc);

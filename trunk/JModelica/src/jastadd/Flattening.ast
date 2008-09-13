@@ -35,6 +35,7 @@ InstBuiltIn : InstComponentDecl;
 UnknownInstComponentDecl : InstComponentDecl;
 
 InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause> [IClassModification];
+InstShortClassExtends : InstExtends;
 
 InstReplacingComposite : InstComposite ::= <OriginalDecl:ComponentDecl> ;
 InstReplacingPrimitive : InstPrimitive ::= <OriginalDecl:ComponentDecl>;

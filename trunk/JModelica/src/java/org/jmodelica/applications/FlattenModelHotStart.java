@@ -46,9 +46,9 @@ public class FlattenModelHotStart{
 		      
 		      //p.dumpTree("");  
 
-		      
+		      InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 		      System.out.println("Checking for errors...");	      
-		      if (sr.checkErrorsInClass(cl)) {
+		      if (ipr.checkErrorsInInstClass(cl)) {
 	    		  System.exit(0);
 	    	  }
 		      
@@ -62,7 +62,7 @@ public class FlattenModelHotStart{
 		      FClass fc = new FClass();
 	    	  StringBuffer str = new StringBuffer();
 		    	  System.out.println("Flattening starts...");
-		    	  InstNode ir = sr.findFlatten(cl,fc);
+		    	  InstNode ir = ipr.findFlattenInst(cl,fc);
 		    	  if (ir==null) {
 		    		  System.out.println("Error:");
 		    		  System.out.println("   Did not find the class: " + cl);
@@ -124,7 +124,7 @@ public class FlattenModelHotStart{
 			      FClass fc2 = new FClass();
 		    	  str = new StringBuffer();
 			    	  System.out.println("Flattening starts...");
-		    	  ir = sr.findFlatten(cl,fc2);
+		    	  ir = ipr.findFlattenInst(cl,fc2);
 			    	  if (ir==null) {
 			    		  System.out.println("Error:");
 			    		  System.out.println("   Did not find the class: " + cl);

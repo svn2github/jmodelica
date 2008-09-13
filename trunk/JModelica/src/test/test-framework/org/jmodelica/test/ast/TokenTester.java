@@ -65,6 +65,7 @@ public class TokenTester {
 		FlatModelicaParser fparser = new FlatModelicaParser();
 		SourceRoot sr = null;
 		FlatRoot fr = null;
+		InstProgramRoot ipr = null;
 		
 		try {
 			String cl = args[1];
@@ -72,6 +73,7 @@ public class TokenTester {
 			ModelicaScanner scanner = new ModelicaScanner(new BufferedReader(reader));
 			//System.out.println("Parsing "+moFile+"...");
 			sr = (SourceRoot)parser.parse(scanner);
+		    ipr = sr.getProgram().getInstProgramRoot();
 		} catch (Error e) {
 			System.out.println("In file: '"+moFile + "':");
 			System.err.println(e.getMessage());
@@ -79,7 +81,7 @@ public class TokenTester {
 		} catch (Exception e) {e.printStackTrace();}
 		
 		FClass fc1 = new FClass();
-		InstNode ir = sr.findFlatten(cName,fc1);
+		InstNode ir = ipr.findFlattenInst(cName,fc1);
 		sr.setFileName(moFile);
 		
 		StringBuffer fm1_str = new StringBuffer();

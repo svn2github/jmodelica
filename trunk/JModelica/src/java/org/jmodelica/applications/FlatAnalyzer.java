@@ -1,5 +1,6 @@
 package org.jmodelica.applications;
 import org.jmodelica.ast.*;
+
 import java.io.*;
 import org.jmodelica.parser.*;
 import java.util.ArrayList;
@@ -35,8 +36,15 @@ public class FlatAnalyzer {
 		     
 		      long parseTime = System.currentTimeMillis();
 		      
+		      
+		      
 		      System.out.println("Checking for errors...");	      
-		      if (sr.checkErrorsInClass(cl)) {
+		      
+		      InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
+
+
+		      
+		      if (ipr.checkErrorsInInstClass(cl)) {
 	    		  System.exit(0);
 	    	  }
 		      
@@ -68,7 +76,7 @@ public class FlatAnalyzer {
 			      flatRoot.setFClass(fc);
 		    	  StringBuffer str = new StringBuffer();
 			    	  System.out.println("Flattening starts...");
-			    	  InstNode ir = sr.findFlatten(cl,fc);
+			    	  InstNode ir = ipr.findFlattenInst(cl,fc);
 			    	  if (ir==null) {
 			    		  System.out.println("Error:");
 			    		  System.out.println("   Did not find the class: " + cl);

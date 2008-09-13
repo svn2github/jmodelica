@@ -29,7 +29,7 @@ public class FlattenModel {
 		      
 		      
 		      sr.setFileName(name);
-		      sr.prettyPrint("");
+//		      sr.prettyPrint("");
 		      
 		      InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 		      //ipr.dumpTree("");
