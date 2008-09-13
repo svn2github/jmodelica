@@ -66,7 +66,25 @@ aspect InstLookupComponents {
 		}
 	}
 	*/
-	eq InstShortClassDecl.memberInstComponent(String name) = myInstClass().memberInstComponent(name);
+	
+	eq InstShortClassDecl.memberInstComponent(String name) {
+		
+		if (hasInstConstraining())
+			return getInstConstraining().getInstNode().memberInstComponent(name);
+		else {
+			HashSet set = new HashSet();
+			for (InstExtends ie : instExtends()) {
+				HashSet h = ie.getClassName().lookupInstClass();
+				if (h.size()==1)
+					set.addAll(((InstClassDecl)h.iterator().next()).memberInstComponent(name));
+			}
+			return set;
+		} 	
+	
+	}
+	
+	
+
 	
 	/**
 	 * Simple matching of component names.
@@ -142,7 +160,7 @@ aspect LookupInstComponentsInModifications {
     
 	eq InstExtends.getIClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name);
 	
-	eq InstShortClassDecl.getIClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name);
+//	eq InstShortClassDecl.getIClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name);
 	
 	inh HashSet IComponentRedeclare.lookupInstComponentInInstElement(String name);
 	eq IComponentRedeclare.getName().lookupInstComponent(String name) = lookupInstComponentInInstElement(name);

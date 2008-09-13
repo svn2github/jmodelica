@@ -81,7 +81,7 @@ aspect LookupComponents {
 		}
 	}
 	
-	eq ShortClassDecl.memberComponent(String name) = myClass().memberComponent(name);
+	eq ShortClassDecl.memberComponent(String name) = getExtendsClauseShortClass().getSuper().myClassDecl().memberComponent(name);
 	
 	/**
 	 * Simple matching of component names.
@@ -224,7 +224,7 @@ aspect LookupComponentsInModifications {
 	/**
 	 * Definition of the lookupComponentInClass attribute for ShortClassDecl.
 	 */
-	eq ShortClassDecl.getClassModification().lookupComponentInClass(String name) {
+/*	eq ShortClassDecl.getClassModification().lookupComponentInClass(String name) {
 	
 		ClassDecl Class = getClassName().myClassDecl();
     	    	
@@ -234,6 +234,7 @@ aspect LookupComponentsInModifications {
     	return emptyHashSet();
 	
 	}
+	*/
 	
 	/**
 	 * Name lookup for component redeclarations in modifiers is performed by

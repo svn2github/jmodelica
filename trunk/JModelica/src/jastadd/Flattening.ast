@@ -12,7 +12,7 @@ InstProgramRoot : InstRoot ::= <Program:Program>
 abstract InstClassDecl: InstNode ::= <ClassDecl:ClassDecl>;
 abstract InstBaseClassDecl : InstClassDecl ::=  /InstImport*/ [InstConstraining];
 InstFullClassDecl : InstBaseClassDecl ::= ;
-InstShortClassDecl : InstBaseClassDecl ::= ClassName:InstAccess [IClassModification];
+InstShortClassDecl : InstBaseClassDecl ::= ;
 InstPrimitiveClassDecl : InstFullClassDecl;
 InstBuiltInClassDecl : InstClassDecl ::= ;
 UnknownInstClassDecl : InstFullClassDecl;
@@ -35,7 +35,7 @@ InstBuiltIn : InstComponentDecl;
 UnknownInstComponentDecl : InstComponentDecl;
 
 InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause> [IClassModification];
-InstShortClassExtends : InstExtends;
+InstExtendsShortClass : InstExtends;
 
 InstReplacingComposite : InstComposite ::= <OriginalDecl:ComponentDecl> ;
 InstReplacingPrimitive : InstPrimitive ::= <OriginalDecl:ComponentDecl>;

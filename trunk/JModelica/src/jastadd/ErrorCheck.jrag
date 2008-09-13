@@ -360,13 +360,8 @@ aspect InstanceErrorCheck {
 	public void InstShortClassDecl.collectErrors() {
 	    if (!errorChecked) {
 		  super.collectErrors();
-		  getClassName().collectErrors();
-		if (hasIClassModification())
-			getIClassModification().collectErrors();
-		if (hasInstConstraining())
-			getInstConstraining().collectErrors();		  
-		if (!getClassName().myInstClassDecl().isUnknown())
-			  getClassName().myInstClassDecl().collectErrors();
+			if (hasInstConstraining())
+				getInstConstraining().collectErrors();		  
 		}
 	}
 

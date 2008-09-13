@@ -25,6 +25,9 @@ aspect InstLookupClasses {
 	eq InstExtends.getInstComponentDecl().lookupInstClass(String name) = genericLookupInstClassInExtends(name);	
 	eq InstExtends.getInstExtends().lookupInstClass(String name) = superLookupInstClassInExtends(name);	
 
+	// The lexical scope of modifiers in short classes is the "outer" scope, although
+	// the short class declaration is modeled as containing an extends clause
+	eq InstExtendsShortClass.getChild().lookupInstClass(String name) = lookupInstClass(name);
 
 
 /*
@@ -306,8 +309,6 @@ aspect InstLookupClasses {
 			return getClassName().myInstClassDecl().superLookupInstClass(name);
 	}
 
-		
-	
 	syn HashSet InstNode.memberInstClass(String name) circular [emptyHashSet()] = emptyHashSet();
 	
 	eq InstFullClassDecl.memberInstClass(String name) {
@@ -334,10 +335,18 @@ aspect InstLookupClasses {
 	
 	eq InstShortClassDecl.memberInstClass(String name) {
 		
+		
 		if (hasInstConstraining())
 			return getInstConstraining().getInstNode().memberInstClass(name);
-		else
-		 	return myInstClass().memberInstClass(name);
+		else {
+			HashSet set = new HashSet();
+			for (InstExtends ie : instExtends()) {
+				HashSet h = ie.getClassName().lookupInstClass();
+				if (h.size()==1)
+					set.addAll(((InstClassDecl)h.iterator().next()).memberInstClass(name));
+			}
+			return set;
+		 }	
 	
 	}
 	
@@ -367,7 +376,7 @@ aspect InstLookupClasses {
 	
 	syn lazy InstClassDecl InstNode.myInstClass() circular [unknownInstClassDecl()] = unknownInstClassDecl(); 
 	eq InstComponentDecl.myInstClass() = getClassName().myInstClassDecl();
-	eq InstShortClassDecl.myInstClass()  = getClassName().myInstClassDecl();
+	//eq InstShortClassDecl.myInstClass()  = getClassName().myInstClassDecl();
 	eq InstClassDecl.myInstClass() = this;
 	eq InstExtends.myInstClass() = getClassName().myInstClassDecl();
 	eq UnknownInstComponentDecl.myInstClass() = unknownInstClassDecl();	
@@ -462,7 +471,7 @@ aspect InstLookupClassesInModifications {
 	eq IElementModification.getIModification().lookupInstClassInInstClass(String name) = getName().myInstClassDecl().memberInstClass(name);
 	eq InstExtends.getIClassModification().lookupInstClassInInstClass(String name) = getClassName().myInstClassDecl().memberInstClass(name);
 	
-	eq InstShortClassDecl.getIClassModification().lookupInstClassInInstClass(String name) = getClassName().myInstClassDecl().memberInstClass(name);
+//	eq InstShortClassDecl.getIClassModification().lookupInstClassInInstClass(String name) = getClassName().myInstClassDecl().memberInstClass(name);
 	
 	inh HashSet IClassRedeclare.lookupInstClassInInstClass(String name);
 	eq IClassRedeclare.getName().lookupInstClass(String name) = lookupInstClassInInstClass(name);

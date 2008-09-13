@@ -95,11 +95,11 @@ aspect PrettyPrint {
 	    str.append(indent + getRestriction().toString());
  		str.append(" " + getName().getID());
 	    str.append(" = ");
-	    str.append(getClassName().name());
-	    if (hasArraySubscripts())
-	    	p.toString(getArraySubscripts(),str,indent+"  ",o);
-	    if (hasClassModification())
-	    	p.toString(getClassModification(),str,indent+"  ",o);
+	    str.append(getExtendsClauseShortClass().getSuper().name());
+	    if (getExtendsClauseShortClass().hasArraySubscripts())
+	    	p.toString(getExtendsClauseShortClass().getArraySubscripts(),str,indent+"  ",o);
+	    if (getExtendsClauseShortClass().hasClassModification())
+	    	p.toString(getExtendsClauseShortClass().getClassModification(),str,indent+"  ",o);
 	    if (hasConstrainingClause())
 	    	p.toString(getConstrainingClause(),str,indent+"  ",o);
 	    

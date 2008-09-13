@@ -155,7 +155,7 @@ BaseClassDecl base_class_decl =
   class_access/*name*/
   array_subscripts?
   class_modification?
-  comment {:        return new ShortClassDecl(new UnknownVisibilityType(),
+  comment {:        return new PN_ShortClassDecl(new UnknownVisibilityType(),
                                              encapsulated,
                                              partial,
                                              restriction,

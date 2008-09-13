@@ -332,8 +332,6 @@ aspect InstanceTreeConstruction {
 	syn lazy List IComponentRedeclare.getDynamicClassNameList() = new List();
 	syn lazy List InstConstrainingComponent.getDynamicClassNameList() = new List();
 
-	
-	
 	syn lazy List InstNode.getInstComponentDeclList() {
 	
 		List l = new List();
@@ -369,6 +367,7 @@ aspect InstanceTreeConstruction {
 		
 		return l;
 	}
+
 
 	eq InstPrimitive.getInstComponentDeclList() = emptyList();
 	eq InstPrimitive.getInstClassDeclList() = emptyList();
@@ -418,7 +417,20 @@ aspect InstanceTreeConstruction {
 	}
 	
 	public InstComponentDecl InstShortClassDecl.newInstComponentDecl(ComponentDecl cd) {
-			return getClassName().myInstClassDecl().newInstComponentDecl(cd);
+		if (!extendsPrimitive()){
+			InstComponentDecl icd = new InstComposite(cd.newInstClassAccess(),cd,new Opt(),new Opt());
+			if (cd.hasModification())
+				icd.setIModification(cd.getModification().newIModification());
+			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
+			return icd;
+		} else {
+			InstPrimitive icd = new InstPrimitive(cd.newInstClassAccess(),cd,new Opt(),new Opt());
+			if (cd.hasModification())
+				icd.setIModification(cd.getModification().newIModification());
+			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
+			return icd;
+
+		}
 	}
 	
 	public InstComponentDecl InstPrimitiveClassDecl.newInstComponentDecl(ComponentDecl cd) {
@@ -448,11 +460,8 @@ aspect InstanceTreeConstruction {
     	return fcd;
     }
     public InstShortClassDecl ShortClassDecl.newInstClassDecl() {
-    	InstShortClassDecl scd =  new InstShortClassDecl(this, new Opt(), getClassName().newInstAccess(), new Opt());
-   	  if (hasClassModification())
-		scd.setIClassModification(getClassModification().newIModification());
-	  scd.setInstConstrainingOpt(newInstConstrainingClassOpt());
-    	
+    	InstShortClassDecl scd =  new InstShortClassDecl(this, new Opt());
+	    scd.setInstConstrainingOpt(newInstConstrainingClassOpt());    	
     	scd.setStart(getStart());
     	return scd;
     }
@@ -468,6 +477,12 @@ aspect InstanceTreeConstruction {
 		return ie;
 	}
 
+    public InstExtends ExtendsClauseShortClass.newInstExtends() {
+		InstExtendsShortClass ie = new InstExtendsShortClass(getSuper().newInstAccess(),this, new Opt());
+		if (hasClassModification())
+			ie.setIClassModification(getClassModification().newIModification());
+		return ie;
+    }
 
 
 	public InstAccess ComponentDecl.newInstClassAccess() {
@@ -680,19 +695,16 @@ aspect InstanceAST_API {
 	syn lazy ArrayList<InstExtends> InstNode.constrainingInstExtends() = 
 		hasInstConstraining()? new ArrayList<InstExtends>() : instExtends();
 
-
 	// TODO: this seems to be a trick? equations are added in InstComponentDecl and
 	// InstBaseClassDecl since they have nodes of type InstConstraining
 	syn boolean InstNode.hasInstConstraining() = false;
 	syn InstConstraining InstNode.getInstConstraining() = null;
 
-	syn boolean InstClassDecl.extendsPrimitive() = false;
-	eq InstShortClassDecl.extendsPrimitive() = finalClass().extendsPrimitive();
-	eq InstFullClassDecl.extendsPrimitive(){
-		return (getNumInstExtends()==1 && getInstExtends(0).getClassName().myInstClassDecl().finalClass().isPrimitive());
-	}
-
-
+	syn boolean InstNode.extendsPrimitive() = false;
+	eq InstShortClassDecl.extendsPrimitive() = getNumInstExtends()==1 && getInstExtends(0).extendsPrimitive();
+	eq InstExtends.extendsPrimitive() = getClassName().myInstClassDecl().isPrimitive();
+	eq InstFullClassDecl.extendsPrimitive() = getNumInstExtends()==1 && getInstExtends(0).extendsPrimitive();
+	
 }
 
 aspect SourceAST_API {
@@ -713,6 +725,12 @@ aspect SourceAST_API {
 			l.add(e);
 		return l;
 	}
+	eq ShortClassDecl.superClasses() {
+		ArrayList<ExtendsClause> l = new ArrayList<ExtendsClause>();
+		l.add(getExtendsClauseShortClass());
+		return l;
+	}
+	
 	
 	syn lazy ArrayList<ComponentDecl> ClassDecl.components() = new ArrayList<ComponentDecl>();
 	eq FullClassDecl.components() {

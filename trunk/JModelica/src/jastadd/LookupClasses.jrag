@@ -231,9 +231,9 @@ aspect LookupClasses {
 			return emptyHashSet();
 	}
 	
-	eq ShortClassDecl.memberClass(String name) = myClass().memberClass(name);
+	eq ShortClassDecl.memberClass(String name) = getExtendsClauseShortClass().getSuper().myClassDecl().memberClass(name);
 	
-	syn lazy ClassDecl ShortClassDecl.myClass() circular [unknownClassDecl()] = getClassName().myClassDecl();
+	//syn lazy ClassDecl ShortClassDecl.myClass() circular [unknownClassDecl()] = getClassName().myClassDecl();
 	
 	
 	syn boolean ClassDecl.matchClassDecl(String name) = false;
@@ -443,7 +443,7 @@ aspect LookupClassesInModifications {
 	/**
 	 * Definition of the lookupClassInClass attribute for ShortClassDecl.
 	 */
-	eq ShortClassDecl.getClassModification().lookupClassInClass(String name) {
+/*	eq ShortClassDecl.getClassModification().lookupClassInClass(String name) {
 	
 		ClassDecl Class = getClassName().myClassDecl();
     	    	
@@ -453,7 +453,7 @@ aspect LookupClassesInModifications {
     	return emptyHashSet();
 	
 	}
-	
+*/	
 	/**
 	 * Name lookup for component redeclarations in modifiers is performed by
 	 * lookupClassInClass.

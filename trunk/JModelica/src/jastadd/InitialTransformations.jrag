@@ -288,7 +288,7 @@
 	
 	}
 
-	// Dymola 6.0b does not support 'elseif'...
+	// TODO: Dymola 6.0b does not support 'elseif'...
 	rewrite IfExp {
 		when (getElseExpNoTransform() instanceof IfExp)
 			to IfExp {
@@ -346,6 +346,36 @@
 			                              getFunctionArguments().getForIndex(0));
 			sre.setStart(getStart());
 			return sre;
+		}
+	}
+
+	rewrite PN_ShortClassDecl {
+		to ShortClassDecl {
+			ExtendsClauseShortClass ecsc = 
+			   new ExtendsClauseShortClass((VisibilityType)getVisibilityType().fullCopy(),
+			                          getClassName(),
+			                          getClassModificationOpt(),
+			                          new Opt<Annotation>(),
+			                          getTypePrefixFlowOpt(),
+			                          getTypePrefixOtherOpt(),
+			                          getTypePrefixInputOutputOpt(),
+			                          getArraySubscriptsOpt(),
+			                          getComment());
+			return new ShortClassDecl(getVisibilityType(), 
+									  getEncapsulatedOpt(), 
+	                                  getPartialOpt(), 
+	                                  getRestriction(), 
+	                                  getName(),  
+                                      getRedeclareOpt(),
+	                                  getFinalOpt(),
+	                                  getInnerOpt(),
+	                                  getOuterOpt(),
+	                                  getReplaceableOpt(),
+	                                  getConstrainingClauseOpt(),
+                                      getConstrainingClauseCommentOpt(),
+                                      ecsc); 
+			                          
+		
 		}
 	}
 
