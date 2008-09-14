@@ -14,6 +14,7 @@ aspect LookupClasses {
     
 	inh HashSet Access.lookupClass(String name) circular [emptyHashSet()];
 	inh HashSet FullClassDecl.lookupClass(String name);
+	inh HashSet ShortClassDecl.lookupClass(String name);
 	
 	eq FullClassDecl.getChild().lookupClass(String name) = genericLookupClass(name); 
 	/*eq FullClassDecl.getEquation().lookupClass(String name) = genericLookupClass(name); 
@@ -31,6 +32,8 @@ aspect LookupClasses {
 	*/
 	
 	eq SourceRoot.getProgram().lookupClass(String name) = emptyHashSet();
+	
+	eq ShortClassDecl.getExtendsClauseShortClass().lookupClass(String name) = lookupClass(name);
 	
 	syn lazy HashSet Program.lookupElementClass(String name) {
 		HashSet set = new HashSet(4);

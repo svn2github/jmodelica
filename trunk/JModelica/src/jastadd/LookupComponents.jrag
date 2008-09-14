@@ -7,8 +7,13 @@ aspect LookupComponents {
 	   in a class and in super classes of the same class.
 	*/
 	inh lazy HashSet Access.lookupComponent(String name);
+	inh lazy HashSet BaseClassDecl.lookupComponent(String name);
+	inh lazy HashSet ExtendsClauseShortClass.lookupComponent(String name);
 	
 	eq FullClassDecl.getChild().lookupComponent(String name) = genericLookupComponent(name); 
+
+	eq ShortClassDecl.getExtendsClauseShortClass().lookupComponent(String name) = lookupComponent(name);
+	eq ExtendsClauseShortClass.getChild().lookupComponent(String name) = lookupComponent(name);
 
 	eq Dot.getRight().lookupComponent(String name) {
 	   debugPrint("Dot.getRight().lookupComponent: " + name);

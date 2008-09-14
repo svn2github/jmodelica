@@ -101,30 +101,19 @@
  	     	return fc;
  	  	}
    	}
-
-	boolean ShortClassDecl.visibilitySet = false;
-
-	/**
-	 * Rewrite a ShortClassDecl to a dito including visibility information.
-	 */
-	rewrite ShortClassDecl {
-   		when (!visibilitySet)
-   			to ShortClassDecl {
-   				setVisibilityType(visibility());
-   				visibilitySet = true;
-   				return this;
-   			}		
-   	}
-   	
+ 	
    	/**
      * Rewrite the PN_ExtendsClause to a ExtendsClause including visibility info 
      */
    	rewrite PN_ExtendsClause {
  	  	to ExtendsClause {     
- 	   		return new ExtendsClause(visibility(),
+ 	   		ExtendsClause e =  new ExtendsClause(visibility(),
  	   		                         getSuper(),
  	   		                         getClassModificationOpt(),
  	   		                         getAnnotationOpt());
+ 	  	
+ 	  		e.setStart(getStart());
+ 	  		return e;
  	  	}
    	}
  
@@ -205,20 +194,20 @@
     		to List {
      			List l = new List();
      				for (int i=0;i<getNumName();i++) {
-       					ComponentClause c = new ComponentClause(getRedeclareOpt(),
- 	     		                                    			getFinalOpt(),
- 	     		                                    			getInnerOpt(),
- 	     		                                    			getOuterOpt(),
- 	     		                                    			getReplaceableOpt(),
-       					                                        getTypePrefixFlowOpt(),
-       					                                        getTypePrefixOtherOpt(),
-       					                                        getTypePrefixInputOutputOpt(),
-       					                                        getClassName(),
-       					                                        getTypeArraySubscriptsOpt(),
-       					                                        getVisibilityType(),
+       					ComponentClause c = new ComponentClause((Opt)getRedeclareOpt().fullCopy(),
+ 	     		                                    			(Opt)getFinalOpt().fullCopy(),
+ 	     		                                    			(Opt)getInnerOpt().fullCopy(),
+ 	     		                                    			(Opt)getOuterOpt().fullCopy(),
+ 	     		                                    			(Opt)getReplaceableOpt().fullCopy(),
+       					                                        (Opt)getTypePrefixFlowOpt().fullCopy(),
+       					                                        (Opt)getTypePrefixOtherOpt().fullCopy(),
+       					                                        (Opt)getTypePrefixInputOutputOpt().fullCopy(),
+       					                                        (ClassAccess)getClassName().fullCopy(),
+       					                                        (Opt)getTypeArraySubscriptsOpt().fullCopy(),
+       					                                        (VisibilityType)getVisibilityType().fullCopy(),
        					                                        new List().add(getName(i)),
-       					                                        getConstrainingClauseOpt(),
-       					                                        getComment());
+       					                                        (Opt)getConstrainingClauseOpt().fullCopy(),
+       					                                        (Comment)getComment().fullCopy());
        					c.setStart(getStart());
        					//System.out.println("ComponentClause->ComponentClause.getStart() = "+c.getStart());
        					l.add(c);
@@ -262,7 +251,7 @@
       			                                    getName(0).getComment(),
       			                                    getConstrainingClauseOpt(),
       			                                    getComment());
-      			c.setStart(getStart());
+      			c.setStart(getName(0).getStart());
       			//System.out.println("ComponentClause->ComponentDecl.getStart() = "+c.getStart());
       			return c;
   			}
@@ -352,7 +341,7 @@
 	rewrite PN_ShortClassDecl {
 		to ShortClassDecl {
 			ExtendsClauseShortClass ecsc = 
-			   new ExtendsClauseShortClass((VisibilityType)getVisibilityType().fullCopy(),
+			   new ExtendsClauseShortClass(visibility(),
 			                          getClassName(),
 			                          getClassModificationOpt(),
 			                          new Opt<Annotation>(),
@@ -361,7 +350,8 @@
 			                          getTypePrefixInputOutputOpt(),
 			                          getArraySubscriptsOpt(),
 			                          getComment());
-			return new ShortClassDecl(getVisibilityType(), 
+			ecsc.setStart(getStart());
+			ShortClassDecl scd = new ShortClassDecl((VisibilityType)ecsc.getVisibilityType().fullCopy(), 
 									  getEncapsulatedOpt(), 
 	                                  getPartialOpt(), 
 	                                  getRestriction(), 
@@ -375,7 +365,8 @@
                                       getConstrainingClauseCommentOpt(),
                                       ecsc); 
 			                          
-		
+		   scd.setStart(getStart());
+		   return scd;
 		}
 	}
 

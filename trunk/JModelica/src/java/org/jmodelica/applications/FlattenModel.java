@@ -96,7 +96,7 @@ public class FlattenModel {
 	    	  }	
 	    	  */	    	  
 		    	  instTime = System.currentTimeMillis();
-		    	 //fc.dumpTree("");
+//		    	  fc.dumpTree("");
 		    	  fc.prettyPrint(str,"");
 		    	  System.out.println(str.toString());
 		    	  printTime = System.currentTimeMillis();

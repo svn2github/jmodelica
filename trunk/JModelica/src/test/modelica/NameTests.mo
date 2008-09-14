@@ -676,6 +676,42 @@ end MyRealSignal;
   
 end ShortClassDeclTest5;
 
+
+model ShortClassDeclTest6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="ShortClassDeclTest6",
+        description="Test short class declarations.",
+                                               flatModel=
+"
+fclass NameTests.ShortClassDeclTest6
+ parameter Real R;
+ parameter Real a.R = R /*(0.0)*/;
+equation 
+end NameTests.ShortClassDeclTest6;
+")})));
+  
+model Resistor
+	parameter Real R;
+end Resistor;
+
+	parameter Real R;
+	
+	replaceable model Load=Resistor(R=R);
+	// Correct, sets the R in Resistor to R from model A.
+/*
+	replaceable model LoadError
+		extends Resistor(R=R);
+		// Gives the singular equation R=R, since the right-hand side R
+		// is searched for in LoadError and found in its base-class Resistor.
+	end LoadError constrainedby TwoPin;
+*/	
+	Load a;
+	
+end ShortClassDeclTest6;
+
+
+
+
 model DerTest1
 	Real x;
 equation

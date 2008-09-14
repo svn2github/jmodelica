@@ -319,8 +319,10 @@ aspect Environments {
 
 
 	inh lazy InstNode IModification.myInstNode();
+	inh lazy InstNode InstNode.myInstNode();
 	eq InstNode.getChild().myInstNode() = this;
-
+	//The lexical scope of modifiers for short classes are "outside" of the short declaration
+    eq InstExtendsShortClass.getChild().myInstNode() = myInstNode();
 	
 	
 
@@ -371,7 +373,7 @@ aspect InstanceTreeConstruction {
 
 	eq InstPrimitive.getInstComponentDeclList() = emptyList();
 	eq InstPrimitive.getInstClassDeclList() = emptyList();
-	eq InstPrimitive.getInstExtendsList() = emptyList();
+//	eq InstPrimitive.getInstExtendsList() = emptyList();
 
     public InstNode InstNode.createInstComponentDecl(ComponentDecl cd) {
     	// Check if the component is redeclared. 
@@ -405,12 +407,14 @@ aspect InstanceTreeConstruction {
 			if (cd.hasModification())
 				icd.setIModification(cd.getModification().newIModification());
 			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
+			icd.setStart(cd.getStart());
 			return icd;
 		} else {
 			InstPrimitive icd = new InstPrimitive(cd.newInstClassAccess(),cd,new Opt(),new Opt());
 			if (cd.hasModification())
 				icd.setIModification(cd.getModification().newIModification());
 			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
+			icd.setStart(cd.getStart());
 			return icd;
 
 		}
@@ -422,14 +426,15 @@ aspect InstanceTreeConstruction {
 			if (cd.hasModification())
 				icd.setIModification(cd.getModification().newIModification());
 			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
+			icd.setStart(cd.getStart());
 			return icd;
 		} else {
 			InstPrimitive icd = new InstPrimitive(cd.newInstClassAccess(),cd,new Opt(),new Opt());
 			if (cd.hasModification())
 				icd.setIModification(cd.getModification().newIModification());
 			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
+			icd.setStart(cd.getStart());
 			return icd;
-
 		}
 	}
 	
@@ -438,6 +443,7 @@ aspect InstanceTreeConstruction {
 		if (cd.hasModification())
 			ipr.setIModification(cd.getModification().newIModification());
 		ipr.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
+		ipr.setStart(cd.getStart());
 		return ipr;
 	}
 	
@@ -474,6 +480,7 @@ aspect InstanceTreeConstruction {
 		InstExtends ie = new InstExtends(getSuper().newInstAccess(),this, new Opt());
 		if (hasClassModification())
 			ie.setIClassModification(getClassModification().newIModification());
+		ie.setStart(getStart());
 		return ie;
 	}
 
@@ -481,6 +488,7 @@ aspect InstanceTreeConstruction {
 		InstExtendsShortClass ie = new InstExtendsShortClass(getSuper().newInstAccess(),this, new Opt());
 		if (hasClassModification())
 			ie.setIClassModification(getClassModification().newIModification());
+		ie.setStart(getStart());
 		return ie;
     }
 
@@ -612,8 +620,9 @@ aspect InstanceAST_API {
 	syn lazy ArrayList<ComponentDecl> InstNode.components() = new ArrayList<ComponentDecl>();
 	eq InstClassRoot.components() = getClassDecl().components();
 	eq InstComponentDecl.components() = myInstClass().components();
-	eq InstExtends.components() = getClassName().myInstClassDecl().components();
+	eq InstExtends.components() = extendsPrimitive()? new ArrayList<ComponentDecl>() : getClassName().myInstClassDecl().components();
 	eq InstBaseClassDecl.components() = getBaseClassDecl().components();
+//    eq InstPrimitiveClassDecl.components() = new ArrayList<ComponentDecl>();
 	
 	syn lazy ArrayList<ExtendsClause> InstNode.superClasses() = new ArrayList<ExtendsClause>();
 	eq InstClassRoot.superClasses() = getClassDecl().superClasses();
@@ -626,6 +635,8 @@ aspect InstanceAST_API {
 	eq InstProgramRoot.classes() = getProgram().classes();
 	eq InstComponentDecl.classes() = myInstClass().classes();
 	eq InstBaseClassDecl.classes() = getBaseClassDecl().classes();
+	eq InstExtends.classes() = getClassName().myInstClassDecl().classes();
+	
 //    eq InstShortClassDecl.classes() = getClassName().myInstClass().classes();
 
 	syn FullClassDecl InstFullClassDecl.getFullClassDecl() = (FullClassDecl)getBaseClassDecl();
@@ -788,12 +799,13 @@ aspect InstanceDumpTree {
 			n.dumpTree(indent + " ");
 
 	}
+
+
 	
 	public void InstExtends.dumpTree(String indent) {
 		System.out.println(indent + dump()
 		                      + ": " + 
 		                      getExtendsClause().getSuper().name());
-        getClassName().dumpTree(indent + "|");
 		System.out.println(toString(indent+"|"));
 
 		//getComponentDecl().dumpTree("");
@@ -809,7 +821,7 @@ aspect InstanceDumpTree {
 	public void InstComposite.dumpTree(String indent) {
 		System.out.println(indent + dump()
 		                      + ": " + 
-		                      getComponentDecl().myClass().name() + " "+
+		                      myInstClass().name() + " "+
 		                      getComponentDecl().name());
         getClassName().dumpTree(indent + "|");
 		System.out.println(toString(indent+"|"));
@@ -827,17 +839,43 @@ aspect InstanceDumpTree {
 	public void InstPrimitive.dumpTree(String indent) {
 		System.out.println(indent + dump()
 							  + ": " + 
-		                      getComponentDecl().myClass().name() + " "+
+		                      myInstClass().name() + " "+
 		                      getComponentDecl().name());
 	    getClassName().dumpTree(indent + "|");
-
 		System.out.println(toString(indent+"|"));
+
+		for (InstNode n : getInstClassDecls())
+			n.dumpTree(indent + " ");
+		for (InstNode n : getInstComponentDecls())
+			n.dumpTree(indent + " ");
+		for (InstNode n : getInstExtendss())
+			n.dumpTree(indent + " ");
+
 
 	}
 	
-	public String InstAccess.toString() {
-		return name();
+	public String InstClassAccess.toString() {
+		String s = dump() +": "+name() + " at line: " + beginLine()+ ", ClassDecl at: ";
+    	if (myInstClassDecl().isUnknown())
+    		s+="Unknown";
+    	else {
+    		s += myInstClassDecl().beginLine();
+        }
+        s+="\n";
+		return s;
 	}
+
+	public String InstComponentAccess.toString() {
+		String s = dump() +": "+name() + " at line: " + beginLine()+ ", ComponentDecl at: ";
+    	if (myInstComponentDecl().isUnknown())
+    		s+="Unknown";
+    	else {
+    		s += myInstComponentDecl().beginLine();
+		}
+        s+="\n";
+		return s;
+	}
+
 	
  	public String InstNode.toString() {
 		return toString("");
@@ -862,6 +900,7 @@ aspect InstanceDumpTree {
 	   StringBuffer str = new StringBuffer();
 	   str.append(indent+"InstComponent:\n");
 	   str.append(indent+" Original decl:  " + getComponentDecl().prettyPrint("") + "\n");
+       str.append(indent+ " "+ getClassName().toString());
 	   str.append(indent+" myEnvironment():\n");
 	   str.append(myEnvironment().toString(indent+" "));
 	   str.append(indent+" myEnvironment('"+name()+"'):\n");
@@ -884,6 +923,7 @@ aspect InstanceDumpTree {
 	   str.append(indent+"InstReplacingComponent:\n");
 	   str.append(indent+" Replacing decl: " + getComponentDecl().prettyPrint("") + "\n");
 	   str.append(indent+" Original decl:  " + getOriginalDecl().prettyPrint("") + "\n");
+       str.append(indent+ " "+getClassName().toString());
 	   str.append(indent+" myEnvironment():\n");
 	   str.append(myEnvironment().toString(indent+" "));
 	   str.append(indent+" myEnvironment('"+name()+"'):\n");
@@ -904,6 +944,7 @@ aspect InstanceDumpTree {
 	   StringBuffer str = new StringBuffer();
 	   str.append(indent+"InstPrimitive:\n");
 	   str.append(indent+" Component decl: " + getComponentDecl().prettyPrint("") + "\n");
+       str.append(indent+ " " +getClassName().toString());	   
 	   str.append(indent+" myEnvironment():\n");
 	   str.append(myEnvironment().toString(indent+" "));
 	   str.append(indent+" myEnvironment('"+name()+"'):\n");
@@ -914,6 +955,29 @@ aspect InstanceDumpTree {
 	}
 
 	public String InstComposite.toString() {
+		return toString("");
+    }
+
+	public String InstExtends.toString(String indent) {
+	   StringBuffer str = new StringBuffer();
+	   str.append(indent+"InstExtendsDecl:\n");
+	   str.append(indent+" Extends clause: " + getExtendsClause().getSuper().name() + "\n");
+       str.append(indent+ " "+ getClassName().toString());
+	   str.append(indent+" myEnvironment():\n");
+	   str.append(myEnvironment().toString(indent+" "));
+	   str.append(indent+" myEnvironment('"+name()+"'):\n");
+	   str.append(myEnvironment(name()).toString(indent+" "));	   
+	   str.append(indent+" mergedEnvironment():\n");
+	   str.append(getMergedEnvironment().toString(indent+" "));
+	   //str.append(indent+" Declared type:\n");
+	   //str.append(indent+declaredType().toString());
+	   //str.append(indent+" Constraining type:\n");
+	   //str.append(indent+constrainingType().toString());
+	   
+	   return str.toString();	
+	}
+
+	public String InstExtends.toString() {
 		return toString("");
     }
 
@@ -940,6 +1004,7 @@ aspect InstanceDumpTree {
     }
 
 
+
 	public String IModification.toString() {
 		return toString("");
     }
@@ -961,7 +1026,7 @@ aspect InstancePrettyPrint {
 	public String InstPrimitive.prettyPrint(String indent) {
 		String str = getClass().getName();
 		str = indent+str.substring(str.lastIndexOf('.')+1);
-		str+= ": " + getComponentDecl().myClass().name() + " "+
+		str+= ": " + myInstClass().name() + " "+
 		                      getComponentDecl().name();
 		return str;
 

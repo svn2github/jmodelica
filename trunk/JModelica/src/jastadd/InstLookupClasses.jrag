@@ -17,6 +17,8 @@ aspect InstLookupClasses {
 	eq InstNode.getInstComponentDecl(int i).lookupInstClass(String name) = genericLookupInstClass(name); 
 	eq InstNode.getInstExtends(int i).lookupInstClass(String name) = superLookupInstClass(name);
 
+    eq InstNode.getDynamicClassName().lookupInstClass(String name) = genericLookupInstClass(name);
+
 	eq InstComponentDecl.getInstClassDecl().lookupInstClass(String name) = genericLookupInstClassInComponent(name);	
 	eq InstComponentDecl.getInstComponentDecl().lookupInstClass(String name) = genericLookupInstClassInComponent(name);	
 	eq InstComponentDecl.getInstExtends().lookupInstClass(String name) = superLookupInstClassInComponent(name);	
@@ -27,7 +29,8 @@ aspect InstLookupClasses {
 
 	// The lexical scope of modifiers in short classes is the "outer" scope, although
 	// the short class declaration is modeled as containing an extends clause
-	eq InstExtendsShortClass.getChild().lookupInstClass(String name) = lookupInstClass(name);
+	eq InstExtendsShortClass.getIClassModification().lookupInstClass(String name) = lookupInstClass(name);
+	eq InstShortClassDecl.getChild().lookupInstClass(String name) = lookupInstClass(name);
 
 
 /*
