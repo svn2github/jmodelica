@@ -216,7 +216,8 @@ aspect Environments {
 			env.mergeInnerModification(im);
 		return env;
 	}
-	
+
+
 	
 	
 	
@@ -324,7 +325,26 @@ aspect Environments {
 	//The lexical scope of modifiers for short classes are "outside" of the short declaration
     eq InstExtendsShortClass.getChild().myInstNode() = myInstNode();
 	
-	
+	/**
+	 * InstPrimitive:s may have children of type InstExtends, if the InstPrimitive is instantiated
+	 * eiter from a short class declaration that references a primitive type or from a 'type' class
+	 * declaration that inherits a primitive type. In both cases, the result is on or a chain of InstExtends/
+	 * InstExtendsShortClass children. The final node in such a chain holds the total merged environment of 
+	 * the InstPrimitive.
+	 */
+	syn lazy Environment InstPrimitive.totalMergedEnvironment() {
+		if (getNumInstExtends()==0)
+			return getMergedEnvironment();
+		else
+			return getInstExtends(0).totalMergedEnvironment();
+	}
+
+	syn Environment InstExtends.totalMergedEnvironment() {
+		if (getNumInstExtends()==0)
+			return getMergedEnvironment();
+		else
+			return getInstExtends(0).totalMergedEnvironment();
+	}
 
 }
 
@@ -419,25 +439,7 @@ aspect InstanceTreeConstruction {
 
 		}
 	}
-	
-	public InstComponentDecl InstShortClassDecl.newInstComponentDecl(ComponentDecl cd) {
-		if (!extendsPrimitive()){
-			InstComponentDecl icd = new InstComposite(cd.newInstClassAccess(),cd,new Opt(),new Opt());
-			if (cd.hasModification())
-				icd.setIModification(cd.getModification().newIModification());
-			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
-			icd.setStart(cd.getStart());
-			return icd;
-		} else {
-			InstPrimitive icd = new InstPrimitive(cd.newInstClassAccess(),cd,new Opt(),new Opt());
-			if (cd.hasModification())
-				icd.setIModification(cd.getModification().newIModification());
-			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
-			icd.setStart(cd.getStart());
-			return icd;
-		}
-	}
-	
+
 	public InstComponentDecl InstPrimitiveClassDecl.newInstComponentDecl(ComponentDecl cd) {
 		InstPrimitive ipr = new InstPrimitive(cd.newInstClassAccess(),cd,new Opt(),new Opt());
 		if (cd.hasModification())
@@ -454,11 +456,7 @@ aspect InstanceTreeConstruction {
     public InstClassDecl ClassDecl.newInstClassDecl() {
     	return null;
     }    
-/*				
-    public InstBaseClassDecl BaseClassDecl.newInstClassDecl() {
-    	return null;
-    }    
-*/
+
     public InstFullClassDecl FullClassDecl.newInstClassDecl() {
     	InstFullClassDecl fcd = new InstFullClassDecl(this,new Opt());
 	    fcd.setInstConstrainingOpt(newInstConstrainingClassOpt());
@@ -601,7 +599,8 @@ aspect InstImportClauses {
 aspect InstanceAST_API {
 	syn boolean InstNode.nameScope() = false;
 	eq InstComponentDecl.nameScope() = true;
-
+    eq InstBaseClassDecl.nameScope() = true;
+    
     syn String InstNode.name() = "";
     eq InstComponentDecl.name() = getComponentDecl().name();
     eq InstBaseClassDecl.name() = getBaseClassDecl().name();
@@ -644,19 +643,7 @@ aspect InstanceAST_API {
 	syn PrimitiveClassDecl InstPrimitiveClassDecl.getPrimitiveClassDecl() = (PrimitiveClassDecl)getBaseClassDecl();
 
 
-/*
-    syn lazy ArrayList<InstNode> InstNode.getInstNodes() {
-    	ArrayList<InstNode> l = new ArrayList<InstNode>();
-    	for (InstNode n : getInstClassDecls())
-    		l.add(n);
 
-    	for (InstNode n : getInstComponentDecls())
-    		l.add(n);
-    	for (InstNode n : getInstExtendss())
-    		l.add(n);
-    	return l;
-    }
-*/
 
 	syn lazy ArrayList<InstClassDecl> InstNode.instClassDecls() {
 		ArrayList<InstClassDecl> l = new ArrayList<InstClassDecl>();	
@@ -713,7 +700,7 @@ aspect InstanceAST_API {
 
 	syn boolean InstNode.extendsPrimitive() = false;
 	eq InstShortClassDecl.extendsPrimitive() = getNumInstExtends()==1 && getInstExtends(0).extendsPrimitive();
-	eq InstExtends.extendsPrimitive() = getClassName().myInstClassDecl().isPrimitive();
+	eq InstExtends.extendsPrimitive() = getClassName().myInstClassDecl().isPrimitive() || getClassName().myInstClassDecl().extendsPrimitive();
 	eq InstFullClassDecl.extendsPrimitive() = getNumInstExtends()==1 && getInstExtends(0).extendsPrimitive();
 	
 }
@@ -889,6 +876,7 @@ aspect InstanceDumpTree {
 	   str.append(myEnvironment(name()).toString(indent+" "));
 	   str.append(indent+" mergedEnvironment():\n");
 	   str.append(getMergedEnvironment().toString(indent+" "));
+
 	   return str.toString();	
 	}
 

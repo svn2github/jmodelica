@@ -67,7 +67,7 @@ aspect Flattening {
 	syn lazy FVariable InstPrimitive.getFVariable() {
 		FExp e = myBindingExp();
 		List attr = new List();
-		for (IModification im : getMergedEnvironment()) {
+		for (IModification im : totalMergedEnvironment()) {
 			im.getModification().collectAttributes(attr,im.myInstNode().getFQNamePrefix());
 		}
 		
@@ -106,7 +106,7 @@ aspect Flattening {
 	syn FExp InstPrimitive.myBindingExp() {
 
 		// A value modification is usually found last in the env list
-		for (IModification im : getMergedEnvironment()) {
+		for (IModification im : totalMergedEnvironment()) {
 			//System.out.println("**************");
 			//getMergedEnvironment(i).getModification().dumpTree("");
 			//System.out.println("**************");

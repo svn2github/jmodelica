@@ -4,7 +4,7 @@ import java.util.HashSet;
 aspect InstLookupComponents {
 
 	inh lazy HashSet InstAccess.lookupInstComponent(String name);	
-	inh lazy HashSet InstShortClassDecl.lookupInstComponent(String name);	
+	inh lazy HashSet InstNode.lookupInstComponent(String name);	
 
 	eq InstBaseClassDecl.getChild().lookupInstComponent(String name) = genericLookupInstComponent(name); 	
 	eq InstNode.getChild().lookupInstComponent(String name) = memberInstComponent(name); 
@@ -15,9 +15,12 @@ aspect InstLookupComponents {
 	eq InstDot.getRight().lookupInstComponent(String name) = getLeft().qualifiedLookupInstComponent(name);
 	eq InstRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
 	
+	
 	syn lazy HashSet InstAccess.qualifiedLookupInstComponent(String name) = emptyHashSet();
 	eq InstComponentAccess.qualifiedLookupInstComponent(String name) = myInstComponentDecl().memberInstComponent(name);	
 	eq InstClassAccess.qualifiedLookupInstComponent(String name) = myInstClassDecl().memberInstComponent(name);
+	
+	
 	
 	syn lazy HashSet InstBaseClassDecl.genericLookupInstComponent(String name) {
 		HashSet h = memberInstComponent(name);
@@ -26,8 +29,10 @@ aspect InstLookupComponents {
 	
 	
 	syn lazy HashSet InstNode.memberInstComponent(String name)  {
-	 		 	
+
 	 	HashSet set = new HashSet(4);
+		 	
+	 	
 		for (InstComponentDecl ic : constrainingInstComponentDecls()) {
 			if (ic.matchInstComponentDecl(name))
 				set.add(ic);
@@ -36,58 +41,21 @@ aspect InstLookupComponents {
 		for (InstExtends ie : constrainingInstExtends()) {
 			set.addAll(ie.memberInstComponent(name));
 		}
-
+		
 		if (set.size()>0) {
 			return set;
 		} else {
 			return emptyHashSet();
 		}
+		
 	}
 
 	// This is needed since the member components of InstPrimitive:s (which are attributes)
 	// are not instantiated
 	eq InstPrimitive.memberInstComponent(String name) = myInstClass().memberInstComponent(name);
+	eq InstExtends.memberInstComponent(String name) = extendsPrimitive()? myInstClass().memberInstComponent(name) : super.memberInstComponent(name);
 
-	/*
-	eq InstComponentDecl.memberInstComponent(String name)  {
-	 		 	
-	 	HashSet set = new HashSet(4);
-		for (InstComponentDecl ic : instComponentDecls()) {
-			if (ic.matchInstComponentDecl(name))
-				set.add(ic);
-		}
 
-		for (InstExtends ie : instExtends()) {
-			HashSet h = ie.getClassName().lookupInstClass();
-			if (h.size()==1)
-				set.addAll(((InstClassDecl)h.iterator().next()).memberInstComponent(name));
-		}
-
-		if (set.size()>0) {
-			return set;
-		} else {
-			return emptyHashSet();
-		}
-	}
-	*/
-	
-	eq InstShortClassDecl.memberInstComponent(String name) {
-		
-		if (hasInstConstraining())
-			return getInstConstraining().getInstNode().memberInstComponent(name);
-		else {
-			HashSet set = new HashSet();
-			for (InstExtends ie : instExtends()) {
-				HashSet h = ie.getClassName().lookupInstClass();
-				if (h.size()==1)
-					set.addAll(((InstClassDecl)h.iterator().next()).memberInstComponent(name));
-			}
-			return set;
-		} 	
-	
-	}
-	
-	
 
 	
 	/**
