@@ -243,15 +243,29 @@ aspect Environments {
 	 * of the modification is added to myEnvironment. The algorithm is somewhat complicated by component
 	 * redeclares that needs to be taken into account. 
 	 */
-	eq InstNode.getChild().myEnvironment(String name) {
+	eq InstNode.getChild().myEnvironment(String name) = myEnvironment_def(name); // This is just to get caching at the right place.
+	
+	syn lazy Environment InstNode.myEnvironment_def(String name) {
 		Environment env = new Environment();
+		boolean componentRedeclareFound = false;
+		IComponentRedeclare icr = retrieveReplacingComponent(name);
 		for (IModification im : getMergedEnvironment()) {
-			if (im.matchIModification(name) != null)
+			// If a first redeclare modification is found, add modifiers
+			if (!componentRedeclareFound && im==icr) {
+            	if (icr.getInstComponentDecl().hasIModification()) 
+    				env.mergeInnerModification(icr.getInstComponentDecl().getIModification());
+				componentRedeclareFound = true;
+			}
+			if (im.matchIModification(name) != null) {
 				env.mergeInnerModification(im.matchIModification(name));
+			}
 		}
 		return env;
 		
 	}
+
+
+
 
 	eq Program.getInstProgramRoot().myEnvironment() = new Environment();
 	eq Program.getInstProgramRoot().myEnvironment(String name) = new Environment();
@@ -305,14 +319,12 @@ aspect Environments {
 	}
 	
 	 /**
-     * Notice that retrieveReplacingComponent returns an InstModification object so that
-     * this modification can be checked for class redeclarations which must be done at the
-     * correct ancestor InstNode.
+     * TODO: Does the return type here need to be IReplacingComponent or can it be ComponentDecl?
      */
-	syn IModification InstNode.retrieveIReplacingComponent(String name) {
+	syn IComponentRedeclare InstNode.retrieveReplacingComponent(String name) {
 		for (IModification im : getMergedEnvironment()) {
 			if (im.matchIComponentRedeclare(name)!=null) {
-				return im;
+				return im.matchIComponentRedeclare(name);
 			}
 		}
 		return null;
@@ -399,8 +411,15 @@ aspect InstanceTreeConstruction {
     	// Check if the component is redeclared. 
     	// -> Yes: Create an InstReplacingComponent component
     	// -> No: Create an InstComponent 
-    	addDynamicClassName(cd.getClassName().newInstAccess());
-    	return getDynamicClassName(getNumDynamicClassName()-1).myInstClassDecl().newInstComponentDecl(cd);    	
+    	IComponentRedeclare irc = retrieveReplacingComponent(cd.name());
+    	if (irc!=null) {
+    		ComponentDecl replacingComp = irc.getComponentRedeclare().getComponentDecl();
+    		addDynamicClassName(replacingComp.getClassName().newInstAccess());
+    		return getDynamicClassName(getNumDynamicClassName()-1).myInstClassDecl().newInstReplacingComponent(replacingComp,cd);    	    		
+    	} else { 
+    		addDynamicClassName(cd.getClassName().newInstAccess());
+    		return getDynamicClassName(getNumDynamicClassName()-1).myInstClassDecl().newInstComponentDecl(cd);    	
+    	}
      }
     
    public InstNode InstNode.createInstClassDecl(ClassDecl bcd) {
@@ -448,9 +467,38 @@ aspect InstanceTreeConstruction {
 		ipr.setStart(cd.getStart());
 		return ipr;
 	}
-	
+
 	public InstComponentDecl InstBuiltInClassDecl.newInstComponentDecl(ComponentDecl cd) {
 		return new InstBuiltIn(cd.newInstClassAccess(),cd,new Opt(),new Opt());
+	}
+
+	public abstract InstComponentDecl InstClassDecl.newInstReplacingComponent(ComponentDecl replacingDecl,
+	                                                                 ComponentDecl originalDecl);
+
+	public InstComponentDecl InstBaseClassDecl.newInstReplacingComponent(ComponentDecl replacingDecl,
+	                                                                 ComponentDecl originalDecl) {
+		if (!extendsPrimitive()){
+			InstReplacingComposite icd = new InstReplacingComposite(replacingDecl.newInstClassAccess(),replacingDecl,new Opt(),new Opt(),originalDecl);
+			if (originalDecl.hasModification()) //TODO: should this really be originalDecl
+				icd.setIModification(originalDecl.getModification().newIModification());
+			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
+			icd.setStart(originalDecl.getStart());
+			return icd;
+		} else {
+			InstReplacingPrimitive icd = new InstReplacingPrimitive(replacingDecl.newInstClassAccess(),replacingDecl,new Opt(),new Opt(),originalDecl);
+			if (originalDecl.hasModification())
+				icd.setIModification(originalDecl.getModification().newIModification());
+			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
+			icd.setStart(originalDecl.getStart());
+			return icd;
+
+		}
+	}
+
+	// This cannot be done.
+	public InstComponentDecl InstBuiltInClassDecl.newInstReplacingComponent(ComponentDecl replacingDecl,
+	                                                                        ComponentDecl originalDecl) {
+		return null;
 	}
 
     public InstClassDecl ClassDecl.newInstClassDecl() {

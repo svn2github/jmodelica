@@ -1053,7 +1053,7 @@ model RedeclareTest1
  fclass RedeclareTests.RedeclareTest1
  Real a.c2.x = 3 /*(3)*/;
  Real a.c2.y = 4 /*(4)*/;
- Real b.a.c2.x = 5 /*(8)*/;
+ Real b.a.c2.x = 5 /*(5)*/;
  Real b.a.c2.y = 4 /*(4)*/;
  Real b.a.c2.z = 9 /*(9)*/;
  Real b.aa.c2.x = 2 /*(2)*/;
