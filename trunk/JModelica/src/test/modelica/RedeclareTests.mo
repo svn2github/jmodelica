@@ -967,11 +967,15 @@ end RedeclareTests.RedeclareTest_Classes_1;
   end C;
  
    model D
+   
+   
      replaceable model myA = A;
      myA a(x=4);
    end D;
  
    model E
+   
+   
       D d(redeclare replaceable model myA = C);
    end E;
  

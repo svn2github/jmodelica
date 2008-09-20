@@ -538,7 +538,8 @@ Argument argument =
    							ClassRedeclare cdr = new ClassRedeclare(each,
                                                          final_,
                                                          pa,
-                                                         base_class_decl); :} 
+                                                         base_class_decl); 
+                            return cdr; :} 
   |each? 
    final_? 
    replaceable 
@@ -574,6 +575,7 @@ Argument argument =
    each? 
    final_?  
    base_class_decl {: ClassAccess pa = new ClassAccess(base_class_decl.getName().getID());
+                      pa.setStart(base_class_decl.getName().getStart());       
                       base_class_decl.setRedeclare(new Redeclare());
    							pa.setStart(base_class_decl.getName().getStart());
    							ClassRedeclare cdr = new ClassRedeclare(each,
@@ -619,9 +621,11 @@ Argument argument =
    base_class_decl 
    constraining_clause? {:  base_class_decl.setConstrainingClauseOpt(constraining_clause);
                             base_class_decl.setReplaceable(replaceable);
+                            ClassAccess ca = new ClassAccess(base_class_decl.getName().getID());
+                            ca.setStart(base_class_decl.getName().getStart());
                              return new  ClassRedeclare(each,
                                                          final_,
-                                                         new ClassAccess(base_class_decl.getName().getID()),
+                                                         ca,
                                                          base_class_decl); :} 
   |REDECLARE
    each? 
@@ -636,9 +640,11 @@ Argument argument =
    modification? 
    comment
    constraining_clause? 
-   {: return new PN_ComponentRedeclare(each,
+   {:  ParseAccess pa = new ParseAccess(comp_name.getID(),array_subscripts);
+       pa.setStart(comp_name.getStart());
+       PN_ComponentRedeclare cr = new PN_ComponentRedeclare(each,
                                         final_,
-                                        new ParseAccess(comp_name.getID(),array_subscripts),
+                                        pa,
                                         new PN_ComponentClause(new Opt(new Redeclare()),
                                                                new Opt(),
                                                                new Opt(),
@@ -651,7 +657,9 @@ Argument argument =
                                                                new Opt(),
                                                                new List().add(new PN_ComponentDecl(comp_name,array_subscripts,modification,new Opt(),comment)),
                                                                constraining_clause,
-                                                               new Comment(new Opt(),new Opt()))); :}                                                      
+                                                               new Comment(new Opt(),new Opt()))); 
+        return cr;                                                       
+                                                               :}                                                      
    ;
 
 

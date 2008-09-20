@@ -2,7 +2,7 @@ import java.util.HashSet;
 
 aspect InstLookupClasses {
 
-	syn HashSet InstAccess.lookupInstClass() circular [emptyHashSet()]{
+	syn lazy HashSet InstAccess.lookupInstClass() circular [emptyHashSet()]{
 	 	return lookupInstClass(name());
 	}
 

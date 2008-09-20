@@ -375,7 +375,7 @@ aspect InstanceErrorCheck {
 
 	public void IClassRedeclare.collectErrors() {
 		super.collectErrors();
-		getInstBaseClassDecl().collectErrors();	
+		getInstClassDecl().collectErrors();	
 	}
 
 	

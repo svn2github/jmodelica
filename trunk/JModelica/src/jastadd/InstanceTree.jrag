@@ -129,21 +129,24 @@ aspect InstModifications{
 		IComponentModification icm = new IComponentModification(this,getName().newInstAccess(),new Opt());
 		if (hasModification())
 			icm.setIModification(getModification().newIModification());
+		icm.setStart(getStart());
 		return icm;
 	}
 	public IComponentRedeclare ComponentRedeclare.newIModification() {
 	    // TODO: Can this component be redeclared?
-		return new IComponentRedeclare(this,getName().newInstAccess());
+		IComponentRedeclare icr = new IComponentRedeclare(this,getName().newInstAccess());
+		icr.setStart(getStart());
+		return icr;
 	}
-	
-	
 	
 	public IComponentRedeclare PN_ComponentRedeclare.newIModification() {
 		return null; // This should never be called since all PN_ComponentRedeclare:s are rewritten	    
 	}	
 	
 	public IClassRedeclare ClassRedeclare.newIModification() {
-		return new IClassRedeclare(this,getName().newInstAccess());
+		IClassRedeclare icr = new IClassRedeclare(this,getName().newInstAccess());
+		icr.setStart(getStart());
+		return icr;
 	}
 	
 	
@@ -294,9 +297,9 @@ aspect Environments {
 	
 	// Only add modifiers in constraining clauses
 	eq IClassRedeclare.matchIModification(String name) {
-		if (name.equals(getName().name()) && getInstBaseClassDecl().hasInstConstraining() &&
-		    getInstBaseClassDecl().getInstConstraining().hasIClassModification())
-			return getInstBaseClassDecl().getInstConstraining().getIClassModification();
+		if (name.equals(getName().name()) && getInstClassDecl().hasInstConstraining() &&
+		    getInstClassDecl().getInstConstraining().hasIClassModification())
+			return getInstClassDecl().getInstConstraining().getIClassModification();
 		return null;
 	}		
 	
@@ -559,7 +562,7 @@ aspect InstanceTreeConstruction {
 		return new InstProgramRoot(this);
 	}
 
-	syn lazy InstClassDecl IClassRedeclare.getInstBaseClassDecl() {
+	syn lazy InstClassDecl IClassRedeclare.getInstClassDecl() {
 		return getClassRedeclare().getBaseClassDecl().newInstClassDecl();
 	}
 

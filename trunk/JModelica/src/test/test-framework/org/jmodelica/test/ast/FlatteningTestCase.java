@@ -95,6 +95,7 @@ public class FlatteningTestCase extends TestCase {
 	}
 	
 	public boolean testMe() {
+        System.out.println("Running test: " + getClassName());
 		SourceRoot sr = parser.parseFile(getSourceFileName());
 		sr.setFileName(getSourceFileName());
 	    InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
