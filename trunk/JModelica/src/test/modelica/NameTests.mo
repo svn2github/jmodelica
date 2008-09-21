@@ -297,8 +297,60 @@ Semantic error at line 297, column 4:
   P.B b;
   
   end NameTest10_Err;
+  
+  model NameTest11_Err
+  
+   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="NameTest11_Err",
+                                               description="Test that names are looked up correct.",
+                                               errorMessage=
+"
+p1 in the right hand side of the modification should not be found.
+")})));
 
+ model A
+ 	parameter Real p1 = 4;
+ end A;
+ 
+ parameter Real p = 5;
+ A a(p1=p1);
+  
+  end NameTest11_Err;
+  
+  
+model NameTest12_Err
+  
+   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="NameTest12_Err",
+                                              description="Test that names are looked up correct.",
+                                               errorMessage=
+"
+  1 error(s) found...
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 346, column 15:
+  The class B is undeclared
+")})));
 
+model M
+
+ model A
+ 	Real x = 4;
+ end A;
+
+ model B
+ 	Real x = 4;
+	Real y = 4;
+ end B;
+ 
+ replaceable A a;
+ 
+end M;
+
+M m(redeclare B a);
+
+  
+end NameTest12_Err;
+  
 
 class ExtendsTest1
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

@@ -105,7 +105,6 @@ aspect Flattening {
 	
 	syn FExp InstPrimitive.myBindingExp() {
 
-		// A value modification is usually found last in the env list
 		for (IModification im : totalMergedEnvironment()) {
 			//System.out.println("**************");
 			//getMergedEnvironment(i).getModification().dumpTree("");

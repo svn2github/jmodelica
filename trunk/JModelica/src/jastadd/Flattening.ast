@@ -34,11 +34,11 @@ InstPrimitive : InstComponentDecl ::= /FVariable/;
 InstBuiltIn : InstComponentDecl;
 UnknownInstComponentDecl : InstComponentDecl;
 
+InstReplacingComposite : InstComposite ::= <OriginalDecl:ComponentDecl> /OriginalInstComponent:InstComponentDecl/ <IComponentRedeclare:IComponentRedeclare>;
+InstReplacingPrimitive : InstPrimitive ::= <OriginalDecl:ComponentDecl> /OriginalInstComponent:InstComponentDecl/ <IComponentRedeclare:IComponentRedeclare>;
+
 InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause> [IClassModification];
 InstExtendsShortClass : InstExtends;
-
-InstReplacingComposite : InstComposite ::= <OriginalDecl:ComponentDecl> ;
-InstReplacingPrimitive : InstPrimitive ::= <OriginalDecl:ComponentDecl>;
 
 // Accesses in the instance tree
 abstract InstAccess ::= <ID>;

@@ -174,21 +174,28 @@ aspect Environments {
 		if (hasInstConstraining() &&
 		       getInstConstraining().hasIClassModification())
 		  	l.add(getInstConstraining().getIClassModification());	
-		    
-		// This is to take modifiers short class declarations into account
-//		ArrayList<Modification> classMods = getComponentDecl().myClass().classModifications();
-//		for (int i = 0;i<classMods.size();i++)
-//			l.add(classMods.get(i));	
-		// This is to take into account the case when we instantiate a
-		// component based on a class which inherits from a primitive type
-//		if (getComponentDecl().myClass().extendsPrimitive()) {
-//			if (getComponentDecl().myClass().getSuper(0).hasClassModification())	
-//				l.add(getComponentDecl().myClass().getSuper(0).getSuper().getClassModification());	
-//		}
 		
 		return l;
 		
 	}
+ 	
+	eq InstReplacingComposite.localIModifications() {
+		ArrayList<IModification> l = new ArrayList<IModification>();
+		// If there is a constraining clase, return its modifications
+		if (getOriginalInstComponent().hasInstConstraining()) {
+		  if (getOriginalInstComponent().getInstConstraining().hasIClassModification()) {
+			l.add(getOriginalInstComponent().getInstConstraining().getIClassModification());
+          }
+        } else {
+            // If no constraining clause, use the original declaration 
+            // and return its modifiers
+     		if (getOriginalInstComponent().hasIModification())
+				l.add(getOriginalInstComponent().getIModification());     
+        }
+		
+		return l;
+	}
+	 	
  	
 	eq InstExtends.localIModifications() {
 		ArrayList<IModification> l = new ArrayList<IModification>();
@@ -417,8 +424,9 @@ aspect InstanceTreeConstruction {
     	IComponentRedeclare irc = retrieveReplacingComponent(cd.name());
     	if (irc!=null) {
     		ComponentDecl replacingComp = irc.getComponentRedeclare().getComponentDecl();
-    		addDynamicClassName(replacingComp.getClassName().newInstAccess());
-    		return getDynamicClassName(getNumDynamicClassName()-1).myInstClassDecl().newInstReplacingComponent(replacingComp,cd);    	    		
+    		// Add the new access to the IComponentRedeclare node in order to get lookup in the right scope
+    		irc.addDynamicClassName(replacingComp.getClassName().newInstAccess());
+    		return irc.getDynamicClassName(irc.getNumDynamicClassName()-1).myInstClassDecl().newInstReplacingComponent(replacingComp,cd,irc);    	    		
     	} else { 
     		addDynamicClassName(cd.getClassName().newInstAccess());
     		return getDynamicClassName(getNumDynamicClassName()-1).myInstClassDecl().newInstComponentDecl(cd);    	
@@ -476,19 +484,19 @@ aspect InstanceTreeConstruction {
 	}
 
 	public abstract InstComponentDecl InstClassDecl.newInstReplacingComponent(ComponentDecl replacingDecl,
-	                                                                 ComponentDecl originalDecl);
+	                                                                 ComponentDecl originalDecl, IComponentRedeclare icr);
 
 	public InstComponentDecl InstBaseClassDecl.newInstReplacingComponent(ComponentDecl replacingDecl,
-	                                                                 ComponentDecl originalDecl) {
+	                                                                 ComponentDecl originalDecl, IComponentRedeclare icr) {
 		if (!extendsPrimitive()){
-			InstReplacingComposite icd = new InstReplacingComposite(replacingDecl.newInstClassAccess(),replacingDecl,new Opt(),new Opt(),originalDecl);
+			InstReplacingComposite icd = new InstReplacingComposite(replacingDecl.newInstClassAccess(),replacingDecl,new Opt(),new Opt(),originalDecl,icr);
 			if (originalDecl.hasModification()) //TODO: should this really be originalDecl
 				icd.setIModification(originalDecl.getModification().newIModification());
 			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
 			icd.setStart(originalDecl.getStart());
 			return icd;
 		} else {
-			InstReplacingPrimitive icd = new InstReplacingPrimitive(replacingDecl.newInstClassAccess(),replacingDecl,new Opt(),new Opt(),originalDecl);
+			InstReplacingPrimitive icd = new InstReplacingPrimitive(replacingDecl.newInstClassAccess(),replacingDecl,new Opt(),new Opt(),originalDecl,icr);
 			if (originalDecl.hasModification())
 				icd.setIModification(originalDecl.getModification().newIModification());
 			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
@@ -500,7 +508,8 @@ aspect InstanceTreeConstruction {
 
 	// This cannot be done.
 	public InstComponentDecl InstBuiltInClassDecl.newInstReplacingComponent(ComponentDecl replacingDecl,
-	                                                                        ComponentDecl originalDecl) {
+	                                                                        ComponentDecl originalDecl, 
+	                                                                        IComponentRedeclare icr) {
 		return null;
 	}
 
@@ -567,15 +576,20 @@ aspect InstanceTreeConstruction {
 	}
 
 	syn lazy InstComponentDecl IComponentRedeclare.getInstComponentDecl() {
-	    // Check if the component is redeclared. 
+	    // TODO: Check if the component is redeclared. Really...?
     	// -> Yes: Create an InstReplacingComponent component
     	// -> No: Create an InstComponent 
 	   	addDynamicClassName(getComponentRedeclare().getComponentDecl().getClassName().newInstAccess());
     	return getDynamicClassName(getNumDynamicClassName()-1).myInstClassDecl().newInstComponentDecl(getComponentRedeclare().getComponentDecl());
-
-	
 	}
 
+	syn lazy InstComponentDecl InstReplacingComposite.getOriginalInstComponent() {
+		// TODO: Check if the component is redeclared. Really...?
+    	// -> Yes: Create an InstReplacingComponent component
+    	// -> No: Create an InstComponent 
+	   	addDynamicClassName(getOriginalDecl().getClassName().newInstAccess());
+    	return getDynamicClassName(getNumDynamicClassName()-1).myInstClassDecl().newInstComponentDecl(getOriginalDecl());
+	}
 
 }
 

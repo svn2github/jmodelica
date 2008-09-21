@@ -291,6 +291,7 @@ aspect FlatNames {
 	eq InstClassDecl.getFQName() = new FQName();
 	inh lazy FQName InstNode.retrieveFQName();
 	eq InstComponentDecl.getChild().retrieveFQName() = getFQName();
+	eq InstComponentDecl.getIModification().retrieveFQName() = retrieveFQName();
 	eq InstClassDecl.getChild().retrieveFQName() = null; //getFQName();
 	
 	eq InstRoot.getChild().retrieveFQName() = null;
