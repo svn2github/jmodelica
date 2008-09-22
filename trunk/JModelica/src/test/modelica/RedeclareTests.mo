@@ -2556,29 +2556,95 @@ end RedeclareTests.RedeclareTest20;
   end D;
 
    model E
-     parameter Real p = 3;
-     model myB = B(x=p);
+     parameter Real pE = 3;
+     model myB = B(x=pE);
      myB b;
      replaceable A a(x=4);
    
    end E;
  
    model F
-     parameter Real p = 4;
-     replaceable model myB = B(x=6,y=p);
+     parameter Real pF = 4;
+     replaceable model myB = B(x=6,y=pF);
      E e(redeclare replaceable myB a(x=5));
    end F;
  
    model G
-   	 parameter Real p = 6;
-     replaceable model myC = C(y=7,z=p);
+   	 parameter Real pG = 6;
+     replaceable model myC = C(y=7,z=pG);
      model myC2 = myC(y=10);
      F f(redeclare model myB = myC2);
    end G;
     
-   parameter Real p = 5; 
-   G g(redeclare model myC = D(w=p));
+   parameter Real p0 = 5; 
+   G g(redeclare model myC = D(w=p0));
 
 end RedeclareTest21;
+
+class RedeclareTest22 "Test of merging of modifications in parametrized classes"
+ 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest22",
+        description="Test of parametrized classes.",
+                                               flatModel=
+"
+fclass RedeclareTests.RedeclareTest20
+ Real g.f.e.b.x = 5 /*(5)*/;
+ Real g.f.e.b.y = 3 /*(3)*/;
+ Real g.f.e.a.x = 5 /*(5)*/;
+ Real g.f.e.a.y = 4 /*(4)*/;
+ Real g.f.e.a.z = 6 /*(6)*/;
+ Real g.f.e.a.w = 5 /*(5)*/;
+equation 
+end RedeclareTests.RedeclareTest20;
+	
+"
+  )})));
+ 
+  
+  model A
+    Real x=1;
+  end A;
+ 
+  model B
+   Real x=2;
+   Real y=3;
+  end B;
+  
+  model C
+   Real x=2;
+   Real y=3;
+   Real z=4;
+  end C;
+
+  model D
+   Real x=2;
+   Real y=3;
+   Real z=4;
+   Real w=5;
+  end D;
+
+   model E
+     parameter Real pE = 3;
+     replaceable model myB = B(x=pE);
+     myB b;
+   end E;
+ 
+   model F
+     parameter Real pF = 4;
+     replaceable model myB2 = B(x=6,y=pF);
+     E e(redeclare model myB = myB2);
+   end F;
+ 
+   model G
+   	 parameter Real pG = 6;
+     replaceable model myC = C(y=7,z=pG);
+     F f(e(redeclare model myB = myC));
+   end G;
+    
+   parameter Real p0 = 5; 
+   G g(f(e(redeclare model myB = D(w=p0))));
+
+end RedeclareTest22;
 
 end RedeclareTests;

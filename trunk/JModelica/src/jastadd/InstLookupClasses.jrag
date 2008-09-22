@@ -528,10 +528,6 @@ aspect InstLookupClassesInModifications {
 	 */
 	eq InstRoot.getChild().lookupInstClassInInstClass(String name) {return emptyHashSet();}
 	  
-
-
-
-
 }
 
 

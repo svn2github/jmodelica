@@ -195,12 +195,24 @@ aspect Environments {
 		return l;
 	}
 	 	
- 	
 	eq InstExtends.localIModifications() {
 		ArrayList<IModification> l = new ArrayList<IModification>();
 		if (hasIClassModification())
 			l.add(getIClassModification());
  		l.addAll(retrieveOriginalShortClassIModifications());
+		return l;
+	}
+
+	eq InstExtendsShortClass.localIModifications() {
+		ArrayList<IModification> l = new ArrayList<IModification>();
+		if (myInstShortClassDecl().isRedeclared()) {
+			if (myInstShortClassDecl().getInstExtends(0).hasIClassModification())
+				l.add(myInstShortClassDecl().getInstExtends(0).getIClassModification());
+		} else {
+			if (hasIClassModification())
+				l.add(getIClassModification());
+		}
+		l.addAll(retrieveOriginalShortClassIModifications());
 		return l;
 	}
  
@@ -222,6 +234,11 @@ aspect Environments {
  		return l;
  	}
  	
+ 	inh lazy InstShortClassDecl InstExtendsShortClass.myInstShortClassDecl();
+ 	eq InstShortClassDecl.getInstExtends().myInstShortClassDecl() = this;
+ 	eq InstExtends.getInstExtends().myInstShortClassDecl() = (InstShortClassDecl)getClassName().myInstClassDecl();
+ 	eq InstComponentDecl.getInstExtends().myInstShortClassDecl() = (InstShortClassDecl)myInstClass();
+ 	eq SourceRoot.getProgram().myInstShortClassDecl() = null;
  	
 	eq SourceRoot.getProgram().retrieveOriginalShortClassIModifications() = new ArrayList<IModification>();
 
