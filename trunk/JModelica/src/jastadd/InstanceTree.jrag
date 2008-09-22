@@ -1,7 +1,6 @@
 
 import java.util.ArrayList;
 
-
     /**
      * TODO: Is it a good idea to inherit? Should env be a component?
      */
@@ -174,7 +173,7 @@ aspect Environments {
 		if (hasInstConstraining() &&
 		       getInstConstraining().hasIClassModification())
 		  	l.add(getInstConstraining().getIClassModification());	
-		
+		l.addAll(retrieveOriginalShortClassIModifications());
 		return l;
 		
 	}
@@ -192,7 +191,7 @@ aspect Environments {
      		if (getOriginalInstComponent().hasIModification())
 				l.add(getOriginalInstComponent().getIModification());     
         }
-		
+ 		l.addAll(retrieveOriginalShortClassIModifications());		
 		return l;
 	}
 	 	
@@ -201,13 +200,38 @@ aspect Environments {
 		ArrayList<IModification> l = new ArrayList<IModification>();
 		if (hasIClassModification())
 			l.add(getIClassModification());
-		// This is to take modifiers short class declarations into account
-//		ArrayList<Modification> classMods = getExtendsClause().getSuper().myClassDecl().classModifications();
-//		for (int i = 0;i<classMods.size();i++)
-//			l.add(classMods.get(i));	
+ 		l.addAll(retrieveOriginalShortClassIModifications());
 		return l;
 	}
+ 
+ 	// This is to take original modifications in redeclared short class declarations into account.
+ 	inh lazy ArrayList<IModification> InstNode.retrieveOriginalShortClassIModifications();
+ 	eq InstComponentDecl.getChild().retrieveOriginalShortClassIModifications() {
+ 		ArrayList<IModification> l = new ArrayList<IModification>();
+ 		l.addAll(myInstClass().originalShortClassIModifications());
+ 		return l;
+ 	}
+ 	eq InstExtends.getChild().retrieveOriginalShortClassIModifications() {
+ 		ArrayList<IModification> l = new ArrayList<IModification>();
+ 		l.addAll(getClassName().myInstClassDecl().originalShortClassIModifications());
+ 		return l;
+ 	}
+ 	eq InstReplacingShortClassDecl.getInstExtends().retrieveOriginalShortClassIModifications() {
+ 		ArrayList<IModification> l = new ArrayList<IModification>();
+ 		l.addAll(originalShortClassIModifications());
+ 		return l;
+ 	}
  	
+ 	
+	eq SourceRoot.getProgram().retrieveOriginalShortClassIModifications() = new ArrayList<IModification>();
+
+	syn lazy ArrayList<IModification> InstClassDecl.originalShortClassIModifications() = new ArrayList<IModification>();
+	eq InstReplacingShortClassDecl.originalShortClassIModifications() {
+		ArrayList<IModification> l = new ArrayList<IModification>();
+		l.addAll(getOriginalInstClass().getInstExtends(0).localIModifications());
+		return l;
+	}
+ 
  
     /* getMergedEnvironment gives the environment applicable
        to the children of the InstNode. It consists of the outer modifications
@@ -245,6 +269,7 @@ aspect Environments {
 	 */
 	eq InstNode.getChild().myEnvironment() = getMergedEnvironment().clone();
 
+/*
 	eq InstReplacingShortClassDecl.getChild().myEnvironment() {
 		Environment env = getMergedEnvironment().clone();
 		if (getOriginalInstClass().hasInstConstraining()) {
@@ -257,6 +282,7 @@ aspect Environments {
 		}
 		return env;
 	}
+*/
 
 	/** 
 	 * When a string argument representing a component name is given as argument to myEnvironment,
@@ -396,6 +422,8 @@ aspect Environments {
 			return getInstExtends(0).totalMergedEnvironment();
 	}
 
+
+
 }
 
 aspect InstanceTreeConstruction {
@@ -478,9 +506,6 @@ aspect InstanceTreeConstruction {
    		// This cannot be redeclared. Just create and return.
    		return ec.newInstExtends();
    }
-
-
-
 		
 		// Dispatch w.r.t. class type
 	public abstract InstComponentDecl InstClassDecl.newInstComponentDecl(ComponentDecl cd);
@@ -707,7 +732,7 @@ aspect InstImportClauses {
     
     eq InstFullClassDecl.getInstImportList() {
     	List l = new List();
-    	for (ImportClause ic : getFullClassDecl().getImports()) {
+    	for (ImportClause ic : getBaseClassDecl().getImports()) {
     		InstImport iic = ic.newInstImport();
     		iic.setStart(ic.getStart());
     		l.add(iic);
@@ -715,7 +740,7 @@ aspect InstImportClauses {
     	return l;
     }
 
-
+	syn lazy List<ImportClause> BaseClassDecl.getImports() = emptyList();
 
 
 	public abstract InstImport ImportClause.newInstImport(); 
@@ -749,7 +774,7 @@ aspect InstanceAST_API {
 	eq InstClassRoot.equations() = getClassDecl().equations();
 	eq InstComponentDecl.equations() = myInstClass().equations();
 	eq InstExtends.equations() = getClassName().myInstClassDecl().equations();
-	eq InstFullClassDecl.equations() = getFullClassDecl().equations();	
+	eq InstFullClassDecl.equations() = getBaseClassDecl().equations();	
 	
 	
 	syn lazy ArrayList<ComponentDecl> InstNode.components() = new ArrayList<ComponentDecl>();
@@ -774,10 +799,11 @@ aspect InstanceAST_API {
 	
 //    eq InstShortClassDecl.classes() = getClassName().myInstClass().classes();
 
+/*
 	syn FullClassDecl InstFullClassDecl.getFullClassDecl() = (FullClassDecl)getBaseClassDecl();
 	syn ShortClassDecl InstShortClassDecl.getShortClassDecl() = (ShortClassDecl)getBaseClassDecl();
 	syn PrimitiveClassDecl InstPrimitiveClassDecl.getPrimitiveClassDecl() = (PrimitiveClassDecl)getBaseClassDecl();
-
+*/
 
 
 
@@ -1108,7 +1134,7 @@ aspect InstanceDumpTree {
 	public String InstFullClassDecl.toString(String indent) {
 	   StringBuffer str = new StringBuffer();
 	   str.append(indent+"InstFullClassDecl:\n");
-	   str.append(indent+" Class decl: " + getFullClassDecl().name() + "\n");
+	   str.append(indent+" Class decl: " + getBaseClassDecl().name() + "\n");
 	   str.append(indent+" myEnvironment():\n");
 	   str.append(myEnvironment().toString(indent+" "));
 	   str.append(indent+" myEnvironment('"+name()+"'):\n");

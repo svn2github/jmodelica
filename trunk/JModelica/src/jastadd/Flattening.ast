@@ -42,7 +42,8 @@ InstReplacingComposite : InstComposite ::= <OriginalDecl:ComponentDecl> /Origina
 InstReplacingPrimitive : InstPrimitive ::= <OriginalDecl:ComponentDecl> /OriginalInstComponent:InstComponentDecl/ <IComponentRedeclare:IComponentRedeclare>;
 
 InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause> [IClassModification];
-InstExtendsShortClass : InstExtends;
+InstExtendsShortClass : InstExtends ::=;
+//InstReplacingExtendsShortClass : InstReplacingExtendsShortClass ::= <InstExtendsShortClass:InstExtendsShortClass>
 
 // Accesses in the instance tree
 abstract InstAccess ::= <ID>;

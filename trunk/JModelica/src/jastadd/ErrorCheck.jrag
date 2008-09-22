@@ -104,16 +104,26 @@ aspect ErrorCheck {
       Problem newP = new Problem(fileName(), s, Problem.Severity.ERROR, Problem.Kind.SEMANTIC,lineNumber(),columnNumber());
       boolean duplicate = false;
       for (Problem p : root().errors) {
-      	if (newP.toString().equals(p.toString()))
+      	if (newP.toString().equals(p.toString())) {
       		duplicate = true;
       		break;
+      	}
       }
       if (!duplicate)
 	      root().errors.add(newP);
   }
 
   void ASTNode.warning(String s) {
-	 root().warnings.add(new Problem(fileName(), "WARNING: " + s, Problem.Severity.WARNING));
+     Problem newP = new Problem(fileName(), "WARNING: " + s, Problem.Severity.WARNING);
+     boolean duplicate = false;
+      for (Problem p : root().warnings) {
+      	if (newP.toString().equals(p.toString())) {
+      		duplicate = true;
+      		break;
+      	}
+      }
+      if (!duplicate)
+	      root().warnings.add(newP);     
   }
 
   
@@ -296,10 +306,14 @@ aspect InstanceErrorCheck {
 //    	getSuperList().collectErrors();
 //    	getImportList().collectErrors();
 //    	getComponentDeclList().collectErrors();
-    	if (!(getFullClassDecl().getName().getID().equals(getFullClassDecl().getEndName())))
-    		error("The declaration and end names of a class should be the same");
+		if (getBaseClassDecl() instanceof FullClassDecl) { 	
+			FullClassDecl fcd = (FullClassDecl)getBaseClassDecl();
+	    	if (!(fcd.getName().getID().equals(fcd.getEndName())))
+    			error("The declaration and end names of a class should be the same");
+  			}
   		}
   	}	
+
 
   public void InstNode.collectErrors() {
     if (!errorChecked) {

@@ -351,6 +351,56 @@ M m(redeclare B a);
   
 end NameTest12_Err;
   
+  
+ model NameTest13_Err
+     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="NameTest13_Err",
+                                              description="Test that names are looked up correct.",
+                                               errorMessage=
+"
+ 3 error(s) found...
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 386, column 37:
+  The class C is undeclared
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 386, column 39:
+  The component y is undeclared
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 389, column 12:
+  The component y is undeclared
+ 
+")})));
+  
+  
+   package P
+   model A
+    Real x=1;
+   end A;
+ 
+     model B
+        Real x=2;
+        Real y=3;
+     end B;
+ 
+     model C
+        Real x=2;
+        Real y=3;
+        Real z=4;
+     end C;
+     
+     replaceable model BB = B(x=3);
+     
+   end P;
+ 
+   package PP = P(redeclare model BB 
+     	                      extends C(y=4);
+                            end BB);
+ 
+  PP.BB bb(y=6);
+ 
+end NameTest13_Err;
+  
+  
 
 class ExtendsTest1
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
