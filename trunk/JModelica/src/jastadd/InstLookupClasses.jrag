@@ -397,6 +397,28 @@ aspect InstLookupClasses {
 			return emptyHashSet();
 	}
 	
+	eq InstComponentDecl.memberInstClass(String name) {
+		HashSet set = new HashSet();
+		
+		for (InstClassDecl icd : constrainingInstClassDecls()) {
+			if (icd.matchInstClassDecl(name)) {
+				set.add(icd);
+			}
+		}
+		
+		for (InstExtends ie : constrainingInstExtends()) {
+			HashSet h = ie.getClassName().lookupInstClass();
+			if (h.size()==1)
+				set.addAll(((InstClassDecl)h.iterator().next()).memberInstClass(name));
+		}
+		
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+	
+	
 	
 	syn boolean InstClassDecl.matchInstClassDecl(String name) = false;
 	eq InstBuiltInClassDecl.matchInstClassDecl(String name) = name().equals(name); 
@@ -514,9 +536,9 @@ aspect InstLookupClassesInModifications {
 
 	eq IElementModification.getName().lookupInstClass(String name) = lookupInstClassInInstClass(name);
 
-	eq InstComponentDecl.getIModification().lookupInstClassInInstClass(String name) = myInstClass().memberInstClass(name);		
-	eq IElementModification.getIModification().lookupInstClassInInstClass(String name) = getName().myInstClassDecl().memberInstClass(name);
-	eq InstExtends.getIClassModification().lookupInstClassInInstClass(String name) = getClassName().myInstClassDecl().memberInstClass(name);
+	eq InstComponentDecl.getIModification().lookupInstClassInInstClass(String name) = /*myInstClass().*/memberInstClass(name);		
+	eq IElementModification.getIModification().lookupInstClassInInstClass(String name) = getName().myInstComponentDecl().memberInstClass(name);
+	eq InstExtends.getIClassModification().lookupInstClassInInstClass(String name) = /*getClassName().myInstClassDecl().*/memberInstClass(name);
 	
 //	eq InstShortClassDecl.getIClassModification().lookupInstClassInInstClass(String name) = getClassName().myInstClassDecl().memberInstClass(name);
 	

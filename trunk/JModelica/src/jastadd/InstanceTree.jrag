@@ -173,7 +173,7 @@ aspect Environments {
 		if (hasInstConstraining() &&
 		       getInstConstraining().hasIClassModification())
 		  	l.add(getInstConstraining().getIClassModification());	
-		l.addAll(retrieveOriginalShortClassIModifications());
+        l.addAll(myInstClass().classIModifications());
 		return l;
 		
 	}
@@ -191,63 +191,61 @@ aspect Environments {
      		if (getOriginalInstComponent().hasIModification())
 				l.add(getOriginalInstComponent().getIModification());     
         }
- 		l.addAll(retrieveOriginalShortClassIModifications());		
+        l.addAll(myInstClass().classIModifications());
+		return l;
+	}
+	 
+	eq InstShortClassDecl.localIModifications() {
+		ArrayList<IModification> l = new ArrayList<IModification>();
+   		if (hasIClassModification())
+				l.add(getIClassModification());     
+		if (hasInstConstraining()) {
+		  if (getInstConstraining().hasIClassModification()) {
+			l.add(getInstConstraining().getIClassModification());
+          }
+        } 
+        l.addAll(getInstExtends(0).getClassName().myInstClassDecl().classIModifications());
+   		return l;
+	}	 
+		 	
+	eq InstReplacingShortClassDecl.localIModifications() {
+		ArrayList<IModification> l = new ArrayList<IModification>();
+		// If there is a constraining clase, return its modifications
+		if (getOriginalInstClass().hasInstConstraining()) {
+		  if (getOriginalInstClass().getInstConstraining().hasIClassModification()) {
+			l.add(getOriginalInstClass().getInstConstraining().getIClassModification());
+          }
+        } else {
+            // If no constraining clause, use the original declaration 
+            // and return its modifiers
+     		if (getOriginalInstClass().hasIClassModification())
+				l.add(getOriginalInstClass().getIClassModification());     
+        }	
+        l.addAll(getInstExtends(0).getClassName().myInstClassDecl().classIModifications());
 		return l;
 	}
 	 	
+	syn lazy boolean InstClassDecl.hasIClassModification() = false;
+	eq InstShortClassDecl.hasIClassModification() = getInstExtends(0).hasIClassModification(); 	
+	syn lazy IClassModification InstClassDecl.getIClassModification() = null;
+	eq InstShortClassDecl.getIClassModification() = getInstExtends(0).getIClassModification(); 	
+
 	eq InstExtends.localIModifications() {
 		ArrayList<IModification> l = new ArrayList<IModification>();
 		if (hasIClassModification())
 			l.add(getIClassModification());
- 		l.addAll(retrieveOriginalShortClassIModifications());
+        l.addAll(getClassName().myInstClassDecl().classIModifications());
 		return l;
 	}
 
 	eq InstExtendsShortClass.localIModifications() {
+		// notice that modifications on short classes are merged in InstShortClassDecl nodes
 		ArrayList<IModification> l = new ArrayList<IModification>();
-		if (myInstShortClassDecl().isRedeclared()) {
-			if (myInstShortClassDecl().getInstExtends(0).hasIClassModification())
-				l.add(myInstShortClassDecl().getInstExtends(0).getIClassModification());
-		} else {
-			if (hasIClassModification())
-				l.add(getIClassModification());
-		}
-		l.addAll(retrieveOriginalShortClassIModifications());
 		return l;
 	}
  
- 	// This is to take original modifications in redeclared short class declarations into account.
- 	inh lazy ArrayList<IModification> InstNode.retrieveOriginalShortClassIModifications();
- 	eq InstComponentDecl.getChild().retrieveOriginalShortClassIModifications() {
- 		ArrayList<IModification> l = new ArrayList<IModification>();
- 		l.addAll(myInstClass().originalShortClassIModifications());
- 		return l;
- 	}
- 	eq InstExtends.getChild().retrieveOriginalShortClassIModifications() {
- 		ArrayList<IModification> l = new ArrayList<IModification>();
- 		l.addAll(getClassName().myInstClassDecl().originalShortClassIModifications());
- 		return l;
- 	}
- 	eq InstReplacingShortClassDecl.getInstExtends().retrieveOriginalShortClassIModifications() {
- 		ArrayList<IModification> l = new ArrayList<IModification>();
- 		l.addAll(originalShortClassIModifications());
- 		return l;
- 	}
- 	
- 	inh lazy InstShortClassDecl InstExtendsShortClass.myInstShortClassDecl();
- 	eq InstShortClassDecl.getInstExtends().myInstShortClassDecl() = this;
- 	eq InstExtends.getInstExtends().myInstShortClassDecl() = (InstShortClassDecl)getClassName().myInstClassDecl();
- 	eq InstComponentDecl.getInstExtends().myInstShortClassDecl() = (InstShortClassDecl)myInstClass();
- 	eq SourceRoot.getProgram().myInstShortClassDecl() = null;
- 	
-	eq SourceRoot.getProgram().retrieveOriginalShortClassIModifications() = new ArrayList<IModification>();
+ 	syn lazy ArrayList<IModification> InstClassDecl.classIModifications() = getMergedEnvironment().clone();
 
-	syn lazy ArrayList<IModification> InstClassDecl.originalShortClassIModifications() = new ArrayList<IModification>();
-	eq InstReplacingShortClassDecl.originalShortClassIModifications() {
-		ArrayList<IModification> l = new ArrayList<IModification>();
-		l.addAll(getOriginalInstClass().getInstExtends(0).localIModifications());
-		return l;
-	}
  
  
     /* getMergedEnvironment gives the environment applicable
@@ -314,8 +312,8 @@ aspect Environments {
 		Environment env = new Environment();
 		boolean componentRedeclareFound = false;
 		IComponentRedeclare icr = retrieveReplacingComponent(name);
-//		boolean classRedeclareFound = false;
-//		IClassRedeclare iclr = retrieveReplacingClass(name);
+		boolean classRedeclareFound = false;
+		IClassRedeclare iclr = retrieveReplacingClass(name);
 		for (IModification im : getMergedEnvironment()) {
 			// If a first component redeclare modification is found, add modifiers
 			if (!componentRedeclareFound && im==icr) {
@@ -324,12 +322,12 @@ aspect Environments {
 				componentRedeclareFound = true;
 			}
 			// If a first class redeclare modification is found, add modifiers
-/*			if (!classRedeclareFound && im==icr) {
-            	if (iclr.getInstClassDecl().hasIModification()) 
-    				env.mergeInnerModification(iclr.getInstClassDecl().getIModification());
+			if (!classRedeclareFound && im==iclr) {
+            	if (iclr.getInstClassDecl().hasIClassModification()) 
+    				env.mergeInnerModification(iclr.getInstClassDecl().getIClassModification());
 				classRedeclareFound = true;
 			}
-*/
+
 			
 			
 			if (im.matchIModification(name) != null) {

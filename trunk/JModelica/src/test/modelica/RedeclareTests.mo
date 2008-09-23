@@ -2519,16 +2519,19 @@ class RedeclareTest21 "Test of merging of modifications in parametrized classes"
         description="Test of parametrized classes.",
                                                flatModel=
 "
-fclass RedeclareTests.RedeclareTest20
- Real g.f.e.b.x = 5 /*(5)*/;
+fclass RedeclareTests.RedeclareTest21
+ parameter Real p0 = 5 /*(5)*/;
+ parameter Real g.pG = 6 /*(6)*/;
+ parameter Real g.f.pF = 4 /*(4)*/;
+ parameter Real g.f.e.pE = 3 /*(3)*/;
+ Real g.f.e.b.x = g.f.e.pE /*(3)*/;
  Real g.f.e.b.y = 3 /*(3)*/;
  Real g.f.e.a.x = 5 /*(5)*/;
- Real g.f.e.a.y = 4 /*(4)*/;
- Real g.f.e.a.z = 6 /*(6)*/;
- Real g.f.e.a.w = 5 /*(5)*/;
-equation 
-end RedeclareTests.RedeclareTest20;
-	
+ Real g.f.e.a.y = g.f.pF /*(4)*/;
+ Real g.f.e.a.z = g.pG /*(6)*/;
+ Real g.f.e.a.w = p0 /*(5)*/;
+equation
+end RedeclareTests.RedeclareTest21;	
 "
   )})));
  
@@ -2588,16 +2591,17 @@ class RedeclareTest22 "Test of merging of modifications in parametrized classes"
         description="Test of parametrized classes.",
                                                flatModel=
 "
-fclass RedeclareTests.RedeclareTest20
- Real g.f.e.b.x = 5 /*(5)*/;
+fclass RedeclareTests.RedeclareTest22
+ parameter Real p0 = 5 /*(5)*/;
+ parameter Real g.pG = 6 /*(6)*/;
+ parameter Real g.f.pF = 4 /*(4)*/;
+ parameter Real g.f.e.pE = 3 /*(3)*/;
+ Real g.f.e.b.x = g.f.e.pE /*(3)*/;
  Real g.f.e.b.y = 3 /*(3)*/;
- Real g.f.e.a.x = 5 /*(5)*/;
- Real g.f.e.a.y = 4 /*(4)*/;
- Real g.f.e.a.z = 6 /*(6)*/;
- Real g.f.e.a.w = 5 /*(5)*/;
-equation 
-end RedeclareTests.RedeclareTest20;
-	
+ Real g.f.e.b.z = 4 /*(4)*/;
+ Real g.f.e.b.w = p0 /*(5)*/;
+equation
+end RedeclareTests.RedeclareTest22;
 "
   )})));
  
@@ -2646,5 +2650,63 @@ end RedeclareTests.RedeclareTest20;
    G g(f(e(redeclare model myB = D(w=p0))));
 
 end RedeclareTest22;
+
+class RedeclareTest225 "Test of merging of modifications in parametrized classes"
+ 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest225",
+        description="Test of parametrized classes.",
+                                               flatModel=
+"
+fclass RedeclareTests.RedeclareTest225
+ parameter Real p0 = 5 /*(5)*/;
+ parameter Real f.e.pE = 3 /*(3)*/;
+ Real f.e.b.x = f.e.pE /*(3)*/;
+ Real f.e.b.y = 3 /*(3)*/;
+ Real f.e.b.z = 4 /*(4)*/;
+ Real f.e.b.w = p0 /*(5)*/;
+equation
+end RedeclareTests.RedeclareTest225;	
+"
+  )})));
+ 
+  
+  model A
+    Real x=1;
+  end A;
+ 
+  model B
+   Real x=2;
+   Real y=3;
+  end B;
+  
+  model C
+   Real x=2;
+   Real y=3;
+   Real z=4;
+  end C;
+
+  model D
+   Real x=2;
+   Real y=3;
+   Real z=4;
+   Real w=5;
+  end D;
+
+   model E
+     parameter Real pE = 3;
+     replaceable model myB = B(x=pE);
+     myB b;
+   end E;
+ 
+   model F
+     E e;
+   end F;
+ 
+   parameter Real p0 = 5; 
+   F f(e(redeclare model myB = D(w=p0)));
+
+end RedeclareTest225;
+
 
 end RedeclareTests;
