@@ -22,11 +22,14 @@ sourceRoot = test_loadFile()
 modelInstance = sourceRoot.getProgram().getInstProgramRoot();
 modelInstance.dumpTree("")
 
+# Create a flat class to use in the flattening algorithm
 flatRoot = org.jmodelica.ast.FlatRoot();
 flatRoot.setFileName(mo_file);
 flatModel = org.jmodelica.ast.FClass();
 flatRoot.setFClass(flatModel);
+# Flatten the model
 ir = modelInstance.findFlattenInst('ConnectTests.CircuitTest1',flatModel);
 
+# Pretty print the flat model
 flatString = flatModel.prettyPrint("")
 print(flatString)
