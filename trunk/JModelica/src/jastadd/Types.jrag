@@ -3,47 +3,12 @@ import java.util.ArrayList;
 
 aspect Types { 
  
-   /* DynamicInstList contains type representations that are created
-      dynamically during type checking.
-    */
-//   syn lazy List InstNode.getDynamicInstList() = new List();
-   
-   /* DynamicInstConstrainingList contains type representations that are created
-      dynamically during type checking and should be flattened as constraining types.
-    */
-//   syn lazy List InstNode.getDynamicInstConstrainingList() = new List();
-/*
-   syn lazy InstComposite InstNode.createDynamicInstComposite(ComponentDecl decl) {
-      // TODO: Check for redeclares
-   	  InstComposite ic = new InstComposite(new List(),decl.newInstClassAccess(),decl,decl.myClass(),new Opt(),new Opt());
-   	  if (decl.hasModification())
-		ic.setIModification(decl.getModification().newIModification());
-	  ic.setInstConstrainingOpt(decl.newInstConstrainingComponentOpt());
- 	 
-   	  addDynamicInst(ic);
-   	  ic.is$Final(true); // TODO: Is this really ok...?
-   	  return ic;
-   }
-   
-   syn lazy InstComposite InstNode.createDynamicInstConstrainingComposite(ComponentDecl decl) {
-   	  // TODO: Check for redeclares
-   	  InstComposite ic = new InstComposite(new List(),decl.newInstClassAccess(),decl,decl.myClass(),new Opt(), new Opt());
-      if (decl.hasModification())
-		ic.setIModification(decl.getModification().newIModification());
-	  ic.setInstConstrainingOpt(decl.newInstConstrainingComponentOpt());
-   	  
-   	  addDynamicInstConstraining(ic);
-   	  ic.is$Final(true); // TODO: Is this really ok...?
-   	  return ic;
-   }
- */
+ 
    // This attribute is used to check if the instance tree should be built based only on constraining types
    inh boolean InstNode.constrainingType();
    eq InstConstraining.getInstNode().constrainingType() = true;
    eq InstRoot.getChild().constrainingType() = false;
-//   eq InstNode.getDynamicInstConstraining().constrainingType() = true;
 
-  
    syn String InstNode.className() = "";
    syn String InstComponentDecl.className() = getComponentDecl().myClass().name();
 
@@ -58,10 +23,12 @@ aspect Types {
 
    eq InstComposite.superTypeCompositeType(InstComposite subType) {
        if (subType == this) return true;
+       if (subType.myInstClass().isUnknown()) return true;
        InstComposite superType = this;
    
        // Check that all elements (here: components) in superType are in subType 
        for (InstNode superTypeComponentInst : containedInstComponents()) {
+       	  // TODO: memberComponentInst should be switched for something in the general name analysis framework
           HashSet<InstNode> set = subType.memberComponentInst(superTypeComponentInst.name());
           if (set.size()!=1)
           	return false;
@@ -69,9 +36,10 @@ aspect Types {
           if (!subTypeComponentInst.subType(superTypeComponentInst))
           	return false;
 	   }
-   	   
    	   return true;
    }
+   
+   eq UnknownInstComponentDecl.superTypeCompositeType(InstComposite subType) = true;
    
    eq InstPrimitive.superTypePrimitiveComponentType(InstPrimitive subType) {
        if (subType == this) return true;
@@ -89,10 +57,10 @@ aspect Types {
      	// This is to take InstExtends into account
      if (node.name().equals(name))
         set.add(node);
- 
      }
      return set;
   }
+
 
   syn lazy ArrayList<InstNode> InstNode.containedInstComponents() {
   	ArrayList<InstNode> l = new ArrayList<InstNode>();
@@ -114,14 +82,6 @@ aspect Types {
      	typeChecked = true;
 	     // Notice that modifiers (including redeclarations) in a constraining clause
    	  	 // are applied to the declaration itself and is therefore also type checked.
-/*
-   	     if (getComponentDecl().hasConstrainingClause()) {
-         	InstComponentDecl superType = createDynamicInstConstrainingComposite(getComponentDecl());
-	     	InstComponentDecl declaredType = createDynamicInstComposite(getComponentDecl()); 
-    	 	if (!declaredType.subType(superType))
-     			superType.getComponentDecl().error("In the declaration '" +declaredType.getComponentDecl().prettyPrint("") +"', the declared class is not a subtype of the constraining class");
-  	 	}
-*/
 		if (hasInstConstraining()) {
 		      InstNode superType = getInstConstraining().getInstNode();
 	     	  InstComponentDecl declaredType = this; 
@@ -133,29 +93,31 @@ aspect Types {
   	 }
   }
   
+  syn lazy InstComponentDecl InstComponentDecl.constrainingInstComponentDecl() = 
+  	hasInstConstraining()? (InstComponentDecl)getInstConstraining().getInstNode() : this;
+  
   public void InstReplacingComposite.typeCheck() {
-  /*
      if (!typeChecked) {
      	typeChecked = true;
      
-	     // Type check the original component
- 	     InstComponentDecl superType = createDynamicInstConstrainingComposite(getOriginalDecl());
-   	     if (getOriginalDecl().hasConstrainingClause()) {
-   	        InstComponentDecl declaredType = createDynamicInstComposite(getOriginalDecl());
-         	if (!declaredType.subType(superType))
-     	  		superType.getComponentDecl().error("In the declaration '" +declaredType.getComponentDecl().prettyPrint("") +"', the declared class is not a subtype of the constraining class");
-         }
+	 // Type check the original component
+	 InstComponentDecl declaredType = getOriginalInstComponent();	 
+	 InstComponentDecl superType = declaredType.constrainingInstComponentDecl();
+	 if (declaredType.hasInstConstraining()) {
+	 	 if (!declaredType.subType(superType))
+     	  	superType.getComponentDecl().error("In the declaration '" +declaredType.getComponentDecl().prettyPrint("") +"', the declared class is not a subtype of the constraining class");
+	 } 
 
      // The environment should be traversed backwards in order to perform correct
      // subtype tests in redeclaration chains.     	
-       for (int i=myEnvironment().getNumInstModification()-1;i>=0;i--) {
-        InstModification im = myEnvironment().getInstModification(i);
-	   	if (im.getModification().matchComponentRedeclare(name())!=null) { 
-           InstComponentDecl constrainingSubType = im.getInstNode().createDynamicInstConstrainingComposite(im.getModification().matchComponentRedeclare(name()));
+       for (int i=myEnvironment().size()-1;i>=0;i--) {
+        IModification im = myEnvironment().get(i);
+	   	if (im.matchIComponentRedeclare(name())!=null) { 
+          InstComponentDecl declaredSubType = im.matchIComponentRedeclare(name()).getInstComponentDecl();
+          InstComponentDecl constrainingSubType = declaredSubType.constrainingInstComponentDecl();
                         
            // Check consistency of the redeclaring component
-           if (constrainingSubType.getComponentDecl().hasConstrainingClause()) {
-              InstComponentDecl declaredSubType = im.getInstNode().createDynamicInstComposite(constrainingSubType.getComponentDecl());
+           if (declaredSubType.hasInstConstraining()) {
               if (!declaredSubType.subType(constrainingSubType))
      	         declaredSubType.getComponentDecl().error("In the declaration '" +declaredSubType.getComponentDecl().prettyPrint("") +"', the declared class is not a subtype of the constraining class");
            }
@@ -170,13 +132,12 @@ aspect Types {
            // If the redeclaring declaration has a constraining clause, the constraining
            // type of the redeclaring declaration of should be used in following subtype-test 
            // instead of the constraining type of the orignal declaration.
-           if (constrainingSubType.getComponentDecl().hasConstrainingClause()) {    
+           if (declaredSubType.hasInstConstraining()) {    
               superType = constrainingSubType;
            }    	   
 	    }
 	 }
   }
-*/
 }
 
 }

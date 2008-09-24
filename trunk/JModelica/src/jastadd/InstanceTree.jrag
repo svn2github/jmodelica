@@ -524,17 +524,29 @@ aspect InstanceTreeConstruction {
 		
 		// Dispatch w.r.t. class type
 	public abstract InstComponentDecl InstClassDecl.newInstComponentDecl(ComponentDecl cd);
-
 	public InstComponentDecl InstBaseClassDecl.newInstComponentDecl(ComponentDecl cd) {
+		return newInstComponentDecl(cd,cd.getClassName());		
+		
+	}
+	public InstComponentDecl InstPrimitiveClassDecl.newInstComponentDecl(ComponentDecl cd) {
+		return newInstComponentDecl(cd,cd.getClassName());
+	}
+	public InstComponentDecl InstBuiltInClassDecl.newInstComponentDecl(ComponentDecl cd) {
+		return newInstComponentDecl(cd,cd.getClassName());
+	}
+		
+	public abstract InstComponentDecl InstClassDecl.newInstComponentDecl(ComponentDecl cd, Access className);
+
+	public InstComponentDecl InstBaseClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
 		if (!extendsPrimitive()){
-			InstComponentDecl icd = new InstComposite(cd.newInstClassAccess(),cd,new Opt(),new Opt());
+			InstComponentDecl icd = new InstComposite(className.newInstAccess(),cd,new Opt(),new Opt());
 			if (cd.hasModification())
 				icd.setIModification(cd.getModification().newIModification());
 			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
 			icd.setStart(cd.getStart());
 			return icd;
 		} else {
-			InstPrimitive icd = new InstPrimitive(cd.newInstClassAccess(),cd,new Opt(),new Opt());
+			InstPrimitive icd = new InstPrimitive(className.newInstAccess(),cd,new Opt(),new Opt());
 			if (cd.hasModification())
 				icd.setIModification(cd.getModification().newIModification());
 			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
@@ -544,8 +556,8 @@ aspect InstanceTreeConstruction {
 		}
 	}
 
-	public InstComponentDecl InstPrimitiveClassDecl.newInstComponentDecl(ComponentDecl cd) {
-		InstPrimitive ipr = new InstPrimitive(cd.newInstClassAccess(),cd,new Opt(),new Opt());
+	public InstComponentDecl InstPrimitiveClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
+		InstPrimitive ipr = new InstPrimitive(className.newInstAccess(),cd,new Opt(),new Opt());
 		if (cd.hasModification())
 			ipr.setIModification(cd.getModification().newIModification());
 		ipr.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
@@ -553,8 +565,8 @@ aspect InstanceTreeConstruction {
 		return ipr;
 	}
 
-	public InstComponentDecl InstBuiltInClassDecl.newInstComponentDecl(ComponentDecl cd) {
-		return new InstBuiltIn(cd.newInstClassAccess(),cd,new Opt(),new Opt());
+	public InstComponentDecl InstBuiltInClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
+		return new InstBuiltIn(className.newInstAccess(),cd,new Opt(),new Opt());
 	}
 
 	public abstract InstComponentDecl InstClassDecl.newInstReplacingComponent(ComponentDecl replacingDecl,
@@ -730,15 +742,14 @@ aspect InstaceConstrainingClauses {
 
 	syn lazy InstNode InstConstraining.getInstNode();
 	eq InstConstrainingComponent.getInstNode() {
-  		return getClassName().myInstClassDecl().newInstComponentDecl(getComponentDecl());
+  		return getClassName().myInstClassDecl().newInstComponentDecl(getComponentDecl(),getConstrainingClause().getAccess());
 	}
 
 	eq InstConstrainingClass.getInstNode() {
 		ClassDecl classToExpand = getClassName().myInstClassDecl().getClassDecl();
 		return classToExpand.newInstClassDecl();
 	}
-
-
+	
 }
 
 aspect InstImportClauses {

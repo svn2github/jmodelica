@@ -67,6 +67,7 @@
   			<include name="org/jmodelica/parser/*.class"/> 
   			<include name="org/jmodelica/test/ast/*.class"/> 
   			<include name="org/jmodelica/test/benchmarks/*.class"/> 
+  			<include name="org/jmodelica/interactive/*.class"/> 
   			<include name="beaver/*.class"/> 
   		</fileset>
   	 </jar>

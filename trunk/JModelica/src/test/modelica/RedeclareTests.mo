@@ -2758,5 +2758,139 @@ end RedeclareTests.RedeclareTest23;
 
 end RedeclareTest23;
 
+class RedeclareTest24 "Test of merging of modifications in parametrized classes"
+ 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest24",
+        description="Test of parametrized classes.",
+                                               flatModel=
+"
+fclass RedeclareTests.RedeclareTest24
+ parameter Real p0 = 5 /*(5)*/;
+ parameter Real g.pG = 6 /*(6)*/;
+ parameter Real g.f.pF = 4 /*(4)*/;
+ parameter Real g.f.e.pE = 3 /*(3)*/;
+ Real g.f.e.b.x = g.f.e.pE /*(3)*/;
+ Real g.f.e.b.y = 3 /*(3)*/;
+ Real g.f.e.b.z = 4 /*(4)*/;
+ Real g.f.e.b.w = p0 /*(5)*/;
+equation
+end RedeclareTests.RedeclareTest24;
+"
+  )})));
+ 
+  
+  model A
+    Real x=1;
+  end A;
+ 
+  model B
+   Real x=2;
+   Real y=3;
+  end B;
+  
+  model C
+   Real x=2;
+   Real y=3;
+   Real z=4;
+  end C;
+
+  model D
+   Real x=2;
+   Real y=3;
+   Real z=4;
+   Real w=5;
+  end D;
+
+   model E
+     parameter Real pE = 3;
+     replaceable model myB = B(x=pE);
+     myB b;
+   end E;
+ 
+   model F
+     parameter Real pF = 4;
+     replaceable model myB2 = B(x=6,y=pF);
+     E e(redeclare model myB = myB2(y=8));
+   end F;
+ 
+   model G
+   	 parameter Real pG = 6;
+     replaceable model myC = C(y=7,z=pG);
+     F f(e(redeclare model myB = myC(z=9)));
+   end G;
+    
+   parameter Real p0 = 5; 
+   G g(f(e(redeclare model myB = D(w=p0))));
+
+end RedeclareTest24;
+
+class RedeclareTest25 "Test of merging of modifications in parametrized classes"
+ 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest25",
+        description="Test of parametrized classes.",
+                                               flatModel=
+"
+fclass RedeclareTests.RedeclareTest25
+ parameter Real p0 = 5 /*(5)*/;
+ parameter Real g.pG = 6 /*(6)*/;
+ parameter Real g.f.pF = 4 /*(4)*/;
+ parameter Real g.f.e.pE = 3 /*(3)*/;
+ Real g.f.e.b.x = g.f.e.pE /*(3)*/;
+ Real g.f.e.b.y = 8 /*(8)*/;
+ Real g.f.e.b.z = 9 /*(9)*/;
+ Real g.f.e.b.w = p0 /*(5)*/;
+equation
+end RedeclareTests.RedeclareTest25;
+"
+  )})));
+ 
+  
+  model A
+    Real x=1;
+  end A;
+ 
+  model B
+   Real x=2;
+   Real y=3;
+  end B;
+  
+  model C
+   Real x=2;
+   Real y=3;
+   Real z=4;
+  end C;
+
+  model D
+   Real x=2;
+   Real y=3;
+   Real z=4;
+   Real w=5;
+  end D;
+
+   model E
+     parameter Real pE = 3;
+     replaceable model myB = B(x=pE);
+     myB b;
+   end E;
+ 
+   model F
+     parameter Real pF = 4;
+     replaceable model myB2 = B(x=6,y=pF);
+     E e(redeclare replaceable model myB = myB2 extends myB2(y=8));
+   end F;
+ 
+   model G
+   	 parameter Real pG = 6;
+     replaceable model myC = C(y=7,z=pG);
+     F f(e(redeclare replaceable model myB = myC extends myC(z=9)));
+   end G;
+    
+   parameter Real p0 = 5; 
+   G g(f(e(redeclare model myB = D(w=p0))));
+
+end RedeclareTest25;
+
 
 end RedeclareTests;
