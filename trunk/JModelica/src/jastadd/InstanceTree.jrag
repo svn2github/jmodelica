@@ -802,7 +802,6 @@ aspect InstanceAST_API {
 	eq InstExtends.equations() = getClassName().myInstClassDecl().equations();
 	eq InstFullClassDecl.equations() = getBaseClassDecl().equations();	
 	
-	
 	syn lazy ArrayList<ComponentDecl> InstNode.components() = new ArrayList<ComponentDecl>();
 	eq InstClassRoot.components() = getClassDecl().components();
 	eq InstComponentDecl.components() = myInstClass().components();

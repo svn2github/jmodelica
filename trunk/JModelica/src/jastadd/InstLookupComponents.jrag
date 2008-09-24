@@ -24,6 +24,7 @@ aspect InstLookupComponents {
 	
 	syn lazy HashSet InstBaseClassDecl.genericLookupInstComponent(String name) {
 		HashSet h = memberInstComponent(name);
+		// TODO: add scoped lookup to find constants.
 		return h;
 	 }
 	
@@ -32,7 +33,6 @@ aspect InstLookupComponents {
 
 	 	HashSet set = new HashSet(4);
 		 	
-	 	
 		for (InstComponentDecl ic : constrainingInstComponentDecls()) {
 			if (ic.matchInstComponentDecl(name))
 				set.add(ic);
@@ -55,9 +55,6 @@ aspect InstLookupComponents {
 	eq InstPrimitive.memberInstComponent(String name) = myInstClass().memberInstComponent(name);
 	eq InstExtends.memberInstComponent(String name) = extendsPrimitive()? myInstClass().memberInstComponent(name) : super.memberInstComponent(name);
 
-
-
-	
 	/**
 	 * Simple matching of component names.
 	 */
