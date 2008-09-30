@@ -11,7 +11,7 @@ InstProgramRoot : InstRoot ::= <Program:Program>
 
 abstract InstClassDecl: InstNode ::= <ClassDecl:ClassDecl>;
 abstract InstBaseClassDecl : InstClassDecl ::=  /InstImport*/ [InstConstraining];
-InstFullClassDecl : InstBaseClassDecl ::= ;
+InstFullClassDecl : InstBaseClassDecl ::= /*FAbstractEquation*/;
 InstShortClassDecl : InstBaseClassDecl ::= ;
 InstPrimitiveClassDecl : InstFullClassDecl;
 InstBuiltInClassDecl : InstClassDecl ::= ;

@@ -392,10 +392,6 @@ aspect InstanceErrorCheck {
 		getInstClassDecl().collectErrors();	
 	}
 
-	
-
-
-  	
   
 /*  
     public void InstClassDecl.collectErrors() {

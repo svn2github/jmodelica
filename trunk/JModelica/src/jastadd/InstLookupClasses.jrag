@@ -418,8 +418,6 @@ aspect InstLookupClasses {
 			return emptyHashSet();
 	}
 	
-	
-	
 	syn boolean InstClassDecl.matchInstClassDecl(String name) = false;
 	eq InstBuiltInClassDecl.matchInstClassDecl(String name) = name().equals(name); 
 	eq InstBaseClassDecl.matchInstClassDecl(String name) = name().equals(name);
@@ -518,7 +516,6 @@ aspect InstLookupImport {
 	}
 	
 }
-
 
 aspect InstLocalClasses {
 
