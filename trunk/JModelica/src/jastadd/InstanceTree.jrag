@@ -421,7 +421,16 @@ aspect Environments {
 	inh lazy InstNode InstNode.myInstNode();
 	eq InstNode.getChild().myInstNode() = this;
 	//The lexical scope of modifiers for short classes are "outside" of the short declaration
-    eq InstExtendsShortClass.getChild().myInstNode() = myInstNode();
+    eq InstExtendsShortClass.getChild().myInstNode() = myInstShortClassDecl().myInstNode();
+	
+	inh lazy InstClassDecl InstExtendsShortClass.myInstShortClassDecl();
+	eq InstShortClassDecl.getInstExtends().myInstShortClassDecl() = this;
+	eq InstComponentDecl.getInstExtends().myInstShortClassDecl() {
+		if (getClassName().myInstClassDecl() instanceof InstShortClassDecl)
+			return (InstShortClassDecl)getClassName().myInstClassDecl();
+	}
+	
+	eq SourceRoot.getChild().myInstShortClassDecl() = unknownInstClassDecl();
 	
 	/**
 	 * InstPrimitive:s may have children of type InstExtends, if the InstPrimitive is instantiated
