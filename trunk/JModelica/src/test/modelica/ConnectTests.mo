@@ -23,6 +23,42 @@ model ConnectTests
       
    end ConnectTest1;
 
+    class ConnectTest2_Err
+
+   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ConnectTest2_Err",
+                                               description="Basic test of name lookup in connect clauses",
+                                               errorMessage=
+"
+1 error(s) found...
+In file 'src/test/modelica/ConnectTests.mo':
+Semantic error at line 53, column 15:
+  Cannot find class or component declaration for cc
+")})));
+
+	connector Ca
+		flow Real x;
+		Real y;
+	end Ca;
+	
+	connector Cb
+		flow Real x;
+		Real y;
+	end Cb;
+	
+	model C2
+		Ca ca;
+		Cb cb;
+	equation
+      connect(cc,cb);
+    end C2;
+    
+    C2 c2;  
+      
+   end ConnectTest2_Err;
+   
+
+
 model Electrical
   
   connector Pin "Pin of an electrical component" 

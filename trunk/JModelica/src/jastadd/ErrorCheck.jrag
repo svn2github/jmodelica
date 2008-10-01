@@ -290,7 +290,7 @@ aspect InstanceErrorCheck {
 	}
 
 	boolean InstNode.errorChecked = false;
-  	public void InstFullClassDecl.collectErrors() {
+  	public void InstBaseClassDecl.collectErrors() {
     	if (!errorChecked) {
     	errorChecked = true;
  //       for (InstClassDecl icd : instClassDecls())
@@ -301,6 +301,8 @@ aspect InstanceErrorCheck {
         	ie.collectErrors();	
         for (InstImport ii : getInstImports())
         	ii.collectErrors();		
+        for (FAbstractEquation e : getFAbstractEquations())
+        	e.collectErrors();
 //    	getEquationList().collectErrors();
 //    	getAlgorithmList().collectErrors();
 //    	getSuperList().collectErrors();
@@ -326,7 +328,6 @@ aspect InstanceErrorCheck {
 		  n.collectErrors();
 	  for(InstNode n : getInstExtendss()) 
 		  n.collectErrors();
-
 	  
 	}
   }
@@ -390,6 +391,16 @@ aspect InstanceErrorCheck {
 	public void IClassRedeclare.collectErrors() {
 		super.collectErrors();
 		getInstClassDecl().collectErrors();	
+	}
+
+	public void IValueModification.collectErrors() {
+		getFExp().collectErrors();
+	}
+
+	public void InstDot.collectErrors() {
+		getLeft().collectErrors();
+		if (!getLeft().isUnknown())
+			getRight().collectErrors();
 	}
 
   

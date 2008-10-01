@@ -64,6 +64,7 @@ FExpSubscript : FSubscript ::= FExp;
 abstract FExp;
 abstract FAbstractEquation;
 FEquation : FAbstractEquation ::= Left:FExp Right:FExp;
+FConnectClause : FAbstractEquation ::= [FStringComment] Connector1:FIdUseInstAccess Connector2:FIdUseInstAccess;
 
 abstract FBinExp : FExp ::= Left:FExp Right:FExp;
 abstract FUnaryExp : FExp ::= FExp;
@@ -115,11 +116,13 @@ FElseIfExp : FExp ::= IfExp:FExp ThenExp:FExp;
 
 FIdUseExp : FExp ::= FIdUse;
 
-//FInstAccessExp : FExp ::= InstAccess;
-
+FInstAccessExp : FExp ::= InstAccess;
 
 FIdDecl ::= FQName;
 FIdUse ::= <ID>;
+
+FIdUseInstAccess : FIdUse ::= InstAccess;
+
 
 FTypeAccess : FIdUse; // New type access
 

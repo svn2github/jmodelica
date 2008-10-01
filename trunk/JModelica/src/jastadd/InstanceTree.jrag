@@ -57,7 +57,10 @@ import java.util.ArrayList;
            StringBuffer str = new StringBuffer();
            str.append("{");
            for (IModification im : this) {
-           	  str.append("  " + im.getModification().prettyPrint("") + ",\n");
+//           	  str.append("  " + im.getModification().prettyPrint("") + ",\n");
+           	  str.append("  " + im.getModification().prettyPrint("") + ",");
+           	  str.append(im.myInstNode().toString());
+           	  str.append("\n");
            }
            str.append("}\n");
            return str.toString();
@@ -72,6 +75,10 @@ import java.util.ArrayList;
               	str.append(im.getModification().prettyPrint(""));
            	  else
            	  	str.append(indent + " " +  im.getModification().prettyPrint(""));
+           	  str.append(": ");
+           	//  if (im.myInstNode().toString()!=null)
+	           	  str.append(im.myInstNode().getClass().getName());
+
               if (i !=size()-1)
               	str.append(",\n");
            }
@@ -736,7 +743,7 @@ aspect InstaceConstrainingClauses {
 		}
 	}
 	
-    syn ConstrainingClause InstConstraining.getConstrainingClause();
+    syn lazy ConstrainingClause InstConstraining.getConstrainingClause();
     eq InstConstrainingComponent.getConstrainingClause() = getComponentDecl().getConstrainingClause();
     eq InstConstrainingClass.getConstrainingClause() = getBaseClassDecl().getConstrainingClause();
 
@@ -750,6 +757,19 @@ aspect InstaceConstrainingClauses {
 		return classToExpand.newInstClassDecl();
 	}
 	
+	syn lazy FExp IValueModification.getFExp() { 
+		return getValueModification().getExp().instantiate();
+	}
+	
+	syn lazy List InstBaseClassDecl.getFAbstractEquationList() { 
+	    List l = new List();
+	    for (AbstractEquation e : equations()) {
+	    	l.add(e.instantiate());
+	    }
+	    return l;
+
+	}
+
 }
 
 aspect InstImportClauses {

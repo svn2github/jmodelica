@@ -94,7 +94,9 @@ aspect UnknownDeclarations {
 	eq InstPrimitiveClassDecl.isPrimitive() = true;
 	eq InstBuiltInClassDecl.isPrimitive() = true;
 	
-		                    
+	syn boolean InstAccess.isUnknown() = true;
+	eq InstComponentAccess.isUnknown() = myInstComponentDecl().isUnknown();
+	eq InstClassAccess.isUnknown() = myInstClassDecl().isUnknown();                  
 		                    
 		                            
 }

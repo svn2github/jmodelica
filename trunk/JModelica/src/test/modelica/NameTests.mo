@@ -138,19 +138,22 @@ model NameTest5_Err
                                                description="Basic test of name lookup",
                                                errorMessage=
 "
-
-
-
+2 error(s) found...
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 151, column 5:
+  Cannot find class or component declaration for b
+Semantic error at line 151, column 15:
+  Cannot find class or component declaration for x
 ")})));
 
   model A
-    Real x = 4;
+    Real y = 4;
   end A;
   
   A a;
   Real y;
 equation
-  a.y = y;
+  b.y = y + a.x;
 equation
  
 
@@ -164,9 +167,10 @@ model NameTest6_Err
                                                description="Basic test of name lookup",
                                                errorMessage=
 "
-
-
-
+1 error(s) found...
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 174, column 14:
+  Cannot find class or component declaration for y
 ")})));
 
   model A
@@ -305,7 +309,10 @@ Semantic error at line 297, column 4:
                                                description="Test that names are looked up correct.",
                                                errorMessage=
 "
-p1 in the right hand side of the modification should not be found.
+  1 error(s) found...
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 320, column 9:
+  Cannot find class or component declaration for p1
 ")})));
 
  model A

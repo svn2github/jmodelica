@@ -28,10 +28,11 @@ aspect InstNameClassification {
 	 */
 	inh Kind InstAccess.kind();
 	eq InstRoot.getChild().kind() = Kind.AMBIGUOUS_ACCESS;
+	eq FlatRoot.getChild().kind() = Kind.AMBIGUOUS_ACCESS;
+
 	eq InstDot.getLeft().kind() {
 	 	return getRight().predKind();
 	}
-
 
 	eq InstExtends.getClassName().kind() = Kind.CLASS_ACCESS;
 //	eq FunctionCall.getName().kind() = Kind.AMBIGUOUS_ACCESS;
@@ -45,6 +46,8 @@ aspect InstNameClassification {
 	eq InstNode.getDynamicClassName().kind() = Kind.CLASS_ACCESS;
     eq IComponentRedeclare.getDynamicClassName().kind() = Kind.CLASS_ACCESS;
 	eq InstConstrainingComponent.getDynamicClassName().kind() = Kind.CLASS_ACCESS;
+	eq InstBaseClassDecl.getFAbstractEquation().kind() = Kind.AMBIGUOUS_ACCESS;	
+		
 		
 	/**
 	 * The attribute predKind defines the kind for qualified
@@ -78,11 +81,11 @@ aspect InstResolveAmbiguousNames {
 	rewrite InstAmbiguousAccess {
 	    when(!duringInstNameClassification()&&!rewritten) 
 	    to InstAccess {
-//	  		if (!lookupComponent(name()).isEmpty()) {
-//     		    ComponentAccess c = new ComponentAccess(name(),getArraySubscriptsOpt());
-//  	 			c.setStart(getStart());
-//  	 			return c;
-//  		} else 
+	  		if (!lookupInstComponent(name()).isEmpty()) {
+     		    InstComponentAccess c = new InstComponentAccess(name());
+  	 			c.setStart(getStart());
+  	 			return c;
+  		} else 
             if(!lookupInstClass(name()).isEmpty()) {		
     			InstClassAccess t = new InstClassAccess(name()); 
     			t.setStart(getStart());

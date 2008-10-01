@@ -1,8 +1,10 @@
 aspect ExpressionType {
 	
 	syn lazy AbstractFlatType FExp.type();	
+	eq FInstAccessExp.type() = new BrokenType();
+	
 	syn lazy AbstractFlatType FVariable.type();	
-	syn lazy AbstractFlatType FAbstractEquation.type();
+	syn lazy AbstractFlatType FAbstractEquation.type() = new BrokenType();
 	
 	// TODO: fix this expression for arrays
 	eq FVariable.type() {

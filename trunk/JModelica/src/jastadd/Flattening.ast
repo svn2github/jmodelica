@@ -10,8 +10,8 @@ InstProgramRoot : InstRoot ::= <Program:Program>
                                /InstBuiltInFunction:InstClassDecl*/;
 
 abstract InstClassDecl: InstNode ::= <ClassDecl:ClassDecl>;
-abstract InstBaseClassDecl : InstClassDecl ::=  /InstImport*/ [InstConstraining];
-InstFullClassDecl : InstBaseClassDecl ::= /*FAbstractEquation*/;
+abstract InstBaseClassDecl : InstClassDecl ::=  /InstImport*/ /FAbstractEquation*/ [InstConstraining];
+InstFullClassDecl : InstBaseClassDecl ::= ;
 InstShortClassDecl : InstBaseClassDecl ::= ;
 InstPrimitiveClassDecl : InstFullClassDecl;
 InstBuiltInClassDecl : InstClassDecl ::= ;
@@ -70,7 +70,7 @@ InstClassRedeclare : InstModification ::= ClassName:InstAccess;
 // error checking.	
 abstract IModification ::= <Modification:Modification>;
 ICompleteModification : IModification ::= IClassModification [IValueModification];
-IValueModification : IModification ::= /*FExp*/;
+IValueModification : IModification ::= /FExp/;
 
 IClassModification : IModification ::= IArgument*;
 abstract IArgument : IModification ::=;

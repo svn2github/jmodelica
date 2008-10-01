@@ -71,7 +71,9 @@ aspect InstLookupClasses {
 	}  
 */		
 	eq SourceRoot.getChild().lookupInstClass(String name) = emptyHashSet();
-
+	
+	// This equation is necessary since InstAccesses may be present in FExps.
+	eq FlatRoot.getChild().lookupInstClass(String name) = emptyHashSet();
 	
 	syn lazy HashSet InstProgramRoot.lookupElementInstClass(String name) {
 		HashSet set = new HashSet(4);

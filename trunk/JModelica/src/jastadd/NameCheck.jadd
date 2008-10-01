@@ -35,5 +35,5 @@ aspect InstanceNameCheck {
 		if (myInstClassDecl().isUnknown()) 
        		error("The class "+qualifiedName()+" is undeclared");
     }
-  
+
 }

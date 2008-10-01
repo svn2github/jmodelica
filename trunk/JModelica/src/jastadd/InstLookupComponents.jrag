@@ -5,22 +5,28 @@ aspect InstLookupComponents {
 
 	inh lazy HashSet InstAccess.lookupInstComponent(String name);	
 	inh lazy HashSet InstNode.lookupInstComponent(String name);	
-
 	eq InstBaseClassDecl.getChild().lookupInstComponent(String name) = genericLookupInstComponent(name); 	
 	eq InstNode.getChild().lookupInstComponent(String name) = memberInstComponent(name); 
+	
+	eq InstComponentDecl.getIModification().lookupInstComponent(String name) = lookupInstComponent(name);
+	eq InstPrimitive.getIModification().lookupInstComponent(String name) = lookupInstComponent(name);
+	eq InstExtends.getIClassModification().lookupInstComponent(String name) = lookupInstComponent(name);
+	
+	eq IValueModification.getFExp().lookupInstComponent(String name) = myInstNode().lookupInstComponent(name);
 	
 	eq InstShortClassDecl.getChild().lookupInstComponent(String name) = lookupInstComponent(name);
 	
 	eq InstPrimitive.getChild().lookupInstComponent(String name) = myInstClass().memberInstComponent(name); 	
 	eq InstDot.getRight().lookupInstComponent(String name) = getLeft().qualifiedLookupInstComponent(name);
 	eq InstRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
-	
-	
+		
 	syn lazy HashSet InstAccess.qualifiedLookupInstComponent(String name) = emptyHashSet();
 	eq InstComponentAccess.qualifiedLookupInstComponent(String name) = myInstComponentDecl().memberInstComponent(name);	
 	eq InstClassAccess.qualifiedLookupInstComponent(String name) = myInstClassDecl().memberInstComponent(name);
 	
-	
+	eq SourceRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
+	// This equation is necessary since InstAccesses may be present in FExps.	
+	eq FlatRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
 	
 	syn lazy HashSet InstBaseClassDecl.genericLookupInstComponent(String name) {
 		HashSet h = memberInstComponent(name);
