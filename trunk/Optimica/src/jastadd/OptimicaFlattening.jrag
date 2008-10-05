@@ -1,50 +1,66 @@
 aspect OptimicaFlattening {
 
-	public InstNode OptClassDecl.findFlatten(String className, FClass fc) {
+	// Check if the InstOptClassDecl matches the name of class to be flattened. 
+	public InstNode InstOptClassDecl.findFlattenInst(String className, FClass fc) {
 		FOptClass foc = (FOptClass)fc;
-		//System.out.println("Model.instantiate: "+getFullClassName() +" : " +getClassName());
    		if (className.equals(qualifiedName())) {
   	 		foc.setFQName(new FQName(qualifiedName())); 
-  	 		InstRoot r = getInstRoot();
+  	 		//InstRoot r = getInstRoot();
+  	 				
 			//r.dumpTree("");
-			foc.addFEquationBlock(new FEquationBlock(new List()));
-			r.flatten(fc);
+			//r.printIVarAccesses("");
+			foc.addFEquationBlock(new FEquationBlock(new List()));			
+			for (AbstractEquation ae : equations()) {
+		       ae.flatten(getFQName(),foc);
+		    }
+			for (Constraint c : constraints()) {
+		       c.flatten(getFQName(),foc);
+		    }
+
+//			for (InstComponentDecl n : getInstComponentDecls())
+//				n.flatten(foc);
+			getInstComponentDeclList().flatten(foc);
+			getInstExtendsList().flatten(foc);
+           
 			foc.genConnectionEquations();
-			if (hasClassModification()) {
+			OptClassDecl ocd = (OptClassDecl)getClassDecl();
+			if (ocd.hasClassModification()) {
 				List attr = new List();
-				getClassModification().collectAttributes(attr,new FQName(new List()));
+				ocd.getClassModification().collectAttributes(attr,new FQName(new List()));
 				foc.setFAttributeList(attr);
 			}
-			return r;	
+			return this;	
    		} else {
-  			return getClassDeclList().findFlatten(className,fc);
+  			return super.findFlattenInst(className,fc);
    		}  	
-	}
-
-
+	}	
+	
 	refine Flattening public void InstNode.flatten(FClass fc) {
-		List l = equations();
-		for (int i=0;i<l.getNumChild();i++) {
-		   ((AbstractEquation)l.getChild(i)).flatten(getFQName(),fc);
+		for (AbstractEquation ae : equations()) {
+		   ae.flatten(getFQName(),fc);
 		}
-		List lc = constraints();
-		for (int i=0;i<lc.getNumChild();i++) {
-		   ((Constraint)lc.getChild(i)).flatten(getFQName(),fc);
-		}
-		getInstNodeList().flatten(fc);
-	}
-	
+        for (Constraint c : constraints()) {
+           c.flatten(getFQName(),fc);
+        }
+		getInstComponentDeclList().flatten(fc);
+		getInstExtendsList().flatten(fc);
+	}	
 
-	syn lazy List ClassDecl.constraints() = root().emptyList();
-	eq OptClassDecl.constraints() = getConstraintList();
-	eq ShortClassDecl.constraints() = getClassName().myClassDecl().constraints();
+	syn lazy ArrayList<Constraint> ClassDecl.constraints() = new ArrayList<Constraint>();
+	eq OptClassDecl.constraints() {
+	    ArrayList<Constraint> l = new ArrayList<Constraint>();
+		for (Constraint c : getConstraints())
+			l.add(c);
+		return l;
+	}
+	eq ShortClassDecl.constraints() = getExtendsClauseShortClass().getSuper().myClassDecl().constraints();
 	
-	syn List InstNode.constraints();
-	eq InstRoot.constraints() = getClassDecl().constraints();
-	eq InstComponent.constraints() = getComponentDecl().myClass().constraints();
+	syn ArrayList<Constraint> InstNode.constraints() = new ArrayList<Constraint>();
+	eq InstClassRoot.constraints() = getClassDecl().constraints();
+	eq InstOptClassDecl.constraints() = getClassDecl().constraints();
+	eq InstComponentDecl.constraints() = getComponentDecl().myClass().constraints();
 	eq InstExtends.constraints() = getExtendsClause().getSuper().myClassDecl().constraints();
 	
-
     public void Constraint.flatten(FQName prefix, FClass fc) {}
 
 	public void ConstraintEq.flatten(FQName prefix, FClass fc) {

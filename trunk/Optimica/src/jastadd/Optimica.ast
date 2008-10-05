@@ -12,3 +12,5 @@ ConstraintGeq : Constraint;
 OptimizationClass : Restriction ::=;
 
 InstantValue : Exp ::= Name:Access Arg:Exp;
+
+InstOptClassDecl : InstFullClassDecl;

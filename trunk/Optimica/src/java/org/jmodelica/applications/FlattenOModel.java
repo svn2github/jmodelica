@@ -1,5 +1,6 @@
 package org.jmodelica.applications;
 import org.jmodelica.ast.*;
+
 import java.io.*;
 import org.jmodelica.parser.*;
 
@@ -9,7 +10,7 @@ public class FlattenOModel {
 		    
 		  long startTime = System.currentTimeMillis();
 		  	if(args.length != 2) {
-		      System.out.println("FlattenModel expects a file name and a class name as command line arguments");
+		      System.out.println("FlattenOModel expects a file name and a class name as command line arguments");
 		      System.exit(1);
 		    }
 		  
@@ -25,19 +26,22 @@ public class FlattenOModel {
 		      
 		      SourceRoot sr = (SourceRoot)parser.parse(scanner);
 		      
-		      sr.dumpTree("");
+		      
+		      //sr.dumpTree("");
 		      
 		      sr.setFileName(name);
 		      
 		      
 		      StringBuffer str2 = new StringBuffer();
-		      sr.getProgram().prettyPrint(str2,"");
+//		      sr.getProgram().prettyPrint(str2,"");
 		      //p.debugPrint("Pretty Printing of original program finished");
-		      System.out.println(str2.toString());
+//		      System.out.println(str2.toString());
 		      /*
 		      p.setFName(name);
 		      reader.close();
 		      */
+		      
+		      InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();		      
 		      long parseTime = System.currentTimeMillis();
 		      
 		      
@@ -67,7 +71,7 @@ public class FlattenOModel {
 
 		      
 		      System.out.println("Checking for errors...");	      
-		      ErrorManager errM = new ErrorManager();
+/*		      ErrorManager errM = new ErrorManager();
 		      if (!sr.checkErrors(cl,errM)) {
 	    		  System.out.println("Error:");
 	    		  System.out.println("   Did not find the class: " + cl);
@@ -75,6 +79,13 @@ public class FlattenOModel {
 	    	  }
 		      
 		      errM.printErrors();
+	*/	      
+		      
+		      System.out.println("Source checking:");
+		      boolean sourceErr = sr.checkErrorsInClass(cl);
+		      
+		      if (sourceErr)
+		    	  System.exit(0);
 		      
 		      long errcheckTime = System.currentTimeMillis();
 		      
@@ -83,11 +94,14 @@ public class FlattenOModel {
 		      long printTime = System.currentTimeMillis();
 		      long instTime = System.currentTimeMillis();
 		      
+		      FlatRoot flatRoot = new FlatRoot();
+		      flatRoot.setFileName(name);
 		      FOptClass fc = new FOptClass();
+		      flatRoot.setFClass(fc);		      
 	    	  StringBuffer str = new StringBuffer();
-		      if (errM.getNumErrors()==0) {
+
 		    	  System.out.println("Flattening starts...");
-		    	  InstNode ir = sr.findFlatten(cl,fc);
+		    	  InstNode ir = ipr.findFlattenInst(cl,fc);
 		    	  if (ir==null) {
 		    		  System.out.println("Error:");
 		    		  System.out.println("   Did not find the class: " + cl);
@@ -98,7 +112,7 @@ public class FlattenOModel {
 		    	  fc.prettyPrint(str,"");
 		    	  System.out.println(str.toString());
 		    	  printTime = System.currentTimeMillis();
-		      }
+
 		
 		      System.err.println("Parse time:         " + ((double)(parseTime-startTime))/1000.0);
 		      System.err.println("Error check time:   " + ((double)(errcheckTime-parseTime))/1000.0);

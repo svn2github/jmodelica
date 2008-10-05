@@ -29,7 +29,7 @@
   <property name="test_junit_dir" value="src/test/junit"/>
   <property name="test_junit-gen_dir" value="src/test/junit-generated"/>
 	
-  <property name="beaver" value="${jmodelica_path}/src/third-party/"/>
+  <property name="beaver" value="${jmodelica_path}/src/third-party/beaver"/>
   <property name="applications" value="${jmodelica_path}/${default_src_dir}/org/jmodelica/applications"/> 
   <property name="debug" value="${jmodelica_path}/${default_src_dir}/org/jmodelica/debug"/> 
 	

@@ -1,9 +1,9 @@
 aspect OptimicaErrorCheck {
 
-  	public void OptClassDecl.collectErrors(ErrorManager em) {
-    	super.collectErrors(em);
-    	getConstraintList().collectErrors(em);
-    	getClassModificationOpt().collectErrors(em);
+  	public void OptClassDecl.collectErrors() {
+    	super.collectErrors();
+    	getConstraintList().collectErrors();
+    	getClassModificationOpt().collectErrors();
   	}
 
 
