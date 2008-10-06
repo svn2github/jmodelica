@@ -348,11 +348,6 @@ aspect InstanceErrorCheck {
 			getIModification().collectErrors();
 		if (hasInstConstraining())
 			getInstConstraining().collectErrors();
-		
-//      This leads to duplicate error messages, ok, this is taken care of
-		if (!myInstClass().isUnknown()) {
-			myInstClass().collectErrors();
-		}
 		}
 	}
 	
@@ -363,25 +358,71 @@ aspect InstanceErrorCheck {
 		if (hasIClassModification())
 			getIClassModification().collectErrors();
 		
-		if (!getClassName().myInstClassDecl().isUnknown()) {
-			getClassName().myInstClassDecl().collectErrors();
-		}
 		}
 	}	
 	
+	public void InstExtendsShortClass.collectErrors() {
+    if (!errorChecked) {
+      errorChecked = true;
+	  nameCheck();
+	  typeCheck();	  
+      // Normally the class modifications in an InstExtendsShortClass
+      // does not need to be checked, since they are checked in InstShortClassDecl.
+      // This is not the case if the short class decl references
+      // an primitive variable, however, and in this case the
+      // class modification needs to bee checked for errors.
+ 	  if (extendsPrimitive() && hasIClassModification())
+		 getIClassModification().collectErrors();
+      
+	  getClassName().collectErrors();
+	  for(InstNode n : getInstComponentDecls()) 
+		  n.collectErrors();
+	  for(InstNode n : getInstClassDecls()) 
+		  n.collectErrors();
+	  for(InstNode n : getInstExtendss()) 
+		  n.collectErrors();
+	  
+	}
+    }
 	
 	//public void InstPrimitiveClassDecl.collectErrors() {}
 
 	public void InstShortClassDecl.collectErrors() {
 	    if (!errorChecked) {
 		  super.collectErrors();
-			if (hasInstConstraining())
+		  // The localIModifications should only be checked if
+		  // the node is not a InstReplacingShortClassDecl. This
+		  // is accomplished by the method collectIModificationErrors.
+		  collectIModificationErrors();
+		  if (hasInstConstraining())
 				getInstConstraining().collectErrors();		  
 		}
 	}
 
-	public void InstBuiltIn.collectErrors() {}
+	public void InstShortClassDecl.collectIModificationErrors() {
+		for (IModification mod : localIModifications())
+			mod.collectErrors();
+    }
+    public void InstReplacingShortClassDecl.collectIModificationErrors() { }
 
+	public void InstReplacingShortClassDecl.collectErrors() {
+	    if (!errorChecked) {
+		  super.collectErrors();
+		  getOriginalInstClass().collectErrors();
+		}
+		
+	}
+
+	public void InstReplacingFullClassDecl.collectErrors() {
+	    if (!errorChecked) {
+		  super.collectErrors();
+		  getOriginalInstClass().collectErrors();
+		}
+		
+	}
+
+
+	public void InstBuiltIn.collectErrors() {}
 
 	public void IComponentRedeclare.collectErrors() {
 		super.collectErrors();
@@ -397,21 +438,28 @@ aspect InstanceErrorCheck {
 		getFExp().collectErrors();
 	}
 
+	boolean InstAccess.errorChecked = false;
 	public void InstDot.collectErrors() {
-		getLeft().collectErrors();
-		if (!getLeft().isUnknown())
-			getRight().collectErrors();
+	    if (!errorChecked) {	
+			errorChecked = true;
+			getLeft().collectErrors();
+			if (!getLeft().isUnknown())
+				getRight().collectErrors();
+		}
 	}
 
-  
-/*  
-    public void InstClassDecl.collectErrors() {
-
-    }
-*/  
-
-
-
+	public void InstClassAccess.collectErrors() {
+	    if (!errorChecked) {
+		    super.collectErrors();
+		    errorChecked = true;
+			// If the class access is to be checked, then the corresponding
+			// InstClassDecl is checked as well, since it is being accessed at
+			// some point.
+			if (!myInstClassDecl().isUnknown())
+				myInstClassDecl().collectErrors();
+		}
+	}
+ 
 }
 
 

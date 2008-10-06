@@ -365,7 +365,10 @@ end NameTest12_Err;
                                               description="Test that names are looked up correct.",
                                                errorMessage=
 "
- 3 error(s) found...
+ 4 error(s) found...
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 386, column 39:
+  The component z is undeclared
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 386, column 37:
   The class C is undeclared
@@ -395,7 +398,7 @@ Semantic error at line 389, column 12:
         Real z=4;
      end C;
      
-     replaceable model BB = B(x=3);
+     replaceable model BB = B(z=3);
      
    end P;
  
@@ -407,6 +410,64 @@ Semantic error at line 389, column 12:
  
 end NameTest13_Err;
   
+ model NameTest14_Err
+     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="NameTest14_Err",
+                                              description="Test that names are looked up correct.",
+                                               errorMessage=
+"
+ 6 error(s) found...
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 454, column 18:
+  The component z is undeclared
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 454, column 20:
+  Cannot find class or component declaration for pBB
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 459, column 18:
+  The component z is undeclared
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 459, column 20:
+  Cannot find class or component declaration for p
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 461, column 18:
+  The component z is undeclared
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 461, column 20:
+  Cannot find class or component declaration for pp
+
+ 
+")})));
+  
+  
+   package P
+   model A
+    Real x=1;
+   end A;
+ 
+     model B
+        Real x=2;
+        Real y=3;
+     end B;
+ 
+     model C
+        Real x=2;
+        Real y=3;
+        Real z=4;
+     end C;
+     
+     
+     replaceable model BB 
+     	 extends B(z=pBB);
+     end BB;
+           
+   end P;
+ 
+   package PP = P(redeclare replaceable model BB = P.B(z=p));
+ 
+   PP.BB bb(z=pp);
+ 
+end NameTest14_Err;
   
 
 class ExtendsTest1
@@ -818,7 +879,29 @@ end Resistor;
 	
 end ShortClassDeclTest6;
 
+model ShortClassDeclTest7_Err
 
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ShortClassDeclTest7_Err",
+        description="Short class declaration of Real.",
+                                               errorMessage=
+"
+  1 error(s) found...
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 834, column 14:
+  The component y is undeclared
+")})));
+
+
+  model A
+    Real x=2;
+  end A;
+  
+  model AA=A(y=2.5);
+  
+  AA aa(x=3);
+
+end ShortClassDeclTest7_Err;
 
 
 model DerTest1
@@ -829,18 +912,6 @@ end DerTest1;
 
 
 model InitialEquationTest1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="InitialEquationTest1",
-        description="Test flattening of initial equations",flatModel=
-"
-fclass NameTests.InitialEquationTest1
- Real x;
-initial equation 
- x = 1;
-equation 
- der(x) = 1;
-end NameTests.InitialEquationTest1;
-")})));
   
   Real x;
   initial equation

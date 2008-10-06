@@ -15,7 +15,6 @@ aspect Flattening {
 	
 	// Check if the InstFullClassDecl matches the name of class to be flattened. 
 	public InstNode InstFullClassDecl.findFlattenInst(String className, FClass fc) {
-	    String qwe = getFQName().name();
    		if (className.equals(qualifiedName())) {
   	 		fc.setFQName(new FQName(qualifiedName())); 
   	 		//InstRoot r = getInstRoot();

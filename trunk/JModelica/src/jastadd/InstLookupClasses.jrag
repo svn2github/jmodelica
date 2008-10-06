@@ -13,8 +13,7 @@ aspect InstLookupClasses {
 	inh HashSet InstAccess.lookupInstClass(String name) circular [emptyHashSet()];
 	inh HashSet InstNode.lookupInstClass(String name);
     inh HashSet IModification.lookupInstClass(String name);
-	
-	
+		
 	eq InstNode.getInstClassDecl(int i).lookupInstClass(String name) = genericLookupInstClass(name); 
 	eq InstNode.getInstComponentDecl(int i).lookupInstClass(String name) = genericLookupInstClass(name); 
 	eq InstNode.getInstExtends(int i).lookupInstClass(String name) = superLookupInstClass(name);
@@ -35,8 +34,10 @@ aspect InstLookupClasses {
 	eq InstShortClassDecl.getChild().lookupInstClass(String name) = lookupInstClass(name);
 	eq InstReplacingShortClassDecl.getChild().lookupInstClass(String name) = getIClassRedeclare().lookupInstClass(name);
 	eq InstReplacingFullClassDecl.getChild().lookupInstClass(String name) = getIClassRedeclare().lookupInstClass(name);
+	eq InstReplacingShortClassDecl.getOriginalInstClass().lookupInstClass(String name) = lookupInstClass(name);
+	eq InstReplacingFullClassDecl.getOriginalInstClass().lookupInstClass(String name) = lookupInstClass(name);
   
-
+ 
 	eq InstReplacingComposite.getClassName().lookupInstClass(String name) = getIComponentRedeclare().lookupInstClass(name);
 	eq InstReplacingPrimitive.getClassName().lookupInstClass(String name) = getIComponentRedeclare().lookupInstClass(name);
 

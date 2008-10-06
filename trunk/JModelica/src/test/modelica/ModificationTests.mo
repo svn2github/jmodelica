@@ -475,6 +475,9 @@ end ModificationTests.ShortClassDeclModTest3;
   AA aa(x=3);
 
 end ShortClassDeclModTest3;
+
+
+
  
 
 end ModificationTests;

@@ -14,7 +14,7 @@ abstract InstBaseClassDecl : InstClassDecl ::=  /InstImport*/ /FAbstractEquation
 InstFullClassDecl : InstBaseClassDecl ::= ;
 InstShortClassDecl : InstBaseClassDecl ::= ;
 InstPrimitiveClassDecl : InstFullClassDecl;
-InstBuiltInClassDecl : InstClassDecl ::= ;
+InstBuiltInClassDecl : InstClassDecl ::=;
 UnknownInstClassDecl : InstFullClassDecl;
 
 InstReplacingFullClassDecl : InstFullClassDecl ::= <OriginalClassDecl:ClassDecl> /OriginalInstClass:InstClassDecl/ <IClassRedeclare:IClassRedeclare>;

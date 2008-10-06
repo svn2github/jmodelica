@@ -1723,6 +1723,7 @@ model RedeclareTest10
       JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest10",
                                                description="Basic redeclares.",
                                                flatModel=
+
 "
 fclass RedeclareTests.RedeclareTest10
  Real r = 0.1 /*(0.1)*/;
@@ -1761,9 +1762,7 @@ fclass RedeclareTests.RedeclareTest10
 equation
 end RedeclareTests.RedeclareTest10;
 ")})));
-  
-  
-  
+    
   extends C0.Colors.MyPalette(p(redeclare C0.Colors.Green c3(r=0.56,g=0.85,b=0.24),c1(b=0.23)));
 model C0 
     

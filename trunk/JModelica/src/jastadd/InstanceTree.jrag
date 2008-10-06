@@ -232,6 +232,7 @@ aspect Environments {
 		return l;
 	}
 	 	
+	// TODO: This should probably be implemented as an AST node child. 	
 	syn lazy boolean InstClassDecl.hasIClassModification() = false;
 	eq InstShortClassDecl.hasIClassModification() = getInstExtends(0).hasIClassModification(); 	
 	syn lazy IClassModification InstClassDecl.getIClassModification() = null;
@@ -421,21 +422,12 @@ aspect Environments {
 	inh lazy InstNode InstNode.myInstNode();
 	eq InstNode.getChild().myInstNode() = this;
 	//The lexical scope of modifiers for short classes are "outside" of the short declaration
-    eq InstExtendsShortClass.getChild().myInstNode() = myInstShortClassDecl().myInstNode();
-	
-	inh lazy InstClassDecl InstExtendsShortClass.myInstShortClassDecl();
-	eq InstShortClassDecl.getInstExtends().myInstShortClassDecl() = this;
-	eq InstComponentDecl.getInstExtends().myInstShortClassDecl() {
-		if (getClassName().myInstClassDecl() instanceof InstShortClassDecl)
-			return (InstShortClassDecl)getClassName().myInstClassDecl();
-	}
-	
-	eq SourceRoot.getChild().myInstShortClassDecl() = unknownInstClassDecl();
+    eq InstExtendsShortClass.getChild().myInstNode() = myInstNode();
 	
 	/**
 	 * InstPrimitive:s may have children of type InstExtends, if the InstPrimitive is instantiated
 	 * eiter from a short class declaration that references a primitive type or from a 'type' class
-	 * declaration that inherits a primitive type. In both cases, the result is on or a chain of InstExtends/
+	 * declaration that inherits a primitive type. In both cases, the result is one or a chain of InstExtends/
 	 * InstExtendsShortClass children. The final node in such a chain holds the total merged environment of 
 	 * the InstPrimitive.
 	 */
@@ -452,8 +444,6 @@ aspect Environments {
 		else
 			return getInstExtends(0).totalMergedEnvironment();
 	}
-
-
 
 }
 
@@ -886,9 +876,7 @@ aspect InstanceAST_API {
 		hasInstConstraining()? new ArrayList<InstClassDecl>() : instClassDecls();
 	eq InstClassDecl.constrainingInstClassDecls() {
 		if (hasInstConstraining()) {
-			ArrayList<InstClassDecl> l = new ArrayList<InstClassDecl>();
-			l.add((InstClassDecl)getInstConstraining().getInstNode());
-			return l;
+            return getInstConstraining().getInstNode().instClassDecls();
 		} else {	
 		return instClassDecls();
 		}
@@ -898,9 +886,7 @@ aspect InstanceAST_API {
 		hasInstConstraining()? new ArrayList<InstComponentDecl>() : instComponentDecls();
 	eq InstComponentDecl.constrainingInstComponentDecls() {
 		if (hasInstConstraining()) {
-			ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
-			l.add((InstComponentDecl)getInstConstraining().getInstNode());
-			return l;
+            return getInstConstraining().getInstNode().instComponentDecls();
 		} else {	
 		return instComponentDecls();
 		}
