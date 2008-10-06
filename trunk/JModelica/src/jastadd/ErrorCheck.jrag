@@ -290,31 +290,6 @@ aspect InstanceErrorCheck {
 	}
 
 	boolean InstNode.errorChecked = false;
-  	public void InstBaseClassDecl.collectErrors() {
-    	if (!errorChecked) {
-    	errorChecked = true;
- //       for (InstClassDecl icd : instClassDecls())
- //       	icd.collectErrors();
-        for (InstComponentDecl icd : instComponentDecls())
-        	icd.collectErrors();
-        for (InstExtends ie : instExtends())
-        	ie.collectErrors();	
-        for (InstImport ii : getInstImports())
-        	ii.collectErrors();		
-        for (FAbstractEquation e : getFAbstractEquations())
-        	e.collectErrors();
-//    	getEquationList().collectErrors();
-//    	getAlgorithmList().collectErrors();
-//    	getSuperList().collectErrors();
-//    	getImportList().collectErrors();
-//    	getComponentDeclList().collectErrors();
-		if (getBaseClassDecl() instanceof FullClassDecl) { 	
-			FullClassDecl fcd = (FullClassDecl)getBaseClassDecl();
-	    	if (!(fcd.getName().getID().equals(fcd.getEndName())))
-    			error("The declaration and end names of a class should be the same");
-  			}
-  		}
-  	}	
 
 
   public void InstNode.collectErrors() {
@@ -328,9 +303,36 @@ aspect InstanceErrorCheck {
 		  n.collectErrors();
 	  for(InstNode n : getInstExtendss()) 
 		  n.collectErrors();
-	  
+	  for(AbstractEquation e : equations()) 
+		  e.collectErrors();
 	}
   }
+
+  	public void InstBaseClassDecl.collectErrors() {
+    	if (!errorChecked) {
+    	errorChecked = true;
+ //       for (InstClassDecl icd : instClassDecls())
+ //       	icd.collectErrors();
+        for (InstComponentDecl icd : instComponentDecls())
+        	icd.collectErrors();
+        for (InstExtends ie : instExtends())
+        	ie.collectErrors();	
+        for (InstImport ii : getInstImports())
+        	ii.collectErrors();		
+//        for (FAbstractEquation e : getFAbstractEquations())
+//        	e.collectErrors();
+//    	getEquationList().collectErrors();
+//    	getAlgorithmList().collectErrors();
+//    	getSuperList().collectErrors();
+//    	getImportList().collectErrors();
+//    	getComponentDeclList().collectErrors();
+		if (getBaseClassDecl() instanceof FullClassDecl) { 	
+			FullClassDecl fcd = (FullClassDecl)getBaseClassDecl();
+	    	if (!(fcd.getName().getID().equals(fcd.getEndName())))
+    			error("The declaration and end names of a class should be the same");
+  			}
+  		}
+  	}	
   	
 	boolean InstImport.errorChecked = false;
     public void InstImport.collectErrors() {
