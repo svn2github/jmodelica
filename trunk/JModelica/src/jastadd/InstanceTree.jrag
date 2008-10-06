@@ -760,7 +760,7 @@ aspect InstaceConstrainingClauses {
 		return getValueModification().getExp().instantiate();
 	}
 	
-	syn lazy List InstBaseClassDecl.getFAbstractEquationList() { 
+	syn lazy List InstNode.getFAbstractEquationList()  { 
 	    List l = new List();
 	    for (AbstractEquation e : equations()) {
 	    	l.add(e.instantiate());

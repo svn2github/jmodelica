@@ -303,22 +303,25 @@ aspect InstanceErrorCheck {
 		  n.collectErrors();
 	  for(InstNode n : getInstExtendss()) 
 		  n.collectErrors();
-	  for(AbstractEquation e : equations()) 
+	  for(FAbstractEquation e : getFAbstractEquations()) 
 		  e.collectErrors();
 	}
   }
 
   	public void InstBaseClassDecl.collectErrors() {
     	if (!errorChecked) {
-    	errorChecked = true;
+//    	errorChecked = true;
+        super.collectErrors();
  //       for (InstClassDecl icd : instClassDecls())
  //       	icd.collectErrors();
+ /*
         for (InstComponentDecl icd : instComponentDecls())
         	icd.collectErrors();
         for (InstExtends ie : instExtends())
         	ie.collectErrors();	
         for (InstImport ii : getInstImports())
         	ii.collectErrors();		
+*/
 //        for (FAbstractEquation e : getFAbstractEquations())
 //        	e.collectErrors();
 //    	getEquationList().collectErrors();

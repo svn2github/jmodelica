@@ -1,4 +1,4 @@
-abstract InstNode ::= /InstComponentDecl*/ /InstClassDecl*/ /InstExtends*/ /FQName/ /DynamicClassName:InstAccess*/; // /DynamicInst:InstNode*/ /DynamicInstConstraining:InstNode*/;
+abstract InstNode ::= /InstComponentDecl*/ /InstClassDecl*/ /InstExtends*/ /FAbstractEquation*/ /FQName/ /DynamicClassName:InstAccess*/; // /DynamicInst:InstNode*/ /DynamicInstConstraining:InstNode*/;
 abstract InstRoot : InstNode ::= /FPrimitiveType*/;
 InstClassRoot : InstRoot ::= <ClassDecl:ClassDecl>;
 //InstFullClassDeclRoot :InstRoot ::= InstFullClassDecl;
@@ -10,7 +10,7 @@ InstProgramRoot : InstRoot ::= <Program:Program>
                                /InstBuiltInFunction:InstClassDecl*/;
 
 abstract InstClassDecl: InstNode ::= <ClassDecl:ClassDecl>;
-abstract InstBaseClassDecl : InstClassDecl ::=  /InstImport*/ /FAbstractEquation*/ [InstConstraining];
+abstract InstBaseClassDecl : InstClassDecl ::=  /InstImport*/ [InstConstraining];
 InstFullClassDecl : InstBaseClassDecl ::= ;
 InstShortClassDecl : InstBaseClassDecl ::= ;
 InstPrimitiveClassDecl : InstFullClassDecl;

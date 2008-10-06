@@ -159,6 +159,33 @@ equation
 
   end NameTest5_Err;
 
+model NameTest55_Err
+  
+  
+   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="NameTest55_Err",
+                                               description="Basic test of name lookup",
+                                               errorMessage=
+"
+1 error(s) found...
+In file 'src/test/modelica/NameTests.mo':
+Semantic error at line 181, column 11:
+  Cannot find class or component declaration for x
+")})));
+
+  model A
+      Real y = 4;
+    equation
+      y = x;
+  end A;
+  
+  A a;
+equation
+ 
+
+  end NameTest55_Err;
+
+
 model NameTest6_Err
   
   
