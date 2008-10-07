@@ -62,12 +62,12 @@ aspect Types {
   }
 
 
-  syn lazy ArrayList<InstNode> InstNode.containedInstComponents() {
-  	ArrayList<InstNode> l = new ArrayList<InstNode>();
+  syn lazy ArrayList<InstComponentDecl> InstNode.containedInstComponents() {
+  	ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
     for (InstNode node : getInstExtendss()) {
        	 l.addAll(node.containedInstComponents());
     }
-    for (InstNode node : getInstComponentDecls()) { 
+    for (InstComponentDecl node : getInstComponentDecls()) { 
          l.add(node);
     }
     return l;

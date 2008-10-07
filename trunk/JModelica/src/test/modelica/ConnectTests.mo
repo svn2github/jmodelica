@@ -57,6 +57,73 @@ Semantic error at line 53, column 15:
       
    end ConnectTest2_Err;
    
+model ConnectTest3
+
+
+  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="ConnectTest3",
+        description="Test of generation of connection equations.",
+                                               flatModel=
+"fclass ConnectTests.ConnectTest3
+ parameter Real gain.k = 1 \"Gain value multiplied with input signal\" /*(1)*/;
+ input Real gain.u \"Input signal connector\";
+ output Real gain.y \"Output signal connector\";
+ parameter Real const.k = 1 \"Constant output value\" /*(1)*/;
+ output Real const.y \"Connector of Real output signal\";
+equation
+ gain.y = ( gain.k ) * ( gain.u );
+ const.y = const.k;
+ const.y = gain.u;
+end ConnectTests.ConnectTest3;
+
+")})));
+
+
+
+ block Gain 
+  "Output the product of a gain value with the input signal" 
+  
+  parameter Real k=1 "Gain value multiplied with input signal";
+public 
+  RealInput u "Input signal connector";
+  RealOutput y "Output signal connector";
+equation 
+  y = k*u;
+end Gain;
+ 
+connector RealInput = input RealSignal "'input Real' as connector";
+ 
+connector RealSignal 
+  "Real port (both input/output possible)" 
+  replaceable type SignalType = Real;
+  
+  extends SignalType;
+  
+end RealSignal;
+ 
+connector RealOutput = output RealSignal "'output Real' as connector";
+ 
+block Constant 
+  "Generate constant signal of type Real" 
+  parameter Real k=1 "Constant output value";
+  extends SO;
+equation 
+  y = k;
+end Constant;
+ 
+partial block SO 
+  "Single Output continuous control block" 
+  RealOutput y "Connector of Real output signal";
+end SO;  
+  
+  Gain gain;
+  Constant const;
+equation 
+  connect(const.y, gain.u);
+
+
+end ConnectTest3;
+
 
 
 model Electrical
@@ -310,6 +377,8 @@ end ConnectTests.CircuitTest2;
     connect(cv.n,r.n);
     connect(r.n,f.n);
   end CircuitTest2;
+
+
 
 
 end ConnectTests;

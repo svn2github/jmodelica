@@ -156,16 +156,22 @@ aspect Names {
   
   syn String FunctionCall.name() = getName().name();
   
-  syn String ClassDecl.primitiveName();
-  eq BaseClassDecl.primitiveName() = getName().getID();
-  eq BuiltInClassDecl.primitiveName() = getName().getID();
+  syn String InstClassDecl.primitiveName();
+  eq InstBaseClassDecl.primitiveName() = name();
+  eq InstBuiltInClassDecl.primitiveName() = name();
   
-  eq FullClassDecl.primitiveName() {
-  	if (getNumSuper()==1 && getSuper(0).getSuper().myClassDecl().finalClass().isPrimitive())
-  		return getSuper(0).getSuper().myClassDecl().finalClass().primitiveName();
+  eq InstFullClassDecl.primitiveName() {
+  	if (extendsPrimitive())
+  		return getInstExtends(0).getClassName().myInstClassDecl().finalClass().primitiveName();
   	else 
-  		return getName().getID();
+  		return name();
   }
+  
+  inh InstClassDecl ASTNode.enclosingInstClassDecl();
+  eq SourceRoot.getProgram().enclosingInstClassDecl() = null;
+  eq FlatRoot.getChild().enclosingInstClassDecl() = null;
+  eq InstBaseClassDecl.getChild().enclosingInstClassDecl() = this;
+  eq InstComponentDecl.getChild().enclosingInstClassDecl() = myInstClass();
   
   inh BaseClassDecl ASTNode.enclosingClassDecl();
   eq SourceRoot.getProgram().enclosingClassDecl() = null;
@@ -205,6 +211,19 @@ aspect Names {
    	inh Access Access.getNextAccess();
    	eq Dot.getLeft().getNextAccess() = getRight().getFirstAccess();
    	eq SourceRoot.getProgram().getNextAccess() = null;
+
+    /**
+     * Access method for the first Access of a qualified or
+     * unqualified name.
+     */
+    syn InstAccess InstAccess.getFirstInstAccess() = this;
+    eq InstDot.getFirstInstAccess() = getLeft().getFirstInstAccess();
+   
+   	inh InstAccess InstAccess.getNextInstAccess();
+   	eq InstDot.getLeft().getNextInstAccess() = getRight().getFirstInstAccess();
+   	eq SourceRoot.getProgram().getNextInstAccess() = null;
+    eq FlatRoot.getChild().getNextInstAccess() = null;
+
    	
    	/**
    	 * stripFirstAccess removes the first access in a qualified
@@ -242,14 +261,15 @@ aspect FlatNames {
 		this((List)fqname.getFQNamePartList().fullCopy());
 	}
 
-	public FQName FQName.append(Access access,FQName prefix) {
-		Access fa = access.getFirstAccess();
-		addFQNamePart(new FQNamePart(fa.name(),
-			                  fa.arraySubscripts()!=null? new Opt(fa.arraySubscripts().flatten(prefix)):new Opt()));
-		while (fa.getNextAccess()!=null) {
-			fa = fa.getNextAccess();
-			addFQNamePart(new FQNamePart(fa.name(),
-			                  fa.arraySubscripts()!=null? new Opt(fa.arraySubscripts().flatten(prefix)):new Opt()));
+	public FQName FQName.append(InstAccess access,FQName prefix) {
+		InstAccess fa = access.getFirstInstAccess();
+		// TODO: fix array subscripts
+		addFQNamePart(new FQNamePart(fa.name(),new Opt()));
+			                  //fa.arraySubscripts()!=null? new Opt(fa.arraySubscripts().flatten(prefix)):new Opt()));
+		while (fa.getNextInstAccess()!=null) {
+			fa = fa.getNextInstAccess();
+			addFQNamePart(new FQNamePart(fa.name(),new Opt()));
+//			                  fa.arraySubscripts()!=null? new Opt(fa.arraySubscripts().flatten(prefix)):new Opt()));
 		}
 		return this;
 	}
@@ -278,12 +298,15 @@ aspect FlatNames {
 		FQName prefix = retrieveFQName();
 		FQName myName = prefix!=null? new FQName(prefix):
 		                              new FQName();
+		//TODO: fix array subscripts
 		if (prefix!=null)
-			myName.addFQNamePart(new FQNamePart(name(),arraySubscripts()!=null? 
-		                                new Opt(arraySubscripts().flatten(prefix)): new Opt()));
+			myName.addFQNamePart(new FQNamePart(name(),new Opt()));
+			                            //arraySubscripts()!=null? 
+		                                //new Opt(arraySubscripts().flatten(prefix)): new Opt()));
 		else
-			myName.addFQNamePart(new FQNamePart(name(),arraySubscripts()!=null? 
-		                                new Opt(arraySubscripts().flatten(new FQName())): new Opt()));
+			myName.addFQNamePart(new FQNamePart(name(),new Opt()));
+			                            //arraySubscripts()!=null? 
+		                                //new Opt(arraySubscripts().flatten(new FQName())): new Opt()));
 		
 		return myName;
 	}
@@ -438,6 +461,8 @@ aspect ComponentDeclMethods {
 		return false;
 	
 	}
+
+	
 
 }
 

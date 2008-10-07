@@ -34,7 +34,7 @@ InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl> /
 // redeclaration of classes.
 abstract InstComponentDecl : InstNode ::= ClassName:InstAccess <ComponentDecl:ComponentDecl> [IModification] [InstConstraining];
 InstComposite : InstComponentDecl;
-InstPrimitive : InstComponentDecl ::= /FVariable/;
+InstPrimitive : InstComponentDecl ;
 InstBuiltIn : InstComponentDecl;
 UnknownInstComponentDecl : InstComponentDecl;
 

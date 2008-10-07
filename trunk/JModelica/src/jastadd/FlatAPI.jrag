@@ -46,7 +46,6 @@ aspect FlatAPI {
 	eq FClass.getChild().myFClass() = this;
 	eq Root.getChild().myFClass() = null; 
 
-	
 }
 
 /*

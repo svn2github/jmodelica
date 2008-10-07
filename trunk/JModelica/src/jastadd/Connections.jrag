@@ -4,61 +4,6 @@ import java.util.ArrayList ;
 
 aspect Connections {
 
-	
-	public void ConnectClause.flatten(FQName prefix, FClass fc) {
-		
-		debugPrint("<<<ConnectClause.flatten: " + getConnector1().name() + 
-		                   ", " + getConnector2().name());
-		
-		//getConnector1().myDecl().dumpTree("");
-		
-		
-		FullClassDecl c1 = (FullClassDecl)(getConnector1().myComponentDecl().myClass().finalClass());
-		FullClassDecl c2 = (FullClassDecl)(getConnector2().myComponentDecl().myClass().finalClass());
-				
-		//boolean outside1 = getConnector1().myDecl().myClassDef()==myClassDef();
-		//boolean outside2 = getConnector2().myDecl().myClassDef()==myClassDef();	
-		
-						
-		// Is it two "primitives" that are connected?
-//		c1.getSuper(0).getSuper().type().getFCD().dumpTree("");
-		if (c1.getNumSuper()>0 && c1.getSuper(0).getSuper().myClassDecl().finalClass() instanceof PrimitiveClassDecl) {
-			fc.getConnectionSetManager().addVars(getConnector1().myComponentDecl(),false,((FQName)prefix.fullCopy()).append(getConnector1().name()),
-		                                         getConnector2().myComponentDecl(),false,((FQName)prefix.fullCopy()).append(getConnector2().name()));
-		    return;
-		}
-		
-		boolean outside1 = enclosingClassDecl().memberComponent(getConnector1().name()).size()>0;
-		boolean outside2 = enclosingClassDecl().memberComponent(getConnector2().name()).size()>0;
-		
-		ComponentDecl var1, var2;
-		
-		debugPrint("<<<ConnectClause.flatten: number of components in connector: "+ c1.allLocalComponentDecl().size());
-		
-		for (Iterator iter = c1.allLocalComponentDecl().iterator(); iter.hasNext(); ) {
-			var1 = (ComponentDecl)iter.next();
-			var2 = (ComponentDecl)c2.memberComponent(var1.name()).iterator().next();
-			FQName fqn1 = new FQName().append(getConnector1(),prefix);
-			FQName fqn2 = new FQName().append(getConnector2(),prefix);
-			fc.getConnectionSetManager().addVars(var1,outside1,((FQName)prefix.fullCopy()).append(fqn1.append(var1.getName().getID())),
-			                                     var2,outside2,((FQName)prefix.fullCopy()).append(fqn2.append(var2.getName().getID())));
-		}
-		
-		/*
-		for (int i=0;i<c1.getNumComponentTotal();i++) {
-			// Careful! Must consider ALL components of the connector class,
-			// including ones inherited from super classes
-			var1 = c1.getComponentTotal(i);
-			var2 = c2.memberDecl(var1.getName().getID());
-			//getConnector1().dumpTree("");
-			//QName qn = ((QName)decls.fullCopy()).append(getConnector1().getQName(),0).add(new QNamePart(var1,null));
-			//System.out.println("** " + ((QName)decls.fullCopy()).append(getConnector1().getQName(),0).nameUnderScore());
-			//System.out.println("*** " + qn.nameUnderScore());
-			fc.getConnectionSetManager().addVars(var1,outside1,((QName)decls.fullCopy()).append(getConnector1().getQName(),0).add(new QNamePart(var1,new Opt())),
-			                                     var2,outside2,((QName)decls.fullCopy()).append(getConnector2().getQName(),0).add(new QNamePart(var2,new Opt())));
-		}*/
-	}
-
 	/* Machinery to manage connection sets */
 
 	public ConnectionSetManager FClass.connectionSetManager = new ConnectionSetManager();
@@ -188,14 +133,15 @@ aspect Connections {
 		public LinkedHashSet getInsideConnectedFlowVars() {
 			return insideConnectedFlowVars;
 		}
+				
+		public void addVars(InstComponentDecl var1, boolean outside1, FQName namePrefix1,
+		                    InstComponentDecl var2, boolean outside2, FQName namePrefix2) {
+
+//			System.out.println("ConnectionSetManager.addVars");
 		
+//		    System.out.println(namePrefix1.name()+"."+var1.name());
+//		    System.out.println(namePrefix2.name()+"."+var2.name());
 		
-		public void addVars(ComponentDecl var1, boolean outside1, FQName namePrefix1,
-		                    ComponentDecl var2, boolean outside2, FQName namePrefix2) {
-		
-			var1.debugPrint("ConnectionSetManager.addVars(): "+ 
-			                  namePrefix1.name() + " "+
-			                  namePrefix2.name());
 			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1,outside1,namePrefix1);
 			ConnectionSetEntry cse2 = new ConnectionSetEntry(var2,outside2,namePrefix2);	
 			
@@ -219,8 +165,7 @@ aspect Connections {
 			
 			LinkedHashSet h1 = getConnectionSet(cse1);
 			LinkedHashSet h2 = getConnectionSet(cse2);
-			
-			//System.out.println("ConnectionSetManager.addVars");
+
 			
 			if (h1!=null && h2==null)
 				h1.add(cse2);
@@ -230,16 +175,16 @@ aspect Connections {
 				h1.addAll(h2);
 				list.remove(h2);
 			} else {
-				//System.out.println("ConnectionSetManager.addVars: about to create a new Hash set");
+//				System.out.println("ConnectionSetManager.addVars: about to create a new Hash set");
 				LinkedHashSet h = new LinkedHashSet();
 				h.add(cse1);
-				//System.out.println("ConnectionSetManager.addVars: cse1 added");
+//				System.out.println("ConnectionSetManager.addVars: cse1 added");
 				h.add(cse2);
-				//System.out.println("ConnectionSetManager.addVars: cse1 added");
+//				System.out.println("ConnectionSetManager.addVars: cse1 added");
 				list.add(h);
 			}
 			
-			//printConnectionSets();
+//			printConnectionSets();
 			
 		}
 	
@@ -310,12 +255,12 @@ aspect Connections {
 	
 	static public class ConnectionSetEntry implements Comparable{
 	
-		private ComponentDecl cd;
+		private InstComponentDecl cd;
 		private boolean outside;
 		private FQName fqName;
 		//private boolean flow;
 		
-		public ConnectionSetEntry(ComponentDecl cd, boolean outside, FQName fqName) {
+		public ConnectionSetEntry(InstComponentDecl cd, boolean outside, FQName fqName) {
 			//System.out.println("Created ConnectionSetEntry: " + cd.getName().getID());
 			this.cd = cd;
 			this.outside = outside;
@@ -327,12 +272,12 @@ aspect Connections {
 			return outside;
 		}
 	
-		public ComponentDecl getVar() {
+		public InstComponentDecl getVar() {
 			return cd;
 		}
 	
 		public boolean isFlow() {
-			return cd.hasTypePrefixFlow();
+			return cd.getComponentDecl().hasTypePrefixFlow();
 		}
 	
 		
