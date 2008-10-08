@@ -20,6 +20,12 @@ typedef struct {
 	double* xInit;                   // Initial point
 	double* x_lb;                    // Lower bound for x
 	double* x_ub;                    // Upper bound for x
+	int nNzJacEqConstr;              // Number of non-zeros in eq. constr. Jac.
+	int* colJacEqConstraintNzElements;  // Col indices of non-zero elements
+	int* rowJacEqConstraintNzElements;  // Row indices of non-zeros elements
+	int nNzJacIneqConstr;            // Number of non-zeros in ineq. constr. Jac.
+	int* colJacIneqConstraintNzElements; // Col indices of non-zero elements
+	int* rowJacIneqConstraintNzElements; // Row indices of non-zeros elements
 	int nColl;                       // Number of collocation points
 	double* A;                       // The A matrix in the Butcher tableau
 	double* b;                       // The b matrix in the Butcher tableau
@@ -87,12 +93,6 @@ int getBounds(OCDef* od, double* x_ub, double* x_lb);
  * getInitial returns the initial point.
  */
 int getInitial(OCDef* od, double* x_init);
-
-/** 
- * getGradCostNzElements returns the indices of the non-zeros in the 
- * cost gradient vector.
- */
-int getGradCostNzElements(OCDef* od, int* colIndex);
 
 /** 
  * getEqConstraintNzElements returns the indices of the non-zeros in the 

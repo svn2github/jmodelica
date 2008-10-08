@@ -34,6 +34,15 @@ OCDef* initOptimizationProblem() {
 	od->x_lb[0] = -10;
 	od->x_ub[0] = 10;
 
+	od->nNzJacEqConstr = 0;              // Number of non-zeros in eq. constr. Jac.
+	od->nNzJacIneqConstr = 1;            // Number of non-zeros in ineq. constr. Jac.
+	od->colJacIneqConstraintNzElements = 
+		(int*)calloc(od->nNzJacIneqConstr,sizeof(int)); // Col indices of non-zero elements
+	od->rowJacIneqConstraintNzElements =
+		(int*)calloc(od->nNzJacIneqConstr,sizeof(int)); // Row indices of non-zeros elements
+	od->colJacIneqConstraintNzElements[0] = 0;
+	od->rowJacIneqConstraintNzElements[0] = 0;
+	
 	//	int nColl;                       // Number of collocation points
 //	double* A;                       // The A matrix in the Butcher tableau
 //	double* b;                       // The b matrix in the Butcher tableau
@@ -142,6 +151,26 @@ int getInitial(OCDef* od, double* xInit){
 	return 1;
 }
 
+/** 
+ * getEqConstraintNzElements returns the indices of the non-zeros in the 
+ * equality constraint Jacobian.
+ */
+int getJacEqConstraintNzElements(OCDef* od, int* colIndex, int* rowIndex) {
+	return 1;
+}
+
+/** 
+ * getIneqConstraintElements returns the indices of the non-zeros in the 
+ * inequality constraint Jacobian.
+ */
+int getJacIneqConstraintNzElements(OCDef* od, int* colIndex, int* rowIndex) {
+	int i;
+	for (i=0;i<od->nNzJacEqConstr;i++) {
+		colIndex[i] = od->colJacIneqConstraintNzElements[i];
+		rowIndex[i] = od->rowJacIneqConstraintNzElements[i];
+	}
+	return 1;
+}
 
 /**
  * dummy main
