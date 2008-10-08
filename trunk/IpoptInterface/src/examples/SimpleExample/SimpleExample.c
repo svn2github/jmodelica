@@ -3,11 +3,11 @@
 
 /*
  * These functions encode the optimization problem
- * 
+ *
  *    min (x-2)^2 + 3
- *   
+ *
  *   subject to
- *    
+ *
  *    3 - x <= 0
  */
 
@@ -16,16 +16,16 @@
  * initOptimizationProblem sets up the problem by creating an instance of OCPDef.
  */
 OCDef* initOptimizationProblem() {
-			
+
 	OCDef* od = (OCDef*)malloc(sizeof(OCDef));
-	
+
 //	ModelDef md = initModel();
-	
+
 //	*md = initModel();                // The model representation
 	od->nVars = 1;                   // Number of variables
 	od->nEqConstr = 0;               // Number of equality constraints
 	od->nIneqConstr = 1;             // Number of inequality constraints
-	
+
 	od->xInit = (double*)calloc(od->nVars,sizeof(double)); // Initial point
 	od->x_lb  = (double*)calloc(od->nVars,sizeof(double)); // Lower bound for x
 	od->x_ub = (double*)calloc(od->nVars,sizeof(double));  // Upper bound for x
@@ -33,7 +33,7 @@ OCDef* initOptimizationProblem() {
 	od->xInit[0] = 2;
 	od->x_lb[0] = -10;
 	od->x_ub[0] = 10;
-	
+
 	//	int nColl;                       // Number of collocation points
 //	double* A;                       // The A matrix in the Butcher tableau
 //	double* b;                       // The b matrix in the Butcher tableau
@@ -45,7 +45,7 @@ OCDef* initOptimizationProblem() {
 //	int startTimeFree;               // Problem with free start time
 //	double finalTime;                // Final time of optimization horizon
 //	int finalTimeFree;               // Problem with free final time
-	
+
 	return (OCDef*)od;
 }
 
@@ -53,14 +53,14 @@ OCDef* initOptimizationProblem() {
  * evalCost returns the cost function value at a given point in search space.
  */
 int evalCost(OCDef* od, double* x, double* f) {
-	
+
 	*f = (x[0]-2)*(x[0]-2) + 3;
 	return 1;
 
 }
 
 /**
- * evalGradCost returns the gradient of the cost function value at 
+ * evalGradCost returns the gradient of the cost function value at
  * a given point in search space.
  */
 int evalGradCost(OCDef* od, double* x, double* grad_f) {
@@ -72,16 +72,16 @@ int evalGradCost(OCDef* od, double* x, double* grad_f) {
  * evalEqConstraints returns the residual of the equality constraints
  */
 int evalEqConstraints(OCDef* od, double* x, double* gEq) {
-	
+
 	return 1;
 }
 
 /**
- * evalJacEqConstraints returns the Jacobian of the residual of the 
+ * evalJacEqConstraints returns the Jacobian of the residual of the
  * equality constraints.
  */
 int evalJacEqConstraint(OCDef* od, double* x, double* jac_gEq) {
-	
+
 	return 1;
 }
 
@@ -89,13 +89,13 @@ int evalJacEqConstraint(OCDef* od, double* x, double* jac_gEq) {
  * evalIneqConstraints returns the residual of the inequality constraints g(x)<=0
  */
 int evalIneqConstraint(OCDef* od, double* x, double* gIneq) {
-	
+
 	*gIneq = 3-x[0];
 	return 1;
 }
 
 /**
- * evalJacIneqConstraints returns Jacobian of the residual of the 
+ * evalJacIneqConstraints returns Jacobian of the residual of the
  * inequality constraints g(x)<=0
  */
 int evalJacIneqConstraint(OCDef* od, double* x, double* jac_gIneq) {
@@ -107,13 +107,13 @@ int evalJacIneqConstraint(OCDef* od, double* x, double* jac_gIneq) {
 /**
  * getDimension returns the number of variables and the number of
  * constraints, respectively, in the problem.
- */ 
+ */
 int getDimensions(OCDef* od, int* nVars, int* nEqConstr, int* nIneqConstr) {
-	
+
 	*nVars = od->nVars;
 	*nEqConstr = od->nEqConstr;
 	*nIneqConstr = od->nIneqConstr;
-	
+
 	return 1;
 }
 
@@ -121,12 +121,12 @@ int getDimensions(OCDef* od, int* nVars, int* nEqConstr, int* nIneqConstr) {
  * getBounds returns the upper and lower bounds on the optimization variables.
  */
 int getBounds(OCDef* od, double* x_ub, double* x_lb) {
-	
+
 	int i;
 	for (i=0;i<od->nVars;i++) {
 		x_lb[i] = od->x_lb[i];
 		x_ub[i] = od->x_ub[i];
-	}	
+	}
 	return 1;
 }
 
@@ -140,4 +140,14 @@ int getInitial(OCDef* od, double* xInit){
 		xInit[i] = od->xInit[i];
 	}
 	return 1;
+}
+
+
+/**
+ * dummy main
+ */
+int main()
+{
+	printf("Hello Optimizers!");
+	return 0;
 }
