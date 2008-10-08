@@ -36,9 +36,41 @@
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.cygwin.exe.debug.938135498" name="Cygwin C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.cygwin.exe.debug">
 <option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.cygwin.exe.debug.option.optimization.level.849252624" name="Optimization Level" superClass="gnu.c.compiler.cygwin.exe.debug.option.optimization.level" valueType="enumerated"/>
 <option id="gnu.c.compiler.cygwin.exe.debug.option.debugging.level.1170161583" name="Debug Level" superClass="gnu.c.compiler.cygwin.exe.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+<option id="gnu.c.compiler.option.preprocessor.nostdinc.1344210654" name="Do not search system directories (-nostdinc)" superClass="gnu.c.compiler.option.preprocessor.nostdinc"/>
+<option id="gnu.c.compiler.option.preprocessor.preprocess.1503984102" name="Preprocess only (-E)" superClass="gnu.c.compiler.option.preprocessor.preprocess"/>
+<option id="gnu.c.compiler.option.preprocessor.def.symbols.250604067" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols"/>
+<option id="gnu.c.compiler.option.preprocessor.undef.symbol.428419562" name="Undefined symbols (-U)" superClass="gnu.c.compiler.option.preprocessor.undef.symbol"/>
+<option id="gnu.c.compiler.option.include.paths.1845189007" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths"/>
+<option id="gnu.c.compiler.option.optimization.flags.341009026" name="Other optimization flags" superClass="gnu.c.compiler.option.optimization.flags"/>
+<option id="gnu.c.compiler.option.debugging.other.1483457740" name="Other debugging flags" superClass="gnu.c.compiler.option.debugging.other"/>
+<option id="gnu.c.compiler.option.debugging.gprof.715876953" name="Generate gprof information (-pg)" superClass="gnu.c.compiler.option.debugging.gprof"/>
+<option id="gnu.c.compiler.option.debugging.prof.267026342" name="Generate prof information (-p)" superClass="gnu.c.compiler.option.debugging.prof"/>
+<option id="gnu.c.compiler.option.warnings.syntax.708104941" name="Check syntax only (-fsyntax-only)" superClass="gnu.c.compiler.option.warnings.syntax"/>
+<option id="gnu.c.compiler.option.warnings.pedantic.43753650" name="Pedantic (-pedantic)" superClass="gnu.c.compiler.option.warnings.pedantic"/>
+<option id="gnu.c.compiler.option.warnings.pedantic.error.200189103" name="Pedantic warnings as errors (-pedantic-errors)" superClass="gnu.c.compiler.option.warnings.pedantic.error"/>
+<option id="gnu.c.compiler.option.warnings.nowarn.1910312579" name="Inhibit all warnings (-w)" superClass="gnu.c.compiler.option.warnings.nowarn"/>
+<option id="gnu.c.compiler.option.warnings.allwarn.151620942" name="All warnings (-Wall)" superClass="gnu.c.compiler.option.warnings.allwarn"/>
+<option id="gnu.c.compiler.option.warnings.toerrors.1542470502" name="Warnings as errors (-Werror)" superClass="gnu.c.compiler.option.warnings.toerrors"/>
+<option id="gnu.c.compiler.option.misc.other.261886135" name="Other flags" superClass="gnu.c.compiler.option.misc.other"/>
+<option id="gnu.c.compiler.option.misc.verbose.6185082" name="Verbose (-v)" superClass="gnu.c.compiler.option.misc.verbose"/>
+<option id="gnu.c.compiler.option.misc.ansi.171447407" name="Support ANSI programs (-ansi)" superClass="gnu.c.compiler.option.misc.ansi"/>
 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.cygwin.1732813330" superClass="cdt.managedbuild.tool.gnu.c.compiler.input.cygwin"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.linker.cygwin.exe.debug.70902712" name="Cygwin C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.cygwin.exe.debug">
+<option id="gnu.c.link.option.nostart.592839366" name="Do not use standard start files (-nostartfiles)" superClass="gnu.c.link.option.nostart"/>
+<option id="gnu.c.link.option.nodeflibs.667296842" name="Do not use default libraries (-nodefaultlibs)" superClass="gnu.c.link.option.nodeflibs"/>
+<option id="gnu.c.link.option.nostdlibs.594374457" name="No startup or default libs (-nostdlib)" superClass="gnu.c.link.option.nostdlibs"/>
+<option id="gnu.c.link.option.strip.1158848097" name="Omit all symbol information (-s)" superClass="gnu.c.link.option.strip"/>
+<option id="gnu.c.link.option.noshared.456771488" name="No shared libraries (-static)" superClass="gnu.c.link.option.noshared"/>
+<option id="gnu.c.link.option.libs.988928018" name="Libraries (-l)" superClass="gnu.c.link.option.libs"/>
+<option id="gnu.c.link.option.paths.1040157563" name="Library search path (-L)" superClass="gnu.c.link.option.paths"/>
+<option id="gnu.c.link.option.ldflags.987586060" name="Linker flags" superClass="gnu.c.link.option.ldflags"/>
+<option id="gnu.c.link.option.other.1703871291" name="Other options (-Xlinker [option])" superClass="gnu.c.link.option.other"/>
+<option id="gnu.c.link.option.userobjs.125826004" name="Other objects" superClass="gnu.c.link.option.userobjs"/>
+<option id="gnu.c.link.option.shared.1316952895" name="Shared (-shared)" superClass="gnu.c.link.option.shared"/>
+<option id="gnu.c.link.option.soname.101853916" name="Shared object name (-Wl,-soname=)" superClass="gnu.c.link.option.soname"/>
+<option id="gnu.c.link.option.implname.1254010230" name="Import Library name (-Wl,--out-implib=)" superClass="gnu.c.link.option.implname"/>
+<option id="gnu.c.link.option.defname.1094588339" name="DEF file name (-Wl,--output-def=)" superClass="gnu.c.link.option.defname"/>
 <inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1944686115" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 <additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -48,8 +80,9 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src/IpoptInterface"/>
+<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src/examples/SimpleExample"/>
 <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src/OptimicaInterface"/>
+<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src/IpoptInterface"/>
 <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src/ModelInterface"/>
 </sourceEntries>
 </configuration>
@@ -406,6 +439,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
+<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src/examples/SimpleExample"/>
 <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src/IpoptInterface"/>
 <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src/ModelInterface"/>
 <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src/OptimicaInterface"/>

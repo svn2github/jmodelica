@@ -14,9 +14,15 @@ typedef struct {
 	long nAuxiliary;             // Number of auxilary variables
 	long nParameters;            // Number of parameters
     long nDAE;                   // Number of equations in the DAE
-} MIDef;
+} ModelDef;
 
-static int evalRHS(MIDef* md, double* states, double* derivatives ,
+/**
+ * initModel initializes the model and creates an MIDef instance
+ */
+ModelDef* initModel();
+
+
+int evalRHS(ModelDef* md, double* states, double* derivatives ,
 		           double* inputs, double* aux, double* parameters, 
 		           double* res);
 

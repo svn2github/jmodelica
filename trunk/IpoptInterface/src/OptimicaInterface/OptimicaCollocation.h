@@ -1,6 +1,9 @@
 #ifndef OPTIMICACOLLOCATION_H_
 #define OPTIMICACOLLOCATION_H_
 
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "../ModelInterface/ModelInterface.h"
 
 /**
@@ -10,7 +13,13 @@
  */
 
 typedef struct {
-	MIDef md;                        // The model representation
+	ModelDef md;                     // The model representation
+	int nVars;                       // Number of variables
+	int nEqConstr;                   // Number of equality constraints
+	int nIneqConstr;                 // Number of inequality constraints
+	double* xInit;                   // Initial point
+	double* x_lb;                    // Lower bound for x
+	double* x_ub;                    // Upper bound for x
 	int nColl;                       // Number of collocation points
 	double* A;                       // The A matrix in the Butcher tableau
 	double* b;                       // The b matrix in the Butcher tableau
@@ -24,33 +33,78 @@ typedef struct {
 	int finalTimeFree;               // Problem with free final time
 } OCDef;
 
+
+/**
+ * initOptimizationProblem sets up the problem by creating an instance of OCPDef.
+ */
+OCDef* initOptimizationProblem();
+
 /**
  * evalCost returns the cost function value at a given point in search space.
  */
-static int evalCost(OCDef* od, double* x, double* f);
+int evalCost(OCDef* od, double* x, double* f);
 
 /**
- * evalConstraints evaluate the equatlity constraint residuals at a given point.
- * Notice that inequality constraints are assumed to be transformed to equality
- * constraints in this interface. Also notice that evalConstraints contains both
- * the equality constraints resulting from transcription of the dynamics as well
- * as constraints given in the optimization formulation.
+ * evalGradCost returns the gradient of the cost function value at 
+ * a given point in search space.
  */
-static int evalConstraints(OCDef* od, double* x, double* g);
+int evalGradCost(OCDef* od, double* x, double* grad_f);
+
+/**
+ * evalEqConstraints returns the residual of the equality constraints
+ */
+int evalEqConstraint(OCDef* od, double* x, double* gEq);
+
+/**
+ * evalJacEqConstraints returns the Jacobian of the residual of the 
+ * equality constraints.
+ */
+int evalJacEqConstraint(OCDef* od, double* x, double* jac_gEq);
+
+/**
+ * evalIneqConstraints returns the residual of the inequality constraints g(x)<=0
+ */
+int evalIneqConstraint(OCDef* od, double* x, double* gIneq);
+
+/**
+ * evalJacIneqConstraints returns Jacobian of the residual of the 
+ * inequality constraints g(x)<=0
+ */
+int evalJacIneqConstraint(OCDef* od, double* x, double* jac_gIneq);
 
 /**
  * getDimension returns the number of variables and the number of
  * constraints, respectively, in the problem.
  */ 
-static int getDimensions(OCDef* od, int* n, int* m);
+int getDimensions(OCDef* od, int* nVars, int* nEqConstr, int* nIneqConstr);
 
 /**
  * getBounds returns the upper and lower bounds on the optimization variables.
  */
-static int getBounds(OCDef* od, double* x_ub, double* x_lb);
+int getBounds(OCDef* od, double* x_ub, double* x_lb);
+
 /**
  * getInitial returns the initial point.
  */
-static int getInitial(OCDef* od, double* x_init);
+int getInitial(OCDef* od, double* x_init);
+
+/** 
+ * getGradCostNzElements returns the indices of the non-zeros in the 
+ * cost gradient vector.
+ */
+int getGradCostNzElements(OCDef* od, int* colIndex);
+
+/** 
+ * getEqConstraintNzElements returns the indices of the non-zeros in the 
+ * equality constraint Jacobian.
+ */
+int getJacEqConstraintNzElements(OCDef* od, int* colIndex, int* rowIndex);
+
+/** 
+ * getIneqConstraintElements returns the indices of the non-zeros in the 
+ * inequality constraint Jacobian.
+ */
+int getJacIneqConstraintNzElements(OCDef* od, int* colIndex, int* rowIndex);
+
 
 #endif /*OPTIMICACOLLOCATION_H_*/
