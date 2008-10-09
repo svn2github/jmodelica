@@ -137,7 +137,7 @@ bool SimpleExample::getJacIneqConstraintNzElementsImpl(int* colIndex, int* rowIn
 }
 
 /**
- * dummy main
+ * test main function
  */
 int main()
 {
