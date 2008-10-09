@@ -1,29 +1,5 @@
 #include "SimpleExample.hpp"
 
-SimpleExample::SimpleExample()
-{
-	// TODO: invoke super class constructor
-
-	// Move to super class?
-	getBounds(x_lb_,x_ub_);
-	getInitial(xInit_);
-
-	getJacEqConstraintNzElements(colJacEqConstraintNzElements_,
-			                     rowJacEqConstraintNzElements_);
-	
-	getJacIneqConstraintNzElements(colJacIneqConstraintNzElements_,
-			                       rowJacIneqConstraintNzElements_);
-	
-
-}
-
-
-SimpleExample::~SimpleExample()
-{
-}
-
-
-
 /*
  * These functions encode the optimization problem
  *
@@ -35,58 +11,23 @@ SimpleExample::~SimpleExample()
  */
 
 
-/**
- * initOptimizationProblem sets up the problem by creating an instance of OCPDef.
- */
+SimpleExample::SimpleExample()
+:
+SimultaneousInterface()
+{
 
-/*
-bool SimpleExample::initOptimizationProblem() {
-
-	OCDef* od = (OCDef*)malloc(sizeof(OCDef));
-
-//	ModelDef md = initModel();
-
-//	*md = initModel();                // The model representation
-
-	ocGetDimensions(&(od->nVars), &(od->nEqConstr), &(od->nIneqConstr),
-			        &(od->nNzJacEqConstr), &(od->nNzJacIneqConstr));
-
-	
-	od->xInit = (double*)calloc(od->nVars,sizeof(double)); // Initial point
-	od->x_lb  = (double*)calloc(od->nVars,sizeof(double)); // Lower bound for x
-	od->x_ub = (double*)calloc(od->nVars,sizeof(double));  // Upper bound for x
-
-	od->xInit[0] = 2;
-	od->x_lb[0] = -10;
-	od->x_ub[0] = 10;
-
-	od->colJacIneqConstraintNzElements = 
-		(int*)calloc(od->nNzJacIneqConstr,sizeof(int)); // Col indices of non-zero elements
-	od->rowJacIneqConstraintNzElements =
-		(int*)calloc(od->nNzJacIneqConstr,sizeof(int)); // Row indices of non-zeros elements
-	od->colJacIneqConstraintNzElements[0] = 1;
-	od->rowJacIneqConstraintNzElements[0] = 1;
-	
-	//	int nColl;                       // Number of collocation points
-//	double* A;                       // The A matrix in the Butcher tableau
-//	double* b;                       // The b matrix in the Butcher tableau
-//	double* c;                       // The c matrix in the Butcher tableau
-//	int nEl;                         // Number of elements
-//	double* mesh;                    // The optimization mesh expressed as
-	                                 // element lengths.
-//	double startTime;                // Start time of optimization horizon
-//	int startTimeFree;               // Problem with free start time
-//	double finalTime;                // Final time of optimization horizon
-//	int finalTimeFree;               // Problem with free final time
-
-	return (OCDef*)od;
 }
-*/
+
+SimpleExample::~SimpleExample()
+{
+	
+}
+
 /**
  * getDimension returns the number of variables and the number of
  * constraints, respectively, in the problem.
  */
-bool SimpleExample::getDimensions(int& nVars, int& nEqConstr, int& nIneqConstr,
+bool SimpleExample::getDimensionsImpl(int& nVars, int& nEqConstr, int& nIneqConstr,
                                   int& nNzJacEqConstr, int& nNzJacIneqConstr) {
 
 	nVars = 1;                   // Number of variables
@@ -103,7 +44,7 @@ bool SimpleExample::getDimensions(int& nVars, int& nEqConstr, int& nIneqConstr,
 /**
  * evalCost returns the cost function value at a given point in search space.
  */
-bool SimpleExample::evalCost(const double* x, double& f) {
+bool SimpleExample::evalCostImpl(const double* x, double& f) {
 
 	f = (x[0]-2)*(x[0]-2) + 3;
 	return true;
@@ -114,7 +55,7 @@ bool SimpleExample::evalCost(const double* x, double& f) {
  * evalGradCost returns the gradient of the cost function value at
  * a given point in search space.
  */
-bool ocEvalGradCost(const double* x, double* grad_f) {
+bool SimpleExample::evalGradCostImpl(const double* x, double* grad_f) {
 	grad_f[0] = 2*x[0];
 	return true;
 }
@@ -122,7 +63,7 @@ bool ocEvalGradCost(const double* x, double* grad_f) {
 /**
  * evalEqConstraints returns the residual of the equality constraints
  */
-bool evalEqConstraints(const double* x, double* gEq) {
+bool SimpleExample::evalEqConstraintImpl(const double* x, double* gEq) {
 
 	return true;
 }
@@ -131,7 +72,7 @@ bool evalEqConstraints(const double* x, double* gEq) {
  * evalJacEqConstraints returns the Jacobian of the residual of the
  * equality constraints.
  */
-bool evalJacEqConstraint(const double* x, double* jac_gEq) {
+bool SimpleExample::evalJacEqConstraintImpl(const double* x, double* jac_gEq) {
 
 	return true;
 }
@@ -139,7 +80,7 @@ bool evalJacEqConstraint(const double* x, double* jac_gEq) {
 /**
  * evalIneqConstraints returns the residual of the inequality constraints g(x)<=0
  */
-bool evalIneqConstraint(const double* x, double* gIneq) {
+bool SimpleExample::evalIneqConstraintImpl(const double* x, double* gIneq) {
 
 	gIneq[0] = 3-x[0];
 	return true;
@@ -149,7 +90,7 @@ bool evalIneqConstraint(const double* x, double* gIneq) {
  * evalJacIneqConstraints returns Jacobian of the residual of the
  * inequality constraints g(x)<=0
  */
-bool evalJacIneqConstraint(const double* x, double* jac_gIneq) {
+bool SimpleExample::evalJacIneqConstraintImpl(const double* x, double* jac_gIneq) {
 	jac_gIneq[0] = -1;
 	return 1;
 }
@@ -157,7 +98,7 @@ bool evalJacIneqConstraint(const double* x, double* jac_gIneq) {
 /**
  * getBounds returns the upper and lower bounds on the optimization variables.
  */
-bool getBounds(double* x_ub, double* x_lb) {
+bool SimpleExample::getBoundsImpl(double* x_ub, double* x_lb) {
 	
 	x_lb[0] = -10;
 	x_ub[0] = 10;
@@ -168,7 +109,7 @@ bool getBounds(double* x_ub, double* x_lb) {
 /**
  * getInitial returns the initial point.
  */
-bool getInitial(double* xInit){
+bool SimpleExample::getInitialImpl(double* xInit){
 	
 	xInit[0] = 2;
 
@@ -179,7 +120,7 @@ bool getInitial(double* xInit){
  * getEqConstraintNzElements returns the indices of the non-zeros in the 
  * equality constraint Jacobian.
  */
-bool getJacEqConstraintNzElements(int* colIndex, int* rowIndex) {
+bool SimpleExample::getJacEqConstraintNzElementsImpl(int* colIndex, int* rowIndex) {
 	return true;
 }
 
@@ -187,7 +128,7 @@ bool getJacEqConstraintNzElements(int* colIndex, int* rowIndex) {
  * getIneqConstraintElements returns the indices of the non-zeros in the 
  * inequality constraint Jacobian.
  */
-bool getJacIneqConstraintNzElements(int* colIndex, int* rowIndex) {
+bool SimpleExample::getJacIneqConstraintNzElementsImpl(int* colIndex, int* rowIndex) {
 
 	colIndex[0] = 1;
 	colIndex[0] = 1;
@@ -200,7 +141,19 @@ bool getJacIneqConstraintNzElements(int* colIndex, int* rowIndex) {
  */
 int main()
 {
-	printf("Hello Optimizers!");
+	
+    SimpleExample* op = new SimpleExample();	
+	
+	op->prettyPrint();
+	
+	double x = 1.;
+	double f = 0.;
+	
+	op->evalCost(&x,f);
+	printf("\nf(%f)=%f\n",x,f);
+	
+	delete op;
+	
 	return 0;
 }
 
