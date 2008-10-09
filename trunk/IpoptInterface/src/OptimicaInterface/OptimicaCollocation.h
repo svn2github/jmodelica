@@ -11,9 +11,8 @@
  * Optimica, where the transcription has been done by means of
  * orthogonal collocation.
  */
-
 typedef struct {
-	ModelDef md;                     // The model representation
+	ModelDef* md;                     // The model representation
 	int nVars;                       // Number of variables
 	int nEqConstr;                   // Number of equality constraints
 	int nIneqConstr;                 // Number of inequality constraints
@@ -39,72 +38,72 @@ typedef struct {
 	int finalTimeFree;               // Problem with free final time
 } OCDef;
 
-
 /**
- * initOptimizationProblem sets up the problem by creating an instance of OCPDef.
+ * ocInitOptimizationProblem sets up the problem by creating an instance of OCPDef.
  */
-OCDef* initOptimizationProblem();
+OCDef* ocInitOptimizationProblem();
 
 /**
- * evalCost returns the cost function value at a given point in search space.
- */
-int evalCost(OCDef* od, double* x, double* f);
-
-/**
- * evalGradCost returns the gradient of the cost function value at 
- * a given point in search space.
- */
-int evalGradCost(OCDef* od, double* x, double* grad_f);
-
-/**
- * evalEqConstraints returns the residual of the equality constraints
- */
-int evalEqConstraint(OCDef* od, double* x, double* gEq);
-
-/**
- * evalJacEqConstraints returns the Jacobian of the residual of the 
- * equality constraints.
- */
-int evalJacEqConstraint(OCDef* od, double* x, double* jac_gEq);
-
-/**
- * evalIneqConstraints returns the residual of the inequality constraints g(x)<=0
- */
-int evalIneqConstraint(OCDef* od, double* x, double* gIneq);
-
-/**
- * evalJacIneqConstraints returns Jacobian of the residual of the 
- * inequality constraints g(x)<=0
- */
-int evalJacIneqConstraint(OCDef* od, double* x, double* jac_gIneq);
-
-/**
- * getDimension returns the number of variables and the number of
+ * ocGetDimension returns the number of variables and the number of
  * constraints, respectively, in the problem.
  */ 
-int getDimensions(OCDef* od, int* nVars, int* nEqConstr, int* nIneqConstr);
+int ocGetDimensions(int* nVars, int* nEqConstr, int* nIneqConstr,
+		            int* nNzJacEqConstr, int* nNzJacIneqConstr);
 
 /**
- * getBounds returns the upper and lower bounds on the optimization variables.
+ * ocEvalCost returns the cost function value at a given point in search space.
  */
-int getBounds(OCDef* od, double* x_ub, double* x_lb);
+int ocEvalCost(OCDef* od, double* x, double* f);
 
 /**
- * getInitial returns the initial point.
+ * ocEvalGradCost returns the gradient of the cost function value at 
+ * a given point in search space.
  */
-int getInitial(OCDef* od, double* x_init);
+int ocEvalGradCost(OCDef* od, double* x, double* grad_f);
+
+/**
+ * ocEvalEqConstraints returns the residual of the equality constraints
+ */
+int ocEvalEqConstraint(OCDef* od, double* x, double* gEq);
+
+/**
+ * ocEvalJacEqConstraints returns the Jacobian of the residual of the 
+ * equality constraints.
+ */
+int ocEvalJacEqConstraint(OCDef* od, double* x, double* jac_gEq);
+
+/**
+ * ocEvalIneqConstraints returns the residual of the inequality constraints g(x)<=0
+ */
+int ocEvalIneqConstraint(OCDef* od, double* x, double* gIneq);
+
+/**
+ * ocEvalJacIneqConstraints returns Jacobian of the residual of the 
+ * inequality constraints g(x)<=0
+ */
+int ocEvalJacIneqConstraint(OCDef* od, double* x, double* jac_gIneq);
+
+/**
+ * ocGetBounds returns the upper and lower bounds on the optimization variables.
+ */
+int ocGetBounds(OCDef* od, double* x_ub, double* x_lb);
+
+/**
+ * ocGetInitial returns the initial point.
+ */
+int ocGetInitial(OCDef* od, double* x_init);
 
 /** 
- * getEqConstraintNzElements returns the indices of the non-zeros in the 
+ * ocGetEqConstraintNzElements returns the indices of the non-zeros in the 
  * equality constraint Jacobian.
  */
-int getJacEqConstraintNzElements(OCDef* od, int* colIndex, int* rowIndex);
+int ocGetJacEqConstraintNzElements(OCDef* od, int* colIndex, int* rowIndex);
 
 /** 
- * getIneqConstraintElements returns the indices of the non-zeros in the 
+ * ocGetIneqConstraintElements returns the indices of the non-zeros in the 
  * inequality constraint Jacobian.
  */
-int getJacIneqConstraintNzElements(OCDef* od, int* colIndex, int* rowIndex);
+int ocGetJacIneqConstraintNzElements(OCDef* od, int* colIndex, int* rowIndex);
 
 
 #endif /*OPTIMICACOLLOCATION_H_*/

@@ -22,10 +22,11 @@ OCDef* initOptimizationProblem() {
 //	ModelDef md = initModel();
 
 //	*md = initModel();                // The model representation
-	od->nVars = 1;                   // Number of variables
-	od->nEqConstr = 0;               // Number of equality constraints
-	od->nIneqConstr = 1;             // Number of inequality constraints
 
+	ocGetDimensions(&(od->nVars), &(od->nEqConstr), &(od->nIneqConstr),
+			        &(od->nNzJacEqConstr), &(od->nNzJacIneqConstr));
+
+	
 	od->xInit = (double*)calloc(od->nVars,sizeof(double)); // Initial point
 	od->x_lb  = (double*)calloc(od->nVars,sizeof(double)); // Lower bound for x
 	od->x_ub = (double*)calloc(od->nVars,sizeof(double));  // Upper bound for x
@@ -34,14 +35,12 @@ OCDef* initOptimizationProblem() {
 	od->x_lb[0] = -10;
 	od->x_ub[0] = 10;
 
-	od->nNzJacEqConstr = 0;              // Number of non-zeros in eq. constr. Jac.
-	od->nNzJacIneqConstr = 1;            // Number of non-zeros in ineq. constr. Jac.
 	od->colJacIneqConstraintNzElements = 
 		(int*)calloc(od->nNzJacIneqConstr,sizeof(int)); // Col indices of non-zero elements
 	od->rowJacIneqConstraintNzElements =
 		(int*)calloc(od->nNzJacIneqConstr,sizeof(int)); // Row indices of non-zeros elements
-	od->colJacIneqConstraintNzElements[0] = 0;
-	od->rowJacIneqConstraintNzElements[0] = 0;
+	od->colJacIneqConstraintNzElements[0] = 1;
+	od->rowJacIneqConstraintNzElements[0] = 1;
 	
 	//	int nColl;                       // Number of collocation points
 //	double* A;                       // The A matrix in the Butcher tableau
@@ -59,9 +58,27 @@ OCDef* initOptimizationProblem() {
 }
 
 /**
- * evalCost returns the cost function value at a given point in search space.
+ * ocGetDimension returns the number of variables and the number of
+ * constraints, respectively, in the problem.
  */
-int evalCost(OCDef* od, double* x, double* f) {
+int ocGetDimensions(int* nVars, int* nEqConstr, int* nIneqConstr,
+		            int* nNzJacEqConstr, int* nNzJacIneqConstr) {
+
+	*nVars = 1;                   // Number of variables
+	*nEqConstr = 0;               // Number of equality constraints
+	*nIneqConstr = 1;             // Number of inequality constraints
+	*nNzJacEqConstr = 0;              // Number of non-zeros in eq. constr. Jac.
+	*nNzJacIneqConstr = 1;            // Number of non-zeros in ineq. constr. Jac.
+
+	return 1;
+}
+
+
+
+/**
+ * ocEvalCost returns the cost function value at a given point in search space.
+ */
+int ocEvalCost(OCDef* od, double* x, double* f) {
 
 	*f = (x[0]-2)*(x[0]-2) + 3;
 	return 1;
@@ -69,67 +86,53 @@ int evalCost(OCDef* od, double* x, double* f) {
 }
 
 /**
- * evalGradCost returns the gradient of the cost function value at
+ * ocEvalGradCost returns the gradient of the cost function value at
  * a given point in search space.
  */
-int evalGradCost(OCDef* od, double* x, double* grad_f) {
+int ocEvalGradCost(OCDef* od, double* x, double* grad_f) {
 	*grad_f = 2*x[0];
 	return 1;
 }
 
 /**
- * evalEqConstraints returns the residual of the equality constraints
+ * ocEvalEqConstraints returns the residual of the equality constraints
  */
-int evalEqConstraints(OCDef* od, double* x, double* gEq) {
+int ocEvalEqConstraints(OCDef* od, double* x, double* gEq) {
 
 	return 1;
 }
 
 /**
- * evalJacEqConstraints returns the Jacobian of the residual of the
+ * ocEvalJacEqConstraints returns the Jacobian of the residual of the
  * equality constraints.
  */
-int evalJacEqConstraint(OCDef* od, double* x, double* jac_gEq) {
+int ocEvalJacEqConstraint(OCDef* od, double* x, double* jac_gEq) {
 
 	return 1;
 }
 
 /**
- * evalIneqConstraints returns the residual of the inequality constraints g(x)<=0
+ * ocEvalIneqConstraints returns the residual of the inequality constraints g(x)<=0
  */
-int evalIneqConstraint(OCDef* od, double* x, double* gIneq) {
+int ocEvalIneqConstraint(OCDef* od, double* x, double* gIneq) {
 
 	*gIneq = 3-x[0];
 	return 1;
 }
 
 /**
- * evalJacIneqConstraints returns Jacobian of the residual of the
+ * ocEvalJacIneqConstraints returns Jacobian of the residual of the
  * inequality constraints g(x)<=0
  */
-int evalJacIneqConstraint(OCDef* od, double* x, double* jac_gIneq) {
+int ocEvalJacIneqConstraint(OCDef* od, double* x, double* jac_gIneq) {
 	*jac_gIneq = -1;
 	return 1;
 }
 
-
 /**
- * getDimension returns the number of variables and the number of
- * constraints, respectively, in the problem.
+ * ocGetBounds returns the upper and lower bounds on the optimization variables.
  */
-int getDimensions(OCDef* od, int* nVars, int* nEqConstr, int* nIneqConstr) {
-
-	*nVars = od->nVars;
-	*nEqConstr = od->nEqConstr;
-	*nIneqConstr = od->nIneqConstr;
-
-	return 1;
-}
-
-/**
- * getBounds returns the upper and lower bounds on the optimization variables.
- */
-int getBounds(OCDef* od, double* x_ub, double* x_lb) {
+int ocGetBounds(OCDef* od, double* x_ub, double* x_lb) {
 
 	int i;
 	for (i=0;i<od->nVars;i++) {
@@ -140,9 +143,9 @@ int getBounds(OCDef* od, double* x_ub, double* x_lb) {
 }
 
 /**
- * getInitial returns the initial point.
+ * ocGetInitial returns the initial point.
  */
-int getInitial(OCDef* od, double* xInit){
+int ocGetInitial(OCDef* od, double* xInit){
 
 	int i;
 	for (i=0;i<od->nVars;i++) {
@@ -152,18 +155,18 @@ int getInitial(OCDef* od, double* xInit){
 }
 
 /** 
- * getEqConstraintNzElements returns the indices of the non-zeros in the 
+ * ocGetEqConstraintNzElements returns the indices of the non-zeros in the 
  * equality constraint Jacobian.
  */
-int getJacEqConstraintNzElements(OCDef* od, int* colIndex, int* rowIndex) {
+int ocGetJacEqConstraintNzElements(OCDef* od, int* colIndex, int* rowIndex) {
 	return 1;
 }
 
 /** 
- * getIneqConstraintElements returns the indices of the non-zeros in the 
+ * ocGetIneqConstraintElements returns the indices of the non-zeros in the 
  * inequality constraint Jacobian.
  */
-int getJacIneqConstraintNzElements(OCDef* od, int* colIndex, int* rowIndex) {
+int ocGetJacIneqConstraintNzElements(OCDef* od, int* colIndex, int* rowIndex) {
 	int i;
 	for (i=0;i<od->nNzJacEqConstr;i++) {
 		colIndex[i] = od->colJacIneqConstraintNzElements[i];
