@@ -64,13 +64,13 @@ public:
 	 * getEqConstraintNzElements returns the indices of the non-zeros in the 
 	 * equality constraint Jacobian.
 	 */
-	virtual bool getJacEqConstraintNzElementsImpl(int* colIndex, int* rowIndex);
+	virtual bool getJacEqConstraintNzElementsImpl(int* rowIndex, int* colIndex);
 
 	/** 
 	 * getIneqConstraintElements returns the indices of the non-zeros in the 
 	 * inequality constraint Jacobian.
 	 */
-	virtual bool getJacIneqConstraintNzElementsImpl(int* colIndex, int* rowIndex);	
+	virtual bool getJacIneqConstraintNzElementsImpl(int* rowIndex, int* colIndex);	
 
 };
 

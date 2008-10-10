@@ -10,11 +10,11 @@ SimultaneousInterface::SimultaneousInterface()
 	x_lb_(NULL),                    // Lower bound for x
 	x_ub_(NULL),                    // Upper bound for x
 	nNzJacEqConstr_(0),              // Number of non-zeros in eq. constr. Jac.
-	colJacEqConstraintNzElements_(NULL),  // Col indices of non-zero elements
 	rowJacEqConstraintNzElements_(NULL),  // Row indices of non-zeros elements
+	colJacEqConstraintNzElements_(NULL),  // Col indices of non-zero elements
 	nNzJacIneqConstr_(0),            // Number of non-zeros in ineq. constr. Jac.
-	colJacIneqConstraintNzElements_(NULL), // Col indices of non-zero elements
 	rowJacIneqConstraintNzElements_(NULL), // Row indices of non-zeros elements
+	colJacIneqConstraintNzElements_(NULL), // Col indices of non-zero elements
 	nColl_(0),                       // Number of collocation points
 	A_(NULL),                       // The A matrix in the Butcher tableau
 	b_(NULL),                       // The b matrix in the Butcher tableau
@@ -209,7 +209,7 @@ bool SimultaneousInterface::getInitial(double* x_init){
  * getEqConstraintNzElements returns the indices of the non-zeros in the 
  * equality constraint Jacobian.
  */
-bool SimultaneousInterface::getJacEqConstraintNzElements(int* colIndex, int* rowIndex){
+bool SimultaneousInterface::getJacEqConstraintNzElements(int* rowIndex, int* colIndex){
 
 	if (!initialized_) 
 		if (!initialize())
@@ -229,7 +229,7 @@ bool SimultaneousInterface::getJacEqConstraintNzElements(int* colIndex, int* row
  * getIneqConstraintElements returns the indices of the non-zeros in the 
  * inequality constraint Jacobian.
  */
-bool SimultaneousInterface::getJacIneqConstraintNzElements(int* colIndex, int* rowIndex){
+bool SimultaneousInterface::getJacIneqConstraintNzElements(int* rowIndex, int* colIndex){
 
 	if (!initialized_) 
 		if (!initialize())

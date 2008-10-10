@@ -130,11 +130,11 @@ private:
 	double* x_lb_;                    // Lower bound for x
 	double* x_ub_;                    // Upper bound for x
 	int nNzJacEqConstr_;              // Number of non-zeros in eq. constr. Jac.
-	int* colJacEqConstraintNzElements_;  // Col indices of non-zero elements
 	int* rowJacEqConstraintNzElements_;  // Row indices of non-zeros elements
+	int* colJacEqConstraintNzElements_;  // Col indices of non-zero elements
 	int nNzJacIneqConstr_;            // Number of non-zeros in ineq. constr. Jac.
-	int* colJacIneqConstraintNzElements_; // Col indices of non-zero elements
 	int* rowJacIneqConstraintNzElements_; // Row indices of non-zeros elements
+	int* colJacIneqConstraintNzElements_; // Col indices of non-zero elements
 	int nColl_;                       // Number of collocation points
 	double* A_;                       // The A matrix in the Butcher tableau
 	double* b_;                       // The b matrix in the Butcher tableau
@@ -203,13 +203,13 @@ protected:
 	 * getEqConstraintNzElements returns the indices of the non-zeros in the 
 	 * equality constraint Jacobian.
 	 */
-	virtual bool getJacEqConstraintNzElementsImpl(int* colIndex, int* rowIndex) = 0;
+	virtual bool getJacEqConstraintNzElementsImpl(int* rowIndex, int* colIndex) = 0;
 
 	/** 
 	 * getIneqConstraintElements returns the indices of the non-zeros in the 
 	 * inequality constraint Jacobian.
 	 */
-	virtual bool getJacIneqConstraintNzElementsImpl(int* colIndex, int* rowIndex) = 0;
+	virtual bool getJacIneqConstraintNzElementsImpl(int* rowIndex, int* colIndex) = 0;
 	
 	
 	

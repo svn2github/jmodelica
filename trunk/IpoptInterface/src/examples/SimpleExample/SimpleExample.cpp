@@ -122,7 +122,7 @@ bool SimpleExample::getInitialImpl(double* xInit){
  * getEqConstraintNzElements returns the indices of the non-zeros in the 
  * equality constraint Jacobian.
  */
-bool SimpleExample::getJacEqConstraintNzElementsImpl(int* colIndex, int* rowIndex) {
+bool SimpleExample::getJacEqConstraintNzElementsImpl(int* rowIndex, int* colIndex) {
 	return true;
 }
 
@@ -130,7 +130,7 @@ bool SimpleExample::getJacEqConstraintNzElementsImpl(int* colIndex, int* rowInde
  * getIneqConstraintElements returns the indices of the non-zeros in the 
  * inequality constraint Jacobian.
  */
-bool SimpleExample::getJacIneqConstraintNzElementsImpl(int* colIndex, int* rowIndex) {
+bool SimpleExample::getJacIneqConstraintNzElementsImpl(int* rowIndex, int* colIndex) {
 
 	colIndex[0] = 1;
 	colIndex[0] = 1;
