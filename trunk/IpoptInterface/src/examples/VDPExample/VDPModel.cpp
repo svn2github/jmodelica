@@ -10,7 +10,6 @@ VDPModel::~VDPModel()
 {
 }
 
-
 /**
  * getDimensions retrieves the dimensions of the model variable vectors.
  */

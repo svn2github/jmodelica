@@ -12,25 +12,24 @@ nOutputs_(0),               // Number of outputs in the model
 nAlgebraic_(0),             // Number of auxilary variables
 nParameters_(0),            // Number of parameters
 nEqns_(0),                   // Number of equations in the DAE
-states_(0),              // State vector
-derivatives_(0),         // Derivative vector
-parameters_(0),          // Parameter vector
-inputs_(0),              // Input vector
-outputs_(0),             // Output vector 
-algebraic_(0),           // Algebraic vector 
-initialized_(0)
+states_(NULL),              // State vector
+derivatives_(NULL),         // Derivative vector
+parameters_(NULL),          // Parameter vector
+inputs_(NULL),              // Input vector
+outputs_(NULL),             // Output vector 
+algebraic_(NULL),           // Algebraic vector 
+initialized_(false)
 {
 }
 ModelInterface::~ModelInterface()
 {
-	if (initialized_) {
-		free(states_);
-		free(derivatives_);
-	    free(parameters_);
-	    free(inputs_);
-	    free(outputs_);
-	    free(algebraic_);
-	}
+		delete [] states_;
+		delete [] derivatives_;
+	    delete [] parameters_;
+	    delete [] inputs_;
+	    delete [] outputs_;
+	    delete [] algebraic_;
+
 }
 
 /**
@@ -46,12 +45,12 @@ bool ModelInterface::initialize() {
 			          nEqns_);
    
 	// Allocate memory
-    states_ = (double*)calloc(nStates_+1, sizeof(double));
-    derivatives_ = (double*)calloc(nDerivatives_+1, sizeof(double));
-    inputs_ = (double*)calloc(nInputs_+1, sizeof(double));
-    outputs_ = (double*)calloc(nOutputs_+1, sizeof(double));
-    algebraic_ = (double*)calloc(nAlgebraic_+1, sizeof(double));
-    parameters_ = (double*)calloc(nParameters_+1, sizeof(double));
+    states_ = new double[nStates_+1];
+    derivatives_ = new double[nDerivatives_+1];
+    inputs_ = new double[nInputs_+1];
+    outputs_ = new double[nOutputs_+1];
+    algebraic_ = new double[nAlgebraic_+1];
+    parameters_ = new double[nParameters_+1];
     initialized_ = true;
 	}
 	return true;

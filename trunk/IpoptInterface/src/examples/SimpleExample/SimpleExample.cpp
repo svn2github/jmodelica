@@ -150,7 +150,7 @@ int main()
 	double f = 0.;
 	
 	op->evalCost(&x,f);
-	printf("\nf(%f)=%f\n",x,f);
+	printf("\nf(%lf)=%lf\n",x,f);
 	
 	delete op;
 	

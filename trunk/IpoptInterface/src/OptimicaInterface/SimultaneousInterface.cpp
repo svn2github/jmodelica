@@ -2,25 +2,25 @@
 
 SimultaneousInterface::SimultaneousInterface()
 :
-	model_(0),           // The model representation
+	model_(NULL),           // The model representation
 	nVars_(0),                       // Number of variables
 	nEqConstr_(0),        // Number of equality constraints
 	nIneqConstr_(0),                 // Number of inequality constraints
-	xInit_(0),                   // Initial point
-	x_lb_(0),                    // Lower bound for x
-	x_ub_(0),                    // Upper bound for x
+	xInit_(NULL),                   // Initial point
+	x_lb_(NULL),                    // Lower bound for x
+	x_ub_(NULL),                    // Upper bound for x
 	nNzJacEqConstr_(0),              // Number of non-zeros in eq. constr. Jac.
-	colJacEqConstraintNzElements_(0),  // Col indices of non-zero elements
-	rowJacEqConstraintNzElements_(0),  // Row indices of non-zeros elements
+	colJacEqConstraintNzElements_(NULL),  // Col indices of non-zero elements
+	rowJacEqConstraintNzElements_(NULL),  // Row indices of non-zeros elements
 	nNzJacIneqConstr_(0),            // Number of non-zeros in ineq. constr. Jac.
-	colJacIneqConstraintNzElements_(0), // Col indices of non-zero elements
-	rowJacIneqConstraintNzElements_(0), // Row indices of non-zeros elements
+	colJacIneqConstraintNzElements_(NULL), // Col indices of non-zero elements
+	rowJacIneqConstraintNzElements_(NULL), // Row indices of non-zeros elements
 	nColl_(0),                       // Number of collocation points
-	A_(0),                       // The A matrix in the Butcher tableau
-	b_(0),                       // The b matrix in the Butcher tableau
-	c_(0),                       // The c matrix in the Butcher tableau
+	A_(NULL),                       // The A matrix in the Butcher tableau
+	b_(NULL),                       // The b matrix in the Butcher tableau
+	c_(NULL),                       // The c matrix in the Butcher tableau
 	nEl_(0),                         // Number of elements
-	mesh_(0),                    // The optimization mesh expressed as
+	mesh_(NULL),                    // The optimization mesh expressed as
 	// element lengths.
 	startTime_(0.0),                // Start time of optimization horizon
 	startTimeFree_(false),               // Problem with free start time
@@ -33,15 +33,13 @@ SimultaneousInterface::SimultaneousInterface()
 
 SimultaneousInterface::~SimultaneousInterface()
 {
-	if (initialized_) {
-		free(xInit_);
-		free(x_lb_);
-		free(x_ub_),
-		free(colJacEqConstraintNzElements_);
-		free(rowJacEqConstraintNzElements_);
-		free(colJacIneqConstraintNzElements_); 
-		free(rowJacIneqConstraintNzElements_);
-	}
+		delete [] xInit_;
+		delete [] x_lb_;
+		delete [] x_ub_;
+		delete [] colJacEqConstraintNzElements_;
+		delete [] rowJacEqConstraintNzElements_;
+		delete [] colJacIneqConstraintNzElements_; 
+		delete [] rowJacIneqConstraintNzElements_;
 
 }
 
@@ -53,18 +51,14 @@ bool SimultaneousInterface::initialize()
 	if (!initialized_) {
 		getDimensionsImpl(nVars_, nEqConstr_, nIneqConstr_, nNzJacEqConstr_, nNzJacIneqConstr_);
 
-		xInit_ = (double*)calloc(nVars_ + 1,sizeof(double)); // Initial point
-		x_lb_  = (double*)calloc(nVars_ + 1,sizeof(double)); // Lower bound for x
-		x_ub_ = (double*)calloc(nVars_ + 1,sizeof(double));  // Upper bound for x
+		xInit_ = new double[nVars_ + 1];
+		x_lb_ = new double[nVars_ + 1];
+		x_ub_ = new double[nVars_ + 1];
 
-		colJacEqConstraintNzElements_ = 
-			(int*)calloc(nNzJacEqConstr_ + 1,sizeof(int)); // Col indices of non-zero elements
-		rowJacEqConstraintNzElements_ =
-			(int*)calloc(nNzJacEqConstr_ + 1,sizeof(int)); // Row indices of non-zeros elements
-		colJacIneqConstraintNzElements_ = 
-			(int*)calloc(nNzJacIneqConstr_ + 1,sizeof(int)); // Col indices of non-zero elements
-		rowJacIneqConstraintNzElements_ =
-			(int*)calloc(nNzJacIneqConstr_ + 1,sizeof(int)); // Row indices of non-zeros elements
+		colJacEqConstraintNzElements_ = new int[nNzJacEqConstr_ + 1];
+		rowJacEqConstraintNzElements_ = new int[nNzJacEqConstr_ + 1];
+		colJacIneqConstraintNzElements_ = new int[nNzJacIneqConstr_ + 1];
+		rowJacIneqConstraintNzElements_  = new int[nNzJacIneqConstr_ + 1];
 
 		getBoundsImpl(x_lb_,x_ub_);
 		getInitialImpl(xInit_);
@@ -256,6 +250,11 @@ bool SimultaneousInterface::getJacIneqConstraintNzElements(int* colIndex, int* r
  */
 bool SimultaneousInterface::prettyPrint() {
 
+	if (!initialized_) 
+		if (!initialize())
+			return false;
+
+	
 printf("Number of variables                           :%d\n",nVars_);
 printf("Number of eq constr.                          :%d\n",nEqConstr_);
 printf("Number of ineq constr.                        :%d\n",nIneqConstr_);
