@@ -49,6 +49,9 @@ SimultaneousInterface::~SimultaneousInterface()
 bool SimultaneousInterface::initialize() 
 {
 	if (!initialized_) {
+
+		getModelInterfaceImpl(model_);
+		
 		getDimensionsImpl(nVars_, nEqConstr_, nIneqConstr_, nNzJacEqConstr_, nNzJacIneqConstr_);
 
 		xInit_ = new double[nVars_];
@@ -73,7 +76,7 @@ bool SimultaneousInterface::initialize()
 		// get non-zeros in equality constraints
 		getJacIneqConstraintNzElementsImpl(rowJacIneqConstraintNzElements_,
 				colJacIneqConstraintNzElements_);
-
+		
 		initialized_ = true;
 	}
 	return true;
@@ -98,6 +101,15 @@ bool SimultaneousInterface::getDimensions(int& nVars, int& nEqConstr, int& nIneq
 	nNzJacIneqConstr = nNzJacIneqConstr_;
 
 	return true;
+}
+
+bool SimultaneousInterface::getModelInterfaceImpl(ModelInterface* model) {
+	if (!initialized_) 
+		if (!initialize())
+			return false;
+	
+	return model_;
+	
 }
 
 /**

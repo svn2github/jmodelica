@@ -37,6 +37,11 @@ public:
 			                     int& nNzJacEqConstr, int& nNzJacIneqConstr);
 
 	/**
+	 * getModelInterface returns a pointer to the description of the dynamical model.
+	 */
+	bool getModelInterface(ModelInterface* model);
+	
+	/**
 	 * evalCost returns the cost function value at a given point in search space.
 	 */
 	bool evalCost(const double* x, double& f);
@@ -156,6 +161,13 @@ protected:
 	virtual bool getDimensionsImpl(int& nVars, int& nEqConstr, int& nIneqConstr,
 			                     int& nNzJacEqConstr, int& nNzJacIneqConstr)=0;
 
+	
+	
+	/**
+	 * getModelInterfaceImpl returns a pointer to the description of the dynamical model.
+	 */
+	virtual bool getModelInterfaceImpl(ModelInterface* model)=0;
+	
 	/**
 	 * evalCost returns the cost function value at a given point in search space.
 	 */

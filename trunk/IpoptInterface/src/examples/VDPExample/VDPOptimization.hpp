@@ -1,15 +1,38 @@
-#ifndef SIMPLEEXAMPLE_HPP_
-#define SIMPLEEXAMPLE_HPP_
+#ifndef VDPOPTIMIZATION_HPP_
+#define VDPOPTIMIZATION_HPP_
 
 #include "../../OptimicaInterface/SimultaneousInterface.hpp"
+#include "../../ModelInterface/ModelInterface.hpp"
+#include "VDPModel.hpp"
 
-class SimpleExample : public SimultaneousInterface
+
+/**
+ * This file encodes the optimization problem
+ * 
+ *  min x_3(t_f)
+ *   u
+ * 
+ *  subject to
+ *  
+ *   \dot x_1 = (1 - x_2^2)*x_1 - x_2 + u
+ *   \dot x_2 = p_1*x_1
+ *   \dot x_3 = x_1^2 + x_2^2 + u^2
+ *
+ * with initial conditions
+ * 
+ *   x_1(0) = 0;
+ *   x_2(0) = 1;
+ *   x_3(0) = 0;
+ * 
+ */
+
+
+class VDPOptimization : public SimultaneousInterface
 {
 public:
-	SimpleExample();
-	virtual ~SimpleExample();
-
-	
+	VDPOptimization();
+	virtual ~VDPOptimization();
+		
 	/**
 	 * getDimension returns the number of variables and the number of
 	 * constraints, respectively, in the problem.
@@ -17,10 +40,7 @@ public:
 	virtual bool getDimensionsImpl(int& nVars, int& nEqConstr, int& nIneqConstr,
 			                     int& nNzJacEqConstr, int& nNzJacIneqConstr);
 
-	/**
-	 * getModelInterfaceImpl returns a pointer to the description of the dynamical model.
-	 */
-	virtual bool getModelInterfaceImpl(ModelInterface* model);
+	virtual bool VDPOptimization::getModelInterfaceImpl(ModelInterface* model);
 	
 	/**
 	 * evalCost returns the cost function value at a given point in search space.
@@ -58,7 +78,7 @@ public:
 	/**
 	 * getBounds returns the upper and lower bounds on the optimization variables.
 	 */
-	virtual bool getBoundsImpl(double* x_lb, double* x_ub);
+	virtual bool getBoundsImpl(double* x_ub, double* x_lb);
 
 	/**
 	 * getInitial returns the initial point.
@@ -69,14 +89,19 @@ public:
 	 * getEqConstraintNzElements returns the indices of the non-zeros in the 
 	 * equality constraint Jacobian.
 	 */
-	virtual bool getJacEqConstraintNzElementsImpl(int* rowIndex, int* colIndex);
+	virtual bool getJacEqConstraintNzElementsImpl(int* colIndex, int* rowIndex);
 
 	/** 
 	 * getIneqConstraintElements returns the indices of the non-zeros in the 
 	 * inequality constraint Jacobian.
 	 */
-	virtual bool getJacIneqConstraintNzElementsImpl(int* rowIndex, int* colIndex);	
+	virtual bool getJacIneqConstraintNzElementsImpl(int* colIndex, int* rowIndex);	
 
+private:
+	ModelInterface* model_;
+	bool modelInitialized_;
+	int N_; // Number of elements
+	double tf_; // Final time
 };
 
-#endif /*SIMPLEEXAMPLE_HPP_*/
+#endif /*VDPOPTIMIZATION_HPP_*/

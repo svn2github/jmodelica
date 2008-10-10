@@ -15,7 +15,7 @@
 
 SimpleExample::SimpleExample()
 :
-SimultaneousInterface()
+SimultaneousInterface() 
 {
 
 }
@@ -41,7 +41,10 @@ bool SimpleExample::getDimensionsImpl(int& nVars, int& nEqConstr, int& nIneqCons
 	return true;
 }
 
-
+bool SimpleExample::getModelInterfaceImpl(ModelInterface* model) {
+	model  = NULL;
+	return true;
+}
 
 /**
  * evalCost returns the cost function value at a given point in search space.
