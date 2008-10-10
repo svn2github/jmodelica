@@ -132,7 +132,7 @@ bool SimpleExample::getJacEqConstraintNzElementsImpl(int* rowIndex, int* colInde
  */
 bool SimpleExample::getJacIneqConstraintNzElementsImpl(int* rowIndex, int* colIndex) {
 
-	colIndex[0] = 1;
+	rowIndex[0] = 1;
 	colIndex[0] = 1;
 
 	return true;

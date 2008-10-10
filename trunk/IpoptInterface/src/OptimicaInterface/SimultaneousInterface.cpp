@@ -63,11 +63,11 @@ bool SimultaneousInterface::initialize()
 		getBoundsImpl(x_lb_,x_ub_);
 		getInitialImpl(xInit_);
 
-		getJacEqConstraintNzElementsImpl(colJacEqConstraintNzElements_,
-				rowJacEqConstraintNzElements_);
+		getJacEqConstraintNzElementsImpl(rowJacEqConstraintNzElements_,
+				colJacEqConstraintNzElements_);
 
-		getJacIneqConstraintNzElementsImpl(colJacIneqConstraintNzElements_,
-				rowJacIneqConstraintNzElements_);
+		getJacIneqConstraintNzElementsImpl(rowJacIneqConstraintNzElements_,
+				colJacIneqConstraintNzElements_);
 
 		initialized_ = true;
 	}
