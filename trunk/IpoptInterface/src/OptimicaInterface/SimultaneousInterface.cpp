@@ -236,7 +236,7 @@ bool SimultaneousInterface::getJacIneqConstraintNzElements(int* rowIndex, int* c
 			return false;
 
 	int i = 0;
-	for (i=0;i<nNzJacEqConstr_;i++) {
+	for (i=0;i<nNzJacIneqConstr_;i++) {
 		colIndex[i] = colJacIneqConstraintNzElements_[i];
 		rowIndex[i] = rowJacIneqConstraintNzElements_[i];
 	}
