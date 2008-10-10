@@ -1,17 +1,21 @@
 #include "OptimicaTNLP.hpp"
-#include "SimultaneousInterface.hpp"
+#include "../OptimicaInterface/SimultaneousInterface.hpp"
+
+#include <iostream>
 
 
 OptimicaTNLP::OptimicaTNLP(SimultaneousInterface* problem)
   :
-  problem_(problem)
+  problem_(problem),
   n_eq_(0),
   n_ineq_(0),
   nnz_jac_eq_(0),
   nnz_jac_ineq_(0)
 {
-  ASSERT_EXCEPTION(problem_ ~= NULL, INVALID_TNLP,
+  ASSERT_EXCEPTION(problem_ != NULL, INVALID_TNLP,
 		   "Null problem definition passed into OptimicaTNLP");
+  
+  std::cout <<"Woohoo... Created one..." << std::endl;
 }
 
 OptimicaTNLP::~OptimicaTNLP()
@@ -21,7 +25,7 @@ OptimicaTNLP::~OptimicaTNLP()
 bool OptimicaTNLP::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 				Index& nnz_h_lag, IndexStyleEnum& index_style)
 {
-  if (!problem_->getDimensions(n, n_eq, n_ineq, nnz_jac_eq, nnz_jac_ineq)) {
+  if (!problem_->getDimensions(n, n_eq_, n_ineq_, nnz_jac_eq_, nnz_jac_ineq_)) {
       return false;
   } 
   
@@ -40,10 +44,14 @@ bool OptimicaTNLP::get_bounds_info(Index n, Number* x_l, Number* x_u,
   DBG_ASSERT(sizeof(Number) == sizeof(double));
   DBG_ASSERT(sizeof(Index) == sizeof(int));
   
-  double value = -1e20;
-  IpBlasDCopy(m, &value, 0, g_l, 1);
-  value = 0;
-  IpBlasDCopy(m, &value, 0, g_u, 0);
+  for (int i=0; i<m; i++) {
+	  g_l[i] = -1e20;
+  }
+
+  for (int i=0; i<n; i++) {
+	 g_u[i] = 0;
+  }
+  
   return problem_->getBounds((double*)x_u, (double*)x_l);
 }
 
@@ -59,7 +67,7 @@ bool OptimicaTNLP::get_starting_point(Index n, bool init_x, Number* x,
 bool OptimicaTNLP::eval_f(Index n, const Number* x, bool new_x,
 			  Number& obj_value)
 {
-  return problem_->evalCost((const double*)x, (double)obj_value);
+  return problem_->evalCost((const double*)x, (double&)obj_value);
 }
 
 bool OptimicaTNLP::eval_grad_f(Index n, const Number* x, bool new_x,
@@ -71,10 +79,10 @@ bool OptimicaTNLP::eval_grad_f(Index n, const Number* x, bool new_x,
 bool OptimicaTNLP::eval_g(Index n, const Number* x, bool new_x,
 			  Index m, Number* g)
 {
-  bool retval = evalEqConstraint((const double*)x, (double*)g);
+  bool retval = problem_->evalEqConstraint((const double*)x, (double*)g);
   if (retval) {
     double* gin = g + n_eq_;
-    retval = eval_IneqConstraint((const double*)x, (double*)gin);
+    retval = problem_->evalIneqConstraint((const double*)x, (double*)gin);
     }
   return retval;
 }
@@ -83,10 +91,10 @@ bool OptimicaTNLP::eval_jac_g(Index n, const Number* x, bool new_x,
 			      Index m, Index nele_jac, Index* iRow,
 			      Index *jCol, Number* values)
 {
-  bool retval = evalJacEqConstraint((const double*)x, (double*)values);
+  bool retval = problem_->evalJacEqConstraint((const double*)x, (double*)values);
   if (retval) {
-    double* values_ineq = values + nnz_eq_;
-    retval = evalJacIneqConstraint((const double*)x, values_ineq);
+    double* values_ineq = values + nnz_jac_eq_;
+    retval = problem_->evalJacIneqConstraint((const double*)x, values_ineq);
   }
   return retval;
 }

@@ -1,14 +1,17 @@
 #include "IpTNLP.hpp"
 
+using namespace Ipopt;
+
+// forward declarations
+class SimultaneousInterface;
+
 /** 
  * This is the class that present the dynamic optimization
  * problem from Optimica to Ipopt
- **/
+ */
 class OptimicaTNLP : public TNLP
 {
-  // forward declarations
-  class SimultaneousInterface;
-  
+public:
   // Construct an OptimicaTNLP - SimultaneousInterface pointer
   // must be valid
   OptimicaTNLP(SimultaneousInterface* problem);
@@ -53,10 +56,7 @@ class OptimicaTNLP : public TNLP
                                    Index m, const Number* g, const Number* lambda,
                                    Number obj_value,
                                    const IpoptData* ip_data,
-                                   IpoptCalculatedQuantities* ip_cq)
-  {
-    std::cout << "<speech voice=\"robot\">Optimal profile calculated!</speech>" << std::endl;
-  }
+                                   IpoptCalculatedQuantities* ip_cq);
     //@}
 
   private:
@@ -80,4 +80,8 @@ class OptimicaTNLP : public TNLP
 
     // Problem definition 
     SimultaneousInterface* problem_;
+    Index n_eq_;
+    Index n_ineq_;
+    Index nnz_jac_eq_;
+    Index nnz_jac_ineq_;
 };

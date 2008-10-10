@@ -1,4 +1,6 @@
 #include "SimpleExample.hpp"
+#include "../../IpoptInterface/OptimicaTNLP.hpp"
+#include "IpIpoptApplication.hpp"
 
 /*
  * These functions encode the optimization problem
@@ -98,7 +100,7 @@ bool SimpleExample::evalJacIneqConstraintImpl(const double* x, double* jac_gIneq
 /**
  * getBounds returns the upper and lower bounds on the optimization variables.
  */
-bool SimpleExample::getBoundsImpl(double* x_ub, double* x_lb) {
+bool SimpleExample::getBoundsImpl(double* x_lb, double* x_ub) {
 	
 	x_lb[0] = -10;
 	x_ub[0] = 10;
@@ -139,21 +141,50 @@ bool SimpleExample::getJacIneqConstraintNzElementsImpl(int* colIndex, int* rowIn
 /**
  * test main function
  */
-int main()
+int main(int argv, char* argc[])
 {
+//	using namespace Ipopt;
 	
-    SimpleExample* op = new SimpleExample();	
-	
+	// Create a new instance of your nlp
+	//  (use a SmartPtr, not raw)
+	SimpleExample* op = new SimpleExample();	
 	op->prettyPrint();
-	
-	double x = 1.;
-	double f = 0.;
-	
-	op->evalCost(&x,f);
-	printf("\nf(%lf)=%lf\n",x,f);
+
+	SmartPtr<TNLP> mynlp = new OptimicaTNLP(op);   
+
+	// Create a new instance of IpoptApplication
+	//  (use a SmartPtr, not raw)
+	SmartPtr<IpoptApplication> app = new IpoptApplication();
+
+	// Change some options
+	// Note: The following choices are only examples, they might not be
+	//       suitable for your optimization problem.
+	app->Options()->SetStringValue("output_file", "ipopt.out");
+	app->Options()->SetStringValue("hessian_approximation","limited-memory");
+
+	// Intialize the IpoptApplication and process the options
+	ApplicationReturnStatus status;
+	status = app->Initialize();
+	if (status != Solve_Succeeded) {
+		printf("\n\n*** Error during initialization!\n");
+		return (int) status;
+	}
+
+	// Ask Ipopt to solve the problem
+	status = app->OptimizeTNLP(mynlp);
+
+	if (status == Solve_Succeeded) {
+		printf("\n\n*** The problem solved!\n");
+	}
+	else {
+		printf("\n\n*** The problem FAILED!\n");
+	}
+
+	// As the SmartPtrs go out of scope, the reference count
+	// will be decremented and the objects will automatically
+	// be deleted.
 	
 	delete op;
-	
-	return 0;
-}
 
+	return (int) status;
+}

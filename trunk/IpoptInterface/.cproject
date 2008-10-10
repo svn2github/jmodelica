@@ -15,12 +15,16 @@
 </extensions>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<configuration artifactName="IpoptInterface" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.cygwin.exe.debug.1712288371" name="Debug" parent="cdt.managedbuild.config.gnu.cygwin.exe.debug">
+<configuration artifactExtension="exe" artifactName="IpoptInterface" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.cygwin.exe.debug.1712288371" name="Debug" parent="cdt.managedbuild.config.gnu.cygwin.exe.debug">
 <folderInfo id="cdt.managedbuild.config.gnu.cygwin.exe.debug.1712288371." name="/" resourcePath="">
 <toolChain id="cdt.managedbuild.toolchain.gnu.cygwin.exe.debug.1257748045" name="Cygwin GCC" superClass="cdt.managedbuild.toolchain.gnu.cygwin.exe.debug">
 <targetPlatform id="cdt.managedbuild.target.gnu.platform.cygwin.exe.debug.44719226" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.cygwin.exe.debug"/>
 <builder buildPath="${workspace_loc:/IpoptInterface/Debug}" id="cdt.managedbuild.target.gnu.builder.cygwin.exe.debug.1128011854" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.cygwin.exe.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.assembler.cygwin.exe.debug.2133599551" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.cygwin.exe.debug">
+<option id="gnu.both.asm.option.flags.75196093" name="Assembler flags" superClass="gnu.both.asm.option.flags"/>
+<option id="gnu.both.asm.option.include.paths.1073212318" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths"/>
+<option id="gnu.both.asm.option.warnings.nowarn.1198985633" name="Suppress warnings (-W)" superClass="gnu.both.asm.option.warnings.nowarn"/>
+<option id="gnu.both.asm.option.version.480417794" name="Announce version (-v)" superClass="gnu.both.asm.option.version"/>
 <inputType id="cdt.managedbuild.tool.gnu.assembler.input.448511456" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.archiver.cygwin.base.1643049228" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.cygwin.base"/>
@@ -31,7 +35,9 @@
 <option id="gnu.cpp.compiler.option.preprocessor.preprocess.475358205" name="Preprocess only (-E)" superClass="gnu.cpp.compiler.option.preprocessor.preprocess"/>
 <option id="gnu.cpp.compiler.option.preprocessor.def.400594100" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def"/>
 <option id="gnu.cpp.compiler.option.preprocessor.undef.590265677" name="Undefined symbols (-U)" superClass="gnu.cpp.compiler.option.preprocessor.undef"/>
-<option id="gnu.cpp.compiler.option.include.paths.106502102" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths"/>
+<option id="gnu.cpp.compiler.option.include.paths.106502102" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="&quot;C:\IPOPT\Ipopt-3.5.4\build\include\coin&quot;"/>
+</option>
 <option id="gnu.cpp.compiler.option.optimization.flags.1878851528" name="Other optimization flags" superClass="gnu.cpp.compiler.option.optimization.flags"/>
 <option id="gnu.cpp.compiler.option.debugging.other.458222930" name="Other debugging flags" superClass="gnu.cpp.compiler.option.debugging.other"/>
 <option id="gnu.cpp.compiler.option.debugging.prof.1800235832" name="Generate prof information (-p)" superClass="gnu.cpp.compiler.option.debugging.prof"/>
@@ -75,8 +81,21 @@
 <option id="gnu.cpp.link.option.nodeflibs.1526006029" name="Do not use default libraries (-nodefaultlibs)" superClass="gnu.cpp.link.option.nodeflibs"/>
 <option id="gnu.cpp.link.option.nostdlibs.1142811228" name="No startup or default libs (-nostdlib)" superClass="gnu.cpp.link.option.nostdlibs"/>
 <option id="gnu.cpp.link.option.strip.1897328032" name="Omit all symbol information (-s)" superClass="gnu.cpp.link.option.strip"/>
-<option id="gnu.cpp.link.option.libs.1817697858" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs"/>
-<option id="gnu.cpp.link.option.paths.799552188" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths"/>
+<option id="gnu.cpp.link.option.libs.1817697858" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
+<listOptionValue builtIn="false" value="ipopt"/>
+<listOptionValue builtIn="false" value="m"/>
+<listOptionValue builtIn="false" value="dl"/>
+<listOptionValue builtIn="false" value="frtbegin"/>
+<listOptionValue builtIn="false" value="g2c"/>
+<listOptionValue builtIn="false" value="cygwin"/>
+<listOptionValue builtIn="false" value="user32"/>
+<listOptionValue builtIn="false" value="kernel32"/>
+<listOptionValue builtIn="false" value="advapi32"/>
+<listOptionValue builtIn="false" value="shell32"/>
+</option>
+<option id="gnu.cpp.link.option.paths.799552188" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
+<listOptionValue builtIn="false" value="&quot;C:\IPOPT\Ipopt-3.5.4\build\lib&quot;"/>
+</option>
 <option id="gnu.cpp.link.option.flags.755064875" name="Linker flags" superClass="gnu.cpp.link.option.flags"/>
 <option id="gnu.cpp.link.option.other.143864792" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other"/>
 <option id="gnu.cpp.link.option.userobjs.1691586107" name="Other objects" superClass="gnu.cpp.link.option.userobjs"/>
@@ -628,6 +647,7 @@
 </target>
 </buildTargets>
 </storageModule>
+<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 </cconfiguration>
 <cconfiguration id="cdt.managedbuild.config.gnu.cygwin.exe.release.1543036920">
 <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cygwin.exe.release.1543036920" moduleId="org.eclipse.cdt.core.settings" name="Release">
@@ -1206,6 +1226,7 @@
 </target>
 </buildTargets>
 </storageModule>
+<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 </cconfiguration>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
