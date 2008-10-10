@@ -23,7 +23,6 @@ C_UPPER_DEPS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
-src/examples/VDPExample \
 src/examples/SimpleExample \
 src/OptimicaInterface \
 src/ModelInterface \

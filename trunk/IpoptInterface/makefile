@@ -9,7 +9,6 @@ RM := rm -rf
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include subdir.mk
--include src/examples/VDPExample/subdir.mk
 -include src/examples/SimpleExample/subdir.mk
 -include src/OptimicaInterface/subdir.mk
 -include src/ModelInterface/subdir.mk
@@ -48,7 +47,7 @@ all: IpoptInterface.exe
 IpoptInterface.exe: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cygwin C++ Linker'
-	g++ -L"C:\IPOPT\Ipopt-3.5.4\build\lib" -o"IpoptInterface.exe" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L"../../Ipopt/opt/lib" -o"IpoptInterface.exe" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
