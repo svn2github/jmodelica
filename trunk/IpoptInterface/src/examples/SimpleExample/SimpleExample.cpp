@@ -37,7 +37,7 @@ bool SimpleExample::getDimensionsImpl(int& nVars, int& nEqConstr, int& nIneqCons
 	nIneqConstr = 1;             // Number of inequality constraints
 	nNzJacEqConstr = 0;              // Number of non-zeros in eq. constr. Jac.
 	nNzJacIneqConstr = 1;            // Number of non-zeros in ineq. constr. Jac.
-
+    
 	return true;
 }
 

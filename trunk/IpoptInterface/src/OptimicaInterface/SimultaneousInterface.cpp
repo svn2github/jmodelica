@@ -90,7 +90,7 @@ bool SimultaneousInterface::getDimensions(int& nVars, int& nEqConstr, int& nIneq
 	nEqConstr = nEqConstr_;
 	nIneqConstr = nIneqConstr_;
 	nNzJacEqConstr = nNzJacEqConstr_;
-	nNzJacIneqConstr = nNzJacEqConstr_;
+	nNzJacIneqConstr = nNzJacIneqConstr_;
 
 	return true;
 }
