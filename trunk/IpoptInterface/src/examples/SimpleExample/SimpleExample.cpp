@@ -104,7 +104,7 @@ bool SimpleExample::getBoundsImpl(double* x_lb, double* x_ub) {
 	
 	x_lb[0] = -10;
 	x_ub[0] = 10;
-
+	
 	return true;
 }
 

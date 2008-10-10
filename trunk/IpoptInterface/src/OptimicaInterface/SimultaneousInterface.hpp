@@ -72,7 +72,7 @@ public:
 	/**
 	 * getBounds returns the upper and lower bounds on the optimization variables.
 	 */
-	bool getBounds(double* x_ub, double* x_lb);
+	bool getBounds(double* x_lb, double* x_ub);
 
 	/**
 	 * getInitial returns the initial point.
@@ -192,7 +192,7 @@ protected:
 	/**
 	 * getBounds returns the upper and lower bounds on the optimization variables.
 	 */
-	virtual bool getBoundsImpl(double* x_ub, double* x_lb) = 0;
+	virtual bool getBoundsImpl(double* x_lb, double* x_ub) = 0;
 
 	/**
 	 * getInitial returns the initial point.

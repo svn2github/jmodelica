@@ -36,10 +36,10 @@ SimultaneousInterface::~SimultaneousInterface()
 		delete [] xInit_;
 		delete [] x_lb_;
 		delete [] x_ub_;
-		delete [] colJacEqConstraintNzElements_;
 		delete [] rowJacEqConstraintNzElements_;
-		delete [] colJacIneqConstraintNzElements_; 
+		delete [] colJacEqConstraintNzElements_;
 		delete [] rowJacIneqConstraintNzElements_;
+		delete [] colJacIneqConstraintNzElements_; 
 
 }
 
@@ -51,21 +51,26 @@ bool SimultaneousInterface::initialize()
 	if (!initialized_) {
 		getDimensionsImpl(nVars_, nEqConstr_, nIneqConstr_, nNzJacEqConstr_, nNzJacIneqConstr_);
 
-		xInit_ = new double[nVars_ + 1];
-		x_lb_ = new double[nVars_ + 1];
-		x_ub_ = new double[nVars_ + 1];
+		xInit_ = new double[nVars_];
+		x_lb_ = new double[nVars_];
+		x_ub_ = new double[nVars_];
 
-		colJacEqConstraintNzElements_ = new int[nNzJacEqConstr_ + 1];
-		rowJacEqConstraintNzElements_ = new int[nNzJacEqConstr_ + 1];
-		colJacIneqConstraintNzElements_ = new int[nNzJacIneqConstr_ + 1];
-		rowJacIneqConstraintNzElements_  = new int[nNzJacIneqConstr_ + 1];
+		rowJacEqConstraintNzElements_ = new int[nNzJacEqConstr_];
+		colJacEqConstraintNzElements_ = new int[nNzJacEqConstr_];
+		rowJacIneqConstraintNzElements_  = new int[nNzJacIneqConstr_];
+		colJacIneqConstraintNzElements_ = new int[nNzJacIneqConstr_];
 
+		// get bounds
 		getBoundsImpl(x_lb_,x_ub_);
+		
+		// get initial point
 		getInitialImpl(xInit_);
 
+		// get non-zeros in inequality constraints
 		getJacEqConstraintNzElementsImpl(rowJacEqConstraintNzElements_,
 				colJacEqConstraintNzElements_);
 
+		// get non-zeros in equality constraints
 		getJacIneqConstraintNzElementsImpl(rowJacIneqConstraintNzElements_,
 				colJacIneqConstraintNzElements_);
 
@@ -172,7 +177,7 @@ bool SimultaneousInterface::evalJacIneqConstraint(const double* x, double* jac_g
 /**
  * getBounds returns the upper and lower bounds on the optimization variables.
  */
-bool SimultaneousInterface::getBounds(double* x_ub, double* x_lb){
+bool SimultaneousInterface::getBounds(double* x_lb, double* x_ub){
 
 	if (!initialized_) 
 		if (!initialize())
@@ -217,8 +222,8 @@ bool SimultaneousInterface::getJacEqConstraintNzElements(int* rowIndex, int* col
 
 	int i = 0;
 	for (i=0;i<nNzJacEqConstr_;i++) {
-		colIndex[i] = colJacEqConstraintNzElements_[i];
 		rowIndex[i] = rowJacEqConstraintNzElements_[i];
+		colIndex[i] = colJacEqConstraintNzElements_[i];
 	}
 
 	return true;
