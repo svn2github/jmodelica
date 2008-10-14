@@ -161,6 +161,18 @@ bool ModelInterface::evalJacDAEResidualParameters(const double* x, const double*
 
 }
 
+bool ModelInterface::evalJacDAEResidualAlgebraic(const double* x, const double* dx, const double* p, const double* u,
+        const double* y, const double* z, double* jacAlgebraic){
+	
+	if (!initialized_) 
+		if (!initialize())
+			return false;
+    
+    return evalJacDAEResidualAlgebraicImpl(x, dx, p, u, y, z, jacAlgebraic);	
+
+}
+
+
 // Getters
 int ModelInterface::getNumStates() {
 	return nStates_;

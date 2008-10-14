@@ -41,7 +41,12 @@ public:
 	 */ 
 	bool getDimensions(int& nVars, int& nEqConstr, int& nIneqConstr,
 			                     int& nNzJacEqConstr, int& nNzJacIneqConstr);
-		
+	
+	/**
+	 * getIntervalSpec returns data that specifies the optimization interval.
+	 */
+	bool getIntervalSpec(double& startTime, bool& startTimeFree, double& finalTime, bool& finalTimeFree);
+	
 	/**
 	 * evalCost returns the cost function value at a given point in search space.
 	 */
@@ -192,6 +197,8 @@ protected:
 	virtual bool getDimensionsImpl(int& nVars, int& nEqConstr, int& nIneqConstr,
 			                     int& nNzJacEqConstr, int& nNzJacIneqConstr) = 0;
 
+	virtual bool getIntervalSpecImpl(double& startTime, bool& startTimeFree, double& finalTime, bool& finalTimeFree) = 0;
+	
 	virtual bool getNumElImpl(int& nEl) = 0;
 	
 	virtual bool getMeshImpl(double* mesh) = 0;

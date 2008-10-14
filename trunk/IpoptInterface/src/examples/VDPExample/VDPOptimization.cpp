@@ -1,4 +1,6 @@
 #include "VDPOptimization.hpp"
+#include "../../IpoptInterface/OptimicaTNLP.hpp"
+#include "IpIpoptApplication.hpp"
 
 VDPOptimization::VDPOptimization()
 :
@@ -47,6 +49,14 @@ bool VDPOptimization::getDimensionsImpl(int& nVars, int& nEqConstr, int& nIneqCo
 	                 nStates; // initial conditions
 	nNzJacIneqConstr = 0;
 	
+	return true;
+}
+
+bool VDPOptimization::getIntervalSpecImpl(double& startTime, bool& startTimeFree, double& finalTime, bool& finalTimeFree) {
+	startTime = 0;
+	startTimeFree = false;
+	finalTime = 5;
+	finalTimeFree = false;
 	return true;
 }
 
@@ -136,27 +146,28 @@ bool VDPOptimization::evalEqConstraintImpl(const double* x, double* gEq) {
 		
 	int nEl = getNumEl();
 	
+	double startTime = getStartTime();
+	double finalTime = getFinalTime();
+	
 	const double* h = getMesh();
 	
 	// Evaluate the Collocation residuals
-	double* _x = NULL;
-	double* xInit = NULL;
-	double* dx = NULL;
-	double* p = NULL;
-	double* u = NULL;
-	double* y = NULL;
-	double* z = NULL;
-	
-	model->getInitial(xInit,dx,p,u,y,z);
+	const double* _x = NULL;
+	const double* xInit = NULL;
+	const double* dx = NULL;
+	const double* p = getModelParameters();
+	const double* u = NULL;
+	const double* y = NULL;
+	const double* z = NULL;
 	
 	double* gEqPtr = gEq;
 	
 	for (int i=0;i<nEl;i++) {
 		
-		_x = (double*) x + nStates + (nStates + nDerivatives + nInputs + nAlgebraic)*i;
-		dx = (double*)x + nStates + (nStates + nDerivatives + nInputs + nAlgebraic)*i + nStates;
-		u = (double*)x + nStates + (nStates + nDerivatives + nInputs + nAlgebraic)*i + nStates + nDerivatives;
-		z = (double*)x + nStates + (nStates + nDerivatives + nInputs + nAlgebraic)*i + nStates + nDerivatives + nInputs;
+		_x = x + nStates + (nStates + nDerivatives + nInputs + nAlgebraic)*i;
+		dx = x + nStates + (nStates + nDerivatives + nInputs + nAlgebraic)*i + nStates;
+		u = x + nStates + (nStates + nDerivatives + nInputs + nAlgebraic)*i + nStates + nDerivatives;
+		z = x + nStates + (nStates + nDerivatives + nInputs + nAlgebraic)*i + nStates + nDerivatives + nInputs;
 	
 		gEqPtr += (nStates + nAlgebraic);
 		model->evalDAEResidual(_x, dx, p, u, y,  z, gEqPtr);
@@ -170,7 +181,7 @@ bool VDPOptimization::evalEqConstraintImpl(const double* x, double* gEq) {
 		dx = (double*)x + nStates + (nStates + nDerivatives + nInputs + nAlgebraic)*i + nStates;
 		
 		for (int j=0;j<nStates;j++) {
-			gEqPtr[j] = dx[j] - (_x[j] - _x[j-nStates])/h[i];
+			gEqPtr[j] = dx[j] - (_x[j] - _x[j-nStates])/h[i]*(finalTime-startTime);
 		}
 		gEqPtr += nStates;
 		
@@ -190,7 +201,76 @@ bool VDPOptimization::evalEqConstraintImpl(const double* x, double* gEq) {
  */
 bool VDPOptimization::evalJacEqConstraintImpl(const double* x, double* jac_gEq) {
 
+	ModelInterface* model = getModel();
+	
+	int nStates = model->getNumStates();
+	int nDerivatives = model->getNumDerivatives();
+	int nInputs = model->getNumInputs();
+//	int nOutputs = model->getNumOutputs();
+	int nAlgebraic = model->getNumAlgebraic();
+	int nEqns = model->getNumEqns();
+	
+	int nEl = getNumEl();
+
+	// Evaluate the Collocation residuals
+	const double* _x = NULL;
+	const double* dx = NULL;
+	const double* p = getModelParameters();
+	const double* u = NULL;
+	const double* y = NULL;
+	const double* z = NULL;
+
+	double startTime = getStartTime();
+	double finalTime = getFinalTime();
+	
+	const double* h = getMesh();
+	
+	double* jac_gEqPtr = jac_gEq;
+	
+	// Jacobian for collocation equations
+	for (int i=0;i<nEl;i++) {
+		
+		_x = x + nStates + (nStates + nDerivatives + nInputs + nAlgebraic)*i;
+		dx = x + nStates + (nStates + nDerivatives + nInputs + nAlgebraic)*i + nStates;
+		u = x + nStates + (nStates + nDerivatives + nInputs + nAlgebraic)*i + nStates + nDerivatives;
+		z = x + nStates + (nStates + nDerivatives + nInputs + nAlgebraic)*i + nStates + nDerivatives + nInputs;
+
+		model->evalJacDAEResidualStates(_x, dx, p, u, y,  z, jac_gEqPtr);
+		jac_gEqPtr += nEqns*(nStates);
+		model->evalJacDAEResidualDerivatives(_x, dx, p, u, y,  z, jac_gEqPtr);
+		jac_gEqPtr += nEqns*(nDerivatives);
+		model->evalJacDAEResidualInputs(_x, dx, p, u, y,  z, jac_gEqPtr);
+		jac_gEqPtr += nEqns*(nInputs);
+		model->evalJacDAEResidualAlgebraic(_x, dx, p, u, y,  z, jac_gEqPtr);
+		jac_gEqPtr += nEqns*(nAlgebraic);
+
+	}
+	
+    // Jacobian for derivative equations
+	for (int i=0;i<nEl;i++) {
+		for (int j=0;j<nDerivatives;j++) {
+			jac_gEqPtr[j] = 1/h[i]*(finalTime-startTime);
+		}
+		jac_gEqPtr += nDerivatives;
+		
+		for (int j=0;j<nDerivatives;j++) {
+			jac_gEqPtr[j] = -1/h[i]*(finalTime-startTime);
+		}
+		jac_gEqPtr += nDerivatives;
+
+		for (int j=0;j<nDerivatives;j++) {
+			jac_gEqPtr[j] = 1;
+		}
+		jac_gEqPtr += nDerivatives;
+		
+	}
+	
+	// Jacobian for initial conditions
+	for (int j=0;j<nDerivatives;j++) {
+		jac_gEqPtr[j] = 1;
+	}
 	return true;
+	
 }
 
 /**
@@ -369,4 +449,55 @@ bool VDPOptimization::getJacIneqConstraintNzElementsImpl(int* rowIndex, int* col
 	// No inequality constraints.
 	return true;
 	
+}
+
+
+int main(int argv, char* argc[])
+{
+//	using namespace Ipopt;
+	
+	// Create a new instance of your nlp
+	//  (use a SmartPtr, not raw)
+	VDPOptimization* op = new VDPOptimization();	
+	//Initialize first!
+	op->initialize();
+	op->prettyPrint();
+
+	SmartPtr<TNLP> mynlp = new OptimicaTNLP(op);   
+
+	// Create a new instance of IpoptApplication
+	//  (use a SmartPtr, not raw)
+	SmartPtr<IpoptApplication> app = new IpoptApplication();
+
+	// Change some options
+	// Note: The following choices are only examples, they might not be
+	//       suitable for your optimization problem.
+	app->Options()->SetStringValue("output_file", "ipopt.out");
+	app->Options()->SetStringValue("hessian_approximation","limited-memory");
+
+	// Intialize the IpoptApplication and process the options
+	ApplicationReturnStatus status;
+	status = app->Initialize();
+	if (status != Solve_Succeeded) {
+		printf("\n\n*** Error during initialization!\n");
+		return (int) status;
+	}
+
+	// Ask Ipopt to solve the problem
+	status = app->OptimizeTNLP(mynlp);
+
+	if (status == Solve_Succeeded) {
+		printf("\n\n*** The problem solved!\n");
+	}
+	else {
+		printf("\n\n*** The problem FAILED!\n");
+	}
+
+	// As the SmartPtrs go out of scope, the reference count
+	// will be decremented and the objects will automatically
+	// be deleted.
+	
+	delete op;
+
+	return (int) status;
 }

@@ -133,3 +133,10 @@ bool VDPModel::evalJacDAEResidualParametersImpl(const double* x, const double* d
    	return true;
    	
 }
+
+
+bool VDPModel::evalJacDAEResidualAlgebraicImpl(const double* x, const double* dx, const double* p, const double* u,
+        const double* y, const double* z, double* jacAlgebraic) {
+	
+	return true;
+}

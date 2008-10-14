@@ -117,6 +117,8 @@ bool SimultaneousInterface::initialize()
 		mesh_ = new double[nEl_];
 		getMeshImpl(mesh_);
 
+		getIntervalSpecImpl(startTime_, startTimeFree_, finalTime_, finalTimeFree_);
+		
 		// Remains to implement collocation matrices
 		
 		initialized_ = true;

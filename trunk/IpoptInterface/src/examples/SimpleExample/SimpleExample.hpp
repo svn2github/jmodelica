@@ -19,6 +19,9 @@ public:
 	virtual bool getDimensionsImpl(int& nVars, int& nEqConstr, int& nIneqConstr,
 			                     int& nNzJacEqConstr, int& nNzJacIneqConstr);
 
+	virtual bool getIntervalSpecImpl(double& startTime, bool& startTimeFree, double& finalTime, bool& finalTimeFree);
+
+	
 	/**
 	 * getNumEl returns the number of elements in the mesh
 	 */

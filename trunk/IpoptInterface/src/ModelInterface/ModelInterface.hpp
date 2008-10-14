@@ -57,6 +57,14 @@ public:
 	bool evalJacDAEResidualParameters(const double* x, const double* dx, const double* p, const double* u,
             const double* y, const double* z, double* jacParameters);
 	
+	/**
+	 * evalJacDAEResidualStates returns the Jacobian of the DAE
+	 * w.r.t. algebraic variables.
+	 */
+	bool evalJacDAEResidualAlgebraic(const double* x, const double* dx, const double* p, const double* u,
+            const double* y, const double* z, double* jacAlgebraic);
+	
+
 	
 	// Getters
 	int getNumStates();
@@ -164,6 +172,14 @@ protected:
 	 */
 	virtual bool evalJacDAEResidualParametersImpl(const double* x, const double* dx, const double* p,
             const double* u, const double* y, const double* z, double* jacParameters)=0;
+
+	/**
+	 * evalJacDAEResidualStates returns the Jacobian of the DAE
+	 * w.r.t. algebraic variables.
+	 */
+	virtual bool evalJacDAEResidualAlgebraicImpl(const double* x, const double* dx, const double* p, const double* u,
+            const double* y, const double* z, double* jacAlgebraic) = 0;
+
 	
 };
 

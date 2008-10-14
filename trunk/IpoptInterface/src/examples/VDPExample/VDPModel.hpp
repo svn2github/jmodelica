@@ -74,6 +74,10 @@ public:
 	virtual bool evalJacDAEResidualParametersImpl(const double* x, const double* dx, const double* p,
 	        const double* u, const double* y, const double* z, double* jacParameters);
 	
+
+	virtual bool evalJacDAEResidualAlgebraicImpl(const double* x, const double* dx, const double* p, const double* u,
+            const double* y, const double* z, double* jacAlgebraic);
+
 	
 };
 

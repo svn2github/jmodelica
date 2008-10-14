@@ -41,6 +41,11 @@ bool SimpleExample::getDimensionsImpl(int& nVars, int& nEqConstr, int& nIneqCons
 	return true;
 }
 
+bool SimpleExample::getIntervalSpecImpl(double& startTime, bool& startTimeFree, double& finalTime, bool& finalTimeFree) {
+	return true;
+}
+
+
 bool SimpleExample::getModelImpl(ModelInterface* model) {
 	model  = NULL;
 	return true;
@@ -154,6 +159,7 @@ bool SimpleExample::getJacIneqConstraintNzElementsImpl(int* rowIndex, int* colIn
 /**
  * test main function
  */
+/*
 int main(int argv, char* argc[])
 {
 //	using namespace Ipopt;
@@ -203,3 +209,4 @@ int main(int argv, char* argc[])
 
 	return (int) status;
 }
+*/
