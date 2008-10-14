@@ -47,10 +47,15 @@ bool ModelInterface::initialize() {
 	// Allocate memory
     states_ = new double[nStates_+1];
     derivatives_ = new double[nDerivatives_+1];
+    parameters_ = new double[nParameters_+1];
     inputs_ = new double[nInputs_+1];
     outputs_ = new double[nOutputs_+1];
     algebraic_ = new double[nAlgebraic_+1];
-    parameters_ = new double[nParameters_+1];
+ 
+    // Get consistent initial conditions
+    getInitialImpl(states_, derivatives_, parameters_, inputs_, 
+    		       outputs_, algebraic_);
+    
     initialized_ = true;
 	}
 	return true;
@@ -78,6 +83,15 @@ bool ModelInterface::getDimensions(int& nStates, int& nDerivatives,
     return true;
 }
 
+bool ModelInterface::getInitial(double* x, double* dx, double* p, double* u,
+		                        double* y, double* z) {	
+	if (!initialized_) 
+		if (!initialize())
+			return false;
+	return getInitialImpl(x, dx, p, u, y, z);
+
+}
+
 /**
  * Evaluate the residual of the DAE. The argument res should have the
  * the size nEqns.
@@ -88,8 +102,8 @@ bool ModelInterface::evalDAEResidual(const double* x, const double* dx, const do
 	if (!initialized_) 
 		if (!initialize())
 			return false;
-    
-    return true;	
+    return evalDAEResidualImpl(x, dx, p, u, y, z, res);
+
 }
 
 /**
@@ -101,9 +115,8 @@ bool ModelInterface::evalJacDAEResidualStates(const double* x, const double* dx,
 	
 	if (!initialized_) 
 		if (!initialize())
-			return false;
-    
-    return true;	
+			return false;    
+    return evalJacDAEResidualStatesImpl(x, dx, p, u, y, z, jacStates);
 }
 
 /**
@@ -117,7 +130,7 @@ bool ModelInterface::evalJacDAEResidualDerivatives(const double* x, const double
 		if (!initialize())
 			return false;
     
-    return true;	
+    return evalJacDAEResidualDerivativesImpl(x, dx, p, u, y, z, jacDerivatives);
 }
 
 /**
@@ -130,8 +143,7 @@ bool ModelInterface::evalJacDAEResidualInputs(const double* x, const double* dx,
 	if (!initialized_) 
 		if (!initialize())
 			return false;
-    
-    return true;	
+    return evalJacDAEResidualInputsImpl(x, dx, p, u, y, z, jacInputs);
 }
 
 /**
@@ -145,7 +157,34 @@ bool ModelInterface::evalJacDAEResidualParameters(const double* x, const double*
 		if (!initialize())
 			return false;
     
-    return true;	
+    return evalJacDAEResidualParametersImpl(x, dx, p, u, y, z, jacParameters);	
+
 }
 
+// Getters
+int ModelInterface::getNumStates() {
+	return nStates_;
+}
 
+int ModelInterface::getNumDerivatives() {
+	return nDerivatives_;
+}
+
+int ModelInterface::getNumInputs() {
+	return nInputs_;
+}
+int ModelInterface::getNumOutputs() {
+	return nOutputs_;
+}
+
+int ModelInterface::getNumAlgebraic() {
+	return nAlgebraic_;
+}
+
+int ModelInterface::getNumParameters() {
+	return nParameters_;
+}
+
+int ModelInterface::getNumEqns() {
+	return nEqns_;
+}

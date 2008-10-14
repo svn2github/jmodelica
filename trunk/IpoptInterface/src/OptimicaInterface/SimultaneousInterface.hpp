@@ -30,17 +30,18 @@ public:
 	virtual ~SimultaneousInterface();
 		
 	/**
+	 * initialize allocates memory and initialize the model
+	 */
+	bool initialize();
+
+	
+	/**
 	 * getDimension returns the number of variables and the number of
 	 * constraints, respectively, in the problem.
 	 */ 
 	bool getDimensions(int& nVars, int& nEqConstr, int& nIneqConstr,
 			                     int& nNzJacEqConstr, int& nNzJacIneqConstr);
-
-	/**
-	 * getModelInterface returns a pointer to the description of the dynamical model.
-	 */
-	bool getModelInterface(ModelInterface* model);
-	
+		
 	/**
 	 * evalCost returns the cost function value at a given point in search space.
 	 */
@@ -100,7 +101,40 @@ public:
 	 * Print the problem specification
 	 */
 	bool prettyPrint();
-	
+
+	// Getters
+	ModelInterface* getModel() const;       
+	int getNumVars() const;                   
+	int getNumEqConstr() const;                
+	int getNumIneqConstr() const;             
+	const double* getXInit() const;               
+	const double* getX_lb() const;                
+	const double* getX_ub() const;                
+	int getNumNzJacEqConstr() const;          
+	const int* getRowJacEqConstraintNzElements() const;
+	const int* getColJacEqConstraintNzElements() const;
+	const int getNumNzJacIneqConstr() const;            
+	const int* getRowJacIneqConstraintNzElements() const;
+	const int* getColJacIneqConstraintNzElements() const;
+	int getNumColl() const;                       
+	const double* getA() const;                      
+	const double* getB() const;                      
+	const double* getC() const;                      
+	int getNumEl() const;                        
+	const double* getMesh() const;                 
+	                                
+	double getStartTime() const;             
+	bool getStartTimeFree() const;             
+	double getFinalTime() const;               
+	bool getFinalTimeFree() const;             
+
+	const double* getModelStateInit() const;         
+	const double* getModelDerivativeInit() const;    
+	const double* getModelParameters() const;        
+	const double* getModelInputInit() const;         
+	const double* getModelOutputInit() const;        
+	const double* getModelAlgebraicInit() const;     
+
 private:
 
     /**@name Default Compiler Generated Methods
@@ -120,12 +154,6 @@ private:
     /** Overloaded Equals Operator */
     void operator=(const SimultaneousInterface&);
     //@}
-	
-	/**
-	 * initialize allocates memory and initialize the model
-	 */
-	bool initialize();
-
     
 	ModelInterface* model_;           // The model representation
 	int nVars_;                       // Number of variables
@@ -152,78 +180,43 @@ private:
 	double finalTime_;                // Final time of optimization horizon
 	bool finalTimeFree_;               // Problem with free final time
 
+	double* modelStateInit_;           // Initial state vector
+	double* modelDerivativeInit_;      // Initial state derivatives
+	double* modelParameters_;          // Parameters of dynamic model
+	double* modelInputInit_;           // Initial inputs of dynamic model (TODO: really?)
+	double* modelOutputInit_;          // Initial outputs of dynamic model
+	double* modelAlgebraicInit_;          // Initial algebraic variables of dynamic model
+	
 	bool initialized_;                 // Flag indicating if the class is initialized
 protected:
-	/**
-	 * getDimension returns the number of variables and the number of
-	 * constraints, respectively, in the problem.
-	 */ 
 	virtual bool getDimensionsImpl(int& nVars, int& nEqConstr, int& nIneqConstr,
-			                     int& nNzJacEqConstr, int& nNzJacIneqConstr)=0;
+			                     int& nNzJacEqConstr, int& nNzJacIneqConstr) = 0;
 
+	virtual bool getNumElImpl(int& nEl) = 0;
 	
+	virtual bool getMeshImpl(double* mesh) = 0;
 	
-	/**
-	 * getModelInterfaceImpl returns a pointer to the description of the dynamical model.
-	 */
-	virtual bool getModelInterfaceImpl(ModelInterface* model)=0;
+	virtual bool getModelImpl(ModelInterface* model) = 0;
 	
-	/**
-	 * evalCost returns the cost function value at a given point in search space.
-	 */
-	virtual bool evalCostImpl(const double* x, double& f)=0;
+	virtual bool evalCostImpl(const double* x, double& f) = 0;
 
-	/**
-	 * evalGradCost returns the gradient of the cost function value at 
-	 * a given point in search space.
-	 */
-	virtual bool evalGradCostImpl(const double* x, double* grad_f)=0;
+	virtual bool evalGradCostImpl(const double* x, double* grad_f) = 0;
 
-	/**
-	 * evalEqConstraints returns the residual of the equality constraints
-	 */
-	virtual bool evalEqConstraintImpl(const double* x, double* gEq)=0;
+	virtual bool evalEqConstraintImpl(const double* x, double* gEq) = 0;
 
-	/**
-	 * evalJacEqConstraints returns the Jacobian of the residual of the 
-	 * equality constraints.
-	 */
 	virtual bool evalJacEqConstraintImpl(const double* x, double* jac_gEq) = 0;
 
-	/**
-	 * evalIneqConstraints returns the residual of the inequality constraints g(x)<=0
-	 */
 	virtual bool evalIneqConstraintImpl(const double* x, double* gIneq) = 0;
 
-	/**
-	 * evalJacIneqConstraints returns Jacobian of the residual of the 
-	 * inequality constraints g(x)<=0
-	 */
 	virtual bool evalJacIneqConstraintImpl(const double* x, double* jac_gIneq) = 0;
 
-	/**
-	 * getBounds returns the upper and lower bounds on the optimization variables.
-	 */
 	virtual bool getBoundsImpl(double* x_lb, double* x_ub) = 0;
 
-	/**
-	 * getInitial returns the initial point.
-	 */
 	virtual bool getInitialImpl(double* x_init) = 0;
 
-	/** 
-	 * getEqConstraintNzElements returns the indices of the non-zeros in the 
-	 * equality constraint Jacobian.
-	 */
 	virtual bool getJacEqConstraintNzElementsImpl(int* rowIndex, int* colIndex) = 0;
 
-	/** 
-	 * getIneqConstraintElements returns the indices of the non-zeros in the 
-	 * inequality constraint Jacobian.
-	 */
 	virtual bool getJacIneqConstraintNzElementsImpl(int* rowIndex, int* colIndex) = 0;
-	
-	
 	
 };
 

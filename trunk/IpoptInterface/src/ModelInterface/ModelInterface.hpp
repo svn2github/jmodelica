@@ -12,45 +12,66 @@ public:
 	 * getDimensions retrieves the dimensions of the model variable vectors.
 	 */
 	bool getDimensions(int& nStates, int& nDerivatives, 
-			          int& nInputs, int& nOutputs,
-			          int& nAlgebraic, int& nParameters,
+			           int& nParameters, int& nInputs, 
+			           int& nOutputs, int& nAlgebraic, 
 			          int& nEqns);
 
+	/** 
+	 * getInitial computes consistend initial conditions.
+	 */
+	bool getInitial(double* x, double* dx, double* p, double* u,
+			        double* y, double* z);
+	
 	/**
 	 * Evaluate the residual of the DAE. The argument res should have the
 	 * the size nEqns.
 	 */
-	bool evalDAEResidual(const double* x, const double* dx, const double* u,
-			             const double* y, const double* z, const double* p, double* res);
+	bool evalDAEResidual(const double* x, const double* dx, const double* p, const double* u,
+			             const double* y, const double* z, double* res);
 
 	/**
 	 * evalJacDAEResidualStates returns the Jacobian of the DAE
 	 * w.r.t. state variables.
 	 */
-	bool evalJacDAEResidualStates(const double* x, const double* dx, const double* u,
-            const double* y, const double* z, const double* p, double* jacStates);
+	bool evalJacDAEResidualStates(const double* x, const double* dx, const double* p, const double* u,
+            const double* y, const double* z, double* jacStates);
 
 	/**
 	 * evalJacDAEResidualStates returns the Jacobian of the DAE
 	 * w.r.t. derivatives.
 	 */
-	bool evalJacDAEResidualDerivatives(const double* x, const double* dx, const double* u,
-            const double* y, const double* z, const double* p, double* jacDerivatives);
+	bool evalJacDAEResidualDerivatives(const double* x, const double* dx, const double* p, const double* u,
+            const double* y, const double* z, double* jacDerivatives);
 
 	/**
 	 * evalJacDAEResidualStates returns the Jacobian of the DAE
 	 * w.r.t. inputs.
 	 */
-	bool evalJacDAEResidualInputs(const double* x, const double* dx, const double* u,
-            const double* y, const double* z, const double* p, double* jacInputs);
+	bool evalJacDAEResidualInputs(const double* x, const double* dx, const double* p, const double* u,
+            const double* y, const double* z, double* jacInputs);
 
 	/**
 	 * evalJacDAEResidualStates returns the Jacobian of the DAE
 	 * w.r.t. parameters.
 	 */
-	bool evalJacDAEResidualParameters(const double* x, const double* dx, const double* u,
-            const double* y, const double* z, const double* p, double* jacParameters);
+	bool evalJacDAEResidualParameters(const double* x, const double* dx, const double* p, const double* u,
+            const double* y, const double* z, double* jacParameters);
 	
+	
+	// Getters
+	int getNumStates();
+	
+	int getNumDerivatives();
+	
+	int getNumInputs();
+	
+	int getNumOutputs() ;
+	
+	int getNumAlgebraic();
+	
+	int getNumParameters();
+	
+	int getNumEqns();
 	
 private:
     /**@name Default Compiler Generated Methods
@@ -102,6 +123,13 @@ protected:
 			          int& nOutputs, int& nAlgebraic,
 			          int& nEqns)=0;
 
+	/** 
+	 * getInitial computes consistend initial conditions.
+	 */
+	virtual bool getInitialImpl(double* x, double* dx, double* p, double* u,
+			        double* y, double* z)=0;
+
+	
 	/**
 	 * Evaluate the residual of the DAE. The argument res should have the
 	 * the size nEqns.

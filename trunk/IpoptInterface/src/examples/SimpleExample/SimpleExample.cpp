@@ -41,8 +41,18 @@ bool SimpleExample::getDimensionsImpl(int& nVars, int& nEqConstr, int& nIneqCons
 	return true;
 }
 
-bool SimpleExample::getModelInterfaceImpl(ModelInterface* model) {
+bool SimpleExample::getModelImpl(ModelInterface* model) {
 	model  = NULL;
+	return true;
+}
+
+bool SimpleExample::getNumElImpl(int& nEl) {
+	nEl = 0;
+	return true;
+}
+
+bool SimpleExample::getMeshImpl(double* mesh) {
+	mesh = NULL;
 	return true;
 }
 
@@ -151,6 +161,8 @@ int main(int argv, char* argc[])
 	// Create a new instance of your nlp
 	//  (use a SmartPtr, not raw)
 	SimpleExample* op = new SimpleExample();	
+	//Initialize first!
+	op->initialize();
 	op->prettyPrint();
 
 	SmartPtr<TNLP> mynlp = new OptimicaTNLP(op);   

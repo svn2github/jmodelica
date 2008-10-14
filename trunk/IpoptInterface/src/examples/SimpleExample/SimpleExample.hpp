@@ -13,14 +13,26 @@ public:
 	/**
 	 * getDimension returns the number of variables and the number of
 	 * constraints, respectively, in the problem.
+	 * TODO: Most likely should *all* dimensions be given here. Possibly
+	 * complemented by a function getNLPDimensions?
 	 */ 
 	virtual bool getDimensionsImpl(int& nVars, int& nEqConstr, int& nIneqConstr,
 			                     int& nNzJacEqConstr, int& nNzJacIneqConstr);
 
 	/**
+	 * getNumEl returns the number of elements in the mesh
+	 */
+	virtual bool getNumElImpl(int& nEl);
+
+	/**
+	 * getMeshImpl computes the mesh
+	 */
+	virtual bool getMeshImpl(double* mesh);
+	
+	/**
 	 * getModelInterfaceImpl returns a pointer to the description of the dynamical model.
 	 */
-	virtual bool getModelInterfaceImpl(ModelInterface* model);
+	virtual bool getModelImpl(ModelInterface* model);
 	
 	/**
 	 * evalCost returns the cost function value at a given point in search space.

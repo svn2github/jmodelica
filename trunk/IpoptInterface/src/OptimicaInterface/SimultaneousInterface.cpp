@@ -26,7 +26,16 @@ SimultaneousInterface::SimultaneousInterface()
 	startTimeFree_(false),               // Problem with free start time
 	finalTime_(0.0),                // Final time of optimization horizon
 	finalTimeFree_(false),               // Problem with free final time
+	
+	modelStateInit_(NULL),           // Initial state vector
+	modelDerivativeInit_(NULL),      // Initial state derivatives
+	modelParameters_(NULL),          // Parameters of dynamic model
+    modelInputInit_(NULL),           // Initial inputs of dynamic model (TODO: really?)
+    modelOutputInit_(NULL),          // Initial outputs of dynamic model
+	modelAlgebraicInit_(NULL),          // Initial algebraic variables of dynamic model
+	
 	initialized_(false)
+
 	{
 
 	}
@@ -41,6 +50,13 @@ SimultaneousInterface::~SimultaneousInterface()
 		delete [] rowJacIneqConstraintNzElements_;
 		delete [] colJacIneqConstraintNzElements_; 
 
+		delete [] modelStateInit_;
+		delete [] modelDerivativeInit_;
+		delete [] modelParameters_;
+		delete [] modelInputInit_;
+		delete [] modelOutputInit_;
+		delete [] modelAlgebraicInit_;
+
 }
 
 /**
@@ -50,8 +66,28 @@ bool SimultaneousInterface::initialize()
 {
 	if (!initialized_) {
 
-		getModelInterfaceImpl(model_);
-		
+		getModelImpl(model_);
+
+		if (model_ != NULL) {
+			int nStates = model_->getNumStates();
+			int nDerivatives = model_->getNumDerivatives();
+			int nParameters = model_->getNumParameters();
+			int nInputs = model_->getNumInputs();
+			int nOutputs = model_->getNumOutputs();
+			int nAlgebraic = model_->getNumAlgebraic();
+
+			modelStateInit_ = new double[nStates];
+			modelDerivativeInit_ = new double[nDerivatives];
+			modelParameters_ = new double[nParameters];
+			modelInputInit_ = new double[nInputs];
+			modelOutputInit_ = new double[nOutputs];
+			modelAlgebraicInit_ = new double[nAlgebraic];
+
+
+			model_->getInitial(modelStateInit_, modelDerivativeInit_, modelParameters_,
+					modelInputInit_, modelOutputInit_, modelAlgebraicInit_);
+		}
+
 		getDimensionsImpl(nVars_, nEqConstr_, nIneqConstr_, nNzJacEqConstr_, nNzJacIneqConstr_);
 
 		xInit_ = new double[nVars_];
@@ -65,7 +101,7 @@ bool SimultaneousInterface::initialize()
 
 		// get bounds
 		getBoundsImpl(x_lb_,x_ub_);
-		
+
 		// get initial point
 		getInitialImpl(xInit_);
 
@@ -76,6 +112,12 @@ bool SimultaneousInterface::initialize()
 		// get non-zeros in equality constraints
 		getJacIneqConstraintNzElementsImpl(rowJacIneqConstraintNzElements_,
 				colJacIneqConstraintNzElements_);
+		        
+		getNumElImpl(nEl_);
+		mesh_ = new double[nEl_];
+		getMeshImpl(mesh_);
+
+		// Remains to implement collocation matrices
 		
 		initialized_ = true;
 	}
@@ -90,9 +132,6 @@ bool SimultaneousInterface::initialize()
 bool SimultaneousInterface::getDimensions(int& nVars, int& nEqConstr, int& nIneqConstr,
 		int& nNzJacEqConstr, int& nNzJacIneqConstr)
 {
-	if (!initialized_) 
-		if (!initialize())
-			return false;
 
 	nVars = nVars_;
 	nEqConstr = nEqConstr_;
@@ -103,24 +142,11 @@ bool SimultaneousInterface::getDimensions(int& nVars, int& nEqConstr, int& nIneq
 	return true;
 }
 
-bool SimultaneousInterface::getModelInterfaceImpl(ModelInterface* model) {
-	if (!initialized_) 
-		if (!initialize())
-			return false;
-	
-	return model_;
-	
-}
-
 /**
  * evalCost returns the cost function value at a given point in search space.
  */
 bool SimultaneousInterface::evalCost(const double* x, double& f) {
-
-	if (!initialized_) 
-			if (!initialize())
-				return false;
-		return evalCostImpl(x,f);
+	return evalCostImpl(x,f);
 }
 
 /**
@@ -128,10 +154,6 @@ bool SimultaneousInterface::evalCost(const double* x, double& f) {
  * a given point in search space.
  */
 bool SimultaneousInterface::evalGradCost(const double* x, double* grad_f){
-
-	if (!initialized_) 
-		if (!initialize())
-			return false;
 	return evalGradCostImpl(x,grad_f);
 
 }
@@ -140,10 +162,6 @@ bool SimultaneousInterface::evalGradCost(const double* x, double* grad_f){
  * evalEqConstraints returns the residual of the equality constraints
  */
 bool SimultaneousInterface::evalEqConstraint(const double* x, double* gEq){
-
-	if (!initialized_) 
-		if (!initialize())
-			return false;
 	return evalEqConstraintImpl(x, gEq);
 
 }
@@ -153,10 +171,6 @@ bool SimultaneousInterface::evalEqConstraint(const double* x, double* gEq){
  * equality constraints.
  */
 bool SimultaneousInterface::evalJacEqConstraint(const double* x, double* jac_gEq){
-
-	if (!initialized_) 
-		if (!initialize())
-			return false;
 	return evalJacEqConstraintImpl(x, jac_gEq);
 
 }
@@ -165,10 +179,6 @@ bool SimultaneousInterface::evalJacEqConstraint(const double* x, double* jac_gEq
  * evalIneqConstraints returns the residual of the inequality constraints g(x)<=0
  */
 bool SimultaneousInterface::evalIneqConstraint(const double* x, double* gIneq){
-
-	if (!initialized_) 
-		if (!initialize())
-			return false;
 	return evalIneqConstraintImpl(x, gIneq);
 
 }
@@ -178,10 +188,6 @@ bool SimultaneousInterface::evalIneqConstraint(const double* x, double* gIneq){
  * inequality constraints g(x)<=0
  */
 bool SimultaneousInterface::evalJacIneqConstraint(const double* x, double* jac_gIneq){
-
-	if (!initialized_) 
-		if (!initialize())
-			return false;
 	return evalJacIneqConstraintImpl(x, jac_gIneq);
 
 }
@@ -190,11 +196,6 @@ bool SimultaneousInterface::evalJacIneqConstraint(const double* x, double* jac_g
  * getBounds returns the upper and lower bounds on the optimization variables.
  */
 bool SimultaneousInterface::getBounds(double* x_lb, double* x_ub){
-
-	if (!initialized_) 
-		if (!initialize())
-			return false;
-
 	int i = 0;
 	for (i=0;i<nVars_;i++) {
 		x_lb[i] = x_lb_[i];
@@ -208,11 +209,6 @@ bool SimultaneousInterface::getBounds(double* x_lb, double* x_ub){
  * getInitial returns the initial point.
  */
 bool SimultaneousInterface::getInitial(double* x_init){
-
-	if (!initialized_) 
-		if (!initialize())
-			return false;
-
 	int i = 0;
 	for (i=0;i<nVars_;i++) {
 		x_init[i] = xInit_[i];
@@ -227,11 +223,6 @@ bool SimultaneousInterface::getInitial(double* x_init){
  * equality constraint Jacobian.
  */
 bool SimultaneousInterface::getJacEqConstraintNzElements(int* rowIndex, int* colIndex){
-
-	if (!initialized_) 
-		if (!initialize())
-			return false;
-
 	int i = 0;
 	for (i=0;i<nNzJacEqConstr_;i++) {
 		rowIndex[i] = rowJacEqConstraintNzElements_[i];
@@ -247,11 +238,6 @@ bool SimultaneousInterface::getJacEqConstraintNzElements(int* rowIndex, int* col
  * inequality constraint Jacobian.
  */
 bool SimultaneousInterface::getJacIneqConstraintNzElements(int* rowIndex, int* colIndex){
-
-	if (!initialized_) 
-		if (!initialize())
-			return false;
-
 	int i = 0;
 	for (i=0;i<nNzJacIneqConstr_;i++) {
 		colIndex[i] = colJacIneqConstraintNzElements_[i];
@@ -267,18 +253,129 @@ bool SimultaneousInterface::getJacIneqConstraintNzElements(int* rowIndex, int* c
  */
 bool SimultaneousInterface::prettyPrint() {
 
-	if (!initialized_) 
-		if (!initialize())
-			return false;
+	printf("Number of variables                           :%d\n",nVars_);
+	printf("Number of eq constr.                          :%d\n",nEqConstr_);
+	printf("Number of ineq constr.                        :%d\n",nIneqConstr_);
+	printf("Number of nz elements in eq. constr. Jac.     :%d\n",nNzJacEqConstr_);
+	printf("Number of nz elements in ineq. constr. Jac.   :%d\n",nNzJacIneqConstr_);
 
-	
-printf("Number of variables                           :%d\n",nVars_);
-printf("Number of eq constr.                          :%d\n",nEqConstr_);
-printf("Number of ineq constr.                        :%d\n",nIneqConstr_);
-printf("Number of nz elements in eq. constr. Jac.     :%d\n",nNzJacEqConstr_);
-printf("Number of nz elements in ineq. constr. Jac.   :%d\n",nNzJacIneqConstr_);
-
-return true;
+	return true;
 
 }
 
+// Getters
+ModelInterface* SimultaneousInterface::getModel() const {
+	return model_;
+}
+
+int SimultaneousInterface::getNumVars() const {
+	return nVars_;
+}
+
+int SimultaneousInterface::getNumEqConstr() const {
+	return nEqConstr_;
+}
+
+int SimultaneousInterface::getNumIneqConstr() const {
+	return nIneqConstr_;
+}
+
+const double* SimultaneousInterface::getXInit() const {
+	return xInit_;
+}
+
+const double* SimultaneousInterface::getX_lb() const {
+	return x_lb_;
+}
+
+const double* SimultaneousInterface::getX_ub() const {
+	return x_ub_;
+}
+
+int SimultaneousInterface::getNumNzJacEqConstr() const {
+	return nNzJacEqConstr_;
+}
+
+const int* SimultaneousInterface::getRowJacEqConstraintNzElements() const {
+	return rowJacEqConstraintNzElements_;
+}
+
+const int* SimultaneousInterface::getColJacEqConstraintNzElements() const {
+	return colJacEqConstraintNzElements_;
+}
+
+const int SimultaneousInterface::getNumNzJacIneqConstr() const {
+	return nNzJacIneqConstr_;
+}
+
+const int* SimultaneousInterface::getRowJacIneqConstraintNzElements() const {
+	return rowJacIneqConstraintNzElements_;
+}
+
+const int* SimultaneousInterface::getColJacIneqConstraintNzElements() const {
+	return colJacIneqConstraintNzElements_;
+}
+
+int SimultaneousInterface::getNumColl() const {
+	return nColl_;
+}
+
+const double* SimultaneousInterface::getA() const {
+	return A_;
+}
+
+const double* SimultaneousInterface::getB() const {
+	return b_;
+}
+
+const double* SimultaneousInterface::getC() const {
+	return c_;
+}
+
+int SimultaneousInterface::getNumEl() const {
+	return nEl_;
+}
+
+const double* SimultaneousInterface::getMesh() const {
+	return mesh_;
+}
+
+double SimultaneousInterface::getStartTime() const {
+	return startTime_;
+}
+
+bool SimultaneousInterface::getStartTimeFree() const {
+	return startTimeFree_;
+}
+
+double SimultaneousInterface::getFinalTime() const {
+	return finalTime_;
+}
+
+bool SimultaneousInterface::getFinalTimeFree() const {
+	return finalTimeFree_;
+}
+
+const double* SimultaneousInterface::getModelStateInit() const {
+	return modelStateInit_;
+}
+
+const double* SimultaneousInterface::getModelDerivativeInit() const {
+	return modelDerivativeInit_;
+}
+
+const double* SimultaneousInterface::getModelParameters() const {
+	return modelParameters_;
+}
+
+const double* SimultaneousInterface::getModelInputInit() const {
+	return modelInputInit_;
+}
+
+const double* SimultaneousInterface::getModelOutputInit() const {
+	return modelOutputInit_;
+}
+
+const double* SimultaneousInterface::getModelAlgebraicInit() const {
+	return modelAlgebraicInit_;
+}

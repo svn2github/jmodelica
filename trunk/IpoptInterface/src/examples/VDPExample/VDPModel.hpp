@@ -10,6 +10,12 @@
  *   \dot x_2 = p_1*x_1
  *   \dot x_3 = x_1^2 + x_2^2 + u^2
  *
+ *   x_1(0) = 0
+ *   x_2(0) = 1
+ *   x_3(0) = 0
+ * 
+ *   p_1 = 1;
+ * 
  */
 
 class VDPModel : public ModelInterface
@@ -26,6 +32,13 @@ public:
 			          int& nOutputs, int& nAlgebraic,
 			          int& nEqns);
 
+	/** 
+	 * getInitial computes consistend initial conditions.
+	 */
+	virtual bool getInitialImpl(double* x, double* dx, double* p, double* u,
+			                    double* y, double* z);
+
+	
 	/**
 	 * Evaluate the residual of the DAE. The argument res should have the
 	 * the size nEqns.

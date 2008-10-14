@@ -29,6 +29,28 @@ bool VDPModel::getDimensionsImpl(int& nStates, int& nDerivatives,
 	return true;
 }
 
+
+
+bool VDPModel::getInitialImpl(double* x, double* dx, double* u,
+		        double* y, double* z, double* p) {
+	
+	x[0] = 0;
+	x[1] = 1;
+	x[2] = 0;
+	
+	u[0] = 0;
+	
+	p[0] = 1;
+	
+	dx[0] = (1-x[1]*x[1])*x[0] - x[1] + u[0];
+	dx[1] = p[0]*x[0];
+	dx[2] = x[0]*x[0] + x[1]*x[1] + u[0]*u[0];
+	
+	return true;
+	
+}
+
+
 /**
  * Evaluate the residual of the DAE. The argument res should have the
  * the size nEqns.
@@ -38,7 +60,7 @@ bool VDPModel::evalDAEResidualImpl(const double* x, const double* dx, const doub
 
 	res[0] = (1-x[1]*x[1])*x[0] - x[1] + u[0] - dx[0];
 	res[1] = p[0]*x[0] - dx[1];
-	res[2] = x[0]*x[0] + x[1]*x[1] + u[0]*u[0];
+	res[2] = x[0]*x[0] + x[1]*x[1] + u[0]*u[0] - dx[2];
 
 	return true;
 }

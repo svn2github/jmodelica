@@ -24,6 +24,54 @@
  *   x_2(0) = 1;
  *   x_3(0) = 0;
  * 
+ *  and t_f = 5.
+ * 
+ * The dynamics is assumed to be given by a DAE system
+ * 
+ *   F(x,\dot x,u,z,p)
+ * 
+ * where x are the variables appearing differentiated, \dot x are the differentiated
+ * variables, u are the inputs an z are the algebraic variables. The vector p consists of 
+ * the parameters to be optimized. 
+ * 
+ * The transcription is performed by means of an implicit Euler scheme:
+ * 
+ *   \dot x_{k+1} = (x_{k+1} - x_{k})/h
+ * 
+ * where h is the step size. The discretization is performed on a mesh
+ * consisting of N+1 points in the interval [0, t_f]. The variables in the NLP are 
+ * then given by
+ * 
+ *   \bar x = [x_0^T, x_1^T, \dot x_1^T, u_1^T, z_1^T, ... x_{N}^T, \dot x_{N}^T, u_{N}^T, z_{N]^T, p^T]^T
+ * 
+ * yielding 
+ * 
+ *   n_{nlp} = (N+1)*n_x + N*(n_x + n_u + n_z) + n_p
+ * 
+ * variables in total. The nlp equality constraint resulting from collocation is given by:
+ * 
+ *    F(x_1,\dot x_1,u_1,z_1,p)
+ *               .
+ *               .
+ *               .
+ *    F(x_N,\dot x_N,u_N,z_N,p)
+ *      \dot x_1 - (x_1 - x_0)/h
+ *               .
+ *               .
+ *               .
+ *      \dot x_N - (x_N - x_{N-1})/h
+ *          x_0 - x_init
+ * 
+ * which gives (assuming that n_eq = n_x + n_z)
+ * 
+ *    N*(n_x + n_z + n_x ) + n_x
+ * 
+ * equality constraints. Consequently, the number of degrees of freedom in the optimization
+ * problem is then
+ * 
+ *    N*n_u + n_p
+ * 
+ * 
  */
 
 
@@ -40,7 +88,18 @@ public:
 	virtual bool getDimensionsImpl(int& nVars, int& nEqConstr, int& nIneqConstr,
 			                     int& nNzJacEqConstr, int& nNzJacIneqConstr);
 
-	virtual bool VDPOptimization::getModelInterfaceImpl(ModelInterface* model);
+	virtual bool getModelImpl(ModelInterface* model);
+	
+	/**
+	 * getNumEl returns the number of elements in the mesh
+	 */
+	virtual bool getNumElImpl(int& nEl);
+
+	/**
+	 * getMeshImpl computes the mesh
+	 */
+	virtual bool getMeshImpl(double* mesh);
+
 	
 	/**
 	 * evalCost returns the cost function value at a given point in search space.
@@ -78,7 +137,7 @@ public:
 	/**
 	 * getBounds returns the upper and lower bounds on the optimization variables.
 	 */
-	virtual bool getBoundsImpl(double* x_ub, double* x_lb);
+	virtual bool getBoundsImpl(double* x_lb, double* x_ub);
 
 	/**
 	 * getInitial returns the initial point.
@@ -89,19 +148,17 @@ public:
 	 * getEqConstraintNzElements returns the indices of the non-zeros in the 
 	 * equality constraint Jacobian.
 	 */
-	virtual bool getJacEqConstraintNzElementsImpl(int* colIndex, int* rowIndex);
+	virtual bool getJacEqConstraintNzElementsImpl(int* rowIndex, int* colIndex);
 
 	/** 
 	 * getIneqConstraintElements returns the indices of the non-zeros in the 
 	 * inequality constraint Jacobian.
 	 */
-	virtual bool getJacIneqConstraintNzElementsImpl(int* colIndex, int* rowIndex);	
+	virtual bool getJacIneqConstraintNzElementsImpl(int* rowIndex, int* colIndex);	
 
 private:
 	ModelInterface* model_;
 	bool modelInitialized_;
-	int N_; // Number of elements
-	double tf_; // Final time
 };
 
 #endif /*VDPOPTIMIZATION_HPP_*/
