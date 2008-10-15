@@ -31,8 +31,8 @@ bool VDPModel::getDimensionsImpl(int& nStates, int& nDerivatives,
 
 
 
-bool VDPModel::getInitialImpl(double* x, double* dx, double* u,
-		        double* y, double* z, double* p) {
+bool VDPModel::getInitialImpl(double* x, double* dx, double* p, double* u,
+		        double* y, double* z) {
 	
 	x[0] = 0;
 	x[1] = 1;

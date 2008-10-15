@@ -1,5 +1,10 @@
 #include "SimultaneousInterface.hpp"
 
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
 SimultaneousInterface::SimultaneousInterface()
 :
 	model_(NULL),           // The model representation
@@ -42,6 +47,8 @@ SimultaneousInterface::SimultaneousInterface()
 
 SimultaneousInterface::~SimultaneousInterface()
 {
+	delete model_;
+	
 		delete [] xInit_;
 		delete [] x_lb_;
 		delete [] x_ub_;
@@ -67,8 +74,9 @@ bool SimultaneousInterface::initialize()
 	if (!initialized_) {
 
 		getModelImpl(model_);
-
+		
 		if (model_ != NULL) {
+			
 			int nStates = model_->getNumStates();
 			int nDerivatives = model_->getNumDerivatives();
 			int nParameters = model_->getNumParameters();
@@ -76,6 +84,8 @@ bool SimultaneousInterface::initialize()
 			int nOutputs = model_->getNumOutputs();
 			int nAlgebraic = model_->getNumAlgebraic();
 
+//			printf("SimultaneousInterface::initialize(): nStates_ = %d\n",nStates);
+			
 			modelStateInit_ = new double[nStates];
 			modelDerivativeInit_ = new double[nDerivatives];
 			modelParameters_ = new double[nParameters];
@@ -83,10 +93,9 @@ bool SimultaneousInterface::initialize()
 			modelOutputInit_ = new double[nOutputs];
 			modelAlgebraicInit_ = new double[nAlgebraic];
 
-
 			model_->getInitial(modelStateInit_, modelDerivativeInit_, modelParameters_,
 					modelInputInit_, modelOutputInit_, modelAlgebraicInit_);
-		}
+		} 
 
 		getDimensionsImpl(nVars_, nEqConstr_, nIneqConstr_, nNzJacEqConstr_, nNzJacIneqConstr_);
 
@@ -112,7 +121,7 @@ bool SimultaneousInterface::initialize()
 		// get non-zeros in equality constraints
 		getJacIneqConstraintNzElementsImpl(rowJacIneqConstraintNzElements_,
 				colJacIneqConstraintNzElements_);
-		        
+
 		getNumElImpl(nEl_);
 		mesh_ = new double[nEl_];
 		getMeshImpl(mesh_);
@@ -135,12 +144,16 @@ bool SimultaneousInterface::getDimensions(int& nVars, int& nEqConstr, int& nIneq
 		int& nNzJacEqConstr, int& nNzJacIneqConstr)
 {
 
+//	std::cout << "SimultaneousInterface::getDimensions enter\n";
+	
 	nVars = nVars_;
 	nEqConstr = nEqConstr_;
 	nIneqConstr = nIneqConstr_;
 	nNzJacEqConstr = nNzJacEqConstr_;
 	nNzJacIneqConstr = nNzJacIneqConstr_;
 
+//	std::cout << "SimultaneousInterface::getDimensions exit\n";
+	
 	return true;
 }
 
@@ -148,6 +161,8 @@ bool SimultaneousInterface::getDimensions(int& nVars, int& nEqConstr, int& nIneq
  * evalCost returns the cost function value at a given point in search space.
  */
 bool SimultaneousInterface::evalCost(const double* x, double& f) {
+
+//	std::cout << "SimultaneousInterface::evalCost enter\n";
 	return evalCostImpl(x,f);
 }
 
@@ -156,6 +171,7 @@ bool SimultaneousInterface::evalCost(const double* x, double& f) {
  * a given point in search space.
  */
 bool SimultaneousInterface::evalGradCost(const double* x, double* grad_f){
+//	std::cout << "SimultaneousInterface::evalGradCost enter\n";
 	return evalGradCostImpl(x,grad_f);
 
 }
@@ -164,8 +180,8 @@ bool SimultaneousInterface::evalGradCost(const double* x, double* grad_f){
  * evalEqConstraints returns the residual of the equality constraints
  */
 bool SimultaneousInterface::evalEqConstraint(const double* x, double* gEq){
+//	std::cout << "SimultaneousInterface::evalEqConstraint enter\n";
 	return evalEqConstraintImpl(x, gEq);
-
 }
 
 /**
@@ -173,6 +189,7 @@ bool SimultaneousInterface::evalEqConstraint(const double* x, double* gEq){
  * equality constraints.
  */
 bool SimultaneousInterface::evalJacEqConstraint(const double* x, double* jac_gEq){
+//	std::cout << "SimultaneousInterface::evalJacEqConstraint enter\n";
 	return evalJacEqConstraintImpl(x, jac_gEq);
 
 }
@@ -181,6 +198,7 @@ bool SimultaneousInterface::evalJacEqConstraint(const double* x, double* jac_gEq
  * evalIneqConstraints returns the residual of the inequality constraints g(x)<=0
  */
 bool SimultaneousInterface::evalIneqConstraint(const double* x, double* gIneq){
+//	std::cout << "SimultaneousInterface::evalIneqConstraint enter\n";
 	return evalIneqConstraintImpl(x, gIneq);
 
 }
@@ -190,6 +208,7 @@ bool SimultaneousInterface::evalIneqConstraint(const double* x, double* gIneq){
  * inequality constraints g(x)<=0
  */
 bool SimultaneousInterface::evalJacIneqConstraint(const double* x, double* jac_gIneq){
+//	std::cout << "SimultaneousInterface::evalJacIneqConstraint enter\n";
 	return evalJacIneqConstraintImpl(x, jac_gIneq);
 
 }
@@ -198,6 +217,7 @@ bool SimultaneousInterface::evalJacIneqConstraint(const double* x, double* jac_g
  * getBounds returns the upper and lower bounds on the optimization variables.
  */
 bool SimultaneousInterface::getBounds(double* x_lb, double* x_ub){
+//	std::cout << "SimultaneousInterface::getBounds enter\n";
 	int i = 0;
 	for (i=0;i<nVars_;i++) {
 		x_lb[i] = x_lb_[i];
@@ -211,6 +231,7 @@ bool SimultaneousInterface::getBounds(double* x_lb, double* x_ub){
  * getInitial returns the initial point.
  */
 bool SimultaneousInterface::getInitial(double* x_init){
+//	std::cout << "SimultaneousInterface::getInitial enter\n";
 	int i = 0;
 	for (i=0;i<nVars_;i++) {
 		x_init[i] = xInit_[i];
@@ -225,6 +246,7 @@ bool SimultaneousInterface::getInitial(double* x_init){
  * equality constraint Jacobian.
  */
 bool SimultaneousInterface::getJacEqConstraintNzElements(int* rowIndex, int* colIndex){
+//	std::cout << "SimultaneousInterface::getJacEqConstraintNzElements enter\n";
 	int i = 0;
 	for (i=0;i<nNzJacEqConstr_;i++) {
 		rowIndex[i] = rowJacEqConstraintNzElements_[i];
@@ -240,12 +262,13 @@ bool SimultaneousInterface::getJacEqConstraintNzElements(int* rowIndex, int* col
  * inequality constraint Jacobian.
  */
 bool SimultaneousInterface::getJacIneqConstraintNzElements(int* rowIndex, int* colIndex){
+//	std::cout << "SimultaneousInterface::getJacIneqConstraintNzElements enter\n";
 	int i = 0;
 	for (i=0;i<nNzJacIneqConstr_;i++) {
 		colIndex[i] = colJacIneqConstraintNzElements_[i];
 		rowIndex[i] = rowJacIneqConstraintNzElements_[i];
 	}
-
+//	std::cout << "SimultaneousInterface::getJacIneqConstraintNzElements exit\n";
 	return true;
 
 }
@@ -255,15 +278,81 @@ bool SimultaneousInterface::getJacIneqConstraintNzElements(int* rowIndex, int* c
  */
 bool SimultaneousInterface::prettyPrint() {
 
-	printf("Number of variables                           :%d\n",nVars_);
-	printf("Number of eq constr.                          :%d\n",nEqConstr_);
-	printf("Number of ineq constr.                        :%d\n",nIneqConstr_);
-	printf("Number of nz elements in eq. constr. Jac.     :%d\n",nNzJacEqConstr_);
-	printf("Number of nz elements in ineq. constr. Jac.   :%d\n",nNzJacIneqConstr_);
-
+	std::cout << "NPL program data:" << std::endl;
+	std::cout << "Number of variables                           :" << nVars_ << std::endl;
+	std::cout << "Number of eq constr.                          :" << nEqConstr_ << std::endl;
+	std::cout << "Number of ineq constr.                        :" << nIneqConstr_ << std::endl;
+	std::cout << "Number of nz elements in eq. constr. Jac.     :" << nNzJacEqConstr_ << std::endl;
+	std::cout << "Number of nz elements in ineq. constr. Jac.   :" << nNzJacIneqConstr_ << std::endl;
+    std::cout << std::endl;
+	
 	return true;
 
 }
+
+bool SimultaneousInterface::writeSolution(double* x) {
+
+	ofstream myfile;
+	myfile.open ("opt_res.py");
+	
+	ModelInterface* model = getModel();
+	
+	int nStates = model->getNumStates();
+	int nDerivatives = model->getNumDerivatives();
+	int nInputs = model->getNumInputs();
+	int nOutputs = model->getNumOutputs();
+	int nAlgebraic = model->getNumAlgebraic();
+	int nEqns = model->getNumEqns();
+
+	int nEl = getNumEl();
+	
+	myfile << "#*** Optimal solution ***" << std::endl;
+    myfile << "#Initial states:" << std::endl;
+   	myfile << "x0 = array([";
+    for (int i=0;i<nStates;i++) {
+    	myfile << x[i];
+    	if (i<nStates-1) {
+    		myfile << ", ";
+    	}
+    }
+	myfile << "])" << std::endl;
+	
+    myfile << "#States, derivatives, inputs, algebraics:" << std::endl;
+   	myfile << "vars = array([";
+    for (int i=0;i<nEl;i++){
+    	myfile << "[";
+    	for (int j=0;j<nStates;j++){
+      		myfile << x[nStates+i*(nStates+nDerivatives+nInputs+nAlgebraic) + j] << ", ";	
+     	}
+    	for (int j=0;j<nDerivatives;j++){
+    		myfile << x[nStates+nStates + i*(nStates+nDerivatives+nInputs+nAlgebraic) + j] << ", ";
+    	}
+    	for (int j=0;j<nInputs;j++){
+       		if (j==nInputs-1 && nAlgebraic==0) {
+    			myfile << x[nStates + nStates + nDerivatives +i*(nStates+nDerivatives+nInputs+nAlgebraic) + j];
+    		} else {
+    			myfile << x[nStates + nStates + nDerivatives +i*(nStates+nDerivatives+nInputs+nAlgebraic) + j] << ", ";
+    		}
+    	}
+    	for (int j=0;j<nAlgebraic;j++){
+       		if (j==nInputs-1) {
+       			myfile << x[nStates + nStates + nDerivatives + nInputs + i*(nStates+nDerivatives+nInputs+nAlgebraic) + j];
+       		} else {
+       			myfile << x[nStates + nStates + nDerivatives + nInputs + i*(nStates+nDerivatives+nInputs+nAlgebraic) + j] << ", ";
+       		}
+       	}    	
+    	myfile << "]";
+    	if (i<nEl-1){
+        	myfile << "," << std::endl;    		
+    	}
+    }
+	myfile << "])" << std::endl;
+    
+	myfile.close();
+    return true;
+}
+
+
 
 // Getters
 ModelInterface* SimultaneousInterface::getModel() const {
@@ -381,3 +470,5 @@ const double* SimultaneousInterface::getModelOutputInit() const {
 const double* SimultaneousInterface::getModelAlgebraicInit() const {
 	return modelAlgebraicInit_;
 }
+
+

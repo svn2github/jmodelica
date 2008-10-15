@@ -7,7 +7,12 @@ public:
 	ModelInterface();
 	virtual ~ModelInterface();
 
+	/**
+	 * initialize allocates memory and initialize the model
+	 */
+	bool initialize();
 
+	
 	/**
 	 * getDimensions retrieves the dimensions of the model variable vectors.
 	 */
@@ -81,6 +86,8 @@ public:
 	
 	int getNumEqns();
 	
+	bool prettyPrint();
+	
 private:
     /**@name Default Compiler Generated Methods
      * (Hidden to avoid implicit creation/calling).
@@ -99,19 +106,14 @@ private:
     /** Overloaded Equals Operator */
     void operator=(const ModelInterface&);
     //@}
-	
-	/**
-	 * initialize allocates memory and initialize the model
-	 */
-	bool initialize();
-    
+	    
 	// Dimensions
     int nStates_;                // Number of states
     int nDerivatives_;           // Number of derivatives
+	int nParameters_;            // Number of parameters
 	int nInputs_;                // Number of intputs
 	int nOutputs_;               // Number of outputs in the model
 	int nAlgebraic_;             // Number of auxilary variables
-	int nParameters_;            // Number of parameters
     int nEqns_;                   // Number of equations in the DAE
 
     double* states_;              // State vector

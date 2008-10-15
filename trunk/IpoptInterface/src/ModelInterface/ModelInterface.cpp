@@ -1,16 +1,18 @@
 #include "ModelInterface.hpp"
 
 #include <stdlib.h>
-#include <stdio.h>
+#include <iostream>
+
+
 
 ModelInterface::ModelInterface()
 :
 nStates_(0),                // Number of states
 nDerivatives_(0),           // Number of derivatives
+nParameters_(0),            // Number of parameters
 nInputs_(0),                // Number of intputs
 nOutputs_(0),               // Number of outputs in the model
 nAlgebraic_(0),             // Number of auxilary variables
-nParameters_(0),            // Number of parameters
 nEqns_(0),                   // Number of equations in the DAE
 states_(NULL),              // State vector
 derivatives_(NULL),         // Derivative vector
@@ -40,17 +42,17 @@ bool ModelInterface::initialize() {
 	if (!initialized_) {
 	// Retrieve model dimensions
 	getDimensionsImpl(nStates_, nDerivatives_, 
-			          nInputs_, nOutputs_,
-			          nAlgebraic_, nParameters_, 
+			          nParameters_ ,nInputs_, nOutputs_,
+			          nAlgebraic_, 
 			          nEqns_);
-   
+
 	// Allocate memory
-    states_ = new double[nStates_+1];
-    derivatives_ = new double[nDerivatives_+1];
-    parameters_ = new double[nParameters_+1];
-    inputs_ = new double[nInputs_+1];
-    outputs_ = new double[nOutputs_+1];
-    algebraic_ = new double[nAlgebraic_+1];
+    states_ = new double[nStates_];
+    derivatives_ = new double[nDerivatives_];
+    parameters_ = new double[nParameters_];
+    inputs_ = new double[nInputs_];
+    outputs_ = new double[nOutputs_];
+    algebraic_ = new double[nAlgebraic_];
  
     // Get consistent initial conditions
     getInitialImpl(states_, derivatives_, parameters_, inputs_, 
@@ -58,6 +60,7 @@ bool ModelInterface::initialize() {
     
     initialized_ = true;
 	}
+
 	return true;
 }
 
@@ -69,9 +72,6 @@ bool ModelInterface::getDimensions(int& nStates, int& nDerivatives,
 		          int& nAlgebraic, int& nParameters,
 		          int& nEqns) {
 	
-	if (!initialized_) 
-		if (!initialize())
-			return false;
     nStates = nStates_;
     nDerivatives = nDerivatives_;
     nInputs = nInputs_;
@@ -79,15 +79,12 @@ bool ModelInterface::getDimensions(int& nStates, int& nDerivatives,
     nAlgebraic = nAlgebraic_;
     nParameters = nParameters_;
     nEqns = nEqns_;
-    
+
     return true;
 }
 
 bool ModelInterface::getInitial(double* x, double* dx, double* p, double* u,
 		                        double* y, double* z) {	
-	if (!initialized_) 
-		if (!initialize())
-			return false;
 	return getInitialImpl(x, dx, p, u, y, z);
 
 }
@@ -99,9 +96,6 @@ bool ModelInterface::getInitial(double* x, double* dx, double* p, double* u,
 bool ModelInterface::evalDAEResidual(const double* x, const double* dx, const double* p,
         const double* u, const double* y, const double* z, double* res) {
 	
-	if (!initialized_) 
-		if (!initialize())
-			return false;
     return evalDAEResidualImpl(x, dx, p, u, y, z, res);
 
 }
@@ -112,11 +106,8 @@ bool ModelInterface::evalDAEResidual(const double* x, const double* dx, const do
  */
 bool ModelInterface::evalJacDAEResidualStates(const double* x, const double* dx, const double* p,
         const double* u, const double* y, const double* z, double* jacStates){
-	
-	if (!initialized_) 
-		if (!initialize())
-			return false;    
-    return evalJacDAEResidualStatesImpl(x, dx, p, u, y, z, jacStates);
+
+	return evalJacDAEResidualStatesImpl(x, dx, p, u, y, z, jacStates);
 }
 
 /**
@@ -126,10 +117,6 @@ bool ModelInterface::evalJacDAEResidualStates(const double* x, const double* dx,
 bool ModelInterface::evalJacDAEResidualDerivatives(const double* x, const double* dx, const double* p,
         const double* u, const double* y, const double* z, double* jacDerivatives) {
 	
-	if (!initialized_) 
-		if (!initialize())
-			return false;
-    
     return evalJacDAEResidualDerivativesImpl(x, dx, p, u, y, z, jacDerivatives);
 }
 
@@ -140,9 +127,6 @@ bool ModelInterface::evalJacDAEResidualDerivatives(const double* x, const double
 bool ModelInterface::evalJacDAEResidualInputs(const double* x, const double* dx, const double* p,
         const double* u, const double* y, const double* z, double* jacInputs){
 	
-	if (!initialized_) 
-		if (!initialize())
-			return false;
     return evalJacDAEResidualInputsImpl(x, dx, p, u, y, z, jacInputs);
 }
 
@@ -153,10 +137,6 @@ bool ModelInterface::evalJacDAEResidualInputs(const double* x, const double* dx,
 bool ModelInterface::evalJacDAEResidualParameters(const double* x, const double* dx, const double* p,
         const double* u, const double* y, const double* z, double* jacParameters){
 	
-	if (!initialized_) 
-		if (!initialize())
-			return false;
-    
     return evalJacDAEResidualParametersImpl(x, dx, p, u, y, z, jacParameters);	
 
 }
@@ -164,11 +144,23 @@ bool ModelInterface::evalJacDAEResidualParameters(const double* x, const double*
 bool ModelInterface::evalJacDAEResidualAlgebraic(const double* x, const double* dx, const double* p, const double* u,
         const double* y, const double* z, double* jacAlgebraic){
 	
-	if (!initialized_) 
-		if (!initialize())
-			return false;
-    
     return evalJacDAEResidualAlgebraicImpl(x, dx, p, u, y, z, jacAlgebraic);	
+
+}
+
+bool ModelInterface::prettyPrint() {
+
+	std::cout << "Dynamic model data:" << std::endl;
+	std::cout << "Number of states                                   :" << nStates_ << std::endl;
+	std::cout << "Number of derivatives                              :" << nDerivatives_ << std::endl;
+	std::cout << "Number of parameters                               :" << nParameters_ << std::endl;
+	std::cout << "Number of inputs                                   :" << nInputs_ << std::endl;
+	std::cout << "Number of output                                   :" << nOutputs_ << std::endl;
+	std::cout << "Number of algebraic                                :" << nAlgebraic_ << std::endl;
+
+	std::cout << std::endl;
+	
+	return true;
 
 }
 

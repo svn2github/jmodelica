@@ -107,6 +107,12 @@ public:
 	 */
 	bool prettyPrint();
 
+	/**
+	 * Print the solution
+	 */
+	bool writeSolution(double* x);
+
+	
 	// Getters
 	ModelInterface* getModel() const;       
 	int getNumVars() const;                   
@@ -203,7 +209,7 @@ protected:
 	
 	virtual bool getMeshImpl(double* mesh) = 0;
 	
-	virtual bool getModelImpl(ModelInterface* model) = 0;
+	virtual bool getModelImpl(ModelInterface*& model) = 0;
 	
 	virtual bool evalCostImpl(const double* x, double& f) = 0;
 

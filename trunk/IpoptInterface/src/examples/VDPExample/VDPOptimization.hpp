@@ -90,7 +90,7 @@ public:
 
 	virtual bool getIntervalSpecImpl(double& startTime, bool& startTimeFree, double& finalTime, bool& finalTimeFree);
 	
-	virtual bool getModelImpl(ModelInterface* model);
+	virtual bool getModelImpl(ModelInterface*& model);
 	
 	/**
 	 * getNumEl returns the number of elements in the mesh
