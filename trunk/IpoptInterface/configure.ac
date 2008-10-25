@@ -19,13 +19,24 @@ AC_PROG_LIBTOOL
 AC_PREFIX_DEFAULT([`pwd`])
 
 # Checks for libraries.
+AC_ARG_WITH([ipopt],
+   [AS_HELP_STRING([--with-ipopt],
+     [ipopt installation directory @<:@default=check@:>@])],
+   [ipopt=$withval],
+   [with_ipopt=no])
+
+AS_IF([test "x$with_ipopt" = xno],
+      [AC_MSG_FAILURE([--with-ipopt option must be specified])],
+      [AC_CHECK_FILE($ipopt/include/coin/IpTNLP.hpp,
+                     [],
+                     [AC_MSG_FAILURE([--with-ipopt option was specified but does not seem to point at a valid Ipopt installation])])])
 
 # Set output variables to be exported to the Makefiles
 AC_SUBST(IPOPT_INC)
 AC_SUBST(IPOPT_LIB)
 
-IPOPT_INC="/work/jakesson/software_tools/Ipopt/Ipopt-3.5.4/build/include/coin"
-IPOPT_LIB="/work/jakesson/software_tools/Ipopt/Ipopt-3.5.4/build/lib"
+IPOPT_INC=$ipopt/include/coin
+IPOPT_LIB=$ipopt/lib
 
 AC_SUBST(JMALLLIBS)
 JMALLLIBS="../ModelInterface/libmodelinterface.la ../OptimicaInterface/liboptimica.la"
