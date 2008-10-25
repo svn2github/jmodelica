@@ -292,6 +292,9 @@ bool SimultaneousInterface::prettyPrint() {
 
 bool SimultaneousInterface::writeSolution(double* x) {
 
+
+  if (model_!=NULL) {
+
 	ofstream myfile;
 	myfile.open ("opt_res.py");
 	
@@ -349,6 +352,8 @@ bool SimultaneousInterface::writeSolution(double* x) {
 	myfile << "])" << std::endl;
     
 	myfile.close();
+
+  }
     return true;
 }
 

@@ -57,6 +57,7 @@ AC_CONFIG_FILES([
  src/OptimicaInterface/Makefile
  src/IpoptInterface/Makefile
  src/examples/VDPExample/Makefile
+ src/examples/SimpleExample/Makefile
 ])
 
 

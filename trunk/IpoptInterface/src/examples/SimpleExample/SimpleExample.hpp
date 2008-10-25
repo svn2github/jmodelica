@@ -35,7 +35,7 @@ public:
 	/**
 	 * getModelInterfaceImpl returns a pointer to the description of the dynamical model.
 	 */
-	virtual bool getModelImpl(ModelInterface* model);
+	virtual bool getModelImpl(ModelInterface*& model);
 	
 	/**
 	 * evalCost returns the cost function value at a given point in search space.

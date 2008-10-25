@@ -19394,22 +19394,12 @@ fi
 fi
 
 
-#if test "x$with_ipopt" = xno; then
-# AC_MSG_FAILURE([--with-ipopt option must be specified])
-#fi
-
 # Set output variables to be exported to the Makefiles
-#ipopt="/work/jakesson/software_tools/Ipopt/Ipopt-3.5.4/build"
-#ipopt="/usr/local/packages/ipopt"
 
 
 
-
-#IPOPT_INC="/work/jakesson/software_tools/Ipopt/Ipopt-3.5.4/build/include/coin"
-#IPOPT_LIB="/work/jakesson/software_tools/Ipopt/Ipopt-3.5.4/build/lib"
 IPOPT_INC=$ipopt/include/coin
 IPOPT_LIB=$ipopt/lib
-
 
 
 JMALLLIBS="../ModelInterface/libmodelinterface.la ../OptimicaInterface/liboptimica.la"
@@ -20031,7 +20021,7 @@ fi
 
 # Checks for library functions.
 
-ac_config_files="$ac_config_files Makefile src/ModelInterface/Makefile src/OptimicaInterface/Makefile src/IpoptInterface/Makefile src/examples/VDPExample/Makefile"
+ac_config_files="$ac_config_files Makefile src/ModelInterface/Makefile src/OptimicaInterface/Makefile src/IpoptInterface/Makefile src/examples/VDPExample/Makefile src/examples/SimpleExample/Makefile"
 
 
 
@@ -20627,6 +20617,7 @@ do
     "src/OptimicaInterface/Makefile") CONFIG_FILES="$CONFIG_FILES src/OptimicaInterface/Makefile" ;;
     "src/IpoptInterface/Makefile") CONFIG_FILES="$CONFIG_FILES src/IpoptInterface/Makefile" ;;
     "src/examples/VDPExample/Makefile") CONFIG_FILES="$CONFIG_FILES src/examples/VDPExample/Makefile" ;;
+    "src/examples/SimpleExample/Makefile") CONFIG_FILES="$CONFIG_FILES src/examples/SimpleExample/Makefile" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
