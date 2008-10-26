@@ -38,6 +38,17 @@ AC_SUBST(IPOPT_LIB)
 IPOPT_INC=$ipopt/include/coin
 IPOPT_LIB=$ipopt/lib
 
+# Set LDFLAGS AND LIBS
+LDFLAGS=-L$ipopt/lib
+case $build in
+  *-cygwin* | *-mingw*)
+    LIBS="-lipopt -lg2c -ldl"
+    ;;
+  *)
+    LIBS="-lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran"
+    ;;  
+esac
+
 AC_SUBST(JMALLLIBS)
 JMALLLIBS="../ModelInterface/libmodelinterface.la ../OptimicaInterface/liboptimica.la"
 
