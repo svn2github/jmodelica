@@ -48,6 +48,9 @@ PROGRAMS = $(bin_PROGRAMS)
 am_simple_OBJECTS = SimpleExample.$(OBJEXT)
 simple_OBJECTS = $(am_simple_OBJECTS)
 simple_DEPENDENCIES = ../../IpoptInterface/libjmrt.la
+simple_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(simple_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -76,6 +79,8 @@ CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
+APP_LDFLAGS = @APP_LDFLAGS@
+APP_LIBS = @APP_LIBS@
 AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
@@ -191,6 +196,7 @@ AM_CPPFLAGS = -I$(IPOPT_INC) \
               -I../../IpoptInterface 
 
 simple_LDADD = ../../IpoptInterface/libjmrt.la
+simple_LDFLAGS = $(APP_LDFLAGS) $(APP_LIBS)
 all: all-am
 
 .SUFFIXES:
@@ -254,7 +260,7 @@ clean-binPROGRAMS:
 	done
 simple$(EXEEXT): $(simple_OBJECTS) $(simple_DEPENDENCIES) 
 	@rm -f simple$(EXEEXT)
-	$(CXXLINK) $(simple_OBJECTS) $(simple_LDADD) $(LIBS)
+	$(simple_LINK) $(simple_OBJECTS) $(simple_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -470,9 +476,6 @@ uninstall-am: uninstall-binPROGRAMS
 	pdf pdf-am ps ps-am tags uninstall uninstall-am \
 	uninstall-binPROGRAMS
 
-
-#simple_LDFLAGS = -L$(IPOPT_LIB) -llapack -lblas -lm -lgfortranbegin -lgfortran -lipopt 
-#simple_LDFLAGS = -L$(IPOPT_LIB)  $(Ld-lipopt -lm -lgfortranbegin -lgfortran  
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

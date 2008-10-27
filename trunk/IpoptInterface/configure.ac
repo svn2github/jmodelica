@@ -39,13 +39,18 @@ IPOPT_INC=$ipopt/include/coin
 IPOPT_LIB=$ipopt/lib
 
 # Set LDFLAGS AND LIBS
-LDFLAGS=-L$ipopt/lib
+AC_SUBST(APP_LDFLAGS)
+AC_SUBST(APP_LIBS)
+APP_LDFLAGS=-L$ipopt/lib
 case $build in
-  *-cygwin* | *-mingw*)
-    LIBS="-lipopt -lg2c -ldl"
+  *-cygwin*)
+    APP_LIBS="-lipopt -lg2c -ldl"
+    ;;
+  *-mingw*)
+    APP_LIBS="-lipopt -lg2c"
     ;;
   *)
-    LIBS="-lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran"
+    APP_LIBS="-lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran"
     ;;  
 esac
 
