@@ -5,7 +5,7 @@ using namespace Ipopt;
 // forward declarations
 class SimultaneousInterface;
 
-/** 
+/**
  * This is the class that present the dynamic optimization
  * problem from Optimica to Ipopt
  */
@@ -15,14 +15,14 @@ public:
   // Construct an OptimicaTNLP - SimultaneousInterface pointer
   // must be valid
   OptimicaTNLP(SimultaneousInterface* problem);
-  
+
   virtual ~OptimicaTNLP();
 
   /** @name NLP initialization methods */
   //@{
   virtual bool get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
                               Index& nnz_h_lag, IndexStyleEnum& index_style);
-  
+
   virtual bool get_bounds_info(Index n, Number* x_l, Number* x_u,
 			       Index m, Number* g_l, Number* g_u);
 
@@ -31,18 +31,18 @@ public:
 				  Index m, bool init_lambda,
 				  Number* lambda);
   //@}
-  
+
   /** @name NLP evaluation methods */
   //@{
   virtual bool eval_f(Index n, const Number* x, bool new_x,
 		      Number& obj_value);
-  
+
   virtual bool eval_grad_f(Index n, const Number* x, bool new_x,
 			   Number* grad_f);
 
   virtual bool eval_g(Index n, const Number* x, bool new_x,
 		      Index m, Number* g);
-  
+
   virtual bool eval_jac_g(Index n, const Number* x, bool new_x,
 			  Index m, Index nele_jac, Index* iRow,
 			  Index *jCol, Number* values);
@@ -62,7 +62,7 @@ public:
   private:
     /**@name Default Compiler Generated Methods
      * (Hidden to avoid implicit creation/calling).
-     * These methods are not implemented and 
+     * These methods are not implemented and
      * we do not want the compiler to implement
      * them for us, so we declare them private
      * and do not define them. This ensures that
@@ -78,7 +78,7 @@ public:
     void operator=(const OptimicaTNLP&);
     //@}
 
-    // Problem definition 
+    // Problem definition
     SimultaneousInterface* problem_;
     Index n_eq_;
     Index n_ineq_;

@@ -274,7 +274,7 @@ bool VDPOptimization::evalJacEqConstraintImpl(const double* x, double* jac_gEq) 
 
 	// Jacobian for derivative equations
 	for (int i=0;i<nEl;i++) {
-		
+
 			for (int j=0;j<nDerivatives;j++) {
 				jac_gEqPtr[j] = 1/(h[i]*(finalTime-startTime));
 			}
@@ -289,7 +289,7 @@ bool VDPOptimization::evalJacEqConstraintImpl(const double* x, double* jac_gEq) 
 				jac_gEqPtr[j] = 1;
 			}
 			jac_gEqPtr += nDerivatives;
-	
+
 	}
 
 	// Jacobian for initial conditions
@@ -360,8 +360,8 @@ bool VDPOptimization::getInitialImpl(double* xInit){
 	return true;
 }
 
-/** 
- * getEqConstraintNzElements returns the indices of the non-zeros in the 
+/**
+ * getEqConstraintNzElements returns the indices of the non-zeros in the
  * equality constraint Jacobian.
  */
 bool VDPOptimization::getJacEqConstraintNzElementsImpl(int* rowIndex, int* colIndex) {
@@ -438,13 +438,13 @@ bool VDPOptimization::getJacEqConstraintNzElementsImpl(int* rowIndex, int* colIn
 		if (i==0) {
 			for (int j=0;j<nDerivatives;j++) {
 				rowIndex[_rowIndex++] = eqnIndex + j + 1;
-				colIndex[_colIndex++] = _xIndex - nStates + j + 1;		
+				colIndex[_colIndex++] = _xIndex - nStates + j + 1;
 			}
 		} else {
 			for (int j=0;j<nDerivatives;j++) {
 				rowIndex[_rowIndex++] = eqnIndex + j + 1;
-				colIndex[_colIndex++] = _xIndex - nStates -nDerivatives - nInputs - nAlgebraic + j + 1;		
-			}			
+				colIndex[_colIndex++] = _xIndex - nStates -nDerivatives - nInputs - nAlgebraic + j + 1;
+			}
 		}
 
 		for (int j=0;j<nStates;j++) {
@@ -463,7 +463,7 @@ bool VDPOptimization::getJacEqConstraintNzElementsImpl(int* rowIndex, int* colIn
 
 	for (int j=0;j<nStates;j++) {
 		rowIndex[_rowIndex++] = eqnIndex + j + 1;
-		colIndex[_colIndex++] = j + 1;		
+		colIndex[_colIndex++] = j + 1;
 	}
 
 	/*
@@ -471,14 +471,14 @@ bool VDPOptimization::getJacEqConstraintNzElementsImpl(int* rowIndex, int* colIn
 		std::cout << rowIndex[i] << " " << colIndex[i] << std::endl;
 	}
 	 */
-	//	std::cout << "VDPOptimization::getJacEqConstraintNzElementsImpl(): _rowIndex: " << _rowIndex << " _colIndex: " << _colIndex << std::endl;  
+	//	std::cout << "VDPOptimization::getJacEqConstraintNzElementsImpl(): _rowIndex: " << _rowIndex << " _colIndex: " << _colIndex << std::endl;
 
 	return true;
 
 }
 
-/** 
- * getIneqConstraintElements returns the indices of the non-zeros in the 
+/**
+ * getIneqConstraintElements returns the indices of the non-zeros in the
  * inequality constraint Jacobian.
  */
 bool VDPOptimization::getJacIneqConstraintNzElementsImpl(int* rowIndex, int* colIndex) {
@@ -491,18 +491,19 @@ bool VDPOptimization::getJacIneqConstraintNzElementsImpl(int* rowIndex, int* col
 
 int main(int argv, char* argc[])
 {
+
 	//	using namespace Ipopt;
 
 	//	printf("Hej!\n");
 	// Create a new instance of your nlp
 	//  (use a SmartPtr, not raw)
-	VDPOptimization* op = new VDPOptimization();	
+	VDPOptimization* op = new VDPOptimization();
 	//Initialize first!
 	op->initialize();
 	op->getModel()->prettyPrint();
 	op->prettyPrint();
 
-	SmartPtr<TNLP> mynlp = new OptimicaTNLP(op);   
+	SmartPtr<TNLP> mynlp = new OptimicaTNLP(op);
 
 	// Create a new instance of IpoptApplication
 	//  (use a SmartPtr, not raw)
