@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:jm="http://www.jmodelica.org/jm" 
+	targetNamespace="http://www.jmodelica.org/jm" 
+	elementFormDefault="unqualified"
+	attributeFormDefault="unqualified"
+	blockDefault="#all"
+	xml:lang="en"
+	version="alpha">
+	
+	<xsd:annotation>
+		<xsd:documentation xml:lang="eng">
+			Model schema for JModelica.
+			Copyright 2008 Modelon AB. All rights reserved.
+		</xsd:documentation>
+	</xsd:annotation>	
+
+	<xsd:element name="model" type="string"></xsd:element>
+<xsd:schema></xsd:schema>
