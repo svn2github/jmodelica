@@ -12,33 +12,27 @@
  *   Assume dense Jacobians for now.
  */
 
+/*
+ * This function is provided for the user in order to know the size of memory to allocate
+ *
+ */
 
-int jmi_dae_ad_dFdpd(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, 
-              Double_t* dx, Double_t* x, Double_t* u, 
-              Double_t* w, Double_t t, Double_t* jac);
+#ifndef _JMI_DAE_AD_H
+#define _JMI_DAE_AD_H
+#include "jmi.h"
 
-int jmi_dae_ad_dFdpi(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, 
-              Double_t* dx, Double_t* x, Double_t* u, 
-              Double_t* w, Double_t t, Double_t* jac);
+#if defined __cplusplus
+        extern "C" {
+#endif
 
-int jmi_dae_ad_dFddx(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, 
-              Double_t* dx, Double_t* x, Double_t* u, 
-              Double_t* w, Double_t t, Double_t* jac);
+int jmi_dae_ad_get_sizes(int* nJacF, int mask);
 
-int jmi_dae_ad_dFdx(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, 
-              Double_t* dx, Double_t* x, Double_t* u, 
-              Double_t* w, Double_t t, Double_t* jac);
+int jmi_dae_ad_dF(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
+              Double_t* dx, Double_t* x, Double_t* u,
+     	      Double_t* w, Double_t t, int mask, Double_t* jac);
 
-int jmi_dae_ad_dFdu(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, 
-              Double_t* dx, Double_t* x, Double_t* u, 
-              Double_t* w, Double_t t, Double_t* jac);
+#if defined __cplusplus
+    }
+#endif
 
-int jmi_dae_ad_dFdw(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, 
-              Double_t* dx, Double_t* x, Double_t* u, 
-              Double_t* w, Double_t t, Double_t* jac);
-
-int jmi_dae_ad_dFdt(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, 
-              Double_t* dx, Double_t* x, Double_t* u, 
-              Double_t* w, Double_t t, Double_t* jac);
-
-
+#endif

@@ -12,64 +12,40 @@
  *   Assume dense Jacobians for now.
  */
 
+#ifndef _JMI_OPT_AD_H
+#define _JMI_OPT_AD_H
+#include "jmi.h"
+
+#if defined __cplusplus
+        extern "C" {
+#endif
 
 
-//PD=1
-//PI=2
-//PD|PI
+int jmi_opt_ad_get_sizes(int* nJacJ, int* nJacCeq, int* nJacCineq, int* nJacHeq, int* nJacCeq, int mask);
 
-int jmi_dae_ad_get_sizes(int* nJacJ, int* nJacCeq, int* nJacCineq, int* nJacHeq, int* nJacCeq, int mask);
-
-int jmi_dae_ad_dJ(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, 
-              Double_t* dx, Double_t* x, Double_t* u, 
+int jmi_opt_ad_dJ(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
+              Double_t* dx, Double_t* x, Double_t* u,
 	      Double_t* w, Double_t t, int mask, Double_t* jac);
 
-int jmi_dae_ad_dCeq(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, 
-              Double_t* dx, Double_t* x, Double_t* u, 
+int jmi_opt_ad_dCeq(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
+              Double_t* dx, Double_t* x, Double_t* u,
 	      Double_t* w, Double_t t, int mask, Double_t* jac);
 
-int jmi_dae_ad_dCineq(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, 
-              Double_t* dx, Double_t* x, Double_t* u, 
+int jmi_opt_ad_dCineq(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
+              Double_t* dx, Double_t* x, Double_t* u,
 	      Double_t* w, Double_t t, int mask, Double_t* jac);
 
-int jmi_dae_ad_dHeq(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, 
-              Double_t* dx, Double_t* x, Double_t* u, 
+int jmi_opt_ad_dHeq(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
+              Double_t* dx, Double_t* x, Double_t* u,
 	      Double_t* w, Double_t t, int mask, Double_t* jac);
 
-int jmi_dae_ad_dHineq(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, 
-              Double_t* dx, Double_t* x, Double_t* u, 
+int jmi_opt_ad_dHineq(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
+              Double_t* dx, Double_t* x, Double_t* u,
 	      Double_t* w, Double_t t, int mask, Double_t* jac);
 
+#if defined __cplusplus
+    }
+#endif
 
 
-//if (mask & PD)
-
-int jmi_dae_ad_dJdpd(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, 
-              Double_t* dx, Double_t* x, Double_t* u, 
-              Double_t* w, Double_t t, Double_t* jac);
-
-int jmi_dae_ad_dJdpi(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, 
-              Double_t* dx, Double_t* x, Double_t* u, 
-              Double_t* w, Double_t t, Double_t* jac);
-
-int jmi_dae_ad_dJddx(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, 
-              Double_t* dx, Double_t* x, Double_t* u, 
-              Double_t* w, Double_t t, Double_t* jac);
-
-int jmi_dae_ad_dJdx(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, 
-              Double_t* dx, Double_t* x, Double_t* u, 
-              Double_t* w, Double_t t, Double_t* jac);
-
-int jmi_dae_ad_dJdu(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, 
-              Double_t* dx, Double_t* x, Double_t* u, 
-              Double_t* w, Double_t t, Double_t* jac);
-
-int jmi_dae_ad_dJdw(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, 
-              Double_t* dx, Double_t* x, Double_t* u, 
-              Double_t* w, Double_t t, Double_t* jac);
-
-int jmi_dae_ad_dJdt(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, 
-              Double_t* dx, Double_t* x, Double_t* u, 
-              Double_t* w, Double_t t, Double_t* jac);
-
-
+#endif
