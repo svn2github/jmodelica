@@ -2,9 +2,17 @@
 <model 
 	xmlns="http://www.jmodelica.org" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-	xsi:schemaLocation="http://www.jmodelica.org JModelica.xsd ">
+	xsi:schemaLocation="http://www.jmodelica.org JModelica.xsd"
 	
-	<name>
-		
-	</name>
+	name="Test"
+	class="dae"
+	linear="false"
+	hybrid="false">
+	
+	<parameters>
+	</parameters>
+	
+	<variables>
+	</variables>
+	
 </model>

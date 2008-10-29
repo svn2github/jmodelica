@@ -9,14 +9,56 @@
 	version="alpha">
 	
 	<xsd:annotation>
-		<xsd:documentation xml:lang="eng">
+		<xsd:documentation xml:lang="en">
 			Model schema for JModelica.
 			Copyright 2008 Modelon AB. All rights reserved.
 		</xsd:documentation>
 	</xsd:annotation>	
 
 
-	<xsd:element name="model" type="jm:ModelType"></xsd:element>
+	<xsd:element name="model" type="jm:Model"/>
 	
-    <xsd:complexType name="ModelType"></xsd:complexType>
+    <xsd:complexType name="Model">
+    	<xsd:sequence>
+    		<xsd:element name="parameters" type="jm:Parameters"/>
+    		<xsd:element name="variables" type="jm:Variables"/>
+    	</xsd:sequence>
+   		<xsd:attribute name="name" type="xsd:string" use="required"/>
+   		<xsd:attribute name="class" use="required">
+   			<xsd:simpleType>
+   				<xsd:restriction base="xsd:string">
+   					<xsd:enumeration value="static"/>
+   					<xsd:enumeration value="ode"/>
+   					<xsd:enumeration value="dae"/>
+   				</xsd:restriction>
+   			</xsd:simpleType>
+   		</xsd:attribute>
+   		<xsd:attribute name="linear" type="xsd:boolean" use="required"/>
+   		<xsd:attribute name="hybrid" type="xsd:boolean" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="Parameters">
+    	<xsd:sequence>
+    		<xsd:element name="parameter" type="jm:Parameter" minOccurs="0" maxOccurs="unbounded"/> 		
+    	</xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="Parameter">
+		<xsd:attribute name="name" type="xsd:string" use="required"/> 		
+		<xsd:attribute name="value" type="xsd:double"/>
+ 		<xsd:attribute name="dependent" type="xsd:boolean"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="Variables">
+    	<xsd:sequence>
+    		<xsd:element name="variable" type="jm:Variables" minOccurs="0" maxOccurs="unbounded"/> 		
+    	</xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="Variable">
+		<xsd:attribute name="name" type="xsd:string" use="required"/> 		
+		<xsd:attribute name="start" type="xsd:double"/>
+		<xsd:attribute name="state" type="xsd:boolean"/>
+    </xsd:complexType>
+
 </xsd:schema>
