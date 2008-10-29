@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsd:schema 
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-	xmlns:jm="http://www.jmodelica.org/jm" 
-	targetNamespace="http://www.jmodelica.org/jm" 
-	elementFormDefault="unqualified"
-	attributeFormDefault="unqualified"
-	blockDefault="#all"
+	xmlns:jm="http://www.jmodelica.org" 
+	targetNamespace="http://www.jmodelica.org" 
+	elementFormDefault="qualified"
+	attributeFormDefault="qualified"
 	xml:lang="en"
 	version="alpha">
 	
@@ -16,5 +15,8 @@
 		</xsd:documentation>
 	</xsd:annotation>	
 
-	<xsd:element name="model" type="string"></xsd:element>
-<xsd:schema></xsd:schema>
+
+	<xsd:element name="model" type="jm:ModelType"></xsd:element>
+	
+    <xsd:complexType name="ModelType"></xsd:complexType>
+</xsd:schema>

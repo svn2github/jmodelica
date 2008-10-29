@@ -3,5 +3,8 @@
 	xmlns="http://www.jmodelica.org" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 	xsi:schemaLocation="http://www.jmodelica.org JModelica.xsd ">
-
+	
+	<name>
+		
+	</name>
 </model>
