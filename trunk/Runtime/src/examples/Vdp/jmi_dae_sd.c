@@ -5,17 +5,6 @@ int jmi_dae_sd_dF(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
               Double_t* dx, Double_t* x, Double_t* u,
      	      Double_t* w, Double_t t, int mask, Double_t* jac) {
 
-	int n_ci;
-	int n_cd;
-	int n_pi;
-	int n_pd;
-	int n_dx;
-	int n_x;
-	int n_u;
-	int n_w;
-	int n_eq;
-
-	jmi_dae_get_sizes(&n_ci, &n_cd, &n_pi, &n_pd, &n_dx, &n_x, &n_u, &n_w, &n_eq);
 
 	int jac_index = 0;
 

@@ -20,9 +20,6 @@
         extern "C" {
 #endif
 
-
-int jmi_opt_ad_get_sizes(int* nJacJ, int* nJacCeq, int* nJacCineq, int* nJacHeq, int* nJacCeq, int mask);
-
 int jmi_opt_ad_dJ(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
               Double_t* dx, Double_t* x, Double_t* u,
 	      Double_t* w, Double_t t, int mask, Double_t* jac);
