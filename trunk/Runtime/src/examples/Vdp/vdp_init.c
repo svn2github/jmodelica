@@ -1,4 +1,4 @@
-#include "../../JMI_C/jmi_init.h"
+#include "../../Jmi/jmi_init.h"
 
 
 int jmi_init_get_sizes(int* n_ci, int* n_cd, int* n_pi, int* n_pd,

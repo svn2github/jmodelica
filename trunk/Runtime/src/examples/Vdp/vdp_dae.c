@@ -14,7 +14,7 @@
  *
  */
 
-#include "../../JMI_C/jmi_dae.h"
+#include "../../Jmi/jmi_dae.h"
 
 int jmi_dae_get_sizes(int* n_ci, int* n_cd, int* n_pi, int* n_pd,
                   int* n_dx, int* n_x, int* n_u, int* n_w, int* n_eq){

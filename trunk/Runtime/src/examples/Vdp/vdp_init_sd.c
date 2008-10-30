@@ -1,5 +1,5 @@
 
-#include "../../JMI_C/jmi_init.h"
+#include "../../Jmi/jmi_init.h"
 
 int jmi_init_sd_dF0(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
               Double_t* dx, Double_t* x, Double_t* u,

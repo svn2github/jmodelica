@@ -1,5 +1,5 @@
 
-#include "../../JMI_C/jmi.h"
+#include "../../Jmi/jmi.h"
 
 #if defined __cplusplus
         extern "C" {

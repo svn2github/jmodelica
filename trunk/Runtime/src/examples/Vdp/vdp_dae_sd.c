@@ -1,5 +1,5 @@
 
-#include "../../JMI_C/jmi_dae.h"
+#include "../../Jmi/jmi_dae.h"
 
 int jmi_dae_sd_dF(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
               Double_t* dx, Double_t* x, Double_t* u,

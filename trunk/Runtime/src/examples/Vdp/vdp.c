@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../../JMI_C/jmi_dae.h"
-#include "../../JMI_C/jmi_init.h"
+#include "../../Jmi/jmi_dae.h"
+#include "../../Jmi/jmi_init.h"
 
 
 

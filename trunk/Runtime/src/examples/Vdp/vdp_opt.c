@@ -23,7 +23,7 @@
  *
  */
 
-#include "../../JMI_C/jmi_opt.h"
+#include "../../Jmi/jmi_opt.h"
 
 int jmi_opt_get_sizes(int* n_Ceq, int* n_Cineq, int* n_Heq, int* n_Hineq) {
 
