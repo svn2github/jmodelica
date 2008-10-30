@@ -36,25 +36,37 @@
 
 
 
-int jmi_opt_get_sizes(int* n_Ceq, int* n_Cineq, int* n_Ceq, int* n_Ceq);
+int jmi_opt_get_sizes(int* n_Ceq, int* n_Cineq, int* n_Heq, int* n_Hineq);
 
 
 int jmi_opt_J(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
               Double_t* dx, Double_t* x, Double_t* u,
               Double_t* w, Double_t* t, Double_t* J);
 
+/**
+ * Path equality constraints Ceq = 0.
+ */
 int jmi_opt_Ceq(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
               Double_t* dx, Double_t* x, Double_t* u,
               Double_t* w, Double_t* t, Double_t* Ceq);
 
+/**
+ * Path inequality constraints Cineq <= 0.
+ */
 int jmi_opt_Cineq(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
               Double_t* dx, Double_t* x, Double_t* u,
               Double_t* w, Double_t* t, Double_t* Cineq);
 
+/**
+ * Point equality constraints Heq = 0.
+ */
 int jmi_opt_Heq(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
               Double_t* dx_p, Double_t* x_p, Double_t* u_p,
               Double_t* w_p, Double_t* t_p, Double_t* Heq);
 
+/**
+ * Point inequality constraints Hineq <= 0.
+ */
 int jmi_opt_Hineq(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
               Double_t* dx_p, Double_t* x_p, Double_t* u_p,
               Double_t* w_p, Double_t* t_p, Double_t* Hineq);

@@ -1,0 +1,64 @@
+
+#include "../../JMI_C/jmi_dae.h"
+
+int jmi_dae_sd_dF(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
+              Double_t* dx, Double_t* x, Double_t* u,
+     	      Double_t* w, Double_t t, int mask, Double_t* jac) {
+
+	int n_ci;
+	int n_cd;
+	int n_pi;
+	int n_pd;
+	int n_dx;
+	int n_x;
+	int n_u;
+	int n_w;
+	int n_eq;
+
+	jmi_dae_get_sizes(&n_ci, &n_cd, &n_pi, &n_pd, &n_dx, &n_x, &n_u, &n_w, &n_eq);
+
+	int jac_index = 0;
+
+	if (mask & AD_PI) {
+		jac[jac_index++] = 0;
+	   	jac[jac_index++] = x[0];
+	   	jac[jac_index++] = 0;
+	}
+	if (mask & AD_PD) {
+
+	}
+	if (mask & AD_DX) {
+		jac[jac_index++] = -1;
+	   	jac[jac_index++] = 0;
+	   	jac[jac_index++] = 0;
+	   	jac[jac_index++] = 0;
+	 	jac[jac_index++] = -1;
+	  	jac[jac_index++] = 0;
+	   	jac[jac_index++] = 0;
+	   	jac[jac_index++] = 0;
+	   	jac[jac_index++] = -1;
+	}
+	if (mask & AD_X) {
+		jac[jac_index++] = (1-x[1]*x[1]);
+	   	jac[jac_index++] = pi[0];
+	   	jac[jac_index++] = 2*x[0];
+	   	jac[jac_index++] = -2*x[1]*x[0] - 1;
+	 	jac[jac_index++] = 0;
+	  	jac[jac_index++] = 2*x[1];
+	   	jac[jac_index++] = 0;
+	   	jac[jac_index++] = 0;
+	   	jac[jac_index++] = 0;
+	}
+	if (mask & AD_U) {
+	   	jac[jac_index++] = 1;
+	   	jac[jac_index++] = 0;
+	   	jac[jac_index++] = 2*u[0];
+
+	}
+	if (mask & AD_W) {
+
+	}
+
+	return 0;
+}
+
