@@ -17,7 +17,7 @@ int jmi_opt_sd_dCeq(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
               Double_t* dx, Double_t* x, Double_t* u,
 	      Double_t* w, Double_t t, int mask, Double_t* jac) {
 
-	if (mask & AD_U) {
+	if (mask & DER_U) {
 		jac[0] = 1;
 		jac[1] = -1;
 	}

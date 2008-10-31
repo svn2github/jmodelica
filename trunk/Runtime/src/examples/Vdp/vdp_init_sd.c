@@ -7,7 +7,7 @@ int jmi_init_sd_dF0(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
 
 	int jac_index = 0;
 
-	if (mask & AD_PI) {
+	if (mask & DER_PI) {
 		jac[jac_index++] = 0;
 	   	jac[jac_index++] = x[0];
 	   	jac[jac_index++] = 0;
@@ -15,10 +15,10 @@ int jmi_init_sd_dF0(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
 	   	jac[jac_index++] = 0;
 	   	jac[jac_index++] = 0;
 	}
-	if (mask & AD_PD) {
+	if (mask & DER_PD) {
 
 	}
-	if (mask & AD_DX) {
+	if (mask & DER_DX) {
 		jac[jac_index++] = -1;
 	   	jac[jac_index++] = 0;
 	   	jac[jac_index++] = 0;
@@ -44,7 +44,7 @@ int jmi_init_sd_dF0(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
 	   	jac[jac_index++] = 0;
 
 	}
-	if (mask & AD_X) {
+	if (mask & DER_X) {
 		jac[jac_index++] = (1-x[1]*x[1]);
 	   	jac[jac_index++] = pi[0];
 	   	jac[jac_index++] = 2*x[0];
@@ -69,7 +69,7 @@ int jmi_init_sd_dF0(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
 	   	jac[jac_index++] = 0;
 	   	jac[jac_index++] = 1;
 	}
-	if (mask & AD_U) {
+	if (mask & DER_U) {
 	   	jac[jac_index++] = 1;
 	   	jac[jac_index++] = 0;
 	   	jac[jac_index++] = 2*u[0];
@@ -79,7 +79,7 @@ int jmi_init_sd_dF0(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
 	   	jac[jac_index++] = 0;
 
 	}
-	if (mask & AD_W) {
+	if (mask & DER_W) {
 
 	}
 

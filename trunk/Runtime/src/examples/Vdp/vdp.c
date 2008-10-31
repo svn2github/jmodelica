@@ -28,7 +28,7 @@ int main(int argv, char* argc[])
 	jmi_init_get_sizes(&n_ci, &n_cd, &n_pi, &n_pd, &n_dx, &n_x, &n_u, &n_w, &n_eq_F0, &n_eq_F1);
 
 	int n_jac_F;
-	int mask = AD_DX | AD_X | AD_U;
+	int mask = DER_DX | DER_X | DER_U;
 	jmi_dae_der_get_sizes(&n_jac_F,mask);
 
 	printf("Number of interactive constants:               %d\n",n_ci);
@@ -56,11 +56,11 @@ int main(int argv, char* argc[])
 	Double_t* res_F0 = (Double_t*)calloc(n_eq_F0,sizeof(Double_t));
 	Double_t* res_F1 = (Double_t*)calloc(n_eq_F1,sizeof(Double_t));
 	Double_t* jac_sd_F = (Double_t*)calloc(n_jac_F,sizeof(Double_t));
-	Double_t* jac_ad_F = (Double_t*)calloc(n_jac_F,sizeof(Double_t));
+	Double_t* jac_DER_F = (Double_t*)calloc(n_jac_F,sizeof(Double_t));
 
 	Double_t t = 0;
 
-	// Here initial values for all parameters should be read from
+	// Here initial values for all parameters should be reDER from
 	// xml-files
 
 	// Try to initialize x = (0,1,0)
@@ -72,7 +72,7 @@ int main(int argv, char* argc[])
 	jmi_init_F0(ci,cd,pi,pd,dx,x,u,w,t,res_F0);
 	jmi_init_F1(ci,cd,pi,pd,dx,x,u,w,t,res_F1);
     jmi_dae_sd_dF(ci,cd,pi,pd,dx,x,u,w,t,mask,jac_sd_F);
-    jmi_dae_ad_dF(ci,cd,pi,pd,dx,x,u,w,t,mask,jac_ad_F);
+    jmi_dae_ad_dF(ci,cd,pi,pd,dx,x,u,w,t,mask,jac_DER_F);
 
 	printf("\n *** State initialized to (0,1,0) ***\n\n");
 	printf("DAE residual:\n");
@@ -92,7 +92,7 @@ int main(int argv, char* argc[])
 
 	printf("\n Jacobian of F wrt dx, x, u:\n");
 	for (i=0;i<n_jac_F;i++){
-		printf("jac_sd_F[%d] = %f, jac_ad_F[%d] = %f\n",i,jac_sd_F[i], i,jac_ad_F[i]);
+		printf("jac_sd_F[%d] = %f, jac_DER_F[%d] = %f\n",i,jac_sd_F[i], i,jac_DER_F[i]);
 	}
 
 	free(ci);
