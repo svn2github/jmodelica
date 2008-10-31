@@ -1,21 +1,9 @@
 /**
  * Interface to first derivatives of the dae residual
  *
- *   - DAE residual Jacobian w.r.t. pd: jac = dFdpd
- *   - DAE residual Jacobian w.r.t. pi: jac = dFdpi
- *   - DAE residual Jacobian w.r.t. dx: jac = dFddx
- *   - DAE residual Jacobian w.r.t. x: jac = dFdx
- *   - DAE residual Jacobian w.r.t. u: jac = dFdu
- *   - DAE residual Jacobian w.r.t. w: jac = dFdw
- *   - DAE residual Jacobian w.r.t. t: jac = dFdt
- *
  *   Assume dense Jacobians for now.
  */
 
-/*
- * This function is provided for the user in order to know the size of memory to allocate
- *
- */
 
 #ifndef _JMI_DAE_FD_H
 #define _JMI_DAE_FD_H

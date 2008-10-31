@@ -41,19 +41,10 @@
 int jmi_init_get_sizes(int* n_ci, int* n_cd, int* n_pi, int* n_pd,
                        int* n_dx, int* n_x, int* n_u, int* n_w, int* n_eq_F0, int* _eq_F1);
 
-/**
- *
- *   - initial DAE residual: res = F0(..)
- *
- */
+
 int jmi_init_F0(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, Double_t* dx, Double_t* x,
 		        Double_t* u, Double_t* w, Double_t t0, Double_t* res);
 
-/**
- *
- *   - initial DAE residual: res = F1(..)
- *
- */
 int jmi_init_F1(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd, Double_t* dx, Double_t* x,
 		        Double_t* u, Double_t* w, Double_t t0, Double_t* res);
 

@@ -28,11 +28,17 @@
 
 typedef double Double_t;
 
-static const int AD_PI = 1;
-static const int AD_PD = 2;
-static const int AD_DX = 4;
-static const int AD_X = 8;
-static const int AD_U = 16;
-static const int AD_W = 32;
+/*
+ * These constants are used to encode and decode the masks that are
+ * used as arguments in the Jacobian fuctions.
+ *
+ */
+
+static const int DER_PI = 1;
+static const int DER_PD = 2;
+static const int DER_DX = 4;
+static const int DER_X = 8;
+static const int DER_U = 16;
+static const int DER_W = 32;
 
 #endif

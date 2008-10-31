@@ -11,9 +11,7 @@
 /**
  * This function returns the size of the jacobian vector given a particular mask.
  */
-
 int jmi_opt_der_get_sizes(int* nJacJ, int* nJacCeq, int* nJacCineq, int* nJacHeq, int* nJacHineq, int mask);
-
 
 
 #if defined __cplusplus

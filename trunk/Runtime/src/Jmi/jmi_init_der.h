@@ -1,6 +1,4 @@
 
-
-
 #ifndef _JMI_INIT_DER_H
 #define _JMI_INIT_DER_H
 #include "jmi.h"

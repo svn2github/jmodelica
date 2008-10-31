@@ -1,13 +1,5 @@
 /**
- * Interface to first derivatives of the dae residual
- *
- *   - Cost function Jacobian w.r.t. pd: jac = dFdpd
- *   - Cost function Jacobian w.r.t. pi: jac = dFdpi
- *   - Cost function Jacobian w.r.t. dx: jac = dFddx
- *   - Cost function Jacobian w.r.t. x: jac = dFdx
- *   - Cost function Jacobian w.r.t. u: jac = dFdu
- *   - Cost function Jacobian w.r.t. w: jac = dFdw
- *   - Cost function Jacobian w.r.t. t: jac = dFdt
+ * Interface to first derivatives of the optimization related functions
  *
  *   Assume dense Jacobians for now.
  */
