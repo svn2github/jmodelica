@@ -2,9 +2,10 @@
 #include <stdlib.h>
 
 #include "../../Jmi/jmi_dae.h"
+#include "../../Jmi/jmi_dae_der.h"
+#include "../../Jmi/jmi_dae_sd.h"
+#include "../../Jmi/jmi_dae_ad.h"
 #include "../../Jmi/jmi_init.h"
-
-
 
 int main(int argv, char* argc[])
 {
@@ -23,21 +24,25 @@ int main(int argv, char* argc[])
 	int n_eq_F0;
 	int n_eq_F1;
 
-
 	jmi_dae_get_sizes(&n_ci, &n_cd, &n_pi, &n_pd, &n_dx, &n_x, &n_u, &n_w, &n_eq_F);
 	jmi_init_get_sizes(&n_ci, &n_cd, &n_pi, &n_pd, &n_dx, &n_x, &n_u, &n_w, &n_eq_F0, &n_eq_F1);
 
-	printf("Number of interactive constants:        %d\n",n_ci);
-	printf("Number of dependent constants:          %d\n",n_cd);
-	printf("Number of interactive parameters:       %d\n",n_pi);
-	printf("Number of dependent parameters:         %d\n",n_pd);
-	printf("Number of derivatives:                  %d\n",n_dx);
-	printf("Number of states:                       %d\n",n_x);
-	printf("Number of inputs:                       %d\n",n_u);
-	printf("Number of algebraics:                   %d\n",n_w);
-	printf("Number of DAE equations:                %d\n",n_eq_F);
-	printf("Number of DAE initial equations (F0):   %d\n",n_eq_F0);
-	printf("Number of DAE initial equations (F1):   %d\n",n_eq_F1);
+	int n_jac_F;
+	int mask = AD_DX | AD_X | AD_U;
+	jmi_dae_der_get_sizes(&n_jac_F,mask);
+
+	printf("Number of interactive constants:               %d\n",n_ci);
+	printf("Number of dependent constants:                 %d\n",n_cd);
+	printf("Number of interactive parameters:              %d\n",n_pi);
+	printf("Number of dependent parameters:                %d\n",n_pd);
+	printf("Number of derivatives:                         %d\n",n_dx);
+	printf("Number of states:                              %d\n",n_x);
+	printf("Number of inputs:                              %d\n",n_u);
+	printf("Number of algebraics:                          %d\n",n_w);
+	printf("Number of DAE equations:                       %d\n",n_eq_F);
+	printf("Number of DAE initial equations (F0):          %d\n",n_eq_F0);
+	printf("Number of DAE initial equations (F1):          %d\n",n_eq_F1);
+	printf("Number of elements in Jacobian wrt dx, x, u:   %d\n",n_jac_F);
 
 	Double_t* ci = (Double_t*)calloc(n_ci,sizeof(Double_t));
 	Double_t* cd = (Double_t*)calloc(n_cd,sizeof(Double_t));
@@ -50,6 +55,8 @@ int main(int argv, char* argc[])
 	Double_t* res_F = (Double_t*)calloc(n_eq_F,sizeof(Double_t));
 	Double_t* res_F0 = (Double_t*)calloc(n_eq_F0,sizeof(Double_t));
 	Double_t* res_F1 = (Double_t*)calloc(n_eq_F1,sizeof(Double_t));
+	Double_t* jac_sd_F = (Double_t*)calloc(n_jac_F,sizeof(Double_t));
+	Double_t* jac_ad_F = (Double_t*)calloc(n_jac_F,sizeof(Double_t));
 
 	Double_t t = 0;
 
@@ -64,8 +71,10 @@ int main(int argv, char* argc[])
 	jmi_dae_F(ci,cd,pi,pd,dx,x,u,w,t,res_F);
 	jmi_init_F0(ci,cd,pi,pd,dx,x,u,w,t,res_F0);
 	jmi_init_F1(ci,cd,pi,pd,dx,x,u,w,t,res_F1);
+    jmi_dae_sd_dF(ci,cd,pi,pd,dx,x,u,w,t,mask,jac_sd_F);
+    jmi_dae_ad_dF(ci,cd,pi,pd,dx,x,u,w,t,mask,jac_ad_F);
 
-	printf("\n *** All vectors initialized to 0 ***\n\n");
+	printf("\n *** State initialized to (0,1,0) ***\n\n");
 	printf("DAE residual:\n");
 	for (i=0;i<n_eq_F;i++){
 		printf("res[%d] = %f\n",i,res_F[i]);
@@ -79,6 +88,11 @@ int main(int argv, char* argc[])
 	printf("\ninitial DAE residual (F1):\n");
 	for (i=0;i<n_eq_F1;i++){
 		printf("res[%d] = %f\n",i,res_F1[i]);
+	}
+
+	printf("\n Jacobian of F wrt dx, x, u:\n");
+	for (i=0;i<n_jac_F;i++){
+		printf("jac_sd_F[%d] = %f, jac_ad_F[%d] = %f\n",i,jac_sd_F[i], i,jac_ad_F[i]);
 	}
 
 	free(ci);
