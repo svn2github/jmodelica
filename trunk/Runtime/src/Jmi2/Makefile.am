@@ -4,7 +4,9 @@ lib_LTLIBRARIES = libjmi.la
 libjmi_la_SOURCES = jmi.h \
                     jmi.c \
                     jmi_runtime.h \
-                    jmi_runtime.c
+                    jmi_runtime.c \
+                    jmi_internal.h \
+                    jmi_internal.c
                  
 #libjmi_la_LIBADD = $(JMALLLIBS)
 #libjmi_la_DEPENDENCIES = $(JMALLLIBS)
