@@ -20002,7 +20002,7 @@ fi
 
 # Checks for library functions.
 
-ac_config_files="$ac_config_files Makefile src/Jmi/Makefile src/Jmi2/Makefile src/examples/Vdp/Makefile src/examples/Vdp2/Makefile"
+ac_config_files="$ac_config_files Makefile src/Jmi/Makefile src/Jmi2/Makefile src/Jmi3/Makefile src/examples/Vdp/Makefile src/examples/Vdp2/Makefile"
 
 
 
@@ -20596,6 +20596,7 @@ do
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "src/Jmi/Makefile") CONFIG_FILES="$CONFIG_FILES src/Jmi/Makefile" ;;
     "src/Jmi2/Makefile") CONFIG_FILES="$CONFIG_FILES src/Jmi2/Makefile" ;;
+    "src/Jmi3/Makefile") CONFIG_FILES="$CONFIG_FILES src/Jmi3/Makefile" ;;
     "src/examples/Vdp/Makefile") CONFIG_FILES="$CONFIG_FILES src/examples/Vdp/Makefile" ;;
     "src/examples/Vdp2/Makefile") CONFIG_FILES="$CONFIG_FILES src/examples/Vdp2/Makefile" ;;
 
