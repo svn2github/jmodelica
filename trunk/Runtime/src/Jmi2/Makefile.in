@@ -53,7 +53,7 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libjmi_la_LIBADD =
-am_libjmi_la_OBJECTS = jmi.lo
+am_libjmi_la_OBJECTS = jmi.lo jmi_runtime.lo
 libjmi_la_OBJECTS = $(am_libjmi_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -187,16 +187,19 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 lib_LTLIBRARIES = libjmi.la
-libjmi_la_SOURCES = jmi_dae.h \
-                    jmi.h \
-                    jmi.c
+libjmi_la_SOURCES = jmi.h \
+                    jmi.c \
+                    jmi_runtime.h \
+                    jmi_runtime.c
 
 
 #libjmi_la_LIBADD = $(JMALLLIBS)
 #libjmi_la_DEPENDENCIES = $(JMALLLIBS)
 
 #AM_CPPFLAGS = -I$(IPOPT_INC)
-include_HEADERS = jmi.h
+include_HEADERS = jmi.h \
+                  jmi_runtime.h
+
 all: all-am
 
 .SUFFIXES:
@@ -267,6 +270,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jmi.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jmi_runtime.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

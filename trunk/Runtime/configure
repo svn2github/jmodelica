@@ -20002,7 +20002,7 @@ fi
 
 # Checks for library functions.
 
-ac_config_files="$ac_config_files Makefile src/Jmi/Makefile src/Jmi2/Makefile src/examples/Vdp/Makefile"
+ac_config_files="$ac_config_files Makefile src/Jmi/Makefile src/Jmi2/Makefile src/examples/Vdp/Makefile src/examples/Vdp2/Makefile"
 
 
 
@@ -20597,6 +20597,7 @@ do
     "src/Jmi/Makefile") CONFIG_FILES="$CONFIG_FILES src/Jmi/Makefile" ;;
     "src/Jmi2/Makefile") CONFIG_FILES="$CONFIG_FILES src/Jmi2/Makefile" ;;
     "src/examples/Vdp/Makefile") CONFIG_FILES="$CONFIG_FILES src/examples/Vdp/Makefile" ;;
+    "src/examples/Vdp2/Makefile") CONFIG_FILES="$CONFIG_FILES src/examples/Vdp2/Makefile" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}

@@ -72,6 +72,7 @@ AC_CONFIG_FILES([
  src/Jmi/Makefile
  src/Jmi2/Makefile
  src/examples/Vdp/Makefile
+ src/examples/Vdp2/Makefile
 ])
 
 

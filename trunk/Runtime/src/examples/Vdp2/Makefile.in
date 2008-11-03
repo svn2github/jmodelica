@@ -32,8 +32,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = vdp$(EXEEXT)
-subdir = src/examples/Vdp
+bin_PROGRAMS = vdp2$(EXEEXT)
+subdir = src/examples/Vdp2
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -45,11 +45,9 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_vdp_OBJECTS = vdp_dae.$(OBJEXT) vdp_init.$(OBJEXT) \
-	vdp_opt.$(OBJEXT) vdp.$(OBJEXT) vdp_dae_sd.$(OBJEXT) \
-	vdp_init_sd.$(OBJEXT) vdp_opt_sd.$(OBJEXT)
-vdp_OBJECTS = $(am_vdp_OBJECTS)
-vdp_DEPENDENCIES = ../../Jmi/libjmiold.la
+am_vdp2_OBJECTS = vdp.$(OBJEXT) vdp_main.$(OBJEXT)
+vdp2_OBJECTS = $(am_vdp2_OBJECTS)
+vdp2_DEPENDENCIES = ../../Jmi2/libjmi.la
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -71,8 +69,8 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(vdp_SOURCES) $(nodist_EXTRA_vdp_SOURCES)
-DIST_SOURCES = $(vdp_SOURCES)
+SOURCES = $(vdp2_SOURCES) $(nodist_EXTRA_vdp2_SOURCES)
+DIST_SOURCES = $(vdp2_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -188,25 +186,20 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
-vdp_SOURCES = vdp_dae.c \
-              vdp_init.c \
-              vdp_opt.c \
-              vdp.c \
-              vdp_dae_sd.c \
-              vdp_init_sd.c \
-              vdp_opt_sd.c
+vdp2_SOURCES = vdp.c \
+               vdp_main.c 
 
 
 #AM_CXXFLAGS = -I$(IPOPT_INC) \
-#              -I../../Jmi 
-AM_CFLAGS = -I../../Jmi 
+#              -I../../Jmi2 
+AM_CFLAGS = -I../../Jmi2 
 
 # This is just to force automake to choose g++ as
 # linker. This is neccesary since libjmiold contains
 # C++ code. Notice that dummy.cpp does not exist in
 # the source tree.
-nodist_EXTRA_vdp_SOURCES = dummy.cpp
-vdp_LDADD = ../../Jmi/libjmiold.la
+nodist_EXTRA_vdp2_SOURCES = dummy.cpp
+vdp2_LDADD = ../../Jmi2/libjmi.la
 all: all-am
 
 .SUFFIXES:
@@ -220,9 +213,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  src/examples/Vdp/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  src/examples/Vdp2/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  src/examples/Vdp/Makefile
+	  $(AUTOMAKE) --foreign  src/examples/Vdp2/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -268,9 +261,9 @@ clean-binPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-vdp$(EXEEXT): $(vdp_OBJECTS) $(vdp_DEPENDENCIES) 
-	@rm -f vdp$(EXEEXT)
-	$(CXXLINK) $(vdp_OBJECTS) $(vdp_LDADD) $(LIBS)
+vdp2$(EXEEXT): $(vdp2_OBJECTS) $(vdp2_DEPENDENCIES) 
+	@rm -f vdp2$(EXEEXT)
+	$(CXXLINK) $(vdp2_OBJECTS) $(vdp2_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -280,12 +273,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp_dae.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp_dae_sd.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp_init.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp_init_sd.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp_opt.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp_opt_sd.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp_main.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
