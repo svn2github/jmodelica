@@ -22,25 +22,52 @@ static const int DER_FD = 1;
 static const int DER_SD = 2;
 static const int DER_AD = 4;
 
-typedef	int (*jmi_dae_get_sizes_t)(int* n_ci, int* n_cd, int* n_pi, int* n_pd,
-			int* n_dx, int* n_x, int* n_u, int* n_w, int* n_eq);
-
 typedef int (*jmi_dae_F_t)(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
 		      Double_t* dx, Double_t* x, Double_t* u, Double_t* w,
 		      Double_t t, Double_t* res);
 
-typedef int (*jmi_dae_xd_dF_t)(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
+typedef int (*jmi_dae_xd_jac_F_t)(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
 			Double_t* dx, Double_t* x, Double_t* u, Double_t* w,
-			Double_t t, int mask, Double_t* res);
+			Double_t t, int* mask, Double_t* jac);
 
 typedef struct {
-  jmi_dae_get_sizes_t dae_get_sizes;
-  jmi_dae_F_t dae_F;
-  jmi_dae_xd_dF_t dae_sd_dF;
-} Jmi_low;
+	jmi_dae_F_t dae_F;
+	jmi_dae_xd_jac_F_t dae_sd_jac_F;
+	int n_ci;
+	int n_cd;
+	int n_pi;
+	int n_pd;
+	int n_dx;
+	int n_x;
+	int n_u;
+	int n_w;
+	int n_eq;
+    int jac_sd_F_nnz;
+    double* jac_sd_F_nz_row;
+    double* jac_sd_F_nz_col;
+    void* der_struct;
+    void* xml_struct;
+} Jmi_dae;
 
-int jmi_low_init(Jmi_low* jmi_low);
-int jmi_low_delete(Jmi_low* jmi_low);
+typedef struct
+{
+    void* der_struct;
+    void* xml_struct;
+} Jmi_init;
+
+typedef struct {
+    void* der_struct;
+    void* xml_struct;
+} Jmi_opt;
+
+typedef struct {
+	Jmi_dae jmi_dae;
+	Jmi_init jmi_init;
+	Jmi_opt jmi_opt;
+} Jmi;
+
+int jmi_init(Jmi_low* jmi_low);
+int jmi_delete(Jmi_low* jmi_low);
 
 
 
