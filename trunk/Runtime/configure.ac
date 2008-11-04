@@ -7,6 +7,8 @@ AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/Jmi/jmi_dae.h])
 AC_CONFIG_HEADER([config.h])
 
+
+
 # Checks for programs.
 AC_PROG_CXX
 
@@ -70,10 +72,8 @@ AC_C_CONST
 AC_CONFIG_FILES([
  Makefile
  src/Jmi/Makefile
- src/Jmi2/Makefile
  src/Jmi3/Makefile
  src/examples/Vdp/Makefile
- src/examples/Vdp2/Makefile
 ])
 
 

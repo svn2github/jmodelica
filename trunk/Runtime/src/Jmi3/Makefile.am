@@ -5,7 +5,8 @@ libjmi_la_SOURCES = jmi_low.h \
                     jmi_low.c \
                     jmi.h \
                     jmi.c 
-                 
+libjmi_la_CFLAGS = -Wall 
+                
 #libjmi_la_LIBADD = $(JMALLLIBS)
 #libjmi_la_DEPENDENCIES = $(JMALLLIBS)
 

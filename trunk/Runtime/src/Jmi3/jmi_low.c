@@ -1,57 +1,80 @@
 // Example of generated function
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "jmi_low.h"
 
-
-// Is it possible to use the function typedefs here to define the functions? 
-
-// I think that it is actually a good idea to have this function
-// instead of fields in the struct. All "sections" (dae, init, opt)
-// are not allways used but the fields would always be present for 
-// all section. Seems a bit fishy to have unused fields whos validity
-// is checked by a NULL pointer condition for some function. Raises
-// consistency issues of the struct.
-int jmi_dae_get_sizes(int* n_ci, int* n_cd, int* n_pi, int* n_pd,
-		      int* n_dx, int* n_x, int* n_u, int* n_w, int* n_eq) {
-  // generated code
-  return 1;
-}
-
-static jmi_dae_F(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
+static int jmi_dae_F(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
 		 Double_t* dx, Double_t* x, Double_t* u, Double_t* w,
 		 Double_t t, Double_t* res) {
   // Generated code
   return 1;
 }
 
-static int jmi_dae_sd_dF(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
+static int jmi_dae_sd_jac_F(Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
 			 Double_t* dx, Double_t* x, Double_t* u,
-			 Double_t* w, Double_t t, int mask, Double_t* jac) {
+			 Double_t* w, Double_t t, int* mask, Double_t* jac) {
   // Generated code
   return 1;
 }
 
 
 // This is the init function
-int jmi_low_init(Jmi_low* jmi_low) {
-  jmi_low = (Jmi_low*)malloc(sizeof(Jmi_low));
-  jmi_low->dae_get_sizes = &jmi_dae_get_sizes;
-  jmi_low->dae_F = &jmi_dae_F;
-  jmi_low->dae_sd_dF = &jmi_dae_sd_dF;
-}
+int jmi_new(Jmi* jmi) {
+  // Create jmi struct
+  jmi = (Jmi*)malloc(sizeof(Jmi));
+  // Create jmi_dae struct
+  Jmi_dae* jmi_dae = (Jmi_dae*)malloc(sizeof(Jmi_dae));
+  // Assign function pointers
+  jmi_dae->dae_F = &jmi_dae_F;
+  jmi_dae->dae_sd_jac_F = &jmi_dae_sd_jac_F;
+  // Set sizes of dae vectors
+  jmi_dae->n_ci=0;
+  jmi_dae->n_cd=0;
+  jmi_dae->n_pi=0;
+  jmi_dae->n_pd=0;
+  jmi_dae->n_dx=0;
+  jmi_dae->n_x=0;
+  jmi_dae->n_u=0;
+  jmi_dae->n_w=0;
+  jmi_dae->n_eq=0;
+  // Set sparsity information of jacobian
+  jmi_dae->jac_sd_F_nnz = 4;
+  jmi_dae->jac_sd_F_nz_row = (Double_t*)malloc(jmi_dae->jac_sd_F_nnz*sizeof(Double_t));
+  jmi_dae->jac_sd_F_nz_col =  (Double_t*)malloc(jmi_dae->jac_sd_F_nnz*sizeof(Double_t));
+  jmi_dae->jac_sd_F_nz_row[0] = 1;
+  jmi_dae->jac_sd_F_nz_row[1] = 2;
+  jmi_dae->jac_sd_F_nz_row[2] = 1;
+  jmi_dae->jac_sd_F_nz_row[3] = 2;
+  jmi_dae->jac_sd_F_nz_col[0] = 1;
+  jmi_dae->jac_sd_F_nz_col[1] = 1;
+  jmi_dae->jac_sd_F_nz_col[2] = 2;
+  jmi_dae->jac_sd_F_nz_col[3] = 2;
 
-int jmi_low_delete(Jmi_low* jmi_low){
-  free(jmi_low);
+  // Set struct pointers in jmi 
+  jmi->jmi_dae = jmi_dae;
+  jmi->jmi_init = NULL;
+  jmi->jmi_opt = NULL;
   return 1;
 }
 
+int jmi_delete(Jmi* jmi){
+  if(jmi->jmi_dae != NULL) {
+    if (jmi->jmi_dae->jac_sd_F_nz_row != NULL) {
+      free(jmi->jmi_dae->jac_sd_F_nz_row);
+    }
+    if (jmi->jmi_dae->jac_sd_F_nz_col != NULL) {
+      free(jmi->jmi_dae->jac_sd_F_nz_col);
+    }
+    free(jmi->jmi_dae);
+  }
+  if(jmi->jmi_init != NULL) {
+    free(jmi->jmi_init);
+  }
+  if(jmi->jmi_opt != NULL) {
+    free(jmi->jmi_opt);
+  }
+  free(jmi);
 
-// This is the const struct. Mabye this is better, cleaner? 
-// No dynamic memory allocation. This const struct should be in jmi_low.h
-// but cannot make it work...
-const Jmi_low jmi_low_struct = {&jmi_dae_get_sizes,
-                 &jmi_dae_F,
-                 &jmi_dae_sd_dF};
+return 1;
+}

@@ -2,59 +2,92 @@
 #include <stdlib.h>
 #include "jmi.h"
 
-static int jmi_dae_fd_dF(Jmi* jmi, Double_t* ci, Double_t* cd, 
+static int jmi_dae_fd_jac_F(Jmi_dae_der* jmi_dae_der, Double_t* ci, Double_t* cd, 
                             Double_t* pi, Double_t* pd,
 			    Double_t* dx, Double_t* x, Double_t* u, Double_t* w,
-			Double_t t, int mask, Double_t* res) {
+			Double_t t, int* mask, Double_t* jac) {
   // Code for finite differences
   return 1;
 
 }
 
 
-static int jmi_dae_ad_dF(Jmi* jmi, Double_t* ci, Double_t* cd, 
+static int jmi_dae_ad_jac_F(Jmi_dae_der* jmi_dae_der, Double_t* ci, Double_t* cd, 
                             Double_t* pi, Double_t* pd,
 			    Double_t* dx, Double_t* x, Double_t* u, Double_t* w,
-			Double_t t, int mask, Double_t* res) {
+			Double_t t, int* mask, Double_t* jac) {
 
   // Code for automatic differentiation
   return 1;
 
 }
 
-static int jmi_dae_dF(Jmi* jmi, Double_t* ci, Double_t* cd, 
+static int jmi_dae_jac_F(Jmi_dae_der* jmi_dae_der, Double_t* ci, Double_t* cd, 
                             Double_t* pi, Double_t* pd,
 			    Double_t* dx, Double_t* x, Double_t* u, Double_t* w,
-			Double_t t, int der_method, int mask, Double_t* res) {
+			Double_t t, int der_method, int* mask, Double_t* jac) {
 
   if (der_method & DER_SD) {
-    if (((Jmi_low*)jmi)->dae_sd_dF != NULL) {
-      return ((Jmi_low*)jmi)->dae_sd_dF(ci,cd,pi,pd,dx,x,u,w,t,mask,res);
+    if (jmi_dae_der->jmi->jmi_dae->dae_sd_jac_F != NULL) {
+      return jmi_dae_der->jmi->jmi_dae->dae_sd_jac_F(ci,cd,pi,pd,dx,x,u,w,t,mask,jac);
     } else {
       return -1;
     } 
   } else if (der_method & DER_FD) {
-    return jmi_dae_fd_dF(jmi,ci,cd,pi,pd,dx,x,u,w,t,mask,res);
+    return jmi_dae_fd_jac_F(jmi_dae_der,ci,cd,pi,pd,dx,x,u,w,t,mask,jac);
   } else if (der_method & DER_AD) {
-    return jmi_dae_ad_dF(jmi,ci,cd,pi,pd,dx,x,u,w,t,mask,res);
+    return jmi_dae_ad_jac_F(jmi_dae_der,ci,cd,pi,pd,dx,x,u,w,t,mask,jac);
   }
   return -1;
 
-
 }
 
-
-// This is the init function
-int jmi_init(Jmi* jmi) {
-  jmi = (Jmi*)malloc(sizeof(Jmi));
-  jmi_low_init(&(jmi->jmi_low));
-  jmi->dae_dF = &jmi_dae_dF;
+static int jmi_dae_jac_fd_F_nnz(Jmi_dae_der* jmi_dae_der, int* nnz) {
+  //...
   return 1;
 }
 
-int jmi_delete(Jmi* jmi) {
-   jmi_low_delete(&(jmi->jmi_low));
-   free(jmi);
+static int jmi_dae_jac_fd_F_nz_indices(Jmi_dae_der* jmi_dae_der, int* row, int* col) {
+  //... Ehhh, what to do here...? Assume dense fd:s? May relay on info from generated code.
+  return 1;
+}
+
+static int jmi_dae_jac_ad_F_nnz(Jmi_dae_der* jmi_dae_der, int* nnz) {
+  //...
+  return 1;
+}
+
+static int jmi_dae_jac_ad_F_nz_indices(Jmi_dae_der* jmi_dae_der, int* row, int* col) {
+  //... 
+  return 1;
+}
+
+int jmi_der_new(Jmi* jmi, Jmi_der* jmi_der) {
+  jmi_der = (Jmi_der*)malloc(sizeof(Jmi_der));
+  // Allocate jmi_dae_der
+  Jmi_dae_der* jmi_dae_der = (Jmi_dae_der*)malloc(sizeof(Jmi_dae_der));
+  jmi_dae_der->jmi = jmi; 
+  jmi_dae_der->jac_F = &jmi_dae_jac_F;
+  jmi_dae_der->jac_fd_F_nnz = &jmi_dae_jac_fd_F_nnz;
+  jmi_dae_der->jac_fd_F_nz_indices = &jmi_dae_jac_fd_F_nz_indices;
+  jmi_dae_der->jac_ad_F_nnz = &jmi_dae_jac_ad_F_nnz;
+  jmi_dae_der->jac_ad_F_nz_indices = &jmi_dae_jac_ad_F_nz_indices;
+ // Allocate jmi_init_der...
+
+ // Allocate jmi_init_der...
+
+  jmi_der->jmi_dae_der = jmi_dae_der;
+  //  jmi_der->jmi_init_der = jmi_init_der;
+  //  jmi_der->jmi_opt_der = jmi_opt_der;
+
+  return 1;
+}
+
+int jmi_der_delete(Jmi_der* jmi_der) {
+  free(jmi_der->jmi_dae_der);
+  //free(jmi_der->jmi_init_der);
+  //free(jmi_der->jmi_opt_der);
+  free(jmi_der);
   return 1;
 }
 
