@@ -12,5 +12,4 @@ libjmi_la_CFLAGS = -Wall
 
 #AM_CPPFLAGS = -I$(IPOPT_INC)
 
-#include_HEADERS = jmi.h \
-#                  jmi_runtime.h
+include_HEADERS = jmi.h 

@@ -184,7 +184,8 @@ top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 SUBDIRS = src/Jmi \
           src/Jmi3 \
-          src/examples/Vdp 
+          src/examples/Vdp \
+          src/examples/Vdp3 
 
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
