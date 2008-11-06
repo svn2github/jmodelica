@@ -148,11 +148,11 @@ typedef int (*jmi_dae_F_t)(Jmi* jmi, Double_t* ci, Double_t* cd, Double_t* pi, D
  *                   assumed to be independent variables. The constants
  *                   DER_NN_SKIP are used to indicate that the Jacobian w.r.t.
  *                   a particular vector should not be evaluated.
- *   mask            This array has the same size size as the output argument
- *                   jac, and holds the value of 0 if the corresponding Jacobian
- *                   entry should not be computed. If the value of an entry in
- *                   mask i 1, then the correponding Jacobian entry will be evaluated.
- *                   The evaluated Jacobian entries are stored in the sum_i(mask[i]) first
+ *   mask            This array has the same size as the number of column of the dense
+ *                   Jacobian, and holds the value of 0 if the corresponding Jacobian
+ *                   cloumn should not be computed. If the value of an entry in
+ *                   mask i 1, then the correponding Jacobian colum will be evaluated.
+ *                   The evaluated Jacobian columns are stored in the first
  *                   entries of the output argument jac.
  *
  *                   [We need to think about the caching issue in AD, where we would like
@@ -195,12 +195,12 @@ jmi_dae_jac_F_nnz_t qwe(Jmi* jmi, int q2, int* nn, int q) {
  * Creates a new Jmi struct, for which a pointer is returned in the output argument jmi.
  * This function is assumed to be given in the generated code.
  */
-int jmi_new(Jmi* jmi);
+int jmi_new(Jmi** jmi);
 
 /**
  * Deallocates memory and deletes a Jmi struct.
  */
-int jmi_delete(Jmi* jmi);
+int jmi_delete(Jmi** jmi);
 
 /**
  * Struct describing a DAE model including evaluation of the DAE residual and (optional) a symbolic
