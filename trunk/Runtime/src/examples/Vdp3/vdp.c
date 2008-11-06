@@ -4,6 +4,11 @@
 #include <stdlib.h>
 #include "../../Jmi3/jmi.h"
 
+// Error codes...
+
+
+// static const int n_ci = 0;
+
 static int vdp_dae_get_sizes(int* n_ci, int* n_cd, int* n_pi, int* n_pd,
 		int* n_dx, int* n_x, int* n_u, int* n_w, int* n_eq_F){
 
@@ -31,6 +36,8 @@ static int vdp_dae_F(Jmi* jmi, Double_t* ci, Double_t* cd, Double_t* pi, Double_
 
 	return 1;
 }
+
+// flag for dense/row, dense/col, sparse
 
 static int vdp_dae_jac_sd_F(Jmi* jmi, Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
 		Double_t* dx, Double_t* x, Double_t* u,
@@ -268,6 +275,8 @@ int jmi_delete(Jmi** jmi){
 	if(jmi_->jmi_opt != NULL) {
 		free(jmi_->jmi_opt);
 	}
+	// Check der structs if not NULL return error and the user has to deallocate them first.
+
 	free(jmi_);
 
 	return 1;

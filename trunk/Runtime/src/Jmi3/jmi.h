@@ -101,6 +101,7 @@
 typedef struct Jmi Jmi;
 
 // Constants for controlling derivative evaluation
+// Prefix JMI och lägg i enumeration
 static const int DER_PI_SPARSE = 1;
 static const int DER_PD_SPARSE = 2;
 static const int DER_DX_SPARSE = 4;
@@ -117,6 +118,7 @@ static const int DER_W_SKIP = 32;
 static const int DER_T_SKIP = 64;
 
 // Typedef for the doubles used in the interface.
+// Prefix Jmi
 typedef double Double_t;
 
 // Function signatures
@@ -167,6 +169,8 @@ typedef int (*jmi_dae_F_t)(Jmi* jmi, Double_t* ci, Double_t* cd, Double_t* pi, D
  *                    - Introduce a newMask argument. If false, the cached data can be used,
  *                      otherwise new data structures are computed.
  *                   ]
+ *
+ *                   [NOTICE. This is a preliminary prototype
  */
 typedef int (*jmi_dae_jac_F_t)(Jmi* jmi, Double_t* ci, Double_t* cd,
 		Double_t* pi, Double_t* pd,
