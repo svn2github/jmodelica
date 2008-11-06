@@ -17,7 +17,7 @@ static int vdp_dae_get_sizes(int* n_ci, int* n_cd, int* n_pi, int* n_pd,
 	*n_w = 0;
 	*n_eq_F = 3;
 
-	return 0;
+	return 1;
 
 }
 
@@ -85,6 +85,7 @@ static int vdp_dae_jac_sd_F(Jmi* jmi, Double_t* ci, Double_t* cd, Double_t* pi, 
 		col_index += jmi->jmi_dae->n_u;
 	}
 
+	return 1;
 }
 
 static int vdp_dae_jac_sd_F_nnz(Jmi* jmi, int* nnz) {
@@ -103,7 +104,7 @@ static int vdp_dae_jac_sd_F_nnz(Jmi* jmi, int* nnz) {
 
 static int vdp_dae_jac_sd_F_nz_indices(Jmi* jmi, int* row, int* col) {
 
-	int i,j;
+//	int i,j;
 	int jac_ind = 0;
 	int col_ind = 0;
 

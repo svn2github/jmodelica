@@ -7,8 +7,6 @@ AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/Jmi/jmi_dae.h])
 AC_CONFIG_HEADER([config.h])
 
-
-
 # Checks for programs.
 AC_PROG_CXX
 

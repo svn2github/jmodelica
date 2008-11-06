@@ -8,7 +8,7 @@ vdp3_SOURCES = vdp.c \
 #AM_CXXFLAGS = -I$(IPOPT_INC) \
 #              -I../../Jmi2 
 
-AM_CFLAGS = -I../../Jmi3
+AM_CFLAGS = -Wall -I../../Jmi3 
 
 # This is just to force automake to choose g++ as
 # linker. This is neccesary since libjmiold contains
