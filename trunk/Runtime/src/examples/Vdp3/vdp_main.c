@@ -16,6 +16,14 @@ int main(int argv, char* argc[])
 	int* jac_F_row = (int*)calloc(jac_F_nnz,sizeof(int));
 	int* jac_F_col = (int*)calloc(jac_F_nnz,sizeof(int));
 
+	int jac_F_n_dense = (jmi->jmi_dae->n_pi +
+			jmi->jmi_dae->n_pd +
+			jmi->jmi_dae->n_dx +
+			jmi->jmi_dae->n_x +
+			jmi->jmi_dae->n_u +
+			jmi->jmi_dae->n_w) * jmi->jmi_dae->n_eq_F;
+
+
 	printf("Number of interactive constants:               %d\n",jmi->jmi_dae->n_ci);
 	printf("Number of dependent constants:                 %d\n",jmi->jmi_dae->n_cd);
 	printf("Number of interactive parameters:              %d\n",jmi->jmi_dae->n_pi);
@@ -30,21 +38,22 @@ int main(int argv, char* argc[])
 	printf("Number of elements in Jacobian wrt dx, x, u:   %d\n",n_jac_F);
 */
 
-	Double_t* ci = (Double_t*)calloc(jmi->jmi_dae->n_ci,sizeof(Double_t));
-	Double_t* cd = (Double_t*)calloc(jmi->jmi_dae->n_cd,sizeof(Double_t));
-	Double_t* pi = (Double_t*)calloc(jmi->jmi_dae->n_pi,sizeof(Double_t));
-	Double_t* pd = (Double_t*)calloc(jmi->jmi_dae->n_pd,sizeof(Double_t));
-	Double_t* dx = (Double_t*)calloc(jmi->jmi_dae->n_dx,sizeof(Double_t));
-	Double_t* x = (Double_t*)calloc(jmi->jmi_dae->n_x,sizeof(Double_t));
-	Double_t* u = (Double_t*)calloc(jmi->jmi_dae->n_u,sizeof(Double_t));
-	Double_t* w = (Double_t*)calloc(jmi->jmi_dae->n_w,sizeof(Double_t));
-	Double_t* res_F = (Double_t*)calloc(jmi->jmi_dae->n_eq_F,sizeof(Double_t));
-	Double_t* jac_sd_F = (Double_t*)calloc(jac_F_nnz,sizeof(Double_t));
-/*	Double_t* res_F0 = (Double_t*)calloc(n_eq_F0,sizeof(Double_t));
-	Double_t* res_F1 = (Double_t*)calloc(n_eq_F1,sizeof(Double_t));
-	Double_t* jac_DER_F = (Double_t*)calloc(n_jac_F,sizeof(Double_t));
+	Jmi_Double_t* ci = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_ci,sizeof(Jmi_Double_t));
+	Jmi_Double_t* cd = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_cd,sizeof(Jmi_Double_t));
+	Jmi_Double_t* pi = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_pi,sizeof(Jmi_Double_t));
+	Jmi_Double_t* pd = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_pd,sizeof(Jmi_Double_t));
+	Jmi_Double_t* dx = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_dx,sizeof(Jmi_Double_t));
+	Jmi_Double_t* x = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_x,sizeof(Jmi_Double_t));
+	Jmi_Double_t* u = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_u,sizeof(Jmi_Double_t));
+	Jmi_Double_t* w = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_w,sizeof(Jmi_Double_t));
+	Jmi_Double_t* res_F = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_eq_F,sizeof(Jmi_Double_t));
+	Jmi_Double_t* jac_sd_F = (Jmi_Double_t*)calloc(jac_F_nnz,sizeof(Jmi_Double_t));
+	Jmi_Double_t* jac_sd_F_dense = (Jmi_Double_t*)calloc(jac_F_n_dense,sizeof(Jmi_Double_t));
+/*	Jmi_Double_t* res_F0 = (Jmi_Double_t*)calloc(n_eq_F0,sizeof(Jmi_Double_t));
+	Jmi_Double_t* res_F1 = (Jmi_Double_t*)calloc(n_eq_F1,sizeof(Jmi_Double_t));
+	Jmi_Double_t* jac_DER_F = (Jmi_Double_t*)calloc(n_jac_F,sizeof(Jmi_Double_t));
 */
-	Double_t t = 0;
+	Jmi_Double_t t = 0;
 
 	// Here initial values for all parameters should be reDER from
 	// xml-files
@@ -78,11 +87,25 @@ int main(int argv, char* argc[])
 	for(i=0;i<jac_F_nnz;i++) {
 		mask[i]=1;
 	}
-    jmi->jmi_dae->jac_sd_F(jmi,ci,cd,pi,pd,dx,x,u,w,t,0,DER_PI_SKIP,mask,jac_sd_F);
-	printf("Jacobian (skipping parameters):\n");
+    jmi->jmi_dae->jac_sd_F(jmi,ci,cd,pi,pd,dx,x,u,w,t,JMI_DER_SPARSE,0,mask,jac_sd_F);
+	printf("Jacobian (sparse):\n");
 	for (i=0;i<jac_F_nnz;i++) {
 		printf("%f\n",jac_sd_F[i]);
 	}
+
+    jmi->jmi_dae->jac_sd_F(jmi,ci,cd,pi,pd,dx,x,u,w,t,JMI_DER_DENSE_COL_MAJOR,0,mask,jac_sd_F_dense);
+	printf("Jacobian (dense col major):\n");
+	for (i=0;i<jac_F_n_dense;i++) {
+		printf("%f\n",jac_sd_F_dense[i]);
+	}
+
+    jmi->jmi_dae->jac_sd_F(jmi,ci,cd,pi,pd,dx,x,u,w,t,JMI_DER_DENSE_ROW_MAJOR,0,mask,jac_sd_F_dense);
+	printf("Jacobian (dense row major):\n");
+	for (i=0;i<jac_F_n_dense;i++) {
+		printf("%f\n",jac_sd_F_dense[i]);
+	}
+
+
 
 /*
 	printf("\ninitial DAE residual (F0):\n");
@@ -110,6 +133,7 @@ int main(int argv, char* argc[])
 	free(w);
 	free(res_F);
 	free(jac_sd_F);
+	free(jac_sd_F_dense);
 	free(mask);
 /*	free(res_F0);
 	free(res_F1);

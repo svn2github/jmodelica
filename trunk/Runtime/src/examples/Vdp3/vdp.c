@@ -4,78 +4,187 @@
 #include <stdlib.h>
 #include "../../Jmi3/jmi.h"
 
-// Error codes...
+static const int N_ci = 0;
+static const int N_cd = 0;
+static const int N_pi = 1;
+static const int N_pd = 0;
+static const int N_dx = 3;
+static const int N_x = 3;
+static const int N_u = 1;
+static const int N_w = 0;
+static const int N_eq_F = 3;
 
 
-// static const int n_ci = 0;
-
-static int vdp_dae_get_sizes(int* n_ci, int* n_cd, int* n_pi, int* n_pd,
-		int* n_dx, int* n_x, int* n_u, int* n_w, int* n_eq_F){
-
-	*n_ci = 0;
-	*n_cd = 0;
-	*n_pi = 1;
-	*n_pd = 0;
-	*n_dx = 3;
-	*n_x = 3;
-	*n_u = 1;
-	*n_w = 0;
-	*n_eq_F = 3;
-
-	return 1;
-
-}
-
-static int vdp_dae_F(Jmi* jmi, Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
-		Double_t* dx, Double_t* x, Double_t* u, Double_t* w,
-		Double_t t, Double_t* res) {
+static int vdp_dae_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd, Jmi_Double_t* pi, Jmi_Double_t* pd,
+		Jmi_Double_t* dx, Jmi_Double_t* x, Jmi_Double_t* u, Jmi_Double_t* w,
+		Jmi_Double_t t, Jmi_Double_t* res) {
 
 	res[0] = (1-x[1]*x[1])*x[0] - x[1] + u[0] - dx[0];
 	res[1] = pi[0]*x[0] - dx[1];
 	res[2] = x[0]*x[0] + x[1]*x[1] + u[0]*u[0] - dx[2];
 
-	return 1;
+	return 0;
 }
 
-// flag for dense/row, dense/col, sparse
 
-static int vdp_dae_jac_sd_F(Jmi* jmi, Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
-		Double_t* dx, Double_t* x, Double_t* u,
-		Double_t* w, Double_t t, int sparsity, int skip, int* mask, Double_t* jac) {
+/*
+ * TODO: This code can certainly be improved and optimized. For example, macros would probably
+ * make it easier to read.
+ */
+static int vdp_dae_jac_sd_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd, Jmi_Double_t* pi, Jmi_Double_t* pd,
+		Jmi_Double_t* dx, Jmi_Double_t* x, Jmi_Double_t* u,
+		Jmi_Double_t* w, Jmi_Double_t t, int sparsity, int skip, int* mask, Jmi_Double_t* jac) {
+
+	int i;
+	int jac_n = N_eq_F;
+	int jac_m = 0;
+	int col_index = 0;
+
+	if (!(skip & JMI_DER_PI_SKIP)) {
+		for (i=0;i<N_pi;i++) {
+			jac_m += mask[col_index++];
+		}
+	}
+	if (!(skip & JMI_DER_PD_SKIP)) {
+		for (i=0;i<N_pd;i++) {
+			jac_m += mask[col_index++];
+		}
+	}
+	if (!(skip & JMI_DER_DX_SKIP)) {
+		for (i=0;i<N_dx;i++) {
+			jac_m += mask[col_index++];
+		}
+	}
+	if (!(skip & JMI_DER_X_SKIP)) {
+		for (i=0;i<N_x;i++) {
+			jac_m += mask[col_index++];
+		}
+	}
+	if (!(skip & JMI_DER_U_SKIP)) {
+		for (i=0;i<N_u;i++) {
+			jac_m += mask[col_index++];
+		}
+	}
+	if (!(skip & JMI_DER_W_SKIP)) {
+		for (i=0;i<N_w;i++) {
+			jac_m += mask[col_index++];
+		}
+	}
+
+	// Set Jacobian to zero if dense evaluation.
+	if ((sparsity & JMI_DER_DENSE_ROW_MAJOR) | (sparsity & JMI_DER_DENSE_COL_MAJOR)) {
+		for (i=0;i<jac_n*jac_m;i++) {
+			jac[i] = 0;
+		}
+	}
 
 	int jac_index = 0;
-	int col_index = 0;
-	if (!(skip & DER_PI_SKIP)) {
+	col_index = 0;
+	if (!(skip & JMI_DER_PI_SKIP)) {
 		if (mask[col_index++] == 1) {
-			jac[jac_index++] = x[0];
+			Jmi_Double_t jac_tmp_1 = x[0];
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*0 + 1] = jac_tmp_1;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*1 + 0] = jac_tmp_1;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index] = jac_tmp_1;
+				jac_index++;
+			}
 		}
 	} else {
 		col_index += jmi->jmi_dae->n_pi;
 	}
 
-	if (!(skip & DER_DX_SKIP)) {
+	if (!(skip & JMI_DER_DX_SKIP)) {
 		if (mask[col_index++] == 1) {
-			jac[jac_index++] = -1;
+			Jmi_Double_t jac_tmp_1 = -1;
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*1 + 0] = jac_tmp_1;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*0 + 1] = jac_tmp_1;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index] = jac_tmp_1;
+				jac_index++;
+			}
 		}
 		if (mask[col_index++] == 1) {
-			jac[jac_index++] = -1;
+			Jmi_Double_t jac_tmp_1 = -1;
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*2 + 1] = jac_tmp_1;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*1 + 2] = jac_tmp_1;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index] = jac_tmp_1;
+				jac_index++;
+			}
 		}
 		if (mask[col_index++] == 1) {
-			jac[jac_index++] = -1;
+			Jmi_Double_t jac_tmp_1 = -1;
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*3 + 2] = jac_tmp_1;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*2 + 3] = jac_tmp_1;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index] = jac_tmp_1;
+				jac_index++;
+			}
 		}
 	} else {
 		col_index += jmi->jmi_dae->n_dx;
 	}
 
-	if (!(skip & DER_X_SKIP)) {
+	if (!(skip & JMI_DER_X_SKIP)) {
 		if (mask[col_index++] == 1) {
-			jac[jac_index++] = (1-x[1]*x[1]);
-			jac[jac_index++] = pi[0];
-			jac[jac_index++] = 2*x[0];
+			Jmi_Double_t jac_tmp_1 = (1-x[1]*x[1]);
+			Jmi_Double_t jac_tmp_2 = pi[0];
+			Jmi_Double_t jac_tmp_3 = 2*x[0];
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*4 + 0] = jac_tmp_1;
+				jac[jac_n*4 + 1] = jac_tmp_2;
+				jac[jac_n*4 + 2] = jac_tmp_3;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*0 + 4] = jac_tmp_1;
+				jac[jac_m*1 + 4] = jac_tmp_2;
+				jac[jac_m*2 + 4] = jac_tmp_3;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index++] = jac_tmp_1;
+				jac[jac_index++] = jac_tmp_2;
+				jac[jac_index++] = jac_tmp_3;
+			}
 		}
 		if (mask[col_index++] == 1) {
-			jac[jac_index++] = -2*x[1]*x[0] - 1;
-			jac[jac_index++] = 2*x[1];
+			Jmi_Double_t jac_tmp_1 = -2*x[1]*x[0] - 1;
+			Jmi_Double_t jac_tmp_2 = 2*x[1];
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*5 + 0] = jac_tmp_1;
+				jac[jac_n*5 + 2] = jac_tmp_2;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*0 + 5] = jac_tmp_1;
+				jac[jac_m*2 + 5] = jac_tmp_2;
+				jac_index += 3;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index++] = jac_tmp_1;
+				jac[jac_index++] = jac_tmp_2;
+			}
 		}
 		if (mask[col_index++] == 1) {
 		}
@@ -83,16 +192,31 @@ static int vdp_dae_jac_sd_F(Jmi* jmi, Double_t* ci, Double_t* cd, Double_t* pi, 
 		col_index += jmi->jmi_dae->n_x;
 	}
 
-	if (!(skip & DER_U_SKIP)) {
+	if (!(skip & JMI_DER_U_SKIP)) {
 		if (mask[col_index++] == 1) {
-			jac[jac_index++] = 1;
-			jac[jac_index++] = 2*u[0];
+			Jmi_Double_t jac_tmp_1 = 1;
+			Jmi_Double_t jac_tmp_2 = 2*u[0];
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*7 + 0] = jac_tmp_1;
+				jac[jac_n*7 + 2] = jac_tmp_2;
+				jac_index += 3;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*0 + 7] = jac_tmp_1;
+				jac[jac_m*2 + 7] = jac_tmp_2;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index++] = jac_tmp_1;
+				jac[jac_index++] = jac_tmp_2;
+			}
+
 		}
 	} else {
 		col_index += jmi->jmi_dae->n_u;
 	}
 
-	return 1;
+	return 0;
 }
 
 static int vdp_dae_jac_sd_F_nnz(Jmi* jmi, int* nnz) {
@@ -106,7 +230,7 @@ static int vdp_dae_jac_sd_F_nnz(Jmi* jmi, int* nnz) {
 			0 //t
 			);
 
-	return 1;
+	return 0;
 }
 
 static int vdp_dae_jac_sd_F_nz_indices(Jmi* jmi, int* row, int* col) {
@@ -234,7 +358,7 @@ static int vdp_dae_jac_sd_F_nz_indices(Jmi* jmi, int* row, int* col) {
 		}
 	}
     */
-	return 1;
+	return 0;
 }
 
 
@@ -259,9 +383,16 @@ int jmi_new(Jmi** jmi) {
 	jmi_dae->jac_sd_F_nnz = vdp_dae_jac_sd_F_nnz;
 	jmi_dae->jac_sd_F_nz_indices = vdp_dae_jac_sd_F_nz_indices;
 	// Set sizes of dae vectors
-	vdp_dae_get_sizes(&jmi_dae->n_ci, &jmi_dae->n_cd, &jmi_dae->n_pi, &jmi_dae->n_pd, &jmi_dae->n_dx,
-			&jmi_dae->n_x, &jmi_dae->n_u, &jmi_dae->n_w, &jmi_dae->n_eq_F);
-	return 1;
+	jmi_dae->n_ci = N_ci;
+	jmi_dae->n_cd = N_cd;
+	jmi_dae->n_pi = N_pi;
+	jmi_dae->n_pd = N_pd;
+	jmi_dae->n_dx = N_dx;
+    jmi_dae->n_x = N_x;
+    jmi_dae->n_u = N_u;
+    jmi_dae->n_w = N_w;
+    jmi_dae->n_eq_F = N_eq_F;
+	return 0;
 }
 
 int jmi_delete(Jmi** jmi){
@@ -275,9 +406,9 @@ int jmi_delete(Jmi** jmi){
 	if(jmi_->jmi_opt != NULL) {
 		free(jmi_->jmi_opt);
 	}
-	// Check der structs if not NULL return error and the user has to deallocate them first.
+	// TODO: Check der structs if not NULL return error and the user has to deallocate them first.
 
 	free(jmi_);
 
-	return 1;
+	return 0;
 }

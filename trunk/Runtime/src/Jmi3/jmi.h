@@ -100,52 +100,41 @@
 // Forward declaration of Jmi struct
 typedef struct Jmi Jmi;
 
-// Constants for controlling derivative evaluation
-// Prefix JMI och lägg i enumeration
-static const int DER_PI_SPARSE = 1;
-static const int DER_PD_SPARSE = 2;
-static const int DER_DX_SPARSE = 4;
-static const int DER_X_SPARSE = 8;
-static const int DER_U_SPARSE = 16;
-static const int DER_W_SPARSE = 32;
+#define JMI_DER_SPARSE 1
+#define JMI_DER_DENSE_COL_MAJOR 2
+#define JMI_DER_DENSE_ROW_MAJOR 4
 
-static const int DER_PI_SKIP = 1;
-static const int DER_PD_SKIP = 2;
-static const int DER_DX_SKIP = 4;
-static const int DER_X_SKIP = 8;
-static const int DER_U_SKIP = 16;
-static const int DER_W_SKIP = 32;
-static const int DER_T_SKIP = 64;
+#define JMI_DER_PI_SKIP 1
+#define JMI_DER_PD_SKIP 2
+#define JMI_DER_DX_SKIP 4
+#define JMI_DER_X_SKIP 8
+#define JMI_DER_U_SKIP 16
+#define JMI_DER_W_SKIP 32
+#define JMI_DER_T_SKIP 64
+
+// TODO: Error codes...
 
 // Typedef for the doubles used in the interface.
-// Prefix Jmi
-typedef double Double_t;
+typedef double Jmi_Double_t;
 
 // Function signatures
 
 /**
  * Evaluation of the DAE residual.
  */
-typedef int (*jmi_dae_F_t)(Jmi* jmi, Double_t* ci, Double_t* cd, Double_t* pi, Double_t* pd,
-		Double_t* dx, Double_t* x, Double_t* u, Double_t* w,
-		Double_t t, Double_t* res);
+typedef int (*jmi_dae_F_t)(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd, Jmi_Double_t* pi, Jmi_Double_t* pd,
+		Jmi_Double_t* dx, Jmi_Double_t* x, Jmi_Double_t* u, Jmi_Double_t* w,
+		Jmi_Double_t t, Jmi_Double_t* res);
 
 /**
  * Evaluation of the Jacobian of the DAE residual.
  *
  *   sparsity        This argument is a mask that selects wheather
  *                   sparse or dense evaluation of the Jacobian should
- *                   be used. The constants DER_NN_SPARSE are used to
- *                   specity this information for each of the vectors
- *                   pi, pd, dx, etc. If a sparse
- *                   representation is selected, the sparsity pattern in
- *                   mask is used. If sparsity=0, dense evaluation is assumed
- *                   and the mask argument is neglected. [Is this really a
- *                   good idea? This means that we need to deal with row vs
- *                   column orientation after all. This complication was avoided
- *                   by only working with the triplet formulation. It may be an
- *                   alternative to work only with sparse representation in the
- *                   interface but to include library-functions for unpacking.]
+ *                   be used. The constants JMI_DER_SPARSE are used to
+ *                   specity a sparse Jacobian, whereas JMI_DER_DENSE_COL_MAJOR
+ *                   and JMI_DER_DENSE_ROW_MAJOR are used to specify dense
+ *                   column major or row major Jacobians respectively.
  *   skip            This arguments controls what input vectors are
  *                   assumed to be independent variables. The constants
  *                   DER_NN_SKIP are used to indicate that the Jacobian w.r.t.
@@ -157,25 +146,11 @@ typedef int (*jmi_dae_F_t)(Jmi* jmi, Double_t* ci, Double_t* cd, Double_t* pi, D
  *                   The evaluated Jacobian columns are stored in the first
  *                   entries of the output argument jac.
  *
- *                   [We need to think about the caching issue in AD, where we would like
- *                   to store a tape for a particular combination of sparsity, skip and mask
- *                   arguments. Options:
- *
- *                    - Supply this information in the jmi_init function and store it in
- *                      the corresponding struct. In this case it would not be possible change
- *                      these values after initialization and they would not be arguments to
- *                      the derivative functions.
- *
- *                    - Introduce a newMask argument. If false, the cached data can be used,
- *                      otherwise new data structures are computed.
- *                   ]
- *
- *                   [NOTICE. This is a preliminary prototype
  */
-typedef int (*jmi_dae_jac_F_t)(Jmi* jmi, Double_t* ci, Double_t* cd,
-		Double_t* pi, Double_t* pd,
-		Double_t* dx, Double_t* x, Double_t* u, Double_t* w,
-		Double_t t, int sparsity, int skip, int* mask, Double_t* jac);
+typedef int (*jmi_dae_jac_F_t)(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd,
+		Jmi_Double_t* pi, Jmi_Double_t* pd,
+		Jmi_Double_t* dx, Jmi_Double_t* x, Jmi_Double_t* u, Jmi_Double_t* w,
+		Jmi_Double_t t, int sparsity, int skip, int* mask, Jmi_Double_t* jac);
 
 /**
  * Returns the number of non-zeros in the DAE residual Jacobian.
@@ -187,13 +162,6 @@ typedef int (*jmi_dae_jac_F_nnz_t)(Jmi* jmi, int* nnz);
  * residual Jacobian.
  */
 typedef int (*jmi_dae_jac_F_nz_indices_t)(Jmi* jmi, int* row, int* col);
-
-/*
-jmi_dae_jac_F_nnz_t qwe(Jmi* jmi, int q2, int* nn, int q) {
-	printf("%d",*nn);
-	return 0;
-}
- */
 
 /**
  * Creates a new Jmi struct, for which a pointer is returned in the output argument jmi.
@@ -209,8 +177,6 @@ int jmi_delete(Jmi** jmi);
 /**
  * Struct describing a DAE model including evaluation of the DAE residual and (optional) a symbolic
  * Jacobian. If the Jacobian is not evaluated, the corresponding function pointers are set to NULL.
- * [In the previous design the sparsity information was encoded as vectors directly in the struct,
- * but I think that functions are better since the design is then consistent with Jmi_dae_der.]
  */
 typedef struct {
 	jmi_dae_F_t F;
