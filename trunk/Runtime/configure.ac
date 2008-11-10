@@ -70,9 +70,7 @@ AC_C_CONST
 AC_CONFIG_FILES([
  Makefile
  src/Jmi/Makefile
- src/Jmi3/Makefile
  src/examples/Vdp/Makefile
- src/examples/Vdp3/Makefile
 ])
 
 

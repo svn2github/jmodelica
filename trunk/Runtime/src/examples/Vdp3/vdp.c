@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "../../Jmi3/jmi.h"
+#include "../../Jmi/jmi.h"
 
 static const int N_ci = 0;
 static const int N_cd = 0;
