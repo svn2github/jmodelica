@@ -1,10 +1,8 @@
 AUTOMAKE_OPTIONS = foreign
 
 noinst_LTLIBRARIES = libjmi.la
-libjmi_la_SOURCES = jmi_low.h \
-                    jmi_low.c \
-                    jmi.h \
-                    jmi.c
+libjmi_la_SOURCES = jmi.h 
+
                      
 libjmi_la_CFLAGS = -Wall 
                 
