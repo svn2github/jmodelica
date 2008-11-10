@@ -14,6 +14,7 @@
 
 @SET_MAKE@
 
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
@@ -42,12 +43,29 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-am__installdirs = "$(DESTDIR)$(bindir)"
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"
+libLTLIBRARIES_INSTALL = $(INSTALL)
+LTLIBRARIES = $(lib_LTLIBRARIES)
+libvdp_la_DEPENDENCIES = ../../Jmi/libjmi.la
+am_libvdp_la_OBJECTS = vdp.lo
+libvdp_la_OBJECTS = $(am_libvdp_la_OBJECTS)
+libvdp_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(libvdp_la_LDFLAGS) $(LDFLAGS) -o $@
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_vdp_OBJECTS = vdp.$(OBJEXT) vdp_main.$(OBJEXT)
+am_vdp_OBJECTS = vdp-vdp.$(OBJEXT) vdp-vdp_main.$(OBJEXT)
 vdp_OBJECTS = $(am_vdp_OBJECTS)
 vdp_DEPENDENCIES = ../../Jmi/libjmi.la
+vdp_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CXXLD) $(vdp_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -69,8 +87,9 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(vdp_SOURCES) $(nodist_EXTRA_vdp_SOURCES)
-DIST_SOURCES = $(vdp_SOURCES)
+SOURCES = $(libvdp_la_SOURCES) $(nodist_EXTRA_libvdp_la_SOURCES) \
+	$(vdp_SOURCES) $(nodist_EXTRA_vdp_SOURCES)
+DIST_SOURCES = $(libvdp_la_SOURCES) $(vdp_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -79,6 +98,7 @@ AMTAR = @AMTAR@
 APP_LDFLAGS = @APP_LDFLAGS@
 APP_LIBS = @APP_LIBS@
 AR = @AR@
+AS = @AS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -95,6 +115,7 @@ CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -120,6 +141,7 @@ LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
+OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -189,7 +211,8 @@ AUTOMAKE_OPTIONS = foreign
 vdp_SOURCES = vdp.c \
                vdp_main.c 
 
-AM_CFLAGS = -Wall -I../../Jmi
+vdp_CFLAGS = -Wall -I../../Jmi
+vdp_CXXFLAGS = -Wall -I../../Jmi
 
 # This is just to force automake to choose g++ as
 # linker. This is neccesary since libjmiold contains
@@ -197,6 +220,13 @@ AM_CFLAGS = -Wall -I../../Jmi
 # the source tree.
 nodist_EXTRA_vdp_SOURCES = dummy.cpp
 vdp_LDADD = ../../Jmi/libjmi.la
+
+#vdp_LDFLAGS=$(APP_LDFLAGS) $(APP_LIBS)
+lib_LTLIBRARIES = libvdp.la
+libvdp_la_SOURCES = vdp.c
+libvdp_la_LDFLAGS = -no-undefined
+nodist_EXTRA_libvdp_la_SOURCES = dummy.cpp
+libvdp_la_LIBADD = ../../Jmi/libjmi.la
 all: all-am
 
 .SUFFIXES:
@@ -230,6 +260,35 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(libdir)"
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f=$(am__strip_dir) \
+	    echo " $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) '$$p' '$(DESTDIR)$(libdir)/$$f'"; \
+	    $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) "$$p" "$(DESTDIR)$(libdir)/$$f"; \
+	  else :; fi; \
+	done
+
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  p=$(am__strip_dir) \
+	  echo " $(LIBTOOL) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$p'"; \
+	  $(LIBTOOL) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$p"; \
+	done
+
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
+	  test "$$dir" != "$$p" || dir=.; \
+	  echo "rm -f \"$${dir}/so_locations\""; \
+	  rm -f "$${dir}/so_locations"; \
+	done
+libvdp.la: $(libvdp_la_OBJECTS) $(libvdp_la_DEPENDENCIES) 
+	$(libvdp_la_LINK) -rpath $(libdir) $(libvdp_la_OBJECTS) $(libvdp_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
@@ -260,7 +319,7 @@ clean-binPROGRAMS:
 	done
 vdp$(EXEEXT): $(vdp_OBJECTS) $(vdp_DEPENDENCIES) 
 	@rm -f vdp$(EXEEXT)
-	$(CXXLINK) $(vdp_OBJECTS) $(vdp_LDADD) $(LIBS)
+	$(vdp_LINK) $(vdp_OBJECTS) $(vdp_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -268,9 +327,11 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dummy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dummy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp-dummy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp-vdp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp-vdp_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -293,6 +354,34 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
+vdp-vdp.o: vdp.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_CFLAGS) $(CFLAGS) -MT vdp-vdp.o -MD -MP -MF $(DEPDIR)/vdp-vdp.Tpo -c -o vdp-vdp.o `test -f 'vdp.c' || echo '$(srcdir)/'`vdp.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/vdp-vdp.Tpo $(DEPDIR)/vdp-vdp.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='vdp.c' object='vdp-vdp.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_CFLAGS) $(CFLAGS) -c -o vdp-vdp.o `test -f 'vdp.c' || echo '$(srcdir)/'`vdp.c
+
+vdp-vdp.obj: vdp.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_CFLAGS) $(CFLAGS) -MT vdp-vdp.obj -MD -MP -MF $(DEPDIR)/vdp-vdp.Tpo -c -o vdp-vdp.obj `if test -f 'vdp.c'; then $(CYGPATH_W) 'vdp.c'; else $(CYGPATH_W) '$(srcdir)/vdp.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/vdp-vdp.Tpo $(DEPDIR)/vdp-vdp.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='vdp.c' object='vdp-vdp.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_CFLAGS) $(CFLAGS) -c -o vdp-vdp.obj `if test -f 'vdp.c'; then $(CYGPATH_W) 'vdp.c'; else $(CYGPATH_W) '$(srcdir)/vdp.c'; fi`
+
+vdp-vdp_main.o: vdp_main.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_CFLAGS) $(CFLAGS) -MT vdp-vdp_main.o -MD -MP -MF $(DEPDIR)/vdp-vdp_main.Tpo -c -o vdp-vdp_main.o `test -f 'vdp_main.c' || echo '$(srcdir)/'`vdp_main.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/vdp-vdp_main.Tpo $(DEPDIR)/vdp-vdp_main.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='vdp_main.c' object='vdp-vdp_main.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_CFLAGS) $(CFLAGS) -c -o vdp-vdp_main.o `test -f 'vdp_main.c' || echo '$(srcdir)/'`vdp_main.c
+
+vdp-vdp_main.obj: vdp_main.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_CFLAGS) $(CFLAGS) -MT vdp-vdp_main.obj -MD -MP -MF $(DEPDIR)/vdp-vdp_main.Tpo -c -o vdp-vdp_main.obj `if test -f 'vdp_main.c'; then $(CYGPATH_W) 'vdp_main.c'; else $(CYGPATH_W) '$(srcdir)/vdp_main.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/vdp-vdp_main.Tpo $(DEPDIR)/vdp-vdp_main.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='vdp_main.c' object='vdp-vdp_main.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_CFLAGS) $(CFLAGS) -c -o vdp-vdp_main.obj `if test -f 'vdp_main.c'; then $(CYGPATH_W) 'vdp_main.c'; else $(CYGPATH_W) '$(srcdir)/vdp_main.c'; fi`
+
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
@@ -313,6 +402,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+vdp-dummy.o: dummy.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_CXXFLAGS) $(CXXFLAGS) -MT vdp-dummy.o -MD -MP -MF $(DEPDIR)/vdp-dummy.Tpo -c -o vdp-dummy.o `test -f 'dummy.cpp' || echo '$(srcdir)/'`dummy.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/vdp-dummy.Tpo $(DEPDIR)/vdp-dummy.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dummy.cpp' object='vdp-dummy.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_CXXFLAGS) $(CXXFLAGS) -c -o vdp-dummy.o `test -f 'dummy.cpp' || echo '$(srcdir)/'`dummy.cpp
+
+vdp-dummy.obj: dummy.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_CXXFLAGS) $(CXXFLAGS) -MT vdp-dummy.obj -MD -MP -MF $(DEPDIR)/vdp-dummy.Tpo -c -o vdp-dummy.obj `if test -f 'dummy.cpp'; then $(CYGPATH_W) 'dummy.cpp'; else $(CYGPATH_W) '$(srcdir)/dummy.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/vdp-dummy.Tpo $(DEPDIR)/vdp-dummy.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dummy.cpp' object='vdp-dummy.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_CXXFLAGS) $(CXXFLAGS) -c -o vdp-dummy.obj `if test -f 'dummy.cpp'; then $(CYGPATH_W) 'dummy.cpp'; else $(CYGPATH_W) '$(srcdir)/dummy.cpp'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -396,9 +499,11 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
+install-binPROGRAMS: install-libLTLIBRARIES
+
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -427,7 +532,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -449,7 +555,7 @@ install-data-am:
 
 install-dvi: install-dvi-am
 
-install-exec-am: install-binPROGRAMS
+install-exec-am: install-binPROGRAMS install-libLTLIBRARIES
 
 install-html: install-html-am
 
@@ -481,26 +587,25 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS
+uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
-	clean-generic clean-libtool ctags distclean distclean-compile \
-	distclean-generic distclean-libtool distclean-tags distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-binPROGRAMS install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags uninstall uninstall-am \
-	uninstall-binPROGRAMS
+	clean-generic clean-libLTLIBRARIES clean-libtool ctags \
+	distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-libLTLIBRARIES \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
-
-#vdp_LDFLAGS=$(APP_LDFLAGS) $(APP_LIBS)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

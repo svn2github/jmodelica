@@ -12,6 +12,18 @@ AC_PROG_CXX
 
 # Libraries will be built
 #AC_PROG_RANLIB
+
+case $build in
+  *-cygwin*)
+    AC_LIBTOOL_WIN32_DLL
+    ;;
+  *-mingw*)
+    AC_LIBTOOL_WIN32_DLL
+    ;;
+  *)
+    APP_LIBS="-lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran"
+    ;;  
+esac
 AC_PROG_LIBTOOL
 
 # By default, we want to install bin, lib, and include
