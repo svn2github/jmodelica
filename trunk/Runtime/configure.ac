@@ -4,7 +4,7 @@
 AC_PREREQ(2.61)
 AC_INIT([JModelicaRT], 0.0.1, BUG-REPORT-ADDRESS)
 AM_INIT_AUTOMAKE
-AC_CONFIG_SRCDIR([src/Jmi/jmi_dae.h])
+AC_CONFIG_SRCDIR([src/Jmi/jmi.h])
 AC_CONFIG_HEADER([config.h])
 
 # Checks for programs.

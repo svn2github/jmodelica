@@ -32,8 +32,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = vdp3$(EXEEXT)
-subdir = src/examples/Vdp3
+bin_PROGRAMS = vdp$(EXEEXT)
+subdir = src/examples/Vdp
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -45,9 +45,9 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_vdp3_OBJECTS = vdp.$(OBJEXT) vdp_main.$(OBJEXT)
-vdp3_OBJECTS = $(am_vdp3_OBJECTS)
-vdp3_DEPENDENCIES = ../../Jmi3/libjmi.la
+am_vdp_OBJECTS = vdp.$(OBJEXT) vdp_main.$(OBJEXT)
+vdp_OBJECTS = $(am_vdp_OBJECTS)
+vdp_DEPENDENCIES = ../../Jmi/libjmi.la
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -69,8 +69,8 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(vdp3_SOURCES) $(nodist_EXTRA_vdp3_SOURCES)
-DIST_SOURCES = $(vdp3_SOURCES)
+SOURCES = $(vdp_SOURCES) $(nodist_EXTRA_vdp_SOURCES)
+DIST_SOURCES = $(vdp_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -186,20 +186,17 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
-vdp3_SOURCES = vdp.c \
+vdp_SOURCES = vdp.c \
                vdp_main.c 
 
-
-#AM_CXXFLAGS = -I$(IPOPT_INC) \
-#              -I../../Jmi2 
-AM_CFLAGS = -Wall -I../../Jmi3 
+AM_CFLAGS = -Wall -I../../Jmi
 
 # This is just to force automake to choose g++ as
 # linker. This is neccesary since libjmiold contains
 # C++ code. Notice that dummy.cpp does not exist in
 # the source tree.
-nodist_EXTRA_vdp3_SOURCES = dummy.cpp
-vdp3_LDADD = ../../Jmi3/libjmi.la
+nodist_EXTRA_vdp_SOURCES = dummy.cpp
+vdp_LDADD = ../../Jmi/libjmi.la
 all: all-am
 
 .SUFFIXES:
@@ -213,9 +210,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  src/examples/Vdp3/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  src/examples/Vdp/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  src/examples/Vdp3/Makefile
+	  $(AUTOMAKE) --foreign  src/examples/Vdp/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -261,9 +258,9 @@ clean-binPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-vdp3$(EXEEXT): $(vdp3_OBJECTS) $(vdp3_DEPENDENCIES) 
-	@rm -f vdp3$(EXEEXT)
-	$(CXXLINK) $(vdp3_OBJECTS) $(vdp3_LDADD) $(LIBS)
+vdp$(EXEEXT): $(vdp_OBJECTS) $(vdp_DEPENDENCIES) 
+	@rm -f vdp$(EXEEXT)
+	$(CXXLINK) $(vdp_OBJECTS) $(vdp_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
