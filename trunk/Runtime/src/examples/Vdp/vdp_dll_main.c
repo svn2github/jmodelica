@@ -11,6 +11,82 @@
  * 1. use dlfnc wrapper
  * 2. use ifdef macros (test what?) to support both dlfcn.h (linux) and
  * windows.h (win32)
+ *
+ * Cross platform programming of loadable libraries:
+
+#ifndef USE_PRECOMPILED_HEADERS
+#ifdef WIN32
+#include <direct.h>
+#include <windows.h>
+#else
+#include <sys/types.h>
+#include <dlfcn.h>
+#endif
+#include <iostream>
+#endif
+
+    using namespace std;
+
+#ifdef WIN32
+    HINSTANCE lib_handle;
+#else
+    void *lib_handle;
+#endif
+
+    // Where retType is the pointer to a return type of the function
+    // This return type can be int, float, double, etc or a struct or class.
+
+    typedef retType* func_t;
+
+    // load the library -------------------------------------------------
+#ifdef WIN32
+    string nameOfLibToLoad("/opt/lib/libctest.dll");
+    lib_handle = LoadLibrary(TEXT(nameOfLibToLoad.c_str()));
+    if (!lib_handle) {
+        cerr << "Cannot load library: " << TEXT(nameOfDllToLoad.c_str()) << endl;
+    }
+#else
+    string nameOfLibToLoad("/opt/lib/libctest.so");
+    lib_handle = dlopen(nameOfLibToLoad.c_str(), RTLD_LAZY);
+    if (!lib_handle) {
+        cerr << "Cannot load library: " << dlerror() << endl;
+    }
+#endif
+
+...
+...
+...
+
+    // load the symbols -------------------------------------------------
+#ifdef WIN32
+    func_t* fn_handle = (func_t*) GetProcAddress(lib_handle, "superfunctionx");
+    if (!fn_handle) {
+        cerr << "Cannot load symbol superfunctionx: " << GetLastError() << endl;
+    }
+#else
+    // reset errors
+    dlerror();
+
+    // load the symbols (handle to function "superfunctionx")
+    func_t* fn_handle= (func_t*) dlsym(lib_handle, "superfunctionx");
+    const char* dlsym_error = dlerror();
+    if (dlsym_error) {
+        cerr << "Cannot load symbol superfunctionx: " << dlsym_error << endl;
+    }
+#endif
+
+...
+...
+...
+
+    // unload the library -----------------------------------------------
+
+#ifdef WIN32
+    FreeLibrary(lib_handle);
+#else
+    dlclose(lib_handle);
+#endif
+
  */
 #include "../../Jmi/jmi.h"
 
