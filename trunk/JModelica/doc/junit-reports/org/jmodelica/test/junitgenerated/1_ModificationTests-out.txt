@@ -1,0 +1,32 @@
+Running test: ModificationTests.ModTest1
+
+Running test: ModificationTests.ModTest2
+
+Running test: ModificationTests.ModTest3
+
+Running test: ModificationTests.ModTest5
+
+Running test: ModificationTests.ModTest6
+
+Running test: ModificationTests.ModTest7
+
+Running test: ModificationTests.ModTest8
+
+Running test: ModificationTests.ModTest9
+
+Running test: ModificationTests.ModTest10
+
+Running test: ModificationTests.ModTest11
+
+Running test: ModificationTests.ModTest_PM_12
+
+Running test: ModificationTests.ModTest13_Err
+Running test: ModificationTests.ModTest14_Err
+Running test: ModificationTests.ModTest15_Err
+Running test: ModificationTests.ShortClassDeclModTest1
+
+Running test: ModificationTests.ShortClassDeclModTest2
+
+Running test: ModificationTests.ShortClassDeclModTest3
+
+

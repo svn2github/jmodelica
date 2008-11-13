@@ -1,0 +1,44 @@
+Running test: NameTests.NameTest2
+
+Running test: NameTests.NameTest3_Err
+Running test: NameTests.NameTest4_Err
+Running test: NameTests.NameTest5_Err
+Running test: NameTests.NameTest55_Err
+Running test: NameTests.NameTest6_Err
+Running test: NameTests.NameTest7_Err
+Running test: NameTests.NameTest8_Err
+Running test: NameTests.NameTest9_Err
+Running test: NameTests.NameTest10_Err
+Running test: NameTests.NameTest11_Err
+Running test: NameTests.NameTest12_Err
+Running test: NameTests.NameTest13_Err
+Running test: NameTests.NameTest14_Err
+Running test: NameTests.ExtendsTest1
+
+Running test: NameTests.ExtendsTest2
+
+Running test: NameTests.ExtendsTest3
+Running test: NameTests.ImportTest1
+
+Running test: NameTests.ImportTest2
+
+Running test: NameTests.ImportTest3
+Running test: NameTests.ImportTest4
+
+Running test: NameTests.ImportTest5
+
+Running test: NameTests.ShortClassDeclTest1
+
+Running test: NameTests.ShortClassDeclTest2
+
+Running test: NameTests.ShortClassDeclTest3
+
+Running test: NameTests.ShortClassDeclTest35_Err
+Running test: NameTests.ShortClassDeclTest4
+
+Running test: NameTests.ShortClassDeclTest5
+
+Running test: NameTests.ShortClassDeclTest6
+
+Running test: NameTests.ShortClassDeclTest7_Err
+

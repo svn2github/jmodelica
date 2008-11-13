@@ -1,0 +1,8 @@
+Running test: ConnectTests.ConnectTest2_Err
+Running test: ConnectTests.ConnectTest3
+
+Running test: ConnectTests.CircuitTest1
+
+Running test: ConnectTests.CircuitTest2
+
+

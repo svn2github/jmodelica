@@ -37,6 +37,7 @@ import org.jmodelica.parser.ModelicaParser.Terminals;
   }
   
   public static final short COMMENT = -1;
+  public static final short WHITESPACE = -2;
   
   public Symbol nextToken() throws java.io.IOException, Scanner.Exception {
     Symbol res;
@@ -182,7 +183,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   {UNSIGNED_NUMBER}   { return newSymbol(Terminals.UNSIGNED_NUMBER, yytext()); }
   
   {Comment}         { return newSymbol(COMMENT); /* Will be discarded before parser. */ }
-  {WhiteSpace}      { /* discard token */ }
+  {WhiteSpace}      { return newSymbol(WHITESPACE); /* Will be discarded before parser. */ }
 
 }
 
