@@ -11,7 +11,7 @@ import org.jmodelica.parser.ModelicaParser.Terminals;
 %class ModelicaScanner
 %extends Scanner
 %unicode
-%function nextToken
+%function nextTokenAll
 %type Symbol
 %yylexthrow Scanner.Exception
 %eofval{
@@ -19,6 +19,7 @@ import org.jmodelica.parser.ModelicaParser.Terminals;
 %eofval}
 %line
 %column
+%char
 
 %{
   StringBuffer string = new StringBuffer(128);
@@ -29,6 +30,20 @@ import org.jmodelica.parser.ModelicaParser.Terminals;
 
   private Symbol newSymbol(short id, Object value) {
     return new Symbol(id, yyline + 1, yycolumn + 1, yylength(), value);
+  }
+  
+  public int offset() {
+    return yychar;
+  }
+  
+  public static final short COMMENT = -1;
+  
+  public Symbol nextToken() throws java.io.IOException, Scanner.Exception {
+    Symbol res;
+    do {
+      res = nextTokenAll();
+    } while (res.getId() < 0);
+    return res;
   }
 
 %}
@@ -166,7 +181,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   //{UNSIGNED_INTEGER}  { return newSymbol(Terminals.INTEGER, yytext()); }
   {UNSIGNED_NUMBER}   { return newSymbol(Terminals.UNSIGNED_NUMBER, yytext()); }
   
-  {Comment}         { /* discard token */ }
+  {Comment}         { return newSymbol(COMMENT); /* Will be discarded before parser. */ }
   {WhiteSpace}      { /* discard token */ }
 
 }
