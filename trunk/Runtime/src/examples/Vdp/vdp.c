@@ -1,5 +1,6 @@
 // Example of generated function
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "../../Jmi/jmi.h"
@@ -395,20 +396,21 @@ int jmi_new(Jmi** jmi) {
 	return 0;
 }
 
-int jmi_delete(Jmi** jmi){
-	Jmi* jmi_ = *jmi;
-	if(jmi_->jmi_dae != NULL) {
-		free(jmi_->jmi_dae);
+int jmi_delete(Jmi* jmi){
+	if(jmi->jmi_dae != NULL) {
+		free(jmi->jmi_dae);
 	}
-	if(jmi_->jmi_init != NULL) {
-		free(jmi_->jmi_init);
+	if(jmi->jmi_init != NULL) {
+		free(jmi->jmi_init);
 	}
-	if(jmi_->jmi_opt != NULL) {
-		free(jmi_->jmi_opt);
+	if(jmi->jmi_opt != NULL) {
+		free(jmi->jmi_opt);
 	}
 	// TODO: Check der structs if not NULL return error and the user has to deallocate them first.
 
-	free(jmi_);
+	free(jmi);
 
 	return 0;
 }
+
+

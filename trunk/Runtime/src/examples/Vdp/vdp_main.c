@@ -142,7 +142,7 @@ int main(int argv, char* argc[])
 	free(jac_F_row);
 	free(jac_F_col);
 
-	jmi_delete(&jmi);
+	jmi_delete(jmi);
 
 	return 0;
 }

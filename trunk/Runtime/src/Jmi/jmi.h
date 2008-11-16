@@ -97,6 +97,11 @@
 
 #include <stdio.h>
 
+#if defined __cplusplus
+        extern "C" {
+#endif
+
+
 // Forward declaration of Jmi struct
 typedef struct Jmi Jmi;
 
@@ -172,7 +177,7 @@ int jmi_new(Jmi** jmi);
 /**
  * Deallocates memory and deletes a Jmi struct.
  */
-int jmi_delete(Jmi** jmi);
+int jmi_delete(Jmi* jmi);
 
 /**
  * Struct describing a DAE model including evaluation of the DAE residual and (optional) a symbolic
@@ -239,5 +244,11 @@ struct Jmi{
 	Jmi_init_der* jmi_init_der;
 	Jmi_opt_der* jmi_opt_der;
 };
+
+#if defined __cplusplus
+    }
+#endif
+
+
 
 #endif

@@ -50,6 +50,23 @@ AC_SUBST(IPOPT_LIB)
 IPOPT_INC=$ipopt/include/coin
 IPOPT_LIB=$ipopt/lib
 
+AC_ARG_WITH([cppad],
+   [AS_HELP_STRING([--with-cppad],
+     [CppAD installation directory @<:@default=check@:>@])],
+   [cppad=$withval],
+   [with_cppad=no])
+
+AS_IF([test "x$with_cppad" = xno],
+      [AC_MSG_FAILURE([--with-cppad option must be specified])],
+      [AC_CHECK_FILE($cppad/cppad/cppad.hpp,
+                     [],
+                     [AC_MSG_FAILURE([--with-cppad option was specified but does not seem to point at a valid CppAD installation])])])
+
+# Set output variables to be exported to the Makefiles
+AC_SUBST(CPPAD_INC)
+
+CPPAD_INC=$cppad
+
 # Set LDFLAGS AND LIBS
 AC_SUBST(APP_LDFLAGS)
 AC_SUBST(APP_LIBS)
