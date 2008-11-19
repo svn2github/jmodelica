@@ -14,17 +14,6 @@ static const int N_u = 1;
 static const int N_w = 0;
 static const int N_eq_F = 3;
 
-static int vdp_dae_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd, Jmi_Double_t* pi, Jmi_Double_t* pd,
-		Jmi_Double_t* dx, Jmi_Double_t* x, Jmi_Double_t* u, Jmi_Double_t* w,
-		Jmi_Double_t t, Jmi_Double_t* res) {
-
-  res[0] = (1-x[1]*x[1])*x[0] - x[1] + u[0] - dx[0];
-  res[1] = pi[0]*x[0] - dx[1];
-  res[2] = x[0]*x[0] + x[1]*x[1] + u[0]*u[0] - dx[2];
-  
-  return 0;
-}
-
 int vdp_cppad_dae_F(Jmi* jmi, Jmi_AD_vec &ci, Jmi_AD_vec &cd, Jmi_AD_vec &pi, Jmi_AD_vec &pd,
 		Jmi_AD_vec &dx, Jmi_AD_vec &x, Jmi_AD_vec &u, Jmi_AD_vec &w,
 		    Jmi_AD &t, Jmi_AD_vec &res){
@@ -32,7 +21,7 @@ int vdp_cppad_dae_F(Jmi* jmi, Jmi_AD_vec &ci, Jmi_AD_vec &cd, Jmi_AD_vec &pi, Jm
   res[0] = (1-x[1]*x[1])*x[0] - x[1] + u[0] - dx[0];
   res[1] = pi[0]*x[0] - dx[1];
   res[2] = x[0]*x[0] + x[1]*x[1] + u[0]*u[0] - dx[2];
-  
+
   return 0;
 }
 
@@ -370,8 +359,6 @@ static int vdp_dae_jac_sd_F_nz_indices(Jmi* jmi, int* row, int* col) {
 	return 0;
 }
 
-
-
 // This is the init function
 int jmi_new(Jmi** jmi) {
   // Create jmi struct
@@ -387,7 +374,12 @@ int jmi_new(Jmi** jmi) {
   jmi_->jmi_init_der = NULL;
   jmi_->jmi_opt_der = NULL;
   // Assign function pointers
-  jmi_dae->F = vdp_dae_F;
+
+  // The function jmi_dae->F is not assigned here if we are using cppad.
+  // Rather it is defined and declared, and based on tape evaluations,
+  // in the jmi_cppad interface.
+  // jmi_dae->F = vdp_dae_F;
+
   jmi_dae->jac_sd_F = vdp_dae_jac_sd_F;
   jmi_dae->jac_sd_F_nnz = vdp_dae_jac_sd_F_nnz;
   jmi_dae->jac_sd_F_nz_indices = vdp_dae_jac_sd_F_nz_indices;
@@ -401,7 +393,7 @@ int jmi_new(Jmi** jmi) {
   jmi_dae->n_u = N_u;
   jmi_dae->n_w = N_w;
   jmi_dae->n_eq_F = N_eq_F;
-  
+
   jmi_cppad_new(jmi_, vdp_cppad_dae_F);
 
 
@@ -424,7 +416,7 @@ int jmi_delete(Jmi* jmi){
 	if(jmi->jmi_dae_der != NULL) {
 	  jmi_cppad_delete(jmi);
 	}
-	
+
 
 	free(jmi);
 

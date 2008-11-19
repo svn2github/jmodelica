@@ -9,75 +9,17 @@
 
 #include <cppad/cppad.hpp>
 
-      template <class Type>
-      Type Poly(const std::vector<double> &a, const Type &x)
-      {     size_t k  = a.size();
-            Type y   = 0.;  // initialize summation
-            Type x_i = 1.;  // initialize x^i
-            size_t i;
-            for(i = 0; i < k; i++)
-            {     y   += a[i] * x_i;  // y   = y + a_i * x^i
-                  x_i *= x;           // x_i = x_i * x
-            }
-            return y;
-      }
-
-
-int test_cppad() {
-    using CppAD::AD;           // use AD as abbreviation for CppAD::AD
-      using std::vector;         // use vector as abbreviation for std::vector
-      size_t i;                  // a temporary index
-
-      // vector of polynomial coefficients
-      size_t k = 5;              // number of polynomial coefficients
-      vector<double> a(k);       // vector of polynomial coefficients
-      for(i = 0; i < k; i++)
-            a[i] = 1.;           // value of polynomial coefficients
-
-      // domain space vector
-      size_t n = 2;              // number of domain space variables
-      vector< AD<double> > X(n); // vector of domain space variables
-      X[0] = 3.;                 // value corresponding to operation sequence
-
-      // declare independent variables and start recording operation sequence
-      CppAD::Independent(X);
-
-      // range space vector
-      size_t m = 1;              // number of ranges space variables
-      vector< AD<double> > Y(m); // vector of ranges space variables
-      Y[0] = Poly(a, X[0]);      // value during recording of operations
-
-      // store operation sequence in f: X -> Y and stop recording
-      CppAD::ADFun<double> f(X, Y);
-
-      // compute derivative using operation sequence stored in f
-      vector<double> jac(m * n); // Jacobian of f (m by n matrix)
-      vector<double> x(n);       // domain space vector
-      x[0] = 3.;                 // argument value for derivative
-      jac  = f.Jacobian(x);      // Jacobian for operation sequence
-
-      // print the results
-      std::cout << "f'(3) computed by CppAD = " << jac[0] << std::endl;
-
-      // check if the derivative is correct
-      int error_code;
-      if( jac[0] == 142. )
-            error_code = 0;      // return code for correct case
-      else  error_code = 1;      // return code for incorrect case
-
-      return error_code;
-
-}
-
 int main(int argv, char* argc[])
 {
 
 	Jmi* jmi;
+	// Create a new Jmi object.
 	jmi_new(&jmi);
 
 	int i;
 
 	int jac_F_nnz;
+	// Get the sparsity of the symbolic Jacobian.
 	jmi->jmi_dae->jac_sd_F_nnz(jmi,&jac_F_nnz);
 	int* jac_F_row = (int*)calloc(jac_F_nnz,sizeof(int));
 	int* jac_F_col = (int*)calloc(jac_F_nnz,sizeof(int));
@@ -103,6 +45,7 @@ int main(int argv, char* argc[])
 	printf("Number of elements in Jacobian wrt dx, x, u:   %d\n",n_jac_F);
 */
 
+	// Allocate memory
 	Jmi_Double_t* ci = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_ci,sizeof(Jmi_Double_t));
 	Jmi_Double_t* cd = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_cd,sizeof(Jmi_Double_t));
 	Jmi_Double_t* pi = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_pi,sizeof(Jmi_Double_t));
@@ -133,8 +76,7 @@ int main(int argv, char* argc[])
 	// Initialize the AD stuff
 	jmi_cppad_init(jmi, ci, cd, pi, pd, dx, x, u, w, t);
 
-
-
+	// Evaluate the residual
 	jmi->jmi_dae->F(jmi,ci,cd,pi,pd,dx,x,u,w,t,res_F);
 
 	/*	jmi_init_F0(ci,cd,pi,pd,dx,x,u,w,t,res_F0);
@@ -164,6 +106,7 @@ int main(int argv, char* argc[])
 		printf("%f\n",jac_sd_F[i]);
 	}
 
+	// Evalute symbolic Jacobian
     jmi->jmi_dae->jac_sd_F(jmi,ci,cd,pi,pd,dx,x,u,w,t,JMI_DER_DENSE_COL_MAJOR,0,mask,jac_sd_F_dense);
 	printf("Jacobian (dense col major):\n");
 	for (i=0;i<jac_F_n_dense;i++) {
@@ -182,17 +125,15 @@ int main(int argv, char* argc[])
 	int* jac_cppad_F_row = (int*)calloc(jac_cppad_F_nnz,sizeof(int));
 	int* jac_cppad_F_col = (int*)calloc(jac_cppad_F_nnz,sizeof(int));
 
-	Jmi_Double_t* jac_cppad_F = (Jmi_Double_t*)calloc(jac_F_n_dense,sizeof(Jmi_Double_t));	
+	Jmi_Double_t* jac_cppad_F = (Jmi_Double_t*)calloc(jac_F_n_dense,sizeof(Jmi_Double_t));
 
 	Jmi_Double_t* jac_cppad_F_dense = (Jmi_Double_t*)calloc(jac_F_n_dense,sizeof(Jmi_Double_t));
-
-
 
 	jmi->jmi_dae_der->jac_F_nz_indices(jmi,jac_cppad_F_row,jac_cppad_F_col);
 	printf("Number of non-zeros in the DAE residual Jacobian (cppad): %d\n",jac_cppad_F_nnz);
 	for (i=0;i<jac_cppad_F_nnz;i++) {
 		printf("%d, %d\n",jac_cppad_F_row[i],jac_cppad_F_col[i]);
-	}	
+	}
 
     jmi->jmi_dae_der->jac_F(jmi,ci,cd,pi,pd,dx,x,u,w,t,JMI_DER_SPARSE,0,mask,jac_cppad_F);
 	printf("Jacobian (sparse) (cppad):\n");
@@ -251,9 +192,6 @@ int main(int argv, char* argc[])
 	free(jac_F_col);
 
 	jmi_delete(jmi);
-
-
-	test_cppad();
 
 	return 0;
 }

@@ -2,16 +2,81 @@
 
 #include "jmi_cppad.hpp"
 
-
 /**
  * This function is intended to be used in jmi->jmi_dae->F, since the
  * function nnn_dae_F in the generated code has a function signature that
  * contains the AD types instead of doubles.
  */
-static int cppad_dae_F () {
+static int cppad_dae_F (Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd, Jmi_Double_t* pi, Jmi_Double_t* pd,
+		Jmi_Double_t* dx, Jmi_Double_t* x, Jmi_Double_t* u, Jmi_Double_t* w,
+		Jmi_Double_t t, Jmi_Double_t* res) {
 
-	// Invoke computation of the function based on the tape.
+	int i;
 
+	std::vector<double> pi_(jmi->jmi_dae->n_pi);
+	std::vector<double> pd_(jmi->jmi_dae->n_pd);
+	std::vector<double> dx_(jmi->jmi_dae->n_dx);
+	std::vector<double> x_(jmi->jmi_dae->n_x);
+	std::vector<double> u_(jmi->jmi_dae->n_u);
+	std::vector<double> w_(jmi->jmi_dae->n_w);
+	std::vector<double> t_(1);
+
+	Jmi_cppad_dae_der *jcdd = (Jmi_cppad_dae_der*)(jmi->jmi_dae_der);
+
+	// Initialize the tapes
+	for (i=0;i<jmi->jmi_dae->n_ci;i++) {
+		(*jcdd->ci_independent)[i] = ci[i];
+	}
+
+	for (i=0;i<jmi->jmi_dae->n_cd;i++) {
+		(*jcdd->cd_independent)[i] = cd[i];
+	}
+
+	for (i=0;i<jmi->jmi_dae->n_pi;i++) {
+		(*jcdd->pi_independent)[i] = pi[i];
+		pi_[i] = pi[i];
+	}
+
+	for (i=0;i<jmi->jmi_dae->n_pd;i++) {
+		(*jcdd->pd_independent)[i] = pd[i];
+		pd_[i] = pd[i];
+	}
+
+	for (i=0;i<jmi->jmi_dae->n_dx;i++) {
+		(*jcdd->dx_independent)[i] = dx[i];
+		dx_[i] = dx[i];
+	}
+
+	for (i=0;i<jmi->jmi_dae->n_x;i++) {
+		(*jcdd->x_independent)[i] = x[i];
+		x_[i] = x[i];
+	}
+
+	for (i=0;i<jmi->jmi_dae->n_u;i++) {
+		(*jcdd->u_independent)[i] = u[i];
+		u_[i] = u[i];
+	}
+
+	for (i=0;i<jmi->jmi_dae->n_w;i++) {
+		(*jcdd->w_independent)[i] = w[i];
+		w_[i] = w[i];
+	}
+
+	(*jcdd->t_independent)[0] = t;
+	t_[0]  = t;
+
+	std::vector<double> res_(jmi->jmi_dae->n_eq_F);
+
+	// TODO: It is a bit arbitrary which tape to use. Lets use the
+	// one for the states. This will be resolved if only one
+	// tape is used.
+	res_ = jcdd->F_x_tape->Forward(0,x_);
+
+	for (i=0;i<jmi->jmi_dae->n_eq_F;i++) {
+		res[i] = res_[i];
+	}
+
+	return 0;
 }
 
 static int cppad_dae_jac_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd,
@@ -77,28 +142,6 @@ static int cppad_dae_jac_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd,
 
 	(*jcdd->t_independent)[0] = t;
 	t_[0]  = t;
-
-	// Evaluate Jacobians
-	int n = 9;
-	/* // this works...
-  std::vector<double> jac_(n);
-  std::vector<double> x_tmp(jmi->jmi_dae->n_x);
-  for (i=0;i<jmi->jmi_dae->n_x;i++) {
-    x_tmp[i] = x[i];
-  }
-
-  jac_ = jcdd->x_tape->Jacobian(x_tmp);
-
-  for (i=0;i<n;i++) {
-    printf("* %f\n",jac_[i]);
-  }
-
-  for (i=0;i<n;i++) {
-    jac[i] = jac_[i];
-  }
-
-	 */
-
 
 	if (!(skip & JMI_DER_PI_SKIP)) {
 		for (i=0;i<jmi->jmi_dae->n_pi;i++) {
@@ -417,65 +460,9 @@ static int cppad_dae_jac_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd,
 		}
 	}
 
-
-	/*
-  std::vector<double> jac_(jmi->jmi_dae->n_x*jmi->jmi_dae->n_eq_F);
-  std::vector<double> x_(jmi->jmi_dae->n_x);
-  std::vector<double> w_(jmi->jmi_dae->n_x);
-  for (i=0;i<jmi->jmi_dae->n_x;i++) {
-    x_[i] = x[i];
-  }
-
-  jac_ = jcdd->F_x_tape->Jacobian(x_);
-    for (i=0;i<jmi->jmi_dae->n_x*jmi->jmi_dae->n_eq_F;i++) {
-    jac[i] = jac_[i];
-  }
-	 */
-	/*
-  jcdd->x_tape->Forward(0,x_);
-
-  for (i=0;i<jmi->jmi_dae->n_x;i++) {
-    for (j=0;j<jmi->jmi_dae->n_x;j++) {
-      w_[j] = 0.;
-    }
-    w_[i] = 1.;
-
-  }
-
-	 */
-	/*
-	for (i=0;i<n;i++) {
-    printf("* %f\n",jac_[i]);
-  }
-	 */
-
-
-	/*
-  std::vector< CppAD::AD<double> > X(2);
-  std::vector< CppAD::AD<double> > Y(2);
-
-  X[0] = 1.;
-  X[1] = 2.;
-
-  CppAD::Independent(X);
-  Y[0] = X[0]+X[1]*X[0];
-  Y[1] = X[1]*X[1];
-  CppAD::ADFun<double> f(X,Y);
-  std::vector<double> j(4);
-  std::vector<double> xx(2);
-  xx[0] = 1.;
-  xx[1] = 2.;
-  j = f.Jacobian(xx);
-
-  for (i=0;i<4;i++) {
-    printf("** %f\n",j[i]);
-  }
-	 */
-
 	return 0;
 
 }
-
 
 static int cppad_dae_jac_F_nnz(Jmi* jmi, int* nnz) {
 
@@ -511,10 +498,11 @@ static int cppad_dae_jac_F_nz_indices(Jmi* jmi, int* row, int* col) {
 
 int jmi_cppad_new(Jmi* jmi, jmi_cppad_dae_F_t cppad_res_func) {
 
-	int i;
-
 	Jmi_cppad_dae_der *jcdd = (Jmi_cppad_dae_der*)malloc(sizeof(Jmi_cppad_dae_der));
 	Jmi_dae_der *jmi_dae_der = &(jcdd->jmi_dae_der);
+
+	// TODO: Is it ok to set this here?
+	jmi->jmi_dae->F = cppad_dae_F;
 
 	jmi_dae_der->jac_F = cppad_dae_jac_F;
 	jmi_dae_der->jac_F_nnz = cppad_dae_jac_F_nnz;
