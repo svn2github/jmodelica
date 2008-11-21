@@ -46,9 +46,10 @@
 
 #include "jmi.h"
 
+/*
 typedef std::vector< CppAD::AD<double> > Jmi_AD_vec;
 typedef CppAD::AD<double> Jmi_AD;
-
+*/
 
 // Function signatures
 
@@ -85,6 +86,7 @@ int jmi_cppad_delete(Jmi* jmi);
  * that are computed in the jmi_cppad_init function.
  *
  */
+/*
 typedef struct {
   Jmi_dae_der jmi_dae_der;
   jmi_cppad_dae_F_t F;
@@ -152,5 +154,5 @@ typedef struct {
 
 } Jmi_cppad_dae_der;
 
-
+*/
 #endif
