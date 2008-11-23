@@ -1,25 +1,113 @@
 
 
-#include "jmi_cppad.hpp"
+ int jmi_ad_init(jmi* jmi) {
+	 return -1;
+ }
+
+ int jmi_get_ci(jmi* jmi, jmi_real_t** ci) {
+	 *ci = &jmi->z[jmi->offs_ci];
+	 return 0;
+ }
+
+ int jmi_get_cd(jmi* jmi, jmi_real_t** cd) {
+	 *cd = &jmi->z[jmi->offs_cd];
+	 return 0;
+ }
+
+ int jmi_get_pi(jmi* jmi, jmi_real_t** pi) {
+	 *pi = &jmi->z[jmi->offs_pi];
+	 return 0;
+ }
+
+ int jmi_get_pd(jmi* jmi, jmi_real_t** pd) {
+	 *pd = &jmi->z[jmi->offs_pd];
+	 return 0;
+ }
+
+ int jmi_get_dx(jmi* jmi, jmi_real_t** dx) {
+	 *dx = &jmi->z[jmi->offs_dx];
+	 return 0;
+ }
+
+ int jmi_get_x(jmi* jmi, jmi_real_t** x) {
+	 *x = &jmi->z[jmi->offs_x];
+	 return 0;
+ }
+
+ int jmi_get_u(jmi* jmi, jmi_real_t** u) {
+	 *u = &jmi->z[jmi->offs_u];
+	 return 0;
+ }
+
+ int jmi_get_w(jmi* jmi, jmi_real_t** w) {
+	 *w = &jmi->z[jmi->offs_w];
+	 return 0;
+ }
+
+ int jmi_get_t(jmi* jmi, jmi_real_t** t) {
+	 *t = &jmi->z[jmi->offs_t];
+	 return 0;
+ }
+
+ int jmi_dae_F(jmi* jmi, jmi_real_t* res) {
+     jmi->dae->F(jmi, res);
+	 return 0;
+ }
+
+ int jmi_dae_dF(jmi* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac) {
+	 jmi->dae->dF(jmi, sparsity, skip, mask, jac);
+	 return 0;
+ }
+
+ int jmi_dae_dF_nnz(jmi* jmi, int* n_nz) {
+	 *n_nz = jmi->dae->dF_n_nz;
+	 return 0;
+ }
+
+ int jmi_dae_dF_nz_indices(jmi* jmi, int* row, int* col) {
+	 int i;
+	 for (i=0;i<jmi->dae->dF_n_nz;i++) {
+		 row[i] = jmi->dae->irow[i];
+		 col[i] = jmi->dae->icol[i];
+	 }
+	 return 0;
+ }
+
+ int jmi_dae_dF_ad(jmi* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac) {
+
+ }
+
+ // Not supported in this interface
+ int jmi_dae_dF_nnz_ad(jmi* jmi, int* n_nz) {
+	 return -1;
+ }
+
+ // Not supported in this interface
+ int jmi_dae_dF_nz_indices_ad(jmi* jmi, int* row, int* col) {
+	 return -1;
+ }
+
+
+// *****************************************************
+
+
 
 /**
  * This function is intended to be used in jmi->jmi_dae->F, since the
  * function nnn_dae_F in the generated code has a function signature that
  * contains the AD types instead of doubles.
  */
-static int cppad_dae_F (Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd, Jmi_Double_t* pi, Jmi_Double_t* pd,
-		Jmi_Double_t* dx, Jmi_Double_t* x, Jmi_Double_t* u, Jmi_Double_t* w,
-		Jmi_Double_t t, Jmi_Double_t* res) {
+static int cppad_dae_F (Jmi* jmi, jmi_real_t* res) {
 
 	int i;
 
-	std::vector<double> pi_(jmi->jmi_dae->n_pi);
-	std::vector<double> pd_(jmi->jmi_dae->n_pd);
-	std::vector<double> dx_(jmi->jmi_dae->n_dx);
-	std::vector<double> x_(jmi->jmi_dae->n_x);
-	std::vector<double> u_(jmi->jmi_dae->n_u);
-	std::vector<double> w_(jmi->jmi_dae->n_w);
-	std::vector<double> t_(1);
+	std::vector<jmi_real_t> pi_(jmi->jmi_dae->n_pi);
+	std::vector<jmi_real_t> pd_(jmi->jmi_dae->n_pd);
+	std::vector<jmi_real_t> dx_(jmi->jmi_dae->n_dx);
+	std::vector<jmi_real_t> x_(jmi->jmi_dae->n_x);
+	std::vector<jmi_real_t> u_(jmi->jmi_dae->n_u);
+	std::vector<jmi_real_t> w_(jmi->jmi_dae->n_w);
+	std::vector<jmi_real_t> t_(1);
 
 	Jmi_cppad_dae_der *jcdd = (Jmi_cppad_dae_der*)(jmi->jmi_dae_der);
 
@@ -65,7 +153,7 @@ static int cppad_dae_F (Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd, Jmi_Double
 	(*jcdd->t_independent)[0] = t;
 	t_[0]  = t;
 
-	std::vector<double> res_(jmi->jmi_dae->n_eq_F);
+	std::vector<jmi_real_t> res_(jmi->jmi_dae->n_eq_F);
 
 	// TODO: It is a bit arbitrary which tape to use. Lets use the
 	// one for the states. This will be resolved if only one
@@ -79,21 +167,21 @@ static int cppad_dae_F (Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd, Jmi_Double
 	return 0;
 }
 
-static int cppad_dae_jac_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd,
-		Jmi_Double_t* pi, Jmi_Double_t* pd,
-		Jmi_Double_t* dx, Jmi_Double_t* x, Jmi_Double_t* u,
-		Jmi_Double_t* w, Jmi_Double_t t, int sparsity,
-		int skip, int* mask, Jmi_Double_t* jac) {
+static int cppad_dae_jac_F(Jmi* jmi, jmi_real_t* ci, jmi_real_t* cd,
+		jmi_real_t* pi, jmi_real_t* pd,
+		jmi_real_t* dx, jmi_real_t* x, jmi_real_t* u,
+		jmi_real_t* w, jmi_real_t t, int sparsity,
+		int skip, int* mask, jmi_real_t* jac) {
 
 	int i,j;
 
-	std::vector<double> pi_(jmi->jmi_dae->n_pi);
-	std::vector<double> pd_(jmi->jmi_dae->n_pd);
-	std::vector<double> dx_(jmi->jmi_dae->n_dx);
-	std::vector<double> x_(jmi->jmi_dae->n_x);
-	std::vector<double> u_(jmi->jmi_dae->n_u);
-	std::vector<double> w_(jmi->jmi_dae->n_w);
-	std::vector<double> t_(1);
+	std::vector<jmi_real_t> pi_(jmi->jmi_dae->n_pi);
+	std::vector<jmi_real_t> pd_(jmi->jmi_dae->n_pd);
+	std::vector<jmi_real_t> dx_(jmi->jmi_dae->n_dx);
+	std::vector<jmi_real_t> x_(jmi->jmi_dae->n_x);
+	std::vector<jmi_real_t> u_(jmi->jmi_dae->n_u);
+	std::vector<jmi_real_t> w_(jmi->jmi_dae->n_w);
+	std::vector<jmi_real_t> t_(1);
 
 	int jac_n = jmi->jmi_dae->n_eq_F;
 	int jac_m = 0;
@@ -188,8 +276,8 @@ static int cppad_dae_jac_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd,
 		// loop over all columns
 		// Evaluate the tape in forward mode
 		jcdd->F_pi_tape->Forward(0,pi_);
-		std::vector<Jmi_Double_t> jac_(jmi->jmi_dae->n_eq_F);
-		std::vector<Jmi_Double_t> d_pi(jmi->jmi_dae->n_pi);
+		std::vector<jmi_real_t> jac_(jmi->jmi_dae->n_eq_F);
+		std::vector<jmi_real_t> d_pi(jmi->jmi_dae->n_pi);
 		for (i=0;i<jmi->jmi_dae->n_pi;i++) {
 			// check the mask if evaluation should be performed
 			if (mask[col_index + i] == 1) {
@@ -227,8 +315,8 @@ static int cppad_dae_jac_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd,
 		// loop over all columns
 		// Evaluate the tape in forward mode
 		jcdd->F_pd_tape->Forward(0,pd_);
-		std::vector<Jmi_Double_t> jac_(jmi->jmi_dae->n_eq_F);
-		std::vector<Jmi_Double_t> d_pd(jmi->jmi_dae->n_pd);
+		std::vector<jmi_real_t> jac_(jmi->jmi_dae->n_eq_F);
+		std::vector<jmi_real_t> d_pd(jmi->jmi_dae->n_pd);
 		for (i=0;i<jmi->jmi_dae->n_pd;i++) {
 			// check the mask if evaluation should be performed
 			if (mask[col_index + i] == 1) {
@@ -266,8 +354,8 @@ static int cppad_dae_jac_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd,
 		// loop over all columns
 		// Evaluate the tape in forward mode
 		jcdd->F_dx_tape->Forward(0,dx_);
-		std::vector<Jmi_Double_t> jac_(jmi->jmi_dae->n_eq_F);
-		std::vector<Jmi_Double_t> d_dx(jmi->jmi_dae->n_dx);
+		std::vector<jmi_real_t> jac_(jmi->jmi_dae->n_eq_F);
+		std::vector<jmi_real_t> d_dx(jmi->jmi_dae->n_dx);
 		for (i=0;i<jmi->jmi_dae->n_dx;i++) {
 			// check the mask if evaluation should be performed
 			if (mask[col_index + i] == 1) {
@@ -307,8 +395,8 @@ static int cppad_dae_jac_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd,
 		// loop over all columns
 		// Evaluate the tape in forward mode
 		jcdd->F_x_tape->Forward(0,x_);
-		std::vector<Jmi_Double_t> jac_(jmi->jmi_dae->n_eq_F);
-		std::vector<Jmi_Double_t> d_x(jmi->jmi_dae->n_x);
+		std::vector<jmi_real_t> jac_(jmi->jmi_dae->n_eq_F);
+		std::vector<jmi_real_t> d_x(jmi->jmi_dae->n_x);
 		for (i=0;i<jmi->jmi_dae->n_x;i++) {
 			// check the mask if evaluation should be performed
 			if (mask[col_index + i] == 1) {
@@ -346,8 +434,8 @@ static int cppad_dae_jac_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd,
 		// loop over all columns
 		// Evaluate the tape in forward mode
 		jcdd->F_u_tape->Forward(0,u_);
-		std::vector<Jmi_Double_t> jac_(jmi->jmi_dae->n_eq_F);
-		std::vector<Jmi_Double_t> d_u(jmi->jmi_dae->n_u);
+		std::vector<jmi_real_t> jac_(jmi->jmi_dae->n_eq_F);
+		std::vector<jmi_real_t> d_u(jmi->jmi_dae->n_u);
 		for (i=0;i<jmi->jmi_dae->n_u;i++) {
 			// check the mask if evaluation should be performed
 			if (mask[col_index + i] == 1) {
@@ -386,8 +474,8 @@ static int cppad_dae_jac_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd,
 		// loop over all columns
 		// Evaluate the tape in forward mode
 		jcdd->F_w_tape->Forward(0,w_);
-		std::vector<Jmi_Double_t> jac_(jmi->jmi_dae->n_eq_F);
-		std::vector<Jmi_Double_t> d_w(jmi->jmi_dae->n_w);
+		std::vector<jmi_real_t> jac_(jmi->jmi_dae->n_eq_F);
+		std::vector<jmi_real_t> d_w(jmi->jmi_dae->n_w);
 		for (i=0;i<jmi->jmi_dae->n_w;i++) {
 			// check the mask if evaluation should be performed
 			if (mask[col_index + i] == 1) {
@@ -426,8 +514,8 @@ static int cppad_dae_jac_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd,
 		// loop over all columns
 		// Evaluate the tape in forward mode
 		jcdd->F_t_tape->Forward(0,t_);
-		std::vector<Jmi_Double_t> jac_(jmi->jmi_dae->n_eq_F);
-		std::vector<Jmi_Double_t> d_t(1);
+		std::vector<jmi_real_t> jac_(jmi->jmi_dae->n_eq_F);
+		std::vector<jmi_real_t> d_t(1);
 		for (i=0;i<1;i++) {
 			// check the mask if evaluation should be performed
 			if (mask[col_index + i] == 1) {
@@ -567,10 +655,10 @@ int jmi_cppad_new(Jmi* jmi, jmi_cppad_dae_F_t cppad_res_func) {
 }
 
 
-int jmi_cppad_init(Jmi* jmi, Jmi_Double_t* ci_init, Jmi_Double_t* cd_init,
-		Jmi_Double_t* pi_init, Jmi_Double_t* pd_init,
-		Jmi_Double_t* dx_init, Jmi_Double_t* x_init, Jmi_Double_t* u_init,
-		Jmi_Double_t* w_init, Jmi_Double_t t_init) {
+int jmi_cppad_init(Jmi* jmi, jmi_real_t* ci_init, jmi_real_t* cd_init,
+		jmi_real_t* pi_init, jmi_real_t* pd_init,
+		jmi_real_t* dx_init, jmi_real_t* x_init, jmi_real_t* u_init,
+		jmi_real_t* w_init, jmi_real_t t_init) {
 
 	int i,j;
 

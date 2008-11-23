@@ -103,8 +103,8 @@
         extern "C" {
 #endif
 
-// Forward declaration of Jmi struct
-typedef struct Jmi Jmi;
+// Forward declaration of jmi struct
+typedef struct jmi jmi;
 
 #define JMI_DER_SPARSE 1
 #define JMI_DER_DENSE_COL_MAJOR 2
@@ -121,26 +121,27 @@ typedef struct Jmi Jmi;
 // TODO: Error codes...
 
 // Typedef for the doubles used in the interface.
-typedef double Jmi_Double_t;
+typedef double jmi_real_t;
 
 
 #if JMI_AD == None
-	typedef void Jmi_AD;
-	typedef double* Jmi_AD_var_vec;
-	typedef double Jmi_AD_var;
-	typedef void Jmi_AD_tape;
+	typedef jmi_real_t jmi_ad_var_t;
+	typedef jmi_real_t* jmi_ad_var_vec_t;
+	typedef void jmi_ad_tape_t;
+	typedef void jmi_ad_t;
 #elif JMI_AD == CppAD
-	typedef std::vector< CppAD::AD<double> > Jmi_AD_var_vec;
-	typedef CppAD::AD<double> Jmi_AD_var;
-	typedef CppAD::ADFun<double> Jmi_AD_tape
+	typedef CppAD::AD<jmi_real_t> jmi_ad_var_t;
+	typedef std::vector< jmi_ad_var_t > jmi_ad_var_vec_t;
+	typedef CppAD::ADFun<jmi_real_t> jmi_ad_tape_t
+
 	typedef struct {
 
-	  Jmi_AD_vec *z_independent;
-	  Jmi_AD_vec *F_z_dependent;
+	  jmi_ad_vec_t *z_independent;
+	  jmi_ad_vec_t *F_z_dependent;
 
-	  CppAD::ADFun<double> *F_z_tape;
+	  jmi_ad_tape_t *F_z_tape;
 
-	  bool tape_initialized;
+	  int tape_initialized;
 
 	  int dF_n_nz_ad;
 	  int* dF_irow_ad;
@@ -176,7 +177,7 @@ typedef double Jmi_Double_t;
 	  int* dF_t_irow_ad;
 	  int* dF_t_icol_ad;
 
-	} Jmi_dae_ad;
+	} jmi_dae_ad;
 
 #else
 	#error The directive JMI_AD must be set to 'None' or 'CppAD'
@@ -187,25 +188,13 @@ typedef double Jmi_Double_t;
 /**
  * Evaluation of the DAE residual in the generated code.
  */
-typedef int (*jmi_dae_F_t)(Jmi* jmi, Jmi_AD_var_vec res);
+typedef int (*jmi_dae_F_t)(jmi* jmi, jmi_ad_var_vec_t res);
 
 
 /**
  * Evaluation of symbolic jacobian in generated code.
  */
-typedef int (*jmi_dae_dF_t)(Jmi* jmi, int sparsity, int skip, int* mask, Jmi_Double_t* jac);
-
-/**
- * Returns the number of non-zeros in the DAE residual Jacobian.
- */
-//typedef int (*jmi_dae_dF_nnz_t)(Jmi* jmi, int* nnz);
-
-/**
- * Returns the row and column indices of the non-zero elements in the DAE
- * residual Jacobian.
- */
-//typedef int (*jmi_dae_dF_nz_indices_t)(Jmi* jmi, int* row, int* col);
-
+typedef int (*jmi_dae_dF_t)(jmi* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac);
 
 /**
  * Struct describing a DAE model including evaluation of the DAE residual and (optional) a symbolic
@@ -213,31 +202,32 @@ typedef int (*jmi_dae_dF_t)(Jmi* jmi, int sparsity, int skip, int* mask, Jmi_Dou
  */
 typedef struct {
 	jmi_dae_F_t F;
+	jmi_dae_dF_t dF;
 	int dF_n_nz;
 	int* dF_irow;
 	int* dF_icol;
-	Jmi_dae_ad* ad;
-} Jmi_dae;
+	jmi_dae_ad* ad;
+} jmi_dae;
 
 typedef struct {
 	//..
-} Jmi_init;
+} jmi_init;
 
 typedef struct {
 	//..
-} Jmi_opt;
+} jmi_opt;
 
 /**
- * Jmi is the main struct in the Jmi interface. It contains pointers to structs of
- * types Jmi_dae, Jmi_init, and Jmi_opt. These pointers are set to structs of the corresponding
+ * jmi is the main struct in the jmi interface. It contains pointers to structs of
+ * types jmi_dae, jmi_init, and jmi_opt. These pointers are set to structs of the corresponding
  * type in the jmi_init function that is implemented in the generated code. If a particular
  * problem does not contain all types of information, the corresponding pointers are set to
  * NULL.
  */
-struct Jmi{
-	Jmi_dae* dae;
-	Jmi_init* init;
-	Jmi_opt* opt;
+struct jmi{
+	jmi_dae* dae;
+	jmi_init* init;
+	jmi_opt* opt;
 
 	int n_ci;
 	int n_cd;
@@ -264,7 +254,7 @@ struct Jmi{
 	/* The z vector contains all variables in the order
 	 * ci, cd, pi, pd, dx, x, u, w, t.
 	 */
-	Jmi_Double_t* z;
+	jmi_real_t* z;
 
 };
 
@@ -278,42 +268,42 @@ struct Jmi{
  */
 
 /**
- * Creates a new Jmi struct, for which a pointer is returned in the output argument jmi.
+ * Creates a new jmi struct, for which a pointer is returned in the output argument jmi.
  * This function is assumed to be given in the generated code.
  */
- int jmi_new(Jmi** jmi);
+ int jmi_new(jmi** jmi);
 
  /**
   * Initializes the AD variables and tapes. Prior to this call, the variables in z should
   * be initialized.
   */
- int jmi_ad_init(Jmi* jmi);
+ int jmi_ad_init(jmi* jmi);
 
 /**
- * Deallocates memory and deletes a Jmi struct.
+ * Deallocates memory and deletes a jmi struct.
  */
- int jmi_delete(Jmi* jmi);
+ int jmi_delete(jmi* jmi);
 
 /**
  * Functions that gives access to the variable vectors.
  * Notice that these functions (and the variable vector)
  * is common for dae, init and opt.
  */
- int jmi_get_ci(Jmi* jmi, double** ci);
- int jmi_get_cd(Jmi* jmi, double** cd);
- int jmi_get_pi(Jmi* jmi, double** pi);
- int jmi_get_pd(Jmi* jmi, double** pd);
- int jmi_get_dx(Jmi* jmi, double** dx);
- int jmi_get_x(Jmi* jmi, double** x);
- int jmi_get_u(Jmi* jmi, double** u);
- int jmi_get_w(Jmi* jmi, double** w);
- int jmi_get_t(Jmi* jmi, double** t);
+ int jmi_get_ci(jmi* jmi, jmi_real_t** ci);
+ int jmi_get_cd(jmi* jmi, jmi_real_t** cd);
+ int jmi_get_pi(jmi* jmi, jmi_real_t** pi);
+ int jmi_get_pd(jmi* jmi, jmi_real_t** pd);
+ int jmi_get_dx(jmi* jmi, jmi_real_t** dx);
+ int jmi_get_x(jmi* jmi, jmi_real_t** x);
+ int jmi_get_u(jmi* jmi, jmi_real_t** u);
+ int jmi_get_w(jmi* jmi, jmi_real_t** w);
+ int jmi_get_t(jmi* jmi, jmi_real_t** t);
 
  /**
   * Evaluate DAE residual. The user sets the input variables by writing to
   * the vectors obtained from the functions jmi_dae_get_x, ...
   */
- int jmi_dae_F(Jmi* jmi, Jmi_Double_t* res);
+ int jmi_dae_F(jmi* jmi, jmi_real_t* res);
 
  /**
   * Evaluation of the Jacobian of the DAE residual.
@@ -341,42 +331,40 @@ struct Jmi{
  /**
   * Evaluate the symbolic Jacobian of the DAE residual function.
   */
- int jmi_dae_dF(Jmi* jmi, int sparsity, int skip, int* mask, Jmi_Double_t* jac);
+ int jmi_dae_dF(jmi* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac);
 
  /**
   * Returns the number of non-zeros in the symbolic DAE residual Jacobian.
   */
- int jmi_dae_dF_nnz(Jmi* jmi, int* nnz);
+ int jmi_dae_dF_nnz(jmi* jmi, int* n_nz);
 
  /**
   * Returns the row and column indices of the non-zero elements in the symbolic DAE
   * residual Jacobian.
   */
- int jmi_dae_dF_nz_indices(Jmi* jmi, int* row, int* col);
+ int jmi_dae_dF_nz_indices(jmi* jmi, int* row, int* col);
 
  /**
    * Evaluate the Jacobian of the DAE residual function by means of an automatic
    * differentiation algorithm.
    */
-  int jmi_dae_dF_ad(Jmi* jmi, int sparsity, int skip, int* mask, Jmi_Double_t* jac);
+  int jmi_dae_dF_ad(jmi* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac);
 
 
   /**
    * Returns the number of non-zeros in the AD DAE residual Jacobian.
    */
-  int jmi_dae_dF_nnz_ad(Jmi* jmi, int* nnz);
+  int jmi_dae_dF_nnz_ad(jmi* jmi, int* n_nz);
 
   /**
    * Returns the row and column indices of the non-zero elements in the AD DAE
    * residual Jacobian.
    */
-  int jmi_dae_dF_nz_indices_ad(Jmi* jmi, int* row, int* col);
+  int jmi_dae_dF_nz_indices_ad(jmi* jmi, int* row, int* col);
 
 
 #if defined __cplusplus
     }
 #endif
-
-
 
 #endif

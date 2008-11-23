@@ -29,9 +29,9 @@ int vdp_cppad_dae_F(Jmi* jmi, Jmi_AD_vec &ci, Jmi_AD_vec &cd, Jmi_AD_vec &pi, Jm
  * TODO: This code can certainly be improved and optimized. For example, macros would probably
  * make it easier to read.
  */
-static int vdp_dae_jac_sd_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd, Jmi_Double_t* pi, Jmi_Double_t* pd,
-		Jmi_Double_t* dx, Jmi_Double_t* x, Jmi_Double_t* u,
-		Jmi_Double_t* w, Jmi_Double_t t, int sparsity, int skip, int* mask, Jmi_Double_t* jac) {
+static int vdp_dae_jac_sd_F(Jmi* jmi, jmi_real_t* ci, jmi_real_t* cd, jmi_real_t* pi, jmi_real_t* pd,
+		jmi_real_t* dx, jmi_real_t* x, jmi_real_t* u,
+		jmi_real_t* w, jmi_real_t t, int sparsity, int skip, int* mask, jmi_real_t* jac) {
 
 	int i;
 	int jac_n = N_eq_F;
@@ -80,7 +80,7 @@ static int vdp_dae_jac_sd_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd, Jmi_Do
 	col_index = 0;
 	if (!(skip & JMI_DER_PI_SKIP)) {
 		if (mask[col_index++] == 1) {
-			Jmi_Double_t jac_tmp_1 = x[0];
+			jmi_real_t jac_tmp_1 = x[0];
 			switch (sparsity) {
 			case JMI_DER_DENSE_COL_MAJOR:
 				jac[jac_n*0 + 1] = jac_tmp_1;
@@ -99,7 +99,7 @@ static int vdp_dae_jac_sd_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd, Jmi_Do
 
 	if (!(skip & JMI_DER_DX_SKIP)) {
 		if (mask[col_index++] == 1) {
-			Jmi_Double_t jac_tmp_1 = -1;
+			jmi_real_t jac_tmp_1 = -1;
 			switch (sparsity) {
 			case JMI_DER_DENSE_COL_MAJOR:
 				jac[jac_n*1 + 0] = jac_tmp_1;
@@ -113,7 +113,7 @@ static int vdp_dae_jac_sd_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd, Jmi_Do
 			}
 		}
 		if (mask[col_index++] == 1) {
-			Jmi_Double_t jac_tmp_1 = -1;
+			jmi_real_t jac_tmp_1 = -1;
 			switch (sparsity) {
 			case JMI_DER_DENSE_COL_MAJOR:
 				jac[jac_n*2 + 1] = jac_tmp_1;
@@ -127,7 +127,7 @@ static int vdp_dae_jac_sd_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd, Jmi_Do
 			}
 		}
 		if (mask[col_index++] == 1) {
-			Jmi_Double_t jac_tmp_1 = -1;
+			jmi_real_t jac_tmp_1 = -1;
 			switch (sparsity) {
 			case JMI_DER_DENSE_COL_MAJOR:
 				jac[jac_n*3 + 2] = jac_tmp_1;
@@ -146,9 +146,9 @@ static int vdp_dae_jac_sd_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd, Jmi_Do
 
 	if (!(skip & JMI_DER_X_SKIP)) {
 		if (mask[col_index++] == 1) {
-			Jmi_Double_t jac_tmp_1 = (1-x[1]*x[1]);
-			Jmi_Double_t jac_tmp_2 = pi[0];
-			Jmi_Double_t jac_tmp_3 = 2*x[0];
+			jmi_real_t jac_tmp_1 = (1-x[1]*x[1]);
+			jmi_real_t jac_tmp_2 = pi[0];
+			jmi_real_t jac_tmp_3 = 2*x[0];
 			switch (sparsity) {
 			case JMI_DER_DENSE_COL_MAJOR:
 				jac[jac_n*4 + 0] = jac_tmp_1;
@@ -167,8 +167,8 @@ static int vdp_dae_jac_sd_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd, Jmi_Do
 			}
 		}
 		if (mask[col_index++] == 1) {
-			Jmi_Double_t jac_tmp_1 = -2*x[1]*x[0] - 1;
-			Jmi_Double_t jac_tmp_2 = 2*x[1];
+			jmi_real_t jac_tmp_1 = -2*x[1]*x[0] - 1;
+			jmi_real_t jac_tmp_2 = 2*x[1];
 			switch (sparsity) {
 			case JMI_DER_DENSE_COL_MAJOR:
 				jac[jac_n*5 + 0] = jac_tmp_1;
@@ -192,8 +192,8 @@ static int vdp_dae_jac_sd_F(Jmi* jmi, Jmi_Double_t* ci, Jmi_Double_t* cd, Jmi_Do
 
 	if (!(skip & JMI_DER_U_SKIP)) {
 		if (mask[col_index++] == 1) {
-			Jmi_Double_t jac_tmp_1 = 1;
-			Jmi_Double_t jac_tmp_2 = 2*u[0];
+			jmi_real_t jac_tmp_1 = 1;
+			jmi_real_t jac_tmp_2 = 2*u[0];
 			switch (sparsity) {
 			case JMI_DER_DENSE_COL_MAJOR:
 				jac[jac_n*7 + 0] = jac_tmp_1;

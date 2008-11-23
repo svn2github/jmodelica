@@ -46,22 +46,22 @@ int main(int argv, char* argc[])
 */
 
 	// Allocate memory
-	Jmi_Double_t* ci = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_ci,sizeof(Jmi_Double_t));
-	Jmi_Double_t* cd = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_cd,sizeof(Jmi_Double_t));
-	Jmi_Double_t* pi = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_pi,sizeof(Jmi_Double_t));
-	Jmi_Double_t* pd = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_pd,sizeof(Jmi_Double_t));
-	Jmi_Double_t* dx = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_dx,sizeof(Jmi_Double_t));
-	Jmi_Double_t* x = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_x,sizeof(Jmi_Double_t));
-	Jmi_Double_t* u = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_u,sizeof(Jmi_Double_t));
-	Jmi_Double_t* w = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_w,sizeof(Jmi_Double_t));
-	Jmi_Double_t* res_F = (Jmi_Double_t*)calloc(jmi->jmi_dae->n_eq_F,sizeof(Jmi_Double_t));
-	Jmi_Double_t* jac_sd_F = (Jmi_Double_t*)calloc(jac_F_nnz,sizeof(Jmi_Double_t));
-	Jmi_Double_t* jac_sd_F_dense = (Jmi_Double_t*)calloc(jac_F_n_dense,sizeof(Jmi_Double_t));
+	jmi_real_t* ci = (jmi_real_t*)calloc(jmi->jmi_dae->n_ci,sizeof(jmi_real_t));
+	jmi_real_t* cd = (jmi_real_t*)calloc(jmi->jmi_dae->n_cd,sizeof(jmi_real_t));
+	jmi_real_t* pi = (jmi_real_t*)calloc(jmi->jmi_dae->n_pi,sizeof(jmi_real_t));
+	jmi_real_t* pd = (jmi_real_t*)calloc(jmi->jmi_dae->n_pd,sizeof(jmi_real_t));
+	jmi_real_t* dx = (jmi_real_t*)calloc(jmi->jmi_dae->n_dx,sizeof(jmi_real_t));
+	jmi_real_t* x = (jmi_real_t*)calloc(jmi->jmi_dae->n_x,sizeof(jmi_real_t));
+	jmi_real_t* u = (jmi_real_t*)calloc(jmi->jmi_dae->n_u,sizeof(jmi_real_t));
+	jmi_real_t* w = (jmi_real_t*)calloc(jmi->jmi_dae->n_w,sizeof(jmi_real_t));
+	jmi_real_t* res_F = (jmi_real_t*)calloc(jmi->jmi_dae->n_eq_F,sizeof(jmi_real_t));
+	jmi_real_t* jac_sd_F = (jmi_real_t*)calloc(jac_F_nnz,sizeof(jmi_real_t));
+	jmi_real_t* jac_sd_F_dense = (jmi_real_t*)calloc(jac_F_n_dense,sizeof(jmi_real_t));
 /*	Jmi_Double_t* res_F0 = (Jmi_Double_t*)calloc(n_eq_F0,sizeof(Jmi_Double_t));
 	Jmi_Double_t* res_F1 = (Jmi_Double_t*)calloc(n_eq_F1,sizeof(Jmi_Double_t));
 	Jmi_Double_t* jac_DER_F = (Jmi_Double_t*)calloc(n_jac_F,sizeof(Jmi_Double_t));
 */
-	Jmi_Double_t t = 0;
+	jmi_real_t t = 0;
 
 	// Here initial values for all parameters should be reDER from
 	// xml-files
@@ -125,9 +125,9 @@ int main(int argv, char* argc[])
 	int* jac_cppad_F_row = (int*)calloc(jac_cppad_F_nnz,sizeof(int));
 	int* jac_cppad_F_col = (int*)calloc(jac_cppad_F_nnz,sizeof(int));
 
-	Jmi_Double_t* jac_cppad_F = (Jmi_Double_t*)calloc(jac_F_n_dense,sizeof(Jmi_Double_t));
+	jmi_real_t* jac_cppad_F = (jmi_real_t*)calloc(jac_F_n_dense,sizeof(jmi_real_t));
 
-	Jmi_Double_t* jac_cppad_F_dense = (Jmi_Double_t*)calloc(jac_F_n_dense,sizeof(Jmi_Double_t));
+	jmi_real_t* jac_cppad_F_dense = (jmi_real_t*)calloc(jac_F_n_dense,sizeof(jmi_real_t));
 
 	jmi->jmi_dae_der->jac_F_nz_indices(jmi,jac_cppad_F_row,jac_cppad_F_col);
 	printf("Number of non-zeros in the DAE residual Jacobian (cppad): %d\n",jac_cppad_F_nnz);
