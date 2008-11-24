@@ -67,7 +67,6 @@ int main(int argv, char* argc[])
 	Jmi_Double_t* jac_DER_F = (Jmi_Double_t*)calloc(n_jac_F,sizeof(Jmi_Double_t));
 */
 
-
 	t_[0] = 0;
 
 	// Here initial values for all parameters should be reDER from

@@ -16,9 +16,11 @@ AC_PROG_CXX
 case $build in
   *-cygwin*)
     AC_LIBTOOL_WIN32_DLL
+    AC_DEFINE([WIN32],[1],[Building on a win32 system (detected Cygwin).])
     ;;
   *-mingw*)
     AC_LIBTOOL_WIN32_DLL
+    AC_DEFINE([WIN32],[1],[Building on a win32 system (detected MinGW).])    
     ;;
   *)
     APP_LIBS="-lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran"
@@ -57,8 +59,15 @@ AC_ARG_WITH([cppad],
    [with_cppad=no])
 
 AS_IF([test "x$with_cppad" = xno],
-      [AC_MSG_FAILURE([--with-cppad option must be specified])],
-      [AC_CHECK_FILE($cppad/cppad/cppad.hpp,
+      [AC_DEFINE([JMI_AD_NONE], [1], [Compile without AD support]) 
+       AC_MSG_RESULT([***********************************************************************])
+       AC_MSG_RESULT([* --with-cppad option not specified - compiling without CppAD support *])
+       AC_MSG_RESULT([***********************************************************************])],
+      [AC_DEFINE([JMI_AD_CPPAD], [1], [Compile with AD support]) 
+       AC_MSG_RESULT([***********************************************************************])
+       AC_MSG_RESULT([* --with-cppad option specified - compiling with CppAD support        *])
+       AC_MSG_RESULT([***********************************************************************])
+       AC_CHECK_FILE($cppad/cppad/cppad.hpp,
                      [],
                      [AC_MSG_FAILURE([--with-cppad option was specified but does not seem to point at a valid CppAD installation])])])
 

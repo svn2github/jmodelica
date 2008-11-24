@@ -98,6 +98,7 @@
 #define _JMI_H
 
 #include <stdio.h>
+#include <config.h>
 
 #if defined __cplusplus
         extern "C" {
@@ -123,17 +124,16 @@ typedef struct jmi_t jmi_t;
 // Typedef for the doubles used in the interface.
 typedef double jmi_real_t;
 
-
-//#if JMI_AD == None
+#ifdef JMI_AD_NONE
 	typedef jmi_real_t jmi_ad_var_t;
 	typedef jmi_real_t* jmi_ad_var_vec_t;
 	typedef void jmi_ad_tape_t;
 	typedef void jmi_dae_ad_t;
-/*
-	#elif JMI_AD == CppAD
+
+#elif defined(JMI_AD_CPPAD)
 	typedef CppAD::AD<jmi_real_t> jmi_ad_var_t;
 	typedef std::vector< jmi_ad_var_t > jmi_ad_var_vec_t;
-	typedef CppAD::ADFun<jmi_real_t> jmi_ad_tape_t
+	typedef CppAD::ADFun<jmi_real_t> jmi_ad_tape_t;
 
 	typedef struct {
 
@@ -181,9 +181,9 @@ typedef double jmi_real_t;
 	} jmi_dae_ad;
 
 #else
-	#error The directive JMI_AD must be set to 'None' or 'CppAD'
+	#error "The directive JMI_AD_NONE or JMI_AD_CPPAD must be set"
 #endif
-*/
+
 // Function signatures to be used in the generated code
 
 /**

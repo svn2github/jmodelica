@@ -435,22 +435,21 @@ int jmi_new(jmi_t** jmi) {
     jmi_->offs_dx = N_ci + N_cd + N_pi + N_pd;
     jmi_->offs_x = N_ci + N_cd + N_pi + N_pd + N_dx;
     jmi_->offs_u = N_ci + N_cd + N_pi + N_pd + N_dx + N_x;
-    jmi_->offs_w = N_ci + N_cd + N_pi + N_pd + N_dx + N_x + N_w;
-    jmi_->offs_t = N_ci + N_cd + N_pi + N_pd + N_dx + N_x + N_w + N_u;
+    jmi_->offs_w = N_ci + N_cd + N_pi + N_pd + N_dx + N_x + N_u;
+    jmi_->offs_t = N_ci + N_cd + N_pi + N_pd + N_dx + N_x + N_u + N_w;
 
     jmi_->n_z = N_ci + N_cd + N_pi + N_pd + N_dx +
                 N_x + N_u + N_w + 1;
 
-    jmi_->z = (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t*));
+    jmi_->z = (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t));
 
 	// Set up the dae struct
     dae->n_eq_F = N_eq_F;
     dae->F = vdp_dae_F;
 	dae->dF = vdp_dae_jac_sd_F;
 	vdp_dae_jac_sd_F_n_nz(&dae->dF_n_nz);
-	//printf("*** %d",dae->dF_n_nz);
-	dae->dF_irow = (int*)calloc(dae->dF_n_nz,sizeof(int*));
-	dae->dF_icol = (int*)calloc(dae->dF_n_nz,sizeof(int*));
+	dae->dF_irow = (int*)calloc(dae->dF_n_nz,sizeof(int));
+	dae->dF_icol = (int*)calloc(dae->dF_n_nz,sizeof(int));
 	vdp_dae_jac_sd_F_nz_indices(dae->dF_irow,dae->dF_icol);
 	dae->ad = NULL;
 
