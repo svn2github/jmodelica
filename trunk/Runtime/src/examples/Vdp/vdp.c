@@ -16,9 +16,33 @@ static const int N_w = 0;
 static const int N_eq_F = 3;
 
 
-static int vdp_dae_F(Jmi* jmi, jmi_real_t* ci, jmi_real_t* cd, jmi_real_t* pi, jmi_real_t* pd,
-		jmi_real_t* dx, jmi_real_t* x, jmi_real_t* u, jmi_real_t* w,
-		jmi_real_t t, jmi_real_t* res) {
+// TODO: Why does this render a type error in the assignment jmi->dae->F?
+//static jmi_dae_F_t vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_t res) {
+
+static int vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_t res) {
+
+	jmi_real_t* ci;
+	jmi_real_t* cd;
+	jmi_real_t* pi;
+	jmi_real_t* pd;
+	jmi_real_t* dx;
+	jmi_real_t* x;
+	jmi_real_t* u;
+	jmi_real_t* w;
+	jmi_real_t* t_;
+	jmi_real_t t;
+
+	jmi_get_ci(jmi, &ci);
+	jmi_get_cd(jmi, &cd);
+	jmi_get_pi(jmi, &pi);
+	jmi_get_pd(jmi, &pd);
+	jmi_get_dx(jmi, &dx);
+	jmi_get_x(jmi, &x);
+	jmi_get_u(jmi, &u);
+	jmi_get_w(jmi, &w);
+	jmi_get_t(jmi, &t_);
+
+	t = t_[0];
 
 	res[0] = (1-x[1]*x[1])*x[0] - x[1] + u[0] - dx[0];
 	res[1] = pi[0]*x[0] - dx[1];
@@ -27,14 +51,36 @@ static int vdp_dae_F(Jmi* jmi, jmi_real_t* ci, jmi_real_t* cd, jmi_real_t* pi, j
 	return 0;
 }
 
-
 /*
  * TODO: This code can certainly be improved and optimized. For example, macros would probably
  * make it easier to read.
  */
-static int vdp_dae_jac_sd_F(Jmi* jmi, jmi_real_t* ci, jmi_real_t* cd, jmi_real_t* pi, jmi_real_t* pd,
-		jmi_real_t* dx, jmi_real_t* x, jmi_real_t* u,
-		jmi_real_t* w, jmi_real_t t, int sparsity, int skip, int* mask, jmi_real_t* jac) {
+// TODO: Why does this render a type error in the assignment jmi->dae->F?
+//static jmi_dae_dF_t vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac) {
+static int vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac) {
+
+	jmi_real_t* ci;
+	jmi_real_t* cd;
+	jmi_real_t* pi;
+	jmi_real_t* pd;
+	jmi_real_t* dx;
+	jmi_real_t* x;
+	jmi_real_t* u;
+	jmi_real_t* w;
+	jmi_real_t* t_;
+	jmi_real_t t;
+
+	jmi_get_ci(jmi, &ci);
+	jmi_get_cd(jmi, &cd);
+	jmi_get_pi(jmi, &pi);
+	jmi_get_pd(jmi, &pd);
+	jmi_get_dx(jmi, &dx);
+	jmi_get_x(jmi, &x);
+	jmi_get_u(jmi, &u);
+	jmi_get_w(jmi, &w);
+	jmi_get_t(jmi, &t_);
+
+	t = t_[0];
 
 	int i;
 	int jac_n = N_eq_F;
@@ -97,7 +143,7 @@ static int vdp_dae_jac_sd_F(Jmi* jmi, jmi_real_t* ci, jmi_real_t* cd, jmi_real_t
 			}
 		}
 	} else {
-		col_index += jmi->jmi_dae->n_pi;
+		col_index += jmi->n_pi;
 	}
 
 	if (!(skip & JMI_DER_DX_SKIP)) {
@@ -144,7 +190,7 @@ static int vdp_dae_jac_sd_F(Jmi* jmi, jmi_real_t* ci, jmi_real_t* cd, jmi_real_t
 			}
 		}
 	} else {
-		col_index += jmi->jmi_dae->n_dx;
+		col_index += jmi->n_dx;
 	}
 
 	if (!(skip & JMI_DER_X_SKIP)) {
@@ -190,7 +236,7 @@ static int vdp_dae_jac_sd_F(Jmi* jmi, jmi_real_t* ci, jmi_real_t* cd, jmi_real_t
 		if (mask[col_index++] == 1) {
 		}
 	} else {
-		col_index += jmi->jmi_dae->n_x;
+		col_index += jmi->n_x;
 	}
 
 	if (!(skip & JMI_DER_U_SKIP)) {
@@ -214,15 +260,15 @@ static int vdp_dae_jac_sd_F(Jmi* jmi, jmi_real_t* ci, jmi_real_t* cd, jmi_real_t
 
 		}
 	} else {
-		col_index += jmi->jmi_dae->n_u;
+		col_index += jmi->n_u;
 	}
 
 	return 0;
 }
 
-static int vdp_dae_jac_sd_F_nnz(Jmi* jmi, int* nnz) {
+static int vdp_dae_jac_sd_F_n_nz(int* n_nz) {
 
-	*nnz = (1 + //pi
+	*n_nz = (1 + //pi
 			0 + //pd
 			3 + //dx
 			5 + //x
@@ -234,7 +280,7 @@ static int vdp_dae_jac_sd_F_nnz(Jmi* jmi, int* nnz) {
 	return 0;
 }
 
-static int vdp_dae_jac_sd_F_nz_indices(Jmi* jmi, int* row, int* col) {
+static int vdp_dae_jac_sd_F_nz_indices(int* row, int* col) {
 
 //	int i,j;
 	int jac_ind = 0;
@@ -244,7 +290,7 @@ static int vdp_dae_jac_sd_F_nz_indices(Jmi* jmi, int* row, int* col) {
     //dF/dpd_1
 	row[jac_ind] = 2;
 	col[jac_ind++] = 1;
-	col_ind += jmi->jmi_dae->n_pi;
+	col_ind += N_pi;
 
 	// Jacobian for dependent parameters
 
@@ -259,7 +305,7 @@ static int vdp_dae_jac_sd_F_nz_indices(Jmi* jmi, int* row, int* col) {
 	row[jac_ind] = 3;
 	col[jac_ind++] = col_ind + 3;
 
-	col_ind += jmi->jmi_dae->n_dx;
+	col_ind += N_dx;
 
 	// Jacobian for states
 	//dF/dx_1
@@ -276,7 +322,7 @@ static int vdp_dae_jac_sd_F_nz_indices(Jmi* jmi, int* row, int* col) {
 	col[jac_ind++] = col_ind + 2;
 	//dF/dx_3
 
-	col_ind += jmi->jmi_dae->n_x;
+	col_ind += N_x;
 
 	// Jacobian for inputs
 	//dF/du_2
@@ -285,14 +331,12 @@ static int vdp_dae_jac_sd_F_nz_indices(Jmi* jmi, int* row, int* col) {
 	row[jac_ind] = 3;
 	col[jac_ind++] = col_ind + 1;
 
-	col_ind += jmi->jmi_dae->n_u;
+	col_ind += N_u;
 
 	// Jacobian for algebraics
-	col_ind += jmi->jmi_dae->n_w;
+	col_ind += N_w;
 
 	// Jacobian for time
-
-
 
 	/*
 	// Template for dense Jacobian...
@@ -362,52 +406,71 @@ static int vdp_dae_jac_sd_F_nz_indices(Jmi* jmi, int* row, int* col) {
 	return 0;
 }
 
-
-
 // This is the init function
-int jmi_new(Jmi** jmi) {
+int jmi_new(jmi_t** jmi) {
 	// Create jmi struct
-	*jmi = (Jmi*)calloc(1,sizeof(Jmi));
-	Jmi* jmi_ = *jmi;
+	*jmi = (jmi_t*)calloc(1,sizeof(jmi_t));
+	jmi_t* jmi_ = *jmi;
 	// Create jmi_dae struct
-	Jmi_dae* jmi_dae = (Jmi_dae*)calloc(1,sizeof(Jmi_dae));
+	jmi_dae_t* dae = (jmi_dae_t*)calloc(1,sizeof(jmi_dae_t));
 	// Set struct pointers in jmi
-	jmi_->jmi_dae = jmi_dae;
-	jmi_->jmi_init = NULL;
-	jmi_->jmi_opt = NULL;
-	jmi_->jmi_dae_der = NULL;
-	jmi_->jmi_init_der = NULL;
-	jmi_->jmi_opt_der = NULL;
-	// Assign function pointers
-	jmi_dae->F = vdp_dae_F;
-	jmi_dae->jac_sd_F = vdp_dae_jac_sd_F;
-	jmi_dae->jac_sd_F_nnz = vdp_dae_jac_sd_F_nnz;
-	jmi_dae->jac_sd_F_nz_indices = vdp_dae_jac_sd_F_nz_indices;
+	jmi_->dae = dae;
+	jmi_->init = NULL;
+	jmi_->opt = NULL;
+
 	// Set sizes of dae vectors
-	jmi_dae->n_ci = N_ci;
-	jmi_dae->n_cd = N_cd;
-	jmi_dae->n_pi = N_pi;
-	jmi_dae->n_pd = N_pd;
-	jmi_dae->n_dx = N_dx;
-    jmi_dae->n_x = N_x;
-    jmi_dae->n_u = N_u;
-    jmi_dae->n_w = N_w;
-    jmi_dae->n_eq_F = N_eq_F;
+	jmi_->n_ci = N_ci;
+	jmi_->n_cd = N_cd;
+	jmi_->n_pi = N_pi;
+	jmi_->n_pd = N_pd;
+	jmi_->n_dx = N_dx;
+    jmi_->n_x = N_x;
+    jmi_->n_u = N_u;
+    jmi_->n_w = N_w;
+
+    jmi_->offs_ci = 0;
+    jmi_->offs_cd = N_ci;
+    jmi_->offs_pi = N_ci + N_cd;
+    jmi_->offs_pd = N_ci + N_cd + N_pi;
+    jmi_->offs_dx = N_ci + N_cd + N_pi + N_pd;
+    jmi_->offs_x = N_ci + N_cd + N_pi + N_pd + N_dx;
+    jmi_->offs_u = N_ci + N_cd + N_pi + N_pd + N_dx + N_x;
+    jmi_->offs_w = N_ci + N_cd + N_pi + N_pd + N_dx + N_x + N_w;
+    jmi_->offs_t = N_ci + N_cd + N_pi + N_pd + N_dx + N_x + N_w + N_u;
+
+    jmi_->n_z = N_ci + N_cd + N_pi + N_pd + N_dx +
+                N_x + N_u + N_w + 1;
+
+    jmi_->z = (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t*));
+
+	// Set up the dae struct
+    dae->n_eq_F = N_eq_F;
+    dae->F = vdp_dae_F;
+	dae->dF = vdp_dae_jac_sd_F;
+	vdp_dae_jac_sd_F_n_nz(&dae->dF_n_nz);
+	//printf("*** %d",dae->dF_n_nz);
+	dae->dF_irow = (int*)calloc(dae->dF_n_nz,sizeof(int*));
+	dae->dF_icol = (int*)calloc(dae->dF_n_nz,sizeof(int*));
+	vdp_dae_jac_sd_F_nz_indices(dae->dF_irow,dae->dF_icol);
+	dae->ad = NULL;
+
 	return 0;
 }
 
-int jmi_delete(Jmi* jmi){
-	if(jmi->jmi_dae != NULL) {
-		free(jmi->jmi_dae);
+int jmi_delete(jmi_t* jmi){
+	if(jmi->dae != NULL) {
+		free(jmi->dae->dF_irow);
+		free(jmi->dae->dF_icol);
+		free(jmi->dae);
 	}
-	if(jmi->jmi_init != NULL) {
-		free(jmi->jmi_init);
+	if(jmi->init != NULL) {
+		free(jmi->init);
 	}
-	if(jmi->jmi_opt != NULL) {
-		free(jmi->jmi_opt);
+	if(jmi->opt != NULL) {
+		free(jmi->opt);
 	}
 	// TODO: Check der structs if not NULL return error and the user has to deallocate them first.
-
+    free(jmi->z);
 	free(jmi);
 
 	return 0;

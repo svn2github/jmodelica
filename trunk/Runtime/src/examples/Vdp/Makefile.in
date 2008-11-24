@@ -33,7 +33,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = vdp$(EXEEXT) vdp_cppad$(EXEEXT)
+bin_PROGRAMS = vdp$(EXEEXT)
 subdir = src/examples/Vdp
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -66,13 +66,6 @@ vdp_DEPENDENCIES = ../../Jmi/libjmi.la
 vdp_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(vdp_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am_vdp_cppad_OBJECTS = vdp_cppad-vdp_cppad.$(OBJEXT) \
-	vdp_cppad-vdp_cppad_main.$(OBJEXT)
-vdp_cppad_OBJECTS = $(am_vdp_cppad_OBJECTS)
-vdp_cppad_DEPENDENCIES = ../../Jmi/libjmi.la
-vdp_cppad_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(vdp_cppad_CXXFLAGS) \
-	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -95,10 +88,8 @@ CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libvdp_la_SOURCES) $(nodist_EXTRA_libvdp_la_SOURCES) \
-	$(vdp_SOURCES) $(nodist_EXTRA_vdp_SOURCES) \
-	$(vdp_cppad_SOURCES)
-DIST_SOURCES = $(libvdp_la_SOURCES) $(vdp_SOURCES) \
-	$(vdp_cppad_SOURCES)
+	$(vdp_SOURCES) $(nodist_EXTRA_vdp_SOURCES)
+DIST_SOURCES = $(libvdp_la_SOURCES) $(vdp_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -229,12 +220,14 @@ vdp_CXXFLAGS = -Wall -I../../Jmi
 # the source tree.
 nodist_EXTRA_vdp_SOURCES = dummy.cpp
 vdp_LDADD = ../../Jmi/libjmi.la
-vdp_cppad_SOURCES = vdp_cppad.cpp \
-               vdp_cppad_main.cpp 
 
-vdp_cppad_CFLAGS = -Wall -I../../Jmi
-vdp_cppad_CXXFLAGS = -Wall -I../../Jmi -I$(CPPAD_INC)
-vdp_cppad_LDADD = ../../Jmi/libjmi.la
+#vdp_cppad_SOURCES = vdp_cppad.cpp \
+#               vdp_cppad_main.cpp 
+
+#vdp_cppad_CFLAGS = -Wall -I../../Jmi
+#vdp_cppad_CXXFLAGS = -Wall -I../../Jmi -I$(CPPAD_INC)
+
+#vdp_cppad_LDADD = ../../Jmi/libjmi.la
 
 #vdp_LDFLAGS=$(APP_LDFLAGS) $(APP_LIBS)
 lib_LTLIBRARIES = libvdp.la
@@ -335,9 +328,6 @@ clean-binPROGRAMS:
 vdp$(EXEEXT): $(vdp_OBJECTS) $(vdp_DEPENDENCIES) 
 	@rm -f vdp$(EXEEXT)
 	$(vdp_LINK) $(vdp_OBJECTS) $(vdp_LDADD) $(LIBS)
-vdp_cppad$(EXEEXT): $(vdp_cppad_OBJECTS) $(vdp_cppad_DEPENDENCIES) 
-	@rm -f vdp_cppad$(EXEEXT)
-	$(vdp_cppad_LINK) $(vdp_cppad_OBJECTS) $(vdp_cppad_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -350,8 +340,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp-vdp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp-vdp_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp_cppad-vdp_cppad.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp_cppad-vdp_cppad_main.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -436,34 +424,6 @@ vdp-dummy.obj: dummy.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dummy.cpp' object='vdp-dummy.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_CXXFLAGS) $(CXXFLAGS) -c -o vdp-dummy.obj `if test -f 'dummy.cpp'; then $(CYGPATH_W) 'dummy.cpp'; else $(CYGPATH_W) '$(srcdir)/dummy.cpp'; fi`
-
-vdp_cppad-vdp_cppad.o: vdp_cppad.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_cppad_CXXFLAGS) $(CXXFLAGS) -MT vdp_cppad-vdp_cppad.o -MD -MP -MF $(DEPDIR)/vdp_cppad-vdp_cppad.Tpo -c -o vdp_cppad-vdp_cppad.o `test -f 'vdp_cppad.cpp' || echo '$(srcdir)/'`vdp_cppad.cpp
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/vdp_cppad-vdp_cppad.Tpo $(DEPDIR)/vdp_cppad-vdp_cppad.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='vdp_cppad.cpp' object='vdp_cppad-vdp_cppad.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_cppad_CXXFLAGS) $(CXXFLAGS) -c -o vdp_cppad-vdp_cppad.o `test -f 'vdp_cppad.cpp' || echo '$(srcdir)/'`vdp_cppad.cpp
-
-vdp_cppad-vdp_cppad.obj: vdp_cppad.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_cppad_CXXFLAGS) $(CXXFLAGS) -MT vdp_cppad-vdp_cppad.obj -MD -MP -MF $(DEPDIR)/vdp_cppad-vdp_cppad.Tpo -c -o vdp_cppad-vdp_cppad.obj `if test -f 'vdp_cppad.cpp'; then $(CYGPATH_W) 'vdp_cppad.cpp'; else $(CYGPATH_W) '$(srcdir)/vdp_cppad.cpp'; fi`
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/vdp_cppad-vdp_cppad.Tpo $(DEPDIR)/vdp_cppad-vdp_cppad.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='vdp_cppad.cpp' object='vdp_cppad-vdp_cppad.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_cppad_CXXFLAGS) $(CXXFLAGS) -c -o vdp_cppad-vdp_cppad.obj `if test -f 'vdp_cppad.cpp'; then $(CYGPATH_W) 'vdp_cppad.cpp'; else $(CYGPATH_W) '$(srcdir)/vdp_cppad.cpp'; fi`
-
-vdp_cppad-vdp_cppad_main.o: vdp_cppad_main.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_cppad_CXXFLAGS) $(CXXFLAGS) -MT vdp_cppad-vdp_cppad_main.o -MD -MP -MF $(DEPDIR)/vdp_cppad-vdp_cppad_main.Tpo -c -o vdp_cppad-vdp_cppad_main.o `test -f 'vdp_cppad_main.cpp' || echo '$(srcdir)/'`vdp_cppad_main.cpp
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/vdp_cppad-vdp_cppad_main.Tpo $(DEPDIR)/vdp_cppad-vdp_cppad_main.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='vdp_cppad_main.cpp' object='vdp_cppad-vdp_cppad_main.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_cppad_CXXFLAGS) $(CXXFLAGS) -c -o vdp_cppad-vdp_cppad_main.o `test -f 'vdp_cppad_main.cpp' || echo '$(srcdir)/'`vdp_cppad_main.cpp
-
-vdp_cppad-vdp_cppad_main.obj: vdp_cppad_main.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_cppad_CXXFLAGS) $(CXXFLAGS) -MT vdp_cppad-vdp_cppad_main.obj -MD -MP -MF $(DEPDIR)/vdp_cppad-vdp_cppad_main.Tpo -c -o vdp_cppad-vdp_cppad_main.obj `if test -f 'vdp_cppad_main.cpp'; then $(CYGPATH_W) 'vdp_cppad_main.cpp'; else $(CYGPATH_W) '$(srcdir)/vdp_cppad_main.cpp'; fi`
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/vdp_cppad-vdp_cppad_main.Tpo $(DEPDIR)/vdp_cppad-vdp_cppad_main.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='vdp_cppad_main.cpp' object='vdp_cppad-vdp_cppad_main.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_cppad_CXXFLAGS) $(CXXFLAGS) -c -o vdp_cppad-vdp_cppad_main.obj `if test -f 'vdp_cppad_main.cpp'; then $(CYGPATH_W) 'vdp_cppad_main.cpp'; else $(CYGPATH_W) '$(srcdir)/vdp_cppad_main.cpp'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

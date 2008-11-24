@@ -1,9 +1,10 @@
 AUTOMAKE_OPTIONS = foreign
 
-noinst_LTLIBRARIES = libjmi.la
+lib_LTLIBRARIES = libjmi.la
 libjmi_la_SOURCES = jmi.h \
-                    jmi_cppad.hpp \
-                    jmi_cppad.cpp
+                    jmi.c
+#                    jmi_cppad.hpp \
+#                    jmi_cppad.cpp
 
 libjmi_la_CFLAGS = -Wall -I$(CPPAD_INC)
 libjmi_la_CXXFLAGS = -Wall -I$(CPPAD_INC)
@@ -13,5 +14,5 @@ libjmi_la_CXXFLAGS = -Wall -I$(CPPAD_INC)
 
 #AM_CPPFLAGS = -I$(IPOPT_INC)
 
-include_HEADERS = jmi.h \
-		  jmi_cppad.hpp
+include_HEADERS = jmi.h 
+#		  jmi_cppad.hpp

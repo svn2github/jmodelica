@@ -1,7 +1,9 @@
 AUTOMAKE_OPTIONS = foreign
 
-bin_PROGRAMS = vdp \
-               vdp_cppad
+#bin_PROGRAMS = vdp \
+#               vdp_cppad
+
+bin_PROGRAMS = vdp
 
 vdp_SOURCES = vdp.c \
                vdp_main.c 
@@ -17,13 +19,13 @@ nodist_EXTRA_vdp_SOURCES = dummy.cpp
 
 vdp_LDADD = ../../Jmi/libjmi.la
 
-vdp_cppad_SOURCES = vdp_cppad.cpp \
-               vdp_cppad_main.cpp 
+#vdp_cppad_SOURCES = vdp_cppad.cpp \
+#               vdp_cppad_main.cpp 
 
-vdp_cppad_CFLAGS = -Wall -I../../Jmi
-vdp_cppad_CXXFLAGS = -Wall -I../../Jmi -I$(CPPAD_INC)
+#vdp_cppad_CFLAGS = -Wall -I../../Jmi
+#vdp_cppad_CXXFLAGS = -Wall -I../../Jmi -I$(CPPAD_INC)
 
-vdp_cppad_LDADD = ../../Jmi/libjmi.la
+#vdp_cppad_LDADD = ../../Jmi/libjmi.la
 
 #vdp_LDFLAGS=$(APP_LDFLAGS) $(APP_LIBS)
 
