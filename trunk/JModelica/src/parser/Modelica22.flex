@@ -1,5 +1,6 @@
 package org.jmodelica.parser;
 
+import java.util.HashMap;
 import beaver.Symbol;
 import beaver.Scanner;
 import org.jmodelica.parser.ModelicaParser.Terminals;
@@ -45,6 +46,18 @@ import org.jmodelica.parser.ModelicaParser.Terminals;
       res = nextTokenAll();
     } while (res.getId() < 0);
     return res;
+  }
+
+  private HashMap offsets = new java.util.LinkedHashMap();
+
+  public HashMap offsets() { 
+    return offsets; 
+  }
+
+  private void registerOffset() {
+    Integer key = new Integer(yyline + 2);
+    Integer value = new Integer(yychar + yylength());
+    offsets.put(key, value);
   }
 
 %}
@@ -183,6 +196,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   {UNSIGNED_NUMBER}   { return newSymbol(Terminals.UNSIGNED_NUMBER, yytext()); }
   
   {Comment}         { return newSymbol(COMMENT); /* Will be discarded before parser. */ }
+  {LineTerminator}	{ registerOffset(); }
   {WhiteSpace}      { return newSymbol(WHITESPACE); /* Will be discarded before parser. */ }
 
 }
