@@ -19686,6 +19686,17 @@ IPOPT_INC=$ipopt/include/coin
 IPOPT_LIB=$ipopt/lib
 
 
+cat >>confdefs.h <<\_ACEOF
+#define JMI_AD_NONE 0
+_ACEOF
+
+
+cat >>confdefs.h <<\_ACEOF
+#define JMI_AD_CPPAD 1
+_ACEOF
+
+
+
 # Check whether --with-cppad was given.
 if test "${with_cppad+set}" = set; then
   withval=$with_cppad; cppad=$withval
@@ -19695,24 +19706,14 @@ fi
 
 
 if test "x$with_cppad" = xno; then
-
-cat >>confdefs.h <<\_ACEOF
-#define JMI_AD_NONE 1
-_ACEOF
-
-       { echo "$as_me:$LINENO: result: ***********************************************************************" >&5
+  { echo "$as_me:$LINENO: result: ***********************************************************************" >&5
 echo "${ECHO_T}***********************************************************************" >&6; }
        { echo "$as_me:$LINENO: result: * --with-cppad option not specified - compiling without CppAD support *" >&5
 echo "${ECHO_T}* --with-cppad option not specified - compiling without CppAD support *" >&6; }
        { echo "$as_me:$LINENO: result: ***********************************************************************" >&5
 echo "${ECHO_T}***********************************************************************" >&6; }
 else
-
-cat >>confdefs.h <<\_ACEOF
-#define JMI_AD_CPPAD 1
-_ACEOF
-
-       { echo "$as_me:$LINENO: result: ***********************************************************************" >&5
+  { echo "$as_me:$LINENO: result: ***********************************************************************" >&5
 echo "${ECHO_T}***********************************************************************" >&6; }
        { echo "$as_me:$LINENO: result: * --with-cppad option specified - compiling with CppAD support        *" >&5
 echo "${ECHO_T}* --with-cppad option specified - compiling with CppAD support        *" >&6; }

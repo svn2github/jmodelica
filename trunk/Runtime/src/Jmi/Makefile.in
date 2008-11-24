@@ -58,6 +58,13 @@ libjmi_la_OBJECTS = $(am_libjmi_la_OBJECTS)
 libjmi_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libjmi_la_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+libjmi_cppad_la_LIBADD =
+am_libjmi_cppad_la_OBJECTS = libjmi_cppad_la-jmi_cppad.lo
+libjmi_cppad_la_OBJECTS = $(am_libjmi_cppad_la_OBJECTS)
+libjmi_cppad_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(libjmi_cppad_la_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -70,8 +77,17 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libjmi_la_SOURCES)
-DIST_SOURCES = $(libjmi_la_SOURCES)
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
+SOURCES = $(libjmi_la_SOURCES) $(libjmi_cppad_la_SOURCES)
+DIST_SOURCES = $(libjmi_la_SOURCES) $(libjmi_cppad_la_SOURCES)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(include_HEADERS)
 ETAGS = etags
@@ -193,24 +209,27 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
-lib_LTLIBRARIES = libjmi.la
+lib_LTLIBRARIES = libjmi.la \
+                  libjmi_cppad.la
+
 libjmi_la_SOURCES = jmi.h \
                     jmi.c
 
-#                    jmi_cppad.hpp \
-#                    jmi_cppad.cpp
-libjmi_la_CFLAGS = -Wall -I$(CPPAD_INC)
-libjmi_la_CXXFLAGS = -Wall -I$(CPPAD_INC)
+libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE
 
 #libjmi_la_LIBADD = $(JMALLLIBS)
 #libjmi_la_DEPENDENCIES = $(JMALLLIBS)
 
 #AM_CPPFLAGS = -I$(IPOPT_INC)
+libjmi_cppad_la_SOURCES = jmi.h \
+                    jmi_cppad.cpp
+
+libjmi_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD
 include_HEADERS = jmi.h 
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
+.SUFFIXES: .c .cpp .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -269,6 +288,8 @@ clean-libLTLIBRARIES:
 	done
 libjmi.la: $(libjmi_la_OBJECTS) $(libjmi_la_DEPENDENCIES) 
 	$(libjmi_la_LINK) -rpath $(libdir) $(libjmi_la_OBJECTS) $(libjmi_la_LIBADD) $(LIBS)
+libjmi_cppad.la: $(libjmi_cppad_la_OBJECTS) $(libjmi_cppad_la_DEPENDENCIES) 
+	$(libjmi_cppad_la_LINK) -rpath $(libdir) $(libjmi_cppad_la_OBJECTS) $(libjmi_cppad_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -276,6 +297,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_cppad_la-jmi_cppad.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-jmi.Plo@am__quote@
 
 .c.o:
@@ -305,6 +327,34 @@ libjmi_la-jmi.lo: jmi.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jmi.c' object='libjmi_la-jmi.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -c -o libjmi_la-jmi.lo `test -f 'jmi.c' || echo '$(srcdir)/'`jmi.c
+
+.cpp.o:
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
+
+.cpp.obj:
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.cpp.lo:
+@am__fastdepCXX_TRUE@	$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+libjmi_cppad_la-jmi_cppad.lo: jmi_cppad.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_cppad_la_CXXFLAGS) $(CXXFLAGS) -MT libjmi_cppad_la-jmi_cppad.lo -MD -MP -MF $(DEPDIR)/libjmi_cppad_la-jmi_cppad.Tpo -c -o libjmi_cppad_la-jmi_cppad.lo `test -f 'jmi_cppad.cpp' || echo '$(srcdir)/'`jmi_cppad.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/libjmi_cppad_la-jmi_cppad.Tpo $(DEPDIR)/libjmi_cppad_la-jmi_cppad.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='jmi_cppad.cpp' object='libjmi_cppad_la-jmi_cppad.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_cppad_la_CXXFLAGS) $(CXXFLAGS) -c -o libjmi_cppad_la-jmi_cppad.lo `test -f 'jmi_cppad.cpp' || echo '$(srcdir)/'`jmi_cppad.cpp
 
 mostlyclean-libtool:
 	-rm -f *.lo

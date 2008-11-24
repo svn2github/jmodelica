@@ -16,10 +16,7 @@ static const int N_w = 0;
 static const int N_eq_F = 3;
 
 
-// TODO: Why does this render a type error in the assignment jmi->dae->F?
-//static jmi_dae_F_t vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_t res) {
-
-static int vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_t res) {
+static jmi_dae_F_t vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_t res) {
 
 	jmi_real_t* ci;
 	jmi_real_t* cd;
@@ -55,9 +52,7 @@ static int vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_t res) {
  * TODO: This code can certainly be improved and optimized. For example, macros would probably
  * make it easier to read.
  */
-// TODO: Why does this render a type error in the assignment jmi->dae->F?
-//static jmi_dae_dF_t vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac) {
-static int vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac) {
+static jmi_dae_dF_t vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac) {
 
 	jmi_real_t* ci;
 	jmi_real_t* cd;
@@ -445,8 +440,8 @@ int jmi_new(jmi_t** jmi) {
 
 	// Set up the dae struct
     dae->n_eq_F = N_eq_F;
-    dae->F = vdp_dae_F;
-	dae->dF = vdp_dae_jac_sd_F;
+    dae->F = &vdp_dae_F;
+	dae->dF = &vdp_dae_jac_sd_F;
 	vdp_dae_jac_sd_F_n_nz(&dae->dF_n_nz);
 	dae->dF_irow = (int*)calloc(dae->dF_n_nz,sizeof(int));
 	dae->dF_icol = (int*)calloc(dae->dF_n_nz,sizeof(int));

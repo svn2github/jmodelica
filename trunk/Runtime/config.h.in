@@ -36,10 +36,10 @@
 /* Define to 1 if the system has the type `_Bool'. */
 #undef HAVE__BOOL
 
-/* Compile with AD support */
+/* CppAD support */
 #undef JMI_AD_CPPAD
 
-/* Compile without AD support */
+/* No AD support */
 #undef JMI_AD_NONE
 
 /* Name of package */

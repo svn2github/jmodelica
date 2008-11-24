@@ -119,18 +119,20 @@ typedef struct jmi_t jmi_t;
 #define JMI_DER_W_SKIP 32
 #define JMI_DER_T_SKIP 64
 
-// TODO: Error codes...
+/*
+ *  TODO: Error codes...
+ *  Introduce #defines to denote different error codes
+ */
 
 // Typedef for the doubles used in the interface.
 typedef double jmi_real_t;
 
-#ifdef JMI_AD_NONE
+#if JMI_AD == JMI_AD_NONE
 	typedef jmi_real_t jmi_ad_var_t;
 	typedef jmi_real_t* jmi_ad_var_vec_t;
 	typedef void jmi_ad_tape_t;
 	typedef void jmi_dae_ad_t;
-
-#elif defined(JMI_AD_CPPAD)
+#elif JMI_AD == JMI_AD_CPPAD
 	typedef CppAD::AD<jmi_real_t> jmi_ad_var_t;
 	typedef std::vector< jmi_ad_var_t > jmi_ad_var_vec_t;
 	typedef CppAD::ADFun<jmi_real_t> jmi_ad_tape_t;
@@ -178,7 +180,7 @@ typedef double jmi_real_t;
 	  int* dF_t_irow_ad;
 	  int* dF_t_icol_ad;
 
-	} jmi_dae_ad;
+	} jmi_dae_ad_t;
 
 #else
 	#error "The directive JMI_AD_NONE or JMI_AD_CPPAD must be set"
@@ -325,6 +327,10 @@ struct jmi_t{
   *                   The evaluated Jacobian columns are stored in the first
   *                   entries of the output argument jac.
   *
+  *  TODO: It may be interesting to include an additional layer that enables
+  *  support for partially defined Jacobians. This would be beneficial if symbolic
+  *  expressions for the Jacobian is available for some entries, but for other
+  *  an AD algorithm is to be used.
   */
 
 
