@@ -52,8 +52,8 @@ AC_SUBST(IPOPT_LIB)
 IPOPT_INC=$ipopt/include/coin
 IPOPT_LIB=$ipopt/lib
 
-AC_DEFINE([JMI_AD_NONE],[0],[No AD support])
-AC_DEFINE([JMI_AD_CPPAD],[1],[CppAD support])
+#AC_DEFINE([JMI_AD_NONE],[0],[No AD support])
+#AC_DEFINE([JMI_AD_CPPAD],[1],[CppAD support])
 
 AC_ARG_WITH([cppad],
    [AS_HELP_STRING([--with-cppad],

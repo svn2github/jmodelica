@@ -97,16 +97,6 @@
 #ifndef _JMI_H
 #define _JMI_H
 
-#include <stdio.h>
-#include <config.h>
-
-#if defined __cplusplus
-        extern "C" {
-#endif
-
-// Forward declaration of jmi struct
-typedef struct jmi_t jmi_t;
-
 #define JMI_DER_SPARSE 1
 #define JMI_DER_DENSE_COL_MAJOR 2
 #define JMI_DER_DENSE_ROW_MAJOR 4
@@ -119,66 +109,88 @@ typedef struct jmi_t jmi_t;
 #define JMI_DER_W_SKIP 32
 #define JMI_DER_T_SKIP 64
 
+#define JMI_AD_NONE 0
+#define JMI_AD_CPPAD 1
+
 /*
  *  TODO: Error codes...
  *  Introduce #defines to denote different error codes
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+
+#if JMI_AD == JMI_AD_CPPAD
+// This must be done outside of 'extern "C"'
+#include <cppad/cppad.hpp>
+#include <vector>
+#endif
+
+#if defined __cplusplus
+        extern "C" {
+#endif
+
+// Forward declaration of jmi struct
+typedef struct jmi_t jmi_t;
+
 // Typedef for the doubles used in the interface.
 typedef double jmi_real_t;
 
 #if JMI_AD == JMI_AD_NONE
+//#include <config.h>
 	typedef jmi_real_t jmi_ad_var_t;
-	typedef jmi_real_t* jmi_ad_var_vec_t;
+	typedef jmi_real_t *jmi_real_vec_t;
+	typedef jmi_real_t *jmi_ad_var_vec_t;
 	typedef void jmi_ad_tape_t;
 	typedef void jmi_dae_ad_t;
 #elif JMI_AD == JMI_AD_CPPAD
+	typedef std::vector<jmi_real_t> jmi_real_vec_t;
 	typedef CppAD::AD<jmi_real_t> jmi_ad_var_t;
 	typedef std::vector< jmi_ad_var_t > jmi_ad_var_vec_t;
 	typedef CppAD::ADFun<jmi_real_t> jmi_ad_tape_t;
 
 	typedef struct {
 
-	  jmi_ad_vec_t *z_independent;
-	  jmi_ad_vec_t *F_z_dependent;
+	  jmi_ad_var_vec_t *z_independent;
+	  jmi_ad_var_vec_t *F_z_dependent;
 
 	  jmi_ad_tape_t *F_z_tape;
 
 	  int tape_initialized;
 
-	  int dF_n_nz_ad;
-	  int* dF_irow_ad;
-	  int* dF_icol_ad;
+	  int dF_z_n_nz;
+	  int* dF_z_irow;
+	  int* dF_z_icol;
 
 	  // Sparsity patterns for individual independent variables
 	  // These variables are useful when computing the Jacobian
-	  int dF_pi_n_nz_ad;
-	  int* dF_pi_irow_ad;
-	  int* dF_pi_icol_ad;
+	  int dF_pi_n_nz;
+	  int* dF_pi_irow;
+	  int* dF_pi_icol;
 
-	  int dF_pd_n_nz_ad;
-	  int* dF_pd_irow_ad;
-	  int* dF_pd_icol_ad;
+	  int dF_pd_n_nz;
+	  int* dF_pd_irow;
+	  int* dF_pd_icol;
 
-	  int dF_dx_n_nz_ad;
-	  int* dF_dx_irow_ad;
-	  int* dF_dx_icol_ad;
+	  int dF_dx_n_nz;
+	  int* dF_dx_irow;
+	  int* dF_dx_icol;
 
-	  int dF_x_n_nz_ad;
-	  int* dF_x_irow_ad;
-	  int* dF_x_icol_ad;
+	  int dF_x_n_nz;
+	  int* dF_x_irow;
+	  int* dF_x_icol;
 
-	  int dF_u_n_nz_ad;
-	  int* dF_u_irow_ad;
-	  int* dF_u_icol_ad;
+	  int dF_u_n_nz;
+	  int* dF_u_irow;
+	  int* dF_u_icol;
 
-	  int dF_w_n_nz_ad;
-	  int* dF_w_irow_ad;
-	  int* dF_w_icol_ad;
+	  int dF_w_n_nz;
+	  int* dF_w_irow;
+	  int* dF_w_icol;
 
-	  int dF_t_n_nz_ad;
-	  int* dF_t_irow_ad;
-	  int* dF_t_icol_ad;
+	  int dF_t_n_nz;
+	  int* dF_t_irow;
+	  int* dF_t_icol;
 
 	} jmi_dae_ad_t;
 
@@ -196,7 +208,7 @@ typedef int (*jmi_dae_F_t)(jmi_t* jmi, jmi_ad_var_vec_t res);
 /**
  * Evaluation of symbolic jacobian in generated code.
  */
-typedef int (*jmi_dae_dF_t)(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac);
+typedef int (*jmi_dae_dF_t)(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_vec_t jac);
 
 /**
  * Struct describing a DAE model including evaluation of the DAE residual and (optional) a symbolic
@@ -256,7 +268,10 @@ struct jmi_t{
 	/* The z vector contains all variables in the order
 	 * ci, cd, pi, pd, dx, x, u, w, t.
 	 */
-	jmi_real_t* z;
+	// This vector contains active AD objects in case of AD
+	jmi_ad_var_vec_t z;
+	// This vector contains the actual values
+	jmi_real_vec_t z_val;
 
 };
 
@@ -277,9 +292,27 @@ struct jmi_t{
 
  /**
   * Initializes the AD variables and tapes. Prior to this call, the variables in z should
-  * be initialized.
+  * be initialized, which is also the reason why this function must be provided for
+  * the user to call after the actual creation of the jmi_t struct.
   */
  int jmi_ad_init(jmi_t* jmi);
+
+ /**
+  * Allocates memory and sets up the jmi_t struct. This function is typically called
+  * from within jmi_new in the generated code. The reason for introducing this function
+  * is that the allocation of the jmi_t struct may depend on the AD method. By encapsulating
+  * the allocation in the runtime library, the generated code can be kept clean from
+  * AD-specific code.
+  */
+ int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
+		      int n_x, int n_u, int n_w);
+
+ int jmi_dae_init(jmi_t* jmi, jmi_dae_F_t jmi_dae_F, int n_eq_F, jmi_dae_dF_t jmi_dae_dF,
+		          int dF_n_nz, int* irow, int* icol);
+
+ //int jmi_init_init(..)
+
+ //int jmi_opt_init(..)
 
 /**
  * Deallocates memory and deletes a jmi struct.

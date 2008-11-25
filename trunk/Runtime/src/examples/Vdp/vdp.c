@@ -5,6 +5,10 @@
 #include <stdlib.h>
 #include "../../Jmi/jmi.h"
 
+#if defined __cplusplus
+        extern "C" {
+#endif
+
 static const int N_ci = 0;
 static const int N_cd = 0;
 static const int N_pi = 1;
@@ -15,9 +19,17 @@ static const int N_u = 1;
 static const int N_w = 0;
 static const int N_eq_F = 3;
 
+#define p1 jmi->z[jmi->offs_pi]
+#define dx1 jmi->z[jmi->offs_dx]
+#define dx2 jmi->z[jmi->offs_dx+1]
+#define dx3 jmi->z[jmi->offs_dx+2]
+#define x1 jmi->z[jmi->offs_x]
+#define x2 jmi->z[jmi->offs_x+1]
+#define x3 jmi->z[jmi->offs_x+2]
+#define u1 jmi->z[jmi->offs_u]
 
 static jmi_dae_F_t vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_t res) {
-
+/*
 	jmi_real_t* ci;
 	jmi_real_t* cd;
 	jmi_real_t* pi;
@@ -44,6 +56,22 @@ static jmi_dae_F_t vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_t res) {
 	res[0] = (1-x[1]*x[1])*x[0] - x[1] + u[0] - dx[0];
 	res[1] = pi[0]*x[0] - dx[1];
 	res[2] = x[0]*x[0] + x[1]*x[1] + u[0]*u[0] - dx[2];
+*/
+
+	// Copy the values that are set by the user to the "active"
+	// vector. This probably gives a performance penalty, but it
+	// is necessary in order to have generated code that can
+	// be compiled both with and without AD.
+	int i;
+	for (i=0;i<jmi->n_z;i++) {
+		jmi->z[i] = jmi->z_val[i];
+		printf("-- %f\n",jmi->z_val[i]);
+		printf("--- %f\n",jmi->z[i]);
+	}
+
+	res[0] = (1-x2*x2)*x1 - x2 + u1 - dx1;
+	res[1] = p1*x1 - dx2;
+	res[2] = x1*x1 + x2*x2 + u1*u1 - dx3;
 
 	return 0;
 }
@@ -52,7 +80,7 @@ static jmi_dae_F_t vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_t res) {
  * TODO: This code can certainly be improved and optimized. For example, macros would probably
  * make it easier to read.
  */
-static jmi_dae_dF_t vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac) {
+static jmi_dae_dF_t vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_vec_t jac) {
 
 	jmi_real_t* ci;
 	jmi_real_t* cd;
@@ -403,71 +431,26 @@ static int vdp_dae_jac_sd_F_nz_indices(int* row, int* col) {
 
 // This is the init function
 int jmi_new(jmi_t** jmi) {
-	// Create jmi struct
-	*jmi = (jmi_t*)calloc(1,sizeof(jmi_t));
-	jmi_t* jmi_ = *jmi;
-	// Create jmi_dae struct
-	jmi_dae_t* dae = (jmi_dae_t*)calloc(1,sizeof(jmi_dae_t));
-	// Set struct pointers in jmi
-	jmi_->dae = dae;
-	jmi_->init = NULL;
-	jmi_->opt = NULL;
 
-	// Set sizes of dae vectors
-	jmi_->n_ci = N_ci;
-	jmi_->n_cd = N_cd;
-	jmi_->n_pi = N_pi;
-	jmi_->n_pd = N_pd;
-	jmi_->n_dx = N_dx;
-    jmi_->n_x = N_x;
-    jmi_->n_u = N_u;
-    jmi_->n_w = N_w;
 
-    jmi_->offs_ci = 0;
-    jmi_->offs_cd = N_ci;
-    jmi_->offs_pi = N_ci + N_cd;
-    jmi_->offs_pd = N_ci + N_cd + N_pi;
-    jmi_->offs_dx = N_ci + N_cd + N_pi + N_pd;
-    jmi_->offs_x = N_ci + N_cd + N_pi + N_pd + N_dx;
-    jmi_->offs_u = N_ci + N_cd + N_pi + N_pd + N_dx + N_x;
-    jmi_->offs_w = N_ci + N_cd + N_pi + N_pd + N_dx + N_x + N_u;
-    jmi_->offs_t = N_ci + N_cd + N_pi + N_pd + N_dx + N_x + N_u + N_w;
+	jmi_init(jmi, N_ci, N_cd, N_pi, N_pd, N_dx,
+			      N_x, N_u, N_w);
 
-    jmi_->n_z = N_ci + N_cd + N_pi + N_pd + N_dx +
-                N_x + N_u + N_w + 1;
+	int dF_n_nz;
+	vdp_dae_jac_sd_F_n_nz(&dF_n_nz);
+	int* dF_irow = (int*)calloc(dF_n_nz,sizeof(int));
+	int* dF_icol = (int*)calloc(dF_n_nz,sizeof(int));
+	vdp_dae_jac_sd_F_nz_indices(dF_irow,dF_icol);
 
-    jmi_->z = (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t));
+	jmi_dae_init(*jmi, vdp_dae_F, N_eq_F, vdp_dae_jac_sd_F,
+			          dF_n_nz, dF_irow, dF_icol);
 
-	// Set up the dae struct
-    dae->n_eq_F = N_eq_F;
-    dae->F = &vdp_dae_F;
-	dae->dF = &vdp_dae_jac_sd_F;
-	vdp_dae_jac_sd_F_n_nz(&dae->dF_n_nz);
-	dae->dF_irow = (int*)calloc(dae->dF_n_nz,sizeof(int));
-	dae->dF_icol = (int*)calloc(dae->dF_n_nz,sizeof(int));
-	vdp_dae_jac_sd_F_nz_indices(dae->dF_irow,dae->dF_icol);
-	dae->ad = NULL;
+	free(dF_irow);
+	free(dF_icol);
 
 	return 0;
 }
 
-int jmi_delete(jmi_t* jmi){
-	if(jmi->dae != NULL) {
-		free(jmi->dae->dF_irow);
-		free(jmi->dae->dF_icol);
-		free(jmi->dae);
-	}
-	if(jmi->init != NULL) {
-		free(jmi->init);
-	}
-	if(jmi->opt != NULL) {
-		free(jmi->opt);
-	}
-	// TODO: Check der structs if not NULL return error and the user has to deallocate them first.
-    free(jmi->z);
-	free(jmi);
-
-	return 0;
-}
-
-
+#if defined __cplusplus
+    }
+#endif
