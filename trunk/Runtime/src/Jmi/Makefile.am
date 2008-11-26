@@ -18,6 +18,7 @@ libjmi_cppad_la_SOURCES = jmi.h \
                     jmi_cppad.cpp
 
 libjmi_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD 
+libjmi_cppad_la_LDFLAGS = -no-undefined
 
 include_HEADERS = jmi.h 
 #		  jmi_cppad.hpp

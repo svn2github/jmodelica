@@ -63,8 +63,8 @@ am_libjmi_cppad_la_OBJECTS = libjmi_cppad_la-jmi_cppad.lo
 libjmi_cppad_la_OBJECTS = $(am_libjmi_cppad_la_OBJECTS)
 libjmi_cppad_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
-	$(libjmi_cppad_la_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
+	$(libjmi_cppad_la_CXXFLAGS) $(CXXFLAGS) \
+	$(libjmi_cppad_la_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -152,6 +152,7 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -224,6 +225,7 @@ libjmi_cppad_la_SOURCES = jmi.h \
                     jmi_cppad.cpp
 
 libjmi_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD 
+libjmi_cppad_la_LDFLAGS = -no-undefined
 include_HEADERS = jmi.h 
 all: all-am
 
