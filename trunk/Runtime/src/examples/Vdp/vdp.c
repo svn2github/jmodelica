@@ -5,9 +5,11 @@
 #include <stdlib.h>
 #include "../../Jmi/jmi.h"
 
+/*
 #if defined __cplusplus
         extern "C" {
 #endif
+*/
 
 static const int N_ci = 0;
 static const int N_cd = 0;
@@ -19,16 +21,22 @@ static const int N_u = 1;
 static const int N_w = 0;
 static const int N_eq_F = 3;
 
-#define p1 jmi->z[jmi->offs_pi]
-#define dx1 jmi->z[jmi->offs_dx]
-#define dx2 jmi->z[jmi->offs_dx+1]
-#define dx3 jmi->z[jmi->offs_dx+2]
-#define x1 jmi->z[jmi->offs_x]
-#define x2 jmi->z[jmi->offs_x+1]
-#define x3 jmi->z[jmi->offs_x+2]
-#define u1 jmi->z[jmi->offs_u]
+#define ci(i) ((*(jmi->z))[jmi->offs_ci+i])
+#define cd(i) ((*(jmi->z))[jmi->offs_cd+i])
+#define pi(i) ((*(jmi->z))[jmi->offs_pi+i])
+#define pd(i) ((*(jmi->z))[jmi->offs_pd+i])
+#define dx(i) ((*(jmi->z))[jmi->offs_dx+i])
+#define x(i) ((*(jmi->z))[jmi->offs_x+i])
+#define u(i) ((*(jmi->z))[jmi->offs_u+i])
+#define w(i) ((*(jmi->z))[jmi->offs_w+i])
+#define tt ((*(jmi->z))[jmi->offs_t])
 
-static jmi_dae_F_t vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_t res) {
+	  // TODO: This does not work...
+//static jmi_dae_F_t vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_t res) {
+
+static int vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_p res) {
+
+  printf("vdp_dae_F: start\n");
 /*
 	jmi_real_t* ci;
 	jmi_real_t* cd;
@@ -62,17 +70,39 @@ static jmi_dae_F_t vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_t res) {
 	// vector. This probably gives a performance penalty, but it
 	// is necessary in order to have generated code that can
 	// be compiled both with and without AD.
-	int i;
-	for (i=0;i<jmi->n_z;i++) {
-		jmi->z[i] = jmi->z_val[i];
-		printf("-- %f\n",jmi->z_val[i]);
-		printf("--- %f\n",jmi->z[i]);
-	}
 
-	res[0] = (1-x2*x2)*x1 - x2 + u1 - dx1;
-	res[1] = p1*x1 - dx2;
-	res[2] = x1*x1 + x2*x2 + u1*u1 - dx3;
+  //  #if JMI_AD == JMI_AD_CPPAD
+    // int i;
+  // for (i=0;i<jmi->n_z;i++) {
+  //  printf("*--* %f\n",CppAD::Value((*(jmi->z))[i]));
+  // }
+  //#endif
 
+
+
+  (*res)[0] = (1-x(1)*x(1))*x(0) - x(1) + u(0) - dx(0);
+  (*res)[1] = pi(0)*x(0) - dx(1);
+  (*res)[2] = x(0)*x(0) + x(1)*x(1) + u(0)*u(0) - dx(2);
+
+	/*
+   #if JMI_AD == JMI_AD_CPPAD
+   double qwe;  
+   int i;
+   for (i=0;i<jmi->n_z;i++) {
+  
+     qwe = res[i];
+  printf("*--* %f\n",qwe);
+   }
+ #endif
+	*/
+
+  printf("vdp_dae_F: stop\n");
+
+	/*	
+      	printf("vdp_dae_F: res[0] = %f\n",res[0]);
+	printf("vdp_dae_F: res[1] = %f\n",res[1]);
+	printf("vdp_dae_F: res[2] = %f\n",res[2]);
+	*/
 	return 0;
 }
 
@@ -80,7 +110,11 @@ static jmi_dae_F_t vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_t res) {
  * TODO: This code can certainly be improved and optimized. For example, macros would probably
  * make it easier to read.
  */
-static jmi_dae_dF_t vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_vec_t jac) {
+
+// TODO: This does not work...
+//static jmi_dae_dF_t vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_vec_t jac) {
+
+static int vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_vec_t jac) {
 
 	jmi_real_t* ci;
 	jmi_real_t* cd;
@@ -442,7 +476,7 @@ int jmi_new(jmi_t** jmi) {
 	int* dF_icol = (int*)calloc(dF_n_nz,sizeof(int));
 	vdp_dae_jac_sd_F_nz_indices(dF_irow,dF_icol);
 
-	jmi_dae_init(*jmi, vdp_dae_F, N_eq_F, vdp_dae_jac_sd_F,
+	jmi_dae_init(*jmi, *vdp_dae_F, N_eq_F, *vdp_dae_jac_sd_F,
 			          dF_n_nz, dF_irow, dF_icol);
 
 	free(dF_irow);
@@ -450,7 +484,8 @@ int jmi_new(jmi_t** jmi) {
 
 	return 0;
 }
-
+/*
 #if defined __cplusplus
     }
 #endif
+*/

@@ -12,11 +12,36 @@
 int main(int argv, char* argc[])
 {
 
+  
+  std::vector< CppAD::AD<double> > *xad = new std::vector< CppAD::AD<double> >(1);
+  std::vector< CppAD::AD<double> > *yad = new std::vector< CppAD::AD<double> >(1);
+
+   (*xad)[0] = 2;
+
+  CppAD::Independent(*xad);
+  (*yad)[0] = ((*xad)[0])*((*xad)[0]);
+  CppAD::ADFun<double> *f = new CppAD::ADFun<double>(*xad,*yad);
+
+  std::vector<double> *xx = new std::vector<double>(1);
+  std::vector<double> *yy = new std::vector<double>(1);
+  
+(*xx)[0] = 2;
+
+  *yy = f->Forward(0,*xx);
+
+  printf("CppAD_test: x=%f, y=%f\n",(*xx)[0],(*yy)[0]);
+  
+
+
 	jmi_t* jmi;
 	// Create a new Jmi object.
 	jmi_new(&jmi);
 
 	int i;
+
+	for (i=0;i<9;i++) {
+	  printf("**-1- %X, %f\n",(int)&((*(jmi->z_val))[i]),(*(jmi->z_val))[i]);
+	}
 
 	std::vector<double> q = *(new std::vector<double>(5));
 	for (i=0;i<5;i++) {
@@ -57,6 +82,7 @@ int main(int argv, char* argc[])
 */
 
 
+
 	jmi_real_t* ci;
 	jmi_real_t* cd;
 	jmi_real_t* pi;
@@ -76,6 +102,11 @@ int main(int argv, char* argc[])
 	jmi_get_u(jmi, &u);
 	jmi_get_w(jmi, &w);
 	jmi_get_t(jmi, &t_);
+
+	for (i=0;i<9;i++) {
+	  printf("**-2- %X, %f\n",(int)&((*(jmi->z_val))[i]),(*(jmi->z_val))[i]);
+	}
+
 
 	/*
 	jmi_real_t* res_F = (jmi_real_t*)calloc(jmi->dae->n_eq_F,sizeof(jmi_real_t));
@@ -98,13 +129,49 @@ int main(int argv, char* argc[])
 	x[1] = 2;
 	x[2] = 3;
 
+
+
+	for (i=0;i<9;i++) {
+	  printf("**-3- %X, %f\n",(int)&((*(jmi->z_val))[i]),(*(jmi->z_val))[i]);
+	}
+
+	  printf("** ci - %X\n",(int)&(ci[0]));
+	  printf("** cd - %X\n",(int)&(cd[0]));
+	  printf("** pi - %X\n",(int)&(pi[0]));
+	  printf("** pd - %X\n",(int)&(pd[0]));
+	  printf("** dx - %X\n",(int)&(dx[0]));
+	  printf("** x - %X\n",(int)&(x[0]));
+	  printf("** u - %X\n",(int)&(u[0]));
+	  printf("** w - %X\n",(int)&(w[0]));
+	  printf("** t - %X\n",(int)&(t_[0]));
+
+	  printf(">** offs_ci - %d\n",jmi->offs_ci);
+	  printf(">** offs_cd - %d\n",jmi->offs_cd);
+	  printf(">** offs_pi - %d\n",jmi->offs_pi);
+	  printf(">** offs_pd - %d\n",jmi->offs_pd);
+	  printf(">** offs_dx - %d\n",jmi->offs_dx);
+	  printf(">** offs_x - %d\n",jmi->offs_x);
+	  printf(">** offs_u - %d\n",jmi->offs_u);
+	  printf(">** offs_w - %d\n",jmi->offs_w);
+	  printf(">** offs_t - %d\n",jmi->offs_t);
+
+	for (i=0;i<3;i++) {
+	  printf("** x - %X\n",(int)&(x[i]));
+
+	}
+
+	for (i=0;i<3;i++) {
+	  printf("** dx - %X\n",(int)&(dx[i]));
+
+	}
+
+	for (i=0;i<9;i++) {
+	  printf("**-4- %X, %f\n",(int)&((*(jmi->z_val))[i]),(*(jmi->z_val))[i]);
+	}
+
 	printf("** * %f\n",x[0]);
 	printf("** * %f\n",x[1]);
 	printf("** * %f\n",x[2]);
-	printf("** * %f\n",jmi->z_val[jmi->offs_x + 0]);
-	printf("** * %f\n",jmi->z_val[jmi->offs_x +1]);
-	printf("** * %f\n",jmi->z_val[jmi->offs_x +2]);
-
 
 	jmi_ad_init(jmi);
 
