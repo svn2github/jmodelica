@@ -5,12 +5,6 @@
 #include <stdlib.h>
 #include "../../Jmi/jmi.h"
 
-/*
-#if defined __cplusplus
-        extern "C" {
-#endif
-*/
-
 static const int N_ci = 0;
 static const int N_cd = 0;
 static const int N_pi = 1;
@@ -31,79 +25,26 @@ static const int N_eq_F = 3;
 #define w(i) ((*(jmi->z))[jmi->offs_w+i])
 #define tt ((*(jmi->z))[jmi->offs_t])
 
-	  // TODO: This does not work...
+// TODO: This does not work...
 //static jmi_dae_F_t vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_t res) {
-
-static int vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_p res) {
-
-  printf("vdp_dae_F: start\n");
 /*
-	jmi_real_t* ci;
-	jmi_real_t* cd;
-	jmi_real_t* pi;
-	jmi_real_t* pd;
-	jmi_real_t* dx;
-	jmi_real_t* x;
-	jmi_real_t* u;
-	jmi_real_t* w;
-	jmi_real_t* t_;
-	jmi_real_t t;
-
-	jmi_get_ci(jmi, &ci);
-	jmi_get_cd(jmi, &cd);
-	jmi_get_pi(jmi, &pi);
-	jmi_get_pd(jmi, &pd);
-	jmi_get_dx(jmi, &dx);
-	jmi_get_x(jmi, &x);
-	jmi_get_u(jmi, &u);
-	jmi_get_w(jmi, &w);
-	jmi_get_t(jmi, &t_);
-
-	t = t_[0];
-
-	res[0] = (1-x[1]*x[1])*x[0] - x[1] + u[0] - dx[0];
-	res[1] = pi[0]*x[0] - dx[1];
-	res[2] = x[0]*x[0] + x[1]*x[1] + u[0]*u[0] - dx[2];
-*/
-
-	// Copy the values that are set by the user to the "active"
-	// vector. This probably gives a performance penalty, but it
-	// is necessary in order to have generated code that can
-	// be compiled both with and without AD.
-
-  //  #if JMI_AD == JMI_AD_CPPAD
-    // int i;
-  // for (i=0;i<jmi->n_z;i++) {
-  //  printf("*--* %f\n",CppAD::Value((*(jmi->z))[i]));
-  // }
-  //#endif
-
-
+ * The res argument is of type pointer to a vector. This means that
+ * in the case of no AD, the type of res is double**. This is
+ * necessary in order to accommodate the AD case, in which case
+ * the type of res is vector< CppAD::AD<double> >. In C++, it would
+ * be ok to pass such an object by reference, using the & operator:
+ * 'vector< CppAD::AD<double> > &res'. However, since we would like
+ * to be able to compile the code both with a C and a C++ compiler
+ * this solution does not work. Probably not too bad, since we can use
+ * macros.
+ */
+static int vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_p res) {
 
   (*res)[0] = (1-x(1)*x(1))*x(0) - x(1) + u(0) - dx(0);
   (*res)[1] = pi(0)*x(0) - dx(1);
   (*res)[2] = x(0)*x(0) + x(1)*x(1) + u(0)*u(0) - dx(2);
 
-	/*
-   #if JMI_AD == JMI_AD_CPPAD
-   double qwe;  
-   int i;
-   for (i=0;i<jmi->n_z;i++) {
-  
-     qwe = res[i];
-  printf("*--* %f\n",qwe);
-   }
- #endif
-	*/
-
-  printf("vdp_dae_F: stop\n");
-
-	/*	
-      	printf("vdp_dae_F: res[0] = %f\n",res[0]);
-	printf("vdp_dae_F: res[1] = %f\n",res[1]);
-	printf("vdp_dae_F: res[2] = %f\n",res[2]);
-	*/
-	return 0;
+  return 0;
 }
 
 /*
@@ -114,7 +55,7 @@ static int vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_p res) {
 // TODO: This does not work...
 //static jmi_dae_dF_t vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_vec_t jac) {
 
-static int vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_vec_t jac) {
+static int vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac) {
 
 	jmi_real_t* ci;
 	jmi_real_t* cd;
@@ -141,39 +82,12 @@ static int vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_r
 
 	int i;
 	int jac_n = N_eq_F;
-	int jac_m = 0;
 	int col_index = 0;
 
-	if (!(skip & JMI_DER_PI_SKIP)) {
-		for (i=0;i<N_pi;i++) {
-			jac_m += mask[col_index++];
-		}
-	}
-	if (!(skip & JMI_DER_PD_SKIP)) {
-		for (i=0;i<N_pd;i++) {
-			jac_m += mask[col_index++];
-		}
-	}
-	if (!(skip & JMI_DER_DX_SKIP)) {
-		for (i=0;i<N_dx;i++) {
-			jac_m += mask[col_index++];
-		}
-	}
-	if (!(skip & JMI_DER_X_SKIP)) {
-		for (i=0;i<N_x;i++) {
-			jac_m += mask[col_index++];
-		}
-	}
-	if (!(skip & JMI_DER_U_SKIP)) {
-		for (i=0;i<N_u;i++) {
-			jac_m += mask[col_index++];
-		}
-	}
-	if (!(skip & JMI_DER_W_SKIP)) {
-		for (i=0;i<N_w;i++) {
-			jac_m += mask[col_index++];
-		}
-	}
+
+	int jac_m;
+	int jac_n_nz;
+	jmi_dae_dF_dim(jmi,sparsity,skip,mask,&jac_m,&jac_n_nz);
 
 	// Set Jacobian to zero if dense evaluation.
 	if ((sparsity & JMI_DER_DENSE_ROW_MAJOR) | (sparsity & JMI_DER_DENSE_COL_MAJOR)) {
@@ -463,7 +377,7 @@ static int vdp_dae_jac_sd_F_nz_indices(int* row, int* col) {
 	return 0;
 }
 
-// This is the init function
+// This is the new function
 int jmi_new(jmi_t** jmi) {
 
 
@@ -484,8 +398,3 @@ int jmi_new(jmi_t** jmi) {
 
 	return 0;
 }
-/*
-#if defined __cplusplus
-    }
-#endif
-*/

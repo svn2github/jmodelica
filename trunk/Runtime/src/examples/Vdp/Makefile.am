@@ -21,8 +21,8 @@ vdp_cppad_SOURCES = vdp.c \
 
 nodist_EXTRA_vdp_cppad_SOURCES = dummy.cpp
 
-vdp_cppad_CFLAGS = -Wall -I../../Jmi -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD -x c++
-vdp_cppad_CXXFLAGS = -Wall -I../../Jmi -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD
+vdp_cppad_CFLAGS = -Wall -I../../Jmi -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD -x c++ 
+vdp_cppad_CXXFLAGS = -Wall -I../../Jmi -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD 
 
 vdp_cppad_LDADD = ../../Jmi/libjmi_cppad.la
 
@@ -32,7 +32,7 @@ lib_LTLIBRARIES = libvdp.la
 #                  libvdp_cppad.la
 
 libvdp_la_SOURCES = vdp.c
-libvdp_la_CFLAGS = -Wall -I../../Jmi -DJMI_AD=JMI_AD_NONE
+libvdp_la_CFLAGS = -Wall -I../../Jmi -DJMI_AD=JMI_AD_NONE 
 libvdp_la_LDFLAGS = -no-undefined
 libvdp_la_LIBADD = ../../Jmi/libjmi.la
 

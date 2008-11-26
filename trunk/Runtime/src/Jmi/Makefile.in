@@ -152,7 +152,6 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
-SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -215,7 +214,7 @@ lib_LTLIBRARIES = libjmi.la \
 libjmi_la_SOURCES = jmi.h \
                     jmi.c
 
-libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE
+libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE 
 
 #libjmi_la_LIBADD = $(JMALLLIBS)
 #libjmi_la_DEPENDENCIES = $(JMALLLIBS)
@@ -224,7 +223,7 @@ libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE
 libjmi_cppad_la_SOURCES = jmi.h \
                     jmi_cppad.cpp
 
-libjmi_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD
+libjmi_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD 
 include_HEADERS = jmi.h 
 all: all-am
 

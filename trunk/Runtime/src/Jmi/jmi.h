@@ -101,13 +101,16 @@
 #define JMI_DER_DENSE_COL_MAJOR 2
 #define JMI_DER_DENSE_ROW_MAJOR 4
 
-#define JMI_DER_PI_SKIP 1
-#define JMI_DER_PD_SKIP 2
-#define JMI_DER_DX_SKIP 4
-#define JMI_DER_X_SKIP 8
-#define JMI_DER_U_SKIP 16
-#define JMI_DER_W_SKIP 32
-#define JMI_DER_T_SKIP 64
+#define JMI_DER_NO_SKIP 0
+#define JMI_DER_CI_SKIP 1
+#define JMI_DER_CD_SKIP 2
+#define JMI_DER_PI_SKIP 4
+#define JMI_DER_PD_SKIP 8
+#define JMI_DER_DX_SKIP 16
+#define JMI_DER_X_SKIP 32
+#define JMI_DER_U_SKIP 64
+#define JMI_DER_W_SKIP 128
+#define JMI_DER_T_SKIP 256
 
 #define JMI_AD_NONE 0
 #define JMI_AD_CPPAD 1
@@ -221,7 +224,7 @@ extern "C" {
   /**
    * Evaluation of symbolic jacobian in generated code.
    */
-  typedef int (*jmi_dae_dF_t)(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_vec_t jac);
+  typedef int (*jmi_dae_dF_t)(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac);
 
   /**
    * Struct describing a DAE model including evaluation of the DAE residual and (optional) a symbolic
@@ -396,6 +399,14 @@ extern "C" {
    */
   int jmi_dae_dF_nz_indices(jmi_t* jmi, int* row, int* col);
 
+
+  /**
+   * This helper function computes the number of columns and the number of non zero
+   * elements in the jacobian given a sparsity configuration. Symbolic Jacobian.
+   */
+  int jmi_dae_dF_dim(jmi_t* jmi, int sparsity, int skip, int *mask,
+		             int *dF_n_cols, int *dF_n_nz);
+
   /**
    * Evaluate the Jacobian of the DAE residual function by means of an automatic
    * differentiation algorithm.
@@ -414,6 +425,12 @@ extern "C" {
    */
   int jmi_dae_dF_nz_indices_ad(jmi_t* jmi, int* row, int* col);
 
+  /**
+   * This helper function computes the number of columns and the number of non zero
+   * elements in the jacobian given a sparsity configuration. AD Jacobian.
+   */
+  int jmi_dae_dF_dim_ad(jmi_t* jmi, int sparsity, int skip, int *mask,
+		                int *dF_n_cols, int *dF_n_nz);
 
 #if defined __cplusplus
 }

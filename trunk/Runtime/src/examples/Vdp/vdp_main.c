@@ -16,12 +16,14 @@ int main(int argv, char* argc[])
 	int* dF_row = (int*)calloc(dF_n_nz,sizeof(int));
 	int* dF_col = (int*)calloc(dF_n_nz,sizeof(int));
 
-	int dF_n_dense = (jmi->n_pi +
+	int dF_n_dense = (jmi->n_ci +
+			jmi->n_cd +
+			jmi->n_pi +
 			jmi->n_pd +
 			jmi->n_dx +
 			jmi->n_x +
 			jmi->n_u +
-			jmi->n_w) * jmi->dae->n_eq_F;
+			jmi->n_w + 1) * jmi->dae->n_eq_F;
 
 	printf("Number of interactive constants:               %d\n",jmi->n_ci);
 	printf("Number of dependent constants:                 %d\n",jmi->n_cd);
@@ -97,10 +99,71 @@ int main(int argv, char* argc[])
 		printf("%d, %d\n",dF_row[i],dF_col[i]);
 	}
 
-	int* mask = (int*)calloc(dF_n_nz,sizeof(int));
+	int* mask = (int*)calloc(jmi->n_z,sizeof(int));
 	for(i=0;i<dF_n_nz;i++) {
 		mask[i]=1;
 	}
+
+	// Compute the size of the Jacobian for different sparsity configurations
+	int dF_n_nz_test;
+	int dF_n_cols_test;
+    jmi_dae_dF_dim(jmi,JMI_DER_DENSE_ROW_MAJOR,JMI_DER_CI_SKIP|
+    		JMI_DER_CD_SKIP|
+    		JMI_DER_CI_SKIP|
+    		JMI_DER_PI_SKIP|
+    		JMI_DER_PD_SKIP|
+    		JMI_DER_DX_SKIP|
+    		JMI_DER_U_SKIP|
+    		JMI_DER_W_SKIP|
+    		JMI_DER_T_SKIP,mask,&dF_n_cols_test,&dF_n_nz_test);
+	printf("Dense dF_dx: dF_n_cols: %d, dF_n_nz: %d\n", dF_n_cols_test, dF_n_nz_test);
+
+    jmi_dae_dF_dim(jmi,JMI_DER_SPARSE,JMI_DER_CI_SKIP|
+    		JMI_DER_CD_SKIP|
+    		JMI_DER_CI_SKIP|
+    		JMI_DER_PI_SKIP|
+    		JMI_DER_PD_SKIP|
+    		JMI_DER_DX_SKIP|
+    		JMI_DER_U_SKIP|
+    		JMI_DER_W_SKIP|
+    		JMI_DER_T_SKIP,mask,&dF_n_cols_test,&dF_n_nz_test);
+	printf("Sparse dF_dx: dF_n_cols: %d, dF_n_nz: %d\n", dF_n_cols_test, dF_n_nz_test);
+
+    jmi_dae_dF_dim(jmi,JMI_DER_SPARSE,JMI_DER_CI_SKIP|
+    		JMI_DER_CD_SKIP|
+    		JMI_DER_CI_SKIP|
+    		JMI_DER_PI_SKIP|
+    		JMI_DER_PD_SKIP|
+    		JMI_DER_DX_SKIP|
+    		JMI_DER_X_SKIP|
+    		JMI_DER_W_SKIP|
+    		JMI_DER_T_SKIP,mask,&dF_n_cols_test,&dF_n_nz_test);
+	printf("Sparse dF_du: dF_n_cols: %d, dF_n_nz: %d\n", dF_n_cols_test, dF_n_nz_test);
+
+
+	mask[jmi->offs_x+1] = 0;
+	mask[jmi->offs_x+2] = 0;
+    jmi_dae_dF_dim(jmi,JMI_DER_SPARSE,JMI_DER_CI_SKIP/
+    		JMI_DER_CD_SKIP|
+    		JMI_DER_CI_SKIP|
+    		JMI_DER_PI_SKIP|
+    		JMI_DER_PD_SKIP|
+    		JMI_DER_DX_SKIP|
+    		JMI_DER_U_SKIP|
+    		JMI_DER_W_SKIP|
+    		JMI_DER_T_SKIP,mask,&dF_n_cols_test,&dF_n_nz_test);
+	printf("Sparse, first column of dF_dx: dF_n_cols: %d, dF_n_nz: %d\n", dF_n_cols_test, dF_n_nz_test);
+
+	mask[jmi->offs_x+1] = 1;
+	mask[jmi->offs_x+2] = 1;
+
+	jmi_dae_dF_dim(jmi,JMI_DER_SPARSE,JMI_DER_NO_SKIP,mask,&dF_n_cols_test,&dF_n_nz_test);
+	printf("Sparse dF_dz: dF_n_cols: %d, dF_n_nz: %d\n", dF_n_cols_test, dF_n_nz_test);
+
+	jmi_dae_dF_dim(jmi,JMI_DER_DENSE_COL_MAJOR,JMI_DER_NO_SKIP,mask,&dF_n_cols_test,&dF_n_nz_test);
+	printf("Dense dF_dz: dF_n_cols: %d, dF_n_nz: %d\n", dF_n_cols_test, dF_n_nz_test);
+
+
     jmi_dae_dF(jmi,JMI_DER_SPARSE,0,mask,dF);
 	printf("Jacobian (sparse):\n");
 	for (i=0;i<dF_n_nz;i++) {

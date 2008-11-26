@@ -87,10 +87,10 @@ int jmi_ad_init(jmi_t* jmi) {
 
   // Compute the tape for all variables.
   // The z vector is assumed to be initialized previously by the user
-  
+
   // Copy user's value into jmi->z
   for (i=0;i<jmi->n_z;i++) {
-    (*(jmi->z))[i] = (*(jmi->z_val))[i];   
+    (*(jmi->z))[i] = (*(jmi->z_val))[i];
   }
   CppAD::Independent(*jmi->z);
   jmi->dae->F(jmi, jdad->F_z_dependent);
@@ -167,7 +167,7 @@ int jmi_ad_init(jmi_t* jmi) {
       jdad->dF_pi_n_nz++;
     } else if (jdad->dF_z_icol[i]-1 >= jmi->offs_pd &&
                jdad->dF_z_icol[i]-1 < jmi->offs_dx) {
-      jdad->dF_pd_n_nz++;    
+      jdad->dF_pd_n_nz++;
     } else if (jdad->dF_z_icol[i]-1 >= jmi->offs_dx &&
                jdad->dF_z_icol[i]-1 < jmi->offs_x) {
       jdad->dF_dx_n_nz++;
@@ -176,14 +176,14 @@ int jmi_ad_init(jmi_t* jmi) {
       jdad->dF_x_n_nz++;
     } else if (jdad->dF_z_icol[i]-1 >= jmi->offs_u &&
                jdad->dF_z_icol[i]-1 < jmi->offs_w) {
-      jdad->dF_u_n_nz++;    
+      jdad->dF_u_n_nz++;
     } else if (jdad->dF_z_icol[i]-1 >= jmi->offs_w &&
                jdad->dF_z_icol[i]-1 < jmi->offs_t) {
-      jdad->dF_w_n_nz++;    
+      jdad->dF_w_n_nz++;
     } else if (jdad->dF_z_icol[i]-1 >= jmi->offs_t) {
-      jdad->dF_t_n_nz++;    
-    }    
-    
+      jdad->dF_t_n_nz++;
+    }
+
   }
 
   jdad->dF_ci_irow = (int*)calloc(jdad->dF_ci_n_nz,sizeof(int));
@@ -290,11 +290,14 @@ int jmi_ad_init(jmi_t* jmi) {
   }
   */
 
+  //jdad->res_w = new jmi_real_vec_t(jmi->dae->n_eq_F);
+
   return 0;
 
 }
 
 int jmi_delete(jmi_t* jmi){
+	/*
   if(jmi->dae != NULL) {
     free(jmi->dae->dF_irow);
     free(jmi->dae->dF_icol);
@@ -313,10 +316,16 @@ int jmi_delete(jmi_t* jmi){
   delete &jmi->z;
   delete &jmi->z_val;
   free(jmi);
-
+*/
   return 0;
 }
 
+/*
+ * This strategy may be a bit risky: pointers to
+ * memory allocated by a vector oject is given
+ * to users. Pros: Less copying of memory. Cons:
+ * the vector object must not be resized etc.
+ */
 int jmi_get_ci(jmi_t* jmi, jmi_real_t** ci) {
   *ci = &((*(jmi->z_val))[jmi->offs_ci]);
   return 0;
@@ -360,5 +369,755 @@ int jmi_get_w(jmi_t* jmi, jmi_real_t** w) {
 int jmi_get_t(jmi_t* jmi, jmi_real_t** t) {
   *t = &((*(jmi->z_val))[jmi->offs_t]);
   return 0;
+}
+
+int jmi_dae_F(jmi_t* jmi, jmi_real_t* res) {
+	int i;
+	// No need to copy anything: jmi->z_val is used for evaluation.
+	// This may have to change, however.
+
+	// TODO: In this operation the intermediate residual storage res_w
+	// is allocated upon every call. Is there a way to avoid this?
+	jmi_real_vec_t res_w = jmi->dae->ad->F_z_tape->Forward(0,*jmi->z_val);
+	for(i=0;i<jmi->dae->n_eq_F;i++) {
+		res[i] = res_w[i];
+	}
+
+	return 0;
+}
+
+
+int jmi_dae_dF(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac) {
+	if (jmi->dae->dF==NULL) {
+		return -1;
+	}
+	jmi->dae->dF(jmi, sparsity, skip, mask, jac);
+	return 0;
+}
+
+int jmi_dae_dF_n_nz(jmi_t* jmi, int* n_nz) {
+	if (jmi->dae->dF==NULL) {
+		return -1;
+	}
+	*n_nz = jmi->dae->dF_n_nz;
+	return 0;
+}
+
+int jmi_dae_dF_nz_indices(jmi_t* jmi, int* row, int* col) {
+	if (jmi->dae->dF==NULL) {
+		return -1;
+	}
+	int i;
+	for (i=0;i<jmi->dae->dF_n_nz;i++) {
+		row[i] = jmi->dae->dF_irow[i];
+		col[i] = jmi->dae->dF_icol[i];
+	}
+	return 0;
+}
+
+int jmi_dae_dF_dim(jmi_t* jmi, int sparsity, int skip, int *mask,
+		             int *dF_n_cols, int *dF_n_nz) {
+	if (jmi->dae->dF==NULL) {
+		return -1;
+	}
+
+	*dF_n_cols = 0;
+	*dF_n_nz = 0;
+
+	int i,j;
+	int col_index = 0;
+
+	if (!(skip & JMI_DER_CI_SKIP)) {
+		for (i=0;i<jmi->n_ci;i++) {
+			if (mask[col_index]) {
+				(*dF_n_cols)++;
+				if (sparsity & JMI_DER_SPARSE) {
+					for (j=0;j<jmi->dae->dF_n_nz;j++) {
+						//printf("%d, %d, %d\n",jmi->dae->dF_n_nz,jmi->dae->dF_icol[j]-1,col_index);
+						(*dF_n_nz) += jmi->dae->dF_icol[j]-1 == col_index? 1 : 0;
+					}
+				} else {
+					(*dF_n_nz) += jmi->dae->n_eq_F;
+				}
+			}
+			col_index++;
+		}
+	} else {
+		col_index += jmi->n_ci;
+	}
+	if (!(skip & JMI_DER_CD_SKIP)) {
+		for (i=0;i<jmi->n_cd;i++) {
+			if (mask[col_index]) {
+				(*dF_n_cols)++;
+				if (sparsity & JMI_DER_SPARSE) {
+					for (j=0;j<jmi->dae->dF_n_nz;j++) {
+						//printf("%d, %d, %d\n",jmi->dae->dF_n_nz,jmi->dae->dF_icol[j]-1,col_index);
+						(*dF_n_nz) += jmi->dae->dF_icol[j]-1 == col_index? 1 : 0;
+					}
+				} else {
+					(*dF_n_nz) += jmi->dae->n_eq_F;
+				}
+			}
+			col_index++;
+		}
+	} else {
+		col_index += jmi->n_ci;
+	}
+	if (!(skip & JMI_DER_PI_SKIP)) {
+		for (i=0;i<jmi->n_pi;i++) {
+			if (mask[col_index]) {
+				(*dF_n_cols)++;
+				if (sparsity & JMI_DER_SPARSE) {
+					for (j=0;j<jmi->dae->dF_n_nz;j++) {
+						//printf("%d, %d, %d\n",jmi->dae->dF_n_nz,jmi->dae->dF_icol[j]-1,col_index);
+						(*dF_n_nz) += jmi->dae->dF_icol[j]-1 == col_index? 1 : 0;
+					}
+				} else {
+					(*dF_n_nz) += jmi->dae->n_eq_F;
+				}
+			}
+			col_index++;
+		}
+	} else {
+		col_index += jmi->n_pi;
+	}
+	if (!(skip & JMI_DER_PD_SKIP)) {
+		for (i=0;i<jmi->n_pd;i++) {
+			if (mask[col_index]) {
+				(*dF_n_cols)++;
+				if (sparsity & JMI_DER_SPARSE) {
+					for (j=0;j<jmi->dae->dF_n_nz;j++) {
+						//printf("%d, %d, %d\n",jmi->dae->dF_n_nz,jmi->dae->dF_icol[j]-1,col_index);
+						(*dF_n_nz) += jmi->dae->dF_icol[j]-1 == col_index? 1 : 0;
+					}
+				} else {
+					(*dF_n_nz) += jmi->dae->n_eq_F;
+				}
+			}
+			col_index++;
+		}
+	} else {
+		col_index += jmi->n_pd;
+	}
+	if (!(skip & JMI_DER_DX_SKIP)) {
+		for (i=0;i<jmi->n_dx;i++) {
+			if (mask[col_index]) {
+				(*dF_n_cols)++;
+				if (sparsity & JMI_DER_SPARSE) {
+					for (j=0;j<jmi->dae->dF_n_nz;j++) {
+						//printf("%d, %d, %d\n",jmi->dae->dF_n_nz,jmi->dae->dF_icol[j]-1,col_index);
+						(*dF_n_nz) += jmi->dae->dF_icol[j]-1 == col_index? 1 : 0;
+					}
+				} else {
+					(*dF_n_nz) += jmi->dae->n_eq_F;
+				}
+			}
+			col_index++;
+		}
+	} else {
+		col_index += jmi->n_dx;
+	}
+
+	if (!(skip & JMI_DER_X_SKIP)) {
+		for (i=0;i<jmi->n_x;i++) {
+			if (mask[col_index]) {
+				(*dF_n_cols)++;
+				if (sparsity & JMI_DER_SPARSE) {
+					for (j=0;j<jmi->dae->dF_n_nz;j++) {
+						//printf("%d, %d, %d\n",jmi->dae->dF_n_nz,jmi->dae->dF_icol[j]-1,col_index);
+						(*dF_n_nz) += jmi->dae->dF_icol[j]-1 == col_index? 1 : 0;
+					}
+				} else {
+					(*dF_n_nz) += jmi->dae->n_eq_F;
+				}
+			}
+			col_index++;
+		}
+	} else {
+		col_index += jmi->n_x;
+	}
+
+	if (!(skip & JMI_DER_U_SKIP)) {
+		for (i=0;i<jmi->n_u;i++) {
+			if (mask[col_index]) {
+				(*dF_n_cols)++;
+				if (sparsity & JMI_DER_SPARSE) {
+					for (j=0;j<jmi->dae->dF_n_nz;j++) {
+						//printf("%d, %d, %d\n",jmi->dae->dF_n_nz,jmi->dae->dF_icol[j]-1,col_index);
+						(*dF_n_nz) += jmi->dae->dF_icol[j]-1 == col_index? 1 : 0;
+					}
+				} else {
+					(*dF_n_nz) += jmi->dae->n_eq_F;
+				}
+			}
+			col_index++;
+		}
+	} else {
+		col_index += jmi->n_u;
+	}
+	if (!(skip & JMI_DER_W_SKIP)) {
+		for (i=0;i<jmi->n_w;i++) {
+			if (mask[col_index]) {
+				(*dF_n_cols)++;
+				if (sparsity & JMI_DER_SPARSE) {
+					for (j=0;j<jmi->dae->dF_n_nz;j++) {
+						//printf("%d, %d, %d\n",jmi->dae->dF_n_nz,jmi->dae->dF_icol[j]-1,col_index);
+						(*dF_n_nz) += jmi->dae->dF_icol[j]-1 == col_index? 1 : 0;
+					}
+				} else {
+					(*dF_n_nz) += jmi->dae->n_eq_F;
+				}
+			}
+			col_index++;
+		}
+	} else {
+		col_index += jmi->n_w;
+	}
+	if (!(skip & JMI_DER_T_SKIP)) {
+		for (i=0;i<1;i++) {
+			if (mask[col_index]) {
+				(*dF_n_cols)++;
+				if (sparsity & JMI_DER_SPARSE) {
+					for (j=0;j<jmi->dae->dF_n_nz;j++) {
+						//printf("%d, %d, %d\n",jmi->dae->dF_n_nz,jmi->dae->dF_icol[j]-1,col_index);
+						(*dF_n_nz) += jmi->dae->dF_icol[j]-1 == col_index? 1 : 0;
+					}
+				} else {
+					(*dF_n_nz) += jmi->dae->n_eq_F;
+				}
+			}
+			col_index++;
+		}
+	}
+
+	return 0;
+}
+
+
+#define JMI_DAE_COMPUTE_DF_PART(skip_mask, n_vars, dF_var_n_nz, dF_var_irow, dF_var_icol) {                               \
+if (!(skip & skip_mask)) {                                                      \
+	/* loop over all columns*/                                                         \
+                                                                                     \
+	for (i=0;i<n_vars;i++) {                                                      \
+		/*  check the mask if evaluation should be performed */                      \
+		if (mask[col_index + i] == 1) {                                             \
+			for (j=0;j<jmi->n_z;j++) {                                               \
+				d_z[j] = 0;                                                            \
+			}                                                                      \
+			d_z[col_index + i] = 1.;                                             \
+			/* Evaluate jacobian column */ \
+			jac_ = jmi->dae->ad->F_z_tape->Forward(1,d_z);  \
+			switch (sparsity) {  \
+			case JMI_DER_DENSE_COL_MAJOR: \
+				for(j=0;j<jmi->dae->n_eq_F;j++) { \
+					jac[jac_n*(col_index+i) + j] = jac_[j]; \
+				} \
+				break; \
+			case JMI_DER_DENSE_ROW_MAJOR: \
+				for(j=0;j<jmi->dae->n_eq_F;j++) { \
+					jac[jac_m*j + (col_index+i)] = jac_[j]; \
+				} \
+				break; \
+			case JMI_DER_SPARSE:\
+				for(j=0;j<dF_var_n_nz;j++) { \
+					if (dF_var_icol[j]-1 == col_index+i) { \
+						jac[jac_index++] = jac_[dF_var_irow[j]-1]; \
+					} \
+				}\
+			} \
+		} \
+	}\
+} \
+col_index += n_vars;\
+}\
+
+
+int jmi_dae_dF_ad(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac) {
+	if (jmi->dae->ad==NULL) {
+		return -1;
+	}
+
+	int i,j;
+
+	int jac_index = 0;
+	int col_index = 0;
+	int jac_n = jmi->dae->n_eq_F;
+
+	int jac_m;
+	int jac_n_nz;
+	jmi_dae_dF_dim_ad(jmi,sparsity,skip,mask,&jac_m,&jac_n_nz);
+
+	printf("****** %d\n",jac_m);
+
+	jmi_real_vec_t jac_(jmi->dae->n_eq_F);
+	jmi_real_vec_t d_z(jmi->n_z);
+
+	// Evaluate the tape for the current z-values
+	jmi->dae->ad->F_z_tape->Forward(0,*jmi->z_val);
+
+	// Set Jacobian to zero if dense evaluation.
+	if ((sparsity & JMI_DER_DENSE_ROW_MAJOR) | (sparsity & JMI_DER_DENSE_COL_MAJOR)) {
+		for (i=0;i<jac_n*jac_m;i++) {
+			jac[i] = 0;
+		}
+	}
+
+	JMI_DAE_COMPUTE_DF_PART(skip, jmi->n_ci, jmi->dae->ad->dF_ci_n_nz,jmi->dae->ad->dF_ci_irow, jmi->dae->ad->dF_ci_icol)
+	JMI_DAE_COMPUTE_DF_PART(skip, jmi->n_cd, jmi->dae->ad->dF_cd_n_nz,jmi->dae->ad->dF_cd_irow, jmi->dae->ad->dF_cd_icol)
+	JMI_DAE_COMPUTE_DF_PART(skip, jmi->n_pi, jmi->dae->ad->dF_pi_n_nz,jmi->dae->ad->dF_pi_irow, jmi->dae->ad->dF_pi_icol)
+	JMI_DAE_COMPUTE_DF_PART(skip, jmi->n_pd, jmi->dae->ad->dF_pd_n_nz,jmi->dae->ad->dF_pd_irow, jmi->dae->ad->dF_pd_icol)
+    JMI_DAE_COMPUTE_DF_PART(skip, jmi->n_dx, jmi->dae->ad->dF_dx_n_nz,jmi->dae->ad->dF_dx_irow, jmi->dae->ad->dF_dx_icol)
+    JMI_DAE_COMPUTE_DF_PART(skip, jmi->n_x, jmi->dae->ad->dF_x_n_nz,jmi->dae->ad->dF_x_irow, jmi->dae->ad->dF_x_icol)
+    JMI_DAE_COMPUTE_DF_PART(skip, jmi->n_u, jmi->dae->ad->dF_u_n_nz,jmi->dae->ad->dF_u_irow, jmi->dae->ad->dF_u_icol)
+    JMI_DAE_COMPUTE_DF_PART(skip, jmi->n_w, jmi->dae->ad->dF_w_n_nz,jmi->dae->ad->dF_w_irow, jmi->dae->ad->dF_w_icol)
+    JMI_DAE_COMPUTE_DF_PART(skip, 1, jmi->dae->ad->dF_t_n_nz,jmi->dae->ad->dF_t_irow, jmi->dae->ad->dF_t_icol)
+
+
+
+/*
+
+	if (jdad->F_pd_tape!=NULL && !(skip & JMI_DER_PD_SKIP)) {
+		// loop over all columns
+		// Evaluate the tape in forward mode
+		jdad->F_pd_tape->Forward(0,pd_);
+		std::vector<jmi_real_t> jac_(jmi->jmi_dae->n_eq_F);
+		std::vector<jmi_real_t> d_pd(jmi->jmi_dae->n_pd);
+		for (i=0;i<jmi->jmi_dae->n_pd;i++) {
+			// check the mask if evaluation should be performed
+			if (mask[col_index + i] == 1) {
+				for (j=0;j<jmi->jmi_dae->n_pd;j++) {
+					d_pd[j] = 0;
+				}
+				d_pd[i] = 1.;
+				// Evaluate jacobian column
+				jac_ = jdad->F_pd_tape->Forward(1,d_pd);
+				switch (sparsity) {
+				case JMI_DER_DENSE_COL_MAJOR:
+					for(j=0;j<jmi->jmi_dae->n_eq_F;j++) {
+						jac[jac_n*(col_index+i) + j] = jac_[j];
+					}
+					break;
+				case JMI_DER_DENSE_ROW_MAJOR:
+					for(j=0;j<jmi->jmi_dae->n_eq_F;j++) {
+						jac[jac_m*j + (col_index+i)] = jac_[j];
+					}
+					break;
+				case JMI_DER_SPARSE:
+					for(j=0;j<jdad->jac_F_pd_n_nz;j++) {
+						if (jdad->jac_F_pd_icol[j]-1 == col_index+i) {
+							jac[jac_index++] = jac_[jdad->jac_F_pd_irow[j]-1];
+						}
+					}
+				}
+			}
+		}
+	}
+	col_index += jmi->jmi_dae->n_pd;
+
+
+	if (jdad->F_dx_tape!=NULL && !(skip & JMI_DER_DX_SKIP)) {
+		// loop over all columns
+		// Evaluate the tape in forward mode
+		jdad->F_dx_tape->Forward(0,dx_);
+		std::vector<jmi_real_t> jac_(jmi->jmi_dae->n_eq_F);
+		std::vector<jmi_real_t> d_dx(jmi->jmi_dae->n_dx);
+		for (i=0;i<jmi->jmi_dae->n_dx;i++) {
+			// check the mask if evaluation should be performed
+			if (mask[col_index + i] == 1) {
+				for (j=0;j<jmi->jmi_dae->n_dx;j++) {
+					d_dx[j] = 0;
+				}
+				d_dx[i] = 1.;
+				// Evaluate jacobian column
+				jac_ = jdad->F_dx_tape->Forward(1,d_dx);
+				switch (sparsity) {
+				case JMI_DER_DENSE_COL_MAJOR:
+					for(j=0;j<jmi->jmi_dae->n_eq_F;j++) {
+						jac[jac_n*(col_index+i) + j] = jac_[j];
+					}
+					break;
+				case JMI_DER_DENSE_ROW_MAJOR:
+					for(j=0;j<jmi->jmi_dae->n_eq_F;j++) {
+						jac[jac_m*j + (col_index+i)] = jac_[j];
+					}
+					//					}
+					break;
+				case JMI_DER_SPARSE:
+					for(j=0;j<jdad->jac_F_dx_n_nz;j++) {
+						if (jdad->jac_F_dx_icol[j]-1 == col_index+i) {
+							jac[jac_index++] = jac_[jdad->jac_F_dx_irow[j]-1];
+
+						}
+					}
+				}
+			}
+		}
+	}
+
+	col_index += jmi->jmi_dae->n_dx;
+
+	if (jdad->F_x_tape!=NULL && !(skip & JMI_DER_X_SKIP)) {
+		// loop over all columns
+		// Evaluate the tape in forward mode
+		jdad->F_x_tape->Forward(0,x_);
+		std::vector<jmi_real_t> jac_(jmi->jmi_dae->n_eq_F);
+		std::vector<jmi_real_t> d_x(jmi->jmi_dae->n_x);
+		for (i=0;i<jmi->jmi_dae->n_x;i++) {
+			// check the mask if evaluation should be performed
+			if (mask[col_index + i] == 1) {
+				for (j=0;j<jmi->jmi_dae->n_x;j++) {
+					d_x[j] = 0;
+				}
+				d_x[i] = 1.;
+				// Evaluate jacobian column
+				jac_ = jdad->F_x_tape->Forward(1,d_x);
+				switch (sparsity) {
+				case JMI_DER_DENSE_COL_MAJOR:
+					for(j=0;j<jmi->jmi_dae->n_eq_F;j++) {
+						jac[jac_n*(col_index+i) + j] = jac_[j];
+					}
+					break;
+				case JMI_DER_DENSE_ROW_MAJOR:
+					for(j=0;j<jmi->jmi_dae->n_eq_F;j++) {
+						jac[jac_m*j + (col_index+i)] = jac_[j];
+					}
+					break;
+				case JMI_DER_SPARSE:
+					for(j=0;j<jdad->jac_F_x_n_nz;j++) {
+						if (jdad->jac_F_x_icol[j]-1 == col_index+i) {
+							jac[jac_index++] = jac_[jdad->jac_F_x_irow[j]-1];
+						}
+					}
+				}
+			}
+		}
+	}
+
+	col_index += jmi->jmi_dae->n_x;
+
+	if (jdad->F_u_tape!=NULL && !(skip & JMI_DER_U_SKIP)) {
+		// loop over all columns
+		// Evaluate the tape in forward mode
+		jdad->F_u_tape->Forward(0,u_);
+		std::vector<jmi_real_t> jac_(jmi->jmi_dae->n_eq_F);
+		std::vector<jmi_real_t> d_u(jmi->jmi_dae->n_u);
+		for (i=0;i<jmi->jmi_dae->n_u;i++) {
+			// check the mask if evaluation should be performed
+			if (mask[col_index + i] == 1) {
+				for (j=0;j<jmi->jmi_dae->n_u;j++) {
+					d_u[j] = 0;
+				}
+				d_u[i] = 1.;
+				// Evaluate jacobian column
+				jac_ = jdad->F_u_tape->Forward(1,d_u);
+				switch (sparsity) {
+				case JMI_DER_DENSE_COL_MAJOR:
+					for(j=0;j<jmi->jmi_dae->n_eq_F;j++) {
+						jac[jac_n*(col_index+i) + j] = jac_[j];
+					}
+					break;
+				case JMI_DER_DENSE_ROW_MAJOR:
+					for(j=0;j<jmi->jmi_dae->n_eq_F;j++) {
+						jac[jac_m*j + (col_index+i)] = jac_[j];
+					}
+					break;
+				case JMI_DER_SPARSE:
+					for(j=0;j<jdad->jac_F_u_n_nz;j++) {
+						//						printf("** %d %d\n",col_index+i,jdad->jac_F_u_icol[j]-1);
+						if (jdad->jac_F_u_icol[j]-1 == col_index+i) {
+							jac[jac_index++] = jac_[jdad->jac_F_u_irow[j]-1];
+						}
+					}
+				}
+			}
+		}
+	}
+
+	col_index += jmi->jmi_dae->n_u;
+
+	if (jdad->F_w_tape!=NULL && !(skip & JMI_DER_W_SKIP)) {
+		// loop over all columns
+		// Evaluate the tape in forward mode
+		jdad->F_w_tape->Forward(0,w_);
+		std::vector<jmi_real_t> jac_(jmi->jmi_dae->n_eq_F);
+		std::vector<jmi_real_t> d_w(jmi->jmi_dae->n_w);
+		for (i=0;i<jmi->jmi_dae->n_w;i++) {
+			// check the mask if evaluation should be performed
+			if (mask[col_index + i] == 1) {
+				for (j=0;j<jmi->jmi_dae->n_w;j++) {
+					d_w[j] = 0;
+				}
+				d_w[i] = 1.;
+				// Evaluate jacobian column
+				jac_ = jdad->F_w_tape->Forward(1,d_w);
+				switch (sparsity) {
+				case JMI_DER_DENSE_COL_MAJOR:
+					for(j=0;j<jmi->jmi_dae->n_eq_F;j++) {
+						jac[jac_n*(col_index+i) + j] = jac_[j];
+					}
+					break;
+				case JMI_DER_DENSE_ROW_MAJOR:
+					for(j=0;j<jmi->jmi_dae->n_eq_F;j++) {
+						jac[jac_m*j + (col_index+i)] = jac_[j];
+					}
+					break;
+				case JMI_DER_SPARSE:
+					for(j=0;j<jdad->jac_F_w_n_nz;j++) {
+						//						printf("** %d %d\n",col_index+i,jdad->jac_F_u_icol[j]-1);
+						if (jdad->jac_F_w_icol[j]-1 == col_index+i) {
+							jac[jac_index++] = jac_[jdad->jac_F_w_irow[j]-1];
+						}
+					}
+				}
+			}
+		}
+	}
+
+	col_index += jmi->jmi_dae->n_w;
+
+	if (jdad->F_t_tape!=NULL && !(skip & JMI_DER_T_SKIP)) {
+		// loop over all columns
+		// Evaluate the tape in forward mode
+		jdad->F_t_tape->Forward(0,t_);
+		std::vector<jmi_real_t> jac_(jmi->jmi_dae->n_eq_F);
+		std::vector<jmi_real_t> d_t(1);
+		for (i=0;i<1;i++) {
+			// check the mask if evaluation should be performed
+			if (mask[col_index + i] == 1) {
+				for (j=0;j<1;j++) {
+					d_t[j] = 0;
+				}
+				d_t[i] = 1.;
+				// Evaluate jacobian column
+				jac_ = jdad->F_t_tape->Forward(1,d_t);
+				switch (sparsity) {
+				case JMI_DER_DENSE_COL_MAJOR:
+					for(j=0;j<jmi->jmi_dae->n_eq_F;j++) {
+						jac[jac_n*(col_index+i) + j] = jac_[j];
+					}
+					break;
+				case JMI_DER_DENSE_ROW_MAJOR:
+					for(j=0;j<jmi->jmi_dae->n_eq_F;j++) {
+						jac[jac_m*j + (col_index+i)] = jac_[j];
+					}
+					break;
+				case JMI_DER_SPARSE:
+					for(j=0;j<jdad->jac_F_t_n_nz;j++) {
+						//						printf("** %d %d\n",col_index+i,jdad->jac_F_u_icol[j]-1);
+						if (jdad->jac_F_t_icol[j]-1 == col_index+i) {
+							jac[jac_index++] = jac_[jdad->jac_F_t_irow[j]-1];
+						}
+					}
+				}
+			}
+		}
+	}
+
+	*/
+	return 0;
+
+	return -1;
+}
+
+
+
+int jmi_dae_dF_n_nz_ad(jmi_t* jmi, int* n_nz) {
+	if (jmi->dae->ad==NULL) {
+		return -1;
+	}
+	*n_nz = jmi->dae->ad->dF_z_n_nz;
+	return 0;
+}
+
+int jmi_dae_dF_nz_indices_ad(jmi_t* jmi, int* row, int* col) {
+	if (jmi->dae->ad==NULL) {
+		return -1;
+	}
+	int i;
+	for (i=0;i<jmi->dae->ad->dF_z_n_nz;i++) {
+		row[i] = jmi->dae->ad->dF_z_irow[i];
+		col[i] = jmi->dae->ad->dF_z_icol[i];
+	}
+	return 0;
+}
+
+int jmi_dae_dF_dim_ad(jmi_t* jmi, int sparsity, int skip, int *mask,
+		             int *dF_n_cols, int *dF_n_nz) {
+
+	if (jmi->dae->ad==NULL) {
+		return -1;
+	}
+
+	*dF_n_cols = 0;
+	*dF_n_nz = 0;
+
+	int i,j;
+	int col_index = 0;
+
+	if (!(skip & JMI_DER_CI_SKIP)) {
+		for (i=0;i<jmi->n_ci;i++) {
+			if (mask[col_index]) {
+				(*dF_n_cols)++;
+				if (sparsity & JMI_DER_SPARSE) {
+					for (j=0;j<jmi->dae->ad->dF_z_n_nz;j++) {
+						//printf("%d, %d, %d\n",jmi->dae->ad->dF_z_n_nz,jmi->dae->ad->dF_z_icol[j]-1,col_index);
+						(*dF_n_nz) += jmi->dae->ad->dF_z_icol[j]-1 == col_index? 1 : 0;
+					}
+				} else {
+					(*dF_n_nz) += jmi->dae->n_eq_F;
+				}
+			}
+			col_index++;
+		}
+	} else {
+		col_index += jmi->n_ci;
+	}
+	if (!(skip & JMI_DER_CD_SKIP)) {
+		for (i=0;i<jmi->n_cd;i++) {
+			if (mask[col_index]) {
+				(*dF_n_cols)++;
+				if (sparsity & JMI_DER_SPARSE) {
+					for (j=0;j<jmi->dae->ad->dF_z_n_nz;j++) {
+						//printf("%d, %d, %d\n",jmi->dae->ad->dF_z_n_nz,jmi->dae->ad->dF_z_icol[j]-1,col_index);
+						(*dF_n_nz) += jmi->dae->ad->dF_z_icol[j]-1 == col_index? 1 : 0;
+					}
+				} else {
+					(*dF_n_nz) += jmi->dae->n_eq_F;
+				}
+			}
+			col_index++;
+		}
+	} else {
+		col_index += jmi->n_ci;
+	}
+	if (!(skip & JMI_DER_PI_SKIP)) {
+		for (i=0;i<jmi->n_pi;i++) {
+			if (mask[col_index]) {
+				(*dF_n_cols)++;
+				if (sparsity & JMI_DER_SPARSE) {
+					for (j=0;j<jmi->dae->ad->dF_z_n_nz;j++) {
+						//printf("%d, %d, %d\n",jmi->dae->ad->dF_z_n_nz,jmi->dae->ad->dF_z_icol[j]-1,col_index);
+						(*dF_n_nz) += jmi->dae->ad->dF_z_icol[j]-1 == col_index? 1 : 0;
+					}
+				} else {
+					(*dF_n_nz) += jmi->dae->n_eq_F;
+				}
+			}
+			col_index++;
+		}
+	} else {
+		col_index += jmi->n_pi;
+	}
+	if (!(skip & JMI_DER_PD_SKIP)) {
+		for (i=0;i<jmi->n_pd;i++) {
+			if (mask[col_index]) {
+				(*dF_n_cols)++;
+				if (sparsity & JMI_DER_SPARSE) {
+					for (j=0;j<jmi->dae->ad->dF_z_n_nz;j++) {
+						//printf("%d, %d, %d\n",jmi->dae->ad->dF_z_n_nz,jmi->dae->ad->dF_z_icol[j]-1,col_index);
+						(*dF_n_nz) += jmi->dae->ad->dF_z_icol[j]-1 == col_index? 1 : 0;
+					}
+				} else {
+					(*dF_n_nz) += jmi->dae->n_eq_F;
+				}
+			}
+			col_index++;
+		}
+	} else {
+		col_index += jmi->n_pd;
+	}
+	if (!(skip & JMI_DER_DX_SKIP)) {
+		for (i=0;i<jmi->n_dx;i++) {
+			if (mask[col_index]) {
+				(*dF_n_cols)++;
+				if (sparsity & JMI_DER_SPARSE) {
+					for (j=0;j<jmi->dae->ad->dF_z_n_nz;j++) {
+						//printf("%d, %d, %d\n",jmi->dae->ad->dF_z_n_nz,jmi->dae->ad->dF_z_icol[j]-1,col_index);
+						(*dF_n_nz) += jmi->dae->ad->dF_z_icol[j]-1 == col_index? 1 : 0;
+					}
+				} else {
+					(*dF_n_nz) += jmi->dae->n_eq_F;
+				}
+			}
+			col_index++;
+		}
+	} else {
+		col_index += jmi->n_dx;
+	}
+
+	if (!(skip & JMI_DER_X_SKIP)) {
+		for (i=0;i<jmi->n_x;i++) {
+			if (mask[col_index]) {
+				(*dF_n_cols)++;
+				if (sparsity & JMI_DER_SPARSE) {
+					for (j=0;j<jmi->dae->ad->dF_z_n_nz;j++) {
+						//printf("%d, %d, %d\n",jmi->dae->ad->dF_z_n_nz,jmi->dae->ad->dF_z_icol[j]-1,col_index);
+						(*dF_n_nz) += jmi->dae->ad->dF_z_icol[j]-1 == col_index? 1 : 0;
+					}
+				} else {
+					(*dF_n_nz) += jmi->dae->n_eq_F;
+				}
+			}
+			col_index++;
+		}
+	} else {
+		col_index += jmi->n_x;
+	}
+
+	if (!(skip & JMI_DER_U_SKIP)) {
+		for (i=0;i<jmi->n_u;i++) {
+			if (mask[col_index]) {
+				(*dF_n_cols)++;
+				if (sparsity & JMI_DER_SPARSE) {
+					for (j=0;j<jmi->dae->ad->dF_z_n_nz;j++) {
+						//printf("%d, %d, %d\n",jmi->dae->ad->dF_z_n_nz,jmi->dae->ad->dF_z_icol[j]-1,col_index);
+						(*dF_n_nz) += jmi->dae->ad->dF_z_icol[j]-1 == col_index? 1 : 0;
+					}
+				} else {
+					(*dF_n_nz) += jmi->dae->n_eq_F;
+				}
+			}
+			col_index++;
+		}
+	} else {
+		col_index += jmi->n_u;
+	}
+	if (!(skip & JMI_DER_W_SKIP)) {
+		for (i=0;i<jmi->n_w;i++) {
+			if (mask[col_index]) {
+				(*dF_n_cols)++;
+				if (sparsity & JMI_DER_SPARSE) {
+					for (j=0;j<jmi->dae->ad->dF_z_n_nz;j++) {
+						//printf("%d, %d, %d\n",jmi->dae->ad->dF_z_n_nz,jmi->dae->ad->dF_z_icol[j]-1,col_index);
+						(*dF_n_nz) += jmi->dae->ad->dF_z_icol[j]-1 == col_index? 1 : 0;
+					}
+				} else {
+					(*dF_n_nz) += jmi->dae->n_eq_F;
+				}
+			}
+			col_index++;
+		}
+	} else {
+		col_index += jmi->n_w;
+	}
+	if (!(skip & JMI_DER_T_SKIP)) {
+		for (i=0;i<1;i++) {
+			if (mask[col_index]) {
+				(*dF_n_cols)++;
+				if (sparsity & JMI_DER_SPARSE) {
+					for (j=0;j<jmi->dae->ad->dF_z_n_nz;j++) {
+						//printf("%d, %d, %d\n",jmi->dae->ad->dF_z_n_nz,jmi->dae->ad->dF_z_icol[j]-1,col_index);
+						(*dF_n_nz) += jmi->dae->ad->dF_z_icol[j]-1 == col_index? 1 : 0;
+					}
+				} else {
+					(*dF_n_nz) += jmi->dae->n_eq_F;
+				}
+			}
+			col_index++;
+		}
+	}
+
+	return 0;
+
 }
 
