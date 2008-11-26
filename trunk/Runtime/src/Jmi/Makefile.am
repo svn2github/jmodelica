@@ -7,7 +7,7 @@ libjmi_la_SOURCES = jmi.h \
                     jmi.c
 
 libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE 
-
+libjmi_la_LDFLAGS = -no-undefined
 
 #libjmi_la_LIBADD = $(JMALLLIBS)
 #libjmi_la_DEPENDENCIES = $(JMALLLIBS)

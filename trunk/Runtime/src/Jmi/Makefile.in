@@ -57,7 +57,7 @@ am_libjmi_la_OBJECTS = libjmi_la-jmi.lo
 libjmi_la_OBJECTS = $(am_libjmi_la_OBJECTS)
 libjmi_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libjmi_la_CFLAGS) \
-	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+	$(CFLAGS) $(libjmi_la_LDFLAGS) $(LDFLAGS) -o $@
 libjmi_cppad_la_LIBADD =
 am_libjmi_cppad_la_OBJECTS = libjmi_cppad_la-jmi_cppad.lo
 libjmi_cppad_la_OBJECTS = $(am_libjmi_cppad_la_OBJECTS)
@@ -216,6 +216,7 @@ libjmi_la_SOURCES = jmi.h \
                     jmi.c
 
 libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE 
+libjmi_la_LDFLAGS = -no-undefined
 
 #libjmi_la_LIBADD = $(JMALLLIBS)
 #libjmi_la_DEPENDENCIES = $(JMALLLIBS)
