@@ -100,7 +100,7 @@ int main(int argv, char* argc[])
 	}
 
 	int* mask = (int*)calloc(jmi->n_z,sizeof(int));
-	for(i=0;i<dF_n_nz;i++) {
+	for(i=0;i<jmi->n_z;i++) {
 		mask[i]=1;
 	}
 

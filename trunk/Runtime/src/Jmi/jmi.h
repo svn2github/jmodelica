@@ -39,7 +39,7 @@
  *        w     algebraic variables
  *        t     time
  *
- * In the interface, all variable vectors are concatenated into one, which is denoted z.
+ * In the interface, all variable vectors, and t, are concatenated into one, which is denoted z.
  *
  *	     This interface also contains a specification of a DAE initialization
  *	     system on the form
@@ -133,14 +133,15 @@
 extern "C" {
 #endif
 
-  // Forward declaration of jmi struct
-  typedef struct jmi_t jmi_t;
+// Forward declaration of jmi struct
+typedef struct jmi_t jmi_t;
 
-  // Typedef for the doubles used in the interface.
-  typedef double jmi_real_t;
+// Typedef for the doubles used in the interface.
+typedef double jmi_real_t;
 
+// This section defines types in the case of no AD and 
+// in the case of CppAD.
 #if JMI_AD == JMI_AD_NONE
-  //#include <config.h>
   typedef jmi_real_t jmi_ad_var_t;
   typedef jmi_real_t *jmi_real_vec_t;
   typedef jmi_real_vec_t *jmi_real_vec_p;
@@ -171,7 +172,7 @@ extern "C" {
     int* dF_z_icol;
 
     // Sparsity patterns for individual independent variables
-    // These variables are useful when computing the Jacobian
+    // These variables are useful when computing the Jacobian.
     int dF_ci_n_nz;
     int* dF_ci_irow;
     int* dF_ci_icol;
@@ -228,7 +229,7 @@ extern "C" {
 
   /**
    * Struct describing a DAE model including evaluation of the DAE residual and (optional) a symbolic
-   * Jacobian. If the Jacobian is not evaluated, the corresponding function pointers are set to NULL.
+   * Jacobian. If the Jacobian is not provided, the corresponding function pointers are set to NULL.
    */
   typedef struct {
     jmi_dae_F_t F;
@@ -250,10 +251,16 @@ extern "C" {
 
   /**
    * jmi is the main struct in the jmi interface. It contains pointers to structs of
-   * types jmi_dae, jmi_init, and jmi_opt. These pointers are set to structs of the corresponding
-   * type in the jmi_init function that is implemented in the generated code. If a particular
-   * problem does not contain all types of information, the corresponding pointers are set to
-   * NULL.
+   * types jmi_dae, jmi_init, and jmi_opt. The creation of a jmi_t struct proceeds in three
+   * steps. First, a raw struct is created by the function jmi_init. Then the jmi_dae_t,
+   * jmi_init_t, and jmi_opt_t structs are initialized by the functions jmi_dae_init,
+   * jmi_init_init, and jmi_opt_init respectively. Finlly, the the jmi_xxx_ad_t structs are
+   * are set up in the function call jmi_ad_init. Notice that the variables should have been
+   * initialized prior to the call to jmi_ad_init.
+   * 
+   * Typically, jmi_init and jmi_xxx_init functions are called from within the jmi_new function
+   * that is provided by the generated code. The function jmi_ad_init is then called from the
+   * user code after the variable vectors has been initialized.
    */
   struct jmi_t{
     jmi_dae_t* dae;
@@ -279,7 +286,7 @@ extern "C" {
     int offs_w;
     int offs_t;
 
-    int n_z; // the sum of all variables (including t), for convenience
+    int n_z; // the sum of all variables vector sizes (including t), for convenience
 
     /* The z vector contains all variables in the order
      * ci, cd, pi, pd, dx, x, u, w, t.
@@ -306,29 +313,31 @@ extern "C" {
    */
   int jmi_new(jmi_t** jmi);
 
-  /**
-   * Initializes the AD variables and tapes. Prior to this call, the variables in z should
-   * be initialized, which is also the reason why this function must be provided for
-   * the user to call after the actual creation of the jmi_t struct.
-   */
-  int jmi_ad_init(jmi_t* jmi);
 
   /**
    * Allocates memory and sets up the jmi_t struct. This function is typically called
    * from within jmi_new in the generated code. The reason for introducing this function
-   * is that the allocation of the jmi_t struct may depend on the AD method. By encapsulating
-   * the allocation in the runtime library, the generated code can be kept clean from
-   * AD-specific code.
+   * is that the allocation of the jmi_t struct should not be repeated in the generated code.
    */
   int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
 	       int n_x, int n_u, int n_w);
 
+  /**
+   * Allocates a jmi_dae_t struct.
+   */
   int jmi_dae_init(jmi_t* jmi, jmi_dae_F_t jmi_dae_F, int n_eq_F, jmi_dae_dF_t jmi_dae_dF,
 		   int dF_n_nz, int* irow, int* icol);
 
   //int jmi_init_init(..)
 
   //int jmi_opt_init(..)
+
+  /**
+   * Initializes the AD variables and tapes. Prior to this call, the variables in z should
+   * be initialized, which is also the reason why this function must be provided for
+   * the user to call after the actual creation of the jmi_t struct.
+   */
+  int jmi_ad_init(jmi_t* jmi);
 
   /**
    * Deallocates memory and deletes a jmi struct.
@@ -426,8 +435,7 @@ extern "C" {
   int jmi_dae_dF_nz_indices_ad(jmi_t* jmi, int* row, int* col);
 
   /**
-   * This helper function computes the number of columns and the number of non zero
-   * elements in the jacobian given a sparsity configuration. AD Jacobian.
+   * Same as jmi_dae_dF_dim, but for AD Jacobian.
    */
   int jmi_dae_dF_dim_ad(jmi_t* jmi, int sparsity, int skip, int *mask,
 		                int *dF_n_cols, int *dF_n_nz);

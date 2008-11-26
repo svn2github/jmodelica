@@ -10,27 +10,6 @@
 
 int main(int argv, char* argc[])
 {
-/*
-
-  std::vector< CppAD::AD<double> > *xad = new std::vector< CppAD::AD<double> >(1);
-  std::vector< CppAD::AD<double> > *yad = new std::vector< CppAD::AD<double> >(1);
-
-   (*xad)[0] = 2;
-
-  CppAD::Independent(*xad);
-  (*yad)[0] = ((*xad)[0])*((*xad)[0]);
-  CppAD::ADFun<double> *f = new CppAD::ADFun<double>(*xad,*yad);
-
-  std::vector<double> *xx = new std::vector<double>(1);
-  std::vector<double> *yy = new std::vector<double>(1);
-
-(*xx)[0] = 2;
-
-  *yy = f->Forward(0,*xx);
-
-  printf("CppAD_test: x=%f, y=%f\n",(*xx)[0],(*yy)[0]);
-  */
-
 
 	jmi_t* jmi;
 	// Create a new Jmi object.
@@ -141,8 +120,8 @@ int main(int argv, char* argc[])
 		printf("%d, %d\n",dF_row[i],dF_col[i]);
 	}
 
-	int* mask = (int*)calloc(dF_n_nz,sizeof(int));
-	for(i=0;i<dF_n_nz;i++) {
+	int* mask = (int*)calloc(jmi->n_z,sizeof(int));
+	for(i=0;i<jmi->n_z;i++) {
 		mask[i]=1;
 	}
 
@@ -199,10 +178,17 @@ int main(int argv, char* argc[])
 		printf("%f\n",dF_ad_dense[i]);
 	}
 
-
-
-
 	jmi_delete(jmi);
 
+	free(res_F);
+	free(dF);
+	free(dF_dense);
+	free(dF_row);
+	free(dF_col);
+	free(dF_row_ad);
+	free(dF_col_ad);
+	free(dF_ad);
+	free(dF_ad_dense);
+	free(mask);
 	return 0;
 }

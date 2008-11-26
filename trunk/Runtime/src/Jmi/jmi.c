@@ -1,6 +1,28 @@
 
 #include "jmi.h"
 
+#define JMI_DAE_COMPUTE_DF_DIM_PART(skip_mask, n_vars, jmi_dF_n_nz, jmi_dF_icol) {\
+	if (!(skip & skip_mask)) {\
+		for (i=0;i<n_vars;i++) {\
+			if (mask[col_index]) {\
+				(*dF_n_cols)++;\
+				if (sparsity & JMI_DER_SPARSE) {\
+					for (j=0;j<jmi_dF_n_nz;j++) {\
+					  /*printf("%d, %d, %d\n",jmi->dae->dF_n_nz,jmi->dae->dF_icol[j]-1,col_index);*/\
+						(*dF_n_nz) += jmi_dF_icol[j]-1 == col_index? 1 : 0;\
+					}\
+				} else {\
+					(*dF_n_nz) += jmi->dae->n_eq_F;\
+				}\
+			}\
+			col_index++;\
+		}\
+	} else {\
+		col_index += n_vars;\
+	}\
+}\
+
+
 int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
 	     int n_x, int n_u, int n_w) {
 
@@ -200,168 +222,15 @@ int jmi_dae_dF_dim(jmi_t* jmi, int sparsity, int skip, int *mask,
 	int i,j;
 	int col_index = 0;
 
-	if (!(skip & JMI_DER_CI_SKIP)) {
-		for (i=0;i<jmi->n_ci;i++) {
-			if (mask[col_index]) {
-				(*dF_n_cols)++;
-				if (sparsity & JMI_DER_SPARSE) {
-					for (j=0;j<jmi->dae->dF_n_nz;j++) {
-						//printf("%d, %d, %d\n",jmi->dae->dF_n_nz,jmi->dae->dF_icol[j]-1,col_index);
-						(*dF_n_nz) += jmi->dae->dF_icol[j]-1 == col_index? 1 : 0;
-					}
-				} else {
-					(*dF_n_nz) += jmi->dae->n_eq_F;
-				}
-			}
-			col_index++;
-		}
-	} else {
-		col_index += jmi->n_ci;
-	}
-	if (!(skip & JMI_DER_CD_SKIP)) {
-		for (i=0;i<jmi->n_cd;i++) {
-			if (mask[col_index]) {
-				(*dF_n_cols)++;
-				if (sparsity & JMI_DER_SPARSE) {
-					for (j=0;j<jmi->dae->dF_n_nz;j++) {
-						//printf("%d, %d, %d\n",jmi->dae->dF_n_nz,jmi->dae->dF_icol[j]-1,col_index);
-						(*dF_n_nz) += jmi->dae->dF_icol[j]-1 == col_index? 1 : 0;
-					}
-				} else {
-					(*dF_n_nz) += jmi->dae->n_eq_F;
-				}
-			}
-			col_index++;
-		}
-	} else {
-		col_index += jmi->n_ci;
-	}
-	if (!(skip & JMI_DER_PI_SKIP)) {
-		for (i=0;i<jmi->n_pi;i++) {
-			if (mask[col_index]) {
-				(*dF_n_cols)++;
-				if (sparsity & JMI_DER_SPARSE) {
-					for (j=0;j<jmi->dae->dF_n_nz;j++) {
-						//printf("%d, %d, %d\n",jmi->dae->dF_n_nz,jmi->dae->dF_icol[j]-1,col_index);
-						(*dF_n_nz) += jmi->dae->dF_icol[j]-1 == col_index? 1 : 0;
-					}
-				} else {
-					(*dF_n_nz) += jmi->dae->n_eq_F;
-				}
-			}
-			col_index++;
-		}
-	} else {
-		col_index += jmi->n_pi;
-	}
-	if (!(skip & JMI_DER_PD_SKIP)) {
-		for (i=0;i<jmi->n_pd;i++) {
-			if (mask[col_index]) {
-				(*dF_n_cols)++;
-				if (sparsity & JMI_DER_SPARSE) {
-					for (j=0;j<jmi->dae->dF_n_nz;j++) {
-						//printf("%d, %d, %d\n",jmi->dae->dF_n_nz,jmi->dae->dF_icol[j]-1,col_index);
-						(*dF_n_nz) += jmi->dae->dF_icol[j]-1 == col_index? 1 : 0;
-					}
-				} else {
-					(*dF_n_nz) += jmi->dae->n_eq_F;
-				}
-			}
-			col_index++;
-		}
-	} else {
-		col_index += jmi->n_pd;
-	}
-	if (!(skip & JMI_DER_DX_SKIP)) {
-		for (i=0;i<jmi->n_dx;i++) {
-			if (mask[col_index]) {
-				(*dF_n_cols)++;
-				if (sparsity & JMI_DER_SPARSE) {
-					for (j=0;j<jmi->dae->dF_n_nz;j++) {
-						//printf("%d, %d, %d\n",jmi->dae->dF_n_nz,jmi->dae->dF_icol[j]-1,col_index);
-						(*dF_n_nz) += jmi->dae->dF_icol[j]-1 == col_index? 1 : 0;
-					}
-				} else {
-					(*dF_n_nz) += jmi->dae->n_eq_F;
-				}
-			}
-			col_index++;
-		}
-	} else {
-		col_index += jmi->n_dx;
-	}
-
-	if (!(skip & JMI_DER_X_SKIP)) {
-		for (i=0;i<jmi->n_x;i++) {
-			if (mask[col_index]) {
-				(*dF_n_cols)++;
-				if (sparsity & JMI_DER_SPARSE) {
-					for (j=0;j<jmi->dae->dF_n_nz;j++) {
-						//printf("%d, %d, %d\n",jmi->dae->dF_n_nz,jmi->dae->dF_icol[j]-1,col_index);
-						(*dF_n_nz) += jmi->dae->dF_icol[j]-1 == col_index? 1 : 0;
-					}
-				} else {
-					(*dF_n_nz) += jmi->dae->n_eq_F;
-				}
-			}
-			col_index++;
-		}
-	} else {
-		col_index += jmi->n_x;
-	}
-
-	if (!(skip & JMI_DER_U_SKIP)) {
-		for (i=0;i<jmi->n_u;i++) {
-			if (mask[col_index]) {
-				(*dF_n_cols)++;
-				if (sparsity & JMI_DER_SPARSE) {
-					for (j=0;j<jmi->dae->dF_n_nz;j++) {
-						//printf("%d, %d, %d\n",jmi->dae->dF_n_nz,jmi->dae->dF_icol[j]-1,col_index);
-						(*dF_n_nz) += jmi->dae->dF_icol[j]-1 == col_index? 1 : 0;
-					}
-				} else {
-					(*dF_n_nz) += jmi->dae->n_eq_F;
-				}
-			}
-			col_index++;
-		}
-	} else {
-		col_index += jmi->n_u;
-	}
-	if (!(skip & JMI_DER_W_SKIP)) {
-		for (i=0;i<jmi->n_w;i++) {
-			if (mask[col_index]) {
-				(*dF_n_cols)++;
-				if (sparsity & JMI_DER_SPARSE) {
-					for (j=0;j<jmi->dae->dF_n_nz;j++) {
-						//printf("%d, %d, %d\n",jmi->dae->dF_n_nz,jmi->dae->dF_icol[j]-1,col_index);
-						(*dF_n_nz) += jmi->dae->dF_icol[j]-1 == col_index? 1 : 0;
-					}
-				} else {
-					(*dF_n_nz) += jmi->dae->n_eq_F;
-				}
-			}
-			col_index++;
-		}
-	} else {
-		col_index += jmi->n_w;
-	}
-	if (!(skip & JMI_DER_T_SKIP)) {
-		for (i=0;i<1;i++) {
-			if (mask[col_index]) {
-				(*dF_n_cols)++;
-				if (sparsity & JMI_DER_SPARSE) {
-					for (j=0;j<jmi->dae->dF_n_nz;j++) {
-						//printf("%d, %d, %d\n",jmi->dae->dF_n_nz,jmi->dae->dF_icol[j]-1,col_index);
-						(*dF_n_nz) += jmi->dae->dF_icol[j]-1 == col_index? 1 : 0;
-					}
-				} else {
-					(*dF_n_nz) += jmi->dae->n_eq_F;
-				}
-			}
-			col_index++;
-		}
-	}
+ JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_CI_SKIP, jmi->n_ci, jmi->dae->dF_n_nz, jmi->dae->dF_icol)
+ JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_CD_SKIP, jmi->n_cd, jmi->dae->dF_n_nz, jmi->dae->dF_icol)
+ JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_PI_SKIP, jmi->n_pi, jmi->dae->dF_n_nz, jmi->dae->dF_icol)
+ JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_PD_SKIP, jmi->n_pd, jmi->dae->dF_n_nz, jmi->dae->dF_icol)
+ JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_DX_SKIP, jmi->n_dx, jmi->dae->dF_n_nz, jmi->dae->dF_icol)
+ JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_X_SKIP, jmi->n_x, jmi->dae->dF_n_nz, jmi->dae->dF_icol)
+ JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_U_SKIP, jmi->n_u, jmi->dae->dF_n_nz, jmi->dae->dF_icol)
+ JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_W_SKIP, jmi->n_w, jmi->dae->dF_n_nz, jmi->dae->dF_icol)
+ JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_T_SKIP, 1, jmi->dae->dF_n_nz, jmi->dae->dF_icol)
 
 	return 0;
 }
