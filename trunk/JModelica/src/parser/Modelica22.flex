@@ -1,6 +1,6 @@
 package org.jmodelica.parser;
 
-import java.util.HashMap;
+import java.util.Map;
 import beaver.Symbol;
 import beaver.Scanner;
 import org.jmodelica.parser.ModelicaParser.Terminals;
@@ -49,9 +49,9 @@ import org.jmodelica.parser.ModelicaParser.Terminals;
     return res;
   }
 
-  private HashMap offsets = new java.util.LinkedHashMap();
+  private Map<Integer, Integer> offsets = new java.util.LinkedHashMap<Integer, Integer>();
 
-  public HashMap offsets() { 
+  public Map<Integer, Integer> offsets() { 
     return offsets; 
   }
 
