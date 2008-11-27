@@ -129,9 +129,9 @@
 #include <vector>
 #endif
 
-#if defined __cplusplus
-extern "C" {
-#endif
+//#if defined __cplusplus
+//extern "C" {
+//#endif
 
 // Forward declaration of jmi struct
 typedef struct jmi_t jmi_t;
@@ -209,6 +209,8 @@ typedef double jmi_real_t;
     int* dF_t_irow;
     int* dF_t_icol;
 
+    jmi_real_vec_p z_work;
+    
   } jmi_dae_ad_t;
 
 #else
@@ -294,7 +296,7 @@ typedef double jmi_real_t;
     // This vector contains active AD objects in case of AD
     jmi_ad_var_vec_p z;
     // This vector contains the actual values
-    jmi_real_vec_p z_val;
+    jmi_real_t** z_val;
 
   };
 
@@ -440,8 +442,8 @@ typedef double jmi_real_t;
   int jmi_dae_dF_dim_ad(jmi_t* jmi, int sparsity, int skip, int *mask,
 		                int *dF_n_cols, int *dF_n_nz);
 
-#if defined __cplusplus
-}
-#endif
+//#if defined __cplusplus
+//}
+//#endif
 
 #endif
