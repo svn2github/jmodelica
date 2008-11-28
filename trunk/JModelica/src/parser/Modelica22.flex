@@ -49,18 +49,6 @@ import org.jmodelica.parser.ModelicaParser.Terminals;
     return res;
   }
 
-  private Map<Integer, Integer> offsets = new java.util.LinkedHashMap<Integer, Integer>();
-
-  public Map<Integer, Integer> offsets() { 
-    return offsets; 
-  }
-
-  private void registerOffset() {
-    Integer key = new Integer(yyline + 2);
-    Integer value = new Integer(yychar + yylength());
-    offsets.put(key, value);
-  }
-
 %}
 
 
@@ -80,8 +68,7 @@ UNSIGNED_NUMBER = {DIGIT} {DIGIT}* ( "." ( {UNSIGNED_INTEGER} )? )? ( (e|E) ( "+
 LineTerminator = \r|\n|\r\n
 InputCharacter = [^\r\n]
 
-NonNLWhiteSpace = [ \t\f]
-WhiteSpace = {LineTerminator} | {NonNLWhiteSpace}
+WhiteSpace = ({LineTerminator} | [ \t\f])+
 
 /* comments */
 Comment = {TraditionalComment} | {EndOfLineComment} 
@@ -121,9 +108,9 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   
   "initial"         { return newSymbol(Terminals.INITIAL); }
   "equation"        { return newSymbol(Terminals.EQUATION); }
-  "initial" {WhiteSpace}+ "equation"        { return newSymbol(Terminals.INITIAL_EQUATION); }
+  "initial" {WhiteSpace} "equation"        { return newSymbol(Terminals.INITIAL_EQUATION); }
   "algorithm"        { return newSymbol(Terminals.ALGORITHM); }
-  "initial" {WhiteSpace}+ "algorithm"        { return newSymbol(Terminals.INITIAL_ALGORITHM); }
+  "initial" {WhiteSpace} "algorithm"        { return newSymbol(Terminals.INITIAL_ALGORITHM); }
   
     "each"        { return newSymbol(Terminals.EACH); }
     "final"        { return newSymbol(Terminals.FINAL); }   
@@ -197,10 +184,8 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   //{UNSIGNED_INTEGER}  { return newSymbol(Terminals.INTEGER, yytext()); }
   {UNSIGNED_NUMBER}   { return newSymbol(Terminals.UNSIGNED_NUMBER, yytext()); }
   
-  {Comment}          { return newSymbol(COMMENT); /* Will be discarded before parser. */ }
-  {LineTerminator}	 { registerOffset(); 
-  					   return newSymbol(WHITESPACE); /* Will be discarded before parser. */ }
-  {NonNLWhiteSpace}+ { return newSymbol(WHITESPACE); /* Will be discarded before parser. */ }
+  {Comment}         { return newSymbol(COMMENT); /* Will be discarded before parser. */ }
+  {WhiteSpace} 		{ return newSymbol(WHITESPACE); /* Will be discarded before parser. */ }
 
 }
 
