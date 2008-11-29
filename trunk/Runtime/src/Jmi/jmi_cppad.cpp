@@ -1,10 +1,10 @@
 /**
  *
  * This is the second draft of an interface to CppAD. The interface supports computation
- * of Jacobians and sparsity patterns on the form required by Ipopt. 
+ * of Jacobians and sparsity patterns on the form required by Ipopt.
  *
  * Usage:
- *    The AD structs jmi_xxx_ad_t (dae, init and opt) contains all the tapes and data structures 
+ *    The AD structs jmi_xxx_ad_t (dae, init and opt) contains all the tapes and data structures
  *    associated with CppAD. These structs are initialized in the function jmi_ad_init. In this step
  *    all the tapes and the sparsity patterns are computed and cached. This requires
  *    actual values (sensible values, ideally...) are provided for all the independent
@@ -124,7 +124,7 @@ int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
     n_x + n_u + n_w + 1;
 
   jmi_->z = new jmi_ad_var_vec_t(jmi_->n_z);
-  
+
   jmi_->z_val = (jmi_real_t**)calloc(1,sizeof(jmi_real_t));
   *(jmi_->z_val) =  (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t));
 
@@ -165,34 +165,6 @@ int jmi_dae_init(jmi_t* jmi, jmi_dae_F_t jmi_dae_F, int n_eq_F, jmi_dae_dF_t jmi
   return 0;
 }
 
-/*
-int jmi_qwe(jmi_t* jmi, jmi_ad_var_vec_t *p) {
- (*(p))[0] = (*(jmi->z))[0] + 2;  
- (*(p))[1] = 2*(*(jmi->z))[1] +3;  
-}
-*/
-
-/*
-#define ci(i) ((*(jmi->z))[jmi->offs_ci+i])
-#define cd(i) ((*(jmi->z))[jmi->offs_cd+i])
-#define pi(i) ((*(jmi->z))[jmi->offs_pi+i])
-#define pd(i) ((*(jmi->z))[jmi->offs_pd+i])
-#define dx(i) ((*(jmi->z))[jmi->offs_dx+i])
-#define x(i) ((*(jmi->z))[jmi->offs_x+i])
-#define u(i) ((*(jmi->z))[jmi->offs_u+i])
-#define w(i) ((*(jmi->z))[jmi->offs_w+i])
-#define tt ((*(jmi->z))[jmi->offs_t])
-
-int vdp_dae_F_t(jmi_t* jmi, jmi_ad_var_vec_p res) {
-
-  (*res)[0] = (1-x(1)*x(1))*x(0) - x(1) + u(0) - dx(0);
-  (*res)[1] = pi(0)*x(0) - dx(1);
-  (*res)[2] = x(0)*x(0) + x(1)*x(1) + u(0)*u(0) - dx(2);
-
-  return 0;
-}
-*/
-
 int jmi_ad_init(jmi_t* jmi) {
 
   int i,j;
@@ -212,39 +184,10 @@ int jmi_ad_init(jmi_t* jmi) {
   }
   CppAD::Independent(*jmi->z);
   jmi->dae->F(jmi, jdad->F_z_dependent);
-//  vdp_dae_F_t(jmi,jdad->F_z_dependent);
   jdad->F_z_tape = new jmi_ad_tape_t(*jmi->z,*jdad->F_z_dependent);
-  
+
   jdad->tape_initialized = true;
 
-	jmi_real_vec_t z_qwe(jmi->n_z);
-	
-	  for (i=0;i<jmi->n_z;i++) {
-		    z_qwe[i] = (*(jmi->z_val))[i];
-		  printf("*****>> %f, %f\n",(*(jmi->z_val))[i],z_qwe[i]);
-	  }
-  
-	jmi_real_vec_t res_w = jmi->dae->ad->F_z_tape->Forward(0,z_qwe);
-  
-	for(i=0;i<jmi->dae->n_eq_F;i++) {
-		  printf("*****<< %f\n",res_w[i]);
-
-	}
-  
-	
-	  for (i=0;i<jmi->n_z;i++) {
-		    z_qwe[i] = i;
-		  printf("*****>> %f\n",z_qwe[i]);
-	  }
-
-	jmi_real_vec_t res_w2 = jmi->dae->ad->F_z_tape->Forward(0,z_qwe);
-
-	for(i=0;i<jmi->dae->n_eq_F;i++) {
-		  printf("*****<< %f\n",res_w2[i]);
-
-	}
-
-	
   // Compute sparsity patterns
   int m = jmi->dae->n_eq_F; // Number of rows in Jacobian
 
@@ -391,7 +334,7 @@ int jmi_ad_init(jmi_t* jmi) {
     jdad->dF_t_irow[i] = jdad->dF_z_irow[jac_ind++];
   }
 
-  
+/*
   printf("%d, %d, %d, %d, %d, %d, %d\n", jdad->dF_pi_n_nz,
 	 jdad->dF_pd_n_nz,
 	 jdad->dF_dx_n_nz,
@@ -436,23 +379,22 @@ int jmi_ad_init(jmi_t* jmi) {
   for (i=0;i<m*jmi->n_z;i++) {
     printf("--*** %d\n",s_z[i]? 1 : 0);
   }
-  
 
-  //jdad->res_w = new jmi_real_vec_t(jmi->dae->n_eq_F);
+*/
 
   jdad->z_work = new jmi_real_vec_t(jmi->n_z);
-  
+
   return 0;
 
 }
 
 int jmi_delete(jmi_t* jmi){
-	
+
   if(jmi->dae != NULL) {
     free(jmi->dae->dF_irow);
     free(jmi->dae->dF_icol);
     if (jmi->dae->ad != NULL) {
-      
+
       delete jmi->dae->ad->F_z_dependent;
       delete jmi->dae->ad->F_z_tape;
       free(jmi->dae->ad->dF_z_irow);
@@ -549,22 +491,14 @@ int jmi_get_t(jmi_t* jmi, jmi_real_t** t) {
 int jmi_dae_F(jmi_t* jmi, jmi_real_t* res) {
 	int i;
 
-	jmi_real_vec_t z_qwe(jmi->n_z);
-	
-	  for (i=0;i<jmi->n_z;i++) {
-		  (*(jmi->z))[i] = (*(jmi->z_val))[i];
-		    z_qwe[i] = (*(jmi->z_val))[i];
-		    (*(jmi->dae->ad->z_work))[i] = (*(jmi->z_val))[i];
-		  printf("*****>> %f, %f, %f\n",(*(jmi->z_val))[i],(*(jmi->dae->ad->z_work))[i],z_qwe[i]);
-	  }
+	for (i=0;i<jmi->n_z;i++) {
+		(*(jmi->dae->ad->z_work))[i] = (*(jmi->z_val))[i];
+	}
 
-		jmi_real_vec_t res_w = jmi->dae->ad->F_z_tape->Forward(0,*jmi->dae->ad->z_work);
-		jmi_real_vec_t res_w2 = jmi->dae->ad->F_z_tape->Forward(0,z_qwe);
+	jmi_real_vec_t res_w = jmi->dae->ad->F_z_tape->Forward(0,*jmi->dae->ad->z_work);
 
 	for(i=0;i<jmi->dae->n_eq_F;i++) {
 		res[i] = res_w[i];
-		  printf("*****>> %f, %f\n",res[i],res_w[i]);
-		  printf("*****>>> %f, %f\n",res[i],res_w2[i]);
 	}
 
 	return 0;
