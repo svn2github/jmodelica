@@ -65,9 +65,9 @@ vdp_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 vdp_cppad_la_LIBADD =
 am_vdp_cppad_la_OBJECTS = vdp_cppad_la-vdp.lo
 vdp_cppad_la_OBJECTS = $(am_vdp_cppad_la_OBJECTS)
-vdp_cppad_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(vdp_cppad_la_CFLAGS) \
-	$(CFLAGS) $(vdp_cppad_la_LDFLAGS) $(LDFLAGS) -o $@
+vdp_cppad_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(vdp_cppad_la_CXXFLAGS) \
+	$(CXXFLAGS) $(vdp_cppad_la_LDFLAGS) $(LDFLAGS) -o $@
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_vdp_OBJECTS = vdp-vdp.$(OBJEXT) vdp-vdp_main.$(OBJEXT)
@@ -104,7 +104,8 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(vdp_la_SOURCES) $(vdp_cppad_la_SOURCES) $(vdp_SOURCES) \
+SOURCES = $(vdp_la_SOURCES) $(vdp_cppad_la_SOURCES) \
+	$(nodist_EXTRA_vdp_cppad_la_SOURCES) $(vdp_SOURCES) \
 	$(vdp_cppad_SOURCES)
 DIST_SOURCES = $(vdp_la_SOURCES) $(vdp_cppad_la_SOURCES) \
 	$(vdp_SOURCES) $(vdp_cppad_SOURCES)
@@ -259,13 +260,14 @@ vdp_la_CFLAGS = -Wall -I../../Jmi -DJMI_AD=JMI_AD_NONE
 
 # The -module flag makes libtool accept nonstandard so/dll names.
 # The -no-undefined flag is needed when building dll:s for Windows
-vdp_la_LDFLAGS = -no-undefined  -module -L../../../lib -Wl,-ljmi
+vdp_la_LDFLAGS = -no-undefined  -module -Wl,../../Jmi/.libs/libjmi.a
 #vdp_la_LIBADD = ../../Jmi/libjmi.la
 #vdp_la_DEPENDENCIES = ../../Jmi/libjmi.a
+nodist_EXTRA_vdp_cppad_la_SOURCES = dummy.cpp
 vdp_cppad_la_SOURCES = vdp.c
 vdp_cppad_la_CFLAGS = -Wall -I../../Jmi -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD -x c++ -DBOGUS_FLAG=0
 vdp_cppad_la_CXXFLAGS = -Wall -I../../Jmi -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD -x c++ -DBOGUS_FLAG=0
-vdp_cppad_la_LDFLAGS = -no-undefined  -module -L../../../lib -Wl,-ljmi_cppad
+vdp_cppad_la_LDFLAGS = -no-undefined  -module -Wl,../../Jmi/.libs/libjmi_cppad.a
 all: all-am
 
 .SUFFIXES:
@@ -375,6 +377,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp-vdp_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp_cppad-vdp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp_cppad-vdp_cppad_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp_cppad_la-dummy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp_cppad_la-vdp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vdp_la-vdp.Plo@am__quote@
 
@@ -475,6 +478,13 @@ vdp_cppad-vdp.obj: vdp.c
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+vdp_cppad_la-dummy.lo: dummy.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_cppad_la_CXXFLAGS) $(CXXFLAGS) -MT vdp_cppad_la-dummy.lo -MD -MP -MF $(DEPDIR)/vdp_cppad_la-dummy.Tpo -c -o vdp_cppad_la-dummy.lo `test -f 'dummy.cpp' || echo '$(srcdir)/'`dummy.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/vdp_cppad_la-dummy.Tpo $(DEPDIR)/vdp_cppad_la-dummy.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dummy.cpp' object='vdp_cppad_la-dummy.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_cppad_la_CXXFLAGS) $(CXXFLAGS) -c -o vdp_cppad_la-dummy.lo `test -f 'dummy.cpp' || echo '$(srcdir)/'`dummy.cpp
 
 vdp_cppad-vdp_cppad_main.o: vdp_cppad_main.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(vdp_cppad_CXXFLAGS) $(CXXFLAGS) -MT vdp_cppad-vdp_cppad_main.o -MD -MP -MF $(DEPDIR)/vdp_cppad-vdp_cppad_main.Tpo -c -o vdp_cppad-vdp_cppad_main.o `test -f 'vdp_cppad_main.cpp' || echo '$(srcdir)/'`vdp_cppad_main.cpp

@@ -43,14 +43,16 @@ vdp_la_CFLAGS = -Wall -I../../Jmi -DJMI_AD=JMI_AD_NONE
 
 # The -module flag makes libtool accept nonstandard so/dll names.
 # The -no-undefined flag is needed when building dll:s for Windows
-vdp_la_LDFLAGS = -no-undefined  -module -L../../../lib -Wl,-ljmi
+vdp_la_LDFLAGS = -no-undefined  -module -Wl,../../Jmi/.libs/libjmi.a
 #vdp_la_LIBADD = ../../Jmi/libjmi.la
 #vdp_la_DEPENDENCIES = ../../Jmi/libjmi.a
+
+nodist_EXTRA_vdp_cppad_la_SOURCES = dummy.cpp
 
 vdp_cppad_la_SOURCES = vdp.c
 vdp_cppad_la_CFLAGS = -Wall -I../../Jmi -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD -x c++ -DBOGUS_FLAG=0
 vdp_cppad_la_CXXFLAGS = -Wall -I../../Jmi -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD -x c++ -DBOGUS_FLAG=0
-vdp_cppad_la_LDFLAGS = -no-undefined  -module -L../../../lib -Wl,-ljmi_cppad
+vdp_cppad_la_LDFLAGS = -no-undefined  -module -Wl,../../Jmi/.libs/libjmi_cppad.a
 #vdp_cppad_la_LIBADD = ../../Jmi/libjmi_cppad.la
 #vdp_cppad_la_DEPENDENCIES = ../../Jmi/libjmi_cppad.la
 
