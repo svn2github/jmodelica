@@ -57,14 +57,14 @@ am_libjmi_la_OBJECTS = libjmi_la-jmi.lo
 libjmi_la_OBJECTS = $(am_libjmi_la_OBJECTS)
 libjmi_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libjmi_la_CFLAGS) \
-	$(CFLAGS) $(libjmi_la_LDFLAGS) $(LDFLAGS) -o $@
+	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 libjmi_cppad_la_LIBADD =
 am_libjmi_cppad_la_OBJECTS = libjmi_cppad_la-jmi_cppad.lo
 libjmi_cppad_la_OBJECTS = $(am_libjmi_cppad_la_OBJECTS)
 libjmi_cppad_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
-	$(libjmi_cppad_la_CXXFLAGS) $(CXXFLAGS) \
-	$(libjmi_cppad_la_LDFLAGS) $(LDFLAGS) -o $@
+	$(libjmi_cppad_la_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -209,6 +209,9 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
+
+#lib_LTLIBRARIES = libjmi.la \
+#                  libjmi_cppad.la
 lib_LTLIBRARIES = libjmi.la \
                   libjmi_cppad.la
 
@@ -219,7 +222,7 @@ libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
-libjmi_la_LDFLAGS = -no-undefined -static-libtool-libs -lm
+#libjmi_la_LDFLAGS = -no-undefined -static-libtool-libs -lm
 
 #libjmi_la_LIBADD = $(JMALLLIBS)
 #libjmi_la_DEPENDENCIES = $(JMALLLIBS)
@@ -230,7 +233,7 @@ libjmi_cppad_la_SOURCES = jmi.h \
 
 libjmi_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD 
 #libjmi_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -lm
-libjmi_cppad_la_LDFLAGS = -no-undefined 
+#libjmi_cppad_la_LDFLAGS = -no-undefined 
 include_HEADERS = jmi.h 
 all: all-am
 
