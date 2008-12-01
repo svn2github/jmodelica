@@ -13,17 +13,21 @@ AC_PROG_CXX
 # Libraries will be built
 #AC_PROG_RANLIB
 
+AC_SUBST(SHAREDEXT)
 case $build in
   *-cygwin*)
     AC_LIBTOOL_WIN32_DLL
     AC_DEFINE([WIN32],[1],[Building on a win32 system (detected Cygwin).])
+    SHAREDEXT=dll
     ;;
   *-mingw*)
     AC_LIBTOOL_WIN32_DLL
     AC_DEFINE([WIN32],[1],[Building on a win32 system (detected MinGW).])    
+    SHAREDEXT=dll
     ;;
   *)
     APP_LIBS="-lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran"
+    SHAREDEXT=.so
     ;;  
 esac
 AC_PROG_LIBTOOL
@@ -93,8 +97,13 @@ case $build in
     ;;  
 esac
 
-AC_SUBST(JMALLLIBS)
-JMALLLIBS="../ModelInterface/libmodelinterface.la ../OptimicaInterface/liboptimica.la"
+#AC_SUBST(JMALLLIBS)
+#JMALLLIBS="../ModelInterface/libmodelinterface.la ../OptimicaInterface/liboptimica.la"
+
+# Used in examples
+jmilib="-L\$(JMILIBDIR) -ljmi";
+AC_SUBST(jmilib)
+
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -109,7 +118,7 @@ AC_C_CONST
 AC_CONFIG_FILES([
  Makefile
  src/Jmi/Makefile
- src/examples/Vdp/Makefile
+ examples/Vdp/Makefile
 ])
 
 

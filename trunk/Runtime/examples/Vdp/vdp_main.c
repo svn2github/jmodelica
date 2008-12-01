@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "../../Jmi/jmi.h"
+#include <jmi.h>
 
 int main(int argv, char* argc[])
 {
