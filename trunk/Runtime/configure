@@ -19676,6 +19676,15 @@ case $build in
     ;;
 esac
 
+#case $build in
+#  *x86_64*)
+CFLAGS+=" -fPIC"
+CXXFLAGS+=" -fPIC"
+#    ;;
+#  *)
+#    ;;
+#esac
+
 # By default, we want to install bin, lib, and include
 # in the directory where configure is run.
 
