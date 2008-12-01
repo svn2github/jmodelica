@@ -1,8 +1,8 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = src/Jmi 
-#          src/examples/Vdp
+SUBDIRS = src/jmi 
 
-
-           
+examples: install
+	cd examples/Vdp; $(MAKE) all
+	cd examples/Vdp_cppad; $(MAKE) all

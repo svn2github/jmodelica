@@ -1,47 +1,40 @@
 
-##########################################################################
-#    You can modify this example makefile to fit for your own program.   #
-#    Usually, you only need to change the five CHANGEME entries below.   #
-##########################################################################
-
-# CHANGEME: This should be the name of your executable
+# Name of the executable
 EXE = vdp_cppad@EXEEXT@ 
 
+# Name of shared library
 SHARED = vdp_cppad@SHAREDEXT@
 
-# CHANGEME: Here is the name of all object files corresponding to the source
-#           code that you wrote in order to define the problem statement
+# Object files to be included in the executable
 OBJS = vdp_cppad_main.@OBJEXT@ \
 	vdp.@OBJEXT@
 
-DLLOBJS = vdp.@OBJEXT@
+# Object files to be included in the shared library
+SHAREDOBJS = vdp.@OBJEXT@
 
-# CHANGEME: Additional libraries
+# Additional libraries
 ADDLIBS =
 
-# CHANGEME: Additional flags for compilation (e.g., include flags)
+# Additional flags for compilation (e.g., include flags)
 ADDINCFLAGS =
 
-# CHANGEME: Directory to the sources for the (example) problem definition
+# Directory to the sources for the (example) problem definition
 # files
 SRCDIR = @srcdir@
 VPATH = @srcdir@
 
 ##########################################################################
-#  Usually, you don't have to change anything below.  Note that if you   #
-#  change certain compiler options, you might have to recompile Ipopt.   #
+#  Usually, you don't have to change anything below.                     #
 ##########################################################################
 
-# C Compiler command
+# C++ Compiler command
 CXX = @CXX@
 
-# C Compiler options
+# C++ Compiler options
 CXXFLAGS = @CXXFLAGS@ -DJMI_AD=JMI_AD_CPPAD
+CXXLINKFLAGS = 
 
-# additional C++ Compiler options for linking
-#CLINKFLAGS = @RPATH_FLAGS@
-
-# Directory with header files
+# Directories with header files
 JMIINCDIR = @includedir@
 CPPADINCDIR = @CPPAD_INC@
 
@@ -50,38 +43,29 @@ JMILIBDIR = @libdir@
 exec_prefix = @exec_prefix@
 prefix = @prefix@
 
-# Libraries necessary to link with IPOPT
-#LIBS = -L$(IPOPTLIBDIR) -lipopt @IPADDLIBS@
+# Libraries necessary to link with jmi
 LIBS = @jmi_cppadlib@ #@ADDLIBS@
 
-# Necessary Include dirs (we use the CYGPATH_W variables to allow
-# compilation with Windows compilers)
-#INCL =  -I`$(CYGPATH_W) $(IPOPTINCDIR)` $(ADDINCFLAGS)
+# Include paths for compilation
 INCL =  -I$(JMIINCDIR) -I$(CPPADINCDIR)
-
-# The following is necessary under cygwin, if native compilers are used
-#CYGPATH_W = @CYGPATH_W@
 
 all: $(EXE) $(SHARED)
 
 .SUFFIXES: .cpp .c .o .obj
 
+# Create the executable
 $(EXE): $(OBJS)
 	$(CXX) $(CXXLINKFLAGS) $(CXXFLAGS) -o $@ $(OBJS) $(LIBS)
-#	bla=;\
-#	for file in $(OBJS); do bla="$$bla `$(CYGPATH_W) $$file`"; done; \
-#	$(CXX) $(CXXLINKFLAGS) $(CXXFLAGS) -o $@ $$bla $(ADDLIBS) $(LIBS)
 
+# Create the shared library
 $(SHARED): $(OBJS)
-	$(CC) -shared $(CLINKFLAGS) $(CFLAGS) -o $@ $(OBJS) $(LIBS)
+	$(CXX) -shared $(CXXLINKFLAGS) $(CXXFLAGS) -o $@ $(SHAREDOBJS) $(LIBS)
 
-
-#%.o: %.c
-#	$(CC) $(CCFLAGS) $(INLC) -c -o $@ $<
-
-clean:
-	rm -rf $(EXE) $(OBJS)
-
+# Compile
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(INCL) -c -o $@ $<
+
+
+clean:
+	rm -rf $(EXE) $(SHARED) $(OBJS)
 

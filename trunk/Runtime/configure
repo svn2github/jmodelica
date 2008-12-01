@@ -732,7 +732,7 @@ PACKAGE_VERSION='0.0.1'
 PACKAGE_STRING='JModelicaRT 0.0.1'
 PACKAGE_BUGREPORT='BUG-REPORT-ADDRESS'
 
-ac_unique_file="src/Jmi/jmi.h"
+ac_unique_file="src/jmi/jmi.h"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>
@@ -20406,7 +20406,7 @@ fi
 
 # Checks for library functions.
 
-ac_config_files="$ac_config_files Makefile src/Jmi/Makefile examples/Vdp/Makefile examples/Vdp_cppad/Makefile"
+ac_config_files="$ac_config_files Makefile src/jmi/Makefile examples/Vdp/Makefile examples/Vdp_cppad/Makefile"
 
 
 
@@ -20998,7 +20998,7 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-    "src/Jmi/Makefile") CONFIG_FILES="$CONFIG_FILES src/Jmi/Makefile" ;;
+    "src/jmi/Makefile") CONFIG_FILES="$CONFIG_FILES src/jmi/Makefile" ;;
     "examples/Vdp/Makefile") CONFIG_FILES="$CONFIG_FILES examples/Vdp/Makefile" ;;
     "examples/Vdp_cppad/Makefile") CONFIG_FILES="$CONFIG_FILES examples/Vdp_cppad/Makefile" ;;
 
