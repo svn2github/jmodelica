@@ -35,7 +35,8 @@ subdir = .
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/configure $(top_srcdir)/examples/Vdp/Makefile.in \
-	config.guess config.sub depcomp install-sh ltmain.sh missing
+	$(top_srcdir)/examples/Vdp_cppad/Makefile.in config.guess \
+	config.sub depcomp install-sh ltmain.sh missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -44,7 +45,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = examples/Vdp/Makefile
+CONFIG_CLEAN_FILES = examples/Vdp/Makefile examples/Vdp_cppad/Makefile
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -167,6 +168,7 @@ htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
+jmi_cppadlib = @jmi_cppadlib@
 jmilib = @jmilib@
 libdir = @libdir@
 libexecdir = @libexecdir@
@@ -243,6 +245,8 @@ $(srcdir)/config.h.in:  $(am__configure_deps)
 distclean-hdr:
 	-rm -f config.h stamp-h1
 examples/Vdp/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/Vdp/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+examples/Vdp_cppad/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/Vdp_cppad/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
