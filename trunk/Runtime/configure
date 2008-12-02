@@ -853,6 +853,8 @@ host
 host_cpu
 host_vendor
 host_os
+SHAREDEXT
+SHARED_LDFLAGS
 CC
 CFLAGS
 ac_ct_CC
@@ -875,7 +877,6 @@ F77
 FFLAGS
 ac_ct_F77
 LIBTOOL
-SHAREDEXT
 IPOPT_INC
 IPOPT_LIB
 CPPAD_INC
@@ -3209,104 +3210,7 @@ fi
 
 
 
-# Libraries will be built
-#AC_PROG_RANLIB
-
-case $build in
-  *-cygwin*)
-
-
-
-cat >>confdefs.h <<\_ACEOF
-#define WIN32 1
-_ACEOF
-
-    ;;
-  *-mingw*)
-
-
-
-cat >>confdefs.h <<\_ACEOF
-#define WIN32 1
-_ACEOF
-
-    ;;
-  *)
-    APP_LIBS="-lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran"
-    ;;
-esac
-# Check whether --enable-shared was given.
-if test "${enable_shared+set}" = set; then
-  enableval=$enable_shared; p=${PACKAGE-default}
-    case $enableval in
-    yes) enable_shared=yes ;;
-    no) enable_shared=no ;;
-    *)
-      enable_shared=no
-      # Look at the argument we got.  We use all the common list separators.
-      lt_save_ifs="$IFS"; IFS="${IFS}$PATH_SEPARATOR,"
-      for pkg in $enableval; do
-	IFS="$lt_save_ifs"
-	if test "X$pkg" = "X$p"; then
-	  enable_shared=yes
-	fi
-      done
-      IFS="$lt_save_ifs"
-      ;;
-    esac
-else
-  enable_shared=yes
-fi
-
-
-# Check whether --enable-static was given.
-if test "${enable_static+set}" = set; then
-  enableval=$enable_static; p=${PACKAGE-default}
-    case $enableval in
-    yes) enable_static=yes ;;
-    no) enable_static=no ;;
-    *)
-     enable_static=no
-      # Look at the argument we got.  We use all the common list separators.
-      lt_save_ifs="$IFS"; IFS="${IFS}$PATH_SEPARATOR,"
-      for pkg in $enableval; do
-	IFS="$lt_save_ifs"
-	if test "X$pkg" = "X$p"; then
-	  enable_static=yes
-	fi
-      done
-      IFS="$lt_save_ifs"
-      ;;
-    esac
-else
-  enable_static=yes
-fi
-
-
-# Check whether --enable-fast-install was given.
-if test "${enable_fast_install+set}" = set; then
-  enableval=$enable_fast_install; p=${PACKAGE-default}
-    case $enableval in
-    yes) enable_fast_install=yes ;;
-    no) enable_fast_install=no ;;
-    *)
-      enable_fast_install=no
-      # Look at the argument we got.  We use all the common list separators.
-      lt_save_ifs="$IFS"; IFS="${IFS}$PATH_SEPARATOR,"
-      for pkg in $enableval; do
-	IFS="$lt_save_ifs"
-	if test "X$pkg" = "X$p"; then
-	  enable_fast_install=yes
-	fi
-      done
-      IFS="$lt_save_ifs"
-      ;;
-    esac
-else
-  enable_fast_install=yes
-fi
-
-
+# Acquire information about the platform
 # Make sure we can run config.sub.
 $SHELL "$ac_aux_dir/config.sub" sun4 >/dev/null 2>&1 ||
   { { echo "$as_me:$LINENO: error: cannot run $SHELL $ac_aux_dir/config.sub" >&5
@@ -3388,6 +3292,127 @@ shift; shift
 host_os=$*
 IFS=$ac_save_IFS
 case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
+
+
+
+# Different platforms use different standard name suffices for
+# shared libraries. Also the flag to gcc for creating a shared library
+# differs. Also, on windows we need to make sure that we can build
+# dll:s.
+
+
+
+case $build in
+  *-cygwin*)
+	echo "Cygwin detected"
+ 	SHAREDEXT=".dll";
+    	SHARED_LDFLAGS=" -shared ";
+
+
+
+cat >>confdefs.h <<\_ACEOF
+#define WIN32 1
+_ACEOF
+
+    ;;
+  *-mingw*)
+	echo "MinGW detected"
+    	SHAREDEXT=".dll";
+    	SHARED_LDFLAGS=" -shared ";
+
+
+
+cat >>confdefs.h <<\_ACEOF
+#define WIN32 1
+_ACEOF
+
+    ;;
+  *-apple*)
+	echo "Mac OS X detected"
+    	SHAREDEXT=".dylib";
+    	SHARED_LDFLAGS=" -dynamiclib ";
+    ;;
+  *)
+	echo "Linux detected"
+    	APP_LIBS="-lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran"
+    	SHAREDEXT=".so";
+   	SHARED_LDFLAGS=" -shared ";
+	# The fPIC flag is used to make the code independent of position in the
+	# memory. This is needed on Linux x86_64 platforms.
+	CFLAGS=" -fPIC $CFLAGS"
+	CXXFLAGS=" -fPIC $CXXFLAGS"
+    ;;
+esac
+# Check whether --enable-shared was given.
+if test "${enable_shared+set}" = set; then
+  enableval=$enable_shared; p=${PACKAGE-default}
+    case $enableval in
+    yes) enable_shared=yes ;;
+    no) enable_shared=no ;;
+    *)
+      enable_shared=no
+      # Look at the argument we got.  We use all the common list separators.
+      lt_save_ifs="$IFS"; IFS="${IFS}$PATH_SEPARATOR,"
+      for pkg in $enableval; do
+	IFS="$lt_save_ifs"
+	if test "X$pkg" = "X$p"; then
+	  enable_shared=yes
+	fi
+      done
+      IFS="$lt_save_ifs"
+      ;;
+    esac
+else
+  enable_shared=yes
+fi
+
+
+# Check whether --enable-static was given.
+if test "${enable_static+set}" = set; then
+  enableval=$enable_static; p=${PACKAGE-default}
+    case $enableval in
+    yes) enable_static=yes ;;
+    no) enable_static=no ;;
+    *)
+     enable_static=no
+      # Look at the argument we got.  We use all the common list separators.
+      lt_save_ifs="$IFS"; IFS="${IFS}$PATH_SEPARATOR,"
+      for pkg in $enableval; do
+	IFS="$lt_save_ifs"
+	if test "X$pkg" = "X$p"; then
+	  enable_static=yes
+	fi
+      done
+      IFS="$lt_save_ifs"
+      ;;
+    esac
+else
+  enable_static=yes
+fi
+
+
+# Check whether --enable-fast-install was given.
+if test "${enable_fast_install+set}" = set; then
+  enableval=$enable_fast_install; p=${PACKAGE-default}
+    case $enableval in
+    yes) enable_fast_install=yes ;;
+    no) enable_fast_install=no ;;
+    *)
+      enable_fast_install=no
+      # Look at the argument we got.  We use all the common list separators.
+      lt_save_ifs="$IFS"; IFS="${IFS}$PATH_SEPARATOR,"
+      for pkg in $enableval; do
+	IFS="$lt_save_ifs"
+	if test "X$pkg" = "X$p"; then
+	  enable_fast_install=yes
+	fi
+      done
+      IFS="$lt_save_ifs"
+      ;;
+    esac
+else
+  enable_fast_install=yes
+fi
 
 
 ac_ext=c
@@ -4827,7 +4852,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4830 "configure"' > conftest.$ac_ext
+  echo '#line 4855 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7388,11 +7413,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7391: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7416: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7395: \$? = $ac_status" >&5
+   echo "$as_me:7420: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7678,11 +7703,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7681: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7706: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7685: \$? = $ac_status" >&5
+   echo "$as_me:7710: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7782,11 +7807,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7785: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7810: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7789: \$? = $ac_status" >&5
+   echo "$as_me:7814: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10133,7 +10158,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10136 "configure"
+#line 10161 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10233,7 +10258,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10236 "configure"
+#line 10261 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12653,11 +12678,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12656: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12681: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:12660: \$? = $ac_status" >&5
+   echo "$as_me:12685: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -12757,11 +12782,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12760: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12785: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:12764: \$? = $ac_status" >&5
+   echo "$as_me:12789: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14321,11 +14346,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14324: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14349: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14328: \$? = $ac_status" >&5
+   echo "$as_me:14353: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14425,11 +14450,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14428: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14453: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14432: \$? = $ac_status" >&5
+   echo "$as_me:14457: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16614,11 +16639,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16617: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16642: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16621: \$? = $ac_status" >&5
+   echo "$as_me:16646: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16904,11 +16929,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16907: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16932: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16911: \$? = $ac_status" >&5
+   echo "$as_me:16936: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17008,11 +17033,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17011: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17036: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17015: \$? = $ac_status" >&5
+   echo "$as_me:17040: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -19663,27 +19688,25 @@ LIBTOOL='$(SHELL) $(top_builddir)/libtool'
 
 
 
-
-case $build in
-  *-cygwin*)
-    SHAREDEXT=".dll"
-    ;;
-  *-mingw*)
-    SHAREDEXT=".dll"
-    ;;
-  *)
-    SHAREDEXT=".so"
-    ;;
-esac
-
 #case $build in
-#  *x86_64*)
-CFLAGS+=" -fPIC"
-CXXFLAGS+=" -fPIC"
+#  *-cygwin*)
+#    SHAREDEXT=".dll";
+#    SHARED_LDFLAGS=" -shared ";
+#    ;;
+#  *-mingw*)
+#    SHAREDEXT=".dll";
+#    SHARED_LDFLAGS=" -shared ";
+#    ;;
+#  *-apple*)
+#    SHAREDEXT=".dylib";
+#    SHARED_LDFLAGS=" -dynamiclib ";
 #    ;;
 #  *)
+#    SHAREDEXT=".so";
+#    SHARED_LDFLAGS=" -shared ";
 #    ;;
 #esac
+
 
 # By default, we want to install bin, lib, and include
 # in the directory where configure is run.
@@ -19708,9 +19731,6 @@ CXXFLAGS+=" -fPIC"
 
 IPOPT_INC=$ipopt/include/coin
 IPOPT_LIB=$ipopt/lib
-
-#AC_DEFINE([JMI_AD_NONE],[0],[No AD support])
-#AC_DEFINE([JMI_AD_CPPAD],[1],[CppAD support])
 
 
 # Check whether --with-cppad was given.
@@ -21155,6 +21175,8 @@ host!$host$ac_delim
 host_cpu!$host_cpu$ac_delim
 host_vendor!$host_vendor$ac_delim
 host_os!$host_os$ac_delim
+SHAREDEXT!$SHAREDEXT$ac_delim
+SHARED_LDFLAGS!$SHARED_LDFLAGS$ac_delim
 CC!$CC$ac_delim
 CFLAGS!$CFLAGS$ac_delim
 ac_ct_CC!$ac_ct_CC$ac_delim
@@ -21167,8 +21189,6 @@ EGREP!$EGREP$ac_delim
 LN_S!$LN_S$ac_delim
 ECHO!$ECHO$ac_delim
 AR!$AR$ac_delim
-RANLIB!$RANLIB$ac_delim
-DLLTOOL!$DLLTOOL$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -21210,6 +21230,8 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+RANLIB!$RANLIB$ac_delim
+DLLTOOL!$DLLTOOL$ac_delim
 AS!$AS$ac_delim
 OBJDUMP!$OBJDUMP$ac_delim
 CPP!$CPP$ac_delim
@@ -21218,7 +21240,6 @@ F77!$F77$ac_delim
 FFLAGS!$FFLAGS$ac_delim
 ac_ct_F77!$ac_ct_F77$ac_delim
 LIBTOOL!$LIBTOOL$ac_delim
-SHAREDEXT!$SHAREDEXT$ac_delim
 IPOPT_INC!$IPOPT_INC$ac_delim
 IPOPT_LIB!$IPOPT_LIB$ac_delim
 CPPAD_INC!$CPPAD_INC$ac_delim
@@ -21230,7 +21251,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 18; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 19; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

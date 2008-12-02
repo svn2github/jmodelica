@@ -34,6 +34,8 @@ CXX = @CXX@
 CXXFLAGS = @CXXFLAGS@ -DJMI_AD=JMI_AD_CPPAD
 CXXLINKFLAGS = 
 
+SHARED_LDFLAGS = @SHARED_LDFLAGS@
+
 # Directories with header files
 JMIINCDIR = @includedir@
 CPPADINCDIR = @CPPAD_INC@
@@ -59,7 +61,7 @@ $(EXE): $(OBJS)
 
 # Create the shared library
 $(SHARED): $(OBJS)
-	$(CXX) -shared $(CXXLINKFLAGS) $(CXXFLAGS) -o $@ $(SHAREDOBJS) $(LIBS)
+	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $@ $(SHAREDOBJS) $(LIBS)
 
 # Compile
 .cpp.o:

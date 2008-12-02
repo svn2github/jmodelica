@@ -34,6 +34,8 @@ CC = @CC@
 CFLAGS = @CFLAGS@ -DJMI_AD=JMI_AD_NONE
 CLINKFLAGS = 
 
+SHARED_LDFLAGS = @SHARED_LDFLAGS@
+
 # Directory with header files
 JMIINCDIR = @includedir@ 
 
@@ -59,7 +61,7 @@ $(EXE): $(OBJS)
 
 # Create the shared library
 $(SHARED): $(OBJS)
-	$(CC) -shared $(CLINKFLAGS) $(CFLAGS) -o $@ $(SHAREDOBJS) $(LIBS)
+	$(CC) $(SHARED_LDFLAGS) $(CLINKFLAGS) $(CFLAGS) -o $@ $(SHAREDOBJS) $(LIBS)
 
 # Compile
 .c.o:

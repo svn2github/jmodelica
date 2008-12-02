@@ -10,45 +10,48 @@ AC_CONFIG_HEADER([config.h])
 # Checks for programs.
 AC_PROG_CXX
 
-# Libraries will be built
-#AC_PROG_RANLIB
+# Acquire information about the platform
+AC_CANONICAL_BUILD
+AC_CANONICAL_HOST
 
+# Different platforms use different standard name suffices for 
+# shared libraries. Also the flag to gcc for creating a shared library
+# differs. Also, on windows we need to make sure that we can build
+# dll:s.
+AC_SUBST(SHAREDEXT)
+AC_SUBST(SHARED_LDFLAGS)
 case $build in
   *-cygwin*)
-    AC_LIBTOOL_WIN32_DLL
-    AC_DEFINE([WIN32],[1],[Building on a win32 system (detected Cygwin).])
+	echo "Cygwin detected"   
+ 	SHAREDEXT=".dll";
+    	SHARED_LDFLAGS=" -shared ";
+    	AC_LIBTOOL_WIN32_DLL
+    	AC_DEFINE([WIN32],[1],[Building on a win32 system (detected Cygwin).])
     ;;
   *-mingw*)
-    AC_LIBTOOL_WIN32_DLL
-    AC_DEFINE([WIN32],[1],[Building on a win32 system (detected MinGW).])    
+	echo "MinGW detected"   
+    	SHAREDEXT=".dll";
+    	SHARED_LDFLAGS=" -shared ";
+    	AC_LIBTOOL_WIN32_DLL
+    	AC_DEFINE([WIN32],[1],[Building on a win32 system (detected MinGW).])    
+    ;;
+  *-apple*)
+	echo "Mac OS X detected"   
+    	SHAREDEXT=".dylib";
+    	SHARED_LDFLAGS=" -dynamiclib ";
     ;;
   *)
-    APP_LIBS="-lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran"
+	echo "Linux detected"   
+    	APP_LIBS="-lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran"
+    	SHAREDEXT=".so";
+   	SHARED_LDFLAGS=" -shared ";
+	# The fPIC flag is used to make the code independent of position in the
+	# memory. This is needed on Linux x86_64 platforms.
+	CFLAGS=" -fPIC $CFLAGS"
+	CXXFLAGS=" -fPIC $CXXFLAGS"
     ;;  
 esac
 AC_PROG_LIBTOOL
-
-AC_SUBST(SHAREDEXT)
-case $build in
-  *-cygwin*)
-    SHAREDEXT=".dll"
-    ;;
-  *-mingw*)
-    SHAREDEXT=".dll"
-    ;;
-  *)
-    SHAREDEXT=".so"
-    ;;  
-esac
-
-#case $build in
-#  *x86_64*)
-CFLAGS+=" -fPIC"
-CXXFLAGS+=" -fPIC"
-#    ;;
-#  *)
-#    ;;  
-#esac
 
 # By default, we want to install bin, lib, and include
 # in the directory where configure is run.
@@ -73,9 +76,6 @@ AC_SUBST(IPOPT_LIB)
 
 IPOPT_INC=$ipopt/include/coin
 IPOPT_LIB=$ipopt/lib
-
-#AC_DEFINE([JMI_AD_NONE],[0],[No AD support])
-#AC_DEFINE([JMI_AD_CPPAD],[1],[CppAD support])
 
 AC_ARG_WITH([cppad],
    [AS_HELP_STRING([--with-cppad],

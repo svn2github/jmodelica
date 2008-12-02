@@ -44,8 +44,8 @@
  *	     This interface also contains a specification of a DAE initialization
  *	     system on the form
  *
- *	      F0(ci,cd,pi,pd,dx,x,u,w,t) = 0
- *	      F1(ci,cd,pi,pd,dx,x,u,w,t) = 0
+ *	      F0(ci,cd,pi,pd,dx,x,u,w,t0) = 0
+ *	      F1(ci,cd,pi,pd,dx,x,u,w,t0) = 0
  *
  *	    were
  *
