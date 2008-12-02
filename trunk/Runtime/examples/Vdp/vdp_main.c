@@ -12,7 +12,7 @@ int main(int argv, char* argc[])
 	int i;
 
 	int dF_n_nz;
-	jmi_dae_dF_n_nz(jmi,&dF_n_nz);
+	jmi_dae_dF_n_nz(jmi,JMI_DER_SYMBOLIC,&dF_n_nz);
 	int* dF_row = (int*)calloc(dF_n_nz,sizeof(int));
 	int* dF_col = (int*)calloc(dF_n_nz,sizeof(int));
 
@@ -93,7 +93,7 @@ int main(int argv, char* argc[])
 		printf("res[%d] = %f\n",i,res_F[i]);
 	}
 
-	jmi_dae_dF_nz_indices(jmi,dF_row,dF_col);
+	jmi_dae_dF_nz_indices(jmi,JMI_DER_SYMBOLIC,dF_row,dF_col);
 	printf("Number of non-zeros in the DAE residual Jacobian: %d\n",dF_n_nz);
 	for (i=0;i<dF_n_nz;i++) {
 		printf("%d, %d\n",dF_row[i],dF_col[i]);
@@ -107,76 +107,44 @@ int main(int argv, char* argc[])
 	// Compute the size of the Jacobian for different sparsity configurations
 	int dF_n_nz_test;
 	int dF_n_cols_test;
-    jmi_dae_dF_dim(jmi,JMI_DER_DENSE_ROW_MAJOR,JMI_DER_CI_SKIP|
-    		JMI_DER_CD_SKIP|
-    		JMI_DER_CI_SKIP|
-    		JMI_DER_PI_SKIP|
-    		JMI_DER_PD_SKIP|
-    		JMI_DER_DX_SKIP|
-    		JMI_DER_U_SKIP|
-    		JMI_DER_W_SKIP|
-    		JMI_DER_T_SKIP,mask,&dF_n_cols_test,&dF_n_nz_test);
+    jmi_dae_dF_dim(jmi,JMI_DER_SYMBOLIC,JMI_DER_DENSE_ROW_MAJOR,JMI_DER_X,mask,&dF_n_cols_test,&dF_n_nz_test);
 	printf("Dense dF_dx: dF_n_cols: %d, dF_n_nz: %d\n", dF_n_cols_test, dF_n_nz_test);
 
-    jmi_dae_dF_dim(jmi,JMI_DER_SPARSE,JMI_DER_CI_SKIP|
-    		JMI_DER_CD_SKIP|
-    		JMI_DER_CI_SKIP|
-    		JMI_DER_PI_SKIP|
-    		JMI_DER_PD_SKIP|
-    		JMI_DER_DX_SKIP|
-    		JMI_DER_U_SKIP|
-    		JMI_DER_W_SKIP|
-    		JMI_DER_T_SKIP,mask,&dF_n_cols_test,&dF_n_nz_test);
+    jmi_dae_dF_dim(jmi,JMI_DER_SYMBOLIC,JMI_DER_SPARSE,JMI_DER_X,mask,&dF_n_cols_test,&dF_n_nz_test);
 	printf("Sparse dF_dx: dF_n_cols: %d, dF_n_nz: %d\n", dF_n_cols_test, dF_n_nz_test);
 
-    jmi_dae_dF_dim(jmi,JMI_DER_SPARSE,JMI_DER_CI_SKIP|
-    		JMI_DER_CD_SKIP|
-    		JMI_DER_CI_SKIP|
-    		JMI_DER_PI_SKIP|
-    		JMI_DER_PD_SKIP|
-    		JMI_DER_DX_SKIP|
-    		JMI_DER_X_SKIP|
-    		JMI_DER_W_SKIP|
-    		JMI_DER_T_SKIP,mask,&dF_n_cols_test,&dF_n_nz_test);
+    jmi_dae_dF_dim(jmi,JMI_DER_SYMBOLIC,JMI_DER_SPARSE,JMI_DER_U,mask,&dF_n_cols_test,&dF_n_nz_test);
 	printf("Sparse dF_du: dF_n_cols: %d, dF_n_nz: %d\n", dF_n_cols_test, dF_n_nz_test);
 
 
 	mask[jmi->offs_x+1] = 0;
 	mask[jmi->offs_x+2] = 0;
-    jmi_dae_dF_dim(jmi,JMI_DER_SPARSE,JMI_DER_CI_SKIP/
-    		JMI_DER_CD_SKIP|
-    		JMI_DER_CI_SKIP|
-    		JMI_DER_PI_SKIP|
-    		JMI_DER_PD_SKIP|
-    		JMI_DER_DX_SKIP|
-    		JMI_DER_U_SKIP|
-    		JMI_DER_W_SKIP|
-    		JMI_DER_T_SKIP,mask,&dF_n_cols_test,&dF_n_nz_test);
+    jmi_dae_dF_dim(jmi,JMI_DER_SYMBOLIC,JMI_DER_SPARSE,JMI_DER_X,mask,&dF_n_cols_test,&dF_n_nz_test);
 	printf("Sparse, first column of dF_dx: dF_n_cols: %d, dF_n_nz: %d\n", dF_n_cols_test, dF_n_nz_test);
 
 	mask[jmi->offs_x+1] = 1;
 	mask[jmi->offs_x+2] = 1;
 
-	jmi_dae_dF_dim(jmi,JMI_DER_SPARSE,JMI_DER_NO_SKIP,mask,&dF_n_cols_test,&dF_n_nz_test);
+	jmi_dae_dF_dim(jmi,JMI_DER_SYMBOLIC,JMI_DER_SPARSE,JMI_DER_ALL,mask,&dF_n_cols_test,&dF_n_nz_test);
 	printf("Sparse dF_dz: dF_n_cols: %d, dF_n_nz: %d\n", dF_n_cols_test, dF_n_nz_test);
 
-	jmi_dae_dF_dim(jmi,JMI_DER_DENSE_COL_MAJOR,JMI_DER_NO_SKIP,mask,&dF_n_cols_test,&dF_n_nz_test);
+	jmi_dae_dF_dim(jmi,JMI_DER_SYMBOLIC,JMI_DER_DENSE_COL_MAJOR,JMI_DER_ALL,mask,&dF_n_cols_test,&dF_n_nz_test);
 	printf("Dense dF_dz: dF_n_cols: %d, dF_n_nz: %d\n", dF_n_cols_test, dF_n_nz_test);
 
 
-    jmi_dae_dF(jmi,JMI_DER_SPARSE,0,mask,dF);
+    jmi_dae_dF(jmi,JMI_DER_SYMBOLIC,JMI_DER_SPARSE,JMI_DER_ALL,mask,dF);
 	printf("Jacobian (sparse):\n");
 	for (i=0;i<dF_n_nz;i++) {
 		printf("%f\n",dF[i]);
 	}
 
-    jmi_dae_dF(jmi,JMI_DER_DENSE_COL_MAJOR,0,mask,dF_dense);
+    jmi_dae_dF(jmi,JMI_DER_SYMBOLIC,JMI_DER_DENSE_COL_MAJOR,JMI_DER_ALL,mask,dF_dense);
 	printf("Jacobian (dense col major):\n");
 	for (i=0;i<dF_n_dense;i++) {
 		printf("%f\n",dF_dense[i]);
 	}
 
-    jmi_dae_dF(jmi,JMI_DER_DENSE_ROW_MAJOR,0,mask,dF_dense);
+    jmi_dae_dF(jmi,JMI_DER_SYMBOLIC,JMI_DER_DENSE_ROW_MAJOR,JMI_DER_ALL,mask,dF_dense);
 	printf("Jacobian (dense row major):\n");
 	for (i=0;i<dF_n_dense;i++) {
 		printf("%f\n",dF_dense[i]);

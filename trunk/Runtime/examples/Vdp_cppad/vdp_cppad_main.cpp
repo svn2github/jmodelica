@@ -17,7 +17,7 @@ int main(int argv, char* argc[])
 
 
 	int dF_n_nz;
-	jmi_dae_dF_n_nz(jmi,&dF_n_nz);
+	jmi_dae_dF_n_nz(jmi,JMI_DER_SYMBOLIC,&dF_n_nz);
 	int* dF_row = (int*)calloc(dF_n_nz,sizeof(int));
 	int* dF_col = (int*)calloc(dF_n_nz,sizeof(int));
 
@@ -38,10 +38,10 @@ int main(int argv, char* argc[])
 	printf("Number of inputs:                              %d\n",jmi->n_u);
 	printf("Number of algebraics:                          %d\n",jmi->n_w);
 	printf("Number of DAE equations:                       %d\n",jmi->dae->n_eq_F);
-/*	printf("Number of DAE initial equations (F0):          %d\n",n_eq_F0);
+	/*	printf("Number of DAE initial equations (F0):          %d\n",n_eq_F0);
 	printf("Number of DAE initial equations (F1):          %d\n",n_eq_F1);
 	printf("Number of elements in Jacobian wrt dx, x, u:   %d\n",n_jac_F);
-*/
+	 */
 
 
 
@@ -73,12 +73,12 @@ int main(int argv, char* argc[])
 	/*	Jmi_Double_t* res_F0 = (Jmi_Double_t*)calloc(n_eq_F0,sizeof(Jmi_Double_t));
 	Jmi_Double_t* res_F1 = (Jmi_Double_t*)calloc(n_eq_F1,sizeof(Jmi_Double_t));
 	Jmi_Double_t* jac_DER_F = (Jmi_Double_t*)calloc(n_jac_F,sizeof(Jmi_Double_t));
-*/
+	 */
 
 
 	// Here initial values for all parameters should be read from
 	// xml-files
-    pi[0] = 1;
+	pi[0] = 1;
 	x[0] = 5;
 	x[1] = 6;
 	x[2] = 7;
@@ -97,7 +97,7 @@ int main(int argv, char* argc[])
 	}
 
 	// Try another point
-    pi[0] = 1;
+	pi[0] = 1;
 	x[0] = 1;
 	x[1] = 2;
 	x[2] = 3;
@@ -113,7 +113,7 @@ int main(int argv, char* argc[])
 		printf("res[%d] = %f\n",i,res_F[i]);
 	}
 
-	jmi_dae_dF_nz_indices(jmi,dF_row,dF_col);
+	jmi_dae_dF_nz_indices(jmi,JMI_DER_SYMBOLIC,dF_row,dF_col);
 	printf("Number of non-zeros in the DAE residual Jacobian: %d\n",dF_n_nz);
 	for (i=0;i<dF_n_nz;i++) {
 		printf("%d, %d\n",dF_row[i],dF_col[i]);
@@ -125,19 +125,19 @@ int main(int argv, char* argc[])
 	}
 
 	// Evalute symbolic Jacobian
-	jmi_dae_dF(jmi,JMI_DER_SPARSE,JMI_DER_NO_SKIP,mask,dF);
+	jmi_dae_dF(jmi,JMI_DER_SYMBOLIC,JMI_DER_SPARSE,JMI_DER_ALL,mask,dF);
 	printf("Jacobian (sparse):\n");
 	for (i=0;i<dF_n_nz;i++) {
 		printf("%f\n",dF[i]);
 	}
 
-    jmi_dae_dF(jmi,JMI_DER_DENSE_COL_MAJOR,JMI_DER_NO_SKIP,mask,dF_dense);
+	jmi_dae_dF(jmi,JMI_DER_SYMBOLIC,JMI_DER_DENSE_COL_MAJOR,JMI_DER_ALL,mask,dF_dense);
 	printf("Jacobian (dense col major):\n");
 	for (i=0;i<dF_n_dense;i++) {
 		printf("%f\n",dF_dense[i]);
 	}
 
-    jmi_dae_dF(jmi,JMI_DER_DENSE_ROW_MAJOR,JMI_DER_NO_SKIP,mask,dF_dense);
+	jmi_dae_dF(jmi,JMI_DER_SYMBOLIC,JMI_DER_DENSE_ROW_MAJOR,JMI_DER_ALL,mask,dF_dense);
 	printf("Jacobian (dense row major):\n");
 	for (i=0;i<dF_n_dense;i++) {
 		printf("%f\n",dF_dense[i]);
@@ -145,7 +145,7 @@ int main(int argv, char* argc[])
 
 	// Do some stuff with the AD functions
 	int dF_n_nz_ad;
-	jmi_dae_dF_n_nz_ad(jmi,&dF_n_nz_ad);
+	jmi_dae_dF_n_nz(jmi,JMI_DER_CPPAD,&dF_n_nz_ad);
 	int* dF_row_ad = (int*)calloc(dF_n_nz_ad,sizeof(int));
 	int* dF_col_ad = (int*)calloc(dF_n_nz_ad,sizeof(int));
 
@@ -153,26 +153,26 @@ int main(int argv, char* argc[])
 
 	jmi_real_t* dF_ad_dense = (jmi_real_t*)calloc(dF_n_dense,sizeof(jmi_real_t));
 
-	jmi_dae_dF_nz_indices_ad(jmi,dF_row_ad,dF_col_ad);
+	jmi_dae_dF_nz_indices(jmi,JMI_DER_CPPAD,dF_row_ad,dF_col_ad);
 	printf("Number of non-zeros in the DAE residual Jacobian (cppad): %d\n",dF_n_nz_ad);
 	for (i=0;i<dF_n_nz_ad;i++) {
 		printf("%d, %d\n",dF_row_ad[i],dF_col_ad[i]);
 	}
 
-    jmi_dae_dF_ad(jmi,JMI_DER_SPARSE,JMI_DER_NO_SKIP,mask,dF_ad);
+	jmi_dae_dF(jmi,JMI_DER_CPPAD,JMI_DER_SPARSE,JMI_DER_ALL,mask,dF_ad);
 	printf("Jacobian (sparse) (cppad):\n");
 	for (i=0;i<dF_n_nz_ad;i++) {
 		printf("%f\n",dF_ad[i]);
 	}
 
-    jmi_dae_dF_ad(jmi,JMI_DER_DENSE_COL_MAJOR,JMI_DER_NO_SKIP,mask,dF_ad_dense);
+	jmi_dae_dF(jmi,JMI_DER_CPPAD,JMI_DER_DENSE_COL_MAJOR,JMI_DER_ALL,mask,dF_ad_dense);
 	printf("Jacobian (dense col major) (cppad):\n");
 	for (i=0;i<dF_n_dense;i++) {
 		printf("%f\n",dF_ad_dense[i]);
 	}
 
-    jmi_dae_dF_ad(jmi,JMI_DER_DENSE_ROW_MAJOR,JMI_DER_NO_SKIP,mask,dF_ad_dense);
-    printf("Jacobian (dense row major) (cppad):\n");
+	jmi_dae_dF(jmi,JMI_DER_CPPAD,JMI_DER_DENSE_ROW_MAJOR,JMI_DER_ALL,mask,dF_ad_dense);
+	printf("Jacobian (dense row major) (cppad):\n");
 	for (i=0;i<dF_n_dense;i++) {
 		printf("%f\n",dF_ad_dense[i]);
 	}

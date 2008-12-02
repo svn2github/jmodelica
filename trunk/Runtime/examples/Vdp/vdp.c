@@ -53,9 +53,9 @@ static int vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_p res) {
  */
 
 // TODO: This does not work...
-//static jmi_dae_dF_t vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_vec_t jac) {
+//static jmi_dae_dF_t vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int independent_vars, int* mask, jmi_real_vec_t jac) {
 
-static int vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac) {
+static int vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
 
 	jmi_real_t* ci;
 	jmi_real_t* cd;
@@ -87,7 +87,7 @@ static int vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_r
 
 	int jac_m;
 	int jac_n_nz;
-	jmi_dae_dF_dim(jmi,sparsity,skip,mask,&jac_m,&jac_n_nz);
+	jmi_dae_dF_dim(jmi,JMI_DER_SYMBOLIC,sparsity,independent_vars,mask,&jac_m,&jac_n_nz);
 
 	// Set Jacobian to zero if dense evaluation.
 	if ((sparsity & JMI_DER_DENSE_ROW_MAJOR) | (sparsity & JMI_DER_DENSE_COL_MAJOR)) {
@@ -98,7 +98,7 @@ static int vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_r
 
 	int jac_index = 0;
 	col_index = 0;
-	if (!(skip & JMI_DER_PI_SKIP)) {
+	if ((independent_vars & JMI_DER_PI)) {
 		if (mask[col_index++] == 1) {
 			jmi_real_t jac_tmp_1 = x[0];
 			switch (sparsity) {
@@ -117,7 +117,7 @@ static int vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_r
 		col_index += jmi->n_pi;
 	}
 
-	if (!(skip & JMI_DER_DX_SKIP)) {
+	if ((independent_vars & JMI_DER_DX)) {
 		if (mask[col_index++] == 1) {
 			jmi_real_t jac_tmp_1 = -1;
 			switch (sparsity) {
@@ -164,7 +164,7 @@ static int vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_r
 		col_index += jmi->n_dx;
 	}
 
-	if (!(skip & JMI_DER_X_SKIP)) {
+	if ((independent_vars & JMI_DER_X)) {
 		if (mask[col_index++] == 1) {
 			jmi_real_t jac_tmp_1 = (1-x[1]*x[1]);
 			jmi_real_t jac_tmp_2 = pi[0];
@@ -210,7 +210,7 @@ static int vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_r
 		col_index += jmi->n_x;
 	}
 
-	if (!(skip & JMI_DER_U_SKIP)) {
+	if ((independent_vars & JMI_DER_U)) {
 		if (mask[col_index++] == 1) {
 			jmi_real_t jac_tmp_1 = 1;
 			jmi_real_t jac_tmp_2 = 2*u[0];
