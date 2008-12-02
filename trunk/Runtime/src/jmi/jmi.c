@@ -12,7 +12,7 @@
 	(*dF_n_nz) += jmi_dF_icol[j]-1 == col_index? 1 : 0;\
 					}\
 				} else {\
-					(*dF_n_nz) += jmi->dae->n_eq_F;\
+					(*dF_n_nz) += jmi->dae->F->n_eq_Y;\
 				}\
 			}\
 			col_index++;\
@@ -67,7 +67,7 @@ int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
 
 }
 
-int jmi_dae_init(jmi_t* jmi, jmi_dae_F_t jmi_dae_F, int n_eq_F, jmi_dae_dF_t jmi_dae_dF,
+int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t jmi_dae_F, int n_eq_F, jmi_jacobian_func_t jmi_dae_dF,
 		int dF_n_nz, int* irow, int* icol) {
 
 	int i;
@@ -75,27 +75,38 @@ int jmi_dae_init(jmi_t* jmi, jmi_dae_F_t jmi_dae_F, int n_eq_F, jmi_dae_dF_t jmi
 	// Create jmi_dae struct
 	jmi_dae_t* dae = (jmi_dae_t*)calloc(1,sizeof(jmi_dae_t));
 	jmi->dae = dae;
+	jmi_func_t* jf_F = (jmi_func_t*)calloc(1,sizeof(jmi_func_t));
+	jmi->dae->F = jf_F;
 
 	// Set up the dae struct
-	dae->n_eq_F = n_eq_F;
-	dae->F = jmi_dae_F;
-	dae->dF = jmi_dae_dF;
+	dae->F->n_eq_Y = n_eq_F;
+	dae->F->Y = jmi_dae_F;
+	dae->F->dY = jmi_dae_dF;
 
-	dae->dF_n_nz = dF_n_nz;
-	dae->dF_irow = (int*)calloc(dF_n_nz,sizeof(int));
-	dae->dF_icol = (int*)calloc(dF_n_nz,sizeof(int));
+	dae->F->dY_n_nz = dF_n_nz;
+	dae->F->dY_irow = (int*)calloc(dF_n_nz,sizeof(int));
+	dae->F->dY_icol = (int*)calloc(dF_n_nz,sizeof(int));
 
 	for (i=0;i<dF_n_nz;i++) {
-		dae->dF_irow[i] = irow[i];
-		dae->dF_icol[i] = icol[i];
+		dae->F->dY_irow[i] = irow[i];
+		dae->F->dY_icol[i] = icol[i];
 	}
 
-	dae->ad = NULL;
+	dae->F->ad = NULL;
 
 	return 0;
 }
 
+int jmi_init_init(jmi_t* jmi, jmi_residual_func_t jmi_init_F0, int n_eq_F0,
+		jmi_jacobian_func_t jmi_init_dF0,
+		int dF0_n_nz, int* dF0_irow, int* dF0_icol,
+		jmi_residual_func_t jmi_init_F1, int n_eq_F1,
+		jmi_jacobian_func_t jmi_init_dF1,
+		int dF1_n_nz, int* dF1_irow, int* dF1_icol) {
 
+
+	return 0;
+}
 
 int jmi_ad_init(jmi_t* jmi) {
 	return -1;
@@ -103,8 +114,8 @@ int jmi_ad_init(jmi_t* jmi) {
 
 int jmi_delete(jmi_t* jmi){
 	if(jmi->dae != NULL) {
-		free(jmi->dae->dF_irow);
-		free(jmi->dae->dF_icol);
+		free(jmi->dae->F->dY_irow);
+		free(jmi->dae->F->dY_icol);
 		free(jmi->dae);
 	}
 	if(jmi->init != NULL) {
@@ -138,7 +149,8 @@ int jmi_get_sizes(jmi_t* jmi, int* n_ci, int* n_cd, int* n_pi, int* n_pd,
 }
 
 int jmi_dae_get_sizes(jmi_t* jmi, int* n_eq_F) {
-	*n_eq_F = jmi->dae->n_eq_F;
+	*n_eq_F = jmi->dae->F->n_eq_Y;
+	return 0;
 }
 
 int jmi_get_ci(jmi_t* jmi, jmi_real_t** ci) {
@@ -192,21 +204,21 @@ int jmi_dae_F(jmi_t* jmi, jmi_real_t* res) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
 
-	jmi->dae->F(jmi, &res);
+	jmi->dae->F->Y(jmi, &res);
 	return 0;
 }
 
 int jmi_dae_dF(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
 	if (eval_alg & JMI_DER_SYMBOLIC) {
 
-		if (jmi->dae->dF==NULL) {
+		if (jmi->dae->F->dY==NULL) {
 			return -1;
 		}
 		int i;
 		for (i=0;i<jmi->n_z;i++) {
 			(*(jmi->z))[i] = (*(jmi->z_val))[i];
 		}
-		jmi->dae->dF(jmi, sparsity, independent_vars, mask, jac);
+		jmi->dae->F->dY(jmi, sparsity, independent_vars, mask, jac);
 		return 0;
 
 	} else if (eval_alg & JMI_DER_CPPAD) {
@@ -219,10 +231,10 @@ int jmi_dae_dF(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int
 int jmi_dae_dF_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
 
 	if (eval_alg & JMI_DER_SYMBOLIC) {
-		if (jmi->dae->dF==NULL) {
+		if (jmi->dae->F->dY==NULL) {
 			return -1;
 		}
-		*n_nz = jmi->dae->dF_n_nz;
+		*n_nz = jmi->dae->F->dY_n_nz;
 		return 0;
 
 	} else if (eval_alg & JMI_DER_CPPAD) {
@@ -236,13 +248,13 @@ int jmi_dae_dF_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col) {
 
 	if (eval_alg & JMI_DER_SYMBOLIC) {
 
-		if (jmi->dae->dF==NULL) {
+		if (jmi->dae->F->dY==NULL) {
 			return -1;
 		}
 		int i;
-		for (i=0;i<jmi->dae->dF_n_nz;i++) {
-			row[i] = jmi->dae->dF_irow[i];
-			col[i] = jmi->dae->dF_icol[i];
+		for (i=0;i<jmi->dae->F->dY_n_nz;i++) {
+			row[i] = jmi->dae->F->dY_irow[i];
+			col[i] = jmi->dae->F->dY_icol[i];
 		}
 		return 0;
 
@@ -258,7 +270,7 @@ int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 		int *dF_n_cols, int *dF_n_nz) {
 	if (eval_alg & JMI_DER_SYMBOLIC) {
 
-		if (jmi->dae->dF==NULL) {
+		if (jmi->dae->F->dY==NULL) {
 			return -1;
 		}
 
@@ -268,15 +280,15 @@ int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 		int i,j;
 		int col_index = 0;
 
-		JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_CI, jmi->n_ci, jmi->dae->dF_n_nz, jmi->dae->dF_icol)
-		JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_CD, jmi->n_cd, jmi->dae->dF_n_nz, jmi->dae->dF_icol)
-		JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_PI, jmi->n_pi, jmi->dae->dF_n_nz, jmi->dae->dF_icol)
-		JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_PD, jmi->n_pd, jmi->dae->dF_n_nz, jmi->dae->dF_icol)
-		JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_DX, jmi->n_dx, jmi->dae->dF_n_nz, jmi->dae->dF_icol)
-		JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_X, jmi->n_x, jmi->dae->dF_n_nz, jmi->dae->dF_icol)
-		JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_U, jmi->n_u, jmi->dae->dF_n_nz, jmi->dae->dF_icol)
-		JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_W, jmi->n_w, jmi->dae->dF_n_nz, jmi->dae->dF_icol)
-		JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_T, 1, jmi->dae->dF_n_nz, jmi->dae->dF_icol)
+		JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_CI, jmi->n_ci, jmi->dae->F->dY_n_nz, jmi->dae->F->dY_icol)
+		JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_CD, jmi->n_cd, jmi->dae->F->dY_n_nz, jmi->dae->F->dY_icol)
+		JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_PI, jmi->n_pi, jmi->dae->F->dY_n_nz, jmi->dae->F->dY_icol)
+		JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_PD, jmi->n_pd, jmi->dae->F->dY_n_nz, jmi->dae->F->dY_icol)
+		JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_DX, jmi->n_dx, jmi->dae->F->dY_n_nz, jmi->dae->F->dY_icol)
+		JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_X, jmi->n_x, jmi->dae->F->dY_n_nz, jmi->dae->F->dY_icol)
+		JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_U, jmi->n_u, jmi->dae->F->dY_n_nz, jmi->dae->F->dY_icol)
+		JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_W, jmi->n_w, jmi->dae->F->dY_n_nz, jmi->dae->F->dY_icol)
+		JMI_DAE_COMPUTE_DF_DIM_PART(JMI_DER_T, 1, jmi->dae->F->dY_n_nz, jmi->dae->F->dY_icol)
 
 		return 0;
 

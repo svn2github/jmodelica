@@ -23,7 +23,7 @@ int main(int argv, char* argc[])
 			jmi->n_dx +
 			jmi->n_x +
 			jmi->n_u +
-			jmi->n_w + 1) * jmi->dae->n_eq_F;
+			jmi->n_w + 1) * jmi->dae->F->n_eq_Y;
 
 	printf("Number of interactive constants:               %d\n",jmi->n_ci);
 	printf("Number of dependent constants:                 %d\n",jmi->n_cd);
@@ -33,7 +33,7 @@ int main(int argv, char* argc[])
 	printf("Number of states:                              %d\n",jmi->n_x);
 	printf("Number of inputs:                              %d\n",jmi->n_u);
 	printf("Number of algebraics:                          %d\n",jmi->n_w);
-	printf("Number of DAE equations:                       %d\n",jmi->dae->n_eq_F);
+	printf("Number of DAE equations:                       %d\n",jmi->dae->F->n_eq_Y);
 /*	printf("Number of DAE initial equations (F0):          %d\n",n_eq_F0);
 	printf("Number of DAE initial equations (F1):          %d\n",n_eq_F1);
 	printf("Number of elements in Jacobian wrt dx, x, u:   %d\n",n_jac_F);
@@ -60,7 +60,7 @@ int main(int argv, char* argc[])
 	jmi_get_w(jmi, &w);
 	jmi_get_t(jmi, &t_);
 
-	jmi_real_t* res_F = (jmi_real_t*)calloc(jmi->dae->n_eq_F,sizeof(jmi_real_t));
+	jmi_real_t* res_F = (jmi_real_t*)calloc(jmi->dae->F->n_eq_Y,sizeof(jmi_real_t));
 	jmi_real_t* dF = (jmi_real_t*)calloc(dF_n_nz,sizeof(jmi_real_t));
 	jmi_real_t* dF_dense = (jmi_real_t*)calloc(dF_n_dense,sizeof(jmi_real_t));
 
@@ -89,7 +89,7 @@ int main(int argv, char* argc[])
 
 	printf("\n *** State initialized to (%f,%f,%f) ***\n\n",x[0],x[1],x[2]);
 	printf("DAE residual:\n");
-	for (i=0;i<jmi->dae->n_eq_F;i++){
+	for (i=0;i<jmi->dae->F->n_eq_Y;i++){
 		printf("res[%d] = %f\n",i,res_F[i]);
 	}
 

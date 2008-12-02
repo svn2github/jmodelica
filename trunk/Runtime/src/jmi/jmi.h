@@ -115,8 +115,8 @@
 #define JMI_DER_T 256
 
 #define JMI_DER_ALL JMI_DER_CI | JMI_DER_CD | JMI_DER_PI | JMI_DER_PD |\
-	                JMI_DER_DX | JMI_DER_X | JMI_DER_U | JMI_DER_W |\
-	                JMI_DER_T
+	JMI_DER_DX | JMI_DER_X | JMI_DER_U | JMI_DER_W |\
+	JMI_DER_T
 
 #define JMI_AD_NONE 0
 #define JMI_AD_CPPAD 1
@@ -135,10 +135,6 @@
 #include <vector>
 #endif
 
-//#if defined __cplusplus
-//extern "C" {
-//#endif
-
 // Forward declaration of jmi struct
 typedef struct jmi_t jmi_t;
 
@@ -148,322 +144,360 @@ typedef double jmi_real_t;
 // This section defines types in the case of no AD and
 // in the case of CppAD.
 #if JMI_AD == JMI_AD_NONE
-  typedef jmi_real_t jmi_ad_var_t;
-  typedef jmi_real_t *jmi_real_vec_t;
-  typedef jmi_real_vec_t *jmi_real_vec_p;
-  typedef jmi_real_t *jmi_ad_var_vec_t;
-  typedef jmi_ad_var_vec_t *jmi_ad_var_vec_p;
-  typedef void jmi_ad_tape_t;
-  typedef jmi_ad_tape_t *jmi_ad_tape_p;
-  typedef void jmi_dae_ad_t;
+typedef jmi_real_t jmi_ad_var_t;
+typedef jmi_real_t *jmi_real_vec_t;
+typedef jmi_real_vec_t *jmi_real_vec_p;
+typedef jmi_real_t *jmi_ad_var_vec_t;
+typedef jmi_ad_var_vec_t *jmi_ad_var_vec_p;
+typedef void jmi_ad_tape_t;
+typedef jmi_ad_tape_t *jmi_ad_tape_p;
+//typedef void jmi_dae_ad_t;
+//typedef void jmi_init_ad_t;
+typedef void jmi_func_ad_t;
 #elif JMI_AD == JMI_AD_CPPAD
-  typedef CppAD::AD<jmi_real_t> jmi_ad_var_t;
-  typedef std::vector<jmi_real_t> jmi_real_vec_t;
-  typedef jmi_real_vec_t *jmi_real_vec_p;
-  typedef std::vector< jmi_ad_var_t > jmi_ad_var_vec_t;
-  typedef jmi_ad_var_vec_t *jmi_ad_var_vec_p;
-  typedef CppAD::ADFun<jmi_real_t> jmi_ad_tape_t;
-  typedef jmi_ad_tape_t *jmi_ad_tape_p;
+typedef CppAD::AD<jmi_real_t> jmi_ad_var_t;
+typedef std::vector<jmi_real_t> jmi_real_vec_t;
+typedef jmi_real_vec_t *jmi_real_vec_p;
+typedef std::vector< jmi_ad_var_t > jmi_ad_var_vec_t;
+typedef jmi_ad_var_vec_t *jmi_ad_var_vec_p;
+typedef CppAD::ADFun<jmi_real_t> jmi_ad_tape_t;
+typedef jmi_ad_tape_t *jmi_ad_tape_p;
 
-  typedef struct {
+/*
+ * The struct jmi_cppad_func_t contains a tape and associated
+ * sparsity information for a particular function Y.
+ */
+typedef struct {
 
-    jmi_ad_var_vec_p F_z_dependent;
+	jmi_ad_var_vec_p Y_z_dependent;
+	jmi_ad_tape_p Y_z_tape;
+	int tape_initialized;
 
-    jmi_ad_tape_p F_z_tape;
+	int dY_z_n_nz;
+	int* dY_z_irow;
+	int* dY_z_icol;
 
-    int tape_initialized;
+	// Sparsity patterns for individual independent variables
+	// These variables are useful when computing the Jacobian.
+	int dY_ci_n_nz, dY_cd_n_nz, dY_pi_n_nz, dY_pd_n_nz, dY_dx_n_nz, dY_x_n_nz,
+	dY_u_n_nz, dY_w_n_nz, dY_t_n_nz;
+	int *dY_ci_irow, *dY_cd_irow, *dY_pi_irow, *dY_pd_irow, *dY_dx_irow, *dY_x_irow,
+	*dY_u_irow, *dY_w_irow, *dY_t_irow;
+	int *dY_ci_icol, *dY_cd_icol, *dY_pi_icol, *dY_pd_icol, *dY_dx_icol, *dY_x_icol,
+	*dY_u_icol, *dY_w_icol, *dY_t_icol;
 
-    int dF_z_n_nz;
-    int* dF_z_irow;
-    int* dF_z_icol;
+	jmi_real_vec_p z_work;
+} jmi_func_ad_t;
+/*
+typedef struct {
+	jmi_cppad_func_t* F;
+	jmi_real_vec_p z_work;
 
-    // Sparsity patterns for individual independent variables
-    // These variables are useful when computing the Jacobian.
-    int dF_ci_n_nz;
-    int* dF_ci_irow;
-    int* dF_ci_icol;
+} jmi_dae_ad_t;
 
-    int dF_cd_n_nz;
-    int* dF_cd_irow;
-    int* dF_cd_icol;
-
-    int dF_pi_n_nz;
-    int* dF_pi_irow;
-    int* dF_pi_icol;
-
-    int dF_pd_n_nz;
-    int* dF_pd_irow;
-    int* dF_pd_icol;
-
-    int dF_dx_n_nz;
-    int* dF_dx_irow;
-    int* dF_dx_icol;
-
-    int dF_x_n_nz;
-    int* dF_x_irow;
-    int* dF_x_icol;
-
-    int dF_u_n_nz;
-    int* dF_u_irow;
-    int* dF_u_icol;
-
-    int dF_w_n_nz;
-    int* dF_w_irow;
-    int* dF_w_icol;
-
-    int dF_t_n_nz;
-    int* dF_t_irow;
-    int* dF_t_icol;
-
-    jmi_real_vec_p z_work;
-
-  } jmi_dae_ad_t;
+typedef struct {
+	jmi_cppad_func_t* F0;
+	jmi_cppad_func_t* F1;
+	jmi_real_vec_p z_work;
+} jmi_init_ad_t;
+*/
 
 #else
 #error "The directive JMI_AD_NONE or JMI_AD_CPPAD must be set"
 #endif
 
-  // Function signatures to be used in the generated code
+// Function signatures to be used in the generated code
 
-  /**
-   * Evaluation of the DAE residual in the generated code.
-   */
-  typedef int (*jmi_dae_F_t)(jmi_t* jmi, jmi_ad_var_vec_p res);
+/**
+ * Evaluation of the DAE residual in the generated code.
+ */
+typedef int (*jmi_residual_func_t)(jmi_t* jmi, jmi_ad_var_vec_p res);
 
-  /**
-   * Evaluation of symbolic jacobian in generated code.
-   */
-  typedef int (*jmi_dae_dF_t)(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac);
+/**
+ * Evaluation of symbolic jacobian in generated code.
+ */
+typedef int (*jmi_jacobian_func_t)(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac);
 
-  /**
-   * Struct describing a DAE model including evaluation of the DAE residual and (optional) a symbolic
-   * Jacobian. If the Jacobian is not provided, the corresponding function pointers are set to NULL.
-   */
-  typedef struct {
-    jmi_dae_F_t F;
-    jmi_dae_dF_t dF;
-    int n_eq_F;
-    int dF_n_nz;
-    int* dF_irow;
-    int* dF_icol;
-    jmi_dae_ad_t* ad;
-  } jmi_dae_t;
+/*
+ * The jmi_func_t is a struct that contains function pointers and dimension information
+ * corresponding to a mathematical vector valued function, Y. The struct also contains
+ * function pointers to symbolic Jacobians and associated sparsity information.
+ */
 
-  typedef struct {
-    //..
-  } jmi_init_t;
-
-  typedef struct {
-    //..
-  } jmi_opt_t;
-
-  /**
-   * jmi is the main struct in the jmi interface. It contains pointers to structs of
-   * types jmi_dae, jmi_init, and jmi_opt. The creation of a jmi_t struct proceeds in three
-   * steps. First, a raw struct is created by the function jmi_init. Then the jmi_dae_t,
-   * jmi_init_t, and jmi_opt_t structs are initialized by the functions jmi_dae_init,
-   * jmi_init_init, and jmi_opt_init respectively. Finlly, the the jmi_xxx_ad_t structs are
-   * are set up in the function call jmi_ad_init. Notice that the variables should have been
-   * initialized prior to the call to jmi_ad_init.
-   *
-   * Typically, jmi_init and jmi_xxx_init functions are called from within the jmi_new function
-   * that is provided by the generated code. The function jmi_ad_init is then called from the
-   * user code after the variable vectors has been initialized.
-   */
-  struct jmi_t{
-    jmi_dae_t* dae;
-    jmi_init_t* init;
-    jmi_opt_t* opt;
-
-    int n_ci;
-    int n_cd;
-    int n_pi;
-    int n_pd;
-    int n_dx;
-    int n_x;
-    int n_u;
-    int n_w;
-    // Offset variables in the z vector, for convenience.
-    int offs_ci;
-    int offs_cd;
-    int offs_pi;
-    int offs_pd;
-    int offs_dx;
-    int offs_x;
-    int offs_u;
-    int offs_w;
-    int offs_t;
-
-    int n_z; // the sum of all variables vector sizes (including t), for convenience
-
-    /* The z vector contains all variables in the order
-     * ci, cd, pi, pd, dx, x, u, w, t.
-     */
-    // This vector contains active AD objects in case of AD
-    jmi_ad_var_vec_p z;
-    // This vector contains the actual values
-    jmi_real_t** z_val;
-
-  };
+typedef struct {
+	jmi_residual_func_t Y;
+	jmi_jacobian_func_t dY;
+	int n_eq_Y;
+	int dY_n_nz;
+	int* dY_irow;
+	int* dY_icol;
+	jmi_func_ad_t* ad;
+} jmi_func_t;
 
 
-  /**
-   * Allocates memory and sets up the jmi_t struct. This function is typically called
-   * from within jmi_new in the generated code. The reason for introducing this function
-   * is that the allocation of the jmi_t struct should not be repeated in the generated code.
-   */
-  int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
-	       int n_x, int n_u, int n_w);
+/**
+ * Struct describing a DAE model including evaluation of the DAE residual and (optional) a symbolic
+ * Jacobian. If the Jacobian is not provided, the corresponding function pointers are set to NULL.
+ */
+typedef struct {
+	jmi_func_t* F;
+} jmi_dae_t;
 
-  /**
-   * Allocates a jmi_dae_t struct.
-   */
-  int jmi_dae_init(jmi_t* jmi, jmi_dae_F_t jmi_dae_F, int n_eq_F, jmi_dae_dF_t jmi_dae_dF,
-		   int dF_n_nz, int* irow, int* icol);
+typedef struct {
+	jmi_func_t* F0;
+	jmi_func_t* F1;
+} jmi_init_t;
 
-  //int jmi_init_init(..)
+typedef struct {
+	//..
+} jmi_opt_t;
 
-  //int jmi_opt_init(..)
+/**
+ * jmi is the main struct in the jmi interface. It contains pointers to structs of
+ * types jmi_dae, jmi_init, and jmi_opt. The creation of a jmi_t struct proceeds in three
+ * steps. First, a raw struct is created by the function jmi_init. Then the jmi_dae_t,
+ * jmi_init_t, and jmi_opt_t structs are initialized by the functions jmi_dae_init,
+ * jmi_init_init, and jmi_opt_init respectively. Finlly, the the jmi_xxx_ad_t structs are
+ * are set up in the function call jmi_ad_init. Notice that the variables should have been
+ * initialized prior to the call to jmi_ad_init.
+ *
+ * Typically, jmi_init and jmi_xxx_init functions are called from within the jmi_new function
+ * that is provided by the generated code. The function jmi_ad_init is then called from the
+ * user code after the variable vectors has been initialized.
+ */
+struct jmi_t{
+	jmi_dae_t* dae;
+	jmi_init_t* init;
+	jmi_opt_t* opt;
 
+	int n_ci;
+	int n_cd;
+	int n_pi;
+	int n_pd;
+	int n_dx;
+	int n_x;
+	int n_u;
+	int n_w;
+	// Offset variables in the z vector, for convenience.
+	int offs_ci;
+	int offs_cd;
+	int offs_pi;
+	int offs_pd;
+	int offs_dx;
+	int offs_x;
+	int offs_u;
+	int offs_w;
+	int offs_t;
 
-  /*
-   * ***************************************
-   *
-   *    Public interface
-   *
-   * ***************************************
-   */
+	int n_z; // the sum of all variables vector sizes (including t), for convenience
 
-  /**
-   * Creates a new jmi struct, for which a pointer is returned in the output argument jmi.
-   * This function is assumed to be given in the generated code.
-   */
-  int jmi_new(jmi_t** jmi);
+	/* The z vector contains all variables in the order
+	 * ci, cd, pi, pd, dx, x, u, w, t.
+	 */
+	// This vector contains active AD objects in case of AD
+	jmi_ad_var_vec_p z;
+	// This vector contains the actual values
+	jmi_real_t** z_val;
 
-  /**
-   * Initializes the AD variables and tapes. Prior to this call, the variables in z should
-   * be initialized, which is also the reason why this function must be provided for
-   * the user to call after the actual creation of the jmi_t struct.
-   */
-  int jmi_ad_init(jmi_t* jmi);
-
-  /**
-   * Deallocates memory and deletes a jmi struct.
-   */
-  int jmi_delete(jmi_t* jmi);
-
-  /*
-    * Get the sizes of the variable vectors.
-    */
-   int jmi_get_sizes(jmi_t* jmi, int* n_ci, int* n_cd, int* n_pi, int* n_pd,
- 		                        int* n_dx, int* n_x, int* n_u, int* n_w);
-
-   /*
-    * Get the number of equations in the DAE.
-    */
-   int jmi_dae_get_sizes(jmi_t* jmi, int* n_eq_F);
-
-
-  /**
-   * Functions that gives access to the variable vectors.
-   * Notice that these functions (and the variable vector)
-   * is common for dae, init and opt.
-   */
-  int jmi_get_ci(jmi_t* jmi, jmi_real_t** ci);
-  int jmi_get_cd(jmi_t* jmi, jmi_real_t** cd);
-  int jmi_get_pi(jmi_t* jmi, jmi_real_t** pi);
-  int jmi_get_pd(jmi_t* jmi, jmi_real_t** pd);
-  int jmi_get_dx(jmi_t* jmi, jmi_real_t** dx);
-  int jmi_get_x(jmi_t* jmi, jmi_real_t** x);
-  int jmi_get_u(jmi_t* jmi, jmi_real_t** u);
-  int jmi_get_w(jmi_t* jmi, jmi_real_t** w);
-  int jmi_get_t(jmi_t* jmi, jmi_real_t** t);
-
-  /**
-   * Evaluate DAE residual. The user sets the input variables by writing to
-   * the vectors obtained from the functions jmi_dae_get_x, ...
-   */
-  int jmi_dae_F(jmi_t* jmi, jmi_real_t* res);
-
-  /**
-   * Evaluation of the Jacobian of the DAE residual.
-   *
-   *   eval_alg          This argument is used to select the method evaluation
-   *                     for the Jacobian. JMI_DER_SYMBOLIC and JMI_DER_CPPAD
-   *                     is currently supported.
-   *   sparsity          This argument is a mask that selects whether
-   *                     sparse or dense evaluation of the Jacobian should
-   *                     be used. The constants JMI_DER_SPARSE are used to
-   *                     specify a sparse Jacobian, whereas JMI_DER_DENSE_COL_MAJOR
-   *                     and JMI_DER_DENSE_ROW_MAJOR are used to specify dense
-   *                     column major or row major Jacobians respectively.
-   *   independent_vars  This argument is used to specify which variable types
-   *                     are considered to be independent variables in the Jacobian
-   *                     evaluation. The constants JMI_DER_NN are used to indicate that
-   *                     the Jacobian w.r.t. a particular vector should be evaluated.
-   *   mask              This array has the same size as the number of column of the dense
-   *                     Jacobian, and holds the value of 0 if the corresponding Jacobian
-   *                     column should not be computed. If the value of an entry in
-   *                     mask i 1, then the corresponding Jacobian column will be evaluated.
-   *                     The evaluated Jacobian columns are stored in the first
-   *                     entries of the output argument jac.
-   *
-   *  TODO: It may be interesting to include an additional layer that enables
-   *  support for partially defined Jacobians. This would be beneficial if symbolic
-   *  expressions for the Jacobian is available for some entries, but for other
-   *  an AD algorithm is to be used.
-   */
+};
 
 
-  /**
-   * Evaluate the symbolic Jacobian of the DAE residual function.
-   */
-  int jmi_dae_dF(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
+/**
+ * Allocates memory and sets up the jmi_t struct. This function is typically called
+ * from within jmi_new in the generated code. The reason for introducing this function
+ * is that the allocation of the jmi_t struct should not be repeated in the generated code.
+ */
+int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
+		int n_x, int n_u, int n_w);
 
-  /**
-   * Returns the number of non-zeros in the symbolic DAE residual Jacobian.
-   */
-  int jmi_dae_dF_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
+/**
+ * Allocates a jmi_dae_t struct.
+ */
+int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t jmi_dae_F, int n_eq_F, jmi_jacobian_func_t jmi_dae_dF,
+		int dF_n_nz, int* irow, int* icol);
 
-  /**
-   * Returns the row and column indices of the non-zero elements in the symbolic DAE
-   * residual Jacobian.
-   */
-  int jmi_dae_dF_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
-
-  /**
-   * This helper function computes the number of columns and the number of non zero
-   * elements in the jacobian given a sparsity configuration. Symbolic Jacobian.
-   */
-  int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
-		             int *dF_n_cols, int *dF_n_nz);
-
-  /**
-   * Evaluate the Jacobian of the DAE residual function by means of an automatic
-   * differentiation algorithm.
-   */
-//  int jmi_dae_dF_ad(jmi_t* jmi, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
+/**
+ * Allocates a jmi_init_t struct.
+ */
+int jmi_init_init(jmi_t* jmi, jmi_residual_func_t jmi_init_F0, int n_eq_F0,
+		jmi_jacobian_func_t jmi_init_dF0,
+		int dF0_n_nz, int* dF0_irow, int* dF0_icol,
+		jmi_residual_func_t jmi_init_F1, int n_eq_F1,
+		jmi_jacobian_func_t jmi_init_dF1,
+		int dF1_n_nz, int* dF1_irow, int* dF1_icol);
 
 
-  /**
-   * Returns the number of non-zeros in the AD DAE residual Jacobian.
-   */
-//  int jmi_dae_dF_n_nz_ad(jmi_t* jmi, int* n_nz);
 
-  /**
-   * Returns the row and column indices of the non-zero elements in the AD DAE
-   * residual Jacobian.
-   */
- // int jmi_dae_dF_nz_indices_ad(jmi_t* jmi, int* row, int* col);
+//int jmi_opt_init(..)
 
-  /**
-   * Same as jmi_dae_dF_dim, but for AD Jacobian.
-   */
- // int jmi_dae_dF_dim_ad(jmi_t* jmi, int sparsity, int independent_vars, int *mask,
-//		                int *dF_n_cols, int *dF_n_nz);
 
-//#if defined __cplusplus
-//}
-//#endif
+/*
+ *****************************************
+ *
+ *    Public interface
+ *
+ ****************************************
+ */
+
+/**
+ * Creates a new jmi struct, for which a pointer is returned in the output argument jmi.
+ * This function is assumed to be given in the generated code.
+ */
+int jmi_new(jmi_t** jmi);
+
+/**
+ * Initializes the AD variables and tapes. Prior to this call, the variables in z should
+ * be initialized, which is also the reason why this function must be provided for
+ * the user to call after the actual creation of the jmi_t struct.
+ */
+int jmi_ad_init(jmi_t* jmi);
+
+/**
+ * Deallocates memory and deletes a jmi struct.
+ */
+int jmi_delete(jmi_t* jmi);
+
+/*
+ * Get the sizes of the variable vectors.
+ */
+int jmi_get_sizes(jmi_t* jmi, int* n_ci, int* n_cd, int* n_pi, int* n_pd,
+		int* n_dx, int* n_x, int* n_u, int* n_w);
+
+/*
+ * Get the number of equations in the DAE.
+ */
+int jmi_dae_get_sizes(jmi_t* jmi, int* n_eq_F);
+
+
+/**
+ * Functions that gives access to the variable vectors.
+ * Notice that these functions (and the variable vector)
+ * is common for dae, init and opt.
+ */
+int jmi_get_ci(jmi_t* jmi, jmi_real_t** ci);
+int jmi_get_cd(jmi_t* jmi, jmi_real_t** cd);
+int jmi_get_pi(jmi_t* jmi, jmi_real_t** pi);
+int jmi_get_pd(jmi_t* jmi, jmi_real_t** pd);
+int jmi_get_dx(jmi_t* jmi, jmi_real_t** dx);
+int jmi_get_x(jmi_t* jmi, jmi_real_t** x);
+int jmi_get_u(jmi_t* jmi, jmi_real_t** u);
+int jmi_get_w(jmi_t* jmi, jmi_real_t** w);
+int jmi_get_t(jmi_t* jmi, jmi_real_t** t);
+
+/**
+ * Evaluate DAE residual. The user sets the input variables by writing to
+ * the vectors obtained from the functions jmi_dae_get_x, ...
+ */
+int jmi_dae_F(jmi_t* jmi, jmi_real_t* res);
+
+/**
+ * Evaluation of the Jacobian of the DAE residual.
+ *
+ *   eval_alg          This argument is used to select the method evaluation
+ *                     for the Jacobian. JMI_DER_SYMBOLIC and JMI_DER_CPPAD
+ *                     is currently supported.
+ *   sparsity          This argument is a mask that selects whether
+ *                     sparse or dense evaluation of the Jacobian should
+ *                     be used. The constants JMI_DER_SPARSE are used to
+ *                     specify a sparse Jacobian, whereas JMI_DER_DENSE_COL_MAJOR
+ *                     and JMI_DER_DENSE_ROW_MAJOR are used to specify dense
+ *                     column major or row major Jacobians respectively.
+ *   independent_vars  This argument is used to specify which variable types
+ *                     are considered to be independent variables in the Jacobian
+ *                     evaluation. The constants JMI_DER_NN are used to indicate that
+ *                     the Jacobian w.r.t. a particular vector should be evaluated.
+ *   mask              This array has the same size as the number of column of the dense
+ *                     Jacobian, and holds the value of 0 if the corresponding Jacobian
+ *                     column should not be computed. If the value of an entry in
+ *                     mask i 1, then the corresponding Jacobian column will be evaluated.
+ *                     The evaluated Jacobian columns are stored in the first
+ *                     entries of the output argument jac.
+ *
+ *  TODO: It may be interesting to include an additional layer that enables
+ *  support for partially defined Jacobians. This would be beneficial if symbolic
+ *  expressions for the Jacobian is available for some entries, but for other
+ *  an AD algorithm is to be used.
+ */
+
+
+/**
+ * Evaluate the symbolic Jacobian of the DAE residual function.
+ */
+int jmi_dae_dF(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
+
+/**
+ * Returns the number of non-zeros in the DAE residual Jacobian.
+ */
+int jmi_dae_dF_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
+
+/**
+ * Returns the row and column indices of the non-zero elements in the DAE
+ * residual Jacobian.
+ */
+int jmi_dae_dF_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+
+/**
+ * This helper function computes the number of columns and the number of non zero
+ * elements in the Jacobian of the DAE residual given a sparsity configuration.
+ */
+int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
+		int *dF_n_cols, int *dF_n_nz);
+
+/**
+ * Evaluate the F0 function of the initialization system.
+ */
+int jmi_init_F0(jmi_t* jmi, jmi_real_t* res);
+
+/**
+ * Evaluate the symbolic Jacobian of the F0 initialization function.
+ */
+int jmi_init_dF0(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
+
+/**
+ * Returns the number of non-zeros in the Jacobian of the F0 initialization function.
+ */
+int jmi_init_dF0_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
+
+/**
+ * Returns the row and column indices of the non-zero elements of the Jacobian of the F0
+ * initialization function.
+ */
+int jmi_init_dF0_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+
+/**
+ * This helper function computes the number of columns and the number of non zero
+ * elements in the Jacobian of the F0 init function given a sparsity configuration.
+ */
+int jmi_init_dF0_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
+		int *dF_n_cols, int *dF_n_nz);
+
+/**
+ * Evaluate the F1 function of the initialization system.
+ */
+int jmi_init_F1(jmi_t* jmi, jmi_real_t* res);
+
+/**
+ * Evaluate the symbolic Jacobian of the F1 initialization function.
+ */
+int jmi_init_dF1(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
+
+/**
+ * Returns the number of non-zeros in the Jacobian of the F1 initialization function.
+ */
+int jmi_init_dF1_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
+
+/**
+ * Returns the row and column indices of the non-zero elements of the Jacobian of the F1
+ * initialization function.
+ */
+int jmi_init_dF1_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+
+/**
+ * This helper function computes the number of columns and the number of non zero
+ * elements in the Jacobian of the F1 init function given a sparsity configuration.
+ */
+int jmi_init_dF1_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
+		int *dF_n_cols, int *dF_n_nz);
+
 
 #endif
