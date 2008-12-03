@@ -469,8 +469,6 @@ int jmi_ad_init(jmi_t* jmi) {
 int jmi_delete(jmi_t* jmi){
 
 	if(jmi->dae != NULL) {
-		free(jmi->dae->F->dF_row);
-		free(jmi->dae->F->dF_col);
 		if (jmi->dae->F->ad != NULL) {
 
 			delete jmi->dae->F->ad->F_z_dependent;
@@ -496,9 +494,12 @@ int jmi_delete(jmi_t* jmi){
 			free(jmi->dae->F->ad->dF_w_col);
 			free(jmi->dae->F->ad->dF_t_row);
 			free(jmi->dae->F->ad->dF_t_col);
-			free(jmi->dae->F->ad);
 			delete jmi->dae->F->ad->z_work;
+			free(jmi->dae->F->ad);
 		}
+		free(jmi->dae->F->dF_row);
+		free(jmi->dae->F->dF_col);
+		free(jmi->dae->F);
 		free(jmi->dae);
 	}
 	if(jmi->init != NULL) {
@@ -509,7 +510,8 @@ int jmi_delete(jmi_t* jmi){
 	}
 
 	delete jmi->z;
-	delete jmi->z_val;
+	free(*(jmi->z_val));
+	free(jmi->z_val);
 	free(jmi);
 
 	return 0;
