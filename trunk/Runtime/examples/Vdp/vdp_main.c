@@ -11,34 +11,35 @@ int main(int argv, char* argc[])
 
 	int i;
 
+	int n_ci, n_cd, n_pi, n_pd, n_dx, n_x, n_u, n_w, n_z, n_eq_F;
+	int offs_ci, offs_cd, offs_pi, offs_pd, offs_dx, offs_x, offs_u, offs_w, offs_t;
+	jmi_get_sizes(jmi, &n_ci, &n_cd, &n_pi, &n_pd, &n_dx, &n_x, &n_u, &n_w);
+	jmi_get_offsets(jmi, &offs_ci, &offs_cd, &offs_pi, &offs_pd, &offs_dx, &offs_x, &offs_u, &offs_w, &offs_t);
+	jmi_dae_get_sizes(jmi, &n_eq_F);
+
+	n_z = n_ci + n_cd + n_pi + n_pd + n_dx + n_x + n_u + n_w + 1;
+
 	int dF_n_nz;
 	jmi_dae_dF_n_nz(jmi,JMI_DER_SYMBOLIC,&dF_n_nz);
 	int* dF_row = (int*)calloc(dF_n_nz,sizeof(int));
 	int* dF_col = (int*)calloc(dF_n_nz,sizeof(int));
 
-	int dF_n_dense = (jmi->n_ci +
-			jmi->n_cd +
-			jmi->n_pi +
-			jmi->n_pd +
-			jmi->n_dx +
-			jmi->n_x +
-			jmi->n_u +
-			jmi->n_w + 1) * jmi->dae->F->n_eq_Y;
+	int dF_n_dense = (n_ci + n_cd + n_pi + n_pd +
+			          n_dx + n_x + n_u + n_w + 1) * n_eq_F;
 
-	printf("Number of interactive constants:               %d\n",jmi->n_ci);
-	printf("Number of dependent constants:                 %d\n",jmi->n_cd);
-	printf("Number of interactive parameters:              %d\n",jmi->n_pi);
-	printf("Number of dependent parameters:                %d\n",jmi->n_pd);
-	printf("Number of derivatives:                         %d\n",jmi->n_dx);
-	printf("Number of states:                              %d\n",jmi->n_x);
-	printf("Number of inputs:                              %d\n",jmi->n_u);
-	printf("Number of algebraics:                          %d\n",jmi->n_w);
-	printf("Number of DAE equations:                       %d\n",jmi->dae->F->n_eq_Y);
+	printf("Number of interactive constants:               %d\n",n_ci);
+	printf("Number of dependent constants:                 %d\n",n_cd);
+	printf("Number of interactive parameters:              %d\n",n_pi);
+	printf("Number of dependent parameters:                %d\n",n_pd);
+	printf("Number of derivatives:                         %d\n",n_dx);
+	printf("Number of states:                              %d\n",n_x);
+	printf("Number of inputs:                              %d\n",n_u);
+	printf("Number of algebraics:                          %d\n",n_w);
+	printf("Number of DAE equations:                       %d\n",n_eq_F);
 /*	printf("Number of DAE initial equations (F0):          %d\n",n_eq_F0);
 	printf("Number of DAE initial equations (F1):          %d\n",n_eq_F1);
 	printf("Number of elements in Jacobian wrt dx, x, u:   %d\n",n_jac_F);
 */
-
 
 	jmi_real_t* ci;
 	jmi_real_t* cd;
@@ -60,7 +61,7 @@ int main(int argv, char* argc[])
 	jmi_get_w(jmi, &w);
 	jmi_get_t(jmi, &t_);
 
-	jmi_real_t* res_F = (jmi_real_t*)calloc(jmi->dae->F->n_eq_Y,sizeof(jmi_real_t));
+	jmi_real_t* res_F = (jmi_real_t*)calloc(n_eq_F,sizeof(jmi_real_t));
 	jmi_real_t* dF = (jmi_real_t*)calloc(dF_n_nz,sizeof(jmi_real_t));
 	jmi_real_t* dF_dense = (jmi_real_t*)calloc(dF_n_dense,sizeof(jmi_real_t));
 
@@ -89,7 +90,7 @@ int main(int argv, char* argc[])
 
 	printf("\n *** State initialized to (%f,%f,%f) ***\n\n",x[0],x[1],x[2]);
 	printf("DAE residual:\n");
-	for (i=0;i<jmi->dae->F->n_eq_Y;i++){
+	for (i=0;i<n_eq_F;i++){
 		printf("res[%d] = %f\n",i,res_F[i]);
 	}
 
@@ -99,8 +100,8 @@ int main(int argv, char* argc[])
 		printf("%d, %d\n",dF_row[i],dF_col[i]);
 	}
 
-	int* mask = (int*)calloc(jmi->n_z,sizeof(int));
-	for(i=0;i<jmi->n_z;i++) {
+	int* mask = (int*)calloc(n_z,sizeof(int));
+	for(i=0;i<n_z;i++) {
 		mask[i]=1;
 	}
 
@@ -117,13 +118,13 @@ int main(int argv, char* argc[])
 	printf("Sparse dF_du: dF_n_cols: %d, dF_n_nz: %d\n", dF_n_cols_test, dF_n_nz_test);
 
 
-	mask[jmi->offs_x+1] = 0;
-	mask[jmi->offs_x+2] = 0;
+	mask[offs_x+1] = 0;
+	mask[offs_x+2] = 0;
     jmi_dae_dF_dim(jmi,JMI_DER_SYMBOLIC,JMI_DER_SPARSE,JMI_DER_X,mask,&dF_n_cols_test,&dF_n_nz_test);
 	printf("Sparse, first column of dF_dx: dF_n_cols: %d, dF_n_nz: %d\n", dF_n_cols_test, dF_n_nz_test);
 
-	mask[jmi->offs_x+1] = 1;
-	mask[jmi->offs_x+2] = 1;
+	mask[offs_x+1] = 1;
+	mask[offs_x+2] = 1;
 
 	jmi_dae_dF_dim(jmi,JMI_DER_SYMBOLIC,JMI_DER_SPARSE,JMI_DER_ALL,mask,&dF_n_cols_test,&dF_n_nz_test);
 	printf("Sparse dF_dz: dF_n_cols: %d, dF_n_nz: %d\n", dF_n_cols_test, dF_n_nz_test);

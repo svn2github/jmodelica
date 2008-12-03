@@ -129,7 +129,6 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
-SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHAREDEXT = @SHAREDEXT@
 SHARED_LDFLAGS = @SHARED_LDFLAGS@
@@ -642,6 +641,10 @@ uninstall-am:
 examples: install
 	cd examples/Vdp; $(MAKE) all
 	cd examples/Vdp_cppad; $(MAKE) all
+
+clean-examples: clean
+	cd examples/Vdp; $(MAKE) clean
+	cd examples/Vdp_cppad; $(MAKE) clean
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

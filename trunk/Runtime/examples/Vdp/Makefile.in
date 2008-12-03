@@ -68,5 +68,5 @@ $(SHARED): $(OBJS)
 	$(CC) $(CFLAGS) $(INCL) -c -o $@ $<
 
 clean:
-	rm -rf $(EXE) $(OBJS)
+	rm -rf $(EXE) $(OBJS) $(SHARED)
 

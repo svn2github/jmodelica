@@ -1,6 +1,5 @@
 // Example of generated function
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <jmi.h>
