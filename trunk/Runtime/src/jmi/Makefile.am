@@ -24,7 +24,7 @@ libjmi_la_LDFLAGS = -no-undefined -static-libtool-libs
 #AM_CPPFLAGS = -I$(IPOPT_INC)
 
 libjmi_cppad_la_SOURCES = jmi.h \
-                    jmi_common.c \ 
+                    jmi_common.c \
                     jmi_cppad.cpp\
                     jmi_common.c
                    
