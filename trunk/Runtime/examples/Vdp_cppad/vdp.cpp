@@ -381,7 +381,7 @@ int jmi_new(jmi_t** jmi) {
 
 
 	jmi_init(jmi, N_ci, N_cd, N_pi, N_pd, N_dx,
-			      N_x, N_u, N_w);
+			      N_x, N_u, N_w,0);
 
 	int dF_n_nz;
 	vdp_dae_jac_sd_F_n_nz(&dF_n_nz);
