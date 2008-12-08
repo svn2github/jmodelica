@@ -8,7 +8,7 @@
  * It is desirable that the model/optimization interfaces can be easily interfaced
  * with python. Python is the intended language for scripting in JModelica and it is
  * therefore important that the generated code is straight forward to use with the
- * python extensions framework.
+ * python extensions or ctypes framework.
  *
  * The model/optimization interface is intended to be used by wide range of users,
  * with different backgrounds and programming skills. It is therefore desirable that
@@ -21,76 +21,76 @@
  * It should also be possible to build shared libraries for models/optimization problems.
  * In this way, it is possible to build applications that contains several models.
  *
+ * -------------------------------------------------------------------------------------
+ * Interface specification
+ * -------------------------------------------------------------------------------------
  *
- *      This interface describes a DAE on the form
+ *   The jmi interface consists of three parts: DAE, DAE initialization and optimization.
+ *   Essentially, the jmi interface consists of a collection of functions that are
+ *   offered to the user for evaluation of the DAE residual, cost functions, constraints
+ *   etc. These functions takes as arguments one more of the following three argument
+ *   classes:
  *
- *        F(ci,cd,pi,pd,dx,x,u,w,t) = 0
+ *   Parameters (denoted p):
  *
- *      were
+ *      ci   independent constant
+ *      cd   dependent constants
+ *      pi   independent parameters
+ *      pd   dependent parameters
  *
- *        ci   independent constant
- *        cd   dependent constants
- *        pi   independent parameters
- *        pd   dependent parameters
+ *      p = [ci^T, cd^T, pi^T, pd^T]^T
  *
- *        dx    differentiated variables
- *        x     variables whos derivatives appear in the DAE
- *        u     inputs
- *        w     algebraic variables
- *        t     time
+ *   Variables (denoted v):
  *
- * In the interface, all variable vectors, and t, are concatenated into one, which is denoted z.
+ *      dx    differentiated variables
+ *      x     variables that appear differentiated
+ *      u     inputs
+ *      w     algebraic variables
+ *      t     time
  *
- *	     This interface also contains a specification of a DAE initialization
- *	     system on the form
+ *	    v = [dx^T, x^T, u^T, w^T, t]^T
  *
- *	      F0(ci,cd,pi,pd,dx,x,u,w,t0) = 0
- *	      F1(ci,cd,pi,pd,dx,x,u,w,t0) = 0
+ *   Variables defined at particular time instants (denoted q):
  *
- *	    were
+ *      dx(t_i)    differentiated variables evaluated at time t_i, i \in 1..n_tp
+ *      x(t_i)     variables that appear differentiated evaluated at time i, t_i \in 1..n_tp
+ *      u(t_i)     inputs evaluated at time t_i, i \in 1..n_tp
+ *      w(t_i)     algebraic variables evaluated at time t_i, i \in 1..n_tp
+ *      t_i        time instants i \in 1..n_tp
  *
- *	      ci   independent constant
- *	      cd   dependent constants
- *	      pi   independent parameters
- *	      pd   dependent parameters
+ *      q = [dx(t_1)^T,...,dx(t_n_tp)^T,  x(t_1)^T,...,x(t_n_tp)^T,
+ *           u(t_1)^T,...,u(t_n_tp)^T,  w(t_1)^T,..., w(t_n_tp)^T, t_1, ...,t_n_tp]^T
  *
- * 	      dx    differentiated variables
- *	      x     variables whos derivatives appear in the DAE
- *	      u     inputs
- *	      w     algebraic variables
- *	      t0     time
+ *   All parameters, variables and point-wise evaluated variables are denoted z:
  *
- *	 	F0 represents the DAE system augmented with additional initial equations
- *	 	and start values that are fixed. F1 on the other hand contains equations for
- *	 	initialization of variables for which the value given in the start attribute is
- *	 	not fixed.
+ *      z = [p^T, v^T, q^T]
  *
- *      Interface also contains the optimization-specific parts of an Optimica
- *      problem:
+ *   The DAE interface is defined by the residual function
  *
- *       - A cost function:
+ *      F(p,v) = 0
  *
- *         J(ci,cd,pi,pd,dx_p,x_p,u_p,w_p,t) to minimize
+ *	 The DAE initialization interface is defined by the functions
  *
- *       - Equality path constraints:
+ *	    F0(p,v) = 0
+ *	    F1(p,v) = 0
  *
- *         Ceq(ci,cd,pi,pd,dx,x,u,w,t) = 0
+ *   F0 represents the DAE system augmented with additional initial equations
+ *   and start values that are fixed. F1 on the other hand contains equations for
+ *   initialization of variables for which the value given in the start attribute is
+ *   not fixed.
  *
- *       - Inequality path constraints:
+ *   The optimization part of the interface is defined by the functions
  *
- *         Cineq(ci,cd,pi,pd,dx,x,u,w,t) <= 0
+ *      J(p,v)
+ *      Ceq(p,v,q) = 0
+ *      Cineq(p,v,q) <= 0
+ *      Heq(p,q) = 0
+ *      Hineq(p,q) <= 0
  *
- *       - Equality point constraints:
- *
- *         Heq(ci,cd,pi,pd,dx_p,x_p,u_p,w_p,t_p) = 0
- *
- *       - Inequality point constraints:
- *
- *         Hineq(ci,cd,pi,pd,dx_p,x_p,u_p,w_p,t_p) <= 0
- *
- *      where dx_p, x_p, u_p, w_p and t_p denotes variables at
- *      certain points in time. This is used describe initial and
- *      terminal conditions, e.g. **This sematics needs to be specified.**
+ *   where J is the cost function to be minimized, Ceq are path equality constraints,
+ *   Cineq are path inequality constraints, Heq are (time) point equality constraints,
+ *   and Hineq are (time) point inequality constraints. The rationale for introducing
+ *   Heq and Hineq is to enable expression of e.g. terminal constraints.
  *
  */
 
@@ -106,19 +106,36 @@
 #define JMI_DER_DENSE_COL_MAJOR 2
 #define JMI_DER_DENSE_ROW_MAJOR 4
 
+// Flags for evaluation of Jacobians w.r.t. parameters in the p vector
 #define JMI_DER_CI 1
 #define JMI_DER_CD 2
 #define JMI_DER_PI 4
 #define JMI_DER_PD 8
+// Flags for evaluation of Jacobians w.r.t. variables in the v vector
 #define JMI_DER_DX 16
 #define JMI_DER_X 32
 #define JMI_DER_U 64
 #define JMI_DER_W 128
 #define JMI_DER_T 256
+// Flags for evaluation of Jacobians w.r.t. variables in the q vector
+#define JMI_DER_DX_P 512
+#define JMI_DER_X_P 1024
+#define JMI_DER_U_P 2048
+#define JMI_DER_W_P 4096
+#define JMI_DER_T_P 8192
 
 #define JMI_DER_ALL JMI_DER_CI | JMI_DER_CD | JMI_DER_PI | JMI_DER_PD |\
 	JMI_DER_DX | JMI_DER_X | JMI_DER_U | JMI_DER_W |\
+	JMI_DER_T | JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | JMI_DER_W_P |\
+	JMI_DER_T_P
+
+#define JMI_DER_ALL_P JMI_DER_CI | JMI_DER_CD | JMI_DER_PI | JMI_DER_PD
+
+#define JMI_DER_ALL_V JMI_DER_DX | JMI_DER_X | JMI_DER_U | JMI_DER_W |\
 	JMI_DER_T
+
+#define JMI_DER_ALL_Q  JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | JMI_DER_W_P |\
+	JMI_DER_T_P
 
 /*
  *****************************************
@@ -150,18 +167,15 @@ int jmi_delete(jmi_t* jmi);
  * Get the sizes of the variable vectors.
  */
 int jmi_get_sizes(jmi_t* jmi, int* n_ci, int* n_cd, int* n_pi, int* n_pd,
-		int* n_dx, int* n_x, int* n_u, int* n_w);
+		int* n_dx, int* n_x, int* n_u, int* n_w, int* n_tp, int* n_z);
 
 /*
  * Get the offsets for the variable types in the z vector.
  */
 int jmi_get_offsets(jmi_t* jmi, int* offs_ci, int* offs_cd, int* offs_pi, int* offs_pd,
-		int* offs_dx, int* offs_x, int* offs_u, int* offs_w, int* offs_t);
+		int* offs_dx, int* offs_x, int* offs_u, int* offs_w, int* offs_t,
+		int* offs_dx_p, int* offs_x_p, int* offs_u_p, int* offs_w_p, int* offs_t_p);
 
-/*
- * Get the number of equations in the DAE.
- */
-int jmi_dae_get_sizes(jmi_t* jmi, int* n_eq_F);
 
 /**
  * Functions that gives access to the variable vectors.
@@ -177,15 +191,16 @@ int jmi_get_x(jmi_t* jmi, jmi_real_t** x);
 int jmi_get_u(jmi_t* jmi, jmi_real_t** u);
 int jmi_get_w(jmi_t* jmi, jmi_real_t** w);
 int jmi_get_t(jmi_t* jmi, jmi_real_t** t);
+int jmi_get_dx_p(jmi_t* jmi, jmi_real_t** dx_p);
+int jmi_get_x_p(jmi_t* jmi, jmi_real_t** x_p);
+int jmi_get_u_p(jmi_t* jmi, jmi_real_t** u_p);
+int jmi_get_w_p(jmi_t* jmi, jmi_real_t** w_p);
+int jmi_get_t_p(jmi_t* jmi, jmi_real_t** t_p);
+
+
 
 /**
- * Evaluate DAE residual. The user sets the input variables by writing to
- * the vectors obtained from the functions jmi_dae_get_x, ...
- */
-int jmi_dae_F(jmi_t* jmi, jmi_real_t* res);
-
-/**
- * Evaluation of the Jacobian of the DAE residual.
+ * Evaluation of Jacobians.
  *
  *   eval_alg          This argument is used to select the method evaluation
  *                     for the Jacobian. JMI_DER_SYMBOLIC and JMI_DER_CPPAD
@@ -213,9 +228,26 @@ int jmi_dae_F(jmi_t* jmi, jmi_real_t* res);
  *  an AD algorithm is to be used.
  */
 
+/*********************************************
+ *
+ * DAE interface
+ *
+ ********************************************/
+
+/*
+ * Get the number of equations in the DAE.
+ */
+int jmi_dae_get_sizes(jmi_t* jmi, int* n_eq_F);
+
 
 /**
- * Evaluate the symbolic Jacobian of the DAE residual function.
+ * Evaluate DAE residual. The user sets the input variables by writing to
+ * the vectors obtained from the functions jmi_dae_get_x, ...
+ */
+int jmi_dae_F(jmi_t* jmi, jmi_real_t* res);
+
+/**
+ * Evaluate the Jacobian of the DAE residual function.
  */
 int jmi_dae_dF(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
 
@@ -237,13 +269,24 @@ int jmi_dae_dF_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
 int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz);
 
+/*********************************************
+ *
+ * Initialization interface
+ *
+ ********************************************/
+
+/*
+ * Get the number of equations in the DAE initialization functions.
+ */
+int jmi_init_get_sizes(jmi_t* jmi, int* n_eq_F0, int* n_eq_F1);
+
 /**
  * Evaluate the F0 function of the initialization system.
  */
 int jmi_init_F0(jmi_t* jmi, jmi_real_t* res);
 
 /**
- * Evaluate the symbolic Jacobian of the F0 initialization function.
+ * Evaluate the Jacobian of the F0 initialization function.
  */
 int jmi_init_dF0(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
 
@@ -271,7 +314,7 @@ int jmi_init_dF0_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
 int jmi_init_F1(jmi_t* jmi, jmi_real_t* res);
 
 /**
- * Evaluate the symbolic Jacobian of the F1 initialization function.
+ * Evaluate the Jacobian of the F1 initialization function.
  */
 int jmi_init_dF1(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
 
@@ -293,5 +336,150 @@ int jmi_init_dF1_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
 int jmi_init_dF1_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz);
 
+/*********************************************
+ *
+ * Optimization interface
+ *
+ ********************************************/
+
+/*
+ * Get the number of equations in the optimization functions.
+ */
+int jmi_opt_get_sizes(jmi_t* jmi, int* n_eq_Ceq, int* n_eq_Cineq, int* n_eq_Heq, int* n_eq_Hineq);
+
+/**
+ * Evaluate the cost function J.
+ */
+int jmi_opt_J(jmi_t* jmi, jmi_real_t* J);
+
+/**
+ * Evaluate the Jacobian of J.
+ */
+int jmi_opt_dJ(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
+
+/**
+ * Returns the number of non-zeros in the Jacobian of J.
+ */
+int jmi_opt_dJ_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
+
+/**
+ * Returns the row and column indices of the non-zero elements of the Jacobian of J.
+ */
+int jmi_opt_J_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+
+/**
+ * This helper function computes the number of columns and the number of non zero
+ * elements in the Jacobian of the const function J given a sparsity configuration.
+ */
+int jmi_opt_dJ_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
+		int *dF_n_cols, int *dF_n_nz);
+
+/**
+ * Evaluate the equality constraint function Ceq.
+ */
+int jmi_opt_Ceq(jmi_t* jmi, jmi_real_t* res);
+
+/**
+ * Evaluate the Jacobian of Ceq.
+ */
+int jmi_opt_dCeq(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
+
+/**
+ * Returns the number of non-zeros in the Jacobian of Ceq.
+ */
+int jmi_opt_dCeq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
+
+/**
+ * Returns the row and column indices of the non-zero elements of the Jacobian of Ceq.
+ */
+int jmi_opt_Ceq_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+
+/**
+ * This helper function computes the number of columns and the number of non zero
+ * elements in the Jacobian of Ceq given a sparsity configuration.
+ */
+int jmi_opt_dCeq_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
+		int *dF_n_cols, int *dF_n_nz);
+
+/**
+ * Evaluate the equality constraint function Cineq.
+ */
+int jmi_opt_Cineq(jmi_t* jmi, jmi_real_t* res);
+
+/**
+ * Evaluate the Jacobian of Cineq.
+ */
+int jmi_opt_dCineq(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
+
+/**
+ * Returns the number of non-zeros in the Jacobian of Cineq.
+ */
+int jmi_opt_dCineq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
+
+/**
+ * Returns the row and column indices of the non-zero elements of the Jacobian of Cineq.
+ */
+int jmi_opt_Cineq_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+
+/**
+ * This helper function computes the number of columns and the number of non zero
+ * elements in the Jacobian of Cineq given a sparsity configuration.
+ */
+int jmi_opt_dCineq_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
+		int *dF_n_cols, int *dF_n_nz);
+
+/**
+ * Evaluate the equality constraint function Heq.
+ */
+int jmi_opt_Heq(jmi_t* jmi, jmi_real_t* res);
+
+/**
+ * Evaluate the Jacobian of Heq.
+ */
+int jmi_opt_dHeq(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
+
+/**
+ * Returns the number of non-zeros in the Jacobian of Heq.
+ */
+int jmi_opt_dHeq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
+
+/**
+ * Returns the row and column indices of the non-zero elements of the Jacobian of Heq.
+ */
+int jmi_opt_Heq_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+
+/**
+ * This helper function computes the number of columns and the number of non zero
+ * elements in the Jacobian of Heq given a sparsity configuration.
+ */
+int jmi_opt_dHeq_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
+		int *dF_n_cols, int *dF_n_nz);
+
+/**
+ * Evaluate the equality constraint function Hineq.
+ */
+int jmi_opt_Hineq(jmi_t* jmi, jmi_real_t* res);
+
+/**
+ * Evaluate the Jacobian of Hineq.
+ */
+int jmi_opt_dHineq(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
+
+/**
+ * Returns the number of non-zeros in the Jacobian of Hineq.
+ */
+int jmi_opt_dHineq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
+
+/**
+ * Returns the row and column indices of the non-zero elements of the Jacobian of Hineq.
+ */
+int jmi_opt_Hineq_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+
+/**
+ * This helper function computes the number of columns and the number of non zero
+ * elements in the Jacobian of Hineq given a sparsity configuration.
+ */
+int jmi_opt_dHineq_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
+		int *dF_n_cols, int *dF_n_nz);
 
 #endif

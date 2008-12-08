@@ -68,12 +68,15 @@ typedef struct {
 
 	// Sparsity patterns for individual independent variables
 	// These variables are useful when computing the Jacobian.
-	int dF_ci_n_nz, dF_cd_n_nz, dF_pi_n_nz, dF_pd_n_nz, dF_dx_n_nz, dF_x_n_nz,
-	dF_u_n_nz, dF_w_n_nz, dF_t_n_nz;
-	int *dF_ci_row, *dF_cd_row, *dF_pi_row, *dF_pd_row, *dF_dx_row, *dF_x_row,
-	*dF_u_row, *dF_w_row, *dF_t_row;
-	int *dF_ci_col, *dF_cd_col, *dF_pi_col, *dF_pd_col, *dF_dx_col, *dF_x_col,
-	*dF_u_col, *dF_w_col, *dF_t_col;
+	int dF_ci_n_nz, dF_cd_n_nz, dF_pi_n_nz, dF_pd_n_nz,
+        dF_dx_n_nz, dF_x_n_nz, dF_u_n_nz, dF_w_n_nz, dF_t_n_nz,
+        dF_dx_p_n_nz, dF_x_p_n_nz, dF_u_p_n_nz, dF_w_p_n_nz, dF_t_p_n_nz;
+	int *dF_ci_row, *dF_cd_row, *dF_pi_row, *dF_pd_row,
+		*dF_dx_row, *dF_x_row, *dF_u_row, *dF_w_row, *dF_t_row,
+	    *dF_dx_p_row, *dF_x_p_row, *dF_u_p_row, *dF_w_p_row, *dF_t_p_row;
+	int *dF_ci_col, *dF_cd_col, *dF_pi_col, *dF_pd_col,
+		*dF_dx_col, *dF_x_col, *dF_u_col, *dF_w_col, *dF_t_col,
+		*dF_dx_p_col, *dF_x_p_col, *dF_u_p_col, *dF_w_p_col, *dF_t_p_col;
 
 	jmi_real_vec_p z_work;
 } jmi_func_ad_t;
@@ -123,6 +126,7 @@ typedef struct {
 	jmi_func_ad_t* ad;
 } jmi_func_t;
 
+
 /**
  * Struct describing a DAE model including evaluation of the DAE residual and (optional) a symbolic
  * Jacobian. If the Jacobian is not provided, the corresponding function pointers are set to NULL.
@@ -137,7 +141,15 @@ typedef struct {
 } jmi_init_t;
 
 typedef struct {
-	//..
+	jmi_func_t* J;
+	jmi_func_t* Ceq;
+	jmi_func_t* Cineq;
+	jmi_func_t* Heq;
+	jmi_func_t* Hineq;
+	jmi_real_t start_time;
+	int start_time_free;
+	jmi_real_t final_time;
+	int final_time_free;
 } jmi_opt_t;
 
 /**
@@ -166,6 +178,14 @@ struct jmi_t{
 	int n_x;
 	int n_u;
 	int n_w;
+
+	int n_tp;
+
+	int n_p;
+	int n_v;
+	int n_q;
+	int n_z; // the sum of all variables vector sizes (including t), for convenience
+
 	// Offset variables in the z vector, for convenience.
 	int offs_ci;
 	int offs_cd;
@@ -176,12 +196,16 @@ struct jmi_t{
 	int offs_u;
 	int offs_w;
 	int offs_t;
+	int offs_dx_p;
+	int offs_x_p;
+	int offs_u_p;
+	int offs_w_p;
+	int offs_t_p;
 
-	int n_z; // the sum of all variables vector sizes (including t), for convenience
+	int offs_p;
+	int offs_v;
+	int offs_q;
 
-	/* The z vector contains all variables in the order
-	 * ci, cd, pi, pd, dx, x, u, w, t.
-	 */
 	// This vector contains active AD objects in case of AD
 	jmi_ad_var_vec_p z;
 	// This vector contains the actual values
@@ -252,7 +276,7 @@ int jmi_func_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independent_
  * is that the allocation of the jmi_t struct should not be repeated in the generated code.
  */
 int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
-		int n_x, int n_u, int n_w);
+		int n_x, int n_u, int n_w, int n_tp);
 
 /**
  * Allocates a jmi_dae_t struct.
@@ -269,5 +293,26 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 		jmi_residual_func_t F1, int n_eq_F1,
 		jmi_jacobian_func_t dF1,
 		int dF1_n_nz, int* dF1_row, int* dF1_col);
+
+/**
+ * Allocates a jmi_opt_t struct.
+ */
+int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t J,
+		jmi_jacobian_func_t dJ,
+		int dJ_n_nz, int* dJ_row, int* dJ_col,
+		jmi_residual_func_t Ceq, int n_eq_Ceq,
+		jmi_jacobian_func_t dCeq,
+		int dCeq_n_nz, int* dCeq_row, int* dCeq_col,
+		jmi_residual_func_t Cineq, int n_eq_Cineq,
+		jmi_jacobian_func_t dCineq,
+		int dCineq_n_nz, int* dCineq_row, int* dCineq_col,
+		jmi_residual_func_t Heq, int n_eq_Heq,
+		jmi_jacobian_func_t dHeq,
+		int dHeq_n_nz, int* dHeq_row, int* dHeq_col,
+		jmi_residual_func_t Hineq, int n_eq_Hineq,
+		jmi_jacobian_func_t dHineq,
+		int dHineq_n_nz, int* dHineq_row, int* dHineq_col,
+		double start_time, int start_time_free,
+		double final_time, int final_time_free);
 
 #endif

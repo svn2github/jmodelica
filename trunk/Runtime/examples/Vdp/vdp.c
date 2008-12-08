@@ -643,7 +643,7 @@ int jmi_new(jmi_t** jmi) {
 
 
 	jmi_init(jmi, N_ci, N_cd, N_pi, N_pd, N_dx,
-			      N_x, N_u, N_w);
+			      N_x, N_u, N_w, 0);
 
 	// Initialize the DAE interface
 	int dF_n_nz;

@@ -11,13 +11,13 @@ int main(int argv, char* argc[])
 
 	int i;
 
-	int n_ci, n_cd, n_pi, n_pd, n_dx, n_x, n_u, n_w, n_z, n_eq_F;
-	int offs_ci, offs_cd, offs_pi, offs_pd, offs_dx, offs_x, offs_u, offs_w, offs_t;
-	jmi_get_sizes(jmi, &n_ci, &n_cd, &n_pi, &n_pd, &n_dx, &n_x, &n_u, &n_w);
-	jmi_get_offsets(jmi, &offs_ci, &offs_cd, &offs_pi, &offs_pd, &offs_dx, &offs_x, &offs_u, &offs_w, &offs_t);
+	int n_ci, n_cd, n_pi, n_pd, n_dx, n_x, n_u, n_w, n_tp, n_z, n_eq_F;
+	int offs_ci, offs_cd, offs_pi, offs_pd, offs_dx, offs_x, offs_u, offs_w, offs_t,
+	    offs_dx_p, offs_x_p, offs_u_p, offs_w_p, offs_t_p;
+	jmi_get_sizes(jmi, &n_ci, &n_cd, &n_pi, &n_pd, &n_dx, &n_x, &n_u, &n_w, &n_tp, &n_z);
+	jmi_get_offsets(jmi, &offs_ci, &offs_cd, &offs_pi, &offs_pd, &offs_dx, &offs_x, &offs_u, &offs_w, &offs_t,
+			&offs_dx_p, &offs_x_p, &offs_u_p, &offs_w_p, &offs_t_p);
 	jmi_dae_get_sizes(jmi, &n_eq_F);
-
-	n_z = n_ci + n_cd + n_pi + n_pd + n_dx + n_x + n_u + n_w + 1;
 
 	int dF_n_nz;
 	jmi_dae_dF_n_nz(jmi,JMI_DER_SYMBOLIC,&dF_n_nz);
