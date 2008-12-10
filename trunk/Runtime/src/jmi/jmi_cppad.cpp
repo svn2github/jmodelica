@@ -466,11 +466,11 @@ int jmi_func_ad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independe
 	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_U, jmi->n_u, func->n_eq_F, func->ad->dF_z_n_nz, func->ad->dF_z_col)
 	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_W, jmi->n_w, func->n_eq_F, func->ad->dF_z_n_nz, func->ad->dF_z_col)
 	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_T, 1, func->n_eq_F, func->ad->dF_z_n_nz, func->ad->dF_z_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_DX, jmi->n_dx*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_X, jmi->n_x*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_U, jmi->n_u*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_W, jmi->n_w*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_T, 1*jmi->n_tp, func->n_eq_F, func->dF_n_nz, jmi->dae->F->dF_col)
+	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_DX_P, jmi->n_dx*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
+	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_X_P, jmi->n_x*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
+	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_U_P, jmi->n_u*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
+	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_W_P, jmi->n_w*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
+	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_T_P, 1*jmi->n_tp, func->n_eq_F, func->dF_n_nz, jmi->dae->F->dF_col)
 
 	return 0;
 
@@ -535,12 +535,42 @@ int jmi_func_ad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 int jmi_ad_init(jmi_t* jmi) {
 
 	if (jmi->dae!=NULL) {
-		jmi_func_ad_init(jmi, jmi->dae->F);
+		int n_eq_F;
+		jmi_dae_get_sizes(jmi,&n_eq_F);
+		if (n_eq_F>0) {
+			jmi_func_ad_init(jmi, jmi->dae->F);
+		}
 	}
 	if (jmi->init!=NULL) {
-		jmi_func_ad_init(jmi, jmi->init->F0);
-		jmi_func_ad_init(jmi, jmi->init->F1);
+		int n_eq_F0, n_eq_F1;
+		jmi_init_get_sizes(jmi,&n_eq_F0,&n_eq_F1);
+		printf("%d, %d\n",n_eq_F0,n_eq_F1);
+		if (n_eq_F0>0) {
+			jmi_func_ad_init(jmi, jmi->init->F0);
+		}
+		if (n_eq_F1>0) {
+			jmi_func_ad_init(jmi, jmi->init->F1);
+		}
 	}
+	if (jmi->opt!=NULL) {
+		int n_eq_Ceq, n_eq_Cineq, n_eq_Heq, n_eq_Hineq;
+		jmi_opt_get_sizes(jmi,&n_eq_Ceq, &n_eq_Cineq, &n_eq_Heq, &n_eq_Hineq);
+
+		jmi_func_ad_init(jmi,jmi->opt->J);
+		if (n_eq_Ceq>0) {
+			jmi_func_ad_init(jmi,jmi->opt->Ceq);
+		}
+		if (n_eq_Cineq>0) {
+			jmi_func_ad_init(jmi,jmi->opt->Cineq);
+		}
+		if (n_eq_Heq>0) {
+			jmi_func_ad_init(jmi,jmi->opt->Heq);
+		}
+		if (n_eq_Hineq>0) {
+			jmi_func_ad_init(jmi,jmi->opt->Hineq);
+		}
+	}
+
 	return 0;
 }
 int jmi_func_ad_delete(jmi_func_ad_t *jfa) {

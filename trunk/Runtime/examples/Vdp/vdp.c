@@ -22,6 +22,13 @@ static const int N_eq_F = 3;
 static const int N_eq_F0 = 6;
 static const int N_eq_F1 = 0;
 
+static const int N_eq_Ceq = 0;
+static const int N_eq_Cineq = 0;
+static const int N_eq_Heq = 0;
+static const int N_eq_Hineq = 0;
+
+static const int N_t_p = 1;
+
 #define ci(i) ((*(jmi->z))[jmi->offs_ci+i])
 #define cd(i) ((*(jmi->z))[jmi->offs_cd+i])
 #define pi(i) ((*(jmi->z))[jmi->offs_pi+i])
@@ -31,11 +38,12 @@ static const int N_eq_F1 = 0;
 #define u(i) ((*(jmi->z))[jmi->offs_u+i])
 #define w(i) ((*(jmi->z))[jmi->offs_w+i])
 #define tt ((*(jmi->z))[jmi->offs_t])
+#define dx_p(j,i) ((*(jmi->z))[jmi->offs_dx_p + j*jmi->n_dx + i])
+#define x_p(j,i) ((*(jmi->z))[jmi->offs_x_p + j*jmi->n_x + i])
+#define u_p(j,i) ((*(jmi->z))[jmi->offs_u_p + j*jmi->n_u + i])
+#define w_p(j,i) ((*(jmi->z))[jmi->offs_w_p + j*jmi->n_w + i])
+#define tt_p(j) ((*(jmi->z))[jmi->offs_t_p+j])
 
-
-
-// TODO: This does not work...
-//static jmi_residual_func_t vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_t res) {
 /*
  * The res argument is of type pointer to a vector. This means that
  * in the case of no AD, the type of res is double**. This is
@@ -60,9 +68,6 @@ static int vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_p res) {
  * TODO: This code can certainly be improved and optimized. For example, macros would probably
  * make it easier to read.
  */
-
-// TODO: This does not work...
-//static jmi_jacobian_func_t vdp_dae_jac_sd_F(jmi_t* jmi, int sparsity, int independent_vars, int* mask, jmi_real_vec_t jac) {
 
 static int vdp_dae_dF(jmi_t* jmi, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
 
@@ -618,32 +623,175 @@ static int vdp_init_dF0_nz_indices(int* row, int* col) {
 
 static int vdp_init_F1(jmi_t* jmi, jmi_ad_var_vec_p res) {
 
-  return 0;
+  return -1;
 }
 
 static int vdp_init_dF1(jmi_t* jmi, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
 
-	return 0;
+	return -1;
 }
 
 static int vdp_init_dF1_n_nz(int* n_nz) {
 
 	*n_nz = 0;
-	return 0;
+	return -1;
 }
 
 static int vdp_init_dF1_nz_indices(int* row, int* col) {
 
+	return -1;
+}
+
+static int vdp_opt_J(jmi_t* jmi, jmi_ad_var_vec_p res) {
+	(*res)[0] = x_p(0,2);
+  return 0;
+}
+
+static int vdp_opt_dJ(jmi_t* jmi, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
+
+	int i;
+	int jac_n = 1;
+	int col_index = 0;
+
+
+	int jac_m;
+	int jac_n_nz;
+	jmi_opt_dJ_dim(jmi,JMI_DER_SYMBOLIC,sparsity,independent_vars,mask,&jac_m,&jac_n_nz);
+
+	// Set Jacobian to zero if dense evaluation.
+	if ((sparsity & JMI_DER_DENSE_ROW_MAJOR) | (sparsity & JMI_DER_DENSE_COL_MAJOR)) {
+		for (i=0;i<jac_n*jac_m;i++) {
+			jac[i] = 0;
+		}
+	}
+
+	col_index = jmi->offs_x_p;
+	if ((independent_vars & JMI_DER_X_P)) {
+		if (mask[col_index] == 1) {
+			jmi_real_t jac_tmp_1 = 1;
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[col_index] = jac_tmp_1;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[col_index] = jac_tmp_1;
+				break;
+			case JMI_DER_SPARSE:
+				jac[0] = jac_tmp_1;
+			}
+		}
+	}
+
 	return 0;
 }
 
+static int vdp_opt_dJ_n_nz(int* n_nz) {
+
+	*n_nz = 1;
+	return 0;
+}
+
+static int vdp_opt_dJ_nz_indices(int* row, int* col) {
+	row[0] = 1;
+	col[0] = 1 + // p_i
+	         3 + // dx
+	         3 + // x
+	         1 + // u
+	         1 + // t
+	         3 + // dx_p
+	         2;  // x_p_3
+	return 0;
+}
+
+
+static int vdp_opt_Ceq(jmi_t* jmi, jmi_ad_var_vec_p res) {
+
+  return -1;
+}
+
+static int vdp_opt_dCeq(jmi_t* jmi, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
+
+	return -1;
+}
+
+static int vdp_opt_dCeq_n_nz(int* n_nz) {
+
+	*n_nz = 0;
+	return -1;
+}
+
+static int vdp_opt_dCeq_nz_indices(int* row, int* col) {
+
+	return -1;
+}
+
+static int vdp_opt_Cineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
+
+  return -1;
+}
+
+static int vdp_opt_dCineq(jmi_t* jmi, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
+
+	return -1;
+}
+
+static int vdp_opt_dCineq_n_nz(int* n_nz) {
+
+	*n_nz = 0;
+	return -1;
+}
+
+static int vdp_opt_dCineq_nz_indices(int* row, int* col) {
+
+	return -1;
+}
+static int vdp_opt_Heq(jmi_t* jmi, jmi_ad_var_vec_p res) {
+
+  return -1;
+}
+
+static int vdp_opt_dHeq(jmi_t* jmi, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
+
+	return -1;
+}
+
+static int vdp_opt_dHeq_n_nz(int* n_nz) {
+
+	*n_nz = 0;
+	return -1;
+}
+
+static int vdp_opt_dHeq_nz_indices(int* row, int* col) {
+
+	return -1;
+}
+static int vdp_opt_Hineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
+
+  return -1;
+}
+
+static int vdp_opt_dHineq(jmi_t* jmi, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
+
+	return -1;
+}
+
+static int vdp_opt_dHineq_n_nz(int* n_nz) {
+
+	*n_nz = 0;
+	return -1;
+}
+
+static int vdp_opt_dHineq_nz_indices(int* row, int* col) {
+
+	return -1;
+}
 
 // This is the new function
 int jmi_new(jmi_t** jmi) {
 
 
 	jmi_init(jmi, N_ci, N_cd, N_pi, N_pd, N_dx,
-			      N_x, N_u, N_w, 0);
+			      N_x, N_u, N_w, N_t_p);
 
 	// Initialize the DAE interface
 	int dF_n_nz;
@@ -670,12 +818,58 @@ int jmi_new(jmi_t** jmi) {
 			            *vdp_init_F1, N_eq_F1, *vdp_init_dF1,
 			            dF1_n_nz, dF1_irow, dF1_icol);
 
+	int dJ_n_nz;
+	vdp_opt_dJ_n_nz(&dJ_n_nz);
+	int* dJ_irow = (int*)calloc(dJ_n_nz,sizeof(int));
+	int* dJ_icol = (int*)calloc(dJ_n_nz,sizeof(int));
+	vdp_opt_dJ_nz_indices(dJ_irow,dJ_icol);
+
+	int dCeq_n_nz;
+	vdp_opt_dCeq_n_nz(&dCeq_n_nz);
+	int* dCeq_irow = (int*)calloc(dCeq_n_nz,sizeof(int));
+	int* dCeq_icol = (int*)calloc(dCeq_n_nz,sizeof(int));
+	vdp_opt_dCeq_nz_indices(dCeq_irow,dCeq_icol);
+
+	int dCineq_n_nz;
+	vdp_opt_dCineq_n_nz(&dCineq_n_nz);
+	int* dCineq_irow = (int*)calloc(dCineq_n_nz,sizeof(int));
+	int* dCineq_icol = (int*)calloc(dCineq_n_nz,sizeof(int));
+	vdp_opt_dCineq_nz_indices(dCineq_irow,dCineq_icol);
+
+	int dHeq_n_nz;
+	vdp_opt_dHeq_n_nz(&dHeq_n_nz);
+	int* dHeq_irow = (int*)calloc(dHeq_n_nz,sizeof(int));
+	int* dHeq_icol = (int*)calloc(dHeq_n_nz,sizeof(int));
+	vdp_opt_dHeq_nz_indices(dHeq_irow,dHeq_icol);
+
+	int dHineq_n_nz;
+	vdp_opt_dHineq_n_nz(&dHineq_n_nz);
+	int* dHineq_irow = (int*)calloc(dHineq_n_nz,sizeof(int));
+	int* dHineq_icol = (int*)calloc(dHineq_n_nz,sizeof(int));
+	vdp_opt_dHineq_nz_indices(dHineq_irow,dHineq_icol);
+
+	jmi_opt_init(*jmi, *vdp_opt_J, *vdp_opt_dJ, dJ_n_nz, dJ_irow, dJ_icol,
+	           *vdp_opt_Ceq, N_eq_Ceq, *vdp_opt_dCeq, dCeq_n_nz, dCeq_irow, dCeq_icol,
+	           *vdp_opt_Cineq, N_eq_Cineq, *vdp_opt_dCineq, dCineq_n_nz, dCineq_irow, dCineq_icol,
+	           *vdp_opt_Heq, N_eq_Heq, *vdp_opt_dHeq, dHeq_n_nz, dHeq_irow, dHeq_icol,
+	           *vdp_opt_Hineq, N_eq_Hineq, *vdp_opt_dHineq, dHineq_n_nz, dHineq_irow, dHineq_icol);
+
 	free(dF_irow);
 	free(dF_icol);
 	free(dF0_irow);
 	free(dF0_icol);
 	free(dF1_irow);
 	free(dF1_icol);
+	free(dJ_icol);
+	free(dJ_irow);
+	free(dCeq_icol);
+	free(dCeq_irow);
+	free(dCineq_icol);
+	free(dCineq_irow);
+	free(dHeq_icol);
+	free(dHeq_irow);
+	free(dHineq_icol);
+	free(dHineq_irow);
 
 	return 0;
 }

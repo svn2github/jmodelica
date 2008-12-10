@@ -106,11 +106,11 @@ int jmi_func_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independent_
 	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_U, jmi->n_u, func->n_eq_F, func->dF_n_nz, func->dF_col)
 	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_W, jmi->n_w, func->n_eq_F, func->dF_n_nz, func->dF_col)
 	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_T, 1, func->n_eq_F, func->dF_n_nz, jmi->dae->F->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_DX, jmi->n_dx*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_X, jmi->n_x*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_U, jmi->n_u*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_W, jmi->n_w*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_T, 1*jmi->n_tp, func->n_eq_F, func->dF_n_nz, jmi->dae->F->dF_col)
+	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_DX_P, jmi->n_dx*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
+	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_X_P, jmi->n_x*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
+	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_U_P, jmi->n_u*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
+	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_W_P, jmi->n_w*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
+	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_T_P, 1*jmi->n_tp, func->n_eq_F, func->dF_n_nz, jmi->dae->F->dF_col)
 
 	return 0;
 
@@ -205,9 +205,7 @@ int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t J,
 		int dHeq_n_nz, int* dHeq_row, int* dHeq_col,
 		jmi_residual_func_t Hineq, int n_eq_Hineq,
 		jmi_jacobian_func_t dHineq,
-		int dHineq_n_nz, int* dHineq_row, int* dHineq_col,
-		double start_time, int start_time_free,
-		double final_time, int final_time_free) {
+		int dHineq_n_nz, int* dHineq_row, int* dHineq_col) {
 
 	// Create opt_init_t struct
 	jmi_opt_t* opt = (jmi_opt_t*)calloc(1,sizeof(jmi_opt_t));
@@ -233,11 +231,6 @@ int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t J,
 	jmi_func_new(&jf_Hineq,Hineq,n_eq_Hineq,dHineq,dHineq_n_nz,dHineq_row, dHineq_row);
 	jmi->opt->Hineq = jf_Hineq;
 
-	opt->start_time = start_time;
-	opt->start_time_free = start_time_free;
-	opt->final_time = final_time;
-	opt->final_time_free = final_time_free;
-
 	return 0;
 
 }
@@ -254,7 +247,7 @@ int jmi_init_get_sizes(jmi_t* jmi, int* n_eq_F0, int* n_eq_F1) {
 		return -1;
 	}
 	*n_eq_F0 = jmi->init->F0->n_eq_F;
-	*n_eq_F0 = jmi->init->F1->n_eq_F;
+	*n_eq_F1 = jmi->init->F1->n_eq_F;
 	return 0;
 }
 
@@ -268,6 +261,16 @@ int jmi_opt_get_sizes(jmi_t* jmi, int* n_eq_Ceq, int* n_eq_Cineq, int* n_eq_Heq,
 	*n_eq_Hineq = jmi->opt->Hineq->n_eq_F;
 return 0;
 }
+
+int jmi_opt_set_optimization_interval(jmi_t *jmi, double start_time, int start_time_free,
+		                              double final_time, int final_time_free) {
+	jmi->opt->start_time = start_time;
+	jmi->opt->start_time_free = start_time_free;
+	jmi->opt->final_time = final_time;
+	jmi->opt->final_time_free = final_time_free;
+	return 0;
+}
+
 
 int jmi_get_ci(jmi_t* jmi, jmi_real_t** ci) {
 	*ci = *(jmi->z_val) + jmi->offs_ci;

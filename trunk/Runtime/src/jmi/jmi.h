@@ -342,6 +342,13 @@ int jmi_init_dF1_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
  *
  ********************************************/
 
+/**
+ * Set the optimization interval. This function should be called prior to using other
+ * functions in the optimization interface.
+ */
+int jmi_opt_set_optimization_interval(jmi_t *jmi, double start_time, int start_time_free,
+		                              double final_time, int final_time_free);
+
 /*
  * Get the number of equations in the optimization functions.
  */

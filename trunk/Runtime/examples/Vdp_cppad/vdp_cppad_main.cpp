@@ -29,8 +29,7 @@ int main(int argv, char* argc[])
 	int* dF_col = (int*)calloc(dF_n_nz,sizeof(int));
 
 
-	int dF_n_dense = (n_ci + n_cd + n_pi + n_pd +
-			          n_dx + n_x + n_u + n_w + 1) * n_eq_F;
+	int dF_n_dense = n_z* n_eq_F;
 
 	printf("Number of interactive constants:               %d\n",jmi->n_ci);
 	printf("Number of dependent constants:                 %d\n",jmi->n_cd);

@@ -311,8 +311,6 @@ int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t J,
 		int dHeq_n_nz, int* dHeq_row, int* dHeq_col,
 		jmi_residual_func_t Hineq, int n_eq_Hineq,
 		jmi_jacobian_func_t dHineq,
-		int dHineq_n_nz, int* dHineq_row, int* dHineq_col,
-		double start_time, int start_time_free,
-		double final_time, int final_time_free);
+		int dHineq_n_nz, int* dHineq_row, int* dHineq_col);
 
 #endif
