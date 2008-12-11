@@ -3,6 +3,12 @@ import java.util.HashSet;
 
 aspect Library {
 
+/*
+	class LibNodeException extends Exception {
+	
+	}
+*/
+
 	eq LibClassDecl.memberClass(String name) {
 		HashSet set = new HashSet();
 		set.addAll(super.memberClass(name));
@@ -48,8 +54,12 @@ aspect Library {
 				
 				File[] allFiles = baseDir.listFiles();
 				if (allFiles==null) {
-					System.out.println("Error reading library library!");
-					System.exit(0);
+					FullClassDecl fcd = new FullClassDecl();
+					fcd.setName(new IdDecl("_ErrorClassDecl_in_lib"));
+					return fcd;
+					//throw new LibNodeException();
+					//System.out.println("Error reading library!");
+					//System.exit(0);
 				} 
 				
 				
@@ -103,10 +113,19 @@ aspect Library {
 	   		} catch (Error e){
 		    	System.out.println("In file: '"+ dirName+"/package.mo"+ "':");
 				System.err.println(e.getMessage());
-		        System.exit(1);
+		        //System.exit(1);
+		        //throw new LibNodeException();
+		        FullClassDecl fcd = new FullClassDecl();
+				fcd.setName(new IdDecl("_ErrorClassDecl_in_lib"));
+                return fcd;		        
 	   		} catch (Exception e) {System.out.println(e.toString());
 	   		                       e.printStackTrace();
-	   		                       System.exit(0);}
+	   		                       //System.exit(0);
+	   		                       //throw new LibNodeException();
+	   		                       FullClassDecl fcd = new FullClassDecl();
+					               fcd.setName(new IdDecl("_ErrorClassDecl_in_lib"));
+	   		                       return fcd;
+	   		                       }
 	   		
 			
 		} else {
