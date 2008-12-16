@@ -1,0 +1,169 @@
+/*
+ *   min f(x)
+ *
+ *   s.t.
+ *
+ *   g(x) <= 0
+ *   h(x) = 0
+ *
+ */
+
+#ifndef _JMI_OPT_SIM_H
+#define _JMI_OPT_SIM_H
+
+#include "jmi.h"
+
+#define JMI_OPT_SIM_LP 1 // Lagrange polynomials
+#define JMI_OPT_SIM_BE 2 // Backwards Euler
+#define JMI_OPT_SIM_FE 3 // Forward Euler
+#define JMI_OPT_SIM_MB 4 // Monomial basis
+
+typedef struct jmi_opt_sim_t jmi_opt_sim_t;
+
+
+// Function typedefs
+typedef int (*jmi_opt_sim_get_dimensions_t)(jmi_opt_sim_t *jmi_opt_sim, int *n_x, int *n_g, int *n_h,
+		int *dg_n_nz, int *dh_n_nz);
+
+typedef int (*jmi_opt_sim_get_interval_spec_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *startTime, int *startTimeFree,
+		jmi_real_t *finalTime, int *finalTimeFree);
+
+typedef int (*jmi_opt_sim_f_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *f);
+
+typedef int (*jmi_opt_sim_df_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *df);
+
+typedef int (*jmi_opt_sim_h_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res);
+
+typedef int (*jmi_opt_sim_dh_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac);
+
+typedef int (*jmi_opt_sim_g_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res);
+
+typedef int (*jmi_opt_sim_dg_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac);
+
+typedef int (*jmi_opt_sim_get_bounds_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_lb, jmi_real_t *x_ub);
+
+typedef int (*jmi_opt_sim_get_initial_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_init);
+
+typedef int (*jmi_opt_sim_h_nz_indices_t)(jmi_opt_sim_t *jmi_opt_sim, int *colIndex, int *rowIndex);
+
+typedef int (*jmi_opt_sim_g_nz_indices_t)(jmi_opt_sim_t *jmi_opt_sim, int *colIndex, int *rowIndex);
+
+struct jmi_opt_sim_t{
+	jmi_t *jmi;                      // jmi_t struct
+	int n_x;                         // Number of variables
+	int n_e;                         // Number of elements in mesh
+	jmi_real_t *hs;                    // Normalized element lengths in mesh (sum(h[i]=1)
+	int hs_free;                      // Free element lengths
+	jmi_real_t *x;                    // x vector.
+	jmi_real_t *x_lb;                 // Lower bounds for variables
+	jmi_real_t *x_ub;                 // Upper bound for variables
+	jmi_real_t *x_init;               // Initial starting point
+	jmi_opt_sim_get_dimensions_t get_dimensions;
+	jmi_opt_sim_get_interval_spec_t get_interval_spec;
+	jmi_opt_sim_f_t f;
+	jmi_opt_sim_df_t df;
+	jmi_opt_sim_h_t h;
+	jmi_opt_sim_dh_t dh;
+	jmi_opt_sim_g_t g;
+	jmi_opt_sim_dg_t dg;
+	int n_g;                          // Number of inequality constraints
+	int n_h;                          // Number of equality constraints
+	jmi_opt_sim_get_bounds_t get_bounds;
+	jmi_opt_sim_get_initial_t get_initial;
+	jmi_opt_sim_h_nz_indices_t h_nz_indices;
+	jmi_opt_sim_g_nz_indices_t g_nz_indices;
+
+};
+
+typedef struct {
+	jmi_opt_sim_t jmi_opt_sim;
+    int n_cp;                      // Number of collocation points
+    jmi_real_t *cp;                // Collocation points for algebraic variables
+    jmi_real_t *cpp;               // Collocation points for dynamic variables
+    jmi_real_t *Lp_cp;             // Lagrange polynomial coefficients based on the points in cp
+    jmi_real_t *Lp_cpp;            // Lagrange polynomial coefficients based on the points in cp plus one more point
+    jmi_real_t *dLp_cp_coeffs;     // Values of the derivative of the Lagrange polynomials at the points in cp
+    jmi_real_t *dLp_cpp_coeffs;    // Values of the derivative of the Lagrange polynomials at the points in cpp
+} jmi_opt_sim_lp_radau_t;
+
+int jmi_opt_sim_lp_radau_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
+		            jmi_real_t *hs, int hs_free,
+		            jmi_real_t *pi_lb, jmi_real_t *dx_lb, jmi_real_t *x_lb,
+		            jmi_real_t *u_lb, jmi_real_t *w_lb, jmi_real_t t0_lb,
+		            jmi_real_t tf_lb, jmi_real_t *hs_lb,
+		            jmi_real_t *pi_ub, jmi_real_t *dx_ub, jmi_real_t *x_ub,
+		            jmi_real_t *u_ub, jmi_real_t *w_ub, jmi_real_t t0_ub,
+		            jmi_real_t tf_ub, jmi_real_t *hs_ub,
+		            int n_cp);
+
+int jmi_opt_sim_lp_radau_delete(jmi_opt_sim_t *jmi_opt_sim);
+
+/**
+ * jmi_opt_sim_get_dimenstions returns the number of variables and the number of
+ * constraints, respectively, in the problem.
+ */
+int jmi_opt_sim_get_dimensions(jmi_opt_sim_t *jmi_opt_sim, int *n_x, int *n_g, int *n_h,
+		int *dg_n_nz, int *dh_n_nz);
+
+/**
+ * jmi_opt_sim_get_interval_spec returns data that specifies the optimization interval.
+ */
+int jmi_opt_sim_get_interval_spec(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *start_time, int *start_time_free,
+		jmi_real_t *final_time, int *final_time_free);
+
+/**
+ * jmi_opt_sim_f returns the cost function value at a given point in search space.
+ */
+int jmi_opt_sim_f(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *f);
+
+/**
+ * jmi_opt_sim_df returns the gradient of the cost function value at
+ * a given point in search space.
+ */
+int jmi_opt_sim_df(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *df);
+
+/**
+ * jmi_opt_sim_h returns the residual of the equality constraints h
+ */
+int jmi_opt_sim_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res);
+
+/**
+ * jmi_opt_sim_dh returns the Jacobian of the residual of the
+ * equality constraints.
+ */
+int jmi_opt_sim_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac);
+
+/**
+ * jmi_opt_sim_g returns the residual of the inequality constraints h
+ */
+int jmi_opt_sim_g(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res);
+
+/**
+ * jmi_opt_sim_dg returns the Jacobian of the residual of the
+ * inequality constraints.
+ */
+int jmi_opt_sim_dg(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac);
+
+/**
+ * jmi_opt_sim_get_bounds returns the upper and lower bounds on the optimization variables.
+ */
+int jmi_opt_sim_get_bounds(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_lb, jmi_real_t *x_ub);
+
+/**
+ * jmi_opt_sim_get_initial returns the initial point.
+ */
+int jmi_opt_sim_get_initial(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_init);
+
+/**
+ * jmi_opt_sim_h_nz_indices returns the indices of the non-zeros in the
+ * equality constraint Jacobian.
+ */
+int jmi_opt_sim_h_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *colIndex, int *rowIndex);
+
+/**
+ * jmi_opt_sim_g_nz_indices returns the indices of the non-zeros in the
+ * inequality constraint Jacobian.
+ */
+int jmi_opt_sim_g_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *colIndex, int *rowIndex);
+
+#endif /* JMI_OPT_SIM_H_ */
