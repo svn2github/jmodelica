@@ -150,6 +150,10 @@ typedef struct {
 	int start_time_free;
 	jmi_real_t final_time;
 	int final_time_free;
+    // TODO: Make sure that these are initialized.
+	int n_p_opt;                     // Number of parameters to optimize (in the p_i vector)
+	int *p_opt_indices;              // Indices of the parameters to optimize (in the p_i vector)
+
 } jmi_opt_t;
 
 /**
@@ -179,7 +183,12 @@ struct jmi_t{
 	int n_u;
 	int n_w;
 
-	int n_tp;
+	// TODO: Make sure that these are initialized
+	// TODO: Give access to tp
+	int n_tp;                        // Number of time points included in the optimization problem
+	jmi_real_t *tp;                  // Time point values in the normalized interval [0..1].
+	                                 // A value <=0 corresponds to the initial time and
+	                                 // a value >=1 corresponds to the final time.
 
 	int n_p;
 	int n_v;

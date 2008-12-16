@@ -99,6 +99,8 @@
 
 #include "jmi_common.h"
 
+#define JMI_INF 1e20;
+
 #define JMI_DER_SYMBOLIC 1
 #define JMI_DER_CPPAD 2
 
@@ -372,7 +374,7 @@ int jmi_opt_dJ_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
 /**
  * Returns the row and column indices of the non-zero elements of the Jacobian of J.
  */
-int jmi_opt_J_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+int jmi_opt_dJ_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
 
 /**
  * This helper function computes the number of columns and the number of non zero
@@ -399,7 +401,7 @@ int jmi_opt_dCeq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
 /**
  * Returns the row and column indices of the non-zero elements of the Jacobian of Ceq.
  */
-int jmi_opt_Ceq_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+int jmi_opt_dCeq_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
 
 /**
  * This helper function computes the number of columns and the number of non zero
@@ -426,7 +428,7 @@ int jmi_opt_dCineq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
 /**
  * Returns the row and column indices of the non-zero elements of the Jacobian of Cineq.
  */
-int jmi_opt_Cineq_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+int jmi_opt_dCineq_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
 
 /**
  * This helper function computes the number of columns and the number of non zero
@@ -453,7 +455,7 @@ int jmi_opt_dHeq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
 /**
  * Returns the row and column indices of the non-zero elements of the Jacobian of Heq.
  */
-int jmi_opt_Heq_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+int jmi_opt_dHeq_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
 
 /**
  * This helper function computes the number of columns and the number of non zero
