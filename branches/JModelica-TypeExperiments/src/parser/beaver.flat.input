@@ -1,4 +1,0 @@
-%right RPAREN;
-%left MULT, DIV;
-%left PLUS, MINUS;
-
