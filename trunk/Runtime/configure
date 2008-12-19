@@ -879,8 +879,7 @@ LIBTOOL
 IPOPT_INC
 IPOPT_LIB
 CPPAD_INC
-APP_LDFLAGS
-APP_LIBS
+ipoptlib
 jmilib
 jmi_cppadlib
 LIBOBJS
@@ -1495,6 +1494,7 @@ Optional Packages:
   --with-pic              try to use only PIC/non-PIC objects [default=use
                           both]
   --with-tags[=TAGS]      include additional configurations [automatic]
+  --with-ipopt            IPOPT installation directory [default=check]
   --with-cppad            CppAD installation directory [default=check]
 
 Some influential environment variables:
@@ -19519,17 +19519,63 @@ LIBTOOL='$(SHELL) $(top_builddir)/libtool'
 
 
 # Checks for libraries.
-#AC_ARG_WITH([ipopt],
-#   [AS_HELP_STRING([--with-ipopt],
-#     [ipopt installation directory [default=check]])],
-#   [ipopt=$withval],
-#   [with_ipopt=no])
 
-#AS_IF([test "x$with_ipopt" = xno],
-#      [AC_MSG_FAILURE([--with-ipopt option must be specified])],
-#      [AC_CHECK_FILE($ipopt/include/coin/IpTNLP.hpp,
-#                     [],
-#                     [AC_MSG_FAILURE([--with-ipopt option was specified but does not seem to point at a valid Ipopt installation])])])
+# Check whether --with-ipopt was given.
+if test "${with_ipopt+set}" = set; then
+  withval=$with_ipopt; ipopt=$withval
+else
+  with_ipopt=no
+fi
+
+
+if test "x$with_ipopt" = xno; then
+  { { echo "$as_me:$LINENO: error: --with-ipopt not specified
+See \`config.log' for more details." >&5
+echo "$as_me: error: --with-ipopt not specified
+See \`config.log' for more details." >&2;}
+   { (exit 1); exit 1; }; }
+else
+  { echo "$as_me:$LINENO: result:  " >&5
+echo "${ECHO_T} " >&6; }
+       { echo "$as_me:$LINENO: result: ***********************************************************************" >&5
+echo "${ECHO_T}***********************************************************************" >&6; }
+       { echo "$as_me:$LINENO: result: * --with-ipopt option specified - compiling with IPOPT support        *" >&5
+echo "${ECHO_T}* --with-ipopt option specified - compiling with IPOPT support        *" >&6; }
+       { echo "$as_me:$LINENO: result: ***********************************************************************" >&5
+echo "${ECHO_T}***********************************************************************" >&6; }
+       { echo "$as_me:$LINENO: result:  " >&5
+echo "${ECHO_T} " >&6; }
+       as_ac_File=`echo "ac_cv_file_$ipopt/include/coin/IpStdCInterface.h" | $as_tr_sh`
+{ echo "$as_me:$LINENO: checking for $ipopt/include/coin/IpStdCInterface.h" >&5
+echo $ECHO_N "checking for $ipopt/include/coin/IpStdCInterface.h... $ECHO_C" >&6; }
+if { as_var=$as_ac_File; eval "test \"\${$as_var+set}\" = set"; }; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  test "$cross_compiling" = yes &&
+  { { echo "$as_me:$LINENO: error: cannot check for file existence when cross compiling" >&5
+echo "$as_me: error: cannot check for file existence when cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+if test -r "$ipopt/include/coin/IpStdCInterface.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+ac_res=`eval echo '${'$as_ac_File'}'`
+	       { echo "$as_me:$LINENO: result: $ac_res" >&5
+echo "${ECHO_T}$ac_res" >&6; }
+if test `eval echo '${'$as_ac_File'}'` = yes; then
+  :
+else
+  { { echo "$as_me:$LINENO: error: --with-ipopt option was specified but does not seem to point at a valid IPOPT installation
+See \`config.log' for more details." >&5
+echo "$as_me: error: --with-ipopt option was specified but does not seem to point at a valid IPOPT installation
+See \`config.log' for more details." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+fi
+
 
 # Set output variables to be exported to the Makefiles
 
@@ -19548,19 +19594,27 @@ fi
 
 
 if test "x$with_cppad" = xno; then
-  { echo "$as_me:$LINENO: result: ***********************************************************************" >&5
+  { echo "$as_me:$LINENO: result:  " >&5
+echo "${ECHO_T} " >&6; }
+       { echo "$as_me:$LINENO: result: ***********************************************************************" >&5
 echo "${ECHO_T}***********************************************************************" >&6; }
        { echo "$as_me:$LINENO: result: * --with-cppad option not specified - compiling without CppAD support *" >&5
 echo "${ECHO_T}* --with-cppad option not specified - compiling without CppAD support *" >&6; }
        { echo "$as_me:$LINENO: result: ***********************************************************************" >&5
 echo "${ECHO_T}***********************************************************************" >&6; }
+       { echo "$as_me:$LINENO: result:  " >&5
+echo "${ECHO_T} " >&6; }
 else
-  { echo "$as_me:$LINENO: result: ***********************************************************************" >&5
+  { echo "$as_me:$LINENO: result:  " >&5
+echo "${ECHO_T} " >&6; }
+       { echo "$as_me:$LINENO: result: ***********************************************************************" >&5
 echo "${ECHO_T}***********************************************************************" >&6; }
        { echo "$as_me:$LINENO: result: * --with-cppad option specified - compiling with CppAD support        *" >&5
 echo "${ECHO_T}* --with-cppad option specified - compiling with CppAD support        *" >&6; }
        { echo "$as_me:$LINENO: result: ***********************************************************************" >&5
 echo "${ECHO_T}***********************************************************************" >&6; }
+       { echo "$as_me:$LINENO: result:  " >&5
+echo "${ECHO_T} " >&6; }
        as_ac_File=`echo "ac_cv_file_$cppad/cppad/cppad.hpp" | $as_tr_sh`
 { echo "$as_me:$LINENO: checking for $cppad/cppad/cppad.hpp" >&5
 echo $ECHO_N "checking for $cppad/cppad/cppad.hpp... $ECHO_C" >&6; }
@@ -19598,19 +19652,23 @@ fi
 
 CPPAD_INC=$cppad
 
-# Set LDFLAGS AND LIBS
+#AC_SUBST(ipoptlib)
+#ipoptlib=-L$ipopt/lib
 
 
-APP_LDFLAGS=-L$ipopt/lib
+
 case $build in
   *-cygwin*)
-    APP_LIBS="-lipopt -lg2c -ldl"
+    ipoptlib="-L$ipopt/lib -lipopt -lg2c -ldl"
     ;;
   *-mingw*)
-    APP_LIBS="-lipopt -lg2c"
+    ipoptlib="-L$ipopt/lib -lipopt -lg2c"
+    ;;
+  *-apple*)
+        ipoptlib="-L$ipopt/lib -lipopt -llapack -lblas -lm -lgfortran"
     ;;
   *)
-    APP_LIBS="-lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran"
+    ipoptlib="-L$ipopt/lib -lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran"
     ;;
 esac
 
@@ -20242,8 +20300,6 @@ fi
 # Checks for library functions.
 
 ac_config_files="$ac_config_files Makefile src/jmi/Makefile examples/Vdp/Makefile examples/Vdp_cppad/Makefile"
-
-
 
 
 cat >confcache <<\_ACEOF
@@ -21048,15 +21104,14 @@ LIBTOOL!$LIBTOOL$ac_delim
 IPOPT_INC!$IPOPT_INC$ac_delim
 IPOPT_LIB!$IPOPT_LIB$ac_delim
 CPPAD_INC!$CPPAD_INC$ac_delim
-APP_LDFLAGS!$APP_LDFLAGS$ac_delim
-APP_LIBS!$APP_LIBS$ac_delim
+ipoptlib!$ipoptlib$ac_delim
 jmilib!$jmilib$ac_delim
 jmi_cppadlib!$jmi_cppadlib$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 18; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 17; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

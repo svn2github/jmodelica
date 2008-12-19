@@ -45,10 +45,10 @@ exec_prefix = @exec_prefix@
 prefix = @prefix@
 
 # Include paths for compilation
-LIBS = @jmilib@ #@ADDLIBS@
+LIBS = @jmilib@ @ipoptlib@ #@ADDLIBS@
 
 # Include paths for compilation
-INCL =  -I$(JMIINCDIR)
+INCL =  -I$(JMIINCDIR) -I@IPOPT_INC@
 
 all: $(EXE) $(SHARED)
 

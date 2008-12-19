@@ -54,7 +54,8 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libjmi_la_LIBADD =
 am_libjmi_la_OBJECTS = libjmi_la-jmi.lo libjmi_la-jmi_common.lo \
-	libjmi_la-jmi_opt_sim.lo libjmi_la-jmi_opt_sim_lp.lo
+	libjmi_la-jmi_opt_sim.lo libjmi_la-jmi_opt_sim_lp.lo \
+	libjmi_la-jmi_opt_sim_ipopt.lo
 libjmi_la_OBJECTS = $(am_libjmi_la_OBJECTS)
 libjmi_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libjmi_la_CFLAGS) \
@@ -99,8 +100,6 @@ CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
-APP_LDFLAGS = @APP_LDFLAGS@
-APP_LIBS = @APP_LIBS@
 AR = @AR@
 AS = @AS@
 AUTOCONF = @AUTOCONF@
@@ -194,6 +193,7 @@ htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
+ipoptlib = @ipoptlib@
 jmi_cppadlib = @jmi_cppadlib@
 jmilib = @jmilib@
 libdir = @libdir@
@@ -227,9 +227,10 @@ libjmi_la_SOURCES = jmi.h \
                     jmi_common.c \
                     jmi_opt_sim.h \
                     jmi_opt_sim.c \
-                    jmi_opt_sim_lp.c
+                    jmi_opt_sim_lp.c \
+                    jmi_opt_sim_ipopt.c
 
-libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE 
+libjmi_la_CFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE 
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
@@ -247,13 +248,14 @@ libjmi_cppad_la_SOURCES = jmi.h \
                     jmi_opt_sim.c \
                     jmi_opt_sim_lp.c
 
-libjmi_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD 
+libjmi_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_INC) -I$(IPOPT_INC) -DJMI_AD=JMI_AD_CPPAD 
 libjmi_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD 
 libjmi_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs 
 #libjmi_cppad_la_LDFLAGS = -no-undefined 
 include_HEADERS = jmi.h \
                   jmi_common.h \
-                  jmi_opt_sim.h
+                  jmi_opt_sim.h \
+                  jmi_opt_sim_ipopt.h
 
 all: all-am
 
@@ -333,6 +335,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-jmi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-jmi_common.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-jmi_opt_sim.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-jmi_opt_sim_ipopt.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-jmi_opt_sim_lp.Plo@am__quote@
 
 .c.o:
@@ -383,6 +386,13 @@ libjmi_la-jmi_opt_sim_lp.lo: jmi_opt_sim_lp.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jmi_opt_sim_lp.c' object='libjmi_la-jmi_opt_sim_lp.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -c -o libjmi_la-jmi_opt_sim_lp.lo `test -f 'jmi_opt_sim_lp.c' || echo '$(srcdir)/'`jmi_opt_sim_lp.c
+
+libjmi_la-jmi_opt_sim_ipopt.lo: jmi_opt_sim_ipopt.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -MT libjmi_la-jmi_opt_sim_ipopt.lo -MD -MP -MF $(DEPDIR)/libjmi_la-jmi_opt_sim_ipopt.Tpo -c -o libjmi_la-jmi_opt_sim_ipopt.lo `test -f 'jmi_opt_sim_ipopt.c' || echo '$(srcdir)/'`jmi_opt_sim_ipopt.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libjmi_la-jmi_opt_sim_ipopt.Tpo $(DEPDIR)/libjmi_la-jmi_opt_sim_ipopt.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jmi_opt_sim_ipopt.c' object='libjmi_la-jmi_opt_sim_ipopt.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -c -o libjmi_la-jmi_opt_sim_ipopt.lo `test -f 'jmi_opt_sim_ipopt.c' || echo '$(srcdir)/'`jmi_opt_sim_ipopt.c
 
 libjmi_cppad_la-jmi_common.lo: jmi_common.c
 @am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_cppad_la_CFLAGS) $(CFLAGS) -MT libjmi_cppad_la-jmi_common.lo -MD -MP -MF $(DEPDIR)/libjmi_cppad_la-jmi_common.Tpo -c -o libjmi_cppad_la-jmi_common.lo `test -f 'jmi_common.c' || echo '$(srcdir)/'`jmi_common.c

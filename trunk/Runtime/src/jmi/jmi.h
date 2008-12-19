@@ -178,6 +178,46 @@ int jmi_get_offsets(jmi_t* jmi, int* offs_ci, int* offs_cd, int* offs_pi, int* o
 		int* offs_dx, int* offs_x, int* offs_u, int* offs_w, int* offs_t,
 		int* offs_dx_p, int* offs_x_p, int* offs_u_p, int* offs_w_p, int* offs_t_p);
 
+/*
+ * Set the vector of time points included in the problem.
+ */
+int jmi_set_tp(jmi_t *jmi, jmi_real_t *tp);
+
+/*
+ * Get the vector of time points included in the problem.
+ */
+int jmi_get_tp(jmi_t *jmi, jmi_real_t *tp);
+
+
+/*
+ * Specify the optimization interval.
+ */
+int jmi_opt_set_optimization_interval(jmi_t *jmi, double start_time, int start_time_free,
+		                              double final_time, int final_time_free);
+
+/*
+ * Get the optimization interval.
+ */
+int jmi_opt_get_optimization_interval(jmi_t *jmi, double *start_time, int *start_time_free,
+		                              double *final_time, int *final_time_free);
+
+
+/*
+ * Specify optimization parameters. p_opt_indices contains the indices of the
+ * parameters to be optimized in the pi vector.
+ */
+int jmi_opt_set_p_opt_indices(jmi_t *jmi, int n_p_opt, int *p_opt_indices);
+
+/*
+ * Get the number of optimization parameters.
+ */
+int jmi_opt_get_n_p_opt(jmi_t *jmi, int *n_p_opt);
+
+/*
+ * Get the optimization parameter indices.
+ */
+int jmi_opt_get_p_opt_indices(jmi_t *jmi, int *p_opt_indices);
+
 
 /**
  * Functions that gives access to the variable vectors.

@@ -2,6 +2,20 @@
 #include "jmi_opt_sim.h"
 
 
+int jmi_opt_sim_get_dimensions(jmi_opt_sim_t *jmi_opt_sim, int *n_x, int *n_g, int *n_h,
+		int *dg_n_nz, int *dh_n_nz) {
+	if (jmi_opt_sim->jmi->opt == NULL) {
+		return -1;
+	}
+	return 0;
+}
+
+
+int jmi_opt_sim_get_x(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t **x) {
+	*x = jmi_opt_sim->x;
+	return 0;
+}
+
 int jmi_opt_sim_get_interval_spec(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *start_time, int *start_time_free,
 		jmi_real_t *final_time, int *final_time_free) {
 	if (jmi_opt_sim->jmi->opt == NULL) {
@@ -37,4 +51,39 @@ int jmi_opt_sim_get_initial(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_init) {
 	}
 	return 0;
 }
+
+
+int jmi_opt_sim_f(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *f) {
+	return jmi_opt_sim->f(jmi_opt_sim, f);
+}
+
+int jmi_opt_sim_df(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *df) {
+	return jmi_opt_sim->df(jmi_opt_sim, df);
+}
+
+int jmi_opt_sim_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
+	return jmi_opt_sim->h(jmi_opt_sim, res);
+}
+
+int jmi_opt_sim_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
+	return jmi_opt_sim->dh(jmi_opt_sim, jac);
+}
+
+int jmi_opt_sim_g(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
+	return jmi_opt_sim->g(jmi_opt_sim, res);
+}
+
+int jmi_opt_sim_dg(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
+	return jmi_opt_sim->dg(jmi_opt_sim, jac);
+}
+
+int jmi_opt_sim_h_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *colIndex, int *rowIndex) {
+
+}
+
+int jmi_opt_sim_g_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *colIndex, int *rowIndex) {
+	return 0;
+}
+
+
 

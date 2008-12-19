@@ -58,17 +58,22 @@ AC_PROG_LIBTOOL
 AC_PREFIX_DEFAULT([`pwd`])
 
 # Checks for libraries.
-#AC_ARG_WITH([ipopt],
-#   [AS_HELP_STRING([--with-ipopt],
-#     [ipopt installation directory @<:@default=check@:>@])],
-#   [ipopt=$withval],
-#   [with_ipopt=no])
+AC_ARG_WITH([ipopt],
+   [AS_HELP_STRING([--with-ipopt],
+     [IPOPT installation directory @<:@default=check@:>@])],
+   [ipopt=$withval],
+   [with_ipopt=no])
 
-#AS_IF([test "x$with_ipopt" = xno],
-#      [AC_MSG_FAILURE([--with-ipopt option must be specified])],
-#      [AC_CHECK_FILE($ipopt/include/coin/IpTNLP.hpp,
-#                     [],
-#                     [AC_MSG_FAILURE([--with-ipopt option was specified but does not seem to point at a valid Ipopt installation])])])
+AS_IF([test "x$with_ipopt" = xno],
+      [AC_MSG_FAILURE([--with-ipopt not specified])],
+       [AC_MSG_RESULT([ ])
+       AC_MSG_RESULT([***********************************************************************])
+       AC_MSG_RESULT([* --with-ipopt option specified - compiling with IPOPT support        *])
+       AC_MSG_RESULT([***********************************************************************])
+       AC_MSG_RESULT([ ])
+       AC_CHECK_FILE($ipopt/include/coin/IpStdCInterface.h,
+                     [],
+                     [AC_MSG_FAILURE([--with-ipopt option was specified but does not seem to point at a valid IPOPT installation])])])
 
 # Set output variables to be exported to the Makefiles
 AC_SUBST(IPOPT_INC)
@@ -84,12 +89,16 @@ AC_ARG_WITH([cppad],
    [with_cppad=no])
 
 AS_IF([test "x$with_cppad" = xno],
-      [AC_MSG_RESULT([***********************************************************************])
+      [AC_MSG_RESULT([ ])
+       AC_MSG_RESULT([***********************************************************************])
        AC_MSG_RESULT([* --with-cppad option not specified - compiling without CppAD support *])
-       AC_MSG_RESULT([***********************************************************************])],
-       [AC_MSG_RESULT([***********************************************************************])
+       AC_MSG_RESULT([***********************************************************************])
+       AC_MSG_RESULT([ ])],
+       [AC_MSG_RESULT([ ])
+       AC_MSG_RESULT([***********************************************************************])
        AC_MSG_RESULT([* --with-cppad option specified - compiling with CppAD support        *])
        AC_MSG_RESULT([***********************************************************************])
+       AC_MSG_RESULT([ ])
        AC_CHECK_FILE($cppad/cppad/cppad.hpp,
                      [],
                      [AC_MSG_FAILURE([--with-cppad option was specified but does not seem to point at a valid CppAD installation])])])
@@ -99,19 +108,23 @@ AC_SUBST(CPPAD_INC)
 
 CPPAD_INC=$cppad
 
-# Set LDFLAGS AND LIBS
-AC_SUBST(APP_LDFLAGS)
-AC_SUBST(APP_LIBS)
-APP_LDFLAGS=-L$ipopt/lib
+#AC_SUBST(ipoptlib)
+#ipoptlib=-L$ipopt/lib
+
+AC_SUBST(ipoptlib)
+
 case $build in
   *-cygwin*)
-    APP_LIBS="-lipopt -lg2c -ldl"
+    ipoptlib="-L$ipopt/lib -lipopt -lg2c -ldl"
     ;;
   *-mingw*)
-    APP_LIBS="-lipopt -lg2c"
+    ipoptlib="-L$ipopt/lib -lipopt -lg2c"
+    ;;
+  *-apple*)
+        ipoptlib="-L$ipopt/lib -lipopt -llapack -lblas -lm -lgfortran"
     ;;
   *)
-    APP_LIBS="-lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran"
+    ipoptlib="-L$ipopt/lib -lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran"
     ;;  
 esac
 
@@ -141,7 +154,5 @@ AC_CONFIG_FILES([
  examples/Vdp/Makefile
  examples/Vdp_cppad/Makefile
 ])
-
-
 
 AC_OUTPUT

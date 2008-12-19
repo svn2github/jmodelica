@@ -13,9 +13,10 @@ libjmi_la_SOURCES = jmi.h \
                     jmi_common.c \
                     jmi_opt_sim.h \
                     jmi_opt_sim.c \
-                    jmi_opt_sim_lp.c
+                    jmi_opt_sim_lp.c \
+                    jmi_opt_sim_ipopt.c
 
-libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE 
+libjmi_la_CFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE 
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
@@ -34,12 +35,13 @@ libjmi_cppad_la_SOURCES = jmi.h \
                     jmi_opt_sim.c \
                     jmi_opt_sim_lp.c
                    
-libjmi_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD 
+libjmi_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_INC) -I$(IPOPT_INC) -DJMI_AD=JMI_AD_CPPAD 
 libjmi_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD 
 libjmi_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs 
 #libjmi_cppad_la_LDFLAGS = -no-undefined 
 
 include_HEADERS = jmi.h \
                   jmi_common.h \
-                  jmi_opt_sim.h
+                  jmi_opt_sim.h \
+                  jmi_opt_sim_ipopt.h
 

@@ -262,14 +262,64 @@ int jmi_opt_get_sizes(jmi_t* jmi, int* n_eq_Ceq, int* n_eq_Cineq, int* n_eq_Heq,
 return 0;
 }
 
+int jmi_set_tp(jmi_t *jmi, jmi_real_t *tp) {
+	int i;
+	for (i=0;i<jmi->n_tp;i++) {
+		jmi->tp[i] = tp[i];
+	}
+	return 0;
+}
+
+int jmi_get_tp(jmi_t *jmi, jmi_real_t *tp) {
+	int i;
+	for (i=0;i<jmi->n_tp;i++) {
+		tp[i] = jmi->tp[i];
+	}
+	return 0;
+}
+
+int jmi_opt_get_optimization_interval(jmi_t *jmi, double *start_time, int *start_time_free,
+		                              double *final_time, int *final_time_free) {
+	*start_time = jmi->opt->start_time;
+	*start_time_free = jmi->opt->start_time_free;
+	*final_time = jmi->opt->final_time;
+	*final_time_free = jmi->opt->final_time_free;
+	return 0;
+}
+
+
 int jmi_opt_set_optimization_interval(jmi_t *jmi, double start_time, int start_time_free,
-		                              double final_time, int final_time_free) {
+		 double final_time, int final_time_free) {
 	jmi->opt->start_time = start_time;
 	jmi->opt->start_time_free = start_time_free;
 	jmi->opt->final_time = final_time;
 	jmi->opt->final_time_free = final_time_free;
 	return 0;
 }
+
+int jmi_opt_set_p_opt_indices(jmi_t *jmi, int n_p_opt, int *p_opt_indices) {
+	int i;
+	jmi->opt->n_p_opt = n_p_opt;
+	jmi->opt->p_opt_indices = (int*)calloc(n_p_opt,sizeof(int));
+	for (i=0;i<n_p_opt;i++) {
+		jmi->opt->p_opt_indices[i] = p_opt_indices[i];
+	}
+	return 0;
+}
+
+int jmi_opt_get_n_p_opt(jmi_t *jmi, int *n_p_opt) {
+	*n_p_opt = jmi->opt->n_p_opt;
+	return 0;
+}
+
+int jmi_opt_get_p_opt_indices(jmi_t *jmi, int *p_opt_indices) {
+	int i;
+	for (i=0;i<jmi->opt->n_p_opt;i++) {
+		 p_opt_indices[i] = jmi->opt->p_opt_indices[i];
+	}
+	return 0;
+}
+
 
 
 int jmi_get_ci(jmi_t* jmi, jmi_real_t** ci) {

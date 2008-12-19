@@ -58,6 +58,12 @@ struct jmi_opt_sim_t{
 	jmi_real_t *x_lb;                 // Lower bounds for variables
 	jmi_real_t *x_ub;                 // Upper bound for variables
 	jmi_real_t *x_init;               // Initial starting point
+	int dg_n_nz;
+	int dh_n_nz;
+	int *dg_row;
+	int *dg_col;
+	int *dh_row;
+	int *dh_col;
 	jmi_opt_sim_get_dimensions_t get_dimensions;
 	jmi_opt_sim_get_interval_spec_t get_interval_spec;
 	jmi_opt_sim_f_t f;
@@ -70,9 +76,8 @@ struct jmi_opt_sim_t{
 	int n_h;                          // Number of equality constraints
 	jmi_opt_sim_get_bounds_t get_bounds;
 	jmi_opt_sim_get_initial_t get_initial;
-	jmi_opt_sim_h_nz_indices_t h_nz_indices;
 	jmi_opt_sim_g_nz_indices_t g_nz_indices;
-
+	jmi_opt_sim_h_nz_indices_t h_nz_indices;
 };
 
 typedef struct {
@@ -80,10 +85,13 @@ typedef struct {
     int n_cp;                      // Number of collocation points
     jmi_real_t *cp;                // Collocation points for algebraic variables
     jmi_real_t *cpp;               // Collocation points for dynamic variables
-    jmi_real_t *Lp_cp;             // Lagrange polynomial coefficients based on the points in cp
-    jmi_real_t *Lp_cpp;            // Lagrange polynomial coefficients based on the points in cp plus one more point
-    jmi_real_t *dLp_cp_coeffs;     // Values of the derivative of the Lagrange polynomials at the points in cp
-    jmi_real_t *dLp_cpp_coeffs;    // Values of the derivative of the Lagrange polynomials at the points in cpp
+    jmi_real_t *Lp_coeffs;               // Lagrange polynomial coefficients based on the points in cp
+    jmi_real_t *Lpp_coeffs;              // Lagrange polynomial coefficients based on the points in cp plus one more point
+    jmi_real_t *Lp_dot_coeffs;               // Lagrange polynomial derivative coefficients based on the points in cp
+    jmi_real_t *Lpp_dot_coeffs;              // Lagrange polynomial derivative coefficients based on the points in cp plus one more point
+    jmi_real_t *Lp_dot_vals;        // Values of the derivative of the Lagrange polynomials at the points in cp
+    jmi_real_t *Lpp_dot_vals;       // Values of the derivative of the Lagrange polynomials at the points in cpp
+    int der_eval_alg;                   // Evaluation algorithm used for computation of derivatives
 } jmi_opt_sim_lp_radau_t;
 
 int jmi_opt_sim_lp_radau_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
@@ -94,7 +102,7 @@ int jmi_opt_sim_lp_radau_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 		            jmi_real_t *pi_ub, jmi_real_t *dx_ub, jmi_real_t *x_ub,
 		            jmi_real_t *u_ub, jmi_real_t *w_ub, jmi_real_t t0_ub,
 		            jmi_real_t tf_ub, jmi_real_t *hs_ub,
-		            int n_cp);
+		            int n_cp, int der_eval_alg);
 
 int jmi_opt_sim_lp_radau_delete(jmi_opt_sim_t *jmi_opt_sim);
 
@@ -110,6 +118,11 @@ int jmi_opt_sim_get_dimensions(jmi_opt_sim_t *jmi_opt_sim, int *n_x, int *n_g, i
  */
 int jmi_opt_sim_get_interval_spec(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *start_time, int *start_time_free,
 		jmi_real_t *final_time, int *final_time_free);
+
+/**
+ * Get the x vector.
+ */
+int jmi_opt_sim_get_x(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t **x);
 
 /**
  * jmi_opt_sim_f returns the cost function value at a given point in search space.
