@@ -7,6 +7,10 @@ int jmi_opt_sim_get_dimensions(jmi_opt_sim_t *jmi_opt_sim, int *n_x, int *n_g, i
 	if (jmi_opt_sim->jmi->opt == NULL) {
 		return -1;
 	}
+	*n_x = 1;
+	*n_g = 1;
+	*n_h = 0;
+
 	return 0;
 }
 
@@ -61,14 +65,6 @@ int jmi_opt_sim_df(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *df) {
 	return jmi_opt_sim->df(jmi_opt_sim, df);
 }
 
-int jmi_opt_sim_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
-	return jmi_opt_sim->h(jmi_opt_sim, res);
-}
-
-int jmi_opt_sim_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
-	return jmi_opt_sim->dh(jmi_opt_sim, jac);
-}
-
 int jmi_opt_sim_g(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
 	return jmi_opt_sim->g(jmi_opt_sim, res);
 }
@@ -77,12 +73,22 @@ int jmi_opt_sim_dg(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 	return jmi_opt_sim->dg(jmi_opt_sim, jac);
 }
 
-int jmi_opt_sim_h_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *colIndex, int *rowIndex) {
-
+int jmi_opt_sim_dg_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *icol) {
+	return jmi_opt_sim->dg_nz_indices(jmi_opt_sim, irow, icol);
 }
 
-int jmi_opt_sim_g_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *colIndex, int *rowIndex) {
-	return 0;
+int jmi_opt_sim_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
+	return jmi_opt_sim->h(jmi_opt_sim, res);
+}
+
+int jmi_opt_sim_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
+	return jmi_opt_sim->dh(jmi_opt_sim, jac);
+}
+
+
+int jmi_opt_sim_dh_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *icol) {
+	return jmi_opt_sim->dh_nz_indices(jmi_opt_sim, irow, icol);
+
 }
 
 

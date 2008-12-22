@@ -76,8 +76,8 @@ struct jmi_opt_sim_t{
 	int n_h;                          // Number of equality constraints
 	jmi_opt_sim_get_bounds_t get_bounds;
 	jmi_opt_sim_get_initial_t get_initial;
-	jmi_opt_sim_g_nz_indices_t g_nz_indices;
-	jmi_opt_sim_h_nz_indices_t h_nz_indices;
+	jmi_opt_sim_g_nz_indices_t dg_nz_indices;
+	jmi_opt_sim_h_nz_indices_t dh_nz_indices;
 };
 
 typedef struct {
@@ -136,17 +136,6 @@ int jmi_opt_sim_f(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *f);
 int jmi_opt_sim_df(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *df);
 
 /**
- * jmi_opt_sim_h returns the residual of the equality constraints h
- */
-int jmi_opt_sim_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res);
-
-/**
- * jmi_opt_sim_dh returns the Jacobian of the residual of the
- * equality constraints.
- */
-int jmi_opt_sim_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac);
-
-/**
  * jmi_opt_sim_g returns the residual of the inequality constraints h
  */
 int jmi_opt_sim_g(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res);
@@ -158,6 +147,29 @@ int jmi_opt_sim_g(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res);
 int jmi_opt_sim_dg(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac);
 
 /**
+ * jmi_opt_sim_g_nz_indices returns the indices of the non-zeros in the
+ * inequality constraint Jacobian.
+ */
+int jmi_opt_sim_dg_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *icol);
+
+/**
+ * jmi_opt_sim_h returns the residual of the equality constraints h
+ */
+int jmi_opt_sim_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res);
+
+/**
+ * jmi_opt_sim_dh returns the Jacobian of the residual of the
+ * equality constraints.
+ */
+int jmi_opt_sim_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac);
+
+/**
+ * jmi_opt_sim_h_nz_indices returns the indices of the non-zeros in the
+ * equality constraint Jacobian.
+ */
+int jmi_opt_sim_dh_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *icol);
+
+/**
  * jmi_opt_sim_get_bounds returns the upper and lower bounds on the optimization variables.
  */
 int jmi_opt_sim_get_bounds(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_lb, jmi_real_t *x_ub);
@@ -167,16 +179,6 @@ int jmi_opt_sim_get_bounds(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_lb, jmi_rea
  */
 int jmi_opt_sim_get_initial(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_init);
 
-/**
- * jmi_opt_sim_h_nz_indices returns the indices of the non-zeros in the
- * equality constraint Jacobian.
- */
-int jmi_opt_sim_h_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *colIndex, int *rowIndex);
 
-/**
- * jmi_opt_sim_g_nz_indices returns the indices of the non-zeros in the
- * inequality constraint Jacobian.
- */
-int jmi_opt_sim_g_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *colIndex, int *rowIndex);
 
 #endif /* JMI_OPT_SIM_H_ */

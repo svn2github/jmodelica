@@ -15,7 +15,7 @@
 
 typedef struct {
 	jmi_opt_sim_t *jmi_opt_sim;
-	jmi_real_t *x;
+//	jmi_real_t *x;
 	Index n;
 	Index m;
 	Index n_g;
@@ -27,6 +27,7 @@ typedef struct {
 	jmi_real_t *g_ub;
 	IpoptProblem nlp;
 
+	enum ApplicationReturnStatus status;
 	jmi_real_t objective;
 	jmi_real_t *g;
 	jmi_real_t *mult_g;
@@ -39,5 +40,6 @@ int jmi_opt_sim_ipopt_new(jmi_opt_sim_ipopt_t **jmi_opt_sim_ipopt, jmi_opt_sim_t
 
 int jmi_opt_sim_ipopt_set_initial_point(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt, jmi_real_t *x_init);
 
+int jmi_opt_sim_ipopt_solve(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt);
 
 #endif /* _JMI_OPT_SIM_IPOPT_H */

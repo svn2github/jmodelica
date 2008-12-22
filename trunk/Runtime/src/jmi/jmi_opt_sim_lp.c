@@ -6,6 +6,9 @@ static int lp_radau_f(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *f) {
 	if (jmi_opt_sim->jmi->opt == NULL) {
 		return -1;
 	}
+
+	*f = (jmi_opt_sim->x[0]-2)*(jmi_opt_sim->x[0]-2) + 3;
+
 	return 0;
 }
 
@@ -13,6 +16,35 @@ static int lp_radau_df(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *df) {
 	if (jmi_opt_sim->jmi->opt == NULL) {
 		return -1;
 	}
+
+	df[0] = 2*jmi_opt_sim->x[0];
+
+	return 0;
+}
+
+static int lp_radau_g(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
+	if (jmi_opt_sim->jmi->opt == NULL) {
+		return -1;
+	}
+    res[0] = 3-jmi_opt_sim->x[0];
+	return 0;
+}
+
+static int lp_radau_dg(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
+	if (jmi_opt_sim->jmi->opt == NULL) {
+		return -1;
+	}
+    jac[0] = -1;
+	return 0;
+}
+
+
+static int lp_radau_dg_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *icol) {
+	if (jmi_opt_sim->jmi->opt == NULL) {
+		return -1;
+	}
+	irow[0] = 1;
+	icol[0] = 1;
 	return 0;
 }
 
@@ -20,6 +52,7 @@ static int lp_radau_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
 	if (jmi_opt_sim->jmi->opt == NULL) {
 		return -1;
 	}
+
 	return 0;
 }
 
@@ -30,7 +63,7 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 	return 0;
 }
 
-static int lp_radau_g(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
+static int lp_radau_dh_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *icol) {
 	if (jmi_opt_sim->jmi->opt == NULL) {
 		return -1;
 	}
@@ -38,29 +71,6 @@ static int lp_radau_g(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
 	return 0;
 }
 
-static int lp_radau_dg(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
-	if (jmi_opt_sim->jmi->opt == NULL) {
-		return -1;
-	}
-
-	return 0;
-}
-
-static int lp_radau_h_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *colIndex, int *rowIndex) {
-	if (jmi_opt_sim->jmi->opt == NULL) {
-		return -1;
-	}
-
-	return 0;
-}
-
-static int lp_radau_g_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *colIndex, int *rowIndex) {
-	if (jmi_opt_sim->jmi->opt == NULL) {
-		return -1;
-	}
-
-	return 0;
-}
 
 int jmi_opt_sim_lp_radau_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
         jmi_real_t *hs, int hs_free,
@@ -218,11 +228,15 @@ int jmi_opt_sim_lp_radau_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
     printf("}\n\n");
 
     */
+
 	// Compute vector sizes
+/*
     (*jmi_opt_sim)->n_x = jmi->opt->n_p_opt +                                   // Number of parameters to be optimized
                           (2*jmi->n_x + jmi->n_u + jmi->n_w)*(n_e*n_cp + 1) +   // Collocation variables + initial variables
                           jmi->n_x*n_e +                                        // States at element junctions
                           (2*jmi->n_x + jmi->n_u + jmi->n_w)*jmi->n_tp;         // Pointwise values
+*/
+    (*jmi_opt_sim)->n_x = 1;
 
     // Free element lengths
     if (hs_free == 1) {
@@ -240,10 +254,13 @@ int jmi_opt_sim_lp_radau_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
     }
 
     // Number of equality constraints
+/*
     (*jmi_opt_sim)->n_h = (2*jmi->n_x + jmi->n_w)*(n_e*n_cp + 1) +             // Collocation equations + initial equations
                           (2*jmi->n_x  + jmi->n_u + jmi->n_w)*jmi->n_tp +      // Pointwise equations
                           jmi->opt->Ceq->n_eq_F*(n_e*n_cp + 1) +               // Path constraints from optimization
                           jmi->opt->Heq->n_eq_F*jmi->n_tp;                // Point constraints from optimization
+*/
+    (*jmi_opt_sim)->n_h = 0;
 
     // if free element lengths:
     // TODO: should be modeled explicitly in the Optimica code?
@@ -253,8 +270,11 @@ int jmi_opt_sim_lp_radau_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
     }
 
     // Number of inequality constraints
+    /*
     (*jmi_opt_sim)->n_g = jmi->opt->Cineq->n_eq_F*(n_e*n_cp + 1) +               // Path inconstraints from optimization
                           jmi->opt->Hineq->n_eq_F*jmi->n_tp;                    // Point inconstraints from optimization
+*/
+    (*jmi_opt_sim)->n_g = 1;
 
 	// Allocate vectors
 	(*jmi_opt_sim)->hs = (jmi_real_t*)calloc(n_e,sizeof(jmi_real_t));
@@ -273,7 +293,7 @@ int jmi_opt_sim_lp_radau_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 	(*jmi_opt_sim)->dh_col = (int*)calloc((*jmi_opt_sim)->dh_n_nz,sizeof(int));
 
 	// Set the bounds vector
-
+/*
 	// Bounds for optimization parameters
 	int offs = 0;
 	for (i=0;i<jmi->opt->n_p_opt;i++) {
@@ -343,6 +363,10 @@ int jmi_opt_sim_lp_radau_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
     for (i=0;i<n_e;i++) {
     	(*jmi_opt_sim)->hs[i] = hs[i];
     }
+*/
+
+	(*jmi_opt_sim)->x_lb[0] = -10;
+	(*jmi_opt_sim)->x_ub[0] = 10;
 
 	//Set function pointers
     (*jmi_opt_sim)->jmi = jmi;
@@ -356,8 +380,8 @@ int jmi_opt_sim_lp_radau_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 	(*jmi_opt_sim)->dg = *lp_radau_dg;
 	(*jmi_opt_sim)->get_bounds = *jmi_opt_sim_get_bounds;
 	(*jmi_opt_sim)->get_initial = *jmi_opt_sim_get_initial;
-	(*jmi_opt_sim)->h_nz_indices = *lp_radau_h_nz_indices;
-	(*jmi_opt_sim)->g_nz_indices = *lp_radau_g_nz_indices;
+	(*jmi_opt_sim)->dh_nz_indices = *lp_radau_dh_nz_indices;
+	(*jmi_opt_sim)->dg_nz_indices = *lp_radau_dg_nz_indices;
 
 	return 0;
 }

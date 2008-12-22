@@ -312,6 +312,8 @@ void test_optimization(jmi_t *jmi) {
 
 	jmi_opt_sim_ipopt_new(&jmi_opt_sim_ipopt, jmi_opt_sim);
 
+	jmi_opt_sim_ipopt_solve(jmi_opt_sim_ipopt);
+
     free(hs);
 
 }

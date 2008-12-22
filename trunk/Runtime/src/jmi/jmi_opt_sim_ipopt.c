@@ -4,11 +4,13 @@
 static int jmi_opt_sim_ipopt_f(Index n, Number* x, Bool new_x,
 			  Number *f, UserDataPtr data) {
 
+//	printf("f\n");
+
 	int i;
 	jmi_opt_sim_ipopt_t *nlp = (jmi_opt_sim_ipopt_t*)data;
 
 	for (i=0;i<nlp->n;i++) {
-		nlp->x[i] = x[i];
+		nlp->jmi_opt_sim->x[i] = x[i];
 	}
 
 	if (jmi_opt_sim_f(nlp->jmi_opt_sim, f) == 0) {
@@ -21,15 +23,47 @@ static int jmi_opt_sim_ipopt_f(Index n, Number* x, Bool new_x,
 
 static int jmi_opt_sim_ipopt_df(Index n, Number* x, Bool new_x,
 			       Number* df, UserDataPtr data) {
-/*
-  return problem_->evalGradCost((const double*)x, (double*) grad_f);
-*/
-	return 0;
+
+//	printf("df\n");
+
+
+	int i;
+	jmi_opt_sim_ipopt_t *nlp = (jmi_opt_sim_ipopt_t*)data;
+
+	for (i=0;i<nlp->n;i++) {
+		nlp->jmi_opt_sim->x[i] = x[i];
+	}
+
+	if (jmi_opt_sim_df(nlp->jmi_opt_sim, df) == 0) {
+		return TRUE;
+	} else {
+		return FALSE;
+	}
+	//return 0;
 }
 
 static int jmi_opt_sim_ipopt_g(Index n, Number* x, Bool new_x,
 			  Index m, Number* g, UserDataPtr data) {
-/*
+
+//	printf("g\n");
+
+
+	int i;
+	jmi_opt_sim_ipopt_t *nlp = (jmi_opt_sim_ipopt_t*)data;
+
+	for (i=0;i<nlp->n;i++) {
+		nlp->jmi_opt_sim->x[i] = x[i];
+	}
+
+	if (jmi_opt_sim_g(nlp->jmi_opt_sim, g) == 0) {
+		return TRUE;
+	} else {
+		return FALSE;
+	}
+
+
+
+	/*
 //	  std::cout << "jmi_opt_sim_ipopt_ipopt_eval_g begin" << std::endl;
   int retval = problem_->evalEqConstraint((const double*)x, (double*)g);
   if (retval) {
@@ -40,13 +74,34 @@ static int jmi_opt_sim_ipopt_g(Index n, Number* x, Bool new_x,
   return retval;
 */
 
-	return 0;
+	//return 0;
 }
 
 static int jmi_opt_sim_ipopt_dg(Index n, Number* x, Bool new_x,
 			      Index m, Index dg_n_nz, Index* irow,
 			      Index *icol, Number* dg, UserDataPtr data) {
 
+//	printf("dg\n");
+
+	int i;
+	jmi_opt_sim_ipopt_t *nlp = (jmi_opt_sim_ipopt_t*)data;
+
+	if (x ==NULL) {
+		jmi_opt_sim_dg_nz_indices(nlp->jmi_opt_sim, irow, icol);
+		irow += nlp->jmi_opt_sim->dg_n_nz;
+		icol += nlp->jmi_opt_sim->dg_n_nz;
+		jmi_opt_sim_dh_nz_indices(nlp->jmi_opt_sim, irow, icol);
+	} else {
+		for (i=0;i<nlp->n;i++) {
+			nlp->jmi_opt_sim->x[i] = x[i];
+		}
+
+		if (jmi_opt_sim_dg(nlp->jmi_opt_sim, dg) == 0) {
+			return TRUE;
+		} else {
+			return FALSE;
+		}
+	}
 	/*
 //	std::cout << "jmi_opt_sim_ipopt_ipopt_eval_jac_g enter\n";
   int retval = -1;
@@ -81,6 +136,8 @@ static int jmi_opt_sim_ipopt_hess_lag(Index n, Number *x, Bool new_x, Number obj
                             Index m, Number *lambda, Bool new_lambda,
                             Index nele_hess, Index *iRow, Index *jCol,
                             Number *values, UserDataPtr user_data) {
+//	printf("hess\n");
+
 
 	return TRUE;
 }
@@ -94,13 +151,17 @@ int jmi_opt_sim_ipopt_new(jmi_opt_sim_ipopt_t **jmi_opt_sim_ipopt, jmi_opt_sim_t
 	jmi_opt_sim_ipopt_t* nlp = (jmi_opt_sim_ipopt_t*)calloc(1,sizeof(jmi_opt_sim_ipopt_t));
 	*jmi_opt_sim_ipopt = nlp;
 
+	nlp->jmi_opt_sim = jmi_opt_sim;
+
 	nlp->n = jmi_opt_sim->n_x;
 	nlp->m = jmi_opt_sim->n_g + jmi_opt_sim->n_h;
 	nlp->dg_n_nz = jmi_opt_sim->dg_n_nz + jmi_opt_sim->dh_n_nz;
 	nlp->hess_lag_n_nz = 0;
 
-	nlp->dg_row = (Index*)calloc(nlp->m,sizeof(Index));
-	nlp->dg_col = (Index*)calloc(nlp->m,sizeof(Index));
+	printf("m=%d\n",nlp->m);
+
+	nlp->dg_row = (Index*)calloc(nlp->dg_n_nz,sizeof(Index));
+	nlp->dg_col = (Index*)calloc(nlp->dg_n_nz,sizeof(Index));
 	nlp->g_lb = (jmi_real_t*)calloc(nlp->m,sizeof(jmi_real_t));
 	nlp->g_ub = (jmi_real_t*)calloc(nlp->m,sizeof(jmi_real_t));
 
@@ -130,8 +191,31 @@ int jmi_opt_sim_ipopt_new(jmi_opt_sim_ipopt_t **jmi_opt_sim_ipopt, jmi_opt_sim_t
 	                               &jmi_opt_sim_ipopt_g, &jmi_opt_sim_ipopt_df,
 	                               &jmi_opt_sim_ipopt_dg, &jmi_opt_sim_ipopt_hess_lag);
 
-	  return 0;
+ //   AddIpoptIntOption(nlp->nlp, "print_level", 10);
+	AddIpoptStrOption(nlp->nlp, "output_file", "ipopt.out");
+	AddIpoptStrOption(nlp->nlp, "hessian_approximation", "limited-memory");
+
+
+	return 0;
+
 }
+
+int jmi_opt_sim_ipopt_solve(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt) {
+
+	jmi_opt_sim_ipopt->status = IpoptSolve(jmi_opt_sim_ipopt->nlp,
+			                               jmi_opt_sim_ipopt->jmi_opt_sim->x,
+			                               jmi_opt_sim_ipopt->g,
+			                               &jmi_opt_sim_ipopt->objective,
+			                               jmi_opt_sim_ipopt->mult_g,
+			                               jmi_opt_sim_ipopt->mult_x_lb,
+			                               jmi_opt_sim_ipopt->mult_x_ub,
+			                               jmi_opt_sim_ipopt);
+
+	return 0;
+
+}
+
+
 
 /*
 int jmi_opt_sim_ipopt_get_starting_point(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt, Index n, int init_x, Number* x,
