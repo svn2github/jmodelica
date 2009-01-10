@@ -15,14 +15,14 @@
 
 SimpleExample::SimpleExample()
 :
-SimultaneousInterface() 
+SimultaneousInterface()
 {
 
 }
 
 SimpleExample::~SimpleExample()
 {
-	
+
 }
 
 /**
@@ -37,7 +37,7 @@ bool SimpleExample::getDimensionsImpl(int& nVars, int& nEqConstr, int& nIneqCons
 	nIneqConstr = 1;             // Number of inequality constraints
 	nNzJacEqConstr = 0;              // Number of non-zeros in eq. constr. Jac.
 	nNzJacIneqConstr = 1;            // Number of non-zeros in ineq. constr. Jac.
-    
+
 	return true;
 }
 
@@ -119,10 +119,10 @@ bool SimpleExample::evalJacIneqConstraintImpl(const double* x, double* jac_gIneq
  * getBounds returns the upper and lower bounds on the optimization variables.
  */
 bool SimpleExample::getBoundsImpl(double* x_lb, double* x_ub) {
-	
+
 	x_lb[0] = -10;
 	x_ub[0] = 10;
-	
+
 	return true;
 }
 
@@ -130,22 +130,22 @@ bool SimpleExample::getBoundsImpl(double* x_lb, double* x_ub) {
  * getInitial returns the initial point.
  */
 bool SimpleExample::getInitialImpl(double* xInit){
-	
+
 	xInit[0] = 2;
 
 	return true;
 }
 
-/** 
- * getEqConstraintNzElements returns the indices of the non-zeros in the 
+/**
+ * getEqConstraintNzElements returns the indices of the non-zeros in the
  * equality constraint Jacobian.
  */
 bool SimpleExample::getJacEqConstraintNzElementsImpl(int* rowIndex, int* colIndex) {
 	return true;
 }
 
-/** 
- * getIneqConstraintElements returns the indices of the non-zeros in the 
+/**
+ * getIneqConstraintElements returns the indices of the non-zeros in the
  * inequality constraint Jacobian.
  */
 bool SimpleExample::getJacIneqConstraintNzElementsImpl(int* rowIndex, int* colIndex) {
@@ -163,15 +163,15 @@ bool SimpleExample::getJacIneqConstraintNzElementsImpl(int* rowIndex, int* colIn
 int main(int argv, char* argc[])
 {
 //	using namespace Ipopt;
-	
+
 	// Create a new instance of your nlp
 	//  (use a SmartPtr, not raw)
-	SimpleExample* op = new SimpleExample();	
+	SimpleExample* op = new SimpleExample();
 	//Initialize first!
 	op->initialize();
 	op->prettyPrint();
 
-	SmartPtr<TNLP> mynlp = new OptimicaTNLP(op);   
+	SmartPtr<TNLP> mynlp = new OptimicaTNLP(op);
 
 	// Create a new instance of IpoptApplication
 	//  (use a SmartPtr, not raw)
@@ -204,7 +204,7 @@ int main(int argv, char* argc[])
 	// As the SmartPtrs go out of scope, the reference count
 	// will be decremented and the objects will automatically
 	// be deleted.
-	
+
 	delete op;
 
 	return (int) status;
