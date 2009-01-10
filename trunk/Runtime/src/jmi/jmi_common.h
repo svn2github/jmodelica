@@ -267,7 +267,8 @@ int jmi_func_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz);
  *  Convenience function of accessing the non-zeros in the Jacobian
  *  in an jmi_func_t
  */
-int jmi_func_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, int *row, int *col);
+int jmi_func_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, int independent_vars,
+        int *mask, int *row, int *col);
 
 /*
  *  Convenience function for computing the dimensions of the Jacobian in an
@@ -318,5 +319,25 @@ int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t J,
 		jmi_residual_func_t Hineq, int n_eq_Hineq,
 		jmi_jacobian_func_t dHineq,
 		int dHineq_n_nz, int* dHineq_row, int* dHineq_col);
+
+/**
+ * Compute the type of variable. The return value is one of JMI_DER_NN if a
+ * valid Jacobian column index is given, otherwise -1.
+ */
+int jmi_variable_type(jmi_t *jmi, int col_index);
+
+/*
+ * Check if a particular column, column_index, is to be included in the Jacobian
+ * defined by independent_vars and mask. If the column is to be included, then
+ * 1 is returned otherwise 0.
+ */
+int jmi_check_Jacobian_column_index(jmi_t *jmi, int independent_vars, int *mask, int col_index);
+
+/*
+ * Map a colum_index for the complete Jacobian into a column index of the
+ * sub-Jacobian defined by independent_vars and mask.
+ *
+ */
+int jmi_map_Jacobian_column_index(jmi_t *jmi, int independent_vars, int *mask, int col_index);
 
 #endif

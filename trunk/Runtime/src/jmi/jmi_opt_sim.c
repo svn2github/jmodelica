@@ -7,9 +7,12 @@ int jmi_opt_sim_get_dimensions(jmi_opt_sim_t *jmi_opt_sim, int *n_x, int *n_g, i
 	if (jmi_opt_sim->jmi->opt == NULL) {
 		return -1;
 	}
-	*n_x = 1;
-	*n_g = 1;
-	*n_h = 0;
+	*n_x = jmi_opt_sim->n_x;
+	*n_g = jmi_opt_sim->n_g;
+	*n_h = jmi_opt_sim->n_h;
+	*dg_n_nz = jmi_opt_sim->dg_n_nz;
+	*dh_n_nz = jmi_opt_sim->dh_n_nz;
+
 
 	return 0;
 }

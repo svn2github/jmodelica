@@ -122,6 +122,8 @@ int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
 		(*(jmi_->z_val))[i] = 0;
 	}
 
+	jmi_->tp = (jmi_real_t*)calloc(jmi_->n_tp,sizeof(jmi_real_t));
+
 	return 0;
 }
 
@@ -430,14 +432,25 @@ int jmi_func_ad_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz) {
 }
 
 // Convenience function of accessing the non-zeros in the AD Jacobian
-int jmi_func_ad_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, int *row, int *col) {
+int jmi_func_ad_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, int independent_vars,
+        int *mask, int *row, int *col) {
 	if (func->ad==NULL) {
 		return -1;
 	}
-	int i;
+    int i;
+
+    int index = 0;               // Index in the row/col vectors of the new Jacobian
+
+	// Iterate over all non-zero indices
 	for (i=0;i<func->ad->dF_z_n_nz;i++) {
-		row[i] = func->ad->dF_z_row[i];
-		col[i] = func->ad->dF_z_col[i];
+//		printf("%d %d\n",i,jmi_check_Jacobian_column_index(jmi, independent_vars, mask, func->dF_col[i]-1));
+		// Check if this particular entry should be included
+		if (jmi_check_Jacobian_column_index(jmi, independent_vars, mask, func->ad->dF_z_col[i]-1) == 1 ) {
+			    // Copy indices
+				row[index] = func->ad->dF_z_row[i];
+				col[index] = jmi_map_Jacobian_column_index(jmi,independent_vars,mask,func->ad->dF_z_col[i]-1) + 1;
+				index++;
+		}
 	}
 	return 0;
 }
@@ -470,7 +483,7 @@ int jmi_func_ad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independe
 	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_X_P, jmi->n_x*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
 	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_U_P, jmi->n_u*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
 	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_W_P, jmi->n_w*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_T_P, 1*jmi->n_tp, func->n_eq_F, func->dF_n_nz, jmi->dae->F->dF_col)
+	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_T_P, 1*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
 
 	return 0;
 
@@ -701,14 +714,15 @@ int jmi_dae_dF_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
 	}
 }
 
-int jmi_dae_dF_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col) {
+int jmi_dae_dF_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col) {
 	if (eval_alg & JMI_DER_SYMBOLIC) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->dae->F, row, col);
+		return jmi_func_dF_nz_indices(jmi, jmi->dae->F, independent_vars, mask, row, col);
 
 	} else if (eval_alg & JMI_DER_CPPAD) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->dae->F, row, col);
+		return jmi_func_ad_dF_nz_indices(jmi, jmi->dae->F, independent_vars, mask, row, col);
 
 	} else {
 		return -1;
@@ -766,14 +780,15 @@ int jmi_init_dF0_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
 	}
 }
 
-int jmi_init_dF0_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col) {
+int jmi_init_dF0_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col) {
 	if (eval_alg & JMI_DER_SYMBOLIC) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->init->F0, row, col);
+		return jmi_func_dF_nz_indices(jmi, jmi->init->F0, independent_vars, mask, row, col);
 
 	} else if (eval_alg & JMI_DER_CPPAD) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->init->F0, row, col);
+		return jmi_func_ad_dF_nz_indices(jmi, jmi->init->F0, independent_vars, mask, row, col);
 
 	} else {
 		return -1;
@@ -832,14 +847,15 @@ int jmi_init_dF1_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
 	}
 }
 
-int jmi_init_dF1_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col) {
+int jmi_init_dF1_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col) {
 	if (eval_alg & JMI_DER_SYMBOLIC) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->init->F1, row, col);
+		return jmi_func_dF_nz_indices(jmi, jmi->init->F1, independent_vars, mask, row, col);
 
 	} else if (eval_alg & JMI_DER_CPPAD) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->init->F1, row, col);
+		return jmi_func_ad_dF_nz_indices(jmi, jmi->init->F1, independent_vars, mask, row, col);
 
 	} else {
 		return -1;
@@ -897,14 +913,15 @@ int jmi_opt_dJ_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
 	}
 }
 
-int jmi_opt_dJ_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col) {
+int jmi_opt_dJ_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col) {
 	if (eval_alg & JMI_DER_SYMBOLIC) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->opt->J, row, col);
+		return jmi_func_dF_nz_indices(jmi, jmi->opt->J, independent_vars, mask, row, col);
 
 	} else if (eval_alg & JMI_DER_CPPAD) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->opt->J, row, col);
+		return jmi_func_ad_dF_nz_indices(jmi, jmi->opt->J, independent_vars, mask, row, col);
 
 	} else {
 		return -1;
@@ -962,14 +979,15 @@ int jmi_opt_dCeq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
 	}
 }
 
-int jmi_opt_dCeq_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col) {
+int jmi_opt_dCeq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col) {
 	if (eval_alg & JMI_DER_SYMBOLIC) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->opt->Ceq, row, col);
+		return jmi_func_dF_nz_indices(jmi, jmi->opt->Ceq, independent_vars, mask, row, col);
 
 	} else if (eval_alg & JMI_DER_CPPAD) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->opt->Ceq, row, col);
+		return jmi_func_dF_nz_indices(jmi, jmi->opt->Ceq, independent_vars, mask, row, col);
 
 	} else {
 		return -1;
@@ -1028,14 +1046,15 @@ int jmi_opt_dCineq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
 	}
 }
 
-int jmi_opt_dCineq_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col) {
+int jmi_opt_dCineq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col) {
 	if (eval_alg & JMI_DER_SYMBOLIC) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->opt->Cineq, row, col);
+		return jmi_func_dF_nz_indices(jmi, jmi->opt->Cineq, independent_vars, mask, row, col);
 
 	} else if (eval_alg & JMI_DER_CPPAD) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->opt->Cineq, row, col);
+		return jmi_func_dF_nz_indices(jmi, jmi->opt->Cineq, independent_vars, mask, row, col);
 
 	} else {
 		return -1;
@@ -1094,14 +1113,15 @@ int jmi_opt_dHeq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
 	}
 }
 
-int jmi_opt_dHeq_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col) {
+int jmi_opt_dHeq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col) {
 	if (eval_alg & JMI_DER_SYMBOLIC) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->opt->Heq, row, col);
+		return jmi_func_dF_nz_indices(jmi, jmi->opt->Heq, independent_vars, mask, row, col);
 
 	} else if (eval_alg & JMI_DER_CPPAD) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->opt->Heq, row, col);
+		return jmi_func_dF_nz_indices(jmi, jmi->opt->Heq, independent_vars, mask, row, col);
 
 	} else {
 		return -1;
@@ -1159,14 +1179,15 @@ int jmi_opt_dHineq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
 	}
 }
 
-int jmi_opt_dHineq_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col) {
+int jmi_opt_dHineq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col) {
 	if (eval_alg & JMI_DER_SYMBOLIC) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->opt->Hineq, row, col);
+		return jmi_func_dF_nz_indices(jmi, jmi->opt->Hineq, independent_vars, mask, row, col);
 
 	} else if (eval_alg & JMI_DER_CPPAD) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->opt->Hineq, row, col);
+		return jmi_func_dF_nz_indices(jmi, jmi->opt->Hineq, independent_vars, mask, row, col);
 
 	} else {
 		return -1;

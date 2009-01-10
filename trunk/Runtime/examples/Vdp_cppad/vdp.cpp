@@ -1,9 +1,11 @@
 // Example of generated function
 
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <jmi.h>
+
+static const int a = 2;
 
 static const int x1_0 = 0;
 static const int x2_0 = 1;
@@ -16,10 +18,10 @@ static const int N_pd = 0;
 static const int N_dx = 3;
 static const int N_x = 3;
 static const int N_u = 1;
-static const int N_w = 0;
-static const int N_eq_F = 3;
+static const int N_w = 1;
+static const int N_eq_F = 4;
 
-static const int N_eq_F0 = 6;
+static const int N_eq_F0 = 7;
 static const int N_eq_F1 = 0;
 
 static const int N_eq_Ceq = 0;
@@ -27,22 +29,22 @@ static const int N_eq_Cineq = 0;
 static const int N_eq_Heq = 0;
 static const int N_eq_Hineq = 0;
 
-static const int N_t_p = 1;
+static const int N_t_p = 2;
 
-#define ci(i) ((*(jmi->z))[jmi->offs_ci+i])
-#define cd(i) ((*(jmi->z))[jmi->offs_cd+i])
-#define pi(i) ((*(jmi->z))[jmi->offs_pi+i])
-#define pd(i) ((*(jmi->z))[jmi->offs_pd+i])
-#define dx(i) ((*(jmi->z))[jmi->offs_dx+i])
-#define x(i) ((*(jmi->z))[jmi->offs_x+i])
-#define u(i) ((*(jmi->z))[jmi->offs_u+i])
-#define w(i) ((*(jmi->z))[jmi->offs_w+i])
-#define tt ((*(jmi->z))[jmi->offs_t])
-#define dx_p(j,i) ((*(jmi->z))[jmi->offs_dx_p + j*jmi->n_dx + i])
-#define x_p(j,i) ((*(jmi->z))[jmi->offs_x_p + j*jmi->n_x + i])
-#define u_p(j,i) ((*(jmi->z))[jmi->offs_u_p + j*jmi->n_u + i])
-#define w_p(j,i) ((*(jmi->z))[jmi->offs_w_p + j*jmi->n_w + i])
-#define tt_p(j) ((*(jmi->z))[jmi->offs_t_p+j])
+#define _ci(i) ((*(jmi->z))[jmi->offs_ci+i])
+#define _cd(i) ((*(jmi->z))[jmi->offs_cd+i])
+#define _pi(i) ((*(jmi->z))[jmi->offs_pi+i])
+#define _pd(i) ((*(jmi->z))[jmi->offs_pd+i])
+#define _dx(i) ((*(jmi->z))[jmi->offs_dx+i])
+#define _x(i) ((*(jmi->z))[jmi->offs_x+i])
+#define _u(i) ((*(jmi->z))[jmi->offs_u+i])
+#define _w(i) ((*(jmi->z))[jmi->offs_w+i])
+#define _t ((*(jmi->z))[jmi->offs_t])
+#define _dx_p(j,i) ((*(jmi->z))[jmi->offs_dx_p + j*jmi->n_dx + i])
+#define _x_p(j,i) ((*(jmi->z))[jmi->offs_x_p + j*jmi->n_x + i])
+#define _u_p(j,i) ((*(jmi->z))[jmi->offs_u_p + j*jmi->n_u + i])
+#define _w_p(j,i) ((*(jmi->z))[jmi->offs_w_p + j*jmi->n_w + i])
+#define _t_p(j) ((*(jmi->z))[jmi->offs_t_p+j])
 
 /*
  * The res argument is of type pointer to a vector. This means that
@@ -57,9 +59,10 @@ static const int N_t_p = 1;
  */
 static int vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_p res) {
 
-  (*res)[0] = (1-x(1)*x(1))*x(0) - x(1) + u(0) - dx(0);
-  (*res)[1] = pi(0)*x(0) - dx(1);
-  (*res)[2] = x(0)*x(0) + x(1)*x(1) + u(0)*u(0) - dx(2);
+  (*res)[0] = (1-_x(1)*_x(1))*_x(0) - _x(1) + _u(0) - _dx(0);
+  (*res)[1] = _pi(0)*_x(0) - _dx(1);
+  (*res)[2] = exp(a*_t)*(_x(0)*_x(0) + _x(1)*_x(1) + _u(0)*_u(0)) - _dx(2);
+  (*res)[3] = _x(0) + _x(1) - _w(0);
 
   return 0;
 }
@@ -71,32 +74,20 @@ static int vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_p res) {
 
 static int vdp_dae_dF(jmi_t* jmi, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
 
-	jmi_real_t* ci;
-	jmi_real_t* cd;
-	jmi_real_t* pi;
-	jmi_real_t* pd;
-	jmi_real_t* dx;
-	jmi_real_t* x;
-	jmi_real_t* u;
-	jmi_real_t* w;
-	jmi_real_t* t_;
-	jmi_real_t t;
-
-	jmi_get_ci(jmi, &ci);
-	jmi_get_cd(jmi, &cd);
-	jmi_get_pi(jmi, &pi);
-	jmi_get_pd(jmi, &pd);
-	jmi_get_dx(jmi, &dx);
-	jmi_get_x(jmi, &x);
-	jmi_get_u(jmi, &u);
-	jmi_get_w(jmi, &w);
-	jmi_get_t(jmi, &t_);
-
-	t = t_[0];
+	jmi_real_t* ci = jmi_get_ci(jmi);
+	jmi_real_t* cd = jmi_get_cd(jmi);
+	jmi_real_t* pi = jmi_get_pi(jmi);
+	jmi_real_t* pd = jmi_get_pd(jmi);
+	jmi_real_t* dx = jmi_get_dx(jmi);
+	jmi_real_t* x = jmi_get_x(jmi);
+	jmi_real_t* u = jmi_get_u(jmi);
+	jmi_real_t* w = jmi_get_w(jmi);
+	jmi_real_t* t = jmi_get_t(jmi);
 
 	int i;
 	int jac_n = N_eq_F;
-	int col_index = 0;
+	int mask_col_index = 0;
+	int jac_col_index = 0;
 
 	int jac_m;
 	int jac_n_nz;
@@ -109,143 +100,222 @@ static int vdp_dae_dF(jmi_t* jmi, int sparsity, int independent_vars, int* mask,
 		}
 	}
 
+	// pi_0 row 1, col 0: x[0]
+
+	// dx_0 row 0, col 1: -1
+	// dx_1 row 1, col 2: -1
+	// dx_2 row 2, col 3: -1
+
+	// x_0 row 0, col 4: (1-x[1]*x[1])
+	// x_0 row 1, col 4: pi[0]
+	// x_0 row 2, col 4: exp(a*t)*2*x[0]
+	// x_0 row 3, col 4: 1
+	// x_1 row 0, col 5: -2*x[1]*x[0] - 1
+	// x_1 row 2, col 5: exp(a*t)*2*x[1]
+    // x_1 row 3, col 5: 1
+
+	// u_0 row 0, col 7: 1
+	// u_0 row 2, col 7: exp(a*t)*2*u[0]
+
+	// w_0 row 4, col 8: -1
+
+	// t row 3, col 9: a*exp(a*t)*(x[0]*x[0] + x[1]*x[1] + u[0]*u[0])
+
+
 	int jac_index = 0;
-	col_index = 0;
+	mask_col_index = 0;
 	if ((independent_vars & JMI_DER_PI)) {
-		if (mask[col_index++] == 1) {
+		if (mask[mask_col_index++] == 1) {
 			jmi_real_t jac_tmp_1 = x[0];
 			switch (sparsity) {
 			case JMI_DER_DENSE_COL_MAJOR:
-				jac[jac_n*0 + 1] = jac_tmp_1;
+				jac[jac_n*jac_col_index + 1] = jac_tmp_1;
 				break;
 			case JMI_DER_DENSE_ROW_MAJOR:
-				jac[jac_m*1 + 0] = jac_tmp_1;
+				jac[jac_m*1 + jac_col_index] = jac_tmp_1;
 				break;
 			case JMI_DER_SPARSE:
 				jac[jac_index] = jac_tmp_1;
 				jac_index++;
 			}
+			jac_col_index++;
 		}
 	} else {
-		col_index += jmi->n_pi;
+		mask_col_index += jmi->n_pi;
 	}
 
 	if ((independent_vars & JMI_DER_DX)) {
-		if (mask[col_index++] == 1) {
+		if (mask[mask_col_index++] == 1) {
 			jmi_real_t jac_tmp_1 = -1;
 			switch (sparsity) {
 			case JMI_DER_DENSE_COL_MAJOR:
-				jac[jac_n*1 + 0] = jac_tmp_1;
+				jac[jac_n*jac_col_index + 0] = jac_tmp_1;
 				break;
 			case JMI_DER_DENSE_ROW_MAJOR:
-				jac[jac_m*0 + 1] = jac_tmp_1;
+				jac[jac_m*0 + jac_col_index] = jac_tmp_1;
 				break;
 			case JMI_DER_SPARSE:
 				jac[jac_index] = jac_tmp_1;
 				jac_index++;
 			}
+			jac_col_index++;
 		}
-		if (mask[col_index++] == 1) {
+		if (mask[mask_col_index++] == 1) {
 			jmi_real_t jac_tmp_1 = -1;
 			switch (sparsity) {
 			case JMI_DER_DENSE_COL_MAJOR:
-				jac[jac_n*2 + 1] = jac_tmp_1;
+				jac[jac_n*jac_col_index + 1] = jac_tmp_1;
 				break;
 			case JMI_DER_DENSE_ROW_MAJOR:
-				jac[jac_m*1 + 2] = jac_tmp_1;
+				jac[jac_m*1 + jac_col_index] = jac_tmp_1;
 				break;
 			case JMI_DER_SPARSE:
 				jac[jac_index] = jac_tmp_1;
 				jac_index++;
 			}
+			jac_col_index++;
 		}
-		if (mask[col_index++] == 1) {
+		if (mask[mask_col_index++] == 1) {
 			jmi_real_t jac_tmp_1 = -1;
 			switch (sparsity) {
 			case JMI_DER_DENSE_COL_MAJOR:
-				jac[jac_n*3 + 2] = jac_tmp_1;
+				jac[jac_n*jac_col_index + 2] = jac_tmp_1;
 				break;
 			case JMI_DER_DENSE_ROW_MAJOR:
-				jac[jac_m*2 + 3] = jac_tmp_1;
+				jac[jac_m*2 + jac_col_index] = jac_tmp_1;
 				break;
 			case JMI_DER_SPARSE:
 				jac[jac_index] = jac_tmp_1;
 				jac_index++;
 			}
+			jac_col_index++;
 		}
 	} else {
-		col_index += jmi->n_dx;
+		mask_col_index += jmi->n_dx;
 	}
 
 	if ((independent_vars & JMI_DER_X)) {
-		if (mask[col_index++] == 1) {
+		if (mask[mask_col_index++] == 1) {
 			jmi_real_t jac_tmp_1 = (1-x[1]*x[1]);
 			jmi_real_t jac_tmp_2 = pi[0];
-			jmi_real_t jac_tmp_3 = 2*x[0];
+			jmi_real_t jac_tmp_3 = exp(a*t[0])*2*x[0];
+			jmi_real_t jac_tmp_4 = 1;
 			switch (sparsity) {
 			case JMI_DER_DENSE_COL_MAJOR:
-				jac[jac_n*4 + 0] = jac_tmp_1;
-				jac[jac_n*4 + 1] = jac_tmp_2;
-				jac[jac_n*4 + 2] = jac_tmp_3;
+				jac[jac_n*jac_col_index + 0] = jac_tmp_1;
+				jac[jac_n*jac_col_index + 1] = jac_tmp_2;
+				jac[jac_n*jac_col_index + 2] = jac_tmp_3;
+				jac[jac_n*jac_col_index + 3] = jac_tmp_4;
 				break;
 			case JMI_DER_DENSE_ROW_MAJOR:
-				jac[jac_m*0 + 4] = jac_tmp_1;
-				jac[jac_m*1 + 4] = jac_tmp_2;
-				jac[jac_m*2 + 4] = jac_tmp_3;
+				jac[jac_m*0 + jac_col_index] = jac_tmp_1;
+				jac[jac_m*1 + jac_col_index] = jac_tmp_2;
+				jac[jac_m*2 + jac_col_index] = jac_tmp_3;
+				jac[jac_m*3 + jac_col_index] = jac_tmp_4;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index++] = jac_tmp_1;
+				jac[jac_index++] = jac_tmp_2;
+				jac[jac_index++] = jac_tmp_3;
+				jac[jac_index++] = jac_tmp_4;
+			}
+			jac_col_index++;
+		}
+		if (mask[mask_col_index++] == 1) {
+			jmi_real_t jac_tmp_1 = -2*x[1]*x[0] - 1;
+			jmi_real_t jac_tmp_2 = exp(a*t[0])*2*x[1];
+			jmi_real_t jac_tmp_3 = 1;
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*jac_col_index + 0] = jac_tmp_1;
+				jac[jac_n*jac_col_index + 2] = jac_tmp_2;
+				jac[jac_n*jac_col_index + 3] = jac_tmp_3;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*0 + jac_col_index] = jac_tmp_1;
+				jac[jac_m*2 + jac_col_index] = jac_tmp_2;
+				jac[jac_m*3 + jac_col_index] = jac_tmp_3;
+				jac_index += 3;
 				break;
 			case JMI_DER_SPARSE:
 				jac[jac_index++] = jac_tmp_1;
 				jac[jac_index++] = jac_tmp_2;
 				jac[jac_index++] = jac_tmp_3;
 			}
+			jac_col_index++;
 		}
-		if (mask[col_index++] == 1) {
-			jmi_real_t jac_tmp_1 = -2*x[1]*x[0] - 1;
-			jmi_real_t jac_tmp_2 = 2*x[1];
-			switch (sparsity) {
-			case JMI_DER_DENSE_COL_MAJOR:
-				jac[jac_n*5 + 0] = jac_tmp_1;
-				jac[jac_n*5 + 2] = jac_tmp_2;
-				break;
-			case JMI_DER_DENSE_ROW_MAJOR:
-				jac[jac_m*0 + 5] = jac_tmp_1;
-				jac[jac_m*2 + 5] = jac_tmp_2;
-				jac_index += 3;
-				break;
-			case JMI_DER_SPARSE:
-				jac[jac_index++] = jac_tmp_1;
-				jac[jac_index++] = jac_tmp_2;
-			}
-		}
-		if (mask[col_index++] == 1) {
+		if (mask[mask_col_index++] == 1) {
+			jac_col_index++;
 		}
 	} else {
-		col_index += jmi->n_x;
+		mask_col_index += jmi->n_x;
 	}
 
 	if ((independent_vars & JMI_DER_U)) {
-		if (mask[col_index++] == 1) {
+		if (mask[mask_col_index++] == 1) {
 			jmi_real_t jac_tmp_1 = 1;
-			jmi_real_t jac_tmp_2 = 2*u[0];
+			jmi_real_t jac_tmp_2 = exp(a*t[0])*2*u[0];
 			switch (sparsity) {
 			case JMI_DER_DENSE_COL_MAJOR:
-				jac[jac_n*7 + 0] = jac_tmp_1;
-				jac[jac_n*7 + 2] = jac_tmp_2;
+				jac[jac_n*jac_col_index + 0] = jac_tmp_1;
+				jac[jac_n*jac_col_index + 2] = jac_tmp_2;
 				jac_index += 3;
 				break;
 			case JMI_DER_DENSE_ROW_MAJOR:
-				jac[jac_m*0 + 7] = jac_tmp_1;
-				jac[jac_m*2 + 7] = jac_tmp_2;
+				jac[jac_m*0 + jac_col_index] = jac_tmp_1;
+				jac[jac_m*2 + jac_col_index] = jac_tmp_2;
 				break;
 			case JMI_DER_SPARSE:
 				jac[jac_index++] = jac_tmp_1;
 				jac[jac_index++] = jac_tmp_2;
 			}
-
+			jac_col_index++;
 		}
 	} else {
-		col_index += jmi->n_u;
+		mask_col_index += jmi->n_u;
 	}
+
+	if ((independent_vars & JMI_DER_W)) {
+		if (mask[mask_col_index++] == 1) {
+			jmi_real_t jac_tmp_1 = -1;
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*jac_col_index + 3] = jac_tmp_1;
+				jac_index += 3;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*3 + jac_col_index] = jac_tmp_1;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index++] = jac_tmp_1;
+			}
+			jac_col_index++;
+		}
+	} else {
+		mask_col_index += jmi->n_w;
+	}
+
+	if ((independent_vars & JMI_DER_T)) {
+		if (mask[mask_col_index++] == 1) {
+			jmi_real_t jac_tmp_1 = a*exp(a*t[0])*(x[0]*x[0] + x[1]*x[1] + u[0]*u[0]);
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*jac_col_index + 2] = jac_tmp_1;
+				jac_index += 3;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*2 + jac_col_index] = jac_tmp_1;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index++] = jac_tmp_1;
+			}
+			jac_col_index++;
+		}
+	} else {
+		mask_col_index += 1;
+	}
+
+
 
 	return 0;
 }
@@ -255,303 +325,16 @@ static int vdp_dae_dF_n_nz(int* n_nz) {
 	*n_nz = (1 + //pi
 			0 + //pd
 			3 + //dx
-			5 + //x
+			7 + //x
 			2 + //u
-			0 + //w
-			0 //t
+			1 + //w
+			1 //t
 			);
 
 	return 0;
 }
 
 static int vdp_dae_dF_nz_indices(int* row, int* col) {
-
-//	int i,j;
-	int jac_ind = 0;
-	int col_ind = 0;
-
-	// Jacobian for independent parameters
-    //dF/dpd_1
-	row[jac_ind] = 2;
-	col[jac_ind++] = 1;
-	col_ind += N_pi;
-
-	// Jacobian for dependent parameters
-
-	// Jacobian for derivatives
-	//dF/ddx_1
-	row[jac_ind] = 1;
-	col[jac_ind++] = col_ind + 1;
-	//dF/ddx_2
-	row[jac_ind] = 2;
-	col[jac_ind++] = col_ind + 2;
-	//dF/ddx_3
-	row[jac_ind] = 3;
-	col[jac_ind++] = col_ind + 3;
-
-	col_ind += N_dx;
-
-	// Jacobian for states
-	//dF/dx_1
-	row[jac_ind] = 1;
-	col[jac_ind++] = col_ind + 1;
-	row[jac_ind] = 2;
-	col[jac_ind++] = col_ind + 1;
-	row[jac_ind] = 3;
-	col[jac_ind++] = col_ind + 1;
-	//dF/dx_2
-	row[jac_ind] = 1;
-	col[jac_ind++] = col_ind + 2;
-	row[jac_ind] = 3;
-	col[jac_ind++] = col_ind + 2;
-	//dF/dx_3
-
-	col_ind += N_x;
-
-	// Jacobian for inputs
-	//dF/du_2
-	row[jac_ind] = 1;
-	col[jac_ind++] = col_ind + 1;
-	row[jac_ind] = 3;
-	col[jac_ind++] = col_ind + 1;
-
-	col_ind += N_u;
-
-	// Jacobian for algebraics
-	col_ind += N_w;
-
-	// Jacobian for time
-
-	return 0;
-}
-
-static int vdp_init_F0(jmi_t* jmi, jmi_ad_var_vec_p res) {
-
-  (*res)[0] = (1-x(1)*x(1))*x(0) - x(1) + u(0) - dx(0);
-  (*res)[1] = pi(0)*x(0) - dx(1);
-  (*res)[2] = x(0)*x(0) + x(1)*x(1) + u(0)*u(0) - dx(2);
-  (*res)[3] = x(0) - x1_0;
-  (*res)[4] = x(1) - x2_0;
-  (*res)[5] = x(2) - x3_0;
-  return 0;
-}
-
-static int vdp_init_dF0(jmi_t* jmi, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
-
-	jmi_real_t* ci;
-	jmi_real_t* cd;
-	jmi_real_t* pi;
-	jmi_real_t* pd;
-	jmi_real_t* dx;
-	jmi_real_t* x;
-	jmi_real_t* u;
-	jmi_real_t* w;
-	jmi_real_t* t_;
-	jmi_real_t t;
-
-	jmi_get_ci(jmi, &ci);
-	jmi_get_cd(jmi, &cd);
-	jmi_get_pi(jmi, &pi);
-	jmi_get_pd(jmi, &pd);
-	jmi_get_dx(jmi, &dx);
-	jmi_get_x(jmi, &x);
-	jmi_get_u(jmi, &u);
-	jmi_get_w(jmi, &w);
-	jmi_get_t(jmi, &t_);
-
-	t = t_[0];
-
-	int i;
-	int jac_n = N_eq_F0;
-	int col_index = 0;
-
-
-	int jac_m;
-	int jac_n_nz;
-	jmi_init_dF0_dim(jmi,JMI_DER_SYMBOLIC,sparsity,independent_vars,mask,&jac_m,&jac_n_nz);
-
-	// Set Jacobian to zero if dense evaluation.
-	if ((sparsity & JMI_DER_DENSE_ROW_MAJOR) | (sparsity & JMI_DER_DENSE_COL_MAJOR)) {
-		for (i=0;i<jac_n*jac_m;i++) {
-			jac[i] = 0;
-		}
-	}
-
-	int jac_index = 0;
-	col_index = 0;
-	if ((independent_vars & JMI_DER_PI)) {
-		if (mask[col_index++] == 1) {
-			jmi_real_t jac_tmp_1 = x[0];
-			switch (sparsity) {
-			case JMI_DER_DENSE_COL_MAJOR:
-				jac[jac_n*0 + 1] = jac_tmp_1;
-				break;
-			case JMI_DER_DENSE_ROW_MAJOR:
-				jac[jac_m*1 + 0] = jac_tmp_1;
-				break;
-			case JMI_DER_SPARSE:
-				jac[jac_index] = jac_tmp_1;
-				jac_index++;
-			}
-		}
-	} else {
-		col_index += jmi->n_pi;
-	}
-
-	if ((independent_vars & JMI_DER_DX)) {
-		if (mask[col_index++] == 1) {
-			jmi_real_t jac_tmp_1 = -1;
-			switch (sparsity) {
-			case JMI_DER_DENSE_COL_MAJOR:
-				jac[jac_n*1 + 0] = jac_tmp_1;
-				break;
-			case JMI_DER_DENSE_ROW_MAJOR:
-				jac[jac_m*0 + 1] = jac_tmp_1;
-				break;
-			case JMI_DER_SPARSE:
-				jac[jac_index] = jac_tmp_1;
-				jac_index++;
-			}
-		}
-		if (mask[col_index++] == 1) {
-			jmi_real_t jac_tmp_1 = -1;
-			switch (sparsity) {
-			case JMI_DER_DENSE_COL_MAJOR:
-				jac[jac_n*2 + 1] = jac_tmp_1;
-				break;
-			case JMI_DER_DENSE_ROW_MAJOR:
-				jac[jac_m*1 + 2] = jac_tmp_1;
-				break;
-			case JMI_DER_SPARSE:
-				jac[jac_index] = jac_tmp_1;
-				jac_index++;
-			}
-		}
-		if (mask[col_index++] == 1) {
-			jmi_real_t jac_tmp_1 = -1;
-			switch (sparsity) {
-			case JMI_DER_DENSE_COL_MAJOR:
-				jac[jac_n*3 + 2] = jac_tmp_1;
-				break;
-			case JMI_DER_DENSE_ROW_MAJOR:
-				jac[jac_m*2 + 3] = jac_tmp_1;
-				break;
-			case JMI_DER_SPARSE:
-				jac[jac_index] = jac_tmp_1;
-				jac_index++;
-			}
-		}
-	} else {
-		col_index += jmi->n_dx;
-	}
-
-	if ((independent_vars & JMI_DER_X)) {
-		if (mask[col_index++] == 1) {
-			jmi_real_t jac_tmp_1 = (1-x[1]*x[1]);
-			jmi_real_t jac_tmp_2 = pi[0];
-			jmi_real_t jac_tmp_3 = 2*x[0];
-			jmi_real_t jac_tmp_4 = 1;
-			switch (sparsity) {
-			case JMI_DER_DENSE_COL_MAJOR:
-				jac[jac_n*4 + 0] = jac_tmp_1;
-				jac[jac_n*4 + 1] = jac_tmp_2;
-				jac[jac_n*4 + 2] = jac_tmp_3;
-				jac[jac_n*4 + 3] = jac_tmp_4;
-				break;
-			case JMI_DER_DENSE_ROW_MAJOR:
-				jac[jac_m*0 + 4] = jac_tmp_1;
-				jac[jac_m*1 + 4] = jac_tmp_2;
-				jac[jac_m*2 + 4] = jac_tmp_3;
-				jac[jac_m*3 + 4] = jac_tmp_4;
-				break;
-			case JMI_DER_SPARSE:
-				jac[jac_index++] = jac_tmp_1;
-				jac[jac_index++] = jac_tmp_2;
-				jac[jac_index++] = jac_tmp_3;
-				jac[jac_index++] = jac_tmp_4;
-			}
-		}
-		if (mask[col_index++] == 1) {
-			jmi_real_t jac_tmp_1 = -2*x[1]*x[0] - 1;
-			jmi_real_t jac_tmp_2 = 2*x[1];
-			jmi_real_t jac_tmp_3 = 1;
-			switch (sparsity) {
-			case JMI_DER_DENSE_COL_MAJOR:
-				jac[jac_n*5 + 0] = jac_tmp_1;
-				jac[jac_n*5 + 2] = jac_tmp_2;
-				jac[jac_n*5 + 4] = jac_tmp_3;
-				break;
-			case JMI_DER_DENSE_ROW_MAJOR:
-				jac[jac_m*0 + 5] = jac_tmp_1;
-				jac[jac_m*2 + 5] = jac_tmp_2;
-				jac[jac_m*4 + 5] = jac_tmp_3;
-				break;
-			case JMI_DER_SPARSE:
-				jac[jac_index++] = jac_tmp_1;
-				jac[jac_index++] = jac_tmp_2;
-				jac[jac_index++] = jac_tmp_3;
-			}
-		}
-		if (mask[col_index++] == 1) {
-			jmi_real_t jac_tmp_1 = 1;
-			switch (sparsity) {
-			case JMI_DER_DENSE_COL_MAJOR:
-				jac[jac_n*6 + 5] = jac_tmp_1;
-				break;
-			case JMI_DER_DENSE_ROW_MAJOR:
-				jac[jac_m*5 + 6] = jac_tmp_1;
-				break;
-			case JMI_DER_SPARSE:
-				jac[jac_index++] = jac_tmp_1;
-			}
-
-		}
-	} else {
-		col_index += jmi->n_x;
-	}
-
-	if ((independent_vars & JMI_DER_U)) {
-		if (mask[col_index++] == 1) {
-			jmi_real_t jac_tmp_1 = 1;
-			jmi_real_t jac_tmp_2 = 2*u[0];
-			switch (sparsity) {
-			case JMI_DER_DENSE_COL_MAJOR:
-				jac[jac_n*7 + 0] = jac_tmp_1;
-				jac[jac_n*7 + 2] = jac_tmp_2;
-				jac_index += 3;
-				break;
-			case JMI_DER_DENSE_ROW_MAJOR:
-				jac[jac_m*0 + 7] = jac_tmp_1;
-				jac[jac_m*2 + 7] = jac_tmp_2;
-				break;
-			case JMI_DER_SPARSE:
-				jac[jac_index++] = jac_tmp_1;
-				jac[jac_index++] = jac_tmp_2;
-			}
-
-		}
-	} else {
-		col_index += jmi->n_u;
-	}
-
-	return 0;
-}
-
-static int vdp_init_dF0_n_nz(int* n_nz) {
-
-	*n_nz = (1 + //pi
-			0 + //pd
-			3 + //dx
-			5 + 3 + //x
-			2 + //u
-			0 + //w
-			0 //t
-			);
-
-	return 0;
-}
-
-static int vdp_init_dF0_nz_indices(int* row, int* col) {
 
 //	int i,j;
 	int jac_ind = 0;
@@ -594,12 +377,10 @@ static int vdp_init_dF0_nz_indices(int* row, int* col) {
 	col[jac_ind++] = col_ind + 2;
 	row[jac_ind] = 3;
 	col[jac_ind++] = col_ind + 2;
-	row[jac_ind] = 5;
-	col[jac_ind++] = col_ind + 1;
+	row[jac_ind] = 4;
+	col[jac_ind++] = col_ind + 2;
 
 	//dF/dx_3
-	row[jac_ind] = 6;
-	col[jac_ind++] = col_ind + 1;
 
 	col_ind += N_x;
 
@@ -613,9 +394,359 @@ static int vdp_init_dF0_nz_indices(int* row, int* col) {
 	col_ind += N_u;
 
 	// Jacobian for algebraics
+	row[jac_ind] = 4;
+	col[jac_ind++] = col_ind + 1;
 	col_ind += N_w;
 
 	// Jacobian for time
+	row[jac_ind] = 3;
+	col[jac_ind++] = col_ind + 1;
+
+	return 0;
+}
+
+static int vdp_init_F0(jmi_t* jmi, jmi_ad_var_vec_p res) {
+
+  (*res)[0] = (1-_x(1)*_x(1))*_x(0) - _x(1) + _u(0) - _dx(0);
+  (*res)[1] = _pi(0)*_x(0) - _dx(1);
+  (*res)[2] = _x(0)*_x(0) + _x(1)*_x(1) + _u(0)*_u(0) - _dx(2);
+  (*res)[3] = _x(0) - x1_0;
+  (*res)[4] = _x(1) - x2_0;
+  (*res)[5] = _x(2) - x3_0;
+  return 0;
+}
+
+static int vdp_init_dF0(jmi_t* jmi, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
+
+	jmi_real_t* ci = jmi_get_ci(jmi);
+	jmi_real_t* cd = jmi_get_cd(jmi);
+	jmi_real_t* pi = jmi_get_pi(jmi);
+	jmi_real_t* pd = jmi_get_pd(jmi);
+	jmi_real_t* dx = jmi_get_dx(jmi);
+	jmi_real_t* x = jmi_get_x(jmi);
+	jmi_real_t* u = jmi_get_u(jmi);
+	jmi_real_t* w = jmi_get_w(jmi);
+	jmi_real_t* t = jmi_get_t(jmi);
+
+	int i;
+	int jac_n = N_eq_F0;
+	int mask_col_index = 0;
+    int jac_col_index = 0;
+
+	int jac_m;
+	int jac_n_nz;
+	jmi_init_dF0_dim(jmi,JMI_DER_SYMBOLIC,sparsity,independent_vars,mask,&jac_m,&jac_n_nz);
+
+	// Set Jacobian to zero if dense evaluation.
+	if ((sparsity & JMI_DER_DENSE_ROW_MAJOR) | (sparsity & JMI_DER_DENSE_COL_MAJOR)) {
+		for (i=0;i<jac_n*jac_m;i++) {
+			jac[i] = 0;
+		}
+	}
+
+	int jac_index = 0;
+	mask_col_index = 0;
+	if ((independent_vars & JMI_DER_PI)) {
+		if (mask[mask_col_index++] == 1) {
+			jmi_real_t jac_tmp_1 = x[0];
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*jac_col_index + 1] = jac_tmp_1;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*1 + jac_col_index] = jac_tmp_1;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index] = jac_tmp_1;
+				jac_index++;
+			}
+			jac_col_index++;
+		}
+	} else {
+		mask_col_index += jmi->n_pi;
+	}
+
+	if ((independent_vars & JMI_DER_DX)) {
+		if (mask[mask_col_index++] == 1) {
+			jmi_real_t jac_tmp_1 = -1;
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*jac_col_index + 0] = jac_tmp_1;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*0 + jac_col_index] = jac_tmp_1;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index] = jac_tmp_1;
+				jac_index++;
+			}
+			jac_col_index++;
+		}
+		if (mask[mask_col_index++] == 1) {
+			jmi_real_t jac_tmp_1 = -1;
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*jac_col_index + 1] = jac_tmp_1;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*1 + jac_col_index] = jac_tmp_1;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index] = jac_tmp_1;
+				jac_index++;
+			}
+			jac_col_index++;
+		}
+		if (mask[mask_col_index++] == 1) {
+			jmi_real_t jac_tmp_1 = -1;
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*jac_col_index + 2] = jac_tmp_1;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*2 + jac_col_index] = jac_tmp_1;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index] = jac_tmp_1;
+				jac_index++;
+			}
+			jac_col_index++;
+		}
+	} else {
+		mask_col_index += jmi->n_dx;
+	}
+
+	if ((independent_vars & JMI_DER_X)) {
+		if (mask[mask_col_index++] == 1) {
+			jmi_real_t jac_tmp_1 = (1-x[1]*x[1]);
+			jmi_real_t jac_tmp_2 = pi[0];
+			jmi_real_t jac_tmp_3 = exp(a*t[0])*2*x[0];
+			jmi_real_t jac_tmp_4 = 1;
+			jmi_real_t jac_tmp_5 = 1;
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*jac_col_index + 0] = jac_tmp_1;
+				jac[jac_n*jac_col_index + 1] = jac_tmp_2;
+				jac[jac_n*jac_col_index + 2] = jac_tmp_3;
+				jac[jac_n*jac_col_index + 3] = jac_tmp_4;
+				jac[jac_n*jac_col_index + 4] = jac_tmp_5;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*0 + jac_col_index] = jac_tmp_1;
+				jac[jac_m*1 + jac_col_index] = jac_tmp_2;
+				jac[jac_m*2 + jac_col_index] = jac_tmp_3;
+				jac[jac_m*3 + jac_col_index] = jac_tmp_4;
+				jac[jac_m*4 + jac_col_index] = jac_tmp_5;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index++] = jac_tmp_1;
+				jac[jac_index++] = jac_tmp_2;
+				jac[jac_index++] = jac_tmp_3;
+				jac[jac_index++] = jac_tmp_4;
+				jac[jac_index++] = jac_tmp_5;
+			}
+			jac_col_index++;
+		}
+		if (mask[mask_col_index++] == 1) {
+			jmi_real_t jac_tmp_1 = -2*x[1]*x[0] - 1;
+			jmi_real_t jac_tmp_2 = exp(a*t[0])*2*x[1];
+			jmi_real_t jac_tmp_3 = 1;
+			jmi_real_t jac_tmp_4 = 1;
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*jac_col_index + 0] = jac_tmp_1;
+				jac[jac_n*jac_col_index + 2] = jac_tmp_2;
+				jac[jac_n*jac_col_index + 3] = jac_tmp_3;
+				jac[jac_n*jac_col_index + 5] = jac_tmp_4;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*0 + jac_col_index] = jac_tmp_1;
+				jac[jac_m*2 + jac_col_index] = jac_tmp_2;
+				jac[jac_m*3 + jac_col_index] = jac_tmp_3;
+				jac[jac_m*5 + jac_col_index] = jac_tmp_4;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index++] = jac_tmp_1;
+				jac[jac_index++] = jac_tmp_2;
+				jac[jac_index++] = jac_tmp_3;
+				jac[jac_index++] = jac_tmp_4;
+			}
+			jac_col_index++;
+		}
+		if (mask[mask_col_index++] == 1) {
+			jmi_real_t jac_tmp_1 = 1;
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*jac_col_index + 6] = jac_tmp_1;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*6 + jac_col_index] = jac_tmp_1;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index++] = jac_tmp_1;
+			}
+			jac_col_index++;
+		}
+	} else {
+		mask_col_index += jmi->n_x;
+	}
+
+	if ((independent_vars & JMI_DER_U)) {
+		if (mask[mask_col_index++] == 1) {
+			jmi_real_t jac_tmp_1 = 1;
+			jmi_real_t jac_tmp_2 = exp(a*t[0])*2*u[0];
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*jac_col_index + 0] = jac_tmp_1;
+				jac[jac_n*jac_col_index + 2] = jac_tmp_2;
+				jac_index += 3;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*0 + jac_col_index] = jac_tmp_1;
+				jac[jac_m*2 + jac_col_index] = jac_tmp_2;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index++] = jac_tmp_1;
+				jac[jac_index++] = jac_tmp_2;
+			}
+			jac_col_index++;
+		}
+	} else {
+		mask_col_index += jmi->n_u;
+	}
+
+
+	if ((independent_vars & JMI_DER_W)) {
+		if (mask[mask_col_index++] == 1) {
+			jmi_real_t jac_tmp_1 = -1;
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*jac_col_index + 3] = jac_tmp_1;
+				jac_index += 3;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*3 + jac_col_index] = jac_tmp_1;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index++] = jac_tmp_1;
+			}
+			jac_col_index++;
+		}
+	} else {
+		mask_col_index += jmi->n_w;
+	}
+
+	if ((independent_vars & JMI_DER_T)) {
+		if (mask[mask_col_index++] == 1) {
+			jmi_real_t jac_tmp_1 = a*exp(a*t[0])*(x[0]*x[0] + x[1]*x[1] + u[0]*u[0]);
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				jac[jac_n*jac_col_index + 2] = jac_tmp_1;
+				jac_index += 3;
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				jac[jac_m*2 + jac_col_index] = jac_tmp_1;
+				break;
+			case JMI_DER_SPARSE:
+				jac[jac_index++] = jac_tmp_1;
+			}
+			jac_col_index++;
+		}
+	} else {
+		mask_col_index += 1;
+	}
+
+
+	return 0;
+}
+
+static int vdp_init_dF0_n_nz(int* n_nz) {
+
+	*n_nz = (1 + //pi
+			0 + //pd
+			3 + //dx
+			7 + 3 + //x
+			2 + //u
+			1 + //w
+			1 //t
+			);
+
+	return 0;
+}
+
+static int vdp_init_dF0_nz_indices(int* row, int* col) {
+
+//	int i,j;
+	int jac_ind = 0;
+	int col_ind = 0;
+
+	// Jacobian for independent parameters
+    //dF/dpd_1
+	row[jac_ind] = 2;
+	col[jac_ind++] = 1;
+	col_ind += N_pi;
+
+	// Jacobian for dependent parameters
+
+	// Jacobian for derivatives
+	//dF/ddx_1
+	row[jac_ind] = 1;
+	col[jac_ind++] = col_ind + 1;
+	//dF/ddx_2
+	row[jac_ind] = 2;
+	col[jac_ind++] = col_ind + 2;
+	//dF/ddx_3
+	row[jac_ind] = 3;
+	col[jac_ind++] = col_ind + 3;
+
+	col_ind += N_dx;
+
+	// Jacobian for states
+	//dF/dx_1
+	row[jac_ind] = 1;
+	col[jac_ind++] = col_ind + 1;
+	row[jac_ind] = 2;
+	col[jac_ind++] = col_ind + 1;
+	row[jac_ind] = 3;
+	col[jac_ind++] = col_ind + 1;
+	row[jac_ind] = 4;
+	col[jac_ind++] = col_ind + 1;
+	row[jac_ind] = 5;
+	col[jac_ind++] = col_ind + 1;
+
+	//dF/dx_2
+	row[jac_ind] = 1;
+	col[jac_ind++] = col_ind + 2;
+	row[jac_ind] = 3;
+	col[jac_ind++] = col_ind + 2;
+	row[jac_ind] = 4;
+	col[jac_ind++] = col_ind + 2;
+	row[jac_ind] = 5;
+	col[jac_ind++] = col_ind + 2;
+
+	//dF/dx_3
+	row[jac_ind] = 6;
+	col[jac_ind++] = col_ind + 3;
+
+	col_ind += N_x;
+
+	// Jacobian for inputs
+	//dF/du_2
+	row[jac_ind] = 1;
+	col[jac_ind++] = col_ind + 1;
+	row[jac_ind] = 3;
+	col[jac_ind++] = col_ind + 1;
+
+	col_ind += N_u;
+
+	// Jacobian for algebraics
+	row[jac_ind] = 4;
+	col[jac_ind++] = col_ind + 1;
+	col_ind += N_w;
+
+	// Jacobian for time
+	row[jac_ind] = 3;
+	col[jac_ind++] = col_ind + 1;
 
 	return 0;
 }
@@ -623,27 +754,27 @@ static int vdp_init_dF0_nz_indices(int* row, int* col) {
 
 static int vdp_init_F1(jmi_t* jmi, jmi_ad_var_vec_p res) {
 
-  return -1;
+  return 0;
 }
 
 static int vdp_init_dF1(jmi_t* jmi, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
 
-	return -1;
+	return 0;
 }
 
 static int vdp_init_dF1_n_nz(int* n_nz) {
 
 	*n_nz = 0;
-	return -1;
+	return 0;
 }
 
 static int vdp_init_dF1_nz_indices(int* row, int* col) {
 
-	return -1;
+	return 0;
 }
 
 static int vdp_opt_J(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	(*res)[0] = x_p(0,2);
+	(*res)[0] = 1; //x_p(0,2);
   return 0;
 }
 
@@ -665,16 +796,18 @@ static int vdp_opt_dJ(jmi_t* jmi, int sparsity, int independent_vars, int* mask,
 		}
 	}
 
-	col_index = jmi->offs_x_p;
+    int jac_col_index = jmi_map_Jacobian_column_index(jmi, independent_vars, mask, jmi->offs_x_p + 2);
+
+	col_index = jmi->offs_x_p + 2;
 	if ((independent_vars & JMI_DER_X_P)) {
 		if (mask[col_index] == 1) {
 			jmi_real_t jac_tmp_1 = 1;
 			switch (sparsity) {
 			case JMI_DER_DENSE_COL_MAJOR:
-				jac[col_index] = jac_tmp_1;
+				jac[jac_col_index] = jac_tmp_1;
 				break;
 			case JMI_DER_DENSE_ROW_MAJOR:
-				jac[col_index] = jac_tmp_1;
+				jac[jac_col_index] = jac_tmp_1;
 				break;
 			case JMI_DER_SPARSE:
 				jac[0] = jac_tmp_1;
@@ -692,14 +825,8 @@ static int vdp_opt_dJ_n_nz(int* n_nz) {
 }
 
 static int vdp_opt_dJ_nz_indices(int* row, int* col) {
-	row[0] = 1;
-	col[0] = 1 + // p_i
-	         3 + // dx
-	         3 + // x
-	         1 + // u
-	         1 + // t
-	         3 + // dx_p
-	         2;  // x_p_3
+	row[0] = 15;
+	col[0] = 1;
 	return 0;
 }
 
@@ -813,6 +940,15 @@ int jmi_new(jmi_t** jmi) {
 	int* dF1_irow = (int*)calloc(dF1_n_nz,sizeof(int));
 	int* dF1_icol = (int*)calloc(dF1_n_nz,sizeof(int));
 	vdp_init_dF1_nz_indices(dF1_irow,dF1_icol);
+
+	/*
+	printf("** %d, %d, %d\n",dF_n_nz,dF0_n_nz,dF1_n_nz);
+	int i;
+	for (i=0;i<dF0_n_nz;i++) {
+		printf("%d %d\n",dF0_irow[i],dF0_icol[i]);
+	}
+*/
+
 	jmi_init_init(*jmi, *vdp_init_F0, N_eq_F0, *vdp_init_dF0,
 			          dF0_n_nz, dF0_irow, dF0_icol,
 			            *vdp_init_F1, N_eq_F1, *vdp_init_dF1,

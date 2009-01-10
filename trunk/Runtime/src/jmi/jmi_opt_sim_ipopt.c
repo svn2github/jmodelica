@@ -4,7 +4,7 @@
 static int jmi_opt_sim_ipopt_f(Index n, Number* x, Bool new_x,
 			  Number *f, UserDataPtr data) {
 
-//	printf("f\n");
+	printf("jmi_opt_sim_ipopt_f:start\n");
 
 	int i;
 	jmi_opt_sim_ipopt_t *nlp = (jmi_opt_sim_ipopt_t*)data;
@@ -14,6 +14,7 @@ static int jmi_opt_sim_ipopt_f(Index n, Number* x, Bool new_x,
 	}
 
 	if (jmi_opt_sim_f(nlp->jmi_opt_sim, f) == 0) {
+		printf("jmi_opt_sim_ipopt_f:end: %f\n",*f);
 		return TRUE;
 	} else {
 		return FALSE;
@@ -24,32 +25,50 @@ static int jmi_opt_sim_ipopt_f(Index n, Number* x, Bool new_x,
 static int jmi_opt_sim_ipopt_df(Index n, Number* x, Bool new_x,
 			       Number* df, UserDataPtr data) {
 
-//	printf("df\n");
-
+	printf("jmi_opt_sim_ipopt_df:start\n");
 
 	int i;
 	jmi_opt_sim_ipopt_t *nlp = (jmi_opt_sim_ipopt_t*)data;
+
+	for (i=0;i<n;i++) {
+		df[i] = 0;
+	}
 
 	for (i=0;i<nlp->n;i++) {
 		nlp->jmi_opt_sim->x[i] = x[i];
 	}
 
 	if (jmi_opt_sim_df(nlp->jmi_opt_sim, df) == 0) {
+		printf("jmi_opt_sim_ipopt_df:end:df\n");
+		for(i=0;i<n;i++){
+			printf("%d, %f\n",i,df[i]);
+		}
+		printf("]\n");
 		return TRUE;
 	} else {
 		return FALSE;
 	}
+
+
+
 	//return 0;
 }
 
 static int jmi_opt_sim_ipopt_g(Index n, Number* x, Bool new_x,
 			  Index m, Number* g, UserDataPtr data) {
 
-//	printf("g\n");
-
+	printf("g\n");
 
 	int i;
 	jmi_opt_sim_ipopt_t *nlp = (jmi_opt_sim_ipopt_t*)data;
+
+	for (i=0;i<m;i++) {
+		g[i] = 0;
+	}
+
+	for (i=0;i<nlp->m;i++) {
+		nlp->jmi_opt_sim->x[i] = x[i];
+	}
 
 	for (i=0;i<nlp->n;i++) {
 		nlp->jmi_opt_sim->x[i] = x[i];
@@ -81,26 +100,40 @@ static int jmi_opt_sim_ipopt_dg(Index n, Number* x, Bool new_x,
 			      Index m, Index dg_n_nz, Index* irow,
 			      Index *icol, Number* dg, UserDataPtr data) {
 
-//	printf("dg\n");
+	printf("dg: n=%d, m=%d, *x=%x\n",n,m,(int)x);
 
-	int i;
+	int i, retval;
 	jmi_opt_sim_ipopt_t *nlp = (jmi_opt_sim_ipopt_t*)data;
 
-	if (x ==NULL) {
-		jmi_opt_sim_dg_nz_indices(nlp->jmi_opt_sim, irow, icol);
+	if (dg == NULL) {
+		retval = jmi_opt_sim_dg_nz_indices(nlp->jmi_opt_sim, irow, icol);
+		if (retval!=0) {
+			return FALSE;
+		}
 		irow += nlp->jmi_opt_sim->dg_n_nz;
 		icol += nlp->jmi_opt_sim->dg_n_nz;
-		jmi_opt_sim_dh_nz_indices(nlp->jmi_opt_sim, irow, icol);
+		retval = jmi_opt_sim_dh_nz_indices(nlp->jmi_opt_sim, irow, icol);
+		if (retval!=0) {
+			return FALSE;
+		}
+		return TRUE;
 	} else {
+		for (i=0;i<dg_n_nz;i++) {
+			dg[i] = 0;
+		}
 		for (i=0;i<nlp->n;i++) {
 			nlp->jmi_opt_sim->x[i] = x[i];
 		}
-
-		if (jmi_opt_sim_dg(nlp->jmi_opt_sim, dg) == 0) {
-			return TRUE;
-		} else {
+		retval = jmi_opt_sim_dg(nlp->jmi_opt_sim, dg);
+		if (retval!=0) {
 			return FALSE;
 		}
+		dg += nlp->dg_n_nz;
+		retval = jmi_opt_sim_dh(nlp->jmi_opt_sim, dg);
+		if (retval!=0) {
+			return FALSE;
+		}
+		return TRUE;
 	}
 	/*
 //	std::cout << "jmi_opt_sim_ipopt_ipopt_eval_jac_g enter\n";
@@ -129,7 +162,7 @@ static int jmi_opt_sim_ipopt_dg(Index n, Number* x, Bool new_x,
   //std::cout << "jmi_opt_sim_ipopt_ipopt_eval_jac_g exit\n";
   return retval;
 */
-	return 0;
+	//return 0;
 }
 
 static int jmi_opt_sim_ipopt_hess_lag(Index n, Number *x, Bool new_x, Number obj_factor,
@@ -155,10 +188,13 @@ int jmi_opt_sim_ipopt_new(jmi_opt_sim_ipopt_t **jmi_opt_sim_ipopt, jmi_opt_sim_t
 
 	nlp->n = jmi_opt_sim->n_x;
 	nlp->m = jmi_opt_sim->n_g + jmi_opt_sim->n_h;
+
+	printf("############  %d %d\n",nlp->n,nlp->m);
+
 	nlp->dg_n_nz = jmi_opt_sim->dg_n_nz + jmi_opt_sim->dh_n_nz;
 	nlp->hess_lag_n_nz = 0;
 
-	printf("m=%d\n",nlp->m);
+//	printf("m=%d\n",nlp->m);
 
 	nlp->dg_row = (Index*)calloc(nlp->dg_n_nz,sizeof(Index));
 	nlp->dg_col = (Index*)calloc(nlp->dg_n_nz,sizeof(Index));
@@ -192,15 +228,24 @@ int jmi_opt_sim_ipopt_new(jmi_opt_sim_ipopt_t **jmi_opt_sim_ipopt, jmi_opt_sim_t
 	                               &jmi_opt_sim_ipopt_dg, &jmi_opt_sim_ipopt_hess_lag);
 
  //   AddIpoptIntOption(nlp->nlp, "print_level", 10);
+
+    AddIpoptStrOption(nlp->nlp, "derivative_test","first-order");
+//    AddIpoptStrOption(nlp->nlp, "derivative_test_print_all","yes");
 	AddIpoptStrOption(nlp->nlp, "output_file", "ipopt.out");
 	AddIpoptStrOption(nlp->nlp, "hessian_approximation", "limited-memory");
-
 
 	return 0;
 
 }
 
 int jmi_opt_sim_ipopt_solve(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt) {
+	int i;
+	// Copy initial guess into x
+	for (i=0;i<jmi_opt_sim_ipopt->jmi_opt_sim->n_x;i++) {
+		jmi_opt_sim_ipopt->jmi_opt_sim->x[i] = jmi_opt_sim_ipopt->jmi_opt_sim->x_init[i];
+		printf("## %f\n",jmi_opt_sim_ipopt->jmi_opt_sim->x[i]);
+	}
+
 
 	jmi_opt_sim_ipopt->status = IpoptSolve(jmi_opt_sim_ipopt->nlp,
 			                               jmi_opt_sim_ipopt->jmi_opt_sim->x,

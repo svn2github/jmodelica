@@ -1,10 +1,24 @@
 /*
+ * jmi_opt_sim.h provides an interface to an NLP derived by means of a
+ * simultaneous optimization method. Notice that the method of transcription
+ * is not specified by the interface. Rather, such a method is specified
+ * by the call back functions in the struct jmi_opt_sim_t. This design
+ * enables different methods to be implemented. Typically, a jmi_opt_sim_t
+ * struct is created by a function call to, for example, jmi_opt_sim_lp_radau_new.
+ * The resulting struct can then be used generically in the jmi_opt_sim interface
+ * functions.
+ *
+ * jmi_opt_sim provides an interface to an NLP on the form:
+ *
  *   min f(x)
  *
  *   s.t.
  *
  *   g(x) <= 0
  *   h(x) = 0
+ *
+ * including evaluation of Jacobians of f, g, and h as well as parsity patterns
+ * for g and h.
  *
  */
 
@@ -13,13 +27,7 @@
 
 #include "jmi.h"
 
-#define JMI_OPT_SIM_LP 1 // Lagrange polynomials
-#define JMI_OPT_SIM_BE 2 // Backwards Euler
-#define JMI_OPT_SIM_FE 3 // Forward Euler
-#define JMI_OPT_SIM_MB 4 // Monomial basis
-
 typedef struct jmi_opt_sim_t jmi_opt_sim_t;
-
 
 // Function typedefs
 typedef int (*jmi_opt_sim_get_dimensions_t)(jmi_opt_sim_t *jmi_opt_sim, int *n_x, int *n_g, int *n_h,
@@ -54,6 +62,8 @@ struct jmi_opt_sim_t{
 	int n_e;                         // Number of elements in mesh
 	jmi_real_t *hs;                    // Normalized element lengths in mesh (sum(h[i]=1)
 	int hs_free;                      // Free element lengths
+	int *tp_e;                         // Element indices for time points
+	jmi_real_t* tp_tau;                       // Taus for time points within elements
 	jmi_real_t *x;                    // x vector.
 	jmi_real_t *x_lb;                 // Lower bounds for variables
 	jmi_real_t *x_ub;                 // Upper bound for variables
@@ -92,10 +102,33 @@ typedef struct {
     jmi_real_t *Lp_dot_vals;        // Values of the derivative of the Lagrange polynomials at the points in cp
     jmi_real_t *Lpp_dot_vals;       // Values of the derivative of the Lagrange polynomials at the points in cpp
     int der_eval_alg;                   // Evaluation algorithm used for computation of derivatives
+    int dF0_n_nz;
+    int dF_dp_n_nz;
+    int dF_ddx_dx_du_dw_n_nz;
+    int offs_p_opt;
+    int offs_dx_0;
+    int offs_x_0;
+    int offs_u_0;
+    int offs_w_0;
+    int offs_dx_coll;
+    int offs_x_coll;
+    int offs_u_coll;
+    int offs_w_coll;
+    int offs_x_el_junc;
+    int offs_dx_p;
+    int offs_x_p;
+    int offs_u_p;
+    int offs_w_p;
+    int offs_h;
+    int offs_t0;
+    int offs_tf;
+    int *der_mask;
 } jmi_opt_sim_lp_radau_t;
 
 int jmi_opt_sim_lp_radau_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 		            jmi_real_t *hs, int hs_free,
+		            jmi_real_t *pi_init, jmi_real_t *dx_init, jmi_real_t *x_init,
+		            jmi_real_t *u_init, jmi_real_t *w_init,
 		            jmi_real_t *pi_lb, jmi_real_t *dx_lb, jmi_real_t *x_lb,
 		            jmi_real_t *u_lb, jmi_real_t *w_lb, jmi_real_t t0_lb,
 		            jmi_real_t tf_lb, jmi_real_t *hs_lb,

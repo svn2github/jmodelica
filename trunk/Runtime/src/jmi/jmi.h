@@ -58,12 +58,14 @@
  *      w(t_i)     algebraic variables evaluated at time t_i, i \in 1..n_tp
  *      t_i        time instants i \in 1..n_tp
  *
+ *      TODO: Should this order be changed?
+ *      TODO: Why is t_i included here?
  *      q = [dx(t_1)^T,...,dx(t_n_tp)^T,  x(t_1)^T,...,x(t_n_tp)^T,
  *           u(t_1)^T,...,u(t_n_tp)^T,  w(t_1)^T,..., w(t_n_tp)^T, t_1, ...,t_n_tp]^T
  *
  *   All parameters, variables and point-wise evaluated variables are denoted z:
  *
- *      z = [p^T, v^T, q^T]
+ *      z = [p^T, v^T, q^T]^T
  *
  *   The DAE interface is defined by the residual function
  *
@@ -81,7 +83,7 @@
  *
  *   The optimization part of the interface is defined by the functions
  *
- *      J(p,v)
+ *      J(p,q)
  *      Ceq(p,v,q) = 0
  *      Cineq(p,v,q) <= 0
  *      Heq(p,q) = 0
@@ -184,6 +186,11 @@ int jmi_get_offsets(jmi_t* jmi, int* offs_ci, int* offs_cd, int* offs_pi, int* o
 int jmi_set_tp(jmi_t *jmi, jmi_real_t *tp);
 
 /*
+ * Get the number of time points.
+ */
+int jmi_get_n_tp(jmi_t *jmi, int *n_tp);
+
+/*
  * Get the vector of time points included in the problem.
  */
 int jmi_get_tp(jmi_t *jmi, jmi_real_t *tp);
@@ -224,22 +231,25 @@ int jmi_opt_get_p_opt_indices(jmi_t *jmi, int *p_opt_indices);
  * Notice that these functions (and the variable vector)
  * is common for dae, init and opt.
  */
-int jmi_get_ci(jmi_t* jmi, jmi_real_t** ci);
-int jmi_get_cd(jmi_t* jmi, jmi_real_t** cd);
-int jmi_get_pi(jmi_t* jmi, jmi_real_t** pi);
-int jmi_get_pd(jmi_t* jmi, jmi_real_t** pd);
-int jmi_get_dx(jmi_t* jmi, jmi_real_t** dx);
-int jmi_get_x(jmi_t* jmi, jmi_real_t** x);
-int jmi_get_u(jmi_t* jmi, jmi_real_t** u);
-int jmi_get_w(jmi_t* jmi, jmi_real_t** w);
-int jmi_get_t(jmi_t* jmi, jmi_real_t** t);
-int jmi_get_dx_p(jmi_t* jmi, jmi_real_t** dx_p);
-int jmi_get_x_p(jmi_t* jmi, jmi_real_t** x_p);
-int jmi_get_u_p(jmi_t* jmi, jmi_real_t** u_p);
-int jmi_get_w_p(jmi_t* jmi, jmi_real_t** w_p);
-int jmi_get_t_p(jmi_t* jmi, jmi_real_t** t_p);
+jmi_real_t* jmi_get_ci(jmi_t* jmi);
+jmi_real_t* jmi_get_cd(jmi_t* jmi);
+jmi_real_t* jmi_get_pi(jmi_t* jmi);
+jmi_real_t* jmi_get_pd(jmi_t* jmi);
+jmi_real_t* jmi_get_dx(jmi_t* jmi);
+jmi_real_t* jmi_get_x(jmi_t* jmi);
+jmi_real_t* jmi_get_u(jmi_t* jmi);
+jmi_real_t* jmi_get_w(jmi_t* jmi);
+jmi_real_t* jmi_get_t(jmi_t* jmi);
+jmi_real_t* jmi_get_dx_p(jmi_t* jmi);
+jmi_real_t* jmi_get_x_p(jmi_t* jmi);
+jmi_real_t* jmi_get_u_p(jmi_t* jmi);
+jmi_real_t* jmi_get_w_p(jmi_t* jmi);
+jmi_real_t* jmi_get_t_p(jmi_t* jmi);
 
-
+/**
+ * Print a summary of the content of the jmi struct.
+ */
+void jmi_print_summary(jmi_t *jmi);
 
 /**
  * Evaluation of Jacobians.
@@ -302,7 +312,8 @@ int jmi_dae_dF_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
  * Returns the row and column indices of the non-zero elements in the DAE
  * residual Jacobian.
  */
-int jmi_dae_dF_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+int jmi_dae_dF_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+		                  int *mask, int* row, int* col);
 
 /**
  * This helper function computes the number of columns and the number of non zero
@@ -341,7 +352,8 @@ int jmi_init_dF0_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
  * Returns the row and column indices of the non-zero elements of the Jacobian of the F0
  * initialization function.
  */
-int jmi_init_dF0_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+int jmi_init_dF0_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col);
 
 /**
  * This helper function computes the number of columns and the number of non zero
@@ -369,7 +381,8 @@ int jmi_init_dF1_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
  * Returns the row and column indices of the non-zero elements of the Jacobian of the F1
  * initialization function.
  */
-int jmi_init_dF1_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+int jmi_init_dF1_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col);
 
 /**
  * This helper function computes the number of columns and the number of non zero
@@ -414,7 +427,8 @@ int jmi_opt_dJ_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
 /**
  * Returns the row and column indices of the non-zero elements of the Jacobian of J.
  */
-int jmi_opt_dJ_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+int jmi_opt_dJ_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col);
 
 /**
  * This helper function computes the number of columns and the number of non zero
@@ -441,7 +455,8 @@ int jmi_opt_dCeq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
 /**
  * Returns the row and column indices of the non-zero elements of the Jacobian of Ceq.
  */
-int jmi_opt_dCeq_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+int jmi_opt_dCeq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col);
 
 /**
  * This helper function computes the number of columns and the number of non zero
@@ -468,7 +483,8 @@ int jmi_opt_dCineq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
 /**
  * Returns the row and column indices of the non-zero elements of the Jacobian of Cineq.
  */
-int jmi_opt_dCineq_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+int jmi_opt_dCineq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col);
 
 /**
  * This helper function computes the number of columns and the number of non zero
@@ -495,7 +511,8 @@ int jmi_opt_dHeq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
 /**
  * Returns the row and column indices of the non-zero elements of the Jacobian of Heq.
  */
-int jmi_opt_dHeq_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+int jmi_opt_dHeq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col);
 
 /**
  * This helper function computes the number of columns and the number of non zero
@@ -522,7 +539,8 @@ int jmi_opt_dHineq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
 /**
  * Returns the row and column indices of the non-zero elements of the Jacobian of Hineq.
  */
-int jmi_opt_Hineq_nz_indices(jmi_t* jmi, int eval_alg, int* row, int* col);
+int jmi_opt_Hineq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col);
 
 /**
  * This helper function computes the number of columns and the number of non zero
