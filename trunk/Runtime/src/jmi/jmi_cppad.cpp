@@ -22,43 +22,6 @@
 
 #include "jmi.h"
 
-#define JMI_FUNC_COMPUTE_DF_PART(tape, independent_vars_mask, n_vars, n_eq_F, dF_var_n_nz, dF_var_row, dF_var_col) {\
-	if ((independent_vars & independent_vars_mask)) {\
-		/* loop over all columns*/ \
-	\
-	for (i=0;i<n_vars;i++) {\
-		/*  check the mask if evaluation should be performed */\
-	if (mask[col_index + i] == 1) { \
-		for (j=0;j<jmi->n_z;j++) {\
-			d_z[j] = 0; \
-		}\
-		d_z[col_index + i] = 1.; \
-		/* Evaluate jacobian column */ \
-	jac_ = tape->Forward(1,d_z);  \
-	switch (sparsity) {  \
-	case JMI_DER_DENSE_COL_MAJOR: \
-	for(j=0;j<n_eq_F;j++) { \
-		jac[jac_n*(col_index+i) + j] = jac_[j]; \
-	} \
-	break; \
-	case JMI_DER_DENSE_ROW_MAJOR: \
-	for(j=0;j<n_eq_F;j++) { \
-		jac[jac_m*j + (col_index+i)] = jac_[j]; \
-	} \
-	break; \
-	case JMI_DER_SPARSE:\
-	for(j=0;j<dF_var_n_nz;j++) { \
-		if (dF_var_col[j]-1 == col_index+i) { \
-			jac[jac_index++] = jac_[dF_var_row[j]-1]; \
-		} \
-	}\
-	} \
-	} \
-	}\
-	} \
-	col_index += n_vars;\
-}\
-
 int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
 		int n_x, int n_u, int n_w, int n_tp) {
 
@@ -467,24 +430,23 @@ int jmi_func_ad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independe
 	*dF_n_cols = 0;
 	*dF_n_nz = 0;
 
-	int i,j;
-	int col_index = 0;
+	int i;
+	for (i=0;i<jmi->n_z;i++) {
+		if (jmi_check_Jacobian_column_index(jmi, independent_vars, mask, i) == 1 ) {
+			(*dF_n_cols)++;
+		}
+	}
 
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_CI, jmi->n_ci, func->n_eq_F, func->ad->dF_z_n_nz, func->ad->dF_z_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_CD, jmi->n_cd, func->n_eq_F, func->ad->dF_z_n_nz, func->ad->dF_z_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_PI, jmi->n_pi, func->n_eq_F, func->ad->dF_z_n_nz, func->ad->dF_z_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_PD, jmi->n_pd, func->n_eq_F, func->ad->dF_z_n_nz, func->ad->dF_z_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_DX, jmi->n_dx, func->n_eq_F, func->ad->dF_z_n_nz, func->ad->dF_z_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_X, jmi->n_x, func->n_eq_F, func->ad->dF_z_n_nz, func->ad->dF_z_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_U, jmi->n_u, func->n_eq_F, func->ad->dF_z_n_nz, func->ad->dF_z_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_W, jmi->n_w, func->n_eq_F, func->ad->dF_z_n_nz, func->ad->dF_z_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_T, 1, func->n_eq_F, func->ad->dF_z_n_nz, func->ad->dF_z_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_DX_P, jmi->n_dx*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_X_P, jmi->n_x*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_U_P, jmi->n_u*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_W_P, jmi->n_w*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_T_P, 1*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
-
+	if (sparsity == JMI_DER_SPARSE) {
+		for (i=0;i<func->dF_n_nz;i++) {
+			// Check if this particular entry should be included
+			if (jmi_check_Jacobian_column_index(jmi, independent_vars, mask, func->dF_col[i]-1) == 1 ) {
+				(*dF_n_nz)++;
+			}
+		}
+	} else {
+		*dF_n_nz = *dF_n_cols*func->n_eq_F;
+	}
 	return 0;
 
 }
@@ -504,17 +466,20 @@ int jmi_func_ad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 	}
 
 	int jac_index = 0;
-	int col_index = 0;
 	int jac_n = func->n_eq_F;
 
 	int jac_m;
 	int jac_n_nz;
-	jmi_func_ad_dF_dim(jmi,jmi->dae->F,sparsity,independent_vars,mask,&jac_m,&jac_n_nz);
+	jmi_func_ad_dF_dim(jmi,func,sparsity,independent_vars,mask,&jac_m,&jac_n_nz);
 
 	//	printf("****** %d\n",jac_m);
 
 	jmi_real_vec_t jac_(func->n_eq_F);
 	jmi_real_vec_t d_z(jmi->n_z);
+
+	for (j=0;j<jmi->n_z;j++) {
+		d_z[j] = 0;
+	}
 
 	// Evaluate the tape for the current z-values
 	func->ad->F_z_tape->Forward(0,*func->ad->z_work);
@@ -526,21 +491,33 @@ int jmi_func_ad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		}
 	}
 
-	JMI_FUNC_COMPUTE_DF_PART(func->ad->F_z_tape, independent_vars, jmi->n_ci, func->n_eq_F, func->ad->dF_ci_n_nz,func->ad->dF_ci_row, func->ad->dF_ci_col)
-	JMI_FUNC_COMPUTE_DF_PART(func->ad->F_z_tape, independent_vars, jmi->n_cd, func->n_eq_F, func->ad->dF_cd_n_nz,func->ad->dF_cd_row, func->ad->dF_cd_col)
-	JMI_FUNC_COMPUTE_DF_PART(func->ad->F_z_tape, independent_vars, jmi->n_pi, func->n_eq_F, func->ad->dF_pi_n_nz,func->ad->dF_pi_row, func->ad->dF_pi_col)
-	JMI_FUNC_COMPUTE_DF_PART(func->ad->F_z_tape, independent_vars, jmi->n_pd, func->n_eq_F, func->ad->dF_pd_n_nz,func->ad->dF_pd_row, func->ad->dF_pd_col)
-	JMI_FUNC_COMPUTE_DF_PART(func->ad->F_z_tape, independent_vars, jmi->n_dx, func->n_eq_F, func->ad->dF_dx_n_nz,func->ad->dF_dx_row, func->ad->dF_dx_col)
-	JMI_FUNC_COMPUTE_DF_PART(func->ad->F_z_tape, independent_vars, jmi->n_x, func->n_eq_F, func->ad->dF_x_n_nz,func->ad->dF_x_row, func->ad->dF_x_col)
-	JMI_FUNC_COMPUTE_DF_PART(func->ad->F_z_tape, independent_vars, jmi->n_u, func->n_eq_F, func->ad->dF_u_n_nz,func->ad->dF_u_row, func->ad->dF_u_col)
-	JMI_FUNC_COMPUTE_DF_PART(func->ad->F_z_tape, independent_vars, jmi->n_w, func->n_eq_F, func->ad->dF_w_n_nz,func->ad->dF_w_row, func->ad->dF_w_col)
-	JMI_FUNC_COMPUTE_DF_PART(func->ad->F_z_tape, independent_vars, 1, func->n_eq_F, func->ad->dF_t_n_nz,func->ad->dF_t_row, func->ad->dF_t_col)
-	JMI_FUNC_COMPUTE_DF_PART(func->ad->F_z_tape, independent_vars, jmi->n_dx*jmi->n_tp, func->n_eq_F, func->ad->dF_dx_p_n_nz,func->ad->dF_dx_p_row, func->ad->dF_dx_p_col)
-	JMI_FUNC_COMPUTE_DF_PART(func->ad->F_z_tape, independent_vars, jmi->n_x*jmi->n_tp, func->n_eq_F, func->ad->dF_x_p_n_nz,func->ad->dF_x_p_row, func->ad->dF_x_p_col)
-	JMI_FUNC_COMPUTE_DF_PART(func->ad->F_z_tape, independent_vars, jmi->n_u*jmi->n_tp, func->n_eq_F, func->ad->dF_u_p_n_nz,func->ad->dF_u_p_row, func->ad->dF_u_p_col)
-	JMI_FUNC_COMPUTE_DF_PART(func->ad->F_z_tape, independent_vars, jmi->n_w*jmi->n_tp, func->n_eq_F, func->ad->dF_w_p_n_nz,func->ad->dF_w_p_row, func->ad->dF_w_p_col)
-	JMI_FUNC_COMPUTE_DF_PART(func->ad->F_z_tape, independent_vars, jmi->n_tp, func->n_eq_F, func->ad->dF_t_p_n_nz,func->ad->dF_t_p_row, func->ad->dF_t_p_col)
-
+	// Iterate over all columns
+	for (i=0;i<jmi->n_z;i++) {
+		if (jmi_check_Jacobian_column_index(jmi, independent_vars, mask, i) == 1 ) {
+			// Evaluate jacobian for column i
+			d_z[i] = 1.;
+			jac_ = func->ad->F_z_tape->Forward(1,d_z);
+			d_z[i] = 0.;
+			switch (sparsity) {
+			case JMI_DER_DENSE_COL_MAJOR:
+				for(j=0;j<func->n_eq_F;j++) {
+					jac[jac_n*(jmi_map_Jacobian_column_index(jmi,independent_vars,mask,i)) + j] = jac_[j];
+				}
+				break;
+			case JMI_DER_DENSE_ROW_MAJOR:
+				for(j=0;j<func->n_eq_F;j++) {
+					jac[jac_m*j + (jmi_map_Jacobian_column_index(jmi,independent_vars,mask,i))] = jac_[j];
+				}
+				break;
+			case JMI_DER_SPARSE:
+				for(j=0;j<func->dF_n_nz;j++) {
+					if (func->dF_col[j]-1 == i) {
+						jac[jac_index++] = jac_[func->dF_row[j]-1];
+					}
+				}
+			}
+		}
+	}
 
 	return 0;
 }

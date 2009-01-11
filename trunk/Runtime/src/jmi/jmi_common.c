@@ -108,31 +108,28 @@ int jmi_func_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independent_
 	*dF_n_cols = 0;
 	*dF_n_nz = 0;
 
-	int i,j;
-	//for (i=0;i<func->dF_n_nz;i++)
-	//	printf("** %d, %d\n",func->dF_row[i],func->dF_col[i]);
+	int i;
 
-	int col_index = 0;
+	for (i=0;i<jmi->n_z;i++) {
+		if (jmi_check_Jacobian_column_index(jmi, independent_vars, mask, i) == 1 ) {
+			(*dF_n_cols)++;
+		}
+	}
 
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_CI, jmi->n_ci, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_CD, jmi->n_cd, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_PI, jmi->n_pi, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_PD, jmi->n_pd, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_DX, jmi->n_dx, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_X, jmi->n_x, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_U, jmi->n_u, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_W, jmi->n_w, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_T, 1, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_DX_P, jmi->n_dx*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_X_P, jmi->n_x*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_U_P, jmi->n_u*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_W_P, jmi->n_w*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
-	JMI_FUNC_COMPUTE_DF_DIM_PART(JMI_DER_T_P, 1*jmi->n_tp, func->n_eq_F, func->dF_n_nz, func->dF_col)
+	if (sparsity == JMI_DER_SPARSE) {
+		for (i=0;i<func->dF_n_nz;i++) {
+			// Check if this particular entry should be included
+			if (jmi_check_Jacobian_column_index(jmi, independent_vars, mask, func->dF_col[i]-1) == 1 ) {
+				(*dF_n_nz)++;
+			}
+		}
+	} else {
+		*dF_n_nz = *dF_n_cols*func->n_eq_F;
+	}
 
 	return 0;
 
 }
-
 
 int jmi_get_sizes(jmi_t* jmi, int* n_ci, int* n_cd, int* n_pi, int* n_pd,
 		                        int* n_dx, int* n_x, int* n_u, int* n_w, int* n_tp, int* n_z) {

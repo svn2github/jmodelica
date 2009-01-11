@@ -6,7 +6,7 @@
 #include <jmi_opt_sim.h>
 #include <jmi_opt_sim_ipopt.h>
 
-#define TEST_VERB 0
+#define TEST_VERB 1
 #define SMALL 1e-10
 
 // Signature of test functions
@@ -525,6 +525,241 @@ int test_12_dae_dF_eval(int verbose) {
 
 }
 
+// Test computation of dF sparse indices
+int test_13_dae_dF_indices(int verbose) {
+
+	mask[3] = 0; // mask dx_3
+	mask[5] = 0; // mask x_2
+
+	int i;
+	int dF_n_nz_test;
+	int dF_n_cols_test;
+    jmi_dae_dF_dim(jmi,JMI_DER_SYMBOLIC,JMI_DER_SPARSE,
+    		JMI_DER_PI | JMI_DER_DX | JMI_DER_X | JMI_DER_U,mask,
+    		         &dF_n_cols_test,&dF_n_nz_test);
+
+	jmi_dae_dF_nz_indices(jmi,JMI_DER_SYMBOLIC,
+			               JMI_DER_PI | JMI_DER_DX | JMI_DER_X | JMI_DER_U,mask,dF_row,dF_col);
+
+	if (verbose == 1) {
+		int i;
+		printf("*** test_13_dae_F_indices start ***\n");
+		printf("Number of non-zeros in the DAE residual Jacobian (pi, dx, x, dx_3 and x_2 masked): %d\n",dF_n_nz_test);
+		for (i=0;i<dF_n_nz_test;i++) {
+			printf("%d, %d\n",dF_row[i],dF_col[i]);
+		}
+		printf("*** test_13_dae_F_indices end ***\n");
+	}
+
+	int dF_row_fix[9] = {2,1,2,1,2,3,4,1,3};
+	int dF_col_fix[9] = {1,2,3,4,4,4,4,6,6};
+
+	int err_sum = 0;
+	for (i=0;i<dF_n_nz_test;i++) {
+		err_sum += abs(dF_row_fix[i] - dF_row[i]);
+		err_sum += abs(dF_col_fix[i] - dF_col[i]);
+	}
+
+	mask[3] = 1;
+	mask[5] = 1;
+
+	if (err_sum==0) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+}
+
+
+// Test evaluation of dF using JMI_DER_SPARSE
+int test_14_dae_dF_eval(int verbose) {
+
+	mask[3] = 0; // mask dx_3
+	mask[5] = 0; // mask x_2
+
+	int i;
+	// Initialize the variables
+    pi[0] = 1;
+    dx[0] = 1;
+    dx[1] = 1;
+    dx[2] = 2;
+	x[0] = 1;
+	x[1] = 2;
+	x[2] = 3;
+	u[0] = 4;
+	w[0] = 3;
+	t[0] = 1;
+
+	int dF_n_nz_test;
+	int dF_n_cols_test;
+    jmi_dae_dF_dim(jmi,JMI_DER_SYMBOLIC,JMI_DER_SPARSE,
+    		JMI_DER_PI | JMI_DER_DX | JMI_DER_X | JMI_DER_U,mask,
+    		         &dF_n_cols_test,&dF_n_nz_test);
+
+	jmi_dae_dF(jmi,JMI_DER_SYMBOLIC,JMI_DER_SPARSE,
+			JMI_DER_PI | JMI_DER_DX | JMI_DER_X | JMI_DER_U ,mask,dF_sparse);
+
+	if (verbose == 1) {
+		printf("*** test_14_dae_dF_eval start ***\n");
+		printf("Jacobian (pi, dx, x, dx_3 and x_2 masked) (sparse):\n");
+		for (i=0;i<dF_n_nz_test;i++) {
+			printf("%f\n",dF_sparse[i]);
+		}
+		printf("*** test_14_dae_dF_eval end ***\n");
+	}
+
+	jmi_real_t jac_fix[9] = {1, -1, -1, -3, 1, 14.778112197861301,
+			                  1, 1, 59.112448791445203};
+	jmi_real_t err_sum = 0;
+	for (i=0;i<dF_n_nz_test;i++) {
+		err_sum += abs(jac_fix[i] - dF_sparse[i]);
+	}
+
+	mask[3] = 1;
+	mask[5] = 1;
+
+	if (err_sum<SMALL) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+}
+
+// Evaluation of dF using JMI_DER_DENSE_COL_MAJOR
+int test_15_dae_dF_eval(int verbose) {
+
+	mask[3] = 0; // mask dx_3
+	mask[5] = 0; // mask x_2
+
+	int i;
+	// Initialize the variables
+    pi[0] = 1;
+    dx[0] = 1;
+    dx[1] = 1;
+    dx[2] = 2;
+	x[0] = 1;
+	x[1] = 2;
+	x[2] = 3;
+	u[0] = 4;
+	w[0] = 3;
+	t[0] = 1;
+
+	int dF_n_nz_test;
+	int dF_n_cols_test;
+    jmi_dae_dF_dim(jmi,JMI_DER_SYMBOLIC,JMI_DER_DENSE_COL_MAJOR,
+    		JMI_DER_PI | JMI_DER_DX | JMI_DER_X | JMI_DER_U,mask,
+    		         &dF_n_cols_test,&dF_n_nz_test);
+
+	jmi_dae_dF_nz_indices(jmi,JMI_DER_SYMBOLIC,
+			JMI_DER_PI | JMI_DER_DX | JMI_DER_X | JMI_DER_U,mask,dF_row,dF_col);
+
+	jmi_dae_dF(jmi,JMI_DER_SYMBOLIC,JMI_DER_DENSE_COL_MAJOR,
+			JMI_DER_PI | JMI_DER_DX | JMI_DER_X | JMI_DER_U,
+			mask,dF_dense);
+
+	jmi_real_t jac_fix_sparse[9] = {1, -1, -1, -3, 1, 14.778112197861301,
+			                  1, 1, 59.112448791445203};
+
+	jmi_real_t *jac_fix_dense = (jmi_real_t*)calloc(dF_n_nz_test,sizeof(jmi_real_t));
+
+	for (i=0;i<9;i++) {
+		jac_fix_dense[dF_row[i]-1 + (dF_col[i]-1)*n_eq_F] = jac_fix_sparse[i];
+	}
+
+	if (verbose == 1) {
+		printf("*** test_15_dae_dF_eval start ***\n");
+		printf("Jacobian (pi, dx, x, dx_3 and x_2 masked) (dense col major):\n");
+		for (i=0;i<dF_n_nz_test;i++) {
+			printf("%f\n",dF_dense[i]);
+		}
+		printf("*** test_15_dae_dF_eval end ***\n");
+	}
+
+	jmi_real_t err_sum = 0;
+	for (i=0;i<dF_n_nz_test;i++) {
+		err_sum += abs(jac_fix_dense[i] - dF_dense[i]);
+	}
+
+	if (err_sum<SMALL) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+	mask[3] = 1;
+	mask[5] = 1;
+
+}
+
+// Evaluation of dF using JMI_DER_DENSE_ROW_MAJOR
+int test_16_dae_dF_eval(int verbose) {
+
+	mask[3] = 0; // mask dx_3
+	mask[5] = 0; // mask x_2
+
+	int i;
+	// Initialize the variables
+    pi[0] = 1;
+    dx[0] = 1;
+    dx[1] = 1;
+    dx[2] = 2;
+	x[0] = 1;
+	x[1] = 2;
+	x[2] = 3;
+	u[0] = 4;
+	w[0] = 3;
+	t[0] = 1;
+
+	int dF_n_nz_test;
+	int dF_n_cols_test;
+    jmi_dae_dF_dim(jmi,JMI_DER_SYMBOLIC,JMI_DER_DENSE_ROW_MAJOR,
+    		JMI_DER_PI | JMI_DER_DX | JMI_DER_X | JMI_DER_U,mask,
+    		         &dF_n_cols_test,&dF_n_nz_test);
+
+	jmi_dae_dF_nz_indices(jmi,JMI_DER_SYMBOLIC,
+			JMI_DER_PI | JMI_DER_DX | JMI_DER_X | JMI_DER_U,mask,dF_row,dF_col);
+
+	jmi_dae_dF(jmi,JMI_DER_SYMBOLIC,JMI_DER_DENSE_ROW_MAJOR,
+			JMI_DER_PI | JMI_DER_DX | JMI_DER_X | JMI_DER_U,
+			mask,dF_dense);
+
+	jmi_real_t jac_fix_sparse[9] = {1, -1, -1, -3, 1, 14.778112197861301,
+			                  1, 1, 59.112448791445203};
+
+	jmi_real_t *jac_fix_dense = (jmi_real_t*)calloc(dF_n_nz_test,sizeof(jmi_real_t));
+
+	for (i=0;i<9;i++) {
+		jac_fix_dense[(dF_row[i]-1)*dF_n_cols_test + dF_col[i]-1] = jac_fix_sparse[i];
+	}
+
+	if (verbose == 1) {
+		printf("*** test_16_dae_dF_eval start ***\n");
+		printf("Jacobian (pi, dx, x, dx_3 and x_2 masked) (dense row major):\n");
+		for (i=0;i<dF_n_nz_test;i++) {
+			printf("%f\n",dF_dense[i]);
+		}
+		printf("*** test_16_dae_dF_eval end ***\n");
+	}
+
+	jmi_real_t err_sum = 0;
+	for (i=0;i<dF_n_nz_test;i++) {
+		err_sum += abs(jac_fix_dense[i] - dF_dense[i]);
+	}
+
+	if (err_sum<SMALL) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+	mask[3] = 1;
+	mask[5] = 1;
+
+}
+
+
 void test_optimization() {
 
 	int i;
@@ -726,6 +961,10 @@ int main(int argv, char* argc[])
     test_function(&test_10_dae_dF_eval, "test_10_dae_dF_eval",TEST_VERB,&test_ok, &test_fail);
     test_function(&test_11_dae_dF_eval, "test_11_dae_dF_eval",TEST_VERB,&test_ok, &test_fail);
     test_function(&test_12_dae_dF_eval, "test_12_dae_dF_eval",TEST_VERB,&test_ok, &test_fail);
+    test_function(&test_13_dae_dF_indices, "test_13_dae_dF_indices",TEST_VERB,&test_ok, &test_fail);
+    test_function(&test_14_dae_dF_eval, "test_14_dae_dF_eval",TEST_VERB,&test_ok, &test_fail);
+    test_function(&test_15_dae_dF_eval, "test_15_dae_dF_eval",TEST_VERB,&test_ok, &test_fail);
+    test_function(&test_16_dae_dF_eval, "test_16_dae_dF_eval",TEST_VERB,&test_ok, &test_fail);
 
     printf(">>> Number of tests run:    %d\n", test_ok + test_fail);
     printf(">>> Number of tests OK:     %d\n", test_ok);

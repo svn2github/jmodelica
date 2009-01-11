@@ -1,4 +1,3 @@
-// Example of generated function
 
 
 #include <stdio.h>
@@ -121,7 +120,6 @@ static int vdp_dae_dF(jmi_t* jmi, int sparsity, int independent_vars, int* mask,
 	// w_0 row 4, col 8: -1
 
 	// t row 3, col 9: a*exp(a*t)*(x[0]*x[0] + x[1]*x[1] + u[0]*u[0])
-
 
 	int jac_index = 0;
 	mask_col_index = 0;

@@ -219,26 +219,6 @@ struct jmi_t{
 
 };
 
-#define JMI_FUNC_COMPUTE_DF_DIM_PART(independent_vars_mask, n_vars, n_eq_F, jmi_dF_n_nz, jmi_dF_col) {\
-	if ((independent_vars & independent_vars_mask)) {\
-		for (i=0;i<n_vars;i++) {\
-			if (mask[col_index]) {\
-				(*dF_n_cols)++;\
-				if (sparsity & JMI_DER_SPARSE) {\
-					for (j=0;j<jmi_dF_n_nz;j++) {\
-	(*dF_n_nz) += jmi_dF_col[j]-1 == col_index? 1 : 0;\
-					}\
-				} else {\
-					(*dF_n_nz) += n_eq_F;\
-				}\
-			}\
-			col_index++;\
-		}\
-	} else {\
-		col_index += n_vars;\
-	}\
-}\
-
 /**
  * Create a new jmi_func_t.
  */
