@@ -127,12 +127,12 @@ typedef struct {
 
 int jmi_opt_sim_lp_radau_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 		            jmi_real_t *hs, int hs_free,
-		            jmi_real_t *pi_init, jmi_real_t *dx_init, jmi_real_t *x_init,
+		            jmi_real_t *p_opt_init, jmi_real_t *dx_init, jmi_real_t *x_init,
 		            jmi_real_t *u_init, jmi_real_t *w_init,
-		            jmi_real_t *pi_lb, jmi_real_t *dx_lb, jmi_real_t *x_lb,
+		            jmi_real_t *p_opt_lb, jmi_real_t *dx_lb, jmi_real_t *x_lb,
 		            jmi_real_t *u_lb, jmi_real_t *w_lb, jmi_real_t t0_lb,
 		            jmi_real_t tf_lb, jmi_real_t *hs_lb,
-		            jmi_real_t *pi_ub, jmi_real_t *dx_ub, jmi_real_t *x_ub,
+		            jmi_real_t *p_opt_ub, jmi_real_t *dx_ub, jmi_real_t *x_ub,
 		            jmi_real_t *u_ub, jmi_real_t *w_ub, jmi_real_t t0_ub,
 		            jmi_real_t tf_ub, jmi_real_t *hs_ub,
 		            int n_cp, int der_eval_alg);

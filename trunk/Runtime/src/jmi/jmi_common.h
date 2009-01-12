@@ -68,16 +68,18 @@ typedef struct {
 
 	// Sparsity patterns for individual independent variables
 	// These variables are useful when computing the Jacobian.
+/*
 	int dF_ci_n_nz, dF_cd_n_nz, dF_pi_n_nz, dF_pd_n_nz,
         dF_dx_n_nz, dF_x_n_nz, dF_u_n_nz, dF_w_n_nz, dF_t_n_nz,
-        dF_dx_p_n_nz, dF_x_p_n_nz, dF_u_p_n_nz, dF_w_p_n_nz, dF_t_p_n_nz;
+        dF_dx_p_n_nz, dF_x_p_n_nz, dF_u_p_n_nz, dF_w_p_n_nz;
+
 	int *dF_ci_row, *dF_cd_row, *dF_pi_row, *dF_pd_row,
 		*dF_dx_row, *dF_x_row, *dF_u_row, *dF_w_row, *dF_t_row,
-	    *dF_dx_p_row, *dF_x_p_row, *dF_u_p_row, *dF_w_p_row, *dF_t_p_row;
+	    *dF_dx_p_row, *dF_x_p_row, *dF_u_p_row, *dF_w_p_row;
 	int *dF_ci_col, *dF_cd_col, *dF_pi_col, *dF_pd_col,
 		*dF_dx_col, *dF_x_col, *dF_u_col, *dF_w_col, *dF_t_col,
-		*dF_dx_p_col, *dF_x_p_col, *dF_u_p_col, *dF_w_p_col, *dF_t_p_col;
-
+		*dF_dx_p_col, *dF_x_p_col, *dF_u_p_col, *dF_w_p_col;
+*/
 	jmi_real_vec_p z_work;
 } jmi_func_ad_t;
 /*
@@ -202,11 +204,10 @@ struct jmi_t{
 	int offs_u;
 	int offs_w;
 	int offs_t;
-	int offs_dx_p;
-	int offs_x_p;
-	int offs_u_p;
-	int offs_w_p;
-	int offs_t_p;
+	int offs_dx_p; // offset of the first dx_p
+	int offs_x_p;  // offset of the first x_p
+	int offs_u_p;  // offset of the first u_p
+	int offs_w_p;  // offset of the first w_p
 
 	int offs_p;
 	int offs_v;

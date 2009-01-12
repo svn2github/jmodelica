@@ -55,10 +55,9 @@ int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
 	jmi_->offs_w = n_ci + n_cd + n_pi + n_pd + n_dx + n_x + n_u;
 	jmi_->offs_t = n_ci + n_cd + n_pi + n_pd + n_dx + n_x + n_u + n_w;
 	jmi_->offs_dx_p = jmi_->offs_t + 1;
-	jmi_->offs_x_p = jmi_->offs_dx_p + n_dx*n_tp;
-	jmi_->offs_u_p = jmi_->offs_x_p + n_x*n_tp;
-	jmi_->offs_w_p = jmi_->offs_u_p + n_u*n_tp;
-	jmi_->offs_t_p = jmi_->offs_w_p + n_w*n_tp;
+	jmi_->offs_x_p = jmi_->offs_dx_p + n_dx;
+	jmi_->offs_u_p = jmi_->offs_x_p + n_x;
+	jmi_->offs_w_p = jmi_->offs_u_p + n_u;
 
 	jmi_->offs_p = 0;
 	jmi_->offs_v = jmi_->offs_dx;
@@ -70,7 +69,7 @@ int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
 
 	jmi_->n_p = n_ci + n_cd + n_pi + n_pd;
 	jmi_->n_v = n_dx + n_x + n_u + n_w + 1;
-	jmi_->n_q = (n_dx + n_x + n_u + n_w + 1)*n_tp;
+	jmi_->n_q = (n_dx + n_x + n_u + n_w)*n_tp;
 
 	jmi_->n_z = jmi_->n_p + jmi_->n_v + jmi_->n_q;
 
@@ -132,7 +131,7 @@ int jmi_func_ad_init(jmi_t *jmi, jmi_func_t *func) {
 
 	// Compute the sparsity pattern
 	s_z = func->ad->F_z_tape->ForSparseJac(jmi->n_z,r_z);
-
+/*
 	func->ad->dF_z_n_nz = 0;
 	func->ad->dF_ci_n_nz = 0;
 	func->ad->dF_cd_n_nz = 0;
@@ -147,8 +146,7 @@ int jmi_func_ad_init(jmi_t *jmi, jmi_func_t *func) {
 	func->ad->dF_x_p_n_nz = 0;
 	func->ad->dF_u_p_n_nz = 0;
 	func->ad->dF_w_p_n_nz = 0;
-	func->ad->dF_t_p_n_nz = 0;
-
+*/
 	// Sort out all the individual variable vector sparsity patterns as well..
 	for (i=0;i<(int)s_z.size();i++) { // cast to int since size() gives unsigned int...
 		if (s_z[i]) func->ad->dF_z_n_nz++;
@@ -176,8 +174,37 @@ int jmi_func_ad_init(jmi_t *jmi, jmi_func_t *func) {
 			}
 		}
 	}
-
+/*
 	for(i=0;i<func->ad->dF_z_n_nz;i++) {
+
+		if (jmi_variable_type(jmi,func->ad->dF_z_col[i]-1) == JMI_DER_CI) {
+			func->ad->dF_ci_n_nz++;
+		} else if (jmi_variable_type(jmi,func->ad->dF_z_col[i]-1) == JMI_DER_CD) {
+			func->ad->dF_cd_n_nz++;
+		} else if (jmi_variable_type(jmi,func->ad->dF_z_col[i]-1) == JMI_DER_PI) {
+			func->ad->dF_pi_n_nz++;
+		} else if (jmi_variable_type(jmi,func->ad->dF_z_col[i]-1) == JMI_DER_PD) {
+			func->ad->dF_pd_n_nz++;
+		} else if (jmi_variable_type(jmi,func->ad->dF_z_col[i]-1) == JMI_DER_DX) {
+			func->ad->dF_dx_n_nz++;
+		} else if (jmi_variable_type(jmi,func->ad->dF_z_col[i]-1) == JMI_DER_X) {
+			func->ad->dF_x_n_nz++;
+		} else if (jmi_variable_type(jmi,func->ad->dF_z_col[i]-1) == JMI_DER_U) {
+			func->ad->dF_u_n_nz++;
+		} else if (jmi_variable_type(jmi,func->ad->dF_z_col[i]-1) == JMI_DER_W) {
+			func->ad->dF_w_n_nz++;
+		} else if (jmi_variable_type(jmi,func->ad->dF_z_col[i]-1) == JMI_DER_T) {
+			func->ad->dF_t_n_nz++;
+		} else if (jmi_variable_type(jmi,func->ad->dF_z_col[i]-1) == JMI_DER_DX_P) {
+			func->ad->dF_dx_p_n_nz++;
+		} else if (jmi_variable_type(jmi,func->ad->dF_z_col[i]-1) == JMI_DER_X_P) {
+			func->ad->dF_x_p_n_nz++;
+		} else if (jmi_variable_type(jmi,func->ad->dF_z_col[i]-1) == JMI_DER_U_P) {
+			func->ad->dF_u_p_n_nz++;
+		} else if (jmi_variable_type(jmi,func->ad->dF_z_col[i]-1) == JMI_DER_W_P) {
+			func->ad->dF_w_p_n_nz++;
+		}
+
 		if (func->ad->dF_z_col[i]-1 < jmi->offs_cd) {
 			func->ad->dF_ci_n_nz++;
 		} else if (func->ad->dF_z_col[i]-1 >= jmi->offs_cd &&
@@ -213,14 +240,14 @@ int jmi_func_ad_init(jmi_t *jmi, jmi_func_t *func) {
 		} else if (func->ad->dF_z_col[i]-1 >= jmi->offs_u_p &&
 				func->ad->dF_z_col[i]-1 < jmi->offs_w_p) {
 			func->ad->dF_u_p_n_nz++;
-		} else if (func->ad->dF_z_col[i]-1 >= jmi->offs_w_p &&
-				func->ad->dF_z_col[i]-1 < jmi->offs_t_p) {
+		} else if (func->ad->dF_z_col[i]-1 >= jmi->offs_w_p) {
 			func->ad->dF_w_p_n_nz++;
-		} else if (func->ad->dF_z_col[i]-1 >= jmi->offs_t_p) {
-			func->ad->dF_t_p_n_nz++;
 		}
-	}
 
+
+	}
+*/
+/*
 	func->ad->dF_ci_row = (int*)calloc(func->ad->dF_ci_n_nz,sizeof(int));
 	func->ad->dF_ci_col = (int*)calloc(func->ad->dF_ci_n_nz,sizeof(int));
 	func->ad->dF_cd_row = (int*)calloc(func->ad->dF_cd_n_nz,sizeof(int));
@@ -247,10 +274,14 @@ int jmi_func_ad_init(jmi_t *jmi, jmi_func_t *func) {
 	func->ad->dF_u_p_col = (int*)calloc(func->ad->dF_u_p_n_nz,sizeof(int));
 	func->ad->dF_w_p_row = (int*)calloc(func->ad->dF_w_p_n_nz,sizeof(int));
 	func->ad->dF_w_p_col = (int*)calloc(func->ad->dF_w_p_n_nz,sizeof(int));
-	func->ad->dF_t_p_row = (int*)calloc(func->ad->dF_t_p_n_nz,sizeof(int));
-	func->ad->dF_t_p_col = (int*)calloc(func->ad->dF_t_p_n_nz,sizeof(int));
 
 	jac_ind = 0;
+*/
+
+// Seemingly, the dF_ci_row, dF_ci_col etc are not needed.
+// The below computation of these quantities are
+// not correct....
+/*
 	for(i=0;i<func->ad->dF_ci_n_nz;i++) {
 		func->ad->dF_ci_col[i] = func->ad->dF_z_col[jac_ind];
 		func->ad->dF_ci_row[i] = func->ad->dF_z_row[jac_ind++];
@@ -287,35 +318,35 @@ int jmi_func_ad_init(jmi_t *jmi, jmi_func_t *func) {
 		func->ad->dF_t_col[i] = func->ad->dF_z_col[jac_ind];
 		func->ad->dF_t_row[i] = func->ad->dF_z_row[jac_ind++];
 	}
-	for(i=0;i<func->ad->dF_dx_p_n_nz;i++) {
-		func->ad->dF_dx_p_col[i] = func->ad->dF_z_col[jac_ind];
-		func->ad->dF_dx_p_row[i] = func->ad->dF_z_row[jac_ind++];
-	}
-	for(i=0;i<func->ad->dF_x_p_n_nz;i++) {
-		func->ad->dF_x_p_col[i] = func->ad->dF_z_col[jac_ind];
-		func->ad->dF_x_p_row[i] = func->ad->dF_z_row[jac_ind++];
-	}
-	for(i=0;i<func->ad->dF_u_p_n_nz;i++) {
-		func->ad->dF_u_p_col[i] = func->ad->dF_z_col[jac_ind];
-		func->ad->dF_u_p_row[i] = func->ad->dF_z_row[jac_ind++];
-	}
-	for(i=0;i<func->ad->dF_w_p_n_nz;i++) {
-		func->ad->dF_w_p_col[i] = func->ad->dF_z_col[jac_ind];
-		func->ad->dF_w_p_row[i] = func->ad->dF_z_row[jac_ind++];
-	}
-	for(i=0;i<func->ad->dF_t_p_n_nz;i++) {
-		func->ad->dF_t_p_col[i] = func->ad->dF_z_col[jac_ind];
-		func->ad->dF_t_p_row[i] = func->ad->dF_z_row[jac_ind++];
-	}
 
-	/*
-  printf("%d, %d, %d, %d, %d, %d, %d\n", func->ad->dF_pi_n_nz,
+		for(i=0;i<func->ad->dF_dx_p_n_nz;i++) {
+			func->ad->dF_dx_p_col[i] = func->ad->dF_z_col[jac_ind];
+			func->ad->dF_dx_p_row[i] = func->ad->dF_z_row[jac_ind++];
+		}
+		for(i=0;i<func->ad->dF_x_p_n_nz;i++) {
+			func->ad->dF_x_p_col[i] = func->ad->dF_z_col[jac_ind];
+			func->ad->dF_x_p_row[i] = func->ad->dF_z_row[jac_ind++];
+		}
+		for(i=0;i<func->ad->dF_u_p_n_nz;i++) {
+			func->ad->dF_u_p_col[i] = func->ad->dF_z_col[jac_ind];
+			func->ad->dF_u_p_row[i] = func->ad->dF_z_row[jac_ind++];
+		}
+		for(i=0;i<func->ad->dF_w_p_n_nz;i++) {
+			func->ad->dF_w_p_col[i] = func->ad->dF_z_col[jac_ind];
+			func->ad->dF_w_p_row[i] = func->ad->dF_z_row[jac_ind++];
+		}
+
+  printf("%d, %d, %d, %d, %d, %d, %d, %d, %d, %d ,%d\n", func->ad->dF_pi_n_nz,
 	 func->ad->dF_pd_n_nz,
 	 func->ad->dF_dx_n_nz,
 	 func->ad->dF_x_n_nz,
 	 func->ad->dF_u_n_nz,
 	 func->ad->dF_w_n_nz,
-	 func->ad->dF_t_n_nz);
+	 func->ad->dF_t_n_nz,
+	 func->ad->dF_dx_p_n_nz,
+	 func->ad->dF_x_p_n_nz,
+	 func->ad->dF_u_p_n_nz,
+	 func->ad->dF_w_p_n_nz);
 
   for (i=0;i<func->ad->dF_z_n_nz;i++) {
     printf("*** %d, %d\n",func->ad->dF_z_row[i],func->ad->dF_z_col[i]);
@@ -344,8 +375,20 @@ int jmi_func_ad_init(jmi_t *jmi, jmi_func_t *func) {
   for (i=0;i<func->ad->dF_w_n_nz;i++) {
     printf("*** w: %d, %d\n",func->ad->dF_w_row[i],func->ad->dF_w_col[i]);
   }
-  for (i=0;i<func->ad->->dF_t_n_nz;i++) {
+  for (i=0;i<func->ad->dF_t_n_nz;i++) {
     printf("*** t: %d, %d\n",func->ad->dF_t_row[i],func->ad->dF_t_col[i]);
+  }
+  for (i=0;i<func->ad->dF_dx_p_n_nz;i++) {
+    printf("*** dx: %d, %d\n",func->ad->dF_dx_p_row[i],func->ad->dF_dx_p_col[i]);
+  }
+  for (i=0;i<func->ad->dF_x_p_n_nz;i++) {
+    printf("*** x: %d, %d\n",func->ad->dF_x_p_row[i],func->ad->dF_x_p_col[i]);
+  }
+  for (i=0;i<func->ad->dF_u_p_n_nz;i++) {
+    printf("*** u: %d, %d\n",func->ad->dF_u_p_row[i],func->ad->dF_u_p_col[i]);
+  }
+  for (i=0;i<func->ad->dF_w_p_n_nz;i++) {
+    printf("*** w: %d, %d\n",func->ad->dF_w_p_row[i],func->ad->dF_w_p_col[i]);
   }
 
   printf("-*** %d\n",func->ad->dF_z_n_nz);
@@ -354,8 +397,8 @@ int jmi_func_ad_init(jmi_t *jmi, jmi_func_t *func) {
     printf("--*** %d\n",s_z[i]? 1 : 0);
   }
 
-	 */
 
+*/
 	func->ad->z_work = new jmi_real_vec_t(jmi->n_z);
 
 
@@ -438,9 +481,9 @@ int jmi_func_ad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independe
 	}
 
 	if (sparsity == JMI_DER_SPARSE) {
-		for (i=0;i<func->dF_n_nz;i++) {
+		for (i=0;i<func->ad->dF_z_n_nz;i++) {
 			// Check if this particular entry should be included
-			if (jmi_check_Jacobian_column_index(jmi, independent_vars, mask, func->dF_col[i]-1) == 1 ) {
+			if (jmi_check_Jacobian_column_index(jmi, independent_vars, mask, func->ad->dF_z_col[i]-1) == 1 ) {
 				(*dF_n_nz)++;
 			}
 		}
@@ -510,6 +553,7 @@ int jmi_func_ad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 				}
 				break;
 			case JMI_DER_SPARSE:
+				// TODO: This may be a bit inefficient?
 				for(j=0;j<func->dF_n_nz;j++) {
 					if (func->dF_col[j]-1 == i) {
 						jac[jac_index++] = jac_[func->dF_row[j]-1];
@@ -570,7 +614,7 @@ int jmi_func_ad_delete(jmi_func_ad_t *jfa) {
 
 	free(jfa->dF_z_row);
 	free(jfa->dF_z_col);
-
+/*
 	free(jfa->dF_ci_row);
 	free(jfa->dF_ci_col);
 	free(jfa->dF_cd_row);
@@ -597,8 +641,7 @@ int jmi_func_ad_delete(jmi_func_ad_t *jfa) {
 	free(jfa->dF_u_p_col);
 	free(jfa->dF_w_p_row);
 	free(jfa->dF_w_p_col);
-	free(jfa->dF_t_p_row);
-	free(jfa->dF_t_p_col);
+	*/
 	delete jfa->z_work;
 	free(jfa);
 

@@ -39,10 +39,10 @@ static int jmi_opt_sim_ipopt_df(Index n, Number* x, Bool new_x,
 	}
 
 	if (jmi_opt_sim_df(nlp->jmi_opt_sim, df) == 0) {
-		printf("jmi_opt_sim_ipopt_df:end:df\n");
+/*		printf("jmi_opt_sim_ipopt_df:end:df\n");
 		for(i=0;i<n;i++){
 			printf("%d, %f\n",i,df[i]);
-		}
+		}*/
 		printf("]\n");
 		return TRUE;
 	} else {
@@ -229,8 +229,10 @@ int jmi_opt_sim_ipopt_new(jmi_opt_sim_ipopt_t **jmi_opt_sim_ipopt, jmi_opt_sim_t
 
  //   AddIpoptIntOption(nlp->nlp, "print_level", 10);
 
+	AddIpoptIntOption(nlp->nlp, "max_iter",10);
     AddIpoptStrOption(nlp->nlp, "derivative_test","first-order");
-//    AddIpoptStrOption(nlp->nlp, "derivative_test_print_all","yes");
+	AddIpoptNumOption(nlp->nlp, "derivative_test_pertubation",1e-6);
+    //    AddIpoptStrOption(nlp->nlp, "derivative_test_print_all","yes");
 	AddIpoptStrOption(nlp->nlp, "output_file", "ipopt.out");
 	AddIpoptStrOption(nlp->nlp, "hessian_approximation", "limited-memory");
 

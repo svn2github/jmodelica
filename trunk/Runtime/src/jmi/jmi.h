@@ -58,10 +58,8 @@
  *      w(t_i)     algebraic variables evaluated at time t_i, i \in 1..n_tp
  *      t_i        time instants i \in 1..n_tp
  *
- *      TODO: Should this order be changed?
- *      TODO: Why is t_i included here?
- *      q = [dx(t_1)^T,...,dx(t_n_tp)^T,  x(t_1)^T,...,x(t_n_tp)^T,
- *           u(t_1)^T,...,u(t_n_tp)^T,  w(t_1)^T,..., w(t_n_tp)^T, t_1, ...,t_n_tp]^T
+ *      q = [dx(t_1)^T, x(t_1)^T, u(t_1)^T, w(t_1)^T, ...,
+ *           dx(t_n_tp)^T, x(t_n_tp)^T, u(t_n_tp)^T, w(t_n_tp)^T]^T
  *
  *   All parameters, variables and point-wise evaluated variables are denoted z:
  *
@@ -178,7 +176,7 @@ int jmi_get_sizes(jmi_t* jmi, int* n_ci, int* n_cd, int* n_pi, int* n_pd,
  */
 int jmi_get_offsets(jmi_t* jmi, int* offs_ci, int* offs_cd, int* offs_pi, int* offs_pd,
 		int* offs_dx, int* offs_x, int* offs_u, int* offs_w, int* offs_t,
-		int* offs_dx_p, int* offs_x_p, int* offs_u_p, int* offs_w_p, int* offs_t_p);
+		int* offs_dx_p, int* offs_x_p, int* offs_u_p, int* offs_w_p);
 
 /*
  * Set the vector of time points included in the problem.
@@ -240,11 +238,10 @@ jmi_real_t* jmi_get_x(jmi_t* jmi);
 jmi_real_t* jmi_get_u(jmi_t* jmi);
 jmi_real_t* jmi_get_w(jmi_t* jmi);
 jmi_real_t* jmi_get_t(jmi_t* jmi);
-jmi_real_t* jmi_get_dx_p(jmi_t* jmi);
-jmi_real_t* jmi_get_x_p(jmi_t* jmi);
-jmi_real_t* jmi_get_u_p(jmi_t* jmi);
-jmi_real_t* jmi_get_w_p(jmi_t* jmi);
-jmi_real_t* jmi_get_t_p(jmi_t* jmi);
+jmi_real_t* jmi_get_dx_p(jmi_t* jmi,int i);
+jmi_real_t* jmi_get_x_p(jmi_t* jmi, int i);
+jmi_real_t* jmi_get_u_p(jmi_t* jmi, int i);
+jmi_real_t* jmi_get_w_p(jmi_t* jmi, int i);
 
 /**
  * Print a summary of the content of the jmi struct.

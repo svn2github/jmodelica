@@ -30,13 +30,25 @@ int test_function(test_function_t tf, char *name, int verbose, int *nbr_test_ok,
 static jmi_t *jmi;
 static int n_ci, n_cd, n_pi, n_pd, n_dx, n_x, n_u, n_w, n_tp, n_z, n_eq_F;
 static int offs_ci, offs_cd, offs_pi, offs_pd, offs_dx, offs_x, offs_u, offs_w, offs_t,
-    offs_dx_p, offs_x_p, offs_u_p, offs_w_p, offs_t_p;
+    offs_dx_p, offs_x_p, offs_u_p, offs_w_p;
+
 
 static int dF_n_nz;
 static int* dF_row;
 static int* dF_col;
-
 static int dF_n_dense;
+static jmi_real_t* res_F;
+static jmi_real_t* dF_sparse;
+static jmi_real_t* dF_dense;
+
+
+static int dJ_n_nz;
+static int* dJ_row;
+static int* dJ_col;
+static int dJ_n_dense;
+static jmi_real_t J;
+static jmi_real_t* dJ_sparse;
+static jmi_real_t* dJ_dense;
 
 static jmi_real_t* ci;
 static jmi_real_t* cd;
@@ -48,9 +60,15 @@ static jmi_real_t* u;
 static jmi_real_t* w;
 static jmi_real_t* t;
 
-static jmi_real_t* res_F;
-static jmi_real_t* dF_sparse;
-static jmi_real_t* dF_dense;
+static jmi_real_t* dx_p_1;
+static jmi_real_t* x_p_1;
+static jmi_real_t* u_p_1;
+static jmi_real_t* w_p_1;
+
+static jmi_real_t* dx_p_2;
+static jmi_real_t* x_p_2;
+static jmi_real_t* u_p_2;
+static jmi_real_t* w_p_2;
 
 static int* mask;
 
@@ -66,7 +84,7 @@ void init_model() {
 
 	jmi_get_sizes(jmi, &n_ci, &n_cd, &n_pi, &n_pd, &n_dx, &n_x, &n_u, &n_w, &n_tp, &n_z);
 	jmi_get_offsets(jmi, &offs_ci, &offs_cd, &offs_pi, &offs_pd, &offs_dx, &offs_x, &offs_u, &offs_w, &offs_t,
-		&offs_dx_p, &offs_x_p, &offs_u_p, &offs_w_p, &offs_t_p);
+		&offs_dx_p, &offs_x_p, &offs_u_p, &offs_w_p);
 	jmi_dae_get_sizes(jmi, &n_eq_F);
 
 	jmi_dae_dF_n_nz(jmi,JMI_DER_SYMBOLIC,&dF_n_nz);
@@ -74,6 +92,12 @@ void init_model() {
 	dF_col = (int*)calloc(dF_n_nz,sizeof(int));
 
 	dF_n_dense = n_z * n_eq_F;
+
+	jmi_opt_dJ_n_nz(jmi,JMI_DER_SYMBOLIC,&dJ_n_nz);
+	dJ_row = (int*)calloc(dJ_n_nz,sizeof(int));
+	dJ_col = (int*)calloc(dJ_n_nz,sizeof(int));
+
+	dJ_n_dense = n_z;
 
 	ci = jmi_get_ci(jmi);
 	cd = jmi_get_cd(jmi);
@@ -85,9 +109,22 @@ void init_model() {
 	w = jmi_get_w(jmi);
 	t = jmi_get_t(jmi);
 
+	dx_p_1 = jmi_get_dx_p(jmi,0);
+	x_p_1 = jmi_get_x_p(jmi,0);
+	u_p_1 = jmi_get_u_p(jmi,0);
+	w_p_1 = jmi_get_w_p(jmi,0);
+
+	dx_p_2 = jmi_get_dx_p(jmi,1);
+	x_p_2 = jmi_get_x_p(jmi,1);
+	u_p_2 = jmi_get_u_p(jmi,1);
+	w_p_2 = jmi_get_w_p(jmi,1);
+
 	res_F = (jmi_real_t*)calloc(n_eq_F,sizeof(jmi_real_t));
 	dF_sparse = (jmi_real_t*)calloc(dF_n_nz,sizeof(jmi_real_t));
 	dF_dense = (jmi_real_t*)calloc(dF_n_dense,sizeof(jmi_real_t));
+
+	dJ_sparse = (jmi_real_t*)calloc(dJ_n_nz,sizeof(jmi_real_t));
+	dJ_dense = (jmi_real_t*)calloc(dJ_n_dense,sizeof(jmi_real_t));
 
 	mask = (int*)calloc(n_z,sizeof(int));
 	for(i=0;i<n_z;i++) {
@@ -345,8 +382,8 @@ int test_8_dae_dF_dim(int verbose) {
 		printf("*** test_8_dae_dF_dim end ***\n");
 	}
 
-	int dF_n_nz_fix = 112;
-	int dF_n_cols_fix = 28; // Including variables for two time points
+	int dF_n_nz_fix = 26*4;
+	int dF_n_cols_fix = 26; // Including variables for two time points
 
 	if (dF_n_nz_fix == dF_n_nz_test && dF_n_cols_fix == dF_n_cols_test) {
 		return 0;
@@ -372,7 +409,7 @@ int test_9_dae_dF_dim(int verbose) {
 	}
 
 	int dF_n_nz_fix = 15;
-	int dF_n_cols_fix = 28;  // Including variables for two time points
+	int dF_n_cols_fix = 26;  // Including variables for two time points
 
 	if (dF_n_nz_fix == dF_n_nz_test && dF_n_cols_fix == dF_n_cols_test) {
 		return 0;
@@ -719,8 +756,8 @@ int test_19_dae_dF_ad_dim(int verbose) {
 		printf("*** test_19_dae_dF_ad_dim end ***\n");
 	}
 
-	int dF_n_nz_fix = 112;
-	int dF_n_cols_fix = 28; // Including variables for two time points
+	int dF_n_nz_fix = 26*4;
+	int dF_n_cols_fix = 26; // Including variables for two time points
 
 	if (dF_n_nz_fix == dF_n_nz_test && dF_n_cols_fix == dF_n_cols_test) {
 		return 0;
@@ -746,7 +783,7 @@ int test_20_dae_dF_ad_dim(int verbose) {
 	}
 
 	int dF_n_nz_fix = 15;
-	int dF_n_cols_fix = 28;  // Including variables for two time points
+	int dF_n_cols_fix = 26;  // Including variables for two time points
 
 	if (dF_n_nz_fix == dF_n_nz_test && dF_n_cols_fix == dF_n_cols_test) {
 		return 0;
@@ -1293,14 +1330,16 @@ int test_30_dae_dF_ad_eval(int verbose) {
 		err_sum += abs(jac_fix_dense[i] - dF_dense[i]);
 	}
 
+	mask[3] = 1;
+	mask[5] = 1;
+
+
 	if (err_sum<SMALL) {
 		return 0;
 	} else {
 		return -1;
 	}
 
-	mask[3] = 1;
-	mask[5] = 1;
 
 }
 
@@ -1359,17 +1398,787 @@ int test_31_dae_dF_ad_eval(int verbose) {
 		err_sum += abs(jac_fix_dense[i] - dF_dense[i]);
 	}
 
+
+	mask[3] = 1;
+	mask[5] = 1;
+
+
 	if (err_sum<SMALL) {
 		return 0;
 	} else {
 		return -1;
 	}
 
-	mask[3] = 1;
-	mask[5] = 1;
+}
+
+// Test evaluation of J
+int test_32_opt_J_eval(int verbose) {
+
+	int i;
+
+	// Initialize the variables
+    pi[0] = 2;
+    dx_p_1[0] = 1;
+    dx_p_1[1] = 2;
+    dx_p_1[2] = 3;
+    x_p_1[0] = 3;
+    x_p_1[1] = 4;
+    x_p_1[2] = 5;
+    u_p_1[0] = 6;
+    w_p_1[0] = 7;
+    dx_p_2[0] = 8;
+    dx_p_2[1] = 9;
+    dx_p_2[2] = 10;
+    x_p_2[0] = 11;
+    x_p_2[1] = 12;
+    x_p_2[2] = 13;
+    u_p_2[0] = 14;
+    w_p_2[0] = 15;
+
+	jmi_opt_J(jmi,&J);
+
+	jmi_real_t J_fix = 296;
+	jmi_real_t err = abs(J_fix - J);
+
+	if (verbose == 1) {
+		int i;
+		printf("*** test_32_opt_J_eval start ***\n");
+		printf("p = {%f}\n",pi[0]);
+		printf("dx_p_1 = {%f,%f,%f}\n",dx_p_1[0],dx_p_1[1],dx_p_1[2]);
+		printf("x_p_1 = {%f,%f,%f}\n",x_p_1[0],x_p_1[1],x_p_1[2]);
+		printf("u_p_1 = {%f}\n",u_p_1[0]);
+		printf("w_p_1 = {%f}\n",w_p_1[0]);
+		printf("dx_p_2 = {%f,%f,%f}\n",dx_p_2[0],dx_p_2[1],dx_p_2[2]);
+		printf("x_p_2 = {%f,%f,%f}\n",x_p_2[0],x_p_2[1],x_p_2[2]);
+		printf("u_p_2 = {%f}\n",u_p_2[0]);
+		printf("w_p_2 = {%f}\n",w_p_2[0]);
+
+
+		printf("J=%f\n",J);
+		printf("*** test_32_opt_J_eval end ***\n");
+	}
+
+	if (err<SMALL) {
+		return 0;
+	} else {
+		return -1;
+	}
 
 }
 
+// Test computation of dJ sparse indices
+int test_33_opt_dJ_indices(int verbose) {
+
+	int i;
+
+	jmi_opt_dJ_nz_indices(jmi,JMI_DER_SYMBOLIC,JMI_DER_ALL,mask,dJ_row,dJ_col);
+
+	if (verbose == 1) {
+		int i;
+		printf("*** test_33_opt_dJ_indices start ***\n");
+		printf("Number of non-zeros in the J Jacobian: %d\n",dJ_n_nz);
+		for (i=0;i<dJ_n_nz;i++) {
+			printf("%d, %d\n",dJ_row[i],dJ_col[i]);
+		}
+		printf("*** test_33_dae_dJ_indices end ***\n");
+	}
+
+	int dJ_row_fix[5] = {1,1,1,1,1};
+	int dJ_col_fix[5] = {1,16,18,24,26};
+
+	int err_sum = 0;
+	for (i=0;i<dJ_n_nz;i++) {
+		err_sum += abs(dJ_row_fix[i] - dJ_row[i]);
+		err_sum += abs(dJ_col_fix[i] - dJ_col[i]);
+	}
+
+	if (err_sum==0) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+}
+
+// Test computation of dJ dimenstions
+int test_34_opt_dJ_dim(int verbose) {
+
+	int dJ_n_nz_test;
+	int dJ_n_cols_test;
+    jmi_opt_dJ_dim(jmi,JMI_DER_SYMBOLIC,JMI_DER_DENSE_ROW_MAJOR,JMI_DER_X_P,mask,&dJ_n_cols_test,&dJ_n_nz_test);
+
+	if (verbose == 1) {
+		printf("*** test_34_opt_dJ_dim start ***\n");
+		printf("Dense dJ_dx_p: dJ_n_cols: %d, dJ_n_nz: %d\n", dJ_n_cols_test, dJ_n_nz_test);
+		printf("*** test_34_opt_dJ_dim end ***\n");
+	}
+
+	int dJ_n_nz_fix = 6;
+	int dJ_n_cols_fix = 6;
+
+	if (dJ_n_nz_fix == dJ_n_nz_test && dJ_n_cols_fix == dJ_n_cols_test) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+}
+
+// Test computation of dJ dimenstions
+int test_35_opt_dJ_dim(int verbose) {
+
+	int dJ_n_nz_test;
+	int dJ_n_cols_test;
+    jmi_opt_dJ_dim(jmi,JMI_DER_SYMBOLIC,JMI_DER_SPARSE,JMI_DER_X_P | JMI_DER_W_P,mask,&dJ_n_cols_test,&dJ_n_nz_test);
+
+	if (verbose == 1) {
+		printf("*** test_35_opt_dJ_dim start ***\n");
+		printf("sparse dJ_dx_p_dw_p: dJ_n_cols: %d, dJ_n_nz: %d\n", dJ_n_cols_test, dJ_n_nz_test);
+		printf("*** test_35_opt_dJ_dim end ***\n");
+	}
+
+	int dJ_n_nz_fix = 4;
+	int dJ_n_cols_fix = 8;
+
+	if (dJ_n_nz_fix == dJ_n_nz_test && dJ_n_cols_fix == dJ_n_cols_test) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+}
+
+// Test computation of dJ dimenstions
+int test_36_opt_dJ_dim(int verbose) {
+
+	mask[16-1] = 0; // mask x_p_1[2]
+	mask[26-1] = 0; // mask w_p_2[0]
+
+	int dJ_n_nz_test;
+	int dJ_n_cols_test;
+    jmi_opt_dJ_dim(jmi,JMI_DER_SYMBOLIC,JMI_DER_SPARSE,JMI_DER_PI | JMI_DER_X_P | JMI_DER_W_P,mask,&dJ_n_cols_test,&dJ_n_nz_test);
+
+	if (verbose == 1) {
+		printf("*** test_36_opt_dJ_dim start ***\n");
+		printf("sparse dJ_pi_dx_p_dw_p (x_p_1(2), w_p_2(0) masked): dJ_n_cols: %d, dJ_n_nz: %d\n", dJ_n_cols_test, dJ_n_nz_test);
+		printf("*** test_36_opt_dJ_dim end ***\n");
+	}
+
+	int dJ_n_nz_fix = 3;
+	int dJ_n_cols_fix = 7;
+
+	mask[16-1] = 1;
+	mask[26-1] = 1;
+
+	if (dJ_n_nz_fix == dJ_n_nz_test && dJ_n_cols_fix == dJ_n_cols_test) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+}
+
+// Test computation of dJ sparse indices
+int test_37_opt_dJ_indices(int verbose) {
+
+	int i;
+
+	mask[16-1] = 0; // mask x_p_1[2]
+	mask[26-1] = 0; // mask w_p_2[0]
+
+	int dJ_n_nz_test;
+	int dJ_n_cols_test;
+
+    jmi_opt_dJ_dim(jmi,JMI_DER_SYMBOLIC,JMI_DER_SPARSE,JMI_DER_PI | JMI_DER_X_P | JMI_DER_W_P,mask,&dJ_n_cols_test,&dJ_n_nz_test);
+
+	jmi_opt_dJ_nz_indices(jmi,JMI_DER_SYMBOLIC,JMI_DER_PI | JMI_DER_X_P | JMI_DER_W_P,mask,dJ_row,dJ_col);
+
+	if (verbose == 1) {
+		int i;
+		printf("*** test_37_opt_dJ_indices start ***\n");
+		printf("Number of non-zeros in the J Jacobian: %d\n",dJ_n_nz_test);
+		for (i=0;i<dJ_n_nz_test;i++) {
+			printf("%d, %d\n",dJ_row[i],dJ_col[i]);
+		}
+		printf("*** test_37_dae_dJ_indices end ***\n");
+	}
+
+	int dJ_row_fix[3] = {1,1,1};
+	int dJ_col_fix[3] = {1,4,7};
+
+	int err_sum = 0;
+	for (i=0;i<dJ_n_nz_test;i++) {
+		err_sum += abs(dJ_row_fix[i] - dJ_row[i]);
+		err_sum += abs(dJ_col_fix[i] - dJ_col[i]);
+	}
+
+	mask[16-1] = 1;
+	mask[26-1] = 1;
+
+	if (err_sum==0) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+}
+
+
+
+// Test evaluation of dJ using JMI_DER_SPARSE
+int test_38_opt_dJ_eval(int verbose) {
+
+	mask[16-1] = 0; // mask x_p_1[2]
+	mask[26-1] = 0; // mask w_p_2[0]
+
+	int i;
+	// Initialize the variables
+    pi[0] = 2;
+    dx_p_1[0] = 1;
+    dx_p_1[1] = 2;
+    dx_p_1[2] = 3;
+    x_p_1[0] = 3;
+    x_p_1[1] = 4;
+    x_p_1[2] = 5;
+    u_p_1[0] = 6;
+    w_p_1[0] = 7;
+    dx_p_2[0] = 8;
+    dx_p_2[1] = 9;
+    dx_p_2[2] = 10;
+    x_p_2[0] = 11;
+    x_p_2[1] = 12;
+    x_p_2[2] = 13;
+    u_p_2[0] = 17;
+    w_p_2[0] = 18;
+
+	int dJ_n_nz_test;
+	int dJ_n_cols_test;
+    jmi_opt_dJ_dim(jmi,JMI_DER_SYMBOLIC,JMI_DER_SPARSE,
+    		JMI_DER_PI | JMI_DER_X_P | JMI_DER_W_P,mask,
+    		         &dJ_n_cols_test,&dJ_n_nz_test);
+
+	jmi_opt_dJ(jmi,JMI_DER_SYMBOLIC,JMI_DER_SPARSE,
+			JMI_DER_PI | JMI_DER_X_P | JMI_DER_W_P,mask,dJ_sparse);
+
+	if (verbose == 1) {
+		printf("*** test_38_opt_dJ_eval start ***\n");
+		printf("Jacobian dJ (x_p_1(2), w_p_2(0) masked) (sparse):\n");
+		for (i=0;i<dJ_n_nz_test;i++) {
+			printf("%f\n",dJ_sparse[i]);
+		}
+		printf("*** test_38_opt_dJ_eval end ***\n");
+	}
+
+	jmi_real_t jac_fix[3] = {4,2*7,1};
+	jmi_real_t err_sum = 0;
+	for (i=0;i<dJ_n_nz_test;i++) {
+		err_sum += abs(jac_fix[i] - dJ_sparse[i]);
+	}
+
+	mask[16-1] = 1;
+	mask[26-1] = 1;
+
+	if (err_sum<SMALL) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+}
+
+// Test evaluation of dJ using JMI_DER_SPARSE
+int test_39_opt_dJ_eval(int verbose) {
+
+	int i;
+	// Initialize the variables
+    pi[0] = 2;
+    dx_p_1[0] = 1;
+    dx_p_1[1] = 2;
+    dx_p_1[2] = 3;
+    x_p_1[0] = 3;
+    x_p_1[1] = 4;
+    x_p_1[2] = 5;
+    u_p_1[0] = 6;
+    w_p_1[0] = 7;
+    dx_p_2[0] = 8;
+    dx_p_2[1] = 9;
+    dx_p_2[2] = 10;
+    x_p_2[0] = 11;
+    x_p_2[1] = 12;
+    x_p_2[2] = 13;
+    u_p_2[0] = 17;
+    w_p_2[0] = 18;
+
+	int dJ_n_nz_test;
+	int dJ_n_cols_test;
+    jmi_opt_dJ_dim(jmi,JMI_DER_SYMBOLIC,JMI_DER_SPARSE,
+    		JMI_DER_PI | JMI_DER_X_P | JMI_DER_W_P,mask,
+    		         &dJ_n_cols_test,&dJ_n_nz_test);
+
+	jmi_opt_dJ(jmi,JMI_DER_SYMBOLIC,JMI_DER_SPARSE,
+			JMI_DER_PI | JMI_DER_X_P | JMI_DER_W_P,mask,dJ_sparse);
+
+	if (verbose == 1) {
+		printf("*** test_39_opt_dJ_eval start ***\n");
+		printf("Jacobian dJ (sparse):\n");
+		for (i=0;i<dJ_n_nz_test;i++) {
+			printf("%f\n",dJ_sparse[i]);
+		}
+		printf("*** test_39_opt_dJ_eval end ***\n");
+	}
+
+	jmi_real_t jac_fix[5] = {4,1,2*7,1,2*18};
+	jmi_real_t err_sum = 0;
+	for (i=0;i<dJ_n_nz_test;i++) {
+		err_sum += abs(jac_fix[i] - dJ_sparse[i]);
+	}
+
+	if (err_sum<SMALL) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+}
+
+// Test evaluation of dJ using JMI_DER_SPARSE
+int test_40_opt_dJ_eval(int verbose) {
+
+	int i;
+	// Initialize the variables
+    pi[0] = 2;
+    dx_p_1[0] = 1;
+    dx_p_1[1] = 2;
+    dx_p_1[2] = 3;
+    x_p_1[0] = 3;
+    x_p_1[1] = 4;
+    x_p_1[2] = 5;
+    u_p_1[0] = 6;
+    w_p_1[0] = 7;
+    dx_p_2[0] = 8;
+    dx_p_2[1] = 9;
+    dx_p_2[2] = 10;
+    x_p_2[0] = 11;
+    x_p_2[1] = 12;
+    x_p_2[2] = 13;
+    u_p_2[0] = 17;
+    w_p_2[0] = 18;
+
+	int dJ_n_nz_test;
+	int dJ_n_cols_test;
+    jmi_opt_dJ_dim(jmi,JMI_DER_SYMBOLIC,JMI_DER_DENSE_COL_MAJOR,
+    		JMI_DER_PI | JMI_DER_X_P | JMI_DER_W_P,mask,
+    		         &dJ_n_cols_test,&dJ_n_nz_test);
+
+	jmi_opt_dJ(jmi,JMI_DER_SYMBOLIC,JMI_DER_DENSE_COL_MAJOR,
+			JMI_DER_PI | JMI_DER_X_P | JMI_DER_W_P,mask,dJ_dense);
+
+	if (verbose == 1) {
+		printf("*** test_40_opt_dJ_eval start ***\n");
+		printf("Jacobian dJ (dense):\n");
+		for (i=0;i<dJ_n_nz_test;i++) {
+			printf("%f\n",dJ_dense[i]);
+		}
+		printf("*** test_40_opt_dJ_eval end ***\n");
+	}
+
+	jmi_real_t jac_fix[9] = {4,0,0,1,2*7,0,0,1,2*18};
+	jmi_real_t err_sum = 0;
+	for (i=0;i<dJ_n_nz_test;i++) {
+		err_sum += abs(jac_fix[i] - dJ_dense[i]);
+	}
+
+	if (err_sum<SMALL) {
+		return 0;
+	} else {
+		return -1;
+	}
+}
+
+
+// Test evaluation of J
+int test_41_opt_J_ad_eval(int verbose) {
+
+	int i;
+
+	// Initialize the variables
+    pi[0] = 2;
+    dx_p_1[0] = 1;
+    dx_p_1[1] = 2;
+    dx_p_1[2] = 3;
+    x_p_1[0] = 3;
+    x_p_1[1] = 4;
+    x_p_1[2] = 5;
+    u_p_1[0] = 6;
+    w_p_1[0] = 7;
+    dx_p_2[0] = 8;
+    dx_p_2[1] = 9;
+    dx_p_2[2] = 10;
+    x_p_2[0] = 11;
+    x_p_2[1] = 12;
+    x_p_2[2] = 13;
+    u_p_2[0] = 14;
+    w_p_2[0] = 15;
+
+	jmi_opt_J(jmi,&J);
+
+	jmi_real_t J_fix = 296;
+	jmi_real_t err = abs(J_fix - J);
+
+	if (verbose == 1) {
+		int i;
+		printf("*** test_41_opt_J_ad_eval start ***\n");
+		printf("p = {%f}\n",pi[0]);
+		printf("dx_p_1 = {%f,%f,%f}\n",dx_p_1[0],dx_p_1[1],dx_p_1[2]);
+		printf("x_p_1 = {%f,%f,%f}\n",x_p_1[0],x_p_1[1],x_p_1[2]);
+		printf("u_p_1 = {%f}\n",u_p_1[0]);
+		printf("w_p_1 = {%f}\n",w_p_1[0]);
+		printf("dx_p_2 = {%f,%f,%f}\n",dx_p_2[0],dx_p_2[1],dx_p_2[2]);
+		printf("x_p_2 = {%f,%f,%f}\n",x_p_2[0],x_p_2[1],x_p_2[2]);
+		printf("u_p_2 = {%f}\n",u_p_2[0]);
+		printf("w_p_2 = {%f}\n",w_p_2[0]);
+
+
+		printf("J=%f\n",J);
+		printf("*** test_41_opt_J_ad_eval end ***\n");
+	}
+
+	if (err<SMALL) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+}
+
+// Test computation of dJ sparse indices
+int test_42_opt_dJ_ad_indices(int verbose) {
+
+	int i;
+
+	jmi_opt_dJ_nz_indices(jmi,JMI_DER_CPPAD,JMI_DER_ALL,mask,dJ_row,dJ_col);
+
+	if (verbose == 1) {
+		int i;
+		printf("*** test_42_opt_dJ_ad_indices start ***\n");
+		printf("Number of non-zeros in the J Jacobian: %d\n",dJ_n_nz);
+		for (i=0;i<dJ_n_nz;i++) {
+			printf("%d, %d\n",dJ_row[i],dJ_col[i]);
+		}
+		printf("*** test_42_dae_dJ_ad_indices end ***\n");
+	}
+
+	int dJ_row_fix[5] = {1,1,1,1,1};
+	int dJ_col_fix[5] = {1,16,18,24,26};
+
+	int err_sum = 0;
+	for (i=0;i<dJ_n_nz;i++) {
+		err_sum += abs(dJ_row_fix[i] - dJ_row[i]);
+		err_sum += abs(dJ_col_fix[i] - dJ_col[i]);
+	}
+
+	if (err_sum==0) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+}
+
+// Test computation of dJ dimenstions
+int test_43_opt_dJ_ad_dim(int verbose) {
+
+	int dJ_n_nz_test;
+	int dJ_n_cols_test;
+    jmi_opt_dJ_dim(jmi,JMI_DER_CPPAD,JMI_DER_DENSE_ROW_MAJOR,JMI_DER_X_P,mask,&dJ_n_cols_test,&dJ_n_nz_test);
+
+	if (verbose == 1) {
+		printf("*** test_43_optJ_ad_dim start ***\n");
+		printf("Dense dJ_dx_p: dJ_n_cols: %d, dJ_n_nz: %d\n", dJ_n_cols_test, dJ_n_nz_test);
+		printf("*** test_43_optJ_ad_dim end ***\n");
+	}
+
+	int dJ_n_nz_fix = 6;
+	int dJ_n_cols_fix = 6;
+
+	if (dJ_n_nz_fix == dJ_n_nz_test && dJ_n_cols_fix == dJ_n_cols_test) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+}
+
+// Test computation of dJ dimenstions
+int test_44_opt_dJ_ad_dim(int verbose) {
+
+	int dJ_n_nz_test;
+	int dJ_n_cols_test;
+    jmi_opt_dJ_dim(jmi,JMI_DER_CPPAD,JMI_DER_SPARSE,JMI_DER_X_P | JMI_DER_W_P,mask,&dJ_n_cols_test,&dJ_n_nz_test);
+
+	if (verbose == 1) {
+		printf("*** test_44_optJ_ad_dim start ***\n");
+		printf("sparse dJ_dx_p_dw_p: dJ_n_cols: %d, dJ_n_nz: %d\n", dJ_n_cols_test, dJ_n_nz_test);
+		printf("*** test_44_optJ_ad_dim end ***\n");
+	}
+
+	int dJ_n_nz_fix = 4;
+	int dJ_n_cols_fix = 8;
+
+	if (dJ_n_nz_fix == dJ_n_nz_test && dJ_n_cols_fix == dJ_n_cols_test) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+}
+
+// Test computation of dJ dimenstions
+int test_45_opt_dJ_ad_dim(int verbose) {
+
+	mask[16-1] = 0; // mask x_p_1[2]
+	mask[26-1] = 0; // mask w_p_2[0]
+
+	int dJ_n_nz_test;
+	int dJ_n_cols_test;
+    jmi_opt_dJ_dim(jmi,JMI_DER_CPPAD,JMI_DER_SPARSE,JMI_DER_PI | JMI_DER_X_P | JMI_DER_W_P,mask,&dJ_n_cols_test,&dJ_n_nz_test);
+
+	if (verbose == 1) {
+		printf("*** test_45_optJ_ad_dim start ***\n");
+		printf("sparse dJ_pi_dx_p_dw_p (x_p_1(2), w_p_2(0) masked): dJ_n_cols: %d, dJ_n_nz: %d\n", dJ_n_cols_test, dJ_n_nz_test);
+		printf("*** test_45_optJ_ad_dim end ***\n");
+	}
+
+	int dJ_n_nz_fix = 3;
+	int dJ_n_cols_fix = 7;
+
+	mask[16-1] = 1;
+	mask[26-1] = 1;
+
+	if (dJ_n_nz_fix == dJ_n_nz_test && dJ_n_cols_fix == dJ_n_cols_test) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+}
+
+// Test computation of dJ sparse indices
+int test_46_opt_dJ_ad_indices(int verbose) {
+
+	int i;
+
+	mask[16-1] = 0; // mask x_p_1[2]
+	mask[26-1] = 0; // mask w_p_2[0]
+
+	int dJ_n_nz_test;
+	int dJ_n_cols_test;
+
+    jmi_opt_dJ_dim(jmi,JMI_DER_CPPAD,JMI_DER_SPARSE,JMI_DER_PI | JMI_DER_X_P | JMI_DER_W_P,mask,&dJ_n_cols_test,&dJ_n_nz_test);
+
+	jmi_opt_dJ_nz_indices(jmi,JMI_DER_CPPAD,JMI_DER_PI | JMI_DER_X_P | JMI_DER_W_P,mask,dJ_row,dJ_col);
+
+	if (verbose == 1) {
+		int i;
+		printf("*** test_46_optJ_ad_indices start ***\n");
+		printf("Number of non-zeros in the J Jacobian: %d\n",dJ_n_nz_test);
+		for (i=0;i<dJ_n_nz_test;i++) {
+			printf("%d, %d\n",dJ_row[i],dJ_col[i]);
+		}
+		printf("*** test_46_daeJ_ad_indices end ***\n");
+	}
+
+	int dJ_row_fix[3] = {1,1,1};
+	int dJ_col_fix[3] = {1,4,7};
+
+	int err_sum = 0;
+	for (i=0;i<dJ_n_nz_test;i++) {
+		err_sum += abs(dJ_row_fix[i] - dJ_row[i]);
+		err_sum += abs(dJ_col_fix[i] - dJ_col[i]);
+	}
+
+	mask[16-1] = 1;
+	mask[26-1] = 1;
+
+	if (err_sum==0) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+}
+
+
+
+// Test evaluation of dJ using JMI_DER_SPARSE
+int test_47_opt_dJ_ad_eval(int verbose) {
+
+	mask[18-1] = 0; // mask x_p_1[2]
+	mask[24-1] = 0; // mask w_p_2[0]
+
+	int i;
+	// Initialize the variables
+    pi[0] = 2;
+    dx_p_1[0] = 1;
+    dx_p_1[1] = 2;
+    dx_p_1[2] = 3;
+    x_p_1[0] = 3;
+    x_p_1[1] = 4;
+    x_p_1[2] = 5;
+    u_p_1[0] = 6;
+    w_p_1[0] = 7;
+    dx_p_2[0] = 8;
+    dx_p_2[1] = 9;
+    dx_p_2[2] = 10;
+    x_p_2[0] = 11;
+    x_p_2[1] = 12;
+    x_p_2[2] = 13;
+    u_p_2[0] = 17;
+    w_p_2[0] = 18;
+
+	int dJ_n_nz_test;
+	int dJ_n_cols_test;
+    jmi_opt_dJ_dim(jmi,JMI_DER_CPPAD,JMI_DER_SPARSE,
+    		JMI_DER_PI | JMI_DER_X_P | JMI_DER_W_P,mask,
+    		         &dJ_n_cols_test,&dJ_n_nz_test);
+
+	jmi_opt_dJ(jmi,JMI_DER_CPPAD,JMI_DER_SPARSE,
+			JMI_DER_PI | JMI_DER_X_P | JMI_DER_W_P,mask,dJ_sparse);
+
+	if (verbose == 1) {
+		printf("*** test_47_optJ_ad_eval start ***\n");
+		printf("Jacobian dJ (x_p_1(2), w_p_2(0) masked) (sparse):\n");
+		for (i=0;i<dJ_n_nz_test;i++) {
+			printf("%f\n",dJ_sparse[i]);
+		}
+		printf("*** test_47_optJ_ad_eval end ***\n");
+	}
+
+	jmi_real_t jac_fix[3] = {4,1,2*18};
+	jmi_real_t err_sum = 0;
+	for (i=0;i<dJ_n_nz_test;i++) {
+		err_sum += abs(jac_fix[i] - dJ_sparse[i]);
+	}
+
+	mask[18-1] = 1;
+	mask[24-1] = 1;
+
+	if (err_sum<SMALL) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+}
+
+// Test evaluation of dJ using JMI_DER_SPARSE
+int test_48_opt_dJ_ad_eval(int verbose) {
+
+	int i;
+	// Initialize the variables
+    pi[0] = 2;
+    dx_p_1[0] = 1;
+    dx_p_1[1] = 2;
+    dx_p_1[2] = 3;
+    x_p_1[0] = 3;
+    x_p_1[1] = 4;
+    x_p_1[2] = 5;
+    u_p_1[0] = 6;
+    w_p_1[0] = 7;
+    dx_p_2[0] = 8;
+    dx_p_2[1] = 9;
+    dx_p_2[2] = 10;
+    x_p_2[0] = 11;
+    x_p_2[1] = 12;
+    x_p_2[2] = 13;
+    u_p_2[0] = 17;
+    w_p_2[0] = 18;
+
+	int dJ_n_nz_test;
+	int dJ_n_cols_test;
+    jmi_opt_dJ_dim(jmi,JMI_DER_CPPAD,JMI_DER_SPARSE,
+    		JMI_DER_PI | JMI_DER_X_P | JMI_DER_W_P,mask,
+    		         &dJ_n_cols_test,&dJ_n_nz_test);
+
+	jmi_opt_dJ(jmi,JMI_DER_CPPAD,JMI_DER_SPARSE,
+			JMI_DER_PI | JMI_DER_X_P | JMI_DER_W_P,mask,dJ_sparse);
+
+	if (verbose == 1) {
+		printf("*** test_48_opt_dJ_ad_eval start ***\n");
+		printf("Jacobian dJ (sparse):\n");
+		for (i=0;i<dJ_n_nz_test;i++) {
+			printf("%f\n",dJ_sparse[i]);
+		}
+		printf("*** test_48_optJ_ad_eval end ***\n");
+	}
+
+	jmi_real_t jac_fix[5] = {4,1,2*7,1,2*18};
+	jmi_real_t err_sum = 0;
+	for (i=0;i<dJ_n_nz_test;i++) {
+		err_sum += abs(jac_fix[i] - dJ_sparse[i]);
+	}
+
+	if (err_sum<SMALL) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+}
+
+// Test evaluation of dJ using JMI_DER_SPARSE
+int test_49_opt_dJ_ad_eval(int verbose) {
+
+	int i;
+	// Initialize the variables
+    pi[0] = 2;
+    dx_p_1[0] = 1;
+    dx_p_1[1] = 2;
+    dx_p_1[2] = 3;
+    x_p_1[0] = 3;
+    x_p_1[1] = 4;
+    x_p_1[2] = 5;
+    u_p_1[0] = 6;
+    w_p_1[0] = 7;
+    dx_p_2[0] = 8;
+    dx_p_2[1] = 9;
+    dx_p_2[2] = 10;
+    x_p_2[0] = 11;
+    x_p_2[1] = 12;
+    x_p_2[2] = 13;
+    u_p_2[0] = 17;
+    w_p_2[0] = 18;
+
+	int dJ_n_nz_test;
+	int dJ_n_cols_test;
+    jmi_opt_dJ_dim(jmi,JMI_DER_CPPAD,JMI_DER_DENSE_COL_MAJOR,
+    		JMI_DER_PI | JMI_DER_X_P | JMI_DER_W_P,mask,
+    		         &dJ_n_cols_test,&dJ_n_nz_test);
+
+	jmi_opt_dJ(jmi,JMI_DER_CPPAD,JMI_DER_DENSE_COL_MAJOR,
+			JMI_DER_PI | JMI_DER_X_P | JMI_DER_W_P,mask,dJ_dense);
+
+	if (verbose == 1) {
+		printf("*** test_49_optJ_ad_eval start ***\n");
+		printf("Jacobian dJ (dense):\n");
+		for (i=0;i<dJ_n_nz_test;i++) {
+			printf("%f\n",dJ_dense[i]);
+		}
+		printf("*** test_49_optJ_ad_eval end ***\n");
+	}
+
+	jmi_real_t jac_fix[9] = {4,0,0,1,2*7,0,0,1,2*18};
+	jmi_real_t err_sum = 0;
+	for (i=0;i<dJ_n_nz_test;i++) {
+		err_sum += abs(jac_fix[i] - dJ_dense[i]);
+	}
+
+	if (err_sum<SMALL) {
+		return 0;
+	} else {
+		return -1;
+	}
+}
 
 int main(int argv, char* argc[])
 {
@@ -1422,6 +2231,26 @@ int main(int argv, char* argc[])
     test_function(&test_29_dae_dF_ad_eval, "test_29_dae_dF_ad_eval",TEST_VERB,&test_ok, &test_fail);
     test_function(&test_30_dae_dF_ad_eval, "test_30_dae_dF_ad_eval",TEST_VERB,&test_ok, &test_fail);
     test_function(&test_31_dae_dF_ad_eval, "test_31_dae_dF_ad_eval",TEST_VERB,&test_ok, &test_fail);
+
+	test_function(&test_32_opt_J_eval, "test_32_opt_J_eval",TEST_VERB,&test_ok, &test_fail);
+	test_function(&test_33_opt_dJ_indices, "test_33_opt_dJ_indices",TEST_VERB,&test_ok, &test_fail);
+	test_function(&test_34_opt_dJ_dim, "test_34_opt_dJ_dim",TEST_VERB,&test_ok, &test_fail);
+	test_function(&test_35_opt_dJ_dim, "test_35_opt_dJ_dim",TEST_VERB,&test_ok, &test_fail);
+	test_function(&test_36_opt_dJ_dim, "test_36_opt_dJ_dim",TEST_VERB,&test_ok, &test_fail);
+	test_function(&test_37_opt_dJ_indices, "test_37_opt_dJ_indices",TEST_VERB,&test_ok, &test_fail);
+    test_function(&test_38_opt_dJ_eval, "test_38_opt_dJ_eval",TEST_VERB,&test_ok, &test_fail);
+    test_function(&test_39_opt_dJ_eval, "test_39_opt_dJ_eval",TEST_VERB,&test_ok, &test_fail);
+    test_function(&test_40_opt_dJ_eval, "test_40_opt_dJ_eval",TEST_VERB,&test_ok, &test_fail);
+
+	test_function(&test_41_opt_J_ad_eval, "test_41_opt_J_ad_eval",TEST_VERB,&test_ok, &test_fail);
+	test_function(&test_42_opt_dJ_ad_indices, "test_42_opt_dJ_ad_indices",TEST_VERB,&test_ok, &test_fail);
+	test_function(&test_43_opt_dJ_ad_dim, "test_43_opt_dJ_ad_dim",TEST_VERB,&test_ok, &test_fail);
+	test_function(&test_44_opt_dJ_ad_dim, "test_44_opt_dJ_ad_dim",TEST_VERB,&test_ok, &test_fail);
+	test_function(&test_45_opt_dJ_ad_dim, "test_45_opt_dJ_ad_dim",TEST_VERB,&test_ok, &test_fail);
+	test_function(&test_46_opt_dJ_ad_indices, "test_46_opt_ad_dJ_indices",TEST_VERB,&test_ok, &test_fail);
+    test_function(&test_47_opt_dJ_ad_eval, "test_47_opt_dJ_ad_eval",TEST_VERB,&test_ok, &test_fail);
+    test_function(&test_48_opt_dJ_ad_eval, "test_48_opt_dJ_ad_eval",TEST_VERB,&test_ok, &test_fail);
+    test_function(&test_49_opt_dJ_ad_eval, "test_49_opt_dJ_ad_eval",TEST_VERB,&test_ok, &test_fail);
 
 
     printf(">>> Number of tests run:    %d\n", test_ok + test_fail);

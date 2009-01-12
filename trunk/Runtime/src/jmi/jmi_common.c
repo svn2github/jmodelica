@@ -98,7 +98,7 @@ int jmi_func_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, int independent_vars,
 
 }
 
-// Convenience function for computing the dimensions of an AD Jacobian.
+// Convenience function for computing the dimensions of the Jacobian.
 int jmi_func_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz) {
 	if (func->dF==NULL) {
@@ -118,6 +118,7 @@ int jmi_func_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independent_
 
 	if (sparsity == JMI_DER_SPARSE) {
 		for (i=0;i<func->dF_n_nz;i++) {
+//			printf(">>>>>>>>>>>>>>>>>>\n");
 			// Check if this particular entry should be included
 			if (jmi_check_Jacobian_column_index(jmi, independent_vars, mask, func->dF_col[i]-1) == 1 ) {
 				(*dF_n_nz)++;
@@ -150,7 +151,7 @@ int jmi_get_sizes(jmi_t* jmi, int* n_ci, int* n_cd, int* n_pi, int* n_pd,
 
 int jmi_get_offsets(jmi_t* jmi, int* offs_ci, int* offs_cd, int* offs_pi, int* offs_pd,
 		int* offs_dx, int* offs_x, int* offs_u, int* offs_w, int *offs_t,
-		int* offs_dx_p, int* offs_x_p, int* offs_u_p, int* offs_w_p, int *offs_t_p) {
+		int* offs_dx_p, int* offs_x_p, int* offs_u_p, int* offs_w_p) {
 	*offs_ci = jmi->offs_ci;
 	*offs_cd = jmi->offs_cd;
 	*offs_pi = jmi->offs_pi;
@@ -164,7 +165,6 @@ int jmi_get_offsets(jmi_t* jmi, int* offs_ci, int* offs_cd, int* offs_pi, int* o
 	*offs_x_p = jmi->offs_x_p;
 	*offs_u_p = jmi->offs_u_p;
 	*offs_w_p = jmi->offs_w_p;
-	*offs_t_p = jmi->offs_t_p;
 
 	return 0;
 }
@@ -250,6 +250,8 @@ int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t J,
 }
 
 int jmi_variable_type(jmi_t *jmi, int col_index) {
+	int i;
+
     if (col_index>=jmi->offs_ci && col_index<jmi->offs_cd) {
     	return JMI_DER_CI;
     } else if (col_index >= jmi->offs_cd && col_index < jmi->offs_pi) {
@@ -268,20 +270,25 @@ int jmi_variable_type(jmi_t *jmi, int col_index) {
     	return JMI_DER_W;
     } else if (col_index>=jmi->offs_t && col_index<jmi->offs_dx_p) {
     	return JMI_DER_T;
-    } else if (col_index>=jmi->offs_dx_p && col_index<jmi->offs_x_p) {
-    	return JMI_DER_DX_P;
-    } else if (col_index>=jmi->offs_x_p && col_index<jmi->offs_u_p) {
-    	return JMI_DER_X_P;
-    } else if (col_index>=jmi->offs_u_p && col_index<jmi->offs_w_p) {
-    	return JMI_DER_U_P;
-    } else if (col_index>=jmi->offs_w_p && col_index<jmi->offs_t_p) {
-    	return JMI_DER_W_P;
-    } else if (col_index>=jmi->offs_t_p && col_index<jmi->n_z) {
-    	return JMI_DER_T_P;
-    } else {
-    	return -1;
     }
 
+    for (i=0;i<jmi->n_tp;i++) {
+    	if (col_index>=jmi->offs_dx_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_u)*i &&
+    			col_index<jmi->offs_x_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_u)*i) {
+    		return JMI_DER_DX_P;
+    	} else if (col_index>=jmi->offs_x_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_u)*i &&
+    			col_index<jmi->offs_u_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_u)*i) {
+    		return JMI_DER_X_P;
+    	} else if (col_index>=jmi->offs_u_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_u)*i &&
+    			col_index<jmi->offs_w_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_u)*i) {
+    		return JMI_DER_U_P;
+    	} else if (col_index>=jmi->offs_w_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_u)*i &&
+    			col_index<jmi->offs_w_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_u)*i + jmi->n_w) {
+    		return JMI_DER_W_P;
+    	}
+    }
+
+    return -1;
 }
 
 int jmi_check_Jacobian_column_index(jmi_t *jmi, int independent_vars, int *mask, int col_index) {
@@ -455,25 +462,22 @@ jmi_real_t* jmi_get_t(jmi_t* jmi) {
 	return *(jmi->z_val) + jmi->offs_t;
 }
 
-jmi_real_t* jmi_get_dx_p(jmi_t* jmi) {
-	return *(jmi->z_val) + jmi->offs_dx_p;
+jmi_real_t* jmi_get_dx_p(jmi_t* jmi, int i) {
+	return *(jmi->z_val) + jmi->offs_dx_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i;
 }
 
-jmi_real_t* jmi_get_x_p(jmi_t* jmi) {
-	return *(jmi->z_val) + jmi->offs_x_p;
+jmi_real_t* jmi_get_x_p(jmi_t* jmi, int i) {
+	return *(jmi->z_val) + jmi->offs_x_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i;
 }
 
-jmi_real_t* jmi_get_u_p(jmi_t* jmi) {
-	return *(jmi->z_val) + jmi->offs_u_p;
+jmi_real_t* jmi_get_u_p(jmi_t* jmi, int i) {
+	return *(jmi->z_val) + jmi->offs_u_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i;
 }
 
-jmi_real_t* jmi_get_w_p(jmi_t* jmi) {
-	return *(jmi->z_val) + jmi->offs_w_p;
+jmi_real_t* jmi_get_w_p(jmi_t* jmi, int i) {
+	return *(jmi->z_val) + jmi->offs_w_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i;
 }
 
-jmi_real_t* jmi_get_t_p(jmi_t* jmi) {
-	return *(jmi->z_val) + jmi->offs_t_p;
-}
 
 void jmi_print_summary(jmi_t *jmi) {
 	printf("Number of interactive constants:               %d\n",jmi->n_ci);
