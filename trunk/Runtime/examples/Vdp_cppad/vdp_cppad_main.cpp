@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <jmi.h>
+#include <jmi_opt_sim.h>
+#include <jmi_opt_sim_ipopt.h>
 
 #define TEST_VERB 1
 #define SMALL 1e-10
@@ -71,6 +73,9 @@ static jmi_real_t* u_p_2;
 static jmi_real_t* w_p_2;
 
 static int* mask;
+
+static jmi_opt_sim_t *jmi_opt_sim;
+static jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt;
 
 // Initialize the model
 void init_model() {
@@ -2180,6 +2185,134 @@ int test_49_opt_dJ_ad_eval(int verbose) {
 	}
 }
 
+int test_optimization(int verbose) {
+
+	int i;
+
+	// Here initial values for all parameters should be read from
+	// xml-files
+    pi[0] = 1;
+    pi[1] = 0;
+    pi[2] = 0;
+
+	// Specify mesh
+	jmi_real_t t0 = 0;
+	jmi_real_t tf = 5;
+	int t0_free = 0;
+	int tf_free = 0;
+	jmi_opt_set_optimization_interval(jmi,t0,t0_free,tf,tf_free);
+
+	// Set time points
+	jmi_real_t *tp = (jmi_real_t*)calloc(2,sizeof(jmi_real_t));
+	tp[0] = 1;
+	tp[1] = 0.1;
+	jmi_set_tp(jmi,tp);
+
+	int n_e = 100;
+	int hs_free = 0;
+	jmi_real_t *hs = (jmi_real_t*)calloc(n_e,sizeof(jmi_real_t));
+    for (i=0;i<n_e;i++) {
+    	hs[i] = 1/(jmi_real_t)n_e;
+    }
+
+    int n_cp = 3;
+
+    // Specify parameters to optimize
+    int n_p_opt = 1;
+    int *p_opt_indices = (int*)calloc(1,sizeof(int));
+    p_opt_indices[0] = 0;
+    jmi_opt_set_p_opt_indices(jmi, n_p_opt, p_opt_indices);
+
+    jmi_real_t *z;
+    z = jmi_get_ci(jmi);
+
+    for(i=0;i<jmi->n_z;i++) {
+    	printf(">>>>>> %d, %f\n",i,z[i]);
+    }
+
+    // Initial point
+    jmi_real_t *p_opt_init = (jmi_real_t*)calloc(n_p_opt,sizeof(jmi_real_t));
+    jmi_real_t *dx_init = (jmi_real_t*)calloc(n_dx,sizeof(jmi_real_t));
+    jmi_real_t *x_init = (jmi_real_t*)calloc(n_x,sizeof(jmi_real_t));
+    jmi_real_t *u_init = (jmi_real_t*)calloc(n_u,sizeof(jmi_real_t));
+    jmi_real_t *w_init = (jmi_real_t*)calloc(n_w,sizeof(jmi_real_t));
+
+    // Bounds
+    jmi_real_t *p_opt_lb = (jmi_real_t*)calloc(n_p_opt,sizeof(int));
+    jmi_real_t *dx_lb = (jmi_real_t*)calloc(n_dx,sizeof(jmi_real_t));
+    jmi_real_t *x_lb = (jmi_real_t*)calloc(n_x,sizeof(jmi_real_t));
+    jmi_real_t *u_lb = (jmi_real_t*)calloc(n_u,sizeof(jmi_real_t));
+    jmi_real_t *w_lb = (jmi_real_t*)calloc(n_w,sizeof(jmi_real_t));
+    jmi_real_t t0_lb = 0;
+    jmi_real_t tf_lb = 0;
+    jmi_real_t *hs_lb = NULL;
+
+    jmi_real_t *p_opt_ub = (jmi_real_t*)calloc(n_p_opt,sizeof(int));
+    jmi_real_t *dx_ub = (jmi_real_t*)calloc(n_dx,sizeof(jmi_real_t));
+    jmi_real_t *x_ub = (jmi_real_t*)calloc(n_x,sizeof(jmi_real_t));
+    jmi_real_t *u_ub = (jmi_real_t*)calloc(n_u,sizeof(jmi_real_t));
+    jmi_real_t *w_ub = (jmi_real_t*)calloc(n_w,sizeof(jmi_real_t));
+    jmi_real_t t0_ub = 0;
+    jmi_real_t tf_ub = 0;
+    jmi_real_t *hs_ub = NULL;
+
+    p_opt_init[0] = 1;
+    dx_init[0] = 1;
+    dx_init[1] = 1;
+    dx_init[2] = 2;
+    x_init[0] = 1;
+    x_init[1] = 2;
+    x_init[2] = 3;
+    u_init[0] = 4;
+    w_init[0] = 3;
+
+    for (i=0;i<n_p_opt;i++) {
+    	p_opt_lb[i] = 0.9;
+    	p_opt_ub[i] = 1.1;
+    }
+
+    for (i=0;i<n_dx;i++) {
+    	dx_lb[i] = -JMI_INF;
+    	dx_ub[i] = JMI_INF;
+    }
+
+    for (i=0;i<n_x;i++) {
+    	x_lb[i] = -JMI_INF;
+    	x_ub[i] = JMI_INF;
+    }
+
+    for (i=0;i<n_u;i++) {
+    	u_lb[i] = -JMI_INF;
+    	u_ub[i] = JMI_INF;
+    }
+
+    for (i=0;i<n_w;i++) {
+    	w_lb[i] = -JMI_INF;
+    	w_ub[i] = JMI_INF;
+    }
+
+	jmi_opt_sim_lp_radau_new(&jmi_opt_sim, jmi, n_e,
+			             hs, hs_free,
+			            p_opt_init, dx_init, x_init,
+			            u_init, w_init,
+			            p_opt_lb, dx_lb, x_lb,
+			            u_lb, w_lb, t0_lb,
+			            tf_lb, hs_lb,
+			            p_opt_ub, dx_ub, x_ub,
+			            u_ub, w_ub, t0_ub,
+			            tf_ub, hs_ub,
+			            n_cp,JMI_DER_CPPAD);
+
+	jmi_opt_sim_ipopt_new(&jmi_opt_sim_ipopt, jmi_opt_sim);
+
+	jmi_opt_sim_ipopt_solve(jmi_opt_sim_ipopt);
+
+	jmi_opt_sim_write_file_matlab(jmi_opt_sim,"result_cppad.m");
+
+    free(hs);
+
+}
+
 int main(int argv, char* argc[])
 {
 
@@ -2251,6 +2384,7 @@ int main(int argv, char* argc[])
     test_function(&test_47_opt_dJ_ad_eval, "test_47_opt_dJ_ad_eval",TEST_VERB,&test_ok, &test_fail);
     test_function(&test_48_opt_dJ_ad_eval, "test_48_opt_dJ_ad_eval",TEST_VERB,&test_ok, &test_fail);
     test_function(&test_49_opt_dJ_ad_eval, "test_49_opt_dJ_ad_eval",TEST_VERB,&test_ok, &test_fail);
+    test_function(&test_optimization, "test_optimization",TEST_VERB,&test_ok, &test_fail);
 
 
     printf(">>> Number of tests run:    %d\n", test_ok + test_fail);

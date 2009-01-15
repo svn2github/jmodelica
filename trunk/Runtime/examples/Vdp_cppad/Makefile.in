@@ -46,10 +46,10 @@ exec_prefix = @exec_prefix@
 prefix = @prefix@
 
 # Libraries necessary to link with jmi
-LIBS = @jmi_cppadlib@ #@ADDLIBS@
+LIBS = @jmi_cppadlib@ @ipoptlib@ #@ADDLIBS@
 
 # Include paths for compilation
-INCL =  -I$(JMIINCDIR) -I$(CPPADINCDIR)
+INCL =  -I$(JMIINCDIR) -I$(CPPADINCDIR) -I@IPOPT_INC@
 
 all: $(EXE) $(SHARED)
 

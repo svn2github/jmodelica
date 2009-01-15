@@ -1192,6 +1192,8 @@ int test_optimization(int verbose) {
 	// Here initial values for all parameters should be read from
 	// xml-files
     pi[0] = 1;
+    pi[1] = 0;
+    pi[2] = 0;
 
 	// Specify mesh
 	jmi_real_t t0 = 0;
@@ -1213,7 +1215,7 @@ int test_optimization(int verbose) {
     	hs[i] = 1/(jmi_real_t)n_e;
     }
 
-    int n_cp = 2;
+    int n_cp = 3;
 
     // Specify parameters to optimize
     int n_p_opt = 1;

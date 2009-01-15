@@ -33,7 +33,8 @@ libjmi_cppad_la_SOURCES = jmi.h \
                     jmi_common.c \
                     jmi_opt_sim.h \
                     jmi_opt_sim.c \
-                    jmi_opt_sim_lp.c
+                    jmi_opt_sim_lp.c \
+                    jmi_opt_sim_ipopt.c
                    
 libjmi_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_INC) -I$(IPOPT_INC) -DJMI_AD=JMI_AD_CPPAD 
 libjmi_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD 
