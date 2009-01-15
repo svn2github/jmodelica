@@ -1,0 +1,102 @@
+# Log variables
+printf "#1\n" > VDP_res.txt;
+printf "char Aclass(3,11)\n" > VDP_res.txt;
+printf "Atrajectory\n" > VDP_res.txt;
+printf "1.1\n\n" > VDP_res.txt;
+
+printf "char name(14,100)\n" > VDP_res.txt;
+printf "Time\n" > VDP_res.txt;
+printf "p1\n" > VDP_res.txt;
+printf "p2\n" > VDP_res.txt;
+printf "p3\n" > VDP_res.txt;
+printf "x1\n" > VDP_res.txt;
+printf "der(x1)\n" > VDP_res.txt;
+printf "x2\n" > VDP_res.txt;
+printf "der(x2)\n" > VDP_res.txt;
+printf "x3\n" > VDP_res.txt;
+printf "der(x3)\n" > VDP_res.txt;
+printf "w\n" > VDP_res.txt;
+printf "u\n" > VDP_res.txt;
+printf "time\n" > VDP_res.txt;
+printf "der(time)\n" > VDP_res.txt;
+printf "\n" > VDP_res.txt;
+
+printf "char description(14,100)\n" > VDP_res.txt;
+printf "time in [s]\n" > VDP_res.txt;
+printf " \n" > VDP_res.txt;
+printf " \n" > VDP_res.txt;
+printf " \n" > VDP_res.txt;
+printf " \n" > VDP_res.txt;
+printf " \n" > VDP_res.txt;
+printf " \n" > VDP_res.txt;
+printf " \n" > VDP_res.txt;
+printf " \n" > VDP_res.txt;
+printf " \n" > VDP_res.txt;
+printf " \n" > VDP_res.txt;
+printf " \n" > VDP_res.txt;
+printf " \n" > VDP_res.txt;
+printf " \n" > VDP_res.txt;
+printf "\n" > VDP_res.txt;
+
+printf "int dataInfo(14,4)\n" > VDP_res.txt;
+printf "0 1 0 -1 # time\n" > VDP_res.txt;
+printf "2 2 0 -1 # p1\n" > VDP_res.txt;
+printf "2 3 0 -1 # p2\n" > VDP_res.txt;
+printf "2 4 0 -1 # p3\n" > VDP_res.txt;
+printf "1 2 0 -1 # x1\n" > VDP_res.txt;
+printf "1 3 0 -1 # der(x1)\n" > VDP_res.txt;
+printf "1 4 0 -1 # x2\n" > VDP_res.txt;
+printf "1 5 0 -1 # der(x2)\n" > VDP_res.txt;
+printf "1 6 0 -1 # x3\n" > VDP_res.txt;
+printf "1 7 0 -1 # der(x3)\n" > VDP_res.txt;
+printf "1 8 0 -1 # w\n" > VDP_res.txt;
+printf "1 9 0 -1 # u\n" > VDP_res.txt;
+printf "1 10 0 -1 # time\n" > VDP_res.txt;
+printf "1 11 0 -1 # der(time)\n" > VDP_res.txt;
+printf "\n" > VDP_res.txt;
+
+printf "float data_1(301,11)\n" > VDP_res.txt;
+printf "0.0 " > VDP_res.txt;
+printf "%16.16f ", x1[1,0] > VDP_res.txt;
+printf "%16.16f ", sum {_k in CPP} 1/(TIME*_H[1])*x1[1,_k]*_A[_k,0] > VDP_res.txt;
+printf "%16.16f ", x2[1,0] > VDP_res.txt;
+printf "%16.16f ", sum {_k in CPP} 1/(TIME*_H[1])*x2[1,_k]*_A[_k,0] > VDP_res.txt;
+printf "%16.16f ", x3[1,0] > VDP_res.txt;
+printf "%16.16f ", sum {_k in CPP} 1/(TIME*_H[1])*x3[1,_k]*_A[_k,0] > VDP_res.txt;
+printf "%16.16f ",  sum {_j in CP} w[1,_j]*_l0[_j] > VDP_res.txt;
+printf "%16.16f ",  sum {_j in CP} u[1,_j]*_l0[_j] > VDP_res.txt;
+printf "%16.16f ", time[1,0] > VDP_res.txt;
+printf "%16.16f ", sum {_k in CPP} 1/(TIME*_H[1])*time[1,_k]*_A[_k,0] > VDP_res.txt;
+      printf "\n" > VDP_res.txt;
+
+for {_i in FE}
+{
+   for {_j in CP}
+   {	
+      printf "%16.16f " , ((_i-1+_p[_j])*TIME/NFE) > VDP_res.txt;
+      printf "%16.16f ", x1[_i,_j] > VDP_res.txt;
+      printf "%16.16f ", DER_x1[_i,_j] > VDP_res.txt;
+      printf "%16.16f ", x2[_i,_j] > VDP_res.txt;
+      printf "%16.16f ", DER_x2[_i,_j] > VDP_res.txt;
+      printf "%16.16f ", x3[_i,_j] > VDP_res.txt;
+      printf "%16.16f ", DER_x3[_i,_j] > VDP_res.txt;
+      printf "%16.16f ", w[_i,_j] > VDP_res.txt;
+      printf "%16.16f ", u[_i,_j] > VDP_res.txt;
+      printf "%16.16f ", time[_i,_j] > VDP_res.txt;
+      printf "%16.16f ", DER_time[_i,_j] > VDP_res.txt;
+      printf "\n" > VDP_res.txt;
+   }
+}
+printf "float data_2(2,4)\n" > VDP_res.txt;
+printf "0.0 " > VDP_res.txt;
+printf "%16.16f ", p1 > VDP_res.txt;
+printf "%16.16f ", p2 > VDP_res.txt;
+printf "%16.16f ", p3 > VDP_res.txt;
+printf "\n" > VDP_res.txt;
+printf "%16.16f ", TIME > VDP_res.txt;
+      printf "%16.16f ", p1 > VDP_res.txt;
+      printf "%16.16f ", p2 > VDP_res.txt;
+      printf "%16.16f ", p3 > VDP_res.txt;
+      printf "\n" > VDP_res.txt;
+close VDP_res.txt;
+

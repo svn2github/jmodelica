@@ -1,0 +1,9 @@
+class VDP
+  oq p1(lowerBound=0.9,upperBound=1.1);
+
+optimization
+  grid(finalTime=fixedFinalTime(finalTime=5),nbrElements=100);
+  minimize(terminalCost = p1^2 + w^2 + x3);
+subject to
+
+end CSTR;
