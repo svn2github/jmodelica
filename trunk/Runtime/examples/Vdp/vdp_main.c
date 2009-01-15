@@ -1206,7 +1206,7 @@ int test_optimization(int verbose) {
 	tp[1] = 0.1;
 	jmi_set_tp(jmi,tp);
 
-	int n_e = 3;
+	int n_e = 100;
 	int hs_free = 0;
 	jmi_real_t *hs = (jmi_real_t*)calloc(n_e,sizeof(jmi_real_t));
     for (i=0;i<n_e;i++) {
@@ -1305,6 +1305,8 @@ int test_optimization(int verbose) {
 
 	jmi_opt_sim_ipopt_solve(jmi_opt_sim_ipopt);
 
+	jmi_opt_sim_write_file_matlab(jmi_opt_sim,"result.m");
+
     free(hs);
 
 }
@@ -1350,7 +1352,7 @@ int main(int argv, char* argc[])
     test_function(&test_23_opt_dJ_eval, "test_23_opt_dJ_eval",TEST_VERB,&test_ok, &test_fail);
     test_function(&test_24_opt_dJ_eval, "test_24_opt_dJ_eval",TEST_VERB,&test_ok, &test_fail);
     test_function(&test_25_opt_dJ_eval, "test_25_opt_dJ_eval",TEST_VERB,&test_ok, &test_fail);
- //   test_function(&test_optimization, "test_optimization",TEST_VERB,&test_ok, &test_fail);
+    test_function(&test_optimization, "test_optimization",TEST_VERB,&test_ok, &test_fail);
 
     printf(">>> Number of tests run:    %d\n", test_ok + test_fail);
     printf(">>> Number of tests OK:     %d\n", test_ok);

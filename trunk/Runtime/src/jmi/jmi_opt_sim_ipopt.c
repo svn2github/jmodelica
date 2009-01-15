@@ -4,9 +4,13 @@
 static int jmi_opt_sim_ipopt_f(Index n, Number* x, Bool new_x,
 			  Number *f, UserDataPtr data) {
 
-	printf("jmi_opt_sim_ipopt_f:start\n");
-
 	int i;
+/*
+	printf("jmi_opt_sim_ipopt_f:start\n");
+	for (i=0;i<n;i++) {
+		printf("x[%d] = %f\n",i,x[i]);
+	}
+*/
 	jmi_opt_sim_ipopt_t *nlp = (jmi_opt_sim_ipopt_t*)data;
 
 	for (i=0;i<nlp->n;i++) {
@@ -14,7 +18,7 @@ static int jmi_opt_sim_ipopt_f(Index n, Number* x, Bool new_x,
 	}
 
 	if (jmi_opt_sim_f(nlp->jmi_opt_sim, f) == 0) {
-		printf("jmi_opt_sim_ipopt_f:end: %f\n",*f);
+//		printf("jmi_opt_sim_ipopt_f:end: %f\n",*f);
 		return TRUE;
 	} else {
 		return FALSE;
@@ -25,7 +29,7 @@ static int jmi_opt_sim_ipopt_f(Index n, Number* x, Bool new_x,
 static int jmi_opt_sim_ipopt_df(Index n, Number* x, Bool new_x,
 			       Number* df, UserDataPtr data) {
 
-	printf("jmi_opt_sim_ipopt_df:start\n");
+//	printf("jmi_opt_sim_ipopt_df:start\n");
 
 	int i;
 	jmi_opt_sim_ipopt_t *nlp = (jmi_opt_sim_ipopt_t*)data;
@@ -42,8 +46,9 @@ static int jmi_opt_sim_ipopt_df(Index n, Number* x, Bool new_x,
 /*		printf("jmi_opt_sim_ipopt_df:end:df\n");
 		for(i=0;i<n;i++){
 			printf("%d, %f\n",i,df[i]);
-		}*/
+		}
 		printf("]\n");
+*/
 		return TRUE;
 	} else {
 		return FALSE;
@@ -57,17 +62,18 @@ static int jmi_opt_sim_ipopt_df(Index n, Number* x, Bool new_x,
 static int jmi_opt_sim_ipopt_g(Index n, Number* x, Bool new_x,
 			  Index m, Number* g, UserDataPtr data) {
 
-	printf("g\n");
+//	printf("jmi_opt_sim_ipopt_g:start\n");
 
 	int i;
 	jmi_opt_sim_ipopt_t *nlp = (jmi_opt_sim_ipopt_t*)data;
+/*
+	for (i=0;i<n;i++) {
+		printf("x[%d] = %f\n",i,x[i]);
+	}
+*/
 
 	for (i=0;i<m;i++) {
 		g[i] = 0;
-	}
-
-	for (i=0;i<nlp->m;i++) {
-		nlp->jmi_opt_sim->x[i] = x[i];
 	}
 
 	for (i=0;i<nlp->n;i++) {
@@ -75,12 +81,15 @@ static int jmi_opt_sim_ipopt_g(Index n, Number* x, Bool new_x,
 	}
 
 	if (jmi_opt_sim_g(nlp->jmi_opt_sim, g) == 0) {
+/*		for (i=0;i<m;i++) {
+			printf("g[%d] = %f\n",i,g[i]);
+		}
+		printf("jmi_opt_sim_ipopt_g:end\n");
+*/
 		return TRUE;
 	} else {
 		return FALSE;
 	}
-
-
 
 	/*
 //	  std::cout << "jmi_opt_sim_ipopt_ipopt_eval_g begin" << std::endl;
@@ -100,7 +109,7 @@ static int jmi_opt_sim_ipopt_dg(Index n, Number* x, Bool new_x,
 			      Index m, Index dg_n_nz, Index* irow,
 			      Index *icol, Number* dg, UserDataPtr data) {
 
-	printf("dg: n=%d, m=%d, *x=%x\n",n,m,(int)x);
+//	printf("dg: n=%d, m=%d, *x=%x\n",n,m,(int)x);
 
 	int i, retval;
 	jmi_opt_sim_ipopt_t *nlp = (jmi_opt_sim_ipopt_t*)data;
@@ -229,9 +238,9 @@ int jmi_opt_sim_ipopt_new(jmi_opt_sim_ipopt_t **jmi_opt_sim_ipopt, jmi_opt_sim_t
 
  //   AddIpoptIntOption(nlp->nlp, "print_level", 10);
 
-	AddIpoptIntOption(nlp->nlp, "max_iter",10);
-    AddIpoptStrOption(nlp->nlp, "derivative_test","first-order");
-	AddIpoptNumOption(nlp->nlp, "derivative_test_pertubation",1e-6);
+	AddIpoptIntOption(nlp->nlp, "max_iter",100);
+ //   AddIpoptStrOption(nlp->nlp, "derivative_test","first-order");
+//	AddIpoptNumOption(nlp->nlp, "derivative_test_pertubation",1e-6);
     //    AddIpoptStrOption(nlp->nlp, "derivative_test_print_all","yes");
 	AddIpoptStrOption(nlp->nlp, "output_file", "ipopt.out");
 	AddIpoptStrOption(nlp->nlp, "hessian_approximation", "limited-memory");

@@ -2,8 +2,10 @@
 #ifndef _JMI_OPT_SIM_LP_H
 #define _JMI_OPT_SIM_LP_H
 
+#include <math.h>
 #include "jmi.h"
 // Radau points
+
 static jmi_real_t jmi_opt_sim_lp_radau_1[1] = {1.0000000000000000e+000};
 
 static jmi_real_t jmi_opt_sim_lp_radau_2[2] = {3.3333333333333337e-001,
@@ -570,6 +572,21 @@ static jmi_real_t jmi_opt_sim_lpp_radau_dot_vals_10[11][11] = {{-9.9999999999998
                                                        {2.5922119028094609e-001, -1.6466772675993407e-001, 2.6724017988449994e-001, -3.8490377804190229e-001, 5.5758559987230205e-001, -8.5461660475917212e-001, 1.4531681475040115e+000, -2.9655938725737108e+000, 8.9720795908328199e+000, 5.1881095017213130e-001, -6.8901673047351736e+001},
                                                        {-9.9999999999999561e-002, 6.3489074494963299e-002, -1.0278178932527715e-001, 1.4729054379692935e-001, -2.1147021062505000e-001, 3.1903624518598728e-001, -5.2645290826627766e-001, 1.0056089751861816e+000, -2.4885984249742834e+000, 1.1039947950453129e+001, 5.0499999999977341e+001}};
 
+/* Evaluate polynomial L_k^{n}(tau), where polynomial coefficients are
+ * given in column major format in the vector pol. This vector should contain
+ * coefficients for all Lagrange polynomials as returned by jmi_opt_sim_lp_radau_get_pols.
+ * This means that the pol matrix should have dimensions n x n.
+ */
+jmi_real_t jmi_opt_sim_lp_radau_eval_pol(jmi_real_t tau, int n, jmi_real_t* pol, int k) {
+	int i;
+	jmi_real_t val = 0;
+	for (i=0;i<n;i++) {
+		val += pol[n*i + k]*pow(tau,n-i-1);
+	}
+	return val;
+}
+
+// Lagrange polynomial matrices are returned in column major format.
 int jmi_opt_sim_lp_radau_get_pols(int n_cp, jmi_real_t *cp, jmi_real_t *cpp,
 		jmi_real_t *Lp_coeffs, jmi_real_t *Lpp_coeffs,
 		jmi_real_t *Lp_dot_coeffs, jmi_real_t *Lpp_dot_coeffs,

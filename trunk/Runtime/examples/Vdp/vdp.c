@@ -28,7 +28,7 @@
 #include <math.h>
 #include <jmi.h>
 
-static const int a = 2;
+static const int a = 0;
 
 static const int x1_0 = 0;
 static const int x2_0 = 1;
@@ -438,6 +438,17 @@ static int vdp_dae_dF_nz_indices(int* row, int* col) {
 }
 
 static int vdp_init_F0(jmi_t* jmi, jmi_ad_var_vec_p res) {
+/*
+	printf("- pi[0] = %f\n",_pi(0));
+	printf("- dx[0] = %f\n",_dx(0));
+	printf("- dx[1] = %f\n",_dx(1));
+	printf("- dx[2] = %f\n",_dx(2));
+	printf("- x[0] = %f\n",_x(0));
+	printf("- x[1] = %f\n",_x(1));
+	printf("- x[2] = %f\n",_x(2));
+	printf("- u[0] = %f\n",_u(0));
+	printf("- w[0] = %f\n",_w(0));
+*/
 
   (*res)[0] = (1-_x(1)*_x(1))*_x(0) - _x(1) + _u(0) - _dx(0);
   (*res)[1] = _pi(0)*_x(0) - _dx(1);
@@ -446,6 +457,17 @@ static int vdp_init_F0(jmi_t* jmi, jmi_ad_var_vec_p res) {
   (*res)[4] = _x(0) - x1_0;
   (*res)[5] = _x(1) - x2_0;
   (*res)[6] = _x(2) - x3_0;
+
+/*
+  printf("-- %f\n",(*res)[0]);
+  printf("-- %f\n",(*res)[1]);
+  printf("-- %f\n",(*res)[2]);
+  printf("-- %f\n",(*res)[3]);
+  printf("-- %f\n",(*res)[4]);
+  printf("-- %f\n",(*res)[5]);
+  printf("-- %f\n",(*res)[6]);
+*/
+
   return 0;
 }
 

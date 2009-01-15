@@ -56,6 +56,8 @@ typedef int (*jmi_opt_sim_h_nz_indices_t)(jmi_opt_sim_t *jmi_opt_sim, int *colIn
 
 typedef int (*jmi_opt_sim_g_nz_indices_t)(jmi_opt_sim_t *jmi_opt_sim, int *colIndex, int *rowIndex);
 
+typedef int (*jmi_opt_sim_write_file_matlab_t)(jmi_opt_sim_t *jmi_opt_sim, char *file_name);
+
 struct jmi_opt_sim_t{
 	jmi_t *jmi;                      // jmi_t struct
 	int n_x;                         // Number of variables
@@ -88,6 +90,7 @@ struct jmi_opt_sim_t{
 	jmi_opt_sim_get_initial_t get_initial;
 	jmi_opt_sim_g_nz_indices_t dg_nz_indices;
 	jmi_opt_sim_h_nz_indices_t dh_nz_indices;
+	jmi_opt_sim_write_file_matlab_t write_file_matlab;
 };
 
 typedef struct {
@@ -212,6 +215,6 @@ int jmi_opt_sim_get_bounds(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_lb, jmi_rea
  */
 int jmi_opt_sim_get_initial(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_init);
 
-
+int jmi_opt_sim_write_file_matlab(jmi_opt_sim_t *jmi_opt_sim_t, char *file_name);
 
 #endif /* JMI_OPT_SIM_H_ */
