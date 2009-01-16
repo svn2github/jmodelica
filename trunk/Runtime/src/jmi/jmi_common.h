@@ -52,7 +52,7 @@ typedef jmi_ad_var_vec_t *jmi_ad_var_vec_p;
 typedef CppAD::ADFun<jmi_real_t> jmi_ad_tape_t;
 typedef jmi_ad_tape_t *jmi_ad_tape_p;
 
-/*
+/**
  * The struct jmi_cppad_func_t contains a tape and associated
  * sparsity information for a particular function F.
  */
@@ -112,12 +112,11 @@ typedef int (*jmi_residual_func_t)(jmi_t* jmi, jmi_ad_var_vec_p res);
  */
 typedef int (*jmi_jacobian_func_t)(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac);
 
-/*
+/**
  * The jmi_func_t is a struct that contains function pointers and dimension information
  * corresponding to a mathematical vector valued function, F. The struct also contains
  * function pointers to symbolic Jacobians and associated sparsity information.
  */
-
 typedef struct {
 	jmi_residual_func_t F;
 	jmi_jacobian_func_t dF;
@@ -137,11 +136,17 @@ typedef struct {
 	jmi_func_t* F;
 } jmi_dae_t;
 
+/**
+ * A struct that encapsulates an initialization system.
+ */
 typedef struct {
 	jmi_func_t* F0;
 	jmi_func_t* F1;
 } jmi_init_t;
 
+/**
+ * A struct that encapsulates an optimization problem.
+ */
 typedef struct {
 	jmi_func_t* J;
 	jmi_func_t* Ceq;
@@ -158,20 +163,20 @@ typedef struct {
 } jmi_opt_t;
 
 /**
- * jmi is the main struct in the jmi interface. It contains pointers to structs of
- * types jmi_dae, jmi_init, and jmi_opt. The creation of a jmi_t struct proceeds in three
+ * jmi_t is the main struct in the jmi interface. It contains pointers to structs of
+ * types jmi_dae_t, jmi_init_t, and jmi_opt_t. The creation of a jmi_t struct proceeds in three
  * steps. First, a raw struct is created by the function jmi_init. Then the jmi_dae_t,
  * jmi_init_t, and jmi_opt_t structs are initialized by the functions jmi_dae_init,
- * jmi_init_init, and jmi_opt_init respectively. Finlly, the the jmi_xxx_ad_t structs are
- * are set up in the function call jmi_ad_init. Notice that the variables should have been
+ * jmi_init_init, and jmi_opt_init respectively. Finlly, the the jmi_dae_ad_t, jmi_init_ad_t, and jmi_opt_ad_t structs
+ * are set up in the function call jmi_ad_init. Notice that the variable vectors should have been
  * initialized prior to the call to jmi_ad_init.
  *
- * Typically, jmi_init and jmi_xxx_init functions are called from within the jmi_new function
+ * Typically, jmi_init, jmi_dae_init, jmi_init_init, and jmi_opt_init  are called from within the jmi_new function
  * that is provided by the generated code. The function jmi_ad_init is then called from the
  * user code after the variable vectors has been initialized.
  */
 struct jmi_t{
-	jmi_dae_t* dae;
+  jmi_dae_t* dae; /**< \brief A jmi_dae_t struct pointer. */
 	jmi_init_t* init;
 	jmi_opt_t* opt;
 

@@ -1,4 +1,6 @@
-/*
+/** \file jmi.h 
+ * \brief Documentation of the public JMI interface.
+ *
  * Design considerations
  *
  * The model/optimization interface is intended to be used in a wide range of
@@ -21,45 +23,46 @@
  * It should also be possible to build shared libraries for models/optimization problems.
  * In this way, it is possible to build applications that contains several models.
  *
- * -------------------------------------------------------------------------------------
+ *
  * Interface specification
- * -------------------------------------------------------------------------------------
  *
  *   The jmi interface consists of three parts: DAE, DAE initialization and optimization.
  *   Essentially, the jmi interface consists of a collection of functions that are
  *   offered to the user for evaluation of the DAE residual, cost functions, constraints
  *   etc. These functions takes as arguments one more of the following three argument
- *   classes:
+ *   types:
  *
- *   Parameters (denoted p):
+ *   Parameters (denoted \f$p\f$):
+ *    - \f$c_i\f$   independent constant
+ *    - \f$c_d\f$   dependent constants
+ *    - \f$p_i\f$   independent parameters
+ *    - \f$p_d\f$   dependent parameters
  *
- *      ci   independent constant
- *      cd   dependent constants
- *      pi   independent parameters
- *      pd   dependent parameters
+ *    with
  *
- *      p = [ci^T, cd^T, pi^T, pd^T]^T
+ *      \f$ p = [c_i^T, c_d^T, p_i^T, p_d^T]^T \f$
  *
- *   Variables (denoted v):
+ *   Variables (denoted \f$v\f$):
  *
- *      dx    differentiated variables
- *      x     variables that appear differentiated
- *      u     inputs
- *      w     algebraic variables
- *      t     time
+ *    - \f$dx\f$    differentiated variables
+ *    - \f$x\f$     variables that appear differentiated
+ *    - \f$u\f$     inputs
+ *    - \f$w\f$     algebraic variables
+ *    - \f$t\f$     time
+ *   
+ *    with 
+ * 
+ *    \f$v = [dx^T, x^T, u^T, w^T, t]^T\f$
  *
- *	    v = [dx^T, x^T, u^T, w^T, t]^T
+ *   Variables defined at particular time instants (denoted \f$q\f$):
  *
- *   Variables defined at particular time instants (denoted q):
+ *      - \f$dx(t_i)\f$    differentiated variables evaluated at time \f$t_i, i \in 1..n_{tp}\f$
+ *      - \f$x(t_i)\f$     variables that appear differentiated evaluated at time \f$t_i, t_i \in 1..n_{tp}\f$
+ *      - \f$u(t_i)\f$     inputs evaluated at time \f$t_i, i \in 1..n_{tp}\f$
+ *      - \f$w(t_i)\f$     algebraic variables evaluated at time \f$t_i, i \in 1..n_{tp}\f$
  *
- *      dx(t_i)    differentiated variables evaluated at time t_i, i \in 1..n_tp
- *      x(t_i)     variables that appear differentiated evaluated at time i, t_i \in 1..n_tp
- *      u(t_i)     inputs evaluated at time t_i, i \in 1..n_tp
- *      w(t_i)     algebraic variables evaluated at time t_i, i \in 1..n_tp
- *      t_i        time instants i \in 1..n_tp
- *
- *      q = [dx(t_1)^T, x(t_1)^T, u(t_1)^T, w(t_1)^T, ...,
- *           dx(t_n_tp)^T, x(t_n_tp)^T, u(t_n_tp)^T, w(t_n_tp)^T]^T
+ *    \f$ q = [dx(t_1)^T, x(t_1)^T, u(t_1)^T, w(t_1)^T, ...,
+ *           dx(t_{n_{tp}})^T, x(t_{n_{tp}})^T, u(t_{n_{tp}})^T, w(t_{n_{tp}})^T]^T\f$
  *
  *   All parameters, variables and point-wise evaluated variables are denoted z:
  *
@@ -147,16 +150,22 @@
  ****************************************
  */
 
-/**
- * Creates a new jmi struct, for which a pointer is returned in the output argument jmi.
+/** 
+ * \brief Create a new jmi_t struct.
+ * 
+ * This function creates a new jmi struct, for which a pointer is returned in the output argument jmi.
  * This function is assumed to be given in the generated code.
+ *
+ * @param jmi A pointer to a jmi_t pointer where the new jmi_t struct is stored.
  */
 int jmi_new(jmi_t** jmi);
 
-/**
+/** 
  * Initializes the AD variables and tapes. Prior to this call, the variables in z should
  * be initialized, which is also the reason why this function must be provided for
  * the user to call after the actual creation of the jmi_t struct.
+ *
+ * @param jmi A pointer to a jmi_t struct.
  */
 int jmi_ad_init(jmi_t* jmi);
 

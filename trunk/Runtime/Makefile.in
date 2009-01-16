@@ -127,6 +127,7 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHAREDEXT = @SHAREDEXT@
 SHARED_LDFLAGS = @SHARED_LDFLAGS@
@@ -188,6 +189,7 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
+EXTRA_DIST = doxydoc/doxydoc.conf
 SUBDIRS = src/jmi 
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -644,6 +646,9 @@ examples: install
 clean-examples: clean
 	cd examples/Vdp; $(MAKE) clean
 	cd examples/Vdp_cppad; $(MAKE) clean
+
+doxydoc:
+	cd $(srcdir); doxygen doxydoc/doxydoc.conf
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
