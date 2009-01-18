@@ -162,6 +162,8 @@ typedef struct {
 
 } jmi_opt_t;
 
+
+
 /**
  * jmi_t is the main struct in the jmi interface. It contains pointers to structs of
  * types jmi_dae_t, jmi_init_t, and jmi_opt_t. The creation of a jmi_t struct proceeds in three
