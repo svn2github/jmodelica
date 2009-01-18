@@ -1,6 +1,5 @@
-/*
- * jmi_common.h contains private data structures and functions.
- *
+/** \file jmi_common.h
+ *  \brief Internal functions of the JMI Model interface.
  */
 
 
@@ -165,6 +164,10 @@ typedef struct {
 
 
 /**
+ * \ingroup jmi_struct
+ *
+ * \brief The main struct of the JMI Model interface.
+ *
  * jmi_t is the main struct in the jmi interface. It contains pointers to structs of
  * types jmi_dae_t, jmi_init_t, and jmi_opt_t. The creation of a jmi_t struct proceeds in three
  * steps. First, a raw struct is created by the function jmi_init. Then the jmi_dae_t,
