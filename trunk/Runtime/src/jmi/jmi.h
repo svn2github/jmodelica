@@ -105,6 +105,7 @@
  *
  *     \f$ F(p,v) = 0 \f$
  *
+ *	For details on the functions included in the DAE interface, see the <a href="group__DAE.html">DAE functions documentation. </a>
  *    \subsection Init The DAE initialization interface
  *
  *	 The DAE initialization interface is defined by the functions \f$F_0(p,v)\f$ and \f$F_1(p,v)\f$ where
