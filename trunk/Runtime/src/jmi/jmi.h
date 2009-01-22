@@ -99,15 +99,15 @@
  *
  *     \f$ z = [p^T, v^T, q^T]^T \f$
  *
- *   \subsection The DAE interface
+ *   \subsection DAE The DAE interface
  *
- *   The DAE interface is defined by the residual function
+ *   The DAE interface is defined by the residual function \f$F(p,v)\f$ where
  *
  *     \f$ F(p,v) = 0 \f$
  *
- *    \subsection The DAE initialization interface
+ *    \subsection Init The DAE initialization interface
  *
- *	 The DAE initialization interface is defined by the functions
+ *	 The DAE initialization interface is defined by the functions \f$F_0(p,v)\f$ and \f$F_1(p,v)\f$ where
  *
  *	  \f$  F_0(p,v) = 0 \f$<br>
  *	  \f$  F_1(p,v) = 0 \f$
@@ -117,11 +117,14 @@
  *   initialization of variables for which the value given in the start attribute is
  *   not fixed.
  *
- *   \subsection The optimization interface
+ *   \subsection Opt The optimization interface
  *
- *   The optimization part of the interface is defined by the functions
+ *   The optimization part of the interface is defined by the functions \f$J(p,q)\f$,
+ *   \f$C_{eq}(p,v,q)\f$, \f$C_{ineq}(p,v,q)\f$, \f$H_{eq}(p,q)\f$, \f$H_{ineq}(p,q)\f$.
+ *   Based on these functions, an optimization problem is then formulated as
  *
- *      \f$J(p,q)\f$<br>
+ *      \f$\min_{p_{opt},u}J(p,q)\f$<br>
+ *      subject to <br>
  *      \f$C_{eq}(p,v,q) = 0\f$<br>
  *      \f$C_{ineq}(p,v,q) \leq 0\f$<br>
  *      \f$H_{eq}(p,q) = 0\f$<br>
@@ -130,7 +133,8 @@
  *   where \f$J\f$ is the cost function to be minimized, \f$C_{eq}\f$ are path equality constraints,
  *   \f$C_{ineq}\f$ are path inequality constraints, \f$H_{eq}\f$ are (time) point equality constraints,
  *   and \f$H_{ineq}\f$ are (time) point inequality constraints. The rationale for introducing
- *   \f$H_{eq}\f$ and \f$H_{ineq}\f$ is to enable expression of e.g. terminal constraints.
+ *   \f$H_{eq}\f$ and \f$H_{ineq}\f$ is to enable expression of e.g. terminal constraints. In addition, the
+ *   DAE and the DAE initialization relations are constraints in the optimization problem.
  *
  *  \section Jacobians Evaluation of Jacobians
  *
@@ -487,18 +491,6 @@ jmi_real_t* jmi_get_w_p(jmi_t* jmi, int i);
 
 /* @} */
 
-/**
- * \defgroup Misc Misc.
- */
-/* @{ */
-
-/**
- * Print a summary of the content of the jmi struct.
- */
-void jmi_print_summary(jmi_t *jmi);
-
-/* @} */
-
 
 
 /*********************************************
@@ -509,6 +501,8 @@ void jmi_print_summary(jmi_t *jmi);
 
 /**
  * \defgroup DAE DAE interface
+ * \brief Access to the DAE residual function.
+ *
  */
 /* @{ */
 
@@ -524,24 +518,65 @@ int jmi_dae_get_sizes(jmi_t* jmi, int* n_eq_F);
 
 
 /**
- * \brief Evaluate DAE residual. The user sets the input variables by writing to
- * the vectors obtained from the functions jmi_dae_get_x, ...
+ * \brief Evaluate DAE residual.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param res (Output) The DAE residual vector.
+ * @return Error code.
+ *
  */
 int jmi_dae_F(jmi_t* jmi, jmi_real_t* res);
 
 /**
  * \brief Evaluate the Jacobian of the DAE residual function.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg Set to either JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or
+ *                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
+ * @param sparsity Set to JMI_DER_SPARSE, JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
+ *                to indicate the output format of the Jacobian.
+ * @param independent_vars Used to indicate which columns of the full Jacobian should
+ *                         be evaluated. The constants JMI_DER_DX, JMI_DER_X etc are used
+ *                         to set this argument.
+ * @param mask This argument is a vector containing ones for the Jacobian columns that
+ *             should be included in the Jacobian and zeros for those which should not.
+ * @param jac (Output) The Jacobian.
+ * @return Error code.
+ *
  */
 int jmi_dae_dF(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
 
 /**
- * \brief Returns the number of non-zeros in the DAE residual Jacobian.
+ * \brief Returns the number of non-zeros in the full DAE residual Jacobian.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg Indicates which for which Jacobian the number of non-zero elements should be returned:
+ *                 Symbolic (JMI_DER_SYMBOLIC) or CppAD (JMI_DER_CPPAD).
+ * @param n_nz (Output) The number of non-zero Jacobian entries.
+ * @return Error code.
  */
 int jmi_dae_dF_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
 
 /**
  * \brief Returns the row and column indices of the non-zero elements in the DAE
  * residual Jacobian.
+ *
+ * Notice that Fortran style indexing is used: the first row (and column) has index 1.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param row (Output) The row indices of the non-zeros in the DAE residual Jacobian.
+ * @param col (Output) The column indices of the non-zeros in the DAE residual Jacobian.
+ * @return Error code.
+ *
  */
 int jmi_dae_dF_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
 		                  int *mask, int* row, int* col);
@@ -549,6 +584,15 @@ int jmi_dae_dF_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
 /**
  * \brief This helper function computes the number of columns and the number of non zero
  * elements in the Jacobian of the DAE residual given a sparsity configuration.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param dF_n_cols (Output) The number of columns of the resulting Jacobian.
+ * @param dF_n_nz (Output) The number of non-zeros of the resulting Jacobian.
+ *
  */
 int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz);
@@ -563,68 +607,159 @@ int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 
 /**
  * \defgroup Initialization DAE Initialization Interface
+ * \brief Access to the DAE initialization functions.
  */
 /* @{ */
 
-/*
+/**
  * Get the number of equations in the DAE initialization functions.
+ *
+ * @param jmi A jmi_t struct.
+ * @param n_eq_F0 (Output) The number of equations in \f$F_0\f$ is stored in this argument.
+ * @param n_eq_F1 (Output) The number of equations in \f$F_1\f$ is stored in this argument.
+ * @return Error code.
+ *
  */
 int jmi_init_get_sizes(jmi_t* jmi, int* n_eq_F0, int* n_eq_F1);
 
 /**
- * Evaluate the F0 function of the initialization system.
+ * Evaluate the \f$F_0\f$ residual function of the initialization system.
+ *
+ * @param jmi A jmi_t struct.
+ * @param res The residual of \f$F_0\f$.
+ * @return Error code.
  */
 int jmi_init_F0(jmi_t* jmi, jmi_real_t* res);
 
 /**
- * Evaluate the Jacobian of the F0 initialization function.
+ * \brief Evaluate the Jacobian of the DAE initialization residual function \f$F_0\f$.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param jac (Output) The Jacobian.
+ * @return Error code.
+ *
  */
 int jmi_init_dF0(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
 
 /**
- * Returns the number of non-zeros in the Jacobian of the F0 initialization function.
+ * \brief Returns the number of non-zeros in the full Jacobian of the DAE initialization residual function \f$F_0\f$.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF_n_nz.
+ * @param n_nz (Output) The number of non-zero entries in the full Jacobian.
+ * @return Error code.
  */
 int jmi_init_dF0_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
 
 /**
- * Returns the row and column indices of the non-zero elements of the Jacobian of the F0
- * initialization function.
+ * \brief Returns the row and column indices of the non-zero elements in the Jacobain of the DAE
+ * initialization residual function \f$F_0\f$.
+ *
+ * Notice that Fortran style indexing is used: the first row (and column) has index 1.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param row (Output) The row indices of the non-zeros in the Jacobian.
+ * @param col (Output) The column indices of the non-zeros in the Jacobian.
+ * @return Error code.
+ *
  */
 int jmi_init_dF0_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
         int *mask, int* row, int* col);
 
 /**
- * This helper function computes the number of columns and the number of non zero
- * elements in the Jacobian of the F0 init function given a sparsity configuration.
+ * \brief This helper function computes the number of columns and the number of non-zero
+ * elements in the Jacobian of the DAE initialization residual function \f$F_0\f$ given
+ * a sparsity configuration.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param dF_n_cols (Output) The number of columns of the resulting Jacobian.
+ * @param dF_n_nz (Output) The number of non-zeros of the resulting Jacobian.
+ *
  */
 int jmi_init_dF0_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz);
 
 /**
- * Evaluate the F1 function of the initialization system.
+ * Evaluate the \f$F_1\f$ residual function of the initialization system.
+ *
+ * @param jmi A jmi_t struct.
+ * @param res The residual of \f$F_1\f$.
+ * @return Error code.
  */
 int jmi_init_F1(jmi_t* jmi, jmi_real_t* res);
 
 /**
- * Evaluate the Jacobian of the F1 initialization function.
+ * \brief Evaluate the Jacobian of the DAE initialization residual function \f$F_1\f$.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param jac (Output) The Jacobian.
+ * @return Error code.
+ *
  */
 int jmi_init_dF1(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
 
 /**
- * Returns the number of non-zeros in the Jacobian of the F1 initialization function.
+ * \brief Returns the number of non-zeros in the full Jacobian of the DAE initialization residual function \f$F_1\f$.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF_n_nz.
+ * @param n_nz (Output) The number of non-zero entries in the full Jacobian.
+ * @return Error code.
  */
 int jmi_init_dF1_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
 
 /**
- * Returns the row and column indices of the non-zero elements of the Jacobian of the F1
- * initialization function.
+ * \brief Returns the row and column indices of the non-zero elements in the Jacobain of the DAE
+ * initialization residual function \f$F_1\f$.
+ *
+ * Notice that Fortran style indexing is used: the first row (and column) has index 1.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param row (Output) The row indices of the non-zeros in the Jacobian.
+ * @param col (Output) The column indices of the non-zeros in the Jacobian.
+ * @return Error code.
+ *
  */
 int jmi_init_dF1_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
         int *mask, int* row, int* col);
 
 /**
- * This helper function computes the number of columns and the number of non zero
- * elements in the Jacobian of the F1 init function given a sparsity configuration.
+ * \brief This helper function computes the number of columns and the number of non-zero
+ * elements in the Jacobian of the DAE initialization residual function \f$F_1\f$ given
+ * a sparsity configuration.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param dF_n_cols (Output) The number of columns of the resulting Jacobian.
+ * @param dF_n_nz (Output) The number of non-zeros of the resulting Jacobian.
+ *
  */
 int jmi_init_dF1_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz);
@@ -641,197 +776,495 @@ int jmi_init_dF1_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
 
 /**
  * \defgroup Optimization Optimization interface
+ * \brief Access to the optimization functions.
  */
 /* @{ */
 
 
 /**
- * Set the optimization interval. This function should be called prior to using other
+ * \brief Set the optimization interval.
+ *
+ * This function should be called prior to using other
  * functions in the optimization interface.
+ *
+ * @param jmi A jmi_t struct.
+ * @param start_time The start time of the optimization interval.
+ * @param start_time_free Set to 0 if the start time of the optimization interval is fixed
+ *                        or 1 if the start time is free.
+ * @param final_time Final time of the optimization interval.
+ * @param final_time_free Set to 0 if the final time of the optimization interval is fixed
+ *                        or 1 if the final time is free.
+ * @return Error code.
+ *
  */
 int jmi_opt_set_optimization_interval(jmi_t *jmi, double start_time, int start_time_free,
 		                              double final_time, int final_time_free);
 
-
 /**
- * Specify the optimization interval.
- */
-int jmi_opt_set_optimization_interval(jmi_t *jmi, double start_time, int start_time_free,
-		                              double final_time, int final_time_free);
-
-/**
- * Get the optimization interval.
+ * \brief Get the optimization interval.
+ *
+ * @param jmi A jmi_t struct.
+ * @param (Output) start_time The start time of the optimization interval.
+ * @param (Output) start_time_free  0 if the start time of the optimization interval is fixed
+ *                        or 1 if the start time is free.
+ * @param (Output) final_time Final time of the optimization interval.
+ * @param (Output) final_time_free 0 if the final time of the optimization interval is fixed
+ *                        or 1 if the final time is free.
+ * @return Error code.
+ *
  */
 int jmi_opt_get_optimization_interval(jmi_t *jmi, double *start_time, int *start_time_free,
 		                              double *final_time, int *final_time_free);
 
 
 /**
- * Specify optimization parameters. p_opt_indices contains the indices of the
- * parameters to be optimized in the pi vector.
+ * \brief Specify optimization parameters of the model.
+ *
+ * Typically only a few model parameters are optimized. Using this function, the
+ * indices of the parameters in the independent parameters vector, \f$p_i\f$ is set.
+ *
+ * @param jmi A jmi_t struct.
+ * @param n_p_opt The number of parameters to be optimized.
+ * @param p_opt_indices The indices of the parameters to be optimized in the
+ *                      \f$p_i\f$ vector.
+ * @return Error code.
  */
 int jmi_opt_set_p_opt_indices(jmi_t *jmi, int n_p_opt, int *p_opt_indices);
 
 /**
- * Get the number of optimization parameters.
+ * \brief Get the number of optimization parameters.
+ *
+ * @param jmi A jmi_t struct.
+ * @param n_p_opt (Output) The number of parameters to be optimized.
+ * @return Error code.
+ *
  */
 int jmi_opt_get_n_p_opt(jmi_t *jmi, int *n_p_opt);
 
 /**
- * Get the optimization parameter indices.
+ * \brief Get the optimization parameter indices.
+ *
+ * @param jmi A jmi_t struct.
+ * @param p_opt_indices (Output) The indices of the parameters to be optimized in the
+ *                      \f$p_i\f$ vector.
+ * @return Error code.
+ *
  */
 int jmi_opt_get_p_opt_indices(jmi_t *jmi, int *p_opt_indices);
 
-
-
 /**
- * Get the number of equations in the optimization functions.
+ * \brief Get the sizes of the the optimization functions.
+ *
+ * @param jmi A jmi_t struct.
+ * @param n_eq_Ceq (Output) The number of equations in the \f$C_{eq}\f$ residual.
+ * @param n_eq_Cineq (Output) The number of equations in the \f$C_{ineq}\f$ residual.
+ * @param n_eq_Heq (Output) The number of equations in the \f$H_{eq}\f$ residual.
+ * @param n_eq_Hineq (Output) The number of equations in the \f$H_{ineq}\f$ residual.
+ * @return Error code.
+ *
  */
 int jmi_opt_get_sizes(jmi_t* jmi, int* n_eq_Ceq, int* n_eq_Cineq, int* n_eq_Heq, int* n_eq_Hineq);
 
 /**
- * Evaluate the cost function J.
+ * \brief Evaluate the cost function \f$J\f$.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param J The value of the cost function.
+ * @return Error code.
+ *
  */
 int jmi_opt_J(jmi_t* jmi, jmi_real_t* J);
 
 /**
- * Evaluate the Jacobian of J.
+ * \brief Evaluate the gradient of the cost function \f$J\f$.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param jac (Output) The gradient.
+ * @return Error code.
+ *
  */
 int jmi_opt_dJ(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
 
 /**
- * Returns the number of non-zeros in the Jacobian of J.
+ * \brief Returns the number of non-zeros in the gradient of the cost function \f$J\f$.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF_n_nz.
+ * @param n_nz (Output) The number of non-zero entries in the full gradient.
+ * @return Error code.
  */
 int jmi_opt_dJ_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
 
 /**
- * Returns the row and column indices of the non-zero elements of the Jacobian of J.
+ * \brief Returns the row and column indices of the non-zero elements in the gradient
+ * of the cost function \f$J\f$.
+ *
+ * Notice that Fortran style indexing is used: the first row (and column) has index 1.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param row (Output) The row indices of the non-zeros in the gradient.
+ * @param col (Output) The column indices of the non-zeros in the gradient.
+ * @return Error code.
+ *
  */
 int jmi_opt_dJ_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
         int *mask, int* row, int* col);
 
 /**
- * This helper function computes the number of columns and the number of non zero
- * elements in the Jacobian of the const function J given a sparsity configuration.
+ * \brief This helper function computes the number of columns and the number of non-zero
+ * elements in the gradient of the cost function \f$J\f$ given a sparsity configuration.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param dF_n_cols (Output) The number of columns of the resulting Jacobian.
+ * @param dF_n_nz (Output) The number of non-zeros of the resulting Jacobian.
+ *
  */
 int jmi_opt_dJ_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz);
 
 /**
- * Evaluate the equality constraint function Ceq.
+ * \brief Evaluate the residual of the equality path constraints \f$C_{eq}\f$.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param res The residual.
+ * @return Error code.
+ *
  */
 int jmi_opt_Ceq(jmi_t* jmi, jmi_real_t* res);
 
 /**
- * Evaluate the Jacobian of Ceq.
+ * \brief Evaluate the Jacobian of the equality path constraint \f$C_{eq}\f$.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param jac (Output) The Jacobian.
+ * @return Error code.
+ *
  */
 int jmi_opt_dCeq(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
 
 /**
- * Returns the number of non-zeros in the Jacobian of Ceq.
+ * \brief Returns the number of non-zeros in the full Jacobian of the equality path
+ * constraint \f$C_{eq}\f$.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF_n_nz.
+ * @param n_nz (Output) The number of non-zero entries in the full Jacobian.
+ * @return Error code.
  */
 int jmi_opt_dCeq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
 
 /**
- * Returns the row and column indices of the non-zero elements of the Jacobian of Ceq.
+ * \brief Returns the row and column indices of the non-zero elements in the Jacobian
+ * of the equality path constraint residual \f$C_{eq}\f$.
+ *
+ * Notice that Fortran style indexing is used: the first row (and column) has index 1.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param row (Output) The row indices of the non-zeros in the Jacobian.
+ * @param col (Output) The column indices of the non-zeros in the Jacobian.
+ * @return Error code.
+ *
  */
 int jmi_opt_dCeq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
         int *mask, int* row, int* col);
 
 /**
- * This helper function computes the number of columns and the number of non zero
- * elements in the Jacobian of Ceq given a sparsity configuration.
+ * \brief This helper function computes the number of columns and the number of non-zero
+ * elements in the Jacobian of the equality path constraint residual function \f$C_{eq}\f$ given
+ * a sparsity configuration.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param dF_n_cols (Output) The number of columns of the resulting Jacobian.
+ * @param dF_n_nz (Output) The number of non-zeros of the resulting Jacobian.
+ *
  */
 int jmi_opt_dCeq_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz);
 
 /**
- * Evaluate the equality constraint function Cineq.
+ * \brief Evaluate the residual of the inequality path constraints \f$C_{ineq}\f$.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param res The residual.
+ * @return Error code.
+ *
  */
 int jmi_opt_Cineq(jmi_t* jmi, jmi_real_t* res);
 
 /**
- * Evaluate the Jacobian of Cineq.
+ * \brief Evaluate the Jacobian of the inequality path constraint \f$C_{ineq}\f$.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param jac (Output) The Jacobian.
+ * @return Error code.
+ *
  */
 int jmi_opt_dCineq(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
 
 /**
- * Returns the number of non-zeros in the Jacobian of Cineq.
+ * \brief Returns the number of non-zeros in the full Jacobian of the inequality path
+ * constraint \f$C_{ineq}\f$.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF_n_nz.
+ * @param n_nz (Output) The number of non-zero entries in the full Jacobian.
+ * @return Error code.
  */
 int jmi_opt_dCineq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
 
 /**
- * Returns the row and column indices of the non-zero elements of the Jacobian of Cineq.
+ * \brief Returns the row and column indices of the non-zero elements in the Jacobian
+ * of the inequality path constraint residual \f$C_{ineq}\f$.
+ *
+ * Notice that Fortran style indexing is used: the first row (and column) has index 1.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param row (Output) The row indices of the non-zeros in the Jacobian.
+ * @param col (Output) The column indices of the non-zeros in the Jacobian.
+ * @return Error code.
+ *
  */
 int jmi_opt_dCineq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
         int *mask, int* row, int* col);
 
 /**
- * This helper function computes the number of columns and the number of non zero
- * elements in the Jacobian of Cineq given a sparsity configuration.
+ * \brief This helper function computes the number of columns and the number of non-zero
+ * elements in the Jacobian of the inequality path constraint residual function \f$C_{ineq}\f$ given
+ * a sparsity configuration.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param dF_n_cols (Output) The number of columns of the resulting Jacobian.
+ * @param dF_n_nz (Output) The number of non-zeros of the resulting Jacobian.
+ *
  */
 int jmi_opt_dCineq_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz);
 
 /**
- * Evaluate the equality constraint function Heq.
+ * \brief Evaluate the residual of the equality point constraints \f$H_{eq}\f$.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param res The residual.
+ * @return Error code.
+ *
  */
 int jmi_opt_Heq(jmi_t* jmi, jmi_real_t* res);
 
 /**
- * Evaluate the Jacobian of Heq.
+ * \brief Evaluate the Jacobian of the equality point constraint \f$H_{eq}\f$.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param jac (Output) The Jacobian.
+ * @return Error code.
+ *
  */
 int jmi_opt_dHeq(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
 
 /**
- * Returns the number of non-zeros in the Jacobian of Heq.
+ * \brief Returns the number of non-zeros in the full Jacobian of the equality point
+ * constraint \f$H_{eq}\f$.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF_n_nz.
+ * @param n_nz (Output) The number of non-zero entries in the full Jacobian.
+ * @return Error code.
  */
 int jmi_opt_dHeq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
 
 /**
- * Returns the row and column indices of the non-zero elements of the Jacobian of Heq.
+ * \brief Returns the row and column indices of the non-zero elements in the Jacobian
+ * of the equality point constraint residual \f$H_{eq}\f$.
+ *
+ * Notice that Fortran style indexing is used: the first row (and column) has index 1.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param row (Output) The row indices of the non-zeros in the Jacobian.
+ * @param col (Output) The column indices of the non-zeros in the Jacobian.
+ * @return Error code.
+ *
  */
 int jmi_opt_dHeq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
         int *mask, int* row, int* col);
 
 /**
- * This helper function computes the number of columns and the number of non zero
- * elements in the Jacobian of Heq given a sparsity configuration.
+ * \brief This helper function computes the number of columns and the number of non-zero
+ * elements in the Jacobian of the equality point constraint residual function \f$H_{eq}\f$ given
+ * a sparsity configuration.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param dF_n_cols (Output) The number of columns of the resulting Jacobian.
+ * @param dF_n_nz (Output) The number of non-zeros of the resulting Jacobian.
+ *
  */
 int jmi_opt_dHeq_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz);
 
 /**
- * Evaluate the equality constraint function Hineq.
+ * \brief Evaluate the residual of the inequality point constraints \f$H_{ineq}\f$.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param res The residual.
+ * @return Error code.
+ *
  */
 int jmi_opt_Hineq(jmi_t* jmi, jmi_real_t* res);
 
 /**
- * Evaluate the Jacobian of Hineq.
+ * \brief Evaluate the Jacobian of the inequality point constraint \f$H_{ineq}\f$.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param jac (Output) The Jacobian.
+ * @return Error code.
+ *
  */
 int jmi_opt_dHineq(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
 
 /**
- * Returns the number of non-zeros in the Jacobian of Hineq.
+ * \brief Returns the number of non-zeros in the full Jacobian of the inequality point
+ * constraint \f$H_{ineq}\f$.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF_n_nz.
+ * @param n_nz (Output) The number of non-zero entries in the full Jacobian.
+ * @return Error code.
  */
 int jmi_opt_dHineq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
 
 /**
- * Returns the row and column indices of the non-zero elements of the Jacobian of Hineq.
+ * \brief Returns the row and column indices of the non-zero elements in the Jacobian
+ * of the inequality point constraint residual \f$H_{ineq}\f$.
+ *
+ * Notice that Fortran style indexing is used: the first row (and column) has index 1.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param row (Output) The row indices of the non-zeros in the Jacobian.
+ * @param col (Output) The column indices of the non-zeros in the Jacobian.
+ * @return Error code.
+ *
  */
 int jmi_opt_Hineq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
         int *mask, int* row, int* col);
 
 /**
- * This helper function computes the number of columns and the number of non zero
- * elements in the Jacobian of Hineq given a sparsity configuration.
+ * \brief This helper function computes the number of columns and the number of non-zero
+ * elements in the Jacobian of the inequality point constraint residual function \f$H_{ineq}\f$ given
+ * a sparsity configuration.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param dF_n_cols (Output) The number of columns of the resulting Jacobian.
+ * @param dF_n_nz (Output) The number of non-zeros of the resulting Jacobian.
+ *
  */
 int jmi_opt_dHineq_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz);
 
 /* @} */
 
+
+/**
+ * \defgroup Misc Miscanellous
+ * \brief Miscanellous functions.
+ */
+/* @{ */
+
+/**
+ * Print a summary of the content of the jmi_t struct.
+ *
+ * @param jmi A jmi_t struct.
+ */
+void jmi_print_summary(jmi_t *jmi);
+
+/* @} */
+
+
+
 #endif
 
 
 /* @} */
+
