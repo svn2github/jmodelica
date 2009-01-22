@@ -9,8 +9,54 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define JMI_AD_NONE 0
-#define JMI_AD_CPPAD 1
+/**
+ * \defgroup Jmi_internal Internal functions of the JMI Model interface.
+ *
+ * \brief Documentation of the internal functions and data structures of the JMI Model interface.
+ *
+ * The JMI Model interface is supported by internal data structures and functions which
+ * are described in the following. The internal data structures support the the use of CppAD (see
+ * http://www.coin-or.org/CppAD/) a package for automatic differentiation. CppAD is based
+ * in operator overloading in and is written in C++. Accordingly, the JMI Runtime Library needs
+ * to be compiled with a C++ compiler in order to use CppAD. On the other hand, for some applications
+ * it is desirable to compile the Runtime Library using a pure C compiler. In order to accommodate
+ * these two situations, there are two sets of typedefs for some of the internal data structures:
+ * one set for the case of C++ compilation with CppAD and one set of typedefs for the case
+ * of C compilation without CppAD. By setting the constant JMI_AD to either JMI_AD_NONE or
+ * JMI_AD_CPPAD (typically done by a compiler directive (switch -D if gcc is used)), the correct
+ * set of typedefs are included.
+ *
+ * \section jmi_func_t The jmi_func_t struct.
+ * All the mathematical functions defined in the JMI Model interface are functions of independent
+ * variables in \f$z\f$. It is therefore convenient to introduce an abstraction of a general
+ * function \f$F(z)\f$.
+ *
+ * \section jmi_jmi_t The jmi_t struct
+ *
+ * \section jmi_internal_init Initialization of interal JMI Model interface structs
+ *
+ */
+
+/* @{ */
+
+/**
+ * \defgroup jmi_internal_defines Defines
+ * \brief Defined constants.
+ */
+
+/* @{ */
+
+#define JMI_AD_NONE 0 /**< \brief No CppAD support.*/
+#define JMI_AD_CPPAD 1 /**< \brief CppAD support. */
+
+/* @} */
+
+/**
+ * \defgroup jmi_internal_typedefs Typedefs
+ * \brief Internal typedefs.
+ */
+
+/* @{ */
 
 /*
  *  TODO: Error codes...
@@ -25,23 +71,32 @@
 
 // Forward declaration of jmi struct
 typedef struct jmi_t jmi_t;
+typedef struct jmi_dae_t jmi_dae_t;
+typedef struct jmi_init_t jmi_init_t;
+typedef struct jmi_opt_t jmi_opt_t;
+typedef struct jmi_func_t jmi_func_t;
+typedef struct jmi_func_ad_t jmi_func_ad_t;
 
 // Typedef for the doubles used in the interface.
-typedef double jmi_real_t;
+typedef double jmi_real_t; ///< Typedef for the real number representation used in the Runtime Library.
 
 // This section defines types in the case of no AD and
 // in the case of CppAD.
 #if JMI_AD == JMI_AD_NONE
-typedef jmi_real_t jmi_ad_var_t;
-typedef jmi_real_t *jmi_real_vec_t;
-typedef jmi_real_vec_t *jmi_real_vec_p;
-typedef jmi_real_t *jmi_ad_var_vec_t;
-typedef jmi_ad_var_vec_t *jmi_ad_var_vec_p;
-typedef void jmi_ad_tape_t;
-typedef jmi_ad_tape_t *jmi_ad_tape_p;
-//typedef void jmi_dae_ad_t;
-//typedef void jmi_init_ad_t;
-typedef void jmi_func_ad_t;
+typedef jmi_real_t jmi_ad_var_t;                       ///< If JMI_AD_NONE: alias for jmi_real_t.<br>
+                                                       ///< If JMI_AD_CPPAD: an active AD object.
+typedef jmi_real_t *jmi_real_vec_t;                    ///< If JMI_AD_NONE: a vector of jmi_real_ts.<br>
+                                                       ///< If JMI_AD_CPPAD: a vector of jmi_real_ts.
+typedef jmi_real_vec_t *jmi_real_vec_p;                ///< If JMI_AD_NONE: a pointer to a vector of jmi_real_ts.<br>
+                                                       ///< If JMI_AD_CPPAD: a pointer to a vector of jmi_real_ts.
+typedef jmi_real_t *jmi_ad_var_vec_t;                  ///< If JMI_AD_NONE: a vector of jmi_real_ts.<br>
+                                                       ///< If JMI_AD_CPPAD: a vector of active AD objecs.
+typedef jmi_ad_var_vec_t *jmi_ad_var_vec_p;            ///< If JMI_AD_NONE: a pointer to a vector of jmi_real_ts.<br>
+                                                       ///< If JMI_AD_CPPAD: a pointer to a vector of active AD objecs.
+typedef void jmi_ad_tape_t;                            ///< If JMI_AD_NONE: void (not used).<br>
+                                                       ///< If JMI_AD_CPPAD: an AD tape.
+typedef jmi_ad_tape_t *jmi_ad_tape_p;                  ///< If JMI_AD_NONE: a pointer to void (not used).<br>
+                                                       ///< If JMI_AD_CPPAD: a pointer to an AD tape.
 #elif JMI_AD == JMI_AD_CPPAD
 typedef CppAD::AD<jmi_real_t> jmi_ad_var_t;
 typedef std::vector<jmi_real_t> jmi_real_vec_t;
@@ -51,184 +106,59 @@ typedef jmi_ad_var_vec_t *jmi_ad_var_vec_p;
 typedef CppAD::ADFun<jmi_real_t> jmi_ad_tape_t;
 typedef jmi_ad_tape_t *jmi_ad_tape_p;
 
-/**
- * The struct jmi_cppad_func_t contains a tape and associated
- * sparsity information for a particular function F.
- */
-typedef struct {
-
-	jmi_ad_var_vec_p F_z_dependent;
-	jmi_ad_tape_p F_z_tape;
-	int tape_initialized;
-
-	int dF_z_n_nz;
-	int* dF_z_row;
-	int* dF_z_col;
-
-	// Sparsity patterns for individual independent variables
-	// These variables are useful when computing the Jacobian.
-/*
-	int dF_ci_n_nz, dF_cd_n_nz, dF_pi_n_nz, dF_pd_n_nz,
-        dF_dx_n_nz, dF_x_n_nz, dF_u_n_nz, dF_w_n_nz, dF_t_n_nz,
-        dF_dx_p_n_nz, dF_x_p_n_nz, dF_u_p_n_nz, dF_w_p_n_nz;
-
-	int *dF_ci_row, *dF_cd_row, *dF_pi_row, *dF_pd_row,
-		*dF_dx_row, *dF_x_row, *dF_u_row, *dF_w_row, *dF_t_row,
-	    *dF_dx_p_row, *dF_x_p_row, *dF_u_p_row, *dF_w_p_row;
-	int *dF_ci_col, *dF_cd_col, *dF_pi_col, *dF_pd_col,
-		*dF_dx_col, *dF_x_col, *dF_u_col, *dF_w_col, *dF_t_col,
-		*dF_dx_p_col, *dF_x_p_col, *dF_u_p_col, *dF_w_p_col;
-*/
-	jmi_real_vec_p z_work;
-} jmi_func_ad_t;
-/*
-typedef struct {
-	jmi_cppad_func_t* F;
-	jmi_real_vec_p z_work;
-
-} jmi_dae_ad_t;
-
-typedef struct {
-	jmi_cppad_func_t* F0;
-	jmi_cppad_func_t* F1;
-	jmi_real_vec_p z_work;
-} jmi_init_ad_t;
-*/
-
 #else
 #error "The directive JMI_AD_NONE or JMI_AD_CPPAD must be set"
 #endif
 
-// Function signatures to be used in the generated code
+/* @} */
 
 /**
- * Evaluation of the DAE residual in the generated code.
+ * \defgroup jmi_function_typedefs Function typedefs
+ * \brief Function signatures to be used in the generated code
+ */
+
+/* @{ */
+
+/**
+ * \brief Function signature for evaluation of a residual function in the generated code.
+ *
+ * Notice that this function signature is used for all functions in the DAE, DAE initialization,
+ * and Optimization interfaces. Notice that this definition supports both C compilation
+ * and C++ compilation with CppAD.
+ *
+ * @param jmi A jmi_t struct.
+ * @param res (Output) The residual value.
+ * @return Error code.
+ *
  */
 typedef int (*jmi_residual_func_t)(jmi_t* jmi, jmi_ad_var_vec_p res);
 
 /**
- * Evaluation of symbolic jacobian in generated code.
- */
-typedef int (*jmi_jacobian_func_t)(jmi_t* jmi, int sparsity, int skip, int* mask, jmi_real_t* jac);
-
-/**
- * The jmi_func_t is a struct that contains function pointers and dimension information
- * corresponding to a mathematical vector valued function, F. The struct also contains
- * function pointers to symbolic Jacobians and associated sparsity information.
- */
-typedef struct {
-	jmi_residual_func_t F;
-	jmi_jacobian_func_t dF;
-	int n_eq_F;
-	int dF_n_nz;
-	int* dF_row;
-	int* dF_col;
-	jmi_func_ad_t* ad;
-} jmi_func_t;
-
-
-/**
- * Struct describing a DAE model including evaluation of the DAE residual and (optional) a symbolic
- * Jacobian. If the Jacobian is not provided, the corresponding function pointers are set to NULL.
- */
-typedef struct {
-	jmi_func_t* F;
-} jmi_dae_t;
-
-/**
- * A struct that encapsulates an initialization system.
- */
-typedef struct {
-	jmi_func_t* F0;
-	jmi_func_t* F1;
-} jmi_init_t;
-
-/**
- * A struct that encapsulates an optimization problem.
- */
-typedef struct {
-	jmi_func_t* J;
-	jmi_func_t* Ceq;
-	jmi_func_t* Cineq;
-	jmi_func_t* Heq;
-	jmi_func_t* Hineq;
-	jmi_real_t start_time;
-	int start_time_free;
-	jmi_real_t final_time;
-	int final_time_free;
-	int n_p_opt;                     // Number of parameters to optimize (in the p_i vector)
-	int *p_opt_indices;              // Indices of the parameters to optimize (in the p_i vector)
-
-} jmi_opt_t;
-
-
-
-/**
- * \ingroup jmi_struct
+ * \brief Evaluation of symbolic jacobian of a residual function in generated code.
+ * Notice that this function signature is used for all functions in the DAE, DAE initialization,
+ * and Optimization interfaces. Notice that this definition supports both C compilation
+ * and C++ compilation with CppAD.
  *
- * \brief The main struct of the JMI Model interface.
- *
- * jmi_t is the main struct in the jmi interface. It contains pointers to structs of
- * types jmi_dae_t, jmi_init_t, and jmi_opt_t. The creation of a jmi_t struct proceeds in three
- * steps. First, a raw struct is created by the function jmi_init. Then the jmi_dae_t,
- * jmi_init_t, and jmi_opt_t structs are initialized by the functions jmi_dae_init,
- * jmi_init_init, and jmi_opt_init respectively. Finlly, the the jmi_dae_ad_t, jmi_init_ad_t, and jmi_opt_ad_t structs
- * are set up in the function call jmi_ad_init. Notice that the variable vectors should have been
- * initialized prior to the call to jmi_ad_init.
- *
- * Typically, jmi_init, jmi_dae_init, jmi_init_init, and jmi_opt_init  are called from within the jmi_new function
- * that is provided by the generated code. The function jmi_ad_init is then called from the
- * user code after the variable vectors has been initialized.
+ * @param jmi A jmi_t struct.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param res (Output) The residual value.
+ * @return Error code.
  */
-struct jmi_t{
-  jmi_dae_t* dae; /**< \brief A jmi_dae_t struct pointer. */
-	jmi_init_t* init;
-	jmi_opt_t* opt;
+typedef int (*jmi_jacobian_func_t)(jmi_t* jmi, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
 
-	int n_ci;
-	int n_cd;
-	int n_pi;
-	int n_pd;
-	int n_dx;
-	int n_x;
-	int n_u;
-	int n_w;
+/* @} */
 
-	int n_tp;                        // Number of time points included in the optimization problem
-	jmi_real_t *tp;                  // Time point values in the normalized interval [0..1].
-	                                 // A value <=0 corresponds to the initial time and
-	                                 // a value >=1 corresponds to the final time.
+/**
+ * \defgroup jmi_func_t The jmi_func_t struct
+ *
+ * \brief Functions for creating, deleting and evaluating jmi_func_t functions.
+ *
+ */
 
-	int n_p;
-	int n_v;
-	int n_q;
-	int n_z; // the sum of all variables vector sizes (including t), for convenience
+/* @{ */
 
-	// Offset variables in the z vector, for convenience.
-	int offs_ci;
-	int offs_cd;
-	int offs_pi;
-	int offs_pd;
-	int offs_dx;
-	int offs_x;
-	int offs_u;
-	int offs_w;
-	int offs_t;
-	int offs_dx_p; // offset of the first dx_p
-	int offs_x_p;  // offset of the first x_p
-	int offs_u_p;  // offset of the first u_p
-	int offs_w_p;  // offset of the first w_p
-
-	int offs_p;
-	int offs_v;
-	int offs_q;
-
-	// This vector contains active AD objects in case of AD
-	jmi_ad_var_vec_p z;
-	// This vector contains the actual values
-	jmi_real_t** z_val;
-
-};
 
 /**
  * Create a new jmi_func_t.
@@ -267,6 +197,70 @@ int jmi_func_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, int independent_vars,
  */
 int jmi_func_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz);
+
+/**
+ * \brief Data structure for representing a single function \f$F(z)\f$.
+ *
+ * jmi_func_t is a struct that contains function pointers and dimension information
+ * corresponding to a mathematical vector valued function, \f$F(z)\f$. The struct also contains
+ * function pointers to symbolic Jacobians and associated sparsity information and
+ * a pointer to a jmi_func_ad_t struct containing AD data (if compiled with AD support).
+ */
+struct jmi_func_t{
+	jmi_residual_func_t F; ///< \brief Pointer to a function for evaluation of \f$F(z)\f$.
+	jmi_jacobian_func_t dF; ///< \brief Pointer to a function for evaluation of the Jacobian of \f$F(z)\f$.
+	int n_eq_F; ///< \brief Size of the function.
+	int dF_n_nz; ///< \brief Number of non-zeros in the symbolic Jacobian of \f$F(z)\f$ (if available).
+	int* dF_row; ///< \brief Row indices of the non-zero elements in the symbolic Jacobian of \f$F(z)\f$ (if available).
+	int* dF_col; ///< \brief Column indices of the non-zero elements in the symbolic Jacobian of \f$F(z)\f$ (if available).
+	jmi_func_ad_t* ad; ///< \brief Pointer to a jmi_func_ad_t struct containing AD information (if compiled with AD support).
+};
+
+/**
+ * \brief Contains data structures for CppAD.
+ *
+ * The struct jmi_func_ad_t contains a tape and associated
+ * sparsity information for a particular jmi_func_t struct.
+ */
+struct jmi_func_ad_t{
+	jmi_ad_var_vec_p F_z_dependent; ///< \brief A vector containing active AD independent objects for use
+	                                ///< by CppAD.
+	jmi_ad_tape_p F_z_tape;         ///< \brief An AD tape.
+	int tape_initialized;           ///< \brief Flag to indicate if the other fields are initialized.
+	                                ///< 0 if uninitialized and 1 if initialized.
+	int dF_z_n_nz;                  ///< \brief Number of non-zeros in Jacobian.
+	int* dF_z_row;                  ///< \brief Row indices of non-zeros in Jacobian.
+	int* dF_z_col;                  ///< \brief Column indices of non-zeros in Jacobian.
+	jmi_real_vec_p z_work;          ///< A work vector for \f$z\f$.
+};
+
+/* @} */
+
+/**
+ * \defgroup jmi_structs_init The jmi_t, jmi_dae_t, jmi_init_t, and jmi_opt_t structs
+ *
+ * \brief Functions for initialization of the jmi_t, jmi_dae_t, jmi_init_t, and jmi_opt_t
+ * structs.
+ *
+ * The creation of a jmi_t struct proceeds in three
+ * steps:
+ *   - First, a raw struct is created by the function jmi_init. In this function,
+ *     the dimensions of the variable vectors are set, but no substructs are
+ *     initialized.
+ *   - Then the jmi_dae_t, jmi_init_t, and jmi_opt_t structs are initialized by the functions jmi_dae_init,
+ *     jmi_init_init, and jmi_opt_init respectively. In these function calls, the corresponding
+ *     function pointers are set and new jmi_func_t structs are created.
+ *   - Finlly, the the jmi_dae_ad_t, jmi_init_ad_t, and jmi_opt_ad_t structs
+ *     are set up in the function call jmi_ad_init. Notice that the variable vectors should have been
+ *     initialized prior to the call to jmi_ad_init.
+ *
+ * Typically, jmi_init, jmi_dae_init, jmi_init_init, and jmi_opt_init  are called from within the jmi_new function
+ * that is provided by the generated code. The function jmi_ad_init is then called from the
+ * user code after the variable vectors has been initialized.
+ *
+ */
+
+/* @{ */
 
 /**
  * Allocates memory and sets up the jmi_t struct. This function is typically called
@@ -312,6 +306,105 @@ int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t J,
 		int dHineq_n_nz, int* dHineq_row, int* dHineq_col);
 
 /**
+ * \brief The main struct of the JMI Model interface containing dimension information and pointers to
+ * jmi_dae_t, jmi_init_t, and jmi_opt_t structs.
+ *
+ * jmi_t is the main struct in the JMI model interface. It contains pointers to structs of
+ * types jmi_dae_t, jmi_init_t, and jmi_opt_t to represent the DAE, DAE initialization and
+ * Optimization interfaces.
+ */
+struct jmi_t{
+  jmi_dae_t* dae;                        ///< \brief A jmi_dae_t struct pointer.
+	jmi_init_t* init;                    ///< \brief A jmi_init_t struct pointer.
+	jmi_opt_t* opt;                      ///< \brief A jmi_opt_t struct pointer.
+
+	int n_ci;                            ///< \brief Number of independent constants.
+	int n_cd;                            ///< \brief Number of dependent constants.
+	int n_pi;                            ///< \brief Number of independent parameters.
+	int n_pd;                            ///< \brief Number of dependent parameters.
+	int n_dx;                            ///< \brief Number of derivatives.
+	int n_x;                             ///< \brief Number of differentiated states.
+	int n_u;                             ///< \brief Number of inputs.
+	int n_w;                             ///< \brief Number of algebraics.
+
+	int n_p;                             ///< \brief Number of elements in \f$p\f$.
+	int n_v;                             ///< \brief Number of elements in \f$v\f$.
+	int n_q;                             ///< \brief Number of elements in \f$q\f$.
+	int n_z;                             ///< \brief Number of elements in \f$z\f$.
+
+	int n_tp;                            ///< \brief Number of time points included in the optimization problem
+	jmi_real_t *tp;                      ///< \brief Time point values in the normalized interval [0..1].
+	                                     ///< A value \f$\leq 0\f$ corresponds to the initial time and
+	                                     ///< a value \f$\geq 1\f$ corresponds to the final time.
+
+	// Offset variables in the z vector, for convenience.
+	int offs_ci;                         ///< Offset of the independent constant vector in \f$z\f$.
+	int offs_cd;                         ///< Offset of the dependent constant vector in \f$z\f$.
+	int offs_pi;                         ///< Offset of the independent parameter vector in \f$z\f$.
+	int offs_pd;                         ///< Offset of the dependent parameter vector in \f$z\f$.
+	int offs_dx;                         ///< Offset of the derivative vector in \f$z\f$.
+	int offs_x;                          ///< Offset of the differentiated variable vector in \f$z\f$.
+	int offs_u;                          ///< Offset of the input vector in \f$z\f$.
+	int offs_w;                          ///< Offset of the algebraic variables vector in \f$z\f$.
+	int offs_t;                          ///< Offset of the time entry in \f$z\f$.
+	int offs_dx_p;                       ///< Offset of the first time point derivative vector in \f$z\f$.
+	int offs_x_p;                        ///< Offset of the first time point differentiated variable vector in \f$z\f$.
+	int offs_u_p;                        ///< Offset of the first time point input vector in \f$z\f$.
+	int offs_w_p;                        ///< Offset of the first time point algebraic variable vector in \f$z\f$.
+
+	int offs_p;                          ///< Offset of the \f$p\f$ vector in \f$z\f$.
+	int offs_v;                          ///< Offset of the \f$v\f$ vector in \f$z\f$.
+	int offs_q;                          ///< Offset of the \f$z\f$ vector in \f$z\f$.
+
+	jmi_ad_var_vec_p z;                  ///< This vector contains active AD objects in case of AD.
+	jmi_real_t** z_val;                  ///< This vector contains the actual values.
+
+};
+
+/**
+ * \brief Struct describing a DAE model.
+ *
+ * Contains one jmi_func_t struct representing the DAE residual function.
+ */
+struct jmi_dae_t{
+	jmi_func_t* F;                       ///< A jmi_func_t struct representing the DAE residual \f$F\f$.
+};
+
+/**
+ * \brief A struct containing a DAE initialization system.
+ */
+struct jmi_init_t{
+	jmi_func_t* F0;                      ///< A jmi_func_t struct representing \f$F_0\f$.
+	jmi_func_t* F1;                      ///< A jmi_func_t struct representing \f$F_1\f$.
+};
+
+/**
+ * \brief A struct containing functions and information about the interval definition
+ *        and optimization parameters for an optimization problem.
+ */
+struct  jmi_opt_t{
+	jmi_func_t* J;                        ///< Function pointer to the cost function.
+	jmi_func_t* Ceq;                      ///< Function pointer to the equality path constraint residual function.
+	jmi_func_t* Cineq;                    ///< Function pointer to the inequality path constraint residual function.
+	jmi_func_t* Heq;                      ///< Function pointer to the equality point constraint residual function.
+	jmi_func_t* Hineq;                    ///< Function pointer to the inequality point constraint residual function.
+	jmi_real_t start_time;                ///< Optimization interval start time.
+	int start_time_free;                  ///< Start time free or fixed.
+	jmi_real_t final_time;                ///< Optimization interval final time.
+	int final_time_free;                  ///< Final time free or fixed.
+	int n_p_opt;                          ///< Number of parameters to optimize (in the \f$p_i\f$ vector).
+	int *p_opt_indices;                   ///< Indices of the parameters to optimize (in the \f$p_i\f$ vector).
+};
+
+/* @} */
+
+/**
+ * \defgroup Misc_internal Miscanellous
+ * \brief Miscanellous functions.
+ */
+/* @{ */
+
+/**
  * Compute the type of variable. The return value is one of JMI_DER_NN if a
  * valid Jacobian column index is given, otherwise -1.
  */
@@ -330,5 +423,13 @@ int jmi_check_Jacobian_column_index(jmi_t *jmi, int independent_vars, int *mask,
  *
  */
 int jmi_map_Jacobian_column_index(jmi_t *jmi, int independent_vars, int *mask, int col_index);
+
+
+
+/* @} */
+
+/* @} */
+
+
 
 #endif
