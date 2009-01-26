@@ -173,7 +173,7 @@ int test_1_dae_F(int verbose) {
 	jmi_real_t res_fix[4] = {-2,0,153.1701780775437,0};
 	jmi_real_t err_sum = 0;
 	for (i=0;i<n_eq_F;i++) {
-		err_sum += abs(res_fix[i] - res_F[i]);
+		err_sum += fabs(res_fix[i] - res_F[i]);
 	}
 
 	if (verbose == 1) {
@@ -223,8 +223,8 @@ int test_2_dae_dF_indices(int verbose) {
 
 	int err_sum = 0;
 	for (i=0;i<dF_n_nz;i++) {
-		err_sum += abs(dF_row_fix[i] - dF_row[i]);
-		err_sum += abs(dF_col_fix[i] - dF_col[i]);
+		err_sum += fabs(dF_row_fix[i] - dF_row[i]);
+		err_sum += fabs(dF_col_fix[i] - dF_col[i]);
 	}
 
 	if (err_sum==0) {
@@ -456,7 +456,7 @@ int test_10_dae_dF_eval(int verbose) {
 			                  3.103403561550873e+02};
 	jmi_real_t err_sum = 0;
 	for (i=0;i<dF_n_nz;i++) {
-		err_sum += abs(jac_fix[i] - dF_sparse[i]);
+		err_sum += fabs(jac_fix[i] - dF_sparse[i]);
 	}
 
 	if (err_sum<SMALL) {
@@ -508,7 +508,7 @@ int test_11_dae_dF_eval(int verbose) {
 
 	jmi_real_t err_sum = 0;
 	for (i=0;i<dF_n_nz;i++) {
-		err_sum += abs(jac_fix_dense[i] - dF_dense[i]);
+		err_sum += fabs(jac_fix_dense[i] - dF_dense[i]);
 	}
 
 	if (err_sum<SMALL) {
@@ -560,7 +560,7 @@ int test_12_dae_dF_eval(int verbose) {
 
 	jmi_real_t err_sum = 0;
 	for (i=0;i<dF_n_nz;i++) {
-		err_sum += abs(jac_fix_dense[i] - dF_dense[i]);
+		err_sum += fabs(jac_fix_dense[i] - dF_dense[i]);
 	}
 
 	if (err_sum<SMALL) {
@@ -597,8 +597,8 @@ int test_13_dae_dF_ad_indices(int verbose) {
 
 	int err_sum = 0;
 	for (i=0;i<dF_n_nz;i++) {
-		err_sum += abs(dF_row_fix[i] - dF_row[i]);
-		err_sum += abs(dF_col_fix[i] - dF_col[i]);
+		err_sum += fabs(dF_row_fix[i] - dF_row[i]);
+		err_sum += fabs(dF_col_fix[i] - dF_col[i]);
 	}
 
 	if (err_sum==0) {
@@ -830,7 +830,7 @@ int test_21_dae_dF_ad_eval(int verbose) {
 			                  3.103403561550873e+02};
 	jmi_real_t err_sum = 0;
 	for (i=0;i<dF_n_nz;i++) {
-		err_sum += abs(jac_fix[i] - dF_sparse[i]);
+		err_sum += fabs(jac_fix[i] - dF_sparse[i]);
 	}
 
 	if (err_sum<SMALL) {
@@ -882,7 +882,7 @@ int test_22_dae_dF_ad_eval(int verbose) {
 
 	jmi_real_t err_sum = 0;
 	for (i=0;i<dF_n_nz;i++) {
-		err_sum += abs(jac_fix_dense[i] - dF_dense[i]);
+		err_sum += fabs(jac_fix_dense[i] - dF_dense[i]);
 	}
 
 	if (err_sum<SMALL) {
@@ -934,7 +934,7 @@ int test_23_dae_dF_ad_eval(int verbose) {
 
 	jmi_real_t err_sum = 0;
 	for (i=0;i<dF_n_nz;i++) {
-		err_sum += abs(jac_fix_dense[i] - dF_dense[i]);
+		err_sum += fabs(jac_fix_dense[i] - dF_dense[i]);
 	}
 
 	if (err_sum<SMALL) {
@@ -976,8 +976,8 @@ int test_24_dae_dF_indices(int verbose) {
 
 	int err_sum = 0;
 	for (i=0;i<dF_n_nz_test;i++) {
-		err_sum += abs(dF_row_fix[i] - dF_row[i]);
-		err_sum += abs(dF_col_fix[i] - dF_col[i]);
+		err_sum += fabs(dF_row_fix[i] - dF_row[i]);
+		err_sum += fabs(dF_col_fix[i] - dF_col[i]);
 	}
 
 	mask[3] = 1;
@@ -1022,8 +1022,8 @@ int test_25_dae_dF_ad_indices(int verbose) {
 
 	int err_sum = 0;
 	for (i=0;i<dF_n_nz_test;i++) {
-		err_sum += abs(dF_row_fix[i] - dF_row[i]);
-		err_sum += abs(dF_col_fix[i] - dF_col[i]);
+		err_sum += fabs(dF_row_fix[i] - dF_row[i]);
+		err_sum += fabs(dF_col_fix[i] - dF_col[i]);
 	}
 
 	mask[3] = 1;
@@ -1078,7 +1078,7 @@ int test_26_dae_dF_eval(int verbose) {
 			                  1, 1, 59.112448791445203};
 	jmi_real_t err_sum = 0;
 	for (i=0;i<dF_n_nz_test;i++) {
-		err_sum += abs(jac_fix[i] - dF_sparse[i]);
+		err_sum += fabs(jac_fix[i] - dF_sparse[i]);
 	}
 
 	mask[3] = 1;
@@ -1144,7 +1144,7 @@ int test_27_dae_dF_eval(int verbose) {
 
 	jmi_real_t err_sum = 0;
 	for (i=0;i<dF_n_nz_test;i++) {
-		err_sum += abs(jac_fix_dense[i] - dF_dense[i]);
+		err_sum += fabs(jac_fix_dense[i] - dF_dense[i]);
 	}
 
 	if (err_sum<SMALL) {
@@ -1210,7 +1210,7 @@ int test_28_dae_dF_eval(int verbose) {
 
 	jmi_real_t err_sum = 0;
 	for (i=0;i<dF_n_nz_test;i++) {
-		err_sum += abs(jac_fix_dense[i] - dF_dense[i]);
+		err_sum += fabs(jac_fix_dense[i] - dF_dense[i]);
 	}
 
 	if (err_sum<SMALL) {
@@ -1266,7 +1266,7 @@ int test_29_dae_dF_ad_eval(int verbose) {
 			                  1, 1, 59.112448791445203};
 	jmi_real_t err_sum = 0;
 	for (i=0;i<dF_n_nz_test;i++) {
-		err_sum += abs(jac_fix[i] - dF_sparse[i]);
+		err_sum += fabs(jac_fix[i] - dF_sparse[i]);
 	}
 
 	mask[3] = 1;
@@ -1332,7 +1332,7 @@ int test_30_dae_dF_ad_eval(int verbose) {
 
 	jmi_real_t err_sum = 0;
 	for (i=0;i<dF_n_nz_test;i++) {
-		err_sum += abs(jac_fix_dense[i] - dF_dense[i]);
+		err_sum += fabs(jac_fix_dense[i] - dF_dense[i]);
 	}
 
 	mask[3] = 1;
@@ -1400,7 +1400,7 @@ int test_31_dae_dF_ad_eval(int verbose) {
 
 	jmi_real_t err_sum = 0;
 	for (i=0;i<dF_n_nz_test;i++) {
-		err_sum += abs(jac_fix_dense[i] - dF_dense[i]);
+		err_sum += fabs(jac_fix_dense[i] - dF_dense[i]);
 	}
 
 
@@ -1443,7 +1443,7 @@ int test_32_opt_J_eval(int verbose) {
 	jmi_opt_J(jmi,&J);
 
 	jmi_real_t J_fix = 296;
-	jmi_real_t err = abs(J_fix - J);
+	jmi_real_t err = fabs(J_fix - J);
 
 	if (verbose == 1) {
 		int i;
@@ -1493,8 +1493,8 @@ int test_33_opt_dJ_indices(int verbose) {
 
 	int err_sum = 0;
 	for (i=0;i<dJ_n_nz;i++) {
-		err_sum += abs(dJ_row_fix[i] - dJ_row[i]);
-		err_sum += abs(dJ_col_fix[i] - dJ_col[i]);
+		err_sum += fabs(dJ_row_fix[i] - dJ_row[i]);
+		err_sum += fabs(dJ_col_fix[i] - dJ_col[i]);
 	}
 
 	if (err_sum==0) {
@@ -1613,8 +1613,8 @@ int test_37_opt_dJ_indices(int verbose) {
 
 	int err_sum = 0;
 	for (i=0;i<dJ_n_nz_test;i++) {
-		err_sum += abs(dJ_row_fix[i] - dJ_row[i]);
-		err_sum += abs(dJ_col_fix[i] - dJ_col[i]);
+		err_sum += fabs(dJ_row_fix[i] - dJ_row[i]);
+		err_sum += fabs(dJ_col_fix[i] - dJ_col[i]);
 	}
 
 	mask[16-1] = 1;
@@ -1677,7 +1677,7 @@ int test_38_opt_dJ_eval(int verbose) {
 	jmi_real_t jac_fix[3] = {4,2*7,1};
 	jmi_real_t err_sum = 0;
 	for (i=0;i<dJ_n_nz_test;i++) {
-		err_sum += abs(jac_fix[i] - dJ_sparse[i]);
+		err_sum += fabs(jac_fix[i] - dJ_sparse[i]);
 	}
 
 	mask[16-1] = 1;
@@ -1735,7 +1735,7 @@ int test_39_opt_dJ_eval(int verbose) {
 	jmi_real_t jac_fix[5] = {4,1,2*7,1,2*18};
 	jmi_real_t err_sum = 0;
 	for (i=0;i<dJ_n_nz_test;i++) {
-		err_sum += abs(jac_fix[i] - dJ_sparse[i]);
+		err_sum += fabs(jac_fix[i] - dJ_sparse[i]);
 	}
 
 	if (err_sum<SMALL) {
@@ -1790,7 +1790,7 @@ int test_40_opt_dJ_eval(int verbose) {
 	jmi_real_t jac_fix[9] = {4,0,0,1,2*7,0,0,1,2*18};
 	jmi_real_t err_sum = 0;
 	for (i=0;i<dJ_n_nz_test;i++) {
-		err_sum += abs(jac_fix[i] - dJ_dense[i]);
+		err_sum += fabs(jac_fix[i] - dJ_dense[i]);
 	}
 
 	if (err_sum<SMALL) {
@@ -1828,7 +1828,7 @@ int test_41_opt_J_ad_eval(int verbose) {
 	jmi_opt_J(jmi,&J);
 
 	jmi_real_t J_fix = 296;
-	jmi_real_t err = abs(J_fix - J);
+	jmi_real_t err = fabs(J_fix - J);
 
 	if (verbose == 1) {
 		int i;
@@ -1878,8 +1878,8 @@ int test_42_opt_dJ_ad_indices(int verbose) {
 
 	int err_sum = 0;
 	for (i=0;i<dJ_n_nz;i++) {
-		err_sum += abs(dJ_row_fix[i] - dJ_row[i]);
-		err_sum += abs(dJ_col_fix[i] - dJ_col[i]);
+		err_sum += fabs(dJ_row_fix[i] - dJ_row[i]);
+		err_sum += fabs(dJ_col_fix[i] - dJ_col[i]);
 	}
 
 	if (err_sum==0) {
@@ -1998,8 +1998,8 @@ int test_46_opt_dJ_ad_indices(int verbose) {
 
 	int err_sum = 0;
 	for (i=0;i<dJ_n_nz_test;i++) {
-		err_sum += abs(dJ_row_fix[i] - dJ_row[i]);
-		err_sum += abs(dJ_col_fix[i] - dJ_col[i]);
+		err_sum += fabs(dJ_row_fix[i] - dJ_row[i]);
+		err_sum += fabs(dJ_col_fix[i] - dJ_col[i]);
 	}
 
 	mask[16-1] = 1;
@@ -2062,7 +2062,7 @@ int test_47_opt_dJ_ad_eval(int verbose) {
 	jmi_real_t jac_fix[3] = {4,1,2*18};
 	jmi_real_t err_sum = 0;
 	for (i=0;i<dJ_n_nz_test;i++) {
-		err_sum += abs(jac_fix[i] - dJ_sparse[i]);
+		err_sum += fabs(jac_fix[i] - dJ_sparse[i]);
 	}
 
 	mask[18-1] = 1;
@@ -2120,7 +2120,7 @@ int test_48_opt_dJ_ad_eval(int verbose) {
 	jmi_real_t jac_fix[5] = {4,1,2*7,1,2*18};
 	jmi_real_t err_sum = 0;
 	for (i=0;i<dJ_n_nz_test;i++) {
-		err_sum += abs(jac_fix[i] - dJ_sparse[i]);
+		err_sum += fabs(jac_fix[i] - dJ_sparse[i]);
 	}
 
 	if (err_sum<SMALL) {
@@ -2175,7 +2175,7 @@ int test_49_opt_dJ_ad_eval(int verbose) {
 	jmi_real_t jac_fix[9] = {4,0,0,1,2*7,0,0,1,2*18};
 	jmi_real_t err_sum = 0;
 	for (i=0;i<dJ_n_nz_test;i++) {
-		err_sum += abs(jac_fix[i] - dJ_dense[i]);
+		err_sum += fabs(jac_fix[i] - dJ_dense[i]);
 	}
 
 	if (err_sum<SMALL) {
