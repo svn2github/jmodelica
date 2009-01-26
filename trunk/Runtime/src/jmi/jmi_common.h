@@ -2,7 +2,6 @@
  *  \brief Internals of the JMI Model interface.
  */
 
-
 #ifndef _JMI_COMMON_H
 #define _JMI_COMMON_H
 
