@@ -198,7 +198,7 @@ int jmi_opt_sim_ipopt_new(jmi_opt_sim_ipopt_t **jmi_opt_sim_ipopt, jmi_opt_sim_t
 	nlp->n = jmi_opt_sim->n_x;
 	nlp->m = jmi_opt_sim->n_g + jmi_opt_sim->n_h;
 
-	printf("############  %d %d\n",nlp->n,nlp->m);
+	//printf("############  %d %d\n",nlp->n,nlp->m);
 
 	nlp->dg_n_nz = jmi_opt_sim->dg_n_nz + jmi_opt_sim->dh_n_nz;
 	nlp->hess_lag_n_nz = 0;
@@ -254,7 +254,7 @@ int jmi_opt_sim_ipopt_solve(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt) {
 	// Copy initial guess into x
 	for (i=0;i<jmi_opt_sim_ipopt->jmi_opt_sim->n_x;i++) {
 		jmi_opt_sim_ipopt->jmi_opt_sim->x[i] = jmi_opt_sim_ipopt->jmi_opt_sim->x_init[i];
-		printf("## %f\n",jmi_opt_sim_ipopt->jmi_opt_sim->x[i]);
+		//printf("## %f\n",jmi_opt_sim_ipopt->jmi_opt_sim->x[i]);
 	}
 
 

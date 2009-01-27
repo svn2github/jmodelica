@@ -2193,7 +2193,7 @@ int test_optimization(int verbose) {
 	// xml-files
     pi[0] = 1;
     pi[1] = 0;
-    pi[2] = 0;
+    pi[2] = 2;
 
 	// Specify mesh
 	jmi_real_t t0 = 0;
@@ -2208,14 +2208,14 @@ int test_optimization(int verbose) {
 	tp[1] = 0.1;
 	jmi_set_tp(jmi,tp);
 
-	int n_e = 100;
+	int n_e = 3;
 	int hs_free = 0;
 	jmi_real_t *hs = (jmi_real_t*)calloc(n_e,sizeof(jmi_real_t));
     for (i=0;i<n_e;i++) {
     	hs[i] = 1/(jmi_real_t)n_e;
     }
 
-    int n_cp = 3;
+    int n_cp = 2;
 
     // Specify parameters to optimize
     int n_p_opt = 1;
@@ -2266,7 +2266,8 @@ int test_optimization(int verbose) {
     x_init[2] = 3;
     u_init[0] = 4;
     w_init[0] = 3;
-    */
+
+  */
 
         dx_init[0] = 0;
         dx_init[1] = 0;
@@ -2301,6 +2302,11 @@ int test_optimization(int verbose) {
     	w_lb[i] = -JMI_INF;
     	w_ub[i] = JMI_INF;
     }
+
+
+    // Set an extra bound for x_3
+    x_lb[2] = 0;
+
 
 	jmi_opt_sim_lp_radau_new(&jmi_opt_sim, jmi, n_e,
 			             hs, hs_free,

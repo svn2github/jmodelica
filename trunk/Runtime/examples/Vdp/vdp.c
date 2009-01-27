@@ -2,14 +2,14 @@
 /**
  * This file encodes the optimization problem
  *
- *  min x_3(t_f) + x_3(t_1) + p_1^2 + w_1(t_f)^2 + w_1(t_1)^2
+ *  min x_3(t_f) + p_2*x_3(t_1) + p_1^2 + w_1(t_f)^2 + p_2*w_1(t_1)^2
  *  u_1,p_1
  *
  *  subject to
  *
  *   \dot x_1 = (1 - x_2^2)*x_1 - x_2 + u_1
  *   \dot x_2 = p_1*x_1
- *   \dot x_3 = x_1^2 + x_2^2 + u_1^2
+ *   \dot x_3 = exp(p_3*t)*(x_1^2 + x_2^2 + u_1^2);
  *   w_1 = x_1 + x_2
  *
  * with initial conditions
@@ -143,7 +143,7 @@ static int vdp_dae_dF(jmi_t* jmi, int sparsity, int independent_vars, int* mask,
 	// x_0 row 2, col 4: exp(pi[2]*t)*2*x[0]
 	// x_0 row 3, col 4: 1
 	// x_1 row 0, col 5: -2*x[1]*x[0] - 1
-	// x_1 row 2, col 5: exp(a*t)*2*x[1]
+	// x_1 row 2, col 5: exp(pi[2]*t)*2*x[1]
     // x_1 row 3, col 5: 1
 
 	// u_0 row 0, col 7: 1

@@ -228,7 +228,8 @@ static void lp_radau_copy_v(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
 		v[0] += jmi_opt_sim->hs[i];
 	} //TODO: Take into account the situation when initial and final times are free.
 	v[0] = jmi->opt->start_time + (jmi->opt->final_time - jmi->opt->start_time)*(v[0] +
-			jmi_opt_sim->hs[i]*nlp->cp[j]);
+			jmi_opt_sim->hs[i]*nlp->cp[j-1]);
+//	printf("-\n%d, %d, %12.12f\n-\n",i,j,v[0]);
 
 }
 
@@ -356,6 +357,8 @@ static int lp_radau_g(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
 	if (jmi_opt_sim->jmi->opt == NULL) {
 		return -1;
 	}
+
+//	printf("-- g\n");
 
 	int i,j;
 	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;

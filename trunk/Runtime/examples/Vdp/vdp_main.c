@@ -1193,7 +1193,7 @@ int test_optimization(int verbose) {
 	// xml-files
     pi[0] = 1;
     pi[1] = 0;
-    pi[2] = 0;
+    pi[2] = 0.2;
 
 	// Specify mesh
 	jmi_real_t t0 = 0;
@@ -1258,7 +1258,7 @@ int test_optimization(int verbose) {
 
     p_opt_init[0] = 1;
 
-    /*
+/*
     dx_init[0] = 1;
     dx_init[1] = 1;
     dx_init[2] = 2;
@@ -1268,7 +1268,6 @@ int test_optimization(int verbose) {
     u_init[0] = 4;
     w_init[0] = 3;
 */
-
     dx_init[0] = 0;
     dx_init[1] = 0;
     dx_init[2] = 0;
@@ -1302,6 +1301,9 @@ int test_optimization(int verbose) {
     	w_lb[i] = -JMI_INF;
     	w_ub[i] = JMI_INF;
     }
+
+    // Set an extra bound for x_3
+    x_lb[2] = 0;
 
 	jmi_opt_sim_lp_radau_new(&jmi_opt_sim, jmi, n_e,
 			             hs, hs_free,
