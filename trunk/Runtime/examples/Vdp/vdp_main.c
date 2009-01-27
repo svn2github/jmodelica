@@ -151,6 +151,8 @@ int test_1_dae_F(int verbose) {
 
 	// Initialize the variables
     pi[0] = 1;
+    pi[1] = 1;
+    pi[2] = 2;
     dx[0] = 1;
     dx[1] = 1;
     dx[2] = 2;
