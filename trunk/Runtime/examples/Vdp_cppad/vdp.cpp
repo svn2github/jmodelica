@@ -2,14 +2,14 @@
 /**
  * This file encodes the optimization problem
  *
- *  min x_3(t_f) + x_3(t_1) + p_1^2 + w_1(t_f)^2 + w_1(t_1)^2
+ *  min x_3(t_f) + p_2*x_3(t_1) + p_1^2 + w_1(t_f)^2 + p_2*w_1(t_1)^2
  *  u_1,p_1
  *
  *  subject to
  *
  *   \dot x_1 = (1 - x_2^2)*x_1 - x_2 + u_1
  *   \dot x_2 = p_1*x_1
- *   \dot x_3 = x_1^2 + x_2^2 + u_1^2
+ *   \dot x_3 = exp(p_3*t)*(x_1^2 + x_2^2 + u_1^2);
  *   w_1 = x_1 + x_2
  *
  * with initial conditions
@@ -143,7 +143,7 @@ static int vdp_dae_dF(jmi_t* jmi, int sparsity, int independent_vars, int* mask,
 	// x_0 row 2, col 4: exp(pi[2]*t)*2*x[0]
 	// x_0 row 3, col 4: 1
 	// x_1 row 0, col 5: -2*x[1]*x[0] - 1
-	// x_1 row 2, col 5: exp(a*t)*2*x[1]
+	// x_1 row 2, col 5: exp(pi[2]*t)*2*x[1]
     // x_1 row 3, col 5: 1
 
 	// u_0 row 0, col 7: 1
@@ -172,6 +172,9 @@ static int vdp_dae_dF(jmi_t* jmi, int sparsity, int independent_vars, int* mask,
 			}
 			jac_col_index++;
 			if (mask[mask_col_index++] == 1) {
+				jac_col_index++;
+			}
+			if (mask[mask_col_index++] == 1) {
 				jmi_real_t jac_tmp_1 = t[0]*exp(pi[2]*t[0])*(x[0]*x[0] + x[1]*x[1] + u[0]*u[0]);
 				switch (sparsity) {
 				case JMI_DER_DENSE_COL_MAJOR:
@@ -184,9 +187,6 @@ static int vdp_dae_dF(jmi_t* jmi, int sparsity, int independent_vars, int* mask,
 					jac[jac_index] = jac_tmp_1;
 					jac_index++;
 				}
-				jac_col_index++;
-			}
-			if (mask[mask_col_index++] == 1) {
 				jac_col_index++;
 			}
 
@@ -548,6 +548,9 @@ static int vdp_init_dF0(jmi_t* jmi, int sparsity, int independent_vars, int* mas
 			jac_col_index++;
 		}
 		if (mask[mask_col_index++] == 1) {
+			jac_col_index++;
+		}
+		if (mask[mask_col_index++] == 1) {
 			jmi_real_t jac_tmp_1 = t[0]*exp(pi[2]*t[0])*(x[0]*x[0] + x[1]*x[1] + u[0]*u[0]);
 			switch (sparsity) {
 			case JMI_DER_DENSE_COL_MAJOR:
@@ -560,9 +563,6 @@ static int vdp_init_dF0(jmi_t* jmi, int sparsity, int independent_vars, int* mas
 				jac[jac_index] = jac_tmp_1;
 				jac_index++;
 			}
-			jac_col_index++;
-		}
-		if (mask[mask_col_index++] == 1) {
 			jac_col_index++;
 		}
 
@@ -943,14 +943,7 @@ static int vdp_opt_dJ(jmi_t* jmi, int sparsity, int independent_vars, int* mask,
 			jac_col_index++;
 		}
 		if (mask[mask_col_index++] == 1) {
-			jmi_real_t jac_tmp_1;
-			switch (i) {
-			case 0:
-				jac_tmp_1 = 0;
-				break;
-			case 1:
-				jac_tmp_1 = x_p_2[2] + w_p_2[0]*w_p_2[0];
-			}
+			jmi_real_t jac_tmp_1 = x_p_2[2] + w_p_2[0]*w_p_2[0];
 			switch (sparsity) {
 			case JMI_DER_DENSE_COL_MAJOR:
 				jac[jac_n*jac_col_index + 0] = jac_tmp_1;
@@ -1129,16 +1122,16 @@ static int vdp_opt_dJ_nz_indices(int* row, int* col) {
 	col[1] = 2;
 
 	row[2] = 1;
-	col[2] = 16;
+	col[2] = 18;
 
 	row[3] = 1;
-	col[3] = 18;
+	col[3] = 20;
 
 	row[4] = 1;
-	col[4] = 24;
+	col[4] = 26;
 
 	row[5] = 1;
-	col[5] = 26;
+	col[5] = 28;
 
 	return 0;
 }
