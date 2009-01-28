@@ -108,7 +108,17 @@ typedef struct {
     int dF0_n_nz;
     int dF_dp_n_nz;
     int dF_ddx_dx_du_dw_n_nz;
-    int offs_p_opt;
+	int dCeq_dp_n_nz;
+	int dCeq_ddx_dx_du_dw_n_nz;
+	int dCeq_ddx_p_dx_p_du_p_dw_p_n_nz;
+	int dCineq_dp_n_nz;
+	int dCineq_ddx_dx_du_dw_n_nz;
+	int dCineq_ddx_p_dx_p_du_p_dw_p_n_nz;
+	int dHeq_dp_n_nz;
+	int dHeq_ddx_p_dx_p_du_p_dw_p_n_nz;
+	int dHineq_dp_n_nz;
+	int dHineq_ddx_p_dx_p_du_p_dw_p_n_nz;
+	int offs_p_opt;
     int offs_dx_0;
     int offs_x_0;
     int offs_u_0;

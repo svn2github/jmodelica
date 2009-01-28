@@ -430,6 +430,7 @@ int jmi_func_ad_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t* res) {
 int jmi_func_ad_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz) {
 
 	if (func->ad==NULL) {
+		*n_nz = 0;
 		return -1;
 	}
 	*n_nz = func->ad->dF_z_n_nz;
@@ -465,13 +466,12 @@ int jmi_func_ad_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, int independent_vars
 int jmi_func_ad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz) {
 
+	*dF_n_cols = 0;
+	*dF_n_nz = 0;
 
 	if (func->ad==NULL) {
 		return -1;
 	}
-
-	*dF_n_cols = 0;
-	*dF_n_nz = 0;
 
 	int i;
 	for (i=0;i<jmi->n_z;i++) {

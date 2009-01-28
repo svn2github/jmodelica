@@ -63,6 +63,7 @@ int jmi_func_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 // Jacobian.
 int jmi_func_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz) {
 	if (func->dF==NULL) {
+		*n_nz = 0;
 		return -1;
 	}
 	*n_nz = func->dF_n_nz;
@@ -101,12 +102,13 @@ int jmi_func_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, int independent_vars,
 // Convenience function for computing the dimensions of the Jacobian.
 int jmi_func_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz) {
-	if (func->dF==NULL) {
-		return -1;
-	}
 
 	*dF_n_cols = 0;
 	*dF_n_nz = 0;
+
+	if (func->dF==NULL) {
+		return -1;
+	}
 
 	int i;
 

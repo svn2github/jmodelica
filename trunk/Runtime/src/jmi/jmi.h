@@ -1234,7 +1234,7 @@ int jmi_opt_dHineq_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
  * @return Error code.
  *
  */
-int jmi_opt_Hineq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+int jmi_opt_dHineq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
         int *mask, int* row, int* col);
 
 /**
@@ -1255,7 +1255,6 @@ int jmi_opt_dHineq_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_v
 		int *dF_n_cols, int *dF_n_nz);
 
 /* @} */
-
 
 /**
  * \defgroup Misc Miscanellous

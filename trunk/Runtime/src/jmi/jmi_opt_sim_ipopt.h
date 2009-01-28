@@ -18,7 +18,6 @@ typedef struct {
 //	jmi_real_t *x;
 	Index n;
 	Index m;
-	Index n_g;
 	Index dg_n_nz;
 	Index *dg_row;
 	Index *dg_col;

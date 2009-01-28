@@ -2232,7 +2232,7 @@ int test_optimization(int verbose) {
 	// xml-files
     pi[0] = 1;
     pi[1] = 0;
-    pi[2] = 2;
+    pi[2] = 0.2;
 
 	// Specify mesh
 	jmi_real_t t0 = 0;
@@ -2247,14 +2247,14 @@ int test_optimization(int verbose) {
 	tp[1] = 0.1;
 	jmi_set_tp(jmi,tp);
 
-	int n_e = 3;
+	int n_e = 100;
 	int hs_free = 0;
 	jmi_real_t *hs = (jmi_real_t*)calloc(n_e,sizeof(jmi_real_t));
     for (i=0;i<n_e;i++) {
     	hs[i] = 1/(jmi_real_t)n_e;
     }
 
-    int n_cp = 2;
+    int n_cp = 3;
 
     // Specify parameters to optimize
     int n_p_opt = 1;

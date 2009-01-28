@@ -127,7 +127,6 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
-SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHAREDEXT = @SHAREDEXT@
 SHARED_LDFLAGS = @SHARED_LDFLAGS@
@@ -643,7 +642,7 @@ examples: install
 	cd examples/Vdp; $(MAKE) all
 	cd examples/Vdp_cppad; $(MAKE) all
 
-clean-examples: clean
+clean-examples: 
 	cd examples/Vdp; $(MAKE) clean
 	cd examples/Vdp_cppad; $(MAKE) clean
 
