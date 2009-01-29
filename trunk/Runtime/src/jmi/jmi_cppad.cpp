@@ -411,6 +411,10 @@ int jmi_func_ad_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t* res) {
 
 	int i;
 
+	if (func->n_eq_F==0) {
+		return 0;
+	}
+
 	for (i=0;i<jmi->n_z;i++) {
 		(*(func->ad->z_work))[i] = (*(jmi->z_val))[i];
 	}
@@ -501,6 +505,10 @@ int jmi_func_ad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 
 	if (func->ad==NULL) {
 		return -1;
+	}
+
+	if (func->n_eq_F==0) {
+		return 0;
 	}
 
 	int i,j;

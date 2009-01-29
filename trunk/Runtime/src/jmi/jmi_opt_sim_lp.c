@@ -400,6 +400,8 @@ static int lp_radau_g(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
 		}
 	}
 
+	jmi_opt_Hineq(jmi,res + jmi->opt->Cineq->n_eq_F*(nlp->n_cp*jmi_opt_sim->n_e + 1));
+
 	return 0;
 }
 
@@ -442,6 +444,11 @@ static int lp_radau_dg(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 
 	}
 
+	jmi_opt_dHineq(jmi_opt_sim->jmi,nlp->der_eval_alg, JMI_DER_SPARSE,
+			     JMI_DER_PI | JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | JMI_DER_W_P, nlp->der_mask,
+			     jac + (nlp->dCineq_ddx_dx_du_dw_n_nz + nlp->dCineq_ddx_p_dx_p_du_p_dw_p_n_nz)*
+			     (1 + nlp->n_cp*jmi_opt_sim->n_e));
+
 	return 0;
 }
 
@@ -478,7 +485,7 @@ static int lp_radau_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
 		lp_radau_copy_p(jmi_opt_sim);
 		lp_radau_copy_q(jmi_opt_sim);
 		lp_radau_copy_initial_point(jmi_opt_sim);
-		jmi_init_F0(jmi_opt_sim->jmi,res);
+		jmi_init_F0(jmi_opt_sim->jmi,res+ dh_init_eq_offs(jmi_opt_sim,0));
 
 		// collocation point residuals
 		for (i=0;i<jmi_opt_sim->n_e;i++) {
@@ -604,9 +611,23 @@ static int lp_radau_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
 		}
 
 		// Constraints Ceq
+		lp_radau_copy_initial_point(jmi_opt_sim);
+		// Initial variables
+		jmi_opt_Ceq(jmi_opt_sim->jmi,res + dh_Ceq_eq_offs(jmi_opt_sim,0,0,0));
+
+		// Collocation variables
+		for (i=0;i<jmi_opt_sim->n_e;i++) {
+			for (j=0;j<nlp->n_cp;j++) {
+				lp_radau_copy_v(jmi_opt_sim,i,j+1);
+				jmi_opt_Ceq(jmi_opt_sim->jmi,res + dh_Ceq_eq_offs(jmi_opt_sim,i,j+1,0));
+			}
+		}
 
 		// Constraints in Heq
+
 		jmi_opt_Heq(jmi_opt_sim->jmi,res + dh_Heq_eq_offs(jmi_opt_sim, 0));
+
+
 
 	return 0;
 }
@@ -916,17 +937,77 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 	}
 
 	// Ceq
+	// Initial variables
+	lp_radau_copy_initial_point(jmi_opt_sim);
+	jmi_opt_dCeq(jmi_opt_sim->jmi,nlp->der_eval_alg, JMI_DER_SPARSE,
+			     JMI_DER_PI, nlp->der_mask, jac + nlp->dF0_n_nz +
+				    (nlp->dF_dp_n_nz +
+			    	nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
+					 jmi->n_x*2*jmi_opt_sim->n_e +
+					 jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+					 (jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
+	                 jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp);
+	jmi_opt_dCeq(jmi_opt_sim->jmi,nlp->der_eval_alg, JMI_DER_SPARSE,
+			     JMI_DER_DX | JMI_DER_X | JMI_DER_U | JMI_DER_W, nlp->der_mask, jac + nlp->dF0_n_nz +
+				    (nlp->dF_dp_n_nz +
+			    	nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
+					 jmi->n_x*2*jmi_opt_sim->n_e +
+					 jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+					 (jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
+	                 jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp + nlp->dCeq_dp_n_nz);
+	jmi_opt_dCeq(jmi_opt_sim->jmi,nlp->der_eval_alg, JMI_DER_SPARSE,
+			     JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | JMI_DER_W_P, nlp->der_mask,
+			     jac + nlp->dF0_n_nz +
+				    (nlp->dF_dp_n_nz +
+			    	nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
+					 jmi->n_x*2*jmi_opt_sim->n_e +
+					 jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+					 (jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
+	                 jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp +
+	                 nlp->dCeq_dp_n_nz + nlp->dCeq_ddx_dx_du_dw_n_nz);
+
+	// collocation variables
+	for (i=0;i<jmi_opt_sim->n_e;i++) {
+		for (j=0;j<nlp->n_cp;j++) {
+			lp_radau_copy_v(jmi_opt_sim,i,j+1);
+			jmi_opt_dCeq(jmi_opt_sim->jmi,nlp->der_eval_alg, JMI_DER_SPARSE,
+					     JMI_DER_PI, nlp->der_mask,
+					     jac + nlp->dF0_n_nz +
+						    (nlp->dF_dp_n_nz +
+					    	nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
+							 jmi->n_x*2*jmi_opt_sim->n_e +
+							 jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+							 (jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
+			                 jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp +
+			                 (nlp->dCeq_dp_n_nz + nlp->dCeq_ddx_dx_du_dw_n_nz + nlp->dCeq_ddx_p_dx_p_du_p_dw_p_n_nz)*
+					     (1 + i*nlp->n_cp + j));
+			jmi_opt_dCeq(jmi_opt_sim->jmi,nlp->der_eval_alg, JMI_DER_SPARSE,
+					     JMI_DER_DX | JMI_DER_X | JMI_DER_U | JMI_DER_W, nlp->der_mask,
+					     jac + nlp->dF0_n_nz +
+						    (nlp->dF_dp_n_nz +
+					    	nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
+							 jmi->n_x*2*jmi_opt_sim->n_e +
+							 jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+							 (jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
+			                 jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp +
+			                 (nlp->dCeq_dp_n_nz + nlp->dCeq_ddx_dx_du_dw_n_nz + nlp->dCeq_ddx_p_dx_p_du_p_dw_p_n_nz)*
+					     (1 + i*nlp->n_cp + j) + nlp->dCeq_dp_n_nz);
+			jmi_opt_dCeq(jmi_opt_sim->jmi,nlp->der_eval_alg, JMI_DER_SPARSE,
+					     JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | JMI_DER_W_P, nlp->der_mask,
+					     jac + nlp->dF0_n_nz +
+						    (nlp->dF_dp_n_nz +
+					    	nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
+							 jmi->n_x*2*jmi_opt_sim->n_e +
+							 jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+							 (jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
+			                 jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp +
+			                 (nlp->dCeq_dp_n_nz + nlp->dCeq_ddx_dx_du_dw_n_nz + nlp->dCeq_ddx_p_dx_p_du_p_dw_p_n_nz)*
+					     (1 + i*nlp->n_cp + j) + nlp->dCeq_dp_n_nz + nlp->dCeq_ddx_dx_du_dw_n_nz);
+		}
+
+	}
 
 	// Heq
-/*	printf("%d\n",nlp->dF0_n_nz +
-		    (nlp->dF_dp_n_nz +
-	    	nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
-			 jmi->n_x*2*jmi_opt_sim->n_e +
-			 jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
-			 (jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
-			 							 jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp);
-*/
-
 	jmi_opt_dHeq(jmi_opt_sim->jmi, nlp->der_eval_alg, JMI_DER_SPARSE,
 			   JMI_DER_PI | JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | JMI_DER_W_P,
 			   nlp->der_mask,jac + nlp->dF0_n_nz +
@@ -935,24 +1016,10 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 			 jmi->n_x*2*jmi_opt_sim->n_e +
 			 jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
 			 (jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
-			 							 jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp);
+			 							 jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp +
+			 							 (nlp->dCeq_dp_n_nz + nlp->dCeq_ddx_dx_du_dw_n_nz + nlp->dCeq_ddx_p_dx_p_du_p_dw_p_n_nz)*
+			 						     (1 + jmi_opt_sim->n_e*nlp->n_cp ));
 
-	/*
-	jac[nlp->dF0_n_nz +
-		    (nlp->dF_dp_n_nz +
-	    	nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
-			 jmi->n_x*2*jmi_opt_sim->n_e +
-			 jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
-			 (jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
-			 							 jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp] = 1;
-	jac[nlp->dF0_n_nz +
-		    (nlp->dF_dp_n_nz +
-	    	nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
-			 jmi->n_x*2*jmi_opt_sim->n_e +
-			 jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
-			 (jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
-			 							 jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp +1] = 1;
-*/
 	return 0;
 }
 
@@ -1468,6 +1535,25 @@ int jmi_opt_sim_lp_radau_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 		}
 	}
 
+	// Sparsity for Hineq
+	row_index = jmi->opt->Ceq->n_eq_F*(n_e*n_cp + 1);
+	col_index = 0;
+	// Parameters
+	for (j=0;j<dHineq_dp_n_nz;j++) {
+		(*jmi_opt_sim)->dh_row[rc_ind] = dHineq_dp_irow[j] + row_index;
+		(*jmi_opt_sim)->dh_col[rc_ind] = dHineq_dp_icol[j] + col_index;
+		rc_ind++;
+	}
+
+	// Variables at interpolation points
+	col_index = opt->offs_dx_p;
+	for (j=0;j<dHineq_ddx_p_dx_p_du_p_dw_p_n_nz;j++) {
+		(*jmi_opt_sim)->dh_row[rc_ind] = dHineq_ddx_p_dx_p_du_p_dw_p_irow[j] + row_index;
+		(*jmi_opt_sim)->dh_col[rc_ind] = dHineq_ddx_p_dx_p_du_p_dw_p_icol[j] + col_index;
+		rc_ind++;
+	}
+
+
 	/**********************************************
 	 * Sparsity for equality constraint Jacobian
 	 **********************************************/
@@ -1714,10 +1800,66 @@ int jmi_opt_sim_lp_radau_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 			}
 	}
 
-	// Sparsity for Heq
 
+	// Sparsity indices for dCeq: variables at initial time
 	row_index = jmi->init->F0->n_eq_F + jmi->dae->F->n_eq_F*n_e*n_cp + jmi->n_u + jmi->n_x*n_e +
-	jmi->n_x*n_e*n_cp + (jmi->n_x + jmi->n_dx + jmi->n_u + jmi->n_w)*jmi->n_tp;
+	  jmi->n_x*n_e*n_cp + (jmi->n_x + jmi->n_dx + jmi->n_u + jmi->n_w)*jmi->n_tp;
+	col_index = 0;
+	// Parameters
+	for (i=0;i<dCeq_dp_n_nz;i++) {
+		(*jmi_opt_sim)->dh_row[rc_ind] = dCeq_dp_irow[i] + row_index;
+		(*jmi_opt_sim)->dh_col[rc_ind] = dCeq_dp_icol[i] + col_index;
+		rc_ind++;
+	}
+
+	// Variables at collocation points
+	col_index = opt->offs_dx_0;
+	for (i=0;i<dCeq_ddx_dx_du_dw_n_nz;i++) {
+		(*jmi_opt_sim)->dh_row[rc_ind] = dCeq_ddx_dx_du_dw_irow[i] + row_index;
+		(*jmi_opt_sim)->dh_col[rc_ind] = dCeq_ddx_dx_du_dw_icol[i] + col_index;
+		rc_ind++;
+	}
+
+	// Variables at interpolation points
+	col_index = opt->offs_dx_p;
+	for (i=0;i<dCeq_ddx_p_dx_p_du_p_dw_p_n_nz;i++) {
+		(*jmi_opt_sim)->dh_row[rc_ind] = dCeq_ddx_p_dx_p_du_p_dw_p_irow[i] + row_index;
+		(*jmi_opt_sim)->dh_col[rc_ind] = dCeq_ddx_p_dx_p_du_p_dw_p_icol[i] + col_index;
+		rc_ind++;
+	}
+
+	// Sparsity for dCeq: collocation equations
+	for (i=0;i<n_e*n_cp;i++) {
+		row_index = jmi->init->F0->n_eq_F + jmi->dae->F->n_eq_F*n_e*n_cp + jmi->n_u + jmi->n_x*n_e +
+		  jmi->n_x*n_e*n_cp + (jmi->n_x + jmi->n_dx + jmi->n_u + jmi->n_w)*jmi->n_tp +
+		  jmi->opt->Ceq->n_eq_F + jmi->opt->Ceq->n_eq_F*i;
+
+		col_index = 0;
+		for (k=0;k<dCeq_dp_n_nz;k++) {
+			(*jmi_opt_sim)->dh_row[rc_ind] = dCeq_dp_irow[k] + row_index;
+			(*jmi_opt_sim)->dh_col[rc_ind] = dCeq_dp_icol[k] + col_index;
+			rc_ind++;
+		}
+
+		col_index = opt->offs_dx_coll + dCeq_ddx_dx_du_dw_n_cols*i;
+		for (k=0;k<dCeq_ddx_dx_du_dw_n_nz;k++) {
+			(*jmi_opt_sim)->dh_row[rc_ind] = dCeq_ddx_dx_du_dw_irow[k] + row_index;
+			(*jmi_opt_sim)->dh_col[rc_ind] = dCeq_ddx_dx_du_dw_icol[k] + col_index;
+			rc_ind++;
+		}
+
+		col_index = opt->offs_dx_p + dCeq_ddx_p_dx_p_du_p_dw_p_n_cols;
+		for (k=0;k<dCeq_ddx_p_dx_p_du_p_dw_p_n_nz;k++) {
+			(*jmi_opt_sim)->dh_row[rc_ind] = dCeq_ddx_p_dx_p_du_p_dw_p_irow[k] + row_index;
+			(*jmi_opt_sim)->dh_col[rc_ind] = dCeq_ddx_p_dx_p_du_p_dw_p_icol[k] + col_index;
+			rc_ind++;
+		}
+	}
+
+	// Sparsity for Heq
+	row_index = jmi->init->F0->n_eq_F + jmi->dae->F->n_eq_F*n_e*n_cp + jmi->n_u + jmi->n_x*n_e +
+	   jmi->n_x*n_e*n_cp + (jmi->n_x + jmi->n_dx + jmi->n_u + jmi->n_w)*jmi->n_tp +
+	   jmi->opt->Ceq->n_eq_F*(n_e*n_cp + 1);
 
 	col_index = 0;
 	// Parameters

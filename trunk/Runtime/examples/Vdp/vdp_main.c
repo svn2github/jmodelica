@@ -1281,7 +1281,7 @@ int test_optimization(int verbose) {
 
     p_opt_init[0] = 1;
 
-
+/*
     dx_init[0] = 1;
     dx_init[1] = 1;
     dx_init[2] = 2;
@@ -1290,7 +1290,7 @@ int test_optimization(int verbose) {
     x_init[2] = 3;
     u_init[0] = 4;
     w_init[0] = 3;
-/*
+*/
     dx_init[0] = 0;
     dx_init[1] = 0;
     dx_init[2] = 0;
@@ -1299,7 +1299,7 @@ int test_optimization(int verbose) {
     x_init[2] = 0;
     u_init[0] = 0;
     w_init[0] = 0;
-*/
+
     for (i=0;i<n_p_opt;i++) {
     	p_opt_lb[i] = 0.9;
     	p_opt_ub[i] = 1.1;

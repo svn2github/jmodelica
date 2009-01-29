@@ -1144,23 +1144,19 @@ static int vdp_opt_dJ_nz_indices(int* row, int* col) {
 
 
 static int vdp_opt_Ceq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-
   return -1;
 }
 
 static int vdp_opt_dCeq(jmi_t* jmi, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
-
 	return -1;
 }
 
 static int vdp_opt_dCeq_n_nz(int* n_nz) {
-
 	*n_nz = 0;
 	return -1;
 }
 
 static int vdp_opt_dCeq_nz_indices(int* row, int* col) {
-
 	return -1;
 }
 
