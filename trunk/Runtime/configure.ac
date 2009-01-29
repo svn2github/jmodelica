@@ -118,7 +118,9 @@ case $build in
     ipoptlib="-L$ipopt/lib -lipopt -lg2c -ldl"
     ;;
   *-mingw*)
-    ipoptlib="-L$ipopt/lib -lipopt -lg2c"
+    ipoptlib="-L$ipopt/lib -lipopt -lm -lfrtbegin \
+       -lg2c -lmingw32 -lmoldname -lmingwex -lmsvcrt \
+       -luser32 -lkernel32 -ladvapi32 -lshell32 -lstdc++"
     ;;
   *-apple*)
         ipoptlib="-L$ipopt/lib -lipopt -llapack -lblas -lm -lgfortran"

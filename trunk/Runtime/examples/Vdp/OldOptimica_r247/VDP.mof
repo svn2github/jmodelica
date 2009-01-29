@@ -1,7 +1,7 @@
 fclass VDP
  parameter Real p1=1;
  parameter Real p2=0;
- parameter Real p3=0;
+ parameter Real p3=0.2;
  Real x1(start=0);
  Real x2(start=1);
  Real x3(start=0);

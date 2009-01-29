@@ -5,5 +5,7 @@ optimization
   grid(finalTime=fixedFinalTime(finalTime=5),nbrElements=100);
   minimize(terminalCost = p1^2 + w^2 + x3);
 subject to
-
+x1>=-0.4;
+u>=-0.1;
+u<=0.75;
 end CSTR;

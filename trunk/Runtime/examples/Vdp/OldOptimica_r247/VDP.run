@@ -7,13 +7,14 @@ model VDP.Constraint.mod;
 data VDP.dat;
 data VDP.InitialGuess.dat;
 option  solver "/work/jakesson/software_tools/Ipopt/Ipopt-3.5.4/build/bin/ipopt";
-
 #option solver "/home/jakesson/work/software_tools/Ipopt/Ipopt-3.2.0/CoinIpopt/bin/ipopt";
 option  ipopt_options "max_iter = 10000 hessian_approximation = limited-memory";
-#option  ipopt_options "max_iter = 10000";
 #solve;
 #include VDP.GenLogFile.run;
 model VDP.Cost.mod;
 solve;
 include VDP.GenLogFile.run;
+
+
+
 

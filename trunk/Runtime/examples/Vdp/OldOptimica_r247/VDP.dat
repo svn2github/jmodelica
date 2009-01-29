@@ -29,7 +29,7 @@ let {_i in FE} _H[_i] := 1/NFE ;
 
 #Parameters
 let p2 := 0;
-let p3 := 0;
+let p3 := 0.2;
 
 #Bounds
 let p1_lb := 0.9;

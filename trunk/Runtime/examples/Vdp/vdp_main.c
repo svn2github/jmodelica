@@ -1261,7 +1261,7 @@ int test_optimization(int verbose) {
     jmi_real_t *w_init = (jmi_real_t*)calloc(n_w,sizeof(jmi_real_t));
 
     // Bounds
-    jmi_real_t *p_opt_lb = (jmi_real_t*)calloc(n_p_opt,sizeof(int));
+    jmi_real_t *p_opt_lb = (jmi_real_t*)calloc(n_p_opt,sizeof(jmi_real_t));
     jmi_real_t *dx_lb = (jmi_real_t*)calloc(n_dx,sizeof(jmi_real_t));
     jmi_real_t *x_lb = (jmi_real_t*)calloc(n_x,sizeof(jmi_real_t));
     jmi_real_t *u_lb = (jmi_real_t*)calloc(n_u,sizeof(jmi_real_t));
@@ -1270,7 +1270,7 @@ int test_optimization(int verbose) {
     jmi_real_t tf_lb = 0;
     jmi_real_t *hs_lb = NULL;
 
-    jmi_real_t *p_opt_ub = (jmi_real_t*)calloc(n_p_opt,sizeof(int));
+    jmi_real_t *p_opt_ub = (jmi_real_t*)calloc(n_p_opt,sizeof(jmi_real_t));
     jmi_real_t *dx_ub = (jmi_real_t*)calloc(n_dx,sizeof(jmi_real_t));
     jmi_real_t *x_ub = (jmi_real_t*)calloc(n_x,sizeof(jmi_real_t));
     jmi_real_t *u_ub = (jmi_real_t*)calloc(n_u,sizeof(jmi_real_t));
