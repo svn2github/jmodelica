@@ -169,8 +169,7 @@ int jmi_opt_sim_ipopt_new(jmi_opt_sim_ipopt_t **jmi_opt_sim_ipopt, jmi_opt_sim_t
 	                               &jmi_opt_sim_ipopt_dg, &jmi_opt_sim_ipopt_hess_lag);
 
  //   AddIpoptIntOption(nlp->nlp, "print_level", 10);
-
-	AddIpoptIntOption(nlp->nlp, "max_iter",100);
+	AddIpoptIntOption(nlp->nlp, "max_iter",1000);
 //    AddIpoptStrOption(nlp->nlp, "derivative_test","first-order");
 //	AddIpoptNumOption(nlp->nlp, "derivative_test_pertubation",1e-6);
     //    AddIpoptStrOption(nlp->nlp, "derivative_test_print_all","yes");
