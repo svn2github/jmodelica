@@ -114,9 +114,18 @@ SourceRoot source_root =
   ;
 
 Program program =
-  base_class_decl_list                        {: return new Program(base_class_decl_list); :}
+  stored_definition   {: return new Program(new List().add(stored_definition)); :}
+  ;
+  
+StoredDefinition stored_definition =
+  within?  
+  base_class_decl_list                        {: return new StoredDefinition(within,base_class_decl_list); :}
   ;
 
+Within within =
+  WITHIN parse_access? SEMICOLON {: return new Within(parse_access); :}
+  ;
+  
 List base_class_decl_list = 
   base_class_decl SEMICOLON                       {: return new List().add(base_class_decl); :}
   | base_class_decl_list base_class_decl   SEMICOLON {: base_class_decl_list.add(base_class_decl);

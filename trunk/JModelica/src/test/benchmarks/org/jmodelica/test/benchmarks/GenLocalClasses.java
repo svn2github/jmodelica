@@ -128,7 +128,7 @@ import java.util.Random;
 		LocGenerator gen = g.new LocGenerator();
 		
 		Program p = new Program();
-		p.addElement(gen.genLocClasses("C",Integer.valueOf(args[0]).intValue(),Integer.valueOf(args[1]).intValue()));
+		p.getUnstructuredEntity(0).addElement(gen.genLocClasses("C",Integer.valueOf(args[0]).intValue(),Integer.valueOf(args[1]).intValue()));
 		
 		SourceRoot sr = new SourceRoot(p);
 		

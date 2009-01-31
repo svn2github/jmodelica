@@ -101,7 +101,7 @@ import java.util.Random;
 		    
 		    
 		    
-			p.addElement(cd);
+			p.getUnstructuredEntity(0).addElement(cd);
 						
 			return p;
 		}

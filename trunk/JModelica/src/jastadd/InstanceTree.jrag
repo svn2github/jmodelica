@@ -950,10 +950,12 @@ aspect SourceAST_API {
 
     syn lazy ArrayList<ClassDecl> Program.classes() {
     	ArrayList<ClassDecl> l = new ArrayList<ClassDecl>();
-    	for (Element e : getElements())
-    		l.add((ClassDecl)e);
+    	for (StoredDefinition sd :getUnstructuredEntitys()) {
+    		for (Element e : sd.getElements()) {
+    			l.add((ClassDecl)e);
+    		}
+    	}
     	return l;
-    
     } 
 
 }

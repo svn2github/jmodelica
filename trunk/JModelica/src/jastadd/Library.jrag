@@ -73,7 +73,7 @@ aspect Library {
 				if (package_mo_present) {
 		
 		   			SourceRoot sr = root().modelicaParser().parseFile(dirName+"/package.mo");
-		   			FullClassDecl fcd = (FullClassDecl)sr.getProgram().getElement(0);
+		   			FullClassDecl fcd = (FullClassDecl)sr.getProgram().getUnstructuredEntity(0).getElement(0);
 		   			LibClassDecl lcd = new LibClassDecl(fcd);
 		   			lcd.setFileName(dirName+"/package.mo");
 	   				   			
@@ -130,7 +130,7 @@ aspect Library {
 			
 		} else {
 			SourceRoot sr = root().modelicaParser().parseFile(getFileName());
-		  	FullClassDecl fcd = (FullClassDecl)sr.getProgram().getElement(0);
+		  	FullClassDecl fcd = (FullClassDecl)sr.getProgram().getUnstructuredEntity(0).getElement(0);
 		  	fcd.setFileName(getFileName());
 			return fcd;
 		}
@@ -176,7 +176,7 @@ aspect Library {
 	
 	syn lazy List Program.getLibNodeList() {
 		//LibNode ln =  new LibNode("/local/home/jakesson/Modelica_2_2_lite/Modelica","Modelica",true);
-		LibNode ln =  new LibNode("/work/jakesson/software_tools/Modelica_std_lib_2.2/Modelica_2_2_lite/Modelica","Modelica",true);
+		LibNode ln =  new LibNode("/Users/jakesson/projects/ModelicaStandardLibrary/ModelicaStandardLibrary_v3/Modelica 3.0.1","Modelica",true);
 		return new List().add(ln);
 	}
 	

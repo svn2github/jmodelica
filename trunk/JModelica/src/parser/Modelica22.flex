@@ -81,6 +81,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
 %%
 
 <YYINITIAL> {
+  "within"           { return newSymbol(Terminals.WITHIN); }  
   "class"           { return newSymbol(Terminals.CLASS); }  
   "model"           { return newSymbol(Terminals.MODEL); }
   "block"           { return newSymbol(Terminals.BLOCK); }

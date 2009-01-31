@@ -70,9 +70,9 @@ aspect PredefinedTypes {
  			Program p = sr.getProgram();
    			builtInDefReader.close();
    			
-   			for (int i=0;i<p.getNumElement();i++) {
+   			for (int i=0;i<p.getUnstructuredEntity(0).getNumElement();i++) {
    			//debugPrint("Program.getPredefinedTypeList(): Hepp!: " + i);
-  			FullClassDecl cd = (FullClassDecl)(p.getElement(i));	
+  			FullClassDecl cd = (FullClassDecl)(p.getUnstructuredEntity(0).getElement(i));	
 
   			pcd = new PrimitiveClassDecl(new PublicVisibilityType(),
   			                       new Opt(),
@@ -191,9 +191,9 @@ aspect PredefinedTypes {
    			Program p = sr.getProgram();
    			reader.close();
    			
-   			for (int i=0;i<p.getNumElement();i++) {
+   			for (int i=0;i<p.getUnstructuredEntity(0).getNumElement();i++) {
    			
-  			FullClassDecl cd = (FullClassDecl)(p.getElement(i));	
+  			FullClassDecl cd = (FullClassDecl)(p.getUnstructuredEntity(0).getElement(i));	
 
   			pcd = new PrimitiveClassDecl(new PublicVisibilityType(),
   			                       new Opt(),

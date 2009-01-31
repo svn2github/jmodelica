@@ -1,7 +1,7 @@
 // MiniModelica abstract grammar
 SourceRoot : Root ::= Program ;
 
-Program ::= Element* 
+Program ::= UnstructuredEntity:StoredDefinition* 
             /UnknownClassDecl/
             /UnknownComponentDecl/
             /PredefinedType:ClassDecl*/ 
@@ -9,6 +9,10 @@ Program ::= Element*
             /BuiltInFunction:ClassDecl*/
             /LibNode*/
             /InstProgramRoot/;
+
+StoredDefinition ::= [Within] Element*;
+
+Within ::= [PackageName:ParseAccess];
 
 abstract ClassDecl : Element ::=;
 abstract BaseClassDecl : ClassDecl::=VisibilityType 

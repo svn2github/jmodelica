@@ -37,11 +37,13 @@ aspect LookupClasses {
 	
 	syn lazy HashSet Program.lookupElementClass(String name) {
 		HashSet set = new HashSet(4);
-		for (int j=0;j<getNumElement();j++) {    
-			if (getElement(j) instanceof BaseClassDecl) {
-				if (((BaseClassDecl)getElement(j)).matchClassDecl(name))
-					//debugPrint(((BaseClassDecl)getElement(j)).getName().name());
-					set.add(getElement(j));
+		for (StoredDefinition sd : getUnstructuredEntitys()) {
+			for (Element el : sd.getElements()) {    
+				if (el instanceof BaseClassDecl) {
+					if (((BaseClassDecl)el).matchClassDecl(name))
+						//debugPrint(((BaseClassDecl)getElement(j)).getName().name());
+						set.add(el);
+				}
 			}
 		}
 		if (set.size()>0)
@@ -89,7 +91,7 @@ aspect LookupClasses {
 			return emptyHashSet();
 	}
 	
-	eq Program.getElement().lookupClass(String name) = genericLookupClass(name);
+	eq Program.getUnstructuredEntity().lookupClass(String name) = genericLookupClass(name);
 	eq Program.getLibNode().lookupClass(String name) = genericLookupClass(name);
 	
 	eq Program.getPredefinedType().lookupClass(String name) {
@@ -289,7 +291,7 @@ aspect LookupImport {
     }
     	*/
     	
-	eq Program.getElement().lookupImportClass(String name) {
+	eq Program.getUnstructuredEntity().lookupImportClass(String name) {
 		HashSet set = new HashSet(4);
 		
 		if (lookupElementClass(name).size()>0)

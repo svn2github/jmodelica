@@ -67,9 +67,24 @@ aspect PrettyPrint {
 	}
 	
 	public void Program.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
-		for (int i=0;i<getNumElement();i++)
- 			p.toString(getElement(i),str,indent,o);
+		for (StoredDefinition sd : getUnstructuredEntitys()) {
+			p.toString(sd,str,indent,o);
+		}
+	}
+ 	
+ 	public void StoredDefinition.prettyPrint(Printer p, StringBuffer str, String indent, Object o) {
+ 		if (hasWithin()) {
+ 			str.append(indent + "within");
+ 			if (getWithin().hasPackageName()) {
+ 				str.append(" ");
+ 				p.toString(getWithin().getPackageName(),str,indent,o);
+ 			}
+ 			str.append(";\n");
+ 		}
+ 		for (Element el : getElements()) {
+	 		p.toString(el,str,indent,o);
  			str.append(";\n");		
+		}
 	}
 	
 	// specialize behavior for A
