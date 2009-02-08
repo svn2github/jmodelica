@@ -235,6 +235,7 @@ Restriction restriction =
   | MODEL                            {: return new Model(); :}
   | BLOCK                            {: return new Block(); :}
   | CONNECTOR                            {: return new Connector(); :}
+  | EXPANDABLE CONNECTOR             {: return new ExpandableConnector(); :}
   | TYPE                            {: return new MType(); :}
   | PACKAGE                            {: return new MPackage(); :}
   | FUNCTION                            {: return new Function(); :}
@@ -410,7 +411,7 @@ Element element =
   ;
   
 ConstrainingClause constraining_clause = 
-  EXTENDS class_access/*name*/ class_modification?{: return new ConstrainingClause(class_access,class_modification); :}
+  CONSTRAINEDBY class_access/*name*/ class_modification?{: return new ConstrainingClause(class_access,class_modification); :}
   ;
   
 PN_ExtendsClause extends_clause = 
@@ -483,7 +484,14 @@ AlgorithmClause algorithm_clause =
                                                      return new AlgorithmClause(abstract_algorithm_list); :}
   ;  
 
-
+/*
+List abstract_equation_list =
+                                  {: return new List(); :}
+  |abstract_equation                           {: return new List().add(abstract_equation); :}
+  | abstract_equation_list abstract_equation  {: abstract_equation_list.add(abstract_equation); 
+                                                 return abstract_equation_list; :}
+  ;  
+*/
 
 List abstract_algorithm_list =
                                   {: return new List(); :}
@@ -685,6 +693,7 @@ AbstractEquation abstract_equation =
   | for_clause_e SEMICOLON                                {: return for_clause_e; :}
   | when_clause_e SEMICOLON                               {: return when_clause_e; :}
   | CONNECT LPAREN parse_access.a COMMA parse_access.b RPAREN comment SEMICOLON {: return new ConnectClause(new Opt(), comment,a,b); :}
+  | function_call comment SEMICOLON {: return new EquationFunctionCall(new Opt(),comment,function_call); :}
   | function_call_simple comment SEMICOLON {: return new EquationFunctionCall(new Opt(),comment, function_call_simple); :}
   //| function_call_initial comment SEMICOLON {: return new EquationFunctionCall(new Opt(),comment, function_call_initial); :}
   | annotation SEMICOLON             {: return new EquationAnnotation(new Opt(),new Comment(new Opt(), new Opt()), annotation); :}
@@ -924,8 +933,8 @@ Exp primary =
   | LBRACK matrix RBRACK {: return matrix; :}
   | LBRACE function_arguments RBRACE {: return new ArrayConstructor(function_arguments); :}
   | TIME                {: return new TimeExp(); :}
+//  | END                 {: return new EndExp(); :} // TODO: Make this work.
   ;
-
  
  FunctionCall function_call =
   parse_access LPAREN function_arguments? RPAREN {: return new FunctionCall(parse_access,function_arguments); :}

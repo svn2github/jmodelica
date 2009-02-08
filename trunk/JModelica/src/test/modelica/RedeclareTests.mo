@@ -1,5 +1,6 @@
 package RedeclareTests
 
+
 model RedeclareTestOx1 "Basic redeclare test"
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTestOx1",
@@ -357,7 +358,7 @@ end RedeclareTests.RedeclareTestOx8;
   end C;
  
    model D
-     replaceable C c extends B;
+     replaceable C c constrainedby B;
    end D;
    // Ok, since the constraining clause of C c is B.
    D d(redeclare B c);
@@ -374,7 +375,7 @@ model RedeclareTestOx9_Err "Constraining clause example, errouneous"
 "1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 399, column 8:
-  'redeclare A c' is not a subtype of 'replaceable C c extends B '
+  'redeclare A c' is not a subtype of 'replaceable C c constrainedby B '
 
   "
   )})));
@@ -388,7 +389,7 @@ Semantic error at line 399, column 8:
    D d(redeclare A c); in class RedeclareTestOx9_Err
    component 'A c' is not a subtype of constraining type B.
    Redeclared declaration located in class D.
-   replaceable C c extends B;
+   replaceable C c constrainedby B;
    Instance name of redeclared original declaration: d.c   
    TODO: the check is correct, but the error message is not correct.
 */
@@ -409,7 +410,7 @@ Semantic error at line 399, column 8:
   end C;
  
    model D
-     replaceable C c extends B;
+     replaceable C c constrainedby B;
    end D;
  
    D d(redeclare A c);
@@ -425,7 +426,7 @@ model RedeclareTestOx95_Err "Constraining clause example, errouneous"
 "1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 450, column 10:
-  In the declaration 'replaceable B b extends C ', the declared class is not a subtype of the constraining class
+  In the declaration 'replaceable B b constrainedby C ', the declared class is not a subtype of the constraining class
 "
   )})));
  
@@ -448,7 +449,7 @@ Semantic error at line 450, column 10:
   end C;
  
    model D
-     replaceable B b extends C;
+     replaceable B b constrainedby C;
    end D;
  
    D d;
@@ -486,14 +487,14 @@ end RedeclareTests.RedeclareTestOx10;
   end C;
  
    model D
-     replaceable B c extends B;
+     replaceable B c constrainedby B;
    end D;
  
    model E
      // This is actually ok since the replacing component does not have an
      // explicit constraining clause, in which case the constraining clause
      // of the original declaration is used.
-     replaceable D d extends D(redeclare replaceable C c);
+     replaceable D d constrainedby D(redeclare replaceable C c);
    end E;
  
    E e(redeclare D d(redeclare B c));
@@ -509,7 +510,7 @@ model RedeclareTestOx11_Err "Constraining clause example."
   2 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 549, column 32:
-  'redeclare replaceable B c extends A ' is not a subtype of 'replaceable B c'
+  'redeclare replaceable B c constrainedby A ' is not a subtype of 'replaceable B c'
 Semantic error at line 553, column 32:
   'redeclare A c' is not a subtype of 'replaceable B c'
 
@@ -521,7 +522,7 @@ Semantic error at line 553, column 32:
    D d(redeclare A c); in class RedeclareTestOx9_Err
    component 'A c' is not a subtype of constraining type B.
    Redeclared declaration located in class D.
-   replaceable C c extends B;
+   replaceable C c constrainedby B;
    Instance name of redeclared original declaration: d.c   
 */
  
@@ -546,7 +547,7 @@ Semantic error at line 553, column 32:
  
    model E
      // This is an error
-     replaceable D d extends D(redeclare replaceable B c extends A);
+     replaceable D d constrainedby D(redeclare replaceable B c constrainedby A);
    end E;
    
    // This is another error
@@ -562,7 +563,7 @@ end RedeclareTestOx11_Err;
 "1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 601, column 69:
-  In the declaration 'redeclare replaceable B c extends C ', the declared class is not a subtype of the constraining class
+  In the declaration 'redeclare replaceable B c constrainedby C ', the declared class is not a subtype of the constraining class
 "
   )})));
 /*
@@ -592,7 +593,7 @@ Semantic error at line 431, column 32:
    end D;
  
    model E
-     replaceable D d(redeclare replaceable C c extends C) extends D(redeclare replaceable B c extends C);
+     replaceable D d(redeclare replaceable C c constrainedby C) constrainedby D(redeclare replaceable B c constrainedby C);
    end E;
   
  
@@ -608,7 +609,7 @@ end RedeclareTestOx115_Err;
 "1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 651, column 32:
-  'redeclare replaceable C c extends A ' is not a subtype of 'replaceable B c'
+  'redeclare replaceable C c constrainedby A ' is not a subtype of 'replaceable B c'
 "
   )})));
 /*
@@ -641,8 +642,8 @@ Semantic error at line 470, column 58:
    end D;
  
    model E 
-     // This is an error because the constraining clause of C c extends A is not a subtype of B c
-     replaceable D d extends D(redeclare replaceable C c extends A);
+     // This is an error because the constraining clause of C c constrainedby A is not a subtype of B c
+     replaceable D d constrainedby D(redeclare replaceable C c constrainedby A);
    end E;
   
  
@@ -674,7 +675,7 @@ end RedeclareTests.RedeclareTestOx12;
  
    model D
      //Here the modifiers (x=3,y=3) are not used when the component is redeclared.
-     replaceable B c(x=3,y=5) extends A(x=5);
+     replaceable B c(x=3,y=5) constrainedby A(x=5);
    end D;
  
    D d(redeclare A c);
@@ -716,7 +717,7 @@ end RedeclareTests.RedeclareTestOx13;
    end D;
  
    model E
-     D d( redeclare replaceable B c(y=10) extends A(x=4));
+     D d( redeclare replaceable B c(y=10) constrainedby A(x=4));
    end E;
  
    E e(d(redeclare C c(z=5)));
@@ -734,7 +735,7 @@ model RedeclareTest_Constr_14_Err "Constraining clause example."
 "1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 752, column 10:
-  In the declaration 'redeclare replaceable B c extends C ', the declared class is not a subtype of the constraining class
+  In the declaration 'redeclare replaceable B c constrainedby C ', the declared class is not a subtype of the constraining class
 "
   )})));
   
@@ -760,7 +761,7 @@ Semantic error at line 752, column 10:
  
    model E
      // Here is the error: A is not a subtype of C
-     D d(redeclare replaceable B c extends C);
+     D d(redeclare replaceable B c constrainedby C);
    end E;
  
    E e(d(redeclare C c));
@@ -776,7 +777,7 @@ model RedeclareTest_Constr_15_Err "Constraining clause example."
 "1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 790, column 10:
-  In the declaration 'redeclare replaceable B c extends C ', the declared class is not a subtype of the constraining class
+  In the declaration 'redeclare replaceable B c constrainedby C ', the declared class is not a subtype of the constraining class
 "
   )})));
   
@@ -801,7 +802,7 @@ Semantic error at line 790, column 10:
  
    model E
      // Here is the error: B is not a subtype of C
-     D d(redeclare replaceable B c extends C);
+     D d(redeclare replaceable B c constrainedby C);
    end E;
  
    E e(d(redeclare replaceable C c));
@@ -817,7 +818,7 @@ model RedeclareTest_Constr_16_Err "Constraining clause example."
 "1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 837, column 10:
-  'redeclare replaceable A c' is not a subtype of 'redeclare replaceable B c extends B '
+  'redeclare replaceable A c' is not a subtype of 'redeclare replaceable B c constrainedby B '
 "
   )})));
   
@@ -842,7 +843,7 @@ Semantic error at line 837, column 10:
  
    model E
      // Here is the error: B is not a subtype of C
-     D d(redeclare replaceable B c extends B);
+     D d(redeclare replaceable B c constrainedby B);
    end E;
  
    E e(d(redeclare replaceable A c));
@@ -858,7 +859,7 @@ model RedeclareTest_Constr_17_Err "Constraining clause example."
 "1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 884, column 34:
-  'redeclare replaceable B c' is not a subtype of 'redeclare replaceable C c extends C '
+  'redeclare replaceable B c' is not a subtype of 'redeclare replaceable C c constrainedby C '
 "
   )})));
   
@@ -883,10 +884,10 @@ Semantic error at line 884, column 34:
  
    model E
      // Here is the error: B is not a subtype of C
-     replaceable D d(redeclare replaceable B c extends B);
+     replaceable D d(redeclare replaceable B c constrainedby B);
    end E;
  
-   E e(redeclare replaceable D d(redeclare replaceable B c) extends D(redeclare replaceable C c extends C));
+   E e(redeclare replaceable D d(redeclare replaceable B c) constrainedby D(redeclare replaceable C c constrainedby C));
  
 end RedeclareTest_Constr_17_Err;
 
@@ -899,7 +900,7 @@ model RedeclareTest_Constr_18_Err "Constraining clause example."
 "1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 918, column 32:
-  'redeclare replaceable B c' is not a subtype of 'replaceable C c extends C '
+  'redeclare replaceable B c' is not a subtype of 'replaceable C c constrainedby C '
 "
   )})));
   
@@ -919,13 +920,13 @@ Semantic error at line 918, column 32:
   end C;
  
    model D
-     replaceable C c extends C;
+     replaceable C c constrainedby C;
    end D;
  
    model E
      // Notice that the modifier in the constraining clause is applied to the declaration itself
      // and is therefore type checked.
-     replaceable D d extends D(redeclare replaceable B c);
+     replaceable D d constrainedby D(redeclare replaceable B c);
    end E;
  
    E e;
@@ -966,7 +967,6 @@ end RedeclareTests.RedeclareTest_Classes_1;
  
    model D
    
-   
      replaceable model myA = A;
      myA a(x=4);
    end D;
@@ -997,7 +997,7 @@ model RedeclareTestOx6b_Err
    end D;
  
    model E
-     D d(redeclare replaceable B a extends B);
+     D d(redeclare replaceable B a constrainedby B);
      Real q = d.a.y; // This access should not be ok since y is not part of
                      // the constraining interface of the replacing
                      // component B b. The constraining interface of the
@@ -1574,7 +1574,7 @@ end RedeclareTests.RedeclareTest9;
   model B
     // Notice that the modifier 'x=8' is  merged since
     // it appears in a constraining clause  
-    A a(redeclare replaceable C22 c2 extends C22(x=8));
+    A a(redeclare replaceable C22 c2 constrainedby C22(x=8));
     A aa;
   end B;
   
@@ -1619,7 +1619,7 @@ Semantic error at line 1609, column 7:
   model B
     // Notice that the modifier 'x=8' is  merged since
     // it appears in a constraining clause  
-    A a(redeclare replaceable C22 c2 extends C22(w=8));
+    A a(redeclare replaceable C22 c2 constrainedby C22(w=8));
     A aa;
   end B;
   
@@ -1709,7 +1709,7 @@ Semantic error at line 1659, column 7:
   model B
     // Notice that the modifier 'x=8' is  merged since
     // it appears in a constraining clause  
-    extends A(redeclare replaceable C22 c2 extends C22(w=8));
+    extends A(redeclare replaceable C22 c2 constrainedby C22(w=8));
     A aa;
   end B;
   
@@ -1799,8 +1799,8 @@ model C0
         
   Real q = 0.3;
         
-  Palette p(redeclare replaceable Red c1 extends Red(g=0.1,b=q),redeclare replaceable Blue c2,
-            redeclare replaceable Green c3 extends Green(b=0.002));
+  Palette p(redeclare replaceable Red c1 constrainedby Red(g=0.1,b=q),redeclare replaceable Blue c2,
+            redeclare replaceable Green c3 constrainedby Green(b=0.002));
         
   end MyPalette;
       
@@ -1846,7 +1846,7 @@ end RedeclareTests.RedeclareTest11;
 ")})));
   
  
-  extends C0(p(redeclare replaceable C0.Green c3 extends C0.Green(r=0.56,g=0.85,b=0.24),c1(b=0.23)));
+  extends C0(p(redeclare replaceable C0.Green c3 constrainedby C0.Green(r=0.56,g=0.85,b=0.24),c1(b=0.23)));
 model C0 
   
   
@@ -1876,7 +1876,7 @@ model C0
   
   Real q = 0.3;
   
-  Palette p(redeclare replaceable Red c1 extends Red(g=0.1,b=q),
+  Palette p(redeclare replaceable Red c1 constrainedby Red(g=0.1,b=q),
             redeclare replaceable Blue c2,redeclare replaceable Green c3);
   
 end C0;
@@ -1923,7 +1923,7 @@ model Unnamed
      Real y=33;
   end C222;
     
-  C1 c1(redeclare replaceable C222 c2 extends C222(y=44,x=2));
+  C1 c1(redeclare replaceable C222 c2 constrainedby C222(y=44,x=2));
     
 end Unnamed;
   
@@ -1965,8 +1965,8 @@ end RedeclareTests.RedeclareTest13;
 	end B;
 	
 	model C
-	  replaceable B b1(x=5) extends B(x=3,y=4);
-	  replaceable B b2(x=5) extends B(y=3);
+	  replaceable B b1(x=5) constrainedby B(x=3,y=4);
+	  replaceable B b2(x=5) constrainedby B(y=3);
     end C;
     
     C c;
@@ -2001,8 +2001,8 @@ end RedeclareTests.RedeclareTest14;
 	end B;
 	
 	model C
-	  replaceable B b1(x=5) extends B(x=3,y=4);
-	  replaceable B b2(x=5) extends B(y=3);
+	  replaceable B b1(x=5) constrainedby B(x=3,y=4);
+	  replaceable B b2(x=5) constrainedby B(y=3);
     end C;
     
     C c(redeclare B b2(z=5));
@@ -2877,19 +2877,59 @@ end RedeclareTests.RedeclareTest25;
    model F
      parameter Real pF = 4;
      replaceable model myB2 = B(x=6,y=pF);
-     E e(redeclare replaceable model myB = myB2 extends myB2(y=8));
+     E e(redeclare replaceable model myB = myB2 constrainedby myB2(y=8));
    end F;
  
    model G
    	 parameter Real pG = 6;
      replaceable model myC = C(y=7,z=pG);
-     F f(e(redeclare replaceable model myB = myC extends myC(z=9)));
+     F f(e(redeclare replaceable model myB = myC constrainedby myC(z=9)));
    end G;
     
    parameter Real p0 = 5; 
    G g(f(e(redeclare model myB = D(w=p0))));
 
 end RedeclareTest25;
+
+model RedeclareTest26 
+
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest26",
+        description="Test of parametrized classes.",
+                                               flatModel=
+"
+fclass RedeclareTests.RedeclareTest26
+ Real m.x;
+ Real m.y;
+equation 
+end RedeclareTests.RedeclareTest26;
+"
+  )})));
+
+	
+	model M1
+	  Real x;
+	  model Q
+	    Real z;
+	  end Q;
+	end M1;
+	
+	model M2
+	  Real x;
+	  Real y;
+	  model Q
+	    Real z;
+	  end Q;
+	end M2;
+	
+	model A
+	   replaceable M1 m;
+	end A;
+
+    extends A(redeclare M2 m);
+
+end RedeclareTest26;
+
 
 
 end RedeclareTests;

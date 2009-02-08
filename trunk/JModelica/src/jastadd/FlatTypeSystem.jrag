@@ -1,6 +1,7 @@
 aspect ExpressionType {
 	
 	syn lazy AbstractFlatType FExp.type();	
+	eq FUnsupportedExp.type() = new BrokenType();
 	eq FInstAccessExp.type() = new BrokenType();
 	
 	syn lazy AbstractFlatType FVariable.type();	

@@ -25,10 +25,14 @@ public class FlattenModel {
 		      
 		      SourceRoot sr = (SourceRoot)parser.parse(scanner);
 		      
+//		      sr.getProgram().dumpClasses("");
+		      
 		      //sr.dumpTree("");
 		      
+		      for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
+		    	  sd.setFileName(name);
+		      }
 		      
-		      sr.setFileName(name);
 //		      sr.prettyPrint("");
 		      
 		      InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
@@ -48,8 +52,8 @@ public class FlattenModel {
 		      
 		      System.out.println("Inst checking:");
 		      boolean instErr = ipr.checkErrorsInInstClass(cl);
-		      System.out.println("Source checking:");
-		      boolean sourceErr = sr.checkErrorsInClass(cl);
+//		      System.out.println("Source checking:");
+//		      boolean sourceErr = sr.checkErrorsInClass(cl);
 		      
 
 /*

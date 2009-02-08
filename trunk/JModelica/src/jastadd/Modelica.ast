@@ -46,7 +46,7 @@ FullClassDecl : BaseClassDecl ::= [StringComment]
                                 <EndName:String>;
 
 LibClassDecl : FullClassDecl ::= LibNode*;
-LibNode ::= <FileName:String> <Name:String> <Structured:boolean> /ClassDecl/;
+LibNode ::= <FileName:String> <Name:String> <Structured:boolean> /StoredDefinition/;
 
 // TODO: Why does ShortClassDecl have type_prefix:es?
 PN_ShortClassDecl : BaseClassDecl ::= [TypePrefixFlow] 
@@ -86,6 +86,7 @@ Model : Restriction::=;
 Block : Restriction::=;
 MClass : Restriction::=;
 Connector : Restriction::=;
+ExpandableConnector : Connector::=;
 MType : Restriction::=;
 MPackage : Restriction::=;
 Function : Restriction::=;
@@ -325,6 +326,7 @@ ColonSubscript : Subscript::=;
 ExpSubscript : Subscript ::= Exp;
 
 TimeExp : Exp;
+EndExp : Exp;
 
 // Dummy node used in the compilation
 PN_DummyClause : Clause ::=;

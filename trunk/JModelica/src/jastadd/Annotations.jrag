@@ -4,7 +4,7 @@ import java.util.LinkedHashSet;
 import org.jmodelica.test.ast.*;
 
 aspect TestAnnotations {
-
+/*
 	rewrite ParseAnnotation {
 		when (testCases().size() > 0)
 			to AUnitTesting {
@@ -69,5 +69,5 @@ aspect TestAnnotations {
        return new FlatteningTestCase(name(),description(),root().fileName(),enclosingClassDecl().qualifiedName(),flatModel(),false);
     }
 
-
+*/
 }

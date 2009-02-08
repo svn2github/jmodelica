@@ -14,7 +14,7 @@ aspect Library {
 		set.addAll(super.memberClass(name));
 		for (int i=0;i<getNumLibNode();i++) {
 			if (getLibNode(i).getName().equals(name)) {
-				set.add(getLibNode(i).getClassDecl());
+				set.add(getLibNode(i).getStoredDefinition().getElement(0));
 			}
 		}
 		
@@ -26,14 +26,13 @@ aspect Library {
 
 	eq LibClassDecl.numLocalClassDecl() = getNumClassDecl() + getNumLibNode();
 	eq LibClassDecl.localClassDecl(int i) = 
-		i<getNumClassDecl()? getClassDecl(i): getLibNode(i-getNumClassDecl()).getClassDecl();
+		i<getNumClassDecl()? getClassDecl(i): 
+		   (FullClassDecl)getLibNode(i-getNumClassDecl()).getStoredDefinition().getElement(0);
 
 	eq LibClassDecl.getLibNode().lookupClass(String name) = genericLookupClass(name);
 	eq LibClassDecl.getLibNode().lookupComponent(String name) = genericLookupComponent(name);
 
-	syn lazy ClassDecl LibNode.getClassDecl() = createClassDecl();
-
-	syn lazy ClassDecl LibNode.createClassDecl() {
+	syn lazy StoredDefinition LibNode.getStoredDefinition() {
 		
 		/* If structured
 		 		a. Read all files
@@ -56,12 +55,10 @@ aspect Library {
 				if (allFiles==null) {
 					FullClassDecl fcd = new FullClassDecl();
 					fcd.setName(new IdDecl("_ErrorClassDecl_in_lib"));
-					return fcd;
-					//throw new LibNodeException();
-					//System.out.println("Error reading library!");
-					//System.exit(0);
+			 		StoredDefinition sd = new StoredDefinition(new Opt(), new List());
+					sd.addElement(fcd);
+                	return sd;
 				} 
-				
 				
 				boolean package_mo_present = false;
 				for (int i=0;i<allFiles.length;i++) {
@@ -71,12 +68,12 @@ aspect Library {
 	   			}
 				
 				if (package_mo_present) {
-		
+				    System.out.println("Reading file: " + dirName+"/package.mo...");
 		   			SourceRoot sr = root().modelicaParser().parseFile(dirName+"/package.mo");
 		   			FullClassDecl fcd = (FullClassDecl)sr.getProgram().getUnstructuredEntity(0).getElement(0);
+		   			sr.getProgram().getUnstructuredEntity(0).setFileName(dirName+"/package.mo");
 		   			LibClassDecl lcd = new LibClassDecl(fcd);
-		   			lcd.setFileName(dirName+"/package.mo");
-	   				   			
+		   				   				   			
 		   			/* Obtain a list of all files
 	   				   get the corresponding package for each file
 	   				   and add to list of TypeDefs */
@@ -89,10 +86,10 @@ aspect Library {
 	   				for (int i=0;i<filesUnStructured.length;i++) {
 	   					debugPrint("*** " + filesUnStructured[i].getName().substring(0,filesUnStructured[i].getName().length()-3));
 	   					debugPrint("  "+filesUnStructured[i]);
-	   					//fcd.addTypeDef(getLibraryUnStructured(filesUnStructured[i].toString()));
-	   					libnodes.add(new LibNode(filesUnStructured[i].toString(),
+   						libnodes.add(new LibNode(filesUnStructured[i].toString(),
 	   				                         filesUnStructured[i].getName().substring(0,filesUnStructured[i].getName().length()-3),
 	   				                         false));	
+	   					
 	   				}
 	   				File[] dirs = baseDir.listFiles();
 	   				debugPrint(" Structured entries: ");
@@ -100,39 +97,67 @@ aspect Library {
 		   				if (dirs[i].isDirectory()){
 		   					debugPrint("  " +dirs[i]);
 		   					debugPrint("*** " + dirs[i].getName());
-		   					libnodes.add(new LibNode(dirs[i].toString(),
+		   							   						   					
+	   						// Check if the directory contains a package.mo
+	   						// if not, do not add a LibNode
+	   						File baseDir_tmp = new File(dirs[i].getAbsolutePath());			
+							File[] allFiles_tmp = baseDir_tmp.listFiles();
+							package_mo_present = false;
+							for (int k=0;k<allFiles_tmp.length;k++) {
+								debugPrint("   # " + allFiles_tmp[k].toString());
+	   							if (allFiles_tmp[k].toString().length()>10)
+	   								if (allFiles_tmp[k].toString().substring(allFiles_tmp[k].toString().length()-10).equals("package.mo"))
+	   									package_mo_present = true;
+	   						}
+	   					
+	   						if (package_mo_present) {
+		   						libnodes.add(new LibNode(dirs[i].toString(),
 		   				                         dirs[i].getName(),
 		   				                         true));
+							} else {
+								debugPrint("*** " + dirs[i].getName() + " Not added: no package.mo present");
+							}
 						}
 	   			
 		   			}
-	   			
+						   			
 					lcd.setLibNodeList(libnodes);
-	   				return lcd;
+					sr.getProgram().getUnstructuredEntity(0).setElement(lcd,0);
+	   				return sr.getProgram().getUnstructuredEntity(0);
 	   			}
 	   		} catch (Error e){
 		    	System.out.println("In file: '"+ dirName+"/package.mo"+ "':");
 				System.err.println(e.getMessage());
-		        //System.exit(1);
-		        //throw new LibNodeException();
 		        FullClassDecl fcd = new FullClassDecl();
 				fcd.setName(new IdDecl("_ErrorClassDecl_in_lib"));
-                return fcd;		        
+				StoredDefinition sd = new StoredDefinition(new Opt(), new List());
+				sd.addElement(fcd);
+                return sd;		        
 	   		} catch (Exception e) {System.out.println(e.toString());
 	   		                       e.printStackTrace();
-	   		                       //System.exit(0);
-	   		                       //throw new LibNodeException();
 	   		                       FullClassDecl fcd = new FullClassDecl();
 					               fcd.setName(new IdDecl("_ErrorClassDecl_in_lib"));
-	   		                       return fcd;
-	   		                       }
-	   		
-			
+				                   StoredDefinition sd = new StoredDefinition(new Opt(), new List());
+				                   sd.addElement(fcd);
+                                   return sd;		        
+	   		                       }			
 		} else {
+		    try {
+		    System.out.println("Reading file: " + getFileName() + "...");
 			SourceRoot sr = root().modelicaParser().parseFile(getFileName());
-		  	FullClassDecl fcd = (FullClassDecl)sr.getProgram().getUnstructuredEntity(0).getElement(0);
-		  	fcd.setFileName(getFileName());
-			return fcd;
+			for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
+				sd.setFileName(getFileName());
+			}
+			return sr.getProgram().getUnstructuredEntity(0);
+			}catch (Error e){
+		    	System.out.println("In file: '"+ getFileName()+ "':");
+				System.err.println(e.getMessage());
+		        FullClassDecl fcd = new FullClassDecl();
+				fcd.setName(new IdDecl("_ErrorClassDecl_in_lib"));
+				StoredDefinition sd = new StoredDefinition(new Opt(), new List());
+				sd.addElement(fcd);
+                return sd;		        
+                }
 		}
 		return null;
 	}
@@ -177,6 +202,7 @@ aspect Library {
 	syn lazy List Program.getLibNodeList() {
 		//LibNode ln =  new LibNode("/local/home/jakesson/Modelica_2_2_lite/Modelica","Modelica",true);
 		LibNode ln =  new LibNode("/Users/jakesson/projects/ModelicaStandardLibrary/ModelicaStandardLibrary_v3/Modelica 3.0.1","Modelica",true);
+		//LibNode ln =  new LibNode("/Users/jakesson/projects/P410-JModelicaIDE/examples/Modelica-2.2/Modelica","Modelica",true);
 		return new List().add(ln);
 	}
 	
@@ -199,47 +225,5 @@ aspect Library {
 			}
 		
 		}
-		
 	
-/*
-	public class LibList extends List {
-		
-		public int numClassDeclsFromPackage;
-		
-		public ASTNode getChild(int i) {
-			if (i<numClassDeclsFromPackage)
-				return super.getChild(i);
-			else {
-				return ((LibNode)super.getChild(i)).getClassDecl();
-			}
-		}
-	
-	}
-*/
-	
-
-
-/*
-	syn lazy List LibClassDecl.getClassDeclList() {
-		return new LibList();
-	}
-*/
-/*
-	syn lazy List Program.getLibraryList() {
-		List lib = new List();
-		
-		DirLibNode dln = new DirLibNode("Modelica","/work/jakesson/software_tools/Modelica_std_lib_2.2/Modelica_2_2_lite/Modelica/");
-		
-		lib.add(dln);
-		return lib;
-	}
-
-	syn lazy ClassDecl LibNode.getClassDecl() {
-		return null;
-	}
-
-	public InstComponent LibNode.newInstComponent(ComponentDecl cd) {
-	  return getClassDecl().newInstComponent(cd);
-	}
-	*/
 }

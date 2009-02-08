@@ -85,6 +85,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "class"           { return newSymbol(Terminals.CLASS); }  
   "model"           { return newSymbol(Terminals.MODEL); }
   "block"           { return newSymbol(Terminals.BLOCK); }
+  "expandable"       { return newSymbol(Terminals.EXPANDABLE); }
   "connector"       { return newSymbol(Terminals.CONNECTOR); }
   "type"            { return newSymbol(Terminals.TYPE); }
   "package"         { return newSymbol(Terminals.PACKAGE); }
@@ -99,6 +100,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "protected"      { return newSymbol(Terminals.PROTECTED); }
   
   "extends"         { return newSymbol(Terminals.EXTENDS); }
+  "constrainedby"         { return newSymbol(Terminals.CONSTRAINEDBY); }
 
   "flow"            { return newSymbol(Terminals.FLOW); }
    "discrete"       { return newSymbol(Terminals.DISCRETE); }

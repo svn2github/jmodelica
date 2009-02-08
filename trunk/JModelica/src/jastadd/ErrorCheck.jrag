@@ -1,8 +1,6 @@
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.ArrayList;
-
-
   
   class Problem implements Comparable {
     public int compareTo(Object o) {
@@ -109,7 +107,7 @@ aspect ErrorCheck {
       		break;
       	}
       }
-      if (!duplicate)
+      if (!duplicate) 
 	      root().errors.add(newP);
   }
 
@@ -241,9 +239,7 @@ aspect ErrorCheck {
    
 }
 
-
 aspect InstanceErrorCheck {
-
 
  // Error checking in instance tree
     syn lazy InstFullClassDecl InstNode.retrieveInstFullClassDecl(String className) {
@@ -255,9 +251,9 @@ aspect InstanceErrorCheck {
 	  return null;
     }   
   	
-  	
-  	
   	eq InstFullClassDecl.retrieveInstFullClassDecl(String className) {
+  	    debugPrint(" ### InstFullClassDecl.retrieveInstFullClassDecl: " + 
+  	      qualifiedName() + " looking for " + className);
 	   	if (className.equals(qualifiedName())) {
 	   		return this;
 		} else
@@ -276,8 +272,10 @@ aspect InstanceErrorCheck {
 		if (fcd == null) {
 			System.out.println("Class "+ className + " not found");
 			return true;
-		} else
+		} else {
+			debugPrint("Class "+ className + " found!");
 			return fcd.errorCheck();
+		}
 	}
 
 	public boolean InstProgramRoot.checkErrorsInInstClass(String className,StringBuffer errorString) {
@@ -285,14 +283,17 @@ aspect InstanceErrorCheck {
 		if (fcd == null) {
 			System.out.println("Class "+ className + " not found");
 			return false;
-		} else
+		} else {
+		    debugPrint("Class "+ className + " found!");
 			return fcd.errorCheck(errorString);
+		}
 	}
 
 	boolean InstNode.errorChecked = false;
 
 
   public void InstNode.collectErrors() {
+    debugPrint(prettyPrint("   #### ") + " errorChecked="+errorChecked);
     if (!errorChecked) {
       errorChecked = true;
 	  nameCheck();
@@ -303,12 +304,17 @@ aspect InstanceErrorCheck {
 		  n.collectErrors();
 	  for(InstNode n : getInstExtendss()) 
 		  n.collectErrors();
-	  for(FAbstractEquation e : getFAbstractEquations()) 
+	  for(FAbstractEquation e : getFAbstractEquations()) {
+		  debugPrint(" mmmm ");
+		      debugPrint(prettyPrint("   ####>> "));
+		  e.prettyPrint(">>> ");
 		  e.collectErrors();
+	  }
 	}
   }
 
   	public void InstBaseClassDecl.collectErrors() {
+  	    debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
     	if (!errorChecked) {
 //    	errorChecked = true;
         super.collectErrors();
@@ -339,13 +345,15 @@ aspect InstanceErrorCheck {
   	
 	boolean InstImport.errorChecked = false;
     public void InstImport.collectErrors() {
-    if (!errorChecked) {
-    	errorChecked = true;
-		getPackageName().collectErrors();
+    	debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+    	if (!errorChecked) {
+    		errorChecked = true;
+			getPackageName().collectErrors();
 		}
 	}
 	
 	public void InstComponentDecl.collectErrors() {
+    debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
     if (!errorChecked) {
 		super.collectErrors();
 		getClassName().collectErrors();
@@ -357,6 +365,7 @@ aspect InstanceErrorCheck {
 	}
 	
 	public void InstExtends.collectErrors() {
+    debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
     if (!errorChecked) {
 		super.collectErrors();
 		getClassName().collectErrors();
@@ -367,7 +376,9 @@ aspect InstanceErrorCheck {
 	}	
 	
 	public void InstExtendsShortClass.collectErrors() {
+        debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
     if (!errorChecked) {
+      debugPrint(prettyPrint("   ### "));
       errorChecked = true;
 	  nameCheck();
 	  typeCheck();	  
@@ -393,6 +404,7 @@ aspect InstanceErrorCheck {
 	//public void InstPrimitiveClassDecl.collectErrors() {}
 
 	public void InstShortClassDecl.collectErrors() {
+        debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
 	    if (!errorChecked) {
 		  super.collectErrors();
 		  // The localIModifications should only be checked if
@@ -411,6 +423,7 @@ aspect InstanceErrorCheck {
     public void InstReplacingShortClassDecl.collectIModificationErrors() { }
 
 	public void InstReplacingShortClassDecl.collectErrors() {
+	    debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);    
 	    if (!errorChecked) {
 		  super.collectErrors();
 		  getOriginalInstClass().collectErrors();
@@ -419,13 +432,13 @@ aspect InstanceErrorCheck {
 	}
 
 	public void InstReplacingFullClassDecl.collectErrors() {
+	    debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
 	    if (!errorChecked) {
 		  super.collectErrors();
 		  getOriginalInstClass().collectErrors();
 		}
 		
 	}
-
 
 	public void InstBuiltIn.collectErrors() {}
 
@@ -445,6 +458,7 @@ aspect InstanceErrorCheck {
 
 	boolean InstAccess.errorChecked = false;
 	public void InstDot.collectErrors() {
+	    debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
 	    if (!errorChecked) {	
 			errorChecked = true;
 			getLeft().collectErrors();
@@ -454,17 +468,33 @@ aspect InstanceErrorCheck {
 	}
 
 	public void InstClassAccess.collectErrors() {
+        debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
 	    if (!errorChecked) {
-		    super.collectErrors();
+		    //super.collectErrors();
+		    nameCheck();
 		    errorChecked = true;
 			// If the class access is to be checked, then the corresponding
 			// InstClassDecl is checked as well, since it is being accessed at
-			// some point.
-			if (!myInstClassDecl().isUnknown())
-				myInstClassDecl().collectErrors();
+			// some point... ...But it is probably too drastic since it means
+			// that if Modelica.Electrical.Analog.Basic.Resistor is accessed,
+			// then first Modelica is completely checked, then Electrical etc.
+			// Probably, only the name should be checked here, and the 
+			// actually target class of an access should be checked. 
+			//if (!myInstClassDecl().isUnknown())
+			//	myInstClassDecl().collectErrors();
 		}
 	}
  
 }
 
+aspect FlatExpressionErrorCheck {
 
+	public void FUnsupportedEquation.collectErrors() {
+		error("Unsupported equation type");
+	}
+
+	public void FUnsupportedExp.collectErrors() {
+		error("Unsupported expression type");
+	}
+	
+}

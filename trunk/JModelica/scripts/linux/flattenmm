@@ -2,6 +2,6 @@
 
 JAR_DIR=./
 
-java -Xmx1000M -classpath $JAR_DIR/bin/jmodelica.jar:$JAR_DIR/tools/aspectjrt.jar org.jmodelica.applications.FlattenModel "$@"
+java -Xmx2000M -classpath $JAR_DIR/bin/jmodelica.jar:$JAR_DIR/tools/aspectjrt.jar org.jmodelica.applications.FlattenModel "$@"
 
 

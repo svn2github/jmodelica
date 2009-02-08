@@ -2,6 +2,7 @@ model LibraryTests
 
    model LibraryTest1
      Modelica.Electrical.Analog.Basic.Resistor resistor;
+     equation
    end LibraryTest1;  
 
   model LibraryTest2

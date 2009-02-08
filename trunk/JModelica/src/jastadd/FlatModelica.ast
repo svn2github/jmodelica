@@ -62,7 +62,9 @@ FColonSubscript : FSubscript::=;
 FExpSubscript : FSubscript ::= FExp;
 
 abstract FExp;
+FUnsupportedExp : FExp;
 abstract FAbstractEquation;
+FUnsupportedEquation : FAbstractEquation;
 FEquation : FAbstractEquation ::= Left:FExp Right:FExp;
 FInitialEquation : FEquation;
 FConnectClause : FAbstractEquation ::= [FStringComment] Connector1:FIdUseInstAccess Connector2:FIdUseInstAccess;

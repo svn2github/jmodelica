@@ -168,7 +168,8 @@ aspect InstModifications{
 
 aspect Environments {
 
- 	syn lazy ArrayList<IModification> InstNode.localIModifications() = new ArrayList<IModification>();
+ 	syn lazy ArrayList<IModification> InstNode.localIModifications() 
+ 	   = new ArrayList<IModification>();
  	
  	eq InstComponentDecl.localIModifications() {
 		ArrayList<IModification> l = new ArrayList<IModification>();
@@ -695,7 +696,7 @@ aspect InstanceTreeConstruction {
     	return getDynamicClassName(getNumDynamicClassName()-1).myInstClassDecl().newInstComponentDecl(getComponentRedeclare().getComponentDecl());
 	}
 
-	syn lazy InstComponentDecl InstReplacingComposite.getOriginalInstComponent() {
+	syn lazy InstComponentDecl InstReplacingComposite.getOriginalInstComponent()  {
 		// TODO: Check if the component is redeclared. Really...?
     	// -> Yes: Create an InstReplacingComponent component
     	// -> No: Create an InstComponent 
@@ -925,6 +926,7 @@ aspect SourceAST_API {
 			l.add(e);
 		return l;
 	}
+		
 	eq ShortClassDecl.superClasses() {
 		ArrayList<ExtendsClause> l = new ArrayList<ExtendsClause>();
 		l.add(getExtendsClauseShortClass());
@@ -948,10 +950,27 @@ aspect SourceAST_API {
 		return l;
 	}
 
+	eq LibClassDecl.classes() {
+		ArrayList<ClassDecl> l = new ArrayList<ClassDecl>();
+		l.addAll(super.classes());
+		for (LibNode ln : getLibNodes()) {
+		    for (Element e : ln.getStoredDefinition().getElements()) {
+				l.add((ClassDecl)e);
+			}
+		}
+		return l;
+	}
+
+
     syn lazy ArrayList<ClassDecl> Program.classes() {
     	ArrayList<ClassDecl> l = new ArrayList<ClassDecl>();
     	for (StoredDefinition sd :getUnstructuredEntitys()) {
     		for (Element e : sd.getElements()) {
+    			l.add((ClassDecl)e);
+    		}
+    	}
+    	for (LibNode ln : getLibNodes()) {
+    	    for (Element e : ln.getStoredDefinition().getElements()) {
     			l.add((ClassDecl)e);
     		}
     	}
@@ -1215,13 +1234,60 @@ aspect InstancePrettyPrint {
 		return str;
 
 	}
-	public String InstPrimitive.prettyPrint(String indent) {
+
+	public String InstBaseClassDecl.prettyPrint(String indent) {
 		String str = getClass().getName();
 		str = indent+str.substring(str.lastIndexOf('.')+1);
-		str+= ": " + myInstClass().name() + " "+
+		str+= ": " + name();
+		return str;
+
+	}
+
+	public String InstShortClassDecl.prettyPrint(String indent) {
+		String str = getClass().getName();
+		str = indent+str.substring(str.lastIndexOf('.')+1);
+		str+= ": " + getInstExtends(0).getClassName().name() + " "+ name();
+		return str;
+	}
+
+	public String InstExtendsShortClass.prettyPrint(String indent) {
+		String str = getClass().getName();
+		str = indent+str.substring(str.lastIndexOf('.')+1);
+		str+= ": " + getClassName().name();
+		return str;
+		
+	}
+
+	public String InstExtends.prettyPrint(String indent) {
+		String str = getClass().getName();
+		str = indent+str.substring(str.lastIndexOf('.')+1);
+		str+= ": " + getClassName().name();
+		return str;
+		
+	}
+
+	public String InstComponentDecl.prettyPrint(String indent) {
+		String str = getClass().getName();
+		str = indent+str.substring(str.lastIndexOf('.')+1);
+		str+= ": " + getClassName().name() + " "+
 		                      getComponentDecl().name();
 		return str;
 
 	}
 
+	public String InstImport.prettyPrint(String indent) {
+		String str = getClass().getName();
+		str = indent+str.substring(str.lastIndexOf('.')+1);
+		str += ": " + getPackageName().name();
+		return str;
+	}
+
+	public String InstAccess.prettyPrint(String indent) {
+		String str = getClass().getName();
+		str = indent+str.substring(str.lastIndexOf('.')+1);
+		str += ": " + name();
+		return str;
+	}
+
+	
 }

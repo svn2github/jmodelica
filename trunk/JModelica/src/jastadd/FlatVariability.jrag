@@ -3,6 +3,7 @@ aspect FlatVariability {
 	syn lazy FTypePrefixOther FExp.variability();
 	// TODO this must be fixed.
 	eq FInstAccessExp.variability() = null;
+	eq FUnsupportedExp.variability() = null;
 	
 	syn lazy FTypePrefixOther FVariable.variability();
 

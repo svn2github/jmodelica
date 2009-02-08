@@ -36,8 +36,12 @@ aspect InstLookupClasses {
 	eq InstReplacingFullClassDecl.getChild().lookupInstClass(String name) = getIClassRedeclare().lookupInstClass(name);
 	eq InstReplacingShortClassDecl.getOriginalInstClass().lookupInstClass(String name) = lookupInstClass(name);
 	eq InstReplacingFullClassDecl.getOriginalInstClass().lookupInstClass(String name) = lookupInstClass(name);
+	
+	eq InstReplacingComposite.getOriginalInstComponent().lookupInstClass(String name) = lookupInstClass(name);
+	eq InstReplacingPrimitive.getOriginalInstComponent().lookupInstClass(String name) = lookupInstClass(name);
+ 	eq InstReplacingComposite.getDynamicClassName().lookupInstClass(String name) = lookupInstClass(name);
+ 	eq InstReplacingPrimitive.getDynamicClassName().lookupInstClass(String name) = lookupInstClass(name);
   
- 
 	eq InstReplacingComposite.getClassName().lookupInstClass(String name) = getIComponentRedeclare().lookupInstClass(name);
 	eq InstReplacingPrimitive.getClassName().lookupInstClass(String name) = getIComponentRedeclare().lookupInstClass(name);
 
@@ -116,10 +120,8 @@ aspect InstLookupClasses {
 		else
 			return emptyHashSet();
 	}
-
-
 /*
-	syn lazy HashSet Program.lookupLibrary(String name) {
+	syn lazy HashSet SourceRoot.lookupLibrary(String name) {
 		HashSet set = new HashSet(4);
 		for (int i=0;i<getNumLibNode();i++) {
 			if (getLibNode(i).getName().equals(name))
@@ -130,10 +132,9 @@ aspect InstLookupClasses {
 		else
 			return emptyHashSet();
 	}
-*/	
-	
+	*/
 	eq InstProgramRoot.getChild().lookupInstClass(String name) = genericLookupInstClass(name);
-//	eq Program.getLibNode().lookupInstClass(String name) = genericLookupClass(name);
+	//eq SourceRoot.getLibNode().lookupInstClass(String name) = genericLookupClass(name);
 	
 
 	eq InstProgramRoot.getInstPredefinedType().lookupInstClass(String name) {

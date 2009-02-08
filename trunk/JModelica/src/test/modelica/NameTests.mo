@@ -283,7 +283,7 @@ Semantic error at line 196, column 4:
   end B;
   
   model C
-    replaceable B b extends A;
+    replaceable B b constrainedby A;
   end C;
 
   C c(b(y=3));
@@ -323,7 +323,7 @@ Semantic error at line 297, column 4:
   
   end P2;
 
-  replaceable package P = P2 extends P1;
+  replaceable package P = P2 constrainedby P1;
   
   P.B b;
   

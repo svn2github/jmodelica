@@ -438,7 +438,7 @@ aspect FlatExpressions {
 aspect InstantiatedExpressions {
 
 	public FAbstractEquation AbstractEquation.instantiate() {
-		return null;
+		return new FUnsupportedEquation();
 	}
 
 	public FAbstractEquation Equation.instantiate() {
@@ -475,7 +475,7 @@ aspect InstantiatedExpressions {
 	}
 	
 	public FExp Exp.instantiate() {
-		return null;
+		return new FUnsupportedExp();
 	}
 
 

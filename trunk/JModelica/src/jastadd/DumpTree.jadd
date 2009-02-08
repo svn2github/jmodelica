@@ -253,3 +253,44 @@ aspect FlatDumpTree {
       		getChild(i).dumpTree(indent + "  ");
     }
 }
+
+aspect DumpClasses {
+
+	public void Program.dumpClasses(String indent) {
+		for (StoredDefinition sd : getUnstructuredEntitys()) {
+//		    System.out.println("### #" + sd.getFileName());
+		    for (Element e : sd.getElements()) {
+				e.dumpClasses(indent + " ");
+			}
+		}	
+		for (LibNode ln : getLibNodes()) {
+//		    System.out.println("### #" + ln.getStoredDefinition().getFileName());
+			for (Element el : ln.getStoredDefinition().getElements()) {
+				el.dumpClasses(indent + " ");
+			}
+		}
+	}
+
+	public void Element.dumpClasses(String indent) {}
+	
+	public void FullClassDecl.dumpClasses(String indent) {
+		System.out.println(indent + name());
+		for (ClassDecl cd : getClassDecls()) {
+			cd.dumpClasses(indent + " ");
+		}
+	}
+
+	public void LibClassDecl.dumpClasses(String indent) {
+		super.dumpClasses(indent);
+		for (LibNode ln : getLibNodes()) {
+//			    System.out.println("### #" + ln.getStoredDefinition().getFileName());
+			for (Element el : ln.getStoredDefinition().getElements()) {
+				el.dumpClasses(indent + " ");
+			}
+		}
+	
+	}
+
+
+
+}

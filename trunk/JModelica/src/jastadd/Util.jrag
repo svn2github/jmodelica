@@ -72,33 +72,29 @@ aspect NodeMethods {
 aspect FileNames {
 
 	syn lazy String ASTNode.fileName() = retrieveFileName();
-	eq FullClassDecl.fileName() = getFileName().equals("")? retrieveFileName(): getFileName();
+	eq StoredDefinition.fileName() = getFileName().equals("")? retrieveFileName(): getFileName();
+	
 	eq Root.fileName() = getFileName();
 	
 	inh lazy String ASTNode.retrieveFileName();
 	eq SourceRoot.getProgram().retrieveFileName() = getFileName();
 	eq FlatRoot.getFClass().retrieveFileName() = getFileName();
 	
-	eq FullClassDecl.getEquation().retrieveFileName() = getFileName().equals("")? retrieveFileName(): getFileName();
-	eq FullClassDecl.getAlgorithm().retrieveFileName() = getFileName().equals("")? retrieveFileName(): getFileName();
-	eq FullClassDecl.getSuper().retrieveFileName() = getFileName().equals("")? retrieveFileName(): getFileName();
-	eq FullClassDecl.getImport().retrieveFileName() = getFileName().equals("")? retrieveFileName(): getFileName();
-	eq FullClassDecl.getClassDecl().retrieveFileName() = getFileName().equals("")? retrieveFileName(): getFileName();
-	eq FullClassDecl.getComponentDecl().retrieveFileName() = getFileName().equals("")? retrieveFileName(): getFileName();
-	eq FullClassDecl.getAnnotation().retrieveFileName() = getFileName().equals("")? retrieveFileName(): getFileName();
-	eq FullClassDecl.getExternalClause().retrieveFileName() = getFileName().equals("")? retrieveFileName(): getFileName();
+	eq StoredDefinition.getChild().retrieveFileName() = getFileName().equals("")? retrieveFileName(): getFileName();
+	eq FullClassDecl.getChild().retrieveFileName() =  retrieveFileName();
+	eq InstFullClassDecl.getChild().retrieveFileName() = getClassDecl().fileName();
+	eq InstComponentDecl.getChild().retrieveFileName() = getComponentDecl().fileName();
+	eq InstExtends.getChild().retrieveFileName() = getExtendsClause().fileName();
+	eq InstImport.getChild().retrieveFileName() = getImportClause().fileName();
+	eq IModification.getChild().retrieveFileName() = getModification().fileName();
 	
 	private String Root.fName = "";
 	public void Root.setFileName(String fName) { this.fName = fName; }
 	public String Root.getFileName() {return fName; }
 
-	private String FullClassDecl.fName = "";
-	public void FullClassDecl.setFileName(String fName) { this.fName = fName; }
-	public String FullClassDecl.getFileName() {return fName; }
-	
-	
-	
-
+	private String StoredDefinition.fName = "";
+	public void StoredDefinition.setFileName(String fName) { this.fName = fName; }
+	public String StoredDefinition.getFileName() {return fName; }
 }
 	
 aspect Names {
