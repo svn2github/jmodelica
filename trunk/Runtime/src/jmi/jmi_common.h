@@ -32,7 +32,7 @@
  * gcc is used)), the correct set of typedefs are included.
  *
  * \section jmi_func_t Representation of functions
- * 
+ *
  * All the mathematical functions defined in the JMI Model interface
  * are functions of independent variables contained in \f$z\f$. It is
  * therefore convenient to introduce an abstraction of a general
@@ -41,8 +41,8 @@
  * materilized by the jmi_func_t struct. This struct contains function
  * pointers for evaluation of the function and its derivatives, as
  * well as sparsity information. In addition, jmi_func_t may contain
- * data structures for evaluation of derivatives by means of CppAD. 
- * 
+ * data structures for evaluation of derivatives by means of CppAD.
+ *
  * \section jmi_jmi_t JMI Model interface structs
  *
  * The main struct of the JMI model interface is jmi_t. An instance of
@@ -52,7 +52,7 @@
  * information of the model and one or several of the structs
  * - jmi_dae_t which contains the DAE residual function.
  * - jmi_init_t which contains the DAE initialization functions.
- * - jmi_opt_t which contains the cost function, the constraint 
+ * - jmi_opt_t which contains the cost function, the constraint
  *   functions, and a specification of the optimization interval.
  * If one of the structs are not present in jmi_t, the corresponding
  * pointer is set to NULL.
@@ -61,7 +61,7 @@
  * interface structs
  *
  * Instances of jmi_t are created by a call to ::jmi_new, which is a
- * function that is typically defined in the generated model code. 
+ * function that is typically defined in the generated model code.
  * The creation of a jmi_t struct proceeds in three
  * steps:
  *   - First, a raw struct is created by the function ::jmi_init. In
@@ -74,7 +74,7 @@
  *   structs are created.
  *   - Finlly, the the AD structs (jmi_func_ad_t) are set up in the
  *   function call ::jmi_ad_init. Notice that the variable vectors
- *   should have been initialized prior to the call to ::jmi_ad_init. 
+ *   should have been initialized prior to the call to ::jmi_ad_init.
  *   Such initialization usually requires access to XML meta-data
  *   files, which is done outside of the generated code.
  *   Accordingly, the AD initialization must be done from the user
@@ -165,8 +165,8 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 /* @} */
 
 /**
- * \defgroup jmi_function_typedefs Function typedefs 
- * 
+ * \defgroup jmi_function_typedefs Function typedefs
+ *
  * \brief Function signatures to be used in the generated code
  */
 
@@ -190,8 +190,8 @@ typedef int (*jmi_residual_func_t)(jmi_t* jmi, jmi_ad_var_vec_p res);
 
 /**
  * \brief Evaluation of symbolic jacobian of a residual function in
- * generated code. 
- * 
+ * generated code.
+ *
  * Notice that this function signature is used for all functions in
  * the DAE, DAE initialization, and Optimization interfaces. Notice
  * that this definition supports both C compilation and C++
@@ -204,7 +204,7 @@ typedef int (*jmi_residual_func_t)(jmi_t* jmi, jmi_ad_var_vec_p res);
  * @param res (Output) The residual value.
  * @return Error code.
  */
-typedef int (*jmi_jacobian_func_t)(jmi_t* jmi, int sparsity, 
+typedef int (*jmi_jacobian_func_t)(jmi_t* jmi, int sparsity,
              int independent_vars, int* mask, jmi_real_t* jac);
 
 /* @} */
@@ -223,7 +223,7 @@ typedef int (*jmi_jacobian_func_t)(jmi_t* jmi, int sparsity,
 /**
  * Create a new jmi_func_t.
  */
-int jmi_func_new(jmi_func_t** jmi_func, jmi_residual_func_t F, 
+int jmi_func_new(jmi_func_t** jmi_func, jmi_residual_func_t F,
                  int n_eq_F, jmi_jacobian_func_t dF,
 		 int dF_n_nz, int* dF_row, int* dF_col);
 
@@ -249,7 +249,7 @@ int jmi_func_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz);
  *  Convenience function of accessing the non-zeros in the Jacobian
  *  in an jmi_func_t
  */
-int jmi_func_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, 
+int jmi_func_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
                            int independent_vars,
                            int *mask, int *row, int *col);
 
@@ -257,7 +257,7 @@ int jmi_func_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
  *  Convenience function for computing the dimensions of the Jacobian in an
  *  jmi_func_t.
  */
-int jmi_func_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, 
+int jmi_func_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
                     int independent_vars, int *mask,
 		    int *dF_n_cols, int *dF_n_nz);
 
@@ -325,7 +325,7 @@ int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
 /**
  * Allocates a jmi_dae_t struct.
  */
-int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F, 
+int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F,
                  jmi_jacobian_func_t dF, int dF_n_nz, int* row, int* col);
 
 /**
@@ -471,7 +471,7 @@ int jmi_variable_type(jmi_t *jmi, int col_index);
  * the Jacobian defined by independent_vars and mask. If the column is
  * to be included, then 1 is returned otherwise 0.
  */
-int jmi_check_Jacobian_column_index(jmi_t *jmi, int independent_vars, 
+int jmi_check_Jacobian_column_index(jmi_t *jmi, int independent_vars,
                                     int *mask, int col_index);
 
 /**
@@ -479,7 +479,7 @@ int jmi_check_Jacobian_column_index(jmi_t *jmi, int independent_vars,
  * the sub-Jacobian defined by independent_vars and mask.
  *
  */
-int jmi_map_Jacobian_column_index(jmi_t *jmi, int independent_vars, 
+int jmi_map_Jacobian_column_index(jmi_t *jmi, int independent_vars,
                                   int *mask, int col_index);
 
 

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <jmi.h>
-#include <jmi_opt_sim.h>
+#include <jmi_opt_sim_lp.h>
 #include <jmi_opt_sim_ipopt.h>
 
 #define TEST_VERB 1
@@ -1328,7 +1328,7 @@ int test_optimization(int verbose) {
     // Set an extra bound for x_3
     x_lb[2] = 0;
 
-	jmi_opt_sim_lp_radau_new(&jmi_opt_sim, jmi, n_e,
+	jmi_opt_sim_lp_new(&jmi_opt_sim, jmi, n_e,
 			             hs, hs_free,
 			            p_opt_init, dx_init, x_init,
 			            u_init, w_init,

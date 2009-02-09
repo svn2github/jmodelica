@@ -1,31 +1,56 @@
-/*
- * jmi_opt_sim.h provides an interface to an NLP derived by means of a
- * simultaneous optimization method. Notice that the method of transcription
- * is not specified by the interface. Rather, such a method is specified
- * by the call back functions in the struct jmi_opt_sim_t. This design
- * enables different methods to be implemented. Typically, a jmi_opt_sim_t
- * struct is created by a function call to, for example, jmi_opt_sim_lp_radau_new.
- * The resulting struct can then be used generically in the jmi_opt_sim interface
- * functions.
+/** \file jmi_opt_sim.h
+ *  \brief An interface to an NLP resulting from discretization of a dynamic
+ *  optimization problem by means of a simultaneous method.
+ **/
+
+/**
+ * \defgroup jmi_opt_sim JMI Simultaneous Optimization interface
  *
- * jmi_opt_sim provides an interface to an NLP on the form:
+ * \brief The JMI Simultaneous optimization interface provides an NLP interface
+ * for a dynamic optimization problem transcribed using a simultaneous method.
  *
- *   min f(x)
+ * The NLP has the form
  *
- *   s.t.
+ * \f$
+ *   \min f(x)
+ * \f$
  *
- *   g(x) <= 0
- *   h(x) = 0
+ *   subject to
  *
- * including evaluation of Jacobians of f, g, and h as well as parsity patterns
- * for g and h.
+ * \f$ g(x) \leq 0\f$<br>
+ * \f$  h(x) = 0 \f$
+ *
+ * where \f$x\in R^{n_x}\f$, \f$g\in n_g\f$ and \f$h \in n_h\f$. The interface
+ * also supports evaluation of Jacobians of \f$f\f$, \f$g\f$, and \f$h\f$ as
+ * well as parsity patterns for \f$g\f$ and \f$h\f$.
+ *
+ * The method of transcription is not specified by the interface. Rather, such
+ * a method is specified by the call-back functions in the struct jmi_opt_sim_t.
+ * This design enables different methods to be implemented and accessed in a
+ * unified way.
+ *
+ * The main data structure of the JMI Simultaneous Optimization interface is
+ * jmi_opt_sim_t. In this struct, pointers to the call-back functions for
+ * evaluation of the functions \f$f\f$, \f$g\f$, and \f$h\f$, and their
+ * derivatives, as well as for accessing sparsity information. Notice that the
+ * content of the vector \f$x\f$ is specific for a particular transcription
+ * method. A jmi_opt_sim_t struct is typically created by a corresponding
+ * create-function that is implemented by a particular implementation of a
+ * transcription method.
  *
  */
 
+/* @{ */
 #ifndef _JMI_OPT_SIM_H
 #define _JMI_OPT_SIM_H
 
 #include "jmi.h"
+
+/**
+ * \defgroup jmi_opt_sim_typedefs Typedefs
+ * \brief Typedefs for data stuctures and call-back function pointers.
+ */
+/* @{ */
 
 typedef struct jmi_opt_sim_t jmi_opt_sim_t;
 
@@ -58,6 +83,46 @@ typedef int (*jmi_opt_sim_g_nz_indices_t)(jmi_opt_sim_t *jmi_opt_sim, int *colIn
 
 typedef int (*jmi_opt_sim_write_file_matlab_t)(jmi_opt_sim_t *jmi_opt_sim, char *file_name);
 
+/* @} */
+
+/**
+ * \defgroup jmi_opt_sim_t The jmi_opt_sim_t struct, setters and getters.
+ * \brief Documentation of the jmi_opt_sim_t struct and it setters and getters.
+ */
+/* @{ */
+
+
+/**
+ * jmi_opt_sim_get_dimenstions returns the number of variables and the number of
+ * constraints, respectively, in the problem.
+ */
+int jmi_opt_sim_get_dimensions(jmi_opt_sim_t *jmi_opt_sim, int *n_x, int *n_g, int *n_h,
+		int *dg_n_nz, int *dh_n_nz);
+
+/**
+ * jmi_opt_sim_get_interval_spec returns data that specifies the optimization interval.
+ */
+int jmi_opt_sim_get_interval_spec(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *start_time, int *start_time_free,
+		jmi_real_t *final_time, int *final_time_free);
+
+/**
+ * Get the x vector.
+ * TODO: this function should return a jmi_real_t*.
+ */
+int jmi_opt_sim_get_x(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t **x);
+
+/**
+ * jmi_opt_sim_get_initial returns the initial point.
+ */
+int jmi_opt_sim_get_initial(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_init);
+
+
+/**
+ * \brief The main struct in the jmi_opt_sim interface is jmi_opt_sim_t.
+ *
+ * This struct contains a pointer to a jmi_t struct, dimension information of
+ * the NLP, and variable vectors.
+ */
 struct jmi_opt_sim_t{
 	jmi_t *jmi;                      // jmi_t struct
 	int n_x;                         // Number of variables
@@ -93,82 +158,19 @@ struct jmi_opt_sim_t{
 	jmi_opt_sim_write_file_matlab_t write_file_matlab;
 };
 
-typedef struct {
-	jmi_opt_sim_t jmi_opt_sim;
-    int n_cp;                      // Number of collocation points
-    jmi_real_t *cp;                // Collocation points for algebraic variables
-    jmi_real_t *cpp;               // Collocation points for dynamic variables
-    jmi_real_t *Lp_coeffs;               // Lagrange polynomial coefficients based on the points in cp
-    jmi_real_t *Lpp_coeffs;              // Lagrange polynomial coefficients based on the points in cp plus one more point
-    jmi_real_t *Lp_dot_coeffs;               // Lagrange polynomial derivative coefficients based on the points in cp
-    jmi_real_t *Lpp_dot_coeffs;              // Lagrange polynomial derivative coefficients based on the points in cp plus one more point
-    jmi_real_t *Lp_dot_vals;        // Values of the derivative of the Lagrange polynomials at the points in cp
-    jmi_real_t *Lpp_dot_vals;       // Values of the derivative of the Lagrange polynomials at the points in cpp
-    int der_eval_alg;                   // Evaluation algorithm used for computation of derivatives
-    int dF0_n_nz;
-    int dF_dp_n_nz;
-    int dF_ddx_dx_du_dw_n_nz;
-	int dCeq_dp_n_nz;
-	int dCeq_ddx_dx_du_dw_n_nz;
-	int dCeq_ddx_p_dx_p_du_p_dw_p_n_nz;
-	int dCineq_dp_n_nz;
-	int dCineq_ddx_dx_du_dw_n_nz;
-	int dCineq_ddx_p_dx_p_du_p_dw_p_n_nz;
-	int dHeq_dp_n_nz;
-	int dHeq_ddx_p_dx_p_du_p_dw_p_n_nz;
-	int dHineq_dp_n_nz;
-	int dHineq_ddx_p_dx_p_du_p_dw_p_n_nz;
-	int offs_p_opt;
-    int offs_dx_0;
-    int offs_x_0;
-    int offs_u_0;
-    int offs_w_0;
-    int offs_dx_coll;
-    int offs_x_coll;
-    int offs_u_coll;
-    int offs_w_coll;
-    int offs_x_el_junc;
-    int offs_dx_p;
-    int offs_x_p;
-    int offs_u_p;
-    int offs_w_p;
-    int offs_h;
-    int offs_t0;
-    int offs_tf;
-    int *der_mask;
-} jmi_opt_sim_lp_radau_t;
+/**
+ * jmi_opt_sim_get_bounds returns the upper and lower bounds on the optimization variables.
+ */
+int jmi_opt_sim_get_bounds(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_lb, jmi_real_t *x_ub);
 
-int jmi_opt_sim_lp_radau_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
-		            jmi_real_t *hs, int hs_free,
-		            jmi_real_t *p_opt_init, jmi_real_t *dx_init, jmi_real_t *x_init,
-		            jmi_real_t *u_init, jmi_real_t *w_init,
-		            jmi_real_t *p_opt_lb, jmi_real_t *dx_lb, jmi_real_t *x_lb,
-		            jmi_real_t *u_lb, jmi_real_t *w_lb, jmi_real_t t0_lb,
-		            jmi_real_t tf_lb, jmi_real_t *hs_lb,
-		            jmi_real_t *p_opt_ub, jmi_real_t *dx_ub, jmi_real_t *x_ub,
-		            jmi_real_t *u_ub, jmi_real_t *w_ub, jmi_real_t t0_ub,
-		            jmi_real_t tf_ub, jmi_real_t *hs_ub,
-		            int n_cp, int der_eval_alg);
 
-int jmi_opt_sim_lp_radau_delete(jmi_opt_sim_t *jmi_opt_sim);
+/* @} */
 
 /**
- * jmi_opt_sim_get_dimenstions returns the number of variables and the number of
- * constraints, respectively, in the problem.
+ * \defgroup jmi_opt_sim_eval_functions Evaluation of NLP functions.
+ * \brief Functions for evaluation of \f$f\f$, \f$g\f$, and \f$h\f$.
  */
-int jmi_opt_sim_get_dimensions(jmi_opt_sim_t *jmi_opt_sim, int *n_x, int *n_g, int *n_h,
-		int *dg_n_nz, int *dh_n_nz);
-
-/**
- * jmi_opt_sim_get_interval_spec returns data that specifies the optimization interval.
- */
-int jmi_opt_sim_get_interval_spec(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *start_time, int *start_time_free,
-		jmi_real_t *final_time, int *final_time_free);
-
-/**
- * Get the x vector.
- */
-int jmi_opt_sim_get_x(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t **x);
+/* @{ */
 
 /**
  * jmi_opt_sim_f returns the cost function value at a given point in search space.
@@ -215,16 +217,22 @@ int jmi_opt_sim_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac);
  */
 int jmi_opt_sim_dh_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *icol);
 
-/**
- * jmi_opt_sim_get_bounds returns the upper and lower bounds on the optimization variables.
- */
-int jmi_opt_sim_get_bounds(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_lb, jmi_real_t *x_ub);
+
+/* @} */
 
 /**
- * jmi_opt_sim_get_initial returns the initial point.
+ * \defgroup jmi_opt_sim_misc Miscanellous
+ * \brief Miscanellous functions.
  */
-int jmi_opt_sim_get_initial(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_init);
+/* @{ */
 
+
+/**
+ * Write the the optimization result to file in Matlab format.
+ */
 int jmi_opt_sim_write_file_matlab(jmi_opt_sim_t *jmi_opt_sim_t, char *file_name);
 
 #endif /* JMI_OPT_SIM_H_ */
+
+/* @} */
+/* @} */

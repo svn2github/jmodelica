@@ -1,39 +1,460 @@
+/** \file jmi_opt_sim_lp.h
+ *  \brief An implementation of a simultaneous optimization method based on
+ *  Lagrange polynomials and Radau points.
+ **/
+
+/**
+ * \defgroup jmi_opt_sim_lp JMI Simultaneous Optimization based on Lagrange \
+ * polynomials and Radau points
+ *
+ * \brief This interface provides a particular implementation of a transcription
+ * method based on Lagrange polynomials and Radau points.
+ *
+ * This implementation provides the call-back functions required by the JMI
+ * Simultaneous Optimization interface.
+ *
+ * \section jmi_opt_sim_lp_mathematical_formulation Mathematical formulation
+ *
+ * Consider the optimization problem
+ *
+ *      \f$\min_{p_{opt},u}J(p,q)\f$<br>
+ *      subject to <br>
+ *      \f$ F(p,v) = 0\f$, \f$[t_0,t_f]\f$ <br>
+ *      \f$  F_0(p,v) = 0 \f$<br>
+ *      \f$C_{eq}(p,v,q) = 0\f$, \f$[t_0,t_f]\f$ <br>
+ *      \f$C_{ineq}(p,v,q) \leq 0,\f$ \f$[t_0,t_f]\f$<br>
+ *      \f$H_{eq}(p,q) = 0\f$<br>
+ *      \f$H_{ineq}(p,q) \leq 0\f$<br>
+ *
+ * where
+ *
+ *   \f$ p = [c_i^T, c_d^T, p_i^T, p_d^T]^T \f$ <br>
+ *   \f$v = [dx^T, x^T, u^T, w^T, t]^T\f$ <br>
+ *   \f$ q = [dx(t_1)^T, x(t_1)^T, u(t_1)^T, w(t_1)^T, ...,
+ *    dx(t_{n_{tp}})^T, x(t_{n_{tp}})^T, u(t_{n_{tp}})^T, w(t_{n_{tp}})^T]^T\f$
+ *
+ * and where the initial and final times can be free or fixed respectively. For
+ * details, see the <a href="group__Jmi.html"> JMI Model interface </a> for
+ * details. Notice that the DAE initialization function \f$F_0\f$ is not
+ * included in the optimization formulation considered here.
+ *
+ * The simultaneous transcription method implemented in this interfaces is based
+ * on collocation on finite elements using Radau points. The number of elements
+ * is denoted \f$n_e\f$, the number of collocation points is denoted
+ * \f$n_c\f$ and the collocation points are denoted
+ *
+ * \f$\tau_j\in (0..1]\f$, \f$j=1..n_c\f$.
+ *
+ * Notice that since Radau points are used, one collocation
+ * point in each element is located the upper element border.
+ *
+ * The normalized element lengths \f$h_0...h_{n_e-1}\f$ fullfills the condition
+ *
+ * \f$\sum_{i=0}^{n_e-1}h_i=1\f$.
+ *
+ * The element junction times can now be written
+ *
+ * \f$t_i=t_0 + (t_f-t_0)\sum_{k=0}^{i-1}h_k\f$, \f$i=1..n_e-1\f$
+ *
+ * and the collocation point times
+ *
+ * \f$t_{i,j}=t_0 + (t_f-t_0)\left(\sum_{k=0}^{i-1}h_k + \tau_jh_i \right)\f$,
+ *    \f$i=0..n_e-1\f$, \f$j=1..n_c\f$.
+ *
+ * \subsection jmi_opt_sim_lp_vars NLP variables
+ *
+ * At the initial point \f$t_0\f$, introduce the variables
+ *
+ * \f$ \dot x_{0,0}, x_{0,0}, u_{0,0}, w_{0,0}\f$,
+ *
+ * at the collocation points
+ *
+ * \f$ \dot x_{i,j}, x_{i,j}, u_{i,j}, w_{i,j}\f$,
+ *    \f$i=0..n_e-1\f$, \f$j=1..n_c\f$,
+ *
+ * and at the element junction points \f$t_i\f$
+ *
+ * \f$x_{i,0}\f$, \f$i=1..n_e\f$.
+ *
+ * At the interpolation time points, the variables
+ *
+ * \f$ \dot x^p_i, x^p_i, u^p_i, w^p_i\f$, \f$ i\in 1..n_{tp} \f$
+ *
+ * are defined. In addition, the parameters \f$p_{opt}\f$ are free variables in
+ * the optimization, as may be the initial and final times.
+ *
+ * The vector of algebraic variables of the NLP is then defined as
+ *
+ * \f$
+ *   \bar x=\left[
+ *   \begin{array}{l}
+ *     p^{opt}_1 \\
+ *     \vdots\\
+ *     p^{opt}_{n_{p^{opt}}} \\
+ *     \dot x_{0,0}\\
+ *     x_{0,0}\\
+ *     u_{0,0}\\
+ *     w_{0,0}\\
+ *     \dot x_{0,1}\\
+ *     x_{0,1}\\
+ *     u_{0,1}\\
+ *     w_{0,1}\\
+ *     \vdots\\
+ *     \dot x_{0,n_c}\\
+ *     x_{0,n_c}\\
+ *     u_{0,n_c}\\
+ *     w_{0,n_c}\\
+ *     \vdots\\
+ *     \dot x_{n_e-1,n_c}\\
+ *     x_{n_e-1,n_c}\\
+ *     u_{n_e-1,n_c}\\
+ *     w_{n_e-1,n_c}\\
+ *     x_{1,0}\\
+ *     \vdots\\
+ *     x_{n_e,0}\\
+ *     \dot x^p_1\\
+ *     x^p_1\\
+ *     u^p_1\\
+ *     w^p_1\\
+ *     \vdots\\
+ *     \dot x^p_{n_{tp}}\\
+ *     x^p_{n_{tp}}\\
+ *     u^p_{n_{tp}}\\
+ *     w^p_{n_{tp}}\\
+ *     t_0\\
+ *     t_f
+ *   \end{array}
+ *   \right]
+ *  \f$
+ *
+ * where the two last elements are optional.
+ *
+ *  In total, this gives
+ *
+ *  \f$ n_{\bar x} = n_{p^{opt}} + (2n_x + n_u + n_w)(n_en_c + 1 + n_{tp})
+ *    n_xn_e + n_e + 2 \f$
+ *
+ * variables in the NLP, assuming that \f$n_{\dot x}=n_x\f$.
+ *
+ * \subsection jmi_opt_sim_lp_constr Equality constraints representing the DAE
+ *
+ * A the initial point the relation
+ *
+ * \f$F_0(p,v_{0,0})=0\f$ ,  \f$v_{0,0} = [\dot x_{0,0}^T, x_{0,0}^T, u_{0,0}^T,
+ *   w_{0,0}^T, t_{0}]^T\f$ <br>
+ *
+ * defines the initial variables. In total this gives \f$2n_x+n_w\f$ equality
+ * constraints under normal assumptions. At the collocation points, the DAE
+ * residual function gives the relations
+ *
+ * \f$F(p,v_{i,j})=0\f$, \f$v_{i,j} = [\dot x_{i,j}^T, x_{i,j}^T, u_{i,j}^T,
+ *   w_{i,j}^T, t_{i,j}]^T.\f$
+ *
+ * This gives \f$(n_x+n_w)n_en_c\f$ equality constraints. In order to ensure
+ * continuity of the differentiated \f$x\f$ variables, the relations
+ *
+ * \f$x_{i,n_c}-x_{i+1,0}=0\f$, \f$i=0..n_e-1\f$
+ *
+ * are introduced. This gives \f$n_en_x\f$ equality constraints. In order to
+ * provide an equation for \f$u_{0,0}\f$, the following residual is introduced
+ *
+ * \f$^{u}r_{0,0}= u_{0,0} -
+ *   \sum_{k=1}^{n_c}u_{0,k}L_k^{n_c}(0)\f$<br>
+ *
+ * where \f$L_k^{n_c}\f$ are Lagrange polynomials of order \f$n_c-1\f$ based
+ * on the points \f$[\tau_1..\tau_{n_c}]\f$. This gives \f$n_u\f$ additional
+ * equality constraints. In each finite element, the differentiated variables
+ * are approximated by
+ *
+ * \f$x(t) = \sum_{k=0}^{n_c}x_{i,k}L_k^{n_c+1}
+ *   \left(\frac{t-t_i}{h_i(t_f-t_0)}\right)\f$, \f$t\in[t_i,t_{i+1}]\f$
+ *
+ * where \f$L_k^{n_c+1}(\tau)\f$ are Lagrange polynomials of order \f$n_c\f$
+ * which are computed based on the points \f$[\tau_0...\tau_{n_c}]\f$,
+ * with \f$\tau_0=0\f$. Accordingly, the residual relations for the derivatives
+ * \f$\dot x_{i,j} \f$ are written
+ *
+ * \f$^{\dot x}r_{i,j}=\dot x_{i,j} - \frac{1}{h_i(t_f-t_0)}\sum_{k=0}^{n_c}
+ *   x_{i,k} \dot L_k^{n_c+1}(\tau_j)\f$=0, \f$i=0..n_e-1\f$, \f$j=1..n_c\f$,
+ *
+ * which gives \f$(n_x+n_w)n_en_c\f$ equality constraints. As for the additional
+ * time points included in the problem, the following residuals are defined:
+ *
+ * \f$^{\dot x}r_{l}^p= \dot x_l^p - \frac{1}{h_{i_l}(t_f-t_0)}
+ *   \sum_{k=0}^{n_c}x_{i_l,k}\dot L_k^{n_c+1}(\tau_l)\f$,
+ *   \f$l=1..n_{tp}\f$<br>
+ * \f$^{x}r_{l}^p= x_l^p -
+ *   \sum_{k=0}^{n_c}x_{i_l,k}L_k^{n_c+1}(\tau_l)\f$,
+ *   \f$l=1..n_{tp}\f$<br>
+ * \f$^{u}r_{l}^p= u_l^p -
+ *   \sum_{k=1}^{n_c}u_{i_l,k}L_k^{n_c}(\tau_l)\f$,
+ *   \f$l=1..n_{tp}\f$<br>
+ * \f$^{w}r_{l}^p= w_l^p -
+ *   \sum_{k=1}^{n_c}w_{i_l,k}L_k^{n_c}(\tau_l)\f$,
+ *   \f$l=1..n_{tp}\f$<br>
+ *
+ * where \f$i_l\f$ are the indices of the elements in which the respective
+ * interpolation points reside and \f$\tau_l\f$ are the respective locations
+ * within the intervals. This gives \f$(2n_x+n_u+n_w)n_{tp}\f$
+ * equality constraints.
+ *
+ * The number of equality constraints is
+ *
+ * \f$2n_x+n_w+(n_x+n_w)n_en_c + n_xn_e + n_u + n_xn_en_c +
+ *   (2n_x+n_u+n_w)n_{tp}\f$
+ *
+ * and the number of free variables when considering the total number of
+ * variables and the number of equality constraints deriving from the DAE
+ * constraint is then
+ *
+ * \f$n_{p^{opt}} + n_un_en_c + 2\f$
+ *
+ * which corresponds the number of free optimization parameters, the input
+ * profile and, optionally, the free initial and terminal points.
+ * \section jmi_opt_sim_lp_create Creation of a jmi_opt_sim_t struct
+ *
+ * \subsection jmi_opt_sim_nlp The NLP problem
+ *
+ * Based on the above collocation formulation, the optimization problem may
+ * be cast as an NPL
+ *
+ * \f$
+ *   \min f(\bar x)
+ * \f$
+ *
+ *   subject to
+ *
+ * \f$ g(\bar x) \leq 0\f$<br>
+ * \f$  h(\bar x) = 0 \f$
+ *
+ * where \f$x\in R^{n_{\bar x}}\f$, \f$g\in n_g\f$ and \f$h \in n_h\f$ and
+ *
+ * \f$
+ * f(\bar x) = J(\bar x)
+ * \f$
+ *
+ * \f$
+ * h(\bar x) = \left[ \begin{array}{l}
+ *                      F_0(p,v_{0,0}) \\
+ *                      F(p,v_{0,1}) \\
+ *                      \vdots\\
+ *                      F(p,v_{0,n_c})\\
+ *                      \vdots\\
+ *                      F(p,v_{n_e-1,n_c})\\
+ *                      x_{0,n_c}-x_{1,0}\\
+ *                      \vdots \\
+ *                      x_{n_e-1,n_c}-x_{n_e,0} \\
+ *                      ^{u}r_{0,0} \\
+ *                      ^{\dot x}r_{0,1}\\
+ *                      \vdots\\
+ *                      ^{\dot x}r_{0,n_c}\\
+ *                      \vdots\\
+ *                      ^{\dot x}r_{n_e-1,n_c}\\
+ *                      ^{\dot x}r_{1}^p\\
+ *                      ^{x}r_{1}^p\\
+ *                      ^{u}r_{1}^p\\
+ *                      ^{w}r_{1}^p\\
+ *                      \vdots\\
+ *                      ^{\dot x}r_{n_{tp}}^p\\
+ *                      ^{x}r_{n_{tp}}^p\\
+ *                      ^{u}r_{n_{tp}}^p\\
+ *                      ^{w}r_{n_{tp}}^p\\
+ *                      C_{eq}(p,v_{0,1},q)\\
+ *                      \vdots\\
+ *                      C_{eq}(p,v_{0,n_c},q)\\
+ *                      \vdots\\
+ *                      C_{eq}(p,v_{n_e-1,n_c},q)\\
+ *                      H_{eq}(p,q)
+ *                      \end{array}
+ *             \right]
+ * \f$
+ *
+ * Notice that the path and point equality constraints \f$C_{eq}\f$ and
+ * \f$H_{eq}\f$ has been introduced. Further, the inequality constraints are
+ * defined as
+ *
+ * \f$
+ * g(\bar x) = \left[ \begin{array}{l}
+ *                      C_{ineq}(p,v_{0,1},q)\\
+ *                      \vdots\\
+ *                      C_{ineq}(p,v_{0,n_c},q)\\
+ *                      \vdots\\
+ *                      C_{ineq}(p,v_{n_e-1,n_c},q)\\
+ *                      H_{ineq}(p,q)
+ *                      \end{array}
+ *             \right]
+ * \f$
+ *
+ * \subsection jmi_opt_sim_jac Jacobians
+ *
+ * \f$
+ *   \frac{\partial h}{\partial\bar x}=
+ *     \left[
+ *         \begin{array}{c cccc cccc c cccc c cccc ccc cccc}
+ *           \frac{\partial F_0}{\partial p^{opt}} &
+ *           \frac{\partial F_0}{\partial \dot x_{0,0}} &
+ *           \frac{\partial F_0}{\partial x_{0,0}} &
+ *           \frac{\partial F_0}{\partial u_{0,0}} &
+ *           \frac{\partial F_0}{\partial w_{0,0}} & &&& \\
+ *           \frac{\partial F}{\partial p^{opt}} & &&&&
+ *           \frac{\partial F}{\partial \dot x_{0,1}} &
+ *           \frac{\partial F}{\partial x_{0,1}} &
+ *           \frac{\partial F}{\partial u_{0,1}} &
+ *           \frac{\partial F}{\partial w_{0,1}}  \\
+ *           & &&&& &&&& \ddots &&& \\
+ *           \frac{\partial F}{\partial p^{opt}} & &&&& & &&&&
+ *           \frac{\partial F}{\partial \dot x_{0,n_c}} &
+ *           \frac{\partial F}{\partial x_{0,n_c}} &
+ *           \frac{\partial F}{\partial u_{0,n_c}} &
+ *           \frac{\partial F}{\partial w_{0,n_c}}  \\
+ *           & &&&& &&&& & &&&& \ddots &&& \\
+ *           \frac{\partial F}{\partial p^{opt}} & &&&& & &&&& & &&&&
+ *           \frac{\partial F}{\partial \dot x_{n_e-1,n_c}} &
+ *           \frac{\partial F}{\partial x_{n_e-1,n_c}} &
+ *           \frac{\partial F}{\partial u_{n_e-1,n_c}} &
+ *           \frac{\partial F}{\partial w_{n_e-1,n_c}}  \\
+ *           & &&&& &&&& & &I&&& & &&&&  -I&\\
+ *           & &&&& &&&& & &&&& \ddots &&&& && \ddots \\
+ *           & &&&& &&&& & &&&& & &I&&& & & -I\\
+ *           & &&I&&
+ *           &&-\frac{\partial ^{u}r_{0,0}}{\partial u_{0,1}} && &
+ *           &&-\frac{\partial ^{u}r_{0,n_c}}{\partial u_{0,n_c}} & \\
+ *           & &-\frac{\partial ^{x}r_{0,1}}{\partial x_{0,0}}&
+ *           && I & -\frac{\partial ^{x}r_{0,1}}{\partial x_{0,1}} &&& &
+ *           &-\frac{\partial ^{x}r_{0,1}}{\partial x_{0,n_c}} &&& & &&&& \\
+ *           & &&&& &&&& \ddots &&& \\
+ *           & &-\frac{\partial ^{x}r_{0,n_c}}{\partial x_{0,0}}
+ *           &&&  & -\frac{\partial ^{x}r_{0,n_c}}{\partial x_{0,1}} &&& &
+ *           I&-\frac{\partial ^{x}r_{0,n_c}}{\partial x_{0,n_c}} &&& & &&&& \\
+ *           & &&&& &&&& & &&&& \ddots &&&& && \ddots \\
+ *           & &&&& &&&& & &&&& & I &-\frac{\partial ^{x}r_{n_e-1,n_c}}
+ *             {\partial x_{n_e-1,n_c}}
+ *           &&&& -\frac{\partial ^{x}r_{n_e-1,n_c}}{\partial x_{n_e-1,0}}\\
+ *           & &-\frac{\partial ^{\dot x^p}r_{1}}{\partial x_{i_1,0}}&
+ *           &&  & -\frac{\partial ^{\dot x^p}r_{1}}{\partial x_{i_1,1}} &&& &
+ *           &-\frac{\partial ^{\dot x^p}r_{1}}{\partial x_{i_1,n_c}} &&& &
+ *           &&&& &&& I\\
+ *           & &-\frac{\partial ^{x^p}r_{1}}{\partial x_{i_1,0}}&
+ *           &&  & -\frac{\partial ^{x^p}r_{1}}{\partial x_{i_1,1}} &&& &
+ *           &-\frac{\partial ^{x^p}r_{1}}{\partial x_{i_1,n_c}} &&& &
+ *           &&&& &&&&I\\
+ *           & &&&&  & &-\frac{\partial ^{u^p}r_{1}}{\partial u_{i_1,1}} && &
+ *           &&-\frac{\partial ^{u^p}r_{1}}{\partial u_{i_1,n_c}} && &
+ *           &&&& &&&&&I\\
+ *           & &&&&  & &&-\frac{\partial ^{w^p}r_{1}}{\partial w_{i_1,1}} & &
+ *           &&&-\frac{\partial ^{w^p}r_{1}}{\partial w_{i_1,n_c}} & &
+ *           &&&& &&&&&&I\\
+ *         \end{array}
+ *     \right]
+ * \f$
+ * To be completed...
+ *
+ * \subsection jmi_opt_sim_jac Hessian of the Lagrangian
+ *
+ *
+ */
+
+/* @{ */
+
 
 #ifndef _JMI_OPT_SIM_LP_H
 #define _JMI_OPT_SIM_LP_H
 
 #include <math.h>
 #include "jmi.h"
+#include "jmi_opt_sim.h"
+
+typedef struct {
+	jmi_opt_sim_t jmi_opt_sim;
+    int n_cp;                      // Number of collocation points
+    jmi_real_t *cp;                // Collocation points for algebraic variables
+    jmi_real_t *cpp;               // Collocation points for dynamic variables
+    jmi_real_t *Lp_coeffs;               // Lagrange polynomial coefficients based on the points in cp
+    jmi_real_t *Lpp_coeffs;              // Lagrange polynomial coefficients based on the points in cp plus one more point
+    jmi_real_t *Lp_dot_coeffs;               // Lagrange polynomial derivative coefficients based on the points in cp
+    jmi_real_t *Lpp_dot_coeffs;              // Lagrange polynomial derivative coefficients based on the points in cp plus one more point
+    jmi_real_t *Lp_dot_vals;        // Values of the derivative of the Lagrange polynomials at the points in cp
+    jmi_real_t *Lpp_dot_vals;       // Values of the derivative of the Lagrange polynomials at the points in cpp
+    int der_eval_alg;                   // Evaluation algorithm used for computation of derivatives
+    int dF0_n_nz;
+    int dF_dp_n_nz;
+    int dF_ddx_dx_du_dw_n_nz;
+	int dCeq_dp_n_nz;
+	int dCeq_ddx_dx_du_dw_n_nz;
+	int dCeq_ddx_p_dx_p_du_p_dw_p_n_nz;
+	int dCineq_dp_n_nz;
+	int dCineq_ddx_dx_du_dw_n_nz;
+	int dCineq_ddx_p_dx_p_du_p_dw_p_n_nz;
+	int dHeq_dp_n_nz;
+	int dHeq_ddx_p_dx_p_du_p_dw_p_n_nz;
+	int dHineq_dp_n_nz;
+	int dHineq_ddx_p_dx_p_du_p_dw_p_n_nz;
+	int offs_p_opt;
+    int offs_dx_0;
+    int offs_x_0;
+    int offs_u_0;
+    int offs_w_0;
+    int offs_dx_coll;
+    int offs_x_coll;
+    int offs_u_coll;
+    int offs_w_coll;
+    int offs_x_el_junc;
+    int offs_dx_p;
+    int offs_x_p;
+    int offs_u_p;
+    int offs_w_p;
+    int offs_h;
+    int offs_t0;
+    int offs_tf;
+    int *der_mask;
+} jmi_opt_sim_lp_t;
+
+int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
+		            jmi_real_t *hs, int hs_free,
+		            jmi_real_t *p_opt_init, jmi_real_t *dx_init, jmi_real_t *x_init,
+		            jmi_real_t *u_init, jmi_real_t *w_init,
+		            jmi_real_t *p_opt_lb, jmi_real_t *dx_lb, jmi_real_t *x_lb,
+		            jmi_real_t *u_lb, jmi_real_t *w_lb, jmi_real_t t0_lb,
+		            jmi_real_t tf_lb, jmi_real_t *hs_lb,
+		            jmi_real_t *p_opt_ub, jmi_real_t *dx_ub, jmi_real_t *x_ub,
+		            jmi_real_t *u_ub, jmi_real_t *w_ub, jmi_real_t t0_ub,
+		            jmi_real_t tf_ub, jmi_real_t *hs_ub,
+		            int n_cp, int der_eval_alg);
+
+int jmi_opt_sim_lp_delete(jmi_opt_sim_t *jmi_opt_sim);
+
+
+
 // Radau points
 
-static jmi_real_t jmi_opt_sim_lp_radau_1[1] = {1.0000000000000000e+000};
+static jmi_real_t jmi_opt_sim_lp_1[1] = {1.0000000000000000e+000};
 
-static jmi_real_t jmi_opt_sim_lp_radau_2[2] = {3.3333333333333337e-001,
+static jmi_real_t jmi_opt_sim_lp_2[2] = {3.3333333333333337e-001,
                                                1.0000000000000000e+000};
 
-static jmi_real_t jmi_opt_sim_lp_radau_3[3] = {1.5505102572168217e-001,
+static jmi_real_t jmi_opt_sim_lp_3[3] = {1.5505102572168217e-001,
                                                6.4494897427831788e-001,
                                                1.0000000000000000e+000};
 
-static jmi_real_t jmi_opt_sim_lp_radau_4[4] = {8.8587959512703929e-002,
+static jmi_real_t jmi_opt_sim_lp_4[4] = {8.8587959512703929e-002,
                                                4.0946686444073477e-001,
                                                7.8765946176084722e-001,
                                                1.0000000000000000e+000};
 
-static jmi_real_t jmi_opt_sim_lp_radau_5[5] = {5.7104196114518224e-002,
+static jmi_real_t jmi_opt_sim_lp_5[5] = {5.7104196114518224e-002,
                                                2.7684301363812369e-001,
                                                5.8359043236891683e-001,
                                                8.6024013565621915e-001,
                                                1.0000000000000000e+000};
 
-static jmi_real_t jmi_opt_sim_lp_radau_6[6] = {3.9809857051469333e-002,
+static jmi_real_t jmi_opt_sim_lp_6[6] = {3.9809857051469333e-002,
                                                1.9801341787360782e-001,
                                                4.3797481024738605e-001,
                                                6.9546427335363603e-001,
                                                9.0146491420117336e-001,
                                                1.0000000000000000e+000};
 
-static jmi_real_t jmi_opt_sim_lp_radau_7[7] = {2.9316427159785663e-002,
+static jmi_real_t jmi_opt_sim_lp_7[7] = {2.9316427159785663e-002,
                                                1.4807859966848447e-001,
                                                3.3698469028115419e-001,
                                                5.5867151877155008e-001,
@@ -41,7 +462,7 @@ static jmi_real_t jmi_opt_sim_lp_radau_7[7] = {2.9316427159785663e-002,
                                                9.2694567131974170e-001,
                                                1.0000000000000000e+000};
 
-static jmi_real_t jmi_opt_sim_lp_radau_8[8] = {2.2479386438713611e-002,
+static jmi_real_t jmi_opt_sim_lp_8[8] = {2.2479386438713611e-002,
                                                1.1467905316090432e-001,
                                                2.6578982278458951e-001,
                                                4.5284637366944469e-001,
@@ -50,7 +471,7 @@ static jmi_real_t jmi_opt_sim_lp_radau_8[8] = {2.2479386438713611e-002,
                                                9.4373743946307775e-001,
                                                1.0000000000000000e+000};
 
-static jmi_real_t jmi_opt_sim_lp_radau_9[9] = {1.7779915147364544e-002,
+static jmi_real_t jmi_opt_sim_lp_9[9] = {1.7779915147364544e-002,
                                                9.1323607899792103e-002,
                                                2.1430847939563114e-001,
                                                3.7193216458327227e-001,
@@ -60,7 +481,7 @@ static jmi_real_t jmi_opt_sim_lp_radau_9[9] = {1.7779915147364544e-002,
                                                9.5536604471002917e-001,
                                                1.0000000000000000e+000};
 
-static jmi_real_t jmi_opt_sim_lp_radau_10[10] = {1.4412409648876801e-002,
+static jmi_real_t jmi_opt_sim_lp_10[10] = {1.4412409648876801e-002,
                                                7.4387389709196450e-002,
                                                1.7611665616299321e-001,
                                                3.0966757992763827e-001,
@@ -74,34 +495,34 @@ static jmi_real_t jmi_opt_sim_lp_radau_10[10] = {1.4412409648876801e-002,
 // Lagrange polynomial coefficients. Lagrange polynomials based on
 // Radau points. The first index denotes polynomial
 // and the second index denotes coefficient.
-static jmi_real_t jmi_opt_sim_lp_radau_coeffs_1[1][1] = {{1.0000000000000000e+000}};
+static jmi_real_t jmi_opt_sim_lp_coeffs_1[1][1] = {{1.0000000000000000e+000}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_coeffs_2[2][2] = {{-1.5000000000000000e+000, 1.5000000000000000e+000},
+static jmi_real_t jmi_opt_sim_lp_coeffs_2[2][2] = {{-1.5000000000000000e+000, 1.5000000000000000e+000},
                                                    {1.5000000000000000e+000, -5.0000000000000011e-001}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_coeffs_3[3][3] = {{2.4158162379719630e+000, -3.9738944426968859e+000, 1.5580782047249224e+000},
+static jmi_real_t jmi_opt_sim_lp_coeffs_3[3][3] = {{2.4158162379719630e+000, -3.9738944426968859e+000, 1.5580782047249224e+000},
                                                    {-5.7491495713052974e+000, 6.6405611093635519e+000, -8.9141153805825557e-001},
                                                    {3.3333333333333339e+000, -2.6666666666666674e+000, 3.3333333333333337e-001}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_coeffs_4[4][4] = {{-4.8912794196729017e+000, 1.0746758781771328e+001, -7.4330170018726225e+000, 1.5775376397741954e+000},
+static jmi_real_t jmi_opt_sim_lp_coeffs_4[4][4] = {{-4.8912794196729017e+000, 1.0746758781771328e+001, -7.4330170018726225e+000, 1.5775376397741954e+000},
                                                    {1.3954090584570253e+001, -2.6181326475517480e+001, 1.3200912486148248e+001, -9.7367659520102201e-001},
                                                    {-1.7812811164897361e+001, 2.6684567693746160e+001, -9.5178954842756305e+000, 6.4613895542682664e-001},
                                                    {8.7500000000000071e+000, -1.1250000000000011e+001, 3.7500000000000040e+000, -2.5000000000000022e-001}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_coeffs_5[5][5] = {{1.1414409029082462e+001, -3.1054881095723236e+001, 2.9933327727048070e+001, -1.1879263560593634e+001, 1.5864079001863365e+000},
+static jmi_real_t jmi_opt_sim_lp_coeffs_5[5][5] = {{1.1414409029082462e+001, -3.1054881095723236e+001, 2.9933327727048070e+001, -1.1879263560593634e+001, 1.5864079001863365e+000},
                                                    {-3.5165389444477917e+001, 8.7946344956204456e+001, -7.3334306169638353e+001, 2.1561468539410203e+001, -1.0081178814983849e+000},
                                                    {5.3750332212318270e+001, -1.1793829875179102e+002, 8.0478815606138582e+001, -1.7021823932825626e+001, 7.3097486615979501e-001},
                                                    {-5.5199351796922784e+001, 1.0584683489130974e+002, -6.2277837163548270e+001, 1.2139618954009054e+001, -5.0926488484774746e-001},
                                                    {2.5199999999999957e+001, -4.4799999999999926e+001, 2.5199999999999971e+001, -4.7999999999999998e+000, 2.0000000000000140e-001}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_coeffs_6[6][6] = {{-2.9265438774851106e+001, 9.4612746692610102e+001, -1.1595572961240211e+002, 6.6330337221894737e+001, -1.7313107012600927e+001, 1.5911914853493199e+000},
+static jmi_real_t jmi_opt_sim_lp_coeffs_6[6][6] = {{-2.9265438774851106e+001, 9.4612746692610102e+001, -1.1595572961240211e+002, 6.6330337221894737e+001, -1.7313107012600927e+001, 1.5911914853493199e+000},
                                                    {9.3862243458277021e+001, -2.8859954040881206e+002, 3.2683532366348646e+002, -1.6282705310569230e+002, 3.1755042868352419e+001, -1.0260164756115300e+000},
                                                    {-1.5604141784878010e+002, 4.4233879349568235e+002, -4.4461800568958944e+002, 1.8355073841348266e+002, -2.6001275978573837e+001, 7.7116760777840010e-001},
                                                    {1.8980539155673600e+002, -4.8917841274080098e+002, 4.3627049246594476e+002, -1.5672374153332311e+002, 2.0417003947766275e+001, -5.9073369632294026e-001},
                                                    {-1.7536077839138161e+002, 4.1582641296132016e+002, -3.4253208082743930e+002, 1.1633638567030457e+002, -1.4690997158277259e+001, 4.2105774547341840e-001},
                                                    {7.6999999999999829e+001, -1.7499999999999960e+002, 1.3999999999999969e+002, -4.6666666666666586e+001, 5.8333333333333313e+000, -1.6666666666666832e-001}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_coeffs_7[7][7] = {{8.0192571118313495e+001, -2.9991334685292816e+002, 4.4460407199704997e+002, -3.3044796361162071e+002, 1.2770531294598710e+002, -2.3734709815362727e+001, 1.5940642185610621e+000},
+static jmi_real_t jmi_opt_sim_lp_coeffs_7[7][7] = {{8.0192571118313495e+001, -2.9991334685292816e+002, 4.4460407199704997e+002, -3.3044796361162071e+002, 1.2770531294598710e+002, -2.3734709815362727e+001, 1.5940642185610621e+000},
                                                    {-2.6339129063052809e+002, 9.5377994351054747e+002, -1.3479394370610592e+003, 9.2856101230388219e+002, -3.1376478422401482e+002, 4.3791109853368695e+001, -1.0365537521965111e+000},
                                                    {4.5903989725135960e+002, -1.5755378874224139e+003, 2.0644088105172696e+003, -1.2704932284472864e+003, 3.5833018973664207e+002, -3.6541603359061675e+001, 7.9382172349081681e-001},
                                                    {-6.0643975001337481e+002, 1.9470107492516181e+003, -2.3409775958036103e+003, 1.2896754064093068e+003, -3.1850024808583032e+002, 2.9864015894140881e+001, -6.3257765224995144e-001},
@@ -109,7 +530,7 @@ static jmi_real_t jmi_opt_sim_lp_radau_coeffs_7[7][7] = {{8.0192571118313495e+00
                                                    {-5.7139306776585136e+002, 1.6240620015605462e+003, -1.7251512562208927e+003, 8.4827888834265218e+002, -1.9265170744622640e+002, 1.7214363923837649e+001, -3.5922239406557838e-001},
                                                    {2.4514285714285938e+002, -6.7885714285714948e+002, 7.0714285714286450e+002, -3.4285714285714681e+002, 7.7142857142858176e+001, -6.8571428571429820e+000, 1.4285714285714821e-001}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_coeffs_8[8][8] = {{-2.3085816523143205e+002, 9.7980528841200726e+002, -1.7017155453484520e+003, 1.5528919867039876e+003, -7.9381355971280118e+002, 2.2323821096678063e+002, -3.1144139898169112e+001, 1.5959241080787296e+000},
+static jmi_real_t jmi_opt_sim_lp_coeffs_8[8][8] = {{-2.3085816523143205e+002, 9.7980528841200726e+002, -1.7017155453484520e+003, 1.5528919867039876e+003, -7.9381355971280118e+002, 2.2323821096678063e+002, -3.1144139898169112e+001, 1.5959241080787296e+000},
                                                    {7.6990929430945539e+002, -3.1966538534958222e+003, 5.3820668269752132e+003, -4.6892414237820230e+003, 2.2260191874091715e+003, -5.4873006841358756e+002, 5.7673331484963498e+001, -1.0432944873711927e+000},
                                                    {-1.3819003387178520e+003, 5.5288130657290540e+003, -8.8486869508107193e+003, 7.1725913980153782e+003, -3.0542660859921375e+003, 6.3131054228954622e+002, -4.8669590446175924e+001, 8.0795993290659407e-001},
                                                    {1.9160856046504819e+003, -7.3076061621358622e+003, 1.0997549563995894e+004, -8.2260511127470436e+003, 3.1531186006670528e+003, -5.7306888079470639e+002, 4.0629916197779259e+001, -6.5752983359440687e-001},
@@ -118,7 +539,7 @@ static jmi_real_t jmi_opt_sim_lp_radau_coeffs_8[8][8] = {{-2.3085816523143205e+0
                                                    {-1.9031148339559459e+003, 6.3239159044769194e+003, -8.2418078904668564e+003, 5.3387503343236776e+003, -1.7933157052920315e+003, 2.9498279926294117e+002, -1.9723984006566734e+001, 3.1337565786239047e-001},
                                                    {8.0437500000000000e+002, -2.6276250000000009e+003, 3.3783750000000036e+003, -2.1656250000000045e+003, 7.2187500000000250e+002, -1.1812500000000081e+002, 7.8750000000001226e+000, -1.2500000000000627e-001}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_coeffs_9[9][9] = {{6.9035610596344168e+002, -3.2770693260167855e+003, 6.5204215834559491e+003, -7.0475272864594044e+003, 4.4797768814512046e+003, -1.6915350697083597e+003, 3.6352134388950219e+002, -3.9541429729042932e+001, 1.5971971534948577e+000},
+static jmi_real_t jmi_opt_sim_lp_coeffs_9[9][9] = {{6.9035610596344168e+002, -3.2770693260167855e+003, 6.5204215834559491e+003, -7.0475272864594044e+003, 4.4797768814512046e+003, -1.6915350697083597e+003, 3.6352134388950219e+002, -3.9541429729042932e+001, 1.5971971534948577e+000},
                                                    {-2.3263571802094007e+003, 1.0871956410037421e+004, -2.1175949197701568e+004, 2.2205512776736006e+004, -1.3490283295360343e+004, 4.7365459030300126e+003, -8.9378092696401268e+002, 7.3403382769901526e+001, -1.0478723380169714e+000},
                                                    {4.2585922385047588e+003, -1.9378287062346204e+004, 3.6428947745068937e+004, -3.6382124712903074e+004, 2.0610317460680191e+004, -6.5089246994037312e+003, 1.0330579105619711e+003, -6.2396293547195256e+001, 8.1741338434516597e-001},
                                                    {-6.0920503037760363e+003, 2.6760998461758096e+004, -4.8100379751692068e+004, 4.5323902440857652e+004, -2.3780141942999100e+004, 6.7852307504230102e+003, -9.4965008810488280e+002, 5.2764208365108296e+001, -6.7377483177517394e-001},
@@ -128,7 +549,7 @@ static jmi_real_t jmi_opt_sim_lp_radau_coeffs_9[9][9] = {{6.9035610596344168e+00
                                                    {-6.4562077704612957e+003, 2.4593889460117935e+004, -3.8027695385670835e+004, 3.0662281111681576e+004, -1.3773001370799277e+004, 3.4058589251527346e+003, -4.2707286729404609e+002, 2.2225883153668043e+001, -2.7798588046056610e-001},
                                                    {2.7011111111110486e+003, -1.0168888888888650e+004, 1.5571111111110742e+004, -1.2456888888888589e+004, 5.5611111111109758e+003, -1.3688888888888555e+003, 1.7111111111110691e+002, -8.8888888888886992e+000, 1.1111111111111326e-001}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_coeffs_10[10][10] = {{-2.1277026297225334e+003, 1.1167769571365932e+004, -2.5035524039945296e+004, 3.1258288058660295e+004, -2.3757874060982482e+004, 1.1277614817081801e+004, -3.2958025830234674e+003, 5.6055935626122027e+002, -4.8926596413450824e+001, 1.5981067179821966e+000},
+static jmi_real_t jmi_opt_sim_lp_coeffs_10[10][10] = {{-2.1277026297225334e+003, 1.1167769571365932e+004, -2.5035524039945296e+004, 3.1258288058660295e+004, -2.3757874060982482e+004, 1.1277614817081801e+004, -3.2958025830234674e+003, 5.6055935626122027e+002, -4.8926596413450824e+001, 1.5981067179821966e+000},
                                                    {7.2230802184581680e+003, -3.7478905592984374e+004, 8.2748518314995556e+004, -1.0118444551157250e+005, 7.4655257871957641e+004, -3.3894000472151369e+004, 9.2190144427509385e+003, -1.3784502682071529e+003, 9.0982122231763540e+001, -1.0511254786987225e+000},
                                                    {-1.3406900863964809e+004, 6.8201457576460336e+004, -1.4675451862998525e+005, 1.7338976337585752e+005, -1.2200299099283923e+005, 5.1732353023571508e+004, -1.2680473303114741e+004, 1.5982127985563202e+003, -7.7727045637454566e+001, 8.2406109581602793e-001},
                                                    {1.9595521595582726e+004, -9.7066226437353573e+004, 2.0199396598781069e+005, -2.2865181509782263e+005, 1.5214608776568013e+005, -5.9902317362824375e+004, 1.3300500349208893e+004, -1.4813200470578699e+003, 6.6288249869053033e+001, -6.8500309307884766e-001},
@@ -139,34 +560,34 @@ static jmi_real_t jmi_opt_sim_lp_radau_coeffs_10[10][10] = {{-2.1277026297225334
                                                    {-2.2241332186509251e+004, 9.5624732961073256e+004, -1.7122660765914031e+005, 1.6550303982850633e+005, -9.3553143329623301e+004, 3.1305483391902333e+004, -5.9803570969146822e+003, 5.9265728680529458e+002, -2.4723018496556413e+001, 2.4982239686837665e-001},
                                                    {9.2377999999998556e+003, -3.9382199999999371e+004, 7.0012799999998839e+004, -6.7267199999998833e+004, 3.7837799999999312e+004, -1.2612599999999760e+004, 2.4023999999999528e+003, -2.3759999999999545e+002, 9.8999999999998369e+000, -9.9999999999999561e-002}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_coeffs_1[1][1] = {{0.0000000000000000e+000}};
+static jmi_real_t jmi_opt_sim_lp_dot_coeffs_1[1][1] = {{0.0000000000000000e+000}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_coeffs_2[2][2] = {{0.0000000000000000e+000, -1.5000000000000000e+000},
+static jmi_real_t jmi_opt_sim_lp_dot_coeffs_2[2][2] = {{0.0000000000000000e+000, -1.5000000000000000e+000},
                                                        {0.0000000000000000e+000, 1.5000000000000000e+000}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_coeffs_3[3][3] = {{0.0000000000000000e+000, 4.8316324759439260e+000, -3.9738944426968859e+000},
+static jmi_real_t jmi_opt_sim_lp_dot_coeffs_3[3][3] = {{0.0000000000000000e+000, 4.8316324759439260e+000, -3.9738944426968859e+000},
                                                        {0.0000000000000000e+000, -1.1498299142610595e+001, 6.6405611093635519e+000},
                                                        {0.0000000000000000e+000, 6.6666666666666679e+000, -2.6666666666666674e+000}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_coeffs_4[4][4] = {{0.0000000000000000e+000, -1.4673838259018705e+001, 2.1493517563542657e+001, -7.4330170018726225e+000},
+static jmi_real_t jmi_opt_sim_lp_dot_coeffs_4[4][4] = {{0.0000000000000000e+000, -1.4673838259018705e+001, 2.1493517563542657e+001, -7.4330170018726225e+000},
                                                        {0.0000000000000000e+000, 4.1862271753710758e+001, -5.2362652951034960e+001, 1.3200912486148248e+001},
                                                        {0.0000000000000000e+000, -5.3438433494692084e+001, 5.3369135387492321e+001, -9.5178954842756305e+000},
                                                        {0.0000000000000000e+000, 2.6250000000000021e+001, -2.2500000000000021e+001, 3.7500000000000040e+000}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_coeffs_5[5][5] = {{0.0000000000000000e+000, 4.5657636116329847e+001, -9.3164643287169710e+001, 5.9866655454096140e+001, -1.1879263560593634e+001},
+static jmi_real_t jmi_opt_sim_lp_dot_coeffs_5[5][5] = {{0.0000000000000000e+000, 4.5657636116329847e+001, -9.3164643287169710e+001, 5.9866655454096140e+001, -1.1879263560593634e+001},
                                                        {0.0000000000000000e+000, -1.4066155777791167e+002, 2.6383903486861334e+002, -1.4666861233927671e+002, 2.1561468539410203e+001},
                                                        {0.0000000000000000e+000, 2.1500132884927308e+002, -3.5381489625537307e+002, 1.6095763121227716e+002, -1.7021823932825626e+001},
                                                        {0.0000000000000000e+000, -2.2079740718769114e+002, 3.1754050467392921e+002, -1.2455567432709654e+002, 1.2139618954009054e+001},
                                                        {0.0000000000000000e+000, 1.0079999999999983e+002, -1.3439999999999978e+002, 5.0399999999999942e+001, -4.7999999999999998e+000}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_coeffs_6[6][6] = {{0.0000000000000000e+000, -1.4632719387425553e+002, 3.7845098677044041e+002, -3.4786718883720630e+002, 1.3266067444378947e+002, -1.7313107012600927e+001},
+static jmi_real_t jmi_opt_sim_lp_dot_coeffs_6[6][6] = {{0.0000000000000000e+000, -1.4632719387425553e+002, 3.7845098677044041e+002, -3.4786718883720630e+002, 1.3266067444378947e+002, -1.7313107012600927e+001},
                                                        {0.0000000000000000e+000, 4.6931121729138511e+002, -1.1543981616352482e+003, 9.8050597099045945e+002, -3.2565410621138460e+002, 3.1755042868352419e+001},
                                                        {0.0000000000000000e+000, -7.8020708924390055e+002, 1.7693551739827294e+003, -1.3338540170687684e+003, 3.6710147682696532e+002, -2.6001275978573837e+001},
                                                        {0.0000000000000000e+000, 9.4902695778368002e+002, -1.9567136509632039e+003, 1.3088114773978343e+003, -3.1344748306664621e+002, 2.0417003947766275e+001},
                                                        {0.0000000000000000e+000, -8.7680389195690805e+002, 1.6633056518452806e+003, -1.0275962424823178e+003, 2.3267277134060913e+002, -1.4690997158277259e+001},
                                                        {0.0000000000000000e+000, 3.8499999999999915e+002, -6.9999999999999841e+002, 4.1999999999999909e+002, -9.3333333333333172e+001, 5.8333333333333313e+000}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_coeffs_7[7][7] = {{0.0000000000000000e+000, 4.8115542670988100e+002, -1.4995667342646407e+003, 1.7784162879881999e+003, -9.9134389083486212e+002, 2.5541062589197421e+002, -2.3734709815362727e+001},
+static jmi_real_t jmi_opt_sim_lp_dot_coeffs_7[7][7] = {{0.0000000000000000e+000, 4.8115542670988100e+002, -1.4995667342646407e+003, 1.7784162879881999e+003, -9.9134389083486212e+002, 2.5541062589197421e+002, -2.3734709815362727e+001},
                                                        {0.0000000000000000e+000, -1.5803477437831684e+003, 4.7688997175527375e+003, -5.3917577482442366e+003, 2.7856830369116465e+003, -6.2752956844802964e+002, 4.3791109853368695e+001},
                                                        {0.0000000000000000e+000, 2.7542393835081575e+003, -7.8776894371120688e+003, 8.2576352420690782e+003, -3.8114796853418593e+003, 7.1666037947328414e+002, -3.6541603359061675e+001},
                                                        {0.0000000000000000e+000, -3.6386385000802488e+003, 9.7350537462580905e+003, -9.3639103832144410e+003, 3.8690262192279206e+003, -6.3700049617166064e+002, 2.9864015894140881e+001},
@@ -174,7 +595,7 @@ static jmi_real_t jmi_opt_sim_lp_radau_dot_coeffs_7[7][7] = {{0.0000000000000000
                                                        {0.0000000000000000e+000, -3.4283584065951081e+003, 8.1203100078027310e+003, -6.9006050248835709e+003, 2.5448366650279568e+003, -3.8530341489245279e+002, 1.7214363923837649e+001},
                                                        {0.0000000000000000e+000, 1.4708571428571563e+003, -3.3942857142857474e+003, 2.8285714285714580e+003, -1.0285714285714405e+003, 1.5428571428571635e+002, -6.8571428571429820e+000}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_coeffs_8[8][8] = {{0.0000000000000000e+000, -1.6160071566200245e+003, 5.8788317304720440e+003, -8.5085777267422600e+003, 6.2115679468159506e+003, -2.3814406791384035e+003, 4.4647642193356126e+002, -3.1144139898169112e+001},
+static jmi_real_t jmi_opt_sim_lp_dot_coeffs_8[8][8] = {{0.0000000000000000e+000, -1.6160071566200245e+003, 5.8788317304720440e+003, -8.5085777267422600e+003, 6.2115679468159506e+003, -2.3814406791384035e+003, 4.4647642193356126e+002, -3.1144139898169112e+001},
                                                        {0.0000000000000000e+000, 5.3893650601661875e+003, -1.9179923120974934e+004, 2.6910334134876066e+004, -1.8756965695128092e+004, 6.6780575622275146e+003, -1.0974601368271751e+003, 5.7673331484963498e+001},
                                                        {0.0000000000000000e+000, -9.6733023710249636e+003, 3.3172878394374326e+004, -4.4243434754053596e+004, 2.8690365592061513e+004, -9.1627982579764121e+003, 1.2626210845790924e+003, -4.8669590446175924e+001},
                                                        {0.0000000000000000e+000, 1.3412599232553373e+004, -4.3845636972815177e+004, 5.4987747819979471e+004, -3.2904204450988174e+004, 9.4593558020011587e+003, -1.1461377615894128e+003, 4.0629916197779259e+001},
@@ -183,7 +604,7 @@ static jmi_real_t jmi_opt_sim_lp_radau_dot_coeffs_8[8][8] = {{0.0000000000000000
                                                        {0.0000000000000000e+000, -1.3321803837691621e+004, 3.7943495426861518e+004, -4.1209039452334284e+004, 2.1355001337294711e+004, -5.3799471158760944e+003, 5.8996559852588234e+002, -1.9723984006566734e+001},
                                                        {0.0000000000000000e+000, 5.6306250000000000e+003, -1.5765750000000005e+004, 1.6891875000000018e+004, -8.6625000000000182e+003, 2.1656250000000073e+003, -2.3625000000000162e+002, 7.8750000000001226e+000}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_coeffs_9[9][9] = {{0.0000000000000000e+000, 5.5228488477075334e+003, -2.2939485282117497e+004, 3.9122529500735691e+004, -3.5237636432297018e+004, 1.7919107525804819e+004, -5.0746052091250795e+003, 7.2704268777900438e+002, -3.9541429729042932e+001},
+static jmi_real_t jmi_opt_sim_lp_dot_coeffs_9[9][9] = {{0.0000000000000000e+000, 5.5228488477075334e+003, -2.2939485282117497e+004, 3.9122529500735691e+004, -3.5237636432297018e+004, 1.7919107525804819e+004, -5.0746052091250795e+003, 7.2704268777900438e+002, -3.9541429729042932e+001},
                                                        {0.0000000000000000e+000, -1.8610857441675205e+004, 7.6103694870261941e+004, -1.2705569518620940e+005, 1.1102756388368004e+005, -5.3961133181441372e+004, 1.4209637709090039e+004, -1.7875618539280254e+003, 7.3403382769901526e+001},
                                                        {0.0000000000000000e+000, 3.4068737908038071e+004, -1.3564800943642342e+005, 2.1857368647041364e+005, -1.8191062356451538e+005, 8.2441269842720765e+004, -1.9526774098211194e+004, 2.0661158211239422e+003, -6.2396293547195256e+001},
                                                        {0.0000000000000000e+000, -4.8736402430208291e+004, 1.8732698923230666e+005, -2.8860227851015242e+005, 2.2661951220428827e+005, -9.5120567771996401e+004, 2.0355692251269029e+004, -1.8993001762097656e+003, 5.2764208365108296e+001},
@@ -193,7 +614,7 @@ static jmi_real_t jmi_opt_sim_lp_radau_dot_coeffs_9[9][9] = {{0.0000000000000000
                                                        {0.0000000000000000e+000, -5.1649662163690366e+004, 1.7215722622082554e+005, -2.2816617231402500e+005, 1.5331140555840789e+005, -5.5092005483197107e+004, 1.0217576775458205e+004, -8.5414573458809218e+002, 2.2225883153668043e+001},
                                                        {0.0000000000000000e+000, 2.1608888888888388e+004, -7.1182222222220560e+004, 9.3426666666664445e+004, -6.2284444444442939e+004, 2.2244444444443903e+004, -4.1066666666665660e+003, 3.4222222222221382e+002, -8.8888888888886992e+000}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_coeffs_10[10][10] = {{0.0000000000000000e+000, -1.9149323667502802e+004, 8.9342156570927458e+004, -1.7524866827961706e+005, 1.8754972835196176e+005, -1.1878937030491242e+005, 4.5110459268327206e+004, -9.8874077490704021e+003, 1.1211187125224405e+003, -4.8926596413450824e+001},
+static jmi_real_t jmi_opt_sim_lp_dot_coeffs_10[10][10] = {{0.0000000000000000e+000, -1.9149323667502802e+004, 8.9342156570927458e+004, -1.7524866827961706e+005, 1.8754972835196176e+005, -1.1878937030491242e+005, 4.5110459268327206e+004, -9.8874077490704021e+003, 1.1211187125224405e+003, -4.8926596413450824e+001},
                                                        {0.0000000000000000e+000, 6.5007721966123514e+004, -2.9983124474387500e+005, 5.7923962820496887e+005, -6.0710667306943494e+005, 3.7327628935978818e+005, -1.3557600188860547e+005, 2.7657043328252817e+004, -2.7569005364143059e+003, 9.0982122231763540e+001},
                                                        {0.0000000000000000e+000, -1.2066210777568328e+005, 5.4561166061168269e+005, -1.0272816304098967e+006, 1.0403385802551452e+006, -6.1001495496419619e+005, 2.0692941209428603e+005, -3.8041419909344222e+004, 3.1964255971126404e+003, -7.7727045637454566e+001},
                                                        {0.0000000000000000e+000, 1.7635969436024452e+005, -7.7652981149882858e+005, 1.4139577619146749e+006, -1.3719108905869359e+006, 7.6073043882840069e+005, -2.3960926945129750e+005, 3.9901501047626676e+004, -2.9626400941157399e+003, 6.6288249869053033e+001},
@@ -204,34 +625,34 @@ static jmi_real_t jmi_opt_sim_lp_radau_dot_coeffs_10[10][10] = {{0.0000000000000
                                                        {0.0000000000000000e+000, -2.0017198967858325e+005, 7.6499786368858605e+005, -1.1985862536139821e+006, 9.9301823897103802e+005, -4.6776571664811647e+005, 1.2522193356760933e+005, -1.7941071290744047e+004, 1.1853145736105892e+003, -2.4723018496556413e+001},
                                                        {0.0000000000000000e+000, 8.3140199999998702e+004, -3.1505759999999497e+005, 4.9008959999999189e+005, -4.0360319999999297e+005, 1.8918899999999657e+005, -5.0450399999999041e+004, 7.2071999999998588e+003, -4.7519999999999089e+002, 9.8999999999998369e+000}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_vals_1[1][1] = {{0.0000000000000000e+000}};
+static jmi_real_t jmi_opt_sim_lp_dot_vals_1[1][1] = {{0.0000000000000000e+000}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_vals_2[2][2] = {{-1.5000000000000000e+000, -1.5000000000000000e+000},
+static jmi_real_t jmi_opt_sim_lp_dot_vals_2[2][2] = {{-1.5000000000000000e+000, -1.5000000000000000e+000},
                                                        {1.5000000000000000e+000, 1.5000000000000000e+000}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_vals_3[3][3] = {{-3.2247448713915894e+000, -8.5773803324704145e-001, 8.5773803324704012e-001},
+static jmi_real_t jmi_opt_sim_lp_dot_vals_3[3][3] = {{-3.2247448713915894e+000, -8.5773803324704145e-001, 8.5773803324704012e-001},
                                                        {4.8577380332470401e+000, -7.7525512860841328e-001, -4.8577380332470428e+000},
                                                        {-1.6329931618554527e+000, 1.6329931618554530e+000, 4.0000000000000000e+000}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_vals_4[4][4] = {{-5.6441078759500876e+000, -1.0923951625919930e+000, 3.9279722479070056e-001, -6.1333769734867083e-001},
+static jmi_real_t jmi_opt_sim_lp_dot_vals_4[4][4] = {{-5.6441078759500876e+000, -1.0923951625919930e+000, 3.9279722479070056e-001, -6.1333769734867083e-001},
                                                        {8.8907397551196681e+000, -1.2211000288946927e+000, -2.0713622171778425e+000, 2.7005312888240454e+000},
                                                        {-5.2094082376126396e+000, 3.3753429231863805e+000, -6.3479209515522861e-001, -9.5871935914753941e+000},
                                                        {1.9627763584430562e+000, -1.0618477316996979e+000, 2.3133570875423599e+000, 7.5000000000000036e+000}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_vals_5[5][5] = {{-8.7559239779383820e+000, -1.4771725091407362e+000, 4.0335296739259441e-001, -2.5747222895190092e-001, 4.8038472266264343e-001},
+static jmi_real_t jmi_opt_sim_lp_dot_vals_5[5][5] = {{-8.7559239779383820e+000, -1.4771725091407362e+000, 4.0335296739259441e-001, -2.5747222895190092e-001, 4.8038472266264343e-001},
                                                        {1.4020232546567769e+001, -1.8060777240836323e+000, -2.1328158609906147e+000, 1.0919862533645777e+000, -1.9296667091648310e+000},
                                                        {-8.9441834771237865e+000, 4.9829302097451702e+000, -8.5676524539718457e-001, -3.5197917271527484e+000, 5.1222398733515462e+000},
                                                        {6.0213169205853880e+000, -2.6906317587962150e+000, 3.7121252077103133e+000, -5.8123305258081359e-001, -1.5672957886849415e+001},
                                                        {-2.3414420120909916e+000, 9.9095178227540703e-001, -1.1258970687151293e+000, 3.2665107553208506e+000, 1.1999999999999989e+001}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_vals_6[6][6] = {{-1.2559703476291553e+001, -1.9708240584738412e+000, 4.7103385387540797e-001, -2.3516436042812927e-001, 1.9368194333693012e-001, -3.9582850983287088e-001},
+static jmi_real_t jmi_opt_sim_lp_dot_vals_6[6][6] = {{-1.2559703476291553e+001, -1.9708240584738412e+000, 4.7103385387540797e-001, -2.3516436042812927e-001, 1.9368194333693012e-001, -3.9582850983287088e-001},
                                                        {2.0273075426320773e+001, -2.5250814079636825e+000, -2.5067421826700880e+000, 9.9410487502893119e-001, -7.6089426018886286e-001, 1.5199633035641256e+000},
                                                        {-1.3391271572648305e+001, 6.9279952973720214e+000, -1.1416181668475041e+000, -3.1928012250524027e+000, 1.9198484936510241e+000, -3.6057314815480268e+000},
                                                        {9.8918725928820930e+000, -4.0650644195781602e+000, 4.7239924539027331e+000, -7.1894419189771952e-001, -5.2542109930169403e+000, 8.0943050994304855e+000},
                                                        {-6.9541488680807877e+000, 2.6558734439037579e+000, -2.4246670510447572e+000, 4.4849266890455439e+000, -5.5465275699956784e-001, -2.3112708411613387e+001},
                                                        {2.7401758978177817e+000, -1.0228988552600944e+000, 8.7800109278422589e-001, -1.3321217866960628e+000, 4.4562275732173600e+000, 1.7499999999999989e+001}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_vals_7[7][7] = {{-1.7055284304421711e+001, -2.5636255666346877e+000, 5.6780734279694656e-001, -2.4980399709663104e-001, 1.6500058257482308e-001, -1.5635154519243599e-001, 3.3700567518956603e-001},
+static jmi_real_t jmi_opt_sim_lp_dot_vals_7[7][7] = {{-1.7055284304421711e+001, -2.5636255666346877e+000, 5.6780734279694656e-001, -2.4980399709663104e-001, 1.6500058257482308e-001, -1.5635154519243599e-001, 3.3700567518956603e-001},
                                                        {2.7655985502972602e+001, -3.3765851454523812e+000, -3.0374211748104969e+000, 1.0577969119949699e+000, -6.4555885400997681e-001, 5.9183834531796009e-001, -1.2611961576820505e+000},
                                                        {-1.8605167998638365e+001, 9.2257793366122129e+000, -1.4837469310039708e+000, -3.4144667139829252e+000, 1.6167797624419080e+000, -1.3617336747754507e+000, 2.8242792375300709e+000},
                                                        {1.4285861237240804e+001, -5.6075711696757686e+000, 5.9593286381636652e+000, -8.9498029378547983e-001, -4.3847168714612188e+000, 2.8819169019919890e+000, -5.6053980861989423e+000},
@@ -239,7 +660,7 @@ static jmi_real_t jmi_opt_sim_lp_radau_dot_vals_7[7][7] = {{-1.7055284304421711e
                                                        {7.9378673298500448e+000, -2.7852886750572416e+000, 2.1098969499512368e+000, -2.5584449004114305e+000, 5.5157599052838542e+000, -5.3940593874075304e-001, -3.1905809616606408e+001},
                                                        {-3.1492520848629031e+000, 1.0924921001249333e+000, -8.0546236505113633e-001, 9.1594548837011835e-001, -1.6172671382331947e+000, 5.8727068440899277e+000, 2.3999999999999766e+001}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_vals_8[8][8] = {{-2.2242599964336073e+001, -3.2521931152629371e+000, 6.8660629189411182e-001, -2.7995703272426908e-001, 1.6444979911015167e-001, -1.2744641004285739e-001, 1.3167367235616112e-001, -2.9360317730084873e-001},
+static jmi_real_t jmi_opt_sim_lp_dot_vals_8[8][8] = {{-2.2242599964336073e+001, -3.2521931152629371e+000, 6.8660629189411182e-001, -2.7995703272426908e-001, 1.6444979911015167e-001, -1.2744641004285739e-001, 1.3167367235616112e-001, -2.9360317730084873e-001},
                                                        {3.6171371117915626e+001, -4.3599941420726864e+000, -3.6869514741383682e+000, 1.1882094936351422e+000, -6.4336246506638162e-001, 4.8061155009233403e-001, -4.8796587479514386e-001, 1.0811358245291984e+000},
                                                        {-2.4602018795925375e+001, 1.1877956852641894e+001, -1.8811856479741564e+000, -3.8555726689761727e+000, 1.6120580831361835e+000, -1.0979538209524833e+000, 1.0710644149832405e+000, -2.3399024862152586e+000},
                                                        {1.9285491806529823e+001, -7.3594220434676387e+000, 7.4125094940935341e+000, -1.1041272031134142e+000, -4.3845652428860262e+000, 2.2985030279694243e+000, -2.0509958690585322e+000, 4.3535853390189843e+000},
@@ -248,7 +669,7 @@ static jmi_real_t jmi_opt_sim_lp_radau_dot_vals_8[8][8] = {{-2.2242599964336073e
                                                        {-8.9482571779968225e+000, 2.9815377691594236e+000, -2.0313844928393650e+000, 2.0233217883838712e+000, -2.8584988926858266e+000, 6.7563649902256024e+000, -5.2980837581898754e-001, -4.2052027226456616e+001},
                                                        {3.5644079211010364e+000, -1.1800985099016703e+000, 7.9279598271294915e-001, -7.6724554300534820e-001, 1.0154103686640328e+000, -1.9642597290041195e+000, 7.5123199557770803e+000, 3.1500000000000320e+001}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_vals_9[9][9] = {{-2.8121619021008335e+001, -4.0350724989723687e+000, 8.2486225432734273e-001, -3.1997767984133674e-001, 1.7475313839470630e-001, -1.2149285049406444e-001, 1.0422600635390467e-001, -1.1404716613786547e-001, 2.6020875840907820e-001},
+static jmi_real_t jmi_opt_sim_lp_dot_vals_9[9][9] = {{-2.8121619021008335e+001, -4.0350724989723687e+000, 8.2486225432734273e-001, -3.1997767984133674e-001, 1.7475313839470630e-001, -1.2149285049406444e-001, 1.0422600635390467e-001, -1.1404716613786547e-001, 2.6020875840907820e-001},
                                                        {4.5820285652941948e+001, -5.4750355521276219e+000, -4.4417963771916220e+000, 1.3608554744805303e+000, -6.8430396438280638e-001, 4.5782439972977329e-001, -3.8501527664497814e-001, 4.1702666427208612e-001, -9.4781745208845791e-001},
                                                        {-3.1388257476394010e+001, 1.4884627518566219e+001, -2.3330854729130834e+000, -4.4348721108071274e+000, 1.7182858362086364e+000, -1.0446981063518095e+000, 8.3996056074370529e-001, -8.9009551923262364e-001, 2.0066495992311673e+000},
                                                        {2.4917261255807528e+001, -9.3322459347804312e+000, 9.0756125205730740e+000, -1.3443311646904093e+000, -4.6943603085022474e+000, 2.1847862278254624e+000, -1.5931518092387407e+000, 1.6173139685071192e+000, -3.5909923378010191e+000},
@@ -258,7 +679,7 @@ static jmi_real_t jmi_opt_sim_lp_radau_dot_vals_9[9][9] = {{-2.8121619021008335e
                                                        {9.9745463768249714e+000, -3.2119296883287163e+000, 2.0457826669166685e+000, -1.8164455014829954e+000, 2.1013636176510815e+000, -3.2623396371900206e+000, 8.1886600277382957e+000, -5.2335960939210224e-001, -5.3551257655264429e+001},
                                                        {-3.9834600728654417e+000, 1.2777821264227729e+000, -8.0728024509691920e-001, 7.0594751812250678e-001, -7.9287877529068140e-001, 1.1524846097804904e+000, -2.3667257586995527e+000, 9.3734523752264334e+000, 3.9999999999996632e+001}};
 
-static jmi_real_t jmi_opt_sim_lp_radau_dot_vals_10[10][10] = {{-3.4692325029699376e+001, -4.9115478561746286e+000, 9.8143401805992170e-001, -3.6775331048787052e-001, 1.9121638423842313e-001, -1.2408990808796005e-001, 9.6223320270546253e-002, -8.8463943703295911e-002, 1.0077041109097706e-001, -2.3369377726768903e-001},
+static jmi_real_t jmi_opt_sim_lp_dot_vals_10[10][10] = {{-3.4692325029699376e+001, -4.9115478561746286e+000, 9.8143401805992170e-001, -3.6775331048787052e-001, 1.9121638423842313e-001, -1.2408990808796005e-001, 9.6223320270546253e-002, -8.8463943703295911e-002, 1.0077041109097706e-001, -2.3369377726768903e-001},
                                                        {5.6603253600356631e+001, -6.7215693675324104e+000, -5.2960018378360871e+000, 1.5666798127560497e+000, -7.4958552758280916e-001, 4.6772377447722135e-001, -3.5511453059936571e-001, 3.2261977204156267e-001, -3.6516285135037663e-001, 8.4474303541749407e-001},
                                                        {-3.8966916656228371e+001, 1.8245679717214713e+001, -2.8390273293468056e+000, -5.1230037481630291e+000, 1.8864617305966078e+000, -1.0679618517505531e+000, 7.7342275262761007e-001, -6.8513036921302728e-001, 7.6532837646557539e-001, -1.7615465313075305e+000},
                                                        {3.1192370903587502e+001, -1.1530523555796620e+001, 1.0944137320037228e+001, -1.6146346353635437e+000, -5.1750239925229806e+000, 2.2367771577521580e+000, -1.4635884582494327e+000, 1.2350870709715878e+000, -1.3470035568102219e+000, 3.0727696381233898e+000},
@@ -270,32 +691,32 @@ static jmi_real_t jmi_opt_sim_lp_radau_dot_vals_10[10][10] = {{-3.46923250296993
                                                        {4.4051672164280413e+000, -1.3817098533378100e+000, 8.3632375838786288e-001, -6.8289425284490513e-001, 6.9059888780641288e-001, -8.5170397897753602e-001, 1.3182729875491397e+000, -2.8217928421080654e+000, 1.1455291776230771e+001, 4.9500000000040956e+001}};
 
 // Radau points plus starting point of interval (0)
-static jmi_real_t jmi_opt_sim_lp_radau_p_1[2] = {0.0000000000000000e+000,
+static jmi_real_t jmi_opt_sim_lp_p_1[2] = {0.0000000000000000e+000,
                                                1.0000000000000000e+000};
 
-static jmi_real_t jmi_opt_sim_lp_radau_p_2[3] = {0.0000000000000000e+000,
+static jmi_real_t jmi_opt_sim_lp_p_2[3] = {0.0000000000000000e+000,
                                                3.3333333333333337e-001,
                                                1.0000000000000000e+000};
 
-static jmi_real_t jmi_opt_sim_lp_radau_p_3[4] = {0.0000000000000000e+000,
+static jmi_real_t jmi_opt_sim_lp_p_3[4] = {0.0000000000000000e+000,
                                                1.5505102572168217e-001,
                                                6.4494897427831788e-001,
                                                1.0000000000000000e+000};
 
-static jmi_real_t jmi_opt_sim_lp_radau_p_4[5] = {0.0000000000000000e+000,
+static jmi_real_t jmi_opt_sim_lp_p_4[5] = {0.0000000000000000e+000,
                                                8.8587959512703929e-002,
                                                4.0946686444073477e-001,
                                                7.8765946176084722e-001,
                                                1.0000000000000000e+000};
 
-static jmi_real_t jmi_opt_sim_lp_radau_p_5[6] = {0.0000000000000000e+000,
+static jmi_real_t jmi_opt_sim_lp_p_5[6] = {0.0000000000000000e+000,
                                                5.7104196114518224e-002,
                                                2.7684301363812369e-001,
                                                5.8359043236891683e-001,
                                                8.6024013565621915e-001,
                                                1.0000000000000000e+000};
 
-static jmi_real_t jmi_opt_sim_lp_radau_p_6[7] = {0.0000000000000000e+000,
+static jmi_real_t jmi_opt_sim_lp_p_6[7] = {0.0000000000000000e+000,
                                                3.9809857051469333e-002,
                                                1.9801341787360782e-001,
                                                4.3797481024738605e-001,
@@ -303,7 +724,7 @@ static jmi_real_t jmi_opt_sim_lp_radau_p_6[7] = {0.0000000000000000e+000,
                                                9.0146491420117336e-001,
                                                1.0000000000000000e+000};
 
-static jmi_real_t jmi_opt_sim_lp_radau_p_7[8] = {0.0000000000000000e+000,
+static jmi_real_t jmi_opt_sim_lp_p_7[8] = {0.0000000000000000e+000,
                                                2.9316427159785663e-002,
                                                1.4807859966848447e-001,
                                                3.3698469028115419e-001,
@@ -312,7 +733,7 @@ static jmi_real_t jmi_opt_sim_lp_radau_p_7[8] = {0.0000000000000000e+000,
                                                9.2694567131974170e-001,
                                                1.0000000000000000e+000};
 
-static jmi_real_t jmi_opt_sim_lp_radau_p_8[9] = {0.0000000000000000e+000,
+static jmi_real_t jmi_opt_sim_lp_p_8[9] = {0.0000000000000000e+000,
                                                2.2479386438713611e-002,
                                                1.1467905316090432e-001,
                                                2.6578982278458951e-001,
@@ -322,7 +743,7 @@ static jmi_real_t jmi_opt_sim_lp_radau_p_8[9] = {0.0000000000000000e+000,
                                                9.4373743946307775e-001,
                                                1.0000000000000000e+000};
 
-static jmi_real_t jmi_opt_sim_lp_radau_p_9[10] = {0.0000000000000000e+000,
+static jmi_real_t jmi_opt_sim_lp_p_9[10] = {0.0000000000000000e+000,
                                                1.7779915147364544e-002,
                                                9.1323607899792103e-002,
                                                2.1430847939563114e-001,
@@ -333,7 +754,7 @@ static jmi_real_t jmi_opt_sim_lp_radau_p_9[10] = {0.0000000000000000e+000,
                                                9.5536604471002917e-001,
                                                1.0000000000000000e+000};
 
-static jmi_real_t jmi_opt_sim_lp_radau_p_10[11] = {0.0000000000000000e+000,
+static jmi_real_t jmi_opt_sim_lp_p_10[11] = {0.0000000000000000e+000,
                                                1.4412409648876801e-002,
                                                7.4387389709196450e-002,
                                                1.7611665616299321e-001,
@@ -574,284 +995,17 @@ static jmi_real_t jmi_opt_sim_lpp_radau_dot_vals_10[11][11] = {{-9.9999999999998
 
 /* Evaluate polynomial L_k^{n}(tau), where polynomial coefficients are
  * given in column major format in the vector pol. This vector should contain
- * coefficients for all Lagrange polynomials as returned by jmi_opt_sim_lp_radau_get_pols.
+ * coefficients for all Lagrange polynomials as returned by jmi_opt_sim_lp_get_pols.
  * This means that the pol matrix should have dimensions n x n.
  */
-jmi_real_t jmi_opt_sim_lp_radau_eval_pol(jmi_real_t tau, int n, jmi_real_t* pol, int k) {
-	int i;
-	jmi_real_t val = 0;
-	for (i=0;i<n;i++) {
-		val += pol[n*i + k]*pow(tau,n-i-1);
-	}
-	return val;
-}
+jmi_real_t jmi_opt_sim_lp_eval_pol(jmi_real_t tau, int n, jmi_real_t* pol, int k);
 
 // Lagrange polynomial matrices are returned in column major format.
-int jmi_opt_sim_lp_radau_get_pols(int n_cp, jmi_real_t *cp, jmi_real_t *cpp,
+int jmi_opt_sim_lp_get_pols(int n_cp, jmi_real_t *cp, jmi_real_t *cpp,
 		jmi_real_t *Lp_coeffs, jmi_real_t *Lpp_coeffs,
 		jmi_real_t *Lp_dot_coeffs, jmi_real_t *Lpp_dot_coeffs,
-		                          jmi_real_t *Lp_dot_vals, jmi_real_t *Lpp_dot_vals){
-	int i,j;
-	switch (n_cp) {
-	case 1:
-
-		for (i=0;i<n_cp;i++) {
-			cp[i] = jmi_opt_sim_lp_radau_1[i];
-		}
-		for (i=0;i<n_cp+1;i++) {
-			cpp[i] = jmi_opt_sim_lp_radau_p_1[i];
-		}
-
-		for (i=0;i<n_cp;i++) {
-			for (j=0;j<n_cp;j++) {
-				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_coeffs_1[i][j];
-				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_coeffs_1[i][j];
-				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_vals_1[i][j];
-			}
-		}
-
-		for (i=0;i<n_cp+1;i++) {
-			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_1[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_1[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_1[i][j];
-			}
-		}
-
-		break;
-	case 2:
-
-		for (i=0;i<n_cp;i++) {
-			cp[i] = jmi_opt_sim_lp_radau_2[i];
-		}
-		for (i=0;i<n_cp+1;i++) {
-			cpp[i] = jmi_opt_sim_lp_radau_p_2[i];
-		}
-
-		for (i=0;i<n_cp;i++) {
-			for (j=0;j<n_cp;j++) {
-				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_coeffs_2[i][j];
-				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_coeffs_2[i][j];
-				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_vals_2[i][j];
-			}
-		}
-
-		for (i=0;i<n_cp+1;i++) {
-			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_2[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_2[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_2[i][j];
-			}
-		}
-
-		break;
-	case 3:
-
-		for (i=0;i<n_cp;i++) {
-			cp[i] = jmi_opt_sim_lp_radau_3[i];
-		}
-		for (i=0;i<n_cp+1;i++) {
-			cpp[i] = jmi_opt_sim_lp_radau_p_3[i];
-		}
-
-		for (i=0;i<n_cp;i++) {
-			for (j=0;j<n_cp;j++) {
-				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_coeffs_3[i][j];
-				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_coeffs_3[i][j];
-				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_vals_3[i][j];
-			}
-		}
-
-		for (i=0;i<n_cp+1;i++) {
-			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_3[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_3[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_3[i][j];
-			}
-		}
-		break;
-	case 4:
-
-		for (i=0;i<n_cp;i++) {
-			cp[i] = jmi_opt_sim_lp_radau_4[i];
-		}
-		for (i=0;i<n_cp+1;i++) {
-			cpp[i] = jmi_opt_sim_lp_radau_p_4[i];
-		}
-
-		for (i=0;i<n_cp;i++) {
-			for (j=0;j<n_cp;j++) {
-				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_coeffs_4[i][j];
-				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_coeffs_4[i][j];
-				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_vals_4[i][j];
-			}
-		}
-
-		for (i=0;i<n_cp+1;i++) {
-			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_4[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_4[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_4[i][j];
-			}
-		}
-		break;
-	case 5:
-
-		for (i=0;i<n_cp;i++) {
-			cp[i] = jmi_opt_sim_lp_radau_5[i];
-		}
-		for (i=0;i<n_cp+1;i++) {
-			cpp[i] = jmi_opt_sim_lp_radau_p_5[i];
-		}
-
-		for (i=0;i<n_cp;i++) {
-			for (j=0;j<n_cp;j++) {
-				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_coeffs_5[i][j];
-				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_coeffs_5[i][j];
-				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_vals_5[i][j];
-			}
-		}
-
-		for (i=0;i<n_cp+1;i++) {
-			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_5[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_5[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_5[i][j];
-			}
-		}
-		break;
-	case 6:
-
-		for (i=0;i<n_cp;i++) {
-			cp[i] = jmi_opt_sim_lp_radau_6[i];
-		}
-		for (i=0;i<n_cp+1;i++) {
-			cpp[i] = jmi_opt_sim_lp_radau_p_6[i];
-		}
-
-		for (i=0;i<n_cp;i++) {
-			for (j=0;j<n_cp;j++) {
-				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_coeffs_6[i][j];
-				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_coeffs_6[i][j];
-				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_vals_6[i][j];
-			}
-		}
-
-		for (i=0;i<n_cp+1;i++) {
-			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_6[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_6[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_6[i][j];
-			}
-		}
-		break;
-	case 7:
-
-		for (i=0;i<n_cp;i++) {
-			cp[i] = jmi_opt_sim_lp_radau_7[i];
-		}
-		for (i=0;i<n_cp+1;i++) {
-			cpp[i] = jmi_opt_sim_lp_radau_p_7[i];
-		}
-
-		for (i=0;i<n_cp;i++) {
-			for (j=0;j<n_cp;j++) {
-				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_coeffs_7[i][j];
-				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_coeffs_7[i][j];
-				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_vals_7[i][j];
-			}
-		}
-
-		for (i=0;i<n_cp+1;i++) {
-			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_7[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_7[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_7[i][j];
-			}
-		}
-		break;
-	case 8:
-
-		for (i=0;i<n_cp;i++) {
-			cp[i] = jmi_opt_sim_lp_radau_8[i];
-		}
-		for (i=0;i<n_cp+1;i++) {
-			cpp[i] = jmi_opt_sim_lp_radau_p_8[i];
-		}
-
-		for (i=0;i<n_cp;i++) {
-			for (j=0;j<n_cp;j++) {
-				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_coeffs_8[i][j];
-				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_coeffs_8[i][j];
-				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_vals_8[i][j];
-			}
-		}
-
-		for (i=0;i<n_cp+1;i++) {
-			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_8[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_8[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_8[i][j];
-			}
-		}
-		break;
-	case 9:
-
-		for (i=0;i<n_cp;i++) {
-			cp[i] = jmi_opt_sim_lp_radau_9[i];
-		}
-		for (i=0;i<n_cp+1;i++) {
-			cpp[i] = jmi_opt_sim_lp_radau_p_9[i];
-		}
-
-		for (i=0;i<n_cp;i++) {
-			for (j=0;j<n_cp;j++) {
-				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_coeffs_9[i][j];
-				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_coeffs_9[i][j];
-				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_vals_9[i][j];
-			}
-		}
-
-		for (i=0;i<n_cp+1;i++) {
-			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_9[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_9[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_9[i][j];
-			}
-		}
-		break;
-	case 10:
-
-		for (i=0;i<n_cp;i++) {
-			cp[i] = jmi_opt_sim_lp_radau_10[i];
-		}
-		for (i=0;i<n_cp+1;i++) {
-			cpp[i] = jmi_opt_sim_lp_radau_p_10[i];
-		}
-
-		for (i=0;i<n_cp;i++) {
-			for (j=0;j<n_cp;j++) {
-				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_coeffs_10[i][j];
-				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_coeffs_10[i][j];
-				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_radau_dot_vals_10[i][j];
-			}
-		}
-
-		for (i=0;i<n_cp+1;i++) {
-			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_10[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_10[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_10[i][j];
-			}
-		}
-		break;
-	default:
-		return -1;
-	}
-
-
-	return 0;
-}
+		                          jmi_real_t *Lp_dot_vals, jmi_real_t *Lpp_dot_vals);
 
 
 #endif
+/* @} */

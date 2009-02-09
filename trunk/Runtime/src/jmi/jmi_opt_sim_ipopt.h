@@ -1,3 +1,8 @@
+/** \file jmi_opt_sim_ipopt.h
+ *  \brief An interface between the NLP representation provided by jmi_opt_sim
+ *  and IPOPT.
+ **/
+
 /**
  * min f(x)
  *

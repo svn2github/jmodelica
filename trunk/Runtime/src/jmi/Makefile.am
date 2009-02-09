@@ -44,5 +44,6 @@ libjmi_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
 include_HEADERS = jmi.h \
                   jmi_common.h \
                   jmi_opt_sim.h \
+                  jmi_opt_sim_lp.h \
                   jmi_opt_sim_ipopt.h
 

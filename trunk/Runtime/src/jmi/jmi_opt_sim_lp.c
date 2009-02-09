@@ -2,35 +2,35 @@
 #include "jmi_opt_sim_lp.h"
 
 static jmi_real_t p_opt(jmi_opt_sim_t *jmi_opt_sim, int i) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	return jmi_opt_sim->x[nlp->offs_p_opt + i];
 }
 static jmi_real_t dx_0(jmi_opt_sim_t *jmi_opt_sim, int i) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	return jmi_opt_sim->x[nlp->offs_dx_0 + i];
 }
 static jmi_real_t x_0(jmi_opt_sim_t *jmi_opt_sim, int i) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	return jmi_opt_sim->x[nlp->offs_x_0 + i];
 }
 static jmi_real_t u_0(jmi_opt_sim_t *jmi_opt_sim, int i) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	return jmi_opt_sim->x[nlp->offs_u_0 + i];
 }
 static jmi_real_t w_0(jmi_opt_sim_t *jmi_opt_sim, int i) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	return jmi_opt_sim->x[nlp->offs_w_0 + i];
 }
 
 // i is element, j is collocation point, k is variable index
 static jmi_real_t dx_coll(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	return jmi_opt_sim->x[nlp->offs_dx_coll + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*(nlp->n_cp*i + j-1) + k];
 }
 // i is element, j is collocation point, k is variable index
 static jmi_real_t x_coll(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	//printf("* %d %d *\n",i,j);
 	if (i==0 && j==0) {
@@ -43,38 +43,38 @@ static jmi_real_t x_coll(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
 }
 // i is element, j is collocation point, k is variable index
 static jmi_real_t u_coll(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	return jmi_opt_sim->x[nlp->offs_u_coll + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*(nlp->n_cp*i + j - 1) + k];
 }
 // i is element, j is collocation point, k is variable index
 static jmi_real_t w_coll(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	return jmi_opt_sim->x[nlp->offs_w_coll + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*(nlp->n_cp*i + j - 1) + k];
 }
 
 // i is time point, j is variable index
 static jmi_real_t dx_p(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	return jmi_opt_sim->x[nlp->offs_dx_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i + j];
 }
 // i is time point, j is variable index
 static jmi_real_t x_p(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	return jmi_opt_sim->x[nlp->offs_x_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i + j];
 }
 // i is time point, j is variable index
 static jmi_real_t u_p(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	return jmi_opt_sim->x[nlp->offs_u_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i + j];
 }
 // i is time point, j is variable index
 static jmi_real_t w_p(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	return jmi_opt_sim->x[nlp->offs_w_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i + j];
 }
@@ -86,14 +86,14 @@ static int dh_init_eq_offs(jmi_opt_sim_t *jmi_opt_sim, int i) {
 
 // i element j collocation point k equation index
 static int dh_res_eq_offs(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	return jmi->init->F0->n_eq_F + jmi->dae->F->n_eq_F*(i*nlp->n_cp + j-1) + k;
 }
 
 // i element j equation index
 static int dh_cont_eq_offs(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	return jmi->init->F0->n_eq_F + jmi->dae->F->n_eq_F*(jmi_opt_sim->n_e*nlp->n_cp) +
 	       jmi->n_x*i + j;
@@ -101,7 +101,7 @@ static int dh_cont_eq_offs(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
 
 // Interpolation equations for u_0 i equation index
 static int dh_u0_eq_offs(jmi_opt_sim_t *jmi_opt_sim, int i) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	return jmi->init->F0->n_eq_F + jmi->dae->F->n_eq_F*(jmi_opt_sim->n_e*nlp->n_cp) +
       jmi->n_x*jmi_opt_sim->n_e + i;
@@ -110,7 +110,7 @@ static int dh_u0_eq_offs(jmi_opt_sim_t *jmi_opt_sim, int i) {
 
 // i element j collocation point k equation index
 static int dh_coll_eq_offs(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	return jmi->init->F0->n_eq_F + jmi->dae->F->n_eq_F*(jmi_opt_sim->n_e*nlp->n_cp) +
 	       jmi->n_x*jmi_opt_sim->n_e + jmi->n_u + jmi->n_x*(nlp->n_cp*i + j-1) + k;
@@ -120,7 +120,7 @@ static int dh_coll_eq_offs(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
 
 // i interpolation point j equation index
 static int dh_dx_p_eq_offs(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	return jmi->init->F0->n_eq_F + jmi->dae->F->n_eq_F*(jmi_opt_sim->n_e*nlp->n_cp) +
     jmi->n_x*jmi_opt_sim->n_e + jmi->n_x*nlp->n_cp*jmi_opt_sim->n_e +
@@ -130,7 +130,7 @@ static int dh_dx_p_eq_offs(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
 
 // i interpolation point j equation index
 static int dh_x_p_eq_offs(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	return jmi->init->F0->n_eq_F + jmi->dae->F->n_eq_F*(jmi_opt_sim->n_e*nlp->n_cp) +
 	       jmi->n_x*jmi_opt_sim->n_e + jmi->n_x*nlp->n_cp*jmi_opt_sim->n_e +
@@ -140,7 +140,7 @@ static int dh_x_p_eq_offs(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
 
 // i interpolation point j equation index
 static int dh_u_p_eq_offs(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	return jmi->init->F0->n_eq_F + jmi->dae->F->n_eq_F*(jmi_opt_sim->n_e*nlp->n_cp) +
 	       jmi->n_x*jmi_opt_sim->n_e + jmi->n_x*nlp->n_cp*jmi_opt_sim->n_e +
@@ -150,7 +150,7 @@ static int dh_u_p_eq_offs(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
 
 // i interpolation point j equation index
 static int dh_w_p_eq_offs(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	return jmi->init->F0->n_eq_F + jmi->dae->F->n_eq_F*(jmi_opt_sim->n_e*nlp->n_cp) +
 	       jmi->n_x*jmi_opt_sim->n_e + jmi->n_x*nlp->n_cp*jmi_opt_sim->n_e +
@@ -160,7 +160,7 @@ static int dh_w_p_eq_offs(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
 
 // Constraint Ceq, element i, collocation point j, constraint k
 static int dh_Ceq_eq_offs(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	return jmi->init->F0->n_eq_F + jmi->dae->F->n_eq_F*(jmi_opt_sim->n_e*nlp->n_cp) +
 	       jmi->n_x*jmi_opt_sim->n_e + jmi->n_x*nlp->n_cp*jmi_opt_sim->n_e +
@@ -171,7 +171,7 @@ static int dh_Ceq_eq_offs(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
 
 // Constraint Heq, constraint i
 static int dh_Heq_eq_offs(jmi_opt_sim_t *jmi_opt_sim, int i) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	return jmi->init->F0->n_eq_F + jmi->dae->F->n_eq_F*(jmi_opt_sim->n_e*nlp->n_cp) +
 	       jmi->n_x*jmi_opt_sim->n_e + jmi->n_x*nlp->n_cp*jmi_opt_sim->n_e +
@@ -188,7 +188,7 @@ static int dg_init_sparse_offs(jmi_opt_sim_t *jmi_opt_sim, int i) {
 
 // i element j collocation point k equation index
 static int dg_coll_spare_offs(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	return nlp->dF0_n_nz +
 	          nlp->dF_dp_n_nz*(i*nlp->n_cp + j + 1) +
@@ -204,7 +204,7 @@ static void print_lp_pols(jmi_opt_sim_t *jmi_opt_sim);
 
 // Copy optimization parameters
 static void lp_radau_copy_p(jmi_opt_sim_t *jmi_opt_sim) {
-	//jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	//jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	int i;
 
@@ -218,7 +218,7 @@ static void lp_radau_copy_p(jmi_opt_sim_t *jmi_opt_sim) {
 // Copy variables, i denotes element and j denotes collocation point
 static void lp_radau_copy_v(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
 
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 
 	int k;
@@ -304,7 +304,7 @@ static void lp_radau_copy_q(jmi_opt_sim_t *jmi_opt_sim) {
 // Copy initial point
 static void lp_radau_copy_initial_point(jmi_opt_sim_t *jmi_opt_sim) {
 
-//	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+//	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 
 	int k;
@@ -358,7 +358,7 @@ static int lp_radau_df(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *df) {
 		return -1;
 	}
 
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	//jmi_t *jmi = jmi_opt_sim->jmi;
 
 	// Copy values into jmi->z
@@ -382,7 +382,7 @@ static int lp_radau_g(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
 
 	int i,j;
 
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 
 	// Path inequality constraints
@@ -410,7 +410,7 @@ static int lp_radau_dg(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 		return -1;
 	}
 	int i,j;
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 
 	// Initial variables
 	lp_radau_copy_p(jmi_opt_sim);
@@ -478,7 +478,7 @@ static int lp_radau_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
 	//	printf("-- g\n");
 
 		int i,j;
-		jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+		jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 		jmi_t *jmi = jmi_opt_sim->jmi;
 
 		// Initial system
@@ -520,7 +520,7 @@ static int lp_radau_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
 			for (l=0;l<nlp->n_cp;l++) {
 				//printf("--- %d %d %d %d %d\n",i,jmi_opt_sim->tp_e[i],k,dh_dx_p_eq_offs(jmi_opt_sim, i, k),l);
 				res[dh_u0_eq_offs(jmi_opt_sim, k)] -=
-					jmi_opt_sim_lp_radau_eval_pol(0,nlp->n_cp, nlp->Lp_coeffs, l)*
+					jmi_opt_sim_lp_eval_pol(0,nlp->n_cp, nlp->Lp_coeffs, l)*
 					   u_coll(jmi_opt_sim,0,l+1,k);
 			}
 		}
@@ -571,7 +571,7 @@ static int lp_radau_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
 					for (l=0;l<nlp->n_cp+1;l++) {
 						//printf("--- %d %d %d %d %d\n",i,jmi_opt_sim->tp_e[i],k,dh_dx_p_eq_offs(jmi_opt_sim, i, k),l);
 						res[dh_dx_p_eq_offs(jmi_opt_sim, i, k)] -=
-							jmi_opt_sim_lp_radau_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp+1, nlp->Lpp_dot_coeffs, l)*
+							jmi_opt_sim_lp_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp+1, nlp->Lpp_dot_coeffs, l)*
 							   x_coll(jmi_opt_sim,jmi_opt_sim->tp_e[i],l,k)/el_length;
 					}
 				}
@@ -582,7 +582,7 @@ static int lp_radau_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
 					for (l=0;l<nlp->n_cp+1;l++) {
 						//printf("--- %d %d %d %d %d\n",i,jmi_opt_sim->tp_e[i],k,dh_dx_p_eq_offs(jmi_opt_sim, i, k),l);
 						res[dh_x_p_eq_offs(jmi_opt_sim, i, k)] -=
-							jmi_opt_sim_lp_radau_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp+1, nlp->Lpp_coeffs, l)*
+							jmi_opt_sim_lp_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp+1, nlp->Lpp_coeffs, l)*
 							   x_coll(jmi_opt_sim,jmi_opt_sim->tp_e[i],l,k);
 					}
 				}
@@ -593,7 +593,7 @@ static int lp_radau_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
 					for (l=0;l<nlp->n_cp;l++) {
 						//printf("--- %d %d %d %d %d\n",i,jmi_opt_sim->tp_e[i],k,dh_dx_p_eq_offs(jmi_opt_sim, i, k),l);
 						res[dh_u_p_eq_offs(jmi_opt_sim, i, k)] -=
-							jmi_opt_sim_lp_radau_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp, nlp->Lp_coeffs, l)*
+							jmi_opt_sim_lp_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp, nlp->Lp_coeffs, l)*
 							   u_coll(jmi_opt_sim,jmi_opt_sim->tp_e[i],l+1,k);
 					}
 				}
@@ -604,7 +604,7 @@ static int lp_radau_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
 					for (l=0;l<nlp->n_cp;l++) {
 						//printf("--- %d %d %d %d %d\n",i,jmi_opt_sim->tp_e[i],k,dh_dx_p_eq_offs(jmi_opt_sim, i, k),l);
 						res[dh_w_p_eq_offs(jmi_opt_sim, i, k)] -=
-							jmi_opt_sim_lp_radau_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp, nlp->Lp_coeffs, l)*
+							jmi_opt_sim_lp_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp, nlp->Lp_coeffs, l)*
 							   w_coll(jmi_opt_sim,jmi_opt_sim->tp_e[i],l+1,k);
 					}
 				}
@@ -638,7 +638,7 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 	}
 
 	int i,j,k,l;
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 
 	// Initial system
@@ -699,7 +699,7 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 		    	nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 				 jmi->n_x*2*jmi_opt_sim->n_e +
 				 jmi->n_u*j + k] =
-					 -jmi_opt_sim_lp_radau_eval_pol(0,nlp->n_cp, nlp->Lp_coeffs, j);
+					 -jmi_opt_sim_lp_eval_pol(0,nlp->n_cp, nlp->Lp_coeffs, j);
 		}
 	}
 
@@ -792,7 +792,7 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 						 jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
 						 (jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
 								 jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*i + k] =
-							 -jmi_opt_sim_lp_radau_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp+1, nlp->Lpp_dot_coeffs, 0)/el_length;
+							 -jmi_opt_sim_lp_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp+1, nlp->Lpp_dot_coeffs, 0)/el_length;
 			}
 
 			// Entries for x_i,j
@@ -806,7 +806,7 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 						 jmi->n_x*(j+1) +
 						 (jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
 								 jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*i + k] =
-							 -jmi_opt_sim_lp_radau_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp+1, nlp->Lpp_dot_coeffs, j+1)/el_length;
+							 -jmi_opt_sim_lp_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp+1, nlp->Lpp_dot_coeffs, j+1)/el_length;
 				}
 			}
 
@@ -834,7 +834,7 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 						 jmi->n_x*(nlp->n_cp + 2) +
 						 (jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
 								 jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*i + k] =
-							 -jmi_opt_sim_lp_radau_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp+1, nlp->Lpp_coeffs, 0);
+							 -jmi_opt_sim_lp_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp+1, nlp->Lpp_coeffs, 0);
 			}
 
 			// Entries for x_i,j
@@ -849,7 +849,7 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 						 jmi->n_x*(j+1) +
 						 (jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
 								 jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*i + k] =
-							 -jmi_opt_sim_lp_radau_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp+1, nlp->Lpp_coeffs, j+1);
+							 -jmi_opt_sim_lp_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp+1, nlp->Lpp_coeffs, j+1);
 				}
 			}
 
@@ -882,7 +882,7 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 						 jmi->n_u*j +
 						 (jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
 								 jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*i + k] =
-							 -jmi_opt_sim_lp_radau_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp, nlp->Lp_coeffs, j);
+							 -jmi_opt_sim_lp_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp, nlp->Lp_coeffs, j);
 				}
 			}
 
@@ -916,7 +916,7 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 						 jmi->n_w*j +
 						 (jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
 								 jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*i + k] =
-							 -jmi_opt_sim_lp_radau_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp, nlp->Lp_coeffs, j);
+							 -jmi_opt_sim_lp_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp, nlp->Lp_coeffs, j);
 				}
 			}
 
@@ -1040,7 +1040,7 @@ static int lp_radau_dh_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *ic
 
 static int lp_radau_write_file_matlab(jmi_opt_sim_t *jmi_opt_sim, char* file_name) {
 	int i,j,k;
-	jmi_opt_sim_lp_radau_t *nlp = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 
 
@@ -1141,7 +1141,7 @@ static int lp_radau_write_file_matlab(jmi_opt_sim_t *jmi_opt_sim, char* file_nam
 
 }
 
-int jmi_opt_sim_lp_radau_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
+int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
         jmi_real_t *hs, int hs_free,
         jmi_real_t *p_opt_init, jmi_real_t *dx_init, jmi_real_t *x_init,
         jmi_real_t *u_init, jmi_real_t *w_init,
@@ -1159,7 +1159,7 @@ int jmi_opt_sim_lp_radau_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 
 	int i, j, k, l;
 
-	jmi_opt_sim_lp_radau_t* opt = (jmi_opt_sim_lp_radau_t*)calloc(1,sizeof(jmi_opt_sim_lp_radau_t));
+	jmi_opt_sim_lp_t* opt = (jmi_opt_sim_lp_t*)calloc(1,sizeof(jmi_opt_sim_lp_t));
 	*jmi_opt_sim = (jmi_opt_sim_t*)opt;
 
     // Compute offsets
@@ -1223,7 +1223,7 @@ int jmi_opt_sim_lp_radau_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 	opt->Lp_dot_vals = (jmi_real_t*)malloc(sizeof(jmi_real_t)*n_cp*n_cp);
 	opt->Lpp_dot_vals = (jmi_real_t*)malloc(sizeof(jmi_real_t)*(n_cp+1)*(n_cp+1));
 
-    jmi_opt_sim_lp_radau_get_pols(n_cp, opt->cp, opt->cpp, opt->Lp_coeffs,
+    jmi_opt_sim_lp_get_pols(n_cp, opt->cp, opt->cpp, opt->Lp_coeffs,
     		opt->Lpp_coeffs, opt->Lp_dot_coeffs,
     		opt->Lpp_dot_coeffs, opt->Lp_dot_vals, opt->Lpp_dot_vals);
 
@@ -2072,13 +2072,13 @@ int jmi_opt_sim_lp_radau_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 	return 0;
 }
 
-int jmi_opt_sim_lp_radau_delete(jmi_opt_sim_t *jmi_opt_sim) {
+int jmi_opt_sim_lp_delete(jmi_opt_sim_t *jmi_opt_sim) {
 
 	return 0;
 }
 
 static void print_problem_stats(jmi_opt_sim_t *jmi_opt_sim) {
-	jmi_opt_sim_lp_radau_t *opt = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *opt = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 
 	int i;
 
@@ -2122,7 +2122,7 @@ static void print_lp_pols(jmi_opt_sim_t *jmi_opt_sim) {
 
 	int i, j;
 
-	jmi_opt_sim_lp_radau_t *opt = (jmi_opt_sim_lp_radau_t*)jmi_opt_sim;
+	jmi_opt_sim_lp_t *opt = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 
     // Print Lagrange polynomials
 	printf("cp = {");
@@ -2244,4 +2244,278 @@ static void print_lp_pols(jmi_opt_sim_t *jmi_opt_sim) {
 
 }
 
+jmi_real_t jmi_opt_sim_lp_eval_pol(jmi_real_t tau, int n, jmi_real_t* pol, int k) {
+	int i;
+	jmi_real_t val = 0;
+	for (i=0;i<n;i++) {
+		val += pol[n*i + k]*pow(tau,n-i-1);
+	}
+	return val;
+}
+
+int jmi_opt_sim_lp_get_pols(int n_cp, jmi_real_t *cp, jmi_real_t *cpp,
+		jmi_real_t *Lp_coeffs, jmi_real_t *Lpp_coeffs,
+		jmi_real_t *Lp_dot_coeffs, jmi_real_t *Lpp_dot_coeffs,
+		                          jmi_real_t *Lp_dot_vals, jmi_real_t *Lpp_dot_vals){
+	int i,j;
+	switch (n_cp) {
+	case 1:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_1[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_1[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_1[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_1[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_1[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_1[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_1[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_1[i][j];
+			}
+		}
+
+		break;
+	case 2:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_2[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_2[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_2[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_2[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_2[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_2[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_2[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_2[i][j];
+			}
+		}
+
+		break;
+	case 3:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_3[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_3[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_3[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_3[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_3[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_3[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_3[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_3[i][j];
+			}
+		}
+		break;
+	case 4:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_4[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_4[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_4[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_4[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_4[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_4[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_4[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_4[i][j];
+			}
+		}
+		break;
+	case 5:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_5[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_5[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_5[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_5[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_5[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_5[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_5[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_5[i][j];
+			}
+		}
+		break;
+	case 6:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_6[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_6[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_6[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_6[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_6[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_6[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_6[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_6[i][j];
+			}
+		}
+		break;
+	case 7:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_7[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_7[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_7[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_7[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_7[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_7[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_7[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_7[i][j];
+			}
+		}
+		break;
+	case 8:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_8[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_8[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_8[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_8[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_8[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_8[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_8[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_8[i][j];
+			}
+		}
+		break;
+	case 9:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_9[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_9[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_9[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_9[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_9[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_9[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_9[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_9[i][j];
+			}
+		}
+		break;
+	case 10:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_10[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_10[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_10[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_10[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_10[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_10[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_10[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_10[i][j];
+			}
+		}
+		break;
+	default:
+		return -1;
+	}
+
+
+	return 0;
+}
 
