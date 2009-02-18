@@ -1,3 +1,15 @@
+/*
+ * This file is part of the JModelica distribution.
+ *
+ * Licensed under the GPL3 open source license
+ * http://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Copyright 2009 Modelon AB.
+ *
+ */
+
+
+
 /** \file jmi_common.h
  *  \brief Internals of the JMI Model interface.
  */

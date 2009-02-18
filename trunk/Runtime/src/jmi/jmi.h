@@ -1,3 +1,14 @@
+/*
+ * This file is part of the JModelica distribution.
+ *
+ * Licensed under the GPL3 open source license
+ * http://www.gnu.org/licenses/agpl-3.0.txt
+ *
+ * Copyright 2009 Modelon AB.
+ *
+ */
+
+
 /** \file jmi.h
  *  \brief The public JMI model interface.
  **/
@@ -83,7 +94,7 @@
  *
  *   Variables (denoted \f$v\f$):
  *
- *    - \f$dx\f$    differentiated variables
+ *    - \f$\dot x\f$    differentiated variables
  *    - \f$x\f$     variables that appear differentiated
  *    - \f$u\f$     inputs
  *    - \f$w\f$     algebraic variables
@@ -91,17 +102,17 @@
  *
  *    with
  *
- *    \f$v = [dx^T, x^T, u^T, w^T, t]^T\f$
+ *    \f$v = [\dot x^T, x^T, u^T, w^T, t]^T\f$
  *
  *   Variables defined at particular time instants (denoted \f$q\f$):
  *
- *      - \f$dx(t_i)\f$    differentiated variables evaluated at time \f$t_i, i \in 1..n_{tp}\f$
+ *      - \f$\dot x(t_i)\f$    differentiated variables evaluated at time \f$t_i, i \in 1..n_{tp}\f$
  *      - \f$x(t_i)\f$     variables that appear differentiated evaluated at time \f$t_i, t_i \in 1..n_{tp}\f$
  *      - \f$u(t_i)\f$     inputs evaluated at time \f$t_i, i \in 1..n_{tp}\f$
  *      - \f$w(t_i)\f$     algebraic variables evaluated at time \f$t_i, i \in 1..n_{tp}\f$
  *
- *    \f$ q = [dx(t_1)^T, x(t_1)^T, u(t_1)^T, w(t_1)^T, ...,
- *           dx(t_{n_{tp}})^T, x(t_{n_{tp}})^T, u(t_{n_{tp}})^T, w(t_{n_{tp}})^T]^T\f$
+ *    \f$ q = [\dot x(t_1)^T, x(t_1)^T, u(t_1)^T, w(t_1)^T, ...,
+ *           \dot x(t_{n_{tp}})^T, x(t_{n_{tp}})^T, u(t_{n_{tp}})^T, w(t_{n_{tp}})^T]^T\f$
  *
  *   All parameters, variables and point-wise evaluated variables are denoted z:
  *
@@ -218,13 +229,13 @@
 #define JMI_DER_PI 4 /**<  \brief Evaluate derivatives w.r.t. independent parameters, \f$p_i\f$.*/
 #define JMI_DER_PD 8 /**<  \brief Evaluate derivatives w.r.t. dependent constants, \f$p_d\f$.*/
 // Flags for evaluation of Jacobians w.r.t. variables in the v vector
-#define JMI_DER_DX 16 /**<  \brief Evaluate derivatives w.r.t. derivatives, \f$dx\f$.*/
+#define JMI_DER_DX 16 /**<  \brief Evaluate derivatives w.r.t. derivatives, \f$\dot x\f$.*/
 #define JMI_DER_X 32 /**<  \brief Evaluate derivatives w.r.t. differentiated variables, \f$x\f$.*/
 #define JMI_DER_U 64 /**<  \brief Evaluate derivatives w.r.t. inputs, \f$u\f$.*/
 #define JMI_DER_W 128 /**<  \brief Evaluate derivatives w.r.t. algebraic variables, \f$w\f$.*/
 #define JMI_DER_T 256 /**<  \brief Evaluate derivatives w.r.t. time, \f$t\f$.*/
 // Flags for evaluation of Jacobians w.r.t. variables in the q vector
-#define JMI_DER_DX_P 512 /**<  \brief Evaluate derivatives w.r.t. derivatives at time points, \f$dx_p\f$.*/
+#define JMI_DER_DX_P 512 /**<  \brief Evaluate derivatives w.r.t. derivatives at time points, \f$\dot x_p\f$.*/
 #define JMI_DER_X_P 1024 /**<  \brief Evaluate derivatives w.r.t. differentiated variables at time points, \f$x_p\f$.*/
 #define JMI_DER_U_P 2048 /**<  \brief Evaluate derivatives w.r.t. inputs at time points, \f$u_p\f$.*/
 #define JMI_DER_W_P 4096 /**<  \brief Evaluate derivatives w.r.t. algebraic variables at time points, \f$w_p\f$.*/

@@ -288,163 +288,385 @@
  * \f$
  *
  * \subsection jmi_opt_sim_jac Jacobians
+ * In order to avoid excessively large Jacobian matrix formulas, the
+ * matrices are split into blocks. For this purpose, introduce
  *
  * \f$
- *   \displaystyle\frac{\partial h}{\partial\bar x}=
+ *   \bar x_1=\left[
+ *   \begin{array}{l}
+ *     p^{opt}_1 \\
+ *     \vdots\\
+ *     p^{opt}_{n_{p^{opt}}} \\
+ *     \dot x_{0,0}\\
+ *     x_{0,0}\\
+ *     u_{0,0}\\
+ *     w_{0,0}
+ *   \end{array}
+ *   \right]
+ *  \f$
+ *
+ * \f$
+ *   \bar x_2=\left[
+ *   \begin{array}{l}
+ *     \dot x_{0,1}\\
+ *     x_{0,1}\\
+ *     u_{0,1}\\
+ *     w_{0,1}\\
+ *     \vdots\\
+ *     \dot x_{0,n_c}\\
+ *     x_{0,n_c}\\
+ *     u_{0,n_c}\\
+ *     w_{0,n_c}\\
+ *     \vdots\\
+ *     \dot x_{n_e-1,n_c}\\
+ *     x_{n_e-1,n_c}\\
+ *     u_{n_e-1,n_c}\\
+ *     w_{n_e-1,n_c}\\
+ *     x_{1,0}\\
+ *     \vdots\\
+ *     x_{n_e,0}\\
+ *   \end{array}
+ *   \right]
+ *  \f$
+ *
+ * \f$
+ *   \bar x_3=\left[
+ *   \begin{array}{l}
+ *     \dot x^p_1\\
+ *     x^p_1\\
+ *     u^p_1\\
+ *     w^p_1\\
+ *     \vdots\\
+ *     \dot x^p_{n_{tp}}\\
+ *     x^p_{n_{tp}}\\
+ *     u^p_{n_{tp}}\\
+ *     w^p_{n_{tp}}\\
+ *     t_0\\
+ *     t_f
+ *   \end{array}
+ *   \right]
+ *  \f$
+ *
+ * and
+ *
+ * \f$
+ * h_1(\bar x) = \left[ \begin{array}{l}
+ *                      F_0(p,v_{0,0}) \\
+ *                      F(p,v_{0,1}) \\
+ *                      \vdots\\
+ *                      F(p,v_{0,n_c})\\
+ *                      \vdots\\
+ *                      F(p,v_{n_e-1,n_c})\\
+ *                      x_{0,n_c}-x_{1,0}\\
+ *                      \vdots \\
+ *                      x_{n_e-1,n_c}-x_{n_e,0} \\
+ *   \end{array}
+ *             \right]
+ * \f$
+ *
+ * \f$
+ * h_2(\bar x) = \left[ \begin{array}{l}
+ *                      ^{u}r_{0,0} \\
+ *                      ^{\dot x}r_{0,1}\\
+ *                      \vdots\\
+ *                      ^{\dot x}r_{0,n_c}\\
+ *                      \vdots\\
+ *                      ^{\dot x}r_{n_e-1,n_c}\\
+ *                      ^{\dot x}r_{1}^p\\
+ *                      ^{x}r_{1}^p\\
+ *                      ^{u}r_{1}^p\\
+ *                      ^{w}r_{1}^p\\
+ *                      \vdots\\
+ *                      ^{\dot x}r_{n_{tp}}^p\\
+ *                      ^{x}r_{n_{tp}}^p\\
+ *                      ^{u}r_{n_{tp}}^p\\
+ *                      ^{w}r_{n_{tp}}^p\\
+ *   \end{array}
+ *             \right]
+ * \f$
+ *
+ * \f$
+ * h_3(\bar x) = \left[ \begin{array}{l}
+ *                      C_{eq}(p,v_{0,1},q)\\
+ *                      \vdots\\
+ *                      C_{eq}(p,v_{0,n_c},q)\\
+ *                      \vdots\\
+ *                      C_{eq}(p,v_{n_e-1,n_c},q)\\
+ *                      H_{eq}(p,q)
+ *                      \end{array}
+ *             \right]
+ * \f$
+ *
+ * The Jacobian of the equality contstraint in then given by
+ *
+ * \f$
+ * \displaystyle \frac{\partial h}{\partial\bar x}=
+ *  \left[ \begin{array}{ccc}
+ *  \displaystyle \frac{\partial h_1}{\partial \bar x_1} &
+ *  \displaystyle\frac{\partial h_1}{\partial \bar x_2} &
+ *  \displaystyle\frac{\partial h_1}{\partial \bar x_3}\\
+ *  \displaystyle \frac{\partial h_2}{\partial \bar x_1} &
+ *  \displaystyle\frac{\partial h_2}{\partial \bar x_2} &
+ *  \displaystyle\frac{\partial h_2}{\partial \bar x_3}\\
+ *  \displaystyle \frac{\partial h_3}{\partial \bar x_1} &
+ *  \displaystyle\frac{\partial h_3}{\partial \bar x_2} &
+ *  \displaystyle\frac{\partial h_3}{\partial \bar x_3}
+ *  \end{array}
+ *  \right]
+ * \f$
+ *
+ * \f$
+ *   \displaystyle \frac{\partial h_1}{\partial \bar x_1}=
  *     \left[
- *         \begin{array}{c cccc cccc c cccc c cccc cccc cccc cc}
+ *         \begin{array}{c cccc}
  *           \displaystyle{\frac{\partial F_0}{\partial p^{opt}}} &
  *           \displaystyle{\frac{\partial F_0}{\partial \dot x_{0,0}}} &
  *           \displaystyle{\frac{\partial F_0}{\partial x_{0,0}}} &
  *           \displaystyle{\frac{\partial F_0}{\partial u_{0,0}}} &
- *           \displaystyle{\frac{\partial F_0}{\partial w_{0,0}}} &
- *           &&& &&&& &&&& &&&& &&&&&&&
- *           \displaystyle{\frac{\partial F_0}{\partial t_0}}\\
- *           \displaystyle{\frac{\partial F}{\partial p^{opt}}} & &&&&
- *           \displaystyle{\frac{\partial F}{\partial \dot x_{0,1}}} &
- *           \displaystyle{\frac{\partial F}{\partial x_{0,1}}} &
- *           \displaystyle{\frac{\partial F}{\partial u_{0,1}}} &
- *           \displaystyle{\frac{\partial F}{\partial w_{0,1}}}
- *           & &&& &&&& &&&& &&&&&& &
- *           \displaystyle{\frac{\partial F}{\partial t_0}} &
- *           \displaystyle{\frac{\partial F}{\partial t_f}}\\
- *           & &&&& &&&& \ddots &&& \\
- *           \displaystyle{\frac{\partial F}{\partial p^{opt}}} & &&&& & &&&&
- *           \displaystyle{\frac{\partial F}{\partial \dot x_{0,n_c}}} &
- *           \displaystyle{\frac{\partial F}{\partial x_{0,n_c}}} &
- *           \displaystyle{\frac{\partial F}{\partial u_{0,n_c}}} &
- *           \displaystyle{\frac{\partial F}{\partial w_{0,n_c}}}
- *           & &&& &&&&&&&&&&
- *           \displaystyle{\frac{\partial F}{\partial t_0}} &
- *           \displaystyle{\frac{\partial F}{\partial t_f}}\\
- *           & &&&& &&&& & &&&& \ddots &&& \\
- *           \displaystyle{\frac{\partial F}{\partial p^{opt}}}
- *            & &&&& & &&&& & &&&&
- *           \displaystyle{\frac{\partial F}{\partial \dot x_{n_e-1,n_c}}} &
- *           \displaystyle{\frac{\partial F}{\partial x_{n_e-1,n_c}}} &
- *           \displaystyle{\frac{\partial F}{\partial u_{n_e-1,n_c}}} &
- *           \displaystyle{\frac{\partial F}{\partial w_{n_e-1,n_c}}}& &&& &&&&&
- *           \displaystyle{\frac{\partial F}{\partial t_0}} &
- *           \displaystyle{\frac{\partial F}{\partial t_f}}\\
- *           & &&&& &&&& & &I&&& & &&&&  -I&\\
- *           & &&&& &&&& & &&&& \ddots &&&& && \ddots \\
- *           & &&&& &&&& & &&&& & &&&& & & -I\\
- *           & &&&& &&&& & &&&& & &I&&& & & & -I\\
- *           & &&I&&
- *           &&\displaystyle{\frac{\partial ^{u}r_{0,0}}{\partial u_{0,1}}} && &
- *           &&\displaystyle{\frac{\partial ^{u}r_{0,0}}
- *           {\partial u_{0,n_c}}} & \\
- *           & &\displaystyle{\frac{\partial ^{x}r_{0,1}}{\partial x_{0,0}}}&
- *           && I & \displaystyle{\frac{\partial ^{\dot x}r_{0,1}}
- *           {\partial x_{0,1}}} &&& &
- *           &\displaystyle{\frac{\partial ^{\dot x}r_{0,1}}
- *           {\partial x_{0,n_c}}} &&& & &&&&
- *           &&&&&&&&
- *           \displaystyle{\frac{\partial ^{\dot x}r_{0,1}}{\partial t_0}}&
- *           \displaystyle{\frac{\partial ^{\dot x}r_{0,1}}{\partial t_f}}\\
- *           & &&&& &&&& \ddots &&& \\
+ *           \displaystyle{\frac{\partial F_0}{\partial w_{0,0}}} \\
+ *           \displaystyle{\frac{\partial F}{\partial p^{opt}}} \\
+ *           & &&&\\
+ *           \displaystyle{\frac{\partial F}{\partial p^{opt}}} & &&&\\
+ *           & &&&\\
+ *           \displaystyle{\frac{\partial F}{\partial p^{opt}}} \\
+ *           0& & \\
+ *           & &\ddots& \\
+ *           & &&&0 \\
+ *         \end{array}
+ *      \right]
+ *  \f$
+ *
+ * \f$
+ *   \displaystyle \frac{\partial h_2}{\partial \bar x_1}=
+ *     \left[
+ *         \begin{array}{c cccc}
+ *           0& 0&0&I &0 \\
+ *            & &\displaystyle{\frac{\partial ^{\dot x}r_{0,1}}
+ *           {\partial x_{0,0}}}&0& \\
+ *           & &\vdots&& \\
  *           & &\displaystyle{\frac{\partial ^{\dot x}r_{0,n_c}}
  *           {\partial x_{0,0}}}
- *           &&&  & \displaystyle{\frac{\partial ^{\dot x}r_{0,n_c}}
- *           {\partial x_{0,1}}} &&& &
- *           I&\displaystyle{\frac{\partial ^{\dot x}r_{0,n_c}}
- *           {\partial x_{0,n_c}}}
- *           &&&&&&&& &&&&&&&&
- *           \displaystyle{\frac{\partial ^{\dot x}r_{0,n_c}}{\partial t_0}}&
- *           \displaystyle{\frac{\partial ^{\dot x}r_{0,n_c}}{\partial t_f}}\\
- *           & &&&& &&&& & &&&& \ddots &&&& &&  \\
- *           & &&&& &&&& & &&&& & I &
- *           \displaystyle{\frac{\partial ^{\dot x}r_{n_e-1,n_c}}
- *             {\partial x_{n_e-1,n_c}}}
- *           &&&& &\displaystyle{\frac{\partial ^{\dot x}r_{n_e-1,n_c}}
- *           {\partial x_{n_e-1,0}}} &&&&&&
- *           \displaystyle{\frac{\partial ^{\dot x}r_{n_e-1,n_c}}
- *           {\partial t_0}}&
- *           \displaystyle{\frac{\partial ^{\dot x}r_{n_e-1,n_c}}
- *           {\partial t_f}}\\
+ *           &&  \\
+ *           & &&&\\
+ *           \vdots& \vdots&&\vdots&\vdots\\
  *           & &\displaystyle{\frac{\partial ^{\dot x^p}r_{1}}
  *           {\partial x_{i_1,0}}}&
- *           &&  & \displaystyle{\frac{\partial ^{\dot x^p}r_{1}}
- *           {\partial x_{i_1,1}}} &&& &
- *           &\displaystyle{\frac{\partial ^{\dot x^p}r_{1}}
- *           {\partial x_{i_1,n_c}}} &&& &
- *           &&&& &&& &I &&& &
- *           \displaystyle{\frac{\partial ^{\dot x^p}r_{1}}{\partial t_0}} &
- *           \displaystyle{\frac{\partial ^{\dot x^p}r_{1}}{\partial t_f}}\\
+ *           &  \\
  *           & &\displaystyle{\frac{\partial ^{x^p}r_{1}}{\partial x_{i_1,0}}}&
- *           &&  & \displaystyle{\frac{\partial ^{x^p}r_{1}}
- *           {\partial x_{i_1,1}}} &&& &
- *           &\displaystyle{\frac{\partial ^{x^p}r_{1}}{\partial x_{i_1,n_c}}}
- *           &&& &&&&& &&&&&I\\
- *           & &&&&  & &\displaystyle{\frac{\partial ^{u^p}r_{1}}
- *           {\partial u_{i_1,1}}} && &
- *           &&\displaystyle{\frac{\partial ^{u^p}r_{1}}{\partial u_{i_1,n_c}}}
- *            && &&&&& &&&&&&I\\
- *           & &&&&  & &&\displaystyle{\frac{\partial ^{w^p}r_{1}}
- *           {\partial w_{i_1,1}}} & &
- *           &&&\displaystyle{\frac{\partial ^{w^p}r_{1}}{\partial w_{i_1,n_c}}}
- *            & & &&&& &&&&&&&I\\
+ *           &  \\
+ *           & &&&\\
+ *           0& 0&...&0&0\\
+ *         \end{array}
+ *      \right]
+ *  \f$
+ *
+ *
+ * \f$
+ *   \displaystyle \frac{\partial h_3}{\partial \bar x_1}=
+ *     \left[
+ *         \begin{array}{c cccc}
  *           \displaystyle{\frac{\partial C_{eq}}{\partial p^{opt}}} &
  *           \displaystyle{\frac{\partial C_{eq}}{\partial \dot x_{0,0}}} &
  *           \displaystyle{\frac{\partial C_{eq}}{\partial x_{0,0}}} &
  *           \displaystyle{\frac{\partial C_{eq}}{\partial u_{0,0}}} &
- *           \displaystyle{\frac{\partial C_{eq}}{\partial w_{0,0}}} & &&&
- *           &&&&& &&&&&&& &&&
- *           \displaystyle{\frac{\partial C_{eq}}{\partial \dot x_{i_l}^p}} &
- *           \displaystyle{\frac{\partial C_{eq}}{\partial x_{i_l}^p}} &
- *           \displaystyle{\frac{\partial C_{eq}}{\partial u_{i_l}^p}} &
- *           \displaystyle{\frac{\partial C_{eq}}{\partial w_{i_l}^p}}  &
- *           \displaystyle{\frac{\partial C_{eq}}{\partial t_0}} &
- *           \displaystyle{\frac{\partial C_{eq}}{\partial t_f}} \\
- *           \displaystyle{\frac{\partial C_{eq}}{\partial p^{opt}}} & &&&&
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial w_{0,0}}} \\
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial p^{opt}}} & &&&\\
+ *           & &&& \\
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial p^{opt}}} & &&&\\
+ *           & &&& \\
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial p^{opt}}} &
+ *           &&&  \\
+ *           \displaystyle{\frac{\partial H_{eq}}{\partial p^{opt}}} &
+ *           &&&  \\
+ *         \end{array}
+ *     \right]
+ *  \f$
+ *
+ * \f$
+ *   \displaystyle \frac{\partial h_1}{\partial \bar x_2}=
+ *     \left[
+ *         \begin{array}{c cc ccccccccccc ccc cccc}
+ *         0 & &&&&&& ... &&&&&& 0 &0&&\\
+ *           \displaystyle{\frac{\partial F}{\partial \dot x_{0,1}}} &
+ *           \displaystyle{\frac{\partial F}{\partial x_{0,1}}} &
+ *           \displaystyle{\frac{\partial F}{\partial u_{0,1}}} &
+ *           \displaystyle{\frac{\partial F}{\partial w_{0,1}}}
+ *           &&&&&&&&&&&&\ddots\\
+ *           & &&& \ddots  \\
+ *           &&&&& \displaystyle{\frac{\partial F}{\partial \dot x_{0,n_c}}} &
+ *           \displaystyle{\frac{\partial F}{\partial x_{0,n_c}}} &
+ *           \displaystyle{\frac{\partial F}{\partial u_{0,n_c}}} &
+ *           \displaystyle{\frac{\partial F}{\partial w_{0,n_c}}}
+ *           &&&&&&&\\
+ *           & &&&& &&&&   \ddots\\
+ *            & &&&& & && &&
+ *           \displaystyle{\frac{\partial F}{\partial \dot x_{n_e-1,n_c}}} &
+ *           \displaystyle{\frac{\partial F}{\partial x_{n_e-1,n_c}}} &
+ *           \displaystyle{\frac{\partial F}{\partial u_{n_e-1,n_c}}} &
+ *           \displaystyle{\frac{\partial F}{\partial w_{n_e-1,n_c}}} &&&&0\\
+ *             &&&& & &I&&& & &&&&  -I&\\
+ *             &&&& & &&&& \ddots &&&& && \ddots \\
+ *             &&&& & &&&& & &&&& & & -I\\
+ *             &&&& & &&&& & &I&&& & & & -I\\
+ *         \end{array}
+ *      \right]
+ *  \f$
+ *
+ * \f$
+ *   \displaystyle \frac{\partial h_2}{\partial \bar x_2}=
+ *     \left[
+ *         \begin{array}{c cc ccccccccccc ccc cccc}
+ *           &&\displaystyle{\frac{\partial ^{u}r_{0,0}}{\partial u_{0,1}}} && &
+ *           &&\displaystyle{\frac{\partial ^{u}r_{0,0}}
+ *           {\partial u_{0,n_c}}} & \\
+ *           I & \displaystyle{\frac{\partial ^{\dot x}r_{0,1}}
+ *           {\partial x_{0,1}}} &&& &
+ *           &\displaystyle{\frac{\partial ^{\dot x}r_{0,1}}
+ *           {\partial x_{0,n_c}}} &&& \\
+ *            &&&& \ddots &&& \\
+ *             & \displaystyle{\frac{\partial ^{\dot x}r_{0,n_c}}
+ *           {\partial x_{0,1}}} &&& &
+ *           I&\displaystyle{\frac{\partial ^{\dot x}r_{0,n_c}}
+ *           {\partial x_{0,n_c}}}\\
+ *            &&&& & &&&& \ddots &&&& &&  \\
+ *            &&&& & &&&& & I &
+ *           \displaystyle{\frac{\partial ^{\dot x}r_{n_e-1,n_c}}
+ *             {\partial x_{n_e-1,n_c}}}
+ *           &&&& &\displaystyle{\frac{\partial ^{\dot x}r_{n_e-1,n_c}}
+ *           {\partial x_{n_e-1,0}}}\\
+ *             & \displaystyle{\frac{\partial ^{\dot x^p}r_{1}}
+ *           {\partial x_{i_1,1}}} &&& &
+ *           &\displaystyle{\frac{\partial ^{\dot x^p}r_{1}}
+ *           {\partial x_{i_1,n_c}}} \\
+ *           & \displaystyle{\frac{\partial ^{x^p}r_{1}}
+ *           {\partial x_{i_1,1}}} &&& &
+ *           &\displaystyle{\frac{\partial ^{x^p}r_{1}}{\partial x_{i_1,n_c}}}\\
+ *             & &\displaystyle{\frac{\partial ^{u^p}r_{1}}
+ *           {\partial u_{i_1,1}}} && &
+ *           &&\displaystyle{\frac{\partial ^{u^p}r_{1}}
+ *           {\partial u_{i_1,n_c}}}\\
+ *            & &&\displaystyle{\frac{\partial ^{w^p}r_{1}}
+ *           {\partial w_{i_1,1}}} & &
+ *           &&&\displaystyle{\frac{\partial ^{w^p}r_{1}}{\partial w_{i_1,n_c}}}
+ *         \end{array}
+ *      \right]
+ *  \f$
+ *
+ * \f$
+ *   \displaystyle \frac{\partial h_3}{\partial \bar x_2}=
+ *     \left[
+ *         \begin{array}{c cc ccccccccccc ccc cccc}
+ *         0 & &&&&&& ... &&&&&& 0 &0&&\\
  *           \displaystyle{\frac{\partial C_{eq}}{\partial \dot x_{0,1}}} &
  *           \displaystyle{\frac{\partial C_{eq}}{\partial x_{0,1}}} &
  *           \displaystyle{\frac{\partial C_{eq}}{\partial u_{0,1}}} &
  *           \displaystyle{\frac{\partial C_{eq}}{\partial w_{0,1}}}
- *           &&&&& &&&&&&&&&&
- *           \displaystyle{\frac{\partial C_{eq}}{\partial \dot x_{i_l}^p}} &
- *           \displaystyle{\frac{\partial C_{eq}}{\partial x_{i_l}^p}} &
- *           \displaystyle{\frac{\partial C_{eq}}{\partial u_{i_l}^p}} &
- *           \displaystyle{\frac{\partial C_{eq}}{\partial w_{i_l}^p}}  &
- *           \displaystyle{\frac{\partial C_{eq}}{\partial t_0}} &
- *           \displaystyle{\frac{\partial C_{eq}}{\partial t_f}}\\
- *           & &&&& &&&& \ddots &&& \\
- *           \displaystyle{\frac{\partial C_{eq}}{\partial p^{opt}}} & &&&&
- *           & &&&&
- *           \displaystyle{\frac{\partial C_{eq}}{\partial \dot x_{0,n_c}}} &
+ *           &&&&&&&&&&&&\ddots\\
+ *           & &&& \ddots  \\
+ *           &&&&& \displaystyle{\frac{\partial C_{eq}}
+ *           {\partial \dot x_{0,n_c}}} &
  *           \displaystyle{\frac{\partial C_{eq}}{\partial x_{0,n_c}}} &
  *           \displaystyle{\frac{\partial C_{eq}}{\partial u_{0,n_c}}} &
  *           \displaystyle{\frac{\partial C_{eq}}{\partial w_{0,n_c}}}
- *           &&&&&&&&&&
- *           \displaystyle{\frac{\partial C_{eq}}{\partial \dot x_{i_l}^p}} &
- *           \displaystyle{\frac{\partial C_{eq}}{\partial x_{i_l}^p}} &
- *           \displaystyle{\frac{\partial C_{eq}}{\partial u_{i_l}^p}} &
- *           \displaystyle{\frac{\partial C_{eq}}{\partial w_{i_l}^p}}  &
- *           \displaystyle{\frac{\partial C_{eq}}{\partial t_0}} &
- *           \displaystyle{\frac{\partial C_{eq}}{\partial t_f}}\\
- *           & &&&& &&&& & &&&& \ddots &&& \\
- *           \displaystyle{\frac{\partial C_{eq}}{\partial p^{opt}}} &
- *           &&&& & &&&& & && &&
+ *           &&&&&&&\\
+ *           & &&&& &&&&   \ddots\\
+ *            & &&&& & && &&
  *           \displaystyle{\frac{\partial C_{eq}}{\partial \dot x_{n_e-1,n_c}}}&
  *           \displaystyle{\frac{\partial C_{eq}}{\partial x_{n_e-1,n_c}}} &
  *           \displaystyle{\frac{\partial C_{eq}}{\partial u_{n_e-1,n_c}}} &
- *           \displaystyle{\frac{\partial C_{eq}}{\partial w_{n_e-1,n_c}}} &
+ *           \displaystyle{\frac{\partial C_{eq}}
+ *           {\partial w_{n_e-1,n_c}}} &&&0\\
+ *            0 &&&& & &&&&... & &&&&  &&0\\
+ *         \end{array}
+ *      \right]
+ *  \f$
+ *
+ * \f$
+ *   \displaystyle \frac{\partial h_1}{\partial \bar x_3}=
+ *     \left[
+ *         \begin{array}{ccc cc}
+ *           0&&& \displaystyle{\frac{\partial F_0}{\partial t_0}}\\
+ *           &\ddots&&\displaystyle{\frac{\partial F}{\partial t_0}} &
+ *           \displaystyle{\frac{\partial F}{\partial t_f}}\\
+ *           &&& \vdots &\vdots \\
+ *           &&&\displaystyle{\frac{\partial F}{\partial t_0}} &
+ *           \displaystyle{\frac{\partial F}{\partial t_f}}\\
+ *           &&& \vdots& \vdots \\
+ *           &&0&\displaystyle{\frac{\partial F}{\partial t_0}} &
+ *           \displaystyle{\frac{\partial F}{\partial t_f}}\\
+ *           0\\
+ *           &\ddots\\
+ *           &&&&0
+ *         \end{array}
+ *      \right]
+ *  \f$
+ *
+ * \f$
+ *   \displaystyle \frac{\partial h_2}{\partial \bar x_3}=
+ *     \left[
+ *         \begin{array}{cccc ccc}
+ *           0& &&& ... &&0 \\
+ *           &\ddots&&&
+ *           \displaystyle{\frac{\partial ^{\dot x}r_{0,1}}{\partial t_0}}&&
+ *           \displaystyle{\frac{\partial ^{\dot x}r_{0,1}}{\partial t_f}}\\
+ *           &&&&\vdots &&\vdots\\
  *           &&&&
+ *           \displaystyle{\frac{\partial ^{\dot x}r_{0,n_c}}{\partial t_0}}&&
+ *           \displaystyle{\frac{\partial ^{\dot x}r_{0,n_c}}{\partial t_f}}\\
+ *           & &&&\vdots  &&\vdots \\
+ *           &&&0&
+ *           \displaystyle{\frac{\partial ^{\dot x}r_{n_e-1,n_c}}
+ *           {\partial t_0}}&&
+ *           \displaystyle{\frac{\partial ^{\dot x}r_{n_e-1,n_c}}
+ *           {\partial t_f}}\\
+ *           I &&& &
+ *           \displaystyle{\frac{\partial ^{\dot x^p}r_{1}}{\partial t_0}} &&
+ *           \displaystyle{\frac{\partial ^{\dot x^p}r_{1}}{\partial t_f}}\\
+ *           &I&&&0\\
+ *           &&I&&&\ddots\\
+ *           &&&I&&&0\\
+ *         \end{array}
+ *      \right]
+ *  \f$
+ *
+ * \f$
+ *   \displaystyle \frac{\partial h_3}{\partial \bar x_3}=
+ *     \left[
+ *         \begin{array}{cccc cc}
  *           \displaystyle{\frac{\partial C_{eq}}{\partial \dot x_{i_l}^p}} &
  *           \displaystyle{\frac{\partial C_{eq}}{\partial x_{i_l}^p}} &
  *           \displaystyle{\frac{\partial C_{eq}}{\partial u_{i_l}^p}} &
  *           \displaystyle{\frac{\partial C_{eq}}{\partial w_{i_l}^p}}  &
  *           \displaystyle{\frac{\partial C_{eq}}{\partial t_0}} &
  *           \displaystyle{\frac{\partial C_{eq}}{\partial t_f}} \\
- *           \displaystyle{\frac{\partial H_{eq}}{\partial p^{opt}}} &
- *           &&&& & &&&& & &&&& &&&& &&&&
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial \dot x_{i_l}^p}} &
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial x_{i_l}^p}} &
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial u_{i_l}^p}} &
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial w_{i_l}^p}}  &
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial t_0}} &
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial t_f}}\\
+ *            \vdots &&&&&\vdots \\
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial \dot x_{i_l}^p}} &
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial x_{i_l}^p}} &
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial u_{i_l}^p}} &
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial w_{i_l}^p}}  &
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial t_0}} &
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial t_f}}\\
+ *            \vdots &&&&&\vdots \\
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial \dot x_{i_l}^p}} &
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial x_{i_l}^p}} &
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial u_{i_l}^p}} &
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial w_{i_l}^p}}  &
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial t_0}} &
+ *           \displaystyle{\frac{\partial C_{eq}}{\partial t_f}} \\
  *           \displaystyle{\frac{\partial H_{eq}}{\partial \dot x_{i_l}^p}} &
  *           \displaystyle{\frac{\partial H_{eq}}{\partial x_{i_l}^p}} &
  *           \displaystyle{\frac{\partial H_{eq}}{\partial u_{i_l}^p}} &
  *           \displaystyle{\frac{\partial H_{eq}}{\partial w_{i_l}^p}}  \\
  *         \end{array}
- *     \right]
- * \f$
+ *      \right]
+ *  \f$
+ *
  *
  * where
  *
@@ -519,73 +741,106 @@
  *  \right|_{p,v_{i,j},q} \left(\sum_{k=0}^{i-1}h_k + \tau_jh_i \right)
  * \f$<br>
  *
+ * The Jacobian of the inequality constraints can now be expressed
+ *
  * \f$
- *   \displaystyle\frac{\partial g}{\partial\bar x}=
+ * \displaystyle \frac{\partial g}{\partial\bar x}=
+ *  \left[ \begin{array}{ccc}
+ *  \displaystyle \frac{\partial g}{\partial \bar x_1} &
+ *  \displaystyle\frac{\partial g}{\partial \bar x_2} &
+ *  \displaystyle\frac{\partial g}{\partial \bar x_3}\\
+ *  \end{array}
+ *  \right]
+ * \f$
+ *
+ * \f$
+ *   \displaystyle \frac{\partial g}{\partial \bar x_1}=
  *     \left[
- *         \begin{array}{c cccc cccc c cccc c cccc cccc cccc cc}
+ *         \begin{array}{c cccc}
  *           \displaystyle{\frac{\partial C_{ineq}}{\partial p^{opt}}} &
  *           \displaystyle{\frac{\partial C_{ineq}}{\partial \dot x_{0,0}}} &
  *           \displaystyle{\frac{\partial C_{ineq}}{\partial x_{0,0}}} &
  *           \displaystyle{\frac{\partial C_{ineq}}{\partial u_{0,0}}} &
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial w_{0,0}}} & &&&
- *           &&&&& &&&&&&& &&&
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial \dot x_{i_l}^p}} &
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial x_{i_l}^p}} &
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial u_{i_l}^p}} &
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial w_{i_l}^p}}  &
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial t_0}} &
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial t_f}} \\
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial p^{opt}}} & &&&&
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial w_{0,0}}} \\
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial p^{opt}}} & &&&\\
+ *           & &&& \\
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial p^{opt}}} & &&&\\
+ *           & &&& \\
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial p^{opt}}} &
+ *           &&&  \\
+ *           \displaystyle{\frac{\partial H_{ineq}}{\partial p^{opt}}} &
+ *           &&&  \\
+ *         \end{array}
+ *     \right]
+ *  \f$
+ *
+ * \f$
+ *   \displaystyle \frac{\partial g}{\partial \bar x_2}=
+ *     \left[
+ *         \begin{array}{c cc ccccccccccc ccc cccc}
+ *         0 & &&&&&& ... &&&&&& 0 &0&&\\
  *           \displaystyle{\frac{\partial C_{ineq}}{\partial \dot x_{0,1}}} &
  *           \displaystyle{\frac{\partial C_{ineq}}{\partial x_{0,1}}} &
  *           \displaystyle{\frac{\partial C_{ineq}}{\partial u_{0,1}}} &
  *           \displaystyle{\frac{\partial C_{ineq}}{\partial w_{0,1}}}
- *           &&&&& &&&&&&&&&&
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial \dot x_{i_l}^p}} &
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial x_{i_l}^p}} &
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial u_{i_l}^p}} &
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial w_{i_l}^p}}  &
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial t_0}} &
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial t_f}}\\
- *           & &&&& &&&& \ddots &&& \\
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial p^{opt}}} & &&&&
- *           & &&&&
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial \dot x_{0,n_c}}} &
+ *           &&&&&&&&&&&&\ddots\\
+ *           & &&& \ddots  \\
+ *           &&&&& \displaystyle{\frac{\partial C_{ineq}}
+ *           {\partial \dot x_{0,n_c}}} &
  *           \displaystyle{\frac{\partial C_{ineq}}{\partial x_{0,n_c}}} &
  *           \displaystyle{\frac{\partial C_{ineq}}{\partial u_{0,n_c}}} &
  *           \displaystyle{\frac{\partial C_{ineq}}{\partial w_{0,n_c}}}
- *           &&&&&&&&&&
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial \dot x_{i_l}^p}} &
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial x_{i_l}^p}} &
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial u_{i_l}^p}} &
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial w_{i_l}^p}}  &
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial t_0}} &
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial t_f}}\\
- *           & &&&& &&&& & &&&& \ddots &&& \\
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial p^{opt}}} &
- *           &&&& & &&&& & && &&
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial
- *           \dot x_{n_e-1,n_c}}}&
+ *           &&&&&&&\\
+ *           & &&&& &&&&   \ddots\\
+ *            & &&&& & && &&
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial \dot x_{n_e-1,n_c}}}&
  *           \displaystyle{\frac{\partial C_{ineq}}{\partial x_{n_e-1,n_c}}} &
  *           \displaystyle{\frac{\partial C_{ineq}}{\partial u_{n_e-1,n_c}}} &
- *           \displaystyle{\frac{\partial C_{ineq}}{\partial w_{n_e-1,n_c}}} &
- *           &&&&
+ *           \displaystyle{\frac{\partial C_{ineq}}
+ *           {\partial w_{n_e-1,n_c}}} &&&0\\
+ *            0 &&&& & &&&&... & &&&&  &&0\\
+ *         \end{array}
+ *      \right]
+ *  \f$
+ *
+ * \f$
+ *   \displaystyle \frac{\partial g}{\partial \bar x_3}=
+ *     \left[
+ *         \begin{array}{cccc cc}
  *           \displaystyle{\frac{\partial C_{ineq}}{\partial \dot x_{i_l}^p}} &
  *           \displaystyle{\frac{\partial C_{ineq}}{\partial x_{i_l}^p}} &
  *           \displaystyle{\frac{\partial C_{ineq}}{\partial u_{i_l}^p}} &
  *           \displaystyle{\frac{\partial C_{ineq}}{\partial w_{i_l}^p}}  &
  *           \displaystyle{\frac{\partial C_{ineq}}{\partial t_0}} &
  *           \displaystyle{\frac{\partial C_{ineq}}{\partial t_f}} \\
- *           \displaystyle{\frac{\partial H_{ineq}}{\partial p^{opt}}} &
- *           &&&& & &&&& & &&&& &&&& &&&&
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial \dot x_{i_l}^p}} &
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial x_{i_l}^p}} &
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial u_{i_l}^p}} &
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial w_{i_l}^p}}  &
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial t_0}} &
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial t_f}}\\
+ *            \vdots &&&&&\vdots \\
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial \dot x_{i_l}^p}} &
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial x_{i_l}^p}} &
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial u_{i_l}^p}} &
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial w_{i_l}^p}}  &
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial t_0}} &
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial t_f}}\\
+ *            \vdots &&&&&\vdots \\
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial \dot x_{i_l}^p}} &
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial x_{i_l}^p}} &
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial u_{i_l}^p}} &
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial w_{i_l}^p}}  &
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial t_0}} &
+ *           \displaystyle{\frac{\partial C_{ineq}}{\partial t_f}} \\
  *           \displaystyle{\frac{\partial H_{ineq}}{\partial \dot x_{i_l}^p}} &
  *           \displaystyle{\frac{\partial H_{ineq}}{\partial x_{i_l}^p}} &
  *           \displaystyle{\frac{\partial H_{ineq}}{\partial u_{i_l}^p}} &
  *           \displaystyle{\frac{\partial H_{ineq}}{\partial w_{i_l}^p}}  \\
  *         \end{array}
- *     \right]
- * \f$
-
+ *      \right]
+ *  \f$
+ *
  * where
  *
  * \f$
@@ -599,6 +854,7 @@
  *  \left. \displaystyle{\frac{\partial C_{ineq}}{\partial t}}
  *  \right|_{p,v_{i,j},q} \left(\sum_{k=0}^{i-1}h_k + \tau_jh_i \right)
  * \f$<br>
+ *
  * \subsection jmi_opt_sim_hess Hessian of the Lagrangian
  *
  * \section jmi_opt_sim_lp_create Creation of a jmi_opt_sim_t struct
