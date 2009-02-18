@@ -429,6 +429,10 @@ int jmi_func_ad_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t* res) {
 
 }
 
+int jmi_func_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res) {
+	return jmi_func_ad_F(jmi,func, res);
+}
+
 // Convenience function for accessing the number of non-zeros in the AD
 // Jacobian.
 int jmi_func_ad_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz) {
@@ -709,7 +713,7 @@ int jmi_delete(jmi_t* jmi){
 }
 
 int jmi_dae_F(jmi_t* jmi, jmi_real_t* res) {
-	return jmi_func_ad_F(jmi,jmi->dae->F, res);
+	return jmi_func_F(jmi,jmi->dae->F, res);
 }
 
 int jmi_dae_dF(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
@@ -775,7 +779,7 @@ int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 }
 
 int jmi_init_F0(jmi_t* jmi, jmi_real_t* res) {
-	return jmi_func_ad_F(jmi,jmi->init->F0, res);
+	return jmi_func_F(jmi,jmi->init->F0, res);
 }
 
 int jmi_init_dF0(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
@@ -842,7 +846,7 @@ int jmi_init_dF0_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
 
 
 int jmi_init_F1(jmi_t* jmi, jmi_real_t* res) {
-	return jmi_func_ad_F(jmi,jmi->init->F1, res);
+	return jmi_func_F(jmi,jmi->init->F1, res);
 }
 
 int jmi_init_dF1(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
@@ -908,7 +912,7 @@ int jmi_init_dF1_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
 }
 
 int jmi_opt_J(jmi_t* jmi, jmi_real_t* res) {
-	return jmi_func_ad_F(jmi,jmi->opt->J, res);
+	return jmi_func_F(jmi,jmi->opt->J, res);
 }
 
 int jmi_opt_dJ(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
@@ -974,7 +978,7 @@ int jmi_opt_dJ_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 }
 
 int jmi_opt_Ceq(jmi_t* jmi, jmi_real_t* res) {
-	return jmi_func_ad_F(jmi,jmi->opt->Ceq, res);
+	return jmi_func_F(jmi,jmi->opt->Ceq, res);
 }
 
 int jmi_opt_dCeq(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
@@ -1041,7 +1045,7 @@ int jmi_opt_dCeq_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
 
 
 int jmi_opt_Cineq(jmi_t* jmi, jmi_real_t* res) {
-	return jmi_func_ad_F(jmi,jmi->opt->Cineq, res);
+	return jmi_func_F(jmi,jmi->opt->Cineq, res);
 }
 
 int jmi_opt_dCineq(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
@@ -1108,7 +1112,7 @@ int jmi_opt_dCineq_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_v
 
 
 int jmi_opt_Heq(jmi_t* jmi, jmi_real_t* res) {
-	return jmi_func_ad_F(jmi,jmi->opt->Heq, res);
+	return jmi_func_F(jmi,jmi->opt->Heq, res);
 }
 
 int jmi_opt_dHeq(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
@@ -1174,7 +1178,7 @@ int jmi_opt_dHeq_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
 }
 
 int jmi_opt_Hineq(jmi_t* jmi, jmi_real_t* res) {
-	return jmi_func_ad_F(jmi,jmi->opt->Hineq, res);
+	return jmi_func_F(jmi,jmi->opt->Hineq, res);
 }
 
 int jmi_opt_dHineq(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {

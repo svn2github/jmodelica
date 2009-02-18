@@ -1,14 +1,3 @@
-/*
- * This file is part of the JModelica distribution.
- *
- * Licensed under the GPL3 open source license
- * http://www.gnu.org/licenses/agpl-3.0.txt
- *
- * Copyright 2009 Modelon AB.
- *
- */
-
-
 
 /** \file jmi_common.h
  *  \brief Internals of the JMI Model interface.
@@ -131,13 +120,13 @@
 #include <vector>
 #endif
 
-// Forward declaration of jmi struct
-typedef struct jmi_t jmi_t;
-typedef struct jmi_dae_t jmi_dae_t;
-typedef struct jmi_init_t jmi_init_t;
-typedef struct jmi_opt_t jmi_opt_t;
-typedef struct jmi_func_t jmi_func_t;
-typedef struct jmi_func_ad_t jmi_func_ad_t;
+// Forward declaration of jmi structs
+typedef struct jmi_t jmi_t;  ///< Forward declaration of struct.
+typedef struct jmi_dae_t jmi_dae_t; ///< Forward declaration of struct.
+typedef struct jmi_init_t jmi_init_t; ///< Forward declaration of struct.
+typedef struct jmi_opt_t jmi_opt_t; ///< Forward declaration of struct.
+typedef struct jmi_func_t jmi_func_t; ///< Forward declaration of struct.
+typedef struct jmi_func_ad_t jmi_func_ad_t; ///< Forward declaration of struct.
 
 // Typedef for the doubles used in the interface.
 typedef double jmi_real_t; ///< Typedef for the real number
@@ -233,41 +222,99 @@ typedef int (*jmi_jacobian_func_t)(jmi_t* jmi, int sparsity,
 
 
 /**
- * Create a new jmi_func_t.
+ * \brief Create a new jmi_func_t.
+ *
+ * @param jmi_func (Output) A double pointer to a jmi_func_t struct.
+ * @param F A function pointer to the residual function.
+ * @param n_eq_F The number of equations in the residual.
+ * @param dF Function pointer to the symbolic Jacobian function.
+ * @param dF_n_nz The number of non-zeros in the symbolic Jacobian.
+ * @param dF_row Row indices of the non-zero elements in the symbolic Jacobian.
+ * @param dF_col Column indices of the non-zero elements in the symbolic
+ *        Jacobian.
+ * @return Error code.
+ *
  */
 int jmi_func_new(jmi_func_t** jmi_func, jmi_residual_func_t F,
                  int n_eq_F, jmi_jacobian_func_t dF,
 		 int dF_n_nz, int* dF_row, int* dF_col);
 
-/*
- * Delete a jmi_func_t.
+/**
+ * \brief Delete a jmi_func_t.
+ *
+ * @param func The jmi_func_t struct to delete.
+ * @return Error code.
  */
 int jmi_func_delete(jmi_func_t *func);
 
-/*
- * Convenience function to evaluate the Jacobian of the function
- * contained in a jmi_func_t.
+/**
+ * \brief Evaluate the residual function of a jmi_func_t struct.
+ *
+ * @param jmi The jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param res (Output) The residual values.
+ * @return Error code.
+ *
+ */
+int jmi_func_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res);
+
+/**
+ * \brief Evaluation of the symbolic Jacobian of the
+ * residual function contained in a jmi_func_t.
+ *
+ * @param jmi The jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param jac (Output) The Jacobian
+ *
  */
 int jmi_func_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		int independent_vars, int* mask, jmi_real_t* jac) ;
 
-/*
- * Convenience function for accessing the number of non-zeros in the
- * Jacobian of the function in jmi_func_t.
+/**
+ * \brief Returns the number of non-zeros in the symbolic Jacobian.
+ *
+ * @param jmi A jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param n_nz (Output) The number of non-zero Jacobian entries.
+ * @return Error code.
  */
 int jmi_func_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz);
 
-/*
- *  Convenience function of accessing the non-zeros in the Jacobian
- *  in an jmi_func_t
+/**
+ * \brief Returns the row and column indices of the non-zero elements in the
+ * symbolic residual Jacobian.
+ *
+ * @param jmi A jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param row (Output) The row indices of the non-zeros in the DAE residual
+ *            Jacobian.
+ * @param col (Output) The column indices of the non-zeros in the DAE residual
+ *            Jacobian.
+ * @return Error code.
+ *
  */
 int jmi_func_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
                            int independent_vars,
                            int *mask, int *row, int *col);
 
-/*
- *  Convenience function for computing the dimensions of the Jacobian in an
- *  jmi_func_t.
+/**
+ * \brief Computes the number of columns and the number of non-zero
+ * elements in the symbolic Jacobian of a jmi_func_t given a sparsity
+ * configuration.
+ *
+ * @param jmi A jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param dF_n_cols (Output) The number of columns of the resulting Jacobian.
+ * @param dF_n_nz (Output) The number of non-zeros of the resulting Jacobian.
+ *
  */
 int jmi_func_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
                     int independent_vars, int *mask,
@@ -326,22 +373,68 @@ struct jmi_func_ad_t{
 /* @{ */
 
 /**
- * Allocates memory and sets up the jmi_t struct. This function is
- * typically called from within jmi_new in the generated code. The
- * reason for introducing this function is that the allocation of the
+ * \brief Allocates memory and sets up the jmi_t struct.
+ *
+ * This function is typically called from within jmi_new in the generated code.
+ * The reason for introducing this function is that the allocation of the
  * jmi_t struct should not be repeated in the generated code.
+ *
+ * @param jmi (Output) A pointer to a jmi_t pointer.
+ * @param n_ci Number of independent constants.
+ * @param n_cd Number of dependent constants.
+ * @param n_pi Number of independent parameters.
+ * @param n_pd Number of dependent parameters.
+ * @param n_dx Number of derivatives.
+ * @param n_x Number of differentiated variables.
+ * @param n_u Number of inputs.
+ * @param n_w Number of algebraics.
+ * @param n_tp Number of interpolation time points.
+ * @return Error code.
  */
 int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
 		int n_x, int n_u, int n_w, int n_tp);
 
 /**
- * Allocates a jmi_dae_t struct.
+ * \brief Allocates a jmi_dae_t struct.
+ *
+ * @param jmi A jmi_t struct.
+ * @param F A function pointer to the DAE residual function.
+ * @param n_eq_F Number of equations in the DAE residual.
+ * @param dF Function pointer to the symbolic Jacobian function.
+ * @param dF_n_nz Number of non-zeros in the symbolic jacobian.
+ * @param row Row indices of the non-zeros in the symbolic Jacobain.
+ * @param col Column indices of the non-zeros in the symbolic Jacobain.
+ * @return Error code.
  */
 int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F,
                  jmi_jacobian_func_t dF, int dF_n_nz, int* row, int* col);
 
 /**
- * Allocates a jmi_init_t struct.
+ * \brief Allocates a jmi_init_t struct.
+ *
+ * @param jmi A jmi_t struct.
+ * @param F0 A function pointer to the DAE initialization residual function
+ * \f$F_0\f$.
+ * @param n_eq_F0 Number of equations in the DAE initialization residual
+ *        function \f$F_0\f$.
+ * @param dF0 Function pointer to the symbolic Jacobian of \f$F_0\f$.
+ * @param dF0_n_nz Number of non-zeros in the symbolic jacobian of \f$F_0\f$.
+ * @param dF0_row Row indices of the non-zeros in the symbolic Jacobain
+ *        of \f$F_0\f$.
+ * @param dF0_col Column indices of the non-zeros in the symbolic Jacobain
+ *        of \f$F_0\f$.
+ * @param F1 A function pointer to the DAE initialization residual function
+ * \f$F_1\f$.
+ * @param n_eq_F1 Number of equations in the DAE initialization residual
+ *        function \f$F_1\f$.
+ * @param dF1 Function pointer to the symbolic Jacobian of \f$F_1\f$.
+ * @param dF1_n_nz Number of non-zeros in the symbolic jacobian of \f$F_1\f$.
+ * @param dF1_row Row indices of the non-zeros in the symbolic Jacobain
+ *        of \f$F_1\f$.
+ * @param dF1_col Column indices of the non-zeros in the symbolic Jacobain
+ *        of \f$F_1\f$.
+ * @return Error code.
+ *
  */
 int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 		  jmi_jacobian_func_t dF0,
@@ -351,7 +444,61 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 		  int dF1_n_nz, int* dF1_row, int* dF1_col);
 
 /**
- * Allocates a jmi_opt_t struct.
+ * \brief Allocates a jmi_opt_t struct.
+ *
+ * @param jmi A jmi_t struct.
+ * @param J A function pointer to the cost function \f$J\f$.
+ * @param dJ Function pointer to the symbolic Jacobian of \f$J\f$.
+ * @param dJ_n_nz Number of non-zeros in the symbolic jacobian of \f$J\f$.
+ * @param dJ_row Row indices of the non-zeros in the symbolic Jacobain
+ *        of \f$J\f$.
+ * @param dJ_col Column indices of the non-zeros in the symbolic Jacobain
+ *        of \f$J\f$.
+ * @param Ceq A function pointer to the equality path constraint residual
+ * function \f$C_{eq}\f$.
+ * @param n_eq_Ceq Number of equations in the equality path constraint residual
+ *        \f$C_{eq}\f$.
+ * @param dCeq Function pointer to the symbolic Jacobian of \f$C_{eq}\f$.
+ * @param dCeq_n_nz Number of non-zeros in the symbolic jacobian of
+ *        \f$C_{eq}\f$.
+ * @param dCeq_row Row indices of the non-zeros in the symbolic Jacobain
+ *        of \f$C_{eq}\f$.
+ * @param dCeq_col Column indices of the non-zeros in the symbolic Jacobain
+ *        of \f$C_{eq}\f$.
+ * @param Cineq A function pointer to the inequality path constraint residual
+ * function \f$C_{ineq}\f$.
+ * @param n_eq_Cineq Number of equations in the inequality path constraint
+ *        residual \f$C_{ineq}\f$.
+ * @param dCineq Function pointer to the symbolic Jacobian of \f$C_{ineq}\f$.
+ * @param dCineq_n_nz Number of non-zeros in the symbolic jacobian of
+ *        \f$C_{ineq}\f$.
+ * @param dCineq_row Row indices of the non-zeros in the symbolic Jacobain
+ *        of \f$C_{ineq}\f$.
+ * @param dCineq_col Column indices of the non-zeros in the symbolic Jacobain
+ *        of \f$C_{ineq}\f$.
+ * @param Heq A function pointer to the equality point constraint residual
+ * function \f$H_{eq}\f$.
+ * @param n_eq_Heq Number of equations in the equality point constraint residual
+ *        \f$H_{eq}\f$.
+ * @param dHeq Function pointer to the symbolic Jacobian of \f$H_{eq}\f$.
+ * @param dHeq_n_nz Number of non-zeros in the symbolic jacobian of
+ *        \f$H_{eq}\f$.
+ * @param dHeq_row Row indices of the non-zeros in the symbolic Jacobain
+ *        of \f$H_{eq}\f$.
+ * @param dHeq_col Column indices of the non-zeros in the symbolic Jacobain
+ *        of \f$H_{eq}\f$.
+ * @param Hineq A function pointer to the inequality point constraint residual
+ * function \f$H_{ineq}\f$.
+ * @param n_eq_Hineq Number of equations in the inequality point constraint
+ *        residual \f$H_{ineq}\f$.
+ * @param dHineq Function pointer to the symbolic Jacobian of \f$H_{ineq}\f$.
+ * @param dHineq_n_nz Number of non-zeros in the symbolic jacobian of
+ *        \f$H_{ineq}\f$.
+ * @param dHineq_row Row indices of the non-zeros in the symbolic Jacobain
+ *        of \f$H_{ineq}\f$.
+ * @param dHineq_col Column indices of the non-zeros in the symbolic Jacobain
+ *        of \f$H_{ineq}\f$.
+ * @return Error code.
  */
 int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t J,
 		 jmi_jacobian_func_t dJ,
@@ -473,28 +620,45 @@ struct  jmi_opt_t{
 /* @{ */
 
 /**
- * Compute the type of variable. The return value is one of JMI_DER_NN
- * if a valid Jacobian column index is given, otherwise -1.
+ * \brief Compute the class of variable.
+ *
+ * The return value is one of JMI_DER_NN if a valid Jacobian column index is
+ * given, otherwise -1. For example JMI_DER_X indicats a differentiated
+ * variable.
+ *
+ * @param jmi A jmi_t struct.
+ * @param col_index The column index for which to compute the variable class.
+ * @return Variable class.
  */
 int jmi_variable_type(jmi_t *jmi, int col_index);
 
 /**
- * Check if a particular column, column_index, is to be included in
- * the Jacobian defined by independent_vars and mask. If the column is
- * to be included, then 1 is returned otherwise 0.
+ * \brief Check if a particular column is to be included in
+ * the Jacobian defined by independent_vars and mask.
+ *
+ * If the column is to be included, then 1 is returned otherwise 0.
+ *
+ * @param jmi A jmi_t struct.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param col_index The column index to be checked.
+ * @return 1 if the column is to be included, otherwise 0.
  */
 int jmi_check_Jacobian_column_index(jmi_t *jmi, int independent_vars,
                                     int *mask, int col_index);
 
 /**
- * Map a colum_index for the complete Jacobian into a column index of
+ * \brief Map a colum_index for the complete Jacobian into a column index of
  * the sub-Jacobian defined by independent_vars and mask.
+ * @param jmi A jmi_t struct.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param col_index The column index to be mapped.
+ * @return Column index in the sub-Jacobian.
  *
  */
 int jmi_map_Jacobian_column_index(jmi_t *jmi, int independent_vars,
                                   int *mask, int col_index);
-
-
 
 /* @} */
 

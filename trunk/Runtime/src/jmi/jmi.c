@@ -99,6 +99,10 @@ int jmi_delete(jmi_t* jmi){
 	return 0;
 }
 
+int jmi_func_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res) {
+	return func->F(jmi,&res);
+}
+
 int jmi_dae_F(jmi_t* jmi, jmi_real_t* res) {
 
 	int i;
@@ -106,7 +110,8 @@ int jmi_dae_F(jmi_t* jmi, jmi_real_t* res) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
 
-	jmi->dae->F->F(jmi, &res);
+	//jmi->dae->F->F(jmi, &res);
+	jmi_func_F(jmi,jmi->dae->F,res);
 
 	return 0;
 }
@@ -175,10 +180,7 @@ int jmi_init_F0(jmi_t* jmi, jmi_real_t* res) {
 	for (i=0;i<jmi->n_z;i++) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
-
-	jmi->init->F0->F(jmi, &res);
-
-	return 0;
+	return jmi_func_F(jmi,jmi->init->F0,res);
 }
 
 int jmi_init_dF0(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
@@ -246,9 +248,8 @@ int jmi_init_F1(jmi_t* jmi, jmi_real_t* res) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
 
-	jmi->init->F1->F(jmi, &res);
+	return jmi_func_F(jmi,jmi->init->F1,res);
 
-	return 0;
 }
 
 int jmi_init_dF1(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
@@ -315,9 +316,7 @@ int jmi_opt_J(jmi_t* jmi, jmi_real_t* res) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
 
-	jmi->opt->J->F(jmi, &res);
-
-	return 0;
+	return jmi_func_F(jmi,jmi->opt->J,res);
 }
 
 int jmi_opt_dJ(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
@@ -383,10 +382,7 @@ int jmi_opt_Ceq(jmi_t* jmi, jmi_real_t* res) {
 	for (i=0;i<jmi->n_z;i++) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
-
-	jmi->opt->Ceq->F(jmi, &res);
-
-	return 0;
+	return jmi_func_F(jmi,jmi->opt->Ceq,res);
 }
 
 int jmi_opt_dCeq(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
@@ -453,9 +449,7 @@ int jmi_opt_Cineq(jmi_t* jmi, jmi_real_t* res) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
 
-	jmi->opt->Cineq->F(jmi, &res);
-
-	return 0;
+	return jmi_func_F(jmi,jmi->opt->Cineq,res);
 }
 
 int jmi_opt_dCineq(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
@@ -521,10 +515,7 @@ int jmi_opt_Heq(jmi_t* jmi, jmi_real_t* res) {
 	for (i=0;i<jmi->n_z;i++) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
-
-	jmi->opt->Heq->F(jmi, &res);
-
-	return 0;
+	return jmi_func_F(jmi,jmi->opt->Heq,res);
 }
 
 int jmi_opt_dHeq(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
@@ -590,10 +581,7 @@ int jmi_opt_Hineq(jmi_t* jmi, jmi_real_t* res) {
 	for (i=0;i<jmi->n_z;i++) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
-
-	jmi->opt->Hineq->F(jmi, &res);
-
-	return 0;
+	return jmi_func_F(jmi,jmi->opt->Hineq,res);
 }
 
 int jmi_opt_dHineq(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
