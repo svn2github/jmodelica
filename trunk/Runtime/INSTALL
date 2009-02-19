@@ -2,45 +2,46 @@ Installation instructions for the JModelica Runtime system.
 
 1. Check out the JModelica Runtime module:
 
-> svn co https://www.jmodelica.org/svn/JModelica/trunk/Runtime
+    svn co https://www.jmodelica.org/svn/JModelica/trunk/Runtime
 
-Make sure that the full path to the directory where you check out
-Runtime does not contain any spaces.
+   Make sure that the full path to the directory where you check out
+   Runtime does not contain any spaces.
 
 2. Download CppAD from http://www.coin-or.org/CppAD. Unzip the 
-tar-ball and put in a directory. Again, make sure that the path to
-this directory does not contain any spaces. You do not have to build
-anything in the CppAD distribution in order to build Runtime.
+   tar-ball and put in a directory. Again, make sure that the path to
+   this directory does not contain any spaces. You do not have to build
+   anything in the CppAD distribution in order to build Runtime.
 
 3. Run the configure script. It is recommended that you create a new
-directory in Runtime:
+   directory in Runtime:
 
-> mkdir build
-> cd build
-> ../configure --with-cppad=/path/to/cppad-dist
+    mkdir build
+    cd build
+    ../configure --with-cppad=/path/to/cppad-dist \
+      --with-ipopt=/path/to/ipopt-build-dir
 
-You may want to give additional arguments to configure, type
+   You may want to give additional arguments to configure, type
 
-> configure --help
+    configure --help
 
-for information. By default, the installation directory (--prefix)
-is set to the current directory.
+   for information. By default, the installation directory (--prefix)
+   is set to the current directory.
 
 4. Build Runtime. In order to build the Runtime, type
 
-> make
+    make
 
-In order to install Runtime, type
+   In order to install Runtime, type
 
-> make install
+    make install
 
-which will render the directories 'lib' and 'include' to be created
-and the corresponding libraries and directories and header files
-will be copied.
+   which will render the directories 'lib' and 'include' to be created
+   and the corresponding libraries and directories and header files
+   will be copied.
 
-In order to build the examples, type
+   In order to build the examples, type
+ 
+    make examples
 
-> make examples
-
-which will build executables and shared libraries for the examples
-in the 'example' directory.
+   which will build executables and shared libraries for the examples
+   in the 'example' directory.
