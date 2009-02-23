@@ -12,7 +12,11 @@ Installation instructions for the JModelica Runtime system.
    this directory does not contain any spaces. You do not have to build
    anything in the CppAD distribution in order to build Runtime.
 
-3. Run the configure script. It is recommended that you create a new
+3. Download Ipopt from https://projects.coin-or.org/Ipopt. Unzip the
+   tar-ball and put in a directory that does not hold any spaces in its
+   absolute path. Build the package according to its INSTALL file.
+
+4. Run the configure script. It is recommended that you create a new
    directory in Runtime:
 
     mkdir build
@@ -27,7 +31,7 @@ Installation instructions for the JModelica Runtime system.
    for information. By default, the installation directory (--prefix)
    is set to the current directory.
 
-4. Build Runtime. In order to build the Runtime, type
+5. Build Runtime. In order to build the Runtime, type
 
     make
 
@@ -45,3 +49,4 @@ Installation instructions for the JModelica Runtime system.
 
    which will build executables and shared libraries for the examples
    in the 'example' directory.
+
