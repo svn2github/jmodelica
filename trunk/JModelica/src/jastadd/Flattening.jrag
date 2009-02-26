@@ -84,8 +84,6 @@ aspect Flattening {
 		fv.setFAttributeList(attr);
 		
 		// TODO: Make sure that prefixes specified in short class declarations are propagated
-		if (getComponentDecl().isFlow())
-			fv.setFTypePrefixFlow(new FFlow());
 		if (getComponentDecl().isInput())
 			fv.setFTypePrefixInputOutput(new FInput());
 		if (getComponentDecl().isOutput())
@@ -182,7 +180,6 @@ aspect FlatVariables {
   public FVariable.FVariable(FPrimitiveType type, FQName fqname) {	  
   	this(new Opt(),
   	      new Opt(),
-  	      new Opt(),
   	      type,
   	      new List(),
   	      new Opt(),
@@ -192,7 +189,6 @@ aspect FlatVariables {
   
   public FVariable.FVariable(FPrimitiveType type, FQName fqname, FExp bexp) {
   	this(new Opt(),
-  	      new Opt(),
   	      new Opt(),
   	      type,
   	      new List(),

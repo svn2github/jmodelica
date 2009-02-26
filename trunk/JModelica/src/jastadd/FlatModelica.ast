@@ -10,8 +10,7 @@ FEquationBlock ::= FAbstractEquation*;
 abstract FAbstractVariable;
 FUndefVariable : FAbstractVariable;
 
-FVariable : FAbstractVariable ::= [FTypePrefixFlow] 
-              [FTypePrefixOther] 
+FVariable : FAbstractVariable ::= [FTypePrefixOther] 
               [FTypePrefixInputOutput]
               Type:FPrimitiveType  
               /* Type:FTypeAccess */ // The child Type:FPrimitiveType would be replaced by this access
@@ -41,8 +40,8 @@ FEach ::=;
 FFinal ::=;
 
 abstract FTypePrefix;
-abstract FTypePrefixFlow : FTypePrefix;
-FFlow : FTypePrefixFlow::=;
+//abstract FTypePrefixFlow : FTypePrefix;
+//FFlow : FTypePrefixFlow::=;
 abstract FTypePrefixOther : FTypePrefix;
 // Continuous is not a valid prefix.  We will use it to identify 
 // expressions that are not parameters, constants, or discrete.

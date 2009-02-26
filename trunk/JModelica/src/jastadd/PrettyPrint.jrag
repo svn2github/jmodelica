@@ -990,7 +990,6 @@ aspect FlattPrettyPrint {
 	eq FIdUseExp.isPrimary() = true;
 	eq FRealLitExp.isPrimary() = true;
 
-	syn String FTypePrefixFlow.toString() = "flow";
 	syn String FTypePrefixInputOutput.toString();
 	eq FInput.toString() = "input";
 	eq FOutput.toString()= "output";
