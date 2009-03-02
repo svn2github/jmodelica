@@ -24,7 +24,8 @@ aspect FlatAPI {
 	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
 	FVariable contributes
  		this when isParameter() &&
- 		  (hasBindingExp()? getBindingExp().isConstantExp(): true)
+ 		  (hasBindingExp()? getBindingExp().isConstantExp(): 
+ 		  (startAttributeSet()? startAttribute().isConstantExp(): true))
 	to FClass.independentParameters() for myFClass();
 
     syn int FClass.numDependentParameters() = dependentParameters().size();
@@ -32,7 +33,8 @@ aspect FlatAPI {
 	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
 	FVariable contributes
  		this when isParameter() &&
- 		  (hasBindingExp()? getBindingExp().isParameterExp(): false)
+ 		  (hasBindingExp()? getBindingExp().isParameterExp(): 
+ 		  (startAttributeSet()? startAttribute().isParameterExp(): false))
 	to FClass.dependentParameters() for myFClass();
 
     syn int FClass.numDifferentiatedVariables() = differentiatedVariables().size();
@@ -124,6 +126,25 @@ aspect FlatAPI {
 	inh FClass FExp.myFClass();
 	eq FClass.getChild().myFClass() = this;
 	eq Root.getChild().myFClass() = null; 
+
+	syn lazy FExp FVariable.startAttribute() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("start")) {
+				return a.hasValue()? a.getValue(): null;
+			}
+		}
+		return null;
+	}
+	
+	syn lazy boolean FVariable.startAttributeSet() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("start")) {
+				return a.getAttributeSet();
+			}
+		}
+		return false;
+	}
+
 
 }
 
