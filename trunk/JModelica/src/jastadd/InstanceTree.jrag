@@ -510,7 +510,7 @@ aspect InstanceTreeConstruction {
     		return getDynamicClassName(getNumDynamicClassName()-1).myInstClassDecl().newInstComponentDecl(cd);    	
     	}
      }
-    
+        
    public InstNode InstNode.createInstClassDecl(ClassDecl bcd) {
     	// Check if the class is redeclared. 
     	// -> Yes: Create an InstReplacingClass component
@@ -533,8 +533,9 @@ aspect InstanceTreeConstruction {
 	public abstract InstComponentDecl InstClassDecl.newInstComponentDecl(ComponentDecl cd);
 	public InstComponentDecl InstBaseClassDecl.newInstComponentDecl(ComponentDecl cd) {
 		return newInstComponentDecl(cd,cd.getClassName());		
-		
 	}
+	
+	
 	public InstComponentDecl InstPrimitiveClassDecl.newInstComponentDecl(ComponentDecl cd) {
 		return newInstComponentDecl(cd,cd.getClassName());
 	}
@@ -616,6 +617,14 @@ aspect InstanceTreeConstruction {
     	fcd.setStart(getStart());
     	return fcd;
     }
+
+    public InstExtendClassDecl ExtendClassDecl.newInstClassDecl() {
+    	InstExtendClassDecl ecd = new InstExtendClassDecl(this,new Opt());
+	    ecd.setInstConstrainingOpt(newInstConstrainingClassOpt());
+    	ecd.setStart(getStart());
+    	return ecd;
+    }
+
     public InstShortClassDecl ShortClassDecl.newInstClassDecl() {
     	InstShortClassDecl scd =  new InstShortClassDecl(this, new Opt());
 	    scd.setInstConstrainingOpt(newInstConstrainingClassOpt());    	
@@ -774,19 +783,16 @@ aspect InstaceConstrainingClauses {
 
 aspect InstImportClauses {
 
-    syn lazy List InstBaseClassDecl.getInstImportList() = emptyList();
-    
-    eq InstFullClassDecl.getInstImportList() {
+
+    syn List InstNode.getInstImportList() {
     	List l = new List();
-    	for (ImportClause ic : getBaseClassDecl().getImports()) {
+    	for (ImportClause ic : imports()) {
     		InstImport iic = ic.newInstImport();
     		iic.setStart(ic.getStart());
     		l.add(iic);
     	}
     	return l;
     }
-
-	syn lazy List<ImportClause> BaseClassDecl.getImports() = emptyList();
 
 
 	public abstract InstImport ImportClause.newInstImport(); 
@@ -844,6 +850,11 @@ aspect InstanceAST_API {
 	
 //    eq InstShortClassDecl.classes() = getClassName().myInstClass().classes();
 
+	syn lazy ArrayList<ImportClause> InstNode.imports() = new ArrayList<ImportClause>();
+	eq InstClassRoot.imports() = getClassDecl().imports();
+	eq InstComponentDecl.imports() = myInstClass().imports();
+	eq InstBaseClassDecl.imports() = getBaseClassDecl().imports();
+
 /*
 	syn FullClassDecl InstFullClassDecl.getFullClassDecl() = (FullClassDecl)getBaseClassDecl();
 	syn ShortClassDecl InstShortClassDecl.getShortClassDecl() = (ShortClassDecl)getBaseClassDecl();
@@ -872,6 +883,14 @@ aspect InstanceAST_API {
 			l.add(n);	
 		return l;
 	}
+
+	syn lazy ArrayList<InstImport> InstNode.instImports() {
+		ArrayList<InstImport> l = new ArrayList<InstImport>();	
+		for (InstImport n : getInstImports())
+			l.add(n);	
+		return l;
+	}
+
 
 	syn lazy ArrayList<InstClassDecl> InstNode.constrainingInstClassDecls() = 
 		hasInstConstraining()? new ArrayList<InstClassDecl>() : instClassDecls();
@@ -976,6 +995,14 @@ aspect SourceAST_API {
     	}
     	return l;
     } 
+
+	syn lazy ArrayList<ImportClause> ClassDecl.imports() = new ArrayList<ImportClause>();
+	eq FullClassDecl.imports() {
+		ArrayList<ImportClause> l = new ArrayList<ImportClause>();
+		for (ImportClause imp : getImports())
+			l.add(imp);
+		return l;
+	}
 
 }
 

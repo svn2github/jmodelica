@@ -119,7 +119,6 @@ List fvariable_list =
 	;
 	
 FVariable fvariable =
-	ftype_prefix_flow? 
     ftype_prefix_other? 
     ftype_prefix_input_output? 
 	fprimitive_type
@@ -131,8 +130,11 @@ FVariable fvariable =
 						fattr = new List();
 					else 
 						fattr = (List)fattributes.getChild(0);
-						
-					return new FVariable(ftype_prefix_flow,ftype_prefix_other,
+					FTypePrefixOther tpo = ftype_prefix_other.getNumChild()==1?
+					  (FTypePrefixOther)ftype_prefix_other.getChild(0):
+					  new FContinuous();
+
+					return new FVariable(tpo,
 	                                    ftype_prefix_input_output,fprimitive_type,fattr,bexp,fstring_comment,fqname); :}
 	;
   
@@ -212,10 +214,6 @@ FEquation fequation =
 	fexp.right 
 	SEMICOLON  {: return new FEquation(left,right); :} 
 	;
-
-FTypePrefix ftype_prefix_flow = 
-  FLOW                          {: return new FFlow(); :}
-  ;
 
 FTypePrefix ftype_prefix_other = 
    PARAMETER                          {: return new FParameter(); :}

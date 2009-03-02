@@ -604,11 +604,8 @@ aspect FlattPrettyPrint {
 		
 			str.append(indent);
 	    
-			if (hasFTypePrefixOther()) {
-				str.append(getFTypePrefixOther().toString());
-				str.append(" ");
-			}
-			
+			str.append(getFTypePrefixOther().toString());
+						
 			if (hasFTypePrefixInputOutput()) {
 				str.append(getFTypePrefixInputOutput().toString());
 				str.append(" ");
@@ -632,20 +629,21 @@ aspect FlattPrettyPrint {
 	    	str.append(getFStringComment().getComment());
 	    	str.append("\"");
 	    }
-	    
+
+/*	    
 	     if (hasBindingExp()) {
  		     FExp bindingExp = getBindingExp();
 				FlatStaticValue value = bindingExp.value();
 				if (value instanceof IntegerStaticValue) {
 					IntegerStaticValue iValue = (IntegerStaticValue) value;
-					str.append(" /*(" + iValue.getValue() + ")*/");
+					str.append(" //(" + iValue.getValue() + ")");
 				} else if (value instanceof RealStaticValue) {
 					RealStaticValue rValue = (RealStaticValue) value;
-					str.append(" /*(" + rValue.getValue() + ")*/");					
+					str.append(" //(" + rValue.getValue() + ")");					
 				}
 			}
-	    
-		
+*/
+
 		}
 
 	
@@ -994,9 +992,9 @@ aspect FlattPrettyPrint {
 	eq FInput.toString() = "input";
 	eq FOutput.toString()= "output";
 	syn String FTypePrefixOther.toString();
-	eq FParameter.toString() = "parameter";
-	eq FDiscrete.toString() = "discrete";
-	eq FConstant.toString() = "constant";
+	eq FParameter.toString() = "parameter ";
+	eq FDiscrete.toString() = "discrete ";
+	eq FConstant.toString() = "constant ";
 	eq FContinuous.toString() = "";	
 	
 	syn String Restriction.toString();

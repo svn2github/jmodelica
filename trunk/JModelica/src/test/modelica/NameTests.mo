@@ -737,6 +737,66 @@ end NameTests.ImportTest5;
   
 end ImportTest5;
 
+
+model ImportTest6
+   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="ImportTest6",
+        description="Test name lookup in a more complex case.",
+                                               flatModel=
+"
+fclass NameTests.ImportTest6
+ Real m.R(start = 1,unit = \"Ohm\");
+equation 
+end NameTests.ImportTest6;
+")})));
+
+  package P
+	model M
+		import SI = NameTests.ImportTest6.P.SIunits;
+		SI.Resistance R(start=1);
+	end M;
+	
+    package SIunits
+    	type Resistance = Real(unit="Ohm");
+    end SIunits;
+  
+  end P;
+
+  P.M m;
+
+end ImportTest6;
+
+model ImportTest7
+   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="ImportTest7",
+        description="Test name lookup in a more complex case.",
+                                               flatModel=
+"
+fclass NameTests.ImportTest7
+ Real m.R(start = 1,unit = \"Ohm\");
+equation 
+end NameTests.ImportTest7;
+")})));
+
+  package P
+	package P1
+		import SI = NameTests.ImportTest7.P.SIunits;
+        model M
+		  SI.Resistance R(start=1);
+		end M;
+	end P1;
+	
+    package SIunits
+    	type Resistance = Real(unit="Ohm");
+    end SIunits;
+  
+  end P;
+
+  P.P1.M m;
+
+end ImportTest7;
+
+
 model ShortClassDeclTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FlatteningTestCase(name="ShortClassDeclTest1",
@@ -936,7 +996,6 @@ model DerTest1
 equation
     der(x)=1;
 end DerTest1;
-
 
 model InitialEquationTest1
   

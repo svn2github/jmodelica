@@ -80,7 +80,6 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   
  //  "extends"         { return newSymbol(Terminals.EXTENDS); }
 
-   "flow"            { return newSymbol(Terminals.FLOW); }
    "parameter"       { return newSymbol(Terminals.PARAMETER); }
    "constant"        { return newSymbol(Terminals.CONSTANT); }
    "input"           { return newSymbol(Terminals.INPUT); }

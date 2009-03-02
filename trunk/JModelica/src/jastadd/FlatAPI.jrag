@@ -4,15 +4,94 @@ import java.util.ArrayList;
 
 aspect FlatAPI {
 
-	coll Collection<FVariable> FClass.parameters() [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+    syn int FClass.numIndependentConstants() = independentConstants().size();
+	coll Collection<FVariable> FClass.independentConstants() 
+	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
 	FVariable contributes
- 		this when isParameter()
-	to FClass.parameters() for myFClass();
-	
-	coll Collection<FVariable> FClass.variables() [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+ 		this when isConstant()
+	to FClass.independentConstants() for myFClass();
+
+	// TODO: Is there such a thing as a dependent constant??
+    syn int FClass.numDependentConstants() = dependentConstants().size();
+	coll Collection<FVariable> FClass.dependentConstants() 
+	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
 	FVariable contributes
- 		this when isVariable()
+ 		this when false
+	to FClass.dependentConstants() for myFClass();
+
+    syn int FClass.numIndependentParameters() = independentParameters().size();
+	coll Collection<FVariable> FClass.independentParameters() 
+	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	FVariable contributes
+ 		this when isParameter() &&
+ 		  (hasBindingExp()? getBindingExp().isConstantExp(): true)
+	to FClass.independentParameters() for myFClass();
+
+    syn int FClass.numDependentParameters() = dependentParameters().size();
+	coll Collection<FVariable> FClass.dependentParameters() 
+	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	FVariable contributes
+ 		this when isParameter() &&
+ 		  (hasBindingExp()? getBindingExp().isParameterExp(): false)
+	to FClass.dependentParameters() for myFClass();
+
+    syn int FClass.numDifferentiatedVariables() = differentiatedVariables().size();
+	coll Collection<FVariable> FClass.differentiatedVariables() 
+	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	FDer contributes
+ 		(FVariable)getFIdUseExp().myFV() when
+ 		!getFIdUseExp().myFV().isUnknown()
+	to FClass.differentiatedVariables() for myFClass();
+
+    syn int FClass.numVariables() = variables().size();
+	coll Collection<FVariable> FClass.variables() 
+	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	FVariable contributes
+ 		this when !isParameter() && !isConstant()
 	to FClass.variables() for myFClass();
+
+    syn int FClass.numAlgebraicVariables() = algebraicVariables().size();
+	syn lazy Collection<FVariable> FClass.algebraicVariables() { 
+	  LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+      for (FVariable fv : getFVariables()) {
+      	if (!fv.isParameter() && !fv.isConstant() && 
+      	  !differentiatedVariables().contains(fv)) {
+      		set.add(fv);
+      	}
+      }
+      return set;
+	}
+
+    syn int FClass.numVariablesWithBindingExp() = variablesWithBindingExp().size();
+	coll Collection<FVariable> FClass.variablesWithBindingExp() 
+	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	FVariable contributes
+ 		this when !isParameter() && !isConstant() &&
+ 		  hasBindingExp()
+	to FClass.variablesWithBindingExp() for myFClass();
+	
+    syn int FClass.numInputs() = inputs().size();
+	coll Collection<FVariable> FClass.inputs() 
+	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	FVariable contributes
+ 		this when isInput()
+	to FClass.inputs() for myFClass();
+
+    syn int FClass.numEquations() = equations().size();
+	syn ArrayList<FAbstractEquation> FClass.equations() {
+		ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
+		for (FEquationBlock b : getFEquationBlocks()) {
+			for (FAbstractEquation e : b.getFAbstractEquations()) {
+				l.add(e);
+			}
+		}
+		return l;
+	}
+	
+	syn int FClass.numInitialEquations() = getNumFInitialEquation(); 
+	syn List FClass.initialEquations() = getFInitialEquationList();
+
+/*	
 
 	coll Collection<FVariable> FClass.structuralParameters() [new LinkedHashSet<FVariable>()] with add root FlatRoot;
 	FIdUseExp contributes
@@ -40,33 +119,111 @@ aspect FlatAPI {
 	inh FEquation FExp.myFEquation();
 	eq FEquation.getChild().myFEquation()=this;
 	eq Root.getChild().myFEquation()=null;
-	
+*/	
 	inh FClass FVariable.myFClass();
-	inh FClass FIdUseExp.myFClass();
+	inh FClass FExp.myFClass();
 	eq FClass.getChild().myFClass() = this;
 	eq Root.getChild().myFClass() = null; 
 
 }
 
-/*
-aspect FlatNameAnalysis {
-	
-	inh FVariable FIdUse.lookupFV(FQName fqname);
-	eq FClass.getChild().lookupFV(FQName fqname) = memberFV(fqname);
-	eq Root.getChild().lookupFV(FQName fqname) = null;
+aspect FlatDiagnostics {
 
-
-	syn lazy FVariable FClass.memberFV(FQName fqname) {
-		for (int i=0;i<getNumFVariable();i++){
-			if (getFVariable(i).name().equals(fqname.name()))
-				return getFVariable(i);
+	syn String FClass.diagnostics() {
+		StringBuffer str = new StringBuffer();
+		str.append("Diagnostics for flattened class " + name() + "\n");
+		str.append("Number of independent constants:              " + 
+		  numIndependentConstants() + "\n");
+		str.append("Number of dependent constants:                " + 
+		  numDependentConstants() + "\n");
+		str.append("Number of independent parameters:             " + 
+		  numIndependentParameters() + "\n");
+		str.append("Number of dependent parameters:               " + 
+		  numDependentParameters() + "\n");
+		str.append("Number of differentiated variables:           " + 
+		  numDifferentiatedVariables() + "\n"); 
+		str.append("Number of inputs:                             " + 
+		  numInputs() + "\n");
+		str.append("Number of variables :                         " + 
+		  numVariables() + "\n");
+		str.append("Number of algebraic variables :               " + 
+		  numAlgebraicVariables() + "\n");
+		str.append("Number of equations:                          " + 
+		  numEquations() + "\n");
+		str.append("Number of variables with binding expression:  " + 
+		  numVariablesWithBindingExp() + "\n");
+		str.append("Total number of equations:                    " + 
+		  (numEquations()+numVariablesWithBindingExp()) + "\n");
+		str.append("Number of initial equations:                  " + 
+		  numInitialEquations() + "\n");
+		  
+		str.append("\n");
+		str.append("Independent constants: {");
+		int i = 0;
+		for (FVariable fv : independentConstants()) {
+			str.append(fv.name());
+			if (i<numIndependentConstants()-1) {
+				str.append(", ");
+			}
+			i++;
 		}
-		return null; // This should never happen if the front-end is ok.
+		str.append("}\n");  
+		str.append("Dependent constants: {");
+		i = 0;
+		for (FVariable fv : dependentConstants()) {
+			str.append(fv.name());
+			if (i<numDependentConstants()-1) {
+				str.append(", ");
+			}
+			i++;
+		}
+		str.append("}\n");  
+		str.append("Independent parameters: {");
+		i = 0;
+		for (FVariable fv : independentParameters()) {
+			str.append(fv.name());
+			if (i<numIndependentParameters()-1) {
+				str.append(", ");
+			}
+			i++;
+		}
+		str.append("}\n");  
+		str.append("Dependent parameters: {");
+		i = 0;
+		for (FVariable fv : dependentParameters()) {
+			str.append(fv.name());
+			if (i<numDependentParameters()-1) {
+				str.append(", ");
+			}
+			i++;
+		}
+		str.append("}\n");  
+		str.append("Differentiated variables: {");
+		i = 0;
+		for (FVariable fv : differentiatedVariables()) {
+			str.append(fv.name());
+			if (i<numDifferentiatedVariables()-1) {
+				str.append(", ");
+			}
+			i++;
+		}
+		str.append("}\n");  
+		str.append("Algebraic variables: {");
+		i = 0;
+		for (FVariable fv : algebraicVariables()) {
+			str.append(fv.name());
+			if (i<numAlgebraicVariables()-1) {
+				str.append(", ");
+			}
+			i++;
+		}
+		str.append("}\n");  
+		return str.toString();
 	}
 
-	syn lazy FVariable FIdUse.myFV() = null;
-	eq FIdUseQualified.myFV() = lookupFV(getFQName());
-	syn lazy FVariable FIdUseExp.myFV() = getFIdUse().myFV();
-}
 
-*/
+
+
+
+
+}

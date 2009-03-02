@@ -2,14 +2,14 @@ import java.util.HashMap;
 
 aspect FlatNameBinding {
 	
-	inh FAbstractVariable FIdUse.lookupFV(FQName fqname);
-	syn lazy FAbstractVariable FIdUse.myFV() = null;
+	inh AbstractFVariable FIdUse.lookupFV(FQName fqname);
+	syn lazy AbstractFVariable FIdUse.myFV() = null;
 	eq FIdUseQualified.myFV() = lookupFV(getFQName());
 	
-	syn lazy FAbstractVariable FIdUseExp.myFV() = getFIdUse().myFV();
-	//inh FAbstractVariable FIdUseExp.lookupFV(FQName fqname);
-	inh FAbstractVariable FEquationBlock.lookupFV(FQName fqname);
-	inh FAbstractVariable FVariable.lookupFV(FQName fqname);
+	syn lazy AbstractFVariable FIdUseExp.myFV() = getFIdUse().myFV();
+	//inh AbstractFVariable FIdUseExp.lookupFV(FQName fqname);
+	inh AbstractFVariable FEquationBlock.lookupFV(FQName fqname);
+	inh AbstractFVariable FVariable.lookupFV(FQName fqname);
 	
 	/* It appears that SourceRoot can contain flattened expressions */
 	/* Is this OK? Yes, it is ok since InstRoot is defined as an NTA */
@@ -22,8 +22,8 @@ aspect FlatNameBinding {
 	eq FClass.getFVariable(int index).lookupFV(FQName fqname) {
 		FVariable variable = (FVariable) fullyQualifiedVariablesMap().get(fqname.name());
 		if (variable == null) {
-			error("Undefined variable " + fqname.name());
-			return new FUndefVariable();
+			//error("Undefined variable " + fqname.name());
+			return unknownFVariable();
 		} else {
 			return variable;
 		}		
@@ -32,8 +32,8 @@ aspect FlatNameBinding {
 	eq FClass.getFEquationBlock(int index).lookupFV(FQName fqname) {
 		FVariable variable = (FVariable) fullyQualifiedVariablesMap().get(fqname.name());
 		if (variable == null) {
-			error("Undefined variable " + fqname.name());
-			return new FUndefVariable();
+			//error("Undefined variable " + fqname.name());
+			return unknownFVariable();
 		} else {
 			return variable;
 		}
@@ -47,4 +47,17 @@ aspect FlatNameBinding {
 		return map;
 	}
 	
+}
+
+aspect UnknownFVariables {
+
+	syn UnknownFVariable FClass.getUnknownFVariable() = new UnknownFVariable();
+
+	syn lazy UnknownFVariable ASTNode.unknownFVariable() = 
+	  root().unknownFVariable();
+	eq FlatRoot.unknownFVariable() = getFClass().getUnknownFVariable();
+
+	syn boolean AbstractFVariable.isUnknown() = false;
+	eq UnknownFVariable.isUnknown() = true;
+	   
 }

@@ -23,10 +23,12 @@ aspect InstLookupClasses {
 	eq InstComponentDecl.getInstClassDecl().lookupInstClass(String name) = genericLookupInstClassInComponent(name);	
 	eq InstComponentDecl.getInstComponentDecl().lookupInstClass(String name) = genericLookupInstClassInComponent(name);	
 	eq InstComponentDecl.getInstExtends().lookupInstClass(String name) = superLookupInstClassInComponent(name);
+    eq InstComponentDecl.getDynamicClassName().lookupInstClass(String name) = genericLookupInstClassInComponent(name);
 	
 	eq InstExtends.getInstClassDecl().lookupInstClass(String name) = genericLookupInstClassInExtends(name);	
 	eq InstExtends.getInstComponentDecl().lookupInstClass(String name) = genericLookupInstClassInExtends(name);	
 	eq InstExtends.getInstExtends().lookupInstClass(String name) = superLookupInstClassInExtends(name);	
+    eq InstExtends.getDynamicClassName().lookupInstClass(String name) = genericLookupInstClassInExtends(name);
 
 	// The lexical scope of modifiers in short classes is the "outer" scope, although
 	// the short class declaration is modeled as containing an extends clause
@@ -181,6 +183,7 @@ aspect InstLookupClasses {
 	syn HashSet InstAccess.qualifiedLookupInstClass(String name) circular [emptyHashSet()] = emptyHashSet();	
 	eq InstClassAccess.qualifiedLookupInstClass(String name) = myInstClassDecl().memberInstClass(name);
 
+/*
 	syn HashSet InstNode.lookupInstClassInImport(String name) circular [emptyHashSet()] = emptyHashSet();
 	
 	eq InstBaseClassDecl.lookupInstClassInImport(String name) {
@@ -192,7 +195,7 @@ aspect InstLookupClasses {
 	    }
 	    return emptyHashSet();
 	}
-
+*/
 	// TODO: rewrite so that classes are only looked up in constraining types.	
 	syn lazy HashSet InstNode.genericLookupInstClass(String name) circular [emptyHashSet()] {
 	
@@ -210,9 +213,14 @@ aspect InstLookupClasses {
 				set.addAll(((InstClassDecl)h.iterator().next()).memberInstClass(name));
 		}
 
+		for (InstImport ii : instImports()) {
+			set.addAll(ii.lookupInstClassInImport(name));		
+		}
+
+/*
 		if (lookupInstClassInImport(name).size()>0)
 			set.addAll(lookupInstClassInImport(name));
-	
+	*/
 		if (set.size()>0)
 			return set;
 		else
@@ -222,10 +230,16 @@ aspect InstLookupClasses {
 	syn HashSet InstNode.superLookupInstClass(String name) circular [emptyHashSet()] {
 	
 		HashSet set = new HashSet();
-		
+
+		/*		
 		if (lookupInstClassInImport(name).size()>0)
 				set.addAll(lookupInstClassInImport(name));
-					
+			*/
+		
+		for (InstImport ii : instImports()) {
+			set.addAll(ii.lookupInstClassInImport(name));		
+		}
+						
 		for (InstClassDecl icd : instClassDecls()) {
 			if (icd.matchInstClassDecl(name)) {
 					set.add(icd);
@@ -237,6 +251,38 @@ aspect InstLookupClasses {
 		else
 			return lookupInstClass(name);
 	}
+
+	// TODO: rewrite so that classes are only looked up in constraining types.	
+	syn lazy HashSet InstComponentDecl.genericLookupInstClass(String name) circular [emptyHashSet()] {
+	
+		HashSet set = new HashSet(4);
+		
+		for (InstClassDecl icd : instClassDecls()) {
+			if (icd.matchInstClassDecl(name)) {
+				set.add(icd);
+			}
+		}
+		
+		for (InstExtends ie : instExtends()) {
+			HashSet h = ie.getClassName().lookupInstClass();
+			if (h.size()==1)
+				set.addAll(((InstClassDecl)h.iterator().next()).memberInstClass(name));
+		}
+
+		for (InstImport ii : instImports()) {
+			set.addAll(ii.lookupInstClassInImport(name));		
+		}
+
+/*
+		if (lookupInstClassInImport(name).size()>0)
+			set.addAll(lookupInstClassInImport(name));
+	*/
+		if (set.size()>0)
+			return set;
+		else
+			return myInstClass().genericLookupInstClass(name);
+	}
+
 
 	// TODO: rewrite so that classes are only looked up in constraining types.	
 	syn lazy HashSet InstComponentDecl.genericLookupInstClassInComponent(String name) circular [emptyHashSet()] {
@@ -257,9 +303,16 @@ aspect InstLookupClasses {
 				set.addAll(((InstClassDecl)h.iterator().next()).memberInstClass(name));
 		}
 
-		if (lookupInstClassInImport(name).size()>0)
-			set.addAll(lookupInstClassInImport(name));
-	
+		for (InstExtends ie : instExtends()) {
+			HashSet h = ie.getClassName().lookupInstClass();
+			if (h.size()==1)
+				set.addAll(((InstClassDecl)h.iterator().next()).memberInstClass(name));
+		}
+
+		for (InstImport ii : instImports()) {
+			set.addAll(ii.lookupInstClassInImport(name));		
+		}
+
 		if (set.size()>0) // Did not find any local class
 			return set;
 		else // continue search att myInstClass()
@@ -271,10 +324,11 @@ aspect InstLookupClasses {
 			return myInstClass().lookupInstClassInIClassRedeclare(name);
 		
 		HashSet set = new HashSet();
-		
-		if (lookupInstClassInImport(name).size()>0)
-				set.addAll(lookupInstClassInImport(name));
-					
+
+		for (InstImport ii : instImports()) {
+			set.addAll(ii.lookupInstClassInImport(name));		
+		}
+							
 		for (InstClassDecl icd : instClassDecls()) {
 			if (icd.matchInstClassDecl(name)) {
 					set.add(icd);
@@ -306,9 +360,10 @@ aspect InstLookupClasses {
 			if (h.size()==1)
 				set.addAll(((InstClassDecl)h.iterator().next()).memberInstClass(name));
 		}
-
+/*
 		if (lookupInstClassInImport(name).size()>0)
 			set.addAll(lookupInstClassInImport(name));
+	*/
 	
 		if (set.size()>0) // Did not find any local class
 			return set;
@@ -321,10 +376,10 @@ aspect InstLookupClasses {
 			return getClassName().myInstClassDecl().lookupInstClassInIClassRedeclare(name);
 		
 		HashSet set = new HashSet();
-		
+		/*
 		if (lookupInstClassInImport(name).size()>0)
 				set.addAll(lookupInstClassInImport(name));
-					
+			*/		
 		for (InstClassDecl icd : instClassDecls()) {
 			if (icd.matchInstClassDecl(name)) {
 					set.add(icd);

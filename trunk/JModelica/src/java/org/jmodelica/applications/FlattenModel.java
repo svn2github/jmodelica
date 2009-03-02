@@ -51,7 +51,11 @@ public class FlattenModel {
 //		      ipr.dumpTree("");		      
 		      
 		      System.out.println("Inst checking:");
+		      try {
 		      boolean instErr = ipr.checkErrorsInInstClass(cl);
+		      } catch(Exception e) {
+		    	  e.printStackTrace();
+		      }
 //		      System.out.println("Source checking:");
 //		      boolean sourceErr = sr.checkErrorsInClass(cl);
 		      
@@ -100,8 +104,9 @@ public class FlattenModel {
 	    	  }	
 	    	  */	    	  
 		    	  instTime = System.currentTimeMillis();
-//		    	  fc.dumpTree("");
+		    	  fc.dumpTree("");
 		    	  fc.prettyPrint(str,"");
+		    	  System.out.println(fc.diagnostics());
 		    	  System.out.println(str.toString());
 		    	  printTime = System.currentTimeMillis();
 		

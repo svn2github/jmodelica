@@ -325,9 +325,9 @@ aspect InstanceErrorCheck {
         	icd.collectErrors();
         for (InstExtends ie : instExtends())
         	ie.collectErrors();	
+*/        	
         for (InstImport ii : getInstImports())
         	ii.collectErrors();		
-*/
 //        for (FAbstractEquation e : getFAbstractEquations())
 //        	e.collectErrors();
 //    	getEquationList().collectErrors();

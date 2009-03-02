@@ -3,14 +3,15 @@ FClass ::= FQName
            FVariable* 
            FInitialEquation:FAbstractEquation*
            FEquationBlock*
-           /FPrimitiveType*/; 
+           /FPrimitiveType*/
+           /UnknownFVariable/; 
 
 FEquationBlock ::= FAbstractEquation*;
 
-abstract FAbstractVariable;
-FUndefVariable : FAbstractVariable;
+abstract AbstractFVariable;
+UnknownFVariable : AbstractFVariable;
 
-FVariable : FAbstractVariable ::= [FTypePrefixOther] 
+FVariable : AbstractFVariable ::= FTypePrefixOther
               [FTypePrefixInputOutput]
               Type:FPrimitiveType  
               /* Type:FTypeAccess */ // The child Type:FPrimitiveType would be replaced by this access

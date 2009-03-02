@@ -1,5 +1,24 @@
 aspect FlatVariability {
 	
+	syn boolean FTypePrefixOther.constantVariability() = false;
+	eq FConstant.constantVariability() = true;	
+	syn boolean FTypePrefixOther.parameterVariability() = false;
+	eq FParameter.parameterVariability() = true;	
+	syn boolean FTypePrefixOther.discreteVariability() = false;
+	eq FDiscrete.discreteVariability() = true;	
+	syn boolean FTypePrefixOther.continuousVariability() = false;
+	eq FContinuous.continuousVariability() = true;	
+
+	syn boolean FVariable.isConstant() = getFTypePrefixOther().constantVariability();
+    syn boolean FVariable.isParameter() = getFTypePrefixOther().parameterVariability();
+    syn boolean FVariable.isDiscrete() = getFTypePrefixOther().discreteVariability();
+    syn boolean FVariable.isContinuous() = getFTypePrefixOther().continuousVariability();
+    	
+	syn boolean FExp.isConstantExp() = variability().constantVariability();
+	syn boolean FExp.isParameterExp() = variability().parameterVariability();
+	syn boolean FExp.isDiscreteExp() = variability().discreteVariability();
+	syn boolean FExp.isContinuousExp() = variability().continuousVariability();
+	
 	syn lazy FTypePrefixOther FExp.variability();
 	// TODO this must be fixed.
 	eq FInstAccessExp.variability() = null;
@@ -8,8 +27,8 @@ aspect FlatVariability {
 	syn lazy FTypePrefixOther FVariable.variability();
 
 	eq FVariable.variability() {
-   		if (hasFTypePrefixOther()) {
-   			return(getFTypePrefixOther());
+   		if (!isContinuous()) {
+   			return getFTypePrefixOther();
    		} else if ((getType() instanceof FIntegerType) ||
    			(getType() instanceof FStringType) ||
    			(getType() instanceof FBooleanType)) {
@@ -80,7 +99,7 @@ aspect FlatVariability {
 	}
 	
 	eq FIdUseExp.variability() {
-		FAbstractVariable variable = this.myFV();
+		AbstractFVariable variable = this.myFV();
 		if (variable instanceof FVariable) {
 			FVariable fVariable = (FVariable) variable;
 			return(fVariable.variability());

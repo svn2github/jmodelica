@@ -73,13 +73,23 @@ aspect Flattening {
 			im.collectAttributes(attr,im.myInstNode().getFQNamePrefix());
 		}
 		
-		//attr.dumpTree("*** ");
+		FTypePrefixOther tpo = null;
+		if (getComponentDecl().isDiscrete()) {
+			tpo = new FDiscrete();	
+		} else if (getComponentDecl().isParameter()) {
+			tpo = new FParameter();
+		} else if (getComponentDecl().isConstant()) {
+			tpo = new FConstant();
+        } else {
+        	tpo = new FContinuous();
+        }		
+		
 		FVariable fv = null;
 		String primitiveName = myInstClass().finalClass().primitiveName();
 		if (e!=null)
-			fv = new FVariable(primitiveType(primitiveName),getFQName(),e);
+			fv = new FVariable(tpo, primitiveType(primitiveName),getFQName(),e);
 		else
-			fv = new FVariable(primitiveType(primitiveName),getFQName());
+			fv = new FVariable(tpo, primitiveType(primitiveName),getFQName());
 		
 		fv.setFAttributeList(attr);
 		
@@ -88,13 +98,7 @@ aspect Flattening {
 			fv.setFTypePrefixInputOutput(new FInput());
 		if (getComponentDecl().isOutput())
 			fv.setFTypePrefixInputOutput(new FOutput());
-		if (getComponentDecl().isDiscrete())
-			fv.setFTypePrefixOther(new FDiscrete());	
-		if (getComponentDecl().isParameter())
-			fv.setFTypePrefixOther(new FParameter());
-		if (getComponentDecl().isConstant())
-			fv.setFTypePrefixOther(new FConstant());
-		
+			
 		if (getComponentDecl().getComment().hasStringComment())
 			fv.setFStringComment(new FStringComment(getComponentDecl().getComment().getStringComment().getComment()));
 		
@@ -177,8 +181,8 @@ aspect FlatVariables {
 	  }
   }
  
-  public FVariable.FVariable(FPrimitiveType type, FQName fqname) {	  
-  	this(new Opt(),
+  public FVariable.FVariable(FTypePrefixOther tpo, FPrimitiveType type, FQName fqname) {	  
+  	this(tpo,
   	      new Opt(),
   	      type,
   	      new List(),
@@ -187,8 +191,8 @@ aspect FlatVariables {
   	      new FQName(fqname));
   }
   
-  public FVariable.FVariable(FPrimitiveType type, FQName fqname, FExp bexp) {
-  	this(new Opt(),
+  public FVariable.FVariable(FTypePrefixOther tpo, FPrimitiveType type, FQName fqname, FExp bexp) {
+  	this(tpo,
   	      new Opt(),
   	      type,
   	      new List(),
@@ -197,23 +201,15 @@ aspect FlatVariables {
   	      new FQName(fqname));
   }
   
-  syn boolean FVariable.isParameter() {
-  		if (hasFTypePrefixOther())
-   			if (getFTypePrefixOther() instanceof FParameter)
-   				return true;
-   	
-   		return false;
-  }
-  
-    syn boolean FVariable.isVariable() {
-  		if (!hasFTypePrefixOther())
-  			return true;
-  		if (hasFTypePrefixOther())
-   			if (getFTypePrefixOther() instanceof FContinuous || getFTypePrefixOther() instanceof FDiscrete)
-   				return true;
-   	
-   		return false;
-  }
+	syn boolean FTypePrefixInputOutput.inputCausality() = false;
+	eq FInput.inputCausality() = true;	
+	syn boolean FTypePrefixInputOutput.outputCausality() = false;
+	eq FOutput.outputCausality() = true;	
+	
+    syn boolean FVariable.isInput() = 
+      hasFTypePrefixInputOutput()? getFTypePrefixInputOutput().inputCausality(): false;    
+    syn boolean FVariable.isOutput() = 
+      hasFTypePrefixInputOutput()? getFTypePrefixInputOutput().outputCausality(): false;
   
 }
 
@@ -340,7 +336,11 @@ aspect FlatExpressions {
 		for (FExp e : getArgss()) {
 			l.add(e.flatten(prefix));
 		}
-		return new FFunctionCall(getName().flatten(new FQName()),l);	
+		if (getName().name().equals("der")) {
+			return new FDer((FIdUseExp)l.getChild(0));
+		} else {
+			return new FFunctionCall(getName().flatten(new FQName()),l);	
+		}
 	}
 	
 	public FExp FSumRedExp.flatten(FQName prefix) {
@@ -377,7 +377,7 @@ aspect FlatExpressions {
 		InstFullClassDecl c2 = (InstFullClassDecl)(getConnector2().getInstAccess().myInstComponentDecl().myInstClass().finalClass());
 				
 		// Is it two "primitives" that are connected?
-		if (c1.extendsPrimitive()) {
+		if (c1.extendsPrimitive() || c1.isPrimitive()) {
 			fc.getConnectionSetManager().addVars(getConnector1().getInstAccess().myInstComponentDecl(),false,((FQName)prefix.fullCopy()).append(getConnector1().getInstAccess().name()),
 		                                         getConnector2().getInstAccess().myInstComponentDecl(),false,((FQName)prefix.fullCopy()).append(getConnector2().getInstAccess().name()));
 		    return;

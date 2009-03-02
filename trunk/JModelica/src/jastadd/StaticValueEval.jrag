@@ -202,7 +202,7 @@ aspect StaticValue {
 	}
 	
 	eq FIdUseExp.staticValue() {
-		FAbstractVariable variable = this.myFV();
+		AbstractFVariable variable = this.myFV();
 		if (variable instanceof FVariable) {
 			FVariable fVariable = (FVariable) variable;
 			return(fVariable.staticValue());			

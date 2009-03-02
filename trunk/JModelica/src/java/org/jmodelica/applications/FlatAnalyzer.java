@@ -88,7 +88,7 @@ public class FlatAnalyzer {
 		    	  fc.prettyPrint(str,"");  
 		    	  System.out.println(str.toString());	  
 		    	  printTime = System.currentTimeMillis();
-		    	 
+		    	 /*
 		    	  Collection<FVariable> variables = fc.variables();
 		    	  System.out.println("Variables, ("+variables.size()+"):");
 		    	  for (Iterator<FVariable> iter=variables.iterator();iter.hasNext();)
@@ -119,7 +119,7 @@ public class FlatAnalyzer {
 			    	  System.out.println("");
 		    	  }
 
-		      
+		      */
 		
 		      System.err.println("Parse time:         " + ((double)(parseTime-startTime))/1000.0);
 		      System.err.println("Error check time:   " + ((double)(errcheckTime-parseTime))/1000.0);
