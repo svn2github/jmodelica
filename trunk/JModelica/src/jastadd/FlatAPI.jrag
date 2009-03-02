@@ -8,7 +8,7 @@ aspect FlatAPI {
 	coll Collection<FVariable> FClass.independentConstants() 
 	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
 	FVariable contributes
- 		this when isConstant()
+ 		this when isIndependentConstant()
 	to FClass.independentConstants() for myFClass();
 
 	// TODO: Is there such a thing as a dependent constant??
@@ -23,18 +23,14 @@ aspect FlatAPI {
 	coll Collection<FVariable> FClass.independentParameters() 
 	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
 	FVariable contributes
- 		this when isParameter() &&
- 		  (hasBindingExp()? getBindingExp().isConstantExp(): 
- 		  (startAttributeSet()? startAttribute().isConstantExp(): true))
+ 		this when isIndependentParameter()
 	to FClass.independentParameters() for myFClass();
 
     syn int FClass.numDependentParameters() = dependentParameters().size();
 	coll Collection<FVariable> FClass.dependentParameters() 
 	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
 	FVariable contributes
- 		this when isParameter() &&
- 		  (hasBindingExp()? getBindingExp().isParameterExp(): 
- 		  (startAttributeSet()? startAttribute().isParameterExp(): false))
+ 		this when isDependentParameter()
 	to FClass.dependentParameters() for myFClass();
 
     syn int FClass.numDifferentiatedVariables() = differentiatedVariables().size();
@@ -127,6 +123,24 @@ aspect FlatAPI {
 	eq FClass.getChild().myFClass() = this;
 	eq Root.getChild().myFClass() = null; 
 
+	syn lazy boolean FVariable.isIndependentConstant() = isConstant();
+	syn lazy boolean FVariable.isDependentConstant() = false;
+	syn lazy boolean FVariable.isIndependentParameter() = isParameter() &&
+ 		  (hasBindingExp()? getBindingExp().isConstantExp(): 
+ 		  (startAttributeSet()? startAttribute().isConstantExp(): true));
+	syn lazy boolean FVariable.isDependentParameter() = isParameter() &&
+ 		  (hasBindingExp()? getBindingExp().isParameterExp(): 
+ 		  (startAttributeSet()? startAttribute().isParameterExp(): false));
+
+	
+	  
+
+
+}
+
+aspect Attributes {
+
+
 	syn lazy FExp FVariable.startAttribute() {
 		for (FAttribute a : getFAttributes()) {
 			if (a.getName().name().equals("start")) {
@@ -144,9 +158,16 @@ aspect FlatAPI {
 		}
 		return false;
 	}
+}
+
+aspect VariableNumbering {
+	/*
+	syn int FVariable.variableIndex() 
+*/
 
 
 }
+
 
 aspect FlatDiagnostics {
 
