@@ -93,10 +93,11 @@ aspect Flattening {
 		
 		fv.setFAttributeList(attr);
 		
+		// Only set prefix for top level inputs and outputs
 		// TODO: Make sure that prefixes specified in short class declarations are propagated
-		if (getComponentDecl().isInput())
+		if (getComponentDecl().isInput() && getFQName().getNumFQNamePart()==1)
 			fv.setFTypePrefixInputOutput(new FInput());
-		if (getComponentDecl().isOutput())
+		if (getComponentDecl().isOutput() && getFQName().getNumFQNamePart()==1)
 			fv.setFTypePrefixInputOutput(new FOutput());
 			
 		if (getComponentDecl().getComment().hasStringComment())
@@ -201,15 +202,6 @@ aspect FlatVariables {
   	      new FQName(fqname));
   }
   
-	syn boolean FTypePrefixInputOutput.inputCausality() = false;
-	eq FInput.inputCausality() = true;	
-	syn boolean FTypePrefixInputOutput.outputCausality() = false;
-	eq FOutput.outputCausality() = true;	
-	
-    syn boolean FVariable.isInput() = 
-      hasFTypePrefixInputOutput()? getFTypePrefixInputOutput().inputCausality(): false;    
-    syn boolean FVariable.isOutput() = 
-      hasFTypePrefixInputOutput()? getFTypePrefixInputOutput().outputCausality(): false;
   
 }
 
