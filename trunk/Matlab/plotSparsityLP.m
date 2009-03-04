@@ -7,6 +7,21 @@ function plotSparsityLP(n_x,n_u,n_w,n_p_opt,n_tp,n_eq_Ceq, ...
            dHineq_dp_n_cols,dHineq_ddx_p_dx_p_du_p_dw_p_n_cols, ...              
            ind_dg,ind_dh,fig_nbr)
 
+%    Copyright (C) 2009 Modelon AB
+%
+%    This program is free software: you can redistribute it and/or modify
+%    it under the terms of the GNU General Public License as published by
+%    the Free Software Foundation, version 3 of the License.
+%
+%    This program is distributed in the hope that it will be useful,
+%    but WITHOUT ANY WARRANTY; without even the implied warranty of
+%    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%    GNU General Public License for more details.
+%
+%    You should have received a copy of the GNU General Public License
+%    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
 n_rows = n_eq_F0 + ...
     	 n_eq_F*n_e*n_cp + ...
          n_x*n_e + ...

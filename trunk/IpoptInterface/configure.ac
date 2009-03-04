@@ -1,3 +1,7 @@
+# Copyright (C) 2009 Modelon AB
+# All Rights reserved
+# This file is published under the Common Public License 1.0.
+
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
