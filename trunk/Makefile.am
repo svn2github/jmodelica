@@ -15,17 +15,17 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-EXTRA_DIST = doxydoc/doxydoc.conf
+#EXTRA_DIST = doc/JMI/jmi_doxydoc.conf
 
-SUBDIRS = src/jmi 
+SUBDIRS = JMI/src/jmi doc/JMI
 
 examples: install
-	cd examples/Vdp; $(MAKE) all
-	cd examples/Vdp_cppad; $(MAKE) all
-	
+	cd JMI/examples/Vdp; $(MAKE) all
+	cd JMI/examples/Vdp_cppad; $(MAKE) all
+
 clean-examples: 
-	cd examples/Vdp; $(MAKE) clean
-	cd examples/Vdp_cppad; $(MAKE) clean
-	
-doxydoc:
-	cd $(srcdir); doxygen doxydoc/doxydoc.conf
+	cd JMI/examples/Vdp; $(MAKE) clean
+	cd JMI/examples/Vdp_cppad; $(MAKE) clean
+
+docs:
+	cd $(srcdir); doxygen doc/JMI/jmi_doxydoc.conf

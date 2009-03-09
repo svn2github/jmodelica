@@ -14,6 +14,20 @@
 
 @SET_MAKE@
 
+# 
+#    Copyright (C) 2009 Modelon AB
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the Common Public License as published by
+#    IBM, version 1.0 of the License.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY. See the Common Public License for more details.
+#
+#    You should have received a copy of the Common Public License
+#    along with this program.  If not, see
+#     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
+
 
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
@@ -33,7 +47,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = src/jmi
+subdir = JMI/src/jmi
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -273,9 +287,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  src/jmi/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  JMI/src/jmi/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  src/jmi/Makefile
+	  $(AUTOMAKE) --foreign  JMI/src/jmi/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

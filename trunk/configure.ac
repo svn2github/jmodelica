@@ -19,7 +19,7 @@
 AC_PREREQ(2.61)
 AC_INIT([JModelicaRT], 0.0.1, BUG-REPORT-ADDRESS)
 AM_INIT_AUTOMAKE
-AC_CONFIG_SRCDIR([src/jmi/jmi.h])
+AC_CONFIG_SRCDIR([JMI/src/jmi/jmi.h])
 AC_CONFIG_HEADER([config.h])
 
 # Checks for programs.
@@ -167,9 +167,10 @@ AC_C_CONST
 
 AC_CONFIG_FILES([
  Makefile
- src/jmi/Makefile
- examples/Vdp/Makefile
- examples/Vdp_cppad/Makefile
+ JMI/src/jmi/Makefile
+ JMI/examples/Vdp/Makefile
+ JMI/examples/Vdp_cppad/Makefile
 ])
+
 
 AC_OUTPUT

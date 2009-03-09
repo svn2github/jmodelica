@@ -13,6 +13,20 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
+
+# 
+#    Copyright (C) 2009 Modelon AB
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the Common Public License as published by
+#    IBM, version 1.0 of the License.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY. See the Common Public License for more details.
+#
+#    You should have received a copy of the Common Public License
+#    along with this program.  If not, see
+#     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
@@ -34,9 +48,10 @@ host_triplet = @host@
 subdir = .
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
-	$(top_srcdir)/configure $(top_srcdir)/examples/Vdp/Makefile.in \
-	$(top_srcdir)/examples/Vdp_cppad/Makefile.in INSTALL \
-	config.guess config.sub depcomp install-sh ltmain.sh missing
+	$(top_srcdir)/JMI/examples/Vdp/Makefile.in \
+	$(top_srcdir)/JMI/examples/Vdp_cppad/Makefile.in \
+	$(top_srcdir)/configure INSTALL config.guess config.sub \
+	depcomp install-sh ltmain.sh missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -45,7 +60,8 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = examples/Vdp/Makefile examples/Vdp_cppad/Makefile
+CONFIG_CLEAN_FILES = JMI/examples/Vdp/Makefile \
+	JMI/examples/Vdp_cppad/Makefile
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -188,8 +204,9 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
-EXTRA_DIST = doxydoc/doxydoc.conf
-SUBDIRS = src/jmi 
+
+#EXTRA_DIST = doc/JMI/jmi_doxydoc.conf
+SUBDIRS = JMI/src/jmi doc/JMI
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -244,9 +261,9 @@ $(srcdir)/config.h.in:  $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
-examples/Vdp/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/Vdp/Makefile.in
+JMI/examples/Vdp/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI/examples/Vdp/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-examples/Vdp_cppad/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/Vdp_cppad/Makefile.in
+JMI/examples/Vdp_cppad/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI/examples/Vdp_cppad/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
@@ -639,15 +656,15 @@ uninstall-am:
 
 
 examples: install
-	cd examples/Vdp; $(MAKE) all
-	cd examples/Vdp_cppad; $(MAKE) all
+	cd JMI/examples/Vdp; $(MAKE) all
+	cd JMI/examples/Vdp_cppad; $(MAKE) all
 
 clean-examples: 
-	cd examples/Vdp; $(MAKE) clean
-	cd examples/Vdp_cppad; $(MAKE) clean
+	cd JMI/examples/Vdp; $(MAKE) clean
+	cd JMI/examples/Vdp_cppad; $(MAKE) clean
 
-doxydoc:
-	cd $(srcdir); doxygen doxydoc/doxydoc.conf
+docs:
+	cd $(srcdir); doxygen doc/JMI/jmi_doxydoc.conf
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
