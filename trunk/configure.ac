@@ -170,6 +170,7 @@ AC_CONFIG_FILES([
  JMI/src/jmi/Makefile
  JMI/examples/Vdp/Makefile
  JMI/examples/Vdp_cppad/Makefile
+ Compiler/ModelicaFrontEnd/build.xml
 ])
 
 

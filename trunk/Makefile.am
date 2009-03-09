@@ -17,7 +17,14 @@ AUTOMAKE_OPTIONS = foreign
 
 #EXTRA_DIST = doc/JMI/jmi_doxydoc.conf
 
-SUBDIRS = JMI/src/jmi doc/JMI
+SUBDIRS = JMI/src/jmi 
+
+all-local:
+	cd Compiler/ModelicaFrontEnd; \
+	ANT_OPTS="-Xmx1024M" ant
+
+install-exec-local:
+	cp Compiler/ModelicaFrontEnd/bin/jmodelica.jar lib
 
 examples: install
 	cd JMI/examples/Vdp; $(MAKE) all
