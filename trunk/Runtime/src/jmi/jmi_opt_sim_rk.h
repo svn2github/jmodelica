@@ -27,7 +27,8 @@
  *
  * Some thoughts in relation to Petzolds book.
  *
- * - In the book the form
+ *
+ * 1) In the book the form
  *
  * \f$ F(\dot y,y,t)=0\f$
  *
@@ -38,21 +39,21 @@
  * may not be differentiable, which is why I think this operation seems a bit
  * suspicious.
  *
- * - If we assume a DAE of index-1 where we partition \f$y\f$ into states
+ * 2) If we assume a DAE of index-1 where we partition \f$y\f$ into states
  * and algebraic variables, we have
  *
- * \f$F(\dot x,x,w,t)\f$
+ * \f$F(\dot x,x,w,t)=0\f$
  *
  * where \f$w\f$ are the algebraic variables. In line with the expressions on
  * top of p. 269 we get
  *
- * \f$x_{i,j}=x_{i-1}+h\sum_{k=1}^{N_c}a_{j,k} \dot x_{i,k}\f$
- * \f$x_i=x_{i-1}+h\sum_{k=1}^{N_c}b_{k} \dot x_{i-1,k}\f$
- * \f$\f$F(\dot x_{i,j},x_{i,j},w_{i,j},t)\f$
+ * \f$\displaystyle x_{i,j}=x_{i-1}+h\sum_{k=1}^{N_c}a_{j,k} \dot x_{i,k}\f$<br>
+ * \f$\displaystyle x_i=x_{i-1}+h\sum_{k=1}^{N_c}b_{k} \dot x_{i-1,k}\f$<br>
+ * \f$F(\dot x_{i,j},x_{i,j},w_{i,j},t)=0\f$<br>
  *
  * assuming that the elements are indexed by \f$i\f$ and the "collocation
- * points" are indexed by \f$j\f. This gives us \f$(2*N_x+N_w)*N_c*N_e + N_e*N_x\f$
- * variables and \f$(2*N_x+N_w)*N_c*N_e + N_e*N_x\f$ equations. So far so good.
+ * points" are indexed by \f$j\f$. This gives us \f$(2N_x+N_w)N_cN_e + N_eN_x\f$
+ * variables and \f$(2N_x+N_w)N_cN_e + N_eN_x\f$ equations. So far so good.
  *
  * Issues:
  *   - Non-unique values in the \f$c\f$ vector in the Butcher tableau gives
