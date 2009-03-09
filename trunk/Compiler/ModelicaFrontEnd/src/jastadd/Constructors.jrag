@@ -1,0 +1,58 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import org.jmodelica.parser.*;
+
+aspect Constructors {
+
+	public ComponentDecl.ComponentDecl(boolean isParameter,
+	                                   String type,
+	                                   String name,
+	                                   String bexp) {
+
+		this(new Opt(),
+		                         new Opt(),
+		                         new Opt(),
+		                         new Opt(),
+		                         new Opt(),
+		                         new Opt(),
+	                             isParameter? new Opt(new Parameter()): new Opt(),      
+                                 new Opt(),
+                                 new ClassAccess(type),
+                                 new Opt(),
+                                 new PublicVisibilityType(),
+                                 new IdDecl(name),
+                                 new Opt(),
+                        		 new Opt(),        
+                                 new Opt(),
+                                 new Comment(new Opt(),new Opt()),
+                                 new Opt(),
+                                 new Comment(new Opt(),new Opt()));
+		
+		
+		Exp bexp_ast=null;
+		
+		if (!bexp.equals("")) {
+		    ModelicaParser mp = new ModelicaParser();
+			bexp_ast = mp.parseExpString(bexp);	
+			//debugPrint("ComponentDecl.ComponentDecl");
+			//bexp_ast.dumpTreeBasic("");	
+		    this.setModification(new ValueModification(bexp_ast));
+        }                     	
+	
+	}
+
+}

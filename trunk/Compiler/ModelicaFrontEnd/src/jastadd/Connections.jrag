@@ -1,0 +1,350 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.ArrayList ;
+
+aspect Connections {
+
+	/* Machinery to manage connection sets */
+
+	public ConnectionSetManager FClass.connectionSetManager = new ConnectionSetManager();
+	
+	public ConnectionSetManager FClass.getConnectionSetManager() {
+		return connectionSetManager;
+	}
+
+	public void FClass.genConnectionEquations() {
+	
+		debugPrint("<<<FClass.genConnectionEquations()");
+		ArrayList l = connectionSetManager.getConnectionSetList();
+		debugPrint("<<<FClass.genConnectionEquations(): "+ l.size() + " sets in manager");
+		//getConnectionSetManager().printConnectionSets();
+		
+		
+		for (int i=0; i<l.size();i++) {
+			LinkedHashSet h = (LinkedHashSet)(l.get(i));
+			
+			ConnectionSetEntry csee[] = new ConnectionSetEntry[1];
+			csee = (ConnectionSetEntry[])h.toArray(csee);
+			
+			java.util.Arrays.sort(csee);
+			
+			//System.out.println("*** Array size: " + csee.length);
+			
+			if (((ConnectionSetEntry)csee[0]).isFlow()) {
+				FExp e = new FNoExp();
+				// Treat first element separately
+				ConnectionSetEntry cse = (ConnectionSetEntry)csee[0];
+				if (cse.isOutside()) 
+					e = new FNegExp(new FIdUseExp(new FIdUseQualified("",(FQName)cse.getFQName().fullCopy())));
+				else
+					e = new FIdUseExp(new FIdUseQualified("",(FQName)cse.getFQName().fullCopy())) ;		
+			
+				for (int j=1; j<csee.length;j++) {
+					cse = (ConnectionSetEntry)csee[j];
+					if (cse.isOutside())
+						e = new FSubExp(e,new FIdUseExp(new FIdUseQualified("",(FQName)cse.getFQName().fullCopy())));
+					else
+						e = new FAddExp(e,new FIdUseExp(new FIdUseQualified("",(FQName)cse.getFQName().fullCopy())));		
+				}
+				getFEquationBlock(0).addFAbstractEquation(new FEquation(e,new FRealLitExp("0.0")));	
+			} else {
+				// Treat first element separately
+				FExp e1=new FNoExp(),e2=new FNoExp();
+				ConnectionSetEntry cse = (ConnectionSetEntry)csee[0];
+				e1 = new FIdUseExp(new FIdUseQualified("",(FQName)cse.getFQName().fullCopy()));
+				for (int j=1;j<csee.length;j++) {
+					cse = (ConnectionSetEntry)csee[j];
+					e2 = new FIdUseExp(new FIdUseQualified("",(FQName)cse.getFQName().fullCopy()));
+					getFEquationBlock(0).addFAbstractEquation(new FEquation(e1,e2));
+					e1 = e2;
+				}
+			}
+
+		}
+
+		// Generate equations for flow variables of connectors not
+		// appearing as inside.
+		LinkedHashSet notInsideConnectedFlowVars = connectionSetManager.getNotInsideConnectedFlowVars();		
+		for (Iterator iter=notInsideConnectedFlowVars.iterator();iter.hasNext();) {
+			ConnectionSetEntry cse = (ConnectionSetEntry)iter.next();
+				getFEquationBlock(0).addFAbstractEquation(new FEquation(new FIdUseExp(new FIdUseQualified("",(FQName)cse.getFQName().fullCopy())),new FRealLitExp("0")));
+		}
+			
+			/*
+			Iterator it = h.iterator();
+			if (((ConnectionSetEntry)it.next()).isFlow()) {
+				FExp e = new FNoExp();
+				// Treat first element separately
+				Iterator iter = h.iterator();
+				ConnectionSetEntry cse = (ConnectionSetEntry)iter.next();
+				if (cse.isOutside())
+					e = new FNegExp(new FIdUse(cse.name()));
+				else
+					e = new FIdUse(cse.name());		
+			
+				while (iter.hasNext()) {
+					cse = (ConnectionSetEntry)iter.next();
+					if (cse.isOutside())
+					e = new FSubExp(e,new FIdUse(cse.name()));
+				else
+					e = new FAddExp(e,new FIdUse(cse.name()));		
+				}
+				addFEquation(new FEquation(e,new FRealLitExp("0.0")));	
+			} else {
+				// Treat first element separately
+				Iterator iter = h.iterator();
+				FExp e1=new FNoExp(),e2=new FNoExp();
+				ConnectionSetEntry cse = (ConnectionSetEntry)iter.next();
+				e1 = new FIdUse(cse.name());
+				while (iter.hasNext()) {
+					cse = (ConnectionSetEntry)iter.next();
+					e2 = new FIdUse(cse.name());
+					addFEquation(new FEquation(e1,e2));
+					e1 = e2;
+				}
+			}
+				*/	
+	}
+
+	static public class MyLinkedHashSet extends LinkedHashSet {
+	
+		public boolean add(Object o) {
+			ConnectionSetEntry cse = (ConnectionSetEntry)o;
+			//System.out.println("nicfv added: " + cse.getVar().getName().getID());
+			super.add(cse);	
+			return true;
+		}
+	}
+
+	static public class ConnectionSetManager {
+	
+		private ArrayList list = new ArrayList();
+		private MyLinkedHashSet notInsideConnectedFlowVars = new MyLinkedHashSet();
+		private LinkedHashSet insideConnectedFlowVars = new LinkedHashSet();
+		
+		public ArrayList getConnectionSetList() {
+			return list;
+		}
+		
+		public LinkedHashSet getNotInsideConnectedFlowVars() {
+			return notInsideConnectedFlowVars;
+		}
+		
+		public LinkedHashSet getInsideConnectedFlowVars() {
+			return insideConnectedFlowVars;
+		}
+				
+		public void addVars(InstComponentDecl var1, boolean outside1, FQName namePrefix1,
+		                    InstComponentDecl var2, boolean outside2, FQName namePrefix2) {
+
+//			System.out.println("ConnectionSetManager.addVars");
+		
+//		    System.out.println(namePrefix1.name()+"."+var1.name());
+//		    System.out.println(namePrefix2.name()+"."+var2.name());
+		
+			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1,outside1,namePrefix1);
+			ConnectionSetEntry cse2 = new ConnectionSetEntry(var2,outside2,namePrefix2);	
+			
+			if (cse1.isFlow() && !insideConnectedFlowVars.contains(cse1))
+				if (outside1) {
+					//notInsideConnectedFlowVars.add(cse1);
+				} else {
+					//notInsideConnectedFlowVars.remove(cse1);
+					notInsideConnectedFlowVars.remove(new ConnectionSetEntry(var1,true,namePrefix1));
+					insideConnectedFlowVars.add(cse1);
+				}
+				
+			if (cse2.isFlow() && !insideConnectedFlowVars.contains(cse2))
+				if (outside1) {
+					//notInsideConnectedFlowVars.add(cse2);
+				} else {
+					//notInsideConnectedFlowVars.remove(cse2);
+					notInsideConnectedFlowVars.remove(new ConnectionSetEntry(var2,true,namePrefix2));
+					insideConnectedFlowVars.add(cse2);
+				}	
+			
+			LinkedHashSet h1 = getConnectionSet(cse1);
+			LinkedHashSet h2 = getConnectionSet(cse2);
+
+			
+			if (h1!=null && h2==null)
+				h1.add(cse2);
+			else if (h2!=null && h1==null)
+				h2.add(cse1);
+			else if (h1!=null && h2!=null) {
+				h1.addAll(h2);
+				list.remove(h2);
+			} else {
+//				System.out.println("ConnectionSetManager.addVars: about to create a new Hash set");
+				LinkedHashSet h = new LinkedHashSet();
+				h.add(cse1);
+//				System.out.println("ConnectionSetManager.addVars: cse1 added");
+				h.add(cse2);
+//				System.out.println("ConnectionSetManager.addVars: cse1 added");
+				list.add(h);
+			}
+			
+//			printConnectionSets();
+			
+		}
+	
+		public LinkedHashSet getConnectionSet(ConnectionSetEntry cse) {
+			for (int i=0;i<list.size();i++) {
+				if (((LinkedHashSet)(list.get(i))).contains(cse))
+					return (LinkedHashSet)list.get(i);
+			}
+			return null;
+		}
+	
+		public void printConnectionSets() {
+		
+			System.out.println("Connection sets: " + list.size() + " sets");
+			StringBuffer str = new StringBuffer();
+			
+			// Print connection sets 
+			for(int i=0;i<list.size();i++) {
+				LinkedHashSet h = (LinkedHashSet)(list.get(i));
+				str.append("Connection set (");
+				Iterator it = h.iterator();
+				if (((ConnectionSetEntry)it.next()).isFlow())
+					str.append("flow");
+				else
+					str.append("non flow");
+				str.append("): {");
+				
+				for (Iterator iter=h.iterator();iter.hasNext();) {
+					
+					Object o = iter.next();
+					//System.out.println("printConnectionSets: " +o.getClass().getName());
+					ConnectionSetEntry cse = (ConnectionSetEntry)o;
+					str.append(cse.name());
+					if (cse.isOutside())
+						str.append("(o)");
+					else
+						str.append("(i)");	
+					if (iter.hasNext())
+						str.append(", ");
+				}	
+				str.append("}\n");
+			}
+			
+			// Print flow variables appearing in inside/outside connectors
+			str.append("Flow variables appearing in inside connectors:\n{");
+			for (Iterator iter=insideConnectedFlowVars.iterator();iter.hasNext();) {
+				ConnectionSetEntry cse = (ConnectionSetEntry)iter.next();
+					str.append(cse.name());
+					if (iter.hasNext())
+						str.append(", ");
+			}
+			str.append("}\n");
+			str.append("Flow variables appearing only in outside connectors:\n{");
+			for (Iterator iter=notInsideConnectedFlowVars.iterator();iter.hasNext();) {
+				ConnectionSetEntry cse = (ConnectionSetEntry)iter.next();
+					str.append(cse.name());
+					if (iter.hasNext())
+						str.append(", ");
+			}
+			str.append("}\n");
+			
+			
+			
+			System.out.println(str.toString());
+		}
+	}
+
+	
+	static public class ConnectionSetEntry implements Comparable{
+	
+		private InstComponentDecl cd;
+		private boolean outside;
+		private FQName fqName;
+		//private boolean flow;
+		
+		public ConnectionSetEntry(InstComponentDecl cd, boolean outside, FQName fqName) {
+			//System.out.println("Created ConnectionSetEntry: " + cd.getName().getID());
+			this.cd = cd;
+			this.outside = outside;
+			this.fqName = (FQName)fqName.fullCopy();
+			//this.fqName.add(new FQNamePart(cd,cd.size()));
+		}
+	
+		public boolean isOutside() {
+			return outside;
+		}
+	
+		public InstComponentDecl getVar() {
+			return cd;
+		}
+	
+		public boolean isFlow() {
+			return cd.getComponentDecl().hasTypePrefixFlow();
+		}
+	
+		
+		public String name() {
+		   return fqName.name();
+		}
+		
+	
+		public FQName getFQName() {
+			return fqName;
+		}
+		
+		public int hashCode() {
+			//System.out.println("ConnectionSetEntry.hashCode");
+			String tr = "true";
+			String fa = "false";
+			return name().intern().hashCode() + (outside? tr.intern().hashCode() : fa.intern().hashCode());
+		}
+		
+		
+		public boolean equals(Object o) {
+			
+			//System.out.println("ConnectionSetEntry.equals");
+			
+			ConnectionSetEntry cse = (ConnectionSetEntry)o;
+			boolean res;
+			
+			
+			if (name().equals(cse.name()) && outside==cse.isOutside())
+				res = true;
+			else
+				res = false;
+			
+			//System.out.println("ConnectionSetEntry.equals: "+res);
+			//cd.dumpTree("");
+			//cse.getVar().dumpTree("");
+		
+			return res;
+		
+		}
+	
+		public int compareTo(Object o) {
+		
+			ConnectionSetEntry cse = (ConnectionSetEntry)o;
+			return name().compareTo(cse.name());
+		
+		}
+	
+	}
+
+
+
+
+}

@@ -1,0 +1,161 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+import java.util.HashSet;
+import java.util.ArrayList;
+
+aspect Types { 
+ 
+   // This attribute is used to check if the instance tree should be built based only on constraining types
+   // TODO: make sure this is used in the instance tree construction framework
+   inh boolean InstNode.constrainingType();
+   eq InstConstraining.getInstNode().constrainingType() = true;
+   eq InstRoot.getChild().constrainingType() = false;
+
+   syn String InstNode.className() = "";
+   syn String InstComponentDecl.className() = getComponentDecl().myClass().name();
+
+   // The double dispatch pattern applied to subtype testing.
+   syn boolean InstNode.subType(InstNode t) = false;
+   syn boolean InstNode.superTypeCompositeType(InstComposite subType) = false;
+   syn boolean InstNode.superTypeClassType(InstRoot subType) = false;
+   syn boolean InstNode.superTypePrimitiveComponentType(InstPrimitive subType) = false;
+   
+   eq InstComposite.subType(InstNode t) = t.superTypeCompositeType(this);
+   eq InstPrimitive.subType(InstNode t) = t.superTypePrimitiveComponentType(this);
+
+   eq InstComposite.superTypeCompositeType(InstComposite subType) {
+       if (subType == this) return true;
+       if (subType.myInstClass().isUnknown()) return true;
+       InstComposite superType = this;
+   
+       // Check that all elements (here: components) in superType are in subType 
+       for (InstNode superTypeComponentInst : containedInstComponents()) {
+       	  // TODO: memberComponentInst should be switched for something in the general name analysis framework
+          HashSet<InstNode> set = subType.memberComponentInst(superTypeComponentInst.name());
+          if (set.size()!=1)
+          	return false;
+          InstNode subTypeComponentInst = set.iterator().next();
+          if (!subTypeComponentInst.subType(superTypeComponentInst))
+          	return false;
+	   }
+   	   return true;
+   }
+   
+   eq UnknownInstComponentDecl.superTypeCompositeType(InstComposite subType) = true;
+   
+   eq InstPrimitive.superTypePrimitiveComponentType(InstPrimitive subType) {
+       if (subType == this) return true;
+       InstPrimitive superType = this;
+       if (subType.className().equals(superType.className()))
+       	  return true;
+       else   
+   	      return false;
+   }
+
+  // Rudimentary name analysis framework for looking up instances
+  syn lazy HashSet<InstNode> InstNode.memberComponentInst(String name) {
+     HashSet<InstNode> set = new HashSet<InstNode>(4);
+     for (InstNode node : containedInstComponents()) {
+     	// This is to take InstExtends into account
+     if (node.name().equals(name))
+        set.add(node);
+     }
+     return set;
+  }
+
+
+  syn lazy ArrayList<InstComponentDecl> InstNode.containedInstComponents() {
+  	ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
+    for (InstNode node : getInstExtendss()) {
+       	 l.addAll(node.containedInstComponents());
+    }
+    for (InstComponentDecl node : getInstComponentDecls()) { 
+         l.add(node);
+    }
+    return l;
+  }
+  
+  // InstNodes are type checked recursively, which means if a top level component
+  // is type checked, then all sub-components are also type checked. Therefore a flag 
+  // is introduced to detect this situation to avoid duplicate error messages.
+  public boolean InstNode.typeChecked = false;
+  public void InstComposite.typeCheck() {
+     if (!typeChecked) {
+     	typeChecked = true;
+	     // Notice that modifiers (including redeclarations) in a constraining clause
+   	  	 // are applied to the declaration itself and is therefore also type checked.
+		if (hasInstConstraining()) {
+		      InstNode superType = getInstConstraining().getInstNode();
+	     	  InstComponentDecl declaredType = this; 
+    	 	  if (!declaredType.subType(superType))
+     			declaredType.getComponentDecl().error("In the declaration '" +declaredType.getComponentDecl().prettyPrint("") +"', the declared class is not a subtype of the constraining class");
+		}
+  	
+  	 	
+  	 }
+  }
+  
+  syn lazy InstComponentDecl InstComponentDecl.constrainingInstComponentDecl() = 
+  	hasInstConstraining()? (InstComponentDecl)getInstConstraining().getInstNode() : this;
+  
+  public void InstReplacingComposite.typeCheck() {
+     if (!typeChecked) {
+     	typeChecked = true;
+     
+	 // Type check the original component
+	 InstComponentDecl declaredType = getOriginalInstComponent();	 
+	 InstComponentDecl superType = declaredType.constrainingInstComponentDecl();
+	 if (declaredType.hasInstConstraining()) {
+	 	 if (!declaredType.subType(superType))
+     	  	superType.getComponentDecl().error("In the declaration '" +declaredType.getComponentDecl().prettyPrint("") +"', the declared class is not a subtype of the constraining class");
+	 } 
+
+     // The environment should be traversed backwards in order to perform correct
+     // subtype tests in redeclaration chains.     	
+       for (int i=myEnvironment().size()-1;i>=0;i--) {
+        IModification im = myEnvironment().get(i);
+	   	if (im.matchIComponentRedeclare(name())!=null) { 
+          InstComponentDecl declaredSubType = im.matchIComponentRedeclare(name()).getInstComponentDecl();
+          InstComponentDecl constrainingSubType = declaredSubType.constrainingInstComponentDecl();
+                        
+           // Check consistency of the redeclaring component
+           if (declaredSubType.hasInstConstraining()) {
+              if (!declaredSubType.subType(constrainingSubType))
+     	         declaredSubType.getComponentDecl().error("In the declaration '" +declaredSubType.getComponentDecl().prettyPrint("") +"', the declared class is not a subtype of the constraining class");
+           }
+           
+           // It is ok to check against the constrainingSubType, since the declaredSubType is a subtype
+           // of the constrainingSubType. Then if constrainingSubType is a subtype of superType, then it
+           // follows that declaredSubType is a subtype of superType by transitivity.
+           if (!constrainingSubType.subType(superType))
+             constrainingSubType.getComponentDecl().error("'" + constrainingSubType.getComponentDecl().prettyPrint("")+ "'"+ " is not a subtype of " + 
+                "'"+superType.getComponentDecl().prettyPrint("")+"'");
+                
+           // If the redeclaring declaration has a constraining clause, the constraining
+           // type of the redeclaring declaration of should be used in following subtype-test 
+           // instead of the constraining type of the orignal declaration.
+           if (declaredSubType.hasInstConstraining()) {    
+              superType = constrainingSubType;
+           }    	   
+	    }
+	 }
+  }
+}
+
+}
+

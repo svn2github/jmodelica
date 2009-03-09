@@ -1,0 +1,79 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.util.HashMap;
+
+aspect FlatNameBinding {
+	
+	inh AbstractFVariable FIdUse.lookupFV(FQName fqname);
+	syn lazy AbstractFVariable FIdUse.myFV() = null;
+	eq FIdUseQualified.myFV() = lookupFV(getFQName());
+	
+	syn lazy AbstractFVariable FIdUseExp.myFV() = getFIdUse().myFV();
+	//inh AbstractFVariable FIdUseExp.lookupFV(FQName fqname);
+	inh AbstractFVariable FEquationBlock.lookupFV(FQName fqname);
+	inh AbstractFVariable FVariable.lookupFV(FQName fqname);
+	
+	/* It appears that SourceRoot can contain flattened expressions */
+	/* Is this OK? Yes, it is ok since InstRoot is defined as an NTA */
+	/* of FullClassDecl */
+
+	eq Root.getChild().lookupFV(FQName fqname) {
+		return null;
+	}
+
+	eq FClass.getFVariable(int index).lookupFV(FQName fqname) {
+		FVariable variable = (FVariable) fullyQualifiedVariablesMap().get(fqname.name());
+		if (variable == null) {
+			//error("Undefined variable " + fqname.name());
+			return unknownFVariable();
+		} else {
+			return variable;
+		}		
+	}
+	
+	eq FClass.getFEquationBlock(int index).lookupFV(FQName fqname) {
+		FVariable variable = (FVariable) fullyQualifiedVariablesMap().get(fqname.name());
+		if (variable == null) {
+			//error("Undefined variable " + fqname.name());
+			return unknownFVariable();
+		} else {
+			return variable;
+		}
+	}	
+			
+	syn lazy HashMap FClass.fullyQualifiedVariablesMap() {
+		HashMap map = new HashMap();
+		for(int k = 0; k < getNumFVariable(); k++) {
+			map.put(getFVariable(k).getFQName().name(),getFVariable(k));
+		}
+		return map;
+	}
+	
+}
+
+aspect UnknownFVariables {
+
+	syn UnknownFVariable FClass.getUnknownFVariable() = new UnknownFVariable();
+
+	syn lazy UnknownFVariable ASTNode.unknownFVariable() = 
+	  root().unknownFVariable();
+	eq FlatRoot.unknownFVariable() = getFClass().getUnknownFVariable();
+
+	syn boolean AbstractFVariable.isUnknown() = false;
+	eq UnknownFVariable.isUnknown() = true;
+	   
+}

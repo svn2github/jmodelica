@@ -1,0 +1,163 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+import java.util.HashSet;
+
+aspect InstLookupComponents {
+
+	inh lazy HashSet InstAccess.lookupInstComponent(String name);	
+	inh lazy HashSet InstNode.lookupInstComponent(String name);	
+	eq InstBaseClassDecl.getChild().lookupInstComponent(String name) = genericLookupInstComponent(name); 	
+	eq InstNode.getChild().lookupInstComponent(String name) = memberInstComponent(name); 
+	
+	eq InstComponentDecl.getIModification().lookupInstComponent(String name) = lookupInstComponent(name);
+	eq InstPrimitive.getIModification().lookupInstComponent(String name) = lookupInstComponent(name);
+	eq InstExtends.getIClassModification().lookupInstComponent(String name) = lookupInstComponent(name);
+	
+	eq IValueModification.getFExp().lookupInstComponent(String name) = myInstNode().lookupInstComponent(name);
+	
+	eq InstShortClassDecl.getChild().lookupInstComponent(String name) = lookupInstComponent(name);
+	
+	eq InstPrimitive.getChild().lookupInstComponent(String name) = myInstClass().memberInstComponent(name); 	
+	eq InstDot.getRight().lookupInstComponent(String name) = getLeft().qualifiedLookupInstComponent(name);
+	eq InstRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
+		
+	syn lazy HashSet InstAccess.qualifiedLookupInstComponent(String name) = emptyHashSet();
+	eq InstComponentAccess.qualifiedLookupInstComponent(String name) = myInstComponentDecl().memberInstComponent(name);	
+	eq InstClassAccess.qualifiedLookupInstComponent(String name) = myInstClassDecl().memberInstComponent(name);
+	
+	eq SourceRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
+	// This equation is necessary since InstAccesses may be present in FExps.	
+	eq FlatRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
+	
+	syn lazy HashSet InstBaseClassDecl.genericLookupInstComponent(String name) {
+		HashSet h = memberInstComponent(name);
+		// TODO: add scoped lookup to find constants.
+		return h;
+	 }
+	
+	
+	syn lazy HashSet InstNode.memberInstComponent(String name)  {
+
+	 	HashSet set = new HashSet(4);
+		 	
+		for (InstComponentDecl ic : constrainingInstComponentDecls()) {
+			if (ic.matchInstComponentDecl(name))
+				set.add(ic);
+		}
+
+		for (InstExtends ie : constrainingInstExtends()) {
+			set.addAll(ie.memberInstComponent(name));
+		}
+		
+		if (set.size()>0) {
+			return set;
+		} else {
+			return emptyHashSet();
+		}
+		
+	}
+
+	// This is needed since the member components of InstPrimitive:s (which are attributes)
+	// are not instantiated
+	eq InstPrimitive.memberInstComponent(String name) = myInstClass().memberInstComponent(name);
+	eq InstExtends.memberInstComponent(String name) = extendsPrimitive()? myInstClass().memberInstComponent(name) : super.memberInstComponent(name);
+
+	/**
+	 * Simple matching of component names.
+	 */
+	syn boolean InstComponentDecl.matchInstComponentDecl(String name) = name().equals(name);
+	
+	syn lazy InstComponentDecl InstAccess.myInstComponentDecl() = unknownInstComponentDecl();
+	eq InstComponentAccess.myInstComponentDecl() {
+		HashSet set = lookupInstComponent(name());
+		if (set.size() > 0) {
+			return (InstComponentDecl)set.iterator().next();
+		} else
+			return unknownInstComponentDecl();
+	}
+	
+	eq InstDot.myInstComponentDecl() = getRight().myInstComponentDecl();
+		
+/*
+	inh HashSet ForClauseE.lookupComponent(String name);	
+	eq ForClauseE.getForEqns().lookupComponent(String name) {
+		HashSet set = new HashSet(4);
+		for (int i=0;i<getNumForIndex();i++) {
+			if (getForIndex(i).getForIndexDecl().matchComponentDecl(name)) {
+				set.add(getForIndex(i).getForIndexDecl());	
+				return set;
+			}
+		}
+		return lookupComponent(name);
+	}
+
+
+	inh HashSet SumRedExp.lookupComponent(String name);	
+	eq SumRedExp.getExp().lookupComponent(String name) {
+		debugPrint("SumRedExp.getExp().lookupComponent: "+ name);
+		HashSet set = new HashSet(4);
+		if (getForIndex().getForIndexDecl().matchComponentDecl(name)) {
+			set.add(getForIndex().getForIndexDecl());
+			return set;	
+		}
+		return lookupComponent(name);
+	}
+*/	
+	
+}
+
+
+
+aspect LookupInstComponentsInModifications {
+      
+
+    /**
+     * The inherited attribute lookupInstComponentInInstElement defines 
+     * the lookup mechanism for left hand component references in modifications.
+     * InstComponents are looked up in InstComponentDecl:s sometimes and in InstClassDecl:s
+     * sometimes. TODO: this should probably be fixed.
+     * 
+     */
+	inh HashSet IElementModification.lookupInstComponentInInstElement(String name);
+	inh HashSet INamedModification.lookupInstComponentInInstElement(String name);
+	
+	eq IElementModification.getName().lookupInstComponent(String name) = lookupInstComponentInInstElement(name);
+	
+	eq INamedModification.getName().lookupInstComponent(String name) = lookupInstComponentInInstElement(name);
+	
+	eq InstConstrainingClass.getIClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name);
+	eq InstConstrainingComponent.getIClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name);
+	     
+	eq InstComponentDecl.getIModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name); 
+	
+	eq InstPrimitive.getIModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name); 
+	
+	eq IElementModification.getIModification().lookupInstComponentInInstElement(String name) = getName().myInstComponentDecl().memberInstComponent(name);
+    
+	eq InstExtends.getIClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name);
+	
+//	eq InstShortClassDecl.getIClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name);
+	
+	inh HashSet IComponentRedeclare.lookupInstComponentInInstElement(String name);
+	eq IComponentRedeclare.getName().lookupInstComponent(String name) = lookupInstComponentInInstElement(name);
+	
+	eq InstRoot.getChild().lookupInstComponentInInstElement(String name) {return emptyHashSet();}
+	  
+}
+
+  

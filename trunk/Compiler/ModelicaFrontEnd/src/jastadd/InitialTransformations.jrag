@@ -1,0 +1,390 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+/**
+ * InitialTransformation contains rewrites that transforms the original
+ * source AST into a canonical form. For example, multiple component
+ * declarations are split into individual ones and visibility is set
+ * for each individual declaration.
+ */
+ 
+ aspect InitialTransformations {
+	/** 
+   	 * This attribute is used to set the visibility of each element
+     * as protected or public. All classes that can have a parent with
+   	 * associated visibility must inherit this attribute. (At least if
+   	 * makes sense for that particular class).
+   	 */
+  	inh VisibilityType ClassDecl.visibility(); 
+  	inh VisibilityType PN_ComponentClause.visibility();
+  	inh VisibilityType PN_ExtendsClause.visibility();
+    
+  	/**
+  	 *  Equations defining public or protected visibility of elements 
+  	 */
+  	eq PublicElementList.getElement().visibility() = new PublicVisibilityType();
+  	eq ProtectedElementList.getElement().visibility() = new ProtectedVisibilityType();
+  	eq SourceRoot.getProgram().visibility() = new PublicVisibilityType(); 
+  	
+  	eq ClassRedeclare.getBaseClassDecl().visibility() = new PublicVisibilityType();
+  	eq ComponentRedeclare.getComponentDecl().visibility() = new PublicVisibilityType();
+  
+   	/**
+     * Rewrite the PN_FullClassDecl to a FullClassDecl including visibility info.
+     */
+   	rewrite PN_FullClassDecl {
+ 	  	to FullClassDecl { 
+ 	   		 //System.out.println("****  rewrite PN_FullClassDecl: "+getClass().getName()+": "+ name());
+ 	   		
+ 	   		Composition c = getComposition();
+  	
+  			List eqn = new List();
+  			List alg = new List();
+  			List sup = new List();
+  			List imp = new List();
+  			List classd = new List();
+  			List compd = new List();
+  			List annotation = new List();
+  	
+  			for (int i=0; i<c.getNumClause();i++) {
+  	
+  				Clause cl = c.getClause(i);
+  		
+  	    		if (cl instanceof ComponentDecl) {
+  	    			compd.add((ComponentDecl)cl);
+  	    		} else if (cl instanceof EquationClause) {
+  	    			EquationClause ec = (EquationClause)cl;
+  	    			for (int j=0;j<ec.getNumAbstractEquation();j++) {
+		  	    		eqn.add(ec.getAbstractEquation(j));
+  	    			}
+		  	    }else if (cl instanceof AlgorithmClause) {
+  	    			AlgorithmClause ac = (AlgorithmClause)cl;
+  	    			for (int j=0;j<ac.getNumAbstractAlgorithm();j++) {
+		  	    		alg.add(ac.getAbstractAlgorithm(j));
+  	    			}
+		  	    } else if (cl instanceof ExtendsClause) {
+		  	    	sup.add((ExtendsClause)cl);
+		  	    } else if (cl instanceof ClassDecl) {
+		  	    	classd.add((ClassDecl)cl);
+		  	    } else if (cl instanceof ImportClause) {
+		  	    	imp.add((ImportClause)cl);
+		  	    } else if (cl instanceof ElementAnnotation) {
+		  	    	annotation.add(((ElementAnnotation)cl).getAnnotation());
+		  	    }
+
+		  	}
+  	
+  			Opt ext_clause = c.hasAbstractExternalClause()?
+  			                 new Opt((ExternalClause)c.getAbstractExternalClause()):
+  			                 new Opt();
+  			
+ 	     	FullClassDecl fc = new FullClassDecl(visibility(),
+ 	     		                          getEncapsulatedOpt(),
+ 	     	                              getPartialOpt(),
+ 	     	                              getRestriction(),
+ 	     	                              getName(),
+ 	     	                              getRedeclareOpt(),
+ 	     	                              getFinalOpt(),
+ 	     	                              getInnerOpt(),
+ 	     	                              getOuterOpt(),
+ 	     	                              getReplaceableOpt(),
+ 	     	                              getConstrainingClauseOpt(),
+ 	     	                              getConstrainingClauseCommentOpt(),
+ 	     	                              getStringCommentOpt(),
+ 	     	                              eqn,
+ 	     	                              alg,
+ 	     	                              sup,
+ 	     	                              imp,
+ 	     	                              classd,
+ 	     	                              compd,
+ 	     	                              annotation,
+ 	     	                              ext_clause,
+ 	     	                              getEndName());
+ 	     	fc.setStart(getRestriction().getStart());
+ 	     	return fc;
+ 	  	}
+   	}
+ 	
+   	/**
+     * Rewrite the PN_ExtendsClause to a ExtendsClause including visibility info 
+     */
+   	rewrite PN_ExtendsClause {
+ 	  	to ExtendsClause {     
+ 	   		ExtendsClause e =  new ExtendsClause(visibility(),
+ 	   		                         getSuper(),
+ 	   		                         getClassModificationOpt(),
+ 	   		                         getAnnotationOpt());
+ 	  	
+ 	  		e.setStart(getStart());
+ 	  		return e;
+ 	  	}
+   	}
+ 
+   	/**
+   	 * Rewrite the PN_ComponentClause to a ComponentClause including
+     * visibility information. 
+     */
+   	rewrite PN_ComponentClause {
+   		to ComponentClause {
+ 	     	List l = new List();
+ 	     
+ 	     	for(int i=0;i<getNumName();i++) {
+ 	     		if (getName(i)!=null) l.add(getName(i));
+ 	     	}
+ 	     
+ 	     	ComponentClause c = new ComponentClause(getRedeclareOpt(),
+ 	     		                                    getFinalOpt(),
+ 	     		                                    getInnerOpt(),
+ 	     		                                    getOuterOpt(),
+ 	     		                                    getReplaceableOpt(),
+ 	     	                                        getTypePrefixFlowOpt(),
+ 	     	                                        getTypePrefixOtherOpt(),
+ 	     	                                        getTypePrefixInputOutputOpt(),
+ 	     	                                        getClassName(),
+ 	     	                                        getTypeArraySubscriptsOpt(),
+ 	     	                                        visibility(),
+ 	     	                                        l,
+ 	     	                                        getConstrainingClauseOpt(),
+ 	     	                                        getComment());
+ 		 	c.setStart(getStart());
+ 		 	//System.out.println("PN_ComponentClause->ComponentClause.getStart() = "+c.getStart());
+ 		 	return c;
+ 		}
+   	}
+   	
+     rewrite PN_ComponentRedeclare {
+   		to ComponentRedeclare {
+ 	       ComponentRedeclare c = new ComponentRedeclare(getEachOpt(),getFinalOpt(), getName(), (ComponentDecl)getBaseComponentDecl());
+ 		   c.setStart(getStart());
+ 		   return c;
+ 		}
+   	} 	
+   	
+   
+  	/**
+   	 * Eliminate the PublicElementList nodes. Creation of a new list
+   	 * is essential to trigger re-writes in the children. 
+   	 */
+  	rewrite PublicElementList in Composition.getClause() {
+     	to List {
+       		List l = new List();
+       		List el = getElementList();
+       		for(int i=0;i<el.getNumChild();i++)	
+            	if (el.getChild(i)!=null) l.add(el.getChild(i));
+       		return l.add(new PN_DummyClause());
+     	}
+  	}
+  
+   	/**
+     * Eliminate the ProtectedElementList nodes Creation of a new list
+     * is essential to trigger re-writes in the children. 
+     */
+  	rewrite ProtectedElementList in Composition.getClause() {
+     	to List {
+       		List l = new List();
+       		List el = getElementList();
+       			for(int i=0;i<el.getNumChild();i++)	
+            		if (el.getChild(i)!=null) l.add(el.getChild(i));
+       		return l.add(new PN_DummyClause());
+     	}
+  	}
+  
+  	/** 
+   	 * Transform ComponentClauses to individual ones 
+     */
+	rewrite ComponentClause in Composition.getClause() {
+    	when (getNumName()>1)
+    		to List {
+     			List l = new List();
+     				for (int i=0;i<getNumName();i++) {
+       					ComponentClause c = new ComponentClause((Opt)getRedeclareOpt().fullCopy(),
+ 	     		                                    			(Opt)getFinalOpt().fullCopy(),
+ 	     		                                    			(Opt)getInnerOpt().fullCopy(),
+ 	     		                                    			(Opt)getOuterOpt().fullCopy(),
+ 	     		                                    			(Opt)getReplaceableOpt().fullCopy(),
+       					                                        (Opt)getTypePrefixFlowOpt().fullCopy(),
+       					                                        (Opt)getTypePrefixOtherOpt().fullCopy(),
+       					                                        (Opt)getTypePrefixInputOutputOpt().fullCopy(),
+       					                                        (ClassAccess)getClassName().fullCopy(),
+       					                                        (Opt)getTypeArraySubscriptsOpt().fullCopy(),
+       					                                        (VisibilityType)getVisibilityType().fullCopy(),
+       					                                        new List().add(getName(i)),
+       					                                        (Opt)getConstrainingClauseOpt().fullCopy(),
+       					                                        (Comment)getComment().fullCopy());
+       					c.setStart(getStart());
+       					//System.out.println("ComponentClause->ComponentClause.getStart() = "+c.getStart());
+       					l.add(c);
+       				}
+     			return l;
+    		}
+  	}
+  
+  	/**
+  	 * Transform ComponentClauses to ComponentDecls 
+  	 */
+  	rewrite ComponentClause {
+    	when (getNumName()==1) 
+    		to ComponentDecl {
+    			// Move all ArraySubscripts to the declaration
+    			List l;
+    			if (getName(0).hasVarArraySubscripts())
+    				l = getName(0).getVarArraySubscripts().getSubscriptList();
+    			else
+    				l = new List();
+    				
+    			if (hasTypeArraySubscripts())
+    				for (int i=0;i<getTypeArraySubscripts().getNumSubscript();i++)
+    					l.add(getTypeArraySubscripts().getSubscript(i));
+    		
+      			ComponentDecl c = new ComponentDecl(getRedeclareOpt(),
+ 	     		                                    getFinalOpt(),
+ 	     		                                    getInnerOpt(),
+ 	     		                                    getOuterOpt(),
+ 	     		                                    getReplaceableOpt(),
+      			                                    getTypePrefixFlowOpt(),
+      			                                    getTypePrefixOtherOpt(),
+      			                                    getTypePrefixInputOutputOpt(),
+      			                                    getClassName(),
+      			                                    new Opt(),
+      			                                    getVisibilityType(),
+      			                                    getName(0).getName(),
+      			                                    new Opt(new ArraySubscripts(l)),
+      			                                    getName(0).getModificationOpt(),
+      			                                    getName(0).getConditionalAttributeOpt(),
+      			                                    getName(0).getComment(),
+      			                                    getConstrainingClauseOpt(),
+      			                                    getComment());
+      			c.setStart(getName(0).getStart());
+      			//System.out.println("ComponentClause->ComponentDecl.getStart() = "+c.getStart());
+      			return c;
+  			}
+  	}
+
+	rewrite PN_ExternalClause {
+		to ExternalClause {
+			if (hasPN_ExternalFunctionCall())
+				return new ExternalClause(getLanguageOpt(),
+				                          getPN_ExternalFunctionCall().getReturnVarOpt(),
+				                          new Opt(getPN_ExternalFunctionCall().getFunctionName()),
+				                          getPN_ExternalFunctionCall().getArgsList(),		
+		                                  getAnnotation1Opt(),
+		                                  getAnnotation2Opt());
+		    else
+		       return new ExternalClause(getLanguageOpt(),
+				                          new Opt(),
+				                          new Opt(),
+				                          new List(),		
+		                                  getAnnotation1Opt(),
+		                                  getAnnotation2Opt());
+		}
+	
+	}
+
+	// TODO: Dymola 6.0b does not support 'elseif'...
+	rewrite IfExp {
+		when (getElseExpNoTransform() instanceof IfExp)
+			to IfExp {
+				//System.out.println("-------------IfExp rewritten: " +getElseIfExpList().getNumChild());
+				//System.out.println(getIfExp()._prettyPrint(""));
+				IfExp e = (IfExp)getElseExpNoTransform();
+				List l = getElseIfExpList();
+				l.add(new ElseIfExp(e.getIfExp(),e.getThenExp()));
+				//System.out.println(l.getNumChild());
+				//l.dumpTree("");
+				return new IfExp(getIfExp(),getThenExp(),
+				                 l,
+				                 e.getElseExpNoTransform());
+			}	
+	}
+
+
+	rewrite ComponentModification {
+    	when (getName().isQualified())
+    	to ComponentModification{
+    		debugPrint("ComponentModification -> ComponentModification: " + getName().qualifiedName());
+    		ComponentModification e = new ComponentModification(new Opt(),
+    				                       new Opt(),
+    				                       getName().getFirstAccess(),
+    				                       //getModificationOpt(),
+    				                       new Opt(new CompleteModification(
+    				                                new ClassModification(
+    				                                 new List().add(
+    				                                  new ComponentModification(
+    				                                   getEachOpt(),
+    				                                   getFinalOpt(),
+    				                                   getName().stripFirstAccess(),
+    				                                   getModificationOpt(),
+    				                                getStringCommentOpt()))),
+    				                               new Opt())),
+    				                       new Opt());
+    		e.getModification().setStart(getStart());
+    		((CompleteModification)e.getModification()).getClassModification().setStart(getStart());
+    		ClassModification cm = ((CompleteModification)e.getModification()).getClassModification();
+    		((ComponentModification)cm.getArgument(0)).getName().setStart(getStart());
+    		e.setStart(getStart());
+    		return e;
+    	}
+    
+    }
+
+	rewrite FunctionCall {
+		when (getName().name().equals("sum") &&
+		      hasFunctionArguments() &&
+			  getFunctionArguments().getNumExp()==1 && 
+			  getFunctionArguments().getNumForIndex()==1 && 
+		      getFunctionArguments().getNumNamedArgument()==0)
+		to SumRedExp {
+			SumRedExp sre = new SumRedExp(getFunctionArguments().getExp(0),
+			                              getFunctionArguments().getForIndex(0));
+			sre.setStart(getStart());
+			return sre;
+		}
+	}
+
+	rewrite PN_ShortClassDecl {
+		to ShortClassDecl {
+			ExtendsClauseShortClass ecsc = 
+			   new ExtendsClauseShortClass(visibility(),
+			                          getClassName(),
+			                          getClassModificationOpt(),
+			                          new Opt<Annotation>(),
+			                          getTypePrefixFlowOpt(),
+			                          getTypePrefixOtherOpt(),
+			                          getTypePrefixInputOutputOpt(),
+			                          getArraySubscriptsOpt(),
+			                          getComment());
+			ecsc.setStart(getStart());
+			ShortClassDecl scd = new ShortClassDecl((VisibilityType)ecsc.getVisibilityType().fullCopy(), 
+									  getEncapsulatedOpt(), 
+	                                  getPartialOpt(), 
+	                                  getRestriction(), 
+	                                  getName(),  
+                                      getRedeclareOpt(),
+	                                  getFinalOpt(),
+	                                  getInnerOpt(),
+	                                  getOuterOpt(),
+	                                  getReplaceableOpt(),
+	                                  getConstrainingClauseOpt(),
+                                      getConstrainingClauseCommentOpt(),
+                                      ecsc); 
+			                          
+		   scd.setStart(getStart());
+		   return scd;
+		}
+	}
+
+}

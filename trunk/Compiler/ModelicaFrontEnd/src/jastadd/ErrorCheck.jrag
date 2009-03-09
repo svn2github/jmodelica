@@ -1,0 +1,516 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.ArrayList;
+  
+  class Problem implements Comparable {
+    public int compareTo(Object o) {
+      if(o instanceof Problem) {
+        Problem other = (Problem)o;
+        if(!fileName.equals(other.fileName))
+          return fileName.compareTo(other.fileName);
+        if(!(beginLine == other.beginLine))
+          return beginLine > other.beginLine? 1 : -1;
+        if(!(beginColumn == other.beginColumn))
+          return beginColumn > other.beginColumn? 1 : -1;          
+        return message.compareTo(other.message);
+      }
+      return 0;
+    }
+    public static class Severity {
+      public static final Severity ERROR = new Severity();
+      public static final Severity WARNING = new Severity();
+      private Severity() { }
+    }
+    public static class Kind {
+      public static final Kind OTHER = new Kind();
+      public static final Kind LEXICAL = new Kind();
+      public static final Kind SYNTACTIC = new Kind();
+      public static final Kind SEMANTIC = new Kind();
+      private Kind() { }
+    }
+    protected int beginLine = 0;
+    protected int beginColumn = 0;
+    public int beginLine() { return beginLine; }
+    public void setBeginLine(int beginLine) { this.beginLine = beginLine; }
+    public int beginColumn() { return beginColumn; }
+    public void setBeginColumn(int beginColumn) { this.beginColumn = beginColumn; }
+  
+    protected String fileName;
+    public String fileName() { return fileName; }
+    public void setFileName(String fileName) { this.fileName = fileName; }
+    protected String message;
+    public String message() { return message; }
+    protected Severity severity = Severity.ERROR;
+    public Severity severity() { return severity; }
+    protected Kind kind = Kind.OTHER;
+    public Kind kind() { return kind; }
+    
+    public Problem(String fileName, String message) {
+      this.fileName = fileName;
+      this.message = message;
+    }
+    public Problem(String fileName, String message, Severity severity) {
+      this(fileName, message);
+      this.severity = severity;
+    }
+    public Problem(String fileName, String message, Severity severity, Kind kind) {
+        this(fileName, message, severity);
+        this.kind = kind;
+    }    
+    public Problem(String fileName, String message, Severity severity, Kind kind, int beginLine, int beginColumn) {
+        this(fileName, message, severity);
+        this.kind = kind;
+        this.beginLine = beginLine;
+        this.beginColumn = beginColumn;
+    }    
+  
+  
+    public String toString() {
+      String s = "";
+      String lineData = "at line "+beginLine+", column "+beginColumn+":\n";
+      if(this.kind == Kind.LEXICAL)
+        s = "Lexical error "+lineData;
+      else if(this.kind == Kind.SYNTACTIC)
+        s = "Syntactic error "+lineData;
+      else if(this.kind == Kind.SEMANTIC)
+        s = "Semantic error "+lineData;
+      return "In file '"+fileName + "':\n" + s +"  "+ message;
+    }
+  }
+
+aspect ErrorCheck {
+
+  public ArrayList<Problem> Root.errors = new ArrayList<Problem>();
+  public ArrayList<Problem> Root.warnings = new ArrayList<Problem>();
+  
+  public String ASTNode.errorPrefix() {
+    return fileName() + ":\n" + "  *** Semantic Error: ";
+  }
+  public String ASTNode.warningPrefix() {
+    return fileName() + ":\n" + "  *** Warning: ";
+  }
+
+  static final int ASTNode.ERRORS = 0;
+  static final int ASTNode.WARNINGS = 1;  
+
+
+  syn int ASTNode.lineNumber() = (start != 0 || getParent()==null)? beginLine() : getParent().lineNumber();
+  syn int ASTNode.columnNumber() = (start != 0 || getParent()==null)? beginColumn() : getParent().columnNumber();
+ 
+ 
+  void ASTNode.error(String s) {
+      Problem newP = new Problem(fileName(), s, Problem.Severity.ERROR, Problem.Kind.SEMANTIC,lineNumber(),columnNumber());
+      boolean duplicate = false;
+      for (Problem p : root().errors) {
+      	if (newP.toString().equals(p.toString())) {
+      		duplicate = true;
+      		break;
+      	}
+      }
+      if (!duplicate) 
+	      root().errors.add(newP);
+  }
+
+  void ASTNode.warning(String s) {
+     Problem newP = new Problem(fileName(), "WARNING: " + s, Problem.Severity.WARNING);
+     boolean duplicate = false;
+      for (Problem p : root().warnings) {
+      	if (newP.toString().equals(p.toString())) {
+      		duplicate = true;
+      		break;
+      	}
+      }
+      if (!duplicate)
+	      root().warnings.add(newP);     
+  }
+
+  
+  public void ASTNode.collectErrors() {
+	  nameCheck();
+	  typeCheck();	  
+	  for(int i = 0; i < getNumChild(); i++) {
+		  getChild(i).collectErrors();
+	  }
+  }
+
+
+  public boolean ASTNode.errorCheck(StringBuffer str) {
+    ArrayList allErrors = root().errors;
+    ArrayList allWarnings = root().warnings;
+    collectErrors();  
+    java.util.Collections.sort(allErrors);
+    java.util.Collections.sort(allWarnings);
+    if (!allWarnings.isEmpty()) {
+    	str.append("\n");        	
+    	str.append("Warnings:\n");    
+    	for(Iterator iter = allWarnings.iterator(); iter.hasNext(); ) {
+    		Problem problem = (Problem) iter.next();
+    		str.append(problem+"\n");
+    	}
+    }
+   if(allErrors.isEmpty())
+      return false;
+    str.append("\n");        	
+    str.append(allErrors.size() + " error(s) found...\n");
+    for(Iterator iter = allErrors.iterator(); iter.hasNext(); ) {
+      Problem problem = (Problem)iter.next();
+      str.append(problem+"\n");
+    }
+    
+    return true;
+  }
+  
+  public boolean ASTNode.errorCheck() {
+ 	StringBuffer str = new StringBuffer();
+ 	boolean errors = errorCheck(str);
+ 	System.out.println(str.toString());
+ 	return errors;
+  }
+
+
+ 
+    syn lazy FullClassDecl ASTNode.retrieveFullClassDecl(String className) {
+      for(int i = 0; i < getNumChild(); i++) {
+		  FullClassDecl fcd = getChild(i).retrieveFullClassDecl(className);
+	  	  if (fcd != null)
+	  	  	return fcd;
+	  }
+	  return null;
+    }   
+  	
+  	eq FullClassDecl.retrieveFullClassDecl(String className) {
+	   	if (className.equals(qualifiedName())) {
+	   		return this;
+		} else
+			return getClassDeclList().retrieveFullClassDecl(className);
+	}
+
+	/* We don't want to error check an entire model, just the classes
+	   that are used. */
+	public boolean SourceRoot.checkErrorsInClass(String className) {
+		FullClassDecl fcd = retrieveFullClassDecl(className);
+		if (fcd == null) {
+			System.out.println("Class "+ className + "not found");
+			return false;
+		} else
+			return fcd.errorCheck();
+	}
+
+	public boolean SourceRoot.checkErrorsInClass(String className,StringBuffer errorString) {
+		FullClassDecl fcd = retrieveFullClassDecl(className);
+		if (fcd == null) {
+			System.out.println("Class "+ className + " not found");
+			return true;
+		} else
+			return fcd.errorCheck(errorString);
+	}
+
+
+	
+	boolean FullClassDecl.errorChecked = false;
+  	public void FullClassDecl.collectErrors() {
+    	debugPrint("ErrorChecking: " + qualifiedName());
+    	if (!errorChecked) {
+    	errorChecked = true;
+    	getEquationList().collectErrors();
+    	getAlgorithmList().collectErrors();
+    	getSuperList().collectErrors();
+    	getImportList().collectErrors();
+    	getComponentDeclList().collectErrors();
+    	debugPrint("ErrorChecking: " + qualifiedName() + ": done with components");
+    	if (!(getName().getID().equals(getEndName())))
+    		error("The declaration and end names of a class should be the same");
+  		}
+  	}
+	
+ 	
+	public void ComponentDecl.collectErrors() {
+		super.collectErrors();
+		if (getClassName().myClassDecl()!=null) {
+		debugPrint("ComponentDecl.collectErrors:  "  + prettyPrint("") + ": " + getClassName().myClassDecl().qualifiedName());
+			getClassName().myClassDecl().collectErrors();
+		}
+	}
+	
+
+	
+   // Don't error check annotation
+   public void Annotation.collectErrors() {}
+   
+}
+
+aspect InstanceErrorCheck {
+
+ // Error checking in instance tree
+    syn lazy InstFullClassDecl InstNode.retrieveInstFullClassDecl(String className) {
+      for(InstNode n : getInstClassDecls()) {
+		  InstFullClassDecl fcd = n.retrieveInstFullClassDecl(className);
+	  	  if (fcd != null)
+	  	  	return fcd;
+	  }
+	  return null;
+    }   
+  	
+  	eq InstFullClassDecl.retrieveInstFullClassDecl(String className) {
+  	    debugPrint(" ### InstFullClassDecl.retrieveInstFullClassDecl: " + 
+  	      qualifiedName() + " looking for " + className);
+	   	if (className.equals(qualifiedName())) {
+	   		return this;
+		} else
+			for (InstClassDecl icd : instClassDecls()) {
+				InstFullClassDecl fcd = icd.retrieveInstFullClassDecl(className);
+				if (fcd!=null) 
+					return fcd;
+			}
+		return null;
+	}
+
+	// We don't want to error check an entire model, just the classes
+	//   that are used. 
+	public boolean InstProgramRoot.checkErrorsInInstClass(String className) {
+		InstFullClassDecl fcd = retrieveInstFullClassDecl(className);
+		if (fcd == null) {
+			System.out.println("Class "+ className + " not found");
+			return true;
+		} else {
+			debugPrint("Class "+ className + " found!");
+			return fcd.errorCheck();
+		}
+	}
+
+	public boolean InstProgramRoot.checkErrorsInInstClass(String className,StringBuffer errorString) {
+		InstFullClassDecl fcd = retrieveInstFullClassDecl(className);
+		if (fcd == null) {
+			System.out.println("Class "+ className + " not found");
+			return false;
+		} else {
+		    debugPrint("Class "+ className + " found!");
+			return fcd.errorCheck(errorString);
+		}
+	}
+
+	boolean InstNode.errorChecked = false;
+
+
+  public void InstNode.collectErrors() {
+    debugPrint(prettyPrint("   #### ") + " errorChecked="+errorChecked);
+    if (!errorChecked) {
+      errorChecked = true;
+	  nameCheck();
+	  typeCheck();	  
+	  for(InstNode n : getInstComponentDecls()) 
+		  n.collectErrors();
+	  for(InstNode n : getInstClassDecls()) 
+		  n.collectErrors();
+	  for(InstNode n : getInstExtendss()) 
+		  n.collectErrors();
+	  for(FAbstractEquation e : getFAbstractEquations()) {
+		  debugPrint(" mmmm ");
+		      debugPrint(prettyPrint("   ####>> "));
+		  e.prettyPrint(">>> ");
+		  e.collectErrors();
+	  }
+	}
+  }
+
+  	public void InstBaseClassDecl.collectErrors() {
+  	    debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+    	if (!errorChecked) {
+//    	errorChecked = true;
+        super.collectErrors();
+ //       for (InstClassDecl icd : instClassDecls())
+ //       	icd.collectErrors();
+ /*
+        for (InstComponentDecl icd : instComponentDecls())
+        	icd.collectErrors();
+        for (InstExtends ie : instExtends())
+        	ie.collectErrors();	
+*/        	
+        for (InstImport ii : getInstImports())
+        	ii.collectErrors();		
+//        for (FAbstractEquation e : getFAbstractEquations())
+//        	e.collectErrors();
+//    	getEquationList().collectErrors();
+//    	getAlgorithmList().collectErrors();
+//    	getSuperList().collectErrors();
+//    	getImportList().collectErrors();
+//    	getComponentDeclList().collectErrors();
+		if (getBaseClassDecl() instanceof FullClassDecl) { 	
+			FullClassDecl fcd = (FullClassDecl)getBaseClassDecl();
+	    	if (!(fcd.getName().getID().equals(fcd.getEndName())))
+    			error("The declaration and end names of a class should be the same");
+  			}
+  		}
+  	}	
+  	
+	boolean InstImport.errorChecked = false;
+    public void InstImport.collectErrors() {
+    	debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+    	if (!errorChecked) {
+    		errorChecked = true;
+			getPackageName().collectErrors();
+		}
+	}
+	
+	public void InstComponentDecl.collectErrors() {
+    debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+    if (!errorChecked) {
+		super.collectErrors();
+		getClassName().collectErrors();
+		if (hasIModification())
+			getIModification().collectErrors();
+		if (hasInstConstraining())
+			getInstConstraining().collectErrors();
+		}
+	}
+	
+	public void InstExtends.collectErrors() {
+    debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+    if (!errorChecked) {
+		super.collectErrors();
+		getClassName().collectErrors();
+		if (hasIClassModification())
+			getIClassModification().collectErrors();
+		
+		}
+	}	
+	
+	public void InstExtendsShortClass.collectErrors() {
+        debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+    if (!errorChecked) {
+      debugPrint(prettyPrint("   ### "));
+      errorChecked = true;
+	  nameCheck();
+	  typeCheck();	  
+      // Normally the class modifications in an InstExtendsShortClass
+      // does not need to be checked, since they are checked in InstShortClassDecl.
+      // This is not the case if the short class decl references
+      // an primitive variable, however, and in this case the
+      // class modification needs to bee checked for errors.
+ 	  if (extendsPrimitive() && hasIClassModification())
+		 getIClassModification().collectErrors();
+      
+	  getClassName().collectErrors();
+	  for(InstNode n : getInstComponentDecls()) 
+		  n.collectErrors();
+	  for(InstNode n : getInstClassDecls()) 
+		  n.collectErrors();
+	  for(InstNode n : getInstExtendss()) 
+		  n.collectErrors();
+	  
+	}
+    }
+	
+	//public void InstPrimitiveClassDecl.collectErrors() {}
+
+	public void InstShortClassDecl.collectErrors() {
+        debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+	    if (!errorChecked) {
+		  super.collectErrors();
+		  // The localIModifications should only be checked if
+		  // the node is not a InstReplacingShortClassDecl. This
+		  // is accomplished by the method collectIModificationErrors.
+		  collectIModificationErrors();
+		  if (hasInstConstraining())
+				getInstConstraining().collectErrors();		  
+		}
+	}
+
+	public void InstShortClassDecl.collectIModificationErrors() {
+		for (IModification mod : localIModifications())
+			mod.collectErrors();
+    }
+    public void InstReplacingShortClassDecl.collectIModificationErrors() { }
+
+	public void InstReplacingShortClassDecl.collectErrors() {
+	    debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);    
+	    if (!errorChecked) {
+		  super.collectErrors();
+		  getOriginalInstClass().collectErrors();
+		}
+		
+	}
+
+	public void InstReplacingFullClassDecl.collectErrors() {
+	    debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+	    if (!errorChecked) {
+		  super.collectErrors();
+		  getOriginalInstClass().collectErrors();
+		}
+		
+	}
+
+	public void InstBuiltIn.collectErrors() {}
+
+	public void IComponentRedeclare.collectErrors() {
+		super.collectErrors();
+		getInstComponentDecl().collectErrors();
+	}
+
+	public void IClassRedeclare.collectErrors() {
+		super.collectErrors();
+		getInstClassDecl().collectErrors();	
+	}
+
+	public void IValueModification.collectErrors() {
+		getFExp().collectErrors();
+	}
+
+	boolean InstAccess.errorChecked = false;
+	public void InstDot.collectErrors() {
+	    debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+	    if (!errorChecked) {	
+			errorChecked = true;
+			getLeft().collectErrors();
+			if (!getLeft().isUnknown())
+				getRight().collectErrors();
+		}
+	}
+
+	public void InstClassAccess.collectErrors() {
+        debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+	    if (!errorChecked) {
+		    //super.collectErrors();
+		    nameCheck();
+		    errorChecked = true;
+			// If the class access is to be checked, then the corresponding
+			// InstClassDecl is checked as well, since it is being accessed at
+			// some point... ...But it is probably too drastic since it means
+			// that if Modelica.Electrical.Analog.Basic.Resistor is accessed,
+			// then first Modelica is completely checked, then Electrical etc.
+			// Probably, only the name should be checked here, and the 
+			// actually target class of an access should be checked. 
+			//if (!myInstClassDecl().isUnknown())
+			//	myInstClassDecl().collectErrors();
+		}
+	}
+ 
+}
+
+aspect FlatExpressionErrorCheck {
+
+	public void FUnsupportedEquation.collectErrors() {
+		error("Unsupported equation type");
+	}
+
+	public void FUnsupportedExp.collectErrors() {
+		error("Unsupported expression type");
+	}
+	
+}

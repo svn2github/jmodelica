@@ -1,0 +1,668 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+aspect Types { 
+
+  /**
+    A type of a component or class is the following information:
+       1. Whether it is replaceable or not.
+       2. Whether the class itself or the class of the component is 
+          transitively non-replaceable (Section 6.2.1), and if not, 
+          the reference to replaceable class it refers to.
+       3. Whether it is a component or a class.
+       4. For each named public element of the class or component 
+          (including both local and inherited named elements) a tuple comprised of:
+             4.1. Name of the element.
+             4.2. Interface or type of the element. This might have 
+                  been modified by modifiers and is thus not necessarily 
+                  identical to the interface of the original declaration.
+       5. Additional information/attributes about the element:
+             5.1. The flow-attribute.
+             5.2. Declared variability (constant, parameter, discrete).
+             5.3. The attributes input and output.
+             5.4. The attributes inner and/or outer..
+             5.5. Whether the declaration is final, and in that case its 
+                  semantics contents.
+             5.6. Array sizes (if any).
+             5.7. Condition of conditional components (if any).
+             5.8. Which kind of specialized class.
+             5.9. For an enumeration type or component of enumeration type the 
+                  names of the enumeration literals in order.
+             5.10. Whether it is a built-in type and the built-in type 
+                   (RealType, IntegerType, StringType or BooleanType).
+
+      Notice that all this information can be changed by modifications. 
+
+	  All information is not applicable to both classes and components, according
+	  to the following table:
+	  	      
+       1.   (Replaceable)           Class/Component
+       2.   (TNR)                   Class/Component
+       3.   (Component or Class)    Class/Component
+       4.*. (Enclosed elements)     Class/Component
+       5.1. (Flow)                  Component
+       5.2. (Variability)           Component
+       5.3. (Input/Output)          Component 
+       5.4. (Inner/Outer)           Class/Component
+       5.5. (Final)                 Class/Component
+       5.6. (Array sizes)           Class/Component
+       5.7. (Cond. comp.)           Component
+       5.8. (What kind of class)    Class/Component
+       5.9. (Enumeration)           Class/Component
+       5.10.(Built-in type)         Class Component
+
+      Design I:
+      Do all type checking based on instance hierarchies. Example:
+      
+      package RedeclareTestOx1
+        model A
+          Real x=1;
+        end A;
+ 
+        model B
+          Real x=2;
+          Real y=3;
+        end B;
+ 
+        model C
+          replaceable A a;
+        end C;
+ 
+        C c(redeclare B a);
+ 
+      end RedeclareTestOx1;
+  
+      The corresponding instance tree is then 
+      
+              InstRoot
+                 |
+                 |
+        1.  InstComposite 'C c' getMergedEnvironment = {redeclare B a}
+                 |
+                 |
+         2.  InstReplacingComponent 'B a'
+             |                     |
+      InstPrimitive 'Real x'  InstPrimitive 'Real y'            
+
+      Type tests:
+      1. No type tests
+      2. Test that the instance tree rooted in 
+            InstReplacingComponent 'B a' 
+         is indeed a subtype of 
+            InstRoot 'replaceable A a'
+               |
+             InstPrimitive 'Real x'
+
+      Design II:
+      Introduce a class hierarchy for Types that encapsulates all this information.
+      We let 
+      
+      
+                               Type
+                                |
+               ------------------------------------
+               |                                   |
+          ComponentType                         ClassType
+               |                                   |
+   ------------------------                        |
+   |                       |                       |
+PrimitiveComponentType     |                       |
+   |                       |                       | 
+   |           ConstrainingComponentType           |
+   |                                               |
+ConstrainingPrimitiveComponentType                 |   
+                                                   |
+                                                   |
+                                        ------------------------
+                                        |                       |
+                                 PrimitiveClassType             |
+                                        |                       |
+                                        |              ConstrainingClassType
+                                        |            
+                            ConstrainingPrimitiveClassType
+                            
+         This design implies that points 3. (Class or Component) and 5.10. (
+         built-in type are encoded in the class hierarchy, in addition to whether
+         the type is a constraining type or not. In addition, since type tests are done              
+
+
+         The type then has the following interface:
+           
+         interface Type {
+               // 1.   (Replaceable)           Class/Component
+               public boolean isReplaceable();
+      
+               // 2.   (TNR)                   Class/Component
+               public boolean isTNR();
+
+               // 4.*. (Enclosed elements)     Class/Component                            
+               public Collection enclosedElements()
+
+               // 5.4. (Inner/Outer)           Class/Component
+               public 
+       5.5. (Final)                 Class/Component
+       5.6. (Array sizes)           Class/Component
+       5.7. (Cond. comp.)           Component
+       5.8. (What kind of class)    Class/Component
+       5.9. (Enumeration)           Class/Component
+       5.10.(Built-in type)         Class Component
+  
+  
+       
+           
+         
+         }
+
+     5.1. (Flow)                  Component
+       5.2. (Variability)           Component
+       5.3. (Input/Output)          Component 
+  
+
+
+
+
+
+
+
+  */
+
+
+   public ClassType InstConstrainingClauseRoot.classType() {
+   		return new ClassType(getConstrainingClause().getAccess().myClassDecl(),getMergedEnvironmentList());
+   }
+   
+   /**
+    * Returns a new ComponentType in a specified outer environment.
+    * The input enviroment is cloned before the type is created.
+    */
+   public ComponentType InstComposite.declaredType(Environment outerEnv) {
+      ComponentType type = declaredType();
+      
+      // Merge the outer modifications.
+      type.env.mergeOuterEnvironment(outerEnv);
+      
+      return type; 
+   }
+
+   /**
+    * Returns a new ComponentType in an empty enviroment.
+    */
+   public ComponentType InstComposite.declaredType() {
+      ComponentType type =  new ComponentType(getComponentDecl());
+      
+      // If the component decl has a modification, this is part of the type
+      if (getComponentDecl().hasModification())
+      	 type.env.mergeOuterModification(this,getComponentDecl().getModification());
+      
+      // If the component decl has a constraining clause with modifications
+      // this is part of the type.
+      if (getComponentDecl().hasConstrainingClause() &&
+           getComponentDecl().getConstrainingClause().hasClassModification())
+      	 type.env.mergeInnerModification(this,getComponentDecl().getConstrainingClause().getClassModification());           
+     
+      return type; 
+   }
+
+
+   /**
+    * Returns a new ComponentType corresponding to the replacing component decl.
+    */
+
+/*   public ComponentType InstReplacingComponent.declaredType() {
+      ComponentType type =  new ComponentType(getComponentDecl());
+      
+      // If the component decl has a modification, this is part of the type
+      if (getComponentDecl().hasModification())
+      	 type.env.mergeOuterModification(this,getComponentDecl().getModification());
+      
+      // If the component decl has a constraining clause with modifications
+      // this is part of the type.
+      if (getComponentDecl().hasConstrainingClause() &&
+           getComponentDecl().getConstrainingClause().hasClassModification())
+      	 type.env.mergeInnerModification(this,getComponentDecl().getConstrainingClause().getClassModification());           
+     
+      return type; 
+   }
+*/
+
+ 
+   /**
+    * Returns a new ConstrainingComponentType in a specified outer environment.
+    * The input enviroment is cloned before the type is created.
+    */   
+   public ConstrainingComponentType InstComposite.constrainingType(Environment outerEnv) {
+      ConstrainingComponentType type = constrainingType();
+      type.env.mergeOuterEnvironment(outerEnv);
+      return type;
+   }
+   
+   /**
+    * Returns a new ConstrainingComponentType in an empty enviroment.
+    */
+   public ConstrainingComponentType InstComposite.constrainingType() {
+      ConstrainingComponentType type;
+      if (!getComponentDecl().hasConstrainingClause()) {
+          type = new ConstrainingComponentType(getComponentDecl(),getComponentDecl().myClass()); 
+      	 // Just add the modifiation at the declaration, if any.
+      	 if (getComponentDecl().hasModification())
+      	 	type.env.mergeOuterModification(this,getComponentDecl().getModification());
+      } else {
+         // Just add the modification of the constraining clause, if any
+          type = new ConstrainingComponentType(getComponentDecl(),getComponentDecl().getConstrainingClause().getAccess().myClassDecl()); 
+          if (getComponentDecl().hasConstrainingClause() &&
+              getComponentDecl().getConstrainingClause().hasClassModification())
+      	 	  type.env.mergeOuterModification(this,getComponentDecl().getConstrainingClause().getClassModification());           
+      }
+      return type;
+   }
+  
+   class Type {
+      Environment env;
+	
+	  public boolean subType(Type t) {
+	  	return false;
+	  }
+
+        public boolean superTypeComponentType(ComponentType t) {
+          return false;
+        }
+        
+        public boolean superTypeClassType(ClassType t) {
+          return false;
+        }
+        
+        public String name() {
+          return getClass().getName();
+        }
+      
+                  
+        
+   }
+
+  class ConstrainingComponentType extends ComponentType {
+        ClassDecl constrainingClass; // This class refers to the constraining
+                                     // class of a component declarations, which
+                                     // may be different than the declared class
+                                     // due to constrainedby
+       
+
+        public ConstrainingComponentType() {
+   		}
+        
+        public ConstrainingComponentType(ComponentDecl compDecl) {
+	     super(compDecl);
+		}
+        
+        public ConstrainingComponentType(ComponentDecl compDecl, Environment env) {
+	       super(compDecl,env);
+		}
+		
+		public ConstrainingComponentType(ComponentDecl compDecl, ClassDecl constrainingClass, Environment env) {
+	       super(compDecl,env);
+	       this.constrainingClass = constrainingClass;
+		}
+
+		public ConstrainingComponentType(ComponentDecl compDecl, ClassDecl constrainingClass) {
+	       super(compDecl);
+	       this.constrainingClass = constrainingClass;
+		}
+		
+		public ClassType classType() {
+        	return new ClassType(constrainingClass,env.clone());
+        }
+		
+         public String toString() {
+           StringBuffer str = new StringBuffer();
+           str.append("** ConstrainingComponentType\n");
+           str.append(compDecl.prettyPrint(""));
+           str.append("\nConstraining class: "+constrainingClass.name()+"\n");
+           str.append("Env=");
+           str.append(env.toString());
+           return str.toString();
+        }
+   }
+   
+   class ConstrainingClassType extends ClassType {
+   
+   }
+
+   class PrimitiveComponentType extends ComponentType {
+   
+   }
+
+   class PrimitiveClassType extends ClassType{
+   
+   }
+   
+   class PrimitiveConstrainingComponentType extends PrimitiveComponentType {
+   }
+   
+   class PrimitiveConstrainingClassType extends PrimitiveClassType {
+   
+   }
+
+
+	class ComponentType extends Type{
+        ComponentDecl compDecl;
+        
+        public ComponentType() {
+   		}
+        
+        public ComponentType(ComponentDecl compDecl) {
+	      this.compDecl = compDecl;
+	      this.env = new Environment();
+		}
+        
+        public ComponentType(ComponentDecl compDecl, Environment env) {
+	      this.compDecl = compDecl;
+	      this.env = env;
+		}
+        
+        public ClassType classType() {
+        	return new ClassType(compDecl.myClass(),(Environment)env.clone());
+        }
+        
+        public String toString() {
+           StringBuffer str = new StringBuffer();
+           str.append("** ComponentType\n");
+           str.append(compDecl.prettyPrint(""));
+           str.append("\nEnv=");
+           str.append(env.toString());
+           return str.toString();
+        }
+        
+        public String name() {
+           return compDecl.prettyPrint("");
+        }
+ 
+        
+        public boolean subType(Type t) {
+           return t.superTypeComponentType(this);
+        }
+        
+        public boolean superTypeComponentType(ComponentType subType) {
+           if (subType == this) return true;
+           ComponentType superType = this;
+                      
+           if ((compDecl.myClass() instanceof PrimitiveClassDecl)) {
+             if (subType.compDecl.myClass()== superType.compDecl.myClass())
+             	return true;
+           }  else if ((compDecl.myClass() instanceof FullClassDecl)) {
+         
+              FullClassDecl superClassDecl = (FullClassDecl)superType.compDecl.myClass();
+              Environment superEnv = superType.env;
+              
+              if (compDecl.hasConstrainingClause()) {
+              	ClassDecl cd_tmp = compDecl.getConstrainingClause().getAccess().myClassDecl();
+              	if (cd_tmp instanceof FullClassDecl) {
+              		superClassDecl = (FullClassDecl)cd_tmp;
+                    superEnv = new Environment();
+	                for (InstModification im : (Environment)compDecl.getConstrainingClause().instConstrainingClauseRoot().getInstNode(0).myEnvironment()) {
+	    	          superEnv.add(im);
+	                } 
+                 }
+              }	
+              
+         	  for (ComponentDecl superTypeComponent : superClassDecl.getComponentDecls()) {
+           		  String cdName = superTypeComponent.name();
+           		  HashSet set = subType.compDecl.myClass().memberComponent(cdName);
+           	   if (set.size()!=1)
+           	   	return false;
+           	   ComponentDecl subTypeComponent = (ComponentDecl)set.iterator().next();	
+           	   Type superTypeComponentType = type(superTypeComponent,superEnv);
+           	   Type subTypeComponentType = type(subTypeComponent,subType.env);	
+           	   if (!subTypeComponentType.subType(superTypeComponentType))
+           	   	return false;
+           	  }
+           	}
+           	
+           return true;
+        }
+        
+        
+   		public static Type type(ComponentDecl cd) {
+           return type(cd,new Environment());
+        }
+       
+   		public static Type type(ComponentDecl cd, Environment env) {
+   		   	  	  	  	 
+   		  ComponentDecl replacingComponent = cd; 
+   		  	  	 
+	   	  for (InstModification im : env) {
+			if (im.getModification().matchRedeclare(cd.name())!=null) {
+				replacingComponent = im.getModification().matchRedeclare(cd.name());
+			    break;
+			}
+		  }
+	     
+	     Environment newEnv = new Environment();
+	     
+	     for (InstModification im : env) {
+			Modification m = im.getModification().matchModification(cd.name());
+			if (m!=null)
+				newEnv.add(new InstModification(im.getInstNode(),m));
+		}
+	     
+	     // Add modifications at the declaration to env
+	     
+	     return new ComponentType(replacingComponent,newEnv);   
+   		
+   		}
+   }
+   
+	class ClassType extends Type{
+	
+		ClassDecl classDecl;
+		
+	    public ClassType() {
+   		}
+ 
+		
+		public ClassType(ClassDecl classDecl, Environment env) {
+	      this.classDecl = classDecl;
+	      this.env = env;
+		}
+
+		public ClassType(ClassDecl classDecl) {
+	      this(classDecl,new Environment());
+		}
+
+       public String toString() {
+           StringBuffer str = new StringBuffer();
+           str.append(classDecl.name());
+           str.append("\nEnv=");
+           for (InstModification im : env) { 
+	           str.append(im.getModification().prettyPrint("")+"\n");
+	       }
+           return str.toString();
+         
+        }
+           
+        public String name() {
+           return classDecl.name();
+        }
+ 
+
+        public boolean subType(Type t) {
+           return t.superTypeClassType(this);
+        }
+        
+        public boolean superTypeClassType(ClassType t) {
+           if (t == this) return true;
+           if (!(classDecl instanceof FullClassDecl) || 
+               !(t.classDecl instanceof FullClassDecl))
+               	return false;
+           FullClassDecl superClassDecl = (FullClassDecl)classDecl;
+           FullClassDecl subClassDecl = (FullClassDecl)t.classDecl;
+           for (ComponentDecl superTypeComponent : superClassDecl.getComponentDecls()) {
+           		String cdName = superTypeComponent.name();
+           		HashSet set = subClassDecl.memberComponent(cdName);
+           	    if (set.size()!=1)
+           	   	  return false;
+           	    ComponentDecl subTypeComponent = (ComponentDecl)set.iterator().next();	
+           	    Type superTypeComponentType = ComponentType.type(superTypeComponent);
+           	     Type subTypeComponentType = ComponentType.type(subTypeComponent);	
+           	   if (!subTypeComponentType.subType(superTypeComponentType))
+           	   	return false;
+           	  }
+            // TODO: check local classes.
+            return true;
+            
+    
+        }
+	    
+	}
+
+
+    public void InstComposite.typeCheck() {
+       
+       if (getComponentDecl().hasConstrainingClause()) {
+       // First type check the constraining clause itself by building the instance tree.
+          getComponentDecl().getConstrainingClause().instConstrainingClauseRoot().collectErrors();
+                  
+          // Then type check the constraining clause in relation to the declaration itself.
+          ClassType subType = new ClassType(getComponentDecl().myClass());
+          ClassType superType = new ClassType(getComponentDecl().getConstrainingClause().getAccess().myClassDecl());
+          if (!subType.subType(superType))
+        	   getComponentDecl().error("'" + subType.name()+ "'"+ " is not a subtype of " + "'"+superType.name()+"'");    
+       }
+    } 
+
+	public void InstReplacingComponent.typeCheck() {
+	    /*
+	       This is questionable. Rather, the original declaration should actually
+	       have been checked previously, when the enclosing class decl is checked in 
+	       an empty environment.
+	    */
+		if (getOriginalDecl().hasConstrainingClause()) { 
+          // First type check the constraining clause itself by building the instance tree.
+          getOriginalDecl().getConstrainingClause().instConstrainingClauseRoot().collectErrors();
+          Environment env = (Environment)getOriginalDecl().getConstrainingClause().instConstrainingClauseRoot().myEnvironment().clone();
+
+	         // Then type check the constraining clause in relation to the declaration itself.
+          ClassType subType = new ClassType(getOriginalDecl().myClass());
+          ClassType superType = new ClassType(getOriginalDecl().getConstrainingClause().getAccess().myClassDecl(),env);
+          if (!subType.subType(superType))
+        	   getOriginalDecl().error("'" + subType.name()+ "'"+ " is not a subtype of " + "'"+superType.name()+"'");    
+       }
+ 
+	
+	   
+	   if (getComponentDecl().hasConstrainingClause()) { 
+          // First type check the constraining clause itself by building the instance tree.
+          getComponentDecl().getConstrainingClause().instConstrainingClauseRoot().collectErrors();
+
+	         // Then type check the constraining clause in relation to the declaration itself.
+          ClassType subType = new ClassType(getComponentDecl().myClass());
+          ClassType superType = new ClassType(getComponentDecl().getConstrainingClause().getAccess().myClassDecl());
+          if (!subType.subType(superType))
+        	   getComponentDecl().error("'" + subType.name()+ "'"+ " is not a subtype of " + "'"+superType.name()+"'");    
+       }
+	
+	    Environment env = (Environment)myEnvironment(name()).clone();
+	
+        for (InstModification im : (Environment)myEnvironment()) {
+	   	if (im.getModification().matchRedeclare(name())!=null) {
+	   	        ComponentDecl replacingDecl = im.getModification().matchRedeclare(name());
+	   	        if (replacingDecl.hasConstrainingClause()) {
+    	   	          ClassType superType = new ClassType(getOriginalDecl().myClass());	
+	                  ClassType subType = new ClassType(replacingDecl.getConstrainingClause().getAccess().myClassDecl());
+	   	            if (!subType.subType(superType))
+        	         replacingDecl.getConstrainingClause().error("'" + subType.name()+ "'"+ " is not a subtype of " + "'"+superType.name()+"'");    
+			          
+	   	        } else {
+                  ComponentType superType = new ComponentType(getOriginalDecl(),new Environment());
+				  ComponentType subType = new ComponentType(replacingDecl,env);
+		          if (!subType.subType(superType))
+        	         subType.compDecl.error("'" + subType.name()+ "'"+ " is not a subtype of " + "'"+superType.name()+"'");    
+			    }
+			}
+	   }	
+       
+        	
+        // Check subtype for ALL redeclarations in myEnvironment!!
+        
+        // If there is a constraining clause: type check this as well, taking
+        // modifications intoaccount.		
+        		
+	}
+
+	public String InstReplacingComponent.toString() {
+	   StringBuffer str = new StringBuffer();
+	   str.append("InstReplacingComponent:\n");
+	   str.append(" Replacing decl: " + getComponentDecl().prettyPrint("") + "\n");
+	   str.append(" Original decl:  " + getOriginalDecl().prettyPrint("") + "\n");
+	   str.append(" myEnvironment():\n");
+	   str.append(myEnvironment().toString());
+	   str.append(" mergedEnvironment():\n");
+	   str.append(getMergedEnvironmentList().toString());
+	   //str.append(" Declared type:\n");
+	   //str.append(declaredType().toString());
+	   //str.append(" Constraining type:\n");
+	   //str.append(constrainingType().toString());
+	   return str.toString();	
+	}
+
+	public String InstPrimitive.toString() {
+	   StringBuffer str = new StringBuffer();
+	   str.append("InstPrimitive:\n");
+	   str.append(" Component decl: " + getComponentDecl().prettyPrint("") + "\n");
+	   str.append(" myEnvironment():\n");
+	   str.append(myEnvironment().toString());
+	   str.append(" mergedEnvironment():\n");
+	   str.append(getMergedEnvironmentList().toString());
+	   return str.toString();	
+	}
+
+	public String InstComposite.toString() {
+	   StringBuffer str = new StringBuffer();
+	   str.append("InstComposite:\n");
+	   str.append(" Component decl: " + getComponentDecl().prettyPrint("") + "\n");
+	   str.append(" myEnvironment():\n");
+	   str.append(myEnvironment().toString());
+	   str.append(" mergedEnvironment():\n");
+	   str.append(getMergedEnvironmentList().toString());
+	   str.append(" Declared type:\n");
+	   str.append(declaredType().toString());
+	   str.append(" Constraining type:\n");
+	   str.append(constrainingType().toString());
+	   
+	   return str.toString();	
+	}
+
+
+
+    public String InstModification.toString() {
+    	return getModification().prettyPrint("");
+    
+    }
+
+}
+
+aspect TypeErrorCheck {
+
+ 
+  public void InstNode.collectErrors() {
+	  nameCheck();
+	  typeCheck();	  
+	  for(InstNode n : getInstNodes()) {
+		  n.collectErrors();
+	  }
+  }
+
+
+}

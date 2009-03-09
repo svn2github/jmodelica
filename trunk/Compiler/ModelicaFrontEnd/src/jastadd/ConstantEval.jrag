@@ -1,0 +1,113 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+aspect LookupInstance {
+
+/*
+	eq InstRoot.getChild().lookupFV(FQName fqname) { 
+	
+		debugPrint(">>>InstRoot.getChild().lookupFV(): looking for: " + fqname.name());
+		return retrieveFV(fqname,0); 
+    }
+   
+	syn FVariable InstNode.retrieveFV(FQName fqname, int nI) {
+		for (int i=0;i<getNumInstNode();i++) {
+			if (getInstNode(i).nameScope()) {
+				FQName childName = getInstNode(i).getFQName();
+				if (childName.getFQNamePart(nI).matchFQNamePart(fqname.getFQNamePart(nI))) {
+					return getInstNode(i).retrieveFV(fqname,nI+1);
+				}
+			} else {
+				FVariable fv = getInstNode(i).retrieveFV(fqname,nI);
+				if (fv!=null)
+					return fv;
+			}
+		}		
+		return null;
+	}
+
+	eq InstPrimitive.retrieveFV(FQName fqname, int nI) = getFVariable();
+	*/
+
+	syn lazy InstPrimitive FQName.myIDecl() = lookupIDecl(this);
+	syn InstPrimitive FIdUse.myIDecl() = null;
+	eq FIdUseQualified.myIDecl() = getFQName().myIDecl();
+	syn lazy InstPrimitive FIdUseExp.myIDecl() = getFIdUse().myIDecl();
+
+	inh InstPrimitive FQName.lookupIDecl(FQName fqname);
+	eq Root.getChild().lookupIDecl(FQName fqname) = null;
+
+/*
+	eq InstRoot.getChild().lookupIDecl(FQName fqname) = retrieveIDecl(fqname,0); 
+
+	syn InstPrimitive InstNode.retrieveIDecl(FQName fqname, int nI) {
+		debugPrint(">>> InstNode.retrieveIDecl ("+getClass().getName()+ "): "+getFQName().name()+ " looking for: " + fqname.name()+" index: "+nI);
+		for (int i=0;i<getNumInstNode();i++) {
+			if (getInstNode(i).nameScope()) {
+				FQName childName = getInstNode(i).getFQName();
+				if (childName.getFQNamePart(nI).matchFQNamePart(fqname.getFQNamePart(nI))) {
+					debugPrint(">>> Found: "+childName.getFQNamePart(nI).getName() );
+					return getInstNode(i).retrieveIDecl(fqname,nI+1);
+				}
+			} else {
+				InstPrimitive ip = getInstNode(i).retrieveIDecl(fqname,nI);
+				if (ip!=null)
+					return ip;
+			}
+		}		
+		return null;
+	}
+
+	eq InstPrimitive.retrieveIDecl(FQName fqname, int nI) = this;
+	*/
+
+	syn InstPrimitive InstNode.instPrimitive() = null;
+	eq InstPrimitive.instPrimitive() = this;
+
+	syn boolean FQNamePart.matchFQNamePart(FQNamePart fqnp) {
+		return getName().equals(fqnp.getName());
+	} 
+
+}
+
+aspect TestInstanceLookup {
+
+/*
+	public void ASTNode.printIVarAccesses(String indent) {    
+		for (int i=0;i<getNumChild();i++)
+			getChild(i).printIVarAccesses(indent);
+	}
+
+	public void InstNode.printIVarAccesses(String indent) {
+	   getInstNodeList().printIVarAccesses(indent);
+	}
+
+	public void InstPrimitive.printIVarAccesses(String indent) {
+		debugPrint(">>>InstPrimitive.printIVarAccesses: " + getFQName().name());
+		FExp bexp = myBindingExp();
+		if (bexp!=null) {
+			addFExp(bexp);
+			if (bexp instanceof FIdUseExp) {
+				FIdUseExp fid = (FIdUseExp)bexp;
+				System.out.println(">>>InstPrimitive.printIVarAccesses: Found FIdUseExp: "+fid.name());
+				//debugPrint(">>>InstPrimitive.printIVarAccesses: IDecl: "+fid.myIDecl());
+				System.out.println(fid.myIDecl().prettyPrint("****"));
+				System.out.println(fid.myFV().prettyPrint("###"));
+			}
+		}
+	}
+*/
+}

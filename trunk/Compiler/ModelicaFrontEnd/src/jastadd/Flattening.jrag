@@ -1,0 +1,616 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+import java.util.ArrayList;
+
+aspect Flattening {
+    
+    public InstNode InstNode.findFlattenInst(String className,FClass fc) {
+    	for (InstClassDecl icd : getInstClassDecls()) {
+    		InstNode n = icd.findFlattenInst(className, fc);
+    		if (n!=null)
+    			return n;
+    	} 
+    	return null;
+    }
+    
+	// Check if the InstFullClassDecl matches the name of class to be flattened. 
+	public InstNode InstFullClassDecl.findFlattenInst(String className, FClass fc) {
+   		if (className.equals(qualifiedName())) {
+  	 		fc.setFQName(new FQName(qualifiedName())); 
+  	 		//InstRoot r = getInstRoot();
+  	 				
+			//r.dumpTree("");
+			//r.printIVarAccesses("");
+			fc.addFEquationBlock(new FEquationBlock(new List()));			
+			for (FAbstractEquation ae : getFAbstractEquations()) {
+		       ae.flatten(getFQName(),fc);
+		    }
+//			for (InstComponentDecl n : getInstComponentDecls())
+//				n.flatten(fc);
+			getInstComponentDeclList().flatten(fc);
+			getInstExtendsList().flatten(fc);
+           
+			fc.genConnectionEquations();
+
+			HashSet<InstAccess> instAccesses = fc.collectInstAccesses();
+			if (instAccesses.size()>0) {
+				System.out.println("Flat model contains InstAccesses!!!");
+				return null;
+			}
+			
+			return this;	
+   		} else {
+  			return super.findFlattenInst(className,fc);
+   		}  	
+	}	
+	
+ 
+	// Generic method for flattening	
+	public void ASTNode.flatten(FClass fc) {
+		for (int i=0;i<getNumChild();i++) {
+			getChild(i).flatten(fc);
+		}
+	}
+
+	public void InstNode.flatten(FClass fc) {
+		for (FAbstractEquation ae : getFAbstractEquations()) {
+		   ae.flatten(getFQName(),fc);
+		}
+		getInstComponentDeclList().flatten(fc);
+		getInstExtendsList().flatten(fc);
+	}
+	
+	public void InstClassDecl.flatten(FClass fc) {}
+	
+	/* TODO: check if it is really a good idea to create FVariables
+	   and then to move them? better to do a fullCopy()? */
+	public void InstPrimitive.flatten(FClass fc) {
+		fc.addFVariable(createFVariable());
+	}
+	
+	syn FVariable InstPrimitive.createFVariable() {
+		FExp e = myBindingExp();
+		List attr = new List();
+		for (IModification im : totalMergedEnvironment()) {
+			im.collectAttributes(attr,im.myInstNode().getFQNamePrefix());
+		}
+		
+		FTypePrefixOther tpo = null;
+		if (getComponentDecl().isDiscrete()) {
+			tpo = new FDiscrete();	
+		} else if (getComponentDecl().isParameter()) {
+			tpo = new FParameter();
+		} else if (getComponentDecl().isConstant()) {
+			tpo = new FConstant();
+        } else {
+        	tpo = new FContinuous();
+        }		
+		
+		FVariable fv = null;
+		String primitiveName = myInstClass().finalClass().primitiveName();
+		if (e!=null)
+			fv = new FVariable(tpo, primitiveType(primitiveName),getFQName(),e);
+		else
+			fv = new FVariable(tpo, primitiveType(primitiveName),getFQName());
+		
+		fv.setFAttributeList(attr);
+		
+		// Only set prefix for top level inputs and outputs
+		// TODO: Make sure that prefixes specified in short class declarations are propagated
+		if (getComponentDecl().isInput() && getFQName().getNumFQNamePart()==1)
+			fv.setFTypePrefixInputOutput(new FInput());
+		if (getComponentDecl().isOutput() && getFQName().getNumFQNamePart()==1)
+			fv.setFTypePrefixInputOutput(new FOutput());
+			
+		if (getComponentDecl().getComment().hasStringComment())
+			fv.setFStringComment(new FStringComment(getComponentDecl().getComment().getStringComment().getComment()));
+		
+		return fv;
+				
+	}
+	
+	syn FExp InstPrimitive.myBindingExp() {
+
+		for (IModification im : totalMergedEnvironment()) {
+			if (im.hasIValueMod()) {
+				return im.iValueMod().flatten(im.myInstNode().getFQNamePrefix());
+			}
+		}
+		return null;
+	}
+
+	syn boolean IModification.hasIValueMod() = false;
+	eq IValueModification.hasIValueMod() = true;
+	eq ICompleteModification.hasIValueMod() = hasIValueModification();
+	
+	syn FExp IModification.iValueMod() = null;
+	eq IValueModification.iValueMod() = getFExp();
+	eq ICompleteModification.iValueMod() = getIValueModification().getFExp();
+	
+	public void ASTNode.collectAttributes(List attrs, FQName prefix) {
+		for (int i=0;i<getNumChild();i++)
+			getChild(i).collectAttributes(attrs, prefix);
+	}
+
+	// This is just to avoid collecting ComponentModification:s that resides inside
+	// ClassRedeclares.
+    public void IClassRedeclare.collectAttributes(List attrs, FQName prefix) {}
+
+	public void IComponentModification.collectAttributes(List attrs, FQName prefix) {
+		if (hasIModification()) {
+			FQName fqn = new FQName(new List().add(new FQNamePart(getName().getID(),new Opt())));
+            boolean attr_set = false;
+            for (int i=0;i<attrs.getNumChild();i++)
+            	if (((FAttribute)attrs.getChild(i)).getName().name().equals(getName().name()))
+					attr_set = true;
+			if (!attr_set) {
+			List my_attr = new List();
+			getIModification().collectAttributes(my_attr,prefix);
+			attrs.add(new FAttribute(new FIdUse(getName().myInstClassDecl().name()),
+									new FIdDecl(fqn),
+			                        getIModification().hasIValueMod()? new Opt(getIModification().iValueMod().flatten(prefix)): new Opt(),
+			                        true,
+			                        getComponentModification().hasEach()? new Opt(new FEach()): new Opt(),
+			                   		getComponentModification().hasFinal()? new Opt(new FFinal()): new Opt(),
+			                   		my_attr));
+			}
+			}
+	}
+}
+
+aspect FlatteningDebug {
+	coll HashSet<InstAccess> FClass.collectInstAccesses() [new HashSet<InstAccess>()] with add root FlatRoot;
+	InstAccess contributes
+ 		this 
+	to FClass.collectInstAccesses() for myFClass();
+    inh FClass InstAccess.myFClass();
+
+}
+
+aspect FlatVariables {
+
+  public FPrimitiveType ASTNode.primitiveType(String type) {
+	  if (type.equals("Real")) {
+		  return fRealType();
+     } else if (type.equals("Integer")) {
+		  return fIntegerType();
+    } else if (type.equals("Boolean")) {
+		  return fBooleanType();
+	  } else if (type.equals("String")) {
+		  return fStringType();
+	  } else {
+		  error("Type " + type + " is not a primitive type");
+		  return fRealType();
+	  }
+  }
+ 
+  public FVariable.FVariable(FTypePrefixOther tpo, FPrimitiveType type, FQName fqname) {	  
+  	this(tpo,
+  	      new Opt(),
+  	      type,
+  	      new List(),
+  	      new Opt(),
+  	      new Opt(),
+  	      new FQName(fqname));
+  }
+  
+  public FVariable.FVariable(FTypePrefixOther tpo, FPrimitiveType type, FQName fqname, FExp bexp) {
+  	this(tpo,
+  	      new Opt(),
+  	      type,
+  	      new List(),
+  	      new Opt(bexp),
+  	      new Opt(),
+  	      new FQName(fqname));
+  }
+  
+  
+}
+
+aspect InstNodeInterface {
+
+	syn ArraySubscripts InstComponentDecl.arraySubscripts() = 
+		getComponentDecl().arraySubscripts()!=null?
+			getComponentDecl().arraySubscripts(): null;
+
+}
+
+aspect FlatExpressions {
+
+	public void FAbstractEquation.flatten(FQName prefix, FClass fc) {}
+
+	public void FEquation.flatten(FQName prefix, FClass fc) {
+		fc.getFEquationBlock(0).addFAbstractEquation(new FEquation(getLeft().flatten(prefix),getRight().flatten(prefix)));
+	}
+
+	public void FInitialEquation.flatten(FQName prefix, FClass fc) {
+	   	fc.addFInitialEquation(new FInitialEquation(getLeft().flatten(prefix),getRight().flatten(prefix)));
+	}
+
+	public FArraySubscripts FArraySubscripts.flatten(FQName prefix) {
+		List l = new List();
+		for (int i=0;i<getNumFSubscript();i++)
+			l.add(getFSubscript(i).flatten(prefix));
+		return new FArraySubscripts(l);
+	}
+	
+	abstract public FSubscript FSubscript.flatten(FQName prefix);
+	public FSubscript FColonSubscript.flatten(FQName prefix) { 
+		return new FColonSubscript();
+	}
+	
+	public FSubscript FExpSubscript.flatten(FQName name) {
+		return new FExpSubscript(getFExp().flatten(name));
+	}
+	
+	public FExp FExp.flatten(FQName prefix) {
+		return null;
+	}
+
+    public FIdUse FIdUse.flatten(FQName prefix) {
+    	return (FIdUse)fullCopy();
+    }
+
+	public FExp FInstAccessExp.flatten(FQName prefix) {
+		return new FIdUseExp(new FIdUseQualified("", getInstAccess().flatten(prefix)));
+	}
+
+	public FQName InstAccess.flatten(FQName prefix) { 
+		FQName myName = new FQName(prefix);
+		myName.append(this,prefix);
+		return myName;
+	}
+
+	public FIdUse FIdUseInstAccess.flatten(FQName prefix) {
+	   return new FIdUseQualified("",getInstAccess().flatten(prefix));
+	}
+
+	public FExp FArrayConstructor.flatten(FQName prefix) {
+	   List l = new List();
+	   for (int i=0;i<getNumFExp();i++)
+	   	 l.add(getFExp(i).flatten(prefix));
+	   return new FArrayConstructor(l);
+	}
+
+	public FIdDecl FIdDecl.flatten(FQName prefix) {
+		return (FIdDecl)fullCopy();
+	}
+
+	public FExp FRangeExp.flatten(FQName prefix) {
+		List l = new List();
+		for (int i=0;i<getNumFExp();i++)
+			l.add(getFExp(i).flatten(prefix));
+		return new FRangeExp(l);
+	}
+
+    public FExp FIfExp.flatten(FQName prefix) {
+		List etl = new List();
+		for (int i=0;i<getNumFElseIfExp();i++) {
+			etl.add(getFElseIfExp(i).flatten(prefix));
+		}
+		return new FIfExp(getIfExp().flatten(prefix),
+		                  getThenExp().flatten(prefix),
+		                  etl,
+		                  getElseExp().flatten(prefix));
+	}
+	
+	public FExp FElseIfExp.flatten(FQName prefix) {
+		return new FElseIfExp(getIfExp().flatten(prefix),
+		                      getThenExp().flatten(prefix));
+	}
+	
+
+	public FExp FAddExp.flatten(FQName prefix) { return new FAddExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
+	public FExp FSubExp.flatten(FQName prefix) { return new FSubExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
+	public FExp FMulExp.flatten(FQName prefix) { return new FMulExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
+	public FExp FDivExp.flatten(FQName prefix) { return new FDivExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
+	public FExp FPowExp.flatten(FQName prefix) { return new FPowExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
+	public FExp FNegExp.flatten(FQName prefix) { return new FNegExp(getFExp().flatten(prefix)); }
+
+	public FExp FLtExp.flatten(FQName prefix) { return new FLtExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
+	public FExp FLeqExp.flatten(FQName prefix) { return new FLeqExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
+	public FExp FGtExp.flatten(FQName prefix) { return new FGtExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
+	public FExp FGeqExp.flatten(FQName prefix) { return new FGeqExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
+	public FExp FEqExp.flatten(FQName prefix) { return new FEqExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
+	public FExp FNeqExp.flatten(FQName prefix) { return new FNeqExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
+	public FExp FNotExp.flatten(FQName prefix) { return new FNotExp(getFExp().flatten(prefix)); }
+	public FExp FOrExp.flatten(FQName prefix) { return new FOrExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
+	public FExp FAndExp.flatten(FQName prefix) { return new FAndExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
+
+	public FExp FRealLitExp.flatten(FQName prefix) { return (FRealLitExp)fullCopy(); }
+	public FExp FStringLitExp.flatten(FQName prefix) { return (FStringLitExp)fullCopy(); }
+	public FExp FBooleanLitExpTrue.flatten(FQName prefix) { return (FBooleanLitExpTrue)fullCopy(); }
+	public FExp FBooleanLitExpFalse.flatten(FQName prefix) { return (FBooleanLitExpFalse)fullCopy(); }
+	
+	public FExp FTimeExp.flatten(FQName prefix) { return new FTimeExp(); }
+		
+	public FExp FFunctionCall.flatten(FQName prefix) {
+		List l = new List();
+		List args = new List();
+		for (FExp e : getArgss()) {
+			l.add(e.flatten(prefix));
+		}
+		if (getName().name().equals("der")) {
+			return new FDer((FIdUseExp)l.getChild(0));
+		} else {
+			return new FFunctionCall(getName().flatten(new FQName()),l);	
+		}
+	}
+	
+	public FExp FSumRedExp.flatten(FQName prefix) {
+		return new FSumRedExp(getFExp().flatten(prefix),
+		                     getFForIndex().flatten(prefix));
+	}
+	
+	public FForIndex FForIndex.flatten(FQName prefix) {
+		return new FForIndex(getFIdDecl().flatten(prefix),
+		                     hasFExp()? new Opt(getFExp().flatten(prefix)): new Opt());
+	}
+
+	//ForClauseE : AbstractEquation ::= ForIndex* ForEqns:AbstractEquation*;
+    //ForIndex ::= ForIndexDecl [Exp];
+	public void FForClauseE.flatten(FQName prefix, FClass fc) {
+		List forIndex = new List();
+		List eqns = new List();
+		for (int i=0;i<getNumFForIndex();i++)
+			forIndex.add(getFForIndex(i).flatten(prefix));
+		FClass fcc = new FClass();
+		fcc.setFQName(new FQName().append("tmp")); 
+		fcc.addFEquationBlock(new FEquationBlock(new List()));
+		//fcc.dumpTree("");
+		for (int i=0;i<getNumForEqns();i++)
+			getForEqns(i).flatten(prefix,fcc);
+		for (int i=0;i<fcc.getFEquationBlock(0).getNumFAbstractEquation();i++)
+			eqns.add(fcc.getFEquationBlock(0).getFAbstractEquation(i));
+		fc.getFEquationBlock(0).addFAbstractEquation(new FForClauseE(forIndex,eqns));
+	}
+
+	public void FConnectClause.flatten(FQName prefix, FClass fc) {
+				
+		InstFullClassDecl c1 = (InstFullClassDecl)(getConnector1().getInstAccess().myInstComponentDecl().myInstClass().finalClass());
+		InstFullClassDecl c2 = (InstFullClassDecl)(getConnector2().getInstAccess().myInstComponentDecl().myInstClass().finalClass());
+				
+		// Is it two "primitives" that are connected?
+		if (c1.extendsPrimitive() || c1.isPrimitive()) {
+			fc.getConnectionSetManager().addVars(getConnector1().getInstAccess().myInstComponentDecl(),false,((FQName)prefix.fullCopy()).append(getConnector1().getInstAccess().name()),
+		                                         getConnector2().getInstAccess().myInstComponentDecl(),false,((FQName)prefix.fullCopy()).append(getConnector2().getInstAccess().name()));
+		    return;
+		}
+
+		boolean outside1 = enclosingInstClassDecl().memberInstComponent(getConnector1().getInstAccess().name()).size()>0;
+		boolean outside2 = enclosingInstClassDecl().memberInstComponent(getConnector2().getInstAccess().name()).size()>0;
+		
+		InstComponentDecl var1, var2;
+		
+		for (InstComponentDecl icd : c1.containedInstComponents()) {
+			var1 = icd;
+			var2 = (InstComponentDecl)c2.memberInstComponent(var1.name()).iterator().next();
+			FQName fqn1 = new FQName().append(getConnector1().getInstAccess(),prefix);
+			FQName fqn2 = new FQName().append(getConnector2().getInstAccess(),prefix);
+			fc.getConnectionSetManager().addVars(var1,outside1,((FQName)prefix.fullCopy()).append(fqn1.append(var1.name())),
+			                                     var2,outside2,((FQName)prefix.fullCopy()).append(fqn2.append(var2.name())));
+		}
+	}
+
+/*	
+	
+	eq Matrix.flatten(FQName prefix) {
+		List l = new List();
+	    for (int i=0;i<getNumExpList();i++) {
+	   	  l.add(getExpList(i).instantiate((QName)decls.clone()));
+		}
+		return new FMatrix(l);
+	}
+	
+	eq ExpList.flatten(FQName prefix) {
+	   List l = new List();
+	   for (int i=0;i<getNumExp();i++)
+	   	 l.add(getExp(i).instantiate((QName)decls.clone()));
+	   return new FExpList(l);
+	}
+	
+	eq SizeExp.flatten(FQName prefix) {
+		return new FSizeExp((FIdUse)getAccess().instantiate(decls),getDim().instantiate(decls));
+	}
+	
+	public void FClass.cleanInputOutput() {
+	
+		for (int i=0;i<getNumFVariable();i++) {
+			if (getFVariable(i).getNumFQName()>1 && getFVariable(i).hasFTypePrefixInputOutput())
+				getFVariable(i).setFTypePrefixInputOutputOpt(new Opt());
+		}
+	
+	}
+*/
+
+}
+
+aspect InstantiatedExpressions {
+
+	public FAbstractEquation AbstractEquation.instantiate() {
+		return new FUnsupportedEquation();
+	}
+
+	public FAbstractEquation Equation.instantiate() {
+	    if (isInitial()) {
+	    	return new FInitialEquation(getLeft().instantiate(),getRight().instantiate());
+		} else {
+			return new FEquation(getLeft().instantiate(),getRight().instantiate());
+	    }
+	}
+
+	public FAbstractEquation ConnectClause.instantiate() {
+	    Opt o = null;
+	    if (getComment().hasStringComment())
+		   o = new Opt(new FStringComment(getComment().getStringComment().getComment()));
+	    else
+	    	o = new Opt();
+		return new FConnectClause(o,new FIdUseInstAccess("",getConnector1().newInstAccess()),new FIdUseInstAccess("",getConnector2().newInstAccess()));
+	}
+
+	public FArraySubscripts ArraySubscripts.instantiate() {
+		List l = new List();
+		for (int i=0;i<getNumSubscript();i++)
+			l.add(getSubscript(i).instantiate());
+		return new FArraySubscripts(l);
+	}
+	
+	abstract public FSubscript Subscript.instantiate();
+	public FSubscript ColonSubscript.instantiate() { 
+		return new FColonSubscript();
+	}
+	
+	public FSubscript ExpSubscript.instantiate() {
+		return new FExpSubscript(getExp().instantiate());
+	}
+	
+	public FExp Exp.instantiate() {
+		return new FUnsupportedExp();
+	}
+
+
+	public FExp AccessExp.instantiate() {
+		return new FInstAccessExp(getAccess().newInstAccess());
+	}
+
+
+	public InstAccess Access.instantiate() { 
+		return newInstAccess();
+	}
+
+	public FExp ArrayConstructor.instantiate() {
+	   List l = new List();
+	   for (int i=0;i<getFunctionArguments().getNumExp();i++)
+	   	 l.add(getFunctionArguments().getExp(i).instantiate());
+	   return new FArrayConstructor(l);
+	}
+
+
+	public FExp RangeExp.instantiate() {
+		List l = new List();
+		for (int i=0;i<getNumExp();i++)
+			l.add(getExp(i).instantiate());
+		return new FRangeExp(l);
+	}
+
+    public FExp IfExp.instantiate() {
+		List etl = new List();
+		for (int i=0;i<getNumElseIfExp();i++) {
+			etl.add(getElseIfExp(i).instantiate());
+		}
+		return new FIfExp(getIfExp().instantiate(),
+		                  getThenExp().instantiate(),
+		                  etl,
+		                  getElseExp().instantiate());
+	}
+	
+	public FExp ElseIfExp.instantiate() {
+		return new FElseIfExp(getIfExp().instantiate(),
+		                      getThenExp().instantiate());
+	}
+
+
+/*	
+	
+	eq Matrix.instantiate() {
+		List l = new List();
+	    for (int i=0;i<getNumExpList();i++) {
+	   	  l.add(getExpList(i).instantiate((QName)decls.clone()));
+		}
+		return new FMatrix(l);
+	}
+	
+	eq ExpList.instantiate() {
+	   List l = new List();
+	   for (int i=0;i<getNumExp();i++)
+	   	 l.add(getExp(i).instantiate((QName)decls.clone()));
+	   return new FExpList(l);
+	}
+	*/
+	
+	public FExp AddExp.instantiate() { return new FAddExp(getLeft().instantiate(),getRight().instantiate()); }
+	public FExp SubExp.instantiate() { return new FSubExp(getLeft().instantiate(),getRight().instantiate()); }
+	public FExp MulExp.instantiate() { return new FMulExp(getLeft().instantiate(),getRight().instantiate()); }
+	public FExp DivExp.instantiate() { return new FDivExp(getLeft().instantiate(),getRight().instantiate()); }
+	public FExp PowExp.instantiate() { return new FPowExp(getLeft().instantiate(),getRight().instantiate()); }
+	public FExp NegExp.instantiate() { return new FNegExp(getExp().instantiate()); }
+
+	public FExp LtExp.instantiate() { return new FLtExp(getLeft().instantiate(),getRight().instantiate()); }
+	public FExp LeqExp.instantiate() { return new FLeqExp(getLeft().instantiate(),getRight().instantiate()); }
+	public FExp GtExp.instantiate() { return new FGtExp(getLeft().instantiate(),getRight().instantiate()); }
+	public FExp GeqExp.instantiate() { return new FGeqExp(getLeft().instantiate(),getRight().instantiate()); }
+	public FExp EqExp.instantiate() { return new FEqExp(getLeft().instantiate(),getRight().instantiate()); }
+	public FExp NeqExp.instantiate() { return new FNeqExp(getLeft().instantiate(),getRight().instantiate()); }
+	public FExp NotExp.instantiate() { return new FNotExp(getExp().instantiate()); }
+	public FExp OrExp.instantiate() { return new FOrExp(getLeft().instantiate(),getRight().instantiate()); }
+	public FExp AndExp.instantiate() { return new FAndExp(getLeft().instantiate(),getRight().instantiate()); }
+
+	public FExp RealLitExp.instantiate() { return new FRealLitExp(getUNSIGNED_NUMBER()); }
+	public FExp StringLitExp.instantiate() { return new FStringLitExp(getSTRING()); }
+	public FExp BooleanLitExpTrue.instantiate() { return new FBooleanLitExpTrue(); }
+	public FExp BooleanLitExpFalse.instantiate() { return new FBooleanLitExpFalse(); }
+	
+	public FExp TimeExp.instantiate() { return new FTimeExp(); }
+	
+	
+	public FExp FunctionCall.instantiate() {
+		List l = new List();
+		List args = new List();
+		if (hasFunctionArguments())
+			args =  getFunctionArguments().getExpList();
+		for (int i=0;i<args.getNumChild();i++) {
+			l.add(((Exp)args.getChild(i)).instantiate());
+		}
+		return new FFunctionCall(new FIdUseInstAccess("",getName().newInstAccess()),l);	
+	}
+	
+	public FExp SumRedExp.instantiate() {
+		return new FSumRedExp(getExp().instantiate(),
+		                     getForIndex().instantiate());
+		
+	}
+	
+	public FForIndex ForIndex.instantiate() {
+		return new FForIndex(new FIdDecl(new FQName().append(getForIndexDecl().name())),
+		                     hasExp()? new Opt(getExp().instantiate()): new Opt());
+	}
+	
+	//ForClauseE : AbstractEquation ::= ForIndex* ForEqns:AbstractEquation*;
+    //ForIndex ::= ForIndexDecl [Exp];
+/*
+	public void ForClauseE.instantiate() {
+		List forIndex = new List();
+		List eqns = new List();
+		for (int i=0;i<getNumForIndex();i++)
+			forIndex.add(getForIndex(i).instantiate());
+		FClass fcc = new FClass();
+		fcc.setFQName(new FQName().append("tmp")); 
+		fcc.addFEquationBlock(new FEquationBlock(new List()));
+		fcc.dumpTree("");
+		for (int i=0;i<getNumForEqns();i++)
+			getForEqns(i).flatten(prefix,fcc);
+		for (int i=0;i<fcc.getFEquationBlock(0).getNumFAbstractEquation();i++)
+			eqns.add(fcc.getFEquationBlock(0).getFAbstractEquation(i));
+		fc.getFEquationBlock(0).addFAbstractEquation(new FForClauseE(forIndex,eqns));
+	}
+	*/
+
+
+}
+
+

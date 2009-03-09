@@ -1,0 +1,117 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+aspect InstNameClassification {
+
+
+
+	rewrite InstParseAccess {
+	   to InstAccess {
+  		if (kind()==Kind.COMPONENT_ACCESS) {
+//  			    InstComponentAccess a = new InstComponentAccess(getID(),getArraySubscriptsOpt());
+  			    InstComponentAccess a = new InstComponentAccess(getID());
+     			a.setStart(getStart());
+     			return a;
+  		} else if (kind()==Kind.CLASS_ACCESS) {
+	 			InstClassAccess a =  new InstClassAccess(getID());
+     			a.setStart(getStart());
+     			return a;
+  		} else {
+//  				InstAmbiguousAccess a = new InstAmbiguousAccess(getID(),getArraySubscriptsOpt());
+  				InstAmbiguousAccess a = new InstAmbiguousAccess(getID());
+    			a.setStart(getStart());
+     			return a;
+  		}
+  		}
+	}
+	
+	// TODO: Check this section so that all inh calls are caught at the right level
+	/**
+	 * Here a few cases are classified based on their context.
+	 */
+	inh Kind InstAccess.kind();
+	eq InstRoot.getChild().kind() = Kind.AMBIGUOUS_ACCESS;
+	eq FlatRoot.getChild().kind() = Kind.AMBIGUOUS_ACCESS;
+
+	eq InstDot.getLeft().kind() {
+	 	return getRight().predKind();
+	}
+
+	eq InstExtends.getClassName().kind() = Kind.CLASS_ACCESS;
+//	eq FunctionCall.getName().kind() = Kind.AMBIGUOUS_ACCESS;
+	eq InstImport.getPackageName().kind() = Kind.CLASS_ACCESS;
+//	eq InstShortClassDecl.getClassName().kind() = Kind.CLASS_ACCESS;
+	eq InstComponentDecl.getClassName().kind() = Kind.CLASS_ACCESS;	
+	eq IComponentModification.getName().kind() = Kind.COMPONENT_ACCESS;
+	eq IClassRedeclare.getName().kind() = Kind.CLASS_ACCESS;
+	eq IComponentRedeclare.getName().kind() = Kind.COMPONENT_ACCESS;
+    eq InstConstraining.getClassName().kind() = Kind.CLASS_ACCESS;
+	eq InstNode.getDynamicClassName().kind() = Kind.CLASS_ACCESS;
+    eq IComponentRedeclare.getDynamicClassName().kind() = Kind.CLASS_ACCESS;
+	eq InstConstrainingComponent.getDynamicClassName().kind() = Kind.CLASS_ACCESS;
+	eq InstBaseClassDecl.getFAbstractEquation().kind() = Kind.AMBIGUOUS_ACCESS;	
+		
+		
+	/**
+	 * The attribute predKind defines the kind for qualified
+	 * names.
+	 */
+	syn Kind InstAccess.predKind() = Kind.AMBIGUOUS_ACCESS;
+	eq InstDot.predKind() {
+		return getLeft().predKind();
+	}
+	eq InstClassAccess.predKind() = Kind.CLASS_ACCESS;
+	eq InstComponentAccess.predKind() = Kind.AMBIGUOUS_ACCESS;
+	eq InstAmbiguousAccess.predKind() = Kind.AMBIGUOUS_ACCESS;
+
+
+	/**
+	 * Helper class for definition of kinds.
+	 */
+/*	static class Kind {
+   		static Kind CLASS_ACCESS = new Kind();
+   		static Kind COMPONENT_ACCESS = new Kind();
+   		static Kind AMBIGUOUS_ACCESS = new Kind();
+	}
+*/
+}
+aspect InstResolveAmbiguousNames {
+	/**
+	 * This rewrite determines whether an InstAmbiguousAccess is a InstTypeAcces or a
+	 * InstComponentAccess by attempting type and component lookups respectively.
+	 */
+	boolean InstAmbiguousAccess.rewritten = false;
+	rewrite InstAmbiguousAccess {
+	    when(!duringInstNameClassification()&&!rewritten) 
+	    to InstAccess {
+	  		if (!lookupInstComponent(name()).isEmpty()) {
+     		    InstComponentAccess c = new InstComponentAccess(name());
+  	 			c.setStart(getStart());
+  	 			return c;
+  		} else 
+            if(!lookupInstClass(name()).isEmpty()) {		
+    			InstClassAccess t = new InstClassAccess(name()); 
+    			t.setStart(getStart());
+  	 			return t;
+  			}
+  			rewritten = true;
+  			return this;
+  		}
+  	}
+}
+
+
