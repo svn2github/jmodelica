@@ -17,7 +17,7 @@ AUTOMAKE_OPTIONS = foreign
 
 #EXTRA_DIST = doc/JMI/jmi_doxydoc.conf
 
-SUBDIRS = JMI/src/jmi 
+SUBDIRS = JMI/src
 
 all-local:
 	cd Compiler/ModelicaFrontEnd; \

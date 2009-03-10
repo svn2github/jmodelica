@@ -208,7 +208,7 @@ top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 
 #EXTRA_DIST = doc/JMI/jmi_doxydoc.conf
-SUBDIRS = JMI/src/jmi 
+SUBDIRS = JMI/src
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
