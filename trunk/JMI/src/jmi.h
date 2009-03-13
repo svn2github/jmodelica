@@ -377,8 +377,8 @@ int jmi_get_offsets(jmi_t* jmi, int* offs_ci, int* offs_cd, int* offs_pi, int* o
 		int* offs_dx_p, int* offs_x_p, int* offs_u_p, int* offs_w_p);
 
 /**
- * \brief Get the number of time points.
- *  
+ * \brief Get the number of time points.
+ *
  * @param jmi The jmi_t struct.
  * @param n_tp (Output) number of time points in the model.
  * @return Error code.
