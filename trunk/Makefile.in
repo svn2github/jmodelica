@@ -91,6 +91,8 @@ distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
+ANT = @ANT@
+ANT_OPTS = @ANT_OPTS@
 AR = @AR@
 AS = @AS@
 AUTOCONF = @AUTOCONF@
@@ -151,6 +153,8 @@ SHARED_LDFLAGS = @SHARED_LDFLAGS@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
+WITH_CPPAD = @WITH_CPPAD@
+WITH_IPOPT = @WITH_IPOPT@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -583,7 +587,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-generic clean-libtool mostlyclean-am
+clean-am: clean-generic clean-libtool clean-local mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -644,9 +648,9 @@ uninstall-am:
 
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am all-local am--refresh check check-am clean \
-	clean-generic clean-libtool ctags ctags-recursive dist \
-	dist-all dist-bzip2 dist-gzip dist-shar dist-tarZ dist-zip \
-	distcheck distclean distclean-generic distclean-hdr \
+	clean-generic clean-libtool clean-local ctags ctags-recursive \
+	dist dist-all dist-bzip2 dist-gzip dist-shar dist-tarZ \
+	dist-zip distcheck distclean distclean-generic distclean-hdr \
 	distclean-libtool distclean-tags distcleancheck distdir \
 	distuninstallcheck dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am install-dvi \
@@ -661,17 +665,19 @@ uninstall-am:
 
 
 all-local:
-	cd Compiler/ModelicaFrontEnd; \
-	ANT_OPTS="-Xmx1024M" ant
+@HAVE_ANT_TRUE@	cd Compiler/ModelicaFrontEnd; \
+@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT)
 
 install-exec-local:
-	cp Compiler/ModelicaFrontEnd/bin/jmodelica.jar lib
+@HAVE_ANT_TRUE@	cp Compiler/ModelicaFrontEnd/bin/jmodelica.jar lib
 
-examples: install
+clean-local: clean-jmi-examples
+
+jmi-examples: install
 	cd JMI/examples/Vdp; $(MAKE) all
 	cd JMI/examples/Vdp_cppad; $(MAKE) all
 
-clean-examples: 
+clean-jmi-examples: 
 	cd JMI/examples/Vdp; $(MAKE) clean
 	cd JMI/examples/Vdp_cppad; $(MAKE) clean
 

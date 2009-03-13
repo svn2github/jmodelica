@@ -19,46 +19,82 @@ AUTOMAKE_OPTIONS = foreign
 #                  libjmi_cppad.la
 
 lib_LTLIBRARIES = libjmi.la \
-                  libjmi_cppad.la
+                  libjmi_algorithm.la 
 
+if COMPILE_WITH_CPPAD
+lib_LTLIBRARIES += libjmi_cppad.la \
+                   libjmi_algorithm_cppad.la
+endif 
+
+if COMPILE_WITH_IPOPT
+lib_LTLIBRARIES += libjmi_solver.la
+if COMPILE_WITH_CPPAD
+lib_LTLIBRARIES += libjmi_solver_cppad.la
+endif
+endif
 
 libjmi_la_SOURCES = jmi.h \
                     jmi_common.h \
                     jmi.c \
                     jmi_common.c \
-                    jmi_opt_sim.h \
-                    jmi_opt_sim.c \
-                    jmi_opt_sim_lp.c \
-                    jmi_opt_sim_ipopt.c
+                    jmi_opt_sim.h 
 
-libjmi_la_CFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE -g
+libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
 libjmi_la_LDFLAGS = -no-undefined -static-libtool-libs
 
-#libjmi_la_LIBADD = $(JMALLLIBS)
-#libjmi_la_DEPENDENCIES = $(JMALLLIBS)
+libjmi_algorithm_la_SOURCES = jmi_opt_sim.h \
+                              jmi_opt_sim.c \
+                              jmi_opt_sim_lp.c
 
-#AM_CPPFLAGS = -I$(IPOPT_INC)
+libjmi_algorithm_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g
+# Don't build shared libraries of libjmi and libjmicppad. This is not
+# really needed, and also (more importantly perhaps) I cannot force
+# static inclusion of the runtime libraries when creating model so:s.
+libjmi_algorithm_la_LDFLAGS = -no-undefined -static-libtool-libs
+
+libjmi_solver_la_SOURCES = jmi_opt_sim_lp.c \
+                           jmi_opt_sim_ipopt.c
+
+libjmi_solver_la_CFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE -g
+# Don't build shared libraries of libjmi and libjmicppad. This is not
+# really needed, and also (more importantly perhaps) I cannot force
+# static inclusion of the runtime libraries when creating model so:s.
+libjmi_solver_la_LDFLAGS = -no-undefined -static-libtool-libs
 
 libjmi_cppad_la_SOURCES = jmi.h \
                     jmi_common.c \
                     jmi_cppad.cpp\
-                    jmi_common.c \
-                    jmi_opt_sim.h \
-                    jmi_opt_sim.c \
-                    jmi_opt_sim_lp.c \
-                    jmi_opt_sim_ipopt.c
+                    jmi_common.c 
                    
-libjmi_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_INC) -I$(IPOPT_INC) -DJMI_AD=JMI_AD_CPPAD -g
+libjmi_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD -g
 libjmi_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD -g
 libjmi_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
+
+libjmi_algorithm_cppad_la_SOURCES = jmi_opt_sim.h \
+                                    jmi_opt_sim.c \
+                                    jmi_opt_sim_lp.c
+                   
+libjmi_algorithm_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD -g
+libjmi_algorithm_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD -g
+libjmi_algorithm_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
 #libjmi_cppad_la_LDFLAGS = -no-undefined 
+
+libjmi_solver_cppad_la_SOURCES = jmi_opt_sim_ipopt.c
+                   
+libjmi_solver_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_INC) -I$(IPOPT_INC) -DJMI_AD=JMI_AD_CPPAD -g
+libjmi_solver_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD -g
+libjmi_solver_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
+#libjmi_cppad_la_LDFLAGS = -no-undefined 
+
 
 include_HEADERS = jmi.h \
                   jmi_common.h \
                   jmi_opt_sim.h \
-                  jmi_opt_sim_lp.h \
-                  jmi_opt_sim_ipopt.h
+                  jmi_opt_sim_lp.h 
 
+if COMPILE_WITH_IPOPT
+include_HEADERS += jmi_opt_sim_ipopt.h
+endif

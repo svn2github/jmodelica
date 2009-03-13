@@ -17,7 +17,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT([JModelicaRT], 0.0.1, BUG-REPORT-ADDRESS)
+AC_INIT([JModelica], 0.0.1, BUG-REPORT-ADDRESS)
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([JMI/src/jmi.h])
 AC_CONFIG_HEADER([config.h])
@@ -80,7 +80,11 @@ AC_ARG_WITH([ipopt],
    [with_ipopt=no])
 
 AS_IF([test "x$with_ipopt" = xno],
-      [AC_MSG_FAILURE([--with-ipopt not specified])],
+      [AC_MSG_RESULT([ ])
+       AC_MSG_RESULT([***********************************************************************])
+       AC_MSG_RESULT([* --with-ipopt option not specified - compiling without IPOPT support *])
+       AC_MSG_RESULT([***********************************************************************])
+       AC_MSG_RESULT([ ])],
        [AC_MSG_RESULT([ ])
        AC_MSG_RESULT([***********************************************************************])
        AC_MSG_RESULT([* --with-ipopt option specified - compiling with IPOPT support        *])
@@ -90,12 +94,32 @@ AS_IF([test "x$with_ipopt" = xno],
                      [],
                      [AC_MSG_FAILURE([--with-ipopt option was specified but does not seem to point at a valid IPOPT installation])])])
 
+AM_CONDITIONAL([COMPILE_WITH_IPOPT],[test "x$with_ipopt" != xno])
+
+
+
+#AS_IF([test "x$with_ipopt" = xno],
+#      [AC_MSG_FAILURE([--with-ipopt not specified])],
+#       [AC_MSG_RESULT([ ])
+#       AC_MSG_RESULT([***********************************************************************])
+#       AC_MSG_RESULT([* --with-ipopt option specified - compiling with IPOPT support        *])
+#       AC_MSG_RESULT([***********************************************************************])
+#       AC_MSG_RESULT([ ])
+#       AC_CHECK_FILE($ipopt/include/coin/IpStdCInterface.h,
+#                     [],
+#                     [AC_MSG_FAILURE([--with-ipopt option was specified but does not seem to point at a valid IPOPT installation])])])
+
 # Set output variables to be exported to the Makefiles
 AC_SUBST(IPOPT_INC)
 AC_SUBST(IPOPT_LIB)
 
 IPOPT_INC=$ipopt/include/coin
 IPOPT_LIB=$ipopt/lib
+
+AC_SUBST(WITH_IPOPT)
+AS_IF([test "x$with_ipopt" != xno],
+      [WITH_IPOPT="true"],
+      [WITH_IPOPT="false"]) 
 
 AC_ARG_WITH([cppad],
    [AS_HELP_STRING([--with-cppad],
@@ -118,16 +142,18 @@ AS_IF([test "x$with_cppad" = xno],
                      [],
                      [AC_MSG_FAILURE([--with-cppad option was specified but does not seem to point at a valid CppAD installation])])])
 
+AM_CONDITIONAL([COMPILE_WITH_CPPAD],[test "x$with_cppad" != xno])
+
 # Set output variables to be exported to the Makefiles
 AC_SUBST(CPPAD_INC)
 
+AC_SUBST(WITH_CPPAD)
 CPPAD_INC=$cppad
-
-#AC_SUBST(ipoptlib)
-#ipoptlib=-L$ipopt/lib
+AS_IF([test "x$with_cppad" != xno],
+      [WITH_CPPAD="true"],
+      [WITH_CPPAD="false"]) 
 
 AC_SUBST(ipoptlib)
-
 case $build in
   *-cygwin*)
     ipoptlib="-L$ipopt/lib -lipopt -lg2c -ldl"
@@ -149,11 +175,22 @@ esac
 #JMALLLIBS="../ModelInterface/libmodelinterface.la ../OptimicaInterface/liboptimica.la"
 
 # Used in examples
-jmilib="-L\$(JMILIBDIR) -ljmi";
+jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm";
+AS_IF([test "x$with_ipopt" != xno],
+      [jmilib+=" -ljmi_solver"]) 
 AC_SUBST(jmilib)
 
-jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad";
+jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad";
+AS_IF([test "x$with_ipopt" != xno],
+      [jmi_cppadlib+=" -ljmi_solver_cppad"]) 
 AC_SUBST(jmi_cppadlib)
+
+AC_PATH_PROG([ANT], [ant], [])
+AC_SUBST(ANT_OPTS)
+ANT_OPTS="ANT_OPTS=-Xmx1024M"
+
+AM_CONDITIONAL([HAVE_ANT],[test "x$ANT" != x])
+
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -175,3 +212,5 @@ AC_CONFIG_FILES([
 
 
 AC_OUTPUT
+
+AC_MSG_RESULT([Configure completed successfully!])

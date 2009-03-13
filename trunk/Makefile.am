@@ -20,17 +20,23 @@ AUTOMAKE_OPTIONS = foreign
 SUBDIRS = JMI/src
 
 all-local:
+if HAVE_ANT
 	cd Compiler/ModelicaFrontEnd; \
-	ANT_OPTS="-Xmx1024M" ant
+	$(ANT_OPTS) $(ANT)
+endif
 
 install-exec-local:
+if HAVE_ANT
 	cp Compiler/ModelicaFrontEnd/bin/jmodelica.jar lib
+endif
 
-examples: install
+clean-local: clean-jmi-examples
+
+jmi-examples: install
 	cd JMI/examples/Vdp; $(MAKE) all
 	cd JMI/examples/Vdp_cppad; $(MAKE) all
 
-clean-examples: 
+clean-jmi-examples: 
 	cd JMI/examples/Vdp; $(MAKE) clean
 	cd JMI/examples/Vdp_cppad; $(MAKE) clean
 

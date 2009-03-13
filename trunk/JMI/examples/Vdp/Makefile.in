@@ -64,18 +64,33 @@ LIBS = @jmilib@ @ipoptlib@ #@ADDLIBS@
 # Include paths for compilation
 INCL =  -I$(JMIINCDIR) -I@IPOPT_INC@
 
+ifeq (@WITH_IPOPT@,true)
+ifeq (@WITH_CPPAD@,true)
 all: $(EXE) $(SHARED)
-
+else
+all:
+endif
+else
+all:
+endif
 # Create the executable
 .SUFFIXES: .cpp .c .o .obj
 
 # Create the executable
 $(EXE): $(OBJS)
+ifeq (@WITH_IPOPT@,true)
+ifeq (@WITH_CPPAD@,true)
 	$(CC) $(CLINKFLAGS) $(CFLAGS) -o $@ $(OBJS) $(LIBS)
+endif
+endif
 
 # Create the shared library
 $(SHARED): $(OBJS)
+ifeq (@WITH_IPOPT@,true)
+ifeq (@WITH_CPPAD@,true)
 	$(CC) $(SHARED_LDFLAGS) $(CLINKFLAGS) $(CFLAGS) -o $@ $(SHAREDOBJS) $(LIBS)
+endif
+endif
 
 # Compile
 .c.o:
