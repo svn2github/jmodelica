@@ -211,6 +211,9 @@
 
 /* @{ */
 
+#ifdef __cplusplus 
+extern "C" {
+#endif
 
 /**
  * \defgroup Defines Defined constants
@@ -1293,10 +1296,10 @@ void jmi_print_summary(jmi_t *jmi);
 
 /* @} */
 
-
-
+#ifdef __cplusplus 
+}
 #endif
-
 
 /* @} */
 
+#endif
