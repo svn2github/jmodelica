@@ -1,0 +1,56 @@
+JMODELICA PYTHON INTERFACE
+===================
+The JModelica Python Interface (JMPI) enables you to work with compiled
+models in Python. As Python is an interpreted language you can work both
+interactively or using scripts.
+
+HOW TO USE
+===================
+1. Add the folder containing the jmodelica package to your PYTHONPATH.
+2. Import the JMPI by adding
+
+     import jmodelica
+    
+   to your Python source code.
+
+RUNNING TESTS
+===================
+The JMPI tests are written using PyUNIT, which is a part of the Python
+Standard Library as of Python 2.1.
+
+Some of the tests are run on certain example models that can be found in
+the JMI examples directory that comes bundled with the JModelica source
+distribution. To run the the unit tests those models _needs to be
+compiled_. This is done by invoking
+
+  make examples
+  
+from the source distribution root.
+
+Tests are simply run by choosing the *test.py file and running it by
+invoking Python. For example
+
+  python jmitest.py
+  
+. The results are printed to stderr.
+
+RUNNING TESTS - FAQ
+===================
+If the test fails and outputs something similar to
+
+  JMIException: libipopt.so.0: cannot open shared object file: No such
+  file or directory
+  
+you are missing the Ipopt shared library in your library path. This can
+be solved in two ways:
+
+ 1) By installing Ipopt on your system (so that library ends up in
+    /usr/local/lib or similar). See Ipopt documentation for this.
+    
+ 2) By setting an environment variable in your shell by invoking
+ 
+      export LD_LIBRARY_PATH=LD_LIBRARY_PATH:/path/to/ipopt_build/lib
+      
+    Unless you put this in your shell's resource file (for example
+    ~/.bashrc) you will need to run this command every time you open up
+    a new shell.
