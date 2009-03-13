@@ -25,13 +25,16 @@ import os.path
 
 from jmi import loadDLL, JMIException
 
-# C++ demangling: http://www.kegel.com/mangle.html
-
-class JMIModelTestCase(unittest.TestCase):
+class JMIModelTestCase:
     """A general test framework for JMI examples."""
     
     def loadDLL(self, relpath):
-        """Load a test model in the JMI model example folder."""
+        """Load a test model in the JMI model example folder.
+        
+        @return A DLL loaded using ctypes.
+        
+        Raises a JMIException on failure.
+        """
         try:
             dll = loadDLL('../../../build/JMI/examples/' \
                           + relpath)
@@ -44,46 +47,58 @@ class JMIModelTestCase(unittest.TestCase):
         return dll
 
 
-class CTypesVDPTestCase(JMIModelTestCase):
-    """Test loading jmi model dll directly with ctypes."""
+class GenericCTypesJMITestCase(JMIModelTestCase):
+    """
+    Tests any JMI Model DLL to see that it conforms to the DLL API.
+    
+    Why not testing one model is because C++ name mangling might occur.
+    Therefor tests should be run on both a C and a C++ compiled model to
+    make sure that they are compiled with correct
+    @code {
+        extern "C" {
+            ...
+        }
+    }
+    .
+    
+    Which DLL is set in the 'file' attribute.
+    """
     
     def setUp(self):
-        self.lib = self.loadDLL('Vdp/vdp')
+        self.dll = self.loadDLL(self.file)
         
     def testLoaded(self):
-        assert(isinstance(self.lib,ctypes.CDLL), \
+        assert(isinstance(self.dll, ctypes.CDLL), \
                "lib is not a CDLL instance")
-        assert(isinstance(self.lib.jmi_new,ctypes._CFuncPtr), \
+        assert(isinstance(self.dll.jmi_new, ctypes._CFuncPtr), \
                "lib.jmi_new is not a ctypes._CFuncPtr instance")
             
     def testJMINew(self):
         jmip = ctypes.c_voidp()
-        assert(self.lib.jmi_new(ctypes.byref(jmip)) == 0, \
+        assert(self.dll.jmi_new(ctypes.byref(jmip)) == 0, \
                "jmi_new returned non-zero")
-        assert(jmip.value != None, \
+        assert(jmip.value is not None, \
                "jmi struct not returned correctly")
 
 
-class CTypesVDPADTestCase(JMIModelTestCase):
-    """Test loading jmi cppad model dll directly with ctypes."""
+class CTypesVDPTestCase(GenericCTypesJMITestCase, unittest.TestCase):
+    """Test loading Van der Pol JMI model DLL directly with ctypes."""
     
     def setUp(self):
-        self.lib = self.loadDLL('Vdp_cppad/vdp_cppad')
-        
-    def testLoaded(self):
-        assert(isinstance(self.lib,ctypes.CDLL), \
-               "lib is not a CDLL instance")
-        assert(isinstance(self.lib._Z7jmi_newPP5jmi_t, \
-                          ctypes._CFuncPtr), \
-               "lib.jmi_new is not a ctypes._CFuncPtr instance")
+        self.file = 'Vdp/vdp'
+        GenericCTypesJMITestCase.setUp(self)
 
 
-def suite():
-    suite = unittest.TestSuite()
-    suit.addTest(CTypesVDPTestCase("testLoaded"))
-    suit.addTest(CTypesVDPADTestCase("testLoaded"))
-    suit.addTest(CTypesVDPADTestCase("testJMINew"))
-    return suite
+class CTypesVDPADTestCase(GenericCTypesJMITestCase, unittest.TestCase):
+    """
+    Test loading Van der Pol JMI model DLL (compiled with CPPAD)
+    directly with ctypes.
+    
+    """
+    
+    def setUp(self):
+        self.file = 'Vdp_cppad/vdp_cppad'
+        GenericCTypesJMITestCase.setUp(self)
 
 
 # run all tests when module is executed from command line
