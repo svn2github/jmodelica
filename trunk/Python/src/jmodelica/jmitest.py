@@ -33,7 +33,7 @@ class JMIModelTestCase(unittest.TestCase):
     def loadDLL(self, relpath):
         """Load a test model in the JMI model example folder."""
         try:
-            dll = loadDLL('../../../../build/JMI/examples/' \
+            dll = loadDLL('../../../build/JMI/examples/' \
                           + relpath)
         except JMIException, e:
             raise JMIException("%s\nUnable to load test models." \
