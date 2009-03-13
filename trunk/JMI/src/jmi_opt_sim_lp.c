@@ -1395,7 +1395,7 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 	(*jmi_opt_sim)->dh_row = (int*)calloc((*jmi_opt_sim)->dh_n_nz,sizeof(int));
 	(*jmi_opt_sim)->dh_col = (int*)calloc((*jmi_opt_sim)->dh_n_nz,sizeof(int));
 
-	printf("%x\n",(int)(*jmi_opt_sim)->dh_row);
+	//	printf("%x\n",(int)(*jmi_opt_sim)->dh_row);
 
 	int *dF0_irow = (int*)calloc(dF0_n_nz,sizeof(int));
 	int *dF0_icol = (int*)calloc(dF0_n_nz,sizeof(int));
