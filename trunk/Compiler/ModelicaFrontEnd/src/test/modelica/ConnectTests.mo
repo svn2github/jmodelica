@@ -82,11 +82,11 @@ model ConnectTest3
         description="Test of generation of connection equations.",
                                                flatModel=
 "fclass ConnectTests.ConnectTest3
- parameter Real gain.k = 1 \"Gain value multiplied with input signal\" /*(1)*/;
- input Real gain.u \"Input signal connector\";
- output Real gain.y \"Output signal connector\";
- parameter Real const.k = 1 \"Constant output value\" /*(1)*/;
- output Real const.y \"Connector of Real output signal\";
+ parameter Real gain.k = 1 \"Gain value multiplied with input signal\";
+ Real gain.u \"Input signal connector\";
+ Real gain.y \"Output signal connector\";
+ parameter Real const.k = 1 \"Constant output value\";
+ Real const.y \"Connector of Real output signal\";
 equation
  gain.y = ( gain.k ) * ( gain.u );
  const.y = const.k;
