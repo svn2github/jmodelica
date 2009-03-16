@@ -561,3 +561,22 @@ aspect Math {
 	}
 
 }
+
+
+aspect Streams {
+
+        // Is this really not in the Standard library???
+        class StringOutputStream extends OutputStream {
+                StringBuffer str = new StringBuffer();
+               
+                public void write(int c) {
+                        str.append((char)c);
+                }
+
+                public String toString() {
+                        return str.toString();
+                }
+        }
+
+       
+}
