@@ -150,7 +150,7 @@ import java.util.Random;
 		SourceRoot sr = new SourceRoot(p);
 		
 		StringBuffer str = new StringBuffer("class "+args[2]+ "\n");
-		System.out.println(sr.prettyPrint(" "));
+		sr.prettyPrint(str," ");
 		str.append("C c;\n end "+args[2]+";\n");
 //   	System.out.println(str.toString());	  
 	    try{

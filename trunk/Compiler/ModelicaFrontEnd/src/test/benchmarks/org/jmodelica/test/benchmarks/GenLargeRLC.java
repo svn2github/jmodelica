@@ -204,7 +204,7 @@ import java.util.Random;
 "    p.v = 0;\n"+
 "  end Ground;\n");
 
-str.append(gen.genBaseRLC(51,50).prettyPrint("  "));
+gen.genBaseRLC(51,50).prettyPrint(str,"  ");
 
 str.append("model Electrical\n" 
 + "  BaseCircuit bc;\n"

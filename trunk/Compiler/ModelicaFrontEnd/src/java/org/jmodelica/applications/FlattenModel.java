@@ -102,6 +102,7 @@ public class FlattenModel {
 		      flatRoot.setFileName(name);
 		      FClass fc = new FClass();
 		      flatRoot.setFClass(fc);
+	    	  StringBuffer str = new StringBuffer();
 		    	  System.out.println("Flattening starts...");
 		    	  InstNode ir = ipr.findFlattenInst(cl,fc);
 		    	  if (ir==null) {
@@ -121,8 +122,9 @@ public class FlattenModel {
 	    	  */	    	  
 		    	  instTime = System.currentTimeMillis();
 		    	  fc.dumpTree("");
+		    	  fc.prettyPrint(str,"");
 		    	  System.out.println(fc.diagnostics());
-		    	  System.out.print(fc.prettyPrint(""));
+		    	  System.out.println(str.toString());
 		    	  printTime = System.currentTimeMillis();
 		
 		      // Generate code?

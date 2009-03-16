@@ -77,6 +77,7 @@ public class FlattenModelHotStart{
 		      long instTime = System.currentTimeMillis();
 		      
 		      FClass fc = new FClass();
+	    	  StringBuffer str = new StringBuffer();
 		    	  System.out.println("Flattening starts...");
 		    	  InstNode ir = ipr.findFlattenInst(cl,fc);
 		    	  if (ir==null) {
@@ -86,7 +87,8 @@ public class FlattenModelHotStart{
 		    	  }
 		    	  instTime = System.currentTimeMillis();
 		    	  //fc.dumpTree("");
-		    	  System.out.println(fc.prettyPrint(""));
+		    	  fc.prettyPrint(str,"");
+		    	  System.out.println(str.toString());
 		    	  printTime = System.currentTimeMillis();
 		
 		      System.err.println("Parse time:         " + ((double)(parseTime-startTime))/1000.0);
@@ -137,6 +139,7 @@ public class FlattenModelHotStart{
 			      long instTime2 = System.currentTimeMillis();
 			      
 			      FClass fc2 = new FClass();
+		    	  str = new StringBuffer();
 			    	  System.out.println("Flattening starts...");
 		    	  ir = ipr.findFlattenInst(cl,fc2);
 			    	  if (ir==null) {
@@ -150,7 +153,8 @@ public class FlattenModelHotStart{
 		    	  }		    	  		    	 
 			    	  instTime2 = System.currentTimeMillis();
 			    	  //fc.dumpTree("");
-			    	  System.out.println(fc2.prettyPrint(""));
+			    	  fc2.prettyPrint(str,"");
+			    	  System.out.println(str.toString());
 			    	  printTime2 = System.currentTimeMillis();
 			
 			      System.err.println("Parse time:         " + ((double)(parseTime2-startTime2))/1000.0);
