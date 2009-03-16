@@ -25,7 +25,7 @@ public class FlattenModel {
 	  public static void main(String args[]) {
 		    
 		  long startTime = System.currentTimeMillis();
-		  	if(args.length != 2) {
+		  	if(args.length < 2) {
 		      System.out.println("FlattenModel expects a file name and a class name as command line arguments");
 		      System.exit(1);
 		    }
@@ -127,6 +127,16 @@ public class FlattenModel {
 		    	  System.out.println(str.toString());
 		    	  printTime = System.currentTimeMillis();
 		
+		      // Generate code?
+		      if (args.length==4) {
+		    	  GenericGenerator generator = 
+		    		  new GenericGenerator(new PrettyPrinter(), '$',fc);
+		    	  System.out.println(generator.toString());
+		    	  generator.generate(args[2],args[3]);
+
+		      }
+		    	  
+		    	  
 		      System.err.println("Parse time:         " + ((double)(parseTime-startTime))/1000.0);
 		      System.err.println("Error check time:   " + ((double)(errcheckTime-parseTime))/1000.0);
 		      System.err.println("Instantiation time: " + ((double)(instTime-errcheckTime))/1000.0);

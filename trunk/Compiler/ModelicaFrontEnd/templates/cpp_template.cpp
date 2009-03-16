@@ -21,14 +21,14 @@
 #include <jmi.h>
 
 
-static const int N_ci = $n_ci$;
-static const int N_cd = $n_cd$;
-static const int N_pi = $n_pi$;
-static const int N_pd = $n_pd$;
-static const int N_dx = $n_dx$;
-static const int N_x = $n_x$;
-static const int N_u = $n_u$;
-static const int N_w = $n_w$;
+static const int N_ci = $n_real_ci$;
+static const int N_cd = $n_real_cd$;
+static const int N_pi = $n_real_pi$;
+static const int N_pd = $n_real_pd$;
+static const int N_dx = $n_real_x$;
+static const int N_x = $n_real_x$;
+static const int N_u = $n_real_u$;
+static const int N_w = $n_real_w$;
 static const int N_eq_F = $n_eq_F$;
 
 static const int N_eq_F0 = $n_eq_F0$;

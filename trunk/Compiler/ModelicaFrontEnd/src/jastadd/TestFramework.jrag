@@ -129,8 +129,24 @@ aspect TestFramework {
 				ftc.setSourceFileName(root().fileName());
 				ftc.setClassName(enclosingClassDecl().qualifiedName());
 				ts.add(ftc);
-			}
-			else if (name.equals("JModelica.UnitTesting.ErrorTestCase")) {
+			} else if (name.equals("JModelica.UnitTesting.CodeGenTestCase")) {
+				CodeGenTestCase cgtc = new CodeGenTestCase();
+				for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
+					NamedArgument na = getFunctionArguments().getNamedArgument(i);
+					if (na.getName().name().equals("name"))
+						cgtc.setName(((StringLitExp)na.getExp()).getSTRING());
+					else if (na.getName().name().equals("description"))
+						cgtc.setDescription(((StringLitExp)na.getExp()).getSTRING());	
+					else if (na.getName().name().equals("generatedCode"))
+						cgtc.setGenCode((((StringLitExp)na.getExp()).getSTRING()).replace("\\\"","\""));		
+					else if (na.getName().name().equals("template"))
+						cgtc.setTemplate((((StringLitExp)na.getExp()).getSTRING()).replace("\\\"","\""));			
+				}
+				debugPrint(">>>>>>>>");
+				cgtc.setSourceFileName(root().fileName());
+				cgtc.setClassName(enclosingClassDecl().qualifiedName());
+				ts.add(cgtc);
+			} else if (name.equals("JModelica.UnitTesting.ErrorTestCase")) {
 				ErrorTestCase etc = new ErrorTestCase();
 				for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
 					NamedArgument na = getFunctionArguments().getNamedArgument(i);
@@ -154,6 +170,7 @@ aspect TestFramework {
 			if (name.equals("testCase")) {
 				getExp().collectTestCasesFC("JModelica.UnitTesting.FlatteningTestCase",ts);
 				getExp().collectTestCasesFC("JModelica.UnitTesting.ErrorTestCase",ts);
+				getExp().collectTestCasesFC("JModelica.UnitTesting.CodeGenTestCase",ts);
 			}
 		}
 	
