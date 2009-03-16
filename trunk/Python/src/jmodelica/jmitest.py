@@ -82,7 +82,11 @@ class GenericCTypesJMITestCase(JMIModelTestCase):
 
 
 class CTypesVDPTestCase(GenericCTypesJMITestCase, unittest.TestCase):
-    """Test loading Van der Pol JMI model DLL directly with ctypes."""
+    """
+    Test loading Van der Pol JMI model DLL (compiled without CPPAD)
+    directly with ctypes.
+    
+    """
     
     def setUp(self):
         self.file = 'Vdp/vdp'
