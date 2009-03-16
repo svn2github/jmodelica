@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Tests of the JMI interface Python wrappers.
 
@@ -23,7 +23,7 @@ import unittest
 import ctypes
 import os.path
 
-from jmi import loadDLL, JMIException
+from jmi import load_DLL, JMIException
 
 class JMIModelTestCase:
     """A general test framework for JMI examples."""
@@ -36,7 +36,7 @@ class JMIModelTestCase:
         Raises a JMIException on failure.
         """
         try:
-            dll = loadDLL('../../../build/JMI/examples/' \
+            dll = load_DLL('../../../build/JMI/examples/' \
                           + relpath)
         except JMIException, e:
             raise JMIException("%s\nUnable to load test models." \

@@ -25,11 +25,11 @@ import os.path
 
 
 class JMIException(Exception):
-    """ A JMI exception. """
+    """A JMI exception."""
     pass
 
 
-def loadDLL(filepath):
+def load_DLL(filepath):
     """Loads a model from a DLL file and returns it.
     
     The filepath can be be both with or without file suffixes (as long
@@ -40,8 +40,8 @@ def loadDLL(filepath):
       >> lib = loadDLL('model.dll')
       >> lib = loadDLL('model.so')
     . All of the above should work on the JModelica supported platforms.
-    However, the first one is recommended as it is the least platform
-    dependent syntax.
+    However, the first one is recommended as it is the most platform
+    independent syntax.
     
     @param filename File path without suffix.
     
@@ -52,7 +52,7 @@ def loadDLL(filepath):
     SUFFIXES_TO_APPEND = ['.so'] # Suffixes that might have to be added
     
     try:
-        """Trying Windows DLL."""
+        # Trying Windows DLL.
         if os.path.isfile(filepath+'.dll'):
             lib = ctypes.CDLL(filepath)
             return lib
@@ -63,14 +63,14 @@ def loadDLL(filepath):
             lib = ctypes.CDLL(filename)
             return lib
         
-        """Trying different suffixes."""
+        # Trying different suffixes.
         suffixed_files = map(lambda x: filepath+x, SUFFIXES_TO_APPEND)
         for suffixed_file in suffixed_files:
             if os.path.isfile(suffixed_file):
                 lib = ctypes.CDLL(suffixed_file)
                 return lib
         
-        """Trying without suffix."""
+        # Trying without suffix.
         lib = ctypes.CDLL(filepath)
         return lib
                                           
@@ -80,5 +80,26 @@ def loadDLL(filepath):
                            " file '%s'" % filename + \
                            " (with varying prefix) exists and is not" +
                            " corrupt.")
-        
+
+
+def load_model(filepath):
+    """Returns a JMI model loaded from file.
     
+    @param filepath The absolute or relative path to the model file to
+                    be loaded.
+    @return 
+    
+    If the model cannot be loaded a JMIException will be raised.
+    
+    """
+    dll = loadDLL(filepath)
+    
+
+class JMIModel:
+    """
+    A JMI Model loaded from a DLL.
+    
+    """
+    
+    def __init__(self, dll):
+        self.dll = dll
