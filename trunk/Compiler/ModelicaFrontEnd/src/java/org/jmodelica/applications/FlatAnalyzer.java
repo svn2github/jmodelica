@@ -90,7 +90,6 @@ public class FlatAnalyzer {
 			      flatRoot.setFileName(name);
 			      FClass fc = new FClass();
 			      flatRoot.setFClass(fc);
-		    	  StringBuffer str = new StringBuffer();
 			    	  System.out.println("Flattening starts...");
 			    	  InstNode ir = ipr.findFlattenInst(cl,fc);
 			    	  if (ir==null) {
@@ -101,8 +100,7 @@ public class FlatAnalyzer {
 		    	  
 		    	  instTime = System.currentTimeMillis();
 		    	 //fc.dumpTree("");
-		    	  fc.prettyPrint(str,"");  
-		    	  System.out.println(str.toString());	  
+		    	  System.out.println(fc.prettyPrint(""));  
 		    	  printTime = System.currentTimeMillis();
 		    	 /*
 		    	  Collection<FVariable> variables = fc.variables();
