@@ -1,4 +1,3 @@
-
 # 
 #    Copyright (C) 2009 Modelon AB
 #
@@ -176,16 +175,14 @@ esac
 #JMALLLIBS="../ModelInterface/libmodelinterface.la ../OptimicaInterface/liboptimica.la"
 
 # Used in examples
-#jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm";
+jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm";
 AS_IF([test "x$with_ipopt" != xno],
-      [jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm -ljmi_solver"],
-      [jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm"]) 
+      [jmilib+=" -ljmi_solver"]) 
 AC_SUBST(jmilib)
 
-#jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad";
+jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad";
 AS_IF([test "x$with_ipopt" != xno],
-      [jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad"],
-      [jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad"]) 
+      [jmi_cppadlib+=" -ljmi_solver_cppad"]) 
 AC_SUBST(jmi_cppadlib)
 
 AC_PATH_PROG([ANT], [ant], [])
@@ -193,7 +190,6 @@ AC_SUBST(ANT_OPTS)
 ANT_OPTS="ANT_OPTS=-Xmx1024M"
 
 AM_CONDITIONAL([HAVE_ANT],[test "x$ANT" != x])
-
 
 # Checks for header files.
 AC_HEADER_STDC
