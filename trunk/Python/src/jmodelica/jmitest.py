@@ -248,20 +248,7 @@ class GenericVDPTests(GenericJMITests):
     def deleteModel(self):
         assert self.dll.jmi_delete(self.jmi) == 0, \
                "jmi_delete failed"
-        
-
-class testVDPWithoutCppADUsingCTypes(GenericVDPTests):
-    """
-    Test loading Van der Pol JMI model DLL (compiled without CPPAD)
-    directly with ctypes.
     
-    """
-    
-    def setUp(self):
-        self.model_path = 'Vdp'
-        self.model_lib = 'vdp'
-        GenericVDPTests.setUp(self)
-        
     def test_1_dae_F(self):
         """Run the test test_1_dae_F also found in @vdp_main.c
         
@@ -293,7 +280,7 @@ class testVDPWithoutCppADUsingCTypes(GenericVDPTests):
         
         err_sum = sum(abs(FIXED_RES - res_F))
         assert err_sum < SMALL, "residuals failed"
-        
+    
     def test_2_dae_dF_indices(self):
         """Run the test test_2_dae_dF_indices also found in @vdp_main.c
         """
@@ -321,6 +308,7 @@ class testVDPWithoutCppADUsingCTypes(GenericVDPTests):
         
         assert sum(abs(dF_row - dF_row_fix))==0, "row indices failed"
         assert sum(abs(dF_col - dF_col_fix))==0, "column indices failed"
+        
         
     def testCtypesArgTypes(self):
         """Test CTypes argument checking.
@@ -353,6 +341,19 @@ class testVDPWithoutCppADUsingCTypes(GenericVDPTests):
                                 byref(dF_n_nz_test))
                        
         assert dF_n_nz_test.value is 12 and dF_n_cols_test.value is 3
+        
+
+class testVDPWithoutCppADUsingCTypes(GenericVDPTests):
+    """
+    Test loading Van der Pol JMI model DLL (compiled without CPPAD)
+    directly with ctypes.
+    
+    """
+    
+    def setUp(self):
+        self.model_path = 'Vdp'
+        self.model_lib = 'vdp'
+        GenericVDPTests.setUp(self)
         
 
 class testVDPWithCppADUsingCTypes(GenericVDPTests):
