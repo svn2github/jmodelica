@@ -35,6 +35,7 @@ clean-local: clean-jmi-examples
 jmi-examples: install
 	cd JMI/examples/Vdp; $(MAKE) all
 	cd JMI/examples/Vdp_cppad; $(MAKE) all
+	cd JMI/examples/FurutaPendulum; $(MAKE) all
 
 clean-jmi-examples: 
 	cd JMI/examples/Vdp; $(MAKE) clean

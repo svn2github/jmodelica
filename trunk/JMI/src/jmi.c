@@ -119,6 +119,102 @@ int jmi_func_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res) {
 	return func->F(jmi,&res);
 }
 
+int jmi_ode_f(jmi_t* jmi) {
+
+	int i;
+	for (i=0;i<jmi->n_z;i++) {
+		(*(jmi->z))[i] = (*(jmi->z_val))[i];
+	}
+
+	jmi_real_t* dx = jmi_get_dx(jmi);
+	for(i=0;i<jmi->n_dx;i++) {
+		dx[i]=0;
+	}
+
+	jmi_real_t* dx_res = calloc(jmi->n_x,sizeof(jmi_real_t));
+
+	//jmi->dae->F->F(jmi, &res);
+	jmi_func_F(jmi,jmi->dae->F,dx_res);
+
+	for(i=0;i<jmi->n_dx;i++) {
+		dx[i]=dx_res[i];
+	}
+
+	free(dx_res);
+
+	return 0;
+}
+
+int jmi_ode_df(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
+	if (eval_alg & JMI_DER_SYMBOLIC) {
+
+		int i;
+		jmi_real_t* dx = jmi_get_dx(jmi);
+		for(i=0;i<jmi->n_dx;i++) {
+			dx[i]=0;
+		}
+
+		return jmi_func_dF(jmi, jmi->dae->F, sparsity,
+				independent_vars & ~JMI_DER_DX, mask, jac) ;
+
+	} else if (eval_alg & JMI_DER_CPPAD) {
+		return -1;
+	} else {
+		return -1;
+	}
+}
+
+int jmi_ode_df_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
+
+	if (eval_alg & JMI_DER_SYMBOLIC) {
+        int df_n_cols;
+        int* mask = calloc(jmi->n_z,sizeof(int));
+        int i;
+        for (i=0;i<jmi->n_z;i++) {
+        	mask[i] = 1;
+        }
+		int ret_val =  jmi_func_dF_dim(jmi, jmi->dae->F, JMI_DER_SPARSE,
+			   JMI_DER_ALL & (~JMI_DER_DX), mask,
+				&df_n_cols, n_nz);
+		free(mask);
+		return ret_val;
+	} else if (eval_alg & JMI_DER_CPPAD) {
+		return -1;
+	} else {
+		return -1;
+	}
+}
+
+int jmi_ode_df_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col) {
+
+	if (eval_alg & JMI_DER_SYMBOLIC) {
+
+		return jmi_func_dF_nz_indices(jmi, jmi->dae->F, independent_vars & (~JMI_DER_DX),
+				mask, row, col);
+
+	} else if (eval_alg & JMI_DER_CPPAD) {
+		return -1;
+	} else {
+		return -1;
+	}
+
+}
+
+int jmi_ode_df_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
+		int *df_n_cols, int *df_n_nz) {
+
+	if (eval_alg & JMI_DER_SYMBOLIC) {
+		return jmi_func_dF_dim(jmi, jmi->dae->F, sparsity, independent_vars & (~JMI_DER_DX), mask,
+				df_n_cols, df_n_nz);
+
+	} else if (eval_alg & JMI_DER_CPPAD) {
+		return -1;
+	} else {
+		return -1;
+	}
+}
+
 int jmi_dae_F(jmi_t* jmi, jmi_real_t* res) {
 
 	int i;

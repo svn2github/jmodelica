@@ -145,6 +145,16 @@
  *   For details on the functions included in the DAE initialization interface, see the
  *   <a href="group__Initialization.html">DAE initialization functions documentation. </a>
  *
+ *   \subsection Ode_interface The ODE interface
+ *
+ *   The ODE interace is defined by the relation
+ *
+ *   \f$\dot x = f(p,x,u,t). \f$
+ *
+ *   WARNING: The current version of the JMI interface supports only Modelica
+ *   models which are written explicitly on ODE form. Accordingly, no
+ *   algebraic variables are supported in this version.
+ *
  *   \subsection Opt The optimization interface
  *
  *   The optimization part of the interface is defined by the functions \f$J(p,q)\f$,
@@ -211,7 +221,7 @@
 
 /* @{ */
 
-#ifdef __cplusplus 
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -248,9 +258,9 @@ extern "C" {
 #define JMI_DER_W_P 4096 /**<  \brief Evaluate derivatives w.r.t. algebraic variables at time points, \f$w_p\f$.*/
 
 /** \brief Evaluate derivatives w.r.t. all variables, \f$z\f$.*/
-#define JMI_DER_ALL JMI_DER_CI | JMI_DER_CD | JMI_DER_PI | JMI_DER_PD |\
+#define JMI_DER_ALL (JMI_DER_CI | JMI_DER_CD | JMI_DER_PI | JMI_DER_PD |\
 	JMI_DER_DX | JMI_DER_X | JMI_DER_U | JMI_DER_W |\
-	JMI_DER_T | JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | JMI_DER_W_P
+	JMI_DER_T | JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | JMI_DER_W_P)
 
 
 /**  \brief Evaluate derivatives w.r.t. all variables in \f$p\f$.*/
@@ -528,6 +538,111 @@ jmi_real_t* jmi_get_u_p(jmi_t* jmi, int i);
 jmi_real_t* jmi_get_w_p(jmi_t* jmi, int i);
 
 /* @} */
+
+
+/*********************************************
+ *
+ * DAE interface
+ *
+ ********************************************/
+
+/**
+ * \defgroup ODE ODE interface
+ * \brief Access to the ODE representation.
+ *
+ * WARNING: The current version of the ODE interface is very limited and
+ * requires that the Modelica model is explicitly given on ODE form.
+ * Accordingly, algebraic variables are not supported.
+ */
+/* @{ */
+
+
+/**
+ * \brief Evaluate the right hand side of the ODE.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_x, ::jmi_get_u etc. The
+ * output (the values of the derivatives) is available after a call to
+ * ::jmi_ode_f in the vector obtained by calling ::jmi_get_dx.
+ *
+ * @param jmi A jmi_t struct.
+ * @return Error code.
+ *
+ */
+int jmi_ode_f(jmi_t* jmi);
+
+/**
+ * \brief Evaluate the Jacobian of the right hand side of the ODE.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_x, ::jmi_get_u etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg Set to either JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or
+ *                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
+ * @param sparsity Set to JMI_DER_SPARSE, JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
+ *                to indicate the output format of the Jacobian.
+ * @param independent_vars Used to indicate which columns of the full Jacobian should
+ *                         be evaluated. The constants JMI_DER_X, JMI_DER_DX etc are used
+ *                         to set this argument. Setting independent_vars to
+ *                         JMI_DER_DX has no effect.
+ * @param mask This argument is a vector containing ones for the Jacobian columns that
+ *             should be included in the Jacobian and zeros for those which should not.
+ * @param jac (Output) The Jacobian.
+ * @return Error code.
+ *
+ */
+int jmi_ode_df(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
+
+/**
+ * \brief Returns the number of non-zeros in the Jacobian of the right hand
+ * side of the ODE.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg Indicates which for which Jacobian the number of non-zero elements should be returned:
+ *                 Symbolic (JMI_DER_SYMBOLIC) or CppAD (JMI_DER_CPPAD).
+ * @param n_nz (Output) The number of non-zero Jacobian entries.
+ * @return Error code.
+ */
+int jmi_ode_df_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
+
+/**
+ * \brief Returns the row and column indices of the non-zero elements in the
+ * Jacobian of the right hand side.
+ *
+ * Notice that Fortran style indexing is used: the first row (and column) has index 1.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param row (Output) The row indices of the non-zeros in the Jacobian.
+ * @param col (Output) The column indices of the non-zeros in the Jacobian.
+ * @return Error code.
+ *
+ */
+int jmi_ode_df_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+		                  int *mask, int* row, int* col);
+
+/**
+ * \brief This helper function computes the number of columns and the number of non zero
+ * elements in the Jacobian of the right hand side of the ODE given a sparsity configuration.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param df_n_cols (Output) The number of columns of the resulting Jacobian.
+ * @param df_n_nz (Output) The number of non-zeros of the resulting Jacobian.
+ *
+ */
+int jmi_ode_df_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
+		int *df_n_cols, int *df_n_nz);
+
+/* @} */
+
+
 
 /*********************************************
  *
@@ -1296,7 +1411,7 @@ void jmi_print_summary(jmi_t *jmi);
 
 /* @} */
 
-#ifdef __cplusplus 
+#ifdef __cplusplus
 }
 #endif
 
