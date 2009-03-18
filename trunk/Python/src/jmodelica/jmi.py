@@ -148,11 +148,29 @@ def load_DLL(filepath):
     """
     dll = _load_DLL_clean(filepath)
     
+    # Initializing the jmi C struct
     jmi = ct.c_voidp()
     assert dll.jmi_new(byref(jmi)) == 0, \
            "jmi_new returned non-zero"
     assert jmi.value is not None, \
            "jmi struct not returned correctly"
+    
+    # Setting return type to ctypes.c_jmi_real_t for some functions
+    int_res_funcs = [dll.jmi_get_ci,
+                     dll.jmi_get_cd,
+                     dll.jmi_get_pi,
+                     dll.jmi_get_pd,
+                     dll.jmi_get_dx,
+                     dll.jmi_get_x,
+                     dll.jmi_get_u,
+                     dll.jmi_get_w,
+                     dll.jmi_get_t,
+                     dll.jmi_get_dx_p,
+                     dll.jmi_get_x_p,
+                     dll.jmi_get_u_p,
+                     dll.jmi_get_w_p]
+    for func in int_res_funcs:
+        func.restype = ct.POINTER(c_jmi_real_t)
     
     # Initialize the global variables used throughout the tests.
     n_ci = ct.c_int()
@@ -282,23 +300,6 @@ def load_DLL(filepath):
     dJ_dense = (dJ_n_dense.value * c_jmi_real_t)()
     
     mask = (n_z.value * ct.c_int)()
-    
-    # Setting return type to ctypes.c_jmi_real_t for some functions
-    int_res_funcs = [dll.jmi_get_ci,
-                     dll.jmi_get_cd,
-                     dll.jmi_get_pi,
-                     dll.jmi_get_pd,
-                     dll.jmi_get_dx,
-                     dll.jmi_get_x,
-                     dll.jmi_get_u,
-                     dll.jmi_get_w,
-                     dll.jmi_get_t,
-                     dll.jmi_get_dx_p,
-                     dll.jmi_get_x_p,
-                     dll.jmi_get_u_p,
-                     dll.jmi_get_w_p]
-    for func in int_res_funcs:
-        func.restype = ct.POINTER(c_jmi_real_t)
     
     # Setting parameter types
     mask_type = Nct.ndpointer(dtype=ct.c_int, \
