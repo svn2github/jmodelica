@@ -15,8 +15,12 @@ HOW TO USE
 
 RUNNING TESTS
 ===================
-The JMPI tests are written using PyUNIT, which is a part of the Python
-Standard Library as of Python 2.1.
+The JMPI tests requires the Nose Python testing framework that can be
+downloaded from:
+
+  http://somethingaboutorange.com/mrl/projects/nose/
+  
+(should also be included in most Linux distros as "python-nose")
 
 Some of the tests are run on certain example models that can be found in
 the JMI examples directory that comes bundled with the JModelica source
@@ -27,12 +31,12 @@ compiled_. This is done by invoking
   
 from the source distribution root.
 
-Tests are simply run by choosing the *test.py file and running it by
-invoking Python. For example
+Tests are simply run by invoking
 
-  python jmitest.py
+  nosetests
   
-. The results are printed to stderr.
+. Nose finds all available tests and runs them. For details on how to
+run specific tests, and more, have a look at the Nose website.
 
 RUNNING TESTS - FAQ
 ===================
