@@ -124,7 +124,7 @@ c_jmi_real_t = ct.c_double
 # ================================================================
 #                           FUNCTIONS
 # ================================================================
-def load_DLL(filepath):
+def load_DLL(libname, path):
     """Loads a model from a DLL file and returns it.
     
     The filepath can be be both with or without file suffixes (as long
@@ -138,15 +138,13 @@ def load_DLL(filepath):
     However, the first one is recommended as it is the most platform
     independent syntax.
     
-    This function is the same as load_DLL_clean except that is adds some
-    meta information about the DLL functions to it.
-    
-    @param filename File path without suffix.
+    @param libname Name of the librarym without prefix.
+    @param path    The relative or absolute path to the library.
     
     @see http://docs.python.org/library/ct.html
     
     """
-    dll = _load_DLL_clean(filepath)
+    dll = Nct.load_library(libname, path)
     
     # Initializing the jmi C struct
     jmi = ct.c_voidp()
@@ -329,47 +327,6 @@ def load_DLL(filepath):
            "jmi_delete failed"
     
     return dll
-
-
-def _load_DLL_clean(filepath):
-    """Helper function for @load_DLL
-    
-    This is the function that actually locates and loads the DLL. Use
-    @load_DLL unless you know what you are doing.
-    
-    """
-    
-    SUFFIXES_TO_APPEND = ['.so'] # Suffixes that might have to be added
-    
-    try:
-        # Trying Windows DLL.
-        if os.path.isfile(filepath+'.dll'):
-            lib = ct.CDLL(filepath)
-            return lib
-        
-        filename = os.path.basename(filepath)
-        (name, delimiter, suffix) = filename.rpartition('.')
-        if suffix.lower() is 'dll' and os.path.isfile(filename):
-            lib = ct.CDLL(filename)
-            return lib
-        
-        # Trying different suffixes.
-        suffixed_files = map(lambda x: filepath+x, SUFFIXES_TO_APPEND)
-        for suffixed_file in suffixed_files:
-            if os.path.isfile(suffixed_file):
-                lib = ct.CDLL(suffixed_file)
-                return lib
-        
-        # Trying without suffix.
-        lib = ct.CDLL(filepath)
-        return lib
-                                          
-    except OSError, e:
-        raise JMIException("%s\nCould not load model." % e + \
-                           " Please check that the" \
-                           " file '%s'" % filename + \
-                           " (with varying prefix) exists and is not" +
-                           " corrupt.")
 
 
 def load_model(filepath):

@@ -22,35 +22,15 @@ for more information.
 import unittest
 import ctypes
 from ctypes import byref
+import os.path
 
 import numpy as N
 
 import jmi as pyjmi # increased readability
 from jmi import JMIException
 
-class JMIModelTestCase:
-    """A general test framework for JMI examples."""
-    
-    def loadDLL(self, relpath):
-        """Load a test model in the JMI model example folder.
-        
-        @return A DLL loaded using ctypes.
-        
-        Raises a JMIException on failure.
-        """
-        try:
-            dll = pyjmi.load_DLL('../../../build/JMI/examples/' \
-                          + relpath)
-        except JMIException, e:
-            raise JMIException("%s\nUnable to load test models." \
-                               " You have probably not compiled the" \
-                               " examples. Please refer to the"
-                               " JModelica for more information." % e)
-                               
-        return dll
 
-
-class GenericJMITests(JMIModelTestCase):
+class GenericJMITests:
     """
     Tests any JMI Model DLL to see that it conforms to the DLL API.
     
@@ -67,8 +47,36 @@ class GenericJMITests(JMIModelTestCase):
     Which DLL is set in the 'file' attribute.
     """
     
+    def loadDLL(self, libname, examplepath):
+        """Load a test model in the JMI model example folder.
+        
+        @note This is not a test.
+        
+        @param libname:
+            The name of the DLL filename without suffix.
+        @param examplepath:
+            The relative path (from the example folder) to the library.
+        @return:
+            A DLL loaded using ctypes.
+        
+        Raises a JMIException on failure.
+        """
+        # Path to example collection root directory
+        EXAMPLES_PATH = '../../../build/JMI/examples'
+        try:
+            dll = pyjmi.load_DLL(libname, \
+                                 os.path.join(EXAMPLES_PATH, \
+                                              examplepath))
+        except JMIException, e:
+            raise JMIException("%s\nUnable to load test models." \
+                               " You have probably not compiled the" \
+                               " examples. Please refer to the"
+                               " JModelica for more information." % e)
+                               
+        return dll
+    
     def setUp(self):
-        self.dll = self.loadDLL(self.file)
+        self.dll = self.loadDLL(self.model_lib, self.model_path)
         
     def testLoaded(self):
         assert isinstance(self.dll, ctypes.CDLL), \
@@ -93,7 +101,6 @@ class GenericVDPTests(GenericJMITests):
     
     """
     def setUp(self):
-        assert self.file
         GenericJMITests.setUp(self)
         self.initModel()
         
@@ -251,7 +258,8 @@ class testVDPWithoutCppADUsingCTypes(GenericVDPTests):
     """
     
     def setUp(self):
-        self.file = 'Vdp/vdp'
+        self.model_path = 'Vdp'
+        self.model_lib = 'vdp'
         GenericVDPTests.setUp(self)
         
     def test_1_dae_F(self):
@@ -355,6 +363,7 @@ class testVDPWithCppADUsingCTypes(GenericVDPTests):
     """
     
     def setUp(self):
-        self.file = 'Vdp_cppad/vdp_cppad'
+        self.model_path = 'Vdp_cppad'
+        self.model_lib = 'vdp_cppad'
         GenericVDPTests.setUp(self)
 
