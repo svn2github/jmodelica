@@ -605,7 +605,6 @@ int jmi_ad_init(jmi_t* jmi) {
 	if (jmi->init!=NULL) {
 		int n_eq_F0, n_eq_F1;
 		jmi_init_get_sizes(jmi,&n_eq_F0,&n_eq_F1);
-		printf("%d, %d\n",n_eq_F0,n_eq_F1);
 		if (n_eq_F0>0) {
 			jmi_func_ad_init(jmi, jmi->init->F0);
 		}
