@@ -77,36 +77,11 @@ class GenericJMITests:
     
     def setUp(self):
         self.dll = self.loadDLL(self.model_lib, self.model_path)
-        
-    def testLoaded(self):
-        assert isinstance(self.dll, ctypes.CDLL), \
-               "lib is not a CDLL instance"
-        assert isinstance(self.dll.jmi_new, ctypes._CFuncPtr), \
-               "lib.jmi_new is not a ctypes._CFuncPtr instance"
-            
-    def testJMIInitDest(self):
-        """Simple inititialization and destruction tests."""
-        
-        jmip = ctypes.c_voidp()
-        assert self.dll.jmi_new(byref(jmip)) == 0, \
-               "jmi_new returned non-zero"
-        assert jmip.value is not None, \
-               "jmi struct not returned correctly"
-        assert self.dll.jmi_delete(jmip) == 0, \
-               "jmi_delete failed"
-               
-               
-class GenericVDPTests(GenericJMITests):
-    """Tests that are run on both VDP-models.
-    
-    """
-    def setUp(self):
-        GenericJMITests.setUp(self)
         self.initModel()
         
     def tearDown(self):
         self.deleteModel()
-
+        
     def initModel(self):
         """Running code to initialize code for all the tests."""
         
@@ -140,47 +115,6 @@ class GenericVDPTests(GenericJMITests):
                                       byref(self.n_z)) \
                is 0, \
                "getting sizes failed"
-               
-        assert self.n_ci.value is 0
-        assert self.n_cd.value is 0
-        assert self.n_pi.value is 3
-        assert self.n_pd.value is 0
-        assert self.n_dx.value is 3
-        assert self.n_x.value is 3
-        assert self.n_u.value is 1
-        assert self.n_w.value is 1
-        assert self.n_tp.value is 2
-        assert self.n_z.value is 28
-               
-        self.offs_ci = ctypes.c_int()
-        self.offs_cd = ctypes.c_int()
-        self.offs_pi = ctypes.c_int()
-        self.offs_pd = ctypes.c_int()
-        self.offs_dx = ctypes.c_int()
-        self.offs_x = ctypes.c_int()
-        self.offs_u = ctypes.c_int()
-        self.offs_w = ctypes.c_int()
-        self.offs_t = ctypes.c_int()
-        self.offs_dx_p = ctypes.c_int()
-        self.offs_x_p = ctypes.c_int()
-        self.offs_u_p = ctypes.c_int()
-        self.offs_w_p = ctypes.c_int()
-        assert self.dll.jmi_get_offsets(self.jmi, \
-                                        byref(self.offs_ci), \
-                                        byref(self.offs_cd), \
-                                        byref(self.offs_pi), \
-                                        byref(self.offs_pd), \
-                                        byref(self.offs_dx), \
-                                        byref(self.offs_x), \
-                                        byref(self.offs_u), \
-                                        byref(self.offs_w), \
-                                        byref(self.offs_t), \
-                                        byref(self.offs_dx_p), \
-                                        byref(self.offs_x_p), \
-                                        byref(self.offs_u_p), \
-                                        byref(self.offs_w_p)) \
-               is 0, \
-               "getting offsets failed"
         
         self.n_eq_F = ctypes.c_int()
         assert self.dll.jmi_dae_get_sizes(self.jmi, \
@@ -257,8 +191,80 @@ class GenericVDPTests(GenericJMITests):
         self.mask = N.ones(self.n_z.value, dtype=int)
         
     def deleteModel(self):
+        """Freeing the JMI structure from memory."""
         assert self.dll.jmi_delete(self.jmi) == 0, \
                "jmi_delete failed"
+
+    def testLoaded(self):
+        assert isinstance(self.dll, ctypes.CDLL), \
+               "lib is not a CDLL instance"
+        assert isinstance(self.dll.jmi_new, ctypes._CFuncPtr), \
+               "lib.jmi_new is not a ctypes._CFuncPtr instance"
+            
+    def testJMIInitDest(self):
+        """Simple inititialization and destruction tests."""
+        
+        jmip = ctypes.c_voidp()
+        assert self.dll.jmi_new(byref(jmip)) == 0, \
+               "jmi_new returned non-zero"
+        assert jmip.value is not None, \
+               "jmi struct not returned correctly"
+        assert self.dll.jmi_delete(jmip) == 0, \
+               "jmi_delete failed"
+               
+    def testGettingOffsets(self):
+        """Testing jmi_get_offsets(...)."""
+        offs_ci = ctypes.c_int()
+        offs_cd = ctypes.c_int()
+        offs_pi = ctypes.c_int()
+        offs_pd = ctypes.c_int()
+        offs_dx = ctypes.c_int()
+        offs_x = ctypes.c_int()
+        offs_u = ctypes.c_int()
+        offs_w = ctypes.c_int()
+        offs_t = ctypes.c_int()
+        offs_dx_p = ctypes.c_int()
+        offs_x_p = ctypes.c_int()
+        offs_u_p = ctypes.c_int()
+        offs_w_p = ctypes.c_int()
+        assert self.dll.jmi_get_offsets(self.jmi, \
+                                        byref(offs_ci), \
+                                        byref(offs_cd), \
+                                        byref(offs_pi), \
+                                        byref(offs_pd), \
+                                        byref(offs_dx), \
+                                        byref(offs_x), \
+                                        byref(offs_u), \
+                                        byref(offs_w), \
+                                        byref(offs_t), \
+                                        byref(offs_dx_p), \
+                                        byref(offs_x_p), \
+                                        byref(offs_u_p), \
+                                        byref(offs_w_p)) \
+               is 0, \
+               "getting offsets failed"
+               
+               
+class GenericVDPTestsUsingCTypes(GenericJMITests):
+    """Tests that are run on both VDP-models.
+    
+    """
+    def setUp(self):
+        GenericJMITests.setUp(self)
+        self.initModel()
+               
+    def testSizes(self):
+        """Test the sizes return by 'jmi_get_sizes(...)'."""
+        assert self.n_ci.value is 0
+        assert self.n_cd.value is 0
+        assert self.n_pi.value is 3
+        assert self.n_pd.value is 0
+        assert self.n_dx.value is 3
+        assert self.n_x.value is 3
+        assert self.n_u.value is 1
+        assert self.n_w.value is 1
+        assert self.n_tp.value is 2
+        assert self.n_z.value is 28
     
     def test_1_dae_F(self):
         """Run the test test_1_dae_F also found in @vdp_main.c
@@ -354,7 +360,7 @@ class GenericVDPTests(GenericJMITests):
         assert dF_n_nz_test.value is 12 and dF_n_cols_test.value is 3
         
 
-class testVDPWithoutCppADUsingCTypes(GenericVDPTests):
+class testVDPWithoutCppADUsingCTypes(GenericVDPTestsUsingCTypes):
     """
     Test loading Van der Pol JMI model DLL (compiled without CPPAD)
     directly with ctypes.
@@ -364,10 +370,10 @@ class testVDPWithoutCppADUsingCTypes(GenericVDPTests):
     def setUp(self):
         self.model_path = 'Vdp'
         self.model_lib = 'vdp'
-        GenericVDPTests.setUp(self)
+        GenericVDPTestsUsingCTypes.setUp(self)
         
 
-class testVDPWithCppADUsingCTypes(GenericVDPTests):
+class testVDPWithCppADUsingCTypes(GenericVDPTestsUsingCTypes):
     """
     Test loading Van der Pol JMI model DLL (compiled with CPPAD)
     directly with ctypes.
@@ -377,7 +383,7 @@ class testVDPWithCppADUsingCTypes(GenericVDPTests):
     def setUp(self):
         self.model_path = 'Vdp_cppad'
         self.model_lib = 'vdp_cppad'
-        GenericVDPTests.setUp(self)
+        GenericVDPTestsUsingCTypes.setUp(self)
         
         # Initializing CppAD, too
         self.dll.jmi_ad_init(self.jmi)
