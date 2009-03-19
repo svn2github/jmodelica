@@ -671,11 +671,6 @@ all-local:
 @HAVE_ANT_TRUE@	cd Compiler/ModelicaFrontEnd; \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT)
 
-#install-exec-local:
-#if HAVE_ANT
-#	cp Compiler/ModelicaFrontEnd/bin/jmodelica.jar lib
-#endif
-
 clean-local: clean-jmi-examples
 
 jmi-examples: install
