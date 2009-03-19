@@ -90,7 +90,7 @@ int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
 
 	jmi_->z = new jmi_ad_var_vec_t(jmi_->n_z);
 
-	jmi_->z_val = (jmi_real_t**)calloc(1,sizeof(jmi_real_t));
+	jmi_->z_val = (jmi_real_t**)calloc(1,sizeof(jmi_real_t *));
 	*(jmi_->z_val) =  (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t));
 
 	int i;
