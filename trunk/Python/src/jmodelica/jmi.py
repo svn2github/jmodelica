@@ -153,23 +153,6 @@ def load_DLL(libname, path):
     assert jmi.value is not None, \
            "jmi struct not returned correctly"
     
-    # Setting return type to ctypes.c_jmi_real_t for some functions
-    int_res_funcs = [dll.jmi_get_ci,
-                     dll.jmi_get_cd,
-                     dll.jmi_get_pi,
-                     dll.jmi_get_pd,
-                     dll.jmi_get_dx,
-                     dll.jmi_get_x,
-                     dll.jmi_get_u,
-                     dll.jmi_get_w,
-                     dll.jmi_get_t,
-                     dll.jmi_get_dx_p,
-                     dll.jmi_get_x_p,
-                     dll.jmi_get_u_p,
-                     dll.jmi_get_w_p]
-    for func in int_res_funcs:
-        func.restype = ct.POINTER(c_jmi_real_t)
-    
     # Initialize the global variables used throughout the tests.
     n_ci = ct.c_int()
     n_cd = ct.c_int()
@@ -194,6 +177,27 @@ def load_DLL(libname, path):
                              byref(n_z)) \
            is 0, \
            "getting sizes failed"
+           
+    # Setting return type to ctypes.array for some functions
+    int_res_funcs = [(dll.jmi_get_ci, n_ci.value),
+                     (dll.jmi_get_cd, n_cd.value),
+                     (dll.jmi_get_pi, n_pi.value),
+                     (dll.jmi_get_pd, n_pd.value),
+                     (dll.jmi_get_dx, n_dx.value),
+                     (dll.jmi_get_x, n_x.value),
+                     (dll.jmi_get_u, n_u.value),
+                     (dll.jmi_get_w, n_w.value),
+                     (dll.jmi_get_t, n_tp.value),
+                     (dll.jmi_get_dx_p, n_dx.value),
+                     (dll.jmi_get_x_p, n_x.value),
+                     (dll.jmi_get_u_p, n_u.value),
+                     (dll.jmi_get_w_p, n_w.value)]
+    for (func, length) in int_res_funcs:
+        restype = Nct.ndpointer(dtype=c_jmi_real_t, \
+                                ndim=1, \
+                                shape=length, \
+                                flags='C')
+        func.restype = ct.POINTER(c_jmi_real_t)
            
     offs_ci = ct.c_int()
     offs_cd = ct.c_int()
@@ -300,14 +304,18 @@ def load_DLL(libname, path):
     mask = (n_z.value * ct.c_int)()
     
     # Setting parameter types
-    mask_type = Nct.ndpointer(dtype=ct.c_int, \
-                              ndim=1, \
-                              shape=n_z.value, \
-                              flags='C')
+    dll.jmi_dae_F.argtypes = [ct.c_void_p, \
+                              Nct.ndpointer(dtype=c_jmi_real_t, \
+                                            ndim=1, \
+                                            shape=n_eq_F.value, \
+                                            flags='C')]
     dll.jmi_dae_dF_nz_indices.argtypes = [ct.c_void_p, \
                                           ct.c_int, \
                                           ct.c_int, \
-                                          mask_type, \
+                                          Nct.ndpointer(dtype=ct.c_int, \
+                                                        ndim=1, \
+                                                        shape=n_z.value, \
+                                                        flags='C'), \
                                           Nct.ndpointer(dtype=ct.c_int, \
                                                         ndim=1, \
                                                         shape=dF_n_nz.value, \
@@ -317,8 +325,13 @@ def load_DLL(libname, path):
                                                         shape=dF_n_nz.value, \
                                                         flags='C')]
     dll.jmi_dae_dF_dim.argtypes = [ct.c_void_p, ct.c_int, ct.c_int, \
-                                   ct.c_int, mask_type, ct.c_void_p, \
-                                   ct.c_void_p]
+                                   ct.c_int, \
+                                   Nct.ndpointer(dtype=ct.c_int, \
+                                                 ndim=1, \
+                                                 shape=n_z.value, \
+                                                 flags='C'), \
+                                   ct.POINTER(ct.c_int), \
+                                   ct.POINTER(ct.c_int)]
                                           
                                           
                                    

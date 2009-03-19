@@ -247,7 +247,7 @@ class GenericVDPTests(GenericJMITests):
         self.u_p_2 = self.dll.jmi_get_u_p(self.jmi, 1);
         self.w_p_2 = self.dll.jmi_get_w_p(self.jmi, 1);
         
-        self.res_F = (self.n_eq_F.value * pyjmi.c_jmi_real_t)()
+        self.res_F = N.zeros(self.n_eq_F.value, dtype=pyjmi.c_jmi_real_t)
         self.dF_sparse = (self.dF_n_nz.value * pyjmi.c_jmi_real_t)()
         self.dF_dense = (self.dF_n_dense.value * pyjmi.c_jmi_real_t)()
         
