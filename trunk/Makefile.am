@@ -25,11 +25,6 @@ if HAVE_ANT
 	$(ANT_OPTS) $(ANT)
 endif
 
-install-exec-local:
-if HAVE_ANT
-	cp Compiler/ModelicaFrontEnd/bin/jmodelica.jar lib
-endif
-
 clean-local: clean-jmi-examples
 
 jmi-examples: install

@@ -42,6 +42,10 @@ public class FlattenModel {
 		      
 		      SourceRoot sr = (SourceRoot)parser.parse(scanner);
 		      
+		      sr.options.addModelicaLibrary("Modelica","3.0.1",
+		    		  "/Users/jakesson/projects/ModelicaStandardLibrary/ModelicaStandardLibrary_v3/Modelica 3.0.1/");
+		      sr.options.setStringOption("default_msl_version","3.0.1");
+		      
 //		      sr.getProgram().dumpClasses("");
 		      
 		      //sr.dumpTree("");

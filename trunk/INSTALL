@@ -5,7 +5,9 @@ Build instructions for the JModelica project.
    In order to compile JModelica you will need a unix-like environment.
    For Windows, it is recommended to use the MingW distribution. In 
    addition 'ant' is needed to build the JastAdd/Java-based compiler
-   front-end. [To be elaborated.]
+   front-end. NOTICE: The JModelic code tree, as well its dependencies,
+   must be locaded in directories for which their absolute path does
+   not contain spaces. [To be elaborated.]
 
 1. Check out a working copy of JModelica:
 

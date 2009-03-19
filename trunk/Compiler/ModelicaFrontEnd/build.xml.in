@@ -31,7 +31,8 @@
   
 	<property name="base_output" value="src/java-generated"/>
 	<property name="parser_output" value="${base_output}/org/jmodelica/parser"/>
-  
+	
+  <property name="jar_output_dir" value="@abs_top_builddir@/lib"/>
   <property name="jastadd_dir" value="@abs_top_srcdir@/ThirdParty/JastAdd"/>
   <property name="junit_dir" value="@abs_top_srcdir@/ThirdParty/Junit"/>
   <property name="jflex_dir" value="@abs_top_srcdir@/ThirdParty/JFlex/jflex-1.4.3"/>  
@@ -59,8 +60,8 @@
 
  <!-- TARGET build -->
   <target name="build" depends="compile-ast">
-
-  	<jar destfile="bin/jmodelica.jar">
+    <mkdir dir="${jar_output_dir}"/>
+  	<jar destfile="${jar_output_dir}/jmodelica.jar">
   		<fileset dir="bin">
   			<include name="org/jmodelica/applications/*.class"/> 
   			<include name="org/jmodelica/ast/*.class"/> 
