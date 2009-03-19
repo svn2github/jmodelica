@@ -141,6 +141,17 @@ class GenericVDPTests(GenericJMITests):
                is 0, \
                "getting sizes failed"
                
+        assert self.n_ci.value is 0
+        assert self.n_cd.value is 0
+        assert self.n_pi.value is 3
+        assert self.n_pd.value is 0
+        assert self.n_dx.value is 3
+        assert self.n_x.value is 3
+        assert self.n_u.value is 1
+        assert self.n_w.value is 1
+        assert self.n_tp.value is 2
+        assert self.n_z.value is 28
+               
         self.offs_ci = ctypes.c_int()
         self.offs_cd = ctypes.c_int()
         self.offs_pi = ctypes.c_int()
@@ -367,4 +378,7 @@ class testVDPWithCppADUsingCTypes(GenericVDPTests):
         self.model_path = 'Vdp_cppad'
         self.model_lib = 'vdp_cppad'
         GenericVDPTests.setUp(self)
+        
+        # Initializing CppAD, too
+        self.dll.jmi_ad_init(self.jmi)
 
