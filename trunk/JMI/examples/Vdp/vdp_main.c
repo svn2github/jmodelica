@@ -182,7 +182,7 @@ int test_1_dae_F(int verbose) {
 	jmi_real_t res_fix[4] = {-2,0,153.1701780775437,0};
 	jmi_real_t err_sum = 0;
 	for (i=0;i<n_eq_F;i++) {
-		err_sum += abs(res_fix[i] - res_F[i]);
+		err_sum += fabs(res_fix[i] - res_F[i]);
 	}
 
 	if (verbose == 1) {
