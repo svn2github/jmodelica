@@ -198,36 +198,6 @@ def load_DLL(libname, path):
                                 shape=length, \
                                 flags='C')
         func.restype = ct.POINTER(c_jmi_real_t)
-           
-    offs_ci = ct.c_int()
-    offs_cd = ct.c_int()
-    offs_pi = ct.c_int()
-    offs_pd = ct.c_int()
-    offs_dx = ct.c_int()
-    offs_x = ct.c_int()
-    offs_u = ct.c_int()
-    offs_w = ct.c_int()
-    offs_t = ct.c_int()
-    offs_dx_p = ct.c_int()
-    offs_x_p = ct.c_int()
-    offs_u_p = ct.c_int()
-    offs_w_p = ct.c_int()
-    assert dll.jmi_get_offsets(jmi, \
-                               byref(offs_ci), \
-                               byref(offs_cd), \
-                               byref(offs_pi), \
-                               byref(offs_pd), \
-                               byref(offs_dx), \
-                               byref(offs_x), \
-                               byref(offs_u), \
-                               byref(offs_w), \
-                               byref(offs_t), \
-                               byref(offs_dx_p), \
-                               byref(offs_x_p), \
-                               byref(offs_u_p), \
-                               byref(offs_w_p)) \
-           is 0, \
-           "getting offsets failed"
     
     n_eq_F = ct.c_int()
     assert dll.jmi_dae_get_sizes(jmi, \
