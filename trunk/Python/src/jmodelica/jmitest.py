@@ -34,17 +34,8 @@ class GenericJMITests:
     """
     Tests any JMI Model DLL to see that it conforms to the DLL API.
     
-    Why not testing one model is because C++ name mangling might occur.
-    Therefor tests should be run on both a C and a C++ compiled model to
-    make sure that they are compiled with correct
-    @code {
-        extern "C" {
-            ...
-        }
-    }
-    .
-    
-    Which DLL is set in the 'file' attribute.
+    Which DLL to test is set using the members 'self.model_lib' and
+    'self.model_path'.
     """
     
     def loadDLL(self, libname, examplepath):
