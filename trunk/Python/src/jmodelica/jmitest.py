@@ -388,3 +388,31 @@ class testVDPWithCppADUsingCTypes(GenericVDPTestsUsingCTypes):
         # Initializing CppAD, too
         self.dll.jmi_ad_init(self.jmi)
 
+
+class testFurutaPendulum(GenericJMITests):
+    """Tests the furuta pendulum example.
+    
+    The furuta pendulum introduces the new ODE interface. Therefor
+    focus in this test is on the ODE interface.
+    """
+    def setUp(self):
+        self.model_path = 'FurutaPendulum'
+        self.model_lib = 'furuta'
+        GenericJMITests.setUp(self)
+        
+        # Initializing CppAD, too
+        self.dll.jmi_ad_init(self.jmi)
+
+
+class testBasicJMIModelClass:
+    """Basic tests for the high level JMIModel class.
+    
+    """
+    def setUp(self):
+        self.model = pyjmi.JMIModel(self.model_path, self.model_lib)
+        
+    def tearDown(self):
+        del self.model
+        
+    def testResidualEvaluation(self):
+        pass

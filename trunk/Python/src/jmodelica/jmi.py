@@ -122,7 +122,7 @@ c_jmi_real_t = ct.c_double
 
 
 # ================================================================
-#                           FUNCTIONS
+#                         LOW LEVEL INTERFACE
 # ================================================================
 def load_DLL(libname, path):
     """Loads a model from a DLL file and returns it.
@@ -326,13 +326,34 @@ def load_model(filepath):
     
 
 # ================================================================
-#                            CLASSES
+#                        HIGH LEVEL INTERFACE
 # ================================================================
 class JMIModel:
     """
     A JMI Model loaded from a DLL.
     
+    @todo:
+        Created properties for getters and setters.
     """
     
-    def __init__(self, dll):
-        self.dll = dll
+    def __init__(self, path, libname):
+        self._dll = load_DLL(path, libname)
+        
+        self._jmi = ct.c_voidp()
+        assert _dll.jmi_new(byref(_jmi)) == 0, \
+               "jmi_new returned non-zero"
+        assert _jmi.value is not None, \
+               "jmi struct not returned correctly"
+
+    def getx(self, x):
+        return 
+        
+    def setx(self, x):
+        raise JMIException("X can only be modified, not set.")
+
+    def __del__(self):
+        """Freeing jmi data structure.
+        """
+        assert _dll.jmi_delete(self._jmi) == 0, \
+               "jmi_delete failed"
+        del self._dll
