@@ -40,7 +40,7 @@ aspect ClassAttributes {
  			Program p = sr.getProgram();
    			builtInDefReader.close();
    			
-  			FullClassDecl cd = (FullClassDecl)(p.getElement(0));	
+  			FullClassDecl cd = (FullClassDecl)(p.getUnstructuredEntity(0).getElement(0));	
 
 			for (int i=0;i<cd.getNumComponentDecl();i++) { 		
  				l.add(cd.getComponentDecl(i));	
@@ -80,4 +80,50 @@ aspect ClassAttributes {
 			return emptyHashSet();	
 	}
 
+	syn lazy List InstOptClassDecl.getInstClassAttributeList() {
+		List l = new List();
+		for (ComponentDecl cd : ((OptClassDecl)getClassDecl()).getClassAttributes()) {
+    		addDynamicClassName(cd.getClassName().newInstAccess());
+			l.add(getDynamicClassName(getNumDynamicClassName()-1).myInstClassDecl().newInstComponentDecl(cd));
+		}
+		return l;
+	}
+
+	eq InstOptClassDecl.getIClassModification().lookupInstComponentInInstElement(String name) {
+		
+		HashSet set = new HashSet();
+		//System.out.println("InstOptClassDecl.getIClassModification().lookupInstComponentInInstElement: " + name);
+		for (int i=0;i<getNumInstClassAttribute();i++) {
+			if (getInstClassAttribute(i).matchInstComponentDecl(name))
+				set.add(getInstClassAttribute(i));
+		}
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+
+	// This equation is needed in order to ensure correct lookup of accesses
+	// in the class attribute construct.
+	eq InstOptClassDecl.getIClassModification().myInstNode() =
+		getInstClassAttribute(0);
+	
+	eq InstOptClassDecl.getIClassModification().lookupInstComponent(String name) =
+		memberInstComponent(name);
+	
+	eq InstOptClassDecl.memberInstComponent(String name) {
+		//System.out.println("InstOptClassDecl.memberInstComponent: " + name);
+		HashSet set = new HashSet(4);
+		set.addAll(super.memberInstComponent(name));
+		for (int i=0;i<getNumInstClassAttribute();i++) {
+			if (getInstClassAttribute(i).matchInstComponentDecl(name))
+				set.add(getInstClassAttribute(i));
+		}
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();	
+	}
+
+	
 }

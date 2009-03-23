@@ -484,7 +484,7 @@ aspect InstanceErrorCheck {
 	}
 
 	public void InstClassAccess.collectErrors() {
-        debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+        //System.out.println(prettyPrint("   ### ") + " errorChecked="+errorChecked);
 	    if (!errorChecked) {
 		    //super.collectErrors();
 		    nameCheck();

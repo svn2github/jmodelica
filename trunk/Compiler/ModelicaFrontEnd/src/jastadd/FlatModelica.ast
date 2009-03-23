@@ -142,7 +142,6 @@ FIdUse ::= <ID>;
 
 FIdUseInstAccess : FIdUse ::= InstAccess;
 
-
 FTypeAccess : FIdUse; // New type access
 
 FIdUseQualified : FIdUse ::= FQName;

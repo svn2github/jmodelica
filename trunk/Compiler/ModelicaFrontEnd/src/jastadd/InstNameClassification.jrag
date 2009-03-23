@@ -98,7 +98,9 @@ aspect InstResolveAmbiguousNames {
 	rewrite InstAmbiguousAccess {
 	    when(!duringInstNameClassification()&&!rewritten) 
 	    to InstAccess {
+	    	//System.out.println("ki: " + name());
 	  		if (!lookupInstComponent(name()).isEmpty()) {
+		    	//System.out.println("ki2: " + name());
      		    InstComponentAccess c = new InstComponentAccess(name());
   	 			c.setStart(getStart());
   	 			return c;

@@ -49,6 +49,7 @@ subdir = .
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/Compiler/ModelicaFrontEnd/build.xml.in \
+	$(top_srcdir)/Compiler/OptimicaFrontEnd/build.xml.in \
 	$(top_srcdir)/JMI/examples/FurutaPendulum/Makefile.in \
 	$(top_srcdir)/JMI/examples/Vdp/Makefile.in \
 	$(top_srcdir)/JMI/examples/Vdp_cppad/Makefile.in \
@@ -65,7 +66,8 @@ CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = JMI/examples/Vdp/Makefile \
 	JMI/examples/Vdp_cppad/Makefile \
 	JMI/examples/FurutaPendulum/Makefile \
-	Compiler/ModelicaFrontEnd/build.xml
+	Compiler/ModelicaFrontEnd/build.xml \
+	Compiler/OptimicaFrontEnd/build.xml
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -276,6 +278,8 @@ JMI/examples/Vdp_cppad/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI
 JMI/examples/FurutaPendulum/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI/examples/FurutaPendulum/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 Compiler/ModelicaFrontEnd/build.xml: $(top_builddir)/config.status $(top_srcdir)/Compiler/ModelicaFrontEnd/build.xml.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+Compiler/OptimicaFrontEnd/build.xml: $(top_builddir)/config.status $(top_srcdir)/Compiler/OptimicaFrontEnd/build.xml.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
@@ -670,6 +674,8 @@ uninstall-am:
 all-local:
 @HAVE_ANT_TRUE@	cd Compiler/ModelicaFrontEnd; \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT)
+@HAVE_ANT_TRUE@	cd Compiler/OptimicaFrontEnd; \
+@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT)
 
 clean-local: clean-jmi-examples
 
@@ -681,6 +687,7 @@ jmi-examples: install
 clean-jmi-examples: 
 	cd JMI/examples/Vdp; $(MAKE) clean
 	cd JMI/examples/Vdp_cppad; $(MAKE) clean
+	cd JMI/examples/FurutaPendulum; $(MAKE) clean
 
 docs:
 	cd $(srcdir); doxygen doc/JMI/jmi_doxydoc.conf

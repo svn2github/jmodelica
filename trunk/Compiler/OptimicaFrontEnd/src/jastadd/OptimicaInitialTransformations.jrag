@@ -103,10 +103,10 @@ aspect OptimicaInitialTransformations {
 }
 
 aspect FlatTypeSystem {
-	eq FInstantValue.type() = new BrokenType();
+	eq FTimedVariable.type() = new BrokenType();
 }
 
 aspect FlatVariability {
     // TODO: Fix this
-    eq FInstantValue.variability() = null;
+    eq FTimedVariable.variability() = null;
 }

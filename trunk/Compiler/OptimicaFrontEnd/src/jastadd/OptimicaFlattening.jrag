@@ -16,6 +16,16 @@
 
 aspect OptimicaFlattening {
 
+    public InstFullClassDecl OptClassDecl.newInstClassDecl() {
+    	InstOptClassDecl fcd = new InstOptClassDecl(this,new Opt(),new Opt());
+	    fcd.setInstConstrainingOpt(newInstConstrainingClassOpt());
+	    if (hasClassModification()) {
+	    	fcd.setIClassModification(getClassModification().newIModification());
+	    }
+    	fcd.setStart(getStart());
+    	return fcd;
+    }
+	
 	// Check if the InstOptClassDecl matches the name of class to be flattened. 
 	public InstNode InstOptClassDecl.findFlattenInst(String className, FClass fc) {
 		FOptClass foc = (FOptClass)fc;
@@ -26,10 +36,10 @@ aspect OptimicaFlattening {
 			//r.dumpTree("");
 			//r.printIVarAccesses("");
 			foc.addFEquationBlock(new FEquationBlock(new List()));			
-			for (AbstractEquation ae : equations()) {
+			for (FAbstractEquation ae : getFAbstractEquations()) {
 		       ae.flatten(getFQName(),foc);
 		    }
-			for (Constraint c : constraints()) {
+			for (FConstraint c : getFConstraints()) {
 		       c.flatten(getFQName(),foc);
 		    }
 
@@ -40,9 +50,10 @@ aspect OptimicaFlattening {
            
 			foc.genConnectionEquations();
 			OptClassDecl ocd = (OptClassDecl)getClassDecl();
-			if (ocd.hasClassModification()) {
+			if (hasIClassModification()) {
 				List attr = new List();
-				ocd.getClassModification().collectAttributes(attr,new FQName(new List()));
+				getIClassModification().collectAttributes(attr,new FQName(new List()));
+				System.out.print("qwe: " + attr.getNumChild());
 				foc.setFAttributeList(attr);
 			}
 			return this;	
@@ -52,10 +63,10 @@ aspect OptimicaFlattening {
 	}	
 	
 	refine Flattening public void InstNode.flatten(FClass fc) {
-		for (AbstractEquation ae : equations()) {
+		for (FAbstractEquation ae : getFAbstractEquations()) {
 		   ae.flatten(getFQName(),fc);
 		}
-        for (Constraint c : constraints()) {
+        for (FConstraint c : getFConstraints()) {
            c.flatten(getFQName(),fc);
         }
 		getInstComponentDeclList().flatten(fc);
@@ -77,25 +88,59 @@ aspect OptimicaFlattening {
 	eq InstComponentDecl.constraints() = getComponentDecl().myClass().constraints();
 	eq InstExtends.constraints() = getExtendsClause().getSuper().myClassDecl().constraints();
 	
-    public void Constraint.flatten(FQName prefix, FClass fc) {}
+    public abstract FConstraint Constraint.instantiate();
+	
+	public FConstraintEq ConstraintEq.instantiate() {
+		return new FConstraintEq(getLeft().instantiate(),getRight().instantiate());
+	}
 
-	public void ConstraintEq.flatten(FQName prefix, FClass fc) {
+	public FConstraintLeq ConstraintLeq.instantiate() {
+		return new FConstraintLeq(getLeft().instantiate(),getRight().instantiate());
+	}
+
+	public FConstraintGeq ConstraintGeq.instantiate() {
+		return new FConstraintGeq(getLeft().instantiate(),getRight().instantiate());
+	}
+
+	public FTimedVariable TimedVariable.instantiate() {
+		return new FTimedVariable(new FIdUseInstAccess("",getName().newInstAccess()),
+		   getArg().instantiate());
+	}
+	
+    public void FConstraint.flatten(FQName prefix, FClass fc) {}
+	
+	public void FConstraintEq.flatten(FQName prefix, FClass fc) {
 		FOptClass foc = (FOptClass)fc;
 		foc.addFConstraint(new FConstraintEq(getLeft().flatten(prefix),getRight().flatten(prefix)));
 	}
 
-	public void ConstraintLeq.flatten(FQName prefix, FClass fc) {
+	public void FConstraintLeq.flatten(FQName prefix, FClass fc) {
 		FOptClass foc = (FOptClass)fc;
 		foc.addFConstraint(new FConstraintLeq(getLeft().flatten(prefix),getRight().flatten(prefix)));
 	}
 
-	public void ConstraintGeq.flatten(FQName prefix, FClass fc) {
+	public void FConstraintGeq.flatten(FQName prefix, FClass fc) {
 		FOptClass foc = (FOptClass)fc;
 		foc.addFConstraint(new FConstraintGeq(getLeft().flatten(prefix),getRight().flatten(prefix)));
 	}
 
-	public FExp InstantValue.flatten(FQName prefix) {
-		return new FInstantValue(new FIdUseQualified("",new FQName().append(getName(),prefix)),
+	public FExp FTimedVariable.flatten(FQName prefix) {
+		return new FTimedVariable(getName().flatten(prefix),
 		   getArg().flatten(prefix));
 	}
+	
+	syn nta List<FConstraint> InstNode.getFConstraintList()  { 
+	    List l = new List();
+	    for (Constraint c : constraints()) {
+	    	l.add(c.instantiate());
+	    }
+	    return l;
+
+	}
+
+	syn List<FConstraint> InstNode.getFConstraints() {
+		return getFConstraintList();	
+	}
+	
+	
 }

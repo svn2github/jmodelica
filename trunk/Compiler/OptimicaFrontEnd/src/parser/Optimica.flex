@@ -14,8 +14,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 package org.jmodelica.parser;
 
+import java.util.Map;
 import beaver.Symbol;
 import beaver.Scanner;
 import org.jmodelica.parser.ModelicaParser.Terminals;
@@ -27,7 +29,7 @@ import org.jmodelica.parser.ModelicaParser.Terminals;
 %class ModelicaScanner
 %extends Scanner
 %unicode
-%function nextToken
+%function nextTokenAll
 %type Symbol
 %yylexthrow Scanner.Exception
 %eofval{
@@ -35,6 +37,7 @@ import org.jmodelica.parser.ModelicaParser.Terminals;
 %eofval}
 %line
 %column
+%char
 
 %{
   StringBuffer string = new StringBuffer(128);
@@ -45,6 +48,22 @@ import org.jmodelica.parser.ModelicaParser.Terminals;
 
   private Symbol newSymbol(short id, Object value) {
     return new Symbol(id, yyline + 1, yycolumn + 1, yylength(), value);
+  }
+  
+  public int offset() {
+    return yychar;
+  }
+  
+  public static final short COMMENT = -1;
+  public static final short WHITESPACE = -2;
+  public static final int EXTRA_TOKENS = 2;
+  
+  public Symbol nextToken() throws java.io.IOException, Scanner.Exception {
+    Symbol res;
+    do {
+      res = nextTokenAll();
+    } while (res.getId() < 0);
+    return res;
   }
 
 %}
@@ -66,7 +85,7 @@ UNSIGNED_NUMBER = {DIGIT} {DIGIT}* ( "." ( {UNSIGNED_INTEGER} )? )? ( (e|E) ( "+
 LineTerminator = \r|\n|\r\n
 InputCharacter = [^\r\n]
 
-WhiteSpace = {LineTerminator} | [ \t\f]
+WhiteSpace = ({LineTerminator} | [ \t\f])+
 
 /* comments */
 Comment = {TraditionalComment} | {EndOfLineComment} 
@@ -79,9 +98,11 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
 %%
 
 <YYINITIAL> {
+  "within"           { return newSymbol(Terminals.WITHIN); }  
   "class"           { return newSymbol(Terminals.CLASS); }  
   "model"           { return newSymbol(Terminals.MODEL); }
   "block"           { return newSymbol(Terminals.BLOCK); }
+  "expandable"       { return newSymbol(Terminals.EXPANDABLE); }
   "connector"       { return newSymbol(Terminals.CONNECTOR); }
   "type"            { return newSymbol(Terminals.TYPE); }
   "package"         { return newSymbol(Terminals.PACKAGE); }
@@ -96,6 +117,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "protected"      { return newSymbol(Terminals.PROTECTED); }
   
   "extends"         { return newSymbol(Terminals.EXTENDS); }
+  "constrainedby"         { return newSymbol(Terminals.CONSTRAINEDBY); }
 
   "flow"            { return newSymbol(Terminals.FLOW); }
    "discrete"       { return newSymbol(Terminals.DISCRETE); }
@@ -106,9 +128,9 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   
   "initial"         { return newSymbol(Terminals.INITIAL); }
   "equation"        { return newSymbol(Terminals.EQUATION); }
-  "initial" {WhiteSpace}+ "equation"        { return newSymbol(Terminals.INITIAL_EQUATION); }
+  "initial" {WhiteSpace} "equation"        { return newSymbol(Terminals.INITIAL_EQUATION); }
   "algorithm"        { return newSymbol(Terminals.ALGORITHM); }
-  "initial" {WhiteSpace}+ "algorithm"        { return newSymbol(Terminals.INITIAL_ALGORITHM); }
+  "initial" {WhiteSpace} "algorithm"        { return newSymbol(Terminals.INITIAL_ALGORITHM); }
   
     "each"        { return newSymbol(Terminals.EACH); }
     "final"        { return newSymbol(Terminals.FINAL); }   
@@ -146,8 +168,10 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
  
  "connect"         { return newSymbol(Terminals.CONNECT); }
  "time"         { return newSymbol(Terminals.TIME); }
-  "constraint"         { return newSymbol(Terminals.CONSTRAINT); }
+   "constraint"         { return newSymbol(Terminals.CONSTRAINT); }
   "optimization"         { return newSymbol(Terminals.OPTIMIZATION); }
+ 
+  
   
   "("               { return newSymbol(Terminals.LPAREN); }
   ")"               { return newSymbol(Terminals.RPAREN); }
@@ -182,13 +206,14 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   //{UNSIGNED_INTEGER}  { return newSymbol(Terminals.INTEGER, yytext()); }
   {UNSIGNED_NUMBER}   { return newSymbol(Terminals.UNSIGNED_NUMBER, yytext()); }
   
-  {Comment}         { /* discard token */ }
-  {WhiteSpace}      { /* discard token */ }
+  {Comment}         { return newSymbol(COMMENT); /* Will be discarded before parser. */ }
+  {WhiteSpace} 		{ return newSymbol(WHITESPACE); /* Will be discarded before parser. */ }
 
 }
 
 //.|\n                { throw new RuntimeException("Illegal character \""+yytext()+ "\" at line "+yyline+", column "+yycolumn); }
 .|\n                { throw new Scanner.Exception(yyline,yycolumn,"Illegal character \""+yytext()+ "\" at line "+yyline+", column "+yycolumn); }
 <<EOF>>             { return newSymbol(Terminals.EOF); }
+
 
 

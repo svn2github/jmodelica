@@ -16,11 +16,10 @@
 
 aspect OptimicaErrorCheck {
 
-  	public void OptClassDecl.collectErrors() {
+  	public void InstOptClassDecl.collectErrors() {
     	super.collectErrors();
-    	getConstraintList().collectErrors();
-    	getClassModificationOpt().collectErrors();
+    	getFConstraintList().collectErrors();
+    	getIClassModificationOpt().collectErrors();
   	}
-
 
 }

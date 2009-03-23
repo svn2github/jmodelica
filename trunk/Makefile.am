@@ -23,6 +23,9 @@ all-local:
 if HAVE_ANT
 	cd Compiler/ModelicaFrontEnd; \
 	$(ANT_OPTS) $(ANT)
+	cd Compiler/OptimicaFrontEnd; \
+	$(ANT_OPTS) $(ANT)
+
 endif
 
 clean-local: clean-jmi-examples
@@ -35,6 +38,7 @@ jmi-examples: install
 clean-jmi-examples: 
 	cd JMI/examples/Vdp; $(MAKE) clean
 	cd JMI/examples/Vdp_cppad; $(MAKE) clean
+	cd JMI/examples/FurutaPendulum; $(MAKE) clean
 
 docs:
 	cd $(srcdir); doxygen doc/JMI/jmi_doxydoc.conf

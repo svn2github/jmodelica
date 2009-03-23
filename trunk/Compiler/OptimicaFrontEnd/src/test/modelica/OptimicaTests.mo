@@ -68,9 +68,10 @@ model OptimicaTests
   
   optimization OptDiTest1 (objective=cost(finalTime),
                            startTime=0,
-                           finalTime(free=true, initialGuess=3))
+                           finalTime(free=true, initialGuess=tf_guess))
     DoubleIntegrator di(u(free=true));
     Real cost(start=0);
+    parameter Real tf_guess=3;
   equation
     der(cost)=1;
   constraint

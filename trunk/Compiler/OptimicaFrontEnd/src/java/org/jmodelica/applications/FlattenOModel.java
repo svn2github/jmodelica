@@ -47,6 +47,10 @@ public class FlattenOModel {
 		      
 		      sr.setFileName(name);
 		      
+		      sr.options.addModelicaLibrary("Modelica","3.0.1",
+    		  "/Users/jakesson/projects/ModelicaStandardLibrary/ModelicaStandardLibrary_v3/Modelica 3.0.1/");
+              sr.options.setStringOption("default_msl_version","3.0.1");
+
 		      
 		      StringBuffer str2 = new StringBuffer();
 //		      sr.getProgram().prettyPrint(str2,"");
@@ -86,22 +90,18 @@ public class FlattenOModel {
 		      //p.dumpTree("");  
 
 		      
-		      System.out.println("Checking for errors...");	      
-/*		      ErrorManager errM = new ErrorManager();
-		      if (!sr.checkErrors(cl,errM)) {
-	    		  System.out.println("Error:");
-	    		  System.out.println("   Did not find the class: " + cl);
-	    		  System.exit(0);
-	    	  }
-		      
-		      errM.printErrors();
-	*/	      
-		      
-		      System.out.println("Source checking:");
-		      boolean sourceErr = sr.checkErrorsInClass(cl);
-		      
-		      if (sourceErr)
+		      System.out.println("Checking for errors...");	   
+		      System.out.println("Inst checking:");
+		      try {
+		      boolean instErr = ipr.checkErrorsInInstClass(cl);
+		      if (instErr) {
 		    	  System.exit(0);
+		      }
+
+		      } catch(Exception e) {
+		    	  e.printStackTrace();
+		      }
+
 		      
 		      long errcheckTime = System.currentTimeMillis();
 		      
@@ -125,7 +125,7 @@ public class FlattenOModel {
 		    	  }
 		    	  instTime = System.currentTimeMillis();
 		    	  fc.dumpTree("");
-		    	  fc.prettyPrint(str,"");
+		    	  System.out.println(fc.prettyPrint(""));
 		    	  System.out.println(str.toString());
 		    	  printTime = System.currentTimeMillis();
 

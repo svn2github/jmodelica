@@ -21,4 +21,4 @@ FConstraintEq : FConstraint;
 FConstraintLeq : FConstraint;
 FConstraintGeq : FConstraint;
 
-FInstantValue : FExp ::= Name:FIdUse Arg:FExp;
+FTimedVariable : FExp ::= Name:FIdUse Arg:FExp;

@@ -27,6 +27,8 @@ ConstraintGeq : Constraint;
 
 OptimizationClass : Restriction ::=;
 
-InstantValue : Exp ::= Name:Access Arg:Exp;
+TimedVariable : Exp ::= Name:Access Arg:Exp;
 
-InstOptClassDecl : InstFullClassDecl;
+InstOptClassDecl : InstFullClassDecl ::= [IClassModification] /InstClassAttribute:InstComponentDecl*/;
+
+
