@@ -27,6 +27,8 @@ if HAVE_ANT
 	$(ANT_OPTS) $(ANT)
 	cd $(abs_top_srcdir)/Compiler/ModelicaCBackEnd; \
 	$(ANT_OPTS) $(ANT)
+	cd $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd; \
+	$(ANT_OPTS) $(ANT)
 endif
 
 install-exec-local:
@@ -34,6 +36,7 @@ if HAVE_ANT
 	cp $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/bin/jmodelica.jar lib
 	cp $(abs_top_srcdir)/Compiler/OptimicaFrontEnd/bin/optimica.jar lib
 	cp $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/bin/jmodelica_c_backend.jar lib
+	cp $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd/bin/jmodelica_xml_backend.jar lib
 endif
 
 clean-local: clean-jmi-examples clean-frontends
@@ -55,6 +58,8 @@ if HAVE_ANT
 	cd $(abs_top_srcdir)/Compiler/OptimicaFrontEnd; \
 	$(ANT_OPTS) $(ANT) clean
 	cd $(abs_top_srcdir)/Compiler/ModelicaCBackend; \
+	$(ANT_OPTS) $(ANT) clean
+	cd $(abs_top_srcdir)/Compiler/ModelicaXMLBackend; \
 	$(ANT_OPTS) $(ANT) clean
 endif
 
