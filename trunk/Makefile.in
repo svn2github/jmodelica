@@ -669,10 +669,13 @@ all-local:
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT)
 @HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/OptimicaFrontEnd; \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT)
+@HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/ModelicaCBackEnd; \
+@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT)
 
 install-exec-local:
 @HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/bin/jmodelica.jar lib
 @HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/OptimicaFrontEnd/bin/optimica.jar lib
+@HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/bin/jmodelica_c_backend.jar lib
 
 clean-local: clean-jmi-examples clean-frontends
 
@@ -690,6 +693,8 @@ clean-frontends:
 @HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/ModelicaFrontEnd; \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean
 @HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/OptimicaFrontEnd; \
+@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean
+@HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/ModelicaCBackend; \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean
 
 docs:
