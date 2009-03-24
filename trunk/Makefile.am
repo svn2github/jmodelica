@@ -42,3 +42,5 @@ clean-jmi-examples:
 
 docs:
 	cd $(srcdir); doxygen doc/JMI/jmi_doxydoc.conf
+	cd $(srcdir); doxygen doc/ModelicaFrontEnd/modelica_frontend_doxydoc.conf
+	cd $(srcdir); doxygen doc/OptimicaFrontEnd/optimica_frontend_doxydoc.conf

@@ -691,6 +691,8 @@ clean-jmi-examples:
 
 docs:
 	cd $(srcdir); doxygen doc/JMI/jmi_doxydoc.conf
+	cd $(srcdir); doxygen doc/ModelicaFrontEnd/modelica_frontend_doxydoc.conf
+	cd $(srcdir); doxygen doc/OptimicaFrontEnd/optimica_frontend_doxydoc.conf
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
