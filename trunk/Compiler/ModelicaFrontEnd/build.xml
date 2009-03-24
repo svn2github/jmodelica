@@ -64,6 +64,7 @@
   	<jar destfile="${jar_output_dir}/jmodelica.jar">
   		<fileset dir="bin">
   			<include name="org/jmodelica/applications/*.class"/> 
+  			<include name="org/jmodelica/codegen/*.class"/> 
   			<include name="org/jmodelica/ast/*.class"/> 
   			<include name="org/jmodelica/parser/*.class"/> 
   			<include name="org/jmodelica/test/ast/*.class"/> 
@@ -163,7 +164,7 @@
 	  		      classpath=".:bin/jmodelica.jar:${beaver_dir}/lib/beaver.jar" 
 	  		      fork="true" 
 	  		      dir=".">
-	  		    	<arg value="@srcdir@/src/test/modelica/NameTests.mo"/>
+	  		    	<arg value="src/test/modelica/NameTests.mo"/>
 	  		    	      <arg value="NameTests"/>
 	  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 	  		    </java>
@@ -172,7 +173,7 @@
 	  		      classpath=".:bin/jmodelica.jar:${beaver_dir}/lib/beaver.jar" 
 	  		      fork="true" 
 	  		      dir=".">
-	  		    	<arg value="@srcdir@/src/test/modelica/RedeclareTests.mo"/>
+	  		    	<arg value="src/test/modelica/RedeclareTests.mo"/>
 	  		    	      <arg value="RedeclareTests"/>
 	  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 	  		    </java>
@@ -181,7 +182,7 @@
 	  		  		      classpath=".:bin/jmodelica.jar:${beaver_dir}/lib/beaver.jar" 
 	  		  		      fork="true" 
 	  		  		      dir=".">
-	  		  		    	<arg value="@srcdir@/src/test/modelica/ModificationTests.mo"/>
+	  		  		    	<arg value="src/test/modelica/ModificationTests.mo"/>
 	  		  		    	      <arg value="ModificationTests"/>
 	  		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 	  		    </java>
@@ -190,7 +191,7 @@
 	  		  		      classpath=".:bin/jmodelica.jar:${beaver_dir}/lib/beaver.jar" 
 	  		  		      fork="true" 
 	  		  		      dir=".">
-	  		  		    	<arg value="@srcdir@/src/test/modelica/ConnectTests.mo"/>
+	  		  		    	<arg value="src/test/modelica/ConnectTests.mo"/>
 	  		  		    	      <arg value="ConnectTests"/>
 	  		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 	  		    </java>
@@ -199,7 +200,7 @@
 	  		  		      classpath=".:bin/jmodelica.jar:${beaver_dir}/lib/beaver.jar" 
 	  		  		      fork="true" 
 	  		  		      dir=".">
-	  		  		    	<arg value="@srcdir@/src/test/modelica/CodeGenTests.mo"/>
+	  		  		    	<arg value="src/test/modelica/CodeGenTests.mo"/>
 	  		  		    	      <arg value="CodeGenTests"/>
 	  		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 	  		    </java>

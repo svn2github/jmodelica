@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.PrintStream;
 import java.io.OutputStream;
 import java.io.StringReader;
+import org.jmodelica.codegen.*;
 
 public class CodeGenTestCase extends TestCase {
 	private String genCode = "";

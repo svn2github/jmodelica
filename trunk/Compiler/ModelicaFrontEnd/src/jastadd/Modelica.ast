@@ -15,7 +15,25 @@
 */
 
 
-// MiniModelica abstract grammar
+// Modelica abstract grammar
+
+/**
+ * \mainpage API documentation of the JModelica Modelica Front-end
+ *
+ */
+
+/**
+ * \defgroup aspect_Flattening Aspect: Flattening
+ */
+
+
+/**
+ * \package org.jmodelica.ast Package containing all AST classes.
+ */
+
+/**
+ * A class representing the root node of a source AST.
+ */
 SourceRoot : Root ::= Program ;
 
 Program ::= UnstructuredEntity:StoredDefinition* 

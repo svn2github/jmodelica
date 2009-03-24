@@ -14,220 +14,23 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/** \file GenericGenerator.java
+ *  \brief GenericGenerator class.
+ */
 
-import java.io.PrintStream;
-import java.io.BufferedReader;
-/*
-The aspect CodeGeneration contains the foundation of a tag-based code generation
-framework. This framework may then be specialized in order to write a 
-particular code generation module.
-*/
-aspect CodeGeneration {
+package org.jmodelica.codegen;
 
-abstract class AbstractGenerator {
+import java.io.*;
+import org.jmodelica.ast.*;
 
-	protected HashMap<String,AbstractTag> tagMap;
-	protected Printer expPrinter;
-	protected int escapeCharacter;
-	
-	public AbstractGenerator(Printer expPrinter, char escapeCharacter) {
-		this.expPrinter = expPrinter;
-		this.escapeCharacter = (int)escapeCharacter;
-		tagMap = new HashMap<String,AbstractTag>();
-	}
-
-	public void generate(String templateFile, String outputFile) 
-	  throws FileNotFoundException {
-		generate(new BufferedReader(new FileReader(new File(templateFile))),
-		  new PrintStream(new File(outputFile)));
-	}
-
-	public void generate(BufferedReader templateReader, 
-	  PrintStream genPrinter) {
-
-		try {
-		AbstractTag tag = null;
-		int c = templateReader.read();
-		int mode = 0;
-		String tag_name = "";
-		while (c != -1) {
-			if (mode==0 && c==escapeCharacter) {
-				mode = 1;
-				tag_name = "";
-			} else if (mode==0 && c!=escapeCharacter) {
-				genPrinter.print((char)c);
-			} else if (mode==1 && c!=escapeCharacter) {
-				tag_name += (char)c;
-			} else {
-			    mode = 0;
-				tag = tagMap.get(tag_name);
-				if (tag != null) {
-					tag.generate(genPrinter);
-				} else {
-					throw new RuntimeException("Unknown tag: "+ tag_name);
-				}
-			}
-			c = templateReader.read();			
-		}
-		} catch (IOException e) {
-		     throw new RuntimeException("IOException during code generation");
-		}
-	}	
-	
-	public String toString() {
-		StringBuffer str = new StringBuffer();
-		for (AbstractTag t : tagMap.values()) {
-			str.append(t.toString()+"\n");
-		}
-		return str.toString();
-	}
-}
-
-	abstract class AbstractTag {
-		protected String name;
-		protected String description;
-		protected AbstractGenerator myGenerator;	
-			
-		public AbstractTag(String name, String description, 
-		  AbstractGenerator myGenerator) {
-			this.name = name;
-			this.description = description;
-			this.myGenerator = myGenerator;
-		}
-	
-		public abstract void generate(PrintStream genPrinter);
-		
-		public String getName() {
-			return name;
-		}
-
-		public String getDescription() {
-			return description;
-		}
-	
-		public String toString() {
-			return "\'"+name+"\': " + description; 
-		}
-		
-	}
-
-	abstract class DAETag extends AbstractTag {
-		protected FClass fclass;
-		
-		public DAETag(String name, String description, 
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super(name,description,myGenerator);
-			this.fclass = fclass;
-		}
-		
-		public FClass getFClass() {
-			return fclass;
-		}
-	}
-
-	abstract class InitTag extends AbstractTag {
-		private FClass fclass;
-		
-		public InitTag(String name, String description, 
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super(name,description,myGenerator);
-			this.fclass = fclass;
-		}		
-	}
-}
-
-aspect GenericGenerator {
-
-	class GenericGenerator extends AbstractGenerator {
-	
-		public GenericGenerator(Printer expPrinter, char escapeCharacter,
-		  FClass fclass) {
-			super(expPrinter,escapeCharacter);
-
-			// Create tags			
-			AbstractTag tag = null;
-			
-			tag = new DAETag_numIndependentConstants(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numIndependentRealConstants(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numIndependentIntegerConstants(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numIndependentBooleanConstants(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numIndependentStringConstants(this,fclass);
-			tagMap.put(tag.getName(),tag);
-
-			tag = new DAETag_numDependentConstants(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numDependentRealConstants(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numDependentIntegerConstants(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numDependentBooleanConstants(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numDependentStringConstants(this,fclass);
-			tagMap.put(tag.getName(),tag);
-
-			tag = new DAETag_numIndependentParameters(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numIndependentRealParameters(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numIndependentIntegerParameters(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numIndependentBooleanParameters(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numIndependentStringParameters(this,fclass);
-			tagMap.put(tag.getName(),tag);
-
-			tag = new DAETag_numDependentParameters(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numDependentRealParameters(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numDependentIntegerParameters(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numDependentBooleanParameters(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numDependentStringParameters(this,fclass);
-			tagMap.put(tag.getName(),tag);
-
-			tag = new DAETag_numAlgebraicVariables(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numAlgebraicRealVariables(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numAlgebraicIntegerVariables(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numAlgebraicBooleanVariables(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numAlgebraicStringVariables(this,fclass);
-			tagMap.put(tag.getName(),tag);
-
-			tag = new DAETag_numInputs(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numRealInputs(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numIntegerInputs(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numBooleanInputs(this,fclass);
-			tagMap.put(tag.getName(),tag);
-			tag = new DAETag_numStringInputs(this,fclass);
-			tagMap.put(tag.getName(),tag);
-
-
-			tag = new DAETag_numDifferentiatedRealVariables(this,fclass);
-			tagMap.put(tag.getName(),tag);
-
-			tag = new DAETag_numEquations(this,fclass);
-			tagMap.put(tag.getName(),tag);
-
-			tag = new DAETag_numInitialEquations(this,fclass);
-			tagMap.put(tag.getName(),tag);
-
-
-
-		}
-	
-	}
+/**
+ * A generator class containing a basic set of tags which
+ * are not language dependent.
+ * 
+ * This class is also intended as base class for more specialized generators.
+ *
+ */
+public class GenericGenerator extends AbstractGenerator {
 
 	class DAETag_numIndependentConstants extends DAETag {
 		
@@ -691,6 +494,96 @@ aspect GenericGenerator {
 	
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param expPrinter Printer object used to generate code for expressions.
+	 * @param escapeCharacter Escape characters used to decode tags.
+	 * @param fclass An FClass object used as a basis for the code generation.
+	 */
+	public GenericGenerator(Printer expPrinter, char escapeCharacter,
+	  FClass fclass) {
+		super(expPrinter,escapeCharacter);
+
+		// Create tags			
+		AbstractTag tag = null;
+		
+		tag = new DAETag_numIndependentConstants(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numIndependentRealConstants(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numIndependentIntegerConstants(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numIndependentBooleanConstants(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numIndependentStringConstants(this,fclass);
+		tagMap.put(tag.getName(),tag);
+
+		tag = new DAETag_numDependentConstants(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numDependentRealConstants(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numDependentIntegerConstants(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numDependentBooleanConstants(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numDependentStringConstants(this,fclass);
+		tagMap.put(tag.getName(),tag);
+
+		tag = new DAETag_numIndependentParameters(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numIndependentRealParameters(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numIndependentIntegerParameters(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numIndependentBooleanParameters(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numIndependentStringParameters(this,fclass);
+		tagMap.put(tag.getName(),tag);
+
+		tag = new DAETag_numDependentParameters(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numDependentRealParameters(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numDependentIntegerParameters(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numDependentBooleanParameters(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numDependentStringParameters(this,fclass);
+		tagMap.put(tag.getName(),tag);
+
+		tag = new DAETag_numAlgebraicVariables(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numAlgebraicRealVariables(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numAlgebraicIntegerVariables(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numAlgebraicBooleanVariables(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numAlgebraicStringVariables(this,fclass);
+		tagMap.put(tag.getName(),tag);
+
+		tag = new DAETag_numInputs(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numRealInputs(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numIntegerInputs(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numBooleanInputs(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numStringInputs(this,fclass);
+		tagMap.put(tag.getName(),tag);
+
+
+		tag = new DAETag_numDifferentiatedRealVariables(this,fclass);
+		tagMap.put(tag.getName(),tag);
+
+		tag = new DAETag_numEquations(this,fclass);
+		tagMap.put(tag.getName(),tag);
+
+		tag = new DAETag_numInitialEquations(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		
+	}
 
 }
-

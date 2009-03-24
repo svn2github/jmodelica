@@ -70,6 +70,7 @@
   	<jar destfile="${jar_output_dir}/optimica.jar">
   		<fileset dir="bin">
   			<include name="org/jmodelica/applications/*.class"/> 
+  			<include name="org/jmodelica/codegen/*.class"/> 
   			<include name="org/jmodelica/ast/*.class"/> 
   			<include name="org/jmodelica/parser/*.class"/> 
   			<include name="org/jmodelica/test/ast/*.class"/> 

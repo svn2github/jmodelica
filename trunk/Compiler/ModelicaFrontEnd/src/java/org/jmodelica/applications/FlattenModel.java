@@ -19,6 +19,7 @@ package org.jmodelica.applications;
 import org.jmodelica.ast.*;
 import java.io.*;
 import org.jmodelica.parser.*;
+import org.jmodelica.codegen.GenericGenerator;
 
 public class FlattenModel {
 	
