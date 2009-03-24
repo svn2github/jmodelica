@@ -207,8 +207,6 @@ AC_CONFIG_FILES([
  JMI/examples/Vdp/Makefile
  JMI/examples/Vdp_cppad/Makefile
  JMI/examples/FurutaPendulum/Makefile
- Compiler/ModelicaFrontEnd/build.xml
- Compiler/OptimicaFrontEnd/build.xml
 ])
 
 

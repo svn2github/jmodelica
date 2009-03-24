@@ -21,14 +21,19 @@ SUBDIRS = JMI/src
 
 all-local:
 if HAVE_ANT
-	cd Compiler/ModelicaFrontEnd; \
+	cd $(abs_top_srcdir)/Compiler/ModelicaFrontEnd; \
 	$(ANT_OPTS) $(ANT)
-	cd Compiler/OptimicaFrontEnd; \
+	cd $(abs_top_srcdir)/Compiler/OptimicaFrontEnd; \
 	$(ANT_OPTS) $(ANT)
-
 endif
 
-clean-local: clean-jmi-examples
+install-exec-local:
+if HAVE_ANT
+	cp $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/bin/jmodelica.jar lib
+	cp $(abs_top_srcdir)/Compiler/OptimicaFrontEnd/bin/optimica.jar lib
+endif
+
+clean-local: clean-jmi-examples clean-frontends
 
 jmi-examples: install
 	cd JMI/examples/Vdp; $(MAKE) all
@@ -39,6 +44,14 @@ clean-jmi-examples:
 	cd JMI/examples/Vdp; $(MAKE) clean
 	cd JMI/examples/Vdp_cppad; $(MAKE) clean
 	cd JMI/examples/FurutaPendulum; $(MAKE) clean
+
+clean-frontends:
+if HAVE_ANT
+	cd $(abs_top_srcdir)/Compiler/ModelicaFrontEnd; \
+	$(ANT_OPTS) $(ANT) clean
+	cd $(abs_top_srcdir)/Compiler/OptimicaFrontEnd; \
+	$(ANT_OPTS) $(ANT) clean
+endif
 
 docs:
 	cd $(srcdir); doxygen doc/JMI/jmi_doxydoc.conf
