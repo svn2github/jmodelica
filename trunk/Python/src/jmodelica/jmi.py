@@ -312,17 +312,13 @@ def load_DLL(libname, path):
            "getting DAE sizes failed"
     
     dF_n_nz = ct.c_int()
-    
-    # A rudimentary check can probably be done different in the future
-    if dll.jmi_dae_dF_n_nz(jmi, JMI_DER_SYMBOLIC, byref(dF_n_nz)) is 0:
-        pass
-    else:
+    if dll.jmi_dae_dF_n_nz(jmi, JMI_DER_SYMBOLIC, byref(dF_n_nz)) \
+        is not 0:
         dF_n_nz = None
     
     dJ_n_nz = ct.c_int() 
-    if dll.jmi_opt_dJ_n_nz(jmi, JMI_DER_SYMBOLIC, byref(dJ_n_nz)) is 0:
-        pass
-    else:
+    if dll.jmi_opt_dJ_n_nz(jmi, JMI_DER_SYMBOLIC, byref(dJ_n_nz)) \
+         is not 0:
         dJ_n_nz = None
     
     dJ_n_dense = ct.c_int(n_z.value);
