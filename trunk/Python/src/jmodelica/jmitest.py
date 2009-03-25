@@ -25,10 +25,54 @@ from ctypes import byref
 import os.path
 
 import numpy as N
+import nose.tools
 
 import jmi as pyjmi # increased readability
 from jmi import JMIException
 
+def load_example_DLL(libname, examplepath):
+    """Load a test model in the JMI model example folder.
+    
+    @note This is not a test.
+    
+    @param libname:
+        The name of the DLL filename without suffix.
+    @param examplepath:
+        The relative path (from the example folder) to the library.
+    @return:
+        A DLL loaded using ctypes.
+    
+    Raises a JMIException on failure.
+    """
+    # Path to example collection root directory
+    EXAMPLES_PATH = '../../../build/JMI/examples'
+    try:
+        dll = pyjmi.load_DLL(libname, get_example_path(examplepath))
+    except JMIException, e:
+        raise JMIException("%s\nUnable to load test models." \
+                           " You have probably not compiled the" \
+                           " examples. Please refer to the"
+                           " JModelica README for more information." \
+                            % e)
+                           
+    return dll
+    
+def get_example_path(examplepath):
+    """Get the relative path (to where this file resides) to the 
+    examples directory.
+    
+    @param examplepath:
+        The example path relative the examples directory.
+    """
+    # Path to example collection root directory
+    EXAMPLES_PATH = '../../../build/JMI/examples'
+    path = os.path.join(EXAMPLES_PATH, examplepath)
+    return path
+
+def test_get_test_path():
+    assert os.path.isdir(get_example_path('')), \
+           "Could not find example root directory. Do you have the " \
+           + " whole repository structure checked out?"
 
 class GenericJMITests:
     """
@@ -38,36 +82,8 @@ class GenericJMITests:
     'self.model_path'.
     """
     
-    def loadDLL(self, libname, examplepath):
-        """Load a test model in the JMI model example folder.
-        
-        @note This is not a test.
-        
-        @param libname:
-            The name of the DLL filename without suffix.
-        @param examplepath:
-            The relative path (from the example folder) to the library.
-        @return:
-            A DLL loaded using ctypes.
-        
-        Raises a JMIException on failure.
-        """
-        # Path to example collection root directory
-        EXAMPLES_PATH = '../../../build/JMI/examples'
-        try:
-            dll = pyjmi.load_DLL(libname, \
-                                 os.path.join(EXAMPLES_PATH, \
-                                              examplepath))
-        except JMIException, e:
-            raise JMIException("%s\nUnable to load test models." \
-                               " You have probably not compiled the" \
-                               " examples. Please refer to the"
-                               " JModelica for more information." % e)
-                               
-        return dll
-    
     def setUp(self):
-        self.dll = self.loadDLL(self.model_lib, self.model_path)
+        self.dll = load_example_DLL(self.model_lib, self.model_path)
         self.initModel()
         
     def tearDown(self):
@@ -114,29 +130,25 @@ class GenericJMITests:
                "getting DAE sizes failed"
         
         self.dF_n_nz = ctypes.c_int()
-        assert self.dll.jmi_dae_dF_n_nz(self.jmi, \
-                                        pyjmi.JMI_DER_SYMBOLIC, \
-                                        byref(self.dF_n_nz)) \
-               is 0, \
-               "getting number of non-zeros in the full DAE residual " \
-               + "Jacobian failed"
-        self.dF_row = (self.dF_n_nz.value * ctypes.c_int)()
-        self.dF_col = (self.dF_n_nz.value * ctypes.c_int)()
+        if self.dll.jmi_dae_dF_n_nz(self.jmi, pyjmi.JMI_DER_SYMBOLIC, \
+                                    byref(self.dF_n_nz)) is 0:
+            self.dF_row = (self.dF_n_nz.value * ctypes.c_int)()
+            self.dF_col = (self.dF_n_nz.value * ctypes.c_int)()
+        else:
+            self.dF_n_nz = None
+            self.dF_row = None
+            self.dF_col = None
         
         self.dJ_n_nz = ctypes.c_int()
-        assert self.dll.jmi_opt_dJ_n_nz(self.jmi, \
-                                        pyjmi.JMI_DER_SYMBOLIC, \
-                                        byref(self.dJ_n_nz)) \
-               is 0, \
-               "getting number of non-zeros in the gradient of the " \
-               + "cost function failed"
-        self.dJ_row = (self.dJ_n_nz.value * ctypes.c_int)()
-        self.dJ_col = (self.dJ_n_nz.value * ctypes.c_int)()
+        if self.dll.jmi_opt_dJ_n_nz(self.jmi, pyjmi.JMI_DER_SYMBOLIC, \
+                                    byref(self.dJ_n_nz)) is 0:
+            self.dJ_row = (self.dJ_n_nz.value * ctypes.c_int)()
+            self.dJ_col = (self.dJ_n_nz.value * ctypes.c_int)()
+        else:
+            self.dJ_row = None
+            self.dJ_col = None
         
         self.dJ_n_dense = ctypes.c_int(self.n_z.value);
-        
-        self.dF_n_dense = ctypes.c_int(self.n_z.value \
-                                        * self.n_eq_F.value)
         
         self.J = pyjmi.c_jmi_real_t();
         
@@ -144,40 +156,28 @@ class GenericJMITests:
         #static jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt;
         self.jmi_opt_sim = ctypes.c_void_p()
         self.jmi_opt_sim_ipopt = ctypes.c_void_p()
-        
-        self.res_F = (self.n_eq_F.value * pyjmi.c_jmi_real_t)()
-        self.dF_sparse = (self.dF_n_nz.value * pyjmi.c_jmi_real_t)()
-        self.dF_dense = (self.dF_n_dense.value * pyjmi.c_jmi_real_t)()
-        
-        self.dJ_sparse = (self.dJ_n_nz.value * pyjmi.c_jmi_real_t)()
-        self.dJ_dense = (self.dJ_n_dense.value * pyjmi.c_jmi_real_t)()
 	    
 	    # The return types for these functions are set in jmi.py's
 	    # function load_DLL(...)
-        self.ci = self.dll.jmi_get_ci(self.jmi);
-        self.cd = self.dll.jmi_get_cd(self.jmi);
-        self.pi = self.dll.jmi_get_pi(self.jmi);
-        self.pd = self.dll.jmi_get_pd(self.jmi);
-        self.dx = self.dll.jmi_get_dx(self.jmi);
-        self.x = self.dll.jmi_get_x(self.jmi);
-        self.u = self.dll.jmi_get_u(self.jmi);
-        self.w = self.dll.jmi_get_w(self.jmi);
-        self.t = self.dll.jmi_get_t(self.jmi);
-        self.dx_p_1 = self.dll.jmi_get_dx_p(self.jmi, 0);
-        self.x_p_1 = self.dll.jmi_get_x_p(self.jmi, 0);
-        self.u_p_1 = self.dll.jmi_get_u_p(self.jmi, 0);
-        self.w_p_1 = self.dll.jmi_get_w_p(self.jmi, 0);
-        self.dx_p_2 = self.dll.jmi_get_dx_p(self.jmi, 1);
-        self.x_p_2 = self.dll.jmi_get_x_p(self.jmi, 1);
-        self.u_p_2 = self.dll.jmi_get_u_p(self.jmi, 1);
-        self.w_p_2 = self.dll.jmi_get_w_p(self.jmi, 1);
+        self.ci = self.dll.jmi_get_ci(self.jmi)
+        self.cd = self.dll.jmi_get_cd(self.jmi)
+        self.pi = self.dll.jmi_get_pi(self.jmi)
+        self.pd = self.dll.jmi_get_pd(self.jmi)
+        self.dx = self.dll.jmi_get_dx(self.jmi)
+        self.x = self.dll.jmi_get_x(self.jmi)
+        self.u = self.dll.jmi_get_u(self.jmi)
+        self.w = self.dll.jmi_get_w(self.jmi)
+        self.t = self.dll.jmi_get_t(self.jmi)
+        self.dx_p_1 = self.dll.jmi_get_dx_p(self.jmi, 0)
+        self.x_p_1 = self.dll.jmi_get_x_p(self.jmi, 0)
+        self.u_p_1 = self.dll.jmi_get_u_p(self.jmi, 0)
+        self.w_p_1 = self.dll.jmi_get_w_p(self.jmi, 0)
+        self.dx_p_2 = self.dll.jmi_get_dx_p(self.jmi, 1)
+        self.x_p_2 = self.dll.jmi_get_x_p(self.jmi, 1)
+        self.u_p_2 = self.dll.jmi_get_u_p(self.jmi, 1)
+        self.w_p_2 = self.dll.jmi_get_w_p(self.jmi, 1)
         
         self.res_F = N.zeros(self.n_eq_F.value, dtype=pyjmi.c_jmi_real_t)
-        self.dF_sparse = (self.dF_n_nz.value * pyjmi.c_jmi_real_t)()
-        self.dF_dense = (self.dF_n_dense.value * pyjmi.c_jmi_real_t)()
-        
-        self.dJ_sparse = (self.dJ_n_nz.value * pyjmi.c_jmi_real_t)()
-        self.dJ_dense = (self.dJ_n_dense.value * pyjmi.c_jmi_real_t)()
         
         self.mask = N.ones(self.n_z.value, dtype=int)
         
@@ -187,6 +187,7 @@ class GenericJMITests:
                "jmi_delete failed"
 
     def testLoaded(self):
+        """Tests if the DLL was successfully loaded."""
         assert isinstance(self.dll, ctypes.CDLL), \
                "lib is not a CDLL instance"
         assert isinstance(self.dll.jmi_new, ctypes._CFuncPtr), \
@@ -256,12 +257,21 @@ class GenericVDPTestsUsingCTypes(GenericJMITests):
         assert self.n_w.value is 1
         assert self.n_tp.value is 2
         assert self.n_z.value is 28
+        
+    def test_jmi_dae_dF_n_nz(self):
+        """Test the function jmi_dae_dF_n_nz(...)."""
+        dF_n_nz = ctypes.c_int()
+        assert self.dll.jmi_dae_dF_n_nz(self.jmi, \
+                                        pyjmi.JMI_DER_SYMBOLIC, \
+                                        byref(dF_n_nz)) \
+               is 0, \
+               "getting number of non-zeros in the full DAE residual " \
+                + "Jacobian failed"
     
     def test_1_dae_F(self):
         """Run the test test_1_dae_F also found in @vdp_main.c
         
         @todo This test does for some reason fail on VDP with CPPAD.
-        
         """
         
         SMALL = 10**-10
@@ -283,7 +293,9 @@ class GenericVDPTestsUsingCTypes(GenericJMITests):
         assert self.dll.jmi_dae_F(self.jmi, self.res_F) is 0, \
                "could not get residuals"
                
-        res_F = N.array(self.res_F)
+        print 'res_F = FIXED_RES   <=>  ', self.res_F, '=', 
+        
+        res_F = self.res_F
         assert res_F.size is FIXED_RES.size
         
         err_sum = sum(abs(FIXED_RES - res_F))
@@ -391,19 +403,105 @@ class testFurutaPendulum(GenericJMITests):
         self.model_lib = 'furuta'
         GenericJMITests.setUp(self)
         
+        # Here initial values for all parameters should be read from
+        # xml-files
+        self.pi[0] = 0.00354;
+        self.pi[1] = 0.00384;
+        self.pi[2] = 0.00258;
+        self.pi[3] = 0.103;
+        self.pi[4] = 0.2;
+        self.pi[5] = 0.0;
+        self.pi[6] = 0.0;
+        self.pi[7] = 0.0;
+        
         # Initializing CppAD, too
+        # Is the Furuta Pendulum using CppAD or not? The program crashes
+        # if this line is uncommented.
         self.dll.jmi_ad_init(self.jmi)
 
 
-class testBasicJMIModelClass:
-    """Basic tests for the high level JMIModel class.
+class testReturnsNDArray():
+    """Tests the (private) function jmi._returns_ndarray(...)
     
     """
-    def setUp(self):
-        self.model = pyjmi.JMIModel(self.model_path, self.model_lib)
+    def testDoubleType(self):
+        """Test the function using the double data type.
+        """
+        # The function to test
+        returns_ndarray = pyjmi._from_address
         
-    def tearDown(self):
-        del self.model
+        ctypes_arr = (4 * ctypes.c_double)(1.2, 1.8, 5.4, 8.32)
+        address = ctypes.addressof(ctypes_arr)
+        narray = returns_ndarray(address, ctypes.sizeof(ctypes_arr) \
+                                           * ctypes.sizeof(ctypes.c_double),
+                                 ctypes.c_double)
+                                 
+        nose.tools.assert_equal(ctypes_arr[0], narray[0])
+        nose.tools.assert_equal(ctypes_arr[3], narray[3])
         
-    def testResidualEvaluation(self):
-        pass
+        ctypes_arr[0] = 3.78
+        nose.tools.assert_equal(ctypes_arr[0], narray[0])
+        
+        ctypes_arr[3] = 14.79
+        nose.tools.assert_equal(ctypes_arr[3], narray[3])
+        
+        narray[0] = 3.42
+        nose.tools.assert_equal(ctypes_arr[0], narray[0])
+        
+        narray[3] = 9.17
+        nose.tools.assert_equal(ctypes_arr[3], narray[3])
+        
+    def testIntType(self):
+        """Test the function using the int data type.
+        """
+        # The function to test
+        returns_ndarray = pyjmi._from_address
+        
+        ctypes_arr = (4 * ctypes.c_int)(2, 8, 5, 3)
+        address = ctypes.addressof(ctypes_arr)
+        narray = returns_ndarray(address, ctypes.sizeof(ctypes_arr) \
+                                           * ctypes.sizeof(ctypes.c_int),
+                                 ctypes.c_int)
+                                 
+        nose.tools.assert_equal(ctypes_arr[0], narray[0])
+        nose.tools.assert_equal(ctypes_arr[3], narray[3])
+        
+        ctypes_arr[0] = 78
+        nose.tools.assert_equal(ctypes_arr[0], narray[0])
+        
+        ctypes_arr[3] = 179
+        nose.tools.assert_equal(ctypes_arr[3], narray[3])
+        
+        narray[0] = 3427
+        nose.tools.assert_equal(ctypes_arr[0], narray[0])
+        
+        narray[3] = 917
+        nose.tools.assert_equal(ctypes_arr[3], narray[3])
+    
+def test_pointer_to_ndarray_converter():
+    """Testing the _PointerToNDArrayConverter class.
+    
+    """
+    converter = pyjmi._PointerToNDArrayConverter(4, ctypes.c_double)
+    
+    ctypes_arr = (4 * ctypes.c_double)(1.5, 8.7, 6.15, 42.0)
+    pointer = ctypes.cast(ctypes_arr, ctypes.POINTER(ctypes.c_double))
+    
+    # func and param are not used
+    narray = converter(pointer, None, None)
+    
+    nose.tools.assert_equal(len(narray), len(ctypes_arr))
+    for elmnt in zip(narray, ctypes_arr):
+        nose.tools.assert_equal(elmnt[0], elmnt[1])
+    
+    ctypes_arr[0] = 4.79
+    nose.tools.assert_equal(ctypes_arr[0], narray[0])
+    
+    narray[0] = 79.75
+    nose.tools.assert_equal(ctypes_arr[0], narray[0])
+    
+    ctypes_arr[0] = 42.79
+    nose.tools.assert_equal(ctypes_arr[3], narray[3])
+    
+    narray[0] = 37.75
+    nose.tools.assert_equal(ctypes_arr[3], narray[3])

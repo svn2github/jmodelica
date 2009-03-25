@@ -25,11 +25,13 @@ import os.path
 
 import ctypes as ct
 from ctypes import byref
+import numpy as N
 import numpy.ctypeslib as Nct
 
 # ================================================================
 #                         CONSTANTS
 # ================================================================
+
 """Use symbolic evaluation of derivatives (if available)."""
 JMI_DER_SYMBOLIC = 1
 """Use automatic differentiation (CppAD) to evaluate derivatives."""
@@ -110,9 +112,18 @@ class JMIException(Exception):
     pass
 
 
+def fail_error_check(message):
+    """A ctypes errcheck that always fails.
+    """
+    def fail(errmsg):
+        raise JMIException(errmsg)
+    
+    return lambda x, y, z: fail(message)
+
 # ================================================================
 #                             CTYPES
 # ================================================================
+
 """Defines the JMI jmi_real_t C-type.
 
 This type is usually a double.
@@ -124,6 +135,105 @@ c_jmi_real_t = ct.c_double
 # ================================================================
 #                         LOW LEVEL INTERFACE
 # ================================================================
+
+def _from_address(address, nbytes, dtype=float):
+    """Converts a C-array to a numpy.array.
+    
+    Borrowed from:
+    http://mail.scipy.org/pipermail/numpy-discussion/2009-March/041323.html
+    
+    """
+    class Dummy(object): pass
+
+    d = Dummy()
+    bytetype = N.dtype(N.uint8)
+
+    d.__array_interface__ = {
+         'data' : (address, False),
+         'typestr' : bytetype.str,
+         'descr' : bytetype.descr,
+         'shape' : (nbytes,),
+         'strides' : None,
+         'version' : 3
+    }   
+
+    return N.asarray(d).view( dtype=dtype )
+
+
+class _PointerToNDArrayConverter:
+    """A callable class used by the function _returns_ndarray(...)
+    to convert result from a DLL function pointer to an array.
+    
+    """
+    def __init__(self, shape, dtype, ndim=1, order=None):
+        """Set meta data about the array the returned pointer is
+        pointing to.
+        
+        @param shape:
+            A tuple containing the shape of the array
+        @param dtype:
+            The data type that the function result points to.
+        @param ndim:
+            The optional number of dimensions that the result 
+            returns.
+        @param order (optional):
+            Optional. The same order parameter as can be used in
+            numpy.array(...).
+        
+        """
+        assert ndim >= 1
+        
+        self._shape = shape
+        self._dtype = dtype
+        self._order = order
+        
+        if ndim is 1:
+            self._num_elmnts = shape
+            try:
+                # If shape is specified as a tuple
+                self._num_elmnts = shape[0]
+            except TypeError:
+                pass
+        else:
+            assert len(shape) is ndim
+            for number in shape:
+                assert number >= 1
+            self._num_elmnts = reduce(lambda x,y: x*y, self.shape)
+        
+    def __call__(self, ret, func, params):
+        
+        if ret is None:
+            raise JMIException("The function returned NULL.")
+            
+        #ctypes_arr_type = C.POINTER(self._num_elmnts * self._dtype)
+        #ctypes_arr = ctypes_arr_type(ret)
+        #narray = N.asarray(ctypes_arr)
+        
+        pointer = ct.cast(ret, ct.c_void_p)
+        address = pointer.value
+        nbytes = ct.sizeof(self._dtype) * self._num_elmnts
+        
+        numpy_arr = _from_address(address, nbytes, self._dtype)
+        
+        return numpy_arr
+
+
+def _returns_ndarray(dll_func, dtype, shape, ndim=1, order=None):
+    """Helper function to set automatic conversion of DLL function
+    result to a NumPy ndarray.
+    
+    """       
+    
+    # Defining conversion function (actually a callable class)
+    conv_function = _PointerToNDArrayConverter(shape=shape, \
+                                               dtype=dtype, \
+                                               ndim=ndim, \
+                                               order=order)
+    
+    dll_func.restype = ct.POINTER(dtype)
+    dll_func.errcheck = conv_function
+
+
 def load_DLL(libname, path):
     """Loads a model from a DLL file and returns it.
     
@@ -178,7 +288,7 @@ def load_DLL(libname, path):
            is 0, \
            "getting sizes failed"
            
-    # Setting return type to ctypes.array for some functions
+    # Setting return type to numpy.array for some functions
     int_res_funcs = [(dll.jmi_get_ci, n_ci.value),
                      (dll.jmi_get_cd, n_cd.value),
                      (dll.jmi_get_pi, n_pi.value),
@@ -193,11 +303,7 @@ def load_DLL(libname, path):
                      (dll.jmi_get_u_p, n_u.value),
                      (dll.jmi_get_w_p, n_w.value)]
     for (func, length) in int_res_funcs:
-        restype = Nct.ndpointer(dtype=c_jmi_real_t, \
-                                ndim=1, \
-                                shape=length, \
-                                flags='C')
-        func.restype = ct.POINTER(c_jmi_real_t)
+        _returns_ndarray(func, c_jmi_real_t, length, order='C')
     
     n_eq_F = ct.c_int()
     assert dll.jmi_dae_get_sizes(jmi, \
@@ -206,24 +312,18 @@ def load_DLL(libname, path):
            "getting DAE sizes failed"
     
     dF_n_nz = ct.c_int()
-    assert dll.jmi_dae_dF_n_nz(jmi, \
-                               JMI_DER_SYMBOLIC, \
-                               byref(dF_n_nz)) \
-           is 0, \
-           "getting number of non-zeros in the full DAE residual " \
-           + "Jacobian failed"
-    dF_row = (dF_n_nz.value * ct.c_int)()
-    dF_col = (dF_n_nz.value * ct.c_int)()
     
-    dJ_n_nz = ct.c_int()
-    assert dll.jmi_opt_dJ_n_nz(jmi, \
-                               JMI_DER_SYMBOLIC, \
-                               byref(dJ_n_nz)) \
-           is 0, \
-           "getting number of non-zeros in the gradient of the " \
-           + "cost function failed"
-    dJ_row = (dJ_n_nz.value * ct.c_int)()
-    dJ_col = (dJ_n_nz.value * ct.c_int)()
+    # A rudimentary check can probably be done different in the future
+    if dll.jmi_dae_dF_n_nz(jmi, JMI_DER_SYMBOLIC, byref(dF_n_nz)) is 0:
+        pass
+    else:
+        dF_n_nz = None
+    
+    dJ_n_nz = ct.c_int() 
+    if dll.jmi_opt_dJ_n_nz(jmi, JMI_DER_SYMBOLIC, byref(dJ_n_nz)) is 0:
+        pass
+    else:
+        dJ_n_nz = None
     
     dJ_n_dense = ct.c_int(n_z.value);
     
@@ -236,13 +336,6 @@ def load_DLL(libname, path):
     #static jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt;
     jmi_opt_sim = ct.c_void_p()
     jmi_opt_sim_ipopt = ct.c_void_p()
-    
-    res_F = (n_eq_F.value * c_jmi_real_t)()
-    dF_sparse = (dF_n_nz.value * c_jmi_real_t)()
-    dF_dense = (dF_n_dense.value * c_jmi_real_t)()
-    
-    dJ_sparse = (dJ_n_nz.value * c_jmi_real_t)()
-    dJ_dense = (dJ_n_dense.value * c_jmi_real_t)()
     
     # The return types for these functions are set in jmi.py's
     # function load_DLL(...)
@@ -264,36 +357,33 @@ def load_DLL(libname, path):
     u_p_2 = dll.jmi_get_u_p(jmi, 1);
     w_p_2 = dll.jmi_get_w_p(jmi, 1);
     
-    res_F = (n_eq_F.value * c_jmi_real_t)()
-    dF_sparse = (dF_n_nz.value * c_jmi_real_t)()
-    dF_dense = (dF_n_dense.value * c_jmi_real_t)()
-    
-    dJ_sparse = (dJ_n_nz.value * c_jmi_real_t)()
-    dJ_dense = (dJ_n_dense.value * c_jmi_real_t)()
-    
-    mask = (n_z.value * ct.c_int)()
-    
     # Setting parameter types
     dll.jmi_dae_F.argtypes = [ct.c_void_p, \
                               Nct.ndpointer(dtype=c_jmi_real_t, \
                                             ndim=1, \
                                             shape=n_eq_F.value, \
                                             flags='C')]
-    dll.jmi_dae_dF_nz_indices.argtypes = [ct.c_void_p, \
-                                          ct.c_int, \
-                                          ct.c_int, \
-                                          Nct.ndpointer(dtype=ct.c_int, \
-                                                        ndim=1, \
-                                                        shape=n_z.value, \
-                                                        flags='C'), \
-                                          Nct.ndpointer(dtype=ct.c_int, \
-                                                        ndim=1, \
-                                                        shape=dF_n_nz.value, \
-                                                        flags='C'), \
-                                          Nct.ndpointer(dtype=ct.c_int, \
-                                                        ndim=1, \
-                                                        shape=dF_n_nz.value, \
-                                                        flags='C')]
+    if dF_n_nz is not None:
+        dll.jmi_dae_dF_nz_indices.argtypes = [ct.c_void_p, \
+                                              ct.c_int, \
+                                              ct.c_int, \
+                                              Nct.ndpointer( \
+                                                dtype=ct.c_int, \
+                                                ndim=1, \
+                                                shape=n_z.value, \
+                                                flags='C'), \
+                                              Nct.ndpointer(
+                                                dtype=ct.c_int, \
+                                                ndim=1, \
+                                                shape=dF_n_nz.value, \
+                                                flags='C'), \
+                                              Nct.ndpointer(dtype=ct.c_int, \
+                                                ndim=1, \
+                                                shape=dF_n_nz.value, \
+                                                flags='C')]
+    else:
+        dll.jmi_dae_dF_nz_indices.errcheck = \
+                        fail_error_check("Functionality not supported.")
     dll.jmi_dae_dF_dim.argtypes = [ct.c_void_p, ct.c_int, ct.c_int, \
                                    ct.c_int, \
                                    Nct.ndpointer(dtype=ct.c_int, \
