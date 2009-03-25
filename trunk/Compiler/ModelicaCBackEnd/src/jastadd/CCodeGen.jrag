@@ -1,3 +1,5 @@
+import java.io.PrintStream;
+
 /*
 Copyright (C) 2009 Modelon AB
 
@@ -14,10 +16,66 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-aspect XMLCodeGen {
+aspect CCodeGen {
 	
+	class CPrettyPrinter extends Printer {
+ 		public void toString(ASTNode node, PrintStream str, String indent, Object o) { 
+ 			node.prettyPrint_C(this, str, indent, o); 
+ 		}
+	}
 	
-	syn boolean FClass.testAttribute() = false;
+	public String ASTNode.prettyPrint_C(String indent) {
+		StringOutputStream os = new StringOutputStream();
+		PrintStream str = new PrintStream(os);
+		prettyPrint_C(str,indent,null);
+		return os.toString();
+	}
+
+	public String ASTNode.prettyPrint_C(String indent,Object o) {
+		StringOutputStream os = new StringOutputStream();	
+		PrintStream str = new PrintStream(os);
+		prettyPrint_C(str,indent,o);
+		return os.toString();
+	}
+
+	public void ASTNode.prettyPrint_C(PrintStream str,String indent) {
+ 		prettyPrint_C(new CPrettyPrinter(),str,indent,null);
+	}
+
+	public void ASTNode.prettyPrint_C(PrintStream str,String indent, Object o) {
+ 		prettyPrint_C(new CPrettyPrinter(),str,indent,o);
+	}
 	
+	public void ASTNode.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		prettyPrint(p,str,indent,o);
+		/*for(int i = 0; i < getNumChild(); i++)
+   			p.toString(getChild(i),str,indent,o); // distpatch through Printer
+	    */
+	}
+	
+	public void FPowExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("pow(");
+		p.toString(getLeft(),str,indent,o); 
+		str.print(",");
+		p.toString(getRight(),str,indent,o);
+		str.print(")");
+	}
+		
+	public void FDer.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("der_");
+		str.print(getFIdUseExp().name());
+	}	
+		
+	public void FAbstractEquation.genResidual_C(int i, String indent, PrintStream str) {}
+	
+	public void FEquation.genResidual_C(int i, String indent, PrintStream str) {
+		str.print(indent + "(*res)[" + i + "] = ");
+		getRight().prettyPrint_C(str,"");
+		str.print(" - (");
+		getLeft().prettyPrint_C(str,"");
+		str.print(");\n");
+	}
 	
 }
+
+

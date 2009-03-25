@@ -25,14 +25,13 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import org.jmodelica.codegen.*;
 
-public class CodeGenTestCase extends TestCase {
+public abstract class CodeGenTestCase extends TestCase {
 	private String genCode = "";
     private String genCodeFileName = "";
     private boolean resultOnFile = false;
 	private String template = "";
     private String templateFileName = "";
     private boolean templateOnFile = false;
-
     
     private ModelicaParser parser = new ModelicaParser();
     
@@ -61,6 +60,8 @@ public class CodeGenTestCase extends TestCase {
 		}
 	}
 
+	public abstract AbstractGenerator createGenerator(FClass fc);
+	
 	public void dump(StringBuffer str,String indent) {
 		str.append(indent+"CodeGenTestCase: \n");
 		if (testMe())
@@ -142,11 +143,10 @@ public class CodeGenTestCase extends TestCase {
    	  	if (ir==null) {
    		    return false;
    	    }
-
+   	  	fc.genBindingEquations();
    	  	// Assume that result and template is not on file.
-  	    GenericGenerator generator = 
-		  new GenericGenerator(new PrettyPrinter(), '$',fc);
   	    StringOutputStream os = new StringOutputStream();
+  	    AbstractGenerator generator = createGenerator(fc);
 	    generator.generate(new BufferedReader(new StringReader(getTemplate())),
 	    		           new PrintStream(os));
 

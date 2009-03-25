@@ -108,7 +108,7 @@ aspect TestFramework {
 	}
 
 	public void FunctionCall.collectTestCasesFC(String name, TestSuite ts) {
-		debugPrint("+FunctionCall.collectTestCasesFC: " + name);
+		//System.out.println("+FunctionCall.collectTestCasesFC: " + name);
 		if (name.equals(getName().qualifiedName())) {
 			if (name.equals("JModelica.UnitTesting"))
 				getFunctionArguments().collectTestCasesNA("testCase",ts);
@@ -129,8 +129,8 @@ aspect TestFramework {
 				ftc.setSourceFileName(root().fileName());
 				ftc.setClassName(enclosingClassDecl().qualifiedName());
 				ts.add(ftc);
-			} else if (name.equals("JModelica.UnitTesting.CodeGenTestCase")) {
-				CodeGenTestCase cgtc = new CodeGenTestCase();
+			} else if (name.equals("JModelica.UnitTesting.GenericCodeGenTestCase")) {
+				GenericCodeGenTestCase cgtc = new GenericCodeGenTestCase();
 				for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
 					NamedArgument na = getFunctionArguments().getNamedArgument(i);
 					if (na.getName().name().equals("name"))
@@ -170,7 +170,7 @@ aspect TestFramework {
 			if (name.equals("testCase")) {
 				getExp().collectTestCasesFC("JModelica.UnitTesting.FlatteningTestCase",ts);
 				getExp().collectTestCasesFC("JModelica.UnitTesting.ErrorTestCase",ts);
-				getExp().collectTestCasesFC("JModelica.UnitTesting.CodeGenTestCase",ts);
+				getExp().collectTestCasesFC("JModelica.UnitTesting.GenericCodeGenTestCase",ts);
 			}
 		}
 	

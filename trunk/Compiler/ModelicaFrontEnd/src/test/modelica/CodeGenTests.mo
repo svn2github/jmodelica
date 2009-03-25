@@ -4,7 +4,7 @@ package CodeGenTests
   model CodeGenTest1
   
   	  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.CodeGenTestCase(name="CodeGenTest1",
+      JModelica.UnitTesting.GenericCodeGenTestCase(name="CodeGenTest1",
         description="Test of code generation",
         template = 
         "n_ci: $n_ci$
@@ -71,7 +71,7 @@ n_real_u: 1
 n_integer_u: 1
 n_boolean_u: 1
 n_string_u: 1
-n_equations: 5
+n_equations: 16
 n_initial_equations: 0")})));
   
   
@@ -127,7 +127,7 @@ n_initial_equations: 0")})));
 	model CodeGenTest2
 	
 	  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.CodeGenTestCase(name="CodeGenTest2",
+      JModelica.UnitTesting.GenericCodeGenTestCase(name="CodeGenTest2",
         description="Test of code generation",
         template = "$n_real_x$",generatedCode="1")})));
 		Real x;

@@ -29,17 +29,18 @@ static const int N_dx = $n_real_x$;
 static const int N_x = $n_real_x$;
 static const int N_u = $n_real_u$;
 static const int N_w = $n_real_w$;
-static const int N_eq_F = $n_eq_F$;
+static const int N_eq_F = $n_equations$;
 
-static const int N_eq_F0 = $n_eq_F0$;
-static const int N_eq_F1 = $n_eq_F1$;
+static const int N_eq_F0 = $n_equations$ + $n_initial_equations$;
+static const int N_eq_F1 = 0;
 
-static const int N_eq_Ceq = $n_eq_Ceq$;
-static const int N_eq_Cineq = $n_eq_Cineq$;
-static const int N_eq_Heq = $n_eq_Heq$;
-static const int N_eq_Hineq = $n_eq_Hineq$;
+static const int N_eq_Ceq = 0;
+static const int N_eq_Cineq = 0;
+static const int N_eq_Heq = 0;
+static const int N_eq_Hineq = 0;
+static const int N_t_p = 0;
 
-static const int N_t_p = $n_t_p$;
+$C_variable_aliases$
 
 #define _ci(i) ((*(jmi->z))[jmi->offs_ci+i])
 #define _cd(i) ((*(jmi->z))[jmi->offs_cd+i])
@@ -71,35 +72,37 @@ static const int N_t_p = $n_t_p$;
  * macros.
  */
 static int vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	$dae_F_residual$
+$C_DAE_equation_residuals$
+	return 0;
 }
 
 static int vdp_init_F0(jmi_t* jmi, jmi_ad_var_vec_p res) {
-  $init_F0_residual$
+$C_DAE_initial_equation_residuals$
+	return 0;
 }
 
 static int vdp_init_F1(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	$init_F1_residual$
+	return 0;
 }
 
 static int vdp_opt_J(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	$opt_J$
+	return -1;
 }
 
 static int vdp_opt_Ceq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	$opt_Ceq_residual$
+	return -1;
 }
 
 static int vdp_opt_Cineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	$opt_Ceq_residual$
+	return -1;
 }
 
 static int vdp_opt_Heq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	$opt_Heq_residual$
+	return -1;
 }
 
 static int vdp_opt_Hineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	$opt_Heq_residual$
+	return -1;
 }
 
 int jmi_new(jmi_t** jmi) {

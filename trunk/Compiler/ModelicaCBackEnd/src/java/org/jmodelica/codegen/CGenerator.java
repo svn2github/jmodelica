@@ -33,6 +33,92 @@ import org.jmodelica.ast.*;
  */
 public class CGenerator extends GenericGenerator {
 
+	class DAETag_C_equationResiduals extends DAETag {
+		
+		public DAETag_C_equationResiduals(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_equation_residuals","C: equation residuals",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			int i=0;
+			for (FAbstractEquation e : fclass.equations()) {
+				e.genResidual_C(i,"    ",genPrinter);				
+				i++;
+			}
+		}
+	
+	}
+	
+	class DAETag_C_initialEquationResiduals extends DAETag {
+		
+		public DAETag_C_initialEquationResiduals(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_initial_equation_residuals","C: initial equation residuals",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+				
+		}
+	
+	}
+
+	class DAETag_C_variableAliases extends DAETag {
+		
+		public DAETag_C_variableAliases(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_variable_aliases","C: macros for C variable aliases",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			for (FVariable fv : fclass.independentRealConstants()) {
+				genPrinter.print("#define " + fv.nameUnderscore());
+				genPrinter.print(" ((*(jmi->z))[jmi->offs_ci+" + 
+						fv.independentRealConstantIndex() + "])\n");
+			}
+			for (FVariable fv : fclass.dependentRealConstants()) {
+				genPrinter.print("#define " + fv.nameUnderscore());
+				genPrinter.print(" ((*(jmi->z))[jmi->offs_cd+" + 
+						fv.dependentRealConstantIndex() + "])\n");
+			}
+			for (FVariable fv : fclass.independentRealParameters()) {
+				genPrinter.print("#define " + fv.nameUnderscore());
+				genPrinter.print(" ((*(jmi->z))[jmi->offs_pi+" + 
+						fv.independentRealParameterIndex() + "])\n");
+			}
+			for (FVariable fv : fclass.dependentRealParameters()) {
+				genPrinter.print("#define " + fv.nameUnderscore());
+				genPrinter.print(" ((*(jmi->z))[jmi->offs_pd+" + 
+						fv.dependentRealParameterIndex() + "])\n");
+			}
+			for (FVariable fv : fclass.differentiatedRealVariables()) {
+				genPrinter.print("#define " + fv.nameUnderscore());
+				genPrinter.print(" ((*(jmi->z))[jmi->offs_x+" + 
+						fv.differentiatedRealVariableIndex() + "])\n");
+			}
+			for (FVariable fv : fclass.differentiatedRealVariables()) {
+				genPrinter.print("#define der_" + fv.nameUnderscore());
+				genPrinter.print(" ((*(jmi->z))[jmi->offs_dx+" + 
+						fv.differentiatedRealVariableIndex() + "])\n");
+			}
+			for (FVariable fv : fclass.realInputs()) {
+				genPrinter.print("#define " + fv.nameUnderscore());
+				genPrinter.print(" ((*(jmi->z))[jmi->offs_u+" + 
+						fv.realInputIndex() + "])\n");
+			}
+			for (FVariable fv : fclass.algebraicRealVariables()) {
+				genPrinter.print("#define " + fv.nameUnderscore());
+				genPrinter.print(" ((*(jmi->z))[jmi->offs_w+" + 
+						fv.algebraicRealVariableIndex() + "])\n");
+			}
+			genPrinter.print("#define time ((*(jmi->z))[jmi->offs_t])\n"); 
+		}
+	}
+	
+	
 	/**
 	 * Constructor.
 	 * 
@@ -44,6 +130,16 @@ public class CGenerator extends GenericGenerator {
 			FClass fclass) {
 		super(expPrinter,escapeCharacter, fclass);
 
+		// Create tags			
+		AbstractTag tag = null;
+		
+		tag = new DAETag_C_equationResiduals(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_C_initialEquationResiduals(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_C_variableAliases(this,fclass);
+		tagMap.put(tag.getName(),tag);		
+		
 	}
 
 }

@@ -354,12 +354,32 @@ aspect FlatNames {
 	syn String FInstAccessExp.name() = getInstAccess().name();
     syn String FIdUseInstAccess.name() = getInstAccess().name();
 	
-	
 	syn String FIdDecl.name() = getFQName().name();
 
 	syn String FClass.name() = getFQName().name();
 	syn String FVariable.name() = getFQName().name();
 
+	syn lazy String FQName.nameUnderscore() {
+		StringBuffer str = new StringBuffer();
+		for (int i=0;i<getNumFQNamePart();i++) {
+			str.append(getFQNamePart(i).getName());
+			if (i<getNumFQNamePart()-1)
+				str.append("_");
+		}
+		return str.toString();
+	}
+	syn String FQNamePart.nameUnderscore() = getName();
+
+	syn String FIdUse.nameUnderscore() = getID();
+	syn String FIdUseExp.nameUnderscore() = getFIdUse().nameUnderscore();
+	eq FIdUseQualified.nameUnderscore() = getFQName().nameUnderscore();
+	//syn String FInstAccessExp.nameUnderscore() = getInstAccess().nameUnderscore();
+    //syn String FIdUseInstAccess.nameUnderscore() = getInstAccess().nameUnderscore();
+	
+	syn String FIdDecl.nameUnderscore() = getFQName().nameUnderscore();
+
+	syn String FClass.nameUnderscore() = getFQName().nameUnderscore();
+	syn String FVariable.nameUnderscore() = getFQName().nameUnderscore();
 }
 
 aspect Visibility {

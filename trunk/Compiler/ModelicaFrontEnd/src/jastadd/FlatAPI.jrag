@@ -14,249 +14,281 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.ArrayList;
 
 aspect FlatAPI {
-
+	
     syn int FClass.numReals() = reals().size();
-	coll Collection<FVariable> FClass.reals() 
-	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	coll ArrayList<FVariable> FClass.reals() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
  		this when isReal()
 	to FClass.reals() for myFClass();
 
     syn int FClass.numIntegers() = integers().size();
-	coll Collection<FVariable> FClass.integers() 
-	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	coll ArrayList<FVariable> FClass.integers() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
  		this when isInteger()
 	to FClass.integers() for myFClass();
 
     syn int FClass.numBooleans() = booleans().size();
-	coll Collection<FVariable> FClass.booleans() 
-	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	coll ArrayList<FVariable> FClass.booleans() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
  		this when isBoolean()
 	to FClass.booleans() for myFClass();
 
     syn int FClass.numStrings() = strings().size();
-	coll Collection<FVariable> FClass.strings() 
-	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	coll ArrayList<FVariable> FClass.strings() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
  		this when isString()
 	to FClass.strings() for myFClass();
 
     syn int FClass.numIndependentConstants() = independentConstants().size();
-	coll Collection<FVariable> FClass.independentConstants() 
-	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	coll ArrayList<FVariable> FClass.independentConstants() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
  		this when isIndependentConstant()
 	to FClass.independentConstants() for myFClass();
 
 	syn int FClass.numIndependentRealConstants() = independentRealConstants().size();
-	syn lazy Collection<FVariable> FClass.independentRealConstants() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.independentRealConstants() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(independentConstants());
       set.retainAll(reals());
       return set;
      }
-
+	syn int FVariable.independentRealConstantIndex() =
+		myFClass().independentRealConstants().indexOf(this);
+	
 	syn int FClass.numIndependentIntegerConstants() = independentIntegerConstants().size();
-	syn lazy Collection<FVariable> FClass.independentIntegerConstants() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.independentIntegerConstants() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(independentConstants());
       set.retainAll(integers());
       return set;
      }
+	syn int FVariable.independentIntegerConstantIndex() =
+		myFClass().independentIntegerConstants().indexOf(this);
 
+	
 	syn int FClass.numIndependentBooleanConstants() = independentBooleanConstants().size();
-	syn lazy Collection<FVariable> FClass.independentBooleanConstants() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.independentBooleanConstants() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(independentConstants());
       set.retainAll(booleans());
       return set;
      }
-
+	syn int FVariable.independentBooleanConstantIndex() =
+		myFClass().independentBooleanConstants().indexOf(this);
+	
 	syn int FClass.numIndependentStringConstants() = independentStringConstants().size();
-	syn lazy Collection<FVariable> FClass.independentStringConstants() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.independentStringConstants() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(independentConstants());
       set.retainAll(strings());
       return set;
      }
+	syn int FVariable.independentStringConstantIndex() =
+		myFClass().independentStringConstants().indexOf(this);
 
 	// TODO: Is there such a thing as a dependent constant??
     syn int FClass.numDependentConstants() = dependentConstants().size();
-	coll Collection<FVariable> FClass.dependentConstants() 
-	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	coll ArrayList<FVariable> FClass.dependentConstants() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
  		this when false
 	to FClass.dependentConstants() for myFClass();
-
+	
 	syn int FClass.numDependentRealConstants() = dependentRealConstants().size();
-	syn lazy Collection<FVariable> FClass.dependentRealConstants() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.dependentRealConstants() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(dependentConstants());
       set.retainAll(reals());
       return set;
      }
-
+	syn int FVariable.dependentRealConstantIndex() =
+		myFClass().dependentRealConstants().indexOf(this);
+	
 	syn int FClass.numDependentIntegerConstants() = dependentIntegerConstants().size();
-	syn lazy Collection<FVariable> FClass.dependentIntegerConstants() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.dependentIntegerConstants() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(dependentConstants());
       set.retainAll(integers());
       return set;
      }
-
+	syn int FVariable.dependentIntegerConstantIndex() =
+		myFClass().dependentIntegerConstants().indexOf(this);
+	
 	syn int FClass.numDependentBooleanConstants() = dependentBooleanConstants().size();
-	syn lazy Collection<FVariable> FClass.dependentBooleanConstants() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.dependentBooleanConstants() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(dependentConstants());
       set.retainAll(booleans());
       return set;
      }
-
+	syn int FVariable.dependentBooleanConstantIndex() =
+		myFClass().dependentBooleanConstants().indexOf(this);
+	
 	syn int FClass.numDependentStringConstants() = dependentStringConstants().size();
-	syn lazy Collection<FVariable> FClass.dependentStringConstants() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.dependentStringConstants() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(dependentConstants());
       set.retainAll(strings());
       return set;
      }
-	
+	syn int FVariable.dependentStringConstantIndex() =
+		myFClass().dependentStringConstants().indexOf(this);
 
     syn int FClass.numIndependentParameters() = independentParameters().size();
-	coll Collection<FVariable> FClass.independentParameters() 
-	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	coll ArrayList<FVariable> FClass.independentParameters() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
  		this when isIndependentParameter()
 	to FClass.independentParameters() for myFClass();
-
+	
 	syn int FClass.numIndependentRealParameters() = independentRealParameters().size();
-	syn lazy Collection<FVariable> FClass.independentRealParameters() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.independentRealParameters() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(independentParameters());
       set.retainAll(reals());
       return set;
      }
+	syn int FVariable.independentRealParameterIndex() =
+		myFClass().independentRealParameters().indexOf(this);
 
 	syn int FClass.numIndependentIntegerParameters() = independentIntegerParameters().size();
-	syn lazy Collection<FVariable> FClass.independentIntegerParameters() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.independentIntegerParameters() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(independentParameters());
       set.retainAll(integers());
       return set;
      }
-
+	syn int FVariable.independentIntegerParameterIndex() =
+		myFClass().independentIntegerParameters().indexOf(this);
+	
 	syn int FClass.numIndependentBooleanParameters() = independentBooleanParameters().size();
-	syn lazy Collection<FVariable> FClass.independentBooleanParameters() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.independentBooleanParameters() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(independentParameters());
       set.retainAll(booleans());
       return set;
      }
+	syn int FVariable.independentBooleanParameterIndex() =
+		myFClass().independentBooleanParameters().indexOf(this);
 
 	syn int FClass.numIndependentStringParameters() = independentStringParameters().size();
-	syn lazy Collection<FVariable> FClass.independentStringParameters() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.independentStringParameters() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(independentParameters());
       set.retainAll(strings());
       return set;
      }
-
+	syn int FVariable.independentStringParameterIndex() =
+		myFClass().independentStringParameters().indexOf(this);
 
     syn int FClass.numDependentParameters() = dependentParameters().size();
-	coll Collection<FVariable> FClass.dependentParameters() 
-	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	coll ArrayList<FVariable> FClass.dependentParameters() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
  		this when isDependentParameter()
 	to FClass.dependentParameters() for myFClass();
 
 	syn int FClass.numDependentRealParameters() = dependentRealParameters().size();
-	syn lazy Collection<FVariable> FClass.dependentRealParameters() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.dependentRealParameters() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(dependentParameters());
       set.retainAll(reals());
       return set;
      }
+	syn int FVariable.dependentRealParameterIndex() =
+		myFClass().dependentRealParameters().indexOf(this);
 
 	syn int FClass.numDependentIntegerParameters() = dependentIntegerParameters().size();
-	syn lazy Collection<FVariable> FClass.dependentIntegerParameters() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.dependentIntegerParameters() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(dependentParameters());
       set.retainAll(integers());
       return set;
      }
-
+	syn int FVariable.dependentIntegerParameterIndex() =
+		myFClass().dependentIntegerParameters().indexOf(this);
+	
 	syn int FClass.numDependentBooleanParameters() = dependentBooleanParameters().size();
-	syn lazy Collection<FVariable> FClass.dependentBooleanParameters() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.dependentBooleanParameters() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(dependentParameters());
       set.retainAll(booleans());
       return set;
      }
-
+	syn int FVariable.dependentBooleanParameterIndex() =
+		myFClass().dependentBooleanParameters().indexOf(this);
+	
 	syn int FClass.numDependentStringParameters() = dependentStringParameters().size();
-	syn lazy Collection<FVariable> FClass.dependentStringParameters() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.dependentStringParameters() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(dependentParameters());
       set.retainAll(strings());
       return set;
      }
-
+	syn int FVariable.dependentStringParameterIndex() =
+		myFClass().dependentStringParameters().indexOf(this);
+	
     syn int FClass.numDifferentiatedRealVariables() = differentiatedRealVariables().size();
-	coll Collection<FVariable> FClass.differentiatedRealVariables() 
-	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	coll ArrayList<FVariable> FClass.differentiatedRealVariables() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FDer contributes
  		(FVariable)getFIdUseExp().myFV() when
  		!getFIdUseExp().myFV().isUnknown()
 	to FClass.differentiatedRealVariables() for myFClass();
-
+	syn int FVariable.differentiatedRealVariableIndex() =
+		myFClass().differentiatedRealVariables().indexOf(this);
+	
     syn int FClass.numVariables() = variables().size();
-	coll Collection<FVariable> FClass.variables() 
-	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	coll ArrayList<FVariable> FClass.variables() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
  		this when  !isParameter() && !isConstant()
 	to FClass.variables() for myFClass();
 	
 	syn int FClass.numRealVariables() = realVariables().size();
-	syn lazy Collection<FVariable> FClass.realVariables() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.realVariables() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(variables());
       set.retainAll(reals());
       return set;
      }
 
 	syn int FClass.numIntegerVariables() = integerVariables().size();
-	syn lazy Collection<FVariable> FClass.integerVariables() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.integerVariables() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(variables());
       set.retainAll(integers());
       return set;
      }
 
 	syn int FClass.numBooleanVariables() = booleanVariables().size();
-	syn lazy Collection<FVariable> FClass.booleanVariables() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.booleanVariables() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(variables());
       set.retainAll(booleans());
       return set;
      }
 
 	syn int FClass.numStringVariables() = stringVariables().size();
-	syn lazy Collection<FVariable> FClass.stringVariables() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.stringVariables() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(variables());
       set.retainAll(strings());
       return set;
      }
 	
     syn int FClass.numAlgebraicVariables() = algebraicVariables().size();
-	syn lazy Collection<FVariable> FClass.algebraicVariables() { 
-	  LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.algebraicVariables() { 
+	  ArrayList<FVariable> set = new ArrayList<FVariable>();
   	  set.addAll(variables());
   	  set.removeAll(differentiatedRealVariables());
   	  set.removeAll(inputs());
@@ -272,117 +304,131 @@ aspect FlatAPI {
 	}
 	
     syn int FClass.numAlgebraicRealVariables() = algebraicRealVariables().size();
-	syn lazy Collection<FVariable> FClass.algebraicRealVariables() { 
-	  LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.algebraicRealVariables() { 
+	  ArrayList<FVariable> set = new ArrayList<FVariable>();
 	  set.addAll(algebraicVariables());
 	  set.retainAll(reals());
       return set;
 	}
-
+	syn int FVariable.algebraicRealVariableIndex() =
+		myFClass().algebraicRealVariables().indexOf(this);
+	
     syn int FClass.numAlgebraicIntegerVariables() = algebraicIntegerVariables().size();
-	syn lazy Collection<FVariable> FClass.algebraicIntegerVariables() { 
-	  LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.algebraicIntegerVariables() { 
+	  ArrayList<FVariable> set = new ArrayList<FVariable>();
 	    set.addAll(algebraicVariables());
 	    set.retainAll(integers());
       return set;
 	}
-
+	syn int FVariable.algebraicIntegerVariableIndex() =
+		myFClass().algebraicIntegerVariables().indexOf(this);
+	
     syn int FClass.numAlgebraicBooleanVariables() = algebraicBooleanVariables().size();
-	syn lazy Collection<FVariable> FClass.algebraicBooleanVariables() { 
-	  LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.algebraicBooleanVariables() { 
+	  ArrayList<FVariable> set = new ArrayList<FVariable>();
 	    set.addAll(algebraicVariables());
 	    set.retainAll(booleans());
       return set;
 	}
+	syn int FVariable.algebraicBooleanVariableIndex() =
+		myFClass().algebraicBooleanVariables().indexOf(this);
 
     syn int FClass.numAlgebraicStringVariables() = algebraicStringVariables().size();
-	syn lazy Collection<FVariable> FClass.algebraicStringVariables() { 
-	  LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.algebraicStringVariables() { 
+	  ArrayList<FVariable> set = new ArrayList<FVariable>();
 	    set.addAll(algebraicVariables());
 	    set.retainAll(strings());
       return set;
 	}
+	syn int FVariable.algebraicStringVariableIndex() =
+		myFClass().algebraicStringVariables().indexOf(this);
 
     syn int FClass.numVariablesWithBindingExp() = variablesWithBindingExp().size();
-	coll Collection<FVariable> FClass.variablesWithBindingExp() 
-	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	coll ArrayList<FVariable> FClass.variablesWithBindingExp() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
  		this when !isParameter() && !isConstant() &&
  		  hasBindingExp()
 	to FClass.variablesWithBindingExp() for myFClass();
 
 	syn int FClass.numRealVariablesWithBindingExp() = realVariablesWithBindingExp().size();
-	syn lazy Collection<FVariable> FClass.realVariablesWithBindingExp() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.realVariablesWithBindingExp() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(variablesWithBindingExp());
       set.retainAll(reals());
       return set;
      }
 
 	syn int FClass.numIntegerVariablesWithBindingExp() = integerVariablesWithBindingExp().size();
-	syn lazy Collection<FVariable> FClass.integerVariablesWithBindingExp() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.integerVariablesWithBindingExp() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(variablesWithBindingExp());
       set.retainAll(integers());
       return set;
      }
 
 	syn int FClass.numBooleanVariablesWithBindingExp() = booleanVariablesWithBindingExp().size();
-	syn lazy Collection<FVariable> FClass.booleanVariablesWithBindingExp() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.booleanVariablesWithBindingExp() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(variablesWithBindingExp());
       set.retainAll(booleans());
       return set;
      }
 
 	syn int FClass.numStringVariablesWithBindingExp() = stringVariablesWithBindingExp().size();
-	syn lazy Collection<FVariable> FClass.stringVariablesWithBindingExp() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.stringVariablesWithBindingExp() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(variablesWithBindingExp());
       set.retainAll(strings());
       return set;
      }
      
     syn int FClass.numInputs() = inputs().size();
-	coll Collection<FVariable> FClass.inputs() 
-	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	coll ArrayList<FVariable> FClass.inputs() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
  		this when isInput()
 	to FClass.inputs() for myFClass();
 
 	syn int FClass.numRealInputs() = realInputs().size();
-	syn lazy Collection<FVariable> FClass.realInputs() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.realInputs() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(inputs());
       set.retainAll(reals());
       return set;
      }
-
+	syn int FVariable.realInputIndex() =
+		myFClass().realInputs().indexOf(this);
+	
 	syn int FClass.numIntegerInputs() = integerInputs().size();
-	syn lazy Collection<FVariable> FClass.integerInputs() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.integerInputs() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(inputs());
       set.retainAll(integers());
       return set;
      }
+	syn int FVariable.integerInputIndex() =
+		myFClass().integerInputs().indexOf(this);
 
 	syn int FClass.numBooleanInputs() = booleanInputs().size();
-	syn lazy Collection<FVariable> FClass.booleanInputs() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.booleanInputs() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(inputs());
       set.retainAll(booleans());
       return set;
      }
+	syn int FVariable.booleanInputIndex() =
+		myFClass().booleanInputs().indexOf(this);
 
 	syn int FClass.numStringInputs() = stringInputs().size();
-	syn lazy Collection<FVariable> FClass.stringInputs() {
-      LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+	syn lazy ArrayList<FVariable> FClass.stringInputs() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
       set.addAll(inputs());
       set.retainAll(strings());
       return set;
      }
-
-
+	syn int FVariable.stringInputIndex() =
+		myFClass().stringInputs().indexOf(this);
 
     syn int FClass.numEquations() = equations().size();
 	syn ArrayList<FAbstractEquation> FClass.equations() {
@@ -404,20 +450,23 @@ aspect FlatAPI {
 		return l;
 	}
 	
+	
+	
+	
 /*	
 
-	coll Collection<FVariable> FClass.structuralParameters() [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	coll ArrayList<FVariable> FClass.structuralParameters() [new ArrayList<FVariable>()] with add root FlatRoot;
 	FIdUseExp contributes
 		(FVariable)myFV() when inArraySubscripts()
 	to FClass.structuralParameters() for myFClass();
 
-	coll Collection<FEquation> FVariable.variableIncidence() [new LinkedHashSet<FEquation>()] with add root FlatRoot;
+	coll ArrayList<FEquation> FVariable.variableIncidence() [new ArrayList<FEquation>()] with add root FlatRoot;
     FIdUseExp contributes
 		myFEquation() when inFEquation()
 	to FVariable.variableIncidence() for (FVariable)myFV();
 	
-	syn lazy ArrayList<Collection> FClass.variableIncidence() {
-		ArrayList<Collection> l = new ArrayList<Collection>();
+	syn lazy ArrayList<ArrayList> FClass.variableIncidence() {
+		ArrayList<ArrayList> l = new ArrayList<ArrayList>();
 		for (FVariable fv : variables()) {
            l.add(fv.variableIncidence());
        } 
@@ -435,6 +484,7 @@ aspect FlatAPI {
 */	
 	inh FClass FVariable.myFClass();
 	inh FClass FExp.myFClass();
+	inh FClass FIdUse.myFClass();
 	eq FClass.getChild().myFClass() = this;
 	eq Root.getChild().myFClass() = null; 
 
