@@ -19735,16 +19735,20 @@ esac
 #JMALLLIBS="../ModelInterface/libmodelinterface.la ../OptimicaInterface/liboptimica.la"
 
 # Used in examples
-jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm";
+#jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm";
 if test "x$with_ipopt" != xno; then
-  jmilib+=" -ljmi_solver"
+  jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm -ljmi_solver"
+else
+  jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm"
 fi
 
 
 
-jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad";
+#jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad";
 if test "x$with_ipopt" != xno; then
-  jmi_cppadlib+=" -ljmi_solver_cppad"
+  jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad"
+else
+  jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad"
 fi
 
 

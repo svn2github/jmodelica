@@ -175,14 +175,16 @@ esac
 #JMALLLIBS="../ModelInterface/libmodelinterface.la ../OptimicaInterface/liboptimica.la"
 
 # Used in examples
-jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm";
+#jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm";
 AS_IF([test "x$with_ipopt" != xno],
-      [jmilib+=" -ljmi_solver"]) 
+      [jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm -ljmi_solver"], 
+      [jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm"])  
 AC_SUBST(jmilib)
 
-jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad";
+#jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad";
 AS_IF([test "x$with_ipopt" != xno],
-      [jmi_cppadlib+=" -ljmi_solver_cppad"]) 
+      [jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad"], 
+      [jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad"])  
 AC_SUBST(jmi_cppadlib)
 
 AC_PATH_PROG([ANT], [ant], [])
