@@ -414,7 +414,8 @@ def load_model(filepath):
 # ================================================================
 #                        HIGH LEVEL INTERFACE
 # ================================================================
-class JMIModel:
+
+class JMIModel(object):
     """
     A JMI Model loaded from a DLL.
     
@@ -422,24 +423,48 @@ class JMIModel:
         Created properties for getters and setters.
     """
     
-    def __init__(self, path, libname):
-        self._dll = load_DLL(path, libname)
+    def __init__(self, libname, path='.'):
+        self._dll = load_DLL(libname, path)
         
         self._jmi = ct.c_voidp()
-        assert _dll.jmi_new(byref(_jmi)) == 0, \
+        assert self._dll.jmi_new(byref(self._jmi)) == 0, \
                "jmi_new returned non-zero"
-        assert _jmi.value is not None, \
+        assert self._jmi.value is not None, \
                "jmi struct not returned correctly"
-
-    def getx(self, x):
-        return 
         
-    def setx(self, x):
-        raise JMIException("X can only be modified, not set.")
+        # The actual array. These must must not be reset (only changed)
+        # as they are pointing to a shared memory space used by
+        # both the JMI DLL and us. Therefor Python properties are used
+        # to ensure that they aren't reset, only modified.
+        self._x = self._dll.jmi_get_x(self._jmi);
+        self._pi = self._dll.jmi_get_pi(self._jmi);
 
     def __del__(self):
         """Freeing jmi data structure.
         """
-        assert _dll.jmi_delete(self._jmi) == 0, \
+        assert self._dll.jmi_delete(self._jmi) == 0, \
                "jmi_delete failed"
-        del self._dll
+        
+    def initAD(self):
+        """Inializing Algorithmic Differential package.
+        
+        Raises a JMIException on failure.
+        """
+        if self._dll.jmi_ad_init(self._jmi) is not 0:
+            raise JMIException("Could not initialize AD.")
+
+    def getX(self):
+        return self._x
+        
+    def setX(self, x):
+        raise JMIException("X can only be modified, not set.")
+        
+    x = property(getX, setX, "The differentiated variables vector.")
+    
+    def getPI(self):
+        return self._pi
+        
+    def setPI(self, pi):
+        raise JMIException("PI can only be modified, not set.")
+        
+    pi = property(getPI, setPI, "The independent parameter vector.")

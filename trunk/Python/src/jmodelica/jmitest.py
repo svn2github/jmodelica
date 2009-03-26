@@ -505,3 +505,58 @@ def test_pointer_to_ndarray_converter():
     
     narray[0] = 37.75
     nose.tools.assert_equal(ctypes_arr[3], narray[3])
+
+class GenericJMIModelClassTests:
+    """Basic tests for the high level JMIModel class.
+    
+    """
+    def setUp(self):
+        self.model = pyjmi.JMIModel(self.model_lib, \
+                                    get_example_path(self.model_path))
+        
+    def tearDown(self):
+        del self.model
+        
+    def genericVectorGetterTest(self, getter):
+        """Test changing the value of a getter."""
+        vec = getter()
+        if len(vec) > 0:
+            temp = vec[0]
+            vec[0] = 5
+            vec = getter()
+            nose.tools.assert_equal(vec[0], 5)
+            vec[0] = temp
+    
+    def testGetters(self):
+        """Testing each getter."""
+        self.genericVectorGetterTest(self.model.getX)
+        self.genericVectorGetterTest(self.model.getPI)
+        
+    def genericVectorSetterTest(self, setter):
+        """Asserts that the setter is not setable."""
+        print setter
+        arr = N.zeros(5684)
+        nose.tools.assert_raises(pyjmi.JMIException, setter, arr)
+        
+    def testSetters(self):
+        """Testing each setter."""
+        self.genericVectorSetterTest(self.model.setX)
+        self.genericVectorSetterTest(self.model.setPI)
+    
+    def testProperties(self):
+        """Test the existence properties."""
+        tmp = self.model.x
+        tmp = self.model.pi
+
+
+class testVDPWithCppADUsingJMIModelClass(GenericJMIModelClassTests):
+    """Tests on VDP model with CppAD using the JMIModel class.
+    
+    """
+    def setUp(self):
+        self.model_path = 'Vdp_cppad'
+        self.model_lib = 'vdp_cppad'
+        GenericJMIModelClassTests.setUp(self)
+        
+        # Initializing CppAD, too
+        self.model.initAD()
