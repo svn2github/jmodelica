@@ -157,7 +157,7 @@ def _from_address(address, nbytes, dtype=float):
          'version' : 3
     }   
 
-    return N.asarray(d).view( dtype=dtype )
+    return N.asarray(d).view(dtype)
 
 
 class _PointerToNDArrayConverter:
