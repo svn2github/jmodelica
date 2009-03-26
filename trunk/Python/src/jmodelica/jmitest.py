@@ -74,7 +74,7 @@ def test_get_test_path():
            "Could not find example root directory. Do you have the " \
            + " whole repository structure checked out?"
 
-class GenericJMITests:
+class GenericJMITestsUsingCTypes:
     """
     Tests any JMI Model DLL to see that it conforms to the DLL API.
     
@@ -237,12 +237,12 @@ class GenericJMITests:
                "getting offsets failed"
                
                
-class GenericVDPTestsUsingCTypes(GenericJMITests):
+class GenericVDPTestsUsingCTypes(GenericJMITestsUsingCTypes):
     """Tests that are run on both VDP-models.
     
     """
     def setUp(self):
-        GenericJMITests.setUp(self)
+        GenericJMITestsUsingCTypes.setUp(self)
         self.initModel()
                
     def testSizes(self):
@@ -363,9 +363,9 @@ class GenericVDPTestsUsingCTypes(GenericJMITests):
         assert dF_n_nz_test.value is 12 and dF_n_cols_test.value is 3
         
 
-class testVDPWithoutCppADUsingCTypes(GenericVDPTestsUsingCTypes):
+class testVDPWithoutADUsingCTypes(GenericVDPTestsUsingCTypes):
     """
-    Test loading Van der Pol JMI model DLL (compiled without CPPAD)
+    Test loading Van der Pol JMI model DLL (compiled without AD)
     directly with ctypes.
     
     """
@@ -376,9 +376,9 @@ class testVDPWithoutCppADUsingCTypes(GenericVDPTestsUsingCTypes):
         GenericVDPTestsUsingCTypes.setUp(self)
         
 
-class testVDPWithCppADUsingCTypes(GenericVDPTestsUsingCTypes):
+class testVDPWithADUsingCTypes(GenericVDPTestsUsingCTypes):
     """
-    Test loading Van der Pol JMI model DLL (compiled with CPPAD)
+    Test loading Van der Pol JMI model DLL (compiled with AD)
     directly with ctypes.
     
     """
@@ -392,16 +392,16 @@ class testVDPWithCppADUsingCTypes(GenericVDPTestsUsingCTypes):
         self.dll.jmi_ad_init(self.jmi)
 
 
-class testFurutaPendulum(GenericJMITests):
-    """Tests the furuta pendulum example.
+class testFurutaPendulum(GenericJMITestsUsingCTypes):
+    """Tests the Furuta pendulum example.
     
-    The furuta pendulum introduces the new ODE interface. Therefor
+    The Furuta pendulum introduces the new ODE interface. Therefor
     focus in this test is on the ODE interface.
     """
     def setUp(self):
         self.model_path = 'FurutaPendulum'
         self.model_lib = 'furuta'
-        GenericJMITests.setUp(self)
+        GenericJMITestsUsingCTypes.setUp(self)
         
         # Here initial values for all parameters should be read from
         # xml-files
@@ -415,8 +415,6 @@ class testFurutaPendulum(GenericJMITests):
         self.pi[7] = 0.0;
         
         # Initializing CppAD, too
-        # Is the Furuta Pendulum using CppAD or not? The program crashes
-        # if this line is uncommented.
         self.dll.jmi_ad_init(self.jmi)
 
 
@@ -549,7 +547,17 @@ class GenericJMIModelClassTests:
         tmp = self.model.pi
 
 
-class testVDPWithCppADUsingJMIModelClass(GenericJMIModelClassTests):
+class testVDPWithoutADUsingJMIModelClass(GenericJMIModelClassTests):
+    """Tests on VDP model with CppAD using the JMIModel class.
+    
+    """
+    def setUp(self):
+        self.model_path = 'Vdp'
+        self.model_lib = 'vdp'
+        GenericJMIModelClassTests.setUp(self)
+
+
+class testVDPWithADUsingJMIModelClass(GenericJMIModelClassTests):
     """Tests on VDP model with CppAD using the JMIModel class.
     
     """
@@ -559,4 +567,30 @@ class testVDPWithCppADUsingJMIModelClass(GenericJMIModelClassTests):
         GenericJMIModelClassTests.setUp(self)
         
         # Initializing CppAD, too
+        self.model.initAD()
+
+
+class testFurutaPendulumUsingJMIModelClass(GenericJMIModelClassTests):
+    """Tests the Furuta pendulum example using the JMIModel class.
+    
+    """
+    def setUp(self):
+        self.model_path = 'FurutaPendulum'
+        self.model_lib = 'furuta'
+        GenericJMIModelClassTests.setUp(self)
+        
+        # Here initial values for all parameters should be read from
+        # xml-files
+        self.model.pi[0] = 0.00354;
+        self.model.pi[1] = 0.00384;
+        self.model.pi[2] = 0.00258;
+        self.model.pi[3] = 0.103;
+        self.model.pi[4] = 0.2;
+        self.model.pi[5] = 0.0;
+        self.model.pi[6] = 0.0;
+        self.model.pi[7] = 0.0;
+        
+        # Initializing CppAD, too
+        # Notice how this must be done _after_ setting the independent
+        # variables to assert reasonable parameter values.
         self.model.initAD()
