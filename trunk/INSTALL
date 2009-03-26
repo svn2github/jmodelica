@@ -14,17 +14,18 @@ Build instructions for the JModelica project.
     svn co https://svn.jmodelica.org/trunk JModelica
 
    Make sure that the full path to the directory where you check out
-   JModelica does not contain any spaces..
+   JModelica does not contain any spaces nor ~ character
 
 2. Download CppAD from http://www.coin-or.org/CppAD. Unzip the 
    tar-ball and put in a directory. Again, make sure that the path to
-   this directory does not contain any spaces. Note: You do not have to 
-   build anything in the CppAD distribution in order to build JModelica.
+   this directory does not contain any spaces nor ~ character.
+   Note: You do not have to build anything in the CppAD distribution
+   in order to build JModelica.
 
 3. Download Ipopt from https://projects.coin-or.org/Ipopt. Unzip the
-   tar-ball and put in a directory that does not hold any spaces in its
-   absolute path. Build the package according to its INSTALL file.
-   Make sure to run 'make install'.
+   tar-ball and put in a directory that does not hold any spaces
+   nor ~ character in its path. Build the package according to its
+   INSTALL file. Make sure to run 'make install'.
 
 4. Run the configure script. It is recommended that you create a new
    directory in JModelica:
@@ -39,7 +40,7 @@ Build instructions for the JModelica project.
    however, that if they are not give, only parts of the software
    will be built.
 
-   You may want to give additional arguments to configure, type
+   You may want to give additional arguments to configure. Type
 
     configure --help
 
