@@ -18,48 +18,67 @@
 */
 
 
-/*
- * Model of a Furuta pendulum:
+/**
+ * \file
+ * Model of a Furuta pendulum is
  *
+ * \f$
+ *  \left\{ \begin{array}{ll}
+ *   \frac{d}{dt} \theta = & \dot\theta \\
+ *   \frac{d}{dt}\dot \theta =&
+ *   \frac{1}{\alpha\beta-\gamma^2+(\beta^2+\gamma^2)\sin^2\theta}
+ *   \left[2\beta\gamma\sin\theta\cos^2\theta\dot\theta\dot\varphi-
+ *   \gamma^2\sin\theta\cos\theta\dot\theta^2+\right. \\
+ *   &\left.+\beta(\alpha+\beta\sin^2\theta)\sin\theta\cos\theta\dot\varphi^2+
+ *   \delta(\alpha+\beta\sin^2\theta)\sin\theta-
+ *   \gamma\cos\theta\tau_\varphi \right] \\
+ *   \frac{d}{dt}\varphi =& \dot\varphi \\
+ *   \frac{d}{dt}\dot \varphi =&
+ *   \frac{1}{\alpha\beta-\gamma^2+(\beta^2+\gamma^2)\sin^2\theta}
+ *   \left[-2\beta^2\sin\theta\cos\theta\dot\theta\dot\varphi+
+ *   \beta\gamma\sin\theta\dot\theta^2-\right. \\
+ *   &-\left.\beta\gamma\sin\theta\cos^2\theta\dot\varphi^2-
+ *   \delta\gamma\sin\theta\cos\theta+\beta\tau_\varphi\right]
+ *  \end{array} \right.
+ * \f$
  *
- * \frac{d}{dt}\theta =& \dot\theta\\
- * \frac{d}{dt}\dot \theta =&
- * \frac{1}{\alpha\beta-\gamma^2+(\beta^2+\gamma^2)\sin^2\theta}
- * \left[2\beta\gamma\sin\theta\cos^2\theta\dot\theta\dot\varphi-
- * \gamma^2\sin\theta\cos\theta\dot\theta^2+\right.\\
- * &\left.+\beta(\alpha+\beta\sin^2\theta)\sin\theta\cos\theta\dot\varphi^2+
- * \delta(\alpha+\beta\sin^2\theta)\sin\theta-
- * \gamma\cos\theta\tau_\varphi \right]\\
- * \frac{d}{dt}\varphi =& \dot\varphi\\
- * \frac{d}{dt}\dot \varphi =&
- * \frac{1}{\alpha\beta-\gamma^2+(\beta^2+\gamma^2)\sin^2\theta}
- * \left[-2\beta^2\sin\theta\cos\theta\dot\theta\dot\varphi+
- * \beta\gamma\sin\theta\dot\theta^2-\right.\\
- * &-\left.\beta\gamma\sin\theta\cos^2\theta\dot\varphi^2-
- * \delta\gamma\sin\theta\cos\theta+\beta\tau_\varphi\right]
+ * .
  *
- * The states are selected as:
+ * The states are selected as
  *
- * x(0) = \theta (Pendulum angle)
- * x(1) = \dot \theta
- * x(2) = \varphi (Arm angle)
- * x(3) = \dot \varphi
+ * \f$
+ *  \begin{array}{lcl}
+ *   \textnormal{x(0)} &=& \theta \textnormal{ (Pendulum angle)} \\
+ *   \textnormal{x(1)} &=& \dot \theta \\
+ *   \textnormal{x(2)} &=& \varphi \textnormal{ (Arm angle)} \\
+ *   \textnormal{x(3)} &=& \dot \varphi
+ *  \end{array}
+ * \f$
+ * 
+ * .
  *
- * The input
- *
- * u(0) = \tau (Motor torque)
+ * The input is
+ * 
+ * \f$ u(0) = \tau \textnormal{ (Motor torque)} \f$
+ 
+ * .
  *
  * The parameters are
  *
- * pi(0) = \alpha = 0.00354
- * pi(1) = \beta = 0.00384
- * pi(2) = \gamma = 0.00258
- * pi(3) = \delta = 0.103
- * pi(4) = \theta_0
- * pi(5) = \dot\theta_0
- * pi(6) = \varphi_0
- * pi(7) = \dot\varphi_0
+ * \f$
+ *  \begin{array}{lll}
+ *   \textnormal{pi(0)} =& \alpha &= 0.00354 \\
+ *   \textnormal{pi(1)} =& \beta &= 0.00384 \\
+ *   \textnormal{pi(2)} =& \gamma &= 0.00258 \\
+ *   \textnormal{pi(3)} =& \delta &= 0.103 \\
+ *   \textnormal{pi(4)} =& \theta_0 &= 0.2 \\
+ *   \textnormal{pi(5)} =& \dot\theta_0 &= 0 \\
+ *   \textnormal{pi(6)} =& \varphi_0 &= 0 \\
+ *   \textnormal{pi(7)} =& \dot\varphi_0 &= 0
+ *  \end{array}
+ * \f$
  *
+ * .
  *
  */
 

@@ -20,32 +20,39 @@
 
 
 /**
+ * \file
  * This file encodes the optimization problem
- *
- *  min x_3(t_f) + p_2*x_3(t_1) + p_1^2 + w_1(t_f)^2 + p_2*w_1(t_1)^2
- *  u_1,p_1
+ * 
+ * \f$ 
+ *  \min_{u_1,p_1} x_3 t_f + p_2*x_3 t_1 + p_1^2 + w_1 t_f^2 + p_2*w_1 t_1^2
+ * \f$ 
  *
  *  subject to
  *
- *   \dot x_1 = (1 - x_2^2)*x_1 - x_2 + u_1
- *   \dot x_2 = p_1*x_1
- *   \dot x_3 = exp(p_3*t)*(x_1^2 + x_2^2 + u_1^2);
- *   w_1 = x_1 + x_2
+ *  \f$
+ *   \left\{ \begin{array}{lcl}
+ *    \dot x_1 &=& (1 - x_2^2)*x_1 - x_2 + u_1 \\
+ *    \dot x_2 &=& p_1*x_1 \\
+ *    \dot x_3 &=& exp(p_3*t)*(x_1^2 + x_2^2 + u_1^2) \\\
+ *    w_1 &=& x_1 + x_2 \\
  *
- *  x_1 >= -0.5
- *  u_1 >= -0.5
- *  u_1 <= 1
+ *    x_1 &>=& -0.5 \\
+ *    u_1 &>=& -0.5 \\
+ *    u_1 &<=& 1 \\
  *
- *  x_1(t_f) = 0;
- *  x_2(t_f) = 0;
+ *    x_1(t_f) &=& 0 \\
+ *    x_2(t_f) &=& 0
+ *   \end{array} \right.
+ *  \f$
+ *
  * with initial conditions
  *
- *   x_1(0) = 0;
- *   x_2(0) = 1;
- *   x_3(0) = 0;
+ *   \f$ x_1(0) = 0 \f$
+ *   \f$ x_2(0) = 1 \f$
+ *   \f$ x_3(0) = 0 \f$
  *
- *  and t_f = 5.
- *  and t_1 = 0.1
+ *  and \f$ t_f = 5. \f$
+ *  and \f$ t_1 = 0.1 \f$
  *
  */
 
