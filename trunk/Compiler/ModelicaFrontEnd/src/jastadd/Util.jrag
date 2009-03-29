@@ -395,6 +395,15 @@ aspect Visibility {
 
 	syn boolean VisibilityType.isProtected() = false;
 	eq ProtectedVisibilityType.isProtected() = true;
+
+	syn boolean FVisibilityType.isPublic() = false;
+	eq FPublicVisibilityType.isPublic() = true;
+
+	syn boolean FVisibilityType.isProtected() = false;
+	eq FProtectedVisibilityType.isProtected() = true;
+
+	syn boolean FVariable.isPublic() = getFVisibilityType().isPublic();
+	syn boolean FVariable.isProtected() = getFVisibilityType().isProtected();
 	
 }
 

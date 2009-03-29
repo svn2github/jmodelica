@@ -1,3 +1,5 @@
+import java.io.PrintStream;
+
 /*
     Copyright (C) 2009 Modelon AB
 
@@ -620,7 +622,10 @@ aspect FlattPrettyPrint {
 	public void FVariable.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		
 			str.print(indent);
-	    
+			if (isProtected()) {
+				str.print("protected ");
+			}
+			
 			str.print(getFTypePrefixOther().toString());
 						
 			if (hasFTypePrefixInputOutput()) {

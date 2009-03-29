@@ -136,6 +136,7 @@ List fvariable_list =
 	;
 	
 FVariable fvariable =
+    fvisibility_type?
     ftype_prefix_other? 
     ftype_prefix_input_output? 
 	fprimitive_type
@@ -150,11 +151,30 @@ FVariable fvariable =
 					FTypePrefixOther tpo = ftype_prefix_other.getNumChild()==1?
 					  (FTypePrefixOther)ftype_prefix_other.getChild(0):
 					  new FContinuous();
-
-					return new FVariable(tpo,
-	                                    ftype_prefix_input_output,fprimitive_type,fattr,bexp,fstring_comment,fqname); :}
+                    FVisibilityType fvt = fvisibility_type.getNumChild()==1?
+                      (FVisibilityType)fvisibility_type.getChild(0) :
+                      new FPublicVisibilityType();
+                    if (fprimitive_type.isReal()) {   
+						return new FRealVariable(fvt,tpo,
+	                       ftype_prefix_input_output,fattr,bexp,fstring_comment,fqname); 
+					} else if (fprimitive_type.isInteger()) {   
+						return new FIntegerVariable(fvt,tpo,
+	                       ftype_prefix_input_output,fattr,bexp,fstring_comment,fqname); 
+					} else if (fprimitive_type.isBoolean()) {   
+						return new FBooleanVariable(fvt,tpo,
+	                       ftype_prefix_input_output,fattr,bexp,fstring_comment,fqname); 
+					} else if (fprimitive_type.isString()) {   
+						return new FStringVariable(fvt,tpo,
+	                       ftype_prefix_input_output,fattr,bexp,fstring_comment,fqname); 
+					} 
+					return null;
+					:}
 	;
   
+FVisibilityType fvisibility_type =
+  PUBLIC    {: return new FPublicVisibilityType(); :}  
+  | PROTECTED    {: return new FProtectedVisibilityType(); :}  
+  ;
 FQName fqname =
   fqname_part {: return new FQName(new List().add(fqname_part)); :}
   | fqname DOT fqname_part {: fqname.addFQNamePart(fqname_part); 

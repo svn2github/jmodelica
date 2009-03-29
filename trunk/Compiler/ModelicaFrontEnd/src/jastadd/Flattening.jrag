@@ -119,17 +119,20 @@ aspect Flattening {
 		String primitiveName = myInstClass().finalClass().primitiveName();
 		Opt eo = e==null? new Opt(): new Opt(e);
 				
+		FVisibilityType fvt = getComponentDecl().isPublic()? 
+				new FPublicVisibilityType() : new FProtectedVisibilityType();
+				
 		if (isReal()) {
-			fv = new FRealVariable(tpo, new Opt(), attr, eo, new Opt(), 
+			fv = new FRealVariable(fvt, tpo, new Opt(), attr, eo, new Opt(), 
 					new FQName(getFQName()));
 		} else if (isInteger()) {
-			fv = new FIntegerVariable(tpo, new Opt(), attr, eo, new Opt(), 
+			fv = new FIntegerVariable(fvt,tpo, new Opt(), attr, eo, new Opt(), 
 					new FQName(getFQName()));
 		} else if (isBoolean()) {
-			fv = new FBooleanVariable(tpo, new Opt(), attr, eo, new Opt(), 
+			fv = new FBooleanVariable(fvt,tpo, new Opt(), attr, eo, new Opt(), 
 					new FQName(getFQName()));
 		} else if (isString()) {
-			fv = new FStringVariable(tpo, new Opt(), attr, eo, new Opt(), 
+			fv = new FStringVariable(fvt,tpo, new Opt(), attr, eo, new Opt(), 
 					new FQName(getFQName()));
 		}
 				

@@ -513,6 +513,20 @@ Semantic error at line 461, column 20:
  
 end NameTest14_Err;
   
+class NameTest15
+     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="NameTest15",
+        description="Check correct flattening of protected variable",
+                                               flatModel=
+"
+fclass NameTests.NameTest15
+ protected Real x = 1;
+equation 
+end NameTests.NameTest15;
+")})));
+
+protected Real x=1;
+end NameTest15;
 
 class ExtendsTest1
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

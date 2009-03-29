@@ -26,12 +26,19 @@ FEquationBlock ::= FAbstractEquation*;
 abstract AbstractFVariable;
 UnknownFVariable : AbstractFVariable;
 
-abstract FVariable : AbstractFVariable ::= FTypePrefixOther
+abstract FVariable : AbstractFVariable ::= 
+              FVisibilityType
+              FTypePrefixOther
               [FTypePrefixInputOutput]
               FAttribute*
               [BindingExp:FExp]
               [FStringComment]
               FQName;
+
+abstract FVisibilityType::=;
+FPublicVisibilityType : FVisibilityType ::=;
+FProtectedVisibilityType : FVisibilityType ::=;
+
 
 FRealVariable : FVariable;
 FIntegerVariable : FVariable;

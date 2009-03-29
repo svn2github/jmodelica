@@ -92,8 +92,8 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   
    "end"             { return newSymbol(Terminals.END); }
   
- //  "public"         { return newSymbol(Terminals.PUBLIC); }
- //  "protected"      { return newSymbol(Terminals.PROTECTED); }
+   "public"         { return newSymbol(Terminals.PUBLIC); }
+   "protected"      { return newSymbol(Terminals.PROTECTED); }
   
  //  "extends"         { return newSymbol(Terminals.EXTENDS); }
 
