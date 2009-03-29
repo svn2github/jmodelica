@@ -19,6 +19,9 @@ import java.util.ArrayList;
 
 aspect FlatAPI {
 	
+	/**
+	 * Returns a unique integer id for a variable in a model.
+	 */
 	inh int FVariable.valueReference();
 	eq FClass.getFVariable(int i).valueReference() = i;
 
