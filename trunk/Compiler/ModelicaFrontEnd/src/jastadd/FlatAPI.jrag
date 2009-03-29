@@ -19,6 +19,9 @@ import java.util.ArrayList;
 
 aspect FlatAPI {
 	
+	inh int FVariable.valueReference();
+	eq FClass.getFVariable(int i).valueReference() = i;
+
     syn int FClass.numReals() = reals().size();
 	coll ArrayList<FVariable> FClass.reals() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
