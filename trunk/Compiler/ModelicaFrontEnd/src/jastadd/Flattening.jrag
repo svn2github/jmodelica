@@ -117,13 +117,22 @@ aspect Flattening {
 		
 		FVariable fv = null;
 		String primitiveName = myInstClass().finalClass().primitiveName();
-		if (e!=null)
-			fv = new FVariable(tpo, primitiveType(primitiveName),getFQName(),e);
-		else
-			fv = new FVariable(tpo, primitiveType(primitiveName),getFQName());
-		
-		fv.setFAttributeList(attr);
-		
+		Opt eo = e==null? new Opt(): new Opt(e);
+				
+		if (isReal()) {
+			fv = new FRealVariable(tpo, new Opt(), attr, eo, new Opt(), 
+					new FQName(getFQName()));
+		} else if (isInteger()) {
+			fv = new FIntegerVariable(tpo, new Opt(), attr, eo, new Opt(), 
+					new FQName(getFQName()));
+		} else if (isBoolean()) {
+			fv = new FBooleanVariable(tpo, new Opt(), attr, eo, new Opt(), 
+					new FQName(getFQName()));
+		} else if (isString()) {
+			fv = new FStringVariable(tpo, new Opt(), attr, eo, new Opt(), 
+					new FQName(getFQName()));
+		}
+				
 		// Only set prefix for top level inputs and outputs
 		// TODO: Make sure that prefixes specified in short class declarations are propagated
 		if (getComponentDecl().isInput() && getFQName().getNumFQNamePart()==1)
@@ -220,45 +229,6 @@ aspect FlatteningDebug {
 
 }
 
-aspect FlatVariables {
-
-  public FPrimitiveType ASTNode.primitiveType(String type) {
-	  if (type.equals("Real")) {
-		  return fRealType();
-     } else if (type.equals("Integer")) {
-		  return fIntegerType();
-    } else if (type.equals("Boolean")) {
-		  return fBooleanType();
-	  } else if (type.equals("String")) {
-		  return fStringType();
-	  } else {
-		  error("Type " + type + " is not a primitive type");
-		  return fRealType();
-	  }
-  }
- 
-  public FVariable.FVariable(FTypePrefixOther tpo, FPrimitiveType type, FQName fqname) {	  
-  	this(tpo,
-  	      new Opt(),
-  	      type,
-  	      new List(),
-  	      new Opt(),
-  	      new Opt(),
-  	      new FQName(fqname));
-  }
-  
-  public FVariable.FVariable(FTypePrefixOther tpo, FPrimitiveType type, FQName fqname, FExp bexp) {
-  	this(tpo,
-  	      new Opt(),
-  	      type,
-  	      new List(),
-  	      new Opt(bexp),
-  	      new Opt(),
-  	      new FQName(fqname));
-  }
-  
-  
-}
 
 aspect InstNodeInterface {
 

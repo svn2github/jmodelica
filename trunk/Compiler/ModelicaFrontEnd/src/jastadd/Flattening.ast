@@ -15,7 +15,7 @@
 */
 
 abstract InstNode ::= /InstComponentDecl*/ /InstClassDecl*/ /InstExtends*/ /InstImport*/ /FAbstractEquation*/ /FQName/ /DynamicClassName:InstAccess*/; // /DynamicInst:InstNode*/ /DynamicInstConstraining:InstNode*/;
-abstract InstRoot : InstNode ::= /FPrimitiveType*/;
+abstract InstRoot : InstNode ::= ;
 InstClassRoot : InstRoot ::= <ClassDecl:ClassDecl>;
 //InstFullClassDeclRoot :InstRoot ::= InstFullClassDecl;
 InstProgramRoot : InstRoot ::= <Program:Program>

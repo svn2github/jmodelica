@@ -45,9 +45,7 @@ aspect FlatVariability {
 	eq FVariable.variability() {
    		if (!isContinuous()) {
    			return getFTypePrefixOther();
-   		} else if ((getType() instanceof FIntegerType) ||
-   			(getType() instanceof FStringType) ||
-   			(getType() instanceof FBooleanType)) {
+   		} else if (isInteger() || isBoolean() || isString()) {
    			return(fDiscrete());
    		} else {
    			return fContinuous();

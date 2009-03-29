@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
+/*
 import java.lang.Math;
 
 aspect StaticValue {
@@ -45,19 +45,18 @@ aspect StaticValue {
 	}	
 
 	eq FVariable.staticValue() {
-		FPrimitiveType theType = getType();	
 		if (hasBindingExp()) {
 			return getBindingExp().staticValue();
-		} else if (theType instanceof FRealType) {
+		} else if (isReal()) {
 			return new RealStaticValue(0.0);
-		} else if (theType instanceof FIntegerType) {
+		} else if (isInteger()) {
 			return new IntegerStaticValue(0);
-		} else if (theType instanceof FStringType) {
+		} else if (isString()) {
 			return new StringStaticValue("");
-		} else if (theType instanceof FBooleanType) {
+		} else if (isBoolean()) {
 			return new BooleanStaticValue(false);
 		} else {
-			error("Unknown type " + theType + " + in variable " + getFQName());
+			//error("Unknown type " + theType + " + in variable " + getFQName());
 			return brokenStaticValue();			
 		}
 	}	
@@ -133,26 +132,26 @@ aspect StaticValue {
 		FlatStaticValue rightValue = getRight().staticValue();		
 		FPrimitiveType leftPrimitive = getLeftPrimitive();
 		FPrimitiveType rightPrimitive = getRightPrimitive();		
-		if (leftPrimitive.equals(fIntegerType()) && 
-			rightPrimitive.equals(fIntegerType())) {
+		if (leftPrimitive.isInteger() && 
+			rightPrimitive.isInteger()) {
 				int left = ((IntegerStaticValue) leftValue).getValue();
 				int right = ((IntegerStaticValue) rightValue).getValue();
 				return new IntegerStaticValue(doIntegerOperation(left,right,operator));
-		} else if (leftPrimitive.equals(fRealType())) {
+		} else if (leftPrimitive.isReal()) {
 				double left = ((RealStaticValue) leftValue).getValue();
 				double right = 0.0;
-				if (rightPrimitive.equals(fIntegerType())) {
+				if (rightPrimitive.isInteger()) {
 					right = (double) ((IntegerStaticValue) rightValue).getValue();
-				} else if (rightPrimitive.equals(fRealType())) {
+				} else if (rightPrimitive.isReal()) {
 					right = ((RealStaticValue) rightValue).getValue();	
 				} else {
 					return brokenStaticValue();				
 				}
 				return new RealStaticValue(doDoubleOperation(left,right,operator));			
-		} else if (rightPrimitive.equals(fRealType())) {
+		} else if (rightPrimitive.isReal()) {
 				double right = ((RealStaticValue) rightValue).getValue();
 				double left = 0.0;
-				if (rightPrimitive.equals(fIntegerType())) {
+				if (rightPrimitive.isInteger()) {
 					left = (double) ((IntegerStaticValue) leftValue).getValue();
 				} else {
 					return brokenStaticValue();				
@@ -205,8 +204,8 @@ aspect StaticValue {
 			FlatStaticValue rightValue = getRight().staticValue();		
 			FPrimitiveType leftPrimitive = getLeftPrimitive();
 			FPrimitiveType rightPrimitive = getRightPrimitive();					
-			if (leftPrimitive.equals(fStringType()) &&
-				   rightPrimitive.equals(fStringType())) {
+			if (leftPrimitive.isString() &&
+				   rightPrimitive.isString()) {
 				String left = ((StringStaticValue) leftValue).getValue();			
 				String right = ((StringStaticValue) rightValue).getValue();						
 				return new StringStaticValue(left + right);
@@ -229,3 +228,5 @@ aspect StaticValue {
 	}
 	
 }
+
+*/

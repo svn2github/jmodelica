@@ -22,30 +22,22 @@ aspect FlatAPI {
     syn int FClass.numReals() = reals().size();
 	coll ArrayList<FVariable> FClass.reals() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
-	FVariable contributes
- 		this when isReal()
-	to FClass.reals() for myFClass();
+	FRealVariable contributes this to FClass.reals() for myFClass();
 
     syn int FClass.numIntegers() = integers().size();
 	coll ArrayList<FVariable> FClass.integers() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
-	FVariable contributes
- 		this when isInteger()
-	to FClass.integers() for myFClass();
+	FIntegerVariable contributes this to FClass.integers() for myFClass();
 
     syn int FClass.numBooleans() = booleans().size();
 	coll ArrayList<FVariable> FClass.booleans() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
-	FVariable contributes
- 		this when isBoolean()
-	to FClass.booleans() for myFClass();
+	FBooleanVariable contributes this to FClass.booleans() for myFClass();
 
     syn int FClass.numStrings() = strings().size();
 	coll ArrayList<FVariable> FClass.strings() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
-	FVariable contributes
- 		this when isString()
-	to FClass.strings() for myFClass();
+	FStringVariable contributes this to FClass.strings() for myFClass();
 
     syn int FClass.numIndependentConstants() = independentConstants().size();
 	coll ArrayList<FVariable> FClass.independentConstants() 
@@ -518,11 +510,15 @@ aspect FlatCausality {
 
 aspect FlatTypes {
 
-	syn boolean FVariable.isReal() = getType() instanceof FRealType;
-	syn boolean FVariable.isInteger() = getType() instanceof FIntegerType;	
-	syn boolean FVariable.isBoolean() = getType() instanceof FBooleanType;
-	syn boolean FVariable.isString() = getType() instanceof FStringType;
-	
+	syn boolean FVariable.isReal() = false;
+	eq FRealVariable.isReal() = true;
+	syn boolean FVariable.isInteger() = false;
+	eq FIntegerVariable.isInteger() = true;
+	syn boolean FVariable.isBoolean() = false;
+	eq FBooleanVariable.isBoolean() = true;
+	syn boolean FVariable.isString() = false;
+	eq FStringVariable.isString() = true;
+		
 }
 
 aspect Attributes {

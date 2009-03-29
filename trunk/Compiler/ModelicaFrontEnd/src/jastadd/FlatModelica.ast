@@ -19,7 +19,6 @@ FClass ::= FQName
            FVariable* 
            FInitialEquation:FAbstractEquation*
            FEquationBlock*
-           /FPrimitiveType*/
            /UnknownFVariable/; 
 
 FEquationBlock ::= FAbstractEquation*;
@@ -27,14 +26,17 @@ FEquationBlock ::= FAbstractEquation*;
 abstract AbstractFVariable;
 UnknownFVariable : AbstractFVariable;
 
-FVariable : AbstractFVariable ::= FTypePrefixOther
+abstract FVariable : AbstractFVariable ::= FTypePrefixOther
               [FTypePrefixInputOutput]
-              Type:FPrimitiveType  
-              /* Type:FTypeAccess */ // The child Type:FPrimitiveType would be replaced by this access
               FAttribute*
               [BindingExp:FExp]
               [FStringComment]
               FQName;
+
+FRealVariable : FVariable;
+FIntegerVariable : FVariable;
+FBooleanVariable : FVariable;
+FStringVariable : FVariable;
 
 abstract FPrimitiveType;
 FRealType : FPrimitiveType ::=;

@@ -628,7 +628,7 @@ aspect FlattPrettyPrint {
 				str.print(" ");
 			}
 			
-			str.print(getType());
+			str.print(type());
 			str.print(" ");
 			p.toString(getFQName(),str,"",o);
 		

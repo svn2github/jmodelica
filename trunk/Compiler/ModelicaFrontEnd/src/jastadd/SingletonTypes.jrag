@@ -16,7 +16,41 @@
 
 aspect BuiltInFlatTypes {
 
+	syn nta FRealType Root.getFRealType() = new FRealType();
+	syn nta FIntegerType Root.getFIntegerType() = new FIntegerType();
+	syn nta FBooleanType Root.getFBooleanType() = new FBooleanType();
+	syn nta FStringType Root.getFStringType() = new FStringType();
+/*
+	syn nta FRealType InstRoot.getFRealType() = new FRealType();
+	syn nta FIntegerType InstRoot.getFIntegerType() = new FIntegerType();
+	syn nta FBooleanType InstRoot.getFBooleanType() = new FBooleanType();
+	syn nta FStringType InstRoot.getFStringType() = new FStringType();
+*/
+	syn boolean InstPrimitive.isReal() = 
+		myInstClass().finalClass().primitiveName().equals("Real");
+	syn boolean InstPrimitive.isInteger() = 
+		myInstClass().finalClass().primitiveName().equals("Integer");
+	syn boolean InstPrimitive.isBoolean() = 
+		myInstClass().finalClass().primitiveName().equals("Boolean");
+	syn boolean InstPrimitive.isString() = 
+		myInstClass().finalClass().primitiveName().equals("String");
 
+	syn boolean FPrimitiveType.isReal() = false;
+	eq FRealType.isReal() = true;
+	syn boolean FPrimitiveType.isInteger() = false;
+	eq FIntegerType.isInteger() = true;
+	syn boolean FPrimitiveType.isBoolean() = false;
+	eq FBooleanType.isBoolean() = true;
+	syn boolean FPrimitiveType.isString() = false;
+	eq FStringType.isString() = true;
+	
+	syn FPrimitiveType FVariable.type();
+	eq FRealVariable.type() = root().getFRealType();
+	eq FIntegerVariable.type() = root().getFIntegerType();
+	eq FBooleanVariable.type() = root().getFBooleanType();
+	eq FStringVariable.type() = root().getFStringType();
+
+/*
 	syn lazy List FClass.getFPrimitiveTypeList() {
 		List l = new List();
 		l.add(new FBooleanType());
@@ -39,11 +73,12 @@ aspect BuiltInFlatTypes {
 //		l.add(new BrokenType());
 		return l;
 	}
+*/
 	
 	/* Ok, this is quick and dirty, but it shows the principle:
 	   the singleton FPrimitiveTypes: should be in a tree. 
 	   The odd names are just to avoid conflicts with the existing code.*/
-
+/*
 	syn FBooleanType InstRoot.f_BooleanType() = (FBooleanType)getFPrimitiveType(0);
 	syn FStringType InstRoot.f_StringType() = (FStringType)getFPrimitiveType(1);
 	syn FRealType InstRoot.f_RealType() = (FRealType)getFPrimitiveType(2);
@@ -88,14 +123,14 @@ aspect BuiltInFlatTypes {
 	eq Root.getChild().lookupFType(String name) = null;
 
 
-	
+	*/
 	
 }
 
 
 aspect BuiltinTypeSingletons {
 
-
+/*
 	public static final FBooleanType FBooleanType.singleton = new FBooleanType();
 	public static final FStringType FStringType.singleton = new FStringType();	
 	public static final FRealType FRealType.singleton = new FRealType();	
@@ -128,7 +163,7 @@ aspect BuiltinTypeSingletons {
 	public static BrokenType ASTNode.brokenType() {
 		return BrokenType.singleton;
 	}
-	
+	*/
 }
 
 aspect VariabilitySingletons {
