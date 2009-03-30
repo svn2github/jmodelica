@@ -113,7 +113,7 @@ int jmi_opt_sim_dh_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *icol) 
 
 }
 
-int jmi_opt_sim_write_file_matlab(jmi_opt_sim_t *jmi_opt_sim, char *file_name) {
+int jmi_opt_sim_write_file_matlab(jmi_opt_sim_t *jmi_opt_sim, const char *file_name) {
 	return jmi_opt_sim->write_file_matlab(jmi_opt_sim, file_name);
 }
 

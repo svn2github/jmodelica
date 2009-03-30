@@ -32,7 +32,7 @@
 typedef int (*test_function_t)(int verbose);
 
 // Run a test function
-int test_function(test_function_t tf, char *name, int verbose, int *nbr_test_ok, int *nbr_test_fail) {
+int test_function(test_function_t tf, const char *name, int verbose, int *nbr_test_ok, int *nbr_test_fail) {
 	int retval = tf(verbose);
 	if (retval == 0) {
 		printf(">>> test %s OK! <<<\n",name);

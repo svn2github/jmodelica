@@ -1058,7 +1058,7 @@ static int lp_radau_dh_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *ic
 	return 0;
 }
 
-static int lp_radau_write_file_matlab(jmi_opt_sim_t *jmi_opt_sim, char* file_name) {
+static int lp_radau_write_file_matlab(jmi_opt_sim_t *jmi_opt_sim, const char* file_name) {
 	int i,j,k;
 	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;

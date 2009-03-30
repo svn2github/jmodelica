@@ -102,7 +102,7 @@ typedef int (*jmi_opt_sim_h_nz_indices_t)(jmi_opt_sim_t *jmi_opt_sim, int *colIn
 
 typedef int (*jmi_opt_sim_g_nz_indices_t)(jmi_opt_sim_t *jmi_opt_sim, int *colIndex, int *rowIndex);
 
-typedef int (*jmi_opt_sim_write_file_matlab_t)(jmi_opt_sim_t *jmi_opt_sim, char *file_name);
+typedef int (*jmi_opt_sim_write_file_matlab_t)(jmi_opt_sim_t *jmi_opt_sim, const char *file_name);
 
 /* @} */
 
@@ -251,7 +251,7 @@ int jmi_opt_sim_dh_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *icol);
 /**
  * Write the the optimization result to file in Matlab format.
  */
-int jmi_opt_sim_write_file_matlab(jmi_opt_sim_t *jmi_opt_sim_t, char *file_name);
+int jmi_opt_sim_write_file_matlab(jmi_opt_sim_t *jmi_opt_sim_t, const char *file_name);
 
 #endif /* JMI_OPT_SIM_H_ */
 
