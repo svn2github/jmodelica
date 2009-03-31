@@ -1,4 +1,4 @@
-<--!
+<!--
     Copyright (C) 2009 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
@@ -14,6 +14,20 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<Test>
-  $n_real_x$
-</Test>
+<ModelVariableInterface>
+	<ModelName> $XML_modelName$ </ModelName>
+	<ModelAttributes>
+		<ModelIdentifier> $XML_modelIdentifier$ </ModelIdentifier>
+		<ModelDescription> $XML_modelDescription$ </ModelDescription>
+		<ModelAuthor> $XML_modelAuthor$ </ModelAuthor>
+		<ModelVersion> $XML_modelVersion$ </ModelVersion>
+		<SchemaVersion> $XML_schemaVersion$ </SchemaVersion>
+		<GenerationTool> $XML_generationTool$ </GenerationTool>
+		<GenerationDate> $XML_generationDate$ </GenerationDate>
+		<GUID> $XML_guid$ </GUID>
+	</ModelAttributes>
+	<ModelVariables>$XML_variables$
+	</ModelVariables>
+	$XML_defaultExperiment$
+	$XML_vendorAnnotations$	
+</ModelVariableInterface>
