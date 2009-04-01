@@ -474,13 +474,13 @@ aspect InstanceErrorCheck {
 
 	boolean InstAccess.errorChecked = false;
 	public void InstDot.collectErrors() {
-	    debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+	    //debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
 	    if (!errorChecked) {	
 			errorChecked = true;
 			getLeft().collectErrors();
 			if (!getLeft().isUnknown())
 				getRight().collectErrors();
-		}
+	    }
 	}
 
 	public void InstClassAccess.collectErrors() {

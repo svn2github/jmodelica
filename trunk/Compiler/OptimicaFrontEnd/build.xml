@@ -169,7 +169,18 @@
 	  <target name="gen-test" depends="build">
 	    <!-- Generates teests -->
 	  	<mkdir dir="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
-	    <java 
+
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	<java 
 	      classname="org.jmodelica.test.ast.JunitGenerator"
 	      classpath=".:bin/jmodelica.jar" 
 	      fork="true" 
@@ -188,14 +199,15 @@
 	  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 	    </java>
 	  	 <java 
-	  		  		      classname="org.jmodelica.test.ast.JunitGenerator"
-	  		  		      classpath=".:bin/jmodelica.jar" 
-	  		  		      fork="true" 
-	  		  		      dir=".">
-	  		  		    	<arg value="src/test/modelica/OptimicaTests.mo"/>
-	  		  		    	      <arg value="OptimicaTests"/>
-	  		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
-	  		    </java>
+		  		      classname="org.jmodelica.test.ast.JunitGenerator"
+		  		      classpath=".:bin/jmodelica.jar:${beaver_dir}/lib/beaver.jar" 
+		  		      fork="true" 
+		  		      dir=".">
+		  		    	<arg value="src/test/modelica/TypeTests.mo"/>
+		  		    	      <arg value="TypeTests"/>
+		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
+		    </java>
+
 	  	<javac compiler="javac1.5" debug="true" destdir="bin" classpath="${tools}/junit-4.4.jar" >
 	  		<src path="${test_junit-gen_dir}/"/>
 	  	    <include name = "org/jmodelica/test/junitgenerated/*.java"/>

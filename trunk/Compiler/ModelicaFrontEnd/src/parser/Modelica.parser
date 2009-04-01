@@ -939,6 +939,7 @@ Exp pow_exp =
 
 Exp primary =        
    UNSIGNED_NUMBER.n    {: return new RealLitExp(n); :}
+  | UNSIGNED_INTEGER.n    {: return new IntegerLitExp(n); :}
   | TRUE                {: return new BooleanLitExpTrue(); :}
   | FALSE                {: return new BooleanLitExpFalse(); :}
   | STRING.s               {: return new StringLitExp(s); :}

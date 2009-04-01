@@ -98,7 +98,7 @@ aspect Flattening {
 	}
 	
 	syn FVariable InstPrimitive.createFVariable() {
-		FExp e = myBindingExp();
+		FExp e = myBindingFExp();
 		List attr = new List();
 		for (IModification im : totalMergedEnvironment()) {
 			im.collectAttributes(attr,im.myInstNode().getFQNamePrefix());
@@ -155,7 +155,17 @@ aspect Flattening {
 	 * 
 	 * Retrieve the binding expression of an InstPrimitive node.
 	 */
-	syn FExp InstPrimitive.myBindingExp() {
+	syn lazy FExp InstPrimitive.myBindingInstExp() {
+
+		for (IModification im : totalMergedEnvironment()) {
+			if (im.hasIValueMod()) {
+				return im.iValueMod();
+			}
+		}
+		return null;
+	}
+
+	syn lazy FExp InstPrimitive.myBindingFExp() {
 
 		for (IModification im : totalMergedEnvironment()) {
 			if (im.hasIValueMod()) {
@@ -165,6 +175,7 @@ aspect Flattening {
 		return null;
 	}
 
+	
 	/**
 	 * \ingroup aspect_Flattening
 	 * 
@@ -344,6 +355,7 @@ aspect FlatExpressions {
 	public FExp FAndExp.flatten(FQName prefix) { return new FAndExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
 
 	public FExp FRealLitExp.flatten(FQName prefix) { return (FRealLitExp)fullCopy(); }
+	public FExp FIntegerLitExp.flatten(FQName prefix) { return (FIntegerLitExp)fullCopy(); }
 	public FExp FStringLitExp.flatten(FQName prefix) { return (FStringLitExp)fullCopy(); }
 	public FExp FBooleanLitExpTrue.flatten(FQName prefix) { return (FBooleanLitExpTrue)fullCopy(); }
 	public FExp FBooleanLitExpFalse.flatten(FQName prefix) { return (FBooleanLitExpFalse)fullCopy(); }
@@ -459,9 +471,13 @@ aspect InstantiatedExpressions {
 
 	public FAbstractEquation Equation.instantiate() {
 	    if (isInitial()) {
-	    	return new FInitialEquation(getLeft().instantiate(),getRight().instantiate());
+	    	FInitialEquation fie = new FInitialEquation(getLeft().instantiate(),getRight().instantiate());
+	    	fie.setStart(getStart());
+	    	return fie;
 		} else {
-			return new FEquation(getLeft().instantiate(),getRight().instantiate());
+			FEquation e = new FEquation(getLeft().instantiate(),getRight().instantiate());
+			e.setStart(getStart());
+			return e;
 	    }
 	}
 
@@ -471,68 +487,94 @@ aspect InstantiatedExpressions {
 		   o = new Opt(new FStringComment(getComment().getStringComment().getComment()));
 	    else
 	    	o = new Opt();
-		return new FConnectClause(o,new FIdUseInstAccess("",getConnector1().newInstAccess()),new FIdUseInstAccess("",getConnector2().newInstAccess()));
+		FConnectClause c = new FConnectClause(o,new FIdUseInstAccess("",getConnector1().newInstAccess()),new FIdUseInstAccess("",getConnector2().newInstAccess()));
+		c.setStart(getStart());
+		return c;
 	}
 
 	public FArraySubscripts ArraySubscripts.instantiate() {
 		List l = new List();
 		for (int i=0;i<getNumSubscript();i++)
 			l.add(getSubscript(i).instantiate());
-		return new FArraySubscripts(l);
+		FArraySubscripts as = new FArraySubscripts(l);
+		as.setStart(getStart());
+		return as;
 	}
 	
 	abstract public FSubscript Subscript.instantiate();
 	public FSubscript ColonSubscript.instantiate() { 
-		return new FColonSubscript();
+		FColonSubscript fcs = new FColonSubscript();
+		fcs.setStart(getStart());
+		return fcs;
 	}
 	
 	public FSubscript ExpSubscript.instantiate() {
-		return new FExpSubscript(getExp().instantiate());
+		FExpSubscript fes = new FExpSubscript(getExp().instantiate());
+		fes.setStart(getStart());
+		return fes;
 	}
 	
 	public FExp Exp.instantiate() {
-		return new FUnsupportedExp();
+		FUnsupportedExp ue = new FUnsupportedExp();
+		ue.setStart(getStart());
+		return ue;
 	}
 
 
 	public FExp AccessExp.instantiate() {
-		return new FInstAccessExp(getAccess().newInstAccess());
+		FInstAccessExp n = new FInstAccessExp(getAccess().newInstAccess());
+		n.setStart(getStart());
+		return n;
 	}
 
 
 	public InstAccess Access.instantiate() { 
-		return newInstAccess();
+		InstAccess n = newInstAccess();
+		n.setStart(getStart());
+		return n;
 	}
 
 	public FExp ArrayConstructor.instantiate() {
 	   List l = new List();
-	   for (int i=0;i<getFunctionArguments().getNumExp();i++)
+	   for (int i=0;i<getFunctionArguments().getNumExp();i++) {
 	   	 l.add(getFunctionArguments().getExp(i).instantiate());
-	   return new FArrayConstructor(l);
+	   	l.getChild(i).setStart(getStart());
+	   }
+	   FArrayConstructor n = new FArrayConstructor(l);
+	   n.setStart(getStart());
+	   return n;
 	}
-
 
 	public FExp RangeExp.instantiate() {
 		List l = new List();
-		for (int i=0;i<getNumExp();i++)
+		for (int i=0;i<getNumExp();i++) {
 			l.add(getExp(i).instantiate());
-		return new FRangeExp(l);
+			l.getChild(i).setStart(getStart());
+		}
+		FRangeExp n = new FRangeExp(l);
+		n.setStart(getStart());
+		return n;
 	}
 
     public FExp IfExp.instantiate() {
 		List etl = new List();
 		for (int i=0;i<getNumElseIfExp();i++) {
 			etl.add(getElseIfExp(i).instantiate());
+			etl.getChild(i).setStart(getStart());
 		}
-		return new FIfExp(getIfExp().instantiate(),
+		FIfExp n = new FIfExp(getIfExp().instantiate(),
 		                  getThenExp().instantiate(),
 		                  etl,
 		                  getElseExp().instantiate());
-	}
+		n.setStart(getStart());
+		return n;
+    }
 	
 	public FExp ElseIfExp.instantiate() {
-		return new FElseIfExp(getIfExp().instantiate(),
+		FElseIfExp n = new FElseIfExp(getIfExp().instantiate(),
 		                      getThenExp().instantiate());
+		n.setStart(getStart());
+		return n;
 	}
 
 
@@ -554,30 +596,128 @@ aspect InstantiatedExpressions {
 	}
 	*/
 	
-	public FExp AddExp.instantiate() { return new FAddExp(getLeft().instantiate(),getRight().instantiate()); }
-	public FExp SubExp.instantiate() { return new FSubExp(getLeft().instantiate(),getRight().instantiate()); }
-	public FExp MulExp.instantiate() { return new FMulExp(getLeft().instantiate(),getRight().instantiate()); }
-	public FExp DivExp.instantiate() { return new FDivExp(getLeft().instantiate(),getRight().instantiate()); }
-	public FExp PowExp.instantiate() { return new FPowExp(getLeft().instantiate(),getRight().instantiate()); }
-	public FExp NegExp.instantiate() { return new FNegExp(getExp().instantiate()); }
+	public FExp AddExp.instantiate() { 
+		FExp ae = new FAddExp(getLeft().instantiate(),getRight().instantiate()); 
+		ae.setStart(getStart());
+		return ae;
+	}
+	public FExp SubExp.instantiate() { 
+		FExp n = new FSubExp(getLeft().instantiate(),getRight().instantiate()); 
+		n.setStart(getStart());
+		return n;
+	}
 
-	public FExp LtExp.instantiate() { return new FLtExp(getLeft().instantiate(),getRight().instantiate()); }
-	public FExp LeqExp.instantiate() { return new FLeqExp(getLeft().instantiate(),getRight().instantiate()); }
-	public FExp GtExp.instantiate() { return new FGtExp(getLeft().instantiate(),getRight().instantiate()); }
-	public FExp GeqExp.instantiate() { return new FGeqExp(getLeft().instantiate(),getRight().instantiate()); }
-	public FExp EqExp.instantiate() { return new FEqExp(getLeft().instantiate(),getRight().instantiate()); }
-	public FExp NeqExp.instantiate() { return new FNeqExp(getLeft().instantiate(),getRight().instantiate()); }
-	public FExp NotExp.instantiate() { return new FNotExp(getExp().instantiate()); }
-	public FExp OrExp.instantiate() { return new FOrExp(getLeft().instantiate(),getRight().instantiate()); }
-	public FExp AndExp.instantiate() { return new FAndExp(getLeft().instantiate(),getRight().instantiate()); }
+	public FExp MulExp.instantiate() { 
+		FExp n = new FMulExp(getLeft().instantiate(),getRight().instantiate()); 
+		n.setStart(getStart());
+		return n;
+	}
+	public FExp DivExp.instantiate() { 
+		FExp n = new FDivExp(getLeft().instantiate(),getRight().instantiate()); 
+		n.setStart(getStart());
+		return n;
+	}
+	
+	public FExp PowExp.instantiate() { 
+		FExp n = new FPowExp(getLeft().instantiate(),getRight().instantiate()); 
+		n.setStart(getStart());
+		return n;	
+	}
+	public FExp NegExp.instantiate() { 
+		FExp n = new FNegExp(getExp().instantiate()); 
+		n.setStart(getStart());
+		return n;	
+	}
 
-	public FExp RealLitExp.instantiate() { return new FRealLitExp(getUNSIGNED_NUMBER()); }
-	public FExp StringLitExp.instantiate() { return new FStringLitExp(getSTRING()); }
-	public FExp BooleanLitExpTrue.instantiate() { return new FBooleanLitExpTrue(); }
-	public FExp BooleanLitExpFalse.instantiate() { return new FBooleanLitExpFalse(); }
+	public FExp LtExp.instantiate() { 
+		FExp n = new FLtExp(getLeft().instantiate(),getRight().instantiate());
+		n.setStart(getStart());
+		return n;
+	}
+
+	public FExp LeqExp.instantiate() { 
+		FExp n = new FLeqExp(getLeft().instantiate(),getRight().instantiate()); 
+		n.setStart(getStart());
+		return n;
+	}
 	
-	public FExp TimeExp.instantiate() { return new FTimeExp(); }
+	public FExp GtExp.instantiate() { 
+		FExp n = new FGtExp(getLeft().instantiate(),getRight().instantiate()); 
+		n.setStart(getStart());
+		return n;
+	}
 	
+	public FExp GeqExp.instantiate() { 
+		FExp n = new FGeqExp(getLeft().instantiate(),getRight().instantiate()); 
+		n.setStart(getStart());
+		return n;
+	}
+	
+	public FExp EqExp.instantiate() { 
+		FExp n = new FEqExp(getLeft().instantiate(),getRight().instantiate()); 
+		n.setStart(getStart());
+		return n;
+	}
+	
+	public FExp NeqExp.instantiate() { 
+		FExp n = new FNeqExp(getLeft().instantiate(),getRight().instantiate()); 
+		n.setStart(getStart());
+		return n;
+	}
+	
+	public FExp NotExp.instantiate() { 
+		FExp n = new FNotExp(getExp().instantiate()); 
+		n.setStart(getStart());
+		return n;
+	}
+	
+	public FExp OrExp.instantiate() { 
+		FExp n = new FOrExp(getLeft().instantiate(),getRight().instantiate()); 
+		n.setStart(getStart());
+		return n;
+	}
+	
+	public FExp AndExp.instantiate() { 
+		FExp n = new FAndExp(getLeft().instantiate(),getRight().instantiate()); 
+		n.setStart(getStart());
+		return n;
+	}
+
+	public FExp RealLitExp.instantiate() { 
+		FExp n = new FRealLitExp(getUNSIGNED_NUMBER()); 
+		n.setStart(getStart());
+		return n;
+	}
+	
+	public FExp IntegerLitExp.instantiate() { 
+		FExp n = new FIntegerLitExp(getUNSIGNED_INTEGER()); 
+		n.setStart(getStart());
+		return n;
+	}
+	
+	public FExp StringLitExp.instantiate() { 
+		FExp n = new FStringLitExp(getSTRING()); 
+		n.setStart(getStart());
+		return n;
+	}
+	
+	public FExp BooleanLitExpTrue.instantiate() { 
+		FExp n = new FBooleanLitExpTrue(); 
+		n.setStart(getStart());
+		return n;
+	}
+	
+	public FExp BooleanLitExpFalse.instantiate() { 
+		FExp n = new FBooleanLitExpFalse(); 
+		n.setStart(getStart());
+		return n;
+	}
+	
+	public FExp TimeExp.instantiate() { 
+		FExp n = new FTimeExp(); 
+		n.setStart(getStart());
+		return n;
+	}	
 	
 	public FExp FunctionCall.instantiate() {
 		List l = new List();
@@ -586,19 +726,25 @@ aspect InstantiatedExpressions {
 			args =  getFunctionArguments().getExpList();
 		for (int i=0;i<args.getNumChild();i++) {
 			l.add(((Exp)args.getChild(i)).instantiate());
+			l.getChild(i).setStart(getStart());
 		}
-		return new FFunctionCall(new FIdUseInstAccess("",getName().newInstAccess()),l);	
+		FFunctionCall n = new FFunctionCall(new FIdUseInstAccess("",getName().newInstAccess()),l);	
+		n.setStart(getStart());
+		return n;
 	}
 	
 	public FExp SumRedExp.instantiate() {
-		return new FSumRedExp(getExp().instantiate(),
+		FSumRedExp n = new FSumRedExp(getExp().instantiate(),
 		                     getForIndex().instantiate());
-		
+		n.setStart(getStart());
+		return n;
 	}
 	
 	public FForIndex ForIndex.instantiate() {
-		return new FForIndex(new FIdDecl(new FQName().append(getForIndexDecl().name())),
+		FForIndex n = new FForIndex(new FIdDecl(new FQName().append(getForIndexDecl().name())),
 		                     hasExp()? new Opt(getExp().instantiate()): new Opt());
+		n.setStart(getStart());
+		return n;
 	}
 	
 	//ForClauseE : AbstractEquation ::= ForIndex* ForEqns:AbstractEquation*;
@@ -638,4 +784,3 @@ aspect FlatBindingEquations {
 		}
 	}
 }
-

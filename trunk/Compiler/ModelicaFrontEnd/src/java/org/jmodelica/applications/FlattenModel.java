@@ -73,19 +73,18 @@ public class FlattenModel {
 //		      ipr.dumpTree("");		      
 		      
 		      System.out.println("Inst checking:");
-		      try {
-		      boolean instErr = ipr.checkErrorsInInstClass(cl);
-		      } catch(Exception e) {
-		    	  e.printStackTrace();
-		      }
+		      boolean instErr = false;
+//		      try {
+		      instErr = ipr.checkErrorsInInstClass(cl);
+//		      } catch(Exception e) {
+//		    	  e.printStackTrace();
+//		      }
 //		      System.out.println("Source checking:");
 //		      boolean sourceErr = sr.checkErrorsInClass(cl);
 		      
 
-/*
-		      if (instErr || sourceErr)
+		      if (instErr)
 		    	  System.exit(0);
-*/
 		      
 /*		      
 		      if (ipr.checkErrorsInInstClass(cl)) {

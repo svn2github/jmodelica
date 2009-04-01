@@ -14,6 +14,123 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+aspect FlatTypeAnalysis {
+
+	syn lazy FPrimitiveType AbstractFVariable.type();
+	eq FRealVariable.type() = fRealType();
+	eq FIntegerVariable.type() = fIntegerType();
+	eq FBooleanVariable.type() = fBooleanType();
+	eq FStringVariable.type() = fStringType();
+	eq UnknownFVariable.type() = fUnknownType();
+
+	syn FPrimitiveType InstPrimitive.type() {
+		if (isReal()) {
+			return fRealType();
+		} else if (isInteger()) {
+			return fIntegerType();
+		} else if (isBoolean()) {
+			return fBooleanType();
+		} else if (isString()) {
+			return fStringType();
+		} else {
+			return fUnknownType();
+		}
+	}
+	
+	syn lazy FPrimitiveType FExp.type() = fUnknownType();
+	
+	eq FUnaryExp.type() = getFExp().type();
+	eq FArtmBinExp.type() = getLeft().type().
+	  binaryNumericPromotion(getRight().type());
+	
+	eq FLogBinExp.type() = fBooleanType();
+	
+	
+	eq FRealLitExp.type() = fRealType();
+	eq FIntegerLitExp.type() = fIntegerType();
+	eq FBooleanLitExp.type() = fBooleanType();
+	eq FStringLitExp.type() = fStringType();
+	eq FTimeExp.type() = fRealType();
+	eq FDer.type() = fRealType();
+	
+	eq FIdUseExp.type() = myFV().type();
+	eq FInstAccessExp.type() = getInstAccess().myInstComponentDecl().isPrimitive()?
+			((InstPrimitive)getInstAccess().myInstComponentDecl()).type() : fUnknownType();
+	
+}
+
+aspect FNumericPromotion {
+	
+	syn FPrimitiveType FPrimitiveType.
+	    binaryNumericPromotion(FPrimitiveType type) = fUnknownType();
+	eq FNumericType.binaryNumericPromotion(FPrimitiveType type) {
+		if (!type.isNumeric()) {
+			return fUnknownType();
+		} else {
+			return isReal()? this : type; 
+		}
+	}
+	
+}
+
+aspect FTypeCompatibility {
+	syn boolean FPrimitiveType.typeCompatible(FPrimitiveType type) = false;
+	eq FRealType.typeCompatible(FPrimitiveType type) = type.isReal() || type.isInteger();
+	eq FIntegerType.typeCompatible(FPrimitiveType type) = type.isInteger();
+	eq FBooleanType.typeCompatible(FPrimitiveType type) = type.isBoolean();
+	eq FStringType.typeCompatible(FPrimitiveType type) = type.isString();
+}
+
+ aspect FTypeEquivalent {
+	syn boolean FPrimitiveType.equivalentTo(FPrimitiveType type) = false;
+	eq FRealType.equivalentTo(FPrimitiveType type) = type.isReal() || type.isInteger();
+	eq FIntegerType.equivalentTo(FPrimitiveType type) = type.isInteger() || type.isReal();
+	eq FBooleanType.equivalentTo(FPrimitiveType type) = type.isBoolean();
+	eq FStringType.equivalentTo(FPrimitiveType type) = type.isString();
+}
+
+
+ aspect BuiltInFlatTypes {
+
+ 	syn nta FRealType Root.getFRealType() = new FRealType();
+ 	syn nta FIntegerType Root.getFIntegerType() = new FIntegerType();
+ 	syn nta FBooleanType Root.getFBooleanType() = new FBooleanType();
+ 	syn nta FStringType Root.getFStringType() = new FStringType();
+ 	syn nta FUnknownType Root.getFUnknownType() = new FUnknownType();
+
+ 	syn boolean InstPrimitive.isReal() = 
+ 		myInstClass().finalClass().primitiveName().equals("Real");
+ 	syn boolean InstPrimitive.isInteger() = 
+ 		myInstClass().finalClass().primitiveName().equals("Integer");
+ 	syn boolean InstPrimitive.isBoolean() = 
+ 		myInstClass().finalClass().primitiveName().equals("Boolean");
+ 	syn boolean InstPrimitive.isString() = 
+ 		myInstClass().finalClass().primitiveName().equals("String");
+
+ 	syn boolean FPrimitiveType.isReal() = false;
+ 	eq FRealType.isReal() = true;
+ 	syn boolean FPrimitiveType.isInteger() = false;
+ 	eq FIntegerType.isInteger() = true;
+ 	syn boolean FPrimitiveType.isBoolean() = false;
+ 	eq FBooleanType.isBoolean() = true;
+ 	syn boolean FPrimitiveType.isString() = false;
+ 	eq FStringType.isString() = true;
+ 	
+ 	syn boolean FPrimitiveType.isNumeric() = false;
+ 	eq FNumericType.isNumeric() = true;
+
+ 	syn boolean FPrimitiveType.isUnknown() = false;
+ 	eq FUnknownType.isUnknown() = true;
+
+ 	syn FPrimitiveType ASTNode.fRealType() = root().getFRealType();
+ 	syn FPrimitiveType ASTNode.fIntegerType() = root().getFIntegerType();
+ 	syn FPrimitiveType ASTNode.fBooleanType() = root().getFBooleanType();
+ 	syn FPrimitiveType ASTNode.fStringType() = root().getFStringType();
+ 	syn FPrimitiveType ASTNode.fUnknownType() = root().getFUnknownType();
+ 	
+ }
+
+ 
 /*
 aspect ExpressionType {
 	

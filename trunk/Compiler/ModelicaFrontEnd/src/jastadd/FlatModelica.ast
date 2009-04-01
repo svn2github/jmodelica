@@ -39,17 +39,20 @@ abstract FVisibilityType::=;
 FPublicVisibilityType : FVisibilityType ::=;
 FProtectedVisibilityType : FVisibilityType ::=;
 
-
 FRealVariable : FVariable;
 FIntegerVariable : FVariable;
 FBooleanVariable : FVariable;
 FStringVariable : FVariable;
 
 abstract FPrimitiveType;
-FRealType : FPrimitiveType ::=;
-FIntegerType : FPrimitiveType ::=; 
+abstract FNumericType : FPrimitiveType;
+FRealType : FNumericType ::=;
+FIntegerType : FNumericType ::=; 
 FStringType : FPrimitiveType ::=;
 FBooleanType : FPrimitiveType ::=;
+
+//FArrayType : FPrimitiveType ::= Dim:FExp;
+FUnknownType : FPrimitiveType ::=;
 
 FQName ::= FQNamePart*;
 FQNamePart ::= <Name:String> [FArraySubscripts];
@@ -121,6 +124,7 @@ FOrExp : FLogBinExp;
 FAndExp : FLogBinExp;
 
 FRealLitExp : FExp ::= <UNSIGNED_NUMBER>;
+FIntegerLitExp : FExp ::= <UNSIGNED_INTEGER>;
 
 FFunctionCall : FExp ::= Name:FIdUse Args:FExp*;
 

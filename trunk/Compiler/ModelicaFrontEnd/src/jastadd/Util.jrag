@@ -23,7 +23,7 @@ import org.jmodelica.parser.*;
 aspect RootAccess {
 	
 	inh lazy Root ASTNode.retrieveRoot();
-	eq SourceRoot.getProgram().retrieveRoot() = this;
+	eq SourceRoot.getChild().retrieveRoot() = this;
 	eq FlatRoot.getFClass().retrieveRoot() = this;
 	syn lazy Root ASTNode.root() = retrieveRoot();
 	eq Root.root() = this;

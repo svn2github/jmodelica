@@ -56,6 +56,7 @@ aspect FlatVariability {
 	eq FUnaryExp.variability() = getFExp().variability();
 	
 	eq FRealLitExp.variability() = fConstant();
+	eq FIntegerLitExp.variability() = fConstant();
 	eq FStringLitExp.variability() = fConstant();
 	eq FBooleanLitExpTrue.variability() = fConstant();
 	eq FBooleanLitExpFalse.variability() = fConstant();	
@@ -173,3 +174,28 @@ aspect FlatVariability {
 	}	
 	
 }
+
+aspect VariabilitySingletons {
+	
+	public static final FContinuous FContinuous.singleton = new FContinuous();	
+	public static final FDiscrete FDiscrete.singleton = new FDiscrete();	
+	public static final FParameter FParameter.singleton = new FParameter();
+	public static final FConstant FConstant.singleton = new FConstant();	
+	
+	public static FContinuous ASTNode.fContinuous() {
+		return FContinuous.singleton;
+	}
+
+	public static FDiscrete ASTNode.fDiscrete() {
+		return FDiscrete.singleton;
+	}	
+
+	public static FParameter ASTNode.fParameter() {
+		return FParameter.singleton;
+	}
+	
+	public static FConstant ASTNode.fConstant() {
+		return FConstant.singleton;
+	}
+}
+

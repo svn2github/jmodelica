@@ -23,6 +23,7 @@ aspect FlatNameBinding {
 	eq FIdUseQualified.myFV() = lookupFV(getFQName());
 	
 	syn lazy AbstractFVariable FIdUseExp.myFV() = getFIdUse().myFV();
+
 	//inh AbstractFVariable FIdUseExp.lookupFV(FQName fqname);
 	inh AbstractFVariable FEquationBlock.lookupFV(FQName fqname);
 	inh AbstractFVariable FVariable.lookupFV(FQName fqname);

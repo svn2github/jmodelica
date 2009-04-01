@@ -31,9 +31,12 @@
  * \package org.jmodelica.ast Package containing all AST classes.
  */
 
+abstract Root;
+
 /**
  * A class representing the root node of a source AST.
  */
+ 
 SourceRoot : Root ::= Program ;
 
 Program ::= UnstructuredEntity:StoredDefinition* 
@@ -309,6 +312,7 @@ PowExp : ArtmBinExp::=; // Easy to make parser take care of this: should be a Pr
 NegExp : Exp::= Exp;
 
 RealLitExp : Exp ::= <UNSIGNED_NUMBER>;
+IntegerLitExp : Exp ::= <UNSIGNED_INTEGER>;
 StringLitExp : Exp ::= <STRING>;
 //BooleanLitExp : Exp ::= <Value:boolean>;
 FunctionCall : Exp ::= Name:Access [FunctionArguments];

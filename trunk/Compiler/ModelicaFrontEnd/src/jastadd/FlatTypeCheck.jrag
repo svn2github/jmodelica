@@ -18,18 +18,40 @@
 aspect FlatTypeCheck {
 	
   public void ASTNode.typeCheck() {
+	  
   }
-  /*
-  public void FExp.typeCheck()	{
-	  this.type();
+ 
+ 
+  public void InstPrimitive.typeCheck() {
+	  if (myBindingInstExp() != null) {
+		  // Check type compatibility
+		  if (!myBindingInstExp().type().isUnknown() &&
+				  !type().typeCompatible(myBindingInstExp().type())) {
+			  error("The binding expression of the variable " + name() +
+					  " does not match the declared type of the variable");
+		  }
+		  // Check Variability compatibility
+		  
+	  }
+	  
   }
-	
-  public void FVariable.typeCheck() {	
-	  this.type();
+ 
+  public void FEquation.typeCheck() {
+	  //System.out.println(getLeft().type() + " " + getRight().type());
+	  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
+		  if (!getLeft().type().equivalentTo(getRight().type())) {
+			  error("The right and left expression types of equation are" +
+		  			" not compatible");		  
+		  }
+	  }
   }
-
-  public void FAbstractEquation.typeCheck() {
-	  this.type();
+  
+  public void FArtmBinExp.typeCheck() {
+	  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
+		  if (type().isUnknown()) {
+			  error("Type error in expression");		  
+		  }
+	  }
   }
-  */
+  
 }

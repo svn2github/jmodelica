@@ -440,6 +440,10 @@ aspect PrettyPrint {
 	public void RealLitExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print(getUNSIGNED_NUMBER());
 	}
+
+	public void IntegerLitExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print(getUNSIGNED_INTEGER());
+	}
 	
 	public void TimeExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("time");
@@ -583,6 +587,7 @@ aspect PrettyPrint {
 	eq FIntegerType.toString() = "Integer";
 	eq FStringType.toString() = "String";
 	eq FBooleanType.toString() = "Boolean";	
+	eq FUnknownType.toString() = "FUnknownType";	
 
 }
 
@@ -873,6 +878,11 @@ aspect FlattPrettyPrint {
 	public void FRealLitExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print(getUNSIGNED_NUMBER());
 	}
+
+	public void FIntegerLitExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print(getUNSIGNED_INTEGER());
+	}
+
 	
 	public void FTimeExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("time");
@@ -1009,6 +1019,9 @@ aspect FlattPrettyPrint {
 	syn boolean FExp.isPrimary() = false;
 	eq FIdUseExp.isPrimary() = true;
 	eq FRealLitExp.isPrimary() = true;
+	eq FIntegerLitExp.isPrimary() = true;
+	eq FBooleanLitExp.isPrimary() = true;
+	eq FStringLitExp.isPrimary() = true;
 
 	syn String FTypePrefixInputOutput.toString();
 	eq FInput.toString() = "input";

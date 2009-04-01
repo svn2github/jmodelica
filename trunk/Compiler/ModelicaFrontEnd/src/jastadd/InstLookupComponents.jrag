@@ -91,7 +91,10 @@ aspect InstLookupComponents {
 			return unknownInstComponentDecl();
 	}
 	
-	eq InstDot.myInstComponentDecl() = getRight().myInstComponentDecl();
+	eq InstDot.myInstComponentDecl() {
+		getLeft(); // FIXME: WHY??? Errors result if removed.
+		return getRight().myInstComponentDecl();
+	}
 		
 /*
 	inh HashSet ForClauseE.lookupComponent(String name);	
