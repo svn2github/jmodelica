@@ -148,5 +148,17 @@ n_initial_equations: 0")})));
    	 equation
    	end CodeGenTest3;
 
+	model CodeGenTest4	
+		Real r(quantity="q", unit="kg", displayUnit="g", 
+		  min=-2-1,max=4,start=1+1,fixed=false,nominal=4-3) = 1;
+		Integer i(quantity="q", min=-2-1,max=4,start=1+1,fixed=false) = 1;
+		Boolean b(quantity="q", start=true,fixed=false) = 1;
+		String s(quantity="q",start="qwe") = 1;
+
+
+   	 equation
+   	end CodeGenTest4;
+
+
 
 end CodeGenTests;

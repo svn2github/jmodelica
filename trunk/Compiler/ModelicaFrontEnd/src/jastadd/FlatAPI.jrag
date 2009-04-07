@@ -490,10 +490,10 @@ aspect FlatAPI {
 	syn lazy boolean FVariable.isDependentConstant() = false;
 	syn lazy boolean FVariable.isIndependentParameter() = isParameter() &&
  		  (hasBindingExp()? getBindingExp().isConstantExp(): 
- 		  (startAttributeSet()? startAttribute().isConstantExp(): true));
+ 		  (startAttributeSet()? startAttributeExp().isConstantExp(): true));
 	syn lazy boolean FVariable.isDependentParameter() = isParameter() &&
  		  (hasBindingExp()? getBindingExp().isParameterExp(): 
- 		  (startAttributeSet()? startAttribute().isParameterExp(): false));
+ 		  (startAttributeSet()? startAttributeExp().isParameterExp(): false));
 	syn lazy boolean FVariable.isDifferentiatedVariable() = 
 	  myFClass().differentiatedRealVariables().contains(this);
 	syn lazy boolean FVariable.isAlgebraicVariable() = 
@@ -527,18 +527,152 @@ aspect FlatTypes {
 		
 }
 
+/**
+ * \brief Evaluation of attriutes for primitive types.
+ */
 aspect Attributes {
 
-
-	syn lazy FExp FVariable.startAttribute() {
+	// Quantity attribute
+	syn lazy boolean FVariable.quantityAttributeSet() {
 		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("start")) {
+			if (a.getName().name().equals("quantity")) {
+				return a.getAttributeSet();
+			}
+		}
+		return false;
+	}
+		
+	syn lazy FExp FVariable.quantityAttributeExp() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("quantity")) {
 				return a.hasValue()? a.getValue(): null;
 			}
 		}
 		return null;
 	}
+
+	syn CValue FVariable.quantityAttributeCValue() =
+		quantityAttributeSet()? quantityAttributeExp().ceval():
+			new CValueString("");
+		
+	syn String FVariable.quantityAttribute() = 
+		quantityAttributeCValue().stringValue();
+
+	// Unit attribute
+	syn lazy boolean FRealVariable.unitAttributeSet() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("unit")) {
+				return a.getAttributeSet();
+			}
+		}
+		return false;
+	}
+		
+	syn lazy FExp FRealVariable.unitAttributeExp()  {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("unit")) {
+				return a.hasValue()? a.getValue(): null;
+			}
+		}
+		return null;
+	}
+
+	syn CValue FRealVariable.unitAttributeCValue() =
+		unitAttributeSet()? unitAttributeExp().ceval():
+			new CValueString("");
+		
+	syn String FRealVariable.unitAttribute() =  
+		unitAttributeCValue().stringValue();
+
+	// Display Unit attribute
+	syn lazy boolean FRealVariable.displayUnitAttributeSet() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("displayUnit")) {
+				return a.getAttributeSet();
+			}
+		}
+		return false;
+	}
+		
+	syn lazy FExp FRealVariable.displayUnitAttributeExp()  {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("displayUnit")) {
+				return a.hasValue()? a.getValue(): null;
+			}
+		}
+		return null;
+	}
+
+	syn CValue FRealVariable.displayUnitAttributeCValue() =
+		displayUnitAttributeSet()? displayUnitAttributeExp().ceval():
+			new CValueString("");
+		
+	syn String FRealVariable.displayUnitAttribute() =  
+		displayUnitAttributeCValue().stringValue();
+
+	// min attribute
+	syn lazy boolean FVariable.minAttributeSet() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("min")) {
+				return a.getAttributeSet();
+			}
+		}
+		return false;
+	}
 	
+	syn lazy FExp FVariable.minAttributeExp() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("min")) {
+				return a.hasValue()? a.getValue(): null;
+			}
+		}
+		return null;
+	}
+
+	syn CValue FRealVariable.minAttributeCValue() =
+		minAttributeSet()? minAttributeExp().ceval():
+			new CValueReal(-1e20);
+	syn CValue FIntegerVariable.minAttributeCValue() =
+		minAttributeSet()? minAttributeExp().ceval():
+			new CValueInteger((int)-1e10);
+	
+	syn double FRealVariable.minAttribute() = 
+		minAttributeCValue().realValue();
+	syn int FIntegerVariable.minAttribute() = 
+		minAttributeCValue().intValue();	
+
+	// max attribute
+	syn lazy boolean FVariable.maxAttributeSet() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("max")) {
+				return a.getAttributeSet();
+			}
+		}
+		return false;
+	}
+	
+	syn lazy FExp FVariable.maxAttributeExp() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("max")) {
+				return a.hasValue()? a.getValue(): null;
+			}
+		}
+		return null;
+	}
+
+	syn CValue FRealVariable.maxAttributeCValue() =
+		maxAttributeSet()? maxAttributeExp().ceval():
+			new CValueReal(1e20);
+	syn CValue FIntegerVariable.maxAttributeCValue() =
+		maxAttributeSet()? maxAttributeExp().ceval():
+			new CValueInteger((int)1e10);
+	
+	syn double FRealVariable.maxAttribute() = 
+		maxAttributeCValue().realValue();
+	syn int FIntegerVariable.maxAttribute() = 
+		maxAttributeCValue().intValue();	
+
+	// start attribute
 	syn lazy boolean FVariable.startAttributeSet() {
 		for (FAttribute a : getFAttributes()) {
 			if (a.getName().name().equals("start")) {
@@ -547,6 +681,106 @@ aspect Attributes {
 		}
 		return false;
 	}
+	
+	syn lazy FExp FVariable.startAttributeExp() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("start")) {
+				return a.hasValue()? a.getValue(): null;
+			}
+		}
+		return null;
+	}
+
+	syn CValue FVariable.startAttributeCValue();
+	eq FRealVariable.startAttributeCValue() =
+		startAttributeSet()? startAttributeExp().ceval():
+			new CValueReal(0.0);
+	eq FIntegerVariable.startAttributeCValue() =
+		startAttributeSet()? startAttributeExp().ceval():
+			new CValueInteger(0);
+	eq FBooleanVariable.startAttributeCValue() =
+		startAttributeSet()? startAttributeExp().ceval():
+			new CValueBoolean(false);
+	eq FStringVariable.startAttributeCValue() =
+		startAttributeSet()? startAttributeExp().ceval():
+			new CValueString("");
+	
+	syn double FRealVariable.startAttribute() = 
+		startAttributeCValue().realValue();
+	syn int FIntegerVariable.startAttribute() = 
+		startAttributeCValue().intValue();
+	syn boolean FBooleanVariable.startAttribute() = 
+		startAttributeCValue().booleanValue();
+	syn String FStringVariable.startAttribute() = 
+		startAttributeCValue().stringValue();
+
+	// fixed attribute
+	syn lazy boolean FVariable.fixedAttributeSet() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("fixed")) {
+				return a.getAttributeSet();
+			}
+		}
+		return false;
+	}
+	
+	syn lazy FExp FVariable.fixedAttributeExp() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("fixed")) {
+				return a.hasValue()? a.getValue(): null;
+			}
+		}
+		return null;
+	}
+	
+	syn CValue FRealVariable.fixedAttributeCValue() =
+		fixedAttributeSet()? fixedAttributeExp().ceval():
+			isParameter() || isConstant()? new CValueBoolean(true):
+				new CValueBoolean(false);
+
+	syn CValue FIntegerVariable.fixedAttributeCValue() =
+		fixedAttributeSet()? fixedAttributeExp().ceval():
+			isParameter() || isConstant()? new CValueBoolean(true):
+				new CValueBoolean(false);
+
+	syn CValue FBooleanVariable.fixedAttributeCValue() =
+		fixedAttributeSet()? fixedAttributeExp().ceval():
+			isParameter() || isConstant()? new CValueBoolean(true):
+				new CValueBoolean(false);
+
+	syn boolean FRealVariable.fixedAttribute() = 
+		fixedAttributeCValue().booleanValue();
+	syn boolean FIntegerVariable.fixedAttribute() = 
+		fixedAttributeCValue().booleanValue();	
+	syn boolean FBooleanVariable.fixedAttribute() = 
+		fixedAttributeCValue().booleanValue();	
+		
+	// Nominal attribute
+	syn lazy boolean FRealVariable.nominalAttributeSet() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("nominal")) {
+				return a.getAttributeSet();
+			}
+		}
+		return false;
+	}
+		
+	syn lazy FExp FRealVariable.nominalAttributeExp()  {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("nominal")) {
+				return a.hasValue()? a.getValue(): null;
+			}
+		}
+		return null;
+	}
+
+	syn CValue FRealVariable.nominalAttributeCValue() =
+		nominalAttributeSet()? nominalAttributeExp().ceval():
+			new CValueReal(1.0);
+		
+	syn double FRealVariable.nominalAttribute() =  
+		nominalAttributeCValue().realValue();
+				
 }
 
 aspect VariableNumbering {

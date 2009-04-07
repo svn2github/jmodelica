@@ -226,7 +226,7 @@ public class XMLGenerator extends GenericGenerator {
 					if(variable.isReal()) {
 						genPrinter.print(tg.generateTag("RealAttributes"));
 						//start attribute
-						if(variable.startAttribute()!=null) {
+						if(variable.startAttributeSet()) {
 							//TODO:evaluate attribute
 							// Dummy value for now
 							genPrinter.print(tg.generateTag("Start") + 1.00 +tg.generateTag("Start"));
@@ -248,7 +248,7 @@ public class XMLGenerator extends GenericGenerator {
 					} else if(variable.isInteger()) {
 						genPrinter.print(tg.generateTag("IntegerAttributes"));
 						//start attribute
-						if(variable.startAttribute()!=null) {
+						if(variable.startAttributeSet()) {
 							//TODO:evaluate attribute
 							// Dummy value for now
 							genPrinter.print(tg.generateTag("Start")+1+tg.generateTag("Start"));
@@ -258,7 +258,7 @@ public class XMLGenerator extends GenericGenerator {
 					} else if(variable.isBoolean()) {
 						genPrinter.print(tg.generateTag("BooleanAttributes"));
 						//start attribute
-						if(variable.startAttribute()!=null) {
+						if(variable.startAttributeSet()) {
 							//TODO:evaluate attribute
 							// Dummy value for now
 							genPrinter.print(tg.generateTag("Start")+true+tg.generateTag("Start"));
@@ -269,7 +269,7 @@ public class XMLGenerator extends GenericGenerator {
 					} else if(variable.isString()) {
 						genPrinter.print(tg.generateTag("StringAttributes"));
 						//start attribute
-						if(variable.startAttribute()!=null) {
+						if(variable.startAttributeSet()) {
 							//TODO:evaluate attribute
 							// Dummy value for now
 							genPrinter.print(tg.generateTag("Start")+"one"+tg.generateTag("Start"));
@@ -282,7 +282,7 @@ public class XMLGenerator extends GenericGenerator {
 						//TODO: Enumeration
 						genPrinter.print(tg.generateTag("EnumerationAttributes"));
 						//startattribute
-						if(variable.startAttribute()!=null) {
+						if(variable.startAttributeSet()) {
 							//TODO:evaluate attribute
 							// Dummy value for now
 							genPrinter.print(tg.generateTag("Start")+1+tg.generateTag("Start"));

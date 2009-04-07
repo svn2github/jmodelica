@@ -243,6 +243,134 @@ aspect FlatDumpTree {
 		System.out.println(s);
 	}
 	*/
+	
+	public void FVariable.dumpTree(String indent) {
+		super.dumpTree(indent);
+		System.out.print(indent + indent + "** Evaluated attributes: ");
+		dumpAttributes();
+	}
+	
+	public void FVariable.dumpAttributes() {
+		
+	}
+	
+	public void FRealVariable.dumpAttributes() {
+		System.out.print("(");
+		boolean someAttrSet = false;
+		if (quantityAttributeSet()) {
+			someAttrSet = true;
+			System.out.print("quantity="+quantityAttribute());
+		}
+		if (unitAttributeSet()) {
+			System.out.print(", ");
+			System.out.print("unit="+unitAttribute());
+			someAttrSet = true;
+		}
+		if (displayUnitAttributeSet()) {
+			System.out.print(", ");
+			System.out.print("displayUnit="+displayUnitAttribute());
+			someAttrSet = true;
+		}
+		if (minAttributeSet()) {
+			System.out.print(", ");
+			System.out.print("min="+minAttribute());
+			someAttrSet = true;
+		}
+		if (maxAttributeSet()) {
+			System.out.print(", ");
+			System.out.print("max="+maxAttribute());
+			someAttrSet = true;
+		}
+		if (startAttributeSet()) {
+			System.out.print(", ");
+			System.out.print("start="+startAttribute());
+			someAttrSet = true;
+		}
+		if (fixedAttributeSet()) {
+			System.out.print(", ");
+			System.out.print("fixed="+fixedAttribute());
+			someAttrSet = true;
+		}
+		if (nominalAttributeSet()) {
+			System.out.print(", ");
+			System.out.print("nominal="+nominalAttribute());
+			someAttrSet = true;
+		}
+
+		
+		System.out.print(")");
+		
+	}
+
+	public void FIntegerVariable.dumpAttributes() {
+		System.out.print("(");
+		boolean someAttrSet = false;
+		if (quantityAttributeSet()) {
+			someAttrSet = true;
+			System.out.print("quantity="+quantityAttribute());
+		}
+		if (minAttributeSet()) {
+			System.out.print(", ");
+			System.out.print("min="+minAttribute());
+			someAttrSet = true;
+		}
+		if (maxAttributeSet()) {
+			System.out.print(", ");
+			System.out.print("max="+maxAttribute());
+			someAttrSet = true;
+		}
+		if (startAttributeSet()) {
+			System.out.print(", ");
+			System.out.print("start="+startAttribute());
+			someAttrSet = true;
+		}
+		if (fixedAttributeSet()) {
+			System.out.print(", ");
+			System.out.print("fixed="+fixedAttribute());
+			someAttrSet = true;
+		}
+		System.out.print(")");
+		
+	}
+
+	public void FBooleanVariable.dumpAttributes() {
+		System.out.print("(");
+		boolean someAttrSet = false;
+		if (quantityAttributeSet()) {
+			someAttrSet = true;
+			System.out.print("quantity="+quantityAttribute());
+		}
+		if (startAttributeSet()) {
+			System.out.print(", ");
+			System.out.print("start="+startAttribute());
+			someAttrSet = true;
+		}
+		if (fixedAttributeSet()) {
+			System.out.print(", ");
+			System.out.print("fixed="+fixedAttribute());
+			someAttrSet = true;
+		}
+		System.out.print(")");
+		
+	}
+
+	public void FStringVariable.dumpAttributes() {
+		System.out.print("(");
+		boolean someAttrSet = false;
+		if (quantityAttributeSet()) {
+			someAttrSet = true;
+			System.out.print("quantity="+quantityAttribute());
+		}
+		if (startAttributeSet()) {
+			System.out.print(", ");
+			System.out.print("start="+startAttribute());
+			someAttrSet = true;
+		}
+		System.out.print(")");
+		
+	}
+	
+	
 	public void FQName.dumpTree(String indent) {
 		debugPrint("FQName.dumpTree");
 		String s = indent + dump() +": " + name() + " at line: " + beginLine();
