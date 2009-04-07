@@ -135,6 +135,18 @@ n_initial_equations: 0")})));
         der(x)=1;
 	end CodeGenTest2;
 
+	model CodeGenTest3
+	
+		parameter Real p1 = 5;
+		parameter Real p2 = p1+4;
+		parameter Real p3 = p2-1;
+		parameter Real p4 = p3*6;
+		parameter Real p5 = p4/6;
+		parameter Real p6 = -p5;
+		parameter Real p7 = p6/83;
+		parameter Real p8 = p7^2;
+   	 equation
+   	end CodeGenTest3;
 
 
 end CodeGenTests;

@@ -25,7 +25,7 @@ aspect FlatTypeCheck {
   public void InstPrimitive.typeCheck() {
 	  if (myBindingInstExp() != null) {
 		  // Check type compatibility
-		  if (!myBindingInstExp().type().isUnknown() &&
+		  if (!myBindingInstExp().type().isUnknown() && // Avoid duplicate error messages
 				  !type().typeCompatible(myBindingInstExp().type())) {
 			  error("The binding expression of the variable " + name() +
 					  " does not match the declared type of the variable");

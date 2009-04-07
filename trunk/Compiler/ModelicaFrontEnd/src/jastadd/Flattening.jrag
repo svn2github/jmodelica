@@ -98,6 +98,7 @@ aspect Flattening {
 	}
 	
 	syn FVariable InstPrimitive.createFVariable() {
+		//System.out.println("**  " + name() + " = " + ceval());
 		FExp e = myBindingFExp();
 		List attr = new List();
 		for (IModification im : totalMergedEnvironment()) {

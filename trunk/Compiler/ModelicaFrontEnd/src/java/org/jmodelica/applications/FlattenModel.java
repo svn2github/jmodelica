@@ -114,7 +114,11 @@ public class FlattenModel {
 		    		  System.exit(0);
 		    	  }
 		    	  ir.dumpTree("");
-		    	  
+		    	/*
+		    	  for (FVariable fv : fc.getFVariables()) {
+		    		  System.out.println(fv.name() + " = " + fv.ceval());
+		    	  }
+		    	  */
 //		    	  if (ir.errorCheck())
 //		    		  System.exit(0);
 	    	  /*
@@ -137,7 +141,6 @@ public class FlattenModel {
 		    	  generator.generate(args[2],args[3]);
 
 		      }
-		    	  
 		    	  
 		      System.err.println("Parse time:         " + ((double)(parseTime-startTime))/1000.0);
 		      System.err.println("Error check time:   " + ((double)(errcheckTime-parseTime))/1000.0);

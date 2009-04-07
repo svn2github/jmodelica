@@ -123,8 +123,13 @@ FNotExp : FUnaryExp ::=;
 FOrExp : FLogBinExp;
 FAndExp : FLogBinExp;
 
-FRealLitExp : FExp ::= <UNSIGNED_NUMBER>;
-FIntegerLitExp : FExp ::= <UNSIGNED_INTEGER>;
+FLitExp : FExp;
+FRealLitExp : FLitExp ::= <UNSIGNED_NUMBER>;
+FIntegerLitExp : FLitExp ::= <UNSIGNED_INTEGER>;
+abstract FBooleanLitExp : FLitExp ::=;
+FBooleanLitExpTrue : FBooleanLitExp;
+FBooleanLitExpFalse : FBooleanLitExp;
+FStringLitExp : FLitExp ::= <String>;
 
 FFunctionCall : FExp ::= Name:FIdUse Args:FExp*;
 
@@ -162,11 +167,7 @@ FIdUseQualified : FIdUse ::= FQName;
 // as such in order to keep track of name parts and array indices, 
 // which in turn enables different output on different formats.
 //FDot : FIdUse ::= Left:FIdUse Right:FIdUse; 
-FStringLitExp : FExp ::= <String>;
 //FBooleanLitExp : FExp ::= <Val:boolean>;
-abstract FBooleanLitExp : FExp ::=;
-FBooleanLitExpTrue : FBooleanLitExp;
-FBooleanLitExpFalse : FBooleanLitExp;
 
 FArrayConstructor : FExp ::= FExp*;
 FMatrix : FExp ::= FExpList*;

@@ -55,11 +55,7 @@ aspect FlatVariability {
 	eq FBinExp.variability() = getLeft().variability().combine(getRight().variability());
 	eq FUnaryExp.variability() = getFExp().variability();
 	
-	eq FRealLitExp.variability() = fConstant();
-	eq FIntegerLitExp.variability() = fConstant();
-	eq FStringLitExp.variability() = fConstant();
-	eq FBooleanLitExpTrue.variability() = fConstant();
-	eq FBooleanLitExpFalse.variability() = fConstant();	
+	eq FLitExp.variability() = fConstant();
 
 	eq FNoExp.variability() = fConstant();
 	
