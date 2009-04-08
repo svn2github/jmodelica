@@ -24,7 +24,11 @@ package org.jmodelica.codegen;
 import java.io.PrintStream;
 import java.util.Stack;
 
+import org.jmodelica.ast.FBooleanVariable;
 import org.jmodelica.ast.FClass;
+import org.jmodelica.ast.FIntegerVariable;
+import org.jmodelica.ast.FRealVariable;
+import org.jmodelica.ast.FStringVariable;
 import org.jmodelica.ast.FVariable;
 import org.jmodelica.ast.Printer;
 
@@ -224,16 +228,47 @@ public class XMLGenerator extends GenericGenerator {
 				if(variable.getNumFAttribute()>0) {
 					//has attributes					
 					if(variable.isReal()) {
+						FRealVariable realvariable=(FRealVariable)variable;
+						
 						genPrinter.print(tg.generateTag("RealAttributes"));
-						//start attribute
-						if(variable.startAttributeSet()) {
-							//TODO:evaluate attribute
-							// Dummy value for now
-							genPrinter.print(tg.generateTag("Start") + 1.00 +tg.generateTag("Start"));
+						
+						//quantity
+						if(variable.quantityAttributeSet()) {
+							genPrinter.print(tg.generateTag("Quantity")+variable.quantityAttribute()+tg.generateTag("Quantity"));
 						}
-						//category attribute
+						//unit
+						if(realvariable.unitAttributeSet()) {
+							genPrinter.print(tg.generateTag("Unit")+realvariable.unitAttribute()+tg.generateTag("Unit"));
+						}
+						//default display unit
+						if(realvariable.displayUnitAttributeSet()) {
+							genPrinter.print(tg.generateTag("DefaultDisplayUnit"));
+							genPrinter.print(tg.generateTag("DisplayUnit")+realvariable.displayUnitAttribute()+tg.generateTag("DisplayUnit"));
+							//TODO:this is default value
+							genPrinter.print(tg.generateTag("Gain")+1.0+tg.generateTag("Gain"));
+							//TODO:offset(optional)
+							genPrinter.print("DefaultDisplayUnit");
+						}
+						//min
+						if(realvariable.minAttributeSet()) {
+							genPrinter.print(tg.generateTag("Min")+realvariable.minAttribute()+tg.generateTag("Min"));
+						}
+						//max
+						if(realvariable.maxAttributeSet()) {
+							genPrinter.print(tg.generateTag("Max")+realvariable.maxAttribute()+tg.generateTag("Max"));
+						}
+						//start
+//						if(variable.startAttributeSet()) {
+						if(realvariable.startAttributeSet()) {
+							genPrinter.print(tg.generateTag("Start") +realvariable.startAttribute()+tg.generateTag("Start"));
+						}						
+						//nominal
+						if(realvariable.nominalAttributeSet()) {
+							genPrinter.print(tg.generateTag("Nominal")+realvariable.nominalAttribute()+tg.generateTag("Nominal"));
+						}
+						//category
 						genPrinter.print(tg.generateTag("Category"));
-						if(variable.isDifferentiatedVariable()) {
+						if(realvariable.isDifferentiatedVariable()) {
 							genPrinter.print("derivative");
 						} else if(false) {
 							//TODO: state variable
@@ -246,12 +281,21 @@ public class XMLGenerator extends GenericGenerator {
 						genPrinter.print(tg.generateTag("RealAttributes"));
 						
 					} else if(variable.isInteger()) {
+						FIntegerVariable integervariable = (FIntegerVariable)variable;
+						
 						genPrinter.print(tg.generateTag("IntegerAttributes"));
-						//start attribute
-						if(variable.startAttributeSet()) {
-							//TODO:evaluate attribute
-							// Dummy value for now
-							genPrinter.print(tg.generateTag("Start")+1+tg.generateTag("Start"));
+						
+						//min
+						if(integervariable.minAttributeSet()) {
+							genPrinter.print(tg.generateTag("Min")+integervariable.minAttribute()+tg.generateTag("Min"));
+						}
+						//max
+						if(integervariable.maxAttributeSet()) {
+							genPrinter.print(tg.generateTag("Max")+integervariable.maxAttribute()+tg.generateTag("Max"));
+						}
+						//start
+						if(integervariable.startAttributeSet()) {
+							genPrinter.print(tg.generateTag("Start")+integervariable.startAttribute()+tg.generateTag("Start"));
 						}						
 						genPrinter.print(tg.generateTag("IntegerAttributes"));
 						
@@ -259,22 +303,16 @@ public class XMLGenerator extends GenericGenerator {
 						genPrinter.print(tg.generateTag("BooleanAttributes"));
 						//start attribute
 						if(variable.startAttributeSet()) {
-							//TODO:evaluate attribute
-							// Dummy value for now
-							genPrinter.print(tg.generateTag("Start")+true+tg.generateTag("Start"));
+							genPrinter.print(tg.generateTag("Start")+((FBooleanVariable)variable).startAttribute()+tg.generateTag("Start"));
 						}
-						
 						genPrinter.print(tg.generateTag("BooleanAttributes"));
 						
 					} else if(variable.isString()) {
 						genPrinter.print(tg.generateTag("StringAttributes"));
 						//start attribute
 						if(variable.startAttributeSet()) {
-							//TODO:evaluate attribute
-							// Dummy value for now
-							genPrinter.print(tg.generateTag("Start")+"one"+tg.generateTag("Start"));
+							genPrinter.print(tg.generateTag("Start")+((FStringVariable)variable).startAttribute()+tg.generateTag("Start"));
 						}
-						
 						genPrinter.print(tg.generateTag("StringAttributes"));
 						
 					} 
