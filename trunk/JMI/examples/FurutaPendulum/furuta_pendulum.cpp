@@ -54,13 +54,13 @@
  *   \textnormal{x(3)} &=& \dot \varphi
  *  \end{array}
  * \f$
- * 
+ *
  * .
  *
  * The input is
- * 
+ *
  * \f$ u(0) = \tau \textnormal{ (Motor torque)} \f$
- 
+
  * .
  *
  * The parameters are
@@ -187,13 +187,13 @@ static int vdp_init_F0(jmi_t* jmi, jmi_ad_var_vec_p res) {
 	_pi(1)*_pi(2)*sin(_x(0))*cos(_x(0))*cos(_x(0))*_x(3)*_x(3)-
 	_pi(3)*_pi(2)*sin(_x(0))*cos(_x(0))+_pi(1)*_u(0)*_x(2)) - _dx(3);
 
-	(*res)[4] = _pi(4);
+	(*res)[4] = _x(0) - _pi(4);
 
-	(*res)[5] = _pi(5);
+	(*res)[5] = _x(1) - _pi(5);
 
-	(*res)[6] = _pi(6);
+	(*res)[6] = _x(2) - _pi(6);
 
-	(*res)[7] = _pi(7);
+	(*res)[7] = _x(3) - _pi(7);
 
 }
 

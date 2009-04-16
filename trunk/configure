@@ -20422,7 +20422,7 @@ fi
 
 # Checks for library functions.
 
-ac_config_files="$ac_config_files Makefile JMI/src/Makefile JMI/examples/Vdp/Makefile JMI/examples/Vdp_cppad/Makefile JMI/examples/FurutaPendulum/Makefile"
+ac_config_files="$ac_config_files Makefile JMI/src/Makefile JMI/examples/Vdp/Makefile JMI/examples/Vdp_cppad/Makefile JMI/examples/FurutaPendulum/Makefile JMI/examples/CSTR/Makefile"
 
 
 
@@ -21038,6 +21038,7 @@ do
     "JMI/examples/Vdp/Makefile") CONFIG_FILES="$CONFIG_FILES JMI/examples/Vdp/Makefile" ;;
     "JMI/examples/Vdp_cppad/Makefile") CONFIG_FILES="$CONFIG_FILES JMI/examples/Vdp_cppad/Makefile" ;;
     "JMI/examples/FurutaPendulum/Makefile") CONFIG_FILES="$CONFIG_FILES JMI/examples/FurutaPendulum/Makefile" ;;
+    "JMI/examples/CSTR/Makefile") CONFIG_FILES="$CONFIG_FILES JMI/examples/CSTR/Makefile" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}

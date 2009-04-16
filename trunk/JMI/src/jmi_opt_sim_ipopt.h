@@ -38,6 +38,11 @@
 #include "jmi_opt_sim.h"
 #include <IpStdCInterface.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 typedef struct {
 	jmi_opt_sim_t *jmi_opt_sim;
 //	jmi_real_t *x;
@@ -65,5 +70,9 @@ int jmi_opt_sim_ipopt_new(jmi_opt_sim_ipopt_t **jmi_opt_sim_ipopt, jmi_opt_sim_t
 int jmi_opt_sim_ipopt_set_initial_point(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt, jmi_real_t *x_init);
 
 int jmi_opt_sim_ipopt_solve(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _JMI_OPT_SIM_IPOPT_H */

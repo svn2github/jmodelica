@@ -67,6 +67,10 @@
 
 #include "jmi.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \defgroup jmi_opt_sim_typedefs Typedefs
  * \brief Typedefs for data stuctures and call-back function pointers.
@@ -252,6 +256,11 @@ int jmi_opt_sim_dh_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *icol);
  * Write the the optimization result to file in Matlab format.
  */
 int jmi_opt_sim_write_file_matlab(jmi_opt_sim_t *jmi_opt_sim_t, const char *file_name);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif /* JMI_OPT_SIM_H_ */
 

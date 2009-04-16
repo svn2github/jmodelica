@@ -892,6 +892,11 @@
 #include "jmi.h"
 #include "jmi_opt_sim.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 typedef struct {
 	jmi_opt_sim_t jmi_opt_sim;
     int n_cp;                      // Number of collocation points
@@ -1534,6 +1539,9 @@ int jmi_opt_sim_lp_get_pols(int n_cp, jmi_real_t *cp, jmi_real_t *cpp,
 		jmi_real_t *Lp_dot_coeffs, jmi_real_t *Lpp_dot_coeffs,
 		                          jmi_real_t *Lp_dot_vals, jmi_real_t *Lpp_dot_vals);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 /* @} */
