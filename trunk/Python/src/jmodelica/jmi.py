@@ -359,6 +359,17 @@ def load_DLL(libname, path):
                                             ndim=1, \
                                             shape=n_eq_F.value, \
                                             flags='C')]
+    dll.jmi_dae_dF.argtypes = [ct.c_void_p, \
+                               ct.c_int, \
+                               ct.c_int, \
+                               ct.c_int, \
+                               Nct.ndpointer( \
+                                                dtype=ct.c_int, \
+                                                ndim=1, \
+                                                flags='C'), \
+                              Nct.ndpointer(dtype=c_jmi_real_t, \
+                                            ndim=1, \
+                                            flags='C')]
     if dF_n_nz is not None:
         dll.jmi_dae_dF_nz_indices.argtypes = [ct.c_void_p, \
                                               ct.c_int, \
@@ -389,7 +400,116 @@ def load_DLL(libname, path):
                                    ct.POINTER(ct.c_int), \
                                    ct.POINTER(ct.c_int)]
                                           
-                                          
+    dll.jmi_init_F0.argtypes = [ct.c_void_p, \
+                                Nct.ndpointer(dtype=c_jmi_real_t, \
+                                              ndim=1, \
+                                              flags='C')]
+    dll.jmi_init_dF0.argtypes = [ct.c_void_p, \
+                                 ct.c_int, \
+                                 ct.c_int, \
+                                 ct.c_int, \
+                                 Nct.ndpointer( \
+                                                dtype=ct.c_int, \
+                                                ndim=1, \
+                                                flags='C'), \
+                                 Nct.ndpointer(dtype=c_jmi_real_t, \
+                                               ndim=1, \
+                                               flags='C')]
+
+    dll.jmi_init_dF0_nz_indices.argtypes = [ct.c_void_p, \
+                                          ct.c_int, \
+                                          ct.c_int, \
+                                          Nct.ndpointer( \
+                                                dtype=ct.c_int, \
+                                                ndim=1, \
+                                                flags='C'), \
+                                          Nct.ndpointer(dtype=ct.c_int, \
+                                                        ndim=1, \
+                                                        flags='C'), \
+                                          Nct.ndpointer(dtype=ct.c_int, \
+                                                        ndim=1, \
+                                                        flags='C')]
+    dll.jmi_init_dF0_dim.argtypes = [ct.c_void_p, ct.c_int, ct.c_int, \
+                                   ct.c_int, \
+                                   Nct.ndpointer(dtype=ct.c_int, \
+                                                 ndim=1, \
+                                                 flags='C'), \
+                                   ct.POINTER(ct.c_int), \
+                                   ct.POINTER(ct.c_int)]
+
+    dll.jmi_init_F1.argtypes = [ct.c_void_p, \
+                                Nct.ndpointer(dtype=c_jmi_real_t, \
+                                              ndim=1, \
+                                              flags='C')]
+    dll.jmi_init_dF1.argtypes = [ct.c_void_p, \
+                                 ct.c_int, \
+                                 ct.c_int, \
+                                 ct.c_int, \
+                                 Nct.ndpointer( \
+                                                dtype=ct.c_int, \
+                                                ndim=1, \
+                                                flags='C'), \
+                                 Nct.ndpointer(dtype=c_jmi_real_t, \
+                                               ndim=1, \
+                                               flags='C')]
+
+    dll.jmi_init_dF1_nz_indices.argtypes = [ct.c_void_p, \
+                                          ct.c_int, \
+                                          ct.c_int, \
+                                          Nct.ndpointer( \
+                                                dtype=ct.c_int, \
+                                                ndim=1, \
+                                                flags='C'), \
+                                          Nct.ndpointer(dtype=ct.c_int, \
+                                                        ndim=1, \
+                                                        flags='C'), \
+                                          Nct.ndpointer(dtype=ct.c_int, \
+                                                        ndim=1, \
+                                                        flags='C')]
+    dll.jmi_init_dF1_dim.argtypes = [ct.c_void_p, ct.c_int, ct.c_int, \
+                                   ct.c_int, \
+                                   Nct.ndpointer(dtype=ct.c_int, \
+                                                 ndim=1, \
+                                                 flags='C'), \
+                                   ct.POINTER(ct.c_int), \
+                                   ct.POINTER(ct.c_int)]
+
+    dll.jmi_ode_f.argtypes = [ct.c_void_p]
+    dll.jmi_ode_df.argtypes = [ct.c_void_p, \
+                               ct.c_int, \
+                               ct.c_int, \
+                               ct.c_int, \
+                                Nct.ndpointer( \
+                                                dtype=ct.c_int, \
+                                                ndim=1, \
+                                                flags='C'), \
+                                 Nct.ndpointer(dtype=c_jmi_real_t, \
+                                               ndim=1, \
+                                               flags='C')]
+
+    dll.jmi_ode_df_nz_indices.argtypes = [ct.c_void_p, \
+                                          ct.c_int, \
+                                          ct.c_int, \
+                                          Nct.ndpointer( \
+                                                dtype=ct.c_int, \
+                                                ndim=1, \
+                                                flags='C'), \
+                                          Nct.ndpointer(dtype=ct.c_int, \
+                                                        ndim=1, \
+                                                        flags='C'), \
+                                          Nct.ndpointer(dtype=ct.c_int, \
+                                                        ndim=1, \
+                                                        flags='C')]
+    dll.jmi_ode_df_dim.argtypes = [ct.c_void_p, ct.c_int, ct.c_int, \
+                                   ct.c_int, \
+                                   Nct.ndpointer(dtype=ct.c_int, \
+                                                 ndim=1, \
+                                                 flags='C'), \
+                                   ct.POINTER(ct.c_int), \
+                                   ct.POINTER(ct.c_int)]
+                                       
+
+
                                    
     
     assert dll.jmi_delete(jmi) == 0, \
