@@ -130,11 +130,13 @@ public class FlattenModel_XML {
 		    	  printTime = System.currentTimeMillis();
 		
 		      // Generate code?
-		      if (args.length==4) {
+		      if (args.length==3) {
 		    	  XMLGenerator generator = 
 		    		  new XMLGenerator(new PrettyPrinter(), '$',fc);
 		    	  System.out.println(generator.toString());
-		    	  generator.generate(args[2],args[3]);
+		    	  //output file name
+		    	  String output = fc.name()+".xml";
+		    	  generator.generate(args[2],output);
 
 		      }
 		    	  
