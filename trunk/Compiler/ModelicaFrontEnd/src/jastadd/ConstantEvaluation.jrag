@@ -105,7 +105,7 @@ aspect ConstantEvaluation {
 	/**
 	 * \brief Constant integer value.
 	 */
-    class CValueInteger extends CValue {
+    public class CValueInteger extends CValue {
         private int value;
         
         /** 
@@ -175,7 +175,7 @@ aspect ConstantEvaluation {
 	/**
 	 * \brief Constant real value.
 	 */      
-    class CValueReal extends CValue {
+    public class CValueReal extends CValue {
         private double value;
         
         /**
@@ -246,7 +246,7 @@ aspect ConstantEvaluation {
 	/**
 	 * \brief Constant boolean value.
 	 */
-    class CValueBoolean extends CValue {
+    public class CValueBoolean extends CValue {
         private boolean value;
 
         /**
@@ -308,7 +308,7 @@ aspect ConstantEvaluation {
 	/**
 	 * \brief Constant string value.
 	 */
-    class CValueString extends CValue {
+    public class CValueString extends CValue {
         private String value;
         
         /**
@@ -358,7 +358,7 @@ aspect ConstantEvaluation {
 	 * non-constant values and values resulting from expressions with
 	 * type errors.
 	 */
-    class CValueUnknown extends CValue {
+    public class CValueUnknown extends CValue {
 
 	    /**
 	     * \brief Returns true if the constant value is of numeric type.
