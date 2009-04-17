@@ -39,7 +39,7 @@ aspect ConstantEvaluation {
 	 * \brief CValue represents a constant value and serves as the super class 
 	 * for constant value classes of the primitive types.
 	 */
-	abstract class CValue {
+	public abstract class CValue {
 
 		/** 
 		 * \brief Default constructor.
@@ -52,7 +52,7 @@ aspect ConstantEvaluation {
 	     * 
 	     * @return Value converted to int.
 	     */
-	    int intValue() { 
+	    public int intValue() { 
 	    	throw new UnsupportedOperationException(); 
 	    }
 	    
@@ -61,7 +61,7 @@ aspect ConstantEvaluation {
 	     * 
 	     * @return Value converted to double.
 	     */
-	    double realValue() { 
+	    public double realValue() { 
 	    	throw new UnsupportedOperationException(); 
 	    }
 	    
@@ -70,7 +70,7 @@ aspect ConstantEvaluation {
 	     * 
 	     * @return Value converted to boolean.
 	     */
-	    boolean booleanValue() { 
+	    public boolean booleanValue() { 
 	    	throw new UnsupportedOperationException(getClass().getName()); 
 	    }
 	    
@@ -79,7 +79,7 @@ aspect ConstantEvaluation {
 	     * 
 	     * @return Value converted to string.	     
 	     */
-	    String stringValue() { 
+	    public String stringValue() { 
 	    	throw new UnsupportedOperationException(); 
 	    }
 	    
@@ -89,7 +89,7 @@ aspect ConstantEvaluation {
 	     *  
 	     *  @return Literal expression AST node.
 	     */
-	    FLitExp buildLiteral() { 
+	    public FLitExp buildLiteral() { 
 	    	throw new UnsupportedOperationException(); 
 	    }
 	    
@@ -98,7 +98,7 @@ aspect ConstantEvaluation {
 	     * 
 	     * @return True if the constant is a numerical value.
 	     */
-	    abstract boolean isNumeric();
+	    public abstract boolean isNumeric();
 	    
   }
   
@@ -122,7 +122,7 @@ aspect ConstantEvaluation {
 	     * 
 	     * @return Value converted to int.
 	     */
-        int intValue() { 
+        public int intValue() { 
         	return value; 
         }
 
@@ -131,7 +131,7 @@ aspect ConstantEvaluation {
 	     * 
 	     *  @return Value converted to double.
 	     */
-        double realValue() { 
+        public double realValue() { 
         	return value; 
         }
         
@@ -140,7 +140,7 @@ aspect ConstantEvaluation {
 	     * 
 	     * @return Value converted to string.
 	     */
-        String stringValue() { 
+        public String stringValue() { 
         	return new Integer(value).toString(); 
         }
         
@@ -149,7 +149,7 @@ aspect ConstantEvaluation {
          * 
          * @return AST node of type FLitExp.
          */
-        FLitExp buildLiteral() { 
+        public FLitExp buildLiteral() { 
         	return new FIntegerLitExp(stringValue()); 
         }
 
@@ -158,7 +158,7 @@ aspect ConstantEvaluation {
 	     * 
 	     * @return True.
 	     */
-	    boolean isNumeric() {
+	    public boolean isNumeric() {
 	    	return true;
 	    }
         
@@ -192,7 +192,7 @@ aspect ConstantEvaluation {
 	     * 
 	     * @return Value converted to int.
 	     */
-        int intValue() { 
+        public int intValue() { 
         	return (int)value; 
         }
         
@@ -201,7 +201,7 @@ aspect ConstantEvaluation {
 	     * 
 	     * @return Value converted to double.
 	     */
-        double realValue() { 
+        public double realValue() { 
         	return value; 
         }
 
@@ -210,7 +210,7 @@ aspect ConstantEvaluation {
 	     * 
 	     * @return Value converted to string.
 	     */
-        String stringValue() { 
+        public String stringValue() { 
         	return new Double(value).toString(); 
         }
         
@@ -219,7 +219,7 @@ aspect ConstantEvaluation {
          * 
          * @return FRealLitExp AST node.
          */
-        FLitExp buildLiteral() { 
+        public FLitExp buildLiteral() { 
         	return new FRealLitExp(stringValue()); 
         }
 
@@ -228,7 +228,7 @@ aspect ConstantEvaluation {
 	     * 
 	     * @return True.
 	     */
-	    boolean isNumeric() {
+	    public boolean isNumeric() {
 	    	return true;
 	    }
         
@@ -263,7 +263,7 @@ aspect ConstantEvaluation {
 	     * 
 	     * @return Value converted to boolean.
 	     */
-        boolean booleanValue() { 
+        public boolean booleanValue() { 
         	return value; 
         }
         
@@ -272,7 +272,7 @@ aspect ConstantEvaluation {
 	     * 
 	     * @return Value converted to string.
 	     */
-        String stringValue() { 
+        public String stringValue() { 
         	return new Boolean(value).toString(); 
         }
         
@@ -281,7 +281,7 @@ aspect ConstantEvaluation {
          * 
          * @return FBooleanLitExp AST node.
          */
-        FLitExp buildLiteral() { 
+        public FLitExp buildLiteral() { 
       	  return value? new FBooleanLitExpTrue() :
       		  new FBooleanLitExpFalse(); 
       	  }
@@ -291,7 +291,7 @@ aspect ConstantEvaluation {
 	     * 
 	     * @return False.
 	     */
-	    boolean isNumeric() {
+	    public boolean isNumeric() {
 	    	return false;
 	    }
         
@@ -323,14 +323,14 @@ aspect ConstantEvaluation {
 	     * 
 	     * @return Value converted to string.
 	     */        
-        String stringValue() { return value; }
+        public String stringValue() { return value; }
 
         /**
          * \brief Create a new literal expression AST node.
          * 
          * @return FStringLitExp AST node.
          */
-        FLitExp buildLiteral() { 
+        public FLitExp buildLiteral() { 
         	return new FStringLitExp(stringValue()); 
         }
 
@@ -339,7 +339,7 @@ aspect ConstantEvaluation {
 	     * 
 	     * @return False.
 	     */
-	    boolean isNumeric() {
+        public boolean isNumeric() {
 	    	return false;
 	    }
                 
@@ -365,7 +365,7 @@ aspect ConstantEvaluation {
 	     * 
 	     * @return False.
 	     */
-	    boolean isNumeric() {
+    	public boolean isNumeric() {
 	    	return false;
 	    }
     	
