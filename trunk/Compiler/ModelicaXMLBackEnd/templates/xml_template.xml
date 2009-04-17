@@ -15,16 +15,16 @@
 -->
 
 <ModelVariableInterface>
-	<ModelName> $XML_modelName$ </ModelName>
+	<ModelName>$XML_modelName$</ModelName>
 	<ModelAttributes>
-		<ModelIdentifier> $XML_modelIdentifier$ </ModelIdentifier>
-		<ModelDescription> $XML_modelDescription$ </ModelDescription>
-		<ModelAuthor> $XML_modelAuthor$ </ModelAuthor>
-		<ModelVersion> $XML_modelVersion$ </ModelVersion>
-		<SchemaVersion> $XML_schemaVersion$ </SchemaVersion>
-		<GenerationTool> $XML_generationTool$ </GenerationTool>
-		<GenerationDate> $XML_generationDate$ </GenerationDate>
-		<GUID> $XML_guid$ </GUID>
+		<ModelIdentifier>$XML_modelIdentifier$</ModelIdentifier>
+		<ModelDescription>$XML_modelDescription$</ModelDescription>
+		<ModelAuthor>$XML_modelAuthor$</ModelAuthor>
+		<ModelVersion>$XML_modelVersion$</ModelVersion>
+		<SchemaVersion>$XML_schemaVersion$</SchemaVersion>
+		<GenerationTool>$XML_generationTool$</GenerationTool>
+		<GenerationDate>$XML_generationDate$</GenerationDate>
+		<GUID>$XML_guid$</GUID>
 	</ModelAttributes>
 	<ModelVariables>$XML_variables$
 	</ModelVariables>
