@@ -150,8 +150,10 @@ public abstract class CodeGenTestCase extends TestCase {
 	    generator.generate(new BufferedReader(new StringReader(getTemplate())),
 	    		           new PrintStream(os));
 
-   	  	
-		return os.toString().equals(getGenCode());
+   	  	System.out.println("**"+getGenCode().trim()+"**");
+   	  	System.out.println("**"+os.toString().trim()+"**");
+	    
+		return os.toString().trim().equals(getGenCode().trim());
 	}
 	
 	public String getGenCode() {
