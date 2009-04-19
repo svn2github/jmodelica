@@ -422,6 +422,16 @@ int jmi_set_tp(jmi_t *jmi, jmi_real_t *tp);
 int jmi_get_tp(jmi_t *jmi, jmi_real_t *tp);
 
 /**
+ * \brief Get a pointer to the z vector containing all real variables.
+ *
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the \f$z\f$ vector.
+ *
+ */
+jmi_real_t* jmi_get_z(jmi_t* jmi);
+
+
+/**
  * \brief Get a pointer to the independent constants vector.
  *
  * @param jmi The jmi_t struct.

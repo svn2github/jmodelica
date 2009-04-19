@@ -448,6 +448,10 @@ int jmi_opt_get_p_opt_indices(jmi_t *jmi, int *p_opt_indices) {
 	}
 }
 
+jmi_real_t* jmi_get_z(jmi_t* jmi) {
+	return *(jmi->z_val);
+}
+
 jmi_real_t* jmi_get_ci(jmi_t* jmi) {
 	return *(jmi->z_val) + jmi->offs_ci;
 }
