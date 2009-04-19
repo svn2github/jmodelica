@@ -20,10 +20,128 @@ import java.util.ArrayList;
 aspect FlatAPI {
 	
 	/**
-	 * Returns a unique integer id for a variable in a model.
+	 * The value reference value is represented by a 32 bit unsigned integer 
+	 * variable. The lowest 28 bits is used to represent the index of a 
+	 * variable of the corresponding Real, Integer, Boolean and String vector. 
+	 * Bits 29-31 represents the primitive type, where:
+	 * 0: Real
+	 * 1: Integer
+	 * 2: Boolean
+	 * 3: String
+	 * Bit 32 is left unused.
+	 *
 	 */
-	inh int FVariable.valueReference();
-	eq FClass.getFVariable(int i).valueReference() = i;
+	inh lazy int FVariable.valueReference();
+	eq FClass.getFVariable(int i).valueReference() {
+		int index = 0;
+		index = 0x00000000; 
+		FVariable fv = getFVariable(i);
+		if (independentRealConstants().indexOf(fv) >= 0) {
+			return index + independentRealConstants().indexOf(fv);
+		} 
+		index += numIndependentRealConstants();
+		if (dependentRealConstants().indexOf(fv) >= 0) {
+			return index + dependentRealConstants().indexOf(fv);
+		} 
+		index += numDependentRealConstants();
+		if (independentRealParameters().indexOf(fv) >= 0) {
+			return index + independentRealParameters().indexOf(fv);
+		} 
+		index += numIndependentRealParameters();
+		if (dependentRealParameters().indexOf(fv) >= 0) {
+			return index + dependentRealParameters().indexOf(fv);
+		} 
+		index += numDependentRealParameters();
+		index += numDifferentiatedRealVariables(); // Skip the dx variables		
+		if (differentiatedRealVariables().indexOf(fv) >= 0) {
+			return index + differentiatedRealVariables().indexOf(fv);
+		} 
+		index += numDifferentiatedRealVariables();
+		if (realInputs().indexOf(fv) >= 0) {
+			return index + realInputs().indexOf(fv);
+		} 
+		index += numRealInputs();
+		if (algebraicRealVariables().indexOf(fv) >= 0) {
+			return index + algebraicRealVariables().indexOf(fv);
+		} 
+
+		index = 0x10000000; 
+		if (independentIntegerConstants().indexOf(fv) >= 0) {
+			return index + independentIntegerConstants().indexOf(fv);
+		} 
+		index += numIndependentIntegerConstants();
+		if (dependentIntegerConstants().indexOf(fv) >= 0) {
+			return index + dependentIntegerConstants().indexOf(fv);
+		} 
+		index += numDependentIntegerConstants();
+		if (independentIntegerParameters().indexOf(fv) >= 0) {
+			return index + independentIntegerParameters().indexOf(fv);
+		} 
+		index += numIndependentIntegerParameters();
+		if (dependentIntegerParameters().indexOf(fv) >= 0) {
+			return index + dependentIntegerParameters().indexOf(fv);
+		} 
+		index += numDependentIntegerParameters();
+		if (integerInputs().indexOf(fv) >= 0) {
+			return index + integerInputs().indexOf(fv);
+		} 
+		index += numIntegerInputs();
+		if (algebraicIntegerVariables().indexOf(fv) >= 0) {
+			return index + algebraicIntegerVariables().indexOf(fv);
+		} 
+		
+		index = 0x20000000; 
+		if (independentBooleanConstants().indexOf(fv) >= 0) {
+			return index + independentBooleanConstants().indexOf(fv);
+		} 
+		index += numIndependentBooleanConstants();
+		if (dependentBooleanConstants().indexOf(fv) >= 0) {
+			return index + dependentBooleanConstants().indexOf(fv);
+		} 
+		index += numDependentBooleanConstants();
+		if (independentBooleanParameters().indexOf(fv) >= 0) {
+			return index + independentBooleanParameters().indexOf(fv);
+		} 
+		index += numIndependentBooleanParameters();
+		if (dependentBooleanParameters().indexOf(fv) >= 0) {
+			return index + dependentBooleanParameters().indexOf(fv);
+		} 
+		index += numDependentBooleanParameters();
+		if (booleanInputs().indexOf(fv) >= 0) {
+			return index + booleanInputs().indexOf(fv);
+		} 
+		index += numBooleanInputs();
+		if (algebraicBooleanVariables().indexOf(fv) >= 0) {
+			return index + algebraicBooleanVariables().indexOf(fv);
+		} 
+
+		index = 0x30000000; 
+		if (independentStringConstants().indexOf(fv) >= 0) {
+			return index + independentStringConstants().indexOf(fv);
+		} 
+		index += numIndependentStringConstants();
+		if (dependentStringConstants().indexOf(fv) >= 0) {
+			return index + dependentStringConstants().indexOf(fv);
+		} 
+		index += numDependentStringConstants();
+		if (independentStringParameters().indexOf(fv) >= 0) {
+			return index + independentStringParameters().indexOf(fv);
+		} 
+		index += numIndependentStringParameters();
+		if (dependentStringParameters().indexOf(fv) >= 0) {
+			return index + dependentStringParameters().indexOf(fv);
+		} 
+		index += numDependentStringParameters();
+		if (stringInputs().indexOf(fv) >= 0) {
+			return index + stringInputs().indexOf(fv);
+		} 
+		index += numStringInputs();
+		if (algebraicStringVariables().indexOf(fv) >= 0) {
+			return index + algebraicStringVariables().indexOf(fv);
+		} 
+
+		return index;
+	}
 
     syn int FClass.numReals() = reals().size();
 	coll ArrayList<FVariable> FClass.reals() 
