@@ -113,12 +113,13 @@ static int vdp_init_F0(jmi_t* jmi, jmi_ad_var_vec_p res) {
 }
 
 static int vdp_init_F1(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return 0;
+	return -1;
 }
 
 static int vdp_opt_J(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	(*res)[0] = _x_p(2,0);
-	return -0;
+	//printf("%f, %f, %f, %f\n",c,T,J,_x_p(0,2));
+	(*res)[0] = _x_p(0,2);
+	return 0;
 }
 
 static int vdp_opt_Ceq(jmi_t* jmi, jmi_ad_var_vec_p res) {
@@ -128,7 +129,7 @@ static int vdp_opt_Ceq(jmi_t* jmi, jmi_ad_var_vec_p res) {
 static int vdp_opt_Cineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
 	(*res)[0] = Tc - 320;
 	(*res)[1] = -Tc + 280;
-	return -1;
+	return 0;
 }
 
 static int vdp_opt_Heq(jmi_t* jmi, jmi_ad_var_vec_p res) {

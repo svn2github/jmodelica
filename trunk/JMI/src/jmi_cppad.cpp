@@ -167,9 +167,12 @@ int jmi_func_ad_init(jmi_t *jmi, jmi_func_t *func) {
 	func->ad->dF_u_p_n_nz = 0;
 	func->ad->dF_w_p_n_nz = 0;
 */
+
 	// Sort out all the individual variable vector sparsity patterns as well..
 	for (i=0;i<(int)s_z.size();i++) { // cast to int since size() gives unsigned int...
-		if (s_z[i]) func->ad->dF_z_n_nz++;
+		if (s_z[i]) {
+			func->ad->dF_z_n_nz++;
+		}
 	}
 
 	func->ad->dF_z_row = (int*)calloc(func->ad->dF_z_n_nz,sizeof(int));
@@ -569,6 +572,7 @@ int jmi_func_ad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 	// Iterate over all columns
 	for (i=0;i<jmi->n_z;i++) {
 		if (jmi_check_Jacobian_column_index(jmi, independent_vars, mask, i) == 1 ) {
+			//printf("Jopp %d\n",i);
 			// Evaluate jacobian for column i
 			d_z[i] = 1.;
 			jac_ = func->ad->F_z_tape->Forward(1,d_z);
@@ -586,9 +590,11 @@ int jmi_func_ad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 				break;
 			case JMI_DER_SPARSE:
 				// TODO: This may be a bit inefficient?
-				for(j=0;j<func->dF_n_nz;j++) {
-					if (func->dF_col[j]-1 == i) {
-						jac[jac_index++] = jac_[func->dF_row[j]-1];
+				//printf("Jepp %d\n",func->ad->dF_z_n_nz);
+				for(j=0;j<func->ad->dF_z_n_nz;j++) {
+					//printf("%d, %d\n",func->ad->dF_z_row[i],func->ad->dF_z_col[j]);
+					if (func->ad->dF_z_col[j]-1 == i) {
+						jac[jac_index++] = jac_[func->ad->dF_z_row[j]-1];
 					}
 				}
 			}
@@ -924,7 +930,7 @@ int jmi_init_dF0(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, i
 				independent_vars, mask, jac) ;
 
 	} else if (eval_alg & JMI_DER_CPPAD) {
-
+        //printf("hej\n");
 		return jmi_func_ad_dF(jmi,jmi->init->F0, sparsity, independent_vars, mask, jac);
 
 	} else {
@@ -1220,7 +1226,7 @@ int jmi_opt_dCineq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
 
 	} else if (eval_alg & JMI_DER_CPPAD) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->opt->Cineq, independent_vars, mask, row, col);
+		return jmi_func_ad_dF_nz_indices(jmi, jmi->opt->Cineq, independent_vars, mask, row, col);
 
 	} else {
 		return -1;
@@ -1287,7 +1293,7 @@ int jmi_opt_dHeq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
 
 	} else if (eval_alg & JMI_DER_CPPAD) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->opt->Heq, independent_vars, mask, row, col);
+		return jmi_func_ad_dF_nz_indices(jmi, jmi->opt->Heq, independent_vars, mask, row, col);
 
 	} else {
 		return -1;

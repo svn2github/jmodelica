@@ -98,15 +98,27 @@ typedef int (*jmi_opt_sim_g_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res);
 
 typedef int (*jmi_opt_sim_dg_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac);
 
-typedef int (*jmi_opt_sim_get_bounds_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_lb, jmi_real_t *x_ub);
+typedef int (*jmi_opt_sim_get_bounds_t)(jmi_opt_sim_t *jmi_opt_sim,
+		jmi_real_t *x_lb, jmi_real_t *x_ub);
 
-typedef int (*jmi_opt_sim_get_initial_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_init);
+typedef int (*jmi_opt_sim_get_initial_t)(jmi_opt_sim_t *jmi_opt_sim,
+		jmi_real_t *x_init);
 
-typedef int (*jmi_opt_sim_h_nz_indices_t)(jmi_opt_sim_t *jmi_opt_sim, int *colIndex, int *rowIndex);
+typedef int (*jmi_opt_sim_h_nz_indices_t)(jmi_opt_sim_t *jmi_opt_sim,
+		int *colIndex, int *rowIndex);
 
-typedef int (*jmi_opt_sim_g_nz_indices_t)(jmi_opt_sim_t *jmi_opt_sim, int *colIndex, int *rowIndex);
+typedef int (*jmi_opt_sim_g_nz_indices_t)(jmi_opt_sim_t *jmi_opt_sim,
+		int *colIndex, int *rowIndex);
 
-typedef int (*jmi_opt_sim_write_file_matlab_t)(jmi_opt_sim_t *jmi_opt_sim, const char *file_name);
+typedef int (*jmi_opt_sim_write_file_matlab_t)(jmi_opt_sim_t *jmi_opt_sim,
+		const char *file_name);
+
+typedef int (*jmi_opt_sim_get_result_variable_vector_length_t)(jmi_opt_sim_t
+		*jmi_opt_sim, int *n);
+
+typedef int (*jmi_opt_sim_get_result_t)(jmi_opt_sim_t *jmi_opt_sim,
+		jmi_real_t *p_opt, jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x,
+		jmi_real_t *u, jmi_real_t *w);
 
 /* @} */
 
@@ -115,7 +127,6 @@ typedef int (*jmi_opt_sim_write_file_matlab_t)(jmi_opt_sim_t *jmi_opt_sim, const
  * \brief Documentation of the jmi_opt_sim_t struct and it setters and getters.
  */
 /* @{ */
-
 
 /**
  * jmi_opt_sim_get_dimenstions returns the number of variables and the number of
@@ -132,9 +143,8 @@ int jmi_opt_sim_get_interval_spec(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *start_
 
 /**
  * Get the x vector.
- * TODO: this function should return a jmi_real_t*.
  */
-int jmi_opt_sim_get_x(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t **x);
+jmi_real_t* jmi_opt_sim_get_x(jmi_opt_sim_t *jmi_opt_sim);
 
 /**
  * jmi_opt_sim_get_initial returns the initial point.
@@ -181,6 +191,8 @@ struct jmi_opt_sim_t{
 	jmi_opt_sim_g_nz_indices_t dg_nz_indices;
 	jmi_opt_sim_h_nz_indices_t dh_nz_indices;
 	jmi_opt_sim_write_file_matlab_t write_file_matlab;
+	jmi_opt_sim_get_result_variable_vector_length_t get_result_variable_vector_length;
+	jmi_opt_sim_get_result_t get_result;
 };
 
 /**
@@ -255,7 +267,21 @@ int jmi_opt_sim_dh_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *icol);
 /**
  * Write the the optimization result to file in Matlab format.
  */
-int jmi_opt_sim_write_file_matlab(jmi_opt_sim_t *jmi_opt_sim_t, const char *file_name);
+int jmi_opt_sim_write_file_matlab(jmi_opt_sim_t *jmi_opt_sim_t,
+		const char *file_name);
+
+/**
+ * Get the length of the result variable vectors.
+ */
+int jmi_opt_sim_get_result_variable_vector_length(jmi_opt_sim_t
+		*jmi_opt_sim, int *n);
+
+/**
+ * Get the results, stored in column major format.
+ */
+int jmi_opt_sim_get_result(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *p_opt,
+		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
+		jmi_real_t *w);
 
 #ifdef __cplusplus
 }

@@ -36,10 +36,8 @@ int jmi_opt_sim_get_dimensions(jmi_opt_sim_t *jmi_opt_sim, int *n_x, int *n_g, i
 	return 0;
 }
 
-
-int jmi_opt_sim_get_x(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t **x) {
-	*x = jmi_opt_sim->x;
-	return 0;
+jmi_real_t* jmi_opt_sim_get_x(jmi_opt_sim_t *jmi_opt_sim) {
+	return jmi_opt_sim->x;
 }
 
 int jmi_opt_sim_get_interval_spec(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *start_time, int *start_time_free,
@@ -115,6 +113,17 @@ int jmi_opt_sim_dh_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *icol) 
 
 int jmi_opt_sim_write_file_matlab(jmi_opt_sim_t *jmi_opt_sim, const char *file_name) {
 	return jmi_opt_sim->write_file_matlab(jmi_opt_sim, file_name);
+}
+
+int jmi_opt_sim_get_result_variable_vector_length(jmi_opt_sim_t
+		*jmi_opt_sim, int *n) {
+	return jmi_opt_sim->get_result_variable_vector_length(jmi_opt_sim, n);
+}
+
+int jmi_opt_sim_get_result(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *p_opt,
+		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
+		jmi_real_t *w) {
+	return jmi_opt_sim->get_result(jmi_opt_sim, p_opt, t, dx, x, u, w);
 }
 
 

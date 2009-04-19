@@ -507,6 +507,12 @@ static int lp_radau_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
 		lp_radau_copy_initial_point(jmi_opt_sim);
 		jmi_init_F0(jmi_opt_sim->jmi,res+ dh_init_eq_offs(jmi_opt_sim,0));
 
+/*
+		for (i=0;i<3;i++) {
+			printf("%f\n",res[i]);
+		}
+*/
+
 		// collocation point residuals
 		for (i=0;i<jmi_opt_sim->n_e;i++) {
 			for (j=0;j<nlp->n_cp;j++) {
@@ -667,7 +673,11 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 	jmi_init_dF0(jmi_opt_sim->jmi,nlp->der_eval_alg, JMI_DER_SPARSE,
 			     JMI_DER_PI | JMI_DER_DX | JMI_DER_X | JMI_DER_U | JMI_DER_W,
 			     nlp->der_mask, jac);
-
+/*
+	for (i=0;i<3;i++) {
+		printf("%f\n",jac[i]);
+	}
+*/
 	// collocation point residuals
 	for (i=0;i<jmi_opt_sim->n_e;i++) {
 		for (j=0;j<nlp->n_cp;j++) {
@@ -1071,7 +1081,6 @@ static int lp_radau_write_file_matlab(jmi_opt_sim_t *jmi_opt_sim, const char* fi
 	// TODO: Support for free initial and final time
 	fprintf(f,"%12.12f\n",jmi->opt->start_time);
 
-
 	for (i=0;i<jmi_opt_sim->n_e;i++) {
 		for (j=0;j<nlp->n_cp;j++) {
 			jmi_real_t tt = jmi->opt->start_time;
@@ -1147,7 +1156,7 @@ static int lp_radau_write_file_matlab(jmi_opt_sim_t *jmi_opt_sim, const char* fi
 	fprintf(f,"\n");
 	for (i=0;i<jmi_opt_sim->n_e;i++) {
 		for (j=0;j<nlp->n_cp;j++) {
-			for (k=0;k<jmi->n_u;k++) {
+			for (k=0;k<jmi->n_w;k++) {
 				fprintf(f,"%12.12f, ",w_coll(jmi_opt_sim,i,j+1,k));
 			}
 			fprintf(f,"\n");
@@ -1160,6 +1169,94 @@ static int lp_radau_write_file_matlab(jmi_opt_sim_t *jmi_opt_sim, const char* fi
 	return 0;
 
 }
+
+static int lp_radau_get_result_variable_vector_length(jmi_opt_sim_t
+		*jmi_opt_sim, int *n) {
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
+	*n = jmi_opt_sim->n_e*nlp->n_cp + 1;
+	return 0;
+}
+static int lp_radau_get_result(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *p_opt_,
+		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
+		jmi_real_t *w) {
+
+	int i,j,k;
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
+	jmi_t *jmi = jmi_opt_sim->jmi;
+
+	// Create time vector
+	t[0] = jmi->opt->start_time;
+	for (i=0;i<jmi_opt_sim->n_e;i++) {
+		for (j=0;j<nlp->n_cp;j++) {
+			jmi_real_t tt = jmi->opt->start_time;
+			for (k=0;k<i;k++) {
+				tt += jmi_opt_sim->hs[k]*(jmi->opt->final_time-jmi->opt->start_time);
+			}
+			tt += jmi_opt_sim->hs[i]*nlp->cp[j]*(jmi->opt->final_time-jmi->opt->start_time);
+			t[i*nlp->n_cp + j + 1] = tt;
+		}
+	}
+
+	// optimization parameters
+	for (i=0;i<jmi->opt->n_p_opt;i++) {
+		p_opt_[i] = p_opt(jmi_opt_sim,i);
+	}
+
+	// derivatives
+	for (i=0;i<jmi->n_dx;i++) {
+		dx[i*(jmi_opt_sim->n_e*nlp->n_cp+1)] = dx_0(jmi_opt_sim,i);
+	}
+	for (i=0;i<jmi_opt_sim->n_e;i++) {
+		for (j=0;j<nlp->n_cp;j++) {
+			for (k=0;k<jmi->n_dx;k++) {
+				dx[k*(jmi_opt_sim->n_e*nlp->n_cp+1) + i*nlp->n_cp + j + 1] =
+					dx_coll(jmi_opt_sim,i,j+1,k);
+			}
+		}
+	}
+
+	// states
+	for (i=0;i<jmi->n_x;i++) {
+		x[i*(jmi_opt_sim->n_e*nlp->n_cp+1)] = x_0(jmi_opt_sim,i);
+	}
+	for (i=0;i<jmi_opt_sim->n_e;i++) {
+		for (j=0;j<nlp->n_cp;j++) {
+			for (k=0;k<jmi->n_x;k++) {
+				x[k*(jmi_opt_sim->n_e*nlp->n_cp+1) + i*nlp->n_cp + j + 1] =
+					x_coll(jmi_opt_sim,i,j+1,k);
+			}
+		}
+	}
+
+	// inputs
+	for (i=0;i<jmi->n_u;i++) {
+		u[i*(jmi_opt_sim->n_e*nlp->n_cp+1)] =u_0(jmi_opt_sim,i);
+	}
+	for (i=0;i<jmi_opt_sim->n_e;i++) {
+		for (j=0;j<nlp->n_cp;j++) {
+			for (k=0;k<jmi->n_u;k++) {
+				u[k*(jmi_opt_sim->n_e*nlp->n_cp+1) + i*nlp->n_cp + j + 1] =
+					u_coll(jmi_opt_sim,i,j+1,k);
+			}
+		}
+	}
+
+	// algebraics
+	for (i=0;i<jmi->n_w;i++) {
+		w[i*(jmi_opt_sim->n_e*nlp->n_cp+1)] = w_0(jmi_opt_sim,i);
+	}
+	for (i=0;i<jmi_opt_sim->n_e;i++) {
+		for (j=0;j<nlp->n_cp;j++) {
+			for (k=0;k<jmi->n_w;k++) {
+				w[k*(jmi_opt_sim->n_e*nlp->n_cp+1) + i*nlp->n_cp + j + 1] =
+					w_coll(jmi_opt_sim,i,j+1,k);
+			}
+		}
+	}
+
+	return 0;
+}
+
 
 int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
         jmi_real_t *hs, int hs_free,
@@ -1227,6 +1324,8 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 				            (hs[j]);
 				break;
 			}
+			(*jmi_opt_sim)->tp_e[i] = n_e-1;
+			(*jmi_opt_sim)->tp_tau[i] = 1.0;
 		}
 	}
 
@@ -2084,7 +2183,9 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 	(*jmi_opt_sim)->dh_nz_indices = *lp_radau_dh_nz_indices;
 	(*jmi_opt_sim)->dg_nz_indices = *lp_radau_dg_nz_indices;
 	(*jmi_opt_sim)->write_file_matlab = *lp_radau_write_file_matlab;
-
+	(*jmi_opt_sim)->get_result_variable_vector_length =
+		*lp_radau_get_result_variable_vector_length;
+	(*jmi_opt_sim)->get_result = *lp_radau_get_result;
 	print_lp_pols(*jmi_opt_sim);
 	print_problem_stats(*jmi_opt_sim);
 
