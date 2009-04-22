@@ -27,7 +27,7 @@ import ctypes as ct
 from ctypes import byref
 import numpy as N
 import numpy.ctypeslib as Nct
-import xml
+import xmlparser
 
 # ================================================================
 #                         CONSTANTS
@@ -563,7 +563,7 @@ def load_xml(filename, filepath='.', schemaname='', schemapath='.'):
         @return: 
             An object representing the parsed XML file.
     """
-    xmldoc = xml.parseXML(filename, filepath, schemaname, schemapath)
+    xmldoc = xmlparser.parseXML(filename, filepath, schemaname, schemapath)
     
     return xmldoc
 
@@ -620,10 +620,10 @@ class JMIModel(object):
         self._t = self._dll.jmi_get_t(self._jmi)
         self._z = self._dll.jmi_get_z(self._jmi)
 
-        xmlname=libname+'.xml' 
+        #xmlname=libname+'.xml' 
         # assumes libname is name of model and xmlfile is located in the same dir as the dll
-        self._xmldoc = load_xml(xmlname,path)
-        self._setStartAttributes()
+        #self._xmldoc = load_xml(xmlname,path)
+        #self._setStartAttributes()
                 
     def __del__(self):
         """Freeing jmi data structure.
