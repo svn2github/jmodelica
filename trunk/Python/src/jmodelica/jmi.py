@@ -27,6 +27,7 @@ import ctypes as ct
 from ctypes import byref
 import numpy as N
 import numpy.ctypeslib as Nct
+import xml
 
 # ================================================================
 #                         CONSTANTS
@@ -301,7 +302,9 @@ def load_DLL(libname, path):
                      (dll.jmi_get_dx_p, n_dx.value),
                      (dll.jmi_get_x_p, n_x.value),
                      (dll.jmi_get_u_p, n_u.value),
-                     (dll.jmi_get_w_p, n_w.value)]
+                     (dll.jmi_get_w_p, n_w.value),
+                     (dll.jmi_get_z, n_z.value)]
+    
     for (func, length) in int_res_funcs:
         _returns_ndarray(func, c_jmi_real_t, length, order='C')
     
@@ -352,6 +355,7 @@ def load_DLL(libname, path):
     x_p_2 = dll.jmi_get_x_p(jmi, 1);
     u_p_2 = dll.jmi_get_u_p(jmi, 1);
     w_p_2 = dll.jmi_get_w_p(jmi, 1);
+    z = dll.jmi_get_z(jmi)
     
     # Setting parameter types
     dll.jmi_dae_F.argtypes = [ct.c_void_p, \
@@ -508,9 +512,20 @@ def load_DLL(libname, path):
                                    ct.POINTER(ct.c_int), \
                                    ct.POINTER(ct.c_int)]
                                        
-
-
-                                   
+    dll.jmi_get_cd.argtypes = [ct.c_void_p]
+    dll.jmi_get_ci.argtypes = [ct.c_void_p]
+    dll.jmi_get_dx.argtypes = [ct.c_void_p]
+    dll.jmi_get_dx_p.argtypes = [ct.c_void_p, ct.c_int]
+    dll.jmi_get_pd.argtypes = [ct.c_void_p]
+    dll.jmi_get_pi.argtypes = [ct.c_void_p]
+    dll.jmi_get_t.argtypes = [ct.c_void_p]
+    dll.jmi_get_u.argtypes = [ct.c_void_p]
+    dll.jmi_get_u_p.argtypes = [ct.c_void_p, ct.c_int]
+    dll.jmi_get_w.argtypes = [ct.c_void_p]
+    dll.jmi_get_w_p.argtypes = [ct.c_void_p, ct.c_int]
+    dll.jmi_get_x.argtypes = [ct.c_void_p]
+    dll.jmi_get_x_p.argtypes = [ct.c_void_p, ct.c_int]
+    dll.jmi_get_z.argtypes = [ct.c_void_p]
     
     assert dll.jmi_delete(jmi) == 0, \
            "jmi_delete failed"
@@ -529,7 +544,45 @@ def load_model(filepath):
     
     """
     dll = load_DLL(filepath)
+
+
+def load_xml(filename, filepath='.', schemaname='', schemapath='.'):
+    """ Parses an XML file. Can validate against a schema if an XML Schema
+        file and path is present.
+        
+        @param filename: 
+            Name of XML file to parse.
+        @param filepath: 
+            Path (relative or absolute) to XML file. Default is current folder.
+        @param schemaname: 
+            Name of XML Schema file to use for validation. If empty string then 
+            validation is skipped.
+        @param schemapath: 
+            Path (relative or absolute) to XMLSchema. Default is current folder.
+            
+        @return: 
+            An object representing the parsed XML file.
+    """
+    xmldoc = xml.parseXML(filename, filepath, schemaname, schemapath)
     
+    return xmldoc
+
+def _translateValueRef(valueref):
+    """ Uses a value reference which is a 32 bit unsigned int to get type of 
+        variable and index in vector using the protocol: bit 0-28 is index, 
+        29-31 is primitive type.
+        
+        @param valueref: The value reference to translate.
+        
+        @return: Primitive type and index in the corresponding vector as integers.
+    """
+    indexmask = 0x0FFFFFFF
+    ptypemask = 0xF0000000
+    
+    index = int(valueref) & indexmask
+    ptype = (int(valueref) & ptypemask) >> 28
+    
+    return (index,ptype)
 
 # ================================================================
 #                        HIGH LEVEL INTERFACE
@@ -545,7 +598,7 @@ class JMIModel(object):
     
     def __init__(self, libname, path='.'):
         self._dll = load_DLL(libname, path)
-        
+
         self._jmi = ct.c_voidp()
         assert self._dll.jmi_new(byref(self._jmi)) == 0, \
                "jmi_new returned non-zero"
@@ -558,7 +611,20 @@ class JMIModel(object):
         # to ensure that they aren't reset, only modified.
         self._x = self._dll.jmi_get_x(self._jmi);
         self._pi = self._dll.jmi_get_pi(self._jmi);
+        self._cd = self._dll.jmi_get_cd(self._jmi)
+        self._ci = self._dll.jmi_get_ci(self._jmi)
+        self._dx = self._dll.jmi_get_dx(self._jmi)
+        self._pd = self._dll.jmi_get_pd(self._jmi)
+        self._u = self._dll.jmi_get_u(self._jmi)
+        self._w = self._dll.jmi_get_w(self._jmi)
+        self._t = self._dll.jmi_get_t(self._jmi)
+        self._z = self._dll.jmi_get_z(self._jmi)
 
+        xmlname=libname+'.xml' 
+        # assumes libname is name of model and xmlfile is located in the same dir as the dll
+        self._xmldoc = load_xml(xmlname,path)
+        self._setStartAttributes()
+                
     def __del__(self):
         """Freeing jmi data structure.
         """
@@ -580,6 +646,14 @@ class JMIModel(object):
         raise JMIException("X can only be modified, not set.")
         
     x = property(getX, setX, "The differentiated variables vector.")
+
+    def getX_P(self, i):
+        return self._dll.jmi_get_x_p(self._jmi, i)
+        
+    def setX_P(self, x_p, i):
+        raise JMIException("X_P can only be modified, not set.")
+        
+    x_p = property(getX_P, setX_P, "The differentiated variables corresponding to the i:th time point.")
     
     def getPI(self):
         return self._pi
@@ -588,3 +662,123 @@ class JMIModel(object):
         raise JMIException("PI can only be modified, not set.")
         
     pi = property(getPI, setPI, "The independent parameter vector.")
+
+    def getCD(self):
+        return self._cd
+        
+    def setCD(self, cd):
+        raise JMIException("CD can only be modified, not set.")
+        
+    cd = property(getCD, setCD, "The dependent constants vector.")
+
+    def getCI(self):
+        return self._ci
+        
+    def setCI(self, ci):
+        raise JMIException("CI can only be modified, not set.")
+        
+    ci = property(getCI, setCI, "The independent constants vector.")
+
+    def getDX(self):
+        return self._dx
+        
+    def setDX(self, dx):
+        raise JMIException("DX can only be modified, not set.")
+        
+    dx = property(getDX, setDX, "The derivatives vector.")
+
+    def getDX_P(self, i):
+        return self._dll.jmi_get_dx_p(self._jmi,i)
+        
+    def setDX_P(self, dx_p, i):
+        raise JMIException("DX_P can only be modified, not set.")
+        
+    dx_p = property(getDX_P, setDX_P, "The derivatives corresponding to the i:th time point.")
+
+    def getPD(self):
+        return self._pd
+        
+    def setPD(self, pd):
+        raise JMIException("PD can only be modified, not set.")
+        
+    pd = property(getPD, setPD, "The dependent paramenters vector.")
+
+    def getU(self):
+        return self._u
+        
+    def setU(self, u):
+        raise JMIException("U can only be modified, not set.")
+        
+    u = property(getU, setU, "The inputs vector.")
+
+    def getU_P(self, i):
+        return self._dll.jmi_get_u_p(self._jmi, i)
+        
+    def setU_P(self, u_p, i):
+        raise JMIException("U_P can only be modified, not set.")
+        
+    u_p = property(getU_P, setU_P, "The inputs corresponding to the i:th time point.")
+
+    def getW(self):
+        return self._w
+        
+    def setW(self, w):
+        raise JMIException("W can only be modified, not set.")
+        
+    w = property(getW, setW, "The algebraic variables vector.")
+
+    def getW_P(self, i):
+        return self._dll.jmi_get_w_p(self._jmi, i)
+        
+    def setW_P(self, w_p, i):
+        raise JMIException("W_P can only be modified, not set.")
+        
+    w_p = property(getW_P, setW_P, "The algebraic variables corresponding to the i:th time point.")
+
+
+    def getT(self):
+        return self._t
+        
+    def setT(self, t):
+        raise JMIException("T can only be modified, not set.")
+        
+    t = property(getT, setT, "The time value.")
+    
+    def getZ(self):
+        return self._z
+        
+    def setZ(self, z):
+        raise JMIException("Z can only be modified, not set.")
+        
+    z = property(getZ, setZ, "All parameters, variables and point-wise evaluated variables vector.")
+
+    def _setStartAttributes(self):
+        """ Set start attributes for all variables.
+        """
+        start_attr = self._xmldoc.getStartAttributes()
+        
+        #Real variables vector
+        z = self.getZ()
+        
+        keys = start_attr.keys()
+        keys.sort()
+        
+        for key in keys:
+            value = start_attr.get(key)
+            
+            (i, ptype) = _translateValueRef(key)
+            if(ptype == 0):
+                # Primitive type is Real
+                z[i] = value
+            elif(ptype == 1):
+                # Primitive type is Integer
+                pass
+            elif(ptype == 2):
+                # Primitive type is Boolean
+                pass
+            elif(ptype == 3):
+                # Primitive type is String
+                pass
+            else:
+                "Unknown type"
+            
