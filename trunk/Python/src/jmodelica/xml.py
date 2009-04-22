@@ -49,17 +49,17 @@ def parseXML(filename, filepath='.', schemaname='', schemapath='.'):
     try:
         xmldoc = etree.ElementTree(file=fpath)
     except etree.XMLSyntaxError, detail:
-        raise XMLException("The XML file: %s is not well-formed. %s") %(filename,detail)
+        raise XMLException("The XML file: %s is not well-formed. %s" %(filename, detail))
     except IOError, detail:
-        raise XMLException("I/O error reading the XML file: %s %s") %(filename,detail)
+        raise XMLException("I/O error reading the XML file: %s. %s" %(filename, detail))
     
     if schemaname:
         try:
             schemadoc = etree.ElementTree(file=schpath)
         except etree.XMLSyntaxError, detail:
-            raise XMLException("The XMLSchema: %s is not well-formed. %s") %(schemaname,detail)
+            raise XMLException("The XMLSchema: %s is not well-formed. %s" %(schemaname, detail))
         except IOError, detail:
-            raise XMLException("I/O error reading the XMLSchema file: %s %s") %(schemaname,detail)
+            raise XMLException("I/O error reading the XMLSchema file: %s. %s" %(schemaname, detail))
          
             
         schema = etree.XMLSchema(schemadoc)
@@ -67,9 +67,9 @@ def parseXML(filename, filepath='.', schemaname='', schemapath='.'):
         result = schema.validate(xmldoc)
         
         if not result:
-            raise XMLException("The XML file: %s is not valid according to the XMLSchema: %s.") %(filename,schemaname)
+            raise XMLException("The XML file: %s is not valid according to the XMLSchema: %s." %(filename, schemaname))
         
-    return XMLdoc(doc)
+    return XMLdoc(xmldoc)
 
 
 class XMLdoc:
