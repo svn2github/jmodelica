@@ -18,7 +18,7 @@
 # References:
 #     http://www.python.org/doc/2.5.2/lib/module-ctypes.html
 #     http://starship.python.net/crew/theller/ctypes/tutorial.html
-#     http://www.scipy.org/Cookbook/Ctypes
+#     http://www.scipy.org/Cookbook/Ctypes 
 
 
 import os.path
@@ -534,7 +534,7 @@ def load_DLL(libname, path):
 
 
 def load_model(filepath):
-    """Returns a JMI model loaded from file.
+    """ Returns a JMI model loaded from file.
     
     @param filepath The absolute or relative path to the model file to
                     be loaded.
@@ -622,7 +622,7 @@ class JMIModel(object):
 
         #xmlname=libname+'.xml' 
         # assumes libname is name of model and xmlfile is located in the same dir as the dll
-        #self._xmldoc = load_xml(xmlname,path)
+        #self._setXMLdoc(load_xml(xmlname,path))
         #self._setStartAttributes()
                 
     def __del__(self):
@@ -632,7 +632,7 @@ class JMIModel(object):
                "jmi_delete failed"
         
     def initAD(self):
-        """Inializing Algorithmic Differential package.
+        """Initializing Algorithmic Differential package.
         
         Raises a JMIException on failure.
         """
@@ -640,122 +640,202 @@ class JMIModel(object):
             raise JMIException("Could not initialize AD.")
 
     def getX(self):
+        """ Gets a reference to the differentiated variables vector.
+        """
         return self._x
         
     def setX(self, x):
+        """ Sets the differentiated variables vector.
+        """
         raise JMIException("X can only be modified, not set.")
         
     x = property(getX, setX, "The differentiated variables vector.")
 
     def getX_P(self, i):
+        """ Gets a reference to the differentiated variables vector corresponding to 
+            the i:th time point.
+        """
         return self._dll.jmi_get_x_p(self._jmi, i)
         
     def setX_P(self, x_p, i):
+        """ Sets the differentiated variables vector corresponding to the i:th time point.
+        """
+
         raise JMIException("X_P can only be modified, not set.")
         
     x_p = property(getX_P, setX_P, "The differentiated variables corresponding to the i:th time point.")
     
     def getPI(self):
+        """ Gets a reference to the independent parameters vector.
+        """
         return self._pi
         
     def setPI(self, pi):
+        """ Sets the independent parameters vector.
+        """
         raise JMIException("PI can only be modified, not set.")
         
     pi = property(getPI, setPI, "The independent parameter vector.")
 
     def getCD(self):
+        """ Gets a reference to the dependent constants vector.
+        """
         return self._cd
         
     def setCD(self, cd):
+        """ Sets the dependent constants vector.
+        """
+
         raise JMIException("CD can only be modified, not set.")
         
     cd = property(getCD, setCD, "The dependent constants vector.")
 
     def getCI(self):
+        """ Gets a reference to the independent constants vector.
+        """
         return self._ci
         
     def setCI(self, ci):
+        """ Sets the independent constants vector.
+        """
+
         raise JMIException("CI can only be modified, not set.")
         
     ci = property(getCI, setCI, "The independent constants vector.")
 
     def getDX(self):
+        """ Gets a reference to the derivatives vector.
+        """
         return self._dx
         
     def setDX(self, dx):
+        """ Sets the derivatives vector.
+        """
         raise JMIException("DX can only be modified, not set.")
         
     dx = property(getDX, setDX, "The derivatives vector.")
 
     def getDX_P(self, i):
+        """ Gets a reference to the derivatives variables vector corresponding to 
+            the i:th time point.  
+        """
         return self._dll.jmi_get_dx_p(self._jmi,i)
         
     def setDX_P(self, dx_p, i):
+        """ Sets the derivatives variables vector corresponding to the i:th time point.  
+        """
         raise JMIException("DX_P can only be modified, not set.")
         
     dx_p = property(getDX_P, setDX_P, "The derivatives corresponding to the i:th time point.")
 
     def getPD(self):
+        """ Gets a reference to the dependent parameters vector.
+        """
         return self._pd
         
     def setPD(self, pd):
+        """ Sets the dependent parameters vector.
+        """
         raise JMIException("PD can only be modified, not set.")
         
     pd = property(getPD, setPD, "The dependent paramenters vector.")
 
     def getU(self):
+        """ Gets a reference to the inputs vector.
+        """
         return self._u
         
     def setU(self, u):
+        """ Sets the inputs vector.
+        """
         raise JMIException("U can only be modified, not set.")
         
     u = property(getU, setU, "The inputs vector.")
 
     def getU_P(self, i):
+        """ Gets a reference to the inputs vector corresponding to the i:th time point.
+        """
         return self._dll.jmi_get_u_p(self._jmi, i)
         
     def setU_P(self, u_p, i):
+        """ Sets the inputs vector corresponding to the i:th time point.
+        """
         raise JMIException("U_P can only be modified, not set.")
         
     u_p = property(getU_P, setU_P, "The inputs corresponding to the i:th time point.")
 
     def getW(self):
+        """ Gets a reference to the algebraic variables vector.
+        """
         return self._w
         
     def setW(self, w):
+        """ Sets the algebraic variables vector.
+        """
         raise JMIException("W can only be modified, not set.")
         
     w = property(getW, setW, "The algebraic variables vector.")
 
     def getW_P(self, i):
+        """ Gets a reference to the algebraic variables vector corresponding to 
+            the i:th time point.
+        """
         return self._dll.jmi_get_w_p(self._jmi, i)
         
     def setW_P(self, w_p, i):
+        """ Sets the algebraic variables vector corresponding to the i:th time point.
+        """
         raise JMIException("W_P can only be modified, not set.")
         
     w_p = property(getW_P, setW_P, "The algebraic variables corresponding to the i:th time point.")
 
-
     def getT(self):
+        """ Gets a reference to the time value.
+        """
         return self._t
         
     def setT(self, t):
+        """ Sets the time value.
+        """
         raise JMIException("T can only be modified, not set.")
         
     t = property(getT, setT, "The time value.")
     
     def getZ(self):
+        """ Gets a reference to the vector containing all parameters, variables and point-wise 
+            evalutated variables vector.
+        """
         return self._z
         
     def setZ(self, z):
+        """ Sets the vector containing all parameters, variables and point-wise 
+            evalutated variables vector.
+        """
         raise JMIException("Z can only be modified, not set.")
         
     z = property(getZ, setZ, "All parameters, variables and point-wise evaluated variables vector.")
-
-    def _setStartAttributes(self):
-        """ Set start attributes for all variables.
+    
+    def _getXMLdoc(self):
+        """ Gets a reference to the XMLDoc instance set for this JMIModel.
         """
-        start_attr = self._xmldoc.getStartAttributes()
+        return self._xmldoc
+    
+    def _setXMLdoc(self, doc):
+        """ Sets the XMLDoc for this JMIModel created with load_xml.
+        """
+        self._xmldoc = doc
+        
+    def _setStartAttributes(self):
+        """ Sets start attributes for all variables in this JMIModel. The start attributes are 
+            fetched together with the corresponding valueReferences from the XMLDoc instance. 
+            The valueReferences are mapped to which primitive type vector and index in vector 
+            each start value belongs to using the protocol implemented in _translateValueRef.
+        
+            Note: The XMLDoc object must have been created by calling load_xml and set with 
+            _setXMLdoc before using this method.
+        """
+        xmldoc = self._getXMLdoc()
+        start_attr = xmldoc.getStartAttributes()
         
         #Real variables vector
         z = self.getZ()
