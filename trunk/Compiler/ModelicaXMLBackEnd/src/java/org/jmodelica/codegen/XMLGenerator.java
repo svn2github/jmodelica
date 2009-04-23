@@ -293,6 +293,10 @@ public class XMLGenerator extends GenericGenerator {
 					
 					genPrinter.print(tg.generateTag("IntegerAttributes"));
 					
+					//quantity
+					if(integervariable.quantityAttributeSet()) {
+						genPrinter.print(tg.generateTag("Quantity")+integervariable.quantityAttribute()+tg.generateTag("Quantity"));
+					}					
 					//min
 					if(integervariable.minAttributeSet()) {
 						genPrinter.print(tg.generateTag("Min")+integervariable.minAttribute()+tg.generateTag("Min"));

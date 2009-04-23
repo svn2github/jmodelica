@@ -100,4 +100,26 @@ package XMLCodeGenTests
    	 equation
    	end XMLCodeGenTest4;
 
+	model XMLCodeGenTest5
+	
+		constant Real r1(unit="m", displayUnit="mm",
+			min = 2*0, max = 2^5, start = 10, nominal = 0) = 1;
+		parameter Real r2(quantity="q1", min = 0, max = 10, start = 0) = 2;
+		discrete Real r3(quantity="q1", unit = "Hz", max = 100) = 3;
+		input Real r4(start = 5, min=-10);
+		output Real r5(max=4, min=3) = 1;
+		
+		protected Integer i1(start=5)=2;
+		Integer i2(quantity="g",max=1000)=3;
+		Integer i3(min=1);
+		
+		String s1;
+		String s2(start="abc")="def";
+		
+		equation
+			s1 = "ghi";
+			r5 = der(r4);	
+		
+	end XMLCodeGenTest5;	
+
 end XMLCodeGenTests;
