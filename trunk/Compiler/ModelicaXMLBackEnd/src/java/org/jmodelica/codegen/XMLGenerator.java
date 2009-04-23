@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package org.jmodelica.codegen;
 
 import java.io.PrintStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Stack;
 
 import org.jmodelica.ast.FBooleanVariable;
@@ -33,11 +35,14 @@ import org.jmodelica.ast.FVariable;
 import org.jmodelica.ast.Printer;
 
 /**
- * A generator class containing a basic set of tags which
- * are not language dependent.
+ * A generator class for XML code generation which takes a model described by
+ * <FClass> and provides an XML document for the meta-data in the model. Uses a
+ * template for the static general structure of tags and an internal class
+ * <TagGenerator> for the parts of the XML that are dynamic, that is, may vary
+ * depending on the contents of the underlying model.
  * 
- * This class is also intended as base class for more specialized generators.
- *
+ * @see AbstractGenerator
+ * 
  */
 public class XMLGenerator extends GenericGenerator {
 		
@@ -145,6 +150,7 @@ public class XMLGenerator extends GenericGenerator {
 	}
 
 	class DAETag_XML_generationDate extends DAETag {
+		private static final String df = "yyyy-MM-dd'T'HH:mm:ss";
 		
 		public DAETag_XML_generationDate (
 		  AbstractGenerator myGenerator, FClass fclass) {
@@ -154,8 +160,9 @@ public class XMLGenerator extends GenericGenerator {
 	
 		public void generate(PrintStream genPrinter) {
 			//TODO: implement when available
-			// Dummy value for now
-			genPrinter.print("2009-03-30T17:36:00");
+			// Todays date for now
+			SimpleDateFormat dateformat = new SimpleDateFormat(df);
+			genPrinter.print(dateformat.format(new Date()));
 		}
 	}
 	
@@ -246,7 +253,7 @@ public class XMLGenerator extends GenericGenerator {
 						//TODO:this is default value
 						genPrinter.print(tg.generateTag("Gain")+1.0+tg.generateTag("Gain"));
 						//TODO:offset(optional)
-						genPrinter.print("DefaultDisplayUnit");
+						genPrinter.print(tg.generateTag("DefaultDisplayUnit"));
 					}
 					//min
 					if(realvariable.minAttributeSet()) {
@@ -398,16 +405,21 @@ public class XMLGenerator extends GenericGenerator {
 //				genPrinter.print("\n\t </VendorAnnotations>");
 		}
 	}
-
-
-	/** Help class for creating start and end tags with the correct amount of tabs.
-	 * */
+	
+	/**
+	 * A helper class to XMLGenerator for providing start and end tags with the
+	 * correct amount of tabs. This class will be used in the XML code
+	 * generation for the model meta-data parts which are optional and therefore
+	 * can not use a template.
+	 * 
+	 */
 	private class TagGenerator {
 		private String tabs="";
 		private Stack<String> stack;
 		private String previous;
 		
 		/**
+		 * Constructor.
 		 * 
 		 * @param tabstart Number of tabs indent at start.
 		 */
@@ -418,6 +430,18 @@ public class XMLGenerator extends GenericGenerator {
 			}
 		}
 		
+		/**
+		 * Generates a tag with a certain tagname.
+		 * 
+		 * The first time the tagname is encountered a start tag is created. The
+		 * second time the same tagname is used a matching end tag is created.
+		 * For each unique tagname a new start tag is created with one more tab
+		 * indent. If start and end tags are encountered immediately after each
+		 * other they will be on the same line.
+		 * 
+		 * @param tagname The name of the tag to create.
+		 * @return Start or end tag with name set to <tagname>.
+		 */
 		public String generateTag(String tagname) {
 			if(stack.isEmpty() || !stack.peek().equals(tagname.trim())) {
 				stack.push(tagname.trim());
@@ -427,6 +451,14 @@ public class XMLGenerator extends GenericGenerator {
 			} 
 		}
 		
+		/**
+		 * Generates a start tag with the specified tagname.
+		 * 
+		 * @param tagname
+		 *            The name of the tag for which a start tag should be
+		 *            created.
+		 * @return The start tag with name set to <tagname>.
+		 */
 		private String generateStartTag(String tagname) {				
 			String tag = "\n"+tabs+"<"+tagname+">";			
 			tabs=tabs+"\t";
@@ -435,6 +467,14 @@ public class XMLGenerator extends GenericGenerator {
 			return tag;
 		}
 		
+		/**
+		 * Generates an end tag with the specified tagname.
+		 * 
+		 * @param tagname
+		 *            The name of the tag for which an end tag should be
+		 *            created.
+		 * @return The end tag with name set to <tagname>.
+		 */
 		private String generateEndTag(String tagname) {
 			String tag;
 			tabs=tabs.substring(1);
