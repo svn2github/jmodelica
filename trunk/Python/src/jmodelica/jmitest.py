@@ -23,6 +23,7 @@ import unittest
 import ctypes
 from ctypes import byref
 import os.path
+import math
 
 import numpy as N
 import nose.tools
@@ -359,8 +360,9 @@ class GenericVDPTestsUsingCTypes(GenericJMITestsUsingCTypes):
                                 pyjmi.JMI_DER_DENSE_ROW_MAJOR, pyjmi.JMI_DER_X, \
                                 self.mask, byref(dF_n_cols_test), \
                                 byref(dF_n_nz_test))
-                       
-        assert dF_n_nz_test.value is 12 and dF_n_cols_test.value is 3
+        
+        nose.tools.assert_equal(dF_n_nz_test.value, 12)
+        nose.tools.assert_equal(dF_n_cols_test.value, 3)
         
 
 class testVDPWithoutADUsingCTypes(GenericVDPTestsUsingCTypes):
@@ -416,7 +418,39 @@ class testFurutaPendulum(GenericJMITestsUsingCTypes):
         
         # Initializing CppAD, too
         self.dll.jmi_ad_init(self.jmi)
-
+        
+    def testODERoot1(self):
+        """Testing a stable bifurcation of the system.
+        
+        The pendulum is pointing downwards. No movements.
+        """
+        # See Doxygen documentation for the meaning of these numbers
+        self.x[:] = [0, 0, 0, 0]
+        self.u[0] = 0
+        
+        # Needed in order to be sure the assert below works
+        self.dx[:] = [1, 2, 3, 4]
+        
+        self.dll.jmi_ode_f(self.jmi)
+        
+        N.testing.assert_almost_equal(self.dx, [0, 0, 0, 0])
+        
+    def testODERoot2(self):
+        """Testing the unstable bifurcation of the system.
+        
+        The pendulum is strictly pointing upwards. No movements.
+        """
+        # See Doxygen documentation for the meaning of these numbers
+        self.x[:] = [math.pi, 0, 0, 0]
+        self.u[0] = 0
+        
+        # Needed in order to be sure the assert below works
+        self.dx[:] = [1, 2, 3, 4]
+        
+        self.dll.jmi_ode_f(self.jmi)
+        
+        N.testing.assert_almost_equal(self.dx, [0, 0, 0, 0])
+        
 
 class testReturnsNDArray():
     """Tests the (private) function jmi._returns_ndarray(...)
