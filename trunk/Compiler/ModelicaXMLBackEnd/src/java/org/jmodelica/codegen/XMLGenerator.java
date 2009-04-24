@@ -264,7 +264,7 @@ public class XMLGenerator extends GenericGenerator {
 						genPrinter.print(tg.generateTag("Max")+realvariable.maxAttribute()+tg.generateTag("Max"));
 					}
 					//start attribute should always be set
-					if(realvariable.hasBindingExp()) {
+					if(realvariable.isParameter() && realvariable.hasBindingExp()) {
 						genPrinter.print(tg.generateTag("Start")+realvariable.getBindingExp().ceval().realValue()+tg.generateTag("Start"));
 					}
 					else {
