@@ -46,12 +46,14 @@ jmi-examples: install
 	cd JMI/examples/Vdp_cppad; $(MAKE) all
 	cd JMI/examples/FurutaPendulum; $(MAKE) all
 	cd JMI/examples/CSTR; $(MAKE) all
+	cd JMI/examples/CSTR2; $(MAKE) all
 
 clean-jmi-examples: 
 	cd JMI/examples/Vdp; $(MAKE) clean
 	cd JMI/examples/Vdp_cppad; $(MAKE) clean
 	cd JMI/examples/FurutaPendulum; $(MAKE) clean
 	cd JMI/examples/CSTR; $(MAKE) clean
+	cd JMI/examples/CSTR2; $(MAKE) clean
 
 clean-frontends:
 if HAVE_ANT

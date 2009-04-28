@@ -368,6 +368,7 @@ static int lp_radau_f(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *f) {
 
 	// Call cost function evaluation
 	jmi_opt_J(jmi_opt_sim->jmi, f);
+//    *f = x_coll(jmi_opt_sim,jmi_opt_sim->n_e-1,3,2); //WEEOO
 
 	return 0;
 }
@@ -385,6 +386,17 @@ static int lp_radau_df(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *df) {
     lp_radau_copy_p(jmi_opt_sim);
     lp_radau_copy_q(jmi_opt_sim);
 
+    // WEEOO
+    /*
+    int i;
+    for (i=0;i<jmi_opt_sim->n_x;i++) {
+    	df[i] = 0;
+    }
+
+    df[7+7*nlp->n_cp*(jmi_opt_sim->n_e-1) + 7*(nlp->n_cp-1) + 3 + 3 - 1] = 1;
+
+    return 0;
+*/
 	// Compute cost function gradient
 	jmi_opt_dJ(jmi_opt_sim->jmi, nlp->der_eval_alg, JMI_DER_DENSE_COL_MAJOR,
 			   JMI_DER_PI, nlp->der_mask, df);
@@ -501,6 +513,12 @@ static int lp_radau_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
 		jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 		jmi_t *jmi = jmi_opt_sim->jmi;
 
+		/*
+		printf("**********************************************");
+		for (i=0;i<jmi_opt_sim->n_x;i++) {
+			printf(">> x[%d] = %12.12f\n",i,jmi_opt_sim->x[i]);
+		}
+*/
 		// Initial system
 		lp_radau_copy_p(jmi_opt_sim);
 		lp_radau_copy_q(jmi_opt_sim);
@@ -652,8 +670,12 @@ static int lp_radau_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
 		// Constraints in Heq
 
 		jmi_opt_Heq(jmi_opt_sim->jmi,res + dh_Heq_eq_offs(jmi_opt_sim, 0));
-
-
+/*
+		for (i=0;i<jmi_opt_sim->n_h;i++) {
+			printf(">> h[%d] = %12.12f\n",i,res[i]);
+		}
+		printf("**********************************************");
+*/
 
 	return 0;
 }

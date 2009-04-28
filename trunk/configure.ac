@@ -210,6 +210,7 @@ AC_CONFIG_FILES([
  JMI/examples/Vdp_cppad/Makefile
  JMI/examples/FurutaPendulum/Makefile
  JMI/examples/CSTR/Makefile
+ JMI/examples/CSTR2/Makefile
 ])
 
 

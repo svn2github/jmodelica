@@ -22,7 +22,7 @@
 
 static const int N_ci = 0;
 static const int N_cd = 0;
-static const int N_pi = 17;
+static const int N_pi = 18;
 static const int N_pd = 0;
 static const int N_dx = 3;
 static const int N_x = 3;
@@ -34,35 +34,36 @@ static const int N_eq_F0 = 3 + 3;
 static const int N_eq_F1 = 0;
 
 static const int N_eq_Ceq = 0;
-static const int N_eq_Cineq = 2;
+static const int N_eq_Cineq = 0;
 static const int N_eq_Heq = 0;
 static const int N_eq_Hineq = 0;
 static const int N_t_p = 1;
 
-#define F0 ((*(jmi->z))[jmi->offs_pi+0])
-#define c0 ((*(jmi->z))[jmi->offs_pi+1])
-#define F ((*(jmi->z))[jmi->offs_pi+2])
-#define T0 ((*(jmi->z))[jmi->offs_pi+3])
-#define r ((*(jmi->z))[jmi->offs_pi+4])
-#define k0 ((*(jmi->z))[jmi->offs_pi+5])
-#define EdivR ((*(jmi->z))[jmi->offs_pi+6])
-#define U ((*(jmi->z))[jmi->offs_pi+7])
-#define rho ((*(jmi->z))[jmi->offs_pi+8])
-#define Cp ((*(jmi->z))[jmi->offs_pi+9])
-#define dH ((*(jmi->z))[jmi->offs_pi+10])
-#define V ((*(jmi->z))[jmi->offs_pi+11])
-#define c_init ((*(jmi->z))[jmi->offs_pi+12])
-#define T_init ((*(jmi->z))[jmi->offs_pi+13])
-#define c_ref ((*(jmi->z))[jmi->offs_pi+14])
-#define T_ref ((*(jmi->z))[jmi->offs_pi+15])
-#define Tc_ref ((*(jmi->z))[jmi->offs_pi+16])
+#define beta ((*(jmi->z))[jmi->offs_pi+0])
+#define J ((*(jmi->z))[jmi->offs_pi+1])
+#define cf ((*(jmi->z))[jmi->offs_pi+2])
+#define alpha ((*(jmi->z))[jmi->offs_pi+3])
+#define Tf ((*(jmi->z))[jmi->offs_pi+4])
+#define k ((*(jmi->z))[jmi->offs_pi+5])
+#define Tc ((*(jmi->z))[jmi->offs_pi+6])
+#define N ((*(jmi->z))[jmi->offs_pi+7])
+#define yc ((*(jmi->z))[jmi->offs_pi+8])
+#define yf ((*(jmi->z))[jmi->offs_pi+9])
+#define q1 ((*(jmi->z))[jmi->offs_pi+10])
+#define q2 ((*(jmi->z))[jmi->offs_pi+11])
+#define r ((*(jmi->z))[jmi->offs_pi+12])
+#define c_init ((*(jmi->z))[jmi->offs_pi+13])
+#define T_init ((*(jmi->z))[jmi->offs_pi+14])
+#define c_ref ((*(jmi->z))[jmi->offs_pi+15])
+#define T_ref ((*(jmi->z))[jmi->offs_pi+16])
+#define u_ref ((*(jmi->z))[jmi->offs_pi+17])
 #define c ((*(jmi->z))[jmi->offs_x+0])
 #define T ((*(jmi->z))[jmi->offs_x+1])
-#define J ((*(jmi->z))[jmi->offs_x+2])
+#define cost ((*(jmi->z))[jmi->offs_x+2])
 #define der_c ((*(jmi->z))[jmi->offs_dx+0])
 #define der_T ((*(jmi->z))[jmi->offs_dx+1])
-#define der_J ((*(jmi->z))[jmi->offs_dx+2])
-#define Tc ((*(jmi->z))[jmi->offs_u+0])
+#define der_cost ((*(jmi->z))[jmi->offs_dx+2])
+#define u ((*(jmi->z))[jmi->offs_u+0])
 #define time ((*(jmi->z))[jmi->offs_t])
 
 
@@ -96,19 +97,23 @@ static const int N_t_p = 1;
  * macros.
  */
 static int vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	(*res)[0] = ( ( F0 ) * ( c0 - ( c ) ) ) / ( V ) - ( ( ( k0 ) * ( c ) ) * ( exp((  - ( EdivR ) ) / ( T )) ) ) - (der_c);
-    (*res)[1] = ( ( F0 ) * ( T0 - ( T ) ) ) / ( V ) - ( ( ( ( ( dH ) / ( ( rho ) * ( Cp ) ) ) * ( k0 ) ) * ( c ) ) * ( exp((  - ( EdivR ) ) / ( T )) ) ) + ( ( ( 2 ) * ( U ) ) / ( ( ( r ) * ( rho ) ) * ( Cp ) ) ) * ( Tc - ( T ) ) - (der_T);
-    (*res)[2] = (c_ref-c)*(c_ref-c) + (T_ref-T)*(T_ref-T) + (Tc_ref-Tc)*(Tc_ref-Tc) - der_J;
+
+	(*res)[0] = beta*(1-c)-k*exp(-N/T)*c - der_c;
+	(*res)[1] = beta*(yf-T)+k*exp(-N/T)*c-alpha*(T-yc)*u - der_T;
+	(*res)[2] = 0.5*(q1*(c_ref-c)*(c_ref-c)+q2*(T_ref-T)*(T_ref-T)+
+			r*(u_ref-u)*(u_ref-u)) - der_cost;
     return 0;
 }
 
 static int vdp_init_F0(jmi_t* jmi, jmi_ad_var_vec_p res) {
-    (*res)[0] = ( ( F0 ) * ( c0 - ( c ) ) ) / ( V ) - ( ( ( k0 ) * ( c ) ) * ( exp((  - ( EdivR ) ) / ( T )) ) ) - (der_c);
-    (*res)[1] = ( ( F0 ) * ( T0 - ( T ) ) ) / ( V ) - ( ( ( ( ( dH ) / ( ( rho ) * ( Cp ) ) ) * ( k0 ) ) * ( c ) ) * ( exp((  - ( EdivR ) ) / ( T )) ) ) + ( ( ( 2 ) * ( U ) ) / ( ( ( r ) * ( rho ) ) * ( Cp ) ) ) * ( Tc - ( T ) ) - (der_T);
-    (*res)[2] = (c_ref-c)*(c_ref-c) + (T_ref-T)*(T_ref-T) + (Tc_ref-Tc)*(Tc_ref-Tc) - der_J;
-    (*res)[3] = c - c_init;
+
+	(*res)[0] = beta*(1-c)-k*exp(-N/T)*c - der_c;
+	(*res)[1] = beta*(yf-T)+k*exp(-N/T)*c-alpha*(T-yc)*u - der_T;
+	(*res)[2] = 0.5*(q1*(c_ref-c)*(c_ref-c)+q2*(T_ref-T)*(T_ref-T)+
+			r*(u_ref-u)*(u_ref-u)) - der_cost;
+	(*res)[3] = c - c_init;
     (*res)[4] = T - T_init;
-    (*res)[5] = J - 0;
+    (*res)[5] = cost - 0;
 	return 0;
 }
 
@@ -127,9 +132,9 @@ static int vdp_opt_Ceq(jmi_t* jmi, jmi_ad_var_vec_p res) {
 }
 
 static int vdp_opt_Cineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	(*res)[0] = Tc - 320;
-	(*res)[1] = -Tc + 280;
-	return 0;
+	//(*res)[0] = Tc - 320;
+	//(*res)[1] = -Tc + 280;
+	return -1;
 }
 
 static int vdp_opt_Heq(jmi_t* jmi, jmi_ad_var_vec_p res) {

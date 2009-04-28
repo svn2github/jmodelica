@@ -49,6 +49,7 @@ subdir = .
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/JMI/examples/CSTR/Makefile.in \
+	$(top_srcdir)/JMI/examples/CSTR2/Makefile.in \
 	$(top_srcdir)/JMI/examples/FurutaPendulum/Makefile.in \
 	$(top_srcdir)/JMI/examples/Vdp/Makefile.in \
 	$(top_srcdir)/JMI/examples/Vdp_cppad/Makefile.in \
@@ -65,7 +66,7 @@ CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = JMI/examples/Vdp/Makefile \
 	JMI/examples/Vdp_cppad/Makefile \
 	JMI/examples/FurutaPendulum/Makefile \
-	JMI/examples/CSTR/Makefile
+	JMI/examples/CSTR/Makefile JMI/examples/CSTR2/Makefile
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -276,6 +277,8 @@ JMI/examples/Vdp_cppad/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI
 JMI/examples/FurutaPendulum/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI/examples/FurutaPendulum/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 JMI/examples/CSTR/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI/examples/CSTR/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+JMI/examples/CSTR2/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI/examples/CSTR2/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
@@ -691,12 +694,14 @@ jmi-examples: install
 	cd JMI/examples/Vdp_cppad; $(MAKE) all
 	cd JMI/examples/FurutaPendulum; $(MAKE) all
 	cd JMI/examples/CSTR; $(MAKE) all
+	cd JMI/examples/CSTR2; $(MAKE) all
 
 clean-jmi-examples: 
 	cd JMI/examples/Vdp; $(MAKE) clean
 	cd JMI/examples/Vdp_cppad; $(MAKE) clean
 	cd JMI/examples/FurutaPendulum; $(MAKE) clean
 	cd JMI/examples/CSTR; $(MAKE) clean
+	cd JMI/examples/CSTR2; $(MAKE) clean
 
 clean-frontends:
 @HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/ModelicaFrontEnd; \

@@ -18,10 +18,10 @@
 
 
 # Name of shared library
-SHARED = cstr@SHAREDEXT@
+SHARED = cstr2@SHAREDEXT@
 
 # Object files to be included in the shared library
-SHAREDOBJS = cstr.@OBJEXT@
+SHAREDOBJS = cstr2.@OBJEXT@
 
 # Additional libraries
 ADDLIBS =
@@ -80,7 +80,6 @@ $(SHARED): $(SHAREDOBJS)
 ifeq (@WITH_IPOPT@,true)
 ifeq (@WITH_CPPAD@,true)
 	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $@ $(SHAREDOBJS) ../../src/*cppad*.o $(LIBS)
-#	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $@ $(SHAREDOBJS) $(LIBS)
 endif
 endif
 
