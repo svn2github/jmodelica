@@ -111,6 +111,7 @@ public class ModelicaCompiler {
 		      flatRoot.setFClass(fc);
 		    	  System.out.println("Flattening starts...");
 		    	  InstNode ir = ipr.findFlattenInst(cl,fc);
+		    	  fc.transformCanonical();
 		    	  if (ir==null) {
 		    		  System.out.println("Error:");
 		    		  System.out.println("   Did not find the class: " + cl);
@@ -159,6 +160,7 @@ public class ModelicaCompiler {
 		    	  CGenerator cgenerator = 	
 		    	  new CGenerator(new PrettyPrinter(), '$',fc);
 			      //System.out.println(generator.toString());
+		    	  output = fc.name()+".c";
 			      cgenerator.generate(args[3],output);
 		      }
 

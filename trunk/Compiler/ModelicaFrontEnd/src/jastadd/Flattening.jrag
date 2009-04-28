@@ -771,17 +771,3 @@ aspect InstantiatedExpressions {
 
 }
 
-aspect FlatBindingEquations {
-	
-	public void FClass.genBindingEquations() {
-		for (FVariable fv : getFVariables()) {
-			if (fv.hasBindingExp() && !fv.isParameter() && !fv.isConstant()) {
-				FExp bexp = fv.getBindingExp();
-				fv.setBindingExpOpt(new Opt());
-				FEquation feq = new FEquation(new FIdUseExp(
-						new FIdUseQualified("",fv.getFQName().fullCopy())),bexp);
-				getFEquationBlock(0).addFAbstractEquation(feq);
-			}
-		}
-	}
-}

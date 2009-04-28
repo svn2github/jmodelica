@@ -1,0 +1,25 @@
+
+/**
+ * This aspect contains transformations on the flattened model which converts
+ * it into a canonical form.
+ */
+aspect TransformCanonical{
+	
+	public void FClass.transformCanonical() {
+		genBindingEquations();
+		flushCache(); // TODO: is this enough or should the entire tree be flushed?
+ 	}
+		
+	public void FClass.genBindingEquations() {
+		for (FVariable fv : getFVariables()) {
+			if (fv.hasBindingExp() && !fv.isParameter() && !fv.isConstant()) {
+				FExp bexp = fv.getBindingExp();
+				fv.setBindingExpOpt(new Opt());
+				FEquation feq = new FEquation(new FIdUseExp(
+						new FIdUseQualified("",fv.getFQName().fullCopy())),bexp);
+				getFEquationBlock(0).addFAbstractEquation(feq);
+			}
+		}
+	}
+}
+

@@ -108,7 +108,7 @@ public class FlattenModel_C {
 		      flatRoot.setFClass(fc);
 		    	  System.out.println("Flattening starts...");
 		    	  InstNode ir = ipr.findFlattenInst(cl,fc);
-		    	  fc.genBindingEquations();
+		    	  fc.transformCanonical();
 		    	  if (ir==null) {
 		    		  System.out.println("Error:");
 		    		  System.out.println("   Did not find the class: " + cl);
