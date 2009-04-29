@@ -44,6 +44,8 @@ FIntegerVariable : FVariable;
 FBooleanVariable : FVariable;
 FStringVariable : FVariable;
 
+FDerivativeVariable : FRealVariable;
+
 abstract FPrimitiveType;
 abstract FNumericType : FPrimitiveType;
 FRealType : FNumericType ::=;

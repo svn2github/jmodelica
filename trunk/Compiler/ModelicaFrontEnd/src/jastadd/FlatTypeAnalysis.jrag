@@ -21,6 +21,7 @@ aspect FlatTypeAnalysis {
 	eq FIntegerVariable.type() = fIntegerType();
 	eq FBooleanVariable.type() = fBooleanType();
 	eq FStringVariable.type() = fStringType();
+	eq FDerivativeVariable.type() = fRealType();
 	eq UnknownFVariable.type() = fUnknownType();
 
 	syn FPrimitiveType InstPrimitive.type() {

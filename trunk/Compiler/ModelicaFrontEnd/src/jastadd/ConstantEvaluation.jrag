@@ -481,6 +481,7 @@ aspect ConstantEvaluation {
    */
   syn CValue AbstractFVariable.ceval();
   eq UnknownFVariable.ceval() = new CValueUnknown();
+  eq FDerivativeVariable.ceval() = new CValueUnknown();
   eq FRealVariable.ceval() {
 	  if ((!isConstant() && !isParameter()) || !hasBindingExp()) {
 		  return new CValueUnknown();

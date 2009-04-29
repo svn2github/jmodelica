@@ -94,14 +94,14 @@ public class CGenerator extends GenericGenerator {
 				genPrinter.print(" ((*(jmi->z))[jmi->offs_pd+" + 
 						fv.dependentRealParameterIndex() + "])\n");
 			}
+			for (FVariable fv : fclass.derivativeVariables()) {
+				genPrinter.print("#define " + fv.nameUnderscore());
+				genPrinter.print(" ((*(jmi->z))[jmi->offs_dx+" + 
+						fv.derivativeVariableIndex() + "])\n");
+			}
 			for (FVariable fv : fclass.differentiatedRealVariables()) {
 				genPrinter.print("#define " + fv.nameUnderscore());
 				genPrinter.print(" ((*(jmi->z))[jmi->offs_x+" + 
-						fv.differentiatedRealVariableIndex() + "])\n");
-			}
-			for (FVariable fv : fclass.differentiatedRealVariables()) {
-				genPrinter.print("#define der_" + fv.nameUnderscore());
-				genPrinter.print(" ((*(jmi->z))[jmi->offs_dx+" + 
 						fv.differentiatedRealVariableIndex() + "])\n");
 			}
 			for (FVariable fv : fclass.realInputs()) {

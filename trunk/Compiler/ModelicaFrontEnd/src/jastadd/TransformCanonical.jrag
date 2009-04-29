@@ -7,7 +7,8 @@ aspect TransformCanonical{
 	
 	public void FClass.transformCanonical() {
 		genBindingEquations();
-		flushCache(); // TODO: is this enough or should the entire tree be flushed?
+		addFDerivativeVariables();
+		//flushCache(); // TODO: is this enough or should the entire tree be flushed?
  	}
 		
 	public void FClass.genBindingEquations() {
@@ -20,6 +21,38 @@ aspect TransformCanonical{
 				getFEquationBlock(0).addFAbstractEquation(feq);
 			}
 		}
+		flushAllRecursive();
 	}
+
+	public void FClass.addFDerivativeVariables() {
+		ArrayList<FDerivativeVariable> l = new ArrayList<FDerivativeVariable>();
+		for (FVariable fv : differentiatedRealVariables()) {
+			l.add(new FDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
+					(FTypePrefixOther)fv.getFTypePrefixOther().fullCopy(),
+					new Opt(),
+					new List(),
+					new Opt(),
+					new Opt(),
+					fv.getFQName().fullCopy()));
+		}
+		for (FVariable fv : l) {
+			addFVariable(fv);
+		}
+		root().flushAllRecursive();
+	}
+
+	public void ASTNode.flushAll() {
+		flushCache();
+		flushCollectionCache();
+	}
+
+	public void ASTNode.flushAllRecursive() {
+		flushAll();
+		for (int i=0;i<getNumChild();i++) {
+			getChild(i).flushAllRecursive();
+		}
+	}
+
+	
 }
 

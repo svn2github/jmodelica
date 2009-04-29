@@ -597,8 +597,10 @@ aspect FlattPrettyPrint {
 		str.print(indent+"fclass "+ name() +"\n");
 		for (int i=0;i<getNumFVariable();i++) {
 			debugPrint("FClass.prettyPrint(): FVariable: " + getFVariable(i).name() + " is$Final: " + is$Final);
-	  		p.toString(getFVariable(i),str,indent+" ",o);
+	  		if (!getFVariable(i).isDerivativeVariable()) {
+	  			p.toString(getFVariable(i),str,indent+" ",o);
 	  		str.print(";\n");  
+	  		}
 		}
 
 		if (getNumFInitialEquation()>0)
@@ -673,6 +675,17 @@ aspect FlattPrettyPrint {
 
 		}
 
+	
+	public void FDerivativeVariable.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print(indent);
+		if (isProtected()) {
+			str.print("protected ");
+		}
+				
+		str.print(type());
+		str.print(" ");
+		str.print(name());		
+	}
 	
 	public void List.prettyPrintFAttributeList(PrintStream str, Printer p, Object o) {
 	

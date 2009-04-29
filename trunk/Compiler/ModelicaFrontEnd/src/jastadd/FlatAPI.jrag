@@ -52,9 +52,12 @@ aspect FlatAPI {
 			return index + dependentRealParameters().indexOf(fv);
 		} 
 		index += numDependentRealParameters();
-		index += numDifferentiatedRealVariables(); // Skip the dx variables		
-		if (differentiatedRealVariables().indexOf(fv) >= 0) {
-			return index + differentiatedRealVariables().indexOf(fv);
+		if (derivativeVariables().indexOf(fv) >= 0) {
+			return index + derivativeVariables().indexOf(fv);
+		} 		
+		index += numDerivativeVariables(); 
+		if (derivativeVariables().indexOf(fv) >= 0) {
+			return index + derivativeVariables().indexOf(fv);
 		} 
 		index += numDifferentiatedRealVariables();
 		if (realInputs().indexOf(fv) >= 0) {
@@ -147,6 +150,7 @@ aspect FlatAPI {
 	coll ArrayList<FVariable> FClass.reals() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FRealVariable contributes this to FClass.reals() for myFClass();
+//	FDerivativeVariable contributes this to FClass.reals() for myFClass();
 
     syn int FClass.numIntegers() = integers().size();
 	coll ArrayList<FVariable> FClass.integers() 
@@ -362,6 +366,15 @@ aspect FlatAPI {
 	to FClass.differentiatedRealVariables() for myFClass();
 	syn int FVariable.differentiatedRealVariableIndex() =
 		myFClass().differentiatedRealVariables().indexOf(this);
+
+    syn int FClass.numDerivativeVariables() = derivativeVariables().size();
+	coll ArrayList<FVariable> FClass.derivativeVariables() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	FDerivativeVariable contributes
+		this
+	to FClass.derivativeVariables() for myFClass();
+	syn int FVariable.derivativeVariableIndex() =
+		myFClass().derivativeVariables().indexOf(this);
 	
     syn int FClass.numVariables() = variables().size();
 	coll ArrayList<FVariable> FClass.variables() 
@@ -407,6 +420,7 @@ aspect FlatAPI {
 	  ArrayList<FVariable> set = new ArrayList<FVariable>();
   	  set.addAll(variables());
   	  set.removeAll(differentiatedRealVariables());
+  	  set.removeAll(derivativeVariables());
   	  set.removeAll(inputs());
   /*
       for (FVariable fv : getFVariables()) {
@@ -614,6 +628,8 @@ aspect FlatAPI {
  		  (startAttributeSet()? startAttributeExp().isParameterExp(): false));
 	syn lazy boolean FVariable.isDifferentiatedVariable() = 
 	  myFClass().differentiatedRealVariables().contains(this);
+	syn lazy boolean FVariable.isDerivativeVariable() = false;
+	eq FDerivativeVariable.isDerivativeVariable() = true;
 	syn lazy boolean FVariable.isAlgebraicVariable() = 
 	  myFClass().algebraicRealVariables().contains(this);
 }
@@ -813,7 +829,8 @@ aspect Attributes {
 	eq FRealVariable.startAttributeCValue() =
 		startAttributeSet()? startAttributeExp().ceval():
 			new CValueReal(0.0);
-	eq FIntegerVariable.startAttributeCValue() =
+	eq FDerivativeVariable.startAttributeCValue() = new CValueReal(0.0);
+		eq FIntegerVariable.startAttributeCValue() =
 		startAttributeSet()? startAttributeExp().ceval():
 			new CValueInteger(0);
 	eq FBooleanVariable.startAttributeCValue() =
@@ -960,9 +977,10 @@ aspect FlatDiagnostics {
 		str.append("  Number of String dependent parameters:      " + 
 		  numDependentStringParameters() + "\n");
 		  
-		  
 		str.append("Number of differentiated variables:           " + 
-		  numDifferentiatedRealVariables() + "\n"); 
+				  numDifferentiatedRealVariables() + "\n"); 
+		str.append("Number of derivative variables:               " + 
+				  numDerivativeVariables() + "\n"); 
 		  
 		str.append("Number of inputs:                             " + 
 		  numInputs() + "\n");
@@ -1073,6 +1091,17 @@ aspect FlatDiagnostics {
 			i++;
 		}
 		str.append("}\n");  
+		str.append("Derivative variables: {");
+		i = 0;
+		for (FVariable fv : derivativeVariables()) {
+			str.append(fv.name());
+			if (i<numDifferentiatedRealVariables()-1) {
+				str.append(", ");
+			}
+			i++;
+		}
+		str.append("}\n");  
+
 		str.append("Algebraic variables: {");
 		i = 0;
 		for (FVariable fv : algebraicRealVariables()) {

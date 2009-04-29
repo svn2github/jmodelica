@@ -276,10 +276,10 @@ public class XMLGenerator extends GenericGenerator {
 					}
 					//category
 					genPrinter.print(tg.generateTag("Category"));
-					if(realvariable.isDifferentiatedVariable()) {
+					if(realvariable.isDerivativeVariable()) {
 						genPrinter.print("derivative");
-					} else if(false) {
-						//TODO: state variable
+					} else if(realvariable.isDifferentiatedVariable()) {
+						genPrinter.print("state");
 					} else {
 						//default is algebraic
 						genPrinter.print("algebraic");
