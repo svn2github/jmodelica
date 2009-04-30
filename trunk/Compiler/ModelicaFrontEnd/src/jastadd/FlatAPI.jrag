@@ -147,24 +147,24 @@ aspect FlatAPI {
 	}
 
     syn int FClass.numReals() = reals().size();
-	coll ArrayList<FVariable> FClass.reals() 
-	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	coll ArrayList<FRealVariable> FClass.reals() 
+	  [new ArrayList<FRealVariable>()] with add root FlatRoot;
 	FRealVariable contributes this to FClass.reals() for myFClass();
 //	FDerivativeVariable contributes this to FClass.reals() for myFClass();
 
     syn int FClass.numIntegers() = integers().size();
-	coll ArrayList<FVariable> FClass.integers() 
-	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	coll ArrayList<FIntegerVariable> FClass.integers() 
+	  [new ArrayList<FIntegerVariable>()] with add root FlatRoot;
 	FIntegerVariable contributes this to FClass.integers() for myFClass();
 
     syn int FClass.numBooleans() = booleans().size();
-	coll ArrayList<FVariable> FClass.booleans() 
-	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	coll ArrayList<FBooleanVariable> FClass.booleans() 
+	  [new ArrayList<FBooleanVariable>()] with add root FlatRoot;
 	FBooleanVariable contributes this to FClass.booleans() for myFClass();
 
     syn int FClass.numStrings() = strings().size();
-	coll ArrayList<FVariable> FClass.strings() 
-	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	coll ArrayList<FStringVariable> FClass.strings() 
+	  [new ArrayList<FStringVariable>()] with add root FlatRoot;
 	FStringVariable contributes this to FClass.strings() for myFClass();
 
     syn int FClass.numIndependentConstants() = independentConstants().size();
@@ -384,34 +384,34 @@ aspect FlatAPI {
 	to FClass.variables() for myFClass();
 	
 	syn int FClass.numRealVariables() = realVariables().size();
-	syn lazy ArrayList<FVariable> FClass.realVariables() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(variables());
-      set.retainAll(reals());
+	syn lazy ArrayList<FRealVariable> FClass.realVariables() {
+      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
+      set.addAll(reals());
+      set.retainAll(variables());
       return set;
      }
 
 	syn int FClass.numIntegerVariables() = integerVariables().size();
-	syn lazy ArrayList<FVariable> FClass.integerVariables() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(variables());
-      set.retainAll(integers());
+	syn lazy ArrayList<FIntegerVariable> FClass.integerVariables() {
+      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
+      set.addAll(integers());
+      set.retainAll(variables());
       return set;
      }
 
 	syn int FClass.numBooleanVariables() = booleanVariables().size();
-	syn lazy ArrayList<FVariable> FClass.booleanVariables() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(variables());
-      set.retainAll(booleans());
+	syn lazy ArrayList<FBooleanVariable> FClass.booleanVariables() {
+      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
+      set.addAll(booleans());
+      set.retainAll(variables());
       return set;
      }
 
 	syn int FClass.numStringVariables() = stringVariables().size();
-	syn lazy ArrayList<FVariable> FClass.stringVariables() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(variables());
-      set.retainAll(strings());
+	syn lazy ArrayList<FStringVariable> FClass.stringVariables() {
+      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
+      set.addAll(strings());
+      set.retainAll(variables());
       return set;
      }
 	
@@ -626,6 +626,7 @@ aspect FlatAPI {
 	syn lazy boolean FVariable.isDependentParameter() = isParameter() &&
  		  (hasBindingExp()? getBindingExp().isParameterExp(): 
  		  (startAttributeSet()? startAttributeExp().isParameterExp(): false));
+	syn boolean FVariable.isVariable() = !isParameter() && !isConstant();
 	syn lazy boolean FVariable.isDifferentiatedVariable() = 
 	  myFClass().differentiatedRealVariables().contains(this);
 	syn lazy boolean FVariable.isDerivativeVariable() = false;

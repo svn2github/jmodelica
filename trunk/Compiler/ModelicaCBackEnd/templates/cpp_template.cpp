@@ -82,6 +82,7 @@ $C_DAE_initial_equation_residuals$
 }
 
 static int vdp_init_F1(jmi_t* jmi, jmi_ad_var_vec_p res) {
+$C_DAE_initial_guess_equation_residuals$
 	return 0;
 }
 

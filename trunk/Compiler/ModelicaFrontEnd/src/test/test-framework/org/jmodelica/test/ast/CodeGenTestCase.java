@@ -143,7 +143,7 @@ public abstract class CodeGenTestCase extends TestCase {
    	  	if (ir==null) {
    		    return false;
    	    }
-   	  	fc.genBindingEquations();
+   	  	fc.transformCanonical();
    	  	// Assume that result and template is not on file.
   	    StringOutputStream os = new StringOutputStream();
   	    AbstractGenerator generator = createGenerator(fc);

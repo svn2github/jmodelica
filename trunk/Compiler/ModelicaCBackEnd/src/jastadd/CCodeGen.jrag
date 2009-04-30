@@ -75,6 +75,18 @@ aspect CCodeGen {
 		getLeft().prettyPrint_C(str,"");
 		str.print(");\n");
 	}
+
+	public void FRealVariable.genStartAttributeResidual_C(int i, String indent, PrintStream str) {
+		str.print(indent + "(*res)[" + i + "] = ");
+		if (startAttributeSet()) {
+			startAttributeExp().prettyPrint_C(str,"");
+		} else {
+			str.print("0.0");
+		}
+		str.print(" - ");
+		str.print(nameUnderscore());
+		str.print(";\n");
+	}
 	
 }
 

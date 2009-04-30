@@ -226,6 +226,26 @@
 			<arg value="CodeGenTests"/>
 			<arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 		</java>
+	  	 <java 
+		  		      classname="org.jmodelica.test.ast.JunitGenerator"
+		  		      classpath=".:bin/ModelicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
+		  		      fork="true" 
+		  		      dir=".">
+		  		    	<arg value="${modelica_front_end_path}/src/test/modelica/TransformCanonicalTests.mo"/>
+		  		    	      <arg value="TransformCanonicalTests"/>
+		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
+		    </java>
+		<java 
+ 		  		      classname="org.jmodelica.test.ast.JunitGenerator"
+ 		  		      classpath=".:bin/ModelicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
+ 		  		      fork="true" 
+ 		  		      dir=".">
+			<arg value="${modelica_c_back_end_path}/src/test/modelica/CCodeGenTests.mo"/>
+			<arg value="CCodeGenTests"/>
+			<arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
+		</java>
+
+	
 		<!--
 		<java 
  		  		      classname="org.jmodelica.test.ast.JunitGenerator"

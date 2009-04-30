@@ -60,11 +60,36 @@ public class CGenerator extends GenericGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
-				
+			int i=0;
+			for (FAbstractEquation e : fclass.initialEquations()) {
+				e.genResidual_C(i,"    ",genPrinter);				
+				i++;
+			}
 		}
 	
 	}
 
+	class DAETag_C_initialGuessEquationResiduals extends DAETag {
+		
+		public DAETag_C_initialGuessEquationResiduals(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_initial_guess_equation_residuals","C: initial guess equation residuals",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			int i=0;
+			for (FRealVariable fv : fclass.realVariables()) {
+				if (!(fv.fixedAttribute() ||
+						(fv.isDifferentiatedVariable() && fv.startAttributeSet()))) {
+					fv.genStartAttributeResidual_C(i,"   ",genPrinter);
+				}
+				i++;
+			}
+		}
+	
+	}
+	
 	class DAETag_C_variableAliases extends DAETag {
 		
 		public DAETag_C_variableAliases(AbstractGenerator myGenerator, 
@@ -136,6 +161,8 @@ public class CGenerator extends GenericGenerator {
 		tag = new DAETag_C_equationResiduals(this,fclass);
 		tagMap.put(tag.getName(),tag);
 		tag = new DAETag_C_initialEquationResiduals(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_C_initialGuessEquationResiduals(this,fclass);
 		tagMap.put(tag.getName(),tag);
 		tag = new DAETag_C_variableAliases(this,fclass);
 		tagMap.put(tag.getName(),tag);		

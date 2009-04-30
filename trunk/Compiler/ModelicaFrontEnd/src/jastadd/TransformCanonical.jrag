@@ -1,16 +1,32 @@
 
 /**
- * This aspect contains transformations on the flattened model which converts
+ * \brief Contains transformations on the flattened model which converts
  * it into a canonical form.
  */
 aspect TransformCanonical{
-	
+
+	/**
+	 * \brief Transform the raw flattened model into a structured form.
+	 * 
+	 * Currently, the following operations are performed:
+	 *  <ul>
+	 *    <li> Binding equations for variables are converted into regular
+	 *         equations by calling genBindingEquations().
+	 *    <li> Derivative variables are generated and inserted in the
+	 *         list of FVariables by calling addFDerivativeVariables().
+	 *    <li> Generate 
+	 *  </ul>
+	 */
 	public void FClass.transformCanonical() {
 		genBindingEquations();
 		addFDerivativeVariables();
+		genInitialEquations();
 		//flushCache(); // TODO: is this enough or should the entire tree be flushed?
  	}
 		
+	/**
+	 * \brief Convert variable binding equations into regular equations.
+	 */
 	public void FClass.genBindingEquations() {
 		for (FVariable fv : getFVariables()) {
 			if (fv.hasBindingExp() && !fv.isParameter() && !fv.isConstant()) {
@@ -24,6 +40,10 @@ aspect TransformCanonical{
 		flushAllRecursive();
 	}
 
+	/**
+	 * \brief Add derivative variables to the list of FVariables, one for each
+	 * differentiate variable.
+	 */
 	public void FClass.addFDerivativeVariables() {
 		ArrayList<FDerivativeVariable> l = new ArrayList<FDerivativeVariable>();
 		for (FVariable fv : differentiatedRealVariables()) {
@@ -41,11 +61,57 @@ aspect TransformCanonical{
 		root().flushAllRecursive();
 	}
 
+	/**
+	 * \brief Generate initial equations from variables with fixed start
+	 * attributes.
+	 * 
+	 * Intitial equations corresponding to explicitly set start attributes of 
+	 * differentiated variables are also generated, without taking the fixed
+	 * attribute into account.
+	 */
+	public void FClass.genInitialEquations() {
+		for (FRealVariable fv : realVariables()) {
+			if (fv.fixedAttribute() ||
+					(fv.isDifferentiatedVariable() && fv.startAttributeSet())) {
+				addFInitialEquation(new FEquation(new FIdUseExp(
+						new FIdUseQualified("",
+						fv.getFQName().fullCopy())),
+						fv.startAttributeExp()));
+			}	
+		}
+		for (FIntegerVariable fv : integerVariables()) {
+			if (fv.fixedAttribute() ||
+					(fv.isDifferentiatedVariable() && fv.startAttributeSet())) {
+				addFInitialEquation(new FEquation(new FIdUseExp(
+						new FIdUseQualified("",
+						fv.getFQName().fullCopy())),
+						fv.startAttributeExp()));
+			}	
+		}
+		for (FBooleanVariable fv : booleanVariables()) {
+			if (fv.fixedAttribute() ||
+					(fv.isDifferentiatedVariable() && fv.startAttributeSet())) {
+				addFInitialEquation(new FEquation(new FIdUseExp(
+						new FIdUseQualified("",
+						fv.getFQName().fullCopy())),
+						fv.startAttributeExp()));
+			}	
+		}		
+		root().flushAllRecursive();
+	}
+	
+	/**
+	 * \brief Flush all caches, including collection attributes.
+	 */
 	public void ASTNode.flushAll() {
 		flushCache();
 		flushCollectionCache();
 	}
 
+	/**
+	 * \brief Flush all caches, including collection attributes, and also
+	 * flush all children.
+	 */
 	public void ASTNode.flushAllRecursive() {
 		flushAll();
 		for (int i=0;i<getNumChild();i++) {
