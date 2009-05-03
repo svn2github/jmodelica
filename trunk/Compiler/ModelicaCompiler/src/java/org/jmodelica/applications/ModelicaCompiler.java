@@ -86,9 +86,11 @@ public class ModelicaCompiler {
 //		      boolean sourceErr = sr.checkErrorsInClass(cl);
 		      
 
-		      if (instErr)
+		      if (instErr) {
 		    	  System.exit(0);
-		      
+		      } else {
+		    	  System.out.println("No errors found");
+		      }
 /*		      
 		      if (ipr.checkErrorsInInstClass(cl)) {
 			      //if (sr.errorCheck()) {
@@ -112,12 +114,16 @@ public class ModelicaCompiler {
 		    	  System.out.println("Flattening starts...");
 		    	  InstNode ir = ipr.findFlattenInst(cl,fc);
 		    	  fc.transformCanonical();
+		    	  boolean flatErr = fc.errorCheck();
+		    	  if(flatErr) {
+		    		  System.exit(0);
+		    	  }
 		    	  if (ir==null) {
 		    		  System.out.println("Error:");
 		    		  System.out.println("   Did not find the class: " + cl);
 		    		  System.exit(0);
 		    	  }
-		    	  ir.dumpTree("");
+		    	  //ir.dumpTree("");
 		    	/*
 		    	  for (FVariable fv : fc.getFVariables()) {
 		    		  System.out.println(fv.name() + " = " + fv.ceval());
@@ -132,7 +138,7 @@ public class ModelicaCompiler {
 	    	  }	
 	    	  */	    	  
 		    	  instTime = System.currentTimeMillis();
-		    	  fc.dumpTree("");
+		    	  //fc.dumpTree("");
 		    	  System.out.println(fc.diagnostics());
 		    	  System.out.print(fc.prettyPrint(""));
 		    	  printTime = System.currentTimeMillis();

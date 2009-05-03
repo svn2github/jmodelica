@@ -14,13 +14,15 @@ aspect TransformCanonical{
 	 *         equations by calling genBindingEquations().
 	 *    <li> Derivative variables are generated and inserted in the
 	 *         list of FVariables by calling addFDerivativeVariables().
-	 *    <li> Generate 
+	 *    <li> Generate initial equations based on start attribute.
+	 *    <li> Sort dependent parameters.
 	 *  </ul>
 	 */
 	public void FClass.transformCanonical() {
 		genBindingEquations();
 		addFDerivativeVariables();
 		genInitialEquations();
+		sortDependentParameters();
 		//flushCache(); // TODO: is this enough or should the entire tree be flushed?
  	}
 		
@@ -99,7 +101,7 @@ aspect TransformCanonical{
 		}		
 		root().flushAllRecursive();
 	}
-	
+		
 	/**
 	 * \brief Flush all caches, including collection attributes.
 	 */
@@ -119,6 +121,127 @@ aspect TransformCanonical{
 		}
 	}
 
+	
+}
+
+aspect ParameterSorting {
+
+	public boolean FClass.cyclicParameters = false;
+	
+	/**
+	 * \brief Sort dependent parameters.
+	 * 
+	 * This is a simple implementation of Kahn's topological sorting algorithm.
+	 * This implementation will most likely be replaced by other graph 
+	 * algorithms later on.
+	 */
+	public void FClass.sortDependentParameters() {
+		ArrayList<FVariable> dps = dependentParameters();
+		//PSGraph psg = new PSGraph();
+		
+		ArrayList<ArrayList<FVariable>> toNodes = new ArrayList<ArrayList<FVariable>>();	
+		ArrayList<ArrayList<FVariable>> fromNodes = new ArrayList<ArrayList<FVariable>>();	
+		
+		for(int i=0;i<numDependentParameters();i++) {
+			toNodes.add(new ArrayList<FVariable>());
+			fromNodes.add(new ArrayList<FVariable>());
+		}
+		
+		for (FVariable fv : dps) {
+			ArrayList<FVariable> deps = fv.referencedFVariablesInBindingExp();
+			for (FVariable fv_add : deps) {
+				if (!(dps.indexOf(fv_add)<0) && !toNodes.get(dps.indexOf(fv_add)).contains(fv)) {
+					toNodes.get(dps.indexOf(fv_add)).add(fv);		
+					fromNodes.get(dps.indexOf(fv)).add(fv_add);
+				}
+			}
+		}	
+		
+		/*
+		for (FVariable fv : dps) {
+			System.out.print(dps.indexOf(fv) + "-> ");
+			for (FVariable fv_ : toNodes.get(dps.indexOf(fv))) {
+				System.out.print(dps.indexOf(fv_) + " ");
+			}
+			System.out.println("");
+		}		
+
+		for (FVariable fv : dps) {
+			System.out.print(dps.indexOf(fv) + "<- ");
+			for (FVariable fv_ : fromNodes.get(dps.indexOf(fv))) {
+				System.out.print(dps.indexOf(fv_) + " ");
+			}
+			System.out.println("");
+		}		
+		 */
+		
+		// Sort using algorithm described at
+		// http://en.wikipedia.org/wiki/Topological_sorting
+		ArrayList<FVariable> L = new ArrayList<FVariable>();
+		ArrayList<FVariable> S = new ArrayList<FVariable>();
+		
+		// Add all nodes without incoming edges to S
+		int i = 0;
+		for (ArrayList<FVariable> l : fromNodes) {
+			if (l.isEmpty()) {
+				S.add(dps.get(i));
+			}
+			i++;
+		}
+		// Repeat while S is not empty
+		while (!S.isEmpty()) {
+			// Remove a node n from S
+			FVariable n = S.remove(0);
+			// Insert n into L
+			L.add(n);
+			// For each node m with an edge e from n to m
+			for (FVariable m : toNodes.get(dps.indexOf(n))) {
+				// Remove edge e from fromNodes
+				fromNodes.get(dps.indexOf(m)).remove(n);
+				// If m has no incoming edges add m to S
+				if (fromNodes.get(dps.indexOf(m)).isEmpty()) {
+					S.add(m);
+				}
+			}
+			// Remove e from toNodes
+			toNodes.get(dps.indexOf(n)).clear();
+		}
+		
+		if (L.size()!=dps.size()) {
+			cyclicParameters = true;
+			return;
+		}
+		
+		for (i=getNumFVariable()-1;i>=0;i--) {
+			if (dps.contains(getFVariable(i))) {
+				getFVariableList().removeChild(i);
+			}
+		}
+
+		for (FVariable fv : L) {
+			addFVariable(fv);
+		}
+		
+		root().flushAllRecursive();
+		
+		/*
+		System.out.println("Sorted dependent parameters: ***");
+		for (FVariable fv : L) {
+			System.out.println(fv.name());
+		}
+		System.out.println("***");
+		*/
+	}	
+		
+}
+
+aspect TransformCanonicalErrorCheck {
+	
+	public void FClass.collectErrors() {
+		if (cyclicParameters) {
+			error("The model "+ name() +" contains cyclic parameter dependencies.");
+		}
+	}
 	
 }
 

@@ -118,8 +118,21 @@ public class ErrorTestCase extends TestCase {
 			if (testErrorMsg.equals(correctErrorMsg))
 	    		return true;
 	    }
-	
-	    
+
+	    // No errors in first pass, check for errors after transform canonical
+	    FlatRoot flatRoot = new FlatRoot();
+	    flatRoot.setFileName(getSourceFileName());
+	    FClass fc = new FClass();
+	    flatRoot.setFClass(fc);
+	    ipr.findFlattenInst(getClassName(),fc);
+	    fc.transformCanonical();
+	    StringBuffer str_flat = new StringBuffer();
+	    if (fc.errorCheck(str_flat)) {
+	    	String testErrorMsg = filterErrorMessages(str_flat.toString());
+	    	String correctErrorMsg = filterErrorMessages(getErrorMessage());
+			if (testErrorMsg.equals(correctErrorMsg))
+	    		return true;
+	    }
 	    
 /*	    
 	    if (sr.checkErrorsInClass(getClassName(),str)) {

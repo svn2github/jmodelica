@@ -108,12 +108,13 @@ public class FlattenModel {
 		      flatRoot.setFClass(fc);
 		    	  System.out.println("Flattening starts...");
 		    	  InstNode ir = ipr.findFlattenInst(cl,fc);
+		    	  fc.transformCanonical();
 		    	  if (ir==null) {
 		    		  System.out.println("Error:");
 		    		  System.out.println("   Did not find the class: " + cl);
 		    		  System.exit(0);
 		    	  }
-		    	  ir.dumpTree("");
+		    	  //ir.dumpTree("");
 		    	/*
 		    	  for (FVariable fv : fc.getFVariables()) {
 		    		  System.out.println(fv.name() + " = " + fv.ceval());
@@ -128,7 +129,7 @@ public class FlattenModel {
 	    	  }	
 	    	  */	    	  
 		    	  instTime = System.currentTimeMillis();
-		    	  fc.dumpTree("");
+		    	  //fc.dumpTree("");
 		    	  System.out.println(fc.diagnostics());
 		    	  System.out.print(fc.prettyPrint(""));
 		    	  printTime = System.currentTimeMillis();

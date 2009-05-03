@@ -633,6 +633,17 @@ aspect FlatAPI {
 	eq FDerivativeVariable.isDerivativeVariable() = true;
 	syn lazy boolean FVariable.isAlgebraicVariable() = 
 	  myFClass().algebraicRealVariables().contains(this);
+
+	inh FVariable FExp.inBindingExp();
+	eq FVariable.getBindingExp().inBindingExp() = this;
+	eq Root.getChild().inBindingExp() = null; 
+	
+	coll ArrayList<FVariable> FVariable.referencedFVariablesInBindingExp() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	FIdUseExp contributes
+		(FVariable)myFV() when !myFV().isUnknown()
+	to FVariable.referencedFVariablesInBindingExp() for inBindingExp();
+	
 }
 
 aspect FlatCausality {
