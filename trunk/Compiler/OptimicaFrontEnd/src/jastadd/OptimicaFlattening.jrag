@@ -20,7 +20,7 @@ aspect OptimicaFlattening {
     	InstOptClassDecl fcd = new InstOptClassDecl(this,new Opt(),new Opt());
 	    fcd.setInstConstrainingOpt(newInstConstrainingClassOpt());
 	    if (hasClassModification()) {
-	    	fcd.setIClassModification(getClassModification().newIModification());
+	    	fcd.setInstClassModification(getClassModification().newInstModification());
 	    }
     	fcd.setStart(getStart());
     	return fcd;
@@ -50,9 +50,9 @@ aspect OptimicaFlattening {
            
 			foc.genConnectionEquations();
 			OptClassDecl ocd = (OptClassDecl)getClassDecl();
-			if (hasIClassModification()) {
+			if (hasInstClassModification()) {
 				List attr = new List();
-				getIClassModification().collectAttributes(attr,new FQName(new List()));
+				getInstClassModification().collectAttributes(attr,new FQName(new List()));
 				System.out.print("qwe: " + attr.getNumChild());
 				foc.setFAttributeList(attr);
 			}

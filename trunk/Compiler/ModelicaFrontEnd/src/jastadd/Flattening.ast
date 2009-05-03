@@ -34,8 +34,8 @@ InstPrimitiveClassDecl : InstFullClassDecl;
 InstBuiltInClassDecl : InstClassDecl ::=;
 UnknownInstClassDecl : InstFullClassDecl;
 
-InstReplacingFullClassDecl : InstFullClassDecl ::= <OriginalClassDecl:ClassDecl> /OriginalInstClass:InstClassDecl/ <IClassRedeclare:IClassRedeclare>;
-InstReplacingShortClassDecl : InstShortClassDecl ::= <OriginalClassDecl:ClassDecl> /OriginalInstClass:InstClassDecl/ <IClassRedeclare:IClassRedeclare>;
+InstReplacingFullClassDecl : InstFullClassDecl ::= <OriginalClassDecl:ClassDecl> /OriginalInstClass:InstClassDecl/ <InstClassRedeclare:InstClassRedeclare>;
+InstReplacingShortClassDecl : InstShortClassDecl ::= <OriginalClassDecl:ClassDecl> /OriginalInstClass:InstClassDecl/ <InstClassRedeclare:InstClassRedeclare>;
 InstReplacingPrimitiveClassDecl : InstReplacingFullClassDecl ::=;
  
 abstract InstImport ::= PackageName:InstAccess <ImportClause:ImportClause>;
@@ -43,22 +43,22 @@ InstImportQualified : InstImport;
 InstImportUnqualified : InstImport;
 InstImportRename : InstImport;
 
-abstract InstConstraining ::=  ClassName:InstAccess [IClassModification] /InstNode/;
+abstract InstConstraining ::=  ClassName:InstAccess [InstClassModification] /InstNode/;
 InstConstrainingClass : InstConstraining ::= <BaseClassDecl:BaseClassDecl>;
 InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl> /DynamicClassName:InstAccess*/;
 
 // The class to expand may differ from the declared class of the component due to 
 // redeclaration of classes.
-abstract InstComponentDecl : InstNode ::= ClassName:InstAccess <ComponentDecl:ComponentDecl> [IModification] [InstConstraining];
+abstract InstComponentDecl : InstNode ::= ClassName:InstAccess <ComponentDecl:ComponentDecl> [InstModification] [InstConstraining];
 InstComposite : InstComponentDecl;
 InstPrimitive : InstComponentDecl ;
 InstBuiltIn : InstComponentDecl;
 UnknownInstComponentDecl : InstComponentDecl;
 
-InstReplacingComposite : InstComposite ::= <OriginalDecl:ComponentDecl> /OriginalInstComponent:InstComponentDecl/ <IComponentRedeclare:IComponentRedeclare>;
-InstReplacingPrimitive : InstPrimitive ::= <OriginalDecl:ComponentDecl> /OriginalInstComponent:InstComponentDecl/ <IComponentRedeclare:IComponentRedeclare>;
+InstReplacingComposite : InstComposite ::= <OriginalDecl:ComponentDecl> /OriginalInstComponent:InstComponentDecl/ <InstComponentRedeclare:InstComponentRedeclare>;
+InstReplacingPrimitive : InstPrimitive ::= <OriginalDecl:ComponentDecl> /OriginalInstComponent:InstComponentDecl/ <InstComponentRedeclare:InstComponentRedeclare>;
 
-InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause> [IClassModification];
+InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause> [InstClassModification];
 InstExtendsShortClass : InstExtends ::=;
 //InstReplacingExtendsShortClass : InstReplacingExtendsShortClass ::= <InstExtendsShortClass:InstExtendsShortClass>
 
@@ -72,30 +72,19 @@ InstAmbiguousAccess : InstAccess;// ::= [ArraySubscripts];
 
 InstComponentAccess : InstAccess;// ::= [ArraySubscripts];
 
-/*
-Environment ::= InstModification*;
-InstModification ::= <InstNode:InstNode> <Modification:Modification>;
-InstCompleteModification : InstModification;
-InstClassModification : InstModification;
-InstValueModification : InstModification ::=;// /FExp/;
-InstComponentModification : InstModification ::= ComponentName:InstAccess;
-InstComponentRedeclare : InstModification ::= ComponentName:InstAccess;
-InstClassRedeclare : InstModification ::= ClassName:InstAccess;
-*/
-
 // These nodes are used to create instance copies of modification trees intended for
 // error checking.	
-abstract IModification ::= <Modification:Modification>;
-ICompleteModification : IModification ::= IClassModification [IValueModification];
-IValueModification : IModification ::= /FExp/;
+abstract InstModification ::= <Modification:Modification>;
+InstCompleteModification : InstModification ::= InstClassModification [InstValueModification];
+InstValueModification : InstModification ::= /FExp/;
 
-IClassModification : IModification ::= IArgument*;
-abstract IArgument : IModification ::=;
+InstClassModification : InstModification ::= InstArgument*;
+abstract InstArgument : InstModification ::=;
 
-abstract INamedModification : IArgument ::= Name:InstAccess;
-abstract IElementModification : INamedModification ::= [IModification];
-IComponentModification : IElementModification; 
-abstract IElementRedeclare : INamedModification;
-IClassRedeclare : IElementRedeclare ::= /InstClassDecl/;
-IComponentRedeclare : IElementRedeclare ::= /InstComponentDecl/ /DynamicClassName:InstAccess*/;
+abstract InstNamedModification : InstArgument ::= Name:InstAccess;
+abstract InstElementModification : InstNamedModification ::= [InstModification];
+InstComponentModification : InstElementModification; 
+abstract InstElementRedeclare : InstNamedModification;
+InstClassRedeclare : InstElementRedeclare ::= /InstClassDecl/;
+InstComponentRedeclare : InstElementRedeclare ::= /InstComponentDecl/ /DynamicClassName:InstAccess*/;
 	

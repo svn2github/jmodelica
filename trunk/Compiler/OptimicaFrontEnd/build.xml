@@ -170,19 +170,9 @@
 	    <!-- Generates teests -->
 	  	<mkdir dir="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 
-	  	
-	  	
-	  	
-	  	
-	  	
-	  	
-	  	
-	  	
-	  	
-	  	
 	  	<java 
 	      classname="org.jmodelica.test.ast.JunitGenerator"
-	      classpath=".:bin/jmodelica.jar" 
+	      classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar" 
 	      fork="true" 
 	      dir=".">
 	    	<arg value="${jmodelica_path}/src/test/modelica/NameTests.mo"/>
@@ -191,7 +181,7 @@
 	    </java>
 	  	 <java 
 	  		      classname="org.jmodelica.test.ast.JunitGenerator"
-	  		      classpath=".:bin/jmodelica.jar" 
+	  		      classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar" 
 	  		      fork="true" 
 	  		      dir=".">
 	  		    	<arg value="${jmodelica_path}/src/test/modelica/ModificationTests.mo"/>
@@ -200,15 +190,16 @@
 	    </java>
 	  	 <java 
 		  		      classname="org.jmodelica.test.ast.JunitGenerator"
-		  		      classpath=".:bin/jmodelica.jar:${beaver_dir}/lib/beaver.jar" 
+		  		      classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar" 
 		  		      fork="true" 
 		  		      dir=".">
-		  		    	<arg value="src/test/modelica/TypeTests.mo"/>
+		  		    	<arg value="${jmodelica_path}/src/test/modelica/TypeTests.mo"/>
 		  		    	      <arg value="TypeTests"/>
 		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 		    </java>
 
-	  	<javac compiler="javac1.5" debug="true" destdir="bin" classpath="${tools}/junit-4.4.jar" >
+	  	<javac compiler="javac1.5" debug="true" destdir="bin" 
+	  		classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar:${junit_dir}/junit-4.5.jar" >
 	  		<src path="${test_junit-gen_dir}/"/>
 	  	    <include name = "org/jmodelica/test/junitgenerated/*.java"/>
 	  		<exclude name = "**/*.aj"/>
@@ -226,13 +217,16 @@
   	<mkdir dir = "doc/junit-reports"/>
   	<junit printsummary="yes">
   	  <classpath>
-  	  <fileset dir="${junit_dir}">
-  	     <include name="junit-4.5.jar"/>
-  	  </fileset>
-  	  <fileset dir="bin">
-  	   	<include name="jmodelica.jar"/>
-  	   	<include name="junit-tests.jar"/>
-  	  </fileset>
+		<fileset dir="${junit_dir}">
+			<include name="junit-4.5.jar"/>
+		</fileset>
+		<fileset dir="bin">
+			<include name="optimica.jar"/>
+			<include name="junit-tests.jar"/>
+		</fileset>
+		<fileset dir="${beaver_dir}/lib">
+			<include name="beaver.jar"/>
+		</fileset>
   	  </classpath>
    		<formatter type="xml"/>
      <!-- <test todir="junit-reports"

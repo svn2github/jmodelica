@@ -19,7 +19,7 @@ import java.util.ArrayList;
     /**
      * TODO: Is it a good idea to inherit? Should env be a component?
      */
-    class Environment extends ArrayList<IModification> {
+    class Environment extends ArrayList<InstModification> {
     
         public Environment() {
         	super();
@@ -28,16 +28,16 @@ import java.util.ArrayList;
         /**
          * Merge an outer modification into the environment: add it at the beginning.
          */    
-    	public void mergeOuterModification(IModification outerMod) {
-    		ArrayList<IModification> outerMods = outerMod.expand();
+    	public void mergeOuterModification(InstModification outerMod) {
+    		ArrayList<InstModification> outerMods = outerMod.expand();
     		addAll(0,outerMods);
     	}
 
         /**
          * Merge an inner modification into the environment: add it last.
          */    
-    	public void mergeInnerModification(IModification innerMod) {
-    		ArrayList<IModification> innerMods = innerMod.expand();
+    	public void mergeInnerModification(InstModification innerMod) {
+    		ArrayList<InstModification> innerMods = innerMod.expand();
     		addAll(innerMods);    	
     	}
 
@@ -71,7 +71,7 @@ import java.util.ArrayList;
         public String toString() {
            StringBuffer str = new StringBuffer();
            str.append("{");
-           for (IModification im : this) {
+           for (InstModification im : this) {
 //           	  str.append("  " + im.getModification().prettyPrint("") + ",\n");
            	  str.append("  " + im.getModification().prettyPrint("") + ",");
            	  str.append(im.myInstNode().toString());
@@ -85,7 +85,7 @@ import java.util.ArrayList;
            StringBuffer str = new StringBuffer();
            str.append(indent+"{");
            for (int i=0;i<size();i++) {
-              IModification im = get(i);
+              InstModification im = get(i);
               if (i==0)
               	str.append(im.getModification().prettyPrint(""));
            	  else
@@ -105,170 +105,170 @@ import java.util.ArrayList;
 
 aspect InstModifications{
 
-	public ArrayList<IModification> IModification.expand() {
-		ArrayList<IModification> l = new ArrayList<IModification>();
+	public ArrayList<InstModification> InstModification.expand() {
+		ArrayList<InstModification> l = new ArrayList<InstModification>();
 		l.add(this);
 		return l;
 	}
 
-	public ArrayList<IModification> ICompleteModification.expand() {
-		ArrayList<IModification> l = new ArrayList<IModification>();
-		for (IModification im : getIClassModification().getIArguments())
+	public ArrayList<InstModification> InstCompleteModification.expand() {
+		ArrayList<InstModification> l = new ArrayList<InstModification>();
+		for (InstModification im : getInstClassModification().getInstArguments())
 			l.add(im);
-		if (hasIValueModification())
-			l.add(getIValueModification());
+		if (hasInstValueModification())
+			l.add(getInstValueModification());
 		return l;	
 		
 	}
 
-	public ArrayList<IModification> IClassModification.expand() {
-		ArrayList<IModification> l = new ArrayList<IModification>();
-		for (IModification im : getIArguments())
+	public ArrayList<InstModification> InstClassModification.expand() {
+		ArrayList<InstModification> l = new ArrayList<InstModification>();
+		for (InstModification im : getInstArguments())
 			l.add(im);
 		return l;	
 	}
 
 
-	public abstract IModification Modification.newIModification();
-	public ICompleteModification CompleteModification.newIModification() {
-		ICompleteModification icm = new ICompleteModification(this,getClassModification().newIModification(),new Opt());
+	public abstract InstModification Modification.newInstModification();
+	public InstCompleteModification CompleteModification.newInstModification() {
+		InstCompleteModification icm = new InstCompleteModification(this,getClassModification().newInstModification(),new Opt());
         if (hasValueModification())
-        	icm.setIValueModification(getValueModification().newIModification());
+        	icm.setInstValueModification(getValueModification().newInstModification());
         return icm;
 	}	
-	public IValueModification ValueModification.newIModification() {
-		return new IValueModification(this);
+	public InstValueModification ValueModification.newInstModification() {
+		return new InstValueModification(this);
 	}
-	public IClassModification ClassModification.newIModification () {
+	public InstClassModification ClassModification.newInstModification () {
 		List l = new List();
 		for (Argument a : getArguments()) {
-			l.add(a.newIModification());
+			l.add(a.newInstModification());
 		}
-		return new IClassModification(this,l);
+		return new InstClassModification(this,l);
 	}
-	public IComponentModification ComponentModification.newIModification() {
-		IComponentModification icm = new IComponentModification(this,getName().newInstAccess(),new Opt());
+	public InstComponentModification ComponentModification.newInstModification() {
+		InstComponentModification icm = new InstComponentModification(this,getName().newInstAccess(),new Opt());
 		if (hasModification())
-			icm.setIModification(getModification().newIModification());
+			icm.setInstModification(getModification().newInstModification());
 		icm.setStart(getStart());
 		return icm;
 	}
-	public IComponentRedeclare ComponentRedeclare.newIModification() {
+	public InstComponentRedeclare ComponentRedeclare.newInstModification() {
 	    // TODO: Can this component be redeclared?
-		IComponentRedeclare icr = new IComponentRedeclare(this,getName().newInstAccess());
+		InstComponentRedeclare icr = new InstComponentRedeclare(this,getName().newInstAccess());
 		icr.setStart(getStart());
 		return icr;
 	}
 	
-	public IComponentRedeclare PN_ComponentRedeclare.newIModification() {
+	public InstComponentRedeclare PN_ComponentRedeclare.newInstModification() {
 		return null; // This should never be called since all PN_ComponentRedeclare:s are rewritten	    
 	}	
 	
-	public IClassRedeclare ClassRedeclare.newIModification() {
-		IClassRedeclare icr = new IClassRedeclare(this,getName().newInstAccess());
+	public InstClassRedeclare ClassRedeclare.newInstModification() {
+		InstClassRedeclare icr = new InstClassRedeclare(this,getName().newInstAccess());
 		icr.setStart(getStart());
 		return icr;
 	}
 	
 	
-	syn CompleteModification ICompleteModification.getCompleteModification() = (CompleteModification)getModification();
-	syn ClassModification IClassModification.getClassModification() = (ClassModification)getModification();
-	syn ValueModification IValueModification.getValueModification() = (ValueModification)getModification();
-	syn ComponentModification IComponentModification.getComponentModification() = (ComponentModification)getModification();
-	syn ClassRedeclare IClassRedeclare.getClassRedeclare() = (ClassRedeclare)getModification();
-	syn ComponentRedeclare IComponentRedeclare.getComponentRedeclare() = (ComponentRedeclare)getModification();
+	syn CompleteModification InstCompleteModification.getCompleteModification() = (CompleteModification)getModification();
+	syn ClassModification InstClassModification.getClassModification() = (ClassModification)getModification();
+	syn ValueModification InstValueModification.getValueModification() = (ValueModification)getModification();
+	syn ComponentModification InstComponentModification.getComponentModification() = (ComponentModification)getModification();
+	syn ClassRedeclare InstClassRedeclare.getClassRedeclare() = (ClassRedeclare)getModification();
+	syn ComponentRedeclare InstComponentRedeclare.getComponentRedeclare() = (ComponentRedeclare)getModification();
 
 
 }
 
 aspect Environments {
 
- 	syn lazy ArrayList<IModification> InstNode.localIModifications() 
- 	   = new ArrayList<IModification>();
+ 	syn lazy ArrayList<InstModification> InstNode.localInstModifications() 
+ 	   = new ArrayList<InstModification>();
  	
- 	eq InstComponentDecl.localIModifications() {
-		ArrayList<IModification> l = new ArrayList<IModification>();
+ 	eq InstComponentDecl.localInstModifications() {
+		ArrayList<InstModification> l = new ArrayList<InstModification>();
 		// Add modifications of the declaration itself
-		if (hasIModification())
-			l.add(getIModification());
+		if (hasInstModification())
+			l.add(getInstModification());
 			
 	    // If there is a constraining clause, these modifications should be merged as well 
 		if (hasInstConstraining() &&
-		       getInstConstraining().hasIClassModification())
-		  	l.add(getInstConstraining().getIClassModification());	
-        l.addAll(myInstClass().classIModifications());
+		       getInstConstraining().hasInstClassModification())
+		  	l.add(getInstConstraining().getInstClassModification());	
+        l.addAll(myInstClass().classInstModifications());
 		return l;
 		
 	}
  	
-	eq InstReplacingComposite.localIModifications() {
-		ArrayList<IModification> l = new ArrayList<IModification>();
+	eq InstReplacingComposite.localInstModifications() {
+		ArrayList<InstModification> l = new ArrayList<InstModification>();
 		// If there is a constraining clase, return its modifications
 		if (getOriginalInstComponent().hasInstConstraining()) {
-		  if (getOriginalInstComponent().getInstConstraining().hasIClassModification()) {
-			l.add(getOriginalInstComponent().getInstConstraining().getIClassModification());
+		  if (getOriginalInstComponent().getInstConstraining().hasInstClassModification()) {
+			l.add(getOriginalInstComponent().getInstConstraining().getInstClassModification());
           }
         } else {
             // If no constraining clause, use the original declaration 
             // and return its modifiers
-     		if (getOriginalInstComponent().hasIModification())
-				l.add(getOriginalInstComponent().getIModification());     
+     		if (getOriginalInstComponent().hasInstModification())
+				l.add(getOriginalInstComponent().getInstModification());     
         }
-        l.addAll(myInstClass().classIModifications());
+        l.addAll(myInstClass().classInstModifications());
 		return l;
 	}
 	 
-	eq InstShortClassDecl.localIModifications() {
-		ArrayList<IModification> l = new ArrayList<IModification>();
-   		if (hasIClassModification())
-				l.add(getIClassModification());     
+	eq InstShortClassDecl.localInstModifications() {
+		ArrayList<InstModification> l = new ArrayList<InstModification>();
+   		if (hasInstClassModification())
+				l.add(getInstClassModification());     
 		if (hasInstConstraining()) {
-		  if (getInstConstraining().hasIClassModification()) {
-			l.add(getInstConstraining().getIClassModification());
+		  if (getInstConstraining().hasInstClassModification()) {
+			l.add(getInstConstraining().getInstClassModification());
           }
         } 
-        l.addAll(getInstExtends(0).getClassName().myInstClassDecl().classIModifications());
+        l.addAll(getInstExtends(0).getClassName().myInstClassDecl().classInstModifications());
    		return l;
 	}	 
 		 	
-	eq InstReplacingShortClassDecl.localIModifications() {
-		ArrayList<IModification> l = new ArrayList<IModification>();
+	eq InstReplacingShortClassDecl.localInstModifications() {
+		ArrayList<InstModification> l = new ArrayList<InstModification>();
 		// If there is a constraining clase, return its modifications
 		if (getOriginalInstClass().hasInstConstraining()) {
-		  if (getOriginalInstClass().getInstConstraining().hasIClassModification()) {
-			l.add(getOriginalInstClass().getInstConstraining().getIClassModification());
+		  if (getOriginalInstClass().getInstConstraining().hasInstClassModification()) {
+			l.add(getOriginalInstClass().getInstConstraining().getInstClassModification());
           }
         } else {
             // If no constraining clause, use the original declaration 
             // and return its modifiers
-     		if (getOriginalInstClass().hasIClassModification())
-				l.add(getOriginalInstClass().getIClassModification());     
+     		if (getOriginalInstClass().hasInstClassModification())
+				l.add(getOriginalInstClass().getInstClassModification());     
         }	
-        l.addAll(getInstExtends(0).getClassName().myInstClassDecl().classIModifications());
+        l.addAll(getInstExtends(0).getClassName().myInstClassDecl().classInstModifications());
 		return l;
 	}
 	 	
 	// TODO: This should probably be implemented as an AST node child. 	
-	syn lazy boolean InstClassDecl.hasIClassModification() = false;
-	eq InstShortClassDecl.hasIClassModification() = getInstExtends(0).hasIClassModification(); 	
-	syn lazy IClassModification InstClassDecl.getIClassModification() = null;
-	eq InstShortClassDecl.getIClassModification() = getInstExtends(0).getIClassModification(); 	
+	syn lazy boolean InstClassDecl.hasInstClassModification() = false;
+	eq InstShortClassDecl.hasInstClassModification() = getInstExtends(0).hasInstClassModification(); 	
+	syn lazy InstClassModification InstClassDecl.getInstClassModification() = null;
+	eq InstShortClassDecl.getInstClassModification() = getInstExtends(0).getInstClassModification(); 	
 
-	eq InstExtends.localIModifications() {
-		ArrayList<IModification> l = new ArrayList<IModification>();
-		if (hasIClassModification())
-			l.add(getIClassModification());
-        l.addAll(getClassName().myInstClassDecl().classIModifications());
+	eq InstExtends.localInstModifications() {
+		ArrayList<InstModification> l = new ArrayList<InstModification>();
+		if (hasInstClassModification())
+			l.add(getInstClassModification());
+        l.addAll(getClassName().myInstClassDecl().classInstModifications());
 		return l;
 	}
 
-	eq InstExtendsShortClass.localIModifications() {
+	eq InstExtendsShortClass.localInstModifications() {
 		// notice that modifications on short classes are merged in InstShortClassDecl nodes
-		ArrayList<IModification> l = new ArrayList<IModification>();
+		ArrayList<InstModification> l = new ArrayList<InstModification>();
 		return l;
 	}
  
- 	syn lazy ArrayList<IModification> InstClassDecl.classIModifications() = getMergedEnvironment().clone();
+ 	syn lazy ArrayList<InstModification> InstClassDecl.classInstModifications() = getMergedEnvironment().clone();
 
  
  
@@ -285,7 +285,7 @@ aspect Environments {
 	syn lazy Environment InstNode.getMergedEnvironment() {
 		// Retrieve modifications upwards
 		Environment env = nameScope()? myEnvironment(name()).clone(): myEnvironment().clone();
-		for (IModification im : localIModifications())
+		for (InstModification im : localInstModifications())
 			env.mergeInnerModification(im);
 		return env;
 	}
@@ -312,12 +312,12 @@ aspect Environments {
 	eq InstReplacingShortClassDecl.getChild().myEnvironment() {
 		Environment env = getMergedEnvironment().clone();
 		if (getOriginalInstClass().hasInstConstraining()) {
-			if (getOriginalInstClass().getInstConstraining().hasIClassModification())
-				env.mergeInnerModification(getOriginalInstClass().getInstConstraining().getIClassModification());
+			if (getOriginalInstClass().getInstConstraining().hasInstClassModification())
+				env.mergeInnerModification(getOriginalInstClass().getInstConstraining().getInstClassModification());
 		} else {
 		    InstClassDecl origDecl = getOriginalInstClass();
-			if (origDecl.getInstExtends(0).hasIClassModification())
-				env.mergeInnerModification(origDecl.getInstExtends(0).getIClassModification());
+			if (origDecl.getInstExtends(0).hasInstClassModification())
+				env.mergeInnerModification(origDecl.getInstExtends(0).getInstClassModification());
 		}
 		return env;
 	}
@@ -335,27 +335,27 @@ aspect Environments {
 	syn lazy Environment InstNode.myEnvironment_def(String name) {
 		Environment env = new Environment();
 		boolean componentRedeclareFound = false;
-		IComponentRedeclare icr = retrieveReplacingComponent(name);
+		InstComponentRedeclare icr = retrieveReplacingComponent(name);
 		boolean classRedeclareFound = false;
-		IClassRedeclare iclr = retrieveReplacingClass(name);
-		for (IModification im : getMergedEnvironment()) {
+		InstClassRedeclare iclr = retrieveReplacingClass(name);
+		for (InstModification im : getMergedEnvironment()) {
 			// If a first component redeclare modification is found, add modifiers
 			if (!componentRedeclareFound && im==icr) {
-            	if (icr.getInstComponentDecl().hasIModification()) 
-    				env.mergeInnerModification(icr.getInstComponentDecl().getIModification());
+            	if (icr.getInstComponentDecl().hasInstModification()) 
+    				env.mergeInnerModification(icr.getInstComponentDecl().getInstModification());
 				componentRedeclareFound = true;
 			}
 			// If a first class redeclare modification is found, add modifiers
 			if (!classRedeclareFound && im==iclr) {
-            	if (iclr.getInstClassDecl().hasIClassModification()) 
-    				env.mergeInnerModification(iclr.getInstClassDecl().getIClassModification());
+            	if (iclr.getInstClassDecl().hasInstClassModification()) 
+    				env.mergeInnerModification(iclr.getInstClassDecl().getInstClassModification());
 				classRedeclareFound = true;
 			}
 
 			
 			
-			if (im.matchIModification(name) != null) {
-				env.mergeInnerModification(im.matchIModification(name));
+			if (im.matchInstModification(name) != null) {
+				env.mergeInnerModification(im.matchInstModification(name));
 			}
 		}
 		return env;
@@ -365,47 +365,47 @@ aspect Environments {
 	eq Program.getInstProgramRoot().myEnvironment() = new Environment();
 	eq Program.getInstProgramRoot().myEnvironment(String name) = new Environment();
 	
-	syn lazy IModification IModification.matchIModification(String name) = null;
-	eq ICompleteModification.matchIModification(String name) {
-		for (IModification im : getIClassModification().getIArguments())
-			if (im.matchIModification(name)!=null)
-				return im.matchIModification(name);
+	syn lazy InstModification InstModification.matchInstModification(String name) = null;
+	eq InstCompleteModification.matchInstModification(String name) {
+		for (InstModification im : getInstClassModification().getInstArguments())
+			if (im.matchInstModification(name)!=null)
+				return im.matchInstModification(name);
 		return null;
 	}
 	
-	eq IComponentModification.matchIModification(String name) {
+	eq InstComponentModification.matchInstModification(String name) {
 		if (name.equals(getName().getID()))
-			return hasIModification()? getIModification() : null;
+			return hasInstModification()? getInstModification() : null;
 		return null;
 	}
 	
 	// Only add modifiers in constraining clauses
-	eq IComponentRedeclare.matchIModification(String name) {
+	eq InstComponentRedeclare.matchInstModification(String name) {
 		if (name.equals(getName().getID()) && getInstComponentDecl().hasInstConstraining() &&
-		    getInstComponentDecl().getInstConstraining().hasIClassModification())
-			return getInstComponentDecl().getInstConstraining().getIClassModification();
+		    getInstComponentDecl().getInstConstraining().hasInstClassModification())
+			return getInstComponentDecl().getInstConstraining().getInstClassModification();
 		return null;
 	}	
 	
 	// Only add modifiers in constraining clauses
-	eq IClassRedeclare.matchIModification(String name) {
+	eq InstClassRedeclare.matchInstModification(String name) {
 		if (name.equals(getName().name()) && getInstClassDecl().hasInstConstraining() &&
-		    getInstClassDecl().getInstConstraining().hasIClassModification())
-			return getInstClassDecl().getInstConstraining().getIClassModification();
+		    getInstClassDecl().getInstConstraining().hasInstClassModification())
+			return getInstClassDecl().getInstConstraining().getInstClassModification();
 		return null;
 	}		
 	
 	
-	syn lazy IComponentRedeclare IModification.matchIComponentRedeclare(String name) = null;
-	eq IComponentRedeclare.matchIComponentRedeclare(String name) {
+	syn lazy InstComponentRedeclare InstModification.matchInstComponentRedeclare(String name) = null;
+	eq InstComponentRedeclare.matchInstComponentRedeclare(String name) {
 		if (getName().name().equals(name))
 			return this;
 		else
 			return null;
 	}
 	
-    syn lazy IClassRedeclare IModification.matchIClassRedeclare(String name) = null;
-	eq IClassRedeclare.matchIClassRedeclare(String name) {
+    syn lazy InstClassRedeclare InstModification.matchInstClassRedeclare(String name) = null;
+	eq InstClassRedeclare.matchInstClassRedeclare(String name) {
 		//if (getName().getID().equals(name))
 		if (getName().name().equals(name))
 			return this;
@@ -416,25 +416,25 @@ aspect Environments {
 	 /**
      * TODO: Does the return type here need to be IReplacingComponent or can it be ComponentDecl?
      */
-	syn IComponentRedeclare InstNode.retrieveReplacingComponent(String name) {
-		for (IModification im : getMergedEnvironment()) {
-			if (im.matchIComponentRedeclare(name)!=null) {
-				return im.matchIComponentRedeclare(name);
+	syn InstComponentRedeclare InstNode.retrieveReplacingComponent(String name) {
+		for (InstModification im : getMergedEnvironment()) {
+			if (im.matchInstComponentRedeclare(name)!=null) {
+				return im.matchInstComponentRedeclare(name);
 			}
 		}
 		return null;
 	}
 
-	syn IClassRedeclare InstNode.retrieveReplacingClass(String name) {
-		for (IModification im : getMergedEnvironment()) {
-			if (im.matchIClassRedeclare(name)!=null) {
-				return im.matchIClassRedeclare(name);
+	syn InstClassRedeclare InstNode.retrieveReplacingClass(String name) {
+		for (InstModification im : getMergedEnvironment()) {
+			if (im.matchInstClassRedeclare(name)!=null) {
+				return im.matchInstClassRedeclare(name);
 			}
 		}
 		return null;
 	}
 
-	inh lazy InstNode IModification.myInstNode();
+	inh lazy InstNode InstModification.myInstNode();
 	inh lazy InstNode InstNode.myInstNode();
 	eq InstNode.getChild().myInstNode() = this;
 	//The lexical scope of modifiers for short classes are "outside" of the short declaration
@@ -466,7 +466,7 @@ aspect Environments {
 aspect InstanceTreeConstruction {
 	
 	syn lazy List InstNode.getDynamicClassNameList() = new List();
-	syn lazy List IComponentRedeclare.getDynamicClassNameList() = new List();
+	syn lazy List InstComponentRedeclare.getDynamicClassNameList() = new List();
 	syn lazy List InstConstrainingComponent.getDynamicClassNameList() = new List();
 
 	syn lazy List InstNode.getInstComponentDeclList() {
@@ -514,10 +514,10 @@ aspect InstanceTreeConstruction {
     	// Check if the component is redeclared. 
     	// -> Yes: Create an InstReplacingComponent component
     	// -> No: Create an InstComponent 
-    	IComponentRedeclare irc = retrieveReplacingComponent(cd.name());
+    	InstComponentRedeclare irc = retrieveReplacingComponent(cd.name());
     	if (irc!=null) {
     		ComponentDecl replacingComp = irc.getComponentRedeclare().getComponentDecl();
-    		// Add the new access to the IComponentRedeclare node in order to get lookup in the right scope
+    		// Add the new access to the InstComponentRedeclare node in order to get lookup in the right scope
     		irc.addDynamicClassName(replacingComp.getClassName().newInstAccess());
     		return irc.getDynamicClassName(irc.getNumDynamicClassName()-1).myInstClassDecl().newInstReplacingComponent(replacingComp,cd,irc);    	    		
     	} else { 
@@ -530,7 +530,7 @@ aspect InstanceTreeConstruction {
     	// Check if the class is redeclared. 
     	// -> Yes: Create an InstReplacingClass component
     	// -> No: Create an InstClassDecl
-    	IClassRedeclare icr = retrieveReplacingClass(bcd.name());
+    	InstClassRedeclare icr = retrieveReplacingClass(bcd.name());
     	if (icr!=null) {
     	    BaseClassDecl replacingClass = icr.getClassRedeclare().getBaseClassDecl();
     		return bcd.newInstReplacingClass(replacingClass,icr);
@@ -564,14 +564,14 @@ aspect InstanceTreeConstruction {
 		if (!extendsPrimitive()){
 			InstComponentDecl icd = new InstComposite(className.newInstAccess(),cd,new Opt(),new Opt());
 			if (cd.hasModification())
-				icd.setIModification(cd.getModification().newIModification());
+				icd.setInstModification(cd.getModification().newInstModification());
 			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
 			icd.setStart(cd.getStart());
 			return icd;
 		} else {
 			InstPrimitive icd = new InstPrimitive(className.newInstAccess(),cd,new Opt(),new Opt());
 			if (cd.hasModification())
-				icd.setIModification(cd.getModification().newIModification());
+				icd.setInstModification(cd.getModification().newInstModification());
 			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
 			icd.setStart(cd.getStart());
 			return icd;
@@ -582,7 +582,7 @@ aspect InstanceTreeConstruction {
 	public InstComponentDecl InstPrimitiveClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
 		InstPrimitive ipr = new InstPrimitive(className.newInstAccess(),cd,new Opt(),new Opt());
 		if (cd.hasModification())
-			ipr.setIModification(cd.getModification().newIModification());
+			ipr.setInstModification(cd.getModification().newInstModification());
 		ipr.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
 		ipr.setStart(cd.getStart());
 		return ipr;
@@ -593,21 +593,21 @@ aspect InstanceTreeConstruction {
 	}
 
 	public abstract InstComponentDecl InstClassDecl.newInstReplacingComponent(ComponentDecl replacingDecl,
-	                                                                 ComponentDecl originalDecl, IComponentRedeclare icr);
+	                                                                 ComponentDecl originalDecl, InstComponentRedeclare icr);
 
 	public InstComponentDecl InstBaseClassDecl.newInstReplacingComponent(ComponentDecl replacingDecl,
-	                                                                 ComponentDecl originalDecl, IComponentRedeclare icr) {
+	                                                                 ComponentDecl originalDecl, InstComponentRedeclare icr) {
 		if (!extendsPrimitive()){
 			InstReplacingComposite icd = new InstReplacingComposite(replacingDecl.newInstClassAccess(),replacingDecl,new Opt(),new Opt(),originalDecl,icr);
 			if (originalDecl.hasModification()) //TODO: should this really be originalDecl
-				icd.setIModification(originalDecl.getModification().newIModification());
+				icd.setInstModification(originalDecl.getModification().newInstModification());
 			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
 			icd.setStart(originalDecl.getStart());
 			return icd;
 		} else {
 			InstReplacingPrimitive icd = new InstReplacingPrimitive(replacingDecl.newInstClassAccess(),replacingDecl,new Opt(),new Opt(),originalDecl,icr);
 			if (originalDecl.hasModification()) //TODO: should this really be originalDecl
-				icd.setIModification(originalDecl.getModification().newIModification());
+				icd.setInstModification(originalDecl.getModification().newInstModification());
 			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
 			icd.setStart(originalDecl.getStart());
 			return icd;
@@ -618,7 +618,7 @@ aspect InstanceTreeConstruction {
 	// This cannot be done.
 	public InstComponentDecl InstBuiltInClassDecl.newInstReplacingComponent(ComponentDecl replacingDecl,
 	                                                                        ComponentDecl originalDecl, 
-	                                                                        IComponentRedeclare icr) {
+	                                                                        InstComponentRedeclare icr) {
 		return null;
 	}
 
@@ -650,23 +650,23 @@ aspect InstanceTreeConstruction {
     	return new InstPrimitiveClassDecl(this, new Opt());
     }
 
-    public InstClassDecl ClassDecl.newInstReplacingClass(ClassDecl replacingClass,IClassRedeclare icr) {
+    public InstClassDecl ClassDecl.newInstReplacingClass(ClassDecl replacingClass,InstClassRedeclare icr) {
     	return null;
     }    
 
-    public InstReplacingFullClassDecl FullClassDecl.newInstReplacingClass(ClassDecl replacingClass,IClassRedeclare icr) {
+    public InstReplacingFullClassDecl FullClassDecl.newInstReplacingClass(ClassDecl replacingClass,InstClassRedeclare icr) {
     	InstReplacingFullClassDecl fcd = new InstReplacingFullClassDecl(replacingClass,new Opt(),this,icr);
 	    fcd.setInstConstrainingOpt(newInstConstrainingClassOpt()); //TODO: Should be constr clause of original or redeclared?
     	fcd.setStart(getStart());
     	return fcd;
     }
-    public InstReplacingShortClassDecl ShortClassDecl.newInstReplacingClass(ClassDecl replacingClass,IClassRedeclare icr) {
+    public InstReplacingShortClassDecl ShortClassDecl.newInstReplacingClass(ClassDecl replacingClass,InstClassRedeclare icr) {
     	InstReplacingShortClassDecl scd =  new InstReplacingShortClassDecl(replacingClass, new Opt(),this,icr);
 	    scd.setInstConstrainingOpt(newInstConstrainingClassOpt());    	
     	scd.setStart(getStart());
     	return scd;
     }
-    public InstReplacingFullClassDecl PrimitiveClassDecl.newInstReplacingClass(ClassDecl replacingClass,IClassRedeclare icr) {
+    public InstReplacingFullClassDecl PrimitiveClassDecl.newInstReplacingClass(ClassDecl replacingClass,InstClassRedeclare icr) {
     	return new InstReplacingPrimitiveClassDecl(replacingClass, new Opt(),this,icr);
     }
 
@@ -674,7 +674,7 @@ aspect InstanceTreeConstruction {
 	public InstExtends ExtendsClause.newInstExtends() {
 		InstExtends ie = new InstExtends(getSuper().newInstAccess(),this, new Opt());
 		if (hasClassModification())
-			ie.setIClassModification(getClassModification().newIModification());
+			ie.setInstClassModification(getClassModification().newInstModification());
 		ie.setStart(getStart());
 		return ie;
 	}
@@ -682,7 +682,7 @@ aspect InstanceTreeConstruction {
     public InstExtends ExtendsClauseShortClass.newInstExtends() {
 		InstExtendsShortClass ie = new InstExtendsShortClass(getSuper().newInstAccess(),this, new Opt());
 		if (hasClassModification())
-			ie.setIClassModification(getClassModification().newIModification());
+			ie.setInstClassModification(getClassModification().newInstModification());
 		ie.setStart(getStart());
 		return ie;
     }
@@ -708,11 +708,11 @@ aspect InstanceTreeConstruction {
 		return new InstProgramRoot(this);
 	}
 
-	syn lazy InstClassDecl IClassRedeclare.getInstClassDecl() {
+	syn lazy InstClassDecl InstClassRedeclare.getInstClassDecl() {
 		return getClassRedeclare().getBaseClassDecl().newInstClassDecl();
 	}
 
-	syn lazy InstComponentDecl IComponentRedeclare.getInstComponentDecl() {
+	syn lazy InstComponentDecl InstComponentRedeclare.getInstComponentDecl() {
 	    // TODO: Check if the component is redeclared. Really...?
     	// -> Yes: Create an InstReplacingComponent component
     	// -> No: Create an InstComponent 
@@ -751,7 +751,7 @@ aspect InstaceConstrainingClauses {
 
 	public Opt ComponentDecl.newInstConstrainingComponentOpt() {
 		if (hasConstrainingClause()) {
-	    	Opt opt = getConstrainingClause().hasClassModification()? new Opt(getConstrainingClause().getClassModification().newIModification()) : new Opt();
+	    	Opt opt = getConstrainingClause().hasClassModification()? new Opt(getConstrainingClause().getClassModification().newInstModification()) : new Opt();
 			return new Opt(new InstConstrainingComponent(getConstrainingClause().getAccess().newInstAccess(),opt,this));
 		} else {
 			return new Opt();
@@ -760,7 +760,7 @@ aspect InstaceConstrainingClauses {
 
 	public Opt BaseClassDecl.newInstConstrainingClassOpt() {
 		if (hasConstrainingClause()) {
-	    	Opt opt = getConstrainingClause().hasClassModification()? new Opt(getConstrainingClause().getClassModification().newIModification()) : new Opt();
+	    	Opt opt = getConstrainingClause().hasClassModification()? new Opt(getConstrainingClause().getClassModification().newInstModification()) : new Opt();
 			return new Opt(new InstConstrainingClass(getConstrainingClause().getAccess().newInstAccess(),opt,this));
 		} else {
 			return new Opt();
@@ -781,7 +781,7 @@ aspect InstaceConstrainingClauses {
 		return classToExpand.newInstClassDecl();
 	}
 	
-	syn lazy FExp IValueModification.getFExp() { 
+	syn lazy FExp InstValueModification.getFExp() { 
 		return getValueModification().getExp().instantiate();
 	}
 	
@@ -1258,10 +1258,10 @@ aspect InstanceDumpTree {
 
 
 
-	public String IModification.toString() {
+	public String InstModification.toString() {
 		return toString("");
     }
-    public String IModification.toString(String indent) {
+    public String InstModification.toString(String indent) {
     	return getModification().prettyPrint(indent);
     
     }

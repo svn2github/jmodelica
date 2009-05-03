@@ -19,7 +19,7 @@ aspect OptimicaErrorCheck {
   	public void InstOptClassDecl.collectErrors() {
     	super.collectErrors();
     	getFConstraintList().collectErrors();
-    	getIClassModificationOpt().collectErrors();
+    	getInstClassModificationOpt().collectErrors();
   	}
 
 }

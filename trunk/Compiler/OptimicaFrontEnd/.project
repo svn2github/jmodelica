@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>Optimica</name>
+	<name>JModelica.OptimicaFrontEnd</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -15,4 +15,11 @@
 		<nature>org.eclipse.ajdt.ui.ajnature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>test-framework</name>
+			<type>2</type>
+			<location>/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/test-framework</location>
+		</link>
+	</linkedResources>
 </projectDescription>

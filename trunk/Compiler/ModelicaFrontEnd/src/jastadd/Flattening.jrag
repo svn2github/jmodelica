@@ -101,7 +101,7 @@ aspect Flattening {
 		//System.out.println("**  " + name() + " = " + ceval());
 		FExp e = myBindingFExp();
 		List attr = new List();
-		for (IModification im : totalMergedEnvironment()) {
+		for (InstModification im : totalMergedEnvironment()) {
 			im.collectAttributes(attr,im.myInstNode().getFQNamePrefix());
 		}
 		
@@ -158,9 +158,9 @@ aspect Flattening {
 	 */
 	syn lazy FExp InstPrimitive.myBindingInstExp() {
 
-		for (IModification im : totalMergedEnvironment()) {
-			if (im.hasIValueMod()) {
-				return im.iValueMod();
+		for (InstModification im : totalMergedEnvironment()) {
+			if (im.hasInstValueMod()) {
+				return im.instValueMod();
 			}
 		}
 		return null;
@@ -168,9 +168,9 @@ aspect Flattening {
 
 	syn lazy FExp InstPrimitive.myBindingFExp() {
 
-		for (IModification im : totalMergedEnvironment()) {
-			if (im.hasIValueMod()) {
-				return im.iValueMod().flatten(im.myInstNode().getFQNamePrefix());
+		for (InstModification im : totalMergedEnvironment()) {
+			if (im.hasInstValueMod()) {
+				return im.instValueMod().flatten(im.myInstNode().getFQNamePrefix());
 			}
 		}
 		return null;
@@ -182,7 +182,7 @@ aspect Flattening {
 	 * 
 	 * Check if a modification has a value modification.
 	 */
-	syn boolean IModification.hasIValueMod() = false;
+	syn boolean InstModification.hasInstValueMod() = false;
 
 	/**
 	 * \ingroup aspect_Flattening
@@ -190,7 +190,7 @@ aspect Flattening {
 	 * Check if a modification has a value modification. True for
 	 * InstValueModification.
 	 */
-	eq IValueModification.hasIValueMod() = true;
+	eq InstValueModification.hasInstValueMod() = true;
 	
 	/**
 	 * \ingroup aspect_Flattening
@@ -198,11 +198,11 @@ aspect Flattening {
 	 * Check if a modification has a value modification. Delegate computation
 	 * to son.
 	 */
-	eq ICompleteModification.hasIValueMod() = hasIValueModification();
+	eq InstCompleteModification.hasInstValueMod() = hasInstValueModification();
 	
-	syn FExp IModification.iValueMod() = null;
-	eq IValueModification.iValueMod() = getFExp();
-	eq ICompleteModification.iValueMod() = getIValueModification().getFExp();
+	syn FExp InstModification.instValueMod() = null;
+	eq InstValueModification.instValueMod() = getFExp();
+	eq InstCompleteModification.instValueMod() = getInstValueModification().getFExp();
 	
 	public void ASTNode.collectAttributes(List attrs, FQName prefix) {
 		for (int i=0;i<getNumChild();i++)
@@ -211,10 +211,10 @@ aspect Flattening {
 
 	// This is just to avoid collecting ComponentModification:s that resides inside
 	// ClassRedeclares.
-    public void IClassRedeclare.collectAttributes(List attrs, FQName prefix) {}
+    public void InstClassRedeclare.collectAttributes(List attrs, FQName prefix) {}
 
-	public void IComponentModification.collectAttributes(List attrs, FQName prefix) {
-		if (hasIModification()) {
+	public void InstComponentModification.collectAttributes(List attrs, FQName prefix) {
+		if (hasInstModification()) {
 			FQName fqn = new FQName(new List().add(new FQNamePart(getName().getID(),new Opt())));
             boolean attr_set = false;
             for (int i=0;i<attrs.getNumChild();i++)
@@ -222,10 +222,10 @@ aspect Flattening {
 					attr_set = true;
 			if (!attr_set) {
 			List my_attr = new List();
-			getIModification().collectAttributes(my_attr,prefix);
+			getInstModification().collectAttributes(my_attr,prefix);
 			attrs.add(new FAttribute(new FIdUse(getName().myInstClassDecl().name()),
 									new FIdDecl(fqn),
-			                        getIModification().hasIValueMod()? new Opt(getIModification().iValueMod().flatten(prefix)): new Opt(),
+			                        getInstModification().hasInstValueMod()? new Opt(getInstModification().instValueMod().flatten(prefix)): new Opt(),
 			                        true,
 			                        getComponentModification().hasEach()? new Opt(new FEach()): new Opt(),
 			                   		getComponentModification().hasFinal()? new Opt(new FFinal()): new Opt(),

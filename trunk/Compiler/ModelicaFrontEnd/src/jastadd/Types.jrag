@@ -128,9 +128,9 @@ aspect Types {
      // The environment should be traversed backwards in order to perform correct
      // subtype tests in redeclaration chains.     	
        for (int i=myEnvironment().size()-1;i>=0;i--) {
-        IModification im = myEnvironment().get(i);
-	   	if (im.matchIComponentRedeclare(name())!=null) { 
-          InstComponentDecl declaredSubType = im.matchIComponentRedeclare(name()).getInstComponentDecl();
+        InstModification im = myEnvironment().get(i);
+	   	if (im.matchInstComponentRedeclare(name())!=null) { 
+          InstComponentDecl declaredSubType = im.matchInstComponentRedeclare(name()).getInstComponentDecl();
           InstComponentDecl constrainingSubType = declaredSubType.constrainingInstComponentDecl();
                         
            // Check consistency of the redeclaring component

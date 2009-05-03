@@ -89,10 +89,10 @@ aspect ClassAttributes {
 		return l;
 	}
 
-	eq InstOptClassDecl.getIClassModification().lookupInstComponentInInstElement(String name) {
+	eq InstOptClassDecl.getInstClassModification().lookupInstComponentInInstElement(String name) {
 		
 		HashSet set = new HashSet();
-		//System.out.println("InstOptClassDecl.getIClassModification().lookupInstComponentInInstElement: " + name);
+		//System.out.println("InstOptClassDecl.getInstClassModification().lookupInstComponentInInstElement: " + name);
 		for (int i=0;i<getNumInstClassAttribute();i++) {
 			if (getInstClassAttribute(i).matchInstComponentDecl(name))
 				set.add(getInstClassAttribute(i));
@@ -105,10 +105,10 @@ aspect ClassAttributes {
 
 	// This equation is needed in order to ensure correct lookup of accesses
 	// in the class attribute construct.
-	eq InstOptClassDecl.getIClassModification().myInstNode() =
+	eq InstOptClassDecl.getInstClassModification().myInstNode() =
 		getInstClassAttribute(0);
 	
-	eq InstOptClassDecl.getIClassModification().lookupInstComponent(String name) =
+	eq InstOptClassDecl.getInstClassModification().lookupInstComponent(String name) =
 		memberInstComponent(name);
 	
 	eq InstOptClassDecl.memberInstComponent(String name) {

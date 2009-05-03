@@ -103,7 +103,7 @@ aspect FileNames {
 	eq InstComponentDecl.getChild().retrieveFileName() = getComponentDecl().fileName();
 	eq InstExtends.getChild().retrieveFileName() = getExtendsClause().fileName();
 	eq InstImport.getChild().retrieveFileName() = getImportClause().fileName();
-	eq IModification.getChild().retrieveFileName() = getModification().fileName();
+	eq InstModification.getChild().retrieveFileName() = getModification().fileName();
 	
 	private String Root.fName = "";
 	public void Root.setFileName(String fName) { this.fName = fName; }
@@ -327,7 +327,7 @@ aspect FlatNames {
 	eq InstClassDecl.getFQName() = new FQName();
 	inh lazy FQName InstNode.retrieveFQName();
 	eq InstComponentDecl.getChild().retrieveFQName() = getFQName();
-	eq InstComponentDecl.getIModification().retrieveFQName() = retrieveFQName();
+	eq InstComponentDecl.getInstModification().retrieveFQName() = retrieveFQName();
 	eq InstReplacingShortClassDecl.getChild().retrieveFQName() = retrieveFQName();
 	eq InstClassDecl.getChild().retrieveFQName() = null; //getFQName();
 	

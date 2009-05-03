@@ -373,8 +373,8 @@ aspect InstanceErrorCheck {
     if (!errorChecked) {
 		super.collectErrors();
 		getClassName().collectErrors();
-		if (hasIModification())
-			getIModification().collectErrors();
+		if (hasInstModification())
+			getInstModification().collectErrors();
 		if (hasInstConstraining())
 			getInstConstraining().collectErrors();
 		}
@@ -385,8 +385,8 @@ aspect InstanceErrorCheck {
     if (!errorChecked) {
 		super.collectErrors();
 		getClassName().collectErrors();
-		if (hasIClassModification())
-			getIClassModification().collectErrors();
+		if (hasInstClassModification())
+			getInstClassModification().collectErrors();
 		
 		}
 	}	
@@ -403,8 +403,8 @@ aspect InstanceErrorCheck {
       // This is not the case if the short class decl references
       // an primitive variable, however, and in this case the
       // class modification needs to bee checked for errors.
- 	  if (extendsPrimitive() && hasIClassModification())
-		 getIClassModification().collectErrors();
+ 	  if (extendsPrimitive() && hasInstClassModification())
+		 getInstClassModification().collectErrors();
       
 	  getClassName().collectErrors();
 	  for(InstNode n : getInstComponentDecls()) 
@@ -423,20 +423,20 @@ aspect InstanceErrorCheck {
         debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
 	    if (!errorChecked) {
 		  super.collectErrors();
-		  // The localIModifications should only be checked if
+		  // The localInstModifications should only be checked if
 		  // the node is not a InstReplacingShortClassDecl. This
-		  // is accomplished by the method collectIModificationErrors.
-		  collectIModificationErrors();
+		  // is accomplished by the method collectInstModificationErrors.
+		  collectInstModificationErrors();
 		  if (hasInstConstraining())
 				getInstConstraining().collectErrors();		  
 		}
 	}
 
-	public void InstShortClassDecl.collectIModificationErrors() {
-		for (IModification mod : localIModifications())
+	public void InstShortClassDecl.collectInstModificationErrors() {
+		for (InstModification mod : localInstModifications())
 			mod.collectErrors();
     }
-    public void InstReplacingShortClassDecl.collectIModificationErrors() { }
+    public void InstReplacingShortClassDecl.collectInstModificationErrors() { }
 
 	public void InstReplacingShortClassDecl.collectErrors() {
 	    debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);    
@@ -458,17 +458,17 @@ aspect InstanceErrorCheck {
 
 	public void InstBuiltIn.collectErrors() {}
 
-	public void IComponentRedeclare.collectErrors() {
+	public void InstComponentRedeclare.collectErrors() {
 		super.collectErrors();
 		getInstComponentDecl().collectErrors();
 	}
 
-	public void IClassRedeclare.collectErrors() {
+	public void InstClassRedeclare.collectErrors() {
 		super.collectErrors();
 		getInstClassDecl().collectErrors();	
 	}
 
-	public void IValueModification.collectErrors() {
+	public void InstValueModification.collectErrors() {
 		getFExp().collectErrors();
 	}
 
