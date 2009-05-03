@@ -193,7 +193,7 @@ int jmi_opt_sim_ipopt_new(jmi_opt_sim_ipopt_t **jmi_opt_sim_ipopt, jmi_opt_sim_t
 //	AddIpoptNumOption(nlp->nlp, "derivative_test_pertubation",1e-4);
 //    AddIpoptStrOption(nlp->nlp, "derivative_test_print_all","yes");
 //	AddIpoptStrOption(nlp->nlp, "output_file", "ipopt.out");
-//	AddIpoptStrOption(nlp->nlp, "hessian_approximation", "limited-memory");
+	AddIpoptStrOption(nlp->nlp, "hessian_approximation", "limited-memory");
 
 	return 0;
 
