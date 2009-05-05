@@ -104,43 +104,43 @@ public class CGenerator extends GenericGenerator {
 	
 		public void generate(PrintStream genPrinter) {
 			for (FVariable fv : fclass.independentRealConstants()) {
-				genPrinter.print("#define " + fv.nameUnderscore());
-				genPrinter.print(" ((*(jmi->z))[jmi->offs_ci+" + 
+				genPrinter.print("#define _" + fv.nameUnderscore());
+				genPrinter.print("_ ((*(jmi->z))[jmi->offs_ci+" + 
 						fv.independentRealConstantIndex() + "])\n");
 			}
 			for (FVariable fv : fclass.dependentRealConstants()) {
-				genPrinter.print("#define " + fv.nameUnderscore());
-				genPrinter.print(" ((*(jmi->z))[jmi->offs_cd+" + 
+				genPrinter.print("#define _" + fv.nameUnderscore());
+				genPrinter.print("_ ((*(jmi->z))[jmi->offs_cd+" + 
 						fv.dependentRealConstantIndex() + "])\n");
 			}
 			for (FVariable fv : fclass.independentRealParameters()) {
-				genPrinter.print("#define " + fv.nameUnderscore());
-				genPrinter.print(" ((*(jmi->z))[jmi->offs_pi+" + 
+				genPrinter.print("#define _" + fv.nameUnderscore());
+				genPrinter.print("_ ((*(jmi->z))[jmi->offs_pi+" + 
 						fv.independentRealParameterIndex() + "])\n");
 			}
 			for (FVariable fv : fclass.dependentRealParameters()) {
-				genPrinter.print("#define " + fv.nameUnderscore());
-				genPrinter.print(" ((*(jmi->z))[jmi->offs_pd+" + 
+				genPrinter.print("#define _" + fv.nameUnderscore());
+				genPrinter.print("_ ((*(jmi->z))[jmi->offs_pd+" + 
 						fv.dependentRealParameterIndex() + "])\n");
 			}
 			for (FVariable fv : fclass.derivativeVariables()) {
-				genPrinter.print("#define " + fv.nameUnderscore());
-				genPrinter.print(" ((*(jmi->z))[jmi->offs_dx+" + 
+				genPrinter.print("#define _" + fv.nameUnderscore());
+				genPrinter.print("_ ((*(jmi->z))[jmi->offs_dx+" + 
 						fv.derivativeVariableIndex() + "])\n");
 			}
 			for (FVariable fv : fclass.differentiatedRealVariables()) {
-				genPrinter.print("#define " + fv.nameUnderscore());
-				genPrinter.print(" ((*(jmi->z))[jmi->offs_x+" + 
+				genPrinter.print("#define _" + fv.nameUnderscore());
+				genPrinter.print("_ ((*(jmi->z))[jmi->offs_x+" + 
 						fv.differentiatedRealVariableIndex() + "])\n");
 			}
 			for (FVariable fv : fclass.realInputs()) {
-				genPrinter.print("#define " + fv.nameUnderscore());
-				genPrinter.print(" ((*(jmi->z))[jmi->offs_u+" + 
+				genPrinter.print("#define _" + fv.nameUnderscore());
+				genPrinter.print("_ ((*(jmi->z))[jmi->offs_u+" + 
 						fv.realInputIndex() + "])\n");
 			}
 			for (FVariable fv : fclass.algebraicRealVariables()) {
-				genPrinter.print("#define " + fv.nameUnderscore());
-				genPrinter.print(" ((*(jmi->z))[jmi->offs_w+" + 
+				genPrinter.print("#define _" + fv.nameUnderscore());
+				genPrinter.print("_ ((*(jmi->z))[jmi->offs_w+" + 
 						fv.algebraicRealVariableIndex() + "])\n");
 			}
 			genPrinter.print("#define time ((*(jmi->z))[jmi->offs_t])\n"); 

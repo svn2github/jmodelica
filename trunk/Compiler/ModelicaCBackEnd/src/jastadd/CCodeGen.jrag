@@ -61,9 +61,13 @@ aspect CCodeGen {
 		str.print(")");
 	}
 		
+	public void FIdUseExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("_"+name()+"_");
+	}
+		
 	public void FDer.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		str.print("der_");
-		str.print(getFIdUseExp().name());
+		str.print("_der_");
+		str.print(getFIdUseExp().name()+"_");
 	}	
 		
 	public void FAbstractEquation.genResidual_C(int i, String indent, PrintStream str) {}
@@ -84,7 +88,7 @@ aspect CCodeGen {
 			str.print("0.0");
 		}
 		str.print(" - ");
-		str.print(nameUnderscore());
+		str.print("_"+nameUnderscore()+"_");
 		str.print(";\n");
 	}
 	
