@@ -61,6 +61,10 @@ public class CGenerator extends GenericGenerator {
 	
 		public void generate(PrintStream genPrinter) {
 			int i=0;
+			for (FAbstractEquation e : fclass.equations()) {
+				e.genResidual_C(i,"    ",genPrinter);				
+				i++;
+			}
 			for (FAbstractEquation e : fclass.initialEquations()) {
 				e.genResidual_C(i,"    ",genPrinter);				
 				i++;
