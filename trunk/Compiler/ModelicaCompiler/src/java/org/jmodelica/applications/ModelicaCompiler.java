@@ -19,6 +19,8 @@ package org.jmodelica.applications;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.logging.Level;
@@ -168,7 +170,7 @@ public class ModelicaCompiler {
 			InstProgramRoot ipr = parseModel(name, cl);
 
 			// flattening
-			FClass fc = flattenModel(cl, name, ipr);
+			FClass fc = flattenModel(name, cl, ipr);
 
 			// Generate code?
 			if (xmlTemplatefile != null && cTemplatefile != null) {
@@ -251,7 +253,7 @@ public class ModelicaCompiler {
 		sr.options.addModelicaLibrary(
 						"Modelica",
 						"3.0.1",
-						"/Users/jakesson/projects/ModelicaStandardLibrary/ModelicaStandardLibrary_v3/Modelica 3.0.1/");
+						"Z:\\jakesson\\projects\\ModelicaStandardLibrary\\ModelicaStandardLibrary_v3\\Modelica 3.0.1");
 		sr.options.setStringOption("default_msl_version", "3.0.1");
 
 	}
@@ -273,6 +275,7 @@ public class ModelicaCompiler {
 		logger.info("Flattening starts...");
 		
 		InstNode ir = ipr.findFlattenInst(cl, fc);
+		
 		fc.transformCanonical();
 
 		boolean flatErr = fc.errorCheck();
@@ -283,6 +286,17 @@ public class ModelicaCompiler {
 			logger.severe("Error:\n Did not find the class: " + cl);
 			System.exit(0);
 		}
+		
+	    try{	
+	    	// Create file 
+	    	FileWriter fstream = new FileWriter(cl+".mof");
+	    	BufferedWriter out = new BufferedWriter(fstream);
+	    	out.write(fc.prettyPrint(""));
+	    	//Close the output stream
+	    	out.close();
+	    }catch (IOException e){//Catch exception if any
+	    	System.err.println("Error: " + e.getMessage());
+	    }
 		
 		if(getLogLevel().equals("INFO")) {
 			System.out.println(fc.diagnostics());
