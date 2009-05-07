@@ -579,9 +579,19 @@ aspect FlatAPI {
 		}
 		return l;
 	}
-	
-	
-	
+
+	syn int FClass.numInitialGuessEquations() {
+		int n_eq = 0;
+		for (FRealVariable fv : realVariables()) {
+			if (!(fv.fixedAttribute() ||
+				(fv.isDifferentiatedVariable() && fv.startAttributeSet()))) {
+				n_eq++;
+			}
+		}
+		return n_eq;
+	}
+
+
 	
 /*	
 

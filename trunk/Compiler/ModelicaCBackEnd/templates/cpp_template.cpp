@@ -32,8 +32,8 @@ static const int N_w = $n_real_w$;
 static const int N_eq_F = $n_equations$;
 
 static const int N_eq_F0 = $n_equations$ + $n_initial_equations$;
-static const int N_eq_F1 = 0;
-static const int N_eq_Fp = n_real_pd;
+static const int N_eq_F1 = $n_initial_guess_equations$;
+static const int N_eq_Fp = $n_real_pd$;
 
 static const int N_eq_Ceq = 0;
 static const int N_eq_Cineq = 0;

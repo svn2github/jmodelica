@@ -24,13 +24,7 @@ package org.jmodelica.codegen;
 import java.io.*;
 import org.jmodelica.ast.*;
 
-/**
- * A generator class containing a basic set of tags which
- * are not language dependent.
- * 
- * This class is also intended as base class for more specialized generators.
- *
- */
+
 public class CGenerator extends GenericGenerator {
 
 	class DAETag_C_equationResiduals extends DAETag {
@@ -87,8 +81,8 @@ public class CGenerator extends GenericGenerator {
 				if (!(fv.fixedAttribute() ||
 						(fv.isDifferentiatedVariable() && fv.startAttributeSet()))) {
 					fv.genStartAttributeResidual_C(i,"   ",genPrinter);
+					i++;
 				}
-				i++;
 			}
 		}
 	

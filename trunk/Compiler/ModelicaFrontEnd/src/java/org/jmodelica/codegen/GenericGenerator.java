@@ -480,6 +480,20 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	class DAETag_numInitialGuessEquations extends DAETag {
+		
+		public DAETag_numInitialGuessEquations(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_initial_guess_equations","Number of initial guess equations",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numInitialGuessEquations());
+		}
+	
+	}
+
 	class DAETag_numDifferentiatedRealVariables extends DAETag {
 		
 		public DAETag_numDifferentiatedRealVariables(
@@ -582,6 +596,8 @@ public class GenericGenerator extends AbstractGenerator {
 		tagMap.put(tag.getName(),tag);
 
 		tag = new DAETag_numInitialEquations(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numInitialGuessEquations(this,fclass);
 		tagMap.put(tag.getName(),tag);
 		
 	}
