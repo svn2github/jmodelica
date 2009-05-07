@@ -175,20 +175,20 @@ aspect FlatAPI {
 	to FClass.independentConstants() for myFClass();
 
 	syn int FClass.numIndependentRealConstants() = independentRealConstants().size();
-	syn lazy ArrayList<FVariable> FClass.independentRealConstants() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(independentConstants());
-      set.retainAll(reals());
+	syn lazy ArrayList<FRealVariable> FClass.independentRealConstants() {
+      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
+      set.addAll(reals());
+      set.retainAll(independentConstants());
       return set;
      }
 	syn int FVariable.independentRealConstantIndex() =
 		myFClass().independentRealConstants().indexOf(this);
 	
 	syn int FClass.numIndependentIntegerConstants() = independentIntegerConstants().size();
-	syn lazy ArrayList<FVariable> FClass.independentIntegerConstants() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(independentConstants());
-      set.retainAll(integers());
+	syn lazy ArrayList<FIntegerVariable> FClass.independentIntegerConstants() {
+      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
+      set.addAll(integers());
+      set.retainAll(independentConstants());
       return set;
      }
 	syn int FVariable.independentIntegerConstantIndex() =
@@ -196,20 +196,20 @@ aspect FlatAPI {
 
 	
 	syn int FClass.numIndependentBooleanConstants() = independentBooleanConstants().size();
-	syn lazy ArrayList<FVariable> FClass.independentBooleanConstants() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(independentConstants());
-      set.retainAll(booleans());
+	syn lazy ArrayList<FBooleanVariable> FClass.independentBooleanConstants() {
+      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
+      set.addAll(booleans());
+      set.retainAll(independentConstants());
       return set;
      }
 	syn int FVariable.independentBooleanConstantIndex() =
 		myFClass().independentBooleanConstants().indexOf(this);
 	
 	syn int FClass.numIndependentStringConstants() = independentStringConstants().size();
-	syn lazy ArrayList<FVariable> FClass.independentStringConstants() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(independentConstants());
-      set.retainAll(strings());
+	syn lazy ArrayList<FStringVariable> FClass.independentStringConstants() {
+      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
+      set.addAll(strings());
+      set.retainAll(independentConstants());
       return set;
      }
 	syn int FVariable.independentStringConstantIndex() =
@@ -224,40 +224,40 @@ aspect FlatAPI {
 	to FClass.dependentConstants() for myFClass();
 	
 	syn int FClass.numDependentRealConstants() = dependentRealConstants().size();
-	syn lazy ArrayList<FVariable> FClass.dependentRealConstants() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(dependentConstants());
-      set.retainAll(reals());
+	syn lazy ArrayList<FRealVariable> FClass.dependentRealConstants() {
+      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
+      set.addAll(reals());
+      set.retainAll(dependentConstants());
       return set;
      }
 	syn int FVariable.dependentRealConstantIndex() =
 		myFClass().dependentRealConstants().indexOf(this);
 	
 	syn int FClass.numDependentIntegerConstants() = dependentIntegerConstants().size();
-	syn lazy ArrayList<FVariable> FClass.dependentIntegerConstants() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(dependentConstants());
-      set.retainAll(integers());
+	syn lazy ArrayList<FIntegerVariable> FClass.dependentIntegerConstants() {
+      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
+      set.addAll(integers());
+      set.retainAll(dependentConstants());
       return set;
      }
 	syn int FVariable.dependentIntegerConstantIndex() =
 		myFClass().dependentIntegerConstants().indexOf(this);
 	
 	syn int FClass.numDependentBooleanConstants() = dependentBooleanConstants().size();
-	syn lazy ArrayList<FVariable> FClass.dependentBooleanConstants() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(dependentConstants());
-      set.retainAll(booleans());
+	syn lazy ArrayList<FBooleanVariable> FClass.dependentBooleanConstants() {
+      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
+      set.addAll(booleans());
+      set.retainAll(dependentConstants());
       return set;
      }
 	syn int FVariable.dependentBooleanConstantIndex() =
 		myFClass().dependentBooleanConstants().indexOf(this);
 	
 	syn int FClass.numDependentStringConstants() = dependentStringConstants().size();
-	syn lazy ArrayList<FVariable> FClass.dependentStringConstants() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(dependentConstants());
-      set.retainAll(strings());
+	syn lazy ArrayList<FStringVariable> FClass.dependentStringConstants() {
+      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
+      set.addAll(strings());
+      set.retainAll(dependentConstants());
       return set;
      }
 	syn int FVariable.dependentStringConstantIndex() =
@@ -271,40 +271,40 @@ aspect FlatAPI {
 	to FClass.independentParameters() for myFClass();
 	
 	syn int FClass.numIndependentRealParameters() = independentRealParameters().size();
-	syn lazy ArrayList<FVariable> FClass.independentRealParameters() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(independentParameters());
-      set.retainAll(reals());
+	syn lazy ArrayList<FRealVariable> FClass.independentRealParameters() {
+      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
+      set.addAll(reals());
+      set.retainAll(independentParameters());
       return set;
      }
 	syn int FVariable.independentRealParameterIndex() =
 		myFClass().independentRealParameters().indexOf(this);
 
 	syn int FClass.numIndependentIntegerParameters() = independentIntegerParameters().size();
-	syn lazy ArrayList<FVariable> FClass.independentIntegerParameters() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(independentParameters());
-      set.retainAll(integers());
+	syn lazy ArrayList<FIntegerVariable> FClass.independentIntegerParameters() {
+      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
+      set.addAll(integers());
+      set.retainAll(independentParameters());
       return set;
      }
 	syn int FVariable.independentIntegerParameterIndex() =
 		myFClass().independentIntegerParameters().indexOf(this);
 	
 	syn int FClass.numIndependentBooleanParameters() = independentBooleanParameters().size();
-	syn lazy ArrayList<FVariable> FClass.independentBooleanParameters() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(independentParameters());
-      set.retainAll(booleans());
+	syn lazy ArrayList<FBooleanVariable> FClass.independentBooleanParameters() {
+      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
+      set.addAll(booleans());
+      set.retainAll(independentParameters());
       return set;
      }
 	syn int FVariable.independentBooleanParameterIndex() =
 		myFClass().independentBooleanParameters().indexOf(this);
 
 	syn int FClass.numIndependentStringParameters() = independentStringParameters().size();
-	syn lazy ArrayList<FVariable> FClass.independentStringParameters() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(independentParameters());
-      set.retainAll(strings());
+	syn lazy ArrayList<FStringVariable> FClass.independentStringParameters() {
+      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
+      set.addAll(strings());
+      set.retainAll(independentParameters());
       return set;
      }
 	syn int FVariable.independentStringParameterIndex() =
@@ -318,40 +318,40 @@ aspect FlatAPI {
 	to FClass.dependentParameters() for myFClass();
 
 	syn int FClass.numDependentRealParameters() = dependentRealParameters().size();
-	syn lazy ArrayList<FVariable> FClass.dependentRealParameters() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(dependentParameters());
-      set.retainAll(reals());
+	syn lazy ArrayList<FRealVariable> FClass.dependentRealParameters() {
+      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
+      set.addAll(reals());
+      set.retainAll(dependentParameters());
       return set;
      }
 	syn int FVariable.dependentRealParameterIndex() =
 		myFClass().dependentRealParameters().indexOf(this);
 
 	syn int FClass.numDependentIntegerParameters() = dependentIntegerParameters().size();
-	syn lazy ArrayList<FVariable> FClass.dependentIntegerParameters() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(dependentParameters());
-      set.retainAll(integers());
+	syn lazy ArrayList<FIntegerVariable> FClass.dependentIntegerParameters() {
+      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
+      set.addAll(integers());
+      set.retainAll(dependentParameters());
       return set;
      }
 	syn int FVariable.dependentIntegerParameterIndex() =
 		myFClass().dependentIntegerParameters().indexOf(this);
 	
 	syn int FClass.numDependentBooleanParameters() = dependentBooleanParameters().size();
-	syn lazy ArrayList<FVariable> FClass.dependentBooleanParameters() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(dependentParameters());
-      set.retainAll(booleans());
+	syn lazy ArrayList<FBooleanVariable> FClass.dependentBooleanParameters() {
+      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
+      set.addAll(booleans());
+      set.retainAll(dependentParameters());
       return set;
      }
 	syn int FVariable.dependentBooleanParameterIndex() =
 		myFClass().dependentBooleanParameters().indexOf(this);
 	
 	syn int FClass.numDependentStringParameters() = dependentStringParameters().size();
-	syn lazy ArrayList<FVariable> FClass.dependentStringParameters() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(dependentParameters());
-      set.retainAll(strings());
+	syn lazy ArrayList<FStringVariable> FClass.dependentStringParameters() {
+      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
+      set.addAll(strings());
+      set.retainAll(dependentParameters());
       return set;
      }
 	syn int FVariable.dependentStringParameterIndex() =

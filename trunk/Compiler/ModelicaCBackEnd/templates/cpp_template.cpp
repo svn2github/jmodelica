@@ -33,6 +33,7 @@ static const int N_eq_F = $n_equations$;
 
 static const int N_eq_F0 = $n_equations$ + $n_initial_equations$;
 static const int N_eq_F1 = 0;
+static const int N_eq_Fp = n_real_pd;
 
 static const int N_eq_Ceq = 0;
 static const int N_eq_Cineq = 0;
@@ -71,38 +72,43 @@ $C_variable_aliases$
  * this solution does not work. Probably not too bad, since we can use
  * macros.
  */
-static int vdp_dae_F(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_dae_F(jmi_t* jmi, jmi_ad_var_vec_p res) {
 $C_DAE_equation_residuals$
 	return 0;
 }
 
-static int vdp_init_F0(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_init_F0(jmi_t* jmi, jmi_ad_var_vec_p res) {
 $C_DAE_initial_equation_residuals$
 	return 0;
 }
 
-static int vdp_init_F1(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_init_F1(jmi_t* jmi, jmi_ad_var_vec_p res) {
 $C_DAE_initial_guess_equation_residuals$
 	return 0;
 }
 
-static int vdp_opt_J(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_init_Fp(jmi_t* jmi, jmi_ad_var_vec_p res) {
+$C_DAE_initial_dependent_parameter_residuals$
+	return 0;
+}
+
+static int model_opt_J(jmi_t* jmi, jmi_ad_var_vec_p res) {
 	return -1;
 }
 
-static int vdp_opt_Ceq(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_opt_Ceq(jmi_t* jmi, jmi_ad_var_vec_p res) {
 	return -1;
 }
 
-static int vdp_opt_Cineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_opt_Cineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
 	return -1;
 }
 
-static int vdp_opt_Heq(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_opt_Heq(jmi_t* jmi, jmi_ad_var_vec_p res) {
 	return -1;
 }
 
-static int vdp_opt_Hineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_opt_Hineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
 	return -1;
 }
 
@@ -112,18 +118,19 @@ int jmi_new(jmi_t** jmi) {
 			      N_x, N_u, N_w, N_t_p);
 
 	// Initialize the DAE interface
-	jmi_dae_init(*jmi, *vdp_dae_F, N_eq_F, NULL, 0, NULL, NULL);
+	jmi_dae_init(*jmi, *model_dae_F, N_eq_F, NULL, 0, NULL, NULL);
 
 	// Initialize the Init interface
-	jmi_init_init(*jmi, *vdp_init_F0, N_eq_F0, NULL,
-			0, NULL, NULL, *vdp_init_F1, N_eq_F1, NULL,
+	jmi_init_init(*jmi, *model_init_F0, N_eq_F0, NULL,
+			0, NULL, NULL, *model_init_F1, N_eq_F1, NULL,
+			            0, NULL, NULL,*model_init_Fp, N_eq_Fp, NULL,
 			            0, NULL, NULL);
 	// Initialize the Opt interface
-	jmi_opt_init(*jmi, *vdp_opt_J, NULL, 0, NULL, NULL,
-	           *vdp_opt_Ceq, N_eq_Ceq, NULL, 0, NULL, NULL,
-	           *vdp_opt_Cineq, N_eq_Cineq, NULL, 0, NULL, NULL,
-	           *vdp_opt_Heq, N_eq_Heq, NULL, 0, NULL, NULL,
-	           *vdp_opt_Hineq, N_eq_Hineq, NULL, 0, NULL, NULL);
+	jmi_opt_init(*jmi, *model_opt_J, NULL, 0, NULL, NULL,
+	           *model_opt_Ceq, N_eq_Ceq, NULL, 0, NULL, NULL,
+	           *model_opt_Cineq, N_eq_Cineq, NULL, 0, NULL, NULL,
+	           *model_opt_Heq, N_eq_Heq, NULL, 0, NULL, NULL,
+	           *model_opt_Hineq, N_eq_Hineq, NULL, 0, NULL, NULL);
 
 	return 0;
 }

@@ -7,18 +7,18 @@ model CCodeGenTest1
         template = 
         "$C_variable_aliases$
 $C_DAE_equation_residuals$",
-        generatedCode="#define p ((*(jmi->z))[jmi->offs_pi+0])
-#define der_x1 ((*(jmi->z))[jmi->offs_dx+0])
-#define der_x2 ((*(jmi->z))[jmi->offs_dx+1])
-#define x1 ((*(jmi->z))[jmi->offs_x+0])
-#define x2 ((*(jmi->z))[jmi->offs_x+1])
-#define u ((*(jmi->z))[jmi->offs_u+0])
-#define w ((*(jmi->z))[jmi->offs_w+0])
+        generatedCode="#define _p_ ((*(jmi->z))[jmi->offs_pi+0])
+#define _der_x1_ ((*(jmi->z))[jmi->offs_dx+0])
+#define _der_x2_ ((*(jmi->z))[jmi->offs_dx+1])
+#define _x1_ ((*(jmi->z))[jmi->offs_x+0])
+#define _x2_ ((*(jmi->z))[jmi->offs_x+1])
+#define _u_ ((*(jmi->z))[jmi->offs_u+0])
+#define _w_ ((*(jmi->z))[jmi->offs_w+0])
 #define time ((*(jmi->z))[jmi->offs_t])
 
-    (*res)[0] = ( 1 - ( pow(x2,2) ) ) * ( x1 ) - ( x2 ) + ( p ) * ( u ) - (der_x1);
-    (*res)[1] = x1 - (der_x2);
-    (*res)[2] = x1 + x2 - (w);
+    (*res)[0] = ( 1 - ( pow(_x2_,2) ) ) * ( _x1_ ) - ( _x2_ ) + ( _p_ ) * ( _u_ ) - (_der_x1_);
+    (*res)[1] = _x1_ - (_der_x2_);
+    (*res)[2] = _x1_ + _x2_ - (_w_);
 ")})));
  
   Real x1(start=0); 
@@ -42,32 +42,32 @@ end CCodeGenTest1;
 $C_DAE_equation_residuals$
 $C_DAE_initial_equation_residuals$
 $C_DAE_initial_guess_equation_residuals$",
-        generatedCode="#define der_x ((*(jmi->z))[jmi->offs_dx+0])
-#define der_v ((*(jmi->z))[jmi->offs_dx+1])
-#define x ((*(jmi->z))[jmi->offs_x+0])
-#define v ((*(jmi->z))[jmi->offs_x+1])
-#define y ((*(jmi->z))[jmi->offs_w+0])
-#define z ((*(jmi->z))[jmi->offs_w+1])
-#define w ((*(jmi->z))[jmi->offs_w+2])
+        generatedCode="#define _der_x_ ((*(jmi->z))[jmi->offs_dx+0])
+#define _der_v_ ((*(jmi->z))[jmi->offs_dx+1])
+#define _x_ ((*(jmi->z))[jmi->offs_x+0])
+#define _v_ ((*(jmi->z))[jmi->offs_x+1])
+#define _y_ ((*(jmi->z))[jmi->offs_w+0])
+#define _z_ ((*(jmi->z))[jmi->offs_w+1])
+#define _w_ ((*(jmi->z))[jmi->offs_w+2])
 #define time ((*(jmi->z))[jmi->offs_t])
 
-    (*res)[0] =  - ( x ) - (der_x);
-    (*res)[1] = 4 - (der_v);
-    (*res)[2] = x - (z);
-    (*res)[3] = 2 - (w);
+    (*res)[0] =  - ( _x_ ) - (_der_x_);
+    (*res)[1] = 4 - (_der_v_);
+    (*res)[2] = _x_ - (_z_);
+    (*res)[3] = 2 - (_w_);
 
-    (*res)[0] =  - ( x ) - (der_x);
-    (*res)[1] = 4 - (der_v);
-    (*res)[2] = x - (z);
-    (*res)[3] = 2 - (w);
-    (*res)[4] = 1 - (x);
-    (*res)[5] = 3 - (y);
+    (*res)[0] =  - ( _x_ ) - (_der_x_);
+    (*res)[1] = 4 - (_der_v_);
+    (*res)[2] = _x_ - (_z_);
+    (*res)[3] = 2 - (_w_);
+    (*res)[4] = 1 - (_x_);
+    (*res)[5] = 3 - (_y_);
 
-   (*res)[2] = 0.0 - z;
-   (*res)[3] = 1 - w;
-   (*res)[4] = 0.0 - v;
-   (*res)[5] = 0.0 - der_x;
-   (*res)[6] = 0.0 - der_v;")})));
+   (*res)[2] = 0.0 - _z_;
+   (*res)[3] = 1 - _w_;
+   (*res)[4] = 0.0 - _v_;
+   (*res)[5] = 0.0 - _der_x_;
+   (*res)[6] = 0.0 - _der_v_;")})));
 
 
 		Real x(start=1);
@@ -79,6 +79,21 @@ $C_DAE_initial_guess_equation_residuals$",
 		der(x) = -x;
 		der(v) = 4;
 	end CCodeGenTest2;
+
+	model CCodeGenTest3
+  	  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.CCodeGenTestCase(name="CCodeGenTest3",
+        description="Test of code generation",
+        template = 
+        "$C_DAE_initial_dependent_parameter_residuals$",
+        generatedCode="   (*res)[0] = ( _p1_ ) * ( _p1_ ) - _p2_;
+   (*res)[1] = _p2_ - _p3_;")})));
+
+
+	    parameter Real p3 = p2;
+	    parameter Real p2 = p1*p1;
+		parameter Real p1 = 4;
+	end CCodeGenTest3;
 
 
 end CCodeGenTests;

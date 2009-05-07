@@ -91,6 +91,8 @@ aspect CCodeGen {
 		str.print("_"+nameUnderscore()+"_");
 		str.print(";\n");
 	}
+
+	
 	
 }
 

@@ -93,6 +93,29 @@ public class CGenerator extends GenericGenerator {
 		}
 	
 	}
+
+	class DAETag_C_initialDependentParameterResiduals extends DAETag {
+		
+		public DAETag_C_initialDependentParameterResiduals(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_initial_dependent_parameter_residuals","C: dependent parameter residuals",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			int i=0;
+			for (FRealVariable fv : fclass.dependentRealParameters()) {
+				genPrinter.print("   " + "(*res)[" + i + "] = ");
+				fv.getBindingExp().prettyPrint_C(genPrinter,"");
+				genPrinter.print(" - ");
+				genPrinter.print("_"+fv.nameUnderscore()+"_");
+				genPrinter.print(";\n");
+
+				i++;
+			}
+		}
+	
+	}
 	
 	class DAETag_C_variableAliases extends DAETag {
 		
@@ -167,6 +190,8 @@ public class CGenerator extends GenericGenerator {
 		tag = new DAETag_C_initialEquationResiduals(this,fclass);
 		tagMap.put(tag.getName(),tag);
 		tag = new DAETag_C_initialGuessEquationResiduals(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_C_initialDependentParameterResiduals(this,fclass);
 		tagMap.put(tag.getName(),tag);
 		tag = new DAETag_C_variableAliases(this,fclass);
 		tagMap.put(tag.getName(),tag);		
