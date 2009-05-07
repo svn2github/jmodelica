@@ -614,13 +614,16 @@ int jmi_ad_init(jmi_t* jmi) {
 		}
 	}
 	if (jmi->init!=NULL) {
-		int n_eq_F0, n_eq_F1;
-		jmi_init_get_sizes(jmi,&n_eq_F0,&n_eq_F1);
+		int n_eq_F0, n_eq_F1, n_eq_Fp;
+		jmi_init_get_sizes(jmi,&n_eq_F0,&n_eq_F1,&n_eq_Fp);
 		if (n_eq_F0>0) {
 			jmi_func_ad_init(jmi, jmi->init->F0);
 		}
 		if (n_eq_F1>0) {
 			jmi_func_ad_init(jmi, jmi->init->F1);
+		}
+		if (n_eq_Fp>0) {
+			jmi_func_ad_init(jmi, jmi->init->Fp);
 		}
 	}
 	if (jmi->opt!=NULL) {
@@ -701,8 +704,12 @@ int jmi_delete(jmi_t* jmi){
 		if (jmi->init->F1->ad != NULL) {
 			jmi_func_ad_delete(jmi->init->F1->ad);
 		}
+		if (jmi->init->Fp->ad != NULL) {
+			jmi_func_ad_delete(jmi->init->Fp->ad);
+		}
 		jmi_func_delete(jmi->init->F0);
 		jmi_func_delete(jmi->init->F1);
+		jmi_func_delete(jmi->init->Fp);
 		free(jmi->init);
 	}
 	if(jmi->opt != NULL) {

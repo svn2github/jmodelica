@@ -453,6 +453,16 @@ int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F,
  *        of \f$F_1\f$.
  * @param dF1_col Column indices of the non-zeros in the symbolic Jacobain
  *        of \f$F_1\f$.
+ * @param Fp A function pointer to the DAE initialization residual function
+ * \f$F_p\f$.
+ * @param n_eq_Fp Number of equations in the DAE initialization residual
+ *        function \f$F_p\f$.
+ * @param dFp Function pointer to the symbolic Jacobian of \f$F_p\f$.
+ * @param dFp_n_nz Number of non-zeros in the symbolic jacobian of \f$F_p\f$.
+ * @param dFp_row Row indices of the non-zeros in the symbolic Jacobain
+ *        of \f$F_p\f$.
+ * @param dFp_col Column indices of the non-zeros in the symbolic Jacobain
+ *        of \f$F_p\f$.
  * @return Error code.
  *
  */
@@ -461,7 +471,10 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 		  int dF0_n_nz, int* dF0_row, int* dF0_col,
 		  jmi_residual_func_t F1, int n_eq_F1,
 		  jmi_jacobian_func_t dF1,
-		  int dF1_n_nz, int* dF1_row, int* dF1_col);
+		  int dF1_n_nz, int* dF1_row, int* dF1_col,
+		  jmi_residual_func_t Fp, int n_eq_Fp,
+		  jmi_jacobian_func_t dFp,
+		  int dFp_n_nz, int* dFp_row, int* dFp_col);
 
 /**
  * \brief Allocates a jmi_opt_t struct.
@@ -610,6 +623,7 @@ struct jmi_dae_t{
 struct jmi_init_t{
 	jmi_func_t* F0;                      ///< A jmi_func_t struct representing \f$F_0\f$.
 	jmi_func_t* F1;                      ///< A jmi_func_t struct representing \f$F_1\f$.
+	jmi_func_t* Fp;                      ///< A jmi_func_t struct representing \f$F_p\f$.
 };
 
 /**

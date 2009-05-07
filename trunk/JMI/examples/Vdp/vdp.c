@@ -69,6 +69,7 @@ static const int N_eq_F = 4;
 
 static const int N_eq_F0 = 7;
 static const int N_eq_F1 = 0;
+static const int N_eq_Fp = 0;
 
 static const int N_eq_Ceq = 0;
 static const int N_eq_Cineq = 3;
@@ -907,6 +908,26 @@ static int vdp_init_dF1_nz_indices(int* row, int* col) {
 	return 0;
 }
 
+static int vdp_init_Fp(jmi_t* jmi, jmi_ad_var_vec_p res) {
+
+  return 0;
+}
+
+static int vdp_init_dFp(jmi_t* jmi, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
+
+	return 0;
+}
+
+static int vdp_init_dFp_n_nz(int* n_nz) {
+	*n_nz = 0;
+	return 0;
+}
+
+static int vdp_init_dFp_nz_indices(int* row, int* col) {
+
+	return 0;
+}
+
 static int vdp_opt_J(jmi_t* jmi, jmi_ad_var_vec_p res) {
 
 	 //min x_3(t_f) + x_3(t_1) + p_1^2 + w_1(t_f)^2 + w_1(t_1)^2
@@ -1647,7 +1668,8 @@ int jmi_new(jmi_t** jmi) {
 	jmi_init_init(*jmi, *vdp_init_F0, N_eq_F0, *vdp_init_dF0,
 			          dF0_n_nz, dF0_irow, dF0_icol,
 			            *vdp_init_F1, N_eq_F1, *vdp_init_dF1,
-			            dF1_n_nz, dF1_irow, dF1_icol);
+			            dF1_n_nz, dF1_irow, dF1_icol,*vdp_init_Fp, N_eq_Fp, NULL,
+			            0, NULL, NULL);
 
 	int dJ_n_nz;
 	vdp_opt_dJ_n_nz(&dJ_n_nz);

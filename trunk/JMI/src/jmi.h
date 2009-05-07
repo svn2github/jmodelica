@@ -147,6 +147,13 @@
  *   initialization of variables for which the value given in the start attribute is
  *   not fixed.
  *
+ *   In addition, a residual function for dependent parameters is provided
+ *
+ *	  \f$  F_p(ci,cd,pi,pd) = 0 \f$
+ *
+ *   The iteration variables of this system are the elements in the \f$p_d\f$
+ *   vector.
+ *
  *   For details on the functions included in the DAE initialization interface, see the
  *   <a href="group__Initialization.html">DAE initialization functions documentation. </a>
  *
@@ -783,10 +790,11 @@ int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
  * @param jmi A jmi_t struct.
  * @param n_eq_F0 (Output) The number of equations in \f$F_0\f$ is stored in this argument.
  * @param n_eq_F1 (Output) The number of equations in \f$F_1\f$ is stored in this argument.
+ * @param n_eq_Fp (Output) The number of equations in \f$F_p\f$ is stored in this argument.
  * @return Error code.
  *
  */
-int jmi_init_get_sizes(jmi_t* jmi, int* n_eq_F0, int* n_eq_F1);
+int jmi_init_get_sizes(jmi_t* jmi, int* n_eq_F0, int* n_eq_F1, int* n_eq_Fp);
 
 /**
  * \brief Evaluate the \f$F_0\f$ residual function of the initialization system.
@@ -929,6 +937,78 @@ int jmi_init_dF1_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
  */
 int jmi_init_dF1_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz);
+
+/**
+ * \brief Evaluate the \f$F_p\f$ residual function of the initialization system.
+ *
+ * @param jmi A jmi_t struct.
+ * @param res The residual of \f$F_p\f$.
+ * @return Error code.
+ */
+int jmi_init_Fp(jmi_t* jmi, jmi_real_t* res);
+
+/**
+ * \brief Evaluate the Jacobian of the DAE initialization residual function \f$F_p\f$.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param jac (Output) The Jacobian.
+ * @return Error code.
+ *
+ */
+int jmi_init_dFp(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
+
+/**
+ * \brief Returns the number of non-zeros in the full Jacobian of the DAE initialization residual function \f$F_p\f$.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF_n_nz.
+ * @param n_nz (Output) The number of non-zero entries in the full Jacobian.
+ * @return Error code.
+ */
+int jmi_init_dFp_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
+
+/**
+ * \brief Returns the row and column indices of the non-zero elements in the Jacobain of the DAE
+ * initialization residual function \f$F_p\f$.
+ *
+ * Notice that Fortran style indexing is used: the first row (and column) has index 1.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param row (Output) The row indices of the non-zeros in the Jacobian.
+ * @param col (Output) The column indices of the non-zeros in the Jacobian.
+ * @return Error code.
+ *
+ */
+int jmi_init_dFp_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col);
+
+/**
+ * \brief This helper function computes the number of columns and the number of non-zero
+ * elements in the Jacobian of the DAE initialization residual function \f$F_p\f$ given
+ * a sparsity configuration.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param dF_n_cols (Output) The number of columns of the resulting Jacobian.
+ * @param dF_n_nz (Output) The number of non-zeros of the resulting Jacobian.
+ *
+ */
+int jmi_init_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
+		int *dF_n_cols, int *dF_n_nz);
+
 
 
 /* @} */

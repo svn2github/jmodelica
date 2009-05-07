@@ -32,6 +32,7 @@ static const int N_eq_F = 3;
 
 static const int N_eq_F0 = 3 + 3;
 static const int N_eq_F1 = 0;
+static const int N_eq_Fp = 0;
 
 static const int N_eq_Ceq = 0;
 static const int N_eq_Cineq = 0;
@@ -121,6 +122,10 @@ static int vdp_init_F1(jmi_t* jmi, jmi_ad_var_vec_p res) {
 	return -1;
 }
 
+static int vdp_init_Fp(jmi_t* jmi, jmi_ad_var_vec_p res) {
+	return -1;
+}
+
 static int vdp_opt_J(jmi_t* jmi, jmi_ad_var_vec_p res) {
 	//printf("%f, %f, %f, %f\n",c,T,J,_x_p(0,2));
 	(*res)[0] = _x_p(0,2);
@@ -156,6 +161,7 @@ int jmi_new(jmi_t** jmi) {
 	// Initialize the Init interface
 	jmi_init_init(*jmi, *vdp_init_F0, N_eq_F0, NULL,
 			0, NULL, NULL, *vdp_init_F1, N_eq_F1, NULL,
+			            0, NULL, NULL,*vdp_init_Fp, N_eq_Fp, NULL,
 			            0, NULL, NULL);
 	// Initialize the Opt interface
 	jmi_opt_init(*jmi, *vdp_opt_J, NULL, 0, NULL, NULL,

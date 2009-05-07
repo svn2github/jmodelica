@@ -210,7 +210,10 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 		int dF0_n_nz, int* dF0_row, int* dF0_col,
 		jmi_residual_func_t F1, int n_eq_F1,
 		jmi_jacobian_func_t dF1,
-		int dF1_n_nz, int* dF1_row, int* dF1_col) {
+		int dF1_n_nz, int* dF1_row, int* dF1_col,
+		jmi_residual_func_t Fp, int n_eq_Fp,
+		jmi_jacobian_func_t dFp,
+		int dFp_n_nz, int* dFp_row, int* dFp_col) {
 
 	// Create jmi_init struct
 	jmi_init_t* init = (jmi_init_t*)calloc(1,sizeof(jmi_init_t));
@@ -223,6 +226,10 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 	jmi_func_t* jf_F1;
 	jmi_func_new(&jf_F1,F1,n_eq_F1,dF1,dF1_n_nz,dF1_row, dF1_col);
 	jmi->init->F1 = jf_F1;
+
+	jmi_func_t* jf_Fp;
+	jmi_func_new(&jf_Fp,Fp,n_eq_Fp,dFp,dFp_n_nz,dFp_row, dFp_col);
+	jmi->init->Fp = jf_Fp;
 
 	return 0;
 }
@@ -354,12 +361,13 @@ int jmi_dae_get_sizes(jmi_t* jmi, int* n_eq_F) {
 	*n_eq_F = jmi->dae->F->n_eq_F;
 	return 0;
 }
-int jmi_init_get_sizes(jmi_t* jmi, int* n_eq_F0, int* n_eq_F1) {
+int jmi_init_get_sizes(jmi_t* jmi, int* n_eq_F0, int* n_eq_F1, int* n_eq_Fp) {
 	if (jmi->init == NULL) {
 		return -1;
 	}
 	*n_eq_F0 = jmi->init->F0->n_eq_F;
 	*n_eq_F1 = jmi->init->F1->n_eq_F;
+	*n_eq_Fp = jmi->init->Fp->n_eq_F;
 	return 0;
 }
 
