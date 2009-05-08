@@ -672,20 +672,19 @@ uninstall-am:
 
 
 all-local:
-@HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/ModelicaFrontEnd; \
-@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT)
-@HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/OptimicaFrontEnd; \
-@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT)
-@HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/ModelicaCBackEnd; \
-@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT)
-@HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd; \
+#	cd $(abs_top_srcdir)/Compiler/ModelicaFrontEnd; \
+#	$(ANT_OPTS) $(ANT)
+#	cd $(abs_top_srcdir)/Compiler/OptimicaFrontEnd; \
+#	$(ANT_OPTS) $(ANT)
+#	cd $(abs_top_srcdir)/Compiler/ModelicaCBackEnd; \
+#	$(ANT_OPTS) $(ANT)
+#	cd $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd; \
+#	$(ANT_OPTS) $(ANT)
+@HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/ModelicaCompiler; \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT)
 
 install-exec-local:
-@HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/ModelicaFrontEnd/bin/jmodelica.jar lib
-@HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/OptimicaFrontEnd/bin/optimica.jar lib
-@HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/bin/jmodelica_c_backend.jar lib
-@HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd/bin/jmodelica_xml_backend.jar lib
+@HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar lib
 
 clean-local: clean-jmi-examples clean-frontends
 
@@ -704,13 +703,15 @@ clean-jmi-examples:
 	cd JMI/examples/CSTR2; $(MAKE) clean
 
 clean-frontends:
-@HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/ModelicaFrontEnd; \
-@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean
-@HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/OptimicaFrontEnd; \
-@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean
-@HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/ModelicaCBackend; \
-@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean
-@HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/ModelicaXMLBackend; \
+#	cd $(abs_top_srcdir)/Compiler/ModelicaFrontEnd; \
+#	$(ANT_OPTS) $(ANT) clean
+#	cd $(abs_top_srcdir)/Compiler/OptimicaFrontEnd; \
+#	$(ANT_OPTS) $(ANT) clean
+#	cd $(abs_top_srcdir)/Compiler/ModelicaCBackend; \
+#	$(ANT_OPTS) $(ANT) clean
+#	cd $(abs_top_srcdir)/Compiler/ModelicaXMLBackend; \
+#	$(ANT_OPTS) $(ANT) clean
+@HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/ModelicaCompiler; \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean
 
 docs:
