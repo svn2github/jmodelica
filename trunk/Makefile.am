@@ -15,7 +15,7 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-#EXTRA_DIST = doc/JMI/jmi_doxydoc.conf
+#EXTRA_DIST =  $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar
 
 SUBDIRS = JMI/src
 
@@ -35,7 +35,7 @@ endif
 
 install-exec-local:
 if HAVE_ANT
-	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar lib
+	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar $(prefix)/lib/
 endif
 
 clean-local: clean-jmi-examples clean-frontends
