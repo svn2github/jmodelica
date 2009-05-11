@@ -112,9 +112,11 @@ AM_CONDITIONAL([COMPILE_WITH_IPOPT],[test "x$with_ipopt" != xno])
 # Set output variables to be exported to the Makefiles
 AC_SUBST(IPOPT_INC)
 AC_SUBST(IPOPT_LIB)
+AC_SUBST(IPOPT_HOME)
 
 IPOPT_INC=$ipopt/include/coin
 IPOPT_LIB=$ipopt/lib
+IPOPT_HOME=$ipopt
 
 AC_SUBST(WITH_IPOPT)
 AS_IF([test "x$with_ipopt" != xno],
@@ -146,9 +148,9 @@ AM_CONDITIONAL([COMPILE_WITH_CPPAD],[test "x$with_cppad" != xno])
 
 # Set output variables to be exported to the Makefiles
 AC_SUBST(CPPAD_INC)
-
 AC_SUBST(WITH_CPPAD)
 CPPAD_INC=$cppad
+
 AS_IF([test "x$with_cppad" != xno],
       [WITH_CPPAD="true"],
       [WITH_CPPAD="false"]) 
@@ -211,6 +213,8 @@ AC_CONFIG_FILES([
  JMI/examples/FurutaPendulum/Makefile
  JMI/examples/CSTR/Makefile
  JMI/examples/CSTR2/Makefile
+ options.xml
+ options.py
 ])
 
 

@@ -1,0 +1,23 @@
+<OptionRegistry>
+	<ModelicaLibrary>
+		<Name>Modelica</Name>
+		<Version>3.1.1</Version>
+		<Path>c:\mypath</Path>
+	</ModelicaLibrary>
+	<Options>
+		<Option>
+			<Type>Real</Type>
+			<RealAttributes>
+				<Key>realkey</Key>
+				<Value>1.0</Value>
+			</RealAttributes>
+		</Option>
+		<Option>
+			<Type>String</Type>
+			<StringAttributes>
+				<Key>py_version</Key>
+				<Value>2.6</Value>
+			</StringAttributes>
+		</Option>
+	</Options>	
+</OptionRegistry>

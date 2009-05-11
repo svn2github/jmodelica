@@ -15,7 +15,7 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-#EXTRA_DIST =  $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar
+# EXTRA_DIST =
 
 SUBDIRS = JMI/src
 
@@ -40,14 +40,16 @@ endif
 	mkdir $(prefix)/Makefiles
 	case $(build) in \
 	*-cygwin*) \
-	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(prefix)/Makefiles/Makefile ;; \
+	cp $(abs_top_srcdir)/JMI/MakeFiles/Makefile.windows $(prefix)/Makefiles/Makefile ;; \
   	*-mingw*) \
-	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(prefix)/Makefiles/MakeFile ;; \
+	cp $(abs_top_srcdir)/JMI/MakeFiles/Makefile.windows $(prefix)/Makefiles/MakeFile ;; \
   	*-apple*) \
-	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.macosx $(prefix)/Makefiles/MakeFile ;; \
+	cp $(abs_top_srcdir)/JMI/MakeFiles/Makefile.macosx $(prefix)/Makefiles/MakeFile ;; \
   	*) \
-	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.linux $(prefix)/Makefiles/MakeFile ;; \
+	cp $(abs_top_srcdir)/JMI/MakeFiles/Makefile.linux $(prefix)/Makefiles/MakeFile ;; \
 	esac 
+	cp options.xml $(prefix)/	
+	cp options.py $(prefix)/	
 
 clean-local: clean-jmi-examples clean-frontends
 
