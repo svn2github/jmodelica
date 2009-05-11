@@ -40,6 +40,12 @@ import org.jmodelica.parser.ModelicaParser.Terminals;
 %char
 
 %{
+  /**
+   * Subclass of Symbol that carries extra information. 
+   * Used to give error reporting class for parser access to offset & length 
+   * of tokens. Start, end, offset and length are extracted from scanner variables
+   * in constructors.
+   */
   public class Symbol extends beaver.Symbol {
   
     private int offset;
@@ -69,6 +75,11 @@ import org.jmodelica.parser.ModelicaParser.Terminals;
     
   }
   
+  /**
+   * Subclass of Scanner.Exception that carries extra information. 
+   * Used to give error reporting class for parser access to offset of error. 
+   * Offset is extracted from scanner variables in constructors.
+   */
   public class Exception extends Scanner.Exception {
     
     public final int offset;
