@@ -18,7 +18,6 @@
 package org.jmodelica.parser;
 
 import java.util.Map;
-import beaver.Symbol;
 import beaver.Scanner;
 import org.jmodelica.parser.ModelicaParser.Terminals;
 
@@ -29,41 +28,74 @@ import org.jmodelica.parser.ModelicaParser.Terminals;
 %class ModelicaScanner
 %extends Scanner
 %unicode
-%function nextTokenAll
+%function nextToken
 %type Symbol
 %yylexthrow Scanner.Exception
-%eofval{
-  return newSymbol(Terminals.EOF);
-%eofval}
+/* From JFlex manual: "<<EOF>> rules [...] should not be mixed with the %eofval directive." */
+//%eofval{
+//  return newSymbol(Terminals.EOF);
+//%eofval}
 %line
 %column
 %char
 
 %{
+  public class Symbol extends beaver.Symbol {
+  
+    private int offset;
+    private int length;
+    
+    public Symbol(short id) {
+      this(id, yytext());
+    }
+    
+    public Symbol(short id, Object value) {
+      super(id, yyline + 1, yycolumn + 1, yylength(), value);
+      offset = yychar;
+      length = yylength();
+    }
+    
+    public int getOffset() {
+      return offset;
+    }
+    
+    public int getEndOffset() {
+      return offset + length - 1;
+    }
+    
+    public int getLength() {
+      return length;
+    }
+    
+  }
+  
+  public class Exception extends Scanner.Exception {
+    
+    public final int offset;
+    
+    public Exception(String msg) {
+      this(yyline + 1, yycolumn + 1, msg);
+    }
+    
+    public Exception(int line, int column, String msg) {
+      super(line, column, msg);
+      offset = yychar;
+    }
+    
+  }
+  
   StringBuffer string = new StringBuffer(128);
 
   private Symbol newSymbol(short id) {
-    return new Symbol(id, yyline + 1, yycolumn + 1, yylength(), yytext());
+    return new Symbol(id);
   }
 
   private Symbol newSymbol(short id, Object value) {
-    return new Symbol(id, yyline + 1, yycolumn + 1, yylength(), value);
+    return new Symbol(id, value);
   }
   
   public int offset() {
     return yychar;
-  }
-  
-  public static final short COMMENT = -1;
-  public static final short WHITESPACE = -2;
-  public static final int EXTRA_TOKENS = 2;
-  
-  public Symbol nextToken() throws java.io.IOException, Scanner.Exception {
-    Symbol res;
-    do {
-      res = nextTokenAll();
-    } while (res.getId() < 0);
-    return res;
   }
 
 %}
@@ -205,13 +237,13 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   {UNSIGNED_INTEGER}  { return newSymbol(Terminals.UNSIGNED_INTEGER, yytext()); }
   {UNSIGNED_NUMBER}   { return newSymbol(Terminals.UNSIGNED_NUMBER, yytext()); }
   
-  {Comment}         { return newSymbol(COMMENT); /* Will be discarded before parser. */ }
-  {WhiteSpace} 		{ return newSymbol(WHITESPACE); /* Will be discarded before parser. */ }
+  {Comment}         { }
+  {WhiteSpace} 		{ }
 
 }
 
 //.|\n                { throw new RuntimeException("Illegal character \""+yytext()+ "\" at line "+yyline+", column "+yycolumn); }
-.|\n                { throw new Scanner.Exception(yyline,yycolumn,"Illegal character \""+yytext()+ "\" at line "+yyline+", column "+yycolumn); }
+.|\n                { throw new Exception("Illegal character \""+yytext()+ "\""); }
 <<EOF>>             { return newSymbol(Terminals.EOF); }
 
 

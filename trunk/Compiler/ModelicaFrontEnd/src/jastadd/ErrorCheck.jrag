@@ -80,6 +80,9 @@ import java.util.ArrayList;
         this.beginColumn = beginColumn;
     }    
   
+    public boolean equals(Object o) {
+    	return (o instanceof Problem) && (compareTo(o) == 0);
+    }
   
     public String toString() {
       String s = "";
@@ -92,6 +95,62 @@ import java.util.ArrayList;
         s = "Semantic error "+lineData;
       return "In file '"+fileName + "':\n" + s +"  "+ message;
     }
+  }
+  
+  /**
+   * Interface for handling semantic errors.
+   * $see Root#setErrorHandler(IErrorHandler)
+   */
+  interface IErrorHandler {
+	  /**
+	   * Called when a semantic error is found. 
+	   * @param s	error message.
+	   * @param n	the node the error originated from.
+	   * @see ASTNode.error(String)
+	   */
+	  public void error(String s, ASTNode n);
+	  /**
+	   * Called when a warning about unimplemented features is issued during semantic error checking.
+	   * @param s	warning message.
+	   * @param n	the node the warning originated from.
+	   * @see ASTNode.warning(String)
+	   */
+	  public void warning(String s, ASTNode n);
+  }
+  
+  /**
+   * Default implementation of {@link IErrorHandler}. 
+   * Collects a list of {@link Problem} for all found errors.
+   */
+  class DefaultErrorHandler implements IErrorHandler {
+	  private Root root;
+	  
+	  public DefaultErrorHandler(Root root) {
+		  this.root = root;
+	  }
+
+	  /**
+	   * Creates a new {@link Problem} and adds it to root.errors, ignoring duplicates.
+	   * @param s	error message.
+	   * @param n	the node the error originated from.
+	   */
+	  public void error(String s, ASTNode n) {
+		  Problem p = new Problem(n.fileName(), s, Problem.Severity.ERROR, Problem.Kind.SEMANTIC, 
+				  n.lineNumber(), n.columnNumber());
+		  if (!root.errors.contains(p))
+			  root.errors.add(p);
+	  }
+
+	  /**
+	   * Creates a new {@link Problem} and adds it to root.warnings, ignoring duplicates.
+	   * @param s	warning message.
+	   * @param n	the node the warning originated from.
+	   */
+	  public void warning(String s, ASTNode n) {
+		  Problem p = new Problem(n.fileName(), "WARNING: " + s, Problem.Severity.WARNING);
+		  if (!root.warnings.contains(p))
+			  root.warnings.add(p);
+	  }
   }
 
 aspect ErrorCheck {
@@ -109,35 +168,41 @@ aspect ErrorCheck {
   static final int ASTNode.ERRORS = 0;
   static final int ASTNode.WARNINGS = 1;  
 
+  private IErrorHandler Root.errorHandler = new DefaultErrorHandler(this);
+  
+  /**
+   * Set the handler for semantic errors.
+   * @see IErrorHandler 
+   */
+  public void Root.setErrorHandler(IErrorHandler handler) {
+	  errorHandler = handler;
+  }
+  
+  /**
+   * Get the handler for semantic errors.
+   * @see IErrorHandler 
+   */
+  public IErrorHandler Root.getErrorHandler() {
+	  return errorHandler;
+  }
 
   syn int ASTNode.lineNumber() = (start != 0 || getParent()==null)? beginLine() : getParent().lineNumber();
   syn int ASTNode.columnNumber() = (start != 0 || getParent()==null)? beginColumn() : getParent().columnNumber();
  
- 
+  /**
+   * Register an error. Delegates to an {@link IErrorHandler}.
+   * @param s	the error message.
+   */
   void ASTNode.error(String s) {
-      Problem newP = new Problem(fileName(), s, Problem.Severity.ERROR, Problem.Kind.SEMANTIC,lineNumber(),columnNumber());
-      boolean duplicate = false;
-      for (Problem p : root().errors) {
-      	if (newP.toString().equals(p.toString())) {
-      		duplicate = true;
-      		break;
-      	}
-      }
-      if (!duplicate) 
-	      root().errors.add(newP);
+	  root().getErrorHandler().error(s, this);
   }
 
+  /**
+   * Register a warning. Delegates to an {@link IErrorHandler}.
+   * @param s	the warning message.
+   */
   void ASTNode.warning(String s) {
-     Problem newP = new Problem(fileName(), "WARNING: " + s, Problem.Severity.WARNING);
-     boolean duplicate = false;
-      for (Problem p : root().warnings) {
-      	if (newP.toString().equals(p.toString())) {
-      		duplicate = true;
-      		break;
-      	}
-      }
-      if (!duplicate)
-	      root().warnings.add(newP);     
+	  root().getErrorHandler().error(s, this);
   }
 
   

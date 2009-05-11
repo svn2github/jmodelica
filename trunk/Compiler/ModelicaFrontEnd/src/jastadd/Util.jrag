@@ -60,6 +60,10 @@ aspect NodeMethods {
   public void ASTNode.setStart(int start) {
     this.start = start;  
   } 
+
+  public void ASTNode.setEnd(int end) {
+    this.end = end;  
+  } 
  
   public int ASTNode.beginLine() { return getLine(getStart()); }
   public int ASTNode.beginColumn() { return getColumn(getStart()); }

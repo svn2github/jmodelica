@@ -57,6 +57,7 @@ aspect NameClassification {
   			    debugPrint("****** ParseAccess: "+getID() + " rewritten to ComponentAccess");
     			ComponentAccess a = new ComponentAccess(getID(),getArraySubscriptsOpt());
      			a.setStart(getStart());
+     			a.setEnd(getStart());
      			return a;
   			}
   		when(kind()==Kind.AMBIGUOUS_ACCESS) 
@@ -64,6 +65,7 @@ aspect NameClassification {
   				debugPrint("****** ParseAccess: "+getID() + " rewritten to AmbiguousAccess");
     			AmbiguousAccess a = new AmbiguousAccess(getID(),getArraySubscriptsOpt());
     			a.setStart(getStart());
+    			a.setEnd(getStart());
      			return a;
   			}
   		when(kind()==Kind.CLASS_ACCESS) 
@@ -72,6 +74,7 @@ aspect NameClassification {
     
      			ClassAccess a =  new ClassAccess(getID());
      			a.setStart(getStart());
+     			a.setEnd(getStart());
      			return a;
   			}
 	}
@@ -83,16 +86,19 @@ aspect NameClassification {
   			    debugPrint("****** ParseAccess: "+getID() + " rewritten to ComponentAccess");
     			ComponentAccess a = new ComponentAccess(getID(),getArraySubscriptsOpt());
      			a.setStart(getStart());
+     			a.setEnd(getEnd());
      			return a;
   		} else if (kind()==Kind.CLASS_ACCESS) {
 	 			debugPrint("ParseAccess: "+getID() + " rewritten to ClassAccess");
      			ClassAccess a =  new ClassAccess(getID());
      			a.setStart(getStart());
-     			return a;
+     			a.setEnd(getEnd());
+    			return a;
   		} else {
   				debugPrint("****** ParseAccess: "+getID() + " rewritten to AmbiguousAccess");
     			AmbiguousAccess a = new AmbiguousAccess(getID(),getArraySubscriptsOpt());
     			a.setStart(getStart());
+     			a.setEnd(getEnd());
      			return a;
   		}
   		}
@@ -155,12 +161,14 @@ aspect ResolveAmbiguousNames {
      			ComponentAccess c = new ComponentAccess(name(),
      			                                        getArraySubscriptsOpt());
   	 			c.setStart(getStart());
-  	 			return c;
+     			c.setEnd(getEnd());
+ 	 			return c;
   		} else if(!lookupClass(name()).isEmpty()) {
     			debugPrint("****** AmbiguousAccess: "+getID() + " rewritten to ClassAccess");
     			ClassAccess t = new ClassAccess(name()); 
     			t.setStart(getStart());
-  	 			return t;
+     			t.setEnd(getEnd());
+ 	 			return t;
   		}
   		rewritten = true;
   		return this;

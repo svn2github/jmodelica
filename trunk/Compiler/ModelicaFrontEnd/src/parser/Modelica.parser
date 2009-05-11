@@ -22,45 +22,136 @@
  package org.jmodelica.parser;
  import org.jmodelica.ast.*;
  import java.io.*;
+ import java.util.Collection;
 :};
 
 %embed {:
 
-  class Events extends Parser.Events {
-  
-    public void syntaxError(Symbol token) {
-      StringBuffer s = new StringBuffer();
-      s.append("Syntax error at line "+ Symbol.getLine(token.getStart()) + ", column " + Symbol.getColumn(token.getStart()) + "\n");
-      if (token.value != null) {
-      	s.append("   Unexpected token: \"" + token.value + "\"");
-      } else if (token.getId()<Terminals.NAMES.length)
-        s.append("  Unexpected token: " + Terminals.NAMES[token.getId()]);
-      else 
-        s.append("  *** Syntactic error");
-      throw new Error(s.toString());
-     // System.out.println(s);
-     // System.exit(0);
-    }
-    
-    /*
-    public void scannerError(Scanner.Exception e) {
-      StringBuffer s = new StringBuffer();
-      s.append(e.line + ", " + e.column + "\n");
-      s.append("  *** Lexical error: " + e.getMessage());
-      //throw new Error(s.toString());
-      System.out.println(s);
-      
-    }*/
-  }
+	/**
+	 * Error reporting class that creates an error message and delegates reporting the 
+	 * message to a subclass.
+	 */
+	public abstract class Report extends Parser.Events {
 
-  {report = new Events();}  // Use error handler in parser
+		/**
+		 * Report an error with error message <code>msg</code>.
+		 */
+		protected abstract void report(String msg);
 
-	public void syntaxError(Symbol token, String errorMessage) {
-      StringBuffer s = new StringBuffer();
-      s.append(Symbol.getLine(token.getStart()) + ", " + Symbol.getColumn(token.getStart()) + "\n");
-        s.append("  *** Syntactic error: "+ errorMessage);
-      throw new Error(s.toString());
-    }
+		/**
+		 * Creates an error message for when <code>token</code> is found unexpectedly. 
+		 * Passes the error message to {@link #report(String)}.
+		 * @param token		the unexpected symbol.
+		 */
+		public void syntaxError(Symbol token) {
+			StringBuffer s = new StringBuffer();
+			s.append("Syntax error at line "+ Symbol.getLine(token.getStart()) + ", column " + Symbol.getColumn(token.getStart()) + "\n");
+			if (token.value != null) {
+				s.append("   Unexpected token: \"" + token.value + "\"");
+			} else if (token.getId()<Terminals.NAMES.length)
+				s.append("  Unexpected token: " + Terminals.NAMES[token.getId()]);
+			else 
+				s.append("  *** Syntactic error");
+			report(s.toString());
+		}
+
+		/**
+		 * Creates an error message for when the scanner throws an exception.
+		 * Passes the error message to {@link #report(String)}.
+		 * @param e		the exception.
+		 */
+		public void scannerError(Scanner.Exception e) {
+			StringBuffer s = new StringBuffer(e.getMessage());
+			s.append(" at line ");
+			s.append(e.line);
+			s.append(", column ");
+			s.append(e.column);
+			report(s.toString());
+		}
+		
+	}
+	
+	/**
+	 * An exception for compiler errors.
+	 */
+	public static class CompilerException extends java.lang.RuntimeException {
+
+		CompilerException(String msg) {
+			super(msg);
+		}
+		
+	}
+	
+	/**
+	 * Error reporting class that throws a {@link CompilerException} on an error.
+	 * Uses error message created by {@link Report}.
+	 */
+	public class AbortingReport extends Report {
+
+		/**
+		 * Throws a <code>CompilerException</code> with <code>msg</code> as the message.
+		 */
+		@Override
+		protected void report(String msg) {
+			throw new CompilerException(msg);
+		}
+		
+	}
+	
+	/**
+	 * Error reporting class that collects error messages for later retrieval.
+	 * Uses error message created by {@link Report}.
+	 */
+	public class CollectingReport extends Report {
+
+		private ArrayList<String> errors = new ArrayList<String>();
+
+		/**
+		 * Adds error message <code>msg</code> to list.
+		 */ 
+		@Override
+		protected void report(String msg) {
+			errors.add(msg);			
+		}
+		
+		/**
+		 * Get the list of errors. Returns a reference to the internal list, not a copy.
+		 * @return a {@link java.util.Collection} with the reported error messages.
+		 */
+		public Collection<String> getErrors() {
+			return errors;
+		}
+		
+		/**
+		 * Reset the list of errors.
+		 */
+		public void resetErrors() {
+			errors = new ArrayList<String>();
+		}
+		
+		/**
+		 * Checks if any errors has been reported.
+		 * @return <code>true</code> if the list contains any errors.
+		 */
+		public boolean hasErrors() {
+			return !errors.isEmpty();
+		}
+
+	}
+
+	{ report = new AbortingReport(); }  // As default, throw exception on errors.
+	
+	/**
+	 * Set the error reporting class to use.
+	 * @param report	a subclass of {@link Parser.Events} to use for reporting errors.
+	 */
+	public void setReport(Parser.Events report) {
+		this.report = report;
+	}
+	
+	public Parser.Events getReport() {
+		return report;
+	}
 
 	public SourceRoot parseFile(String fileName) {
 		SourceRoot sr = null;
@@ -135,8 +226,9 @@ Program program =
   ;
   
 StoredDefinition stored_definition =
-  within?  
-  base_class_decl_list                        {: return new StoredDefinition(within,base_class_decl_list); :}
+    within?  
+    base_class_decl_list                        {: return new StoredDefinition(within,base_class_decl_list); :}
+  | error										{: return new BadDefinition(); :} 
   ;
 
 Within within =
@@ -224,7 +316,8 @@ BaseClassDecl base_class_decl =
                                              class_modification,
                  							 string_comment,
                                              composition,
-                                             end); :}                      
+                                             end); :}  
+  | error		{: return new BadClassDecl(); :}      
   ;
 
 Partial partial = 
@@ -425,6 +518,7 @@ Element element =
                                                component_list,
                                                constraining_clause,comment); :}
   | annotation SEMICOLON                  {: return new ElementAnnotation(annotation); :} 
+  | error SEMICOLON						  {: return new BadElement(); :}
   ;
   
 ConstrainingClause constraining_clause = 
@@ -567,6 +661,7 @@ Argument argument =
    base_class_decl 
    constraining_clause? {:  ClassAccess pa = new ClassAccess(base_class_decl.getName().getID());
    							pa.setStart(base_class_decl.getName().getStart());
+   							pa.setEnd(base_class_decl.getName().getEnd());
    							base_class_decl.setConstrainingClauseOpt(constraining_clause);
    							base_class_decl.setReplaceable(replaceable);
    							ClassRedeclare cdr = new ClassRedeclare(each,
@@ -588,6 +683,7 @@ Argument argument =
    constraining_clause? 
    {: 			ParseAccess pa = new ParseAccess(comp_name.getID(),array_subscripts);
    				pa.setStart(comp_name.getStart());
+   				pa.setEnd(comp_name.getEnd());
    				PN_ComponentRedeclare cdr = new PN_ComponentRedeclare(each,
                                         final_,
                                         pa,
@@ -610,13 +706,14 @@ Argument argument =
    final_?  
    base_class_decl {: ClassAccess pa = new ClassAccess(base_class_decl.getName().getID());
                       pa.setStart(base_class_decl.getName().getStart());       
+                      pa.setEnd(base_class_decl.getName().getEnd());       
                       base_class_decl.setRedeclare(new Redeclare());
-   							pa.setStart(base_class_decl.getName().getStart());
-   							ClassRedeclare cdr = new ClassRedeclare(each,
-                                                      final_,
-                                                      pa,
-                                                      base_class_decl);
-                           return cdr; :}
+                      pa.setStart(base_class_decl.getName().getStart());
+                      ClassRedeclare cdr = new ClassRedeclare(each,
+                                                              final_,
+                                                              pa,
+                                                              base_class_decl);
+                      return cdr; :}
   |REDECLARE
    each? 
    final_? 
@@ -630,6 +727,7 @@ Argument argument =
    comment
    {: ParseAccess pa = new ParseAccess(comp_name.getID(),array_subscripts);
    				pa.setStart(comp_name.getStart());
+   				pa.setEnd(array_subscripts.getEnd());
    				PN_ComponentRedeclare cdr = new PN_ComponentRedeclare(each,
                                         final_,
                                         pa,
@@ -657,6 +755,7 @@ Argument argument =
                             base_class_decl.setReplaceable(replaceable);
                             ClassAccess ca = new ClassAccess(base_class_decl.getName().getID());
                             ca.setStart(base_class_decl.getName().getStart());
+                            ca.setEnd(base_class_decl.getName().getEnd());
                              return new  ClassRedeclare(each,
                                                          final_,
                                                          ca,
@@ -676,6 +775,7 @@ Argument argument =
    constraining_clause? 
    {:  ParseAccess pa = new ParseAccess(comp_name.getID(),array_subscripts);
        pa.setStart(comp_name.getStart());
+       pa.setEnd(comp_name.getEnd());
        PN_ComponentRedeclare cr = new PN_ComponentRedeclare(each,
                                         final_,
                                         pa,
@@ -693,7 +793,8 @@ Argument argument =
                                                                constraining_clause,
                                                                new Comment(new Opt(),new Opt()))); 
         return cr;                                                       
-                                                               :}                                                      
+                                                               :}
+   | error				{: return new BadArgument(); :}                                              
    ;
 
 
@@ -769,6 +870,7 @@ ForIndex for_index =
                                                               new Comment(new Opt(),new Opt())),
                                                               for_in_exp); 
                           f.setStart(id_decl.getStart()); 
+                          f.setEnd(for_in_exp.getEnd()); 
                           return f; :}
   ;
 
@@ -961,9 +1063,11 @@ Exp primary =
 FunctionCall function_call_simple =
   ID.id LPAREN function_arguments? RPAREN {: ParseAccess p = new ParseAccess(id,new Opt());
                                              p.setStart(function_arguments.getStart());
+                                             p.setEnd(function_arguments.getEnd());
                                              return new FunctionCall(p,function_arguments); :}
   |INITIAL LPAREN function_arguments? RPAREN {: ParseAccess p = new ParseAccess("initial",new Opt());
                                                 p.setStart(function_arguments.getStart());
+                                             	p.setEnd(function_arguments.getEnd());
                                                 return new FunctionCall(p,function_arguments); :}
   ;  
   

@@ -70,11 +70,7 @@ aspect Library {
 				
 				File[] allFiles = baseDir.listFiles();
 				if (allFiles==null) {
-					FullClassDecl fcd = new FullClassDecl();
-					fcd.setName(new IdDecl("_ErrorClassDecl_in_lib"));
-			 		StoredDefinition sd = new StoredDefinition(new Opt(), new List());
-					sd.addElement(fcd);
-                	return sd;
+                	return createErrorStoredDefenition();
 				} 
 				
 				boolean package_mo_present = false;
@@ -142,41 +138,39 @@ aspect Library {
 					sr.getProgram().getUnstructuredEntity(0).setElement(lcd,0);
 	   				return sr.getProgram().getUnstructuredEntity(0);
 	   			}
-	   		} catch (Error e){
-		    	System.out.println("In file: '"+ dirName+"/package.mo"+ "':");
+			} catch (ModelicaParser.CompilerException e) {
+				System.out.println("In file: '"+ dirName+"/package.mo"+ "':");
 				System.err.println(e.getMessage());
-		        FullClassDecl fcd = new FullClassDecl();
-				fcd.setName(new IdDecl("_ErrorClassDecl_in_lib"));
-				StoredDefinition sd = new StoredDefinition(new Opt(), new List());
-				sd.addElement(fcd);
-                return sd;		        
-	   		} catch (Exception e) {System.out.println(e.toString());
-	   		                       e.printStackTrace();
-	   		                       FullClassDecl fcd = new FullClassDecl();
-					               fcd.setName(new IdDecl("_ErrorClassDecl_in_lib"));
-				                   StoredDefinition sd = new StoredDefinition(new Opt(), new List());
-				                   sd.addElement(fcd);
-                                   return sd;		        
-	   		                       }			
+				return createErrorStoredDefenition();		        
+			} catch (Exception e) {
+				// No need, printStackTrace() prints string from toString() as well 
+//				System.out.println(e.toString());
+				e.printStackTrace();
+				return createErrorStoredDefenition();		        
+			}			
 		} else {
-		    try {
-		    System.out.println("Reading file: " + getFileName() + "...");
-			SourceRoot sr = root().modelicaParser().parseFile(getFileName());
-			for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
-				sd.setFileName(getFileName());
-			}
-			return sr.getProgram().getUnstructuredEntity(0);
-			}catch (Error e){
-		    	System.out.println("In file: '"+ getFileName()+ "':");
+			try {
+				System.out.println("Reading file: " + getFileName() + "...");
+				SourceRoot sr = root().modelicaParser().parseFile(getFileName());
+				for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
+					sd.setFileName(getFileName());
+				}
+				return sr.getProgram().getUnstructuredEntity(0);
+			} catch (ModelicaParser.CompilerException e) {
+				System.out.println("In file: '"+ getFileName()+ "':");
 				System.err.println(e.getMessage());
-		        FullClassDecl fcd = new FullClassDecl();
-				fcd.setName(new IdDecl("_ErrorClassDecl_in_lib"));
-				StoredDefinition sd = new StoredDefinition(new Opt(), new List());
-				sd.addElement(fcd);
-                return sd;		        
-                }
+				return createErrorStoredDefenition();		        
+			}
 		}
 		return null;
+	}
+	
+	private StoredDefinition LibNode.createErrorStoredDefenition() {
+		BadClassDecl bcd = new BadClassDecl();
+		bcd.setName(new IdDecl("_ErrorClassDecl_in_lib"));
+		StoredDefinition sd = new StoredDefinition(new Opt(), new List());
+		sd.addElement(bcd);
+		return sd;		        
 	}
 	
 	public LibClassDecl.LibClassDecl(FullClassDecl fcd) {

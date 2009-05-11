@@ -151,12 +151,14 @@ aspect InstModifications{
 		if (hasModification())
 			icm.setInstModification(getModification().newInstModification());
 		icm.setStart(getStart());
+		icm.setEnd(getEnd());
 		return icm;
 	}
 	public InstComponentRedeclare ComponentRedeclare.newInstModification() {
 	    // TODO: Can this component be redeclared?
 		InstComponentRedeclare icr = new InstComponentRedeclare(this,getName().newInstAccess());
 		icr.setStart(getStart());
+		icr.setEnd(getEnd());
 		return icr;
 	}
 	
@@ -167,6 +169,7 @@ aspect InstModifications{
 	public InstClassRedeclare ClassRedeclare.newInstModification() {
 		InstClassRedeclare icr = new InstClassRedeclare(this,getName().newInstAccess());
 		icr.setStart(getStart());
+		icr.setEnd(getEnd());
 		return icr;
 	}
 	
@@ -487,7 +490,9 @@ aspect InstanceTreeConstruction {
 		ArrayList<ClassDecl> classes = classes();
 		
 		for (ClassDecl cd : classes) {
-		    l.add(createInstClassDecl(cd));
+		    InstNode icd = createInstClassDecl(cd);
+		    if (icd != null)
+		    	l.add(icd);
 		}				
 		
 		return l;
@@ -567,6 +572,7 @@ aspect InstanceTreeConstruction {
 				icd.setInstModification(cd.getModification().newInstModification());
 			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
 			icd.setStart(cd.getStart());
+			icd.setEnd(cd.getEnd());
 			return icd;
 		} else {
 			InstPrimitive icd = new InstPrimitive(className.newInstAccess(),cd,new Opt(),new Opt());
@@ -574,6 +580,7 @@ aspect InstanceTreeConstruction {
 				icd.setInstModification(cd.getModification().newInstModification());
 			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
 			icd.setStart(cd.getStart());
+			icd.setEnd(cd.getEnd());
 			return icd;
 
 		}
@@ -585,6 +592,7 @@ aspect InstanceTreeConstruction {
 			ipr.setInstModification(cd.getModification().newInstModification());
 		ipr.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
 		ipr.setStart(cd.getStart());
+		ipr.setEnd(cd.getEnd());
 		return ipr;
 	}
 
@@ -603,6 +611,7 @@ aspect InstanceTreeConstruction {
 				icd.setInstModification(originalDecl.getModification().newInstModification());
 			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
 			icd.setStart(originalDecl.getStart());
+			icd.setEnd(originalDecl.getEnd());
 			return icd;
 		} else {
 			InstReplacingPrimitive icd = new InstReplacingPrimitive(replacingDecl.newInstClassAccess(),replacingDecl,new Opt(),new Opt(),originalDecl,icr);
@@ -610,6 +619,7 @@ aspect InstanceTreeConstruction {
 				icd.setInstModification(originalDecl.getModification().newInstModification());
 			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
 			icd.setStart(originalDecl.getStart());
+			icd.setEnd(originalDecl.getEnd());
 			return icd;
 
 		}
@@ -630,13 +640,15 @@ aspect InstanceTreeConstruction {
     	InstFullClassDecl fcd = new InstFullClassDecl(this,new Opt());
 	    fcd.setInstConstrainingOpt(newInstConstrainingClassOpt());
     	fcd.setStart(getStart());
-    	return fcd;
+    	fcd.setEnd(getEnd());
+   	return fcd;
     }
 
     public InstExtendClassDecl ExtendClassDecl.newInstClassDecl() {
     	InstExtendClassDecl ecd = new InstExtendClassDecl(this,new Opt());
 	    ecd.setInstConstrainingOpt(newInstConstrainingClassOpt());
     	ecd.setStart(getStart());
+       	ecd.setEnd(getEnd());
     	return ecd;
     }
 
@@ -644,6 +656,7 @@ aspect InstanceTreeConstruction {
     	InstShortClassDecl scd =  new InstShortClassDecl(this, new Opt());
 	    scd.setInstConstrainingOpt(newInstConstrainingClassOpt());    	
     	scd.setStart(getStart());
+    	scd.setEnd(getEnd());
     	return scd;
     }
     public InstPrimitiveClassDecl PrimitiveClassDecl.newInstClassDecl() {
@@ -658,13 +671,15 @@ aspect InstanceTreeConstruction {
     	InstReplacingFullClassDecl fcd = new InstReplacingFullClassDecl(replacingClass,new Opt(),this,icr);
 	    fcd.setInstConstrainingOpt(newInstConstrainingClassOpt()); //TODO: Should be constr clause of original or redeclared?
     	fcd.setStart(getStart());
+    	fcd.setEnd(getEnd());
     	return fcd;
     }
     public InstReplacingShortClassDecl ShortClassDecl.newInstReplacingClass(ClassDecl replacingClass,InstClassRedeclare icr) {
     	InstReplacingShortClassDecl scd =  new InstReplacingShortClassDecl(replacingClass, new Opt(),this,icr);
 	    scd.setInstConstrainingOpt(newInstConstrainingClassOpt());    	
     	scd.setStart(getStart());
-    	return scd;
+    	scd.setEnd(getEnd());
+   	return scd;
     }
     public InstReplacingFullClassDecl PrimitiveClassDecl.newInstReplacingClass(ClassDecl replacingClass,InstClassRedeclare icr) {
     	return new InstReplacingPrimitiveClassDecl(replacingClass, new Opt(),this,icr);
@@ -676,6 +691,7 @@ aspect InstanceTreeConstruction {
 		if (hasClassModification())
 			ie.setInstClassModification(getClassModification().newInstModification());
 		ie.setStart(getStart());
+		ie.setEnd(getEnd());
 		return ie;
 	}
 
@@ -684,6 +700,7 @@ aspect InstanceTreeConstruction {
 		if (hasClassModification())
 			ie.setInstClassModification(getClassModification().newInstModification());
 		ie.setStart(getStart());
+		ie.setEnd(getEnd());
 		return ie;
     }
 
@@ -695,11 +712,13 @@ aspect InstanceTreeConstruction {
 	public InstAccess Access.newInstAccess() {
 		InstAccess ia =  new InstParseAccess(getID());
 		ia.setStart(getStart());
+		ia.setEnd(getEnd());
 		return ia;
 	}
 	public InstAccess Dot.newInstAccess() {
 		InstAccess ia = new InstDot("",getLeft().newInstAccess(),getRight().newInstAccess());
 		ia.setStart(getStart());
+		ia.setEnd(getEnd());
 		return ia;
 	}	
 
@@ -804,6 +823,7 @@ aspect InstImportClauses {
     	for (ImportClause ic : imports()) {
     		InstImport iic = ic.newInstImport();
     		iic.setStart(ic.getStart());
+    		iic.setEnd(ic.getEnd());
     		l.add(iic);
     	}
     	return l;

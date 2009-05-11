@@ -115,6 +115,7 @@
  	     	                              ext_clause,
  	     	                              getEndName());
  	     	fc.setStart(getRestriction().getStart());
+ 	     	fc.setEnd(getEnd());
  	     	return fc;
  	  	}
    	}
@@ -130,6 +131,7 @@
  	   		                         getAnnotationOpt());
  	  	
  	  		e.setStart(getStart());
+ 	  		e.setEnd(getEnd());
  	  		return e;
  	  	}
    	}
@@ -161,7 +163,8 @@
  	     	                                        getConstrainingClauseOpt(),
  	     	                                        getComment());
  		 	c.setStart(getStart());
- 		 	//System.out.println("PN_ComponentClause->ComponentClause.getStart() = "+c.getStart());
+ 	  		c.setEnd(getEnd());
+		 	//System.out.println("PN_ComponentClause->ComponentClause.getStart() = "+c.getStart());
  		 	return c;
  		}
    	}
@@ -170,6 +173,7 @@
    		to ComponentRedeclare {
  	       ComponentRedeclare c = new ComponentRedeclare(getEachOpt(),getFinalOpt(), getName(), (ComponentDecl)getBaseComponentDecl());
  		   c.setStart(getStart());
+	  	   c.setEnd(getEnd());
  		   return c;
  		}
    	} 	
@@ -226,7 +230,8 @@
        					                                        (Opt)getConstrainingClauseOpt().fullCopy(),
        					                                        (Comment)getComment().fullCopy());
        					c.setStart(getStart());
-       					//System.out.println("ComponentClause->ComponentClause.getStart() = "+c.getStart());
+       		 	  		c.setEnd(getEnd());
+      					//System.out.println("ComponentClause->ComponentClause.getStart() = "+c.getStart());
        					l.add(c);
        				}
      			return l;
@@ -269,7 +274,8 @@
       			                                    getConstrainingClauseOpt(),
       			                                    getComment());
       			c.setStart(getName(0).getStart());
-      			//System.out.println("ComponentClause->ComponentDecl.getStart() = "+c.getStart());
+     	  		c.setEnd(getEnd());
+     			//System.out.println("ComponentClause->ComponentDecl.getStart() = "+c.getStart());
       			return c;
   			}
   	}
@@ -332,10 +338,14 @@
     				                               new Opt())),
     				                       new Opt());
     		e.getModification().setStart(getStart());
+    		e.getModification().setEnd(getEnd());
     		((CompleteModification)e.getModification()).getClassModification().setStart(getStart());
+    		((CompleteModification)e.getModification()).getClassModification().setEnd(getEnd());
     		ClassModification cm = ((CompleteModification)e.getModification()).getClassModification();
     		((ComponentModification)cm.getArgument(0)).getName().setStart(getStart());
+    		((ComponentModification)cm.getArgument(0)).getName().setEnd(getEnd());
     		e.setStart(getStart());
+ 	  		e.setEnd(getEnd());
     		return e;
     	}
     
@@ -351,6 +361,7 @@
 			SumRedExp sre = new SumRedExp(getFunctionArguments().getExp(0),
 			                              getFunctionArguments().getForIndex(0));
 			sre.setStart(getStart());
+ 	  		sre.setEnd(getEnd());
 			return sre;
 		}
 	}
@@ -368,6 +379,7 @@
 			                          getArraySubscriptsOpt(),
 			                          getComment());
 			ecsc.setStart(getStart());
+			ecsc.setEnd(getEnd());
 			ShortClassDecl scd = new ShortClassDecl((VisibilityType)ecsc.getVisibilityType().fullCopy(), 
 									  getEncapsulatedOpt(), 
 	                                  getPartialOpt(), 
@@ -383,6 +395,7 @@
                                       ecsc); 
 			                          
 		   scd.setStart(getStart());
+	  	   scd.setEnd(getEnd());
 		   return scd;
 		}
 	}
