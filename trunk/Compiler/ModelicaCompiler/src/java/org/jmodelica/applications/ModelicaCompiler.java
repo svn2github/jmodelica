@@ -213,7 +213,7 @@ public class ModelicaCompiler {
 	public static InstProgramRoot parseModel(String name, String cl) throws FileNotFoundException, IOException, Exception {
 
 		ModelicaParser parser = new ModelicaParser();
-		ModelicaParser.CollectingEvents report = new CollectingEvents();
+//		ModelicaParser.CollectingEvents report = new CollectingEvents();
 		Reader reader = new FileReader(name);
 		ModelicaScanner scanner = new ModelicaScanner(new BufferedReader(reader));
 

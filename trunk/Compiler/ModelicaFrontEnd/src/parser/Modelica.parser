@@ -31,7 +31,7 @@
 	 * Error reporting class that creates an error message and delegates reporting the 
 	 * message to a subclass.
 	 */
-	public static abstract class Report extends Parser.Events {
+	public abstract class Report extends Parser.Events {
 
 		/**
 		 * Report an error with error message <code>msg</code>.
@@ -74,7 +74,7 @@
 	/**
 	 * An exception for compiler errors.
 	 */
-	public static class CompilerException extends java.lang.RuntimeException {
+	public class CompilerException extends java.lang.RuntimeException {
 
 		CompilerException(String msg) {
 			super(msg);
