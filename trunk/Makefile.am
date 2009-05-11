@@ -37,6 +37,17 @@ install-exec-local:
 if HAVE_ANT
 	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar $(prefix)/lib/
 endif
+	mkdir $(prefix)/Makefiles
+	case $(build) in \
+	*-cygwin*) \
+	cp $(abs_top_srcdir)/JMI/MakeFiles/Makefile.windows $(prefix)/Makefiles/Makefile ;; \
+  	*-mingw*) \
+	cp $(abs_top_srcdir)/JMI/MakeFiles/Makefile.windows $(prefix)/Makefiles/MakeFile ;; \
+  	*-apple*) \
+	cp $(abs_top_srcdir)/JMI/MakeFiles/Makefile.macosx $(prefix)/Makefiles/MakeFile ;; \
+  	*) \
+	cp $(abs_top_srcdir)/JMI/MakeFiles/Makefile.linux $(prefix)/Makefiles/MakeFile ;; \
+	esac 
 
 clean-local: clean-jmi-examples clean-frontends
 
