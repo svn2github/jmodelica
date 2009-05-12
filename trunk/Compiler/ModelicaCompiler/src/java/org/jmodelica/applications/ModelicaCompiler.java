@@ -17,14 +17,17 @@
 package org.jmodelica.applications;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import org.jmodelica.ast.FClass;
 import org.jmodelica.ast.FlatRoot;
@@ -71,20 +74,23 @@ import beaver.Parser.Exception;
  *  The logs will be printed to standard out.
  *  
  *  
- *  For method (2), the compilation steps are divided into 3 tasks which can be used via the methods:
- *  1. parseModel (source code -> attributed source representation -> instance model)
- *  2. flattenModel (instance model -> flattened model)
- *  3. generateCode (flattened model -> c code and XML code)
+ *  For method (2), the compilation steps are divided into 4 tasks which can be used via the methods:
+ *  1. parseModel (source code -> attributed source representation)
+ *  2. instantiateModel (source representation -> instance model)
+ *  3. flattenModel (instance model -> flattened model)
+ *  4. generateCode (flattened model -> c code and XML code)
  *  
  *  They must be called in this order. Use provided methods to get/set logging level. 
  *  
  */
 public class ModelicaCompiler {
 
-	private static final Logger logger = Logger.getLogger("JModelica.ModelicaCompiler");
+//	private static final Logger logger = Logger.getLogger("JModelica.ModelicaCompiler");
+	private static final Logger logger = ModelicaLoggers.getConsoleLogger("JModelica.ModelicaCompiler");
 	public static final String INFO = "i";
 	public static final String WARNING = "w";
 	public static final String ERROR = "e";
+	public static final String INHERITED = "inh";
 	
 	
 	
@@ -148,7 +154,7 @@ public class ModelicaCompiler {
 	 * @return Log level setting for this class.
 	 */
 	public static String getLogLevel() {
-		return logger.getLevel().toString();
+		return logger.getLevel() != null ? logger.getLevel().toString():ModelicaCompiler.INHERITED;
 	}
 	
 	/**
@@ -163,12 +169,15 @@ public class ModelicaCompiler {
 	 * @param cTemplatefile The c template file (optional).
 	 */
 	public static void compileModel(String name, String cl, String xmlTemplatefile, String cTemplatefile) {
-		logger.info("Compiling model...");
+		logger.info("======= Compiling model =======");
 		
 		try {
-			// build tree
-			InstProgramRoot ipr = parseModel(name, cl);
+			// build source tree
+			SourceRoot sr = parseModel(name, cl);
 
+			// compute instance tree
+			InstProgramRoot ipr = instantiateModel(sr, cl);
+			
 			// flattening
 			FClass fc = flattenModel(name, cl, ipr);
 
@@ -194,24 +203,23 @@ public class ModelicaCompiler {
 			return;
 		}
 
+		logger.info("====== Model compiled successfully =======");
 	}
 
 	/**
 	 * 
-	 * Parses a model and returns a reference to the root of the instance tree. 
-	 * First the model source data is parsed and represented in a source tree. From
-	 * the source tree a model instance tree is computed. Some error checks such as 
-	 * type checking is performed when computing the model instance.
+	 * Parses a model and returns a reference to the root of the source tree. 
+	 * Options related to the compilation are also loaded here and added to the 
+	 * source tree representation.
 	 * 
 	 * @param name The name of the model file.
 	 * @param cl The name of the class in the model file to compile.
-	 * @return The root of the instance tree.
+	 * @return The root of the source tree.
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 * @throws Exception
 	 */
-	public static InstProgramRoot parseModel(String name, String cl) throws FileNotFoundException, IOException, Exception {
-
+	public static SourceRoot parseModel(String name, String cl) throws FileNotFoundException, IOException, Exception {
 		ModelicaParser parser = new ModelicaParser();
 //		ModelicaParser.CollectingEvents report = new CollectingEvents();
 		Reader reader = new FileReader(name);
@@ -225,20 +233,7 @@ public class ModelicaCompiler {
 			sd.setFileName(name);
 		}
 
-		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-
-		logger.info("Checking for errors...");
-		/*
-		 * This is very strange. If errorCheck() is run instead of
-		 * checkErrorsInClass(cl), we get incorrect results for
-		 * scripts/linux/flattenmm src/test/modelica/NameTests.mo
-		 * NameTests.ImportTest1 TODO: fix this!!!
-		 */
-
-		if (ipr.checkErrorsInInstClass(cl))
-			System.exit(0);
-
-		return ipr;
+		return sr;
 	}
 
 	/**
@@ -259,6 +254,32 @@ public class ModelicaCompiler {
 
 	}
 
+	/**
+	 * 
+	 * Computes a model instance tree from a source tree. Some error checks 
+	 * such as type checking is performed during the computation.
+	 * 
+	 * @param sr The reference to the model source root.
+	 * @param cl The name of the class in the model file to compile.
+	 * @return The root of the instance tree.
+	 */
+	public static InstProgramRoot instantiateModel(SourceRoot sr, String cl) {
+		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
+
+		logger.info("Checking for errors...");
+		/*
+		 * This is very strange. If errorCheck() is run instead of
+		 * checkErrorsInClass(cl), we get incorrect results for
+		 * scripts/linux/flattenmm src/test/modelica/NameTests.mo
+		 * NameTests.ImportTest1 TODO: fix this!!!
+		 */
+
+		if (ipr.checkErrorsInInstClass(cl))
+			System.exit(0);
+
+		return ipr;		
+	}
+	
 	/**
 	 * Computes the flattened model representation from the parsed instance model.
 	 * 
@@ -284,10 +305,11 @@ public class ModelicaCompiler {
 			System.exit(0);
 		}
 		if (ir == null) {
-			logger.severe("Error:\n Did not find the class: " + cl);
+//			logger.severe("Error:\n Did not find the class: " + cl);
 			System.exit(0);
 		}
 		
+		logger.info("Creating .mof file...");
 	    try{	
 	    	// Create file 
 	    	FileWriter fstream = new FileWriter(cl+".mof");
@@ -299,6 +321,8 @@ public class ModelicaCompiler {
 	    	System.err.println("Error: " + e.getMessage());
 	    }
 		
+	    logger.info("... .mof file created.");
+	    
 		if(getLogLevel().equals("INFO")) {
 			System.out.println(fc.diagnostics());
 			System.out.print(fc.prettyPrint(""));
@@ -329,5 +353,30 @@ public class ModelicaCompiler {
 		output = fc.name() + ".c";
 		cgenerator.generate(ctemplate, output);
 
+		logger.info("...code generated.");
+	}
+	
+	private static class ModelicaLoggers {
+
+		public static Logger getConsoleLogger(String name) {
+			Logger l = Logger.getLogger(name);
+			l.setUseParentHandlers(false);
+			ConsoleHandler ch = new ConsoleHandler();
+			ch.setFormatter(new ConsoleFormatter());
+			l.addHandler(ch);
+			l.setLevel(Level.INFO);
+			return l;
+		}
+	
+		private static class ConsoleFormatter extends SimpleFormatter {
+			public ConsoleFormatter() {
+				super();
+			}
+			@Override
+			public String format(LogRecord record) {
+				return record.getMessage()+"\n";
+			}
+		
+		}
 	}
 }
