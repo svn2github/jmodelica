@@ -34,7 +34,7 @@ Build instructions for the JModelica project.
     mkdir build
     cd build
     ../configure --with-cppad=/path/to/cppad-dist \
-      --with-ipopt=/path/to/ipopt-build-dir
+      --with-ipopt=/path/to/ipopt-install-dir
 
    The arguments --with-cppad and --with-ipopt are optional. Notice,
    however, that if they are not give, only parts of the software

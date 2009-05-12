@@ -40,16 +40,18 @@ endif
 	mkdir $(prefix)/Makefiles
 	case $(build) in \
 	*-cygwin*) \
-	cp $(abs_top_srcdir)/JMI/MakeFiles/Makefile.windows $(prefix)/Makefiles/Makefile ;; \
+	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(prefix)/Makefiles/Makefile ;; \
   	*-mingw*) \
-	cp $(abs_top_srcdir)/JMI/MakeFiles/Makefile.windows $(prefix)/Makefiles/MakeFile ;; \
+	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(prefix)/Makefiles/MakeFile ;; \
   	*-apple*) \
-	cp $(abs_top_srcdir)/JMI/MakeFiles/Makefile.macosx $(prefix)/Makefiles/MakeFile ;; \
+	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.macosx $(prefix)/Makefiles/MakeFile ;; \
   	*) \
-	cp $(abs_top_srcdir)/JMI/MakeFiles/Makefile.linux $(prefix)/Makefiles/MakeFile ;; \
-	esac 
-	cp options.xml $(prefix)/	
-	cp options.py $(prefix)/	
+	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.linux $(prefix)/Makefiles/MakeFile ;; \
+	esac
+	[ -e $(prefix)/Options ] && echo "Options directory exists "|| mkdir $(prefix)/Options
+	cp Options/options_tpl.xml $(prefix)/Options/options.xml
+	cp Options/options_tpl.py $(prefix)/Options/options.py
+
 
 clean-local: clean-jmi-examples clean-frontends
 
