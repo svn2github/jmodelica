@@ -23,6 +23,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Collection;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -40,6 +41,9 @@ import org.jmodelica.codegen.CGenerator;
 import org.jmodelica.codegen.XMLGenerator;
 import org.jmodelica.parser.ModelicaParser;
 import org.jmodelica.parser.ModelicaScanner;
+import org.jmodelica.ast.Problem;
+import org.jmodelica.ast.CompilerException;
+import org.jmodelica.ast.ModelicaClassNotFoundException;
 
 import beaver.Parser.Exception;
 
@@ -123,7 +127,35 @@ public class ModelicaCompiler {
 			ctempl = args[arg+3];
 		}
 		
-		compileModel(name, cl, xmltempl, ctempl);
+		try {
+			compileModel(name, cl, xmltempl, ctempl);
+		} catch  (ModelicaClassNotFoundException e){
+			logger.severe("Could not find the class "+ cl);
+			System.exit(0);
+		} catch (CompilerException ce) {
+			StringBuffer str = new StringBuffer();
+			str.append(ce.getProblems().size() + " errors found:\n");
+			for (Problem p : ce.getProblems()) {
+				str.append(p.toString()+"\n");
+			}
+			logger.severe(str.toString());
+			System.exit(0);
+		} catch (Error e) {
+			logger.severe("In file: '" + name + "':"+e.getMessage());
+			System.exit(0);
+		} catch (FileNotFoundException e) {
+			logger.severe("Could not find file: " + name);
+			System.exit(0);
+		} catch (IOException e) {
+			logger.severe(e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		} catch (Exception e) {
+			logger.severe(e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+
 	}	
 	
 	/**
@@ -168,41 +200,24 @@ public class ModelicaCompiler {
 	 * @param xmlTemplatefile The XML template file (optional).
 	 * @param cTemplatefile The c template file (optional).
 	 */
-	public static void compileModel(String name, String cl, String xmlTemplatefile, String cTemplatefile) {
+	public static void compileModel(String name, String cl, String xmlTemplatefile, String cTemplatefile) 
+	  throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, Exception {
 		logger.info("======= Compiling model =======");
 		
-		try {
-			// build source tree
-			SourceRoot sr = parseModel(name, cl);
+		// build source tree
+		SourceRoot sr = parseModel(name, cl);
 
-			// compute instance tree
-			InstProgramRoot ipr = instantiateModel(sr, cl);
+		// compute instance tree
+		InstProgramRoot ipr = instantiateModel(sr, cl);
 			
-			// flattening
-			FClass fc = flattenModel(name, cl, ipr);
+		// flattening
+		FClass fc = flattenModel(name, cl, ipr);
 
-			// Generate code?
-			if (xmlTemplatefile != null && cTemplatefile != null) {
-				generateCode(fc, xmlTemplatefile, cTemplatefile);
-			}
-
-		} catch (Error e) {
-			logger.severe("In file: '" + name + "':"+e.getMessage());
-			System.exit(1);
-
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			return;
-		} catch (IOException e) {
-			logger.severe(e.getMessage());
-			e.printStackTrace();
-			return;
-		} catch (Exception e) {
-			logger.severe(e.getMessage());
-			e.printStackTrace();
-			return;
+		// Generate code?
+		if (xmlTemplatefile != null && cTemplatefile != null) {
+			generateCode(fc, xmlTemplatefile, cTemplatefile);
 		}
-
+		
 		logger.info("====== Model compiled successfully =======");
 	}
 
@@ -219,14 +234,33 @@ public class ModelicaCompiler {
 	 * @throws IOException
 	 * @throws Exception
 	 */
-	public static SourceRoot parseModel(String name, String cl) throws FileNotFoundException, IOException, Exception {
+	public static SourceRoot parseModel(String name, String cl) 
+	  throws FileNotFoundException, IOException, Exception, CompilerException{
 		ModelicaParser parser = new ModelicaParser();
-//		ModelicaParser.CollectingEvents report = new CollectingEvents();
+//		ModelicaParser.CollectingReport report = new ModelicaParser.CollectingReport();
+//		parser.setReport(report);
 		Reader reader = new FileReader(name);
 		ModelicaScanner scanner = new ModelicaScanner(new BufferedReader(reader));
-
+	/*
+		if (report.hasErrors()) {
+			CompilerException ce = new CompilerException();
+			for (Problem p : report.getErrors()) {
+				ce.addProblem(p);
+			}
+			throw ce;
+		}
+		*/
 		logger.info("Parsing " + name + "...");
-		SourceRoot sr = (SourceRoot) parser.parse(scanner);
+		SourceRoot sr;
+		try {
+			sr = (SourceRoot) parser.parse(scanner);
+		} catch (ModelicaParser.ParserException e) {
+			e.getProblem().setFileName(name);
+			CompilerException ce = new CompilerException();
+			ce.addProblem(e.getProblem());
+			throw ce;
+		}
+
 		loadOptions(sr);
 
 		for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
@@ -234,24 +268,6 @@ public class ModelicaCompiler {
 		}
 
 		return sr;
-	}
-
-	/**
-	 * Loads the options provided, either hardcoded or from a file.
-	 * 
-	 * @param sr
-	 *            The source root belonging to the model for which the options
-	 *            should be set.
-	 */
-	private static void loadOptions(SourceRoot sr) {
-		logger.info("Loading options...");
-		
-		sr.options.addModelicaLibrary(
-						"Modelica",
-						"3.0.1",
-						"Z:\\jakesson\\projects\\ModelicaStandardLibrary\\ModelicaStandardLibrary_v3\\Modelica 3.0.1");
-		sr.options.setStringOption("default_msl_version", "3.0.1");
-
 	}
 
 	/**
@@ -263,20 +279,19 @@ public class ModelicaCompiler {
 	 * @param cl The name of the class in the model file to compile.
 	 * @return The root of the instance tree.
 	 */
-	public static InstProgramRoot instantiateModel(SourceRoot sr, String cl) {
+	public static InstProgramRoot instantiateModel(SourceRoot sr, String cl) throws ModelicaClassNotFoundException, CompilerException{
 		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 
 		logger.info("Checking for errors...");
-		/*
-		 * This is very strange. If errorCheck() is run instead of
-		 * checkErrorsInClass(cl), we get incorrect results for
-		 * scripts/linux/flattenmm src/test/modelica/NameTests.mo
-		 * NameTests.ImportTest1 TODO: fix this!!!
-		 */
-
-		if (ipr.checkErrorsInInstClass(cl))
-			System.exit(0);
-
+		Collection<Problem> problems = ipr.checkErrorsInInstClass(cl);
+		if (problems.size()>0) {
+			CompilerException ce = new CompilerException();
+			for (Problem p : problems) {
+				ce.addProblem(p);
+			}
+			throw ce;
+		}
+		
 		return ipr;		
 	}
 	
@@ -288,7 +303,8 @@ public class ModelicaCompiler {
 	 * @param ipr The reference to the instance tree root.
 	 * @return FClass object representing the flattened model.
 	 */
-	public static FClass flattenModel(String name, String cl, InstProgramRoot ipr) {
+	public static FClass flattenModel(String name, String cl, InstProgramRoot ipr) 
+		throws CompilerException, ModelicaClassNotFoundException, IOException {
 		FlatRoot flatRoot = new FlatRoot();
 		flatRoot.setFileName(name);
 		FClass fc = new FClass();
@@ -296,31 +312,27 @@ public class ModelicaCompiler {
 
 		logger.info("Flattening starts...");
 		
-		InstNode ir = ipr.findFlattenInst(cl, fc);
+		ipr.findFlattenInst(cl, fc);
 		
 		fc.transformCanonical();
 
-		boolean flatErr = fc.errorCheck();
-		if (flatErr) {
-			System.exit(0);
+		Collection<Problem> problems = fc.errorCheck();
+		if (problems.size()>0) {
+			CompilerException ce = new CompilerException();
+			for (Problem p : problems) {
+				ce.addProblem(p);
+			}
+			throw ce;
 		}
-		if (ir == null) {
-//			logger.severe("Error:\n Did not find the class: " + cl);
-			System.exit(0);
-		}
-		
+				
 		logger.info("Creating .mof file...");
-	    try{	
-	    	// Create file 
-	    	FileWriter fstream = new FileWriter(cl+".mof");
-	    	BufferedWriter out = new BufferedWriter(fstream);
-	    	out.write(fc.prettyPrint(""));
-	    	//Close the output stream
-	    	out.close();
-	    }catch (IOException e){//Catch exception if any
-	    	System.err.println("Error: " + e.getMessage());
-	    }
-		
+	    	    	// Create file 
+	   	FileWriter fstream = new FileWriter(cl+".mof");
+	   	BufferedWriter out = new BufferedWriter(fstream);
+	   	out.write(fc.prettyPrint(""));
+	   	//Close the output stream
+	   	out.close();
+	   
 	    logger.info("... .mof file created.");
 	    
 		if(getLogLevel().equals("INFO")) {
@@ -354,6 +366,24 @@ public class ModelicaCompiler {
 		cgenerator.generate(ctemplate, output);
 
 		logger.info("...code generated.");
+	}
+
+	/**
+	 * Loads the options provided, either hardcoded or from a file.
+	 * 
+	 * @param sr
+	 *            The source root belonging to the model for which the options
+	 *            should be set.
+	 */
+	private static void loadOptions(SourceRoot sr) {
+		logger.info("Loading options...");
+		
+		sr.options.addModelicaLibrary(
+						"Modelica",
+						"3.0.1",
+						"Z:\\jakesson\\projects\\ModelicaStandardLibrary\\ModelicaStandardLibrary_v3\\Modelica 3.0.1");
+		sr.options.setStringOption("default_msl_version", "3.0.1");
+
 	}
 	
 	private static class ModelicaLoggers {

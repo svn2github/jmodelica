@@ -65,7 +65,8 @@ end TransformCanonicalTests.TransformCanonicalTest2;
       JModelica.UnitTesting.ErrorTestCase(name="TransformCanonical3_Err",
                                                description="Test parameter sorting.",
                                                errorMessage=
-"In file '../ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+" 1 error found...
+In file '../ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 0, column 0:
   The model TransformCanonicalTests.TransformCanonicalTest3_Err contains cyclic parameter dependencies.
 
@@ -84,7 +85,8 @@ Semantic error at line 0, column 0:
       JModelica.UnitTesting.ErrorTestCase(name="TransformCanonical4_Err",
                                                description="Test parameter sorting.",
                                                errorMessage=
-"In file '../ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+" 1 error found...
+In file '../ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 0, column 0:
   The model TransformCanonicalTests.TransformCanonicalTest4_Err contains cyclic parameter dependencies.
 

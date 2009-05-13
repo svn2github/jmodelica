@@ -75,7 +75,7 @@ public class FlattenModel {
 		      System.out.println("Inst checking:");
 		      boolean instErr = false;
 //		      try {
-		      instErr = ipr.checkErrorsInInstClass(cl);
+		      instErr = ipr.checkErrorsInInstClass(cl).size()>0;
 //		      } catch(Exception e) {
 //		    	  e.printStackTrace();
 //		      }

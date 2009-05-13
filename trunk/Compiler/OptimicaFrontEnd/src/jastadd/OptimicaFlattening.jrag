@@ -27,7 +27,7 @@ aspect OptimicaFlattening {
     }
 	
 	// Check if the InstOptClassDecl matches the name of class to be flattened. 
-	public InstNode InstOptClassDecl.findFlattenInst(String className, FClass fc) {
+	public InstNode InstOptClassDecl.findFlattenInstRecursive(String className, FClass fc) {
 		FOptClass foc = (FOptClass)fc;
    		if (className.equals(qualifiedName())) {
   	 		foc.setFQName(new FQName(qualifiedName())); 
@@ -58,7 +58,7 @@ aspect OptimicaFlattening {
 			}
 			return this;	
    		} else {
-  			return super.findFlattenInst(className,fc);
+  			return super.findFlattenInstRecursive(className,fc);
    		}  	
 	}	
 	

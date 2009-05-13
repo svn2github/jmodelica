@@ -60,7 +60,7 @@ public class FlatAnalyzer {
 
 
 		      
-		      if (ipr.checkErrorsInInstClass(cl)) {
+		      if (ipr.checkErrorsInInstClass(cl).size()>0) {
 	    		  System.exit(0);
 	    	  }
 		      

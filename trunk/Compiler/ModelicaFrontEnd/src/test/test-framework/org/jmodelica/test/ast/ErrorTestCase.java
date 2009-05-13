@@ -23,6 +23,7 @@ import org.jmodelica.ast.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Collection;
 
 /**
  * @author jakesson
@@ -107,7 +108,17 @@ public class ErrorTestCase extends TestCase {
 		sr.setFileName(getSourceFileName());	    
 		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 	    StringBuffer str = new StringBuffer();
-	    if (ipr.checkErrorsInInstClass(getClassName(),str)) {
+	    Collection<Problem> problems;
+	    try {
+	    	problems = ipr.checkErrorsInInstClass(getClassName());
+	    } catch (ModelicaClassNotFoundException e) {
+	    	return false;
+	    }
+	    if (problems.size()>0) {
+	    	str.append("Errors found!\n");
+	    	for (Problem p : problems) {
+	    		str.append(p.toString()+"\n");
+	    	}
 	    	String testErrorMsg = filterErrorMessages(str.toString());
 	    	String correctErrorMsg = filterErrorMessages(getErrorMessage());
 //	    	System.out.println("**** " +getClassName());
@@ -124,50 +135,26 @@ public class ErrorTestCase extends TestCase {
 	    flatRoot.setFileName(getSourceFileName());
 	    FClass fc = new FClass();
 	    flatRoot.setFClass(fc);
-	    ipr.findFlattenInst(getClassName(),fc);
-	    fc.transformCanonical();
-	    StringBuffer str_flat = new StringBuffer();
-	    if (fc.errorCheck(str_flat)) {
-	    	String testErrorMsg = filterErrorMessages(str_flat.toString());
-	    	String correctErrorMsg = filterErrorMessages(getErrorMessage());
-			if (testErrorMsg.equals(correctErrorMsg))
-	    		return true;
+	    try {
+	    	ipr.findFlattenInst(getClassName(),fc);
+	    	fc.transformCanonical();
+	    	StringBuffer str_flat = new StringBuffer();
+	    	problems = fc.errorCheck();
+	    	if (problems.size()>0) {
+//	    		str.append("Errors found!\n");
+	    		for (Problem p : problems) {
+	    			str_flat.append(p.toString()+"\n");
+	    		}
+	    		String testErrorMsg = filterErrorMessages(str_flat.toString());
+	    		String correctErrorMsg = filterErrorMessages(getErrorMessage());
+	    		if (testErrorMsg.equals(correctErrorMsg))
+	    			return true;
+	    	}
+	    } catch (Exception e) {
+	    	return false;
 	    }
 	    
-/*	    
-	    if (sr.checkErrorsInClass(getClassName(),str)) {
-	    	String testErrorMsg = filterErrorMessages(str.toString());
-	    	String correctErrorMsg = filterErrorMessages(getErrorMessage());
-			if (testErrorMsg.equals(correctErrorMsg))
-	    		return true;
-	    }
-	
-	  FClass fc = new FClass();  
-	  InstNode ir = sr.findFlatten(getClassName(),fc);
-  	  if (ir.errorCheck(str)) {
-	    	String testErrorMsg = filterErrorMessages(str.toString());
-	    	String correctErrorMsg = filterErrorMessages(getErrorMessage());
-	    	if (testErrorMsg.equals(correctErrorMsg))
-	    		return true;
-  	  }
-*/	    
-		/*
-		ErrorManager errM = new ErrorManager();
-	    //System.out.println(sr.checkErrors(getClassName(),errM));
-	    //System.out.println(getClassName());
-	    //StringBuffer str0 = new StringBuffer();
-	    //sr.dumpTree("");
-	    if (!sr.checkErrors(getClassName(),errM))
-	    	return false;
-	    if (errM.getNumErrors()==0)
-	    	return false;
-	    */
-	    //StringBuffer str = new StringBuffer();
-	    //errM.printErrors(str);
-	    //System.out.println(str.toString());
-	    //System.out.println(errorMessage);
-	    //if (!errorMessage.equals(str.toString()))
-	    //	return false;
+	    
 	    return false;
 	    		
 		

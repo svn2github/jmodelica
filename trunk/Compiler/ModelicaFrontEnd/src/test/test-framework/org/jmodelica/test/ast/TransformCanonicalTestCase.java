@@ -19,6 +19,7 @@ package org.jmodelica.test.ast;
 import org.jmodelica.parser.ModelicaParser;
 import org.jmodelica.parser.FlatModelicaParser;
 import org.jmodelica.ast.*;
+import java.util.Collection;
 
 /**
  * @author jakesson
@@ -116,7 +117,13 @@ public class TransformCanonicalTestCase extends TestCase {
 		SourceRoot sr = parser.parseFile(getSourceFileName());
 		sr.setFileName(getSourceFileName());
 	    InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-	    if (ipr.checkErrorsInInstClass(getClassName())) {
+	    Collection<Problem> problems;
+	    try {
+	    	problems = ipr.checkErrorsInInstClass(getClassName());
+	    } catch (ModelicaClassNotFoundException e){
+	    	return false;
+	    }
+	    if (problems.size()>0) {
 	    	//System.out.println("***** Errors in Class!");
 	    	return false;
 	    }
@@ -136,27 +143,14 @@ public class TransformCanonicalTestCase extends TestCase {
 	    flatRoot.setFClass(fc);
 	    
 		//FClass fc = new FClass();
-	    InstNode ir = ipr.findFlattenInst(getClassName(), fc);
-	    
-	    
-	    
-   	  	if (ir==null) {
-   		    return false;
-   	    }
-   	    
-//   	  	StringBuffer str = new StringBuffer();
-//   	    if (ir.errorCheck(str)) {
-//   	    	System.out.println(getClassName());
-//   		    System.out.println(str.toString());
-//   	    	return false;
-//   	    }
-		//if (fc.errorCheck()) {
-	    	//System.out.println("***** Errors in Class!");
-	    //	return false;			
-		//}
-		//System.out.println(fc.prettyPrint(""));
-		//System.out.println(getFlatModel());
-   	  	fc.transformCanonical();
+	    InstNode ir;
+	    try {
+	    	ir= ipr.findFlattenInst(getClassName(), fc);
+	    } catch (ModelicaClassNotFoundException e) {
+	    	return false;
+	    }
+
+	    fc.transformCanonical();
 		TokenTester tt = new TokenTester();
 		String testModel = fc.prettyPrint("");
 		String correctModel = getFlatModel();

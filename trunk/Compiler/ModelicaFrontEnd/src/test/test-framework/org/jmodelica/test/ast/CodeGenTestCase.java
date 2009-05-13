@@ -119,11 +119,15 @@ public abstract class CodeGenTestCase extends TestCase {
 		SourceRoot sr = parser.parseFile(getSourceFileName());
 		sr.setFileName(getSourceFileName());
 	    InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-	    if (ipr.checkErrorsInInstClass(getClassName())) {
-	    	//System.out.println("***** Errors in Class!");
+	    
+	    try {
+	    	if (ipr.checkErrorsInInstClass(getClassName()).size()>0) {
+	    		//System.out.println("***** Errors in Class!");
+	    		return false;
+	    	} 
+	    }catch (ModelicaClassNotFoundException e) {
 	    	return false;
 	    }
-
 	    
 	    //sr.retrieveFullClassDecl("NameTests.ImportTest1").dumpTree("");
 /*
@@ -139,19 +143,18 @@ public abstract class CodeGenTestCase extends TestCase {
 	    flatRoot.setFClass(fc);
 	    
 		//FClass fc = new FClass();
-	    InstNode ir = ipr.findFlattenInst(getClassName(), fc);
-   	  	if (ir==null) {
-   		    return false;
-   	    }
+	    InstNode ir;
+	    try {
+	    	ir = ipr.findFlattenInst(getClassName(), fc);
+	    } catch (ModelicaClassNotFoundException e) {
+	    	return false;
+	    }
    	  	fc.transformCanonical();
    	  	// Assume that result and template is not on file.
   	    StringOutputStream os = new StringOutputStream();
   	    AbstractGenerator generator = createGenerator(fc);
 	    generator.generate(new BufferedReader(new StringReader(getTemplate())),
 	    		           new PrintStream(os));
-
-   	  	System.out.println("**"+getGenCode().trim()+"**");
-   	  	System.out.println("**"+os.toString().trim()+"**");
 	    
 		return os.toString().trim().equals(getGenCode().trim());
 	}

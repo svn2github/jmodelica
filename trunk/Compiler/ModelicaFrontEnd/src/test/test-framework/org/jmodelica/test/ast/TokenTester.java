@@ -97,7 +97,12 @@ public class TokenTester {
 		} catch (Exception e) {e.printStackTrace();}
 		
 		FClass fc1 = new FClass();
-		InstNode ir = ipr.findFlattenInst(cName,fc1);
+		InstNode ir;
+		try {
+			ir = ipr.findFlattenInst(cName,fc1);
+		} catch (ModelicaClassNotFoundException e) {
+			System.exit(0);
+		}
 		sr.setFileName(moFile);
 		
 		StringBuffer fm1_str = new StringBuffer();

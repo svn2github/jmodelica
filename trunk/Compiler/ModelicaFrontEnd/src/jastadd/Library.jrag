@@ -138,7 +138,7 @@ aspect Library {
 					sr.getProgram().getUnstructuredEntity(0).setElement(lcd,0);
 	   				return sr.getProgram().getUnstructuredEntity(0);
 	   			}
-			} catch (ModelicaParser.CompilerException e) {
+			} catch (ModelicaParser.ParserException e) {
 				System.out.println("In file: '"+ dirName+"/package.mo"+ "':");
 				System.err.println(e.getMessage());
 				return createErrorStoredDefenition();		        
@@ -156,7 +156,7 @@ aspect Library {
 					sd.setFileName(getFileName());
 				}
 				return sr.getProgram().getUnstructuredEntity(0);
-			} catch (ModelicaParser.CompilerException e) {
+			} catch (ModelicaParser.ParserException e) {
 				System.out.println("In file: '"+ getFileName()+ "':");
 				System.err.println(e.getMessage());
 				return createErrorStoredDefenition();		        

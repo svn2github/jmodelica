@@ -23,7 +23,22 @@ aspect TestFramework_XML {
 				ftc.setSourceFileName(root().fileName());
 				ftc.setClassName(enclosingClassDecl().qualifiedName());
 				ts.add(ftc);
-			} else if (name.equals("JModelica.UnitTesting.GenericCodeGenTestCase")) {
+			} else if (name.equals("JModelica.UnitTesting.TransformCanonicalTestCase")) {
+				TransformCanonicalTestCase tctc = new TransformCanonicalTestCase();
+				for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
+					NamedArgument na = getFunctionArguments().getNamedArgument(i);
+					if (na.getName().name().equals("name"))
+						tctc.setName(((StringLitExp)na.getExp()).getSTRING());
+					else if (na.getName().name().equals("description"))
+						tctc.setDescription(((StringLitExp)na.getExp()).getSTRING());	
+					else if (na.getName().name().equals("flatModel"))
+						tctc.setFlatModel((((StringLitExp)na.getExp()).getSTRING()).replace("\\\"","\""));		
+						//ftc.setFlatModel((((StringLitExp)na.getExp()).getSTRING()));		
+				}
+				tctc.setSourceFileName(root().fileName());
+				tctc.setClassName(enclosingClassDecl().qualifiedName());
+				ts.add(tctc);
+		}else if (name.equals("JModelica.UnitTesting.GenericCodeGenTestCase")) {
 				GenericCodeGenTestCase cgtc = new GenericCodeGenTestCase();
 				for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
 					NamedArgument na = getFunctionArguments().getNamedArgument(i);
@@ -83,6 +98,7 @@ aspect TestFramework_XML {
 				getExp().collectTestCasesFC("JModelica.UnitTesting.ErrorTestCase",ts);
 				getExp().collectTestCasesFC("JModelica.UnitTesting.GenericCodeGenTestCase",ts);
 				getExp().collectTestCasesFC("JModelica.UnitTesting.XMLCodeGenTestCase",ts);
+				getExp().collectTestCasesFC("JModelica.UnitTesting.TransformCanonicalTestCase",ts);
 			}
 		}
 	

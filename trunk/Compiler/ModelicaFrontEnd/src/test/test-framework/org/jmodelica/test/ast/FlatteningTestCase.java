@@ -19,6 +19,7 @@ package org.jmodelica.test.ast;
 import org.jmodelica.parser.ModelicaParser;
 import org.jmodelica.parser.FlatModelicaParser;
 import org.jmodelica.ast.*;
+import java.util.Collection;
 
 /**
  * @author jakesson
@@ -115,60 +116,33 @@ public class FlatteningTestCase extends TestCase {
         System.out.println("Running test: " + getClassName());
 		SourceRoot sr = parser.parseFile(getSourceFileName());
 		sr.setFileName(getSourceFileName());
-	    InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-	    if (ipr.checkErrorsInInstClass(getClassName())) {
+		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
+		Collection<Problem> problems;
+		try {
+			problems = ipr.checkErrorsInInstClass(getClassName());
+		} catch (ModelicaClassNotFoundException e) {
+			return false;
+		}
+	    if (problems.size()>0) {
 	    	//System.out.println("***** Errors in Class!");
 	    	return false;
-	    }
-
-	    
-	    //sr.retrieveFullClassDecl("NameTests.ImportTest1").dumpTree("");
-/*
-	    if (sr.checkErrorsInClass(getClassName())) {
-	    	//System.out.println("***** Errors in Class!");
-	    	return false;
-	    }
-*/
-	    
+	    }	    
 	    FlatRoot flatRoot = new FlatRoot();
 	    flatRoot.setFileName(getSourceFileName());
 	    FClass fc = new FClass();
 	    flatRoot.setFClass(fc);
 	    
-		//FClass fc = new FClass();
-	    InstNode ir = ipr.findFlattenInst(getClassName(), fc);
-	    
-	    
-	    
-   	  	if (ir==null) {
-   		    return false;
-   	    }
-   	    
-//   	  	StringBuffer str = new StringBuffer();
-//   	    if (ir.errorCheck(str)) {
-//   	    	System.out.println(getClassName());
-//   		    System.out.println(str.toString());
-//   	    	return false;
-//   	    }
-		//if (fc.errorCheck()) {
-	    	//System.out.println("***** Errors in Class!");
-	    //	return false;			
-		//}
-		//System.out.println(fc.prettyPrint(""));
-		//System.out.println(getFlatModel());
-		TokenTester tt = new TokenTester();
+	    InstNode ir;
+	    try {
+	    	ir = ipr.findFlattenInst(getClassName(), fc);
+	    } catch (ModelicaClassNotFoundException e) {
+	    	return false;
+	    }
+	 	TokenTester tt = new TokenTester();
 		String testModel = fc.prettyPrint("");
 		String correctModel = getFlatModel();
 		
 		boolean result =  tt.test(testModel,correctModel);
-		/*if (!result) {
-			System.out.println(fc.prettyPrint("").equals(getFlatModel()));
-			sr.retrieveFullClassDecl("NameTests.ImportTest1").dumpTree("");
-			fc.dumpTreeBasic("");
-			try {
-     			System.in.read();
-			} catch (Exception e){}
-		}*/
 		return result;
 	}
 	

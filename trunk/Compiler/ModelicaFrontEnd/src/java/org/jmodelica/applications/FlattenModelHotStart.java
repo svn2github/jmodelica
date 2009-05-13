@@ -65,7 +65,7 @@ public class FlattenModelHotStart{
 
 		      InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 		      System.out.println("Checking for errors...");	      
-		      if (ipr.checkErrorsInInstClass(cl)) {
+		      if (ipr.checkErrorsInInstClass(cl).size()>0) {
 	    		  System.exit(0);
 	    	  }
 		      
@@ -127,7 +127,7 @@ public class FlattenModelHotStart{
 			      long parseTime2 = System.currentTimeMillis();
 			      
 			      System.out.println("Checking for errors...");	      
-		    	  if (sr.errorCheck()) {
+		    	  if (sr.errorCheck().size()>0) {
 		    		  System.exit(0);
 		    	  }
 			      
@@ -145,7 +145,7 @@ public class FlattenModelHotStart{
 			    		  System.exit(0);
 			    	  }
 		    	  System.out.println("Checking for errors...");	      
-		    	  if (fc2.errorCheck()) {
+		    	  if (fc2.errorCheck().size()>0) {
 		    		  System.exit(0);
 		    	  }		    	  		    	 
 			    	  instTime2 = System.currentTimeMillis();

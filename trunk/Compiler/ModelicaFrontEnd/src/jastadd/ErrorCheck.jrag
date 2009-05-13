@@ -87,14 +87,79 @@ import java.util.ArrayList;
     public String toString() {
       String s = "";
       String lineData = "at line "+beginLine+", column "+beginColumn+":\n";
-      if(this.kind == Kind.LEXICAL)
+      if(this.kind == Kind.LEXICAL) {
         s = "Lexical error "+lineData;
-      else if(this.kind == Kind.SYNTACTIC)
+      } else if(this.kind == Kind.SYNTACTIC) {
         s = "Syntactic error "+lineData;
-      else if(this.kind == Kind.SEMANTIC)
+      } else if(this.kind == Kind.SEMANTIC) {
         s = "Semantic error "+lineData;
-      return "In file '"+fileName + "':\n" + s +"  "+ message;
-    }
+      }
+      
+      if (this.severity == severity.ERROR) {
+    	  return "Error: in file '"+fileName + "':\n" + s +"  "+ message;
+      } else {
+    	  return "Warning: in file '"+fileName + "':\n" + s +"  "+ message;
+      }
+     }
+  }
+  
+  
+  /**
+   * Exception containing a list of compiler errors/warnings. 
+   */
+  public class CompilerException extends Exception {
+	  private ArrayList<Problem> problems;
+	  
+	  /**
+	   * Default constructor.
+	   */
+	  public CompilerException() {
+		  problems = new ArrayList<Problem>();
+	  }
+	  
+	  /**
+	   * Add a new problem.
+	   */
+	  public void addProblem(Problem p) {
+		  problems.add(p);
+	  }
+	  
+	  /**
+	   * Get the list of problems.
+	   */
+	  public ArrayList<Problem> getProblems() {
+		  return problems;
+	  }
+
+	  /**
+	   * Convert to string.
+	   */
+	  public String toString() {
+		  StringBuffer str = new StringBuffer();
+		  str.append(problems.size() + " problems found:\n");
+		  for(Iterator iter = problems.iterator(); iter.hasNext(); ) {
+			  Problem problem = (Problem) iter.next();
+			  str.append(problem+"\n");
+		  }
+		  return str.toString();
+	  }
+  }
+  
+  /**
+   * Exception to be thrown when the Modelica class to instantiate is not
+   * found.
+   */
+  public class ModelicaClassNotFoundException extends Exception{
+	  private String className;
+	  
+	  public ModelicaClassNotFoundException(String className) {
+		  this.className = className;
+	  }
+	  
+	  public String getClassName() {
+		  return className;
+	  }
+	  
   }
   
   /**
@@ -215,12 +280,18 @@ aspect ErrorCheck {
   }
 
 
-  public boolean ASTNode.errorCheck(StringBuffer str) {
+  public Collection<Problem> ASTNode.errorCheck(){
     ArrayList allErrors = root().errors;
     ArrayList allWarnings = root().warnings;
     collectErrors();  
     java.util.Collections.sort(allErrors);
     java.util.Collections.sort(allWarnings);
+    
+    ArrayList<Problem> problems = new ArrayList<Problem>();
+    problems.addAll(allWarnings);
+    problems.addAll(allErrors);
+    
+    /*
     if (!allWarnings.isEmpty()) {
     	str.append("\n");        	
     	str.append("Warnings:\n");    
@@ -237,17 +308,19 @@ aspect ErrorCheck {
       Problem problem = (Problem)iter.next();
       str.append(problem+"\n");
     }
+    */
     
-    return true;
+    return problems;
   }
   
+  /*
   public boolean ASTNode.errorCheck() {
  	StringBuffer str = new StringBuffer();
  	boolean errors = errorCheck(str);
  	System.out.println(str.toString());
  	return errors;
   }
-
+*/
 
  
     syn lazy FullClassDecl ASTNode.retrieveFullClassDecl(String className) {
@@ -268,26 +341,14 @@ aspect ErrorCheck {
 
 	/* We don't want to error check an entire model, just the classes
 	   that are used. */
-	public boolean SourceRoot.checkErrorsInClass(String className) {
+	public Collection<Problem> SourceRoot.checkErrorsInClass(String className) throws ModelicaClassNotFoundException {
 		FullClassDecl fcd = retrieveFullClassDecl(className);
 		if (fcd == null) {
-			System.out.println("Class "+ className + "not found");
-			return false;
+			throw new ModelicaClassNotFoundException("Class "+ className + "not found");
 		} else
 			return fcd.errorCheck();
 	}
 
-	public boolean SourceRoot.checkErrorsInClass(String className,StringBuffer errorString) {
-		FullClassDecl fcd = retrieveFullClassDecl(className);
-		if (fcd == null) {
-			System.out.println("Class "+ className + " not found");
-			return true;
-		} else
-			return fcd.errorCheck(errorString);
-	}
-
-
-	
 	boolean FullClassDecl.errorChecked = false;
   	public void FullClassDecl.collectErrors() {
     	debugPrint("ErrorChecking: " + qualifiedName());
@@ -348,25 +409,12 @@ aspect InstanceErrorCheck {
 
 	// We don't want to error check an entire model, just the classes
 	//   that are used. 
-	public boolean InstProgramRoot.checkErrorsInInstClass(String className) {
+	public Collection<Problem> InstProgramRoot.checkErrorsInInstClass(String className) throws ModelicaClassNotFoundException{
 		InstFullClassDecl fcd = retrieveInstFullClassDecl(className);
 		if (fcd == null) {
-			System.out.println("Class "+ className + " not found");
-			return true;
+			throw new ModelicaClassNotFoundException("Class "+ className + " not found");
 		} else {
-			debugPrint("Class "+ className + " found!");
 			return fcd.errorCheck();
-		}
-	}
-
-	public boolean InstProgramRoot.checkErrorsInInstClass(String className,StringBuffer errorString) {
-		InstFullClassDecl fcd = retrieveInstFullClassDecl(className);
-		if (fcd == null) {
-			System.out.println("Class "+ className + " not found");
-			return false;
-		} else {
-		    debugPrint("Class "+ className + " found!");
-			return fcd.errorCheck(errorString);
 		}
 	}
 

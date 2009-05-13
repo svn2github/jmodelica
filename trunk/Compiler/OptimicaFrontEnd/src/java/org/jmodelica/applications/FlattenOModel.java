@@ -19,6 +19,7 @@ import org.jmodelica.ast.*;
 
 import java.io.*;
 import org.jmodelica.parser.*;
+import java.util.Collection;
 
 public class FlattenOModel {
 	
@@ -93,8 +94,8 @@ public class FlattenOModel {
 		      System.out.println("Checking for errors...");	   
 		      System.out.println("Inst checking:");
 		      try {
-		      boolean instErr = ipr.checkErrorsInInstClass(cl);
-		      if (instErr) {
+		      Collection<Problem> problems = ipr.checkErrorsInInstClass(cl);
+		      if (problems.size()>0) {
 		    	  System.exit(0);
 		      }
 

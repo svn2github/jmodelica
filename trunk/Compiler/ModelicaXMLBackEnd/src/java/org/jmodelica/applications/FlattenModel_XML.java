@@ -20,6 +20,7 @@ import org.jmodelica.ast.*;
 import java.io.*;
 import org.jmodelica.parser.*;
 import org.jmodelica.codegen.XMLGenerator;
+import java.util.Collection;
 
 public class FlattenModel_XML {
 	
@@ -73,7 +74,7 @@ public class FlattenModel_XML {
 		      
 		      System.out.println("Inst checking:");
 		      try {
-		      boolean instErr = ipr.checkErrorsInInstClass(cl);
+		    	  Collection<Problem> problems = ipr.checkErrorsInInstClass(cl);
 		      } catch(Exception e) {
 		    	  e.printStackTrace();
 		      }

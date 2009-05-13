@@ -73,7 +73,7 @@ public class FlattenModel_C {
 		      
 		      System.out.println("Inst checking:");
 		      try {
-		      boolean instErr = ipr.checkErrorsInInstClass(cl);
+		      boolean instErr = ipr.checkErrorsInInstClass(cl).size()>0;
 		      } catch(Exception e) {
 		    	  e.printStackTrace();
 		      }
