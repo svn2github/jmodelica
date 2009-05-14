@@ -128,6 +128,7 @@ public class FlattenOModel {
 		    	  fc.dumpTree("");
 		    	  System.out.println(fc.prettyPrint(""));
 		    	  System.out.println(str.toString());
+		    	  System.out.println(fc.diagnostics());
 		    	  printTime = System.currentTimeMillis();
 
 		

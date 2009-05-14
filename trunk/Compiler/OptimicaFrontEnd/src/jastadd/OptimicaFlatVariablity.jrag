@@ -1,0 +1,60 @@
+
+/**
+ * This aspect introduces a new type of variability: timed. An expression has 
+ * timed variability if it is composed of parameters, literals and timed
+ * variables but no continuous or discrete variables.
+ */
+aspect OptimicaFlatVariability {
+
+	syn boolean FTypePrefixOther.timedVariability() = false;
+	eq FTimed.timedVariability() = true;	
+
+	syn boolean FExp.isTimedExp() = variability().timedVariability();
+
+	eq FTimedVariable.variability() = fTimed();
+	eq FStartTimeExp.variability() = fParameter();
+	eq FFinalTimeExp.variability() = fParameter();
+	
+	public static final FTimed FTimed.singleton = new FTimed();	
+
+	public static FTimed ASTNode.fTimed() {
+		return FTimed.singleton;
+	}
+
+   	refine FlatVariability public FTypePrefixOther FTypePrefixOther.combine(FTypePrefixOther other) {   			
+   		if (this instanceof FContinuous) {
+   			return this;
+   		} else if (other instanceof FContinuous) {
+   			return other;
+   		// neither is a continuous variable
+   		} else if (this instanceof FDiscrete) {
+   			return this;
+   		} else if (other instanceof FDiscrete) {
+   			return other;
+   	   		// neither is a continuous variable or discrete variable   			
+   		} else if (this instanceof FTimed) {
+   			return this;
+   		} else if (other instanceof FTimed) {
+   			return other;
+   		} else if (this instanceof FParameter) {
+   			return this;
+   		} else if (other instanceof FParameter) {
+   			return other;
+   		// neither is a continuous variable, discrete variable, or a parameter value
+   		} else {
+   			return this;
+   		}
+	}	
+
+   	eq FTimed.toString() = "timed";
+	
+	syn boolean FConstraint.isTimed() = 
+		(getRight().isTimedExp() | getRight().isParameterExp() | getRight().isConstantExp()) & 
+		(getLeft().isTimedExp() | getLeft().isParameterExp() | getLeft().isConstantExp());
+
+	syn boolean FConstraint.isParameter() = 
+		(getRight().isParameterExp() | getRight().isConstantExp()) & 
+		(getLeft().isParameterExp() | getLeft().isConstantExp());
+
+	
+}

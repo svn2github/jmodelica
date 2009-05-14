@@ -36,7 +36,7 @@ aspect FlatNameBinding {
 		return null;
 	}
 
-	eq FClass.getFVariable(int index).lookupFV(FQName fqname) {
+	eq FClass.getChild(int index).lookupFV(FQName fqname) {
 		FVariable variable = (FVariable) fullyQualifiedVariablesMap().get(fqname.name());
 		if (variable == null) {
 			//error("Undefined variable " + fqname.name());
@@ -45,17 +45,7 @@ aspect FlatNameBinding {
 			return variable;
 		}		
 	}
-	
-	eq FClass.getFEquationBlock(int index).lookupFV(FQName fqname) {
-		FVariable variable = (FVariable) fullyQualifiedVariablesMap().get(fqname.name());
-		if (variable == null) {
-			//error("Undefined variable " + fqname.name());
-			return unknownFVariable();
-		} else {
-			return variable;
-		}
-	}	
-			
+				
 	syn lazy HashMap FClass.fullyQualifiedVariablesMap() {
 		HashMap map = new HashMap();
 		for(int k = 0; k < getNumFVariable(); k++) {

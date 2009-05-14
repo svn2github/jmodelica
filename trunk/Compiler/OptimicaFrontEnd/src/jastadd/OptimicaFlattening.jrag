@@ -98,6 +98,8 @@ aspect OptimicaFlattening {
 		return new FConstraintLeq(getLeft().instantiate(),getRight().instantiate());
 	}
 
+	
+	
 	public FConstraintGeq ConstraintGeq.instantiate() {
 		return new FConstraintGeq(getLeft().instantiate(),getRight().instantiate());
 	}
@@ -106,6 +108,7 @@ aspect OptimicaFlattening {
 		return new FTimedVariable(new FIdUseInstAccess("",getName().newInstAccess()),
 		   getArg().instantiate());
 	}
+	
 	
     public void FConstraint.flatten(FQName prefix, FClass fc) {}
 	

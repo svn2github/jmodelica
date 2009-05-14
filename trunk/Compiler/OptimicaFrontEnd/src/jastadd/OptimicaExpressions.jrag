@@ -28,5 +28,39 @@ aspect OptimicaExpressions {
 		 	return iv;
 		 }
 	}
+	
+	rewrite FIdUseExp {
+		when (name().equals("startTime")) to FStartTimeExp {
+			return new FStartTimeExp();
+		}
+	}
 
+	rewrite FIdUseExp {
+		when (name().equals("finalTime")) to FFinalTimeExp {
+			return new FFinalTimeExp();
+		}
+	}
+	
+	eq FStartTimeExp.ceval() {
+		if (myFOptClass().startTimeAttributeSet()) {
+			return myFOptClass().startTimeAttributeCValue();
+		} else if (myFOptClass().startTimeInitialGuessAttributeSet()) {
+			return myFOptClass().startTimeInitialGuessAttributeCValue();
+		} else {
+			return myFOptClass().startTimeAttributeCValue();
+		}
+	}
+
+	eq FFinalTimeExp.ceval() {
+		if (myFOptClass().finalTimeAttributeSet()) {
+			return myFOptClass().finalTimeAttributeCValue();
+		} else if (myFOptClass().finalTimeInitialGuessAttributeSet()) {
+			return myFOptClass().finalTimeInitialGuessAttributeCValue();
+		} else {
+			return myFOptClass().finalTimeAttributeCValue();
+		}
+	}
+	
+	
+	
 }

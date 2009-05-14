@@ -6,5 +6,6 @@
 	<classpathentry kind="src" path="src/test/junit-generated"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.ajdt.core.ASPECTJRT_CONTAINER"/>
+	<classpathentry kind="lib" path="/Users/jakesson/projects/JModelica/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -101,12 +101,3 @@ aspect OptimicaInitialTransformations {
 
 
 }
-/*
-aspect FlatTypeSystem {
-	eq FTimedVariable.type() = new BrokenType();
-}
-*/
-aspect FlatVariability {
-    // TODO: Fix this
-    eq FTimedVariable.variability() = fContinuous();
-}

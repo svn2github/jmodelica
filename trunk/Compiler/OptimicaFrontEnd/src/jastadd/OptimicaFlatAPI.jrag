@@ -1,0 +1,851 @@
+aspect OptimicaFlatAPI {
+	
+	/**
+	 * \brief Check if the free attribute is set for a variable.
+	 * 
+	 * @return True if attribute set.
+	 */
+	syn lazy boolean FVariable.freeAttributeSet() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("free")) {
+				return a.getAttributeSet();
+			}
+		}
+		return false;
+	}
+		
+	/**
+	 * \brief Get the free attribute expression.
+	 * 
+	 * @return Attribute expression or null if not set.
+	 */
+	syn lazy FExp FVariable.freeAttributeExp() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("free")) {
+				return a.hasValue()? a.getValue(): null;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * \brief Get the free attribute CValue.
+	 * 
+	 * @return A CValue containing the evaluated attribute expression or 
+	 * false if not set.
+	 */
+	syn CValue FVariable.freeAttributeCValue() =
+		freeAttributeSet()? freeAttributeExp().ceval():
+			new CValueBoolean(false);
+		
+	/**
+	 * \brief Get the free attribute value.
+	 * 
+	 * @return Attribute value, false if attribute not set.
+	 */
+	syn boolean FVariable.freeAttribute() = 
+		freeAttributeCValue().booleanValue();
+
+	/**
+	 * \brief Check if the initialGuess attribute is set for a variable.
+	 * 
+	 * @return True if attribute set.
+	 */
+	syn lazy boolean FVariable.initialGuessAttributeSet() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("initialGuess")) {
+				return a.getAttributeSet();
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * \brief Get the initialGuess attribute expression.
+	 * 
+	 * @return Attribute expression or null if not set.
+	 */
+	syn lazy FExp FVariable.initialGuessAttributeExp() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("initialGuess")) {
+				return a.hasValue()? a.getValue(): null;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * \brief Get the initialGuess attribute CValue.
+	 * 
+	 * @return A CValue containing the evaluated attribute expression or 
+	 * 0.0 if not set.
+	 */
+	syn CValue FRealVariable.initialGuessAttributeCValue() =
+		minAttributeSet()? initialGuessAttributeExp().ceval():
+			new CValueReal(0.0);
+
+	/**
+	 * \brief Get the initialGuess attribute CValue.
+	 * 
+	 * @return A CValue containing the evaluated attribute expression or 
+	 * 0 if not set.
+	 */		
+	syn CValue FIntegerVariable.initialGuessAttributeCValue() =
+		initialGuessAttributeSet()? initialGuessAttributeExp().ceval():
+			new CValueInteger(0);
+	/**
+	 * \brief Get the initialGuess attribute CValue.
+	 * 
+	 * @return A CValue containing the evaluated attribute expression or 
+	 * false if not set.
+	 */	
+	syn CValue FBooleanVariable.initialGuessAttributeCValue() =
+		initialGuessAttributeSet()? initialGuessAttributeExp().ceval():
+			new CValueBoolean(false);
+
+	/**
+	 * \brief Get the initialGuess attribute value.
+	 * 
+	 * @return Attribute value, 0.0 if attribute not set.
+	 */
+	syn double FRealVariable.initialGuessAttribute() = 
+		initialGuessAttributeCValue().realValue();
+	
+	/**
+	 * \brief Get the initialGuess attribute value.
+	 * 
+	 * @return Attribute value, 0 if attribute not set.
+	 */
+	syn int FIntegerVariable.initialGuessAttribute() = 
+		initialGuessAttributeCValue().intValue();	
+	
+	/**
+	 * \brief Get the initialGuess attribute value.
+	 * 
+	 * @return Attribute value, false if attribute not set.
+	 */
+	syn boolean FBooleanVariable.initialGuessAttribute() = 
+		initialGuessAttributeCValue().booleanValue();	
+
+	/**
+	 * \brief Get the cost function expression.
+	 * 
+	 * @return Cost function expression.
+	 */
+	syn lazy FExp FOptClass.objectiveExp() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("objective")) {
+				return a.hasValue()? a.getValue(): null;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * \brief Check if the startTime attribute is set.
+	 * 
+	 * @return True if attribute set.
+	 */
+	syn lazy boolean FOptClass.startTimeAttributeSet() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("startTime") && a.hasValue()) {
+				return a.getAttributeSet();
+			}
+		}
+		return false;
+	}
+		
+	/**
+	 * \brief Get the startTime attribute expression.
+	 * 
+	 * @return Attribute expression or null if not set.
+	 */
+	syn lazy FExp FOptClass.startTimeAttributeExp() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("startTime")) {
+				return a.hasValue()? a.getValue(): null;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * \brief Get the startTime attribute CValue.
+	 * 
+	 * @return A CValue containing the evaluated attribute expression or 
+	 * 0.0 if not set.
+	 */
+	syn CValue FOptClass.startTimeAttributeCValue() =
+		startTimeAttributeSet()? startTimeAttributeExp().ceval():
+			new CValueReal(0.0);
+		
+	/**
+	 * \brief Get the startTime attribute value.
+	 * 
+	 * @return Attribute value, 0.0 if attribute not set.
+	 */	
+	syn double FOptClass.startTimeAttribute() = 
+		startTimeAttributeCValue().realValue();
+
+	/**
+	 * \brief Check if the free attribute of the startTime is set.
+	 * 
+	 * @return True if attribute set.
+	 */
+	syn lazy boolean FOptClass.startTimeFreeAttributeSet() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("startTime")) {
+				for (FAttribute aa : a.getFAttributes()) {
+					if (aa.getName().name().equals("free")) {
+						return aa.getAttributeSet();
+					}
+				}
+			}
+		}
+		return false;
+	}
+		
+	/**
+	 * \brief Get the free attribute expression for startTime.
+	 * 
+	 * @return Attribute expression or null if not set.
+	 */
+	syn lazy FExp FOptClass.startTimeFreeAttributeExp() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("startTime")) {
+				for (FAttribute aa : a.getFAttributes()) {
+					if (aa.getName().name().equals("free")) {
+						return aa.hasValue()? aa.getValue(): null;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * \brief Get the free attribute CValue of startTime.
+	 * 
+	 * @return A CValue containing the evaluated attribute expression or 
+	 * false if not set.
+	 */
+	syn CValue FOptClass.startTimeFreeAttributeCValue() =
+		startTimeFreeAttributeSet()? startTimeFreeAttributeExp().ceval():
+			new CValueBoolean(false);
+		
+	/**
+	 * \brief Get the free attribute value for startTime.
+	 * 
+	 * @return Attribute value, false if attribute not set.
+	 */	
+	syn boolean FOptClass.startTimeFreeAttribute() = 
+		startTimeFreeAttributeCValue().booleanValue();
+
+	/**
+	 * \brief Check if the initialGuess attribute of the startTime is set.
+	 * 
+	 * @return True if attribute set.
+	 */
+	syn lazy boolean FOptClass.startTimeInitialGuessAttributeSet() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("startTime")) {
+				for (FAttribute aa : a.getFAttributes()) {
+					if (aa.getName().name().equals("initialGuess")) {
+						return aa.getAttributeSet();
+					}
+				}
+			}
+		}
+		return false;
+	}
+		
+	/**
+	 * \brief Get the initialGuess attribute expression for startTime.
+	 * 
+	 * @return Attribute expression or null if not set.
+	 */
+	syn lazy FExp FOptClass.startTimeInitialGuessAttributeExp() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("startTime")) {
+				for (FAttribute aa : a.getFAttributes()) {
+					if (aa.getName().name().equals("initialGuess")) {
+						return aa.hasValue()? aa.getValue(): null;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * \brief Get the initialGuess attribute CValue of startTime.
+	 * 
+	 * @return A CValue containing the evaluated attribute expression or 
+	 * 0.0 if not set.
+	 */
+	syn CValue FOptClass.startTimeInitialGuessAttributeCValue() =
+		startTimeInitialGuessAttributeSet()? startTimeInitialGuessAttributeExp().ceval():
+			new CValueReal(0.0);
+		
+	/**
+	 * \brief Get the initialGuess attribute value for startTime.
+	 * 
+	 * @return Attribute value, 0.0 if attribute not set.
+	 */
+	syn double FOptClass.startTimeInitialGuessAttribute() = 
+		startTimeInitialGuessAttributeCValue().realValue();
+	
+	/**
+	 * \brief Check if the finalTime attribute is set.
+	 * 
+	 * @return True if attribute set.
+	 */
+	syn lazy boolean FOptClass.finalTimeAttributeSet() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("finalTime") && a.hasValue()) {
+				return a.getAttributeSet();
+			}
+		}
+		return false;
+	}
+		
+	/**
+	 * \brief Get the finalTime attribute expression.
+	 * 
+	 * @return Attribute expression or null if not set.
+	 */
+	syn lazy FExp FOptClass.finalTimeAttributeExp() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("finalTime")) {
+				return a.hasValue()? a.getValue(): null;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * \brief Get the finalTime attribute CValue.
+	 * 
+	 * @return A CValue containing the evaluated attribute expression or 
+	 * 1.0 if not set.
+	 */
+	syn CValue FOptClass.finalTimeAttributeCValue() =
+		finalTimeAttributeSet()? finalTimeAttributeExp().ceval():
+			new CValueReal(1.0);
+		
+	/**
+	 * \brief Get the finalTime attribute value.
+	 * 
+	 * @return Attribute value, 1.0 if attribute not set.
+	 */	
+	syn double FOptClass.finalTimeAttribute() = 
+		finalTimeAttributeCValue().realValue();
+
+	/**
+	 * \brief Check if the static attribute is set.
+	 * 
+	 * @return True if attribute set.
+	 */
+	syn lazy boolean FOptClass.staticAttributeSet() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("static") && a.hasValue()) {
+				return a.getAttributeSet();
+			}
+		}
+		return false;
+	}
+		
+	/**
+	 * \brief Get the static attribute expression.
+	 * 
+	 * @return Attribute expression or null if not set.
+	 */
+	syn lazy FExp FOptClass.staticAttributeExp() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("static")) {
+				return a.hasValue()? a.getValue(): null;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * \brief Get the static attribute CValue.
+	 * 
+	 * @return A CValue containing the evaluated attribute expression or 
+	 * false if not set.
+	 */
+	syn CValue FOptClass.staticAttributeCValue() =
+		staticAttributeSet()? staticAttributeExp().ceval():
+			new CValueBoolean(false);
+		
+	/**
+	 * \brief Get the static attribute value.
+	 * 
+	 * @return Attribute value, false if attribute not set.
+	 */	
+	syn boolean FOptClass.staticAttribute() = 
+		staticAttributeCValue().booleanValue();
+
+	/**
+	 * \brief Check if the free attribute of the finalTime is set.
+	 * 
+	 * @return True if attribute set.
+	 */
+	syn lazy boolean FOptClass.finalTimeFreeAttributeSet() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("finalTime")) {
+				for (FAttribute aa : a.getFAttributes()) {
+					if (aa.getName().name().equals("free")) {
+						return aa.getAttributeSet();
+					}
+				}
+			}
+		}
+		return false;
+	}
+		
+	/**
+	 * \brief Get the free attribute expression for finalTime.
+	 * 
+	 * @return Attribute expression or null if not set.
+	 */
+	syn lazy FExp FOptClass.finalTimeFreeAttributeExp() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("finalTime")) {
+				for (FAttribute aa : a.getFAttributes()) {
+					if (aa.getName().name().equals("free")) {
+						return aa.hasValue()? aa.getValue(): null;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * \brief Get the free attribute CValue for finalTime.
+	 * 
+	 * @return A CValue containing the evaluated attribute expression or 
+	 * false if not set.
+	 */
+	syn CValue FOptClass.finalTimeFreeAttributeCValue() =
+		finalTimeFreeAttributeSet()? finalTimeFreeAttributeExp().ceval():
+			new CValueBoolean(false);
+
+	/**
+	 * \brief Get the free attribute value for finalTime.
+	 * 
+	 * @return Attribute value, false if attribute not set.
+	 */		
+	syn boolean FOptClass.finalTimeFreeAttribute() = 
+		finalTimeFreeAttributeCValue().booleanValue();
+	
+	/**
+	 * \brief Check if the initialGuess attribute of the finalTime is set.
+	 * 
+	 * @return True if attribute set.
+	 */
+	syn lazy boolean FOptClass.finalTimeInitialGuessAttributeSet() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("finalTime")) {
+				for (FAttribute aa : a.getFAttributes()) {
+					if (aa.getName().name().equals("initialGuess")) {
+						return aa.getAttributeSet();
+					}
+				}
+			}
+		}
+		return false;
+	}
+		
+	/**
+	 * \brief Get the initialGuess attribute expression for finalTime.
+	 * 
+	 * @return Attribute expression or null if not set.
+	 */
+	syn lazy FExp FOptClass.finalTimeInitialGuessAttributeExp() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("finalTime")) {
+				for (FAttribute aa : a.getFAttributes()) {
+					if (aa.getName().name().equals("initialGuess")) {
+						return aa.hasValue()? aa.getValue(): null;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * \brief Get the initialGuess attribute CValue for finalTime.
+	 * 
+	 * @return A CValue containing the evaluated attribute expression or 
+	 * 1.0 if not set.
+	 */
+	syn CValue FOptClass.finalTimeInitialGuessAttributeCValue() =
+		finalTimeInitialGuessAttributeSet()? finalTimeInitialGuessAttributeExp().ceval():
+			new CValueReal(1.0);
+		
+	/**
+	 * \brief Get the initialGuess attribute value for finalTime.
+	 * 
+	 * @return Attribute value, 1.0 if attribute not set.
+	 */	
+	syn double FOptClass.finalTimeInitialGuessAttribute() = 
+		finalTimeInitialGuessAttributeCValue().realValue();
+
+	/**
+	 * \brief Get the number of Constraints.
+	 */
+    syn int FOptClass.numConstraints() = constraints().size();
+    
+    /**
+     * \brief Get a list of all constraints.
+     */
+	coll ArrayList<FConstraint> FOptClass.constraints() 
+	  [new ArrayList<FConstraint>()] with add root FlatRoot;
+	FConstraint contributes this to FOptClass.constraints() for myFClass();
+	
+	/**
+	 * \brief Get the number of equality constraints.
+	 */
+    syn int FOptClass.numEqConstraints() = eqConstraints().size();
+	
+    /**
+     * \brief Get a list of equality constraints.
+     */
+    coll ArrayList<FConstraint> FOptClass.eqConstraints() 
+	  [new ArrayList<FConstraint>()] with add root FlatRoot;
+	FConstraint contributes
+ 		this when isEqConstraint()
+	to FOptClass.eqConstraints() for myFClass();
+
+	/**
+	 * \brief Get the number of LEQ constraints.
+	 */
+    syn int FOptClass.numLeqConstraints() = leqConstraints().size();
+
+	/**
+	 * \brief Get a list of LEQ constraints.
+	 */
+    coll ArrayList<FConstraint> FOptClass.leqConstraints() 
+	  [new ArrayList<FConstraint>()] with add root FlatRoot;
+	FConstraint contributes
+ 		this when isLeqConstraint()
+	to FOptClass.leqConstraints() for myFClass();
+
+	/**
+	 * \brief Get the number of GEQ constraints.
+	 */
+    syn int FOptClass.numGeqConstraints() = geqConstraints().size();
+	
+	/**
+	 * \brief Get the number of GEQ constraints.
+	 */
+    coll ArrayList<FConstraint> FOptClass.geqConstraints() 
+	  [new ArrayList<FConstraint>()] with add root FlatRoot;
+	FConstraint contributes
+ 		this when isGeqConstraint()
+	to FOptClass.geqConstraints() for myFClass();	
+
+	/**
+	 * \brief Get the number of equality path constraints.
+	 */
+    syn int FOptClass.numPathEqConstraints() = pathEqConstraints().size();
+
+	/**
+	 * \brief Get a list of equality path constraints.
+	 */
+    syn lazy ArrayList<FConstraintEq> FOptClass.pathEqConstraints() {
+    	ArrayList<FConstraintEq> list = new ArrayList<FConstraintEq>();
+    	for (FConstraint c : eqConstraints()) {
+    		if (!c.isTimed() && !c.isParameter()){
+    			list.add((FConstraintEq)c);
+    		}
+    	}
+    	return list;
+    }
+
+	/**
+	 * \brief Get the number of LEQ path constraints.
+	 */
+    syn int FOptClass.numPathLeqConstraints() = pathLeqConstraints().size();
+    
+	/**
+	 * \brief Get a list of LEQ path constraints.
+	 */
+    syn lazy ArrayList<FConstraintLeq> FOptClass.pathLeqConstraints() {
+    	ArrayList<FConstraintLeq> list = new ArrayList<FConstraintLeq>();
+    	for (FConstraint c : leqConstraints()) {
+    		if (!c.isTimed() && !c.isParameter()){
+    			list.add((FConstraintLeq)c);
+    		}
+    	}
+    	return list;
+    }
+
+	/**
+	 * \brief Get the number of GEQ path constraints.
+	 */
+    syn int FOptClass.numPathGeqConstraints() = pathGeqConstraints().size();
+    
+	/**
+	 * \brief Get a list of GEQ path constraints.
+	 */
+    syn lazy ArrayList<FConstraintGeq> FOptClass.pathGeqConstraints() {
+    	ArrayList<FConstraintGeq> list = new ArrayList<FConstraintGeq>();
+    	for (FConstraint c : geqConstraints()) {
+    		if (!c.isTimed() && !c.isParameter()){
+    			list.add((FConstraintGeq)c);
+    		}
+    	}
+    	return list;
+    }
+
+	/**
+	 * \brief Get the number of equality point constraints.
+	 */
+    syn int FOptClass.numPointEqConstraints() = pointEqConstraints().size();
+
+	/**
+	 * \brief Get a list of equality point constraints.
+	 */
+    syn lazy ArrayList<FConstraintEq> FOptClass.pointEqConstraints() {
+    	ArrayList<FConstraintEq> list = new ArrayList<FConstraintEq>();
+    	for (FConstraint c : eqConstraints()) {
+    		if (c.isTimed() || c.isParameter()){
+    			list.add((FConstraintEq)c);
+    		}
+    	}
+    	return list;
+    }
+
+	/**
+	 * \brief Get the number of LEQ point constraints.
+	 */
+    syn int FOptClass.numPointLeqConstraints() = pointLeqConstraints().size();
+ 
+	/**
+	 * \brief Get a list of LEQ point constraints.
+	 */
+    syn lazy ArrayList<FConstraintLeq> FOptClass.pointLeqConstraints() {
+    	ArrayList<FConstraintLeq> list = new ArrayList<FConstraintLeq>();
+    	for (FConstraint c : leqConstraints()) {
+    		if (c.isTimed() || c.isParameter()){
+    			list.add((FConstraintLeq)c);
+    		}
+    	}
+    	return list;
+    }
+
+	/**
+	 * \brief Get the number of GEQ point constraints.
+	 */
+    syn int FOptClass.numPointGeqConstraints() = pointGeqConstraints().size();
+    
+	/**
+	 * \brief Get a list of GEQ point constraints.
+	 */
+    syn lazy ArrayList<FConstraintGeq> FOptClass.pointGeqConstraints() {
+    	ArrayList<FConstraintGeq> list = new ArrayList<FConstraintGeq>();
+    	for (FConstraint c : geqConstraints()) {
+    		if (c.isTimed() || c.isParameter()){
+    			list.add((FConstraintGeq)c);
+    		}
+    	}
+    	return list;
+    }
+    	
+    /**
+     * \brief Returns true for equality constraints.
+     */
+	syn boolean FConstraint.isEqConstraint() = false;
+	eq FConstraintEq.isEqConstraint() = true;
+
+    /**
+     * \brief Returns true for LEQ constraints.
+     */
+	syn boolean FConstraint.isLeqConstraint() = false;
+	eq FConstraintLeq.isLeqConstraint() = true;
+
+    /**
+     * \brief Returns true for GEQ constraints.
+     */
+	syn boolean FConstraint.isGeqConstraint() = false;
+	eq FConstraintGeq.isGeqConstraint() = true;
+			
+    /**
+     * \brief Get the number of timed variables.
+     */
+	syn int FOptClass.numTimedVariables() = timedVariables().size();
+	
+    /**
+     * \brief Get the a list of timed variables.
+     */
+	coll ArrayList<FTimedVariable> FOptClass.timedVariables() 
+		[new ArrayList<FTimedVariable>()] with add root FlatRoot;
+	FTimedVariable contributes
+	    this
+	to FOptClass.timedVariables() for myFClass();
+
+    /**
+     * \brief Get the number of real timed variables.
+     */
+	syn int FOptClass.numTimedRealVariables() = timedRealVariables().size();
+
+    /**
+     * \brief Get the a list of real timed variables.
+     */
+	syn lazy ArrayList<FTimedVariable> FOptClass.timedRealVariables() {
+		ArrayList<FTimedVariable> list = new ArrayList<FTimedVariable>();
+		for (FTimedVariable tv : timedVariables()) {
+			if (tv.getName().myFV().isReal()) {
+				list.add(tv);
+			}
+		}
+		return list;
+	}
+		
+	inh FClass FConstraint.myFClass();
+
+    /**
+     * \brief Get the number of time points.
+     */
+	syn int FOptClass.numTimePointsExp() = timePointsExp().size();
+	
+    /**
+     * \brief Get a list of time point expressions.
+     */
+	syn ArrayList<FExp> FOptClass.timePointsExp() {
+		ArrayList<FExp> list = new ArrayList<FExp>();
+		for (FTimedVariable tv : timedVariables()) {
+			list.add(tv.getArg());
+		}
+		return list;		
+	}
+	
+    /**
+     * \brief Get the number of (unique) time points.
+     */
+	syn int FOptClass.numTimePoints() = timePoints().length;
+	
+    /**
+     * \brief Get a sorted vector of unique time points.
+     */
+	syn lazy double[] FOptClass.timePoints() {
+		ArrayList<Double> ts = new ArrayList<Double>();
+		for (FExp t : timePointsExp()) {
+			ts.add(new Double(t.ceval().realValue()));
+		}
+		java.util.Collections.sort(ts);
+		ArrayList<Double> ts_unique = new ArrayList<Double>();
+		ts_unique.add(ts.get(0));
+		double tt = ts.get(0).doubleValue();
+		for (int i=1;i<ts.size();i++) {
+			if (ts.get(i)>tt) {
+				ts_unique.add(ts.get(i));
+				tt = ts.get(i).doubleValue();
+			}
+		}
+		double[] tts = new double[ts_unique.size()];
+		for (int i=0;i<ts_unique.size();i++) {
+			tts[i] = ts_unique.get(i).doubleValue();
+		}
+		return tts;
+	}
+
+	/**
+	 * \brief Get the index of a time point.
+	 * 
+	 * @param t Time point
+	 * @return Time point index. Returns -1 if time point not found.
+	 */
+	syn lazy int FOptClass.timePointIndex(double t) {
+		for (int i=0;i<timePoints().length;i++) {
+			if (timePoints()[i]==t) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	inh FOptClass FVariable.myFOptClass();
+	inh FOptClass FExp.myFOptClass();
+	inh FOptClass FIdUse.myFOptClass();
+	eq FOptClass.getChild().myFOptClass() = this;
+	eq Root.getChild().myFOptClass() = null; 
+	
+	/**
+	 * Print diagnostics.
+	 */
+	public String FOptClass.diagnostics() {
+		StringBuffer str = new StringBuffer();
+		str.append(super.diagnostics() + "\n");
+		str.append("Cost function:   " + objectiveExp().prettyPrint("") + "\n");
+		str.append("startTime:       " + (startTimeAttributeSet()? startTimeAttributeExp().prettyPrint(""): "not set") + "\n");
+		str.append("startTime free:  " + (startTimeFreeAttributeSet()? startTimeFreeAttributeExp().prettyPrint(""): "not set") + "\n");
+		str.append("startTime init:  " + (startTimeInitialGuessAttributeSet()? startTimeInitialGuessAttributeExp().prettyPrint(""): "not set") + "\n");
+		str.append("finalTime:       " + (finalTimeAttributeSet()? finalTimeAttributeExp().prettyPrint(""): "not set") + "\n");
+		str.append("finalTime free:  " + (finalTimeFreeAttributeSet()? finalTimeFreeAttributeExp().prettyPrint(""): "not set") + "\n");
+		str.append("finalTime init:  " + (finalTimeInitialGuessAttributeSet()? finalTimeInitialGuessAttributeExp().prettyPrint(""): "not set") + "\n");
+		str.append("\n");
+		str.append("Number of timed real variables: " + numTimedRealVariables() + "\n");
+		str.append("Timed real variables: {");
+		for (FTimedVariable tv : timedRealVariables()) {
+			str.append(tv.prettyPrint("") + " ");
+		}
+		str.append("}\n");
+		str.append("Number of time points: " + numTimePoints() + "\n");
+		str.append("Time points: {");
+		for (int i=0;i<numTimePoints();i++) {
+			str.append(timePoints()[i] + " ");
+		}
+		str.append("}\n\n");
+		
+		str.append("Path Equality Constraints: {\n");
+		for (FConstraint c : pathEqConstraints()) {
+			str.append(c.prettyPrint("  "));
+			str.append("\n");
+		}
+		str.append("}\n");
+
+		str.append("Path Leq Constraints: {\n");
+		for (FConstraint c : pathLeqConstraints()) {
+			str.append(c.prettyPrint("  "));
+			str.append("\n");
+		}
+		str.append("}\n");
+
+		str.append("Path Geq Constraints: {\n");
+		for (FConstraint c : pathGeqConstraints()) {
+			str.append(c.prettyPrint("  "));
+			str.append("\n");
+		}
+		str.append("}\n");
+
+		str.append("Point Equality Constraints: {\n");
+		for (FConstraint c : pointEqConstraints()) {
+			str.append(c.prettyPrint("  "));
+			str.append("\n");
+		}
+		str.append("}\n");
+
+		str.append("Point Leq Constraints: {\n");
+		for (FConstraint c : pointLeqConstraints()) {
+			str.append(c.prettyPrint("  "));
+			str.append("\n");
+		}
+		str.append("}\n");
+
+		str.append("Point Geq Constraints: {\n");
+		for (FConstraint c : pointGeqConstraints()) {
+			str.append(c.prettyPrint("  "));
+			str.append("\n");
+		}
+		str.append("}\n");
+
+		
+		return str.toString();
+	}	
+}

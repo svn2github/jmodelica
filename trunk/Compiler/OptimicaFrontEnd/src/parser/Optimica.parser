@@ -39,6 +39,7 @@ BaseClassDecl base_class_decl =
                                              end,
                                              class_modification); :}
 ;
+
 Clause composition_clause = constraint_clause;
 
 ConstraintClause constraint_clause = 
@@ -58,3 +59,5 @@ Constraint oconstraint =
   |  artm_exp.a LEQ artm_exp.b SEMICOLON{: return new ConstraintLeq(a,b); :}
   |  artm_exp.a GEQ artm_exp.b SEMICOLON{: return new ConstraintGeq(a,b); :}
   ;
+
+  

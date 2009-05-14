@@ -672,13 +672,13 @@ aspect FlatCausality {
 
 aspect FlatTypes {
 
-	syn boolean FVariable.isReal() = false;
+	syn boolean AbstractFVariable.isReal() = false;
 	eq FRealVariable.isReal() = true;
-	syn boolean FVariable.isInteger() = false;
+	syn boolean AbstractFVariable.isInteger() = false;
 	eq FIntegerVariable.isInteger() = true;
-	syn boolean FVariable.isBoolean() = false;
+	syn boolean AbstractFVariable.isBoolean() = false;
 	eq FBooleanVariable.isBoolean() = true;
-	syn boolean FVariable.isString() = false;
+	syn boolean AbstractFVariable.isString() = false;
 	eq FStringVariable.isString() = true;
 		
 }

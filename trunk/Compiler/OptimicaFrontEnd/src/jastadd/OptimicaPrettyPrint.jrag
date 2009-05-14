@@ -164,5 +164,14 @@ aspect FlatOptimicaPrettyPrint {
 			p.toString(getArg(),str,"",o);
 		str.print(")");
 	}
+
+	public void FStartTimeExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.append("startTime");
+	}
+	
+	public void FFinalTimeExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.append("finalTime");
+	}
 	
 }
+

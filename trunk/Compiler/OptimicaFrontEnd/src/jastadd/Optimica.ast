@@ -29,6 +29,9 @@ OptimizationClass : Restriction ::=;
 
 TimedVariable : Exp ::= Name:Access Arg:Exp;
 
+StartTimeExp : Exp;
+FinalTimeExp : Exp;
+
 InstOptClassDecl : InstFullClassDecl ::= [InstClassModification] /InstClassAttribute:InstComponentDecl*/;
 
 
