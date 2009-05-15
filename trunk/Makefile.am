@@ -21,21 +21,16 @@ SUBDIRS = JMI/src
 
 all-local:
 if HAVE_ANT
-#	cd $(abs_top_srcdir)/Compiler/ModelicaFrontEnd; \
-#	$(ANT_OPTS) $(ANT)
-#	cd $(abs_top_srcdir)/Compiler/OptimicaFrontEnd; \
-#	$(ANT_OPTS) $(ANT)
-#	cd $(abs_top_srcdir)/Compiler/ModelicaCBackEnd; \
-#	$(ANT_OPTS) $(ANT)
-#	cd $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd; \
-#	$(ANT_OPTS) $(ANT)
 	cd $(abs_top_srcdir)/Compiler/ModelicaCompiler; \
+	$(ANT_OPTS) $(ANT)
+	cd $(abs_top_srcdir)/Compiler/OptimicaCompiler; \
 	$(ANT_OPTS) $(ANT)
 endif
 
 install-exec-local:
 if HAVE_ANT
 	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar $(prefix)/lib/
+	cp $(abs_top_srcdir)/Compiler/OptimicaCompiler/bin/OptimicaCompiler.jar $(prefix)/lib/
 endif
 	mkdir $(prefix)/Makefiles
 	case $(build) in \
@@ -92,6 +87,8 @@ if HAVE_ANT
 #	cd $(abs_top_srcdir)/Compiler/ModelicaXMLBackend; \
 #	$(ANT_OPTS) $(ANT) clean
 	cd $(abs_top_srcdir)/Compiler/ModelicaCompiler; \
+	$(ANT_OPTS) $(ANT) clean
+	cd $(abs_top_srcdir)/Compiler/OptimicaCompiler; \
 	$(ANT_OPTS) $(ANT) clean
 endif
 

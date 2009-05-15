@@ -680,19 +680,14 @@ uninstall-am:
 
 
 all-local:
-#	cd $(abs_top_srcdir)/Compiler/ModelicaFrontEnd; \
-#	$(ANT_OPTS) $(ANT)
-#	cd $(abs_top_srcdir)/Compiler/OptimicaFrontEnd; \
-#	$(ANT_OPTS) $(ANT)
-#	cd $(abs_top_srcdir)/Compiler/ModelicaCBackEnd; \
-#	$(ANT_OPTS) $(ANT)
-#	cd $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd; \
-#	$(ANT_OPTS) $(ANT)
 @HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/ModelicaCompiler; \
+@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT)
+@HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/OptimicaCompiler; \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT)
 
 install-exec-local:
 @HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar $(prefix)/lib/
+@HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/OptimicaCompiler/bin/OptimicaCompiler.jar $(prefix)/lib/
 	mkdir $(prefix)/Makefiles
 	case $(build) in \
 	*-cygwin*) \
@@ -747,6 +742,8 @@ clean-frontends:
 #	cd $(abs_top_srcdir)/Compiler/ModelicaXMLBackend; \
 #	$(ANT_OPTS) $(ANT) clean
 @HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/ModelicaCompiler; \
+@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean
+@HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/OptimicaCompiler; \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean
 
 docs:
