@@ -358,11 +358,11 @@ public class ModelicaCompiler {
 		logger.info("Generating code...");
 		
 		XMLGenerator generator = new XMLGenerator(new PrettyPrinter(), '$', fc);
-		String output = fc.name() + ".xml";
+		String output = fc.nameUnderscore()+".xml";
 		generator.generate(xmltemplate, output);
 
 		CGenerator cgenerator = new CGenerator(new PrettyPrinter(), '$', fc);
-		output = fc.name() + ".c";
+		output = fc.nameUnderscore() + ".c";
 		cgenerator.generate(ctemplate, output);
 
 		logger.info("...code generated.");
