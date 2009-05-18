@@ -65,7 +65,8 @@ def compile_model(model_file_name, model_class_name, build_wth_algs=False):
 
     try:
         JCompiler.compileModel(model_file_name, model_class_name, xmlpath, cppath)
-        retval = compile_dll(model_class_name, build_wth_algs)
+        c_file = model_class_name.replace('.','_',1)
+        retval = compile_dll(c_file, build_wth_algs)
         return retval
 
     except jpype.JavaException, ex:
@@ -186,7 +187,7 @@ def compile_dll(c_file_name, build_wth_algs=False):
     #make settings
     make_file = common._jm_home+os.sep+'Makefiles'+os.sep+'MakeFile'
     file_name =' FILE_NAME='+c_file_name
-    jmodelica_h=' JMODELICA_HOME='+_format_string(common._jm_home)
+    jmodelica_h=' JMODELICA_HOME='+common._jm_home
     cppad_h = ' CPPAD_HOME='+common.user_options['cppad_home']
     ipopt_h = ' IPOPT_HOME='+common.user_options['ipopt_home']
 
@@ -216,7 +217,7 @@ def _handle_exception(ex):
         #throw python exception
         
     if ex.javaClass() is jpype.java.io.FileNotFoundException:
-        print "*** Caught ClassNotFoundException ***"
+        print "*** Caught FileNotFoundException ***"
         #throw python exception
         
     if ex.javaClass() is jpype.java.io.IOException:
@@ -227,24 +228,3 @@ def _handle_exception(ex):
         print "*** Caught Exception ***"
         #throw python exception
 
-
-def _format_string(s):
-    """ Help function to format paths in the format that MINGW32/Msys likes it.
-    (That is without '\' and  for example 'C:') 
-    
-    @todo: Not clear if this is needed but it works for now.
-    """
-
-    sep = '/'
-
-    #must start with /
-    if not s.startswith(sep):
-        s = sep+s
-    
-    #replace :
-    s = s.replace(':',sep)
-
-    #must have pathseparator = /
-    s = s.replace(os.sep,sep)
-
-    return s

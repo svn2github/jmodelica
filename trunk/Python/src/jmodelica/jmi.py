@@ -624,10 +624,10 @@ class JMIModel(object):
         self._t = self._dll.jmi_get_t(self._jmi)
         self._z = self._dll.jmi_get_z(self._jmi)
 
-        #xmlname=libname+'.xml' 
+        xmlname=libname+'.xml' 
         # assumes libname is name of model and xmlfile is located in the same dir as the dll
-        #self._setXMLdoc(load_xml(xmlname,path))
-        #self._setStartAttributes()
+        self._setXMLdoc(load_xml(xmlname,path))
+        self._setStartAttributes()
                 
     def __del__(self):
         """Freeing jmi data structure.
