@@ -21,5 +21,10 @@
 			<type>2</type>
 			<location>/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/test-framework</location>
 		</link>
+		<link>
+			<name>test-framework-mf</name>
+			<type>2</type>
+			<location>/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/test-framework</location>
+		</link>
 	</linkedResources>
 </projectDescription>

@@ -35,13 +35,15 @@ static const int N_eq_F0 = $n_equations$ + $n_initial_equations$;
 static const int N_eq_F1 = $n_initial_guess_equations$;
 static const int N_eq_Fp = $n_real_pd$;
 
-static const int N_eq_Ceq = 0;
-static const int N_eq_Cineq = 0;
-static const int N_eq_Heq = 0;
-static const int N_eq_Hineq = 0;
-static const int N_t_p = 0;
+static const int N_eq_Ceq = $n_ceq$;
+static const int N_eq_Cineq = $n_cineq$;
+static const int N_eq_Heq = $n_heq$;
+static const int N_eq_Hineq = $n_hineq$;
+static const int N_t_p = $n_tp$;
 
 $C_variable_aliases$
+
+$C_point_variable_aliases$
 
 #define _ci(i) ((*(jmi->z))[jmi->offs_ci+i])
 #define _cd(i) ((*(jmi->z))[jmi->offs_cd+i])
@@ -93,23 +95,28 @@ $C_DAE_initial_dependent_parameter_residuals$
 }
 
 static int model_opt_J(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
+$C_Opt_cost_function$
+	return 0;
 }
 
 static int model_opt_Ceq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
+$C_Opt_path_equality_constraints$
+	return 0;
 }
 
 static int model_opt_Cineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
+$C_Opt_path_inequality_constraints$
+	return 0;
 }
 
 static int model_opt_Heq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
+$C_Opt_point_equality_constraints$
+	return 0;
 }
 
 static int model_opt_Hineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
+$C_Opt_point_inequality_constraints$
+	return 0;
 }
 
 int jmi_new(jmi_t** jmi) {

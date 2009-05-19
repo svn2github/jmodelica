@@ -56,6 +56,21 @@ model OptimicaTests
     finalTime>=0.1;
     finalTime<=10;
   end InstantValueTest1;
+
+  optimization InstantValueTest2 
+     (objective=x(p1)+x(p2)+x(p3)+x(finalTime)^2,startTime=0,finalTime(free=true,initialGuess=3))
+    Real x(start=0);
+    input Real u(free=true);
+    parameter Real p1 = 1/3;
+    parameter Real p2 = 4/57;
+    parameter Real p3 = 0.34;
+   equation
+    der(x)=u;
+   constraint
+    x(finalTime)=3; 
+    finalTime>=0.1;
+    finalTime<=10;
+  end InstantValueTest2;
   
   model DoubleIntegrator
   	Real x(start=0);
