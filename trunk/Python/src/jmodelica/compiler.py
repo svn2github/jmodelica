@@ -57,7 +57,19 @@ def compile_model(model_file_name, model_class_name, build_wth_algs=False):
         Optional if compiled dll should also contain optimization algorithms.
         Default is False.
         
-    @todo: Proper errorhandling. Should throw Python exceptions.
+    @raise CompilerError:
+        Raised if one or more error is found during compilation.
+    @raise ModelicaClassNotFoundError:
+        Raised if the model class is not found.
+    @raise IOError:
+        Raised if the model file is not found, can not be read or
+        any other IO related error.
+    @raise Exception:
+        Raised by the parser for general errors related to the parsing 
+        of the model.       
+    @raise JError:
+        Raised if there was a runtime exception thrown by the underlying Java
+        classes, for example, NullPointerException.
         
 """
     xmlpath = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_template.xml'
@@ -71,28 +83,35 @@ def compile_model(model_file_name, model_class_name, build_wth_algs=False):
 
     except jpype.JavaException, ex:
         _handle_exception(ex)
-        print "! Compiling model failed."
 
 
-def parse_model(model_file_name, model_class_name):
+def parse_model(model_file_name):
     """ Parses a model and returns a reference to the source tree representation.
     
         @param model_file_name:
             Path to file in which the model is contained.
-        @param model_class_name:
-            Name of model class in the model file to compile.
         @return: 
             Reference to the root of the source tree representation of the parsed model.
-            
-        @todo: Proper errorhandling. Should throw Python exceptions.
+        
+        @raise CompilerError:
+            Raised if one or more error is found during compilation.
+        @raise IOError:
+            Raised if the model file is not found, can not be read or
+            any other IO related error.
+        @raise Exception:
+            Raised by the parser for general errors related to the parsing 
+            of the model.       
+        @raise JError:
+            Raised if there was a runtime exception thrown by the underlying Java
+            classes, for example, NullPointerException.
+
     """ 
     try:
-        sr = JCompiler.parseModel(model_file_name, model_class_name)
+        sr = JCompiler.parseModel(model_file_name)
         return sr
         
     except jpype.JavaException, ex:
         _handle_exception(ex)
-        print "! Parsing model failed."
                
 
 def instantiate_model(source_root, model_class_name):
@@ -109,7 +128,14 @@ def instantiate_model(source_root, model_class_name):
             
         @return: Reference to the root of the instance tree representation. 
     
-        @todo: Proper errorhandling. Should throw Python exceptions.
+        @raise CompilerError:
+            Raised if one or more error is found during compilation.
+        @raise ModelicaClassNotFoundError:
+            Raised if the model class is not found.
+        @raise JError:
+            Raised if there was a runtime exception thrown by the underlying Java
+            classes, for example, NullPointerException.
+
     """
     
     try:
@@ -118,7 +144,6 @@ def instantiate_model(source_root, model_class_name):
     
     except jpype.JavaException, ex:
         _handle_exception(ex)
-        print "! Instantiating model failed."
 
 
 def flatten_model(model_file_name, model_class_name, inst_prg_root):
@@ -135,7 +160,17 @@ def flatten_model(model_file_name, model_class_name, inst_prg_root):
         
         @return: Object (FClass) representing the flattened model. 
     
-        @todo: Proper errorhandling. Should throw Python exceptions.
+        @raise CompilerError:
+            Raised if one or more error is found during compilation.
+        @raise ModelicaClassNotFoundError:
+            Raised if the model class is not found.
+        @raise IOError:
+            Raised if the model file is not found, can not be read or
+            any other IO related error.
+        @raise JError:
+            Raised if there was a runtime exception thrown by the underlying Java
+            classes, for example, NullPointerException.
+
     """
 
     try:
@@ -144,7 +179,6 @@ def flatten_model(model_file_name, model_class_name, inst_prg_root):
     
     except jpype.JavaException, ex:
         _handle_exception(ex)
-        print "! Flattening failed."
 
 
 def generate_code(fclass):
@@ -156,7 +190,13 @@ def generate_code(fclass):
         
         @param fclass: Reference to the flattened model object representation.  
         
-        @todo: Proper errorhandling. Should throw Python exceptions.
+        @raise IOError:
+            Raised if the model file is not found, can not be read or
+            any other IO related error.
+        @raise JError:
+            Raised if there was a runtime exception thrown by the underlying Java
+            classes, for example, NullPointerException.
+
     """
     xmlpath = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_template.xml'
     cppath = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_template.c'
@@ -165,7 +205,6 @@ def generate_code(fclass):
         JCompiler.generateCode(fclass, xmlpath, cppath)
     except jpype.JavaException, ex:
         _handle_exception(ex)
-        print "! Generating code failed."
 
 
 def compile_dll(c_file_name, build_wth_algs=False):
@@ -202,29 +241,55 @@ def compile_dll(c_file_name, build_wth_algs=False):
 
 
 def _handle_exception(ex):
-    """ Help function which catches and handles all Java Exceptions that 
-    the underlying Java classes might throw.
+    """ Help function which catches and handles all expected Java Exceptions 
+        that the underlying Java classes might throw.
     
-    @todo: Proper errorhandling. Should throw Python exceptions.
     """      
 
     if ex.javaClass() is org.jmodelica.ast.CompilerException:
-        print "*** Caught CompilerException ***"
-        #throw python exception
+        arraylist = ex.__javaobject__.getProblems()
+        itr = arraylist.iterator()
+
+        problems = ""
+        while itr.hasNext():
+            problems=problems+str(itr.next())
+
+        raise CompilerError(problems)
         
     if ex.javaClass() is org.jmodelica.ast.ModelicaClassNotFoundException:
-        print "*** Caught ModelicaClassNotFoundException ***"
-        #throw python exception
+        raise ModelicaClassNotFoundError(str(ex.__javaobject__.getClassName()))
         
     if ex.javaClass() is jpype.java.io.FileNotFoundException:
-        print "*** Caught FileNotFoundException ***"
-        #throw python exception
+        raise IOError(ex.message())
         
     if ex.javaClass() is jpype.java.io.IOException:
-        print "*** Caught IOException ***"
-        #throw python exception
+        raise IOError(ex.message())           
 
     if ex.javaClass() is jpype.java.lang.Exception:
-        print "*** Caught Exception ***"
-        #throw python exception
+        raise Exception(ex.message())
+    
+    if ex.javaClass() is jpype.java.lang.NullPointerException:
+        raise JError(str(ex.stacktrace()))
+
+
+class JError(Exception):
+    """ Base class for exceptions specific to this module. 
+    """
+    def __init__(self, message):
+        self.message = message
+        
+    def __str__(self):
+        return self.message
+
+class ModelicaClassNotFoundError(JError):
+    """ Raised if the model class to be compiled can not be found.
+    """
+    pass
+
+class CompilerError(JError):
+    """ Raised if there were one or more errors found during compilation 
+        of the model. If there are several errors in one model, they are 
+        collected and presented in one CompilerError. 
+    """
+    pass
 
