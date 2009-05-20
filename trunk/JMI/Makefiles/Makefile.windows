@@ -30,18 +30,22 @@
 #                         or equivalently, the directory of a binary JModelica
 #                         distribution.
 #   CPPAD_HOME            (mandatory) The directory of CppAD.
-#   BUILD_WITH_ALGORITHMS (optional) Default is 'false'. If this argument is set to
-#                         'true' a dll containing also optimization algorithms and the
-#                         IPOPT interface is built.
 #   IPOPT_HOME            (mandatory if BUILD_WITH_ALGORITHMS=true) An IPOPT build
 #                         directory.
-#            
+#
+# The following targets are supported:
+#    model        Build a shared object file containing the generated code
+#                 and the low level JMI interface (contained in jmi.a)
+#    algorithms   Build a shared object file including the content resulting 
+#                 in the target 'basic' and in addition JMI algorithms.
+#    ipopt        Build a shared object file including the content resulting 
+#                 in the target 'algorithms' and in addition the Ipopt algorithm
+#                 interface.                 
 # Example:
-#  make -f Makefile.windows
+#  make -f Makefile.windows ipopt
 #       FILE_NAME=CCodeGenTests.CCodeGenTest2 \
-#       JMODELICA_HOME=/c/jmodelica/build \
+#       JMODELICA_HOME=/c/jmodelica_install \
 #       CPPAD_HOME=/c/CppAD-20090303.0/ \
-#       BUILD_WITH_ALGORITHMS=true \
 #       IPOPT_HOME=/c/Ipopt-3.5.5/build \
 #
 #
@@ -83,38 +87,56 @@ CPPADINCDIR = $(CPPAD_HOME)
 JMILIBDIR = ${JMODELICA_HOME}/lib
 
 # Libraries necessary to link with jmi
-ifeq ($(BUILD_WITH_ALGORITHMS),true)
-LIBS = -L$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad -L$(IPOPT_HOME)/lib -lipopt -lm -lfrtbegin -lg2c -lmingw32 -lmoldname -lmingwex -lmsvcrt -luser32 -lkernel32 -ladvapi32 -lshell32 -lstdc++ 
-else
 LIBS = -L$(JMILIBDIR) -ljmi_cppad 
-endif
+LIBS_IPOPT = -L$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad -L$(IPOPT_HOME)/lib -lipopt -lm -lfrtbegin -lg2c -lmingw32 -lmoldname -lmingwex -lmsvcrt -luser32 -lkernel32 -ladvapi32 -lshell32 -lstdc++ 
 
 # Include paths for compilation
-ifeq ($(BUILD_WITH_ALGORITHMS),true)
-INCL = -I$(JMIINCDIR) -I$(CPPADINCDIR) -I$(IPOPT_HOME)/include/coin
-else
 INCL = -I$(JMIINCDIR) -I$(CPPADINCDIR)
+
+model: $(OBJS)
+	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) $(LIBS)
+
+algorithms: $(OBJS)
+# This is to ensure that the contents of libjmi_algorithm_cppad and
+# is included in the resulting shared object file.
+ifeq "$(wildcard .jmi_objs )" ""
+	mkdir .jmi_objs
 endif
+	cd .jmi_objs && ar -x $(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a   
+	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/*.o $(LIBS)
+	del .jmi_objs\*.o
+	rmdir .jmi_objs
 
-all: $(SHARED)
-
-.SUFFIXES: .cpp .c .o .obj
-
-# Create the shared library
-$(SHARED): $(OBJS)
-ifeq ($(BUILD_WITH_ALGORITHMS),true)
+ipopt: $(OBJS)
 # This is to ensure that the contents of libjmi_algorithm_cppad and
 # libjmi_solver_cppade is included in the resulting shared object file.
 ifeq "$(wildcard .jmi_objs )" ""
 	mkdir .jmi_objs
 endif
 	cd .jmi_objs && ar -x $(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a  && ar -x $(JMODELICA_HOME)/lib/libjmi_solver_cppad.a  
-	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $@ $(OBJS) ./.jmi_objs/*.o $(LIBS)
+	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/*.o $(LIBS_IPOPT)
 	del .jmi_objs\*.o
 	rmdir .jmi_objs
-else
-	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $@ $(OBJS) $(LIBS)
-endif
+
+all: $(SHARED)
+
+.SUFFIXES: .cpp .c .o .obj
+
+## Create the shared library
+#$(SHARED): $(OBJS)
+#ifeq ($(BUILD_WITH_ALGORITHMS),true)
+## This is to ensure that the contents of libjmi_algorithm_cppad and
+## libjmi_solver_cppade is included in the resulting shared object file.
+#ifeq "$(wildcard .jmi_objs )" ""
+#	mkdir .jmi_objs
+#endif
+#	cd .jmi_objs && ar -x $(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a  && ar -x $(JMODELICA_HOME)/lib/libjmi_solver_cppad.a  
+#	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $@ $(OBJS) ./.jmi_objs/*.o $(LIBS)
+#	del .jmi_objs\*.o
+#	rmdir .jmi_objs
+#else
+#	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $@ $(OBJS) $(LIBS)
+#endif
 
 # Compile
 .cpp.o:

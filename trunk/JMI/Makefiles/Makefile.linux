@@ -44,9 +44,9 @@
 # Example:
 #  make -f Makefile.linux ipopt \
 #    FILE_NAME=CCodeGenTests.CCodeGenTest1 \
-#    JMODELICA_HOME=/Users/jakesson/projects/JModelica/build \
-#    CPPAD_HOME=/Users/jakesson/packages/cppad-20081116/ \
-#    IPOPT_HOME=/Users/jakesson/packages/Ipopt/3.5.4/build
+#    JMODELICA_HOME=/home/jakesson/projects/JModelica/build \
+#    CPPAD_HOME=/home/jakesson/packages/cppad-20081116/ \
+#    IPOPT_HOME=/home/jakesson/packages/Ipopt/3.5.4/build
 #
 
 # Name of shared library
