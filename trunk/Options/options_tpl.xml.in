@@ -6,17 +6,10 @@
 	</ModelicaLibrary>
 	<Options>
 		<Option>
-			<Type>Real</Type>
-			<RealAttributes>
-				<Key>realkey</Key>
-				<Value>1.0</Value>
-			</RealAttributes>
-		</Option>
-		<Option>
 			<Type>String</Type>
 			<StringAttributes>
-				<Key>py_version</Key>
-				<Value>2.6</Value>
+				<Key>default_msl_version</Key>
+				<Value>3.0.1</Value>
 			</StringAttributes>
 		</Option>
 	</Options>	
