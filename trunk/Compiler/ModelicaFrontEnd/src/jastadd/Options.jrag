@@ -158,12 +158,6 @@ aspect Options {
 		
 		public OptionRegistry() {
 			optionsMap = new HashMap<String,Option>();
-		
-			// Options are created here. May want to read options from
-			// file as well.
-			createModelicaLibraryOption();
-			createStringOption("default_msl_version","Default version of" +
-					"the Modelica standard library.","3.0.1");
 		}
 		
 		protected void createModelicaLibraryOption() {
@@ -201,7 +195,7 @@ aspect Options {
 		public void setIntegerOption(String key, int value) {
 			Option o = optionsMap.get(key);
 			if (o == null) {
-				throw new UnknownOptionException("Unknown option: "+key);
+				createIntegerOption(key, "IntegerOption", value);
 			} else if (o instanceof IntegerOption) {
 				((IntegerOption)o).setValue(value);
 			} else {
@@ -231,7 +225,7 @@ aspect Options {
 		public void setStringOption(String key, String value) {
 			Option o = optionsMap.get(key);
 			if (o == null) {
-				throw new UnknownOptionException("Unknown option: "+key);
+				createStringOption(key, "StringOption", value);
 			} else if (o instanceof StringOption) {
 				((StringOption)o).setValue(value);
 			} else {
@@ -261,7 +255,7 @@ aspect Options {
 		public void setRealOption(String key, double value) {
 			Option o = optionsMap.get(key);
 			if (o == null) {
-				throw new UnknownOptionException("Unknown option: "+key);
+				createRealOption(key, "RealOption", value);
 			} else if (o instanceof RealOption) {
 				((RealOption)o).setValue(value);
 			} else {
@@ -291,7 +285,7 @@ aspect Options {
 		public void setBooleanOption(String key, boolean value) {
 			Option o = optionsMap.get(key);
 			if (o == null) {
-				throw new UnknownOptionException("Unknown option: "+key);
+				createBooleanOption(key, "BooleanOption", value);
 			} else if (o instanceof BooleanOption) {
 				((BooleanOption)o).setValue(value);
 			} else {
