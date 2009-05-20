@@ -578,7 +578,7 @@ aspect ConstantEvaluation {
   eq FRealType.div(CValue v1, CValue v2) = 
 	  new CValueReal(v1.realValue()/v2.realValue());
   eq FIntegerType.div(CValue v1, CValue v2) = 
-	  new CValueInteger(v1.intValue()/v2.intValue());
+	  new CValueReal(v1.realValue()/v2.realValue());
 
   /**
    * \brief Power expression for constant values.
