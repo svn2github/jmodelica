@@ -205,7 +205,7 @@ public class XMLGenerator extends GenericGenerator {
 				
 				//Description (optional)
 				if(variable.hasFStringComment()) {
-					genPrinter.print(tg.generateTag("Description")+variable.getFStringComment()+tg.generateTag("Description"));
+					genPrinter.print(tg.generateTag("Description")+variable.getFStringComment().getComment()+tg.generateTag("Description"));
 				}
 				
 				//Private/Protected (Optional)
