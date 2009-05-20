@@ -98,6 +98,23 @@ model OptimicaTests
     di.u<=1;
     di.v<=0.5;
   end OptDiTest1;
+
+  optimization OptDiTest2 (objective=cost(finalTime),
+                           startTime=0,
+                           finalTime=5)
+    DoubleIntegrator di(u(free=true));
+    Real cost(start=0);
+
+  equation
+    der(cost)=di.x^2 + di.v^2 + di.u^2;
+  constraint
+    di.x(finalTime)=1;
+    di.v(finalTime)=0;
+    di.u>=-1;
+    di.u<=1;
+    di.v<=0.5;
+  end OptDiTest2;
+
   
 optimization DIMinTime (objective=cost(finalTime),
                         startTime=0,
@@ -134,6 +151,8 @@ constraint
   di.v<=0.5;
   di.u>=-1; di.u<=1;
 end DIMinTime;
+
+
 
 model Servo 
   
