@@ -56,8 +56,8 @@ aspect FlatAPI {
 			return index + derivativeVariables().indexOf(fv);
 		} 		
 		index += numDerivativeVariables(); 
-		if (derivativeVariables().indexOf(fv) >= 0) {
-			return index + derivativeVariables().indexOf(fv);
+		if (differentiatedRealVariables().indexOf(fv) >= 0) {
+			return index + differentiatedRealVariables().indexOf(fv);
 		} 
 		index += numDifferentiatedRealVariables();
 		if (realInputs().indexOf(fv) >= 0) {
