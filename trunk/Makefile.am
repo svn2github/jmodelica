@@ -56,7 +56,8 @@ endif
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar $(prefix)/ThirdParty/Beaver/lib/ 
 	mkdir $(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/jmi_modelica_template.c $(prefix)/CodeGenTemplates
-	cp  $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd/templates/jmi_modelica_template.xml $(prefix)/CodeGenTemplates
+	cp  $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd/templates/jmi_modelica_variables_template.xml $(prefix)/CodeGenTemplates
+	cp  $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd/templates/jmi_modelica_values_template.xml $(prefix)/CodeGenTemplates
 	mkdir $(prefix)/XML
 	cp  $(abs_top_srcdir)/XML/*.xsd $(prefix)/XML
 
