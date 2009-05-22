@@ -550,28 +550,7 @@ def load_model(filepath):
     dll = load_DLL(filepath)
 
 
-def load_xml(filename, filepath='.', schemaname='', schemapath='.'):
-    """ Parses an XML file. Can validate against a schema if an XML Schema
-        file and path is present.
-        
-        @param filename: 
-            Name of XML file to parse.
-        @param filepath: 
-            Path (relative or absolute) to XML file. Default is current folder.
-        @param schemaname: 
-            Name of XML Schema file to use for validation. If empty string then 
-            validation is skipped.
-        @param schemapath: 
-            Path (relative or absolute) to XMLSchema. Default is current folder.
-            
-        @return: 
-            An object representing the parsed XML file.
-    """
-    xmldoc = xmlparser.parseXML(filename, filepath, schemaname, schemapath)
-    
-    return xmldoc
-
-def _translateValueRef(valueref):
+def _translate_value_ref(valueref):
     """ Uses a value reference which is a 32 bit unsigned int to get type of 
         variable and index in vector using the protocol: bit 0-28 is index, 
         29-31 is primitive type.
@@ -624,10 +603,18 @@ class JMIModel(object):
         self._t = self._dll.jmi_get_t(self._jmi)
         self._z = self._dll.jmi_get_z(self._jmi)
 
+        # set start attributes
         xml_variables_name=libname+'_variables.xml' 
         # assumes libname is name of model and xmlfile is located in the same dir as the dll
-        self._set_XMLvariables_doc(load_xml(xml_variables_name,path))
-        self._setStartAttributes()
+        self._set_XMLvariables_doc(xmlparser.XMLVariablesDoc(path+os.sep+xml_variables_name))
+        self._set_start_attributes()
+        
+        # set independent parameter values
+        xml_values_name = libname+'_values.xml'
+        self._set_XMLvalues_doc(xmlparser.XMLValuesDoc(path+os.sep+xml_values_name))
+        self._set_iparam_values()
+        
+        self.initAD()
                 
     def __del__(self):
         """Freeing jmi data structure.
@@ -820,26 +807,33 @@ class JMIModel(object):
     z = property(getZ, setZ, "All parameters, variables and point-wise evaluated variables vector.")
     
     def _get_XMLvariables_doc(self):
-        """ Gets a reference to the XMLDoc for model variables instance set for this JMIModel.
+        """ Gets a reference to the XMLDoc instance for model variables set for this JMIModel.
         """
         return self._xmlvariables_doc
     
     def _set_XMLvariables_doc(self, doc):
-        """ Sets the XMLDoc for model variables for this JMIModel created with load_xml.
+        """ Sets the XMLDoc for model variables for this JMIModel.
         """
         self._xmlvariables_doc = doc
+
+    def _get_XMLvalues_doc(self):
+        """ Gets a reference to the XMLDoc instance for independent parameter values set for this JMIModel.
+        """
+        return self._xmlvalues_doc
+    
+    def _set_XMLvalues_doc(self, doc):
+        """ Sets the XMLDoc for independent parameter values for this JMIModel.
+        """
+        self._xmlvalues_doc = doc
         
-    def _setStartAttributes(self):
+    def _set_start_attributes(self):
         """ Sets start attributes for all variables in this JMIModel. The start attributes are 
             fetched together with the corresponding valueReferences from the XMLDoc instance. 
             The valueReferences are mapped to which primitive type vector and index in vector 
             each start value belongs to using the protocol implemented in _translateValueRef.
-        
-            Note: The XMLDoc object must have been created by calling load_xml and set with 
-            _setXMLdoc before using this method.
         """
         xmldoc = self._get_XMLvariables_doc()
-        start_attr = xmldoc.getStartAttributes()
+        start_attr = xmldoc.get_start_attributes()
         
         #Real variables vector
         z = self.getZ()
@@ -850,7 +844,7 @@ class JMIModel(object):
         for key in keys:
             value = start_attr.get(key)
             
-            (i, ptype) = _translateValueRef(key)
+            (i, ptype) = _translate_value_ref(key)
             if(ptype == 0):
                 # Primitive type is Real
                 z[i] = value
@@ -865,4 +859,39 @@ class JMIModel(object):
                 pass
             else:
                 "Unknown type"
-            
+    
+    def _set_iparam_values(self):
+        """ Sets values for the independent parameters in this JMIModel.
+        """
+        xmldoc = self._get_XMLvalues_doc()
+        values = xmldoc.get_iparam_values()
+       
+        z = self.getZ()
+       
+        keys = values.keys()
+        keys.sort()
+       
+        for key in keys:
+            value = values.get(key)
+            (i, ptype) = _translate_value_ref(key)
+           
+            if(ptype == 0):
+               # Primitive type is Real
+               z[i] = value
+            elif(ptype == 1):
+                # Primitive type is Integer
+                pass
+            elif(ptype == 2):
+                # Primitive type is Boolean
+                pass
+            elif(ptype == 3):
+                # Primitive type is String
+                pass
+            else:
+                "Unknown type"
+        
+        
+        
+        
+        
+        

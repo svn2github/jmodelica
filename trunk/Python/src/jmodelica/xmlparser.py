@@ -20,19 +20,14 @@
 from lxml import etree
 import os.path
 
-def parseXML(filename, filepath='.', schemaname='', schemapath='.'):
+def _parse_XML(filename, schemaname=''):
     """ Parses and validates (optional) an XML file and returns an
         object representing the parsed XML.
     
         @param filename: 
-            Name of XML file to parse.
-        @param filepath: 
-            Path (absolute or relative) to the XML file. Default is current folder.
+            Name of XML file to parse including absolute or relative path.
         @param schemaname: 
-            Name of XML Schema file (if any).
-        @param schemapath: 
-            Path (absolute or relative) to the XML Schema file (if any). 
-            Default is current folder.
+            Name of XML Schema file including absolute or relative path (if any).
         
         @raise XMLException: 
             If the XML file can not be read or is not well-formed. If a schema is 
@@ -40,14 +35,14 @@ def parseXML(filename, filepath='.', schemaname='', schemapath='.'):
             or if the validation fails. 
         
         @return: 
-            XMLdoc, object representing the parsed XML file.
+            Reference to the ElementTree object containing the parsed XML.
     """
     
-    fpath = os.path.join(filepath,filename)
-    schpath = os.path.join(schemapath,schemaname)
+    #fpath = os.path.join(filepath,filename)
+    #schpath = os.path.join(schemapath,schemaname)
     
     try:
-        xmldoc = etree.ElementTree(file=fpath)
+        xmldoc = etree.ElementTree(file=filename)
     except etree.XMLSyntaxError, detail:
         raise XMLException("The XML file: %s is not well-formed. %s" %(filename, detail))
     except IOError, detail:
@@ -55,7 +50,7 @@ def parseXML(filename, filepath='.', schemaname='', schemapath='.'):
     
     if schemaname:
         try:
-            schemadoc = etree.ElementTree(file=schpath)
+            schemadoc = etree.ElementTree(file=schemaname)
         except etree.XMLSyntaxError, detail:
             raise XMLException("The XMLSchema: %s is not well-formed. %s" %(schemaname, detail))
         except IOError, detail:
@@ -69,19 +64,23 @@ def parseXML(filename, filepath='.', schemaname='', schemapath='.'):
         if not result:
             raise XMLException("The XML file: %s is not valid according to the XMLSchema: %s." %(filename, schemaname))
         
-    return XMLdoc(xmldoc)
+    return xmldoc
 
 
 class XMLdoc:
-    """ Class representing a parsed XML file.
+    """ Base class representing a parsed XML file.
     """
     
-    def __init__(self,doc):
-        self._doc = doc
-        self._xpatheval = etree.XPathEvaluator(doc)
-        
-    def _getRealStartAttributes(self):
-        """ Help function which extracts the ValueReference and Start attribute of all Real
+    def __init__(self, filename, schemaname=''):
+        _doc = _parse_XML(filename, schemaname)
+        self._xpatheval = etree.XPathEvaluator(_doc)
+
+class XMLVariablesDoc(XMLdoc):
+    """ Class representing a parsed XML file containing model variable meta data.
+    """
+       
+    def _get_real_start_attributes(self):
+        """ Help function which extracts the ValueReference and Start attribute for all Real
             variables in the XML document.
             
             @return: Dict with ValueReference as key and Start attribute as value. 
@@ -91,8 +90,8 @@ class XMLdoc:
         
         return dict(zip(keys,vals))
 
-    def _getIntStartAttributes(self):
-        """ Help function which extracts the ValueReference and Start attribute of all Integer
+    def _get_int_start_attributes(self):
+        """ Help function which extracts the ValueReference and Start attribute for all Integer
             variables in the XML document.
             
             @return: Dict with ValueReference as key and Start attribute as value. 
@@ -103,8 +102,8 @@ class XMLdoc:
         
         return dict(zip(keys,vals))
     
-    def _getStringStartAttributes(self):
-        """ Help function which extracts the ValueReference and Start attribute of all String
+    def _get_string_start_attributes(self):
+        """ Help function which extracts the ValueReference and Start attribute for all String
             variables in the XML document.
             
             @return: Dict with ValueReference as key and Start attribute as value. 
@@ -115,8 +114,8 @@ class XMLdoc:
         
         return dict(zip(keys,vals))
 
-    def _getBooleanStartAttributes(self):
-        """ Help function which extracts the ValueReference and Start attribute of all Boolean
+    def _get_boolean_start_attributes(self):
+        """ Help function which extracts the ValueReference and Start attribute for all Boolean
             variables in the XML document.
             
             @return: Dict with ValueReference as key and Start attribute as value. 
@@ -128,18 +127,83 @@ class XMLdoc:
         return dict(zip(keys,vals))
 
            
-    def getStartAttributes(self):
-        """ Extracts ValueReference and Start attribute of all variables in the XML document.
+    def get_start_attributes(self):
+        """ Extracts ValueReference and Start attribute for all variables in the XML document.
             
             @return: Dict with ValueReference as key and Start attribute as value. 
         """
-        result=self._getRealStartAttributes()
-        result.update(self._getIntStartAttributes())
-        result.update(self._getStringStartAttributes())
-        result.update(self._getBooleanStartAttributes())
+        result=self._get_real_start_attributes()
+        result.update(self._get_int_start_attributes())
+        result.update(self._get_string_start_attributes())
+        result.update(self._get_boolean_start_attributes())
         
         return result
-    
+
+class XMLValuesDoc(XMLdoc):
+    """ Class representing a parsed XML file containing values for all independent parameters.
+    """
         
+    def _get_boolean_values(self):
+        """ Help function which extracts the ValueReference and value for all Boolean
+            independent parameters in the XML document.
+            
+            @return: Dict with ValueReference as key and parameter value as value. 
+        """
+
+        keys = self._xpatheval("//BooleanParameter/ValueReference/text()")
+        vals = self._xpatheval("//BooleanParameter/Value/text()")
+
+        return dict(zip(keys,vals))
+
+    def _get_string_values(self):
+        """ Help function which extracts the ValueReference and value for all String
+            independent parameters in the XML document.
+            
+            @return: Dict with ValueReference as key and parameter value as value. 
+        """
+
+        keys = self._xpatheval("//StringParameter/ValueReference/text()")
+        vals = self._xpatheval("//StringParameter/Value/text()")
+
+        return dict(zip(keys,vals))
+
+    def _get_integer_values(self):
+        """ Help function which extracts the ValueReference and value for all Integer
+            independent parameters in the XML document.
+            
+            @return: Dict with ValueReference as key and parameter value as value. 
+        """
+
+        keys = self._xpatheval("//IntegerParameter/ValueReference/text()")
+        vals = self._xpatheval("//IntegerParameter/Value/text()")
+
+        return dict(zip(keys,vals))
+
+    def _get_real_values(self):
+        """ Help function which extracts the ValueReference and value for all Real
+            independent parameters in the XML document.
+            
+            @return: Dict with ValueReference as key and parameter value as value. 
+        """
+
+        keys = self._xpatheval("//RealParameter/ValueReference/text()")
+        vals = self._xpatheval("//RealParameter/Value/text()")
+
+        return dict(zip(keys,vals))
+        
+    def get_iparam_values(self):
+        """ Extracts ValueReference and value for all independent parameters in the XML document.
+            
+            @return: Dict with ValueReference as key and parameter value as value. 
+        """
+
+        result = self._get_boolean_values()
+        result.update(self._get_string_values())
+        result.update(self._get_integer_values())
+        result.update(self._get_real_values())
+
+        return result
+        
+       
 class XMLException(Exception):
     pass
