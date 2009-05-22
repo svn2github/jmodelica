@@ -72,11 +72,12 @@ def compile_model(model_file_name, model_class_name, build_wth_algs=False):
         classes, for example, NullPointerException.
         
 """
-    xmlpath = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_template.xml'
+    xml_variables_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_variables_template.xml'
+    xml_values_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_values_template.xml'
     cppath = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_template.c'
 
     try:
-        JCompiler.compileModel(model_file_name, model_class_name, xmlpath, cppath)
+        JCompiler.compileModel(model_file_name, model_class_name, xml_variables_path, xml_values_path, cppath)
         c_file = model_class_name.replace('.','_',1)
         retval = compile_dll(c_file, build_wth_algs)
         return retval
@@ -198,11 +199,12 @@ def generate_code(fclass):
             classes, for example, NullPointerException.
 
     """
-    xmlpath = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_template.xml'
+    xml_variables_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_variables_template.xml'
+    xml_values_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_values_template.xml'
     cppath = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_template.c'
 
     try:
-        JCompiler.generateCode(fclass, xmlpath, cppath)
+        JCompiler.generateCode(fclass, xml_variables_path, xml_values_path, cppath)
     except jpype.JavaException, ex:
         _handle_exception(ex)
 

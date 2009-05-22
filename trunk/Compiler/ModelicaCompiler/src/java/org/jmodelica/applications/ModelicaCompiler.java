@@ -54,7 +54,8 @@ import org.jmodelica.ast.PrettyPrinter;
 import org.jmodelica.ast.SourceRoot;
 import org.jmodelica.ast.StoredDefinition;
 import org.jmodelica.codegen.CGenerator;
-import org.jmodelica.codegen.XMLGenerator;
+import org.jmodelica.codegen.XMLVariableGenerator;
+import org.jmodelica.codegen.XMLValueGenerator;
 import org.jmodelica.parser.ModelicaParser;
 import org.jmodelica.parser.ModelicaScanner;
 import org.jmodelica.ast.Problem;
@@ -134,16 +135,18 @@ public class ModelicaCompiler {
 		
 		String name = args[arg];
 		String cl = args[arg+1];
-		String xmltempl = null;
+		String xmlVariablesTempl = null;
+		String xmlValuesTempl = null;
 		String ctempl = null;
 		
-		if (args.length >= arg+4) {
-			xmltempl = args[arg+2];
-			ctempl = args[arg+3];
+		if (args.length >= arg+5) {
+			xmlVariablesTempl = args[arg+2];
+			xmlValuesTempl = args[arg+3];
+			ctempl = args[arg+4];
 		}
 		
 		try {
-			compileModel(name, cl, xmltempl, ctempl);
+			compileModel(name, cl, xmlVariablesTempl, xmlValuesTempl, ctempl);
 		} catch  (ModelicaClassNotFoundException e){
 			logger.severe("Could not find the class "+ cl);
 			System.exit(0);
@@ -205,17 +208,18 @@ public class ModelicaCompiler {
 	}
 	
 	/**
-	 * Compiles a Modelica model. A model file name and class must be provided. A 
-	 * template file for XML and one for c can be provided to generatate code for 
+	 * Compiles a Modelica model. A model file name and class must be provided. Two  
+	 * template files for XML and one for c can be provided to generatate code for 
 	 * this model. Prints an error and returns without completion if, for example, 
 	 * a file can not be found or if the parsing fails. 
 	 * 
 	 * @param name The name of the model file.
 	 * @param cl The name of the class in the model file to compile.
-	 * @param xmlTemplatefile The XML template file (optional).
+	 * @param xmlVariablesTempl The XML template file for model variables(optional).
+	 * @param xmlValuesTempl The XML template file for independent parameter values (optional).
 	 * @param cTemplatefile The c template file (optional).
 	 */
-	public static void compileModel(String name, String cl, String xmlTemplatefile, String cTemplatefile) 
+	public static void compileModel(String name, String cl, String xmlVariablesTempl, String xmlValuesTempl, String cTemplatefile) 
 	  throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, Exception {
 		logger.info("======= Compiling model =======");
 		
@@ -229,8 +233,8 @@ public class ModelicaCompiler {
 		FClass fc = flattenModel(name, cl, ipr);
 
 		// Generate code?
-		if (xmlTemplatefile != null && cTemplatefile != null) {
-			generateCode(fc, xmlTemplatefile, cTemplatefile);
+		if (xmlVariablesTempl != null && xmlValuesTempl !=null && cTemplatefile != null) {
+			generateCode(fc, xmlVariablesTempl, xmlValuesTempl, cTemplatefile);
 		}
 		
 		logger.info("====== Model compiled successfully =======");
@@ -359,22 +363,27 @@ public class ModelicaCompiler {
 
 	/**
 	 * 
-	 * Generates XML and c code for a flattened model represented as an 
-	 * instance of FClass using template files. The XML and c files are 
-	 * given the default names <modelname>.xml and <modelname>.c respectively.
+	 * Generates XML and c code for a flattened model represented as an instance of FClass using 
+	 * template files. The XML variables, XML values and c files are given the default names 
+	 * <modelname>_variables.xml, <modelname>_values.xml and <modelname>.c respectively.
 	 * 
 	 * @param fc The FClass instance for which the code generation should be computed.
-	 * @param xmltemplate The path to the XML template file.
+	 * @param xmlVariablesTempl The path to the XML template file for model variables.
+	 * @param xmlValuesTempl The path to the XML template file for independent parameter values.
 	 * @param ctemplate The path to the c template file.
 	 * @throws FileNotFoundException Throws the exception if either of the two files are not found.
 	 */
-	public static void generateCode(FClass fc, String xmltemplate, String ctemplate) throws FileNotFoundException {
+	public static void generateCode(FClass fc, String xmlVariablesTempl, String xmlValuesTempl, String ctemplate) throws FileNotFoundException {
 		logger.info("Generating code...");
 		
-		XMLGenerator generator = new XMLGenerator(new PrettyPrinter(), '$', fc);
-		String output = fc.nameUnderscore()+".xml";
-		generator.generate(xmltemplate, output);
+		XMLVariableGenerator variablegenerator = new XMLVariableGenerator(new PrettyPrinter(), '$', fc);
+		String output = fc.nameUnderscore()+"_variables.xml";
+		variablegenerator.generate(xmlVariablesTempl, output);
 
+		XMLValueGenerator valuegenerator = new XMLValueGenerator(new PrettyPrinter(), '$', fc);
+		output = fc.nameUnderscore()+"_values.xml";
+		valuegenerator.generate(xmlValuesTempl, output);
+		
 		CGenerator cgenerator = new CGenerator(new PrettyPrinter(), '$', fc);
 		output = fc.nameUnderscore() + ".c";
 		cgenerator.generate(ctemplate, output);

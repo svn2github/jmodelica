@@ -624,9 +624,9 @@ class JMIModel(object):
         self._t = self._dll.jmi_get_t(self._jmi)
         self._z = self._dll.jmi_get_z(self._jmi)
 
-        xmlname=libname+'.xml' 
+        xml_variables_name=libname+'_variables.xml' 
         # assumes libname is name of model and xmlfile is located in the same dir as the dll
-        self._setXMLdoc(load_xml(xmlname,path))
+        self._set_XMLvariables_doc(load_xml(xml_variables_name,path))
         self._setStartAttributes()
                 
     def __del__(self):
@@ -819,15 +819,15 @@ class JMIModel(object):
         
     z = property(getZ, setZ, "All parameters, variables and point-wise evaluated variables vector.")
     
-    def _getXMLdoc(self):
-        """ Gets a reference to the XMLDoc instance set for this JMIModel.
+    def _get_XMLvariables_doc(self):
+        """ Gets a reference to the XMLDoc for model variables instance set for this JMIModel.
         """
-        return self._xmldoc
+        return self._xmlvariables_doc
     
-    def _setXMLdoc(self, doc):
-        """ Sets the XMLDoc for this JMIModel created with load_xml.
+    def _set_XMLvariables_doc(self, doc):
+        """ Sets the XMLDoc for model variables for this JMIModel created with load_xml.
         """
-        self._xmldoc = doc
+        self._xmlvariables_doc = doc
         
     def _setStartAttributes(self):
         """ Sets start attributes for all variables in this JMIModel. The start attributes are 
@@ -838,7 +838,7 @@ class JMIModel(object):
             Note: The XMLDoc object must have been created by calling load_xml and set with 
             _setXMLdoc before using this method.
         """
-        xmldoc = self._getXMLdoc()
+        xmldoc = self._get_XMLvariables_doc()
         start_attr = xmldoc.getStartAttributes()
         
         #Real variables vector

@@ -44,7 +44,7 @@ import org.jmodelica.ast.Printer;
  * @see AbstractGenerator
  * 
  */
-public class XMLGenerator extends GenericGenerator {
+public class XMLVariableGenerator extends GenericGenerator {
 		
 	class DAETag_XML_modelName extends DAETag {
 		
@@ -263,13 +263,15 @@ public class XMLGenerator extends GenericGenerator {
 					if(realvariable.maxAttributeSet()) {
 						genPrinter.print(tg.generateTag("Max")+realvariable.maxAttribute()+tg.generateTag("Max"));
 					}
-					//start attribute should always be set
-					if(realvariable.isParameter() && realvariable.hasBindingExp()) {
-						genPrinter.print(tg.generateTag("Start")+realvariable.getBindingExp().ceval().realValue()+tg.generateTag("Start"));
-					}
-					else {
-						genPrinter.print(tg.generateTag("Start") +realvariable.startAttribute()+tg.generateTag("Start"));
-					}						
+					//start attribute should always be set - Changed when independent parameter xml has been introduced.
+//					if(realvariable.isParameter() && realvariable.hasBindingExp()) {
+//						genPrinter.print(tg.generateTag("Start")+realvariable.getBindingExp().ceval().realValue()+tg.generateTag("Start"));
+//					}
+//					else {
+//						genPrinter.print(tg.generateTag("Start") +realvariable.startAttribute()+tg.generateTag("Start"));
+//					}
+					genPrinter.print(tg.generateTag("Start") +realvariable.startAttribute()+tg.generateTag("Start"));
+
 					//nominal
 					if(realvariable.nominalAttributeSet()) {
 						genPrinter.print(tg.generateTag("Nominal")+realvariable.nominalAttribute()+tg.generateTag("Nominal"));
@@ -410,88 +412,6 @@ public class XMLGenerator extends GenericGenerator {
 		}
 	}
 	
-	/**
-	 * A helper class to XMLGenerator for providing start and end tags with the
-	 * correct amount of tabs. This class will be used in the XML code
-	 * generation for the model meta-data parts which are optional and therefore
-	 * can not use a template.
-	 * 
-	 */
-	private class TagGenerator {
-		private String tabs="";
-		private Stack<String> stack;
-		private String previous;
-		
-		/**
-		 * Constructor.
-		 * 
-		 * @param tabstart Number of tabs indent at start.
-		 */
-		public TagGenerator(int tabstart) {
-			stack = new Stack<String>();
-			for(int i =0; i<tabstart; i++) {
-				tabs=tabs+"\t";
-			}
-		}
-		
-		/**
-		 * Generates a tag with a certain tagname.
-		 * 
-		 * The first time the tagname is encountered a start tag is created. The
-		 * second time the same tagname is used a matching end tag is created.
-		 * For each unique tagname a new start tag is created with one more tab
-		 * indent. If start and end tags are encountered immediately after each
-		 * other they will be on the same line.
-		 * 
-		 * @param tagname The name of the tag to create.
-		 * @return Start or end tag with name set to <tagname>.
-		 */
-		public String generateTag(String tagname) {
-			if(stack.isEmpty() || !stack.peek().equals(tagname.trim())) {
-				stack.push(tagname.trim());
-				return generateStartTag(tagname);
-			}else {
-				return generateEndTag(stack.pop());
-			} 
-		}
-		
-		/**
-		 * Generates a start tag with the specified tagname.
-		 * 
-		 * @param tagname
-		 *            The name of the tag for which a start tag should be
-		 *            created.
-		 * @return The start tag with name set to <tagname>.
-		 */
-		private String generateStartTag(String tagname) {				
-			String tag = "\n"+tabs+"<"+tagname+">";			
-			tabs=tabs+"\t";
-			previous = tagname;
-			
-			return tag;
-		}
-		
-		/**
-		 * Generates an end tag with the specified tagname.
-		 * 
-		 * @param tagname
-		 *            The name of the tag for which an end tag should be
-		 *            created.
-		 * @return The end tag with name set to <tagname>.
-		 */
-		private String generateEndTag(String tagname) {
-			String tag;
-			tabs=tabs.substring(1);
-			if(!previous.equals(tagname)) {
-				tag=("\n"+tabs);
-			} else {
-				tag=("");
-			}
-			tag=tag+("</"+tagname+">");
-
-			return tag;
-		}
-	}
 
 	/**
 	 * Constructor.
@@ -500,7 +420,7 @@ public class XMLGenerator extends GenericGenerator {
 	 * @param escapeCharacter Escape characters used to decode tags.
 	 * @param fclass An FClass object used as a basis for the code generation.
 	 */
-	public XMLGenerator(Printer expPrinter, char escapeCharacter,
+	public XMLVariableGenerator(Printer expPrinter, char escapeCharacter,
 			FClass fclass) {
 		super(expPrinter,escapeCharacter, fclass);
 		
@@ -533,6 +453,88 @@ public class XMLGenerator extends GenericGenerator {
 		tagMap.put(tag.getName(), tag);
 
 	}
+}
 
+/**
+ * A helper class to XMLGenerator for providing start and end tags with the
+ * correct amount of tabs. This class will be used in the XML code
+ * generation for the model meta-data parts which are optional and therefore
+ * can not use a template.
+ * 
+ */
+class TagGenerator {
+	private String tabs="";
+	private Stack<String> stack;
+	private String previous;
+	
+	/**
+	 * Constructor.
+	 * 
+	 * @param tabstart Number of tabs indent at start.
+	 */
+	public TagGenerator(int tabstart) {
+		stack = new Stack<String>();
+		for(int i =0; i<tabstart; i++) {
+			tabs=tabs+"\t";
+		}
+	}
+	
+	/**
+	 * Generates a tag with a certain tagname.
+	 * 
+	 * The first time the tagname is encountered a start tag is created. The
+	 * second time the same tagname is used a matching end tag is created.
+	 * For each unique tagname a new start tag is created with one more tab
+	 * indent. If start and end tags are encountered immediately after each
+	 * other they will be on the same line.
+	 * 
+	 * @param tagname The name of the tag to create.
+	 * @return Start or end tag with name set to <tagname>.
+	 */
+	public String generateTag(String tagname) {
+		if(stack.isEmpty() || !stack.peek().equals(tagname.trim())) {
+			stack.push(tagname.trim());
+			return generateStartTag(tagname);
+		}else {
+			return generateEndTag(stack.pop());
+		} 
+	}
+	
+	/**
+	 * Generates a start tag with the specified tagname.
+	 * 
+	 * @param tagname
+	 *            The name of the tag for which a start tag should be
+	 *            created.
+	 * @return The start tag with name set to <tagname>.
+	 */
+	private String generateStartTag(String tagname) {				
+		String tag = "\n"+tabs+"<"+tagname+">";			
+		tabs=tabs+"\t";
+		previous = tagname;
+		
+		return tag;
+	}
+	
+	/**
+	 * Generates an end tag with the specified tagname.
+	 * 
+	 * @param tagname
+	 *            The name of the tag for which an end tag should be
+	 *            created.
+	 * @return The end tag with name set to <tagname>.
+	 */
+	private String generateEndTag(String tagname) {
+		String tag;
+		tabs=tabs.substring(1);
+		if(!previous.equals(tagname)) {
+			tag=("\n"+tabs);
+		} else {
+			tag=("");
+		}
+		tag=tag+("</"+tagname+">");
+
+		return tag;
+	}
 }
 

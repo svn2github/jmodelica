@@ -19,7 +19,7 @@ package org.jmodelica.applications;
 import org.jmodelica.ast.*;
 import java.io.*;
 import org.jmodelica.parser.*;
-import org.jmodelica.codegen.XMLGenerator;
+import org.jmodelica.codegen.XMLVariableGenerator;
 import java.util.Collection;
 
 public class FlattenModel_XML {
@@ -133,8 +133,8 @@ public class FlattenModel_XML {
 		
 		      // Generate code?
 		      if (args.length==3) {
-		    	  XMLGenerator generator = 
-		    		  new XMLGenerator(new PrettyPrinter(), '$',fc);
+		    	  XMLVariableGenerator generator = 
+		    		  new XMLVariableGenerator(new PrettyPrinter(), '$',fc);
 		    	  System.out.println(generator.toString());
 		    	  //output file name
 		    	  String output = fc.name()+".xml";

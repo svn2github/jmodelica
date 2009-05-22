@@ -37,7 +37,7 @@ public class XMLCodeGenTestCase extends CodeGenTestCase {
 	}
 
 	public AbstractGenerator createGenerator(FClass fc) {
-		return new XMLGenerator(new PrettyPrinter(), '$',fc);		
+		return new XMLVariableGenerator(new PrettyPrinter(), '$',fc);		
 	}
 	
 }
