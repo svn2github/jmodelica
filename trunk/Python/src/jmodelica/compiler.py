@@ -42,7 +42,7 @@ org = jpype.JPackage('org')
 JCompiler = org.jmodelica.applications.ModelicaCompiler
 
 
-def compile_model(model_file_name, model_class_name, build_wth_algs=False):
+def compile_model(model_file_name, model_class_name, target = "model"):
     """ Performs all steps in the compilation of a model: parsing, 
     instantiating, flattening, code generation and dll generation.
     Outputs are object file, c-code file, xml file and dll which 
@@ -53,9 +53,11 @@ def compile_model(model_file_name, model_class_name, build_wth_algs=False):
         Path to file in which the model is contained.
     @param model_class_name:
         Name of model class in the model file to compile.
-    @param build_wth_algs:
-        Optional if compiled dll should also contain optimization algorithms.
-        Default is False.
+    @param target:
+        Set target to specify the contents of the object file used 
+        to build the .dll. Default is "model". Other two options
+        are "algorithms" and "ipopt". See makefile in install folder
+        for details.
         
     @raise CompilerError:
         Raised if one or more error is found during compilation.
@@ -79,7 +81,7 @@ def compile_model(model_file_name, model_class_name, build_wth_algs=False):
     try:
         JCompiler.compileModel(model_file_name, model_class_name, xml_variables_path, xml_values_path, cppath)
         c_file = model_class_name.replace('.','_',1)
-        retval = compile_dll(c_file, build_wth_algs)
+        retval = compile_dll(c_file, target)
         return retval
 
     except jpype.JavaException, ex:
@@ -209,7 +211,7 @@ def generate_code(fclass):
         _handle_exception(ex)
 
 
-def compile_dll(c_file_name, build_wth_algs=False):
+def compile_dll(c_file_name, target="model"):
     """ Compiles a c code representation of a model and outputs a .dll file.
         Default output folder is the current folder from which this module is run.
         Needs a c-file which is generated with generate_code.
@@ -218,9 +220,11 @@ def compile_dll(c_file_name, build_wth_algs=False):
         
         @param c_file_name:
             Name of c-file for which the .dll should be compiled without file extention.
-        @param build_wth_algs:
-            Optional if compiled dll should also contain optimization algorithms.
-            Default is False.
+        @param target:
+            Set target to specify the contents of the object file used 
+            to build the .dll. Default is "model". Other two options
+            are "algorithms" and "ipopt". See makefile in install folder
+            for details.
             
         @return: System return value.
       
@@ -232,11 +236,7 @@ def compile_dll(c_file_name, build_wth_algs=False):
     cppad_h = ' CPPAD_HOME='+common.user_options['cppad_home']
     ipopt_h = ' IPOPT_HOME='+common.user_options['ipopt_home']
 
-    cmd = 'make -f'+make_file+file_name+jmodelica_h+cppad_h+ipopt_h
-
-    if build_wth_algs:
-        build_w_algs=' BUILD_WITH_ALGORITHMS=true'
-        cmd = 'make -f'+make_file+file_name+jmodelica_h+cppad_h+build_w_algs+ipopt_h
+    cmd = 'make -f'+make_file+' '+target+file_name+jmodelica_h+cppad_h+ipopt_h
 
     #run make -> <model_class_name>.dll
     retval=os.system(cmd)
