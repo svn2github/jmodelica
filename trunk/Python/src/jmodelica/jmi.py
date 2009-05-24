@@ -572,11 +572,8 @@ def _translate_value_ref(valueref):
 # ================================================================
 
 class JMIModel(object):
-    """
-    A JMI Model loaded from a DLL.
-    
-    @todo:
-        Created properties for getters and setters.
+    """ A JMI Model loaded from a DLL.
+
     """
     
     def __init__(self, libname, path='.'):
