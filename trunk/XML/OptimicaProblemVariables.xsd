@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2009 (http://www.altova.com) by Magnus Gäfvert (Modelon AB) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:element name="OptimicaProblemVariableInterface">
+		<xs:annotation>
+			<xs:documentation>Meta data for an optimization problem in Optimica</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="IntervalStartTime">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Value" type="xs:double" minOccurs="0"/>
+							<xs:element name="Free" type="xs:boolean" minOccurs="0"/>
+							<xs:element name="InitialGuess" type="xs:double" minOccurs="0"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="IntervalFinalTime">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Value" type="xs:double" minOccurs="0"/>
+							<xs:element name="Free" type="xs:boolean" minOccurs="0"/>
+							<xs:element name="InitialGuess" type="xs:double" minOccurs="0"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="TimePoint">
+					<xs:complexType>
+						<xs:sequence minOccurs="0" maxOccurs="unbounded">
+							<xs:element name="Index" type="xs:unsignedLong"/>
+							<xs:element name="Value" type="xs:double"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
