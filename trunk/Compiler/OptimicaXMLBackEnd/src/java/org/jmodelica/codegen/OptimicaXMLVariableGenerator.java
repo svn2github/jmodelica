@@ -22,16 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package org.jmodelica.codegen;
 
 import java.io.PrintStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Stack;
 
 import org.jmodelica.ast.FBooleanVariable;
 import org.jmodelica.ast.FClass;
 import org.jmodelica.ast.FIntegerVariable;
 import org.jmodelica.ast.FRealVariable;
 import org.jmodelica.ast.FStringVariable;
-import org.jmodelica.ast.FVariable;
 import org.jmodelica.ast.Printer;
 
 /**
@@ -44,7 +40,7 @@ import org.jmodelica.ast.Printer;
  * @see AbstractGenerator
  * 
  */
-public class OptimicaXMLGenerator extends XMLGenerator {
+public class OptimicaXMLVariableGenerator extends XMLVariableGenerator {
 		
 
 	/**
@@ -54,17 +50,31 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 	 * @param escapeCharacter Escape characters used to decode tags.
 	 * @param fclass An FClass object used as a basis for the code generation.
 	 */
-	public OptimicaXMLGenerator(Printer expPrinter, char escapeCharacter,
+	public OptimicaXMLVariableGenerator(Printer expPrinter, char escapeCharacter,
 			FClass fclass) {
 		super(expPrinter,escapeCharacter, fclass);
-		
-		// Create tags			
-		AbstractTag tag = null;
-
-//		tag = new DAETag_XML_modelName(this,fclass);
-//		tagMap.put(tag.getName(), tag);
 
 	}
-
+	
+	@Override
+	protected void addRealAttributes(PrintStream genPrinter, TagGenerator tg, FRealVariable realvariable) {
+		super.addRealAttributes(genPrinter, tg, realvariable);
+		genPrinter.print(tg.generateTag("Free")+realvariable.freeAttribute()+tg.generateTag("Free"));		
+		genPrinter.print(tg.generateTag("InitialGuess")+realvariable.initialGuessAttribute()+tg.generateTag("InitialGuess"));
+	}
+	
+	@Override
+	protected void addIntegerAttributes(PrintStream genPrinter, TagGenerator tg, FIntegerVariable integervariable) {
+		super.addIntegerAttributes(genPrinter, tg, integervariable);
+		genPrinter.print(tg.generateTag("Free")+integervariable.freeAttribute()+tg.generateTag("Free"));
+		genPrinter.print(tg.generateTag("InitialGuess")+integervariable.initialGuessAttribute()+tg.generateTag("InitialGuess"));
+	}
+	
+	@Override
+	protected void addBooleanAttributes(PrintStream genPrinter, TagGenerator tg, FBooleanVariable booleanvariable) {
+		super.addBooleanAttributes(genPrinter, tg, booleanvariable);
+		genPrinter.print(tg.generateTag("Free")+booleanvariable.freeAttribute()+tg.generateTag("Free"));
+		genPrinter.print(tg.generateTag("InitialGuess")+booleanvariable.initialGuessAttribute()+tg.generateTag("InitialGuess"));
+	}
 }
 

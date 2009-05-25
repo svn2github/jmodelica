@@ -235,98 +235,24 @@ public class XMLVariableGenerator extends GenericGenerator {
 
 				if(variable.isReal()) {
 					FRealVariable realvariable=(FRealVariable)variable;
-						
 					genPrinter.print(tg.generateTag("RealAttributes"));
-					
-					//quantity
-					if(variable.quantityAttributeSet()) {
-						genPrinter.print(tg.generateTag("Quantity")+variable.quantityAttribute()+tg.generateTag("Quantity"));
-					}
-					//unit
-					if(realvariable.unitAttributeSet()) {
-						genPrinter.print(tg.generateTag("Unit")+realvariable.unitAttribute()+tg.generateTag("Unit"));
-					}
-					//default display unit
-					if(realvariable.displayUnitAttributeSet()) {
-						genPrinter.print(tg.generateTag("DefaultDisplayUnit"));
-						genPrinter.print(tg.generateTag("DisplayUnit")+realvariable.displayUnitAttribute()+tg.generateTag("DisplayUnit"));
-						//TODO:this is default value
-						genPrinter.print(tg.generateTag("Gain")+1.0+tg.generateTag("Gain"));
-						//TODO:offset(optional)
-						genPrinter.print(tg.generateTag("DefaultDisplayUnit"));
-					}
-					//min
-					if(realvariable.minAttributeSet()) {
-						genPrinter.print(tg.generateTag("Min")+realvariable.minAttribute()+tg.generateTag("Min"));
-					}
-					//max
-					if(realvariable.maxAttributeSet()) {
-						genPrinter.print(tg.generateTag("Max")+realvariable.maxAttribute()+tg.generateTag("Max"));
-					}
-					//start attribute should always be set - Changed when independent parameter xml has been introduced.
-//					if(realvariable.isParameter() && realvariable.hasBindingExp()) {
-//						genPrinter.print(tg.generateTag("Start")+realvariable.getBindingExp().ceval().realValue()+tg.generateTag("Start"));
-//					}
-//					else {
-//						genPrinter.print(tg.generateTag("Start") +realvariable.startAttribute()+tg.generateTag("Start"));
-//					}
-					genPrinter.print(tg.generateTag("Start") +realvariable.startAttribute()+tg.generateTag("Start"));
-
-					//nominal
-					if(realvariable.nominalAttributeSet()) {
-						genPrinter.print(tg.generateTag("Nominal")+realvariable.nominalAttribute()+tg.generateTag("Nominal"));
-					}
-					//category
-					genPrinter.print(tg.generateTag("Category"));
-					if(realvariable.isDerivativeVariable()) {
-						genPrinter.print("derivative");
-					} else if(realvariable.isDifferentiatedVariable()) {
-						genPrinter.print("state");
-					} else {
-						//default is algebraic
-						genPrinter.print("algebraic");
-					}
-					genPrinter.print(tg.generateTag("Category"));
-					
+					addRealAttributes(genPrinter, tg, realvariable);					
 					genPrinter.print(tg.generateTag("RealAttributes"));
 					
 				} else if(variable.isInteger()) {
-					FIntegerVariable integervariable = (FIntegerVariable)variable;
-					
+					FIntegerVariable integervariable = (FIntegerVariable)variable;					
 					genPrinter.print(tg.generateTag("IntegerAttributes"));
-					
-					//quantity
-					if(integervariable.quantityAttributeSet()) {
-						genPrinter.print(tg.generateTag("Quantity")+integervariable.quantityAttribute()+tg.generateTag("Quantity"));
-					}					
-					//min
-					if(integervariable.minAttributeSet()) {
-						genPrinter.print(tg.generateTag("Min")+integervariable.minAttribute()+tg.generateTag("Min"));
-					}
-					//max
-					if(integervariable.maxAttributeSet()) {
-						genPrinter.print(tg.generateTag("Max")+integervariable.maxAttribute()+tg.generateTag("Max"));
-					}
-					//start
-					if(integervariable.startAttributeSet()) {
-						genPrinter.print(tg.generateTag("Start")+integervariable.startAttribute()+tg.generateTag("Start"));
-					}						
+					addIntegerAttributes(genPrinter, tg, integervariable);
 					genPrinter.print(tg.generateTag("IntegerAttributes"));
 						
 				} else if(variable.isBoolean()) {
 					genPrinter.print(tg.generateTag("BooleanAttributes"));
-					//start attribute
-					if(variable.startAttributeSet()) {
-						genPrinter.print(tg.generateTag("Start")+((FBooleanVariable)variable).startAttribute()+tg.generateTag("Start"));
-					}
+					addBooleanAttributes(genPrinter, tg, (FBooleanVariable)variable);
 					genPrinter.print(tg.generateTag("BooleanAttributes"));
 					
 				} else if(variable.isString()) {
 					genPrinter.print(tg.generateTag("StringAttributes"));
-					//start attribute
-					if(variable.startAttributeSet()) {
-						genPrinter.print(tg.generateTag("Start")+((FStringVariable)variable).startAttribute()+tg.generateTag("Start"));
-					}
+					addStringAttributes(genPrinter, tg, (FStringVariable)variable);
 					genPrinter.print(tg.generateTag("StringAttributes"));
 					
 				} else if(false){
@@ -378,6 +304,86 @@ public class XMLVariableGenerator extends GenericGenerator {
 			
 		}
 
+	}
+	
+	protected void addRealAttributes(PrintStream genPrinter, TagGenerator tg, FRealVariable realvariable) {
+		
+		//quantity
+		if(realvariable.quantityAttributeSet()) {
+			genPrinter.print(tg.generateTag("Quantity")+realvariable.quantityAttribute()+tg.generateTag("Quantity"));
+		}
+		//unit
+		if(realvariable.unitAttributeSet()) {
+			genPrinter.print(tg.generateTag("Unit")+realvariable.unitAttribute()+tg.generateTag("Unit"));
+		}
+		//default display unit
+		if(realvariable.displayUnitAttributeSet()) {
+			genPrinter.print(tg.generateTag("DefaultDisplayUnit"));
+			genPrinter.print(tg.generateTag("DisplayUnit")+realvariable.displayUnitAttribute()+tg.generateTag("DisplayUnit"));
+			//TODO:this is default value
+			genPrinter.print(tg.generateTag("Gain")+1.0+tg.generateTag("Gain"));
+			//TODO:offset(optional)
+			genPrinter.print(tg.generateTag("DefaultDisplayUnit"));
+		}
+		//min
+		if(realvariable.minAttributeSet()) {
+			genPrinter.print(tg.generateTag("Min")+realvariable.minAttribute()+tg.generateTag("Min"));
+		}
+		//max
+		if(realvariable.maxAttributeSet()) {
+			genPrinter.print(tg.generateTag("Max")+realvariable.maxAttribute()+tg.generateTag("Max"));
+		}
+		genPrinter.print(tg.generateTag("Start") +realvariable.startAttribute()+tg.generateTag("Start"));
+
+		//nominal
+		if(realvariable.nominalAttributeSet()) {
+			genPrinter.print(tg.generateTag("Nominal")+realvariable.nominalAttribute()+tg.generateTag("Nominal"));
+		}
+		//category
+		genPrinter.print(tg.generateTag("Category"));
+		if(realvariable.isDerivativeVariable()) {
+			genPrinter.print("derivative");
+		} else if(realvariable.isDifferentiatedVariable()) {
+			genPrinter.print("state");
+		} else {
+			//default is algebraic
+			genPrinter.print("algebraic");
+		}
+		genPrinter.print(tg.generateTag("Category"));
+
+	}
+	
+	protected void addIntegerAttributes(PrintStream genPrinter, TagGenerator tg, FIntegerVariable integervariable) {
+		
+		//quantity
+		if(integervariable.quantityAttributeSet()) {
+			genPrinter.print(tg.generateTag("Quantity")+integervariable.quantityAttribute()+tg.generateTag("Quantity"));
+		}					
+		//min
+		if(integervariable.minAttributeSet()) {
+			genPrinter.print(tg.generateTag("Min")+integervariable.minAttribute()+tg.generateTag("Min"));
+		}
+		//max
+		if(integervariable.maxAttributeSet()) {
+			genPrinter.print(tg.generateTag("Max")+integervariable.maxAttribute()+tg.generateTag("Max"));
+		}
+		//start
+		genPrinter.print(tg.generateTag("Start")+integervariable.startAttribute()+tg.generateTag("Start"));						
+	}
+	
+	protected void addBooleanAttributes(PrintStream genPrinter, TagGenerator tg, FBooleanVariable booleanvariable) {
+		//start attribute
+		if(booleanvariable.startAttributeSet()) {
+			genPrinter.print(tg.generateTag("Start")+ booleanvariable.startAttribute()+tg.generateTag("Start"));
+		}
+		
+	}
+	
+	protected void addStringAttributes(PrintStream genPrinter, TagGenerator tg, FStringVariable stringvariable) {
+		//start attribute
+		if(stringvariable.startAttributeSet()) {
+			genPrinter.print(tg.generateTag("Start")+stringvariable.startAttribute()+tg.generateTag("Start"));
+		}
 	}
 	
 	class DAETag_XML_defaultExperiment extends DAETag {

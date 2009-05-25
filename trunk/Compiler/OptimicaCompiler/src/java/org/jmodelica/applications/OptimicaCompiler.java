@@ -30,41 +30,40 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-import org.jmodelica.ast.FClass;
+import org.jmodelica.ast.FOptClass;
 import org.jmodelica.ast.FlatRoot;
-import org.jmodelica.ast.InstNode;
 import org.jmodelica.ast.InstProgramRoot;
 import org.jmodelica.ast.PrettyPrinter;
 import org.jmodelica.ast.SourceRoot;
 import org.jmodelica.ast.StoredDefinition;
-import org.jmodelica.codegen.CGenerator;
-import org.jmodelica.codegen.XMLGenerator;
 import org.jmodelica.parser.ModelicaParser;
 import org.jmodelica.parser.ModelicaScanner;
 import org.jmodelica.ast.Problem;
 import org.jmodelica.ast.CompilerException;
 import org.jmodelica.ast.ModelicaClassNotFoundException;
+import org.jmodelica.codegen.OptimicaCGenerator;
+import org.jmodelica.codegen.OptimicaXMLVariableGenerator;
 
 import beaver.Parser.Exception;
 
 /**
  * 
- * Main compiler class which bundles the tasks needed to compile a Modelica model.
+ * Main compiler class which bundles the tasks needed to compile an Optimica model.
  * 
  *  There are two usages with this class:
  *  1. Compile in one step with command line arguments using this class only.
  *  2. Split compilation into several steps by calling the static methods in your own class/module.
  *  
- *  Use (1) for a simple and compact way of compiling a Modelica model. As a minimum, provide 
+ *  Use (1) for a simple and compact way of compiling an Optimica model. As a minimum, provide 
  *  the modelfile name and class name as command line arguments. Optional arguments are XML 
  *  template and c template files which are needed for code generation. If any of these are 
  *  ommitted no code generation will be performed.
  *  
  *  Example without code generation: 
- *  org.jmodelica.applications.ModelicaCompiler myModels/models.mo models.model1
+ *  org.jmodelica.applications.OptimicaCompiler myModels/models.mo models.model1
  *  
  *  Example with code generation:
- *  org.jmodelica.applications.ModelicaCompiler myModels/models.mo models.model1 templates/XMLtemplate.xml templates/cppTemplate.cpp
+ *  org.jmodelica.applications.OptimicaCompiler myModels/models.mo models.model1 templates/XMLtemplate.xml templates/cppTemplate.cpp
  *  
  *  Logging can be set with the optional argument -i, -w or -e where:
  *  
@@ -73,7 +72,7 @@ import beaver.Parser.Exception;
  *  -e : log error messages only (default if the log option is not used)
  *  
  *  Example with log level set to INFO:
- *  org.jmodelica.applications.ModelicaCompiler -i myModels/models.mo models.model1
+ *  org.jmodelica.applications.OptimicaCompiler -i myModels/models.mo models.model1
  *  
  *  The logs will be printed to standard out.
  *  
@@ -90,7 +89,7 @@ import beaver.Parser.Exception;
 public class OptimicaCompiler {
 
 //	private static final Logger logger = Logger.getLogger("JModelica.ModelicaCompiler");
-	private static final Logger logger = ModelicaLoggers.getConsoleLogger("JModelica.ModelicaCompiler");
+	private static final Logger logger = ModelicaLoggers.getConsoleLogger("JModelica.OptimicaCompiler");
 	public static final String INFO = "i";
 	public static final String WARNING = "w";
 	public static final String ERROR = "e";
@@ -100,7 +99,7 @@ public class OptimicaCompiler {
 	
 	public static void main(String args[]) {
 		if(args.length < 1) {
-			logger.severe("ModelicaCompiler expects the command line arguments: [-i/w/e] <file name> <class name> [<xml template> <c template>]");
+			logger.severe("OptimicaCompiler expects the command line arguments: [-i/w/e] <file name> <class name> [<xml template> <c template>]");
 			System.exit(1);
 		}
 		int arg = 0;
@@ -113,7 +112,7 @@ public class OptimicaCompiler {
 		}
 
 		if (args.length < arg+2) {
-			logger.severe("ModelicaCompiler expects a file name and a class name as command line arguments.");
+			logger.severe("OptimicaCompiler expects a file name and a class name as command line arguments.");
 			System.exit(1);
 		}		
 		
@@ -160,7 +159,7 @@ public class OptimicaCompiler {
 	
 	/**
 	 * Sets logging to the level specified. Valid values are:
-	 * ModelicaCompiler.INFO, ModelicaCompiler.WARNING or ModelicaCompiler.ERROR
+	 * OptimicaCompiler.INFO, OptimicaCompiler.WARNING or OptimicaCompiler.ERROR
 	 * 
 	 * Default log level setting is ERROR. Messages will be printed to the 
 	 * standard out.
@@ -190,7 +189,7 @@ public class OptimicaCompiler {
 	}
 	
 	/**
-	 * Compiles a Modelica model. A model file name and class must be provided. A 
+	 * Compiles an Optimica model. A model file name and class must be provided. A 
 	 * template file for XML and one for c can be provided to generatate code for 
 	 * this model. Prints an error and returns without completion if, for example, 
 	 * a file can not be found or if the parsing fails. 
@@ -200,7 +199,7 @@ public class OptimicaCompiler {
 	 * @param xmlTemplatefile The XML template file (optional).
 	 * @param cTemplatefile The c template file (optional).
 	 */
-	public static void compileModel(String name, String cl, String xmlTemplatefile, String cTemplatefile) 
+	public static void compileModel(String name, String cl, String xmlVariablesTempl, String cTemplatefile) 
 	  throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, Exception {
 		logger.info("======= Compiling model =======");
 		
@@ -211,11 +210,11 @@ public class OptimicaCompiler {
 		InstProgramRoot ipr = instantiateModel(sr, cl);
 			
 		// flattening
-		FClass fc = flattenModel(name, cl, ipr);
+		FOptClass fc = flattenModel(name, cl, ipr);
 
 		// Generate code?
-		if (xmlTemplatefile != null && cTemplatefile != null) {
-			generateCode(fc, xmlTemplatefile, cTemplatefile);
+		if (xmlVariablesTempl != null && cTemplatefile != null) {
+			generateCode(fc, xmlVariablesTempl, cTemplatefile);
 		}
 		
 		logger.info("====== Model compiled successfully =======");
@@ -303,11 +302,11 @@ public class OptimicaCompiler {
 	 * @param ipr The reference to the instance tree root.
 	 * @return FClass object representing the flattened model.
 	 */
-	public static FClass flattenModel(String name, String cl, InstProgramRoot ipr) 
+	public static FOptClass flattenModel(String name, String cl, InstProgramRoot ipr) 
 		throws CompilerException, ModelicaClassNotFoundException, IOException {
 		FlatRoot flatRoot = new FlatRoot();
 		flatRoot.setFileName(name);
-		FClass fc = new FClass();
+		FOptClass fc = new FOptClass();
 		flatRoot.setFClass(fc);
 
 		logger.info("Flattening starts...");
@@ -350,19 +349,19 @@ public class OptimicaCompiler {
 	 * given the default names <modelname>.xml and <modelname>.c respectively.
 	 * 
 	 * @param fc The FClass instance for which the code generation should be computed.
-	 * @param xmltemplate The path to the XML template file.
+	 * @param xmlVariableTempl The path to the XML template file for model variables.
 	 * @param ctemplate The path to the c template file.
 	 * @throws FileNotFoundException Throws the exception if either of the two files are not found.
 	 */
-	public static void generateCode(FClass fc, String xmltemplate, String ctemplate) throws FileNotFoundException {
+	public static void generateCode(FOptClass fc, String xmlVariablesTempl, String ctemplate) throws FileNotFoundException {
 		logger.info("Generating code...");
 		
-		XMLGenerator generator = new XMLGenerator(new PrettyPrinter(), '$', fc);
-		String output = fc.name() + ".xml";
-		generator.generate(xmltemplate, output);
+		OptimicaXMLVariableGenerator variablegenerator = new OptimicaXMLVariableGenerator(new PrettyPrinter(), '$', fc);
+		String output = fc.nameUnderscore() + "_optvariables.xml";
+		variablegenerator.generate(xmlVariablesTempl, output);
 
-		CGenerator cgenerator = new CGenerator(new PrettyPrinter(), '$', fc);
-		output = fc.name() + ".c";
+		OptimicaCGenerator cgenerator = new OptimicaCGenerator(new PrettyPrinter(), '$', fc);
+		output = fc.nameUnderscore() + ".c";
 		cgenerator.generate(ctemplate, output);
 
 		logger.info("...code generated.");

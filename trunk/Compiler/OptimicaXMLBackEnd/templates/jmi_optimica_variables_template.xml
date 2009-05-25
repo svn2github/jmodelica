@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<ModelVariableInterface>
+<OptimicaModelVariableInterface>
 	<ModelName>$XML_modelName$</ModelName>
 	<ModelAttributes>
 		<ModelIdentifier>$XML_modelIdentifier$</ModelIdentifier>
@@ -30,4 +30,4 @@
 	</ModelVariables>
 	$XML_defaultExperiment$
 	$XML_vendorAnnotations$	
-</ModelVariableInterface>
+</OptimicaModelVariableInterface>
