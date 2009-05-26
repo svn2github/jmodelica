@@ -2,80 +2,108 @@ Build instructions for the JModelica project.
 
 0. Requirements.
 
-   In order to compile JModelica you will need a unix-like environment.
-   For Windows, it is recommended to use the MingW distribution. In 
-   addition 'ant' is needed to build the JastAdd/Java-based compiler
-   front-end. NOTICE: The JModelic code tree, as well its dependencies,
-   must be locaded in directories for which their absolute path does
-   not contain spaces. [To be elaborated.]
+In order to compile JModelica you will need a unix-like environment. For 
+Windows, it is recommended to use the MingW distribution. In addition 'ant' is 
+needed to build the JastAdd/Java-based compiler front-ends. 
+NOTICE: The JModelica code tree, as well its dependencies (and ant, must be 
+located in directories for which their absolute path does not contain spaces.
 
-1. Check out a working copy of JModelica:
+1. Get JModelica.org
 
-    svn co https://svn.jmodelica.org/trunk JModelica
+Check out a working copy of JModelica.org: 
 
-   Make sure that the full path to the directory where you check out
-   JModelica does not contain any spaces nor ~ character
+ > svn co https://svn.jmodelica.org/trunk JModelica 
 
-2. Download CppAD from http://www.coin-or.org/CppAD. Unzip the 
-   tar-ball and put in a directory. Again, make sure that the path to
-   this directory does not contain any spaces nor ~ character.
-   Note: You do not have to build anything in the CppAD distribution
-   in order to build JModelica.
+Make sure that the full path to the directory where you check out JModelica does 
+not contain any spaces nor ~ character
 
-3. Download Ipopt from https://projects.coin-or.org/Ipopt. Unzip the
-   tar-ball and put in a directory that does not hold any spaces
-   nor ~ character in its path. Build the package according to its
-   INSTALL file. Make sure to run 'make install'.
+2. Get CppAD (optional)
 
-4. Run the configure script. It is recommended that you create a new
-   directory in JModelica:
+Download CppAD from http://www.coin-or.org/CppAD. Unzip the tar-ball and put 
+in a directory. Again, make sure that the path to this directory does not 
+contain any spaces nor ~ character. Note: You do not have to build anything in 
+the CppAD distribution in order to build JModelica.
 
-    cd JModelica
-    mkdir build
-    cd build
-    ../configure --with-cppad=/path/to/cppad-dist \
-      --with-ipopt=/path/to/ipopt-install-dir
+3. Get Ipopt (optional)
 
-   The arguments --with-cppad and --with-ipopt are optional. Notice,
-   however, that if they are not give, only parts of the software
-   will be built.
+Download Ipopt from https://projects.coin-or.org/Ipopt. Unzip the tar-ball and 
+put in a directory that does not hold any spaces nor ~ character in its path. 
+Build the package according to its INSTALL file. Make sure to run 
 
-   You may want to give additional arguments to configure. Type
+ > make install
 
-    configure --help
+4. Configure
 
-   for information. By default, the installation directory (--prefix)
-   is set to the current directory.
+Run the configure script. It is recommended that you create a new directory 
+in JModelica: 
 
-5. Build JModelica. In order to build, type
+cd JModelica
+mkdir build
+cd build
 
-    make
+ > ../configure --with-cppad=/path/to/cppad-dist \
+                --with-ipopt=/path/to/ipopt-install-dir
 
-   In order to install, type
+The arguments --with-cppad and --with-ipopt are optional. Notice, however, 
+that if they are not give, only parts of the software will be built. You may 
+want to give additional arguments to configure. Type configure --help for 
+information. By default, the installation directory (--prefix) is set to 
+the current directory, it is recommended to set the --prefix argument to
+override this behaviour. 
 
-    make install
+5. Build and install
 
-   which will render the directories 'lib' and 'include' to be created
-   and the corresponding libraries and directories and header files
-   will be copied. 
+In order to build, type 
 
-   In order to build the examples, type
+ > make 
+
+In order to install, type 
+
+ > make install 
+
+which will render the directories 'lib' and 'include' to be created in the 
+installation directory and the corresponding libraries and directories and 
+header files will be copied. In addition, templates, XML schemas, third party
+dependencies and makefiles used to build the generated C code are copied into
+the installation directory. Also, the Python code is copied into the
+installation directory. This may change in the future in favor of a solution
+where the jmodelica.org Python package is distributed as a standard Python
+installation package.
+
+In order to build the JMI examples, type 
+
+ > make jmi-examples 
  
-    make jmi-examples
+which will build executables for the examples in the 'JMI/examples' directory. 
+Notice that both --with-cppad and --with-ipopt have to be provided in order to 
+build the examples. In order to remove compiled executables and shared object 
+files in the 'JMI/examples' directories, run 
 
-   which will build executables and shared libraries for the examples
-   in the 'JMI/examples' directory. Notice that both --with-cppad
-   and --with-ipopt have to be provided in order to build the
-   examples.
+ > make clean-jmi-examples
 
-   In order to remove compiled executables and shared object files
-   in the 'JMI/examples' directories, run
+6. Generate documentation.
 
-    make clean-jmi-examples
+The command 
 
-6. Generate documentation. The command
+ > make docs 
 
-    make docs
+will generate documentation in the 'doc' directory. The generated documentation 
+is also available at www.jmodelica.org, where nightly generated docs are 
+published.
 
-   will generate documentation into the 'doc' directory.   
+7. Running JModelica.org from Python
+
+In order to run the JModelica.org compilers from Python, the packages
+Jython (http://www.jython.org) and lxml (http://codespeak.net/lxml/) need to
+be installed. Also, the environment variables JMODELICA_HOME, containing
+the path to the JModelica.org installation directory (again, without spaces
+or ~ in the path), and PYTHONPATH, containing the path to the 'Python' 
+directory in the JModelica.org installation directory needs to be set. If you 
+run on Linux, you will most likely have everything you need by now. If you run 
+Windows, you also need MinGW which provides make and the gcc-suite which are 
+needed to compile the generated C code. A convenient choice is then python(x,y) 
+(http://www.pythonxy.com), which provides a Python environment bundled with
+(amongst other things) a MinGW installation. 
+
+
 
