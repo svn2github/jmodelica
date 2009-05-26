@@ -189,7 +189,7 @@ int jmi_opt_sim_ipopt_new(jmi_opt_sim_ipopt_t **jmi_opt_sim_ipopt, jmi_opt_sim_t
 
  //   AddIpoptIntOption(nlp->nlp, "print_level", 10);
 	AddIpoptIntOption(nlp->nlp, "max_iter",1000);
-//   AddIpoptStrOption(nlp->nlp, "derivative_test","first-order");
+	//   AddIpoptStrOption(nlp->nlp, "derivative_test","first-order");
 //	AddIpoptNumOption(nlp->nlp, "derivative_test_pertubation",1e-4);
 //    AddIpoptStrOption(nlp->nlp, "derivative_test_print_all","yes");
 //	AddIpoptStrOption(nlp->nlp, "output_file", "ipopt.out");
@@ -218,6 +218,21 @@ int jmi_opt_sim_ipopt_solve(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt) {
 
 	return 0;
 
+}
+
+int jmi_opt_sim_ipopt_set_string_option(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt, char key[], char val[]) {
+	AddIpoptStrOption(jmi_opt_sim_ipopt->nlp, key, val);
+	return 0;
+}
+
+int jmi_opt_sim_ipopt_set_int_option(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt, char key[], int val) {
+	AddIpoptIntOption(jmi_opt_sim_ipopt->nlp, key, val);
+	return 0;
+}
+
+int jmi_opt_sim_ipopt_set_num_option(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt, char key[], double val) {
+	AddIpoptNumOption(jmi_opt_sim_ipopt->nlp, key, val);
+	return 0;
 }
 
 
