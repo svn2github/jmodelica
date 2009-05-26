@@ -487,6 +487,43 @@ def load_DLL(libname, path):
                                      ct.POINTER(ct.c_int),
                                      ct.POINTER(ct.c_int)]
 
+    dll.jmi_init_Fp.argtypes = [ct.c_void_p,
+                                Nct.ndpointer(dtype=c_jmi_real_t,
+                                              ndim=1,
+                                              flags='C')]
+    dll.jmi_init_dFp.argtypes = [ct.c_void_p,
+                                 ct.c_int,
+                                 ct.c_int,
+                                 ct.c_int,
+                                 Nct.ndpointer(
+                                                dtype=ct.c_int,
+                                                ndim=1,
+                                                flags='C'),
+                                 Nct.ndpointer(dtype=c_jmi_real_t,
+                                               ndim=1,
+                                               flags='C')]
+
+    dll.jmi_init_dFp_nz_indices.argtypes = [ct.c_void_p,
+                                          ct.c_int,
+                                          ct.c_int,
+                                          Nct.ndpointer(
+                                                dtype=ct.c_int,
+                                                ndim=1,
+                                                flags='C'),
+                                          Nct.ndpointer(dtype=ct.c_int,
+                                                        ndim=1,
+                                                        flags='C'),
+                                          Nct.ndpointer(dtype=ct.c_int,
+                                                        ndim=1,
+                                                        flags='C')]
+    dll.jmi_init_dFp_dim.argtypes = [ct.c_void_p, ct.c_int, ct.c_int,
+                                   ct.c_int,
+                                   Nct.ndpointer(dtype=ct.c_int,
+                                                 ndim=1,
+                                                 flags='C'),
+                                   ct.POINTER(ct.c_int),
+                                   ct.POINTER(ct.c_int)]
+
     dll.jmi_ode_f.argtypes  = [ct.c_void_p]
     dll.jmi_ode_df.argtypes = [ct.c_void_p,
                                ct.c_int,
