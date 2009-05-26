@@ -43,6 +43,7 @@ import org.jmodelica.ast.CompilerException;
 import org.jmodelica.ast.ModelicaClassNotFoundException;
 import org.jmodelica.codegen.OptimicaCGenerator;
 import org.jmodelica.codegen.OptimicaXMLVariableGenerator;
+import org.jmodelica.codegen.XMLProblemVariableGenerator;
 
 import beaver.Parser.Exception;
 
@@ -118,16 +119,18 @@ public class OptimicaCompiler {
 		
 		String name = args[arg];
 		String cl = args[arg+1];
-		String xmltempl = null;
+		String xmlVariablesTempl = null;
+		String xmlProblVariablesTempl = null;
 		String ctempl = null;
 		
 		if (args.length >= arg+4) {
-			xmltempl = args[arg+2];
-			ctempl = args[arg+3];
+			xmlVariablesTempl = args[arg+2];
+			xmlProblVariablesTempl = args[arg+3];
+			ctempl = args[arg+4];
 		}
 		
 		try {
-			compileModel(name, cl, xmltempl, ctempl);
+			compileModel(name, cl, xmlVariablesTempl, xmlProblVariablesTempl, ctempl);
 		} catch  (ModelicaClassNotFoundException e){
 			logger.severe("Could not find the class "+ cl);
 			System.exit(0);
@@ -199,7 +202,7 @@ public class OptimicaCompiler {
 	 * @param xmlTemplatefile The XML template file (optional).
 	 * @param cTemplatefile The c template file (optional).
 	 */
-	public static void compileModel(String name, String cl, String xmlVariablesTempl, String cTemplatefile) 
+	public static void compileModel(String name, String cl, String xmlVariablesTempl, String xmlProblVariablesTempl, String cTemplatefile) 
 	  throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, Exception {
 		logger.info("======= Compiling model =======");
 		
@@ -214,7 +217,7 @@ public class OptimicaCompiler {
 
 		// Generate code?
 		if (xmlVariablesTempl != null && cTemplatefile != null) {
-			generateCode(fc, xmlVariablesTempl, cTemplatefile);
+			generateCode(fc, xmlVariablesTempl,xmlProblVariablesTempl, cTemplatefile);
 		}
 		
 		logger.info("====== Model compiled successfully =======");
@@ -353,13 +356,17 @@ public class OptimicaCompiler {
 	 * @param ctemplate The path to the c template file.
 	 * @throws FileNotFoundException Throws the exception if either of the two files are not found.
 	 */
-	public static void generateCode(FOptClass fc, String xmlVariablesTempl, String ctemplate) throws FileNotFoundException {
+	public static void generateCode(FOptClass fc, String xmlVariablesTempl, String xmlProblVariablesTempl, String ctemplate) throws FileNotFoundException {
 		logger.info("Generating code...");
 		
 		OptimicaXMLVariableGenerator variablegenerator = new OptimicaXMLVariableGenerator(new PrettyPrinter(), '$', fc);
 		String output = fc.nameUnderscore() + "_optvariables.xml";
 		variablegenerator.generate(xmlVariablesTempl, output);
-
+		
+		XMLProblemVariableGenerator problVariableGenerator = new XMLProblemVariableGenerator(new PrettyPrinter(), '$', fc);
+		output = fc.nameUnderscore() + "_problvariables.xml";
+		problVariableGenerator.generate(xmlProblVariablesTempl, output);
+		
 		OptimicaCGenerator cgenerator = new OptimicaCGenerator(new PrettyPrinter(), '$', fc);
 		output = fc.nameUnderscore() + ".c";
 		cgenerator.generate(ctemplate, output);

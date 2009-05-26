@@ -27,7 +27,6 @@ import org.jmodelica.ast.FBooleanVariable;
 import org.jmodelica.ast.FClass;
 import org.jmodelica.ast.FIntegerVariable;
 import org.jmodelica.ast.FRealVariable;
-import org.jmodelica.ast.FStringVariable;
 import org.jmodelica.ast.Printer;
 
 /**
