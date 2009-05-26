@@ -212,7 +212,7 @@ public class OptimicaCompiler {
 		logger.info("======= Compiling model =======");
 		
 		// build source tree
-		SourceRoot sr = parseModel(name, cl);
+		SourceRoot sr = parseModel(name);
 
 		// compute instance tree
 		InstProgramRoot ipr = instantiateModel(sr, cl);
@@ -235,13 +235,12 @@ public class OptimicaCompiler {
 	 * source tree representation.
 	 * 
 	 * @param name The name of the model file.
-	 * @param cl The name of the class in the model file to compile.
 	 * @return The root of the source tree.
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 * @throws Exception
 	 */
-	public static SourceRoot parseModel(String name, String cl) 
+	public static SourceRoot parseModel(String name) 
 	  throws FileNotFoundException, IOException, Exception, CompilerException{
 		ModelicaParser parser = new ModelicaParser();
 //		ModelicaParser.CollectingReport report = new ModelicaParser.CollectingReport();
