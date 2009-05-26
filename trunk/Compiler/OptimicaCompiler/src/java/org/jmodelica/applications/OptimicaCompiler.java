@@ -44,6 +44,7 @@ import org.jmodelica.ast.ModelicaClassNotFoundException;
 import org.jmodelica.codegen.OptimicaCGenerator;
 import org.jmodelica.codegen.OptimicaXMLVariableGenerator;
 import org.jmodelica.codegen.XMLProblemVariableGenerator;
+import org.jmodelica.codegen.XMLValueGenerator;
 
 import beaver.Parser.Exception;
 
@@ -57,14 +58,15 @@ import beaver.Parser.Exception;
  *  
  *  Use (1) for a simple and compact way of compiling an Optimica model. As a minimum, provide 
  *  the modelfile name and class name as command line arguments. Optional arguments are XML 
- *  template and c template files which are needed for code generation. If any of these are 
+ *  templates and c template files which are needed for code generation. If any of these are 
  *  ommitted no code generation will be performed.
  *  
  *  Example without code generation: 
  *  org.jmodelica.applications.OptimicaCompiler myModels/models.mo models.model1
  *  
  *  Example with code generation:
- *  org.jmodelica.applications.OptimicaCompiler myModels/models.mo models.model1 templates/XMLtemplate.xml templates/cppTemplate.cpp
+ *  org.jmodelica.applications.OptimicaCompiler myModels/models.mo models.model1 
+ *  templates/XMLtemplate1.xml templates/XMLtemplate2.xml templates/XMLtemplate3.xml templates/cppTemplate.cpp
  *  
  *  Logging can be set with the optional argument -i, -w or -e where:
  *  
@@ -89,7 +91,6 @@ import beaver.Parser.Exception;
  */
 public class OptimicaCompiler {
 
-//	private static final Logger logger = Logger.getLogger("JModelica.ModelicaCompiler");
 	private static final Logger logger = ModelicaLoggers.getConsoleLogger("JModelica.OptimicaCompiler");
 	public static final String INFO = "i";
 	public static final String WARNING = "w";
@@ -121,16 +122,18 @@ public class OptimicaCompiler {
 		String cl = args[arg+1];
 		String xmlVariablesTempl = null;
 		String xmlProblVariablesTempl = null;
+		String xmlValuesTempl = null;
 		String ctempl = null;
 		
-		if (args.length >= arg+4) {
+		if (args.length >= arg+6) {
 			xmlVariablesTempl = args[arg+2];
 			xmlProblVariablesTempl = args[arg+3];
-			ctempl = args[arg+4];
+			xmlValuesTempl = args[arg+4];
+			ctempl = args[arg+5];
 		}
 		
 		try {
-			compileModel(name, cl, xmlVariablesTempl, xmlProblVariablesTempl, ctempl);
+			compileModel(name, cl, xmlVariablesTempl, xmlProblVariablesTempl, xmlValuesTempl, ctempl);
 		} catch  (ModelicaClassNotFoundException e){
 			logger.severe("Could not find the class "+ cl);
 			System.exit(0);
@@ -199,10 +202,12 @@ public class OptimicaCompiler {
 	 * 
 	 * @param name The name of the model file.
 	 * @param cl The name of the class in the model file to compile.
-	 * @param xmlTemplatefile The XML template file (optional).
+	 * @param xmlVariablesTempl The XML template file for model variables (optional).
+	 * @param xmlProblVariablesTempl The XML template file for the optimization problem variables (optional).
+	 * @param xmlValuesTempl The XML template file for independent parameter values (optional).
 	 * @param cTemplatefile The c template file (optional).
 	 */
-	public static void compileModel(String name, String cl, String xmlVariablesTempl, String xmlProblVariablesTempl, String cTemplatefile) 
+	public static void compileModel(String name, String cl, String xmlVariablesTempl, String xmlProblVariablesTempl, String xmlValuesTempl, String cTemplatefile) 
 	  throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, Exception {
 		logger.info("======= Compiling model =======");
 		
@@ -217,7 +222,7 @@ public class OptimicaCompiler {
 
 		// Generate code?
 		if (xmlVariablesTempl != null && cTemplatefile != null) {
-			generateCode(fc, xmlVariablesTempl,xmlProblVariablesTempl, cTemplatefile);
+			generateCode(fc, xmlVariablesTempl,xmlProblVariablesTempl, xmlValuesTempl, cTemplatefile);
 		}
 		
 		logger.info("====== Model compiled successfully =======");
@@ -352,11 +357,13 @@ public class OptimicaCompiler {
 	 * given the default names <modelname>.xml and <modelname>.c respectively.
 	 * 
 	 * @param fc The FClass instance for which the code generation should be computed.
-	 * @param xmlVariableTempl The path to the XML template file for model variables.
+	 * @param xmlVariablesTempl The XML template file for model variables (optional).
+	 * @param xmlProblVariablesTempl The XML template file for the optimization problem variables (optional).
+	 * @param xmlValuesTempl The XML template file for independent parameter values (optional).
 	 * @param ctemplate The path to the c template file.
 	 * @throws FileNotFoundException Throws the exception if either of the two files are not found.
 	 */
-	public static void generateCode(FOptClass fc, String xmlVariablesTempl, String xmlProblVariablesTempl, String ctemplate) throws FileNotFoundException {
+	public static void generateCode(FOptClass fc, String xmlVariablesTempl, String xmlProblVariablesTempl, String xmlValuesTempl, String ctemplate) throws FileNotFoundException {
 		logger.info("Generating code...");
 		
 		OptimicaXMLVariableGenerator variablegenerator = new OptimicaXMLVariableGenerator(new PrettyPrinter(), '$', fc);
@@ -366,6 +373,10 @@ public class OptimicaCompiler {
 		XMLProblemVariableGenerator problVariableGenerator = new XMLProblemVariableGenerator(new PrettyPrinter(), '$', fc);
 		output = fc.nameUnderscore() + "_problvariables.xml";
 		problVariableGenerator.generate(xmlProblVariablesTempl, output);
+		
+		XMLValueGenerator valuegenerator = new XMLValueGenerator(new PrettyPrinter(), '$', fc);
+		output = fc.nameUnderscore() + "_optvalues.xml";
+		valuegenerator.generate(xmlValuesTempl, output);
 		
 		OptimicaCGenerator cgenerator = new OptimicaCGenerator(new PrettyPrinter(), '$', fc);
 		output = fc.nameUnderscore() + ".c";
