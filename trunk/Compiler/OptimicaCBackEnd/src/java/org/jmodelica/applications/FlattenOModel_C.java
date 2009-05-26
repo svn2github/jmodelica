@@ -99,13 +99,18 @@ public class FlattenOModel_C {
 		      try {
 		      Collection<Problem> problems = ipr.checkErrorsInInstClass(cl);
 		      if (problems.size()>0) {
+					CompilerException ce = new CompilerException();
+					for (Problem p : problems) {
+						System.out.println(p.toString());
+					}
+
 		    	  System.exit(0);
 		      }
 
 		      } catch(Exception e) {
 		    	  e.printStackTrace();
 		      }
-
+		      
 		      
 		      long errcheckTime = System.currentTimeMillis();
 		      
@@ -143,7 +148,6 @@ public class FlattenOModel_C {
 			    	  System.out.println(generator.toString());
 			    	  generator.generate(args[2],fc.nameUnderscore()+".c");
 			      }
-	    	  
 		    	  
 		      System.err.println("Parse time:         " + ((double)(parseTime-startTime))/1000.0);
 		      System.err.println("Error check time:   " + ((double)(errcheckTime-parseTime))/1000.0);
