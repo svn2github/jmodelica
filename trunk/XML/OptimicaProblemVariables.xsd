@@ -25,7 +25,7 @@
 						</xs:sequence>
 					</xs:complexType>
 				</xs:element>
-				<xs:element name="TimePoint">
+				<xs:element name="TimePoints">
 					<xs:complexType>
 						<xs:sequence minOccurs="0" maxOccurs="unbounded">
 							<xs:element name="Index" type="xs:unsignedLong"/>
