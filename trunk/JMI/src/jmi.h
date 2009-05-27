@@ -1006,10 +1006,8 @@ int jmi_init_dFp_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
  * @param dF_n_nz (Output) The number of non-zeros of the resulting Jacobian.
  *
  */
-int jmi_init_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
+int jmi_init_dFp_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz);
-
-
 
 /* @} */
 
