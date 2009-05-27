@@ -18,6 +18,7 @@ package org.jmodelica.applications;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -29,6 +30,15 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 import org.jmodelica.ast.FOptClass;
 import org.jmodelica.ast.FlatRoot;
@@ -45,6 +55,10 @@ import org.jmodelica.codegen.OptimicaCGenerator;
 import org.jmodelica.codegen.OptimicaXMLVariableGenerator;
 import org.jmodelica.codegen.XMLProblemVariableGenerator;
 import org.jmodelica.codegen.XMLValueGenerator;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import beaver.Parser.Exception;
 
@@ -393,13 +407,89 @@ public class OptimicaCompiler {
 	 */
 	private static void loadOptions(SourceRoot sr) {
 		logger.info("Loading options...");
+		try {
+			String sep = System.getProperty("file.separator");
+			String filepath = System.getenv("JMODELICA_HOME")+sep+"Options"+sep+"options.xml";
+			
+			Document doc = parseAndGetDOM(filepath);
 		
-		sr.options.addModelicaLibrary(
-						"Modelica",
-						"3.0.1",
-						"Z:\\jakesson\\projects\\ModelicaStandardLibrary\\ModelicaStandardLibrary_v3\\Modelica 3.0.1");
-		sr.options.setStringOption("default_msl_version", "3.0.1");
+			XPathFactory factory = XPathFactory.newInstance();
+			XPath xpath = factory.newXPath();
+			
+			//set modelica library
+			XPathExpression expr = xpath.compile("/OptionRegistry/ModelicaLibrary");		
+			Node modelicalib = (Node)expr.evaluate(doc, XPathConstants.NODE);
+			if(modelicalib != null && modelicalib.hasChildNodes()) {
+				//modelica lib set
+				expr = xpath.compile("OptionRegistry/ModelicaLibrary/Name");
+				String name = (String)expr.evaluate(doc,XPathConstants.STRING);
+				
+				expr = xpath.compile("OptionRegistry/ModelicaLibrary/Version");
+				String version = (String)expr.evaluate(doc, XPathConstants.STRING);
+				
+				expr = xpath.compile("OptionRegistry/ModelicaLibrary/Path");
+				String path = (String)expr.evaluate(doc, XPathConstants.STRING);
+				
+				sr.options.addModelicaLibrary(name, version, path);
+			}
+			
+			//set other options if there are any
+			expr = xpath.compile("OptionRegistry/Options");
+			Node options = (Node)expr.evaluate(doc, XPathConstants.NODE);
+			if(options !=null && options.hasChildNodes()) {
+				//other options set
+				
+				//types
+				expr = xpath.compile("OptionRegistry/Options/Option/Type");
+				NodeList thetypes = (NodeList)expr.evaluate(doc, XPathConstants.NODESET);
+				
+				//keys
+				expr = xpath.compile("OptionRegistry/Options/Option/*/Key");
+				NodeList thekeys = (NodeList)expr.evaluate(doc, XPathConstants.NODESET);
+				
+				//values
+				expr = xpath.compile("OptionRegistry/Options/Option/*/Value");
+				NodeList thevalues = (NodeList)expr.evaluate(doc, XPathConstants.NODESET);
+				
+				for(int i=0; i<thetypes.getLength();i++) {
+					Node n = thetypes.item(i);
+					
+					String type = n.getTextContent();
+					String key = thekeys.item(i).getTextContent();
+					String value = thevalues.item(i).getTextContent();
+					
+					if(type.equals("String")) {
+						sr.options.setStringOption(key, value);
+					} else if(type.equals("Integer")) {
+						sr.options.setIntegerOption(key, Integer.parseInt(value));
+					} else if(type.equals("Real")) {
+						sr.options.setRealOption(key, Double.parseDouble(value));
+					} else if(type.equals("Boolean")) {
+						sr.options.setBooleanOption(key, Boolean.parseBoolean(value));
+					}
+				}				
+			}
+		
+		} catch(SAXException e) {
+			e.printStackTrace();
+		} catch(IOException e) {
+			e.printStackTrace();			
+		} catch(ParserConfigurationException e) {
+			e.printStackTrace();
+		} catch(XPathExpressionException e) {
+			e.printStackTrace();
+		}
+	}
 
+	private static Document parseAndGetDOM(String xmlfile) throws ParserConfigurationException, IOException, SAXException{
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		factory.setIgnoringComments(true);
+		factory.setIgnoringElementContentWhitespace(true);
+		factory.setNamespaceAware(true);
+		DocumentBuilder builder = factory.newDocumentBuilder();
+		
+		Document doc = builder.parse(new File(xmlfile));
+		return doc;
 	}
 	
 	private static class ModelicaLoggers {
