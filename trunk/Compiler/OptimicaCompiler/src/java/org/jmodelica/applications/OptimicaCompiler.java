@@ -366,7 +366,7 @@ public class OptimicaCompiler {
 		logger.info("Generating code...");
 		
 		OptimicaXMLVariableGenerator variablegenerator = new OptimicaXMLVariableGenerator(new PrettyPrinter(), '$', fc);
-		String output = fc.nameUnderscore() + "_optvariables.xml";
+		String output = fc.nameUnderscore() + "_variables.xml";
 		variablegenerator.generate(xmlVariablesTempl, output);
 		
 		XMLProblemVariableGenerator problVariableGenerator = new XMLProblemVariableGenerator(new PrettyPrinter(), '$', fc);
@@ -374,7 +374,7 @@ public class OptimicaCompiler {
 		problVariableGenerator.generate(xmlProblVariablesTempl, output);
 		
 		XMLValueGenerator valuegenerator = new XMLValueGenerator(new PrettyPrinter(), '$', fc);
-		output = fc.nameUnderscore() + "_optvalues.xml";
+		output = fc.nameUnderscore() + "_values.xml";
 		valuegenerator.generate(xmlValuesTempl, output);
 		
 		OptimicaCGenerator cgenerator = new OptimicaCGenerator(new PrettyPrinter(), '$', fc);
