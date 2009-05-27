@@ -1,7 +1,8 @@
-""" Module containing functions for compiling models. Options which are user specific can be set
+""" Module containing functions for compiling Optimica models. Options which are user specific can be set
     either before importing this module by editing the file options.py or interactively by accessing
     the default options via the common module. If options are not changed the default option settings
     will be used.
+
 """
 #    Copyright (C) 2009 Modelon AB
 #
@@ -17,7 +18,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import os
 import sys
 
@@ -25,21 +25,21 @@ import jpype
 
 import common
 
-#get paths to external directories: ModelicaCompiler, Beaver
-_mc_jar = common._jm_home+os.sep+'lib'+os.sep+'ModelicaCompiler.jar'
+#get paths to external directories: OptimicaCompiler, Beaver
+_oc_jar = common._jm_home+os.sep+'lib'+os.sep+'OptimicaCompiler.jar'
 _beaver_lib = common._jm_home+os.sep+'ThirdParty'+os.sep+'Beaver'+os.sep+'lib'
 
 _dir_path="-Djava.ext.dirs=%s" %_beaver_lib
-_class_path="-Djava.class.path=%s" %_mc_jar
+_class_path="-Djava.class.path=%s" %_oc_jar
 
 #start JVM
 if not jpype.isJVMStarted():
     jpype.startJVM(jpype.getDefaultJVMPath(),_class_path,_dir_path)
     print "JVM started."
 
-#get java class (ModelicaCompiler)
+#get java class (OptimicaCompiler)
 org = jpype.JPackage('org')
-JCompiler = org.jmodelica.applications.ModelicaCompiler
+OptCompiler = org.jmodelica.applications.OptimicaCompiler
 
 
 def compile_model(model_file_name, model_class_name, target = "model"):
@@ -61,7 +61,7 @@ def compile_model(model_file_name, model_class_name, target = "model"):
         
     @raise CompilerError:
         Raised if one or more error is found during compilation.
-    @raise ModelicaClassNotFoundError:
+    @raise OptimicaClassNotFoundError:
         Raised if the model class is not found.
     @raise IOError:
         Raised if the model file is not found, can not be read or
@@ -74,12 +74,13 @@ def compile_model(model_file_name, model_class_name, target = "model"):
         classes, for example, NullPointerException.
         
 """
-    xml_variables_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_variables_template.xml'
+    xml_variables_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_optimica_variables_template.xml'
+    xml_problvariables_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_optimica_problvariables_template.xml'
     xml_values_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_values_template.xml'
     cppath = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_template.c'
 
     try:
-        JCompiler.compileModel(model_file_name, model_class_name, xml_variables_path, xml_values_path, cppath)
+        OptCompiler.compileModel(model_file_name, model_class_name, xml_variables_path, xml_problvariables_path, xml_values_path, cppath)
         c_file = model_class_name.replace('.','_',1)
         retval = compile_dll(c_file, target)
         return retval
@@ -110,7 +111,7 @@ def parse_model(model_file_name):
 
     """ 
     try:
-        sr = JCompiler.parseModel(model_file_name)
+        sr = OptCompiler.parseModel(model_file_name)
         return sr
         
     except jpype.JavaException, ex:
@@ -133,7 +134,7 @@ def instantiate_model(source_root, model_class_name):
     
         @raise CompilerError:
             Raised if one or more error is found during compilation.
-        @raise ModelicaClassNotFoundError:
+        @raise OptimicaClassNotFoundError:
             Raised if the model class is not found.
         @raise JError:
             Raised if there was a runtime exception thrown by the underlying Java
@@ -142,7 +143,7 @@ def instantiate_model(source_root, model_class_name):
     """
     
     try:
-        ipr = JCompiler.instantiateModel(source_root,model_class_name)
+        ipr = OptCompiler.instantiateModel(source_root,model_class_name)
         return ipr
     
     except jpype.JavaException, ex:
@@ -165,7 +166,7 @@ def flatten_model(model_file_name, model_class_name, inst_prg_root):
     
         @raise CompilerError:
             Raised if one or more error is found during compilation.
-        @raise ModelicaClassNotFoundError:
+        @raise OptimicaClassNotFoundError:
             Raised if the model class is not found.
         @raise IOError:
             Raised if the model file is not found, can not be read or
@@ -177,7 +178,7 @@ def flatten_model(model_file_name, model_class_name, inst_prg_root):
     """
 
     try:
-        fclass = JCompiler.flattenModel(model_file_name, model_class_name, inst_prg_root)
+        fclass = OptCompiler.flattenModel(model_file_name, model_class_name, inst_prg_root)
         return fclass
     
     except jpype.JavaException, ex:
@@ -201,12 +202,13 @@ def generate_code(fclass):
             classes, for example, NullPointerException.
 
     """
-    xml_variables_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_variables_template.xml'
+    xml_variables_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_optimica_variables_template.xml'
+    xml_problvariables_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_optimica_problvariables_template.xml'
     xml_values_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_values_template.xml'
     cppath = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_template.c'
 
     try:
-        JCompiler.generateCode(fclass, xml_variables_path, xml_values_path, cppath)
+        OptCompiler.generateCode(fclass, xml_variables_path, xml_values_path, cppath)
     except jpype.JavaException, ex:
         _handle_exception(ex)
 
@@ -283,7 +285,7 @@ class JError(Exception):
     def __str__(self):
         return self.message
 
-class ModelicaClassNotFoundError(JError):
+class OptimicaClassNotFoundError(JError):
     """ Raised if the model class to be compiled can not be found.
     """
     pass
@@ -294,4 +296,3 @@ class CompilerError(JError):
         collected and presented in one CompilerError. 
     """
     pass
-
