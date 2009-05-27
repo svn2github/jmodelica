@@ -77,7 +77,7 @@ def compile_model(model_file_name, model_class_name, target = "model"):
     xml_variables_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_optimica_variables_template.xml'
     xml_problvariables_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_optimica_problvariables_template.xml'
     xml_values_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_values_template.xml'
-    cppath = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_template.c'
+    cppath = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_optimica_template.c'
 
     try:
         OptCompiler.compileModel(model_file_name, model_class_name, xml_variables_path, xml_problvariables_path, xml_values_path, cppath)

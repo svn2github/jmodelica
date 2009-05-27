@@ -38,9 +38,6 @@ def _parse_XML(filename, schemaname=''):
             Reference to the ElementTree object containing the parsed XML.
     """
     
-    #fpath = os.path.join(filepath,filename)
-    #schpath = os.path.join(schemapath,schemaname)
-    
     try:
         xmldoc = etree.ElementTree(file=filename)
     except etree.XMLSyntaxError, detail:
@@ -75,135 +72,68 @@ class XMLdoc:
         _doc = _parse_XML(filename, schemaname)
         self._xpatheval = etree.XPathEvaluator(_doc)
 
+
 class XMLVariablesDoc(XMLdoc):
     """ Class representing a parsed XML file containing model variable meta data.
     """
-       
-    def _get_real_start_attributes(self):
-        """ Help function which extracts the ValueReference and Start attribute for all Real
-            variables in the XML document.
-            
-            @return: Dict with ValueReference as key and Start attribute as value. 
-        """
-        keys=self._xpatheval("//ScalarVariable/ValueReference/text()[../../DataType=\"Real\"]")
-        vals=self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Start/text()")
-        
-        return dict(zip(keys,vals))
-
-    def _get_int_start_attributes(self):
-        """ Help function which extracts the ValueReference and Start attribute for all Integer
-            variables in the XML document.
-            
-            @return: Dict with ValueReference as key and Start attribute as value. 
-        """
-
-        keys=self._xpatheval("//ScalarVariable/ValueReference/text()[../../DataType=\"Integer\"]")
-        vals=self._xpatheval("//ScalarVariable/Attributes/IntegerAttributes/Start/text()")
-        
-        return dict(zip(keys,vals))
     
-    def _get_string_start_attributes(self):
-        """ Help function which extracts the ValueReference and Start attribute for all String
-            variables in the XML document.
-            
-            @return: Dict with ValueReference as key and Start attribute as value. 
-        """
-
-        keys=self._xpatheval("//ScalarVariable/ValueReference/text()[../../DataType=\"String\"]")
-        vals=self._xpatheval("//ScalarVariable/Attributes/StringAttributes/Start/text()")
-        
-        return dict(zip(keys,vals))
-
-    def _get_boolean_start_attributes(self):
-        """ Help function which extracts the ValueReference and Start attribute for all Boolean
-            variables in the XML document.
-            
-            @return: Dict with ValueReference as key and Start attribute as value. 
-        """
-
-        keys=self._xpatheval("//ScalarVariable/ValueReference/text()[../../DataType=\"Boolean\"]")
-        vals=self._xpatheval("//ScalarVariable/Attributes/BooleanAttributes/Start/text()")
-        
-        return dict(zip(keys,vals))
-
-           
     def get_start_attributes(self):
         """ Extracts ValueReference and Start attribute for all variables in the XML document.
             
             @return: Dict with ValueReference as key and Start attribute as value. 
         """
-        result=self._get_real_start_attributes()
-        result.update(self._get_int_start_attributes())
-        result.update(self._get_string_start_attributes())
-        result.update(self._get_boolean_start_attributes())
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()")
+        vals = self._xpatheval("//ScalarVariable/Attributes/*/Start/text()")
         
-        return result
-
+        return dict(keys,vals)
+    
+    def get_opt_variable_refs(self):
+        refs = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Free=\"true\"]")
+        return refs
+    
+    
 class XMLValuesDoc(XMLdoc):
     """ Class representing a parsed XML file containing values for all independent parameters.
     """
-        
-    def _get_boolean_values(self):
-        """ Help function which extracts the ValueReference and value for all Boolean
-            independent parameters in the XML document.
-            
-            @return: Dict with ValueReference as key and parameter value as value. 
-        """
-
-        keys = self._xpatheval("//BooleanParameter/ValueReference/text()")
-        vals = self._xpatheval("//BooleanParameter/Value/text()")
-
-        return dict(zip(keys,vals))
-
-    def _get_string_values(self):
-        """ Help function which extracts the ValueReference and value for all String
-            independent parameters in the XML document.
-            
-            @return: Dict with ValueReference as key and parameter value as value. 
-        """
-
-        keys = self._xpatheval("//StringParameter/ValueReference/text()")
-        vals = self._xpatheval("//StringParameter/Value/text()")
-
-        return dict(zip(keys,vals))
-
-    def _get_integer_values(self):
-        """ Help function which extracts the ValueReference and value for all Integer
-            independent parameters in the XML document.
-            
-            @return: Dict with ValueReference as key and parameter value as value. 
-        """
-
-        keys = self._xpatheval("//IntegerParameter/ValueReference/text()")
-        vals = self._xpatheval("//IntegerParameter/Value/text()")
-
-        return dict(zip(keys,vals))
-
-    def _get_real_values(self):
-        """ Help function which extracts the ValueReference and value for all Real
-            independent parameters in the XML document.
-            
-            @return: Dict with ValueReference as key and parameter value as value. 
-        """
-
-        keys = self._xpatheval("//RealParameter/ValueReference/text()")
-        vals = self._xpatheval("//RealParameter/Value/text()")
-
-        return dict(zip(keys,vals))
-        
+                
     def get_iparam_values(self):
         """ Extracts ValueReference and value for all independent parameters in the XML document.
             
             @return: Dict with ValueReference as key and parameter value as value. 
         """
 
-        result = self._get_boolean_values()
-        result.update(self._get_string_values())
-        result.update(self._get_integer_values())
-        result.update(self._get_real_values())
+        keys = self._xpatheval("//ValueReference/text()")
+        vals = self._xpatheval("//Value/text()")
 
-        return result
+        return dict(zip(keys,vals))
         
-       
+class XMLProblVariablesDoc(self):
+    """ Class representing a parsed XML file containing Optimica problem specification meta data.
+    """
+    
+    def get_starttime(self):
+        return self._xpatheval("//IntervalStartTime/Value/text()")
+
+    def get_starttime_free(self):
+        free = self._xpatheval("//IntervalStartTime/Free/text()")
+        if free.count('true') > 0:
+            return 1;
+        else:
+            return 0;
+
+    def get_finaltime(self):
+        return self._xpatheval("//IntervalFinalTime/Value/text()")
+
+    def get_finaltime_free(self):
+        free = self._xpatheval("//IntervalFinalTime/Free/text()")
+        if free.count('true') > 0:
+            return 1;
+        else:
+            return 0;
+
+    def get_timepoints(self):
+        return self._xpatheval("//TimePoints/Value/text()")
+    
+     
 class XMLException(Exception):
     pass
