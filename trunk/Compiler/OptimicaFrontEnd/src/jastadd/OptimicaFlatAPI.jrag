@@ -81,7 +81,7 @@ aspect OptimicaFlatAPI {
 	 * 0.0 if not set.
 	 */
 	syn CValue FRealVariable.initialGuessAttributeCValue() =
-		minAttributeSet()? initialGuessAttributeExp().ceval():
+		initialGuessAttributeSet()? initialGuessAttributeExp().ceval():
 			new CValueReal(0.0);
 
 	/**
