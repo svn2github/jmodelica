@@ -1058,6 +1058,72 @@ int jmi_init_dF1_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
 	}
 }
 
+int jmi_init_Fp(jmi_t* jmi, jmi_real_t* res) {
+	return jmi_func_F(jmi,jmi->init->Fp, res);
+}
+
+int jmi_init_dFp(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
+
+	if (eval_alg & JMI_DER_SYMBOLIC) {
+
+		return jmi_func_dF(jmi, jmi->init->Fp, sparsity,
+				independent_vars, mask, jac) ;
+
+	} else if (eval_alg & JMI_DER_CPPAD) {
+
+		return jmi_func_ad_dF(jmi,jmi->init->Fp, sparsity, independent_vars, mask, jac);
+
+	} else {
+		return -1;
+	}
+}
+
+int jmi_init_dFp_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
+	if (eval_alg & JMI_DER_SYMBOLIC) {
+
+		return jmi_func_dF_n_nz(jmi, jmi->init->Fp, n_nz);
+
+	} else if (eval_alg & JMI_DER_CPPAD) {
+
+		return jmi_func_ad_dF_n_nz(jmi, jmi->init->Fp, n_nz);
+
+	} else {
+		return -1;
+	}
+}
+
+int jmi_init_dFp_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col) {
+	if (eval_alg & JMI_DER_SYMBOLIC) {
+
+		return jmi_func_dF_nz_indices(jmi, jmi->init->Fp, independent_vars, mask, row, col);
+
+	} else if (eval_alg & JMI_DER_CPPAD) {
+
+		return jmi_func_ad_dF_nz_indices(jmi, jmi->init->Fp, independent_vars, mask, row, col);
+
+	} else {
+		return -1;
+	}
+}
+
+int jmi_init_dFp_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
+		int *dF_n_cols, int *dF_n_nz) {
+	if (eval_alg & JMI_DER_SYMBOLIC) {
+
+		return jmi_func_dF_dim(jmi, jmi->init->Fp, sparsity, independent_vars, mask,
+				dF_n_cols, dF_n_nz);
+
+	} else if (eval_alg & JMI_DER_CPPAD) {
+
+		return jmi_func_ad_dF_dim(jmi, jmi->init->Fp, sparsity, independent_vars, mask,
+				dF_n_cols, dF_n_nz);
+
+	} else {
+		return -1;
+	}
+}
+
 int jmi_opt_J(jmi_t* jmi, jmi_real_t* res) {
 	return jmi_func_F(jmi,jmi->opt->J, res);
 }
