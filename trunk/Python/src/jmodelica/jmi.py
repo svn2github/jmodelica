@@ -365,6 +365,12 @@ def load_DLL(libname, path):
     z      = dll.jmi_get_z(jmi)
     
     # Setting parameter types
+    dll.jmi_opt_set_p_opt_indices.argtypes = [ct.c_void_p,
+                                              ct.c_int,
+                                              Nct.ndpointer(dtype=ct.c_int,
+                                                            ndim=1,
+                                                            flags='C')]
+    
     dll.jmi_opt_set_optimization_interval.argtypes = [ct.c_void_p,
                                                       c_jmi_real_t,
                                                       ct.c_int,
@@ -648,6 +654,61 @@ class JMIModel(object):
         self._t = self._dll.jmi_get_t(self._jmi)
         self._z = self._dll.jmi_get_z(self._jmi)
 
+        # sizes of all arrays
+        self._n_ci = ct.c_int()
+        self._n_cd = ct.c_int()
+        self._n_pi = ct.c_int()
+        self._n_pd = ct.c_int()
+        self._n_dx = ct.c_int()
+        self._n_x  = ct.c_int()
+        self._n_u  = ct.c_int()
+        self._n_w  = ct.c_int()
+        self._n_tp = ct.c_int()
+        self._n_z  = ct.c_int()
+        assert self._dll.jmi_get_sizes(self._jmi,
+                                 byref(self._n_ci),
+                                 byref(self._n_cd),
+                                 byref(self._n_pi),
+                                 byref(self._n_pd),
+                                 byref(self._n_dx),
+                                 byref(self._n_x),
+                                 byref(self._n_u),
+                                 byref(self._n_w),
+                                 byref(self._n_tp),
+                                 byref(self._n_z)) \
+                                 is 0, \
+                                 "getting sizes failed"
+        # offsets
+        self._offs_ci = ct.c_int()
+        self._offs_cd = ct.c_int()
+        self._offs_pi = ct.c_int()
+        self._offs_pd = ct.c_int()
+        self._offs_dx = ct.c_int()
+        self._offs_x = ct.c_int()
+        self._offs_u = ct.c_int()
+        self._offs_w = ct.c_int()
+        self._offs_t = ct.c_int()
+        self._offs_dx_p = ct.c_int()
+        self._offs_x_p = ct.c_int()
+        self._offs_u_p = ct.c_int()
+        self._offs_w_p = ct.c_int()
+        assert self._dll.jmi_get_offsets(self._jmi,
+                                         byref(self._offs_ci),
+                                         byref(self._offs_cd),
+                                         byref(self._offs_pi),
+                                         byref(self._offs_pd),
+                                         byref(self._offs_dx),
+                                         byref(self._offs_x),
+                                         byref(self._offs_u),
+                                         byref(self._offs_w),
+                                         byref(self._offs_t),
+                                         byref(self._offs_dx_p),
+                                         byref(self._offs_x_p),
+                                         byref(self._offs_u_p),
+                                         byref(self._offs_w_p)) \
+                                         is 0, \
+                                         "getting offsets failed"
+
         # set start attributes
         xml_variables_name=libname+'_variables.xml' 
         # assumes libname is name of model and xmlfile is located in the same dir as the dll
@@ -659,7 +720,18 @@ class JMIModel(object):
         self._set_XMLvalues_doc(xmlparser.XMLValuesDoc(path+os.sep+xml_values_name))
         self._set_iparam_values()
                 
-        
+        # set optimizataion interval, time points and optimization indices (if Optimica)
+        xml_problvariables_name = libname+'_problvariables.xml'
+        try:
+            self._set_XMLproblvariables_doc(xmlparser.XMLProblVariablesDoc(path+os.sep+xml_problvariables_name))
+            self._set_opt_interval()
+            self._set_timepoints()
+            self._set_opt_indices()
+            
+        except IOError, e:
+            # Modelica model - can not load Optimica specific xml
+            pass
+
         
         self.initAD()
                 
@@ -840,8 +912,8 @@ class JMIModel(object):
     t = property(getT, setT, "The time value.")
     
     def getZ(self):
-        """ Gets a reference to the vector containing all parameters, variables and point-wise 
-            evalutated variables vector.
+        """ Gets a reference to the vector containing all parameters, variables 
+            and point-wise evalutated variables vector.
         """
         return self._z
         
@@ -854,7 +926,8 @@ class JMIModel(object):
     z = property(getZ, setZ, "All parameters, variables and point-wise evaluated variables vector.")
     
     def _get_XMLvariables_doc(self):
-        """ Gets a reference to the XMLDoc instance for model variables set for this JMIModel.
+        """ Gets a reference to the XMLDoc instance for model variables set for 
+            this JMIModel.
         """
         return self._xmlvariables_doc
     
@@ -864,15 +937,25 @@ class JMIModel(object):
         self._xmlvariables_doc = doc
 
     def _get_XMLvalues_doc(self):
-        """ Gets a reference to the XMLDoc instance for independent parameter values set for this JMIModel.
+        """ Gets a reference to the XMLDoc instance for independent parameter 
+            values set for this JMIModel.
         """
         return self._xmlvalues_doc
     
     def _set_XMLvalues_doc(self, doc):
-        """ Sets the XMLDoc for independent parameter values for this JMIModel.
-        """
+        """ Sets the XMLDoc for independent parameter values for this JMIModel."""
         self._xmlvalues_doc = doc
-        
+
+    def _get_XMLproblvariables_doc(self):
+        """ Gets a reference to the XMLDoc instance for optimization problem variables 
+            set for this JMIModel.
+        """
+        return self._xmlproblvariables_doc
+    
+    def _set_XMLproblvariables_doc(self, doc):
+        """ Sets the XMLDoc for optimization problem variables for this JMIModel."""
+        self._xmlproblvariables_doc = doc
+       
     def _set_start_attributes(self):
         """ Sets start attributes for all variables in this JMIModel. The start attributes are 
             fetched together with the corresponding valueReferences from the XMLDoc instance. 
@@ -908,8 +991,7 @@ class JMIModel(object):
                 "Unknown type"
     
     def _set_iparam_values(self):
-        """ Sets values for the independent parameters in this JMIModel.
-        """
+        """ Sets values for the independent parameters in this JMIModel."""
         xmldoc = self._get_XMLvalues_doc()
         values = xmldoc.get_iparam_values()
        
@@ -937,8 +1019,38 @@ class JMIModel(object):
             else:
                 "Unknown type"
             
+    def _set_opt_interval(self):
+        """ Sets the optimization intervals for this JMIModel (if Optimica). """
+        xmldoc = self._get_XMLproblvariables_doc()
+        starttime = xmldoc.get_starttime()
+        starttimefree = xmldoc.get_starttime_free()
+        finaltime = xmldoc.get_finaltime()
+        finaltimefree = xmldoc.get_finaltime_free()
+
+        if starttime and finaltime:
+            self._dll.jmi_opt_set_optimization_interval(self._jmi,float(starttime), int(starttimefree),
+                                                        float(finaltime), int(finaltimefree))        
         
+    def _set_timepoints(self):       
+        """ Sets the optimization timepoints for this JMIModel (if Optimica). """
+        xmldoc = self._get_XMLproblvariables_doc()
+        points = []
+        for point in xmldoc.get_timepoints():
+            points.append(float(point))
+            
+        self._dll.jmi_set_tp(self._jmi, N.array(points))   
+
         
+    def _set_opt_indices(self):
+        """ Sets the optimization parameter indices for this JMIModel (if Optimica). """
+        xmldoc = self._get_XMLvariables_doc()
+        refs = xmldoc.get_opt_variable_refs()
         
-        
-        
+        if len(refs) > 0:
+            n_p_opt = 0
+            p_opt_indices = []
+            for ref in refs:
+                p_opt_indices.append(int(ref) - self._offs_pi.value)
+                n_p_opt = n_p_opt +1
+
+            self._dll.jmi_opt_set_p_opt_indices(self._jmi,n_p_opt,N.array(p_opt_indices))

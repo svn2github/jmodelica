@@ -112,28 +112,30 @@ class XMLProblVariablesDoc(XMLdoc):
     """
     
     def get_starttime(self):
-        return self._xpatheval("//IntervalStartTime/Value/text()")
+        time = self._xpatheval("//IntervalStartTime/Value/text()")
+        if len(time) > 0:
+            return time[0]
+        else:
+            return None
 
     def get_starttime_free(self):
         free = self._xpatheval("//IntervalStartTime/Free/text()")
-        if free.count('true') > 0:
-            return 1;
-        else:
-            return 0;
-
+        return bool(free.count('true'))
+    
     def get_finaltime(self):
-        return self._xpatheval("//IntervalFinalTime/Value/text()")
+        time = self._xpatheval("//IntervalFinalTime/Value/text()")
+        if len(time) > 0:
+            return time[0]
+        else:
+            return None
 
     def get_finaltime_free(self):
         free = self._xpatheval("//IntervalFinalTime/Free/text()")
-        if free.count('true') > 0:
-            return 1;
-        else:
-            return 0;
+        return bool(free.count('true'))
 
     def get_timepoints(self):
         return self._xpatheval("//TimePoints/Value/text()")
-    
+        
      
 class XMLException(Exception):
     pass
