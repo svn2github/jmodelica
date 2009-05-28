@@ -365,6 +365,12 @@ def load_DLL(libname, path):
     z      = dll.jmi_get_z(jmi)
     
     # Setting parameter types
+    dll.jmi_opt_set_optimization_interval.argtypes = [ct.c_void_p,
+                                                      c_jmi_real_t,
+                                                      ct.c_int,
+                                                      c_jmi_real_t,
+                                                      ct.c_int]      
+    
     dll.jmi_dae_F.argtypes = [ct.c_void_p,
                               Nct.ndpointer(dtype=c_jmi_real_t,
                                             ndim=1,
@@ -652,6 +658,8 @@ class JMIModel(object):
         xml_values_name = libname+'_values.xml'
         self._set_XMLvalues_doc(xmlparser.XMLValuesDoc(path+os.sep+xml_values_name))
         self._set_iparam_values()
+                
+        
         
         self.initAD()
                 
@@ -928,7 +936,7 @@ class JMIModel(object):
                 pass
             else:
                 "Unknown type"
-        
+            
         
         
         

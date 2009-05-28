@@ -85,7 +85,7 @@ class XMLVariablesDoc(XMLdoc):
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()")
         vals = self._xpatheval("//ScalarVariable/Attributes/*/Start/text()")
         
-        return dict(keys,vals)
+        return dict(zip(keys,vals))
     
     def get_opt_variable_refs(self):
         refs = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Free=\"true\"]")
@@ -107,7 +107,7 @@ class XMLValuesDoc(XMLdoc):
 
         return dict(zip(keys,vals))
         
-class XMLProblVariablesDoc(self):
+class XMLProblVariablesDoc(XMLdoc):
     """ Class representing a parsed XML file containing Optimica problem specification meta data.
     """
     
