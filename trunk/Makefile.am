@@ -32,7 +32,7 @@ if HAVE_ANT
 	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar $(prefix)/lib/
 	cp $(abs_top_srcdir)/Compiler/OptimicaCompiler/bin/OptimicaCompiler.jar $(prefix)/lib/
 endif
-	mkdir $(prefix)/Makefiles
+	mkdir -p $(prefix)/Makefiles
 	case $(build) in \
 	*-cygwin*) \
 	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(prefix)/Makefiles/Makefile ;; \
@@ -46,22 +46,22 @@ endif
 	[ -e $(prefix)/Options ] && echo "Options directory exists "|| mkdir $(prefix)/Options
 	cp Options/options_tpl.xml $(prefix)/Options/options.xml
 	cp Options/options_tpl.py $(prefix)/Options/options.py
-	mkdir $(prefix)/Python
-	mkdir $(prefix)/Python/jmodelica
+	mkdir -p $(prefix)/Python
+	mkdir -p $(prefix)/Python/jmodelica
 	cp $(abs_top_srcdir)/Python/src/jmodelica/*.py $(prefix)/Python/jmodelica
-	mkdir $(prefix)/ThirdParty
-	mkdir $(prefix)/ThirdParty/Beaver
-	mkdir $(prefix)/ThirdParty/Beaver/lib
+	mkdir -p $(prefix)/ThirdParty
+	mkdir -p $(prefix)/ThirdParty/Beaver
+	mkdir -p $(prefix)/ThirdParty/Beaver/lib
 	cp $(abs_top_srcdir)/Python/src/jmodelica/*.py $(prefix)/Python/jmodelica/
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar $(prefix)/ThirdParty/Beaver/lib/ 
-	mkdir $(prefix)/CodeGenTemplates
+	mkdir -p $(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/jmi_modelica_template.c $(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/OptimicaCBackEnd/templates/jmi_optimica_template.c $(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd/templates/jmi_modelica_variables_template.xml $(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd/templates/jmi_modelica_values_template.xml $(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/OptimicaXMLBackEnd/templates/jmi_optimica_variables_template.xml $(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/OptimicaXMLBackEnd/templates/jmi_optimica_problvariables_template.xml $(prefix)/CodeGenTemplates
-	mkdir $(prefix)/XML
+	mkdir -p $(prefix)/XML
 	cp  $(abs_top_srcdir)/XML/*.xsd $(prefix)/XML
 
 clean-local: clean-jmi-examples clean-frontends
@@ -102,3 +102,4 @@ docs:
 #	cd $(srcdir); doxygen doc/OptimicaFrontEnd/optimica_frontend_doxydoc.conf
 	cd $(srcdir); doxygen doc/ModelicaCompiler/modelica_compiler_doxydoc.conf
 	cd $(srcdir); doxygen doc/OptimicaCompiler/optimica_compiler_doxydoc.conf
+	cd $(srcdir); doxygen doc/PyJMI/pyjmi_doxydoc.conf
