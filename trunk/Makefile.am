@@ -69,6 +69,7 @@ clean-local: clean-jmi-examples clean-frontends
 jmi-examples: install
 	cd JMI/examples/Vdp; $(MAKE) all
 	cd JMI/examples/Vdp_cppad; $(MAKE) all
+	cd JMI/examples/Vdp_cppad_ode; $(MAKE) all
 	cd JMI/examples/FurutaPendulum; $(MAKE) all
 	cd JMI/examples/CSTR; $(MAKE) all
 	cd JMI/examples/CSTR2; $(MAKE) all
@@ -76,6 +77,7 @@ jmi-examples: install
 clean-jmi-examples: 
 	cd JMI/examples/Vdp; $(MAKE) clean
 	cd JMI/examples/Vdp_cppad; $(MAKE) clean
+	cd JMI/examples/Vdp_cppad_ode; $(MAKE) clean
 	cd JMI/examples/FurutaPendulum; $(MAKE) clean
 	cd JMI/examples/CSTR; $(MAKE) clean
 	cd JMI/examples/CSTR2; $(MAKE) clean
