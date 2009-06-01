@@ -23,6 +23,7 @@ import unittest
 import ctypes
 from ctypes import byref
 import os.path
+import os
 import math
 
 import numpy as N
@@ -45,8 +46,6 @@ def load_example_DLL(libname, examplepath):
     
     Raises a JMIException on failure.
     """
-    # Path to example collection root directory
-    EXAMPLES_PATH = '../../../build/JMI/examples'
     try:
         dll = pyjmi.load_DLL(libname, get_example_path(examplepath))
     except JMIException, e:
@@ -66,13 +65,15 @@ def get_example_path(examplepath):
         The example path relative the examples directory.
     """
     # Path to example collection root directory
-    EXAMPLES_PATH = '../../../build/JMI/examples'
+    jmhome = os.environ.get('JMODELICA_HOME')
+    assert jmhome is not None, "You will need to define the JMODELICA_HOME environment variable."
+    EXAMPLES_PATH = '%s/JMI/examples' % jmhome
     path = os.path.join(EXAMPLES_PATH, examplepath)
     return path
 
 def test_get_test_path():
     assert os.path.isdir(get_example_path('')), \
-           "Could not find example root directory. Do you have the " \
+           "Could not find example root directory. Do you have the" \
            + " whole repository structure checked out?"
 
 class GenericJMITestsUsingCTypes:
