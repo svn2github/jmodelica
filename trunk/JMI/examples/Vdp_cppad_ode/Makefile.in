@@ -16,17 +16,8 @@
 #    see <http://www.gnu.org/licenses/> or 
 #    <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 
-
-
-# Name of the executable
-EXE = vdp_cppad_ode@EXEEXT@ 
-
 # Name of shared library
 SHARED = vdp_cppad_ode@SHAREDEXT@
-
-# Object files to be included in the executable
-OBJS = vdp_cppad_main.@OBJEXT@ \
-	vdp.@OBJEXT@
 
 # Object files to be included in the shared library
 SHAREDOBJS = vdp.@OBJEXT@
@@ -72,7 +63,7 @@ INCL =  -I$(JMIINCDIR) -I$(CPPADINCDIR) -I@IPOPT_INC@
 
 ifeq (@WITH_IPOPT@,true)
 ifeq (@WITH_CPPAD@,true)
-all: $(EXE) $(SHARED)
+all: $(SHARED)
 else
 all:
 endif
@@ -82,16 +73,8 @@ endif
 
 .SUFFIXES: .cpp .c .o .obj
 
-# Create the executable
-$(EXE): $(OBJS)
-ifeq (@WITH_IPOPT@,true)
-ifeq (@WITH_CPPAD@,true)
-	$(CXX) $(CXXLINKFLAGS) $(CXXFLAGS) -o $@ $(OBJS) $(LIBS)
-endif
-endif
-
 # Create the shared library
-$(SHARED): $(OBJS)
+$(SHARED): $(SHAREDOBJS)
 ifeq (@WITH_IPOPT@,true)
 ifeq (@WITH_CPPAD@,true)
 	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $@ $(SHAREDOBJS) $(LIBS)
