@@ -49,10 +49,10 @@ def load_example_DLL(libname, examplepath):
     try:
         dll = pyjmi.load_DLL(libname, get_example_path(examplepath))
     except JMIException, e:
-        raise JMIException("%s\nUnable to load test models." \
-                           " You have probably not compiled the" \
+        raise JMIException("%s\nUnable to load test models."
+                           " You have probably not compiled the"
                            " examples. Please refer to the"
-                           " JModelica README for more information." \
+                           " JModelica README for more information."
                             % e)
                            
     return dll
@@ -111,28 +111,28 @@ class GenericJMITestsUsingCTypes:
         self.n_w = ctypes.c_int()
         self.n_tp = ctypes.c_int()
         self.n_z = ctypes.c_int()
-        assert self.dll.jmi_get_sizes(self.jmi, \
-                                      byref(self.n_ci), \
-                                      byref(self.n_cd), \
-                                      byref(self.n_pi), \
-                                      byref(self.n_pd), \
-                                      byref(self.n_dx), \
-                                      byref(self.n_x), \
-                                      byref(self.n_u), \
-                                      byref(self.n_w), \
-                                      byref(self.n_tp), \
+        assert self.dll.jmi_get_sizes(self.jmi,
+                                      byref(self.n_ci),
+                                      byref(self.n_cd),
+                                      byref(self.n_pi),
+                                      byref(self.n_pd),
+                                      byref(self.n_dx),
+                                      byref(self.n_x),
+                                      byref(self.n_u),
+                                      byref(self.n_w),
+                                      byref(self.n_tp),
                                       byref(self.n_z)) \
                is 0, \
                "getting sizes failed"
         
         self.n_eq_F = ctypes.c_int()
-        assert self.dll.jmi_dae_get_sizes(self.jmi, \
+        assert self.dll.jmi_dae_get_sizes(self.jmi,
                                           byref(self.n_eq_F)) \
                is 0, \
                "getting DAE sizes failed"
         
         self.dF_n_nz = ctypes.c_int()
-        if self.dll.jmi_dae_dF_n_nz(self.jmi, pyjmi.JMI_DER_SYMBOLIC, \
+        if self.dll.jmi_dae_dF_n_nz(self.jmi, pyjmi.JMI_DER_SYMBOLIC,
                                     byref(self.dF_n_nz)) is 0:
             self.dF_row = (self.dF_n_nz.value * ctypes.c_int)()
             self.dF_col = (self.dF_n_nz.value * ctypes.c_int)()
@@ -142,7 +142,7 @@ class GenericJMITestsUsingCTypes:
             self.dF_col = None
         
         self.dJ_n_nz = ctypes.c_int()
-        if self.dll.jmi_opt_dJ_n_nz(self.jmi, pyjmi.JMI_DER_SYMBOLIC, \
+        if self.dll.jmi_opt_dJ_n_nz(self.jmi, pyjmi.JMI_DER_SYMBOLIC,
                                     byref(self.dJ_n_nz)) is 0:
             self.dJ_row = (self.dJ_n_nz.value * ctypes.c_int)()
             self.dJ_col = (self.dJ_n_nz.value * ctypes.c_int)()
@@ -221,19 +221,19 @@ class GenericJMITestsUsingCTypes:
         offs_x_p = ctypes.c_int()
         offs_u_p = ctypes.c_int()
         offs_w_p = ctypes.c_int()
-        assert self.dll.jmi_get_offsets(self.jmi, \
-                                        byref(offs_ci), \
-                                        byref(offs_cd), \
-                                        byref(offs_pi), \
-                                        byref(offs_pd), \
-                                        byref(offs_dx), \
-                                        byref(offs_x), \
-                                        byref(offs_u), \
-                                        byref(offs_w), \
-                                        byref(offs_t), \
-                                        byref(offs_dx_p), \
-                                        byref(offs_x_p), \
-                                        byref(offs_u_p), \
+        assert self.dll.jmi_get_offsets(self.jmi,
+                                        byref(offs_ci),
+                                        byref(offs_cd),
+                                        byref(offs_pi),
+                                        byref(offs_pd),
+                                        byref(offs_dx),
+                                        byref(offs_x),
+                                        byref(offs_u),
+                                        byref(offs_w),
+                                        byref(offs_t),
+                                        byref(offs_dx_p),
+                                        byref(offs_x_p),
+                                        byref(offs_u_p),
                                         byref(offs_w_p)) \
                is 0, \
                "getting offsets failed"
@@ -263,12 +263,12 @@ class GenericVDPTestsUsingCTypes(GenericJMITestsUsingCTypes):
     def test_jmi_dae_dF_n_nz(self):
         """Test the function jmi_dae_dF_n_nz(...)."""
         dF_n_nz = ctypes.c_int()
-        assert self.dll.jmi_dae_dF_n_nz(self.jmi, \
-                                        pyjmi.JMI_DER_SYMBOLIC, \
+        assert self.dll.jmi_dae_dF_n_nz(self.jmi,
+                                        pyjmi.JMI_DER_SYMBOLIC,
                                         byref(dF_n_nz)) \
                is 0, \
                "getting number of non-zeros in the full DAE residual " \
-                + "Jacobian failed"
+               "Jacobian failed"
     
     def test_1_dae_F(self):
         """Run the test test_1_dae_F also found in @vdp_main.c
@@ -311,11 +311,11 @@ class GenericVDPTestsUsingCTypes(GenericJMITestsUsingCTypes):
         mask = N.ones(self.n_z.value, dtype=int)
         dF_row = N.zeros(self.dF_n_nz.value, dtype=int)
         dF_col = N.zeros(self.dF_n_nz.value, dtype=int)
-        assert self.dll.jmi_dae_dF_nz_indices(self.jmi, \
-                                              pyjmi.JMI_DER_SYMBOLIC, \
-                                              pyjmi.JMI_DER_ALL, \
-                                              mask, \
-                                              dF_row, \
+        assert self.dll.jmi_dae_dF_nz_indices(self.jmi,
+                                              pyjmi.JMI_DER_SYMBOLIC,
+                                              pyjmi.JMI_DER_ALL,
+                                              mask,
+                                              dF_row,
                                               dF_col) \
                is 0, \
                "could not get indices"
@@ -323,9 +323,9 @@ class GenericVDPTestsUsingCTypes(GenericJMITestsUsingCTypes):
         print "dF_row: %s" % dF_row
         print "dF_col: %s" % dF_col
                
-        dF_row_fix = N.array([2,3,1,2,3,1,2,3,4,1,3,4,1,3,4,3], \
+        dF_row_fix = N.array([2,3,1,2,3,1,2,3,4,1,3,4,1,3,4,3],
                              dtype=int)
-        dF_col_fix = N.array([1,3,4,5,6,7,7,7,7,8,8,8,10,10,11,12], \
+        dF_col_fix = N.array([1,3,4,5,6,7,7,7,7,8,8,8,10,10,11,12],
                              dtype=int)
         
         assert sum(abs(dF_row - dF_row_fix))==0, "row indices failed"
@@ -338,11 +338,11 @@ class GenericVDPTestsUsingCTypes(GenericJMITestsUsingCTypes):
         dF_row = N.array([], dtype=pyjmi.c_jmi_real_t)
         dF_col = N.array([], dtype=pyjmi.c_jmi_real_t)
         try:
-            assert self.dll.jmi_dae_dF_nz_indices(self.jmi, \
-                                                  pyjmi.JMI_DER_SYMBOLIC, \
-                                                  pyjmi.JMI_DER_ALL, \
-                                                  self.mask, \
-                                                  dF_row, \
+            assert self.dll.jmi_dae_dF_nz_indices(self.jmi,
+                                                  pyjmi.JMI_DER_SYMBOLIC,
+                                                  pyjmi.JMI_DER_ALL,
+                                                  self.mask,
+                                                  dF_row,
                                                   dF_col) \
                    is 0, \
                    "could not get indices"
@@ -357,9 +357,9 @@ class GenericVDPTestsUsingCTypes(GenericJMITestsUsingCTypes):
         
         dF_n_nz_test = ctypes.c_int()
         dF_n_cols_test = ctypes.c_int()
-        self.dll.jmi_dae_dF_dim(self.jmi, pyjmi.JMI_DER_SYMBOLIC, \
-                                pyjmi.JMI_DER_DENSE_ROW_MAJOR, pyjmi.JMI_DER_X, \
-                                self.mask, byref(dF_n_cols_test), \
+        self.dll.jmi_dae_dF_dim(self.jmi, pyjmi.JMI_DER_SYMBOLIC,
+                                pyjmi.JMI_DER_DENSE_ROW_MAJOR, pyjmi.JMI_DER_X,
+                                self.mask, byref(dF_n_cols_test),
                                 byref(dF_n_nz_test))
         
         nose.tools.assert_equal(dF_n_nz_test.value, 12)
@@ -465,7 +465,7 @@ class testReturnsNDArray():
         
         ctypes_arr = (4 * ctypes.c_double)(1.2, 1.8, 5.4, 8.32)
         address = ctypes.addressof(ctypes_arr)
-        narray = returns_ndarray(address, ctypes.sizeof(ctypes_arr) \
+        narray = returns_ndarray(address, ctypes.sizeof(ctypes_arr)
                                            * ctypes.sizeof(ctypes.c_double),
                                  ctypes.c_double)
                                  
@@ -492,7 +492,7 @@ class testReturnsNDArray():
         
         ctypes_arr = (4 * ctypes.c_int)(2, 8, 5, 3)
         address = ctypes.addressof(ctypes_arr)
-        narray = returns_ndarray(address, ctypes.sizeof(ctypes_arr) \
+        narray = returns_ndarray(address, ctypes.sizeof(ctypes_arr)
                                            * ctypes.sizeof(ctypes.c_int),
                                  ctypes.c_int)
                                  
@@ -544,7 +544,7 @@ class GenericJMIModelClassTests:
     
     """
     def setUp(self):
-        self.model = pyjmi.JMIModel(self.model_lib, \
+        self.model = pyjmi.JMIModel(self.model_lib,
                                     get_example_path(self.model_path))
         
     def tearDown(self):
