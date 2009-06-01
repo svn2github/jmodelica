@@ -354,14 +354,6 @@ def load_DLL(libname, path):
     u      = dll.jmi_get_u(jmi);
     w      = dll.jmi_get_w(jmi);
     t      = dll.jmi_get_t(jmi);
-    dx_p_1 = dll.jmi_get_dx_p(jmi, 0);
-    x_p_1  = dll.jmi_get_x_p(jmi, 0);
-    u_p_1  = dll.jmi_get_u_p(jmi, 0);
-    w_p_1  = dll.jmi_get_w_p(jmi, 0);
-    dx_p_2 = dll.jmi_get_dx_p(jmi, 1);
-    x_p_2  = dll.jmi_get_x_p(jmi, 1);
-    u_p_2  = dll.jmi_get_u_p(jmi, 1);
-    w_p_2  = dll.jmi_get_w_p(jmi, 1);
     z      = dll.jmi_get_z(jmi)
     
     # Setting parameter types
@@ -757,7 +749,7 @@ class JMIModel(object):
     def setX(self, x):
         """ Sets the differentiated variables vector.
         """
-        raise JMIException("X can only be modified, not set.")
+        self._x[:] = x
         
     x = property(getX, setX, "The differentiated variables vector.")
 
@@ -767,11 +759,11 @@ class JMIModel(object):
         """
         return self._dll.jmi_get_x_p(self._jmi, i)
         
-    def setX_P(self, x_p, i):
+    def setX_P(self, new_x_p, i):
         """ Sets the differentiated variables vector corresponding to the i:th time point.
         """
-
-        raise JMIException("X_P can only be modified, not set.")
+        x_p = self._dll.jmi_get_x_p(self._jmi, i)
+        x_p[:] = new_x_p
         
     x_p = property(getX_P, setX_P, "The differentiated variables corresponding to the i:th time point.")
     
@@ -783,7 +775,7 @@ class JMIModel(object):
     def setPI(self, pi):
         """ Sets the independent parameters vector.
         """
-        raise JMIException("PI can only be modified, not set.")
+        self._pi[:] = pi
         
     pi = property(getPI, setPI, "The independent parameter vector.")
 
@@ -795,8 +787,7 @@ class JMIModel(object):
     def setCD(self, cd):
         """ Sets the dependent constants vector.
         """
-
-        raise JMIException("CD can only be modified, not set.")
+        self._cd[:] = cd
         
     cd = property(getCD, setCD, "The dependent constants vector.")
 
@@ -808,8 +799,7 @@ class JMIModel(object):
     def setCI(self, ci):
         """ Sets the independent constants vector.
         """
-
-        raise JMIException("CI can only be modified, not set.")
+        self._ci[:] = ci
         
     ci = property(getCI, setCI, "The independent constants vector.")
 
@@ -821,7 +811,7 @@ class JMIModel(object):
     def setDX(self, dx):
         """ Sets the derivatives vector.
         """
-        raise JMIException("DX can only be modified, not set.")
+        self._dx[:] = dx
         
     dx = property(getDX, setDX, "The derivatives vector.")
 
@@ -831,10 +821,11 @@ class JMIModel(object):
         """
         return self._dll.jmi_get_dx_p(self._jmi,i)
         
-    def setDX_P(self, dx_p, i):
+    def setDX_P(self, new_dx_p, i):
         """ Sets the derivatives variables vector corresponding to the i:th time point.  
         """
-        raise JMIException("DX_P can only be modified, not set.")
+        dx_p = self._dll.jmi_get_dx_p(self._jmi,i)
+        dx_p[:] = new_dx_p
         
     dx_p = property(getDX_P, setDX_P, "The derivatives corresponding to the i:th time point.")
 
@@ -846,7 +837,7 @@ class JMIModel(object):
     def setPD(self, pd):
         """ Sets the dependent parameters vector.
         """
-        raise JMIException("PD can only be modified, not set.")
+        self._pd[:] = pd
         
     pd = property(getPD, setPD, "The dependent paramenters vector.")
 
@@ -858,7 +849,7 @@ class JMIModel(object):
     def setU(self, u):
         """ Sets the inputs vector.
         """
-        raise JMIException("U can only be modified, not set.")
+        self._u[:] = u
         
     u = property(getU, setU, "The inputs vector.")
 
@@ -867,10 +858,11 @@ class JMIModel(object):
         """
         return self._dll.jmi_get_u_p(self._jmi, i)
         
-    def setU_P(self, u_p, i):
+    def setU_P(self, new_u_p, i):
         """ Sets the inputs vector corresponding to the i:th time point.
         """
-        raise JMIException("U_P can only be modified, not set.")
+        u_p = self._dll.jmi_get_u_p(self._jmi, i)
+        u_p[:] = new_u_p
         
     u_p = property(getU_P, setU_P, "The inputs corresponding to the i:th time point.")
 
@@ -882,7 +874,7 @@ class JMIModel(object):
     def setW(self, w):
         """ Sets the algebraic variables vector.
         """
-        raise JMIException("W can only be modified, not set.")
+        self._w[:] = w
         
     w = property(getW, setW, "The algebraic variables vector.")
 
@@ -892,22 +884,29 @@ class JMIModel(object):
         """
         return self._dll.jmi_get_w_p(self._jmi, i)
         
-    def setW_P(self, w_p, i):
+    def setW_P(self, new_w_p, i):
         """ Sets the algebraic variables vector corresponding to the i:th time point.
         """
-        raise JMIException("W_P can only be modified, not set.")
+        w_p = self._dll.jmi_get_w_p(self._jmi, i)
+        w_p[:] = new_w_p
         
     w_p = property(getW_P, setW_P, "The algebraic variables corresponding to the i:th time point.")
 
     def getT(self):
         """ Gets a reference to the time value.
+        
+            @note:
+                getT returns a NumPy array of length 1.
         """
         return self._t
         
     def setT(self, t):
         """ Sets the time value.
+        
+            @note:
+                Parameter t must be a NumPy array of length 1.
         """
-        raise JMIException("T can only be modified, not set.")
+        self._t[:] = t
         
     t = property(getT, setT, "The time value.")
     
@@ -921,7 +920,7 @@ class JMIModel(object):
         """ Sets the vector containing all parameters, variables and point-wise 
             evalutated variables vector.
         """
-        raise JMIException("Z can only be modified, not set.")
+        self._z[:] = z
         
     z = property(getZ, setZ, "All parameters, variables and point-wise evaluated variables vector.")
     

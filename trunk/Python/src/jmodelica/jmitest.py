@@ -549,32 +549,47 @@ class GenericJMIModelClassTests:
         
     def tearDown(self):
         del self.model
-        
-    def genericVectorGetterTest(self, getter):
-        """Test changing the value of a getter."""
-        vec = getter()
-        if len(vec) > 0:
-            temp = vec[0]
-            vec[0] = 5
-            vec = getter()
-            nose.tools.assert_equal(vec[0], 5)
-            vec[0] = temp
     
     def testGetters(self):
-        """Testing each getter."""
-        self.genericVectorGetterTest(self.model.getX)
-        self.genericVectorGetterTest(self.model.getPI)
-        
-    def genericVectorSetterTest(self, setter):
-        """Asserts that the setter is not setable."""
-        print setter
-        arr = N.zeros(5684)
-        nose.tools.assert_raises(pyjmi.JMIException, setter, arr)
+        """ Testing each getter. """
+        def assert_value_change(getter):
+            """ Test changing the value of a getter. """
+            vec = getter()
+            if len(vec) > 0:
+                temp = vec[0]
+                vec[0] = 5
+                vec = getter()
+                nose.tools.assert_equal(vec[0], 5)
+                vec[0] = temp
+                
+        getters = [ self.model.getX, self.model.getPI ]
+        map(assert_value_change, getters)
         
     def testSetters(self):
-        """Testing each setter."""
-        self.genericVectorSetterTest(self.model.setX)
-        self.genericVectorSetterTest(self.model.setPI)
+        """ Testing each setter. """
+        def assert_length_check(setter):
+            """Asserts that the setter is not setable."""
+            print setter
+            arr = N.zeros(5684)
+            nose.tools.assert_raises(pyjmi.JMIException, setter, arr)
+            
+        setters = [ self.model.setX, self.model.setPI ]
+        map(assert_length_check, setters)
+        
+    def testGetSet(self):
+        """ Test the setters based on getters. """
+        from random import randrange, seed, random
+        seed(42)
+        
+        def test_get_set(getter, setter):
+            """ Test to get and modify by setting. """
+            x = getter().copy()
+            x[randrange(len(x))] = random()
+            setter(x)
+        
+        getsets = [ (self.model.getX, self.model.setX),
+                    (self.model.getPI, self.model.setPI) ]
+        map(test_get_set, getsets)
     
     def testProperties(self):
         """Test the existence properties."""
