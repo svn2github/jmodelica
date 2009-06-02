@@ -326,7 +326,7 @@ libjmi_algorithm_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g
 # static inclusion of the runtime libraries when creating model so:s.
 libjmi_algorithm_la_LDFLAGS = -no-undefined -static-libtool-libs
 libjmi_solver_la_SOURCES = jmi_opt_sim_lp.c \
-                           jmi_opt_sim_ipopt.c \
+                           jmi_opt_sim_ipopt.cpp \
                            jmi_TNLP.cpp
 
 libjmi_solver_la_CFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE -g
@@ -351,7 +351,7 @@ libjmi_algorithm_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_INC) -DJMI_AD=JMI_AD_C
 libjmi_algorithm_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD -g
 libjmi_algorithm_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
 #libjmi_cppad_la_LDFLAGS = -no-undefined 
-libjmi_solver_cppad_la_SOURCES = jmi_opt_sim_ipopt.c \
+libjmi_solver_cppad_la_SOURCES = jmi_opt_sim_ipopt.cpp \
                                  jmi_TNLP.cpp
 
 libjmi_solver_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_INC) -I$(IPOPT_INC) -DJMI_AD=JMI_AD_CPPAD -g
@@ -530,20 +530,6 @@ libjmi_solver_la-jmi_opt_sim_lp.lo: jmi_opt_sim_lp.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_solver_la_CFLAGS) $(CFLAGS) -c -o libjmi_solver_la-jmi_opt_sim_lp.lo `test -f 'jmi_opt_sim_lp.c' || echo '$(srcdir)/'`jmi_opt_sim_lp.c
 
-libjmi_solver_la-jmi_opt_sim_ipopt.lo: jmi_opt_sim_ipopt.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_solver_la_CFLAGS) $(CFLAGS) -MT libjmi_solver_la-jmi_opt_sim_ipopt.lo -MD -MP -MF $(DEPDIR)/libjmi_solver_la-jmi_opt_sim_ipopt.Tpo -c -o libjmi_solver_la-jmi_opt_sim_ipopt.lo `test -f 'jmi_opt_sim_ipopt.c' || echo '$(srcdir)/'`jmi_opt_sim_ipopt.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libjmi_solver_la-jmi_opt_sim_ipopt.Tpo $(DEPDIR)/libjmi_solver_la-jmi_opt_sim_ipopt.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jmi_opt_sim_ipopt.c' object='libjmi_solver_la-jmi_opt_sim_ipopt.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_solver_la_CFLAGS) $(CFLAGS) -c -o libjmi_solver_la-jmi_opt_sim_ipopt.lo `test -f 'jmi_opt_sim_ipopt.c' || echo '$(srcdir)/'`jmi_opt_sim_ipopt.c
-
-libjmi_solver_cppad_la-jmi_opt_sim_ipopt.lo: jmi_opt_sim_ipopt.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_solver_cppad_la_CFLAGS) $(CFLAGS) -MT libjmi_solver_cppad_la-jmi_opt_sim_ipopt.lo -MD -MP -MF $(DEPDIR)/libjmi_solver_cppad_la-jmi_opt_sim_ipopt.Tpo -c -o libjmi_solver_cppad_la-jmi_opt_sim_ipopt.lo `test -f 'jmi_opt_sim_ipopt.c' || echo '$(srcdir)/'`jmi_opt_sim_ipopt.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libjmi_solver_cppad_la-jmi_opt_sim_ipopt.Tpo $(DEPDIR)/libjmi_solver_cppad_la-jmi_opt_sim_ipopt.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jmi_opt_sim_ipopt.c' object='libjmi_solver_cppad_la-jmi_opt_sim_ipopt.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_solver_cppad_la_CFLAGS) $(CFLAGS) -c -o libjmi_solver_cppad_la-jmi_opt_sim_ipopt.lo `test -f 'jmi_opt_sim_ipopt.c' || echo '$(srcdir)/'`jmi_opt_sim_ipopt.c
-
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
@@ -572,12 +558,26 @@ libjmi_cppad_la-jmi_cppad.lo: jmi_cppad.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_cppad_la_CXXFLAGS) $(CXXFLAGS) -c -o libjmi_cppad_la-jmi_cppad.lo `test -f 'jmi_cppad.cpp' || echo '$(srcdir)/'`jmi_cppad.cpp
 
+libjmi_solver_la-jmi_opt_sim_ipopt.lo: jmi_opt_sim_ipopt.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_solver_la_CXXFLAGS) $(CXXFLAGS) -MT libjmi_solver_la-jmi_opt_sim_ipopt.lo -MD -MP -MF $(DEPDIR)/libjmi_solver_la-jmi_opt_sim_ipopt.Tpo -c -o libjmi_solver_la-jmi_opt_sim_ipopt.lo `test -f 'jmi_opt_sim_ipopt.cpp' || echo '$(srcdir)/'`jmi_opt_sim_ipopt.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/libjmi_solver_la-jmi_opt_sim_ipopt.Tpo $(DEPDIR)/libjmi_solver_la-jmi_opt_sim_ipopt.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='jmi_opt_sim_ipopt.cpp' object='libjmi_solver_la-jmi_opt_sim_ipopt.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_solver_la_CXXFLAGS) $(CXXFLAGS) -c -o libjmi_solver_la-jmi_opt_sim_ipopt.lo `test -f 'jmi_opt_sim_ipopt.cpp' || echo '$(srcdir)/'`jmi_opt_sim_ipopt.cpp
+
 libjmi_solver_la-jmi_TNLP.lo: jmi_TNLP.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_solver_la_CXXFLAGS) $(CXXFLAGS) -MT libjmi_solver_la-jmi_TNLP.lo -MD -MP -MF $(DEPDIR)/libjmi_solver_la-jmi_TNLP.Tpo -c -o libjmi_solver_la-jmi_TNLP.lo `test -f 'jmi_TNLP.cpp' || echo '$(srcdir)/'`jmi_TNLP.cpp
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/libjmi_solver_la-jmi_TNLP.Tpo $(DEPDIR)/libjmi_solver_la-jmi_TNLP.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='jmi_TNLP.cpp' object='libjmi_solver_la-jmi_TNLP.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_solver_la_CXXFLAGS) $(CXXFLAGS) -c -o libjmi_solver_la-jmi_TNLP.lo `test -f 'jmi_TNLP.cpp' || echo '$(srcdir)/'`jmi_TNLP.cpp
+
+libjmi_solver_cppad_la-jmi_opt_sim_ipopt.lo: jmi_opt_sim_ipopt.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_solver_cppad_la_CXXFLAGS) $(CXXFLAGS) -MT libjmi_solver_cppad_la-jmi_opt_sim_ipopt.lo -MD -MP -MF $(DEPDIR)/libjmi_solver_cppad_la-jmi_opt_sim_ipopt.Tpo -c -o libjmi_solver_cppad_la-jmi_opt_sim_ipopt.lo `test -f 'jmi_opt_sim_ipopt.cpp' || echo '$(srcdir)/'`jmi_opt_sim_ipopt.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/libjmi_solver_cppad_la-jmi_opt_sim_ipopt.Tpo $(DEPDIR)/libjmi_solver_cppad_la-jmi_opt_sim_ipopt.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='jmi_opt_sim_ipopt.cpp' object='libjmi_solver_cppad_la-jmi_opt_sim_ipopt.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_solver_cppad_la_CXXFLAGS) $(CXXFLAGS) -c -o libjmi_solver_cppad_la-jmi_opt_sim_ipopt.lo `test -f 'jmi_opt_sim_ipopt.cpp' || echo '$(srcdir)/'`jmi_opt_sim_ipopt.cpp
 
 libjmi_solver_cppad_la-jmi_TNLP.lo: jmi_TNLP.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_solver_cppad_la_CXXFLAGS) $(CXXFLAGS) -MT libjmi_solver_cppad_la-jmi_TNLP.lo -MD -MP -MF $(DEPDIR)/libjmi_solver_cppad_la-jmi_TNLP.Tpo -c -o libjmi_solver_cppad_la-jmi_TNLP.lo `test -f 'jmi_TNLP.cpp' || echo '$(srcdir)/'`jmi_TNLP.cpp

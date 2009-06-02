@@ -45,13 +45,12 @@ VPATH = @srcdir@
 ##########################################################################
 #  Usually, you don't have to change anything below.                     #
 ##########################################################################
+# C++ Compiler command
+CXX = @CXX@
 
-# C Compiler command
-CC = @CC@
-
-# C Compiler options
-CFLAGS = @CFLAGS@ -DJMI_AD=JMI_AD_NONE
-CLINKFLAGS = 
+# C++ Compiler options
+CXXFLAGS = @CXXFLAGS@ -DJMI_AD=JMI_AD_CPPAD
+CXXLINKFLAGS = 
 
 SHARED_LDFLAGS = @SHARED_LDFLAGS@
 
@@ -85,7 +84,7 @@ endif
 $(EXE): $(OBJS)
 ifeq (@WITH_IPOPT@,true)
 ifeq (@WITH_CPPAD@,true)
-	$(CC) $(CLINKFLAGS) $(CFLAGS) -o $@ $(OBJS) $(LIBS)
+	$(CXX) $(CXXLINKFLAGS) $(CXXFLAGS) -o $@ $(OBJS) $(LIBS)
 endif
 endif
 
@@ -93,7 +92,7 @@ endif
 $(SHARED): $(OBJS)
 ifeq (@WITH_IPOPT@,true)
 ifeq (@WITH_CPPAD@,true)
-	$(CC) $(SHARED_LDFLAGS) $(CLINKFLAGS) $(CFLAGS) -o $@ $(SHAREDOBJS) $(LIBS)
+	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $@ $(SHAREDOBJS) $(LIBS)
 endif
 endif
 

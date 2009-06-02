@@ -2,14 +2,13 @@
 // All Rights reserved
 // This file is published under the Common Public License 1.0.
 
+#ifndef JMI_TNLP_HPP_
+#define JMI_TNLP_HPP_
 
 #include "IpTNLP.hpp"
 #include "jmi_opt_sim.h"
 
 using namespace Ipopt;
-
-// forward declarations
-class SimultaneousInterface;
 
 /**
  * This is the class that present the dynamic optimization
@@ -38,6 +37,8 @@ public:
 				  Number* lambda);
   //@}
 
+//  virtual bool get_constraints_linearity(Index m, LinearityType* const_types);
+
   /** @name NLP evaluation methods */
   //@{
   virtual bool eval_f(Index n, const Number* x, bool new_x,
@@ -64,7 +65,12 @@ public:
                                    const IpoptData* ip_data,
                                    IpoptCalculatedQuantities* ip_cq);
     //@}
+/*
+    virtual Index get_number_of_nonlinear_variables();
 
+    virtual bool get_list_of_nonlinear_variables(Index num_nonlin_vars,
+        Index* pos_nonlin_vars);
+*/
   private:
     /**@name Default Compiler Generated Methods
      * (Hidden to avoid implicit creation/calling).
@@ -86,8 +92,13 @@ public:
 
     // Problem definition
     jmi_opt_sim_t* problem_;
-    Index n_eq_;
-    Index n_ineq_;
-    Index nnz_jac_eq_;
-    Index nnz_jac_ineq_;
+    Index n_;
+    Index n_h_;
+    Index n_g_;
+    Index dh_n_nz_;
+    Index dg_n_nz_;
 };
+
+
+
+#endif

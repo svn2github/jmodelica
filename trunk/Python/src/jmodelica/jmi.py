@@ -234,7 +234,9 @@ def _returns_ndarray(dll_func, dtype, shape, ndim=1, order=None):
     dll_func.restype = ct.POINTER(dtype)
     dll_func.errcheck = conv_function
 
-
+## This is an api comment.
+# @param libname Name of library.
+# @param path Path to library.
 def load_DLL(libname, path):
     """Loads a model from a DLL file and returns it.
     

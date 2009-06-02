@@ -61,7 +61,7 @@ libjmi_algorithm_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g
 libjmi_algorithm_la_LDFLAGS = -no-undefined -static-libtool-libs
 
 libjmi_solver_la_SOURCES = jmi_opt_sim_lp.c \
-                           jmi_opt_sim_ipopt.c \
+                           jmi_opt_sim_ipopt.cpp \
                            jmi_TNLP.cpp
 
 libjmi_solver_la_CFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE -g
@@ -89,7 +89,7 @@ libjmi_algorithm_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_INC) -DJMI_AD=JMI_AD_CPPAD 
 libjmi_algorithm_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
 #libjmi_cppad_la_LDFLAGS = -no-undefined 
 
-libjmi_solver_cppad_la_SOURCES = jmi_opt_sim_ipopt.c \
+libjmi_solver_cppad_la_SOURCES = jmi_opt_sim_ipopt.cpp \
                                  jmi_TNLP.cpp
                    
 libjmi_solver_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_INC) -I$(IPOPT_INC) -DJMI_AD=JMI_AD_CPPAD -g
