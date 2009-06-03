@@ -87,7 +87,7 @@ class XMLVariablesDoc(XMLdoc):
         
         return dict(zip(keys,vals))
     
-    def get_opt_variable_refs(self):
+    def get_p_opt_variable_refs(self):
         refs = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Free=\"true\"]")
         return refs
     

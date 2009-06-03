@@ -313,13 +313,7 @@ def load_DLL(libname, path):
     
     for (func, length) in int_res_funcs:
         _returns_ndarray(func, c_jmi_real_t, length, order='C')
-    
-    dll.jmi_set_tp.argtypes = [ct.c_void_p,
-                               Nct.ndpointer(dtype=c_jmi_real_t,
-                                             ndim=1,
-                                             shape=n_tp.value,
-                                             flags='C')]
-    
+        
     n_eq_F = ct.c_int()
     assert dll.jmi_dae_get_sizes(jmi,
                                  byref(n_eq_F)) \
@@ -359,18 +353,105 @@ def load_DLL(libname, path):
     z      = dll.jmi_get_z(jmi)
     
     # Setting parameter types
-    dll.jmi_opt_set_p_opt_indices.argtypes = [ct.c_void_p,
-                                              ct.c_int,
-                                              Nct.ndpointer(dtype=ct.c_int,
-                                                            ndim=1,
-                                                            flags='C')]
+    # creation, initialization and destruction
+    dll.jmi_ad_init.argtypes = [ct.c_void_p]
+    dll.jmi_delete.argtypes = [ct.c_void_p]
     
-    dll.jmi_opt_set_optimization_interval.argtypes = [ct.c_void_p,
-                                                      c_jmi_real_t,
-                                                      ct.c_int,
-                                                      c_jmi_real_t,
-                                                      ct.c_int]      
-    
+    # setters and getters
+    dll.jmi_get_sizes.argtypes = [ct.c_void_p,
+                                  ct.POINTER(ct.c_int),
+                                  ct.POINTER(ct.c_int),
+                                  ct.POINTER(ct.c_int),
+                                  ct.POINTER(ct.c_int),
+                                  ct.POINTER(ct.c_int),
+                                  ct.POINTER(ct.c_int),
+                                  ct.POINTER(ct.c_int),
+                                  ct.POINTER(ct.c_int),
+                                  ct.POINTER(ct.c_int),
+                                  ct.POINTER(ct.c_int)]   
+    dll.jmi_get_offsets.argtypes = [ct.c_void_p,
+                                    ct.POINTER(ct.c_int),
+                                    ct.POINTER(ct.c_int),
+                                    ct.POINTER(ct.c_int),
+                                    ct.POINTER(ct.c_int),
+                                    ct.POINTER(ct.c_int),
+                                    ct.POINTER(ct.c_int),
+                                    ct.POINTER(ct.c_int),
+                                    ct.POINTER(ct.c_int),
+                                    ct.POINTER(ct.c_int),
+                                    ct.POINTER(ct.c_int),
+                                    ct.POINTER(ct.c_int),
+                                    ct.POINTER(ct.c_int),
+                                    ct.POINTER(ct.c_int)]
+    dll.jmi_get_n_tp.argtypes = [ct.c_void_p,
+                                 ct.POINTER(ct.c_int)]    
+    dll.jmi_set_tp.argtypes = [ct.c_void_p,
+                               Nct.ndpointer(dtype=c_jmi_real_t,
+                                             ndim=1,
+                                             shape=n_tp.value,
+                                             flags='C')]    
+    dll.jmi_get_tp.argtypes = [ct.c_void_p,
+                               Nct.ndpointer(dtype=c_jmi_real_t,
+                                             ndim=1,
+                                             flags='C')]
+    dll.jmi_get_z.argtypes    = [ct.c_void_p]
+    dll.jmi_get_ci.argtypes   = [ct.c_void_p]
+    dll.jmi_get_cd.argtypes   = [ct.c_void_p]
+    dll.jmi_get_pi.argtypes   = [ct.c_void_p]
+    dll.jmi_get_pd.argtypes   = [ct.c_void_p]
+    dll.jmi_get_dx.argtypes   = [ct.c_void_p]
+    dll.jmi_get_dx_p.argtypes = [ct.c_void_p, ct.c_int]
+    dll.jmi_get_t.argtypes    = [ct.c_void_p]
+    dll.jmi_get_u.argtypes    = [ct.c_void_p]
+    dll.jmi_get_u_p.argtypes  = [ct.c_void_p, ct.c_int]
+    dll.jmi_get_w.argtypes    = [ct.c_void_p]
+    dll.jmi_get_w_p.argtypes  = [ct.c_void_p, ct.c_int]
+    dll.jmi_get_x.argtypes    = [ct.c_void_p]
+    dll.jmi_get_x_p.argtypes  = [ct.c_void_p, ct.c_int]
+ 
+    # ODE interface
+    dll.jmi_ode_f.argtypes  = [ct.c_void_p]
+    dll.jmi_ode_df.argtypes = [ct.c_void_p,
+                               ct.c_int,
+                               ct.c_int,
+                               ct.c_int,
+                               Nct.ndpointer(dtype=ct.c_int,
+                                             ndim=1,
+                                             shape=n_z.value,
+                                             flags='C'),
+                               Nct.ndpointer(dtype=c_jmi_real_t,
+                                             ndim=1,
+                                             flags='C')]    
+    dll.jmi_ode_df_n_nz.argtypes = [ct.c_void_p,
+                                    ct.c_int,
+                                    ct.POINTER(ct.c_int)]
+    dll.jmi_ode_df_nz_indices.argtypes = [ct.c_void_p,
+                                          ct.c_int,
+                                          ct.c_int,
+                                          Nct.ndpointer(dtype=ct.c_int,
+                                                        ndim=1,
+                                                        shape=n_z.value,
+                                                        flags='C'),
+                                          Nct.ndpointer(dtype=ct.c_int,
+                                                        ndim=1,
+                                                        flags='C'),
+                                          Nct.ndpointer(dtype=ct.c_int,
+                                                        ndim=1,
+                                                        flags='C')]
+    dll.jmi_ode_df_dim.argtypes = [ct.c_void_p,
+                                   ct.c_int,
+                                   ct.c_int,
+                                   ct.c_int,
+                                   Nct.ndpointer(dtype=ct.c_int,
+                                                 ndim=1,
+                                                 shape=n_z.value,
+                                                 flags='C'),
+                                   ct.POINTER(ct.c_int),
+                                   ct.POINTER(ct.c_int)]    
+
+    # DAE interface
+    dll.jmi_dae_get_sizes.argtypes = [ct.c_void_p,
+                                      ct.POINTER(ct.c_int)]      
     dll.jmi_dae_F.argtypes = [ct.c_void_p,
                               Nct.ndpointer(dtype=c_jmi_real_t,
                                             ndim=1,
@@ -382,10 +463,15 @@ def load_DLL(libname, path):
                                ct.c_int,
                                Nct.ndpointer(dtype=ct.c_int,
                                              ndim=1,
+                                             shape=n_z.value,
                                              flags='C'),
                                Nct.ndpointer(dtype=c_jmi_real_t,
                                              ndim=1,
-                                             flags='C')]
+                                             flags='C')]   
+    dll.jmi_dae_dF_n_nz.argtypes = [ct.c_void_p,
+                                    ct.c_int,
+                                    ct.POINTER(ct.c_int)]
+    
     if dF_n_nz is not None:
         dll.jmi_dae_dF_nz_indices.argtypes = [ct.c_void_p,
                                               ct.c_int,
@@ -407,8 +493,7 @@ def load_DLL(libname, path):
                                                 flags='C')]
     else:
         dll.jmi_dae_dF_nz_indices.errcheck = \
-                        fail_error_check("Functionality not supported.")
-                        
+                        fail_error_check("Functionality not supported.")                        
     dll.jmi_dae_dF_dim.argtypes = [ct.c_void_p, ct.c_int, ct.c_int,
                                    ct.c_int,
                                    Nct.ndpointer(dtype=ct.c_int,
@@ -417,7 +502,12 @@ def load_DLL(libname, path):
                                                  flags='C'),
                                    ct.POINTER(ct.c_int),
                                    ct.POINTER(ct.c_int)]
-                                          
+    
+    # DAE initialization interface
+    dll.jmi_init_get_sizes.argtypes = [ct.c_void_p,
+                                       ct.POINTER(ct.c_int),
+                                       ct.POINTER(ct.c_int),
+                                       ct.POINTER(ct.c_int)]                                          
     dll.jmi_init_F0.argtypes = [ct.c_void_p,
                                 Nct.ndpointer(dtype=c_jmi_real_t,
                                               ndim=1,
@@ -428,17 +518,21 @@ def load_DLL(libname, path):
                                  ct.c_int,
                                  Nct.ndpointer(dtype=ct.c_int,
                                                ndim=1,
+                                               shape=n_z.value,
                                                flags='C'),
                                  Nct.ndpointer(dtype=c_jmi_real_t,
                                                ndim=1,
                                                flags='C')]
-
+    dll.jmi_init_dF0_n_nz = [ct.c_void_p,
+                             ct.c_int,
+                             ct.POINTER(ct.c_int)]
     dll.jmi_init_dF0_nz_indices.argtypes = [ct.c_void_p,
                                           ct.c_int,
                                           ct.c_int,
                                           Nct.ndpointer(
                                                 dtype=ct.c_int,
                                                 ndim=1,
+                                                shape=n_z.value,
                                                 flags='C'),
                                           Nct.ndpointer(dtype=ct.c_int,
                                                         ndim=1,
@@ -452,10 +546,10 @@ def load_DLL(libname, path):
                                      ct.c_int,
                                      Nct.ndpointer(dtype=ct.c_int,
                                                    ndim=1,
+                                                   shape=n_z.value,
                                                    flags='C'),
                                      ct.POINTER(ct.c_int),
                                      ct.POINTER(ct.c_int)]
-
     dll.jmi_init_F1.argtypes = [ct.c_void_p,
                                 Nct.ndpointer(dtype=c_jmi_real_t,
                                               ndim=1,
@@ -466,16 +560,20 @@ def load_DLL(libname, path):
                                  ct.c_int,
                                  Nct.ndpointer(dtype=ct.c_int,
                                                ndim=1,
+                                               shape=n_z.value,
                                                flags='C'),
                                  Nct.ndpointer(dtype=c_jmi_real_t,
                                                ndim=1,
                                                flags='C')]
-
+    dll.jmi_init_dF1_n_nz = [ct.c_void_p,
+                             ct.c_int,
+                             ct.POINTER(ct.c_int)]
     dll.jmi_init_dF1_nz_indices.argtypes = [ct.c_void_p,
                                           ct.c_int,
                                           ct.c_int,
                                           Nct.ndpointer(dtype=ct.c_int,
                                                         ndim=1,
+                                                        shape=n_z.value,
                                                         flags='C'),
                                           Nct.ndpointer(dtype=ct.c_int,
                                                         ndim=1,
@@ -489,10 +587,10 @@ def load_DLL(libname, path):
                                      ct.c_int,
                                      Nct.ndpointer(dtype=ct.c_int,
                                                    ndim=1,
+                                                   shape=n_z.value,
                                                    flags='C'),
                                      ct.POINTER(ct.c_int),
                                      ct.POINTER(ct.c_int)]
-
     dll.jmi_init_Fp.argtypes = [ct.c_void_p,
                                 Nct.ndpointer(dtype=c_jmi_real_t,
                                               ndim=1,
@@ -501,21 +599,23 @@ def load_DLL(libname, path):
                                  ct.c_int,
                                  ct.c_int,
                                  ct.c_int,
-                                 Nct.ndpointer(
-                                                dtype=ct.c_int,
-                                                ndim=1,
-                                                flags='C'),
+                                 Nct.ndpointer(dtype=ct.c_int,
+                                               ndim=1,
+                                               shape=n_z.value,
+                                               flags='C'),
                                  Nct.ndpointer(dtype=c_jmi_real_t,
                                                ndim=1,
                                                flags='C')]
-
+    dll.jmi_init_dFp_n_nz = [ct.c_void_p,
+                             ct.c_int,
+                             ct.POINTER(ct.c_int)]
     dll.jmi_init_dFp_nz_indices.argtypes = [ct.c_void_p,
                                           ct.c_int,
                                           ct.c_int,
-                                          Nct.ndpointer(
-                                                dtype=ct.c_int,
-                                                ndim=1,
-                                                flags='C'),
+                                          Nct.ndpointer(dtype=ct.c_int,
+                                                        ndim=1,
+                                                        shape=n_z.value,
+                                                        flags='C'),
                                           Nct.ndpointer(dtype=ct.c_int,
                                                         ndim=1,
                                                         flags='C'),
@@ -526,66 +626,250 @@ def load_DLL(libname, path):
                                    ct.c_int,
                                    Nct.ndpointer(dtype=ct.c_int,
                                                  ndim=1,
+                                                 shape=n_z.value,
                                                  flags='C'),
                                    ct.POINTER(ct.c_int),
                                    ct.POINTER(ct.c_int)]
-
-    dll.jmi_ode_f.argtypes  = [ct.c_void_p]
-    dll.jmi_ode_df.argtypes = [ct.c_void_p,
+    
+    # Optimization interface
+    dll.jmi_opt_set_optimization_interval.argtypes = [ct.c_void_p,
+                                                      c_jmi_real_t,
+                                                      ct.c_int,
+                                                      c_jmi_real_t,
+                                                      ct.c_int]    
+    dll.jmi_opt_get_optimization_interval.argtypes = [ct.c_void_p,
+                                                      c_jmi_real_t,
+                                                      ct.c_int,
+                                                      c_jmi_real_t,
+                                                      ct.c_int]
+    dll.jmi_opt_set_p_opt_indices.argtypes = [ct.c_void_p,
+                                              ct.c_int,
+                                              Nct.ndpointer(dtype=ct.c_int,
+                                                            ndim=1,
+                                                            flags='C')]    
+    dll.jmi_opt_get_n_p_opt.argtypes = [ct.c_void_p,
+                                        ct.POINTER(ct.c_int)]    
+    dll.jmi_opt_get_p_opt_indices.argtypes = [ct.c_void_p,
+                                              ct.POINTER(ct.c_int)]   
+    dll.jmi_opt_get_sizes.argtypes = [ct.c_void_p,
+                                      ct.POINTER(ct.c_int),
+                                      ct.POINTER(ct.c_int),
+                                      ct.POINTER(ct.c_int),
+                                      ct.POINTER(ct.c_int)]    
+    dll.jmi_opt_J.argtypes = [ct.c_void_p,
+                              Nct.ndpointer(dtype=c_jmi_real_t,
+                                            ndim=1,
+                                            flags='C')]   
+    dll.jmi_opt_dJ.argtypes = [ct.c_void_p,
                                ct.c_int,
                                ct.c_int,
                                ct.c_int,
                                Nct.ndpointer(dtype=ct.c_int,
                                              ndim=1,
+                                             shape=n_z.value,
                                              flags='C'),
                                Nct.ndpointer(dtype=c_jmi_real_t,
                                              ndim=1,
-                                             flags='C')]
-
-    dll.jmi_ode_df_nz_indices.argtypes = [ct.c_void_p,
+                                             flags='C')]   
+    dll.jmi_opt_dJ_n_nz.argtypes = [ct.c_void_p,
+                                    ct.c_int,
+                                    ct.POINTER(ct.c_int)]    
+    dll.jmi_opt_dJ_nz_indices.argtypes = [ct.c_void_p,
                                           ct.c_int,
                                           ct.c_int,
                                           Nct.ndpointer(dtype=ct.c_int,
                                                         ndim=1,
+                                                        shape=n_z.value,
                                                         flags='C'),
                                           Nct.ndpointer(dtype=ct.c_int,
                                                         ndim=1,
                                                         flags='C'),
                                           Nct.ndpointer(dtype=ct.c_int,
                                                         ndim=1,
-                                                        flags='C')]
-    dll.jmi_ode_df_dim.argtypes = [ct.c_void_p,
+                                                        flags='C')]    
+    dll.jmi_opt_dJ_dim.argtypes = [ct.c_void_p,
                                    ct.c_int,
                                    ct.c_int,
                                    ct.c_int,
                                    Nct.ndpointer(dtype=ct.c_int,
                                                  ndim=1,
+                                                 shape=n_z.value,
                                                  flags='C'),
                                    ct.POINTER(ct.c_int),
-                                   ct.POINTER(ct.c_int)]
-                                       
-    dll.jmi_get_cd.argtypes   = [ct.c_void_p]
-    dll.jmi_get_ci.argtypes   = [ct.c_void_p]
-    dll.jmi_get_dx.argtypes   = [ct.c_void_p]
-    dll.jmi_get_dx_p.argtypes = [ct.c_void_p, ct.c_int]
-    dll.jmi_get_pd.argtypes   = [ct.c_void_p]
-    dll.jmi_get_pi.argtypes   = [ct.c_void_p]
-    dll.jmi_get_t.argtypes    = [ct.c_void_p]
-    dll.jmi_get_u.argtypes    = [ct.c_void_p]
-    dll.jmi_get_u_p.argtypes  = [ct.c_void_p, ct.c_int]
-    dll.jmi_get_w.argtypes    = [ct.c_void_p]
-    dll.jmi_get_w_p.argtypes  = [ct.c_void_p, ct.c_int]
-    dll.jmi_get_x.argtypes    = [ct.c_void_p]
-    dll.jmi_get_x_p.argtypes  = [ct.c_void_p, ct.c_int]
-    dll.jmi_get_z.argtypes    = [ct.c_void_p]
+                                   ct.POINTER(ct.c_int)]    
+    dll.jmi_opt_Ceq.argtypes = [ct.c_void_p,
+                               Nct.ndpointer(dtype=c_jmi_real_t,
+                                             ndim=1,
+                                             flags='C')]    
+    dll.jmi_opt_dCeq.argtypes = [ct.c_void_p,
+                                 ct.c_int,
+                                 ct.c_int,
+                                 ct.c_int,
+                                 Nct.ndpointer(dtype=ct.c_int,
+                                               ndim=1,
+                                               shape=n_z.value,
+                                               flags='C'),
+                                 Nct.ndpointer(dtype=c_jmi_real_t,
+                                               ndim=1,
+                                               flags='C')]   
+    dll.jmi_opt_dCeq_n_nz.argtypes = [ct.c_void_p,
+                                      ct.c_int,
+                                      ct.POINTER(ct.c_int)]   
+    dll.jmi_opt_dCeq_nz_indices.argtypes = [ct.c_void_p,
+                                            ct.c_int,
+                                            ct.c_int,
+                                            Nct.ndpointer(dtype=ct.c_int,
+                                                          ndim=1,
+                                                          shape=n_z.value,
+                                                          flags='C'),
+                                            Nct.ndpointer(dtype=ct.c_int,
+                                                          ndim=1,
+                                                          flags='C'),
+                                            Nct.ndpointer(dtype=ct.c_int,
+                                                          ndim=1,
+                                                          flags='C')]
+    dll.jmi_opt_dCeq_dim.argtypes = [ct.c_void_p,
+                                     ct.c_int,
+                                     ct.c_int,
+                                     ct.c_int,
+                                     Nct.ndpointer(dtype=ct.c_int,
+                                                   ndim=1,
+                                                   shape=n_z.value,
+                                                   flags='C'),
+                                     ct.POINTER(ct.c_int),
+                                     ct.POINTER(ct.c_int)]    
+    dll.jmi_opt_Cineq.argtypes = [ct.c_void_p,
+                                  Nct.ndpointer(dtype=c_jmi_real_t,
+                                                ndim=1,
+                                                flags='C')]    
+    dll.jmi_opt_dCineq.argtypes = [ct.c_void_p,
+                                   ct.c_int,
+                                   ct.c_int,
+                                   ct.c_int,
+                                   Nct.ndpointer(dtype=ct.c_int,
+                                                 ndim=1,
+                                                 shape=n_z.value,
+                                                 flags='C'),
+                                   Nct.ndpointer(dtype=c_jmi_real_t,
+                                                 ndim=1,
+                                                 flags='C')]   
+    dll.jmi_opt_dCineq_n_nz.argtypes = [ct.c_void_p,
+                                        ct.c_int,
+                                        ct.POINTER(ct.c_int)]    
+    dll.jmi_opt_dCineq_nz_indices.argtypes = [ct.c_void_p,
+                                              ct.c_int,
+                                              ct.c_int,
+                                              Nct.ndpointer(dtype=ct.c_int,
+                                                            ndim=1,
+                                                            shape=n_z.value,
+                                                            flags='C'),
+                                              Nct.ndpointer(dtype=ct.c_int,
+                                                            ndim=1,
+                                                            flags='C'),
+                                              Nct.ndpointer(dtype=ct.c_int,
+                                                            ndim=1,
+                                                            flags='C')]    
+    dll.jmi_opt_dCineq_dim.argtypes = [ct.c_void_p,
+                                       ct.c_int,
+                                       ct.c_int,
+                                       ct.c_int,
+                                       Nct.ndpointer(dtype=ct.c_int,
+                                                     ndim=1,
+                                                     shape=n_z.value,
+                                                     flags='C'),
+                                       ct.POINTER(ct.c_int),
+                                       ct.POINTER(ct.c_int)]    
+    dll.jmi_opt_Heq.argtypes = [ct.c_void_p,
+                                Nct.ndpointer(dtype=c_jmi_real_t,
+                                              ndim=1,
+                                              flags='C')]    
+    dll.jmi_opt_dHeq.argtypes = [ct.c_void_p,
+                                 ct.c_int,
+                                 ct.c_int,
+                                 ct.c_int,
+                                 Nct.ndpointer(dtype=ct.c_int,
+                                               ndim=1,
+                                               shape=n_z.value,
+                                               flags='C'),
+                                 Nct.ndpointer(dtype=c_jmi_real_t,
+                                             ndim=1,
+                                             flags='C')]    
+    dll.jmi_opt_dHeq_n_nz.argtypes = [ct.c_void_p,
+                                      ct.c_int,
+                                      ct.POINTER(ct.c_int)]    
+    dll.jmi_opt_dHeq_nz_indices.argtypes = [ct.c_void_p,
+                                            ct.c_int,
+                                            ct.c_int,
+                                            Nct.ndpointer(dtype=ct.c_int,
+                                                          ndim=1,
+                                                          shape=n_z.value,
+                                                          flags='C'),
+                                            Nct.ndpointer(dtype=ct.c_int,
+                                                            ndim=1,
+                                                            flags='C'),
+                                            Nct.ndpointer(dtype=ct.c_int,
+                                                            ndim=1,
+                                                            flags='C')]    
+    dll.jmi_opt_dHeq_dim.argtypes = [ct.c_void_p,
+                                     ct.c_int,
+                                     ct.c_int,
+                                     ct.c_int,
+                                     Nct.ndpointer(dtype=ct.c_int,
+                                                   ndim=1,
+                                                   shape=n_z.value,
+                                                   flags='C'),
+                                     ct.POINTER(ct.c_int),
+                                     ct.POINTER(ct.c_int)]    
+    dll.jmi_opt_Hineq.argtypes = [ct.c_void_p,
+                                  Nct.ndpointer(dtype=c_jmi_real_t,
+                                                ndim=1,
+                                                flags='C')]    
+    dll.jmi_opt_dHineq.argtypes = [ct.c_void_p,
+                                   ct.c_int,
+                                   ct.c_int,
+                                   ct.c_int,
+                                   Nct.ndpointer(dtype=ct.c_int,
+                                                 ndim=1,
+                                                 shape=n_z.value,
+                                                 flags='C'),
+                                   Nct.ndpointer(dtype=c_jmi_real_t,
+                                                 ndim=1,
+                                                 flags='C')]   
+    dll.jmi_opt_dHineq_n_nz.argtypes = [ct.c_void_p,
+                                        ct.c_int,
+                                        ct.POINTER(ct.c_int)]   
+    dll.jmi_opt_dHineq_nz_indices.argtypes = [ct.c_void_p,
+                                              ct.c_int,
+                                              ct.c_int,
+                                              Nct.ndpointer(dtype=ct.c_int,
+                                                            ndim=1,
+                                                            shape=n_z.value,
+                                                            flags='C'),
+                                              Nct.ndpointer(dtype=ct.c_int,
+                                                            ndim=1,
+                                                            flags='C'),
+                                              Nct.ndpointer(dtype=ct.c_int,
+                                                            ndim=1,
+                                                            flags='C')]    
+    dll.jmi_opt_dHineq_dim.argtypes = [ct.c_void_p,
+                                       ct.c_int,
+                                       ct.c_int,
+                                       ct.c_int,
+                                       Nct.ndpointer(dtype=ct.c_int,
+                                                     ndim=1,
+                                                     shape=n_z.value,
+                                                     flags='C'),
+                                       ct.POINTER(ct.c_int),
+                                       ct.POINTER(ct.c_int)]
     
-
+    
+    # Simultaneous Optimization based on Lagrange polynomials and Radau points
     dll.jmi_opt_sim_lp_new.argtypes = [ct.c_void_p,
                                        ct.c_void_p,
                                        ct.c_int,
                                        Nct.ndpointer(dtype=c_jmi_real_t,
-                                                      ndim=1,
-                                                      flags='C'),
+                                                     ndim=1,
+                                                     flags='C'),
                                        ct.c_int,
                                        Nct.ndpointer(dtype=c_jmi_real_t,
                                                      ndim=1,
@@ -645,6 +929,7 @@ def load_DLL(libname, path):
                                        ct.c_int,
                                        ct.c_int]
 
+    # Simultaneous Optimization interface
     dll.jmi_opt_sim_get_result.argtypes = [ct.c_void_p,
                                            Nct.ndpointer(dtype=c_jmi_real_t,
                                                          ndim=1,
@@ -664,7 +949,6 @@ def load_DLL(libname, path):
                                            Nct.ndpointer(dtype=c_jmi_real_t,
                                                          ndim=1,
                                                          flags='C')]
-
    
     assert dll.jmi_delete(jmi) == 0, \
            "jmi_delete failed"
@@ -746,19 +1030,9 @@ class JMIModel(object):
         self._n_w  = ct.c_int()
         self._n_tp = ct.c_int()
         self._n_z  = ct.c_int()
-        assert self._dll.jmi_get_sizes(self._jmi,
-                                 byref(self._n_ci),
-                                 byref(self._n_cd),
-                                 byref(self._n_pi),
-                                 byref(self._n_pd),
-                                 byref(self._n_dx),
-                                 byref(self._n_x),
-                                 byref(self._n_u),
-                                 byref(self._n_w),
-                                 byref(self._n_tp),
-                                 byref(self._n_z)) \
-                                 is 0, \
-                                 "getting sizes failed"
+        
+        self.get_sizes()
+
         # offsets
         self._offs_ci = ct.c_int()
         self._offs_cd = ct.c_int()
@@ -773,22 +1047,8 @@ class JMIModel(object):
         self._offs_x_p = ct.c_int()
         self._offs_u_p = ct.c_int()
         self._offs_w_p = ct.c_int()
-        assert self._dll.jmi_get_offsets(self._jmi,
-                                         byref(self._offs_ci),
-                                         byref(self._offs_cd),
-                                         byref(self._offs_pi),
-                                         byref(self._offs_pd),
-                                         byref(self._offs_dx),
-                                         byref(self._offs_x),
-                                         byref(self._offs_u),
-                                         byref(self._offs_w),
-                                         byref(self._offs_t),
-                                         byref(self._offs_dx_p),
-                                         byref(self._offs_x_p),
-                                         byref(self._offs_u_p),
-                                         byref(self._offs_w_p)) \
-                                         is 0, \
-                                         "getting offsets failed"
+
+        self.get_offsets()
 
         # set start attributes
         xml_variables_name=libname+'_variables.xml' 
@@ -807,7 +1067,7 @@ class JMIModel(object):
             self._set_XMLproblvariables_doc(xmlparser.XMLProblVariablesDoc(path+os.sep+xml_problvariables_name))
             self._set_opt_interval()
             self._set_timepoints()
-            self._set_opt_indices()
+            self._set_p_opt_indices()
             
         except IOError, e:
             # Modelica model - can not load Optimica specific xml
@@ -815,28 +1075,102 @@ class JMIModel(object):
 
         
         self.initAD()
-                
-    def __del__(self):
-        """Freeing jmi data structure.
-        """
-        assert self._dll.jmi_delete(self._jmi) == 0, \
-               "jmi_delete failed"
-        
+         
     def initAD(self):
         """Initializing Algorithmic Differential package.
         
-        Raises a JMIException on failure.
+            Raises a JMIException on failure.
         """
         if self._dll.jmi_ad_init(self._jmi) is not 0:
             raise JMIException("Could not initialize AD.")
+               
+    def __del__(self):
+        """ Freeing jmi data structure.
+        
+        """
+        assert self._dll.jmi_delete(self._jmi) == 0, \
+               "jmi_delete failed"
+               
+    def get_sizes(self):
+        """ Gets the sizes of the variable vectors.
+        
+        """
+        retval = self._dll.jmi_get_sizes(self._jmi,
+                                 byref(self._n_ci),
+                                 byref(self._n_cd),
+                                 byref(self._n_pi),
+                                 byref(self._n_pd),
+                                 byref(self._n_dx),
+                                 byref(self._n_x),
+                                 byref(self._n_u),
+                                 byref(self._n_w),
+                                 byref(self._n_tp),
+                                 byref(self._n_z))
+        if retval is not 0:
+            raise JMIException("Getting sizes failed.")
+                     
+        l = [self._n_ci.value, self._n_cd.value, self._n_pi.value, self._n_pd.value, self._n_dx.value, 
+             self._n_x.value, self._n_u.value, self._n_w.value, self._n_tp.value, self._n_z.value]
+        return l
+    
+    def get_offsets(self):
+        """ Gets the offsets for the variable types in the z vector.
+        
+        """
+        retval = self._dll.jmi_get_offsets(self._jmi,
+                                         byref(self._offs_ci),
+                                         byref(self._offs_cd),
+                                         byref(self._offs_pi),
+                                         byref(self._offs_pd),
+                                         byref(self._offs_dx),
+                                         byref(self._offs_x),
+                                         byref(self._offs_u),
+                                         byref(self._offs_w),
+                                         byref(self._offs_t),
+                                         byref(self._offs_dx_p),
+                                         byref(self._offs_x_p),
+                                         byref(self._offs_u_p),
+                                         byref(self._offs_w_p))
+        if retval is not 0:
+            raise JMIException("Getting offsets failed.")
+        
+        l = [self._offs_ci.value, self._offs_cd.value, self._offs_pi.value, self._offs_pd.value, 
+             self._offs_dx.value, self._offs_x.value, self._offs_u.value, self._offs_w.value, 
+             self._offs_t.value, self._offs_dx_p.value, self._offs_x_p.value, self._offs_u_p.value, 
+             self._offs_w_p.value]
+        return l
+    
+    def get_n_tp(self):
+        """ Gets the number of time points in the model.
+        
+        """
+        if self._dll.jmi_get_n_tp(self._jmi, byref(self._n_tp)) is not 0:
+            raise JMIException("Getting number of time points in the model failed.")
+        return self._n_tp.value
+
+    def set_tp(self, tp):
+        """ Sets the vector of time points. 
+        
+        """
+        if self._dll.jmi_set_tp(self._jmi, tp) is not 0:
+            raise JMIException("Setting vector of time points failed.")
+        
+    def get_tp(self, tp):
+        """ Gets the vector of time points.
+        
+        """
+        if self._dll.jmi_get_tp(self._jmi, tp) is not 0:
+            raise JMIException("Getting vector of time points failed.")
 
     def getX(self):
         """ Gets a reference to the differentiated variables vector.
+        
         """
         return self._x
         
     def setX(self, x):
         """ Sets the differentiated variables vector.
+        
         """
         self._x[:] = x
         
@@ -845,11 +1179,13 @@ class JMIModel(object):
     def getX_P(self, i):
         """ Gets a reference to the differentiated variables vector corresponding to 
             the i:th time point.
+            
         """
         return self._dll.jmi_get_x_p(self._jmi, i)
         
     def setX_P(self, new_x_p, i):
         """ Sets the differentiated variables vector corresponding to the i:th time point.
+        
         """
         x_p = self._dll.jmi_get_x_p(self._jmi, i)
         x_p[:] = new_x_p
@@ -858,11 +1194,13 @@ class JMIModel(object):
     
     def getPI(self):
         """ Gets a reference to the independent parameters vector.
+        
         """
         return self._pi
         
     def setPI(self, pi):
         """ Sets the independent parameters vector.
+        
         """
         self._pi[:] = pi
         
@@ -870,11 +1208,13 @@ class JMIModel(object):
 
     def getCD(self):
         """ Gets a reference to the dependent constants vector.
+        
         """
         return self._cd
         
     def setCD(self, cd):
         """ Sets the dependent constants vector.
+        
         """
         self._cd[:] = cd
         
@@ -882,11 +1222,13 @@ class JMIModel(object):
 
     def getCI(self):
         """ Gets a reference to the independent constants vector.
+        
         """
         return self._ci
         
     def setCI(self, ci):
         """ Sets the independent constants vector.
+        
         """
         self._ci[:] = ci
         
@@ -894,11 +1236,13 @@ class JMIModel(object):
 
     def getDX(self):
         """ Gets a reference to the derivatives vector.
+        
         """
         return self._dx
         
     def setDX(self, dx):
         """ Sets the derivatives vector.
+        
         """
         self._dx[:] = dx
         
@@ -906,12 +1250,14 @@ class JMIModel(object):
 
     def getDX_P(self, i):
         """ Gets a reference to the derivatives variables vector corresponding to 
-            the i:th time point.  
+            the i:th time point.
+            
         """
         return self._dll.jmi_get_dx_p(self._jmi,i)
         
     def setDX_P(self, new_dx_p, i):
-        """ Sets the derivatives variables vector corresponding to the i:th time point.  
+        """ Sets the derivatives variables vector corresponding to the i:th time point.
+        
         """
         dx_p = self._dll.jmi_get_dx_p(self._jmi,i)
         dx_p[:] = new_dx_p
@@ -920,11 +1266,13 @@ class JMIModel(object):
 
     def getPD(self):
         """ Gets a reference to the dependent parameters vector.
+        
         """
         return self._pd
         
     def setPD(self, pd):
         """ Sets the dependent parameters vector.
+        
         """
         self._pd[:] = pd
         
@@ -932,11 +1280,13 @@ class JMIModel(object):
 
     def getU(self):
         """ Gets a reference to the inputs vector.
+        
         """
         return self._u
         
     def setU(self, u):
         """ Sets the inputs vector.
+        
         """
         self._u[:] = u
         
@@ -944,11 +1294,13 @@ class JMIModel(object):
 
     def getU_P(self, i):
         """ Gets a reference to the inputs vector corresponding to the i:th time point.
+        
         """
         return self._dll.jmi_get_u_p(self._jmi, i)
         
     def setU_P(self, new_u_p, i):
         """ Sets the inputs vector corresponding to the i:th time point.
+        
         """
         u_p = self._dll.jmi_get_u_p(self._jmi, i)
         u_p[:] = new_u_p
@@ -957,11 +1309,13 @@ class JMIModel(object):
 
     def getW(self):
         """ Gets a reference to the algebraic variables vector.
+        
         """
         return self._w
         
     def setW(self, w):
         """ Sets the algebraic variables vector.
+        
         """
         self._w[:] = w
         
@@ -970,11 +1324,13 @@ class JMIModel(object):
     def getW_P(self, i):
         """ Gets a reference to the algebraic variables vector corresponding to 
             the i:th time point.
+            
         """
         return self._dll.jmi_get_w_p(self._jmi, i)
         
     def setW_P(self, new_w_p, i):
         """ Sets the algebraic variables vector corresponding to the i:th time point.
+        
         """
         w_p = self._dll.jmi_get_w_p(self._jmi, i)
         w_p[:] = new_w_p
@@ -1002,46 +1358,557 @@ class JMIModel(object):
     def getZ(self):
         """ Gets a reference to the vector containing all parameters, variables 
             and point-wise evalutated variables vector.
+            
         """
         return self._z
         
     def setZ(self, z):
         """ Sets the vector containing all parameters, variables and point-wise 
             evalutated variables vector.
+            
         """
         self._z[:] = z
         
-    z = property(getZ, setZ, "All parameters, variables and point-wise evaluated variables vector.")
+    z = property(getZ, setZ, "All parameters, variables and point-wise evaluated variables vector.")   
+    
+    def ode_f(self):
+        """ Evalutates the right hand side of the ODE.
+        
+        """
+        if self._dll.jmi_ode_f(self._jmi) is not 0:
+            raise JMIException("Evaluating ODE failed.")
+        
+    def ode_df(self, eval_alg, sparsity, independent_vars, mask, jac):
+        """ Evaluates the Jacobian of the right hand side of the ODE.
+        
+        """
+        if self._dll.jmi_ode_df(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
+            raise JMIException("Evaluation of Jacobian failed.")
+    
+    def ode_df_n_nz(self, eval_alg):
+        """ Returns the number of non-zeros in the Jacobian of the right hand side of the ODE.
+        
+        """
+        n_nz = ct.c_int()
+        if self._dll.jmi_ode_df_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
+            raise JMIException("Getting number of non-zeros failed.")
+        return n_nz.value
+    
+    def ode_df_nz_indices(self, eval_alg, independent_vars, mask, row, col):
+        """ Returns the row and column indices of the non-zero elements in the Jacobian 
+            of the right hand side of the ODE.
+            
+        """
+        if self._dll.jmi_ode_df_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, col) is not 0:
+            raise JMIException("Getting row and column indices failed.")
+    
+    def ode_df_dim(self, eval_alg, sparsity, independent_vars, mask):
+        """ Returns the number of columns and non-zero elements in the Jacobian 
+            of the right hand side of the ODE.
+            
+        """
+        df_n_cols = ct.c_int()
+        df_n_nz = ct.c_int()
+        if self._dll.jmi_ode_df_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(df_n_cols), byref(df_n_nz)) is not 0:
+            raise JMIException("Getting number of columns and non-zero elements failed.")        
+        return df_n_cols.value, df_n_nz.value
+    
+    def dae_get_sizes(self):
+        """ Returns the number of equations of the DAE.
+        
+        """
+        n_eq_F = ct.c_int
+        if self._dll.jmi_dae_get_sizes(self._jmi, byref(n_eq_F)) is not 0:
+            raise JMIException("Getting number of equations failed.")
+        return n_eq_F.value
+    
+    def dae_F(self, res):
+        """ Evaluates the DAE residual.
+        
+        """
+        if self._dll.jmi_dae_F(self._jmi, res) is not 0:
+            raise JMIException("Evaluating the DAE residual failed.")
+    
+    def dae_dF(self, eval_alg, sparsity, independent_vars, mask, jac):
+        """ Evaluates the Jacobian of the DAE residual function.
+        
+        """
+        if self._dll.jmi_dae_dF(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
+            raise JMIException("Evaluating the Jacobian failed.")
+    
+    def dae_dF_n_nz(self, eval_alg):
+        """ Returns the number of non-zeros in the full DAE residual Jacobian.
+        
+        """
+        n_nz = ct.c_int
+        if self._dll.jmi_dae_dF_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
+            raise JMIException("Getting the number of non-zeros failed.")
+        return n_nz.value
+    
+    def dae_dF_nz_indices(self, eval_alg, independent_vars, mask, row, col):
+        """ Returns the row and column indices of the non-zero elements in the 
+            DAE residual Jacobian.
+            
+        """
+        if self._dll.jmi_dae_dF_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, cols) is not 0:
+            raise JMIException("Getting the row and column indices failed.")
+    
+    def dae_dF_dim(self, eval_alg, sparsity, independent_vars, mask):
+        """ Returns the number of columns and non-zero elements in the Jacobian 
+            of the DAE residual.
+            
+        """
+        dF_n_cols = ct.c_int()
+        dF_n_nz = ct.c_int()
+        if self._dll.jmi_dae_dF_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
+            raise JMIException("Returning the number of columns and non-zero elements failed.")        
+        return dF_n_cols.value, dF_n_nz.value
+    
+    def init_get_sizes(self):
+        """ The number of equations in the DAE initialization functions.
+        
+        """
+        n_eq_f0 = ct.c_int
+        n_eq_f1 = ct.c_int
+        n_eq_fp = ct.c_int
+        if self._dll.jmi_init_get_sizes(self._jmi, byref(n_eq_f0), byref(n_eq_f1), byref(n_eq_fp)) is not 0:
+            raise JMIException("Getting the number of equations failed.")
+        return n_eq_f0.value, n_eq_f1.value, n_eq_fp.value
+    
+    def init_F0(self, res):
+        """ Evaluates the F0 residual function of the initialization system.
+        
+        """
+        if self._dll.jmi_init_F0(self._jmi, res) is not 0:
+            raise JMIException("Evaluating the F0 residual function failed.")
+        
+    def init_dF0(self, eval_alg, sparsity, independent_vars, mask, jac):
+        """ Evaluates the Jacobian of the DAE initialization residual function F0.
+        
+        """
+        if self._dll.jmi_init_dF0(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
+            raise JMIException("Evaluating the Jacobian failed.")
+    
+    def init_dF0_n_nz(self, eval_alg):
+        """ Returns the number of non-zeros in the full Jacobian of the DAE 
+            initialization residual function F0.
+            
+        """
+        n_nz = ct.c_int
+        if self._dll.jmi_init_dF0_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
+            raise JMIException("Getting the number of non-zeros failed.")
+        return n_nz.value
+    
+    def init_dF0_nz_indices(self, eval_alg, independent_vars, mask, row, col):
+        """ Returns the row and column indices of the non-zero elements in the 
+            Jacobian of the DAE initialization residual function F0.
+            
+        """
+        if self._dll.jmi_init_dF0_nz_indices(self._jmi, eval_alg, independent_vars, mask, row_i, cols_i) is not 0:
+            raise JMIException("Getting the row and column indices failed.")
+    
+    def init_dF0_dim(self, eval_alg, sparsity, independent_vars, mask):
+        """ Returns the number of columns and non-zero elements in the Jacobian 
+            of the DAE initialization residual function F0.
+            
+        """
+        dF_n_cols = ct.c_int()
+        dF_n_nz = ct.c_int()
+        if self._dll.jmi_init_dF0_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
+            raise JMIException("Returning the number of columns and non-zero elements failed.")             
+        return dF_n_cols.value, dF_n_nz.value
+
+    def init_F1(self, res):
+        """ Evaluates the F1 residual function of the initialization system.
+        
+        """
+        if self._dll.jmi_init_F1(self._jmi, res) is not 0:
+            raise JMIException("Evaluating the F1 residual function failed.")            
+        
+    def init_dF1(self, eval_alg, sparsity, independent_vars, mask, jac):
+        """ Evaluates the Jacobian of the DAE initialization residual function F1.
+        
+        """
+        if self._dll.jmi_init_dF1(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
+            raise JMIException("Evaluating the Jacobian failed.")
+    
+    def init_dF1_n_nz(self, eval_alg):
+        """ Returns the number of non-zeros in the full Jacobian of the DAE 
+            initialization residual function F1.
+            
+        """
+        n_nz = ct.c_int
+        if self._dll.jmi_init_dF1_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
+            raise JMIException("Getting the number of non-zeros failed.")
+        return n_nz.value
+    
+    def init_dF1_nz_indices(self, eval_alg, independent_vars, mask, row, col):
+        """ Returns the row and column indices of the non-zero elements in the 
+            Jacobian of the DAE initialization residual function F1.
+            
+        """
+        if self._dll.jmi_init_dF1_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, cols) is not 0:
+            raise JMIException("Getting the row and column indices failed.")
+    
+    def init_dF1_dim(self, eval_alg, sparsity, independent_vars, mask):
+        """ Returns the number of columns and non-zero elements in the Jacobian 
+            of the DAE initialization residual function F1.
+            
+        """
+        dF_n_cols = ct.c_int()
+        dF_n_nz = ct.c_int()
+        if self._dll.jmi_init_dF1_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
+            raise JMIException("Getting the number of columns and non-zero elements failed.")        
+        return dF_n_cols.value, dF_n_nz.value
+ 
+    def init_Fp(self, res):
+        """ Evaluates the Fp residual function of the initialization system.
+        
+        """
+        if self._dll.jmi_init_Fp(self._jmi, res) is not 0:
+            raise JMIException("Evaluating the Fp residual function failed.")
+        
+    def init_dFp(self, eval_alg, sparsity, independent_vars, mask, jac):
+        """ Evaluates the Jacobian of the DAE initialization residual function Fp.
+        
+        """
+        if self._dll.jmi_init_dFp(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
+            raise JMIException("Evaluating the Jacobian failed.")
+    
+    def init_dFp_n_nz(self, eval_alg):
+        """ Returns the number of non-zeros in the full Jacobian of the DAE 
+            initialization residual function Fp.
+            
+        """
+        n_nz = ct.c_int
+        if self._dll.jmi_init_dFp_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
+            raise JMIException("Getting the number of non-zeros failed.")
+        return n_nz.value
+    
+    def init_dFp_nz_indices(self, eval_alg, independent_vars, mask, row, col):
+        """ Returns the row and column indices of the non-zero elements in the 
+            Jacobian of the DAE initialization residual function Fp.
+            
+        """
+        if self._dll.jmi_init_dFp_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, cols) is not 0:
+            raise JMIException("Getting the row and column indices failed.")
+    
+    def init_dFp_dim(self, eval_alg, sparsity, independent_vars, mask):
+        """ Returns the number of columns and non-zero elements in the Jacobian 
+            of the DAE initialization residual function Fp.
+            
+        """
+        dF_n_cols = ct.c_int()
+        dF_n_nz = ct.c_int()
+        if self._dll.jmi_init_dFp_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
+            raise JMIException("Getting the number of columns and non-zero elements failed.")        
+        return dF_n_cols.value, dF_n_nz.value
+    
+    def opt_set_optimization_interval(self, start_time, start_time_free, final_time, final_time_free):
+        """ Sets the optimization interval.
+        
+        """
+        if self._dll.jmi_opt_set_optimization_interval(self._jmi, start_time, start_time_free, final_time, final_time_free) is not 0:
+            raise JMIException("Setting the optimization interval failed.")
+        
+    def opt_get_optimization_interval(self):
+        """ Gets the optimization interval.
+        
+        """
+        start_time = ct.c_double()
+        start_time_free = ct.c_int()
+        final_time = ct.c_double()
+        final_time_free = ct.c_int()
+        if self._dll.jmi_get_optimization_interval(self._jmi, byref(start_time), byref(start_time_free), byref(final_time), byref(final_time_free)) is not 0:
+            raise JMIException("Getting the optimization interval failed.")
+        return start_time, start_time_free, final_time, final_time_free
+        
+    def opt_set_p_opt_indices(self, n_p_opt, p_opt_indices):
+        """ Specifies optimization parameters for the model.
+        
+        """
+        if self._dll.jmi_opt_set_p_opt_indices(self._jmi, n_p_opt, p_opt_indices) is not 0:
+            raise JMIException("Specifing optimization parameters failed.")
+        
+    def opt_get_n_p_opt(self):
+        """ Gets the number of optimization parameters.
+        
+        """
+        n_p_opt = ct.c_int()
+        if self._dll.jmi_opt_get_n_p_opt(self._jmi, byref(n_p_opt)) is not 0:
+            raise JMIException("Getting the number of optimization parameters failed.")
+        return n_p_opt
+        
+    def opt_get_p_opt_indices(self, p_opt_indices):
+        """ Gets the optimization parameter indices.
+        
+        """
+        if self._dll.jmi_opt_get_p_opt_indices(self._jmi, p_opt_indices) is not 0:
+            raise JMIException("Getting the optimization parameters failed.")
+        
+    def opt_get_sizes(self):
+        """ Gets the sizes of the optimization functions.
+        
+        """
+        n_eq_Ceq = ct.c_int()
+        n_eq_Cineq = ct.c_int()
+        n_eq_Heq = ct.c_int()
+        n_eq_Hineq = ct.c_int()
+        if self._dll.jmi_opt_get_sizes(self._jmi, byref(n_eq_Ceq), byref(n_eq_Cineq), byref(n_eq_Heq), byref(n_eq_Hineq)) is not 0:
+            raise JMIException("Getting the sizes of the optimization functions failed.")
+        return n_eq_Ceq, n_eq_Cineq, n_eq_Heq, n_eq_Hineq
+        
+    def opt_J(self, J):
+        """ Evaluates the cost function J.
+        
+        """
+        if self._dll.jmi_opt_J(self._jmi, J) is not 0:
+            raise JMIException("Evaluation of J failed.")
+        
+    def opt_dJ(self, eval_alg, sparsity, independent_vars, mask, jac):
+        """ Evaluates the gradient of the cost function.
+        
+        """
+        if self._dll.jmi_opt_dJ(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
+            raise JMIException("Evaluation of the gradient of the cost function failed.")
+        
+    def opt_dJ_n_nz(self, eval_alg):
+        """ Returns the number of zeros in the gradient of the cost function J.
+        
+        """
+        n_nz = ct.c_int()
+        if self._dll.jmi_opt_dJ_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
+            raise JMIException("Getting the number of zeros failed.")
+        return n_nz.value
+        
+    def opt_dJ_nz_indices(self, eval_alg, independent_vars, mask, row, col):
+        """ Returns the row and column indices of the non-zero elements 
+            in the gradient of the cost function J.
+            
+        """
+        if self._dll.jmi_opt_dJ_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, col) is not 0:
+            raise JMIException("Getting the row and column indices failed.")        
+        
+    def opt_dJ_dim(self, eval_alg, sparsity, independent_vars, mask):
+        """ Computes the number of columns and non-zero elements in 
+            the gradient of the cost function.
+            
+        """
+        dF_n_cols = ct.c_int()
+        dF_n_nz = ct.c_int()
+        if self._dll.jmi_opt_dJ_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
+            raise JMIException("Computing the number of columns and non-zero elements failed.")
+        return dF_n_cols.value, dF_n_nz.value
+        
+    def opt_Ceq(self, res):
+        """ Evaluates the residual of the equality path constraint Ceq.
+        
+        """
+        if self._dll.jmi_opt_Ceq(self._jmi, res) is not 0:
+            raise JMIException("Evaluation of the residual of the equality path constraint Ceq failed.")
+        
+    def opt_dCeq(self, eval_alg, sparsity, independent_vars, mask, jac):
+        """ Evaluates the Jacobian of the equality path constraint Ceq.
+        
+        """
+        if self._dll.jmi_opt_dCeq(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
+            raise JMIException("Evaluation of the Jacobian of the equality path constraint Ceq failed.")
+        
+    def opt_dCeq_n_nz(self, eval_alg):
+        """ Returns the number of non-zeros in the full Jacobian of the
+            equality path constraint Ceq.
+            
+        """
+        n_nz = ct.c_int()
+        if self._dll.jmi_opt_dCeq_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
+            raise JMIException("Getting the number of non-zeros failed.")
+        return n_nz.value
+        
+    def opt_dCeq_nz_indices(self, eval_alg, independent_vars, mask, row, col):
+        """ Returns the row and column indices of the non-zero elements
+            in the Jacobian of the equality path constraint residual Ceq.
+            
+        """
+        if self._dll.jmi_opt_dCeq_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, col) is not 0:
+            raise JMIException("Getting the row and column indices failed.")
+        
+    def opt_dCeq_dim(self, eval_alg, sparsity, independent_vars, mask):
+        """ Computes the number of columns and non-zero elements in the 
+            Jacobian of the equality path constraint residual function Ceq.
+            
+        """
+        dF_n_cols = ct.c_int()
+        dF_n_nz = ct.c_int()
+        if self._dll.jmi_opt_dCeq_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
+            raise JMIException("Computing the number of columns and non-zero elements failed.")
+        return dF_n_cols.value, dF_n_nz.value
+        
+    def opt_Cineq(self, res):
+        """ Evaluates the residual of the inequality path constraint Cineq.
+        
+        """
+        if self._dll.jmi_opt_Cineq(self._jmi, res) is not 0:
+            raise JMIException("Evaluating the residual of the inequality path constraint Cineq failed.")
+        
+    def opt_dCineq(self, eval_alg, sparsity, independent_vars, mask, jac):
+        """ Evaluates the Jacobian of the inequality path constraint Cineq.
+        
+        """
+        if self._dll.jmi_opt_dCineq(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
+            raise JMIException("Evaluating the Jacobian of the inequality path constraint Cineq failed.")
+        
+    def opt_dCineq_n_nz(self, eval_alg):
+        """ Returns the number of non-zeros in the full Jacobian of the
+            inequality path constraint Cineq.
+            
+        """
+        n_nz = ct.c_int()
+        if self._dll.jmi_opt_dCineq_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
+            raise JMIException("Getting the number of non-zeros failed.")
+        return n_nz.value
+        
+    def opt_dCineq_nz_indices(self, eval_alg, independent_vars, mask, row, col):
+        """ Returns the row and column indices of the non-zero elements
+            in the Jacobian of the inequality path constraint residual Cineq.
+            
+        """
+        if self._dll.jmi_opt_dCineq_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, col) is not 0:
+            raise JMIException("Getting the row and column indices failed.")
+        
+    def opt_dCineq_dim(self, eval_alg, sparsity, independent_vars, mask):
+        """ Computes the number of columns and non-zero elements in the 
+            Jacobian of the inequality path constraint residual function Cineq.
+            
+        """
+        dF_n_cols = ct.c_int()
+        dF_n_nz = ct.c_int()
+        if self._dll.jmi_opt_dCineq_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
+            raise JMIException("Computing the number of columns and non-zero elements failed.")
+        return dF_n_cols.value, dF_n_nz.value
+
+    def opt_Heq(self, res):
+        """ Evaluates the residual of the equality point constraint Heq.
+        
+        """
+        if self._dll.jmi_opt_Heq(self._jmi, res) is not 0:
+            raise JMIException("Evaluating the residual of the equality point constraint Heq failed.")
+        
+    def opt_dHeq(self, eval_alg, sparsity, independent_vars, mask, jac):
+        """ Evaluates the Jacobian of the equality point constraint Heq.
+        
+        """
+        if self._dll.jmi_opt_dHeq(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
+            raise JMIException("Evaluating the Jacobian of the equality point constraint Heq failed.")
+        
+    def opt_dHeq_n_nz(self, eval_alg):
+        """ Returns the number of non-zeros in the full Jacobian of the
+            equality point constraint Heq.
+            
+        """
+        n_nz = ct.c_int()
+        if self._dll.jmi_opt_dHeq_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
+            raise JMIException("Getting the number of non-zeros failed.")
+        return n_nz.value
+        
+    def opt_dHeq_nz_indices(self, eval_alg, independent_vars, mask, row, col):
+        """ Returns the row and column indices of the non-zero elements
+            in the Jacobian of the equality point constraint residual Heq.
+            
+        """
+        if self._dll.jmi_opt_dHeq_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, col) is not 0:
+            raise JMIException("Getting the row and column indices failed.")
+        
+    def opt_dHeq_dim(self, eval_alg, sparsity, independent_vars, mask):
+        """ Computes the number of columns and non-zero elements in the 
+            Jacobian of the equality point constraint residual function Heq.
+            
+        """
+        dF_n_cols = ct.c_int()
+        dF_n_nz = ct.c_int()
+        if self._dll.jmi_opt_dHeq_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
+            raise JMIException("Computing the number of columns and non-zero elements failed.")
+        return dF_n_cols.value, dF_n_nz.value
+
+    def opt_Hineq(self, res):
+        """ Evaluates the residual of the inequality point constraint Hineq.
+        
+        """
+        if self._dll.jmi_opt_Hineq(self._jmi, res) is not 0:
+            raise JMIException("Evaluating the residual of the inequality point constraint Hineq failed.")
+        
+    def opt_dHineq(self, eval_alg, sparsity, independent_vars, mask, jac):
+        """ Evaluates the Jacobian of the inequality point constraint Hineq.
+        
+        """
+        if self._dll.jmi_opt_dHineq(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
+            raise JMIException("Evaluating the Jacobian of the inequality point constraint Hineq failed.")
+        
+    def opt_dHineq_n_nz(self, eval_alg):
+        """ Returns the number of non-zeros in the full Jacobian of the
+            inequality point constraint Hineq.
+            
+        """
+        n_nz = ct.c_int()
+        if self._dll.jmi_opt_dHineq_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
+            raise JMIException("Getting the number of non-zeros failed.")
+        return n_nz.value
+        
+    def opt_dHineq_nz_indices(self, eval_alg, independent_vars, mask, row, col):
+        """ Returns the row and column indices of the non-zero elements
+            in the Jacobian of the inequality point constraint residual Hineq.
+            
+        """
+        if self._dll.jmi_opt_dHineq_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, col) is not 0:
+            raise JMIException("Getting the row and column indices failed.")
+        
+    def opt_dHineq_dim(self, eval_alg, sparsity, independent_vars, mask):
+        """ Computes the number of columns and non-zero elements in the 
+            Jacobian of the inequality point constraint residual function Hineq.
+            
+        """
+        dF_n_cols = ct.c_int()
+        dF_n_nz = ct.c_int()
+        if self._dll.jmi_opt_dHineq_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
+            raise JMIException("Computing the number of columns and non-zero elements failed.")
+        return dF_n_cols.value, dF_n_nz.value
     
     def _get_XMLvariables_doc(self):
         """ Gets a reference to the XMLDoc instance for model variables set for 
             this JMIModel.
+            
         """
         return self._xmlvariables_doc
     
     def _set_XMLvariables_doc(self, doc):
         """ Sets the XMLDoc for model variables for this JMIModel.
+        
         """
         self._xmlvariables_doc = doc
 
     def _get_XMLvalues_doc(self):
         """ Gets a reference to the XMLDoc instance for independent parameter 
             values set for this JMIModel.
+            
         """
         return self._xmlvalues_doc
     
     def _set_XMLvalues_doc(self, doc):
-        """ Sets the XMLDoc for independent parameter values for this JMIModel."""
+        """ Sets the XMLDoc for independent parameter values for this JMIModel.
+        
+        """
         self._xmlvalues_doc = doc
 
     def _get_XMLproblvariables_doc(self):
         """ Gets a reference to the XMLDoc instance for optimization problem variables 
             set for this JMIModel.
+            
         """
         return self._xmlproblvariables_doc
     
     def _set_XMLproblvariables_doc(self, doc):
-        """ Sets the XMLDoc for optimization problem variables for this JMIModel."""
+        """ Sets the XMLDoc for optimization problem variables for this JMIModel.
+        
+        """
         self._xmlproblvariables_doc = doc
        
     def _set_start_attributes(self):
@@ -1049,6 +1916,7 @@ class JMIModel(object):
             fetched together with the corresponding valueReferences from the XMLDoc instance. 
             The valueReferences are mapped to which primitive type vector and index in vector 
             each start value belongs to using the protocol implemented in _translateValueRef.
+            
         """
         xmldoc = self._get_XMLvariables_doc()
         start_attr = xmldoc.get_start_attributes()
@@ -1079,7 +1947,9 @@ class JMIModel(object):
                 "Unknown type"
     
     def _set_iparam_values(self):
-        """ Sets values for the independent parameters in this JMIModel."""
+        """ Sets values for the independent parameters in this JMIModel.
+        
+        """
         xmldoc = self._get_XMLvalues_doc()
         values = xmldoc.get_iparam_values()
        
@@ -1108,7 +1978,9 @@ class JMIModel(object):
                 "Unknown type"
             
     def _set_opt_interval(self):
-        """ Sets the optimization intervals for this JMIModel (if Optimica). """
+        """ Sets the optimization intervals for this JMIModel (if Optimica).
+        
+        """
         xmldoc = self._get_XMLproblvariables_doc()
         starttime = xmldoc.get_starttime()
         starttimefree = xmldoc.get_starttime_free()
@@ -1116,23 +1988,27 @@ class JMIModel(object):
         finaltimefree = xmldoc.get_finaltime_free()
 
         if starttime and finaltime:
-            self._dll.jmi_opt_set_optimization_interval(self._jmi,float(starttime), int(starttimefree),
+            self.opt_set_optimization_interval(float(starttime), int(starttimefree),
                                                         float(finaltime), int(finaltimefree))        
         
     def _set_timepoints(self):       
-        """ Sets the optimization timepoints for this JMIModel (if Optimica). """
+        """ Sets the optimization timepoints for this JMIModel (if Optimica).
+        
+        """
         xmldoc = self._get_XMLproblvariables_doc()
         points = []
         for point in xmldoc.get_timepoints():
             points.append(float(point))
-            
-        self._dll.jmi_set_tp(self._jmi, N.array(points))   
+         
+        self.set_tp(N.array(points))   
 
         
-    def _set_opt_indices(self):
-        """ Sets the optimization parameter indices for this JMIModel (if Optimica). """
+    def _set_p_opt_indices(self):
+        """ Sets the optimization parameter indices for this JMIModel (if Optimica).
+        
+        """
         xmldoc = self._get_XMLvariables_doc()
-        refs = xmldoc.get_opt_variable_refs()
+        refs = xmldoc.get_p_opt_variable_refs()
         
         if len(refs) > 0:
             n_p_opt = 0
@@ -1141,4 +2017,4 @@ class JMIModel(object):
                 p_opt_indices.append(int(ref) - self._offs_pi.value)
                 n_p_opt = n_p_opt +1
 
-            self._dll.jmi_opt_set_p_opt_indices(self._jmi,n_p_opt,N.array(p_opt_indices))
+            self.opt_set_p_opt_indices(n_p_opt,N.array(p_opt_indices))
