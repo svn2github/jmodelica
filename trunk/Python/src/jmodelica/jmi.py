@@ -638,10 +638,10 @@ def load_DLL(libname, path):
                                                       c_jmi_real_t,
                                                       ct.c_int]    
     dll.jmi_opt_get_optimization_interval.argtypes = [ct.c_void_p,
-                                                      c_jmi_real_t,
-                                                      ct.c_int,
-                                                      c_jmi_real_t,
-                                                      ct.c_int]
+                                                      ct.POINTER(c_jmi_real_t),
+                                                      ct.POINTER(ct.c_int),
+                                                      ct.POINTER(c_jmi_real_t),
+                                                      ct.POINTER(ct.c_int)]
     dll.jmi_opt_set_p_opt_indices.argtypes = [ct.c_void_p,
                                               ct.c_int,
                                               Nct.ndpointer(dtype=ct.c_int,
@@ -650,7 +650,9 @@ def load_DLL(libname, path):
     dll.jmi_opt_get_n_p_opt.argtypes = [ct.c_void_p,
                                         ct.POINTER(ct.c_int)]    
     dll.jmi_opt_get_p_opt_indices.argtypes = [ct.c_void_p,
-                                              ct.POINTER(ct.c_int)]   
+                                              Nct.ndpointer(dtype=ct.c_int,
+                                                            ndim=1,
+                                                            flags='C')]                                                 
     dll.jmi_opt_get_sizes.argtypes = [ct.c_void_p,
                                       ct.POINTER(ct.c_int),
                                       ct.POINTER(ct.c_int),
@@ -864,7 +866,8 @@ def load_DLL(libname, path):
     
     
     # Simultaneous Optimization based on Lagrange polynomials and Radau points
-    dll.jmi_opt_sim_lp_new.argtypes = [ct.c_void_p,
+    try:
+        dll.jmi_opt_sim_lp_new.argtypes = [ct.c_void_p,
                                        ct.c_void_p,
                                        ct.c_int,
                                        Nct.ndpointer(dtype=c_jmi_real_t,
@@ -928,9 +931,46 @@ def load_DLL(libname, path):
                                                      flags='C'),
                                        ct.c_int,
                                        ct.c_int]
+    except AttributeError, e:
+        pass
+    
+    try:
+        dll.jmi_opt_sim_lp_delete.argtypes = [ct.c_void_p]
+    except AttributeError, e:
+        pass
+    
+    try:
+        dll.jmi_opt_sim_lp_get_pols.argtypes = [ct.c_int,
+                                                Nct.ndpointer(dtype=c_jmi_real_t,
+                                                              ndim=1,
+                                                              flags='C'),
+                                                Nct.ndpointer(dtype=c_jmi_real_t,
+                                                              ndim=1,
+                                                              flags='C'),
+                                                Nct.ndpointer(dtype=c_jmi_real_t,
+                                                              ndim=1,
+                                                              flags='C'),
+                                                Nct.ndpointer(dtype=c_jmi_real_t,
+                                                              ndim=1,
+                                                              flags='C'),
+                                                Nct.ndpointer(dtype=c_jmi_real_t,
+                                                              ndim=1,
+                                                              flags='C'),
+                                                Nct.ndpointer(dtype=c_jmi_real_t,
+                                                              ndim=1,
+                                                              flags='C'),
+                                                Nct.ndpointer(dtype=c_jmi_real_t,
+                                                              ndim=1,
+                                                              flags='C'),
+                                                Nct.ndpointer(dtype=c_jmi_real_t,
+                                                              ndim=1,
+                                                              flags='C')]
+    except AttributeError, e:
+        pass    
 
     # Simultaneous Optimization interface
-    dll.jmi_opt_sim_get_result.argtypes = [ct.c_void_p,
+    try:
+        dll.jmi_opt_sim_get_result.argtypes = [ct.c_void_p,
                                            Nct.ndpointer(dtype=c_jmi_real_t,
                                                          ndim=1,
                                                          flags='C'),
@@ -949,6 +989,8 @@ def load_DLL(libname, path):
                                            Nct.ndpointer(dtype=c_jmi_real_t,
                                                          ndim=1,
                                                          flags='C')]
+    except AttributeError, e:
+        pass
    
     assert dll.jmi_delete(jmi) == 0, \
            "jmi_delete failed"
@@ -1619,9 +1661,9 @@ class JMIModel(object):
         start_time_free = ct.c_int()
         final_time = ct.c_double()
         final_time_free = ct.c_int()
-        if self._dll.jmi_get_optimization_interval(self._jmi, byref(start_time), byref(start_time_free), byref(final_time), byref(final_time_free)) is not 0:
+        if self._dll.jmi_opt_get_optimization_interval(self._jmi, byref(start_time), byref(start_time_free), byref(final_time), byref(final_time_free)) is not 0:
             raise JMIException("Getting the optimization interval failed.")
-        return start_time, start_time_free, final_time, final_time_free
+        return start_time.value, start_time_free.value, final_time.value, final_time_free.value
         
     def opt_set_p_opt_indices(self, n_p_opt, p_opt_indices):
         """ Specifies optimization parameters for the model.
@@ -1637,7 +1679,7 @@ class JMIModel(object):
         n_p_opt = ct.c_int()
         if self._dll.jmi_opt_get_n_p_opt(self._jmi, byref(n_p_opt)) is not 0:
             raise JMIException("Getting the number of optimization parameters failed.")
-        return n_p_opt
+        return n_p_opt.value
         
     def opt_get_p_opt_indices(self, p_opt_indices):
         """ Gets the optimization parameter indices.
@@ -1656,7 +1698,7 @@ class JMIModel(object):
         n_eq_Hineq = ct.c_int()
         if self._dll.jmi_opt_get_sizes(self._jmi, byref(n_eq_Ceq), byref(n_eq_Cineq), byref(n_eq_Heq), byref(n_eq_Hineq)) is not 0:
             raise JMIException("Getting the sizes of the optimization functions failed.")
-        return n_eq_Ceq, n_eq_Cineq, n_eq_Heq, n_eq_Hineq
+        return n_eq_Ceq.value, n_eq_Cineq.value, n_eq_Heq.value, n_eq_Hineq.value
         
     def opt_J(self, J):
         """ Evaluates the cost function J.
@@ -1925,7 +1967,7 @@ class JMIModel(object):
         z = self.getZ()
         
         keys = start_attr.keys()
-        keys.sort()
+        keys.sort(key=int)
         
         for key in keys:
             value = start_attr.get(key)
@@ -1956,7 +1998,7 @@ class JMIModel(object):
         z = self.getZ()
        
         keys = values.keys()
-        keys.sort()
+        keys.sort(key=int)
        
         for key in keys:
             value = values.get(key)
@@ -2013,8 +2055,278 @@ class JMIModel(object):
         if len(refs) > 0:
             n_p_opt = 0
             p_opt_indices = []
+            refs.sort(key=int)
+            
             for ref in refs:
-                p_opt_indices.append(int(ref) - self._offs_pi.value)
+                (z_i, ptype) = _translate_value_ref(ref)
+                p_opt_indices.append(z_i - self._offs_pi.value)
                 n_p_opt = n_p_opt +1
 
             self.opt_set_p_opt_indices(n_p_opt,N.array(p_opt_indices))
+
+class JMISimultaneousOptLagPols(object):
+    
+    def __init__(self, jmi_model, n_e, hs, n_cp):
+        self._jmi_model = jmi_model
+        self._jmi_opt_sim = ct.c_voidp()
+
+        # Initialization
+        _p_opt_init = N.zeros(jmi_model.opt_get_n_p_opt())
+        _dx_init = N.zeros(jmi_model._n_dx.value)
+        _x_init = N.zeros(jmi_model._n_x.value)
+        _u_init = N.zeros(jmi_model._n_u.value)
+        _w_init = N.zeros(jmi_model._n_w.value)
+    
+        # Bounds
+        _p_opt_lb = -1.0e20*N.ones(jmi_model.opt_get_n_p_opt())
+        _dx_lb = -1.0e20*N.ones(jmi_model._n_dx.value)
+        _x_lb = -1.0e20*N.ones(jmi_model._n_x.value)
+        _u_lb = -1.0e20*N.ones(jmi_model._n_u.value)
+        _w_lb = -1.0e20*N.ones(jmi_model._n_w.value)
+        _t0_lb = 0.; # not yet supported
+        _tf_lb = 0.; # not yet supported
+        _hs_lb = N.zeros(n_e); # not yet supported
+        
+        _p_opt_ub = 1.0e20*N.ones(jmi_model.opt_get_n_p_opt())
+        _dx_ub = 1.0e20*N.ones(jmi_model._n_dx.value)
+        _x_ub = 1.0e20*N.ones(jmi_model._n_x.value)
+        _u_ub = 1.0e20*N.ones(jmi_model._n_u.value)
+        _w_ub = 1.0e20*N.ones(jmi_model._n_w.value)
+        _t0_ub = 0.; # not yet supported
+        _tf_ub = 0.; # not yet supported
+        _hs_ub = N.zeros(n_e); # not yet supported
+                
+        # default values
+        hs_free = 0
+        
+        self._set_initial_values(_p_opt_init, _dx_init, _x_init, _u_init, _w_init)
+        self._set_lb_values(_p_opt_lb, _dx_lb, _x_lb, _u_lb, _w_lb)
+        self._set_ub_values(_p_opt_ub, _dx_ub, _x_ub, _u_ub, _w_ub)
+                
+        assert self._jmi_model._dll.jmi_opt_sim_lp_new(byref(self._jmi_opt_sim), self._jmi_model._jmi, n_e,
+                                  hs, hs_free,
+                                 _p_opt_init, _dx_init, _x_init,
+                                 _u_init, _w_init,
+                                 _p_opt_lb, _dx_lb, _x_lb,
+                                 _u_lb, _w_lb, _t0_lb,
+                                 _tf_lb, _hs_lb,
+                                 _p_opt_ub, _dx_ub, _x_ub,
+                                 _u_ub, _w_ub, _t0_ub,
+                                 _tf_ub, _hs_ub,
+                                 n_cp,JMI_DER_CPPAD) is 0, \
+                                 " jmi_opt_lp_new returned non-zero."
+        assert self._jmi_opt_sim.value is not None, \
+            "jmi_opt_sim_lp struct has not returned correctly."
+            
+    def __del__(self):
+        """ Freeing jmi_opt_sim data structure.
+        
+        """
+        assert self._jmi_model._dll.jmi_opt_sim_lp_delete(self._jmi_opt_sim) == 0, \
+               "jmi_delete failed"
+
+    def opt_sim_lp_get_pols(self, n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, Lp_dot_coeffs, Lpp_dot_coeffs, Lp_dot_vals, Lpp_dot_vals):
+        if self._jmi_model._dll.jmi_opt_sim_lp_get_pols(n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, Lp_dot_coeffs, 
+                                                        Lpp_dot_coeffs, Lp_dot_vals, Lpp_dot_vals) is not 0:
+            raise JMIException("Getting sim lp pols failed.")
+        
+    
+    def _set_initial_values(self, p_opt_init, dx_init, x_init, u_init, w_init):
+        xmldoc = self._jmi_model._get_XMLvariables_doc()
+
+        # p_opt: free variables
+        values = xmldoc.get_p_opt_initial_guess_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_p_opt = z_i - self._jmi_model._offs_pi.value
+            p_opt_init[i_p_opt] = values.get(ref)         
+
+        # dx: derivative
+        values = xmldoc.get_dx_initial_guess_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_dx = z_i - self._jmi_model._offs_dx.value
+            dx_init[i_dx] = values.get(ref) 
+        
+        # x: differentiate
+        values = xmldoc.get_x_initial_guess_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_x = z_i - self._jmi_model._offs_x.value
+            x_init[i_x] = values.get(ref)
+            
+        # u: input
+        values = xmldoc.get_u_initial_guess_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_u = z_i - self._jmi_model._offs_u.value
+            u_init[i_u] = values.get(ref)
+        
+        # w: algebraic
+        values = xmldoc.get_w_initial_guess_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_w = z_i - self._jmi_model._offs_w.value
+            w_init[i_w] = values.get(ref) 
+
+    def _set_lb_values(self, p_opt_lb, dx_lb, x_lb, u_lb, w_lb):
+        xmldoc = self._jmi_model._get_XMLvariables_doc()
+
+        # p_opt: free variables
+        values = xmldoc.get_p_opt_lb_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_p_opt = z_i - self._jmi_model._offs_pi.value
+            p_opt_lb[i_p_opt] = values.get(ref)         
+
+        # dx: derivative
+        values = xmldoc.get_dx_lb_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_dx = z_i - self._jmi_model._offs_dx.value
+            dx_lb[i_dx] = values.get(ref) 
+        
+        # x: differentiate
+        values = xmldoc.get_x_lb_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_x = z_i - self._jmi_model._offs_x.value
+            x_lb[i_x] = values.get(ref)
+            
+        # u: input
+        values = xmldoc.get_u_lb_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_u = z_i - self._jmi_model._offs_u.value
+            u_lb[i_u] = values.get(ref)
+        
+        # w: algebraic
+        values = xmldoc.get_w_lb_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_w = z_i - self._jmi_model._offs_w.value
+            w_lb[i_w] = values.get(ref) 
+
+    def _set_ub_values(self, p_opt_ub, dx_ub, x_ub, u_ub, w_ub):
+        xmldoc = self._jmi_model._get_XMLvariables_doc()
+
+        # p_opt: free variables
+        values = xmldoc.get_p_opt_ub_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_p_opt = z_i - self._jmi_model._offs_pi.value
+            p_opt_ub[i_p_opt] = values.get(ref)         
+
+        # dx: derivative
+        values = xmldoc.get_dx_ub_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_dx = z_i - self._jmi_model._offs_dx.value
+            dx_ub[i_dx] = values.get(ref) 
+        
+        # x: differentiate
+        values = xmldoc.get_x_ub_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_x = z_i - self._jmi_model._offs_x.value
+            x_ub[i_x] = values.get(ref)
+            
+        # u: input
+        values = xmldoc.get_u_ub_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_u = z_i - self._jmi_model._offs_u.value
+            u_ub[i_u] = values.get(ref)
+        
+        # w: algebraic
+        values = xmldoc.get_w_ub_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_w = z_i - self._jmi_model._offs_w.value
+            w_ub[i_w] = values.get(ref) 
+       
+        
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+    
