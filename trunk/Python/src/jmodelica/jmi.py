@@ -970,6 +970,38 @@ def load_DLL(libname, path):
 
     # Simultaneous Optimization interface
     try:
+        dll.jmi_opt_sim_ipopt_new.argtypes = [ct.c_void_p,
+                                              ct.c_void_p]
+    except AttributeError, e:
+        pass
+    
+    try:
+        dll.jmi_opt_sim_ipopt_solve.argtypes = [ct.c_void_p]
+    except AttributeError, e:
+        pass
+    
+    try:
+        dll.jmi_opt_sim_ipopt_set_string_option.argtypes = [ct.c_void_p,
+                                                            ct.c_char_p,
+                                                            ct.c_char_p]
+    except AttributeError, e:
+        pass
+    
+    try:
+        dll.jmi_opt_sim_ipopt_set_int_option.argtypes = [ct.c_void_p,
+                                                         ct.c_char_p,
+                                                         ct.c_int]
+    except AttributeError, e:
+        pass
+
+    try:
+        dll.jmi_opt_sim_ipopt_set_double_option.argtypes = [ct.c_void_p,
+                                                            ct.c_char_p,
+                                                            ct.c_double]
+    except AttributeError, e:
+        pass
+    
+    try:
         dll.jmi_opt_sim_get_result.argtypes = [ct.c_void_p,
                                            Nct.ndpointer(dtype=c_jmi_real_t,
                                                          ndim=1,
@@ -2305,11 +2337,35 @@ class JMISimultaneousOptLagPols(object):
             i_w = z_i - self._jmi_model._offs_w.value
             w_ub[i_w] = values.get(ref) 
        
+class JMISimultaneousOptIPOPT(object):
+    
+    def __init__(self, jmi_opt_sim_model):
+        self._jmi_opt_sim_model = jmi_opt_sim_model
+        self._jmi_opt_sim_ipopt = ct.c_voidp()     
         
+        assert self._jmi_opt_sim_model._jmi_model._dll.jmi_opt_sim_ipopt_new(byref(self._jmi_opt_sim_ipopt), 
+                                                                             self._jmi_opt_sim_model._jmi_opt_sim) == 0, \
+               "jmi_opt_sim_ipopt_new returned non-zero"
+        assert self._jmi_opt_sim_ipopt.value is not None, \
+               "jmi struct not returned correctly"
+    
         
-      
+    def opt_sim_ipopt_solve(self):    
+        if self._jmi_opt_sim_model._jmi_model._dll.jmi_opt_sim_ipopt_solve(self._jmi_opt_sim_ipopt) is not 0:
+            raise JMIException("Solving IPOPT failed.")
+    
+    def opt_sim_ipopt_set_string_option(self, key, val):
+        if self._jmi_opt_sim_model._jmi_model._dll.jmi_opt_sim_ipopt_set_string_option(self._jmi_opt_sim_ipopt, key, val) is not 0:
+            raise JMIException("Setting string option failed.")
         
-        
+    def opt_sim_ipopt_set_int_option(self, key, val):
+        if self._jmi_opt_sim_model._jmi_model._dll.jmi_opt_sim_ipopt_set_int_option(self._jmi_opt_sim_ipopt, key, val) is not 0:
+            raise JMIException("Setting int option failed.")
+
+    def opt_sim_ipopt_set_num_option(self, key, val):
+        if self._jmi_opt_sim_model._jmi_model._dll.jmi_opt_sim_ipopt_set_num_option(self._jmi_opt_sim_ipopt, key, val) is not 0:
+            raise JMIException("Setting num option failed.")
+    
         
         
         
