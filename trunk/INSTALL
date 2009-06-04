@@ -94,16 +94,18 @@ published.
 7. Running JModelica.org from Python
 
 In order to run the JModelica.org compilers from Python, the packages
-Jython (http://www.jython.org) and lxml (http://codespeak.net/lxml/) need to
-be installed. Also, the environment variables JMODELICA_HOME, containing
-the path to the JModelica.org installation directory (again, without spaces
-or ~ in the path), and PYTHONPATH, containing the path to the 'Python' 
-directory in the JModelica.org installation directory needs to be set. If you 
-run on Linux, you will most likely have everything you need by now. If you run 
-Windows, you also need MinGW which provides make and the gcc-suite which are 
-needed to compile the generated C code. A convenient choice is then python(x,y) 
-(http://www.pythonxy.com), which provides a Python environment bundled with
-(amongst other things) a MinGW installation. 
+Jython (http://www.jython.org) and lxml (http://codespeak.net/lxml/)
+need to be installed. Also, the environment variables JMODELICA_HOME,
+containing the path to the JModelica.org installation directory
+(again, without spaces or ~ in the path), PYTHONPATH, containing the
+path to the 'Python' directory in the JModelica.org installation
+directory and JAVA_HOME containing the path to a Java JRE or SDK
+installation needs to be set. If you run on Linux, you will most
+likely have everything you need by now. If you run Windows, you also
+need MinGW which provides make and the gcc-suite which are needed to
+compile the generated C code. A convenient choice is then python(x,y)
+(http://www.pythonxy.com), which provides a Python environment bundled
+with (amongst other things) a MinGW installation.
 
 
 
