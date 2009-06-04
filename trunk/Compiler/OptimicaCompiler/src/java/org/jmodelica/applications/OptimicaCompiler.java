@@ -16,55 +16,32 @@
 
 package org.jmodelica.applications;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Reader;
 import java.util.Collection;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
+import org.jmodelica.ast.CompilerException;
 import org.jmodelica.ast.FOptClass;
 import org.jmodelica.ast.FlatRoot;
 import org.jmodelica.ast.InstProgramRoot;
-import org.jmodelica.ast.PrettyPrinter;
-import org.jmodelica.ast.SourceRoot;
-import org.jmodelica.ast.StoredDefinition;
-import org.jmodelica.parser.ModelicaParser;
-import org.jmodelica.parser.ModelicaScanner;
-import org.jmodelica.ast.Problem;
-import org.jmodelica.ast.CompilerException;
 import org.jmodelica.ast.ModelicaClassNotFoundException;
+import org.jmodelica.ast.PrettyPrinter;
+import org.jmodelica.ast.Problem;
+import org.jmodelica.ast.SourceRoot;
 import org.jmodelica.codegen.OptimicaCGenerator;
 import org.jmodelica.codegen.OptimicaXMLVariableGenerator;
 import org.jmodelica.codegen.XMLProblemVariableGenerator;
 import org.jmodelica.codegen.XMLValueGenerator;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import beaver.Parser.Exception;
 
 /**
  * 
- * Main compiler class which bundles the tasks needed to compile an Optimica model.
+ * Main compiler class which bundles the tasks needed to compile an Optimica model. This class
+ * is an extension of ModelicaCompiler.
  * 
  *  There are two usages with this class:
  *  1. Compile in one step with command line arguments using this class only.
@@ -95,23 +72,17 @@ import beaver.Parser.Exception;
  *  
  *  
  *  For method (2), the compilation steps are divided into 4 tasks which can be used via the methods:
- *  1. parseModel (source code -> attributed source representation)
- *  2. instantiateModel (source representation -> instance model)
+ *  1. parseModel (source code -> attributed source representation) - ModelicaCompiler
+ *  2. instantiateModel (source representation -> instance model) - ModelicaCompiler
  *  3. flattenModel (instance model -> flattened model)
  *  4. generateCode (flattened model -> c code and XML code)
  *  
- *  They must be called in this order. Use provided methods to get/set logging level. 
+ *  They must be called in this order. Use provided methods in ModelicaCompiler to get/set logging level. 
  *  
  */
-public class OptimicaCompiler {
+public class OptimicaCompiler extends ModelicaCompiler{
 
 	private static final Logger logger = ModelicaLoggers.getConsoleLogger("JModelica.OptimicaCompiler");
-	public static final String INFO = "i";
-	public static final String WARNING = "w";
-	public static final String ERROR = "e";
-	public static final String INHERITED = "inh";
-	
-	
 	
 	public static void main(String args[]) {
 		if(args.length < 1) {
@@ -176,38 +147,7 @@ public class OptimicaCompiler {
 		}
 
 	}	
-	
-	/**
-	 * Sets logging to the level specified. Valid values are:
-	 * OptimicaCompiler.INFO, OptimicaCompiler.WARNING or OptimicaCompiler.ERROR
-	 * 
-	 * Default log level setting is ERROR. Messages will be printed to the 
-	 * standard out.
-	 * 
-	 * @param level The level of logging to use as of now.
-	 */
-	public static void setLogLevel(String level) {
-		if(level.equals(OptimicaCompiler.INFO)) {
-			logger.setLevel(Level.INFO);
-		} else if(level.equals(OptimicaCompiler.WARNING)) {
-			logger.setLevel(Level.WARNING);
-		} else if(level.equals(OptimicaCompiler.ERROR)){
-			logger.setLevel(Level.SEVERE);
-		} else {
-			//severe is default
-			logger.setLevel(Level.SEVERE);
-		}
-	}
-	
-	/**
-	 * Returns the log level that is currently set.
-	 * 
-	 * @return Log level setting for this class.
-	 */
-	public static String getLogLevel() {
-		return logger.getLevel() != null ? logger.getLevel().toString():OptimicaCompiler.INHERITED;
-	}
-	
+			
 	/**
 	 * Compiles an Optimica model. A model file name and class must be provided. A 
 	 * template file for XML and one for c can be provided to generatate code for 
@@ -240,79 +180,6 @@ public class OptimicaCompiler {
 		}
 		
 		logger.info("====== Model compiled successfully =======");
-	}
-
-	/**
-	 * 
-	 * Parses a model and returns a reference to the root of the source tree. 
-	 * Options related to the compilation are also loaded here and added to the 
-	 * source tree representation.
-	 * 
-	 * @param name The name of the model file.
-	 * @return The root of the source tree.
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 * @throws Exception
-	 */
-	public static SourceRoot parseModel(String name) 
-	  throws FileNotFoundException, IOException, Exception, CompilerException{
-		ModelicaParser parser = new ModelicaParser();
-//		ModelicaParser.CollectingReport report = new ModelicaParser.CollectingReport();
-//		parser.setReport(report);
-		Reader reader = new FileReader(name);
-		ModelicaScanner scanner = new ModelicaScanner(new BufferedReader(reader));
-	/*
-		if (report.hasErrors()) {
-			CompilerException ce = new CompilerException();
-			for (Problem p : report.getErrors()) {
-				ce.addProblem(p);
-			}
-			throw ce;
-		}
-		*/
-		logger.info("Parsing " + name + "...");
-		SourceRoot sr;
-		try {
-			sr = (SourceRoot) parser.parse(scanner);
-		} catch (ModelicaParser.ParserException e) {
-			e.getProblem().setFileName(name);
-			CompilerException ce = new CompilerException();
-			ce.addProblem(e.getProblem());
-			throw ce;
-		}
-
-		loadOptions(sr);
-
-		for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
-			sd.setFileName(name);
-		}
-
-		return sr;
-	}
-
-	/**
-	 * 
-	 * Computes a model instance tree from a source tree. Some error checks 
-	 * such as type checking is performed during the computation.
-	 * 
-	 * @param sr The reference to the model source root.
-	 * @param cl The name of the class in the model file to compile.
-	 * @return The root of the instance tree.
-	 */
-	public static InstProgramRoot instantiateModel(SourceRoot sr, String cl) throws ModelicaClassNotFoundException, CompilerException{
-		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-
-		logger.info("Checking for errors...");
-		Collection<Problem> problems = ipr.checkErrorsInInstClass(cl);
-		if (problems.size()>0) {
-			CompilerException ce = new CompilerException();
-			for (Problem p : problems) {
-				ce.addProblem(p);
-			}
-			throw ce;
-		}
-		
-		return ipr;		
 	}
 	
 	/**
@@ -396,123 +263,5 @@ public class OptimicaCompiler {
 		cgenerator.generate(ctemplate, output);
 
 		logger.info("...code generated.");
-	}
-
-	/**
-	 * Loads the options provided, either hardcoded or from a file.
-	 * 
-	 * @param sr
-	 *            The source root belonging to the model for which the options
-	 *            should be set.
-	 */
-	private static void loadOptions(SourceRoot sr) {
-		logger.info("Loading options...");
-		try {
-			String sep = System.getProperty("file.separator");
-			String filepath = System.getenv("JMODELICA_HOME")+sep+"Options"+sep+"options.xml";
-			
-			Document doc = parseAndGetDOM(filepath);
-		
-			XPathFactory factory = XPathFactory.newInstance();
-			XPath xpath = factory.newXPath();
-			
-			//set modelica library
-			XPathExpression expr = xpath.compile("/OptionRegistry/ModelicaLibrary");		
-			Node modelicalib = (Node)expr.evaluate(doc, XPathConstants.NODE);
-			if(modelicalib != null && modelicalib.hasChildNodes()) {
-				//modelica lib set
-				expr = xpath.compile("OptionRegistry/ModelicaLibrary/Name");
-				String name = (String)expr.evaluate(doc,XPathConstants.STRING);
-				
-				expr = xpath.compile("OptionRegistry/ModelicaLibrary/Version");
-				String version = (String)expr.evaluate(doc, XPathConstants.STRING);
-				
-				expr = xpath.compile("OptionRegistry/ModelicaLibrary/Path");
-				String path = (String)expr.evaluate(doc, XPathConstants.STRING);
-				
-				sr.options.addModelicaLibrary(name, version, path);
-			}
-			
-			//set other options if there are any
-			expr = xpath.compile("OptionRegistry/Options");
-			Node options = (Node)expr.evaluate(doc, XPathConstants.NODE);
-			if(options !=null && options.hasChildNodes()) {
-				//other options set
-				
-				//types
-				expr = xpath.compile("OptionRegistry/Options/Option/Type");
-				NodeList thetypes = (NodeList)expr.evaluate(doc, XPathConstants.NODESET);
-				
-				//keys
-				expr = xpath.compile("OptionRegistry/Options/Option/*/Key");
-				NodeList thekeys = (NodeList)expr.evaluate(doc, XPathConstants.NODESET);
-				
-				//values
-				expr = xpath.compile("OptionRegistry/Options/Option/*/Value");
-				NodeList thevalues = (NodeList)expr.evaluate(doc, XPathConstants.NODESET);
-				
-				for(int i=0; i<thetypes.getLength();i++) {
-					Node n = thetypes.item(i);
-					
-					String type = n.getTextContent();
-					String key = thekeys.item(i).getTextContent();
-					String value = thevalues.item(i).getTextContent();
-					
-					if(type.equals("String")) {
-						sr.options.setStringOption(key, value);
-					} else if(type.equals("Integer")) {
-						sr.options.setIntegerOption(key, Integer.parseInt(value));
-					} else if(type.equals("Real")) {
-						sr.options.setRealOption(key, Double.parseDouble(value));
-					} else if(type.equals("Boolean")) {
-						sr.options.setBooleanOption(key, Boolean.parseBoolean(value));
-					}
-				}				
-			}
-		
-		} catch(SAXException e) {
-			e.printStackTrace();
-		} catch(IOException e) {
-			e.printStackTrace();			
-		} catch(ParserConfigurationException e) {
-			e.printStackTrace();
-		} catch(XPathExpressionException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private static Document parseAndGetDOM(String xmlfile) throws ParserConfigurationException, IOException, SAXException{
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setIgnoringComments(true);
-		factory.setIgnoringElementContentWhitespace(true);
-		factory.setNamespaceAware(true);
-		DocumentBuilder builder = factory.newDocumentBuilder();
-		
-		Document doc = builder.parse(new File(xmlfile));
-		return doc;
-	}
-	
-	private static class ModelicaLoggers {
-
-		public static Logger getConsoleLogger(String name) {
-			Logger l = Logger.getLogger(name);
-			l.setUseParentHandlers(false);
-			ConsoleHandler ch = new ConsoleHandler();
-			ch.setFormatter(new ConsoleFormatter());
-			l.addHandler(ch);
-			l.setLevel(Level.INFO);
-			return l;
-		}
-	
-		private static class ConsoleFormatter extends SimpleFormatter {
-			public ConsoleFormatter() {
-				super();
-			}
-			@Override
-			public String format(LogRecord record) {
-				return record.getMessage()+"\n";
-			}
-		
-		}
 	}
 }

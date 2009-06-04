@@ -18,12 +18,12 @@ package org.jmodelica.applications;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.File;
 import java.util.Collection;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -34,33 +34,30 @@ import java.util.logging.SimpleFormatter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-
-import javax.xml.xpath.XPathFactory;
 import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
-import org.xml.sax.SAXException;
-
+import org.jmodelica.ast.CompilerException;
 import org.jmodelica.ast.FClass;
 import org.jmodelica.ast.FlatRoot;
-import org.jmodelica.ast.InstNode;
 import org.jmodelica.ast.InstProgramRoot;
+import org.jmodelica.ast.ModelicaClassNotFoundException;
 import org.jmodelica.ast.PrettyPrinter;
+import org.jmodelica.ast.Problem;
 import org.jmodelica.ast.SourceRoot;
 import org.jmodelica.ast.StoredDefinition;
 import org.jmodelica.codegen.CGenerator;
-import org.jmodelica.codegen.XMLVariableGenerator;
 import org.jmodelica.codegen.XMLValueGenerator;
+import org.jmodelica.codegen.XMLVariableGenerator;
 import org.jmodelica.parser.ModelicaParser;
 import org.jmodelica.parser.ModelicaScanner;
-import org.jmodelica.ast.Problem;
-import org.jmodelica.ast.CompilerException;
-import org.jmodelica.ast.ModelicaClassNotFoundException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import beaver.Parser.Exception;
 
@@ -401,7 +398,7 @@ public class ModelicaCompiler {
 	 *            The source root belonging to the model for which the options
 	 *            should be set.
 	 */
-	private static void loadOptions(SourceRoot sr) {
+	protected static void loadOptions(SourceRoot sr) {
 		logger.info("Loading options...");
 		try {
 			String sep = System.getProperty("file.separator");
@@ -489,7 +486,7 @@ public class ModelicaCompiler {
 	}
 	
 	
-	private static class ModelicaLoggers {
+	protected static class ModelicaLoggers {
 
 		public static Logger getConsoleLogger(String name) {
 			Logger l = Logger.getLogger(name);

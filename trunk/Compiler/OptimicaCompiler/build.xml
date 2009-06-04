@@ -31,6 +31,7 @@
 	<property name = "modelica_c_back_end_path" value="../ModelicaCBackEnd"/>
 	<property name = "optimica_xml_back_end_path" value="../OptimicaXMLBackEnd"/>
 	<property name = "optimica_c_back_end_path" value="../OptimicaCBackEnd"/>
+	<property name = "modelica_compiler_path" value="../ModelicaCompiler"/>
 
 	<!-- "package" is the directory where generated files will be stored -->
 	<property name="ast_package" value="org.jmodelica.ast"/>
@@ -58,6 +59,7 @@
 	<property name="modelica_front_end_src_dir" value="${modelica_front_end_path}/src/java"/>
 	<property name="modelica_xml_back_end_src_dir" value="${modelica_xml_back_end_path}/src/java"/>
 	<property name="modelica_c_back_end_src_dir" value="${modelica_c_back_end_path}/src/java"/>
+	<property name="modelica_compiler_src_dir" value="${modelica_compiler_path}/src/java"/>
 	
 	<property name="optimica_front_end_src_dir" value="${optimica_front_end_path}/src/java"/>
 	<property name="optimica_xml_back_end_src_dir" value="${optimica_xml_back_end_path}/src/java"/>
@@ -111,6 +113,7 @@
 			<src path="${modelica_front_end_src_dir}"/>
 			<src path="${modelica_xml_back_end_src_dir}"/>
 			<src path="${modelica_c_back_end_src_dir}"/>
+			<src path="${modelica_compiler_src_dir}"/>
 
 			<src path="${optimica_front_end_src_dir}"/>
 			<src path="${optimica_xml_back_end_src_dir}"/>
