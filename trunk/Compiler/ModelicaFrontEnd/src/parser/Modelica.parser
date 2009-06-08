@@ -287,7 +287,7 @@ BaseClassDecl base_class_decl =
   restriction  
   id_decl.class_name ASSIGN
   type_prefix_flow?
-  type_prefix_other?
+  type_prefix_variability?
   type_prefix_input_output?
   class_access/*name*/
   array_subscripts?
@@ -305,7 +305,7 @@ BaseClassDecl base_class_decl =
                                              new Opt(),
                                              new Opt(),
                                              type_prefix_flow,
-                                             type_prefix_other,
+                                             type_prefix_variability,
                                              type_prefix_input_output,
                                              class_access,
                                              array_subscripts,
@@ -347,7 +347,7 @@ Encapsulated encapsulated =
   ENCAPSULATED {: return new Encapsulated(); :}
   ;
 
-TypePrefix type_prefix_other = 
+TypePrefix type_prefix_variability = 
    DISCRETE                          {: return new Discrete(); :}
   | PARAMETER                          {: return new Parameter(); :}
   | CONSTANT                          {: return new Constant(); :}
@@ -493,7 +493,7 @@ Element element =
     inner? 
     outer? 
     type_prefix_flow? 
-    type_prefix_other? 
+    type_prefix_variability? 
     type_prefix_input_output? 
     class_access/*name*/ 
     array_subscripts? 
@@ -504,7 +504,7 @@ Element element =
                                                outer,
                                                new Opt(),
                                                type_prefix_flow,
-                                               type_prefix_other,
+                                               type_prefix_variability,
                                                type_prefix_input_output,
                                                class_access,
                                                array_subscripts,
@@ -517,7 +517,7 @@ Element element =
     outer? 
     replaceable 
     type_prefix_flow? 
-    type_prefix_other? 
+    type_prefix_variability? 
     type_prefix_input_output? 
     class_access/*name*/ 
     array_subscripts? 
@@ -530,7 +530,7 @@ Element element =
                                                outer,
                                                new Opt(replaceable),
                                                type_prefix_flow,
-                                               type_prefix_other,
+                                               type_prefix_variability,
                                                type_prefix_input_output,
                                                class_access,
                                                array_subscripts,
@@ -692,7 +692,7 @@ Argument argument =
    final_? 
    replaceable 
    type_prefix_flow?
-   type_prefix_other? 
+   type_prefix_variability? 
    type_prefix_input_output? 
    class_access 
    id_decl.comp_name 
@@ -712,7 +712,7 @@ Argument argument =
                                                                new Opt(),
                                                                new Opt(new Replaceable()),
                                                                type_prefix_flow,
-                                                               type_prefix_other,
+                                                               type_prefix_variability,
                                                                type_prefix_input_output,
                                                                class_access,
                                                                new Opt(),
@@ -737,7 +737,7 @@ Argument argument =
    each? 
    final_? 
    type_prefix_flow?
-   type_prefix_other? 
+   type_prefix_variability? 
    type_prefix_input_output? 
    class_access 
    id_decl.comp_name 
@@ -756,7 +756,7 @@ Argument argument =
                                                                new Opt(),
                                                                new Opt(),
                                                                type_prefix_flow,
-                                                               type_prefix_other,
+                                                               type_prefix_variability,
                                                                type_prefix_input_output,
                                                                class_access,
                                                                new Opt(),
@@ -784,7 +784,7 @@ Argument argument =
    final_? 
    replaceable 
    type_prefix_flow?
-   type_prefix_other? 
+   type_prefix_variability? 
    type_prefix_input_output? 
    class_access 
    id_decl.comp_name 
@@ -804,7 +804,7 @@ Argument argument =
                                                                new Opt(),
                                                                new Opt(new Replaceable()),
                                                                type_prefix_flow,
-                                                               type_prefix_other,
+                                                               type_prefix_variability,
                                                                type_prefix_input_output,
                                                                class_access,
                                                                new Opt(),

@@ -14,51 +14,218 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * \brief Root node for flat Modelica models.
+ */
 FlatRoot : Root ::= FClass;
+
+/**
+ * \brief A flat Modelica model containing variables, initial equations and
+ * DAE equations.
+ *
+ * FClass corresponds to a flattened Modelica model and contains essentially
+ * a list of variables and variables and a list of equations, of which some
+ * are initial equations. FClass will be extended to include also functions.
+ */ 
 FClass ::= FQName 
            FVariable* 
            FInitialEquation:FAbstractEquation*
            FEquationBlock*
            /UnknownFVariable/; 
 
+/**
+ * \brief A list of equations corresponding to a BLT block.
+ */
 FEquationBlock ::= FAbstractEquation*;
 
+/**
+ * \brief Abstract base class for flat variables.
+ */
 abstract AbstractFVariable;
+
+/**
+ * \brief A flat variable corresponding to an unknown declaration.
+ */
 UnknownFVariable : AbstractFVariable;
 
-abstract FVariable : AbstractFVariable ::= 
-              FVisibilityType
-              FTypePrefixOther
-              [FTypePrefixInputOutput]
-              FAttribute*
-              [BindingExp:FExp]
-              [FStringComment]
-              FQName;
+/**
+ * \brief A class representing a flattened Modelica variable.
+ *
+ * FVariable contains information about the variable's visibility (public
+ * or protected), variability (parameter, discrete or continuous) and causality
+ * (input or output). In addition, FVariable contains a list of attributes
+ * and, optionally, a binding expression. FVariables may represent both array
+ * variables and scalar variables: this information is embedded in the 
+ * FQName class.
+ */
+abstract FVariable : AbstractFVariable ::= FVisibilityType
+                                           FTypePrefixVariability
+                                           [FTypePrefixInputOutput]
+                                           FAttribute*
+                                           [BindingExp:FExp]
+                                           [FStringComment]
+                                           FQName;
 
-abstract FVisibilityType::=;
-FPublicVisibilityType : FVisibilityType ::=;
-FProtectedVisibilityType : FVisibilityType ::=;
+/**
+ * \brief Base class for variable type prefixes.
+ */
+abstract FTypePrefix;
 
+/**
+ * \brief Base class for variability type prefixes.
+ */
+abstract FTypePrefixVariability : FTypePrefix;
+
+/**
+ * \brief Continuous (default) variability.
+ *
+ * Continuous is not a valid prefix but is used to identify  expressions that 
+ * are not declared as parameters, constants, or discrete.
+ */
+FContinuous : FTypePrefixVariability::=;
+
+/**
+ * \brief Discrete variability.
+ */
+FDiscrete : FTypePrefixVariability::=;
+
+/**
+ * \brief Parameter variability.
+ */
+FParameter : FTypePrefixVariability::=;
+
+/**
+ * \brief Constant variability.
+ */
+FConstant : FTypePrefixVariability::=;
+
+/**
+ * \brief Base class for causality type prefixes.
+ */
+abstract FTypePrefixInputOutput : FTypePrefix;
+
+/**
+ * \brief Input causality.
+ */ 
+FInput : FTypePrefixInputOutput::=;
+
+/**
+ * \brief Output causality.
+ */
+FOutput : FTypePrefixInputOutput::=;
+
+/**
+ * \brief FVariable of type Real.
+ */
 FRealVariable : FVariable;
+
+/**
+ * \brief FVariable of type Integer.
+ */
 FIntegerVariable : FVariable;
+
+/**
+ * \brief FVariable of type Boolean.
+ */
 FBooleanVariable : FVariable;
+
+/**
+ * \brief FVariable of type String.
+ */
 FStringVariable : FVariable;
 
+/**
+ * \brief FVariable corresponding to a derivative variable.
+ *
+ * Notice that this kind of variables does not result from flattening, but are
+ * introduced when a flattened model is transformed into a cononical form.
+ */
 FDerivativeVariable : FRealVariable;
 
+/**
+ * \brief Node representing the visibility of an FVariable object.
+ */
+abstract FVisibilityType::=;
+
+/**
+ * \brief Public visibility.
+ */
+FPublicVisibilityType : FVisibilityType ::=;
+
+/**
+ * \brief Protected visibility.
+ */
+FProtectedVisibilityType : FVisibilityType ::=;
+
+/**
+ * \brief Base class for primitive type nodes.
+ *
+ * The flat type system is based on explicit representations of the primitive
+ * types Real, Integer, Boolean and String, where each type corresponds to
+ * an AST node. FPrimitiveType serves as base class for these AST nodes.
+ */
 abstract FPrimitiveType;
+
+/**
+ * \brief Base class for the numeric types Real and Integer.
+ */
 abstract FNumericType : FPrimitiveType;
+
+/**
+ * \brief Class representing the primitive type Real.
+ */
 FRealType : FNumericType ::=;
+
+/**
+ * \brief Class representing the primitive type Integer.
+ */
 FIntegerType : FNumericType ::=; 
-FStringType : FPrimitiveType ::=;
+
+/**
+ * \brief Class representing the primitive type Boolean.
+ */
 FBooleanType : FPrimitiveType ::=;
 
-//FArrayType : FPrimitiveType ::= Dim:FExp;
+/**
+ * \brief Class representing the primitive type String.
+ */
+FStringType : FPrimitiveType ::=;
+
+/**
+ * \brief Class representing an unknown primitive type.
+ *
+ * Used to represent type errors. 
+ */
 FUnknownType : FPrimitiveType ::=;
 
+/**
+ * \brief A qualified name supporting array subscripts.
+ *
+ * Flattened variables and identifiers typically have qualified names, which
+ * are represented by FQName. FQName contains a list of FQNamePart objects
+ * which in turn contains a name and, optionally, array subscripts. The 
+ * structure of the FQName class is motivated by the fact that flat names
+ * needs to be printed in a number of different way (dot notation, underscore
+ * notation etc).
+ */
 FQName ::= FQNamePart*;
+
+/**
+ * \brief A name and, optionally, its associated array subscripts.
+ * 
+ * To be used in FQName:s.
+ */
 FQNamePart ::= <Name:String> [FArraySubscripts];
 
+/**
+ * \brief Representation of an attribute for a built-in types.
+ *
+ * The attributes (start, unit etc.) of the built-in types are represented by
+ * objects of the FAttribute class, which in turned are stored in the 
+ * FVariables. FAttributes contain information about the attribute name and
+ * type, its value, whether it is set explicitly by the user and the prefixes
+ * each and final. 
+ */
 FAttribute ::= Type:FIdUse
                Name:FIdDecl 			   
                [Value:FExp]
@@ -67,120 +234,357 @@ FAttribute ::= Type:FIdUse
                [FFinal]
                FAttribute*;
 
+/**
+ * \brief Node representing the each prefix for attributes.
+ */
 FEach ::=;
+
+/**
+ * \brief Node representing the final prefix for attributes.
+ */
 FFinal ::=;
 
-abstract FTypePrefix;
-//abstract FTypePrefixFlow : FTypePrefix;
-//FFlow : FTypePrefixFlow::=;
-abstract FTypePrefixOther : FTypePrefix;
-// Continuous is not a valid prefix.  We will use it to identify 
-// expressions that are not parameters, constants, or discrete.
-FContinuous : FTypePrefixOther::=;
-FDiscrete : FTypePrefixOther::=;
-FParameter : FTypePrefixOther::=;
-FConstant : FTypePrefixOther::=;
-abstract FTypePrefixInputOutput : FTypePrefix;
-FInput : FTypePrefixInputOutput::=;
-FOutput : FTypePrefixInputOutput::=;
-
+/**
+ * \brief A string comment node.
+ */
 FStringComment ::= <Comment:String>;
 
+/**
+ * \brief Array subscripts used in FQNames.
+ */
 FArraySubscripts ::= FSubscript*;
+
+/**
+ * \brief Base class for array subscripts.
+ */ 
 abstract FSubscript;
+
+/**
+ * \brief The colon subsript used to denote that the array size is inferred.
+ */
 FColonSubscript : FSubscript::=;
+
+/**
+ * \brief Expression subscript.
+ */
 FExpSubscript : FSubscript ::= FExp;
 
-abstract FExp;
-FUnsupportedExp : FExp;
+/**
+ * \brief Base class for flattened equations.
+ */
 abstract FAbstractEquation;
-FUnsupportedEquation : FAbstractEquation;
-FEquation : FAbstractEquation ::= Left:FExp Right:FExp;
-FInitialEquation : FEquation;
-FConnectClause : FAbstractEquation ::= [FStringComment] Connector1:FIdUseInstAccess Connector2:FIdUseInstAccess;
 
+/**
+ * \brief Unsupported equation.
+ */
+FUnsupportedEquation : FAbstractEquation;
+
+/**
+ * \brief An equation consisting of a right and a left hand side expression.
+ */
+FEquation : FAbstractEquation ::= Left:FExp Right:FExp;
+
+/**
+ * \brief An initial equation consisting of a right and a left 
+ * hand side expression.
+ */
+FInitialEquation : FEquation;
+
+/**
+ * \brief A flattened connect statement.
+ *
+ * Notice that FConnectClauses are not present in flattened models, where
+ * connect statements has been transformed into regular equations, but only
+ * as an intermediate node type.
+ */
+FConnectClause : FAbstractEquation ::= [FStringComment] 
+                                       Connector1:FIdUseInstAccess 
+                                       Connector2:FIdUseInstAccess;
+
+/**
+ * \brief Abstract base class for all flattened expressions.
+ */
+abstract FExp;
+
+/**
+ * \brief Unsupported expression.
+ *
+ * Used for reporting errors.
+ */
+FUnsupportedExp : FExp;
+
+/**
+ * \brief Base class for binary expressions.
+ */
 abstract FBinExp : FExp ::= Left:FExp Right:FExp;
+
+/**
+ * \brief Base class for unary expressions.
+ */
 abstract FUnaryExp : FExp ::= FExp;
 
+/**
+ * \brief Base class for arithmetic binary expressions.
+ */
 abstract FArtmBinExp : FBinExp;
+
+/**
+ * \brief Addition expression.
+ */
 FAddExp : FArtmBinExp::=;
+
+/**
+ * \brief Subtraction expression.
+ */
 FSubExp : FArtmBinExp::=;
+
+/**
+ * \brief Multiplicative expression.
+ */
 FMulExp : FArtmBinExp::=;
+
+/**
+ * \brief Matrix multiplied by matrix expression.
+ */
 FMulExpMM : FMulExp::=;
+
+/**
+ * \brief Vector multiplied by matrix expression.
+ */
 FMulExpVM : FMulExp::=;
+
+/**
+ * \brief Matrix multiplied by vector expression.
+ */
 FMulExpMV : FMulExp::=;
+
+/**
+ * \brief Vector multiplied by vector expression.
+ */
 FMulExpVV : FMulExp::=;
+
+/**
+ * \brief Division expression.
+ */
 FDivExp : FArtmBinExp::=;
+
+/**
+ * \brief Power expression.
+ */
 FPowExp : FArtmBinExp::=;
+
+/**
+ * \brief Unary negation expression.
+ */
 FNegExp : FUnaryExp ::=;
 
+/**
+ * \brief Base class for logical binary expressions.
+ */
 abstract FLogBinExp : FBinExp;
+
+/**
+ * \brief Less than expression.
+ */
 FLtExp : FLogBinExp;
+
+/**
+ * \brief Less than or equal expression.
+ */
 FLeqExp : FLogBinExp;
+
+/**
+ * \brief Greater than expression.
+ */
 FGtExp : FLogBinExp;
+
+/**
+ * \brief Greater than or equal expression.
+ */
 FGeqExp : FLogBinExp;
+
+/**
+ * \brief Equality expression.
+ */
 FEqExp : FLogBinExp;
+
+/**
+ * \brief Negation expression.
+ */
 FNeqExp : FLogBinExp;
+
+/**
+ * \brief Not expression.
+ */
 FNotExp : FUnaryExp ::=;
+
+/**
+ * \brief Or expression.
+ */
 FOrExp : FLogBinExp;
+
+/**
+ * \brief And expression.
+ */
 FAndExp : FLogBinExp;
 
+/**
+ * \brief Base class for literal expressions.
+ */
 FLitExp : FExp;
+
+/**
+ * \brief Real literal expression.
+ */
 FRealLitExp : FLitExp ::= <UNSIGNED_NUMBER>;
+
+/**
+ * \brief Integer literal expression.
+ */
 FIntegerLitExp : FLitExp ::= <UNSIGNED_INTEGER>;
+
+/**
+ * \brief Boolean literal expression.
+ */
 abstract FBooleanLitExp : FLitExp ::=;
+
+/**
+ * \brief True boolean literal expression.
+ */
 FBooleanLitExpTrue : FBooleanLitExp;
+
+/**
+ * \brief False boolean literal expression.
+ */
 FBooleanLitExpFalse : FBooleanLitExp;
+
+/**
+ * \brief String literal expression.
+ */
 FStringLitExp : FLitExp ::= <String>;
 
+/**
+ * \brief Function call expression.
+ */
 FFunctionCall : FExp ::= Name:FIdUse Args:FExp*;
 
+/**
+ * \brief Summation reduction expression.
+ */
 FSumRedExp : FExp ::= FExp FForIndex;
+
+/**
+ * \brief For indices expression.
+ */
 FForIndex ::= FIdDecl [FExp];
 
-FScalar : FUnaryExp ::=;
-FTranspose : FUnaryExp ::=;
-FIdentity : FFunctionCall;
-FOnes : FFunctionCall;
-FZeros : FFunctionCall;
-
+/**
+ * \brief Summation function.
+ */
 FSumExp : FUnaryExp ::=;
 
+/**
+ * \brief For clause expression.
+ */
 FForClauseE : FAbstractEquation ::= FForIndex* ForEqns:FAbstractEquation*;
 
+/**
+ * \brief If expression.
+ */
 FIfExp : FExp ::= IfExp:FExp ThenExp:FExp FElseIfExp* ElseExp:FExp;
+
+/**
+ * \brief Else if expression
+ */
 FElseIfExp : FExp ::= IfExp:FExp ThenExp:FExp;
 
+/**
+ * \brief Declaration of a qualified name. 
+ */
 FIdDecl ::= FQName;
 
+/**
+ * \brief A qualified identifier.
+ */
 FIdUse ::= FQName; 
 
+/**
+ * \brief A qualifed identifier in an expression.
+ */
 FIdUseExp : FExp ::= FIdUse;
 
+/**
+ * \brief The built-in function der.
+ */
 FDer : FIdUseExp ::=; 
 
-FInstAccessExp : FExp ::= InstAccess;
-
+/**
+ * \brief Identifier in the instance tree.
+ */
 FIdUseInstAccess : FIdUse ::= InstAccess;
 
-//FTypeAccess : FIdUse; // New type access
+/**
+ * \brief Identifiers in instantiated expressions.
+ *
+ * Instantiated expressions occurs in the instance tree.
+ */
+FInstAccessExp : FExp ::= InstAccess;
 
-//FIdUseQualified : FIdUse ::= FQName;
-// The flat model does not contain qualified names, but is modeled
-// as such in order to keep track of name parts and array indices, 
-// which in turn enables different output on different formats.
-//FDot : FIdUse ::= Left:FIdUse Right:FIdUse; 
-//FBooleanLitExp : FExp ::= <Val:boolean>;
-
+/**
+ * \brief Array constructor expression.
+ */
 FArrayConstructor : FExp ::= FExp*;
+
+/**
+ * \brief A matrix expression.
+ */
 FMatrix : FExp ::= FExpList*;
+
+/**
+ * \brief An expression list used in FMatrix nodes.
+ */
 FExpList : FExp ::= FExp*;
 
+/**
+ * \brief Range expression.
+ */
 FRangeExp : FExp ::= FExp*;
 
+/**
+ * \brief Dummy node.
+ */
 FNoExp : FExp::=;
 
+/**
+ * \brief Built-in variable time.
+ */
 FTimeExp : FExp;
 
 // Built in functions
 FSizeExp : FExp ::= FIdUseExp Dim:FExp;
+
+/**
+ * \brief Scalar built-in function.
+ */
+FScalar : FUnaryExp ::=;
+
+/**
+ * \brief Transpose built-in function.
+ */
+FTranspose : FUnaryExp ::=;
+
+/**
+ * \brief Identity built-in function.
+ */
+FIdentity : FFunctionCall;
+
+/**
+ * \brief Ones built-in function.
+ */
+FOnes : FFunctionCall;
+
+/**
+ * \brief Zeros built-in function.
+ */
+FZeros : FFunctionCall;
+

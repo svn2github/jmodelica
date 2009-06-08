@@ -434,8 +434,8 @@ aspect ComponentDeclMethods {
    	 */
    	syn boolean ComponentDecl.isParameter() {
    	
-   		if (hasTypePrefixOther())
-   			if (getTypePrefixOther() instanceof Parameter)
+   		if (hasTypePrefixVariability())
+   			if (getTypePrefixVariability() instanceof Parameter)
    				return true;
    	
    		return false;
@@ -461,8 +461,8 @@ aspect ComponentDeclMethods {
    	 */
    	syn boolean ComponentDecl.isConstant() {
    	
-   		if (hasTypePrefixOther())
-   			if (getTypePrefixOther() instanceof Constant)
+   		if (hasTypePrefixVariability())
+   			if (getTypePrefixVariability() instanceof Constant)
    				return true;
    	
    		return false;
@@ -473,8 +473,8 @@ aspect ComponentDeclMethods {
    	 */
    	syn boolean ComponentDecl.isDiscrete() {
    	
-   		if (hasTypePrefixOther())
-   			if (getTypePrefixOther() instanceof Discrete)
+   		if (hasTypePrefixVariability())
+   			if (getTypePrefixVariability() instanceof Discrete)
    				return true;
    	
    		return false;

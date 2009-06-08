@@ -16,35 +16,35 @@
 
 aspect FlatVariability {
 	
-	syn boolean FTypePrefixOther.constantVariability() = false;
+	syn boolean FTypePrefixVariability.constantVariability() = false;
 	eq FConstant.constantVariability() = true;	
-	syn boolean FTypePrefixOther.parameterVariability() = false;
+	syn boolean FTypePrefixVariability.parameterVariability() = false;
 	eq FParameter.parameterVariability() = true;	
-	syn boolean FTypePrefixOther.discreteVariability() = false;
+	syn boolean FTypePrefixVariability.discreteVariability() = false;
 	eq FDiscrete.discreteVariability() = true;	
-	syn boolean FTypePrefixOther.continuousVariability() = false;
+	syn boolean FTypePrefixVariability.continuousVariability() = false;
 	eq FContinuous.continuousVariability() = true;	
 
-	syn boolean FVariable.isConstant() = getFTypePrefixOther().constantVariability();
-    syn boolean FVariable.isParameter() = getFTypePrefixOther().parameterVariability();
-    syn boolean FVariable.isDiscrete() = getFTypePrefixOther().discreteVariability();
-    syn boolean FVariable.isContinuous() = getFTypePrefixOther().continuousVariability();
+	syn boolean FVariable.isConstant() = getFTypePrefixVariability().constantVariability();
+    syn boolean FVariable.isParameter() = getFTypePrefixVariability().parameterVariability();
+    syn boolean FVariable.isDiscrete() = getFTypePrefixVariability().discreteVariability();
+    syn boolean FVariable.isContinuous() = getFTypePrefixVariability().continuousVariability();
     	
 	syn boolean FExp.isConstantExp() = variability().constantVariability();
 	syn boolean FExp.isParameterExp() = variability().parameterVariability();
 	syn boolean FExp.isDiscreteExp() = variability().discreteVariability();
 	syn boolean FExp.isContinuousExp() = variability().continuousVariability();
 	
-	syn lazy FTypePrefixOther FExp.variability();
+	syn lazy FTypePrefixVariability FExp.variability();
 	// TODO this must be fixed.
 	eq FInstAccessExp.variability() = null;
 	eq FUnsupportedExp.variability() = null;
 	
-	syn lazy FTypePrefixOther FVariable.variability();
+	syn lazy FTypePrefixVariability FVariable.variability();
 
 	eq FVariable.variability() {
    		if (!isContinuous()) {
-   			return getFTypePrefixOther();
+   			return getFTypePrefixVariability();
    		} else if (isInteger() || isBoolean() || isString()) {
    			return(fDiscrete());
    		} else {
@@ -60,22 +60,9 @@ aspect FlatVariability {
 	eq FNoExp.variability() = fConstant();
 	
 	eq FTimeExp.variability() = fContinuous();
-		
-	/*
-	eq FDer.variability() {
-		if (getFIdUseExp().variability() instanceof FContinuous)
-			return fContinuous();
-		else if (getFIdUseExp().variability() instanceof FDiscrete) {
-			error("Cannot apply der operator to discrete expression " + this);
-			return fContinuous();
-		}
-		else
-			return fConstant();
-	}
-	*/
 	
 	eq FIfExp.variability() {
-		FTypePrefixOther total = getThenExp().variability();
+		FTypePrefixVariability total = getThenExp().variability();
 		for (int i=0; i<getNumFElseIfExp(); i++) {
 			total = total.combine(getFElseIfExp(i).variability());
 		}
@@ -88,7 +75,7 @@ aspect FlatVariability {
 	eq FSizeExp.variability() = getFIdUseExp().variability();
 
 	eq FMatrix.variability() {
-		FTypePrefixOther total = fConstant();
+		FTypePrefixVariability total = fConstant();
 		for (int i=0; i<getNumFExpList(); i++) {
 			total = total.combine(getFExpList(i).variability());
 		}
@@ -96,7 +83,7 @@ aspect FlatVariability {
 	}
 	
 	eq FExpList.variability() {
-		FTypePrefixOther total = fConstant();		
+		FTypePrefixVariability total = fConstant();		
 		for (int i=0; i<getNumFExp(); i++) {
 			total = total.combine(getFExp(i).variability());
 		}
@@ -104,7 +91,7 @@ aspect FlatVariability {
 	}
 	
 	eq FFunctionCall.variability() {
-		FTypePrefixOther total = fConstant();
+		FTypePrefixVariability total = fConstant();
 		for (int i=0; i< getNumArgs(); i++) {
 			total = total.combine(getArgs(i).variability());
 		}
@@ -126,7 +113,7 @@ aspect FlatVariability {
 	}
 
 	// TODO: Take care of IDENT in range-expr without the 'in rang-expr'
-	syn FTypePrefixOther FForIndex.variability() {
+	syn FTypePrefixVariability FForIndex.variability() {
 		if (hasFExp()) {
 			return getFExp().variability();
 		} else {
@@ -135,7 +122,7 @@ aspect FlatVariability {
 	}
 
 	eq FRangeExp.variability() {
-		FTypePrefixOther total = fConstant();
+		FTypePrefixVariability total = fConstant();
 		for (int i=0; i<getNumFExp(); i++) {
 			total = total.combine(getFExp(i).variability());
 		}
@@ -143,14 +130,14 @@ aspect FlatVariability {
 	}
 	
 	eq FArrayConstructor.variability() {
-		FTypePrefixOther total = fConstant();
+		FTypePrefixVariability total = fConstant();
 		for (int i=0; i<getNumFExp(); i++) {
 			total = total.combine(getFExp(i).variability());
 		}
 		return total;		
 	}	
 	
-   	public FTypePrefixOther FTypePrefixOther.combine(FTypePrefixOther other) {   			
+   	public FTypePrefixVariability FTypePrefixVariability.combine(FTypePrefixVariability other) {   			
    		if (this instanceof FContinuous) {
    			return this;
    		} else if (other instanceof FContinuous) {

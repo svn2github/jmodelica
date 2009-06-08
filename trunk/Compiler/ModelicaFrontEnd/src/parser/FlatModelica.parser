@@ -126,7 +126,7 @@ List fvariable_list =
 	
 FVariable fvariable =
     fvisibility_type?
-    ftype_prefix_other? 
+    ftype_prefix_variability? 
     ftype_prefix_input_output? 
 	fprimitive_type
 	fqname
@@ -137,8 +137,8 @@ FVariable fvariable =
 						fattr = new List();
 					else 
 						fattr = (List)fattributes.getChild(0);
-					FTypePrefixOther tpo = ftype_prefix_other.getNumChild()==1?
-					  (FTypePrefixOther)ftype_prefix_other.getChild(0):
+					FTypePrefixVariability tpo = ftype_prefix_variability.getNumChild()==1?
+					  (FTypePrefixVariability)ftype_prefix_variability.getChild(0):
 					  new FContinuous();
                     FVisibilityType fvt = fvisibility_type.getNumChild()==1?
                       (FVisibilityType)fvisibility_type.getChild(0) :
@@ -235,9 +235,10 @@ FEquation fequation =
 	SEMICOLON  {: return new FEquation(left,right); :} 
 	;
 
-FTypePrefix ftype_prefix_other = 
+FTypePrefix ftype_prefix_variability = 
    PARAMETER                          {: return new FParameter(); :}
   | CONSTANT                          {: return new FConstant(); :}
+  | DISCRETE                          {: return new FDiscrete(); :}
   ;
   
 FTypePrefix ftype_prefix_input_output = 

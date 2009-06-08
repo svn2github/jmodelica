@@ -131,7 +131,7 @@ aspect Flattening {
 			im.collectAttributes(attr,im.myInstNode().getFQNamePrefix());
 		}
 		
-		FTypePrefixOther tpo = null;
+		FTypePrefixVariability tpo = null;
 		if (getComponentDecl().isDiscrete()) {
 			tpo = new FDiscrete();	
 		} else if (getComponentDecl().isParameter()) {

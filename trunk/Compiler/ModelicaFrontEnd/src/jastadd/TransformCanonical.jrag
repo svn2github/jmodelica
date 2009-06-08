@@ -50,7 +50,7 @@ aspect TransformCanonical{
 		ArrayList<FDerivativeVariable> l = new ArrayList<FDerivativeVariable>();
 		for (FVariable fv : differentiatedRealVariables()) {
 			l.add(new FDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-					(FTypePrefixOther)fv.getFTypePrefixOther().fullCopy(),
+					(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
 					new Opt(),
 					new List(),
 					new Opt(),
@@ -133,19 +133,25 @@ aspect ParameterSorting {
 	 * algorithms later on.
 	 */
 	public void FClass.sortDependentParameters() {
-		ArrayList<FVariable> dps = dependentParameters();
-		//PSGraph psg = new PSGraph();
 		
+		// Retrieve the dependent parameter that will be sorted
+		ArrayList<FVariable> dps = dependentParameters();
+		
+		// Create data structures for the adjacency graph.
 		ArrayList<ArrayList<FVariable>> toNodes = new ArrayList<ArrayList<FVariable>>();	
 		ArrayList<ArrayList<FVariable>> fromNodes = new ArrayList<ArrayList<FVariable>>();	
 		
+		// Initialize data structures.
 		for(int i=0;i<numDependentParameters();i++) {
 			toNodes.add(new ArrayList<FVariable>());
 			fromNodes.add(new ArrayList<FVariable>());
 		}
 		
+		// For each flat variable
 		for (FVariable fv : dps) {
+			// Retreive all variables referenced in binding expression
 			ArrayList<FVariable> deps = fv.referencedFVariablesInBindingExp();
+			// Build the actual adjacency graph.
 			for (FVariable fv_add : deps) {
 				if (!(dps.indexOf(fv_add)<0) && !toNodes.get(dps.indexOf(fv_add)).contains(fv)) {
 					toNodes.get(dps.indexOf(fv_add)).add(fv);		
@@ -153,25 +159,7 @@ aspect ParameterSorting {
 				}
 			}
 		}	
-		
-		/*
-		for (FVariable fv : dps) {
-			System.out.print(dps.indexOf(fv) + "-> ");
-			for (FVariable fv_ : toNodes.get(dps.indexOf(fv))) {
-				System.out.print(dps.indexOf(fv_) + " ");
-			}
-			System.out.println("");
-		}		
-
-		for (FVariable fv : dps) {
-			System.out.print(dps.indexOf(fv) + "<- ");
-			for (FVariable fv_ : fromNodes.get(dps.indexOf(fv))) {
-				System.out.print(dps.indexOf(fv_) + " ");
-			}
-			System.out.println("");
-		}		
-		 */
-		
+				
 		// Sort using algorithm described at
 		// http://en.wikipedia.org/wiki/Topological_sorting
 		ArrayList<FVariable> L = new ArrayList<FVariable>();
@@ -204,30 +192,26 @@ aspect ParameterSorting {
 			toNodes.get(dps.indexOf(n)).clear();
 		}
 		
+		// Not possible to find an ordering without cycles?
 		if (L.size()!=dps.size()) {
 			cyclicParameters = true;
 			return;
 		}
 		
+		// Remove all dependent parameters from (in reversed order)
 		for (i=getNumFVariable()-1;i>=0;i--) {
 			if (dps.contains(getFVariable(i))) {
 				getFVariableList().removeChild(i);
 			}
 		}
 
+		// Add all dependent parameters in sorted order.
 		for (FVariable fv : L) {
 			addFVariable(fv);
 		}
-		
+
+		// Flush AST since the structure has changed.
 		root().flushAllRecursive();
-		
-		/*
-		System.out.println("Sorted dependent parameters: ***");
-		for (FVariable fv : L) {
-			System.out.println(fv.name());
-		}
-		System.out.println("***");
-		*/
 	}	
 		
 }

@@ -6,7 +6,7 @@
  */
 aspect OptimicaFlatVariability {
 
-	syn boolean FTypePrefixOther.timedVariability() = false;
+	syn boolean FTypePrefixVariability.timedVariability() = false;
 	eq FTimed.timedVariability() = true;	
 
 	syn boolean FExp.isTimedExp() = variability().timedVariability();
@@ -21,7 +21,7 @@ aspect OptimicaFlatVariability {
 		return FTimed.singleton;
 	}
 
-   	refine FlatVariability public FTypePrefixOther FTypePrefixOther.combine(FTypePrefixOther other) {   			
+   	refine FlatVariability public FTypePrefixVariability FTypePrefixVariability.combine(FTypePrefixVariability other) {   			
    		if (this instanceof FContinuous) {
    			return this;
    		} else if (other instanceof FContinuous) {

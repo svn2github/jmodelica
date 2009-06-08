@@ -88,7 +88,7 @@ LibNode ::= <FileName:String> <Name:String> <Structured:boolean> /StoredDefiniti
 
 // TODO: Why does ShortClassDecl have type_prefix:es?
 PN_ShortClassDecl : BaseClassDecl ::= [TypePrefixFlow] 
-                                [TypePrefixOther]
+                                [TypePrefixVariability]
                                 [TypePrefixInputOutput] 
                                 ClassName:Access  
                                 [ArraySubscripts] 
@@ -98,7 +98,7 @@ PN_ShortClassDecl : BaseClassDecl ::= [TypePrefixFlow]
 ShortClassDecl : BaseClassDecl ::= ExtendsClauseShortClass;
 
 ExtendsClauseShortClass : ExtendsClause ::= [TypePrefixFlow] 
-                                [TypePrefixOther]
+                                [TypePrefixVariability]
                                 [TypePrefixInputOutput] 
                                 [ArraySubscripts] 
                                 Comment; 
@@ -188,7 +188,7 @@ abstract BaseComponentDecl : AbstractComponentDecl ::= [Redeclare]
                                          [Outer] 
                                          [Replaceable] 
                                          [TypePrefixFlow] 
-                                         [TypePrefixOther] 
+                                         [TypePrefixVariability] 
                                          [TypePrefixInputOutput] 
                                          ClassName:Access 
                                          [TypeArraySubscripts:ArraySubscripts];
@@ -220,10 +220,10 @@ PN_ComponentDecl ::= Name:IdDecl
 abstract TypePrefix;
 abstract TypePrefixFlow : TypePrefix;
 Flow : TypePrefixFlow::=;
-abstract TypePrefixOther : TypePrefix;
-Discrete : TypePrefixOther::=;
-Parameter : TypePrefixOther::=;
-Constant : TypePrefixOther::=;
+abstract TypePrefixVariability : TypePrefix;
+Discrete : TypePrefixVariability::=;
+Parameter : TypePrefixVariability::=;
+Constant : TypePrefixVariability::=;
 abstract TypePrefixInputOutput : TypePrefix;
 Input : TypePrefixInputOutput::=;
 Output : TypePrefixInputOutput::=;

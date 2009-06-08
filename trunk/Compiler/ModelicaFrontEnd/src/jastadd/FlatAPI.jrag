@@ -950,14 +950,6 @@ aspect FVariableUses {
 	FIdUseExp contributes this when !(getParent() instanceof FDer) to 
 	   FVariable.uses() for myFV();
 
-	/**
-	 * \brief Collection attribute returning all derivative uses in expressions.
-	 */
-/*	coll HashSet<FDer> FDerivativeVariable.derUses() [new HashSet<FDer>()] 
-	   with add root FlatRoot;
-	
-	FDer contributes this to FDerivativeVariable.derUses() for myFDV();
-	*/
 }
 
 aspect LinearFVariables {

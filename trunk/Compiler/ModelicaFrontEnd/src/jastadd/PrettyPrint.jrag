@@ -231,8 +231,8 @@ aspect PrettyPrint {
 			str.print(getReplaceable().toString() + " ");	
 		if (hasTypePrefixFlow())
 			str.print(getTypePrefixFlow().toString() + " ");
-		if (hasTypePrefixOther())
-			str.print(getTypePrefixOther().toString() + " ");
+		if (hasTypePrefixVariability())
+			str.print(getTypePrefixVariability().toString() + " ");
 		if (hasTypePrefixInputOutput())
 			str.print(getTypePrefixInputOutput().toString() + " ");
 		
@@ -577,7 +577,7 @@ aspect PrettyPrint {
 	syn String TypePrefixInputOutput.toString();
 	eq Input.toString() = "input";
 	eq Output.toString()= "output";
-	syn String TypePrefixOther.toString();
+	syn String TypePrefixVariability.toString();
 	eq Parameter.toString() = "parameter";
 	eq Discrete.toString() = "discrete";
 	eq Constant.toString() = "constant";
@@ -633,7 +633,7 @@ aspect FlattPrettyPrint {
 				str.print("protected ");
 			}
 			
-			str.print(getFTypePrefixOther().toString());
+			str.print(getFTypePrefixVariability().toString());
 						
 			if (hasFTypePrefixInputOutput()) {
 				str.print(getFTypePrefixInputOutput().toString());
@@ -1032,7 +1032,7 @@ aspect FlattPrettyPrint {
 	syn String FTypePrefixInputOutput.toString();
 	eq FInput.toString() = "input";
 	eq FOutput.toString()= "output";
-	syn String FTypePrefixOther.toString();
+	syn String FTypePrefixVariability.toString();
 	eq FParameter.toString() = "parameter ";
 	eq FDiscrete.toString() = "discrete ";
 	eq FConstant.toString() = "constant ";

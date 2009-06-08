@@ -23,7 +23,7 @@ FConstraintGeq : FConstraint;
 
 FTimedVariable : FExp ::= Name:FIdUse Arg:FExp;
 
-FTimed : FTypePrefixOther;
+FTimed : FTypePrefixVariability;
 
 FStartTimeExp : FExp;
 FFinalTimeExp : FExp;
