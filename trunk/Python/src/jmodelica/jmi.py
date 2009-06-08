@@ -2064,18 +2064,21 @@ class JMIModel(object):
         if starttime and finaltime:
             self.opt_set_optimization_interval(float(starttime), int(starttimefree),
                                                         float(finaltime), int(finaltimefree))        
-        
+
     def _set_timepoints(self):       
         """ Sets the optimization timepoints for this JMIModel (if Optimica).
         
-        """
+        """        
         xmldoc = self._get_XMLproblvariables_doc()
+
+        start =  float(xmldoc.get_starttime())
+        final = float(xmldoc.get_finaltime())
         points = []
         for point in xmldoc.get_timepoints():
-            points.append(float(point))
+            norm_point = (float(point) - start) / (final-start)
+            points.append(float(norm_point))
          
         self.set_tp(N.array(points))   
-
         
     def _set_p_opt_indices(self):
         """ Sets the optimization parameter indices for this JMIModel (if Optimica).
