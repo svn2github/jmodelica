@@ -88,112 +88,152 @@ class XMLVariablesDoc(XMLdoc):
         return dict(zip(keys,vals))
     
     def get_p_opt_variable_refs(self):
-        refs = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Free=\"true\"]")
+        """ Extracts ValueReference for all free independent parameters.
+        
+        """
+        refs = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"independentParameter\"] \
+                               [../../Attributes/RealAttributes/Free=\"true\"]")
         return refs
     
     def get_w_initial_guess_values(self):
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Variability=\"continuous\"] \
-                                       [../../Attributes/RealAttributes/Category=\"algebraic\"] \
-                                       [../../Causality=\"internal\"]")
-
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../Variability=\"continuous\"] \
-                               [../../../../Attributes/RealAttributes/Category=\"algebraic\"] \
-                               [../../../../Causality=\"internal\"]")
+        """ Extracts ValueReference and InitialGuess values for all algebraic variables.
+        
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"algebraic\"]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../Attributes/RealAttributes/Category=\"algebraic\"]")
             
         return dict(zip(keys,vals))
     
     def get_u_initial_guess_values(self):
+        """ Extracts ValueReference and InitialGuess values for all input variables.
+        
+        """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../Causality=\"input\"]")
             
         return dict(zip(keys,vals))
     
     def get_dx_initial_guess_values(self):
+        """ Extracts ValueReference and InitialGuess values for all derivative variables.
+        
+        """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"derivative\"]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../Attributes/RealAttributes/Category=\"derivative\"]")
         
         return dict(zip(keys, vals))
     
     def get_x_initial_guess_values(self):
+        """ Extracts ValueReference and InitialGuess values for all differentiated variables.
+        
+        """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"state\"]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../Attributes/RealAttributes/Category=\"state\"]")
         
         return dict(zip(keys, vals))
     
     def get_p_opt_initial_guess_values(self):
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Free=\"true\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../Attributes/RealAttributes/Free=\"true\"]")
+        """ Extracts ValueReference and InitialGuess values for all free independent parameters.
+        
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"independentParameter\"] \
+                                [../../Attributes/RealAttributes/Free=\"true\"]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../Attributes/RealAttributes/Category=\"independentParameter\"] \
+                                [../../../../Attributes/RealAttributes/Free=\"true\"]")
         
         return dict(zip(keys, vals))
 
     def get_w_lb_values(self):
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Variability=\"continuous\"] \
-                                       [../../Attributes/RealAttributes/Category=\"algebraic\"] \
-                                       [../../Causality=\"internal\"]")
-
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../Variability=\"continuous\"] \
-                               [../../../../Attributes/RealAttributes/Category=\"algebraic\"] \
-                               [../../../../Causality=\"internal\"]")
+        """ Extracts ValueReference and lower bound values for all algebraic variables.
+        
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"algebraic\"]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../Attributes/RealAttributes/Category=\"algebraic\"]")
             
         return dict(zip(keys,vals))
     
     def get_u_lb_values(self):
+        """ Extracts ValueReference and lower bound values for all input variables.
+        
+        """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../Causality=\"input\"]")
             
         return dict(zip(keys,vals))
     
     def get_dx_lb_values(self):
+        """ Extracts ValueReference and lower bound values for all derivative variables.
+        
+        """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"derivative\"]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../Attributes/RealAttributes/Category=\"derivative\"]")
         
         return dict(zip(keys, vals))
     
     def get_x_lb_values(self):
+        """ Extracts ValueReference and lower bound values for all differentiated variables.
+        
+        """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"state\"]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../Attributes/RealAttributes/Category=\"state\"]")
         
         return dict(zip(keys, vals))
     
     def get_p_opt_lb_values(self):
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Free=\"true\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../Attributes/RealAttributes/Free=\"true\"]")
+        """ Extracts ValueReference and lower bound values for all free independent parameters.
+        
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"independentParameter\"] \
+                               [../../Attributes/RealAttributes/Free=\"true\"]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../Attributes/RealAttributes/Category=\"independentParameter\"] \
+                               [../../../../Attributes/RealAttributes/Free=\"true\"]")
         
         return dict(zip(keys, vals))
 
     def get_w_ub_values(self):
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Variability=\"continuous\"] \
-                                       [../../Attributes/RealAttributes/Category=\"algebraic\"] \
-                                       [../../Causality=\"internal\"]")
-
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../Variability=\"continuous\"] \
-                               [../../../../Attributes/RealAttributes/Category=\"algebraic\"] \
-                               [../../../../Causality=\"internal\"]")
+        """ Extracts ValueReference and upper bound values for all algebraic variables.
+        
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"algebraic\"] ")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../Attributes/RealAttributes/Category=\"algebraic\"]")
             
         return dict(zip(keys,vals))
 
     def get_u_ub_values(self):
+        """ Extracts ValueReference and upper bound values for all input variables.
+        
+        """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../Causality=\"input\"]")
             
         return dict(zip(keys,vals))
     
     def get_dx_ub_values(self):
+        """ Extracts ValueReference and upper bound values for all derivative variables.
+        
+        """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"derivative\"]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../Attributes/RealAttributes/Category=\"derivative\"]")
         
         return dict(zip(keys, vals))
     
     def get_x_ub_values(self):
+        """ Extracts ValueReference and upper bound values for all differentiated variables.
+        
+        """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"state\"]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../Attributes/RealAttributes/Category=\"state\"]")
         
         return dict(zip(keys, vals))
     
     def get_p_opt_ub_values(self):
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Free=\"true\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../Attributes/RealAttributes/Free=\"true\"]")
+        """ Extracts ValueReference and upper bound values for all free independent parameters.
         
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"independentParameter\"] \
+                               [../../Attributes/RealAttributes/Free=\"true\"]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../Attributes/RealAttributes/Category=\"independentParameter\"] \
+                               [../../../../Attributes/RealAttributes/Free=\"true\"]")
+                
         return dict(zip(keys, vals))
    
             
@@ -217,6 +257,9 @@ class XMLProblVariablesDoc(XMLdoc):
     """
     
     def get_starttime(self):
+        """ Extracts the interval start time.
+        
+        """
         time = self._xpatheval("//IntervalStartTime/Value/text()")
         if len(time) > 0:
             return time[0]
@@ -224,10 +267,16 @@ class XMLProblVariablesDoc(XMLdoc):
             return None
 
     def get_starttime_free(self):
+        """ Extracts the start time free attribute value.
+        
+        """
         free = self._xpatheval("//IntervalStartTime/Free/text()")
         return bool(free.count('true'))
     
     def get_finaltime(self):
+        """ Extracts the interval final time.
+        
+        """
         time = self._xpatheval("//IntervalFinalTime/Value/text()")
         if len(time) > 0:
             return time[0]
@@ -235,10 +284,16 @@ class XMLProblVariablesDoc(XMLdoc):
             return None
 
     def get_finaltime_free(self):
+        """ Extracts the final time free attribute value.
+        
+        """
         free = self._xpatheval("//IntervalFinalTime/Free/text()")
         return bool(free.count('true'))
 
     def get_timepoints(self):
+        """ Extracts all time points.
+        
+        """
         return self._xpatheval("//TimePoints/Value/text()")
         
      

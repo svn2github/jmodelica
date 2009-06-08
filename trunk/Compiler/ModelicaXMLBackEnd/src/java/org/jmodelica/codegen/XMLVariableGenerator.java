@@ -345,6 +345,14 @@ public class XMLVariableGenerator extends GenericGenerator {
 			genPrinter.print("derivative");
 		} else if(realvariable.isDifferentiatedVariable()) {
 			genPrinter.print("state");
+		} else if(realvariable.isDependentConstant()) {
+			genPrinter.print("dependentConstant");
+		} else if(realvariable.isIndependentConstant()) {
+			genPrinter.print("independentConstant");
+		} else if(realvariable.isDependentParameter()) {
+			genPrinter.print("dependentParamenter");
+		} else if(realvariable.isIndependentParameter()) {
+			genPrinter.print("independentParameter");
 		} else {
 			//default is algebraic
 			genPrinter.print("algebraic");
