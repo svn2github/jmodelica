@@ -334,13 +334,10 @@ aspect FlatNames {
 	eq InstComponentDecl.getInstModification().retrieveFQName() = retrieveFQName();
 	eq InstReplacingShortClassDecl.getChild().retrieveFQName() = retrieveFQName();
 	eq InstClassDecl.getChild().retrieveFQName() = null; //getFQName();
-	
-	
-	
+		
 	eq InstRoot.getChild().retrieveFQName() = null;
 	eq SourceRoot.getProgram().retrieveFQName() = null;
 
-	
 	syn lazy String FQName.name() {
 		StringBuffer str = new StringBuffer();
 		for (int i=0;i<getNumFQNamePart();i++) {
@@ -351,28 +348,12 @@ aspect FlatNames {
 		}
 		return str.toString();
 	}
-	syn lazy String FQName.derName() {
-		StringBuffer str = new StringBuffer();
-		for (int i=0;i<getNumFQNamePart();i++) {
-			if (i==getNumFQNamePart()-1) {
-				str.append("der(");
-			}
-			str.append(getFQNamePart(i).getName());
-			if (i==getNumFQNamePart()-1) {
-				str.append(")");
-			}
-			if (i<getNumFQNamePart()-1) {
-				str.append(".");
-			}
-		}
-		return str.toString();
-	}
-
+	
 	syn String FQNamePart.name() = getName();
 
-	syn String FIdUse.name() = getID();
+	syn String FIdUse.name() = getFQName().name();
 	syn String FIdUseExp.name() = getFIdUse().name();
-	eq FIdUseQualified.name() = getFQName().name();
+	eq FDer.name() = derName();
 	syn String FInstAccessExp.name() = getInstAccess().name();
     syn String FIdUseInstAccess.name() = getInstAccess().name();
 	
@@ -380,7 +361,12 @@ aspect FlatNames {
 
 	syn String FClass.name() = getFQName().name();
 	syn String FVariable.name() = getFQName().name();
+
+	syn lazy String FQName.derName() = "der(" + name() + ")";
+			
 	eq FDerivativeVariable.name() = getFQName().derName();
+	syn String FIdUse.derName() = getFQName().derName();
+	syn String FIdUseExp.derName() = getFIdUse().derName();
 	
 	syn lazy String FQName.nameUnderscore() {
 		StringBuffer str = new StringBuffer();
@@ -393,9 +379,9 @@ aspect FlatNames {
 	}
 	syn String FQNamePart.nameUnderscore() = getName();
 
-	syn String FIdUse.nameUnderscore() = getID();
+	syn String FIdUse.nameUnderscore() = getFQName().nameUnderscore();
 	syn String FIdUseExp.nameUnderscore() = getFIdUse().nameUnderscore();
-	eq FIdUseQualified.nameUnderscore() = getFQName().nameUnderscore();
+	eq FDer.nameUnderscore() = "der_" + getFIdUse().nameUnderscore();
 	//syn String FInstAccessExp.nameUnderscore() = getInstAccess().nameUnderscore();
     //syn String FIdUseInstAccess.nameUnderscore() = getInstAccess().nameUnderscore();
 	
@@ -603,6 +589,7 @@ aspect AllElements {
 }
 
 aspect Math {
+/*
 	public boolean FFunctionCall.rewrittenToExp = false;
 	rewrite FFunctionCall {
 		when (getName().name().equals("Modelica.Math.sin") && 
@@ -612,7 +599,7 @@ aspect Math {
 		      	return new FFunctionCall(new FIdUse("sin"),new List().add(getArgs(0)));
 		      }
 	}
-
+*/
 }
 
 

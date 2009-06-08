@@ -18,34 +18,42 @@ import java.util.HashMap;
 
 aspect FlatNameBinding {
 	
-	inh AbstractFVariable FIdUse.lookupFV(FQName fqname);
-	syn lazy AbstractFVariable FIdUse.myFV() = null;
-	eq FIdUseQualified.myFV() = lookupFV(getFQName());
+	inh AbstractFVariable FIdUse.lookupFV(String name);
+	syn lazy AbstractFVariable FIdUse.myFV() = lookupFV(getFQName().name());
 	
-	syn AbstractFVariable FIdUseExp.myFV() = getFIdUse().myFV();
+	syn AbstractFVariable FIdUseExp.myFV() = getFIdUse().lookupFV(name());
 
 	//inh AbstractFVariable FIdUseExp.lookupFV(FQName fqname);
-	inh AbstractFVariable FEquationBlock.lookupFV(FQName fqname);
-	inh AbstractFVariable FVariable.lookupFV(FQName fqname);
+	// inh AbstractFVariable FEquationBlock.lookupFV(FQName fqname);
+	// inh AbstractFVariable FVariable.lookupFV(FQName fqname);
 	
-	/* It appears that SourceRoot can contain flattened expressions */
-	/* Is this OK? Yes, it is ok since InstRoot is defined as an NTA */
-	/* of FullClassDecl */
+	eq Root.getChild().lookupFV(String name) = null;
 
-	eq Root.getChild().lookupFV(FQName fqname) {
-		return null;
-	}
-
-	eq FClass.getChild(int index).lookupFV(FQName fqname) {
-		FVariable variable = (FVariable) fullyQualifiedVariablesMap().get(fqname.name());
+	eq FClass.getChild(int index).lookupFV(String name) {
+		FVariable variable = (FVariable) fullyQualifiedVariablesMap().get(name);
 		if (variable == null) {
-			//error("Undefined variable " + fqname.name());
 			return unknownFVariable();
 		} else {
 			return variable;
 		}		
 	}
-				
+	
+	/*
+	inh AbstractFVariable FDer.lookupFDV(String name);
+	eq Root.getChild().lookupFDV(String name) = null;
+	eq FClass.getChild(int index).lookupFDV(String name) {
+		FVariable variable = (FDerivativeVariable) 
+		   fullyQualifiedVariablesMap().get(name);
+		if (variable == null) {
+			return unknownFVariable();
+		} else {
+			return variable;
+		}		
+	}
+	syn lazy FDerivativeVariable FDer.myFDV() = 
+		(FDerivativeVariable)lookupFDV(getFIdUseExp().derName());	
+	*/
+	
 	syn lazy HashMap FClass.fullyQualifiedVariablesMap() {
 		HashMap map = new HashMap();
 		for(int k = 0; k < getNumFVariable(); k++) {

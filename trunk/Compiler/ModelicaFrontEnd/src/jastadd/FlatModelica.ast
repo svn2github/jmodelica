@@ -138,8 +138,6 @@ FFunctionCall : FExp ::= Name:FIdUse Args:FExp*;
 FSumRedExp : FExp ::= FExp FForIndex;
 FForIndex ::= FIdDecl [FExp];
 
-FDer : FExp ::= FIdUseExp;
-
 FScalar : FUnaryExp ::=;
 FTranspose : FUnaryExp ::=;
 FIdentity : FFunctionCall;
@@ -153,18 +151,21 @@ FForClauseE : FAbstractEquation ::= FForIndex* ForEqns:FAbstractEquation*;
 FIfExp : FExp ::= IfExp:FExp ThenExp:FExp FElseIfExp* ElseExp:FExp;
 FElseIfExp : FExp ::= IfExp:FExp ThenExp:FExp;
 
+FIdDecl ::= FQName;
+
+FIdUse ::= FQName; 
+
 FIdUseExp : FExp ::= FIdUse;
+
+FDer : FIdUseExp ::=; 
 
 FInstAccessExp : FExp ::= InstAccess;
 
-FIdDecl ::= FQName;
-FIdUse ::= <ID>;
-
 FIdUseInstAccess : FIdUse ::= InstAccess;
 
-FTypeAccess : FIdUse; // New type access
+//FTypeAccess : FIdUse; // New type access
 
-FIdUseQualified : FIdUse ::= FQName;
+//FIdUseQualified : FIdUse ::= FQName;
 // The flat model does not contain qualified names, but is modeled
 // as such in order to keep track of name parts and array indices, 
 // which in turn enables different output on different formats.

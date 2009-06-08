@@ -203,7 +203,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
                s = s.substring(1,s.length()-1);
                 return newSymbol(Terminals.STRING,s); }
   {ID}      { return newSymbol(Terminals.ID, yytext()); }
-  //{UNSIGNED_INTEGER}  { return newSymbol(Terminals.INTEGER, yytext()); }
+  {UNSIGNED_INTEGER}  { return newSymbol(Terminals.UNSIGNED_INTEGER, yytext()); }
   {UNSIGNED_NUMBER}   { return newSymbol(Terminals.UNSIGNED_NUMBER, yytext()); }
   
   {Comment}         { return newSymbol(COMMENT); /* Will be discarded before parser. */ }

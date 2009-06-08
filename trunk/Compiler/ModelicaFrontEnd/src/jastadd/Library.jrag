@@ -67,10 +67,9 @@ aspect Library {
 			String dirName = getFileName();
 			try {
 				File baseDir = new File(dirName);
-				
 				File[] allFiles = baseDir.listFiles();
 				if (allFiles==null) {
-                	return createErrorStoredDefenition();
+					return createErrorStoredDefenition();
 				} 
 				
 				boolean package_mo_present = false;

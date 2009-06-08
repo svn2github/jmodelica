@@ -41,19 +41,8 @@
       else 
         s.append("  *** Syntactic error");
       throw new Error(s.toString());
-     // System.out.println(s);
-     // System.exit(0);
     }
     
-    /*
-    public void scannerError(Scanner.Exception e) {
-      StringBuffer s = new StringBuffer();
-      s.append(e.line + ", " + e.column + "\n");
-      s.append("  *** Lexical error: " + e.getMessage());
-      //throw new Error(s.toString());
-      System.out.println(s);
-      
-    }*/
   }
 
   {report = new Events();}  // Use error handler in parser
@@ -225,20 +214,14 @@ FAttribute fattribute =
     ffinal?
 	fid_decl
 	ASSIGN
-	fexp {: return new FAttribute(new FIdUse("UnknownType"),fid_decl,new Opt(fexp),true,feach,ffinal,new List()); :}
+	fexp {: return new FAttribute(new FIdUse(new FQName(new List().add(new FQNamePart("UnknownType",new Opt())))),
+	  fid_decl,new Opt(fexp),true,feach,ffinal,new List()); :}
 	;
 	
 FExp bexp =
 	ASSIGN
 	fexp {: return fexp; :}
 	;
-
-//List fequation_list = 
-//	fequation    {: return new List().add(fequation); :}
-//	| fequation_list fequation {: fequation_list.add(fequation);
-//	                              return fequation_list; :}
-//	;
-
 
 List fequation_section = 
 	EQUATION
@@ -283,8 +266,7 @@ FExp fprimary =
   | MINUS fprimary       {: return new FNegExp(fprimary); :}
   | STRING.s               {: return new FStringLitExp(s); :}
   | fid_use LPAREN arg_list RPAREN {: return new FFunctionCall(fid_use,arg_list); :}
-//  | fid_use        {: return fid_use; :}
-  | fid_use_qualified        {: return fid_use_qualified; :} 
+  | fid_use        {: return new FIdUseExp(fid_use); :} 
   | LPAREN fexp.a RPAREN {: return a; :}
   | TIME {: return new FTimeExp(); :}
   ;
@@ -297,12 +279,8 @@ FPrimitiveType fprimitive_type =
   	else return null; :}
   ;
   
-FIdUse fid_use =
-  ID.name {: return new FIdUse(name); :}
-  ;
-  
-FIdUseQualified fid_use_qualified = 
-   fqname   {: return new FIdUseQualified("",fqname); :}
+FIdUse fid_use = 
+   fqname   {: return new FIdUse(fqname); :}
    ;
    
 FIdDecl fid_decl = 

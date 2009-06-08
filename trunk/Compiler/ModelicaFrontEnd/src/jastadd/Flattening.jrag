@@ -249,7 +249,10 @@ aspect Flattening {
 			if (!attr_set) {
 			List my_attr = new List();
 			getInstModification().collectAttributes(my_attr,prefix);
-			attrs.add(new FAttribute(new FIdUse(getName().myInstClassDecl().name()),
+			FQName fqn2 = new FQName();
+			fqn2.addFQNamePart(new FQNamePart(getName().myInstClassDecl().name(),
+					new Opt()));
+			attrs.add(new FAttribute(new FIdUse(fqn2),
 									new FIdDecl(fqn),
 			                        getInstModification().hasInstValueMod()? new Opt(getInstModification().instValueMod().flatten(prefix)): new Opt(),
 			                        true,
@@ -316,7 +319,7 @@ aspect FlatExpressions {
     }
 
 	public FExp FInstAccessExp.flatten(FQName prefix) {
-		return new FIdUseExp(new FIdUseQualified("", getInstAccess().flatten(prefix)));
+		return new FIdUseExp(new FIdUse(getInstAccess().flatten(prefix)));
 	}
 
 	public FQName InstAccess.flatten(FQName prefix) { 
@@ -326,7 +329,7 @@ aspect FlatExpressions {
 	}
 
 	public FIdUse FIdUseInstAccess.flatten(FQName prefix) {
-	   return new FIdUseQualified("",getInstAccess().flatten(prefix));
+	   return new FIdUse(getInstAccess().flatten(prefix));
 	}
 
 	public FExp FArrayConstructor.flatten(FQName prefix) {
@@ -396,7 +399,7 @@ aspect FlatExpressions {
 			l.add(e.flatten(prefix));
 		}
 		if (getName().name().equals("der")) {
-			return new FDer((FIdUseExp)l.getChild(0));
+			return new FDer(((FIdUseExp)l.getChild(0)).getFIdUse());
 		} else {
 			return new FFunctionCall(getName().flatten(new FQName()),l);	
 		}
@@ -516,7 +519,9 @@ aspect InstantiatedExpressions {
 		   o = new Opt(new FStringComment(getComment().getStringComment().getComment()));
 	    else
 	    	o = new Opt();
-		FConnectClause c = new FConnectClause(o,new FIdUseInstAccess("",getConnector1().newInstAccess()),new FIdUseInstAccess("",getConnector2().newInstAccess()));
+		FConnectClause c = new FConnectClause(o,new FIdUseInstAccess(
+				new FQName(),getConnector1().newInstAccess()),
+				new FIdUseInstAccess(new FQName(),getConnector2().newInstAccess()));
 		c.setStart(getStart());
 		c.setEnd(getEnd());
 		return c;
@@ -793,7 +798,7 @@ aspect InstantiatedExpressions {
 			l.getChild(i).setStart(getStart());
 			l.getChild(i).setEnd(getEnd());
 		}
-		FFunctionCall n = new FFunctionCall(new FIdUseInstAccess("",getName().newInstAccess()),l);	
+		FFunctionCall n = new FFunctionCall(new FIdUseInstAccess(new FQName(),getName().newInstAccess()),l);	
 		n.setStart(getStart());
 		n.setEnd(getEnd());
 		return n;

@@ -19,10 +19,13 @@ package org.jmodelica.test.ast;
 import org.jmodelica.parser.ModelicaParser;
 import org.jmodelica.parser.FlatModelicaParser;
 import org.jmodelica.ast.*;
+
 import java.io.BufferedReader;
 import java.io.PrintStream;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.util.Collection;
+
 import org.jmodelica.codegen.*;
 
 public abstract class CodeGenTestCase extends TestCase {
@@ -117,25 +120,25 @@ public abstract class CodeGenTestCase extends TestCase {
 	public boolean testMe() {
         System.out.println("Running test: " + getClassName());
 		SourceRoot sr = parser.parseFile(getSourceFileName());
+		TestSuite.loadOptions(sr);
 		sr.setFileName(getSourceFileName());
 	    InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 	    
 	    try {
-	    	if (ipr.checkErrorsInInstClass(getClassName()).size()>0) {
-	    		//System.out.println("***** Errors in Class!");
+	    	Collection<Problem> problems = 
+	    		ipr.checkErrorsInInstClass(getClassName());
+	    	if (problems.size()>0) {
+	    		System.out.println("***** Errors in Class!");
+	    		for (Problem p : problems) {
+	    			System.out.println(p.toString() + " \n");
+	    		}
 	    		return false;
 	    	} 
 	    }catch (ModelicaClassNotFoundException e) {
 	    	return false;
 	    }
 	    
-	    //sr.retrieveFullClassDecl("NameTests.ImportTest1").dumpTree("");
-/*
-	    if (sr.checkErrorsInClass(getClassName())) {
-	    	//System.out.println("***** Errors in Class!");
-	    	return false;
-	    }
-*/
+//	    System.out.println("Hej");
 	    
 	    FlatRoot flatRoot = new FlatRoot();
 	    flatRoot.setFileName(getSourceFileName());
@@ -147,6 +150,8 @@ public abstract class CodeGenTestCase extends TestCase {
 	    try {
 	    	ir = ipr.findFlattenInst(getClassName(), fc);
 	    } catch (ModelicaClassNotFoundException e) {
+	    	System.out.println("Modelica class " + getClassName() + 
+	    			" not found.");
 	    	return false;
 	    }
    	  	fc.transformCanonical();
@@ -155,6 +160,10 @@ public abstract class CodeGenTestCase extends TestCase {
   	    AbstractGenerator generator = createGenerator(fc);
 	    generator.generate(new BufferedReader(new StringReader(getTemplate())),
 	    		           new PrintStream(os));
+	    
+//	    System.out.println(os.toString().trim());
+//	    System.out.println("**");
+//	    System.out.println(getGenCode().trim());
 	    
 		return os.toString().trim().equals(getGenCode().trim());
 	}

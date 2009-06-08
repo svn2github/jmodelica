@@ -236,7 +236,7 @@
 		<mkdir dir="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 		<java 
 	      classname="org.jmodelica.test.ast.JunitGenerator"
-	      classpath=".:bin/ModelicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
+	      classpath=".:bin/OptimicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
 	      fork="true" 
 	      dir=".">
 			<arg value="${modelica_front_end_path}/src/test/modelica/NameTests.mo"/>
@@ -245,7 +245,7 @@
 		</java>
 		<java 
 	  		      classname="org.jmodelica.test.ast.JunitGenerator"
-	  		      classpath=".:bin/ModelicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
+	  		      classpath=".:bin/OptimicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
 	  		      fork="true" 
 	  		      dir=".">
 			<arg value="${modelica_front_end_path}/src/test/modelica/ModificationTests.mo"/>
@@ -255,7 +255,7 @@
 
 		<java 
 	  		      classname="org.jmodelica.test.ast.JunitGenerator"
-	  		      classpath=".:bin/ModelicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
+	  		      classpath=".:bin/OptimicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
 	  		      fork="true" 
 	  		      dir=".">
 			<arg value="${modelica_front_end_path}/src/test/modelica/RedeclareTests.mo"/>
@@ -264,7 +264,7 @@
 		</java>
 		<java 
 	  		  		      classname="org.jmodelica.test.ast.JunitGenerator"
-	  		  		      classpath=".:bin/ModelicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
+	  		  		      classpath=".:bin/OptimicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
 	  		  		      fork="true" 
 	  		  		      dir=".">
 			<arg value="${modelica_front_end_path}/src/test/modelica/ConnectTests.mo"/>
@@ -273,7 +273,7 @@
 		</java>
 		<java 
  		  		      classname="org.jmodelica.test.ast.JunitGenerator"
- 		  		      classpath=".:bin/ModelicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
+ 		  		      classpath=".:bin/OptimicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
  		  		      fork="true" 
  		  		      dir=".">
 			<arg value="${modelica_front_end_path}/src/test/modelica/CodeGenTests.mo"/>
@@ -282,7 +282,7 @@
 		</java>
 	  	 <java 
 		  		      classname="org.jmodelica.test.ast.JunitGenerator"
-		  		      classpath=".:bin/ModelicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
+		  		      classpath=".:bin/OptimicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
 		  		      fork="true" 
 		  		      dir=".">
 		  		    	<arg value="${modelica_front_end_path}/src/test/modelica/TransformCanonicalTests.mo"/>
@@ -291,7 +291,7 @@
 		    </java>
 		<java 
  		  		      classname="org.jmodelica.test.ast.JunitGenerator"
- 		  		      classpath=".:bin/ModelicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
+ 		  		      classpath=".:bin/OptimicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
  		  		      fork="true" 
  		  		      dir=".">
 			<arg value="${modelica_c_back_end_path}/src/test/modelica/CCodeGenTests.mo"/>
@@ -313,7 +313,7 @@
 	-->
 		<java 
 		  		      classname="org.jmodelica.test.ast.JunitGenerator"
-		  		      classpath=".:bin/ModelicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
+		  		      classpath=".:bin/OptimicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
 		  		      fork="true" 
 		  		      dir=".">
 			<arg value="${modelica_front_end_path}/src/test/modelica/TypeTests.mo"/>
@@ -323,7 +323,7 @@
 
 	  	 <java 
 		  		      classname="org.jmodelica.test.ast.JunitGenerator"
-		  		      classpath=".:bin/ModelicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
+		  		      classpath=".:bin/OptimicaCompiler.jar:${beaver_dir}/lib/beaver.jar" 
 		  		      fork="true" 
 		  		      dir=".">
 		  		    	<arg value="${modelica_front_end_path}/src/test/modelica/TransformCanonicalTests.mo"/>
@@ -354,7 +354,7 @@
 					<include name="junit-4.5.jar"/>
 				</fileset>
 				<fileset dir="bin">
-					<include name="ModelicaCompiler.jar"/>
+					<include name="OptimicaCompiler.jar"/>
 					<include name="junit-tests.jar"/>
 				</fileset>
 				<fileset dir="${beaver_dir}/lib">

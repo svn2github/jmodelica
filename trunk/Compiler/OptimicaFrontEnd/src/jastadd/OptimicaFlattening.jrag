@@ -121,7 +121,7 @@ aspect OptimicaFlattening {
 	}
 
 	public FTimedVariable TimedVariable.instantiate() {
-		return new FTimedVariable(new FIdUseInstAccess("",getName().newInstAccess()),
+		return new FTimedVariable(new FIdUseInstAccess(new FQName(),getName().newInstAccess()),
 		   getArg().instantiate());
 	}
 	

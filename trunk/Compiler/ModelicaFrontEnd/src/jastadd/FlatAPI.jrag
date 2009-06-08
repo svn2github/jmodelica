@@ -361,8 +361,7 @@ aspect FlatAPI {
 	coll ArrayList<FVariable> FClass.differentiatedRealVariables() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FDer contributes
- 		(FVariable)getFIdUseExp().myFV() when
- 		!getFIdUseExp().myFV().isUnknown()
+ 		(FVariable)getFIdUse().myFV() when !getFIdUse().myFV().isUnknown()
 	to FClass.differentiatedRealVariables() for myFClass();
 	syn int FVariable.differentiatedRealVariableIndex() =
 		myFClass().differentiatedRealVariables().indexOf(this);
@@ -940,14 +939,64 @@ aspect Attributes {
 				
 }
 
-aspect VariableNumbering {
-	/*
-	syn int FVariable.variableIndex() 
-*/
+aspect FVariableUses {
+	
+	/**
+	 * \brief Collection attribute returning all variable uses in expressions.
+	 */
+	coll HashSet<FIdUseExp> FVariable.uses() [new HashSet<FIdUseExp>()] 
+	   with add root FlatRoot;
+	
+	FIdUseExp contributes this when !(getParent() instanceof FDer) to 
+	   FVariable.uses() for myFV();
 
-
+	/**
+	 * \brief Collection attribute returning all derivative uses in expressions.
+	 */
+/*	coll HashSet<FDer> FDerivativeVariable.derUses() [new HashSet<FDer>()] 
+	   with add root FlatRoot;
+	
+	FDer contributes this to FDerivativeVariable.derUses() for myFDV();
+	*/
 }
 
+aspect LinearFVariables {
+	
+	/**
+	 * \brief Check linearity of variable.
+	 * 
+	 * The attribute isLinear returns true if all uses of the variable appears
+	 * linearly in equations and in initial equations.
+	 */
+	syn lazy boolean FVariable.isLinear() {
+		for (FIdUseExp e : uses()) {
+			if (!e.isLinear()) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	inh boolean FExp.isLinear();
+	eq FlatRoot.getChild().isLinear() = true;
+	eq SourceRoot.getChild().isLinear() = true;
+	
+	eq FAbstractEquation.getChild().isLinear() = true;
+	
+	eq FMulExp.getLeft().isLinear() =
+		(getRight().isConstantExp() || getRight().isParameterExp())?
+				isLinear() : false;
+	eq FMulExp.getRight().isLinear() =
+		(getLeft().isConstantExp() || getLeft().isParameterExp())?
+				isLinear() : false;
+	eq FDivExp.getLeft().isLinear() =
+		(getRight().isConstantExp() || getRight().isParameterExp())?
+				isLinear() : false;			
+	eq FDivExp.getRight().isLinear() = false;		
+    eq FPowExp.getChild().isLinear() = false;
+    eq FFunctionCall.getChild().isLinear() = false;
+				
+}
 
 aspect FlatDiagnostics {
 
@@ -1063,88 +1112,77 @@ aspect FlatDiagnostics {
 		  numInitialEquations() + "\n");
 		  
 		str.append("\n");
-		str.append("Independent constants: {");
-		int i = 0;
+		str.append("Independent constants: \n");
 		for (FVariable fv : independentConstants()) {
-			str.append(fv.name());
-			if (i<numIndependentConstants()-1) {
-				str.append(", ");
-			}
-			i++;
+			str.append(" " + fv.name());
+			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
+					+ fv.isLinear());
+				str.append("\n");
 		}
-		str.append("}\n");  
-		str.append("Dependent constants: {");
-		i = 0;
+		str.append("\n");
+		
+		str.append("Dependent constants: \n");
 		for (FVariable fv : dependentConstants()) {
-			str.append(fv.name());
-			if (i<numDependentConstants()-1) {
-				str.append(", ");
-			}
-			i++;
+			str.append(" " + fv.name());
+			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
+					+ fv.isLinear());
+				str.append("\n");
 		}
-		str.append("}\n");  
-		str.append("Independent parameters: {");
-		i = 0;
+		str.append("\n");
+		
+		str.append("Independent parameters: \n");
 		for (FVariable fv : independentParameters()) {
-			str.append(fv.name());
-			if (i<numIndependentParameters()-1) {
-				str.append(", ");
-			}
-			i++;
+			str.append(" " + fv.name());
+			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
+					+ fv.isLinear());
+				str.append("\n");
 		}
-		str.append("}\n");  
-		str.append("Dependent parameters: {");
-		i = 0;
+		str.append("\n");
+		
+		str.append("Dependent parameters: \n");
 		for (FVariable fv : dependentParameters()) {
-			str.append(fv.name());
-			if (i<numDependentParameters()-1) {
-				str.append(", ");
-			}
-			i++;
+			str.append(" " + fv.name());
+			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
+					+ fv.isLinear());
+				str.append("\n");
 		}
-		str.append("}\n");  
-		str.append("Differentiated variables: {");
-		i = 0;
+
+		str.append("\n");  
+		str.append("Differentiated variables: \n");
 		for (FVariable fv : differentiatedRealVariables()) {
-			str.append(fv.name());
-			if (i<numDifferentiatedRealVariables()-1) {
-				str.append(", ");
-			}
-			i++;
+			str.append(" " + fv.name());
+			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
+					+ fv.isLinear());
+			str.append("\n");
 		}
-		str.append("}\n");  
-		str.append("Derivative variables: {");
-		i = 0;
+
+		str.append("\n");  
+		str.append("Derivative variables: \n");
 		for (FVariable fv : derivativeVariables()) {
-			str.append(fv.name());
-			if (i<numDifferentiatedRealVariables()-1) {
-				str.append(", ");
-			}
-			i++;
+			str.append(" " + fv.name());
+			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
+					+ fv.isLinear());
+				str.append("\n");
 		}
-		str.append("}\n");  
+		str.append("\n");  
 
-		str.append("Algebraic variables: {");
-		i = 0;
+		str.append("Algebraic variables: \n");
 		for (FVariable fv : algebraicRealVariables()) {
-			str.append(fv.name());
-			if (i<numAlgebraicRealVariables()-1) {
-				str.append(", ");
-			}
-			i++;
+			str.append(" " + fv.name());
+			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
+					+ fv.isLinear());
+				str.append("\n");
 		}
-		str.append("}\n");  
-		str.append("Input variables: {");
-		i = 0;
+		str.append("\n");
+		
+		str.append("Input variables: \n");
 		for (FVariable fv : inputs()) {
-			str.append(fv.name());
-			if (i<numInputs()-1) {
-				str.append(", ");
-			}
-			i++;
+			str.append(" " + fv.name());
+			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
+					+ fv.isLinear());
+				str.append("\n");
 		}
-		str.append("}\n");  
-
+		str.append("\n");  
 
 		return str.toString();
 	}

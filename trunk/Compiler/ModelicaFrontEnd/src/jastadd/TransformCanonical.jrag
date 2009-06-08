@@ -35,7 +35,7 @@ aspect TransformCanonical{
 				FExp bexp = fv.getBindingExp();
 				fv.setBindingExpOpt(new Opt());
 				FEquation feq = new FEquation(new FIdUseExp(
-						new FIdUseQualified("",fv.getFQName().fullCopy())),bexp);
+						new FIdUse(fv.getFQName().fullCopy())),bexp);
 				getFEquationBlock(0).addFAbstractEquation(feq);
 			}
 		}
@@ -76,8 +76,7 @@ aspect TransformCanonical{
 			if (fv.fixedAttribute() ||
 					(fv.isDifferentiatedVariable() && fv.startAttributeSet())) {
 				addFInitialEquation(new FEquation(new FIdUseExp(
-						new FIdUseQualified("",
-						fv.getFQName().fullCopy())),
+						new FIdUse(fv.getFQName().fullCopy())),
 						fv.startAttributeExp()));
 			}	
 		}
@@ -85,8 +84,7 @@ aspect TransformCanonical{
 			if (fv.fixedAttribute() ||
 					(fv.isDifferentiatedVariable() && fv.startAttributeSet())) {
 				addFInitialEquation(new FEquation(new FIdUseExp(
-						new FIdUseQualified("",
-						fv.getFQName().fullCopy())),
+						new FIdUse(fv.getFQName().fullCopy())),
 						fv.startAttributeExp()));
 			}	
 		}
@@ -94,8 +92,7 @@ aspect TransformCanonical{
 			if (fv.fixedAttribute() ||
 					(fv.isDifferentiatedVariable() && fv.startAttributeSet())) {
 				addFInitialEquation(new FEquation(new FIdUseExp(
-						new FIdUseQualified("",
-						fv.getFQName().fullCopy())),
+						new FIdUse(fv.getFQName().fullCopy())),
 						fv.startAttributeExp()));
 			}	
 		}		

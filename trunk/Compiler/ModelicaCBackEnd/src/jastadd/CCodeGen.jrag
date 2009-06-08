@@ -65,11 +65,6 @@ aspect CCodeGen {
 		str.print("_"+nameUnderscore()+"_");
 	}
 		
-	public void FDer.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		str.print("_der_");
-		str.print(getFIdUseExp().nameUnderscore()+"_");
-	}	
-		
 	public void FAbstractEquation.genResidual_C(int i, String indent, PrintStream str) {}
 	
 	public void FEquation.genResidual_C(int i, String indent, PrintStream str) {

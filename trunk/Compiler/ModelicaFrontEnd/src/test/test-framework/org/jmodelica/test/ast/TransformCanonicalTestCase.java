@@ -115,6 +115,7 @@ public class TransformCanonicalTestCase extends TestCase {
 	public boolean testMe() {
         System.out.println("Running test: " + getClassName());
 		SourceRoot sr = parser.parseFile(getSourceFileName());
+		TestSuite.loadOptions(sr);
 		sr.setFileName(getSourceFileName());
 	    InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 	    Collection<Problem> problems;
@@ -154,16 +155,8 @@ public class TransformCanonicalTestCase extends TestCase {
 		TokenTester tt = new TokenTester();
 		String testModel = fc.prettyPrint("");
 		String correctModel = getFlatModel();
-		
+				
 		boolean result =  tt.test(testModel,correctModel);
-		/*if (!result) {
-			System.out.println(fc.prettyPrint("").equals(getFlatModel()));
-			sr.retrieveFullClassDecl("NameTests.ImportTest1").dumpTree("");
-			fc.dumpTreeBasic("");
-			try {
-     			System.in.read();
-			} catch (Exception e){}
-		}*/
 		return result;
 	}
 	

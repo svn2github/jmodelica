@@ -51,26 +51,26 @@ aspect Connections {
 				// Treat first element separately
 				ConnectionSetEntry cse = (ConnectionSetEntry)csee[0];
 				if (cse.isOutside()) 
-					e = new FNegExp(new FIdUseExp(new FIdUseQualified("",(FQName)cse.getFQName().fullCopy())));
+					e = new FNegExp(new FIdUseExp(new FIdUse((FQName)cse.getFQName().fullCopy())));
 				else
-					e = new FIdUseExp(new FIdUseQualified("",(FQName)cse.getFQName().fullCopy())) ;		
+					e = new FIdUseExp(new FIdUse((FQName)cse.getFQName().fullCopy())) ;		
 			
 				for (int j=1; j<csee.length;j++) {
 					cse = (ConnectionSetEntry)csee[j];
 					if (cse.isOutside())
-						e = new FSubExp(e,new FIdUseExp(new FIdUseQualified("",(FQName)cse.getFQName().fullCopy())));
+						e = new FSubExp(e,new FIdUseExp(new FIdUse((FQName)cse.getFQName().fullCopy())));
 					else
-						e = new FAddExp(e,new FIdUseExp(new FIdUseQualified("",(FQName)cse.getFQName().fullCopy())));		
+						e = new FAddExp(e,new FIdUseExp(new FIdUse((FQName)cse.getFQName().fullCopy())));		
 				}
 				getFEquationBlock(0).addFAbstractEquation(new FEquation(e,new FRealLitExp("0.0")));	
 			} else {
 				// Treat first element separately
 				FExp e1=new FNoExp(),e2=new FNoExp();
 				ConnectionSetEntry cse = (ConnectionSetEntry)csee[0];
-				e1 = new FIdUseExp(new FIdUseQualified("",(FQName)cse.getFQName().fullCopy()));
+				e1 = new FIdUseExp(new FIdUse((FQName)cse.getFQName().fullCopy()));
 				for (int j=1;j<csee.length;j++) {
 					cse = (ConnectionSetEntry)csee[j];
-					e2 = new FIdUseExp(new FIdUseQualified("",(FQName)cse.getFQName().fullCopy()));
+					e2 = new FIdUseExp(new FIdUse((FQName)cse.getFQName().fullCopy()));
 					getFEquationBlock(0).addFAbstractEquation(new FEquation(e1,e2));
 					e1 = e2;
 				}
@@ -83,7 +83,7 @@ aspect Connections {
 		LinkedHashSet notInsideConnectedFlowVars = connectionSetManager.getNotInsideConnectedFlowVars();		
 		for (Iterator iter=notInsideConnectedFlowVars.iterator();iter.hasNext();) {
 			ConnectionSetEntry cse = (ConnectionSetEntry)iter.next();
-				getFEquationBlock(0).addFAbstractEquation(new FEquation(new FIdUseExp(new FIdUseQualified("",(FQName)cse.getFQName().fullCopy())),new FRealLitExp("0")));
+				getFEquationBlock(0).addFAbstractEquation(new FEquation(new FIdUseExp(new FIdUse((FQName)cse.getFQName().fullCopy())),new FRealLitExp("0")));
 		}
 			
 			/*

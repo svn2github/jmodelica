@@ -917,17 +917,10 @@ aspect FlattPrettyPrint {
 		debugPrint("FIdUse.prettyPrint(): " + name());
 		str.print(name());
 	}
-
-	public void FIdUseQualified.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		debugPrint("FIdUseQualified.prettyPrint(): " + name());
-		p.toString(getFQName(),str,"",o);		
-	}	
 		
 	public void FDer.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		debugPrint("FDer.prettyPrint");
-		str.print("der(");
-		p.toString(getFIdUseExp(),str,indent,o);
-		str.print(")");
+		str.print(name());
 	}
 	
 	public void FSumExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {

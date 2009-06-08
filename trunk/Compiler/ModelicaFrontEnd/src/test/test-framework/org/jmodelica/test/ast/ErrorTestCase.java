@@ -105,7 +105,8 @@ public class ErrorTestCase extends TestCase {
 	public boolean testMe() {
         System.out.println("Running test: " + getClassName());
 		SourceRoot sr = parser.parseFile(getSourceFileName());
-		sr.setFileName(getSourceFileName());	    
+		sr.setFileName(getSourceFileName());	
+		TestSuite.loadOptions(sr);
 		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 	    StringBuffer str = new StringBuffer();
 	    Collection<Problem> problems;
