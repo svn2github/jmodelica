@@ -254,9 +254,9 @@ def _handle_exception(ex):
         arraylist = ex.__javaobject__.getProblems()
         itr = arraylist.iterator()
 
-        problems = ""
+        problems = "\n"
         while itr.hasNext():
-            problems=problems+str(itr.next())
+            problems=problems+str(itr.next())+"\n"
 
         raise CompilerError(problems)
         
