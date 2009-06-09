@@ -275,6 +275,8 @@ def _handle_exception(ex):
     if ex.javaClass() is jpype.java.lang.NullPointerException:
         raise JError(str(ex.stacktrace()))
 
+    raise JError(str(ex.stacktrace()))
+
 
 class JError(Exception):
     """ Base class for exceptions specific to this module. 

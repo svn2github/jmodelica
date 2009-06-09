@@ -23,6 +23,7 @@
 
 import os
 
+import sys
 import ctypes as ct
 from ctypes import byref
 import numpy as N
@@ -1074,9 +1075,18 @@ class JMIModel(object):
     """
     
     def __init__(self, libname, path='.'):
+        # detect platform specific shared library file extension
+        suffix = ''
+        if sys.platform == 'win32':
+            suffix = '.dll'
+        elif sys.platform == 'darwin':
+            suffix = '.dylib'
+        else:
+            suffix = '.so'
+
         # create temp dll
-        fhandle,self._tempfname = tempfile.mkstemp(suffix='.dll')
-        shutil.copyfile(path+os.sep+libname+'.dll',self._tempfname)
+        fhandle,self._tempfname = tempfile.mkstemp(suffix=suffix)
+        shutil.copyfile(path+os.sep+libname+suffix,self._tempfname)
         os.close(fhandle)
         fname = self._tempfname.split(os.sep)
         fname = fname[len(fname)-1]
