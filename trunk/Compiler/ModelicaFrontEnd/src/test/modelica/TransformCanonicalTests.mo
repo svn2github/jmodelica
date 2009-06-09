@@ -132,5 +132,48 @@ end TransformCanonicalTests.TransformCanonicalTest5;
   end TransformCanonicalTest5;
 
 
+  model TransformCanonicalTest6
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="TransformCanonicalTest6",
+        description="Test parameter sorting",
+                                               flatModel=
+"
+fclass TransformCanonicalTests.TransformCanonicalTest6
+ parameter Real p1 = sin(1) /* 0.8414709848078965 */;
+ parameter Real p2 = cos(1) /* 0.5403023058681398 */;
+ parameter Real p3 = tan(1) /* 1.5574077246549023 */;
+ parameter Real p4 = asin(0.3) /* 0.3046926540153975 */;
+ parameter Real p5 = acos(0.3) /* 1.2661036727794992 */;
+ parameter Real p6 = atan(0.3) /* 0.2914567944778671 */;
+ parameter Real p7 = atan2(0.3) /* 0.5404195002705842 */;
+ parameter Real p8 = sinh(1) /* 1.1752011936438014 */;
+ parameter Real p9 = cosh(1) /* 1.543080634815244 */;
+ parameter Real p10 = tanh(1) /* 0.7615941559557649 */;
+ parameter Real p11 = exp(1) /* 2.7182818284590455 */;
+ parameter Real p12 = log(1) /* 0.0 */;
+ parameter Real p13 = log10(1) /* 0.0 */;
+equation 
+end TransformCanonicalTests.TransformCanonicalTest6;
+")})));
+
+
+    parameter Real p1 = sin(1);
+    parameter Real p2 = cos(1);
+    parameter Real p3 = tan(1); 
+    parameter Real p4 = asin(0.3);
+    parameter Real p5 = acos(0.3);
+    parameter Real p6 = atan(0.3); 
+    parameter Real p7 = atan2(0.3,0.5); 	
+    parameter Real p8 = sinh(1);
+    parameter Real p9 = cosh(1);
+    parameter Real p10 = tanh(1); 
+    parameter Real p11 = exp(1);
+    parameter Real p12 = log(1);
+    parameter Real p13 = log10(1); 
+
+
+  	
+  end TransformCanonicalTest6;
+
 
 end TransformCanonicalTests;

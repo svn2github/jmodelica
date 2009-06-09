@@ -561,6 +561,79 @@ FNoExp : FExp::=;
 FTimeExp : FExp;
 
 // Built in functions
+/**
+ * \brief Base class for built-in mathematical functions.
+ */
+FBuiltInExp : FExp ::= FExp;
+
+/**
+ * \brief Sin built-in function.
+ */
+FSinExp : FBuiltInExp ::= ;
+
+/**
+ * \brief Cos built-in function.
+ */
+FCosExp : FBuiltInExp ::= ;
+
+/**
+ * \brief Tan built-in function.
+ */
+FTanExp : FBuiltInExp ::= ;
+
+/**
+ * \brief Asin built-in function.
+ */
+FAsinExp : FBuiltInExp ::= ;
+
+/**
+ * \brief ACos built-in function.
+ */
+FAcosExp : FBuiltInExp ::= ;
+
+/**
+ * \brief ATan built-in function.
+ */
+FAtanExp : FBuiltInExp ::= ;
+
+/**
+ * \brief Atan2 built-in function.
+ */
+FAtan2Exp : FBuiltInExp ::= Y:FExp;
+
+/**
+ * \brief Sinh built-in function.
+ */
+FSinhExp : FBuiltInExp ::= ;
+
+/**
+ * \brief Cosh built-in function.
+ */
+FCoshExp : FBuiltInExp ::= ;
+
+/**
+ * \brief Tanh built-in function.
+ */
+FTanhExp : FBuiltInExp ::= ;
+
+/**
+ * \brief Exp built-in function.
+ */
+FExpExp : FBuiltInExp ::= ;
+
+/**
+ * \brief Log built-in function.
+ */
+FLogExp : FBuiltInExp ::= ;
+
+/**
+ * \brief Log10 built-in function.
+ */
+FLog10Exp : FBuiltInExp ::= ;
+
+/**
+ * \brief Size built-in function.
+ */
 FSizeExp : FExp ::= FIdUseExp Dim:FExp;
 
 /**

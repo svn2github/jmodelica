@@ -61,6 +61,8 @@ aspect FlatVariability {
 	
 	eq FTimeExp.variability() = fContinuous();
 	
+	eq FBuiltInExp.variability() = getFExp().variability();
+	
 	eq FIfExp.variability() {
 		FTypePrefixVariability total = getThenExp().variability();
 		for (int i=0; i<getNumFElseIfExp(); i++) {

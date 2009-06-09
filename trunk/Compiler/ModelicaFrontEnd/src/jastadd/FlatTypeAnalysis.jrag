@@ -45,8 +45,7 @@ aspect FlatTypeAnalysis {
 	  binaryNumericPromotion(getRight().type());
 	
 	eq FLogBinExp.type() = fBooleanType();
-	
-	
+
 	eq FRealLitExp.type() = fRealType();
 	eq FIntegerLitExp.type() = fIntegerType();
 	eq FBooleanLitExp.type() = fBooleanType();
@@ -58,6 +57,8 @@ aspect FlatTypeAnalysis {
 	eq FInstAccessExp.type() = getInstAccess().myInstComponentDecl().isPrimitive()?
 			((InstPrimitive)getInstAccess().myInstComponentDecl()).type() : fUnknownType();
 	
+	eq FBuiltInExp.type() = fRealType();		
+			
 }
 
 aspect FNumericPromotion {

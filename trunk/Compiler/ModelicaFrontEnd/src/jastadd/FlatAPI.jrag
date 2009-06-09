@@ -1127,7 +1127,19 @@ aspect FlatDiagnostics {
 			str.append(" " + fv.name());
 			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
 					+ fv.isLinear());
-				str.append("\n");
+			if (fv.hasBindingExp()) {
+				str.append(" evaluated binding exp: ");
+				if (fv.isReal()) {
+					str.append(fv.getBindingExp().ceval().realValue());
+				} else if (fv.isInteger()) {
+					str.append(fv.getBindingExp().ceval().intValue());
+				} else if (fv.isBoolean()) {
+					str.append(fv.getBindingExp().ceval().booleanValue());
+				} else if (fv.isString()) {
+					str.append(fv.getBindingExp().ceval().stringValue());
+				}
+			}
+			str.append("\n");
 		}
 		str.append("\n");
 		

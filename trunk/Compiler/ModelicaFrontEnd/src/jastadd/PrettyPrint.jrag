@@ -659,20 +659,20 @@ aspect FlattPrettyPrint {
 	    	str.print("\"");
 	    }
 
-/*	    
-	     if (hasBindingExp()) {
- 		     FExp bindingExp = getBindingExp();
-				FlatStaticValue value = bindingExp.value();
-				if (value instanceof IntegerStaticValue) {
-					IntegerStaticValue iValue = (IntegerStaticValue) value;
-					str.print(" //(" + iValue.getValue() + ")");
-				} else if (value instanceof RealStaticValue) {
-					RealStaticValue rValue = (RealStaticValue) value;
-					str.print(" //(" + rValue.getValue() + ")");					
-				}
+	    if (isIndependentParameter() && hasBindingExp()) {
+	    	str.print(" /* ");
+	    	if (isReal()) {
+				str.print(getBindingExp().ceval().realValue());
+			} else if (isInteger()) {
+				str.print(getBindingExp().ceval().intValue());
+			} else if (isBoolean()) {
+				str.print(getBindingExp().ceval().booleanValue());
+			} else if (isString()) {
+				str.print(getBindingExp().ceval().stringValue());
 			}
-*/
-
+	    	str.print(" */");
+	    }
+	    
 		}
 
 	
@@ -921,6 +921,84 @@ aspect FlattPrettyPrint {
 	public void FDer.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		debugPrint("FDer.prettyPrint");
 		str.print(name());
+	}
+
+	public void FSinExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("sin(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
+	}
+
+	public void FCosExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("cos(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
+	}
+
+	public void FTanExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("tan(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
+	}
+	
+	public void FAsinExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("asin(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
+	}
+
+	public void FAcosExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("acos(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
+	}
+
+	public void FAtanExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("atan(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
+	}
+
+	public void FAtan2Exp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("atan2(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
+	}
+
+	public void FSinhExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("sinh(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
+	}
+
+	public void FCoshExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("cosh(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
+	}
+
+	public void FTanhExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("tanh(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
+	}
+
+	public void FExpExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("exp(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
+	}
+
+	public void FLogExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("log(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
+	}
+
+	public void FLog10Exp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("log10(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
 	}
 	
 	public void FSumExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
