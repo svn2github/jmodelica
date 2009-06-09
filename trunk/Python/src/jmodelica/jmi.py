@@ -2119,7 +2119,7 @@ class JMIModel(object):
 
 class JMISimultaneousOptLagPols(object):
     
-    def __init__(self, jmi_model, n_e, hs, n_cp):
+    def __init__(self, jmi_model, n_e, hs, n_cp):       
         self._jmi_model = jmi_model
         self._jmi_opt_sim = ct.c_voidp()
 
@@ -2155,29 +2155,37 @@ class JMISimultaneousOptLagPols(object):
         self._set_initial_values(_p_opt_init, _dx_init, _x_init, _u_init, _w_init)
         self._set_lb_values(_p_opt_lb, _dx_lb, _x_lb, _u_lb, _w_lb)
         self._set_ub_values(_p_opt_ub, _dx_ub, _x_ub, _u_ub, _w_ub)
-                
-        assert self._jmi_model._dll.jmi_opt_sim_lp_new(byref(self._jmi_opt_sim), self._jmi_model._jmi, n_e,
-                                  hs, hs_free,
-                                 _p_opt_init, _dx_init, _x_init,
-                                 _u_init, _w_init,
-                                 _p_opt_lb, _dx_lb, _x_lb,
-                                 _u_lb, _w_lb, _t0_lb,
-                                 _tf_lb, _hs_lb,
-                                 _p_opt_ub, _dx_ub, _x_ub,
-                                 _u_ub, _w_ub, _t0_ub,
-                                 _tf_ub, _hs_ub,
-                                 n_cp,JMI_DER_CPPAD) is 0, \
-                                 " jmi_opt_lp_new returned non-zero."
+        
+        try:       
+            assert self._jmi_model._dll.jmi_opt_sim_lp_new(byref(self._jmi_opt_sim), self._jmi_model._jmi, n_e,
+                                      hs, hs_free,
+                                     _p_opt_init, _dx_init, _x_init,
+                                     _u_init, _w_init,
+                                     _p_opt_lb, _dx_lb, _x_lb,
+                                     _u_lb, _w_lb, _t0_lb,
+                                     _tf_lb, _hs_lb,
+                                     _p_opt_ub, _dx_ub, _x_ub,
+                                     _u_ub, _w_ub, _t0_ub,
+                                     _tf_ub, _hs_ub,
+                                     n_cp,JMI_DER_CPPAD) is 0, \
+                                     " jmi_opt_lp_new returned non-zero."
+        except AttributeError,e:
+             raise JMIException("Can not create JMISimultaneousOptLagPols object. Try recompiling model with target='algorithms'")
+        
         assert self._jmi_opt_sim.value is not None, \
             "jmi_opt_sim_lp struct has not returned correctly."
+
             
     def __del__(self):
         """ Freeing jmi_opt_sim data structure.
         
         """
-        assert self._jmi_model._dll.jmi_opt_sim_lp_delete(self._jmi_opt_sim) == 0, \
-               "jmi_delete failed"
-
+        try:
+            assert self._jmi_model._dll.jmi_opt_sim_lp_delete(self._jmi_opt_sim) == 0, \
+                   "jmi_delete failed"
+        except AttributeError, e:
+            pass
+            
     def opt_sim_lp_get_pols(self, n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, Lp_dot_coeffs, Lpp_dot_coeffs, Lp_dot_vals, Lpp_dot_vals):
         if self._jmi_model._dll.jmi_opt_sim_lp_get_pols(n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, Lp_dot_coeffs, 
                                                         Lpp_dot_coeffs, Lp_dot_vals, Lpp_dot_vals) is not 0:
@@ -2362,15 +2370,18 @@ class JMISimultaneousOptIPOPT(object):
     
     def __init__(self, jmi_opt_sim_model):
         self._jmi_opt_sim_model = jmi_opt_sim_model
-        self._jmi_opt_sim_ipopt = ct.c_voidp()     
+        self._jmi_opt_sim_ipopt = ct.c_voidp()
         
-        assert self._jmi_opt_sim_model._jmi_model._dll.jmi_opt_sim_ipopt_new(byref(self._jmi_opt_sim_ipopt), 
-                                                                             self._jmi_opt_sim_model._jmi_opt_sim) == 0, \
-               "jmi_opt_sim_ipopt_new returned non-zero"
+        try:
+            assert self._jmi_opt_sim_model._jmi_model._dll.jmi_opt_sim_ipopt_new(byref(self._jmi_opt_sim_ipopt), 
+                                                                                 self._jmi_opt_sim_model._jmi_opt_sim) == 0, \
+                   "jmi_opt_sim_ipopt_new returned non-zero"
+        except AttributeError, e:
+            raise JMIException("Can not create JMISimultaneousOptIPOPT object. Please recompile model with target='ipopt")
+        
         assert self._jmi_opt_sim_ipopt.value is not None, \
                "jmi struct not returned correctly"
-    
-        
+               
     def opt_sim_ipopt_solve(self):    
         if self._jmi_opt_sim_model._jmi_model._dll.jmi_opt_sim_ipopt_solve(self._jmi_opt_sim_ipopt) is not 0:
             raise JMIException("Solving IPOPT failed.")
