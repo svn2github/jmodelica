@@ -21,12 +21,16 @@
 #     http://www.scipy.org/Cookbook/Ctypes 
 
 
-import os.path
+import os
 
 import ctypes as ct
 from ctypes import byref
 import numpy as N
 import numpy.ctypeslib as Nct
+import tempfile
+import shutil
+import _ctypes
+
 import xmlparser
 
 # ================================================================
@@ -1070,7 +1074,15 @@ class JMIModel(object):
     """
     
     def __init__(self, libname, path='.'):
-        self._dll = load_DLL(libname, path)
+        # create temp dll
+        fhandle,self._tempfname = tempfile.mkstemp(suffix='.dll')
+        shutil.copyfile(path+os.sep+libname+'.dll',self._tempfname)
+        os.close(fhandle)
+        fname = self._tempfname.split(os.sep)
+        fname = fname[len(fname)-1]
+        
+        #load temp dll
+        self._dll = load_DLL(fname,tempfile.gettempdir())
 
         self._jmi = ct.c_voidp()
         assert self._dll.jmi_new(byref(self._jmi)) == 0, \
@@ -1159,11 +1171,17 @@ class JMIModel(object):
             raise JMIException("Could not initialize AD.")
                
     def __del__(self):
-        """ Freeing jmi data structure.
+        """ Freeing jmi data structure. Removing handle and 
+            deleting temporary dll file.
         
         """
-        assert self._dll.jmi_delete(self._jmi) == 0, \
-               "jmi_delete failed"
+        try:
+            assert self._dll.jmi_delete(self._jmi) == 0, \
+                   "jmi_delete failed"
+            _ctypes.FreeLibrary(self._dll._handle)
+        except AttributeError,e:
+            pass
+        os.remove(self._tempfname)
                
     def get_sizes(self):
         """ Gets the sizes of the variable vectors.
