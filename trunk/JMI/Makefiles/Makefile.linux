@@ -87,7 +87,7 @@ JMILIBDIR = ${JMODELICA_HOME}/lib
 # Libraries necessary to link with jmi
 LIBS = -L$(JMILIBDIR) -ljmi_cppad 
 LIBS_IPOPT = -L$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad \
--ljmi_solver_cppad -L$(IPOPT_HOME)/lib -lipopt -llapack -lblas -lm -lgfortran
+-ljmi_solver_cppad -L$(IPOPT_HOME)/lib -lipopt -llapack -lblas -lm -lgfortran -lpthread
 
 # Include paths for compilation
 INCL = -I$(JMIINCDIR) -I$(CPPADINCDIR)

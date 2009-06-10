@@ -169,7 +169,7 @@ case $build in
         ipoptlib="-L$ipopt/lib -lipopt -llapack -lblas -lm -lgfortran"
     ;;
   *)
-    ipoptlib="-L$ipopt/lib -lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran"
+    ipoptlib="-L$ipopt/lib -lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran -lpthread"
     ;;  
 esac
 
