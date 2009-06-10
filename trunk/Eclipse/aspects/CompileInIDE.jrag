@@ -1,0 +1,30 @@
+import org.eclipse.core.resources.IFile;
+
+aspect CompileInIDE {
+	
+	/*
+	 * Core needs this for lookup in registry. 
+	 */
+	syn String ASTNode.getFileName() = fileName();
+	eq StoredDefinition.hasLookupKey() = true;
+	eq StoredDefinition.lookupKey() = getFileName();
+
+	/*
+	 * A link between a Component node and IFile is useful in, e.g., error collection
+	 */
+	private IFile StoredDefinition.file = null;
+	public void StoredDefinition.setFile(IFile file) {
+		this.file = file;
+		if (file != null)
+			setFileName(file.getRawLocation().toOSString());
+	}
+	public IFile StoredDefinition.getFile() {
+		return file;
+	}
+
+	/*
+	 * Core ignores root nodes that doesn't return true for this. 
+	 * Might need to actually check later.
+	 */
+	eq SourceRoot.isProjectAST() = true;
+}

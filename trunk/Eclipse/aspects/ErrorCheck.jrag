@@ -1,0 +1,30 @@
+aspect ErrorCheck {
+	/**
+	 * Returns the BaseClassDecl containing the given interval.
+	 * 
+	 *  @param off	offset of interval.
+	 *  @param len	length of interval.
+	 */
+	syn BaseClassDecl ASTNode.containingClass(int off, int len) = null;
+	eq StoredDefinition.containingClass(int off, int len) {
+		for (Element e : getElements()) {
+			BaseClassDecl res = e.containingClass(off, len);
+			if (res != null)
+				return res;
+		}
+		return null;
+	}
+	eq FullClassDecl.containingClass(int off, int len) {
+		int end = off + (len == 0 ? 0 : len - 1);
+		if (getBeginOffset() <= off && getEndOffset() >= end) {
+			for (Element e : getClassDecls()) {
+				BaseClassDecl res = e.containingClass(off, len);
+				if (res != null)
+					return res;
+			}
+			return this;
+		} else {
+			return null;
+		}
+	}
+}

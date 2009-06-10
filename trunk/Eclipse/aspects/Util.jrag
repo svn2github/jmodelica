@@ -1,0 +1,24 @@
+aspect Util {
+	
+	inh lazy StoredDefinition ASTNode.getDefinition();
+	eq StoredDefinition.getChild(int index).getDefinition() = this;
+	eq InstNode.getInstClassDecl(int index).getDefinition() = 
+			getInstClassDecl(index).getClassDecl().getDefinition();
+	eq InstNode.getInstComponentDecl(int index).getDefinition() = 
+			getInstComponentDecl(index).myInstClass().getClassDecl().getDefinition();
+  	
+  	private IDocument StoredDefinition.document;
+  	
+  	public void StoredDefinition.setDocument(IDocument doc) {
+  		document = doc;
+  	}
+  	
+  	public IDocument StoredDefinition.getDocument() {
+  		return document;
+  	}
+  	
+  	public boolean StoredDefinition.hasDocument() {
+  		return document != null;
+  	}
+
+}

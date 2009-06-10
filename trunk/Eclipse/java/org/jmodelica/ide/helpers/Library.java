@@ -1,0 +1,115 @@
+package org.jmodelica.ide.helpers;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Library {
+
+	private static final String PART_SEPARATOR = File.pathSeparator;
+	private static final String LIBRARY_SEPARATOR = "|";
+	
+	public String name;
+	public Version version;
+	public String path;
+
+	public Library(String str) {
+		String[] arr = Util.explode(PART_SEPARATOR, str);
+		name = arr[0];
+		version = new Version(arr[1]);
+		path = arr[2];
+	}
+
+	public Library() {
+	}
+
+	public String toString() {
+		return Util.implode(PART_SEPARATOR, new String[] { name, version.toString(), path });
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Library) {
+			Library lib = (Library) obj;
+			return name.equals(lib.name) && version.equals(lib.version);
+		}
+		return false;
+	}
+	
+	public boolean isOK() {
+		return !name.equals("");
+	}
+
+	public static String toString(List<Library> libs) {
+		if (libs == null)
+			return "";
+		String[] arr = new String[libs.size()];
+		for (int i = 0; i < libs.size(); i++) {
+			arr[i] = libs.get(i).toString();
+		}
+		return Util.implode(LIBRARY_SEPARATOR, arr);
+	}
+	
+	public static List<Library> fromString(String str) {
+		if (str == null) 
+			return new ArrayList<Library>();
+		String[] arr = Util.explode(LIBRARY_SEPARATOR, str);
+		ArrayList<Library> res = new ArrayList<Library>(arr.length);
+		try {
+			for (int i = 0; i < arr.length; i++) {
+				res.add(new Library(arr[i]));
+			}
+		} catch (ArrayIndexOutOfBoundsException e) {
+			return new ArrayList<Library>();
+		}
+		return res;
+	}
+	
+	public static class Version implements Comparable<Version> {
+		private int[] num;
+		private String sub;
+		private String str;
+		
+		public Version(String string) {
+			char first = string.length() > 0 ? string.charAt(0) : ' ';
+			if (first >= '0' && first <= '9') {
+				String[] arr = string.split(" ", 2);
+				if (arr.length > 1)
+					sub = arr[1];
+				arr = arr[0].split("\\.");
+				num = new int[arr.length];
+				for (int i = 0; i < arr.length; i++)
+					num[i] = Integer.parseInt(arr[i]);
+			} else {
+				num = new int[0];
+				sub = string;
+			}
+			str = string;
+		}
+		
+		@Override
+		public String toString() {
+			return str;
+		}
+
+		public int compareTo(Version v) {
+			int res = 0, n = Math.max(num.length, v.num.length);
+			for (int i = 0; res == 0 && i < n; i++) {
+				int v1 = i < num.length ? num[i] : 0;
+				int v2 = i < v.num.length ? v.num[i] : 0;
+				res = v1 - v2;
+			}
+			if (res == 0) {
+				if (sub != null) {
+					if (v.sub == null)
+						res = -1;
+					else
+						res = sub.compareTo(v.sub);
+				} else if (v.sub != null) {
+					res = 1;
+				}
+			}
+			return res;
+		}
+	}
+}

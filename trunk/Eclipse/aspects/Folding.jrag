@@ -1,0 +1,51 @@
+import java.util.ArrayList;
+import org.eclipse.jface.text.Position;
+import org.jmodelica.ide.folding.AnnotationPosition;
+
+aspect ModelicaFolding {
+	
+	protected ArrayList<Position> Annotation.makeFoldingPosition() {
+		int start = getBeginOffset() + 1;
+		int end = getEndOffset();
+		int length = end - start + 1;
+		ArrayList<Position> list = new ArrayList<Position>(1);
+    	if (start > 0 && length > 0) 
+	    	list.add(new AnnotationPosition(start, length));
+    	return list;
+    }
+
+//    eq FullClassDecl.hasFolding() = true;
+    eq Annotation.hasFolding() = true;
+    eq Annotation.foldingPositions(IDocument document) = makeFoldingPosition();
+    
+    /*
+     * Avoid loading libraries.
+     */
+	refine Folding eq ASTNode.foldingPositions(IDocument document) {
+		ArrayList list = new ArrayList();
+		if (isError())
+			return list;
+		if (hasFolding()) {
+			try {
+				int lineStart = ASTNode.getLine(getStart());
+				int lineEnd = ASTNode.getLine(getEnd());
+				int nbrOfLines = document.getNumberOfLines();
+				int startOffset = document.getLineOffset(lineStart > 1 ? lineStart - 1 : 0);
+				int endOffset = document.getLineOffset(lineEnd < nbrOfLines ? lineEnd : lineEnd - 1);
+				int foldLength = endOffset - startOffset;
+				if ((lineEnd - lineStart) > 0) {
+					list.add(new Position(startOffset, foldLength));
+				}
+			} catch (BadLocationException e) {
+				e.printStackTrace();
+			}
+		}
+		for (int i = 0; i < getNumChildNoTransform(); i++) {
+			list.addAll(getChildNoTransform(i).foldingPositions(document));
+		}
+		return list;
+	}
+	
+	// TODO: Don't traverse entire tree, prune at nodes where we know folds can't occur. Can remove refine then as well.
+    
+}
