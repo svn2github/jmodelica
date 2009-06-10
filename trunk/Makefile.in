@@ -53,7 +53,6 @@ DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(top_srcdir)/JMI/examples/FurutaPendulum/Makefile.in \
 	$(top_srcdir)/JMI/examples/Vdp/Makefile.in \
 	$(top_srcdir)/JMI/examples/Vdp_cppad/Makefile.in \
-	$(top_srcdir)/JMI/examples/Vdp_cppad_ode/Makefile.in \
 	$(top_srcdir)/Options/options_tpl.py.in \
 	$(top_srcdir)/Options/options_tpl.xml.in \
 	$(top_srcdir)/configure INSTALL config.guess config.sub \
@@ -68,7 +67,6 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = JMI/examples/Vdp/Makefile \
 	JMI/examples/Vdp_cppad/Makefile \
-	JMI/examples/Vdp_cppad_ode/Makefile \
 	JMI/examples/FurutaPendulum/Makefile \
 	JMI/examples/CSTR/Makefile JMI/examples/CSTR2/Makefile \
 	Options/options_tpl.xml Options/options_tpl.py
@@ -122,13 +120,14 @@ DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
-DUMPBIN = @DUMPBIN@
+ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
-FGREP = @FGREP@
+F77 = @F77@
+FFLAGS = @FFLAGS@
 GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -138,22 +137,17 @@ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 IPOPT_HOME = @IPOPT_HOME@
 IPOPT_INC = @IPOPT_INC@
 IPOPT_LIB = @IPOPT_LIB@
-LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
-LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
-NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
-OTOOL = @OTOOL@
-OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
@@ -177,7 +171,7 @@ abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
-ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
+ac_ct_F77 = @ac_ct_F77@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
@@ -211,7 +205,6 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
-lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -224,6 +217,7 @@ sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
@@ -287,8 +281,6 @@ distclean-hdr:
 JMI/examples/Vdp/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI/examples/Vdp/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 JMI/examples/Vdp_cppad/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI/examples/Vdp_cppad/Makefile.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-JMI/examples/Vdp_cppad_ode/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI/examples/Vdp_cppad_ode/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 JMI/examples/FurutaPendulum/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI/examples/FurutaPendulum/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
@@ -742,7 +734,6 @@ clean-local: clean-jmi-examples clean-frontends
 jmi-examples: install
 	cd JMI/examples/Vdp; $(MAKE) all
 	cd JMI/examples/Vdp_cppad; $(MAKE) all
-	cd JMI/examples/Vdp_cppad_ode; $(MAKE) all
 	cd JMI/examples/FurutaPendulum; $(MAKE) all
 	cd JMI/examples/CSTR; $(MAKE) all
 	cd JMI/examples/CSTR2; $(MAKE) all
@@ -750,7 +741,6 @@ jmi-examples: install
 clean-jmi-examples: 
 	cd JMI/examples/Vdp; $(MAKE) clean
 	cd JMI/examples/Vdp_cppad; $(MAKE) clean
-	cd JMI/examples/Vdp_cppad_ode; $(MAKE) clean
 	cd JMI/examples/FurutaPendulum; $(MAKE) clean
 	cd JMI/examples/CSTR; $(MAKE) clean
 	cd JMI/examples/CSTR2; $(MAKE) clean
