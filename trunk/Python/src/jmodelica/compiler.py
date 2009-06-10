@@ -252,7 +252,7 @@ def _handle_exception(ex):
         arraylist = ex.__javaobject__.getProblems()
         itr = arraylist.iterator()
 
-        problems = "\"
+        problems = "\\"
         while itr.hasNext():
             problems=problems+str(itr.next())+"\n"
 
