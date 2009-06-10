@@ -746,6 +746,10 @@ int jmi_delete(jmi_t* jmi){
 
 int jmi_ode_f(jmi_t* jmi) {
 
+	if (jmi->n_w != 0) { // Check if not ODE
+		return -1;
+	}
+
 	int i;
 	jmi_real_t* dx = jmi_get_dx(jmi);
 	for(i=0;i<jmi->n_dx;i++) {
@@ -766,6 +770,10 @@ int jmi_ode_f(jmi_t* jmi) {
 }
 
 int jmi_ode_df(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
+
+	if (jmi->n_w != 0) { // Check if not ODE
+		return -1;
+	}
 
 	if (eval_alg & JMI_DER_SYMBOLIC) {
 
@@ -795,6 +803,11 @@ int jmi_ode_df(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int
 }
 
 int jmi_ode_df_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
+
+	if (jmi->n_w != 0) { // Check if not ODE
+		return -1;
+	}
+
 	if (eval_alg & JMI_DER_SYMBOLIC) {
 	       int df_n_cols;
 	        int* mask = (int*)calloc(jmi->n_z,sizeof(int));
@@ -828,6 +841,11 @@ int jmi_ode_df_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
 
 int jmi_ode_df_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
         int *mask, int* row, int* col) {
+
+	if (jmi->n_w != 0) { // Check if not ODE
+		return -1;
+	}
+
 	if (eval_alg & JMI_DER_SYMBOLIC) {
 
 		return jmi_func_dF_nz_indices(jmi, jmi->dae->F, independent_vars & (~JMI_DER_DX), mask, row, col);
@@ -843,6 +861,11 @@ int jmi_ode_df_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
 
 int jmi_ode_df_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *df_n_cols, int *df_n_nz) {
+
+	if (jmi->n_w != 0) { // Check if not ODE
+		return -1;
+	}
+
 	if (eval_alg & JMI_DER_SYMBOLIC) {
 
 		return jmi_func_dF_dim(jmi, jmi->dae->F, sparsity, independent_vars & (~JMI_DER_DX), mask,
