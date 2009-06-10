@@ -1,8 +1,10 @@
 package org.jmodelica.ide.error;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.jastadd.plugin.compiler.ast.IError;
 
+import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.parser.ModelicaScanner;
 import org.jmodelica.parser.ModelicaScanner.Symbol;
 
@@ -54,4 +56,7 @@ public class CompileError implements IError {
 		return start;
 	}
 
+	public void addAsMarkerTo(IResource res) {
+		Util.addErrorMarker(res, this);
+	}
 }

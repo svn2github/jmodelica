@@ -3,6 +3,7 @@ package org.jmodelica.ide.outline;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -49,5 +50,22 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 			comparator = new OutlineItemComparator();
 		return comparator;
 	}
-
+	
+	/**
+	 * Redraws the tree view 
+	 */
+	public void update() {
+		TreeViewer viewer = getTreeViewer();
+		if (viewer != null) {
+			Control control= viewer.getControl();
+			if (control != null && !control.isDisposed()) {
+				control.setRedraw(false);
+				viewer.setInput(fRoot); 
+				rootChanged(viewer);
+				control.setRedraw(true);
+			}
+		}
+	}
+	
+	protected abstract void rootChanged(TreeViewer viewer);
 }

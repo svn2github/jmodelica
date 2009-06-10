@@ -157,21 +157,18 @@ public class ModelicaCompiler extends AbstractCompiler {
 	private void parseFile(Reader reader, IFile file) {
 		try {
 			currentFile = file;
+			errorReport.setFile(file);
 			scanner.yyreset(reader);
 			SourceRoot localRoot = (SourceRoot) parser.parse(scanner);
-			
-			updateErrorMarkers(file, errorReport.getAndResetErrors(), ERROR_MARKER_ID);
 			
 			for (StoredDefinition def : localRoot.getProgram().getUnstructuredEntitys()) 
 				addDefinition(def);
 			
-		} catch (beaver.Parser.Exception e) {
+		} catch (Exception e) {
 			addDefinition(new BadDefinition());
-			updateErrorMarkers(file, errorReport.getAndResetErrors(), ERROR_MARKER_ID);
-		} catch (IOException e) {
-			addDefinition(new BadDefinition());
-			updateErrorMarkers(file, errorReport.getAndResetErrors(), ERROR_MARKER_ID);
-		} 
+		} finally {
+			errorReport.cleanUp();
+		}
 	}
 
 	private void addDefinition(StoredDefinition def) {

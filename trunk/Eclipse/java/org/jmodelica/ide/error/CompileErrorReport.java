@@ -3,7 +3,11 @@ package org.jmodelica.ide.error;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.jastadd.plugin.compiler.ast.IError;
+import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.parser.ModelicaScanner;
 import org.jmodelica.parser.ModelicaParser.Terminals;
 
@@ -100,23 +104,32 @@ public class CompileErrorReport extends Events {
 		EXPECTED[Terminals.WITHIN] = "\"within\"";
 	}
 
-	private Collection<IError> errors = new ArrayList<IError>();
 	private ModelicaScanner.Symbol lastSyntaxError;
+	private IFile file;
 	
-	public Collection<IError> getAndResetErrors() {
-		Collection<IError> temp = errors;
-		errors = new ArrayList<IError>();
-		return temp;
+	public void setFile(IFile file) {
+		this.file = file;
+		Util.deleteErrorMarkers(file);
+		lastSyntaxError = null;
 	}
 	
-	public boolean hasErrors() {
-		return !errors.isEmpty();
+	public void cleanUp() {
+		if (lastSyntaxError != null)
+			report(getUnexpectedMessage());
+	}
+
+	private void report(StringBuilder msg) {
+		report(new CompileError(msg.toString(), IError.SYNTACTIC, lastSyntaxError));
+		lastSyntaxError = null;
+	}
+
+	private void report(CompileError err) {
+		err.addAsMarkerTo(file);
 	}
 
 	@Override
 	public void errorPhraseRemoved(Symbol error) {
-		StringBuilder msg = getUnexpectedMessage();
-		errors.add(new CompileError(msg.toString(), IError.SYNTACTIC, lastSyntaxError));
+		report(getUnexpectedMessage());
 	}
 
 	@Override
@@ -128,7 +141,7 @@ public class CompileErrorReport extends Events {
 			msg.append(", insert ");
 			msg.append(EXPECTED[token.getId()]);
 			msg.append(" to complete statement");
-			errors.add(new CompileError(msg.toString(), IError.SYNTACTIC, lastSyntaxError));
+			report(msg);
 		}
 	}
 
@@ -137,16 +150,17 @@ public class CompileErrorReport extends Events {
 		StringBuilder msg = getUnexpectedMessage();
 		msg.append(", expected ");
 		msg.append(EXPECTED[token.getId()]);
-		errors.add(new CompileError(msg.toString(), IError.SYNTACTIC, lastSyntaxError));
+		report(msg);
 	}
 
 	@Override
 	public void scannerError(Scanner.Exception e) {
-		errors.add(new CompileError((ModelicaScanner.Exception) e));
+		report(new CompileError((ModelicaScanner.Exception) e));
 	}
 
 	@Override
 	public void syntaxError(Symbol token) {
+		cleanUp();
 		lastSyntaxError = (ModelicaScanner.Symbol) token;
 	}
 
@@ -154,7 +168,7 @@ public class CompileErrorReport extends Events {
 	public void unexpectedTokenRemoved(Symbol token) {
 		StringBuilder msg = getUnexpectedMessage();
 		msg.append(", delete this token");
-		errors.add(new CompileError(msg.toString(), IError.SYNTACTIC, lastSyntaxError));
+		report(msg);
 	}
 
 	private StringBuilder getUnexpectedMessage() {
@@ -169,5 +183,6 @@ public class CompileErrorReport extends Events {
 		}
 		return msg;
 	}
-
+	
+	// TODO: CompileError unnecessary, create markers directly
 }

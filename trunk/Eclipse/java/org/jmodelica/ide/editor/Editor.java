@@ -19,12 +19,16 @@ import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.presentation.IPresentationDamager;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
+import org.eclipse.jface.text.reconciler.DirtyRegion;
+import org.eclipse.jface.text.reconciler.IReconciler;
+import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
+import org.eclipse.jface.text.reconciler.MonoReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.FastPartitioner;
 import org.eclipse.jface.text.rules.ITokenScanner;
@@ -47,8 +51,8 @@ import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+import org.jastadd.plugin.ReconcilingStrategy;
 import org.jastadd.plugin.compiler.ast.IFoldingNode;
-import org.jastadd.plugin.compiler.ast.IJastAddNode;
 import org.jastadd.plugin.registry.ASTRegistry;
 import org.jastadd.plugin.registry.IASTRegistryListener;
 import org.jmodelica.ast.ASTNode;
@@ -90,9 +94,12 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	public static final String CONTENT_TYPE_ID = Constants.CONTENT_TYPE_ID;
 	public static final String FILE_EXTENSION = Constants.FILE_EXTENSION;
 
-	// Content outline
+	// Content outlines
 	private OutlinePage fSourceOutlinePage;
 	private InstanceOutlinePage fInstanceOutlinePage;
+
+	// Reconciling strategy
+	private ReconcilingStrategy fStrategy;
 
 	// ASTRegistry listener fields
 	private ASTRegistry fRegistry;
@@ -110,6 +117,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		fRegistry = org.jastadd.plugin.Activator.getASTRegistry();
 		fSourceOutlinePage = new SourceOutlinePage(this); 
 		fInstanceOutlinePage = new InstanceOutlinePage(this);
+		fStrategy = new ReconcilingStrategy();
 	}
 
 	/*
@@ -217,10 +225,9 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		if (input instanceof IFileEditorInput) 
 			fInput = (IFileEditorInput)input;
 		resetAST(fInput);
-		if (fRoot == null) {
+		fStrategy.setFile(fInput == null ? null : fInput.getFile());
+		if (fRoot == null) 
 			compileExternal(input);
-			update();
-		}
 	}
 
 	@Override
@@ -253,6 +260,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 			}
 		} catch (IllegalArgumentException e) {
 		}
+		update();
 	}
 
 	private String getPathOfInput(IEditorInput input) {
@@ -487,6 +495,11 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 			reconciler.setDamager(dr, type);
 			reconciler.setRepairer(dr, type);
 		}
+		
+		@Override 
+		public IReconciler getReconciler(ISourceViewer sourceViewer) {
+			return new MonoReconciler(fStrategy, false);
+	    }
 	}
 
 	private class DoOperationAction extends Action {
@@ -555,18 +568,18 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	}
 
 	private class ErrorCheckAction extends ConnectedTextsAction {
-		private BaseClassDecl curClass;
+		private BaseClassDecl currentClass;
 
 		public ErrorCheckAction() {
 			setTexts(Constants.ACTION_ERROR_CHECK_TEXT);
 			setEnabled(false);
 		}
 
-		public void setCurClass(BaseClassDecl curClass) {
-			if (curClass != this.curClass) {
-				this.curClass = curClass;
-				if (curClass != null) {
-					setTexts("Check " + curClass.getName().getID() + " for errors");
+		public void setCurClass(BaseClassDecl currentClass) {
+			if (currentClass != this.currentClass) {
+				this.currentClass = currentClass;
+				if (currentClass != null) {
+					setTexts("Check " + currentClass.getName().getID() + " for errors");
 					setEnabled(true);
 				} else {
 					setTexts(Constants.ACTION_ERROR_CHECK_TEXT);
@@ -578,18 +591,18 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		@Override
 		public void run() {
 			performSave(true, null);
-			SourceRoot root = (SourceRoot) curClass.root();
+			SourceRoot root = (SourceRoot) currentClass.root();
 			InstProgramRoot ipr = root.getProgram().getInstProgramRoot();
 			InstanceErrorHandler errorHandler = (InstanceErrorHandler) root.getErrorHandler();
 			errorHandler.resetCounter();
-			ipr.retrieveInstFullClassDecl(curClass.qualifiedName()).collectErrors();
+			ipr.retrieveInstFullClassDecl(currentClass.qualifiedName()).collectErrors();
 			int num = errorHandler.getNumErrors();
 			String msg;
 			if (num == 0) 
 				msg = "No errors found.";
 			else
 				msg = num + " errors found.";
-			String title = "Checking " + curClass.getName().getID() + " for errors:";
+			String title = "Checking " + currentClass.getName().getID() + " for errors:";
 			MessageDialog.openInformation(new Shell(), title, msg);
 		}
 	}

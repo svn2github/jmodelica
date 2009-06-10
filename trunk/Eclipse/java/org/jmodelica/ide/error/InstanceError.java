@@ -5,6 +5,7 @@ import org.eclipse.core.resources.IResource;
 import org.jastadd.plugin.compiler.ast.IError;
 import org.jmodelica.ast.ASTNode;
 import org.jmodelica.ide.ModelicaCompiler;
+import org.jmodelica.ide.helpers.Util;
 
 public class InstanceError implements IError {
 	
@@ -61,7 +62,7 @@ public class InstanceError implements IError {
 	
 	public boolean attachToFile() {
 		if (hasFile()) {
-			ModelicaCompiler.addErrorMarker(file, this, ModelicaCompiler.ERROR_MARKER_ID);
+			Util.addErrorMarker(file, this);
 			return true;
 		}
 		return false;
