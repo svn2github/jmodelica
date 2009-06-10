@@ -869,6 +869,101 @@ def load_DLL(libname, path):
                                        ct.POINTER(ct.c_int),
                                        ct.POINTER(ct.c_int)]
     
+    # JMI Simultaneous Optimization interface
+    dll.jmi_opt_sim_get_dimensions.argtypes = [ct.c_void_p,
+                                               ct.POINTER(ct.c_int),
+                                               ct.POINTER(ct.c_int),
+                                               ct.POINTER(ct.c_int),
+                                               ct.POINTER(ct.c_int),
+                                               ct.POINTER(ct.c_int)]
+    dll.jmi_opt_sim_get_interval_spec.argtypes = [ct.c_void_p,
+                                                  Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                ndim=1,
+                                                                flags='C'),
+                                                  Nct.ndpointer(dtype=ct.c_int,
+                                                                ndim=1,
+                                                                flags='C'),
+                                                  Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                ndim=1,
+                                                                flags='C'),
+                                                  Nct.ndpointer(dtype=ct.c_int,
+                                                                ndim=1,
+                                                                flags='C')]
+    dll.jmi_opt_sim_get_x.argtypes =[ct.c_void_p]
+    dll.jmi_opt_sim_get_initial.argtypes = [ct.c_void_p,
+                                            Nct.ndpointer(dtype=c_jmi_real_t,
+                                                          ndim=1,
+                                                          flags='C')]
+    dll.jmi_opt_sim_get_bounds.argtypes = [ct.c_void_p,
+                                            Nct.ndpointer(dtype=c_jmi_real_t,
+                                                          ndim=1,
+                                                          flags='C'),
+                                            Nct.ndpointer(dtype=c_jmi_real_t,
+                                                          ndim=1,
+                                                          flags='C')]
+    dll.jmi_opt_sim_f.argtypes = [ct.c_void_p,
+                                  Nct.ndpointer(dtype=c_jmi_real_t,
+                                                ndim=1,
+                                                flags='C')]
+    dll.jmi_opt_sim_df.argtypes = [ct.c_void_p,
+                                   Nct.ndpointer(dtype=c_jmi_real_t,
+                                                 ndim=1,
+                                                 flags='C')]
+    dll.jmi_opt_sim_g.argtypes = [ct.c_void_p,
+                                  Nct.ndpointer(dtype=c_jmi_real_t,
+                                                ndim=1,
+                                                flags='C')]
+    dll.jmi_opt_sim_dg.argtypes = [ct.c_void_p,
+                                   Nct.ndpointer(dtype=c_jmi_real_t,
+                                                 ndim=1,
+                                                 flags='C')]
+    dll.jmi_opt_sim_dg_nz_indices.argtypes = [ct.c_void_p,
+                                              Nct.ndpointer(dtype=ct.c_int,
+                                                            ndim=1,
+                                                            flags='C'),
+                                              Nct.ndpointer(dtype=ct.c_int,
+                                                            ndim=1,
+                                                            flags='C')]
+    dll.jmi_opt_sim_h.argtypes = [ct.c_void_p,
+                                  Nct.ndpointer(dtype=c_jmi_real_t,
+                                                ndim=1,
+                                                flags='C')]
+    dll.jmi_opt_sim_dh.argtypes = [ct.c_void_p,
+                                   Nct.ndpointer(dtype=c_jmi_real_t,
+                                                 ndim=1,
+                                                 flags='C')]
+    dll.jmi_opt_sim_dh_nz_indices.argtypes = [ct.c_void_p,
+                                              Nct.ndpointer(dtype=ct.c_int,
+                                                            ndim=1,
+                                                            flags='C'),
+                                              Nct.ndpointer(dtype=ct.c_int,
+                                                            ndim=1,
+                                                            flags='C')]
+    dll.jmi_opt_sim_write_file_matlab.argtypes = [ct.c_void_p,
+                                                  ct.c_char_p]
+    dll.jmi_opt_sim_get_result_variable_vector_length.argtypes = [ct.c_void_p,
+                                                                  ct.POINTER(ct.c_int)]
+    dll.jmi_opt_sim_get_result.argtypes = [ct.c_void_p,
+                                           Nct.ndpointer(dtype=c_jmi_real_t,
+                                                         ndim=1,
+                                                         flags='C'),
+                                           Nct.ndpointer(dtype=c_jmi_real_t,
+                                                         ndim=1,
+                                                         flags='C'),
+                                           Nct.ndpointer(dtype=c_jmi_real_t,
+                                                         ndim=1,
+                                                         flags='C'),
+                                           Nct.ndpointer(dtype=c_jmi_real_t,
+                                                         ndim=1,
+                                                         flags='C'),
+                                           Nct.ndpointer(dtype=c_jmi_real_t,
+                                                         ndim=1,
+                                                         flags='C'),
+                                           Nct.ndpointer(dtype=c_jmi_real_t,
+                                                         ndim=1,
+                                                         flags='C')]
+    #Is this correct????
+    _returns_ndarray(dll.jmi_opt_sim_get_x, c_jmi_real_t, n_x.value, order='C')
     
     # Simultaneous Optimization based on Lagrange polynomials and Radau points
     try:
@@ -973,7 +1068,7 @@ def load_DLL(libname, path):
     except AttributeError, e:
         pass    
 
-    # Simultaneous Optimization interface
+    # IPOPT
     try:
         dll.jmi_opt_sim_ipopt_new.argtypes = [ct.c_void_p,
                                               ct.c_void_p]
@@ -2127,11 +2222,141 @@ class JMIModel(object):
 
             self.opt_set_p_opt_indices(n_p_opt,N.array(p_opt_indices))
 
-class JMISimultaneousOptLagPols(object):
+class JMISimultaneousOpt(object):
     
-    def __init__(self, jmi_model, n_e, hs, n_cp):       
+    def __init__(self):
+        raise JMIException("This class can not be instantiated.")
+    
+    def _initialize(self, jmi_model):
         self._jmi_model = jmi_model
         self._jmi_opt_sim = ct.c_voidp()
+        
+    def opt_sim_get_dimensions(self):
+        """ Returns the number of variables and the number 
+            of constraints, respectively, in the problem.
+            
+        """
+        n_x = ct.c_int()
+        n_g = ct.c_int()
+        n_h = ct.c_int()
+        dg_n_nz = ct.c_int()
+        dh_n_nz = ct.c_int()
+        if self._jmi_model._dll.jmi_opt_sim_get_dimensions(self._jmi_opt_sim, byref(n_x), byref(n_g), 
+                                                        byref(n_h), byref(dg_n_nz), byref(dh_n_nz)) is not 0:
+            raise JMIException("Getting the number of variables and constraints failed.")
+        return n_x, n_g, n_h, dg_n_nz, dh_n_nz
+
+    def opt_sim_get_interval_spec(self, start_time, start_time_free, final_time, final_time_free):
+        """ Returns data that specifies the optimization interval.
+        
+        """
+        if self._jmi_model._dll.jmi_opt_sim_get_interval_spec(self._jmi_opt_sim, start_time, start_time_free, final_time, final_time_free) is not 0:
+            raise JMIException("Getting the optimization interval data failed.")
+        
+    def opt_sim_get_x(self):
+        """ Gets the x vector.
+        
+        """
+        return self._jmi_model._dll.jmi_opt_sim_get_x(self._jmi_opt_sim)
+
+    def opt_sim_get_initial(self, x_init):
+        """ Gets the initial point.
+        
+        """
+        if self._jmi_model._dll.jmi_opt_sim_get_initial(self._jmi_opt_sim, x_init) is not 0:
+            raise JMIException("Getting the initial point failed.")
+        
+    def opt_sim_get_bounds(self, x_lb, x_ub):
+        """ Gets the upper and lower bounds of the optimization variables.
+        
+        """
+        if self._jmi_model._dll.jmi_opt_sim_get_bounds(self._jmi_opt_sim, x_lb, x_ub) is not 0:
+            raise JMIException("Getting upper and lower bounds of the optimization variables failed.")
+        
+    def opt_sim_f(self, f):
+        """ Gets the cost function value at a given point in search space.
+        
+        """
+        if self._jmi_model._dll.jmi_opt_sim_f(self._jmi_opt_sim, f) is not 0:
+            raise JMIException("Getting the cost function failed.")
+        
+    def opt_sim_df(self, df):
+        """ Gets the gradient of the cost function value at a given point 
+            in search space.
+            
+        """
+        if self._jmi_model._dll.jmi_opt_sim_df(self._jmi_opt_sim, df) is not 0:
+            raise JMIException("Getting the gradient of the cost function value failed.")
+        
+    def opt_sim_g(self, res):
+        """ Gets the residual of the inequality constraints h.
+            
+        """
+        if self._jmi_model._dll.jmi_opt_sim_g(self._jmi_opt_sim, res) is not 0:
+            raise JMIException("Getting the residual of the inequality constraints failed.")
+        
+    def opt_sim_dg(self, jac):
+        """ Gets the Jacobian of the residual of the inequality constraints.
+        
+        """
+        if self._jmi_model._dll.jmi_opt_sim_dg(self._jmi_opt_sim, jac) is not 0:
+            raise JMIException("Getting the Jacobian of the residual of the inequality constraints failed.")
+        
+    def opt_sim_dg_nz_indices(self, irow, icol):
+        """ Gets the indices of the non-zeros in the inequality constraint Jacobian.
+        
+        """
+        if self._jmi_model._dll.jmi_opt_sim_dg_nz_indices(self._jmi_opt_sim, irow, icol) is not 0:
+            raise JMIException("Getting the indices of the non-zeros in the equality constraint Jacobian failed.")
+        
+    def opt_sim_h(self, res):
+        """ Gets the residual of the equality constraints h.
+        
+        """
+        if self._jmi_model._dll.jmi_opt_sim_h(self._jmi_opt_sim, res) is not 0:
+            raise JMIException("Getting the residual of the equality constraints failed.")
+        
+    def opt_sim_dh(self, jac):
+        """ Gets the Jacobian of the residual of the equality constraints.
+        
+        """
+        if self._jmi_model._dll.jmi_opt_sim_dh(self._jmi_opt_sim, jac) is not 0:
+            raise JMIException("Getting the Jacobian of the residual of the equality constraints.")
+        
+    def opt_sim_dh_nz_indices(self, irow, icol):
+        """ Getting the indices of the non-zeros in the equality constraint Jacobian.
+        
+        """
+        if self._jmi_model._dll.jmi_opt_sim_dh_nz_indices(self._jmi_opt_sim, irow, icol) is not 0:
+            raise JMIException("Getting the indices of the non-zeros in the equality constraint Jacobian failed.")
+        
+    def opt_sim_write_file_matlab(self, file_name):
+        """ Writes the optimization result to file in Matlab format.
+        
+        """
+        if self._jmi_model._dll.jmi_opt_sim_write_file_matlab(self._jmi_opt_sim, file_name) is not 0:
+            raise JMIException("Writing the optimization result to file in Matlab format failed.")
+        
+    def opt_sim_get_result_variable_vector_length(self):
+        """ Gets the length of the result variable vectors.
+         
+        """
+        n = ct.c_int()
+        if self._jmi_model._dll.jmi_opt_sim_get_result_variable_vector_length(self._jmi_opt_sim, byref(n)) is not 0:
+            raise JMIException("Getting the length of the result variable vectors failed.")
+        return n
+        
+    def opt_sim_get_result(self, p_opt, t, dx, x, u, w):
+        """ Gets the results, stored in column major format.
+         
+        """
+        if self._jmi_model._dll.jmi_opt_sim_get_result(self._jmi_opt_sim, p_opt, t, dx, x, u, w) is not 0:
+            raise JMIException("Getting the results failed.")
+    
+class JMISimultaneousOptLagPols(JMISimultaneousOpt):
+    
+    def __init__(self, jmi_model, n_e, hs, n_cp):       
+        JMISimultaneousOpt._initialize(self, jmi_model)
 
         # Initialization
         _p_opt_init = N.zeros(jmi_model.opt_get_n_p_opt())
@@ -2167,7 +2392,7 @@ class JMISimultaneousOptLagPols(object):
         self._set_ub_values(_p_opt_ub, _dx_ub, _x_ub, _u_ub, _w_ub)
         
         try:       
-            assert self._jmi_model._dll.jmi_opt_sim_lp_new(byref(self._jmi_opt_sim), self._jmi_model._jmi, n_e,
+            assert jmi_model._dll.jmi_opt_sim_lp_new(byref(self._jmi_opt_sim), jmi_model._jmi, n_e,
                                       hs, hs_free,
                                      _p_opt_init, _dx_init, _x_init,
                                      _u_init, _w_init,
