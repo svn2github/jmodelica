@@ -44,8 +44,8 @@ endif
 	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.linux $(prefix)/Makefiles/MakeFile ;; \
 	esac
 	[ -e $(prefix)/Options ] && echo "Options directory exists "|| mkdir $(prefix)/Options
-	cp Options/options_tpl.xml $(prefix)/Options/options.xml
-	cp Options/options_tpl.py $(prefix)/Options/options.py
+	[ -e $(prefix)/Options/options.xml ] && echo "options.xml exists "|| cp Options/options_tpl.xml $(prefix)/Options/options.xml
+	[ -e $(prefix)/Options/options.py ] && echo "options.py exists "|| cp Options/options_tpl.py $(prefix)/Options/options.py
 	mkdir -p $(prefix)/Python
 	mkdir -p $(prefix)/Python/jmodelica
 	cp $(abs_top_srcdir)/Python/src/jmodelica/*.py $(prefix)/Python/jmodelica
