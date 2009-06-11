@@ -1,14 +1,21 @@
 
 <project name="jmodelica_ide" default="gen">
 
+	<condition property="jmodelica_root" value=".." else="../..">
+		<available file="../Compiler/ModelicaFrontEnd/src" type="dir" property=""/>
+	</condition>
+	
 	<property name="lib_dir" value="lib" />
-	<property name="beaver_dir" value="../ThirdParty/Beaver/beaver-0.9.6.1/lib" />
-	<property name="jflex_dir" value="../ThirdParty/JFlex/jflex-1.4.3/lib" />
-	<property name="jastadd_dir" value="../ThirdParty/JastAdd" />
+	<property name="beaver_dir" value="${jmodelica_root}/ThirdParty/Beaver/beaver-0.9.6.1/lib" />
+	<property name="jflex_dir" value="${jmodelica_root}/ThirdParty/JFlex/jflex-1.4.3/lib" />
+	<property name="jastadd_dir" value="${jmodelica_root}/ThirdParty/JastAdd" />
 	
 	<property name="java_dir" value="java" />
-	<property name="jmodelica_dir" value="../Compiler/ModelicaFrontEnd/src" />
-	<property name="core_dir" value="../../org.jastadd.plugin" />
+	<property name="bin_dir" value="bin" />
+	<property name="output_dir" value="site" />
+	
+	<property name="jmodelica_dir" value="${jmodelica_root}/Compiler/ModelicaFrontEnd/src" />
+	<property name="core_dir" value="../org.jastadd.plugin" />
 
 	<property name="package" value="org.jmodelica" />
 	<property name="package_dir" value="${java_dir}/org/jmodelica" />
@@ -40,9 +47,12 @@
 	  </classpath>
 	</taskdef>
 	
+	<!-- meta-target for generating all java files -->
+	<target name="gen" depends="copy,scanner,parser,ast"/>
+	
 	<!-- generate compiler ast files -->
 	<!-- create AST node types and weave aspect modules -->
-	<target name="gen" depends="copy,scanner,parser">
+	<target name="ast">
 		<jastadd package="${package}.ast" beaver="true" rewrite="true" outdir="${java_dir}" NoCacheCycle="false" ComponentCheck="true" visitcheck="false" LazyMaps="true" Deterministic="true" NoStatic="false" Debug="false">
 			<fileset dir="${compiler_aspects}">
 				<include name="*.ast" />
@@ -134,8 +144,8 @@
 		</delete>
 	</target>
 
-	<!-- remove generated source files -->
-	<target name="cleanGen">
+	<!-- remove generated and copied java files -->
+	<target name="cleanGen" depends="clean">
 		<delete dir="${package_dir}/ast" />
 		<delete dir="${package_dir}/test" />
 		<delete dir="${package_dir}/codegen" />
@@ -145,6 +155,9 @@
 		<delete file="${lib_dir}/beaver-rt-src.jar" />
 	</target>
 
+	<!-- remove compiled files -->
+	<target name="clean">
+	</target>
 </project>
 
 

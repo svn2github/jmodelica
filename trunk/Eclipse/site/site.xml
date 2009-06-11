@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description url=".">
+      JModelica Update Site
+   </description>
+   <feature url="features/org.jmodelica.ide_0.3.1.jar" id="org.jmodelica.ide" version="0.3.1">
+      <category name="org.jmodelica.ide.category"/>
+   </feature>
+   <category-def name="org.jmodelica.ide.category" label="JModelica">
+      <description>
+         JModelica plugins
+      </description>
+   </category-def>
+</site>
