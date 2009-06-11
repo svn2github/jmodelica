@@ -958,9 +958,16 @@ aspect LinearFVariables {
 	 * \brief Check linearity of variable.
 	 * 
 	 * The attribute isLinear returns true if all uses of the variable appears
-	 * linearly in equations and in initial equations.
+	 * linearly in equations and in initial equations. Parameters and constants
+	 * are assumed to be literals in the linearity computation. Accordingly,
+	 * multiplication of a variable with a parameter or constant does not render
+	 * the variable nonlinear. Also, parameters and constants are considered
+	 * to be linear themselves.
 	 */
 	syn lazy boolean FVariable.isLinear() {
+		if (isParameter() || isConstant()) {
+			return true;
+		}
 		for (FIdUseExp e : uses()) {
 			if (!e.isLinear()) {
 				return false;
@@ -969,6 +976,13 @@ aspect LinearFVariables {
 		return true;
 	}
 	
+	/**
+	 * \brief Check if a subexpression appears linearly.
+	 * 
+	 * Note that this method does not check if the expression itself is linear
+	 * but wheather it apperas linearly in a composite expression. For example
+	 * the sub expression 'sin(x)' appears linearly in '1+sin(x)'.
+	 */
 	inh boolean FExp.isLinear();
 	eq FlatRoot.getChild().isLinear() = true;
 	eq SourceRoot.getChild().isLinear() = true;
