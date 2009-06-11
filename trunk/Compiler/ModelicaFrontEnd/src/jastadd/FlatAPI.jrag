@@ -1001,6 +1001,7 @@ aspect LinearFVariables {
 	eq FDivExp.getRight().isLinear() = false;		
     eq FPowExp.getChild().isLinear() = false;
     eq FFunctionCall.getChild().isLinear() = false;
+    eq FBuiltInExp.getChild().isLinear() = false;
 				
 }
 
@@ -1118,6 +1119,19 @@ aspect FlatDiagnostics {
 		  numInitialEquations() + "\n");
 		  
 		str.append("\n");
+		
+		str.append(variableDiagnostics());
+		
+		str.append("\n");  
+
+		return str.toString();
+	}
+
+
+	public String FClass.variableDiagnostics() {
+		
+		StringBuffer str = new StringBuffer();
+		
 		str.append("Independent constants: \n");
 		for (FVariable fv : independentConstants()) {
 			str.append(" " + fv.name());
@@ -1200,13 +1214,10 @@ aspect FlatDiagnostics {
 					+ fv.isLinear());
 				str.append("\n");
 		}
-		str.append("\n");  
 
 		return str.toString();
+		
 	}
-
-
-
 
 
 

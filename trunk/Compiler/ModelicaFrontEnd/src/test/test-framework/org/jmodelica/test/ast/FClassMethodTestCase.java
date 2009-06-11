@@ -19,54 +19,50 @@ package org.jmodelica.test.ast;
 import org.jmodelica.parser.ModelicaParser;
 import org.jmodelica.parser.FlatModelicaParser;
 import org.jmodelica.ast.*;
-
-import java.io.BufferedReader;
-import java.io.PrintStream;
-import java.io.OutputStream;
-import java.io.StringReader;
 import java.util.Collection;
+import java.lang.reflect.Method;
 
-import org.jmodelica.codegen.*;
-
-public abstract class CodeGenTestCase extends TestCase {
-	private String genCode = "";
-    private String genCodeFileName = "";
+public class FClassMethodTestCase extends TestCase {
+	private String output = "";
+    private String methodName = "";
+    private String outputFileName = "";
     private boolean resultOnFile = false;
-	private String template = "";
-    private String templateFileName = "";
-    private boolean templateOnFile = false;
-    
+	
     private ModelicaParser parser = new ModelicaParser();
+    private FlatModelicaParser flatParser = new FlatModelicaParser();
     
-	public CodeGenTestCase() {}
+	public FClassMethodTestCase() {}
     
-	public CodeGenTestCase(String name, 
+	/**
+	 * @param name
+	 * @param description
+	 * @param sourceFileName
+	 * @param className
+	 * @param output
+	 * @oaram methodName
+	 * @param outputFileName
+	 * @param resultOnFile
+	 */
+	public FClassMethodTestCase(String name, 
 			                  String description,
 			                  String sourceFileName, 
 			                  String className, 
 			                  String result,
-			                  boolean resultOnFile,
-			                  String template,
-			                  boolean templateOnFile) {
+			                  String methodName,
+			                  boolean resultOnFile) {
 		super(name, description, sourceFileName, className);
+		this.methodName = methodName;
 		this.resultOnFile = resultOnFile;		
 		if (!resultOnFile) {
-			this.genCode = result;
+			this.output = result;
 		} else {
-			this.genCodeFileName = result;
+			this.outputFileName = result;
 		}
-		this.templateOnFile = resultOnFile;		
-		if (!resultOnFile) {
-			this.template = result;
-		} else {
-			this.templateFileName = result;
-		}
+		
 	}
 
-	public abstract AbstractGenerator createGenerator(FClass fc);
-	
 	public void dump(StringBuffer str,String indent) {
-		str.append(indent+"CodeGenTestCase: \n");
+		str.append(indent+"FClassMethodTestCase: \n");
 		if (testMe())
 			str.append("PASS\n");
 		else
@@ -76,23 +72,23 @@ public abstract class CodeGenTestCase extends TestCase {
 		str.append(indent+" Source file:              "+getSourceFileName()+"\n");
 		str.append(indent+" Class name:               "+getClassName()+"\n");
 		if (!isResultOnFile())
-			str.append(indent+" Generated code:\n"+getGenCode()+"\n");
+			str.append(indent+" Output:\n"+getOutput()+"\n");
 		else
-			str.append(indent+" Generated code file name: "+getGenCodeFileName()+"\n");
+			str.append(indent+" Output file name: "+getOutputFileName()+"\n");
 		
 	}
 
 	public String toString() {
 		StringBuffer str = new StringBuffer();
-		str.append("CodeGenTestCase: \n");
+		str.append("FClassMethodTestCase: \n");
 		str.append(" Name:                     "+getName()+"\n");
 		str.append(" Description:              "+getDescription()+"\n");
 		str.append(" Source file:              "+getSourceFileName()+"\n");
 		str.append(" Class name:               "+getClassName()+"\n");
 		if (!isResultOnFile())
-			str.append(" Generated code:\n"+getGenCode()+"\n");
+			str.append(" Output:\n"+getOutput()+"\n");
 		else
-			str.append(" Generated code file name: "+getGenCodeFileName()+"\n");
+			str.append(" Output file name: "+getOutputFileName()+"\n");
 		return str.toString();
 	}
 	
@@ -122,108 +118,114 @@ public abstract class CodeGenTestCase extends TestCase {
 		SourceRoot sr = parser.parseFile(getSourceFileName());
 		TestSuite.loadOptions(sr);
 		sr.setFileName(getSourceFileName());
-	    InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-	    
-	    try {
-	    	Collection<Problem> problems = 
-	    		ipr.checkErrorsInInstClass(getClassName());
-	    	if (problems.size()>0) {
-	    		System.out.println("***** Errors in Class!");
-	    		for (Problem p : problems) {
-	    			System.out.println(p.toString() + " \n");
-	    		}
-	    		return false;
-	    	} 
-	    }catch (ModelicaClassNotFoundException e) {
+		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
+		Collection<Problem> problems;
+		try {
+			problems = ipr.checkErrorsInInstClass(getClassName());
+		} catch (ModelicaClassNotFoundException e) {
+			return false;
+		}
+	    if (problems.size()>0) {
+	    	//System.out.println("***** Errors in Class!");
 	    	return false;
-	    }
-	    
-//	    System.out.println("Hej");
-	    
+	    }	    
 	    FlatRoot flatRoot = new FlatRoot();
 	    flatRoot.setFileName(getSourceFileName());
 	    FClass fc = new FClass();
 	    flatRoot.setFClass(fc);
 	    
-		//FClass fc = new FClass();
 	    InstNode ir;
 	    try {
 	    	ir = ipr.findFlattenInst(getClassName(), fc);
 	    } catch (ModelicaClassNotFoundException e) {
-	    	System.out.println("Modelica class " + getClassName() + 
-	    			" not found.");
 	    	return false;
 	    }
-   	  	fc.transformCanonical();
-   	  	// Assume that result and template is not on file.
-  	    StringOutputStream os = new StringOutputStream();
-  	    AbstractGenerator generator = createGenerator(fc);
-	    generator.generate(new BufferedReader(new StringReader(getTemplate())),
-	    		           new PrintStream(os));
 	    
-//	    System.out.println(os.toString().trim());
-//	    System.out.println("**");
-//	    System.out.println(getGenCode().trim());
-	    
-		return removeWhitespace(os.toString()).compareTo(removeWhitespace(getGenCode()))==0;
-	}
+	    try {
+	    	Method method =  fc.getClass().getDeclaredMethod(getMethodName(), 
+	    			new Class[] {});
+	    	Object args[] = new Object[0];
+	    	String testResult =((String)method.invoke(fc, args));
+	    	testResult = removeWhitespace(testResult);
+	    	String outp = removeWhitespace(getOutput());
+
+	    	/*
+	    	testResult = testResult.replace('\r', 'R');
+	    	testResult = testResult.replace('\n', 'N');
+	    	testResult = testResult.replace(' ', 'S');
+	    	String outp = getOutput();
+	    	outp = outp.replace('\r', 'R');
+	    	outp = outp.replace('\n', 'N');
+	    	outp = outp.replace(' ', 'S');	  
+	    	*/  	
+//	    	System.out.println("test ****  \n" +testResult);
+//	    	System.out.println("fixture ****  \n" +outp);
+//	    	for (int i=0;i<testResult.length();i++) {
+//	    		System.out.println(outp.substring(i,i+1) + " | " +
+//	    				testResult.substring(i,i+1));
+//	    	}
+	    	return testResult.compareTo(outp)==0;
+	    } catch (Exception e) {
+	    	e.printStackTrace();
+	    }
+	    return false;    	
+	}	
+
 	
-	public String getGenCode() {
-		return genCode;
+	/**
+	 * @return the output
+	 */
+	public String getOutput() {
+		return output;
 	}
-	
-	public void setGenCode(String genCode) {
-		this.genCode = genCode;
-		this.genCodeFileName = "";
+	/**
+	 * @param output the output to set
+	 */
+	public void setOutput(String output) {
+		this.output = output;
+		this.outputFileName = "";
 		this.resultOnFile = false;
 	}
-
-	public String getGenCodeFileName() {
-		return genCodeFileName;
-	}
 	
-	public void setGenCodeFileName(String flatModelFileName) {
-		this.genCodeFileName = flatModelFileName;
-		this.genCode = "";
+	/**
+	 * @return the methodName
+	 */
+	public String getMethodName() {
+		return methodName;
+	}
+	/**
+	 * @param methodName the methodName to set
+	 */
+	public void setMethodName(String methodName) {
+		this.methodName = methodName;
+	}
+
+	/**
+	 * @return the outputFileName
+	 */
+	public String getOutputFileName() {
+		return outputFileName;
+	}
+	/**
+	 * @param outputFileName the outputFileName to set
+	 */
+	public void setOutputFileName(String outputFileName) {
+		this.outputFileName = outputFileName;
+		this.output = "";
 		this.resultOnFile = true;
 	}
-	
+	/**
+	 * @return the resultOnFile
+	 */
 	public boolean isResultOnFile() {
 		return resultOnFile;
 	}
 	
+	/**
+	 * @param resultOnFile the resultOnFile to set
+	 */
 	public void setResultOnFile(boolean resultOnFile) {
 		this.resultOnFile = resultOnFile;
 	}
-
-	public String getTemplate() {
-		return template;
-	}
-	
-	public void setTemplate(String template) {
-		this.template = template;
-		this.templateFileName = "";
-		this.templateOnFile = false;
-	}
-
-	public String templateFileName() {
-		return templateFileName;
-	}
-	
-	public void templateFileName(String templateFileName) {
-		this.templateFileName = templateFileName;
-		this.template = "";
-		this.resultOnFile = true;
-	}
-	
-	public boolean isTemplateOnFile() {
-		return templateOnFile;
-	}
-	
-	public void setTemplateOnFile(boolean resultOnFile) {
-		this.templateOnFile = templateOnFile;
-	}
-
-	
 	
 }

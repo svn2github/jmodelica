@@ -23,7 +23,25 @@ aspect TestFramework_C {
 				ftc.setSourceFileName(root().fileName());
 				ftc.setClassName(enclosingClassDecl().qualifiedName());
 				ts.add(ftc);
-			} else if (name.equals("JModelica.UnitTesting.GenericCodeGenTestCase")) {
+			} else if (name.equals("JModelica.UnitTesting.FClassMethodTestCase")) {
+				FClassMethodTestCase ftc = new FClassMethodTestCase();
+				for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
+					NamedArgument na = getFunctionArguments().getNamedArgument(i);
+					if (na.getName().name().equals("name"))
+						ftc.setName(((StringLitExp)na.getExp()).getSTRING());
+					else if (na.getName().name().equals("description"))
+						ftc.setDescription(((StringLitExp)na.getExp()).getSTRING());	
+					else if (na.getName().name().equals("methodName"))
+						ftc.setMethodName(((StringLitExp)na.getExp()).getSTRING());	
+					else if (na.getName().name().equals("methodResult"))
+						ftc.setOutput((((StringLitExp)na.getExp()).getSTRING()).replace("\\\"","\""));		
+						//ftc.setFlatModel((((StringLitExp)na.getExp()).getSTRING()));		
+				}
+				debugPrint(">>>>>>>>");
+				ftc.setSourceFileName(root().fileName());
+				ftc.setClassName(enclosingClassDecl().qualifiedName());
+				ts.add(ftc);
+			}else if (name.equals("JModelica.UnitTesting.GenericCodeGenTestCase")) {
 				GenericCodeGenTestCase cgtc = new GenericCodeGenTestCase();
 				for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
 					NamedArgument na = getFunctionArguments().getNamedArgument(i);
@@ -98,6 +116,7 @@ aspect TestFramework_C {
 				getExp().collectTestCasesFC("JModelica.UnitTesting.ErrorTestCase",ts);
 				getExp().collectTestCasesFC("JModelica.UnitTesting.TransformCanonicalTestCase",ts);
 				getExp().collectTestCasesFC("JModelica.UnitTesting.GenericCodeGenTestCase",ts);
+				getExp().collectTestCasesFC("JModelica.UnitTesting.FClassMethodTestCase",ts);
 				getExp().collectTestCasesFC("JModelica.UnitTesting.CCodeGenTestCase",ts);
 			}
 		}

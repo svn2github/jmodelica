@@ -135,7 +135,7 @@ end TransformCanonicalTests.TransformCanonicalTest5;
   model TransformCanonicalTest6
 	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.TransformCanonicalTestCase(name="TransformCanonicalTest6",
-        description="Test parameter sorting",
+        description="Built-in functions.",
                                                flatModel=
 "
 fclass TransformCanonicalTests.TransformCanonicalTest6
@@ -174,6 +174,115 @@ end TransformCanonicalTests.TransformCanonicalTest6;
 
   	
   end TransformCanonicalTest6;
+
+
+  model EvalTest1
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="EvalTest1",
+      methodName="variableDiagnostics",
+        description="Test evaluation of independent parameters", methodResult=
+        "Independent constants: 
+        
+Dependent constants: 
+
+Independent parameters: 
+ p1: number of uses: 0, isLinear: true evaluated binding exp: 0.8414709848078965
+ p2: number of uses: 0, isLinear: true evaluated binding exp: 0.5403023058681398
+ p3: number of uses: 0, isLinear: true evaluated binding exp: 1.5574077246549023
+ p4: number of uses: 0, isLinear: true evaluated binding exp: 0.3046926540153975
+ p5: number of uses: 0, isLinear: true evaluated binding exp: 1.2661036727794992
+ p6: number of uses: 0, isLinear: true evaluated binding exp: 0.2914567944778671
+ p7: number of uses: 0, isLinear: true evaluated binding exp: 0.5404195002705842
+ p8: number of uses: 0, isLinear: true evaluated binding exp: 1.1752011936438014
+ p9: number of uses: 0, isLinear: true evaluated binding exp: 1.543080634815244
+ p10: number of uses: 0, isLinear: true evaluated binding exp: 0.7615941559557649
+ p11: number of uses: 0, isLinear: true evaluated binding exp: 2.7182818284590455
+ p12: number of uses: 0, isLinear: true evaluated binding exp: 0.0
+ p13: number of uses: 0, isLinear: true evaluated binding exp: 0.0
+
+Dependent parameters: 
+
+Differentiated variables: 
+
+Derivative variables: 
+
+Algebraic variables: 
+
+Input variables: 
+")})));
+
+
+    parameter Real p1 = sin(1);
+    parameter Real p2 = cos(1);
+    parameter Real p3 = tan(1); 
+    parameter Real p4 = asin(0.3);
+    parameter Real p5 = acos(0.3);
+    parameter Real p6 = atan(0.3); 
+    parameter Real p7 = atan2(0.3,0.5); 	
+    parameter Real p8 = sinh(1);
+    parameter Real p9 = cosh(1);
+    parameter Real p10 = tanh(1); 
+    parameter Real p11 = exp(1);
+    parameter Real p12 = log(1);
+    parameter Real p13 = log10(1); 
+
+
+  	
+  end EvalTest1;
+
+  model LinearityTest1
+  
+  	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="LinearityTest1",
+      methodName="variableDiagnostics",
+        description="Test linearity of variables.", methodResult=
+        "  
+
+Independent constants: 
+
+Dependent constants: 
+
+Independent parameters: 
+ p1: number of uses: 3, isLinear: true evaluated binding exp: 1.0
+
+Dependent parameters: 
+
+Differentiated variables: 
+
+Derivative variables: 
+
+Algebraic variables: 
+ x1: number of uses: 2, isLinear: true
+ x2: number of uses: 2, isLinear: true
+ x3: number of uses: 2, isLinear: false
+ x4: number of uses: 2, isLinear: true
+ x5: number of uses: 2, isLinear: false
+ x6: number of uses: 3, isLinear: true
+ x7: number of uses: 1, isLinear: false
+
+Input variables: 
+  ")})));
+  
+  	Real x1;
+  	Real x2;
+  	Real x3;
+  	Real x4;
+  	Real x5;
+  	Real x6;
+  	Real x7;
+  	
+  	parameter Real p1 = 1;
+  	  
+  equation
+  	x1 = x1*p1 + x2;
+  	x2 = x3^2;
+  	x3 = x4/p1;
+  	x4 = p1/x5;
+  	x5 = x6-x6;
+  	x6 = sin(x7);
+  
+  end LinearityTest1;
+
 
 
 end TransformCanonicalTests;

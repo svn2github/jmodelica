@@ -111,5 +111,19 @@ abstract public class TestCase {
 		this.className = className;
 	}
 	
+	/**
+	 * \brief Remove all whitespaces.
+	 * @param str
+	 * @return
+	 */
+	public String removeWhitespace(String str) {
+		String str_res = str;
+    	str_res = str_res.replaceAll("\\r", "");
+    	str_res = str_res.replaceAll("\\n", "");
+    	str_res = str_res.replaceAll(" ", "");
+		return str_res;
+	}
 
+	
+	
 }

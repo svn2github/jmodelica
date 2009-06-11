@@ -129,6 +129,24 @@ aspect TestFramework {
 				ftc.setSourceFileName(root().fileName());
 				ftc.setClassName(enclosingClassDecl().qualifiedName());
 				ts.add(ftc);
+			}else if (name.equals("JModelica.UnitTesting.FClassMethodTestCase")) {
+				FClassMethodTestCase ftc = new FClassMethodTestCase();
+				for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
+					NamedArgument na = getFunctionArguments().getNamedArgument(i);
+					if (na.getName().name().equals("name"))
+						ftc.setName(((StringLitExp)na.getExp()).getSTRING());
+					else if (na.getName().name().equals("description"))
+						ftc.setDescription(((StringLitExp)na.getExp()).getSTRING());	
+					else if (na.getName().name().equals("methodName"))
+						ftc.setMethodName(((StringLitExp)na.getExp()).getSTRING());	
+					else if (na.getName().name().equals("methodResult"))
+						ftc.setOutput((((StringLitExp)na.getExp()).getSTRING()).replace("\\\"","\""));		
+						//ftc.setFlatModel((((StringLitExp)na.getExp()).getSTRING()));		
+				}
+				debugPrint(">>>>>>>>");
+				ftc.setSourceFileName(root().fileName());
+				ftc.setClassName(enclosingClassDecl().qualifiedName());
+				ts.add(ftc);
 			}else if (name.equals("JModelica.UnitTesting.TransformCanonicalTestCase")) {
 					TransformCanonicalTestCase tctc = new TransformCanonicalTestCase();
 					for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
@@ -187,6 +205,7 @@ aspect TestFramework {
 				getExp().collectTestCasesFC("JModelica.UnitTesting.TransformCanonicalTestCase",ts);
 				getExp().collectTestCasesFC("JModelica.UnitTesting.ErrorTestCase",ts);
 				getExp().collectTestCasesFC("JModelica.UnitTesting.GenericCodeGenTestCase",ts);
+				getExp().collectTestCasesFC("JModelica.UnitTesting.FClassMethodTestCase",ts);
 			}
 		}
 	
