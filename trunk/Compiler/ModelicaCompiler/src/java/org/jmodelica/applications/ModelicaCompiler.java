@@ -61,46 +61,53 @@ import org.xml.sax.SAXException;
 
 import beaver.Parser.Exception;
 
-
 /**
  * 
- * Main compiler class which bundles the tasks needed to compile a Modelica model.
+ * Main compiler class which bundles the tasks needed to compile a Modelica
+ * model.
+ * <p>
+ * There are two usages with this class:
+ * -# Compile in one step either from the command line or by calling the static 
+ * method <compileModel> in your own class.
+ * -# Split compilation into several steps by calling the static methods
+ * in your own class.
+ * <p>
+ * Use (1) for a simple and compact way of compiling a Modelica model. As a
+ * minimum, provide the modelfile name and class name as command line arguments.
+ * Optional arguments are XML template and c template files which are needed for
+ * code generation. If any of these are ommitted no code generation will be
+ * performed.
+ * <p>
+ * Command line example without code generation:<br>
+ * <code>org.jmodelica.applications.ModelicaCompiler myModels/models.mo models.model1</code>
+ * <p>
+ * Command line example with code generation: <br>
+ * <code>org.jmodelica.applications.ModelicaCompiler myModels/models.mo models.model1
+ * XMLtemplate1.xml XMLtemplate2.xml cppTemplate.cpp</code>
+ * <p>
+ * Logging can be set with the optional argument -i, -w or -e where:
+ * <p>
+ * 	- -i : log info, warning and error messages 
+ * 	- -w : log warning and error messages
+ * 	- -e : log error messages only (default if the log option is not used)
+ * <p>
+ * Example with log level set to INFO: <br>
+ * <code>org.jmodelica.applications.ModelicaCompiler -i myModels/models.mo 
+ * models.model1</code>
+ * <p>
+ * The logs will be printed to standard out.
+ * <p>
  * 
- *  There are two usages with this class:
- *  1. Compile in one step with command line arguments using this class only.
- *  2. Split compilation into several steps by calling the static methods in your own class/module.
- *  
- *  Use (1) for a simple and compact way of compiling a Modelica model. As a minimum, provide 
- *  the modelfile name and class name as command line arguments. Optional arguments are XML 
- *  template and c template files which are needed for code generation. If any of these are 
- *  ommitted no code generation will be performed.
- *  
- *  Example without code generation: 
- *  org.jmodelica.applications.ModelicaCompiler myModels/models.mo models.model1
- *  
- *  Example with code generation:
- *  org.jmodelica.applications.ModelicaCompiler myModels/models.mo models.model1 templates/XMLtemplate.xml templates/cppTemplate.cpp
- *  
- *  Logging can be set with the optional argument -i, -w or -e where:
- *  
- *  -i : log info, warning and error messages
- *	-w : log warning and error messages
- *  -e : log error messages only (default if the log option is not used)
- *  
- *  Example with log level set to INFO:
- *  org.jmodelica.applications.ModelicaCompiler -i myModels/models.mo models.model1
- *  
- *  The logs will be printed to standard out.
- *  
- *  
- *  For method (2), the compilation steps are divided into 4 tasks which can be used via the methods:
- *  1. parseModel (source code -> attributed source representation)
- *  2. instantiateModel (source representation -> instance model)
- *  3. flattenModel (instance model -> flattened model)
- *  4. generateCode (flattened model -> c code and XML code)
- *  
- *  They must be called in this order. Use provided methods to get/set logging level. 
- *  
+ * For method (2), the compilation steps are divided into 4 tasks which can be
+ * used via the methods:
+ * -# parseModel (source code -> attributed source representation)  
+ * -# instantiateModel (source representation -> instance model) 
+ * -# flattenModel (instance model -> flattened model) 
+ * -# generateCode (flattened model -> c code and XML code)
+ * <p>
+ * They must be called in this order. Use provided methods to get/set logging
+ * level.
+ * 
  */
 public class ModelicaCompiler {
 
@@ -113,7 +120,8 @@ public class ModelicaCompiler {
 	
 	public static void main(String args[]) {
 		if(args.length < 1) {
-			logger.severe("ModelicaCompiler expects the command line arguments: [-i/w/e] <file name> <class name> [<xml template> <c template>]");
+			logger.severe("ModelicaCompiler expects the command line arguments: " +
+					"[-i/w/e] <file name> <class name> [<xml template> <c template>]");
 			System.exit(1);
 		}
 		int arg = 0;
@@ -126,7 +134,8 @@ public class ModelicaCompiler {
 		}
 
 		if (args.length < arg+2) {
-			logger.severe("ModelicaCompiler expects a file name and a class name as command line arguments.");
+			logger.severe("ModelicaCompiler expects a file name and a class name as " +
+					"command line arguments.");
 			System.exit(1);
 		}		
 		
@@ -177,10 +186,11 @@ public class ModelicaCompiler {
 	 * Sets logging to the level specified. Valid values are:
 	 * ModelicaCompiler.INFO, ModelicaCompiler.WARNING or ModelicaCompiler.ERROR
 	 * 
-	 * Default log level setting is ERROR. Messages will be printed to the 
+	 * Default log level setting is ERROR. Messages will be printed to the
 	 * standard out.
 	 * 
-	 * @param level The level of logging to use as of now.
+	 * @param level
+	 *            The level of logging to use as of now.
 	 */
 	public static void setLogLevel(String level) {
 		if(level.equals(ModelicaCompiler.INFO)) {
@@ -205,19 +215,42 @@ public class ModelicaCompiler {
 	}
 	
 	/**
-	 * Compiles a Modelica model. A model file name and class must be provided. Two  
-	 * template files for XML and one for c can be provided to generatate code for 
-	 * this model. Prints an error and returns without completion if, for example, 
-	 * a file can not be found or if the parsing fails. 
+	 * Compiles a Modelica model. A model file name and class must be provided.
+	 * Two template files for XML and one for c can be provided to generatate
+	 * code for this model. Prints an error and returns without completion if,
+	 * for example, a file can not be found or if the parsing fails.
 	 * 
-	 * @param name The name of the model file.
-	 * @param cl The name of the class in the model file to compile.
-	 * @param xmlVariablesTempl The XML template file for model variables(optional).
-	 * @param xmlValuesTempl The XML template file for independent parameter values (optional).
-	 * @param cTemplatefile The c template file (optional).
+	 * @param name
+	 *            The name of the model file.
+	 * @param cl
+	 *            The name of the class in the model file to compile.
+	 * @param xmlVariablesTempl
+	 *            The XML template file for model variables(optional).
+	 * @param xmlValuesTempl
+	 *            The XML template file for independent parameter values
+	 *            (optional).
+	 * @param cTemplatefile
+	 *            The c template file (optional).
+	 * 
+	 * @throws beaver.Parser.Exception
+	 *             If there was an Beaver parsing exception.
+	 * @throws CompilerException
+	 *             If errors have been found during the parsing, instantiation
+	 *             or flattening.
+	 * @throws FileNotFoundException
+	 *             If the model file can not be found.
+	 * @throws IOException
+	 *             If there was an error reading the model file. (Beaver
+	 *             exception.)
+	 * @throws IOException
+	 *             If there was an error creating the .mof file.
+	 * @throws ModelicaClassNotFoundException
+	 *             If the Modelica class to parse, instantiate or flatten is not
+	 *             found.
+	 * 
 	 */
 	public static void compileModel(String name, String cl, String xmlVariablesTempl, String xmlValuesTempl, String cTemplatefile) 
-	  throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, Exception {
+	  throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		logger.info("======= Compiling model =======");
 		
 		// build source tree
@@ -239,18 +272,26 @@ public class ModelicaCompiler {
 
 	/**
 	 * 
-	 * Parses a model and returns a reference to the root of the source tree. 
-	 * Options related to the compilation are also loaded here and added to the 
+	 * Parses a model and returns a reference to the root of the source tree.
+	 * Options related to the compilation are also loaded here and added to the
 	 * source tree representation.
 	 * 
-	 * @param name The name of the model file.
+	 * @param name
+	 *            The name of the model file.
+	 *            
 	 * @return The root of the source tree.
+	 * 
+	 * @throws beaver.Parser.Exception
+	 *             If there was an Beaver parsing exception.
+	 * @throws CompilerException
+	 *             If errors have been found during the parsing.
 	 * @throws FileNotFoundException
+	 *             If the model file can not be found.
 	 * @throws IOException
-	 * @throws Exception
+	 *             If there was an error reading the model file. (Beaver exception.)
 	 */
 	public static SourceRoot parseModel(String name) 
-	  throws FileNotFoundException, IOException, Exception, CompilerException{
+	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
 		ModelicaParser parser = new ModelicaParser();
 //		ModelicaParser.CollectingReport report = new ModelicaParser.CollectingReport();
 //		parser.setReport(report);
@@ -287,14 +328,23 @@ public class ModelicaCompiler {
 
 	/**
 	 * 
-	 * Computes a model instance tree from a source tree. Some error checks 
-	 * such as type checking is performed during the computation.
+	 * Computes a model instance tree from a source tree. Some error checks such
+	 * as type checking is performed during the computation.
 	 * 
-	 * @param sr The reference to the model source root.
-	 * @param cl The name of the class in the model file to compile.
+	 * @param sr
+	 *            The reference to the model source root.
+	 * @param cl
+	 *            The name of the class in the model file to compile.
+	 * 
 	 * @return The root of the instance tree.
+	 * 
+	 * @throws CompilerException
+	 *             If errors have been found during the instantiation.
+	 * @throws ModelicaClassNotFoundException
+	 *             If the Modelica class to instantiate is not found.
 	 */
-	public static InstProgramRoot instantiateModel(SourceRoot sr, String cl) throws ModelicaClassNotFoundException, CompilerException{
+	public static InstProgramRoot instantiateModel(SourceRoot sr, String cl) 
+		throws ModelicaClassNotFoundException, CompilerException{
 		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 
 		logger.info("Checking for errors...");
@@ -311,12 +361,24 @@ public class ModelicaCompiler {
 	}
 	
 	/**
-	 * Computes the flattened model representation from the parsed instance model.
+	 * Computes the flattened model representation from the parsed instance
+	 * model.
 	 * 
-	 * @param name The name of the model file.
-	 * @param cl The name of the class in the model file to compile.
-	 * @param ipr The reference to the instance tree root.
+	 * @param name
+	 *            The name of the model file.
+	 * @param cl
+	 *            The name of the class in the model file to compile.
+	 * @param ipr
+	 *            The reference to the instance tree root.
+	 * 
 	 * @return FClass object representing the flattened model.
+	 * 
+	 * @throws CompilerException
+	 *             If errors have been found during the flattening.
+	 * @throws IOException
+	 *             If there was an error creating the .mof file.
+	 * @throws ModelicaClassNotFoundException
+	 *             If the Modelica class to flatten is not found.
 	 */
 	public static FClass flattenModel(String name, String cl, InstProgramRoot ipr) 
 		throws CompilerException, ModelicaClassNotFoundException, IOException {
@@ -360,17 +422,27 @@ public class ModelicaCompiler {
 
 	/**
 	 * 
-	 * Generates XML and c code for a flattened model represented as an instance of FClass using 
-	 * template files. The XML variables, XML values and c files are given the default names 
-	 * <modelname>_variables.xml, <modelname>_values.xml and <modelname>.c respectively.
+	 * Generates XML and c code for a flattened model represented as an instance
+	 * of FClass using template files. The XML variables, XML values and c files
+	 * are given the default names <modelname>_variables.xml,
+	 * <modelname>_values.xml and <modelname>.c respectively.
 	 * 
-	 * @param fc The FClass instance for which the code generation should be computed.
-	 * @param xmlVariablesTempl The path to the XML template file for model variables.
-	 * @param xmlValuesTempl The path to the XML template file for independent parameter values.
-	 * @param ctemplate The path to the c template file.
-	 * @throws FileNotFoundException Throws the exception if either of the two files are not found.
+	 * @param fc
+	 *            The FClass instance for which the code generation should be
+	 *            computed.
+	 * @param xmlVariablesTempl
+	 *            The path to the XML template file for model variables.
+	 * @param xmlValuesTempl
+	 *            The path to the XML template file for independent parameter
+	 *            values.
+	 * @param ctemplate
+	 *            The path to the c template file.
+	 * 
+	 * @throws FileNotFoundException
+	 *             If either of the three template files can not be found.
 	 */
-	public static void generateCode(FClass fc, String xmlVariablesTempl, String xmlValuesTempl, String ctemplate) throws FileNotFoundException {
+	public static void generateCode(FClass fc, String xmlVariablesTempl, String xmlValuesTempl, String ctemplate) 
+		throws FileNotFoundException {
 		logger.info("Generating code...");
 		
 		XMLVariableGenerator variablegenerator = new XMLVariableGenerator(new PrettyPrinter(), '$', fc);
@@ -474,7 +546,23 @@ public class ModelicaCompiler {
 		}
 	}
 	
-	private static Document parseAndGetDOM(String xmlfile) throws ParserConfigurationException, IOException, SAXException{
+	/**
+	 * Parses an XML file and returns the DOM document instance.
+	 * 
+	 * @param xmlfile
+	 *            The XML file to be parsed.
+	 * 
+	 * @return The DOM document object.
+	 * 
+	 * @throws ParserConfigurationException
+	 *             If a parser configuration error has occured.
+	 * @throws IOException
+	 *             If an IO error occurs.
+	 * @throws SAXException
+	 *             If an error with the parsing occurs.
+	 */
+	private static Document parseAndGetDOM(String xmlfile) 
+		throws ParserConfigurationException, IOException, SAXException{
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setIgnoringComments(true);
 		factory.setIgnoringElementContentWhitespace(true);
@@ -485,9 +573,30 @@ public class ModelicaCompiler {
 		return doc;
 	}
 	
-	
+	/**
+	 * Class which can be used to fetch static loggers with different purposes.
+	 * 
+	 * This is an attempt to have a general Logger class which contains loggers
+	 * for different purposes. It is then possible to have each logger specially
+	 * configured for its indended use. Right now there is only one logger class
+	 * which is a console logger. It has a specific loglevel and a certain
+	 * formatting. Another useful logger could be a filelogger which has a
+	 * loglevel and an output formatting which suits logging to file.
+	 * 
+	 */
 	protected static class ModelicaLoggers {
-
+		
+		/**
+		 * Returns a logger with a certain name which prints logs to the
+		 * console. If the name is encountered for the first time a new logger
+		 * is created otherwise the already created logger with the specific
+		 * name is returned. The log outputs are formatted to suit a console.
+		 * The default log level is Level.INFO.
+		 * 
+		 * @param name
+		 *            The name of the logger.
+		 * @return A logger which prints log messages to the console.
+		 */
 		public static Logger getConsoleLogger(String name) {
 			Logger l = Logger.getLogger(name);
 			l.setUseParentHandlers(false);
@@ -497,7 +606,12 @@ public class ModelicaCompiler {
 			l.setLevel(Level.INFO);
 			return l;
 		}
-	
+		
+		/**
+		 * Private formatting helper class for the console logger. Formats
+		 * log messages to suit a console output.
+		 * 
+		 */
 		private static class ConsoleFormatter extends SimpleFormatter {
 			public ConsoleFormatter() {
 				super();
