@@ -387,7 +387,9 @@ def load_DLL(libname, path):
                                     ct.POINTER(ct.c_int),
                                     ct.POINTER(ct.c_int),
                                     ct.POINTER(ct.c_int),
-                                    ct.POINTER(ct.c_int)] 
+                                    ct.POINTER(ct.c_int)]
+    dll.jmi_get_n_tp.argtypes = [ct.c_void_p,
+                                 ct.POINTER(ct.c_int)]    
     dll.jmi_set_tp.argtypes = [ct.c_void_p,
                                Nct.ndpointer(dtype=c_jmi_real_t,
                                              ndim=1,
@@ -664,7 +666,6 @@ def load_DLL(libname, path):
     dll.jmi_opt_J.argtypes = [ct.c_void_p,
                               Nct.ndpointer(dtype=c_jmi_real_t,
                                             ndim=1,
-                                            shape=1,
                                             flags='C')]   
     dll.jmi_opt_dJ.argtypes = [ct.c_void_p,
                                ct.c_int,
@@ -1169,14 +1170,6 @@ class JMIModel(object):
     """
     
     def __init__(self, libname, path='.'):
-        """ Constructor.
-        
-        @param libname:
-            The name of the file containing the DLL.
-        @param path:
-            The path where the DLL (and it's optional XML file)
-            resides.
-        """
         # detect platform specific shared library file extension
         suffix = ''
         if sys.platform == 'win32':
@@ -1230,17 +1223,6 @@ class JMIModel(object):
         self._n_z  = ct.c_int()
         
         self.get_sizes()
-        
-        # artificial sizes. See JMI API documentation for more info.
-        # these are loaded as ct.c_int()s to keep things the same when
-        # working with the sizes above.
-        self._n_p = ct.c_int(self._n_ci.value + self._n_cd.value
-                              + self._n_pi.value + self._n_pd.value)
-        self._n_v = ct.c_int(self._n_dx.value + self._n_x.value
-                              + self._n_u.value + self._n_w.value + 1)
-        self._n_q = ct.c_int((self._n_dx.value + self._n_x.value
-                              + self._n_u.value + self._n_w.value)
-                              * self._n_tp.value)
 
         # offsets
         self._offs_ci = ct.c_int()
@@ -1286,7 +1268,7 @@ class JMIModel(object):
         self.initAD()
          
     def initAD(self):
-        """ Initializing Algorithmic Differential package.
+        """Initializing Algorithmic Differential package.
         
             Raises a JMIException on failure.
         """
@@ -1558,13 +1540,15 @@ class JMIModel(object):
             @note:
                 getT returns a NumPy array of length 1.
         """
-        return self._t[0]
+        return self._t
         
     def setT(self, t):
         """ Sets the time value.
         
+            @note:
+                Parameter t must be a NumPy array of length 1.
         """
-        self._t[0] = t
+        self._t[:] = t
         
     t = property(getT, setT, "The time value.")
     
@@ -1827,8 +1811,6 @@ class JMIModel(object):
     def opt_get_optimization_interval(self):
         """ Gets the optimization interval.
         
-            See JMI documentation for more information.
-        
         """
         start_time = ct.c_double()
         start_time_free = ct.c_int()
@@ -1873,14 +1855,12 @@ class JMIModel(object):
             raise JMIException("Getting the sizes of the optimization functions failed.")
         return n_eq_Ceq.value, n_eq_Cineq.value, n_eq_Heq.value, n_eq_Hineq.value
         
-    def opt_J(self):
+    def opt_J(self, J):
         """ Evaluates the cost function J.
         
         """
-        J = N.array([0], dtype=c_jmi_real_t())
         if self._dll.jmi_opt_J(self._jmi, J) is not 0:
             raise JMIException("Evaluation of J failed.")
-        return J[0]
         
     def opt_dJ(self, eval_alg, sparsity, independent_vars, mask, jac):
         """ Evaluates the gradient of the cost function.
@@ -2652,4 +2632,24 @@ class JMISimultaneousOptIPOPT(object):
     def opt_sim_ipopt_set_num_option(self, key, val):
         if self._jmi_opt_sim_model._jmi_model._dll.jmi_opt_sim_ipopt_set_num_option(self._jmi_opt_sim_ipopt, key, val) is not 0:
             raise JMIException("Setting num option failed.")
+    
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
 
+    
