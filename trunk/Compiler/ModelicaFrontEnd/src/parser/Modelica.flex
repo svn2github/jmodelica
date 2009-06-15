@@ -18,6 +18,7 @@
 package org.jmodelica.parser;
 
 import java.util.Map;
+import java.util.HashMap;
 import beaver.Scanner;
 import org.jmodelica.parser.ModelicaParser.Terminals;
 
@@ -95,6 +96,8 @@ import org.jmodelica.parser.ModelicaParser.Terminals;
     
   }
   
+  private HashMap<Integer, Integer> lineBreakMap;
+  
   StringBuffer string = new StringBuffer(128);
 
   private Symbol newSymbol(short id) {
@@ -105,11 +108,35 @@ import org.jmodelica.parser.ModelicaParser.Terminals;
     return new Symbol(id, value);
   }
   
-  public int offset() {
-    return yychar;
+  public void reset(java.io.Reader reader) {
+    lineBreakMap = new HashMap<Integer, Integer>();
+    lineBreakMap.put(0, 0);
+    yyreset(reader);
   }
-
+  
+  private void addLineBreaks(String text) {
+  	int line = yyline;  	
+  	for (int i = 0; i < text.length(); i += 1) {
+  		switch (text.charAt(i)) {
+  			case '\r': 
+  				if (i < text.length() - 1 && text.charAt(i+1) == '\n') 
+  					++i;
+  			case '\n': 
+  				lineBreakMap.put(++line, yychar + i + 1);
+		} 
+  	} 
+  }
+  
+  public Map<Integer, Integer> getLineBreakMap() {
+	  return lineBreakMap;
+  }
+  
 %}
+
+%init{
+  lineBreakMap = new HashMap<Integer, Integer>();
+  lineBreakMap.put(0, 0);
+%init}
 
 
 ID = {NONDIGIT} ({DIGIT}|{NONDIGIT})* | {Q_IDENT}
@@ -127,9 +154,10 @@ UNSIGNED_NUMBER = {DIGIT} {DIGIT}* ( "." ( {UNSIGNED_INTEGER} )? )? ( (e|E) ( "+
 
 
 LineTerminator = \r|\n|\r\n
+NonBreakingWhiteSpace = [ \t\f]+
 InputCharacter = [^\r\n]
 
-WhiteSpace = ({LineTerminator} | [ \t\f])+
+WhiteSpace = ({LineTerminator} | {NonBreakingWhiteSpace})+
 
 /* comments */
 Comment = {TraditionalComment} | {EndOfLineComment} 
@@ -172,9 +200,11 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   
   "initial"         { return newSymbol(Terminals.INITIAL); }
   "equation"        { return newSymbol(Terminals.EQUATION); }
-  "initial" {WhiteSpace} "equation"        { return newSymbol(Terminals.INITIAL_EQUATION); }
+  "initial" {WhiteSpace} "equation"    { addLineBreaks(yytext()); 
+  										 return newSymbol(Terminals.INITIAL_EQUATION); }
   "algorithm"        { return newSymbol(Terminals.ALGORITHM); }
-  "initial" {WhiteSpace} "algorithm"        { return newSymbol(Terminals.INITIAL_ALGORITHM); }
+  "initial" {WhiteSpace} "algorithm"   { addLineBreaks(yytext()); 
+  										 return newSymbol(Terminals.INITIAL_ALGORITHM); }
   
     "each"        { return newSymbol(Terminals.EACH); }
     "final"        { return newSymbol(Terminals.FINAL); }   
@@ -242,15 +272,18 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "<>"               { return newSymbol(Terminals.NEQ); }
   
   {STRING}  {  String s = yytext();
+               addLineBreaks(s);
                s = s.substring(1,s.length()-1);
-                return newSymbol(Terminals.STRING,s); }
-  {ID}      { return newSymbol(Terminals.ID, yytext()); }
+               return newSymbol(Terminals.STRING,s); }
+  {ID}      { String s = yytext();
+  			  addLineBreaks(s);
+  			  return newSymbol(Terminals.ID, s); }
   {UNSIGNED_INTEGER}  { return newSymbol(Terminals.UNSIGNED_INTEGER, yytext()); }
   {UNSIGNED_NUMBER}   { return newSymbol(Terminals.UNSIGNED_NUMBER, yytext()); }
   
-  {Comment}         { }
-  {WhiteSpace} 		{ }
-
+  {Comment}         { addLineBreaks(yytext()); }
+  {NonBreakingWhiteSpace} 		{ }
+  {LineTerminator} 		{ lineBreakMap.put(yyline+1, yychar + yylength()); }
 }
 
 //.|\n                { throw new RuntimeException("Illegal character \""+yytext()+ "\" at line "+yyline+", column "+yycolumn); }

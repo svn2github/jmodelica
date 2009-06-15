@@ -16,6 +16,7 @@
 
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import org.jmodelica.parser.*;
@@ -619,4 +620,12 @@ aspect Streams {
         }
 
        
+}
+
+aspect LineOffsets {
+	private Map<Integer, Integer> StoredDefinition.lineBreakMap;
+	
+	public void StoredDefinition.setLineBreakMap(Map<Integer, Integer> map) {
+		lineBreakMap = map;
+	}
 }

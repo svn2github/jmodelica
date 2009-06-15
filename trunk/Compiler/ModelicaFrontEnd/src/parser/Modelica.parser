@@ -23,6 +23,7 @@
  import org.jmodelica.ast.*;
  import java.io.*;
  import java.util.Collection;
+ import java.util.Map;
 :};
 
 %embed {:
@@ -171,12 +172,19 @@
 	public Parser.Events getReport() {
 		return report;
 	}
+	
+	private Map<Integer, Integer> lineBreakMap;
+	
+	public void setLineBreakMap(Map<Integer, Integer> map) {
+	    lineBreakMap = map;
+	}
 
 	public SourceRoot parseFile(String fileName) {
 		SourceRoot sr = null;
 		try {
 			Reader reader = new FileReader(fileName);
 			ModelicaScanner scanner = new ModelicaScanner(new BufferedReader(reader));
+			setLineBreakMap(scanner.getLineBreakMap());
 			sr = (SourceRoot)parse(scanner);
 			sr.setFileName(fileName);
 		}  catch (FileNotFoundException e) {
@@ -193,10 +201,11 @@
 		return sr;
 	}
 	
-		public SourceRoot parseString(String str, String fileName) {
+	public SourceRoot parseString(String str, String fileName) {
 		SourceRoot sr = null;
 		try {
 			ModelicaScanner scanner = new ModelicaScanner(new StringReader(str));
+			setLineBreakMap(scanner.getLineBreakMap());
 			sr = (SourceRoot)parse(scanner);
 			sr.setFileName(fileName);
 		}  catch (FileNotFoundException e) {
@@ -246,7 +255,9 @@ Program program =
   
 StoredDefinition stored_definition =
     within?  
-    base_class_decl_list                        {: return new StoredDefinition(within,base_class_decl_list); :}
+    base_class_decl_list                        {: StoredDefinition def = new StoredDefinition(within, base_class_decl_list);
+                                                   def.setLineBreakMap(lineBreakMap);
+    											   return def; :}
   | error										{: return new BadDefinition(); :} 
   ;
 
