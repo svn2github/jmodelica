@@ -28,9 +28,9 @@ aspect Outline {
 			buf.append(", ");
 			buf.append(getTypePrefixFlow());
 		}
-		if (hasTypePrefixOther()) {
+		if (hasTypePrefixVariability()) {
 			buf.append(", ");
-			buf.append(getTypePrefixOther());
+			buf.append(getTypePrefixVariability());
 		}
 		if (hasTypePrefixInputOutput()) {
 			buf.append(", ");

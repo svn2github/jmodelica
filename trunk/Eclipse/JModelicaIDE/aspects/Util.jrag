@@ -5,7 +5,7 @@ aspect Util {
 	eq InstNode.getInstClassDecl(int index).getDefinition() = 
 			getInstClassDecl(index).getClassDecl().getDefinition();
 	eq InstNode.getInstComponentDecl(int index).getDefinition() = 
-			getInstComponentDecl(index).myInstClass().getClassDecl().getDefinition();
+			getInstComponentDecl(index).getComponentDecl().getDefinition();
   	
   	private IDocument StoredDefinition.document;
   	

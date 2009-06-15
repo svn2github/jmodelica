@@ -35,7 +35,7 @@ public class InstanceError implements IError {
 		hasDoc = node.getDefinition().hasDocument();
 		if (hasDoc) {
 			start = node.getBeginOffset();
-			end = node.getEndOffset();
+			end = node.getEndOffset() + 1;
 		}
 	}
 
@@ -101,7 +101,7 @@ public class InstanceError implements IError {
 	public boolean equals(Object o) {
 		if (o instanceof InstanceError) {
 			InstanceError e = (InstanceError) o;
-			return line == e.line && col == e.col && file.equals(e.file) && msg.equals(msg);
+			return line == e.line && col == e.col && fileName.equals(e.fileName) && msg.equals(msg);
 		}
 		return false;
 	}
