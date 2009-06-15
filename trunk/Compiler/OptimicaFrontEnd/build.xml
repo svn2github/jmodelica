@@ -197,7 +197,16 @@
 		  		    	      <arg value="TypeTests"/>
 		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 		    </java>
-
+	<!--  	 <java 
+		  		      classname="org.jmodelica.test.ast.JunitGenerator"
+		  		      classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar" 
+		  		      fork="true" 
+		  		      dir=".">
+		  		    	<arg value="src/test/modelica/OptimicaTransformCanonicalTests.mo"/>
+		  		    	      <arg value="OptimicaTransformCanonicalTests"/>
+		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
+		    </java>
+-->
 	  	<javac compiler="javac1.5" debug="true" destdir="bin" 
 	  		classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar:${junit_dir}/junit-4.5.jar" >
 	  		<src path="${test_junit-gen_dir}/"/>

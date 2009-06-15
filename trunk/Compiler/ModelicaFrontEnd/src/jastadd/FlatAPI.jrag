@@ -629,7 +629,8 @@ aspect FlatAPI {
 
 	syn lazy boolean FVariable.isIndependentConstant() = isConstant();
 	syn lazy boolean FVariable.isDependentConstant() = false;
-	syn lazy boolean FVariable.isIndependentParameter() = isParameter() &&
+	syn lazy boolean FVariable.isIndependentParameter();
+	eq FVariable.isIndependentParameter() = isParameter() &&
  		  (hasBindingExp()? getBindingExp().isConstantExp(): 
  		  (startAttributeSet()? startAttributeExp().isConstantExp(): true));
 	syn lazy boolean FVariable.isDependentParameter() = isParameter() &&

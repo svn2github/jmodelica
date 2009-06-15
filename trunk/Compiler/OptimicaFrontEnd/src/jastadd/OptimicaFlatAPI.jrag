@@ -1,6 +1,16 @@
 aspect OptimicaFlatAPI {
 	
 	/**
+	 * \brief Refine the definition of isIndependentParameter to take into
+	 * account optimized parameters.
+	 */
+	refine FlatAPI eq FVariable.isIndependentParameter() = 
+		(isParameter() || isOptParameter()) &&
+	  (hasBindingExp()? getBindingExp().isConstantExp(): 
+	  (startAttributeSet()? startAttributeExp().isConstantExp(): true));
+
+	
+	/**
 	 * \brief Check if the free attribute is set for a variable.
 	 * 
 	 * @return True if attribute set.
@@ -776,6 +786,41 @@ aspect OptimicaFlatAPI {
 	eq FOptClass.getChild().myFOptClass() = this;
 	eq Root.getChild().myFOptClass() = null; 
 	
+}
+
+aspect OptimicaFVariableUses {
+	
+	/**
+	 * \brief Collection attribute returning all variable uses in timed
+	 * variables.
+	 */
+	coll HashSet<FTimedVariable> FVariable.usesTimedVariables() 
+	  [new HashSet<FTimedVariable>()] 
+	   with add root FlatRoot;
+	
+	FTimedVariable contributes this to 
+	   FVariable.usesTimedVariables() for getName().myFV();
+		
+}
+
+aspect OptimicaLinearVariables {
+	
+	syn lazy boolean[] FVariable.isLinearTimedVariables() {
+		boolean isLin[] = new boolean[myFOptClass().numTimePoints()];
+		for (int i=0;i<myFOptClass().numTimePoints();i++) {
+			isLin[i] = true;
+		}
+		for (FTimedVariable ftv : usesTimedVariables()) {
+			if (!ftv.isLinear()) {
+				isLin[myFOptClass().timePointIndex(ftv.getArg().ceval().realValue())] = false;
+			}
+		}
+		return isLin;
+	}
+	
+}
+
+aspect OptimicaFlatAPIDiagnostics {
 	/**
 	 * Print diagnostics.
 	 */
@@ -845,7 +890,25 @@ aspect OptimicaFlatAPI {
 		}
 		str.append("}\n");
 
+		str.append("\n");
+		str.append(timedVariablesLinearityDiagnostics());
 		
 		return str.toString();
 	}	
+	
+	public String FOptClass.timedVariablesLinearityDiagnostics() {
+		StringBuffer str = new StringBuffer();
+		
+		for (FVariable fv : getFVariables()) {
+			str.append(fv.name() + ":\n");
+			boolean isLin[] = fv.isLinearTimedVariables();
+			for (int i=0;i<numTimePoints();i++) {
+				str.append("  " + timePoints()[i] + ": " +
+						isLin[i] + "\n");
+			}
+		}
+		
+		return str.toString();
+	}
+	
 }

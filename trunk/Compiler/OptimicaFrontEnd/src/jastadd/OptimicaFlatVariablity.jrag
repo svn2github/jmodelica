@@ -8,9 +8,8 @@ aspect OptimicaFlatVariability {
 
 	syn boolean FTypePrefixVariability.timedVariability() = false;
 	eq FTimed.timedVariability() = true;	
-
 	syn boolean FExp.isTimedExp() = variability().timedVariability();
-
+	
 	eq FTimedVariable.variability() = fTimed();
 	eq FStartTimeExp.variability() = fParameter();
 	eq FFinalTimeExp.variability() = fParameter();
@@ -20,7 +19,38 @@ aspect OptimicaFlatVariability {
 	public static FTimed ASTNode.fTimed() {
 		return FTimed.singleton;
 	}
-
+	
+	syn boolean FTypePrefixVariability.optParameterVariability() = false;
+	eq FTimed.optParameterVariability() = true;	
+	syn boolean FExp.isOptParameterExp() = variability().optParameterVariability();
+	
+	refine FlatVariability eq FVariable.isParameter() =
+		getFTypePrefixVariability().parameterVariability() &&
+		!freeAttribute();
+	
+	public static final FOptParameter FOptParameter.singleton = new FOptParameter();	
+	
+    syn boolean FVariable.isOptParameter() = 
+    	getFTypePrefixVariability().parameterVariability() &&
+    	freeAttribute();
+	
+	public static FOptParameter ASTNode.fOptParameter() {
+		return FOptParameter.singleton;
+	}
+	
+	refine FlatVariability eq FVariable.variability() {
+   		if (!isContinuous()) {
+   			if (isOptParameter()) {
+   				return fOptParameter();
+   			}
+   			return getFTypePrefixVariability();
+   		} else if (isInteger() || isBoolean() || isString()) {
+   			return(fDiscrete());
+   		} else {
+   			return fContinuous();
+   		}
+	}
+	
    	refine FlatVariability public FTypePrefixVariability FTypePrefixVariability.combine(FTypePrefixVariability other) {   			
    		if (this instanceof FContinuous) {
    			return this;
@@ -31,11 +61,16 @@ aspect OptimicaFlatVariability {
    			return this;
    		} else if (other instanceof FDiscrete) {
    			return other;
-   	   		// neither is a continuous variable or discrete variable   			
+   	   		// neither is a discrete variable or discrete variable   			
    		} else if (this instanceof FTimed) {
    			return this;
    		} else if (other instanceof FTimed) {
    			return other;
+   		} else if (this instanceof FOptParameter) {
+   			return this;
+   		} else if (other instanceof FOptParameter) {
+   			return other;
+   		// neither is a optimized parameter variable, discrete variable, or continuous value
    		} else if (this instanceof FParameter) {
    			return this;
    		} else if (other instanceof FParameter) {
@@ -47,6 +82,7 @@ aspect OptimicaFlatVariability {
 	}	
 
    	eq FTimed.toString() = "timed";
+   	eq FOptParameter.toString() = "opt_parameter";
 	
 	syn boolean FConstraint.isTimed() = 
 		(getRight().isTimedExp() | getRight().isParameterExp() | getRight().isConstantExp()) & 

@@ -26,7 +26,8 @@ aspect FlatVariability {
 	eq FContinuous.continuousVariability() = true;	
 
 	syn boolean FVariable.isConstant() = getFTypePrefixVariability().constantVariability();
-    syn boolean FVariable.isParameter() = getFTypePrefixVariability().parameterVariability();
+    syn boolean FVariable.isParameter(); 
+    eq FVariable.isParameter() = getFTypePrefixVariability().parameterVariability();
     syn boolean FVariable.isDiscrete() = getFTypePrefixVariability().discreteVariability();
     syn boolean FVariable.isContinuous() = getFTypePrefixVariability().continuousVariability();
     	
