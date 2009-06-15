@@ -25,18 +25,18 @@ aspect InstNameClassification {
 //  			    InstComponentAccess a = new InstComponentAccess(getID(),getArraySubscriptsOpt());
   			    InstComponentAccess a = new InstComponentAccess(getID());
      			a.setStart(getStart());
-     			a.setEnd(getStart());
+     			a.setEnd(getEnd());
      			return a;
   		} else if (kind()==Kind.CLASS_ACCESS) {
 	 			InstClassAccess a =  new InstClassAccess(getID());
      			a.setStart(getStart());
-     			a.setEnd(getStart());
+     			a.setEnd(getEnd());
      			return a;
   		} else {
 //  				InstAmbiguousAccess a = new InstAmbiguousAccess(getID(),getArraySubscriptsOpt());
   				InstAmbiguousAccess a = new InstAmbiguousAccess(getID());
     			a.setStart(getStart());
-    			a.setEnd(getStart());
+    			a.setEnd(getEnd());
      			return a;
   		}
   		}
@@ -106,13 +106,13 @@ aspect InstResolveAmbiguousNames {
 		    	//System.out.println("ki2: " + name());
      		    InstComponentAccess c = new InstComponentAccess(name());
   	 			c.setStart(getStart());
-  	 			c.setEnd(getStart());
+  	 			c.setEnd(getEnd());
   	 			return c;
   		} else 
             if(!lookupInstClass(name()).isEmpty()) {		
     			InstClassAccess t = new InstClassAccess(name()); 
     			t.setStart(getStart());
-    			t.setEnd(getStart());
+    			t.setEnd(getEnd());
   	 			return t;
   			}
   			rewritten = true;
