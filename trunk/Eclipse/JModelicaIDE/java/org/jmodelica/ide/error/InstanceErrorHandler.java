@@ -1,5 +1,7 @@
 package org.jmodelica.ide.error;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 
 import org.jmodelica.ast.ASTNode;
@@ -9,12 +11,14 @@ public class InstanceErrorHandler implements IErrorHandler {
 	
 	private HashSet<InstanceError> foundErrors = new HashSet<InstanceError>();
 	private HashSet<InstanceError> countedErrors = new HashSet<InstanceError>();
+	private boolean lostErrors;
 
 	public void error(String s, ASTNode n) {
 		InstanceError error = new InstanceError(s, n);
 		if (!foundErrors.contains(error)) {
 			// TODO: if file/document isn't available, find them or attach later
-			error.attachToFile();
+			if (!error.attachToFile())
+				lostErrors = true;
 			foundErrors.add(error);
 		}
 		if (!countedErrors.contains(error)) {
@@ -28,7 +32,7 @@ public class InstanceErrorHandler implements IErrorHandler {
 	
 	public void reset() {
 		foundErrors.clear();
-		countedErrors.clear();
+		resetCounter();
 	}
 	
 	public int getNumErrors() {
@@ -37,6 +41,18 @@ public class InstanceErrorHandler implements IErrorHandler {
 
 	public void resetCounter() {
 		countedErrors.clear();
+		lostErrors = false;
+	}
+	
+	public boolean hasLostErrors() {
+		return lostErrors;
 	}
 
+	public Collection<InstanceError> getLostErrors() {
+		Collection<InstanceError> res = new ArrayList<InstanceError>(foundErrors.size());
+		for (InstanceError e : foundErrors)
+			if (!e.hasFile())
+				res.add(e);
+		return res;
+	}
 }

@@ -18,7 +18,6 @@ public class InstanceError implements IError {
 	private IResource file;
 	private ASTNode node;
 	private boolean hasFile;
-	private boolean hasDoc;
 	
 	public InstanceError(String msg, ASTNode n) {
 		super();
@@ -27,16 +26,9 @@ public class InstanceError implements IError {
 		line = n.lineNumber();
 		col = n.columnNumber();
 		node = n;
+		start = node.getBeginOffset();
+		end = node.getEndOffset() + 1;
 		updateFile();
-		updateDoc();
-	}
-
-	private void updateDoc() {
-		hasDoc = node.getDefinition().hasDocument();
-		if (hasDoc) {
-			start = node.getBeginOffset();
-			end = node.getEndOffset() + 1;
-		}
 	}
 
 	private void updateFile() {
@@ -48,16 +40,6 @@ public class InstanceError implements IError {
 		if (!hasFile)
 			updateFile();
 		return hasFile;
-	}
-
-	public boolean hasDoc() {
-		if (!hasDoc)
-			updateDoc();
-		return hasDoc;
-	}
-
-	public boolean isOK() {
-		return hasFile() && hasDoc();
 	}
 	
 	public boolean attachToFile() {
@@ -85,11 +67,15 @@ public class InstanceError implements IError {
 	}
 
 	public int getStartOffset() {
-		return hasDoc() ? start : -1;
+		return start;
 	}
 
 	public int getEndOffset() {
-		return hasDoc() ? end : -1;
+		return end;
+	}
+
+	public String getFileName() {
+		return fileName;
 	}
 
 	@Override

@@ -173,7 +173,8 @@ public class ModelicaCompiler extends AbstractCompiler {
 
 	private void addDefinition(StoredDefinition def) {
 		def.setFile(currentFile);
-		if (currentFile == null)
+		def.setLineBreakMap(scanner.getLineBreakMap());
+		if (currentFile == null) 
 			def.setFileName(currentPath);
 		list.add(def);
 	}

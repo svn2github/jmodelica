@@ -3,19 +3,15 @@ import org.eclipse.jface.text.BadLocationException;
 
 aspect Offset {
 	
+	public int StoredDefinition.calcOffset(int location) {
+		int line = ASTNode.getLine(location);
+		int col = ASTNode.getColumn(location);
+		return lineBreakMap.get(line - 1) + col - 1;
+	}
+	
   	protected int ASTNode.createOffset(int location) {
 		try {
-			return createOffset(location, getDefinition().getDocument());
-		} catch (Exception e) {
-			return -1;
-		}
-    }
-	
-	protected int ASTNode.createOffset(int location, IDocument doc) {
-		try {
-			int line = ASTNode.getLine(location);
-			int col = ASTNode.getColumn(location);
-			return doc.getLineOffset(line - 1) + col - 1;
+			return getDefinition().calcOffset(location);
 		} catch (Exception e) {
 			return -1;
 		}
@@ -37,40 +33,17 @@ aspect Offset {
 		return createOffset(ASTNode.makePosition(line, 1));
 	}
 	
-	/**
-	 * Gets offset of the beginning or end of a line.
-	 * 
-	 * Adjust is typically 1 if finding the end of the line, 0 otherwise.
-	 * 
-	 * @param location  a location in the line to find the offset of.
-	 * @param adjust    added to the line number if the location isn't at the beginning of the line.
-	 * @param doc		document to use for looking up line numbers.
-	 */
-	protected int ASTNode.createLineOffset(int location, int adjust, IDocument doc) {
-		int line = ASTNode.getLine(location);
-		int col = ASTNode.getColumn(location);
-		if (col > 1)
-			line += adjust;
-		return createOffset(ASTNode.makePosition(line, 1), doc);
-	}
-	
 	syn int ASTNode.getValidStart() = start == 0 ? getParent().getValidStart() : start;
 	syn int ASTNode.getValidEnd() =   end == 0 ? getParent().getValidEnd() : end;
 	eq Root.getValidStart() =         start;
 	eq Root.getValidEnd() =           end;
 	
-	syn int ASTNode.getBeginOffset() =              createOffset(getValidStart());
-	syn int ASTNode.getBeginOffset(IDocument doc) = createOffset(getValidStart(), doc);
-	syn int ASTNode.getEndOffset() =                createOffset(getValidEnd());
-	syn int ASTNode.getEndOffset(IDocument doc) =   createOffset(getValidEnd(), doc);
+	syn int ASTNode.getBeginOffset() =     createOffset(getValidStart());
+	syn int ASTNode.getEndOffset() =       createOffset(getValidEnd());
 	 
-	syn int ASTNode.getBeginLineOffset() =              createLineOffset(getValidStart(), 0);
-	syn int ASTNode.getBeginLineOffset(IDocument doc) = createLineOffset(getValidStart(), 0, doc);
-	syn int ASTNode.getEndLineOffset() =                createLineOffset(getValidEnd(), 1);
-	syn int ASTNode.getEndLineOffset(IDocument doc) =   createLineOffset(getValidEnd(), 1, doc);
+	syn int ASTNode.getBeginLineOffset() = createLineOffset(getValidStart(), 0);
+	syn int ASTNode.getEndLineOffset() =   createLineOffset(getValidEnd(), 1);
 	
-	syn int ASTNode.getOffset() =              getBeginOffset();
-	syn int ASTNode.getOffset(IDocument doc) = getBeginOffset(doc);
-	syn int ASTNode.getLength() =              getEndOffset() - getBeginOffset() + 1;	
-	syn int ASTNode.getLength(IDocument doc) = getEndOffset(doc) - getBeginOffset(doc) + 1;
+	syn int ASTNode.getOffset() =          getBeginOffset();
+	syn int ASTNode.getLength() =          getEndOffset() - getBeginOffset() + 1;	
 }

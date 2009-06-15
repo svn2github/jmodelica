@@ -6,6 +6,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
@@ -62,11 +63,13 @@ import org.jmodelica.ast.SourceRoot;
 import org.jmodelica.ast.StoredDefinition;
 import org.jmodelica.ide.Constants;
 import org.jmodelica.ide.ModelicaCompiler;
+import org.jmodelica.ide.error.InstanceError;
 import org.jmodelica.ide.error.InstanceErrorHandler;
 import org.jmodelica.ide.folding.AnnotationPosition;
 import org.jmodelica.ide.folding.AnnotationProjectionAnnotation;
 import org.jmodelica.ide.folding.ModelicaProjectionSupport;
 import org.jmodelica.ide.folding.ModelicaProjectionViewer;
+import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.outline.InstanceOutlinePage;
 import org.jmodelica.ide.outline.OutlinePage;
 import org.jmodelica.ide.outline.SourceOutlinePage;
@@ -421,8 +424,8 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		
 		IDocument doc = getSourceViewer().getDocument();
 		ASTNode sel = node.getSelectionNode();
-		int offset = sel.getOffset(doc);
-		int length = sel.getLength(doc);
+		int offset = sel.getOffset();
+		int length = sel.getLength();
 		if (offset >= 0 && length >= 0) 
 			selectAndReveal(offset, length);
 
@@ -590,18 +593,35 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 
 		@Override
 		public void run() {
-			performSave(true, null);
+			//performSave(true, null);
 			SourceRoot root = (SourceRoot) currentClass.root();
 			InstProgramRoot ipr = root.getProgram().getInstProgramRoot();
 			InstanceErrorHandler errorHandler = (InstanceErrorHandler) root.getErrorHandler();
 			errorHandler.resetCounter();
 			ipr.retrieveInstFullClassDecl(currentClass.qualifiedName()).collectErrors();
-			int num = errorHandler.getNumErrors();
 			String msg;
-			if (num == 0) 
-				msg = "No errors found.";
-			else
-				msg = num + " errors found.";
+			if (errorHandler.hasLostErrors()) {
+				Collection<InstanceError> err = errorHandler.getLostErrors();
+				Collection<String> files = new HashSet<String>();
+				for (InstanceError e : err) 
+					if (!files.contains(e.getFileName()))
+						files.add(e.getFileName());
+				StringBuilder buf = new StringBuilder("Error");
+				if (err.size() > 1)
+					buf.append('s');
+				buf.append(" found in file");
+				if (files.size() > 1)
+					buf.append('s');
+				buf.append(" outside workspace: ");
+				buf.append(Util.listString(files, "'", "'", ", ", " && "));
+				msg = buf.toString();
+			} else {
+				int num = errorHandler.getNumErrors();
+				if (num == 0) 
+					msg = "No errors found.";
+				else
+					msg = num + " errors found.";
+			}
 			String title = "Checking " + currentClass.getName().getID() + " for errors:";
 			MessageDialog.openInformation(new Shell(), title, msg);
 		}

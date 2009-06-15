@@ -2,6 +2,8 @@ package org.jmodelica.ide.helpers;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IMarker;
@@ -99,5 +101,22 @@ public class Util {
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static String listString(Collection<?> list, String pre, String suff, String sep, String and) {
+		StringBuilder buf = new StringBuilder();
+		int i = 0, last = list.size() - 1;
+		for (Object o : list) {
+			if (i > 0) {
+				if (i < last)
+					buf.append(sep);
+				else 
+					buf.append(and);
+			}
+			buf.append(pre);
+			buf.append(o);
+			buf.append(suff);
+		}
+		return buf.toString();
 	}
 }
