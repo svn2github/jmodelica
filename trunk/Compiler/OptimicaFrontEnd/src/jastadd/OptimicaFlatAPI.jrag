@@ -805,6 +805,24 @@ aspect OptimicaFVariableUses {
 
 aspect OptimicaLinearVariables {
 	
+	
+	/**
+	 * \brief Linearity of timed variables.
+	 * 
+	 * The returned vector of booleans corresponds to linearity of the
+	 * FVariable at each time point included in the optimization problem. 
+	 * Notice that this method differs from FClass.isLinear(). FClass.isLinear()
+	 * returns the linearity of a variables derived by looking only at its 
+	 * corresponding identifiers (in binding equations, initial equations and 
+	 * equations) excluding timed variables. FOptClass.isLinearTimedVariables()
+	 * on the other hand is derived based only on timed variables. The
+	 * ordering of the entries of the returned vector is the same as the
+	 * one given by the method FOptClass.timePointIndex().
+	 * 
+	 * @return A vector of booleans corresponding to the linearity of timed
+	 * variable occurances. Each entry is true if the timed variable(s) for
+	 * the corresponding time point all occurs linearly, otherwise false.
+	 */
 	syn lazy boolean[] FVariable.isLinearTimedVariables() {
 		boolean isLin[] = new boolean[myFOptClass().numTimePoints()];
 		for (int i=0;i<myFOptClass().numTimePoints();i++) {
@@ -821,8 +839,9 @@ aspect OptimicaLinearVariables {
 }
 
 aspect OptimicaFlatAPIDiagnostics {
+
 	/**
-	 * Print diagnostics.
+	 * \brief Print diagnostics for FOptClass.
 	 */
 	public String FOptClass.diagnostics() {
 		StringBuffer str = new StringBuffer();
@@ -896,6 +915,10 @@ aspect OptimicaFlatAPIDiagnostics {
 		return str.toString();
 	}	
 	
+	/**
+	 * \brief Returns a string containing information of timed variable
+	 * linearity.
+	 */
 	public String FOptClass.timedVariablesLinearityDiagnostics() {
 		StringBuffer str = new StringBuffer();
 		
