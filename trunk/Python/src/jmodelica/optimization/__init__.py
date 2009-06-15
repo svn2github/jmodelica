@@ -1,2 +1,2 @@
 """The JModelica Python Optimization toolkit."""
-__all__ = []
+__all__ = ['shooting']
