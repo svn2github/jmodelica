@@ -30,13 +30,17 @@ import org.jmodelica.ast.FRealVariable;
 import org.jmodelica.ast.Printer;
 
 /**
- * A generator class for XML code generation which takes a model described by
+ * A generator class for XML code generation which takes an Optimica model described by
  * <FClass> and provides an XML document for the meta-data in the model. Uses a
  * template for the static general structure of tags and an internal class
  * <TagGenerator> for the parts of the XML that are dynamic, that is, may vary
  * depending on the contents of the underlying model.
  * 
+ * This class extends XMLVariableGenerator.
+ * 
  * @see AbstractGenerator
+ * @see XMLVariableGenerator
+ * @see TagGenerator
  * 
  */
 public class OptimicaXMLVariableGenerator extends XMLVariableGenerator {

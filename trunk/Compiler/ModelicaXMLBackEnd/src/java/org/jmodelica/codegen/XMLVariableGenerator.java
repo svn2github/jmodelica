@@ -45,7 +45,12 @@ import org.jmodelica.ast.Printer;
  * 
  */
 public class XMLVariableGenerator extends GenericGenerator {
-		
+	
+	/**
+	 * Internal class used to generate the model name tag.
+	 * 
+	 * @see DAETag
+	 */
 	class DAETag_XML_modelName extends DAETag {
 		
 		public DAETag_XML_modelName(
@@ -53,12 +58,21 @@ public class XMLVariableGenerator extends GenericGenerator {
 			super("XML_modelName","Model name.",
 			  myGenerator,fclass);
 		}
-	
+		
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
 		public void generate(PrintStream genPrinter) {
 			genPrinter.print(fclass.name());
 		}
 	}
 	
+	/**
+	 * Internal class used to generate the model identifier tag.
+	 * 
+	 * @see DAETag
+	 */
 	class DAETag_XML_modelIdentifier extends DAETag {
 		
 		public DAETag_XML_modelIdentifier(
@@ -67,6 +81,10 @@ public class XMLVariableGenerator extends GenericGenerator {
 			  myGenerator,fclass);
 		}
 	
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
 		public void generate(PrintStream genPrinter) {
 			//TODO: implement when available
 			// Dummy value for now
@@ -74,6 +92,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 		}
 	}
 	
+	/**
+	 * Internal class used to generate the model description tag.
+	 * 
+	 * @see DAETag
+	 */
 	class DAETag_XML_modelDescription extends DAETag {
 		
 		public DAETag_XML_modelDescription(
@@ -81,7 +104,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 			super("XML_modelDescription","Model description.",
 			  myGenerator,fclass);
 		}
-	
+		
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
 		public void generate(PrintStream genPrinter) {
 			//TODO: implement when available
 			// Dummy value for now
@@ -89,6 +116,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 		}
 	}
 	
+	/**
+	 * Internal class used to generate the model author tag.
+	 * 
+	 * @see DAETag
+	 */
 	class DAETag_XML_modelAuthor extends DAETag {
 		
 		public DAETag_XML_modelAuthor(
@@ -96,7 +128,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 			super("XML_modelAuthor","The author of the model.",
 			  myGenerator,fclass);
 		}
-	
+		
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
 		public void generate(PrintStream genPrinter) {
 			//TODO: implement when available
 			// Dummy value for now
@@ -104,6 +140,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 		}
 	}
 
+	/**
+	 * Internal class used to generate the model version tag.
+	 * 
+	 * @see DAETag
+	 */
 	class DAETag_XML_modelVersion extends DAETag {
 		
 		public DAETag_XML_modelVersion(
@@ -111,7 +152,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 			super("XML_modelVersion","Model version.",
 			  myGenerator,fclass);
 		}
-	
+		
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
 		public void generate(PrintStream genPrinter) {
 			//TODO: implement when available
 			// Dummy value for now
@@ -119,6 +164,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 		}
 	}
 
+	/**
+	 * Internal class used to generate the model schema version tag.
+	 * 
+	 * @see DAETag
+	 */
 	class DAETag_XML_schemaVersion extends DAETag {
 		
 		public DAETag_XML_schemaVersion(
@@ -126,7 +176,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 			super("XML_schemaVersion","Schema version.",
 			  myGenerator,fclass);
 		}
-	
+		
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
 		public void generate(PrintStream genPrinter) {
 			//TODO: implement when available
 			// Dummy value for now
@@ -134,6 +188,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 		}
 	}
 
+	/**
+	 * Internal class used to generate the model generation tool tag.
+	 * 
+	 * @see DAETag
+	 */
 	class DAETag_XML_generationTool extends DAETag {
 		
 		public DAETag_XML_generationTool (
@@ -141,7 +200,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 			super("XML_generationTool","Generation tool.",
 			  myGenerator,fclass);
 		}
-	
+		
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
 		public void generate(PrintStream genPrinter) {
 			//TODO: implement when available
 			// Dummy value for now
@@ -149,6 +212,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 		}
 	}
 
+	/**
+	 * Internal class used to generate the model generation date tag.
+	 * 
+	 * @see DAETag
+	 */
 	class DAETag_XML_generationDate extends DAETag {
 		private static final String df = "yyyy-MM-dd'T'HH:mm:ss";
 		
@@ -157,7 +225,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 			super("XML_generationDate","Generation date.",
 			  myGenerator,fclass);
 		}
-	
+		
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
 		public void generate(PrintStream genPrinter) {
 			//TODO: implement when available
 			// Todays date for now
@@ -166,6 +238,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 		}
 	}
 	
+	/**
+	 * Internal class used to generate the model global unique identifier tag.
+	 * 
+	 * @see DAETag
+	 */
 	class DAETag_XML_guid extends DAETag {
 		
 		public DAETag_XML_guid (
@@ -173,7 +250,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 			super("XML_guid","The Globally Unique Identifier.",
 			  myGenerator,fclass);
 		}
-	
+		
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
 		public void generate(PrintStream genPrinter) {
 			//TODO: implement when available
 			// Dummy value for now
@@ -181,7 +262,15 @@ public class XMLVariableGenerator extends GenericGenerator {
 		}
 	}
 
-
+	/**
+	 * Internal class used to generate the model variables tags.
+	 * 
+	 * The model variables tags may vary in number and content. Therefore 
+	 * the template file can not be used for this part of the XML. Instead, 
+	 * all model variable tags are generated dynamically using this tag class.
+	 * 
+	 * @see DAETag
+	 */
 	class DAETag_XML_modelVariables extends DAETag {
 		
 		public DAETag_XML_modelVariables(
@@ -190,7 +279,10 @@ public class XMLVariableGenerator extends GenericGenerator {
 			  myGenerator,fclass);
 		}
 	
-		
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
 		public void generate(PrintStream genPrinter) {
 			TagGenerator tg = new TagGenerator(2);
 			
@@ -306,6 +398,9 @@ public class XMLVariableGenerator extends GenericGenerator {
 
 	}
 	
+	/*
+	 * Helper method generating all real attributes.
+	 */
 	protected void addRealAttributes(PrintStream genPrinter, TagGenerator tg, FRealVariable realvariable) {
 		
 		//quantity
@@ -361,6 +456,9 @@ public class XMLVariableGenerator extends GenericGenerator {
 
 	}
 	
+	/*
+	 * Helper method generating all integer attributes.
+	 */
 	protected void addIntegerAttributes(PrintStream genPrinter, TagGenerator tg, FIntegerVariable integervariable) {
 		
 		//quantity
@@ -379,6 +477,9 @@ public class XMLVariableGenerator extends GenericGenerator {
 		genPrinter.print(tg.generateTag("Start")+integervariable.startAttribute()+tg.generateTag("Start"));						
 	}
 	
+	/*
+	 * Helper method generating all boolean attributes.
+	 */
 	protected void addBooleanAttributes(PrintStream genPrinter, TagGenerator tg, FBooleanVariable booleanvariable) {
 		//start attribute
 		if(booleanvariable.startAttributeSet()) {
@@ -387,6 +488,9 @@ public class XMLVariableGenerator extends GenericGenerator {
 		
 	}
 	
+	/*
+	 * Helper class generating all string attributes.
+	 */
 	protected void addStringAttributes(PrintStream genPrinter, TagGenerator tg, FStringVariable stringvariable) {
 		//start attribute
 		if(stringvariable.startAttributeSet()) {
@@ -394,6 +498,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 		}
 	}
 	
+	/**
+	 * Internal class used to generate the default experiment tag.
+	 * 
+	 * @see DAETag
+	 */
 	class DAETag_XML_defaultExperiment extends DAETag {
 		
 		public DAETag_XML_defaultExperiment(
@@ -401,7 +510,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 			super("XML_defaultExperiment","Default experiment (optional).",
 			  myGenerator,fclass);
 		}
-	
+		
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
 		public void generate(PrintStream genPrinter) {
 			//TODO: default experiment (optional)
 //				genPrinter.print("<DefaultExperiment>");
@@ -410,6 +523,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 		}
 	}
 
+	/**
+	 * Internal class used to generate the vendor annotations tag.
+	 * 
+	 * @see DAETag
+	 */
 	class DAETag_XML_vendorAnnotations extends DAETag {
 		
 		public DAETag_XML_vendorAnnotations(
@@ -417,7 +535,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 			super("XML_vendorAnnotations","Vendor annotations (optional).",
 			  myGenerator,fclass);
 		}
-	
+		
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
 		public void generate(PrintStream genPrinter) {
 			//TODO: vendor annotations (optional)
 //				genPrinter.print("<VendorAnnotations>");
@@ -470,10 +592,9 @@ public class XMLVariableGenerator extends GenericGenerator {
 }
 
 /**
- * A helper class to XMLGenerator for providing start and end tags with the
- * correct amount of tabs. This class will be used in the XML code
- * generation for the model meta-data parts which are optional and therefore
- * can not use a template.
+ * A helper class to XMLGenerator classes providing start and end tags with the
+ * correct amount of tabs. This class will be used in the XML code generation
+ * for the parts which are dynamical and therefore can not use a template.
  * 
  */
 class TagGenerator {
@@ -497,12 +618,13 @@ class TagGenerator {
 	 * Generates a tag with a certain tagname.
 	 * 
 	 * The first time the tagname is encountered a start tag is created. The
-	 * second time the same tagname is used a matching end tag is created.
-	 * For each unique tagname a new start tag is created with one more tab
-	 * indent. If start and end tags are encountered immediately after each
-	 * other they will be on the same line.
+	 * second time the same tagname is used a matching end tag is created. For
+	 * each unique tagname a new start tag is created with one more tab indent.
+	 * If start and end tags are encountered immediately after each other they
+	 * will be on the same line.
 	 * 
-	 * @param tagname The name of the tag to create.
+	 * @param tagname
+	 *            The name of the tag to create.
 	 * @return Start or end tag with name set to <tagname>.
 	 */
 	public String generateTag(String tagname) {
@@ -518,8 +640,7 @@ class TagGenerator {
 	 * Generates a start tag with the specified tagname.
 	 * 
 	 * @param tagname
-	 *            The name of the tag for which a start tag should be
-	 *            created.
+	 *            The name of the tag for which a start tag should be created.
 	 * @return The start tag with name set to <tagname>.
 	 */
 	private String generateStartTag(String tagname) {				
@@ -534,8 +655,7 @@ class TagGenerator {
 	 * Generates an end tag with the specified tagname.
 	 * 
 	 * @param tagname
-	 *            The name of the tag for which an end tag should be
-	 *            created.
+	 *            The name of the tag for which an end tag should be created.
 	 * @return The end tag with name set to <tagname>.
 	 */
 	private String generateEndTag(String tagname) {
