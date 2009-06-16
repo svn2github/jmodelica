@@ -15,7 +15,7 @@
 */
 import java.util.ArrayList;
 import org.eclipse.jface.text.Position;
-import org.jmodelica.ide.folding.AnnotationPosition;
+import org.jmodelica.folding.CharacterPosition;
 
 aspect ModelicaFolding {
 	
@@ -25,7 +25,7 @@ aspect ModelicaFolding {
 		int length = end - start + 1;
 		ArrayList<Position> list = new ArrayList<Position>(1);
     	if (start > 0 && length > 0) 
-	    	list.add(new AnnotationPosition(start, length));
+	    	list.add(new CharacterPosition(start, length));
     	return list;
     }
 

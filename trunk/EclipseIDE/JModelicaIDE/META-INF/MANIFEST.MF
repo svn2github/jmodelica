@@ -16,4 +16,5 @@ Require-Bundle: org.jastadd.plugin,
  org.eclipse.ui.ide,
  org.eclipse.ui.editors,
  org.eclipse.ui.views,
- org.eclipse.ui.navigator
+ org.eclipse.ui.navigator,
+ org.jmodelica.folding;bundle-version="0.1.0"

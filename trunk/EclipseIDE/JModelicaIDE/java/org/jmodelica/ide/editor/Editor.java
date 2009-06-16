@@ -76,14 +76,15 @@ import org.jmodelica.ast.BaseClassDecl;
 import org.jmodelica.ast.InstProgramRoot;
 import org.jmodelica.ast.SourceRoot;
 import org.jmodelica.ast.StoredDefinition;
+import org.jmodelica.folding.CharacterPosition;
+import org.jmodelica.folding.CharacterProjectionAnnotation;
+import org.jmodelica.folding.CharacterProjectionSupport;
+import org.jmodelica.folding.CharacterProjectionViewer;
 import org.jmodelica.ide.Constants;
 import org.jmodelica.ide.ModelicaCompiler;
 import org.jmodelica.ide.error.InstanceError;
 import org.jmodelica.ide.error.InstanceErrorHandler;
-import org.jmodelica.ide.folding.AnnotationPosition;
-import org.jmodelica.ide.folding.AnnotationProjectionAnnotation;
-import org.jmodelica.ide.folding.ModelicaProjectionSupport;
-import org.jmodelica.ide.folding.ModelicaProjectionViewer;
+import org.jmodelica.ide.folding.AnnotationDrawer;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.outline.InstanceOutlinePage;
 import org.jmodelica.ide.outline.OutlinePage;
@@ -125,7 +126,8 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	private String fKey;
 	private IProject fProject;
 	private IDocumentPartitioner fPartitioner;
-	private ModelicaProjectionSupport projectionSupport;
+	private CharacterProjectionSupport projectionSupport;
+	private AnnotationDrawer annotationDrawingStrategy;
 	
 	// Actions that needs to be altered
 	private ErrorCheckAction errorCheckAction;
@@ -152,21 +154,23 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		fOverviewRuler = createOverviewRuler(getSharedColors());
 		
 		// Projection support
-		ModelicaProjectionViewer viewer = new ModelicaProjectionViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles);
+		CharacterProjectionViewer viewer = new CharacterProjectionViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles);
 	    configureProjectionSupport(viewer);
 	    configureDecorationSupport(viewer);
 		
 		return viewer;
 	}
 
-	private void configureProjectionSupport(ModelicaProjectionViewer viewer) {
-		projectionSupport = new ModelicaProjectionSupport(viewer, getAnnotationAccess(), getSharedColors());
+	private void configureProjectionSupport(CharacterProjectionViewer viewer) {
+		projectionSupport = new CharacterProjectionSupport(viewer, getAnnotationAccess(), getSharedColors());
+		annotationDrawingStrategy = new AnnotationDrawer(projectionSupport.getAnnotationPainterDrawingStrategy());
+		annotationDrawingStrategy.setCursorLineBackground(getCursorLineBackground());
+		projectionSupport.setAnnotationPainterDrawingStrategy(annotationDrawingStrategy);
 	    projectionSupport.addSummarizableAnnotationType(ModelicaCompiler.ERROR_MARKER_ID);
-	    projectionSupport.setCursorLineBackground(getCursorLineBackground());
 	    projectionSupport.install();
 	}
 
-	private void configureDecorationSupport(ModelicaProjectionViewer viewer) {
+	private void configureDecorationSupport(CharacterProjectionViewer viewer) {
 		// Set default values for brace matching.
 	    IPreferenceStore preferenceStore = getPreferenceStore();
 		preferenceStore.setDefault(BRACE_MATCHING_KEY, true);
@@ -182,7 +186,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
 		String property = event.getProperty();
 		if (property.equals(CURRENT_LINE_KEY) || property.equals(CURRENT_LINE_COLOR_KEY))
-		    projectionSupport.setCursorLineBackground(getCursorLineBackground());
+			annotationDrawingStrategy.setCursorLineBackground(getCursorLineBackground());
 		super.handlePreferenceStoreChanged(event);
 	}
 
@@ -376,7 +380,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	 */
 	private void updateProjectionAnnotations() {
 		
-		ModelicaProjectionViewer viewer = (ModelicaProjectionViewer)getSourceViewer();
+		CharacterProjectionViewer viewer = (CharacterProjectionViewer)getSourceViewer();
 		if (viewer == null) 
 			return;
 		
@@ -401,8 +405,8 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 			Collection<Position> positions = node.foldingPositions(document);
 			for (Position pos : positions) {
 				ProjectionAnnotation annotation;
-				if (pos instanceof AnnotationPosition) {
-					annotation = new AnnotationProjectionAnnotation();
+				if (pos instanceof CharacterPosition) {
+					annotation = new CharacterProjectionAnnotation();
 					if (!toggleAnnotationsAction.isVisible())
 						annotation.markCollapsed();
 				} else {
@@ -538,13 +542,13 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 
 	private class ExpandAllAction extends DoOperationAction {
 		public ExpandAllAction() {
-			super("&Expand All", ModelicaProjectionViewer.EXPAND_ALL);
+			super("&Expand All", CharacterProjectionViewer.EXPAND_ALL);
 		}
 	}
 
 	private class CollapseAllAction extends DoOperationAction {
 		public CollapseAllAction() {
-			super("&Collapse All", ModelicaProjectionViewer.COLLAPSE_ALL);
+			super("&Collapse All", CharacterProjectionViewer.COLLAPSE_ALL);
 		}
 	}
 	
@@ -571,7 +575,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		@Override
 		public void run() {
 			update(!visible);
-			int action = visible ? ModelicaProjectionViewer.EXPAND_ANNOTATIONS : ModelicaProjectionViewer.COLLAPSE_ANNOTATIONS;
+			int action = visible ? CharacterProjectionViewer.EXPAND_ANNOTATIONS : CharacterProjectionViewer.COLLAPSE_ANNOTATIONS;
 			ISourceViewer sourceViewer = getSourceViewer();
 			if (sourceViewer instanceof ITextOperationTarget) {
 				((ITextOperationTarget) sourceViewer).doOperation(action);
