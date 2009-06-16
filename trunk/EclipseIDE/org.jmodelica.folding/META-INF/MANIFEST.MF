@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Line-free Code Folding Plug-in
+Bundle-SymbolicName: org.jmodelica.folding
+Bundle-Version: 0.1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.eclipse.jface.text,
+ org.eclipse.swt,
+ org.eclipse.core.runtime,
+ org.eclipse.jface
+Export-Package: org.jmodelica.folding
