@@ -33,6 +33,7 @@ import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.projection.IProjectionPosition;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
+import org.eclipse.jface.text.source.projection.ProjectionSupport;
 
 
 /**
@@ -41,7 +42,7 @@ import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
  *
  * @since 3.0
  */
-class ModelicaProjectionRulerColumn extends AnnotationRulerColumn {
+class ProjectionRulerColumn extends AnnotationRulerColumn {
 
 	private ProjectionAnnotation fCurrentAnnotation;
 
@@ -52,7 +53,7 @@ class ModelicaProjectionRulerColumn extends AnnotationRulerColumn {
 	 * @param width the width in pixels
 	 * @param annotationAccess the annotation access
 	 */
-	public ModelicaProjectionRulerColumn(IAnnotationModel model, int width, IAnnotationAccess annotationAccess) {
+	public ProjectionRulerColumn(IAnnotationModel model, int width, IAnnotationAccess annotationAccess) {
 		super(model, width, annotationAccess);
 	}
 
@@ -62,7 +63,7 @@ class ModelicaProjectionRulerColumn extends AnnotationRulerColumn {
 	 * @param width the width in pixels
 	 * @param annotationAccess the annotation access
 	 */
-	public ModelicaProjectionRulerColumn(int width, IAnnotationAccess annotationAccess) {
+	public ProjectionRulerColumn(int width, IAnnotationAccess annotationAccess) {
 		super(width, annotationAccess);
 	}
 
@@ -95,13 +96,11 @@ class ModelicaProjectionRulerColumn extends AnnotationRulerColumn {
 			IDocument document= getCachedTextViewer().getDocument();
 
 			int previousDistance= Integer.MAX_VALUE;
-			int previousDistanceInLine= Integer.MAX_VALUE;
 
 			Iterator e= model.getAnnotationIterator();
 			while (e.hasNext()) {
 				Object next= e.next();
-				// We don't want to handle Modelica annotation folds
-				if (next instanceof ProjectionAnnotation && !(next instanceof AnnotationProjectionAnnotation)) {
+				if (next instanceof ProjectionAnnotation) {
 					ProjectionAnnotation annotation= (ProjectionAnnotation) next;
 					Position p= model.getPosition(annotation);
 					if (p == null)
@@ -110,19 +109,14 @@ class ModelicaProjectionRulerColumn extends AnnotationRulerColumn {
 					int distance= getDistance(annotation, p, document, line);
 					if (distance == -1)
 						continue;
-					
-					if (distance == 0) {
-						distance = getDistanceInLine(p, document, line);
-						if (distance < previousDistanceInLine) {
-							previousAnnotation = annotation;
-							previousDistanceInLine = distance;
-							previousDistance = 0;
-						}
-					} else if (!exact) {
+
+					if (!exact) {
 						if (distance < previousDistance) {
 							previousAnnotation= annotation;
 							previousDistance= distance;
 						}
+					} else if (distance == 0) {
+						previousAnnotation= annotation;
 					}
 				}
 			}
@@ -146,8 +140,6 @@ class ModelicaProjectionRulerColumn extends AnnotationRulerColumn {
 			try {
 				int startLine= document.getLineOfOffset(position.getOffset());
 				int endLine= document.getLineOfOffset(position.getOffset() + position.getLength());
-				// We used this for annotations, but they no longer have buttons in the ruler.
-//				if (startLine <= line && line <= endLine) {
 				if (startLine <= line && line < endLine) {
 					if (annotation.isCollapsed()) {
 						int captionOffset;
@@ -166,14 +158,6 @@ class ModelicaProjectionRulerColumn extends AnnotationRulerColumn {
 			}
 		}
 		return -1;
-	}
-	
-	private int getDistanceInLine(Position position, IDocument document, int line) {
-		try {
-			return position.getOffset() - document.getLineOffset(line);
-		} catch (BadLocationException e) {
-			return -1;
-		}
 	}
 
 	private boolean clearCurrentAnnotation() {
@@ -233,7 +217,7 @@ class ModelicaProjectionRulerColumn extends AnnotationRulerColumn {
 	public void setModel(IAnnotationModel model) {
 		if (model instanceof IAnnotationModelExtension) {
 			IAnnotationModelExtension extension= (IAnnotationModelExtension) model;
-			model= extension.getAnnotationModel(ModelicaProjectionSupport.PROJECTION);
+			model= extension.getAnnotationModel(ProjectionSupport.PROJECTION);
 		}
 		super.setModel(model);
 	}

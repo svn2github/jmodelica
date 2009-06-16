@@ -25,6 +25,7 @@ import org.eclipse.jface.text.source.AnnotationPainter.IDrawingStrategy;
 import org.eclipse.jface.text.source.projection.IProjectionListener;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
+import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
@@ -53,7 +54,7 @@ public class ModelicaProjectionSupport {
 	 * Key of the projection annotation model inside the visual annotation
 	 * model. Also internally used as key for the projection drawing strategy.
 	 */
-	public final static Object PROJECTION= new Object();
+	public final static Object PROJECTION= ProjectionSupport.PROJECTION;
 
 	private static class ProjectionAnnotationsPainter extends AnnotationPainter {
 
@@ -263,7 +264,7 @@ public class ModelicaProjectionSupport {
 	private IInformationControlCreator fInformationPresenterControlCreator;
 	private ProjectionListener fProjectionListener;
 	private ProjectionAnnotationsPainter fPainter;
-	private ModelicaProjectionRulerColumn fColumn;
+	private ProjectionRulerColumn fColumn;
 	/**
 	 * @since 3.1
 	 */
@@ -408,7 +409,7 @@ public class ModelicaProjectionSupport {
 		}
 
 		if (fColumn == null) {
-			fColumn= new ModelicaProjectionRulerColumn(9, fAnnotationAccess);
+			fColumn= new ProjectionRulerColumn(9, fAnnotationAccess);
 			fColumn.addAnnotationType(ProjectionAnnotation.TYPE);
 			fColumn.setHover(createProjectionAnnotationHover());
 			fViewer.addVerticalRulerColumn(fColumn);
