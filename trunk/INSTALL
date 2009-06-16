@@ -94,7 +94,7 @@ published.
 7. Running JModelica.org from Python
 
 In order to run the JModelica.org compilers from Python, the packages
-Jython (http://www.jython.org) and lxml (http://codespeak.net/lxml/)
+JPype (http://jpype.sourceforge.net/) and lxml (http://codespeak.net/lxml/)
 need to be installed. Also, the environment variables JMODELICA_HOME,
 containing the path to the JModelica.org installation directory
 (again, without spaces or ~ in the path), PYTHONPATH, containing the
