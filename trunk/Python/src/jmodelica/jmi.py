@@ -1030,6 +1030,31 @@ def load_DLL(libname, path):
                                                      ndim=1,
                                                      flags='C'),
                                        ct.c_int,
+                                       Nct.ndpointer(dtype=ct.c_int,
+                                                     ndim=1,
+                                                     flags='C'),                                           
+                                       Nct.ndpointer(dtype=ct.c_int,
+                                                     ndim=1,
+                                                     flags='C'),                                           
+                                       Nct.ndpointer(dtype=ct.c_int,
+                                                     ndim=1,
+                                                     flags='C'),                                           
+                                       Nct.ndpointer(dtype=ct.c_int,
+                                                     ndim=1,
+                                                     flags='C'),                                           
+                                       Nct.ndpointer(dtype=ct.c_int,
+                                                     ndim=1,
+                                                     flags='C'),                                           
+                                       Nct.ndpointer(dtype=ct.c_int,
+                                                     ndim=1,
+                                                     flags='C'),                                           
+                                       Nct.ndpointer(dtype=ct.c_int,
+                                                     ndim=1,
+                                                     flags='C'),                                           
+                                       Nct.ndpointer(dtype=ct.c_int,
+                                                     ndim=1,
+                                                     flags='C'),                                           
+                                       ct.c_int,
                                        ct.c_int]
     except AttributeError, e:
         pass
@@ -2392,7 +2417,18 @@ class JMISimultaneousOptLagPols(JMISimultaneousOpt):
         self._set_initial_values(_p_opt_init, _dx_init, _x_init, _u_init, _w_init)
         self._set_lb_values(_p_opt_lb, _dx_lb, _x_lb, _u_lb, _w_lb)
         self._set_ub_values(_p_opt_ub, _dx_ub, _x_ub, _u_ub, _w_ub)
-        
+
+        _linearity_information_provided = 0;
+        _p_opt_lin = N.ones(jmi_model.opt_get_n_p_opt(),dtype=int)
+        _dx_lin = N.ones(jmi_model._n_dx.value,dtype=int)
+        _x_lin = N.ones(jmi_model._n_x.value,dtype=int)
+        _u_lin = N.ones(jmi_model._n_u.value,dtype=int)        
+        _w_lin = N.ones(jmi_model._n_w.value,dtype=int)
+        _dx_tp_lin = N.ones(jmi_model._n_dx.value*jmi_model._n_tp.value,dtype=int)
+        _x_tp_lin = N.ones(jmi_model._n_x.value*jmi_model._n_tp.value,dtype=int)
+        _u_tp_lin = N.ones(jmi_model._n_u.value*jmi_model._n_tp.value,dtype=int)        
+        _w_tp_lin = N.ones(jmi_model._n_w.value*jmi_model._n_tp.value,dtype=int)
+
         try:       
             assert jmi_model._dll.jmi_opt_sim_lp_new(byref(self._jmi_opt_sim), jmi_model._jmi, n_e,
                                       hs, hs_free,
@@ -2404,6 +2440,9 @@ class JMISimultaneousOptLagPols(JMISimultaneousOpt):
                                      _p_opt_ub, _dx_ub, _x_ub,
                                      _u_ub, _w_ub, _t0_ub,
                                      _tf_ub, _hs_ub,
+                                     _linearity_information_provided,                
+                                     _p_opt_lin, _dx_lin, _x_lin, _u_lin, _w_lin,
+                                     _dx_tp_lin, _x_tp_lin, _u_tp_lin, _w_tp_lin,                
                                      n_cp,JMI_DER_CPPAD) is 0, \
                                      " jmi_opt_lp_new returned non-zero."
         except AttributeError,e:

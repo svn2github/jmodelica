@@ -313,14 +313,19 @@ void jmi_TNLP::finalize_solution(SolverReturn status,
 
 }
 
-/*
+
 Index jmi_TNLP::get_number_of_nonlinear_variables() {
-	return 12;//2725-1205 - 300;
+	return -1;
+
+	//return 12;//2725-1205 - 300;
 }
 
 bool jmi_TNLP::get_list_of_nonlinear_variables(Index num_nonlin_vars,
     Index* pos_nonlin_vars) {
 
+	return false;
+
+	/*
 	pos_nonlin_vars[0] = 5;
 	pos_nonlin_vars[1] = 6;
 	pos_nonlin_vars[2] = 7;
@@ -349,6 +354,5 @@ bool jmi_TNLP::get_list_of_nonlinear_variables(Index num_nonlin_vars,
 //	}
 
 	return true;
-
-}
 */
+}

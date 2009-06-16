@@ -2375,7 +2375,8 @@ int test_optimization(int verbose) {
 			            tf_lb, hs_lb,
 			            p_opt_ub, dx_ub, x_ub,
 			            u_ub, w_ub, t0_ub,
-			            tf_ub, hs_ub,
+			            tf_ub, hs_ub,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
+			            NULL,
 			            n_cp,JMI_DER_CPPAD);
 
 	jmi_opt_sim_ipopt_new(&jmi_opt_sim_ipopt, jmi_opt_sim);

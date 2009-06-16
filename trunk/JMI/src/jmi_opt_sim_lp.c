@@ -1290,6 +1290,9 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
         jmi_real_t *p_opt_ub, jmi_real_t *dx_ub, jmi_real_t *x_ub,
         jmi_real_t *u_ub, jmi_real_t *w_ub, jmi_real_t t0_ub,
         jmi_real_t tf_ub, jmi_real_t *hs_ub,
+        int linearity_information_provided,
+        int* p_opt_lin, int* dx_lin, int* x_lin, int* u_lin, int* w_lin,
+        int* dx_tp_lin, int* x_tp_lin, int* u_tp_lin, int* w_tp_lin,
         int n_cp, int der_eval_alg) {
 
 	if (jmi->opt == NULL) {

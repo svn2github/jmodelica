@@ -973,6 +973,7 @@ typedef struct {
  * @param x_lb Lower bounds for the states.
  * @param u_lb Lower bounds for the inputs.
  * @param t0_lb Lower bound for interval start time.
+ * @param tf_lb Lower bound for interval final time.
  * @param hs_lb Lower bound for element lengths.
  * @param w_lb Lower bounds for the algebraic variables.
  * @param p_opt_ub Upper bounds for the optimized parameters.
@@ -981,7 +982,39 @@ typedef struct {
  * @param u_ub Upper bounds for the inputs.
  * @param w_ub Upper bounds for the algebraic variables.
  * @param t0_ub Upper bound for interval start time.
+ * @param tf_ub Upper bound for interval final time.
  * @param hs_ub Upper bound for element lengths.
+ * @param linearity_information_provided 1 if linearity information is provided
+ * in the following arguments, otherwise 0.
+ * @param p_opt_lin Vector of size n_p_opt. A value of 1 indicates that
+ * the corresponding variable appears linearly in all equations and constraints
+ * and a value of 0 indicates that it appear non-linearly in some equation
+ * or constraint. If this vector is NULL then it is assumed that no
+ * information about linearity is provided.
+ * @param dx_lin Vector of size n_dx. See argument documentation of p_opt_lin
+ * for details on the interpretation of the content of this vector.
+ * @param x_lin Vector of size n_x. See argument documentation of p_opt_lin
+ * for details on the interpretation of the content of this vector.
+ * @param u_lin Vector of size n_u. See argument documentation of p_opt_lin
+ * for details on the interpretation of the content of this vector.
+ * @param w_lin Vector of size n_w. See argument documentation of p_opt_lin
+ * for details on the interpretation of the content of this vector.
+ * @param dx_tp_lin Vector of size n_dx*n_tp. The first n_dx elements are used
+ * to store linearity information about the dx vector at the first time point.
+ * Elements n_dx..2*n_dx-1 are used to store linearity information about the
+ * dx vector at the section time point etc.
+ * @param x_tp_lin Vector of size n_x*n_tp. The first n_x elements are used
+ * to store linearity information about the x vector at the first time point.
+ * Elements n_x..2*n_x-1 are used to store linearity information about the
+ * x vector at the second time point etc.
+ * @param u_tp_lin Vector of size n_u*n_tp. The first n_u elements are used
+ * to store linearity information bout the u vector at the first time point.
+ * Elements n_u..2*n_u-1 are used to store linearity information about the
+ * u vector at the second time point etc.
+ * @param w_tp_lin Vector of size n_w*n_tp. The first n_w elements are used
+ * to store linearity information about the w vector at the first time point.
+ * Elements n_w..2*n_w-1 are used to store linearity information about the
+ * w vector at the second time point etc.
  * @param n_cp Number of collocation points. Valid numbers are 2..10.
  * @param der_eval_alg Specification of evaluation algorithm for derivatives.
  * Valid arguments are JMI_DER_SYMBOLIC and JMI_DER_CPPAD. Notice that if
@@ -999,6 +1032,9 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 		            jmi_real_t *p_opt_ub, jmi_real_t *dx_ub, jmi_real_t *x_ub,
 		            jmi_real_t *u_ub, jmi_real_t *w_ub, jmi_real_t t0_ub,
 		            jmi_real_t tf_ub, jmi_real_t *hs_ub,
+		            int linearity_information_provided,
+		            int* p_opt_lin, int* dx_lin, int* x_lin, int* u_lin, int* w_lin,
+		            int* dx_tp_lin, int* x_tp_lin, int* u_tp_lin, int* w_tp_lin,
 		            int n_cp, int der_eval_alg);
 
 /**
