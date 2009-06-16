@@ -1855,12 +1855,14 @@ class JMIModel(object):
             raise JMIException("Getting the sizes of the optimization functions failed.")
         return n_eq_Ceq.value, n_eq_Cineq.value, n_eq_Heq.value, n_eq_Hineq.value
         
-    def opt_J(self, J):
+    def opt_J(self):
         """ Evaluates the cost function J.
         
         """
+        J = N.zeros(1, dtype=c_jmi_real_t)
         if self._dll.jmi_opt_J(self._jmi, J) is not 0:
             raise JMIException("Evaluation of J failed.")
+        return J[0]
         
     def opt_dJ(self, eval_alg, sparsity, independent_vars, mask, jac):
         """ Evaluates the gradient of the cost function.
@@ -1870,12 +1872,12 @@ class JMIModel(object):
             raise JMIException("Evaluation of the gradient of the cost function failed.")
         
     def opt_dJ_n_nz(self, eval_alg):
-        """ Returns the number of zeros in the gradient of the cost function J.
+        """ Returns the number of non-zeros in the gradient of the cost function J.
         
         """
         n_nz = ct.c_int()
         if self._dll.jmi_opt_dJ_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
-            raise JMIException("Getting the number of zeros failed.")
+            raise JMIException("Getting the number of non-zeros failed.")
         return n_nz.value
         
     def opt_dJ_nz_indices(self, eval_alg, independent_vars, mask, row, col):
