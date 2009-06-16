@@ -18,66 +18,85 @@
 */
 
 /** \file jmi_opt_sim_ipopt.h
- *  \brief An interface between the NLP representation provided by jmi_opt_sim
+ *  \brief An interface between the NLP representation provided by jmi_opt_sim_t
  *  and IPOPT.
  **/
 
-/**
- * min f(x)
- *
- * s.t.
- *
- * g_lb <= g(x) <= g_ub
- *
- */
 #ifndef _JMI_OPT_SIM_IPOPT_H
 #define _JMI_OPT_SIM_IPOPT_H
 
 #include "jmi.h"
 #include "jmi_opt_sim.h"
-//#include <IpStdCInterface.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/*
-typedef struct {
-	jmi_opt_sim_t *jmi_opt_sim;
-//	jmi_real_t *x;
-	Index n;
-	Index m;
-	Index dg_n_nz;
-	Index *dg_row;
-	Index *dg_col;
-	Index hess_lag_n_nz;
-	jmi_real_t *g_lb;
-	jmi_real_t *g_ub;
-	IpoptProblem nlp;
 
-	enum ApplicationReturnStatus status;
-	jmi_real_t objective;
-	jmi_real_t *g;
-	jmi_real_t *mult_g;
-	jmi_real_t *mult_x_lb;
-	jmi_real_t *mult_x_ub;
+/**
+ * \defgroup jmi_opt_sim_ipopt Ipopt interface to the JMI simultaneous optimization interface
+ * \brief Documentation of the Ipopt interface to the JMI simultaneous optimization interface.
+ *
+ */
+/* @{ */
 
-} jmi_opt_sim_ipopt_t;
-*/
 
+/**
+ * \brief Struct containing a pointer to a jmi_TNLP object which represents
+ * the Ipopt NLP.
+ */
 typedef struct jmi_opt_sim_ipopt_t jmi_opt_sim_ipopt_t;
 
+/**
+ * \brief Create a new instance of a jmi_opt_sim_ipopt_t struct.
+ *
+ * @param jmi_opt_sim_ipopt (Output) The new struct.
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @return Error code.
+ */
 int jmi_opt_sim_ipopt_new(jmi_opt_sim_ipopt_t **jmi_opt_sim_ipopt, jmi_opt_sim_t *jmi_opt_sim);
 
 //int jmi_opt_sim_ipopt_set_initial_point(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt, jmi_real_t *x_init);
 
+/**
+ * \brief Solve the NLP problem.
+ *
+ * @param jmi_opt_sim_ipopt A jmi_opt_sim_ipopt_t struct.
+ * @return Error code.
+ */
 int jmi_opt_sim_ipopt_solve(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt);
 
+/**
+ * \brief Set Ipopt string option.
+ *
+ *  @param jmi_opt_sim_ipopt A jmi_opt_sim_ipopt_t struct.
+ *  @param key The name of the option.
+ *  @param val The value of the option.
+ *  @return Error code.
+ */
 int jmi_opt_sim_ipopt_set_string_option(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt, char* key, char* val);
 
+/**
+ * \brief Set Ipopt integer option.
+ *
+ *  @param jmi_opt_sim_ipopt A jmi_opt_sim_ipopt_t struct.
+ *  @param key The name of the option.
+ *  @param val The value of the option.
+ *  @return Error code.
+ */
 int jmi_opt_sim_ipopt_set_int_option(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt, char* key, int val);
 
+/**
+ * \brief Set Ipopt double option.
+ *
+ *  @param jmi_opt_sim_ipopt A jmi_opt_sim_ipopt_t struct.
+ *  @param key The name of the option.
+ *  @param val The value of the option.
+ *  @return Error code.
+ */
 int jmi_opt_sim_ipopt_set_num_option(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt, char* key, double val);
+
+/* @} */
 
 #ifdef __cplusplus
 }

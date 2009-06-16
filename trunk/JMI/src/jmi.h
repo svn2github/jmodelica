@@ -47,11 +47,26 @@
  *     - <a href="group__jmi__opt__sim.html"> Documentation of simultaneous
  *     interface optimization </a>
  *     - <a href="group__jmi__opt__sim__lp.html"> Documentation of implementation
- *     based on Lagrange polynomials and Radau points. </a>
+ *     based on Lagrange polynomials and Radau points</a>
  *  \section jmi_solver_interface The JMI Solver interface
  *    Typically, the JMI Model and Algorithm interfaces are intended to
- *    be integrated with numerical solvers. The JMI Solver interface then contains functions that
- *    are often necessary to manage such integrations.
+ *    be integrated with numerical solvers. Currently, the JMI interface provides
+ *    an interface to the NLP solver Ipopt (https://projects.coin-or.org/Ipopt).
+ *     - <a href="group__jmi__opt__sim__ipopt.html"> Documentation of the Ipopt
+ *     interface to the JMI simultaneous optimization interface</a>
+ *
+ * \section limitations Limitations
+ * The JModelica.org JMI interface in under development. The function signatures
+ * are likely to change in the future - all feedback is very welcome. The following
+ * limitations apply:
+ *   - Minimum time problems are not supported.
+ *   - Optimization of element lengths in the JMI simultaneous optimization
+ *   interface is not supportd.
+ *   - Symbolic Jacobians are not provided by the compiler. This is actually
+ *   a limitation in the code generation module, but as a consequence, the
+ *   JMI_DER_SYMBOLIC flag cannot be used in the JMI interface.
+ *   - The ODE interface is very limited and requires a Modelica model to be
+ *   stated on explicit ODE form (\f$\dot x=f(x,u)\f$) in order to work.
  *
  */
 
@@ -212,7 +227,7 @@
  *                     evaluation. The constants JMI_DER_NN are used to indicate that
  *                     the Jacobian w.r.t. a particular vector should be evaluated.
  *   - mask              This array has the same size as the number of column of the dense
- *                     Jacobian, and holds the value of 0 if the corresponding Jacobian
+ *                     Jacobian (equal to the size of the vector \f$z\f$), and holds the value of 0 if the corresponding Jacobian
  *                     column should not be computed. If the value of an entry in
  *                     mask i 1, then the corresponding Jacobian column will be evaluated.
  *                     The evaluated Jacobian columns are stored in the first
@@ -412,7 +427,10 @@ int jmi_get_n_tp(jmi_t *jmi, int *n_tp);
  * \brief Set the vector of time points included in the problem.
  *
  * @param jmi The jmi_t struct.
- * @param tp A pointer to a jmi_real_t array of size n_tp that contains the time points.
+ * @param tp A pointer to a jmi_real_t array of size n_tp that contains the time
+ * points. Notice that the time points should be normalized to the interval
+ * [0,1], where 0 corresponds to the interval start time and where 1 corresponds
+ * to the interval final time.
  * @return Error code.
  *
  */
@@ -422,7 +440,8 @@ int jmi_set_tp(jmi_t *jmi, jmi_real_t *tp);
  * \brief Get the vector of time points included in the problem.
  *
  * @param jmi The jmi_t struct.
- * @param tp (Output) a pointer to a jmi_real_t array of size n_tp. Upon return the array contains the time points of the model.
+ * @param tp (Output) a pointer to a jmi_real_t array of size n_tp.
+ * Upon return the array contains the normalized time points of the model.
  * @return Error code.
  *
  */
@@ -610,6 +629,7 @@ int jmi_ode_f(jmi_t* jmi);
  *                         JMI_DER_DX has no effect.
  * @param mask This argument is a vector containing ones for the Jacobian columns that
  *             should be included in the Jacobian and zeros for those which should not.
+ *             The size of this vector is the same as the z vector.
  * @param jac (Output) The Jacobian.
  * @return Error code.
  *
@@ -719,6 +739,7 @@ int jmi_dae_F(jmi_t* jmi, jmi_real_t* res);
  *                         to set this argument.
  * @param mask This argument is a vector containing ones for the Jacobian columns that
  *             should be included in the Jacobian and zeros for those which should not.
+ *             The size of this vector is the same as the z vector.
  * @param jac (Output) The Jacobian.
  * @return Error code.
  *
@@ -1034,10 +1055,10 @@ int jmi_init_dFp_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
  * @param jmi A jmi_t struct.
  * @param start_time The start time of the optimization interval.
  * @param start_time_free Set to 0 if the start time of the optimization interval is fixed
- *                        or 1 if the start time is free.
+ *                        or 1 if the start time is free. CURRENTLY NOT SUPPORTED.
  * @param final_time Final time of the optimization interval.
  * @param final_time_free Set to 0 if the final time of the optimization interval is fixed
- *                        or 1 if the final time is free.
+ *                        or 1 if the final time is free. CURRENTLY NOT SUPPORTED.
  * @return Error code.
  *
  */

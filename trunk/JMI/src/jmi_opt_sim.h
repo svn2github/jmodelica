@@ -129,25 +129,49 @@ typedef int (*jmi_opt_sim_get_result_t)(jmi_opt_sim_t *jmi_opt_sim,
 /* @{ */
 
 /**
- * jmi_opt_sim_get_dimenstions returns the number of variables and the number of
- * constraints, respectively, in the problem.
+ * \brief Get the number of variables and the number of
+ * constraints, respectively, in the NLP problem.
+ *
+ * @param jmi_opt_sim_t A jmi_opt_sim_t struct.
+ * @param n_x (Output) Number of variables in the NLP problem.
+ * @param n_g (Output) Number of inequality constraints.
+ * @param n_h (Output) Number of equality constraints.
+ * @param dg_n_nz (Output) Number of non-zeros in the Jacobian of the inequality
+ * constraints.
+ * @param dh_n_nz (Output) Number of non-zeros in the Jacobian of the equality
+ * constraints.
  */
-int jmi_opt_sim_get_dimensions(jmi_opt_sim_t *jmi_opt_sim, int *n_x, int *n_g, int *n_h,
-		int *dg_n_nz, int *dh_n_nz);
+int jmi_opt_sim_get_dimensions(jmi_opt_sim_t *jmi_opt_sim, int *n_x, int *n_g,
+		int *n_h, int *dg_n_nz, int *dh_n_nz);
 
 /**
- * jmi_opt_sim_get_interval_spec returns data that specifies the optimization interval.
+ * \brief Retrieve data that specifies the optimization interval.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param start_time (Output) Optimization interval start time.
+ * @param start_time_free (Output) 0 if the start time is fixed, otherwise 1.
+ * @param final_time (Output) Optimization interval final time.
+ * @param final_time_free (Output) 0 if the final time is fixed, otherwise 1.
+ * \return Error code.
  */
-int jmi_opt_sim_get_interval_spec(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *start_time, int *start_time_free,
+int jmi_opt_sim_get_interval_spec(jmi_opt_sim_t *jmi_opt_sim,
+		jmi_real_t *start_time, int *start_time_free,
 		jmi_real_t *final_time, int *final_time_free);
 
 /**
- * Get the x vector.
+ * \brief Get the x vector of the NLP.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @return The x vector.
  */
 jmi_real_t* jmi_opt_sim_get_x(jmi_opt_sim_t *jmi_opt_sim);
 
 /**
- * jmi_opt_sim_get_initial returns the initial point.
+ * \brief Get the initial point of the NLP.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param x_init (Output) the initial guess vector.
+ * @return Error code.
  */
 int jmi_opt_sim_get_initial(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_init);
 
@@ -176,6 +200,8 @@ struct jmi_opt_sim_t{
 	int *dg_col;
 	int *dh_row;
 	int *dh_col;
+//	int n_nonlinear_variables;
+//	int *non_linear_variables_indices; // Stored Fortran style (first index = 1)
 	jmi_opt_sim_get_dimensions_t get_dimensions;
 	jmi_opt_sim_get_interval_spec_t get_interval_spec;
 	jmi_opt_sim_f_t f;
@@ -196,7 +222,12 @@ struct jmi_opt_sim_t{
 };
 
 /**
- * jmi_opt_sim_get_bounds returns the upper and lower bounds on the optimization variables.
+ * \brief Get the upper and lower bounds of the optimization variables.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param x_lb (Output) Lower bounds vector.
+ * @param x_lb (Output) Upper bounds vector.
+ * @return Error code.
  */
 int jmi_opt_sim_get_bounds(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_lb, jmi_real_t *x_ub);
 
@@ -210,47 +241,86 @@ int jmi_opt_sim_get_bounds(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_lb, jmi_rea
 /* @{ */
 
 /**
- * jmi_opt_sim_f returns the cost function value at a given point in search space.
+ * \brief Returns the cost function value at a given point in search space.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param f (Output) Value of the cost function.
+ * @param Error code.
  */
 int jmi_opt_sim_f(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *f);
 
 /**
- * jmi_opt_sim_df returns the gradient of the cost function value at
+ * \brief Returns the gradient of the cost function value at
  * a given point in search space.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param df (Output) Value of the gradient of the cost function.
+ * @param Error code.
  */
 int jmi_opt_sim_df(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *df);
 
 /**
- * jmi_opt_sim_g returns the residual of the inequality constraints h
+ * \brief Returns the residual of the inequality constraints.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param res (Output) Residual of the inequality constraints.
+ * @param Error code.
  */
 int jmi_opt_sim_g(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res);
 
 /**
- * jmi_opt_sim_dg returns the Jacobian of the residual of the
- * inequality constraints.
+ * \brief Returns the Jacobian of the residual of the inequality constraints.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jac (Output) Jacobian of the residual of the inequality constraints.
+ * @param Error code.
  */
 int jmi_opt_sim_dg(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac);
 
 /**
- * jmi_opt_sim_g_nz_indices returns the indices of the non-zeros in the
- * inequality constraint Jacobian.
+ * \Brief Returns the indices of the non-zeros in the
+ * inequality constraint Jacobian. The indices are returned in Fortran style
+ * with the first entry indexed as 1.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param irow (Output) Row indices of the non-zero entries in the
+ *  Jacobian of the residual of the inequality constraints.
+ * @param icol (Output) Column indices of the non-zero entries in the
+ *  Jacobian of the residual of the inequality constraints.
+ * @param Error code.
  */
 int jmi_opt_sim_dg_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *icol);
 
 /**
- * jmi_opt_sim_h returns the residual of the equality constraints h
+ * \brief Returns the residual of the equality constraints.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param res (Output) Residual of the equality constraints.
+ * @param Error code.
  */
 int jmi_opt_sim_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res);
 
 /**
- * jmi_opt_sim_dh returns the Jacobian of the residual of the
- * equality constraints.
+ * \brief Returns the Jacobian of the residual of the equality constraints.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jac (Output) Jacobian of the residual of the equality constraints.
+ * @param Error code.
  */
 int jmi_opt_sim_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac);
 
+
 /**
- * jmi_opt_sim_h_nz_indices returns the indices of the non-zeros in the
- * equality constraint Jacobian.
+ * \Brief Returns the indices of the non-zeros in the
+ * equality constraint Jacobian. The indices are returned in Fortran style
+ * with the first entry indexed as 1.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param irow (Output) Row indices of the non-zero entries in the
+ *  Jacobian of the residual of the equality constraints.
+ * @param icol (Output) Column indices of the non-zero entries in the
+ *  Jacobian of the residual of the equality constraints.
+ * @param Error code.
  */
 int jmi_opt_sim_dh_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *icol);
 
@@ -265,19 +335,45 @@ int jmi_opt_sim_dh_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *icol);
 
 
 /**
- * Write the the optimization result to file in Matlab format.
+ * \brief Write the the optimization result to file in Matlab format.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param file_name Name of the file.
+ * @return Error code.
+ *
  */
 int jmi_opt_sim_write_file_matlab(jmi_opt_sim_t *jmi_opt_sim_t,
 		const char *file_name);
 
 /**
- * Get the length of the result variable vectors.
+ * \brief Get the length of the result variable vectors.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param n (Output) the number of points in the independent time vector.
+ * @return Error code.
+ *
  */
 int jmi_opt_sim_get_result_variable_vector_length(jmi_opt_sim_t
 		*jmi_opt_sim, int *n);
 
 /**
- * Get the results, stored in column major format.
+ * \brief Get the optimization results.
+ *
+ * The output arguments corresponding to the derivatives, the states, the
+ * inputs and the algebraic variables are matrices (stored in column major
+ * format) where each row contains the variable values at a particular time
+ * point and were each column contains the trajectory of a particular variable.
+ * The number of rows of these matrices are given by the function
+ * jmi_opt_sim_get_result_variable_vector_length.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param p_opt (Output) A vector containing the optimal values of the
+ * parameters.
+ * @param t (Output) The time vector.
+ * @param dx (Output) The derivatives.
+ * @param x (Output) The states.
+ * @param u (Output) The inputs.
+ * @param w (Output) The algebraic variables.
  */
 int jmi_opt_sim_get_result(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *p_opt,
 		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,

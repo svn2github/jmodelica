@@ -942,6 +942,53 @@ typedef struct {
     int *der_mask;
 } jmi_opt_sim_lp_t;
 
+/**
+ * \brief Create a new jmi_opt_sim_t struct based on collocation by means
+ * of Lagrange polynomials.
+ *
+ * This function takes as its arguments information about initial guesses,
+ * bounds, number of finite elements and number of collocation points. The
+ * resulting jmi_opt_sim_t struct contains callback functions which evaluate
+ * the constraints and cost function resulting from transcription of the
+ * continuous time dynamic optimization problem by means of a simultaneous method
+ * based on orthogonal collocation on finite elements and Lagrange polynomials
+ * on Radau points. Notice that the returned jmi_opt_sim_t struct is generic in
+ * the sense that it represents a general NLP where the particular transcription
+ * method is implemented in the cost function and constraints callback functions.
+ *
+ * @param jmi_opt_sim (Output) The returned jmi_opt_sim_t struct.
+ * @param jmi A jmi_t struct representing the dynamic model.
+ * @param n_e Number of finite elements.
+ * @param hs A vector containing the normalized element lengths: sum(hs)=1.
+ * @param hs_free A flag indicating if the elements are free. If hs_free is
+ * 0 then the element lenths are assumed to be fixed, otherwise free. NOTICE:
+ * THIS FEATURE IS CURRENTLY NOT SUPPORTED.
+ * @param p_opt_init Initial guesses for the optimized parameters.
+ * @param dx_init Initial guesses for the derivatives.
+ * @param x_init Initial guesses for the states.
+ * @param u_init Initial guesses for the inputs.
+ * @param w_init Initial guesses for the algebraic variables.
+ * @param p_opt_lb Lower bounds for the optimized parameters.
+ * @param dx_lb Lower bounds for the derivatives.
+ * @param x_lb Lower bounds for the states.
+ * @param u_lb Lower bounds for the inputs.
+ * @param t0_lb Lower bound for interval start time.
+ * @param hs_lb Lower bound for element lengths.
+ * @param w_lb Lower bounds for the algebraic variables.
+ * @param p_opt_ub Upper bounds for the optimized parameters.
+ * @param dx_ub Upper bounds for the derivatives.
+ * @param x_ub Upper bounds for the states.
+ * @param u_ub Upper bounds for the inputs.
+ * @param w_ub Upper bounds for the algebraic variables.
+ * @param t0_ub Upper bound for interval start time.
+ * @param hs_ub Upper bound for element lengths.
+ * @param n_cp Number of collocation points. Valid numbers are 2..10.
+ * @param der_eval_alg Specification of evaluation algorithm for derivatives.
+ * Valid arguments are JMI_DER_SYMBOLIC and JMI_DER_CPPAD. Notice that if
+ * JMI_DER_SYMBOLIC is used, then symbolic Jacobians need to be present in
+ * in the generated code.
+ * @return Error code.
+ */
 int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 		            jmi_real_t *hs, int hs_free,
 		            jmi_real_t *p_opt_init, jmi_real_t *dx_init, jmi_real_t *x_init,
@@ -954,6 +1001,13 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 		            jmi_real_t tf_ub, jmi_real_t *hs_ub,
 		            int n_cp, int der_eval_alg);
 
+/**
+ * \brief Deallocate the fields of a jmi_opt_sim_t struct created by the function
+ * jmi_opt_sim_lp_new.
+ *
+ * @jmi_opt_sim The jmi_opt_sim_t struct to delete.
+ * @return Error code.
+ */
 int jmi_opt_sim_lp_delete(jmi_opt_sim_t *jmi_opt_sim);
 
 
@@ -1526,14 +1580,51 @@ static jmi_real_t jmi_opt_sim_lpp_radau_dot_vals_10[11][11] = {{-9.9999999999998
                                                        {2.5922119028094609e-001, -1.6466772675993407e-001, 2.6724017988449994e-001, -3.8490377804190229e-001, 5.5758559987230205e-001, -8.5461660475917212e-001, 1.4531681475040115e+000, -2.9655938725737108e+000, 8.9720795908328199e+000, 5.1881095017213130e-001, -6.8901673047351736e+001},
                                                        {-9.9999999999999561e-002, 6.3489074494963299e-002, -1.0278178932527715e-001, 1.4729054379692935e-001, -2.1147021062505000e-001, 3.1903624518598728e-001, -5.2645290826627766e-001, 1.0056089751861816e+000, -2.4885984249742834e+000, 1.1039947950453129e+001, 5.0499999999977341e+001}};
 
-/* Evaluate polynomial L_k^{n}(tau), where polynomial coefficients are
+/**
+ * \brief Evaluate Lagrange polynomial\f$L_k^{n}(\tau)\f$.
+ *
+ * The polynomial coefficients are
  * given in column major format in the vector pol. This vector should contain
  * coefficients for all Lagrange polynomials as returned by jmi_opt_sim_lp_get_pols.
  * This means that the pol matrix should have dimensions n x n.
+ *
+ * @param tau \f$\tau\f$, value of independent variable in polynomial evaluation.
+ * @param n Order of polynomials.
+ * @param pol Vector containing the polynomial coefficients.
+ * @param k Specify evaluation of the k:th Lagrange polynomial.
+ * @return Value of polynomial.
+ *
  */
 jmi_real_t jmi_opt_sim_lp_eval_pol(jmi_real_t tau, int n, jmi_real_t* pol, int k);
 
 // Lagrange polynomial matrices are returned in column major format.
+
+/**
+ * \brief Get Lagrange polynomials of a specified order.
+ *
+ * @param n_cp Number of collocation points.
+ * @param cp (Output) Radu collocation points for polynomials of order n_cp-1.
+ * @param cpp (Output) Radau collocation points for polynomials of order n_cp.
+ *  In this case, the point 0 has been added to cp.
+ * @param Lp_coeffs (Output) Polynomial coefficients for polynomials based on the points
+ * given by cp. The coefficients are stored in a matrix (vectorized using column
+ * major convention) of size n_cp x n_cp where each row contains the
+ * coefficients of one Lagrange polynomial.
+ * @param Lpp_coeffs (Output) Polynomial coefficients for polynomials based on the points
+ * given by cpp. The coefficients are stored in a matrix (vectorized using
+ * column major format) of size n_cp+1 x n_cp+1.
+ * @param Lp_dot_coeffs (Output) Polynomial coefficients for the derivatives of the
+ * polynomials based on the cp points. The coefficients are stored in a matrix
+ * (vectorized using column major format) of size n_cp x n_cp-1.
+ * @param Lpp_dot_coeffs. (Output) Polynomial coefficients for the derivatives of the
+ * polynomials based on the cpp points. The coefficients are stored in a matrix
+ * (vectorized using column major format) of size n_cp+1 x n_cp.
+ * @param Lp_dot_vals (Output) Values of the derivatives of the cp polynomials when
+ * evaluated at the Radau collocation points. The vector has the size n_cp.
+ * @param Lpp_dot_vals (Output) Values of the derivatives of the cpp polynomials when
+ * evaluated at the collocation points. The vector has the size n_cp+1.
+ * @return Error code.
+ */
 int jmi_opt_sim_lp_get_pols(int n_cp, jmi_real_t *cp, jmi_real_t *cpp,
 		jmi_real_t *Lp_coeffs, jmi_real_t *Lpp_coeffs,
 		jmi_real_t *Lp_dot_coeffs, jmi_real_t *Lpp_dot_coeffs,
