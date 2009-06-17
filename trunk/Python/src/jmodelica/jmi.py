@@ -1265,7 +1265,30 @@ class JMIModel(object):
         self._offs_w_p = ct.c_int()
 
         self.get_offsets()
-
+        
+        self._path = os.path.abspath(path)
+        self._libname = libname
+        self._setDefaultValuesFromMetadata()
+        
+        self.initAD()
+        
+    def resetModel(self):
+        """ Reset the initial values to the states when the model was
+            loaded into memory.
+        """
+        self.setDefaultValuesFromMetadata()
+        
+    def _setDefaultValuesFromMetadata(self, libname=None, path=None):
+        """ Load metadata saved in XML files.
+        
+            Meta data can be things like time points, initial states,
+            initial cost etc.
+        """
+        if libname is None:
+            libname = self._libname
+        if path is None:
+            path = self._path
+        
         # set start attributes
         xml_variables_name=libname+'_variables.xml' 
         # assumes libname is name of model and xmlfile is located in the same dir as the dll
@@ -1288,9 +1311,6 @@ class JMIModel(object):
         except IOError, e:
             # Modelica model - can not load Optimica specific xml
             pass
-
-        
-        self.initAD()
          
     def initAD(self):
         """Initializing Algorithmic Differential package.
@@ -1373,6 +1393,8 @@ class JMIModel(object):
     def set_tp(self, tp):
         """ Sets the vector of time points. 
         
+        @todo:
+            Assert correct vector length.
         """
         if self._dll.jmi_set_tp(self._jmi, tp) is not 0:
             raise JMIException("Setting vector of time points failed.")
@@ -1411,8 +1433,6 @@ class JMIModel(object):
         """
         x_p = self._dll.jmi_get_x_p(self._jmi, i)
         x_p[:] = new_x_p
-        
-    x_p = property(getX_P, setX_P, "The differentiated variables corresponding to the i:th time point.")
     
     def getPI(self):
         """ Gets a reference to the independent parameters vector.
@@ -1483,8 +1503,6 @@ class JMIModel(object):
         """
         dx_p = self._dll.jmi_get_dx_p(self._jmi,i)
         dx_p[:] = new_dx_p
-        
-    dx_p = property(getDX_P, setDX_P, "The derivatives corresponding to the i:th time point.")
 
     def getPD(self):
         """ Gets a reference to the dependent parameters vector.
@@ -1526,8 +1544,6 @@ class JMIModel(object):
         """
         u_p = self._dll.jmi_get_u_p(self._jmi, i)
         u_p[:] = new_u_p
-        
-    u_p = property(getU_P, setU_P, "The inputs corresponding to the i:th time point.")
 
     def getW(self):
         """ Gets a reference to the algebraic variables vector.
@@ -1556,8 +1572,6 @@ class JMIModel(object):
         """
         w_p = self._dll.jmi_get_w_p(self._jmi, i)
         w_p[:] = new_w_p
-        
-    w_p = property(getW_P, setW_P, "The algebraic variables corresponding to the i:th time point.")
 
     def getT(self):
         """ Gets a reference to the time value.
