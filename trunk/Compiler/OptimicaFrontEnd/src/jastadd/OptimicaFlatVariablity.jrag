@@ -23,13 +23,12 @@ aspect OptimicaFlatVariability {
 	syn boolean FTypePrefixVariability.optParameterVariability() = false;
 	eq FTimed.optParameterVariability() = true;	
 	syn boolean FExp.isOptParameterExp() = variability().optParameterVariability();
-	
-	refine FlatVariability eq FVariable.isParameter() =
-		getFTypePrefixVariability().parameterVariability() &&
-		!freeAttribute();
-	
+		
 	public static final FOptParameter FOptParameter.singleton = new FOptParameter();	
 	
+	// Notice that the attribute FVariable.isParameter is not redefined in order
+	// not to render a lot of attributes in FlatAPI to be redefined as a
+	// consequence.
     syn boolean FVariable.isOptParameter() = 
     	getFTypePrefixVariability().parameterVariability() &&
     	freeAttribute();

@@ -1,16 +1,6 @@
 aspect OptimicaFlatAPI {
 	
 	/**
-	 * \brief Refine the definition of isIndependentParameter to take into
-	 * account optimized parameters.
-	 */
-	refine FlatAPI eq FVariable.isIndependentParameter() = 
-		(isParameter() || isOptParameter()) &&
-	  (hasBindingExp()? getBindingExp().isConstantExp(): 
-	  (startAttributeSet()? startAttributeExp().isConstantExp(): true));
-
-	
-	/**
 	 * \brief Check if the free attribute is set for a variable.
 	 * 
 	 * @return True if attribute set.

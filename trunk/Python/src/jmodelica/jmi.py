@@ -1054,6 +1054,9 @@ def load_DLL(libname, path):
                                        Nct.ndpointer(dtype=ct.c_int,
                                                      ndim=1,
                                                      flags='C'),                                           
+                                       Nct.ndpointer(dtype=ct.c_int,
+                                                     ndim=1,
+                                                     flags='C'),                                           
                                        ct.c_int,
                                        ct.c_int]
     except AttributeError, e:
