@@ -1279,7 +1279,7 @@ class JMIModel(object):
         """ Reset the initial values to the states when the model was
             loaded into memory.
         """
-        self.setDefaultValuesFromMetadata()
+        self._setDefaultValuesFromMetadata()
         
     def _setDefaultValuesFromMetadata(self, libname=None, path=None):
         """ Load metadata saved in XML files.
