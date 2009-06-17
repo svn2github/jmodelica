@@ -365,6 +365,29 @@ public class XMLVariableGenerator extends GenericGenerator {
 				
 				genPrinter.print(tg.generateTag("Attributes"));
 				
+				//is linear?
+				addLinearInfo(genPrinter, tg, variable);
+				
+				//variable category
+				genPrinter.print(tg.generateTag("VariableCategory"));
+				if(variable.isDerivativeVariable()) {
+					genPrinter.print("derivative");
+				} else if(variable.isDifferentiatedVariable()) {
+					genPrinter.print("state");
+				} else if(variable.isDependentConstant()) {
+					genPrinter.print("dependentConstant");
+				} else if(variable.isIndependentConstant()) {
+					genPrinter.print("independentConstant");
+				} else if(variable.isDependentParameter()) {
+					genPrinter.print("dependentParamenter");
+				} else if(variable.isIndependentParameter()) {
+					genPrinter.print("independentParameter");
+				} else {
+					//default is algebraic
+					genPrinter.print("algebraic");
+				}
+				genPrinter.print(tg.generateTag("VariableCategory"));
+
 				//Variability (optional with default)
 				genPrinter.print(tg.generateTag("Variability"));
 				if(variable.isConstant()) {
@@ -392,10 +415,17 @@ public class XMLVariableGenerator extends GenericGenerator {
 				genPrinter.print(tg.generateTag("Causality"));
 				
 				genPrinter.print(tg.generateTag("ScalarVariable"));
-			}
-			
+			}			
 		}
-
+	}
+	
+	/*
+	 * Helper method generating linear variable tag such that it can be overridden in 
+	 * OptimicaXMLVariableGenerator.
+	 */
+	protected void addLinearInfo(PrintStream genPrinter, TagGenerator tg, FVariable variable){
+		//isLinear
+		genPrinter.print(tg.generateTag("IsLinear")+variable.isLinear()+tg.generateTag("IsLinear"));
 	}
 	
 	/*
@@ -434,26 +464,6 @@ public class XMLVariableGenerator extends GenericGenerator {
 		if(realvariable.nominalAttributeSet()) {
 			genPrinter.print(tg.generateTag("Nominal")+realvariable.nominalAttribute()+tg.generateTag("Nominal"));
 		}
-		//category
-		genPrinter.print(tg.generateTag("Category"));
-		if(realvariable.isDerivativeVariable()) {
-			genPrinter.print("derivative");
-		} else if(realvariable.isDifferentiatedVariable()) {
-			genPrinter.print("state");
-		} else if(realvariable.isDependentConstant()) {
-			genPrinter.print("dependentConstant");
-		} else if(realvariable.isIndependentConstant()) {
-			genPrinter.print("independentConstant");
-		} else if(realvariable.isDependentParameter()) {
-			genPrinter.print("dependentParamenter");
-		} else if(realvariable.isIndependentParameter()) {
-			genPrinter.print("independentParameter");
-		} else {
-			//default is algebraic
-			genPrinter.print("algebraic");
-		}
-		genPrinter.print(tg.generateTag("Category"));
-
 	}
 	
 	/*
@@ -628,12 +638,17 @@ class TagGenerator {
 	 * @return Start or end tag with name set to <tagname>.
 	 */
 	public String generateTag(String tagname) {
+		return generateTag(tagname, false);
+	}
+	
+	public String generateTag(String tagname, boolean isAttributeTag) {
 		if(stack.isEmpty() || !stack.peek().equals(tagname.trim())) {
 			stack.push(tagname.trim());
-			return generateStartTag(tagname);
+			return generateStartTag(tagname, isAttributeTag);
 		}else {
-			return generateEndTag(stack.pop());
+			return generateEndTag(stack.pop(), isAttributeTag);
 		} 
+
 	}
 	
 	/**
@@ -643,11 +658,15 @@ class TagGenerator {
 	 *            The name of the tag for which a start tag should be created.
 	 * @return The start tag with name set to <tagname>.
 	 */
-	private String generateStartTag(String tagname) {				
-		String tag = "\n"+tabs+"<"+tagname+">";			
+	private String generateStartTag(String tagname, boolean isAttributeTag) {
+		String tag;
+		if(isAttributeTag) {
+			tag = "\n"+tabs+"<"+tagname+" "; 
+		}else {
+			tag = "\n"+tabs+"<"+tagname+">";			
+		}
 		tabs=tabs+"\t";
 		previous = tagname;
-		
 		return tag;
 	}
 	
@@ -658,7 +677,7 @@ class TagGenerator {
 	 *            The name of the tag for which an end tag should be created.
 	 * @return The end tag with name set to <tagname>.
 	 */
-	private String generateEndTag(String tagname) {
+	private String generateEndTag(String tagname, boolean isAttributeTag) {
 		String tag;
 		tabs=tabs.substring(1);
 		if(!previous.equals(tagname)) {
@@ -666,8 +685,11 @@ class TagGenerator {
 		} else {
 			tag=("");
 		}
-		tag=tag+("</"+tagname+">");
-
+		if(isAttributeTag) {
+			tag = tag +"/>";
+		} else {
+			tag=tag+("</"+tagname+">");
+		}
 		return tag;
 	}
 }

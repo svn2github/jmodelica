@@ -27,6 +27,7 @@ import org.jmodelica.ast.FBooleanVariable;
 import org.jmodelica.ast.FClass;
 import org.jmodelica.ast.FIntegerVariable;
 import org.jmodelica.ast.FRealVariable;
+import org.jmodelica.ast.FVariable;
 import org.jmodelica.ast.Printer;
 
 /**
@@ -78,6 +79,22 @@ public class OptimicaXMLVariableGenerator extends XMLVariableGenerator {
 		super.addBooleanAttributes(genPrinter, tg, booleanvariable);
 		genPrinter.print(tg.generateTag("Free")+booleanvariable.freeAttribute()+tg.generateTag("Free"));
 		genPrinter.print(tg.generateTag("InitialGuess")+booleanvariable.initialGuessAttribute()+tg.generateTag("InitialGuess"));
+	}
+	
+	@Override
+	protected void addLinearInfo(PrintStream genPrinter, TagGenerator tg, FVariable variable) {
+		super.addLinearInfo(genPrinter, tg, variable);
+		boolean[] linearTimedVariables = variable.isLinearTimedVariables();
+		
+		if(linearTimedVariables.length > 0) {
+			genPrinter.print(tg.generateTag("IsLinearTimedVariables"));
+			for(int i=0;i<linearTimedVariables.length;i++) {
+				genPrinter.print(tg.generateTag("TimePoint", true));
+				genPrinter.print("index=\""+i+"\" isLinear=\""+linearTimedVariables[i]+"\"");
+				genPrinter.print(tg.generateTag("TimePoint", true));
+			}
+			genPrinter.print(tg.generateTag("IsLinearTimedVariables"));
+		}
 	}
 }
 

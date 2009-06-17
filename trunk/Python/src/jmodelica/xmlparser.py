@@ -91,7 +91,7 @@ class XMLVariablesDoc(XMLdoc):
         """ Extracts ValueReference for all free independent parameters.
         
         """
-        refs = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"independentParameter\"] \
+        refs = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"independentParameter\"] \
                                [../../Attributes/RealAttributes/Free=\"true\"]")
         return refs
     
@@ -99,8 +99,8 @@ class XMLVariablesDoc(XMLdoc):
         """ Extracts ValueReference and InitialGuess values for all algebraic variables.
         
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"algebraic\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../Attributes/RealAttributes/Category=\"algebraic\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../VariableCategory=\"algebraic\"]")
             
         return dict(zip(keys,vals))
     
@@ -117,8 +117,8 @@ class XMLVariablesDoc(XMLdoc):
         """ Extracts ValueReference and InitialGuess values for all derivative variables.
         
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"derivative\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../Attributes/RealAttributes/Category=\"derivative\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../VariableCategory=\"derivative\"]")
         
         return dict(zip(keys, vals))
     
@@ -126,8 +126,8 @@ class XMLVariablesDoc(XMLdoc):
         """ Extracts ValueReference and InitialGuess values for all differentiated variables.
         
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"state\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../Attributes/RealAttributes/Category=\"state\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../VariableCategory=\"state\"]")
         
         return dict(zip(keys, vals))
     
@@ -135,9 +135,9 @@ class XMLVariablesDoc(XMLdoc):
         """ Extracts ValueReference and InitialGuess values for all free independent parameters.
         
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"independentParameter\"] \
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"independentParameter\"] \
                                 [../../Attributes/RealAttributes/Free=\"true\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../Attributes/RealAttributes/Category=\"independentParameter\"] \
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../VariableCategory=\"independentParameter\"] \
                                 [../../../../Attributes/RealAttributes/Free=\"true\"]")
         
         return dict(zip(keys, vals))
@@ -146,8 +146,8 @@ class XMLVariablesDoc(XMLdoc):
         """ Extracts ValueReference and lower bound values for all algebraic variables.
         
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"algebraic\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../Attributes/RealAttributes/Category=\"algebraic\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../VariableCategory=\"algebraic\"]")
             
         return dict(zip(keys,vals))
     
@@ -164,8 +164,8 @@ class XMLVariablesDoc(XMLdoc):
         """ Extracts ValueReference and lower bound values for all derivative variables.
         
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"derivative\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../Attributes/RealAttributes/Category=\"derivative\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../VariableCategory=\"derivative\"]")
         
         return dict(zip(keys, vals))
     
@@ -173,8 +173,8 @@ class XMLVariablesDoc(XMLdoc):
         """ Extracts ValueReference and lower bound values for all differentiated variables.
         
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"state\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../Attributes/RealAttributes/Category=\"state\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../VariableCategory=\"state\"]")
         
         return dict(zip(keys, vals))
     
@@ -182,9 +182,9 @@ class XMLVariablesDoc(XMLdoc):
         """ Extracts ValueReference and lower bound values for all free independent parameters.
         
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"independentParameter\"] \
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"independentParameter\"] \
                                [../../Attributes/RealAttributes/Free=\"true\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../Attributes/RealAttributes/Category=\"independentParameter\"] \
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../VariableCategory=\"independentParameter\"] \
                                [../../../../Attributes/RealAttributes/Free=\"true\"]")
         
         return dict(zip(keys, vals))
@@ -193,8 +193,8 @@ class XMLVariablesDoc(XMLdoc):
         """ Extracts ValueReference and upper bound values for all algebraic variables.
         
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"algebraic\"] ")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../Attributes/RealAttributes/Category=\"algebraic\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"] ")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../VariableCategory=\"algebraic\"]")
             
         return dict(zip(keys,vals))
 
@@ -211,8 +211,8 @@ class XMLVariablesDoc(XMLdoc):
         """ Extracts ValueReference and upper bound values for all derivative variables.
         
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"derivative\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../Attributes/RealAttributes/Category=\"derivative\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../VariableCategory=\"derivative\"]")
         
         return dict(zip(keys, vals))
     
@@ -220,8 +220,8 @@ class XMLVariablesDoc(XMLdoc):
         """ Extracts ValueReference and upper bound values for all differentiated variables.
         
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"state\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../Attributes/RealAttributes/Category=\"state\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../VariableCategory=\"state\"]")
         
         return dict(zip(keys, vals))
     
@@ -229,9 +229,9 @@ class XMLVariablesDoc(XMLdoc):
         """ Extracts ValueReference and upper bound values for all free independent parameters.
         
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Attributes/RealAttributes/Category=\"independentParameter\"] \
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"independentParameter\"] \
                                [../../Attributes/RealAttributes/Free=\"true\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../Attributes/RealAttributes/Category=\"independentParameter\"] \
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../VariableCategory=\"independentParameter\"] \
                                [../../../../Attributes/RealAttributes/Free=\"true\"]")
                 
         return dict(zip(keys, vals))
