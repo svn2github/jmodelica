@@ -26,8 +26,7 @@ aspect FlatVariability {
 	eq FContinuous.continuousVariability() = true;	
 
 	syn boolean FVariable.isConstant() = getFTypePrefixVariability().constantVariability();
-    syn boolean FVariable.isParameter(); 
-    eq FVariable.isParameter() = getFTypePrefixVariability().parameterVariability();
+    syn boolean FVariable.isParameter() = getFTypePrefixVariability().parameterVariability();
     syn boolean FVariable.isDiscrete() = getFTypePrefixVariability().discreteVariability();
     syn boolean FVariable.isContinuous() = getFTypePrefixVariability().continuousVariability();
     	
@@ -41,9 +40,7 @@ aspect FlatVariability {
 	eq FInstAccessExp.variability() = null;
 	eq FUnsupportedExp.variability() = null;
 	
-	syn lazy FTypePrefixVariability FVariable.variability();
-
-	eq FVariable.variability() {
+	syn lazy FTypePrefixVariability FVariable.variability() {
    		if (!isContinuous()) {
    			return getFTypePrefixVariability();
    		} else if (isInteger() || isBoolean() || isString()) {
