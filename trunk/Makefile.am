@@ -47,9 +47,7 @@ endif
 	[ -e $(prefix)/Options/options.xml ] && echo "options.xml exists "|| cp Options/options_tpl.xml $(prefix)/Options/options.xml
 	[ -e $(prefix)/Options/options.py ] && echo "options.py exists "|| cp Options/options_tpl.py $(prefix)/Options/options.py
 	mkdir -p $(prefix)/Python
-	mkdir -p $(prefix)/Python/jmodelica
-	cp $(abs_top_srcdir)/Python/src/jmodelica/*.py $(prefix)/Python/jmodelica
-	cp $(abs_top_srcdir)/Python/src/jmodelica/*.py $(prefix)/Python/jmodelica/
+	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/Python
 	mkdir -p $(prefix)/ThirdParty
 	mkdir -p $(prefix)/ThirdParty/Beaver
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE $(prefix)/ThirdParty/Beaver/

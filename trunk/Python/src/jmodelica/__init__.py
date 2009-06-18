@@ -9,7 +9,7 @@ sys.path.append(_opath)
 import options
 
 """The JModelica Python toolkit."""
-__all__ = ['interactive', 'jmi', 'xmlparser', 'compiler', 'optimization']
+__all__ = ['interactive', 'jmi', 'xmlparser', 'compiler', 'optimization', 'examples']
 
 
 #load all options
