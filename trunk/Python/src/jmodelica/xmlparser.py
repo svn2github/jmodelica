@@ -235,7 +235,109 @@ class XMLVariablesDoc(XMLdoc):
                                [../../../../Attributes/RealAttributes/Free=\"true\"]")
                 
         return dict(zip(keys, vals))
-   
+
+    def get_w_lin_values(self):
+        """ Extracts ValueReference and linearity information for all algebraic variables.
+        
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"] ")
+        vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../VariableCategory=\"algebraic\"]")
+            
+        return dict(zip(keys,vals))
+
+    def get_u_lin_values(self):
+        """ Extracts ValueReference and linearity information for all input variables.
+        
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"]")
+        vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../Causality=\"input\"]")
+            
+        return dict(zip(keys,vals))
+    
+    def get_dx_lin_values(self):
+        """ Extracts ValueReference and linearity information for all derivative variables.
+        
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"]")
+        vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../VariableCategory=\"derivative\"]")
+        
+        return dict(zip(keys, vals))
+    
+    def get_x_lin_values(self):
+        """ Extracts ValueReference and linearity information for all differentiated variables.
+        
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"]")
+        vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../VariableCategory=\"state\"]")
+        
+        return dict(zip(keys, vals))
+    
+    def get_p_opt_lin_values(self):
+        """ Extracts ValueReference and linearity information for all free independent parameters.
+        
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"independentParameter\"] \
+                               [../../Attributes/RealAttributes/Free=\"true\"]")
+        vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../VariableCategory=\"independentParameter\"] \
+                               [../../../../Attributes/RealAttributes/Free=\"true\"]")
+                
+        return dict(zip(keys, vals))
+
+    def get_w_lin_tp_values(self):
+        """ Extracts ValueReference and linear timed variables for all algebraic variables.
+        
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"] ")
+        vals = []
+
+        for key in keys:
+            tp = self._xpatheval("//ScalarVariable/IsLinearTimedVariables/TimePoint/@isLinear[../../../VariableCategory=\"algebraic\"] \
+                [../../../ValueReference="+key+"]")
+            vals.append(tp)
+        
+        return dict(zip(keys,vals))
+
+    def get_u_lin_tp_values(self):
+        """ Extracts ValueReference and linear timed variables for all input variables.
+        
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"]")
+        vals = []
+
+        for key in keys:
+            tp = self._xpatheval("//ScalarVariable/IsLinearTimedVariables/TimePoint/@isLinear[../../../Causality=\"input\"] \
+                [../../../ValueReference="+key+"]")
+            vals.append(tp)
+
+        return dict(zip(keys,vals))
+    
+    def get_dx_lin_tp_values(self):
+        """ Extracts ValueReference and linear timed variables for all derivative variables.
+        
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"]")
+        vals = []
+
+        for key in keys:
+            tp = self._xpatheval("//ScalarVariable/IsLinearTimedVariables/TimePoint/@isLinear[../../../VariableCategory=\"derivative\"] \
+                [../../../ValueReference="+key+"]")
+            vals.append(tp)
+        
+        return dict(zip(keys, vals))
+    
+    def get_x_lin_tp_values(self):
+        """ Extracts ValueReference and linear timed variables for all differentiated variables.
+        
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"]")
+        vals = []
+        
+        for key in keys:
+            tp = self._xpatheval("//ScalarVariable/IsLinearTimedVariables/TimePoint/@isLinear[../../../VariableCategory=\"state\"] \
+                [../../../ValueReference="+key+"]")
+            vals.append(tp)
+
+        return dict(zip(keys, vals))
             
 class XMLValuesDoc(XMLdoc):
     """ Class representing a parsed XML file containing values for all independent parameters.

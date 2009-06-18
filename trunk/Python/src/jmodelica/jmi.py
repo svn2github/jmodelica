@@ -2481,6 +2481,8 @@ class JMISimultaneousOptLagPols(JMISimultaneousOpt):
         _x_tp_lin = N.ones(jmi_model._n_x.value*jmi_model._n_tp.value,dtype=int)
         _u_tp_lin = N.ones(jmi_model._n_u.value*jmi_model._n_tp.value,dtype=int)        
         _w_tp_lin = N.ones(jmi_model._n_w.value*jmi_model._n_tp.value,dtype=int)
+        
+        self._set_lin_values(_p_opt_lin, _dx_lin, _x_lin, _u_lin, _w_lin, _dx_tp_lin, _x_tp_lin, _u_tp_lin, _w_tp_lin)
 
         try:       
             assert jmi_model._dll.jmi_opt_sim_lp_new(byref(self._jmi_opt_sim), jmi_model._jmi, n_e,
@@ -2529,12 +2531,20 @@ class JMISimultaneousOptLagPols(JMISimultaneousOpt):
         
         refs = values.keys()
         refs.sort(key=int)
-        
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_p_opt = z_i - self._jmi_model._offs_pi.value
-            p_opt_init[i_p_opt] = values.get(ref)         
 
+        n_p_opt = self._jmi_model.opt_get_n_p_opt()
+        if n_p_opt > 0:
+            p_opt_indices = N.zeros(n_p_opt, dtype=int)
+        
+            self._jmi_model.opt_get_p_opt_indices(p_opt_indices)
+            p_opt_indices = p_opt_indices.tolist()
+            
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_pi = z_i - self._jmi_model._offs_pi.value
+                i_pi_opt = p_opt_indices.index(i_pi)
+                p_opt_init[i_pi_opt] = values.get(ref)
+        
         # dx: derivative
         values = xmldoc.get_dx_initial_guess_values()
         
@@ -2544,7 +2554,7 @@ class JMISimultaneousOptLagPols(JMISimultaneousOpt):
         for ref in refs:
             (z_i, ptype) = _translate_value_ref(ref)
             i_dx = z_i - self._jmi_model._offs_dx.value
-            dx_init[i_dx] = values.get(ref) 
+            dx_init[i_dx] = values.get(ref)
         
         # x: differentiate
         values = xmldoc.get_x_initial_guess_values()
@@ -2587,11 +2597,19 @@ class JMISimultaneousOptLagPols(JMISimultaneousOpt):
         
         refs = values.keys()
         refs.sort(key=int)
+
+        n_p_opt = self._jmi_model.opt_get_n_p_opt()
+        if n_p_opt > 0:
+            p_opt_indices = N.zeros(n_p_opt, dtype=int)
         
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_p_opt = z_i - self._jmi_model._offs_pi.value
-            p_opt_lb[i_p_opt] = values.get(ref)         
+            self._jmi_model.opt_get_p_opt_indices(p_opt_indices)
+            p_opt_indices = p_opt_indices.tolist()
+            
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_pi = z_i - self._jmi_model._offs_pi.value
+                i_pi_opt = p_opt_indices.index(i_pi)
+                p_opt_lb[i_pi_opt] = values.get(ref)
 
         # dx: derivative
         values = xmldoc.get_dx_lb_values()
@@ -2645,17 +2663,26 @@ class JMISimultaneousOptLagPols(JMISimultaneousOpt):
         
         refs = values.keys()
         refs.sort(key=int)
+
+        n_p_opt = self._jmi_model.opt_get_n_p_opt()
+        if n_p_opt > 0:
+            p_opt_indices = N.zeros(n_p_opt, dtype=int)
         
-        for ref in refs:
-            (z_i, ptype) = _translate_value_ref(ref)
-            i_p_opt = z_i - self._jmi_model._offs_pi.value
-            p_opt_ub[i_p_opt] = values.get(ref)         
+            self._jmi_model.opt_get_p_opt_indices(p_opt_indices)
+            p_opt_indices = p_opt_indices.tolist()
+            
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_pi = z_i - self._jmi_model._offs_pi.value
+                i_pi_opt = p_opt_indices.index(i_pi)
+                p_opt_ub[i_pi_opt] = values.get(ref)
 
         # dx: derivative
         values = xmldoc.get_dx_ub_values()
         
         refs = values.keys()
         refs.sort(key=int)
+
         
         for ref in refs:
             (z_i, ptype) = _translate_value_ref(ref)
@@ -2694,7 +2721,128 @@ class JMISimultaneousOptLagPols(JMISimultaneousOpt):
             (z_i, ptype) = _translate_value_ref(ref)
             i_w = z_i - self._jmi_model._offs_w.value
             w_ub[i_w] = values.get(ref) 
-       
+
+    def _set_lin_values(self, p_opt_lin, dx_lin, x_lin, u_lin, w_lin, dx_tp_lin, x_tp_lin, u_tp_lin, w_tp_lin):
+        xmldoc = self._jmi_model._get_XMLvariables_doc()
+
+        # p_opt: free variables
+        values = xmldoc.get_p_opt_lin_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+
+        n_p_opt = self._jmi_model.opt_get_n_p_opt()
+        if n_p_opt > 0:
+            p_opt_indices = N.zeros(n_p_opt, dtype=int)
+        
+            self._jmi_model.opt_get_p_opt_indices(p_opt_indices)
+            p_opt_indices = p_opt_indices.tolist()
+            
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_pi = z_i - self._jmi_model._offs_pi.value
+                i_pi_opt = p_opt_indices.index(i_pi)
+                p_opt_lin[i_pi_opt] = values.get(ref)
+
+        # dx: derivative
+        values = xmldoc.get_dx_lin_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_dx = z_i - self._jmi_model._offs_dx.value
+            dx_lin[i_dx] = (values.get(ref) == "true").__int__()  
+        
+        # x: differentiate
+        values = xmldoc.get_x_lin_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_x = z_i - self._jmi_model._offs_x.value
+            x_lin[i_x] = (values.get(ref) == "true").__int__()
+            
+        # u: input
+        values = xmldoc.get_u_lin_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_u = z_i - self._jmi_model._offs_u.value
+            u_lin[i_u] = (values.get(ref) == "true").__int__()
+        
+        # w: algebraic
+        values = xmldoc.get_w_lin_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_w = z_i - self._jmi_model._offs_w.value
+            w_lin[i_w] = (values.get(ref) == "true").__int__()
+
+
+        # number of timepoints
+        no_of_tp = self._jmi_model._n_tp.value
+
+        # timepoints dx: derivative
+        values = xmldoc.get_dx_lin_tp_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for no_tp in range(no_of_tp):
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_dx = z_i - self._jmi_model._offs_dx.value
+                dx_tp_lin[i_dx+no_tp*len(refs)] = (values.get(ref)[no_tp] == "true").__int__()
+        
+        # timepoints x: differentiate
+        values = xmldoc.get_x_lin_tp_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)       
+        
+        for no_tp in range(no_of_tp):
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_x = z_i - self._jmi_model._offs_x.value
+                
+                x_tp_lin[i_x+no_tp*len(refs)] = (values.get(ref)[no_tp] == "true").__int__()
+            
+        # timepoints u: input
+        values = xmldoc.get_u_lin_tp_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for no_tp in range(no_of_tp):
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_u = z_i - self._jmi_model._offs_u.value
+                
+                u_tp_lin[i_u+no_tp*len(refs)] = (values.get(ref)[no_tp] == "true").__int__()
+        
+        # timepoints w: algebraic
+        values = xmldoc.get_w_lin_tp_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+
+        for no_tp in range(no_of_tp):
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_w = z_i - self._jmi_model._offs_w.value
+                w_tp_lin[i_w+no_tp*len(refs)] = (values.get(ref)[no_tp] == "true").__int__()
+
+      
 class JMISimultaneousOptIPOPT(object):
     
     def __init__(self, jmi_opt_sim_model):
