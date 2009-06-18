@@ -1656,7 +1656,16 @@ class JMIModel(object):
     def ode_df(self, eval_alg, sparsity, independent_vars, mask, jac):
         """ Evaluates the Jacobian of the right hand side of the ODE.
         
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_ode_df(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
             raise JMIException("Evaluation of Jacobian failed.")
     
@@ -1672,16 +1681,34 @@ class JMIModel(object):
     def ode_df_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """ Returns the row and column indices of the non-zero elements in the Jacobian 
             of the right hand side of the ODE.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_ode_df_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, col) is not 0:
             raise JMIException("Getting row and column indices failed.")
     
     def ode_df_dim(self, eval_alg, sparsity, independent_vars, mask):
         """ Returns the number of columns and non-zero elements in the Jacobian 
             of the right hand side of the ODE.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         df_n_cols = ct.c_int()
         df_n_nz = ct.c_int()
         if self._dll.jmi_ode_df_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(df_n_cols), byref(df_n_nz)) is not 0:
@@ -1707,7 +1734,16 @@ class JMIModel(object):
     def dae_dF(self, eval_alg, sparsity, independent_vars, mask, jac):
         """ Evaluates the Jacobian of the DAE residual function.
         
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_dae_dF(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
             raise JMIException("Evaluating the Jacobian failed.")
     
@@ -1723,16 +1759,34 @@ class JMIModel(object):
     def dae_dF_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """ Returns the row and column indices of the non-zero elements in the 
             DAE residual Jacobian.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_dae_dF_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, cols) is not 0:
             raise JMIException("Getting the row and column indices failed.")
     
     def dae_dF_dim(self, eval_alg, sparsity, independent_vars, mask):
         """ Returns the number of columns and non-zero elements in the Jacobian 
             of the DAE residual.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         dF_n_cols = ct.c_int()
         dF_n_nz = ct.c_int()
         if self._dll.jmi_dae_dF_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
@@ -1760,7 +1814,16 @@ class JMIModel(object):
     def init_dF0(self, eval_alg, sparsity, independent_vars, mask, jac):
         """ Evaluates the Jacobian of the DAE initialization residual function F0.
         
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_init_dF0(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
             raise JMIException("Evaluating the Jacobian failed.")
     
@@ -1777,16 +1840,34 @@ class JMIModel(object):
     def init_dF0_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """ Returns the row and column indices of the non-zero elements in the 
             Jacobian of the DAE initialization residual function F0.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_init_dF0_nz_indices(self._jmi, eval_alg, independent_vars, mask, row_i, cols_i) is not 0:
             raise JMIException("Getting the row and column indices failed.")
     
     def init_dF0_dim(self, eval_alg, sparsity, independent_vars, mask):
         """ Returns the number of columns and non-zero elements in the Jacobian 
             of the DAE initialization residual function F0.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         dF_n_cols = ct.c_int()
         dF_n_nz = ct.c_int()
         if self._dll.jmi_init_dF0_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
@@ -1803,7 +1884,16 @@ class JMIModel(object):
     def init_dF1(self, eval_alg, sparsity, independent_vars, mask, jac):
         """ Evaluates the Jacobian of the DAE initialization residual function F1.
         
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_init_dF1(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
             raise JMIException("Evaluating the Jacobian failed.")
     
@@ -1820,16 +1910,34 @@ class JMIModel(object):
     def init_dF1_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """ Returns the row and column indices of the non-zero elements in the 
             Jacobian of the DAE initialization residual function F1.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_init_dF1_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, cols) is not 0:
             raise JMIException("Getting the row and column indices failed.")
     
     def init_dF1_dim(self, eval_alg, sparsity, independent_vars, mask):
         """ Returns the number of columns and non-zero elements in the Jacobian 
             of the DAE initialization residual function F1.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         dF_n_cols = ct.c_int()
         dF_n_nz = ct.c_int()
         if self._dll.jmi_init_dF1_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
@@ -1846,7 +1954,16 @@ class JMIModel(object):
     def init_dFp(self, eval_alg, sparsity, independent_vars, mask, jac):
         """ Evaluates the Jacobian of the DAE initialization residual function Fp.
         
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_init_dFp(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
             raise JMIException("Evaluating the Jacobian failed.")
     
@@ -1863,16 +1980,34 @@ class JMIModel(object):
     def init_dFp_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """ Returns the row and column indices of the non-zero elements in the 
             Jacobian of the DAE initialization residual function Fp.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_init_dFp_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, cols) is not 0:
             raise JMIException("Getting the row and column indices failed.")
     
     def init_dFp_dim(self, eval_alg, sparsity, independent_vars, mask):
         """ Returns the number of columns and non-zero elements in the Jacobian 
             of the DAE initialization residual function Fp.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         dF_n_cols = ct.c_int()
         dF_n_nz = ct.c_int()
         if self._dll.jmi_init_dFp_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
@@ -1945,7 +2080,16 @@ class JMIModel(object):
     def opt_dJ(self, eval_alg, sparsity, independent_vars, mask, jac):
         """ Evaluates the gradient of the cost function.
         
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_opt_dJ(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
             raise JMIException("Evaluation of the gradient of the cost function failed.")
         
@@ -1961,16 +2105,34 @@ class JMIModel(object):
     def opt_dJ_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """ Returns the row and column indices of the non-zero elements 
             in the gradient of the cost function J.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_opt_dJ_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, col) is not 0:
             raise JMIException("Getting the row and column indices failed.")        
         
     def opt_dJ_dim(self, eval_alg, sparsity, independent_vars, mask):
         """ Computes the number of columns and non-zero elements in 
             the gradient of the cost function.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         dF_n_cols = ct.c_int()
         dF_n_nz = ct.c_int()
         if self._dll.jmi_opt_dJ_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
@@ -1987,7 +2149,16 @@ class JMIModel(object):
     def opt_dCeq(self, eval_alg, sparsity, independent_vars, mask, jac):
         """ Evaluates the Jacobian of the equality path constraint Ceq.
         
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_opt_dCeq(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
             raise JMIException("Evaluation of the Jacobian of the equality path constraint Ceq failed.")
         
@@ -2004,16 +2175,34 @@ class JMIModel(object):
     def opt_dCeq_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """ Returns the row and column indices of the non-zero elements
             in the Jacobian of the equality path constraint residual Ceq.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_opt_dCeq_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, col) is not 0:
             raise JMIException("Getting the row and column indices failed.")
         
     def opt_dCeq_dim(self, eval_alg, sparsity, independent_vars, mask):
         """ Computes the number of columns and non-zero elements in the 
             Jacobian of the equality path constraint residual function Ceq.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         dF_n_cols = ct.c_int()
         dF_n_nz = ct.c_int()
         if self._dll.jmi_opt_dCeq_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
@@ -2030,7 +2219,16 @@ class JMIModel(object):
     def opt_dCineq(self, eval_alg, sparsity, independent_vars, mask, jac):
         """ Evaluates the Jacobian of the inequality path constraint Cineq.
         
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_opt_dCineq(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
             raise JMIException("Evaluating the Jacobian of the inequality path constraint Cineq failed.")
         
@@ -2047,16 +2245,34 @@ class JMIModel(object):
     def opt_dCineq_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """ Returns the row and column indices of the non-zero elements
             in the Jacobian of the inequality path constraint residual Cineq.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_opt_dCineq_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, col) is not 0:
             raise JMIException("Getting the row and column indices failed.")
         
     def opt_dCineq_dim(self, eval_alg, sparsity, independent_vars, mask):
         """ Computes the number of columns and non-zero elements in the 
             Jacobian of the inequality path constraint residual function Cineq.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         dF_n_cols = ct.c_int()
         dF_n_nz = ct.c_int()
         if self._dll.jmi_opt_dCineq_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
@@ -2073,7 +2289,16 @@ class JMIModel(object):
     def opt_dHeq(self, eval_alg, sparsity, independent_vars, mask, jac):
         """ Evaluates the Jacobian of the equality point constraint Heq.
         
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_opt_dHeq(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
             raise JMIException("Evaluating the Jacobian of the equality point constraint Heq failed.")
         
@@ -2090,16 +2315,34 @@ class JMIModel(object):
     def opt_dHeq_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """ Returns the row and column indices of the non-zero elements
             in the Jacobian of the equality point constraint residual Heq.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_opt_dHeq_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, col) is not 0:
             raise JMIException("Getting the row and column indices failed.")
         
     def opt_dHeq_dim(self, eval_alg, sparsity, independent_vars, mask):
         """ Computes the number of columns and non-zero elements in the 
             Jacobian of the equality point constraint residual function Heq.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         dF_n_cols = ct.c_int()
         dF_n_nz = ct.c_int()
         if self._dll.jmi_opt_dHeq_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
@@ -2116,7 +2359,16 @@ class JMIModel(object):
     def opt_dHineq(self, eval_alg, sparsity, independent_vars, mask, jac):
         """ Evaluates the Jacobian of the inequality point constraint Hineq.
         
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_opt_dHineq(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
             raise JMIException("Evaluating the Jacobian of the inequality point constraint Hineq failed.")
         
@@ -2133,16 +2385,34 @@ class JMIModel(object):
     def opt_dHineq_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """ Returns the row and column indices of the non-zero elements
             in the Jacobian of the inequality point constraint residual Hineq.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         if self._dll.jmi_opt_dHineq_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, col) is not 0:
             raise JMIException("Getting the row and column indices failed.")
         
     def opt_dHineq_dim(self, eval_alg, sparsity, independent_vars, mask):
         """ Computes the number of columns and non-zero elements in the 
             Jacobian of the inequality point constraint residual function Hineq.
-            
+        
+        @param independent_vars:
+            Can either be a bitmask or a list of numbers that whould be
+            preprocessed using the | operator. Using a list is more
+            prefered as it is more Pythonesque.
         """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
         dF_n_cols = ct.c_int()
         dF_n_nz = ct.c_int()
         if self._dll.jmi_opt_dHineq_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
@@ -2302,8 +2572,9 @@ class JMIModel(object):
 
             self.opt_set_p_opt_indices(n_p_opt,N.array(p_opt_indices))
 
+
 class JMISimultaneousOpt(object):
-    
+    """ @todo: Needs documentation. """    
     def __init__(self):
         raise JMIException("This class can not be instantiated.")
     
