@@ -21,8 +21,6 @@ jmi_TNLP::jmi_TNLP(jmi_opt_sim_t* problem)
 {
   ASSERT_EXCEPTION(problem_ != NULL, INVALID_TNLP,
 		   "Null problem definition passed into jmi_TNLP");
-
- // std::cout <<"Woohoo... Created one..." << std::endl;
 }
 
 jmi_TNLP::~jmi_TNLP()
@@ -32,43 +30,29 @@ jmi_TNLP::~jmi_TNLP()
 bool jmi_TNLP::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 				Index& nnz_h_lag, IndexStyleEnum& index_style)
 {
- // std::cout << "In get_nlp_info\n";
-  //if (!problem_->getDimensions(n, n_eq_, n_ineq_, dh_n_nz, dg_n_nz)) {
-  //    return false;
-  //}
-
   if (jmi_opt_sim_get_dimensions(problem_, &n, &n_g_, &n_h_,
 			&dg_n_nz_, &dh_n_nz_) < 0) {
 	  return false;
   }
-
   n_ = n;
   m = n_h_ + n_g_;
   nnz_jac_g = dh_n_nz_ + dg_n_nz_;
   nnz_h_lag = 0;
   index_style = FORTRAN_STYLE;
-
-  //std::cout << "n: " << n << " m: " << m << " nnz_jac_g: " << nnz_jac_g << " nnz_h_lag: " << nnz_h_lag << std::endl;
-
   return true;
 }
 
 bool jmi_TNLP::get_bounds_info(Index n, Number* x_l, Number* x_u,
 				   Index m, Number* g_l, Number* g_u)
 {
- // std::cout << "In Get Bounds Info\n";
   DBG_ASSERT(n_h_ + n_g_ == m);
   DBG_ASSERT(sizeof(Number) == sizeof(double));
   DBG_ASSERT(sizeof(Index) == sizeof(int));
-
- // std::cout << "first\n";
-
 
   for (int i=0; i<n_h_; i++) {
 	  g_l[i] = 0;
   }
 
- // std::cout << "second\n";
   for (int i=0; i<n_h_; i++) {
 	 g_u[i] = 0;
   }
@@ -77,7 +61,6 @@ bool jmi_TNLP::get_bounds_info(Index n, Number* x_l, Number* x_u,
 	  g_l[i] = -1e20;
   }
 
- // std::cout << "second\n";
   for (int i=n_h_; i<n_h_ + n_g_; i++) {
 	 g_u[i] = 0;
   }
@@ -85,14 +68,7 @@ bool jmi_TNLP::get_bounds_info(Index n, Number* x_l, Number* x_u,
   if (jmi_opt_sim_get_bounds(problem_, x_l, x_u) < 0) {
 	  return false;
   }
-//  bool retval = problem_->getBounds((double*)x_l, (double*)x_u);
 
-
- // std::cout << "third\n";
- /* for (int i=0; i<n; i++) {
-    std::cout << x_l[i] << " <= x <= " << x_u[i] << std::endl;
-  }
-   */
   return true;
 
 }
@@ -103,8 +79,6 @@ bool jmi_TNLP::get_starting_point(Index n, bool init_x, Number* x,
 				      Number* lambda)
 {
   DBG_ASSERT(init_x == true && init_z == false && init_lambda == false);
-//  std::cout << "jmi_TNLP::get_starting_point\n";
-  //return problem_->getInitial((double*)x);
   if (jmi_opt_sim_get_initial(problem_, x) < 0) {
 	  return false;
   }
@@ -131,7 +105,7 @@ bool jmi_TNLP::get_constraints_linearity(Index m, LinearityType* const_types) {
 bool jmi_TNLP::eval_f(Index n, const Number* x, bool new_x,
 			  Number& obj_value)
 {
-  //return problem_->evalCost((const double*)x, (double&)obj_value);
+
 	int i;
 
 	for (i=0;i<n_;i++) {
@@ -149,7 +123,7 @@ bool jmi_TNLP::eval_f(Index n, const Number* x, bool new_x,
 bool jmi_TNLP::eval_grad_f(Index n, const Number* x, bool new_x,
 			       Number* grad_f)
 {
-  //return problem_->evalGradCost((const double*)x, (double*) grad_f);
+
 	int i;
 
 	for (i=0;i<n_;i++) {
@@ -187,17 +161,9 @@ bool jmi_TNLP::eval_g(Index n, const Number* x, bool new_x,
 	if (jmi_opt_sim_g(problem_, g) < 0) {
 		return false;
 	}
+
 	return true;
-/*
-	//	  std::cout << "jmi_TNLP::eval_g begin" << std::endl;
-  bool retval = problem_->evalEqConstraint((const double*)x, (double*)g);
-  if (retval) {
-    double* gin = g + n_eq_;
-    retval = problem_->evalIneqConstraint((const double*)x, (double*)gin);
-    }
-//  std::cout << "jmi_TNLP::eval_g end" << std::endl;
-  return retval;
-  */
+
 }
 
 bool jmi_TNLP::eval_jac_g(Index n, const Number* x, bool new_x,
@@ -225,11 +191,6 @@ bool jmi_TNLP::eval_jac_g(Index n, const Number* x, bool new_x,
 		iRow -= problem_->dh_n_nz;
 		jCol -= problem_->dh_n_nz;
 
-		/*
-		for (i=0;i<nele_jac;i++) {
-			std::cout << "[" << iRow[i] << "," << jCol[i] << "]" << std::endl;
-		}
-*/
 		return true;
 	} else {
 		for (i=0;i<dg_n_nz_;i++) {
@@ -249,55 +210,6 @@ bool jmi_TNLP::eval_jac_g(Index n, const Number* x, bool new_x,
 		return true;
 	}
 
-
-	/*
-//	std::cout << "jmi_TNLP::eval_jac_g enter\n";
-  bool retval = false;
-  if (values == NULL) {
-//		std::cout << "jmi_TNLP::eval_jac_g enter computing sparsity\n";
-
-    retval = problem_->getJacEqConstraintNzElements(iRow,jCol);
- */
- /*
-    std::cout << "*" << std::endl;
-    for (int i=0;i<dh_n_nz + dg_n_nz_;i++) {
-    	std::cout << iRow[i] << " " << jCol[i] << std::endl;
-    }
-*/
-	/*
-    if (retval) {
-      iRow += dh_n_nz;
-      jCol += dh_n_nz;
-      retval = problem_->getJacIneqConstraintNzElements(iRow, jCol);
-    }
-    */
-/*
-  iRow -= dh_n_nz;
-    jCol -= dh_n_nz;
-
-    std::cout << "**" << std::endl;
-    for (int i=0;i<dh_n_nz + dg_n_nz_;i++) {
-    	std::cout << iRow[i] << " " << jCol[i] << std::endl;
-    }
- */
- /* }
-  else {
-//		std::cout << "jmi_TNLP::eval_jac_g enter computing jac_g \n";
-    retval = problem_->evalJacEqConstraint((const double*)x, (double*)values);
-    if (retval) {
-      values += dh_n_nz;
-      retval = problem_->evalJacIneqConstraint((const double*)x, (double*)values);
-    }
-    */
-    /*
-    values -= dh_n_nz;
-    for (int i=0;i<dh_n_nz + dg_n_nz_;i++) {
-    	std::cout << values[i] << std::endl;
-    }
-    */
- // }
-  //std::cout << "jmi_TNLP::eval_jac_g exit\n";
-  //return retval;
 	return false;
 }
 
@@ -308,22 +220,22 @@ void jmi_TNLP::finalize_solution(SolverReturn status,
 				     const IpoptData* ip_data,
 				     IpoptCalculatedQuantities* ip_cq)
 {
-  //std::cout << "<speech voice=\"robot\">Optimal profile calculated!</speech>" << std::endl;
- // problem_->writeSolution((double*)x);
-
 }
 
 
 Index jmi_TNLP::get_number_of_nonlinear_variables() {
-	return -1;
-
-	//return 12;//2725-1205 - 300;
+	return problem_->n_nonlinear_variables;
 }
 
 bool jmi_TNLP::get_list_of_nonlinear_variables(Index num_nonlin_vars,
     Index* pos_nonlin_vars) {
 
-	return false;
+	int i;
+	for (i=0;i<num_nonlin_vars;i++) {
+		pos_nonlin_vars[i] = problem_->non_linear_variables_indices[i];
+	}
+
+	return true;
 
 	/*
 	pos_nonlin_vars[0] = 5;

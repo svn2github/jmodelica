@@ -200,8 +200,8 @@ struct jmi_opt_sim_t{
 	int *dg_col;
 	int *dh_row;
 	int *dh_col;
-//	int n_nonlinear_variables;
-//	int *non_linear_variables_indices; // Stored Fortran style (first index = 1)
+	int n_nonlinear_variables;
+	int *non_linear_variables_indices; // Stored Fortran style (first index = 1)
 	jmi_opt_sim_get_dimensions_t get_dimensions;
 	jmi_opt_sim_get_interval_spec_t get_interval_spec;
 	jmi_opt_sim_f_t f;
