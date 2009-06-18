@@ -224,7 +224,7 @@ void jmi_TNLP::finalize_solution(SolverReturn status,
 
 
 Index jmi_TNLP::get_number_of_nonlinear_variables() {
-	return problem_->n_nonlinear_variables;
+	return -1;//problem_->n_nonlinear_variables;
 }
 
 bool jmi_TNLP::get_list_of_nonlinear_variables(Index num_nonlin_vars,
