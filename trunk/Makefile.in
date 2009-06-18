@@ -705,11 +705,13 @@ install-exec-local:
 	mkdir -p $(prefix)/Python
 	mkdir -p $(prefix)/Python/jmodelica
 	cp $(abs_top_srcdir)/Python/src/jmodelica/*.py $(prefix)/Python/jmodelica
+	cp $(abs_top_srcdir)/Python/src/jmodelica/*.py $(prefix)/Python/jmodelica/
 	mkdir -p $(prefix)/ThirdParty
 	mkdir -p $(prefix)/ThirdParty/Beaver
 	mkdir -p $(prefix)/ThirdParty/Beaver/lib
-	cp $(abs_top_srcdir)/Python/src/jmodelica/*.py $(prefix)/Python/jmodelica/
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar $(prefix)/ThirdParty/Beaver/lib/ 
+	mkdir -p $(prefix)/ThirdParty/CppAD
+	cp -r $(CPPAD_INC)/* $(prefix)/ThirdParty/CppAD/
 	mkdir -p $(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/jmi_modelica_template.c $(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/OptimicaCBackEnd/templates/jmi_optimica_template.c $(prefix)/CodeGenTemplates

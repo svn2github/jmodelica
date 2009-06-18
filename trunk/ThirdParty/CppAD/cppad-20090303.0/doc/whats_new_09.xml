@@ -1,0 +1,230 @@
+<?xml version='1.0'?>
+<?xml-stylesheet type='text/xsl' href='pmathml.xsl'?>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>Changes and Additions to CppAD During 2009</title>
+<meta name="description" id="description" content="Changes and Additions to CppAD During 2009"/>
+<meta name="keywords" id="keywords" content=" "/>
+<style type='text/css'>
+body { color : black }
+body { background-color : white }
+A:link { color : blue }
+A:visited { color : purple }
+A:active { color : purple }
+</style>
+<script type='text/javascript' language='JavaScript' src='_whats_new_09_xml.js'>
+</script>
+</head>
+<body>
+<table><tr>
+<td>
+<a href="http://www.coin-or.org/CppAD/" target="_top"><img border="0" src="_image.gif"/></a>
+</td>
+<td><a href="whats_new.xml" target="_top">Prev</a>
+</td><td><a href="whats_new_08.xml" target="_top">Next</a>
+</td><td>
+<select onchange='choose_across0(this)'>
+<option>Index-&gt;</option>
+<option>contents</option>
+<option>reference</option>
+<option>index</option>
+<option>search</option>
+<option>external</option>
+</select>
+</td>
+<td>
+<select onchange='choose_up0(this)'>
+<option>Up-&gt;</option>
+<option>CppAD</option>
+<option>Appendix</option>
+<option>whats_new</option>
+<option>whats_new_09</option>
+</select>
+</td>
+<td>
+<select onchange='choose_down3(this)'>
+<option>CppAD-&gt;</option>
+<option>Install</option>
+<option>Introduction</option>
+<option>AD</option>
+<option>ADFun</option>
+<option>library</option>
+<option>preprocessor</option>
+<option>Example</option>
+<option>Appendix</option>
+</select>
+</td>
+<td>
+<select onchange='choose_down2(this)'>
+<option>Appendix-&gt;</option>
+<option>Faq</option>
+<option>speed</option>
+<option>Theory</option>
+<option>glossary</option>
+<option>Bib</option>
+<option>Bugs</option>
+<option>WishList</option>
+<option>whats_new</option>
+<option>include_deprecated</option>
+<option>License</option>
+</select>
+</td>
+<td>
+<select onchange='choose_down1(this)'>
+<option>whats_new-&gt;</option>
+<option>whats_new_09</option>
+<option>whats_new_08</option>
+<option>whats_new_07</option>
+<option>whats_new_06</option>
+<option>whats_new_05</option>
+<option>whats_new_04</option>
+<option>whats_new_03</option>
+</select>
+</td>
+<td>whats_new_09</td>
+<td>
+<select onchange='choose_current0(this)'>
+<option>Headings-&gt;</option>
+<option>Introduction</option>
+<option>02-20</option>
+<option>02-15</option>
+<option>02-01</option>
+<option>01-31</option>
+<option>01-18</option>
+<option>01-06</option>
+</select>
+</td>
+</tr></table><br/>
+<center><b><big><big>Changes and Additions to CppAD During 2009</big></big></b></center>
+<br/>
+<b><big><a name="Introduction" id="Introduction">Introduction</a></big></b>
+<br/>
+This section contains a list of the changes to CppAD during 2009
+(in reverse order by date).
+The purpose of this section is to
+assist you in learning about changes between various versions of CppAD.
+
+<br/>
+<br/>
+<b><big><a name="02-20" id="02-20">02-20</a></big></b>
+<br/>
+Demonstrate using AD to compute the derivative
+of the solution of an ODE with respect to a parameter
+(in the <a href="runge_45_2.cpp.xml" target="_top"><span style='white-space: nowrap'>runge_45_2.cpp</span></a>
+ example).
+
+<br/>
+<br/>
+<b><big><a name="02-15" id="02-15">02-15</a></big></b>
+<br/>
+Change the distribution
+<a href="installunix.xml#Download.Unix Tar Files" target="_top"><span style='white-space: nowrap'>tar&#xA0;files</span></a>
+
+to only contain one copy of the documentation.
+Link to the current Internet documentation for the other three copies.
+
+
+<br/>
+<br/>
+<b><big><a name="02-01" id="02-01">02-01</a></big></b>
+<br/>
+Move the <code><font color="blue">Prev</font></code> and <code><font color="blue">Next</font></code> buttons at the top of the documentation
+to the beginning so that their position does not change between sections.
+This makes it easier to repeatedly select this links.
+
+
+<br/>
+<br/>
+<b><big><a name="01-31" id="01-31">01-31</a></big></b>
+<br/>
+Modify <code><font color="blue">cppad/local/op_code.hpp</font></code> to avoid incorrect warning by
+g++ version 4.3.2 when building <code><font color="blue">pycppad</font></code> (a python interface to CppAD).
+
+<br/>
+<br/>
+<b><big><a name="01-18" id="01-18">01-18</a></big></b>
+<br/>
+Sometimes an error occurs while taping AD operations.
+The <a href="abort_recording.xml" target="_top"><span style='white-space: nowrap'>abort_recording</span></a>
+ function has been added 
+to make it easier to recover in such cases.
+<code><span style='white-space: nowrap'><br/>
+<br/>
+</span></code>Previously, CppAD speed and comparison tests used Adolc-1.10.2.
+The version used in the tests has been upgraded to
+<a href="http://www.math.tu-dresden.de/~adol-c/" target="_top"><span style='white-space: nowrap'>Adolc-2.0.0.</span></a>
+
+<code><span style='white-space: nowrap'><br/>
+<br/>
+</span></code>A discussion has been added to the documentation for <a href="jacobian.xml" target="_top"><span style='white-space: nowrap'>Jacobian</span></a>
+ 
+about its use of
+<a href="jacobian.xml#Forward or Reverse" target="_top"><span style='white-space: nowrap'>forward&#xA0;or&#xA0;reverse</span></a>
+
+mode depending on which it estimates is more efficient.
+<code><span style='white-space: nowrap'><br/>
+<br/>
+</span></code>A minor typo has been fixed in the description of
+<a href="reverse_any.xml#W(t, u)" target="_top"><span style='white-space: nowrap'>W(t,&#xA0;u)</span></a>
+ in <a href="reverse_any.xml" target="_top"><span style='white-space: nowrap'>reverse_any</span></a>
+.
+To be specific, 
+
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow>
+<mi mathvariant='italic'>o</mi>
+<mo stretchy="false">(</mo>
+<msup><mi mathvariant='italic'>t</mi>
+<mrow><mi mathvariant='italic'>p</mi>
+<mn>-1</mn>
+</mrow>
+</msup>
+<mo stretchy="false">)</mo>
+<mo stretchy="false">*</mo>
+<msup><mi mathvariant='italic'>t</mi>
+<mrow><mn>1</mn>
+<mo stretchy="false">-</mo>
+<mi mathvariant='italic'>p</mi>
+</mrow>
+</msup>
+<mo stretchy="false">&#x02192;</mo>
+<mn>0</mn>
+</mrow></math>
+
+
+has been replaced by
+
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow>
+<mi mathvariant='italic'>o</mi>
+<mo stretchy="false">(</mo>
+<msup><mi mathvariant='italic'>t</mi>
+<mrow><mi mathvariant='italic'>p</mi>
+<mn>-1</mn>
+</mrow>
+</msup>
+<mo stretchy="false">)</mo>
+<mo stretchy="false">/</mo>
+<msup><mi mathvariant='italic'>t</mi>
+<mrow><mn>1</mn>
+<mo stretchy="false">-</mo>
+<mi mathvariant='italic'>p</mi>
+</mrow>
+</msup>
+<mo stretchy="false">&#x02192;</mo>
+<mn>0</mn>
+</mrow></math>
+
+.
+
+<br/>
+<br/>
+<b><big><a name="01-06" id="01-06">01-06</a></big></b>
+<br/>
+Made some minor improvements to the documentation in
+<a href="funconstruct.xml" target="_top"><span style='white-space: nowrap'>FunConstruct</span></a>
+.
+
+
+<hr/>Input File: omh/whats_new_09.omh
+
+</body>
+</html>

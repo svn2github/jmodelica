@@ -96,19 +96,6 @@ AS_IF([test "x$with_ipopt" = xno],
 
 AM_CONDITIONAL([COMPILE_WITH_IPOPT],[test "x$with_ipopt" != xno])
 
-
-
-#AS_IF([test "x$with_ipopt" = xno],
-#      [AC_MSG_FAILURE([--with-ipopt not specified])],
-#       [AC_MSG_RESULT([ ])
-#       AC_MSG_RESULT([***********************************************************************])
-#       AC_MSG_RESULT([* --with-ipopt option specified - compiling with IPOPT support        *])
-#       AC_MSG_RESULT([***********************************************************************])
-#       AC_MSG_RESULT([ ])
-#       AC_CHECK_FILE($ipopt/include/coin/IpStdCInterface.h,
-#                     [],
-#                     [AC_MSG_FAILURE([--with-ipopt option was specified but does not seem to point at a valid IPOPT installation])])])
-
 # Set output variables to be exported to the Makefiles
 AC_SUBST(IPOPT_INC)
 AC_SUBST(IPOPT_LIB)
@@ -130,26 +117,27 @@ AC_ARG_WITH([cppad],
    [with_cppad=no])
 
 AS_IF([test "x$with_cppad" = xno],
-      [AC_MSG_RESULT([ ])
-       AC_MSG_RESULT([***********************************************************************])
-       AC_MSG_RESULT([* --with-cppad option not specified - compiling without CppAD support *])
-       AC_MSG_RESULT([***********************************************************************])
-       AC_MSG_RESULT([ ])],
-       [AC_MSG_RESULT([ ])
-       AC_MSG_RESULT([***********************************************************************])
-       AC_MSG_RESULT([* --with-cppad option specified - compiling with CppAD support        *])
-       AC_MSG_RESULT([***********************************************************************])
-       AC_MSG_RESULT([ ])
-       AC_CHECK_FILE($cppad/cppad/cppad.hpp,
+      [cppad="ThirdParty/CppAD/cppad-20090303.0/"])
+
+AS_IF([test "x$with_cppad" = xno],
+      [AC_CHECK_FILE($srcdir/$cppad/cppad/cppad.hpp,
+                     [],
+                     [AC_MSG_FAILURE([--with-cppad option was specified but does not seem to point at a valid CppAD installation])])],
+      [AC_CHECK_FILE($cppad/cppad/cppad.hpp,
                      [],
                      [AC_MSG_FAILURE([--with-cppad option was specified but does not seem to point at a valid CppAD installation])])])
+
+AS_IF([test "x$with_cppad" = xno],
+      [with_cppad=automatic])
 
 AM_CONDITIONAL([COMPILE_WITH_CPPAD],[test "x$with_cppad" != xno])
 
 # Set output variables to be exported to the Makefiles
 AC_SUBST(CPPAD_INC)
 AC_SUBST(WITH_CPPAD)
-CPPAD_INC=$cppad
+AS_IF([test "x$with_cppad" = xautomatic],
+      [CPPAD_INC=`cd $srcdir; pwd`/$cppad],
+      [CPPAD_INC=$cppad])
 
 AS_IF([test "x$with_cppad" != xno],
       [WITH_CPPAD="true"],
