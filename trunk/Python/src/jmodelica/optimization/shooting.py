@@ -17,6 +17,13 @@ except ImportError:
     import nvecserial
     
 from jmodelica.jmi import *
+import pylab as p
+import nose
+
+
+class ShootingException(Exception):
+    """ A shooting exception. """
+    pass
 
 
 def _get_example_path(relpath):
@@ -82,10 +89,21 @@ class StandardModel(object):
         return self._jmim.dx
         
     def getModelSize(self):
-        """Returns the dimension of the problem. """
+        """ Returns the dimension of the problem. """
         return len(self.getStates())
         
     def getRealModelSize(self):
+        """ Returns the dimension of the problem. 
+        
+        @remark:
+            In my master thesis code base there exists a class called
+            GenericSensivityModel that wraps an existing model creating
+            a pseudo problem that solves multiple disturbed instances of
+            this model to be able to approximate sensitivities in a
+            different approach than using SUNDIALS. This method came
+            into existence to be able to know the size of the original
+            problem/model.
+        """
         return self.getModelSize()
         
     def evalF(self):
@@ -107,7 +125,14 @@ class StandardModel(object):
         return jac
         
     def getSensitivities(self, y):
-        """ Not supported in this model. """
+        """ Not supported in this model class.
+        
+        @remark:
+            This method came existence due to GenericSensivityModel that
+            exists in my master thesis code base. See remark on
+            ::self.getRealModelSize() for more information why this
+            method exists.
+        """
         raise NotImplementedError('This model does not support'
                                   ' sensitivity analysis implicitly.')
                                    
@@ -156,12 +181,35 @@ class StandardModel(object):
         ignore1, ignore2, final_time, ignore3 = self._jmim.opt_get_optimization_interval()
         return final_time
         
-    def getCostJacobian(self):
-        mask = N.ones(self._jmim._n_z.value, dtype=int)
-        jac = N.zeros(self._jmim._n_z.value, dtype=c_jmi_real_t)
-        self._jmim.opt_dJ(JMI_DER_CPPAD, JMI_DER_SPARSE, JMI_DER_DX,
+    def getCostJacobian(self, independent_variables, mask=None):
+        """ Returns the jacobian for the cost function with respect to
+            the independent variable independent_variable.
+            
+        @param independent_variable:
+            A mask consisting of the independent variables (JMI_DER_X
+            etc.) requested.
+        @todo:
+            independent_variable should not be a mask. It is not
+            pythonesque.
+        @return:
+            The cost gradient/jacobian.
+        """
+        assert self._jmim._n_z.value != 0
+        if mask is None:
+            mask = N.ones(self._jmim._n_z.value, dtype=int)
+        
+        n_cols, n_nz = self._jmim.opt_dJ_dim(JMI_DER_CPPAD,
+                                             JMI_DER_DENSE_ROW_MAJOR,
+                                             independent_variables,
+                                             mask)
+        jac = N.zeros(n_nz, dtype=c_jmi_real_t)
+        
+        self._jmim.opt_dJ(JMI_DER_CPPAD, JMI_DER_DENSE_ROW_MAJOR, independent_variables,
                           mask, jac)
-        return jac
+        return jac.reshape( (1, len(jac)) )
+        
+    def reset(self):
+        self._jmim.resetModel()
 
 
 class TestStandardModel:
@@ -265,21 +313,55 @@ class TestStandardModel:
         assert self.m.isFixedStartTime(), "Only fixed times supported."
         assert self.m.isFixedFinalTime(), "Only fixed times supported."
         
+        T, ys, sens, ignore = solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime())
+        
+        p.plot(T, ys)
+        p.title('testFixedSimulation(...) output')
+        #p.show()
+        
+    def testOptJacNonZeros(self):
+        """ Testing the numer of non-zero elements in VDP after
+            simulation.
+            
+        @note:
+            This test is model specific and not generic as most other
+            tests in this class.
+        """
         solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime())
+        assert self.m._jmim._n_z > 0, "Length of z should be greater than zero."
+        print 'n_z.value:', self.m._jmim._n_z.value
+        n_cols, n_nz = self.m._jmim.opt_dJ_dim(JMI_DER_CPPAD,
+                                               JMI_DER_SPARSE,
+                                               JMI_DER_X_P,
+                                               N.ones(self.m._jmim._n_z.value,
+                                                      dtype=int))
+        
+        print 'n_nz:', n_nz
+        
+        assert n_cols > 0, "The resulting should at least of one column."
+        assert n_nz > 0, "The resulting jacobian should at least have" \
+                         " one element (structurally) non-zero."
         
     def testOptimizationCostEval(self):
         """ Test evaluation of optimization cost function
-        
         """
-        solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime())
-        self.m.evalCost()
+        T, ys, sens, ignore = solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime())
+        self.m._jmim.setX_P(ys[-1], 0)
+        self.m._jmim.setDX_P(self.m.getDiffs(), 0)
+        cost = self.m.evalCost()
+        nose.tools.assert_not_equal(cost, 0)
         
     def testOptimizationCostJacobian(self):
         """ Test evaluation of optimization cost function jacobian
         
+        @note:
+            This test is model specific for the VDP oscillator.
         """
-        solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime())
-        self.m.getCostJacobian()
+        T, ys, sens, ignore = solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime())
+        self.m._jmim.setX_P(ys[-1], 0)
+        self.m._jmim.setDX_P(self.m.getDiffs(), 0)
+        jac = self.m.getCostJacobian(JMI_DER_X_P)
+        N.testing.assert_almost_equal(jac, [[0, 0, 1]])
 
 
 def solve_using_sundials(model, end_time, start_time=0.0, verbose=False, sensi=False, use_jacobian=False):
@@ -305,6 +387,9 @@ def solve_using_sundials(model, end_time, start_time=0.0, verbose=False, sensi=F
             1. Time samples.
             2. States samples.
             3. Sensitivity matrix. None if sensi==False.
+            4. An instance of the PyFData class containing the indices
+               for the the sensivity matrix.
+               
     """
     def _sundials_f(t, x, dx, f_data):
         """ Model (RHS) evaluation function.
@@ -396,8 +481,11 @@ def solve_using_sundials(model, end_time, start_time=0.0, verbose=False, sensi=F
             """ The Pythonic FData structure corresponding to the fdata
                 structure sent used by SUNDIALS.
             
-                An instance of of this structure is refered to by the
+                An instance of of this structure is referred to by the
                 C data structure UserData.
+                
+                This class can be used to interpret the columns in the
+                sensivity matrix.
                 
             """
             # Slots is a feature that can be used in new-style Python
@@ -451,6 +539,7 @@ def solve_using_sundials(model, end_time, start_time=0.0, verbose=False, sensi=F
         data.ignore_p = 0
     else:
         data.ignore_p = 1
+        parameters = None # Needed for correct return
         
     if use_jacobian:
         cvodes.CVDenseSetJacFn(cvode_mem, _Jac, ctypes.pointer(data))
@@ -523,10 +612,199 @@ def solve_using_sundials(model, end_time, start_time=0.0, verbose=False, sensi=F
     ylist = N.array(ylist)
     
     if sensi:
-        return (T, ylist, N.array(yS))
+        return (T, ylist, N.array(yS), parameters)
     else:
         try:
             yS = model.getSensitivities(y)
         except NotImplementedError:
             yS = None
-        return (T, ylist, yS)
+        return (T, ylist, yS, parameters)
+
+
+def _shoot(model, start_time, end_time):
+    """ Does a single "shot". Model parameters must be set BEFORE
+        calling this method.
+        
+    @note:
+        Currently written specifically for VDP.
+    @note:
+        Currently only supports inputs.
+    @note:
+        Assumes cost function is not directly dependent on parameters
+        (in this case - input u).
+        
+    @param start_time:
+        The time when simulation should start.
+    @param end_time:
+        The time when the simulation should finish.
+    @return:
+        A tuple consisting of:
+            1. The cost after simulation.
+            2. The cost gradient with respect to input U.
+            3. The final ($t_{tp_0}=1$) simulation states.
+            
+    """
+    T, ys, sens, params = solve_using_sundials(model, end_time, start_time, sensi=True)
+    u_sens = sens[:][params.u_start:params.u_end]
+    model._jmim.setX_P(ys[-1], 0)
+    model._jmim.setDX_P(model.getDiffs(), 0)
+    
+    cost = model.evalCost()
+    
+    cost_jac = model.getCostJacobian(JMI_DER_X_P)
+        
+    # This assumes that the cost function does not depend on the u:s
+    # which is the case of 
+    gradient = N.dot(cost_jac, u_sens.T)
+    gradient = gradient.flatten()
+    
+    last_y = ys[-1][:]
+    
+    return cost, gradient, last_y
+
+
+def single_shooting(model, initial_u=0.4):
+    """ Run single shooting.
+    
+    @note:
+        Currently written specifically for VDP.
+    @note:
+        Currently only supports inputs.
+    
+    @param model:
+        The model to simulate/optimize over.
+    @param initial_u:
+        The initial input U_0 used to initialize the optimization with.
+    @return:
+        The optimal u.
+        
+    """
+    start_time = model.getStartTime()
+    end_time = model.getFinalTime()
+    
+    u = model.getInputs()
+    new_u = N.array([0.4])
+    print "Initial u:", u
+    
+    # Used for plotting.
+    Us = []
+    costs = []
+    
+    ITERATIONS = 20
+    for ignore in range(ITERATIONS):
+        model.reset()
+        u[:] = new_u
+        print "u is", u
+        cost, gradient, last_y = _shoot(model, start_time, end_time)
+        
+        print "Cost:", cost
+        Us.append(u[0])
+        costs.append(cost)
+        
+        new_u = u-0.001*gradient
+    
+    p.plot(Us, costs)
+    p.title('Optimization history.')
+    p.show()
+    
+    return u
+
+
+def multiple_shooting(model, initials, end_time=None):
+    """ Does multiple shooting.
+    
+    @param model:
+        The model to simulate/optimize over.
+    @param initials:
+        A list of tuples, each corresponding to a segment in the
+        multiple shooting algorithm. Each tuple consists of:
+            1. The start_time for the segment.
+            2. The input U for the segment (being constant throughout
+               the segment simulation.
+    @return:
+        The optimal inputs (Us).
+        
+    """
+    if len(initials) == 0:
+        raise ShootingException('Incorrect initial_Us parameter. You must specify at least one segment.')
+    if initials[0][0] != model.getStartTime():
+        print "Warning: The start time of the first segment should usually coinside with the model start time."
+        
+    if end_time is None:
+        end_time = model.getFinalTime()
+        
+    start_times, Us = zip(*initial_Us)
+    segments = zip(start_times, start_times[1:]+[end_time], Us)
+    
+    raise NotImplementedError('Multiple shooting is not implemented yet')
+    
+    # TODO: CREATE A U-VECTOR AND USE THAT ONE
+    
+    # The following contains some pseudo code.
+    while OPTIMIZING:
+        for (seg_start_time, seg_end_time, u) in segments:
+            model.reset()
+            model.setInputs(N.array([u]))
+            seg_cost, seg_gradient, seg_last_y = _shoot(model, seg_start_time, seg_end_time)
+            
+            # SAVE THE RESULTS
+            
+        # CALCULATE GLOBAL GRADIENT
+        # UPDATE U-vector
+    
+
+def cost_graph(model):
+    """ Plot the cost as a function a constant u (single shooting).
+    
+    @note:
+        Currently written specifically for VDP.
+    @note:
+        Currently only supports inputs.
+    """
+    start_time = model.getStartTime()
+    end_time = model.getFinalTime()
+    
+    u = model.getInputs()
+    print "Initial u:", u
+    
+    costs = []
+    Us = []
+    
+    for u_elmnt in N.arange(-0.5, 1, 0.02):
+        print "u is", u
+        model.reset()
+        u[0]=u_elmnt
+        T, ys, sens, params = solve_using_sundials(model, end_time, start_time, sensi=True)
+        model._jmim.setX_P(ys[-1], 0)
+        model._jmim.setDX_P(model.getDiffs(), 0)
+        
+        cost = model.evalCost()
+        print "Cost:", cost
+        
+        # Saved for plotting
+        costs.append(cost)
+        Us.append(u_elmnt)
+        
+        cost_jac = model.getCostJacobian(JMI_DER_X_P)
+        
+    p.plot(Us, costs)
+    p.title("Costs as a function of different constant Us (VDP model)")
+    p.show()
+
+
+def main():
+    m = _load_example_standard_model('vdp', 'VDP_pack_VDP_Opt')
+    
+    # Whether the cost as a function of input U should be plotted
+    GEN_PLOT = False
+    
+    if GEN_PLOT:
+        cost_graph(m)
+    else:
+        opt_u = single_shooting(m)
+        print "Optimal u:", opt_u
+
+
+if __name__ == "__main__":
+    main()
+
