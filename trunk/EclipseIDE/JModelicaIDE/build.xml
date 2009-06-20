@@ -15,7 +15,9 @@
 	<property name="output_dir" value="site" />
 	
 	<property name="jmodelica_dir" value="${jmodelica_root}/Compiler/ModelicaFrontEnd/src" />
-	<property name="core_dir" value="../org.jastadd.plugin" />
+	<condition property="core_dir" value="../org.jastadd.plugin" else="${jastadd_dir}/org.jastadd.plugin">
+		<available file="../org.jastadd.plugin" type="dir" property=""/>
+	</condition>
 
 	<property name="package" value="org.jmodelica" />
 	<property name="package_dir" value="${java_dir}/org/jmodelica" />
