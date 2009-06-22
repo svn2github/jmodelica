@@ -1,5 +1,4 @@
-""" Holds all common variables for this package
-"""
+""" Holds all common variables for this package. """
 #    Copyright (C) 2009 Modelon AB
 #
 #    This program is free software: you can redistribute it and/or modify

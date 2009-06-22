@@ -1,7 +1,8 @@
-""" Module containing functions for compiling Optimica models. Options which are user specific can be set
-    either before importing this module by editing the file options.py or interactively by accessing
-    the default options via the common module. If options are not changed the default option settings
-    will be used.
+"""
+Module containing functions for compiling Optimica models. Options which are user specific can be set
+either before importing this module by editing the file options.py or interactively by accessing
+the default options via the common module. If options are not changed the default option settings
+will be used.
 
 """
 #    Copyright (C) 2009 Modelon AB
@@ -43,37 +44,43 @@ OptCompiler = org.jmodelica.applications.OptimicaCompiler
 
 
 def compile_model(model_file_name, model_class_name, target = "model"):
-    """ Performs all steps in the compilation of a model: parsing, 
-    instantiating, flattening, code generation and dll generation.
-    Outputs are object file, c-code file, xml file and dll which 
-    are all written to the folder in which the compilation is performed.
-    All files will get the default name <model_class_name>.<ext>.
     
-    @param model_file_name: 
-        Path to file in which the model is contained.
-    @param model_class_name:
-        Name of model class in the model file to compile.
-    @param target:
-        Set target to specify the contents of the object file used 
-        to build the .dll. Default is "model". Other two options
-        are "algorithms" and "ipopt". See makefile in install folder
-        for details.
+    """ 
+    Compiles an Optimica model.
+    
+    Performs all steps in the compilation of a model: parsing, instantiating, 
+    flattening, code generation and dll generation. Outputs are object file, 
+    c-code file, xml file and dll which are all written to the folder in which 
+    the compilation is performed. All files will get the default name 
+    <model_class_name>.<ext>. Set target to specify the contents of the object 
+    file used to build the .dll. Default is "model". Other two options are 
+    "algorithms" and "ipopt". See makefile in install folder for details.
+    
+    Parameters:
+    
+        model_file_name -- 
+            Path to file in which the model is contained.
+        model_class_name -- 
+            Name of model class in the model file to compile.
+        target -- 
+            The build target.
+      
+    Exceptions:
+       
+        CompilerError -- 
+            If one or more error is found during compilation.
+        OptimicaClassNotFoundError -- 
+            If the model class is not found.
+        IOError -- 
+            If the model file is not found, can not be read or any other IO 
+            related error.
+        Exception -- 
+            If there are general errors related to the parsing of the model.       
+        JError -- 
+            If there was a runtime exception thrown by the underlying Java 
+            classes.
         
-    @raise CompilerError:
-        Raised if one or more error is found during compilation.
-    @raise OptimicaClassNotFoundError:
-        Raised if the model class is not found.
-    @raise IOError:
-        Raised if the model file is not found, can not be read or
-        any other IO related error.
-    @raise Exception:
-        Raised by the parser for general errors related to the parsing 
-        of the model.       
-    @raise JError:
-        Raised if there was a runtime exception thrown by the underlying Java
-        classes, for example, NullPointerException.
-        
-"""
+    """
     xml_variables_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_optimica_variables_template.xml'
     xml_problvariables_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_optimica_problvariables_template.xml'
     xml_values_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_values_template.xml'
@@ -88,120 +95,143 @@ def compile_model(model_file_name, model_class_name, target = "model"):
     except jpype.JavaException, ex:
         _handle_exception(ex)
 
-
 def parse_model(model_file_name):
-    """ Parses a model and returns a reference to the source tree representation.
+    """ 
+    Parses a model.
     
-        @param model_file_name:
+    Parses a model and returns a reference to the source tree representation.
+    
+    Parameters:    
+    
+        model_file_name -- 
             Path to file in which the model is contained.
-        @return: 
-            Reference to the root of the source tree representation of the parsed model.
+            
+    Return:
+ 
+        Reference to the root of the source tree representation of the parsed 
+        model.
+    
+    Exceptions:
         
-        @raise CompilerError:
-            Raised if one or more error is found during compilation.
-        @raise IOError:
-            Raised if the model file is not found, can not be read or
-            any other IO related error.
-        @raise Exception:
-            Raised by the parser for general errors related to the parsing 
-            of the model.       
-        @raise JError:
-            Raised if there was a runtime exception thrown by the underlying Java
-            classes, for example, NullPointerException.
-
+        CompilerError --
+            If one or more error is found during compilation.
+        IOError --
+            If the model file is not found, can not be read or any other IO 
+            related error.
+        Exception --
+            If there are general errors related to the parsing of the model.       
+        JError -- 
+            If there was a runtime exception thrown by the underlying Java 
+            classes.
+            
     """ 
     try:
         sr = OptCompiler.parseModel(model_file_name)
-        return sr
-        
+        return sr        
     except jpype.JavaException, ex:
-        _handle_exception(ex)
-               
+        _handle_exception(ex)               
 
 def instantiate_model(source_root, model_class_name):
-    """ Generates an instance tree representation for a model 
-        using the source tree belonging to the model which must 
-        first be created with parse_model.
+    """ 
+    Generates an instance tree representation for a model. 
+    
+    Generates an instance tree representation for a model using the source tree 
+    belonging to the model which must first be created with parse_model.
         
-        @see: parse_model
+    Parameters:   
         
-        @param source_root:
+        source_root -- 
             Reference to the root of the source tree representation.
-        @param model_class_name:
+        model_class_name -- 
             Name of model class in the model file to compile.
+    
+    Returns:
+    
+        Reference to the root of the instance tree representation. 
+    
+    Exceptions:
+    
+        CompilerError -- 
+            If one or more error is found during compilation.
+        ModelicaClassNotFoundError -- 
+            If the model class is not found.
+        JError --
+            If there was a runtime exception thrown by the underlying Java 
+            classes.
             
-        @return: Reference to the root of the instance tree representation. 
-    
-        @raise CompilerError:
-            Raised if one or more error is found during compilation.
-        @raise OptimicaClassNotFoundError:
-            Raised if the model class is not found.
-        @raise JError:
-            Raised if there was a runtime exception thrown by the underlying Java
-            classes, for example, NullPointerException.
-
-    """
-    
+    """   
     try:
         ipr = OptCompiler.instantiateModel(source_root,model_class_name)
-        return ipr
-    
+        return ipr    
     except jpype.JavaException, ex:
         _handle_exception(ex)
-
 
 def flatten_model(model_file_name, model_class_name, inst_prg_root):
-    """ Computes a flattened representation of a model using the instance tree 
-        belonging to the model which must first be created with instantiate_model.
-        
-        @see: instantiate_model
-        
-        @param model_file_name:
-            Path to file in which the model is contained.
-        @param model_class_name:
-            Name of model class in the model file to compile.
-        @param inst_prg_root: Reference to the instance tree representation. 
-        
-        @return: Object (FClass) representing the flattened model. 
+    """ 
+    Computes a flattened representation of a model. 
     
-        @raise CompilerError:
-            Raised if one or more error is found during compilation.
-        @raise OptimicaClassNotFoundError:
-            Raised if the model class is not found.
-        @raise IOError:
-            Raised if the model file is not found, can not be read or
-            any other IO related error.
-        @raise JError:
-            Raised if there was a runtime exception thrown by the underlying Java
-            classes, for example, NullPointerException.
+    Computes a flattened representation of a model using the instance tree 
+    belonging to the model which must first be created with instantiate_model.
+        
+    Parameters:  
+        
+        model_file_name --
+            Path to file in which the model is contained.
+        model_class_name --
+            Name of model class in the model file to compile.
+        inst_prg_root -- 
+            Reference to the instance tree representation. 
+    
+    Returns:
+    
+        Object (FOptClass) representing the flattened model. 
+    
+    Exceptions:
+    
+        CompilerError --
+            If one or more error is found during compilation.
+        ModelicaClassNotFoundError --
+            If the model class is not found.
+        IOError --
+            If the model file is not found, can not be read or any other IO 
+            related error.
+        JError -- 
+            If there was a runtime exception thrown by the underlying Java 
+            classes.
 
     """
-
     try:
         fclass = OptCompiler.flattenModel(model_file_name, model_class_name, inst_prg_root)
-        return fclass
-    
+        return fclass    
     except jpype.JavaException, ex:
         _handle_exception(ex)
 
-
 def generate_code(fclass):
-    """ Generates c and xml code for a model using the FClass represenation created
-        with flatten_model and template files located in the JModelica installation folder.
-        Default output folder is the current folder from which this module is run.
+    
+    """ 
+    Generates code for a model.
+    
+    Generates code for a model c and xml code for a model using the FOptClass 
+    represenation created with flatten_model and template files located in the 
+    JModelica installation folder. Default output folder is the current folder 
+    from which this module is run.
         
-        @see: flatten_model
+    Parameters:
         
-        @param fclass: Reference to the flattened model object representation.  
+        fclass -- 
+            Reference to the flattened model object representation.  
         
-        @raise IOError:
-            Raised if the model file is not found, can not be read or
-            any other IO related error.
-        @raise JError:
-            Raised if there was a runtime exception thrown by the underlying Java
-            classes, for example, NullPointerException.
-
+    Exceptions:
+    
+        IOError -- 
+            If the model file is not found, can not be read or any other IO 
+            related error.
+        JError --
+            If there was a runtime exception thrown by the underlying Java 
+            classes.
+            
     """
+
     xml_variables_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_optimica_variables_template.xml'
     xml_problvariables_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_optimica_problvariables_template.xml'
     xml_values_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_values_template.xml'
@@ -214,23 +244,28 @@ def generate_code(fclass):
 
 
 def compile_dll(c_file_name, target="model"):
-    """ Compiles a c code representation of a model and outputs a .dll file.
-        Default output folder is the current folder from which this module is run.
-        Needs a c-file which is generated with generate_code.
+    
+    """ 
+    Compiles a c code representation of a model.
+    
+    Compiles a c code representation of a model and outputs a .dll file. Default 
+    output folder is the current folder from which this module is run. Needs a 
+    c-file which is generated with generate_code.
         
-        @see: generate_code
+    Parameters:
         
-        @param c_file_name:
-            Name of c-file for which the .dll should be compiled without file extention.
-        @param target:
-            Set target to specify the contents of the object file used 
-            to build the .dll. Default is "model". Other two options
-            are "algorithms" and "ipopt". See makefile in install folder
-            for details.
+        c_file_name --
+            Name of c-file for which the .dll should be compiled without file 
+            extention.
+        target --
+            Build target.
+
+    Returns:
             
-        @return: System return value.
-      
+        System return value. 
+            
     """
+
     #make settings
     make_file = common._jm_home+os.sep+'Makefiles'+os.sep+'MakeFile'
     file_name =' FILE_NAME='+c_file_name
@@ -245,11 +280,7 @@ def compile_dll(c_file_name, target="model"):
 
 
 def _handle_exception(ex):
-    """ Help function which catches and handles all expected Java Exceptions 
-        that the underlying Java classes might throw.
-    
-    """      
-
+    """ Catch and handle all expected Java Exceptions that the underlying Java classes might throw. """
     if ex.javaClass() is org.jmodelica.ast.CompilerException:
         arraylist = ex.__javaobject__.getProblems()
         itr = arraylist.iterator()
@@ -279,22 +310,40 @@ def _handle_exception(ex):
 
 
 class JError(Exception):
-    """ Base class for exceptions specific to this module. 
-    """
+    
+    """ Base class for exceptions specific to this module. """
+
     def __init__(self, message):
+        """ Create new error with a specific message. """
         self.message = message
         
     def __str__(self):
+        """ 
+        Print error message when class instance is printed.
+         
+        Overrides the general-purpose special method such that a string 
+        representation of an instance of this class will be the error message.
+        
+        """
         return self.message
 
 class OptimicaClassNotFoundError(JError):
-    """ Raised if the model class to be compiled can not be found.
+    
+    """ 
+    Class for a errors raised if the Optimica model class to be compiled 
+    can not be found.
+    
     """
+    
     pass
 
 class CompilerError(JError):
-    """ Raised if there were one or more errors found during compilation 
-        of the model. If there are several errors in one model, they are 
-        collected and presented in one CompilerError. 
+    
+    """ 
+    Class representing a compiler error. Raised if there were one or more errors 
+    found during compilation of the model. If there are several errors in one 
+    model, they are collected and presented in one CompilerError.
+    
     """
+    
     pass
