@@ -270,7 +270,7 @@ def compile_dll(c_file_name, target="model"):
     make_file = common._jm_home+os.sep+'Makefiles'+os.sep+'MakeFile'
     file_name =' FILE_NAME='+c_file_name
     jmodelica_h=' JMODELICA_HOME='+common._jm_home
-    cppad_h = ' CPPAD_HOME='+common.user_options['cppad_home']
+    cppad_h = ' CPPAD_HOME='+common._jm_home+os.sep+'ThirdParty'+os.sep+'CppAD'
     ipopt_h = ' IPOPT_HOME='+common.user_options['ipopt_home']
 
     cmd = 'make -f'+make_file+' '+target+file_name+jmodelica_h+cppad_h+ipopt_h

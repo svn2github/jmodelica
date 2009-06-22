@@ -1,2 +1,1 @@
-cppad_home = "@CPPAD_INC@"
 ipopt_home = "@IPOPT_HOME@"
