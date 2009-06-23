@@ -16,6 +16,7 @@ try:
 except ImportError:
     import cvodes
     import nvecserial
+from openopt import NLP
     
 from jmodelica.jmi import *
 import pylab as p
@@ -689,31 +690,23 @@ def single_shooting(model, initial_u=0.4):
     end_time = model.getFinalTime()
     
     u = model.getInputs()
-    new_u = N.array([0.4])
+    u0 = N.array([0.4])
     print "Initial u:", u
     
-    # Used for plotting.
-    Us = []
-    costs = []
-    
-    ITERATIONS = 20
-    for ignore in range(ITERATIONS):
+    def f(new_u):
         model.reset()
         u[:] = new_u
         print "u is", u
         cost, gradient, last_y = _shoot(model, start_time, end_time)
         
         print "Cost:", cost
-        Us.append(u[0])
-        costs.append(cost)
-        
-        new_u = u-0.001*gradient
+        return cost
+    p = NLP(f, u0, maxIter = 1e3, maxFunEvals = 1e2)
+    p.plot = 1
+    p.iprint = 1
     
-    p.plot(Us, costs)
-    p.title('Optimization history.')
-    p.show()
-    
-    return u
+    u_opt = p.solve('ralg')
+    return u_opt
 
 
 def multiple_shooting(model, initials, grid=[(0, 1)]):
