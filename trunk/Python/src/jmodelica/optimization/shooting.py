@@ -543,6 +543,7 @@ def solve_using_sundials(model, end_time, start_time=0.0, verbose=False, sensi=F
         parameters = None # Needed for correct return
         
     if use_jacobian:
+        raise ShootingException('Jacobian is not implemented as of now.')
         cvodes.CVDenseSetJacFn(cvode_mem, _Jac, ctypes.pointer(data))
     cvodes.CVodeSetFdata(cvode_mem, ctypes.pointer(data))
     
