@@ -5,6 +5,7 @@
 """
 
 import ctypes
+import math
 
 import nose
 import numpy as N
@@ -205,7 +206,7 @@ class StandardModel(object):
         jac = N.zeros(n_nz, dtype=c_jmi_real_t)
         
         self._jmim.opt_dJ(JMI_DER_CPPAD, JMI_DER_DENSE_ROW_MAJOR, independent_variables,
-                          mask, jac)
+                          jac)
         return jac.reshape( (1, len(jac)) )
         
     def reset(self):
@@ -675,6 +676,10 @@ def single_shooting(model, initial_u=0.4):
         The model to simulate/optimize over.
     @param initial_u:
         The initial input U_0 used to initialize the optimization with.
+    @param start_time:
+        The normalized start time of the simulation.
+    @param end_time:
+        The normalized end time of the simulation.
     @return:
         The optimal u.
         
@@ -710,7 +715,7 @@ def single_shooting(model, initial_u=0.4):
     return u
 
 
-def multiple_shooting(model, initials, end_time=None):
+def multiple_shooting(model, initials, grid=[(0, 1)]):
     """ Does multiple shooting.
     
     @param model:
@@ -718,27 +723,50 @@ def multiple_shooting(model, initials, end_time=None):
     @param initials:
         A list of tuples, each corresponding to a segment in the
         multiple shooting algorithm. Each tuple consists of:
-            1. The start_time for the segment.
-            2. The input U for the segment (being constant throughout
+            1. The input U for the segment (being constant throughout
                the segment simulation.
+    @param grid:
+        A list of 2-tuples per segment. The first element in each tuple
+        being the segment start time, the second element the segment end
+        time.
     @return:
         The optimal inputs (Us).
         
     """
-    if len(initials) == 0:
-        raise ShootingException('Incorrect initial_Us parameter. You must specify at least one segment.')
-    if initials[0][0] != model.getStartTime():
+    # Check for errors
+    try:
+        if len(initials) != len(grid):
+            raise ShootingException('Initial parameters must either be constant, or the same length as grid segments.')
+    except TypeError:
+        initials = [initials] * len(grid)
+    if math.abs(initials[0][0]) > 0.001:
         print "Warning: The start time of the first segment should usually coinside with the model start time."
+    if math.abs(initials[-1][1]-1) > 0.001:
+        print "Warning: The end time of the last segment should usually coinside with the model end time."
+    def check_inequality(a,b):
+        if a >= b:
+            raise ShootingException('One grid segment is incorrectly formatted.')
+    map(check_inequality, grid)
         
-    if end_time is None:
-        end_time = model.getFinalTime()
-        
-    start_times, Us = zip(*initial_Us)
-    segments = zip(start_times, start_times[1:]+[end_time], Us)
+    # Denormalize times
+    model_sim_len = model.getFinalTime() - model.getStartTime()
+    def denormalize_segment(start_time, end_time):
+        start_time = model.getStartTime() + model_sim_len * start_time
+        end_time = model.getStartTime() + model_sim_len * end_time
+        return (start_time, end_time)
+    initials = map(denormalize_segment, initials)
+    
+    # Preparing for multiple shooting
+    u = model.getInputs()
+    def shoot_segment(u, segment_times):
+        start_time = segment_times[0]
+        end_time = segment_times[1]
+        model.reset()
+        u[:] = u
+        seg_cost, seg_gradient, seg_last_y = _shoot(model, seg_start_time, seg_end_time)
+        return seg_cost, seg_gradient, seg_last_y
     
     raise NotImplementedError('Multiple shooting is not implemented yet')
-    
-    # TODO: CREATE A U-VECTOR AND USE THAT ONE
     
     # The following contains some pseudo code.
     while OPTIMIZING:
@@ -801,8 +829,25 @@ def main():
     if GEN_PLOT:
         cost_graph(m)
     else:
-        opt_u = single_shooting(m)
-        print "Optimal u:", opt_u
+        SHOOTING_METHOD = 'single'
+        if SHOOTING_METHOD=='single':
+            opt_u = single_shooting(m)
+            print "Optimal u:", opt_u
+        elif SHOOTING_METHOD == 'multiple':
+            grid = [(0, 0.1),
+                    (0.1, 0.2),
+                    (0.2, 0.3),
+                    (0.3, 0.4),
+                    (0.4, 0.5),
+                    (0.5, 0.6),
+                    (0.6, 0.7),
+                    (0.7, 0.8),
+                    (0.8, 0.9),
+                    (0.9, 1.0),]
+            initials = [0.25] * len(grid)
+            opt_us = multiple_shooting(m, grid, initials)
+            print "Optimal us:", opt_us
+        
 
 
 if __name__ == "__main__":
