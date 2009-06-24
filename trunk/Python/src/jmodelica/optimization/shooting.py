@@ -693,15 +693,34 @@ def single_shooting(model, initial_u=0.4):
     u0 = N.array([0.4])
     print "Initial u:", u
     
-    def f(new_u):
+    gradient = None
+    gradient_u = None
+    
+    def f(cur_u):
+        global gradient
+        global gradient_u
         model.reset()
-        u[:] = new_u
+        u[:] = cur_u
         print "u is", u
         cost, gradient, last_y = _shoot(model, start_time, end_time)
         
+        gradient_u = cur_u.copy()
+        
         print "Cost:", cost
+        print "Grad:", gradient
         return cost
+    
+    def df(cur_u):
+        if max(gradient_u - cur_u) < 0.001:
+            print "Using existing gradient"
+        else:
+            print "Recalculating gradient"
+            f(cur_u)
+            
+        return gradient
+    
     p = NLP(f, u0, maxIter = 1e3, maxFunEvals = 1e2)
+    p.df = df
     p.plot = 1
     p.iprint = 1
     
@@ -808,9 +827,19 @@ def cost_graph(model):
         Us.append(u_elmnt)
         
         cost_jac = model.getCostJacobian(JMI_DER_X_P)
-        
+    
+    p.subplot('121')
     p.plot(Us, costs)
     p.title("Costs as a function of different constant Us (VDP model)")
+    
+    from scipy import convolve
+    p.subplot('122')
+    dUs = Us
+    dcost = convolve(costs, N.array([1, -1])/0.02)[0:-1]
+    assert len(dUs) == len(dcost)
+    p.plot(dUs, dcost)
+    p.title('Forward derivatives')
+    
     p.show()
 
 
