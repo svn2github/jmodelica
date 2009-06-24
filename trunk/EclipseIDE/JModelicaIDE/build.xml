@@ -55,7 +55,9 @@
 	<!-- generate compiler ast files -->
 	<!-- create AST node types and weave aspect modules -->
 	<target name="ast">
-		<jastadd package="${package}.ast" beaver="true" rewrite="true" outdir="${java_dir}" NoCacheCycle="false" ComponentCheck="true" visitcheck="false" LazyMaps="true" Deterministic="true" NoStatic="false" Debug="false">
+		<jastadd package="${package}.ast" licence="${ide_aspects}/licence.blurb" beaver="true" rewrite="true" 
+			outdir="${java_dir}" NoCacheCycle="false" ComponentCheck="true" visitcheck="false" LazyMaps="true" 
+			Deterministic="true" NoStatic="false" Debug="false">
 			<fileset dir="${compiler_aspects}">
 				<include name="*.ast" />
 				<include name="*.jrag" />
