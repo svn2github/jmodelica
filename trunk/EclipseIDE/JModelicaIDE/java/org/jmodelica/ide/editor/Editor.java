@@ -425,11 +425,12 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 			IFoldingNode node = (IFoldingNode) fRoot;
 			IDocument document = getSourceViewer().getDocument();
 			Collection<Position> positions = node.foldingPositions(document);
+			ITextSelection sel = (ITextSelection)getSelectionProvider().getSelection();
 			for (Position pos : positions) {
 				ProjectionAnnotation annotation;
 				if (pos instanceof CharacterPosition) {
 					annotation = new CharacterProjectionAnnotation();
-					if (!toggleAnnotationsAction.isVisible())
+					if (!toggleAnnotationsAction.isVisible() && !overlaps(sel, pos))
 						annotation.markCollapsed();
 				} else {
 					annotation = new ProjectionAnnotation();
@@ -441,6 +442,20 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		// TODO: Only replace annotations that have changed, so that the state of the others are kept
 		// Update annotations
 		model.modifyAnnotations(oldAnnotations, newAnnotations, null);
+	}
+
+	private boolean overlaps(ITextSelection sel, Position pos) {
+		int selStart = sel.getOffset();
+		int selEnd = selStart + sel.getLength();
+		int posStart = pos.offset;
+		int posEnd = posStart + pos.length;
+		if (selStart > posStart && selStart < posEnd)
+			return true;
+		if (selEnd > posStart && selEnd < posEnd)
+			return true;
+		if (selStart <= posStart && selEnd >= posEnd)
+			return true;
+		return false;
 	}
 
 	@Override
@@ -482,11 +497,18 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	private class ViewerConfiguration extends SourceViewerConfiguration {
 
 		private IndentationStrategy indentationStrategy;
+		private AnnotationParenthesisAdder annotationParenthesisAdder;
 
 		@Override
 		public IAutoEditStrategy[] getAutoEditStrategies(
 				ISourceViewer sourceViewer, String contentType) {
-			return new IAutoEditStrategy[] { getIndentationStrategy() };
+			return new IAutoEditStrategy[] { getAnnotationParenthesisAdder(), getIndentationStrategy() };
+		}
+
+		private AnnotationParenthesisAdder getAnnotationParenthesisAdder() {
+			if (annotationParenthesisAdder == null)
+				annotationParenthesisAdder = new AnnotationParenthesisAdder();
+			return annotationParenthesisAdder;
 		}
 
 		private IndentationStrategy getIndentationStrategy() {
