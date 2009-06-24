@@ -1217,7 +1217,10 @@ def _cleanup():
     
     for tmp in _temp_dlls:
         if os.access(tmp.get('name'),os.F_OK):
-            _ctypes.FreeLibrary(tmp.get('handle'))
+            try:
+                _ctypes.FreeLibrary(tmp.get('handle'))
+            except AttributeError:
+                _ctypes.dlclose(tmp.get('handle'))
             os.remove(tmp.get('name'))
 
 # _cleanup registered to run on termination       
