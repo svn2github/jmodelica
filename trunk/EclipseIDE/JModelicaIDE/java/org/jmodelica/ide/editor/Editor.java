@@ -55,6 +55,7 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
@@ -117,8 +118,9 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	private OutlinePage fSourceOutlinePage;
 	private InstanceOutlinePage fInstanceOutlinePage;
 
-	// Reconciling strategy
+	// Reconciling strategies
 	private ReconcilingStrategy fStrategy;
+	private LocalReconcilingStrategy fLocalStrategy;
 
 	// ASTRegistry listener fields
 	private ASTRegistry fRegistry;
@@ -132,12 +134,16 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	// Actions that needs to be altered
 	private ErrorCheckAction errorCheckAction;
 	private ToggleAnnotationsAction toggleAnnotationsAction;
+	private ModelicaCompiler cmp;
+	private boolean fCompiledLocal;
 
 	public Editor() {
 		fRegistry = org.jastadd.plugin.Activator.getASTRegistry();
 		fSourceOutlinePage = new SourceOutlinePage(this); 
 		fInstanceOutlinePage = new InstanceOutlinePage(this);
 		fStrategy = new ReconcilingStrategy();
+		fLocalStrategy = new LocalReconcilingStrategy(this);
+		cmp = new ModelicaCompiler();
 	}
 
 	/*
@@ -247,9 +253,12 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		if (input instanceof IFileEditorInput) 
 			fInput = (IFileEditorInput)input;
 		resetAST(fInput);
+		// TODO: Move to resetAST()?
 		fStrategy.setFile(fInput == null ? null : fInput.getFile());
 		if (fRoot == null) 
-			compileExternal(input);
+			compileLocal(input);
+		else
+			fCompiledLocal = false;
 	}
 
 	@Override
@@ -270,19 +279,32 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		addAction(menu, Constants.ACTION_COLLAPSE_ALL_ID);
 	}
 
-	private void compileExternal(IEditorInput input) {
+	public void recompileLocal(IDocument document) {
+		fRoot = (ASTNode) cmp.compileToAST(document, null, null, null);
+		Display.getDefault().asyncExec(new Runnable() {
+			public void run() {
+				update();
+			}
+		});
+	}
+	
+	private void compileLocal(IEditorInput input) {
 		try {
 			IFile file = null;
 			if (input instanceof IFileEditorInput) 
 				file = ((IFileEditorInput) input).getFile();
 			String path = getPathOfInput(input);
 			if (path != null) {
-				ModelicaCompiler cmp = new ModelicaCompiler();
 				fRoot = cmp.compileFile(file, path);
 			}
 		} catch (IllegalArgumentException e) {
 		}
+		fCompiledLocal = true;
 		update();
+	}
+
+	public boolean isCompiledLocal() {
+		return fCompiledLocal;
 	}
 
 	private String getPathOfInput(IEditorInput input) {
@@ -519,7 +541,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		
 		@Override 
 		public IReconciler getReconciler(ISourceViewer sourceViewer) {
-			return new MonoReconciler(fStrategy, false);
+			return new MonoReconciler(isCompiledLocal() ? fLocalStrategy : fStrategy, false);
 	    }
 	}
 

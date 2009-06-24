@@ -102,10 +102,10 @@ public class ModelicaCompiler extends AbstractCompiler {
 	}
 
 	@Override
-	protected IASTNode compileToAST(IDocument document,
+	public IASTNode compileToAST(IDocument document,
 			DirtyRegion dirtyRegion, IRegion region, IFile file) {
 		// TODO: Only compile the changed region, if possible
-		newRoot(file.getProject());
+		newRoot(file != null ? file.getProject() : null);
 		parseFile(new DocumentReader(document), file);
 		return list.getChild(0);
 	}

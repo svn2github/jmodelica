@@ -15,20 +15,15 @@
 */
 package org.jmodelica.ide.error;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.jastadd.plugin.compiler.ast.IError;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.parser.ModelicaScanner;
 import org.jmodelica.parser.ModelicaParser.Terminals;
 
+import beaver.Scanner;
 import beaver.Symbol;
 import beaver.Parser.Events;
-import beaver.Scanner;
 
 public class CompileErrorReport extends Events {
 	
@@ -124,7 +119,8 @@ public class CompileErrorReport extends Events {
 	
 	public void setFile(IFile file) {
 		this.file = file;
-		Util.deleteErrorMarkers(file);
+		if (file != null)
+			Util.deleteErrorMarkers(file);
 		lastSyntaxError = null;
 	}
 	
@@ -139,7 +135,8 @@ public class CompileErrorReport extends Events {
 	}
 
 	private void report(CompileError err) {
-		err.addAsMarkerTo(file);
+		if (file != null)
+			err.addAsMarkerTo(file);
 	}
 
 	@Override
