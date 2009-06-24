@@ -795,6 +795,17 @@ aspect OptimicaFVariableUses {
 
 aspect OptimicaLinearVariables {
 	
+	refine FlatAPI eq FVariable.isLinear() {
+		if ((isParameter() || isConstant()) && !isOptParameter()) {
+			return true;
+		}
+		for (FIdUseExp e : uses()) {
+			if (!e.isLinear()) {
+				return false;
+			}
+		}
+		return true;
+	}
 	
 	/**
 	 * \brief Linearity of timed variables.

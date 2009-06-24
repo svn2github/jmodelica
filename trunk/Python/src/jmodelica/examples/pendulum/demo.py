@@ -1,3 +1,9 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+# Import library for path manipulations
+import os.path
+
 # Import the JModelica.org Python packages
 import jmodelica
 import jmodelica.jmi as jmi
@@ -11,10 +17,12 @@ import matplotlib.pyplot as plt
 def run_demo():
     """Demonstrate how to solve a dynamic optimization
     problem based on an inverted pendulum system."""
+
+    curr_dir = os.path.dirname(os.path.abspath(__file__));
     
     # Comile the Optimica model first to C code and
     # then to a dynamic library
-    oc.compile_model("Pendulum_pack.mo",
+    oc.compile_model(curr_dir+"/Pendulum_pack.mo",
                  "Pendulum_pack.Pendulum_Opt",
                  target='ipopt')
 
@@ -86,3 +94,5 @@ def run_demo():
     plt.ylabel('u')
     plt.xlabel('time')
     plt.show()
+
+run_demo()

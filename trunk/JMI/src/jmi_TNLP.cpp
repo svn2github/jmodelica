@@ -224,7 +224,8 @@ void jmi_TNLP::finalize_solution(SolverReturn status,
 
 
 Index jmi_TNLP::get_number_of_nonlinear_variables() {
-	return -1;//problem_->n_nonlinear_variables;
+	//printf("********* %d\n",problem_->n_nonlinear_variables);
+	return problem_->n_nonlinear_variables;
 }
 
 bool jmi_TNLP::get_list_of_nonlinear_variables(Index num_nonlin_vars,
@@ -232,12 +233,13 @@ bool jmi_TNLP::get_list_of_nonlinear_variables(Index num_nonlin_vars,
 
 	int i;
 	for (i=0;i<num_nonlin_vars;i++) {
+		//printf("* %d\n",problem_->non_linear_variables_indices[i]);
 		pos_nonlin_vars[i] = problem_->non_linear_variables_indices[i];
 	}
 
 	return true;
 
-	/*
+/*
 	pos_nonlin_vars[0] = 5;
 	pos_nonlin_vars[1] = 6;
 	pos_nonlin_vars[2] = 7;
@@ -251,7 +253,23 @@ bool jmi_TNLP::get_list_of_nonlinear_variables(Index num_nonlin_vars,
 	pos_nonlin_vars[10] = 27;
 	pos_nonlin_vars[11] = 28;
 
+*/
+	/*
+	pos_nonlin_vars[0] = 5;
+	pos_nonlin_vars[1] = 6;
+	pos_nonlin_vars[2] = 8;
+	pos_nonlin_vars[3] = 13;
+	pos_nonlin_vars[4] = 14;
+	pos_nonlin_vars[5] = 16;
+	pos_nonlin_vars[6] = 21;
+	pos_nonlin_vars[7] = 22;
+	pos_nonlin_vars[8] = 24;
+	pos_nonlin_vars[9] = 29;
+	pos_nonlin_vars[10] = 30;
+	pos_nonlin_vars[11] = 32;
+*/
 
+/*
 //	int i;
 
 //	for (i=0;i<301;i++) {
@@ -264,7 +282,7 @@ bool jmi_TNLP::get_list_of_nonlinear_variables(Index num_nonlin_vars,
 //	for (i=0;i<16;i++) {
 //		pos_nonlin_vars[1220 - 16 + i] = 2725 - 16 + i + 1;
 //	}
-
-	return true;
 */
+//	return true;
+
 }

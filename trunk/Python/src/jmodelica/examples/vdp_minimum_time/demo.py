@@ -1,3 +1,9 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+# Import library for path manipulations
+import os.path
+
 # Import the JModelica.org Python packages
 import jmodelica
 import jmodelica.jmi as jmi
@@ -12,10 +18,12 @@ def run_demo():
     """Demonstrate how to solve a minimum time
     dynamic optimization problem based on a
     Van der Pol oscillator system."""
+
+    curr_dir = os.path.dirname(os.path.abspath(__file__));
     
     # Comile the Optimica model first to C code and
     # then to a dynamic library
-    oc.compile_model("VDP.mo",
+    oc.compile_model(curr_dir+"/VDP.mo",
                      "VDP_pack.VDP_Opt",
                      target='ipopt')
 
@@ -72,3 +80,4 @@ def run_demo():
     plt.xlabel('time')
     plt.show()
     
+run_demo()

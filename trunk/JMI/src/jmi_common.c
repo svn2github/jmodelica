@@ -302,17 +302,17 @@ int jmi_variable_type(jmi_t *jmi, int col_index) {
     }
 
     for (i=0;i<jmi->n_tp;i++) {
-    	if (col_index>=jmi->offs_dx_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_u)*i &&
-    			col_index<jmi->offs_x_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_u)*i) {
+    	if (col_index>=jmi->offs_dx_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i &&
+    			col_index<jmi->offs_x_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i) {
     		return JMI_DER_DX_P;
-    	} else if (col_index>=jmi->offs_x_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_u)*i &&
-    			col_index<jmi->offs_u_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_u)*i) {
+    	} else if (col_index>=jmi->offs_x_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i &&
+    			col_index<jmi->offs_u_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i) {
     		return JMI_DER_X_P;
-    	} else if (col_index>=jmi->offs_u_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_u)*i &&
-    			col_index<jmi->offs_w_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_u)*i) {
+    	} else if (col_index>=jmi->offs_u_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i &&
+    			col_index<jmi->offs_w_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i) {
     		return JMI_DER_U_P;
-    	} else if (col_index>=jmi->offs_w_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_u)*i &&
-    			col_index<jmi->offs_w_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_u)*i + jmi->n_w) {
+    	} else if (col_index>=jmi->offs_w_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i &&
+    			col_index<jmi->offs_w_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i + jmi->n_w) {
     		return JMI_DER_W_P;
     	}
     }
@@ -323,6 +323,8 @@ int jmi_variable_type(jmi_t *jmi, int col_index) {
 int jmi_check_Jacobian_column_index(jmi_t *jmi, int independent_vars, int *mask, int col_index) {
 
 //	printf("<<< %d %d\n", col_index, mask[col_index]);
+//	printf("<< %d %d\n", independent_vars, jmi_variable_type(jmi, col_index));
+
 	if (mask[col_index] == 0) {
 //		printf("Hej\n");
 		return 0;

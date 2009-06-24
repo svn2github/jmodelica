@@ -37,7 +37,6 @@ int jmi_opt_sim_ipopt_new(jmi_opt_sim_ipopt_t **jmi_opt_sim_ipopt, jmi_opt_sim_t
 
 	nlp->ipopt_app = new Ipopt::IpoptApplication();
 	nlp->ipopt_app->Options()->SetStringValue("hessian_approximation", "limited-memory");
-//	nlp->ipopt_app->Options()->SetStringValue("derivative_test", "first-order");
 
 	return 0;
 }

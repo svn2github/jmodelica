@@ -388,7 +388,7 @@ class XMLVariablesDoc(XMLdoc):
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"independentParameter\"] \
                                [../../Attributes/RealAttributes/Free=\"true\"]")
         vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../VariableCategory=\"independentParameter\"] \
-                               [../../../../Attributes/RealAttributes/Free=\"true\"]")                
+                               [../../Attributes/RealAttributes/Free=\"true\"]")                
         return dict(zip(keys, vals))
 
     def get_w_lin_tp_values(self):

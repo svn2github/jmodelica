@@ -3435,7 +3435,7 @@ class JMISimultaneousOptLagPols(JMISimultaneousOpt):
         self._set_lb_values(_p_opt_lb, _dx_lb, _x_lb, _u_lb, _w_lb)
         self._set_ub_values(_p_opt_ub, _dx_ub, _x_ub, _u_ub, _w_ub)
 
-        _linearity_information_provided = 0;
+        _linearity_information_provided = 1;
         _p_opt_lin = N.ones(jmi_model.opt_get_n_p_opt(),dtype=int)
         _dx_lin = N.ones(jmi_model._n_dx.value,dtype=int)
         _x_lin = N.ones(jmi_model._n_x.value,dtype=int)
@@ -3793,7 +3793,8 @@ class JMISimultaneousOptLagPols(JMISimultaneousOpt):
         
             self._jmi_model.opt_get_p_opt_indices(p_opt_indices)
             p_opt_indices = p_opt_indices.tolist()
-            
+
+            print(p_opt_indices)
             for ref in refs:
                 (z_i, ptype) = _translate_value_ref(ref)
                 i_pi = z_i - self._jmi_model._offs_pi.value
@@ -3820,6 +3821,7 @@ class JMISimultaneousOptLagPols(JMISimultaneousOpt):
         for ref in refs:
             (z_i, ptype) = _translate_value_ref(ref)
             i_x = z_i - self._jmi_model._offs_x.value
+            print(values.get(ref))
             x_lin[i_x] = (values.get(ref) == "true").__int__()
             
         # u: input

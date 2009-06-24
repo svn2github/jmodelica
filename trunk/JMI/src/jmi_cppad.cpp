@@ -1255,7 +1255,7 @@ int jmi_opt_dCeq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
 
 	} else if (eval_alg & JMI_DER_CPPAD) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->opt->Ceq, independent_vars, mask, row, col);
+		return jmi_func_ad_dF_nz_indices(jmi, jmi->opt->Ceq, independent_vars, mask, row, col);
 
 	} else {
 		return -1;
@@ -1455,7 +1455,7 @@ int jmi_opt_dHineq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
 
 	} else if (eval_alg & JMI_DER_CPPAD) {
 
-		return jmi_func_dF_nz_indices(jmi, jmi->opt->Hineq, independent_vars, mask, row, col);
+		return jmi_func_ad_dF_nz_indices(jmi, jmi->opt->Hineq, independent_vars, mask, row, col);
 
 	} else {
 		return -1;
