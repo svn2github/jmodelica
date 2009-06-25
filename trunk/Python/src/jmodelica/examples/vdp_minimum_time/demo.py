@@ -21,7 +21,7 @@ def run_demo():
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     
-    # Comile the Optimica model first to C code and
+    # Compile the Optimica model first to C code and
     # then to a dynamic library
     oc.compile_model(curr_dir+"/VDP.mo",
                      "VDP_pack.VDP_Opt",
