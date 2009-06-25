@@ -18,8 +18,6 @@ package org.jmodelica.ide.scanners.generated;
 import java.io.IOException;
 import java.io.StringReader;
 
-import org.jmodelica.ide.editor.IndentationStrategy.Word;
-
 %%
 
 %public
@@ -27,30 +25,43 @@ import org.jmodelica.ide.editor.IndentationStrategy.Word;
 %class IndentationKeywordScanner
 %unicode
 %buffer 256
-%type Word
+%type void
 %char
 %table
 
 %{
-	Word res;
+	String keyword = null;
+	String id = null;
+	boolean mend, mbeg;
 	
     public IndentationKeywordScanner() {
         this(new StringReader(""));
     }
     
-    public Word findWord(String line, int type) {
+    public void match(String line) {
         yyreset(new StringReader(line));
-        yybegin(type);
+        id = null;
+        mend = mbeg = false;
         try {
-			return yylex();
+			yylex();
 		} catch (IOException e) {
-			return null;
 		}
     }
-    
-    private Word createWord() {
-        return new Word(yytext(), null, yychar);
+    //equations, public etc. are considered as end blocks 
+    public boolean matchesBeginBlock() {
+    	return mbeg;
     }
+    public boolean matchesEndBlock() {
+    	return mend;
+    }
+    
+    public String getId() {
+    	return id;
+    }
+    public String getKeyword() {
+    	return keyword;
+    }	
+   
 %}
 
 NONDIGIT = [a-zA-Z_]
@@ -70,35 +81,39 @@ Operator = "(" | ")" | "{" | "}" | "[" | "]" | ";" | ":" | "." | "," | "+" | "-"
            "/" | "=" | "^" | "<" | "<=" | ">" | ">=" | "==" | "<>"
 Ignore = {WhiteSpace} | {TradComment} | {Id} | {String} | {NUMBER} | {Operator}
 
-IndentWordId =  "block" | "class" | "connector" | "function" | "model" | "package" | "record" | "type"
-IndentWordEnd = "equation" | "algorithm" | "public" | "protected"
-AdjustWordId =  "end"
-AdjustWordEnd = {IndentWordEnd}
+NewBlock =  "block" | "class" | "connector" | "function" | "model" | "package" | "record" | "type"
+SepBlock = "equation" | "algorithm" | "public" | "protected"
+EndBlock =  "end"
 
-%state INDENT, ADJUST, ID
+%state IDENT
 
 %%
+{WhiteSpace} {}
+<<EOF>> { return; }
 
-<INDENT> {
-  {IndentWordId}	{ res = createWord(); yybegin(ID); }
-  {IndentWordEnd}	{ return createWord(); }
+<YYINITIAL> {
+	{NewBlock} { 
+  		mbeg = true;
+  		keyword = yytext();
+  		yybegin(IDENT); 
+	}
+	{SepBlock} { 
+		mend = true; 
+		keyword = yytext();
+		return;
+	}
+	{EndBlock} {
+		mend = true;
+		keyword = yytext();
+		yybegin(IDENT);
+	}  					
 }
 
-<ADJUST> {
-  {AdjustWordId}	{ res = createWord(); yybegin(ID); }
-  {AdjustWordEnd}	{ return createWord(); }
+<IDENT> {
+	{Id} {
+		id = yytext();
+		return;
+	}
 }
 
-<INDENT, ADJUST> {
-  {Ignore}			{ }
-  .					{ }
-  {LineComment}		{ return null; }
-  <<EOF>>			{ return null; }
-}
-
-<ID> {
-  {Id}				{ res.id = yytext(); return res; }
-  {WhiteSpace}		{ }
-  .					{ return res; }
-  <<EOF>>			{ return res; }
-}
+.|\n { return; }

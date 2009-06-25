@@ -26,6 +26,14 @@ aspect Outline {
 	eq InstComponentDecl.showInContentOutline() = true;
 	
 	/*
+	 * Don't traverse into error nodes.
+	 */
+	eq BadDefinition.hasVisibleChildren() = false;
+	eq BadClassDecl.hasVisibleChildren() = false;
+	eq BadElement.hasVisibleChildren() = false;
+	eq BadArgument.hasVisibleChildren() = false;
+	
+	/*
 	 * Set labels of interesting nodes
 	 */
 	eq BaseClassDecl.contentOutlineLabel() = getRestriction().toString() + " " + getName().getID();
