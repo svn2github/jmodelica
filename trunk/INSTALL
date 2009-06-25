@@ -41,15 +41,14 @@ cd JModelica
 mkdir build
 cd build
 
- > ../configure --with-cppad=/path/to/cppad-dist \
-                --with-ipopt=/path/to/ipopt-install-dir
+ > ../configure --with-ipopt=/path/to/ipopt-install-dir
 
-The arguments --with-cppad and --with-ipopt are optional. Notice, however, 
-that if they are not give, only parts of the software will be built. You may 
-want to give additional arguments to configure. Type configure --help for 
-information. By default, the installation directory (--prefix) is set to 
-the current directory, it is recommended to set the --prefix argument to
-override this behaviour. 
+The argument --with-ipopt is optional. Notice, however, that if they
+are not give, only parts of the software will be built. You may want
+to give additional arguments to configure. Type configure --help for
+information. By default, the installation directory (--prefix) is set
+to the current directory, it is recommended to set the --prefix
+argument to override this behaviour.
 
 5. Build and install
 
@@ -94,18 +93,20 @@ published.
 7. Running JModelica.org from Python
 
 In order to run the JModelica.org compilers from Python, the packages
-JPype (http://jpype.sourceforge.net/) and lxml (http://codespeak.net/lxml/)
-need to be installed. Also, the environment variables JMODELICA_HOME,
-containing the path to the JModelica.org installation directory
-(again, without spaces or ~ in the path), PYTHONPATH, containing the
-path to the 'Python' directory in the JModelica.org installation
-directory and JAVA_HOME containing the path to a Java JRE or SDK
-installation needs to be set. If you run on Linux, you will most
-likely have everything you need by now. If you run Windows, you also
-need MinGW which provides make and the gcc-suite which are needed to
-compile the generated C code. A convenient choice is then python(x,y)
-(http://www.pythonxy.com), which provides a Python environment bundled
-with (amongst other things) a MinGW installation.
+JPype (http://jpype.sourceforge.net/) and lxml
+(http://codespeak.net/lxml/) need to be installed. Also, the
+environment variables JMODELICA_HOME, containing the path to the
+JModelica.org installation directory (again, without spaces or ~ in
+the path), PYTHONPATH, containing the path to the 'Python' directory
+in the JModelica.org installation directory and JAVA_HOME containing
+the path to a Java JRE or SDK installation needs to be set. In
+addition, on some Linux platforms, it may be necessary to include the
+IPOPT lib directory in the LD_LIBRARY_PATH variable. If you run
+Linux, you will most likely have everything you need by now. If you
+run Windows, you also need MinGW which provides make and the gcc-suite
+which are needed to compile the generated C code. A convenient choice
+is then python(x,y) (http://www.pythonxy.com), which provides a Python
+environment bundled with (amongst other things) a MinGW installation.
 
 
 
