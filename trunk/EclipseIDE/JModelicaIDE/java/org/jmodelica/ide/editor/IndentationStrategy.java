@@ -46,8 +46,26 @@ class IndentationStrategy extends DefaultIndentLineAutoEditStrategy {
 			d.get(reg.getOffset(), reg.getLength()).startsWith("/*");	
 	}
 	
+	/**
+	 * Check if region <code>reg</code> is normal code
+	 */
 	protected static boolean isNormal(IDocument d, ITypedRegion reg) throws BadLocationException {
-		return !isCStyleComment(d, reg);
+		return !isCStyleComment(d, reg) && !isAnnotation(reg);
+	}
+	
+	/**
+	 * Check if region <code>reg</code> is an annotation
+	 */
+	protected static boolean isAnnotation(ITypedRegion reg) throws BadLocationException {
+		return reg.getType() == Modelica22PartitionScanner.ANNOTATION_PARTITION;
+	}
+	
+	/**
+	 * Check if region <code>reg</code> is code that shouldn't have any indentation support
+	 */
+	protected static boolean isNotToBeIndented(ITypedRegion reg) throws BadLocationException {
+		return reg.getType() == Modelica22PartitionScanner.QIDENT_PARTITION ||
+			reg.getType() == Modelica22PartitionScanner.STRING_PARTITION;
 	}
 
 	/** 
@@ -85,7 +103,7 @@ class IndentationStrategy extends DefaultIndentLineAutoEditStrategy {
 		int start = lineInfo.getOffset();
 		int end = start + lineInfo.getLength();
 		ITypedRegion startPart = getPartitionPreferNormal(d, start);
-		while (!isNormal(d, startPart)) {
+		while (isCStyleComment(d, startPart) || isNotToBeIndented(startPart)) {
 			start = d.getLineInformationOfOffset(startPart.getOffset()).getOffset();
 			startPart = getPartitionPreferNormal(d, start);
 		}
@@ -104,6 +122,11 @@ class IndentationStrategy extends DefaultIndentLineAutoEditStrategy {
 			IRegion refLine = d.getLineInformationOfOffset(partition.getOffset());
 			line = d.get(refLine.getOffset(), refLine.getLength());
 			indent = countWidth(line, partition.getOffset() - refLine.getOffset()) + 3;
+		} else if (isAnnotation(partition)) {
+			int curLine = d.getLineOfOffset(c.offset);
+			int startLine = d.getLineOfOffset(partition.getOffset());
+			if (curLine == startLine)
+				indent += INDENT;
 		} else if (iks.matchesEndBlock()) {
 			adjustThisLine(d, c, iks.getId(), lineInfo);	
 		} else if (iks.matchesBeginBlock() &&
@@ -140,7 +163,7 @@ class IndentationStrategy extends DefaultIndentLineAutoEditStrategy {
 		c.addCommand(targetLine.getOffset(),
 				getIndentation(d, c, targetLine.getOffset()).length(),
 				getIndentation(d, c, referenceLineOffset),
-				c.owner);
+				null);
 		c.caretOffset = c.offset; //needed for added command to run 
 								  //for some mysterious reason
 	}
@@ -203,15 +226,17 @@ class IndentationStrategy extends DefaultIndentLineAutoEditStrategy {
 	@Override
 	public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
 		try {
-			if (TextUtilities.indexOf(d.getLegalLineDelimiters(), c.text, 0)[0] != -1)
-				handlePastedBlock(d, c);
-			if (TextUtilities.endsWith(d.getLegalLineDelimiters(), c.text) != -1)
-				handleLineBreak(d, c);
-			else if (c.text.endsWith(";"))
-				handleLineTerminator(d, c);
-			
+			if (!isNotToBeIndented(getPartitionPreferNormal(d, c.offset))) {
+				if (TextUtilities.indexOf(d.getLegalLineDelimiters(), c.text, 0)[0] != -1)
+					handlePastedBlock(d, c);
+				if (TextUtilities.endsWith(d.getLegalLineDelimiters(), c.text) != -1)
+					handleLineBreak(d, c);
+				else if (c.text.endsWith(";"))
+					handleLineTerminator(d, c);
+			}
 		} catch (BadLocationException e) {
 			System.out.println("BadLocation calculating indent");
+			e.printStackTrace();
 //		} catch (Error e) {
 //			e.printStackTrace();
 		}
