@@ -27,6 +27,7 @@ import java.io.Reader;
 import java.util.Collection;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -109,16 +110,16 @@ import beaver.Parser.Exception;
  * level.
  * 
  */
-public class ModelicaCompiler {
-
-//	private static final Logger logger = Logger.getLogger("JModelica.ModelicaCompiler");
-	private static final Logger logger = ModelicaLoggers.getConsoleLogger("JModelica.ModelicaCompiler");
+public class ModelicaCompiler {	
+	public static final LogManager logmanager = LogManager.getLogManager();
+	
+	protected static final Logger logger = ModelicaLoggers.getConsoleLogger("JModelica.ModelicaCompiler");
 	public static final String INFO = "i";
 	public static final String WARNING = "w";
 	public static final String ERROR = "e";
 	public static final String INHERITED = "inh";
 	
-	public static void main(String args[]) {
+	public static void main(String args[]) {		
 		if(args.length < 1) {
 			logger.severe("ModelicaCompiler expects the command line arguments: " +
 					"[-i/w/e] <file name> <class name> [<xml template> <c template>]");
@@ -127,10 +128,10 @@ public class ModelicaCompiler {
 		int arg = 0;
 		if(args[arg].trim().substring(0,1).equals("-")) {
 			//has logger option
-			setLogLevel(args[arg].trim().substring(1));
+			setLogLevel(logger.getName(),args[arg].trim().substring(1));
 			arg++;
 		} else {
-			setLogLevel(ModelicaCompiler.ERROR);
+			setLogLevel(logger.getName(),ModelicaCompiler.ERROR);
 		}
 
 		if (args.length < arg+2) {
@@ -192,16 +193,16 @@ public class ModelicaCompiler {
 	 * @param level
 	 *            The level of logging to use as of now.
 	 */
-	public static void setLogLevel(String level) {
+	public static void setLogLevel(String logger, String level) {
 		if(level.equals(ModelicaCompiler.INFO)) {
-			logger.setLevel(Level.INFO);
+			logmanager.getLogger(logger).setLevel(Level.INFO);
 		} else if(level.equals(ModelicaCompiler.WARNING)) {
-			logger.setLevel(Level.WARNING);
+			logmanager.getLogger(logger).setLevel(Level.WARNING);
 		} else if(level.equals(ModelicaCompiler.ERROR)){
-			logger.setLevel(Level.SEVERE);
+			logmanager.getLogger(logger).setLevel(Level.SEVERE);
 		} else {
 			//severe is default
-			logger.setLevel(Level.SEVERE);
+			logmanager.getLogger(logger).setLevel(Level.SEVERE);
 		}
 	}
 	
@@ -210,8 +211,9 @@ public class ModelicaCompiler {
 	 * 
 	 * @return Log level setting for this class.
 	 */
-	public static String getLogLevel() {
-		return logger.getLevel() != null ? logger.getLevel().toString():ModelicaCompiler.INHERITED;
+	public static String getLogLevel(String logger) {
+		return logmanager.getLogger(logger).getLevel() != null ? 
+				logmanager.getLogger(logger).getLevel().toString():ModelicaCompiler.INHERITED;
 	}
 	
 	/**
@@ -410,9 +412,9 @@ public class ModelicaCompiler {
 	   	//Close the output stream
 	   	out.close();
 	   
-	    logger.info("... .mof file created.");
+	   	logger.info("... .mof file created.");
 	    
-		if(getLogLevel().equals("INFO")) {
+		if(getLogLevel("JModelica.ModelicaCompiler").equals("INFO")) {
 			System.out.println(fc.diagnostics());
 			System.out.print(fc.prettyPrint(""));
 		}

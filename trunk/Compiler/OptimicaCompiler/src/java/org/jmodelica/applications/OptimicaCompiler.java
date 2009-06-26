@@ -21,7 +21,6 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.logging.Logger;
 
 import org.jmodelica.ast.CompilerException;
 import org.jmodelica.ast.FOptClass;
@@ -86,8 +85,6 @@ import beaver.Parser.Exception;
  * 
  */
 public class OptimicaCompiler extends ModelicaCompiler{
-
-	private static final Logger logger = ModelicaLoggers.getConsoleLogger("JModelica.OptimicaCompiler");
 	
 	public static void main(String args[]) {
 		if(args.length < 1) {
@@ -98,10 +95,10 @@ public class OptimicaCompiler extends ModelicaCompiler{
 		int arg = 0;
 		if(args[arg].trim().substring(0,1).equals("-")) {
 			//has logger option
-			setLogLevel(args[arg].trim().substring(1));
+			setLogLevel(logger.getName(), args[arg].trim().substring(1));
 			arg++;
 		} else {
-			setLogLevel(OptimicaCompiler.ERROR);
+			setLogLevel(logger.getName(), ModelicaCompiler.ERROR);
 		}
 
 		if (args.length < arg+2) {
@@ -266,7 +263,7 @@ public class OptimicaCompiler extends ModelicaCompiler{
 	   
 	    logger.info("... .mof file created.");
 	    
-		if(getLogLevel().equals("INFO")) {
+		if(getLogLevel(logger.getName()).equals("INFO")) {
 			System.out.println(fc.diagnostics());
 			System.out.print(fc.prettyPrint(""));
 		}

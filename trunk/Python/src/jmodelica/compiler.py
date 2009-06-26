@@ -44,6 +44,11 @@ if not jpype.isJVMStarted():
 org = jpype.JPackage('org')
 JCompiler = org.jmodelica.applications.ModelicaCompiler
 
+#constants
+LOG_ERROR = JCompiler.ERROR
+LOG_WARNING = JCompiler.WARNING
+LOG_INFO = JCompiler.INFO
+
 def compile_model(model_file_name, model_class_name, target = "model"):
     
     """ 
@@ -276,6 +281,10 @@ def compile_dll(c_file_name, target="model"):
 
     #run make -> <model_class_name>.dll
     retval=os.system(cmd)
+    return retval
+
+def set_log_level(level):
+    JCompiler.setLogLevel(JCompiler.logger.getName(), level)
 
 def _handle_exception(ex):
     """ Catch and handle all expected Java Exceptions that the underlying Java classes might throw. """
