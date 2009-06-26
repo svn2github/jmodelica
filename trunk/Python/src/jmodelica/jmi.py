@@ -263,11 +263,10 @@ def load_DLL(libname, path):
     @see http://docs.python.org/library/ct.html
     
     """
-    try:
-        dll = Nct.load_library(libname, path)
-    except OSError, e:
-        raise JMIException("Could not load library '%s' in path '%s'."
-                            % (libname, path))
+
+    # Don't catch this exception since it hides the acutal source
+    # of the error.
+    dll = Nct.load_library(libname, path)
     
     # Initializing the jmi C struct
     jmi = ct.c_voidp()
