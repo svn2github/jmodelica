@@ -36,6 +36,7 @@ import org.eclipse.ui.progress.UIJob;
 import org.jastadd.plugin.compiler.ast.IASTNode;
 import org.jastadd.plugin.compiler.ast.IOutlineNode;
 import org.jastadd.plugin.registry.ASTRegistry;
+import org.jastadd.plugin.registry.IASTRegistryListener;
 import org.jmodelica.ast.ASTNode;
 import org.jmodelica.ast.ClassDecl;
 import org.jmodelica.ast.Element;
@@ -197,13 +198,18 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		return false;
 	} 
 	
-	public class LibrariesList {
+	public class LibrariesList implements IASTRegistryListener {
 		
 		private LibNode[] libraries;
 		private IProject project;
 		
 		public LibrariesList(IProject project) {
 			this.project = project;
+			readLibraries();
+			registry.addListener(this, project, null);
+		}
+
+		private void readLibraries() {
 			IASTNode ast = registry.lookupAST(null, project);
 			if (ast instanceof SourceRoot) {
 				List<LibNode> libNodes = ((SourceRoot) ast).getProgram().getLibNodes();
@@ -233,6 +239,16 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		@Override
 		public String toString() {
 			return "Loaded Libraries";
+		}
+
+		public void childASTChanged(IProject project, String key) {
+		}
+
+		public void projectASTChanged(IProject project) {
+			boolean hadChildren = hasChildren();
+			readLibraries();
+			boolean updProj = hadChildren != hasChildren();
+			viewer.refresh(updProj ? project : this);
 		}
 	}
 }

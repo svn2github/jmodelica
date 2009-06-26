@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -60,6 +61,8 @@ public class ProjectPropertyPage extends PropertyPage {
 	private DirectoryDialog dirDlg;
 	private MessageBox error;
 	private PackageExaminer	examiner;
+	
+	private boolean changed;
 
 	public ProjectPropertyPage() {
 		Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
@@ -68,6 +71,7 @@ public class ProjectPropertyPage extends PropertyPage {
 		dirDlg.setText("Select library");
 		error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
 		examiner = new PackageExaminer();
+		changed = false;
 	}
 	
 	@Override
@@ -183,6 +187,12 @@ public class ProjectPropertyPage extends PropertyPage {
 		return true;
 	}
 	
+	@Override
+	public boolean performCancel() {
+		changed = false;
+		return true;
+	}
+
 	private void loadProperties() {
 		IProject proj = getProject();
 		String libStr = null;
@@ -200,8 +210,11 @@ public class ProjectPropertyPage extends PropertyPage {
 			String libStr = Library.toString(libraries);
 			proj.setPersistentProperty(Constants.PROPERTY_LIBRARIES_ID, libStr);
 			proj.setPersistentProperty(Constants.PROPERTY_DEFAULT_MSL_ID, defaultMSL);
+			if (changed) 
+				proj.build(IncrementalProjectBuilder.FULL_BUILD, null);
 		} catch (CoreException e) {
 		}
+		changed = false;
 	}
 
 	public void updateDefautMSL() {
@@ -251,6 +264,7 @@ public class ProjectPropertyPage extends PropertyPage {
 						addLibrary(lib);
 						if (lib.name.equals("Modelica"))
 							updateDefautMSL();
+						changed = true;
 					}
 				} catch (FileNotFoundException ex) {
 					error.setMessage("No package.mo file found.\nDirectory does not seem to contain a library.");
@@ -274,6 +288,7 @@ public class ProjectPropertyPage extends PropertyPage {
 			libraries.remove(i);
 			if (isMSL)
 				updateDefautMSL();
+			changed = true;
 		}
 
 	}
@@ -298,6 +313,7 @@ public class ProjectPropertyPage extends PropertyPage {
 
 		public void widgetSelected(SelectionEvent e) {
 			defaultMSL = defMSLCombo.getItem(defMSLCombo.getSelectionIndex());
+			changed = true;
 		}
 
 	}
