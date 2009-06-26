@@ -14,16 +14,22 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 import org.eclipse.core.resources.IFile;
+import java.net.URI;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 aspect CompileInIDE {
 	
 	/*
 	 * Core needs this for lookup in registry. 
 	 */
-	syn String ASTNode.getFileName() = fileName();
 	eq StoredDefinition.hasLookupKey() = true;
-	eq StoredDefinition.lookupKey() = getFileName();
+	eq StoredDefinition.lookupKey() = fileName();
 
+	/*
+	 * IJastAddNode requires this for some reason.
+	 */
+	public String ASTNode.getFileName() { return null; }
+	
 	/*
 	 * A link between a Component node and IFile is useful in, e.g., error collection
 	 */
@@ -34,6 +40,12 @@ aspect CompileInIDE {
 			setFileName(file.getRawLocation().toOSString());
 	}
 	public IFile StoredDefinition.getFile() {
+		if (file == null) {	
+			URI uri = new File(fileName()).toURI();
+			IFile files[] = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(uri);
+			if (files.length > 0)
+				file = files[0];
+		}
 		return file;
 	}
 

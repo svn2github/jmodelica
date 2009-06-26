@@ -83,11 +83,11 @@ class IndentationStrategy extends DefaultIndentLineAutoEditStrategy {
 		int begOfLineText = findEndOfWhiteSpace(d, lineInfo.getOffset(), 
 				lineInfo.getOffset() + lineInfo.getLength());
 		return begOfLineText;
-	}
+	}	
 	
 	protected static ITypedRegion getPartitionPreferNormal(IDocument d, int offset) throws BadLocationException {
 		ITypedRegion r = d.getPartition(offset);
-		if (!isNormal(d, r) && r.getOffset() == offset) {
+		if (!isNormal(d, r) && r.getOffset() == offset && offset > 0) {
 			ITypedRegion r2 = d.getPartition(offset - 1);
 			if (isNormal(d, r2))
 				return r2;
@@ -164,11 +164,11 @@ class IndentationStrategy extends DefaultIndentLineAutoEditStrategy {
 				getIndentation(d, c, targetLine.getOffset()).length(),
 				getIndentation(d, c, referenceLineOffset),
 				null);
-		c.caretOffset = c.offset; //needed for added command to run 
-								  //for some mysterious reason
+		c.caretOffset = c.offset; //needed for added command to be run 
 	}
 
-	private void handlePastedBlock(IDocument d, DocumentCommand c) throws BadLocationException {
+	private void handlePastedBlock(IDocument d, DocumentCommand c) 
+			throws BadLocationException {
 		IRegion lineInfo = d.getLineInformationOfOffset(c.offset);
 		String line = d.get(lineInfo.getOffset(), lineInfo.getLength());
 		int begOfLineText = beginningOfLineText(d, lineInfo);

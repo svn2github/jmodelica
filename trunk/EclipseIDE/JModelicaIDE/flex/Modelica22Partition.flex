@@ -153,13 +153,13 @@ NormalID = {NONDIGIT} ({DIGIT}|{NONDIGIT})*
 ID = {NormalID} | {QIdent}
 Class = "block" | "class" | "connector" | "function" | "model" | "package" | "record" | "type"
 
-CommentCont = ([^*]* | "*" [^/])*
+CommentCont = ([^*]* | "*" [^/])* 
 QIdentCont = ({Q_CHAR}|{S_ESCAPE})*
 StringCont = ({S_CHAR}|{S_ESCAPE})*
 
 QIdent = "\'" {QIdentCont} "\'"
 String = "\"" {StringCont} "\""
-Comment = "/*" {CommentCont} "*/"
+Comment = "/*" {CommentCont} "*"? "*/"
 Definition = {Class} {WS} {ID}
 
 Other = .|{NL}

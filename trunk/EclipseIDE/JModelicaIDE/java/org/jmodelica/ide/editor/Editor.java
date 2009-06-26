@@ -353,7 +353,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		if (fInput != null) {
 			IFile file = fInput.getFile();
 			fKey = file.getRawLocation().toOSString();
-			fProject = file.getProject();			
+			fProject = file.getProject();
 			fRoot = (ASTNode) fRegistry.lookupAST(fKey, fProject);
 			fRegistry.addListener(this, fProject, fKey);
 			update();
