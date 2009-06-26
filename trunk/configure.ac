@@ -150,7 +150,7 @@ case $build in
     ;;
   *-mingw*)
     ipoptlib="-L$ipopt/lib -lipopt -lm -lfrtbegin \
-       -lg2c -lmingw32 -lmoldname -lmingwex -lmsvcrt \
+       -lgfortran -lpthread -lmingw32 -lmoldname -lmingwex -lmsvcrt \
        -luser32 -lkernel32 -ladvapi32 -lshell32 -lstdc++"
     ;;
   *-apple*)
