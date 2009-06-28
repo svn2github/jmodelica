@@ -233,7 +233,7 @@ bool jmi_TNLP::get_list_of_nonlinear_variables(Index num_nonlin_vars,
 
 	int i;
 	for (i=0;i<num_nonlin_vars;i++) {
-		printf("* %d\n",problem_->non_linear_variables_indices[i]);
+		//printf("* %d\n",problem_->non_linear_variables_indices[i]);
 		pos_nonlin_vars[i] = problem_->non_linear_variables_indices[i];
 	}
 

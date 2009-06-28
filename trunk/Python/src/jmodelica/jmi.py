@@ -3793,7 +3793,6 @@ class JMISimultaneousOptLagPols(JMISimultaneousOpt):
             self._jmi_model.opt_get_p_opt_indices(p_opt_indices)
             p_opt_indices = p_opt_indices.tolist()
 
-            print(p_opt_indices)
             for ref in refs:
                 (z_i, ptype) = _translate_value_ref(ref)
                 i_pi = z_i - self._jmi_model._offs_pi.value
@@ -3820,7 +3819,6 @@ class JMISimultaneousOptLagPols(JMISimultaneousOpt):
         for ref in refs:
             (z_i, ptype) = _translate_value_ref(ref)
             i_x = z_i - self._jmi_model._offs_x.value
-            print(values.get(ref))
             x_lin[i_x] = (values.get(ref) == "true").__int__()
             
         # u: input

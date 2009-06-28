@@ -2329,14 +2329,14 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 						}
 					}
 				}
-
+/*
 				printf(">> %d\n",n_nl_vars);
 				printf(">> %d\n",n_nl_p_opt);
 				printf(">> %d\n",n_nl_dx);
 				printf(">> %d\n",n_nl_x);
 				printf(">> %d\n",n_nl_u);
 				printf(">> %d\n",n_nl_w);
-
+*/
 				// Compute the total number of non linear variables in the NLP x vector
 				n_nl_vars += n_nl_p_opt + n_nl_dx*(1+n_cp*n_e) +
 				n_nl_x*(1+n_cp*n_e) +
