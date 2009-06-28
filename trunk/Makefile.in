@@ -716,6 +716,7 @@ install-exec-local:
 	cp $(CPPAD_INC)/cppad/*.hpp $(prefix)/ThirdParty/CppAD/cppad
 	mkdir -p $(prefix)/ThirdParty/CppAD/cppad/local	
 	cp $(CPPAD_INC)/cppad/local/*.hpp $(prefix)/ThirdParty/CppAD/cppad/local
+	cd $(abs_top_srcdir)/ThirdParty; find MSL -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/ThirdParty
 	mkdir -p $(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/jmi_modelica_template.c $(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/OptimicaCBackEnd/templates/jmi_optimica_template.c $(prefix)/CodeGenTemplates
