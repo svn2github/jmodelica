@@ -106,3 +106,5 @@ def run_demo():
     plt.xlabel('time')
     plt.show()
     
+if __name__ == "__main__":
+    run_demo()

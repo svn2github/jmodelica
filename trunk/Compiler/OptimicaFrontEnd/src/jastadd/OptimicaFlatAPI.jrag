@@ -927,7 +927,7 @@ aspect OptimicaFlatAPIDiagnostics {
 			str.append(fv.name() + ":\n");
 			boolean isLin[] = fv.isLinearTimedVariables();
 			for (int i=0;i<numTimePoints();i++) {
-				str.append("  " + timePoints()[i] + ": " +
+				str.append("  " + timePoints()[i] + ", isLinear: " +
 						isLin[i] + "\n");
 			}
 		}

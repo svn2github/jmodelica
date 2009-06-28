@@ -79,5 +79,6 @@ def run_demo():
     plt.ylabel('x2')
     plt.xlabel('time')
     plt.show()
-    
-run_demo()
+
+if __name__ == "__main__":
+    run_demo()

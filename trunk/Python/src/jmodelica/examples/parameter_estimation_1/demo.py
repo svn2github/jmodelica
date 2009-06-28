@@ -28,7 +28,7 @@ def run_demo():
                      target='ipopt')
     
     # Load the dynamic library and XML data
-    model=jmi.JMIModel("ParEst_ParEst2")
+    model=jmi.JMIModel("ParEst_ParEst")
     
     # Retreive parameter and variable vectors
     pi = model.getPI();
@@ -39,7 +39,7 @@ def run_demo():
     
     # Set model input
     w[0] = 1
-    
+
     # ODE right hand side
     # This can be done since DAE residuals 1 and 2
     # are written on simple "ODE" form: f(x,u)-\dot x = 0
@@ -59,21 +59,7 @@ def run_demo():
     t_sim = N.linspace(t0,tf,num=N_points)
     xx0=N.array([0.,0.])
     xx = integr.odeint(F,xx0,t_sim)
-    
-    # Plot simulation
-    plt.figure(1)
-    plt.clf()
-    plt.subplot(211)
-    plt.plot(t_sim,xx[:,0])
-    plt.grid()
-    plt.ylabel('x1')
-    
-    plt.subplot(212)
-    plt.plot(t_sim,xx[:,1])
-    plt.grid()
-    plt.ylabel('x2')
-    plt.show()
-    
+        
     # Extract measurements
     N_points_meas = 11
     t_meas = N.linspace(t0,10,num=N_points_meas)
@@ -85,11 +71,21 @@ def run_demo():
     # Set parameters corresponding to measurement data in model
     pi[4:15] = t_meas
     pi[15:26] = xx_meas[:,0]
-    
-    # Plot measurement points
+
+    # Plot simulation
     plt.figure(1)
+    plt.clf()
     plt.subplot(211)
+    plt.plot(t_sim,xx[:,0])
+    plt.grid()
     plt.plot(t_meas,xx_meas[:,0],'x')
+    plt.ylabel('x1')
+    
+    plt.subplot(212)
+    plt.plot(t_sim,xx[:,1])
+    plt.grid()
+    plt.ylabel('x2')
+    plt.show()
     
     # Initialize the mesh
     n_e = 50 # Number of elements 
@@ -142,5 +138,6 @@ def run_demo():
     print("** Optimal parameter values: **")
     print("w = %f"%pi[0])
     print("z = %f"%pi[1])
-    
-run_demo()
+
+if __name__ == "__main__":
+    run_demo()
