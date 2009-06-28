@@ -252,13 +252,13 @@ Differentiated variables:
 Derivative variables: 
 
 Algebraic variables: 
- x1: number of uses: 2, isLinear: true
- x2: number of uses: 2, isLinear: true
- x3: number of uses: 2, isLinear: false
- x4: number of uses: 2, isLinear: true
- x5: number of uses: 2, isLinear: false
- x6: number of uses: 3, isLinear: true
- x7: number of uses: 1, isLinear: false
+ x1: number of uses: 2, isLinear: true, alias: no
+ x2: number of uses: 2, isLinear: true, alias: no
+ x3: number of uses: 2, isLinear: false, alias: no
+ x4: number of uses: 2, isLinear: true, alias: no
+ x5: number of uses: 2, isLinear: false, alias: no
+ x6: number of uses: 3, isLinear: true, alias: no
+ x7: number of uses: 1, isLinear: false, alias: no
 
 Input variables: 
   ")})));
@@ -283,6 +283,367 @@ Input variables:
   
   end LinearityTest1;
 
+  model AliasTest1
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest1",
+      methodName="aliasDiagnostics",
+        description="Test computation of alias sets.", methodResult=
+        "Alias sets:
+{x1,-x3,-x4}
+{x2,-x5,-x6}
+4 variables can be eliminated
+")})));
+
+    Real x1 = 1;
+    Real x2 = 1;
+    Real x3,x4,x5,x6;
+  equation
+    x1 = -x3;
+    -x1 = x4;
+    x2 = -x5;
+    x5 = x6;  
+   
+  end AliasTest1;
+
+  model AliasTest2
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest2",
+      methodName="aliasDiagnostics",
+        description="Test computation of alias sets.", methodResult=
+        "Alias sets:
+{x1,x2,x3,x4}
+3 variables can be eliminated
+")})));
+
+    Real x1 = 1;
+    Real x2,x3,x4;
+  equation
+    x1 = x2;
+    x3 = x4;
+    x1 = x3;
+
+  end AliasTest2;
+
+  model AliasTest3
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest3",
+      methodName="aliasDiagnostics",
+        description="Test computation of alias sets.", methodResult=
+        "Alias sets:
+{x1,x2,-x3,-x4}
+3 variables can be eliminated
+")})));
+
+    Real x1 = 1;
+    Real x2,x3,x4;
+  equation
+    x1 = x2;
+    x3 = x4;
+    x1 = -x3;
+
+  end AliasTest3;
+
+  model AliasTest4
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest4",
+      methodName="aliasDiagnostics",
+        description="Test computation of alias sets.", methodResult=
+        "Alias sets:
+{x1,-x2,x3,x4}
+3 variables can be eliminated
+")})));
+
+    Real x1 = 1;
+    Real x2,x3,x4;
+  equation
+    -x1 = x2;
+    x3 = x4;
+    x1 = x3;
+
+  end AliasTest4;
+
+  model AliasTest5
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest5",
+      methodName="aliasDiagnostics",
+        description="Test computation of alias sets.", methodResult=
+        "Alias sets:
+{x1,-x2,-x3,-x4}
+3 variables can be eliminated
+")})));
+
+    Real x1 = 1;
+    Real x2,x3,x4;
+  equation
+    -x1 = x2;
+    x3 = x4;
+    x1 = -x3;
+
+  end AliasTest5;
+
+  model AliasTest6
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest6",
+      methodName="aliasDiagnostics",
+        description="Test computation of alias sets.", methodResult=
+        "Alias sets:
+{x1,x2,x3,-x4}
+3 variables can be eliminated
+")})));
+
+    Real x1 = 1;
+    Real x2,x3,x4;
+  equation
+    x1 = x2;
+    -x3 = x4;
+    x1 = x3;
+
+  end AliasTest6;
+
+  model AliasTest7
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest7",
+      methodName="aliasDiagnostics",
+        description="Test computation of alias sets.", methodResult=
+        "Alias sets:
+{x1,x2,-x3,x4}
+3 variables can be eliminated
+")})));
+
+    Real x1 = 1;
+    Real x2,x3,x4;
+  equation
+    x1 = x2;
+    -x3 = x4;
+    x1 = -x3;
+
+  end AliasTest7;
+
+  model AliasTest8
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest8",
+      methodName="aliasDiagnostics",
+        description="Test computation of alias sets.", methodResult=
+        "Alias sets:
+{x1,-x2,x3,-x4}
+3 variables can be eliminated
+")})));
+
+    Real x1 = 1;
+    Real x2,x3,x4;
+  equation
+    -x1 = x2;
+    -x3 = x4;
+    x1 = x3;
+
+  end AliasTest8;
+
+  model AliasTest9
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest9",
+      methodName="aliasDiagnostics",
+        description="Test computation of alias sets.", methodResult=
+        "Alias sets:
+{x1,-x2,-x3,x4}
+3 variables can be eliminated
+")})));
+
+    Real x1 = 1;
+    Real x2,x3,x4;
+  equation
+    -x1 = x2;
+    -x3 = x4;
+    x1 = -x3;
+
+  end AliasTest9;
+
+  model AliasTest10
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest10",
+      methodName="aliasDiagnostics",
+        description="Test computation of alias sets.", methodResult=
+        "Alias sets:
+{x1,x2,x3}
+2 variables can be eliminated
+")})));
+
+    Real x1 = 1;
+    Real x2,x3;
+  equation
+    x1 = x2;
+    x3 = x1;
+
+  end AliasTest10;
+
+  model AliasTest11
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest11",
+      methodName="aliasDiagnostics",
+        description="Test computation of alias sets.", methodResult=
+        "Alias sets:
+{x1,x2,-x3}
+2 variables can be eliminated
+")})));
+
+    Real x1 = 1;
+    Real x2,x3;
+  equation
+    x1 = x2;
+    x3 = -x1;
+
+  end AliasTest11;
+
+  model AliasTest12
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest12",
+      methodName="aliasDiagnostics",
+        description="Test computation of alias sets.", methodResult=
+        "Alias sets:
+{x1,-x2,x3}
+2 variables can be eliminated
+")})));
+
+    Real x1 = 1;
+    Real x2,x3;
+  equation
+    x1 = -x2;
+    x3 = x1;
+
+  end AliasTest12;
+
+  model AliasTest13
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest13",
+      methodName="aliasDiagnostics",
+        description="Test computation of alias sets.", methodResult=
+        "Alias sets:
+{x1,-x2,-x3}
+2 variables can be eliminated
+")})));
+
+    Real x1 = 1;
+    Real x2,x3;
+  equation
+    x1 = -x2;
+    x3 = -x1;
+
+  end AliasTest13;
+
+  model AliasTest14
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest14",
+      methodName="aliasDiagnostics",
+        description="Test computation of alias sets.", methodResult=
+        "Alias sets:
+{x1,-x2,x3}
+2 variables can be eliminated
+")})));
+
+    Real x1 = 1;
+    Real x2,x3;
+  equation
+    -x1 = x2;
+    x3 = x1;
+
+  end AliasTest14;
+
+  model AliasTest15
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest15",
+      methodName="aliasDiagnostics",
+        description="Test computation of alias sets.", methodResult=
+        "Alias sets:
+{x1,-x2,-x3}
+2 variables can be eliminated
+")})));
+
+    Real x1 = 1;
+    Real x2,x3;
+  equation
+    -x1 = x2;
+    x3 = -x1;
+
+  end AliasTest15;
+
+  model AliasTest16_Err
+     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="AliasTest16_Err",
+                                               description="Test alias error.",
+                                               errorMessage=
+" 1 error found...
+Semantic error at line 0, column 0:
+  Alias error: trying to add the negated alias pair (x3,-x1) to the alias set {x1,x2,x3}
+
+")})));
+
+    Real x1 = 1;
+    Real x2,x3;
+  equation
+    x1 = x2;
+    x2 = x3;
+    x3=-x1;
+
+  end AliasTest16_Err;
+
+  model AliasTest17_Err
+     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="AliasTest17_Err",
+                                               description="Test alias error.",
+                                               errorMessage=
+" 
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 0, column 0:
+  Alias error: trying to add the alias pair (x3,x1) to the alias set {x1,x2,-x3}
+")})));
+
+    Real x1 = 1;
+    Real x2,x3;
+  equation
+    x1 = x2;
+    x2 = -x3;
+    x3=x1;
+
+  end AliasTest17_Err;
+
+  model AliasTest18_Err
+     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="AliasTest18_Err",
+                                               description="Test alias error.",
+                                               errorMessage=
+" 
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 0, column 0:
+  Alias error: trying to add the alias pair (x3,x1) to the alias set {x1,-x2,-x3}
+")})));
+
+    Real x1 = 1;
+    Real x2,x3;
+  equation
+    -x1 = x2;
+    x2 = x3;
+    x3=x1;
+
+  end AliasTest18_Err;
+
+  model AliasTest19_Err
+     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="AliasTest19_Err",
+                                               description="Test alias error.",
+                                               errorMessage=
+" 
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 0, column 0:
+  Alias error: trying to add the negated alias pair (x3,-x1) to the alias set {x1,-x2,x3}
+")})));
+
+    Real x1 = 1;
+    Real x2,x3;
+  equation
+    -x1 = x2;
+    x2 = -x3;
+    x3=-x1;
+
+  end AliasTest19_Err;
 
 
 end TransformCanonicalTests;

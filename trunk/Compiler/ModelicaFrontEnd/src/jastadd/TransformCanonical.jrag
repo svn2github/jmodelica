@@ -23,6 +23,7 @@ aspect TransformCanonical{
 		addFDerivativeVariables();
 		genInitialEquations();
 		sortDependentParameters();
+		genAlias();
 		//flushCache(); // TODO: is this enough or should the entire tree be flushed?
  	}
 		
@@ -98,7 +99,50 @@ aspect TransformCanonical{
 		}		
 		root().flushAllRecursive();
 	}
+	
+	/**
+	 * \brief Generate alias information and remove alias equations.
+	 */
+	public void FClass.genAlias() {
+		aliasManager = new AliasManager();
 		
+		for (FAbstractEquation equation : 
+			getFEquationBlock(0).getFAbstractEquations()) {
+			// Iterate over all equations
+			if (equation instanceof FEquation) {
+				FEquation eqn = (FEquation)equation;
+				if (eqn.getLeft() instanceof FIdUseExp && // x = y
+ 						eqn.getRight() instanceof FIdUseExp) {
+					aliasManager.addAliasVariables((FVariable)((FIdUseExp)eqn.getLeft()).myFV(),
+							(FVariable)((FIdUseExp)eqn.getRight()).myFV(),
+							false);
+				} else if (eqn.getLeft() instanceof FNegExp && // -x = y
+						((FNegExp)eqn.getLeft()).getFExp() instanceof FIdUseExp &&
+						eqn.getRight() instanceof FIdUseExp) {
+					aliasManager.addAliasVariables((FVariable)((FIdUseExp)((FNegExp)eqn.getLeft()).getFExp()).myFV(),
+							(FVariable)((FIdUseExp)eqn.getRight()).myFV(),
+							true); 
+				} else if (eqn.getLeft() instanceof FIdUseExp && // x = -y
+						eqn.getRight() instanceof FNegExp &&
+						((FNegExp)eqn.getRight()).getFExp() instanceof FIdUseExp) {
+					aliasManager.addAliasVariables((FVariable)((FIdUseExp)eqn.getLeft()).myFV(),
+							(FVariable)((FIdUseExp)((FNegExp)eqn.getRight()).getFExp()).myFV(),
+							true);
+				} else if (eqn.getLeft() instanceof FNegExp && // -x = -y
+						((FNegExp)eqn.getLeft()).getFExp() instanceof FIdUseExp &&
+						eqn.getRight() instanceof FNegExp &&
+						((FNegExp)eqn.getRight()).getFExp() instanceof FIdUseExp
+						) {
+					aliasManager.addAliasVariables((FVariable)((FIdUseExp)((FNegExp)eqn.getLeft()).getFExp()).myFV(),
+							(FVariable)((FIdUseExp)((FNegExp)eqn.getRight()).getFExp()).myFV(),
+							false);
+
+				}
+			}
+		}	
+		
+	}
+	
 	/**
 	 * \brief Flush all caches, including collection attributes.
 	 */
@@ -123,6 +167,9 @@ aspect TransformCanonical{
 
 aspect ParameterSorting {
 
+	/**
+	 * \brief Indicate if there exist cyclic parameter dependencies.
+	 */
 	public boolean FClass.cyclicParameters = false;
 	
 	/**
@@ -221,6 +268,9 @@ aspect TransformCanonicalErrorCheck {
 	public void FClass.collectErrors() {
 		if (cyclicParameters) {
 			error("The model "+ name() +" contains cyclic parameter dependencies.");
+		}
+		if (getAliasManager().aliasError()) {
+			error(getAliasManager().getAliasErrorMessage());
 		}
 	}
 	

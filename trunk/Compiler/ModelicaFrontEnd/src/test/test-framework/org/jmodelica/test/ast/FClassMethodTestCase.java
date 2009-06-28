@@ -141,6 +141,8 @@ public class FClassMethodTestCase extends TestCase {
 	    	return false;
 	    }
 	    
+	    fc.transformCanonical();
+	    
 	    try {
 	    	Method method =  fc.getClass().getDeclaredMethod(getMethodName(), 
 	    			new Class[] {});
@@ -149,15 +151,6 @@ public class FClassMethodTestCase extends TestCase {
 	    	testResult = removeWhitespace(testResult);
 	    	String outp = removeWhitespace(getOutput());
 
-	    	/*
-	    	testResult = testResult.replace('\r', 'R');
-	    	testResult = testResult.replace('\n', 'N');
-	    	testResult = testResult.replace(' ', 'S');
-	    	String outp = getOutput();
-	    	outp = outp.replace('\r', 'R');
-	    	outp = outp.replace('\n', 'N');
-	    	outp = outp.replace(' ', 'S');	  
-	    	*/  	
 //	    	System.out.println("test ****  \n" +testResult);
 //	    	System.out.println("fixture ****  \n" +outp);
 //	    	for (int i=0;i<testResult.length();i++) {

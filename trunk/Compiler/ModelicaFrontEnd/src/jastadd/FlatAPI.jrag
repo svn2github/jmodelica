@@ -1125,9 +1125,31 @@ aspect FlatDiagnostics {
 		
 		str.append("\n");  
 
+		str.append(aliasDiagnostics());
+		
+		str.append("\n");  
+
 		return str.toString();
 	}
 
+	public String FClass.aliasDiagnostics() {
+		StringBuffer str = new StringBuffer();
+		str.append("Alias sets:\n");
+		if (getAliasManager()!=null) {
+			str.append(getAliasManager().printAliasSets());
+			int n_elim = 0;
+			for (LinkedHashSet<AliasVariable> aliasSet : 
+				getAliasManager().getAliasSets()) {
+				n_elim += aliasSet.size() - 1;
+			}
+			str.append(n_elim + " variables can be eliminated");
+				
+		} else {
+			str.append("  Alias sets not computed.\n");
+		}
+		return str.toString();	
+		
+	}
 
 	public String FClass.variableDiagnostics() {
 		
@@ -1204,7 +1226,16 @@ aspect FlatDiagnostics {
 			str.append(" " + fv.name());
 			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
 					+ fv.isLinear());
-				str.append("\n");
+			str.append(", alias: ");
+			if (!fv.isAlias()) {
+				str.append("no");
+			} else {
+				if (fv.isNegated()) {
+					str.append("-");
+				}
+				str.append(fv.alias().valueReference());
+			}
+			str.append("\n");
 		}
 		str.append("\n");
 		
