@@ -26,6 +26,8 @@ import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
@@ -134,8 +136,11 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	// Actions that needs to be altered
 	private ErrorCheckAction errorCheckAction;
 	private ToggleAnnotationsAction toggleAnnotationsAction;
+	
 	private ModelicaCompiler cmp;
+	
 	private boolean fCompiledLocal;
+	private IFile fLocalFile;
 
 	public Editor() {
 		fRegistry = org.jastadd.plugin.Activator.getASTRegistry();
@@ -280,7 +285,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	}
 
 	public void recompileLocal(IDocument document) {
-		fRoot = (ASTNode) cmp.compileToAST(document, null, null, null);
+		fRoot = (ASTNode) cmp.compileToAST(document, null, null, fLocalFile);
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
 				update();
@@ -290,17 +295,31 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	
 	private void compileLocal(IEditorInput input) {
 		try {
-			IFile file = null;
+			fLocalFile = null;
 			if (input instanceof IFileEditorInput) 
-				file = ((IFileEditorInput) input).getFile();
+				fLocalFile = ((IFileEditorInput) input).getFile();
 			String path = getPathOfInput(input);
 			if (path != null) {
-				fRoot = cmp.compileFile(file, path);
+				if (fLocalFile == null) 
+					fLocalFile = getFileForPath(path);
+				fRoot = cmp.compileFile(fLocalFile, path);
 			}
 		} catch (IllegalArgumentException e) {
 		}
 		fCompiledLocal = true;
 		update();
+	}
+
+	private IFile getFileForPath(String path) {
+		// TODO: If file is outside workspace, add linked resource?
+		IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
+		if (path.startsWith(workspace.getRawLocation().toOSString())) {
+			URI uri = new File(path).toURI();
+			IFile files[] = workspace.findFilesForLocationURI(uri);
+			if (files.length > 0)
+				return files[0];
+		}
+		return null;
 	}
 
 	public boolean isCompiledLocal() {

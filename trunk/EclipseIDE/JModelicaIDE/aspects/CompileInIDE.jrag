@@ -14,8 +14,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 import org.eclipse.core.resources.IFile;
-import java.net.URI;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import java.net.URI;
 
 aspect CompileInIDE {
 	
@@ -40,9 +41,11 @@ aspect CompileInIDE {
 			setFileName(file.getRawLocation().toOSString());
 	}
 	public IFile StoredDefinition.getFile() {
-		if (file == null) {	
-			URI uri = new File(fileName()).toURI();
-			IFile files[] = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(uri);
+		String path = fileName();
+		IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
+		if (path.startsWith(workspace.getRawLocation().toOSString())) {
+			URI uri = new File(path).toURI();
+			IFile files[] = workspace.findFilesForLocationURI(uri);
 			if (files.length > 0)
 				file = files[0];
 		}
