@@ -363,11 +363,29 @@ aspect FlatNames {
 	syn String FClass.name() = getFQName().name();
 	syn String FVariable.name() = getFQName().name();
 
-	syn lazy String FQName.derName() = "der(" + name() + ")";
-			
+//	syn lazy String FQName.derName() = "der(" + name() + ")";
 	eq FDerivativeVariable.name() = getFQName().derName();
 	syn String FIdUse.derName() = getFQName().derName();
 	syn String FIdUseExp.derName() = getFIdUse().derName();
+
+	syn lazy String FQName.derName() {
+		StringBuffer str = new StringBuffer();
+		for (int i=0;i<getNumFQNamePart();i++) {
+			if (i==getNumFQNamePart()-1) {
+				str.append("der(");
+			}			
+			str.append(getFQNamePart(i).getName());
+			if (i<getNumFQNamePart()-1) {
+				str.append(".");
+			} 
+		}
+		str.append(")");
+		return str.toString();
+	}
+	
+	
+	//syn String FIdUse.derName2() = getFQName().derName2();
+	//syn String FIdUseExp.derName2() = getFIdUse().derName2();
 	
 	syn lazy String FQName.nameUnderscore() {
 		StringBuffer str = new StringBuffer();

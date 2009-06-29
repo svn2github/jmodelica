@@ -34,6 +34,7 @@ import _ctypes
 import atexit
 
 import xmlparser
+import io
 
 # ================================================================
 #                         CONSTANTS
@@ -1375,6 +1376,24 @@ class JMIModel(object):
         except AttributeError,e:
             pass
         os.remove(self._tempfname)
+
+    def get_variable_names(self):
+        """
+        Extract the names of the variables in a model.
+
+        Returns:
+            Dict with ValueReference as key and name as value.
+        """
+        return self._get_XMLvariables_doc().get_variable_names()
+
+    def get_variable_descriptions(self):
+        """
+        Extract the descriptions of the variables in a model.
+
+        Returns:
+            Dict with ValueReference as key and description as value.
+        """
+        return self._get_XMLvariables_doc().get_variable_descriptions()
                
     def get_sizes(self):
         """ Get and return a list of the sizes of the variable vectors. """
@@ -3193,6 +3212,10 @@ class JMIModel(object):
                 n_p_opt = n_p_opt +1
             self.opt_set_p_opt_indices(n_p_opt,N.array(p_opt_indices))
 
+    def get_name(self):
+        """ Return the name of the model. """
+        return self._libname
+
 class JMISimultaneousOpt(object):
 
     """
@@ -3507,6 +3530,75 @@ class JMISimultaneousOptLagPols(JMISimultaneousOpt):
                    "jmi_delete failed"
         except AttributeError, e:
             pass
+
+    def get_result(self):
+        """
+        Get the optimization results.
+        
+        Returns:
+        p_opt --
+            A vector containing the values of the optimized parameters.
+        data --
+            A two dimensional array of variable trajectory data. The
+            first column represents the time vector. The following
+            colums contain, in order, the derivatives, the states,
+            the inputs and the algebraic variables. The ordering is
+            according to increasing value references.
+        """
+
+        n_points = self.opt_sim_get_result_variable_vector_length()
+        n_points = n_points.value
+
+        sizes = self._jmi_model.get_sizes()
+        n_dx = sizes[4]
+        n_x = sizes[5]
+        n_u = sizes[6]
+        n_w = sizes[7]
+        n_popt = self._jmi_model.opt_get_n_p_opt()
+        
+        # Create result data vectors
+        p_opt = N.zeros(n_popt)
+        t_ = N.zeros(n_points)
+        dx_ = N.zeros(n_dx*n_points)
+        x_ = N.zeros(n_x*n_points)
+        u_ = N.zeros(n_u*n_points)
+        w_ = N.zeros(n_w*n_points)
+        
+        # Get the result
+        self.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
+        
+        data = N.zeros((n_points,1+n_dx+n_x+n_u+n_w))
+        data[:,0] = t_
+        for i in range(n_dx):
+            data[:,i+1] = dx_[i*n_points:(i+1)*n_points]
+        for i in range(n_x):
+            data[:,n_dx+i+1] = x_[i*n_points:(i+1)*n_points]
+        for i in range(n_u):
+            data[:,n_dx+n_x+i+1] = u_[i*n_points:(i+1)*n_points]
+        for i in range(n_w):
+            data[:,n_dx+n_x+n_u+i+1] = w_[i*n_points:(i+1)*n_points]
+
+        return p_opt, data
+    
+    def export_result_dymola(self, format='txt'):
+        """
+        Export the opitimization result on Dymola format.
+
+        Parameters:
+            format --
+                A string equal either to 'txt' for output to Dymola textual
+                format or 'mat' for output to Dymola binary Matlab format.
+
+        Limitations:
+            Only format='txt' is currently supported.
+        """
+
+        # Get results
+        p_opt, data = self.get_result()
+        
+        # Write result
+        io.export_result_dymola(self._jmi_model,data)
+
             
     def opt_sim_lp_get_pols(self, n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, Lp_dot_coeffs, Lpp_dot_coeffs, Lp_dot_vals, Lpp_dot_vals):
         """

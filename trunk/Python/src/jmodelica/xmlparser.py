@@ -96,6 +96,28 @@ class XMLdoc:
 class XMLVariablesDoc(XMLdoc):
     
     """ Class representing a parsed XML file containing model variable meta data. """
+
+    def get_variable_names(self):
+        """
+        Extract the names of the variables in a model.
+
+        Returns:
+            Dict with ValueReference as key and name as value.
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()")
+        vals = self._xpatheval("//ScalarVariable/ScalarVariableName/text()")       
+        return dict(zip(keys,vals))
+
+    def get_variable_descriptions(self):
+        """
+        Extract the descriptions of the variables in a model.
+
+        Returns:
+            Dict with ValueReference as key and description as value.
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text() [../../Description]")
+        vals = self._xpatheval("//ScalarVariable/Description/text()")
+        return dict(zip(keys,vals))
     
     def get_start_attributes(self):
         """ 

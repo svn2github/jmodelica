@@ -9,7 +9,7 @@ sys.path.append(_opath)
 import options
 
 """The JModelica Python toolkit."""
-__all__ = ['jmi', 'xmlparser', 'compiler', 'optimicacompiler','optimization', 'examples', 'tests']
+__all__ = ['jmi', 'xmlparser', 'compiler', 'optimicacompiler','optimization', 'examples', 'tests','io']
 
 #load all options
 common.user_options['ipopt_home']=options.ipopt_home
