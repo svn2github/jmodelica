@@ -1197,12 +1197,12 @@ int jmi_opt_dJ_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
  * @param sparsity See ::jmi_dae_dF.
  * @param independent_vars See ::jmi_dae_dF.
  * @param mask See ::jmi_dae_dF.
- * @param dF_n_cols (Output) The number of columns of the resulting Jacobian.
- * @param dF_n_nz (Output) The number of non-zeros of the resulting Jacobian.
+ * @param dJ_n_cols (Output) The number of columns of the resulting Jacobian.
+ * @param dJ_n_nz (Output) The number of non-zeros of the resulting Jacobian.
  *
  */
 int jmi_opt_dJ_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
-		int *dF_n_cols, int *dF_n_nz);
+		int *dJ_n_cols, int *dJ_n_nz);
 
 /**
  * \brief Evaluate the residual of the equality path constraints \f$C_{eq}\f$.

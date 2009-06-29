@@ -568,12 +568,12 @@ int jmi_opt_dJ_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
 }
 
 int jmi_opt_dJ_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
-		int *dF_n_cols, int *dF_n_nz) {
+		int *dJ_n_cols, int *dJ_n_nz) {
 
 	if (eval_alg & JMI_DER_SYMBOLIC) {
 
 		return jmi_func_dF_dim(jmi, jmi->opt->J, sparsity, independent_vars, mask,
-				dF_n_cols, dF_n_nz);
+				dJ_n_cols, dJ_n_nz);
 
 	} else if (eval_alg & JMI_DER_CPPAD) {
 		return -1;
