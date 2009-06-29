@@ -21,10 +21,10 @@
 /**
  * A package offering a basic code generation framework.
  */
-package org.jmodelica.codegen;
+package org.jmodelica.modelica.codegen;
 
 import java.util.HashMap;
-import org.jmodelica.ast.*;
+import org.jmodelica.modelica.ast.*;
 import java.io.*;
 
 /**

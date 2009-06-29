@@ -15,7 +15,7 @@
 */
 
 
-package org.jmodelica.test.ast;
+package org.jmodelica.modelica.test;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +29,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.jmodelica.ast.SourceRoot;
+import org.jmodelica.modelica.ast.SourceRoot;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;

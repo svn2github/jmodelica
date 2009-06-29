@@ -15,7 +15,7 @@
 */
 
 
-import org.jmodelica.parser.*;
+import org.jmodelica.modelica.parser.*;
 aspect PredefinedTypes {
 
 	inh List FullClassDecl.getPredefinedType();

@@ -15,9 +15,9 @@
 */
 
 
-package org.jmodelica.test.benchmarks;
+package org.jmodelica.modelica.test;
 
-import org.jmodelica.ast.*;
+import org.jmodelica.modelica.ast.*;
 import java.io.*;
 import java.util.Random;
 

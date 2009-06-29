@@ -18,9 +18,9 @@
  *  \brief InitTag class.
  */
 
-package org.jmodelica.codegen;
+package org.jmodelica.modelica.codegen;
 
-import org.jmodelica.ast.*;
+import org.jmodelica.modelica.ast.*;
 
 /**
  * A tag class intended for use as base class for tags using the DAE

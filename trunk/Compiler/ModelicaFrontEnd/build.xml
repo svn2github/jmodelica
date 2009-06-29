@@ -27,10 +27,10 @@
 <project name="JModelica" default="build" basedir=".">
 
   <!-- "package" is the directory where generated files will be stored -->
-  <property name="ast_package" value="org.jmodelica.ast"/>
+  <property name="ast_package" value="org.jmodelica.modelica.ast"/>
   
 	<property name="base_output" value="src/java-generated"/>
-	<property name="parser_output" value="${base_output}/org/jmodelica/parser"/>
+	<property name="parser_output" value="${base_output}/org/jmodelica/modelica/parser"/>
 	
   <property name="jar_output_dir" value="bin"/>
   <property name="jastadd_dir" value="../../ThirdParty/JastAdd"/>
@@ -63,18 +63,14 @@
     <mkdir dir="${jar_output_dir}"/>
   	<jar destfile="${jar_output_dir}/jmodelica.jar">
   		<fileset dir="bin">
-  			<include name="org/jmodelica/applications/*.class"/> 
-  			<include name="org/jmodelica/codegen/*.class"/> 
-  			<include name="org/jmodelica/ast/*.class"/> 
-  			<include name="org/jmodelica/parser/*.class"/> 
-  			<include name="org/jmodelica/test/ast/*.class"/> 
-  			<include name="org/jmodelica/test/benchmarks/*.class"/> 
-  			<include name="org/jmodelica/interactive/*.class"/> 
+  			<include name="org/jmodelica/modelica/codegen/*.class"/> 
+  			<include name="org/jmodelica/modelica/ast/*.class"/> 
+  			<include name="org/jmodelica/modelica/parser/*.class"/> 
+  			<include name="org/jmodelica/modelica/test/*.class"/> 
   			<!-- <include name="beaver/*.class"/> --> 
   		</fileset>
   	 </jar>
     </target>
-
 	
   <target name="compile-ast" depends="gen,gen-parser">
 	<mkdir dir="bin"/>
@@ -104,8 +100,6 @@
     </jastadd>
   
  </target>
-
-
 
 	<target name="gen-parser">
 	
@@ -158,81 +152,79 @@
  <!-- TARGET gen-test -->
 	  <target name="gen-test" depends="build">
 	    <!-- Generates teests -->
-	  	<mkdir dir="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
+	  	<mkdir dir="${test_junit-gen_dir}/org/jmodelica/modelica/test/junitgenerated"/>
 	  	<java 
-	  		      classname="org.jmodelica.test.ast.JunitGenerator"
+	  		      classname="org.jmodelica.modelica.test.JunitGenerator"
 	  		      classpath=".:bin/jmodelica.jar:${beaver_dir}/lib/beaver.jar" 
 	  		      fork="true" 
 	  		      dir=".">
 	  		    	<arg value="src/test/modelica/NameTests.mo"/>
 	  		    	      <arg value="NameTests"/>
-	  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
+	  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/modelica/test/junitgenerated"/>
 	  		    </java>
 	  	<java 
-	  		      classname="org.jmodelica.test.ast.JunitGenerator"
+	  		      classname="org.jmodelica.modelica.test.JunitGenerator"
 	  		      classpath=".:bin/jmodelica.jar:${beaver_dir}/lib/beaver.jar" 
 	  		      fork="true" 
 	  		      dir=".">
 	  		    	<arg value="src/test/modelica/RedeclareTests.mo"/>
 	  		    	      <arg value="RedeclareTests"/>
-	  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
+	  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/modelica/test/junitgenerated"/>
 	  		    </java>
 	  	 <java 
-	  		  		      classname="org.jmodelica.test.ast.JunitGenerator"
+	  		  		      classname="org.jmodelica.modelica.test.JunitGenerator"
 	  		  		      classpath=".:bin/jmodelica.jar:${beaver_dir}/lib/beaver.jar" 
 	  		  		      fork="true" 
 	  		  		      dir=".">
 	  		  		    	<arg value="src/test/modelica/ModificationTests.mo"/>
 	  		  		    	      <arg value="ModificationTests"/>
-	  		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
+	  		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/modelica/test/junitgenerated"/>
 	  		    </java>
 	  	 <java 
-	  		  		      classname="org.jmodelica.test.ast.JunitGenerator"
+	  		  		      classname="org.jmodelica.modelica.test.JunitGenerator"
 	  		  		      classpath=".:bin/jmodelica.jar:${beaver_dir}/lib/beaver.jar" 
 	  		  		      fork="true" 
 	  		  		      dir=".">
 	  		  		    	<arg value="src/test/modelica/ConnectTests.mo"/>
 	  		  		    	      <arg value="ConnectTests"/>
-	  		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
+	  		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/modelica/test/junitgenerated"/>
 	  		    </java>
 	  	 <java 
- 		  		      classname="org.jmodelica.test.ast.JunitGenerator"
+ 		  		      classname="org.jmodelica.modelica.test.JunitGenerator"
  		  		      classpath=".:bin/jmodelica.jar:${beaver_dir}/lib/beaver.jar" 
  		  		      fork="true" 
  		  		      dir=".">
  		  		    	<arg value="src/test/modelica/CodeGenTests.mo"/>
  		  		    	      <arg value="CodeGenTests"/>
- 		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
+ 		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/modelica/test/junitgenerated"/>
  		    </java>
 	  	 <java 
- 		  		      classname="org.jmodelica.test.ast.JunitGenerator"
+ 		  		      classname="org.jmodelica.modelica.test.JunitGenerator"
  		  		      classpath=".:bin/jmodelica.jar:${beaver_dir}/lib/beaver.jar" 
  		  		      fork="true" 
  		  		      dir=".">
  		  		    	<arg value="src/test/modelica/TypeTests.mo"/>
  		  		    	      <arg value="TypeTests"/>
- 		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
+ 		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/modelica/test/junitgenerated"/>
  		    </java>
 	  	 <java 
-		  		      classname="org.jmodelica.test.ast.JunitGenerator"
+		  		      classname="org.jmodelica.modelica.test.JunitGenerator"
 		  		      classpath=".:bin/jmodelica.jar:${beaver_dir}/lib/beaver.jar" 
 		  		      fork="true" 
 		  		      dir=".">
 		  		    	<arg value="src/test/modelica/TransformCanonicalTests.mo"/>
 		  		    	      <arg value="TransformCanonicalTests"/>
-		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
+		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/modelica/test/junitgenerated"/>
 		    </java>
-
-	  	
 
 	  	<javac compiler="javac1.5" debug="true" destdir="bin" classpath="${junit_dir}/junit-4.5.jar" >
 	  		<src path="${test_junit-gen_dir}/"/>
-	  	    <include name = "org/jmodelica/test/junitgenerated/*.java"/>
+	  	    <include name = "org/jmodelica/modelica/test/junitgenerated/*.java"/>
 	  		<exclude name = "**/*.aj"/>
 	  	</javac>
 	  	<jar destfile="bin/junit-tests.jar">
 	  		<fileset dir="bin">
-	  			<include name="org/jmodelica/test/junitgenerated/*.class"/> 
+	  			<include name="org/jmodelica/modelica/test/junitgenerated/*.class"/> 
 	  		</fileset>
 	  	 </jar>
 	  </target>
@@ -262,7 +254,7 @@
   		
       <batchtest fork="yes" todir="doc/junit-reports">
       <fileset dir="${test_junit-gen_dir}/">
-        <include name="org/jmodelica/test/junitgenerated/*.java"/>
+        <include name="org/jmodelica/modelica/test/junitgenerated/*.java"/>
       </fileset>
     </batchtest> 
   	</junit>

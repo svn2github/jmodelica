@@ -15,7 +15,7 @@
 */
 
 
-package org.jmodelica.test.ast;
+package org.jmodelica.modelica.test;
 
 /**
  * @author jakesson

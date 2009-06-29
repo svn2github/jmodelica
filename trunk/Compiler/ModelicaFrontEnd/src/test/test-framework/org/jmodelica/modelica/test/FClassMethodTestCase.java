@@ -15,10 +15,10 @@
 */
 
 
-package org.jmodelica.test.ast;
-import org.jmodelica.parser.ModelicaParser;
-import org.jmodelica.parser.FlatModelicaParser;
-import org.jmodelica.ast.*;
+package org.jmodelica.modelica.test;
+import org.jmodelica.modelica.parser.ModelicaParser;
+import org.jmodelica.modelica.parser.FlatModelicaParser;
+import org.jmodelica.modelica.ast.*;
 import java.util.Collection;
 import java.lang.reflect.Method;
 

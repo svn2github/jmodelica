@@ -18,7 +18,7 @@
  *  \brief AbstractTag class.
  */
 
-package org.jmodelica.codegen;
+package org.jmodelica.modelica.codegen;
 
 import java.io.*;
 

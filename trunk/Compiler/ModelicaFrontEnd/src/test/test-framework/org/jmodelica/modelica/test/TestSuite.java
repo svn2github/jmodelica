@@ -15,9 +15,9 @@
 */
 
 
-package org.jmodelica.test.ast;
-import org.jmodelica.ast.*;
-import org.jmodelica.parser.*;
+package org.jmodelica.modelica.test;
+import org.jmodelica.modelica.ast.*;
+import org.jmodelica.modelica.parser.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -82,10 +82,10 @@ public class TestSuite {
 	
 	public void dumpJunit(String testFile, String dir) {
 		StringBuffer str = new StringBuffer();
-		str.append("package org.jmodelica.test.junitgenerated;\n\n");
+		str.append("package org.jmodelica.modelica.test.junitgenerated;\n\n");
 		str.append("import org.junit.*;\n");
 		str.append("import static org.junit.Assert.*;\n");
-		str.append("import org.jmodelica.test.ast.*;\n");
+		str.append("import org.jmodelica.modelica.test.*;\n");
 		str.append("\n");
 		str.append("public class " + name + " {\n\n");
 		str.append("  static TestSuite ts;\n\n");

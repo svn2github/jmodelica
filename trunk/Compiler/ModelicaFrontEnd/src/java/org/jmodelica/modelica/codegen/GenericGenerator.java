@@ -18,10 +18,10 @@
  *  \brief GenericGenerator class.
  */
 
-package org.jmodelica.codegen;
+package org.jmodelica.modelica.codegen;
 
 import java.io.*;
-import org.jmodelica.ast.*;
+import org.jmodelica.modelica.ast.*;
 
 /**
  * A generator class containing a basic set of tags which

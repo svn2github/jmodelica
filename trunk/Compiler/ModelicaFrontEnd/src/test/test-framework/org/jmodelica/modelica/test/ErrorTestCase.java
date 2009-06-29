@@ -14,11 +14,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.jmodelica.test.ast;
+package org.jmodelica.modelica.test;
 
-import org.jmodelica.parser.ModelicaParser;
-import org.jmodelica.parser.FlatModelicaParser;
-import org.jmodelica.ast.*;
+import org.jmodelica.modelica.parser.ModelicaParser;
+import org.jmodelica.modelica.parser.FlatModelicaParser;
+import org.jmodelica.modelica.ast.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;

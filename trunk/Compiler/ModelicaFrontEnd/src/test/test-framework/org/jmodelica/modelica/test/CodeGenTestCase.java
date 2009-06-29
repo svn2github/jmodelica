@@ -15,10 +15,10 @@
 */
 
 
-package org.jmodelica.test.ast;
-import org.jmodelica.parser.ModelicaParser;
-import org.jmodelica.parser.FlatModelicaParser;
-import org.jmodelica.ast.*;
+package org.jmodelica.modelica.test;
+import org.jmodelica.modelica.parser.ModelicaParser;
+import org.jmodelica.modelica.parser.FlatModelicaParser;
+import org.jmodelica.modelica.ast.*;
 
 import java.io.BufferedReader;
 import java.io.PrintStream;
@@ -26,7 +26,7 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.util.Collection;
 
-import org.jmodelica.codegen.*;
+import org.jmodelica.modelica.codegen.*;
 
 public abstract class CodeGenTestCase extends TestCase {
 	private String genCode = "";

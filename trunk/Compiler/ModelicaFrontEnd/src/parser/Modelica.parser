@@ -19,8 +19,8 @@
 %goal exp;
 
 %header {:
- package org.jmodelica.parser;
- import org.jmodelica.ast.*;
+ package org.jmodelica.modelica.parser;
+ import org.jmodelica.modelica.ast.*;
  import java.io.*;
  import java.util.Collection;
  import java.util.Map;

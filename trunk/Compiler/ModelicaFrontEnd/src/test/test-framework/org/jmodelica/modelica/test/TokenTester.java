@@ -17,14 +17,14 @@
 /**
  * 
  */
-package org.jmodelica.test.ast;
+package org.jmodelica.modelica.test;
 
-import org.jmodelica.ast.*;
-import org.jmodelica.parser.FlatModelicaParser.Terminals;
-import org.jmodelica.parser.FlatModelicaScanner;
-import org.jmodelica.parser.FlatModelicaParser;
-import org.jmodelica.parser.ModelicaScanner;
-import org.jmodelica.parser.ModelicaParser;
+import org.jmodelica.modelica.ast.*;
+import org.jmodelica.modelica.parser.FlatModelicaParser.Terminals;
+import org.jmodelica.modelica.parser.FlatModelicaScanner;
+import org.jmodelica.modelica.parser.FlatModelicaParser;
+import org.jmodelica.modelica.parser.ModelicaScanner;
+import org.jmodelica.modelica.parser.ModelicaParser;
 import java.io.StringReader;
 import java.io.FileReader;
 import java.io.Reader;

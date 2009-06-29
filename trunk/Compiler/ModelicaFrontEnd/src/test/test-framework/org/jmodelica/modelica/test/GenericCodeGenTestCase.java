@@ -15,9 +15,9 @@
 */
 
 
-package org.jmodelica.test.ast;
-import org.jmodelica.ast.*;
-import org.jmodelica.codegen.*;
+package org.jmodelica.modelica.test;
+import org.jmodelica.modelica.ast.*;
+import org.jmodelica.modelica.codegen.*;
 
 
 public class GenericCodeGenTestCase extends CodeGenTestCase {

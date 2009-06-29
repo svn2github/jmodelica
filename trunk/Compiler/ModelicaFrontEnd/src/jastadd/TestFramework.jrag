@@ -15,7 +15,7 @@
 */
 
 
-import org.jmodelica.test.ast.*;
+import org.jmodelica.modelica.test.*;
 
 aspect TestFramework {
 	
