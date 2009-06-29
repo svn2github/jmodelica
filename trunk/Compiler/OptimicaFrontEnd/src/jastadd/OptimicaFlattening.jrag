@@ -69,7 +69,6 @@ aspect OptimicaFlattening {
 			if (hasInstClassModification()) {
 				List attr = new List();
 				getInstClassModification().collectAttributes(attr,new FQName(new List()));
-				System.out.print("qwe: " + attr.getNumChild());
 				foc.setFAttributeList(attr);
 			}
 			return this;	
