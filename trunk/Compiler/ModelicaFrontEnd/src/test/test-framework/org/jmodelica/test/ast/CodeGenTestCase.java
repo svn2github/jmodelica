@@ -220,7 +220,7 @@ public abstract class CodeGenTestCase extends TestCase {
 		return templateOnFile;
 	}
 	
-	public void setTemplateOnFile(boolean resultOnFile) {
+	public void setTemplateOnFile(boolean templateOnFile) {
 		this.templateOnFile = templateOnFile;
 	}
 
