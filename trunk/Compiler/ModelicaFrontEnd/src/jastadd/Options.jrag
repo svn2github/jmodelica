@@ -112,9 +112,9 @@ aspect Options {
 		}
 	}
 
-	class ModelicaLibraryOption extends Option {
+	class ModelicaLibraryOption extends Option implements Iterable<ModelicaLibraryOption.LibrarySpec>  {
 		
-		class LibrarySpec {
+		public static class LibrarySpec {
 			String name;
 			String version;
 			String path;
@@ -124,6 +124,23 @@ aspect Options {
 				this.version = version;
 				this.path = path;
 			}
+		}
+		
+		public class Iterator implements java.util.Iterator<LibrarySpec> {
+			
+			private int i = 0;
+
+			public boolean hasNext() {
+				return i < libraries.size();
+			}
+
+			public LibrarySpec next() {
+				return libraries.get(i++);
+			}
+
+			public void remove() {
+				throw new UnsupportedOperationException();
+			} 
 		}
 	
 		protected ArrayList<LibrarySpec> libraries;
@@ -143,6 +160,10 @@ aspect Options {
 					return ls.path;
 			}
 			return null;
+		}
+
+		public java.util.Iterator<LibrarySpec> iterator() {
+			return new Iterator();
 		}
 	}
 	
@@ -165,25 +186,32 @@ aspect Options {
 		}
 		
 		public void addModelicaLibrary(String name, String version, String path) {
-			Option o = optionsMap.get("modelica_path");
-			if (o == null) {
-				createModelicaLibraryOption();
-			}
-			o = optionsMap.get("modelica_path");
-			((ModelicaLibraryOption)o).addLibrary(name,version,path);
-			
+			getModelicaLibraryOption(true).addLibrary(name,version,path);
 		}
 
-		public String getModelicaLibraryPath(String name, String version) {
+ 		public ModelicaLibraryOption getModelicaLibraryOption() {
+			return getModelicaLibraryOption(false);
+		}
+		
+		protected ModelicaLibraryOption getModelicaLibraryOption(boolean create) {
 			Option o = optionsMap.get("modelica_path");
 			if (o == null) {
-				throw new UnknownOptionException("Unknown option modelica_path");
+				if (create) {
+					createModelicaLibraryOption();
+					return (ModelicaLibraryOption) optionsMap.get("modelica_path");
+				} else {
+					throw new UnknownOptionException("Unknown option modelica_path");
+				}
 			} else if (o instanceof ModelicaLibraryOption) {
-				return ((ModelicaLibraryOption)o).getLibraryPath(name,version);
+				return (ModelicaLibraryOption) o;
 			} else {
 				throw new UnknownOptionException("Option: modelica_path is not of " +
 						"of the expected type");
 			}
+		}
+
+		public String getModelicaLibraryPath(String name, String version) {
+			return getModelicaLibraryOption().getLibraryPath(name,version);
 		}
 		
 		protected void createIntegerOption(String key, String description,
