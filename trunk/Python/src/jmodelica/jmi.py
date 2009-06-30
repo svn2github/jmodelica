@@ -1223,7 +1223,7 @@ class JMIModel(object):
     """A JMI Model loaded from a DLL."""
     
     def __init__(self, libname, path='.'):
-		"""Contructor."""
+        """Contructor."""
 		
         # detect platform specific shared library file extension
         suffix = ''
@@ -1408,7 +1408,7 @@ class JMIModel(object):
         if retval is not 0:
             raise JMIException("Getting sizes failed.")                     
         
-		l = [self._n_ci.value, self._n_cd.value, self._n_pi.value, self._n_pd.value, self._n_dx.value, 
+        l = [self._n_ci.value, self._n_cd.value, self._n_pi.value, self._n_pd.value, self._n_dx.value, 
              self._n_x.value, self._n_u.value, self._n_w.value, self._n_tp.value, self._n_z.value]
         return l
     
@@ -1432,7 +1432,7 @@ class JMIModel(object):
         if retval is not 0:
             raise JMIException("Getting offsets failed.")        
         
-		l = [self._offs_ci.value, self._offs_cd.value, self._offs_pi.value, self._offs_pd.value, 
+        l = [self._offs_ci.value, self._offs_cd.value, self._offs_pi.value, self._offs_pd.value, 
              self._offs_dx.value, self._offs_x.value, self._offs_u.value, self._offs_w.value, 
              self._offs_t.value, self._offs_dx_p.value, self._offs_x_p.value, self._offs_u_p.value, 
              self._offs_w_p.value]
@@ -1540,7 +1540,7 @@ class JMIModel(object):
         """Returns a reference to the dependent parameters vector."""
         return self._pd
         
-    def setD(sself, pd):
+    def setPD(sself, pd):
         """Sets the dependent parameters vector."""
         self._pd[:] = pd
         
