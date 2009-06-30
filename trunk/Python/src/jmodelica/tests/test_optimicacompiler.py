@@ -10,9 +10,9 @@ import jmodelica.optimicacompiler as oc
 
 
 jm_home = os.environ.get('JMODELICA_HOME')
-path_to_examples = r"\Python\jmodelica\examples"
+path_to_examples = os.sep+'Python'+os.sep+'jmodelica'+os.sep+'examples'
 
-model = r"\pendulum\Pendulum_pack.mo"
+model = os.sep+'pendulum'+os.sep+'Pendulum_pack.mo'
 fpath = jm_home+path_to_examples+model
 cpath = "Pendulum_pack.Pendulum_Opt"
 
