@@ -121,8 +121,8 @@ class JMIException(Exception):
 
 
 def fail_error_check(message):
-    """A ctypes errcheck that always fails.
-    """
+    """A ctypes errcheck that always fails."""
+	
     def fail(errmsg):
         raise JMIException(errmsg)
     
@@ -174,19 +174,14 @@ class _PointerToNDArrayConverter:
     
     """
     def __init__(self, shape, dtype, ndim=1, order=None):
-        """Set meta data about the array the returned pointer is
-        pointing to.
+        """Set meta data about the array the returned pointer is pointing to.
         
-        @param shape:
-            A tuple containing the shape of the array
-        @param dtype:
-            The data type that the function result points to.
-        @param ndim:
-            The optional number of dimensions that the result 
-            returns.
-        @param order (optional):
-            Optional. The same order parameter as can be used in
-            numpy.array(...).
+        Parameters:
+            shape -- a tuple containing the shape of the array
+            dtype -- the data type that the function result points to.
+            ndim  -- the optional number of dimensions that the result returns.
+            order (optional) -- the same order parameter as can be used in
+                                numpy.array(...).
         
         """
         assert ndim >= 1
@@ -227,10 +222,7 @@ class _PointerToNDArrayConverter:
 
 
 def _returns_ndarray(dll_func, dtype, shape, ndim=1, order=None):
-    """Helper function to set automatic conversion of DLL function
-    result to a NumPy ndarray.
-    
-    """       
+    """Sets automatic conversion to ndarray of DLL function results."""
     
     # Defining conversion function (actually a callable class)
     conv_function = _PointerToNDArrayConverter(shape=shape,
@@ -258,10 +250,11 @@ def load_DLL(libname, path):
     However, the first one is recommended as it is the most platform
     independent syntax.
     
-    @param libname Name of the librarym without prefix.
-    @param path    The relative or absolute path to the library.
+    Parameters:
+        libname -- name of the library without prefix.
+        path -- the relative or absolute path to the library.
     
-    @see http://docs.python.org/library/ct.html
+    See also http://docs.python.org/library/ct.html
     
     """
 
@@ -1163,28 +1156,25 @@ def load_DLL(libname, path):
 
 
 def load_model(filepath):
-    """ Returns a JMI model loaded from file.
+    """Returns a JMI model loaded from file filepath.
     
-    @param filepath The absolute or relative path to the model file to
-                    be loaded.
-    @return 
+    filepath can be both absolute or relative path to the model file to be
+    loaded.
     
     If the model cannot be loaded a JMIException will be raised.
-    
+	
     """
     dll = load_DLL(filepath)
 
 
 def _translate_value_ref(valueref):
-    """ 
-    Translate a ValueReference into variable type and index in z-vector.
+    """Translate a ValueReference into variable type and index in z-vector.
     
     Uses a value reference which is a 32 bit unsigned int to get type of 
     variable and index in vector using the protocol: bit 0-28 is index, 29-31 
     is primitive type.
         
     Parameters:
-    
         valueref -- 
             The value reference to translate.
             
@@ -1203,8 +1193,7 @@ def _translate_value_ref(valueref):
 _temp_dlls = []
 
 def _cleanup():
-    """ 
-    Remove all temporary dll files from file system on interpreter termination.
+    """Remove all temporary dll files from file system on interpreter termination.
     
     Helper function which removes all temporary dll files from the file system 
     which have been created by the JMIModel constructor and have not been 
@@ -1214,7 +1203,6 @@ def _cleanup():
     file names and handles created during the Python session. 
         
     """
-    
     for tmp in _temp_dlls:
         if os.access(tmp.get('name'),os.F_OK):
             try:
@@ -1232,9 +1220,11 @@ atexit.register(_cleanup)
 
 class JMIModel(object):
     
-    """ A JMI Model loaded from a DLL. """
+    """A JMI Model loaded from a DLL."""
     
     def __init__(self, libname, path='.'):
+		"""Contructor."""
+		
         # detect platform specific shared library file extension
         suffix = ''
         if sys.platform == 'win32':
@@ -1317,16 +1307,19 @@ class JMIModel(object):
         self.initAD()
         
     def resetModel(self):
-        """ Reset the initial values to the states when the model was
-            loaded into memory.
+        """Reset the internal states of the DLL.
+		
+		Calling this function is equivalent to reopening the model.
+		
         """
         self._setDefaultValuesFromMetadata()
         
     def _setDefaultValuesFromMetadata(self, libname=None, path=None):
-        """ Load metadata saved in XML files.
+        """Load metadata saved in XML files.
         
-            Meta data can be things like time points, initial states,
-            initial cost etc.
+        Meta data can be things like time points, initial states, initial cost
+        etc.
+		
         """
         if libname is None:
             libname = self._libname
@@ -1359,14 +1352,17 @@ class JMIModel(object):
     def initAD(self):
         """Initializing Algorithmic Differential package.
         
-            Raises a JMIException on failure.
+        Raises a JMIException on failure.
+		
         """
         if self._dll.jmi_ad_init(self._jmi) is not 0:
             raise JMIException("Could not initialize AD.")
                
     def __del__(self):
-        """ Freeing jmi data structure. Removing handle and 
-            deleting temporary dll file.
+        """DLL load cleanup function.
+        
+        Freeing jmi data structure. Removing handle and deleting temporary DLL
+        file if possible.
         
         """
         try:
@@ -1396,7 +1392,8 @@ class JMIModel(object):
         return self._get_XMLvariables_doc().get_variable_descriptions()
                
     def get_sizes(self):
-        """ Get and return a list of the sizes of the variable vectors. """
+        """Get and return a list of the sizes of the variable vectors."""
+		
         retval = self._dll.jmi_get_sizes(self._jmi,
                                  byref(self._n_ci),
                                  byref(self._n_cd),
@@ -1410,12 +1407,14 @@ class JMIModel(object):
                                  byref(self._n_z))
         if retval is not 0:
             raise JMIException("Getting sizes failed.")                     
-        l = [self._n_ci.value, self._n_cd.value, self._n_pi.value, self._n_pd.value, self._n_dx.value, 
+        
+		l = [self._n_ci.value, self._n_cd.value, self._n_pi.value, self._n_pd.value, self._n_dx.value, 
              self._n_x.value, self._n_u.value, self._n_w.value, self._n_tp.value, self._n_z.value]
         return l
     
     def get_offsets(self):
-        """ Get and return a list of the offsets for the variable types in the z vector. """
+        """Get and return a list of the offsets for the variable types in the z vector."""
+		
         retval = self._dll.jmi_get_offsets(self._jmi,
                                          byref(self._offs_ci),
                                          byref(self._offs_cd),
@@ -1432,54 +1431,52 @@ class JMIModel(object):
                                          byref(self._offs_w_p))
         if retval is not 0:
             raise JMIException("Getting offsets failed.")        
-        l = [self._offs_ci.value, self._offs_cd.value, self._offs_pi.value, self._offs_pd.value, 
+        
+		l = [self._offs_ci.value, self._offs_cd.value, self._offs_pi.value, self._offs_pd.value, 
              self._offs_dx.value, self._offs_x.value, self._offs_u.value, self._offs_w.value, 
              self._offs_t.value, self._offs_dx_p.value, self._offs_x_p.value, self._offs_u_p.value, 
              self._offs_w_p.value]
         return l
     
     def get_n_tp(self):
-        """ Get and return the number of time points in the model. """
+        """Get and return the number of time points in the model."""
         if self._dll.jmi_get_n_tp(self._jmi, byref(self._n_tp)) is not 0:
             raise JMIException("Getting number of time points in the model failed.")
         return self._n_tp.value
 
     def set_tp(self, tp):
-        """ 
-        Set the vector of time points. 
+        """Set the vector of time points. 
         
-        @todo:
+        Todo:
             Assert correct vector length.
         """
         if self._dll.jmi_set_tp(self._jmi, tp) is not 0:
             raise JMIException("Setting vector of time points failed.")
         
     def get_tp(self, tp):
-        """ Get and return the vector of time points. """
+        """Get and return the vector of time points."""
         if self._dll.jmi_get_tp(self._jmi, tp) is not 0:
             raise JMIException("Getting vector of time points failed.")
 
     def getX(self):
-        """ Return a reference to the differentiated variables vector. """
+        """Return a reference to the differentiated variables vector."""
         return self._x
         
     def setX(self, x):
-        """ Set the differentiated variables vector. """
+        """Set the differentiated variables vector."""
         self._x[:] = x
         
     x = property(getX, setX, "The differentiated variables vector.")
 
     def getX_P(self, i):
-        """ 
-        Return a reference to the differentiated variables vector corresponding 
-        to the i:th time point.
+        """Returns a reference to the differentiated variables vector
+        corresponding to the i:th time point.
         
         """
         return self._dll.jmi_get_x_p(self._jmi, i)
         
     def setX_P(self, new_x_p, i):
-        """ 
-        Set the differentiated variables vector corresponding to the i:th 
+        """Sets the differentiated variables vector corresponding to the i:th 
         time point. 
         
         """
@@ -1487,166 +1484,154 @@ class JMIModel(object):
         x_p[:] = new_x_p
     
     def getPI(self):
-        """ Return a reference to the independent parameters vector. """
+        """Returns a reference to the independent parameters vector."""
         return self._pi
         
     def setPI(self, pi):
-        """ Set the independent parameters vector. """
+        """Sets the independent parameters vector."""
         self._pi[:] = pi
         
     pi = property(getPI, setPI, "The independent parameter vector.")
 
     def getCD(self):
-        """ Return a reference to the dependent constants vector. """
+        """Returns a reference to the dependent constants vector."""
         return self._cd
         
     def setCD(self, cd):
-        """ Set the dependent constants vector. """
+        """Sets the dependent constants vector."""
         self._cd[:] = cd
         
     cd = property(getCD, setCD, "The dependent constants vector.")
 
     def getCI(self):
-        """ Return a reference to the independent constants vector. """
+        """Returns a reference to the independent constants vector."""
         return self._ci
         
     def setCI(self, ci):
-        """ Set the independent constants vector. """
+        """Sets the independent constants vector."""
         self._ci[:] = ci
         
     ci = property(getCI, setCI, "The independent constants vector.")
 
     def getDX(self):
-        """ Return a reference to the derivatives vector. """
+        """Returns a reference to the derivatives vector."""
         return self._dx
         
     def setDX(self, dx):
-        """ Set the derivatives vector. """
+        """Sets the derivatives vector."""
         self._dx[:] = dx
         
     dx = property(getDX, setDX, "The derivatives vector.")
 
     def getDX_P(self, i):
-        """ 
-        Return a reference to the derivatives variables vector corresponding to 
-        the i:th time point.
-            
+        """Returns a reference to the derivatives variables vector
+        corresponding to the i:th time point.
         """
         return self._dll.jmi_get_dx_p(self._jmi,i)
         
     def setDX_P(self, new_dx_p, i):
-        """ 
-        Set the derivatives variables vector corresponding to the i:th time 
-        point.
-        
+        """Sets the derivatives variables vector corresponding to the i:th
+        time point.
         """
         dx_p = self._dll.jmi_get_dx_p(self._jmi,i)
         dx_p[:] = new_dx_p
 
     def getPD(self):
-        """ Return a reference to the dependent parameters vector. """
+        """Returns a reference to the dependent parameters vector."""
         return self._pd
         
-    def setPD(self, pd):
-        """ Set the dependent parameters vector. """
+    def setD(sself, pd):
+        """Sets the dependent parameters vector."""
         self._pd[:] = pd
         
     pd = property(getPD, setPD, "The dependent paramenters vector.")
 
     def getU(self):
-        """ Return a reference to the inputs vector. """
+        """Returns a reference to the inputs vector."""
         return self._u
         
     def setU(self, u):
-        """ Set the inputs vector. """
+        """Sets the inputs vector."""
         self._u[:] = u
         
     u = property(getU, setU, "The inputs vector.")
 
     def getU_P(self, i):
-        """ 
-        Return a reference to the inputs vector corresponding to the i:th time 
+        """Returns a reference to the inputs vector corresponding to the i:th time 
         point.
-        
         """
         return self._dll.jmi_get_u_p(self._jmi, i)
         
     def setU_P(self, new_u_p, i):
-        """ Set the inputs vector corresponding to the i:th time point. """
+        """Sets the inputs vector corresponding to the i:th time point."""
         u_p = self._dll.jmi_get_u_p(self._jmi, i)
         u_p[:] = new_u_p
 
     def getW(self):
-        """ Return a reference to the algebraic variables vector. """
+        """Returns a reference to the algebraic variables vector."""
         return self._w
         
     def setW(self, w):
-        """ Set the algebraic variables vector. """
+        """Sets the algebraic variables vector."""
         self._w[:] = w
         
     w = property(getW, setW, "The algebraic variables vector.")
 
     def getW_P(self, i):
-        """ 
-        Return a reference to the algebraic variables vector corresponding to 
+        """Returns a reference to the algebraic variables vector corresponding to 
         the i:th time point.
-            
         """
         return self._dll.jmi_get_w_p(self._jmi, i)
         
     def setW_P(self, new_w_p, i):
-        """ 
-        Set the algebraic variables vector corresponding to the i:th time 
+        """Sets the algebraic variables vector corresponding to the i:th time 
         point.
-        
         """
         w_p = self._dll.jmi_get_w_p(self._jmi, i)
         w_p[:] = new_w_p
 
     def getT(self):
-        """ Return a reference to the time value.
+        """Returns a reference to the time value.
         
-            @note:
-                getT returns a NumPy array of length 1.
+        The return value is a NumPy array of length 1.
         """
         return self._t
         
     def setT(self, t):
-        """ Set the time value.
+        """Sets the time value.
         
-            @note:
-                Parameter t must be a NumPy array of length 1.
+        Parameter t must be a NumPy array of length 1.
         """
         self._t[:] = t
         
     t = property(getT, setT, "The time value.")
     
     def getZ(self):
-        """ 
-        Return a reference to the vector containing all parameters, variables 
-        and point-wise evalutated variables vector.
-            
+        """Returns a reference to the vector containing all parameters,
+        variables and point-wise evalutated variables vector.
         """
         return self._z
         
     def setZ(self, z):
-        """ 
-        Set the vector containing all parameters, variables and point-wise 
+        """Sets the vector containing all parameters, variables and point-wise 
         evalutated variables vector.
-            
         """
         self._z[:] = z
         
     z = property(getZ, setZ, "All parameters, variables and point-wise evaluated variables vector.")   
     
     def ode_f(self):
-        """ Evalutate the right hand side of the ODE. """
+        """Evalutates the right hand side of the ODE.
+		
+		The results is saved to the internal states and can be accessed by
+		accessing 'my_model.x'.
+		
+		"""
         if self._dll.jmi_ode_f(self._jmi) is not 0:
             raise JMIException("Evaluating ODE failed.")
         
     def ode_df(self, eval_alg, sparsity, independent_vars, jac, mask=None):
-        """ 
-        Evaluate the Jacobian of the right hand side of the ODE.
+        """Evaluates the Jacobian of the right hand side of the ODE.
         
         Parameters:
             eval_alg -- 
@@ -1656,17 +1641,21 @@ class JMIModel(object):
                Output format of the Jacobian. Use JMI_DER_SPARSE, 
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
-                Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                Indicates which columns of the full Jacobian should be
+                evaluated (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
             jac --
                 The Jacobian. (Return)
-                
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
+				
         """
         if mask is None:
             mask = N.ones(self._n_z.value, dtype=int)
@@ -1679,9 +1668,8 @@ class JMIModel(object):
             raise JMIException("Evaluation of Jacobian failed.")
     
     def ode_df_n_nz(self, eval_alg):
-        """ 
-        Get the number of non-zeros in the Jacobian of the right hand side of 
-        the ODE.
+        """Get the number of non-zeros in the Jacobian of the right hand side
+        of the ODE.
         
         Parameters:
             eval_alg --
@@ -1690,7 +1678,7 @@ class JMIModel(object):
                 
         Returns:
             The number of non-zero Jacobian entries.
-            
+			
         """
         n_nz = ct.c_int()
         if self._dll.jmi_ode_df_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
@@ -1698,8 +1686,7 @@ class JMIModel(object):
         return n_nz.value
     
     def ode_df_nz_indices(self, eval_alg, independent_vars, mask, row, col):
-        """ 
-        Get the row and column indices of the non-zero elements in the 
+        """Get the row and column indices of the non-zero elements in the 
         Jacobian of the right hand side of the ODE.
         
         Parameters:
@@ -1708,19 +1695,22 @@ class JMIModel(object):
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
             row --
                 Row indices of the non-zeros in the Jacobian. (Return)
             col --
                 Column indices of the non-zeros in the Jacobian. (Return)
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
-
+				
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -1730,9 +1720,8 @@ class JMIModel(object):
             raise JMIException("Getting row and column indices failed.")
     
     def ode_df_dim(self, eval_alg, sparsity, independent_vars, mask):
-        """ 
-        Return the number of columns and non-zero elements in the Jacobian of 
-        the right hand side of the ODE.
+        """Return the number of columns and non-zero elements in the Jacobian
+        of the right hand side of the ODE.
         
         Parameters:
             eval_alg -- 
@@ -1743,19 +1732,22 @@ class JMIModel(object):
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
        
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
-
+			
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -1768,26 +1760,24 @@ class JMIModel(object):
         return df_n_cols.value, df_n_nz.value
     
     def dae_get_sizes(self):
-        """ Return the number of equations of the DAE. """
+        """Returns the number of equations of the DAE."""
         n_eq_F = ct.c_int
         if self._dll.jmi_dae_get_sizes(self._jmi, byref(n_eq_F)) is not 0:
             raise JMIException("Getting number of equations failed.")
         return n_eq_F.value
     
     def dae_F(self, res):
-        """ 
-        Evaluate the DAE residual.
+        """Evaluates the DAE residual.
         
         Parameters:
             res -- DAE residual vector. (Return)
-            
+			
         """
         if self._dll.jmi_dae_F(self._jmi, res) is not 0:
             raise JMIException("Evaluating the DAE residual failed.")
     
     def dae_dF(self, eval_alg, sparsity, independent_vars, jac, mask=None):
-        """ 
-        Evaluate the Jacobian of the DAE residual function.
+        """Evaluate the Jacobian of the DAE residual function.
         
         Parameters:
             eval_alg -- 
@@ -1798,17 +1788,20 @@ class JMIModel(object):
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
             jac --
-                The Jacobian. (Return) 
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
-
+                The Jacobian. (Return)
+				
         """
         if mask is None:
             mask = N.ones(self._n_z.value, dtype=int)
@@ -1821,8 +1814,7 @@ class JMIModel(object):
             raise JMIException("Evaluating the Jacobian failed.")
     
     def dae_dF_n_nz(self, eval_alg):
-        """ 
-        Get the number of non-zeros in the full DAE residual Jacobian.
+        """Get the number of non-zeros in the full DAE residual Jacobian.
 
         Parameters:
             eval_alg --
@@ -1831,7 +1823,7 @@ class JMIModel(object):
                 
         Returns:
             The number of non-zero Jacobian entries.
-        
+			
         """
         n_nz = ct.c_int
         if self._dll.jmi_dae_dF_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
@@ -1839,8 +1831,8 @@ class JMIModel(object):
         return n_nz.value
     
     def dae_dF_nz_indices(self, eval_alg, independent_vars, mask, row, col):
-        """ Returns the row and column indices of the non-zero elements in the 
-            DAE residual Jacobian.
+        """Returns the row and column indices of the non-zero elements in the
+        DAE residual Jacobian.
         
         Parameters:
             eval_alg -- 
@@ -1848,19 +1840,24 @@ class JMIModel(object):
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
             row --
-                Row indices of the non-zeros in the DAE residual Jacobian. (Return)
+                Row indices of the non-zeros in the DAE residual Jacobian.
+                (Return)
             col --
-                Column indices of the non-zeros in the DAE residual Jacobian. (Return)
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
-
+                Column indices of the non-zeros in the DAE residual Jacobian.
+                (Return)
+				
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -1870,8 +1867,7 @@ class JMIModel(object):
             raise JMIException("Getting the row and column indices failed.")
     
     def dae_dF_dim(self, eval_alg, sparsity, independent_vars, mask):
-        """ 
-        Get the number of columns and non-zero elements in the Jacobian of 
+        """Get the number of columns and non-zero elements in the Jacobian of 
         the DAE residual.
         
         Parameters:
@@ -1883,19 +1879,22 @@ class JMIModel(object):
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
         
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
-
+			
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -1908,12 +1907,11 @@ class JMIModel(object):
         return dF_n_cols.value, dF_n_nz.value
     
     def init_get_sizes(self):
-        """ 
-        Get the number of equations in the DAE initialization functions.
+        """Gets the number of equations in the DAE initialization functions.
         
         Returns:
             The number of equations in F0, F1 and Fp resp.
-            
+			
         """
         n_eq_f0 = ct.c_int
         n_eq_f1 = ct.c_int
@@ -1923,19 +1921,18 @@ class JMIModel(object):
         return n_eq_f0.value, n_eq_f1.value, n_eq_fp.value
     
     def init_F0(self, res):
-        """ 
-        Evaluate the F0 residual function of the initialization system.
+        """Evaluates the F0 residual function of the initialization system.
         
         Parameters:
             res -- The residual of F0.
-            
+			
         """
         if self._dll.jmi_init_F0(self._jmi, res) is not 0:
             raise JMIException("Evaluating the F0 residual function failed.")
         
     def init_dF0(self, eval_alg, sparsity, independent_vars, jac, mask=None):
-        """ 
-        Evaluate the Jacobian of the DAE initialization residual function F0.
+        """Evaluates the Jacobian of the DAE initialization residual function
+        F0.
         
         Parameters:
             eval_alg -- 
@@ -1945,19 +1942,23 @@ class JMIModel(object):
                Output format of the Jacobian. Use JMI_DER_SPARSE, 
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
-                Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                Indicates which columns of the full Jacobian should be
+                evaluated (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
             jac --
-                The Jacobian. (Return) 
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
-                
+                The Jacobian. (Return)
+				 
         """
+		
         if mask is None:
             mask = N.ones(self._n_z.value, dtype=int)
         
@@ -1969,8 +1970,7 @@ class JMIModel(object):
             raise JMIException("Evaluating the Jacobian failed.")
     
     def init_dF0_n_nz(self, eval_alg):
-        """ 
-        Get the number of non-zeros in the full Jacobian of the DAE 
+        """Get the number of non-zeros in the full Jacobian of the DAE 
         initialization residual function F0.
         
         Parameters:
@@ -1980,7 +1980,7 @@ class JMIModel(object):
                 
         Returns:
             The number of non-zero Jacobian entries in the full Jacobian.
-
+			
         """
         n_nz = ct.c_int
         if self._dll.jmi_init_dF0_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
@@ -1988,9 +1988,8 @@ class JMIModel(object):
         return n_nz.value
     
     def init_dF0_nz_indices(self, eval_alg, independent_vars, mask, row, col):
-        """ 
-        Get the row and column indices of the non-zero elements in the Jacobian 
-        of the DAE initialization residual function F0.
+        """Get the row and column indices of the non-zero elements in the
+        Jacobian of the DAE initialization residual function F0.
         
         Parameters:
             eval_alg -- 
@@ -1998,19 +1997,22 @@ class JMIModel(object):
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
             row --
                 Row indices of the non-zeros in the Jacobian. (Return)
             col --
                 Column indices of the non-zeros in the Jacobian. (Return)
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
-
+				
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2020,9 +2022,8 @@ class JMIModel(object):
             raise JMIException("Getting the row and column indices failed.")
     
     def init_dF0_dim(self, eval_alg, sparsity, independent_vars, mask):
-        """ 
-        Get the number of columns and non-zero elements in the Jacobian of the 
-        DAE initialization residual function F0.
+        """Get the number of columns and non-zero elements in the Jacobian of
+        the DAE initialization residual function F0.
         
         Parameters:
             eval_alg -- 
@@ -2033,19 +2034,15 @@ class JMIModel(object):
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
+                (for example JMI_DER_DX or JMI_DER_X).
             mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
 
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
-        
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
-
+			
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2058,19 +2055,18 @@ class JMIModel(object):
         return dF_n_cols.value, dF_n_nz.value
 
     def init_F1(self, res):
-        """ 
-        Evaluate the F1 residual function of the initialization system.
+        """Evaluates the F1 residual function of the initialization system.
         
         Parameters:
             res -- The residual of F1.
-            
+			
         """
         if self._dll.jmi_init_F1(self._jmi, res) is not 0:
             raise JMIException("Evaluating the F1 residual function failed.")            
         
     def init_dF1(self, eval_alg, sparsity, independent_vars, jac, mask=None):
-        """ 
-        Evaluate the Jacobian of the DAE initialization residual function F1.
+        """Evaluates the Jacobian of the DAE initialization residual function
+        F1.
         
         Parameters:
             eval_alg -- 
@@ -2081,18 +2077,22 @@ class JMIModel(object):
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
             jac --
-                The Jacobian. (Return) 
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
-                
+                The Jacobian. (Return)    
+				
         """
+		
         if mask is None:
             mask = N.ones(self._n_z.value, dtype=int)
         
@@ -2104,8 +2104,7 @@ class JMIModel(object):
             raise JMIException("Evaluating the Jacobian failed.")
     
     def init_dF1_n_nz(self, eval_alg):
-        """ 
-        Get the number of non-zeros in the full Jacobian of the DAE 
+        """Get the number of non-zeros in the full Jacobian of the DAE 
         initialization residual function F1.
         
         Parameters:
@@ -2115,7 +2114,7 @@ class JMIModel(object):
                 
         Returns:
             The number of non-zero Jacobian entries in the full Jacobian.
-
+			
         """
         n_nz = ct.c_int
         if self._dll.jmi_init_dF1_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
@@ -2123,9 +2122,8 @@ class JMIModel(object):
         return n_nz.value
     
     def init_dF1_nz_indices(self, eval_alg, independent_vars, mask, row, col):
-        """ 
-        Get the row and column indices of the non-zero elements in the Jacobian 
-        of the DAE initialization residual function F1.
+        """Get the row and column indices of the non-zero elements in the
+        Jacobian of the DAE initialization residual function F1.
         
         Parameters:
             eval_alg -- 
@@ -2133,19 +2131,22 @@ class JMIModel(object):
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
             row --
                 Row indices of the non-zeros in the Jacobian. (Return)
             col --
                 Column indices of the non-zeros in the Jacobian. (Return)
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
-
+				
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2156,9 +2157,8 @@ class JMIModel(object):
             raise JMIException("Getting the row and column indices failed.")
     
     def init_dF1_dim(self, eval_alg, sparsity, independent_vars, mask):
-        """ 
-        Get the number of columns and non-zero elements in the Jacobian of the 
-        DAE initialization residual function F1.
+        """Get the number of columns and non-zero elements in the Jacobian of
+        the DAE initialization residual function F1.
         
         Parameters:
             eval_alg -- 
@@ -2169,19 +2169,22 @@ class JMIModel(object):
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
 
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
-        
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
-
+			
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2194,19 +2197,18 @@ class JMIModel(object):
         return dF_n_cols.value, dF_n_nz.value
  
     def init_Fp(self, res):
-        """ 
-        Evaluate the Fp residual function of the initialization system.
+        """Evaluates the Fp residual function of the initialization system.
         
         Parameters:
             res -- The residual of Fp.
-            
+			
         """
         if self._dll.jmi_init_Fp(self._jmi, res) is not 0:
             raise JMIException("Evaluating the Fp residual function failed.")
         
     def init_dFp(self, eval_alg, sparsity, independent_vars, jac, mask=None):
-        """ 
-        Evaluate the Jacobian of the DAE initialization residual function F1.
+        """Evaluates the Jacobian of the DAE initialization residual function
+        F1.
         
         Parameters:
             eval_alg -- 
@@ -2217,17 +2219,20 @@ class JMIModel(object):
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
             jac --
-                The Jacobian. (Return) 
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
-                
+                The Jacobian. (Return)
+				
         """
         if mask is None:
             mask = N.ones(self._n_z.value, dtype=int)
@@ -2241,8 +2246,7 @@ class JMIModel(object):
             raise JMIException("Evaluating the Jacobian failed.")
     
     def init_dFp_n_nz(self, eval_alg):
-        """ 
-        Get the number of non-zeros in the full Jacobian of the DAE 
+        """Get the number of non-zeros in the full Jacobian of the DAE 
         initialization residual function Fp.
         
         Parameters:
@@ -2252,7 +2256,7 @@ class JMIModel(object):
                 
         Returns:
             The number of non-zero Jacobian entries in the full Jacobian.
-
+			
         """
         n_nz = ct.c_int
         if self._dll.jmi_init_dFp_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
@@ -2260,8 +2264,7 @@ class JMIModel(object):
         return n_nz.value
     
     def init_dFp_nz_indices(self, eval_alg, independent_vars, mask, row, col):
-        """ 
-        Get the row and column indices of the non-zero elements in the Jacobian 
+        """Get the row and column indices of the non-zero elements in the Jacobian 
         of the DAE initialization residual function Fp.
         
         Parameters:
@@ -2270,19 +2273,22 @@ class JMIModel(object):
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
             row --
                 Row indices of the non-zeros in the Jacobian. (Return)
             col --
                 Column indices of the non-zeros in the Jacobian. (Return)
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
-
+				
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2292,9 +2298,8 @@ class JMIModel(object):
             raise JMIException("Getting the row and column indices failed.")
     
     def init_dFp_dim(self, eval_alg, sparsity, independent_vars, mask):
-        """ 
-        Get the number of columns and non-zero elements in the Jacobian of the 
-        DAE initialization residual function Fp.
+        """Get the number of columns and non-zero elements in the Jacobian of
+        the DAE initialization residual function Fp.
         
         Parameters:
             eval_alg -- 
@@ -2305,19 +2310,21 @@ class JMIModel(object):
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
-        
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
-
+			
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2330,28 +2337,26 @@ class JMIModel(object):
         return dF_n_cols.value, dF_n_nz.value
     
     def opt_set_optimization_interval(self, start_time, start_time_free, final_time, final_time_free):
-        """ 
-        Set the optimization interval.
+        """Set the optimization interval.
         
         Parameters:
             start_time -- Start time of optimization interval.
             start_time_free -- 0 if start time should be fixed or 1 if free.
             final_time -- Final time of optimization interval.
             final_time_free -- 0 if final time should be fixed or 1 if free.
-        
+			
         """
         if self._dll.jmi_opt_set_optimization_interval(self._jmi, start_time, start_time_free, final_time, final_time_free) is not 0:
             raise JMIException("Setting the optimization interval failed.")
         
     def opt_get_optimization_interval(self):
-        """ 
-        Get the optimization interval.
+        """Gets the optimization interval.
         
         Returns:
             Tuple with: start time of optimization interval, 0 if start time is 
             fixed and 1 if free, final time of optimization interval, 0 if final 
             time is fixed and 1 if free respectively. 
-            
+			
         """
         start_time = ct.c_double()
         start_time_free = ct.c_int()
@@ -2374,15 +2379,14 @@ class JMIModel(object):
             raise JMIException("Specifing optimization parameters failed.")
         
     def opt_get_n_p_opt(self):
-        """ Return the number of optimization parameters. """
+        """Return the number of optimization parameters."""
         n_p_opt = ct.c_int()
         if self._dll.jmi_opt_get_n_p_opt(self._jmi, byref(n_p_opt)) is not 0:
             raise JMIException("Getting the number of optimization parameters failed.")
         return n_p_opt.value
         
     def opt_get_p_opt_indices(self, p_opt_indices):
-        """ 
-        Get the optimization parameter indices.
+        """Get the optimization parameter indices.
         
         Parameters:    
             p_opt_indices -- Indices of parameters to be optimized. (Return)
@@ -2392,8 +2396,7 @@ class JMIModel(object):
             raise JMIException("Getting the optimization parameters failed.")
         
     def opt_get_sizes(self):
-        """ 
-        Get the sizes of the optimization functions.
+        """Get the sizes of the optimization functions.
         
         Returns:
             Tuple with number of equations in the Ceq, Cineq, Heq and Hineq 
@@ -2409,15 +2412,14 @@ class JMIModel(object):
         return n_eq_Ceq.value, n_eq_Cineq.value, n_eq_Heq.value, n_eq_Hineq.value
         
     def opt_J(self):
-        """ Evaluate the cost function J. """
+        """Evaluate the cost function J."""
         J = N.zeros(1, dtype=c_jmi_real_t)
         if self._dll.jmi_opt_J(self._jmi, J) is not 0:
             raise JMIException("Evaluation of J failed.")
         return J[0]
         
     def opt_dJ(self, eval_alg, sparsity, independent_vars, jac, mask=None):
-        """ 
-        Evaluate the gradient of the cost function.
+        """Evaluate the gradient of the cost function.
         
         Parameters:
             eval_alg -- 
@@ -2428,18 +2430,22 @@ class JMIModel(object):
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
             jac --
                 The gradient. (Return)
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
                 
         """
+		
         if mask is None:
             mask = N.ones(self._n_z.value, dtype=int)
         
@@ -2451,8 +2457,7 @@ class JMIModel(object):
             raise JMIException("Evaluation of the gradient of the cost function failed.")
         
     def opt_dJ_n_nz(self, eval_alg):
-        """ 
-        Get the number of non-zeros in the gradient of the cost function J.
+        """Get the number of non-zeros in the gradient of the cost function J.
         
         Parameters:
             eval_alg --
@@ -2469,8 +2474,7 @@ class JMIModel(object):
         return n_nz.value
         
     def opt_dJ_nz_indices(self, eval_alg, independent_vars, mask, row, col):
-        """ 
-        Get the row and column indices of the non-zero elements in the gradient 
+        """Get the row and column indices of the non-zero elements in the gradient 
         of the cost function J.
         
         Parameters:
@@ -2479,18 +2483,21 @@ class JMIModel(object):
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
             row --
                 Row indices of the non-zeros in the gradient. (Return)
             col --
                 Column indices of the non-zeros in the gradient. (Return)
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
 
         """
         try:
@@ -2501,9 +2508,8 @@ class JMIModel(object):
             raise JMIException("Getting the row and column indices failed.")        
         
     def opt_dJ_dim(self, eval_alg, sparsity, independent_vars, mask):
-        """ 
-        Compute the number of columns and non-zero elements in the gradient of 
-        the cost function.
+        """Compute the number of columns and non-zero elements in the gradient
+        of the cost function.
         
         Parameters:
             eval_alg -- 
@@ -2514,20 +2520,24 @@ class JMIModel(object):
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
         
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
 
         """
+		
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
@@ -2540,8 +2550,7 @@ class JMIModel(object):
         return dF_n_cols.value, dF_n_nz.value
         
     def opt_Ceq(self, res):
-        """ 
-        Evaluate the residual of the equality path constraint Ceq.
+        """Evaluate the residual of the equality path constraint Ceq.
         
         Parameters:
             res -- The residual.
@@ -2551,8 +2560,7 @@ class JMIModel(object):
             raise JMIException("Evaluation of the residual of the equality path constraint Ceq failed.")
         
     def opt_dCeq(self, eval_alg, sparsity, independent_vars, jac, mask=None):
-        """ 
-        Evaluate the Jacobian of the equality path constraint Ceq.
+        """Evaluate the Jacobian of the equality path constraint Ceq.
         
         Parameters:
             eval_alg -- 
@@ -2563,16 +2571,19 @@ class JMIModel(object):
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
             jac --
                 The Jacobian. (Return)
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
         
         """
         if mask is None:
@@ -2587,8 +2598,7 @@ class JMIModel(object):
             raise JMIException("Evaluation of the Jacobian of the equality path constraint Ceq failed.")
         
     def opt_dCeq_n_nz(self, eval_alg):
-        """ 
-        Get the number of non-zeros in the full Jacobian of the equality path 
+        """Get the number of non-zeros in the full Jacobian of the equality path 
         constraint Ceq.
         
         Parameters:
@@ -2606,8 +2616,7 @@ class JMIModel(object):
         return n_nz.value
         
     def opt_dCeq_nz_indices(self, eval_alg, independent_vars, mask, row, col):
-        """ 
-        Get the row and column indices of the non-zero elements in the Jacobian 
+        """Get the row and column indices of the non-zero elements in the Jacobian 
         of the equality path constraint residual Ceq.
         
         Parameters:
@@ -2616,18 +2625,21 @@ class JMIModel(object):
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
             row --
                 Row indices of the non-zeros in the Jacobian. (Return)
             col --
                 Column indices of the non-zeros in the Jacobian. (Return)
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
 
         """
         try:
@@ -2638,8 +2650,7 @@ class JMIModel(object):
             raise JMIException("Getting the row and column indices failed.")
         
     def opt_dCeq_dim(self, eval_alg, sparsity, independent_vars, mask):
-        """ 
-        Compute the number of columns and non-zero elements in the Jacobian of 
+        """Compute the number of columns and non-zero elements in the Jacobian of 
         the equality path constraint residual function Ceq.
         
         Parameters:
@@ -2651,14 +2662,17 @@ class JMIModel(object):
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
         
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
@@ -2677,8 +2691,7 @@ class JMIModel(object):
         return dF_n_cols.value, dF_n_nz.value
         
     def opt_Cineq(self, res):
-        """ 
-        Evaluate the residual of the inequality path constraint Cineq.
+        """Evaluate the residual of the inequality path constraint Cineq.
         
         Parameters:
             res -- The residual.        
@@ -2688,8 +2701,7 @@ class JMIModel(object):
             raise JMIException("Evaluating the residual of the inequality path constraint Cineq failed.")
         
     def opt_dCineq(self, eval_alg, sparsity, independent_vars, jac, mask=None):
-        """ 
-        Evaluate the Jacobian of the inequality path constraint Cineq.
+        """Evaluate the Jacobian of the inequality path constraint Cineq.
         
         Parameters:
             eval_alg -- 
@@ -2700,18 +2712,22 @@ class JMIModel(object):
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
             jac --
                 The Jacobian. (Return)
 
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
-
         """
+		
         if mask is None:
             mask = N.ones(self._n_z.value, dtype=int)
         
@@ -2724,8 +2740,7 @@ class JMIModel(object):
             raise JMIException("Evaluating the Jacobian of the inequality path constraint Cineq failed.")
         
     def opt_dCineq_n_nz(self, eval_alg):
-        """ 
-        Get the number of non-zeros in the full Jacobian of the inequality path 
+        """Get the number of non-zeros in the full Jacobian of the inequality path 
         constraint Cineq.
         
         Parameters:
@@ -2743,8 +2758,7 @@ class JMIModel(object):
         return n_nz.value
         
     def opt_dCineq_nz_indices(self, eval_alg, independent_vars, mask, row, col):
-        """ 
-        Get the row and column indices of the non-zero elements in the Jacobian 
+        """Get the row and column indices of the non-zero elements in the Jacobian 
         of the inequality path constraint residual Cineq.
         
         Parameters:
@@ -2762,10 +2776,6 @@ class JMIModel(object):
             col --
                 Column indices of the non-zeros in the Jacobian. (Return)
 
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
-
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2775,8 +2785,7 @@ class JMIModel(object):
             raise JMIException("Getting the row and column indices failed.")
         
     def opt_dCineq_dim(self, eval_alg, sparsity, independent_vars, mask):
-        """ 
-        Compute the number of columns and non-zero elements in the Jacobian of 
+        """Compute the number of columns and non-zero elements in the Jacobian of 
         the inequality path constraint residual function Cineq.
         
         Parameters:
@@ -2788,14 +2797,17 @@ class JMIModel(object):
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
         
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
@@ -2813,8 +2825,7 @@ class JMIModel(object):
         return dF_n_cols.value, dF_n_nz.value
 
     def opt_Heq(self, res):
-        """ 
-        Evaluate the residual of the equality point constraint Heq.
+        """Evaluate the residual of the equality point constraint Heq.
         
         Parameters:
             res -- The residual.        
@@ -2824,8 +2835,7 @@ class JMIModel(object):
             raise JMIException("Evaluating the residual of the equality point constraint Heq failed.")
         
     def opt_dHeq(self, eval_alg, sparsity, independent_vars, jac, mask=None):
-        """ 
-        Evaluate the Jacobian of the equality point constraint Heq.
+        """Evaluate the Jacobian of the equality point constraint Heq.
         
         Parameters:
             eval_alg -- 
@@ -2836,16 +2846,19 @@ class JMIModel(object):
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
             jac --
                 The Jacobian. (Return)
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
 
         """
         if mask is None:
@@ -2888,18 +2901,21 @@ class JMIModel(object):
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
             row --
                 Row indices of the non-zeros in the Jacobian. (Return)
             col --
                 Column indices of the non-zeros in the Jacobian. (Return)
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
 
         """
         try:
@@ -2923,14 +2939,17 @@ class JMIModel(object):
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
         
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
@@ -2971,16 +2990,19 @@ class JMIModel(object):
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
             jac --
                 The Jacobian. (Return)
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
 
         """
         if mask is None:
@@ -3023,18 +3045,21 @@ class JMIModel(object):
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
             row --
                 Row indices of the non-zeros in the Jacobian. (Return)
             col --
                 Column indices of the non-zeros in the Jacobian. (Return)
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
 
         """
         try:
@@ -3059,14 +3084,17 @@ class JMIModel(object):
                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
-                (JMI_DER_DX or JMI_DER_X).
-            mask --
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask (optional) --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-
-        @param independent_vars: Can either be a bitmask or a list of numbers 
-        that whould be preprocessed using the | operator. Using a list is more 
-        prefered as it is more Pythonesque.
+				
+				If this one is not specified the mask is all ones and the
+				evaluations are only based on independent_vars.
         
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
