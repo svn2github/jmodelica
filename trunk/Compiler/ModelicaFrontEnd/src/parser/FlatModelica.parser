@@ -24,7 +24,7 @@
 
 %header {:
  package org.jmodelica.modelica.parser;
- import org.jmodelica.modelica.ast.*;
+ import org.jmodelica.modelica.compiler.*;
  import java.io.*;
 :};
 %embed {:

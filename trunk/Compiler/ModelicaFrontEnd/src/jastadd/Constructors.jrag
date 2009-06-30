@@ -14,7 +14,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import org.jmodelica.modelica.parser.*;
 
 aspect Constructors {
 
@@ -46,8 +45,9 @@ aspect Constructors {
 		Exp bexp_ast=null;
 		
 		if (!bexp.equals("")) {
-		    ModelicaParser mp = new ModelicaParser();
-			bexp_ast = mp.parseExpString(bexp);	
+		    //ModelicaParser mp = new ModelicaParser();
+			//bexp_ast = mp.parseExpString(bexp);
+			bexp_ast = root().parseExpString(bexp);
 			//debugPrint("ComponentDecl.ComponentDecl");
 			//bexp_ast.dumpTreeBasic("");	
 		    this.setModification(new ValueModification(bexp_ast));

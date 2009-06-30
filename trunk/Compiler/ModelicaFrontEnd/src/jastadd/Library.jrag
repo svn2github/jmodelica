@@ -81,7 +81,7 @@ aspect Library {
 				
 				if (package_mo_present) {
 				    System.out.println("Reading file: " + dirName+"/package.mo...");
-		   			SourceRoot sr = root().modelicaParser().parseFile(dirName+"/package.mo");
+		   			SourceRoot sr = root().parseFile(dirName+"/package.mo");
 		   			FullClassDecl fcd = (FullClassDecl)sr.getProgram().getUnstructuredEntity(0).getElement(0);
 		   			sr.getProgram().getUnstructuredEntity(0).setFileName(dirName+"/package.mo");
 		   			LibClassDecl lcd = new LibClassDecl(fcd);
@@ -150,7 +150,7 @@ aspect Library {
 		} else {
 			try {
 				System.out.println("Reading file: " + getFileName() + "...");
-				SourceRoot sr = root().modelicaParser().parseFile(getFileName());
+				SourceRoot sr = root().parseFile(getFileName());
 				for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
 					sd.setFileName(getFileName());
 				}

@@ -14,18 +14,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-%goal source_root;
-%goal exp;
-
-%header {:
- package org.jmodelica.modelica.parser;
- import org.jmodelica.modelica.ast.*;
- import java.io.*;
- import java.util.Collection;
- import java.util.Map;
-:};
-
 %embed {:
 
 	/**
@@ -226,7 +214,7 @@
 		Exp exp = null;
 		try {
 			ModelicaScanner scanner = new ModelicaScanner(new StringReader(str));
-			exp = (Exp)parse(scanner,ModelicaParser.AltGoals.exp);
+			exp = (Exp)parse(scanner,AltGoals.exp);
 			//System.out.println("ModelicaParser.parseExpString: "+str);
 			//exp.dumpTreeBasic("");
 		}  catch (FileNotFoundException e) {

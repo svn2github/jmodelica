@@ -41,8 +41,82 @@ aspect RootAccess {
 	eq Root.emptyArrayList() = getEmptyArrayList();
 	syn lazy ArrayList Root.getEmptyArrayList() = new ArrayList();
 	
-	syn lazy ModelicaParser Root.modelicaParser() = new ModelicaParser();
-	syn lazy FlatModelicaParser Root.flatModelicaParser() = new FlatModelicaParser();
+//	syn lazy ModelicaParser Root.parser() = new ModelicaParser();
+//	syn lazy FlatModelicaParser Root.flatModelicaParser() = new FlatModelicaParser();
+	
+	/*
+	 * The Parser methods are introduced here so that they can be refined in
+	 * extensions where other parsers are used.
+	 */
+	
+	syn SourceRoot Root.parseFile(String fileName) {
+		SourceRoot sr = null;
+		try {
+			Reader reader = new FileReader(fileName);
+			ModelicaScanner scanner = new ModelicaScanner(new BufferedReader(reader));
+			ModelicaParser parser = new ModelicaParser();
+			parser.setLineBreakMap(scanner.getLineBreakMap());
+			sr = (SourceRoot)parser.parse(scanner);
+			sr.setFileName(fileName);
+		}  catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		
+		return sr;
+	}
+	
+	syn SourceRoot Root.parseString(String str, String fileName) {
+		SourceRoot sr = null;
+		try {
+			ModelicaScanner scanner = new ModelicaScanner(new StringReader(str));
+			ModelicaParser parser = new ModelicaParser();
+			parser.setLineBreakMap(scanner.getLineBreakMap());
+			sr = (SourceRoot)parser.parse(scanner);
+			sr.setFileName(fileName);
+		}  catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		return sr;
+	}
+	
+	syn Exp Root.parseExpString(String str) {
+		Exp exp = null;
+		try {
+			ModelicaScanner scanner = new ModelicaScanner(new StringReader(str));
+			ModelicaParser parser = new ModelicaParser();
+			exp = (Exp)parser.parse(scanner,ModelicaParser.AltGoals.exp);
+			//System.out.println("ModelicaParser.parseExpString: "+str);
+			//exp.dumpTreeBasic("");
+		}  catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		
+		return exp;
+	}
+
+	
+	
 	
 }
 
