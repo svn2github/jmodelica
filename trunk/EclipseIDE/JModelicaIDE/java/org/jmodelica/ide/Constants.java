@@ -70,4 +70,6 @@ public class Constants {
 		CONFIGURED_CONTENT_TYPES = Arrays.copyOf(a, a.length + b.length);
 		System.arraycopy(b, 0, CONFIGURED_CONTENT_TYPES, a.length, b.length);
 	}
+
+	public static final String PACKAGE_FILE = "package.mo";
 }

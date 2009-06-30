@@ -15,6 +15,7 @@
 */
 import java.util.ArrayList;
 import org.eclipse.jface.text.Position;
+import org.jmodelica.ide.folding.FilePosition;
 import org.jmodelica.ide.folding.FileCharacterPosition;
 
 aspect ModelicaFolding {
@@ -32,7 +33,36 @@ aspect ModelicaFolding {
 //    eq FullClassDecl.hasFolding() = true;
     eq Annotation.hasFolding() = true;
     eq Annotation.foldingPositions(IDocument document) = makeFoldingPosition();
-	
+
+    /*
+     * Since all children isn't always returned by getChild(), we need new foldingPositions() 
+     */
+	eq ClassDecl.foldingPositions(IDocument document) {
+		ArrayList list = new ArrayList();
+		if (hasFolding()) {
+			try {
+				int lineStart = ASTNode.getLine(getStart());
+				int lineEnd = ASTNode.getLine(getEnd());
+				int nbrOfLines = document.getNumberOfLines();
+				int startOffset = document.getLineOffset(lineStart > 1 ? lineStart - 1 : 0);
+				int endOffset = document.getLineOffset(lineEnd < nbrOfLines ? lineEnd : lineEnd - 1);
+				int foldLength = endOffset - startOffset;
+				if ((lineEnd - lineStart) > 0) {
+					list.add(new FilePosition(startOffset, foldLength, fileName()));
+				}
+			} catch (BadLocationException e) {
+				e.printStackTrace();
+			}
+		}
+		for (int i = 0; i < getNumChild(); i++) {
+			if (!(getChild(i) instanceof ClassDecl))
+				list.addAll(getChild(i).foldingPositions(document));
+		}
+		for (ClassDecl decl : classes())
+			list.addAll(decl.foldingPositions(document));
+		return list;
+	}
+
 	/* 
 	 * Don't traverse entire tree. We should avoid error nodes and nodes that can't contain folds anyway.
 	 */

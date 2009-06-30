@@ -20,9 +20,13 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
@@ -132,5 +136,20 @@ public class Util {
 			buf.append(suff);
 		}
 		return buf.toString();
+	}
+	
+	private static boolean isLibrary(IContainer lib) {
+		return lib instanceof IFolder && lib.exists(new Path(Constants.PACKAGE_FILE));
+	}
+	
+	public static boolean isInLibrary(IResource file) {
+		return isLibrary(file.getParent());
+	}
+	
+	public static String getLibraryPath(IResource file) {
+		IContainer parent = file.getParent();
+		while (isLibrary(parent.getParent())) 
+			parent = parent.getParent();
+		return parent.findMember(Constants.PACKAGE_FILE).getLocation().toOSString();
 	}
 }

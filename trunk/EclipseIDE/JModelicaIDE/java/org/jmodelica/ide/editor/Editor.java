@@ -83,6 +83,7 @@ import org.jmodelica.ide.ModelicaCompiler;
 import org.jmodelica.ide.error.InstanceError;
 import org.jmodelica.ide.error.InstanceErrorHandler;
 import org.jmodelica.ide.folding.AnnotationDrawer;
+import org.jmodelica.ide.folding.IFilePosition;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.outline.InstanceOutlinePage;
 import org.jmodelica.ide.outline.OutlinePage;
@@ -136,6 +137,8 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	
 	private boolean fCompiledLocal;
 	private IFile fLocalFile;
+	private boolean fIsLibrary;
+	private String fPath;
 
 	public Editor() {
 		fRegistry = org.jastadd.plugin.Activator.getASTRegistry();
@@ -293,11 +296,11 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 			fLocalFile = null;
 			if (input instanceof IFileEditorInput) 
 				fLocalFile = ((IFileEditorInput) input).getFile();
-			String path = getPathOfInput(input);
-			if (path != null) {
+			fPath = getPathOfInput(input);
+			if (fPath != null) {
 				if (fLocalFile == null) 
-					fLocalFile = getFileForPath(path);
-				fRoot = cmp.compileFile(fLocalFile, path);
+					fLocalFile = getFileForPath(fPath);
+				fRoot = cmp.compileFile(fLocalFile, fPath);
 			}
 		} catch (IllegalArgumentException e) {
 		}
@@ -362,11 +365,18 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		fRoot = null;
 		fProject = null;
 		fKey = null;
+		fIsLibrary = false;
+		fPath = null;
 		
 		// Update
 		if (fInput != null) {
 			IFile file = fInput.getFile();
-			fKey = file.getRawLocation().toOSString();
+			fIsLibrary = Util.isInLibrary(file);
+			fPath = file.getRawLocation().toOSString();
+			if (fIsLibrary)
+				fKey = Util.getLibraryPath(file);
+			else
+				fKey = fPath;
 			fProject = file.getProject();
 			fRoot = (ASTNode) fRegistry.lookupAST(fKey, fProject);
 			fRegistry.addListener(this, fProject, fKey);
@@ -441,15 +451,17 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 			Collection<Position> positions = node.foldingPositions(document);
 			ITextSelection sel = (ITextSelection)getSelectionProvider().getSelection();
 			for (Position pos : positions) {
-				ProjectionAnnotation annotation;
-				if (pos instanceof CharacterPosition) {
-					annotation = new CharacterProjectionAnnotation();
-					if (!toggleAnnotationsAction.isVisible() && !overlaps(sel, pos))
-						annotation.markCollapsed();
-				} else {
-					annotation = new ProjectionAnnotation();
+				if (!fIsLibrary || ((IFilePosition) pos).getFileName().equals(fPath)) {
+					ProjectionAnnotation annotation;
+					if (pos instanceof CharacterPosition) {
+						annotation = new CharacterProjectionAnnotation();
+						if (!toggleAnnotationsAction.isVisible() && !overlaps(sel, pos))
+							annotation.markCollapsed();
+					} else {
+						annotation = new ProjectionAnnotation();
+					}
+					newAnnotations.put(annotation, pos);
 				}
-				newAnnotations.put(annotation, pos);
 			}
 		}
 

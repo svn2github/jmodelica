@@ -13,29 +13,16 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.jmodelica.ide.outline;
 
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
-
-public class SourceOutlinePage extends OutlinePage {
-
-	private SourceOutlineContentProvider contentProvider;
-
-	public SourceOutlinePage(AbstractTextEditor editor) {
-		super(editor);
+aspect IDELibrary {
+	eq Program.lookupChildAST(String key) {
+		IASTNode match = super.lookupChildAST(key);
+		for (int i = 0; match == null && i < getNumLibNode(); i++) 
+			match = getLibNode(i).lookupChildAST(key);
+		return match;
 	}
-
-	@Override
-	protected ITreeContentProvider getContentProvider() {
-		if (contentProvider == null)
-			contentProvider = new SourceOutlineContentProvider();
-		return contentProvider;
-	}
-
-	@Override
-	protected void rootChanged(TreeViewer viewer) {
-		viewer.expandToLevel(2);
-	}
+	
+	eq StoredDefinition.lookupChildAST(String key) = 
+		(hasLookupKey() && key != null && key.equals(lookupKey())) ? this : null;
+	eq LibNode.lookupChildAST(String key) = getStoredDefinition().lookupChildAST(key);
 }

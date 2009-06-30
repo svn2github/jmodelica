@@ -68,10 +68,11 @@ public class ModelicaCompiler extends AbstractCompiler {
 	private CompileErrorReport errorReport;
 	private InstanceErrorHandler instanceErrorHandler;
 	private PackageExaminer examiner;
+	private SourceRoot root;
 
 	@Override
 	protected IASTNode compileToProjectAST(IProject project, IProgressMonitor monitor) {
-		SourceRoot root = newRoot(project);
+		newRoot(project);
 		recursiveCompile(project, monitor);
 		return root;
 	}
@@ -85,7 +86,15 @@ public class ModelicaCompiler extends AbstractCompiler {
 				String extension = resource[i].getFileExtension();
 				int type = resource[i].getType();
 				if (type == IResource.FOLDER) {
-					recursiveCompile((IFolder) resource[i], monitor);
+					// If it is a package, add to library list, otherwise, recurse
+					IFolder folder = (IFolder) resource[i];
+					try {
+						Library lib = examiner.examine(folder.getLocation().toOSString());
+						if (lib.isOK())
+							root.options.addModelicaLibrary(lib.name, lib.version.toString(), lib.path);
+					} catch (FileNotFoundException e) {
+						recursiveCompile((IFolder) resource[i], monitor);
+					}
 				} else if (type == IResource.FILE && extension != null
 						&& extension.equals(Constants.FILE_EXTENSION)) {
 					// Convert to IFile and get content
@@ -115,9 +124,9 @@ public class ModelicaCompiler extends AbstractCompiler {
 		return compileFile(file, file.getRawLocation().toOSString());
 	}
 
-	private SourceRoot newRoot(IProject project) {
+	private void newRoot(IProject project) {
 		list = new List<StoredDefinition>();
-		SourceRoot root = new SourceRoot(new Program(list));
+		root = new SourceRoot(new Program(list));
 		instanceErrorHandler.reset();
 		root.setErrorHandler(instanceErrorHandler);
 
@@ -133,25 +142,7 @@ public class ModelicaCompiler extends AbstractCompiler {
 			for (Library lib : libraries) 
 				root.options.addModelicaLibrary(lib.name, lib.version.toString(), lib.path);
 			root.options.setStringOption("default_msl_version", defaultMSL);
-			
-			// Find packages in root dir of project and add to library list
-			try {
-				for (IResource res : project.members()) {
-					if (res.getType() == IResource.FOLDER) {
-						IFolder folder = (IFolder) res;
-						try {
-							Library lib = examiner.examine(folder.getLocation().toOSString());
-							if (lib.isOK())
-								root.options.addModelicaLibrary(lib.name, lib.version.toString(), lib.path);
-						} catch (FileNotFoundException e) {
-						}
-					}
-				}
-			} catch (CoreException e) {
-			}
 		}
-
-		return root;
 	}
 
 	private void parseFile(IFile file, String path) {
