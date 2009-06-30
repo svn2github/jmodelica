@@ -19,16 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *  \brief XMLGenerator class.
 */
 
-package org.jmodelica.codegen;
 
 import java.io.PrintStream;
-
-import org.jmodelica.ast.FBooleanVariable;
-import org.jmodelica.ast.FClass;
-import org.jmodelica.ast.FIntegerVariable;
-import org.jmodelica.ast.FRealVariable;
-import org.jmodelica.ast.FVariable;
-import org.jmodelica.ast.Printer;
 
 /**
  * A generator class for XML code generation which takes an Optimica model described by

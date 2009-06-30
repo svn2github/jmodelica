@@ -68,28 +68,6 @@
 	}
 	
 	/**
-	 * An exception for parser errors.
-	 */
-	public static class ParserException extends java.lang.RuntimeException {
-		private Problem p;
-		
-		/**
-		 * Default constructor.
-		 */
-		public ParserException(Problem p) {
-			this.p = p;
-		}
-		
-		/**
-		 * Getter for problem.
-		 */
-		 public Problem getProblem() {
-		 	return p;
-		 }
-		
-	}
-	
-	/**
 	 * Error reporting class that throws a {@link CompilerException} on an error.
 	 * Uses error message created by {@link Report}.
 	 */
@@ -165,70 +143,6 @@
 	
 	public void setLineBreakMap(Map<Integer, Integer> map) {
 	    lineBreakMap = map;
-	}
-
-	public SourceRoot parseFile(String fileName) {
-		SourceRoot sr = null;
-		try {
-			Reader reader = new FileReader(fileName);
-			ModelicaScanner scanner = new ModelicaScanner(new BufferedReader(reader));
-			setLineBreakMap(scanner.getLineBreakMap());
-			sr = (SourceRoot)parse(scanner);
-			sr.setFileName(fileName);
-		}  catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-		
-		return sr;
-	}
-	
-	public SourceRoot parseString(String str, String fileName) {
-		SourceRoot sr = null;
-		try {
-			ModelicaScanner scanner = new ModelicaScanner(new StringReader(str));
-			setLineBreakMap(scanner.getLineBreakMap());
-			sr = (SourceRoot)parse(scanner);
-			sr.setFileName(fileName);
-		}  catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-		
-		return sr;
-	}
-	
-	public Exp parseExpString(String str) {
-		Exp exp = null;
-		try {
-			ModelicaScanner scanner = new ModelicaScanner(new StringReader(str));
-			exp = (Exp)parse(scanner,AltGoals.exp);
-			//System.out.println("ModelicaParser.parseExpString: "+str);
-			//exp.dumpTreeBasic("");
-		}  catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-		
-		return exp;
 	}
 
 :};

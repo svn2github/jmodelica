@@ -15,19 +15,19 @@
 */
 
 
-package org.jmodelica.parser;
+package org.jmodelica.optimica.parser;
 
 import java.util.Map;
 import java.util.HashMap; 
 import beaver.Symbol;
 import beaver.Scanner;
-import org.jmodelica.parser.ModelicaParser.Terminals;
+import org.jmodelica.optimica.parser.OptimicaParser.Terminals;
 
 %%
 
 %public
 %final
-%class ModelicaScanner
+%class OptimicaScanner
 %extends Scanner
 %unicode
 %function nextTokenAll

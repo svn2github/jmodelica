@@ -15,7 +15,6 @@
 */
 
 
-import org.jmodelica.modelica.parser.ModelicaParser;
 import org.jmodelica.modelica.parser.FlatModelicaParser;
 
 import java.io.BufferedReader;
@@ -32,8 +31,6 @@ public abstract class CodeGenTestCase extends TestCase {
 	private String template = "";
     private String templateFileName = "";
     private boolean templateOnFile = false;
-    
-    private ModelicaParser parser = new ModelicaParser();
     
 	public CodeGenTestCase() {}
     
@@ -116,7 +113,8 @@ public abstract class CodeGenTestCase extends TestCase {
 	
 	public boolean testMe() {
         System.out.println("Running test: " + getClassName());
-		SourceRoot sr = parser.parseFile(getSourceFileName());
+		ParserHandler ph = new ParserHandler();
+		SourceRoot sr = ph.parseFile(getSourceFileName());
 		TestSuite.loadOptions(sr);
 		sr.setFileName(getSourceFileName());
 	    InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();

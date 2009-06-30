@@ -299,7 +299,7 @@ public class ModelicaCompiler {
 		SourceRoot sr;
 		try {
 			sr = (SourceRoot) parser.parse(scanner);
-		} catch (ModelicaParser.ParserException e) {
+		} catch (ParserException e) {
 			e.getProblem().setFileName(name);
 			CompilerException ce = new CompilerException();
 			ce.addProblem(e.getProblem());

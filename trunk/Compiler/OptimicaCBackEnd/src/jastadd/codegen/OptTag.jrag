@@ -20,10 +20,6 @@
  */
 
 
-package org.jmodelica.codegen;
-
-import org.jmodelica.ast.*;
-
 /**
  * C code generation tag for use with flattened Optimica models.
  *

@@ -47,12 +47,13 @@ aspect Constructors {
 		if (!bexp.equals("")) {
 		    //ModelicaParser mp = new ModelicaParser();
 			//bexp_ast = mp.parseExpString(bexp);
-			bexp_ast = root().parseExpString(bexp);
+			ParserHandler ph = new ParserHandler();
+			bexp_ast = ph.parseExpString(bexp);
 			//debugPrint("ComponentDecl.ComponentDecl");
 			//bexp_ast.dumpTreeBasic("");	
 		    this.setModification(new ValueModification(bexp_ast));
         }                     	
 	
 	}
-
+	
 }

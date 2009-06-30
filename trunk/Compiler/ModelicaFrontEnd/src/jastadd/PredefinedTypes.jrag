@@ -14,8 +14,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-import org.jmodelica.modelica.parser.*;
 aspect PredefinedTypes {
 
 	inh List FullClassDecl.getPredefinedType();
@@ -76,16 +74,18 @@ aspect PredefinedTypes {
        	builtInDef += "parameter StringType start=\"\";\n";
     	builtInDef += "end String;\n"; 	
    
-   		java.io.StringReader builtInDefReader = new java.io.StringReader(builtInDef);
- 	  	ModelicaParser parser = new ModelicaParser();
-  		PrimitiveClassDecl pcd=null;
+//   		java.io.StringReader builtInDefReader = new java.io.StringReader(builtInDef);
+// 	  	ModelicaParser parser = new ModelicaParser();
+ 		PrimitiveClassDecl pcd=null;
   
    		try {
    		
-   			ModelicaScanner scanner = new ModelicaScanner(builtInDefReader);
-   			SourceRoot sr = (SourceRoot)parser.parse(scanner);
+ //  			ModelicaScanner scanner = new ModelicaScanner(builtInDefReader);
+ //  			SourceRoot sr = (SourceRoot)parser.parse(scanner);
+   			ParserHandler ph = new ParserHandler();
+  			SourceRoot sr = ph.parseString(builtInDef,"");
  			Program p = sr.getProgram();
-   			builtInDefReader.close();
+ //  			builtInDefReader.close();
    			
    			for (int i=0;i<p.getUnstructuredEntity(0).getNumElement();i++) {
    			//debugPrint("Program.getPredefinedTypeList(): Hepp!: " + i);
@@ -201,12 +201,16 @@ aspect PredefinedTypes {
 +"function log \"natural (base e) logarithm (u shall be > 0)\" end log;\n"
 +"function log10 \"base 10 logarithm (u shall be > 0)\" end log10;\n";
 
-   		   java.io.StringReader reader = new java.io.StringReader(builtInFunc);
+ //  		   java.io.StringReader reader = new java.io.StringReader(builtInFunc);
    			//Reader reader = new FileReader("builtin/builtin_functions.mo");
-   			ModelicaScanner scanner = new ModelicaScanner(reader);
-   			SourceRoot sr = (SourceRoot)parser.parse(scanner);
+//   			ModelicaScanner scanner = new ModelicaScanner(reader);
+
+   			ParserHandler ph = new ParserHandler();
+  			SourceRoot sr = ph.parseString(builtInFunc,"");
+
+//   			SourceRoot sr = (SourceRoot)parser.parse(scanner);
    			Program p = sr.getProgram();
-   			reader.close();
+ //  			reader.close();
    			
    			for (int i=0;i<p.getUnstructuredEntity(0).getNumElement();i++) {
    			

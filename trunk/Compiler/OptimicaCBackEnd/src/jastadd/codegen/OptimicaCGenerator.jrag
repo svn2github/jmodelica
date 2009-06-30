@@ -19,11 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *  \brief CGenerator class.
 */
 
-package org.jmodelica.codegen;
 
 import java.io.*;
-
-import org.jmodelica.ast.*;
 
 /**
  * OptimicaCGenerator extends the functionality of CGenerator to also

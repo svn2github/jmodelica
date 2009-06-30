@@ -19,7 +19,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import org.jmodelica.modelica.parser.*;
 
 aspect RootAccess {
 	
@@ -49,7 +48,7 @@ aspect RootAccess {
 	 * extensions where other parsers are used.
 	 */
 	
-	syn SourceRoot Root.parseFile(String fileName) {
+	syn SourceRoot ParserHandler.parseFile(String fileName) {
 		SourceRoot sr = null;
 		try {
 			Reader reader = new FileReader(fileName);
@@ -72,7 +71,7 @@ aspect RootAccess {
 		return sr;
 	}
 	
-	syn SourceRoot Root.parseString(String str, String fileName) {
+	syn SourceRoot ParserHandler.parseString(String str, String fileName) {
 		SourceRoot sr = null;
 		try {
 			ModelicaScanner scanner = new ModelicaScanner(new StringReader(str));
@@ -93,7 +92,7 @@ aspect RootAccess {
 		return sr;
 	}
 	
-	syn Exp Root.parseExpString(String str) {
+	syn Exp ParserHandler.parseExpString(String str) {
 		Exp exp = null;
 		try {
 			ModelicaScanner scanner = new ModelicaScanner(new StringReader(str));
@@ -695,7 +694,6 @@ aspect Math {
 */
 }
 
-
 aspect Streams {
 
         // Is this really not in the Standard library???
@@ -710,8 +708,6 @@ aspect Streams {
                         return str.toString();
                 }
         }
-
-       
 }
 
 aspect LineOffsets {
@@ -720,4 +716,30 @@ aspect LineOffsets {
 	public void StoredDefinition.setLineBreakMap(Map<Integer, Integer> map) {
 		lineBreakMap = map;
 	}
+}
+
+aspect ParserHelpers {
+
+	/**
+	 * An exception for parser errors.
+	 */
+	public static class ParserException extends java.lang.RuntimeException {
+		private Problem p;
+		
+		/**
+		 * Default constructor.
+		 */
+		public ParserException(Problem p) {
+			this.p = p;
+		}
+		
+		/**
+		 * Getter for problem.
+		 */
+		 public Problem getProblem() {
+		 	return p;
+		 }
+		
+	}
+	
 }

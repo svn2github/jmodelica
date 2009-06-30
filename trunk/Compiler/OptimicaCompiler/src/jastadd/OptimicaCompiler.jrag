@@ -14,28 +14,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.jmodelica.applications;
-
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
 
-import org.jmodelica.ast.CompilerException;
-import org.jmodelica.ast.FOptClass;
-import org.jmodelica.ast.FlatRoot;
-import org.jmodelica.ast.InstProgramRoot;
-import org.jmodelica.ast.ModelicaClassNotFoundException;
-import org.jmodelica.ast.PrettyPrinter;
-import org.jmodelica.ast.Problem;
-import org.jmodelica.ast.SourceRoot;
-import org.jmodelica.codegen.OptimicaCGenerator;
-import org.jmodelica.codegen.OptimicaXMLVariableGenerator;
-import org.jmodelica.codegen.XMLProblemVariableGenerator;
-import org.jmodelica.codegen.XMLValueGenerator;
-
-import beaver.Parser.Exception;
+//import beaver.Parser.Exception;
 
 /**
  * 

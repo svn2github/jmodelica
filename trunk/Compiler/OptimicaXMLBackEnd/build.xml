@@ -30,10 +30,10 @@
 	<property name = "optimicafrontend_path" value="../OptimicaFrontEnd"/>
 	
 	<!-- "package" is the directory where generated files will be stored -->
-	<property name="ast_package" value="org.jmodelica.ast"/>
+	<property name="ast_package" value="org.jmodelica.optimica.compiler"/>
 
 	<property name="base_output" value="src/java-generated"/>
-	<property name="parser_output" value="${base_output}/org/jmodelica/parser"/>
+	<property name="parser_output" value="${base_output}/org/jmodelica/optimica/parser"/>
 
 	<!-- "tools" is the directory where the needed tools (lexing, parsing, jastadd2, junit.jar) are located. -->
 	<property name="jar_output_dir" value="bin"/>
@@ -47,17 +47,9 @@
 	<property name="modelicaxmlbackend_ast" value="${modelicaxmlbackend_path}/src/jastadd"/>
 	<property name="optimicafrontend_ast" value="${optimicafrontend_path}/src/jastadd"/>
 	<property name="optimicaxmlbackend_ast" value="src/jastadd"/>
-	<property name="default_src_dir" value="${jmodelica_path}/src/java"/>
-	<property name="modelicaxmlbackend_src_dir" value="${modelicaxmlbackend_path}/src/java"/>
-	<property name="optimicafrontend_src_dir" value="${optimicafrontend_path}/src/java"/>
-	<property name="optimicaxmlbackend_src_dir" value="src/java"/>
-	<property name="test_src_dir" value="${jmodelica_path}/src/test/test-framework"/>
-	<property name="modelicaxmlbackend_test_src_dir" value="${modelicaxmlbackend_path}/src/test/test-framework"/>
-	<property name="local_test_src_dir" value="src/test/test-framework"/>
 	<property name="test_junit_dir" value="src/test/junit"/>
 	<property name="test_junit-gen_dir" value="src/test/junit-generated"/>
 
-	<property name="applications" value="${jmodelica_path}/${default_src_dir}/org/jmodelica/applications"/>
 	<property name="debug" value="${jmodelica_path}/${default_src_dir}/org/jmodelica/debug"/>
 
 	<!-- "jastadd" is an ant task class in jastadd2.jar -->
@@ -69,7 +61,6 @@
   	       classname="beaver.comp.run.AntTask" 
   	       classpath="${beaver_dir}/lib/beaver.jar"/>
 
-
 	<!-- TARGET build -->
 	<target name="build" depends="compile-ast">
 		<!-- compile all java files in srcdir and recursively in subdirectories -->
@@ -77,27 +68,16 @@
 		<mkdir dir="${jar_output_dir}"/>
 		<jar destfile="${jar_output_dir}/optimica_xml_backend.jar">
 			<fileset dir="bin">
-				<include name="org/jmodelica/applications/*.class"/>
-				<include name="org/jmodelica/codegen/*.class"/>
-				<include name="org/jmodelica/ast/*.class"/>
-				<include name="org/jmodelica/parser/*.class"/>
-				<include name="org/jmodelica/test/ast/*.class"/>
+				<include name="org/jmodelica/optimica/compiler/*.class"/>
+				<include name="org/jmodelica/optimica/parser/*.class"/>
 			</fileset>
 		</jar>
 	</target>
 
-
 	<target name="compile-ast" depends="gen,gen-parser">
 		<mkdir dir="bin"/>
-		<javac classpath="${beaver_dir}/lib/beaver.jar" compiler="javac1.5" debug="true" destdir="bin">
+		<javac classpath="${beaver_dir}/lib/beaver.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" compiler="javac1.5" debug="true" destdir="bin">
 			<src path="${base_output}"/>
-			<src path="${default_src_dir}"/>
-			<src path="${modelicaxmlbackend_src_dir}"/>
-			<src path="${optimicaxmlbackend_src_dir}"/>
-			<src path="${optimicafrontend_src_dir}"/>
-			<src path="${test_src_dir}"/>
-			<src path="${local_test_src_dir}"/>
-			<src path="${modelicaxmlbackend_test_src_dir}"/>
 			<include name = "**/*.java"/>
 			<exclude name = "**/*junit*/**"/>
 			<exclude name = "**/*.aj"/>
@@ -115,11 +95,33 @@
 				<include name="*.jadd"/>
 				<include name="*.jrag"/>
 			</fileset>
+			<fileset dir="${ast}/codegen">
+				<include name="*.ast"/>
+				<include name="*.jadd"/>
+				<include name="*.jrag"/>
+			</fileset>
+			<fileset dir="${ast}/test-framework">
+				<include name="*.ast"/>
+				<include name="*.jadd"/>
+				<include name="*.jrag"/>
+			</fileset>
+
 			<fileset dir="${modelicaxmlbackend_ast}">
 				<include name="*.ast"/>
 				<include name="*.jadd"/>
 				<include name="*.jrag"/>
 			</fileset>
+			<fileset dir="${modelicaxmlbackend_ast}/codegen">
+				<include name="*.ast"/>
+				<include name="*.jadd"/>
+				<include name="*.jrag"/>
+			</fileset>
+			<fileset dir="${modelicaxmlbackend_ast}/test-framework">
+				<include name="*.ast"/>
+				<include name="*.jadd"/>
+				<include name="*.jrag"/>
+			</fileset>
+
 			<fileset dir="${optimicafrontend_ast}">
 				<include name="*.ast"/>
 				<include name="*.jadd"/>
@@ -138,35 +140,26 @@
 	
 	    <!-- generate the scanner -->
 	    <jflex file="${optimica_parser}/Optimica.flex" outdir="${parser_output}" nobak="yes"/>
+
+	    <jflex file="${optimica_parser}/Optimica.flex" outdir="${parser_output}" nobak="yes"/>
 	  	<!-- generate the parser phase 1, translating .lalr to .beaver -->
-		<concat destfile="${parser_output}/Modelica_cat.parser" force="no">
-			          <filelist dir="${jmodelica_parser}" files="Modelica.parser"/>
+	       <concat destfile="${parser_output}/Modelica_all.parser" force="no">
+	          <filelist dir="." files="${optimica_parser}/Optimica_header.parser"/>
+	          <filelist dir="${jmodelica_parser}" files="Modelica.parser" />	
+	         </concat>
+		<concat destfile="${parser_output}/Optimica_cat.parser" force="no">
+			          <filelist dir="${parser_output}" files="Modelica_all.parser"/>
 			          <filelist dir="${optimica_parser}" files="Optimica.parser" />	
 			         </concat>
-		
 			<java classpath="${jastadd_dir}/JastAddParser.jar:${beaver_dir}/lib/beaver-rt.jar" classname="Main">
-	  	      <arg line="${parser_output}/Modelica_cat.parser ${parser_output}/ModelicaParser_raw.beaver"/>
+	  	      <arg line="${parser_output}/Optimica_cat.parser ${parser_output}/OptimicaParser_raw.beaver"/>
 	  	    </java> 
-	        <concat destfile="${parser_output}/ModelicaParser.beaver" force="no">
+	        <concat destfile="${parser_output}/OptimicaParser.beaver" force="no">
 	          <filelist dir="." files="${jmodelica_parser}/beaver.input"/>
-	          <filelist dir="${parser_output}" files="ModelicaParser_raw.beaver" />	
+	          <filelist dir="${parser_output}" files="OptimicaParser_raw.beaver" />	
 	         </concat>
 	  	    <!-- generate the parser phase 2, translating .beaver to .java -->
-	  	    <beaver file="${parser_output}/ModelicaParser.beaver" terminalNames="yes" compress="no" useSwitch="yes"/>
-	  	  
-	  	
-	  	
-	  	    <jflex file="${jmodelica_parser}/FlatModelica.flex" outdir="${parser_output}" nobak="yes"/>
-	  	  	<!-- generate the parser phase 1, translating .lalr to .beaver -->
-	  	 	   <java classpath="${jastadd_dir}/JastAddParser.jar:${beaver_dir}/lib/beaver-rt.jar" classname="Main">
-	  	  	      <arg line="${jmodelica_parser}/FlatModelica.parser ${parser_output}/FlatModelicaParser_raw.beaver"/>
-	  	  	    </java> 
-	  	        <concat destfile="${parser_output}/FlatModelicaParser.beaver" force="no">
-	  	          <filelist dir="." files="${jmodelica_parser}/beaver.flat.input"/>
-	  	          <filelist dir="${parser_output}" files="FlatModelicaParser_raw.beaver" />	
-	  	         </concat>
-	  	  	    <!-- generate the parser phase 2, translating .beaver to .java -->
-	  	  	    <beaver file="${parser_output}/FlatModelicaParser.beaver" terminalNames="yes" compress="no" useSwitch="yes"/>
+	  	    <beaver file="${parser_output}/OptimicaParser.beaver" terminalNames="yes" compress="no" useSwitch="yes"/>
 	 
 	
 	</target>

@@ -14,7 +14,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import org.jmodelica.modelica.parser.ModelicaParser;
 import org.jmodelica.modelica.parser.FlatModelicaParser;
 
 import java.io.BufferedReader;
@@ -30,7 +29,6 @@ public class ErrorTestCase extends TestCase {
 
 	String errorMessage="";
 	
-	private ModelicaParser parser = new ModelicaParser();
 	private FlatModelicaParser flatParser = new FlatModelicaParser();
 	
 	public ErrorTestCase() {}
@@ -101,7 +99,8 @@ public class ErrorTestCase extends TestCase {
 	@Override
 	public boolean testMe() {
         System.out.println("Running test: " + getClassName());
-		SourceRoot sr = parser.parseFile(getSourceFileName());
+		ParserHandler ph = new ParserHandler();
+		SourceRoot sr = ph.parseFile(getSourceFileName());
 		sr.setFileName(getSourceFileName());	
 		TestSuite.loadOptions(sr);
 		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();

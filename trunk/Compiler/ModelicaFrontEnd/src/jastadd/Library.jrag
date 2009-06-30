@@ -17,6 +17,7 @@
 
 import java.io.*;
 import java.util.HashSet;
+import org.jmodelica.modelica.parser.*;
 
 aspect Library {
 
@@ -81,7 +82,8 @@ aspect Library {
 				
 				if (package_mo_present) {
 				    System.out.println("Reading file: " + dirName+"/package.mo...");
-		   			SourceRoot sr = root().parseFile(dirName+"/package.mo");
+				    ParserHandler ph = new ParserHandler();
+		   			SourceRoot sr = ph.parseFile(dirName+"/package.mo");
 		   			FullClassDecl fcd = (FullClassDecl)sr.getProgram().getUnstructuredEntity(0).getElement(0);
 		   			sr.getProgram().getUnstructuredEntity(0).setFileName(dirName+"/package.mo");
 		   			LibClassDecl lcd = new LibClassDecl(fcd);
@@ -137,7 +139,7 @@ aspect Library {
 					sr.getProgram().getUnstructuredEntity(0).setElement(lcd,0);
 	   				return sr.getProgram().getUnstructuredEntity(0);
 	   			}
-			} catch (ModelicaParser.ParserException e) {
+			} catch (ParserException e) {
 				System.out.println("In file: '"+ dirName+"/package.mo"+ "':");
 				System.err.println(e.getMessage());
 				return createErrorStoredDefenition();		        
@@ -150,12 +152,13 @@ aspect Library {
 		} else {
 			try {
 				System.out.println("Reading file: " + getFileName() + "...");
-				SourceRoot sr = root().parseFile(getFileName());
+				ParserHandler ph = new ParserHandler();
+				SourceRoot sr = ph.parseFile(getFileName());
 				for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
 					sd.setFileName(getFileName());
 				}
 				return sr.getProgram().getUnstructuredEntity(0);
-			} catch (ModelicaParser.ParserException e) {
+			} catch (ParserException e) {
 				System.out.println("In file: '"+ getFileName()+ "':");
 				System.err.println(e.getMessage());
 				return createErrorStoredDefenition();		        

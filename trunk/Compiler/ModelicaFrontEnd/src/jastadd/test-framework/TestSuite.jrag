@@ -14,9 +14,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
-import org.jmodelica.modelica.parser.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -50,8 +47,8 @@ public class TestSuite {
 	public TestSuite(String fileName, String className) {
 		name = className;
 		l = new ArrayList<TestCase>();
-		ModelicaParser parser = new ModelicaParser();
-		SourceRoot sr = (SourceRoot)parser.parseFile(fileName);
+		ParserHandler ph = new ParserHandler();
+		SourceRoot sr = ph.parseFile(fileName);
 		loadOptions(sr);
 		sr.collectTestCases(this,className);
 	}
@@ -229,7 +226,4 @@ public class TestSuite {
 		Document doc = builder.parse(new File(xmlfile));
 		return doc;
 	}
-
-
-	
 }

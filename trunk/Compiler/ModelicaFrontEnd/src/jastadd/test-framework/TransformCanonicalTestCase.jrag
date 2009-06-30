@@ -14,8 +14,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-import org.jmodelica.modelica.parser.ModelicaParser;
 import org.jmodelica.modelica.parser.FlatModelicaParser;
 import java.util.Collection;
 
@@ -28,7 +26,6 @@ public class TransformCanonicalTestCase extends TestCase {
     private String flatModelFileName = "";
     private boolean resultOnFile = false;
 	
-    private ModelicaParser parser = new ModelicaParser();
     private FlatModelicaParser flatParser = new FlatModelicaParser();
     
 	public TransformCanonicalTestCase() {}
@@ -112,7 +109,8 @@ public class TransformCanonicalTestCase extends TestCase {
 	
 	public boolean testMe() {
         System.out.println("Running test: " + getClassName());
-		SourceRoot sr = parser.parseFile(getSourceFileName());
+		ParserHandler ph = new ParserHandler();
+		SourceRoot sr = ph.parseFile(getSourceFileName());
 		TestSuite.loadOptions(sr);
 		sr.setFileName(getSourceFileName());
 	    InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
