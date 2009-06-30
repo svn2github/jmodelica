@@ -2,7 +2,7 @@ package VDP_pack
 
   optimization VDP_Opt (objective = cost(finalTime),
                          startTime = 0,
-                         finalTime = 5)
+                         finalTime = 20)
 
 
     // Parameters
@@ -22,7 +22,9 @@ package VDP_pack
   equation
     der(x1) = (1 - x2^2) * x1 - x2 + u;
     der(x2) = p1 * x1;
-    der(cost) = exp(p3 * time) * (x1^2 + x2^2 + u^2);
+    der(cost) = exp(p3 * 1/*time*/) * (x1^2 + x2^2 + u^2);
+  constraint 
+     u<=0.75;
   end VDP_Opt;
 
 end VDP_pack;
