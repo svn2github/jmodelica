@@ -18,7 +18,6 @@ package org.jmodelica.ide.helpers;
 import java.io.File;
 import java.net.URI;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IMarker;

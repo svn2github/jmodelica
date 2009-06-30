@@ -15,7 +15,6 @@
 */
 package org.jmodelica.ide.ui;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;

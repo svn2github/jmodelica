@@ -56,14 +56,14 @@ class IndentationStrategy extends DefaultIndentLineAutoEditStrategy {
 	/**
 	 * Check if region <code>reg</code> is an annotation
 	 */
-	protected static boolean isAnnotation(ITypedRegion reg) throws BadLocationException {
+	protected static boolean isAnnotation(ITypedRegion reg) {
 		return reg.getType() == Modelica22PartitionScanner.ANNOTATION_PARTITION;
 	}
 	
 	/**
 	 * Check if region <code>reg</code> is code that shouldn't have any indentation support
 	 */
-	protected static boolean isNotToBeIndented(ITypedRegion reg) throws BadLocationException {
+	protected static boolean isNotToBeIndented(ITypedRegion reg) {
 		return reg.getType() == Modelica22PartitionScanner.QIDENT_PARTITION ||
 			reg.getType() == Modelica22PartitionScanner.STRING_PARTITION;
 	}

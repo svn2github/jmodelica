@@ -24,7 +24,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
-import org.eclipse.ui.texteditor.ITextEditor;
 import org.jastadd.plugin.compiler.ast.IJastAddNode;
 import org.jastadd.plugin.ui.view.AbstractBaseContentOutlinePage;
 import org.jmodelica.ast.ASTNode;
