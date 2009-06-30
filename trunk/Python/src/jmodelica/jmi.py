@@ -1204,12 +1204,13 @@ def _cleanup():
         
     """
     for tmp in _temp_dlls:
-        if os.access(tmp.get('name'),os.F_OK):
-            try:
+        tmpfile = tmp.get('name')
+        if os.path.exists(tmpfile) and os.path.isfile(tmpfile):
+            if sys.platform == 'win32':
                 _ctypes.FreeLibrary(tmp.get('handle'))
-            except AttributeError:
-                _ctypes.dlclose(tmp.get('handle'))
-            os.remove(tmp.get('name'))
+            #else:
+            #    _ctypes.dlclose(tmp.get('handle'))
+            os.remove(tmpfile)
 
 # _cleanup registered to run on termination       
 atexit.register(_cleanup)
@@ -1365,13 +1366,12 @@ class JMIModel(object):
         file if possible.
         
         """
-        try:
-            assert self._dll.jmi_delete(self._jmi) == 0, \
-                   "jmi_delete failed"
-            _ctypes.FreeLibrary(self._dll._handle)
-        except AttributeError,e:
-            pass
-        os.remove(self._tempfname)
+        assert self._dll.jmi_delete(self._jmi) == 0, \
+               "jmi_delete failed"
+        if os.path.exists(self._tempfname) and os.path.isfile(self._tempfname):
+            if sys.platform == 'win32':
+                _ctypes.FreeLibrary(self._dll._handle)
+            os.remove(self._tempfname)
 
     def get_variable_names(self):
         """
