@@ -40,8 +40,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.jmodelica.modelica.parser.ModelicaParser;
-import org.jmodelica.modelica.parser.ModelicaScanner;
+//import org.jmodelica.modelica.parser.ModelicaParser;
+//import org.jmodelica.modelica.parser.ModelicaScanner;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -281,11 +281,11 @@ public class ModelicaCompiler {
 	 */
 	public static SourceRoot parseModel(String name) 
 	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
-		ModelicaParser parser = new ModelicaParser();
+//		ModelicaParser parser = new ModelicaParser();
 //		ModelicaParser.CollectingReport report = new ModelicaParser.CollectingReport();
 //		parser.setReport(report);
-		Reader reader = new FileReader(name);
-		ModelicaScanner scanner = new ModelicaScanner(new BufferedReader(reader));
+//		Reader reader = new FileReader(name);
+//		ModelicaScanner scanner = new ModelicaScanner(new BufferedReader(reader));
 	/*
 		if (report.hasErrors()) {
 			CompilerException ce = new CompilerException();
@@ -295,10 +295,13 @@ public class ModelicaCompiler {
 			throw ce;
 		}
 		*/
+		ParserHandler ph = new ParserHandler();
+		
 		logger.info("Parsing " + name + "...");
 		SourceRoot sr;
 		try {
-			sr = (SourceRoot) parser.parse(scanner);
+//			sr = (SourceRoot) parser.parse(scanner);
+			sr = ph.parseFile(name);
 		} catch (ParserException e) {
 			e.getProblem().setFileName(name);
 			CompilerException ce = new CompilerException();

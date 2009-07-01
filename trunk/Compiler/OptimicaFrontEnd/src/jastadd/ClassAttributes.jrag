@@ -29,17 +29,17 @@ aspect ClassAttributes {
 		builtInDef += "parameter Boolean static=false;\n";
     	builtInDef += "end ClassAttributes;\n";
    
-   		java.io.StringReader builtInDefReader = new java.io.StringReader(builtInDef);
- 	  	ModelicaParser parser = new ModelicaParser();
+   		//java.io.StringReader builtInDefReader = new java.io.StringReader(builtInDef);
+ 	  	//ModelicaParser parser = new ModelicaParser();
   		PrimitiveClassDecl pcd=null;
   
    		try {
    		
-   			ModelicaScanner scanner = new ModelicaScanner(builtInDefReader);
-   			SourceRoot sr = (SourceRoot)parser.parse(scanner);
+   			//ModelicaScanner scanner = new ModelicaScanner(builtInDefReader);
+   			ParserHandler ph = new ParserHandler();
+   			SourceRoot sr = ph.parseString(builtInDef,"");
  			Program p = sr.getProgram();
-   			builtInDefReader.close();
-   			
+   			   			
   			FullClassDecl cd = (FullClassDecl)(p.getUnstructuredEntity(0).getElement(0));	
 
 			for (int i=0;i<cd.getNumComponentDecl();i++) { 		

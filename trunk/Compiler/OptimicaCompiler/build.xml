@@ -48,6 +48,7 @@
 	<property name="jmodelica_parser" value="${modelica_front_end_path}/src/parser"/>
 	<property name="optimica_parser" value="${optimica_front_end_path}/src/parser"/>
 		
+	<property name="local_ast" value="src/jastadd"/>
 	<property name="ast" value="${modelica_front_end_path}/src/jastadd"/>
 	<property name="modelica_xml_back_end_ast" value="${modelica_xml_back_end_path}/src/jastadd"/>
 	<property name="modelica_c_back_end_ast" value="${modelica_c_back_end_path}/src/jastadd"/>
@@ -102,6 +103,11 @@
 		<mkdir dir="${base_output}"/>
 		<!-- run jastadd to generate AST files -->
 		<jastadd package="${ast_package}" beaver="true" rewrite="true" outdir="${base_output}" NoCacheCycle="false" ComponentCheck="true" visitcheck="false" LazyMaps="true" Deterministic="true" NoStatic="false" Debug="false">
+			<fileset dir="${local_ast}">
+							<include name="*.ast"/>
+							<include name="*.jadd"/>
+							<include name="*.jrag"/>
+						</fileset>
 			<fileset dir="${ast}">
 				<include name="*.ast"/>
 				<include name="*.jadd"/>

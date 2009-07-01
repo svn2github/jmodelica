@@ -28,10 +28,11 @@ import common
 
 #get paths to external directories: OptimicaCompiler, Beaver
 _oc_jar = common._jm_home+os.sep+'lib'+os.sep+'OptimicaCompiler.jar'
+_mc_jar = common._jm_home+os.sep+'lib'+os.sep+'ModelicaCompiler.jar'
 _beaver_lib = common._jm_home+os.sep+'ThirdParty'+os.sep+'Beaver'+os.sep+'lib'
 
 _dir_path="-Djava.ext.dirs=%s" %_beaver_lib
-_class_path="-Djava.class.path=%s" %_oc_jar
+_class_path="-Djava.class.path=%s:%s" %(_oc_jar,_mc_jar)
 
 #start JVM
 if not jpype.isJVMStarted():
@@ -40,7 +41,7 @@ if not jpype.isJVMStarted():
 
 #get java class (OptimicaCompiler)
 org = jpype.JPackage('org')
-OptCompiler = org.jmodelica.applications.OptimicaCompiler
+OptCompiler = org.jmodelica.optimica.compiler.OptimicaCompiler
 
 #constants
 LOG_ERROR = OptCompiler.ERROR
@@ -91,6 +92,7 @@ def compile_model(model_file_name, model_class_name, target = "model"):
     cppath = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_optimica_template.c'
 
     try:
+        print(OptCompiler)
         OptCompiler.compileModel(model_file_name, model_class_name, xml_variables_path, xml_problvariables_path, xml_values_path, cppath)
         c_file = model_class_name.replace('.','_',1)
         retval = compile_dll(c_file, target)
@@ -288,7 +290,7 @@ def set_log_level(level):
 
 def _handle_exception(ex):
     """ Catch and handle all expected Java Exceptions that the underlying Java classes might throw. """
-    if ex.javaClass() is org.jmodelica.ast.CompilerException:
+    if ex.javaClass() is org.jmodelica.optimica.compiler.CompilerException:
         arraylist = ex.__javaobject__.getProblems()
         itr = arraylist.iterator()
 
@@ -298,7 +300,7 @@ def _handle_exception(ex):
 
         raise CompilerError(problems)
         
-    if ex.javaClass() is org.jmodelica.ast.ModelicaClassNotFoundException:
+    if ex.javaClass() is org.jmodelica.optimica.compiler.ModelicaClassNotFoundException:
         raise ModelicaClassNotFoundError(str(ex.__javaobject__.getClassName()))
         
     if ex.javaClass() is jpype.java.io.FileNotFoundException:
