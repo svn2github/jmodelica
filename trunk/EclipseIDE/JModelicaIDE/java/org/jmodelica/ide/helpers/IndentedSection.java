@@ -139,7 +139,7 @@ public class IndentedSection {
 			sec[i] = putIndent(sec[i], 
 					Math.max(0, offset + getIndent(sec[i]) - ref));
 		}
-		if (sec[sec.length-1].trim().isEmpty())
+		if (sec[sec.length-1].trim().equals(""))
 			sec[sec.length-1] = "";
 		return this;
 	}

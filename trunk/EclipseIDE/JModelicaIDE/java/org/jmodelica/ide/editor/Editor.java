@@ -258,12 +258,15 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		if (input instanceof IFileEditorInput) 
 			fInput = (IFileEditorInput)input;
 		resetAST(fInput);
-		// TODO: Move to resetAST()?
-		fStrategy.setFile(fInput == null ? null : fInput.getFile());
+		
 		if (fRoot == null) 
 			compileLocal(input);
 		else
 			fCompiledLocal = false;
+		
+		IDocument document = getSourceViewer().getDocument();
+		if (document != null) 
+			setupDocumentPartitioner(document);
 	}
 
 	@Override
@@ -369,10 +372,11 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		fKey = null;
 		fIsLibrary = false;
 		fPath = null;
+		IFile file = null;
 		
 		// Update
 		if (fInput != null) {
-			IFile file = fInput.getFile();
+			file = fInput.getFile();
 			fIsLibrary = Util.isInLibrary(file);
 			fPath = file.getRawLocation().toOSString();
 			if (fIsLibrary)
@@ -384,6 +388,8 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 			fRegistry.addListener(this, fProject, fKey);
 			update();
 		}
+		
+		fStrategy.setFile(file);
 	}
 	
 	
@@ -392,9 +398,6 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	 */
 	private void update() {
 		if (getSourceViewer() != null && fRoot != null && !fRoot.isError()) {
-			IDocument document = getSourceViewer().getDocument();
-			if (document != null) 
-				setupDocumentPartitioner(document);
 			// Update outline
 			fSourceOutlinePage.updateAST(fRoot);
 			fInstanceOutlinePage.updateAST(fRoot);

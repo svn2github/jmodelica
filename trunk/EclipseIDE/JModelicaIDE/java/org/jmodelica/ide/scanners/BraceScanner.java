@@ -70,13 +70,13 @@ public abstract class BraceScanner {
 	}
 
 	protected void addBrace(Brace type) {
-		braces.push(type);
+		braces.addFirst(type);
 	}
 
 	protected Result removeBrace(Brace type) {
 		if (braces.isEmpty())
 			return Result.MISMATCH;
-		Brace match = braces.pop();
+		Brace match = braces.removeFirst();
 		if (type != match)
 			return Result.MISMATCH;
 		if (braces.isEmpty())

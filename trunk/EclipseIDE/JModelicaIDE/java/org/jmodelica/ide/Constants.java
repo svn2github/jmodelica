@@ -67,7 +67,8 @@ public class Constants {
 	static {
 		String[] a = Modelica22PartitionScanner.LEGAL_PARTITIONS;
 		String[] b = new String[] { IDocument.DEFAULT_CONTENT_TYPE, CONTENT_TYPE_ID };
-		CONFIGURED_CONTENT_TYPES = Arrays.copyOf(a, a.length + b.length);
+		CONFIGURED_CONTENT_TYPES = new String[a.length + b.length];
+		System.arraycopy(a, 0, CONFIGURED_CONTENT_TYPES, 0, a.length);
 		System.arraycopy(b, 0, CONFIGURED_CONTENT_TYPES, a.length, b.length);
 	}
 

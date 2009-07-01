@@ -27,7 +27,7 @@ public class Activator extends AbstractUIPlugin {
 	public static final String PLUGIN_ID = Constants.PLUGIN_ID;
 
 	// The shared instance
-	private static Activator plugin;
+	private static Activator plugin = new Activator();
 	
 	/**
 	 * The constructor
