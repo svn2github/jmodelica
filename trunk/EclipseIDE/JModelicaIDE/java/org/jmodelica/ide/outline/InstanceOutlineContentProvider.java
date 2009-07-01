@@ -18,13 +18,13 @@ package org.jmodelica.ide.outline;
 import java.util.ArrayList;
 
 import org.jastadd.plugin.ui.view.JastAddContentProvider;
-import org.jmodelica.ast.ClassDecl;
-import org.jmodelica.ast.Element;
-import org.jmodelica.ast.InstClassDecl;
-import org.jmodelica.ast.InstProgramRoot;
-import org.jmodelica.ast.Program;
-import org.jmodelica.ast.SourceRoot;
-import org.jmodelica.ast.StoredDefinition;
+import org.jmodelica.modelica.compiler.ClassDecl;
+import org.jmodelica.modelica.compiler.Element;
+import org.jmodelica.modelica.compiler.InstClassDecl;
+import org.jmodelica.modelica.compiler.InstProgramRoot;
+import org.jmodelica.modelica.compiler.Program;
+import org.jmodelica.modelica.compiler.SourceRoot;
+import org.jmodelica.modelica.compiler.StoredDefinition;
 
 public class InstanceOutlineContentProvider extends JastAddContentProvider {
 

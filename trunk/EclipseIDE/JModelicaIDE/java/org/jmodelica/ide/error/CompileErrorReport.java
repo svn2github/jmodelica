@@ -18,8 +18,8 @@ package org.jmodelica.ide.error;
 import org.eclipse.core.resources.IFile;
 import org.jastadd.plugin.compiler.ast.IError;
 import org.jmodelica.ide.helpers.Util;
-import org.jmodelica.parser.ModelicaScanner;
-import org.jmodelica.parser.ModelicaParser.Terminals;
+import org.jmodelica.modelica.parser.ModelicaScanner;
+import org.jmodelica.modelica.parser.ModelicaParser.Terminals;
 
 import beaver.Scanner;
 import beaver.Symbol;

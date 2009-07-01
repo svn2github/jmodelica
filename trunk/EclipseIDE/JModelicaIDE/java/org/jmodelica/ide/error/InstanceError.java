@@ -18,7 +18,7 @@ package org.jmodelica.ide.error;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.jastadd.plugin.compiler.ast.IError;
-import org.jmodelica.ast.ASTNode;
+import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.ide.helpers.Util;
 
 public class InstanceError implements IError {

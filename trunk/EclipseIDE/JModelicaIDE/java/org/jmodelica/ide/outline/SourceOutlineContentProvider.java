@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.jastadd.plugin.compiler.ast.IOutlineNode;
-import org.jmodelica.ast.ASTNode;
-import org.jmodelica.ast.ClassDecl;
-import org.jmodelica.ast.StoredDefinition;
+import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.modelica.compiler.ClassDecl;
+import org.jmodelica.modelica.compiler.StoredDefinition;
 
 public class SourceOutlineContentProvider implements ITreeContentProvider {
 

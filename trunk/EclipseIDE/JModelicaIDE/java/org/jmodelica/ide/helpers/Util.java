@@ -34,7 +34,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.jastadd.plugin.compiler.ast.IError;
-import org.jmodelica.ast.ASTNode;
+import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.ide.Constants;
 import org.jmodelica.ide.editor.Editor;
 

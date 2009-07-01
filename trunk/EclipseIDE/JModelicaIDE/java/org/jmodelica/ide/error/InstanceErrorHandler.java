@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.jmodelica.ast.ASTNode;
-import org.jmodelica.ast.IErrorHandler;
+import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.modelica.compiler.IErrorHandler;
 
 public class InstanceErrorHandler implements IErrorHandler {
 	

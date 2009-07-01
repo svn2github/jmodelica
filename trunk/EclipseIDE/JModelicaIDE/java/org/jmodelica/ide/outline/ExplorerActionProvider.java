@@ -26,7 +26,7 @@ import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
 import org.eclipse.ui.navigator.ICommonViewerSite;
 import org.eclipse.ui.navigator.ICommonViewerWorkbenchSite;
-import org.jmodelica.ast.ASTNode;
+import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.ide.helpers.Util;
 
 public class ExplorerActionProvider extends CommonActionProvider {

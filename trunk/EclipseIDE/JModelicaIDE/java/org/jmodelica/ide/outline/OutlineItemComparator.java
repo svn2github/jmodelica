@@ -17,9 +17,9 @@ package org.jmodelica.ide.outline;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
-import org.jmodelica.ast.ASTNode;
-import org.jmodelica.ast.BaseClassDecl;
-import org.jmodelica.ast.InstClassDecl;
+import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.modelica.compiler.BaseClassDecl;
+import org.jmodelica.modelica.compiler.InstClassDecl;
 
 public class OutlineItemComparator extends ViewerSorter {
 	@Override

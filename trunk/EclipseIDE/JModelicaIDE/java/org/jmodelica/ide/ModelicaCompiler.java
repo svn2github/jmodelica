@@ -34,19 +34,19 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
 import org.jastadd.plugin.compiler.AbstractCompiler;
 import org.jastadd.plugin.compiler.ast.IASTNode;
-import org.jmodelica.ast.ASTNode;
-import org.jmodelica.ast.BadDefinition;
-import org.jmodelica.ast.List;
-import org.jmodelica.ast.Program;
-import org.jmodelica.ast.SourceRoot;
-import org.jmodelica.ast.StoredDefinition;
+import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.modelica.compiler.BadDefinition;
+import org.jmodelica.modelica.compiler.List;
+import org.jmodelica.modelica.compiler.Program;
+import org.jmodelica.modelica.compiler.SourceRoot;
+import org.jmodelica.modelica.compiler.StoredDefinition;
 import org.jmodelica.ide.error.CompileErrorReport;
 import org.jmodelica.ide.error.InstanceErrorHandler;
 import org.jmodelica.ide.helpers.DocumentReader;
 import org.jmodelica.ide.helpers.Library;
 import org.jmodelica.ide.scanners.generated.PackageExaminer;
-import org.jmodelica.parser.ModelicaParser;
-import org.jmodelica.parser.ModelicaScanner;
+import org.jmodelica.modelica.parser.ModelicaParser;
+import org.jmodelica.modelica.parser.ModelicaScanner;
 
 public class ModelicaCompiler extends AbstractCompiler {
 

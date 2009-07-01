@@ -42,27 +42,30 @@ public class EditorContributor extends BasicTextEditorActionContributor {
 	private static final String[] ACTIONS = { Constants.ACTION_ERROR_CHECK_ID, Constants.ACTION_TOGGLE_ANNOTATIONS_ID };
 	private LabelRetargetAction errorCheckAction;
 	private RetargetAction toggleAnnotationsAction;
+	private RetargetAction[] retargetActions;
 
 	public EditorContributor() {
 		errorCheckAction = new LabelRetargetAction(Constants.ACTION_ERROR_CHECK_ID, Constants.ACTION_ERROR_CHECK_TEXT);
 		errorCheckAction.setImageDescriptor(ImageLoader.ERROR_CHECK_DESC);
 		errorCheckAction.setDisabledImageDescriptor(ImageLoader.ERROR_CHECK_DIS_DESC);
 		toggleAnnotationsAction = new RetargetAction(Constants.ACTION_TOGGLE_ANNOTATIONS_ID, 
-				Constants.ACTION_TOGGLE_ANNOTATIONS_TEXT, LabelRetargetAction.AS_CHECK_BOX);
+				Constants.ACTION_TOGGLE_ANNOTATIONS_TEXT, RetargetAction.AS_CHECK_BOX);
 		toggleAnnotationsAction.setImageDescriptor(ImageLoader.ANNOTATION_DESC);
 		toggleAnnotationsAction.setDisabledImageDescriptor(ImageLoader.ANNOTATION_DIS_DESC);
+		
+		retargetActions = new RetargetAction[] { errorCheckAction, toggleAnnotationsAction };
 	}
 
 	@Override
 	public void init(IActionBars bars, IWorkbenchPage page) {
 		super.init(bars, page);
-		page.addPartListener(errorCheckAction);
-		page.addPartListener(toggleAnnotationsAction);
+		for (RetargetAction a : retargetActions)
+			page.addPartListener(a);
 			doSetActiveEditor(page.getActiveEditor());
 		IWorkbenchPart activePart = page.getActivePart();
 		if (activePart != null) {
-			errorCheckAction.partActivated(activePart);
-			toggleAnnotationsAction.partActivated(activePart);
+			for (RetargetAction a : retargetActions)
+				a.partActivated(activePart);
 		}
 	}
 
@@ -109,10 +112,10 @@ public class EditorContributor extends BasicTextEditorActionContributor {
 
 	@Override
 	public void dispose() {
-		getPage().removePartListener(errorCheckAction);
-		getPage().removePartListener(toggleAnnotationsAction);
-		errorCheckAction.dispose();
-		toggleAnnotationsAction.dispose();
+		for (RetargetAction a : retargetActions) {
+			getPage().removePartListener(a);
+			a.dispose();
+		}
 		super.dispose();
 	}
 

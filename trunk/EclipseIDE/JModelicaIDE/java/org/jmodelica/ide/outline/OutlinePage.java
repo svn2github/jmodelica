@@ -26,7 +26,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.jastadd.plugin.compiler.ast.IJastAddNode;
 import org.jastadd.plugin.ui.view.AbstractBaseContentOutlinePage;
-import org.jmodelica.ast.ASTNode;
+import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.ide.editor.Editor;
 
 public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
