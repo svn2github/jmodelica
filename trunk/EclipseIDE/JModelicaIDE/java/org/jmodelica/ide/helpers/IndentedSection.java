@@ -23,10 +23,13 @@ package org.jmodelica.ide.helpers;
  */
 public class IndentedSection {
 
+	public static String lineSep = System.getProperties().getProperty("line.separator");
+	public static int tabWidth = 4;
+	public static boolean tabbed = true;
+	
 	protected final String[] sec;
 	protected final    int[] ind;
-	protected int tabWidth;
-
+	
 	/**
 	 * Creates a section of lines defined from <code>s</code> by
 	 * splitting on line separators. 
@@ -34,9 +37,7 @@ public class IndentedSection {
 	 * @param tabWidth tab width when converting to and from tabbed
 	 * representation
 	 */
-	public IndentedSection(String s, int tabWidth) {
-		
-		this.tabWidth = tabWidth;
+	public IndentedSection(String s) {
 		
 		sec = s.split("\n|\r|\r\n", -1);
 		ind = new int[sec.length];
@@ -47,12 +48,28 @@ public class IndentedSection {
 		}
 	}
 
+	public static boolean isIndentChar(char c) {
+		return c == ' ' || c == '\t';
+	}
+	
+	/**
+	 * Trim indentation
+	 * @param s string to trim
+	 * @return
+	 */
+	public static String trimIndent(String s) {
+		int i = 0;
+		while (i < s.length() && isIndentChar(s.charAt(i)))
+			++i;
+		return s.substring(i);
+	}
+	
 	/**
 	 * Count indentation width
 	 * @param s String to count
 	 * @return
 	 */
-	public int getIndent(String s) {
+	public static int getIndent(String s) {
 		s = spacify(s);
 		int i = 0; 
 		while (i < s.length() && s.charAt(i) == ' ')
@@ -60,14 +77,7 @@ public class IndentedSection {
 		return i;
 	}
 
-	/**
-	 * Set indentation width
-	 * @param s String to change
-	 * @param Indentation width in spaces
-	 * @param tabbed put tabs
-	 * @return
-	 */
-	public String putIndent(String s, int count, boolean tabbed) {
+	protected static String putIndent(String s, int count, boolean tabbed) {
 		StringBuilder bob = new StringBuilder();
 		while (tabbed && count - tabWidth >= 0) {
 			bob.append('\t');
@@ -77,15 +87,25 @@ public class IndentedSection {
 			bob.append(' ');
 			count--;
 		}
-		return bob.toString() + s.trim();
+		return bob.toString() + trimIndent(s);
 	}
 
+	/**
+	 * Set indentation width
+	 * @param s String to change
+	 * @param Indentation width in spaces
+	 * @return
+	 */
+	public static String putIndent(String s, int count) {
+		return putIndent(s, count, tabbed); 
+	}
+		
 	/**
 	 * Convert indent to tabs
 	 * @param s
 	 * @return
 	 */
-	public String tabify(String s) {
+	public static String tabify(String s) {
 		return putIndent(s, getIndent(s), true);
 	}
 	
@@ -94,7 +114,7 @@ public class IndentedSection {
 	 * @param s
 	 * @return
 	 */
-	public String spacify(String s) {
+	public static String spacify(String s) {
 		StringBuilder bob = new StringBuilder();
 		for (char c : s.toCharArray()) {
 			if (c == '\t') {
@@ -106,24 +126,28 @@ public class IndentedSection {
 		}	
 		return bob.toString();
 	}
-	
+		
 	/**
 	 * Offset indentation in this section to <code>offset</code> spaces, for the
 	 * first line in the section. Keep relative indentations for whole section,
 	 * if possible. 
 	 * @param offset offset 
 	 */
-	public void offsetIndentTo(int offset) {
+	public IndentedSection offsetIndentTo(int offset) {
 		int ref = getIndent(sec[0]);
-		for (int i = 0; i < sec.length; i++)
-			sec[i] = putIndent(sec[i], Math.max(0, offset + (getIndent(sec[i]) - ref)), false);
+		for (int i = 0; i < sec.length; i++) {
+			sec[i] = putIndent(sec[i], 
+					Math.max(0, offset + getIndent(sec[i]) - ref));
+		}
+		if (sec[sec.length-1].trim().isEmpty())
+			sec[sec.length-1] = "";
+		return this;
 	}
 	
 	public String toString() {
 		String[] tmp = new String[sec.length];
 		for (int i = 0; i < sec.length; i++) 
 			tmp[i] = tabify(sec[i]);
-		String lineSep = System.getProperties().getProperty("line.separator");
 		return Util.implode(lineSep, tmp);
 	}
 }
