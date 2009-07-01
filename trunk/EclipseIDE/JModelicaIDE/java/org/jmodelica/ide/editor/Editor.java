@@ -70,10 +70,6 @@ import org.jastadd.plugin.ReconcilingStrategy;
 import org.jastadd.plugin.compiler.ast.IFoldingNode;
 import org.jastadd.plugin.registry.ASTRegistry;
 import org.jastadd.plugin.registry.IASTRegistryListener;
-import org.jmodelica.modelica.compiler.ASTNode;
-import org.jmodelica.modelica.compiler.BaseClassDecl;
-import org.jmodelica.modelica.compiler.InstProgramRoot;
-import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.folding.CharacterPosition;
 import org.jmodelica.folding.CharacterProjectionAnnotation;
 import org.jmodelica.folding.CharacterProjectionSupport;
@@ -86,6 +82,7 @@ import org.jmodelica.ide.folding.AnnotationDrawer;
 import org.jmodelica.ide.folding.IFilePosition;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.indent.IndentationStrategy;
+import org.jmodelica.ide.indent.Indentor;
 import org.jmodelica.ide.outline.InstanceOutlinePage;
 import org.jmodelica.ide.outline.OutlinePage;
 import org.jmodelica.ide.outline.SourceOutlinePage;
@@ -96,6 +93,10 @@ import org.jmodelica.ide.scanners.generated.Modelica22AnnotationScanner;
 import org.jmodelica.ide.scanners.generated.Modelica22DefenitionScanner;
 import org.jmodelica.ide.scanners.generated.Modelica22NormalScanner;
 import org.jmodelica.ide.scanners.generated.Modelica22PartitionScanner;
+import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.modelica.compiler.BaseClassDecl;
+import org.jmodelica.modelica.compiler.InstProgramRoot;
+import org.jmodelica.modelica.compiler.SourceRoot;
 
 /**
  * Basic source editor with projection annotations and outline
@@ -523,7 +524,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	 */
 	private class ViewerConfiguration extends SourceViewerConfiguration {
 
-		private IndentationStrategy indentationStrategy;
+		private Indentor indentationStrategy;
 		private AnnotationParenthesisAdder annotationParenthesisAdder;
 
 		@Override
@@ -538,9 +539,9 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 			return annotationParenthesisAdder;
 		}
 
-		private IndentationStrategy getIndentationStrategy() {
+		private Indentor getIndentationStrategy() {
 			if (indentationStrategy == null)
-				indentationStrategy = new IndentationStrategy();
+				indentationStrategy = new Indentor();
 			return indentationStrategy;
 		}
 
