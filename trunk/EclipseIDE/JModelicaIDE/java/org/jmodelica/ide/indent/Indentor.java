@@ -1,4 +1,4 @@
-package org.jmodelica.indent;
+package org.jmodelica.ide.indent;
 
 import java.util.Arrays;
 

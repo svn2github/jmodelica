@@ -85,6 +85,7 @@ import org.jmodelica.ide.error.InstanceErrorHandler;
 import org.jmodelica.ide.folding.AnnotationDrawer;
 import org.jmodelica.ide.folding.IFilePosition;
 import org.jmodelica.ide.helpers.Util;
+import org.jmodelica.ide.indent.IndentationStrategy;
 import org.jmodelica.ide.outline.InstanceOutlinePage;
 import org.jmodelica.ide.outline.OutlinePage;
 import org.jmodelica.ide.outline.SourceOutlinePage;

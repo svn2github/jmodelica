@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.jmodelica.ide.editor;
+package org.jmodelica.ide.indent;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultIndentLineAutoEditStrategy;
@@ -28,8 +28,7 @@ import org.jmodelica.ide.scanners.generated.BackwardClassFinder;
 import org.jmodelica.ide.scanners.generated.IndentationKeywordScanner;
 import org.jmodelica.ide.scanners.generated.Modelica22PartitionScanner;
 
-
-class IndentationStrategy extends DefaultIndentLineAutoEditStrategy {
+public class IndentationStrategy extends DefaultIndentLineAutoEditStrategy {
 	
 	protected static final IndentationKeywordScanner iks = new IndentationKeywordScanner();
 	protected static final BackwardClassFinder backwDefnFinder = new BackwardClassFinder();
