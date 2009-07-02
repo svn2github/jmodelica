@@ -549,6 +549,44 @@ void jmi_print_summary(jmi_t *jmi) {
 	}
 }
 
+void jmi_lin_interpolate(jmi_real_t x, jmi_real_t *z , int n ,int m,
+		jmi_real_t *y) {
+
+	int i;
+	int el = 0;
+
+	// Check if before interval
+	if (x <= z[0]) {
+		for (i=0;i<m-1;i++) {
+//			printf("%d: %f\n",i+1,z[n*(i+1)]);
+			y[i] = z[n*(i+1)];
+		}
+		return;
+	}
+	// Check after interval
+	if (x >= z[n-1]) {
+		for (i=0;i<m-1;i++) {
+			y[i] = z[n*(i+2)-1];
+		}
+		return;
+	}
+
+	// Find correct element
+	while(x >= z[el]) {
+		el++;
+	}
+	el--;
+
+//	printf(">> %d\n",el);
+
+	// Compute interpolated values.
+	for (i=0;i<m-1;i++) {
+		y[i] = (x-z[el])*(z[n*(i+1) + el + 1] - z[n*(i+1) + el])/(z[el+1]-z[el]) +
+		   z[n*(i+1) + el];
+	}
+
+}
+
 
 
 

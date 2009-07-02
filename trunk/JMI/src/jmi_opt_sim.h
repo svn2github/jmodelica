@@ -104,6 +104,15 @@ typedef int (*jmi_opt_sim_get_bounds_t)(jmi_opt_sim_t *jmi_opt_sim,
 typedef int (*jmi_opt_sim_get_initial_t)(jmi_opt_sim_t *jmi_opt_sim,
 		jmi_real_t *x_init);
 
+typedef int (*jmi_opt_sim_set_initial_t)(jmi_opt_sim_t *jmi_opt_sim,
+		jmi_real_t *x_init);
+
+typedef int (*jmi_opt_sim_set_initial_from_trajectory_t)(
+		jmi_opt_sim_t *jmi_opt_sim,
+		jmi_real_t *p_opt_init, jmi_real_t *trajectory_data_init,
+		jmi_real_t *hs_init, jmi_real_t start_time_init,
+		jmi_real_t final_time_init);
+
 typedef int (*jmi_opt_sim_h_nz_indices_t)(jmi_opt_sim_t *jmi_opt_sim,
 		int *colIndex, int *rowIndex);
 
@@ -175,6 +184,43 @@ jmi_real_t* jmi_opt_sim_get_x(jmi_opt_sim_t *jmi_opt_sim);
  */
 int jmi_opt_sim_get_initial(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_init);
 
+/**
+ * \brief Set the initial point of the NLP.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param (Output) x_init The initial guess vector.
+ * @return Error code.
+ */
+ int jmi_opt_sim_set_initial(jmi_opt_sim_t *jmi_opt_sim,
+		jmi_real_t *x_init);
+
+/**
+ * \brief Set the initial point based on time series trajectories of the
+ * variables of the problem.
+ *
+ * Also, initial guesses for the optimization interval and element lengths
+ * are provided.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param p_opt_init A vector of size n_p_opt containing initial values for the
+ * optimized parameters.
+ * @param trajectory_data_init A matrix stored in column major format. The
+ * first column contains the time vector. The following column contains, in
+ * order, the derivative, state, input, and algebraic variable profiles.
+ * @param hs_init A vector of length n_e containing initial guesses of the
+ * normalized lengths of the finite elements. This argument is neglected
+ * if the problem does not have free element lengths.
+ * @param start_time_init Initial guess of interval start time. This
+ * argument is neglected if the start time is fixed.
+ * @param final_time_init Initial guess of interval final time. This
+ * argument is neglected if the final time is fixed.
+ *
+ */
+int jmi_opt_sim_set_initial_from_trajectory(
+		jmi_opt_sim_t *jmi_opt_sim,
+		jmi_real_t *p_opt_init, jmi_real_t *trajectory_data_init,
+		jmi_real_t *hs_init, jmi_real_t start_time_init,
+		jmi_real_t final_time_init);
 
 /**
  * \brief The main struct in the jmi_opt_sim interface is jmi_opt_sim_t.
@@ -214,6 +260,7 @@ struct jmi_opt_sim_t{
 	int n_h;                          // Number of equality constraints
 	jmi_opt_sim_get_bounds_t get_bounds;
 	jmi_opt_sim_get_initial_t get_initial;
+	jmi_opt_sim_set_initial_from_trajectory_t set_initial_from_trajectory;
 	jmi_opt_sim_g_nz_indices_t dg_nz_indices;
 	jmi_opt_sim_h_nz_indices_t dh_nz_indices;
 	jmi_opt_sim_write_file_matlab_t write_file_matlab;

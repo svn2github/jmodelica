@@ -1321,6 +1321,106 @@ static int lp_radau_get_result(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *p_opt_,
 	return 0;
 }
 
+static int lp_set_initial_from_trajectory(
+		jmi_opt_sim_t *jmi_opt_sim,
+		jmi_real_t *p_opt_init, jmi_real_t *trajectory_data_init,
+		jmi_real_t *hs_init, jmi_real_t start_time_init,
+		jmi_real_t final_time_init) {
+
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
+	jmi_t *jmi = jmi_opt_sim->jmi;
+
+	int i;
+	int j;
+
+	int n_ci, n_cd, n_pi, n_pd, n_dx, n_x, n_u, n_w, n_tp, n_z;
+
+	jmi_get_sizes(jmi, &n_ci, &n_cd, &n_pi, &n_pd,
+			&n_dx, &n_x, &n_u, &n_w, &n_tp, &n_z);
+
+	jmi_real_t *tp = (jmi_real_t*)calloc(n_tp,sizeof(jmi_real_t));
+	jmi_get_tp(jmi,tp);
+
+	int n_vars = n_dx + n_x + n_u + n_w;
+	int n_points;
+	jmi_opt_sim_get_result_variable_vector_length(jmi_opt_sim, &n_points);
+	jmi_real_t *vals = (jmi_real_t*)calloc(n_vars,sizeof(jmi_real_t));
+
+	jmi_real_t start_time;
+	int start_time_free;
+	jmi_real_t final_time;
+	int final_time_free;
+	jmi_opt_get_optimization_interval(jmi, &start_time, &start_time_free,
+			                              &final_time, &final_time_free);
+
+	jmi_real_t tt = start_time;
+
+	// Create a collocation point vector
+	//TODO: Take into account the situation when initial and final times are free.
+	jmi_real_t *time_vec =(jmi_real_t*)calloc(jmi_opt_sim->n_e*(nlp->n_cp),
+			sizeof(jmi_real_t));
+
+	for (i=0;i<jmi_opt_sim->n_e;i++) {
+		for (j=0;j<nlp->n_cp;j++) {
+			time_vec[i*nlp->n_cp + j] = tt + nlp->cp[j]*jmi_opt_sim->hs[i]*
+			(final_time - start_time);
+		}
+		tt += jmi_opt_sim->hs[i]*(final_time - start_time);
+	}
+
+    // Initialize the optimization parameters
+	for (i=0;i<jmi_opt_sim->jmi->opt->n_p_opt;i++) {
+		jmi_opt_sim->x_init[i] = p_opt_init[i];
+	}
+
+    // Initialize the initial point
+	jmi_lin_interpolate(jmi_opt_sim->jmi->opt->start_time,
+					trajectory_data_init,n_points,n_vars+1,jmi_opt_sim->x_init+
+					jmi->opt->n_p_opt);
+
+    // Loop over the collocation points, interpolate in input tables.
+	for (i=0;i<jmi_opt_sim->n_e;i++) {
+		for (j=0;j<nlp->n_cp;j++) {
+			jmi_lin_interpolate(time_vec[i*nlp->n_cp + j],
+							trajectory_data_init,n_points,n_vars+1,
+							jmi_opt_sim->x_init + jmi->opt->n_p_opt +
+							n_vars*(1 + i*nlp->n_cp + j));
+		}
+	}
+
+    // Loop over element junction states
+	for (i=0;i<jmi_opt_sim->n_e;i++) {
+		jmi_lin_interpolate(time_vec[(i+1)*nlp->n_cp],
+						trajectory_data_init,n_points,n_vars+1,vals);
+		for (j=0;j<n_x;j++) {
+			jmi_opt_sim->x_init[jmi->opt->n_p_opt +
+								n_vars*(1 + jmi_opt_sim->n_e*nlp->n_cp) +
+										n_dx*i + j] = vals[n_dx + j];
+		}
+	}
+
+    // Loop over time points
+	for (i=0;i<jmi->n_tp;i++) {
+		jmi_lin_interpolate(tp[i],
+						trajectory_data_init,n_points,n_vars+1,
+						jmi_opt_sim->x_init +  jmi->opt->n_p_opt +
+						n_vars*(1 + jmi_opt_sim->n_e*nlp->n_cp) +
+								n_dx*jmi_opt_sim->n_e + i*n_vars);
+
+	}
+
+	for (i=0;i<jmi_opt_sim->n_x;i++) {
+		jmi_opt_sim->x[i] = jmi_opt_sim->x_init[i];
+	}
+
+	// TODO: take care of varying start and final time.
+
+	free(tp);
+	free(time_vec);
+	free(vals);
+
+	return 0;
+}
 
 int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 		jmi_real_t *hs, int hs_free,
@@ -1644,8 +1744,6 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 
 			int *dHineq_ddx_p_dx_p_du_p_dw_p_irow = (int*)calloc(dHineq_ddx_p_dx_p_du_p_dw_p_n_nz,sizeof(int));
 			int *dHineq_ddx_p_dx_p_du_p_dw_p_icol = (int*)calloc(dHineq_ddx_p_dx_p_du_p_dw_p_n_nz,sizeof(int));
-			dHineq_ddx_p_dx_p_du_p_dw_p_irow[0]=1;
-			dHineq_ddx_p_dx_p_du_p_dw_p_icol[0]=1;
 			jmi_opt_dHineq_nz_indices(jmi,opt->der_eval_alg,
 					JMI_DER_DX_P | JMI_DER_X_P |
 					JMI_DER_U_P | JMI_DER_W_P, opt->der_mask,
@@ -2487,14 +2585,14 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 			(*jmi_opt_sim)->get_initial = *jmi_opt_sim_get_initial;
 			(*jmi_opt_sim)->dh_nz_indices = *lp_radau_dh_nz_indices;
 			(*jmi_opt_sim)->dg_nz_indices = *lp_radau_dg_nz_indices;
+			(*jmi_opt_sim)->set_initial_from_trajectory =
+				*lp_set_initial_from_trajectory;
 			(*jmi_opt_sim)->write_file_matlab = *lp_radau_write_file_matlab;
 			(*jmi_opt_sim)->get_result_variable_vector_length =
 				*lp_radau_get_result_variable_vector_length;
 			(*jmi_opt_sim)->get_result = *lp_radau_get_result;
 			//print_lp_pols(*jmi_opt_sim);
 			print_problem_stats(*jmi_opt_sim);
-
-
 			return 0;
 }
 
@@ -2502,6 +2600,9 @@ int jmi_opt_sim_lp_delete(jmi_opt_sim_t *jmi_opt_sim) {
 
 	return 0;
 }
+
+
+
 
 static void print_problem_stats(jmi_opt_sim_t *jmi_opt_sim) {
 	jmi_opt_sim_lp_t *opt = (jmi_opt_sim_lp_t*)jmi_opt_sim;

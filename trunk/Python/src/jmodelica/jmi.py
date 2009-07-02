@@ -862,7 +862,7 @@ def load_DLL(libname, path):
                                                      flags='C'),
                                        ct.POINTER(ct.c_int),
                                        ct.POINTER(ct.c_int)]
-    
+
     # JMI Simultaneous Optimization interface
     try:
         dll.jmi_opt_sim_get_dimensions.argtypes = [ct.c_void_p,
@@ -889,6 +889,25 @@ def load_DLL(libname, path):
                                                 Nct.ndpointer(dtype=c_jmi_real_t,
                                                               ndim=1,
                                                               flags='C')]
+        
+        dll.jmi_opt_sim_set_initial.argtypes =  [ct.c_void_p,
+                                                Nct.ndpointer(dtype=c_jmi_real_t,
+                                                              ndim=1,
+                                                              flags='C')] 
+
+        dll.jmi_opt_sim_set_initial_from_trajectory.argtypes = [ct.c_void_p,
+                                                                Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                              ndim=1,
+                                                                              flags='C'),
+                                                                Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                              ndim=1,
+                                                                              flags='C'),
+                                                                Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                              ndim=1,
+                                                                              flags='C'),
+                                                                c_jmi_real_t,
+                                                                c_jmi_real_t] 
+
         dll.jmi_opt_sim_get_bounds.argtypes = [ct.c_void_p,
                                                 Nct.ndpointer(dtype=c_jmi_real_t,
                                                               ndim=1,
@@ -960,7 +979,7 @@ def load_DLL(libname, path):
         #Is this correct????
         _returns_ndarray(dll.jmi_opt_sim_get_x, c_jmi_real_t, n_x.value, order='C')
     except AttributeError, e:
-       pass
+        pass
 
     # Simultaneous Optimization based on Lagrange polynomials and Radau points
     try:
@@ -3311,7 +3330,47 @@ class JMISimultaneousOpt(object):
         """
         if self._jmi_model._dll.jmi_opt_sim_get_initial(self._jmi_opt_sim, x_init) is not 0:
             raise JMIException("Getting the initial point failed.")
-        
+
+    def opt_sim_set_initial(self, x_init):
+        """ Set the initial point of the NLP.
+
+        Parameters:
+            x_init --- The initial guess vector.
+        """
+        if self._jmi_model._dll.jmi_opt_sim_set_initial(self._jmi_opt_sim, x_init) is not 0:
+            raise JMIException("Setting the initial point failed.")
+ 
+    def opt_sim_set_initial_from_trajectory(self, p_opt_init, trajectory_data_init,
+                                            hs_init, start_time_init, final_time_init):
+        """
+        Set the initial point based on time series trajectories of the
+        variables of the problem.
+
+        Also, initial guesses for the optimization interval and element lengths
+        are provided.
+
+        Parameters:
+        p_opt_init -- A vector of size n_p_opt containing initial values for the
+        optimized parameters.
+        trajectory_data_init -- A matrix stored in column major format. The
+        first column contains the time vector. The following column contains, in
+        order, the derivative, state, input, and algebraic variable profiles.
+        hs_init -- A vector of length n_e containing initial guesses of the
+        normalized lengths of the finite elements. This argument is neglected
+        if the problem does not have free element lengths.
+        start_time_init -- Initial guess of interval start time. This
+        argument is neglected if the start time is fixed.
+        final_time_init -- Initial guess of interval final time. This
+        argument is neglected if the final time is fixed.
+        """
+        if self._jmi_model._dll.jmi_opt_sim_set_initial_from_trajectory(self._jmi_opt_sim, \
+                                                                        p_opt_init, \
+                                                                        trajectory_data_init, \
+                                                                        hs_init, \
+                                                                        start_time_init, \
+                                                                        final_time_init) is not 0:
+            raise JMIException("Setting the initial point failed.")
+
     def opt_sim_get_bounds(self, x_lb, x_ub):
         """ 
         Get the upper and lower bounds of the optimization variables.

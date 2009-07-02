@@ -1517,11 +1517,32 @@ int jmi_opt_dHineq_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_v
 /* @{ */
 
 /**
- * Print a summary of the content of the jmi_t struct.
+ * \brief Print a summary of the content of the jmi_t struct.
  *
  * @param jmi A jmi_t struct.
  */
 void jmi_print_summary(jmi_t *jmi);
+
+/**
+ * \brief Linear interpolation in table.
+ *
+ * Linear interpolation is performed in a table consisting of an abscissa and
+ * one or more ordinates. If the interpolation point resides outside of the
+ * interval of the provided abscissa, then the initial or final ordinate
+ * values, respectively, are returned.
+ *
+ * @param x The interpolation point.
+ * @param z A matrix stored in column major format containing the abscissa,
+ * stored in the first column, and the ordinates, stored in the following
+ * columns.
+ * @param n Number of points in the abscissa vector.
+ * @param m Number of columns of z, i.e., the number of ordinate vectors plus
+ * one for the abscissa.
+ * @param y (Output) A vector of size m-1 containing the interpolated ordinate
+ * values.
+ */
+void jmi_lin_interpolate(jmi_real_t x, jmi_real_t *z , int n ,int m,
+		jmi_real_t *y);
 
 /* @} */
 
