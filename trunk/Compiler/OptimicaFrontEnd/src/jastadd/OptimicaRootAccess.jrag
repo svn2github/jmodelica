@@ -18,7 +18,8 @@ aspect OptimicaRootAccess {
 	
 	//refine RootAccess eq Root.parser() = new OptimicaParser();
 	
-	refine RootAccess eq ParserHandler.parseFile(String fileName) {
+	refine RootAccess SourceRoot ParserHandler.parseFile(String fileName) 
+	   throws ParserException, beaver.Parser.Exception {
 		SourceRoot sr = null;
 		try {
 			Reader reader = new FileReader(fileName);
@@ -32,16 +33,14 @@ aspect OptimicaRootAccess {
 			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
+			System.out.println("Error when parsing file: "+ fileName);
+		}
 		
 		return sr;
 	}
 
-	refine RootAccess eq ParserHandler.parseString(String str, String fileName) {
+	refine RootAccess SourceRoot ParserHandler.parseString(String str, String fileName)  
+	   throws ParserException, beaver.Parser.Exception {
 		SourceRoot sr = null;
 		try {
 			OptimicaScanner scanner = new OptimicaScanner(new StringReader(str));
@@ -55,14 +54,12 @@ aspect OptimicaRootAccess {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
+		}
 		return sr;
 	}
 	
-	refine RootAccess eq ParserHandler.parseExpString(String str) {
+	refine RootAccess Exp ParserHandler.parseExpString(String str) 
+	   throws ParserException, beaver.Parser.Exception {
 		Exp exp = null;
 		try {
 			OptimicaScanner scanner = new OptimicaScanner(new StringReader(str));
@@ -76,10 +73,7 @@ aspect OptimicaRootAccess {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
+		}
 		
 		return exp;
 	}

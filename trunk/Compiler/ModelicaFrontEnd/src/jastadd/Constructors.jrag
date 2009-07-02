@@ -41,14 +41,17 @@ aspect Constructors {
                                  new Opt(),
                                  new Comment(new Opt(),new Opt()));
 		
-		
 		Exp bexp_ast=null;
 		
 		if (!bexp.equals("")) {
 		    //ModelicaParser mp = new ModelicaParser();
 			//bexp_ast = mp.parseExpString(bexp);
 			ParserHandler ph = new ParserHandler();
-			bexp_ast = ph.parseExpString(bexp);
+			try {
+				bexp_ast = ph.parseExpString(bexp);
+			} catch (Exception e) {	
+				System.out.println("Error when parsing string");	
+			}
 			//debugPrint("ComponentDecl.ComponentDecl");
 			//bexp_ast.dumpTreeBasic("");	
 		    this.setModification(new ValueModification(bexp_ast));

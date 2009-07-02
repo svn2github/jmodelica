@@ -48,7 +48,8 @@ aspect RootAccess {
 	 * extensions where other parsers are used.
 	 */
 	
-	syn SourceRoot ParserHandler.parseFile(String fileName) {
+	public SourceRoot ParserHandler.parseFile(String fileName) 
+	   throws ParserException, beaver.Parser.Exception {
 		SourceRoot sr = null;
 		try {
 			Reader reader = new FileReader(fileName);
@@ -63,15 +64,13 @@ aspect RootAccess {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
+		}
 		
 		return sr;
 	}
 	
-	syn SourceRoot ParserHandler.parseString(String str, String fileName) {
+	public SourceRoot ParserHandler.parseString(String str, String fileName) 
+	   throws ParserException, beaver.Parser.Exception {
 		SourceRoot sr = null;
 		try {
 			ModelicaScanner scanner = new ModelicaScanner(new StringReader(str));
@@ -85,14 +84,12 @@ aspect RootAccess {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
+		}
 		return sr;
 	}
 	
-	syn Exp ParserHandler.parseExpString(String str) {
+	public Exp ParserHandler.parseExpString(String str)
+	   throws ParserException, beaver.Parser.Exception {
 		Exp exp = null;
 		try {
 			ModelicaScanner scanner = new ModelicaScanner(new StringReader(str));
@@ -106,17 +103,11 @@ aspect RootAccess {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
+		}
 		
 		return exp;
 	}
 
-	
-	
-	
 }
 
 aspect DebugPrint {
@@ -723,7 +714,7 @@ aspect ParserHelpers {
 	/**
 	 * An exception for parser errors.
 	 */
-	public static class ParserException extends java.lang.RuntimeException {
+	public class ParserException extends java.lang.Exception {
 		private Problem p;
 		
 		/**

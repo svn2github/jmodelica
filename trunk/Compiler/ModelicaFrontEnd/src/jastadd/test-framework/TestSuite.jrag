@@ -48,7 +48,12 @@ public class TestSuite {
 		name = className;
 		l = new ArrayList<TestCase>();
 		ParserHandler ph = new ParserHandler();
-		SourceRoot sr = ph.parseFile(fileName);
+		SourceRoot sr = null;
+		try {
+			sr = ph.parseFile(fileName);
+		} catch (Exception e) {
+			System.out.println("Error when parsing file: " + fileName);
+		}
 		loadOptions(sr);
 		sr.collectTestCases(this,className);
 	}

@@ -100,7 +100,12 @@ public class ErrorTestCase extends TestCase {
 	public boolean testMe() {
         System.out.println("Running test: " + getClassName());
 		ParserHandler ph = new ParserHandler();
-		SourceRoot sr = ph.parseFile(getSourceFileName());
+		SourceRoot sr = null;
+		try {
+			sr = ph.parseFile(getSourceFileName());
+		} catch (Exception e) {
+			System.out.println("Error when parsing file: " + getSourceFileName());
+		}
 		sr.setFileName(getSourceFileName());	
 		TestSuite.loadOptions(sr);
 		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();

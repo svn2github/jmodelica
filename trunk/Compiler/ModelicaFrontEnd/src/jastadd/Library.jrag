@@ -70,7 +70,7 @@ aspect Library {
 				File baseDir = new File(dirName);
 				File[] allFiles = baseDir.listFiles();
 				if (allFiles==null) {
-					return createErrorStoredDefenition();
+					return createErrorStoredDefinition();
 				} 
 				
 				boolean package_mo_present = false;
@@ -83,8 +83,8 @@ aspect Library {
 				if (package_mo_present) {
 				    System.out.println("Reading file: " + dirName+"/package.mo...");
 				    ParserHandler ph = new ParserHandler();
-		   			SourceRoot sr = ph.parseFile(dirName+"/package.mo");
-		   			FullClassDecl fcd = (FullClassDecl)sr.getProgram().getUnstructuredEntity(0).getElement(0);
+				    SourceRoot sr = ph.parseFile(dirName+"/package.mo");
+				    FullClassDecl fcd = (FullClassDecl)sr.getProgram().getUnstructuredEntity(0).getElement(0);
 		   			sr.getProgram().getUnstructuredEntity(0).setFileName(dirName+"/package.mo");
 		   			LibClassDecl lcd = new LibClassDecl(fcd);
 		   				   				   			
@@ -139,16 +139,12 @@ aspect Library {
 					sr.getProgram().getUnstructuredEntity(0).setElement(lcd,0);
 	   				return sr.getProgram().getUnstructuredEntity(0);
 	   			}
-			} catch (ParserException e) {
-				System.out.println("In file: '"+ dirName+"/package.mo"+ "':");
-				System.err.println(e.getMessage());
-				return createErrorStoredDefenition();		        
 			} catch (Exception e) {
-				// No need, printStackTrace() prints string from toString() as well 
-//				System.out.println(e.toString());
-				e.printStackTrace();
-				return createErrorStoredDefenition();		        
-			}			
+				System.out.println("Error when parsing file: '"+ dirName+"/package.mo"+ "':");
+				//System.err.println(e.getMessage());
+				return createErrorStoredDefinition();		        
+			} 		
+			
 		} else {
 			try {
 				System.out.println("Reading file: " + getFileName() + "...");
@@ -158,16 +154,16 @@ aspect Library {
 					sd.setFileName(getFileName());
 				}
 				return sr.getProgram().getUnstructuredEntity(0);
-			} catch (ParserException e) {
-				System.out.println("In file: '"+ getFileName()+ "':");
-				System.err.println(e.getMessage());
-				return createErrorStoredDefenition();		        
-			}
+			} catch (Exception e) {
+				System.out.println("Error when parsing file: '"+ getFileName()+ "':");
+				//System.err.println(e.getMessage());
+				return createErrorStoredDefinition();		        
+			} 
 		}
 		return null;
 	}
 	
-	private StoredDefinition LibNode.createErrorStoredDefenition() {
+	private StoredDefinition LibNode.createErrorStoredDefinition() {
 		BadClassDecl bcd = new BadClassDecl();
 		bcd.setName(new IdDecl("_ErrorClassDecl_in_lib"));
 		StoredDefinition sd = new StoredDefinition(new Opt(), new List());

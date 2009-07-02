@@ -60,7 +60,7 @@ public class TokenTester {
 
 		return testSuccess;
 	}
-
+/*
 	public static void main(String args[]) {
 	
 		if(args.length != 3) {
@@ -121,11 +121,13 @@ public class TokenTester {
 		
 		TokenTester tt = new TokenTester();
 		boolean testSuccess = tt.test(fm1_str.toString(),fm2_str.toString());
-/*
+
 		if (testSuccess)
 			System.out.println("Test succeeded!");
 		else
 			System.out.println("Test failed!");
-*/
+
 	}
+
+*/
 }
