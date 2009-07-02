@@ -106,4 +106,9 @@ public class InstanceError implements IError {
 		return false;
 	}
 
+	@Override
+	public String toString() {
+		return String.format("%s, line %d, col %d:\n%s\n", fileName, line, col, msg);
+	}
+
 }

@@ -21,7 +21,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
@@ -64,6 +63,7 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.jastadd.plugin.ReconcilingStrategy;
@@ -99,10 +99,7 @@ import org.jmodelica.modelica.compiler.InstProgramRoot;
 import org.jmodelica.modelica.compiler.SourceRoot;
 
 /**
- * Basic source editor with projection annotations and outline
- * 
- * @author emma
- * 
+ * Modelica source editor.
  */
 public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryListener {
 
@@ -111,7 +108,15 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	private static final String CURRENT_LINE_KEY = AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE;
 	private static final String BRACE_MATCHING_KEY = Constants.KEY_BRACE_MATCHING;
 	private static final String BRACE_MATCHING_COLOR_KEY = Constants.KEY_BRACE_MATCHING_COLOR;
+	
+	/**
+	 * Identifier of the target content type (Modelica source).
+	 */
 	public static final String CONTENT_TYPE_ID = Constants.CONTENT_TYPE_ID;
+	
+	/**
+	 * Default file extension of handled file type (Modelica source).
+	 */
 	public static final String FILE_EXTENSION = Constants.FILE_EXTENSION;
 
 	// Content outlines
@@ -127,7 +132,10 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	private ASTNode fRoot;
 	private String fKey;
 	private IProject fProject;
+	
 	private IDocumentPartitioner fPartitioner;
+	
+	// For folding
 	private CharacterProjectionSupport projectionSupport;
 	private AnnotationDrawer annotationDrawingStrategy;
 	
@@ -135,26 +143,29 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	private ErrorCheckAction errorCheckAction;
 	private ToggleAnnotationsAction toggleAnnotationsAction;
 	
-	private ModelicaCompiler cmp;
+	private ModelicaCompiler compiler;
 	
 	private boolean fCompiledLocal;
 	private IFile fLocalFile;
+	
 	private boolean fIsLibrary;
 	private String fPath;
 
+	/**
+	 * Standard constructor.
+	 */
 	public Editor() {
 		fRegistry = org.jastadd.plugin.Activator.getASTRegistry();
 		fSourceOutlinePage = new SourceOutlinePage(this); 
 		fInstanceOutlinePage = new InstanceOutlinePage(this);
 		fStrategy = new ReconcilingStrategy();
 		fLocalStrategy = new LocalReconcilingStrategy(this);
-		cmp = new ModelicaCompiler();
+		compiler = new ModelicaCompiler();
 	}
 
-	/*
-	 * Override to get projection annotations in the viewer
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#createSourceViewer(org.eclipse.swt.widgets.Composite, org.eclipse.jface.text.source.IVerticalRuler, int)
+	/**
+	 * Create and configure a source viewer. Creates a {@link CharacterProjectionViewer} and 
+	 * configures it for folding and brace matching.
 	 */
 	@Override
 	protected ISourceViewer createSourceViewer(Composite parent,
@@ -191,8 +202,6 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		decoration.setCharacterPairMatcher(new ModelicaCharacterPairMatcher(viewer));
 		decoration.setMatchingCharacterPainterPreferenceKeys(BRACE_MATCHING_KEY, BRACE_MATCHING_COLOR_KEY);
 	}
-
-	
 	@Override
 	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
 		String property = event.getProperty();
@@ -209,10 +218,8 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		return new Color(Display.getCurrent(), color);
 	}
 
-	/*
-	 * Override to set the configuration of the source viewer and to update on creation
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#createPartControl(org.eclipse.swt.widgets.Composite)
+	/**
+	 * Sets source viewer configuration to a {@link ViewerConfiguration} and creates control.
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
@@ -224,10 +231,9 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	    update();
 	}
 	
-	/*
-	 * Override to create an outline page
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#getAdapter(java.lang.Class)
+	/**
+	 * Can return an {@link IContentOutlinePage}.
+	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -238,17 +244,27 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		return super.getAdapter(required);
 	}
 
+	/**
+	 * Gets the source outline page associated with this editor.
+	 * @return  the source outline page
+	 * @see IContentOutlinePage
+	 */
 	public IContentOutlinePage getSourceOutlinePage() {
 		return fSourceOutlinePage;
 	}
 
+	/**
+	 * Gets the instance outline page associated with this editor.
+	 * @return  the instance outline page
+	 * @see IContentOutlinePage
+	 */
 	public IContentOutlinePage getInstanceOutlinePage() {
 		return fInstanceOutlinePage;
 	}
 
 	/**
-	 * Override this method to reset the AST when the input changes 
-	 * the editor input change. 
+	 * Updates editor to match input change.
+	 * @see AbstractTextEditor#doSetInput(IEditorInput)
 	 */
 	@Override
 	protected void doSetInput(IEditorInput input) throws CoreException {
@@ -257,7 +273,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		IFileEditorInput fInput = null;
 		if (input instanceof IFileEditorInput) 
 			fInput = (IFileEditorInput)input;
-		resetAST(fInput);
+		resetAST(fInput); //sets fRoot
 		
 		if (fRoot == null) 
 			compileLocal(input);
@@ -269,7 +285,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 			setupDocumentPartitioner(document);
 	}
 
-	@Override
+	@Override	
 	protected void createActions() {
 		super.createActions();
 		
@@ -287,8 +303,13 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		addAction(menu, Constants.ACTION_COLLAPSE_ALL_ID);
 	}
 
+	/**
+	 * If edited file is compiled locally, this method is called
+	 * by reconciler to compile AST and update editor.
+	 * @param document currently edited document
+	 */
 	public void recompileLocal(IDocument document) {
-		fRoot = (ASTNode) cmp.compileToAST(document, null, null, fLocalFile);
+		fRoot = (ASTNode) compiler.compileToAST(document, null, null, fLocalFile);
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
 				update();
@@ -296,6 +317,11 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		});
 	}
 	
+	/**
+	 * Compile file locally. Try to get file references from input.
+	 * @param input input object (typically {@link IFileEditorInput}
+	 *  or {@link IURIEditorInput})
+	 */
 	private void compileLocal(IEditorInput input) {
 		try {
 			fLocalFile = null;
@@ -305,7 +331,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 			if (fPath != null) {
 				if (fLocalFile == null) 
 					fLocalFile = getFileForPath(fPath);
-				fRoot = cmp.compileFile(fLocalFile, fPath);
+				fRoot = compiler.compileFile(fLocalFile, fPath);
 			}
 		} catch (IllegalArgumentException e) {
 		}
@@ -313,6 +339,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		update();
 	}
 
+	
 	private IFile getFileForPath(String path) {
 		// TODO: If file is outside workspace, add linked resource?
 		IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
@@ -325,6 +352,10 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		return null;
 	}
 
+	/**
+	 * Return true if file is compiled locally.
+	 * @return true iff file is compiled locally
+	 */
 	public boolean isCompiledLocal() {
 		return fCompiledLocal;
 	}
@@ -346,6 +377,9 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 
 	// ASTRegistry listener methods
 	
+	/**
+	 * Is called when AST is updated. 
+	 */
 	public void childASTChanged(IProject project, String key) {
 		if (project == fProject && key.equals(fKey)) {
 			fRoot = (ASTNode) fRegistry.lookupAST(fKey, fProject);
@@ -495,6 +529,10 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		updateErrorCheckAction();
 	}
 	
+	/**
+	 * Sets error check action to check the class 
+	 * currently containing selection.
+	 */
 	private void updateErrorCheckAction() {
 		try {
 			ITextSelection sel = (ITextSelection) getSelectionProvider().getSelection();
@@ -664,6 +702,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	}
 
 	private class ErrorCheckAction extends ConnectedTextsAction {
+		private static final int MAX_ERRORS_SHOWN = 10;
 		private BaseClassDecl currentClass;
 
 		public ErrorCheckAction() {
@@ -696,18 +735,13 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 			String msg;
 			if (errorHandler.hasLostErrors()) {
 				Collection<InstanceError> err = errorHandler.getLostErrors();
-				Collection<String> files = new HashSet<String>();
-				for (InstanceError e : err) 
-					if (!files.contains(e.getFileName()))
-						files.add(e.getFileName());
-				StringBuilder buf = new StringBuilder("Error");
-				if (err.size() > 1)
-					buf.append('s');
-				buf.append(" found in file");
-				if (files.size() > 1)
-					buf.append('s');
-				buf.append(" outside workspace: ");
-				buf.append(Util.listString(files, "'", "'", ", ", " && "));
+				StringBuilder buf = new StringBuilder("Errors found in files outside workspace:\n");
+				if (err.size() > MAX_ERRORS_SHOWN)
+					buf.append(String.format("(First %d of %d errors shown.)", MAX_ERRORS_SHOWN, err.size()));
+				int i = 0;
+				for (InstanceError e : err)
+					if (i++ < MAX_ERRORS_SHOWN)
+						buf.append(e);
 				msg = buf.toString();
 			} else {
 				int num = errorHandler.getNumErrors();

@@ -6,6 +6,10 @@ import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 import static java.lang.Character.isWhitespace;
 
+/**
+ * Inserts closing parenthesis of annotation when user types opening parenthesis.
+ * Closing parenthesis is added after cursor.
+ */
 public class AnnotationParenthesisAdder implements IAutoEditStrategy {
 	
 	private static final String keyword = "annotation";
