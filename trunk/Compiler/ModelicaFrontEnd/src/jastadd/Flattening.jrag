@@ -534,7 +534,10 @@ aspect FlatExpressions {
 aspect InstantiatedExpressions {
 
 	public FAbstractEquation AbstractEquation.instantiate() {
-		return new FUnsupportedEquation();
+		FUnsupportedEquation ue = new FUnsupportedEquation();
+		ue.setStart(getStart());
+		ue.setEnd(getEnd());
+		return ue;
 	}
 
 	public FAbstractEquation Equation.instantiate() {
