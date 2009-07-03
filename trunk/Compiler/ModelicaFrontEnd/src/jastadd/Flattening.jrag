@@ -319,19 +319,7 @@ aspect FlatExpressions {
     }
 
 	public FExp FInstAccessExp.flatten(FQName prefix) {
-		// If the FInstAccess referes to a constant, then inline expression
-		if (getInstAccess().myDecl() instanceof InstPrimitive()) {
-			InstPrimitive ip = null;
-			ip = (InstPrimitive)getInstAccess().myDecl();
-			if (ip.isConstant()) {
-				if (ip.isReal())) {
-					return new FRealLitExp(ip.myBindingExp().ceval().realValue());
-				}
-			}
-			
-		} else {
 			return new FIdUseExp(new FIdUse(getInstAccess().flatten(prefix)));
-		}
 	}
 
 	public FQName InstAccess.flatten(FQName prefix) { 
