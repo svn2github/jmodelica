@@ -581,6 +581,7 @@ aspect PrettyPrint {
 	eq Parameter.toString() = "parameter";
 	eq Discrete.toString() = "discrete";
 	eq Constant.toString() = "constant";
+	eq Continuous.toString() = "";
 	
 	syn String FPrimitiveType.toString();
 	eq FRealType.toString() = "Real";

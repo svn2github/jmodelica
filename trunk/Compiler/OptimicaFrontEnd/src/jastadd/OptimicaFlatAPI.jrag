@@ -738,6 +738,9 @@ aspect OptimicaFlatAPI {
 		for (FExp t : timePointsExp()) {
 			ts.add(new Double(t.ceval().realValue()));
 		}
+		if (ts.size()==0) {
+			return new double[0];
+		}
 		java.util.Collections.sort(ts);
 		ArrayList<Double> ts_unique = new ArrayList<Double>();
 		ts_unique.add(ts.get(0));
@@ -847,7 +850,12 @@ aspect OptimicaFlatAPIDiagnostics {
 	public String FOptClass.diagnostics() {
 		StringBuffer str = new StringBuffer();
 		str.append(super.diagnostics() + "\n");
-		str.append("Cost function:   " + objectiveExp().prettyPrint("") + "\n");
+		str.append("Cost function:   ");
+		if (objectiveExp()!=null) {
+			str.append(objectiveExp()!=null? objectiveExp().prettyPrint("") + "\n": "");
+		} else {
+			str.append(" not give\n");
+		}
 		str.append("startTime:       " + (startTimeAttributeSet()? startTimeAttributeExp().prettyPrint(""): "not set") + "\n");
 		str.append("startTime free:  " + (startTimeFreeAttributeSet()? startTimeFreeAttributeExp().prettyPrint(""): "not set") + "\n");
 		str.append("startTime init:  " + (startTimeInitialGuessAttributeSet()? startTimeInitialGuessAttributeExp().prettyPrint(""): "not set") + "\n");
@@ -922,7 +930,7 @@ aspect OptimicaFlatAPIDiagnostics {
 	 */
 	public String FOptClass.timedVariablesLinearityDiagnostics() {
 		StringBuffer str = new StringBuffer();
-		
+		str.append("Linearity of time points:\n");
 		for (FVariable fv : getFVariables()) {
 			str.append(fv.name() + ":\n");
 			boolean isLin[] = fv.isLinearTimedVariables();

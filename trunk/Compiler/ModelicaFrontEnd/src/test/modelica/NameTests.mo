@@ -528,6 +528,25 @@ end NameTests.NameTest15;
 protected Real x=1;
 end NameTest15;
 
+
+class NameTest16
+     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="NameTest16",
+        description="Check that constants are inlined.",
+                                               flatModel=
+"
+fclass NameTests.NameTest16
+constant Real c = 1.0;
+parameter Real p = 1.0;
+equation
+end NameTests.NameTest16;
+")})));
+
+constant Real c = 1.0;
+parameter Real p = c;
+
+end NameTest16;
+
 class ExtendsTest1
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FlatteningTestCase(name="ExtendsTest1",

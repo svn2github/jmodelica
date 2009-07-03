@@ -141,9 +141,11 @@ public class OptimicaCGenerator extends CGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			genPrinter.print("   (*res)[0] = ");
-			foptclass.objectiveExp().prettyPrint_C(genPrinter,"");
-			genPrinter.print(";\n");
+			if (foptclass.objectiveExp()!=null) {
+				genPrinter.print("   (*res)[0] = ");
+				foptclass.objectiveExp().prettyPrint_C(genPrinter,"");
+				genPrinter.print(";\n");
+			}
 		}
 	}
 	

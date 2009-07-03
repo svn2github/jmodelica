@@ -33,10 +33,11 @@ _beaver_lib = common._jm_home+os.sep+'ThirdParty'+os.sep+'Beaver'+os.sep+'lib'
 
 _dir_path="-Djava.ext.dirs=%s" %_beaver_lib
 _class_path="-Djava.class.path=%s:%s" %(_oc_jar,_mc_jar)
+_jvm_mem_args="-Xmx1024M"
 
 #start JVM
 if not jpype.isJVMStarted():
-    jpype.startJVM(jpype.getDefaultJVMPath(),_class_path,_dir_path)
+    jpype.startJVM(jpype.getDefaultJVMPath(),_class_path,_dir_path,_jvm_mem_args)
     print "JVM started."
 
 #get java class (OptimicaCompiler)
@@ -94,7 +95,7 @@ def compile_model(model_file_name, model_class_name, target = "model"):
     try:
         print(OptCompiler)
         OptCompiler.compileModel(model_file_name, model_class_name, xml_variables_path, xml_problvariables_path, xml_values_path, cppath)
-        c_file = model_class_name.replace('.','_',1)
+        c_file = model_class_name.replace('.','_')
         retval = compile_dll(c_file, target)
         return retval
 

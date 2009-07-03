@@ -319,9 +319,36 @@ aspect FlatExpressions {
     }
 
 	public FExp FInstAccessExp.flatten(FQName prefix) {
-			return new FIdUseExp(new FIdUse(getInstAccess().flatten(prefix)));
-	}
+		// If the FInstAccess referes to a constant, then inline expression
+		if (getInstAccess().myInstComponentDecl() instanceof InstPrimitive) {
+			InstPrimitive ip = null;
+			ip = (InstPrimitive)getInstAccess().myInstComponentDecl();
+			if (ip.isConstant()) {
+				if (ip.isReal()) {
+					return new FRealLitExp(
+							Double.toString(ip.myBindingFExp().ceval().realValue()));
+				}
+				if (ip.isInteger()) {
+					return new FIntegerLitExp(
+							Integer.toString(ip.myBindingFExp().ceval().intValue()));
+				}
+				if (ip.isBoolean()) {
+					if (ip.myBindingFExp().ceval().booleanValue()) {
+						return new FBooleanLitExpTrue();
+					} else {
+						return new FBooleanLitExpFalse();
+					}
+				}
+				if (ip.isReal()) {
+					return new FStringLitExp(ip.myBindingFExp().ceval().stringValue());
+				}
 
+			}
+
+		} 
+		return new FIdUseExp(new FIdUse(getInstAccess().flatten(prefix)));
+	}
+	
 	public FQName InstAccess.flatten(FQName prefix) { 
 		FQName myName = new FQName(prefix);
 		myName.append(this,prefix);

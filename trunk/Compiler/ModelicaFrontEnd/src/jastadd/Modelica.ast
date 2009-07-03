@@ -223,6 +223,7 @@ abstract TypePrefix;
 abstract TypePrefixFlow : TypePrefix;
 Flow : TypePrefixFlow::=;
 abstract TypePrefixVariability : TypePrefix;
+Continuous : TypePrefixVariability::=;
 Discrete : TypePrefixVariability::=;
 Parameter : TypePrefixVariability::=;
 Constant : TypePrefixVariability::=;

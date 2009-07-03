@@ -25,11 +25,39 @@ aspect FlatVariability {
 	syn boolean FTypePrefixVariability.continuousVariability() = false;
 	eq FContinuous.continuousVariability() = true;	
 
+	syn boolean TypePrefixVariability.constantVariability() = false;
+	eq Constant.constantVariability() = true;	
+	syn boolean TypePrefixVariability.parameterVariability() = false;
+	eq Parameter.parameterVariability() = true;	
+	syn boolean TypePrefixVariability.discreteVariability() = false;
+	eq Discrete.discreteVariability() = true;	
+	syn boolean TypePrefixVariability.continuousVariability() = false;
+	eq Continuous.continuousVariability() = true;	
+
+	
 	syn boolean FVariable.isConstant() = getFTypePrefixVariability().constantVariability();
     syn boolean FVariable.isParameter() = getFTypePrefixVariability().parameterVariability();
     syn boolean FVariable.isDiscrete() = getFTypePrefixVariability().discreteVariability();
     syn boolean FVariable.isContinuous() = getFTypePrefixVariability().continuousVariability();
     	
+	syn boolean InstPrimitive.isConstant() = 
+		getComponentDecl().hasTypePrefixVariability()?
+		getComponentDecl().getTypePrefixVariability().constantVariability() : false;
+
+	syn boolean InstPrimitive.isParameter() = 
+		getComponentDecl().hasTypePrefixVariability()?
+		getComponentDecl().getTypePrefixVariability().parameterVariability() : false;
+
+	syn boolean InstPrimitive.isDiscrete() = 
+		getComponentDecl().hasTypePrefixVariability()?
+		getComponentDecl().getTypePrefixVariability().discreteVariability() : false;
+
+	syn boolean InstPrimitive.isContinuous() = 
+		getComponentDecl().hasTypePrefixVariability()?
+		getComponentDecl().getTypePrefixVariability().continuousVariability() : true;
+
+		
+		
 	syn boolean FExp.isConstantExp() = variability().constantVariability();
 	syn boolean FExp.isParameterExp() = variability().parameterVariability();
 	syn boolean FExp.isDiscreteExp() = variability().discreteVariability();

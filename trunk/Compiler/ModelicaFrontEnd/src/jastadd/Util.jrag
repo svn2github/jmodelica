@@ -714,7 +714,7 @@ aspect ParserHelpers {
 	/**
 	 * An exception for parser errors.
 	 */
-	public class ParserException extends java.lang.Exception {
+	public class ParserException extends java.lang.RuntimeException {
 		private Problem p;
 		
 		/**
