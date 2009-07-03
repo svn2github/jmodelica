@@ -969,7 +969,9 @@ aspect SourceAST_API {
 	eq FullClassDecl.equations() {
 		ArrayList<AbstractEquation> l = new ArrayList<AbstractEquation>();
 		for (AbstractEquation e : getEquations())
-			l.add(e);
+			if (!(e instanceof EquationAnnotation)) {
+				l.add(e);
+			}
 		return l;
 	}
 	
