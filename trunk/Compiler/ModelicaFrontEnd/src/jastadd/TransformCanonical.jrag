@@ -35,8 +35,12 @@ aspect TransformCanonical{
 			if (fv.hasBindingExp() && !fv.isParameter() && !fv.isConstant()) {
 				FExp bexp = fv.getBindingExp();
 				fv.setBindingExpOpt(new Opt());
+				// Do not copy array indices
+				FQName var_name = fv.getFQName().fullCopy();
+				var_name.getFQNamePart(var_name.getNumFQNamePart()-1).
+				   setFArraySubscriptsOpt(new Opt());
 				FEquation feq = new FEquation(new FIdUseExp(
-						new FIdUse(fv.getFQName().fullCopy())),bexp);
+						new FIdUse(var_name)),bexp);
 				getFEquationBlock(0).addFAbstractEquation(feq);
 			}
 		}

@@ -423,8 +423,12 @@ aspect ConstantEvaluation {
   
   eq FIdUseExp.ceval() = myFV().ceval();
   
-  eq FInstAccessExp.ceval() = getInstAccess().myInstComponentDecl().isPrimitive()?
-	((InstPrimitive)getInstAccess().myInstComponentDecl()).ceval() : new CValueUnknown();
+  eq FInstAccessExp.ceval() { 
+//	  System.out.println(getInstAccess().name());
+//	  System.out.println(getInstAccess());
+//	  System.out.println(getInstAccess().myInstComponentDecl());
+	  return getInstAccess().myInstComponentDecl().isPrimitive()?
+	((InstPrimitive)getInstAccess().myInstComponentDecl()).ceval() : new CValueUnknown(); }
 
   eq FSinExp.ceval() = new CValueReal(java.lang.Math.sin(getFExp().ceval().realValue()));
   eq FCosExp.ceval() = new CValueReal(java.lang.Math.cos(getFExp().ceval().realValue()));
@@ -621,5 +625,21 @@ aspect ConstantEvaluation {
   eq FRealType.neg(CValue v) = new CValueReal(-v.realValue());
   eq FIntegerType.neg(CValue v) = new CValueInteger(-v.intValue());
 
-   
+}
+
+aspect ArrayConstantEvaluation {
+	
+	public int[] FSubscript.arrayIndices() {
+		return new int[0];
+	}
+	
+	public int[] FExpSubscript.arrayIndices() {
+		int s = getFExp().ceval().intValue();
+		int ind[] = new int[s];
+		for (int i=0;i<s;i++) {
+			ind[i] = i+1;
+		}
+		return ind;
+	}
+	
 }

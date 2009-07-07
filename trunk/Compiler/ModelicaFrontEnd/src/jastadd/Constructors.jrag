@@ -17,6 +17,15 @@
 
 aspect Constructors {
 
+	/*
+	public InstComposite.InstComposite(InstAccess a,
+			                                   ComponentDecl cd,
+			                                   Opt<InstModification> inst_mod_opt,
+			                                   Opt<InstConstraining> inst_constr_opt) {
+		this(a,new Opt<FArraySubscripts>(),cd,inst_mod_opt,inst_constr_opt);
+	}
+	*/
+	
 	public ComponentDecl.ComponentDecl(boolean isParameter,
 	                                   String type,
 	                                   String name,

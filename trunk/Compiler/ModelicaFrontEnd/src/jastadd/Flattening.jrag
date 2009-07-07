@@ -87,10 +87,14 @@ aspect Flattening {
 			//fc.genBindingEquations();
 			fc.genConnectionEquations();
 
+			//System.out.println(fc.prettyPrint(""));
+			//fc.dumpTree("");
+			
+			
 			HashSet<InstAccess> instAccesses = fc.collectInstAccesses();
 			if (instAccesses.size()>0) {
 				System.out.println("Flat model contains InstAccesses!!!");
-				return null;
+				//return null;
 			}
 			
 			return this;	
@@ -250,7 +254,7 @@ aspect Flattening {
 			List my_attr = new List();
 			getInstModification().collectAttributes(my_attr,prefix);
 			FQName fqn2 = new FQName();
-			fqn2.addFQNamePart(new FQNamePart(getName().myInstClassDecl().name(),
+			fqn2.addFQNamePart(new FQNamePart(getName().myInstComponentDecl().myInstClass().name(),
 					new Opt()));
 			attrs.add(new FAttribute(new FIdUse(fqn2),
 									new FIdDecl(fqn),

@@ -123,7 +123,7 @@ class ModTest6
                                                description="Test merging of modifications",
                                                flatModel=
 " fclass ModificationTests.ModTest6
- Real c2.p(nominal=4)=3;
+ parameter Real c2.p(nominal=4)=3;
  Real c2.c1.x(min=c2.p)=5;
 equation 
 end ModificationTests.ModTest6;")})));
@@ -133,7 +133,7 @@ class C1
 end C1;
 
 class C2
-  Real p(nominal=4)=3;
+  parameter Real p(nominal=4)=3;
   C1 c1 (x(min=p)=5);
 end C2;
 

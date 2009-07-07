@@ -103,14 +103,15 @@ aspect InstResolveAmbiguousNames {
 	    to InstAccess {
 	    	//System.out.println("ki: " + name());
 	  		if (!lookupInstComponent(name()).isEmpty()) {
-		    	//System.out.println("ki2: " + name());
+	  			//System.out.println("ki2: " + name());
      		    InstComponentAccess c = new InstComponentAccess(name());
   	 			c.setStart(getStart());
   	 			c.setEnd(getEnd());
   	 			return c;
   		} else 
             if(!lookupInstClass(name()).isEmpty()) {		
-    			InstClassAccess t = new InstClassAccess(name()); 
+            	//System.out.println("ki3: " + name());
+            	InstClassAccess t = new InstClassAccess(name()); 
     			t.setStart(getStart());
     			t.setEnd(getEnd());
   	 			return t;

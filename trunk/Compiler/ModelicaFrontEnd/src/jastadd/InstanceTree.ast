@@ -49,11 +49,13 @@ InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl> /
 
 // The class to expand may differ from the declared class of the component due to 
 // redeclaration of classes.
-abstract InstComponentDecl : InstNode ::= ClassName:InstAccess <ComponentDecl:ComponentDecl> [InstModification] [InstConstraining];
+abstract InstComponentDecl : InstNode ::= ClassName:InstAccess [FArraySubscripts] <ComponentDecl:ComponentDecl> [InstModification] [InstConstraining];
 InstComposite : InstComponentDecl;
 InstPrimitive : InstComponentDecl ;
 InstBuiltIn : InstComponentDecl;
 UnknownInstComponentDecl : InstComponentDecl;
+
+InstArrayDecl : InstComponentDecl ::= <Index:int>;
 
 InstReplacingComposite : InstComposite ::= <OriginalDecl:ComponentDecl> /OriginalInstComponent:InstComponentDecl/ <InstComponentRedeclare:InstComponentRedeclare>;
 InstReplacingPrimitive : InstPrimitive ::= <OriginalDecl:ComponentDecl> /OriginalInstComponent:InstComponentDecl/ <InstComponentRedeclare:InstComponentRedeclare>;

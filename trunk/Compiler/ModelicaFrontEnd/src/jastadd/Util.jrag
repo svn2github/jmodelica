@@ -377,21 +377,36 @@ aspect FlatNames {
 	syn lazy FQName InstNode.getFQName() = getFQNamePrefix();
 	
 	eq InstComponentDecl.getFQName() {
+		
 		FQName prefix = retrieveFQName();
 		FQName myName = prefix!=null? new FQName(prefix):
 		                              new FQName();
-		//TODO: fix array subscripts
-		if (prefix!=null)
-			myName.addFQNamePart(new FQNamePart(name(),new Opt()));
-			                            //arraySubscripts()!=null? 
-		                                //new Opt(arraySubscripts().flatten(prefix)): new Opt()));
-		else
-			myName.addFQNamePart(new FQNamePart(name(),new Opt()));
-			                            //arraySubscripts()!=null? 
-		                                //new Opt(arraySubscripts().flatten(new FQName())): new Opt()));
+	
+		Opt array_subscr = new Opt();
+		if (isPrimitive() && isArrayDecl() ) {
+			array_subscr.setChild((FArraySubscripts)getFArraySubscripts().flatten(myName),0);
+		}
 		
+		myName.addFQNamePart(new FQNamePart(name(),array_subscr));
 		return myName;
 	}
+	
+	eq InstArrayDecl.getFQName() {
+		FQName prefix = retrieveFQName();
+
+		FQName myName = prefix!=null? new FQName(prefix):
+		                              new FQName();
+		
+		FArraySubscripts fas = new FArraySubscripts(
+				new List().add(new FExpSubscript(new FIntegerLitExp(getIndex()+""))));
+
+		if (myName.getFQNamePart(myName.getNumFQNamePart()-1).hasFArraySubscripts()) {
+			myName.getFQNamePart(myName.getNumFQNamePart()-1).getFArraySubscripts().addFSubscript(fas.getFSubscript(0));
+		} else {
+			myName.getFQNamePart(myName.getNumFQNamePart()-1).setFArraySubscripts(fas);
+		}
+		return myName;
+	}	
 
 	eq InstClassDecl.getFQName() = new FQName();
 	inh lazy FQName InstNode.retrieveFQName();
@@ -399,7 +414,7 @@ aspect FlatNames {
 	eq InstComponentDecl.getInstModification().retrieveFQName() = retrieveFQName();
 	eq InstReplacingShortClassDecl.getChild().retrieveFQName() = retrieveFQName();
 	eq InstClassDecl.getChild().retrieveFQName() = null; //getFQName();
-		
+	
 	eq InstRoot.getChild().retrieveFQName() = null;
 	eq SourceRoot.getProgram().retrieveFQName() = null;
 
@@ -407,6 +422,9 @@ aspect FlatNames {
 		StringBuffer str = new StringBuffer();
 		for (int i=0;i<getNumFQNamePart();i++) {
 			str.append(getFQNamePart(i).getName());
+			if (getFQNamePart(i).hasFArraySubscripts()) {
+				str.append(getFQNamePart(i).getFArraySubscripts().prettyPrint(""));
+			}
 			if (i<getNumFQNamePart()-1) {
 				str.append(".");
 			}
@@ -428,6 +446,7 @@ aspect FlatNames {
 	syn String FVariable.name() = getFQName().name();
 
 //	syn lazy String FQName.derName() = "der(" + name() + ")";
+	
 	eq FDerivativeVariable.name() = getFQName().derName();
 	syn String FIdUse.derName() = getFQName().derName();
 	syn String FIdUseExp.derName() = getFIdUse().derName();

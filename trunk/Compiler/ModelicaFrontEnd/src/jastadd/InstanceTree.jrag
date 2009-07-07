@@ -473,17 +473,68 @@ aspect InstanceTreeConstruction {
 	syn lazy List InstConstrainingComponent.getDynamicClassNameList() = new List();
 
 	syn lazy List InstNode.getInstComponentDeclList() {
-	
+		
 		List l = new List();
 		ArrayList<ComponentDecl> comps = components();
 
 		for (ComponentDecl cd : comps) {
-		    l.add(createInstComponentDecl(cd));
-		}				
-		
+			l.add(createInstComponentDecl(cd));
+		}			
 		return l;
+		
 	}
 
+	eq InstComponentDecl.getInstComponentDeclList() {
+		
+		if (isArrayDecl()) { // Take care of array declarations separately
+			// Get the array indices
+			int[] ind = getFArraySubscripts().getFSubscript(0).arrayIndices();
+			// Create FArraySubscripts for remaining subscripts
+			/*
+			Opt subscript_opt = new Opt();
+			if (getFArraySubscripts().getNumFSubscript()>1) {
+				FArraySubscripts fas = new FArraySubscripts();
+				for (int i=1;i<getFArraySubscripts().getNumFSubscript();i++) {
+					fas.addFSubscript((FSubscript)getFArraySubscripts().
+							getFSubscript(i).fullCopy());
+				}
+				subscript_opt.setChild(fas,0);
+			}
+			*/
+			// Loop over indices and create new InstArrayDecls
+			List l = new List();
+			for (int i=0;i<ind.length;i++) {
+				l.add(new InstArrayDecl(new InstParseAccess("ArrayDecl"),new Opt(),
+						getComponentDecl(),new Opt(),new Opt(),ind[i]));
+			}
+			return l;
+		} else { // If not array, then proceed as usual
+			return super.getInstComponentDeclList();
+		}
+	}
+
+	eq InstArrayDecl.getInstComponentDeclList() {
+		FSubscript fs = childFSubscript(1);
+		if (fs!=null) {
+			int[] ind = fs.arrayIndices();
+			// Loop over indices and create new InstArrayDecls
+			List l = new List();
+			for (int i=0;i<ind.length;i++) {
+				l.add(new InstArrayDecl(new InstParseAccess("ArrayDecl"),new Opt(),
+						instComponentDecl().getComponentDecl(),new Opt(),new Opt(),ind[i]));
+			}
+			return l;
+		} else {
+			List l = new List();
+			ArrayList<ComponentDecl> comps = components();
+
+			for (ComponentDecl cd : comps) {
+				l.add(createInstComponentDecl(cd));
+			}			
+			return l;
+		}
+	}
+	
 	syn lazy List InstNode.getInstClassDeclList() {
 	
 		List l = new List();
@@ -510,8 +561,23 @@ aspect InstanceTreeConstruction {
 		return l;
 	}
 
+	eq InstPrimitive.getInstComponentDeclList() {
+		
+		if (isArrayDecl()) { // Take care of array declarations separately
+			// Get the array indices
+			int[] ind = getFArraySubscripts().getFSubscript(0).arrayIndices();
+			// Loop over indices and create new InstArrayDecls
+			List l = new List();
+			for (int i=0;i<ind.length;i++) {
+				l.add(new InstArrayDecl(new InstParseAccess("ArrayDecl"),new Opt(),
+					getComponentDecl(),new Opt(),new Opt(),ind[i]));
+			}
+			return l;
+		} else { // If not array, then proceed as usual
+			return emptyList();
+		}
+	}
 
-	eq InstPrimitive.getInstComponentDeclList() = emptyList();
 	eq InstPrimitive.getInstClassDeclList() = emptyList();
 //	eq InstPrimitive.getInstExtendsList() = emptyList();
 
@@ -566,8 +632,12 @@ aspect InstanceTreeConstruction {
 	public abstract InstComponentDecl InstClassDecl.newInstComponentDecl(ComponentDecl cd, Access className);
 
 	public InstComponentDecl InstBaseClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
+		Opt fas_opt = new Opt();
+		if (cd.hasVarArraySubscripts()) {
+			fas_opt.setChild(cd.getVarArraySubscripts().instantiate(),0);
+		}
 		if (!extendsPrimitive()){
-			InstComponentDecl icd = new InstComposite(className.newInstAccess(),cd,new Opt(),new Opt());
+			InstComponentDecl icd = new InstComposite(className.newInstAccess(),fas_opt,cd,new Opt(),new Opt());
 			if (cd.hasModification())
 				icd.setInstModification(cd.getModification().newInstModification());
 			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
@@ -575,7 +645,7 @@ aspect InstanceTreeConstruction {
 			icd.setEnd(cd.getEnd());
 			return icd;
 		} else {
-			InstPrimitive icd = new InstPrimitive(className.newInstAccess(),cd,new Opt(),new Opt());
+			InstPrimitive icd = new InstPrimitive(className.newInstAccess(),fas_opt,cd,new Opt(),new Opt());
 			if (cd.hasModification())
 				icd.setInstModification(cd.getModification().newInstModification());
 			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
@@ -587,7 +657,11 @@ aspect InstanceTreeConstruction {
 	}
 
 	public InstComponentDecl InstPrimitiveClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
-		InstPrimitive ipr = new InstPrimitive(className.newInstAccess(),cd,new Opt(),new Opt());
+		Opt fas_opt = new Opt();
+		if (cd.hasVarArraySubscripts()) {
+			fas_opt.setChild(cd.getVarArraySubscripts().instantiate(),0);
+		}
+		InstPrimitive ipr = new InstPrimitive(className.newInstAccess(),fas_opt,cd,new Opt(),new Opt());
 		if (cd.hasModification())
 			ipr.setInstModification(cd.getModification().newInstModification());
 		ipr.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
@@ -597,7 +671,7 @@ aspect InstanceTreeConstruction {
 	}
 
 	public InstComponentDecl InstBuiltInClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
-		return new InstBuiltIn(className.newInstAccess(),cd,new Opt(),new Opt());
+		return new InstBuiltIn(className.newInstAccess(),new Opt(),cd,new Opt(),new Opt());
 	}
 
 	public abstract InstComponentDecl InstClassDecl.newInstReplacingComponent(ComponentDecl replacingDecl,
@@ -605,8 +679,12 @@ aspect InstanceTreeConstruction {
 
 	public InstComponentDecl InstBaseClassDecl.newInstReplacingComponent(ComponentDecl replacingDecl,
 	                                                                 ComponentDecl originalDecl, InstComponentRedeclare icr) {
+		Opt fas_opt = new Opt();
+		if (replacingDecl.hasVarArraySubscripts()) {
+			fas_opt.setChild(replacingDecl.getVarArraySubscripts().instantiate(),0);
+		}
 		if (!extendsPrimitive()){
-			InstReplacingComposite icd = new InstReplacingComposite(replacingDecl.newInstClassAccess(),replacingDecl,new Opt(),new Opt(),originalDecl,icr);
+			InstReplacingComposite icd = new InstReplacingComposite(replacingDecl.newInstClassAccess(),fas_opt,replacingDecl,new Opt(),new Opt(),originalDecl,icr);
 			if (originalDecl.hasModification()) //TODO: should this really be originalDecl
 				icd.setInstModification(originalDecl.getModification().newInstModification());
 			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
@@ -614,7 +692,7 @@ aspect InstanceTreeConstruction {
 			icd.setEnd(originalDecl.getEnd());
 			return icd;
 		} else {
-			InstReplacingPrimitive icd = new InstReplacingPrimitive(replacingDecl.newInstClassAccess(),replacingDecl,new Opt(),new Opt(),originalDecl,icr);
+			InstReplacingPrimitive icd = new InstReplacingPrimitive(replacingDecl.newInstClassAccess(),fas_opt,replacingDecl,new Opt(),new Opt(),originalDecl,icr);
 			if (originalDecl.hasModification()) //TODO: should this really be originalDecl
 				icd.setInstModification(originalDecl.getModification().newInstModification());
 			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
@@ -856,7 +934,6 @@ aspect InstanceAST_API {
 	syn BaseClassDecl InstBaseClassDecl.getBaseClassDecl() = (BaseClassDecl)getClassDecl();
 	syn BuiltInClassDecl InstBuiltInClassDecl.getBuiltInClassDecl() = (BuiltInClassDecl)getClassDecl();
 
-	
 	syn ArrayList<AbstractEquation> InstNode.equations() = new ArrayList<AbstractEquation>();
 	eq InstClassRoot.equations() = getClassDecl().equations();
 	eq InstComponentDecl.equations() = myInstClass().equations();
@@ -866,6 +943,8 @@ aspect InstanceAST_API {
 	syn lazy ArrayList<ComponentDecl> InstNode.components() = new ArrayList<ComponentDecl>();
 	eq InstClassRoot.components() = getClassDecl().components();
 	eq InstComponentDecl.components() = myInstClass().components();
+	eq InstArrayDecl.components() = instComponentDecl().isPrimitive()? 
+			new ArrayList<ComponentDecl>() : instComponentDecl().components();
 	eq InstExtends.components() = extendsPrimitive()? new ArrayList<ComponentDecl>() : getClassName().myInstClassDecl().components();
 	eq InstBaseClassDecl.components() = getBaseClassDecl().components();
 //    eq InstPrimitiveClassDecl.components() = new ArrayList<ComponentDecl>();
@@ -1042,6 +1121,25 @@ aspect SourceAST_API {
 		return l;
 	}
 
+}
+
+aspect InstArrays {
+	
+	inh FSubscript InstArrayDecl.childFSubscript(int i);
+	eq InstArrayDecl.getInstComponentDecl().childFSubscript(int i) = 
+		childFSubscript(i+1);
+	eq InstComponentDecl.getInstComponentDecl().childFSubscript(int i) =
+		(hasFArraySubscripts() && getFArraySubscripts().getNumFSubscript()>i)?
+				getFArraySubscripts().getFSubscript(i) : null;
+	eq InstRoot.getChild().childFSubscript(int i) = null;
+
+	inh InstComponentDecl InstArrayDecl.instComponentDecl();
+	eq InstComponentDecl.getChild().instComponentDecl() = this;
+	eq InstRoot.getChild().instComponentDecl() = null;
+	
+	syn boolean InstComponentDecl.isArrayDecl() = hasFArraySubscripts() && 
+	getFArraySubscripts().getNumFSubscript()>0;
+	
 }
 
 aspect InstanceDumpTree {
@@ -1340,6 +1438,14 @@ aspect InstancePrettyPrint {
 
 	}
 
+	public String InstArrayDecl.prettyPrint(String indent) {
+		String str = getClass().getName();
+		str = indent+str.substring(str.lastIndexOf('.')+1);
+		str+= ": " + getIndex();
+		return str;
+
+	}
+	
 	public String InstImport.prettyPrint(String indent) {
 		String str = getClass().getName();
 		str = indent+str.substring(str.lastIndexOf('.')+1);

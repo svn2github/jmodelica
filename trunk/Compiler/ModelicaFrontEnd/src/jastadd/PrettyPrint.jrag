@@ -918,7 +918,7 @@ aspect FlattPrettyPrint {
 		debugPrint("FIdUse.prettyPrint(): " + name());
 		str.print(name());
 	}
-		
+	
 	public void FDer.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		debugPrint("FDer.prettyPrint");
 		str.print(name());

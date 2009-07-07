@@ -1,0 +1,138 @@
+within ;
+package ArrayTests
+
+  model ArrayTest1
+    Real x[2];
+  equation
+    x[1] = 3;
+    x[2] = 4;
+  end ArrayTest1;
+
+  model ArrayTest1b
+    parameter Integer n = 2;
+    Real x[n];
+  equation
+    x[1] = 3;
+    x[2] = 4;
+  end ArrayTest1b;
+
+  model ArrayTest2
+    Real x[2,2];
+  equation
+    x[1,1] = 1;
+    x[1,2] = 2;
+    x[2,1] = 3;
+    x[2,2] = 4;
+  end ArrayTest2;
+
+  model ArrayTest3
+    Real x[:] = {2,3};
+    Real y[2];
+  equation
+    y[1] = x[1];
+    y[2] = x[2];
+  end ArrayTest3;
+
+  model ArrayTest4
+    model M
+      Real x[2];
+    end M;
+    M m[2];
+  equation
+    m[1].x[1] = 1;
+    m[1].x[2] = 2;
+    m[2].x[1] = 3;
+    m[2].x[2] = 4;
+  end ArrayTest4;
+
+  model ArrayTest5
+    model M
+      Real x[3] = {-1,-2,-3};
+    end M;
+    M m[2](x={{1,2,3},{4,5,6}});
+  end ArrayTest5;
+
+  model ArrayTest6
+    model M
+      Real x[3];
+    end M;
+    M m[2];
+  equation
+    m.x = {{1,2,3},{4,5,6}};
+  end ArrayTest6;
+
+  model ArrayTest7
+    Real x[3];
+  equation
+    x[1:2] = {1,2};
+    x[3] = 3;
+  end ArrayTest7;
+
+  model ArrayTest8
+    model M
+      parameter Integer n = 3;
+      Real x[n] = ones(n);
+    end M;
+      M m[2](n={1,2});
+  end ArrayTest8;
+
+      model ArrayTest9
+        model M
+              parameter Integer n1 = 2;
+              Real x[n1] = ones(n1);
+        end M;
+
+        model N
+              parameter Integer n2 = 2;
+              M m[n2,n2+1];
+        end N;
+	    N nn;
+      end ArrayTest9;
+
+      model ArrayTest95
+        model M
+              parameter Integer n1 = 3;
+              Real x = n1;
+        end M;
+
+        model N
+              parameter Integer n2 = 2;
+              M m;
+        end N;
+        N n(m(n={3,4}));
+      end ArrayTest95;
+
+
+   model ArrayTest10
+    parameter Integer n;
+    Real x[n];
+   end ArrayTest10;
+
+   model ArrayTest11
+    model M
+      Real x[2];
+    end M;
+      M m1[2];
+      M m2[3];
+   equation
+      m1[:].x[:] = {{1,2},{3,4}};
+      m2[1:2].x[:] = {{1,2},{3,4}};
+      m2[3].x[:] = {1,2};
+   end ArrayTest11;
+
+      model ArrayTest12
+        model M
+              Real x[2];
+        end M;
+
+        model N
+              M m[3];
+        end N;
+        N n[1];
+      equation
+        n.m.x={{{1,2},{3,4},{5,6}}};
+
+      end ArrayTest12;
+
+  annotation (uses(Modelica(version="3.0.1")));
+end ArrayTest;

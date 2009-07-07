@@ -248,6 +248,7 @@ aspect FlatDumpTree {
 		super.dumpTree(indent);
 		System.out.print(indent + indent + "** Evaluated attributes: ");
 		dumpAttributes();
+		System.out.println("\n");
 	}
 	
 	public void FVariable.dumpAttributes() {
