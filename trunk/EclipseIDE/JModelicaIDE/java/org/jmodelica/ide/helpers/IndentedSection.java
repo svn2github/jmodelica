@@ -126,7 +126,7 @@ public class IndentedSection {
 		}	
 		return bob.toString();
 	}
-		
+
 	/**
 	 * Offset indentation in this section to <code>offset</code> spaces, for the
 	 * first line in the section. Keep relative indentations for whole section,

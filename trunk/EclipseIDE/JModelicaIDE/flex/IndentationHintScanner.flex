@@ -16,9 +16,11 @@
 
 package org.jmodelica.ide.scanners.generated;
 
-import java.util.Stack;
+import java.util.*;
 import java.io.StringReader;
 import java.io.IOException;
+import org.jmodelica.ide.indent.*;
+
 
 /**
  * Scanner which pushes indentation anchors, used to indent the 
@@ -26,7 +28,6 @@ import java.io.IOException;
  *
  * @author philip
  */
-
 
 %%
 
@@ -48,151 +49,20 @@ import java.io.IOException;
 		
 		yyreset(new StringReader(text));
 		
+		ancs = new AnchorList();
+	
 		annotation_paren_level = 0;
-		
-		partial_newline = false;
-		
-		anchors = new BottomlessStack<Anchor>(Anchor.BOTTOM);
-		
-		sinks = new Stack<Sink>();
-		
 		last_state = YYINITIAL;
-		
-		
+
 		try {
 			yylex();
 		} catch (IOException e) { }
-		
 	}
 	
 	/* scanner state variables */
-	
-	public BottomlessStack<Anchor> anchors;
-	
-	public Stack<Sink> sinks;
-	
-	int annotation_paren_level;
-	
-	boolean partial_newline;
-	
+	public AnchorList ancs;
+	int annotation_paren_level;	
 	int last_state;
-	
-	
-	public enum Indent { INDENT	    {public int modify(int indent, int tabWidth) { return indent + tabWidth; } },
-						 SAME       {public int modify(int indent, int tabWidth) { return indent; } },
-						 NONE       {public int modify(int indent, int tabWidth) { return 0; } },
-						 COMMENT    {public int modify(int indent, int tabWidth) { return indent + 3; } };
-						 public abstract int modify(int indent, int tabWidth);
-					   } 
-	/**
-	 * Anchor point in text, providing indentation hints. 
-	 * @author philip
-	 */
-	public static class Anchor {
-		
-		public final static Anchor BOTTOM = new Anchor(0, Indent.SAME, "#"); 
-	
-		public int offset;
-		public Indent indent;
-		public String id;
-				
-		public Anchor(int offset, Indent indent, String id) {
-			this.offset = offset;
-			this.indent = indent;
-			this.id = id; 
-		}
-		public Anchor(int offset) { this(offset, null, null); }
-	}
-		
-	/** 
-	  * Sink tokens, used to "sink" lines containing 'end' and 'equation' etc
-	  * to a reference Anchor 
-	  * @author philip */
-	public static class Sink {
-		
-		public final static Sink BOTTOM = new Sink(0, Anchor.BOTTOM);
-	
-		public int offset;
-		public Anchor reference;
-		public Sink(int offset, Anchor reference) { 
-			this.reference = reference;
-			this.offset = offset;
-		}
-	}
-			
-	public Anchor anchorAt(int offset) {
-		Anchor result = Anchor.BOTTOM;
-		for (Anchor a : anchors) {
-			if (a.offset <= offset)
-				result = a;
-		}
-		return result;
-	}
-	
-	public Sink sinkAt(int lower, int upper) {
-		Sink result = null;
-		for (Sink sink : sinks) {
-			if (lower <= sink.offset && sink.offset < upper)
-				result = sink;
-		}
-		return result;	
-	}	
-
-	/**
- 	* Stack with default "bottom" element, which can be popped indefinitely.
- 	*
- 	* @author philip
- 	*/
-	public static class BottomlessStack<E> extends Stack<E> {
-		
-		public BottomlessStack(E bottom) {
-			super();
-			super.push(bottom);
-		}
-		
-		public E pop() {
-			if (size() == 1)
-				return super.peek();
-			return super.pop();
-		}
-	}
-
-	
-	void pushAnchor(Indent indent, String id) {
-		anchors.push(new Anchor(yychar, indent, id));
-	}
-
-	void pushAnchor(Indent indent) { 
-		pushAnchor(indent, "#"); 
-	}
-	
-	void popAnchor() {
-		anchors.pop();
-	}
-	
-	void popTo(String id) {
-		while (anchors.peek() != Anchor.BOTTOM &&
-			   !anchors.peek().id.matches(id)) {
-			anchors.pop();
-		}
-	}
-	
-	void popPast(String id) {
-		popTo(id); 
-		anchors.pop();
-	}
-	
-	void pushSink() {
-		Anchor ref = Anchor.BOTTOM;
-		for (Anchor a : anchors)
-			if ("class".equals(a.id))
-				ref = a;
-		sinks.push(new Sink(yychar, ref));
-	}
-
-	void setLastIndent(Indent indent) {
-		anchors.peek().indent = Indent.SAME;
-	}
 	
 %}
 
@@ -226,81 +96,100 @@ Other = . | {NewLine}
 
 %%
 
- 
   <<EOF>> 			{ return; }
-  "/*"  			{ pushAnchor(Indent.COMMENT, "comment");    last_state = yystate(); yybegin(COMMENT_LINEBEGIN); }
-  "\""				{ pushAnchor(Indent.NONE,    "string");     last_state = yystate(); yybegin(STRING); }
-  "\'"				{ pushAnchor(Indent.NONE,    "qident");      yybegin(QIDENT); }
-  "annotation"		{ pushAnchor(Indent.INDENT,  "annotation"); yybegin(ANNOTATION); }
+  "/*"  			{ ancs.beginSection(yychar + 2, yychar, Indent.COMMENT, "comment");
+  				      last_state = yystate(); 
+  				      yybegin(COMMENT_LINEBEGIN); 
+  				    }
+  "\""				{ ancs.beginSection(yychar + 1, yychar, Indent.NONE, "string");     
+  					  last_state = yystate(); 
+  					  yybegin(STRING); 
+  					}
+  "\'"				{ ancs.beginSection(yychar + 1, yychar, Indent.NONE, "qident");
+  					  yybegin(QIDENT); 
+  					}
+  "annotation"		{ ancs.beginSection(yychar + yylength(), yychar, Indent.INDENT, "annotation");
+  					  yybegin(ANNOTATION); 
+  					}
 
 <YYINITIAL> {
-  {Class}			{ pushAnchor(Indent.INDENT, "class"); } 
-  {Separator}		{ pushSink(); }
-  {End}				{ pushSink(); pushAnchor(Indent.INDENT); yybegin(END); }
-  {NewLine} 		{ yybegin(LINEBEGIN); } 
-  ";"				{ popTo("newline|class");
-  					  partial_newline = false; 
-  					  if (!anchors.peek().id.equals("class"))
-  					  		setLastIndent(Indent.SAME); }
+  ^.				{ yypushback(1); yybegin(LINEBEGIN); }
+  {NewLine}			{ yybegin(LINEBEGIN); }   
+  {Class}			{ ancs.addAnchor(yychar, yychar, Indent.SAME); 
+  					  ancs.beginSection(yychar + yylength(), yychar, Indent.INDENT, "class"); } 
+  {Separator}		{ ancs.addSink(yychar); }
+  {End}				{ ancs.addSink(yychar);
+  					  ancs.addAnchor(yychar + yylength(), yychar, Indent.INDENT);
+  					  yybegin(END); 
+  					}
+  ";"				{ ancs.completeStatement(yychar + 1); }
 } 
 
 <LINEBEGIN> {
-  {Separator}		{ pushSink(); }  				
   {Class} 			|
   {End}				|
-  ";"				{ pushAnchor(Indent.SAME, "newline"); 
-  					  yypushback(yytext().length()); 
-  					  yybegin(YYINITIAL); }
-  {Id}			    { pushAnchor(partial_newline ? Indent.SAME : Indent.INDENT, 
-  								 partial_newline ? "#" : "newline");
-  					  partial_newline = true;
-  					  yybegin(YYINITIAL); }
+  ";"				|
+  {Separator}		{ yypushback(yylength()); yybegin(YYINITIAL); }
+  {Id}			    { ancs.beginStatement(yychar);
+  					  yybegin(YYINITIAL); 
+  					}
   {WhiteSpace}*		{ }
 }
 
 <ANNOTATION_LINEBEGIN> {
 	{WhiteSpace}	{ }
-	. 				{ pushAnchor(Indent.SAME, "annotation_newline"); 
-					  yypushback(1); yybegin(ANNOTATION); }
+	. 				{ ancs.beginSection(yychar+1, yychar, Indent.SAME, "annotation_newline"); 
+					  yypushback(1); 
+					  yybegin(ANNOTATION); }
 }
 
 <ANNOTATION> {
   "("				{ annotation_paren_level++; }
   ")" 				{ if (--annotation_paren_level == 0) { 
-  							popPast("annotation");
+  							ancs.popPast("annotation", yychar + yylength());
   							yybegin(YYINITIAL); 
   					  }
 					} 
-   "/*"  			{ pushAnchor(Indent.COMMENT, "comment"); last_state = yystate(); yybegin(COMMENT_LINEBEGIN); }
-  "\""				{ pushAnchor(Indent.NONE,    "string");  last_state = yystate(); yybegin(STRING); }
-  {NewLine} 	    { pushAnchor(Indent.SAME); yybegin(ANNOTATION_LINEBEGIN); }
+   "/*"  			{ ancs.beginSection(yychar+2, yychar, Indent.COMMENT, "comment");
+					  last_state = yystate();
+					  yybegin(COMMENT_LINEBEGIN); }
+  "\""				{ ancs.beginSection(yychar+1, -1,Indent.NONE, "string");
+					  last_state = yystate(); yybegin(STRING); }
+  {NewLine}			{ yybegin(ANNOTATION_LINEBEGIN); }
   {Other}			{ 	}
 }
 
 <END> {
   {WhiteSpace}		{  }
   {Id}			    {  }
-  {Other}			{ popPast("class"); yybegin(YYINITIAL); }
+  {Other}			{ ancs.popPast("class", yychar + yylength()); 
+  					  yybegin(YYINITIAL); }
 }
 
 <STRING> {
-  "\""				{ popPast("string"); yybegin(last_state); }
+  "\\\""			{  }
+  "\""				{ ancs.popPast("string", yychar + yylength()); 
+  					  yybegin(last_state); }
   {Other}			{ }
 }
 
 <QIDENT> {
-  "\'"				{ popPast("qident"); yybegin(YYINITIAL); }
+  "\\\'" 			{  }
+  "\'"				{ ancs.popPast("qident", yychar + yylength()); 
+  					  yybegin(YYINITIAL); }
   {Other}			{ }
 }
 
 <COMMENT_LINEBEGIN> {
   {WhiteSpace} 		{ }
-  "*/"				{ popPast("comment"); yybegin(last_state); }
-  {Other}		    { pushAnchor(Indent.SAME); yybegin(COMMENT); }
+  "*/"				{ ancs.popPast("comment", yychar + yylength()); 
+  					  yybegin(last_state); }
+  {Other}		    { ancs.addAnchor(yychar+1, yychar, Indent.SAME); yybegin(COMMENT); }
 }
 
 <COMMENT> {
-  "*/"				{ popPast("comment"); yybegin(last_state); }
+  "*/"				{ ancs.popPast("comment", yychar + yylength()); 
+  					  yybegin(last_state); }
   {NewLine}	     	{ yybegin(COMMENT_LINEBEGIN); }
   {Other}			{ }
 }

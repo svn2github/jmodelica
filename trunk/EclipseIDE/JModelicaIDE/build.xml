@@ -50,6 +50,9 @@
 		</classpath>
 	</taskdef>
 
+	<!-- meta-target for generating scanners -->
+	<target name="genscanner" depends="copy,scanner"/>
+
 	<!-- meta-target for generating all java files -->
 	<target name="gen" depends="copy,scanner,parser,ast"/>
 

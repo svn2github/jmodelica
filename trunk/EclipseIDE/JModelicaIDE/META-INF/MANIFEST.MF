@@ -18,3 +18,4 @@ Require-Bundle: org.jastadd.plugin;bundle-version="1.0.7",
  org.eclipse.ui.editors,
  org.eclipse.ui.views,
  org.eclipse.ui.navigator
+Import-Package: junit.framework
