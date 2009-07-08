@@ -17,4 +17,7 @@
 import os
 
 _jm_home = os.environ.get('JMODELICA_HOME')
+if _jm_home is None:
+	raise EnvironmentError('The environment variable JMODELICA_HOME needs to'
+						   ' be set in order to run JModelica.')
 user_options = {}
