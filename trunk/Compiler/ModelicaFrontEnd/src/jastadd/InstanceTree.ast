@@ -55,7 +55,7 @@ InstPrimitive : InstComponentDecl ;
 InstBuiltIn : InstComponentDecl;
 UnknownInstComponentDecl : InstComponentDecl;
 
-InstArrayDecl : InstComponentDecl ::= <Index:int>;
+InstArrayComponentDecl : InstComponentDecl ::= <Index:int>;
 
 InstReplacingComposite : InstComposite ::= <OriginalDecl:ComponentDecl> /OriginalInstComponent:InstComponentDecl/ <InstComponentRedeclare:InstComponentRedeclare>;
 InstReplacingPrimitive : InstPrimitive ::= <OriginalDecl:ComponentDecl> /OriginalInstComponent:InstComponentDecl/ <InstComponentRedeclare:InstComponentRedeclare>;
@@ -68,11 +68,13 @@ InstExtendsShortClass : InstExtends ::=;
 abstract InstAccess ::= <ID>;
 InstDot : InstAccess ::= Left:InstAccess Right:InstAccess;
 
-InstParseAccess : InstAccess;// ::= [ArraySubscripts];
-InstClassAccess : InstAccess;
-InstAmbiguousAccess : InstAccess;// ::= [ArraySubscripts];
+InstArrayAccess : InstAccess ::= [FArraySubscripts];
 
-InstComponentAccess : InstAccess;// ::= [ArraySubscripts];
+InstParseAccess : InstArrayAccess;
+InstClassAccess : InstAccess;
+InstAmbiguousAccess : InstArrayAccess;
+
+InstComponentAccess : InstArrayAccess;
 
 // These nodes are used to create instance copies of modification trees intended for
 // error checking.	

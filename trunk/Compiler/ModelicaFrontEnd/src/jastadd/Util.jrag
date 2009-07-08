@@ -321,14 +321,6 @@ aspect Names {
 		return (Access)getRight().fullCopy();
 	}
    	
-   	syn ArraySubscripts Access.arraySubscripts() = null;
-   	syn ArraySubscripts ParseAccess.arraySubscripts() = 
-   	   hasArraySubscripts()? getArraySubscripts(): null;
-   	syn ArraySubscripts ComponentAccess.arraySubscripts() = 
-   	   hasArraySubscripts()? getArraySubscripts(): null;
-   	syn ArraySubscripts AmbiguousAccess.arraySubscripts() = 
-   	   hasArraySubscripts()? getArraySubscripts(): null;
-
 	syn boolean Access.isQualified() = false;
 	eq Dot.isQualified() = true;
 }
@@ -345,13 +337,21 @@ aspect FlatNames {
 
 	public FQName FQName.append(InstAccess access,FQName prefix) {
 		InstAccess fa = access.getFirstInstAccess();
-		// TODO: fix array subscripts
-		addFQNamePart(new FQNamePart(fa.name(),new Opt()));
-			                  //fa.arraySubscripts()!=null? new Opt(fa.arraySubscripts().flatten(prefix)):new Opt()));
+		Opt as = null;
+		if (fa.isInstArrayAccess()) {
+			as = new Opt(fa.fArraySubscripts().flatten(prefix));
+		} else {
+			as = new Opt();
+		}
+		addFQNamePart(new FQNamePart(fa.name(),as));
 		while (fa.getNextInstAccess()!=null) {
 			fa = fa.getNextInstAccess();
-			addFQNamePart(new FQNamePart(fa.name(),new Opt()));
-//			                  fa.arraySubscripts()!=null? new Opt(fa.arraySubscripts().flatten(prefix)):new Opt()));
+			if (fa.isInstArrayAccess()) {
+				as = new Opt(fa.fArraySubscripts().flatten(prefix));
+			} else {
+				as = new Opt();
+			}
+			addFQNamePart(new FQNamePart(fa.name(),as));
 		}
 		return this;
 	}
@@ -391,7 +391,7 @@ aspect FlatNames {
 		return myName;
 	}
 	
-	eq InstArrayDecl.getFQName() {
+	eq InstArrayComponentDecl.getFQName() {
 		FQName prefix = retrieveFQName();
 
 		FQName myName = prefix!=null? new FQName(prefix):

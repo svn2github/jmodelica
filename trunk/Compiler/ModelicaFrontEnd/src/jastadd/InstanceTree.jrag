@@ -501,10 +501,10 @@ aspect InstanceTreeConstruction {
 				subscript_opt.setChild(fas,0);
 			}
 			*/
-			// Loop over indices and create new InstArrayDecls
+			// Loop over indices and create new InstArrayComponentDecls
 			List l = new List();
 			for (int i=0;i<ind.length;i++) {
-				l.add(new InstArrayDecl(new InstParseAccess("ArrayDecl"),new Opt(),
+				l.add(new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"),new Opt(),
 						getComponentDecl(),new Opt(),new Opt(),ind[i]));
 			}
 			return l;
@@ -513,14 +513,14 @@ aspect InstanceTreeConstruction {
 		}
 	}
 
-	eq InstArrayDecl.getInstComponentDeclList() {
+	eq InstArrayComponentDecl.getInstComponentDeclList() {
 		FSubscript fs = childFSubscript(1);
 		if (fs!=null) {
 			int[] ind = fs.arrayIndices();
-			// Loop over indices and create new InstArrayDecls
+			// Loop over indices and create new InstArrayComponentDecls
 			List l = new List();
 			for (int i=0;i<ind.length;i++) {
-				l.add(new InstArrayDecl(new InstParseAccess("ArrayDecl"),new Opt(),
+				l.add(new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"),new Opt(),
 						instComponentDecl().getComponentDecl(),new Opt(),new Opt(),ind[i]));
 			}
 			return l;
@@ -566,10 +566,10 @@ aspect InstanceTreeConstruction {
 		if (isArrayDecl()) { // Take care of array declarations separately
 			// Get the array indices
 			int[] ind = getFArraySubscripts().getFSubscript(0).arrayIndices();
-			// Loop over indices and create new InstArrayDecls
+			// Loop over indices and create new InstArrayComponentDecls
 			List l = new List();
 			for (int i=0;i<ind.length;i++) {
-				l.add(new InstArrayDecl(new InstParseAccess("ArrayDecl"),new Opt(),
+				l.add(new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"),new Opt(),
 					getComponentDecl(),new Opt(),new Opt(),ind[i]));
 			}
 			return l;
@@ -782,17 +782,30 @@ aspect InstanceTreeConstruction {
 		return ie;
     }
 
-
 	public InstAccess ComponentDecl.newInstClassAccess() {
 		return getClassName().newInstAccess();
 	}
 	
-	public InstAccess Access.newInstAccess() {
-		InstAccess ia =  new InstParseAccess(getID());
+	public InstAccess ArrayAccess.newInstAccess() {
+		Opt as = null;
+		if (hasArraySubscripts() && getArraySubscripts().getNumSubscript()>0) {
+			as = new Opt(getArraySubscripts().instantiate());
+		} else {
+			as = new Opt();
+		}
+		InstAccess ia =  new InstParseAccess(getID(),as);
 		ia.setStart(getStart());
 		ia.setEnd(getEnd());
 		return ia;
 	}
+
+	public InstAccess Access.newInstAccess() {
+		InstAccess ia =  new InstParseAccess(getID(),new Opt());
+		ia.setStart(getStart());
+		ia.setEnd(getEnd());
+		return ia;
+	}
+
 	public InstAccess Dot.newInstAccess() {
 		InstAccess ia = new InstDot("",getLeft().newInstAccess(),getRight().newInstAccess());
 		ia.setStart(getStart());
@@ -943,7 +956,7 @@ aspect InstanceAST_API {
 	syn lazy ArrayList<ComponentDecl> InstNode.components() = new ArrayList<ComponentDecl>();
 	eq InstClassRoot.components() = getClassDecl().components();
 	eq InstComponentDecl.components() = myInstClass().components();
-	eq InstArrayDecl.components() = instComponentDecl().isPrimitive()? 
+	eq InstArrayComponentDecl.components() = instComponentDecl().isPrimitive()? 
 			new ArrayList<ComponentDecl>() : instComponentDecl().components();
 	eq InstExtends.components() = extendsPrimitive()? new ArrayList<ComponentDecl>() : getClassName().myInstClassDecl().components();
 	eq InstBaseClassDecl.components() = getBaseClassDecl().components();
@@ -1125,15 +1138,15 @@ aspect SourceAST_API {
 
 aspect InstArrays {
 	
-	inh FSubscript InstArrayDecl.childFSubscript(int i);
-	eq InstArrayDecl.getInstComponentDecl().childFSubscript(int i) = 
+	inh FSubscript InstArrayComponentDecl.childFSubscript(int i);
+	eq InstArrayComponentDecl.getInstComponentDecl().childFSubscript(int i) = 
 		childFSubscript(i+1);
 	eq InstComponentDecl.getInstComponentDecl().childFSubscript(int i) =
 		(hasFArraySubscripts() && getFArraySubscripts().getNumFSubscript()>i)?
 				getFArraySubscripts().getFSubscript(i) : null;
 	eq InstRoot.getChild().childFSubscript(int i) = null;
 
-	inh InstComponentDecl InstArrayDecl.instComponentDecl();
+	inh InstComponentDecl InstArrayComponentDecl.instComponentDecl();
 	eq InstComponentDecl.getChild().instComponentDecl() = this;
 	eq InstRoot.getChild().instComponentDecl() = null;
 	
@@ -1438,7 +1451,7 @@ aspect InstancePrettyPrint {
 
 	}
 
-	public String InstArrayDecl.prettyPrint(String indent) {
+	public String InstArrayComponentDecl.prettyPrint(String indent) {
 		String str = getClass().getName();
 		str = indent+str.substring(str.lastIndexOf('.')+1);
 		str+= ": " + getIndex();

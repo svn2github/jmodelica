@@ -2,6 +2,19 @@ within ;
 package ArrayTests
 
   model ArrayTest1
+        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="ArrayTest1",
+        description="Flattening of arrays.",
+                                               flatModel=
+"
+fclass ArrayTests.ArrayTest1
+ Real x[2];
+equation 
+ x[1] = 3;
+ x[2] = 4;
+end ArrayTests.ArrayTest1;
+")})));
+  
     Real x[2];
   equation
     x[1] = 3;
@@ -9,6 +22,21 @@ package ArrayTests
   end ArrayTest1;
 
   model ArrayTest1b
+  
+         annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="ArrayTest1b",
+        description="Flattening of arrays.",
+                                               flatModel=
+                                               " 
+fclass ArrayTests.ArrayTest1b
+ parameter Integer n = 2 /* 2 */;
+ Real x[n];
+equation 
+ x[1] = 3;
+ x[2] = 4; 
+end ArrayTests.ArrayTest1b;
+")})));
+
     parameter Integer n = 2;
     Real x[n];
   equation
@@ -17,6 +45,21 @@ package ArrayTests
   end ArrayTest1b;
 
   model ArrayTest2
+         annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="ArrayTest2",
+        description="Flattening of arrays.",
+                                               flatModel=
+                                               " 
+fclass ArrayTests.ArrayTest2
+ Real x[2,2];
+equation 
+ x[1,1] = 1;
+ x[1,2] = 2;
+ x[2,1] = 3;
+ x[2,2] = 4; 
+end ArrayTests.ArrayTest2;
+")})));
+
     Real x[2,2];
   equation
     x[1,1] = 1;
@@ -26,6 +69,7 @@ package ArrayTests
   end ArrayTest2;
 
   model ArrayTest3
+
     Real x[:] = {2,3};
     Real y[2];
   equation
@@ -128,11 +172,32 @@ package ArrayTests
         model N
               M m[3];
         end N;
-        N n[1];
+        N n;
       equation
         n.m.x={{{1,2},{3,4},{5,6}}};
 
       end ArrayTest12;
+
+  model ArrayTest13
+    model C
+      parameter Integer n = 2;
+    end C;
+    C c;
+    C cv[c.n];
+  end ArrayTest13;
+
+      model ArrayTest14
+        model M
+              Real x[1] = ones(1);
+        end M;
+
+        model N
+              M m[3,2];
+        end N;
+        N n;
+      equation
+
+      end ArrayTest14;
 
   annotation (uses(Modelica(version="3.0.1")));
 end ArrayTest;

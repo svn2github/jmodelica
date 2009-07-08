@@ -17,13 +17,10 @@
 
 aspect InstNameClassification {
 
-
-
 	rewrite InstParseAccess {
 	   to InstAccess {
   		if (kind()==Kind.COMPONENT_ACCESS) {
-//  			    InstComponentAccess a = new InstComponentAccess(getID(),getArraySubscriptsOpt());
-  			    InstComponentAccess a = new InstComponentAccess(getID());
+  			    InstComponentAccess a = new InstComponentAccess(getID(),getFArraySubscriptsOpt());
      			a.setStart(getStart());
      			a.setEnd(getEnd());
      			return a;
@@ -33,8 +30,7 @@ aspect InstNameClassification {
      			a.setEnd(getEnd());
      			return a;
   		} else {
-//  				InstAmbiguousAccess a = new InstAmbiguousAccess(getID(),getArraySubscriptsOpt());
-  				InstAmbiguousAccess a = new InstAmbiguousAccess(getID());
+  				InstAmbiguousAccess a = new InstAmbiguousAccess(getID(),getFArraySubscriptsOpt());
     			a.setStart(getStart());
     			a.setEnd(getEnd());
      			return a;
@@ -104,7 +100,7 @@ aspect InstResolveAmbiguousNames {
 	    	//System.out.println("ki: " + name());
 	  		if (!lookupInstComponent(name()).isEmpty()) {
 	  			//System.out.println("ki2: " + name());
-     		    InstComponentAccess c = new InstComponentAccess(name());
+     		    InstComponentAccess c = new InstComponentAccess(name(),getFArraySubscriptsOpt());
   	 			c.setStart(getStart());
   	 			c.setEnd(getEnd());
   	 			return c;

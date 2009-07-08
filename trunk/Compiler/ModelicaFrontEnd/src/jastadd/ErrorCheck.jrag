@@ -493,7 +493,7 @@ aspect InstanceErrorCheck {
 		}
 	}
 
-	public void InstArrayDecl.collectErrors() {
+	public void InstArrayComponentDecl.collectErrors() {
 	    if (!errorChecked) {
 	  	  for(InstNode n : getInstComponentDecls()) 
 			  n.collectErrors();

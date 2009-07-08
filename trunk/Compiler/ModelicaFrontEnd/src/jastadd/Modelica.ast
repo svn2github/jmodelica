@@ -351,12 +351,13 @@ AccessExp : Exp ::= Access;
 abstract Access ::= <ID>;
 Dot : Access ::= Left:Access Right:Access;
 
-ParseAccess : Access ::= [ArraySubscripts];
-ClassAccess : Access;
-AmbiguousAccess : Access ::= [ArraySubscripts];
+ArrayAccess : Access ::= [ArraySubscripts];
 
-ComponentAccess : Access ::= [ArraySubscripts];
-//PackageAccess : Access ::=;
+ParseAccess : ArrayAccess;
+ClassAccess : Access;
+AmbiguousAccess : ArrayAccess;
+
+ComponentAccess : ArrayAccess;
 
 ArrayConstructor : Exp ::= FunctionArguments;
 Matrix : Exp ::= ExpList*;
