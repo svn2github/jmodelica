@@ -19,7 +19,8 @@ package org.jmodelica.ide.scanners.generated;
 import java.util.*;
 import java.io.StringReader;
 import java.io.IOException;
-import org.jmodelica.ide.indent.*;
+import org.jmodelica.ide.editor.ModelicaAnchorList;
+import org.jmodelica.ide.editor.Indent;
 
 
 /**
@@ -49,7 +50,7 @@ import org.jmodelica.ide.indent.*;
 		
 		yyreset(new StringReader(text));
 		
-		ancs = new AnchorList();
+		ancs = new ModelicaAnchorList();
 	
 		annotation_paren_level = 0;
 		last_state = YYINITIAL;
@@ -60,7 +61,7 @@ import org.jmodelica.ide.indent.*;
 	}
 	
 	/* scanner state variables */
-	public AnchorList ancs;
+	public ModelicaAnchorList ancs;
 	int annotation_paren_level;	
 	int last_state;
 	
@@ -130,7 +131,7 @@ Other = . | {NewLine}
   {End}				|
   ";"				|
   {Separator}		{ yypushback(yylength()); yybegin(YYINITIAL); }
-  {Id}			    { ancs.beginStatement(yychar);
+  {Id}			    { ancs.beginLine(yychar);
   					  yybegin(YYINITIAL); 
   					}
   {WhiteSpace}*		{ }
@@ -184,7 +185,8 @@ Other = . | {NewLine}
   {WhiteSpace} 		{ }
   "*/"				{ ancs.popPast("comment", yychar + yylength()); 
   					  yybegin(last_state); }
-  {Other}		    { ancs.addAnchor(yychar+1, yychar, Indent.SAME); yybegin(COMMENT); }
+  {Other}		    { ancs.addAnchor(yychar+1, yychar, Indent.SAME); 
+  					  yybegin(COMMENT); }
 }
 
 <COMMENT> {

@@ -2,8 +2,8 @@ package testcases;
 
 import junit.framework.TestCase;
 
+import org.jmodelica.ide.editor.indent.Indent;
 import org.jmodelica.ide.indent.Anchor;
-import org.jmodelica.ide.indent.Indent;
 import org.jmodelica.ide.scanners.generated.IndentationHintScanner;
 
 public class IndentationTest extends TestCase {
@@ -94,9 +94,10 @@ static IndentTestCase[] testCases = {
     /* 62 */    new IndentTestCase("model m\nReal r;equation", Indent.SAME, "equation", "Real"),
     /* 63 */    new IndentTestCase("model m\nReal r;\n\n\nequation\n", Indent.SAME, "\n\n\nequation", "Real"),
     /* 64 */    new IndentTestCase("model m model q end q end m; end z;\t", Indent.SAME, "\t", "model m"),  
+    /* 65 */    new IndentTestCase("\nmodel m model q end q end m; end z;\t", Indent.SAME, "\t", "model m"),  
     /* sink tests */
-    /* 65 */    new IndentTestCase("model m\nend m;\t", Indent.SAME, "\t", "model m", "model m"),
-    /* 66 */    new IndentTestCase("model m model q \nend q;\t", Indent.SAME, "\t", "model q", "model q"),
+    /* 66 */    new IndentTestCase("model m\nend m;\t", Indent.SAME, "\t", "model m", "model m"),
+    /* 67 */    new IndentTestCase("model m model q \nend q;\t", Indent.SAME, "\t", "model q", "model q"),
 };
 
 public void testIndent() {

@@ -42,6 +42,8 @@ public class Constants {
 	public static final String ACTION_ERROR_CHECK_TEXT = "Check for &errors";
 	public static final String ACTION_TOGGLE_ANNOTATIONS_ID = ACTION_ID + ".annotation";
 	public static final String ACTION_TOGGLE_ANNOTATIONS_TEXT = "Show &annotations";
+	public static final String ACTION_FORMAT_REGION_ID = ACTION_ID + ".format-region";
+	public static final String ACTION_FORMAT_REGION_TEXT = "&Format region";
 	public static final String GROUP_ID = ACTION_ID + ".group";
 	public static final String GROUP_MODELICA_ID = GROUP_ID + ".modelica";
 	public static final String GROUP_ERROR_ID = GROUP_ID + ".error";

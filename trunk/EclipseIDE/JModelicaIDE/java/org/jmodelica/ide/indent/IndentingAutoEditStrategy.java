@@ -8,9 +8,7 @@ import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
-import org.jmodelica.ide.helpers.IndentedSection;
 import org.jmodelica.ide.scanners.generated.IndentationHintScanner;
-
 
 
 /**
@@ -19,7 +17,8 @@ import org.jmodelica.ide.scanners.generated.IndentationHintScanner;
  * @author philip
  * 
  */
-public class Indentor extends DefaultIndentLineAutoEditStrategy {
+public class IndentingAutoEditStrategy extends
+        DefaultIndentLineAutoEditStrategy {
 
 final static IndentationHintScanner ihs = new IndentationHintScanner();
 
@@ -40,7 +39,6 @@ protected int getIndent(IDocument d, int begin, int end, boolean countSinks)
             IndentedSection.tabWidth);
 }
 
-
 public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
     try {
         boolean semicolon = c.text.equals(";");
@@ -59,13 +57,15 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
         String text = d.get(0, lineEnd);
         ihs.analyze(text);
 
-        /* Check if there are sinks on current line. In that case indent
-           edited line */
+        /*
+         * Check if there are sinks on current line. In that case indent edited
+         * line
+         */
         Anchor a = ihs.ancs.sinkAt(c.offset);
         if (a != Anchor.BOTTOM && a.offset >= lineBegin) {
             int sinkIndent = countTokens(d, a.reference);
-            String tmp = new IndentedSection(d.get(lineBegin, c.offset - lineBegin))
-                .offsetIndentTo(sinkIndent).toString();
+            String tmp = new IndentedSection(d.get(lineBegin, c.offset
+                    - lineBegin)).offsetIndentTo(sinkIndent).toString();
             c.addCommand(lineBegin, c.offset - lineBegin, tmp, c.owner);
         }
 
@@ -81,13 +81,17 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
 
             int begText = findEndOfWhiteSpace(d, lineBegin, lineEnd);
             if (c.offset <= begText) {
-                /* put 'cursor' in very beginning of line if breaking before
-                   indent ends */
+                /*
+                 * put 'cursor' in very beginning of line if breaking before
+                 * indent ends
+                 */
                 c.length += c.offset - lineBegin;
                 c.offset = lineBegin;
             } else
-                 /* if breaking in the middle of line, remove indent from the
-                    first row */
+                /*
+                 * if breaking in the middle of line, remove indent from the
+                 * first row
+                 */
                 c.text = IndentedSection.trimIndent(c.text);
 
             if (endsWithNewLine)

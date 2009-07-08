@@ -81,7 +81,7 @@ import org.jmodelica.ide.error.InstanceErrorHandler;
 import org.jmodelica.ide.folding.AnnotationDrawer;
 import org.jmodelica.ide.folding.IFilePosition;
 import org.jmodelica.ide.helpers.Util;
-import org.jmodelica.ide.indent.Indentor;
+import org.jmodelica.ide.indent.IndentingAutoEditStrategy;
 import org.jmodelica.ide.outline.InstanceOutlinePage;
 import org.jmodelica.ide.outline.OutlinePage;
 import org.jmodelica.ide.outline.SourceOutlinePage;
@@ -141,6 +141,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	// Actions that needs to be altered
 	private ErrorCheckAction errorCheckAction;
 	private ToggleAnnotationsAction toggleAnnotationsAction;
+	private FormatRegionAction formatRegionAction;
 	
 	private ModelicaCompiler compiler;
 	
@@ -222,7 +223,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
-
+	    
 		 // Set the source viewer configuration before the call to createPartControl to set viewer configuration
 	    super.setSourceViewerConfiguration(new ViewerConfiguration());
 	    super.createPartControl(parent);
@@ -279,6 +280,9 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		else
 			fCompiledLocal = false;
 		
+		if (getSourceViewer() == null) 
+		    return;
+		
 		IDocument document = getSourceViewer().getDocument();
 		if (document != null) 
 			setupDocumentPartitioner(document);
@@ -292,6 +296,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		setAction(Constants.ACTION_COLLAPSE_ALL_ID, new CollapseAllAction());
 		setAction(Constants.ACTION_ERROR_CHECK_ID, errorCheckAction = new ErrorCheckAction());
 		setAction(Constants.ACTION_TOGGLE_ANNOTATIONS_ID, toggleAnnotationsAction = new ToggleAnnotationsAction());
+		setAction(Constants.ACTION_FORMAT_REGION_ID, formatRegionAction = new FormatRegionAction(this));
 		updateErrorCheckAction();
 	}
 	
@@ -564,7 +569,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	 */
 	private class ViewerConfiguration extends SourceViewerConfiguration {
 
-		private Indentor indentationStrategy;
+		private IndentingAutoEditStrategy indentationStrategy;
 		private AnnotationParenthesisAdder annotationParenthesisAdder;
 
 		@Override
@@ -579,9 +584,9 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 			return annotationParenthesisAdder;
 		}
 
-		private Indentor getIndentationStrategy() {
+		private IndentingAutoEditStrategy getIndentationStrategy() {
 			if (indentationStrategy == null)
-				indentationStrategy = new Indentor();
+				indentationStrategy = new IndentingAutoEditStrategy();
 			return indentationStrategy;
 		}
 
@@ -753,4 +758,8 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 			MessageDialog.openInformation(new Shell(), title, msg);
 		}
 	}
+
+    public IDocument getDocument() {
+        return getSourceViewer() == null ? null : getSourceViewer().getDocument();
+    }
 }

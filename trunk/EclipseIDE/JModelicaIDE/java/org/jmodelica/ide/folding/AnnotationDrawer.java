@@ -78,19 +78,19 @@ public class AnnotationDrawer implements IDrawingStrategy {
 	}
 
 	private Font getFont(StyleRange style, Font oldFont) {
-		if (oldFont != null && oldFont == lastOldFont) {
+		if (oldFont != null && oldFont == lastOldFont) 
 			return lastFont;
-		} else {
-			lastOldFont = oldFont;
-			if (lastFont != null)
-				lastFont.dispose();
-			lastFont = style.font;
-			if (lastFont == null) 
-				lastFont = oldFont;
-			FontData data = lastFont.getFontData()[0];
-			lastFont = new Font(lastFont.getDevice(), data.getName(), data.getHeight(), data.getStyle() | SWT.BOLD);
-			return lastFont;
-		}
+
+		lastOldFont = oldFont;
+		if (lastFont != null)
+			lastFont.dispose();
+		lastFont = style.font;
+		if (lastFont == null) 
+			lastFont = oldFont;
+		FontData data = lastFont.getFontData()[0];
+		lastFont = new Font(lastFont.getDevice(), data.getName(), data.getHeight(), data.getStyle() | SWT.BOLD);
+		return lastFont;
+
 	}
 
 	private Color getBackground(StyledText textWidget, StyleRange style,
@@ -102,7 +102,7 @@ public class AnnotationDrawer implements IDrawingStrategy {
 	    	int line = textWidget.getLineAtOffset(offset);
 			bg = textWidget.getLineBackground(line);
 	    	if (bg == null) {
-	    		if (useCursorBackground(textWidget, line)) 
+	    		if (useCursorBackground(textWidget, line) || style == null) 
 					bg = cursorLineBackground;
 	    		else 
 	    			bg = style.background;
