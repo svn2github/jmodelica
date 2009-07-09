@@ -197,10 +197,12 @@ aspect Flattening {
 	}
 
 	syn lazy FExp InstPrimitive.myBindingFExp() {
-
+        //System.out.println("In file: " + fileName() + " at line: " + beginLine() + ": " + prettyPrint(""));
 		for (InstModification im : totalMergedEnvironment()) {
 			if (im.hasInstValueMod()) {
-				return im.instValueMod().flatten(im.myInstNode().getFQNamePrefix());
+				FExp fe = im.instValueMod().flatten(im.myInstNode().getFQNamePrefix());
+				fe.setParent(this);
+				return fe;
 			}
 		}
 		return null;
@@ -844,34 +846,36 @@ aspect InstantiatedExpressions {
 			l.getChild(i).setEnd(getEnd());
 		}
 		
+		//System.out.println("*** " + getName().name());
+		
 		FExp n = null;
 		if (getName().name().equals("der")) {
 			n = new FDer(new FIdUseInstAccess(new FQName(), ((FInstAccessExp)l.getChild(0)).getInstAccessNoTransform())); 
-		} else if (getName().name().equals("sin")) {
+		} else if (getName().name().equals("sin") || getName().name().equals("Modelica.Math.sin")) {
 			n = new FSinExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("cos")) {
+		} else if (getName().name().equals("cos") || getName().name().equals("Modelica.Math.cos")) {
 			n = new FCosExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("tan")) {
+		} else if (getName().name().equals("tan") || getName().name().equals("Modelica.Math.tan")) {
 			n = new FTanExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("asin")) {
+		} else if (getName().name().equals("asin") || getName().name().equals("Modelica.Math.asin")) {
 			n = new FAsinExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("acos")) {
+		} else if (getName().name().equals("acos") || getName().name().equals("Modelica.Math.acos")) {
 			n = new FAcosExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("atan")) {
+		} else if (getName().name().equals("atan") || getName().name().equals("Modelica.Math.atan")) {
 			n = new FAtanExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("atan2")) {
+		} else if (getName().name().equals("atan2") || getName().name().equals("Modelica.Math.atan2")) {
 			n = new FAtan2Exp((FExp)l.getChild(0),(FExp)l.getChild(1)); 
-		} else if (getName().name().equals("sinh")) {
+		} else if (getName().name().equals("sinh") || getName().name().equals("Modelica.Math.sinh")) {
 			n = new FSinhExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("cosh")) {
+		} else if (getName().name().equals("cosh") || getName().name().equals("Modelica.Math.cosh")) {
 			n = new FCoshExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("tanh")) {
+		} else if (getName().name().equals("tanh") || getName().name().equals("Modelica.Math.tanh")) {
 			n = new FTanhExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("exp")) {
+		} else if (getName().name().equals("exp") || getName().name().equals("Modelica.Math.exp")) {
 			n = new FExpExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("log")) {
+		} else if (getName().name().equals("log") || getName().name().equals("Modelica.Math.log")) {
 			n = new FLogExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("log10")) {
+		} else if (getName().name().equals("log10") || getName().name().equals("Modelica.Math.log10")) {
 			n = new FLog10Exp((FExp)l.getChild(0)); 
 		} else {
 			n = new FFunctionCall(new FIdUseInstAccess(new FQName(),getName().newInstAccess()),l);	

@@ -17,6 +17,24 @@
 
 model LibraryTests 
 
+   
+
+   model MathFuncTest1 
+      parameter Real p = Modelica.Constants.pi;   
+   end MathFuncTest1;
+
+   model MathFuncTest2
+      // Lookup of constants in packages currently does not work.
+      import Modelica.Constants.*;
+      parameter Real p = pi;
+   end MathFuncTest2;
+
+   model MathFuncTest3
+      import SI = Modelica.SIunits;
+      SI.Temperature t;
+   end MathFuncTest3;
+
+
    model LibraryTest1
      Modelica.Electrical.Analog.Basic.Capacitor c;
      equation
