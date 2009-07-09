@@ -43,8 +43,10 @@ public class Constants {
 	public static final String ACTION_TOGGLE_ANNOTATIONS_ID = ACTION_ID + ".annotation";
 	public static final String ACTION_TOGGLE_ANNOTATIONS_TEXT = "Show &annotations";
 	public static final String ACTION_FORMAT_REGION_ID = ACTION_ID + ".format-region";
-	public static final String ACTION_FORMAT_REGION_TEXT = "&Format region";
-	public static final String GROUP_ID = ACTION_ID + ".group";
+    public static final String ACTION_FORMAT_REGION_TEXT = "&Format region";
+    public static final String ACTION_TOGGLE_COMMENT_ID = ACTION_ID + ".toggle-comment";
+    public static final String ACTION_TOGGLE_COMMENT_TEXT = "Toggle &Comment";
+    public static final String GROUP_ID = ACTION_ID + ".group";
 	public static final String GROUP_MODELICA_ID = GROUP_ID + ".modelica";
 	public static final String GROUP_ERROR_ID = GROUP_ID + ".error";
 	

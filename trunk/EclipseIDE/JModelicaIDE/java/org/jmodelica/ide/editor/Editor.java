@@ -141,7 +141,6 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	// Actions that needs to be altered
 	private ErrorCheckAction errorCheckAction;
 	private ToggleAnnotationsAction toggleAnnotationsAction;
-	private FormatRegionAction formatRegionAction;
 	
 	private ModelicaCompiler compiler;
 	
@@ -296,7 +295,8 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		setAction(Constants.ACTION_COLLAPSE_ALL_ID, new CollapseAllAction());
 		setAction(Constants.ACTION_ERROR_CHECK_ID, errorCheckAction = new ErrorCheckAction());
 		setAction(Constants.ACTION_TOGGLE_ANNOTATIONS_ID, toggleAnnotationsAction = new ToggleAnnotationsAction());
-		setAction(Constants.ACTION_FORMAT_REGION_ID, formatRegionAction = new FormatRegionAction(this));
+		setAction(Constants.ACTION_FORMAT_REGION_ID, new FormatRegionAction(this));
+		setAction(Constants.ACTION_TOGGLE_COMMENT_ID, new ToggleComment(this));
 		updateErrorCheckAction();
 	}
 	

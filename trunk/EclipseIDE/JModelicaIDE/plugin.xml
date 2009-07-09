@@ -255,6 +255,12 @@
             id="JModelicaIDE.ModelicaFormatRegionCommand"
             name="Format region">
       </command>
+      <command
+            categoryId="JModelicaIDE.ModelicaCommandCategory"
+            description="Toggle comment on the selected region."
+            id="JModelicaIDE.ModelicaToggleCommentCommand"
+            name="Toggle comment on region">
+      </command>
       <category
             description="JModelica commands"
             id="JModelicaIDE.ModelicaCommandCategory"
@@ -264,6 +270,11 @@
             commandId="JModelicaIDE.ModelicaFormatRegionCommand"
             keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
             keySequence="Shift+Ctrl+F">
+      </keyBinding>
+      <keyBinding
+            commandId="JModelicaIDE.ModelicaToggleCommentCommand"
+            keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            keySequence="Shift+Ctrl+C">
       </keyBinding>
    </extension>
 </plugin>

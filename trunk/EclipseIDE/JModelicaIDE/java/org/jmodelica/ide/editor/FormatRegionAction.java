@@ -7,6 +7,10 @@ import org.eclipse.jface.text.ITextSelection;
 import org.jmodelica.ide.indent.IndentedSection;
 import org.jmodelica.ide.scanners.generated.IndentationHintScanner;
 
+/**
+ * Action for auto indenting the selected region.
+ * @author philip
+ */
 public class FormatRegionAction extends Action {
 
 protected Editor editor;
@@ -26,23 +30,18 @@ public void run() {
 
     ITextSelection sel =
             (ITextSelection) editor.getSelectionProvider().getSelection();
-
+    
     String doc = d.get();
     IndentationHintScanner ihs = new IndentationHintScanner();
     ihs.analyze(doc);
 
     if (sel.getLength() == 0) {
-        try {
-        d.set(new IndentedSection(doc).indent(ihs.ancs).toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        d.set(new IndentedSection(doc).indent(ihs.ancs).toString());  
     } else {
         int beg = sel.getStartLine();
         int end = sel.getEndLine() + 1;
         String section = new IndentedSection(doc).indent(ihs.ancs, beg, end)
                 .toString(beg, end);
-
         try {
             int startOffset = d.getLineOffset(beg);
             int endOffset = d.getLineOffset(end - 1);

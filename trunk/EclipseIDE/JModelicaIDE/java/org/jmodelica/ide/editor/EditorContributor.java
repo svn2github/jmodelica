@@ -41,12 +41,15 @@ import org.jmodelica.ide.ui.ImageLoader;
  */
 public class EditorContributor extends BasicTextEditorActionContributor {
 
-private static final String[] ACTIONS = { Constants.ACTION_ERROR_CHECK_ID,
-        Constants.ACTION_TOGGLE_ANNOTATIONS_ID,
-        Constants.ACTION_FORMAT_REGION_ID };
+private static final String[] ACTIONS = { 
+    Constants.ACTION_ERROR_CHECK_ID,
+    Constants.ACTION_TOGGLE_ANNOTATIONS_ID,
+    Constants.ACTION_FORMAT_REGION_ID, 
+    Constants.ACTION_TOGGLE_COMMENT_ID };
 private LabelRetargetAction errorCheckAction;
 private RetargetAction toggleAnnotationsAction;
 private LabelRetargetAction formatRegionAction;
+private LabelRetargetAction toggleCommentAction;
 private RetargetAction[] retargetActions;
 
 public EditorContributor() {
@@ -67,10 +70,15 @@ public EditorContributor() {
             Constants.ACTION_FORMAT_REGION_ID,
             Constants.ACTION_FORMAT_REGION_TEXT);
 
+    toggleCommentAction = new LabelRetargetAction(
+            Constants.ACTION_TOGGLE_COMMENT_ID,
+            Constants.ACTION_TOGGLE_COMMENT_TEXT);
+    
     retargetActions = new RetargetAction[] { 
             errorCheckAction,
             toggleAnnotationsAction, 
-            formatRegionAction };
+            formatRegionAction,
+            toggleCommentAction };
 }
 
 @Override
@@ -111,6 +119,7 @@ public void contributeToMenu(IMenuManager menu) {
     editMenu.appendToGroup(Constants.GROUP_ERROR_ID, errorCheckAction);
     editMenu.appendToGroup(Constants.GROUP_ERROR_ID, toggleAnnotationsAction);
     editMenu.appendToGroup(Constants.GROUP_ERROR_ID, formatRegionAction);
+    editMenu.appendToGroup(Constants.GROUP_ERROR_ID, toggleCommentAction);
 }
 
 @Override
