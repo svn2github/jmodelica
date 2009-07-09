@@ -1653,7 +1653,7 @@ class JMIModel(object):
         if self._dll.jmi_ode_f(self._jmi) is not 0:
             raise JMIException("Evaluating ODE failed.")
         
-    def ode_df(self, eval_alg, sparsity, independent_vars, jac, mask=None):
+    def ode_df(self, eval_alg, sparsity, independent_vars, mask, jac):
         """Evaluates the Jacobian of the right hand side of the ODE.
         
         Parameters:
@@ -1670,19 +1670,13 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
             jac --
                 The Jacobian. (Return)
 				
         """
-        if mask is None:
-            mask = N.ones(self._n_z.value, dtype=int)
-        
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
@@ -1723,12 +1717,9 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
             row --
                 Row indices of the non-zeros in the Jacobian. (Return)
             col --
@@ -1760,12 +1751,9 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
        
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
@@ -1799,7 +1787,7 @@ class JMIModel(object):
         if self._dll.jmi_dae_F(self._jmi, res) is not 0:
             raise JMIException("Evaluating the DAE residual failed.")
     
-    def dae_dF(self, eval_alg, sparsity, independent_vars, jac, mask=None):
+    def dae_dF(self, eval_alg, sparsity, independent_vars, mask, jac):
         """Evaluate the Jacobian of the DAE residual function.
         
         Parameters:
@@ -1816,19 +1804,13 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
             jac --
                 The Jacobian. (Return)
 				
         """
-        if mask is None:
-            mask = N.ones(self._n_z.value, dtype=int)
-        
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
@@ -1868,12 +1850,9 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
             row --
                 Row indices of the non-zeros in the DAE residual Jacobian.
                 (Return)
@@ -1907,12 +1886,9 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
         
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
@@ -1953,7 +1929,7 @@ class JMIModel(object):
         if self._dll.jmi_init_F0(self._jmi, res) is not 0:
             raise JMIException("Evaluating the F0 residual function failed.")
         
-    def init_dF0(self, eval_alg, sparsity, independent_vars, jac, mask=None):
+    def init_dF0(self, eval_alg, sparsity, independent_vars, mask, jac):
         """Evaluates the Jacobian of the DAE initialization residual function
         F0.
         
@@ -1971,20 +1947,14 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
             jac --
                 The Jacobian. (Return)
 				 
         """
 		
-        if mask is None:
-            mask = N.ones(self._n_z.value, dtype=int)
-        
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
@@ -2025,12 +1995,9 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
             row --
                 Row indices of the non-zeros in the Jacobian. (Return)
             col --
@@ -2087,7 +2054,7 @@ class JMIModel(object):
         if self._dll.jmi_init_F1(self._jmi, res) is not 0:
             raise JMIException("Evaluating the F1 residual function failed.")            
         
-    def init_dF1(self, eval_alg, sparsity, independent_vars, jac, mask=None):
+    def init_dF1(self, eval_alg, sparsity, independent_vars, mask, jac):
         """Evaluates the Jacobian of the DAE initialization residual function
         F1.
         
@@ -2105,20 +2072,14 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
             jac --
                 The Jacobian. (Return)    
 				
         """
 		
-        if mask is None:
-            mask = N.ones(self._n_z.value, dtype=int)
-        
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
@@ -2159,12 +2120,9 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
             row --
                 Row indices of the non-zeros in the Jacobian. (Return)
             col --
@@ -2197,12 +2155,9 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
 
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
@@ -2229,7 +2184,7 @@ class JMIModel(object):
         if self._dll.jmi_init_Fp(self._jmi, res) is not 0:
             raise JMIException("Evaluating the Fp residual function failed.")
         
-    def init_dFp(self, eval_alg, sparsity, independent_vars, jac, mask=None):
+    def init_dFp(self, eval_alg, sparsity, independent_vars, mask, jac):
         """Evaluates the Jacobian of the DAE initialization residual function
         F1.
         
@@ -2247,19 +2202,13 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
             jac --
                 The Jacobian. (Return)
 				
         """
-        if mask is None:
-            mask = N.ones(self._n_z.value, dtype=int)
-        
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
@@ -2301,12 +2250,9 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
             row --
                 Row indices of the non-zeros in the Jacobian. (Return)
             col --
@@ -2338,12 +2284,9 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
@@ -2441,7 +2384,7 @@ class JMIModel(object):
             raise JMIException("Evaluation of J failed.")
         return J[0]
         
-    def opt_dJ(self, eval_alg, sparsity, independent_vars, jac, mask=None):
+    def opt_dJ(self, eval_alg, sparsity, independent_vars, mask, jac):
         """Evaluate the gradient of the cost function.
         
         Parameters:
@@ -2458,20 +2401,14 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
             jac --
                 The gradient. (Return)
                 
         """
 		
-        if mask is None:
-            mask = N.ones(self._n_z.value, dtype=int)
-        
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
@@ -2511,12 +2448,9 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
             row --
                 Row indices of the non-zeros in the gradient. (Return)
             col --
@@ -2548,12 +2482,9 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
         
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
@@ -2582,7 +2513,7 @@ class JMIModel(object):
         if self._dll.jmi_opt_Ceq(self._jmi, res) is not 0:
             raise JMIException("Evaluation of the residual of the equality path constraint Ceq failed.")
         
-    def opt_dCeq(self, eval_alg, sparsity, independent_vars, jac, mask=None):
+    def opt_dCeq(self, eval_alg, sparsity, independent_vars, mask, jac):
         """Evaluate the Jacobian of the equality path constraint Ceq.
         
         Parameters:
@@ -2599,19 +2530,13 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
             jac --
                 The Jacobian. (Return)
         
         """
-        if mask is None:
-            mask = N.ones(self._n_z.value, dtype=int)
-        
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
@@ -2653,12 +2578,9 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
             row --
                 Row indices of the non-zeros in the Jacobian. (Return)
             col --
@@ -2690,12 +2612,9 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
         
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
@@ -2723,7 +2642,7 @@ class JMIModel(object):
         if self._dll.jmi_opt_Cineq(self._jmi, res) is not 0:
             raise JMIException("Evaluating the residual of the inequality path constraint Cineq failed.")
         
-    def opt_dCineq(self, eval_alg, sparsity, independent_vars, jac, mask=None):
+    def opt_dCineq(self, eval_alg, sparsity, independent_vars, mask, jac):
         """Evaluate the Jacobian of the inequality path constraint Cineq.
         
         Parameters:
@@ -2740,20 +2659,14 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
             jac --
                 The Jacobian. (Return)
 
         """
 		
-        if mask is None:
-            mask = N.ones(self._n_z.value, dtype=int)
-        
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
@@ -2825,12 +2738,9 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
         
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
@@ -2857,7 +2767,7 @@ class JMIModel(object):
         if self._dll.jmi_opt_Heq(self._jmi, res) is not 0:
             raise JMIException("Evaluating the residual of the equality point constraint Heq failed.")
         
-    def opt_dHeq(self, eval_alg, sparsity, independent_vars, jac, mask=None):
+    def opt_dHeq(self, eval_alg, sparsity, independent_vars, mask, jac):
         """Evaluate the Jacobian of the equality point constraint Heq.
         
         Parameters:
@@ -2874,19 +2784,13 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
             jac --
                 The Jacobian. (Return)
 
         """
-        if mask is None:
-            mask = N.ones(self._n_z.value, dtype=int)
-        
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
@@ -2929,12 +2833,9 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
             row --
                 Row indices of the non-zeros in the Jacobian. (Return)
             col --
@@ -2967,12 +2868,9 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
         
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
@@ -3000,7 +2898,7 @@ class JMIModel(object):
         if self._dll.jmi_opt_Hineq(self._jmi, res) is not 0:
             raise JMIException("Evaluating the residual of the inequality point constraint Hineq failed.")
         
-    def opt_dHineq(self, eval_alg, sparsity, independent_vars, jac, mask=None):
+    def opt_dHineq(self, eval_alg, sparsity, independent_vars, mask, jac):
         """ 
         Evaluate the Jacobian of the inequality point constraint Hineq.
         
@@ -3018,19 +2916,13 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
             jac --
                 The Jacobian. (Return)
 
         """
-        if mask is None:
-            mask = N.ones(self._n_z.value, dtype=int)
-        
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
@@ -3073,12 +2965,9 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
             row --
                 Row indices of the non-zeros in the Jacobian. (Return)
             col --
@@ -3112,12 +3001,9 @@ class JMIModel(object):
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
-            mask (optional) --
+            mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-				
-				If this one is not specified the mask is all ones and the
-				evaluations are only based on independent_vars.
         
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
