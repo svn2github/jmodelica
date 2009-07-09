@@ -492,7 +492,19 @@ aspect InstanceErrorCheck {
 			getInstConstraining().collectErrors();
 		}
 	}
+/*
+	public void InstPrimitive.collectErrors() {
+    if (!errorChecked) {
+		super.collectErrors();
+			if (isParameter() && myBindingFExp()==null){
+			   warning("The parameter " + name() + " does not have a binding expression.");
+			} else if (isConstant() && myBindingFExp()==null){
+			   warning("The constant " + name() + " does not have a binding expression.");
+			}
 
+		}
+	}
+*/
 	public void InstArrayComponentDecl.collectErrors() {
 	    if (!errorChecked) {
 	  	  for(InstNode n : getInstComponentDecls()) 
