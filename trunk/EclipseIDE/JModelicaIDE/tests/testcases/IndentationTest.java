@@ -2,7 +2,7 @@ package testcases;
 
 import junit.framework.TestCase;
 
-import org.jmodelica.ide.editor.indent.Indent;
+import org.jmodelica.ide.editor.Indent;
 import org.jmodelica.ide.indent.Anchor;
 import org.jmodelica.ide.scanners.generated.IndentationHintScanner;
 

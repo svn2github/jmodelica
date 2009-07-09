@@ -9,7 +9,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
 import org.jmodelica.ide.scanners.generated.IndentationHintScanner;
-
+import org.jmodelica.ide.editor.ModelicaAnchorList;
 
 /**
  * Auto editing strategy for indenting source code from indentation hints.

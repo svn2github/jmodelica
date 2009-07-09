@@ -1,4 +1,4 @@
-package org.jmodelica.ide.editor.indent;
+package org.jmodelica.ide.editor;
 
 public enum Indent implements org.jmodelica.ide.indent.Indent { 
 	INDENT	{ public int modify(int indent, int indentWidth) { return indent + indentWidth; } },

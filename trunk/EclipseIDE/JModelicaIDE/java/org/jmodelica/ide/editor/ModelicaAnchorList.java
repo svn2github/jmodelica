@@ -1,4 +1,4 @@
-package org.jmodelica.ide.editor.indent;
+package org.jmodelica.ide.editor;
 
 import java.util.LinkedList;
 import java.util.Stack;

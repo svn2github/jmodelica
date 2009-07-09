@@ -112,6 +112,7 @@ Other = . | {NewLine}
   "annotation"		{ ancs.beginSection(yychar + yylength(), yychar, Indent.INDENT, "annotation");
   					  yybegin(ANNOTATION); 
   					}
+  "//" .* {NewLine}	{ }
 
 <YYINITIAL> {
   ^.				{ yypushback(1); yybegin(LINEBEGIN); }

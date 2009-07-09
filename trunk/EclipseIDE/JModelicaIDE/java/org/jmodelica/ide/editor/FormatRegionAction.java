@@ -7,6 +7,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.jmodelica.ide.indent.IndentedSection;
 import org.jmodelica.ide.scanners.generated.IndentationHintScanner;
 
+
 /**
  * Action for auto indenting the selected region.
  * @author philip
