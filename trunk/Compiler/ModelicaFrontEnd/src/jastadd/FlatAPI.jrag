@@ -358,11 +358,19 @@ aspect FlatAPI {
 		myFClass().dependentStringParameters().indexOf(this);
 	
     syn int FClass.numDifferentiatedRealVariables() = differentiatedRealVariables().size();
-	coll ArrayList<FVariable> FClass.differentiatedRealVariables() 
-	  [new ArrayList<FVariable>()] with add root FlatRoot;
+  	syn lazy ArrayList<FVariable> FClass.differentiatedRealVariables() {
+  		ArrayList<FVariable> l = new ArrayList<FVariable>();
+  		for (FVariable fv : differentiatedRealVariablesSet()) {
+  			l.add(fv);
+  		}
+  		return l;
+  	}
+  	// The LinkedHashSet is used here to avoid duplicates.
+	coll LinkedHashSet<FVariable> FClass.differentiatedRealVariablesSet() 
+	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
 	FDer contributes
  		(FVariable)getFIdUse().myFV() when !getFIdUse().myFV().isUnknown()
-	to FClass.differentiatedRealVariables() for myFClass();
+	to FClass.differentiatedRealVariablesSet() for myFClass();
 	syn int FVariable.differentiatedRealVariableIndex() =
 		myFClass().differentiatedRealVariables().indexOf(this);
 
@@ -841,7 +849,7 @@ aspect Attributes {
 	syn lazy FExp FVariable.startAttributeExp() {
 		for (FAttribute a : getFAttributes()) {
 			if (a.getName().name().equals("start")) {
-				return a.hasValue()? a.getValue(): null;
+				return  a.hasValue()? a.getValue(): null;
 			}
 		}
 		return null;
