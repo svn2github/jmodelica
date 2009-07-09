@@ -36,3 +36,30 @@ _jvm_mem_args="-Xmx1024M"
 
 #user options dict
 user_options = {}
+
+def _parse_jvm_args(args):
+	""" Parse string of JVM arguments and return list. """
+	result = []
+	if args:
+		args = args.strip()
+		list = args.split(' ')
+		for l in list:
+			if l:
+				result.append(l)
+	return result
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

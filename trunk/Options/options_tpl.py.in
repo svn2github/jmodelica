@@ -1,1 +1,2 @@
 ipopt_home = "@IPOPT_HOME@"
+jvm_args = ""

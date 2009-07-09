@@ -13,5 +13,4 @@ __all__ = ['jmi', 'xmlparser', 'compiler', 'optimicacompiler','optimization', 'e
 
 #load all options
 common.user_options['ipopt_home']=options.ipopt_home
-
-
+common.user_options['jvm_args']=options.jvm_args
