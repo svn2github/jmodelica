@@ -25,14 +25,15 @@ model LibraryTests
 
    model MathFuncTest2
       // Lookup of constants in packages currently does not work.
-      import Modelica.Constants.*;
-      parameter Real p = pi;
+      import Modelica.Math;
+      parameter Real p = Math.sin(3);
    end MathFuncTest2;
 
-   model MathFuncTest3
-      import SI = Modelica.SIunits;
-      SI.Temperature t;
-   end MathFuncTest3;
+   model ConstantLookupTest1
+      // Lookup of constants in packages currently does not work.
+      import Modelica.Constants.*;
+      parameter Real p = pi;
+   end ConstantLookupTest2;
 
 
    model LibraryTest1
