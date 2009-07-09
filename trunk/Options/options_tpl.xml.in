@@ -1,8 +1,8 @@
 <OptionRegistry>
 	<ModelicaLibrary>
 		<Name>Modelica</Name>
-		<Version>3.1.1</Version>
-		<Path>c:\mypath</Path>
+		<Version>3.0.1</Version>
+		<Path>@prefix@/ThirdParty/MSL/MSL-3.0.1/Modelica/</Path>
 	</ModelicaLibrary>
 	<Options>
 		<Option>
