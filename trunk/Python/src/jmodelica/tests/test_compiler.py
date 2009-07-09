@@ -3,6 +3,7 @@
 """
 
 import os
+import sys
 
 import nose
 
@@ -21,6 +22,16 @@ def test_compile():
     Test that compilation is possible with compiler 
     and that all obligatory files are created. 
     """
+
+    # detect platform specific shared library file extension
+    suffix = ''
+    if sys.platform == 'win32':
+        suffix = '.dll'
+    elif sys.platform == 'darwin':
+        suffix = '.dylib'
+    else:
+        suffix = '.so'
+        
     assert cp.compile_model(fpath, cpath) == 0, \
            "Compiling "+cpath+" failed."
     
@@ -37,8 +48,8 @@ def test_compile():
     assert os.access(fname+'.c', os.F_OK) == True, \
            fname+'.c'+" was not created."        
     
-    assert os.access(fname+'.dll', os.F_OK) == True, \
-           fname+'.dll'+" was not created."        
+    assert os.access(fname+suffix, os.F_OK) == True, \
+           fname+suffix+" was not created."        
         
 
 def test_compile_wtarget_alg():
