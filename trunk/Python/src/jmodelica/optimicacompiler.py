@@ -29,8 +29,7 @@ import common
 #start JVM
 if not jpype.isJVMStarted():
     jvm_args = common._parse_jvm_args(common.user_options['jvm_args'])
-#    jpype.startJVM(jpype.getDefaultJVMPath(),common._class_path,common._dir_path, tuple(jvm_args))
-    jpype.startJVM(jpype.getDefaultJVMPath(),common._class_path,common._dir_path, '-Xmx1024m')
+    jpype.startJVM(jpype.getDefaultJVMPath(),common._class_path,common._dir_path, *jvm_args)
     print "JVM started."
 
 #get java class (OptimicaCompiler)
