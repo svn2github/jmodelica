@@ -20,8 +20,8 @@ oc.set_log_level(oc.LOG_ERROR)
    
 def test_optimica_compile():
     """
-    Test that compilation is possible and that all
-    obligatory files are created. 
+    Test that compilation is possible with optimicacompiler
+    and that all obligatory files are created. 
     """
 
     # detect platform specific shared library file extension
@@ -57,17 +57,17 @@ def test_optimica_compile():
         
 
 def test_optimica_compile_wtarget_alg():
-    """ Test that it is possible to compile with target algorithms. """
+    """ Test that it is possible to compile (optimicacompiler.py) with target algorithms. """
     assert oc.compile_model(fpath, cpath, target='algorithms') == 0, \
            "Compiling "+cpath+" with target=algorithms failed."
     
 def test_optimica_compile_wtarget_ipopt():
-    """ Test that it is possible to compile with target ipopt. """
+    """ Test that it is possible to compile (optimicacompiler.py) with target ipopt. """
     assert oc.compile_model(fpath, cpath, target='ipopt') == 0, \
            "Compiling "+cpath+" with target=ipopt failed."
     
 def test_optimica_stepbystep():
-    """ Test that it is possible to compile step-by-step. """
+    """ Test that it is possible to compile (optimicacompiler.py) step-by-step. """
     sourceroot = oc.parse_model(fpath)
     ipr = oc.instantiate_model(sourceroot, cpath)
     fclass = oc.flatten_model(fpath, cpath, ipr)

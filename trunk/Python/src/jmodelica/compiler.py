@@ -28,21 +28,14 @@ import jpype
 
 import common
 
-#get paths to external directories: ModelicaCompiler, Beaver
-_mc_jar = common._jm_home+os.sep+'lib'+os.sep+'ModelicaCompiler.jar'
-_beaver_lib = common._jm_home+os.sep+'ThirdParty'+os.sep+'Beaver'+os.sep+'lib'
-
-_dir_path="-Djava.ext.dirs=%s" %_beaver_lib
-_class_path="-Djava.class.path=%s" %_mc_jar
-
 #start JVM
 if not jpype.isJVMStarted():
-    jpype.startJVM(jpype.getDefaultJVMPath(),_class_path,_dir_path)
+    jpype.startJVM(jpype.getDefaultJVMPath(),common._class_path,common._dir_path,common._jvm_mem_args)
     print "JVM started."
 
 #get java class (ModelicaCompiler)
 org = jpype.JPackage('org')
-JCompiler = org.jmodelica.applications.ModelicaCompiler
+JCompiler = org.jmodelica.modelica.compiler.ModelicaCompiler
 
 #constants
 LOG_ERROR = JCompiler.ERROR
@@ -94,7 +87,7 @@ def compile_model(model_file_name, model_class_name, target = "model"):
 
     try:
         JCompiler.compileModel(model_file_name, model_class_name, xml_variables_path, xml_values_path, cppath)
-        c_file = model_class_name.replace('.','_',1)
+        c_file = model_class_name.replace('.','_')
         retval = compile_dll(c_file, target)
         return retval
 
