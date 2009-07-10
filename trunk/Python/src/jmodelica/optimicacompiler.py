@@ -93,6 +93,54 @@ def compile_model(model_file_name, model_class_name, target = "model"):
     except jpype.JavaException, ex:
         _handle_exception(ex)
 
+def compile_models(model_file_names, model_class_name, target = "model"):
+    
+    """ 
+    Compiles an Optimica model.
+
+    This function is identical to jmodelica.optimicacompiler.compile_model
+    except that it excepts a list of file names where models are stored.
+    
+    Parameters:
+    
+        model_file_names -- 
+            A list of paths to files in which the models are contained.
+        model_class_name -- 
+            Name of model class in the model file to compile.
+        target -- 
+            The build target.
+      
+    Exceptions:
+       
+        CompilerError -- 
+            If one or more error is found during compilation.
+        OptimicaClassNotFoundError -- 
+            If the model class is not found.
+        IOError -- 
+            If the model file is not found, can not be read or any other IO 
+            related error.
+        Exception -- 
+            If there are general errors related to the parsing of the model.       
+        JError -- 
+            If there was a runtime exception thrown by the underlying Java 
+            classes.
+        
+    """
+    xml_variables_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_optimica_variables_template.xml'
+    xml_problvariables_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_optimica_problvariables_template.xml'
+    xml_values_path = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_values_template.xml'
+    cppath = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_optimica_template.c'
+
+    try:
+        OptCompiler.compileModels(model_file_names, model_class_name, xml_variables_path, xml_problvariables_path, xml_values_path, cppath)
+        c_file = model_class_name.replace('.','_')
+        retval = compile_dll(c_file, target)
+        return retval
+
+    except jpype.JavaException, ex:
+        _handle_exception(ex)
+
+
 def parse_model(model_file_name):
     """ 
     Parses a model.
@@ -128,6 +176,45 @@ def parse_model(model_file_name):
         return sr        
     except jpype.JavaException, ex:
         _handle_exception(ex)               
+
+def parse_models(*model_file_names):
+    """ 
+    Parses models stored in different files.
+    
+    Identical to jmodelica.optimicacompiler.parse_model except that it accepts
+    multiple file names. Parses model stored in different files and returns a
+    reference to the source tree representation containing all models.
+    
+    Parameters:    
+    
+        model_file_name -- 
+            Path to file in which the model is contained.
+            
+    Return:
+ 
+        Reference to the root of the source tree representation of the parsed 
+        model.
+    
+    Exceptions:
+        
+        CompilerError --
+            If one or more error is found during compilation.
+        IOError --
+            If the model file is not found, can not be read or any other IO 
+            related error.
+        Exception --
+            If there are general errors related to the parsing of the model.       
+        JError -- 
+            If there was a runtime exception thrown by the underlying Java 
+            classes.
+            
+    """ 
+    try:
+        sr = OptCompiler.parseModels(model_file_names)
+        return sr        
+    except jpype.JavaException, ex:
+        _handle_exception(ex)               
+
 
 def instantiate_model(source_root, model_class_name):
     """ 
@@ -236,7 +323,7 @@ def generate_code(fclass):
     cppath = common._jm_home+os.sep+'CodeGenTemplates'+os.sep+'jmi_modelica_template.c'
 
     try:
-        OptCompiler.generateCode(fclass, xml_variables_path, xml_values_path, cppath)
+        OptCompiler.generateCode(fclass, xml_variables_path,xml_problvariables_path,xml_values_path, cppath)
     except jpype.JavaException, ex:
         _handle_exception(ex)
 

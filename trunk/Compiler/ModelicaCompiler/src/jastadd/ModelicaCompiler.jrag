@@ -249,7 +249,60 @@ public class ModelicaCompiler {
 		InstProgramRoot ipr = instantiateModel(sr, cl);
 			
 		// flattening
-		FClass fc = flattenModel(name, cl, ipr);
+		FClass fc = flattenModel(cl+".mof", cl, ipr);
+
+		// Generate code?
+		if (xmlVariablesTempl != null && xmlValuesTempl !=null && cTemplatefile != null) {
+			generateCode(fc, xmlVariablesTempl, xmlValuesTempl, cTemplatefile);
+		}
+		
+		logger.info("====== Model compiled successfully =======");
+	}
+
+	/**
+	 * Same as compileModel, but supports multiple model files.
+	 * 
+	 * @param name
+	 *            The names of the model files.
+	 * @param cl
+	 *            The name of the class in the model file to compile.
+	 * @param xmlVariablesTempl
+	 *            The XML template file for model variables(optional).
+	 * @param xmlValuesTempl
+	 *            The XML template file for independent parameter values
+	 *            (optional).
+	 * @param cTemplatefile
+	 *            The c template file (optional).
+	 * 
+	 * @throws beaver.Parser.Exception
+	 *             If there was an Beaver parsing exception.
+	 * @throws CompilerException
+	 *             If errors have been found during the parsing, instantiation
+	 *             or flattening.
+	 * @throws FileNotFoundException
+	 *             If the model file can not be found.
+	 * @throws IOException
+	 *             If there was an error reading the model file. (Beaver
+	 *             exception.)
+	 * @throws IOException
+	 *             If there was an error creating the .mof file.
+	 * @throws ModelicaClassNotFoundException
+	 *             If the Modelica class to parse, instantiate or flatten is not
+	 *             found.
+	 * 
+	 */
+	public static void compileModels(String name[], String cl, String xmlVariablesTempl, String xmlValuesTempl, String cTemplatefile) 
+	  throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		logger.info("======= Compiling model =======");
+		
+		// build source tree
+		SourceRoot sr = parseModels(name);
+
+		// compute instance tree
+		InstProgramRoot ipr = instantiateModel(sr, cl);
+			
+		// flattening
+		FClass fc = flattenModel(cl+".mof", cl, ipr);
 
 		// Generate code?
 		if (xmlVariablesTempl != null && xmlValuesTempl !=null && cTemplatefile != null) {
@@ -315,6 +368,44 @@ public class ModelicaCompiler {
 			sd.setFileName(name);
 		}
 
+		return sr;
+	}
+
+	/**
+	 * 
+	 * Parses a set of files and returns a reference to the root of a source tree
+         * where the content of all files is contained. Each file is parsed using
+         * the parseModel method.
+	 * 
+	 * @param name
+	 *            An array of file names.
+	 *            
+	 * @return The root of the source tree.
+	 * 
+	 * @throws beaver.Parser.Exception
+	 *             If there was an Beaver parsing exception.
+	 * @throws CompilerException
+	 *             If errors have been found during the parsing.
+	 * @throws FileNotFoundException
+	 *             If the model file can not be found.
+	 * @throws IOException
+	 *             If there was an error reading the model file. (Beaver exception.)
+	 */
+	public static SourceRoot parseModels(String name[]) 
+	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
+
+		SourceRoot sr = null;
+
+		for (int i=0;i<name.length;i++) {
+			SourceRoot sr_tmp = parseModel(name[i]);
+			if (i==0) {
+				sr = sr_tmp;
+			} else {
+                                for (StoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) {
+					sr.getProgram().addUnstructuredEntity(sd);
+                                }
+                        }
+		}
 		return sr;
 	}
 
