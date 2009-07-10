@@ -1385,16 +1385,19 @@ class JMIModel(object):
         file if possible.
         
         """
-        try:
-            assert self._dll.jmi_delete(self._jmi) == 0, \
-                   "jmi_delete failed"
-            if os.path.exists(self._tempfname) and os.path.isfile(self._tempfname):
-                if sys.platform == 'win32':
-                    _ctypes.FreeLibrary(self._dll._handle)
-                os.remove(self._tempfname)
-        except AttributeError:
-            # Error caused if constructor crashes
+        if sys.platform == 'win32':
             pass
+        else:
+            try:
+                assert self._dll.jmi_delete(self._jmi) == 0, \
+                       "jmi_delete failed"
+                if os.path.exists(self._tempfname) and os.path.isfile(self._tempfname):
+                    if sys.platform == 'win32':
+                        _ctypes.FreeLibrary(self._dll._handle)
+                    os.remove(self._tempfname)
+            except AttributeError:
+                # Error caused if constructor crashes
+                pass
 
     def get_variable_names(self):
         """
