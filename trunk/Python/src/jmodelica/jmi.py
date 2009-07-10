@@ -3581,7 +3581,10 @@ class JMISimultaneousOpt(object):
         elif len(u_names) > 0:
             traj = res.get_variable_data(u_names.get(u_name_value_refs[0]))
         elif len(w_names) > 0:
-            traj = res.get_variable_data(w_names.get(w_name_value_refs[0]))
+            for ref in w_name_value_refs:
+                traj = res.get_variable_data(w_names.get(ref))
+                if N.size(traj.x)>2:
+                    break
         else:
             return
 
