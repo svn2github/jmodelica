@@ -1,0 +1,167 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+import java.io.*;
+import java.util.Random;
+
+//import sun.security.krb5.internal.crypto.c;
+
+ public class GenLocalClasses {
+
+	public class LocGenerator {
+
+		Random r = new Random();
+		
+		public ComponentDecl createComponentDecl(String c, String name, String bindexp,
+				                                 String modname1, String val1) {
+			
+			Modification m = null;
+			ValueModification be = null;
+			ClassModification clm = null;
+			
+			if (bindexp!=null)
+				be = new ValueModification(new RealLitExp(bindexp));
+			if (modname1!=null) {
+				ComponentModification a = new ComponentModification(new Opt(),
+                        new Opt(),
+                        new ParseAccess(modname1,new Opt()),
+                        new Opt(new ValueModification(new RealLitExp(val1))),
+                        new Opt());
+				clm = new ClassModification(new List().add(a));
+			}
+			
+			if (be!=null && clm==null){
+				m = be;
+			} else if (clm!=null) {
+				if (be!=null)
+					m = new CompleteModification(clm,new Opt(be));
+				else
+					m = new CompleteModification(clm,new Opt());
+			}	
+			
+			
+			
+			
+			ComponentDecl cd = new ComponentDecl(new Opt(),
+                      new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new ClassAccess(c),
+                        new Opt(),
+                        new PublicVisibilityType(),
+                        new IdDecl(name),
+                        new Opt(),
+                        m!=null? new Opt(m) : new Opt(),
+                        new Opt(),
+                        new Comment(),
+                        new Opt(),
+                        new Comment());
+			
+			return cd;
+			
+		}
+		
+		public FullClassDecl createFullClassDef(String name) {
+			
+			return new FullClassDecl(new PublicVisibilityType(),
+                        new Opt(),
+                        new Opt(),
+                        new Model(),
+                        new IdDecl(name),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new List(),
+                        new List(),
+                        new List(),
+                        new List(),
+                        new List(),
+                        new List(),
+                        new List(),
+                        new Opt(),
+                        name);
+		}
+		
+		public FullClassDecl genLocClasses(String name,int n, int m) {
+			
+			FullClassDecl cd = createFullClassDef(name);
+			
+			cd.addComponentDecl(createComponentDecl("Real","x_"+name,Double.toString(r.nextDouble()),"min",Double.toString(r.nextDouble())));
+		
+			if (m>0 && n>0) {
+			
+				for (int i=1;i<=n;i++) {
+					cd.addClassDecl(genLocClasses(name+"_"+i,n-1,m-1));
+				}
+				
+				/*
+				for (int i=1;i<=n;i++) {
+					cd.addSuper(new ExtendsClause(new PublicVisibilityType(),
+							                      new ParseAccess(name+"_"+i,new Opt()),
+							                      new Opt(),
+							                      new Opt()));
+				}*/
+				
+				for (int i=1;i<=n;i++) {
+					cd.addComponentDecl(createComponentDecl(name+"_"+i, name+"_"+i+"_",null,"x_"+name+"_"+i,Double.toString(r.nextDouble())));
+				}
+			
+			}
+			
+			return cd;
+		}
+
+	}
+	
+	public static void main(String args[]) {
+
+		GenLocalClasses g = new GenLocalClasses();
+		
+		LocGenerator gen = g.new LocGenerator();
+		
+		Program p = new Program();
+		p.getUnstructuredEntity(0).addElement(gen.genLocClasses("C",Integer.valueOf(args[0]).intValue(),Integer.valueOf(args[1]).intValue()));
+		
+		SourceRoot sr = new SourceRoot(p);
+		
+		StringBuffer str = new StringBuffer("class "+args[2]+ "\n");
+		System.out.println(sr.prettyPrint(" "));
+		str.append("C c;\n end "+args[2]+";\n");
+//   	System.out.println(str.toString());	  
+	    try{
+	        // Create file 
+	        FileWriter fstream = new FileWriter(args[3]);
+	        BufferedWriter out = new BufferedWriter(fstream);
+	        out.write(str.toString());
+	        //Close the output stream
+	        out.close();
+	        }catch (Exception e){//Catch exception if any
+	          System.err.println("Error: " + e.getMessage());
+	        }
+		
+	  }
+	  
+}

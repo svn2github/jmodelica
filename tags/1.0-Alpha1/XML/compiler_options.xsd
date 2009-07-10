@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:element name="OptionRegistry">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ModelicaLibrary">
+          				<xs:complexType>
+            					<xs:sequence minOccurs="0" maxOccurs="1">
+              						<xs:element name="Name" type="xs:string"/>
+              						<xs:element name="Version" type="xs:string"/>
+              						<xs:element name="Path" type="xs:string"/>
+            					</xs:sequence>
+          				</xs:complexType>
+        			</xs:element>	
+				<xs:element name="Options">
+          				<xs:complexType>
+            					<xs:sequence minOccurs="0" maxOccurs="unbounded">
+              						<xs:element name="Option" type="OptionType"/>
+            					</xs:sequence>
+          				</xs:complexType>
+        			</xs:element>
+      			</xs:sequence>
+    		</xs:complexType>
+  	</xs:element>	  
+  	<xs:complexType name="OptionType">
+		<xs:sequence>
+     			<xs:element name="Type"> 	
+				<xs:simpleType>
+          				<xs:restriction base="xs:token">
+            					<xs:enumeration value="Integer"/>
+            					<xs:enumeration value="String"/>
+            					<xs:enumeration value="Real"/>
+         					<xs:enumeration value="Boolean"/>
+          				</xs:restriction>
+        			</xs:simpleType>
+			</xs:element>
+        		<xs:choice>
+            			<xs:element name="IntegerAttributes">
+              				<xs:complexType>
+                				<xs:sequence>
+                  					<xs:element name="Key" type="xs:string"/> 
+                					<xs:element name="Value" type="xs:integer"/>
+						</xs:sequence>
+            				</xs:complexType>
+	    			</xs:element>
+	    			<xs:element name="StringAttributes">
+	      				<xs:complexType>
+                				<xs:sequence>
+                  					<xs:element name="Key" type="xs:string"/> 
+                  					<xs:element name="Value" type="xs:string"/>
+						</xs:sequence>
+              				</xs:complexType>
+	    			</xs:element>
+	    			<xs:element name="RealAttributes">
+	      				<xs:complexType>
+               					<xs:sequence>
+                					<xs:element name="Key" type="xs:string"/> 
+                  					<xs:element name="Value" type="xs:double"/>
+						</xs:sequence>
+              				</xs:complexType>
+	    			</xs:element>
+	    			<xs:element name="BooleanAttributes">
+	      				<xs:complexType>
+                				<xs:sequence>
+                  					<xs:element name="Key" type="xs:string"/> 
+                  					<xs:element name="Value" type="xs:boolean"/>
+						</xs:sequence>
+              				</xs:complexType>
+	    			</xs:element>
+			</xs:choice>
+		</xs:sequence>    							
+	</xs:complexType>
+</xs:schema>

@@ -1,0 +1,14 @@
+aspect ErrorClasses {
+	
+	syn boolean ASTNode.isError() = false;
+
+	eq BadDefinition.isError() = true;
+	eq BadClassDecl.isError() = true;
+	eq BadElement.isError() = true;
+	eq BadArgument.isError() = true;
+	
+	public InstModification BadArgument.newInstModification() {
+		return null;
+	}
+	
+}

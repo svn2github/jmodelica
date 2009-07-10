@@ -1,0 +1,112 @@
+Build instructions for the JModelica project.
+
+0. Requirements.
+
+In order to compile JModelica you will need a unix-like environment. For 
+Windows, it is recommended to use the MingW distribution. In addition 'ant' is 
+needed to build the JastAdd/Java-based compiler front-ends. 
+NOTICE: The JModelica code tree, as well its dependencies (and ant, must be 
+located in directories for which their absolute path does not contain spaces.
+
+1. Get JModelica.org
+
+Check out a working copy of JModelica.org: 
+
+ > svn co https://svn.jmodelica.org/trunk JModelica 
+
+Make sure that the full path to the directory where you check out JModelica does 
+not contain any spaces nor ~ character
+
+2. Get CppAD (optional)
+
+Download CppAD from http://www.coin-or.org/CppAD. Unzip the tar-ball and put 
+in a directory. Again, make sure that the path to this directory does not 
+contain any spaces nor ~ character. Note: You do not have to build anything in 
+the CppAD distribution in order to build JModelica.
+
+3. Get Ipopt (optional)
+
+Download Ipopt from https://projects.coin-or.org/Ipopt. Unzip the tar-ball and 
+put in a directory that does not hold any spaces nor ~ character in its path. 
+Build the package according to its INSTALL file. Make sure to run 
+
+ > make install
+
+4. Configure
+
+Run the configure script. It is recommended that you create a new directory 
+in JModelica: 
+
+cd JModelica
+mkdir build
+cd build
+
+ > ../configure --with-ipopt=/path/to/ipopt-install-dir
+
+The argument --with-ipopt is optional. Notice, however, that if they
+are not give, only parts of the software will be built. You may want
+to give additional arguments to configure. Type configure --help for
+information. By default, the installation directory (--prefix) is set
+to the current directory, it is recommended to set the --prefix
+argument to override this behaviour.
+
+5. Build and install
+
+In order to build, type 
+
+ > make 
+
+In order to install, type 
+
+ > make install 
+
+which will render the directories 'lib' and 'include' to be created in the 
+installation directory and the corresponding libraries and directories and 
+header files will be copied. In addition, templates, XML schemas, third party
+dependencies and makefiles used to build the generated C code are copied into
+the installation directory. Also, the Python code is copied into the
+installation directory. This may change in the future in favor of a solution
+where the jmodelica.org Python package is distributed as a standard Python
+installation package.
+
+In order to build the JMI examples, type 
+
+ > make jmi-examples 
+ 
+which will build executables for the examples in the 'JMI/examples' directory. 
+Notice that both --with-cppad and --with-ipopt have to be provided in order to 
+build the examples. In order to remove compiled executables and shared object 
+files in the 'JMI/examples' directories, run 
+
+ > make clean-jmi-examples
+
+6. Generate documentation.
+
+The command 
+
+ > make docs 
+
+will generate documentation in the 'doc' directory. The generated documentation 
+is also available at www.jmodelica.org, where nightly generated docs are 
+published.
+
+7. Running JModelica.org from Python
+
+In order to run the JModelica.org compilers from Python, the packages
+JPype (http://jpype.sourceforge.net/) and lxml
+(http://codespeak.net/lxml/) need to be installed. Also, the
+environment variables JMODELICA_HOME, containing the path to the
+JModelica.org installation directory (again, without spaces or ~ in
+the path), PYTHONPATH, containing the path to the 'Python' directory
+in the JModelica.org installation directory and JAVA_HOME containing
+the path to a Java JRE or SDK installation needs to be set. In
+addition, on some Linux platforms, it may be necessary to include the
+IPOPT lib directory in the LD_LIBRARY_PATH variable. If you run
+Linux, you will most likely have everything you need by now. If you
+run Windows, you also need MinGW which provides make and the gcc-suite
+which are needed to compile the generated C code. A convenient choice
+is then python(x,y) (http://www.pythonxy.com), which provides a Python
+environment bundled with (amongst other things) a MinGW installation.
+
+
+

@@ -1,0 +1,16 @@
+<OptionRegistry>
+	<ModelicaLibrary>
+		<Name>Modelica</Name>
+		<Version>3.0.1</Version>
+		<Path>@prefix@/ThirdParty/MSL/MSL-3.0.1/Modelica/</Path>
+	</ModelicaLibrary>
+	<Options>
+		<Option>
+			<Type>String</Type>
+			<StringAttributes>
+				<Key>default_msl_version</Key>
+				<Value>3.0.1</Value>
+			</StringAttributes>
+		</Option>
+	</Options>	
+</OptionRegistry>
