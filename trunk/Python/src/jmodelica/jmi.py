@@ -1405,6 +1405,52 @@ class JMIModel(object):
         """
         return self._get_XMLvariables_doc().get_variable_names()
 
+    def get_derivative_names(self):
+        """
+        Extract the names of the derivatives in a model.
+
+        Returns:
+            Dict with ValueReference as key and name as value.
+        """
+        return self._get_XMLvariables_doc().get_derivative_names()
+
+    def get_differentiated_variable_names(self):
+        """
+        Extract the names of the differentiated_variables in a model.
+
+        Returns:
+            Dict with ValueReference as key and name as value.
+        """
+        return self._get_XMLvariables_doc().get_differentiated_variable_names()
+
+    def get_input_names(self):
+        """
+        Extract the names of the inputs in a model.
+
+        Returns:
+            Dict with ValueReference as key and name as value.
+        """
+        return self._get_XMLvariables_doc().get_input_names()
+
+    def get_algebraic_variable_names(self):
+        """
+        Extract the names of the algebraic variables in a model.
+
+        Returns:
+            Dict with ValueReference as key and name as value.
+        """
+        return self._get_XMLvariables_doc().get_algebraic_variable_names()
+
+    def get_p_opt_names(self):
+        """
+        Extract the names of the optimized parameters.
+
+        Returns:
+            Dict with ValueReference as key and name as value.
+        """
+        return self._get_XMLvariables_doc().get_p_opt_names()
+
+
     def get_variable_descriptions(self):
         """
         Extract the descriptions of the variables in a model.
@@ -3240,18 +3286,24 @@ class JMISimultaneousOpt(object):
         are provided.
 
         Parameters:
-        p_opt_init -- A vector of size n_p_opt containing initial values for the
-        optimized parameters.
-        trajectory_data_init -- A matrix stored in column major format. The
-        first column contains the time vector. The following column contains, in
-        order, the derivative, state, input, and algebraic variable profiles.
-        hs_init -- A vector of length n_e containing initial guesses of the
-        normalized lengths of the finite elements. This argument is neglected
-        if the problem does not have free element lengths.
-        start_time_init -- Initial guess of interval start time. This
-        argument is neglected if the start time is fixed.
-        final_time_init -- Initial guess of interval final time. This
-        argument is neglected if the final time is fixed.
+        p_opt_init --
+            A vector of size n_p_opt containing initial values for the
+            optimized parameters.
+        trajectory_data_init --
+            A matrix stored in column major format. The
+            first column contains the time vector. The following column
+            contains, in order, the derivative, state, input, and algebraic
+            variable profiles.
+        hs_init --
+            A vector of length n_e containing initial guesses of the
+            normalized lengths of the finite elements. This argument is neglected
+            if the problem does not have free element lengths.
+        start_time_init --
+            Initial guess of interval start time. This argument is neglected if
+            the start time is fixed.
+        final_time_init --
+            Initial guess of interval final time. This argument is neglected if
+            the final time is fixed.
         """
         if self._jmi_model._dll.jmi_opt_sim_set_initial_from_trajectory(self._jmi_opt_sim, \
                                                                         p_opt_init, \
@@ -3576,7 +3628,116 @@ class JMISimultaneousOptLagPols(JMISimultaneousOpt):
         # Write result
         io.export_result_dymola(self._jmi_model,data)
 
+    def set_initial_from_dymola(self,res, hs_init, start_time_init, final_time_init):
+        """
+        Initialize the optimization vector from an object of either ResultDymolaTextual
+        or ResultDymolaBinary.
+
+        Parameters:
+            format --
+                A reference to an object of type ResultDymolaTextual or
+                ResultDymolaBinary.
+            hs_init -- A vector of length n_e containing initial guesses of the
+                normalized lengths of the finite elements. This argument is
+                neglected if the problem does not have free element lengths.
+            start_time_init --
+                Initial guess of interval start time. This argument is neglected
+                if the start time is fixed.
+            final_time_init --
+                Initial guess of interval final time. This argument is neglected
+                if the final time is fixed.
+        """
+
+        # Obtain the names
+        dx_names = self._jmi_model.get_derivative_names()
+        dx_name_value_refs = dx_names.keys()
+        dx_name_value_refs.sort(key=int)
+
+        x_names = self._jmi_model.get_differentiated_variable_names()
+        x_name_value_refs = x_names.keys()
+        x_name_value_refs.sort(key=int)
+
+        u_names = self._jmi_model.get_input_names()
+        u_name_value_refs = u_names.keys()
+        u_name_value_refs.sort(key=int)
+
+        w_names = self._jmi_model.get_algebraic_variable_names()
+        w_name_value_refs = w_names.keys()
+        w_name_value_refs.sort(key=int)
+
+        p_opt_names = self._jmi_model.get_p_opt_names()
+        p_opt_name_value_refs = p_opt_names.keys()
+        p_opt_name_value_refs.sort(key=int)
+
+        #print(dx_names)
+        #print(x_names)
+        #print(u_names)
+        #print(w_names)
+        
+        # Obtain vector sizes
+        n_points = 0
+        if len(dx_names) > 0:
+            traj = res.get_variable_data(dx_names.get(dx_name_value_refs[0]))
+        elif len(x_names) > 0:
+            traj = res.get_variable_data(x_names.get(x_name_value_refs[0]))
+        elif len(u_names) > 0:
+            traj = res.get_variable_data(u_names.get(u_name_value_refs[0]))
+        elif len(w_names) > 0:
+            traj = res.get_variable_data(w_names.get(w_name_value_refs[0]))
+        else:
+            return
+
+        #print(traj.t)
+
+        n_points = N.size(traj.t,0)
+        n_cols = 1+len(dx_names)+len(x_names)+len(u_names)+len(w_names)
+        var_data = N.zeros((n_points,n_cols))
+
+        p_opt_data = N.zeros(len(p_opt_names))
+
+        # Get the parameters TODO
+        p_opt_data[0] = 2.2811985;
+        
+        # Initialize time
+        var_data[:,0] = traj.t;
+
+        #print(N.size(var_data))
+        # Loop over all the names
+        col_index = 1;
+        for ref in dx_name_value_refs:
+            #print(dx_names.get(ref))
+            #print(col_index)
+            traj = res.get_variable_data(dx_names.get(ref))
+            var_data[:,col_index] = traj.x
+            col_index = col_index + 1
+        for ref in x_name_value_refs:
+            #print(x_names.get(ref))
+            #print(col_index)
+            traj = res.get_variable_data(x_names.get(ref))
+            var_data[:,col_index] = traj.x
+            col_index = col_index + 1
+        for ref in u_name_value_refs:
+            #print(u_names.get(ref))
+            #print(col_index)
+            traj = res.get_variable_data(u_names.get(ref))
+            var_data[:,col_index] = traj.x
+            col_index = col_index + 1
+        for ref in w_name_value_refs:
+            #print(w_names.get(ref))
+            #print(col_index)
+            traj = res.get_variable_data(w_names.get(ref))
+            if N.size(traj.x)==2:
+                var_data[:,col_index] = N.ones(n_points)*traj.x[0]
+            else:
+                var_data[:,col_index] = traj.x
+            col_index = col_index + 1
+
+#        print(var_data)
+
             
+        self.opt_sim_set_initial_from_trajectory(p_opt_data,N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0],
+                                                 hs_init,start_time_init,final_time_init)
+
     def opt_sim_lp_get_pols(self, n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, Lp_dot_coeffs, Lpp_dot_coeffs, Lp_dot_vals, Lpp_dot_vals):
         """
         Get the Lagrange polynomials of a specified order.

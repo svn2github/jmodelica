@@ -108,6 +108,65 @@ class XMLVariablesDoc(XMLdoc):
         vals = self._xpatheval("//ScalarVariable/ScalarVariableName/text()")       
         return dict(zip(keys,vals))
 
+    def get_derivative_names(self):
+        """
+        Extract the names of the derivatives in a model.
+
+        Returns:
+            Dict with ValueReference as key and name as value.
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text() [../../VariableCategory=\"derivative\"]")
+        vals = self._xpatheval("//ScalarVariable/ScalarVariableName/text()[../../VariableCategory=\"derivative\"]")
+
+        return dict(zip(keys,vals))
+
+    def get_differentiated_variable_names(self):
+        """
+        Extract the names of the differentiated variables in a model.
+
+        Returns:
+            Dict with ValueReference as key and name as value.
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text() [../../VariableCategory=\"state\"]")
+        vals = self._xpatheval("//ScalarVariable/ScalarVariableName/text()[../../VariableCategory=\"state\"]")
+        return dict(zip(keys,vals))
+
+    def get_input_names(self):
+        """
+        Extract the names of the inputs in a model.
+
+        Returns:
+            Dict with ValueReference as key and name as value.
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text() [../../VariableCategory=\"input\"]")
+        vals = self._xpatheval("//ScalarVariable/ScalarVariableName/text()[../../VariableCategory=\"input\"]")       
+        return dict(zip(keys,vals))
+
+    def get_algebraic_variable_names(self):
+        """
+        Extract the names of the algebraic variables in a model.
+
+        Returns:
+            Dict with ValueReference as key and name as value.
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text() [../../VariableCategory=\"algebraic\"]")
+        vals = self._xpatheval("//ScalarVariable/ScalarVariableName/text()[../../VariableCategory=\"algebraic\"]")       
+        return dict(zip(keys,vals))
+
+    def get_p_opt_names(self):
+        """ 
+        Extract the names for all optimized independent parameters.
+        
+        Returns:
+            Dict with ValueReference as key and name as value.
+            
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"independentParameter\"] \
+                               [../../Attributes/RealAttributes/Free=\"true\"]")
+        vals = self._xpatheval("//ScalarVariable/ScalarVariableName/text()[../../VariableCategory=\"independentParameter\"] \
+                               [../../Attributes/RealAttributes/Free=\"true\"]")       
+        return dict(zip(keys,vals))
+
     def get_variable_descriptions(self):
         """
         Extract the descriptions of the variables in a model.
@@ -115,8 +174,8 @@ class XMLVariablesDoc(XMLdoc):
         Returns:
             Dict with ValueReference as key and description as value.
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text() [../../Description]")
-        vals = self._xpatheval("//ScalarVariable/Description/text()")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()")
+        vals = self._xpatheval("//ScalarVariable/Description/text() [../../Description]")
         return dict(zip(keys,vals))
     
     def get_start_attributes(self):
