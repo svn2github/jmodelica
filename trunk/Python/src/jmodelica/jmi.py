@@ -3457,108 +3457,6 @@ class JMISimultaneousOpt(object):
         """
         if self._jmi_model._dll.jmi_opt_sim_get_result(self._jmi_opt_sim, p_opt, t, dx, x, u, w) is not 0:
             raise JMIException("Getting the results failed.")
-    
-class JMISimultaneousOptLagPols(JMISimultaneousOpt):
-    
-    """ 
-    An implementation of a transcription method based on Lagrange polynomials 
-    and Radau points. Extends the abstract class JMISimultaneousOpt. 
-    """
-    
-    def __init__(self, jmi_model, n_e, hs, n_cp):
-        """
-        Constructor where main data structure is created. 
-        
-        Initial guesses, lower and upper bounds and linearity information is 
-        set for optimized parameters, derivatives, states, inputs and 
-        algebraic variables. These values are taken from the XML files created 
-        at compilation.
-        
-        Parameters:
-            jmi_model -- The JMIModel object.
-            n_e -- Number of finite elements.
-            hs -- Vector containing the normalized element lengths.
-            n_cp -- Number of collocation points. 
-        
-        """    
-        JMISimultaneousOpt._initialize(self, jmi_model)
-
-        # Initialization
-        _p_opt_init = N.zeros(jmi_model.opt_get_n_p_opt())
-        _dx_init = N.zeros(jmi_model._n_dx.value)
-        _x_init = N.zeros(jmi_model._n_x.value)
-        _u_init = N.zeros(jmi_model._n_u.value)
-        _w_init = N.zeros(jmi_model._n_w.value)
-    
-        # Bounds
-        _p_opt_lb = -1.0e20*N.ones(jmi_model.opt_get_n_p_opt())
-        _dx_lb = -1.0e20*N.ones(jmi_model._n_dx.value)
-        _x_lb = -1.0e20*N.ones(jmi_model._n_x.value)
-        _u_lb = -1.0e20*N.ones(jmi_model._n_u.value)
-        _w_lb = -1.0e20*N.ones(jmi_model._n_w.value)
-        _t0_lb = 0.; # not yet supported
-        _tf_lb = 0.; # not yet supported
-        _hs_lb = N.zeros(n_e); # not yet supported
-        
-        _p_opt_ub = 1.0e20*N.ones(jmi_model.opt_get_n_p_opt())
-        _dx_ub = 1.0e20*N.ones(jmi_model._n_dx.value)
-        _x_ub = 1.0e20*N.ones(jmi_model._n_x.value)
-        _u_ub = 1.0e20*N.ones(jmi_model._n_u.value)
-        _w_ub = 1.0e20*N.ones(jmi_model._n_w.value)
-        _t0_ub = 0.; # not yet supported
-        _tf_ub = 0.; # not yet supported
-        _hs_ub = N.zeros(n_e); # not yet supported
-                
-        # default values
-        hs_free = 0
-        
-        self._set_initial_values(_p_opt_init, _dx_init, _x_init, _u_init, _w_init)
-        self._set_lb_values(_p_opt_lb, _dx_lb, _x_lb, _u_lb, _w_lb)
-        self._set_ub_values(_p_opt_ub, _dx_ub, _x_ub, _u_ub, _w_ub)
-
-        _linearity_information_provided = 1;
-        _p_opt_lin = N.ones(jmi_model.opt_get_n_p_opt(),dtype=int)
-        _dx_lin = N.ones(jmi_model._n_dx.value,dtype=int)
-        _x_lin = N.ones(jmi_model._n_x.value,dtype=int)
-        _u_lin = N.ones(jmi_model._n_u.value,dtype=int)        
-        _w_lin = N.ones(jmi_model._n_w.value,dtype=int)
-        _dx_tp_lin = N.ones(jmi_model._n_dx.value*jmi_model._n_tp.value,dtype=int)
-        _x_tp_lin = N.ones(jmi_model._n_x.value*jmi_model._n_tp.value,dtype=int)
-        _u_tp_lin = N.ones(jmi_model._n_u.value*jmi_model._n_tp.value,dtype=int)        
-        _w_tp_lin = N.ones(jmi_model._n_w.value*jmi_model._n_tp.value,dtype=int)
-        
-        self._set_lin_values(_p_opt_lin, _dx_lin, _x_lin, _u_lin, _w_lin, _dx_tp_lin, _x_tp_lin, _u_tp_lin, _w_tp_lin)
-
-        try:       
-            assert jmi_model._dll.jmi_opt_sim_lp_new(byref(self._jmi_opt_sim), jmi_model._jmi, n_e,
-                                      hs, hs_free,
-                                     _p_opt_init, _dx_init, _x_init,
-                                     _u_init, _w_init,
-                                     _p_opt_lb, _dx_lb, _x_lb,
-                                     _u_lb, _w_lb, _t0_lb,
-                                     _tf_lb, _hs_lb,
-                                     _p_opt_ub, _dx_ub, _x_ub,
-                                     _u_ub, _w_ub, _t0_ub,
-                                     _tf_ub, _hs_ub,
-                                     _linearity_information_provided,                
-                                     _p_opt_lin, _dx_lin, _x_lin, _u_lin, _w_lin,
-                                     _dx_tp_lin, _x_tp_lin, _u_tp_lin, _w_tp_lin,                
-                                     n_cp,JMI_DER_CPPAD) is 0, \
-                                     " jmi_opt_lp_new returned non-zero."
-        except AttributeError,e:
-             raise JMIException("Can not create JMISimultaneousOptLagPols object. Try recompiling model with target='algorithms'")
-        
-        assert self._jmi_opt_sim.value is not None, \
-            "jmi_opt_sim_lp struct has not returned correctly."
-
-            
-    def __del__(self):
-        """ Free jmi_opt_sim data structure. """
-        try:
-            assert self._jmi_model._dll.jmi_opt_sim_lp_delete(self._jmi_opt_sim) == 0, \
-                   "jmi_delete failed"
-        except AttributeError, e:
-            pass
 
     def get_result(self):
         """
@@ -3691,17 +3589,31 @@ class JMISimultaneousOptLagPols(JMISimultaneousOpt):
 
         n_points = N.size(traj.t,0)
         n_cols = 1+len(dx_names)+len(x_names)+len(u_names)+len(w_names)
+
         var_data = N.zeros((n_points,n_cols))
+        # Initialize time vector
+        var_data[:,0] = traj.t;
 
         p_opt_data = N.zeros(len(p_opt_names))
 
-        # Get the parameters TODO
-        p_opt_data[0] = 2.2811985;
+        # Get the parameters
+        n_p_opt = self._jmi_model.opt_get_n_p_opt()
+        if n_p_opt > 0:
+            p_opt_indices = N.zeros(n_p_opt, dtype=int)
         
-        # Initialize time
-        var_data[:,0] = traj.t;
+            self._jmi_model.opt_get_p_opt_indices(p_opt_indices)
+            p_opt_indices = p_opt_indices.tolist()
+
+            for ref in p_opt_name_value_refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_pi = z_i - self._jmi_model._offs_pi.value
+                i_pi_opt = p_opt_indices.index(i_pi)
+                traj = res.get_variable_data(p_opt_names.get(ref))
+                p_opt_data[i_pi_opt] = traj.x[0]
 
         #print(N.size(var_data))
+
+        # Initialize variable names
         # Loop over all the names
         col_index = 1;
         for ref in dx_name_value_refs:
@@ -3737,6 +3649,110 @@ class JMISimultaneousOptLagPols(JMISimultaneousOpt):
             
         self.opt_sim_set_initial_from_trajectory(p_opt_data,N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0],
                                                  hs_init,start_time_init,final_time_init)
+
+
+    
+class JMISimultaneousOptLagPols(JMISimultaneousOpt):
+    
+    """ 
+    An implementation of a transcription method based on Lagrange polynomials 
+    and Radau points. Extends the abstract class JMISimultaneousOpt. 
+    """
+    
+    def __init__(self, jmi_model, n_e, hs, n_cp):
+        """
+        Constructor where main data structure is created. 
+        
+        Initial guesses, lower and upper bounds and linearity information is 
+        set for optimized parameters, derivatives, states, inputs and 
+        algebraic variables. These values are taken from the XML files created 
+        at compilation.
+        
+        Parameters:
+            jmi_model -- The JMIModel object.
+            n_e -- Number of finite elements.
+            hs -- Vector containing the normalized element lengths.
+            n_cp -- Number of collocation points. 
+        
+        """    
+        JMISimultaneousOpt._initialize(self, jmi_model)
+
+        # Initialization
+        _p_opt_init = N.zeros(jmi_model.opt_get_n_p_opt())
+        _dx_init = N.zeros(jmi_model._n_dx.value)
+        _x_init = N.zeros(jmi_model._n_x.value)
+        _u_init = N.zeros(jmi_model._n_u.value)
+        _w_init = N.zeros(jmi_model._n_w.value)
+    
+        # Bounds
+        _p_opt_lb = -1.0e20*N.ones(jmi_model.opt_get_n_p_opt())
+        _dx_lb = -1.0e20*N.ones(jmi_model._n_dx.value)
+        _x_lb = -1.0e20*N.ones(jmi_model._n_x.value)
+        _u_lb = -1.0e20*N.ones(jmi_model._n_u.value)
+        _w_lb = -1.0e20*N.ones(jmi_model._n_w.value)
+        _t0_lb = 0.; # not yet supported
+        _tf_lb = 0.; # not yet supported
+        _hs_lb = N.zeros(n_e); # not yet supported
+        
+        _p_opt_ub = 1.0e20*N.ones(jmi_model.opt_get_n_p_opt())
+        _dx_ub = 1.0e20*N.ones(jmi_model._n_dx.value)
+        _x_ub = 1.0e20*N.ones(jmi_model._n_x.value)
+        _u_ub = 1.0e20*N.ones(jmi_model._n_u.value)
+        _w_ub = 1.0e20*N.ones(jmi_model._n_w.value)
+        _t0_ub = 0.; # not yet supported
+        _tf_ub = 0.; # not yet supported
+        _hs_ub = N.zeros(n_e); # not yet supported
+                
+        # default values
+        hs_free = 0
+        
+        self._set_initial_values(_p_opt_init, _dx_init, _x_init, _u_init, _w_init)
+        self._set_lb_values(_p_opt_lb, _dx_lb, _x_lb, _u_lb, _w_lb)
+        self._set_ub_values(_p_opt_ub, _dx_ub, _x_ub, _u_ub, _w_ub)
+
+        _linearity_information_provided = 1;
+        _p_opt_lin = N.ones(jmi_model.opt_get_n_p_opt(),dtype=int)
+        _dx_lin = N.ones(jmi_model._n_dx.value,dtype=int)
+        _x_lin = N.ones(jmi_model._n_x.value,dtype=int)
+        _u_lin = N.ones(jmi_model._n_u.value,dtype=int)        
+        _w_lin = N.ones(jmi_model._n_w.value,dtype=int)
+        _dx_tp_lin = N.ones(jmi_model._n_dx.value*jmi_model._n_tp.value,dtype=int)
+        _x_tp_lin = N.ones(jmi_model._n_x.value*jmi_model._n_tp.value,dtype=int)
+        _u_tp_lin = N.ones(jmi_model._n_u.value*jmi_model._n_tp.value,dtype=int)        
+        _w_tp_lin = N.ones(jmi_model._n_w.value*jmi_model._n_tp.value,dtype=int)
+        
+        self._set_lin_values(_p_opt_lin, _dx_lin, _x_lin, _u_lin, _w_lin, _dx_tp_lin, _x_tp_lin, _u_tp_lin, _w_tp_lin)
+
+        try:       
+            assert jmi_model._dll.jmi_opt_sim_lp_new(byref(self._jmi_opt_sim), jmi_model._jmi, n_e,
+                                      hs, hs_free,
+                                     _p_opt_init, _dx_init, _x_init,
+                                     _u_init, _w_init,
+                                     _p_opt_lb, _dx_lb, _x_lb,
+                                     _u_lb, _w_lb, _t0_lb,
+                                     _tf_lb, _hs_lb,
+                                     _p_opt_ub, _dx_ub, _x_ub,
+                                     _u_ub, _w_ub, _t0_ub,
+                                     _tf_ub, _hs_ub,
+                                     _linearity_information_provided,                
+                                     _p_opt_lin, _dx_lin, _x_lin, _u_lin, _w_lin,
+                                     _dx_tp_lin, _x_tp_lin, _u_tp_lin, _w_tp_lin,                
+                                     n_cp,JMI_DER_CPPAD) is 0, \
+                                     " jmi_opt_lp_new returned non-zero."
+        except AttributeError,e:
+             raise JMIException("Can not create JMISimultaneousOptLagPols object. Try recompiling model with target='algorithms'")
+        
+        assert self._jmi_opt_sim.value is not None, \
+            "jmi_opt_sim_lp struct has not returned correctly."
+
+            
+    def __del__(self):
+        """ Free jmi_opt_sim data structure. """
+        try:
+            assert self._jmi_model._dll.jmi_opt_sim_lp_delete(self._jmi_opt_sim) == 0, \
+                   "jmi_delete failed"
+        except AttributeError, e:
+            pass
 
     def opt_sim_lp_get_pols(self, n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, Lp_dot_coeffs, Lpp_dot_coeffs, Lp_dot_vals, Lpp_dot_vals):
         """
