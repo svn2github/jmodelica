@@ -157,13 +157,17 @@ aspect FlatVariability {
 		return total;		
 	}
 	
-	eq FArrayConstructor.variability() {
+	eq FArray.variability() {
 		FTypePrefixVariability total = fConstant();
 		for (int i=0; i<getNumFExp(); i++) {
 			total = total.combine(getFExp(i).variability());
 		}
 		return total;		
 	}	
+	
+	eq FIdentity.variability() = fConstant();
+	eq FOnes.variability() = fConstant();
+	eq FZeros.variability() = fConstant();
 	
    	public FTypePrefixVariability FTypePrefixVariability.combine(FTypePrefixVariability other) {   			
    		if (this instanceof FContinuous) {

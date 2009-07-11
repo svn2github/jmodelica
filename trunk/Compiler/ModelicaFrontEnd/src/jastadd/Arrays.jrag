@@ -39,5 +39,129 @@ aspect Arrays {
 	syn FArraySubscripts InstAccess.fArraySubscripts() = null;
 	eq InstArrayAccess.fArraySubscripts() = hasFArraySubscripts()? getFArraySubscripts(): null;
 
+	// Array dimensions
+	syn int FArraySubscripts.ndims() {
+		int nd = 0;
+		for (FSubscript fs : getFSubscripts()) {
+			nd += fs.ndims();
+		}
+		return nd;
+	}
+	
+	syn int FSubscript.ndims();
+	// Can only be 0 or 1 for FExpSubscript
+	eq FExpSubscript.ndims() = getFExp().ndims();
+	eq FColonSubscript.ndims() = 1;
+	
+	syn int FExp.ndims() = 0;
+	eq FInstAccessExp.ndims() = getInstAccess().ndims();
+	eq FRangeExp.ndims() = 1;
+	eq FArray.ndims() {
+		if (getNumFExp()==0) {
+			return 1;
+		} else {
+			return getFExp(0).ndims() + 1;
+		}
+	}
+	eq FIdentity.ndims() = 2;
+	eq FOnes.ndims() = getNumFExp();
+	eq FZeros.ndims() = getNumFExp();
+	
+	syn int InstAccess.ndims() = 0;
+	eq InstArrayAccess.ndims() = hasFArraySubscripts()? 
+			getFArraySubscripts().ndims(): 
+				myInstComponentDecl().ndims();
+	
+	eq InstDot.ndims() = getRight().ndims() + getLeft().ndims();
+	
+	syn int InstComponentDecl.ndims() = hasFArraySubscripts()? 
+			getFArraySubscripts().ndims(): 0;
+
+	// Array sizes		
+	syn int[] FArraySubscripts.size() {
+		int s[] = new int[ndims()];
+		int index = 0;
+		for (FSubscript fs : getFSubscripts()) {
+			if (fs.ndims() == 1) {
+				s[index++] = fs.size()[0];
+			}
+		}
+		return s;
+	}
+	
+	syn int[] FSubscript.size();
+
+	eq FExpSubscript.size() = getFExp().size();
+	
+	eq FColonSubscript.size() = new int[0];
+	
+	syn int[] FExp.size() = new int[0];
+	eq FInstAccessExp.size() = getInstAccess().size();
+	eq FRangeExp.size() = new int[1];
+	eq FArray.size() {
+		int s[] = new int[ndims()];
+		if (getNumFExp()==0) {
+		} else {
+			int ss[] = getFExp(0).size();
+			s[0] = getNumFExp();
+			for (int i=1;i<ndims()-1;i++) {
+				s[i] = ss[i-1];
+			}
+		}
+		return s;
+	}
+	eq FIdentity.size() {
+		int s[] = new int[2];
+		s[0] = getFExp().ceval().intValue();
+		s[1] = getFExp().ceval().intValue();
+		return s;
+	}
+	eq FOnes.size() {
+		int s[] = new int[ndims()];
+		int index = 0;
+		for (FExp fe : getFExps()) {
+			s[index++] = fe.ceval().intValue();
+		}
+		return s;
+		
+	}
+	eq FZeros.size() {
+		int s[] = new int[ndims()];
+		int index = 0;
+		for (FExp fe : getFExps()) {
+			s[index++] = fe.ceval().intValue();
+		}
+		return s;
+		
+	}
+	
+	syn int[] InstAccess.size() = new int[0];
+	eq InstArrayAccess.size() = hasFArraySubscripts()? 
+			getFArraySubscripts().size(): 
+				myInstComponentDecl().size();
+	
+	eq InstDot.size() {
+		int s[] = new int[ndims()];
+		int sr[] = getRight().size();
+		int sl[] = getLeft().size();
+		for (int i=0;i<sl.length;i++) {
+			s[i] = sl[i];
+		}
+		for (int i=0;i<sr.length;i++) {
+			s[i+sl.length] = sr[i];
+		}
+		return s;
+	}
+	
+	syn int[] InstComponentDecl.size() = hasFArraySubscripts()? 
+			getFArraySubscripts().size(): new int[0];
+			
+			
+	
+	/*
+	syn int FIdUse.size() = getFQName().size();
+	
+	syn int getFQName().size() = -1;
+	*/
 	
 }

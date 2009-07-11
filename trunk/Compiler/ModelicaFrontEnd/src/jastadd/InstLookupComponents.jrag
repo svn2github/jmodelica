@@ -127,11 +127,49 @@ aspect InstLookupComponents {
 	
 }
 
+aspect LookupInstComponentSlices {
+	
+	syn InstComponentDecl[] InstComponentAccess.slice() {
+		
+		// Access refers to scalar declaration or, access has no array 
+		// subscripts but refers to array declaration
+		if (!hasFArraySubscripts()) {
+			return myInstComponentDecl().slice();
+		} else { // Access has array subscripts
+			return myInstComponentDecl().slice(getFArraySubscripts());
+		}
+	}
 
+	syn lazy InstComponentDecl[] InstComponentDecl.slice() {
+		if (!hasFArraySubscripts()) { // Scalar variable
+			InstComponentDecl s[] = new InstComponentDecl[1];
+			s[0] = this;
+			return s;
+		} else { // Array declaration: return all "leaf" InstArrayComponentDecls
+			int size[] = size();
+			int n_s = 1;
+			for (int i=0;i<size.length;i++) {
+				n_s = n_s*size[i];
+			}
+			InstComponentDecl s[] = new InstComponentDecl[n_s];
+			return s;			
+		}
+	}
+
+	syn lazy InstComponentDecl[] InstComponentDecl.slice(FArraySubscripts fas) {
+		int size[] = fas.size();
+		int n_s = 1;
+		for (int i=0;i<size.length;i++) {
+			n_s = n_s*size[i];
+		}
+		InstComponentDecl s[] = new InstComponentDecl[n_s];
+	
+		return s;		
+	}
+}
 
 aspect LookupInstComponentsInModifications {
       
-
     /**
      * The inherited attribute lookupInstComponentInInstElement defines 
      * the lookup mechanism for left hand component references in modifications.

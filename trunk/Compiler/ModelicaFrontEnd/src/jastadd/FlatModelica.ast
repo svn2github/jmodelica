@@ -533,7 +533,7 @@ FInstAccessExp : FExp ::= InstAccess;
 /**
  * \brief Array constructor expression.
  */
-FArrayConstructor : FExp ::= FExp*;
+FArray : FExp ::= FExp*;
 
 /**
  * \brief A matrix expression.
@@ -649,15 +649,15 @@ FTranspose : FUnaryExp ::=;
 /**
  * \brief Identity built-in function.
  */
-FIdentity : FFunctionCall;
+FIdentity : FExp ::= FExp;
 
 /**
  * \brief Ones built-in function.
  */
-FOnes : FFunctionCall;
+FOnes : FExp ::= FExp*;
 
 /**
  * \brief Zeros built-in function.
  */
-FZeros : FFunctionCall;
+FZeros : FExp ::= FExp*;
 

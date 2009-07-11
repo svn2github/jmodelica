@@ -365,11 +365,11 @@ aspect FlatExpressions {
 	   return new FIdUse(getInstAccess().flatten(prefix));
 	}
 
-	public FExp FArrayConstructor.flatten(FQName prefix) {
+	public FExp FArray.flatten(FQName prefix) {
 	   List l = new List();
 	   for (int i=0;i<getNumFExp();i++)
 	   	 l.add(getFExp(i).flatten(prefix));
-	   return new FArrayConstructor(l);
+	   return new FArray(l);
 	}
 
 	public FIdDecl FIdDecl.flatten(FQName prefix) {
@@ -629,7 +629,7 @@ aspect InstantiatedExpressions {
 	   	l.getChild(i).setStart(getStart());
 	   	l.getChild(i).setEnd(getEnd());
 	   }
-	   FArrayConstructor n = new FArrayConstructor(l);
+	   FArray n = new FArray(l);
 	   n.setStart(getStart());
 	   n.setEnd(getEnd());
 	   return n;
@@ -836,7 +836,7 @@ aspect InstantiatedExpressions {
 	}	
 	
 	public FExp FunctionCall.instantiate() {
-		List l = new List();
+		List<FExp> l = new List<FExp>();
 		List args = new List();
 		if (hasFunctionArguments())
 			args =  getFunctionArguments().getExpList();
@@ -877,6 +877,12 @@ aspect InstantiatedExpressions {
 			n = new FLogExp((FExp)l.getChild(0)); 
 		} else if (getName().name().equals("log10") || getName().name().equals("Modelica.Math.log10")) {
 			n = new FLog10Exp((FExp)l.getChild(0)); 
+		} else if (getName().name().equals("identity")) {
+			n = new FIdentity(l.getChild(0));
+		} else if (getName().name().equals("ones")) {
+			n = new FOnes(l);
+		} else if (getName().name().equals("zeros")) {
+			n = new FZeros(l);
 		} else {
 			n = new FFunctionCall(new FIdUseInstAccess(new FQName(),getName().newInstAccess()),l);	
 		}

@@ -1070,7 +1070,7 @@ aspect FlattPrettyPrint {
 		str.print(")");
 	}
 	
-	public void FArrayConstructor.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+	public void FArray.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("{");
 		for (int i=0; i<getNumFExp(); i++) {
 			p.toString(getFExp(i),str,indent,o);
