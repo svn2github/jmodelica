@@ -92,7 +92,7 @@ QIdentCont = {Q_CHAR} | {S_ESCAPE}
 Other = . | {NewLine}
 
 
-%state LINEBEGIN, CLASS, END
+%state LINEBEGIN, END
 %xstate COMMENT, COMMENT_LINEBEGIN, STRING, QIDENT, ANNOTATION, ANNOTATION_LINEBEGIN 
 
 %%
@@ -119,8 +119,8 @@ Other = . | {NewLine}
   {NewLine}			{ yybegin(LINEBEGIN); }   
   {Class}			{ ancs.addAnchor(yychar, yychar, Indent.SAME); 
   					  ancs.beginSection(yychar + yylength(), yychar, Indent.INDENT, "class"); } 
-  {Separator}		{ ancs.addSink(yychar); }
-  {End}				{ ancs.addSink(yychar);
+  {Separator}		{ ancs.addSink(yychar, "class"); }
+  {End}				{ ancs.addSink(yychar, "class");
   					  ancs.addAnchor(yychar + yylength(), yychar, Indent.INDENT);
   					  yybegin(END); 
   					}
@@ -136,11 +136,12 @@ Other = . | {NewLine}
   					  yybegin(YYINITIAL); 
   					}
   {WhiteSpace}*		{ }
+  
 }
 
 <ANNOTATION_LINEBEGIN> {
 	{WhiteSpace}	{ }
-	. 				{ ancs.beginSection(yychar+1, yychar, Indent.SAME, "annotation_newline"); 
+	. 				{ ancs.beginSection(yychar+1, yychar, Indent.SAME, "#"); 
 					  yypushback(1); 
 					  yybegin(ANNOTATION); }
 }
@@ -160,6 +161,7 @@ Other = . | {NewLine}
   {NewLine}			{ yybegin(ANNOTATION_LINEBEGIN); }
   {Other}			{ 	}
 }
+
 
 <END> {
   {WhiteSpace}		{  }
@@ -184,7 +186,8 @@ Other = . | {NewLine}
 
 <COMMENT_LINEBEGIN> {
   {WhiteSpace} 		{ }
-  "*/"				{ ancs.popPast("comment", yychar + yylength()); 
+  "*/"				{ ancs.addSink(yychar, "comment"); // match comment end delim to start delim if alone on line
+  					  ancs.popPast("comment", yychar + yylength()); 
   					  yybegin(last_state); }
   {Other}		    { ancs.addAnchor(yychar+1, yychar, Indent.SAME); 
   					  yybegin(COMMENT); }
