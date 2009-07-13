@@ -22,12 +22,16 @@ final static String classRegex = String.format(
         "(.|\r|\n)*(^|\\s)(%s)\\s+\\w+\\s*", Util.implode("|",
                 openBlockKeywords));
 
+public boolean matches(IDocument d, DocumentCommand c) throws BadLocationException {
+    return c.text.matches("(\n|\r)\\s*") && d.get(0, c.offset).matches(classRegex);
+}
+
 public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
     try {
 
         String doc = d.get(0, c.offset);
 
-        if (c.text.matches("(\n|\r)\\s*") && doc.matches(classRegex)) {
+        if (matches(d, c)) {
             // below will fail for qidents with spaces. oh noes!
             String id = doc.substring(doc.trim().lastIndexOf(" ")).trim();
 

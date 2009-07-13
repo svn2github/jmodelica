@@ -583,7 +583,8 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 			        new BracketAdder("[", "]"),
 			        new BracketAdder("{", "}"),
 			        new BracketAdder("\"", "\""),
-			        };
+			        new CommentAdder(),
+			    };
 		}
 
 		private AnnotationParenthesisAdder getAnnotationParenthesisAdder() {

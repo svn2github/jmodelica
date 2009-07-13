@@ -36,9 +36,8 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
         } else if (c.text.equals(startToken)
                 && d.get(c.offset, endLine - c.offset).replaceAll("[^\\w]", "")
                         .isEmpty()) {
-            c.text += endToken;
-            c.shiftsCaret = false;
-            c.caretOffset = c.offset + startToken.length();
+            c.length = 0;
+            d.replace(c.offset, 0, endToken);
         }
     } catch (BadLocationException e) {
         e.printStackTrace();
