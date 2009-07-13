@@ -44,7 +44,7 @@ public Anchor(int offset, int reference) {
 }
 
 public String toString() {
-    return "(" + offset + ", " + indent + ")";
+    return "(" + offset + ", " + indent + ", " + id + ")";
 }
 
 }

@@ -9,7 +9,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
 import org.jmodelica.ide.scanners.generated.IndentationHintScanner;
-import org.jmodelica.ide.editor.ModelicaAnchorList;
 
 /**
  * Auto editing strategy for indenting source code from indentation hints.
@@ -46,9 +45,10 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
                 .getLegalLineDelimiters(), c.text, 0), new int[] { -1, -1 });
         boolean endsWithNewLine = TextUtilities.endsWith(d
                 .getLegalLineDelimiters(), c.text) != -1;
-        boolean pastedBlock = c.text.length() > 1;
+        boolean pastedBlock = c.text.length() > 1; 
+   
         /* remove whitespace trailing cursor when breaking */
-        if (!(semicolon || hasNewlines || pastedBlock))
+        if (!(semicolon || hasNewlines))
             return;
 
         IRegion line = d.getLineInformationOfOffset(c.offset);
@@ -98,7 +98,8 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
                 c.text += IndentedSection.putIndent("", getIndent(d, c.offset,
                         lineEnd, true));
         }
-        c.caretOffset = c.offset + c.length;
+        
+        c.caretOffset = c.offset + c.length;    
     } catch (Exception e) {
         System.out.println("Exception in indentation code");
         e.printStackTrace();

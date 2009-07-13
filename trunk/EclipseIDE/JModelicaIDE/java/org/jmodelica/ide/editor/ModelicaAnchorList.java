@@ -157,10 +157,10 @@ public void popPast(String id, int offset) {
  * @param offset
  *            offset of inserted anchor 
  */
-public void addSink(int offset) {
+public void addSink(int offset, String id) {
     int ref = 0;
     for (Anchor a : stack)
-        if ("class".equals(a.id))
+        if (id.equals(a.id))
             ref = a.reference;
     sinks.addLast(new Anchor(offset, ref, Indent.SAME, "#"));
 }
