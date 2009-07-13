@@ -21,15 +21,16 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
     try {
 
         String regType = d.getPartition(c.offset).getType();
-        int line = d.getLineOfOffset(c.offset);
-        int endLine = d.getLineOffset(line) + d.getLineLength(line);
-        
+        int endLine; {
+            int line = d.getLineOfOffset(c.offset);
+            endLine = d.getLineOffset(line) + d.getLineLength(line);
+        }
+            
         if (d.get(0, c.offset).trim().endsWith("annotation") && 
             d.get(c.offset, endLine - c.offset).trim().isEmpty() &&
             !regType.equals(Modelica22PartitionScanner.COMMENT_PARTITION) &&
             !regType.equals(Modelica22PartitionScanner.QIDENT_PARTITION)) 
         {
-            
             String suffix = "";
             if (!c.text.endsWith("("))
                 suffix += "(";

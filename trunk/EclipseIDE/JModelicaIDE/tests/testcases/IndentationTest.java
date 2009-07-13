@@ -98,12 +98,13 @@ static IndentTestCase[] testCases = {
     /* 66 */    new IndentTestCase("model m\nannotation ();\nend m;\t", Indent.SAME, "\t", "model m"),  
    
     /* sink tests */
-    /* 66 */    new IndentTestCase("model m\nend m;\t", Indent.SAME, "\t", "model m", "model m"),
-    /* 67 */    new IndentTestCase("model m model q \nend q;\t", Indent.SAME, "\t", "model q", "model q"),
-    /* 68 */    new IndentTestCase("/* a comment\n   */\t", null, "\t", "/* a", "/* a"),
+    /* 67 */    new IndentTestCase("model m\nend m;\t", Indent.SAME, "\t", "model m", "model m"),
+    /* 68 */    new IndentTestCase("model m model q \nend q;\t", Indent.SAME, "\t", "model q", "model q"),
+    /* 69 */    new IndentTestCase("/* a comment\n   */\t", null, "\t", "/* a", "/* a"),
 };
 
 public void testIndent() {
+    
     for (int i = 0; i < testCases.length; i++) {
         
         IndentTestCase tc = testCases[i];

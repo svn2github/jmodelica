@@ -575,7 +575,15 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		@Override
 		public IAutoEditStrategy[] getAutoEditStrategies(
 				ISourceViewer sourceViewer, String contentType) {
-			return new IAutoEditStrategy[] { getAnnotationParenthesisAdder(), getIndentationStrategy() };
+			return new IAutoEditStrategy[] { 
+			        getAnnotationParenthesisAdder(), 
+			        getIndentationStrategy(),
+			        new BlockAdder(),
+			        new BracketAdder("(", ")"),
+			        new BracketAdder("[", "]"),
+			        new BracketAdder("{", "}"),
+			        new BracketAdder("\"", "\""),
+			        };
 		}
 
 		private AnnotationParenthesisAdder getAnnotationParenthesisAdder() {
