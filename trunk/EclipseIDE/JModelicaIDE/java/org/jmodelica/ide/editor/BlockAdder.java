@@ -4,6 +4,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.indent.IndentedSection;
 
@@ -22,16 +23,12 @@ final static String classRegex = String.format(
         "(.|\r|\n)*(^|\\s)(%s)\\s+\\w+\\s*", Util.implode("|",
                 openBlockKeywords));
 
-public boolean matches(IDocument d, DocumentCommand c) throws BadLocationException {
-    return c.text.matches("(\n|\r)\\s*") && d.get(0, c.offset).matches(classRegex);
-}
-
 public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
     try {
 
         String doc = d.get(0, c.offset);
 
-        if (matches(d, c)) {
+        if (c.text.matches("(\n|\r)\\s*") && doc.matches(classRegex)) {
             // below will fail for qidents with spaces. oh noes!
             String id = doc.substring(doc.trim().lastIndexOf(" ")).trim();
 
@@ -48,8 +45,9 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
                         .countIndent(d.get(lineStart, c.offset - lineStart)));
             }
 
-            c.length = 0;
-            d.replace((c.offset), 0, String.format("\n%send %s;", indent, id));
+            IRegion reg = d.getLineInformationOfOffset(c.offset);
+            d.replace(reg.getOffset() + reg.getLength(), 0, String.format(
+                    "\n%send %s;", indent, id));
         }
     } catch (BadLocationException e) {
         e.printStackTrace();

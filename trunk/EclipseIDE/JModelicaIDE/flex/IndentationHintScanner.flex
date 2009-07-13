@@ -186,7 +186,7 @@ Other = . | {NewLine}
 
 <COMMENT_LINEBEGIN> {
   {WhiteSpace} 		{ }
-  "*/"				{ ancs.addSink(yychar, "comment"); // match comment end delim to start delim if alone on line
+  "*/"				{ ancs.addSink(yychar-2, "comment"); // match comment end delim to start delim if alone on line
   					  ancs.popPast("comment", yychar + yylength()); 
   					  yybegin(last_state); }
   {Other}		    { ancs.addAnchor(yychar+1, yychar, Indent.SAME); 

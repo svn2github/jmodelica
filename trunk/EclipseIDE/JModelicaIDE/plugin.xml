@@ -261,6 +261,12 @@
             id="JModelicaIDE.ModelicaToggleCommentCommand"
             name="Toggle comment on region">
       </command>
+      <command
+            categoryId="JModelicaIDE.ModelicaCommandCategory"
+            description="Toggle annotations on document"
+            id="JModelicaIDE.ModelicaToggleAnnotationCommand"
+            name="Toggle annotations on region">
+      </command>
       <category
             description="JModelica commands"
             id="JModelicaIDE.ModelicaCommandCategory"
@@ -275,6 +281,11 @@
             commandId="JModelicaIDE.ModelicaToggleCommentCommand"
             keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
             keySequence="Shift+Ctrl+C">
+      </keyBinding>
+      <keyBinding
+            commandId="JModelicaIDE.ModelicaToggleAnnotationCommand"
+            keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            keySequence="Ctrl+T">
       </keyBinding>
    </extension>
 </plugin>

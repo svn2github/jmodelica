@@ -294,7 +294,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		setAction(Constants.ACTION_EXPAND_ALL_ID, new ExpandAllAction());
 		setAction(Constants.ACTION_COLLAPSE_ALL_ID, new CollapseAllAction());
 		setAction(Constants.ACTION_ERROR_CHECK_ID, errorCheckAction = new ErrorCheckAction());
-		setAction(Constants.ACTION_TOGGLE_ANNOTATIONS_ID, toggleAnnotationsAction = new ToggleAnnotationsAction());
+		setAction(Constants.ACTION_TOGGLE_ANNOTATIONS_ID, toggleAnnotationsAction = new ToggleAnnotationsAction(this));
 		setAction(Constants.ACTION_FORMAT_REGION_ID, new FormatRegionAction(this));
 		setAction(Constants.ACTION_TOGGLE_COMMENT_ID, new ToggleComment(this));
 		updateErrorCheckAction();
@@ -678,39 +678,11 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		}
 	}
 	
-	private class ConnectedTextsAction extends Action {
+	class ConnectedTextsAction extends Action {
 		protected void setTexts(String text) {
 			setText(text);
 			setToolTipText(text);
 			setDescription(text);
-		}
-	}
-	
-	private class ToggleAnnotationsAction extends ConnectedTextsAction {
-		private boolean visible;
-
-		public ToggleAnnotationsAction() {
-			super();
-			update(false);
-		}
-
-		public boolean isVisible() {
-			return visible;
-		}
-
-		@Override
-		public void run() {
-			update(!visible);
-			int action = visible ? CharacterProjectionViewer.EXPAND_ANNOTATIONS : CharacterProjectionViewer.COLLAPSE_ANNOTATIONS;
-			ISourceViewer sourceViewer = getSourceViewer();
-			if (sourceViewer instanceof ITextOperationTarget) {
-				((ITextOperationTarget) sourceViewer).doOperation(action);
-			}
-		}
-
-		private void update(boolean visible) {
-			this.visible = visible;
-			setChecked(visible);
 		}
 	}
 
@@ -770,5 +742,9 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 
     public IDocument getDocument() {
         return getSourceViewer() == null ? null : getSourceViewer().getDocument();
+    }
+    
+    public ISourceViewer publicGetSourceViewer() {
+        return getSourceViewer();
     }
 }
