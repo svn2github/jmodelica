@@ -131,6 +131,7 @@ public void completeStatement(int offset) {
     if (anchors.getLast().id.equals("newline"))
         anchors.getLast().indent = Indent.SAME;
     stack.push(anchors.getLast());
+    anchors.getLast().id = "#";
     partial_newline = false;
 }
 
@@ -174,4 +175,5 @@ public void pushTop(int offset) {
     anchors.add(new Anchor(offset, stack.peek().reference,
             stack.peek().indent, stack.peek().id));
 }
+
 }

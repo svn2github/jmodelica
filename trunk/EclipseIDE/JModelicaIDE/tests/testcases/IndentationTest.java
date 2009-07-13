@@ -95,9 +95,12 @@ static IndentTestCase[] testCases = {
     /* 63 */    new IndentTestCase("model m\nReal r;\n\n\nequation\n", Indent.SAME, "\n\n\nequation", "Real"),
     /* 64 */    new IndentTestCase("model m model q end q end m; end z;\t", Indent.SAME, "\t", "model m"),  
     /* 65 */    new IndentTestCase("\nmodel m model q end q end m; end z;\t", Indent.SAME, "\t", "model m"),  
+    /* 66 */    new IndentTestCase("model m \n //end m;\n", Indent.INDENT, " m", "model"),
+    /* 67 */    new IndentTestCase("model m; real r; end m;\t", Indent.SAME, "\t", "model m"),
+    /* 68 */    new IndentTestCase("model m\nannotation( ); real r; end m;\t", Indent.SAME, "\t", "model m"),
     /* sink tests */
-    /* 66 */    new IndentTestCase("model m\nend m;\t", Indent.SAME, "\t", "model m", "model m"),
-    /* 67 */    new IndentTestCase("model m model q \nend q;\t", Indent.SAME, "\t", "model q", "model q"),
+                new IndentTestCase("model m\nend m;\t", Indent.SAME, "\t", "model m", "model m"),
+                new IndentTestCase("model m model q \nend q;\t", Indent.SAME, "\t", "model q", "model q"),
 };
 
 public void testIndent() {

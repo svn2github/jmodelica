@@ -27,10 +27,11 @@ import org.jmodelica.ide.helpers.Util;
  */
 public class IndentedSection {
 
-public static String lineSep =
-        System.getProperties().getProperty("line.separator");
 public static int tabWidth = 4;
 public static boolean tabbed = true;
+public static String commentSyntax = "//";
+public static String lineSep =
+        System.getProperties().getProperty("line.separator");
 
 protected final String[] sec;
 
@@ -87,9 +88,10 @@ public IndentedSection indent(AnchorList hints, int lineStart, int lineEnd) {
         offset += sec[i].length() + lineSep.length();
     }
 
-    for (int i = lineStart; i < lineEnd; i++)
-        sec[i] = putIndent(sec[i], indents[i]);
-
+    for (int i = lineStart; i < lineEnd; i++) 
+        if (!sec[i].trim().startsWith(commentSyntax))
+            sec[i] = putIndent(sec[i], indents[i]);
+    
     return this;
 }
 
@@ -206,10 +208,16 @@ public IndentedSection offsetIndentTo(int offset) {
     return this;
 }
 
-public String toString(int start, int end) {
-    String[] tmp = new String[end - start];
-    for (int i = start; i < end; i++)
-        tmp[i - start] = putIndent(sec[i], countIndent(sec[i]), tabbed);
+/**
+ * Returns a string repr. of lines <code>start</code> to <code>end</code>.
+ * @param startLine line start
+ * @param endLine line end
+ * @return string repr. of lines <code>start</code> to <code>end</code>
+ */
+public String toString(int startLine, int endLine) {
+    String[] tmp = new String[endLine - startLine];
+    for (int i = startLine; i < endLine; i++)
+        tmp[i - startLine] = putIndent(sec[i], countIndent(sec[i]), tabbed);
     return Util.implode(lineSep, tmp);
 }
 
