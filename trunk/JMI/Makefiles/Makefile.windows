@@ -104,7 +104,7 @@ ifeq "$(wildcard .jmi_objs )" ""
 endif
 	cd .jmi_objs && ar -x $(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a   
 	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/*.o $(LIBS)
-	del .jmi_objs\*.o
+	rm .jmi_objs/*.o
 	rmdir .jmi_objs
 
 ipopt: $(OBJS)
@@ -115,7 +115,7 @@ ifeq "$(wildcard .jmi_objs )" ""
 endif
 	cd .jmi_objs && ar -x $(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a  && ar -x $(JMODELICA_HOME)/lib/libjmi_solver_cppad.a  
 	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/*.o $(LIBS_IPOPT)
-	del .jmi_objs\*.o
+	rm .jmi_objs/*.o
 	rmdir .jmi_objs
 
 all: $(SHARED)
