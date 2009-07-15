@@ -1,13 +1,15 @@
 JMODELICA PYTHON INTERFACE
 ===================
-The JModelica Python Interface (JMPI) enables you to work with compiled
-models in Python. As Python is an interpreted language you can work both
+The JModelica Python Interface (JMPI) enables you to work with both Modelica and 
+Optimica models in Python. As Python is an interpreted language you can work 
 interactively or using scripts.
 
 HOW TO USE
 ===================
 1. Add the folder containing the jmodelica package to your PYTHONPATH.
-2. Import the JMPI by adding
+2. Add the environment variable JMODELICA_HOME which should point at your 
+JModelica installation root folder.
+3. Import the JMPI by adding
 
      import jmodelica
     
@@ -22,6 +24,14 @@ downloaded from:
   
 (should also be included in most Linux distros as "python-nose")
 
+Run the tests in the tests package with
+
+	nosetests
+	
+standing somewhere in the jmodelica package. Nose then finds all available 
+tests and runs them. For details on how to run specific tests, and more, 
+have a look at the Nose website.
+
 Some of the tests are run on certain example models that can be found in
 the JMI examples directory that comes bundled with the JModelica source
 distribution. To run the the unit tests those models _needs to be
@@ -31,12 +41,18 @@ compiled_. This is done by invoking
   
 from the source distribution root.
 
-Tests are simply run by invoking
+RUNNING EXAMPLES
+===================
+There are a number of example models in the examples package which 
+demonstrate how the JModelica Python Interface can be used. In all 
+examples packages there is one .mo file for the Modelica and Optimica 
+code, describing the model and optimization problem, and one demo.py file 
+which shows the Python code needed to compile, run the model and solve 
+an optimization problem. Take a look at the code or simply run an 
+example with 
 
-  nosetests
-  
-. Nose finds all available tests and runs them. For details on how to
-run specific tests, and more, have a look at the Nose website.
+	import demo
+	demo.run_demo()
 
 RUNNING TESTS - FAQ
 ===================
