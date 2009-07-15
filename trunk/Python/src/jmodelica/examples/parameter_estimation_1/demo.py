@@ -28,7 +28,7 @@ def run_demo():
                      target='ipopt')
     
     # Load the dynamic library and XML data
-    model=jmi.JMIModel("ParEst_ParEst")
+    model=jmi.Model("ParEst_ParEst")
     
     # Retreive parameter and variable vectors
     pi = model.getPI();
@@ -49,7 +49,7 @@ def run_demo():
         x[0] = xx[0] # Set states
         x[1] = xx[1]
         res = N.zeros(5); # Create residual vector
-        model.dae_F(res) # Evaluate DAE residual
+        model.jmimodel.dae_F(res) # Evaluate DAE residual
         return N.array([res[1],res[2]])
     
     # Simulate model to get measurement data
@@ -93,10 +93,10 @@ def run_demo():
     n_cp = 3; # Number of collocation points in each element
     
     # Create an NLP object
-    nlp = jmi.JMISimultaneousOptLagPols(model,n_e,hs,n_cp)
+    nlp = jmi.SimultaneousOptLagPols(model,n_e,hs,n_cp)
     
     # Create an Ipopt NLP object
-    nlp_ipopt = jmi.JMISimultaneousOptIPOPT(nlp)
+    nlp_ipopt = jmi.JMISimultaneousOptIPOPT(nlp.jmi_simoptlagpols)
     
     #nlp_ipopt.opt_sim_ipopt_set_string_option("derivative_test","first-order")
     nlp_ipopt.opt_sim_ipopt_set_int_option("max_iter",500)
@@ -106,7 +106,7 @@ def run_demo():
     
     # Retreive the number of points in each column in the
     # result matrix
-    n_points = nlp.opt_sim_get_result_variable_vector_length()
+    n_points = nlp.jmi_simoptlagpols.opt_sim_get_result_variable_vector_length()
     n_points = n_points.value
     
     # Create optimization result data vectors
@@ -118,7 +118,7 @@ def run_demo():
     w_ = N.zeros(4*n_points)
     
     # Get the result
-    nlp.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
+    nlp.jmi_simoptlagpols.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
     
     # Plot optimization result
     plt.figure(2)

@@ -23,16 +23,16 @@ import numpy
 import array
 import scipy.io
 
-def export_result_dymola(jmi_model, data, file_name='', format='txt'):
+def export_result_dymola(model, data, file_name='', format='txt'):
     """
     Export an optimization or simulation result to file in Dymolas
     result file format. The parameter values are read from the z
-    vector of the jmi_model object and the time series are read from
+    vector of the model object and the time series are read from
     the data argument.
 
     Parameters:
-        jmi_model --
-            A JMIModel object.
+        model --
+            A Model object.
         data --
             A two dimensional array of variable trajectory data. The
             first column represents the time vector. The following
@@ -56,7 +56,7 @@ def export_result_dymola(jmi_model, data, file_name='', format='txt'):
     if (format=='txt'):
 
         if file_name=='':
-            file_name=jmi_model.get_name() + '_result.txt'
+            file_name=model.get_name() + '_result.txt'
 
         # Open file
         f = open(file_name,'w')
@@ -69,7 +69,7 @@ def export_result_dymola(jmi_model, data, file_name='', format='txt'):
         f.write('\n')
 
         # Write names
-        names = jmi_model.get_variable_names()
+        names = model.get_variable_names()
         name_value_refs = names.keys()
         name_value_refs.sort(key=int)
 
@@ -88,7 +88,7 @@ def export_result_dymola(jmi_model, data, file_name='', format='txt'):
         f.write('\n')
 
         # Write descriptions
-        descriptions = jmi_model.get_variable_descriptions()
+        descriptions = model.get_variable_descriptions()
         desc_value_refs = descriptions.keys()
         desc_value_refs.sort(key=int)
 
@@ -111,7 +111,7 @@ def export_result_dymola(jmi_model, data, file_name='', format='txt'):
         f.write('\n')
 
         # Write data meta information
-        offs = jmi_model.get_offsets()
+        offs = model.get_offsets()
         n_parameters = offs[4] # offs[4] = offs_dx
         f.write('int dataInfo(%d,%d)\n' % (len(name_value_refs)+1, 4))
         f.write('0 1 0 -1 # time\n')
@@ -133,11 +133,11 @@ def export_result_dymola(jmi_model, data, file_name='', format='txt'):
         f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
         f.write("%12.12f" % data[0,0])
         for ref in range(n_parameters):
-            f.write(" %12.12f" % jmi_model.getZ()[ref])
+            f.write(" %12.12f" % model.getZ()[ref])
         f.write('\n')
         f.write("%12.12f" % data[-1,0])
         for ref in range(n_parameters):
-            f.write(" %12.12f" % jmi_model.getZ()[ref])
+            f.write(" %12.12f" % model.getZ()[ref])
         f.write('\n\n')
 
         # Write data set 2

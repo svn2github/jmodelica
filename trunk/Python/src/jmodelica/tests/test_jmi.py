@@ -43,7 +43,7 @@ def test_jmi_opt_sim_set_initial_from_trajectory():
     oc.compile_model(fpath, cpath, target='ipopt')
 
     # Load the dynamic library and XML data
-    vdp = jmi.JMIModel(fname)
+    vdp = jmi.Model(fname)
 
 
     # Initialize the mesh
@@ -52,17 +52,17 @@ def test_jmi_opt_sim_set_initial_from_trajectory():
     n_cp = 3; # Number of collocation points in each element
     
     # Create an NLP object
-    nlp = jmi.JMISimultaneousOptLagPols(vdp,n_e,hs,n_cp)
+    nlp = jmi.SimultaneousOptLagPols(vdp,n_e,hs,n_cp)
     
     # Create an Ipopt NLP object
-    nlp_ipopt = jmi.JMISimultaneousOptIPOPT(nlp)
+    nlp_ipopt = jmi.JMISimultaneousOptIPOPT(nlp.jmi_simoptlagpols)
     
     # Solve the optimization problem
     nlp_ipopt.opt_sim_ipopt_solve()
     
     # Retreive the number of points in each column in the
     # result matrix
-    n_points = nlp.opt_sim_get_result_variable_vector_length()
+    n_points = nlp.jmi_simoptlagpols.opt_sim_get_result_variable_vector_length()
     n_points = n_points.value
     
     # Create result data vectors
@@ -74,12 +74,12 @@ def test_jmi_opt_sim_set_initial_from_trajectory():
     w_ = N.zeros(n_points)
     
     # Get the result
-    nlp.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
+    nlp.jmi_simoptlagpols.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
 
     z_ = N.concatenate((t_,dx_,x_,u_))
     hs = N.zeros(1)
 
-    vdp._dll.jmi_opt_sim_set_initial_from_trajectory(nlp._jmi_opt_sim,p_opt,z_,hs,0.,0.)
+    vdp.jmimodel._dll.jmi_opt_sim_set_initial_from_trajectory(nlp.jmi_simoptlagpols._jmi_opt_sim,p_opt,z_,hs,0.,0.)
     
     p_opt2 = N.zeros(1)
     t_2 = N.zeros(n_points)
@@ -89,7 +89,7 @@ def test_jmi_opt_sim_set_initial_from_trajectory():
     w_2 = N.zeros(n_points)
         
     # Get the result
-    nlp.opt_sim_get_result(p_opt2,t_2,dx_2,x_2,u_2,w_2)
+    nlp.jmi_simoptlagpols.opt_sim_get_result(p_opt2,t_2,dx_2,x_2,u_2,w_2)
     
     assert max(N.abs(x_-x_2))<1e-12, \
            "The values used in initialization does not match the values that were read back after initialization."        
@@ -112,7 +112,7 @@ def test_set_initial_from_dymola():
     oc.compile_model(fpath, cpath, target='ipopt')
 
     # Load the dynamic library and XML data
-    vdp = jmi.JMIModel(fname)
+    vdp = jmi.Model(fname)
 
 
     # Initialize the mesh
@@ -121,17 +121,17 @@ def test_set_initial_from_dymola():
     n_cp = 3; # Number of collocation points in each element
     
     # Create an NLP object
-    nlp = jmi.JMISimultaneousOptLagPols(vdp,n_e,hs,n_cp)
+    nlp = jmi.SimultaneousOptLagPols(vdp,n_e,hs,n_cp)
     
     # Create an Ipopt NLP object
-    nlp_ipopt = jmi.JMISimultaneousOptIPOPT(nlp)
+    nlp_ipopt = jmi.JMISimultaneousOptIPOPT(nlp.jmi_simoptlagpols)
     
     # Solve the optimization problem
     nlp_ipopt.opt_sim_ipopt_solve()
 
     # Retreive the number of points in each column in the
     # result matrix
-    n_points = nlp.opt_sim_get_result_variable_vector_length()
+    n_points = nlp.jmi_simoptlagpols.opt_sim_get_result_variable_vector_length()
     n_points = n_points.value
 
     # Create result data vectors
@@ -143,7 +143,7 @@ def test_set_initial_from_dymola():
     w_ = N.zeros(n_points)
     
     # Get the result
-    nlp.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
+    nlp.jmi_simoptlagpols.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
 
     # Write to file
     nlp.export_result_dymola()
@@ -162,7 +162,7 @@ def test_set_initial_from_dymola():
     w_2 = N.zeros(n_points)
     
     # Get the result
-    nlp.opt_sim_get_result(p_opt_2,t_2,dx_2,x_2,u_2,w_2)
+    nlp.jmi_simoptlagpols.opt_sim_get_result(p_opt_2,t_2,dx_2,x_2,u_2,w_2)
 
 
     assert max(N.abs(p_opt-p_opt_2))<1e-3, \

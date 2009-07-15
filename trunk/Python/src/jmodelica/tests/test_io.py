@@ -35,7 +35,7 @@ def setup():
 def test_dymola_export_import():
 
     # Load the dynamic library and XML data
-    vdp = jmi.JMIModel(fname)
+    vdp = jmi.Model(fname)
 
     # Initialize the mesh
     n_e = 50 # Number of elements 
@@ -43,10 +43,10 @@ def test_dymola_export_import():
     n_cp = 3; # Number of collocation points in each element
 
     # Create an NLP object
-    nlp = jmi.JMISimultaneousOptLagPols(vdp,n_e,hs,n_cp)
+    nlp = jmi.SimultaneousOptLagPols(vdp,n_e,hs,n_cp)
 
     # Create an Ipopt NLP object
-    nlp_ipopt = jmi.JMISimultaneousOptIPOPT(nlp)
+    nlp_ipopt = jmi.JMISimultaneousOptIPOPT(nlp.jmi_simoptlagpols)
 
     # Solve the optimization problem
     nlp_ipopt.opt_sim_ipopt_solve()

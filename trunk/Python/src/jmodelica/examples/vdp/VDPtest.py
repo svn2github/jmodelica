@@ -14,7 +14,7 @@ def setup():
 
 def test_simple_load_model():
     """ Try loading the model """
-    cstr = jmi.JMIModel("VDP_pack_VDP_Opt")
+    cstr = jmi.Model("VDP_pack_VDP_Opt")
 
     pi = cstr.getPI();
     x = cstr.getX();
