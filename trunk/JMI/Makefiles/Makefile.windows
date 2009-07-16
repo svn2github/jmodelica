@@ -74,6 +74,12 @@ OBJS = $(FILE_NAME).o
 # C++ Compiler command
 CXX = g++
 
+# ar command
+AR = ar
+
+# Command to remove temporary files
+RM = del
+
 # C++ Compiler options
 CXXFLAGS = -g -O2 -DJMI_AD=JMI_AD_CPPAD
 
@@ -104,7 +110,7 @@ ifeq "$(wildcard .jmi_objs )" ""
 endif
 	cd .jmi_objs && ar -x $(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a   
 	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/*.o $(LIBS)
-	rm .jmi_objs/*.o
+	$(RM) .jmi_objs\*.o
 	rmdir .jmi_objs
 
 ipopt: $(OBJS)
@@ -113,9 +119,9 @@ ipopt: $(OBJS)
 ifeq "$(wildcard .jmi_objs )" ""
 	mkdir .jmi_objs
 endif
-	cd .jmi_objs && ar -x $(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a  && ar -x $(JMODELICA_HOME)/lib/libjmi_solver_cppad.a  
+	cd .jmi_objs && $(AR) -x $(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a  && $(AR) -x $(JMODELICA_HOME)/lib/libjmi_solver_cppad.a  
 	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/*.o $(LIBS_IPOPT)
-	rm .jmi_objs/*.o
+	$(RM) .jmi_objs\*.o
 	rmdir .jmi_objs
 
 all: $(SHARED)
@@ -147,4 +153,5 @@ all: $(SHARED)
 
 clean:
 	del $(SHARED) $(OBJS)
+
 
