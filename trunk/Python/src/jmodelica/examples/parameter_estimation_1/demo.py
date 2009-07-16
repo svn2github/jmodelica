@@ -103,14 +103,14 @@ def run_demo():
     
     # Solve the optimization problem
     nlp_ipopt.opt_sim_ipopt_solve()
-    
+
     # Retreive the number of points in each column in the
     # result matrix
     n_points = nlp.jmi_simoptlagpols.opt_sim_get_result_variable_vector_length()
     n_points = n_points.value
-    
+
     # Create optimization result data vectors
-    p_opt = N.zeros(1)
+    p_opt = N.zeros(2)
     t_ = N.zeros(n_points)
     dx_ = N.zeros(2*n_points)
     x_ = N.zeros(2*n_points)
