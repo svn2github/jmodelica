@@ -1,4 +1,4 @@
-package org.jmodelica.ide.editor;
+package org.jmodelica.ide.editor.editingstrategies;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentCommand;

@@ -15,8 +15,6 @@
 */
 package org.jmodelica.ide;
 
-import java.util.Arrays;
-
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.graphics.RGB;

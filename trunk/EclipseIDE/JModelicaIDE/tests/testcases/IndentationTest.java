@@ -12,13 +12,13 @@ static IndentationHintScanner ihs;
 
 static class IndentTestCase {
     String text, anchorstart, reference, sinkRef;
-    Indent wantedIndent;
+    org.jmodelica.ide.indent.Indent wantedIndent;
     
-    public IndentTestCase(String text, Indent wanted, String start, String ref) {
+    public IndentTestCase(String text, org.jmodelica.ide.indent.Indent wanted, String start, String ref) {
         this(text, wanted, start, ref, null);
     }
     
-    public IndentTestCase(String text, Indent wanted, String start, String ref, String sinkRef) {
+    public IndentTestCase(String text, org.jmodelica.ide.indent.Indent wanted, String start, String ref, String sinkRef) {
         this.text = text;
         this.anchorstart = start;
         this.reference = ref;
@@ -29,7 +29,7 @@ static class IndentTestCase {
 
 static IndentTestCase[] testCases = { 
     /* indentation tests */
-    /* 0 */     new IndentTestCase("Real\n", Indent.INDENT, "eal", "Real"),
+    /* 0 */     new IndentTestCase("Real r;\t", Anchor.SAME, "\t", "Real"),
     /* 1 */     new IndentTestCase("model mqadfdsa\n", Indent.INDENT, " m", "model"),
     /* 2 */     new IndentTestCase("model m\nReal r", Indent.INDENT, "eal r", "Real"),
     /* 3 */     new IndentTestCase("model m\nReal r;\t", Indent.SAME, "\t", "Rea"),
@@ -43,9 +43,9 @@ static IndentTestCase[] testCases = {
     /* 11 */    new IndentTestCase("model m \n model q end q", Indent.INDENT, " q", "end q"),
     /* 12 */    new IndentTestCase("model m model q end q;\t", Indent.SAME, "\t", "model q"),
     /* 13 */    new IndentTestCase("model m \n model q end z;\t", Indent.SAME, "", "model q"),
-    /* 14 */    new IndentTestCase("model /*testing*/ m", Indent.INDENT, " m", "model"),
+    /* 14 */    new IndentTestCase("model /*testing*/ m", Indent.INDENT, "*/ m", "model"),
     /* 15 */    new IndentTestCase("model /*testing*/ m end /* test */ m;\t", Indent.SAME, "\t", "model /*"),
-    /* 16 */    new IndentTestCase("model /*testing*/ m end /*!!*/\t", Indent.INDENT, "\t", "end "),
+    /* 16 */    new IndentTestCase("model /*testing*/ m end /*!!*/\t", Indent.INDENT, "*/", "end "),
     /* 17 */    new IndentTestCase("model /*testing*/ m end /* test ", Indent.SAME, "est", "test"),
     /* 18 */    new IndentTestCase("model 'apaa", Indent.NONE, "apaa", "'apaa"),
     /* 19 */    new IndentTestCase("model 'apaa'\t", Indent.INDENT, "\t", "model '"),
@@ -62,46 +62,48 @@ static IndentTestCase[] testCases = {
     /* 30 */    new IndentTestCase("model q \nReal r; /* comment */", Indent.SAME, "", "Real"),
     /* 31 */    new IndentTestCase("model q \nReal r; \n Int i;\t", Indent.SAME, "\t", "Int"),
     /* 32 */    new IndentTestCase("model q \n Real r; \n Int i", Indent.INDENT, "nt i", "Int"),
-    /* 33 */    new IndentTestCase("model q \n Real r; \n /* comment */\t", Indent.SAME, "\t", "Real"),
-    /* 34 */    new IndentTestCase("model q \n Real r \n /* comment */\t", Indent.INDENT, "\t", "Real"),
-    /* 35 */    new IndentTestCase("model q \n Real r;;;;;; \n /* comment */\t", Indent.SAME, "\t", "Real"),
-    /* 36 */    new IndentTestCase("model q \n Real r;\n     Int i;;;;;\n /* comment */\t", Indent.SAME, "\t", "Int"),
+    /* 33 */    new IndentTestCase("model q \n Real r; \n /* comment */", Indent.SAME, "*/", "Real"),
+    /* 34 */    new IndentTestCase("model q \n Real r \n /* comment */", Indent.INDENT, "*/", "Real"),
+    /* 35 */    new IndentTestCase("model q \n Real r;;;;;; \n /* comment */", Indent.SAME, "*/", "Real"),
+    /* 36 */    new IndentTestCase("model q \n Real r;\n     Int i;;;;;\n /* comment */", Indent.SAME, "*/", "Int"),
     /* 37 */    new IndentTestCase("model m \n  Real \n r;\t", Indent.SAME, "\t", "Real"),
     /* 38 */    new IndentTestCase("model m \n  Real \n r qwz", Indent.SAME, " qwz", "r qwz"),
     /* 39 */    new IndentTestCase("model m \n  Real \n r \n q\t", Indent.SAME, "\t", "q\t"),
-    /* 40 */    new IndentTestCase("model m /* comment \n */\t", Indent.INDENT, "\t", "model"),
+    /* 40 */    new IndentTestCase("model m /* comment \n */", Indent.INDENT, "*/", "model"),
     /* 41 */    new IndentTestCase("model m\nReal r;end m;\t", Indent.SAME, "\t", "model"),
     /* 42 */    new IndentTestCase("model m annotation ", Indent.INDENT, " ", "anno"),
-    /* 43 */    new IndentTestCase("model m annotation()\t", Indent.INDENT, "\t", "model"),
-    /* 44 */    new IndentTestCase("model m annotation ()\t", Indent.INDENT, "\t", "model"),
-    /* 45 */    new IndentTestCase("model m annotation (()bladibal/*sdklj*/(()))\t", Indent.INDENT, "\t", "model"),
+    /* 43 */    new IndentTestCase("model m annotation()\t", Indent.INDENT, ")\t", "model"),
+    /* 44 */    new IndentTestCase("model m annotation ()\t", Indent.INDENT, ")\t", "model"),
+    /* 45 */    new IndentTestCase("model m annotation (()bladibal/*sdklj*/(()))\t", Indent.INDENT, ")\t", "model"),
     /* 46 */    new IndentTestCase("model m annotation (", Indent.INDENT, " (", "anno"),
     /* 47 */    new IndentTestCase("model m annotation ( jjj \n iii!", Indent.SAME, "ii!", "iii!"),
-    /* 48 */    new IndentTestCase("model m annotation ( jjj \n iii\n\n\n)\t", Indent.INDENT, "\t", "model m"),
+    /* 48 */    new IndentTestCase("model m annotation ( jjj \n iii\n\n\n)\t", Indent.INDENT, ")\t", "model m"),
     /* 49 */    new IndentTestCase("model m \n for i in 1:size(b,1) loop", Indent.INDENT, " i in", "for i"),
     /* 50 */    new IndentTestCase("model m \n for i in 1:size(b,1) loop\n result := 3;\t", Indent.SAME, "\t", "result"),
     /* 51 */    new IndentTestCase("model m \n for i in 1:size(b,1) loop\n result := 3;\nend for;\t", Indent.SAME, "\t", "for"),
     /* 52 */    new IndentTestCase("model m annotation ( \"string\nin annot", Indent.NONE, null, null),
     /* 53 */    new IndentTestCase("model m annotation ( \"string\nin annot\"\t", Indent.INDENT, "\t", "annotation"),
     /* 54 */    new IndentTestCase("model m annotation ( /*   comment in annot", Indent.SAME, "omment", "comment"),
-    /* 55 */    new IndentTestCase("model m annotation ( /*   comment in annot */\t", Indent.INDENT, "\t", "annotation"),
-    /* 56 */    new IndentTestCase("model m annotation\n(  \n   bla /*   comment in annot */\t", Indent.SAME, "\t", "bla"),
+    /* 55 */    new IndentTestCase("model m annotation ( /*   comment in annot */", Indent.INDENT, "*/", "annotation"),
+    /* 56 */    new IndentTestCase("model m annotation\n(  \n   bla /*   comment in annot */", Indent.SAME, "*/", "bla"),
     /* 57 */    new IndentTestCase("model m\n  /* comment */\n  Real r;\t", Indent.SAME, "\t", "Real"),
-    /* 58 */    new IndentTestCase("model m\n  annotation(x=20)\t", Indent.INDENT, "\t", "model"),
+    /* 58 */    new IndentTestCase("model m\n  annotation(x=20)\t", Indent.INDENT, ")\t", "model"),
     /* 59 */    new IndentTestCase("model m\n  annotation(x=20);\t", Indent.INDENT, "\t", "model"),
     /* 60 */    new IndentTestCase("model m\n  annotation(x=20\ny=30\nz=40", Indent.SAME, "=40", "z=40"),
-    /* 61 */    new IndentTestCase("model q\n  /* comment */ \n annotation ()\t", Indent.INDENT, "\t", "model"),
+    /* 61 */    new IndentTestCase("model q\n  /* comment */ \n annotation ()\t", Indent.INDENT, ")\t", "model"),
     /* 62 */    new IndentTestCase("model m\nReal r;equation", Indent.SAME, "equation", "Real"),
     /* 63 */    new IndentTestCase("model m\nReal r;\n\n\nequation\n", Indent.SAME, "\n\n\nequation", "Real"),
     /* 64 */    new IndentTestCase("model m model q end q end m; end z;\t", Indent.SAME, "\t", "model m"),  
     /* 65 */    new IndentTestCase("\nmodel m model q end q end m; end z;\t", Indent.SAME, "\t", "model m"),  
     /* 66 */    new IndentTestCase("model m\nannotation ();\nend m;\t", Indent.SAME, "\t", "model m"),  
+    /* 67 */    new IndentTestCase("model modelmodel", Indent.INDENT, " modelmodel", "model modelmodel"),  
    
     /* sink tests */
-    /* 67 */    new IndentTestCase("model m\nend m;\t", Indent.SAME, "\t", "model m", "model m"),
-    /* 68 */    new IndentTestCase("model m model q \nend q;\t", Indent.SAME, "\t", "model q", "model q"),
-    /* 69 */    new IndentTestCase("/* a comment\n   */\t", null, "\t", "/* a", "/* a"),
+    /* 68 */    new IndentTestCase("model m\nend m;\t", Indent.SAME, "\t", "model m", "model m"),
+    /* 69 */    new IndentTestCase("model m model q \nend q;\t", Indent.SAME, "\t", "model q", "model q"),
+    /* 70 */    new IndentTestCase("/* a comment\n   */", null, "*/", "/* a", "/* a"),
 };
+
 
 public void testIndent() {
     

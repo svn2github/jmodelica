@@ -283,12 +283,6 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		else
 			fCompiledLocal = false;
 		
-		if (getSourceViewer() == null) 
-		    return;
-		
-		IDocument document = getSourceViewer().getDocument();
-		if (document != null) 
-			setupDocumentPartitioner(document);
 	}
 
 	@Override	
@@ -432,14 +426,17 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 		}
 		
 		fStrategy.setFile(file);
-	}
-	
+	}	
 	
 	/**
 	 * Updates the outline and the view
 	 */
 	private void update() {
-		if (getSourceViewer() != null && fRoot != null && !fRoot.isError()) {
+	    
+	    if (getSourceViewer() != null && fRoot != null && !fRoot.isError()) {
+	        IDocument document = getSourceViewer().getDocument();
+	        if (document != null) 
+	            setupDocumentPartitioner(document);
 			// Update outline
 			fSourceOutlinePage.updateAST(fRoot);
 			fInstanceOutlinePage.updateAST(fRoot);

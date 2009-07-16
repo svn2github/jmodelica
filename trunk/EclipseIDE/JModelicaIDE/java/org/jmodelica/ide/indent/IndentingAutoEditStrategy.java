@@ -45,10 +45,11 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
                 .getLegalLineDelimiters(), c.text, 0), new int[] { -1, -1 });
         boolean endsWithNewLine = TextUtilities.endsWith(d
                 .getLegalLineDelimiters(), c.text) != -1;
-        boolean pastedBlock = c.text.length() > 1; 
+        boolean pastedBlock = c.text.length() > 1;
+        boolean isTab = c.text.equals("\t");
    
         /* remove whitespace trailing cursor when breaking */
-        if (!(semicolon || hasNewlines))
+        if (!(semicolon || hasNewlines || isTab))
             return;
 
         IRegion line = d.getLineInformationOfOffset(c.offset);
@@ -69,15 +70,25 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
             c.addCommand(lineBegin, c.offset - lineBegin, tmp, c.owner);
         }
 
-        if (hasNewlines) {
+        if (isTab) {
+            /* if tabbing before beginning of line, put indentation at correct
+             * level */
+            int indent = getIndent(d, c.offset, lineEnd, true);
+            String ind = d.get(lineBegin, c.offset - lineBegin);
+            if (ind.trim().isEmpty() && IndentedSection.spacify(ind).length() < indent) {
+                c.offset = lineBegin;
+                c.length = findEndOfWhiteSpace(d, lineBegin, lineEnd) - lineBegin;
+                c.text = IndentedSection.putIndent("", indent);
+            }
+        } else if (hasNewlines) {
             /* remove whitespace trailing cursor when breaking */
             c.length += findEndOfWhiteSpace(d, c.offset, lineEnd) - c.offset;
 
-            int indent = getIndent(d, c.offset, lineEnd, false);
-
-            if (pastedBlock)
+            if (pastedBlock) {
+                int indent = getIndent(d, c.offset, lineEnd, false);
                 c.text = new IndentedSection(c.text).offsetIndentTo(indent)
                         .toString();
+            }
 
             int begText = findEndOfWhiteSpace(d, lineBegin, lineEnd);
             if (c.offset <= begText) {

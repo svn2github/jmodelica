@@ -54,8 +54,8 @@ import org.jmodelica.ide.editor.Indent;
 	
 		annotation_paren_level = 0;
 		last_state = YYINITIAL;
-
-		try {
+		
+	try {
 			yylex();
 		} catch (IOException e) { }
 	}
@@ -116,7 +116,7 @@ Other = . | {NewLine}
 
 <YYINITIAL> {
   ^.				{ yypushback(1); yybegin(LINEBEGIN); }
-  {NewLine}			{ yybegin(LINEBEGIN); }   
+  {NewLine}			{ yybegin(LINEBEGIN); }
   {Class}			{ ancs.addAnchor(yychar, yychar, Indent.SAME); 
   					  ancs.beginSection(yychar + yylength(), yychar, Indent.INDENT, "class"); } 
   {Separator}		{ ancs.addSink(yychar, "class"); }
@@ -124,6 +124,7 @@ Other = . | {NewLine}
   					  ancs.addAnchor(yychar + yylength(), yychar, Indent.INDENT);
   					  yybegin(END); 
   					}
+  {NormalId}    	{  }
   ";"				{ ancs.completeStatement(yychar + 1); }
 } 
 
@@ -149,7 +150,7 @@ Other = . | {NewLine}
 <ANNOTATION> {
   "("				{ annotation_paren_level++; }
   ")" 				{ if (--annotation_paren_level == 0) { 
-  							ancs.popPast("annotation", yychar + yylength());
+  							ancs.popPast("annotation", yychar);
   							yybegin(YYINITIAL); 
   					  }
 					} 
@@ -186,15 +187,15 @@ Other = . | {NewLine}
 
 <COMMENT_LINEBEGIN> {
   {WhiteSpace} 		{ }
-  "*/"				{ ancs.addSink(yychar-2, "comment"); // match comment end delim to start delim if alone on line
-  					  ancs.popPast("comment", yychar + yylength()); 
+  "*/"				{ ancs.addSink(yychar, "comment"); // match comment end delim to start delim if alone on line
+  					  ancs.popPast("comment", yychar); 
   					  yybegin(last_state); }
   {Other}		    { ancs.addAnchor(yychar+1, yychar, Indent.SAME); 
   					  yybegin(COMMENT); }
 }
 
 <COMMENT> {
-  "*/"				{ ancs.popPast("comment", yychar + yylength()); 
+  "*/"				{ ancs.popPast("comment", yychar); 
   					  yybegin(last_state); }
   {NewLine}	     	{ yybegin(COMMENT_LINEBEGIN); }
   {Other}			{ }
