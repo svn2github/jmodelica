@@ -70,7 +70,9 @@ AC_PROG_LIBTOOL
 
 # By default, we want to install bin, lib, and include
 # in the directory where configure is run.
-AC_PREFIX_DEFAULT([`pwd`])
+AS_IF([test "x$JMODELICA_HOME" = x],
+ 	AC_PREFIX_DEFAULT([`pwd`]),
+        AC_PREFIX_DEFAULT(["$JMODELICA_HOME"]))
 
 # Checks for libraries.
 AC_ARG_WITH([ipopt],
