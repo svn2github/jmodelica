@@ -181,7 +181,7 @@ AC_SUBST(jmi_cppadlib)
 
 AC_PATH_PROG([ANT], [ant], [])
 AC_SUBST(ANT_OPTS)
-ANT_OPTS="ANT_OPTS=-Xmx1500M"
+ANT_OPTS="ANT_OPTS=-Xmx512M"
 
 AM_CONDITIONAL([HAVE_ANT],[test "x$ANT" != x])
 
