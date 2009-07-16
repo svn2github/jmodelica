@@ -76,6 +76,10 @@ import org.jmodelica.folding.CharacterProjectionSupport;
 import org.jmodelica.folding.CharacterProjectionViewer;
 import org.jmodelica.ide.Constants;
 import org.jmodelica.ide.ModelicaCompiler;
+import org.jmodelica.ide.editor.editingstrategies.AnnotationParenthesisAdder;
+import org.jmodelica.ide.editor.editingstrategies.BlockAdder;
+import org.jmodelica.ide.editor.editingstrategies.BracketAdder;
+import org.jmodelica.ide.editor.editingstrategies.CommentAdder;
 import org.jmodelica.ide.error.InstanceError;
 import org.jmodelica.ide.error.InstanceErrorHandler;
 import org.jmodelica.ide.folding.AnnotationDrawer;
@@ -583,6 +587,7 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 			        new BracketAdder("[", "]"),
 			        new BracketAdder("{", "}"),
 			        new BracketAdder("\"", "\""),
+			        new BracketAdder("'", "'"),
 			        new CommentAdder(),
 			    };
 		}
