@@ -15,25 +15,29 @@ import org.jmodelica.ide.indent.AnchorList;
  * 
  * @author philip
  */
-public class ModelicaAnchorList implements AnchorList {
+public class ModelicaAnchorList implements AnchorList<Indent> {
 
-private Stack<Anchor> stack;
-private LinkedList<Anchor> anchors, sinks;
+protected Stack<Anchor<Indent>> stack;
+protected LinkedList<Anchor<Indent>> anchors, sinks;
 
-private boolean partial_newline;
+protected boolean partial_newline;
+
+public final static Anchor<Indent> BOTTOM = 
+    new Anchor<Indent>(0, 0, Indent.SAME, "#BOTTOM#");
 
 public ModelicaAnchorList() {
     super();
     partial_newline = false;
-    stack = new Stack<Anchor>();
-    anchors = new LinkedList<Anchor>();
-    sinks = new LinkedList<Anchor>();
-    push(Anchor.BOTTOM);
+    stack = new Stack<Anchor<Indent>>();
+    anchors = new LinkedList<Anchor<Indent>>();
+    sinks = new LinkedList<Anchor<Indent>>();
+    push(BOTTOM);
 }
 
-protected Anchor find(Iterable<Anchor> anchors, int offset) {
-    Anchor result = Anchor.BOTTOM;
-    for (Anchor a : anchors)
+protected Anchor<Indent> find(Iterable<Anchor<Indent>> anchors, int offset, 
+        Anchor<Indent> def) {
+    Anchor<Indent> result = def; 
+    for (Anchor<Indent> a : anchors)
         if (a.offset < offset)
             result = a;
     return result;
@@ -46,8 +50,8 @@ protected Anchor find(Iterable<Anchor> anchors, int offset) {
  *            offset of anchor
  * @return
  */
-public Anchor anchorAt(int offset) {
-    return find(anchors, offset);
+public Anchor<Indent> anchorAt(int offset) {
+    return find(anchors, offset, BOTTOM);
 }
 
 /**
@@ -57,11 +61,11 @@ public Anchor anchorAt(int offset) {
  *            offset of anchor
  * @return
  */
-public Anchor sinkAt(int offset) {
-    return find(sinks, offset);
+public Anchor<Indent> sinkAt(int offset) {
+    return find(sinks, offset, null);
 }
 
-protected void push(Anchor a) {
+protected void push(Anchor<Indent> a) {
     anchors.addLast(a);
     stack.push(a);
 }
@@ -87,7 +91,7 @@ protected void pop() {
  *            anchor id
  */
 public void beginSection(int offset, int reference, Indent indent, String id) {
-    push(new Anchor(offset, reference, indent, id));
+    push(new Anchor<Indent>(offset, reference, indent, id));
 }
 
 /**
@@ -124,7 +128,7 @@ public void beginLine(int offset) {
  *            offset of inserted anchor.
  */
 public void completeStatement(int offset) {
-    while (stack.peek() != Anchor.BOTTOM
+    while (stack.peek() != BOTTOM
             && !stack.peek().id.matches("newline|class"))
         pop();
     pushTop(offset);
@@ -145,7 +149,7 @@ public void completeStatement(int offset) {
  *            offset of inserted anchor
  */
 public void popPast(String id, int offset) {
-    while (stack.peek() != Anchor.BOTTOM && !stack.peek().id.matches(id))
+    while (stack.peek() != BOTTOM && !stack.peek().id.matches(id))
         pop();
     pop();
     pushTop(offset);
@@ -159,10 +163,10 @@ public void popPast(String id, int offset) {
  */
 public void addSink(int offset, String id) {
     int ref = 0;
-    for (Anchor a : stack)
+    for (Anchor<Indent> a : stack)
         if (id.equals(a.id))
             ref = a.reference;
-    sinks.addLast(new Anchor(offset, ref, Indent.SAME, "#"));
+    sinks.addLast(new Anchor<Indent>(offset, ref, Indent.SAME, "#"));
 }
 
 /**
@@ -172,8 +176,34 @@ public void addSink(int offset, String id) {
  *            offset of inserted anchor.
  */
 public void pushTop(int offset) {
-    anchors.add(new Anchor(offset, stack.peek().reference,
+    anchors.add(new Anchor<Indent>(offset, stack.peek().reference,
             stack.peek().indent, stack.peek().id));
+}
+
+/**
+ * Bind the current tab width to transform list to AnchorList&lt;Integer&gt;.
+ * 
+ * @param tabWidth tabWidth to use
+ */
+public AnchorList<Integer> bindTabWidth(final int tabWidth) {
+    return new AnchorList<Integer> () {
+
+        public Anchor<Integer> anchorAt(int offset) {
+            Anchor<Indent> a = ModelicaAnchorList.this.anchorAt(offset);
+            return new Anchor<Integer>(a.offset, a.reference, 
+                    a.indent.modify(0, tabWidth), a.id); 
+        }
+
+        public Anchor<Integer> sinkAt(int offset) {
+            Anchor<Indent> a = ModelicaAnchorList.this.sinkAt(offset);
+            return a == null ?
+                    null : 
+                    new Anchor<Integer>(a.offset, a.reference, 
+                            a.indent.modify(0, tabWidth), a.id); 
+        }
+        
+    };
+    
 }
 
 }

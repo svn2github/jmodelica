@@ -3,6 +3,7 @@ package testcases;
 import junit.framework.TestCase;
 
 import org.jmodelica.ide.editor.Indent;
+import org.jmodelica.ide.editor.ModelicaAnchorList;
 import org.jmodelica.ide.indent.Anchor;
 import org.jmodelica.ide.scanners.generated.IndentationHintScanner;
 
@@ -12,13 +13,13 @@ static IndentationHintScanner ihs;
 
 static class IndentTestCase {
     String text, anchorstart, reference, sinkRef;
-    org.jmodelica.ide.indent.Indent wantedIndent;
+    Indent wantedIndent;
     
-    public IndentTestCase(String text, org.jmodelica.ide.indent.Indent wanted, String start, String ref) {
+    public IndentTestCase(String text, Indent wanted, String start, String ref) {
         this(text, wanted, start, ref, null);
     }
     
-    public IndentTestCase(String text, org.jmodelica.ide.indent.Indent wanted, String start, String ref, String sinkRef) {
+    public IndentTestCase(String text, Indent wanted, String start, String ref, String sinkRef) {
         this.text = text;
         this.anchorstart = start;
         this.reference = ref;
@@ -29,7 +30,7 @@ static class IndentTestCase {
 
 static IndentTestCase[] testCases = { 
     /* indentation tests */
-    /* 0 */     new IndentTestCase("Real r;\t", Anchor.SAME, "\t", "Real"),
+    /* 0 */     new IndentTestCase("Real r;\t", Indent.SAME, "\t", "Real"),
     /* 1 */     new IndentTestCase("model mqadfdsa\n", Indent.INDENT, " m", "model"),
     /* 2 */     new IndentTestCase("model m\nReal r", Indent.INDENT, "eal r", "Real"),
     /* 3 */     new IndentTestCase("model m\nReal r;\t", Indent.SAME, "\t", "Rea"),
@@ -72,12 +73,12 @@ static IndentTestCase[] testCases = {
     /* 40 */    new IndentTestCase("model m /* comment \n */", Indent.INDENT, "*/", "model"),
     /* 41 */    new IndentTestCase("model m\nReal r;end m;\t", Indent.SAME, "\t", "model"),
     /* 42 */    new IndentTestCase("model m annotation ", Indent.INDENT, " ", "anno"),
-    /* 43 */    new IndentTestCase("model m annotation()\t", Indent.INDENT, ")\t", "model"),
-    /* 44 */    new IndentTestCase("model m annotation ()\t", Indent.INDENT, ")\t", "model"),
-    /* 45 */    new IndentTestCase("model m annotation (()bladibal/*sdklj*/(()))\t", Indent.INDENT, ")\t", "model"),
+    /* 43 */    new IndentTestCase("model m annotation()\t", Indent.INDENT, "\t", "model"),
+    /* 44 */    new IndentTestCase("model m annotation ()\t", Indent.INDENT, "\t", "model"),
+    /* 45 */    new IndentTestCase("model m annotation (()bladibal/*sdklj*/(()))\t", Indent.INDENT, "\t", "model"),
     /* 46 */    new IndentTestCase("model m annotation (", Indent.INDENT, " (", "anno"),
     /* 47 */    new IndentTestCase("model m annotation ( jjj \n iii!", Indent.SAME, "ii!", "iii!"),
-    /* 48 */    new IndentTestCase("model m annotation ( jjj \n iii\n\n\n)\t", Indent.INDENT, ")\t", "model m"),
+    /* 48 */    new IndentTestCase("model m annotation ( jjj \n iii\n\n\n)\t", Indent.INDENT, "\t", "model m"),
     /* 49 */    new IndentTestCase("model m \n for i in 1:size(b,1) loop", Indent.INDENT, " i in", "for i"),
     /* 50 */    new IndentTestCase("model m \n for i in 1:size(b,1) loop\n result := 3;\t", Indent.SAME, "\t", "result"),
     /* 51 */    new IndentTestCase("model m \n for i in 1:size(b,1) loop\n result := 3;\nend for;\t", Indent.SAME, "\t", "for"),
@@ -87,10 +88,10 @@ static IndentTestCase[] testCases = {
     /* 55 */    new IndentTestCase("model m annotation ( /*   comment in annot */", Indent.INDENT, "*/", "annotation"),
     /* 56 */    new IndentTestCase("model m annotation\n(  \n   bla /*   comment in annot */", Indent.SAME, "*/", "bla"),
     /* 57 */    new IndentTestCase("model m\n  /* comment */\n  Real r;\t", Indent.SAME, "\t", "Real"),
-    /* 58 */    new IndentTestCase("model m\n  annotation(x=20)\t", Indent.INDENT, ")\t", "model"),
+    /* 58 */    new IndentTestCase("model m\n  annotation(x=20)\t", Indent.INDENT, "\t", "model"),
     /* 59 */    new IndentTestCase("model m\n  annotation(x=20);\t", Indent.INDENT, "\t", "model"),
     /* 60 */    new IndentTestCase("model m\n  annotation(x=20\ny=30\nz=40", Indent.SAME, "=40", "z=40"),
-    /* 61 */    new IndentTestCase("model q\n  /* comment */ \n annotation ()\t", Indent.INDENT, ")\t", "model"),
+    /* 61 */    new IndentTestCase("model q\n  /* comment */ \n annotation ()\t", Indent.INDENT, "\t", "model"),
     /* 62 */    new IndentTestCase("model m\nReal r;equation", Indent.SAME, "equation", "Real"),
     /* 63 */    new IndentTestCase("model m\nReal r;\n\n\nequation\n", Indent.SAME, "\n\n\nequation", "Real"),
     /* 64 */    new IndentTestCase("model m model q end q end m; end z;\t", Indent.SAME, "\t", "model m"),  
@@ -108,12 +109,12 @@ static IndentTestCase[] testCases = {
 public void testIndent() {
     
     for (int i = 0; i < testCases.length; i++) {
-        
+        System.out.println("----------" + i);
         IndentTestCase tc = testCases[i];
         ihs.analyze(tc.text);
 
-        Anchor anchor = ihs.ancs.anchorAt(tc.text.length()+1);
-        Anchor sink = ihs.ancs.sinkAt(tc.text.length()+1);
+        Anchor<Indent> anchor = ihs.ancs.anchorAt(tc.text.length()+1);
+        Anchor<Indent> sink = ihs.ancs.sinkAt(tc.text.length()+1);
         
         StringBuilder bob = new StringBuilder();
         
@@ -137,7 +138,7 @@ public void testIndent() {
     
         bob.append("sink:");
         bob.append(String.format("got:%s wanted:%s\n",
-                tc.text.substring(sink.reference),
+                sink == null ? "null" : tc.text.substring(sink.reference),
                 tc.sinkRef));
         
         if (tc.wantedIndent != null) {

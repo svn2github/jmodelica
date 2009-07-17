@@ -21,7 +21,8 @@ public class IndentedSectionTest extends TestCase {
         IndentedSection.tabbed = true;
         IndentationHintScanner ihs = new IndentationHintScanner();
         ihs.analyze(new IndentedSection(testIndentData).toString());
-        assertEquals(new IndentedSection(testIndentData).indent(ihs.ancs).toString(),
+        assertEquals(new IndentedSection(testIndentData).indent(
+                    ihs.ancs.bindTabWidth(IndentedSection.tabWidth)).toString(),
                 "model m\n" +
                 "\treal r;\n" +
                 "\tmodel q\n" +
@@ -35,7 +36,8 @@ public class IndentedSectionTest extends TestCase {
         IndentedSection.tabWidth = 4;
         IndentedSection.tabbed = true;
         IndentationHintScanner ihs = new IndentationHintScanner();
-        ihs.analyze(new IndentedSection(testIndentData).toString());        String[] tmp = testIndentData.split("\n");
+        ihs.analyze(new IndentedSection(testIndentData).toString());        
+        String[] tmp = testIndentData.split("\n");
 
         assertEquals(
                 "\t model m\n" +
@@ -46,7 +48,7 @@ public class IndentedSectionTest extends TestCase {
                 "\t   int i;\n" +
                 "\t\t   end m;",
                 new IndentedSection(testIndentData).
-                indent(ihs.ancs, 2, 4).toString());
+                indent(ihs.ancs.bindTabWidth(IndentedSection.tabWidth), 2, 4).toString());
         assertEquals(
                 "\t model m\n" +
                 "\t\t real r;\n" +
@@ -56,7 +58,7 @@ public class IndentedSectionTest extends TestCase {
                 "\t   int i;\n" +
                 "\t\t   end m;",
                 new IndentedSection(testIndentData).
-                    indent(ihs.ancs, 1, 4).toString());
+                    indent(ihs.ancs.bindTabWidth(IndentedSection.tabWidth), 1, 4).toString());
     }
 
     public void testSpacify() {

@@ -93,7 +93,7 @@ Other = . | {NewLine}
 
 
 %state LINEBEGIN, END
-%xstate COMMENT, COMMENT_LINEBEGIN, STRING, QIDENT, ANNOTATION, ANNOTATION_LINEBEGIN 
+%xstate COMMENT, COMMENT_LINEBEGIN, STRING, QIDENT, ANNOTATION, ANNOTATION_LINEBEGIN, CLASS 
 
 %%
 
@@ -118,7 +118,9 @@ Other = . | {NewLine}
   ^.				{ yypushback(1); yybegin(LINEBEGIN); }
   {NewLine}			{ yybegin(LINEBEGIN); }
   {Class}			{ ancs.addAnchor(yychar, yychar, Indent.SAME); 
-  					  ancs.beginSection(yychar + yylength(), yychar, Indent.INDENT, "class"); } 
+  					  ancs.beginSection(yychar + yylength(), yychar, Indent.INDENT, "class");
+  					  yybegin(CLASS);
+  					} 
   {Separator}		{ ancs.addSink(yychar, "class"); }
   {End}				{ ancs.addSink(yychar, "class");
   					  ancs.addAnchor(yychar + yylength(), yychar, Indent.INDENT);
@@ -127,6 +129,11 @@ Other = . | {NewLine}
   {NormalId}    	{  }
   ";"				{ ancs.completeStatement(yychar + 1); }
 } 
+
+<CLASS> {
+	{WhiteSpace}* {NormalId} { yybegin(YYINITIAL);}
+	{Other} 		   { yypushback(1); yybegin(YYINITIAL); }
+}
 
 <LINEBEGIN> {
   {Class} 			|
@@ -150,14 +157,14 @@ Other = . | {NewLine}
 <ANNOTATION> {
   "("				{ annotation_paren_level++; }
   ")" 				{ if (--annotation_paren_level == 0) { 
-  							ancs.popPast("annotation", yychar);
+  							ancs.popPast("annotation", yychar+1);
   							yybegin(YYINITIAL); 
   					  }
 					} 
    "/*"  			{ ancs.beginSection(yychar+2, yychar, Indent.COMMENT, "comment");
 					  last_state = yystate();
 					  yybegin(COMMENT_LINEBEGIN); }
-  "\""				{ ancs.beginSection(yychar+1, -1,Indent.NONE, "string");
+  "\""				{ ancs.beginSection(yychar+1, yychar, Indent.NONE, "string");
 					  last_state = yystate(); yybegin(STRING); }
   {NewLine}			{ yybegin(ANNOTATION_LINEBEGIN); }
   {Other}			{ 	}

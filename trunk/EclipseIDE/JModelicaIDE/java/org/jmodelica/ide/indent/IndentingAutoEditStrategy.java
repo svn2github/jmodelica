@@ -8,6 +8,7 @@ import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
+import org.jmodelica.ide.editor.ModelicaAnchorList;
 import org.jmodelica.ide.scanners.generated.IndentationHintScanner;
 
 /**
@@ -28,14 +29,13 @@ protected int countTokens(IDocument d, int offset) throws BadLocationException {
 }
 
 /** Calculate indent at offset from hints. */
-protected int getIndent(IDocument d, int begin, int end, boolean countSinks)
+protected int getIndent(IDocument d, int begin, int end, boolean countSinks, AnchorList<Integer> aList)
         throws BadLocationException {
-    Anchor a = ihs.ancs.sinkAt(end + 1);
+    Anchor<Integer> a = aList.sinkAt(end + 1);
     if (!countSinks || a == null || a.offset < begin)
-        a = ihs.ancs.anchorAt(begin + 1);
+        a = aList.anchorAt(begin + 1);
 
-    return a.indent.modify(countTokens(d, a.reference),
-            IndentedSection.tabWidth);
+    return countTokens(d, a.reference) + a.indent;
 }
 
 public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
@@ -57,13 +57,14 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
         int lineEnd = lineBegin + line.getLength();
         String text = d.get(0, lineEnd);
         ihs.analyze(text);
+        AnchorList<Integer> ancs = ihs.ancs.bindTabWidth(IndentedSection.tabWidth);
 
         /*
          * Check if there are sinks on current line. In that case indent edited
          * line
          */
-        Anchor a = ihs.ancs.sinkAt(c.offset);
-        if (a != Anchor.BOTTOM && a.offset >= lineBegin) {
+        Anchor<Integer> a = ancs.sinkAt(c.offset);
+        if (a != null && a.offset >= lineBegin) {
             int sinkIndent = countTokens(d, a.reference);
             String tmp = new IndentedSection(d.get(lineBegin, c.offset
                     - lineBegin)).offsetIndentTo(sinkIndent).toString();
@@ -73,7 +74,7 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
         if (isTab) {
             /* if tabbing before beginning of line, put indentation at correct
              * level */
-            int indent = getIndent(d, c.offset, lineEnd, true);
+            int indent = getIndent(d, c.offset, lineEnd, true, ancs);
             String ind = d.get(lineBegin, c.offset - lineBegin);
             if (ind.trim().isEmpty() && IndentedSection.spacify(ind).length() < indent) {
                 c.offset = lineBegin;
@@ -85,7 +86,7 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
             c.length += findEndOfWhiteSpace(d, c.offset, lineEnd) - c.offset;
 
             if (pastedBlock) {
-                int indent = getIndent(d, c.offset, lineEnd, false);
+                int indent = getIndent(d, c.offset, lineEnd, false, ancs);
                 c.text = new IndentedSection(c.text).offsetIndentTo(indent)
                         .toString();
             }
@@ -107,7 +108,7 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
 
             if (endsWithNewLine)
                 c.text += IndentedSection.putIndent("", getIndent(d, c.offset,
-                        lineEnd, true));
+                        lineEnd, true, ancs));
         }
         
         c.caretOffset = c.offset + c.length;    

@@ -1,23 +1,27 @@
 package org.jmodelica.ide.indent;
 
-import org.jmodelica.ide.indent.Indent;
+
 
 /**
- * Anchor point in text, providing indentation hints.
+ * Anchor point in text, providing indentation hints. The anchor represents an
+ * indentation hint saying at offset <code>offset</code>, the indent should be
+ * the same as at <code>reference</code>, modified by Indent.
+ * 
+ * Type parameter E represents the indentation modifier of the anchor, and a
+ * list needs to be transformed to AnchorList&lt;Integer&gt; before use of any
+ * of the classes in this package.
+ * 
+ * The type parameter exists to be able to let the code creating the list be
+ * agnostic of things like tab width, and other environment variables, which 
+ * can instead be bound later.
  * 
  * @author philip
  */
-public class Anchor {
-
-public static final Indent SAME = new Indent() {
-    public int modify(int indent, int indentWidth) { return indent; }
-};
-
-public final static Anchor BOTTOM = new Anchor(0, 0, SAME, "#");
+public class Anchor<E> {
 
 public int reference;
 public int offset;
-public Indent indent;
+public E indent;
 public String id;
 
 /**
@@ -32,16 +36,16 @@ public String id;
  * @param modifiesCurrentLine if anchor changes indentation of current line
  *            rather than the following text
  */
-public Anchor(int offset, int reference, Indent indent, String id) {
+public Anchor(int offset, int reference, E indent, String id) {
     this.reference = reference;
     this.offset = offset;
     this.indent = indent;
     this.id = id;
 }
 
-public Anchor(int offset, int reference) {
-    this(offset, reference, SAME, null);
-}
+//public Anchor(int offset, int reference, E indent) {
+//    this(offset, reference, indent, "#");
+//}
 
 public String toString() {
     return "(" + offset + ", " + indent + ", " + id + ")";

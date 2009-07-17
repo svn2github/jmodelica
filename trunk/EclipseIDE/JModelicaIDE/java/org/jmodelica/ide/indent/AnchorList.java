@@ -10,15 +10,15 @@ package org.jmodelica.ide.indent;
  * @author philip
  * 
  */
-public interface AnchorList {
+public interface AnchorList<E> {
 
 /**
  * Give an anchor 
  * @param offset
  * @return
  */
-public Anchor anchorAt(int offset);
+public Anchor<E> anchorAt(int offset);
 
-public Anchor sinkAt(int offset);
+public Anchor<E> sinkAt(int offset);
 
 }

@@ -31,7 +31,7 @@ public static int tabWidth = 4;
 public static boolean tabbed = true;
 public static String commentSyntax = "//";
 public static String lineSep =
-        System.getProperties().getProperty("line.separator");
+        System.getProperties().getProperty("line.separator", "\n");
 
 protected final String[] sec;
 
@@ -54,7 +54,7 @@ public IndentedSection(String s) {
  * @param hints hints to indent by
  * @return indented source code
  */
-public IndentedSection indent(AnchorList hints, int lineStart, int lineEnd) {
+public IndentedSection indent(AnchorList<Integer> hints, int lineStart, int lineEnd) {
 
     String text = toString();
 
@@ -67,14 +67,14 @@ public IndentedSection indent(AnchorList hints, int lineStart, int lineEnd) {
 
     for (int i = lineStart; i < lineEnd; i++) {
 
-        Anchor a = hints.sinkAt(offset + sec[i].length());
+        Anchor<Integer> a = hints.sinkAt(offset + sec[i].length());
         if (a.offset < offset)
             a = hints.anchorAt(offset);
         int lineBeg = text.lastIndexOf(lineSep, a.reference);
         lineBeg = lineBeg <= 0 ? 0 : lineBeg + lineSep.length();
 
-        int indent = spacify(text.substring(lineBeg, a.reference)).length();
-        indent = a.indent.modify(indent, tabWidth);
+        int indent = spacify(text.substring(lineBeg, a.reference)).length() 
+            + a.indent;
 
         // find line number of reference offset
         int refLineNbr = 0, tmp = 0;
@@ -98,7 +98,7 @@ public IndentedSection indent(AnchorList hints, int lineStart, int lineEnd) {
 /**
  * @see IndentedSection#indent(AnchorList)
  */
-public IndentedSection indent(AnchorList hints) {
+public IndentedSection indent(AnchorList<Integer> hints) {
     return indent(hints, 0, sec.length);
 }
 

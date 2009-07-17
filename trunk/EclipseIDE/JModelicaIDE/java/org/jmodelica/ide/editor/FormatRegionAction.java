@@ -4,6 +4,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
+import org.jmodelica.ide.indent.AnchorList;
 import org.jmodelica.ide.indent.IndentedSection;
 import org.jmodelica.ide.scanners.generated.IndentationHintScanner;
 
@@ -35,13 +36,14 @@ public void run() {
     String doc = d.get();
     IndentationHintScanner ihs = new IndentationHintScanner();
     ihs.analyze(doc);
+    AnchorList<Integer> ancs = ihs.ancs.bindTabWidth(IndentedSection.tabWidth);
 
     if (sel.getLength() == 0) {
-        d.set(new IndentedSection(doc).indent(ihs.ancs).toString());  
+        d.set(new IndentedSection(doc).indent(ancs).toString());  
     } else {
         int beg = sel.getStartLine();
         int end = sel.getEndLine() + 1;
-        String section = new IndentedSection(doc).indent(ihs.ancs, beg, end)
+        String section = new IndentedSection(doc).indent(ancs, beg, end)
                 .toString(beg, end);
         try {
             int startOffset = d.getLineOffset(beg);
