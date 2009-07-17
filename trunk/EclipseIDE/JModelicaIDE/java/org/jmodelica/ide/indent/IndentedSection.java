@@ -68,7 +68,7 @@ public IndentedSection indent(AnchorList<Integer> hints, int lineStart, int line
     for (int i = lineStart; i < lineEnd; i++) {
 
         Anchor<Integer> a = hints.sinkAt(offset + sec[i].length());
-        if (a.offset < offset)
+        if (a == null || a.offset < offset)
             a = hints.anchorAt(offset);
         int lineBeg = text.lastIndexOf(lineSep, a.reference);
         lineBeg = lineBeg <= 0 ? 0 : lineBeg + lineSep.length();
