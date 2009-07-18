@@ -19,7 +19,10 @@ def run_demo():
     """Demonstrate how to solve the 
     CSTR optimization problem."""
 
-    oc.compile_model("CSTR.mo", "CSTR.CSTR_Opt", target='ipopt')
+    curr_dir = os.path.dirname(os.path.abspath(__file__));
+
+
+    oc.compile_model(curr_dir+"/CSTR.mo", "CSTR.CSTR_Opt", target='ipopt')
 
     cstr=jmi.Model("CSTR_CSTR_Opt")
 
