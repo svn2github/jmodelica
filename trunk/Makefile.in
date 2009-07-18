@@ -55,8 +55,10 @@ DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(top_srcdir)/JMI/examples/Vdp_cppad/Makefile.in \
 	$(top_srcdir)/Options/options_tpl.py.in \
 	$(top_srcdir)/Options/options_tpl.xml.in \
-	$(top_srcdir)/configure INSTALL config.guess config.sub \
-	depcomp install-sh ltmain.sh missing
+	$(top_srcdir)/Python/jm_ipython.sh.in \
+	$(top_srcdir)/Python/jm_python.sh.in $(top_srcdir)/configure \
+	INSTALL config.guess config.sub depcomp install-sh ltmain.sh \
+	missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -69,7 +71,8 @@ CONFIG_CLEAN_FILES = JMI/examples/Vdp/Makefile \
 	JMI/examples/Vdp_cppad/Makefile \
 	JMI/examples/FurutaPendulum/Makefile \
 	JMI/examples/CSTR/Makefile JMI/examples/CSTR2/Makefile \
-	Options/options_tpl.xml Options/options_tpl.py
+	Options/options_tpl.xml Options/options_tpl.py \
+	Python/jm_ipython.sh Python/jm_python.sh
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -109,7 +112,7 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
-CPPAD_INC = @CPPAD_INC@
+CPPAD_HOME = @CPPAD_HOME@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
@@ -287,6 +290,10 @@ JMI/examples/CSTR2/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI/exa
 Options/options_tpl.xml: $(top_builddir)/config.status $(top_srcdir)/Options/options_tpl.xml.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 Options/options_tpl.py: $(top_builddir)/config.status $(top_srcdir)/Options/options_tpl.py.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+Python/jm_ipython.sh: $(top_builddir)/config.status $(top_srcdir)/Python/jm_ipython.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+Python/jm_python.sh: $(top_builddir)/config.status $(top_srcdir)/Python/jm_python.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
@@ -704,18 +711,20 @@ install-exec-local:
 	[ -e $(prefix)/Options/options.py ] && echo "options.py exists "|| cp Options/options_tpl.py $(prefix)/Options/options.py
 	mkdir -p $(prefix)/Python
 	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/Python
+	cp Python/jm_*.sh $(prefix)/Python
+	chmod u+x $(prefix)/Python/jm_*.sh
 	mkdir -p $(prefix)/ThirdParty
 	mkdir -p $(prefix)/ThirdParty/Beaver
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE $(prefix)/ThirdParty/Beaver/
 	mkdir -p $(prefix)/ThirdParty/Beaver/lib
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar $(prefix)/ThirdParty/Beaver/lib/ 
 	mkdir -p $(prefix)/ThirdParty/CppAD
-	cp $(CPPAD_INC)/COPYING $(prefix)/ThirdParty/CppAD
+	cp $(CPPAD_HOME)/COPYING $(prefix)/ThirdParty/CppAD
 	mkdir -p $(prefix)/ThirdParty/CppAD/cppad	
-	cp $(CPPAD_INC)/cppad/*.h $(prefix)/ThirdParty/CppAD/cppad
-	cp $(CPPAD_INC)/cppad/*.hpp $(prefix)/ThirdParty/CppAD/cppad
+	cp $(CPPAD_HOME)/cppad/*.h $(prefix)/ThirdParty/CppAD/cppad
+	cp $(CPPAD_HOME)/cppad/*.hpp $(prefix)/ThirdParty/CppAD/cppad
 	mkdir -p $(prefix)/ThirdParty/CppAD/cppad/local	
-	cp $(CPPAD_INC)/cppad/local/*.hpp $(prefix)/ThirdParty/CppAD/cppad/local
+	cp $(CPPAD_HOME)/cppad/local/*.hpp $(prefix)/ThirdParty/CppAD/cppad/local
 	cd $(abs_top_srcdir)/ThirdParty; find MSL -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/ThirdParty
 	mkdir -p $(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/jmi_modelica_template.c $(prefix)/CodeGenTemplates

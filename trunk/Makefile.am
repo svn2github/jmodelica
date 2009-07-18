@@ -48,18 +48,20 @@ endif
 	[ -e $(prefix)/Options/options.py ] && echo "options.py exists "|| cp Options/options_tpl.py $(prefix)/Options/options.py
 	mkdir -p $(prefix)/Python
 	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/Python
+	cp Python/jm_*.sh $(prefix)/Python
+	chmod u+x $(prefix)/Python/jm_*.sh
 	mkdir -p $(prefix)/ThirdParty
 	mkdir -p $(prefix)/ThirdParty/Beaver
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE $(prefix)/ThirdParty/Beaver/
 	mkdir -p $(prefix)/ThirdParty/Beaver/lib
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar $(prefix)/ThirdParty/Beaver/lib/ 
 	mkdir -p $(prefix)/ThirdParty/CppAD
-	cp $(CPPAD_INC)/COPYING $(prefix)/ThirdParty/CppAD
+	cp $(CPPAD_HOME)/COPYING $(prefix)/ThirdParty/CppAD
 	mkdir -p $(prefix)/ThirdParty/CppAD/cppad	
-	cp $(CPPAD_INC)/cppad/*.h $(prefix)/ThirdParty/CppAD/cppad
-	cp $(CPPAD_INC)/cppad/*.hpp $(prefix)/ThirdParty/CppAD/cppad
+	cp $(CPPAD_HOME)/cppad/*.h $(prefix)/ThirdParty/CppAD/cppad
+	cp $(CPPAD_HOME)/cppad/*.hpp $(prefix)/ThirdParty/CppAD/cppad
 	mkdir -p $(prefix)/ThirdParty/CppAD/cppad/local	
-	cp $(CPPAD_INC)/cppad/local/*.hpp $(prefix)/ThirdParty/CppAD/cppad/local
+	cp $(CPPAD_HOME)/cppad/local/*.hpp $(prefix)/ThirdParty/CppAD/cppad/local
 	cd $(abs_top_srcdir)/ThirdParty; find MSL -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/ThirdParty
 	mkdir -p $(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/jmi_modelica_template.c $(prefix)/CodeGenTemplates

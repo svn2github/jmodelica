@@ -135,11 +135,11 @@ AS_IF([test "x$with_cppad" = xno],
 AM_CONDITIONAL([COMPILE_WITH_CPPAD],[test "x$with_cppad" != xno])
 
 # Set output variables to be exported to the Makefiles
-AC_SUBST(CPPAD_INC)
+AC_SUBST(CPPAD_HOME)
 AC_SUBST(WITH_CPPAD)
 AS_IF([test "x$with_cppad" = xautomatic],
-      [CPPAD_INC=`cd $srcdir; pwd`/$cppad],
-      [CPPAD_INC=$cppad])
+      [CPPAD_HOME=`cd $srcdir; pwd`/$cppad],
+      [CPPAD_HOME=$cppad])
 
 AS_IF([test "x$with_cppad" != xno],
       [WITH_CPPAD="true"],
@@ -205,6 +205,8 @@ AC_CONFIG_FILES([
  JMI/examples/CSTR2/Makefile
  Options/options_tpl.xml
  Options/options_tpl.py
+ Python/jm_ipython.sh
+ Python/jm_python.sh
 ])
 
 
