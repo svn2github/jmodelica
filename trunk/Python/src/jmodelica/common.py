@@ -35,11 +35,13 @@ if _jm_home is None:
 	_jm_home=os.path.join(_jm_sdk_home,'install')
 	os.environ['JMODELICA_HOME'] = _jm_home
 
-cppad_h = os.path.join(_jm_home,'ThirdParty','CppAD')
-os.environ['CPPAD_HOME'] = cppad_h
+if os.environ['CPPAD_HOME']=='':
+    cppad_h = os.path.join(_jm_home,'ThirdParty','CppAD')
+    os.environ['CPPAD_HOME'] = cppad_h
 
-ipopt_h = os.path.join(_jm_sdk_home,'Ipopt-MUMPS')
-os.environ['IPOPT_HOME'] = ipopt_h
+if os.environ['IPOPT_HOME']=='':
+    ipopt_h = os.path.join(_jm_sdk_home,'Ipopt-MUMPS')
+    os.environ['IPOPT_HOME'] = ipopt_h
 
 if sys.platform == 'win32':
     path = os.environ.get('PATH')
