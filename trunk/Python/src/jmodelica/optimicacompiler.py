@@ -352,15 +352,20 @@ def compile_dll(c_file_name, target="model"):
     """
 
     #make settings
-    make_file = common._jm_home+os.sep+'Makefiles'+os.sep+'MakeFile'
+    make_file = os.path.join(os.environ['JMODELICA_HOME'],'Makefiles','MakeFile')
     file_name =' FILE_NAME='+c_file_name
-    jmodelica_h=' JMODELICA_HOME='+common._jm_home
-    cppad_h = ' CPPAD_HOME='+common._jm_home+os.sep+'ThirdParty'+os.sep+'CppAD'
-    ipopt_h = ' IPOPT_HOME='+common.user_options['ipopt_home']
-    
-    cmd = 'make -f'+make_file+' '+target+file_name+jmodelica_h+cppad_h+ipopt_h
-
+    jmodelica_h=' JMODELICA_HOME='+os.environ['JMODELICA_HOME']
+    cppad_h = ' CPPAD_HOME='+os.environ['CPPAD_HOME']
+    ipopt_h = ' IPOPT_HOME='+os.environ['IPOPT_HOME']
+    if sys.platform == 'win32':
+        make = os.path.join(os.environ['JMODELICA_SDK_HOME'],'mingw','bin','mingw32-make') + ' -f '
+        compiler = ' CXX=' + os.path.join(os.environ['JMODELICA_SDK_HOME'],'mingw','bin','g++')
+        ar = ' AR=' + os.path.join(os.environ['JMODELICA_SDK_HOME'],'mingw','bin','ar')
+        cmd = make + make_file + compiler + ar + ' ' + target +file_name + jmodelica_h + cppad_h + ipopt_h
+    else:
+        cmd = 'make -f' + make_file + ' ' + target + file_name + jmodelica_h + cppad_h + ipopt_h
     #run make -> <model_class_name>.dll
+    print cmd
     retval=os.system(cmd)
     return retval
 

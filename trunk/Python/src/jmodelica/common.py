@@ -17,22 +17,47 @@
 import os
 import sys
 
-_jm_home = os.environ.get('JMODELICA_HOME')
-if _jm_home is None:
-	raise EnvironmentError('The environment variable JMODELICA_HOME needs to'
+#set/get environment variables
+try:
+	_jm_sdk_home = os.environ['JMODELICA_SDK_HOME']
+except KeyError:
+	_jm_sdk_home = None
+
+try:
+	_jm_home = os.environ['JMODELICA_HOME']
+except KeyError:
+	_jm_home = None
+
+if _jm_sdk_home is None and _jm_home is None:
+	raise EnvironmentError('The environment variable JMODELICA_SDK_HOME or JMODELICA_HOME needs to'
 						   ' be set in order to run JModelica.')
+if _jm_home is None:
+	_jm_home=os.path.join(_jm_sdk_home,'install')
+	os.environ['JMODELICA_HOME'] = _jm_home
+
+cppad_h = os.path.join(_jm_home,'ThirdParty','CppAD')
+os.environ['CPPAD_HOME'] = cppad_h
+
+ipopt_h = os.path.join(_jm_sdk_home,'Ipopt-MUMPS')
+os.environ['IPOPT_HOME'] = ipopt_h
+
+if sys.platform == 'win32':
+    path = os.environ.get('PATH')
+    mingw = os.path.join(_jm_sdk_home,'mingw','bin')
+    path = mingw + ';' + path
+    os.environ['PATH'] = path
 
 #get paths to external directories: OptimicaCompiler, ModelicaCompiler, Beaver
-_oc_jar = _jm_home+os.sep+'lib'+os.sep+'OptimicaCompiler.jar'
-_mc_jar = _jm_home+os.sep+'lib'+os.sep+'ModelicaCompiler.jar'
-_beaver_lib = _jm_home+os.sep+'ThirdParty'+os.sep+'Beaver'+os.sep+'lib'
+_oc_jar = os.path.join(_jm_home,'lib','OptimicaCompiler.jar')
+_mc_jar = os.path.join(_jm_home,'lib','ModelicaCompiler.jar')
+_beaver_lib = os.path.join(_jm_home,'ThirdParty','Beaver','lib')
+
 # JVM dir and class paths
 _dir_path="-Djava.ext.dirs=%s" %_beaver_lib
 if sys.platform == 'win32':
     _class_path="-Djava.class.path=%s;%s" %(_oc_jar,_mc_jar)
 else:
     _class_path="-Djava.class.path=%s:%s" %(_oc_jar,_mc_jar)
-_jvm_mem_args="-Xmx1024M"
 
 #user options dict
 user_options = {}
