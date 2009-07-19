@@ -23,12 +23,12 @@ def run_demo():
     
     # Compile the Optimica model first to C code and
     # then to a dynamic library
-    oc.compile_model(curr_dir+"/VDP.mo",
-                     "VDP_pack.VDP_Opt",
+    oc.compile_model(curr_dir+"/files/VDP.mo",
+                     "VDP_pack.VDP_Opt_Min_Time",
                      target='ipopt')
 
     # Load the dynamic library and XML data
-    vdp=jmi.Model("VDP_pack_VDP_Opt")
+    vdp=jmi.Model("VDP_pack_VDP_Opt_Min_Time")
 
     # Initialize the mesh
     n_e = 50 # Number of elements 
