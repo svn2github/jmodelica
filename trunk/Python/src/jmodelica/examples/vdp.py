@@ -23,7 +23,7 @@ def run_demo():
     
     # Compile the Optimica model first to C code and
     # then to a dynamic library
-    oc.compile_model(curr_dir+"/VDP.mo",
+    oc.compile_model(curr_dir+"/files/VDP.mo",
                      "VDP_pack.VDP_Opt",
                      target='ipopt')
 
