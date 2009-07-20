@@ -2,11 +2,16 @@ Build instructions for the JModelica project.
 
 0. Requirements.
 
-In order to compile JModelica you will need a unix-like environment. For 
-Windows, it is recommended to use the MingW distribution. In addition 'ant' is 
-needed to build the JastAdd/Java-based compiler front-ends. 
-NOTICE: The JModelica code tree, as well its dependencies (and ant, must be 
-located in directories for which their absolute path does not contain spaces.
+In order to compile JModelica you will need a unix-like
+environment. Depending on you operating system, different actions are
+required.
+
+ - For Linux, you most likely have everything you need.
+ - For Mac OS X you need to install the XCode compiler suite,
+   Subversion and Ant.
+ - For Windows, it is recommended to use the JModelica.org-SDK
+   installer which contains all the tools necessary to build the
+   platform.
 
 1. Get JModelica.org
 
@@ -14,43 +19,41 @@ Check out a working copy of JModelica.org:
 
  > svn co https://svn.jmodelica.org/trunk JModelica 
 
-Make sure that the full path to the directory where you check out JModelica does 
-not contain any spaces nor ~ character
+Make sure that the full path to the directory where you check out
+JModelica does not contain any spaces nor ~ character. Notice that
+this step can be (optionally) performed by the JModelica.org-SDK
+installer.
 
-2. Get CppAD (optional)
+2. Get Ipopt (optional)
 
-Download CppAD from http://www.coin-or.org/CppAD. Unzip the tar-ball and put 
-in a directory. Again, make sure that the path to this directory does not 
-contain any spaces nor ~ character. Note: You do not have to build anything in 
-the CppAD distribution in order to build JModelica.
-
-3. Get Ipopt (optional)
-
-Download Ipopt from https://projects.coin-or.org/Ipopt. Unzip the tar-ball and 
-put in a directory that does not hold any spaces nor ~ character in its path. 
-Build the package according to its INSTALL file. Make sure to run 
+Download Ipopt from https://projects.coin-or.org/Ipopt. Unzip the
+tar-ball and put in a directory that does not hold any spaces nor ~
+character in its path. Build the package according to its INSTALL
+file. Make sure to run
 
  > make install
 
-4. Configure
+Notice that a compiled version of Ipopt is included in the
+JModelica.org-SDK installer.
 
-Run the configure script. It is recommended that you create a new directory 
-in JModelica: 
+3. Configure
 
-cd JModelica
-mkdir build
-cd build
+Run the configure script. It is recommended that you create a new
+directory for building the platform
 
- > ../configure --with-ipopt=/path/to/ipopt-install-dir
+ > cd JModelica
+ > mkdir build
+ > cd build
+ > ../configure --with-ipopt=/path/to/ipopt-install-dir 
 
-The argument --with-ipopt is optional. Notice, however, that if they
-are not give, only parts of the software will be built. You may want
-to give additional arguments to configure. Type configure --help for
+The argument --with-ipopt is optional. Notice, however, that if it is
+not give, only parts of the software will be built. You may want to
+give additional arguments to configure. Type configure --help for
 information. By default, the installation directory (--prefix) is set
-to the current directory, it is recommended to set the --prefix
+to the current directory. It is recommended to set the --prefix
 argument to override this behaviour.
 
-5. Build and install
+4. Build and install
 
 In order to build, type 
 
@@ -60,53 +63,90 @@ In order to install, type
 
  > make install 
 
-which will render the directories 'lib' and 'include' to be created in the 
-installation directory and the corresponding libraries and directories and 
-header files will be copied. In addition, templates, XML schemas, third party
-dependencies and makefiles used to build the generated C code are copied into
-the installation directory. Also, the Python code is copied into the
-installation directory. This may change in the future in favor of a solution
-where the jmodelica.org Python package is distributed as a standard Python
-installation package.
+which will render the directories 'lib' and 'include' to be created in
+the installation directory and the corresponding libraries and
+directories and header files will be copied. In addition, templates,
+XML schemas, third party dependencies and makefiles used to build the
+generated C code are copied into the installation directory. Also, the
+Python code is copied into the installation directory. 
 
 In order to build the JMI examples, type 
 
  > make jmi-examples 
  
-which will build executables for the examples in the 'JMI/examples' directory. 
-Notice that both --with-cppad and --with-ipopt have to be provided in order to 
-build the examples. In order to remove compiled executables and shared object 
-files in the 'JMI/examples' directories, run 
+which will build executables for the examples in the 'JMI/examples'
+directory. Notice that --with-ipopt has to be provided in order to
+build the examples. In order to remove compiled executables and shared
+object files in the 'JMI/examples' directories, run
 
  > make clean-jmi-examples
 
-6. Generate documentation.
+5. Generate documentation.
 
 The command 
 
  > make docs 
 
-will generate documentation in the 'doc' directory. The generated documentation 
-is also available at www.jmodelica.org, where nightly generated docs are 
-published.
+will generate documentation in the 'doc' directory. The generated
+documentation is also available at www.jmodelica.org, where nightly
+generated docs are published.
 
-7. Running JModelica.org from Python
+6. Running JModelica.org from Python
 
 In order to run the JModelica.org compilers from Python, the packages
-JPype (http://jpype.sourceforge.net/) and lxml
-(http://codespeak.net/lxml/) need to be installed. Also, the
-environment variables JMODELICA_HOME, containing the path to the
-JModelica.org installation directory (again, without spaces or ~ in
-the path), PYTHONPATH, containing the path to the 'Python' directory
-in the JModelica.org installation directory and JAVA_HOME containing
-the path to a Java JRE or SDK installation needs to be set. In
-addition, on some Linux platforms, it may be necessary to include the
-IPOPT lib directory in the LD_LIBRARY_PATH variable. If you run
-Linux, you will most likely have everything you need by now. If you
-run Windows, you also need MinGW which provides make and the gcc-suite
-which are needed to compile the generated C code. A convenient choice
-is then python(x,y) (http://www.pythonxy.com), which provides a Python
-environment bundled with (amongst other things) a MinGW installation.
+ 
+ - JPype (http://jpype.sourceforge.net/) 
+ - lxml (http://codespeak.net/lxml/) 
+ - NumPy (http://numpy.scipy.org/)
+ - SciPy (http://www.scipy.org/)
+ - Matplotlib (http://matplotlib.sourceforge.net/)
+ - Nose (http://code.google.com/p/python-nose/) (Only needed to run
+   the test suits.)
 
+need to be installed. The JModelica.org has been tested on Python 2.5
+and Python 2.6. For Windows users, the python(x,y) distribution
+(www.pythonxy.com), containing NumPy, SciPy and Matplotlib, is
+recommended. Notice that the JModelica.org-SDK and JModelica.org
+installers for Windows will install JPype, lxml and Nose
+automatically. Linux and Mac OS X users need to install these packages
+manually.
+
+JModelica.org uses the following environment variables:
+
+ - JMODELICA_HOME containing the path to the JModelica.org installation
+   directory (again, without spaces or ~ in the path).
+ - JMODELICA_SDK_HOME containing the path to a JModelica.org-SDK
+   installation directory. Serves as an alternative to
+   JMODELICA_HOME. (Windows only.)
+ - PYTHONPATH containing the path to the directory $JMODELICA_HOME/Python.
+ - JAVA_HOME containing the path to a Java JRE or SDK installation.
+ - IPOPT_HOME containing the path to an Ipopt installation directory.
+ - LD_LIBRARY_PATH containing the path to the $IPOPT_HOME/lib directory
+   (Linux only.)
+
+Notice that the environment variables do not need to be set
+globally. For Linux and Mac OS X, start-up scripts for python and
+ipython are provided in $JMODELICA_HOME/Python/jm_python.sh and
+$JMODELICA_HOME/Python/jm_ipython.sh. For Windows, the
+JModelica.org-SDK or the JModelica.org installers set the necessary
+environment variables. It is, however, possible to override the
+default values by setting the variables explicitly.
+
+7. Test the distribution
+
+Start Pyton or IPython. Type 
+
+ > import jmodelica.examples.cstr as cstr
+ > cstr.run_demo()
+
+You should now see the output of Ipopt and windows containing plots
+showing the optimization results should be opened.
+
+=======
+Issues:
+ - When running on Windows, the file
+   $JMODELICA_HOME/Options/options.xml needs to be edited so that the
+   path identifying the Modelica Standard Library is given on standard
+   Windows format, rather than on MinGW format.
 
 
