@@ -1057,5 +1057,66 @@ model InitialEquationTest1
   
 end InitialEquationTest1;
 
+model EndExpTest1
+
+ Real x[1];
+equation
+ x[end] = 2;
+
+end EndExpTest1;
+
+model EndExpTest2
+
+ Real x;
+equation
+ if true then
+   x=3;
+ else
+   x=5;
+ end if;
+
+end EndExpTest2;
+
+model EndExpTest3
+
+ Real x[2];
+equation
+ for i in 1:2 loop
+  x[i] = i;
+ end for;
+end EndExpTest3;
+
+model EndExpTest4
+
+ Real x[2];
+algorithm
+ for i in 1:2 loop
+  x[i] := i;
+ end for;
+end EndExpTest4;
+
+model EndExpTest5
+ Real x;
+algorithm
+ if true then
+   x:=3;
+ else
+   x:=5;
+ end if;
+
+end EndExpTest5;
+
+model EndExpTest6
+
+ Real x[2];
+ Integer i;
+algorithm
+ i:=1;
+ while i <=2 loop
+  x[i] := i;
+  i:=i+1;
+ end while;
+end EndExpTest6;
+
 
 end NameTests;

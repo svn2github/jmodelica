@@ -87,6 +87,8 @@ aspect FlatVariability {
 	
 	eq FTimeExp.variability() = fContinuous();
 	
+	eq FEndExp.variability() = fParameter();
+	
 	eq FBuiltInExp.variability() = getFExp().variability();
 	
 	eq FIfExp.variability() {

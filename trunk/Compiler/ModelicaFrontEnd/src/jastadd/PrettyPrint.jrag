@@ -448,7 +448,11 @@ aspect PrettyPrint {
 	public void TimeExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("time");
 	}
-		
+
+	public void EndExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("end");
+	}
+	
 	public void FunctionCall.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		p.toString(getName(),str,indent,o);
 		str.print("("); 
@@ -900,6 +904,10 @@ aspect FlattPrettyPrint {
 	
 	public void FTimeExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("time");
+	}
+
+	public void FEndExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("end");
 	}
 	
 	public void FStringLitExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {

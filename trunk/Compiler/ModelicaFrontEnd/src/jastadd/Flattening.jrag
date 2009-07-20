@@ -439,6 +439,7 @@ aspect FlatExpressions {
 	public FExp FLog10Exp.flatten(FQName prefix) { return new FLog10Exp(getFExp().flatten(prefix)); }
 	
 	public FExp FTimeExp.flatten(FQName prefix) { return new FTimeExp(); }
+	public FExp FEndExp.flatten(FQName prefix) { return new FEndExp(); }
 		
 	public FExp FFunctionCall.flatten(FQName prefix) {
 		List l = new List();
@@ -830,6 +831,13 @@ aspect InstantiatedExpressions {
 	
 	public FExp TimeExp.instantiate() { 
 		FExp n = new FTimeExp(); 
+		n.setStart(getStart());
+		n.setEnd(getEnd());
+		return n;
+	}	
+
+	public FExp EndExp.instantiate() { 
+		FExp n = new FEndExp(); 
 		n.setStart(getStart());
 		n.setEnd(getEnd());
 		return n;

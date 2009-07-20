@@ -107,7 +107,6 @@ public class ErrorTestCase extends TestCase {
 			System.out.println("Error when parsing file: " + getSourceFileName());
 		}
 		sr.setFileName(getSourceFileName());	
-		TestSuite.loadOptions(sr);
 		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 	    StringBuffer str = new StringBuffer();
 	    Collection<Problem> problems;

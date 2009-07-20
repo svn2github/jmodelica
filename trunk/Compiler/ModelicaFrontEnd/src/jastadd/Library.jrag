@@ -134,14 +134,18 @@ aspect Library {
 						}
 	   			
 		   			}
-						   			
 					lcd.setLibNodeList(libnodes);
 					sr.getProgram().getUnstructuredEntity(0).setElement(lcd,0);
 	   				return sr.getProgram().getUnstructuredEntity(0);
 	   			}
+			} catch (ParserException e) {
+				e.getProblem().setFileName(getFileName());
+				System.out.println(e.getProblem().toString()+"\n");
+				return createErrorStoredDefinition();		        
 			} catch (Exception e) {
 				System.out.println("Error when parsing file: '"+ dirName+"/package.mo"+ "':");
-				//System.err.println(e.getMessage());
+				System.out.println("   " + e.getClass().getName());
+				System.err.println(e.getMessage());
 				return createErrorStoredDefinition();		        
 			} 		
 			
@@ -154,9 +158,14 @@ aspect Library {
 					sd.setFileName(getFileName());
 				}
 				return sr.getProgram().getUnstructuredEntity(0);
+			} catch (ParserException e) {
+				e.getProblem().setFileName(getFileName());
+				System.out.println(e.getProblem().toString()+"\n");
+				return createErrorStoredDefinition();		        
 			} catch (Exception e) {
 				System.out.println("Error when parsing file: '"+ getFileName()+ "':");
-				//System.err.println(e.getMessage());
+				System.out.println("   " + e.getClass().getName());
+				System.err.println(e.getMessage());
 				return createErrorStoredDefinition();		        
 			} 
 		}

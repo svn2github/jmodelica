@@ -466,6 +466,7 @@ aspect InstanceErrorCheck {
 //    	getComponentDeclList().collectErrors();
 		if (getBaseClassDecl() instanceof FullClassDecl) { 	
 			FullClassDecl fcd = (FullClassDecl)getBaseClassDecl();
+			//System.out.println(fcd.getName().getID() +  " " + fcd.getEndName());
 	    	if (!(fcd.getName().getID().equals(fcd.getEndName())))
     			error("The declaration and end names of a class should be the same");
   			}

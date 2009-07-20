@@ -165,6 +165,21 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "algorithm"        { return newSymbol(Terminals.ALGORITHM); }
      "initial" {WhiteSpace} "algorithm"   { addLineBreaks(yytext()); 
   										 return newSymbol(Terminals.INITIAL_ALGORITHM); }
+  "end" {WhiteSpace} "for"   { addLineBreaks(yytext()); 
+    return newSymbol(Terminals.END_FOR); }
+
+  "end" {WhiteSpace} "while"   { addLineBreaks(yytext()); 
+    return newSymbol(Terminals.END_WHILE); }
+
+  "end" {WhiteSpace} "if"   { addLineBreaks(yytext()); 
+    return newSymbol(Terminals.END_IF); }
+
+  "end" {WhiteSpace} "when"   { addLineBreaks(yytext()); 
+    return newSymbol(Terminals.END_WHEN); }
+ 
+    "end" {WhiteSpace} {ID} { String s = yytext();
+  			  return newSymbol(Terminals.END_ID, s); }  										 
+  										 
      "each"        { return newSymbol(Terminals.EACH); }
     "final"        { return newSymbol(Terminals.FINAL); }   
     "replaceable"        { return newSymbol(Terminals.REPLACEABLE); }

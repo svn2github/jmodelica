@@ -560,6 +560,12 @@ FNoExp : FExp::=;
  */
 FTimeExp : FExp;
 
+/**
+ * \brief 'Built-in expression 'end', used in arrays.
+ */
+FEndExp : FExp;
+
+
 // Built in functions
 /**
  * \brief Base class for built-in mathematical functions.

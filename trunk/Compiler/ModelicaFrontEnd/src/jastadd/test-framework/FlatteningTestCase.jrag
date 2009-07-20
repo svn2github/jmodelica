@@ -117,7 +117,6 @@ public class FlatteningTestCase extends TestCase {
 		} catch (Exception e) {
 			System.out.println("Error when parsing file: " + getSourceFileName());
 		}
-		TestSuite.loadOptions(sr);
 		sr.setFileName(getSourceFileName());
 		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 		Collection<Problem> problems;

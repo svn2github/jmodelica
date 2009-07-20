@@ -22,7 +22,9 @@ BaseClassDecl base_class_decl =
   class_modification?
   string_comment? 
   composition 
-  END ID.end   {:  return new PN_OptClassDecl(new UnknownVisibilityType(),
+  END_ID.end   {:  String end_s = end.substring(3,end.length());
+	                end_s = removeWhitespace(end_s);
+                   return new PN_OptClassDecl(new UnknownVisibilityType(),
                                              encapsulated,
                                              partial,
                                              new OptimizationClass(),
@@ -36,7 +38,7 @@ BaseClassDecl base_class_decl =
                                              new Opt(),
                                              string_comment,
                                              composition,
-                                             end,
+                                             end_s,
                                              class_modification); :}
 ;
 

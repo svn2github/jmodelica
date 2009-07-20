@@ -145,10 +145,133 @@
 	    lineBreakMap = map;
 	}
 
+ public String removeWhitespace(String str) {
+		String str_res = str;
+    	str_res = str_res.replaceAll("\\r", "");
+    	str_res = str_res.replaceAll("\\n", "");
+    	str_res = str_res.replaceAll(" ", "");
+		return str_res;
+	}
+
+	/**
+	 * Loads the options set in the file options.xml. 
+	 * 
+	 * Assumes current location is install/lib and that options.xml is 
+	 * located in install/Options.
+	 * 
+	 * @param sr
+	 *            The source root belonging to the model for which the options
+	 *            should be set.
+	 */	 
+	protected static void loadOptions(SourceRoot sr) {
+		//logger.info("Loading options...");
+		try {
+			String sep = System.getProperty("file.separator");
+			String filepath = System.getenv("JMODELICA_HOME")+sep+"Options"+sep+"options.xml";
+			
+			org.w3c.dom.Document doc = parseAndGetDOM(filepath);
+		
+			javax.xml.xpath.XPathFactory factory = javax.xml.xpath.XPathFactory.newInstance();
+			javax.xml.xpath.XPath xpath = factory.newXPath();
+			
+			//set modelica library
+			javax.xml.xpath.XPathExpression expr = xpath.compile("/OptionRegistry/ModelicaLibrary");		
+			org.w3c.dom.Node modelicalib = (org.w3c.dom.Node)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODE);
+			if(modelicalib != null && modelicalib.hasChildNodes()) {
+				//modelica lib set
+				expr = xpath.compile("OptionRegistry/ModelicaLibrary/Name");
+				String name = (String)expr.evaluate(doc,javax.xml.xpath.XPathConstants.STRING);
+				
+				expr = xpath.compile("OptionRegistry/ModelicaLibrary/Version");
+				String version = (String)expr.evaluate(doc, javax.xml.xpath.XPathConstants.STRING);
+				
+				expr = xpath.compile("OptionRegistry/ModelicaLibrary/Path");
+				String path = (String)expr.evaluate(doc, javax.xml.xpath.XPathConstants.STRING);
+				
+				sr.options.addModelicaLibrary(name, version, path);
+			}
+			
+			//set other options if there are any
+			expr = xpath.compile("OptionRegistry/Options");
+			org.w3c.dom.Node options = (org.w3c.dom.Node)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODE);
+			if(options !=null && options.hasChildNodes()) {
+				//other options set
+				
+				//types
+				expr = xpath.compile("OptionRegistry/Options/Option/Type");
+				org.w3c.dom.NodeList thetypes = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
+				
+				//keys
+				expr = xpath.compile("OptionRegistry/Options/Option/*/Key");
+				org.w3c.dom.NodeList thekeys = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
+				
+				//values
+				expr = xpath.compile("OptionRegistry/Options/Option/*/Value");
+				org.w3c.dom.NodeList thevalues = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
+				
+				for(int i=0; i<thetypes.getLength();i++) {
+					org.w3c.dom.Node n = thetypes.item(i);
+					
+					String type = n.getTextContent();
+					String key = thekeys.item(i).getTextContent();
+					String value = thevalues.item(i).getTextContent();
+					
+					if(type.equals("String")) {
+						sr.options.setStringOption(key, value);
+					} else if(type.equals("Integer")) {
+						sr.options.setIntegerOption(key, Integer.parseInt(value));
+					} else if(type.equals("Real")) {
+						sr.options.setRealOption(key, Double.parseDouble(value));
+					} else if(type.equals("Boolean")) {
+						sr.options.setBooleanOption(key, Boolean.parseBoolean(value));
+					}
+				}				
+			}
+		
+		} catch(org.xml.sax.SAXException e) {
+			e.printStackTrace();
+		} catch(IOException e) {
+			e.printStackTrace();			
+		} catch(javax.xml.parsers.ParserConfigurationException e) {
+			e.printStackTrace();
+		} catch(javax.xml.xpath.XPathExpressionException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Parses an XML file and returns the DOM document instance.
+	 * 
+	 * @param xmlfile
+	 *            The XML file to be parsed.
+	 * 
+	 * @return The DOM document object.
+	 * 
+	 * @throws ParserConfigurationException
+	 *             If a parser configuration error has occured.
+	 * @throws IOException
+	 *             If an IO error occurs.
+	 * @throws SAXException
+	 *             If an error with the parsing occurs.
+	 */
+	private static org.w3c.dom.Document parseAndGetDOM(String xmlfile) 
+		throws javax.xml.parsers.ParserConfigurationException, IOException, org.xml.sax.SAXException{
+		javax.xml.parsers.DocumentBuilderFactory factory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
+		factory.setIgnoringComments(true);
+		factory.setIgnoringElementContentWhitespace(true);
+		factory.setNamespaceAware(true);
+		javax.xml.parsers.DocumentBuilder builder = factory.newDocumentBuilder();		
+		org.w3c.dom.Document doc = builder.parse(new File(xmlfile));
+		return doc;
+	}
+
+
 :};
  
 SourceRoot source_root = 
-  program {: return new SourceRoot(program); :}
+  program {: SourceRoot sr = new SourceRoot(program); 
+             loadOptions(sr);
+             return sr; :}
   ;
 
 Program program =
@@ -180,7 +303,9 @@ BaseClassDecl base_class_decl =
   id_decl.start 
   string_comment? 
   composition 
-  END ID.end   {: return new PN_FullClassDecl(new UnknownVisibilityType(),
+  END_ID.end   {:   String end_s = end.substring(3,end.length());
+	                end_s = removeWhitespace(end_s);
+                 return new PN_FullClassDecl(new UnknownVisibilityType(),
                                              encapsulated,
                                              partial,
                                              restriction,
@@ -194,7 +319,7 @@ BaseClassDecl base_class_decl =
                                              new Opt(),
                                              string_comment,
                                              composition,
-                                             end); :}
+                                             end_s); :}
   |encapsulated? 
   partial? 
   restriction  
@@ -232,7 +357,9 @@ BaseClassDecl base_class_decl =
   class_modification?
   string_comment? 
   composition 
-  END ID.end   {:   //System.out.println("Hej");
+  END_ID.end   {:   //System.out.println("Hej");
+                       String end_s = end.substring(3,end.length());
+	                end_s = removeWhitespace(end_s);
                     return new ExtendClassDecl(new UnknownVisibilityType(),
                                              encapsulated,
                                              partial,
@@ -248,7 +375,7 @@ BaseClassDecl base_class_decl =
                                              class_modification,
                  							 string_comment,
                                              composition,
-                                             end); :}  
+                                             end_s); :}  
   | error		{: return new BadClassDecl(); :}      
   ;
 
@@ -754,7 +881,7 @@ ConditionalEquationE conditional_equation_e =
   abstract_equation*
   else_if_clause_e*
   else_equations
-  END IF comment {: return new ConditionalEquationE(new Opt(), comment, ifexp,abstract_equation,else_if_clause_e,else_equations); :}
+  END_IF comment {: return new ConditionalEquationE(new Opt(), comment, ifexp,abstract_equation,else_if_clause_e,else_equations); :}
   ;  
 
 ElseIfClauseE else_if_clause_e =
@@ -771,7 +898,7 @@ List else_equations =
 ForClauseE for_clause_e =
   FOR for_indices LOOP
   abstract_equation*
-  END FOR comment   {: return new ForClauseE(new Opt(), comment, for_indices,abstract_equation); :}
+  END_FOR comment   {: return new ForClauseE(new Opt(), comment, for_indices,abstract_equation); :}
   ;
 
 
@@ -814,7 +941,7 @@ WhenClauseE when_clause_e =
   WHEN exp.wexp THEN
   abstract_equation*
   else_when_clause_e*
-  END WHEN comment {: return new WhenClauseE(new Opt(), comment, wexp,abstract_equation,else_when_clause_e); :}
+  END_WHEN comment {: return new WhenClauseE(new Opt(), comment, wexp,abstract_equation,else_when_clause_e); :}
   ;  
 
 ElseWhenClauseE else_when_clause_e =
@@ -844,7 +971,7 @@ ConditionalEquationA conditional_equation_a =
   abstract_algorithm_list
   else_if_clause_a*
   else_algorithms
-  END IF comment {: return new ConditionalEquationA(new Opt(), comment, ifexp,abstract_algorithm_list,else_if_clause_a,else_algorithms); :}
+  END_IF comment {: return new ConditionalEquationA(new Opt(), comment, ifexp,abstract_algorithm_list,else_if_clause_a,else_algorithms); :}
   ;  
 
 ElseIfClauseA else_if_clause_a =
@@ -861,14 +988,14 @@ List else_algorithms =
 ForClauseA for_clause_a =
   FOR for_indices LOOP
   abstract_algorithm_list
-  END FOR comment   {: return new ForClauseA(new Opt(), comment, for_indices,abstract_algorithm_list); :}
+  END_FOR comment   {: return new ForClauseA(new Opt(), comment, for_indices,abstract_algorithm_list); :}
   ;
 
 WhenClauseA when_clause_a =
   WHEN exp.wexp THEN
   abstract_algorithm_list
   else_when_clause_a*
-  END WHEN comment {: return new WhenClauseA(new Opt(), comment, wexp,abstract_algorithm_list,else_when_clause_a); :}
+  END_WHEN comment {: return new WhenClauseA(new Opt(), comment, wexp,abstract_algorithm_list,else_when_clause_a); :}
   ;  
 
 ElseWhenClauseA else_when_clause_a =
@@ -879,7 +1006,7 @@ ElseWhenClauseA else_when_clause_a =
 WhileClause while_clause = 
   WHILE exp.whileexp LOOP
   abstract_algorithm_list
-  END WHILE comment               {: return new WhileClause(new Opt(),comment,whileexp,abstract_algorithm_list); :}
+  END_WHILE comment               {: return new WhileClause(new Opt(),comment,whileexp,abstract_algorithm_list); :}
   ;
   
 Exp exp =
@@ -985,7 +1112,7 @@ Exp primary =
   | LBRACK matrix RBRACK {: return matrix; :}
   | LBRACE function_arguments RBRACE {: return new ArrayConstructor(function_arguments); :}
   | TIME                {: return new TimeExp(); :}
-//  | END                 {: return new EndExp(); :} // TODO: Make this work.
+  | END                 {: return new EndExp(); :} // TODO: Make this work.
   ;
  
  FunctionCall function_call =
