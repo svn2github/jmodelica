@@ -267,6 +267,12 @@
             id="JModelicaIDE.ModelicaToggleAnnotationCommand"
             name="Toggle annotations on region">
       </command>
+      <command
+            categoryId="JModelicaIDE.ModelicaCommandCategory"
+            description="Perform error check"
+            id="JModelicaIDE.ErrorCheckCommand"
+            name="Error check">
+      </command>
       <category
             description="JModelica commands"
             id="JModelicaIDE.ModelicaCommandCategory"
@@ -286,6 +292,11 @@
             commandId="JModelicaIDE.ModelicaToggleAnnotationCommand"
             keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
             keySequence="Ctrl+T">
+      </keyBinding>
+      <keyBinding
+            commandId="JModelicaIDE.ErrorCheckCommand"
+            keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            keySequence="Ctrl+Alt+E">
       </keyBinding>
    </extension>
 </plugin>

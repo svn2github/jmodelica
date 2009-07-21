@@ -16,6 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package org.jmodelica.ide.indent;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
 import org.jmodelica.ide.helpers.Util;
 
 
@@ -56,41 +58,32 @@ public IndentedSection(String s) {
  */
 public IndentedSection indent(AnchorList<Integer> hints, int lineStart, int lineEnd) {
 
-    String text = toString();
+    Document d = new Document(toString());
 
     int[] indents = new int[sec.length];
     int[] adjusts = new int[sec.length];
 
-    int offset = 0;
-    for (int i = 0; i < lineStart; i++)
-        offset += sec[i].length() + lineSep.length();
-
+    try { 
     for (int i = lineStart; i < lineEnd; i++) {
 
+        int offset = d.getLineOffset(i);
+        
         Anchor<Integer> a = hints.sinkAt(offset + sec[i].length());
         if (a == null || a.offset < offset)
             a = hints.anchorAt(offset);
-        int lineBeg = text.lastIndexOf(lineSep, a.reference);
-        lineBeg = lineBeg <= 0 ? 0 : lineBeg + lineSep.length();
 
-        int indent = spacify(text.substring(lineBeg, a.reference)).length() 
-            + a.indent;
-
-        // find line number of reference offset
-        int refLineNbr = 0, tmp = 0;
-        while ((tmp += (sec[refLineNbr] + lineSep).length()) <= a.reference)
-            ++refLineNbr;
-        indent += adjusts[refLineNbr];
+        int indent = a.indent + adjusts[d.getLineOfOffset(a.reference)];  
 
         indents[i] = indent;
         adjusts[i] = indents[i] - countIndent(sec[i]);
 
-        offset += sec[i].length() + lineSep.length();
     }
 
     for (int i = lineStart; i < lineEnd; i++) 
         if (!sec[i].trim().startsWith(commentSyntax))
             sec[i] = putIndent(sec[i], indents[i]);
+    
+    } catch (BadLocationException e) {}
     
     return this;
 }
@@ -102,6 +95,10 @@ public IndentedSection indent(AnchorList<Integer> hints) {
     return indent(hints, 0, sec.length);
 }
 
+public static boolean isIndentChar(char c) {
+    return c == ' ' || c == '\t';
+}
+
 /**
  * Trim indentation
  * 
@@ -110,7 +107,7 @@ public IndentedSection indent(AnchorList<Integer> hints) {
  */
 public static String trimIndent(String s) {
     int i = 0;
-    while (i < s.length() && (s.charAt(i) == ' ' || s.charAt(i) == '\t'))
+    while (i < s.length() && isIndentChar(s.charAt(i)))
         ++i;
     return s.substring(i);
 }
@@ -199,9 +196,8 @@ public static String spacify(String s) {
 public IndentedSection offsetIndentTo(int offset) {
     int ref = countIndent(sec[0]);
     for (int i = 0; i < sec.length; i++) {
-        sec[i] =
-                putIndent(sec[i], Math.max(0, offset + countIndent(sec[i])
-                        - ref));
+        sec[i] = putIndent(sec[i], 
+                Math.max(0, offset + countIndent(sec[i]) - ref));
     }
     if (sec[sec.length - 1].trim().equals(""))
         sec[sec.length - 1] = "";

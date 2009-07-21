@@ -173,7 +173,8 @@ Other = .|{NL}
   "\'"				{ /* YYINITIAL: "\'" */ begin(QIDENT); }
   "/*"				{ /* YYINITIAL: "/*" */ begin(COMMENT); }
   "annotation"		{ /* YYINITIAL: "annotation" */ saveOffset = yychar; return beginAnnotation(); }
-  {Definition}		{ /* YYINITIAL: Definition */ offset = yychar; return new Token(DEFINITION_PARTITION); }
+  ^{Definition}		{ /* YYINITIAL: Definition */ offset = yychar; return new Token(DEFINITION_PARTITION); }
+  {WS}{Definition}	{ /* YYINITIAL: Definition */ offset = yychar; return new Token(DEFINITION_PARTITION); }
   {WS}				{ /* YYINITIAL: WS */ }
   {Other}			{ /* YYINITIAL: Other */ begin(NORMAL); }
   <<EOF>>			{ /* YYINITIAL: EOF */ offset = yychar; return Token.EOF; }
@@ -183,7 +184,7 @@ Other = .|{NL}
   "\""				{ /* NORMAL: StringML */ return normalEnd(); }
   "\'"				{ /* NORMAL: QIdentML */ return normalEnd(); }
   "/*"				{ /* NORMAL: CommentML */ return normalEnd(); }
-  {Definition}		{ /* NORMAL: Definition */ return normalEnd(); }
+  {WS}{Definition}	{ /* NORMAL: Definition */ return normalEnd(); }
   "annotation"		{ /* NORMAL: "annotation" */ return beginAnnotation(); }
   {Other}			{ /* NORMAL: Other */ }
   <<EOF>>			{ /* NORMAL: EOF */ return normalEnd(); }

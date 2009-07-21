@@ -27,10 +27,14 @@ public class RestartDamagerRepairer extends DefaultDamagerRepairer {
 		super(scanner);
 	}
 
+//	protected boolean isDangerous(char c) {
+//	    return c == '"' || c == '/' || c == '*' || c == '\'';
+//	}
+	
 	@Override
 	public IRegion getDamageRegion(ITypedRegion partition, DocumentEvent e,
 			boolean documentPartitioningChanged) {
-		return partition;
+		return super.getDamageRegion(partition, e, documentPartitioningChanged);
 	}
 
 }

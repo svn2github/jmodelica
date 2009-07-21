@@ -1,9 +1,28 @@
 package org.jmodelica.ide.editor;
 
-public enum Indent { 
-	INDENT	{ public int modify(int indent, int indentWidth) { return indent + indentWidth; } },
-	SAME	{ public int modify(int indent, int indentWidth) { return indent; } },
-	NONE	{ public int modify(int indent, int indentWidth) { return 0; } },
-	COMMENT	{ public int modify(int indent, int indentWidth) { return indent + 3; } };
+public abstract class Indent {
+    
+
+	public static Indent INDENT    = new Indent() { public int modify(int indent, int indentWidth) { return indent + indentWidth; } };
+    public static Indent SAME      = new Indent() { public int modify(int indent, int indentWidth) { return indent; } };
+    public static Indent UNCHANGED = new Indent() { public int modify(int indent, int indentWidth) { return indent; } };
+    public static Indent COMMENT   = new Indent() { public int modify(int indent, int indentWidth) { return indent + 3; } }; 
+    
+    public static class AnnotationParen extends Indent {
+        int level;
+        
+        public AnnotationParen(int level) {
+            this.level = level;
+        }
+        
+        public int modify(int indent, int indentWidth) { return indent + level; }
+        
+        public boolean equals(Object o) { // for testing
+            if (o == null || !(o instanceof AnnotationParen))
+                return false;
+            return ((AnnotationParen)o).level == level;
+        }
+    };
+        
 	public abstract int modify(int indent, int indentWidth);
 } 

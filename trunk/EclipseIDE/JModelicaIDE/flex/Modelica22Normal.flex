@@ -97,11 +97,44 @@ Normal = {Operator} | {ID} | {UNSIGNED_NUMBER}
 
 Comment = "//" {InputCharacter}* {LineTerminator}?
 
+
+NONDIGIT = [a-zA-Z_]
+DIGIT = [0-9]
+S_CHAR = [^\"\\]
+Q_CHAR = [^\'\\]
+S_ESCAPE = "\\\'" | "\\\"" | "\\?" | "\\\\" | "\\a" | "\\b" | "\\f" | "\\n" | "\\r" | "\\t" | "\\v"
+
+NL = \r|\n|\r\n
+WS = ({NL} | [ \t\f])+
+QIdentCont = ({Q_CHAR}|{S_ESCAPE})*
+QIdent = "\'" {QIdentCont} "\'"
+NormalID = {NONDIGIT} ({DIGIT}|{NONDIGIT})*
+ID = {NormalID} | {QIdent}
+
+
+%state COMMENTSTATE, COMMENT_ONE_LINE
+
 %%
 
-{Keyword}     { return KEYWORD; }
-{WhiteSpace}  { return NORMAL; }
-{Normal}      { return NORMAL; }
-{Comment}     { return COMMENT; }
-.             { return NORMAL; }
-<<EOF>>       { return Token.EOF; }
+<YYINITIAL> {
+	{Keyword}     { return KEYWORD; }
+	{WhiteSpace}  { return NORMAL; }
+	{Normal}      { return NORMAL; }
+	"//"		  { yybegin(COMMENT_ONE_LINE); return COMMENT_BOUNDARY; }
+	{ID}	      { return NORMAL; }
+	.             { return NORMAL; }
+}	
+
+<COMMENT_ONE_LINE> {
+	.*				{ yybegin(YYINITIAL); return COMMENT; }
+}
+
+<COMMENTSTATE> {
+	"\\" . 			{ return COMMENT; }
+	"*/"			{ yybegin(YYINITIAL); return COMMENT_BOUNDARY; }
+	[^*/\\]+		{ System.out.println("HERE!" + yytext()); return COMMENT; }
+}
+
+<<EOF>>      		{ return Token.EOF; }
+
+

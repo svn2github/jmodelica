@@ -30,7 +30,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.IAutoEditStrategy;
@@ -39,7 +38,6 @@ import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.reconciler.IReconciler;
@@ -58,7 +56,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IURIEditorInput;
@@ -78,11 +75,10 @@ import org.jmodelica.folding.CharacterProjectionViewer;
 import org.jmodelica.ide.Constants;
 import org.jmodelica.ide.ModelicaCompiler;
 import org.jmodelica.ide.editor.editingstrategies.AnnotationParenthesisAdder;
-import org.jmodelica.ide.editor.editingstrategies.BlockAdder;
+import org.jmodelica.ide.editor.editingstrategies.EndOfBlockAdder;
 import org.jmodelica.ide.editor.editingstrategies.BracketAdder;
 import org.jmodelica.ide.editor.editingstrategies.CommentAdder;
-import org.jmodelica.ide.error.InstanceError;
-import org.jmodelica.ide.error.InstanceErrorHandler;
+import org.jmodelica.ide.editor.editingstrategies.ForIfAdder;
 import org.jmodelica.ide.folding.AnnotationDrawer;
 import org.jmodelica.ide.folding.IFilePosition;
 import org.jmodelica.ide.helpers.Util;
@@ -98,9 +94,6 @@ import org.jmodelica.ide.scanners.generated.Modelica22DefenitionScanner;
 import org.jmodelica.ide.scanners.generated.Modelica22NormalScanner;
 import org.jmodelica.ide.scanners.generated.Modelica22PartitionScanner;
 import org.jmodelica.modelica.compiler.ASTNode;
-import org.jmodelica.modelica.compiler.BaseClassDecl;
-import org.jmodelica.modelica.compiler.InstProgramRoot;
-import org.jmodelica.modelica.compiler.SourceRoot;
 
 /**
  * Modelica source editor.
@@ -580,7 +573,8 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 			return new IAutoEditStrategy[] { 
 			        getAnnotationParenthesisAdder(), 
 			        getIndentationStrategy(),
-			        new BlockAdder(),
+			        new EndOfBlockAdder(),
+			        new ForIfAdder(),
 			        new BracketAdder("(", ")"),
 			        new BracketAdder("[", "]"),
 			        new BracketAdder("{", "}"),
@@ -678,68 +672,6 @@ public class Editor extends AbstractDecoratedTextEditor implements IASTRegistryL
 	private class CollapseAllAction extends DoOperationAction {
 		public CollapseAllAction() {
 			super("&Collapse All", CharacterProjectionViewer.COLLAPSE_ALL);
-		}
-	}
-	
-	class ConnectedTextsAction extends Action {
-		protected void setTexts(String text) {
-			setText(text);
-			setToolTipText(text);
-			setDescription(text);
-		}
-	}
-
-	private class ErrorCheckAction extends ConnectedTextsAction {
-		private static final int MAX_ERRORS_SHOWN = 10;
-		private BaseClassDecl currentClass;
-
-		public ErrorCheckAction() {
-			setTexts(Constants.ACTION_ERROR_CHECK_TEXT);
-			setEnabled(false);
-		}
-
-		public void setCurClass(BaseClassDecl currentClass) {
-			if (currentClass != this.currentClass) {
-				this.currentClass = currentClass;
-				if (currentClass != null) {
-					setTexts("Check " + currentClass.getName().getID() + " for errors");
-					setEnabled(true);
-				} else {
-					setTexts(Constants.ACTION_ERROR_CHECK_TEXT);
-					setEnabled(false);
-				}
-			}
-		}
-
-		@Override
-		public void run() {
-			//performSave(true, null);
-			SourceRoot root = (SourceRoot) currentClass.root();
-			InstProgramRoot ipr = root.getProgram().getInstProgramRoot();
-			InstanceErrorHandler errorHandler = (InstanceErrorHandler) root.getErrorHandler();
-			errorHandler.resetCounter();
-			String name = currentClass.qualifiedName();
-			ipr.retrieveInstFullClassDecl(name).collectErrors();
-			String msg;
-			if (errorHandler.hasLostErrors()) {
-				Collection<InstanceError> err = errorHandler.getLostErrors();
-				StringBuilder buf = new StringBuilder("Errors found in files outside workspace:\n");
-				if (err.size() > MAX_ERRORS_SHOWN)
-					buf.append(String.format("(First %d of %d errors shown.)", MAX_ERRORS_SHOWN, err.size()));
-				int i = 0;
-				for (InstanceError e : err)
-					if (i++ < MAX_ERRORS_SHOWN)
-						buf.append(e);
-				msg = buf.toString();
-			} else {
-				int num = errorHandler.getNumErrors();
-				if (num == 0) 
-					msg = "No errors found.";
-				else
-					msg = num + " errors found.";
-			}
-			String title = "Checking " + currentClass.getName().getID() + " for errors:";
-			MessageDialog.openInformation(new Shell(), title, msg);
 		}
 	}
 

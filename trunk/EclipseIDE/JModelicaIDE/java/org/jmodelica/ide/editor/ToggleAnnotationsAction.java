@@ -5,13 +5,13 @@ import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.jmodelica.folding.CharacterProjectionViewer;
 
-public class ToggleAnnotationsAction extends Editor.ConnectedTextsAction {
+public class ToggleAnnotationsAction extends ConnectedTextsAction {
 
 protected Editor editor;
 protected boolean visible;    
 
 public ToggleAnnotationsAction(Editor editor) {
-    editor.super();
+    super();
     this.editor = editor;
     update(false);
     this.setActionDefinitionId("JModelicaIDE.ModelicaToggleAnnotationCommand");

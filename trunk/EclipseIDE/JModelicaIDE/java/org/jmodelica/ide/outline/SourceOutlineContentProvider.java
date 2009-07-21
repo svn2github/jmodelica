@@ -34,13 +34,19 @@ public class SourceOutlineContentProvider implements ITreeContentProvider {
 	}
 
 	public Object getParent(Object element) {
-		if (element instanceof ASTNode) {
-			ASTNode node = ((ASTNode) element).getParent();
-			while (!node.showInContentOutline() && !(node instanceof StoredDefinition))
-				node = node.getParent();
-			return node;
-		}
-		return null;
+	    
+		if (!(element instanceof ASTNode))
+		    return null;
+		    
+		ASTNode node = ((ASTNode) element);
+
+		do
+			node = node.getParent();
+		while (node != null && 
+		      !node.showInContentOutline() && 
+		     !(node instanceof StoredDefinition)); 
+			
+		return node;
 	}
 
 	public boolean hasChildren(Object element) {

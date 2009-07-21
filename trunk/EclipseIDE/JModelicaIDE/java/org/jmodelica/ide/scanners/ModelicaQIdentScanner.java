@@ -15,13 +15,13 @@
 */
 package org.jmodelica.ide.scanners;
 
-import org.eclipse.jface.text.rules.IToken;
 
 public class ModelicaQIdentScanner extends StupidScanner {
 
-	@Override
-	protected IToken getToken() {
-		return NORMAL;
-	}
+String s = "this is a string";
+
+public ModelicaQIdentScanner() {
+    super(QIDENT_BOUNDARY, NORMAL, QIDENT_BOUNDARY, "'", "'");
+} 
 
 }

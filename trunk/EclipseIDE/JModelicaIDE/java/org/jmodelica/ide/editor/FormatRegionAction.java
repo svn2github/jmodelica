@@ -36,7 +36,7 @@ public void run() {
     String doc = d.get();
     IndentationHintScanner ihs = new IndentationHintScanner();
     ihs.analyze(doc);
-    AnchorList<Integer> ancs = ihs.ancs.bindTabWidth(IndentedSection.tabWidth);
+    AnchorList<Integer> ancs = ihs.ancs.bindTabWidth(IndentedSection.tabWidth, d);
 
     if (sel.getLength() == 0) {
         d.set(new IndentedSection(doc).indent(ancs).toString());  

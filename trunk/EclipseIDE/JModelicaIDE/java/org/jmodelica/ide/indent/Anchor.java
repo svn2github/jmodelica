@@ -1,7 +1,6 @@
 package org.jmodelica.ide.indent;
 
 
-
 /**
  * Anchor point in text, providing indentation hints. The anchor represents an
  * indentation hint saying at offset <code>offset</code>, the indent should be
