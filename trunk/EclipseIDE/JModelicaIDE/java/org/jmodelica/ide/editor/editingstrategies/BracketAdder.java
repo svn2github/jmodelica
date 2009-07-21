@@ -35,7 +35,7 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
             c.caretOffset = c.offset + 1;
         } else if (c.text.equals(startToken)
                 && d.get(c.offset, endLine - c.offset).replaceAll("[^\\w]", "")
-                        .isEmpty()) {
+                        .equals("")) {
             c.length = 0;
             d.replace(c.offset, 0, endToken);
         }

@@ -27,7 +27,7 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
         }
             
         if (d.get(0, c.offset).trim().endsWith("annotation") && 
-            d.get(c.offset, endLine - c.offset).trim().isEmpty() &&
+            d.get(c.offset, endLine - c.offset).trim().equals("") &&
             !regType.equals(Modelica22PartitionScanner.COMMENT_PARTITION) &&
             !regType.equals(Modelica22PartitionScanner.QIDENT_PARTITION)) 
         {
