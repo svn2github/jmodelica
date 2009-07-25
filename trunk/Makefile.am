@@ -19,6 +19,8 @@ AUTOMAKE_OPTIONS = foreign
 
 SUBDIRS = JMI/src
 
+bindistdir=JModelica.org-$(VERSION)-bin
+
 all-local:
 if HAVE_ANT
 	cd $(abs_top_srcdir)/Compiler/ModelicaCompiler; \
@@ -62,7 +64,7 @@ endif
 	cp $(CPPAD_HOME)/cppad/*.hpp $(prefix)/ThirdParty/CppAD/cppad
 	mkdir -p $(prefix)/ThirdParty/CppAD/cppad/local	
 	cp $(CPPAD_HOME)/cppad/local/*.hpp $(prefix)/ThirdParty/CppAD/cppad/local
-	cd $(abs_top_srcdir)/ThirdParty; find MSL -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/ThirdParty
+	cd $(abs_top_srcdir)/ThirdParty; find MSL -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/ThirdParty
 	mkdir -p $(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/jmi_modelica_template.c $(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/OptimicaCBackEnd/templates/jmi_optimica_template.c $(prefix)/CodeGenTemplates
@@ -72,6 +74,23 @@ endif
 	cp  $(abs_top_srcdir)/Compiler/OptimicaXMLBackEnd/templates/jmi_optimica_problvariables_template.xml $(prefix)/CodeGenTemplates
 	mkdir -p $(prefix)/XML
 	cp  $(abs_top_srcdir)/XML/*.xsd $(prefix)/XML
+
+
+
+bindistdir: install
+	rm -rf $(bindistdir)
+	mkdir -p $(bindistdir)
+	cp -r $(prefix)/* $(bindistdir)
+if COMPILE_WITH_IPOPT	
+	mkdir -p $(bindistdir)/ThirdParty/Ipopt
+	cd $(IPOPT_HOME); find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/Ipopt
+endif 
+
+bindist: bindistdir
+	tar -cf $(bindistdir).tar $(bindistdir)
+	gzip -c $(bindistdir).tar > $(bindistdir).tar.gz
+	rm -rf $(bindistdir)
+	rm -rf $(bindistdir).tar
 
 clean-local: clean-jmi-examples clean-frontends
 

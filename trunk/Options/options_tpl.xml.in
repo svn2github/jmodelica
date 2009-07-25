@@ -2,7 +2,7 @@
 	<ModelicaLibrary>
 		<Name>Modelica</Name>
 		<Version>3.0.1</Version>
-		<Path>@prefix@/ThirdParty/MSL/MSL-3.0.1/Modelica/</Path>
+		<Path>@prefix@/ThirdParty/MSL/Modelica/</Path>
 	</ModelicaLibrary>
 	<Options>
 		<Option>
