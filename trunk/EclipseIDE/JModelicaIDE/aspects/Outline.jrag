@@ -80,7 +80,7 @@ aspect Outline {
 	eq InstClassDecl.contentOutlineImage() = ImageLoader.getClassImage(getClassIconName(), false, true);
 	eq InstComponentDecl.contentOutlineImage() = ImageLoader.getClassImage(getClassIconName(), true, true);
 	eq ComponentDecl.contentOutlineImage() = ImageLoader.getFrequentImage(ImageLoader.COMPONENT_IMAGE);
-	eq InstPrimitive.contentOutlineImage() = ImageLoader.getFrequentImage(ImageLoader.COMPONENT_IMAGE);
+//	eq InstPrimitive.contentOutlineImage() = ImageLoader.getClassImage(ImageLoader.COMPONENT_IMAGE);
 	
 	/**
 	 * Return the class type for the node as defined by <pre>ImageLoader.*_CLASS</pre>, if applicable.
@@ -91,6 +91,7 @@ aspect Outline {
 	eq InstClassDecl.getClassIconName() = getClassDecl().getClassIconName();
 //	eq ComponentDecl.getClassIconName() = getRestriction().getClassIconName();
 	eq InstComponentDecl.getClassIconName() = myInstClass().getClassIconName();
+	eq InstPrimitive.getClassIconName() = ImageLoader.CLASS_CLASS;
 	eq Block.getClassIconName() = ImageLoader.BLOCK_CLASS;
 	eq MClass.getClassIconName() = ImageLoader.CLASS_CLASS;
 	eq Connector.getClassIconName() = ImageLoader.CONNECTOR_CLASS;

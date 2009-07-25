@@ -34,7 +34,7 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
         boolean atEndLine; {
             int line = d.getLineOfOffset(c.offset);
             int endLine = d.getLineOffset(line) + d.getLineLength(line);
-            atEndLine = d.get(c.offset, endLine - c.offset).trim().isEmpty();
+            atEndLine = d.get(c.offset, endLine - c.offset).trim().equals("");
         }
 
         boolean afterAnnotation = d.get(0, c.offset).trim().
