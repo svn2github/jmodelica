@@ -1,20 +1,22 @@
 package org.jmodelica.ide.editor.editingstrategies;
 
-import java.util.Arrays;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
+import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.scanners.generated.Modelica22PartitionScanner;
 
 
 /**
- * Inserts closing parenthesis of annotation when user types opening
- * parenthesis. Closing parenthesis is added after cursor.
+ * Inserts closing ");" of annotation when user types opening parenthesis.
+ * Closing parenthesis is added after cursor.
  */
+
 public class AnnotationParenthesisAdder implements IAutoEditStrategy {
 
+public final static AnnotationParenthesisAdder adder = 
+    new AnnotationParenthesisAdder();
 
 public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
 
@@ -23,13 +25,12 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
 
     try {
 
-        boolean inNormalPartition; {
-            String regType = d.getPartition(c.offset).getType();
-            inNormalPartition = 
-                !regType.equals(Modelica22PartitionScanner.COMMENT_PARTITION) &&
-                !regType.equals(Modelica22PartitionScanner.QIDENT_PARTITION); 
-        }
-
+        boolean inSourcePartition =
+            Util.is(d.getPartition(c.offset).getType()).among(
+                    IDocument.DEFAULT_CONTENT_TYPE,
+                    Modelica22PartitionScanner.DEFINITION_PARTITION,
+                    Modelica22PartitionScanner.NORMAL_PARTITION);
+        
         boolean atEndLine; {
             int line = d.getLineOfOffset(c.offset);
             int endLine = d.getLineOffset(line) + d.getLineLength(line);
@@ -39,7 +40,7 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
         boolean afterAnnotation = d.get(0, c.offset).trim().
             endsWith("annotation");
         
-        if (inNormalPartition && atEndLine && afterAnnotation) {
+        if (inSourcePartition && atEndLine && afterAnnotation) {
             String suffix = "";
             if (!c.text.endsWith("("))
                 suffix += "(";

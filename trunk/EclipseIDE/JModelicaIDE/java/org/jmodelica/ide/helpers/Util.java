@@ -17,16 +17,22 @@ package org.jmodelica.ide.helpers;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
@@ -34,9 +40,9 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.jastadd.plugin.compiler.ast.IError;
-import org.jmodelica.modelica.compiler.ASTNode;
-import org.jmodelica.ide.Constants;
+import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
+import org.jmodelica.modelica.compiler.ASTNode;
 
 public class Util {
 	public static String DELIM = "|";
@@ -80,7 +86,7 @@ public class Util {
 			IEditorPart editor = null;
 			try {
 				URI uri = new File(node.containingFileName()).toURI();
-				editor = IDE.openEditor(page, uri, Constants.EDITOR_ID, true);
+				editor = IDE.openEditor(page, uri, IDEConstants.EDITOR_ID, true);
 			} catch (PartInitException e) {
 			}
 			if (editor instanceof Editor) 
@@ -88,7 +94,7 @@ public class Util {
 		}
 	}
 
-	public static final String ERROR_MARKER_ID = Constants.ERROR_MARKER_ID;
+	public static final String ERROR_MARKER_ID = IDEConstants.ERROR_MARKER_ID;
 
 	public static void deleteErrorMarkers(IResource res) {
 		try {
@@ -139,7 +145,7 @@ public class Util {
 	}
 	
 	private static boolean isLibrary(IContainer lib) {
-		return lib instanceof IFolder && lib.exists(new Path(Constants.PACKAGE_FILE));
+		return lib instanceof IFolder && lib.exists(new Path(IDEConstants.PACKAGE_FILE));
 	}
 	
 	public static boolean isInLibrary(IResource file) {
@@ -150,6 +156,75 @@ public class Util {
 		IContainer parent = file.getParent();
 		while (isLibrary(parent.getParent())) 
 			parent = parent.getParent();
-		return parent.findMember(Constants.PACKAGE_FILE).getLocation().toOSString();
+		return parent.findMember(IDEConstants.PACKAGE_FILE).getLocation().toOSString();
 	}
+	
+	/**
+	 * @see <code>is(E e)</code>
+	 * @author philip
+	 */
+	public static class Among<E> {
+	    private E e; 
+	    public Among(E e) {
+	        this.e = e;
+	    }
+	    public boolean among(E... list) {
+	        return Arrays.asList(list).contains(e);
+	    }
+	}
+	
+	/**
+	 * Create an {@link Among}-object, supporting queries on the form: <br><br>
+	 * Util.is(E e).among(E... list_of_objects);
+	 * @param e element to query for membership of
+	 * @return {@link Among}-object to perform membership queries.
+	 */
+	public static <E> Among<E> is(E e) {
+	    return new Among<E>(e);
+	}
+	
+	public static <E> List<E> fromIterator(Iterator<E> iterator) {
+	    List<E> list = new LinkedList<E>();
+	    while(iterator.hasNext())
+	        list.add(iterator.next());
+	    return list;
+	}
+	
+	/**
+	 * Returns line of document at line <code> line </code>.
+	 */
+	public static String getLine(IDocument d, int line) throws BadLocationException {
+	    
+	    int end = line < d.getNumberOfLines() - 1
+	        ? d.getLineOffset(line + 1)
+	        : d.getLength();
+	    
+	    return d.get(d.getLineOffset(line), end - d.getLineOffset(line));
+	}
+
+    /**
+     * Replaces lines between <code>begLine</code> and <code>endLine</code> with
+     * <code>str</code>. Returns the diff in number of characters resulting from
+     * replacement.
+     */
+    public static int replaceLines(IDocument d, int begLine, int endLine,
+            String str) {
+
+        try {
+            int startOffset = d.getLineOffset(begLine);
+            int endOffset = endLine < d.getNumberOfLines() - 1
+                ? d.getLineOffset(endLine + 1)
+                : d.getLength();
+            int length = endOffset - startOffset;
+            
+            d.replace(startOffset, length, str);
+            
+            return str.length() - length; 
+            
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+	
 }

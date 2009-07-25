@@ -1,0 +1,86 @@
+import org.jmodelica.ide.namecomplete.ASTNodeComparator;
+import org.jmodelica.ide.helpers.Maybe;
+
+
+/**
+ *  Find the ASTNode corresponding to a certain position in the source code. 
+ */
+aspect LookupFromSource {
+
+    syn boolean ASTNode.hasCompletions() = false;
+    eq ComponentAccess.hasCompletions() = true;
+    eq ClassAccess.hasCompletions() = true;
+    
+    syn Maybe<ASTNode<T>> ASTNode.getNodeAt(int line, int col);
+
+    /** 
+     * Returns the ASTNode at line <code>line</code>, column <code>col</code>.
+     * Looks through the entire AST to find the best match.
+     */
+    eq ASTNode.getNodeAt(int line, int col) {
+        
+        ASTNode<T> min = this;
+
+        boolean nodeAtCaret = 
+            ASTNodeComparator.containsPoint(this, line, col); 
+     
+        if (!hasCompletions() || !nodeAtCaret) 
+            min = null;
+        
+        for (ASTNode node : this) // recurse down the tree
+            min = ASTNodeComparator.min(
+                    min, 
+                    (ASTNode<T>)node.getNodeAt(line, col).value()); //why type conversion necessary? 
+
+        return new Maybe<ASTNode<T>>(min);
+    }
+}
+
+/**
+ *  Finds location of referencing node for the things we are interested 
+ *  in cross referencing.
+ */
+aspect CrossReference {
+    
+    /**
+     * Get referencing node.
+     */
+    syn HashSet<IJastAddNode> ASTNode.getReference();
+    
+    eq ComponentAccess.getReference()
+        = lookupComponent(getID());
+    
+    eq ClassAccess.getReference()
+        = lookupClass(getID());
+    
+    eq ASTNode.getReference() = new HashSet<IJastAddNode>();
+    
+    /**
+     * Finding the source node of given declaration for lookup.
+     * TODO: why is this not working?
+     */
+    inh StoredDefinition ASTNode.getStoredDefinition();
+    eq StoredDefinition.getChild().getStoredDefinition() = this;
+    eq ASTNode.getChild().getStoredDefinition() = null;
+}
+
+
+
+    
+//TODO: remove. only for debugging
+aspect NADebugging {    
+    
+    public void ASTNode.debugNN(String ind) {
+        System.out.printf("%s%s: (%d,%d)-(%d,%d)\n", ind, 
+                this.getNodeName(), 
+                this.getBeginLine(), this.getBeginColumn(),
+                this.getEndLine(),   this.getEndColumn());
+    }
+    
+    public void ASTNode.printASTBLA(String ind) {
+        this.debugNN(ind);
+        for (ASTNode node : this) 
+            node.printASTBLA(ind + "  ");
+    }
+  
+}

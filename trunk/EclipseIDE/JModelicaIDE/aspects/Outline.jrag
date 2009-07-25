@@ -123,7 +123,7 @@ aspect Outline {
 	 * Anyway we need new hasVisibleChildren & getChildren.
 	 */
    	eq InstNode.hasVisibleChildren() {
-   		/* Don't decend into error nodes. */
+   		/* Don't descend into error nodes. */
    		if (isError())
    			return false;
     	if (showInContentOutline()) 

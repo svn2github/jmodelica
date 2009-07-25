@@ -59,7 +59,7 @@ public class ModelicaCompiler extends AbstractCompiler {
 		scanner = new ModelicaScanner(System.in);  // Dummy stream
 	}
 
-	public static final String ERROR_MARKER_ID = Constants.ERROR_MARKER_ID;
+	public static final String ERROR_MARKER_ID = IDEConstants.ERROR_MARKER_ID;
 	private ModelicaParser parser;
 	private List<StoredDefinition> list;
 	private ModelicaScanner scanner;
@@ -96,7 +96,7 @@ public class ModelicaCompiler extends AbstractCompiler {
 						recursiveCompile((IFolder) resource[i], monitor);
 					}
 				} else if (type == IResource.FILE && extension != null
-						&& extension.equals(Constants.FILE_EXTENSION)) {
+						&& extension.equals(IDEConstants.FILE_EXTENSION)) {
 					// Convert to IFile and get content
 					IFile file = (IFile) resource[i];
 					parseFile(file, null);
@@ -133,8 +133,8 @@ public class ModelicaCompiler extends AbstractCompiler {
 		if (project != null) {
 			String libStr = null, defaultMSL = null;
 			try {
-				libStr = project.getPersistentProperty(Constants.PROPERTY_LIBRARIES_ID);
-				defaultMSL = project.getPersistentProperty(Constants.PROPERTY_DEFAULT_MSL_ID);
+				libStr = project.getPersistentProperty(IDEConstants.PROPERTY_LIBRARIES_ID);
+				defaultMSL = project.getPersistentProperty(IDEConstants.PROPERTY_DEFAULT_MSL_ID);
 			} catch (CoreException e) {
 			}
 			java.util.List<Library> libraries = Library.fromString(libStr);
@@ -193,11 +193,11 @@ public class ModelicaCompiler extends AbstractCompiler {
 
 	@Override
 	protected Collection<String> acceptedFileExtensions() {
-		return Arrays.asList(Constants.All_FILE_EXTENSIONS);
+		return Arrays.asList(IDEConstants.All_FILE_EXTENSIONS);
 	}
 
 	@Override
 	protected String acceptedNatureID() {
-		return Constants.NATURE_ID;
+		return IDEConstants.NATURE_ID;
 	}
 }

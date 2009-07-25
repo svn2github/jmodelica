@@ -23,7 +23,7 @@ import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.Token;
 
-import org.jmodelica.ide.Constants;
+import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.scanners.DocumentScanner;
 
 %%
@@ -41,7 +41,7 @@ import org.jmodelica.ide.scanners.DocumentScanner;
 %table
 
 %{
-    private static final String PARTITION = Constants.PLUGIN_ID + ".partition";
+    private static final String PARTITION = IDEConstants.PLUGIN_ID + ".partition";
     public static final String NORMAL_PARTITION = PARTITION + ".normal";
     public static final String STRING_PARTITION = PARTITION + ".string";
     public static final String QIDENT_PARTITION = PARTITION + ".qident";

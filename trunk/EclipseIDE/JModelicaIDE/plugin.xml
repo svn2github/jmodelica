@@ -273,6 +273,12 @@
             id="JModelicaIDE.ErrorCheckCommand"
             name="Error check">
       </command>
+      <command
+            categoryId="JModelicaIDE.ModelicaCommandCategory"
+            description="Follow cross reference"
+            id="JModelicaIDE.FollowReferenceCommand"
+            name="Follow cross reference">
+      </command>
       <category
             description="JModelica commands"
             id="JModelicaIDE.ModelicaCommandCategory"
@@ -297,6 +303,11 @@
             commandId="JModelicaIDE.ErrorCheckCommand"
             keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
             keySequence="Ctrl+Alt+E">
+      </keyBinding>
+      <keyBinding
+            commandId="JModelicaIDE.FollowReferenceCommand"
+            keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            keySequence="F3">
       </keyBinding>
    </extension>
 </plugin>

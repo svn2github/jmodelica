@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.CoreException;
 
 public class Nature implements IProjectNature {
 
-	public static final String NATURE_ID = Constants.NATURE_ID;
+	public static final String NATURE_ID = IDEConstants.NATURE_ID;
 	
 	private IProject project;
 	

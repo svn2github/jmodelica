@@ -44,7 +44,7 @@ public abstract class HilightScanner extends DocumentScanner implements ITokenSc
 	    RGB normalColor     = new RGB(  0,   0,   0); 
 	    RGB keywordColor    = new RGB(127,   0,  85);
 	    RGB commentColor    = new RGB(150, 160, 230);
-	    RGB stringColor     = new RGB(  0,  42, 255);
+	    RGB stringColor     = new RGB( 30,  60, 200);
 	    RGB annotation      = new RGB( 40,  70,  40);
 	    RGB annotationKeywd = new RGB(127,  30,  85);
 	    RGB annotationLhs   = new RGB(  0,  60,  50);

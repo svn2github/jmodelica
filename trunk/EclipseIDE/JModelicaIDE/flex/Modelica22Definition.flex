@@ -28,7 +28,7 @@ import org.jmodelica.ide.scanners.HilightScanner;
 
 %public
 %final
-%class Modelica22DefenitionScanner
+%class Modelica22DefinitionScanner
 %extends HilightScanner
 %unicode
 %buffer 128
@@ -41,7 +41,7 @@ import org.jmodelica.ide.scanners.HilightScanner;
 %{
     private int start;
     
-    public Modelica22DefenitionScanner() {
+    public Modelica22DefinitionScanner() {
         this(new StringReader(""));
     }
     
@@ -81,7 +81,7 @@ Class = "block" | "class" | "connector" | "function" | "model" | "package" | "re
 %%
 
 {Class}        { return KEYWORD; }
-{NormalID}     { return DEFENITION; }
+{NormalID}     { return DEFINITION; }
 {WhiteSpace}   { return NORMAL; }
 .              { return NORMAL; }
 <<EOF>>        { return Token.EOF; }

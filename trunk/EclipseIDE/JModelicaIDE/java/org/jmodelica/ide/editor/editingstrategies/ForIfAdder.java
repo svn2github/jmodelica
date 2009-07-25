@@ -7,13 +7,15 @@ import org.eclipse.jface.text.IRegion;
 
 
 /**
- * Adds end for; when user types for ...
+ * Adds end for/if; when user types for/if ...
  * 
  * @author philip
  * 
  */
 
 public class ForIfAdder extends EndStatementAdder{
+
+public final static ForIfAdder adder = new ForIfAdder();
 
 protected static final String forRegex = "\\s*for(\\s.*)?";
 protected static final String ifRegex   = "\\s*if(\\s.*)?";
@@ -32,10 +34,10 @@ public void customizeDocumentCommand(IDocument d,
             }
             
             if (line.matches(forRegex)) 
-                tryAdd("end for;", d, c.offset);
+                addEndIfNotPresent("end for;", d, c.offset);
 
-            if (line.matches(ifRegex)) 
-                tryAdd("end if;", d, c.offset);
+            else if (line.matches(ifRegex)) 
+                addEndIfNotPresent("end if;", d, c.offset);
             
         } catch (BadLocationException e) {
             e.printStackTrace();

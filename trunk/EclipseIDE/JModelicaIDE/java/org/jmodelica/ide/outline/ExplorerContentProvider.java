@@ -44,7 +44,7 @@ import org.jmodelica.modelica.compiler.LibNode;
 import org.jmodelica.modelica.compiler.List;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
-import org.jmodelica.ide.Constants;
+import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.ModelicaCompiler;
 
 public class ExplorerContentProvider implements ITreeContentProvider, IResourceChangeListener, IResourceDeltaVisitor {
@@ -184,7 +184,7 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 			return true;
 		case IResource.FILE:
 			final IFile file = (IFile) source;
-			if (file.getFileExtension().equals(Constants.FILE_EXTENSION)) {
+			if (file.getFileExtension().equals(IDEConstants.FILE_EXTENSION)) {
 				new UIJob("Update Source tree in Project Explorer") {
 					public IStatus runInUIThread(IProgressMonitor monitor) {
 						if (viewer != null && !viewer.getControl().isDisposed())

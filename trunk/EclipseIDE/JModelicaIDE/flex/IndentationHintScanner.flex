@@ -45,7 +45,7 @@ import org.jmodelica.ide.editor.Indent;
         this(new StringReader(""));
     }
     
-    public void analyze(String text) {
+    public ModelicaAnchorList analyze(String text) {
 		
 		yyreset(new StringReader(text));
 		
@@ -54,9 +54,11 @@ import org.jmodelica.ide.editor.Indent;
 		annotation_paren_level = 0;
 		last_state = YYINITIAL;
 		
-	try {
+		try {
 			yylex();
 		} catch (IOException e) { }
+		
+		return ancs;
 	}
 	
 	/* scanner state variables */

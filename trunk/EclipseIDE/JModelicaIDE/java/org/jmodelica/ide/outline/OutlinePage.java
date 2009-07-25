@@ -39,11 +39,12 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 
 	@Override
 	protected void openFileForNode(IJastAddNode node) {
-		// This method is never called, and there seems to be no situation that it should be.
+		// This method is never called, and there seems to be 
+	    // no situation that it should be.
 	}
 
 	@Override
-	protected void highlightNodeInEditor(IJastAddNode node) {
+	public void highlightNodeInEditor(IJastAddNode node) {
 		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page = window.getActivePage();
 		IEditorPart editor = page.getActiveEditor();

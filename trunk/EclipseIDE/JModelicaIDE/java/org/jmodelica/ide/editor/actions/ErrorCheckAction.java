@@ -1,10 +1,10 @@
-package org.jmodelica.ide.editor;
+package org.jmodelica.ide.editor.actions;
 
 import java.util.Collection;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.jmodelica.ide.Constants;
+import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.error.InstanceError;
 import org.jmodelica.ide.error.InstanceErrorHandler;
 import org.jmodelica.modelica.compiler.BaseClassDecl;
@@ -18,7 +18,7 @@ private BaseClassDecl currentClass;
 
 public ErrorCheckAction() {
     super();
-    setTexts(Constants.ACTION_ERROR_CHECK_TEXT);
+    setTexts(IDEConstants.ACTION_ERROR_CHECK_TEXT);
     setEnabled(false);
     super.setActionDefinitionId("JModelicaIDE.ErrorCheckCommand");
 }
@@ -30,7 +30,7 @@ public void setCurClass(BaseClassDecl currentClass) {
             setTexts("Check " + currentClass.getName().getID() + " for errors");
             setEnabled(true);
         } else {
-            setTexts(Constants.ACTION_ERROR_CHECK_TEXT);
+            setTexts(IDEConstants.ACTION_ERROR_CHECK_TEXT);
             setEnabled(false);
         }
     }

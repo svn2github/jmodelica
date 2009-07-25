@@ -42,7 +42,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
-import org.jmodelica.ide.Constants;
+import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.helpers.Library;
 import org.jmodelica.ide.helpers.Library.Version;
 import org.jmodelica.ide.scanners.generated.PackageExaminer;
@@ -196,8 +196,8 @@ public class ProjectPropertyPage extends PropertyPage {
 		IProject proj = getProject();
 		String libStr = null;
 		try {
-			libStr = proj.getPersistentProperty(Constants.PROPERTY_LIBRARIES_ID);
-			defaultMSL = proj.getPersistentProperty(Constants.PROPERTY_DEFAULT_MSL_ID);
+			libStr = proj.getPersistentProperty(IDEConstants.PROPERTY_LIBRARIES_ID);
+			defaultMSL = proj.getPersistentProperty(IDEConstants.PROPERTY_DEFAULT_MSL_ID);
 		} catch (CoreException e) {
 		}
 		libraries = Library.fromString(libStr);
@@ -207,8 +207,8 @@ public class ProjectPropertyPage extends PropertyPage {
 		IProject proj = getProject();
 		try {
 			String libStr = Library.toString(libraries);
-			proj.setPersistentProperty(Constants.PROPERTY_LIBRARIES_ID, libStr);
-			proj.setPersistentProperty(Constants.PROPERTY_DEFAULT_MSL_ID, defaultMSL);
+			proj.setPersistentProperty(IDEConstants.PROPERTY_LIBRARIES_ID, libStr);
+			proj.setPersistentProperty(IDEConstants.PROPERTY_DEFAULT_MSL_ID, defaultMSL);
 			if (changed) 
 				proj.build(IncrementalProjectBuilder.FULL_BUILD, null);
 		} catch (CoreException e) {

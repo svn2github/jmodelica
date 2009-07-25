@@ -4,61 +4,65 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.jmodelica.ide.editor.actions.ToggleComment;
+import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.indent.IndentedSection;
 
 
 public abstract class EndStatementAdder implements IAutoEditStrategy {
 
-protected String getLine(IDocument d, int line) throws BadLocationException {
-    IRegion lineReg = d.getLineInformation(line);
-    return d.get(lineReg.getOffset(), lineReg.getLength());
-}
-
-protected boolean doAdd(String endStmnt, IDocument d, int offset)
+/**
+ * Checks if endStmnt occurs among the source code lines after
+ * <code> offset </code>, within or at the end of the scope at
+ * <code> offset </code> (scope heuristically determined by indentation).
+ * 
+ */
+protected boolean endExists(String endStmnt, IDocument d, int offset)
         throws BadLocationException {
     
-    int line = d.getLineOfOffset(offset);
-    int indent = IndentedSection.countIndent(getLine(d, line));
+    int startLine = d.getLineOfOffset(offset);
+    int indent = IndentedSection.countIndent(Util.getLine(d, startLine));
     
-    if (getLine(d, line).contains(endStmnt))
-        return false;
-
-    for (line = line + 1; line < d.getNumberOfLines() - 1; line++) {
-
-        if (IndentedSection.countIndent(getLine(d, line)) <= indent)
+    for (int ln = startLine; ln < d.getNumberOfLines() - 1; ln++) {
+        
+        String line = Util.getLine(d, ln);
+        // ignore empty lines and comments
+        if (line.trim().equals("") || 
+                ToggleComment.isCommented(line))
+            continue;
+        // break if encounter line with less or equal indentation
+        if (ln > startLine && IndentedSection.countIndent(line) <= indent)
             break;
 
-        if (getLine(d, line).contains(endStmnt))
-            return false;
+        if (line.contains(endStmnt))
+            return true;
     }
-
-    return !getLine(d, line).contains(endStmnt);
+    return Util.getLine(d, startLine).contains(endStmnt);
 }
 
 
 /**
- * Scans document and adds "end id;" if it can't find an end statement already, 
+ * Scans document and adds ednStmnt if it can't find it already, 
  * within the current scope. 
- * @param id 
+ * @param endStmnt 
  * @param d
  * @param offset
  */
-public void tryAdd(String id, IDocument d, int offset) {
+public void addEndIfNotPresent(String endStmnt, IDocument d, int offset) {
 
     try {
 
-        if (!doAdd(id, d, offset))
+        if (endExists(endStmnt, d, offset))
             return;
         
         IRegion lineReg = d.getLineInformationOfOffset(offset);
         int lineEndOffset = lineReg.getOffset() + lineReg.getLength();
 
-        String endStatement;
-        {
+        String endStatement; {
             int line = lineReg.getOffset();
             String indent = IndentedSection.putIndent("", IndentedSection
                     .countIndent(d.get(line, offset - line)));
-            endStatement = String.format("\n%s%s", indent, id);
+            endStatement = String.format("\n%s%s", indent, endStmnt);
         }
 
         // must insert end statement with d.replace, as if using the

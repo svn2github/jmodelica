@@ -1,9 +1,10 @@
 
-package org.jmodelica.ide.editor;
+package org.jmodelica.ide.editor.actions;
 
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.jmodelica.folding.CharacterProjectionViewer;
+import org.jmodelica.ide.editor.Editor;
 
 public class ToggleAnnotationsAction extends ConnectedTextsAction {
 
@@ -14,7 +15,8 @@ public ToggleAnnotationsAction(Editor editor) {
     super();
     this.editor = editor;
     update(false);
-    this.setActionDefinitionId("JModelicaIDE.ModelicaToggleAnnotationCommand");
+    this.setActionDefinitionId(
+            "JModelicaIDE.ModelicaToggleAnnotationCommand");
 }
 
 public boolean isVisible() {
@@ -24,7 +26,10 @@ public boolean isVisible() {
 @Override
 public void run() {
     update(!visible);
-    int action = visible ? CharacterProjectionViewer.EXPAND_ANNOTATIONS : CharacterProjectionViewer.COLLAPSE_ANNOTATIONS;
+    int action = visible 
+        ? CharacterProjectionViewer.EXPAND_ANNOTATIONS 
+        : CharacterProjectionViewer.COLLAPSE_ANNOTATIONS;
+    
     ISourceViewer sourceViewer = editor.publicGetSourceViewer();
     if (sourceViewer instanceof ITextOperationTarget) {
         ((ITextOperationTarget) sourceViewer).doOperation(action);

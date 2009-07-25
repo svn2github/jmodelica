@@ -32,8 +32,8 @@ public class IndentedSectionTest extends TestCase {
         ihs.analyze(tmp);
 
         assertEquals(new IndentedSection(testIndentData).indent(
-                    ihs.ancs.bindTabWidth(IndentedSection.tabWidth, 
-                            new Document(tmp))).toString(),
+                    ihs.ancs.bindEnv(new Document(tmp), 
+                            IndentedSection.tabWidth)).toString(),
                 "model m\n" +
                 "\treal r;\n" +
                 "\tmodel q\n" +
@@ -60,8 +60,8 @@ public class IndentedSectionTest extends TestCase {
                 "\t   int i;\n" +
                 "\t\t   end m;",
                 new IndentedSection(testIndentData).
-                indent(ihs.ancs.bindTabWidth(IndentedSection.tabWidth, 
-                        new Document(tmp)), 2, 4).toString());
+                indent(ihs.ancs.bindEnv(new Document(tmp), 
+                        IndentedSection.tabWidth), 2, 4).toString());
         assertEquals(
                 "\t model m\n" +
                 "\t\t real r;\n" +
@@ -71,8 +71,8 @@ public class IndentedSectionTest extends TestCase {
                 "\t   int i;\n" +
                 "\t\t   end m;",
                 new IndentedSection(testIndentData).
-                    indent(ihs.ancs.bindTabWidth(IndentedSection.tabWidth, 
-                            new Document(tmp)), 1, 4).toString());
+                    indent(ihs.ancs.bindEnv(new Document(tmp), 
+                            IndentedSection.tabWidth), 1, 4).toString());
     }
 
     public void testIndentString() {
@@ -85,8 +85,8 @@ public class IndentedSectionTest extends TestCase {
         assertEquals(
                 testIndentStringData, 
                 new IndentedSection(testIndentStringData).
-                indent(ihs.ancs.bindTabWidth(IndentedSection.tabWidth, 
-                        new Document(tmp))).toString());
+                indent(ihs.ancs.bindEnv(new Document(tmp), 
+                        IndentedSection.tabWidth)).toString());
         
     }
     
@@ -121,8 +121,8 @@ public class IndentedSectionTest extends TestCase {
         ihs.analyze(tmp);
         
         String indented = new IndentedSection(in).
-        indent(ihs.ancs.bindTabWidth(IndentedSection.tabWidth, 
-                new Document(tmp))).toString();
+        indent(ihs.ancs.bindEnv(new Document(tmp), 
+                IndentedSection.tabWidth)).toString();
         
         assertEquals(wanted, indented);
    }

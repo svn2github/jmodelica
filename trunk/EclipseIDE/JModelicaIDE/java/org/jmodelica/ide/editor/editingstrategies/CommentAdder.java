@@ -2,10 +2,7 @@ package org.jmodelica.ide.editor.editingstrategies;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentCommand;
-import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.jmodelica.ide.indent.IndentedSection;
 
 
 /**
@@ -15,6 +12,8 @@ import org.jmodelica.ide.indent.IndentedSection;
  * 
  */
 public class CommentAdder extends EndStatementAdder {
+
+public final static CommentAdder adder = new CommentAdder();
 
 public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
     try {
@@ -28,7 +27,7 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
         if (!(insertingNewline && afterCommentStart)) 
             return;
         
-        tryAdd("*/", d, c.offset);
+        super.addEndIfNotPresent("*/", d, c.offset);
         
     } catch (BadLocationException e) {
         e.printStackTrace();

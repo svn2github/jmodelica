@@ -201,10 +201,9 @@ public void pushTop(int offset) {
 
 /**
  * Bind the current tab width to transform list to AnchorList&lt;Integer&gt;.
- * 
  * @param tabWidth tabWidth to use
  */
-public AnchorList<Integer> bindTabWidth(final int tabWidth, final IDocument doc) {
+public AnchorList<Integer> bindEnv(final IDocument doc, final int tabWidth) {
     return new AnchorList<Integer>() {
 
         private IDocument d = doc;

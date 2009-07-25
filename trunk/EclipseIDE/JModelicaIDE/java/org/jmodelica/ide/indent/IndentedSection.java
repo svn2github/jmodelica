@@ -56,7 +56,8 @@ public IndentedSection(String s) {
  * @param hints hints to indent by
  * @return indented source code
  */
-public IndentedSection indent(AnchorList<Integer> hints, int lineStart, int lineEnd) {
+public IndentedSection indent(AnchorList<Integer> hints, 
+        int lineStart, int lineEnd) {
 
     Document d = new Document(toString());
 
@@ -214,7 +215,8 @@ public String toString(int startLine, int endLine) {
     String[] tmp = new String[endLine - startLine];
     for (int i = startLine; i < endLine; i++)
         tmp[i - startLine] = putIndent(sec[i], countIndent(sec[i]), tabbed);
-    return Util.implode(lineSep, tmp);
+    return Util.implode(lineSep, tmp) + 
+        (endLine < sec.length - 1 ? lineSep : "");
 }
 
 public String toString() {

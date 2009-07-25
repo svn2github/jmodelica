@@ -20,7 +20,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.graphics.RGB;
 import org.jmodelica.ide.scanners.generated.Modelica22PartitionScanner;
 
-public class Constants {
+public class IDEConstants {
 
 	public static final String PLUGIN_ID = "org.jmodelica.ide";
 	public static final String NATURE_ID = PLUGIN_ID + ".nature";
@@ -44,6 +44,8 @@ public class Constants {
     public static final String ACTION_FORMAT_REGION_TEXT = "&Format region";
     public static final String ACTION_TOGGLE_COMMENT_ID = ACTION_ID + ".toggle-comment";
     public static final String ACTION_TOGGLE_COMMENT_TEXT = "Toggle &Comment";
+    public static final String ACTION_COMPLETE_ID = ACTION_ID + ".complete";
+    public static final String ACTION_COMPLETE_TEXT = "&Complete Name";
     public static final String GROUP_ID = ACTION_ID + ".group";
 	public static final String GROUP_MODELICA_ID = GROUP_ID + ".modelica";
 	public static final String GROUP_ERROR_ID = GROUP_ID + ".error";

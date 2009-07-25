@@ -42,10 +42,6 @@ public Anchor(int offset, int reference, E indent, String id) {
     this.id = id;
 }
 
-//public Anchor(int offset, int reference, E indent) {
-//    this(offset, reference, indent, "#");
-//}
-
 public String toString() {
     return "(" + offset + ", " + indent + ", " + id + ")";
 }

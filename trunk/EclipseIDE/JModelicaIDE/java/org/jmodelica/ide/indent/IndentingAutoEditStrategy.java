@@ -20,6 +20,9 @@ import org.jmodelica.ide.scanners.generated.IndentationHintScanner;
 public class IndentingAutoEditStrategy extends
         DefaultIndentLineAutoEditStrategy {
 
+public final static IndentingAutoEditStrategy editStrategy = 
+    new IndentingAutoEditStrategy();
+
 final static IndentationHintScanner ihs = new IndentationHintScanner();
 
 public static int countTokens(IDocument d, int offset) {
@@ -34,16 +37,16 @@ public static int countTokens(IDocument d, int offset) {
     }
 }
 /** Calculate indent at offset from hints. */
-protected int getIndent(IDocument d, int begin, int end, boolean countSinks,
+protected int getIndent(int begin, int end, boolean countSinks,
         AnchorList<Integer> aList) {
+    
     Anchor<Integer> a = aList.sinkAt(end + 1);
+    
     if (!countSinks || a == null || a.offset < begin)
         a = aList.anchorAt(begin + 1);
 
     return a.indent;
 }
-
-// TODO: move getIndent to ModelicaAnchorList
 
 public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
     try {
@@ -65,7 +68,7 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
         String text = d.get(0, lineEnd);
         ihs.analyze(text);
         AnchorList<Integer> ancs = ihs.ancs
-                .bindTabWidth(IndentedSection.tabWidth, d);
+                .bindEnv(d, IndentedSection.tabWidth);
 
         /*
          * Check if there are sinks on current line. In that case indent edited
@@ -84,7 +87,7 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
              * if tabbing before beginning of line, put indentation at correct
              * level
              */
-            int indent = getIndent(d, c.offset, lineEnd, true, ancs);
+            int indent = getIndent(c.offset, lineEnd, true, ancs);
             String ind = d.get(lineBegin, c.offset - lineBegin);
             if (ind.trim().equals("")
                     && IndentedSection.spacify(ind).length() < indent) {
@@ -98,7 +101,7 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
             c.length += findEndOfWhiteSpace(d, c.offset, lineEnd) - c.offset;
 
             if (pastedBlock) {
-                int indent = getIndent(d, c.offset, lineEnd, false, ancs);
+                int indent = getIndent(c.offset, lineEnd, false, ancs);
                 c.text = new IndentedSection(c.text).offsetIndentTo(indent)
                         .toString();
             }
@@ -119,7 +122,7 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
                 c.text = IndentedSection.trimIndent(c.text);
 
             if (endsWithNewLine)
-                c.text += IndentedSection.putIndent("", getIndent(d, c.offset,
+                c.text += IndentedSection.putIndent("", getIndent(c.offset,
                         lineEnd, true, ancs));
         }
 
