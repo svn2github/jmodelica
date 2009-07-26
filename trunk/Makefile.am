@@ -50,7 +50,8 @@ endif
 	[ -e $(prefix)/Options/options.py ] && echo "options.py exists "|| cp Options/options_tpl.py $(prefix)/Options/options.py
 	mkdir -p $(prefix)/Python
 	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/Python
-	cp Python/jm_*.sh $(prefix)/Python
+	[ -e $(prefix)/Python/jm_python.sh ] && echo "jm_python.sh exists "|| cp Python/jm_python.sh $(prefix)/Python/jm_python.sh
+	[ -e $(prefix)/Python/jm_ipython.sh ] && echo "jm_ipython.sh exists "|| cp Python/jm_ipython.sh $(prefix)/Python/jm_ipython.sh
 	chmod u+x $(prefix)/Python/jm_*.sh
 	mkdir -p $(prefix)/ThirdParty
 	mkdir -p $(prefix)/ThirdParty/Beaver
@@ -75,15 +76,30 @@ endif
 	mkdir -p $(prefix)/XML
 	cp  $(abs_top_srcdir)/XML/*.xsd $(prefix)/XML
 
-
-
 bindistdir: install
 	rm -rf $(bindistdir)
 	mkdir -p $(bindistdir)
-	cp -r $(prefix)/* $(bindistdir)
+	cp -r $(prefix)/CodeGenTemplates $(bindistdir)
+	cp -r $(prefix)/MakeFiles $(bindistdir)
+	cp -r $(prefix)/Options $(bindistdir)
+	cp -r $(prefix)/Python $(bindistdir)
+	cp -r $(prefix)/ThirdParty $(bindistdir)
+	cp -r $(prefix)/XML $(bindistdir)
+	cp -r $(prefix)/include $(bindistdir)
+	cp -r $(prefix)/lib $(bindistdir)
 if COMPILE_WITH_IPOPT	
 	mkdir -p $(bindistdir)/ThirdParty/Ipopt
+# Copy files
 	cd $(IPOPT_HOME); find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/Ipopt
+# Copy symbolic links
+	cd $(IPOPT_HOME); find * -type l |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/Ipopt
+endif 
+if WITH_MINGW	
+	mkdir -p $(bindistdir)/ThirdParty/MinGW
+# Copy files
+	cd $(MINGW_HOME); find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/MinGW
+# Copy symbolic links
+	cd $(MINGW_HOME); find * -type l |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/MinGW
 endif 
 
 bindist: bindistdir

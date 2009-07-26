@@ -112,6 +112,32 @@ AS_IF([test "x$with_ipopt" != xno],
       [WITH_IPOPT="true"],
       [WITH_IPOPT="false"]) 
 
+# Checks for mingw.
+AC_ARG_WITH([mingw],
+   [AS_HELP_STRING([--with-mingw],
+     [MinGW installation directory. @<:@default=check@:>@])],
+   [mingw=$withval],
+   [with_mingw=no])
+
+AS_IF([test "x$with_mingw" = xno],
+      [mingw=["$MINGW_HOME"]])
+
+AS_IF([test "x$MINGW_HOME" != x],
+      [with_mingw=env])
+
+AS_IF([test "x$with_mingw" = xno],
+      [AC_MSG_RESULT([MinGW installation not specified.])],
+      [AC_CHECK_FILE($mingw/bin/gcc.exe,
+                     [],
+                     [AC_MSG_FAILURE([MinGW installation specifed, but seems to be corrupt!])])])
+
+AM_CONDITIONAL([WITH_MINGW],[test "x$with_mingw" != xno])
+
+# Set output variables to be exported to the Makefiles
+AC_SUBST(MINGW_HOME)
+MINGW_HOME=$mingw
+
+# Detect CppAD
 AC_ARG_WITH([cppad],
    [AS_HELP_STRING([--with-cppad],
      [CppAD installation directory @<:@default=check@:>@])],
@@ -124,7 +150,7 @@ AS_IF([test "x$with_cppad" = xno],
 AS_IF([test "x$with_cppad" = xno],
       [AC_CHECK_FILE($srcdir/$cppad/cppad/cppad.hpp,
                      [],
-                     [AC_MSG_FAILURE([--with-cppad option was specified but does not seem to point at a valid CppAD installation])])],
+                     [AC_MSG_FAILURE([CppAD sources not found - distribution corrupt?])])],
       [AC_CHECK_FILE($cppad/cppad/cppad.hpp,
                      [],
                      [AC_MSG_FAILURE([--with-cppad option was specified but does not seem to point at a valid CppAD installation])])])

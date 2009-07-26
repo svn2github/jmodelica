@@ -146,6 +146,7 @@ LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
+MINGW_HOME = @MINGW_HOME@
 MKDIR_P = @MKDIR_P@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
@@ -712,7 +713,8 @@ install-exec-local:
 	[ -e $(prefix)/Options/options.py ] && echo "options.py exists "|| cp Options/options_tpl.py $(prefix)/Options/options.py
 	mkdir -p $(prefix)/Python
 	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/Python
-	cp Python/jm_*.sh $(prefix)/Python
+	[ -e $(prefix)/Python/jm_python.sh ] && echo "jm_python.sh exists "|| cp Python/jm_python.sh $(prefix)/Python/jm_python.sh
+	[ -e $(prefix)/Python/jm_ipython.sh ] && echo "jm_ipython.sh exists "|| cp Python/jm_ipython.sh $(prefix)/Python/jm_ipython.sh
 	chmod u+x $(prefix)/Python/jm_*.sh
 	mkdir -p $(prefix)/ThirdParty
 	mkdir -p $(prefix)/ThirdParty/Beaver
@@ -740,16 +742,30 @@ install-exec-local:
 bindistdir: install
 	rm -rf $(bindistdir)
 	mkdir -p $(bindistdir)
-	cp -r $(prefix)/* $(bindistdir)
+	cp -r $(prefix)/CodeGenTemplates $(bindistdir)
+	cp -r $(prefix)/MakeFiles $(bindistdir)
+	cp -r $(prefix)/Options $(bindistdir)
+	cp -r $(prefix)/Python $(bindistdir)
+	cp -r $(prefix)/ThirdParty $(bindistdir)
+	cp -r $(prefix)/XML $(bindistdir)
+	cp -r $(prefix)/include $(bindistdir)
+	cp -r $(prefix)/lib $(bindistdir)
 @COMPILE_WITH_IPOPT_TRUE@	mkdir -p $(bindistdir)/ThirdParty/Ipopt
+# Copy files
 @COMPILE_WITH_IPOPT_TRUE@	cd $(IPOPT_HOME); find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/Ipopt
+# Copy symbolic links
+@COMPILE_WITH_IPOPT_TRUE@	cd $(IPOPT_HOME); find * -type l |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/Ipopt
+@WITH_MINGW_TRUE@	mkdir -p $(bindistdir)/ThirdParty/MinGW
+# Copy files
+@WITH_MINGW_TRUE@	cd $(MINGW_HOME); find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/MinGW
+# Copy symbolic links
+@WITH_MINGW_TRUE@	cd $(MINGW_HOME); find * -type l |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/MinGW
 
 bindist: bindistdir
 	tar -cf $(bindistdir).tar $(bindistdir)
 	gzip -c $(bindistdir).tar > $(bindistdir).tar.gz
 	rm -rf $(bindistdir)
 	rm -rf $(bindistdir).tar
-#	tardir=$(prefix) && $(am__tar) | GZIP=$(GZIP_ENV) gzip -c >$(prefix).tar.gz
 
 clean-local: clean-jmi-examples clean-frontends
 

@@ -881,6 +881,9 @@ IPOPT_INC
 IPOPT_LIB
 IPOPT_HOME
 WITH_IPOPT
+WITH_MINGW_TRUE
+WITH_MINGW_FALSE
+MINGW_HOME
 COMPILE_WITH_CPPAD_TRUE
 COMPILE_WITH_CPPAD_FALSE
 CPPAD_HOME
@@ -1505,6 +1508,7 @@ Optional Packages:
                           both]
   --with-tags[=TAGS]      include additional configurations [automatic]
   --with-ipopt            IPOPT installation directory [default=check]
+  --with-mingw            MinGW installation directory. [default=check]
   --with-cppad            CppAD installation directory [default=check]
 
 Some influential environment variables:
@@ -4848,7 +4852,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4851 "configure"' > conftest.$ac_ext
+  echo '#line 4855 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7397,11 +7401,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7400: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7404: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7404: \$? = $ac_status" >&5
+   echo "$as_me:7408: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7665,11 +7669,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7668: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7672: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7672: \$? = $ac_status" >&5
+   echo "$as_me:7676: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7769,11 +7773,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7772: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7776: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7776: \$? = $ac_status" >&5
+   echo "$as_me:7780: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10077,7 +10081,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10080 "configure"
+#line 10084 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10177,7 +10181,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10180 "configure"
+#line 10184 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12513,11 +12517,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12516: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12520: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:12520: \$? = $ac_status" >&5
+   echo "$as_me:12524: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -12617,11 +12621,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12620: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12624: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:12624: \$? = $ac_status" >&5
+   echo "$as_me:12628: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14187,11 +14191,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14190: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14194: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14194: \$? = $ac_status" >&5
+   echo "$as_me:14198: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14291,11 +14295,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14294: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14298: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14298: \$? = $ac_status" >&5
+   echo "$as_me:14302: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16489,11 +16493,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16492: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16496: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16496: \$? = $ac_status" >&5
+   echo "$as_me:16500: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16757,11 +16761,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16760: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16764: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16764: \$? = $ac_status" >&5
+   echo "$as_me:16768: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16861,11 +16865,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16864: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16868: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16868: \$? = $ac_status" >&5
+   echo "$as_me:16872: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -19625,6 +19629,76 @@ else
 fi
 
 
+# Checks for mingw.
+
+# Check whether --with-mingw was given.
+if test "${with_mingw+set}" = set; then
+  withval=$with_mingw; mingw=$withval
+else
+  with_mingw=no
+fi
+
+
+if test "x$with_mingw" = xno; then
+  mingw="$MINGW_HOME"
+fi
+
+
+if test "x$MINGW_HOME" != x; then
+  with_mingw=env
+fi
+
+
+if test "x$with_mingw" = xno; then
+  { echo "$as_me:$LINENO: result: MinGW installation not specified." >&5
+echo "${ECHO_T}MinGW installation not specified." >&6; }
+else
+  as_ac_File=`echo "ac_cv_file_$mingw/bin/gcc.exe" | $as_tr_sh`
+{ echo "$as_me:$LINENO: checking for $mingw/bin/gcc.exe" >&5
+echo $ECHO_N "checking for $mingw/bin/gcc.exe... $ECHO_C" >&6; }
+if { as_var=$as_ac_File; eval "test \"\${$as_var+set}\" = set"; }; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  test "$cross_compiling" = yes &&
+  { { echo "$as_me:$LINENO: error: cannot check for file existence when cross compiling" >&5
+echo "$as_me: error: cannot check for file existence when cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+if test -r "$mingw/bin/gcc.exe"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+ac_res=`eval echo '${'$as_ac_File'}'`
+	       { echo "$as_me:$LINENO: result: $ac_res" >&5
+echo "${ECHO_T}$ac_res" >&6; }
+if test `eval echo '${'$as_ac_File'}'` = yes; then
+  :
+else
+  { { echo "$as_me:$LINENO: error: MinGW installation specifed, but seems to be corrupt!
+See \`config.log' for more details." >&5
+echo "$as_me: error: MinGW installation specifed, but seems to be corrupt!
+See \`config.log' for more details." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+fi
+
+
+ if test "x$with_mingw" != xno; then
+  WITH_MINGW_TRUE=
+  WITH_MINGW_FALSE='#'
+else
+  WITH_MINGW_TRUE='#'
+  WITH_MINGW_FALSE=
+fi
+
+
+# Set output variables to be exported to the Makefiles
+
+MINGW_HOME=$mingw
+
+# Detect CppAD
 
 # Check whether --with-cppad was given.
 if test "${with_cppad+set}" = set; then
@@ -19662,9 +19736,9 @@ echo "${ECHO_T}$ac_res" >&6; }
 if test `eval echo '${'$as_ac_File'}'` = yes; then
   :
 else
-  { { echo "$as_me:$LINENO: error: --with-cppad option was specified but does not seem to point at a valid CppAD installation
+  { { echo "$as_me:$LINENO: error: CppAD sources not found - distribution corrupt?
 See \`config.log' for more details." >&5
-echo "$as_me: error: --with-cppad option was specified but does not seem to point at a valid CppAD installation
+echo "$as_me: error: CppAD sources not found - distribution corrupt?
 See \`config.log' for more details." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -20570,6 +20644,13 @@ echo "$as_me: error: conditional \"COMPILE_WITH_IPOPT\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${WITH_MINGW_TRUE}" && test -z "${WITH_MINGW_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"WITH_MINGW\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"WITH_MINGW\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${COMPILE_WITH_CPPAD_TRUE}" && test -z "${COMPILE_WITH_CPPAD_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"COMPILE_WITH_CPPAD\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -21279,6 +21360,9 @@ IPOPT_INC!$IPOPT_INC$ac_delim
 IPOPT_LIB!$IPOPT_LIB$ac_delim
 IPOPT_HOME!$IPOPT_HOME$ac_delim
 WITH_IPOPT!$WITH_IPOPT$ac_delim
+WITH_MINGW_TRUE!$WITH_MINGW_TRUE$ac_delim
+WITH_MINGW_FALSE!$WITH_MINGW_FALSE$ac_delim
+MINGW_HOME!$MINGW_HOME$ac_delim
 COMPILE_WITH_CPPAD_TRUE!$COMPILE_WITH_CPPAD_TRUE$ac_delim
 COMPILE_WITH_CPPAD_FALSE!$COMPILE_WITH_CPPAD_FALSE$ac_delim
 CPPAD_HOME!$CPPAD_HOME$ac_delim
@@ -21294,7 +21378,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 28; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 31; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
