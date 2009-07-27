@@ -28,6 +28,7 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
         boolean inSourcePartition =
             Util.is(d.getPartition(c.offset).getType()).among(
                     IDocument.DEFAULT_CONTENT_TYPE,
+                    Modelica22PartitionScanner.ANNOTATION_PARTITION,
                     Modelica22PartitionScanner.DEFINITION_PARTITION,
                     Modelica22PartitionScanner.NORMAL_PARTITION);
         

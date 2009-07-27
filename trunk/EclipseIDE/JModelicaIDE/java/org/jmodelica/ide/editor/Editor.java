@@ -30,7 +30,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
-import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
@@ -63,7 +62,9 @@ import org.jmodelica.folding.CharacterProjectionSupport;
 import org.jmodelica.folding.CharacterProjectionViewer;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.ModelicaCompiler;
+import org.jmodelica.ide.editor.actions.CollapseAllAction;
 import org.jmodelica.ide.editor.actions.ErrorCheckAction;
+import org.jmodelica.ide.editor.actions.ExpandAllAction;
 import org.jmodelica.ide.editor.actions.FollowReference;
 import org.jmodelica.ide.editor.actions.FormatRegionAction;
 import org.jmodelica.ide.editor.actions.ToggleAnnotationsAction;
@@ -73,9 +74,11 @@ import org.jmodelica.ide.folding.IFilePosition;
 import org.jmodelica.ide.helpers.EclipseCruftinessWorkaroundClass;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.outline.InstanceOutlinePage;
+import org.jmodelica.ide.outline.OutlinePage;
 import org.jmodelica.ide.outline.SourceOutlinePage;
 import org.jmodelica.ide.scanners.generated.Modelica22PartitionScanner;
 import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.modelica.compiler.BaseClassDecl;
 
 /**
  * Modelica source editor.
@@ -83,17 +86,8 @@ import org.jmodelica.modelica.compiler.ASTNode;
 public class Editor extends AbstractDecoratedTextEditor 
     implements IASTRegistryListener {
 
-
-    /* OK, these constant re-declarations are really redundant, but damn
-     * AbstractDecoratedTextEditorPreferenceConstants is a long class name o.O
-     */
-    private static final String CURRENT_LINE_COLOR_KEY = 
-        AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR;
-    private static final String CURRENT_LINE_KEY = 
-        AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE;
-    
     // Content outlines
-    private SourceOutlinePage fSourceOutlinePage;
+    private OutlinePage fSourceOutlinePage;
     private InstanceOutlinePage fInstanceOutlinePage;
 
     // Reconciling strategies
@@ -109,8 +103,7 @@ public class Editor extends AbstractDecoratedTextEditor
     private IDocumentPartitioner fPartitioner;
     
     // For folding
-    private CharacterProjectionSupport projectionSupport;
-    private AnnotationDrawer annotationDrawingStrategy;
+    private AnnotationDrawer annotationDrawer;
     
     // Actions that needs to be altered
     private ErrorCheckAction errorCheckAction;
@@ -132,7 +125,6 @@ public class Editor extends AbstractDecoratedTextEditor
         fRegistry            = org.jastadd.plugin.Activator.getASTRegistry();
         fSourceOutlinePage   = new SourceOutlinePage(this); 
         fInstanceOutlinePage = new InstanceOutlinePage(this);
-        followReference         = new FollowReference(this);
         fStrategy            = new ReconcilingStrategy();
         fLocalStrategy       = new LocalReconcilingStrategy(this);
         compiler             = new ModelicaCompiler();
@@ -167,18 +159,19 @@ public class Editor extends AbstractDecoratedTextEditor
     }
 
     private void configureProjectionSupport(CharacterProjectionViewer viewer) {
-        projectionSupport = 
+        CharacterProjectionSupport projectionSupport = 
             new CharacterProjectionSupport(
                     viewer, 
                     getAnnotationAccess(), 
                     getSharedColors());
-        annotationDrawingStrategy = 
+     
+        annotationDrawer = 
             new AnnotationDrawer(
                     projectionSupport.getAnnotationPainterDrawingStrategy());
-        annotationDrawingStrategy.setCursorLineBackground(getCursorLineBackground());
+        annotationDrawer.setCursorLineBackground(getCursorLineBackground());
         
         projectionSupport.setAnnotationPainterDrawingStrategy(
-                annotationDrawingStrategy);
+                annotationDrawer);
         projectionSupport.addSummarizableAnnotationType(
                 ModelicaCompiler.ERROR_MARKER_ID);
         projectionSupport.install();
@@ -196,7 +189,8 @@ public class Editor extends AbstractDecoratedTextEditor
                 IDEConstants.KEY_BRACE_MATCHING_COLOR, 
                 IDEConstants.BRACE_MATCHING_COLOR);
 
-        // Configure brace matching and ensure decoration support has been created and configured.
+        // Configure brace matching and ensure decoration support 
+        // has been created and configured.
         SourceViewerDecorationSupport decoration = 
             getSourceViewerDecorationSupport(viewer);
         decoration.setCharacterPairMatcher(
@@ -209,10 +203,10 @@ public class Editor extends AbstractDecoratedTextEditor
     @Override
     protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
         if (Util.is(event.getProperty()).among(
-                CURRENT_LINE_KEY, 
-                CURRENT_LINE_COLOR_KEY)) 
+                AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE, 
+                AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR)) 
         {
-            annotationDrawingStrategy.setCursorLineBackground(
+            annotationDrawer.setCursorLineBackground(
                     getCursorLineBackground());
         }
         super.handlePreferenceStoreChanged(event);
@@ -220,12 +214,15 @@ public class Editor extends AbstractDecoratedTextEditor
 
     private Color getCursorLineBackground() {
 
-        if (!getPreferenceStore().getBoolean(CURRENT_LINE_KEY))
+        if (!getPreferenceStore().getBoolean(
+                AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE))
+        {
             return null;
+        }
         
         RGB color = PreferenceConverter.getColor(
                 getPreferenceStore(), 
-                CURRENT_LINE_COLOR_KEY);
+                AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR);
         
         return new Color(Display.getCurrent(), color);
     }
@@ -264,7 +261,7 @@ public class Editor extends AbstractDecoratedTextEditor
      * @return  the source outline page
      * @see IContentOutlinePage
      */
-    public SourceOutlinePage getSourceOutlinePage() {
+    public IContentOutlinePage getSourceOutlinePage() {
         return fSourceOutlinePage;
     }
 
@@ -298,26 +295,28 @@ public class Editor extends AbstractDecoratedTextEditor
         }
         
     }
+    
 
     @Override   
     protected void createActions() {
         super.createActions();
+        setActions( new ExpandAllAction(this),
+                    new CollapseAllAction(this),
+                    new FormatRegionAction(this),
+                    new ToggleComment(this),
+                    errorCheckAction =      
+                        new ErrorCheckAction(),
+                    toggleAnnotationsAction = 
+                        new ToggleAnnotationsAction(this),
+                    followReference =         
+                        new FollowReference(this)); 
         
-        setAction(IDEConstants.ACTION_EXPAND_ALL_ID, 
-                new ExpandAllAction());
-        setAction(IDEConstants.ACTION_COLLAPSE_ALL_ID, 
-                new CollapseAllAction());
-        setAction(IDEConstants.ACTION_ERROR_CHECK_ID, 
-                errorCheckAction = new ErrorCheckAction());
-        setAction(IDEConstants.ACTION_TOGGLE_ANNOTATIONS_ID, 
-                toggleAnnotationsAction = new ToggleAnnotationsAction(this));
-        setAction(IDEConstants.ACTION_FORMAT_REGION_ID, 
-                new FormatRegionAction(this));
-        setAction(IDEConstants.ACTION_TOGGLE_COMMENT_ID, 
-                new ToggleComment(this));
-        setAction(IDEConstants.ACTION_COMPLETE_ID, 
-                followReference);
         updateErrorCheckAction();
+    }
+    
+    public void setActions(Action... actions) {
+        for (Action action : actions) 
+            super.setAction(action.getId(), action);
     }
     
     @Override
@@ -451,23 +450,25 @@ public class Editor extends AbstractDecoratedTextEditor
      */
     private void update() {
         
-        if (getSourceViewer() != null && 
-            fRoot != null && 
-           !fRoot.isError()) 
+        if (getSourceViewer() == null || 
+            fRoot == null || 
+            fRoot.isError())
         {
-            IDocument document = getDocument();
-            if (document != null) 
-                setupDocumentPartitioner(document);
-        
-            // Update outline
-            fSourceOutlinePage.updateAST(fRoot);
-            fInstanceOutlinePage.updateAST(fRoot);
-            followReference.updateAST(fRoot);
-            
-            // Update folding
-            updateProjectionAnnotations();
-            updateErrorCheckAction();
+            return;
         }
+    
+        IDocument document = getDocument();
+        if (document != null) 
+            setupDocumentPartitioner(document);
+    
+        // Update outline
+        fSourceOutlinePage.updateAST(fRoot);
+        fInstanceOutlinePage.updateAST(fRoot);
+        followReference.updateAST(fRoot);
+        
+        // Update folding
+        updateProjectionAnnotations();
+        updateErrorCheckAction();
     }
     
     private void setupDocumentPartitioner(IDocument document) {
@@ -485,9 +486,8 @@ public class Editor extends AbstractDecoratedTextEditor
 
     private IDocumentPartitioner getDocumentPartitioner() {
         if (fPartitioner == null) {
-            Modelica22PartitionScanner scanner = 
-                new Modelica22PartitionScanner();
-            fPartitioner = new FastPartitioner(scanner, 
+            fPartitioner = new FastPartitioner(
+                    new Modelica22PartitionScanner(),
                     Modelica22PartitionScanner.LEGAL_PARTITIONS);
         }
         return fPartitioner;
@@ -522,7 +522,7 @@ public class Editor extends AbstractDecoratedTextEditor
 
         IFoldingNode node = fRoot;
         ITextSelection sel = getSelection();
-
+        
         for (Position pos : node.foldingPositions(this.getDocument())) {
             
             if (fIsLibrary && 
@@ -566,61 +566,52 @@ public class Editor extends AbstractDecoratedTextEditor
      * currently containing selection.
      */
     private void updateErrorCheckAction() {
+
+        BaseClassDecl containgClass;
+      
         try {
-            ITextSelection sel = getSelection(); 
-            errorCheckAction.setCurClass(
-                 fRoot.containingClass(sel.getOffset(), sel.getLength()));
+            
+            containgClass = fRoot.containingClass(
+                    getSelection().getOffset(), 
+                    getSelection().getLength());
+            
         } catch (NullPointerException e) {
+            
             e.printStackTrace();
+            containgClass = null;
+            
         }
+        
+        errorCheckAction.setCurClass(containgClass);
     }
 
+    /**
+     * Selects the <code> node </code> in the editor contains file <code>
+     *  node </code> is from. 
+     * @param node node to select
+     * @return whether file <code> node </code> is from matches file in editor
+     */
     public boolean selectNode(ASTNode node) {
         
-        String path = getPathOfInput(getEditorInput());
-        if (!path.equals(node.containingFileName()))
-            return false;
+        boolean matchesInput = 
+            getPathOfInput(getEditorInput()).equals(
+            node.containingFileName());
         
-        ASTNode sel = node.getSelectionNode();
-        if (sel.getOffset() >= 0 && sel.getLength() >= 0) 
-            selectAndReveal(sel.getOffset(), sel.getLength());
+        if (matchesInput) {
 
-        return true;
-    }
-
-    private class DoOperationAction extends Action {
-        private int action;
-
-        public DoOperationAction(String text, int action) {
-            super(text);
-            this.action = action;
+            ASTNode sel = node.getSelectionNode();
+            if (sel.getOffset() >= 0 && sel.getLength() >= 0) 
+                selectAndReveal(sel.getOffset(), sel.getLength());
         }
         
-        @Override
-        public void run() {
-            ISourceViewer sourceViewer = getSourceViewer();
-            if (sourceViewer instanceof ITextOperationTarget) {
-                ((ITextOperationTarget) sourceViewer).doOperation(action);
-            }
-        }
-    }
-
-    private class ExpandAllAction extends DoOperationAction {
-        public ExpandAllAction() {
-            super("&Expand All", CharacterProjectionViewer.EXPAND_ALL);
-        }
-    }
-
-    private class CollapseAllAction extends DoOperationAction {
-        public CollapseAllAction() {
-            super("&Collapse All", CharacterProjectionViewer.COLLAPSE_ALL);
-        }
+        return matchesInput;
     }
 
     public IDocument getDocument() {
         return getSourceViewer() == null ? null : getSourceViewer().getDocument();
     }
     
+    // superclass method is final and protected
     public ISourceViewer publicGetSourceViewer() {
         return getSourceViewer();
     }

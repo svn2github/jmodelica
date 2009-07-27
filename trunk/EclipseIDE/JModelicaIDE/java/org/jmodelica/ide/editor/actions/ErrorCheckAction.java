@@ -18,6 +18,7 @@ private BaseClassDecl currentClass;
 
 public ErrorCheckAction() {
     super();
+    super.setId(IDEConstants.ACTION_ERROR_CHECK_ID);
     setTexts(IDEConstants.ACTION_ERROR_CHECK_TEXT);
     setEnabled(false);
     super.setActionDefinitionId("JModelicaIDE.ErrorCheckCommand");

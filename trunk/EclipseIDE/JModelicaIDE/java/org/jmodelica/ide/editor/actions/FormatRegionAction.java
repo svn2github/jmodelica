@@ -3,6 +3,7 @@ package org.jmodelica.ide.editor.actions;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
+import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.indent.AnchorList;
@@ -21,6 +22,7 @@ protected Editor editor;
 
 public FormatRegionAction(Editor editor) {
     super();
+    super.setId(IDEConstants.ACTION_FORMAT_REGION_ID);
     setActionDefinitionId(
             "JModelicaIDE.ModelicaFormatRegionCommand");
     this.editor = editor;

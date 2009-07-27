@@ -79,8 +79,8 @@ public EditorContributor() {
             IDEConstants.ACTION_TOGGLE_COMMENT_TEXT);
     
     completeAction = new LabelRetargetAction(
-            IDEConstants.ACTION_COMPLETE_ID,
-            IDEConstants.ACTION_COMPLETE_TEXT);
+            IDEConstants.ACTION_FOLLOW_REFERENCE_ID,
+            IDEConstants.ACTION_FOLLOW_REFERENCE_TEXT);
    
     retargetActions = new RetargetAction[] { 
             errorCheckAction,

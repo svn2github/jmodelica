@@ -5,6 +5,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
+import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.ide.helpers.Util;
 
@@ -21,8 +22,10 @@ protected Editor editor;
 
 public ToggleComment(Editor editor) {
     super();
+    super.setId(IDEConstants.ACTION_TOGGLE_COMMENT_ID);
     setActionDefinitionId(
             "JModelicaIDE.ModelicaToggleCommentCommand");
+    
     this.editor = editor;
 }
 

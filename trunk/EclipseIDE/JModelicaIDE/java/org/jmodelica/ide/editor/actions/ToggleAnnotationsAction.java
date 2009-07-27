@@ -4,6 +4,7 @@ package org.jmodelica.ide.editor.actions;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.jmodelica.folding.CharacterProjectionViewer;
+import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
 
 public class ToggleAnnotationsAction extends ConnectedTextsAction {
@@ -13,6 +14,7 @@ protected boolean visible;
 
 public ToggleAnnotationsAction(Editor editor) {
     super();
+    super.setId(IDEConstants.ACTION_TOGGLE_ANNOTATIONS_ID);
     this.editor = editor;
     update(false);
     this.setActionDefinitionId(

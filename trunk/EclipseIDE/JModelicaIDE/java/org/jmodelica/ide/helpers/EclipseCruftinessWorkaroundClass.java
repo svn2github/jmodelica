@@ -20,17 +20,16 @@ import org.jmodelica.ide.editor.Editor;
  */
 public class EclipseCruftinessWorkaroundClass {
 
-public static Maybe<Editor> getModelicaEditorForFile(String filename) {
-    
-    IFile file = getFileForPath(filename);
-    
+public static Maybe<Editor> getModelicaEditorForFile(IFile file) {
+
     IWorkbenchPage page = PlatformUI.getWorkbench().
         getActiveWorkbenchWindow().getActivePage(); 
     
+    System.out.println("!@!@!@!@!: "+file.getName());
     IEditorDescriptor desc = PlatformUI.getWorkbench().
     getEditorRegistry().getDefaultEditor(file.getName());
     
-    // cuteness overload
+    // warning: cuteness overload
     Editor part;
     try {
         part = (Editor)page.openEditor(new FileEditorInput(file), desc.getId());

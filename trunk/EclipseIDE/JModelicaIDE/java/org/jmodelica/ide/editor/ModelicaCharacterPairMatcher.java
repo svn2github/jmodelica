@@ -78,9 +78,9 @@ public class ModelicaCharacterPairMatcher implements ICharacterPairMatcher {
 		return null;
 	}
 
-	private boolean isPositionOk(IDocument document, int offset)
-			throws BadLocationException {
-		return isNormalState(document, offset) && !isFolded(document, offset);
+	private boolean isPositionOk(IDocument document, int offset) {
+		return isNormalState(document, offset) && 
+		      !isFolded(document, offset);
 	}
 
 	private boolean isFolded(IDocument document, int offset) {

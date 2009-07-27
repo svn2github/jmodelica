@@ -46,6 +46,8 @@ public class IDEConstants {
     public static final String ACTION_TOGGLE_COMMENT_TEXT = "Toggle &Comment";
     public static final String ACTION_COMPLETE_ID = ACTION_ID + ".complete";
     public static final String ACTION_COMPLETE_TEXT = "&Complete Name";
+    public static final String ACTION_FOLLOW_REFERENCE_ID = ACTION_ID + ".complete";
+    public static final String ACTION_FOLLOW_REFERENCE_TEXT = "&Complete Name";
     public static final String GROUP_ID = ACTION_ID + ".group";
 	public static final String GROUP_MODELICA_ID = GROUP_ID + ".modelica";
 	public static final String GROUP_ERROR_ID = GROUP_ID + ".error";
