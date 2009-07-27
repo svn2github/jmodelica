@@ -12,7 +12,7 @@ import jmodelica.compiler as cp
 jm_home = os.environ.get('JMODELICA_HOME')
 path_to_examples = os.sep+'Python'+os.sep+'jmodelica'+os.sep+'examples'
 
-model = os.sep+'pendulum_no_opt'+os.sep+'Pendulum_pack_no_opt.mo'
+model = os.sep+'files'+os.sep+'Pendulum_pack_no_opt.mo'
 fpath = jm_home+path_to_examples+model
 cpath = "Pendulum_pack.Pendulum"
 cp.set_log_level(cp.LOG_ERROR)

@@ -18,7 +18,7 @@ sep = os.path.sep
 jm_home = os.environ.get('JMODELICA_HOME')
 path_to_examples = sep + "Python" + sep + "jmodelica" + sep + "examples"
 
-model = sep + "vdp_minimum_time" + sep + "VDP.mo"
+model = sep + "files" + sep + "VDP.mo"
 fpath = jm_home+path_to_examples+model
 cpath = "VDP_pack.VDP_Opt"
 

@@ -35,7 +35,7 @@ def test_jmi_opt_sim_set_initial_from_trajectory():
     they match.
     """
     
-    model = sep + "vdp_minimum_time" + sep + "VDP.mo"
+    model = sep + "files" + sep + "VDP.mo"
     fpath = jm_home+path_to_examples+model
     cpath = "VDP_pack.VDP_Opt"
     fname = cpath.replace('.','_',1)
