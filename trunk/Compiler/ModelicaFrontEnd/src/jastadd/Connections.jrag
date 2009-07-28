@@ -155,8 +155,8 @@ aspect Connections {
 
 //			System.out.println("ConnectionSetManager.addVars");
 		
-//		    System.out.println(namePrefix1.name()+"."+var1.name());
-//		    System.out.println(namePrefix2.name()+"."+var2.name());
+		    //System.out.println(namePrefix1.name()+" . "+var1.name());
+		    //System.out.println(namePrefix2.name()+" . "+var2.name());
 		
 			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1,outside1,namePrefix1);
 			ConnectionSetEntry cse2 = new ConnectionSetEntry(var2,outside2,namePrefix2);	

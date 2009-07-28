@@ -395,7 +395,149 @@ end ConnectTests.CircuitTest2;
     connect(r.n,f.n);
   end CircuitTest2;
 
+model ConnectorTest
 
+  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="ConnectorTest",
+        description="Test of generation of connection equations.",
+                                               flatModel=
+"fclass ConnectTests.ConnectorTest
+ parameter Real c.b.firstOrder.k = 1 \"Gain\" /* 1.0 */;
+ parameter Real c.b.firstOrder.T(start = 1,final quantity = \"Time\",final unit = \"s\") = 1 \"Time Constant\" /* 1.0 */;
+ parameter Real c.b.firstOrder.y_start = 0 \"Initial or guess value of output (= state)\" /* 0.0 */;
+ Real c.b.firstOrder.u \"Connector of Real input signal\";
+ Real c.b.firstOrder.y(start = c.b.firstOrder.y_start) \"Connector of Real output signal\";
+ Real c.b.feedback.u1;
+ Real c.b.feedback.u2;
+ Real c.b.feedback.y;
+ Real c.b.u;
+ parameter Real c.const.k(start = 1) = 1 \"Constant output value\" /* 1.0 */;
+ Real c.const.y \"Connector of Real output signal\";
+initial equation 
+ c.b.firstOrder.y = c.b.firstOrder.y_start;
+equation 
+ c.b.firstOrder.der(y) = ( ( c.b.firstOrder.k ) * ( c.b.firstOrder.u ) - ( c.b.firstOrder.y ) ) / ( c.b.firstOrder.T );
+ c.b.feedback.y = c.b.feedback.u1 - ( c.b.feedback.u2 );
+ c.const.y = c.const.k;
+ c.b.feedback.u1 = c.b.u;
+ c.b.u = c.const.y;
+ c.b.feedback.y = c.b.firstOrder.u;
+ c.b.feedback.u2 = c.b.firstOrder.y;
+end ConnectTests.ConnectorTest;
+")})));
+
+   model A
+ 
+     RealInput u
+      annotation (Placement(transformation(extent={{-120,-20},{-80,20}})));
+     RealOutput y
+      annotation (Placement(transformation(extent={{100,-10},{120,10}})));
+     parameter Real k = 1;
+   equation 
+     y = k*u;
+   end A;
+ 
+   model B
+		FirstOrder firstOrder
+		  annotation (Placement(transformation(extent={{30,12},{50,32}})));
+    Feedback feedback
+      annotation (Placement(transformation(extent={{-46,12},{-26,32}})));
+    annotation (Diagram(coordinateSystem(preserveAspectRatio=true, extent={{
+              -100,-100},{100,100}}), graphics));
+    RealInput u
+      annotation (Placement(transformation(extent={{-120,-20},{-80,20}})));
+   equation 
+    connect(feedback.y, firstOrder.u) annotation (Line(
+        points={{-27,22},{28,22}},
+        color={0,0,127},
+        smooth=Smooth.None));
+    connect(firstOrder.y, feedback.u2) annotation (Line(
+        points={{51,22},{74,22},{74,-22},{-36,-22},{-36,14}},
+        color={0,0,127},
+        smooth=Smooth.None));
+    connect(feedback.u1, u) annotation (Line(
+        points={{-44,22},{-66,22},{-66,0},{-100,0}},
+        color={0,0,127},
+        smooth=Smooth.None));
+   end B;
+
+
+   
+	  block FirstOrder "First order transfer function block (= 1 pole)"
+	   parameter Real k=1 "Gain";
+	   parameter Modelica.SIunits.Time T(start=1)=1 "Time Constant";
+	   parameter Real y_start=0 "Initial or guess value of output (= state)";
+	
+	   extends SISO(y(start=y_start));
+	
+	 initial equation 
+		 y = y_start;
+	 equation 
+	   der(y) = (k*u - y)/T;
+	 end FirstOrder;
+	
+	connector RealInput =  input Real "'input Real' as connector";
+	
+   connector RealOutput = output Real "'output Real' as connector";
+	
+   block Feedback 
+	 "Output difference between commanded and feedback input"
+	
+	 input RealInput u1;
+	 input RealInput u2;
+	 output RealOutput y;
+	
+   equation 
+	 y = u1 - u2;
+   end Feedback;
+	
+	partial block SISO 
+	 "Single Input Single Output continuous control block"
+	 extends BlockIcon;
+	
+	 RealInput u "Connector of Real input signal";
+	 RealOutput y "Connector of Real output signal";
+   end SISO;
+	
+   partial block BlockIcon 
+	 "Basic graphical layout of input/output block"
+	
+	
+   equation
+	
+   end BlockIcon;
+	
+   block Constant 
+	 "Generate constant signal of type Real"
+	 parameter Real k(start=1) "Constant output value";
+	 extends SO;
+	
+   equation 
+	 y = k;
+   end Constant;
+	
+   partial block SO 
+	 "Single Output continuous control block"
+	 extends BlockIcon;
+	
+	 RealOutput y "Connector of Real output signal";
+	
+   end SO;
+    model C
+    B b annotation (Placement(transformation(extent={{28,6},{48,26}})));
+    Constant const(k=1)
+      annotation (Placement(transformation(extent={{-60,8},{-40,28}})));
+    annotation (Diagram(coordinateSystem(preserveAspectRatio=false, extent={{
+              -100,-100},{100,100}}), graphics));
+  equation 
+    connect(const.y, b.u) annotation (Line(
+        points={{-39,18},{-6,18},{-6,16},{28,16}},
+        color={0,0,127},
+        smooth=Smooth.None));
+  end C;
+  
+  C c;
+end ConnectorTest;
 
 
 end ConnectTests;

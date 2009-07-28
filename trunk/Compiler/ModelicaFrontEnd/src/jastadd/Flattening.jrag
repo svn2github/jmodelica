@@ -485,9 +485,14 @@ aspect FlatExpressions {
 				
 		// Is it two "primitives" that are connected?
 		if (c1.extendsPrimitive() || c1.isPrimitive()) {
+/*
 			fc.getConnectionSetManager().addVars(getConnector1().getInstAccess().myInstComponentDecl(),false,((FQName)prefix.fullCopy()).append(getConnector1().getInstAccess().flatten(prefix)),
 		                                         getConnector2().getInstAccess().myInstComponentDecl(),false,((FQName)prefix.fullCopy()).append(getConnector2().getInstAccess().flatten(prefix)));
-		    return;
+*/
+			fc.getConnectionSetManager().addVars(getConnector1().getInstAccess().myInstComponentDecl(),false,getConnector1().getInstAccess().flatten(prefix),
+                    getConnector2().getInstAccess().myInstComponentDecl(),false,getConnector2().getInstAccess().flatten(prefix));
+
+			return;
 		}
 
 		boolean outside1 = enclosingInstClassDecl().memberInstComponent(getConnector1().getInstAccess().name()).size()>0;

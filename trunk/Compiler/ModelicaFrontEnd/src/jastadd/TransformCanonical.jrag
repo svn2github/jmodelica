@@ -104,6 +104,8 @@ aspect TransformCanonical{
 		root().flushAllRecursive();
 	}
 	
+	ArrayList<String> FClass.aliasErrors = new ArrayList<String>();
+	
 	/**
 	 * \brief Generate alias information and remove alias equations.
 	 */
@@ -117,30 +119,72 @@ aspect TransformCanonical{
 				FEquation eqn = (FEquation)equation;
 				if (eqn.getLeft() instanceof FIdUseExp && // x = y
  						eqn.getRight() instanceof FIdUseExp) {
-					aliasManager.addAliasVariables((FVariable)((FIdUseExp)eqn.getLeft()).myFV(),
-							(FVariable)((FIdUseExp)eqn.getRight()).myFV(),
+ 					AbstractFVariable fv1 = ((FIdUseExp)eqn.getLeft()).myFV();
+ 					AbstractFVariable fv2 = ((FIdUseExp)eqn.getRight()).myFV();	
+ 					if (fv1.isUnknown()) {
+ 						aliasErrors.add("During computation of alias sets: the variable " + ((FIdUseExp)eqn.getLeft()).name() + " is unknown.");
+ 						break;
+ 					}
+ 					if (fv2.isUnknown()) {
+ 						aliasErrors.add("During computation of alias sets: the variable " + ((FIdUseExp)eqn.getRight()).name() + " is unknown.");
+ 						break;
+ 					}
+					if (!fv1.isUnknown() && !fv2.isUnknown()) { 					
+						aliasManager.addAliasVariables((FVariable)fv1,
+							(FVariable)fv2,
 							false);
+					}
 				} else if (eqn.getLeft() instanceof FNegExp && // -x = y
 						((FNegExp)eqn.getLeft()).getFExp() instanceof FIdUseExp &&
 						eqn.getRight() instanceof FIdUseExp) {
-					aliasManager.addAliasVariables((FVariable)((FIdUseExp)((FNegExp)eqn.getLeft()).getFExp()).myFV(),
-							(FVariable)((FIdUseExp)eqn.getRight()).myFV(),
+ 					AbstractFVariable fv1 = ((FIdUseExp)((FNegExp)eqn.getLeft()).getFExp()).myFV();
+ 					AbstractFVariable fv2 = ((FIdUseExp)eqn.getRight()).myFV();
+ 					if (fv1.isUnknown()) {
+ 						aliasErrors.add("During computation of alias sets: the variable " + ((FIdUseExp)((FNegExp)eqn.getLeft()).getFExp()).name() + " is unknown.");
+ 					}
+ 					if (fv2.isUnknown()) {
+ 						aliasErrors.add("During computation of alias sets: the variable " + ((FIdUseExp)eqn.getRight()).name() + " is unknown.");
+  					}
+					if (!fv1.isUnknown() && !fv2.isUnknown()) {
+						aliasManager.addAliasVariables((FVariable)fv1,
+							(FVariable)fv2,
 							true); 
+		            }
 				} else if (eqn.getLeft() instanceof FIdUseExp && // x = -y
-						eqn.getRight() instanceof FNegExp &&
+ 						eqn.getRight() instanceof FNegExp &&
 						((FNegExp)eqn.getRight()).getFExp() instanceof FIdUseExp) {
-					aliasManager.addAliasVariables((FVariable)((FIdUseExp)eqn.getLeft()).myFV(),
-							(FVariable)((FIdUseExp)((FNegExp)eqn.getRight()).getFExp()).myFV(),
+					AbstractFVariable fv1 = ((FIdUseExp)eqn.getLeft()).myFV();
+ 					AbstractFVariable fv2 = ((FIdUseExp)((FNegExp)eqn.getRight()).getFExp()).myFV();	
+ 					if (fv1.isUnknown()) {
+ 						aliasErrors.add("During computation of alias sets: the variable " + ((FIdUseExp)eqn.getLeft()).name() + " is unknown.");
+  					}
+ 					if (fv2.isUnknown()) {
+ 						aliasErrors.add("During computation of alias sets: the variable " + ((FIdUseExp)((FNegExp)eqn.getRight()).getFExp()).name() + " is unknown.");
+ 						break;
+ 					}
+					if (!fv1.isUnknown() && !fv2.isUnknown()) {						
+						aliasManager.addAliasVariables((FVariable)fv1,
+							(FVariable)fv2,
 							true);
+					}
 				} else if (eqn.getLeft() instanceof FNegExp && // -x = -y
 						((FNegExp)eqn.getLeft()).getFExp() instanceof FIdUseExp &&
 						eqn.getRight() instanceof FNegExp &&
 						((FNegExp)eqn.getRight()).getFExp() instanceof FIdUseExp
 						) {
-					aliasManager.addAliasVariables((FVariable)((FIdUseExp)((FNegExp)eqn.getLeft()).getFExp()).myFV(),
-							(FVariable)((FIdUseExp)((FNegExp)eqn.getRight()).getFExp()).myFV(),
+					AbstractFVariable fv1 = ((FIdUseExp)((FNegExp)eqn.getLeft()).getFExp()).myFV();
+ 					AbstractFVariable fv2 = ((FIdUseExp)((FNegExp)eqn.getRight()).getFExp()).myFV();	
+ 					if (fv1.isUnknown()) {
+ 						aliasErrors.add("During computation of alias sets: the variable " + ((FIdUseExp)((FNegExp)eqn.getLeft()).getFExp()).name() + " is unknown.");
+ 					}
+ 					if (fv2.isUnknown()) {
+ 						aliasErrors.add("During computation of alias sets: the variable " + ((FIdUseExp)((FNegExp)eqn.getRight()).getFExp()).name() + " is unknown.");
+ 					}	
+					if (!fv1.isUnknown() && !fv2.isUnknown()) { 										
+						aliasManager.addAliasVariables((FVariable)fv1,
+							(FVariable)fv2,
 							false);
-
+					}
 				}
 			}
 		}	
@@ -275,6 +319,9 @@ aspect TransformCanonicalErrorCheck {
 		}
 		if (getAliasManager().aliasError()) {
 			error(getAliasManager().getAliasErrorMessage());
+		}
+		for (String str : aliasErrors) {
+			error(str);
 		}
 	}
 	
