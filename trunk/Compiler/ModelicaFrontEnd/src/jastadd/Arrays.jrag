@@ -21,11 +21,9 @@ aspect Arrays {
 		hasVarArraySubscripts()? getVarArraySubscripts():
 			null;
 
-/*
 	inh boolean FIdUseExp.inArraySubscripts();
 	eq FArraySubscripts.getChild().inArraySubscripts() = true;
 	eq Root.getChild().inArraySubscripts() = false;
-*/
 	
 	syn boolean Access.isArrayAccess() = false;
 	eq ArrayAccess.isArrayAccess() = hasArraySubscripts();
@@ -40,7 +38,9 @@ aspect Arrays {
 	eq InstArrayAccess.fArraySubscripts() = hasFArraySubscripts()? getFArraySubscripts(): null;
 
 	// Array dimensions
-	syn int FArraySubscripts.ndims() {
+	syn int FArraySubscripts.ndims() { 
+		// Need to check if each individual subscript increases 
+		// dimension. (ndims(x[1])=0)
 		int nd = 0;
 		for (FSubscript fs : getFSubscripts()) {
 			nd += fs.ndims();
@@ -49,7 +49,7 @@ aspect Arrays {
 	}
 	
 	syn int FSubscript.ndims();
-	// Can only be 0 or 1 for FExpSubscript
+	// Can only be 0 or 1 for FExpSubscript?
 	eq FExpSubscript.ndims() = getFExp().ndims();
 	eq FColonSubscript.ndims() = 1;
 	
@@ -57,7 +57,7 @@ aspect Arrays {
 	eq FInstAccessExp.ndims() = getInstAccess().ndims();
 	eq FRangeExp.ndims() = 1;
 	eq FArray.ndims() {
-		if (getNumFExp()==0) {
+		if (getNumFExp()==0) { //Empty array
 			return 1;
 		} else {
 			return getFExp(0).ndims() + 1;
@@ -67,6 +67,9 @@ aspect Arrays {
 	eq FOnes.ndims() = getNumFExp();
 	eq FZeros.ndims() = getNumFExp();
 	
+	syn int FIdUse.ndims() = getFQName().ndims();
+	eq FIdUseExp.ndims() = getFIdUse().ndims();
+		
 	syn int InstAccess.ndims() = 0;
 	eq InstArrayAccess.ndims() = hasFArraySubscripts()? 
 			getFArraySubscripts().ndims(): 
@@ -77,6 +80,17 @@ aspect Arrays {
 	syn int InstComponentDecl.ndims() = hasFArraySubscripts()? 
 			getFArraySubscripts().ndims(): 0;
 
+	syn int FVariable.ndims() = getFQName().ndims();
+	
+	syn int FQName.ndims() {
+		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
+		if (last.hasFArraySubscripts()) {
+			return last.getFArraySubscripts().ndims(); 
+		} else {
+			return 0;
+		}
+	}
+			
 	// Array sizes		
 	syn int[] FArraySubscripts.size() {
 		int s[] = new int[ndims()];
@@ -97,7 +111,41 @@ aspect Arrays {
 	
 	syn int[] FExp.size() = new int[0];
 	eq FInstAccessExp.size() = getInstAccess().size();
-	eq FRangeExp.size() = new int[1];
+
+	/*//TODO: Not finished!
+ 	eq FRangeExp.size() {
+		int[] si = new int[1];
+		si[0] = 0;
+		if (getNumFExp()==2) {
+			si[0] = getFExp(1).ceval().intValue() - 
+				getFExp(0).ceval().intValue() + 1;
+			if (si[0]<0) {
+				si[0] = 0;
+			}
+		} else if (getNumFExp()==3) {
+			double i1 = getFExp(0).ceval().realValue();
+			double i2 = getFExp(1).ceval().realValue();
+			double i3 = getFExp(2).ceval().realValue();
+			
+			if (i3>=i1 && i2>0) { // 1:2:3
+				double i = i1;
+				while (i<=i3) {
+					
+				}
+			} else if (i3<i1 && i2>0) { // 3:2:1
+				si[0] = 0;
+			} else if (i3<i1 && i2<0) { // 3:-2:1
+
+			} else if (i3>=i1 && i2<0) { // 1:-2:0
+				si[0] = 0;
+			} else if (i2==0) {
+				si[0] = 0;
+			}
+		}
+		return si;
+	}
+	*/
+	
 	eq FArray.size() {
 		int s[] = new int[ndims()];
 		if (getNumFExp()==0) {
@@ -122,9 +170,9 @@ aspect Arrays {
 		for (FExp fe : getFExps()) {
 			s[index++] = fe.ceval().intValue();
 		}
-		return s;
-		
+		return s;		
 	}
+	
 	eq FZeros.size() {
 		int s[] = new int[ndims()];
 		int index = 0;
@@ -134,6 +182,9 @@ aspect Arrays {
 		return s;
 		
 	}
+	
+	syn int[] FIdUse.size() = getFQName().size();
+	eq FIdUseExp.size() = getFIdUse().size();
 	
 	syn int[] InstAccess.size() = new int[0];
 	eq InstArrayAccess.size() = hasFArraySubscripts()? 
@@ -155,13 +206,35 @@ aspect Arrays {
 	
 	syn int[] InstComponentDecl.size() = hasFArraySubscripts()? 
 			getFArraySubscripts().size(): new int[0];
+
+	syn int[] FVariable.size() = getFQName().size();
 			
-			
+	syn int[] FQName.size() {
+		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
+		if (last.hasFArraySubscripts()) {
+			return last.getFArraySubscripts().size(); 
+		} else {
+			return new int[0];
+		}
+	}
+				
+	syn boolean FExp.isArray() = ndims()>0;
+	syn boolean FVariable.isArray() = ndims()>0;
+	syn boolean InstPrimitive.isArray() = ndims()>0;
+
+	// Computation of Arrays from expressions
+	syn nta FArray FExp.array() = null;
 	
-	/*
-	syn int FIdUse.size() = getFQName().size();
+	syn FArray FSubscript.array() = null;
 	
-	syn int getFQName().size() = -1;
+	eq FExpSubscript.array() = getFExp().array();
+/*		
+	eq FRangeExp.array() {
+		
+		
+	}
 	*/
+	
+	
 	
 }
