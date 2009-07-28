@@ -18,7 +18,8 @@ except ImportError:
     import nvecserial
 from openopt import NLP
     
-from jmodelica.jmi import *
+import jmodelica.jmi as pyjmi
+from jmodelica.jmi import c_jmi_real_t
 import pylab as p
 import nose
 
@@ -72,23 +73,23 @@ class StandardModel(object):
     
     """
     def __init__(self, dllname, path):
-        self._jmim = JMIModel(dllname, path)
+        self._m = pyjmi.Model(dllname, path)
                
     def getParameters(self):
         """Returns the parameters."""
-        return self._jmim.pi
+        return self._m.pi
         
     def setParameters(self, params):
-        self._jmim.pi = params
+        self._m.pi = params
         
     def getStates(self):
-        return self._jmim.x
+        return self._m.x
         
     def setStates(self, x):
-        self._jmim.x = x
+        self._m.x = x
         
     def getDiffs(self):
-        return self._jmim.dx
+        return self._m.dx
         
     def getModelSize(self):
         """ Returns the dimension of the problem. """
@@ -110,18 +111,17 @@ class StandardModel(object):
         
     def evalF(self):
         """ Evaluate F."""
-        self._jmim.ode_f()
+        self._m.jmimodel.ode_f()
         
     def evalJacX(self):
         """ Evaluate the jacobian of the function F w.r.t. states x. """
         jac  = N.array([0] * self.getRealModelSize()**2, dtype=c_jmi_real_t)
         mask = N.array([1] * self.getRealModelSize()**2, dtype=N.int32)
-        self._jmim.jmi_ode_df(self._jmi,
-                                   J.JMI_DER_CPPAD,
-                                   J.JMI_DER_DENSE_ROW_MAJOR,
-                                   J.JMI_DER_X,
-                                   mask,
-                                   jac)
+        self._m.jmimodel.jmi_ode_df(pyjmi.JMI_DER_CPPAD,
+                                    pyjmi.JMI_DER_DENSE_ROW_MAJOR,
+                                    pyjmi.JMI_DER_X,
+                                    mask,
+                                    jac)
         n = self.getRealModelSize()
         jac = jac.reshape( (n,n) )
         return jac
@@ -139,48 +139,48 @@ class StandardModel(object):
                                   ' sensitivity analysis implicitly.')
                                    
     def getInputs(self):
-        return self._jmim.u
+        return self._m.u
         
     def setInputs(self, new_u):
-        self._jmim.u = new_u
+        self._m.u = new_u
         
     def getAlgebraics(self):
-        return self._jmim.w
+        return self._m.w
         
     def setAlgebraics(self, w):
-        self._jmim.w = w
+        self._m.w = w
         
     def setTime(self, new_t):
         """ Set the variable t. """
-        self._jmim.t = new_t
+        self._m.t = new_t
         
     def getTime(self):
-        return self._jmim.t
+        return self._m.t
         
     def evalCost(self):
         """ Evaluate the optimization cost function, J. """
-        return self._jmim.opt_J()
+        return self._m.jmimodel.opt_J()
         
     def isFreeStartTime(self):
-        ignore1, start_time_free, ignore2, ignore3 = self._jmim.opt_get_optimization_interval()
+        ignore1, start_time_free, ignore2, ignore3 = self._m.jmimodel.opt_get_optimization_interval()
         return start_time_free == 1
         
     def isFixedStartTime(self):
         return not self.isFreeStartTime()
         
     def isFreeFinalTime(self):
-        ignore1, ignore2, ignore3, final_time_free = self._jmim.opt_get_optimization_interval()
+        ignore1, ignore2, ignore3, final_time_free = self._m.jmimodel.opt_get_optimization_interval()
         return final_time_free == 1
         
     def isFixedFinalTime(self):
         return not self.isFreeFinalTime()
         
     def getStartTime(self):
-        start_time, ignore1, ignore2, ignore3 = self._jmim.opt_get_optimization_interval()
+        start_time, ignore1, ignore2, ignore3 = self._m.jmimodel.opt_get_optimization_interval()
         return start_time
         
     def getFinalTime(self):
-        ignore1, ignore2, final_time, ignore3 = self._jmim.opt_get_optimization_interval()
+        ignore1, ignore2, final_time, ignore3 = self._m.jmimodel.opt_get_optimization_interval()
         return final_time
         
     def getCostJacobian(self, independent_variables, mask=None):
@@ -196,22 +196,25 @@ class StandardModel(object):
         @return:
             The cost gradient/jacobian.
         """
-        assert self._jmim._n_z.value != 0
+        assert self._m._n_z.value != 0
         if mask is None:
-            mask = N.ones(self._jmim._n_z.value, dtype=int)
+            mask = N.ones(self._m._n_z.value, dtype=int)
         
-        n_cols, n_nz = self._jmim.opt_dJ_dim(JMI_DER_CPPAD,
-                                             JMI_DER_DENSE_ROW_MAJOR,
-                                             independent_variables,
-                                             mask)
+        n_cols, n_nz = self._m.jmimodel.opt_dJ_dim(pyjmi.JMI_DER_CPPAD,
+                                                   pyjmi.JMI_DER_DENSE_ROW_MAJOR,
+                                                   independent_variables,
+                                                   mask)
         jac = N.zeros(n_nz, dtype=c_jmi_real_t)
         
-        self._jmim.opt_dJ(JMI_DER_CPPAD, JMI_DER_DENSE_ROW_MAJOR, independent_variables,
-                          jac)
+        self._m.jmimodel.opt_dJ(pyjmi.JMI_DER_CPPAD,
+                                pyjmi.JMI_DER_DENSE_ROW_MAJOR,
+                                independent_variables,
+                                mask,
+                                jac)
         return jac.reshape( (1, len(jac)) )
         
     def reset(self):
-        self._jmim.resetModel()
+        self._m.resetModel()
 
 
 class TestStandardModel:
@@ -309,13 +312,28 @@ class TestStandardModel:
         self.m.evalF()
 
     def testFixedSimulation(self):
-        """ Test simulation
-        
-        """
+        """Test simulation"""
         assert self.m.isFixedStartTime(), "Only fixed times supported."
         assert self.m.isFixedFinalTime(), "Only fixed times supported."
         
         T, ys, sens, ignore = solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime())
+        assert len(T) == len(ys)
+        
+        p.plot(T, ys)
+        p.title('testFixedSimulation(...) output')
+        #p.show()
+        
+    def testFixedSimulationIntervals(self):
+        """Test simulation between a different time span."""
+        assert self.m.isFixedStartTime(), "Only fixed times supported."
+        assert self.m.isFixedFinalTime(), "Only fixed ties supported."
+        
+        middle_timepoint = (self.m.getFinalTime() + self.m.getStartTime()) / 2.0
+        
+        T, ys, sens, ignore = solve_using_sundials(self.m, self.m.getFinalTime(), middle_timepoint)
+        assert len(T) == len(ys)
+        T, ys, sens, ignore = solve_using_sundials(self.m, middle_timepoint, self.m.getStartTime())
+        assert len(T) == len(ys)
         
         p.plot(T, ys)
         p.title('testFixedSimulation(...) output')
@@ -330,12 +348,12 @@ class TestStandardModel:
             tests in this class.
         """
         solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime())
-        assert self.m._jmim._n_z > 0, "Length of z should be greater than zero."
-        print 'n_z.value:', self.m._jmim._n_z.value
-        n_cols, n_nz = self.m._jmim.opt_dJ_dim(JMI_DER_CPPAD,
-                                               JMI_DER_SPARSE,
-                                               JMI_DER_X_P,
-                                               N.ones(self.m._jmim._n_z.value,
+        assert self.m._m._n_z > 0, "Length of z should be greater than zero."
+        print 'n_z.value:', self.m._m._n_z.value
+        n_cols, n_nz = self.m._m.jmimodel.opt_dJ_dim(pyjmi.JMI_DER_CPPAD,
+                                                     pyjmi.JMI_DER_SPARSE,
+                                                     pyjmi.JMI_DER_X_P,
+                                                     N.ones(self.m._m._n_z.value,
                                                       dtype=int))
         
         print 'n_nz:', n_nz
@@ -348,8 +366,8 @@ class TestStandardModel:
         """ Test evaluation of optimization cost function
         """
         T, ys, sens, ignore = solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime())
-        self.m._jmim.setX_P(ys[-1], 0)
-        self.m._jmim.setDX_P(self.m.getDiffs(), 0)
+        self.m._m.setX_P(ys[-1], 0)
+        self.m._m.setDX_P(self.m.getDiffs(), 0)
         cost = self.m.evalCost()
         nose.tools.assert_not_equal(cost, 0)
         
@@ -360,10 +378,14 @@ class TestStandardModel:
             This test is model specific for the VDP oscillator.
         """
         T, ys, sens, ignore = solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime())
-        self.m._jmim.setX_P(ys[-1], 0)
-        self.m._jmim.setDX_P(self.m.getDiffs(), 0)
-        jac = self.m.getCostJacobian(JMI_DER_X_P)
+        self.m._m.setX_P(ys[-1], 0)
+        self.m._m.setDX_P(self.m.getDiffs(), 0)
+        jac = self.m.getCostJacobian(pyjmi.JMI_DER_X_P)
         N.testing.assert_almost_equal(jac, [[0, 0, 1]])
+        
+    def testReset(self):
+        """ Testing resetting the model."""
+        self.m.reset()
 
 
 def solve_using_sundials(model, end_time, start_time=0.0, verbose=False, sensi=False, use_jacobian=False):
@@ -393,6 +415,11 @@ def solve_using_sundials(model, end_time, start_time=0.0, verbose=False, sensi=F
                for the the sensivity matrix.
                
     """
+    if end_time < start_time:
+        raise ShootingException('End time cannot be before start time.')
+    if end_time == start_time:
+        raise ShootingException('End time and start time cannot currently coinside.')
+    
     def _sundials_f(t, x, dx, f_data):
         """ Model (RHS) evaluation function.
         
@@ -544,7 +571,7 @@ def solve_using_sundials(model, end_time, start_time=0.0, verbose=False, sensi=F
         parameters = None # Needed for correct return
         
     if use_jacobian:
-        raise ShootingException('Jacobian is not implemented as of now.')
+        raise NotImplementedError('Jacobian cannot be used as of now.')
         cvodes.CVDenseSetJacFn(cvode_mem, _Jac, ctypes.pointer(data))
     cvodes.CVodeSetFdata(cvode_mem, ctypes.pointer(data))
     
@@ -568,10 +595,12 @@ def solve_using_sundials(model, end_time, start_time=0.0, verbose=False, sensi=F
         cvodes.CVodeSetSensParams(cvode_mem, parameters.params, None, None)
 
     # time step
-    tout = 0.4
+    time_step = 0.02
+    
+    tout = start_time + time_step
 
     # initial time
-    t = cvodes.realtype(0.0)
+    t = cvodes.realtype(t0.value)
 
     # used for collecting the y's for plotting
     T, ylist = [], []
@@ -589,13 +618,13 @@ def solve_using_sundials(model, end_time, start_time=0.0, verbose=False, sensi=F
         ylist.append(N.array(y))
 
         if flag == cvodes.CV_SUCCESS:
-            tout += 0.02;
+            tout += time_step
 
         if tout > end_time:
             break
             
-        if sensi:
-            cvodes.CVodeGetSens(cvode_mem, t, yS)
+    if sensi:
+        cvodes.CVodeGetSens(cvode_mem, t, yS)
 
     if verbose:
         # collecting lots of information about the execution and present it
@@ -633,8 +662,7 @@ def _shoot(model, start_time, end_time):
     @note:
         Currently only supports inputs.
     @note:
-        Assumes cost function is not directly dependent on parameters
-        (in this case - input u).
+        Assumes cost function is only dependent on state X.
         
     @param start_time:
         The time when simulation should start.
@@ -642,31 +670,38 @@ def _shoot(model, start_time, end_time):
         The time when the simulation should finish.
     @return:
         A tuple consisting of:
-            1. The cost after simulation.
-            2. The cost gradient with respect to input U.
-            3. The final ($t_{tp_0}=1$) simulation states.
+            1. The cost gradient with respect to initial states and
+               input U.
+            2. The final ($t_{tp_0}=1$) simulation states.
+            3. A structure holding the indices for the gradient.
             
     """
     T, ys, sens, params = solve_using_sundials(model, end_time, start_time, sensi=True)
-    u_sens = sens[:][params.u_start:params.u_end]
-    model._jmim.setX_P(ys[-1], 0)
-    model._jmim.setDX_P(model.getDiffs(), 0)
     
-    cost = model.evalCost()
+    sens_rows = range(params.xinit_start, params.xinit_end) + range(params.u_start, params.u_end)
+    sens_mini = sens[sens_rows]
+    gradparams = {
+        'xinit_start': 0,
+        'xinit_end': params.xinit_end - params.xinit_start,
+        'u_start': params.xinit_end - params.xinit_start,
+        'u_end': params.xinit_end - params.xinit_start + params.u_end - params.u_start,
+    }
+    model._m.setX_P(ys[-1], 0)
+    model._m.setDX_P(model.getDiffs(), 0)
     
-    cost_jac = model.getCostJacobian(JMI_DER_X_P)
+    cost_jac = model.getCostJacobian(pyjmi.JMI_DER_X_P)
         
     # This assumes that the cost function does not depend on the u:s
     # which is the case of 
-    gradient = N.dot(cost_jac, u_sens.T)
+    gradient = N.dot(cost_jac, sens_mini.T)
     gradient = gradient.flatten()
     
     last_y = ys[-1][:]
     
-    return cost, gradient, last_y
+    return gradient, last_y, gradparams
 
 
-def single_shooting(model, initial_u=0.4):
+def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
     """ Run single shooting.
     
     @note:
@@ -678,10 +713,9 @@ def single_shooting(model, initial_u=0.4):
         The model to simulate/optimize over.
     @param initial_u:
         The initial input U_0 used to initialize the optimization with.
-    @param start_time:
-        The normalized start time of the simulation.
-    @param end_time:
-        The normalized end time of the simulation.
+    @param GRADIENT_THRESHOLD:
+        The threshold in when the inf norm of two different gradients
+        should consider two gradients same or different.
     @return:
         The optimal u.
         
@@ -702,16 +736,18 @@ def single_shooting(model, initial_u=0.4):
         model.reset()
         u[:] = cur_u
         print "u is", u
-        cost, gradient, last_y = _shoot(model, start_time, end_time)
+        big_gradient, last_y, gradparams = _shoot(model, start_time, end_time)
+        cost = model.evalCost()
         
         gradient_u = cur_u.copy()
+        gradient = big_gradient[gradparams['u_start']:gradparams['u_end']]
         
         print "Cost:", cost
         print "Grad:", gradient
         return cost
     
     def df(cur_u):
-        if max(gradient_u - cur_u) < 0.001:
+        if gradient_u is not None and max(gradient_u - cur_u) < GRADIENT_THRESHOLD:
             print "Using existing gradient"
         else:
             print "Recalculating gradient"
@@ -728,70 +764,196 @@ def single_shooting(model, initial_u=0.4):
     return u_opt
 
 
-def multiple_shooting(model, initials, grid=[(0, 1)]):
+def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, GRADIENT_THRESHOLD=0.0001):
     """ Does multiple shooting.
     
     @param model:
         The model to simulate/optimize over.
-    @param initials:
-        A list of tuples, each corresponding to a segment in the
-        multiple shooting algorithm. Each tuple consists of:
-            1. The input U for the segment (being constant throughout
-               the segment simulation.
+    @param initial_u:
+        A list of initial inputs for each segment. If not a list, it is
+        assumed to be the same initial input for each segment.
     @param grid:
         A list of 2-tuples per segment. The first element in each tuple
         being the segment start time, the second element the segment end
         time.
+    @param initial_y:
+        Can be three things:
+         * A list of initial states for all grids. If any of these are
+           None they will be replaced by the default model state.
+         * None -- same as default state.
+         * One state. This state will be the initial state for every
+           segment.
+        A list of initial states for each segment except the first one.
+        If not a list the same initial state will be used for each
+        segment.
     @return:
         The optimal inputs (Us).
         
     """
+    model.reset()
+    default_state = model.getStates().copy()
+    
     # Check for errors
+    if not len(grid) >= 1:
+        raise ShootingException('You need to specify at least one segment.')
     try:
-        if len(initials) != len(grid):
-            raise ShootingException('Initial parameters must either be constant, or the same length as grid segments.')
+        if len(initial_u) != len(grid):
+            raise ShootingException('initial_u parameters must either be constant, or the same length as grid segments.')
     except TypeError:
-        initials = [initials] * len(grid)
-    if math.abs(initials[0][0]) > 0.001:
+        initial_u = [initial_u] * len(grid)
+    try:
+        if len(initial_y) != len(grid):
+            raise ShootingException('initial_y states must either be constant, or the same length as grid segments.')
+    except TypeError:
+        initial_y = [initial_y] * len(grid)    
+    if math.fabs(grid[0][0]) > 0.001:
         print "Warning: The start time of the first segment should usually coinside with the model start time."
-    if math.abs(initials[-1][1]-1) > 0.001:
+    if math.fabs(grid[-1][1]-1) > 0.001:
         print "Warning: The end time of the last segment should usually coinside with the model end time."
-    def check_inequality(a,b):
+    def check_inequality(a, b):
         if a >= b:
             raise ShootingException('One grid segment is incorrectly formatted.')
-    map(check_inequality, grid)
-        
+    map(check_inequality, *zip(*grid))
+    
+    def substitute_None(x):
+        if x is None:
+            return default_state
+        else:
+            return x
+    initial_y = map(substitute_None, initial_y)
+    
     # Denormalize times
-    model_sim_len = model.getFinalTime() - model.getStartTime()
     def denormalize_segment(start_time, end_time):
+        model_sim_len = model.getFinalTime() - model.getStartTime()
         start_time = model.getStartTime() + model_sim_len * start_time
         end_time = model.getStartTime() + model_sim_len * end_time
         return (start_time, end_time)
-    initials = map(denormalize_segment, initials)
+    grid = map(denormalize_segment, *zip(*grid))
     
     # Preparing for multiple shooting
-    u = model.getInputs()
-    def shoot_segment(u, segment_times):
-        start_time = segment_times[0]
-        end_time = segment_times[1]
-        model.reset()
-        u[:] = u
-        seg_cost, seg_gradient, seg_last_y = _shoot(model, seg_start_time, seg_end_time)
-        return seg_cost, seg_gradient, seg_last_y
-    
-    raise NotImplementedError('Multiple shooting is not implemented yet')
-    
-    # The following contains some pseudo code.
-    while OPTIMIZING:
-        for (seg_start_time, seg_end_time, u) in segments:
-            model.reset()
-            model.setInputs(N.array([u]))
-            seg_cost, seg_gradient, seg_last_y = _shoot(model, seg_start_time, seg_end_time)
+    def shoot_all_segments_p(p):
+        """A different paramtrization than shoot_all_segments(...)."""
+        
+        assert p.ndim == 1
+        
+        def shoot_all_segments(ys, us):
+            """Does the actual multiple shooting.
             
-            # SAVE THE RESULTS
+            @param ys:
+                The initial states for each segment.
+            @param us:
+                The control signal for each segment.
+            @return:
+                A tuple consisting of:
+                    1. Cost.
+                    2. Cost gradient.
+            """
+            assert len(us) == len(grid)
+            assert len(ys) == len(grid)
+            assert len(ys[0]) == model.getModelSize()
             
-        # CALCULATE GLOBAL GRADIENT
-        # UPDATE U-vector
+            def shoot_single_segment(u, y0, segment_times):
+                if len(y0) != model.getModelSize():
+                    raise ShootingException('Wrong length to single segment: %s != %s' % (len(y0), model.getModelSize()))
+                    
+                seg_start_time = segment_times[0]
+                seg_end_time = segment_times[1]
+                model.reset()
+                
+                u = u.flatten()
+                y0 = y0.flatten()
+                
+                model.setInputs(u)
+                model.setStates(y0)
+                
+                seg_gradient, seg_last_y, seg_gradparams = _shoot(model, seg_start_time, seg_end_time)
+                return seg_gradient, seg_last_y, seg_gradparams
+            
+            # Shoot all  segments except the last one just to make sure that
+            # it is being shot last to be able to extract the optimization
+            # cost.
+            results = map(shoot_single_segment, us[0:-1], ys[0:-1], grid[0:-1])
+            results.append(shoot_single_segment(us[-1], ys[-1], grid[-1]))
+            model_cost = model.evalCost()
+            gradients, last_ys, seg_gradparams = zip(*results)
+            seg_gradparams = seg_gradparams[0] # they are all the same
+            
+            cost = model_cost + sum( ( ys[-1] - N.array(last_ys)[-1] )**2 )
+            #cost = model_cost
+            print '========================='
+            print 'cost:', cost
+            print 'Model cost:', model_cost
+            print '========================='
+            
+            # TODO: Calculate gradient
+            gradient = N.zeros(len(ys) + len(us))
+            gradient = None
+            
+            return cost, gradient
+            
+        ys = p[0 : len(grid) * model.getModelSize()]
+        ys = ys.reshape( (len(grid), model.getModelSize()) )
+        us = p[len(grid) * model.getModelSize() : ]
+        us = us.reshape( (len(grid), 1) ) # Assumes only one input signal
+        return shoot_all_segments(ys, us)
+        
+    def f(p):
+        """The cost evaluation function.
+        
+        @param p:
+            A concatenation of initial states (excluding the first
+            segment) and parameters.
+        """
+        cost, gradient = shoot_all_segments_p(p)
+        
+        global last_gradient
+        global last_gradient_p
+        if gradient is not None:
+            last_gradient = gradient.copy()
+            last_gradient_p = p.copy()
+        
+        return cost
+        
+    def df(p):
+        """Returns the gradient of f(cur_u)."""
+        if max(gradient_u - cur_u) < GRADIENT_THRESHOLD:
+            print "Using existing gradient"
+            gradient = last_gradient
+        else:
+            print "Recalculating gradient"
+            cost, gradient = shoot_all_segments_p(p)
+            
+        return gradient
+        
+    def f_ineq(p):
+        us = p[len(grid) * model.getModelSize() : ]
+        us = us.reshape( (len(grid), 1) ) # Assumes only one input signal
+        return N.concatenate( (-0.5-us, u-1) )
+        
+    # Initial try
+    p0 = N.concatenate( (N.array(initial_y).flatten(), N.array(initial_u).flatten()) )
+    
+    # Get OpenOPT handler
+    p = NLP(f, p0, maxIter = 1e3, maxFunEvals = 1e2)   
+    
+    # Equalities as a constraint between the segments
+    p.Aeq = N.zeros( (len(p0), len(p0)) )
+    for i in range(model.getModelSize() * (len(grid) - 1)):
+        p.Aeq[i, i] = 1
+        p.Aeq[i, i + model.getModelSize()] = -1
+    #print p.Aeq[0]
+    
+    #import pdb
+    #pdb.set_trace()
+    #return
+    p.beq = N.zeros(len(p0))
+    
+    #p.df = df
+    p.plot = 1
+    p.iprint = 1
+    
+    u_opt = p.solve('ralg')
+    return u_opt
     
 
 def cost_graph(model):
@@ -826,7 +988,7 @@ def cost_graph(model):
         costs.append(cost)
         Us.append(u_elmnt)
         
-        cost_jac = model.getCostJacobian(JMI_DER_X_P)
+        cost_jac = model.getCostJacobian(pyjmi.JMI_DER_X_P)
     
     p.subplot('121')
     p.plot(Us, costs)
@@ -852,7 +1014,7 @@ def main():
     if GEN_PLOT:
         cost_graph(m)
     else:
-        SHOOTING_METHOD = 'single'
+        SHOOTING_METHOD = 'multiple'
         if SHOOTING_METHOD=='single':
             opt_u = single_shooting(m)
             print "Optimal u:", opt_u
@@ -867,8 +1029,8 @@ def main():
                     (0.7, 0.8),
                     (0.8, 0.9),
                     (0.9, 1.0),]
-            initials = [0.25] * len(grid)
-            opt_us = multiple_shooting(m, grid, initials)
+            initial_u = 0.25
+            opt_us = multiple_shooting(m, initial_u, grid)
             print "Optimal us:", opt_us
         
 
