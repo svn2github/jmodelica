@@ -91,11 +91,12 @@ int jmi_opt_sim_set_initial(jmi_opt_sim_t *jmi_opt_sim,
 int jmi_opt_sim_set_initial_from_trajectory(
 		jmi_opt_sim_t *jmi_opt_sim,
 		jmi_real_t *p_opt_init, jmi_real_t *trajectory_data_init,
-		jmi_real_t *hs_init, jmi_real_t start_time_init,
+		int traj_n_points, jmi_real_t *hs_init, jmi_real_t start_time_init,
 		jmi_real_t final_time_init) {
 	return jmi_opt_sim->set_initial_from_trajectory(jmi_opt_sim,
-			p_opt_init,trajectory_data_init,hs_init,start_time_init,
-			final_time_init);
+							p_opt_init,trajectory_data_init,traj_n_points,
+							hs_init,start_time_init,
+							final_time_init);
 }
 
 int jmi_opt_sim_f(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *f) {

@@ -902,6 +902,7 @@ def load_DLL(libname, path):
                                                                 Nct.ndpointer(dtype=c_jmi_real_t,
                                                                               ndim=1,
                                                                               flags='C'),
+                                                                ct.c_int,
                                                                 Nct.ndpointer(dtype=c_jmi_real_t,
                                                                               ndim=1,
                                                                               flags='C'),
@@ -1279,8 +1280,8 @@ class Model(object):
         self._path = os.path.abspath(path)
         self._libname = libname
         self._setDefaultValuesFromMetadata()
-
         self.jmimodel.initAD()
+        self._set_dependent_parameters()
 
     def resetModel(self):
         """Reset the internal states of the DLL.
@@ -1324,6 +1325,13 @@ class Model(object):
         except IOError, e:
             # Modelica model - can not load Optimica specific xml
             pass
+
+    def _set_dependent_parameters(self):
+        """
+        Sets the dependent parameters of the model.
+        """
+
+        self.jmimodel.init_Fp(self.getPD())
 
     def get_variable_names(self):
         """
@@ -1464,6 +1472,16 @@ class Model(object):
         
     pi = property(getPI, setPI, "The independent parameter vector.")
 
+    def getPD(self):
+        """Returns a reference to the dependent parameters vector."""
+        return self.jmimodel._pd
+        
+    def setPD(sself, pd):
+        """Sets the dependent parameters vector."""
+        self.jmimodel._pd[:] = pd
+        
+    pd = property(getPD, setPD, "The dependent paramenters vector.")
+
     def getCD(self):
         """Returns a reference to the dependent constants vector."""
         return self.jmimodel.get_cd()
@@ -1506,16 +1524,6 @@ class Model(object):
         """
         dx_p = self.jmimodel.get_dx_p(i)
         dx_p[:] = new_dx_p
-
-    def getPD(self):
-        """Returns a reference to the dependent parameters vector."""
-        return self._pd
-        
-    def setPD(sself, pd):
-        """Sets the dependent parameters vector."""
-        self.jmimodel._pd[:] = pd
-        
-    pd = property(getPD, setPD, "The dependent paramenters vector.")
 
     def getU(self):
         """Returns a reference to the inputs vector."""
@@ -3396,7 +3404,7 @@ class SimultaneousOpt(object):
         or ResultDymolaBinary.
 
         Parameters:
-            format --
+            res --
                 A reference to an object of type ResultDymolaTextual or
                 ResultDymolaBinary.
             hs_init -- A vector of length n_e containing initial guesses of the
@@ -3452,7 +3460,7 @@ class SimultaneousOpt(object):
         else:
             return
 
-        #print(traj.t)
+        print(traj.t)
 
         n_points = N.size(traj.t,0)
         n_cols = 1+len(dx_names)+len(x_names)+len(u_names)+len(w_names)
@@ -3511,10 +3519,10 @@ class SimultaneousOpt(object):
                 var_data[:,col_index] = traj.x
             col_index = col_index + 1
 
-#        print(var_data)
-
+        print(var_data)
+        print(N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0])
             
-        self.jmisimopt.opt_sim_set_initial_from_trajectory(p_opt_data,N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0],
+        self.jmisimopt.opt_sim_set_initial_from_trajectory(p_opt_data,N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0],N.size(var_data,0),
                                                  hs_init,start_time_init,final_time_init)
         
 
@@ -3595,7 +3603,7 @@ class JMISimultaneousOpt(object):
         if self._jmi_model._dll.jmi_opt_sim_set_initial(self._jmi_opt_sim, x_init) is not 0:
             raise JMIException("Setting the initial point failed.")
  
-    def opt_sim_set_initial_from_trajectory(self, p_opt_init, trajectory_data_init,
+    def opt_sim_set_initial_from_trajectory(self, p_opt_init, trajectory_data_init, traj_n_points,
                                             hs_init, start_time_init, final_time_init):
         """
         Set the initial point based on time series trajectories of the
@@ -3613,6 +3621,8 @@ class JMISimultaneousOpt(object):
             first column contains the time vector. The following column
             contains, in order, the derivative, state, input, and algebraic
             variable profiles.
+        traj_n_points --
+            Number of time points in trajectory_data_init.
         hs_init --
             A vector of length n_e containing initial guesses of the
             normalized lengths of the finite elements. This argument is neglected
@@ -3627,6 +3637,7 @@ class JMISimultaneousOpt(object):
         if self._jmi_model._dll.jmi_opt_sim_set_initial_from_trajectory(self._jmi_opt_sim, \
                                                                         p_opt_init, \
                                                                         trajectory_data_init, \
+                                                                        traj_n_points, \
                                                                         hs_init, \
                                                                         start_time_init, \
                                                                         final_time_init) is not 0:

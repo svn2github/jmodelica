@@ -303,13 +303,19 @@ class ResultDymolaTextual:
             of the variable.
         """
         varInd  = self.get_variable_index(name)
-        dataInd = self.dataInfo[varInd][1]-1
+        dataInd = self.dataInfo[varInd][1]
+        factor = 1
+        if dataInd<0:
+            factor = -1
+            dataInd = -dataInd -1
+        else:
+            dataInd = dataInd - 1
         dataMat = self.dataInfo[varInd][0]-1
         # Take into account that the 'Time' variable has data matrix index 0,
         # which means that it is
         if dataMat<0:
             dataMat = 0
-        return Trajectory(self.data[dataMat][:,0],self.data[dataMat][:,dataInd])
+        return Trajectory(self.data[dataMat][:,0],factor*self.data[dataMat][:,dataInd])
 	
 	
 class ResultDymolaBinary:
@@ -357,10 +363,17 @@ class ResultDymolaBinary:
             of the variable.
         """
         varInd  = self.get_variable_index(name)
-        dataInd = self.raw['dataInfo'][1][varInd]-1
+        dataInd = self.raw['dataInfo'][1][varInd]
         dataMat = self.raw['dataInfo'][0][varInd]
+        factor = 1
+        if dataInd<0:
+            factor = -1
+            dataInd = -dataInd -1
+        else:
+            dataInd = dataInd - 1
+        
         # Take into account that the 'Time' variable has data matrix index 0
             
         if dataMat<1:
             dataMat = 1
-        return Trajectory(self.raw['data_%d'%dataMat][0,:],self.raw['data_%d'%dataMat][dataInd,:])
+        return Trajectory(self.raw['data_%d'%dataMat][0,:],factor*self.raw['data_%d'%dataMat][dataInd,:])

@@ -110,7 +110,7 @@ typedef int (*jmi_opt_sim_set_initial_t)(jmi_opt_sim_t *jmi_opt_sim,
 typedef int (*jmi_opt_sim_set_initial_from_trajectory_t)(
 		jmi_opt_sim_t *jmi_opt_sim,
 		jmi_real_t *p_opt_init, jmi_real_t *trajectory_data_init,
-		jmi_real_t *hs_init, jmi_real_t start_time_init,
+		int traj_n_points, jmi_real_t *hs_init, jmi_real_t start_time_init,
 		jmi_real_t final_time_init);
 
 typedef int (*jmi_opt_sim_h_nz_indices_t)(jmi_opt_sim_t *jmi_opt_sim,
@@ -207,6 +207,8 @@ int jmi_opt_sim_get_initial(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_init);
  * @param trajectory_data_init A matrix stored in column major format. The
  * first column contains the time vector. The following column contains, in
  * order, the derivative, state, input, and algebraic variable profiles.
+ * @param traj_n_points Number of time points contained in the vector
+   trajectory_data_init.
  * @param hs_init A vector of length n_e containing initial guesses of the
  * normalized lengths of the finite elements. This argument is neglected
  * if the problem does not have free element lengths.
@@ -219,7 +221,7 @@ int jmi_opt_sim_get_initial(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_init);
 int jmi_opt_sim_set_initial_from_trajectory(
 		jmi_opt_sim_t *jmi_opt_sim,
 		jmi_real_t *p_opt_init, jmi_real_t *trajectory_data_init,
-		jmi_real_t *hs_init, jmi_real_t start_time_init,
+		int traj_n_points,jmi_real_t *hs_init, jmi_real_t start_time_init,
 		jmi_real_t final_time_init);
 
 /**

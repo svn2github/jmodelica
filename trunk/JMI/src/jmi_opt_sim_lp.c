@@ -1324,7 +1324,7 @@ static int lp_radau_get_result(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *p_opt_,
 static int lp_set_initial_from_trajectory(
 		jmi_opt_sim_t *jmi_opt_sim,
 		jmi_real_t *p_opt_init, jmi_real_t *trajectory_data_init,
-		jmi_real_t *hs_init, jmi_real_t start_time_init,
+		int traj_n_points, jmi_real_t *hs_init, jmi_real_t start_time_init,
 		jmi_real_t final_time_init) {
 
 	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
@@ -1375,14 +1375,14 @@ static int lp_set_initial_from_trajectory(
 
     // Initialize the initial point
 	jmi_lin_interpolate(jmi_opt_sim->jmi->opt->start_time,
-					trajectory_data_init,n_points,n_vars+1,jmi_opt_sim->x_init+
+					trajectory_data_init,traj_n_points,n_vars+1,jmi_opt_sim->x_init+
 					jmi->opt->n_p_opt);
 
     // Loop over the collocation points, interpolate in input tables.
 	for (i=0;i<jmi_opt_sim->n_e;i++) {
 		for (j=0;j<nlp->n_cp;j++) {
 			jmi_lin_interpolate(time_vec[i*nlp->n_cp + j],
-							trajectory_data_init,n_points,n_vars+1,
+							trajectory_data_init,traj_n_points,n_vars+1,
 							jmi_opt_sim->x_init + jmi->opt->n_p_opt +
 							n_vars*(1 + i*nlp->n_cp + j));
 		}
@@ -1391,7 +1391,7 @@ static int lp_set_initial_from_trajectory(
     // Loop over element junction states
 	for (i=0;i<jmi_opt_sim->n_e;i++) {
 		jmi_lin_interpolate(time_vec[(i+1)*nlp->n_cp],
-						trajectory_data_init,n_points,n_vars+1,vals);
+						trajectory_data_init,traj_n_points,n_vars+1,vals);
 		for (j=0;j<n_x;j++) {
 			jmi_opt_sim->x_init[jmi->opt->n_p_opt +
 								n_vars*(1 + jmi_opt_sim->n_e*nlp->n_cp) +
@@ -1402,7 +1402,7 @@ static int lp_set_initial_from_trajectory(
     // Loop over time points
 	for (i=0;i<jmi->n_tp;i++) {
 		jmi_lin_interpolate(tp[i],
-						trajectory_data_init,n_points,n_vars+1,
+						trajectory_data_init,traj_n_points,n_vars+1,
 						jmi_opt_sim->x_init +  jmi->opt->n_p_opt +
 						n_vars*(1 + jmi_opt_sim->n_e*nlp->n_cp) +
 								n_dx*jmi_opt_sim->n_e + i*n_vars);

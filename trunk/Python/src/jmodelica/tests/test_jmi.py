@@ -79,7 +79,7 @@ def test_jmi_opt_sim_set_initial_from_trajectory():
     z_ = N.concatenate((t_,dx_,x_,u_))
     hs = N.zeros(1)
 
-    vdp.jmimodel._dll.jmi_opt_sim_set_initial_from_trajectory(nlp.jmi_simoptlagpols._jmi_opt_sim,p_opt,z_,hs,0.,0.)
+    vdp.jmimodel._dll.jmi_opt_sim_set_initial_from_trajectory(nlp.jmi_simoptlagpols._jmi_opt_sim,p_opt,z_,n_points,hs,0.,0.)
     
     p_opt2 = N.zeros(1)
     t_2 = N.zeros(n_points)
@@ -104,7 +104,7 @@ def test_set_initial_from_dymola():
     they match.
     """
     
-    model = sep + "vdp_minimum_time" + sep + "VDP.mo"
+    model = sep + "files" + sep + "VDP.mo"
     fpath = jm_home+path_to_examples+model
     cpath = "VDP_pack.VDP_Opt_Min_Time"
     fname = cpath.replace('.','_',1)

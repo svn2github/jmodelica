@@ -106,6 +106,10 @@ class XMLVariablesDoc(XMLdoc):
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()")
         vals = self._xpatheval("//ScalarVariable/ScalarVariableName/text()")       
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys,vals))
 
     def get_derivative_names(self):
@@ -117,7 +121,10 @@ class XMLVariablesDoc(XMLdoc):
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text() [../../VariableCategory=\"derivative\"]")
         vals = self._xpatheval("//ScalarVariable/ScalarVariableName/text()[../../VariableCategory=\"derivative\"]")
-
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys,vals))
 
     def get_differentiated_variable_names(self):
@@ -129,6 +136,10 @@ class XMLVariablesDoc(XMLdoc):
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text() [../../VariableCategory=\"state\"]")
         vals = self._xpatheval("//ScalarVariable/ScalarVariableName/text()[../../VariableCategory=\"state\"]")
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys,vals))
 
     def get_input_names(self):
@@ -139,7 +150,11 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and name as value.
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text() [../../VariableCategory=\"input\"]")
-        vals = self._xpatheval("//ScalarVariable/ScalarVariableName/text()[../../VariableCategory=\"input\"]")       
+        vals = self._xpatheval("//ScalarVariable/ScalarVariableName/text()[../../VariableCategory=\"input\"]")
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")        
         return dict(zip(keys,vals))
 
     def get_algebraic_variable_names(self):
@@ -164,7 +179,11 @@ class XMLVariablesDoc(XMLdoc):
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"independentParameter\"] \
                                [../../Attributes/RealAttributes/Free=\"true\"]")
         vals = self._xpatheval("//ScalarVariable/ScalarVariableName/text()[../../VariableCategory=\"independentParameter\"] \
-                               [../../Attributes/RealAttributes/Free=\"true\"]")       
+                               [../../Attributes/RealAttributes/Free=\"true\"]")
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys,vals))
 
     def get_variable_descriptions(self):
@@ -174,8 +193,12 @@ class XMLVariablesDoc(XMLdoc):
         Returns:
             Dict with ValueReference as key and description as value.
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text() [../../Description]")
         vals = self._xpatheval("//ScalarVariable/Description/text() [../../Description]")
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys,vals))
     
     def get_start_attributes(self):
@@ -188,6 +211,10 @@ class XMLVariablesDoc(XMLdoc):
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()")
         vals = self._xpatheval("//ScalarVariable/Attributes/*/Start/text()")       
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys,vals))
     
     def get_p_opt_variable_refs(self):
@@ -213,6 +240,10 @@ class XMLVariablesDoc(XMLdoc):
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../VariableCategory=\"algebraic\"]")
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys,vals))
     
     def get_u_initial_guess_values(self):
@@ -225,6 +256,10 @@ class XMLVariablesDoc(XMLdoc):
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../Causality=\"input\"]")
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys,vals))
     
     def get_dx_initial_guess_values(self):
@@ -238,6 +273,10 @@ class XMLVariablesDoc(XMLdoc):
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../VariableCategory=\"derivative\"]")
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys, vals))
     
     def get_x_initial_guess_values(self):
@@ -251,6 +290,10 @@ class XMLVariablesDoc(XMLdoc):
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../VariableCategory=\"state\"]")
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")        
         return dict(zip(keys, vals))
     
     def get_p_opt_initial_guess_values(self):
@@ -266,6 +309,10 @@ class XMLVariablesDoc(XMLdoc):
                                 [../../Attributes/RealAttributes/Free=\"true\"]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../VariableCategory=\"independentParameter\"] \
                                 [../../../../Attributes/RealAttributes/Free=\"true\"]")
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys, vals))
 
     def get_w_lb_values(self):
@@ -277,8 +324,12 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and lower bound as value.
         
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../VariableCategory=\"algebraic\"]")    
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"][../../Attributes/*/Min]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../VariableCategory=\"algebraic\"]")
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys,vals))
     
     def get_u_lb_values(self):
@@ -290,9 +341,12 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and lower bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"] [../../Attributes/*/Min]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../Causality=\"input\"]")
-            
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")            
         return dict(zip(keys,vals))
     
     def get_dx_lb_values(self):
@@ -304,9 +358,12 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and lower bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"] [../../Attributes/*/Min]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../VariableCategory=\"derivative\"]")
-        
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")        
         return dict(zip(keys, vals))
     
     def get_x_lb_values(self):
@@ -318,8 +375,12 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and lower bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"] [../../Attributes/*/Min]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../VariableCategory=\"state\"]")
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys, vals))
     
     def get_p_opt_lb_values(self):
@@ -332,9 +393,13 @@ class XMLVariablesDoc(XMLdoc):
             
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"independentParameter\"] \
-                               [../../Attributes/RealAttributes/Free=\"true\"]")
+                               [../../Attributes/RealAttributes/Free=\"true\"] [../../Attributes/*/Min]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../VariableCategory=\"independentParameter\"] \
                                [../../../../Attributes/RealAttributes/Free=\"true\"]")
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys, vals))
 
     def get_w_ub_values(self):
@@ -345,9 +410,12 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and upper bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"] ")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"] [../../Attributes/*/Max]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../VariableCategory=\"algebraic\"]")
-            
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")            
         return dict(zip(keys,vals))
 
     def get_u_ub_values(self):
@@ -358,8 +426,12 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and upper bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"] [../../Attributes/*/Max]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../Causality=\"input\"]")    
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys,vals))
     
     def get_dx_ub_values(self):
@@ -371,8 +443,12 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and upper bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"] [../../Attributes/*/Max]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../VariableCategory=\"derivative\"]")
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys, vals))
     
     def get_x_ub_values(self):
@@ -384,9 +460,12 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and upper bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"] [../../Attributes/*/Max]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../VariableCategory=\"state\"]")
-        
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")        
         return dict(zip(keys, vals))
     
     def get_p_opt_ub_values(self):
@@ -399,9 +478,13 @@ class XMLVariablesDoc(XMLdoc):
             
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"independentParameter\"] \
-                               [../../Attributes/RealAttributes/Free=\"true\"]")
+                               [../../Attributes/RealAttributes/Free=\"true\"] [../../Attributes/*/Max]")
         vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../VariableCategory=\"independentParameter\"] \
                                [../../../../Attributes/RealAttributes/Free=\"true\"]")        
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys, vals))
 
     def get_w_lin_values(self):
@@ -413,8 +496,12 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and boolean isLinear as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"] ")
-        vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../VariableCategory=\"algebraic\"]")            
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"] [../../IsLinear]")
+        vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../VariableCategory=\"algebraic\"]")
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")        
         return dict(zip(keys,vals))
 
     def get_u_lin_values(self):
@@ -426,8 +513,12 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and boolean isLinear as value.
 
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"][../../IsLinear]")
         vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../Causality=\"input\"]")            
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys,vals))
     
     def get_dx_lin_values(self):
@@ -439,8 +530,12 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and boolean isLinear as value.
 
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"][../../IsLinear]")
         vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../VariableCategory=\"derivative\"]")        
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys, vals))
     
     def get_x_lin_values(self):
@@ -452,8 +547,12 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and boolean isLinear as value.
 
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"][../../IsLinear]")
         vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../VariableCategory=\"state\"]")        
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys, vals))
     
     def get_p_opt_lin_values(self):
@@ -467,9 +566,13 @@ class XMLVariablesDoc(XMLdoc):
 
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"independentParameter\"] \
-                               [../../Attributes/RealAttributes/Free=\"true\"]")
+                               [../../Attributes/RealAttributes/Free=\"true\"][../../IsLinear]")
         vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../VariableCategory=\"independentParameter\"] \
                                [../../Attributes/RealAttributes/Free=\"true\"]")                
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys, vals))
 
     def get_w_lin_tp_values(self):
@@ -481,12 +584,16 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and boolean isLinear as value.
 
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"] ")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"][../../IsLinearTimedVariables]")
         vals = []
         for key in keys:
             tp = self._xpatheval("//ScalarVariable/IsLinearTimedVariables/TimePoint/@isLinear[../../../VariableCategory=\"algebraic\"] \
                 [../../../ValueReference="+key+"]")
             vals.append(tp)        
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys,vals))
 
     def get_u_lin_tp_values(self):
@@ -499,12 +606,16 @@ class XMLVariablesDoc(XMLdoc):
             as value. 
         
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"][../../IsLinearTimedVariables]")
         vals = []
         for key in keys:
             tp = self._xpatheval("//ScalarVariable/IsLinearTimedVariables/TimePoint/@isLinear[../../../Causality=\"input\"] \
                 [../../../ValueReference="+key+"]")
             vals.append(tp)
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys,vals))
     
     def get_dx_lin_tp_values(self):
@@ -517,12 +628,16 @@ class XMLVariablesDoc(XMLdoc):
             as value. 
         
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"][../../IsLinearTimedVariables]")
         vals = []
         for key in keys:
             tp = self._xpatheval("//ScalarVariable/IsLinearTimedVariables/TimePoint/@isLinear[../../../VariableCategory=\"derivative\"] \
                 [../../../ValueReference="+key+"]")
             vals.append(tp)        
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys, vals))
     
     def get_x_lin_tp_values(self):
@@ -535,12 +650,16 @@ class XMLVariablesDoc(XMLdoc):
             as value. 
         
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"][../../IsLinearTimedVariables]")
         vals = []        
         for key in keys:
             tp = self._xpatheval("//ScalarVariable/IsLinearTimedVariables/TimePoint/@isLinear[../../../VariableCategory=\"state\"] \
                 [../../../ValueReference="+key+"]")
             vals.append(tp)
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys, vals))
             
 class XMLValuesDoc(XMLdoc):
@@ -558,6 +677,10 @@ class XMLValuesDoc(XMLdoc):
         """
         keys = self._xpatheval("//ValueReference/text()")
         vals = self._xpatheval("//Value/text()")
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys)")
         return dict(zip(keys,vals))
         
 class XMLProblVariablesDoc(XMLdoc):
