@@ -20,7 +20,7 @@ path_to_examples = sep + "Python" + sep + "jmodelica" + sep + "examples"
 
 model = sep + "files" + sep + "VDP.mo"
 fpath = jm_home+path_to_examples+model
-cpath = "VDP_pack.VDP_Opt"
+cpath = "VDP_pack.VDP_Opt_Min_Time"
 
 fname = cpath.replace('.','_',1)
 
