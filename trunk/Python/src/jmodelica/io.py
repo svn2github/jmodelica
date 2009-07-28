@@ -99,7 +99,7 @@ def export_result_dymola(model, data, file_name='', format='txt'):
                 max_desc_length = len(descriptions.get(ref))
 
         f.write('char description(%d,%d)\n' % (len(name_value_refs)+1, max_desc_length))
-        f.write('Time in [s]')
+        f.write('Time in [s]\n')
 
         # Loop over all variables, not only those with a description
         for ref in name_value_refs:

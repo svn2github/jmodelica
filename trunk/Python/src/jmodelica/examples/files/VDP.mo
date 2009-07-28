@@ -38,7 +38,7 @@ package VDP_pack
     // is a parameter to be minimized 
     // subject to the dynamics
     // \dot x = tf*f(x,u)
-    parameter Real tf(free=true,min=0.2)=1;
+    parameter Real tf(free=true,min=0.2)=1 "Final time";
 
     // The states
     Real x1(start=0);
