@@ -1439,14 +1439,14 @@ class Model(object):
         
     x = property(getX, setX, "The differentiated variables vector.")
 
-    def getXP(self, i):
+    def getX_P(self, i):
         """Returns a reference to the differentiated variables vector
         corresponding to the i:th time point.
         
         """
         return self.jmimodel.get_x_p(i)
         
-    def setXP(self, new_x_p, i):
+    def setX_P(self, new_x_p, i):
         """Sets the differentiated variables vector corresponding to the i:th 
         time point. 
         
