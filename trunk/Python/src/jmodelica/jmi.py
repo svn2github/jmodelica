@@ -3460,7 +3460,7 @@ class SimultaneousOpt(object):
         else:
             return
 
-        print(traj.t)
+        #print(traj.t)
 
         n_points = N.size(traj.t,0)
         n_cols = 1+len(dx_names)+len(x_names)+len(u_names)+len(w_names)
@@ -3519,8 +3519,8 @@ class SimultaneousOpt(object):
                 var_data[:,col_index] = traj.x
             col_index = col_index + 1
 
-        print(var_data)
-        print(N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0])
+        #print(var_data)
+        #print(N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0])
             
         self.jmisimopt.opt_sim_set_initial_from_trajectory(p_opt_data,N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0],N.size(var_data,0),
                                                  hs_init,start_time_init,final_time_init)
