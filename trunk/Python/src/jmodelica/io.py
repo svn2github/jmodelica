@@ -269,8 +269,12 @@ class ResultDymolaTextual:
             nCols = int(nCols[0])
             data = []
             for i in range(0,nLines):
-                info = fid.readline().split()
+                info = []
+                while len(info) < nCols:
+                    l = fid.readline()
+                    info.extend(l.split())
                 data.append(map(float,info[0:nCols]))
+                del(info)
             self.data.append(numpy.array(data))
 
     def get_variable_index(self,name): 
