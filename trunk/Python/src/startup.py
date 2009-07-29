@@ -34,14 +34,16 @@ import warnings
 import jpype
 
 _jm_home = os.environ['JMODELICA_HOME']
+environ = {}
 environ['JMODELICA_HOME'] = _jm_home
 
 _defaults = [('IPOPT_HOME','',True),
              ('CPPAD_HOME',os.path.join(_jm_home,'ThirdParty','CppAD'),True),
              ('MINGW_HOME',os.path.join(_jm_home,'mingw'),True),
              ('MC_JAR',os.path.join(_jm_home,'lib','OptimicaCompiler.jar'),True),
-             ('OC_JAR',os.path.join(_jm_home,'lib','ModelicsCompiler.jar'),True),
+             ('OC_JAR',os.path.join(_jm_home,'lib','ModelicaCompiler.jar'),True),
              ('BEAVER_PATH',os.path.join(_jm_home,'ThirdParty','Beaver','lib'),True),
+             ('MODELICAPATH',os.path.join(_jm_home,'ThirdParty','MSL','Modelica'),True),
              ('JVM_PATH',jpype.getDefaultJVMPath(),True),
              ('JVM_ARGS','',False)]
 
