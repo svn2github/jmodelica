@@ -25,7 +25,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Stack;
 
-
 /**
  * A generator class for XML code generation which takes a model described by
  * <FClass> and provides an XML document for the meta-data in the model. Uses a
@@ -452,8 +451,12 @@ public class XMLVariableGenerator extends GenericGenerator {
 		if(realvariable.maxAttributeSet()) {
 			genPrinter.print(tg.generateTag("Max")+realvariable.maxAttribute()+tg.generateTag("Max"));
 		}
-		genPrinter.print(tg.generateTag("Start") +realvariable.startAttribute()+tg.generateTag("Start"));
-
+		//start
+		if (realvariable.isDependentParameter() && !realvariable.startAttributeSet()) {
+			genPrinter.print(tg.generateTag("Start") +realvariable.getBindingExp().ceval().realValue() + tg.generateTag("Start"));
+		} else {
+			genPrinter.print(tg.generateTag("Start") +realvariable.startAttribute()+tg.generateTag("Start"));
+		}
 		//nominal
 		if(realvariable.nominalAttributeSet()) {
 			genPrinter.print(tg.generateTag("Nominal")+realvariable.nominalAttribute()+tg.generateTag("Nominal"));
@@ -478,7 +481,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 			genPrinter.print(tg.generateTag("Max")+integervariable.maxAttribute()+tg.generateTag("Max"));
 		}
 		//start
-		genPrinter.print(tg.generateTag("Start")+integervariable.startAttribute()+tg.generateTag("Start"));						
+		if (integervariable.isDependentParameter() && !integervariable.startAttributeSet()) {
+			genPrinter.print(tg.generateTag("Start") +integervariable.getBindingExp().ceval().intValue() + tg.generateTag("Start"));
+		} else {
+			genPrinter.print(tg.generateTag("Start") +integervariable.startAttribute()+tg.generateTag("Start"));
+		}
 	}
 	
 	/*
@@ -486,10 +493,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 	 */
 	protected void addBooleanAttributes(PrintStream genPrinter, TagGenerator tg, FBooleanVariable booleanvariable) {
 		//start attribute
-		if(booleanvariable.startAttributeSet()) {
-			genPrinter.print(tg.generateTag("Start")+ booleanvariable.startAttribute()+tg.generateTag("Start"));
-		}
-		
+		if (booleanvariable.isDependentParameter() && !booleanvariable.startAttributeSet()) {
+			genPrinter.print(tg.generateTag("Start") +booleanvariable.getBindingExp().ceval().intValue() + tg.generateTag("Start"));
+		} else if(booleanvariable.startAttributeSet()) {
+			genPrinter.print(tg.generateTag("Start") +booleanvariable.startAttribute()+tg.generateTag("Start"));
+		}		
 	}
 	
 	/*
@@ -497,7 +505,9 @@ public class XMLVariableGenerator extends GenericGenerator {
 	 */
 	protected void addStringAttributes(PrintStream genPrinter, TagGenerator tg, FStringVariable stringvariable) {
 		//start attribute
-		if(stringvariable.startAttributeSet()) {
+		if (stringvariable.isDependentParameter() && !stringvariable.startAttributeSet()) {
+			genPrinter.print(tg.generateTag("Start") +stringvariable.getBindingExp().ceval().intValue() + tg.generateTag("Start"));
+		} else if(stringvariable.startAttributeSet()) {
 			genPrinter.print(tg.generateTag("Start")+stringvariable.startAttribute()+tg.generateTag("Start"));
 		}
 	}
