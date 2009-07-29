@@ -764,7 +764,7 @@ def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
     return u_opt
 
 
-def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, GRADIENT_THRESHOLD=0.0001):
+def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, plot=True):
     """ Does multiple shooting.
     
     @param model:
@@ -823,79 +823,29 @@ def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, GRADIENT_
     initial_y = map(substitute_None, initial_y)
     
     # Denormalize times
-    def denormalize_segment(start_time, end_time):
-        model_sim_len = model.getFinalTime() - model.getStartTime()
-        start_time = model.getStartTime() + model_sim_len * start_time
-        end_time = model.getStartTime() + model_sim_len * end_time
+    simulation_length = model.getFinalTime() - model.getStartTime()
+    def denormalize_time(start_time, end_time):
+        start_time = model.getStartTime() + simulation_length * start_time
+        end_time = model.getStartTime() + simulation_length * end_time
         return (start_time, end_time)
-    grid = map(denormalize_segment, *zip(*grid))
+    grid = map(denormalize_time, *zip(*grid))
     
-    # Preparing for multiple shooting
-    def shoot_all_segments_p(p):
-        """A different paramtrization than shoot_all_segments(...)."""
+    def shoot_single_segment(u, y0, segment_times):
+        if len(y0) != model.getModelSize():
+            raise ShootingException('Wrong length to single segment: %s != %s' % (len(y0), model.getModelSize()))
+            
+        seg_start_time = segment_times[0]
+        seg_end_time = segment_times[1]
+        model.reset()
         
-        assert p.ndim == 1
+        u = u.flatten()
+        y0 = y0.flatten()
         
-        def shoot_all_segments(ys, us):
-            """Does the actual multiple shooting.
-            
-            @param ys:
-                The initial states for each segment.
-            @param us:
-                The control signal for each segment.
-            @return:
-                A tuple consisting of:
-                    1. Cost.
-                    2. Cost gradient.
-            """
-            assert len(us) == len(grid)
-            assert len(ys) == len(grid)
-            assert len(ys[0]) == model.getModelSize()
-            
-            def shoot_single_segment(u, y0, segment_times):
-                if len(y0) != model.getModelSize():
-                    raise ShootingException('Wrong length to single segment: %s != %s' % (len(y0), model.getModelSize()))
-                    
-                seg_start_time = segment_times[0]
-                seg_end_time = segment_times[1]
-                model.reset()
-                
-                u = u.flatten()
-                y0 = y0.flatten()
-                
-                model.setInputs(u)
-                model.setStates(y0)
-                
-                seg_gradient, seg_last_y, seg_gradparams = _shoot(model, seg_start_time, seg_end_time)
-                return seg_gradient, seg_last_y, seg_gradparams
-            
-            # Shoot all  segments except the last one just to make sure that
-            # it is being shot last to be able to extract the optimization
-            # cost.
-            results = map(shoot_single_segment, us[0:-1], ys[0:-1], grid[0:-1])
-            results.append(shoot_single_segment(us[-1], ys[-1], grid[-1]))
-            model_cost = model.evalCost()
-            gradients, last_ys, seg_gradparams = zip(*results)
-            seg_gradparams = seg_gradparams[0] # they are all the same
-            
-            cost = model_cost + sum( ( ys[-1] - N.array(last_ys)[-1] )**2 )
-            #cost = model_cost
-            print '========================='
-            print 'cost:', cost
-            print 'Model cost:', model_cost
-            print '========================='
-            
-            # TODO: Calculate gradient
-            gradient = N.zeros(len(ys) + len(us))
-            gradient = None
-            
-            return cost, gradient
-            
-        ys = p[0 : len(grid) * model.getModelSize()]
-        ys = ys.reshape( (len(grid), model.getModelSize()) )
-        us = p[len(grid) * model.getModelSize() : ]
-        us = us.reshape( (len(grid), 1) ) # Assumes only one input signal
-        return shoot_all_segments(ys, us)
+        model.setInputs(u)
+        model.setStates(y0)
+        
+        seg_gradient, seg_last_y, seg_gradparams = _shoot(model, seg_start_time, seg_end_time)
+        return seg_gradient, seg_last_y, seg_gradparams
         
     def f(p):
         """The cost evaluation function.
@@ -904,57 +854,112 @@ def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, GRADIENT_
             A concatenation of initial states (excluding the first
             segment) and parameters.
         """
-        cost, gradient = shoot_all_segments_p(p)
-        
-        global last_gradient
-        global last_gradient_p
-        if gradient is not None:
-            last_gradient = gradient.copy()
-            last_gradient_p = p.copy()
-        
+        ys, us = _split_opt_x(model, len(grid), p)
+        shoot_single_segment(us[-1], ys[-1], grid[-1])
+        cost = model.evalCost()
         return cost
         
-    def df(p):
+    def df(p): # grad(f) - CURRENTLY NOT USED
         """Returns the gradient of f(cur_u)."""
-        if max(gradient_u - cur_u) < GRADIENT_THRESHOLD:
-            print "Using existing gradient"
-            gradient = last_gradient
-        else:
-            print "Recalculating gradient"
-            cost, gradient = shoot_all_segments_p(p)
-            
-        return gradient
+        return NotImplemented
         
-    def f_ineq(p):
-        us = p[len(grid) * model.getModelSize() : ]
-        us = us.reshape( (len(grid), 1) ) # Assumes only one input signal
-        return N.concatenate( (-0.5-us, u-1) )
+    def h(p): # h(p) = 0
+        """ Evaluate continuity constraints."""
+        def eval_last_ys(u, y0, interval):
+            grad, last_y, gradparams = shoot_single_segment(u, y0, interval)
+            return last_y
+        
+        y0s, us = _split_opt_x(model, len(grid), p)
+        last_ys = N.array(map(eval_last_ys, us[:-1], y0s[:-1], grid[:-1]))
+        return (y0s[1:]-last_ys)
         
     # Initial try
     p0 = N.concatenate( (N.array(initial_y).flatten(), N.array(initial_u).flatten()) )
     
+    # Less than (-0.5 < u < 1)
+    # TODO: These are currently hard coded. They shouldn't be.
+    nlt = 2 * len(grid)
+    Alt = N.zeros( (nlt, len(p0)) )
+    Alt[:len(grid), len(grid) * model.getModelSize():] = N.eye(len(grid))
+    Alt[len(grid):, len(grid) * model.getModelSize():] = -N.eye(len(grid))
+    blt = N.ones(nlt)
+    blt[len(grid):] = -0.5
+    
     # Get OpenOPT handler
-    p = NLP(f, p0, maxIter = 1e3, maxFunEvals = 1e2)   
-    
-    # Equalities as a constraint between the segments
-    p.Aeq = N.zeros( (len(p0), len(p0)) )
-    for i in range(model.getModelSize() * (len(grid) - 1)):
-        p.Aeq[i, i] = 1
-        p.Aeq[i, i + model.getModelSize()] = -1
-    #print p.Aeq[0]
-    
-    #import pdb
-    #pdb.set_trace()
-    #return
-    p.beq = N.zeros(len(p0))
+    p = NLP(f, p0, maxIter = 1e3, maxFunEvals = 1e2, h=h, A=Alt, b=blt)
     
     #p.df = df
     p.plot = 1
     p.iprint = 1
     
     u_opt = p.solve('ralg')
+    
+    print "Solution:", u_opt.xf
+    print "Eq.constr.:", N.dot(Aeq, u_opt.xf)
+    
+    if u_opt.isFeasible and plot:
+        plot_control_solutions(model, grid, u_opt.xf)
+    else:
+        print "The solution is not feasible. Not plotting."
+    
     return u_opt
     
+
+def _split_opt_x(model, gridsize, p):
+    ys = p[0 : gridsize * model.getModelSize()]
+    ys = ys.reshape( (gridsize, model.getModelSize()) )
+    us = p[gridsize * model.getModelSize() : ]
+    us = us.reshape( (gridsize, len(model.getInputs())) ) # Assumes only one input signal
+    return ys, us
+    
+
+def _plot_control_solution(model, interval, initial_ys, us):
+    model.reset()
+    model.setStates(initial_ys)
+    model.setInputs(us)
+    solver_data = solve_using_sundials(model, end_time=interval[1], start_time=interval[0])
+    T, Y = solver_data[0], solver_data[1]
+    p.plot(T,Y)
+    return T, Y
+
+
+def plot_control_solutions(model, grid, x):
+    initial_ys, us = _split_opt_x(model, len(grid), x)
+    
+    p.figure()
+    p.hold(True)
+    solutions = map(_plot_control_solution, [model]*len(grid), grid, initial_ys, us)
+    p.hold(False)
+    """Ts, ys = zip(*solutions)
+    
+    # Concatenate
+    Ts = map(lambda x: list(x), Ts)
+    ys = map(lambda x: list(x), ys)
+    T = reduce(lambda x,y: x+y, Ts) 
+    Y = reduce(lambda x,y: x+y, ys)
+    
+    p.figure()
+    p.plot(T, Y)"""
+    p.title('The shooting solution')
+    p.show()
+
+
+def test_plot_control_solutions():
+    """ Testing plot_control_solutions(...)"""
+    m = _load_example_standard_model('vdp', 'VDP_pack_VDP_Opt')
+    grid = [(0, 0.1),
+            (0.1, 0.2),
+            (0.2, 0.3),
+            (0.3, 0.4),
+            (0.4, 0.5),
+            (0.5, 0.6),
+            (0.6, 0.7),
+            (0.7, 0.8),
+            (0.8, 0.9),
+            (0.9, 1.0),]
+    us = N.array([1, 1, 1, 1]*len(grid))
+    plot_control_solutions(m, grid, us)
+
 
 def cost_graph(model):
     """ Plot the cost as a function a constant u (single shooting).
