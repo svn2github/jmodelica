@@ -715,6 +715,7 @@ install-exec-local:
 	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/Python
 	[ -e $(prefix)/Python/jm_python.sh ] && echo "jm_python.sh exists "|| cp Python/jm_python.sh $(prefix)/Python/jm_python.sh
 	[ -e $(prefix)/Python/jm_ipython.sh ] && echo "jm_ipython.sh exists "|| cp Python/jm_ipython.sh $(prefix)/Python/jm_ipython.sh
+	cp $(abs_top_srcdir)/Python/src/startup.py $(prefix)/
 	chmod u+x $(prefix)/Python/jm_*.sh
 	mkdir -p $(prefix)/ThirdParty
 	mkdir -p $(prefix)/ThirdParty/Beaver
