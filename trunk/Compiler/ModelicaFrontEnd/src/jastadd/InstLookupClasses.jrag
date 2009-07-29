@@ -624,5 +624,45 @@ aspect InstLookupClassesInModifications {
 	  
 }
 
+aspect SimpleInstClassLookup {
+	
+	/**
+	 * This method offers a simplified way of looking up qualified class names
+	 * in the instance class structure.
+	 * 
+	 * @param name A string containing a qualified name, for example 'A.B.C'.
+	 */
+	syn lazy InstClassDecl InstProgramRoot.simpleLookupInstClassDecl(String name) = 
+		simpleLookupInstClassDeclRecursive(name);
+	
+	public InstClassDecl InstNode.simpleLookupInstClassDeclRecursive(String name) {
+		// Split up name
+		int ind = name.indexOf('.');
+		String firstName = "";
+		String lastName = "";
+		if (ind==-1) {
+			firstName = name;
+			lastName = "";
+		} else {
+			firstName = name.substring(0,ind);
+			lastName = name.substring(ind+1,name.length());
+		}
+		for (InstClassDecl icd_tmp : getInstClassDecls()) {
+			if (icd_tmp.name().equals(firstName)) {
+				if (lastName.equals("")) {
+					return icd_tmp;
+				} else {
+					return icd_tmp.simpleLookupInstClassDeclRecursive(lastName);
+				}
+			}
+		}
+		return unknownInstClassDecl();
+	}
+
+}
+
+
+
+
 
 

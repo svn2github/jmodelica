@@ -26,38 +26,14 @@ aspect Flattening {
 	 * Generic traversal method used to find a particular class instance
 	 * in the instance tree, and if so, flatten it.
 	 */
-    public InstNode InstNode.findFlattenInst(String className,FClass fc) throws ModelicaClassNotFoundException {
-    	InstNode n = findFlattenInstRecursive(className,fc);
-    	if (n!=null) {
-    		return n;
-    	}
-    	throw new ModelicaClassNotFoundException("Class "+ className + "not found");
-    }
-    
-    public InstNode InstNode.findFlattenInstRecursive(String className,FClass fc) {
-    	for (InstClassDecl icd : getInstClassDecls()) {
-    		InstNode n = icd.findFlattenInstRecursive(className, fc);
-    		if (n!=null) {
-    			return n;
-    		} 
-    	}	
-    	return null;
-    }
-    
-
-	/**
-	 * \ingroup aspect_Flattening
-	 * 
-	 * Check if a class instance matches a particular name, and if so,
-	 * flatten the class. 
-	 */
-    public InstNode InstFullClassDecl.findFlattenInstRecursive(String className, FClass fc) {
-    	if (className.equals(qualifiedName())) {
-    		// Decode qualifiedName() and create an FQName object
-    		FQName fqn = new FQName();
+    public InstNode InstProgramRoot.findFlattenInst(String className,FClass fc) throws ModelicaClassNotFoundException {
+    	
+    	InstClassDecl icd = simpleLookupInstClassDecl(className);
+    	if (!icd.isUnknown()) {
+       		FQName fqn = new FQName();
     		int index = 0;
     		int new_index = 0;
-    		String qn = qualifiedName();
+    		String qn = icd.qualifiedName();
     		while (index>=0) {
     			new_index = qn.indexOf('.',index);
      			if (new_index>=0) {
@@ -67,41 +43,36 @@ aspect Flattening {
     				fqn.addFQNamePart(new FQNamePart(qn.substring(index,qn.length()),new Opt()));
         			index = new_index;
     			}
-
     		}
+    		fc.setFQName(fqn); 
+    		fc.addFEquationBlock(new FEquationBlock(new List()));			
+    		for (FAbstractEquation ae : icd.getFAbstractEquations()) {
+    		       ae.flatten(getFQName(),fc);
+    		    }
+    		icd.getInstComponentDeclList().flatten(fc);
+    		icd.getInstExtendsList().flatten(fc);
     		
-  	 		fc.setFQName(fqn); 
-  	 		//InstRoot r = getInstRoot();
-  	 				
-			//r.dumpTree("");
-			//r.printIVarAccesses("");
-			fc.addFEquationBlock(new FEquationBlock(new List()));			
-			for (FAbstractEquation ae : getFAbstractEquations()) {
-		       ae.flatten(getFQName(),fc);
-		    }
-//			for (InstComponentDecl n : getInstComponentDecls())
-//				n.flatten(fc);
-			getInstComponentDeclList().flatten(fc);
-			getInstExtendsList().flatten(fc);
-           
-			//fc.genBindingEquations();
 			fc.genConnectionEquations();
 
 			//System.out.println(fc.prettyPrint(""));
 			//fc.dumpTree("");
-			
-			
+						
 			HashSet<InstAccess> instAccesses = fc.collectInstAccesses();
 			if (instAccesses.size()>0) {
 				System.out.println("Flat model contains InstAccesses!!!");
 				//return null;
 			}
-			
-			return this;	
-   		} else {
-  			return super.findFlattenInstRecursive(className,fc);
-   		}  	
-	}	
+
+    		
+    	} else {
+        	throw new ModelicaClassNotFoundException("Class "+ className + "not found");
+    	}
+    	
+    	return icd;
+    	
+    }
+    
+    
 	
  
 	// Generic method for flattening	
