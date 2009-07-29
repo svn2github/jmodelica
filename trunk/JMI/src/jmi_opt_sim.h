@@ -101,6 +101,9 @@ typedef int (*jmi_opt_sim_dg_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac);
 typedef int (*jmi_opt_sim_get_bounds_t)(jmi_opt_sim_t *jmi_opt_sim,
 		jmi_real_t *x_lb, jmi_real_t *x_ub);
 
+typedef int (*jmi_opt_sim_set_bounds_t)(jmi_opt_sim_t *jmi_opt_sim,
+		jmi_real_t *x_lb, jmi_real_t *x_ub);
+
 typedef int (*jmi_opt_sim_get_initial_t)(jmi_opt_sim_t *jmi_opt_sim,
 		jmi_real_t *x_init);
 
@@ -279,6 +282,16 @@ struct jmi_opt_sim_t{
  * @return Error code.
  */
 int jmi_opt_sim_get_bounds(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_lb, jmi_real_t *x_ub);
+
+/**
+ * \brief Get the upper and lower bounds of the optimization variables.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param x_lb (Output) Lower bounds vector.
+ * @param x_lb (Output) Upper bounds vector.
+ * @return Error code.
+ */
+int jmi_opt_sim_set_bounds(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_lb, jmi_real_t *x_ub);
 
 
 /* @} */

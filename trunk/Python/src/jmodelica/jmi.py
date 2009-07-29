@@ -916,6 +916,13 @@ def load_DLL(libname, path):
                                                 Nct.ndpointer(dtype=c_jmi_real_t,
                                                               ndim=1,
                                                               flags='C')]
+        dll.jmi_opt_sim_set_bounds.argtypes = [ct.c_void_p,
+                                                Nct.ndpointer(dtype=c_jmi_real_t,
+                                                              ndim=1,
+                                                              flags='C'),
+                                                Nct.ndpointer(dtype=c_jmi_real_t,
+                                                              ndim=1,
+                                                              flags='C')]
         dll.jmi_opt_sim_f.argtypes = [ct.c_void_p,
                                       Nct.ndpointer(dtype=c_jmi_real_t,
                                                     ndim=1,
@@ -3653,6 +3660,18 @@ class JMISimultaneousOpt(object):
         
         """
         if self._jmi_model._dll.jmi_opt_sim_get_bounds(self._jmi_opt_sim, x_lb, x_ub) is not 0:
+            raise JMIException("Getting upper and lower bounds of the optimization variables failed.")
+
+    def opt_sim_set_bounds(self, x_lb, x_ub):
+        """ 
+        Set the upper and lower bounds of the optimization variables.
+        
+        Parameters:
+            x_lb -- The lower bounds vector. (Return)
+            x_ub -- The upper bounds vector. (Return)
+        
+        """
+        if self._jmi_model._dll.jmi_opt_sim_set_bounds(self._jmi_opt_sim, x_lb, x_ub) is not 0:
             raise JMIException("Getting upper and lower bounds of the optimization variables failed.")
         
     def opt_sim_f(self, f):
