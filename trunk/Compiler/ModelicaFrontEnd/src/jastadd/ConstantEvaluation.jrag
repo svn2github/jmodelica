@@ -100,6 +100,15 @@ aspect ConstantEvaluation {
 	     */
 	    public abstract boolean isNumeric();
 	    
+	    /**
+	     * \brief Check if there was an error in the evaluation.
+	     *
+	     * @return true if there was an error, otherwise true. 
+	     */
+	    public boolean isUnknown() {
+      		return false;
+      	}
+	   
   }
   
 	/**
@@ -377,6 +386,11 @@ aspect ConstantEvaluation {
     	public String toString() { 
       		return "CValueUnknown"; 
       	}
+      	
+      	public boolean isUnknown() {
+      		return true;
+      	}
+      	
       }
 	
     
@@ -421,8 +435,13 @@ aspect ConstantEvaluation {
   eq FBooleanLitExpFalse.ceval() = new CValueBoolean(false);
   eq FStringLitExp.ceval() = new CValueString(getString());
   
-  eq FIdUseExp.ceval() = myFV().ceval();
-  
+  eq FIdUseExp.ceval() {
+   	if (myFV()!=null && !myFV().isUnknown()) {
+   		return myFV().ceval();
+   	} else {
+   		return new CValueUnknown();
+   	}
+  }
   eq FInstAccessExp.ceval() { 
 //	  System.out.println(getInstAccess().name());
 //	  System.out.println(getInstAccess());
@@ -462,7 +481,9 @@ aspect ConstantEvaluation {
 	 * @return The constant value.
 	 */
 	syn CValue InstPrimitive.ceval() {
-		if (myBindingInstExp()==null ||
+	  if ((!isConstant() && !isParameter())) {
+		  return new CValueUnknown();
+	  } else if (myBindingInstExp()==null ||
 				myBindingInstExp().type().isUnknown()) { 
 			return new CValueUnknown();
 		} else if (isReal()) {
@@ -642,4 +663,100 @@ aspect ArrayConstantEvaluation {
 		return ind;
 	}
 	
+}
+
+aspect CircularExpressions {
+
+	syn lazy boolean FExp.isCircular() circular [true] = false;
+	
+	eq FBinExp.isCircular() = getLeft().isCircular() | getRight().isCircular();
+	eq FUnaryExp.isCircular() = getFExp().isCircular();
+	
+	eq FIdUseExp.isCircular() = myFV().isCircular();
+	eq FInstAccessExp.isCircular() = getInstAccess().myInstComponentDecl().isCircular();	
+	eq FFunctionCall.isCircular() {
+		for (FExp e : getArgss()) {
+			if (e.isCircular()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	eq FSumRedExp.isCircular() = getFExp().isCircular() | getFForIndex().isCircular();
+	syn lazy boolean FForIndex.isCircular() circular [true] = hasFExp()? getFExp().isCircular(): false;
+	eq FIfExp.isCircular() {
+		if (getIfExp().isCircular() | getThenExp().isCircular() | getElseExp().isCircular()) {
+			return true;
+		} else {
+			for (FElseIfExp ee : getFElseIfExps()) {
+				if (ee.isCircular()) {
+					return true;
+				}
+			}
+		} 
+		return false;
+	}
+	eq FElseIfExp.isCircular() = getIfExp().isCircular() | getThenExp().isCircular();
+	eq FArray.isCircular() {
+		for (FExp e : getFExps()) {
+			if (e.isCircular()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	// TODO: Add FMatrix
+
+	eq FRangeExp.isCircular() {
+		for (FExp e : getFExps()) {
+			if (e.isCircular()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	eq FBuiltInExp.isCircular() = getFExp().isCircular();
+	eq FAtan2Exp.isCircular() = getFExp().isCircular() | getY().isCircular();
+	eq FSizeExp.isCircular() = getFIdUseExp().isCircular() | getDim().isCircular();
+	eq FOnes.isCircular() {
+		for (FExp e : getFExps()) {
+			if (e.isCircular()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	eq FZeros.isCircular() {
+		for (FExp e : getFExps()) {
+			if (e.isCircular()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
+	
+
+	syn lazy boolean AbstractFVariable.isCircular() circular [true] = false;
+	eq FVariable.isCircular() {
+		if (hasBindingExp()) {
+		 	return getBindingExp().isCircular();
+		} else {
+		    return false;
+		}
+	}
+	
+	syn lazy boolean InstComponentDecl.isCircular() circular [true] = false;
+	eq InstPrimitive.isCircular() {
+		if (myBindingInstExp()!=null) {
+		 	return myBindingInstExp().isCircular();
+		} else {
+		    return false;
+		}	
+	}	
+	
+
 }

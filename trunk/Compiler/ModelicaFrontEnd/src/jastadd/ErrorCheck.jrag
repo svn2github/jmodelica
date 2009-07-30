@@ -493,19 +493,30 @@ aspect InstanceErrorCheck {
 			getInstConstraining().collectErrors();
 		}
 	}
-/*
+
 	public void InstPrimitive.collectErrors() {
     if (!errorChecked) {
 		super.collectErrors();
+		/*
 			if (isParameter() && myBindingFExp()==null){
-			   warning("The parameter " + name() + " does not have a binding expression.");
+			   error("The parameter " + name() + " does not have a binding expression.");
 			} else if (isConstant() && myBindingFExp()==null){
-			   warning("The constant " + name() + " does not have a binding expression.");
+			   error("The constant " + name() + " does not have a binding expression.");
+			}
+*/			
+			if ((isParameter() || isConstant()) && !(myBindingInstExp()==null)) {
+				if (myBindingInstExp().isCircular()) {
+					error("Could not evaluate binding expression due to circularity: '" + 
+					    myBindingInstExp().prettyPrint("") + "'");
+				} else if (myBindingInstExp().ceval().isUnknown()) {
+					error("Could not evaluate binding expression: '" + 
+					    myBindingInstExp().prettyPrint("") + "'");
+				}
 			}
 
 		}
 	}
-*/
+
 	public void InstArrayComponentDecl.collectErrors() {
 	    if (!errorChecked) {
 	  	  for(InstNode n : getInstComponentDecls()) 

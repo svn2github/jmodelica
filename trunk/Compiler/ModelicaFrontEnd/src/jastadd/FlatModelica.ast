@@ -655,7 +655,7 @@ FTranspose : FUnaryExp ::=;
 /**
  * \brief Identity built-in function.
  */
-FIdentity : FExp ::= FExp;
+FIdentity : FUnaryExp ::=;
 
 /**
  * \brief Ones built-in function.

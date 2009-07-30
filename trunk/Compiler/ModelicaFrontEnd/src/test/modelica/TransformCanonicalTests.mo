@@ -65,10 +65,16 @@ end TransformCanonicalTests.TransformCanonicalTest2;
       JModelica.UnitTesting.ErrorTestCase(name="TransformCanonical3_Err",
                                                description="Test parameter sorting.",
                                                errorMessage=
-" 1 error found...
-In file '../ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 0, column 0:
-  The model TransformCanonicalTests.TransformCanonicalTest3_Err contains cyclic parameter dependencies.
+" 3 errors found...
+Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 79, column 19:
+  Could not evaluate binding expression due to circularity: '( p3 ) * ( p3 )'
+Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 80, column 19:
+  Could not evaluate binding expression due to circularity: 'p2 + p1'
+Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 81, column 19:
+  Could not evaluate binding expression due to circularity: '( p4 ) * ( p1 )'
 
 ")})));
     
@@ -85,10 +91,16 @@ Semantic error at line 0, column 0:
       JModelica.UnitTesting.ErrorTestCase(name="TransformCanonical4_Err",
                                                description="Test parameter sorting.",
                                                errorMessage=
-" 1 error found...
-In file '../ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 0, column 0:
-  The model TransformCanonicalTests.TransformCanonicalTest4_Err contains cyclic parameter dependencies.
+" 3 errors found...
+Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 103, column 19:
+  Could not evaluate binding expression due to circularity: '( p3 ) * ( p3 )'
+Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 104, column 19:
+  Could not evaluate binding expression due to circularity: 'p2 + p1'
+Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 105, column 19:
+  Could not evaluate binding expression due to circularity: '( p1 ) * ( p2 )'
 
 ")})));
 
@@ -645,5 +657,38 @@ Semantic error at line 0, column 0:
 
   end AliasTest19_Err;
 
+model ParameterBindingExpTest1_Err
+     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ParameterBindingExpTest1_Err",
+                                               description="Test error in dependent parameter binding expression.",
+                                               errorMessage=
+" 1 error found...
+Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 650, column 17:
+  Could not evaluate binding expression: 'x'
+")})));
+
+	Real x = 2;
+	parameter Real p = x;
+end ParameterBindingExpTest1_Err;
+
+model ParameterBindingExpTest2_Err
+     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ParameterBindingExpTest2_Err",
+                                               description="Test error in dependent parameter binding expression.",
+                                               errorMessage=
+" 2 errors found...
+Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 654, column 17:
+  Could not evaluate binding expression: 'x'
+Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 654, column 21:
+  Cannot find class or component declaration for x
+
+")})));
+
+
+	parameter Real p = x;
+end ParameterBindingExpTest2_Err;
 
 end TransformCanonicalTests;

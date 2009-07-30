@@ -354,6 +354,9 @@ Semantic error at line 297, column 4:
                                                errorMessage=
 "
   1 error(s) found...
+  Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 363, column 18:
+  Could not evaluate binding expression: 'p1'
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 320, column 9:
   Cannot find class or component declaration for p1
@@ -991,7 +994,7 @@ model ShortClassDeclTest6
                                                flatModel=
 "
 fclass NameTests.ShortClassDeclTest6
- parameter Real R;
+ parameter Real R = 1;
  parameter Real a.R = R /*(0.0)*/;
 equation 
 end NameTests.ShortClassDeclTest6;
@@ -1001,7 +1004,7 @@ model Resistor
 	parameter Real R;
 end Resistor;
 
-	parameter Real R;
+	parameter Real R=1;
 	
 	replaceable model Load=Resistor(R=R);
 	// Correct, sets the R in Resistor to R from model A.

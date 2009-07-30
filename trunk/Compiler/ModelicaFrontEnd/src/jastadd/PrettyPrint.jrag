@@ -666,14 +666,18 @@ aspect FlattPrettyPrint {
 
 	    if (isIndependentParameter() && hasBindingExp()) {
 	    	str.print(" /* ");
-	    	if (isReal()) {
-				str.print(getBindingExp().ceval().realValue());
-			} else if (isInteger()) {
-				str.print(getBindingExp().ceval().intValue());
-			} else if (isBoolean()) {
-				str.print(getBindingExp().ceval().booleanValue());
-			} else if (isString()) {
-				str.print(getBindingExp().ceval().stringValue());
+	    	try {
+		    	if (isReal()) {
+					str.print(getBindingExp().ceval().realValue());
+				} else if (isInteger()) {
+					str.print(getBindingExp().ceval().intValue());
+				} else if (isBoolean()) {
+					str.print(getBindingExp().ceval().booleanValue());
+				} else if (isString()) {
+					str.print(getBindingExp().ceval().stringValue());
+				}
+			} catch (UnsupportedOperationException e){
+				str.print("evalutation error");
 			}
 	    	str.print(" */");
 	    }
@@ -925,6 +929,11 @@ aspect FlattPrettyPrint {
 	public void FIdUse.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		debugPrint("FIdUse.prettyPrint(): " + name());
 		str.print(name());
+	}
+
+	public void FInstAccessExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		debugPrint("FIdUse.prettyPrint(): " + name());
+		str.print(getInstAccess().name());
 	}
 	
 	public void FDer.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
