@@ -64,7 +64,16 @@ aspect CCodeGen {
 	public void FIdUseExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		str.print("_"+nameUnderscore()+"_");
 	}
-		
+
+	public void FDivExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("jmi_divide(");
+		p.toString(getLeft(),str,indent,o);
+		str.print(","); 
+		p.toString(getRight(),str,indent,o);
+		str.print(","); 
+		str.print("\"Divide by zero: "+prettyPrint("")+"\")");
+	}
+
 	public void FAbstractEquation.genResidual_C(int i, String indent, PrintStream str) {}
 	
 	public void FEquation.genResidual_C(int i, String indent, PrintStream str) {

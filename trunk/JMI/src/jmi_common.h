@@ -183,6 +183,11 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 #error "The directive JMI_AD_NONE or JMI_AD_CPPAD must be set"
 #endif
 
+/**
+ * Function to wrap division and report errors.
+ */
+jmi_ad_var_t jmi_divide(jmi_ad_var_t num, jmi_ad_var_t den,const char msg[]);
+
 /* @} */
 
 /**

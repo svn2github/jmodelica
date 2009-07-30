@@ -26,6 +26,17 @@
 
 #include "jmi.h"
 
+jmi_ad_var_t jmi_divide(jmi_ad_var_t num, jmi_ad_var_t den,const char msg[]) {
+  if (den==0) {
+    printf(msg);
+    printf("\n");
+    return (num==0)? 0: ( (num>0)? 1.e20: -1.e20 );
+  } else {
+    return num/den;
+  }
+}
+
+
 int jmi_func_new(jmi_func_t** jmi_func, jmi_residual_func_t F, int n_eq_F, jmi_jacobian_func_t dF,
 		int dF_n_nz, int* dF_row, int* dF_col) {
 

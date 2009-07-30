@@ -127,7 +127,10 @@ int jmi_func_ad_init(jmi_t *jmi, jmi_func_t *func) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
 	CppAD::Independent(*jmi->z);
-	func->F(jmi, func->ad->F_z_dependent);
+	
+	if (func->F(jmi, func->ad->F_z_dependent)!=0) {
+	  return -1;
+	}
 	func->ad->F_z_tape = new jmi_ad_tape_t(*jmi->z,*func->ad->F_z_dependent);
 
 	func->ad->tape_initialized = true;
@@ -610,20 +613,28 @@ int jmi_ad_init(jmi_t* jmi) {
 		int n_eq_F;
 		jmi_dae_get_sizes(jmi,&n_eq_F);
 		if (n_eq_F>0) {
-			jmi_func_ad_init(jmi, jmi->dae->F);
+		  if (jmi_func_ad_init(jmi, jmi->dae->F)!=0) {
+		    return -1;
+		  }
 		}
 	}
 	if (jmi->init!=NULL) {
 		int n_eq_F0, n_eq_F1, n_eq_Fp;
 		jmi_init_get_sizes(jmi,&n_eq_F0,&n_eq_F1,&n_eq_Fp);
 		if (n_eq_F0>0) {
-			jmi_func_ad_init(jmi, jmi->init->F0);
+		  if (jmi_func_ad_init(jmi, jmi->init->F0)!=0) {
+		    return -1;
+		  }
 		}
 		if (n_eq_F1>0) {
-			jmi_func_ad_init(jmi, jmi->init->F1);
+		  if (jmi_func_ad_init(jmi, jmi->init->F1)!=0) {
+		    return -1;
+		  }
 		}
 		if (n_eq_Fp>0) {
-			jmi_func_ad_init(jmi, jmi->init->Fp);
+		  if (jmi_func_ad_init(jmi, jmi->init->Fp)!=0) {
+		    return -1;
+		  }
 		}
 	}
 	if (jmi->opt!=NULL) {
@@ -632,16 +643,24 @@ int jmi_ad_init(jmi_t* jmi) {
 
 		jmi_func_ad_init(jmi,jmi->opt->J);
 		if (n_eq_Ceq>0) {
-			jmi_func_ad_init(jmi,jmi->opt->Ceq);
+		  if (jmi_func_ad_init(jmi,jmi->opt->Ceq)!=0) {
+		    return -1;
+		  }
 		}
 		if (n_eq_Cineq>0) {
-			jmi_func_ad_init(jmi,jmi->opt->Cineq);
+		  if (jmi_func_ad_init(jmi,jmi->opt->Cineq)!=0) {
+		    return -1;
+		  }
 		}
 		if (n_eq_Heq>0) {
-			jmi_func_ad_init(jmi,jmi->opt->Heq);
+		  if (jmi_func_ad_init(jmi,jmi->opt->Heq)!=0) {
+		    return -1;
+		  }
 		}
 		if (n_eq_Hineq>0) {
-			jmi_func_ad_init(jmi,jmi->opt->Hineq);
+		  if (jmi_func_ad_init(jmi,jmi->opt->Hineq)!=0) {
+		    return -1;
+		  }
 		}
 	}
 
