@@ -29,7 +29,7 @@ class ShootingException(Exception):
     pass
 
 
-def _get_example_path(relpath):
+def _get_example_path():
     """ Get the absolute path to the examples.
     
     @param relpath:
@@ -41,29 +41,11 @@ def _get_example_path(relpath):
     assert jmhome is not None, "You have to specify" \
                                " JMODELICA_HOME environment" \
                                " variable."
-    return os.path.join(jmhome, '..', 'Python', 'src', 'jmodelica',
-                        'examples', relpath)
-
-
-def _load_example_jmi_model(relpath, libname):
-    """ Loads an example model.
-    
-        This function is used by the test cases in this file.
-    
-    """
-    try:
-        model = JMIModel(libname, _get_example_path(relpath))
-    except JMIException, e:
-        raise JMIException("%s\nUnable to load test models."
-                           " You have probably not compiled the"
-                           " examples. Please refer to the"
-                           " JModelica README for more information."
-                            % e)
-    return model
+    return os.path.join(jmhome, '..', 'Python', 'src', 'jmodelica', 'examples', 'vdp')
     
     
-def _load_example_standard_model(relpath, libname):
-    model = StandardModel(libname, _get_example_path(relpath))
+def _load_example_standard_model(libname):
+    model = StandardModel(libname, _get_example_path())
     return model
 
 
@@ -224,7 +206,7 @@ class TestStandardModel:
         """ Test setUp. Load the test model
         
         """
-        self.m = _load_example_standard_model('vdp', 'VDP_pack_VDP_Opt')
+        self.m = _load_example_standard_model('VDP_pack_VDP_Opt')
         
     def testModelSize(self):
         """ Test GenericModel.getModelSize()
@@ -316,12 +298,14 @@ class TestStandardModel:
         assert self.m.isFixedStartTime(), "Only fixed times supported."
         assert self.m.isFixedFinalTime(), "Only fixed times supported."
         
+        self.m.reset()
+        self.m.setInputs([0.25])
         T, ys, sens, ignore = solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime())
         assert len(T) == len(ys)
         
         p.plot(T, ys)
         p.title('testFixedSimulation(...) output')
-        #p.show()
+        p.show()
         
     def testFixedSimulationIntervals(self):
         """Test simulation between a different time span."""
@@ -483,8 +467,8 @@ def solve_using_sundials(model, end_time, start_time=0.0, verbose=False, sensi=F
         ]
     PUserData = ctypes.POINTER(UserData) # Pointer type of UserData
     
-    # initial y
-    y = cvodes.NVector(model.getStates())
+    # initial y (copying just in case)
+    y = cvodes.NVector(model.getStates().copy())
 
     # relative tolerance
     abstol = cvodes.realtype(1.0e-6) # used to be e-14
@@ -603,7 +587,7 @@ def solve_using_sundials(model, end_time, start_time=0.0, verbose=False, sensi=F
     t = cvodes.realtype(t0.value)
 
     # used for collecting the y's for plotting
-    T, ylist = [], []
+    T, ylist = [t0.value], [model.getStates().copy()]
     
     while True:
         # run ODE solver
@@ -642,6 +626,7 @@ def solve_using_sundials(model, end_time, start_time=0.0, verbose=False, sensi=F
         print "nni = %-6ld ncfn = %-6ld netf = %-6ld nge = %ld\n "%(nni, ncfn, netf, nge)
     
     ylist = N.array(ylist)
+    T = N.array(T)
     
     if sensi:
         return (T, ylist, N.array(yS), parameters)
@@ -688,11 +673,11 @@ def _shoot(model, start_time, end_time):
     }
     model._m.setX_P(ys[-1], 0)
     model._m.setDX_P(model.getDiffs(), 0)
+    model._m.setU_P(model.getInputs(), 0)
     
     cost_jac = model.getCostJacobian(pyjmi.JMI_DER_X_P)
         
-    # This assumes that the cost function does not depend on the u:s
-    # which is the case of 
+    # This assumes that the cost function does not depend on U
     gradient = N.dot(cost_jac, sens_mini.T)
     gradient = gradient.flatten()
     
@@ -764,6 +749,38 @@ def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
     return u_opt
 
 
+def _eval_initial_ys(model, grid):
+    from scipy import interpolate
+    _check_grid(grid)
+    
+    model.reset()
+    T, ys, sens, params = solve_using_sundials(model, model.getFinalTime(), model.getStartTime())
+    T = map(lambda x: (x - model.getStartTime()) / (model.getFinalTime() - model.getStartTime()), T)
+    T = N.array(T)
+    
+    tck = interpolate.interp1d(T, ys, axis=0)
+    initials = map(lambda interval: tck(interval[0]).flatten(), grid)
+    initials = N.array(initials).flatten()
+    return initials
+    
+
+def _check_grid(grid):
+    """Check grid input parameter for errors.
+    
+    Raises exception on error.
+    """
+    if not len(grid) >= 1:
+        raise ShootingException('You need to specify at least one segment.')
+    if math.fabs(grid[0][0]) > 0.001:
+        raise ShootingException("Warning: The start time of the first segment should usually coinside with the model start time.")
+    if math.fabs(grid[-1][1]-1) > 0.001:
+        raise ShootingException("Warning: The end time of the last segment should usually coinside with the model end time.")
+    def check_inequality(a, b):
+        if a >= b:
+            raise ShootingException('One grid segment is incorrectly formatted.')
+    map(check_inequality, *zip(*grid))
+
+
 def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, plot=True):
     """ Does multiple shooting.
     
@@ -780,9 +797,7 @@ def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, plot=True
         Can be three things:
          * A list of initial states for all grids. If any of these are
            None they will be replaced by the default model state.
-         * None -- same as default state.
-         * One state. This state will be the initial state for every
-           segment.
+         * None -- using the solution from the default model state.
         A list of initial states for each segment except the first one.
         If not a list the same initial state will be used for each
         segment.
@@ -793,34 +808,16 @@ def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, plot=True
     model.reset()
     default_state = model.getStates().copy()
     
-    # Check for errors
-    if not len(grid) >= 1:
-        raise ShootingException('You need to specify at least one segment.')
-    try:
-        if len(initial_u) != len(grid):
-            raise ShootingException('initial_u parameters must either be constant, or the same length as grid segments.')
-    except TypeError:
-        initial_u = [initial_u] * len(grid)
-    try:
-        if len(initial_y) != len(grid):
-            raise ShootingException('initial_y states must either be constant, or the same length as grid segments.')
-    except TypeError:
-        initial_y = [initial_y] * len(grid)    
-    if math.fabs(grid[0][0]) > 0.001:
-        print "Warning: The start time of the first segment should usually coinside with the model start time."
-    if math.fabs(grid[-1][1]-1) > 0.001:
-        print "Warning: The end time of the last segment should usually coinside with the model end time."
-    def check_inequality(a, b):
-        if a >= b:
-            raise ShootingException('One grid segment is incorrectly formatted.')
-    map(check_inequality, *zip(*grid))
+    # Check grid for errors
+    _check_grid(grid)
     
-    def substitute_None(x):
-        if x is None:
-            return default_state
-        else:
-            return x
-    initial_y = map(substitute_None, initial_y)
+    # Check initials for errors
+    if len(initial_u) != len(grid):
+        raise ShootingException('initial_u parameters must be the same length as grid segments.')
+    if initial_y is None:
+        initial_y = _eval_initial_ys(model, grid)
+    elif len(initial_y) != len(grid):
+        raise ShootingException('initial_y states must be the same length as grid segments.')
     
     # Denormalize times
     simulation_length = model.getFinalTime() - model.getStartTime()
@@ -836,11 +833,11 @@ def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, plot=True
             
         seg_start_time = segment_times[0]
         seg_end_time = segment_times[1]
-        model.reset()
         
         u = u.flatten()
         y0 = y0.flatten()
         
+        model.reset()
         model.setInputs(u)
         model.setStates(y0)
         
@@ -855,12 +852,22 @@ def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, plot=True
             segment) and parameters.
         """
         ys, us = _split_opt_x(model, len(grid), p)
-        shoot_single_segment(us[-1], ys[-1], grid[-1])
+        gradient, last_y, gradparams = shoot_single_segment(us[-1], ys[-1], grid[-1])
+        model._m.setX_P(last_y, 0)
+        model._m.setDX_P(model.getDiffs(), 0)
+        model._m.setU_P(model.getInputs(), 0)
         cost = model.evalCost()
+        
+        print "(u, y, grid) = ", us[-1], ys[-1], grid[-1]
+        print "Cost:", cost
+        
         return cost
         
     def df(p): # grad(f) - CURRENTLY NOT USED
-        """Returns the gradient of f(cur_u)."""
+        """Returns the gradient of f(cur_u).
+        
+        In the VDP example it depends on the 
+        """
         return NotImplemented
         
     def h(p): # h(p) = 0
@@ -871,22 +878,24 @@ def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, plot=True
         
         y0s, us = _split_opt_x(model, len(grid), p)
         last_ys = N.array(map(eval_last_ys, us[:-1], y0s[:-1], grid[:-1]))
+        print "Equality contraints:", (y0s[1:]-last_ys)
         return (y0s[1:]-last_ys)
+        
+    def dh(p):
+        return NotImplemented
         
     # Initial try
     p0 = N.concatenate( (N.array(initial_y).flatten(), N.array(initial_u).flatten()) )
     
     # Less than (-0.5 < u < 1)
     # TODO: These are currently hard coded. They shouldn't be.
-    nlt = 2 * len(grid)
+    nlt = len(grid)
     Alt = N.zeros( (nlt, len(p0)) )
     Alt[:len(grid), len(grid) * model.getModelSize():] = N.eye(len(grid))
-    Alt[len(grid):, len(grid) * model.getModelSize():] = -N.eye(len(grid))
-    blt = N.ones(nlt)
-    blt[len(grid):] = -0.5
+    blt = 0.75*N.ones(nlt)
     
     # Get OpenOPT handler
-    p = NLP(f, p0, maxIter = 1e3, maxFunEvals = 1e2, h=h, A=Alt, b=blt)
+    p = NLP(f, p0, maxIter = 1e3, maxFunEvals = 1e3, h=h, A=Alt, b=blt)
     
     #p.df = df
     p.plot = 1
@@ -894,13 +903,8 @@ def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, plot=True
     
     u_opt = p.solve('ralg')
     
-    print "Solution:", u_opt.xf
-    print "Eq.constr.:", N.dot(Aeq, u_opt.xf)
-    
-    if u_opt.isFeasible and plot:
+    if plot:
         plot_control_solutions(model, grid, u_opt.xf)
-    else:
-        print "The solution is not feasible. Not plotting."
     
     return u_opt
     
@@ -917,9 +921,16 @@ def _plot_control_solution(model, interval, initial_ys, us):
     model.reset()
     model.setStates(initial_ys)
     model.setInputs(us)
-    solver_data = solve_using_sundials(model, end_time=interval[1], start_time=interval[0])
-    T, Y = solver_data[0], solver_data[1]
-    p.plot(T,Y)
+    
+    print "====="
+    print model.getParameters()
+    print model.getInputs()
+    print model.getStates()
+    print "====="
+    
+    T, Y, yS, parameters = solve_using_sundials(model, end_time=interval[1], start_time=interval[0])
+    #print Y
+    p.plot(T,Y[:,2])
     return T, Y
 
 
@@ -946,7 +957,8 @@ def plot_control_solutions(model, grid, x):
 
 def test_plot_control_solutions():
     """ Testing plot_control_solutions(...)"""
-    m = _load_example_standard_model('vdp', 'VDP_pack_VDP_Opt')
+    m = _load_example_standard_model('VDP_pack_VDP_Opt')
+    m.reset()
     grid = [(0, 0.1),
             (0.1, 0.2),
             (0.2, 0.3),
@@ -957,7 +969,18 @@ def test_plot_control_solutions():
             (0.7, 0.8),
             (0.8, 0.9),
             (0.9, 1.0),]
-    us = N.array([1, 1, 1, 1]*len(grid))
+    # Used to be: N.array([1, 1, 1, 1]*len(grid))        
+    us = [  0.00000000e+00,  1.00000000e+00,  0.00000000e+00, -1.86750972e+00,
+           -1.19613740e+00,  3.21955502e+01,  1.15871750e+00, -9.56876370e-01,
+            7.82651050e+01, -3.35655693e-01,  1.95491165e+00,  1.47923425e+02,
+           -2.32963068e+00, -1.65371763e-01,  1.94340923e+02,  6.82953492e-01,
+           -1.57360749e+00,  2.66717232e+02,  1.46549806e+00,  1.74702679e+00,
+            3.29995167e+02, -1.19712096e+00,  9.57726717e-01,  3.80947471e+02,
+            3.54379487e-01, -1.95842811e+00,  4.52105868e+02,  2.34170339e+00,
+            1.77754406e-01,  4.98700011e+02,  2.50000000e-01,  2.50000000e-01,
+            2.50000000e-01,  2.50000000e-01,  2.50000000e-01,  1.36333570e-01,
+            2.50000000e-01,  2.50000000e-01,  2.50000000e-01,  2.50000000e-01]
+    us = N.array(us)
     plot_control_solutions(m, grid, us)
 
 
@@ -983,8 +1006,9 @@ def cost_graph(model):
         model.reset()
         u[0]=u_elmnt
         T, ys, sens, params = solve_using_sundials(model, end_time, start_time, sensi=True)
-        model._jmim.setX_P(ys[-1], 0)
-        model._jmim.setDX_P(model.getDiffs(), 0)
+        model._m.setX_P(ys[-1], 0)
+        model._m.setDX_P(model.getDiffs(), 0)
+        model._m.setU_P(model.getInputs(), 0)
         
         cost = model.evalCost()
         print "Cost:", cost
@@ -1011,10 +1035,10 @@ def cost_graph(model):
 
 
 def main():
-    m = _load_example_standard_model('vdp', 'VDP_pack_VDP_Opt')
+    m = _load_example_standard_model('VDP_pack_VDP_Opt')
     
     # Whether the cost as a function of input U should be plotted
-    GEN_PLOT = False
+    GEN_PLOT = True
     
     if GEN_PLOT:
         cost_graph(m)
@@ -1034,9 +1058,9 @@ def main():
                     (0.7, 0.8),
                     (0.8, 0.9),
                     (0.9, 1.0),]
-            initial_u = 0.25
+            initial_u = [0.25] * len(grid)
             opt_us = multiple_shooting(m, initial_u, grid)
-            print "Optimal us:", opt_us
+            print "Optimal us:", opt_us.xf
         
 
 
