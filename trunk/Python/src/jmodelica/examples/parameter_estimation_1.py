@@ -7,7 +7,7 @@ import os.path
 # Import the JModelica.org Python packages
 import jmodelica
 import jmodelica.jmi as jmi
-import jmodelica.optimicacompiler as oc
+from jmodelica.compiler import OptimicaCompiler as oc
 
 # Import numerical libraries
 import numpy as N

@@ -7,7 +7,7 @@ import os.path
 import nose
 
 import jmodelica.jmi as jmi
-import jmodelica.optimicacompiler as oc
+from jmodelica.compiler import OptimicaCompiler as oc
 import jmodelica.xmlparser as xp
 import jmodelica.io
 import matplotlib.pyplot as plt

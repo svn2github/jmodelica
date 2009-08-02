@@ -6,7 +6,7 @@ import os.path
 
 import jmodelica
 import jmodelica.jmi as jmi
-import jmodelica.optimicacompiler as oc
+from jmodelica.compiler import OptimicaCompiler as oc
 
 import numpy as N
 import scipy as S
@@ -24,7 +24,7 @@ def run_demo():
 
     oc.compile_model(curr_dir+"/files/CSTR.mo", "CSTR.CSTR_Opt", target='ipopt')
 
-    cstr=jmi.Model("CSTR_CSTR_Opt")
+    cstr = jmi.Model("CSTR_CSTR_Opt")
 
     pi = cstr.getPI();
     x = cstr.getX();

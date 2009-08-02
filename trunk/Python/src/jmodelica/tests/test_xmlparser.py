@@ -5,7 +5,7 @@ import os
 
 import nose
 
-import jmodelica.optimicacompiler as oc
+from jmodelica.compiler import OptimicaCompiler as oc
 import jmodelica.xmlparser as xp
 
 

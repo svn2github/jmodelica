@@ -32,6 +32,7 @@ import os, os.path
 import sys
 import warnings
 import jpype
+#import matplotlib
 
 _jm_home = os.environ['JMODELICA_HOME']
 environ = {}
@@ -45,7 +46,7 @@ _defaults = [('IPOPT_HOME','',True),
              ('BEAVER_PATH',os.path.join(_jm_home,'ThirdParty','Beaver','lib'),True),
              ('MODELICAPATH',os.path.join(_jm_home,'ThirdParty','MSL','Modelica'),True),
              ('JVM_PATH',jpype.getDefaultJVMPath(),True),
-             ('JVM_ARGS','',False)]
+             ('JVM_ARGS','-Xmx512m',False)]
 
 # read values for system environment if possible, otherwise set default
 for _e in _defaults:
@@ -54,10 +55,13 @@ for _e in _defaults:
     except KeyError:
         environ[_e[0]] = _e[1]
   
-# add mingw to path (win32)
 if sys.platform == 'win32':
+    # add mingw to path (win32)
     os.environ['PATH'] = os.path.join(environ['MINGW_HOME'],'bin') + \
                          ';' + os.environ['PATH']
+else:
+    # MINGW_HOME only on win32
+    del environ['MINGW_HOME']
     
 # set working directory
 if sys.platform == 'win32':
@@ -72,6 +76,14 @@ if not os.path.exists(_p):
         _p = ""
 if _p:
     os.chdir(_p)
+
+
+# set matplotlib backend
+# one of GTK GTKAgg GTKCairo FltkAgg QtAgg TkAgg
+# WX WXAgg Agg Cairo GD GDK Paint PS PDF SVG Template
+# Qt4Agg
+#matplotlib.rcParams['backend'] = 'TkAgg'
+#matplotlib.rcParams['interactive'] = True
 
 # read user startup script
 if sys.platform == 'win32':
@@ -89,3 +101,7 @@ for _e in _defaults:
     if _e[2] and not os.path.exists(environ[_e[0]]):
         warnings.warn('%s=%s path does not exist. Environment may be corrupt.' % (_e[0],environ[_e[0]]))
         
+print("""
+Check that the path to MSL is set correctly in 'Options\\options.xml'.
+This will soon be replaced by proper use of MODELICAPATH.
+""")

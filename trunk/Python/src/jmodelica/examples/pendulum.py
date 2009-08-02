@@ -7,7 +7,7 @@ import os.path
 # Import the JModelica.org Python packages
 import jmodelica
 import jmodelica.jmi as jmi
-import jmodelica.optimicacompiler as oc
+from jmodelica.compiler import OptimicaCompiler as oc
 
 # Import numerical libraries
 import numpy as N
@@ -86,7 +86,6 @@ def run_demo():
     plt.grid()
     plt.ylabel('dx')
     plt.xlabel('time')
-    plt.show()
     
     plt.subplot(313)
     plt.plot(t_,u_)

@@ -6,10 +6,12 @@ import os
 import sys
 import nose
 
-import jmodelica.optimicacompiler as oc
+from jmodelica.compiler import OptimicaCompiler as oc
+import jmodelica as jm
 
+print(sys.platform);
 
-jm_home = os.environ.get('JMODELICA_HOME')
+jm_home = jm.environ['JMODELICA_HOME']
 path_to_examples = os.sep+'Python'+os.sep+'jmodelica'+os.sep+'examples'
 
 model = os.sep+'files'+os.sep+'Pendulum_pack.mo'
