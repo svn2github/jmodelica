@@ -40,13 +40,15 @@ environ['JMODELICA_HOME'] = _jm_home
 
 _defaults = [('IPOPT_HOME','',True),
              ('CPPAD_HOME',os.path.join(_jm_home,'ThirdParty','CppAD'),True),
-             ('MINGW_HOME',os.path.join(_jm_home,'mingw'),True),
              ('MC_JAR',os.path.join(_jm_home,'lib','OptimicaCompiler.jar'),True),
              ('OC_JAR',os.path.join(_jm_home,'lib','ModelicaCompiler.jar'),True),
              ('BEAVER_PATH',os.path.join(_jm_home,'ThirdParty','Beaver','lib'),True),
              ('MODELICAPATH',os.path.join(_jm_home,'ThirdParty','MSL','Modelica'),True),
              ('JVM_PATH',jpype.getDefaultJVMPath(),True),
              ('JVM_ARGS','-Xmx512m',False)]
+
+if sys.platform == 'win32':
+    _defaults.append(('MINGW_HOME',os.path.join(_jm_home,'mingw'),True))
 
 # read values for system environment if possible, otherwise set default
 for _e in _defaults:
@@ -59,9 +61,9 @@ if sys.platform == 'win32':
     # add mingw to path (win32)
     os.environ['PATH'] = os.path.join(environ['MINGW_HOME'],'bin') + \
                          ';' + os.environ['PATH']
-else:
-    # MINGW_HOME only on win32
-    del environ['MINGW_HOME']
+#else:
+#    # MINGW_HOME only on win32
+#    del environ['MINGW_HOME']
     
 # set working directory
 if sys.platform == 'win32':
