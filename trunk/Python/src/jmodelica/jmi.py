@@ -36,6 +36,9 @@ import atexit
 import xmlparser
 import io
 
+int = N.int32
+N.int = N.int32
+
 # ================================================================
 #                         CONSTANTS
 # ================================================================
@@ -1732,7 +1735,7 @@ class Model(object):
                 (z_i, ptype) = _translate_value_ref(ref)
                 p_opt_indices.append(z_i - self._offs_pi.value)
                 n_p_opt = n_p_opt +1
-            self.jmimodel.opt_set_p_opt_indices(n_p_opt,N.array(p_opt_indices))
+            self.jmimodel.opt_set_p_opt_indices(n_p_opt,N.array(p_opt_indices,dtype=int))
 
     def get_name(self):
         """ Return the name of the model. """
