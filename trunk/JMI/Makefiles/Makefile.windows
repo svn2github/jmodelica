@@ -50,6 +50,8 @@
 #
 #
 #
+# Make sure that cmd.exe is used, even if cygwin or mingw-sh are on the path
+SHELL = cmd.exe
 
 # Name of shared library
 FILE_NAME = 
