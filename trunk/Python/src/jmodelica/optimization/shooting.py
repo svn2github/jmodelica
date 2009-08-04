@@ -9,6 +9,7 @@ import math
 
 import nose
 import numpy as N
+import scipy as S
 
 try:
     from pysundials import cvodes
@@ -292,6 +293,15 @@ class TestStandardModel:
         
     def testEvaluation(self):
         self.m.evalF()
+        
+    def testSimulationWSensivity(self):
+        """Testing simulation sensivity."""
+        self.m.reset()
+        self.m.setInputs([0.25])
+        T, ys, sens, ignore = solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime(), sensi=True)
+        assert len(T) == len(ys)
+        assert sens is not None
+        assert len(T) > 1
 
     def testFixedSimulation(self):
         """Test simulation"""
@@ -305,7 +315,7 @@ class TestStandardModel:
         
         p.plot(T, ys)
         p.title('testFixedSimulation(...) output')
-        p.show()
+        #p.show()
         
     def testFixedSimulationIntervals(self):
         """Test simulation between a different time span."""
@@ -675,15 +685,21 @@ def _shoot(model, start_time, end_time):
     model._m.setDX_P(model.getDiffs(), 0)
     model._m.setU_P(model.getInputs(), 0)
     
-    cost_jac = model.getCostJacobian(pyjmi.JMI_DER_X_P)
-        
-    # This assumes that the cost function does not depend on U
-    gradient = N.dot(cost_jac, sens_mini.T)
-    gradient = gradient.flatten()
+    cost_jac_x = model.getCostJacobian(pyjmi.JMI_DER_X_P).flatten()
+    cost_jac_u = model.getCostJacobian(pyjmi.JMI_DER_U_P).flatten()
+    cost_jac = N.concatenate ( [cost_jac_x, cost_jac_u] )
     
-    last_y = ys[-1][:]
+    # See my master thesis report for the specifics of these calculations.
+    costgradient_x = N.dot(sens[params.xinit_start:params.xinit_end, :], cost_jac_x).flatten()
+    costgradient_u = N.dot(sens[params.u_start:params.u_end, :], cost_jac_x).flatten() + cost_jac_u
     
-    return gradient, last_y, gradparams
+    # The full cost gradient w.r.t. the states and the input
+    costgradient = N.concatenate( [costgradient_x, costgradient_u] )
+    
+    last_y = ys[-1,:]
+    
+    # TODO: Create a return type instead of returning tuples
+    return costgradient, last_y, gradparams, sens_mini
 
 
 def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
@@ -721,7 +737,11 @@ def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
         model.reset()
         u[:] = cur_u
         print "u is", u
-        big_gradient, last_y, gradparams = _shoot(model, start_time, end_time)
+        big_gradient, last_y, gradparams, sens = _shoot(model, start_time, end_time)
+        
+        model._m.setX_P(ys[-1], 0)
+        model._m.setDX_P(model.getDiffs(), 0)
+        model._m.setU_P(model.getInputs(), 0)
         cost = model.evalCost()
         
         gradient_u = cur_u.copy()
@@ -827,12 +847,12 @@ def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, plot=True
         return (start_time, end_time)
     grid = map(denormalize_time, *zip(*grid))
     
-    def shoot_single_segment(u, y0, segment_times):
+    def shoot_single_segment(u, y0, interval):
         if len(y0) != model.getModelSize():
             raise ShootingException('Wrong length to single segment: %s != %s' % (len(y0), model.getModelSize()))
             
-        seg_start_time = segment_times[0]
-        seg_end_time = segment_times[1]
+        seg_start_time = interval[0]
+        seg_end_time = interval[1]
         
         u = u.flatten()
         y0 = y0.flatten()
@@ -841,8 +861,10 @@ def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, plot=True
         model.setInputs(u)
         model.setStates(y0)
         
-        seg_gradient, seg_last_y, seg_gradparams = _shoot(model, seg_start_time, seg_end_time)
-        return seg_gradient, seg_last_y, seg_gradparams
+        seg_cost_gradient, seg_last_y, seg_gradparams, sens = _shoot(model, seg_start_time, seg_end_time)
+        
+        # TODO: Create a return type instead of returning tuples
+        return seg_cost_gradient, seg_last_y, seg_gradparams, sens
         
     def f(p):
         """The cost evaluation function.
@@ -852,14 +874,15 @@ def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, plot=True
             segment) and parameters.
         """
         ys, us = _split_opt_x(model, len(grid), p)
-        gradient, last_y, gradparams = shoot_single_segment(us[-1], ys[-1], grid[-1])
+        costgradient, last_y, gradparams, sens = shoot_single_segment(us[-1], ys[-1], grid[-1])
+        
         model._m.setX_P(last_y, 0)
         model._m.setDX_P(model.getDiffs(), 0)
         model._m.setU_P(model.getInputs(), 0)
         cost = model.evalCost()
         
-        print "(u, y, grid) = ", us[-1], ys[-1], grid[-1]
-        print "Cost:", cost
+        print "Evaluating cost:", cost
+        print "Evaluating cost: (u, y, grid) = ", us[-1], ys[-1], grid[-1]
         
         return cost
         
@@ -868,21 +891,75 @@ def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, plot=True
         
         In the VDP example it depends on the 
         """
-        return NotImplemented
+        ys, us = _split_opt_x(model, len(grid), p)
+        costgradient, last_y, gradparams, sens = shoot_single_segment(us[-1], ys[-1], grid[-1])
+        
+        print "Evaluating cost function gradient."
+        
+        # HARDCODED
+        # Comments:
+        #  * The cost does not depend on the first nine initial states.
+        #  * The cost does not depend on the inputs/control signal
+        return N.array([0] * 3 * 9 + list(costgradient[gradparams.xinit_start:gradparams.xinit_end])
+                       + [0] * 9
+                       + costgradient[gradparams.u_start:gradparams.u_end])
         
     def h(p): # h(p) = 0
-        """ Evaluate continuity constraints."""
+        """ Evaluates continuity (equality) constraints."""
         def eval_last_ys(u, y0, interval):
-            grad, last_y, gradparams = shoot_single_segment(u, y0, interval)
+            grad, last_y, gradparams, sens = shoot_single_segment(u, y0, interval)
             return last_y
         
         y0s, us = _split_opt_x(model, len(grid), p)
         last_ys = N.array(map(eval_last_ys, us[:-1], y0s[:-1], grid[:-1]))
-        print "Equality contraints:", (y0s[1:]-last_ys)
-        return (y0s[1:]-last_ys)
+        print "Evaluating equality contraints:", (last_ys - y0s[1:])
+        return (last_ys - y0s[1:])
         
     def dh(p):
-        return NotImplemented
+        """Evaluates the jacobian of h(p).
+        
+        TODO: Set first initial states to zero (or even better have a mask for
+              which parameters that should not be changed).
+        """
+        print "Evaluating equality contraints gradient."
+        
+        def eval_last_ys(u, y0, interval):
+            costgrad, last_y, gradparams, sens = shoot_single_segment(u, y0, interval)
+            return gradparams, sens
+        
+        y0s, us = _split_opt_x(model, len(grid), p)
+        mapresults = map(eval_last_ys, us[:-1], y0s[:-1], grid[:-1])
+        gradparams, sens = zip(*mapresults)
+        
+        NP = len(p)         # number of elements in p
+        NOS = len(model.getStates()) # Number Of States
+        NOI = len(model.getInputs()) # Number Of Inputs
+        NEQ = (len(grid) - 1) * NOS # number of equality equations in h(p)
+        
+        r = N.zeros((NEQ, NP))
+        
+        for segmentindex in range(len(grid) - 1):
+            # Indices
+            row_start = segmentindex * NOS
+            row_end = row_start + NOS
+            xinitsenscols_start = segmentindex * NOS
+            xinitsenscols_end = xinitsenscols_start + NOS
+            xinitcols_start = segmentindex * NOS + NOS
+            xinitcols_end = xinitcols_start + NOS
+            usenscols_start = len(y0s) + NOI * segmentindex
+            usenscols_end = usenscols_start + NOI
+            
+            # Indices from the sensivity matrix
+            sensxinitindices = range(gradparams[segmentindex]['xinit_start'], gradparams[segmentindex]['xinit_end'])
+            sensuindices = range(gradparams[segmentindex]['u_start'], gradparams[segmentindex]['u_end'])
+            
+            r[row_start : row_end, xinitsenscols_start : xinitsenscols_end] = sens[segmentindex][sensxinitindices, :].T
+            r[row_start : row_end, xinitcols_start : xinitcols_end] = [[-1, 0, 0],
+                                                                       [0, -1, 0],
+                                                                       [0, 0, -1]]
+            r[row_start : row_end, usenscols_start : usenscols_end] = sens[segmentindex][sensuindices, :].T
+        
+        return r
         
     # Initial try
     p0 = N.concatenate( (N.array(initial_y).flatten(), N.array(initial_u).flatten()) )
@@ -895,7 +972,7 @@ def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, plot=True
     blt = 0.75*N.ones(nlt)
     
     # Get OpenOPT handler
-    p = NLP(f, p0, maxIter = 1e3, maxFunEvals = 1e3, h=h, A=Alt, b=blt)
+    p = NLP(f, p0, maxIter = 1e3, maxFunEvals = 1e3, h=h, A=Alt, b=blt, df=df, dh=dh)
     
     #p.df = df
     p.plot = 1
@@ -922,37 +999,21 @@ def _plot_control_solution(model, interval, initial_ys, us):
     model.setStates(initial_ys)
     model.setInputs(us)
     
-    print "====="
-    print model.getParameters()
-    print model.getInputs()
-    print model.getStates()
-    print "====="
-    
     T, Y, yS, parameters = solve_using_sundials(model, end_time=interval[1], start_time=interval[0])
-    #print Y
     p.plot(T,Y[:,2])
     return T, Y
 
 
-def plot_control_solutions(model, grid, x):
+def plot_control_solutions(model, grid, x, doshow=True):
     initial_ys, us = _split_opt_x(model, len(grid), x)
     
-    p.figure()
+    #p.figure()
     p.hold(True)
     solutions = map(_plot_control_solution, [model]*len(grid), grid, initial_ys, us)
     p.hold(False)
-    """Ts, ys = zip(*solutions)
-    
-    # Concatenate
-    Ts = map(lambda x: list(x), Ts)
-    ys = map(lambda x: list(x), ys)
-    T = reduce(lambda x,y: x+y, Ts) 
-    Y = reduce(lambda x,y: x+y, ys)
-    
-    p.figure()
-    p.plot(T, Y)"""
     p.title('The shooting solution')
-    p.show()
+    if doshow:
+        p.show()
 
 
 def test_plot_control_solutions():
@@ -969,6 +1030,8 @@ def test_plot_control_solutions():
             (0.7, 0.8),
             (0.8, 0.9),
             (0.9, 1.0),]
+    grid = N.array(grid) * (m.getFinalTime() - m.getStartTime()) + m.getStartTime()        
+            
     # Used to be: N.array([1, 1, 1, 1]*len(grid))        
     us = [  0.00000000e+00,  1.00000000e+00,  0.00000000e+00, -1.86750972e+00,
            -1.19613740e+00,  3.21955502e+01,  1.15871750e+00, -9.56876370e-01,
@@ -981,7 +1044,40 @@ def test_plot_control_solutions():
             2.50000000e-01,  2.50000000e-01,  2.50000000e-01,  1.36333570e-01,
             2.50000000e-01,  2.50000000e-01,  2.50000000e-01,  2.50000000e-01]
     us = N.array(us)
-    plot_control_solutions(m, grid, us)
+    plot_control_solutions(m, grid, us, doshow=False)
+
+
+def test_control_solution_variations():
+    """Test different variations of control solutions."""
+    m = _load_example_standard_model('VDP_pack_VDP_Opt')
+    m.reset()
+    grid = [(0, 0.1),
+            (0.1, 0.2),
+            (0.2, 0.3),
+            (0.3, 0.4),
+            (0.4, 0.5),
+            (0.5, 0.6),
+            (0.6, 0.7),
+            (0.7, 0.8),
+            (0.8, 0.9),
+            (0.9, 1.0),]
+    grid = N.array(grid) * (m.getFinalTime() - m.getStartTime()) + m.getStartTime()    
+            
+    for u in [-0.5, -0.25, 0, 0.25, 0.5]:
+        print "u:", u
+        us = [  0.00000000e+00,  1.00000000e+00,  0.00000000e+00, -1.86750972e+00,
+                   -1.19613740e+00,  3.21955502e+01,  1.15871750e+00, -9.56876370e-01,
+                    7.82651050e+01, -3.35655693e-01,  1.95491165e+00,  1.47923425e+02,
+                   -2.32963068e+00, -1.65371763e-01,  1.94340923e+02,  6.82953492e-01,
+                   -1.57360749e+00,  2.66717232e+02,  1.46549806e+00,  1.74702679e+00,
+                    3.29995167e+02, -1.19712096e+00,  9.57726717e-01,  3.80947471e+02,
+                    3.54379487e-01, -1.95842811e+00,  4.52105868e+02,  2.34170339e+00,
+                    1.77754406e-01,  4.98700011e+02] + [u] * 10
+        us = N.array(us)
+        plot_control_solutions(m, grid, us, doshow=False)
+        
+        import time
+        time.sleep(3)
 
 
 def cost_graph(model):
@@ -1038,7 +1134,7 @@ def main():
     m = _load_example_standard_model('VDP_pack_VDP_Opt')
     
     # Whether the cost as a function of input U should be plotted
-    GEN_PLOT = True
+    GEN_PLOT = False
     
     if GEN_PLOT:
         cost_graph(m)
