@@ -739,7 +739,7 @@ def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
         print "u is", u
         big_gradient, last_y, gradparams, sens = _shoot(model, start_time, end_time)
         
-        model._m.setX_P(ys[-1], 0)
+        model._m.setX_P(last_y, 0)
         model._m.setDX_P(model.getDiffs(), 0)
         model._m.setU_P(model.getInputs(), 0)
         cost = model.evalCost()
