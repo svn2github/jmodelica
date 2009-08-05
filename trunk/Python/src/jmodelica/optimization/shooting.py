@@ -649,7 +649,7 @@ def solve_using_sundials(model, end_time, start_time=0.0, verbose=False, sensi=F
 
 
 def _shoot(model, start_time, end_time):
-    """ Does a single "shot". Model parameters must be set BEFORE
+    """ Does a single 'shot'. Model parameters/states etc. must be set BEFORE
         calling this method.
         
     @note:
@@ -690,8 +690,8 @@ def _shoot(model, start_time, end_time):
     cost_jac = N.concatenate ( [cost_jac_x, cost_jac_u] )
     
     # See my master thesis report for the specifics of these calculations.
-    costgradient_x = N.dot(sens[params.xinit_start:params.xinit_end, :], cost_jac_x).flatten()
-    costgradient_u = N.dot(sens[params.u_start:params.u_end, :], cost_jac_x).flatten() + cost_jac_u
+    costgradient_x = N.dot(sens[params.xinit_start:params.xinit_end, :], cost_jac_x).flatten() # verified
+    costgradient_u = N.dot(sens[params.u_start:params.u_end, :], cost_jac_x).flatten() + cost_jac_u # verified
     
     # The full cost gradient w.r.t. the states and the input
     costgradient = N.concatenate( [costgradient_x, costgradient_u] )
@@ -770,12 +770,12 @@ def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
 
 
 def _eval_initial_ys(model, grid):
+    # TODO: Move this to MultipleShooter
     from scipy import interpolate
-    _check_grid(grid)
+    _check_grid_consistency(grid)
     
     model.reset()
     T, ys, sens, params = solve_using_sundials(model, model.getFinalTime(), model.getStartTime())
-    T = map(lambda x: (x - model.getStartTime()) / (model.getFinalTime() - model.getStartTime()), T)
     T = N.array(T)
     
     tck = interpolate.interp1d(T, ys, axis=0)
@@ -784,70 +784,145 @@ def _eval_initial_ys(model, grid):
     return initials
     
 
-def _check_grid(grid):
+def _check_normgrid_consistency(normgrid):
+    # TODO: Move this to MultipleShooter
+    """Check normalized grid input parameter for errors.
+    
+    Raises ShootingException on error.
+    """
+    if math.fabs(normgrid[0][0]) > 0.001:
+        raise ShootingException("Warning: The start time of the first segment should usually coinside with the model start time.")
+    if math.fabs(normgrid[-1][1]-1) > 0.001:
+        raise ShootingException("Warning: The end time of the last segment should usually coinside with the model end time.")
+    _check_grid_consistency(normgrid)
+
+
+def _check_grid_consistency(grid):
+    # TODO: Move this to MultipleShooter
     """Check grid input parameter for errors.
     
-    Raises exception on error.
+    Raises ShootingException on error.
     """
     if not len(grid) >= 1:
         raise ShootingException('You need to specify at least one segment.')
-    if math.fabs(grid[0][0]) > 0.001:
-        raise ShootingException("Warning: The start time of the first segment should usually coinside with the model start time.")
-    if math.fabs(grid[-1][1]-1) > 0.001:
-        raise ShootingException("Warning: The end time of the last segment should usually coinside with the model end time.")
     def check_inequality(a, b):
         if a >= b:
             raise ShootingException('One grid segment is incorrectly formatted.')
     map(check_inequality, *zip(*grid))
 
 
-def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, plot=True):
-    """ Does multiple shooting.
+class MultipleShooter:
+    """Handles Multiple Shooting model optimization."""
     
-    @param model:
-        The model to simulate/optimize over.
-    @param initial_u:
-        A list of initial inputs for each segment. If not a list, it is
-        assumed to be the same initial input for each segment.
-    @param grid:
-        A list of 2-tuples per segment. The first element in each tuple
-        being the segment start time, the second element the segment end
-        time.
-    @param initial_y:
-        Can be three things:
-         * A list of initial states for all grids. If any of these are
-           None they will be replaced by the default model state.
-         * None -- using the solution from the default model state.
-        A list of initial states for each segment except the first one.
-        If not a list the same initial state will be used for each
-        segment.
-    @return:
-        The optimal inputs (Us).
+    def __init__(self, model, initial_u, normgrid=[(0, 1)], initial_y=None, plot=True):
+        """Constructor.
         
-    """
-    model.reset()
-    default_state = model.getStates().copy()
+        @param model:
+            The model to simulate/optimize over.
+        @param initial_u:
+            A list of initial inputs for each segment. If not a list, it is
+            assumed to be the same initial input for each segment.
+        @param normgrid:
+            A list of 2-tuples per segment. The first element in each tuple
+            being the segment start time, the second element the segment end
+            time. The grid must hold normalized values.
+        @param initial_y:
+            Can be three things:
+             * A list of initial states for all grids. If any of these are
+               None they will be replaced by the default model state.
+             * None -- using the solution from the default model state.
+             * A list of initial states for each segment except the first one.
+               If not a list the same initial state will be used for each
+               segment.
+               
+        NOTE that any states set in the model will be reset when initializing
+        this class with with that model.
+        """
+        self.set_model(model)
+        self.set_normalized_grid(normgrid)
+        self.set_initial_u(initial_u)
+        self.set_initial_y(initial_y)
+        
+    def set_model(self, model):
+        """Set the model.
+        
+        NOTE that any states set in the model will be reset when initializing
+        this class with with that model.
+        """
+        model.reset()
+        self._m = model
+        
+    def get_model(self):
+        return self._m    
+        
+    def set_initial_u(self, initial_u):
+        """ Set the initial U's (control signals) for each segment."""
+        if len(initial_u) != len(self.get_grid()):
+            raise ShootingException('initial_u parameters must be the same length as grid segments.')
+        self._initial_u = initial_u
+        
+    def get_initial_u(self):
+        return self._initial_u
+        
+    def set_initial_y(self, initial_y=None):
+        """Set the initial states for the first optimization iteration.
+        
+        If initial_y is None a simple guessing scheme will be used based on a
+        simple simulation using default initial values.
+        """
+        model = self.get_model()
+        grid = self.get_grid()
+        
+        if initial_y is None:
+            initial_y = _eval_initial_ys(model, grid)
+        elif len(initial_y) != len(grid):
+            raise ShootingException('initial_y states must be the same length as grid segments.')
+        self._initial_y = initial_y
+        
+    def get_initial_y(self):
+        return self._initial_y
+        
+    def set_normalized_grid(self, grid):
+        """ Set the grid containing normalized times between [0, 1].
+        
+        The method also checks for inconsistencies in the grid.
+        """
+        _check_normgrid_consistency(grid)
+        
+        model = self.get_model()
+        
+        # Denormalize times
+        simulation_length = model.getFinalTime() - model.getStartTime()
+        def denormalize_time(start_time, end_time):
+            start_time = model.getStartTime() + simulation_length * start_time
+            end_time = model.getStartTime() + simulation_length * end_time
+            return (start_time, end_time)
+            
+        self.set_grid(map(denormalize_time, *zip(*grid)))
+        
+    def set_grid(self, grid):
+        """ Set the grid.
+        
+        The grid does not necessarily have to be normalized.
+        
+        The method also checks for inconsistencies in the grid.
+        """
+        _check_grid_consistency(grid)
+        
+        self._grid = grid
+        
+    def get_grid(self):
+        """ Returned the real grid holding the actual simulation times."""
+        return self._grid
     
-    # Check grid for errors
-    _check_grid(grid)
-    
-    # Check initials for errors
-    if len(initial_u) != len(grid):
-        raise ShootingException('initial_u parameters must be the same length as grid segments.')
-    if initial_y is None:
-        initial_y = _eval_initial_ys(model, grid)
-    elif len(initial_y) != len(grid):
-        raise ShootingException('initial_y states must be the same length as grid segments.')
-    
-    # Denormalize times
-    simulation_length = model.getFinalTime() - model.getStartTime()
-    def denormalize_time(start_time, end_time):
-        start_time = model.getStartTime() + simulation_length * start_time
-        end_time = model.getStartTime() + simulation_length * end_time
-        return (start_time, end_time)
-    grid = map(denormalize_time, *zip(*grid))
-    
-    def shoot_single_segment(u, y0, interval):
+    def _shoot_single_segment(self, u, y0, interval):
+        """Shoot a single segment in multiple shooting.
+        
+        The 'shot' is done between interval[0] and interval[1] with initial
+        states y0 and constant input/control signal u.
+        """
+        model = self.get_model()
+        
         if len(y0) != model.getModelSize():
             raise ShootingException('Wrong length to single segment: %s != %s' % (len(y0), model.getModelSize()))
             
@@ -865,16 +940,19 @@ def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, plot=True
         
         # TODO: Create a return type instead of returning tuples
         return seg_cost_gradient, seg_last_y, seg_gradparams, sens
-        
-    def f(p):
+    
+    def f(self, p):
         """The cost evaluation function.
         
         @param p:
             A concatenation of initial states (excluding the first
-            segment) and parameters.
+            segment) and parameters. See _split_opt_x(...) for details.
         """
+        model = self.get_model()
+        grid = self.get_grid()
         ys, us = _split_opt_x(model, len(grid), p)
-        costgradient, last_y, gradparams, sens = shoot_single_segment(us[-1], ys[-1], grid[-1])
+        
+        costgradient, last_y, gradparams, sens = self._shoot_single_segment(us[-1], ys[-1], grid[-1])
         
         model._m.setX_P(last_y, 0)
         model._m.setDX_P(model.getDiffs(), 0)
@@ -886,55 +964,68 @@ def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, plot=True
         
         return cost
         
-    def df(p): # grad(f) - CURRENTLY NOT USED
-        """Returns the gradient of f(cur_u).
+    def df(self, p):
+        """Returns the gradient of self.f(p).
         
         In the VDP example it depends on the 
         """
+        model = self.get_model()
+        grid = self.get_grid()
         ys, us = _split_opt_x(model, len(grid), p)
-        costgradient, last_y, gradparams, sens = shoot_single_segment(us[-1], ys[-1], grid[-1])
+        costgradient, last_y, gradparams, sens = self._shoot_single_segment(us[-1], ys[-1], grid[-1])
         
         print "Evaluating cost function gradient."
         
-        # HARDCODED
         # Comments:
-        #  * The cost does not depend on the first nine initial states.
-        #  * The cost does not depend on the inputs/control signal
-        return N.array([0] * 3 * 9 + list(costgradient[gradparams.xinit_start:gradparams.xinit_end])
-                       + [0] * 9
-                       + costgradient[gradparams.u_start:gradparams.u_end])
+        #  * The cost does not depend on the first initial states.
+        #  * The cost does not depend on the first inputs/control signal
+        gradient = N.array([0] * len(model.getStates()) * (len(grid) - 1)
+                            + list(costgradient[gradparams['xinit_start'] : gradparams['xinit_end']])
+                            + [0] * (len(grid) - 1)
+                            + list(costgradient[gradparams['u_start'] : gradparams['u_end']]))
+        assert len(p) == len(gradient)
+        print gradient
+        return gradient
         
-    def h(p): # h(p) = 0
+    def h(self, p): # h(p) = 0
         """ Evaluates continuity (equality) constraints."""
-        def eval_last_ys(u, y0, interval):
-            grad, last_y, gradparams, sens = shoot_single_segment(u, y0, interval)
-            return last_y
-        
+        # This function has visually been verified to work in the sense that
+        # discontinuities lead to a big magnitude for that
+        model = self.get_model()
+        grid = self.get_grid()
         y0s, us = _split_opt_x(model, len(grid), p)
+        
+        def eval_last_ys(u, y0, interval):
+            grad, last_y, gradparams, sens = self._shoot_single_segment(u, y0, interval)
+            return last_y
         last_ys = N.array(map(eval_last_ys, us[:-1], y0s[:-1], grid[:-1]))
+        
         print "Evaluating equality contraints:", (last_ys - y0s[1:])
+        
         return (last_ys - y0s[1:])
         
-    def dh(p):
-        """Evaluates the jacobian of h(p).
+    def dh(self, p):
+        """ Evaluates the jacobian of self.h(p).
         
         TODO: Set first initial states to zero (or even better have a mask for
               which parameters that should not be changed).
         """
         print "Evaluating equality contraints gradient."
         
-        def eval_last_ys(u, y0, interval):
-            costgrad, last_y, gradparams, sens = shoot_single_segment(u, y0, interval)
-            return gradparams, sens
-        
+        model = self.get_model()
+        grid = self.get_grid()
         y0s, us = _split_opt_x(model, len(grid), p)
+        
+        def eval_last_ys(u, y0, interval):
+            costgrad, last_y, gradparams, sens = self._shoot_single_segment(u, y0, interval)
+            return gradparams, sens
         mapresults = map(eval_last_ys, us[:-1], y0s[:-1], grid[:-1])
         gradparams, sens = zip(*mapresults)
         
-        NP = len(p)         # number of elements in p
+        NP = len(p)                  # number of elements in p
         NOS = len(model.getStates()) # Number Of States
         NOI = len(model.getInputs()) # Number Of Inputs
-        NEQ = (len(grid) - 1) * NOS # number of equality equations in h(p)
+        NEQ = (len(grid) - 1) * NOS  # number of equality equations in h(p)
         
         r = N.zeros((NEQ, NP))
         
@@ -961,30 +1052,86 @@ def multiple_shooting(model, initial_u, grid=[(0, 1)], initial_y=None, plot=True
         
         return r
         
-    # Initial try
-    p0 = N.concatenate( (N.array(initial_y).flatten(), N.array(initial_u).flatten()) )
-    
-    # Less than (-0.5 < u < 1)
-    # TODO: These are currently hard coded. They shouldn't be.
-    nlt = len(grid)
-    Alt = N.zeros( (nlt, len(p0)) )
-    Alt[:len(grid), len(grid) * model.getModelSize():] = N.eye(len(grid))
-    blt = 0.75*N.ones(nlt)
-    
-    # Get OpenOPT handler
-    p = NLP(f, p0, maxIter = 1e3, maxFunEvals = 1e3, h=h, A=Alt, b=blt, df=df, dh=dh)
-    
-    #p.df = df
-    p.plot = 1
-    p.iprint = 1
-    
-    u_opt = p.solve('ralg')
-    
-    if plot:
-        plot_control_solutions(model, grid, u_opt.xf)
-    
-    return u_opt
-    
+    def runOptimization(self, plot=True):
+        """Start/run optimization procedure and the optimum."""
+        initial_y = self.get_initial_y()
+        initial_u = self.get_initial_u()
+        grid = self.get_grid()
+        model = self.get_model()
+        
+        # Initial try
+        p0 = N.concatenate( (N.array(initial_y).flatten(), N.array(initial_u).flatten()) )
+        
+        # Less than (-0.5 < u < 1)
+        # TODO: These are currently hard coded. They shouldn't be.
+        NLT = len(grid)
+        Alt = N.zeros( (NLT, len(p0)) )
+        Alt[:len(grid), len(grid) * model.getModelSize():] = N.eye(len(grid))
+        blt = 0.75*N.ones(NLT)
+        
+        # Get OpenOPT handler
+        p = NLP(self.f, p0, maxIter = 1e3, maxFunEvals = 1e3, h=self.h, A=Alt, b=blt, df=self.df, dh=self.dh)
+        #p = NLP(self.f, p0, maxIter = 1e2, maxFunEvals = 1e3, h=self.h)
+        """Notes:
+         * Using only (f) optimization seems to work.
+         * Using both (f) and (df) seems to work partly. However, a lot slower
+           and converges extremely slow.
+        """
+        
+        
+        if plot:
+            p.plot = 1
+        p.iprint = 1
+        
+        opt = p.solve('ralg')
+        
+        if plot:
+            plot_control_solutions(model, grid, opt.xf)
+        
+        return opt.xf
+        
+    def runSteepestDescent(self, plot=True):
+        initial_y = self.get_initial_y()
+        initial_u = self.get_initial_u()
+        grid = self.get_grid()
+        model = self.get_model()
+        
+        # Initial try
+        p0 = N.concatenate( (N.array(initial_y).flatten(), N.array(initial_u).flatten()) )
+        x = p0.copy()
+        
+        p.hold(True)
+        for i in range(200):
+            p.plot([i], [self.f(x)], 'o')
+            x = x - 0.001 * self.df(x)
+        p.hold(False)
+        p.show()
+        
+        if plot:
+            plot_control_solutions(model, grid, x)
+        
+        return x
+        
+    def runQuasiNewtonsMethod(self, plot=True):
+        initial_y = self.get_initial_y()
+        initial_u = self.get_initial_u()
+        grid = self.get_grid()
+        model = self.get_model()
+        
+        # Initial try
+        p0 = N.concatenate( (N.array(initial_y).flatten(), N.array(initial_u).flatten()) )
+        
+        from scipy.optimize import fmin_bfgs
+        #xopt = fmin_bfgs(self.f, p0, fprime=self.df)
+        xopt = fmin_bfgs(self.f, p0)
+        """This is interesting. It seems that adding fprime does not add to
+        the convergence of the optimization."""
+        
+        if plot:
+            plot_control_solutions(model, grid, xopt)
+
+        return xopt
+
 
 def _split_opt_x(model, gridsize, p):
     ys = p[0 : gridsize * model.getModelSize()]
@@ -1155,8 +1302,11 @@ def main():
                     (0.8, 0.9),
                     (0.9, 1.0),]
             initial_u = [0.25] * len(grid)
-            opt_us = multiple_shooting(m, initial_u, grid)
-            print "Optimal us:", opt_us.xf
+            shooter = MultipleShooter(m, initial_u, grid)
+            #optimum = shooter.runQuasiNewtonsMethod()
+            #optimum = shooter.runSteepestDescent()
+            optimum = shooter.runOptimization()
+            print "Optimal us:", optimum
         
 
 
