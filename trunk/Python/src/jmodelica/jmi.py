@@ -1447,6 +1447,12 @@ class Model(object):
              self._offs_w_p.value]
         return l
 
+    def get_n_tp(self):
+        """Get the number of time points."""
+        
+        self.jmimodel.get_n_tp(self._n_tp)
+        return self._n_tp.value
+
     def getX(self):
         """Return a reference to the differentiated variables vector."""
         return self.jmimodel.get_x()
@@ -1791,7 +1797,7 @@ class JMIModel(object):
         self._w = self._dll.jmi_get_w(self._jmi)
         self._t = self._dll.jmi_get_t(self._jmi)
         self._z = self._dll.jmi_get_z(self._jmi)
-               
+
         #self.initAD()
                  
     def initAD(self):
@@ -1862,11 +1868,12 @@ class JMIModel(object):
         if retval is not 0:
             raise JMIException("Getting offsets failed.")        
             
-    def get_n_tp(self):
+    def get_n_tp(self,n_tp):
         """Get and return the number of time points in the model."""
-        if self._dll.jmi_get_n_tp(self._jmi, byref(self._n_tp)) is not 0:
+        
+        retval = self._dll.jmi_get_n_tp(self._jmi, byref(n_tp))
+        if retval is not 0:
             raise JMIException("Getting number of time points in the model failed.")
-        return self._n_tp.value
 
     def set_tp(self, tp):
         """Set the vector of time points. 
