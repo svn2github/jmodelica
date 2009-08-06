@@ -10,6 +10,7 @@ import math
 import nose
 import numpy as N
 import scipy as S
+import matplotlib
 
 try:
     from pysundials import cvodes
@@ -1052,6 +1053,13 @@ class MultipleShooter:
         
         return r
         
+    def get_p0(self):
+        """Returns the vector which is to optimized over."""
+        initial_y = self.get_initial_y()
+        initial_u = self.get_initial_u()
+        p0 = N.concatenate( (N.array(initial_y).flatten(), N.array(initial_u).flatten()) )
+        return p0
+        
     def runOptimization(self, plot=True):
         """Start/run optimization procedure and the optimum."""
         initial_y = self.get_initial_y()
@@ -1060,7 +1068,7 @@ class MultipleShooter:
         model = self.get_model()
         
         # Initial try
-        p0 = N.concatenate( (N.array(initial_y).flatten(), N.array(initial_u).flatten()) )
+        p0 = self.get_p0()
         
         # Less than (-0.5 < u < 1)
         # TODO: These are currently hard coded. They shouldn't be.
@@ -1097,7 +1105,7 @@ class MultipleShooter:
         model = self.get_model()
         
         # Initial try
-        p0 = N.concatenate( (N.array(initial_y).flatten(), N.array(initial_u).flatten()) )
+        p0 = self.get_p0()
         x = p0.copy()
         
         p.hold(True)
@@ -1119,7 +1127,7 @@ class MultipleShooter:
         model = self.get_model()
         
         # Initial try
-        p0 = N.concatenate( (N.array(initial_y).flatten(), N.array(initial_u).flatten()) )
+        p0 = self.get_p0()
         
         from scipy.optimize import fmin_bfgs
         #xopt = fmin_bfgs(self.f, p0, fprime=self.df)
@@ -1131,6 +1139,131 @@ class MultipleShooter:
             plot_control_solutions(model, grid, xopt)
 
         return xopt
+        
+        
+def _verify_gradient(f, df, xstart, xend, SMALL=0.1, STEPS=100):
+    """ Output a comparison plot between f.d. quotient and and df.
+    
+    The plot os written to the current matplotlib figure within the interval
+    [xstart, xend] split into STEPS steps. The finite difference quotient has
+    an infitesimal equal to SMALL.
+    """
+    assert xstart < xend
+    
+    x = N.arange(xstart, xend, 1.0*(xend - xstart) / STEPS)
+    
+    # Plot the function evaluated
+    p.subplot(211)
+    fevals = N.array(map(f,x))
+    p.plot(x, fevals, label='The evaluated function')
+    p.title('Derivative check ')
+    p.legend()
+    
+    p.subplot(212)
+    p.title('Derivative comparison')
+    p.hold(True)
+    
+    # Plot the derivative
+    dfs = map(df,x)
+    p.plot(x, dfs, label='Given derivative')
+    
+    # Plot the approximated finite difference
+    fevals_delta = N.array(map(f, x+SMALL))
+    adfs = (fevals_delta - fevals) / SMALL
+    p.plot(x, adfs, label='Approximate derivative')
+    
+    # Plot the difference between approximated derivative and the given derivative
+    p.plot(x, adfs-dfs, label='Der. method difference')
+    
+    p.hold(False)
+    p.legend(prop=matplotlib.font_manager.FontProperties(size=8))
+    
+    
+def test_verify_gradient():
+    """ Testing _verify_gradient(...)."""
+    fig = p.figure()
+    f = lambda x: x**2
+    df = lambda x: 2*x
+    _verify_gradient(f, df, -10, 10)
+    fig.savefig('test_verify_gradient.png')
+    
+
+class _PartialEvaluator:
+    """Evaluator used to evaluate a one dimensional function by setting
+       the other fixes. Used by test_gradient_elements().
+       
+    TODO: Clearer documentation :-)   
+    """
+    def __init__(self, f, df, xbase, index):
+        self._f = f
+        self._df = df
+        self._xbase = xbase
+        self._index = index
+        
+    def f(self, x):
+        xvec = self._xbase.copy()
+        xvec[self._index] = x
+        return self._f(xvec)
+        
+    def df(self, x):
+        xvec = self._xbase.copy()
+        xvec[self._index] = x
+        return self._df(xvec)[self._index]
+
+
+def test_f_gradient_elements(certainindex=None):
+    """ Basic testing of gradients (disabled by default).
+    
+    This tests takes a couple of hours to run unless certainindex is defined
+    (whereas only the element of index certainindex will be tested). Therefor
+    it is turned off by default. Set run_huge_test variable to True to run this
+    test by default.
+    
+    Also note that this test is not really supposed to test functionality per
+    se. It is rather a test that can be used to visually verify that gradients
+    behave the way they are expected to.
+    """
+    run_huge_test = False
+    
+    if run_huge_test is False and certainindex is None:
+        return
+    
+    m = _load_example_standard_model('VDP_pack_VDP_Opt')
+    grid = [(0, 0.1),
+            (0.1, 0.2),
+            (0.2, 0.3),
+            (0.3, 0.4),
+            (0.4, 0.5),
+            (0.5, 0.6),
+            (0.6, 0.7),
+            (0.7, 0.8),
+            (0.8, 0.9),
+            (0.9, 1.0),]
+    initial_u = [0.25] * len(grid)
+    shooter = MultipleShooter(m, initial_u, grid)
+    p0 = shooter.get_p0()
+    
+    if certainindex is not None:
+        indices = [certainindex]
+    else:
+        indices = range(len(p0))
+    
+    for index in indices:
+        fig = p.figure()
+        evaluator = _PartialEvaluator(shooter.f, shooter.df, p0, index)
+        p.suptitle('Partial derivative test (of gradient elements, index=%s)' % index)
+        _verify_gradient(evaluator.f, evaluator.df, -10, 10)
+        fig.savefig('test_f_gradient_elements_%s.png' % index)
+        fig.savefig('test_f_gradient_elements_%s.eps' % index)
+
+
+def test_f_gradient_element_29():
+    """Testing part. diff. which corresponds to element 29 in grad(f) in VDP.
+    
+    This was a failing test in test_f_gradient_elements(None) which is the
+    reason why I'm adding it here.
+    """
+    test_f_gradient_elements(29)
 
 
 def _split_opt_x(model, gridsize, p):
