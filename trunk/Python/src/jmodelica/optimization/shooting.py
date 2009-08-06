@@ -295,14 +295,41 @@ class TestStandardModel:
     def testEvaluation(self):
         self.m.evalF()
         
-    def testSimulationWSensivity(self):
+    def testSimulationWSensivity(self, SMALL=0.3):
         """Testing simulation sensivity."""
+        
+        FINALTIME = 2
+        STARTTIME = self.m.getStartTime()
+        DURATION = FINALTIME - STARTTIME
+        
         self.m.reset()
         self.m.setInputs([0.25])
-        T, ys, sens, ignore = solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime(), sensi=True)
+        T, ys, sens, params = solve_using_sundials(self.m, FINALTIME, STARTTIME, sensi=True)
+        
         assert len(T) == len(ys)
         assert sens is not None
         assert len(T) > 1
+        
+        self.m.reset()
+        self.m.setInputs([0.25 + SMALL])
+        self.m.setStates(self.m.getStates() + SMALL)
+        T2, ys2, ignore, ignore2 = solve_using_sundials(self.m, FINALTIME, STARTTIME, sensi=False)
+        
+        fig = p.figure()
+        p.hold(True)
+        p.plot(T, ys, label="The non-disturbed solution")
+        p.plot(T2, ys2, label="The solution with disturbed initial conditions (SMALL=%s)" % SMALL)
+        
+        lininterpol = ys[-1] + DURATION * N.dot(N.r_[
+                                                    sens[params.xinit_start : params.xinit_end],
+                                                    sens[params.u_start : params.u_end]
+                                                ].T,
+                                                [SMALL]*4)
+        p.plot([T2[-1]], [lininterpol], 'xr', label="Expected states linearly interpolated.")
+        
+        p.legend(loc=0, prop=matplotlib.font_manager.FontProperties(size=8))
+        p.hold(False)
+        fig.savefig('TestStandardModel_testSimulationWSensivity.png')
 
     def testFixedSimulation(self):
         """Test simulation"""
