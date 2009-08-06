@@ -202,7 +202,7 @@ class StandardModel(object):
 
 
 class TestStandardModel:
-    """ Test the GenericModel class. """
+    """ Test the StandardModel class. """
     
     def setUp(self):
         """ Test setUp. Load the test model
@@ -341,9 +341,10 @@ class TestStandardModel:
         T, ys, sens, ignore = solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime())
         assert len(T) == len(ys)
         
+        fig = p.figure()
         p.plot(T, ys)
         p.title('testFixedSimulation(...) output')
-        #p.show()
+        fig.savefig('TestStandardModel_testFixedSimulation.png')
         
     def testFixedSimulationIntervals(self):
         """Test simulation between a different time span."""
@@ -357,9 +358,10 @@ class TestStandardModel:
         T, ys, sens, ignore = solve_using_sundials(self.m, middle_timepoint, self.m.getStartTime())
         assert len(T) == len(ys)
         
+        fig = p.figure()
         p.plot(T, ys)
         p.title('testFixedSimulation(...) output')
-        #p.show()
+        fig.savefig('TestStandardModel_testFixedSimulationIntervals.png')
         
     def testOptJacNonZeros(self):
         """ Testing the numer of non-zero elements in VDP after
