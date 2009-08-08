@@ -47,33 +47,32 @@ def _get_example_path():
     
     
 def _load_example_standard_model(libname):
-    model = StandardModel(libname, _get_example_path())
+    model = JmiOptModel(libname, _get_example_path())
     return model
 
 
-class StandardModel(object):
-    """ The standard model. Contains the common functions used to make
-        this class behave as a DAE/ODE-model.
+class OptModel:
+    """An abstract model on which optimization is done on.
+    
+    Contains the common functions used to make this class behave as a DAE/ODE
+    model.
     
     """
-    def __init__(self, dllname, path):
-        self._m = pyjmi.Model(dllname, path)
-               
     def getParameters(self):
         """Returns the parameters."""
-        return self._m.pi
+        raise NotImplementedError()
         
     def setParameters(self, params):
-        self._m.pi = params
+        raise NotImplementedError()
         
     def getStates(self):
-        return self._m.x
+        raise NotImplementedError()
         
     def setStates(self, x):
-        self._m.x = x
+        raise NotImplementedError()
         
     def getDiffs(self):
-        return self._m.dx
+        raise NotImplementedError()
         
     def getModelSize(self):
         """ Returns the dimension of the problem. """
@@ -95,6 +94,373 @@ class StandardModel(object):
         
     def evalF(self):
         """ Evaluate F."""
+        raise NotImplementedError()
+        
+    def evalJacX(self):
+        """Evaluate the jacobian of the function F w.r.t. states x. """
+        raise NotImplementedError()
+        
+    def getSensitivities(self, y):
+        """Not supported in this model class.
+        
+        @remark:
+            This method came existence due to GenericSensivityModel that
+            exists in my master thesis code base. See remark on
+            ::self.getRealModelSize() for more information why this
+            method exists.
+        """
+        raise NotImplementedError('This model does not support'
+                                  ' sensitivity analysis implicitly.')
+                                   
+    def getInputs(self):
+        raise NotImplementedError()
+        
+    def setInputs(self, new_u):
+        raise NotImplementedError()
+        
+    def setTime(self, new_t):
+        """ Set the variable t. """
+        raise NotImplementedError()
+        
+    def getTime(self):
+        raise NotImplementedError()
+        
+    def evalCost(self):
+        """ Evaluate the optimization cost function, J. """
+        raise NotImplementedError()
+        
+    def isFreeStartTime(self):
+        raise NotImplementedError()
+        
+    def isFreeFinalTime(self):
+        raise NotImplementedError()
+        
+    def isFixedStartTime(self):
+        return not self.isFreeStartTime()
+        
+    def isFixedFinalTime(self):
+        return not self.isFreeFinalTime()
+        
+    def getStartTime(self):
+        raise NotImplementedError()
+        
+    def getFinalTime(self):
+        raise NotImplementedError()
+        
+    def getCostJacobian(self, independent_variables, mask=None):
+        """ Returns a partial jacobian of the cost function.
+        
+        Returns the partial jacobian of the cost function with respect to the
+        independent variables independent_variable (JMI_DER_X etc.).
+        
+        @todo:
+            independent_variable should not be a mask. It is not
+            pythonesque.
+        """
+        raise NotImplementedError()
+        
+    def reset(self):
+        raise NotImplementedError()
+        
+
+class _DebugOptModel(OptModel):
+    """A model defined in Python instead of using a JMI model (JmiOptModel).
+    
+    This class is used for debugging. Initially created to verify correct
+    sensitivity analysis.
+    
+    Model (ODE):
+    
+    xdot0 = 1
+    xdot1 = p1
+    xdot2 = x0 + p0*x1
+    
+    Parameters:
+    p0 = 3
+    """
+    def __init__(self):
+        self.reset()
+        
+    def reset(self):
+        self._params = N.array([3], dtype=pyjmi.c_jmi_real_t)
+        self._time = 0
+        self._xdiffs = N.array([1, 3, 0], dtype=pyjmi.c_jmi_real_t)
+        self._x = N.array([0, 0, 0], dtype=pyjmi.c_jmi_real_t)
+    
+    def getParameters(self):
+        """Returns the parameters."""
+        return self._params
+        
+    def setParameters(self, params):
+        self._params[:] = params
+        
+    def getStates(self):
+        return self._x
+        
+    def setStates(self, x):
+        self._x[:] = x
+        
+    def getDiffs(self):
+        return self._xdiffs
+        
+    def evalF(self):
+        """ Evaluate F:
+        
+        xdot0 = 1
+        xdot1 = p1
+        xdot2 = x0 + p0*x1
+        """
+        x = self.getStates()
+        xdot = self.getDiffs()
+        params = self.getParameters()
+        xdot[0] = 1
+        xdot[1] = params[0]
+        xdot[2] = x[0] + params[0] * x[1]
+        
+    def evalJacX(self):
+        """Evaluate the jacobian of the function F w.r.t. states x. """
+        raise NotImplementedError()
+                                   
+    def getInputs(self):
+        return N.array([])
+        
+    def setInputs(self, new_u):
+        inputs = self.getInputs()
+        inputs[:] = new_u
+        
+    def setTime(self, new_t):
+        """ Set the variable t. """
+        self._time = new_t
+        
+    def getTime(self):
+        return self._time
+        
+    def evalCost(self):
+        """ Evaluate the optimization cost function, J. """
+        raise NotImplementedError()
+        
+    def isFreeStartTime(self):
+        return False
+        
+    def isFreeFinalTime(self):
+        return False
+        
+    def getStartTime(self):
+        return 0
+        
+    def getFinalTime(self):
+        return 2
+        
+    def getCostJacobian(self, independent_variables, mask=None):
+        """ Returns a partial jacobian of the cost function.
+        
+        Returns the partial jacobian of the cost function with respect to the
+        independent variables independent_variable (JMI_DER_X etc.).
+        
+        @todo:
+            independent_variable should not be a mask. It is not
+            pythonesque.
+        """
+        raise NotImplementedError()
+
+
+class TestDebugOptModel:
+    """ Test the JmiOptModel class. """
+    
+    def setUp(self):
+        """ Test setUp. Load the test model
+        
+        """
+        self.m = _DebugOptModel()
+        
+    def testModelSize(self):
+        """ Test GenericModel.getModelSize()
+        
+        """
+        size = self.m.getModelSize()
+        nose.tools.assert_equal(size, 3)
+        
+    def testRealModelSize(self):
+        """ Test GenericModel.getRealModelSize(). """
+        size = self.m.getRealModelSize()
+        nose.tools.assert_equal(size, 3)
+        
+    def testStatesGetSet(self):
+        """ Test GenericModel.setStates(...) and
+            GenericModel.getStates()
+        
+        """
+        new_states = [1.74, 3.38, 12.45]
+        reset = [0, 0, 0]
+        self.m.setStates(reset)
+        states = self.m.getStates()
+        N.testing.assert_array_almost_equal(reset, states)
+        self.m.setStates(new_states)
+        states = self.m.getStates()
+        N.testing.assert_array_almost_equal(new_states, states)
+        
+    def testDiffs(self):
+        """ Test GenericModel.setDiffs(...) and
+            GenericModel.getDiffs()
+        
+        """
+        reset = [0, 0, 0]
+        diffs = self.m.getDiffs()
+        diffs[:] = reset
+        diffs2 = self.m.getDiffs()
+        N.testing.assert_array_almost_equal(reset, diffs2)
+        
+        new_diffs = [1.54, 3.88, 45.87]
+        diffs[:] = new_diffs
+        N.testing.assert_array_almost_equal(new_diffs, diffs2)
+        
+    def testInputs(self):
+        """ Test GenericModel.setInputs(...) and
+            GenericModel.getInputs()
+        
+        """
+        new_inputs = []
+        reset = []
+        self.m.setInputs(reset)
+        inputs = self.m.getInputs()
+        N.testing.assert_array_almost_equal(reset, inputs)
+        self.m.setInputs(new_inputs)
+        inputs = self.m.getInputs()
+        N.testing.assert_array_almost_equal(new_inputs, inputs)
+        
+    def testParameters(self):
+        """ Test GenericModel.setParameters(...) and
+            GenericModel.getParameters()
+        
+        """
+        new_params = [1.54]
+        reset = [0]
+        self.m.setParameters(reset)
+        params = self.m.getParameters()
+        N.testing.assert_array_almost_equal(reset, params)
+        self.m.setParameters(new_params)
+        params = self.m.getParameters()
+        N.testing.assert_array_almost_equal(new_params, params)
+        
+    def testTimeGetSet(self):
+        """ Test GenericModel.setTime(...) and GenericModel.getTime()
+        
+        """
+        new_time = 0.47
+        reset = 0
+        self.m.setTime(reset)
+        t = self.m.getTime()
+        nose.tools.assert_almost_equal(reset, t)
+        self.m.setTime(new_time)
+        t = self.m.getTime()
+        nose.tools.assert_almost_equal(new_time, t)
+        
+    def testEvaluation(self):
+        self.m.evalF()
+        
+    def testSimulationWSensivity(self, SMALL=0.3):
+        """Testing simulation sensivity."""
+        
+        FINALTIME = self.m.getFinalTime()
+        STARTTIME = self.m.getStartTime()
+        DURATION = FINALTIME - STARTTIME
+        
+        self.m.reset()
+        T, ys, sens, params = solve_using_sundials(self.m, FINALTIME, STARTTIME, sensi=True)
+        
+        assert len(T) == len(ys)
+        assert sens is not None
+        assert len(T) > 1
+        
+        for indexname in ['pi_start', 'pi_end', 'xinit_start', 'xinit_end', 'u_start', 'u_end']:
+            print "%s:\t%s" % (indexname, getattr(params, indexname))
+        print sens
+        
+        self.m.reset()
+        self.m.setStates(self.m.getStates() + SMALL)
+        T2, ys2, ignore, ignore2 = solve_using_sundials(self.m, FINALTIME, STARTTIME, sensi=False)
+        
+        fig = p.figure()
+        p.hold(True)
+        p.plot(T, ys, label="The non-disturbed solution")
+        p.plot(T2, ys2, label="The solution with disturbed initial conditions (SMALL=%s)" % SMALL)
+        
+        lininterpol = ys[-1] + DURATION * N.dot(N.r_[
+                                                    sens[params.xinit_start : params.xinit_end],
+                                                    sens[params.u_start : params.u_end]
+                                                ].T,
+                                                [SMALL]*3)
+        p.plot([T2[-1]], [lininterpol], 'xr', label="Expected states linearly interpolated.")
+        
+        p.legend(loc=0, prop=matplotlib.font_manager.FontProperties(size=8))
+        p.hold(False)
+        fig.savefig('TestDebugOptModel_testSimulationWSensivity.png')
+
+    def testFixedSimulation(self):
+        """Test simulation"""
+        assert self.m.isFixedStartTime(), "Only fixed times supported."
+        assert self.m.isFixedFinalTime(), "Only fixed times supported."
+        
+        self.m.reset()
+        self.m.setInputs([0.25])
+        T, ys, sens, ignore = solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime())
+        assert len(T) == len(ys)
+        
+        fig = p.figure()
+        p.plot(T, ys)
+        p.title('testFixedSimulation(...) output')
+        fig.savefig('TestDebugOptModel_testFixedSimulation.png')
+        
+    def testFixedSimulationIntervals(self):
+        """Test simulation between a different time span."""
+        assert self.m.isFixedStartTime(), "Only fixed times supported."
+        assert self.m.isFixedFinalTime(), "Only fixed ties supported."
+        
+        middle_timepoint = (self.m.getFinalTime() + self.m.getStartTime()) / 2.0
+        
+        T, ys, sens, ignore = solve_using_sundials(self.m, self.m.getFinalTime(), middle_timepoint)
+        assert len(T) == len(ys)
+        T, ys, sens, ignore = solve_using_sundials(self.m, middle_timepoint, self.m.getStartTime())
+        assert len(T) == len(ys)
+        
+        fig = p.figure()
+        p.plot(T, ys)
+        p.title('testFixedSimulation(...) output')
+        fig.savefig('TestDebugOptModel_testFixedSimulationIntervals.png')
+        
+    def testReset(self):
+        """ Testing resetting the model."""
+        self.m.reset()
+
+
+class JmiOptModel(OptModel):
+    """ The standard model.
+    
+    Contains the common functions used to make this class behave as a DAE/ODE
+    model.
+    
+    """
+    def __init__(self, dllname, path):
+        self._m = pyjmi.Model(dllname, path)
+               
+    def getParameters(self):
+        """Returns the parameters."""
+        return self._m.pi
+        
+    def setParameters(self, params):
+        self._m.pi = params
+        
+    def getStates(self):
+        return self._m.x
+        
+    def setStates(self, x):
+        self._m.x = x
+        
+    def getDiffs(self):
+        return self._m.dx
+        
+    def evalF(self):
+        """ Evaluate F."""
         self._m.jmimodel.ode_f()
         
     def evalJacX(self):
@@ -109,30 +475,12 @@ class StandardModel(object):
         n = self.getRealModelSize()
         jac = jac.reshape( (n,n) )
         return jac
-        
-    def getSensitivities(self, y):
-        """ Not supported in this model class.
-        
-        @remark:
-            This method came existence due to GenericSensivityModel that
-            exists in my master thesis code base. See remark on
-            ::self.getRealModelSize() for more information why this
-            method exists.
-        """
-        raise NotImplementedError('This model does not support'
-                                  ' sensitivity analysis implicitly.')
                                    
     def getInputs(self):
         return self._m.u
         
     def setInputs(self, new_u):
         self._m.u = new_u
-        
-    def getAlgebraics(self):
-        return self._m.w
-        
-    def setAlgebraics(self, w):
-        self._m.w = w
         
     def setTime(self, new_t):
         """ Set the variable t. """
@@ -168,17 +516,14 @@ class StandardModel(object):
         return final_time
         
     def getCostJacobian(self, independent_variables, mask=None):
-        """ Returns the jacobian for the cost function with respect to
-            the independent variable independent_variable.
-            
-        @param independent_variable:
-            A mask consisting of the independent variables (JMI_DER_X
-            etc.) requested.
+        """ Returns a partial jacobian of the cost function.
+        
+        Returns the partial jacobian of the cost function with respect to the
+        independent variables independent_variable (JMI_DER_X etc.).
+        
         @todo:
             independent_variable should not be a mask. It is not
             pythonesque.
-        @return:
-            The cost gradient/jacobian.
         """
         assert self._m._n_z.value != 0
         if mask is None:
@@ -201,8 +546,8 @@ class StandardModel(object):
         self._m.resetModel()
 
 
-class TestStandardModel:
-    """ Test the StandardModel class. """
+class TestJmiOptModel:
+    """ Test the JmiOptModel class. """
     
     def setUp(self):
         """ Test setUp. Load the test model
@@ -329,7 +674,7 @@ class TestStandardModel:
         
         p.legend(loc=0, prop=matplotlib.font_manager.FontProperties(size=8))
         p.hold(False)
-        fig.savefig('TestStandardModel_testSimulationWSensivity.png')
+        fig.savefig('TestJmiOptModel_testSimulationWSensivity.png')
 
     def testFixedSimulation(self):
         """Test simulation"""
@@ -344,7 +689,7 @@ class TestStandardModel:
         fig = p.figure()
         p.plot(T, ys)
         p.title('testFixedSimulation(...) output')
-        fig.savefig('TestStandardModel_testFixedSimulation.png')
+        fig.savefig('TestJmiOptModel_testFixedSimulation.png')
         
     def testFixedSimulationIntervals(self):
         """Test simulation between a different time span."""
@@ -361,7 +706,7 @@ class TestStandardModel:
         fig = p.figure()
         p.plot(T, ys)
         p.title('testFixedSimulation(...) output')
-        fig.savefig('TestStandardModel_testFixedSimulationIntervals.png')
+        fig.savefig('TestJmiOptModel_testFixedSimulationIntervals.png')
         
     def testOptJacNonZeros(self):
         """ Testing the numer of non-zero elements in VDP after
@@ -422,8 +767,7 @@ def solve_using_sundials(model, end_time,
     """ Solve Lotka-Volterra equation using PySUNDIALS.
     
     @param model:
-        The model to use. As of today either of StandardModel type or
-        GenericSensitivityModel.
+        The model to use. Should be a derive class from OptModel.
     @param end_time:
         The time when the model simulation should end.
     @param start_time:
