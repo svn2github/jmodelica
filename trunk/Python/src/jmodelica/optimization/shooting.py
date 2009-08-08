@@ -51,7 +51,128 @@ def _load_example_standard_model(libname):
     return model
 
 
-class StandardModel(object):
+class OptimizationModel:
+    """ An abstract model on which optimization is done on.
+    
+    Contains the common functions used to make this class behave as a
+    DAE/ODE-model.
+    
+    """
+    def getParameters(self):
+        """Returns the parameters."""
+        raise NotImplementedError()
+        
+    def setParameters(self, params):
+        raise NotImplementedError()
+        
+    def getStates(self):
+        raise NotImplementedError()
+        
+    def setStates(self, x):
+        raise NotImplementedError()
+        
+    def getDiffs(self):
+        raise NotImplementedError()
+        
+    def getModelSize(self):
+        """ Returns the dimension of the problem. """
+        raise NotImplementedError()
+        
+    def getRealModelSize(self):
+        """ Returns the dimension of the problem. 
+        
+        @remark:
+            In my master thesis code base there exists a class called
+            GenericSensivityModel that wraps an existing model creating
+            a pseudo problem that solves multiple disturbed instances of
+            this model to be able to approximate sensitivities in a
+            different approach than using SUNDIALS. This method came
+            into existence to be able to know the size of the original
+            problem/model.
+        """
+        raise NotImplementedError()
+        
+    def evalF(self):
+        """ Evaluate F."""
+        raise NotImplementedError()
+        
+    def evalJacX(self):
+        """ Evaluate the jacobian of the function F w.r.t. states x. """
+        raise NotImplementedError()
+        
+    def getSensitivities(self, y):
+        """ Not supported in this model class.
+        
+        @remark:
+            This method came existence due to GenericSensivityModel that
+            exists in my master thesis code base. See remark on
+            ::self.getRealModelSize() for more information why this
+            method exists.
+        """
+        raise NotImplementedError('This model does not support'
+                                  ' sensitivity analysis implicitly.')
+                                   
+    def getInputs(self):
+        raise NotImplementedError()
+        
+    def setInputs(self, new_u):
+        raise NotImplementedError()
+        
+    def getAlgebraics(self):
+        raise NotImplementedError()
+        
+    def setAlgebraics(self, w):
+        raise NotImplementedError()
+        
+    def setTime(self, new_t):
+        """ Set the variable t. """
+        raise NotImplementedError()
+        
+    def getTime(self):
+        raise NotImplementedError()
+        
+    def evalCost(self):
+        """ Evaluate the optimization cost function, J. """
+        raise NotImplementedError()
+        
+    def isFreeStartTime(self):
+        raise NotImplementedError()
+        
+    def isFixedStartTime(self):
+        raise NotImplementedError()
+        
+    def isFreeFinalTime(self):
+        raise NotImplementedError()
+        
+    def isFixedFinalTime(self):
+        raise NotImplementedError()
+        
+    def getStartTime(self):
+        raise NotImplementedError()
+        
+    def getFinalTime(self):
+        raise NotImplementedError()
+        
+    def getCostJacobian(self, independent_variables, mask=None):
+        """ Returns the jacobian for the cost function with respect to
+            the independent variable independent_variable.
+            
+        @param independent_variable:
+            A mask consisting of the independent variables (JMI_DER_X
+            etc.) requested.
+        @todo:
+            independent_variable should not be a mask. It is not
+            pythonesque.
+        @return:
+            The cost gradient/jacobian.
+        """
+        raise NotImplementedError()
+        
+    def reset(self):
+        raise NotImplementedError()
+
+
+class StandardModel(OptimizationModel):
     """ The standard model. Contains the common functions used to make
         this class behave as a DAE/ODE-model.
     
@@ -109,18 +230,6 @@ class StandardModel(object):
         n = self.getRealModelSize()
         jac = jac.reshape( (n,n) )
         return jac
-        
-    def getSensitivities(self, y):
-        """ Not supported in this model class.
-        
-        @remark:
-            This method came existence due to GenericSensivityModel that
-            exists in my master thesis code base. See remark on
-            ::self.getRealModelSize() for more information why this
-            method exists.
-        """
-        raise NotImplementedError('This model does not support'
-                                  ' sensitivity analysis implicitly.')
                                    
     def getInputs(self):
         return self._m.u
