@@ -619,7 +619,7 @@ def solve_using_sundials(model, end_time, start_time=0.0, verbose=False, sensi=F
         cvodes.CVodeSetSensParams(cvode_mem, parameters.params, None, None)
 
     # time step
-    time_step = 0.02
+    time_step = 0.001
     
     tout = start_time + time_step
 
@@ -1266,8 +1266,8 @@ def test_f_gradient_elements(certainindex=None):
             (0.5, 0.6),
             (0.6, 0.7),
             (0.7, 0.8),
-            (0.8, 0.9),
-            (0.9, 1.0),]
+            (0.8, 0.99),
+            (0.99, 1.0),]
     initial_u = [0.25] * len(grid)
     shooter = MultipleShooter(m, initial_u, grid)
     p0 = shooter.get_p0()
