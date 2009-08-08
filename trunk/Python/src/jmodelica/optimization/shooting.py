@@ -551,28 +551,28 @@ def solve_using_sundials(model, end_time,
             #
             # See: http://www.geocities.com/foetsch/python/new_style_classes.htm
             __slots__ = [
-                            'params',   # Holds the C type parameter
-                                        # vector used by SUNDIALS
-                                        # internal sens. analysis.
-                            'pi_start', # Start index for where the
-                                        # independent parameters are
-                                        # stored in params.
-                            'pi_end',   # End index for where the
-                                        # independent parameters are
-                                        # stored in params.
-                            'xinit_start',  # Start index for where the
-                                            # initial values are stored
-                                            # in params.
-                            'xinit_end',    # End index for where the
-                                            # initial values are stored
-                                            # in params.
-                            'u_start',  # Start index for where the
-                                        # optimal control inputs are
-                                        # stored in params.
-                            'u_end',    # End index for where the
-                                        # optimal control inputs are
-                                        # stored in params.
-                        ]
+                'params',   # Holds the C type parameter
+                            # vector used by SUNDIALS
+                            # internal sens. analysis.
+                'pi_start', # Start index for where the
+                            # independent parameters are
+                            # stored in params.
+                'pi_end',   # End index for where the
+                            # independent parameters are
+                            # stored in params.
+                'xinit_start',  # Start index for where the
+                                # initial values are stored
+                                # in params.
+                'xinit_end',    # End index for where the
+                                # initial values are stored
+                                # in params.
+                'u_start',  # Start index for where the
+                            # optimal control inputs are
+                            # stored in params.
+                'u_end',    # End index for where the
+                            # optimal control inputs are
+                            # stored in params.
+            ]
         parameters           = PyFData()
         pi_ctype             = cvodes.realtype \
                                 * (len(model.getParameters()) \
