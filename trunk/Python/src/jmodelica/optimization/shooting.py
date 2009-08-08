@@ -372,9 +372,15 @@ class TestDebugOptModel:
         assert sens is not None
         assert len(T) > 1
         
+        print "INDICES:"
+        print "============"
         for indexname in ['pi_start', 'pi_end', 'xinit_start', 'xinit_end', 'u_start', 'u_end']:
-            print "%s:\t%s" % (indexname, getattr(params, indexname))
+            print "%-14s%s" % ("%s:" % indexname, getattr(params, indexname))
+        print "============"
+        print "SENSIVITIES:"
+        print "============"
         print sens
+        print "============"
         
         self.m.reset()
         self.m.setStates(self.m.getStates() + SMALL)
