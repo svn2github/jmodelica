@@ -412,7 +412,13 @@ class TestStandardModel:
         self.m.reset()
 
 
-def solve_using_sundials(model, end_time, start_time=0.0, verbose=False, sensi=False, use_jacobian=False):
+def solve_using_sundials(model, end_time,
+                         start_time=0.0,
+                         verbose=False,
+                         sensi=False,
+                         use_jacobian=False,
+                         abstol=1.0e-6, # used to be e-14
+                         reltol=1.0e-6):
     """ Solve Lotka-Volterra equation using PySUNDIALS.
     
     @param model:
@@ -510,11 +516,9 @@ def solve_using_sundials(model, end_time, start_time=0.0, verbose=False, sensi=F
     # initial y (copying just in case)
     y = cvodes.NVector(model.getStates().copy())
 
-    # relative tolerance
-    abstol = cvodes.realtype(1.0e-6) # used to be e-14
-
-    # absolute tolerance
-    reltol = cvodes.realtype(1.0e-6)
+    # converting tolerances to C types
+    abstol = cvodes.realtype(abstol)
+    reltol = cvodes.realtype(reltol)
 
     t0 = cvodes.realtype(start_time)
 
