@@ -777,7 +777,8 @@ def solve_using_sundials(model, end_time,
                          sensi=False,
                          use_jacobian=False,
                          abstol=1.0e-6, # used to be e-14
-                         reltol=1.0e-6):
+                         reltol=1.0e-6,
+                         time_step=0.02):
     """ Solve Lotka-Volterra equation using PySUNDIALS.
     
     @param model:
@@ -794,6 +795,13 @@ def solve_using_sundials(model, end_time,
         SUNDIALS. Defaults to False.
     @param use_jacobian:
         If the jacobian should be used or not. (EXPERIMENTAL!)
+    @param abstol:
+        The absolute tolerance. See SUNDIALS' manual for more info.
+    @param reltol:
+        The relative tolerance. See SUDNIALS' manual for more info.
+    @param time_step:
+        The step size when SUNDIALS should return from it's internal loop. See
+        SUNDIALS' manual for more info.
     @return:
         A tuple consisting of:
             1. Time samples.
@@ -983,7 +991,7 @@ def solve_using_sundials(model, end_time,
         cvodes.CVodeSetSensParams(cvode_mem, parameters.params, None, None)
 
     # time step
-    time_step = 0.001
+    time_step = time_step
     
     tout = start_time + time_step
 
@@ -1251,11 +1259,13 @@ class MultipleShooter:
         
     def set_initial_u(self, initial_u):
         """ Set the initial U's (control signals) for each segment."""
-        if len(initial_u) != len(self.get_grid()):
+        grid = self.get_grid()
+        if len(initial_u) != len(grid):
             raise ShootingException('initial_u parameters must be the same length as grid segments.')
-        self._initial_u = initial_u
+        self._initial_u = N.array(initial_u).reshape( (len(grid), -1) )
         
     def get_initial_u(self):
+        """Returns the constant control/input signals, one segment per row."""
         return self._initial_u
         
     def set_initial_y(self, initial_y=None):
@@ -1271,9 +1281,10 @@ class MultipleShooter:
             initial_y = _eval_initial_ys(model, grid)
         elif len(initial_y) != len(grid):
             raise ShootingException('initial_y states must be the same length as grid segments.')
-        self._initial_y = initial_y
+        self._initial_y = N.array(initial_y).reshape( (len(grid), -1) )
         
     def get_initial_y(self):
+        """Returns the initial states, one segment per row."""
         return self._initial_y
         
     def set_normalized_grid(self, grid):
@@ -1382,12 +1393,20 @@ class MultipleShooter:
         return gradient
         
     def h(self, p): # h(p) = 0
-        """ Evaluates continuity (equality) constraints."""
-        # This function has visually been verified to work in the sense that
-        # discontinuities lead to a big magnitude for that
+        """Evaluates continuity (equality) constraints.
+        
+        This function has visually been verified to work in the sense that
+        discontinuities lead to a big magnitude of the corresponding elements
+        in the system.
+        """
         model = self.get_model()
         grid = self.get_grid()
         y0s, us = _split_opt_x(model, len(grid), p)
+        
+        # Assert that initial states of first gradient are unchanged
+        y0s_from_p0 = self.get_initial_y()
+        #N.testing.assert_array_almost_equal(y0s_from_p0[0], y0s[0])
+        y0s[0,:] = y0s_from_p0[0,:]
         
         def eval_last_ys(u, y0, interval):
             grad, last_y, gradparams, sens = self._shoot_single_segment(u, y0, interval)
@@ -1438,7 +1457,9 @@ class MultipleShooter:
             sensxinitindices = range(gradparams[segmentindex]['xinit_start'], gradparams[segmentindex]['xinit_end'])
             sensuindices = range(gradparams[segmentindex]['u_start'], gradparams[segmentindex]['u_end'])
             
-            r[row_start : row_end, xinitsenscols_start : xinitsenscols_end] = sens[segmentindex][sensxinitindices, :].T
+            if segmentindex != 0:
+                # The initial states of first segment is locked.
+                r[row_start : row_end, xinitsenscols_start : xinitsenscols_end] = sens[segmentindex][sensxinitindices, :].T
             r[row_start : row_end, xinitcols_start : xinitcols_end] = [[-1, 0, 0],
                                                                        [0, -1, 0],
                                                                        [0, 0, -1]]
@@ -1455,8 +1476,6 @@ class MultipleShooter:
         
     def runOptimization(self, plot=True):
         """Start/run optimization procedure and the optimum."""
-        initial_y = self.get_initial_y()
-        initial_u = self.get_initial_u()
         grid = self.get_grid()
         model = self.get_model()
         
@@ -1479,10 +1498,15 @@ class MultipleShooter:
            and converges extremely slow.
         """
         
-        
         if plot:
             p.plot = 1
         p.iprint = 1
+        
+        # Uncomment these to check gradients against finite difference
+        # quotients
+        #p.checkdf(maxViolation=0.05)
+        #p.checkdh()
+        #return
         
         opt = p.solve('ralg')
         
@@ -1492,8 +1516,6 @@ class MultipleShooter:
         return opt.xf
         
     def runSteepestDescent(self, plot=True):
-        initial_y = self.get_initial_y()
-        initial_u = self.get_initial_u()
         grid = self.get_grid()
         model = self.get_model()
         
@@ -1514,8 +1536,6 @@ class MultipleShooter:
         return x
         
     def runQuasiNewtonsMethod(self, plot=True):
-        initial_y = self.get_initial_y()
-        initial_u = self.get_initial_u()
         grid = self.get_grid()
         model = self.get_model()
         
@@ -1605,12 +1625,12 @@ class _PartialEvaluator:
 
 
 def test_f_gradient_elements(certainindex=None):
-    """ Basic testing of gradients (disabled by default).
+    """Basic testing of gradients (disabled by default).
     
-    This tests takes a couple of hours to run unless certainindex is defined
-    (whereas only the element of index certainindex will be tested). Therefor
-    it is turned off by default. Set run_huge_test variable to True to run this
-    test by default.
+    This tests takes slightly less than an hour to run on my computer unless
+    certainindex is defined (whereas only the element of index certainindex
+    will be tested). Therefor it is turned off by default. Set run_huge_test
+    variable to True to run this test by default.
     
     Also note that this test is not really supposed to test functionality per
     se. It is rather a test that can be used to visually verify that gradients
@@ -1630,8 +1650,8 @@ def test_f_gradient_elements(certainindex=None):
             (0.5, 0.6),
             (0.6, 0.7),
             (0.7, 0.8),
-            (0.8, 0.99),
-            (0.99, 1.0),]
+            (0.8, 0.9),
+            (0.9, 1.0),]
     initial_u = [0.25] * len(grid)
     shooter = MultipleShooter(m, initial_u, grid)
     p0 = shooter.get_p0()
