@@ -956,13 +956,15 @@ def solve_using_sundials(model, end_time,
     if sensi:
         NP = len(model.getParameters()) # number of model parameters
         NU = len(model.getInputs()) # number of control signals/inputs
-        NI = len(model.getDiffs()) # number of initial states from
-                                   # which sensitivity is calculated
+        NI = model.getModelSize() # number of initial states from
+                                  # which sensitivity is calculated
         NS      = NP + NI + NU # number of sensitivities to be calculated
-        NEQ     = len(model.getDiffs())
+        NEQ     = model.getModelSize()
+        assert NEQ == NI, "yS must be modified below to handle the" \
+                          " inequality NEQ != NI"
         err_con = False # Use sensisitity for error control
         yS      = nvecserial.NVectorArray([[0] * NEQ] * NP
-                                            + [[1] * NEQ] * NI
+                                            + N.eye(NI).tolist()
                                             + [[0] * NEQ] * NU)
         
         cvodes.CVodeSensMalloc(cvode_mem, NS, cvodes.CV_STAGGERED1, yS)
