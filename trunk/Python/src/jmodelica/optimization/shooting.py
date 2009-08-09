@@ -172,7 +172,7 @@ class _DebugOptModel(OptModel):
     Model (ODE):
     
     xdot0 = 1
-    xdot1 = p1
+    xdot1 = p0
     xdot2 = x0 + p0*x1
     
     Parameters:
@@ -207,7 +207,7 @@ class _DebugOptModel(OptModel):
         """ Evaluate F:
         
         xdot0 = 1
-        xdot1 = p1
+        xdot1 = p0
         xdot2 = x0 + p0*x1
         """
         x = self.getStates()
