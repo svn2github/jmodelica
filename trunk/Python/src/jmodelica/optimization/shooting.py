@@ -6,6 +6,7 @@
 
 import ctypes
 import math
+import os
 
 import nose
 import numpy as N
@@ -38,15 +39,27 @@ def _get_example_path():
         The path to the example model relative to JMODELICA_HOME.
     
     """
-    import os
     jmhome = os.environ.get('JMODELICA_HOME')
     assert jmhome is not None, "You have to specify" \
                                " JMODELICA_HOME environment" \
                                " variable."
-    return os.path.join(jmhome, '..', 'Python', 'src', 'jmodelica', 'examples', 'vdp')
+    return os.path.join(jmhome, '..', 'Python', 'src', 'jmodelica', 'examples', 'files')
     
     
-def _load_example_standard_model(libname):
+def _load_example_standard_model(libname, mofile=None, optpackage=None):
+    try:
+        model = JmiOptModel(libname, _get_example_path())
+    except IOError:
+        if mofile is None or optpackage is None:
+            raise
+            
+        print "The model was not found. Trying to compile it..."
+        import jmodelica.optimicacompiler as oc
+        curdir = os.getcwd()
+        os.chdir(_get_example_path())
+        oc.compile_model(os.path.join(_get_example_path(), mofile), optpackage)
+        os.chdir(curdir)
+        
     model = JmiOptModel(libname, _get_example_path())
     return model
 
@@ -1834,7 +1847,7 @@ def cost_graph(model):
 
 
 def main():
-    m = _load_example_standard_model('VDP_pack_VDP_Opt')
+    m = _load_example_standard_model('VDP_pack_VDP_Opt', "VDP.mo", "VDP_pack.VDP_Opt")
     
     # Whether the cost as a function of input U should be plotted
     GEN_PLOT = False
