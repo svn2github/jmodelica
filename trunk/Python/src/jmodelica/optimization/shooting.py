@@ -1050,9 +1050,12 @@ def solve_using_sundials(model, end_time,
         return (T, ylist, yS, parameters)
 
 
-def _shoot(model, start_time, end_time):
-    """ Does a single 'shot'. Model parameters/states etc. must be set BEFORE
-        calling this method.
+def _shoot(model, start_time, end_time, sensi=True):
+    """ Does a single 'shot'.
+    
+    if sensi is set to False no sensitivity analysis will be done and the 
+    
+    Model parameters/states etc. must be set BEFORE calling this method.
         
     @note:
         Currently written specifically for VDP.
@@ -1071,32 +1074,39 @@ def _shoot(model, start_time, end_time):
                input U.
             2. The final ($t_{tp_0}=1$) simulation states.
             3. A structure holding the indices for the gradient.
+            4. The corresponding sensitivity matrix.
             
     """
-    T, ys, sens, params = solve_using_sundials(model, end_time, start_time, sensi=True)
+    T, ys, sens, params = solve_using_sundials(model, end_time, start_time, sensi=sensi)
     
-    sens_rows = range(params.xinit_start, params.xinit_end) + range(params.u_start, params.u_end)
-    sens_mini = sens[sens_rows]
-    gradparams = {
-        'xinit_start': 0,
-        'xinit_end': params.xinit_end - params.xinit_start,
-        'u_start': params.xinit_end - params.xinit_start,
-        'u_end': params.xinit_end - params.xinit_start + params.u_end - params.u_start,
-    }
     model._m.setX_P(ys[-1], 0)
     model._m.setDX_P(model.getDiffs(), 0)
     model._m.setU_P(model.getInputs(), 0)
     
-    cost_jac_x = model.getCostJacobian(pyjmi.JMI_DER_X_P).flatten()
-    cost_jac_u = model.getCostJacobian(pyjmi.JMI_DER_U_P).flatten()
-    cost_jac = N.concatenate ( [cost_jac_x, cost_jac_u] )
+    if sensi:
+        sens_rows = range(params.xinit_start, params.xinit_end) + range(params.u_start, params.u_end)
+        sens_mini = sens[sens_rows]
+        gradparams = {
+            'xinit_start': 0,
+            'xinit_end': params.xinit_end - params.xinit_start,
+            'u_start': params.xinit_end - params.xinit_start,
+            'u_end': params.xinit_end - params.xinit_start + params.u_end - params.u_start,
+        }
     
-    # See my master thesis report for the specifics of these calculations.
-    costgradient_x = N.dot(sens[params.xinit_start:params.xinit_end, :], cost_jac_x).flatten() # verified
-    costgradient_u = N.dot(sens[params.u_start:params.u_end, :], cost_jac_x).flatten() + cost_jac_u # verified
-    
-    # The full cost gradient w.r.t. the states and the input
-    costgradient = N.concatenate( [costgradient_x, costgradient_u] )
+        cost_jac_x = model.getCostJacobian(pyjmi.JMI_DER_X_P).flatten()
+        cost_jac_u = model.getCostJacobian(pyjmi.JMI_DER_U_P).flatten()
+        cost_jac = N.concatenate ( [cost_jac_x, cost_jac_u] )
+        
+        # See my master thesis report for the specifics of these calculations.
+        costgradient_x = N.dot(sens[params.xinit_start:params.xinit_end, :], cost_jac_x).flatten() # verified
+        costgradient_u = N.dot(sens[params.u_start:params.u_end, :], cost_jac_x).flatten() + cost_jac_u # verified
+        
+        # The full cost gradient w.r.t. the states and the input
+        costgradient = N.concatenate( [costgradient_x, costgradient_u] )
+    else:
+        costgradient = None
+        gradparams = None
+        sens_mini = None
     
     last_y = ys[-1,:]
     
@@ -1320,7 +1330,7 @@ class MultipleShooter:
         """ Returned the real grid holding the actual simulation times."""
         return self._grid
     
-    def _shoot_single_segment(self, u, y0, interval):
+    def _shoot_single_segment(self, u, y0, interval, sensi=True):
         """Shoot a single segment in multiple shooting.
         
         The 'shot' is done between interval[0] and interval[1] with initial
@@ -1341,7 +1351,7 @@ class MultipleShooter:
         model.setInputs(u)
         model.setStates(y0)
         
-        seg_cost_gradient, seg_last_y, seg_gradparams, sens = _shoot(model, seg_start_time, seg_end_time)
+        seg_cost_gradient, seg_last_y, seg_gradparams, sens = _shoot(model, seg_start_time, seg_end_time, sensi=sensi)
         
         # TODO: Create a return type instead of returning tuples
         return seg_cost_gradient, seg_last_y, seg_gradparams, sens
@@ -1357,7 +1367,7 @@ class MultipleShooter:
         grid = self.get_grid()
         ys, us = _split_opt_x(model, len(grid), p)
         
-        costgradient, last_y, gradparams, sens = self._shoot_single_segment(us[-1], ys[-1], grid[-1])
+        costgradient, last_y, gradparams, sens = self._shoot_single_segment(us[-1], ys[-1], grid[-1], sensi=False)
         
         model._m.setX_P(last_y, 0)
         model._m.setDX_P(model.getDiffs(), 0)
