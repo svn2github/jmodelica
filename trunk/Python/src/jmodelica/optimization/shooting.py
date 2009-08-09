@@ -372,6 +372,14 @@ class TestDebugOptModel:
         assert sens is not None
         assert len(T) > 1
         
+        # This expected result was calculated by hand
+        # See my master thesis for details.
+        expected_sens = N.array([[0, 2, 12],
+                                 [1, 0, 2 ],
+                                 [0, 1, 6 ],
+                                 [0, 0, 1 ]])
+        N.testing.assert_array_almost_equal(sens, expected_sens)                         
+        
         print "INDICES:"
         print "============"
         for indexname in ['pi_start', 'pi_end', 'xinit_start', 'xinit_end', 'u_start', 'u_end']:
