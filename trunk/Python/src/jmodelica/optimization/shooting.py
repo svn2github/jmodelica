@@ -1450,7 +1450,7 @@ class MultipleShooter:
             xinitsenscols_end = xinitsenscols_start + NOS
             xinitcols_start = segmentindex * NOS + NOS
             xinitcols_end = xinitcols_start + NOS
-            usenscols_start = len(y0s) + NOI * segmentindex
+            usenscols_start = y0s.size + NOI * segmentindex
             usenscols_end = usenscols_start + NOI
             
             # Indices from the sensivity matrix
