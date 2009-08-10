@@ -1308,15 +1308,15 @@ class MultipleShooter:
             initial_y = _eval_initial_ys(model, grid)
         elif len(initial_y) != len(grid):
             raise ShootingException('initial_y states must be the same length as grid segments.')
-        self._initial_y = N.array(initial_y).reshape( (len(grid), -1) )
+        self._initial_y = N.array(initial_y).reshape( (len(grid), self.get_model().getModelSize()) )
         
     def get_initial_y(self):
         """Returns the initial states, one segment per row."""
-        return self._initial_y
+        return self._initial_y[1:]
         
     def get_initial_y_grid0(self):
         """Returns the initial states for the first grid."""
-        return self._initial_y[-1]
+        return self._initial_y[0]
         
     def set_normalized_grid(self, grid):
         """ Set the grid containing normalized times between [0, 1].
@@ -1494,20 +1494,19 @@ class MultipleShooter:
                                                                        [0, 0, -1]]
             r[row_start : row_end, usenscols_start : usenscols_end] = sens[segmentindex][sensuindices, :].T
         
-        N.set_printoptions(N.nan)
-        print r
+        #N.set_printoptions(N.nan)
+        #print r
         
         return r
         
     def get_p0(self):
         """Returns the vector which is to optimized over."""
         initial_y = self.get_initial_y()
-        initial_y = initial_y[1:]
         initial_u = self.get_initial_u()
         p0 = N.concatenate( (N.array(initial_y).flatten(), N.array(initial_u).flatten()) )
         return p0
         
-    def runOptimization(self, plot=True):
+    def runOptimization(self, plot=True, check_gradients=False, only_check_gradients=False):
         """Start/run optimization procedure and the optimum."""
         grid = self.get_grid()
         model = self.get_model()
@@ -1529,27 +1528,24 @@ class MultipleShooter:
                 maxIter = 1e3,
                 maxFunEvals = 1e3,
                 h=self.h,
+                A=Alt,
+                b=blt,
                 df=self.df,
                 dh=self.dh,
                 ftol = 1e-4,
                 xtol = 1e-4,
                 contol=1e-4)
-        #p = NLP(self.f, p0, maxIter = 1e2, maxFunEvals = 1e3, h=self.h)
-        """Notes:
-         * Using only (f) optimization seems to work.
-         * Using both (f) and (df) seems to work partly. However, a lot slower
-           and converges extremely slow.
-        """
         
         if plot:
             p.plot = 1
         p.iprint = 1
         
-        # Uncomment these to check gradients against finite difference
-        # quotients
-        #p.checkdf(maxViolation=0.05)
-        #p.checkdh()
-        #return
+        if check_gradients or only_check_gradients:
+            # Check gradients against finite difference quotients
+            p.checkdf(maxViolation=0.05)
+            p.checkdh()
+            if only_check_gradients:
+                return None
         
         opt = p.solve('ralg')
         
@@ -1904,9 +1900,8 @@ def main():
             #optimum = shooter.runSteepestDescent()
             optimum = shooter.runOptimization()
             print "Optimal us:", optimum
-        
-
+            return optimum
 
 if __name__ == "__main__":
-    main()
+    opt = main()
 
