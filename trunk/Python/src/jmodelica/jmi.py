@@ -1340,7 +1340,7 @@ class Model(object):
         """
         Sets the dependent parameters of the model.
         """
-
+        self.setPD(N.zeros(self._n_pd.value))
         self.jmimodel.init_Fp(self.getPD())
 
     def get_variable_names(self):
@@ -1492,7 +1492,7 @@ class Model(object):
         """Returns a reference to the dependent parameters vector."""
         return self.jmimodel._pd
         
-    def setPD(sself, pd):
+    def setPD(self, pd):
         """Sets the dependent parameters vector."""
         self.jmimodel._pd[:] = pd
         
