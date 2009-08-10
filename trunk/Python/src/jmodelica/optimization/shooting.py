@@ -784,7 +784,8 @@ class TestJmiOptModel:
         self.m.reset()
 
 
-def solve_using_sundials(model, end_time,
+def solve_using_sundials(model,
+                         end_time,
                          start_time=0.0,
                          verbose=False,
                          sensi=False,
@@ -828,6 +829,9 @@ def solve_using_sundials(model, end_time,
         raise ShootingException('End time cannot be before start time.')
     if end_time == start_time:
         raise ShootingException('End time and start time cannot currently coinside.')
+        
+    # If this line is not here T[-1] returned will be end_time - time_step
+    end_time = end_time + time_step
     
     def _sundials_f(t, x, dx, f_data):
         """ Model (RHS) evaluation function.
@@ -1310,6 +1314,10 @@ class MultipleShooter:
         """Returns the initial states, one segment per row."""
         return self._initial_y
         
+    def get_initial_y_grid0(self):
+        """Returns the initial states for the first grid."""
+        return self._initial_y[-1]
+        
     def set_normalized_grid(self, grid):
         """ Set the grid containing normalized times between [0, 1].
         
@@ -1378,7 +1386,9 @@ class MultipleShooter:
         """
         model = self.get_model()
         grid = self.get_grid()
-        ys, us = _split_opt_x(model, len(grid), p)
+        ys, us = _split_opt_x(model, len(grid), p, self.get_initial_y_grid0())
+        
+        print "p:", p
         
         costgradient, last_y, gradparams, sens = self._shoot_single_segment(us[-1], ys[-1], grid[-1], sensi=False)
         
@@ -1399,7 +1409,7 @@ class MultipleShooter:
         """
         model = self.get_model()
         grid = self.get_grid()
-        ys, us = _split_opt_x(model, len(grid), p)
+        ys, us = _split_opt_x(model, len(grid), p, self.get_initial_y_grid0())
         costgradient, last_y, gradparams, sens = self._shoot_single_segment(us[-1], ys[-1], grid[-1])
         
         print "Evaluating cost function gradient."
@@ -1407,10 +1417,11 @@ class MultipleShooter:
         # Comments:
         #  * The cost does not depend on the first initial states.
         #  * The cost does not depend on the first inputs/control signal
-        gradient = N.array([0] * len(model.getStates()) * (len(grid) - 1)
+        gradient = N.array([0] * len(model.getStates()) * (len(grid) - 2)
                             + list(costgradient[gradparams['xinit_start'] : gradparams['xinit_end']])
-                            + [0] * (len(grid) - 1)
+                            + [0] * (len(grid) - 1) * len(model.getInputs())
                             + list(costgradient[gradparams['u_start'] : gradparams['u_end']]))
+        
         assert len(p) == len(gradient)
         print gradient
         return gradient
@@ -1424,12 +1435,7 @@ class MultipleShooter:
         """
         model = self.get_model()
         grid = self.get_grid()
-        y0s, us = _split_opt_x(model, len(grid), p)
-        
-        # Assert that initial states of first gradient are unchanged
-        y0s_from_p0 = self.get_initial_y()
-        #N.testing.assert_array_almost_equal(y0s_from_p0[0], y0s[0])
-        y0s[0,:] = y0s_from_p0[0,:]
+        y0s, us = _split_opt_x(model, len(grid), p, self.get_initial_y_grid0())
         
         def eval_last_ys(u, y0, interval):
             grad, last_y, gradparams, sens = self._shoot_single_segment(u, y0, interval)
@@ -1450,7 +1456,7 @@ class MultipleShooter:
         
         model = self.get_model()
         grid = self.get_grid()
-        y0s, us = _split_opt_x(model, len(grid), p)
+        y0s, us = _split_opt_x(model, len(grid), p, self.get_initial_y_grid0())
         
         def eval_last_ys(u, y0, interval):
             costgrad, last_y, gradparams, sens = self._shoot_single_segment(u, y0, interval)
@@ -1469,11 +1475,11 @@ class MultipleShooter:
             # Indices
             row_start = segmentindex * NOS
             row_end = row_start + NOS
-            xinitsenscols_start = segmentindex * NOS
+            xinitsenscols_start = (segmentindex - 1) * NOS
             xinitsenscols_end = xinitsenscols_start + NOS
-            xinitcols_start = segmentindex * NOS + NOS
+            xinitcols_start = segmentindex * NOS
             xinitcols_end = xinitcols_start + NOS
-            usenscols_start = y0s.size + NOI * segmentindex
+            usenscols_start = (y0s.size - NOS) + NOI * segmentindex
             usenscols_end = usenscols_start + NOI
             
             # Indices from the sensivity matrix
@@ -1488,11 +1494,15 @@ class MultipleShooter:
                                                                        [0, 0, -1]]
             r[row_start : row_end, usenscols_start : usenscols_end] = sens[segmentindex][sensuindices, :].T
         
+        N.set_printoptions(N.nan)
+        print r
+        
         return r
         
     def get_p0(self):
         """Returns the vector which is to optimized over."""
         initial_y = self.get_initial_y()
+        initial_y = initial_y[1:]
         initial_u = self.get_initial_u()
         p0 = N.concatenate( (N.array(initial_y).flatten(), N.array(initial_u).flatten()) )
         return p0
@@ -1509,11 +1519,21 @@ class MultipleShooter:
         # TODO: These are currently hard coded. They shouldn't be.
         NLT = len(grid)
         Alt = N.zeros( (NLT, len(p0)) )
-        Alt[:len(grid), len(grid) * model.getModelSize():] = N.eye(len(grid))
+        Alt[:len(grid), (len(grid) - 1) * model.getModelSize():] = N.eye(len(grid))
         blt = 0.75*N.ones(NLT)
         
         # Get OpenOPT handler
-        p = NLP(self.f, p0, maxIter = 1e3, maxFunEvals = 1e3, h=self.h, A=Alt, b=blt, df=self.df, dh=self.dh)
+        #p = NLP(self.f, p0, maxIter = 1e3, maxFunEvals = 1e3, h=self.h, A=Alt, b=blt, df=self.df, dh=self.dh)
+        p = NLP(self.f,
+                p0,
+                maxIter = 1e3,
+                maxFunEvals = 1e3,
+                h=self.h,
+                df=self.df,
+                dh=self.dh,
+                ftol = 1e-4,
+                xtol = 1e-4,
+                contol=1e-4)
         #p = NLP(self.f, p0, maxIter = 1e2, maxFunEvals = 1e3, h=self.h)
         """Notes:
          * Using only (f) optimization seems to work.
@@ -1702,10 +1722,17 @@ def test_f_gradient_element_29():
     test_f_gradient_elements(29)
 
 
-def _split_opt_x(model, gridsize, p):
-    ys = p[0 : gridsize * model.getModelSize()]
+def _split_opt_x(model, gridsize, p, prepend_initials):
+    """Split a Multiple Shooting optimization array into its segmented parts.
+    
+    Based on the OptModel model and grid size gridsize _split_opt_x(...) takes
+    an optimization vector p and returns tuple (ys, us) where ys is a matrix
+    with the initial states, one segment per row. us are the control signals,
+    one row per segment.
+    """
+    ys = N.concatenate( (prepend_initials, p[0 : (gridsize - 1) * model.getModelSize()]) )
     ys = ys.reshape( (gridsize, model.getModelSize()) )
-    us = p[gridsize * model.getModelSize() : ]
+    us = p[(gridsize - 1) * model.getModelSize() : ]
     us = us.reshape( (gridsize, len(model.getInputs())) ) # Assumes only one input signal
     return ys, us
     
@@ -1716,14 +1743,23 @@ def _plot_control_solution(model, interval, initial_ys, us):
     model.setInputs(us)
     
     T, Y, yS, parameters = solve_using_sundials(model, end_time=interval[1], start_time=interval[0])
+    p.hold(True)
+    p.plot(T,Y[:,0])
+    p.plot(T,Y[:,1])
     p.plot(T,Y[:,2])
+    p.hold(False)
     return T, Y
 
 
 def plot_control_solutions(model, grid, x, doshow=True):
-    initial_ys, us = _split_opt_x(model, len(grid), x)
+    """Plot multiple shooting solution.
     
-    #p.figure()
+    NOTE that the model will be reset when calling this!
+    """
+    model.reset()
+    initial_ys, us = _split_opt_x(model, len(grid), x, model.getStates())
+    
+    p.figure()
     p.hold(True)
     solutions = map(_plot_control_solution, [model]*len(grid), grid, initial_ys, us)
     p.hold(False)
@@ -1860,16 +1896,8 @@ def main():
             opt_u = single_shooting(m)
             print "Optimal u:", opt_u
         elif SHOOTING_METHOD == 'multiple':
-            grid = [(0, 0.1),
-                    (0.1, 0.2),
-                    (0.2, 0.3),
-                    (0.3, 0.4),
-                    (0.4, 0.5),
-                    (0.5, 0.6),
-                    (0.6, 0.7),
-                    (0.7, 0.8),
-                    (0.8, 0.9),
-                    (0.9, 1.0),]
+            grid = [(0, 0.5),
+                    (0.5, 1.0),]
             initial_u = [0.25] * len(grid)
             shooter = MultipleShooter(m, initial_u, grid)
             #optimum = shooter.runQuasiNewtonsMethod()
