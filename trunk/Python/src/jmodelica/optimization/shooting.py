@@ -1195,7 +1195,7 @@ def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
     p.iprint = 1
     
     u_opt = p.solve('ralg')
-    return u_opt
+    return u_opt.xf
 
 
 def _eval_initial_ys(model, grid):
@@ -1414,13 +1414,16 @@ class MultipleShooter:
         
         print "Evaluating cost function gradient."
         
-        # Comments:
-        #  * The cost does not depend on the first initial states.
-        #  * The cost does not depend on the first inputs/control signal
-        gradient = N.array([0] * len(model.getStates()) * (len(grid) - 2)
-                            + list(costgradient[gradparams['xinit_start'] : gradparams['xinit_end']])
-                            + [0] * (len(grid) - 1) * len(model.getInputs())
-                            + list(costgradient[gradparams['u_start'] : gradparams['u_end']]))
+        if len(grid) == 1:
+            gradient = N.array(costgradient[gradparams['u_start'] : gradparams['u_end']])
+        else:
+            # Comments:
+            #  * The cost does not depend on the first initial states.
+            #  * The cost does not depend on the first inputs/control signal
+            gradient = N.array([0] * len(model.getStates()) * (len(grid) - 2)
+                                + list(costgradient[gradparams['xinit_start'] : gradparams['xinit_end']])
+                                + [0] * (len(grid) - 1) * len(model.getInputs())
+                                + list(costgradient[gradparams['u_start'] : gradparams['u_end']]))
         
         assert len(p) == len(gradient)
         print gradient
@@ -1495,6 +1498,7 @@ class MultipleShooter:
             r[row_start : row_end, usenscols_start : usenscols_end] = sens[segmentindex][sensuindices, :].T
         
         #N.set_printoptions(N.nan)
+        #print "dh(p):"
         #print r
         
         return r
@@ -1522,19 +1526,19 @@ class MultipleShooter:
         blt = 0.75*N.ones(NLT)
         
         # Get OpenOPT handler
-        #p = NLP(self.f, p0, maxIter = 1e3, maxFunEvals = 1e3, h=self.h, A=Alt, b=blt, df=self.df, dh=self.dh)
         p = NLP(self.f,
                 p0,
                 maxIter = 1e3,
                 maxFunEvals = 1e3,
-                h=self.h,
                 A=Alt,
                 b=blt,
                 df=self.df,
-                dh=self.dh,
                 ftol = 1e-4,
                 xtol = 1e-4,
                 contol=1e-4)
+        if len(grid) > 1:
+            p.h  = self.h
+            p.dh = self.dh
         
         if plot:
             p.plot = 1
@@ -1547,50 +1551,13 @@ class MultipleShooter:
             if only_check_gradients:
                 return None
         
-        opt = p.solve('ralg')
+        #opt = p.solve('ralg') # does not work - serious convergence issues
+        opt = p.solve('scipy_slsqp')
         
         if plot:
             plot_control_solutions(model, grid, opt.xf)
         
         return opt.xf
-        
-    def runSteepestDescent(self, plot=True):
-        grid = self.get_grid()
-        model = self.get_model()
-        
-        # Initial try
-        p0 = self.get_p0()
-        x = p0.copy()
-        
-        p.hold(True)
-        for i in range(200):
-            p.plot([i], [self.f(x)], 'o')
-            x = x - 0.001 * self.df(x)
-        p.hold(False)
-        p.show()
-        
-        if plot:
-            plot_control_solutions(model, grid, x)
-        
-        return x
-        
-    def runQuasiNewtonsMethod(self, plot=True):
-        grid = self.get_grid()
-        model = self.get_model()
-        
-        # Initial try
-        p0 = self.get_p0()
-        
-        from scipy.optimize import fmin_bfgs
-        #xopt = fmin_bfgs(self.f, p0, fprime=self.df)
-        xopt = fmin_bfgs(self.f, p0)
-        """This is interesting. It seems that adding fprime does not add to
-        the convergence of the optimization."""
-        
-        if plot:
-            plot_control_solutions(model, grid, xopt)
-
-        return xopt
         
         
 def _verify_gradient(f, df, xstart, xend, SMALL=0.1, STEPS=100):
@@ -1891,6 +1858,7 @@ def main():
         if SHOOTING_METHOD=='single':
             opt_u = single_shooting(m)
             print "Optimal u:", opt_u
+            return opt_u
         elif SHOOTING_METHOD == 'multiple':
             grid = [(0, 0.5),
                     (0.5, 1.0),]
@@ -1899,9 +1867,10 @@ def main():
             #optimum = shooter.runQuasiNewtonsMethod()
             #optimum = shooter.runSteepestDescent()
             optimum = shooter.runOptimization()
-            print "Optimal us:", optimum
+            print "Optimal p:", optimum
             return optimum
 
 if __name__ == "__main__":
+    # The assignment below allows iPython session to reuse the parameter opt
     opt = main()
 
