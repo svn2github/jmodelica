@@ -1705,13 +1705,18 @@ def _plot_control_solution(model, interval, initial_ys, us):
     model.setStates(initial_ys)
     model.setInputs(us)
     
+    p.subplot(211)
     T, Y, yS, parameters = solve_using_sundials(model, end_time=interval[1], start_time=interval[0])
     p.hold(True)
     p.plot(T,Y[:,0])
     p.plot(T,Y[:,1])
     p.plot(T,Y[:,2])
     p.hold(False)
-    return T, Y
+    
+    p.subplot(212)
+    p.hold(True)
+    p.plot(interval, [us, us])
+    p.hold(False)
 
 
 def plot_control_solutions(model, grid, x, doshow=True):
@@ -1724,9 +1729,10 @@ def plot_control_solutions(model, grid, x, doshow=True):
     
     p.figure()
     p.hold(True)
-    solutions = map(_plot_control_solution, [model]*len(grid), grid, initial_ys, us)
+    map(_plot_control_solution, [model]*len(grid), grid, initial_ys, us)
+    p.subplot(211); p.title("Solutions (states)")
+    p.subplot(212); p.title("Control/input signals")
     p.hold(False)
-    p.title('The shooting solution')
     if doshow:
         p.show()
 
