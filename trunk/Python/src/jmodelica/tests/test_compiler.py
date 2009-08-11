@@ -72,3 +72,4 @@ def test_stepbystep():
     assert mc.compile_dll(cpath.replace('.','_',1)) == 0, \
            "Compiling dll failed."
 
+

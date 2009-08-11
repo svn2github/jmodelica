@@ -174,22 +174,7 @@
 			javax.xml.xpath.XPathFactory factory = javax.xml.xpath.XPathFactory.newInstance();
 			javax.xml.xpath.XPath xpath = factory.newXPath();
 			
-			//set modelica library
-			javax.xml.xpath.XPathExpression expr = xpath.compile("/OptionRegistry/ModelicaLibrary");		
-			org.w3c.dom.Node modelicalib = (org.w3c.dom.Node)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODE);
-			if(modelicalib != null && modelicalib.hasChildNodes()) {
-				//modelica lib set
-				expr = xpath.compile("OptionRegistry/ModelicaLibrary/Name");
-				String name = (String)expr.evaluate(doc,javax.xml.xpath.XPathConstants.STRING);
-				
-				expr = xpath.compile("OptionRegistry/ModelicaLibrary/Version");
-				String version = (String)expr.evaluate(doc, javax.xml.xpath.XPathConstants.STRING);
-				
-				expr = xpath.compile("OptionRegistry/ModelicaLibrary/Path");
-				String path = (String)expr.evaluate(doc, javax.xml.xpath.XPathConstants.STRING);
-				
-				sr.options.addModelicaLibrary(name, version, path);
-			}
+			javax.xml.xpath.XPathExpression expr;
 			
 			//set other options if there are any
 			expr = xpath.compile("OptionRegistry/Options");

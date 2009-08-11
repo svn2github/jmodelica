@@ -9,8 +9,6 @@ import nose
 from jmodelica.compiler import OptimicaCompiler as oc
 import jmodelica as jm
 
-print(sys.platform);
-
 jm_home = jm.environ['JMODELICA_HOME']
 path_to_examples = os.sep+'Python'+os.sep+'jmodelica'+os.sep+'examples'
 
@@ -75,3 +73,37 @@ def test_optimica_stepbystep():
     fclass = oc.flatten_model(fpath, cpath, ipr)
     assert oc.compile_dll(cpath.replace('.','_',1)) == 0, \
            "Compiling dll failed."
+
+def TO_ADDtest_MODELICAPATH():
+    """ Test that the MODELICAPATH is loaded correctly.
+
+    This test does currently not pass since changes of global
+    environment variable MODELICAPATH does not take effect
+    after OptimicaCompiler has been used a first time."""
+
+    curr_dir = os.path.dirname(os.path.abspath(__file__));
+    jm_home = os.environ['JMODELICA_HOME']
+    model = os.path.join('files','Test_MODELICAPATH.mo')
+    fpath = os.path.join(curr_dir,model)
+    cpath = "Test_MODELICAPATH"
+    fname = cpath.replace('.','_',1)
+        
+    pathElSep = ''
+    if sys.platform == 'win32':
+        pathElSep = ';'
+    else:
+        pathElSep = ':'
+
+    modelica_path = os.environ['MODELICAPATH']
+    os.environ['MODELICAPATH'] = os.environ['MODELICAPATH'] + pathElSep + \
+                                 os.path.join(curr_dir,'files','MODELICAPATH_test','LibLoc1') + pathElSep + \
+                                 os.path.join(curr_dir,'files','MODELICAPATH_test','LibLoc2')
+
+    comp_res = 1
+    try:
+        oc.compile_model(fpath, cpath, target='ipopt')
+    except:
+        comp_res = 0
+
+    assert comp_res==1, "Compilation failed in test_MODELICAPATH"
+    

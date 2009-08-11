@@ -1118,11 +1118,14 @@ aspect SourceAST_API {
     			l.add((ClassDecl)e);
     		}
     	}
+    	// Libraries are loaded when needed in instance lookup instead
+    	/*
     	for (LibNode ln : getLibNodes()) {
     	    for (Element e : ln.getStoredDefinition().getElements()) {
     			l.add((ClassDecl)e);
     		}
     	}
+    	*/
     	return l;
     } 
 

@@ -35,7 +35,6 @@ abstract Root;
 
 ParserHandler;
 
-
 /**
  * A class representing the root node of a source AST.
  */
@@ -86,7 +85,7 @@ FullClassDecl : BaseClassDecl ::= [StringComment]
                                 <EndName:String>;
 
 LibClassDecl : FullClassDecl ::= LibNode*;
-LibNode ::= <FileName:String> <Name:String> <Structured:boolean> /StoredDefinition/;
+LibNode ::= <FileName:String> <Name:String> <Structured:boolean> <Version:String> /StoredDefinition/;
 
 // TODO: Why does ShortClassDecl have type_prefix:es?
 PN_ShortClassDecl : BaseClassDecl ::= [TypePrefixFlow] 

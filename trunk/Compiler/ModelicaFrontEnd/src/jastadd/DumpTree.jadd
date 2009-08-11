@@ -408,12 +408,14 @@ aspect DumpClasses {
 				e.dumpClasses(indent + " ");
 			}
 		}	
+		/*
 		for (LibNode ln : getLibNodes()) {
 //		    System.out.println("### #" + ln.getStoredDefinition().getFileName());
 			for (Element el : ln.getStoredDefinition().getElements()) {
 				el.dumpClasses(indent + " ");
 			}
 		}
+		*/
 	}
 
 	public void Element.dumpClasses(String indent) {}

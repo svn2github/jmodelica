@@ -20,14 +20,11 @@ import java.util.HashSet;
 import org.jmodelica.modelica.parser.*;
 
 aspect Library {
-
-/*
-	class LibNodeException extends Exception {
 	
-	}
-*/
+	syn lazy List InstProgramRoot.getInstLibClassDeclList() = new List();
 
 	eq LibClassDecl.memberClass(String name) {
+		//System.out.println(">> LibClassDecl.memberClass ("+ getName() + ") looking for: " + name + " enter");
 		HashSet set = new HashSet();
 		set.addAll(super.memberClass(name));
 		for (int i=0;i<getNumLibNode();i++) {
@@ -35,7 +32,7 @@ aspect Library {
 				set.add(getLibNode(i).getStoredDefinition().getElement(0));
 			}
 		}
-		
+		//System.out.println(">> LibClassDecl.memberClass ("+ getName() + ") looking for: " + name + " exit");		
 		if (set.size()>0)
 			return set;
 		else
@@ -43,10 +40,15 @@ aspect Library {
 	}
 
 	eq LibClassDecl.numLocalClassDecl() = getNumClassDecl() + getNumLibNode();
-	eq LibClassDecl.localClassDecl(int i) = 
-		i<getNumClassDecl()? getClassDecl(i): 
-		   (FullClassDecl)getLibNode(i-getNumClassDecl()).getStoredDefinition().getElement(0);
-
+	
+	eq LibClassDecl.localClassDecl(int i) { 
+		if (i<getNumClassDecl()) {
+			return getClassDecl(i); 
+		} else {
+		   return (FullClassDecl)getLibNode(i-getNumClassDecl()).getStoredDefinition().getElement(0);
+		}
+	}	
+		
 	eq LibClassDecl.getLibNode().lookupClass(String name) = genericLookupClass(name);
 	eq LibClassDecl.getLibNode().lookupComponent(String name) = genericLookupComponent(name);
 
@@ -64,6 +66,12 @@ aspect Library {
 		   		b. Return the resulting FullClassDecl  	 
 		*/
 	
+		//System.out.println("LibNode.getStoredDefinition: "+ getName() + " enter");
+		/*
+		if (getName().equals("Utilities")) {
+			throw new RuntimeException("Wow");
+		}
+		*/
 		if (getStructured()) {
 			String dirName = getFileName();
 			try {
@@ -136,6 +144,7 @@ aspect Library {
 		   			}
 					lcd.setLibNodeList(libnodes);
 					sr.getProgram().getUnstructuredEntity(0).setElement(lcd,0);
+					//System.out.println("LibNode.getStoredDefinition: "+ getName() + " exit1");
 	   				return sr.getProgram().getUnstructuredEntity(0);
 	   			}
 			} catch (ParserException e) {
@@ -157,6 +166,7 @@ aspect Library {
 				for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
 					sd.setFileName(getFileName());
 				}
+				//System.out.println("LibNode.getStoredDefinition: "+ getName() + " exit2");
 				return sr.getProgram().getUnstructuredEntity(0);
 			} catch (ParserException e) {
 				e.getProblem().setFileName(getFileName());
@@ -178,6 +188,11 @@ aspect Library {
 		StoredDefinition sd = new StoredDefinition(new Opt(), new List());
 		sd.addElement(bcd);
 		return sd;		        
+	}
+	
+	public LibNode.LibNode(String fileName, String name, boolean structured) {
+		this(fileName,name,structured,"Unknown");
+		
 	}
 	
 	public LibClassDecl.LibClassDecl(FullClassDecl fcd) {
@@ -218,16 +233,69 @@ aspect Library {
 	}
 	
 	syn lazy List Program.getLibNodeList() {
-		//LibNode ln =  new LibNode("/local/home/jakesson/Modelica_2_2_lite/Modelica","Modelica",true);
-    	List list = new List();
-		list.add(new LibNode(root().options.getModelicaLibraryPath("Modelica",
-				root().options.getStringOption("default_msl_version")), "Modelica", true));
-		for (ModelicaLibraryOption.LibrarySpec lib : root().options.getModelicaLibraryOption()) 
-			if (!lib.name.equals("Modelica"))
-				list.add(new LibNode(lib.path, lib.name, true));
-		//LibNode ln =  new LibNode("/Users/jakesson/projects/ModelicaStandardLibrary/ModelicaStandardLibrary_v3/Modelica 3.0.1","Modelica",true);
-		//LibNode ln =  new LibNode("/Users/jakesson/projects/P410-JModelicaIDE/examples/Modelica-2.2/Modelica","Modelica",true);
-		return list;
+		List libnodes = new List();
+		// Retrieve MODELICAPATH
+		String modelicaPath = System.getenv("MODELICAPATH");
+		System.out.println("MODELICAPATH="+modelicaPath);
+		
+		// Find the correct separator of path elements: ':' or ';'
+		String pathSeparator;
+		String os = System.getProperty("os.name").toLowerCase();
+		//System.out.println(os);
+		if (os.indexOf("win") >= 0) {
+			pathSeparator = ";";
+		} else {
+			pathSeparator = ":";
+		}
+		// Get list of directories from MODELICAPATH
+		String[] modelicaPathElements = modelicaPath.split(pathSeparator);
+		// For each directory detect all libraries
+		for (int i=0;i<modelicaPathElements.length;i++) {
+			try {
+				File baseDir = new File(modelicaPathElements[i]);
+				File[] allFiles = baseDir.listFiles();
+				if (allFiles!=null) {
+					// Get all Unstructured entities:
+	   				File[] filesUnStructured = baseDir.listFiles(new UnStructuredEntriesFilenameFilter());
+	   				for (int j=0;j<filesUnStructured.length;j++) {
+   						libnodes.add(new LibNode(filesUnStructured[j].toString(),
+	   				                         filesUnStructured[j].getName().substring(0,filesUnStructured[j].getName().length()-3),
+	   				                         false));			
+	   				}
+	   				// Get all Structured entities:
+	   				File[] dirs = baseDir.listFiles();
+		   			for (int j=0;j<dirs.length;j++) {
+		   				if (dirs[j].isDirectory()){
+	   						// Check if the directory contains a package.mo
+	   						// if not, do not add a LibNode
+	   						File baseDir_tmp = new File(dirs[j].getAbsolutePath());			
+							File[] allFiles_tmp = baseDir_tmp.listFiles();
+							boolean package_mo_present = false;
+							for (int k=0;k<allFiles_tmp.length;k++) {
+	   							if (allFiles_tmp[k].toString().length()>10)
+	   								if (allFiles_tmp[k].toString().substring(allFiles_tmp[k].toString().length()-10).equals("package.mo"))
+	   									package_mo_present = true;
+	   						}
+	   					
+	   						if (package_mo_present) {
+		   						libnodes.add(new LibNode(dirs[j].toString(),
+		   				                         dirs[j].getName(),
+		   				                         true));
+							} 
+						}
+	   			
+		   			}
+
+				}						        
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				e.printStackTrace();
+			} 		
+
+		}
+					
+		return libnodes;
+				
 	}
 	
 	static class UnStructuredEntriesFilenameFilter implements FilenameFilter {

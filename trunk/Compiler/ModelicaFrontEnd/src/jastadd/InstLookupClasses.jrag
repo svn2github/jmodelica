@@ -138,19 +138,59 @@ aspect InstLookupClasses {
 		else
 			return emptyHashSet();
 	}
-/*
-	syn lazy HashSet SourceRoot.lookupLibrary(String name) {
+	
+	InstFullClassDecl LibNode.instFullClassDecl = null;
+	HashMap<String,LibNode> InstProgramRoot.libraryMap = 
+		new HashMap<String,LibNode>();
+	
+	syn lazy HashSet InstProgramRoot.lookupLibrary(String name) {
 		HashSet set = new HashSet(4);
-		for (int i=0;i<getNumLibNode();i++) {
-			if (getLibNode(i).getName().equals(name))
-				set.add(getLibNode(i).getClassDecl());
+		Program prog = ((SourceRoot)root()).getProgram();
+		
+		LibNode ln = null;
+		// Check if library is loaded
+		if (libraryMap.get(name) != null) {
+			ln = libraryMap.get(name);
+		} else { // If not search amongst LibNodes
+			int i = 0;
+			for  (LibNode ln_tmp : prog.getLibNodes()) {
+				if (ln_tmp.getName().equals(name)) {
+					ln = ln_tmp;
+					break;
+				}
+				i ++;
+			}
+			if (ln != null) {
+				libraryMap.put(name,ln);
+			}
+		}
+
+		if (ln != null && ln.instFullClassDecl != null) { // Lib found and loaded
+			set.add(ln.instFullClassDecl);
+		} else if (ln != null) { // Lib found but not loaded
+			// Only need to consider one class according to spec.
+			if (ln.getStoredDefinition().getNumElement() > 0) {
+   	    		ClassDecl cd = (ClassDecl)ln.getStoredDefinition().getElement(0);
+   	    		// Instantiate class
+   			    InstNode icd = createInstClassDecl(cd);
+   			    if (icd != null) {
+   			    	if (icd instanceof InstFullClassDecl) {
+   			    		// Add to instance tree
+   			    		addInstLibClassDecl((InstFullClassDecl)icd);
+   			    		// Make sure is$Final is true;
+   			    		getInstLibClassDecl(getNumInstLibClassDecl()-1);
+   			    		ln.instFullClassDecl = (InstFullClassDecl)icd;
+   			    		set.add((InstFullClassDecl)icd);
+   			    	}
+    	    	}
+    	    }
 		}
 		if (set.size()>0)
 			return set;
 		else
 			return emptyHashSet();
 	}
-	*/
+	
 	eq InstProgramRoot.getChild().lookupInstClass(String name) = genericLookupInstClass(name);
 	//eq SourceRoot.getLibNode().lookupInstClass(String name) = genericLookupClass(name);
 	
@@ -181,10 +221,12 @@ aspect InstLookupClasses {
 		
 		if (lookupInstBuiltInFunction(name).size()>0)
 			set.addAll(lookupInstBuiltInFunction(name));
-		
-/*		if (lookupLibrary(name).size()>0)
+
+		// TODO: propagate information about the class from where
+		// the lookup is requested, so that version information
+		// stored in annotations can be retreived. 
+		if (lookupLibrary(name).size()>0)
 			set.addAll(lookupLibrary(name));
-*/
 
 		if (set.size()>0)
 			return set;

@@ -47,6 +47,9 @@ _defaults = [('IPOPT_HOME','',True),
              ('JVM_PATH',jpype.getDefaultJVMPath(),True),
              ('JVM_ARGS','-Xmx512m',False)]
 
+# Set MODELICAPATH
+os.environ['MODELICAPATH'] = os.path.join(_jm_home,'ThirdParty','MSL')
+
 if sys.platform == 'win32':
     _defaults.append(('MINGW_HOME',os.path.join(_jm_home,'mingw'),True))
 
@@ -103,7 +106,3 @@ for _e in _defaults:
     if _e[2] and not os.path.exists(environ[_e[0]]):
         warnings.warn('%s=%s path does not exist. Environment may be corrupt.' % (_e[0],environ[_e[0]]))
         
-print("""
-Check that the path to MSL is set correctly in 'Options\\options.xml'.
-This will soon be replaced by proper use of MODELICAPATH.
-""")

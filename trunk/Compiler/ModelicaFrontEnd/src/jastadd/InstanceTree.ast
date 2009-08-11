@@ -23,7 +23,8 @@ InstProgramRoot : InstRoot ::= <Program:Program>
                                /UnknownInstComponentDecl/
                                /InstPredefinedType:InstClassDecl*/ 
                                /InstBuiltInType:InstClassDecl*/   
-                               /InstBuiltInFunction:InstClassDecl*/;
+                               /InstBuiltInFunction:InstClassDecl*/
+                               /InstLibClassDecl:InstClassDecl*/;
 
 abstract InstClassDecl: InstNode ::= <ClassDecl:ClassDecl>;
 abstract InstBaseClassDecl : InstClassDecl ::= [InstConstraining];

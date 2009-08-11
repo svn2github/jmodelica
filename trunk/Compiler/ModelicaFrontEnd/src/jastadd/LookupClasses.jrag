@@ -136,10 +136,10 @@ aspect LookupClasses {
 		
 		if (lookupBuiltInFunction(name).size()>0)
 			set.addAll(lookupBuiltInFunction(name));
-		
+/*		
 		if (lookupLibrary(name).size()>0)
 			set.addAll(lookupLibrary(name));
-	
+	*/
 		debugPrint("Program.getElement(int i).lookupClass: " + 
 		            name + " matches: " + set.size());
 
