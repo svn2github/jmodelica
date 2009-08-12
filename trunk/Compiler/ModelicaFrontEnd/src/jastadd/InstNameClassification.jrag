@@ -63,7 +63,7 @@ aspect InstNameClassification {
     eq InstComponentRedeclare.getDynamicClassName().kind() = Kind.CLASS_ACCESS;
 	eq InstConstrainingComponent.getDynamicClassName().kind() = Kind.CLASS_ACCESS;
 	eq InstBaseClassDecl.getFAbstractEquation().kind() = Kind.AMBIGUOUS_ACCESS;	
-		
+	eq InstNode.getDynamicComponentName().kind() = Kind.COMPONENT_ACCESS;		
 		
 	/**
 	 * The attribute predKind defines the kind for qualified

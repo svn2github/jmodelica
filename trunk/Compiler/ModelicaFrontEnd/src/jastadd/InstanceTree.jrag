@@ -469,6 +469,7 @@ aspect Environments {
 aspect InstanceTreeConstruction {
 	
 	syn lazy List InstNode.getDynamicClassNameList() = new List();
+	syn lazy List InstNode.getDynamicComponentNameList() = new List();
 	syn lazy List InstComponentRedeclare.getDynamicClassNameList() = new List();
 	syn lazy List InstConstrainingComponent.getDynamicClassNameList() = new List();
 

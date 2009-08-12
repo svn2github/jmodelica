@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-abstract InstNode ::= /InstComponentDecl*/ /InstClassDecl*/ /InstExtends*/ /InstImport*/ /FAbstractEquation*/ /FQName/ /DynamicClassName:InstAccess*/; // /DynamicInst:InstNode*/ /DynamicInstConstraining:InstNode*/;
+abstract InstNode ::= /InstComponentDecl*/ /InstClassDecl*/ /InstExtends*/ /InstImport*/ /FAbstractEquation*/ /FQName/ /DynamicClassName:InstAccess*/ /DynamicComponentName:InstAccess*/; // /DynamicInst:InstNode*/ /DynamicInstConstraining:InstNode*/;
 abstract InstRoot : InstNode ::= ;
 InstClassRoot : InstRoot ::= <ClassDecl:ClassDecl>;
 //InstFullClassDeclRoot :InstRoot ::= InstFullClassDecl;
