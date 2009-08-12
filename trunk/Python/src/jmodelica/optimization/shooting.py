@@ -54,7 +54,7 @@ def _load_example_standard_model(libname, mofile=None, optpackage=None):
             raise
             
         print "The model was not found. Trying to compile it..."
-        import jmodelica.optimicacompiler as oc
+        from jmodelica.compiler import OptimicaCompiler as oc
         curdir = os.getcwd()
         os.chdir(_get_example_path())
         oc.compile_model(os.path.join(_get_example_path(), mofile), optpackage)
