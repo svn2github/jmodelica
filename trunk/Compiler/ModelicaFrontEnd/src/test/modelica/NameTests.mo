@@ -849,6 +849,32 @@ end NameTests.ImportTest7;
 
 end ImportTest7;
 
+model ImportTest8
+	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+	   JModelica.UnitTesting.FlatteningTestCase(name="ImportTest8",
+		 description="Test name lookup in a structured library.",
+												flatModel=
+ "
+ fclass NameTests.ImportTest8
+  parameter Real r.R(start = 1,final quantity = \"Resistance\",final unit = \"Ohm\") \"Resistance\";
+  Real r.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Voltage drop between the two pins (= p.v - n.v)\";
+  Real r.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing from pin p to pin n\";
+  Real r.p.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
+  Real r.p.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
+  Real r.n.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
+  Real r.n.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
+ equation 
+  ( r.R ) * ( r.i ) = r.v;
+  r.v = r.p.v - ( r.n.v );
+  0 = r.p.i + r.n.i;
+  r.i = r.p.i; 
+ end NameTests.ImportTest8;
+ ")})));
+
+  Modelica.Electrical.Analog.Basic.Resistor r;
+	
+end ImportTest8;
+  
 
 model ShortClassDeclTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

@@ -69,30 +69,6 @@ aspect InstLookupClasses {
 	syn boolean InstClassDecl.isRedeclared() = false;
 	eq InstReplacingShortClassDecl.isRedeclared() = true;
 
-/*
-	eq InstComponentDecl.getChild(int i).lookupInstClass(String name) {
-		if (getInstNode(i) instanceof InstExtends)
-			return myInstClass().superLookupInstClass(name);
-		else
-		 	return myInstClass().genericLookupInstClass(name); 
-	}
-
-	eq InstExtends.getInstNode(int i).lookupInstClass(String name) {
-		if (getInstNode(i) instanceof InstExtends)
-			return getClassName().myInstClassDecl().superLookupInstClass(name);
-		else
-		 	return getClassName().myInstClassDecl().genericLookupInstClass(name); 
-	}
-*/
-
-
-
-/*	
-	eq InstFullClassDecl.getSuper(int i).lookupInstClass(String name) {
-	  HashSet h = superLookupInstClass(name);
-	  return h;
-	}  
-*/		
 	eq SourceRoot.getChild().lookupInstClass(String name) = emptyHashSet();
 	
 	// This equation is necessary since InstAccesses may be present in FExps.
@@ -584,10 +560,9 @@ aspect InstLookupImport {
 		
 		if (lookupElementInstClass(name).size()>0)
 			set.addAll(lookupElementInstClass(name));
-	/*
+	
 		if (lookupLibrary(name).size()>0)
 			set.addAll(lookupLibrary(name));
-    */
 
 		if (set.size()>0)
 			return set;
@@ -595,19 +570,6 @@ aspect InstLookupImport {
 			return emptyHashSet();
 	}
 	
-	/*
-	eq Program.getLibNode().lookupImportClass(String name) {
-		HashSet set = new HashSet(4);
-
-		if (lookupLibrary(name).size()>0)
-			set.addAll(lookupLibrary(name));
-			
-		if (set.size()>0)
-			return set;
-		else
-			return emptyHashSet();
-	}
-	*/
 	
 	syn HashSet InstImport.lookupInstClassInImport(String name) circular [emptyHashSet()];
 	

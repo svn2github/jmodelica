@@ -170,8 +170,9 @@
 	  		      classname="org.jmodelica.modelica.compiler.JunitGenerator"
 	  		      classpath=".:bin/jmodelica.jar:${beaver_dir}/lib/beaver.jar" 
 	  		      fork="true" 
-	  		      dir=".">
-	  		    	<arg value="src/test/modelica/NameTests.mo"/>
+	  		      dir="."
+	  		      maxmemory="512M">
+		    	<arg value="src/test/modelica/NameTests.mo"/>
 	  		    	      <arg value="NameTests"/>
 	  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 	  		    </java>
@@ -248,7 +249,9 @@
   <target name="test" depends="gen-test">
     <!-- Run all tests in dir by using the TestAll java program -->
   	<mkdir dir = "doc/junit-reports"/>
-  	<junit printsummary="yes">
+  	<junit printsummary="yes" 
+  		   fork="true"
+  		   maxmemory="512M">
   	  <classpath>
   	  <fileset dir="${junit_dir}">
   	     <include name="junit-4.5.jar"/>
