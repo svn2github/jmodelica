@@ -1870,8 +1870,6 @@ def main():
                     (0.5, 1.0),]
             initial_u = [0.25] * len(grid)
             shooter = MultipleShooter(m, initial_u, grid)
-            #optimum = shooter.runQuasiNewtonsMethod()
-            #optimum = shooter.runSteepestDescent()
             optimum = shooter.runOptimization()
             print "Optimal p:", optimum
             return optimum
