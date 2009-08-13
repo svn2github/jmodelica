@@ -21,28 +21,41 @@ protected boolean endExists(String endStmnt, IDocument d, int offset)
         throws BadLocationException {
     
     int startLine = d.getLineOfOffset(offset);
-    int indent = IndentedSection.countIndent(Util.getLine(d, startLine));
+    int startIndent = IndentedSection.countIndent(Util.getLine(d, startLine));
     
-    for (int ln = startLine; ln < d.getNumberOfLines() - 1; ln++) {
+    int i;    
+    for (i = startLine; i < d.getNumberOfLines() - 1; i++) {
         
-        String line = Util.getLine(d, ln);
-        // ignore empty lines and comments
-        if (line.trim().equals("") || 
-                ToggleComment.isCommented(line))
+        String line = Util.getLine(d, i);
+        
+        boolean ignoreLine = line.trim().equals("") || 
+            ToggleComment.isCommented(line) ||
+            line.startsWith("initial") ||  
+            line.startsWith("equation") ||  
+            line.startsWith("algorithm") ||  
+            line.startsWith("public") ||  
+            line.startsWith("protected");  
+        
+        if (ignoreLine)
             continue;
-        // break if encounter line with less or equal indentation
-        if (ln > startLine && IndentedSection.countIndent(line) <= indent)
+        
+        boolean endStatementAtLine = 
+            line.contains(endStmnt);
+        
+        boolean leftScope = 
+            i > startLine && 
+            IndentedSection.countIndent(line) <= startIndent;
+        
+        if (endStatementAtLine || leftScope)  
             break;
-
-        if (line.contains(endStmnt))
-            return true;
+        
     }
-    return Util.getLine(d, startLine).contains(endStmnt);
+    
+    return Util.getLine(d, i).contains(endStmnt);
 }
 
-
 /**
- * Scans document and adds ednStmnt if it can't find it already, 
+ * Scans document and adds endStmnt if it can't find it already, 
  * within the current scope. 
  * @param endStmnt 
  * @param d
@@ -55,21 +68,22 @@ public void addEndIfNotPresent(String endStmnt, IDocument d, int offset) {
         if (endExists(endStmnt, d, offset))
             return;
         
-        IRegion lineReg = d.getLineInformationOfOffset(offset);
-        int lineEndOffset = lineReg.getOffset() + lineReg.getLength();
+        IRegion line = d.getLineInformationOfOffset(offset);
+        int lineEnd = line.getOffset() + line.getLength();
 
         String endStatement; {
-            int line = lineReg.getOffset();
-            String indent = IndentedSection.putIndent("", IndentedSection
-                    .countIndent(d.get(line, offset - line)));
+            int lineStart = line.getOffset();
+            int indentWidth = IndentedSection.countIndent(
+                d.get(lineStart, offset - lineStart));
+            String indent = IndentedSection.putIndent("", indentWidth);
             endStatement = String.format("\n%s%s", indent, endStmnt);
         }
 
         // must insert end statement with d.replace, as if using the
-        // DocumentCommand, it seems impossible to posititon cursor in the
-        // middle of the command.text. this causes this class to cause two
+        // DocumentCommand class, it seems impossible to posititon cursor in 
+        // the middle of the command.text. this causes this class to create two
         // undo entries. TODO: fix if possible
-        d.replace(lineEndOffset, 0, endStatement);
+        d.replace(lineEnd, 0, endStatement);
 
     } catch (BadLocationException e) {
         e.printStackTrace();

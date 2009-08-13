@@ -19,10 +19,10 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
     try {
 
         int lineStart = d.getLineInformationOfOffset(c.offset).getOffset();
-        String doc = d.get(lineStart, c.offset - lineStart);
+        String line = d.get(lineStart, c.offset - lineStart);
 
         boolean insertingNewline = c.text.matches("(\n|\r)\\s*");
-        boolean afterCommentStart = doc.matches("(.|\r|\n)*/\\*\\s*"); 
+        boolean afterCommentStart = line.matches("(.|\r|\n)*/\\*\\s*"); 
         
         if (!(insertingNewline && afterCommentStart)) 
             return;

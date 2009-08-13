@@ -17,6 +17,7 @@ public class ForIfAdder extends EndStatementAdder{
 
 public final static ForIfAdder adder = new ForIfAdder();
 
+protected static final String whenRegex = "\\s*when(\\s.*)?";
 protected static final String forRegex = "\\s*for(\\s.*)?";
 protected static final String ifRegex   = "\\s*if(\\s.*)?";
 
@@ -38,6 +39,9 @@ public void customizeDocumentCommand(IDocument d,
 
             else if (line.matches(ifRegex)) 
                 addEndIfNotPresent("end if;", d, c.offset);
+            
+            else if (line.matches(whenRegex))
+                addEndIfNotPresent("end when;", d, c.offset);
             
         } catch (BadLocationException e) {
             e.printStackTrace();
