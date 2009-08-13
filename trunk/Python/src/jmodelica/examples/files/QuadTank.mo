@@ -35,7 +35,7 @@ package QuadTank_pack
 		/* see https://trac.jmodelica.org/ticket/274#comment:4 for background
 		 * on these values
 		 */
-		der(cost) = (4.82630404e+02 /*x3_B*/ - x3)^2 + (6.82088796e+02 /*x4_B*/ - x4)^2 + (3 - u1)^2 + (3 - u2)^2;
+		der(cost) = ((4.82630404e+02 /*x3_B*/ - x3)^2 + (6.82088796e+02 /*x4_B*/ - x4)^2 + (3 - u1)^2 + (3 - u2)^2) / 10^8;
   end QuadTank_Opt;
 
 end QuadTank_pack;
