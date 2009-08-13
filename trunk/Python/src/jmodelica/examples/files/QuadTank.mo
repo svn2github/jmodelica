@@ -2,7 +2,7 @@ package QuadTank_pack
 	
 	optimization QuadTank_Opt (objective = cost(finalTime),
                          startTime = 0,
-                         finalTime = 20)
+                         finalTime = 50000)
 
     // Process parameters
 	parameter Real A1=28, A2=32, A3=28, A4=32;
