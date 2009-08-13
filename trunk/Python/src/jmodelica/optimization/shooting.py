@@ -46,9 +46,9 @@ def _get_example_path():
     return os.path.join(jmhome, '..', 'Python', 'src', 'jmodelica', 'examples', 'files')
     
     
-def _load_example_standard_model(libname, mofile=None, optpackage=None):
+def _load_model(libname, path, mofile=None, optpackage=None):
     try:
-        model = JmiOptModel(libname, _get_example_path())
+        model = JmiOptModel(libname, path)
     except IOError:
         if mofile is None or optpackage is None:
             raise
@@ -56,12 +56,16 @@ def _load_example_standard_model(libname, mofile=None, optpackage=None):
         print "The model was not found. Trying to compile it..."
         from jmodelica.compiler import OptimicaCompiler as oc
         curdir = os.getcwd()
-        os.chdir(_get_example_path())
-        oc.compile_model(os.path.join(_get_example_path(), mofile), optpackage)
+        os.chdir(path)
+        oc.compile_model(os.path.join(path, mofile), optpackage)
         os.chdir(curdir)
         
-    model = JmiOptModel(libname, _get_example_path())
+    model = JmiOptModel(libname, path)
     return model
+    
+    
+def _load_example_standard_model(libname, mofile=None, optpackage=None):
+    return _load_model(libname, _get_example_path(), mofile, optpackage)
 
 
 class OptModel:
@@ -1851,30 +1855,77 @@ def cost_graph(model):
     p.show()
 
 
+def construct_grid(n):
+    """Construct and return a grid with n segments."""
+    times = N.linspace(0, 1, n+1)
+    return zip(times[:-1], times[1:])
+
+
 def main():
-    m = _load_example_standard_model('VDP_pack_VDP_Opt', "VDP.mo", "VDP_pack.VDP_Opt")
+    from optparse import OptionParser
+    parser = OptionParser()
+    parser.add_option('-w', '--what', default='multiple', type='choice',
+        metavar="METHOD",
+        choices=['multiple', 'single', 'genplot'],
+        help="What this script should do. Can be multiple, single or genplot. (default=%default)")
+    parser.add_option('-m', '--model', default='VDP_pack.VDP_Opt',
+        metavar="MODELNAME",
+        help="The optimica model that should be loaded from within the *.mo file. (default=%default)")
+    parser.add_option('-D', '--directory', default=_get_example_path(),
+        metavar="PATH",
+        help="The directory from which to load the *.mo file. (default=%default)")
+    parser.add_option('-f', '--modelfile', default='VDP.mo',
+        metavar="FILE",
+        help="The *.mo file that contains the Optimica optimzation problem description and/or model. (default=%default)")
+    parser.add_option('-d', '--dllfile', default='VDP_pack_VDP_Opt',
+        metavar="FILE",
+        help="The name of the compiled DLL file that contains the compiled model. If this doesn't exist it will be created from the *.mo file. (default=%default)")
     
-    # Whether the cost as a function of input U should be plotted
-    GEN_PLOT = False
+    parser.add_option('-u', '--initial-u', dest='initialu', default=0.25,
+        type='float', metavar="U",
+        help="The initial guess of control/input signal u in optimization. (default=%default)")
+    parser.add_option('-g', '--gridsize', dest='gridsize', default=10,
+        type='int', metavar="N",
+        help="The grid size to use in multiple shooting. (default=%default)")
     
-    if GEN_PLOT:
+    parser.add_option('-p', '--predefined-model', dest='predmodel', default=None, type='choice', choices=['vdp', 'quadtank'], help="A set of predefined example models. Using one of these will override --modelfile, --directory, --modelfile and --directory.")
+    
+    (options, args) = parser.parse_args()
+    
+    if options.gridsize <= 0:
+        raise ShootingException('Grid size must be greater than zero.')
+        
+    if options.predmodel == 'vdp':
+        options.dllfile = 'VDP_pack_VDP_Opt'
+        options.model = 'VDP_pack.VDP_Opt'
+        options.directory = _get_example_path()
+        options.modelfile = 'VDP.mo'
+    elif options.predmodel == 'quadtank':
+        options.dllfile = 'QuadTank_pack_QuadTank_Opt'
+        options.model = 'QuadTank_pack.QuadTank_Opt'
+        options.directory = _get_example_path()
+        options.modelfile = 'QuadTank.mo'
+    
+    m = _load_model(options.dllfile, options.directory, options.modelfile, options.model)
+    
+    if options.what == 'genplot':
+        # Whether the cost as a function of input U should be plotted
         cost_graph(m)
-    else:
-        SHOOTING_METHOD = 'multiple'
-        if SHOOTING_METHOD=='single':
-            opt_u = single_shooting(m)
-            print "Optimal u:", opt_u
-            return opt_u
-        elif SHOOTING_METHOD == 'multiple':
-            grid = [(0, 0.5),
-                    (0.5, 1.0),]
-            initial_u = [0.25] * len(grid)
-            shooter = MultipleShooter(m, initial_u, grid)
-            optimum = shooter.runOptimization()
-            print "Optimal p:", optimum
-            return optimum
+    elif options.what=='single':
+        opt_u = single_shooting(m)
+        print "Optimal u:", opt_u
+        return opt_u
+    elif options.what == 'multiple':
+        grid = construct_grid(options.gridsize)
+        initial_u = [[options.initialu] * len(m.getInputs())] * options.gridsize
+        shooter = MultipleShooter(m, initial_u, grid)
+        optimum = shooter.runOptimization()
+        print "Optimal p:", optimum
+        return optimum
+        
+    return None
+
 
 if __name__ == "__main__":
     # The assignment below allows iPython session to reuse the parameter opt
     opt = main()
-
