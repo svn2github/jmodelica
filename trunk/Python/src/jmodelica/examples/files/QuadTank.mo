@@ -31,7 +31,11 @@ package QuadTank_pack
 					g2_nmp*k2_nmp/A2*u2;
 		der(x3) = -a3/A3*sqrt(2*g*x3) + (1-g2_nmp)*k2_nmp/A3*u2;
 		der(x4) = -a4/A4*sqrt(2*g*x4) + (1-g1_nmp)*k1_nmp/A4*u1;
-		der(cost) = (2 /*x3_B*/ - x3)^2 + (2 /*x4_B*/ - x4)^2 + (3 - u1)^2 + (3 - u2)^2;
+		
+		/* see https://trac.jmodelica.org/ticket/274#comment:4 for background
+		 * on these values
+		 */
+		der(cost) = (4.82630404e+02 /*x3_B*/ - x3)^2 + (6.82088796e+02 /*x4_B*/ - x4)^2 + (3 - u1)^2 + (3 - u2)^2;
   end QuadTank_Opt;
 
 end QuadTank_pack;
