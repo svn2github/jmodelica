@@ -829,6 +829,13 @@ def solve_using_sundials(model,
                for the the sensivity matrix.
                
     """
+    print "Input innan integration:", model.getInputs()
+    print "States:", model.getStates()
+    print start_time, "to", end_time
+    
+    import sys
+    sys.stdout.flush()
+    
     if end_time < start_time:
         raise ShootingException('End time cannot be before start time.')
     if end_time == start_time:
@@ -1071,7 +1078,7 @@ def solve_using_sundials(model,
         return (T, ylist, yS, parameters)
 
 
-def _shoot(model, start_time, end_time, sensi=True):
+def _shoot(model, start_time, end_time, sensi=True, time_step=0.2):
     """ Does a single 'shot'.
     
     if sensi is set to False no sensitivity analysis will be done and the 
@@ -1098,7 +1105,7 @@ def _shoot(model, start_time, end_time, sensi=True):
             4. The corresponding sensitivity matrix.
             
     """
-    T, ys, sens, params = solve_using_sundials(model, end_time, start_time, sensi=sensi)
+    T, ys, sens, params = solve_using_sundials(model, end_time, start_time, sensi=sensi, time_step=time_step)
     
     model._m.setX_P(ys[-1], 0)
     model._m.setDX_P(model.getDiffs(), 0)
@@ -1202,13 +1209,12 @@ def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
     return u_opt.xf
 
 
-def _eval_initial_ys(model, grid):
+def _eval_initial_ys(model, grid, time_step=0.2):
     # TODO: Move this to MultipleShooter
     from scipy import interpolate
     _check_grid_consistency(grid)
     
-    model.reset()
-    T, ys, sens, params = solve_using_sundials(model, model.getFinalTime(), model.getStartTime())
+    T, ys, sens, params = solve_using_sundials(model, model.getFinalTime(), model.getStartTime(), time_step=time_step)
     T = N.array(T)
     
     tck = interpolate.interp1d(T, ys, axis=0)
@@ -1273,8 +1279,16 @@ class MultipleShooter:
         """
         self.set_model(model)
         self.set_normalized_grid(normgrid)
+        self.set_time_step()
         self.set_initial_u(initial_u)
         self.set_initial_y(initial_y)
+        
+    def set_time_step(self, time_step=0.2):
+        """The step length when the integrator should return."""
+        self._time_step = time_step
+        
+    def get_time_step(self):
+        return self._time_step
         
     def set_model(self, model):
         """Set the model.
@@ -1291,9 +1305,13 @@ class MultipleShooter:
     def set_initial_u(self, initial_u):
         """ Set the initial U's (control signals) for each segment."""
         grid = self.get_grid()
+        model = self.get_model()
         if len(initial_u) != len(grid):
             raise ShootingException('initial_u parameters must be the same length as grid segments.')
-        self._initial_u = N.array(initial_u).reshape( (len(grid), -1) )
+        self._initial_u = N.array(initial_u).reshape( (len(grid), len(model.getInputs())) )
+        
+        # Assume the first initial_u is a feasible one
+        model.setInputs(self._initial_u[0])
         
     def get_initial_u(self):
         """Returns the constant control/input signals, one segment per row."""
@@ -1309,7 +1327,7 @@ class MultipleShooter:
         grid = self.get_grid()
         
         if initial_y is None:
-            initial_y = _eval_initial_ys(model, grid)
+            initial_y = _eval_initial_ys(model, grid, time_step=self.get_time_step())
         elif len(initial_y) != len(grid):
             raise ShootingException('initial_y states must be the same length as grid segments.')
         self._initial_y = N.array(initial_y).reshape( (len(grid), self.get_model().getModelSize()) )
@@ -1376,7 +1394,7 @@ class MultipleShooter:
         model.setInputs(u)
         model.setStates(y0)
         
-        seg_cost_gradient, seg_last_y, seg_gradparams, sens = _shoot(model, seg_start_time, seg_end_time, sensi=sensi)
+        seg_cost_gradient, seg_last_y, seg_gradparams, sens = _shoot(model, seg_start_time, seg_end_time, sensi=sensi, time_step=self.get_time_step())
         
         # TODO: Create a return type instead of returning tuples
         return seg_cost_gradient, seg_last_y, seg_gradparams, sens
@@ -1496,9 +1514,7 @@ class MultipleShooter:
             if segmentindex != 0:
                 # The initial states of first segment is locked.
                 r[row_start : row_end, xinitsenscols_start : xinitsenscols_end] = sens[segmentindex][sensxinitindices, :].T
-            r[row_start : row_end, xinitcols_start : xinitcols_end] = [[-1, 0, 0],
-                                                                       [0, -1, 0],
-                                                                       [0, 0, -1]]
+            r[row_start : row_end, xinitcols_start : xinitcols_end] = -N.eye(model.getModelSize())
             r[row_start : row_end, usenscols_start : usenscols_end] = sens[segmentindex][sensuindices, :].T
         
         #N.set_printoptions(N.nan)
@@ -1524,18 +1540,18 @@ class MultipleShooter:
         
         # Less than (-0.5 < u < 1)
         # TODO: These are currently hard coded. They shouldn't be.
-        NLT = len(grid)
-        Alt = N.zeros( (NLT, len(p0)) )
-        Alt[:len(grid), (len(grid) - 1) * model.getModelSize():] = N.eye(len(grid))
-        blt = 0.75*N.ones(NLT)
+        #NLT = len(grid) * len(model.getInputs())
+        #Alt = N.zeros( (NLT, len(p0)) )
+        #Alt[:, (len(grid) - 1) * model.getModelSize():] = -N.eye(len(grid) * len(model.getInputs()))
+        #blt = -0.5*N.ones(NLT)
         
         # Get OpenOPT handler
         p = NLP(self.f,
                 p0,
                 maxIter = 1e3,
                 maxFunEvals = 1e3,
-                A=Alt,
-                b=blt,
+                #A=Alt,
+                #b=blt,
                 df=self.df,
                 ftol = 1e-4,
                 xtol = 1e-4,
@@ -1881,6 +1897,8 @@ def main():
     parser.add_option('-d', '--dllfile', default='VDP_pack_VDP_Opt',
         metavar="FILE",
         help="The name of the compiled DLL file that contains the compiled model. If this doesn't exist it will be created from the *.mo file. (default=%default)")
+    parser.add_option('-t', '--timestep', default=0.2, type="float",
+        help="The step size between each integrator return.")
     
     parser.add_option('-u', '--initial-u', dest='initialu', default=0.25,
         type='float', metavar="U",
@@ -1906,6 +1924,7 @@ def main():
         options.model = 'QuadTank_pack.QuadTank_Opt'
         options.directory = _get_example_path()
         options.modelfile = 'QuadTank.mo'
+        options.timestep = 5
     
     m = _load_model(options.dllfile, options.directory, options.modelfile, options.model)
     
@@ -1918,8 +1937,10 @@ def main():
         return opt_u
     elif options.what == 'multiple':
         grid = construct_grid(options.gridsize)
+        m.setInputs([options.initialu] * len(m.getInputs())) # needed to be able get a reasonable initial
         initial_u = [[options.initialu] * len(m.getInputs())] * options.gridsize
         shooter = MultipleShooter(m, initial_u, grid)
+        shooter.set_time_step(options.timestep)
         optimum = shooter.runOptimization()
         print "Optimal p:", optimum
         return optimum
