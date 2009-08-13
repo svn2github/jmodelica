@@ -17,7 +17,7 @@ public class EndOfBlockAdder extends EndStatementAdder {
 
 public final static EndOfBlockAdder adder = new EndOfBlockAdder(); 
 
-final static String[] openBlockKeywords = { "block", "when", "class",
+final static String[] openBlockKeywords = { "block", "class",
         "connector", "function", "model", "package", "record", "type" };
 
 final static String classRegex = String.format(

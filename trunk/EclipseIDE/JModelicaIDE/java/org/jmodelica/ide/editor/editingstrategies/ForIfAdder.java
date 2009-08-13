@@ -17,11 +17,9 @@ public class ForIfAdder extends EndStatementAdder{
 
 public final static ForIfAdder adder = new ForIfAdder();
 
-protected static final String whenRegex = "\\s*when(\\s.*)?";
-protected static final String forRegex = "\\s*for(\\s.*)?";
-protected static final String ifRegex   = "\\s*if(\\s.*)?";
+protected static final String templateRegex = "\\s*(%s)(\\s.*)?";
 
-public void customizeDocumentCommand(IDocument d,
+public void customizeDocumentCommand(IDocument doc,
             DocumentCommand c) {
         
         if (!c.text.matches("(\n|\r)\\s*"))
@@ -30,19 +28,17 @@ public void customizeDocumentCommand(IDocument d,
         try {
 
             String line; {
-                IRegion lineReg = d.getLineInformationOfOffset(c.offset);
-                line = d.get(lineReg.getOffset(), lineReg.getLength());
+                IRegion lineReg = doc.getLineInformationOfOffset(c.offset);
+                line = doc.get(lineReg.getOffset(), lineReg.getLength());
             }
             
-            if (line.matches(forRegex)) 
-                addEndIfNotPresent("end for;", d, c.offset);
-
-            else if (line.matches(ifRegex)) 
-                addEndIfNotPresent("end if;", d, c.offset);
-            
-            else if (line.matches(whenRegex))
-                addEndIfNotPresent("end when;", d, c.offset);
-            
+            for (String keyword : new String[] {"for", "if", "while", "when"})
+                if (line.matches(String.format(templateRegex, keyword)))
+                    addEndIfNotPresent(
+                            String.format("end %s;", keyword), 
+                            doc, 
+                            c.offset);
+                
         } catch (BadLocationException e) {
             e.printStackTrace();
         }
