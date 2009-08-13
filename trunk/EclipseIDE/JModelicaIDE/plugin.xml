@@ -275,9 +275,9 @@
       </command>
       <command
             categoryId="JModelicaIDE.ModelicaCommandCategory"
-            description="Follow cross reference"
-            id="JModelicaIDE.FollowReferenceCommand"
-            name="Follow cross reference">
+            description="Go to declaration"
+            id="JModelicaIDE.GoToDeclarationCommand"
+            name="Go to declaration">
       </command>
       <category
             description="JModelica commands"
@@ -305,7 +305,7 @@
             keySequence="Ctrl+Alt+E">
       </keyBinding>
       <keyBinding
-            commandId="JModelicaIDE.FollowReferenceCommand"
+            commandId="JModelicaIDE.GoToDeclarationCommand"
             keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
             keySequence="F3">
       </keyBinding>

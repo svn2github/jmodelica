@@ -94,7 +94,6 @@ static IndentTestCase[] testCases = {
 public void testIndent() {
     
     for (int i = 0; i < testCases.length; i++) {
-        System.out.println("----------" + i);
         IndentTestCase tc = testCases[i];
         ihs.analyze(tc.text);
 

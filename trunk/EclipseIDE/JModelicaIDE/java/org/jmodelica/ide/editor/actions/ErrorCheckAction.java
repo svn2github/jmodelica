@@ -28,7 +28,7 @@ public void setCurClass(BaseClassDecl currentClass) {
     if (currentClass != this.currentClass) {
         this.currentClass = currentClass;
         if (currentClass != null) {
-            setTexts("Check " + currentClass.getName().getID() + " for errors");
+            setTexts("Check '" + currentClass.getName().getID() + "' for errors");
             setEnabled(true);
         } else {
             setTexts(IDEConstants.ACTION_ERROR_CHECK_TEXT);

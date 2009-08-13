@@ -1,6 +1,9 @@
 package org.jmodelica.ide.editor;
 
 import org.eclipse.jface.text.IAutoEditStrategy;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.reconciler.IReconciler;
@@ -14,8 +17,9 @@ import org.jmodelica.ide.editor.editingstrategies.AnnotationParenthesisAdder;
 import org.jmodelica.ide.editor.editingstrategies.BracketAdder;
 import org.jmodelica.ide.editor.editingstrategies.CommentAdder;
 import org.jmodelica.ide.editor.editingstrategies.EndOfBlockAdder;
-import org.jmodelica.ide.editor.editingstrategies.ForIfAdder;
+import org.jmodelica.ide.editor.editingstrategies.KeywordAdder;
 import org.jmodelica.ide.indent.IndentingAutoEditStrategy;
+import org.jmodelica.ide.namecomplete.Completions;
 import org.jmodelica.ide.scanners.ModelicaCommentScanner;
 import org.jmodelica.ide.scanners.ModelicaQIdentScanner;
 import org.jmodelica.ide.scanners.ModelicaStringScanner;
@@ -23,7 +27,6 @@ import org.jmodelica.ide.scanners.generated.Modelica22AnnotationScanner;
 import org.jmodelica.ide.scanners.generated.Modelica22DefinitionScanner;
 import org.jmodelica.ide.scanners.generated.Modelica22NormalScanner;
 import org.jmodelica.ide.scanners.generated.Modelica22PartitionScanner;
-
 
 
 /**
@@ -36,9 +39,11 @@ import org.jmodelica.ide.scanners.generated.Modelica22PartitionScanner;
 public class ViewerConfiguration extends SourceViewerConfiguration {
 
 Editor editor;
+Completions completions;
 
 public ViewerConfiguration(Editor editor) {
     this.editor = editor;
+    this.completions = editor.getCompletions();
 }
 
 @Override
@@ -48,7 +53,7 @@ public IAutoEditStrategy[] getAutoEditStrategies(
             AnnotationParenthesisAdder.adder,
             IndentingAutoEditStrategy.editStrategy,
             EndOfBlockAdder.adder,
-            ForIfAdder.adder,
+            KeywordAdder.adder,
             new BracketAdder("(", ")"),
             new BracketAdder("[", "]"),
             new BracketAdder("{", "}"),
@@ -120,6 +125,22 @@ public IReconciler getReconciler(ISourceViewer sourceViewer) {
     return new MonoReconciler(
             editor.getStrategy(),
             false);
+}
+
+@Override
+public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+    
+    ContentAssistant assist = new ContentAssistant();
+    
+    for (String contentType : new String[] {
+            IDocument.DEFAULT_CONTENT_TYPE,
+            Modelica22PartitionScanner.NORMAL_PARTITION,
+            Modelica22PartitionScanner.DEFINITION_PARTITION})
+    {
+        assist.setContentAssistProcessor(completions, contentType);
+    }
+    
+    return assist;
 }
 
 }

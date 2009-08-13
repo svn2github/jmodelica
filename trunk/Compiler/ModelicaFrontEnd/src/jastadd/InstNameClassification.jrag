@@ -58,10 +58,13 @@ aspect InstNameClassification {
 	eq InstComponentModification.getName().kind() = Kind.COMPONENT_ACCESS;
 	eq InstClassRedeclare.getName().kind() = Kind.CLASS_ACCESS;
 	eq InstComponentRedeclare.getName().kind() = Kind.COMPONENT_ACCESS;
-    eq InstConstraining.getClassName().kind() = Kind.CLASS_ACCESS;
+
+	eq InstConstraining.getClassName().kind() = Kind.CLASS_ACCESS;
+	eq InstNode.getDynamicComponentName().kind() = Kind.COMPONENT_ACCESS;
 	eq InstNode.getDynamicClassName().kind() = Kind.CLASS_ACCESS;
     eq InstComponentRedeclare.getDynamicClassName().kind() = Kind.CLASS_ACCESS;
 	eq InstConstrainingComponent.getDynamicClassName().kind() = Kind.CLASS_ACCESS;
+	
 	eq InstBaseClassDecl.getFAbstractEquation().kind() = Kind.AMBIGUOUS_ACCESS;	
 	eq InstNode.getDynamicComponentName().kind() = Kind.COMPONENT_ACCESS;		
 		
@@ -97,16 +100,13 @@ aspect InstResolveAmbiguousNames {
 	rewrite InstAmbiguousAccess {
 	    when(!duringInstNameClassification()&&!rewritten) 
 	    to InstAccess {
-	    	//System.out.println("ki: " + name());
 	  		if (!lookupInstComponent(name()).isEmpty()) {
-	  			//System.out.println("ki2: " + name());
      		    InstComponentAccess c = new InstComponentAccess(name(),getFArraySubscriptsOpt());
   	 			c.setStart(getStart());
   	 			c.setEnd(getEnd());
   	 			return c;
   		} else 
             if(!lookupInstClass(name()).isEmpty()) {		
-            	//System.out.println("ki3: " + name());
             	InstClassAccess t = new InstClassAccess(name()); 
     			t.setStart(getStart());
     			t.setEnd(getEnd());

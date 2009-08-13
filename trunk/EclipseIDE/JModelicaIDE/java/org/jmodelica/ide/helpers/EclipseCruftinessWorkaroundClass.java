@@ -22,14 +22,14 @@ public class EclipseCruftinessWorkaroundClass {
 
 public static Maybe<Editor> getModelicaEditorForFile(IFile file) {
 
+    // warning: cuteness overload
+
     IWorkbenchPage page = PlatformUI.getWorkbench().
         getActiveWorkbenchWindow().getActivePage(); 
     
-    System.out.println("!@!@!@!@!: "+file.getName());
     IEditorDescriptor desc = PlatformUI.getWorkbench().
     getEditorRegistry().getDefaultEditor(file.getName());
     
-    // warning: cuteness overload
     Editor part;
     try {
         part = (Editor)page.openEditor(new FileEditorInput(file), desc.getId());
@@ -41,10 +41,8 @@ public static Maybe<Editor> getModelicaEditorForFile(IFile file) {
         part = null;
     }
     
-    return new Maybe<Editor>(part);
+    return Maybe.Just(part);
 }
-
-
 
 public static IFile getFileForPath(String path) {
     

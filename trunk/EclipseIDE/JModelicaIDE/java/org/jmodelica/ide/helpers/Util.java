@@ -227,4 +227,9 @@ public class Util {
         }
     }
 	
+    public static String qualifyName(String prefix, String suffix) {
+        return prefix.equals("") 
+            ? suffix
+            : prefix + "." + suffix;
+    }
 }

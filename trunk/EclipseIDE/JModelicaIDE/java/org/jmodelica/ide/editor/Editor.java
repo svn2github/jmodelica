@@ -15,6 +15,9 @@
 */
 package org.jmodelica.ide.editor;
 
+import static org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE;
+import static org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -48,7 +51,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
-import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -65,14 +67,15 @@ import org.jmodelica.ide.ModelicaCompiler;
 import org.jmodelica.ide.editor.actions.CollapseAllAction;
 import org.jmodelica.ide.editor.actions.ErrorCheckAction;
 import org.jmodelica.ide.editor.actions.ExpandAllAction;
-import org.jmodelica.ide.editor.actions.FollowReference;
 import org.jmodelica.ide.editor.actions.FormatRegionAction;
+import org.jmodelica.ide.editor.actions.GoToDeclaration;
 import org.jmodelica.ide.editor.actions.ToggleAnnotationsAction;
 import org.jmodelica.ide.editor.actions.ToggleComment;
 import org.jmodelica.ide.folding.AnnotationDrawer;
 import org.jmodelica.ide.folding.IFilePosition;
 import org.jmodelica.ide.helpers.EclipseCruftinessWorkaroundClass;
 import org.jmodelica.ide.helpers.Util;
+import org.jmodelica.ide.namecomplete.Completions;
 import org.jmodelica.ide.outline.InstanceOutlinePage;
 import org.jmodelica.ide.outline.OutlinePage;
 import org.jmodelica.ide.outline.SourceOutlinePage;
@@ -116,7 +119,9 @@ public class Editor extends AbstractDecoratedTextEditor
     
     private boolean fIsLibrary;
     private String fPath;
-    private FollowReference followReference;
+
+    private GoToDeclaration followReference;
+    private Completions completions;
 
     /**
      * Standard constructor.
@@ -128,6 +133,7 @@ public class Editor extends AbstractDecoratedTextEditor
         fStrategy            = new ReconcilingStrategy();
         fLocalStrategy       = new LocalReconcilingStrategy(this);
         compiler             = new ModelicaCompiler();
+        completions          = new Completions();
     }
 
     /**
@@ -203,8 +209,8 @@ public class Editor extends AbstractDecoratedTextEditor
     @Override
     protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
         if (Util.is(event.getProperty()).among(
-                AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE, 
-                AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR)) 
+                EDITOR_CURRENT_LINE, 
+                EDITOR_CURRENT_LINE_COLOR)) 
         {
             annotationDrawer.setCursorLineBackground(
                     getCursorLineBackground());
@@ -215,14 +221,14 @@ public class Editor extends AbstractDecoratedTextEditor
     private Color getCursorLineBackground() {
 
         if (!getPreferenceStore().getBoolean(
-                AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE))
+                EDITOR_CURRENT_LINE))
         {
             return null;
         }
         
         RGB color = PreferenceConverter.getColor(
                 getPreferenceStore(), 
-                AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR);
+                EDITOR_CURRENT_LINE_COLOR);
         
         return new Color(Display.getCurrent(), color);
     }
@@ -309,7 +315,7 @@ public class Editor extends AbstractDecoratedTextEditor
                     toggleAnnotationsAction = 
                         new ToggleAnnotationsAction(this),
                     followReference =         
-                        new FollowReference(this)); 
+                        new GoToDeclaration(this)); 
         
         updateErrorCheckAction();
     }
@@ -465,6 +471,7 @@ public class Editor extends AbstractDecoratedTextEditor
         fSourceOutlinePage.updateAST(fRoot);
         fInstanceOutlinePage.updateAST(fRoot);
         followReference.updateAST(fRoot);
+        completions.updateAST(fRoot);
         
         // Update folding
         updateProjectionAnnotations();
@@ -622,5 +629,9 @@ public class Editor extends AbstractDecoratedTextEditor
     
     public IReconcilingStrategy getStrategy() {
         return fCompiledLocal ? fLocalStrategy : fStrategy;
+    }
+
+    public Completions getCompletions() {
+        return completions;
     }
 }

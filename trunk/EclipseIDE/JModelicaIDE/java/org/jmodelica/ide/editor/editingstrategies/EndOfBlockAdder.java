@@ -21,10 +21,8 @@ final static String[] openBlockKeywords = { "block", "class",
         "connector", "function", "model", "package", "record", "type" };
 
 final static String classRegex = String.format(
-
-"(.|\r|\n)*(^|\\s)(%s)\\s+\\w+(\\ |\t)*",
-
-Util.implode("|", openBlockKeywords));
+        "(.|\r|\n)*(^|\\s)(%s)\\s+\\w+(\\ |\t)*",
+        Util.implode("|", openBlockKeywords));
 
 public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
     try {

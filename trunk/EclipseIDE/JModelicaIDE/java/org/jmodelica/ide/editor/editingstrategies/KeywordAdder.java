@@ -13,9 +13,9 @@ import org.eclipse.jface.text.IRegion;
  * 
  */
 
-public class ForIfAdder extends EndStatementAdder{
+public class KeywordAdder extends EndStatementAdder{
 
-public final static ForIfAdder adder = new ForIfAdder();
+public final static KeywordAdder adder = new KeywordAdder();
 
 protected static final String templateRegex = "\\s*(%s)(\\s.*)?";
 

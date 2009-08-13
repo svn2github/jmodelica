@@ -57,7 +57,7 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
                 .getLegalLineDelimiters(), c.text) != -1;
         boolean pastedBlock = c.text.length() > 1;
         boolean isTab = c.text.equals("\t");
-
+        
         /* remove whitespace trailing cursor when breaking */
         if (!(semicolon || hasNewlines || isTab))
             return;
@@ -66,10 +66,14 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
         int lineBegin = line.getOffset();
         int lineEnd = lineBegin + line.getLength();
         String text = d.get(0, lineEnd);
-        ihs.analyze(text);
-        AnchorList<Integer> ancs = ihs.ancs
+        
+        AnchorList<Integer> ancs = ihs.analyze(text)
                 .bindEnv(d, IndentedSection.tabWidth);
 
+        boolean atBeginningOfLine = c.offset < findEndOfWhiteSpace(
+                d, lineBegin, c.offset); 
+        
+        System.out.println(atBeginningOfLine);
         /*
          * Check if there are sinks on current line. In that case indent edited
          * line
@@ -96,7 +100,7 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
                         - lineBegin;
                 c.text = IndentedSection.putIndent("", indent);
             }
-        } else if (hasNewlines) {
+        } else if (hasNewlines || atBeginningOfLine) {
             /* remove whitespace trailing cursor when breaking */
             c.length += findEndOfWhiteSpace(d, c.offset, lineEnd) - c.offset;
 

@@ -4,6 +4,8 @@
 	<classpathentry exported="true" kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="java"/>
 	<classpathentry kind="src" path="tests"/>
-	<classpathentry exported="true" kind="lib" path="lib/beaver-rt.jar" sourcepath="lib/beaver-rt-src.jar"/>
+	<classpathentry exported="true" kind="lib" path="/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.jastadd.plugin"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.jmodelica.folding"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

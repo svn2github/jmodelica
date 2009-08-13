@@ -1,6 +1,7 @@
-import org.jmodelica.ide.namecomplete.ASTNodeComparator;
 import org.jmodelica.ide.helpers.Maybe;
-
+import org.jmodelica.ide.namecomplete.CompletionComment;
+import org.jmodelica.ide.namecomplete.CompletionFilter;
+import java.util.ArrayList;
 
 /**
  *  Find the ASTNode corresponding to a certain position in the source code. 
@@ -8,32 +9,107 @@ import org.jmodelica.ide.helpers.Maybe;
 aspect LookupFromSource {
 
     syn boolean ASTNode.hasCompletions() = false;
-    eq ComponentAccess.hasCompletions() = true;
-    eq ClassAccess.hasCompletions() = true;
+    eq ClassDecl.hasCompletions() = true;
     
-    syn Maybe<ASTNode<T>> ASTNode.getNodeAt(int line, int col);
+    syn Maybe<ASTNode<T>> ASTNode.getNodeAt(IDocument d, int offset);
 
+    /**
+     * @return true iff. ASTNode contains point (line, col).
+     */
+    public boolean ASTNode.containsPoint(int line, int col) {
+        
+        boolean beginsBefore = 
+            getBeginLine() == line && getBeginColumn() <= col ||
+            getBeginLine() < line;
+        
+        boolean endsAfter = 
+            getEndLine() == line && getEndColumn() >= col ||
+            getEndLine() > line;
+        
+        return beginsBefore && endsAfter;
+    }    
+    
     /** 
      * Returns the ASTNode at line <code>line</code>, column <code>col</code>.
      * Looks through the entire AST to find the best match.
      */
-    eq ASTNode.getNodeAt(int line, int col) {
+    eq ASTNode.getNodeAt(IDocument d, int offset) {
         
-        ASTNode<T> min = this;
-
-        boolean nodeAtCaret = 
-            ASTNodeComparator.containsPoint(this, line, col); 
-     
-        if (!hasCompletions() || !nodeAtCaret) 
-            min = null;
+        int line, col;
+        try {
+            line = d.getLineOfOffset(offset);
+            col = offset - d.getLineOffset(line);
+        } catch (BadLocationException e) { 
+            return null; 
+        }
         
-        for (ASTNode node : this) // recurse down the tree
-            min = ASTNodeComparator.min(
-                    min, 
-                    (ASTNode<T>)node.getNodeAt(line, col).value()); //why type conversion necessary? 
+        ASTNode result = null;
+        
+        if (hasCompletions() && containsPoint(line, col))
+            result = this;
+        
+        for (ASTNode node : this) { 
+            // recurse down the tree
+            ASTNode tmp = (ASTNode)node.getNodeAt(d, offset).value(); 
+            if (tmp != null)
+                result = tmp;
+        }
 
-        return new Maybe<ASTNode<T>>(min);
+        return new Maybe<ASTNode<T>>(result);
     }
+    
+    syn ArrayList<InstNode> InstNode.completionNodes() = new ArrayList<InstNode>();
+    
+    /**
+     * Completion proposals for InstClassDecl:s are all classes and
+     * (constant) components.
+     */
+    eq InstClassDecl.completionNodes() {
+        ArrayList<InstNode> completions = new ArrayList<InstNode>();
+        completions.addAll(instClassDecls());
+        completions.addAll(instComponentDecls());
+        return completions;
+    }
+    
+    /**
+     * Completion proposals for InstComponentDecl:s are only components. 
+     */
+    eq InstComponentDecl.completionNodes() = 
+        new ArrayList<InstNode>(instComponentDecls()); 
+
+    /**
+     * Returns a list of completion suggestions for <code>decl</code>, filtering
+     * out suggestions not matching <code>filter</code>.
+     * 
+     * @param access access to give completions for
+     * @param filter Filter for matches
+     * @return list of suggestions
+     */   
+    public ArrayList<InstNode> InstNode.completionProposals(
+            CompletionFilter filter) {
+
+        ArrayList<InstNode> proposals = new ArrayList<InstNode>();
+
+        for (InstNode node : completionNodes())
+            if (filter.matches(node.name()))
+                proposals.add(node);
+        
+        return proposals;
+    }
+
+}
+
+/**
+ * Get the string comment from classes to display in the content assist. 
+ */
+aspect ComletionComment {
+    
+    syn CompletionComment InstNode.proposalComment() = CompletionComment.NULL;
+    eq InstClassDecl.proposalComment() = new CompletionComment(myInstClass().getClassDecl().stringComment());
+    
+    syn String ASTNode.stringComment() = null;
+    eq FullClassDecl.stringComment() = hasStringComment() ? getStringComment().getComment() : null;
+    
 }
 
 /**
@@ -64,23 +140,21 @@ aspect CrossReference {
     eq ASTNode.getChild().getStoredDefinition() = null;
 }
 
-
-
-    
 //TODO: remove. only for debugging
 aspect NADebugging {    
     
     public void ASTNode.debugNN(String ind) {
-        System.out.printf("%s%s: (%d,%d)-(%d,%d)\n", ind, 
+        System.out.printf("%s%s: (%d,%d)-(%d,%d), (%d-%d)\n", ind, 
                 this.getNodeName(), 
-                this.getBeginLine(), this.getBeginColumn(),
-                this.getEndLine(),   this.getEndColumn());
+                this.getBeginLine(),   this.getBeginColumn(),
+                this.getEndLine(),     this.getEndColumn(),
+                this.getBeginOffset(), this.getEndOffset());
     }
     
-    public void ASTNode.printASTBLA(String ind) {
+    public void ASTNode.printASTqq(String ind) {
         this.debugNN(ind);
         for (ASTNode node : this) 
-            node.printASTBLA(ind + "  ");
+            node.printASTqq(ind + "  ");
     }
   
 }
