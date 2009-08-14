@@ -39,6 +39,12 @@ aspect Arrays {
 
 	// Array dimensions
 	syn int FArraySubscripts.ndims() { 
+		return getNumFSubscript();
+	}
+
+	// Array dimensions
+	syn int FArraySubscripts.accessNdims() { 
+		//System.out.println("FArraySubscripts.accessNdims()");
 		// Need to check if each individual subscript increases 
 		// dimension. (ndims(x[1])=0)
 		int nd = 0;
@@ -47,6 +53,7 @@ aspect Arrays {
 		}
 		return nd;
 	}
+
 	
 	syn int FSubscript.ndims();
 	// Can only be 0 or 1 for FExpSubscript?
@@ -71,9 +78,12 @@ aspect Arrays {
 	eq FIdUseExp.ndims() = getFIdUse().ndims();
 		
 	syn int InstAccess.ndims() = 0;
-	eq InstArrayAccess.ndims() = hasFArraySubscripts()? 
-			getFArraySubscripts().ndims(): 
+	eq InstArrayAccess.ndims() {
+		//.out.println("InstArrayAccess.ndims()");
+		return hasFArraySubscripts()? 
+			getFArraySubscripts().accessNdims(): 
 				myInstComponentDecl().ndims();
+	}
 	
 	eq InstDot.ndims() = getRight().ndims() + getLeft().ndims();
 	
@@ -96,29 +106,38 @@ aspect Arrays {
 		int s[] = new int[ndims()];
 		int index = 0;
 		for (FSubscript fs : getFSubscripts()) {
+			s[index++] = fs.ceval().intValue();
+		}
+		return s;
+	}
+
+	syn int[] FArraySubscripts.accessSize() {
+		int s[] = new int[accessNdims()];
+		int index = 0;
+		for (FSubscript fs : getFSubscripts()) {
 			if (fs.ndims() == 1) {
 				s[index++] = fs.size()[0];
 			}
 		}
 		return s;
 	}
+
 	
 	syn int[] FSubscript.size();
 
 	eq FExpSubscript.size() = getFExp().size();
 	
-	eq FColonSubscript.size() = new int[0];
+	eq FColonSubscript.size() = new int[0]; // TODO
 	
 	syn int[] FExp.size() = new int[0];
 	eq FInstAccessExp.size() = getInstAccess().size();
 
-	/*//TODO: Not finished!
  	eq FRangeExp.size() {
 		int[] si = new int[1];
 		si[0] = 0;
 		if (getNumFExp()==2) {
-			si[0] = getFExp(1).ceval().intValue() - 
-				getFExp(0).ceval().intValue() + 1;
+			si[0] = (int)(getFExp(1).ceval().realValue() - 
+				getFExp(0).ceval().realValue() + 1);
 			if (si[0]<0) {
 				si[0] = 0;
 			}
@@ -130,12 +149,17 @@ aspect Arrays {
 			if (i3>=i1 && i2>0) { // 1:2:3
 				double i = i1;
 				while (i<=i3) {
-					
+					i += i2;
 				}
+				si[0] = (int)i;
 			} else if (i3<i1 && i2>0) { // 3:2:1
 				si[0] = 0;
 			} else if (i3<i1 && i2<0) { // 3:-2:1
-
+				double i = i1;
+				while (i<=i3) {
+					i += i2;
+				}
+				si[0] = (int)i;
 			} else if (i3>=i1 && i2<0) { // 1:-2:0
 				si[0] = 0;
 			} else if (i2==0) {
@@ -144,7 +168,6 @@ aspect Arrays {
 		}
 		return si;
 	}
-	*/
 	
 	eq FArray.size() {
 		int s[] = new int[ndims()];
@@ -152,12 +175,13 @@ aspect Arrays {
 		} else {
 			int ss[] = getFExp(0).size();
 			s[0] = getNumFExp();
-			for (int i=1;i<ndims()-1;i++) {
+			for (int i=1;i<ndims();i++) {
 				s[i] = ss[i-1];
 			}
 		}
 		return s;
 	}
+	
 	eq FIdentity.size() {
 		int s[] = new int[2];
 		s[0] = getFExp().ceval().intValue();
@@ -188,7 +212,7 @@ aspect Arrays {
 	
 	syn int[] InstAccess.size() = new int[0];
 	eq InstArrayAccess.size() = hasFArraySubscripts()? 
-			getFArraySubscripts().size(): 
+			getFArraySubscripts().accessSize(): 
 				myInstComponentDecl().size();
 	
 	eq InstDot.size() {
@@ -228,13 +252,23 @@ aspect Arrays {
 	syn FArray FSubscript.array() = null;
 	
 	eq FExpSubscript.array() = getFExp().array();
-/*		
 	eq FRangeExp.array() {
+		double i1 = getFExp(0).ceval().realValue();
+		double i2;
+		if (getNumFExp()==2) {
+			i2 = 1;
+		} else {
+			i2 = getFExp(1).ceval().realValue();
+		}
 		
+		List l = new List();
+		for (int i=0;i<size()[0];i++) {
+			l.add(new RealLitExp(i1 + i*i2 + ""));
+		}
+		
+		return new FArray(l);
 		
 	}
-	*/
-	
 	
 	
 }

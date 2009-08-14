@@ -17,22 +17,65 @@
 aspect FlatTypeAnalysis {
 
 	syn lazy FPrimitiveType AbstractFVariable.type();
-	eq FRealVariable.type() = fRealType();
-	eq FIntegerVariable.type() = fIntegerType();
-	eq FBooleanVariable.type() = fBooleanType();
-	eq FStringVariable.type() = fStringType();
-	eq FDerivativeVariable.type() = fRealType();
+	eq FRealVariable.type() {
+		if (ndims()==0) {
+			return fRealScalarType();				
+		} else {
+			return fRealArrayType(size().clone());
+		}
+	}
+	eq FIntegerVariable.type() {
+		if (ndims()==0) {
+			return fIntegerScalarType();				
+		} else {
+			return fIntegerArrayType(size().clone());
+		}
+	}
+	eq FBooleanVariable.type() {
+		if (ndims()==0) {
+			return fBooleanScalarType();				
+		} else {
+			return fBooleanArrayType(size().clone());
+		}
+	}
+	eq FStringVariable.type() {
+		if (ndims()==0) {
+			return fStringScalarType();				
+		} else {
+			return fStringArrayType(size().clone());
+		}
+	}
+	eq FDerivativeVariable.type() = fRealScalarType();
 	eq UnknownFVariable.type() = fUnknownType();
 
 	syn FPrimitiveType InstPrimitive.type() {
 		if (isReal()) {
-			return fRealType();
+			if (ndims()==0) {
+				return fRealScalarType();				
+			} else {
+				return fRealArrayType(size().clone());
+			}
 		} else if (isInteger()) {
-			return fIntegerType();
+			if (ndims()==0) {
+				return fIntegerScalarType();				
+			} else {
+				return fIntegerArrayType(size().clone());
+			}
+
 		} else if (isBoolean()) {
-			return fBooleanType();
+			if (ndims()==0) {
+				return fBooleanScalarType();				
+			} else {
+				return fBooleanArrayType(size().clone());
+			}
+
 		} else if (isString()) {
-			return fStringType();
+			if (ndims()==0) {
+				return fStringScalarType();				
+			} else {
+				return fStringArrayType(size().clone());
+			}
+
 		} else {
 			return fUnknownType();
 		}
@@ -44,20 +87,61 @@ aspect FlatTypeAnalysis {
 	eq FArtmBinExp.type() = getLeft().type().
 	  binaryNumericPromotion(getRight().type());
 	
-	eq FLogBinExp.type() = fBooleanType();
+	eq FLogBinExp.type() = fBooleanScalarType();
 
-	eq FRealLitExp.type() = fRealType();
-	eq FIntegerLitExp.type() = fIntegerType();
-	eq FBooleanLitExp.type() = fBooleanType();
-	eq FStringLitExp.type() = fStringType();
-	eq FTimeExp.type() = fRealType();
-	eq FDer.type() = fRealType();
+	eq FRealLitExp.type() = fRealScalarType();
+	eq FIntegerLitExp.type() = fIntegerScalarType();
+	eq FBooleanLitExp.type() = fBooleanScalarType();
+	eq FStringLitExp.type() = fStringScalarType();
+	eq FTimeExp.type() = fRealScalarType();
+	eq FDer.type() = fRealScalarType();
+	
+	eq FArray.type() {
+		int[] size = size().clone();
+		// Check that the types of the elements are consistent
+		//System.out.println("FArray.type() hej!");
+		FPrimitiveType t = getFExp(0).type();
+		for (int i=1;i<getNumFExp();i++) {
+			if (!t.equivalentTo(getFExp(i).type())) {
+				//System.out.println("FArray.type() hoj!");
+				return fUnknownType();
+			}
+			if (t.isNumeric()) {
+				//System.out.println("FArray.type() hopp!");
+				t = t.binaryNumericPromotion(getFExp(i).type());
+			}
+		}
+		if (t.isReal()) {
+			return fRealArrayType(size);
+		} else if (t.isInteger()) {
+			return fIntegerArrayType(size);
+		} if (t.isBoolean()) {
+			return fBooleanArrayType(size);
+		} if (t.isString()) {
+			return fStringArrayType(size);
+		} else {
+			//System.out.println("FArray.type() oj!");
+			return fUnknownType();
+		}
+		
+	}
 	
 	eq FIdUseExp.type() = myFV().type();
-	eq FInstAccessExp.type() = getInstAccess().myInstComponentDecl().isPrimitive()?
-			((InstPrimitive)getInstAccess().myInstComponentDecl()).type() : fUnknownType();
+	eq FInstAccessExp.type() {
+		if (getInstAccess().myInstComponentDecl().isPrimitive()) {
+			InstPrimitive ip = ((InstPrimitive)getInstAccess().myInstComponentDecl());
+			if (ndims()==0) {
+				return ip.type().scalarType();
+			} else {
+				int[] size = size().clone();
+				return ip.type().scalarType().arrayType(size);
+			}
+		} else {
+			return fUnknownType();
+		}
+	}	
 	
-	eq FBuiltInExp.type() = fRealType();		
+	eq FBuiltInExp.type() = fRealScalarType();		
 			
 }
 
@@ -65,41 +149,111 @@ aspect FNumericPromotion {
 	
 	syn FPrimitiveType FPrimitiveType.
 	    binaryNumericPromotion(FPrimitiveType type) = fUnknownType();
-	eq FNumericType.binaryNumericPromotion(FPrimitiveType type) {
+	eq FPrimitiveScalarNumericType.binaryNumericPromotion(FPrimitiveType type) {
 		if (!type.isNumeric()) {
 			return fUnknownType();
 		} else {
 			return isReal()? this : type; 
 		}
 	}
-	
+
+	eq FPrimitiveArrayNumericType.binaryNumericPromotion(FPrimitiveType type) {
+		if (!type.isNumeric()) {
+			return fUnknownType();
+		} else {
+			return isReal()? this : type; 
+		}
+	}
+
 }
 
 aspect FTypeCompatibility {
 	syn boolean FPrimitiveType.typeCompatible(FPrimitiveType type) = false;
-	eq FRealType.typeCompatible(FPrimitiveType type) = type.isReal() || type.isInteger();
-	eq FIntegerType.typeCompatible(FPrimitiveType type) = type.isInteger();
-	eq FBooleanType.typeCompatible(FPrimitiveType type) = type.isBoolean();
-	eq FStringType.typeCompatible(FPrimitiveType type) = type.isString();
+	eq FRealScalarType.typeCompatible(FPrimitiveType type) = 
+		(type.isReal() || type.isInteger()) && type.isScalar() ;
+	eq FIntegerScalarType.typeCompatible(FPrimitiveType type) = 
+		type.isInteger() && type.isScalar();
+	eq FBooleanScalarType.typeCompatible(FPrimitiveType type) = 
+		type.isBoolean() && type.isScalar();
+	eq FStringScalarType.typeCompatible(FPrimitiveType type) = 
+		type.isString() && type.isScalar();
+
+	eq FRealArrayType.typeCompatible(FPrimitiveType type) = 
+		(type.isReal() || type.isInteger()) && dimensionCompatible(type);
+	eq FIntegerArrayType.typeCompatible(FPrimitiveType type) = 
+		type.isInteger() && dimensionCompatible(type);
+	eq FBooleanArrayType.typeCompatible(FPrimitiveType type) = 
+		type.isBoolean() && dimensionCompatible(type);
+	eq FStringArrayType.typeCompatible(FPrimitiveType type) = 
+		type.isString() && dimensionCompatible(type);
+	
+	syn boolean FPrimitiveType.dimensionCompatible(FPrimitiveType type) = false;
+	eq FPrimitiveScalarType.dimensionCompatible(FPrimitiveType type) = type.isScalar();
+	eq FPrimitiveArrayType.dimensionCompatible(FPrimitiveType type) {
+		//System.out.println("hej: " + ndims()+" " + type.ndims());
+		if (ndims() != type.ndims()) {
+			return false;
+		} else {
+			int[] size_me = size();
+			int[] size_type = type.size();
+			/*
+			System.out.println("size_me");
+			for (int i=0;i<size_me.length;i++) {
+				System.out.println(size_me[i]);
+			}
+			*/
+			//System.out.println("size_type");
+			for (int i=0;i<size_type.length;i++) {
+				System.out.println(size_type[i]);
+			}
+
+			for (int i=0;i<ndims();i++) {
+				if (size_me[i] != size_type[i]) {
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+	
 }
 
  aspect FTypeEquivalent {
-	syn boolean FPrimitiveType.equivalentTo(FPrimitiveType type) = false;
-	eq FRealType.equivalentTo(FPrimitiveType type) = type.isReal() || type.isInteger();
-	eq FIntegerType.equivalentTo(FPrimitiveType type) = type.isInteger() || type.isReal();
-	eq FBooleanType.equivalentTo(FPrimitiveType type) = type.isBoolean();
-	eq FStringType.equivalentTo(FPrimitiveType type) = type.isString();
-}
+	 /* The function equivalentTo is used in equation type checking where equations
+	  * like
+	  * x=0
+	  * where x is declared as Real is ok.
+	  */
+	 syn boolean FPrimitiveType.equivalentTo(FPrimitiveType type) = false;
+	eq FRealScalarType.equivalentTo(FPrimitiveType type) = type.isReal() || type.isInteger();
+	eq FIntegerScalarType.equivalentTo(FPrimitiveType type) = type.isInteger() || type.isReal();
+	eq FBooleanScalarType.equivalentTo(FPrimitiveType type) = type.isBoolean();
+	eq FStringScalarType.equivalentTo(FPrimitiveType type) = type.isString();
 
+	eq FRealArrayType.equivalentTo(FPrimitiveType type) = 
+		(type.isReal() || type.isInteger()) && dimensionCompatible(type);
+	eq FIntegerArrayType.equivalentTo(FPrimitiveType type) = 
+		(type.isInteger() || type.isReal()) && dimensionCompatible(type);
+	eq FBooleanArrayType.equivalentTo(FPrimitiveType type) = 
+		type.isBoolean() && dimensionCompatible(type);
+	eq FStringArrayType.equivalentTo(FPrimitiveType type) = 
+		type.isString() && dimensionCompatible(type);
+
+ 
+ }
 
  aspect BuiltInFlatTypes {
 
- 	syn nta FRealType Root.getFRealType() = new FRealType();
- 	syn nta FIntegerType Root.getFIntegerType() = new FIntegerType();
- 	syn nta FBooleanType Root.getFBooleanType() = new FBooleanType();
- 	syn nta FStringType Root.getFStringType() = new FStringType();
+ 	syn nta FRealScalarType Root.getFRealScalarType() = new FRealScalarType();
+ 	syn nta FIntegerScalarType Root.getFIntegerScalarType() = new FIntegerScalarType();
+ 	syn nta FBooleanScalarType Root.getFBooleanScalarType() = new FBooleanScalarType();
+ 	syn nta FStringScalarType Root.getFStringScalarType() = new FStringScalarType();
+ 	syn nta FUnknownScalarType Root.getFUnknownScalarType() = new FUnknownScalarType();
  	syn nta FUnknownType Root.getFUnknownType() = new FUnknownType();
 
+ 	syn lazy List Root.getDynamicArrayTypeList() = new List();
+ 	eq Root.getDynamicArrayType().retrieveRoot() = this; 	
+ 	
  	syn boolean InstPrimitive.isReal() = 
  		myInstClass().finalClass().primitiveName().equals("Real");
  	syn boolean InstPrimitive.isInteger() = 
@@ -110,25 +264,125 @@ aspect FTypeCompatibility {
  		myInstClass().finalClass().primitiveName().equals("String");
 
  	syn boolean FPrimitiveType.isReal() = false;
- 	eq FRealType.isReal() = true;
+ 	eq FRealScalarType.isReal() = true;
+ 	eq FRealArrayType.isReal() = true;
  	syn boolean FPrimitiveType.isInteger() = false;
- 	eq FIntegerType.isInteger() = true;
+ 	eq FIntegerScalarType.isInteger() = true;
+ 	eq FIntegerArrayType.isInteger() = true;
  	syn boolean FPrimitiveType.isBoolean() = false;
- 	eq FBooleanType.isBoolean() = true;
+ 	eq FBooleanScalarType.isBoolean() = true;
+ 	eq FBooleanArrayType.isBoolean() = true;
  	syn boolean FPrimitiveType.isString() = false;
- 	eq FStringType.isString() = true;
+ 	eq FStringScalarType.isString() = true;
+ 	eq FStringArrayType.isString() = true;
+ 	
+ 	syn boolean FPrimitiveType.isArray() = false;
+ 	eq FPrimitiveArrayType.isArray() = true;
+
+ 	syn boolean FPrimitiveType.isScalar() = false;
+ 	eq FPrimitiveScalarType.isScalar() = true;
  	
  	syn boolean FPrimitiveType.isNumeric() = false;
- 	eq FNumericType.isNumeric() = true;
+ 	eq FPrimitiveScalarNumericType.isNumeric() = true;
+ 	eq FPrimitiveArrayNumericType.isNumeric() = true;
 
+ 	syn int FPrimitiveType.ndims() = 0;
+ 	eq FPrimitiveArrayType.ndims() = getSize().length;
+ 	
+ 	syn lazy int[] FPrimitiveType.size() = new int[0];
+ 	eq FPrimitiveArrayType.size() = getSize().clone();
+ 	
+ 	syn FPrimitiveScalarType FPrimitiveType.scalarType() = fUnknownScalarType();
+ 	syn FPrimitiveScalarType FRealScalarType.scalarType() = this;
+ 	syn FPrimitiveScalarType FIntegerScalarType.scalarType() = this;
+ 	syn FPrimitiveScalarType FBooleanScalarType.scalarType() = this;
+ 	syn FPrimitiveScalarType FStringScalarType.scalarType() = this;
+
+ 	syn FPrimitiveScalarType FUnknownArrayType.scalarType() = fUnknownScalarType();
+ 	syn FPrimitiveScalarType FRealArrayType.scalarType() = fRealScalarType();
+ 	syn FPrimitiveScalarType FIntegerArrayType.scalarType() = fIntegerScalarType();
+ 	syn FPrimitiveScalarType FBooleanArrayType.scalarType() = fBooleanScalarType();
+ 	syn FPrimitiveScalarType FStringArrayType.scalarType() = fStringScalarType();
+ 	
+ 	
  	syn boolean FPrimitiveType.isUnknown() = false;
+ 	eq FUnknownScalarType.isUnknown() = true;
+ 	eq FUnknownArrayType.isUnknown() = true;
  	eq FUnknownType.isUnknown() = true;
-
- 	syn FPrimitiveType ASTNode.fRealType() = root().getFRealType();
- 	syn FPrimitiveType ASTNode.fIntegerType() = root().getFIntegerType();
- 	syn FPrimitiveType ASTNode.fBooleanType() = root().getFBooleanType();
- 	syn FPrimitiveType ASTNode.fStringType() = root().getFStringType();
+ 	
+ 	syn FPrimitiveScalarType ASTNode.fRealScalarType() = root().getFRealScalarType();
+ 	syn FPrimitiveScalarType ASTNode.fIntegerScalarType() = root().getFIntegerScalarType();
+ 	syn FPrimitiveScalarType ASTNode.fBooleanScalarType() = root().getFBooleanScalarType();
+ 	syn FPrimitiveScalarType ASTNode.fStringScalarType() = root().getFStringScalarType();
+ 	syn FPrimitiveScalarType ASTNode.fUnknownScalarType() = root().getFUnknownScalarType();
  	syn FPrimitiveType ASTNode.fUnknownType() = root().getFUnknownType();
+ 	
+ 	syn FPrimitiveArrayType ASTNode.fRealArrayType(int[] size) {
+ 		FPrimitiveType t = new FRealArrayType(size);
+ 		root().getDynamicArrayTypeList().add(t);
+ 		// Make sure the returned type is final
+ 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1);
+ 	}
+
+ 	syn FPrimitiveArrayType ASTNode.fIntegerArrayType(int[] size) {
+ 		FPrimitiveType t = new FIntegerArrayType(size);
+ 		root().getDynamicArrayTypeList().add(t);
+ 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1);
+ 	}
+
+ 	syn FPrimitiveArrayType ASTNode.fBooleanArrayType(int[] size) {
+ 		FPrimitiveType t = new FBooleanArrayType(size);
+ 		root().getDynamicArrayTypeList().add(t);
+ 		// Make sure the returned type is final
+ 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1);
+ 	}
+
+ 	syn FPrimitiveArrayType ASTNode.fStringArrayType(int[] size) {
+ 		FPrimitiveType t = new FStringArrayType(size);
+ 		root().getDynamicArrayTypeList().add(t);
+ 		// Make sure the returned type is final
+ 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1);
+ 	}
+
+ 	syn FPrimitiveArrayType ASTNode.fUnknownArrayType(int[] size) {
+ 		FPrimitiveType t = new FUnknownArrayType(size);
+ 		root().getDynamicArrayTypeList().add(t);
+ 		// Make sure the returned type is final
+ 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1);
+ 	}
+ 	
+ 	syn FPrimitiveArrayType FPrimitiveScalarType.arrayType(int[] size);
+ 	eq FRealScalarType.arrayType(int[] size) {
+ 		FPrimitiveType t = new FRealArrayType(size);
+ 		root().getDynamicArrayTypeList().add(t);
+ 		// Make sure the returned type is final
+ 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1); 		
+ 	}
+ 	eq FIntegerScalarType.arrayType(int[] size) {
+ 		FPrimitiveType t = new FIntegerArrayType(size);
+ 		root().getDynamicArrayTypeList().add(t);
+ 		// Make sure the returned type is final
+ 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1); 		
+ 	}
+ 	eq FBooleanScalarType.arrayType(int[] size) {
+ 		FPrimitiveType t = new FBooleanArrayType(size);
+ 		root().getDynamicArrayTypeList().add(t);
+ 		// Make sure the returned type is final
+ 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1); 		
+ 	}
+ 	eq FStringScalarType.arrayType(int[] size) {
+ 		FPrimitiveType t = new FStringArrayType(size);
+ 		root().getDynamicArrayTypeList().add(t);
+ 		// Make sure the returned type is final
+ 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1); 		
+ 	}
+ 	eq FUnknownScalarType.arrayType(int[] size) {
+ 		FPrimitiveType t = new FUnknownArrayType(size);
+ 		root().getDynamicArrayTypeList().add(t);
+ 		// Make sure the returned type is final
+ 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1); 		
+ 	}
+
  	
  }
 
@@ -181,9 +435,9 @@ aspect ExpressionType {
 		if (tryValue.equals(emptyType())) {
 			FPrimitiveType leftPrimitive = getLeftPrimitive();
 			FPrimitiveType rightPrimitive = getRightPrimitive();
-			if (leftPrimitive.equals(fStringType()) &&
-				   rightPrimitive.equals(fStringType())) {
-				return new FlatType(fStringType(), 0);
+			if (leftPrimitive.equals(fStringScalarType()) &&
+				   rightPrimitive.equals(fStringScalarType())) {
+				return new FlatType(fStringScalarType(), 0);
 			} else {
 				error("The types " + getLeft() + " and " + getRight() +
 						"cannot be used on the operator " + this);
@@ -203,21 +457,21 @@ aspect ExpressionType {
 		String stringValue = getUNSIGNED_NUMBER();
 		try {
 			Integer.parseInt(stringValue);
-			return new FlatType(fIntegerType(), 0);			
+			return new FlatType(fIntegerScalarType(), 0);			
 		} catch(NumberFormatException formatException) {}
 		try {
 			Double.parseDouble(stringValue);
-			return new FlatType(fRealType(), 0);			
+			return new FlatType(fRealScalarType(), 0);			
 		} catch(NumberFormatException formatException) {}
 		error(stringValue + " is not an integer value or a real value.");
 		return brokenType();
 	}
 	
-	eq FStringLitExp.type() = new FlatType(fStringType(), 0);
-	eq FBooleanLitExpTrue.type() = new FlatType(fBooleanType(), 0);
-	eq FBooleanLitExpFalse.type() = new FlatType(fBooleanType(), 0);
+	eq FStringLitExp.type() = new FlatType(fStringScalarType(), 0);
+	eq FBooleanLitExpTrue.type() = new FlatType(fBooleanScalarType(), 0);
+	eq FBooleanLitExpFalse.type() = new FlatType(fBooleanScalarType(), 0);
 
-	eq FTimeExp.type() = new FlatType(fRealType(), 0);
+	eq FTimeExp.type() = new FlatType(fRealScalarType(), 0);
 
 	// TODO: Some error checking should be done here
 	// The expression must be a subtype of real
@@ -300,7 +554,7 @@ aspect ExpressionType {
 
 	// TODO: type checking on this expression
 	eq FSizeExp.type() {
-		return new FlatType(fIntegerType(), 0);
+		return new FlatType(fIntegerScalarType(), 0);
 	}
 	
 	eq FArrayConstructor.type() {
@@ -364,10 +618,10 @@ aspect ExpressionType {
 		FPrimitiveType leftPrimitive = getLeftPrimitive();
 		FPrimitiveType rightPrimitive = getRightPrimitive();		
 		if (leftPrimitive.equals(rightPrimitive) &&
-			leftPrimitive.equals(fBooleanType())) {
+			leftPrimitive.equals(fBooleanScalarType())) {
 			valid = true;
 		}
-		if (valid) return new FlatType(fBooleanType(), 0);
+		if (valid) return new FlatType(fBooleanScalarType(), 0);
 		else {
 			error("The types " + getLeft() + " and " + getRight() +
 					"cannot be used on the operator " + this);			
@@ -387,16 +641,16 @@ aspect ExpressionType {
 		FPrimitiveType rightPrimitive = getRightPrimitive();		
 		if (leftPrimitive.equals(rightPrimitive)) {
 			valid = true;
-		} else if (leftPrimitive.equals(fRealType()) ||
-				   rightPrimitive.equals(fRealType())) {
-			if ((leftPrimitive.equals(fIntegerType()) ||
-				leftPrimitive.equals(fRealType())) &&
-				(rightPrimitive.equals(fIntegerType()) ||
-				rightPrimitive.equals(fRealType()))) {
+		} else if (leftPrimitive.equals(fRealScalarType()) ||
+				   rightPrimitive.equals(fRealScalarType())) {
+			if ((leftPrimitive.equals(fIntegerScalarType()) ||
+				leftPrimitive.equals(fRealScalarType())) &&
+				(rightPrimitive.equals(fIntegerScalarType()) ||
+				rightPrimitive.equals(fRealScalarType()))) {
 					valid = true;
 			}
 		}
-		if (valid) return new FlatType(fBooleanType(), 0);
+		if (valid) return new FlatType(fBooleanScalarType(), 0);
 		else {
 			error("The types " + getLeft() + " and " + getRight() +
 					"cannot be used on the operator " + this);			
@@ -424,16 +678,16 @@ aspect ExpressionType {
 		}		
 		FPrimitiveType leftPrimitive = getLeftPrimitive();
 		FPrimitiveType rightPrimitive = getRightPrimitive();		
-		if (leftPrimitive.equals(fIntegerType()) && 
-			rightPrimitive.equals(fIntegerType())) {
-				return new FlatType(fIntegerType(), 0);
-		} else if (leftPrimitive.equals(fRealType()) ||
-				   rightPrimitive.equals(fRealType())) {
-				if ((leftPrimitive.equals(fIntegerType()) ||
-					leftPrimitive.equals(fRealType())) &&
-					(rightPrimitive.equals(fIntegerType()) ||
-					rightPrimitive.equals(fRealType()))) {
-					return new FlatType(fRealType(), 0);
+		if (leftPrimitive.equals(fIntegerScalarType()) && 
+			rightPrimitive.equals(fIntegerScalarType())) {
+				return new FlatType(fIntegerScalarType(), 0);
+		} else if (leftPrimitive.equals(fRealScalarType()) ||
+				   rightPrimitive.equals(fRealScalarType())) {
+				if ((leftPrimitive.equals(fIntegerScalarType()) ||
+					leftPrimitive.equals(fRealScalarType())) &&
+					(rightPrimitive.equals(fIntegerScalarType()) ||
+					rightPrimitive.equals(fRealScalarType()))) {
+					return new FlatType(fRealScalarType(), 0);
 				} else {
 					error("The types " + getLeft() + " and " + getRight() +
 							"cannot be used on the operator " + this);					

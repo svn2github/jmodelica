@@ -199,5 +199,23 @@ end ArrayTests.ArrayTest2;
 
       end ArrayTest14;
 
+model ArrayTest15_Err
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ArrayTest15_Err",
+        description="Test type checking of arrays",
+                                               errorMessage=
+"
+JError: 1 problems found:
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 213, column 9:
+  Type dimension mismatch in declaration x: dimension of declaration is 1, dimension of binding expression is 2
+")})));
+
+   Real x[3] = {{2},{2},{3}};
+
+end ArrayTest15_Err;
+
+
   annotation (uses(Modelica(version="3.0.1")));
 end ArrayTest;

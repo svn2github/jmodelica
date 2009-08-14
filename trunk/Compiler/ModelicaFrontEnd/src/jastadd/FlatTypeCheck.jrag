@@ -25,14 +25,33 @@ aspect FlatTypeCheck {
   public void InstPrimitive.typeCheck() {
 	  if (myBindingInstExp() != null) {
 		  // Check type compatibility
+/*		  System.out.println("Type check " + name() + " type: " + 
+				  type().toString() + " (" + type().toString() + ") "+ " binding exp type: " + 
+				  myBindingInstExp().type().toString() + "( "+ myBindingInstExp().type().toString() + ") " + " binding exp:");
+		  myBindingInstExp().dumpTree("");
+*/
+		  
+/*		  if (myBindingInstExp().type().isUnknown()) {
+			  error("The binding expression of the variable " + name() + " has unknown type.");
+		  }
+	*/	  
 		  if (!myBindingInstExp().type().isUnknown() && // Avoid duplicate error messages
 				  !type().typeCompatible(myBindingInstExp().type())) {
-//			  System.out.println("Error in " + name() + " type: " + 
-//					  type().toString() + " binding exp type: " + 
-//					  myBindingInstExp().type().toString() + " binding exp:");
-//			  myBindingInstExp().dumpTree("");
+			  if (ndims() != myBindingInstExp().ndims()) {
+				  error("Type dimension mismatch in declaration " + name() +
+						  ": dimension of declaration is " + ndims() + 
+						  ", dimension of binding expression is "+ myBindingInstExp().ndims());
+			  } else {
+			  
+/*
+			  System.out.println("Error in " + name() + " type: " + 
+					  type().toString() + " (" + type().toString() + ") "+ " binding exp type: " + 
+					  myBindingInstExp().type().toString() + "( "+ myBindingInstExp().type().toString() + ") " + " binding exp:");
+			  myBindingInstExp().dumpTree("");
+			  */
 			  error("The binding expression of the variable " + name() +
 					  " does not match the declared type of the variable");
+			  }
 		  }
 		  // Check Variability compatibility
 		  
@@ -41,7 +60,7 @@ aspect FlatTypeCheck {
   }
  
   public void FEquation.typeCheck() {
-	  //System.out.println(getLeft().type() + " " + getRight().type());
+	  //System.out.println("FEquation.typeCheck(): " + getLeft().type() + " " + getRight().type());
 	  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
 		  if (!getLeft().type().equivalentTo(getRight().type())) {
 			  error("The right and left expression types of equation are" +

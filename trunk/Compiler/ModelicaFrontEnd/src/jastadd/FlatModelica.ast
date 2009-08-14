@@ -166,37 +166,54 @@ FProtectedVisibilityType : FVisibilityType ::=;
  */
 abstract FPrimitiveType;
 
+abstract FPrimitiveScalarType : FPrimitiveType;
+abstract FPrimitiveArrayType : FPrimitiveType ::= <Size:int[]>;
+abstract FPrimitiveScalarNumericType : FPrimitiveScalarType;
+abstract FPrimitiveArrayNumericType : FPrimitiveArrayType;
+
 /**
  * \brief Base class for the numeric types Real and Integer.
  */
-abstract FNumericType : FPrimitiveType;
+//abstract FNumericType : FPrimitiveType;
 
 /**
  * \brief Class representing the primitive type Real.
  */
-FRealType : FNumericType ::=;
+FRealScalarType : FPrimitiveScalarNumericType ::=;
+
+FRealArrayType : FPrimitiveArrayNumericType;
 
 /**
  * \brief Class representing the primitive type Integer.
  */
-FIntegerType : FNumericType ::=; 
+FIntegerScalarType : FPrimitiveScalarNumericType ::=; 
+
+FIntegerArrayType : FPrimitiveArrayNumericType;
 
 /**
  * \brief Class representing the primitive type Boolean.
  */
-FBooleanType : FPrimitiveType ::=;
+FBooleanScalarType : FPrimitiveScalarType ::=;
+
+FBooleanArrayType : FPrimitiveArrayType;
 
 /**
  * \brief Class representing the primitive type String.
  */
-FStringType : FPrimitiveType ::=;
+FStringScalarType : FPrimitiveScalarType ::=;
+
+FStringArrayType : FPrimitiveArrayType;
 
 /**
  * \brief Class representing an unknown primitive type.
  *
  * Used to represent type errors. 
  */
-FUnknownType : FPrimitiveType ::=;
+FUnknownScalarType : FPrimitiveScalarType ::=;
+
+FUnknownArrayType : FPrimitiveArrayType ::=;
+
+FUnknownType : FPrimitiveType;
 
 /**
  * \brief A qualified name supporting array subscripts.
