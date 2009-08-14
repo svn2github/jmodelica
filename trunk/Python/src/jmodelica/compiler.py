@@ -127,7 +127,7 @@ class ModelicaCompiler():
             return retval
 
         except jpype.JavaException, ex:
-            self._handle_exception(ex)
+            _handle_exception(ex)
 
     @classmethod
     def parse_model(self,model_file_name):   
@@ -165,7 +165,7 @@ class ModelicaCompiler():
             sr = self.Compiler.parseModel(model_file_name)
             return sr        
         except jpype.JavaException, ex:
-            self._handle_exception(ex)
+            _handle_exception(ex)
 
     @classmethod
     def instantiate_model(self, source_root, model_class_name):
@@ -202,7 +202,7 @@ class ModelicaCompiler():
             ipr = self.Compiler.instantiateModel(source_root,model_class_name)
             return ipr    
         except jpype.JavaException, ex:
-            self._handle_exception(ex)
+            _handle_exception(ex)
 
     @classmethod
     def flatten_model(self, model_file_name, model_class_name, inst_prg_root):
@@ -246,7 +246,7 @@ class ModelicaCompiler():
                                                  inst_prg_root)
             return fclass    
         except jpype.JavaException, ex:
-            self._handle_exception(ex)
+            _handle_exception(ex)
 
     @classmethod
     def generate_code(self,fclass):
@@ -283,7 +283,7 @@ class ModelicaCompiler():
                                        self.xml_val_path,
                                        self.c_tpl_path)
         except jpype.JavaException, ex:
-            self._handle_exception(ex)
+            _handle_exception(ex)
 
     @classmethod
     def compile_dll(self, c_file_name, target="model"):
