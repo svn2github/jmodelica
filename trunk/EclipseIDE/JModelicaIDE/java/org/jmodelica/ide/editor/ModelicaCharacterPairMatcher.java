@@ -58,16 +58,12 @@ public class ModelicaCharacterPairMatcher implements ICharacterPairMatcher {
 			offset--;
 			char ch = document.getChar(offset);
 			switch (ch) {
-			case '(':
-			case '[':
-			case '{':
+			case '(': case '[': case '{':
 				anchor = LEFT;
 				if (isPositionOk(document, offset))
 					return getForwardScanner().match(document, offset);
 				break;
-			case ')':
-			case ']':
-			case '}':
+			case ')': case ']': case '}':
 				anchor = RIGHT;
 				if (isPositionOk(document, offset))
 					return getBackwardScanner().match(document, offset);
@@ -80,14 +76,15 @@ public class ModelicaCharacterPairMatcher implements ICharacterPairMatcher {
 
 	private boolean isPositionOk(IDocument document, int offset) {
 		return isNormalState(document, offset) && 
-		      !isFolded(document, offset);
+		      !isFolded(offset);
 	}
 
-	private boolean isFolded(IDocument document, int offset) {
+    private boolean isFolded(int offset) {
 		if (projectionViewer != null) {
 			ProjectionAnnotationModel model = projectionViewer.getProjectionAnnotationModel();
 			if (model != null) {
-				Iterator iter = model.getAnnotationIterator(offset, 1, true, true);
+			    Iterator<?> iter =
+			        model.getAnnotationIterator(offset, 1, true, true);
 				while (iter.hasNext()) {
 					Object ann = iter.next();
 					if (ann instanceof ProjectionAnnotation) {

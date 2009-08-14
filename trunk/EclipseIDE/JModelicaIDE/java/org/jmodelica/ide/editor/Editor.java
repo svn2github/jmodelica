@@ -99,7 +99,7 @@ public class Editor extends AbstractDecoratedTextEditor
 
     // ASTRegistry listener fields
     private ASTRegistry fRegistry; 
-    private ASTNode fRoot;
+    private ASTNode<?> fRoot;
     private String fKey;
     private IProject fProject;
     
@@ -339,7 +339,7 @@ public class Editor extends AbstractDecoratedTextEditor
      */
     public void recompileLocal(IDocument document) {
         
-        fRoot = (ASTNode)
+        fRoot = (ASTNode<?>)
             compiler.compileToAST(document, 
                                   null,
                                   null, 
@@ -407,14 +407,14 @@ public class Editor extends AbstractDecoratedTextEditor
      */
     public void childASTChanged(IProject project, String key) {
         if (project == fProject && key.equals(fKey)) {
-            fRoot = (ASTNode) fRegistry.lookupAST(fKey, fProject);
+            fRoot = (ASTNode<?>) fRegistry.lookupAST(fKey, fProject);
             update();
         }
     }
 
     public void projectASTChanged(IProject project) {
         if (project == fProject) {
-            fRoot = (ASTNode) fRegistry.lookupAST(fKey, fProject);
+            fRoot = (ASTNode<?>) fRegistry.lookupAST(fKey, fProject);
             update();
         }
     }
@@ -443,7 +443,7 @@ public class Editor extends AbstractDecoratedTextEditor
             else
                 fKey = fPath;
             fProject = file.getProject();
-            fRoot = (ASTNode) fRegistry.lookupAST(fKey, fProject);
+            fRoot = (ASTNode<?>) fRegistry.lookupAST(fKey, fProject);
             fRegistry.addListener(this, fProject, fKey);
             update();
         }
@@ -598,7 +598,7 @@ public class Editor extends AbstractDecoratedTextEditor
      * @param node node to select
      * @return whether file <code> node </code> is from matches file in editor
      */
-    public boolean selectNode(ASTNode node) {
+    public boolean selectNode(ASTNode<?> node) {
         
         boolean matchesInput = 
             getPathOfInput(getEditorInput()).equals(
@@ -606,7 +606,7 @@ public class Editor extends AbstractDecoratedTextEditor
         
         if (matchesInput) {
 
-            ASTNode sel = node.getSelectionNode();
+            ASTNode<?> sel = node.getSelectionNode();
             if (sel.getOffset() >= 0 && sel.getLength() >= 0) 
                 selectAndReveal(sel.getOffset(), sel.getLength());
         }

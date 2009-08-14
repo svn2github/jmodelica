@@ -16,7 +16,7 @@ public class SourceOutlineContentProvider implements ITreeContentProvider {
 			return getVisible(((StoredDefinition) element).getElements());
 		} else if (element instanceof ClassDecl) {
 			ClassDecl decl = (ClassDecl) element;
-			ArrayList list = new ArrayList();
+			ArrayList<Object> list = new ArrayList<Object>();
 			list.addAll(decl.classes());
 			list.addAll(decl.components());
 			return getVisible(list);
@@ -24,7 +24,7 @@ public class SourceOutlineContentProvider implements ITreeContentProvider {
 		return null;
 	}
 
-	private Object[] getVisible(Iterable elements) {
+	private Object[] getVisible(Iterable<?> elements) {
 		ArrayList<Object> list = new ArrayList<Object>();
 		for (Object e : elements) {
 			if (e instanceof IOutlineNode && ((IOutlineNode) e).showInContentOutline())
@@ -35,10 +35,10 @@ public class SourceOutlineContentProvider implements ITreeContentProvider {
 
 	public Object getParent(Object element) {
 	    
-		if (!(element instanceof ASTNode))
+		if (!(element instanceof ASTNode<?>))
 		    return null;
 		    
-		ASTNode node = ((ASTNode) element);
+		ASTNode<?> node = ((ASTNode<?>) element);
 
 		do
 			node = node.getParent();
@@ -59,7 +59,7 @@ public class SourceOutlineContentProvider implements ITreeContentProvider {
 		return false;
 	}
 
-	private boolean hasVisible(Iterable elements) {
+	private boolean hasVisible(Iterable<?> elements) {
 		for (Object e : elements) 
 			if (e instanceof IOutlineNode && ((IOutlineNode) e).showInContentOutline())
 				return true;

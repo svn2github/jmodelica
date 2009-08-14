@@ -36,25 +36,23 @@ public void run() {
     IDocument d = editor.getDocument();
     ITextSelection sel = editor.getSelection();
 
-    String doc = d.get();
+    IndentedSection sec = new IndentedSection(d.get());
+
     AnchorList<Integer> ancs = new IndentationHintScanner()
-        .analyze(doc)
+        .analyze(sec.toString())
         .bindEnv(d, IndentedSection.tabWidth);
 
+    // replace all lines in document if nothing selected
     if (sel.getLength() == 0) {
-        // replace all lines in document if nothing selected
-        d.set(new IndentedSection(doc)
-            .indent(ancs)
-            .toString());
+        d.set(sec.indent(ancs).toString());
         return;
     }
 
     int begLine = sel.getStartLine();
     int endLine = sel.getEndLine();
     
-    String section = new IndentedSection(doc)
-        .indent(ancs, begLine, endLine + 1)
-        .toString(begLine, endLine + 1);
+    String section = sec.indent(ancs, begLine, endLine + 1)
+                        .toString(begLine, endLine + 1);
 
     Util.replaceLines(d, begLine, endLine, section);
 

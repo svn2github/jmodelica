@@ -30,11 +30,11 @@ protected boolean endExists(String endStmnt, IDocument d, int offset)
         
         boolean ignoreLine = line.trim().equals("") || 
             ToggleComment.isCommented(line) ||
-            line.startsWith("initial") ||  
-            line.startsWith("equation") ||  
-            line.startsWith("algorithm") ||  
-            line.startsWith("public") ||  
-            line.startsWith("protected");  
+            line.trim().startsWith("initial") ||  
+            line.trim().startsWith("equation") ||  
+            line.trim().startsWith("algorithm") ||  
+            line.trim().startsWith("public") ||  
+            line.trim().startsWith("protected");  
         
         if (ignoreLine)
             continue;

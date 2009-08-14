@@ -192,13 +192,13 @@ public static String spacify(String s) {
  * first line in the section. Keep relative indentations for whole section, if
  * possible.
  * 
- * @param offset offset
+ * @param indent indent width
  */
-public IndentedSection offsetIndentTo(int offset) {
+public IndentedSection offsetIndentTo(int indent) {
     int ref = countIndent(sec[0]);
     for (int i = 0; i < sec.length; i++) {
         sec[i] = putIndent(sec[i], 
-                Math.max(0, offset + countIndent(sec[i]) - ref));
+                Math.max(0, indent + countIndent(sec[i]) - ref));
     }
     if (sec[sec.length - 1].trim().equals(""))
         sec[sec.length - 1] = "";

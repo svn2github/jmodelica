@@ -24,14 +24,15 @@ import org.jmodelica.modelica.compiler.InstClassDecl;
 public class OutlineItemComparator extends ViewerSorter {
 	@Override
 	public int category(Object element) {
-		if (element instanceof ASTNode)
-			return ((ASTNode) element).outlineCategory();
+		if (element instanceof ASTNode<?>)
+			return ((ASTNode<?>) element).outlineCategory();
 		if (element instanceof ExplorerContentProvider.LibrariesList) 
 			return -2;
 		return super.category(element);
 	}
 
-	@Override
+	@SuppressWarnings("unchecked")
+    @Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		if (e1 instanceof InstClassDecl)
 			e1 = ((InstClassDecl) e1).getClassDecl();

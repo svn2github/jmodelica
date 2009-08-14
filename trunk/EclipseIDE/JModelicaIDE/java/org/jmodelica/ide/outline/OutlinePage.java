@@ -48,8 +48,8 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page = window.getActivePage();
 		IEditorPart editor = page.getActiveEditor();
-		if (editor instanceof Editor && node instanceof ASTNode) 
-			((Editor) editor).selectNode((ASTNode) node);
+		if (editor instanceof Editor && node instanceof ASTNode<?>) 
+			((Editor) editor).selectNode((ASTNode<?>) node);
 	}
 
 	@Override

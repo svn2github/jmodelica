@@ -30,10 +30,10 @@ public class InstanceError implements IError {
 	private int line;
 	private int col;
 	private IResource file;
-	private ASTNode node;
+	private ASTNode<?> node;
 	private boolean hasFile;
 	
-	public InstanceError(String msg, ASTNode n) {
+	public InstanceError(String msg, ASTNode<?> n) {
 		super();
 		this.msg = msg;
 		fileName = n.fileName();

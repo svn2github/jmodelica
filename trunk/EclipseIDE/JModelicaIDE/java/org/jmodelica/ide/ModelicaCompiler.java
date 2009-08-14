@@ -185,7 +185,7 @@ public class ModelicaCompiler extends AbstractCompiler {
 		list.add(def);
 	}
 	
-	public ASTNode compileFile(IFile file, String path) {
+	public ASTNode<?> compileFile(IFile file, String path) {
 		newRoot(file != null ? file.getProject() : null);
 		parseFile(file, path);
 		return list.getChild(0);

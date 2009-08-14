@@ -37,6 +37,8 @@ import org.jastadd.plugin.compiler.ast.IASTNode;
 import org.jastadd.plugin.compiler.ast.IOutlineNode;
 import org.jastadd.plugin.registry.ASTRegistry;
 import org.jastadd.plugin.registry.IASTRegistryListener;
+import org.jmodelica.ide.IDEConstants;
+import org.jmodelica.ide.ModelicaCompiler;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.Element;
@@ -44,8 +46,6 @@ import org.jmodelica.modelica.compiler.LibNode;
 import org.jmodelica.modelica.compiler.List;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
-import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.ModelicaCompiler;
 
 public class ExplorerContentProvider implements ITreeContentProvider, IResourceChangeListener, IResourceDeltaVisitor {
 
@@ -62,7 +62,7 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof IFile) {
 			parentElement = getRoot((IFile) parentElement);
-			return getClassesFromSD((ASTNode) parentElement);
+			return getClassesFromSD((ASTNode<?>) parentElement);
 		} 
 		if (parentElement instanceof IProject) {
 			LibrariesList libList = new LibrariesList((IProject) parentElement);
@@ -79,7 +79,7 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 
 	public Object getParent(Object element) {
 		if (element instanceof ClassDecl) {
-			ASTNode parent = getParentClass((ClassDecl) element);
+			ASTNode<?> parent = getParentClass((ClassDecl) element);
 			if (parent instanceof StoredDefinition) {
 				if (parent.getParent() instanceof LibNode)
 					return parent.getParent();
@@ -114,20 +114,20 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		return ast == null ? cmp.compileFile(file, path) : ast;
 	}
 	
-	private ASTNode getParentClass(ASTNode node) {
+	private ASTNode<?> getParentClass(ASTNode<?> node) {
 		while (!(node instanceof ClassDecl || node instanceof StoredDefinition))
 			node = node.getParent();
 		return node;
 	}
 
-	private Object[] getClassesFromSD(ASTNode node) {
+	private Object[] getClassesFromSD(ASTNode<?> node) {
 		if (!(node instanceof StoredDefinition))
 			return null;
 		StoredDefinition sd = (StoredDefinition) node;
 		return getVisible(sd.getElements());
 	}
 
-	private Object[] getVisible(Iterable objs) {
+	private Object[] getVisible(Iterable<?> objs) {
 		ArrayList<Object> list = new ArrayList<Object>();
 		for (Object e : objs) {
 			if (e instanceof IOutlineNode && ((IOutlineNode) e).showInContentOutline())
@@ -136,7 +136,7 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		return list.toArray();
 	}
 
-	private boolean hasSDChildren(ASTNode node) {
+	private boolean hasSDChildren(ASTNode<?> node) {
 		if (!(node instanceof StoredDefinition))
 			return false;
 		for (Element e : ((StoredDefinition) node).getElements())

@@ -206,9 +206,6 @@ public String getErrorMessage() {
 
 public void updateAST(ASTNode<?> fRoot) {
     this.fRoot = fRoot;
-    System.out.println(fRoot);
-    fRoot.prettyPrint(System.out, "");
 }
-
 
 }

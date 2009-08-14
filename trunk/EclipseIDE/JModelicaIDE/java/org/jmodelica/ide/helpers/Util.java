@@ -32,7 +32,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
@@ -81,8 +80,8 @@ public class Util {
 	}
 
 	public static void openAndSelect(IWorkbenchPage page, Object elem) {
-		if (elem instanceof ASTNode) {
-			ASTNode node = (ASTNode) elem;
+		if (elem instanceof ASTNode<?>) {
+			ASTNode<?> node = (ASTNode<?>) elem;
 			IEditorPart editor = null;
 			try {
 				URI uri = new File(node.containingFileName()).toURI();
