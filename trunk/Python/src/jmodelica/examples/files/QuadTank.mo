@@ -1,26 +1,41 @@
 package QuadTank_pack
 	
-	optimization QuadTank_Opt (objective = cost(finalTime),
+	optimization QuadTank_Opt (objective = cost(finalTime)/* + 
+1000*((x1_r - x1(finalTime))/0.05)^2 + 1000*((x2_r - x2(finalTime))/0.05)^2 + 
+1000*((x3_r - x3(finalTime))/0.05)^2 + 1000*((x3_r - x3(finalTime))/0.05)^2*/,
                          startTime = 0,
-                         finalTime = 50000)
+                         finalTime = 50)
 
     // Process parameters
-	parameter Real A1=28, A2=32, A3=28, A4=32;
-	parameter Real a1=0.071, a2=0.057, a3=0.071, a4=0.057;
-	parameter Real kc=0.5;
-	parameter Real g=9.81;
-	parameter Real k1_nmp=3.14, k2_nmp=3.29;
+	parameter Modelica.SIunits.Area A1=2.8e-3, A2=3.2e-3, A3=2.8e-3, A4=3.2e-3;
+	parameter Modelica.SIunits.Area a1=7.1e-6, a2=5.7e-6, a3=7.1e-6, a4=5.7e-6;
+	parameter Modelica.SIunits.Acceleration g=9.81;
+	parameter Real k1_nmp(unit="m/s/V") = 3.14e-6, k2_nmp(unit="m/s/V") = 3.29e-6;
 	parameter Real g1_nmp=0.30, g2_nmp=0.30;
 
+    // Initial tank levels
+	parameter Modelica.SIunits.Length x1_0 = 1;
+	parameter Modelica.SIunits.Length x2_0 = 1;
+	parameter Modelica.SIunits.Length x3_0 = 1;
+	parameter Modelica.SIunits.Length x4_0 = 1;
+
+    // Reference values
+	parameter Modelica.SIunits.Length x1_r = 1;
+	parameter Modelica.SIunits.Length x2_r = 1;
+	parameter Modelica.SIunits.Length x3_r = 1;
+	parameter Modelica.SIunits.Length x4_r = 1;
+	parameter Modelica.SIunits.Voltage u1_r = 1;
+	parameter Modelica.SIunits.Voltage u2_r = 1;
+	
     // Tank levels
-	Real x1(start=1,min=0.1,max=20);
-	Real x2(start=1,min=0.1,max=20);
-	Real x3(start=1,min=0.1,max=20);
-	Real x4(start=1,min=0.1,max=20);
+	Modelica.SIunits.Length x1(initialGuess=4,start=x1_0,min=0.01,max=0.20);
+	Modelica.SIunits.Length x2(initialGuess=4,start=x2_0,min=0.01,max=0.20);
+	Modelica.SIunits.Length x3(initialGuess=4,start=x3_0,min=0.01,max=0.20);
+	Modelica.SIunits.Length x4(initialGuess=4,start=x4_0,min=0.01,max=0.20);
 
 	// Inputs
-	input Real u1;
-	input Real u2;
+	input Modelica.SIunits.Voltage u1(initialGuess=3,min=0);
+	input Modelica.SIunits.Voltage u2(initialGuess=4,min=0);
 
     Real cost(start=0);
 
@@ -35,7 +50,16 @@ package QuadTank_pack
 		/* see https://trac.jmodelica.org/ticket/274#comment:4 for background
 		 * on these values
 		 */
-		der(cost) = ((4.82630404e+02 /*x3_B*/ - x3)^2 + (6.82088796e+02 /*x4_B*/ - x4)^2 + (3 - u1)^2 + (3 - u2)^2) / 10^8;
-  end QuadTank_Opt;
+		der(cost) = /* 10*((x1_r - x1)/0.05)^2 + 10*((x2_r - x2)/0.05)^2 + 
+10*((x3_r - x3)/0.05)^2 + 10*((x3_r - x3)/0.05)^2 +*/ ((u1_r - u1)/3)^2 + 
+((u2_r - u2)/3)^2;
+
+constraint
+x1(finalTime) = x1_r;
+x2(finalTime) = x2_r;
+x3(finalTime) = x3_r;
+x4(finalTime) = x4_r;
+
+end QuadTank_Opt;
 
 end QuadTank_pack;
