@@ -486,6 +486,12 @@ FStringLitExp : FLitExp ::= <String>;
 FFunctionCall : FExp ::= Name:FIdUse Args:FExp*;
 
 /**
+ * \brief Function call expression in instance trees.
+ */
+InstFunctionCall : FExp ::= Name:InstAccess Args:FExp*;
+
+
+/**
  * \brief Summation reduction expression.
  */
 FSumRedExp : FExp ::= FExp FForIndex;
@@ -653,6 +659,11 @@ FLogExp : FBuiltInExp ::= ;
  * \brief Log10 built-in function.
  */
 FLog10Exp : FBuiltInExp ::= ;
+
+/**
+ * \brief Sqrt built-in function.
+ */
+FSqrtExp : FBuiltInExp ::= ;
 
 /**
  * \brief Size built-in function.

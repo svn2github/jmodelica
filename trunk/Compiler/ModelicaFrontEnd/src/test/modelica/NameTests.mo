@@ -874,7 +874,27 @@ model ImportTest8
   Modelica.Electrical.Analog.Basic.Resistor r;
 	
 end ImportTest8;
-  
+
+model ImportTest9
+	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+	   JModelica.UnitTesting.FlatteningTestCase(name="ImportTest9",
+		 description="Test of import of builtin mathematical functions.",
+												flatModel=
+ "
+ fclass NameTests.ImportTest9
+  parameter Real p1 = cos(9) /* -0.9111302618846769 */;
+  parameter Real p2 = sin(9) /* 0.4121184852417566 */;
+  parameter Real p3 = sqrt(3) /* 1.7320508075688772 */;
+ equation 
+ end NameTests.ImportTest9;
+ ")})));
+		
+	import Math = Modelica.Math;
+	parameter Real p1 = Math.cos(9);
+	parameter Real p2 = Modelica.Math.sin(9);
+	parameter Real p3 = sqrt(3);
+end ImportTest9;
+
 
 model ShortClassDeclTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

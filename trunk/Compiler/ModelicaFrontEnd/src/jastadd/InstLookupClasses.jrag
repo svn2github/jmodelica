@@ -251,10 +251,6 @@ aspect InstLookupClasses {
 			set.addAll(ii.lookupInstClassInImport(name));		
 		}
 
-/*
-		if (lookupInstClassInImport(name).size()>0)
-			set.addAll(lookupInstClassInImport(name));
-	*/
 		if (set.size()>0)
 			return set;
 		else
@@ -265,11 +261,6 @@ aspect InstLookupClasses {
 	
 		HashSet set = new HashSet();
 
-		/*		
-		if (lookupInstClassInImport(name).size()>0)
-				set.addAll(lookupInstClassInImport(name));
-			*/
-		
 		for (InstImport ii : instImports()) {
 			set.addAll(ii.lookupInstClassInImport(name));		
 		}
@@ -307,10 +298,6 @@ aspect InstLookupClasses {
 			set.addAll(ii.lookupInstClassInImport(name));		
 		}
 
-/*
-		if (lookupInstClassInImport(name).size()>0)
-			set.addAll(lookupInstClassInImport(name));
-	*/
 		if (set.size()>0)
 			return set;
 		else

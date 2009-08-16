@@ -1056,7 +1056,13 @@ aspect FlattPrettyPrint {
 		p.toString(getFExp(), str, indent, o);
 		str.print(")");
 	}
-	
+
+	public void FSqrtExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("sqrt(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
+	}
+
 	public void FSumExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("sum(");
 		p.toString(getFExp(),str,indent,o);
@@ -1086,6 +1092,18 @@ aspect FlattPrettyPrint {
 		}
 		str.print(")");
 	}
+
+	public void InstFunctionCall.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print(getName().name());
+		str.print("(");
+		for (int i=0; i<getNumArgs(); i++) {
+				p.toString(getArgs(i),str,"",o);
+				if (i<getNumArgs()-1)
+					str.print(",");
+		}
+		str.print(")");
+	}
+
 	
 	public void FSumRedExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("sum("); 

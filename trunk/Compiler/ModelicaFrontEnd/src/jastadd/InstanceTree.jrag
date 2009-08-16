@@ -1245,23 +1245,23 @@ aspect InstanceDumpTree {
 	}
 	
 	public String InstClassAccess.toString() {
-		String s = dump() +": "+name() + " at line: " + beginLine()+ ", ClassDecl at: ";
+		String s = dump() +": "+name() + " at line: " + beginLine();/* + ", ClassDecl at: ";
     	if (myInstClassDecl().isUnknown())
     		s+="Unknown";
     	else {
     		s += myInstClassDecl().beginLine();
-        }
+        }*/
         s+="\n";
 		return s;
 	}
 
 	public String InstComponentAccess.toString() {
-		String s = dump() +": "+name() + " at line: " + beginLine()+ ", ComponentDecl at: ";
+		String s = dump() +": "+name() + " at line: " + beginLine();/*+ ", ComponentDecl at: ";
     	if (myInstComponentDecl().isUnknown())
     		s+="Unknown";
     	else {
     		s += myInstComponentDecl().beginLine();
-		}
+		}*/
         s+="\n";
 		return s;
 	}

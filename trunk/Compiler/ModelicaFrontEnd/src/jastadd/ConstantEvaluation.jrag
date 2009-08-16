@@ -783,8 +783,8 @@ aspect ConstantEvaluation {
   eq FExpExp.ceval() = new CValueReal(java.lang.Math.exp(getFExp().ceval().realValue()));
   eq FLogExp.ceval() = new CValueReal(java.lang.Math.log(getFExp().ceval().realValue()));
   eq FLog10Exp.ceval() = new CValueReal(java.lang.Math.log10(getFExp().ceval().realValue()));	  
+  eq FSqrtExp.ceval() = new CValueReal(java.lang.Math.sqrt(getFExp().ceval().realValue()));	  
 
-  
 	/**
 	 * \brief Evaluation of a primitive instance node locade in the instance
 	 * AST.

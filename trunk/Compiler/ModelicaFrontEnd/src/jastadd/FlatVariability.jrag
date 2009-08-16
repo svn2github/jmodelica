@@ -127,6 +127,14 @@ aspect FlatVariability {
 		}
 		return total;
 	}
+
+	eq InstFunctionCall.variability() {
+		FTypePrefixVariability total = fConstant();
+		for (int i=0; i< getNumArgs(); i++) {
+			total = total.combine(getArgs(i).variability());
+		}
+		return total;
+	}
 	
 	eq FIdUseExp.variability() {
 		AbstractFVariable variable = this.myFV();

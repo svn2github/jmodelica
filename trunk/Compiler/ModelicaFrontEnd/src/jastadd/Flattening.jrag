@@ -408,6 +408,7 @@ aspect FlatExpressions {
 	public FExp FExpExp.flatten(FQName prefix) { return new FExpExp(getFExp().flatten(prefix)); }
 	public FExp FLogExp.flatten(FQName prefix) { return new FLogExp(getFExp().flatten(prefix)); }
 	public FExp FLog10Exp.flatten(FQName prefix) { return new FLog10Exp(getFExp().flatten(prefix)); }
+	public FExp FSqrtExp.flatten(FQName prefix) { return new FSqrtExp(getFExp().flatten(prefix)); }
 	
 	public FExp FTimeExp.flatten(FQName prefix) { return new FTimeExp(); }
 	public FExp FEndExp.flatten(FQName prefix) { return new FEndExp(); }
@@ -835,32 +836,34 @@ aspect InstantiatedExpressions {
 		FExp n = null;
 		if (getName().name().equals("der")) {
 			n = new FDer(new FIdUseInstAccess(new FQName(), ((FInstAccessExp)l.getChild(0)).getInstAccessNoTransform())); 
-		} else if (getName().name().equals("sin") || getName().name().equals("Modelica.Math.sin")) {
+		} else if (getName().name().equals("sin")) {
 			n = new FSinExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("cos") || getName().name().equals("Modelica.Math.cos")) {
+		} else if (getName().name().equals("cos")) {
 			n = new FCosExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("tan") || getName().name().equals("Modelica.Math.tan")) {
+		} else if (getName().name().equals("tan")) {
 			n = new FTanExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("asin") || getName().name().equals("Modelica.Math.asin")) {
+		} else if (getName().name().equals("asin")) {
 			n = new FAsinExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("acos") || getName().name().equals("Modelica.Math.acos")) {
+		} else if (getName().name().equals("acos")) {
 			n = new FAcosExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("atan") || getName().name().equals("Modelica.Math.atan")) {
+		} else if (getName().name().equals("atan")) {
 			n = new FAtanExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("atan2") || getName().name().equals("Modelica.Math.atan2")) {
+		} else if (getName().name().equals("atan2")) {
 			n = new FAtan2Exp((FExp)l.getChild(0),(FExp)l.getChild(1)); 
-		} else if (getName().name().equals("sinh") || getName().name().equals("Modelica.Math.sinh")) {
+		} else if (getName().name().equals("sinh")) {
 			n = new FSinhExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("cosh") || getName().name().equals("Modelica.Math.cosh")) {
+		} else if (getName().name().equals("cosh")) {
 			n = new FCoshExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("tanh") || getName().name().equals("Modelica.Math.tanh")) {
+		} else if (getName().name().equals("tanh")) {
 			n = new FTanhExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("exp") || getName().name().equals("Modelica.Math.exp")) {
+		} else if (getName().name().equals("exp")) {
 			n = new FExpExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("log") || getName().name().equals("Modelica.Math.log")) {
+		} else if (getName().name().equals("log")) {
 			n = new FLogExp((FExp)l.getChild(0)); 
-		} else if (getName().name().equals("log10") || getName().name().equals("Modelica.Math.log10")) {
+		} else if (getName().name().equals("log10")) {
 			n = new FLog10Exp((FExp)l.getChild(0)); 
+		} else if (getName().name().equals("sqrt")) {
+			n = new FSqrtExp((FExp)l.getChild(0)); 
 		} else if (getName().name().equals("identity")) {
 			n = new FIdentity(l.getChild(0));
 		} else if (getName().name().equals("ones")) {
@@ -868,13 +871,55 @@ aspect InstantiatedExpressions {
 		} else if (getName().name().equals("zeros")) {
 			n = new FZeros(l);
 		} else {
-			n = new FFunctionCall(new FIdUseInstAccess(new FQName(),getName().newInstAccess()),l);	
+			n = new InstFunctionCall(getName().newInstAccess(),l);	
 		}
 		n.setStart(getStart());
 		n.setEnd(getEnd());
 		return n;
 	}
 	
+	boolean InstFunctionCall.rewritten = false;
+	rewrite InstFunctionCall {
+    	when (!rewritten)
+    		to FExp {
+    			FExp n = null;
+    			String name = getName().myInstClassDecl().qualifiedName(); 
+    			if (name.equals("Modelica.Math.sin")) {
+    				n = new FSinExp(getArgs(0));
+    			} else if (name.equals("Modelica.Math.cos")) {
+    				n = new FCosExp(getArgs(0));
+    			} else if (name.equals("Modelica.Math.tan")) {
+    				n = new FTanExp(getArgs(0));
+    			} else if (name.equals("Modelica.Math.asin")) {
+    				n = new FAsinExp(getArgs(0));
+    			} else if (name.equals("Modelica.Math.acos")) {
+    				n = new FAcosExp(getArgs(0));
+    			} else if (name.equals("Modelica.Math.atan")) {
+    				n = new FAtanExp(getArgs(0));
+    			} else if (name.equals("Modelica.Math.atan2")) {
+    				n = new FAtan2Exp(getArgs(0),getArgs(1));  
+    			} else if (name.equals("Modelica.Math.sinh")) {
+    				n = new FSinhExp(getArgs(0));
+    			} else if (name.equals("Modelica.Math.cosh")) {
+    				n = new FCoshExp(getArgs(0));
+    			} else if (name.equals("Modelica.Math.tanh")) {
+    				n = new FTanhExp(getArgs(0));
+    			} else if (name.equals("Modelica.Math.exp")) {
+    				n = new FExpExp(getArgs(0));
+    			} else if (name.equals("Modelica.Math.log")) {
+    				n = new FLogExp(getArgs(0));
+    			} else if (name.equals("Modelica.Math.log10")) {
+    				n = new FLog10Exp(getArgs(0));
+    			} else {
+    				n = this;
+    				rewritten = true;
+    			}
+				n.setStart(getStart());
+				n.setEnd(getEnd());
+				return n;	
+    	}
+  	}
+  
 	public FExp SumRedExp.instantiate() {
 		FSumRedExp n = new FSumRedExp(getExp().instantiate(),
 		                     getForIndex().instantiate());
