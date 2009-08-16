@@ -97,8 +97,8 @@ In order to run the JModelica.org compilers from Python, the packages
  
  - JPype (http://jpype.sourceforge.net/) 
  - lxml (http://codespeak.net/lxml/) 
- - NumPy (http://numpy.scipy.org/)
- - SciPy (http://www.scipy.org/)
+ - NumPy 1.2.0 (http://numpy.scipy.org/)
+ - SciPy 0.7 (http://www.scipy.org/)
  - Matplotlib (http://matplotlib.sourceforge.net/)
  - Nose (http://code.google.com/p/python-nose/) (Only needed to run
    the test suits.)
