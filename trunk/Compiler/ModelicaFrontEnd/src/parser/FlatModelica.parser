@@ -273,10 +273,10 @@ FExp fprimary =
   ;
 
 FPrimitiveType fprimitive_type =
-  ID.name {: if (name.equals("Real")) return new FRealType(); 
-  	else if (name.equals("Boolean")) return new FBooleanType();
-  	else if (name.equals("String")) return new FStringType();
-  	else if (name.equals("Integer")) return new FIntegerType();
+  ID.name {: if (name.equals("Real")) return new FRealScalarType(); 
+  	else if (name.equals("Boolean")) return new FBooleanScalarType();
+  	else if (name.equals("String")) return new FStringScalarType();
+  	else if (name.equals("Integer")) return new FIntegerScalarType();
   	else return null; :}
   ;
   
