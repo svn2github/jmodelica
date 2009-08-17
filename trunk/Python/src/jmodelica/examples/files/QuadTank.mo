@@ -12,18 +12,18 @@ package QuadTank_pack
 	parameter Real g1_nmp=0.70, g2_nmp=0.70;
 
     // Initial tank levels
-	parameter Modelica.SIunits.Length x1_0 = 1;
-	parameter Modelica.SIunits.Length x2_0 = 1;
-	parameter Modelica.SIunits.Length x3_0 = 1;
-	parameter Modelica.SIunits.Length x4_0 = 1;
+	parameter Modelica.SIunits.Length x1_0 = 0.04102638;
+	parameter Modelica.SIunits.Length x2_0 = 0.06607553;
+	parameter Modelica.SIunits.Length x3_0 = 0.00393984;
+	parameter Modelica.SIunits.Length x4_0 = 0.00556818;
 
     // Reference values
-	parameter Modelica.SIunits.Length x1_r = 1;
-	parameter Modelica.SIunits.Length x2_r = 1;
-	parameter Modelica.SIunits.Length x3_r = 1;
-	parameter Modelica.SIunits.Length x4_r = 1;
-	parameter Modelica.SIunits.Voltage u1_r = 1;
-	parameter Modelica.SIunits.Voltage u2_r = 1;
+	parameter Modelica.SIunits.Length x1_r = 0.06410371;
+	parameter Modelica.SIunits.Length x2_r = 0.10324302;
+	parameter Modelica.SIunits.Length x3_r = 0.006156;
+	parameter Modelica.SIunits.Length x4_r = 0.00870028;
+	parameter Modelica.SIunits.Voltage u1_r = 2.5;
+	parameter Modelica.SIunits.Voltage u2_r = 2.5;
 	
     // Tank levels
 	Modelica.SIunits.Length x1(initialGuess=x1_0,start=x1_0,min=0.0001/*,max=0.20*/);

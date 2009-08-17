@@ -43,7 +43,7 @@ def _get_example_path():
     assert jmhome is not None, "You have to specify" \
                                " JMODELICA_HOME environment" \
                                " variable."
-    return os.path.join(jmhome, '..', 'Python', 'src', 'jmodelica', 'examples', 'files')
+    return os.path.join(jmhome, 'Python', 'jmodelica', 'examples', 'files')
     
     
 def _load_model(libname, path, mofile=None, optpackage=None):
@@ -55,12 +55,12 @@ def _load_model(libname, path, mofile=None, optpackage=None):
             
         print "The model was not found. Trying to compile it..."
         from jmodelica.compiler import OptimicaCompiler as oc
-        curdir = os.getcwd()
-        os.chdir(path)
+        #curdir = os.getcwd()
+        #os.chdir(path)
         oc.compile_model(os.path.join(path, mofile), optpackage)
-        os.chdir(curdir)
+        #os.chdir(curdir)
         
-    model = JmiOptModel(libname, path)
+    model = JmiOptModel(libname,'./')
     return model
     
     
@@ -842,7 +842,7 @@ def solve_using_sundials(model,
         raise ShootingException('End time and start time cannot currently coinside.')
         
     # If this line is not here T[-1] returned will be end_time - time_step
-    end_time = end_time + time_step
+    #end_time = end_time + time_step
     
     def _sundials_f(t, x, dx, f_data):
         """ Model (RHS) evaluation function.
@@ -1022,6 +1022,8 @@ def solve_using_sundials(model,
     time_step = time_step
     
     tout = start_time + time_step
+    if tout>end_time:
+        tout=end_time
 
     # initial time
     t = cvodes.realtype(t0.value)
@@ -1040,12 +1042,15 @@ def solve_using_sundials(model,
         """Used for return."""
         T.append(t.value)
         ylist.append(N.array(y))
+        if N.abs(tout-end_time)<=1e-6:
+            break
 
         if flag == cvodes.CV_SUCCESS:
             tout += time_step
 
-        if tout > end_time:
-            break
+        if tout>end_time:
+            tout=end_time
+
             
     if sensi:
         cvodes.CVodeGetSens(cvode_mem, t, yS)
@@ -1105,6 +1110,15 @@ def _shoot(model, start_time, end_time, sensi=True, time_step=0.2):
             4. The corresponding sensitivity matrix.
             
     """
+
+#     print('******************************************')
+#     print(model._m.getZ())
+#     print(start_time)
+#     print(end_time)
+#     print(sensi)
+#     print(time_step)
+#     print('******************************************')
+    
     T, ys, sens, params = solve_using_sundials(model, end_time, start_time, sensi=sensi, time_step=time_step)
     
     model._m.setX_P(ys[-1], 0)
@@ -1461,6 +1475,14 @@ class MultipleShooter:
         model = self.get_model()
         grid = self.get_grid()
         y0s, us = _split_opt_x(model, len(grid), p, self.get_initial_y_grid0())
+
+#         print('*****')
+#         print('p')
+#         print(p)
+#         print('y0s')
+#         print(y0s)
+#         print('us')
+#         print(us)
         
         def eval_last_ys(u, y0, interval):
             grad, last_y, gradparams, sens = self._shoot_single_segment(u, y0, interval)
@@ -1537,21 +1559,29 @@ class MultipleShooter:
         
         # Initial try
         p0 = self.get_p0()
-        
+
         # Less than (-0.5 < u < 1)
         # TODO: These are currently hard coded. They shouldn't be.
         #NLT = len(grid) * len(model.getInputs())
         #Alt = N.zeros( (NLT, len(p0)) )
         #Alt[:, (len(grid) - 1) * model.getModelSize():] = -N.eye(len(grid) * len(model.getInputs()))
         #blt = -0.5*N.ones(NLT)
+
+        N_xvars = (len(grid) - 1) * model.getModelSize()
+        N_uvars = len(grid) * len(model.getInputs())
+        N_vars = N_xvars + N_uvars
+        Alt = -N.eye(N_vars)
+        blt = N.zeros(N_vars)
+        blt[0:N_xvars] = -N.ones(N_xvars)*0.001
+        blt[N_xvars:] = -N.ones(N_uvars)*1;
         
         # Get OpenOPT handler
         p = NLP(self.f,
                 p0,
                 maxIter = 1e3,
                 maxFunEvals = 1e3,
-                #A=Alt,
-                #b=blt,
+                A=Alt,
+                b=blt,
                 df=self.df,
                 ftol = 1e-4,
                 xtol = 1e-4,
@@ -1724,19 +1754,27 @@ def _plot_control_solution(model, interval, initial_ys, us):
     model.reset()
     model.setStates(initial_ys)
     model.setInputs(us)
-    
+
+    p.figure(1)
     p.subplot(211)
     T, Y, yS, parameters = solve_using_sundials(model, end_time=interval[1], start_time=interval[0])
     p.hold(True)
-    p.plot(T,Y[:,0])
-    p.plot(T,Y[:,1])
-    p.plot(T,Y[:,2])
-    p.hold(False)
-    
+    p.plot(T,Y[:,0],'b',linewidth=2)
+    p.plot(T,Y[:,1],'g--',linewidth=2)
     p.subplot(212)
+    p.plot(T,Y[:,2],'b',linewidth=2)
+    p.plot(T,Y[:,3],'g--',linewidth=2)
+    #p.hold(False)
+
+    p.figure(2)
+    p.subplot(211)
     p.hold(True)
-    p.plot(interval, [us, us])
-    p.hold(False)
+    p.plot(interval, [us[0], us[0]],'b')
+    p.subplot(212)
+    p.plot(interval, [us[1], us[1]],'b')
+    #p.hold(False)
+
+    return [T,Y,yS]
 
 
 def plot_control_solutions(model, grid, x, doshow=True):
@@ -1900,7 +1938,7 @@ def main():
     parser.add_option('-t', '--timestep', default=0.2, type="float",
         help="The step size between each integrator return.")
     
-    parser.add_option('-u', '--initial-u', dest='initialu', default=0.25,
+    parser.add_option('-u', '--initial-u', dest='initialu', default=2.5,
         type='float', metavar="U",
         help="The initial guess of control/input signal u in optimization. (default=%default)")
     parser.add_option('-g', '--gridsize', dest='gridsize', default=10,
@@ -1910,6 +1948,8 @@ def main():
     parser.add_option('-p', '--predefined-model', dest='predmodel', default=None, type='choice', choices=['vdp', 'quadtank'], help="A set of predefined example models. Using one of these will override --modelfile, --directory, --modelfile and --directory.")
     
     (options, args) = parser.parse_args()
+
+    options.predmodel = 'quadtank'
     
     if options.gridsize <= 0:
         raise ShootingException('Grid size must be greater than zero.')
