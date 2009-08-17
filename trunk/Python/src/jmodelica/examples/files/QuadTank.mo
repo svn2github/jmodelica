@@ -1,8 +1,6 @@
 package QuadTank_pack
 	
-	optimization QuadTank_Opt (objective = cost(finalTime)/* + 
-1000*((x1_r - x1(finalTime))/0.05)^2 + 1000*((x2_r - x2(finalTime))/0.05)^2 + 
-1000*((x3_r - x3(finalTime))/0.05)^2 + 1000*((x3_r - x3(finalTime))/0.05)^2*/,
+	optimization QuadTank_Opt (objective = cost(finalTime),
                          startTime = 0,
                          finalTime = 50)
 
@@ -11,7 +9,7 @@ package QuadTank_pack
 	parameter Modelica.SIunits.Area a1=7.1e-6, a2=5.7e-6, a3=7.1e-6, a4=5.7e-6;
 	parameter Modelica.SIunits.Acceleration g=9.81;
 	parameter Real k1_nmp(unit="m/s/V") = 3.14e-6, k2_nmp(unit="m/s/V") = 3.29e-6;
-	parameter Real g1_nmp=0.30, g2_nmp=0.30;
+	parameter Real g1_nmp=0.70, g2_nmp=0.70;
 
     // Initial tank levels
 	parameter Modelica.SIunits.Length x1_0 = 1;
@@ -28,14 +26,14 @@ package QuadTank_pack
 	parameter Modelica.SIunits.Voltage u2_r = 1;
 	
     // Tank levels
-	Modelica.SIunits.Length x1(initialGuess=4,start=x1_0,min=0.01,max=0.20);
-	Modelica.SIunits.Length x2(initialGuess=4,start=x2_0,min=0.01,max=0.20);
-	Modelica.SIunits.Length x3(initialGuess=4,start=x3_0,min=0.01,max=0.20);
-	Modelica.SIunits.Length x4(initialGuess=4,start=x4_0,min=0.01,max=0.20);
+	Modelica.SIunits.Length x1(initialGuess=x1_0,start=x1_0,min=0.0001/*,max=0.20*/);
+	Modelica.SIunits.Length x2(initialGuess=x2_0,start=x2_0,min=0.0001/*,max=0.20*/);
+	Modelica.SIunits.Length x3(initialGuess=x3_0,start=x3_0,min=0.0001/*,max=0.20*/);
+	Modelica.SIunits.Length x4(initialGuess=x4_0,start=x4_0,min=0.0001/*,max=0.20*/);
 
 	// Inputs
-	input Modelica.SIunits.Voltage u1(initialGuess=3,min=0);
-	input Modelica.SIunits.Voltage u2(initialGuess=4,min=0);
+	input Modelica.SIunits.Voltage u1(initialGuess=u1_r/*,min=0,max=10*/);
+	input Modelica.SIunits.Voltage u2(initialGuess=u2_r/*,min=0,max=10*/);
 
     Real cost(start=0);
 
@@ -50,16 +48,20 @@ package QuadTank_pack
 		/* see https://trac.jmodelica.org/ticket/274#comment:4 for background
 		 * on these values
 		 */
-		der(cost) = /* 10*((x1_r - x1)/0.05)^2 + 10*((x2_r - x2)/0.05)^2 + 
-10*((x3_r - x3)/0.05)^2 + 10*((x3_r - x3)/0.05)^2 +*/ ((u1_r - u1)/3)^2 + 
-((u2_r - u2)/3)^2;
+		der(cost) = 40000*((x1_r - x1))^2 + 
+                            40000*((x2_r - x2))^2 + 
+                            40000*((x3_r - x3))^2 + 
+                            40000*((x3_r - x3))^2 + 
+                            ((u1_r - u1))^2 + 
+                            ((u2_r - u2))^2;
 
 constraint
+/*
 x1(finalTime) = x1_r;
 x2(finalTime) = x2_r;
 x3(finalTime) = x3_r;
 x4(finalTime) = x4_r;
-
+*/
 end QuadTank_Opt;
 
 end QuadTank_pack;
