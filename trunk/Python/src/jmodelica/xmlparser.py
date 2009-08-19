@@ -93,9 +93,24 @@ class XMLdoc:
         _doc = _parse_XML(filename, schemaname)
         self._xpatheval = etree.XPathEvaluator(_doc)
 
-class XMLVariablesDoc(XMLdoc):
-    
+class XMLVariablesDoc(XMLdoc):    
     """ Class representing a parsed XML file containing model variable meta data. """
+    
+    def get_valueref(self, variablename):
+        """
+        Extract the ValueReference given a variable name.
+        
+        Parameters:
+            variablename -- the name of the variable
+            
+        Returns:
+            The ValueReference for the variable passed as argument.
+        """
+        ref = self._xpatheval("//ScalarVariable/ValueReference/text() [../../ScalarVariableName=\""+variablename+"\"]")
+        if len(ref) > 0:
+            return ref[0]
+        else:
+            return None
 
     def get_variable_names(self):
         """

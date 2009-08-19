@@ -474,8 +474,29 @@ def load_DLL(libname, path):
                                     ct.c_int,
                                     ct.POINTER(ct.c_int)]
     
-    if dF_n_nz is not None:
-        dll.jmi_dae_dF_nz_indices.argtypes = [ct.c_void_p,
+#    if dF_n_nz is not None:
+#        dll.jmi_dae_dF_nz_indices.argtypes = [ct.c_void_p,
+#                                              ct.c_int,
+#                                              ct.c_int,
+#                                              Nct.ndpointer(
+#                                                dtype=ct.c_int,
+#                                                ndim=1,
+#                                                shape=n_z.value,
+#                                                flags='C'),
+#                                              Nct.ndpointer(
+#                                                dtype=ct.c_int,
+#                                                ndim=1,
+#                                                shape=dF_n_nz.value,
+#                                                flags='C'),
+#                                              Nct.ndpointer(
+#                                                dtype=ct.c_int,
+#                                                ndim=1,
+#                                                shape=dF_n_nz.value,
+#                                                flags='C')]
+#    else:
+#        dll.jmi_dae_dF_nz_indices.errcheck = \
+#                        fail_error_check("Functionality not supported.")      
+    dll.jmi_dae_dF_nz_indices.argtypes = [ct.c_void_p,
                                               ct.c_int,
                                               ct.c_int,
                                               Nct.ndpointer(
@@ -486,16 +507,12 @@ def load_DLL(libname, path):
                                               Nct.ndpointer(
                                                 dtype=ct.c_int,
                                                 ndim=1,
-                                                shape=dF_n_nz.value,
                                                 flags='C'),
                                               Nct.ndpointer(
                                                 dtype=ct.c_int,
                                                 ndim=1,
-                                                shape=dF_n_nz.value,
                                                 flags='C')]
-    else:
-        dll.jmi_dae_dF_nz_indices.errcheck = \
-                        fail_error_check("Functionality not supported.")                        
+                     
     dll.jmi_dae_dF_dim.argtypes = [ct.c_void_p, ct.c_int, ct.c_int,
                                    ct.c_int,
                                    Nct.ndpointer(dtype=ct.c_int,
@@ -525,9 +542,9 @@ def load_DLL(libname, path):
                                  Nct.ndpointer(dtype=c_jmi_real_t,
                                                ndim=1,
                                                flags='C')]
-    dll.jmi_init_dF0_n_nz = [ct.c_void_p,
-                             ct.c_int,
-                             ct.POINTER(ct.c_int)]
+    dll.jmi_init_dF0_n_nz.argtypes = [ct.c_void_p,
+                                      ct.c_int,
+                                      ct.POINTER(ct.c_int)]
     dll.jmi_init_dF0_nz_indices.argtypes = [ct.c_void_p,
                                           ct.c_int,
                                           ct.c_int,
@@ -567,7 +584,7 @@ def load_DLL(libname, path):
                                  Nct.ndpointer(dtype=c_jmi_real_t,
                                                ndim=1,
                                                flags='C')]
-    dll.jmi_init_dF1_n_nz = [ct.c_void_p,
+    dll.jmi_init_dF1_n_nz.argtypes = [ct.c_void_p,
                              ct.c_int,
                              ct.POINTER(ct.c_int)]
     dll.jmi_init_dF1_nz_indices.argtypes = [ct.c_void_p,
@@ -608,7 +625,7 @@ def load_DLL(libname, path):
                                  Nct.ndpointer(dtype=c_jmi_real_t,
                                                ndim=1,
                                                flags='C')]
-    dll.jmi_init_dFp_n_nz = [ct.c_void_p,
+    dll.jmi_init_dFp_n_nz.argtypes = [ct.c_void_p,
                              ct.c_int,
                              ct.POINTER(ct.c_int)]
     dll.jmi_init_dFp_nz_indices.argtypes = [ct.c_void_p,
@@ -1746,6 +1763,26 @@ class Model(object):
     def get_name(self):
         """ Return the name of the model. """
         return self._libname
+    
+    def getparameter(self, name):
+        xmldoc = self._get_XMLvariables_doc()
+        valref = xmldoc.get_valueref(name.strip())
+        value = None
+        if valref:
+            (z_i, ptype) = _translate_value_ref(valref)
+            value = self.getPI()[z_i - self._offs_pi.value]
+        else:
+            print "Parameter "+name.strip()+" could not be found in model."
+        return value
+        
+    def setparameter(self, name, value):
+        xmldoc = self._get_XMLvariables_doc()
+        valref = xmldoc.get_valueref(name)
+        if valref:
+            (z_i, ptype) = _translate_value_ref(valref)
+            self.getPI()[z_i - self._offs_pi.value] = value
+        else:
+            print "Parameter "+name+" could not be found in model."
 
 class JMIModel(object):
     
@@ -2088,7 +2125,7 @@ class JMIModel(object):
     
     def dae_get_sizes(self):
         """Returns the number of equations of the DAE."""
-        n_eq_F = ct.c_int
+        n_eq_F = ct.c_int()
         if self._dll.jmi_dae_get_sizes(self._jmi, byref(n_eq_F)) is not 0:
             raise JMIException("Getting number of equations failed.")
         return n_eq_F.value
@@ -2146,7 +2183,7 @@ class JMIModel(object):
             The number of non-zero Jacobian entries.
 			
         """
-        n_nz = ct.c_int
+        n_nz = ct.c_int()
         if self._dll.jmi_dae_dF_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
             raise JMIException("Getting the number of non-zeros failed.")
         return n_nz.value
@@ -2181,7 +2218,7 @@ class JMIModel(object):
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
             pass        
-        if self._dll.jmi_dae_dF_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, cols) is not 0:
+        if self._dll.jmi_dae_dF_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, col) is not 0:
             raise JMIException("Getting the row and column indices failed.")
     
     def dae_dF_dim(self, eval_alg, sparsity, independent_vars, mask):
@@ -2228,9 +2265,9 @@ class JMIModel(object):
             The number of equations in F0, F1 and Fp resp.
 			
         """
-        n_eq_f0 = ct.c_int
-        n_eq_f1 = ct.c_int
-        n_eq_fp = ct.c_int
+        n_eq_f0 = ct.c_int()
+        n_eq_f1 = ct.c_int()
+        n_eq_fp = ct.c_int()
         if self._dll.jmi_init_get_sizes(self._jmi, byref(n_eq_f0), byref(n_eq_f1), byref(n_eq_fp)) is not 0:
             raise JMIException("Getting the number of equations failed.")
         return n_eq_f0.value, n_eq_f1.value, n_eq_fp.value
@@ -2291,7 +2328,7 @@ class JMIModel(object):
             The number of non-zero Jacobian entries in the full Jacobian.
 			
         """
-        n_nz = ct.c_int
+        n_nz = ct.c_int()
         if self._dll.jmi_init_dF0_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
             raise JMIException("Getting the number of non-zeros failed.")
         return n_nz.value
@@ -2324,7 +2361,7 @@ class JMIModel(object):
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
             pass       
-        if self._dll.jmi_init_dF0_nz_indices(self._jmi, eval_alg, independent_vars, mask, row_i, cols_i) is not 0:
+        if self._dll.jmi_init_dF0_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, col) is not 0:
             raise JMIException("Getting the row and column indices failed.")
     
     def init_dF0_dim(self, eval_alg, sparsity, independent_vars, mask):
@@ -2416,7 +2453,7 @@ class JMIModel(object):
             The number of non-zero Jacobian entries in the full Jacobian.
 			
         """
-        n_nz = ct.c_int
+        n_nz = ct.c_int()
         if self._dll.jmi_init_dF1_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
             raise JMIException("Getting the number of non-zeros failed.")
         return n_nz.value
@@ -2450,7 +2487,7 @@ class JMIModel(object):
         except TypeError:
             pass
         
-        if self._dll.jmi_init_dF1_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, cols) is not 0:
+        if self._dll.jmi_init_dF1_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, col) is not 0:
             raise JMIException("Getting the row and column indices failed.")
     
     def init_dF1_dim(self, eval_alg, sparsity, independent_vars, mask):
@@ -2546,7 +2583,7 @@ class JMIModel(object):
             The number of non-zero Jacobian entries in the full Jacobian.
 			
         """
-        n_nz = ct.c_int
+        n_nz = ct.c_int()
         if self._dll.jmi_init_dFp_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
             raise JMIException("Getting the number of non-zeros failed.")
         return n_nz.value
@@ -2813,11 +2850,11 @@ class JMIModel(object):
         except TypeError:
             pass
         
-        dF_n_cols = ct.c_int()
-        dF_n_nz = ct.c_int()
-        if self._dll.jmi_opt_dJ_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
+        dJ_n_cols = ct.c_int()
+        dJ_n_nz = ct.c_int()
+        if self._dll.jmi_opt_dJ_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dJ_n_cols), byref(dJ_n_nz)) is not 0:
             raise JMIException("Computing the number of columns and non-zero elements failed.")
-        return dF_n_cols.value, dF_n_nz.value
+        return dJ_n_cols.value, dJ_n_nz.value
         
     def opt_Ceq(self, res):
         """Evaluate the residual of the equality path constraint Ceq.
