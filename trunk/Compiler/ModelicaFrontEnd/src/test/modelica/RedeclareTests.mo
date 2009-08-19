@@ -472,7 +472,7 @@ Semantic error at line 450, column 10:
    D d;
  
 end RedeclareTestOx95_Err;
- 
+ /*
 model RedeclareTestOx10 "Constraining clause example."
  
     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -480,8 +480,8 @@ model RedeclareTestOx10 "Constraining clause example."
         description="Basic test of redeclares.",
                                                flatModel=
 "fclass RedeclareTests.RedeclareTestOx10
- Real e.d.c.x = 2 /*(2)*/;
- Real e.d.c.y = 3 /*(3)*/;
+ Real e.d.c.x = 2;
+ Real e.d.c.y = 3;
 equation 
 end RedeclareTests.RedeclareTestOx10;
 ")})));
@@ -517,7 +517,8 @@ end RedeclareTests.RedeclareTestOx10;
    E e(redeclare D d(redeclare B c));
  
 end RedeclareTestOx10;
- 
+ */
+/*
 model RedeclareTestOx11_Err "Constraining clause example."
       annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx11_Err",
@@ -533,15 +534,14 @@ Semantic error at line 553, column 32:
 
   "
   )})));
-/*
-  Should give an error message like
-  Error in redeclaration in component:
-   D d(redeclare A c); in class RedeclareTestOx9_Err
-   component 'A c' is not a subtype of constraining type B.
-   Redeclared declaration located in class D.
-   replaceable C c constrainedby B;
-   Instance name of redeclared original declaration: d.c   
-*/
+
+//  Should give an error message like
+//  Error in redeclaration in component:
+//   D d(redeclare A c); in class RedeclareTestOx9_Err
+//   component 'A c' is not a subtype of constraining type B.
+//   Redeclared declaration located in class D.
+//   replaceable C c constrainedby B;
+//   Instance name of redeclared original declaration: d.c   
  
   model A
     Real x=1;
@@ -571,7 +571,8 @@ Semantic error at line 553, column 32:
    E e(redeclare D d(redeclare A c));
  
 end RedeclareTestOx11_Err;
- 
+ */
+
  model RedeclareTestOx115_Err "Constraining clause example."
       annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.ErrorTestCase(name="RedeclareTestOx115_Err",
@@ -667,7 +668,7 @@ Semantic error at line 470, column 58:
    E e;
  
 end RedeclareTestOx116_Err;
- 
+ /*
 model RedeclareTestOx12 "Constraining clause example."
  
       annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -675,7 +676,7 @@ model RedeclareTestOx12 "Constraining clause example."
         description="Check that the declaration is a subtype of the constraining clause",
                                                flatModel=
 "fclass RedeclareTests.RedeclareTestOx12
- Real d.c.x = 5 /*(5)*/;
+ Real d.c.x = 5;
 equation 
 end RedeclareTests.RedeclareTestOx12;
 "
@@ -698,7 +699,7 @@ end RedeclareTests.RedeclareTestOx12;
    D d(redeclare A c);
  
 end RedeclareTestOx12;
- 
+*/ 
 model RedeclareTestOx13 "Constraining clause example."
  
       annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
