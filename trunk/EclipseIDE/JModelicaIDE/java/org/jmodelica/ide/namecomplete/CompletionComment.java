@@ -21,7 +21,7 @@ public CompletionComment() { super(); }
 public CompletionComment(String str) { super(str); }
 
 public String toString() {
-    return isNull() ? "" : "  -  " + value;
+    return isNothing() ? "" : "  -  " + value;
 }
 
 }

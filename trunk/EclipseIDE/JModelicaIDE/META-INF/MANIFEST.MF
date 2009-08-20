@@ -2,14 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JModelica IDE
 Bundle-SymbolicName: org.jmodelica.ide;singleton:=true
-Bundle-Version: 0.3.4
+Bundle-Version: 0.3.4.r786
 Bundle-Activator: org.jmodelica.ide.Activator
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ClassPath: lib/beaver-rt.jar,
  .
-Require-Bundle: org.jastadd.plugin;bundle-version="1.0.7",
- org.eclipse.jface.text,
+Require-Bundle: org.eclipse.jface.text,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
  org.eclipse.ui,
@@ -17,5 +16,6 @@ Require-Bundle: org.jastadd.plugin;bundle-version="1.0.7",
  org.eclipse.ui.editors,
  org.eclipse.ui.views,
  org.eclipse.ui.navigator,
- org.jmodelica.folding;bundle-version="0.1.2"
+ org.jmodelica.folding;bundle-version="0.1.2",
+ org.jastadd.plugin;bundle-version="1.0.8"
 Import-Package: junit.framework

@@ -4,6 +4,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
+import org.jmodelica.ide.indent.DocUtil;
 
 
 /**
@@ -32,12 +33,12 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
 
         boolean endTokenTrailingCaret = 
             d.get(c.offset, endLine - c.offset).startsWith(endToken);
-
+        
         if (c.text.equals(endToken) && endTokenTrailingCaret) {
             c.text = "";
             c.caretOffset = c.offset + 1;
         }
-
+        
         else if (c.text.equals(startToken)) {
             
             boolean afterLastWordOnLine = 
@@ -45,7 +46,10 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
                     .replaceAll("[^\\w]", "")
                     .equals("");
         
-            if (afterLastWordOnLine) {
+            boolean symmetricTokenOnLine =
+                DocUtil.getLine(d, c.offset).contains(startToken);
+            
+            if (afterLastWordOnLine && !symmetricTokenOnLine) {
                 c.text += endToken;
                 c.shiftsCaret = false;
                 c.caretOffset = c.offset + 1;

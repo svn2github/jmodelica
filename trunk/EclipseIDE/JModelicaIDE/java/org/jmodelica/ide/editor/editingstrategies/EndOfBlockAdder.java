@@ -3,8 +3,8 @@ package org.jmodelica.ide.editor.editingstrategies;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
+import org.jmodelica.generated.scanners.Modelica22PartitionScanner;
 import org.jmodelica.ide.helpers.Util;
-import org.jmodelica.ide.scanners.generated.Modelica22PartitionScanner;
 
 
 /**

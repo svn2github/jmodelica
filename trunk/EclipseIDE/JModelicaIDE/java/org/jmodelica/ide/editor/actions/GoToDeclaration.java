@@ -1,11 +1,13 @@
 package org.jmodelica.ide.editor.actions;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.text.ITextSelection;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
+import org.jmodelica.ide.helpers.EclipseCruftinessWorkaroundClass;
 import org.jmodelica.ide.helpers.Maybe;
+import org.jmodelica.ide.namecomplete.Lookup;
 import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.modelica.compiler.InstNode;
 
 
 public class GoToDeclaration extends Action {
@@ -22,31 +24,27 @@ public GoToDeclaration(Editor editor) {
 }
 
 public void run() {
-
-    // not initialized, or not able to create AST.
+    
+    // not initialised, or not able to create AST.
     // TODO: if possible: if AST not yet created, wait for it to complete
+    // TODO: apply bridge parsing to try get AST if failed 
     if (fRoot == null) 
-         return;
+        return;
     
-    ITextSelection sel = editor.getSelection();
+    Maybe<InstNode> iNode = new Lookup(fRoot).declFromAccessAt(
+            editor.getDocument(),
+            editor.getSelection().getOffset());
     
-    try {
-        Maybe<?> node = fRoot.getNodeAt(editor.getDocument(), sel.getOffset());
-        if (node.isNull()) {
-            System.out.println("got nothing");
-            return;
-        }
-        System.out.println(node);
-        //Access acc = (Access)node.value();
-        
-//        InstNode decl = Completions.lookup(acc, acc.enclosingClassDecl());
-//        
-//        if (decl != null)
-//            editor.selectNode(decl);
-                
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
+    if (iNode.isNothing()) 
+        return;
+ 
+    String pathToDecl = iNode.value().retrieveFileName(); 
+    
+    Editor editor = 
+        EclipseCruftinessWorkaroundClass.getModelicaEditorForFile(
+        EclipseCruftinessWorkaroundClass.getFileForPath(pathToDecl)).value();
+    
+    editor.selectNode(iNode.value());
     
 }
 

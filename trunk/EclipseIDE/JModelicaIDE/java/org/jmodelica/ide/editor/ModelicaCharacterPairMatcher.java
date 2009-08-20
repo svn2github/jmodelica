@@ -26,10 +26,10 @@ import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.jmodelica.folding.CharacterProjectionViewer;
-import org.jmodelica.ide.scanners.generated.AnnotationNormalStateScanner;
-import org.jmodelica.ide.scanners.generated.BackwardBraceScanner;
-import org.jmodelica.ide.scanners.generated.ForwardBraceScanner;
-import org.jmodelica.ide.scanners.generated.Modelica22PartitionScanner;
+import org.jmodelica.generated.scanners.AnnotationNormalStateScanner;
+import org.jmodelica.generated.scanners.BackwardBraceScanner;
+import org.jmodelica.generated.scanners.ForwardBraceScanner;
+import org.jmodelica.generated.scanners.Modelica22PartitionScanner;
 
 public class ModelicaCharacterPairMatcher implements ICharacterPairMatcher {
 

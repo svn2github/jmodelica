@@ -62,6 +62,7 @@ import org.jmodelica.folding.CharacterPosition;
 import org.jmodelica.folding.CharacterProjectionAnnotation;
 import org.jmodelica.folding.CharacterProjectionSupport;
 import org.jmodelica.folding.CharacterProjectionViewer;
+import org.jmodelica.generated.scanners.Modelica22PartitionScanner;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.ModelicaCompiler;
 import org.jmodelica.ide.editor.actions.CollapseAllAction;
@@ -79,7 +80,6 @@ import org.jmodelica.ide.namecomplete.Completions;
 import org.jmodelica.ide.outline.InstanceOutlinePage;
 import org.jmodelica.ide.outline.OutlinePage;
 import org.jmodelica.ide.outline.SourceOutlinePage;
-import org.jmodelica.ide.scanners.generated.Modelica22PartitionScanner;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.BaseClassDecl;
 

@@ -3,11 +3,25 @@ package testcases;
 import junit.framework.TestCase;
 
 import org.eclipse.jface.text.Document;
+import org.jmodelica.generated.scanners.IndentationHintScanner;
 import org.jmodelica.ide.indent.IndentedSection;
-import org.jmodelica.ide.scanners.generated.IndentationHintScanner;
 
 
 public class IndentedSectionTest extends TestCase {
+
+    public void testInd(String in, String wanted) {
+
+        IndentationHintScanner ihs = new IndentationHintScanner();
+        String tmp = new IndentedSection(in).toString();
+        ihs.analyze(tmp);
+        
+        String indented = new IndentedSection(in).
+        indent(ihs.ancs.bindEnv(new Document(tmp), 
+                IndentedSection.tabWidth)).toString();
+        
+        assertEquals(wanted, indented);
+   }
+
     String testIndentData = 
         "     model m\n" +
         "real r;\n" +
@@ -114,19 +128,6 @@ public class IndentedSectionTest extends TestCase {
         testInd(in, wanted);
     }
     
-    public void testInd(String in, String wanted) {
-
-        IndentationHintScanner ihs = new IndentationHintScanner();
-        String tmp = new IndentedSection(in).toString();
-        ihs.analyze(tmp);
-        
-        String indented = new IndentedSection(in).
-        indent(ihs.ancs.bindEnv(new Document(tmp), 
-                IndentedSection.tabWidth)).toString();
-        
-        assertEquals(wanted, indented);
-   }
-
     public void testSpacify() {
         IndentedSection.tabWidth = 4;
         assertEquals(IndentedSection.spacify("\t  test\n" +
@@ -151,6 +152,26 @@ public class IndentedSectionTest extends TestCase {
         IndentedSection.tabWidth = 10;
         assertEquals(IndentedSection.countIndent("         \ttest"), 10);
         assertEquals(IndentedSection.countIndent("          \ttest"), 20);
+    }
+    
+    public void testStringsInAnnotations() {
+        IndentedSection.tabWidth = 4;
+        IndentedSection.tabbed = true;
+        String test =
+            "model m\n"+
+            "annotation (x = Test(\n"+
+            "        a = \"test\",\n"+
+            "       b = \"test\"));\n"+
+            "end m;";
+            
+        String wanted = 
+            "model m\n"+
+            "\tannotation (x = Test(\n"+
+            "\t\t\t\t a = \"test\",\n"+
+            "\t\t\t\t b = \"test\"));\n"+
+            "end m;";
+
+        testInd(test, wanted);
     }
     
 }

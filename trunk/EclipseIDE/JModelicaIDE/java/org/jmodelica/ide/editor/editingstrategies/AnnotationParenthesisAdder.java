@@ -4,8 +4,8 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
+import org.jmodelica.generated.scanners.Modelica22PartitionScanner;
 import org.jmodelica.ide.helpers.Util;
-import org.jmodelica.ide.scanners.generated.Modelica22PartitionScanner;
 
 
 /**
@@ -19,7 +19,7 @@ public final static AnnotationParenthesisAdder adder =
     new AnnotationParenthesisAdder();
 
 public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
-
+    
     if (c.text == null || !(c.text.equals(" ") || c.text.equals("(")))
         return;
 
@@ -40,7 +40,7 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
 
         boolean afterAnnotation = d.get(0, c.offset).trim().
             endsWith("annotation");
-        
+
         if (inSourcePartition && atEndLine && afterAnnotation) {
             String suffix = "";
             if (!c.text.endsWith("("))

@@ -12,6 +12,10 @@ import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.jmodelica.generated.scanners.Modelica22AnnotationScanner;
+import org.jmodelica.generated.scanners.Modelica22DefinitionScanner;
+import org.jmodelica.generated.scanners.Modelica22NormalScanner;
+import org.jmodelica.generated.scanners.Modelica22PartitionScanner;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.editingstrategies.AnnotationParenthesisAdder;
 import org.jmodelica.ide.editor.editingstrategies.BracketAdder;
@@ -23,10 +27,6 @@ import org.jmodelica.ide.namecomplete.Completions;
 import org.jmodelica.ide.scanners.ModelicaCommentScanner;
 import org.jmodelica.ide.scanners.ModelicaQIdentScanner;
 import org.jmodelica.ide.scanners.ModelicaStringScanner;
-import org.jmodelica.ide.scanners.generated.Modelica22AnnotationScanner;
-import org.jmodelica.ide.scanners.generated.Modelica22DefinitionScanner;
-import org.jmodelica.ide.scanners.generated.Modelica22NormalScanner;
-import org.jmodelica.ide.scanners.generated.Modelica22PartitionScanner;
 
 
 /**
@@ -50,7 +50,8 @@ public ViewerConfiguration(Editor editor) {
 public IAutoEditStrategy[] getAutoEditStrategies(
         ISourceViewer sourceViewer, String contentType) {
     return new IAutoEditStrategy[] { 
-            AnnotationParenthesisAdder.adder,
+            // IndentingAutoEditStrategy is first, so no other command
+            // makes it believe it's receiving a pasted block. 
             IndentingAutoEditStrategy.editStrategy,
             EndOfBlockAdder.adder,
             KeywordAdder.adder,
@@ -60,6 +61,7 @@ public IAutoEditStrategy[] getAutoEditStrategies(
             new BracketAdder("\"", "\""),
             new BracketAdder("'", "'"),
             CommentAdder.adder,
+            AnnotationParenthesisAdder.adder,
         };
 }
 

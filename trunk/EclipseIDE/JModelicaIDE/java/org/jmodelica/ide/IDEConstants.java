@@ -18,7 +18,7 @@ package org.jmodelica.ide;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.graphics.RGB;
-import org.jmodelica.ide.scanners.generated.Modelica22PartitionScanner;
+import org.jmodelica.generated.scanners.Modelica22PartitionScanner;
 
 public class IDEConstants {
 

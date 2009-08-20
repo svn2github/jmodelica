@@ -3,12 +3,12 @@ package org.jmodelica.ide.editor.actions;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
+import org.jmodelica.generated.scanners.IndentationHintScanner;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.indent.AnchorList;
 import org.jmodelica.ide.indent.IndentedSection;
-import org.jmodelica.ide.scanners.generated.IndentationHintScanner;
 
 
 /**

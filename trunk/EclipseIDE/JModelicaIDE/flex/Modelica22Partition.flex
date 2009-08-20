@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.jmodelica.ide.scanners.generated;
+package org.jmodelica.generated.scanners;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -164,7 +164,7 @@ Definition = {Class} {WS} {ID}
 
 Other = .|{NL}
 
-%state ANNOTATION, NORMAL, STRING, QIDENT, COMMENT
+%state ANNOTATION, NORMAL, STRING, QIDENT, COMMENT, LINE_COMMENT
 
 %%
 
@@ -172,6 +172,7 @@ Other = .|{NL}
   "\""				{ /* YYINITIAL: "\"" */ begin(STRING); }
   "\'"				{ /* YYINITIAL: "\'" */ begin(QIDENT); }
   "/*"				{ /* YYINITIAL: "/*" */ begin(COMMENT); }
+  "//" 				{ begin(LINE_COMMENT); }
   "annotation"		{ /* YYINITIAL: "annotation" */ saveOffset = yychar; return beginAnnotation(); }
   ^{Definition}		{ /* YYINITIAL: Definition */ offset = yychar; return new Token(DEFINITION_PARTITION); }
   {WS}{Definition}	{ /* YYINITIAL: Definition */ offset = yychar; return new Token(DEFINITION_PARTITION); }
@@ -184,6 +185,7 @@ Other = .|{NL}
   "\""				{ /* NORMAL: StringML */ return normalEnd(); }
   "\'"				{ /* NORMAL: QIdentML */ return normalEnd(); }
   "/*"				{ /* NORMAL: CommentML */ return normalEnd(); }
+  "//" 				{ begin(LINE_COMMENT); }
   {WS}{Definition}	{ /* NORMAL: Definition */ return normalEnd(); }
   "annotation"		{ /* NORMAL: "annotation" */ return beginAnnotation(); }
   {Other}			{ /* NORMAL: Other */ }
@@ -216,4 +218,10 @@ Other = .|{NL}
   {CommentCont}		{ /* COMMENT: CommentCont */ }
   "*/"				{ /* COMMENT: (end of comment) */ return end(COMMENT_PARTITION); }
   <<EOF>>			{ /* COMMENT: EOF */ return end(COMMENT_PARTITION); }
+}
+
+
+<LINE_COMMENT> {
+	.* 				{ return end(COMMENT_PARTITION); }
+	<<EOF>> 		{ return end(COMMENT_PARTITION); } 
 }

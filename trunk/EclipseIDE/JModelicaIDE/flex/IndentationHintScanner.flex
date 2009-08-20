@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.jmodelica.ide.scanners.generated;
+package org.jmodelica.generated.scanners;
 
 import java.util.*;
 import java.io.StringReader;
@@ -186,7 +186,8 @@ Other = . | {NewLine}
 					  last_state = yystate();
 					  yybegin(COMMENT_LINEBEGIN); }
   "\""				{ ancs.beginSection(yychar+1, yychar, Indent.UNCHANGED, "string");
-					  last_state = yystate(); yybegin(STRING); }
+					  last_state = yystate();
+					  yybegin(STRING); }
   {NewLine}			{ yybegin(ANNOTATION_LINEBEGIN); }
   {Other}			{ 	}
 }
@@ -200,8 +201,9 @@ Other = . | {NewLine}
 }
 
 <STRING> {
+  "\\\\"			{  }
   "\\\""			{  }
-  "\""				{ ancs.popPast("string", yychar + yylength()); 
+  "\""				{ ancs.popPast("string", yychar + yylength());
   					  yybegin(last_state); }
   {Other}			{ }
 }

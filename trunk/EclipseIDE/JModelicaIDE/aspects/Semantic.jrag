@@ -3,20 +3,22 @@ import org.jmodelica.ide.namecomplete.CompletionComment;
 import org.jmodelica.ide.namecomplete.CompletionFilter;
 import java.util.ArrayList;
 
-/**
- *  Find the ASTNode corresponding to a certain position in the source code. 
- */
-aspect LookupFromSource {
-
-    syn boolean ASTNode.hasCompletions() = false;
-    eq ClassDecl.hasCompletions() = true;
-    
-    syn Maybe<ASTNode<T>> ASTNode.getNodeAt(IDocument d, int offset);
+aspect Semantic {
 
     /**
      * @return true iff. ASTNode contains point (line, col).
      */
-    public boolean ASTNode.containsPoint(int line, int col) {
+    public boolean ASTNode.containsPoint(IDocument d, int offset) {
+        
+        int line, col;
+        try {
+
+            line = d.getLineOfOffset(offset);
+            col = offset - d.getLineOffset(line);
+            line++; // go from 0-based to 1-based line number
+        
+        } catch (BadLocationException e) { return false; }
+        
         
         boolean beginsBefore = 
             getBeginLine() == line && getBeginColumn() <= col ||
@@ -29,34 +31,59 @@ aspect LookupFromSource {
         return beginsBefore && endsAfter;
     }    
     
-    /** 
-     * Returns the ASTNode at line <code>line</code>, column <code>col</code>.
-     * Looks through the entire AST to find the best match.
+       
+    /**
+     * Return class declaration at offset. Favour inner classes over outer.
+     * Ignores short class declarations.
      */
-    eq ASTNode.getNodeAt(IDocument d, int offset) {
-        
-        int line, col;
-        try {
-            line = d.getLineOfOffset(offset);
-            col = offset - d.getLineOffset(line);
-        } catch (BadLocationException e) { 
-            return null; 
+    syn Maybe<ClassDecl> ASTNode.getClassDeclAt(IDocument d, int offset);
+    
+    eq ASTNode.getClassDeclAt(IDocument d, int offset) {
+        for (ASTNode<?> child : this) {
+            Maybe<ClassDecl> rec = child.getClassDeclAt(d, offset);  
+            if (rec.hasValue())
+                return rec;
         }
+        return Maybe.Nothing(ClassDecl.class);
         
-        ASTNode result = null;
-        
-        if (hasCompletions() && containsPoint(line, col))
-            result = this;
-        
-        for (ASTNode node : this) { 
-            // recurse down the tree
-            ASTNode tmp = (ASTNode)node.getNodeAt(d, offset).value(); 
-            if (tmp != null)
-                result = tmp;
-        }
-
-        return new Maybe<ASTNode<T>>(result);
     }
+    
+    eq FullClassDecl.getClassDeclAt(IDocument d, int offset) {
+        return super.getClassDeclAt(d, offset)
+                    .orElse(Maybe.fromBool(this, containsPoint(d, offset)));
+    }
+    
+    /**
+     * Return access at offset. Favour left child of Dot nodes over the Dot
+     * node itself, but not the right child. I.e. (where ^ marks the offset)
+
+     *  ...qualifi^ed.name      returns "qualified", while
+     *  ...qualified.na^me      returns "qualified.name"
+     *     
+     */
+    syn Maybe<Access> ASTNode.getAccessAt(IDocument d, int offset); 
+    
+    eq ASTNode.getAccessAt(IDocument d, int offset) {
+        for (ASTNode<?> child : this) {
+            Maybe<Access> rec = child.getAccessAt(d, offset);  
+            if (rec.hasValue())
+                return rec;
+        }
+        return Maybe.Nothing(Access.class);
+    }
+    
+    eq Dot.getAccessAt(IDocument d, int offset) {
+        if (!containsPoint(d, offset))
+            return Maybe.Nothing(Access.class);
+        return getLeft().getAccessAt(d, offset).orElse(Maybe.Just(this));
+    }
+    
+    eq Access.getAccessAt(IDocument d, int offset) {
+        if (containsPoint(d, offset))
+            return Maybe.Just(this);
+        return Maybe.Nothing(Access.class);
+    }
+    
     
     syn ArrayList<InstNode> InstNode.completionNodes() = new ArrayList<InstNode>();
     

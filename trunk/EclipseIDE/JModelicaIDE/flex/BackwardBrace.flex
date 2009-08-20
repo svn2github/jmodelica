@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.jmodelica.ide.scanners.generated;
+package org.jmodelica.generated.scanners;
 
 import java.io.StringReader;
 import java.io.Reader;

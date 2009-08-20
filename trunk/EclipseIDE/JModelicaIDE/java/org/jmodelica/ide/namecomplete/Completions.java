@@ -1,5 +1,6 @@
 package org.jmodelica.ide.namecomplete;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -75,7 +76,7 @@ public Pair<String, String> getContext(IDocument d, int caretOffset) {
         int lineStart = d.getLineOffset(d.getLineOfOffset(caretOffset));
 
         String line = d.get(lineStart, caretOffset - lineStart).trim();
-        String[] tmp = line.split("[^A-Za-z_0-9.]");
+        String[] tmp = line.split("[^_A-Za-z_0-9.]", -1);
 
         context = tmp[tmp.length - 1];
         int i = context.lastIndexOf('.');
@@ -107,49 +108,53 @@ public Pair<String, String> getContext(IDocument d, int caretOffset) {
  *  
  * @param d document
  * @param offset caret offset
- * @return completion proposals 
+ * @return instance nodes of completion proposals 
  */
-public ICompletionProposal[] suggestedDecls(IDocument d, int offset) {
-
-    String qualifedPart, filter; // context for completion
+public ArrayList<InstNode> suggestedDecls(IDocument d, int offset) {
+    
+    String qualifedPart, filter;
     {
         Pair<String, String> p = getContext(d, offset);
         qualifedPart = p.fst();
         filter = p.snd();
     }
-
-    InstNode decl; // declaration to look up completions in
+    
+    InstNode decl;
     {
         Maybe<InstClassDecl> enclosingClass = 
-            new Lookup(fRoot).instClassAt(d, offset);
+            new Lookup(fRoot).instEnclosingClassAt(d, offset);
         
-        if (enclosingClass.isNull())
-            return null;
+        if (enclosingClass.isNothing())
+            return new ArrayList<InstNode>();
 
-        // if no qualified part, use enclosing class, o.w. look up 
-        // the qualified name leading caret
-        
-        Maybe<InstNode> mDecl = qualifedPart.equals("") 
-            ? new Maybe<InstNode>(enclosingClass.value())
-            : new Lookup(fRoot).lookupQualifiedName(
+        if (qualifedPart.equals(""))
+            // if no qualified part, do look up in enclosing class
+            decl = enclosingClass.value();
+        else {
+            // o.w. look up the qualified name leading caret in
+            // enclosing class, and use result for lookup
+            Maybe<InstNode> mDecl = new Lookup(fRoot).lookupQualifiedName(
                     enclosingClass.value(), 
                     CompletionUtil.createDotAccess(qualifedPart.split("\\.")));
         
-        if (mDecl.isNull()) // lookup of qualified name failed  
-            return null;
-        
-        decl = mDecl.value();
+            if (mDecl.isNothing()) 
+                return new ArrayList<InstNode>();
+            
+            decl = mDecl.value();
+        }
     }
-    
-    return makeCompletions(
-            decl.completionProposals(new CompletionFilter(filter)),
-            filter,
-            offset);
+    System.out.println("'" + filter + "'");
+    return decl.completionProposals(new CompletionFilter(filter));
 }
 
 public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer,
         int offset) {
-    return suggestedDecls(viewer.getDocument(), offset);
+
+    
+    return makeCompletions(
+            suggestedDecls(viewer.getDocument(), offset),
+            getContext(viewer.getDocument(), offset).snd(),
+            offset);
 }
 
 /**

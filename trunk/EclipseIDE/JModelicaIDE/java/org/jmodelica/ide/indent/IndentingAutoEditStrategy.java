@@ -5,7 +5,7 @@ import org.eclipse.jface.text.DefaultIndentLineAutoEditStrategy;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextUtilities;
-import org.jmodelica.ide.scanners.generated.IndentationHintScanner;
+import org.jmodelica.generated.scanners.IndentationHintScanner;
 
 
 /**
@@ -17,7 +17,8 @@ import org.jmodelica.ide.scanners.generated.IndentationHintScanner;
 public class IndentingAutoEditStrategy extends
         DefaultIndentLineAutoEditStrategy {
 
-public final static IndentingAutoEditStrategy editStrategy = new IndentingAutoEditStrategy();
+public final static IndentingAutoEditStrategy editStrategy = 
+    new IndentingAutoEditStrategy();
 
 final static IndentationHintScanner ihs = new IndentationHintScanner();
 

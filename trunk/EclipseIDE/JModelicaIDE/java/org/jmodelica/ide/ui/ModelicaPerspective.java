@@ -23,7 +23,8 @@ import org.jmodelica.ide.IDEConstants;
 
 public class ModelicaPerspective implements IPerspectiveFactory {
 
-	public void createInitialLayout(IPageLayout layout) {
+	@SuppressWarnings("deprecation")
+    public void createInitialLayout(IPageLayout layout) {
 		String edit = layout.getEditorArea();
 		layout.setEditorAreaVisible(true);
 		

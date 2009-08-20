@@ -22,6 +22,10 @@ public abstract class Indent {
                 return false;
             return ((AnnotationParen)o).level == level;
         }
+        
+        public String toString() {
+            return String.format("AnnotationParen: Level=%d", level);
+        }
     };
         
 	public abstract int modify(int indent, int indentWidth);

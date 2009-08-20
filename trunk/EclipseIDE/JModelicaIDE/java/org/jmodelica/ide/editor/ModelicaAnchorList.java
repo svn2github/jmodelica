@@ -22,8 +22,8 @@ import org.jmodelica.ide.indent.IndentingAutoEditStrategy;
  */
 public class ModelicaAnchorList implements AnchorList<Indent> {
 
-protected Stack<Anchor<Indent>> stack;
-protected LinkedList<Anchor<Indent>> anchors, sinks;
+public Stack<Anchor<Indent>> stack;
+public LinkedList<Anchor<Indent>> anchors, sinks;
 
 protected boolean partial_newline;
 
@@ -90,14 +90,19 @@ public void pushUnchanged(int offset) {
  * @param level
  */
 public void annotationParen(int offset, int level) {
+    
+    Indent newIndent = new Indent.AnnotationParen(level);
+    
     popTo("paren");
     
     pushTop(offset);
     
     anchors.getLast().id = "#";
 
-    Indent indent = new Indent.AnnotationParen(level);
+    Indent indent = newIndent;
     anchors.getLast().indent = indent;
+    
+    push(anchors.getLast());
 }
 
 /**

@@ -36,7 +36,7 @@ public class Maybe<E> {
      * returns true iff. contained value is null.
      * @return true iff. contained value is null.
      */
-    public boolean isNull() {
+    public boolean isNothing() {
         return value == null;
     }
     
@@ -45,7 +45,7 @@ public class Maybe<E> {
      * @return true iff. contained value is non-null.
      */
     public boolean hasValue() {
-        return !isNull();
+        return !isNothing();
     }
 
     public E value() {
@@ -60,14 +60,6 @@ public class Maybe<E> {
     public E fromMaybe(E defaultValue) {
         return hasValue() ? value() : defaultValue;
     }
-    
-    @Override
-    public String toString() {
-        return isNull() 
-            ? "Nothing" 
-            : String.format("Just(%s)", value().toString());
-    }
-    
     /**
      * Left biased or on Maybe.
      * @param other other Maybe
@@ -76,4 +68,22 @@ public class Maybe<E> {
     public Maybe<E> orElse(Maybe<? extends E> other) {
         return hasValue() ? this : new Maybe<E>(other.value);
     }
+    
+    /**
+     * Returns Just value if <code> guard </code> is true, o.w. Nothing.
+     * @param value value to bind
+     * @param guard guard for binding 
+     * @return Just value if <code> guard </code> is true, o.w. Nothing.
+     */
+    public static <E> Maybe<E> fromBool(E value, boolean guard) {
+        return guard ? Just(value) : new Maybe<E>();
+    }
+    
+    @Override
+    public String toString() {
+        return isNothing() 
+        ? "Nothing" 
+                : String.format("Just(%s)", value().toString());
+    }
+    
 }

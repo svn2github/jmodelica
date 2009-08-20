@@ -42,10 +42,10 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
+import org.jmodelica.generated.scanners.PackageExaminer;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.helpers.Library;
 import org.jmodelica.ide.helpers.Library.Version;
-import org.jmodelica.ide.scanners.generated.PackageExaminer;
 
 public class ProjectPropertyPage extends PropertyPage {
 

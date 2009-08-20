@@ -17,6 +17,7 @@ public static int textStart(IDocument doc, int offset) {
         }
         return offset;
     } catch (BadLocationException e) {
+        e.printStackTrace();
         return 0;
     }
 }
@@ -45,8 +46,21 @@ public static String getLinePartial(IDocument doc, int offset) {
     try {
         return doc.get(lineStart, offset - lineStart);
     } catch (BadLocationException e) {
+        e.printStackTrace();
         return "";
     }
+}
+
+public static String getLine(IDocument doc, int offset) {
+    try {
+        int start = lineStartOffsetOfOffset(doc, offset);
+        int end = lineEndOffsetOfOffset(doc, offset);
+        return doc.get(start, end - start);
+                       
+    } catch (BadLocationException e) {
+        e.printStackTrace();
+        return "";
+    } 
 }
 
 }

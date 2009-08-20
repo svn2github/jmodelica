@@ -2,14 +2,14 @@
 <feature
       id="org.jmodelica.ide"
       label="JModelica IDE"
-      version="0.3.4">
+      version="0.3.4.r786">
 
    <copyright url="http://www.example.com/copyright">
-      [Enter Copyright Description here.]
+      hooray we have a copyright notice
    </copyright>
 
    <license url="http://www.example.com/license">
-      [Enter License Description here.]
+      yay, this is a license agreement!
    </license>
 
    <requires>
@@ -21,6 +21,8 @@
       <import plugin="org.eclipse.ui.editors" version="3.4.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui.views" version="3.3.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui.navigator"/>
+      <import plugin="org.jmodelica.folding" version="0.1.2" match="greaterOrEqual"/>
+      <import plugin="org.jastadd.plugin" version="1.0.8" match="greaterOrEqual"/>
       <import plugin="org.junit4"/>
       <import plugin="org.eclipse.debug.core"/>
       <import plugin="org.eclipse.debug.ui"/>
@@ -35,21 +37,21 @@
          id="org.jmodelica.ide"
          download-size="0"
          install-size="0"
-         version="0.3.4"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.jastadd.plugin"
          download-size="0"
          install-size="0"
-         version="1.0.9"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.jmodelica.folding"
          download-size="0"
          install-size="0"
-         version="0.1.2"
+         version="0.0.0"
          unpack="false"/>
 
 </feature>
