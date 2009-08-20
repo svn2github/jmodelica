@@ -18,13 +18,13 @@ package Annotations "Annotations for Modelica 3.1"
      state. Whether or not the dynamic values are to be applied is a
      semantic issue.
      - Redesign uses annotation to 'Uses("SomeLib 3.1")' or similar.
-     - Redesign 'conversion' annotation to 'Conversion(from = "3.1",
-     script = "...")', 'Conversion(from = "3.2", noConversion = true)'
-     etc. (allowing multiple 'Conversion' annotations).
+     - Redesign 'conversion' annotation to 
+     'Conversions({Conversion(from = "3.1", script = "...")', 
+     'Conversion(from = "3.2", noConversion = true),...})'
      - Change the 'derivative' annotation to
-     'Derivatives(Derivative(order = 2, derfunc = foo2))'
-     - Change the 'inverse' annotation to 'Inverses(Inverse(arg = 2, invfunc =
-     foo2))'
+     'Derivatives({Derivative(order = 2, derfunc = foo2),...})'
+     - Change the 'inverse' annotation to 'Inverses({Inverse(arg = 2, 
+     invfunc = foo2),...})'
      - Change the "Library" annotation to only support the vector
      form.
      - No idea what to do with the 'choice' annotation that takes
