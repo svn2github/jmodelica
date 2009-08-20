@@ -1695,9 +1695,10 @@ class Model(object):
             else:
                 "Unknown type"
     
-    def _set_iparam_values(self):
+    def _set_iparam_values(self, xmldoc=None):
         """ Set values for the independent parameters. """
-        xmldoc = self._get_XMLvalues_doc()
+        if not xmldoc:
+            xmldoc = self._get_XMLvalues_doc()
         values = xmldoc.get_iparam_values()
        
         z = self.getZ()
@@ -1765,6 +1766,7 @@ class Model(object):
         return self._libname
     
     def getparameter(self, name):
+        """ Get value of a parameter. """
         xmldoc = self._get_XMLvariables_doc()
         valref = xmldoc.get_valueref(name.strip())
         value = None
@@ -1776,6 +1778,7 @@ class Model(object):
         return value
         
     def setparameter(self, name, value):
+        """ Set value of a parameter. """
         xmldoc = self._get_XMLvariables_doc()
         valref = xmldoc.get_valueref(name)
         if valref:
@@ -1783,6 +1786,72 @@ class Model(object):
             self.getPI()[z_i - self._offs_pi.value] = value
         else:
             print "Parameter "+name+" could not be found in model."
+    
+    def load_parameters_from_XML(self, filename="", path="."):
+        """ 
+        Reset pi vector with values from the XML file created 
+        when model was compiled. If an XML file other than this 
+        should be used instead set the parameters filename and 
+        path (if no path is set file is assumed to be in the 
+        current directory).
+                
+        Parameters:
+            filename -- filename of XML file that should be loaded (optional)
+            path -- directory where XML file is located (optional)
+            
+        Raises IOError if file could not be found.
+        
+        """
+        if filename:
+                xml_values_name = os.path.join(path, filename)
+        else:
+            #load original xml
+            xml_values_name = os.path.join(path, self.get_name()+'_values.xml')
+        
+        if os.path.exists(xml_values_name):
+            self._set_iparam_values(xmlparser.XMLValuesDoc(xml_values_name))
+        else:
+            raise IOError("The file: "+xml_values_name+" could not be found.")
+        
+    def write_parameters_to_XML(self, filename="", path="."):
+        """ 
+        Write parameter values (real) in pi vector to XML. The default 
+        behaviour is to overwrite the XML file created when model was 
+        compiled. To write to a new file, set parameters filename and 
+        path (if no path is set file is assumed to be in the 
+        current directory). 
+        
+        Parameters:
+            filename -- filename of XML file that should be loaded (optional)
+            path -- directory where XML file is located (optional)
+        """
+        pi = self.getPI()
+        parameters = {}
+        # get all indep parameters, translate index in z-vector
+        # to valueref and save in dict with parameter value as value
+        for i in range(len(pi)):
+            zi = i+self._offs_pi.value
+            # parameter type is real (ptype=0) -> z-vector -> index = valueref
+            parameters[zi]=pi[i]
+            
+        # get all parameters in XMLvaluesdoc, go through them all and 
+        # for each, find corresponding parameter in dict created above
+        # and set new value saved in dict (which comes from pi vector)
+        xmldoc = self._get_XMLvalues_doc()
+        elements=xmldoc._doc.findall("/RealParameter")
+        for e in elements:
+            ref = e.getchildren()[0]
+            val = e.getchildren()[1]
+            if parameters.has_key(int(ref.text)):
+                val.text=str(parameters[int(ref.text)])
+        # finally, write to file
+        if filename:
+            if not os.path.exists(path):
+                os.mkdir(path)
+            xmldoc._doc.write(os.path.join(path,filename))
+        else:
+            xmldoc._doc.write(xmldoc._doc.docinfo.URL)
+
 
 class JMIModel(object):
     

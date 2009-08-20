@@ -90,8 +90,8 @@ class XMLdoc:
         can be used to evaluate XPath expressions on the XML.
          
         """
-        _doc = _parse_XML(filename, schemaname)
-        self._xpatheval = etree.XPathEvaluator(_doc)
+        self._doc = _parse_XML(filename, schemaname)
+        self._xpatheval = etree.XPathEvaluator(self._doc)
 
 class XMLVariablesDoc(XMLdoc):    
     """ Class representing a parsed XML file containing model variable meta data. """
