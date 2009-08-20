@@ -46,6 +46,8 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
                     .replaceAll("[^\\w]", "")
                     .equals("");
         
+            // prevent editor from inserting
+            // e.g. ' or " twice, when unwanted
             boolean symmetricTokenOnLine =
                 DocUtil.getLine(d, c.offset).contains(startToken);
             
