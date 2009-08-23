@@ -49,6 +49,7 @@ public ViewerConfiguration(Editor editor) {
 @Override
 public IAutoEditStrategy[] getAutoEditStrategies(
         ISourceViewer sourceViewer, String contentType) {
+    // note: order significant here
     return new IAutoEditStrategy[] { 
             // IndentingAutoEditStrategy is first, so no other command
             // makes it believe it's receiving a pasted block. 

@@ -27,7 +27,7 @@ final static String classRegex = String.format(
 public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
     try {
 
-        boolean insertingNewline = c.text.matches("(\n|\r)\\s*");
+        boolean insertingNewline = c.text.matches("(\r\n|\n|\r)\\s*");
 
         if (!insertingNewline)
             return;
@@ -52,17 +52,18 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
         if (!afterClassBegin)
             return;
 
-        String blockId; {
-            String[] words = doc.split("\\s+");
-            blockId = words[words.length - 1];
-        }
-
-        String endStatement = String.format("end %s;", blockId);
-        super.addEndIfNotPresent(endStatement, d, c.offset);
+        super.addEndIfNotPresent(getEndStatementString(doc), d, c.offset);
                 
 
     } catch (BadLocationException e) {
         e.printStackTrace();
     }
 }
+
+public String getEndStatementString(String doc) {
+    
+    String[] words = doc.split("\\s+");
+    return String.format("end %s;", words[words.length - 1]);
+}
+
 }

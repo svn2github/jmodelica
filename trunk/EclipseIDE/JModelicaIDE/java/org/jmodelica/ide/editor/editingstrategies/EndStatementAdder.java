@@ -76,9 +76,16 @@ public void addEndIfNotPresent(String endStmnt, IDocument d, int offset) {
             int indentWidth = IndentedSection.countIndent(
                 d.get(lineStart, offset - lineStart));
             String indent = IndentedSection.putIndent("", indentWidth);
-            endStatement = String.format("\n%s%s", indent, endStmnt);
+            endStatement = String.format("%s%s%s",
+                    IndentedSection.lineSep,
+                    indent, 
+                    endStmnt);
         }
 
+        //
+        // another adverse effect of the completely retarded DocumentCommand 
+        // Class:
+        // 
         // must insert end statement with d.replace, as if using the
         // DocumentCommand class, it seems impossible to posititon cursor in 
         // the middle of the command.text. this causes this class to create two

@@ -480,14 +480,17 @@ public class Editor extends AbstractDecoratedTextEditor
     
     private void setupDocumentPartitioner(IDocument document) {
         
-        IDocumentPartitioner wanted = getDocumentPartitioner();
-        IDocumentPartitioner current = document.getDocumentPartitioner();
-        
-        if (wanted != current) {
-            if (current != null)
-                current.disconnect();
-            wanted.connect(document);
-            document.setDocumentPartitioner(wanted);
+        try {
+            IDocumentPartitioner wanted = getDocumentPartitioner();
+            IDocumentPartitioner current = document.getDocumentPartitioner();
+            if (wanted != current) {
+                if (current != null)
+                    current.disconnect();
+                wanted.connect(document);
+                document.setDocumentPartitioner(wanted);
+            }
+        } catch (Error e) {
+            e.printStackTrace();
         }
     }
 

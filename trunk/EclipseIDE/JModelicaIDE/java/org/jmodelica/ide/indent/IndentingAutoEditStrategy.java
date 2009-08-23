@@ -4,7 +4,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultIndentLineAutoEditStrategy;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.TextUtilities;
 import org.jmodelica.generated.scanners.IndentationHintScanner;
 
 
@@ -47,10 +46,9 @@ protected int getIndent(int begin, int end,
 public void customizeDocumentCommand(IDocument doc, DocumentCommand c) {
 
     try {
-        boolean pastedBlock = c.text.length() > 1;
+        boolean pastedBlock = c.text.length() > 1 && !c.text.equals("\r\n");
         boolean isSemicolon = c.text.equals(";");
-        boolean isNewLine = TextUtilities.equals(doc.getLegalLineDelimiters(),
-                c.text) != -1;
+        boolean isNewLine = c.text.matches("\r|\n|\r\n");
         boolean isTab = c.text.equals("\t");
     
         // breaking here not necessary for correctness, but we don't

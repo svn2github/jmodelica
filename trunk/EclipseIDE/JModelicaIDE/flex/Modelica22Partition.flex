@@ -225,3 +225,5 @@ Other = .|{NL}
 	.* 				{ return end(COMMENT_PARTITION); }
 	<<EOF>> 		{ return end(COMMENT_PARTITION); } 
 }
+
+[^]					{ return end(IDocument.DEFAULT_CONTENT_TYPE); }

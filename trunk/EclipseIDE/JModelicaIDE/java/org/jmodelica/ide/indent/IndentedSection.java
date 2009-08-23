@@ -44,7 +44,7 @@ protected final String[] sec;
  * @param tabWidth tab width when converting to and from tabbed representation
  */
 public IndentedSection(String s) {
-    sec = s.split("\n|\r|\r\n", -1);
+    sec = s.split("\r\n|\n|\r", -1);
     for (int i = 0; i < sec.length; i++)
         sec[i] = tabbed ? tabify(sec[i]) : spacify(sec[i]);
 }
