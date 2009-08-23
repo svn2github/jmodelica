@@ -30,6 +30,7 @@ public class IndentedSectionTest extends TestCase {
         "end q;\n" +
         "       int i;\n" +
         "           end m;";
+    
     String testIndentStringData = 
         "\"bla\n" +
         "     bla\n" +
@@ -174,4 +175,53 @@ public class IndentedSectionTest extends TestCase {
         testInd(test, wanted);
     }
     
+    public void testWindows() {
+
+        IndentedSection.lineSep = "\r\n";
+        
+        String expected = 
+            "     model m\r\n" +
+            "real r;\r\n" +
+            "        model q\r\n" +
+            "            real r;\r\n" +
+            "end q;\r\n" +
+            "       int i;\r\n" +
+            "           end m;";
+        
+        String wanted = 
+        "model m\r\n" +
+        "\treal r;\r\n" +
+        "\tmodel q\r\n" +
+        "\t\treal r;\r\n" +
+        "\tend q;\r\n" +
+        "\tint i;\r\n" +
+        "end m;";
+        
+        testInd(expected, wanted);
+    }
+    
+    public void testMac() {
+
+        IndentedSection.lineSep = "\r";
+        
+        String expected = 
+            "     model m\r" +
+            "real r;\r" +
+            "        model q\r" +
+            "            real r;\r" +
+            "end q;\r" +
+            "       int i;\r" +
+            "           end m;";
+        
+        String wanted = 
+        "model m\r" +
+        "\treal r;\r" +
+        "\tmodel q\r" +
+        "\t\treal r;\r" +
+        "\tend q;\r" +
+        "\tint i;\r" +
+        "end m;";
+        
+        testInd(expected, wanted);
+    }    
 }
