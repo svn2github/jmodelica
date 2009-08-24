@@ -552,12 +552,15 @@ public class ModelicaCompiler {
 		 * @return A logger which prints log messages to the console.
 		 */
 		public static Logger getConsoleLogger(String name) {
-			Logger l = Logger.getLogger(name);
-			l.setUseParentHandlers(false);
-			ConsoleHandler ch = new ConsoleHandler();
-			ch.setFormatter(new ConsoleFormatter());
-			l.addHandler(ch);
-			l.setLevel(Level.INFO);
+			Logger l = logmanager.getLogger(name);
+			if(l == null) {
+				l = Logger.getLogger(name);
+				l.setUseParentHandlers(false);
+				ConsoleHandler ch = new ConsoleHandler();
+				ch.setFormatter(new ConsoleFormatter());
+				l.addHandler(ch);
+				l.setLevel(Level.INFO);			
+			}
 			return l;
 		}
 		
