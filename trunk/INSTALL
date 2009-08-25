@@ -6,9 +6,11 @@ In order to compile JModelica you will need a unix-like
 environment. Depending on you operating system, different actions are
 required.
 
- - For Linux, you most likely have everything you need.
- - For Mac OS X you need to install the XCode compiler suite,
-   Subversion and Ant.
+ - For Linux, make sure that gcc compiler suite, Subversion and
+   Apache Ant are installed.
+ - The requrements for Mac OS X are the same as for Linux. The 
+   gcc compiler suite is available in the XCode distribution 
+   provided by Apple.
  - For Windows, it is recommended to use the JModelica.org-SDK
    installer which contains all the tools necessary to build the
    platform.
