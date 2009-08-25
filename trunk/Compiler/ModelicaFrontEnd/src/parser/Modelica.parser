@@ -254,7 +254,10 @@
 :};
  
 SourceRoot source_root = 
-  program {: SourceRoot sr = new SourceRoot(program); 
+           {: SourceRoot sr = new SourceRoot(new Program(new List())); 
+             loadOptions(sr);
+             return sr; :}
+  |program {: SourceRoot sr = new SourceRoot(program); 
              loadOptions(sr);
              return sr; :}
   ;
