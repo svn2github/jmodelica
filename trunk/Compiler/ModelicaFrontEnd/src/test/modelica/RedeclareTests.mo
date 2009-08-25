@@ -2948,6 +2948,44 @@ end RedeclareTests.RedeclareTest26;
 
 end RedeclareTest26;
 
+model RedeclareTest27
+ 
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest27",
+        description="Test of parametrized classes.",
+                                               flatModel=
+"
+fclass RedeclareTests.RedeclareTest27
+ Real b.y = 3;
+equation 
+end RedeclareTests.RedeclareTest27;
+")})));
+
+ package P1
+    model A
+      Real x=2;
+    end A;
+  end P1;
+
+  package P2
+    extends P1;
+    model B
+      Real y=3;
+    end B;
+  end P2;
+
+  package P3
+    replaceable package P = P1;
+  end P3;
+
+  package P4
+    extends P3(redeclare package P = P2);
+  end P4;
+
+  P4.P.B b;
+
+
+end RedeclareTest27;
 
 
 end RedeclareTests;

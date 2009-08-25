@@ -784,8 +784,7 @@ end NameTests.ImportTest5;
     
   end P;
     
-  extends P;
-  import NameTests.ImportTest5.C.*;
+  import NameTests.ImportTest5.P.C.*;
   D d(z=3);
   
 end ImportTest5;
