@@ -102,6 +102,82 @@ public class ModelicaCompiler {
 		this.xmlValuesTempl = xmlValuesTempl;
 		this.cTemplatefile = cTemplatefile;		
 	}
+	
+	/**
+	 * Returns the modelicapath attribute set for this compiler instance.
+	 * 
+	 * @return Reference to the modelicapath attribute. 
+	 * 
+	 */
+	public String getModelicapath() {
+		return this.modelicapath;
+	}
+	
+	/**
+	 * Set the modelicapath attribute.
+	 * 
+	 * @param path The new modelicapath.
+	 */
+	public void setModelicapath(String path) {
+		this.modelicapath = path;
+	}
+	
+	/**
+	 * Returns the XML variables template file path set for this compiler instance.
+	 * 
+	 * @return Reference to the XML variables template file path attribute. 
+	 * 
+	 */
+	public String getXMLVariablesTemplate() {
+		return this.xmlVariablesTempl;
+	}
+
+	/**
+	 * Set the XML variables template file path attribute.
+	 * 
+	 * @param template The new XML variables template file path.
+	 */
+	public void setXMLVariablesTemplate(String template) {
+		this.xmlVariablesTempl = template;
+	}
+	
+	/**
+	 * Returns the XML values template file path set for this compiler instance.
+	 * 
+	 * @return Reference to the XML values template file path attribute.
+	 * 
+	 */
+	public String getXMLValuesTemplate() {
+		return this.xmlValuesTempl;
+	}
+
+	/**
+	 * Set the XML values template file path attribute.
+	 * 
+	 * @param template The new XML values template file path.
+	 */
+	public void setXMLValuesTemplate(String template) {
+		this.xmlValuesTempl = template;
+	}
+
+	/**
+	 * Returns the c template file path set for this compiler instance.
+	 * 
+	 * @return Reference to the c template file path attribute. 
+	 * 
+	 */
+	public String getCTemplate() {
+		return this.cTemplatefile;
+	}
+	
+	/**
+	 * Set the c template file path attribute.
+	 * 
+	 * @param template The new c template file path.
+	 */
+	public void setCTemplate(String template) {
+		this.cTemplatefile = template;
+	}
 			
 	/**
 	 * Compiles a Modelica model. A model file name and class must be provided.

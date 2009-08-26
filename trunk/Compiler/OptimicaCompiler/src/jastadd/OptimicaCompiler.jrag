@@ -71,22 +71,33 @@ import java.util.Collection;
  */
 public class OptimicaCompiler extends ModelicaCompiler{
 	
-	private String modelicapath = null;
-	private String xmlVariablesTempl = null;
 	private String xmlProblVariablesTempl = null;
-	private String xmlValuesTempl = null;
-	private String cTemplatefile = null;
 	
 	public OptimicaCompiler(String modelicapath, String xmlVariablesTempl, 
 			String xmlProblVariablesTempl, String xmlValuesTempl, String cTemplatefile) {
 		super(modelicapath, xmlVariablesTempl, xmlValuesTempl, cTemplatefile);
-		this.modelicapath = modelicapath;
-		this.xmlVariablesTempl = xmlVariablesTempl;
 		this.xmlProblVariablesTempl = xmlProblVariablesTempl;
-		this.xmlValuesTempl = xmlValuesTempl;
-		this.cTemplatefile = cTemplatefile;
 	}
-			
+	
+	/**
+	 * Returns the XML problem variables template file path set for this compiler instance.
+	 * 
+	 * @return Reference to the XML variables template file path attribute. 
+	 * 
+	 */
+	public String getXMLProblVariablesTemplate() {
+		return this.xmlProblVariablesTempl;
+	}
+
+	/**
+	 * Set the XML problem variables template file path attribute.
+	 * 
+	 * @param template The new XML problem variables template file path.
+	 */
+	public void setXMLProblVariablesTemplate(String template) {
+		this.xmlProblVariablesTempl = template;
+	}
+	
 	/**
 	 * Compiles an Optimica model. A model file name and class must be provided.
 	 * Template files for XML and c code can be provided to generatate code for
@@ -139,7 +150,7 @@ public class OptimicaCompiler extends ModelicaCompiler{
 		FOptClass fc = flattenModel(cl+".mof", cl, ipr);
 
 		// Generate code?
-		if (xmlVariablesTempl != null && cTemplatefile != null) {
+		if (super.getXMLVariablesTemplate() != null && super.getCTemplate() != null) {
 			generateCode(fc);
 		}
 		
@@ -237,7 +248,7 @@ public class OptimicaCompiler extends ModelicaCompiler{
 
 		OptimicaXMLVariableGenerator variablegenerator = new OptimicaXMLVariableGenerator(new PrettyPrinter(), '$', fc);
 		String output = fc.nameUnderscore() + "_variables.xml";
-		variablegenerator.generate(this.xmlVariablesTempl, output);
+		variablegenerator.generate(super.getXMLVariablesTemplate(), output);
 
 		XMLProblemVariableGenerator problVariableGenerator = new XMLProblemVariableGenerator(new PrettyPrinter(), '$', fc);
 		output = fc.nameUnderscore() + "_problvariables.xml";
@@ -245,11 +256,11 @@ public class OptimicaCompiler extends ModelicaCompiler{
 
 		XMLValueGenerator valuegenerator = new XMLValueGenerator(new PrettyPrinter(), '$', fc);
 		output = fc.nameUnderscore() + "_values.xml";
-		valuegenerator.generate(this.xmlValuesTempl, output);
+		valuegenerator.generate(super.getXMLValuesTemplate(), output);
 
 		OptimicaCGenerator cgenerator = new OptimicaCGenerator(new PrettyPrinter(), '$', fc);
 		output = fc.nameUnderscore() + ".c";
-		cgenerator.generate(this.cTemplatefile, output);
+		cgenerator.generate(super.getCTemplate(), output);
 
 		logger.info("...code generated.");
 	}
