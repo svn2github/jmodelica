@@ -33,10 +33,7 @@ class ShootingException(Exception):
 
 
 def _get_example_path():
-    """ Get the absolute path to the examples.
-    
-    @param relpath:
-        The path to the example model relative to JMODELICA_HOME.
+    """Get the absolute path to the examples directory.
     
     """
     jmhome = os.environ.get('JMODELICA_HOME')
@@ -47,6 +44,16 @@ def _get_example_path():
     
     
 def _load_model(libname, path, mofile=None, optpackage=None):
+    """Load and return a JmiOptModel from DLL file residing in path.
+    
+    If the DLL file does not exist this method tries to build it if mofile and
+    optpackage are specified.
+    
+    Keyword parameters:
+    mofile -- the Modelica file used to build the DLL file.
+    optpackage -- the Optimica package in the mofile which is to be compiled.
+    
+    """
     try:
         model = JmiOptModel(libname, path)
     except IOError:
@@ -55,16 +62,27 @@ def _load_model(libname, path, mofile=None, optpackage=None):
             
         print "The model was not found. Trying to compile it..."
         from jmodelica.compiler import OptimicaCompiler as oc
-        #curdir = os.getcwd()
-        #os.chdir(path)
+        curdir = os.getcwd()
+        os.chdir(path)
         oc.compile_model(os.path.join(path, mofile), optpackage)
-        #os.chdir(curdir)
+        os.chdir(curdir)
+        model = JmiOptModel(libname,'./')
         
-    model = JmiOptModel(libname,'./')
     return model
     
     
 def _load_example_standard_model(libname, mofile=None, optpackage=None):
+    """Load and return a JmiOptModel from DLL file residing in the example
+       path.
+        
+    If the DLL file does not exist this method tries to build it if mofile and
+    optpackage are specified.
+    
+    Keyword parameters:
+    mofile -- the Modelica file used to build the DLL file.
+    optpackage -- the Optimica package in the mofile which is to be compiled.
+    
+    """
     return _load_model(libname, _get_example_path(), mofile, optpackage)
 
 
@@ -76,41 +94,50 @@ class OptModel:
     
     """
     def getParameters(self):
-        """Returns the parameters."""
+        """Getter for the model parameters."""
         raise NotImplementedError()
         
     def setParameters(self, params):
+        """Setter for the model parameters."""
         raise NotImplementedError()
         
     def getStates(self):
+        """Getter for the model states."""
         raise NotImplementedError()
         
     def setStates(self, x):
+        """Setter for the model states."""
         raise NotImplementedError()
         
     def getDiffs(self):
+        """Getter for the derivatives.
+        
+        They are evaluated using self.evalF().
+        """
         raise NotImplementedError()
         
     def getModelSize(self):
-        """ Returns the dimension of the problem. """
+        """Returns the dimension of the problem."""
         return len(self.getStates())
         
     def getRealModelSize(self):
-        """ Returns the dimension of the problem. 
-        
-        @remark:
-            In my master thesis code base there exists a class called
-            GenericSensivityModel that wraps an existing model creating
-            a pseudo problem that solves multiple disturbed instances of
-            this model to be able to approximate sensitivities in a
-            different approach than using SUNDIALS. This method came
-            into existence to be able to know the size of the original
-            problem/model.
+        """Returns the dimension of the problem. 
+                
+        In my master thesis code base there exists a class called
+        GenericSensivityModel that wraps an existing model creating a pseudo
+        problem that solves multiple disturbed instances of this model to be
+        able to approximate sensitivities in a different approach than using
+        SUNDIALS. This method came into existence to be able to know the size
+        of the original problem/model.
         """
         return self.getModelSize()
         
     def evalF(self):
-        """ Evaluate F."""
+        """Evaluate F.
+        
+        This evaluation sets the differentials that can be gotten by calling
+        the getter self.getDiffs().
+        """
         raise NotImplementedError()
         
     def evalJacX(self):
@@ -120,48 +147,55 @@ class OptModel:
     def getSensitivities(self, y):
         """Not supported in this model class.
         
-        @remark:
-            This method came existence due to GenericSensivityModel that
-            exists in my master thesis code base. See remark on
-            ::self.getRealModelSize() for more information why this
-            method exists.
+        This method came existence due to GenericSensivityModel that exists in
+        my master thesis code base. See remark on ::self.getRealModelSize() for
+        more information why this method exists.
         """
         raise NotImplementedError('This model does not support'
                                   ' sensitivity analysis implicitly.')
                                    
     def getInputs(self):
+        """Getter for the input/control signal."""
         raise NotImplementedError()
         
     def setInputs(self, new_u):
+        """Setter for the input/control signal."""
         raise NotImplementedError()
         
     def setTime(self, new_t):
-        """ Set the variable t. """
+        """Setter for time the variable t."""
         raise NotImplementedError()
         
     def getTime(self):
+        """Getter for time the variable t."""
         raise NotImplementedError()
         
     def evalCost(self):
-        """ Evaluate the optimization cost function, J. """
+        """Evaluate the optimization cost function, J."""
         raise NotImplementedError()
         
     def isFreeStartTime(self):
+        """Returns True if the start time is free, False otherwise."""
         raise NotImplementedError()
         
     def isFreeFinalTime(self):
+        """Returns True if the end time is free, False otherwise."""
         raise NotImplementedError()
         
     def isFixedStartTime(self):
+        """Returns False if the start time is free, True otherwise."""
         return not self.isFreeStartTime()
         
     def isFixedFinalTime(self):
+        """Returns False if the end time is free, True otherwise."""
         return not self.isFreeFinalTime()
         
     def getStartTime(self):
+        """Returns the start time for the simulation."""
         raise NotImplementedError()
         
     def getFinalTime(self):
+        """Returns the end time for the simulation."""
         raise NotImplementedError()
         
     def getCostJacobian(self, independent_variables, mask=None):
@@ -170,13 +204,14 @@ class OptModel:
         Returns the partial jacobian of the cost function with respect to the
         independent variables independent_variable (JMI_DER_X etc.).
         
-        @todo:
-            independent_variable should not be a mask. It is not
-            pythonesque.
+        Todo:
+        independent_variable should not be a mask. It is not the pythonesque
+        way to do it.
         """
         raise NotImplementedError()
         
     def reset(self):
+        """Reset everything in the model the it looks reloaded."""
         raise NotImplementedError()
         
 
@@ -194,6 +229,8 @@ class _DebugOptModel(OptModel):
     
     Parameters:
     p0 = 3
+    
+    See method doctypes for OptModel for method documentation.
     """
     def __init__(self):
         self.reset()
@@ -205,7 +242,6 @@ class _DebugOptModel(OptModel):
         self._x = N.array([0, 0, 0], dtype=pyjmi.c_jmi_real_t)
     
     def getParameters(self):
-        """Returns the parameters."""
         return self._params
         
     def setParameters(self, params):
@@ -221,7 +257,7 @@ class _DebugOptModel(OptModel):
         return self._xdiffs
         
     def evalF(self):
-        """ Evaluate F:
+        """Evaluate F:
         
         xdot0 = 1
         xdot1 = p0
@@ -235,7 +271,6 @@ class _DebugOptModel(OptModel):
         xdot[2] = x[0] + params[0] * x[1]
         
     def evalJacX(self):
-        """Evaluate the jacobian of the function F w.r.t. states x. """
         raise NotImplementedError()
                                    
     def getInputs(self):
@@ -246,14 +281,12 @@ class _DebugOptModel(OptModel):
         inputs[:] = new_u
         
     def setTime(self, new_t):
-        """ Set the variable t. """
         self._time = new_t
         
     def getTime(self):
         return self._time
         
     def evalCost(self):
-        """ Evaluate the optimization cost function, J. """
         raise NotImplementedError()
         
     def isFreeStartTime(self):
@@ -269,44 +302,32 @@ class _DebugOptModel(OptModel):
         return 2
         
     def getCostJacobian(self, independent_variables, mask=None):
-        """ Returns a partial jacobian of the cost function.
-        
-        Returns the partial jacobian of the cost function with respect to the
-        independent variables independent_variable (JMI_DER_X etc.).
-        
-        @todo:
-            independent_variable should not be a mask. It is not
-            pythonesque.
-        """
         raise NotImplementedError()
 
 
 class TestDebugOptModel:
-    """ Test the JmiOptModel class. """
+    """Tests for the _DebugOptModel class.
+    
+    Using the non-Modelica model _DebugOptModel makes it possible to verify
+    numerical solutions.
+    """
     
     def setUp(self):
-        """ Test setUp. Load the test model
-        
-        """
+        """Test setUp. Load the test model"""
         self.m = _DebugOptModel()
         
     def testModelSize(self):
-        """ Test GenericModel.getModelSize()
-        
-        """
+        """Test _DebugOptModel.getModelSize()"""
         size = self.m.getModelSize()
         nose.tools.assert_equal(size, 3)
         
     def testRealModelSize(self):
-        """ Test GenericModel.getRealModelSize(). """
+        """Test _DebugOptModel.getRealModelSize()."""
         size = self.m.getRealModelSize()
         nose.tools.assert_equal(size, 3)
         
     def testStatesGetSet(self):
-        """ Test GenericModel.setStates(...) and
-            GenericModel.getStates()
-        
-        """
+        """Test _DebugOptModel.setStates(...) and _DebugOptModel.getStates()"""
         new_states = [1.74, 3.38, 12.45]
         reset = [0, 0, 0]
         self.m.setStates(reset)
@@ -317,10 +338,7 @@ class TestDebugOptModel:
         N.testing.assert_array_almost_equal(new_states, states)
         
     def testDiffs(self):
-        """ Test GenericModel.setDiffs(...) and
-            GenericModel.getDiffs()
-        
-        """
+        """Test _DebugOptModel.setDiffs(...) and _DebugOptModel.getDiffs()"""
         reset = [0, 0, 0]
         diffs = self.m.getDiffs()
         diffs[:] = reset
@@ -332,10 +350,7 @@ class TestDebugOptModel:
         N.testing.assert_array_almost_equal(new_diffs, diffs2)
         
     def testInputs(self):
-        """ Test GenericModel.setInputs(...) and
-            GenericModel.getInputs()
-        
-        """
+        """Test _DebugOptModel.setInputs(...) and _DebugOptModel.getInputs()"""
         new_inputs = []
         reset = []
         self.m.setInputs(reset)
@@ -346,9 +361,8 @@ class TestDebugOptModel:
         N.testing.assert_array_almost_equal(new_inputs, inputs)
         
     def testParameters(self):
-        """ Test GenericModel.setParameters(...) and
-            GenericModel.getParameters()
-        
+        """Test _DebugOptModel.setParameters(...) and
+           _DebugOptModel.getParameters()
         """
         new_params = [1.54]
         reset = [0]
@@ -360,9 +374,7 @@ class TestDebugOptModel:
         N.testing.assert_array_almost_equal(new_params, params)
         
     def testTimeGetSet(self):
-        """ Test GenericModel.setTime(...) and GenericModel.getTime()
-        
-        """
+        """Test _DebugOptModel.setTime(...) and _DebugOptModel.getTime()"""
         new_time = 0.47
         reset = 0
         self.m.setTime(reset)
@@ -373,10 +385,11 @@ class TestDebugOptModel:
         nose.tools.assert_almost_equal(new_time, t)
         
     def testEvaluation(self):
+        """Test _DebugOptModel.evalF()"""
         self.m.evalF()
         
     def testSimulationWSensivity(self, SMALL=0.3):
-        """Testing simulation sensivity."""
+        """Testing simulation sensivity of _DebugOptModel."""
         
         FINALTIME = self.m.getFinalTime()
         STARTTIME = self.m.getStartTime()
@@ -428,7 +441,7 @@ class TestDebugOptModel:
         fig.savefig('TestDebugOptModel_testSimulationWSensivity.png')
 
     def testFixedSimulation(self):
-        """Test simulation"""
+        """Test simulation of _DebugOptModel"""
         assert self.m.isFixedStartTime(), "Only fixed times supported."
         assert self.m.isFixedFinalTime(), "Only fixed times supported."
         
@@ -443,7 +456,7 @@ class TestDebugOptModel:
         fig.savefig('TestDebugOptModel_testFixedSimulation.png')
         
     def testFixedSimulationIntervals(self):
-        """Test simulation between a different time span."""
+        """Test simulation between a different time span of _DebugOptModel."""
         assert self.m.isFixedStartTime(), "Only fixed times supported."
         assert self.m.isFixedFinalTime(), "Only fixed ties supported."
         
@@ -460,15 +473,17 @@ class TestDebugOptModel:
         fig.savefig('TestDebugOptModel_testFixedSimulationIntervals.png')
         
     def testReset(self):
-        """ Testing resetting the model."""
+        """Testing resetting the _DebugOptModel model"""
         self.m.reset()
 
 
 class JmiOptModel(OptModel):
-    """ The standard model.
+    """A Optimica/Modelica optimization model.
     
     Contains the common functions used to make this class behave as a DAE/ODE
-    model.
+    model paired with an optimization problem.
+    
+    See method doctypes for OptModel for method documentation.
     
     """
     def __init__(self, dllname, path):
@@ -491,11 +506,9 @@ class JmiOptModel(OptModel):
         return self._m.dx
         
     def evalF(self):
-        """ Evaluate F."""
         self._m.jmimodel.ode_f()
         
     def evalJacX(self):
-        """ Evaluate the jacobian of the function F w.r.t. states x. """
         jac  = N.array([0] * self.getRealModelSize()**2, dtype=c_jmi_real_t)
         mask = N.array([1] * self.getRealModelSize()**2, dtype=N.int32)
         self._m.jmimodel.jmi_ode_df(pyjmi.JMI_DER_CPPAD,
@@ -521,7 +534,6 @@ class JmiOptModel(OptModel):
         return self._m.t
         
     def evalCost(self):
-        """ Evaluate the optimization cost function, J. """
         return self._m.jmimodel.opt_J()
         
     def isFreeStartTime(self):
@@ -547,15 +559,6 @@ class JmiOptModel(OptModel):
         return final_time
         
     def getCostJacobian(self, independent_variables, mask=None):
-        """ Returns a partial jacobian of the cost function.
-        
-        Returns the partial jacobian of the cost function with respect to the
-        independent variables independent_variable (JMI_DER_X etc.).
-        
-        @todo:
-            independent_variable should not be a mask. It is not
-            pythonesque.
-        """
         assert self._m._n_z.value != 0
         if mask is None:
             mask = N.ones(self._m._n_z.value, dtype=int)
@@ -578,31 +581,24 @@ class JmiOptModel(OptModel):
 
 
 class TestJmiOptModel:
-    """ Test the JmiOptModel class. """
+    """Test the JmiOptModel instance of the Van der Pol oscillator."""
     
     def setUp(self):
-        """ Test setUp. Load the test model
-        
-        """
+        """Test setUp. Load the test model."""
         self.m = _load_example_standard_model('VDP_pack_VDP_Opt')
         
     def testModelSize(self):
-        """ Test GenericModel.getModelSize()
-        
-        """
+        """Test JmiOptModel.getModelSize()"""
         size = self.m.getModelSize()
         nose.tools.assert_equal(size, 3)
         
     def testRealModelSize(self):
-        """ Test GenericModel.getRealModelSize(). """
+        """Test JmiOptModel.getRealModelSize()."""
         size = self.m.getRealModelSize()
         nose.tools.assert_equal(size, 3)
         
     def testStatesGetSet(self):
-        """ Test GenericModel.setStates(...) and
-            GenericModel.getStates()
-        
-        """
+        """Test JmiOptModel.setStates(...) and JmiOptModel.getStates()"""
         new_states = [1.74, 3.38, 12.45]
         reset = [0, 0, 0]
         self.m.setStates(reset)
@@ -613,10 +609,7 @@ class TestJmiOptModel:
         N.testing.assert_array_almost_equal(new_states, states)
         
     def testDiffs(self):
-        """ Test GenericModel.setDiffs(...) and
-            GenericModel.getDiffs()
-        
-        """
+        """Test JmiOptModel.setDiffs(...) and JmiOptModel.getDiffs()"""
         reset = [0, 0, 0]
         diffs = self.m.getDiffs()
         diffs[:] = reset
@@ -628,10 +621,7 @@ class TestJmiOptModel:
         N.testing.assert_array_almost_equal(new_diffs, diffs2)
         
     def testInputs(self):
-        """ Test GenericModel.setInputs(...) and
-            GenericModel.getInputs()
-        
-        """
+        """Test JmiOptModel.setInputs(...) and JmiOptModel.getInputs()"""
         new_inputs = [1.54]
         reset = [0]
         self.m.setInputs(reset)
@@ -642,9 +632,7 @@ class TestJmiOptModel:
         N.testing.assert_array_almost_equal(new_inputs, inputs)
         
     def testParameters(self):
-        """ Test GenericModel.setParameters(...) and
-            GenericModel.getParameters()
-        
+        """Test JmiOptModel.setParameters(...) and JmiOptModel.getParameters()
         """
         new_params = [1.54, 19.54, 78.12]
         reset = [0] * 3
@@ -656,9 +644,7 @@ class TestJmiOptModel:
         N.testing.assert_array_almost_equal(new_params, params)
         
     def testTimeGetSet(self):
-        """ Test GenericModel.setTime(...) and GenericModel.getTime()
-        
-        """
+        """Test JmiOptModel.setTime(...) and JmiOptModel.getTime()"""
         new_time = 0.47
         reset = 0
         self.m.setTime(reset)
@@ -669,10 +655,11 @@ class TestJmiOptModel:
         nose.tools.assert_almost_equal(new_time, t)
         
     def testEvaluation(self):
+        """Test JmiOptModel.evalF() of JmiOptModel."""
         self.m.evalF()
         
     def testSimulationWSensivity(self, SMALL=0.3):
-        """Testing simulation sensivity."""
+        """Testing simulation sensivity of JmiOptModel."""
         
         FINALTIME = 2
         STARTTIME = self.m.getStartTime()
@@ -708,7 +695,7 @@ class TestJmiOptModel:
         fig.savefig('TestJmiOptModel_testSimulationWSensivity.png')
 
     def testFixedSimulation(self):
-        """Test simulation"""
+        """Test simulation of JmiOptModel."""
         assert self.m.isFixedStartTime(), "Only fixed times supported."
         assert self.m.isFixedFinalTime(), "Only fixed times supported."
         
@@ -723,7 +710,7 @@ class TestJmiOptModel:
         fig.savefig('TestJmiOptModel_testFixedSimulation.png')
         
     def testFixedSimulationIntervals(self):
-        """Test simulation between a different time span."""
+        """Test simulation between a different time span of JmiOptModel."""
         assert self.m.isFixedStartTime(), "Only fixed times supported."
         assert self.m.isFixedFinalTime(), "Only fixed ties supported."
         
@@ -740,12 +727,12 @@ class TestJmiOptModel:
         fig.savefig('TestJmiOptModel_testFixedSimulationIntervals.png')
         
     def testOptJacNonZeros(self):
-        """ Testing the numer of non-zero elements in VDP after
+        """ Testing the number of non-zero elements in VDP (JmiOptModel) after
             simulation.
-            
-        @note:
-            This test is model specific and not generic as most other
-            tests in this class.
+        
+        Note:
+        This test is model specific and not generic as most other
+        tests in this class.
         """
         solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime())
         assert self.m._m._n_z > 0, "Length of z should be greater than zero."
@@ -763,8 +750,7 @@ class TestJmiOptModel:
                          " one element (structurally) non-zero."
         
     def testOptimizationCostEval(self):
-        """ Test evaluation of optimization cost function
-        """
+        """Test evaluation of optimization cost function."""
         T, ys, sens, ignore = solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime())
         self.m._m.setX_P(ys[-1], 0)
         self.m._m.setDX_P(self.m.getDiffs(), 0)
@@ -772,10 +758,10 @@ class TestJmiOptModel:
         nose.tools.assert_not_equal(cost, 0)
         
     def testOptimizationCostJacobian(self):
-        """ Test evaluation of optimization cost function jacobian
+        """Test evaluation of optimization cost function jacobian.
         
-        @note:
-            This test is model specific for the VDP oscillator.
+        Note:
+        This test is model specific for the VDP oscillator.
         """
         T, ys, sens, ignore = solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime())
         self.m._m.setX_P(ys[-1], 0)
@@ -784,7 +770,7 @@ class TestJmiOptModel:
         N.testing.assert_almost_equal(jac, [[0, 0, 1]])
         
     def testReset(self):
-        """ Testing resetting the model."""
+        """Testing resetting the JmiOptModel model."""
         self.m.reset()
 
 
@@ -797,37 +783,38 @@ def solve_using_sundials(model,
                          abstol=1.0e-6, # used to be e-14
                          reltol=1.0e-6,
                          time_step=0.02):
-    """ Solve Lotka-Volterra equation using PySUNDIALS.
+    """Integrate the model model from 0 to end_time.
     
-    @param model:
-        The model to use. Should be a derive class from OptModel.
-    @param end_time:
-        The time when the model simulation should end.
-    @param start_time:
-        The (optional) time when the model simulation should start.
-        Defaults to 0.0.
-    @param verbose:
-        True of verbose output should be printed. Defaults to False.
-    @param sensi:
-        True if the built-in sensitivity functionality should be used in
-        SUNDIALS. Defaults to False.
-    @param use_jacobian:
-        If the jacobian should be used or not. (EXPERIMENTAL!)
-    @param abstol:
-        The absolute tolerance. See SUNDIALS' manual for more info.
-    @param reltol:
-        The relative tolerance. See SUDNIALS' manual for more info.
-    @param time_step:
-        The step size when SUNDIALS should return from it's internal loop. See
-        SUNDIALS' manual for more info.
-    @return:
-        A tuple consisting of:
-            1. Time samples.
-            2. States samples.
-            3. Sensitivity matrix. None if sensi==False.
-            4. An instance of the PyFData class containing the indices
-               for the the sensivity matrix.
-               
+    The model needs to be initialized before calling this function (all states
+    needs to be set etc.
+    
+    The function returns a tuple consisting of:
+        1. Time samples.
+        2. Corresponding states samples.
+        3. Sensitivity matrix. None if sensi==False.
+        4. An instance of the PyFData class containing the indices
+           for the the sensivity matrix.
+    
+    See keyword parameter start_time if simulation needs to be conducted
+    starting from a different time.
+    
+    Parameters:
+    model -- the model to use. Should be a derived class from OptModel.
+    end_time -- the time when the model simulation should end.
+    
+    Keyword parameters:
+    start_time   -- the (optional) time when the model simulation should start.
+                    Defaults to 0.0.
+    verbose      -- true of verbose output should be printed. Defaults to
+                    False.
+    sensi        -- true if the built-in sensitivity functionality should be
+                    used in SUNDIALS. Defaults to False.
+    use_jacobian -- if the jacobian should be used or not. (EXPERIMENTAL!)
+    abstol       -- the absolute tolerance. See SUNDIALS' manual for more info.
+    reltol       -- the relative tolerance. See SUDNIALS' manual for more info.
+    time_step    -- the step size when SUNDIALS should return from it's
+                    internal loop. See SUNDIALS' manual for more info.
+    
     """
     print "Input innan integration:", model.getInputs()
     print "States:", model.getStates()
@@ -845,12 +832,18 @@ def solve_using_sundials(model,
     #end_time = end_time + time_step
     
     def _sundials_f(t, x, dx, f_data):
-        """ Model (RHS) evaluation function.
+        """The sundials' RHS evaluation function.
         
-            Moving data between SUNDIALS arrays and NumPy arrays.
-            
-            f_data contains the model and an array with it's parameters.
+        This function basically moves data between SUNDIALS arrays and NumPy
+        arrays.
         
+        Parameters:
+        t      -- the point time on which the evalution is being done.
+        x      -- the states.
+        dx     -- the derivatives of the states.
+        f_data -- contains the model and an array with it's parameters.
+        
+        See SUNDIALS' manual and/or PySUNDIALS demos for more information.
         """
         data = ctypes.cast(f_data, PUserData).contents
         model = data.model
@@ -889,10 +882,8 @@ def solve_using_sundials(model,
         return 0
         
     class UserData(ctypes.Structure):
-        """
-            ctypes structure used to move data in (and out of?) the
-            callback functions.
-        
+        """ctypes structure used to move data in (and out of?) the callback
+           functions.
         """
         _fields_ = [
             ('parameters', ctypes.py_object), # parameters
@@ -929,15 +920,15 @@ def solve_using_sundials(model,
     data.t_sim_duration = data.t_sim_end - data.t_sim_start
     if sensi:
         class PyFData(object):
-            """ The Pythonic FData structure corresponding to the fdata
-                structure sent used by SUNDIALS.
+            """The Pythonic FData structure corresponding to the fdata
+               structure sent used by SUNDIALS.
             
-                An instance of of this structure is referred to by the
-                C data structure UserData.
-                
-                This class can be used to interpret the columns in the
-                sensivity matrix.
-                
+            An instance of of this structure is referred to by the
+            C data structure UserData.
+            
+            This class can be used to interpret the columns in the
+            sensivity matrix.
+            
             """
             # Slots is a feature that can be used in new-style Python
             # classes. It basically makes sure that typos are not made
@@ -1084,31 +1075,32 @@ def solve_using_sundials(model,
 
 
 def _shoot(model, start_time, end_time, sensi=True, time_step=0.2):
-    """ Does a single 'shot'.
+    """Performs a single 'shot' (simulation) from start_time to end_time.
+    
+    Model parameters/states etc. must be set BEFORE calling this method.
+    
+    The function returns a tuple consisting of:
+        1. The cost gradient with respect to initial states and
+           input U.
+        2. The final ($t_{tp_0}=1$) simulation states.
+        3. A dictionary holding the indices for the gradient.
+        4. The corresponding sensitivity matrix (if sensi is not False)
     
     if sensi is set to False no sensitivity analysis will be done and the 
     
-    Model parameters/states etc. must be set BEFORE calling this method.
+    Parameters:
+    model      -- the model which is to be used in the shot (simulation).
+    start_time -- the time when simulation should start.
+    end_time   -- the time when the simulation should finish.
+    
+    Keyword parameters:
+    sensi     -- True/False, if sensivity is to be conducted. (default=True)
+    time_step -- the time_step to be taken within the integration code.
+                 (default=0.2)
         
-    @note:
-        Currently written specifically for VDP.
-    @note:
-        Currently only supports inputs.
-    @note:
-        Assumes cost function is only dependent on state X.
-        
-    @param start_time:
-        The time when simulation should start.
-    @param end_time:
-        The time when the simulation should finish.
-    @return:
-        A tuple consisting of:
-            1. The cost gradient with respect to initial states and
-               input U.
-            2. The final ($t_{tp_0}=1$) simulation states.
-            3. A structure holding the indices for the gradient.
-            4. The corresponding sensitivity matrix.
-            
+    Notes:
+     * Assumes cost function is only dependent on state X and control signal U.
+    
     """
 
 #     print('******************************************')
@@ -1157,23 +1149,25 @@ def _shoot(model, start_time, end_time, sensi=True, time_step=0.2):
 
 
 def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
-    """ Run single shooting.
+    """Run single shooting of model model with a constant u.
     
-    @note:
-        Currently written specifically for VDP.
-    @note:
-        Currently only supports inputs.
+    The function returns the optimal u.
     
-    @param model:
-        The model to simulate/optimize over.
-    @param initial_u:
-        The initial input U_0 used to initialize the optimization with.
-    @param GRADIENT_THRESHOLD:
-        The threshold in when the inf norm of two different gradients
-        should consider two gradients same or different.
-    @return:
-        The optimal u.
-        
+    Notes:
+     * Currently written specifically for VDP.
+     * Currently only supports inputs.
+    
+    Parameters:
+    model -- the model which is to be simulated. Only models with one control
+             signal is supported.
+             
+    Keyword parameters:
+    initial_u -- the initial input U_0 used to initialize the optimization
+                 with.
+    GRADIENT_THRESHOLD -- the threshold in when the inf norm of two different
+                          gradients should consider two gradients same or
+                          different.
+    
     """
     start_time = model.getStartTime()
     end_time = model.getFinalTime()
@@ -1186,6 +1180,7 @@ def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
     gradient_u = None
     
     def f(cur_u):
+        """The cost evaluation function."""
         global gradient
         global gradient_u
         model.reset()
@@ -1206,6 +1201,10 @@ def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
         return cost
     
     def df(cur_u):
+        """The gradient of the cost function.
+        
+        NOT USED right now.
+        """
         if gradient_u is not None and max(gradient_u - cur_u) < GRADIENT_THRESHOLD:
             print "Using existing gradient"
         else:
@@ -1224,6 +1223,22 @@ def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
 
 
 def _eval_initial_ys(model, grid, time_step=0.2):
+    """Generate a feasible initial guesstimate of the initial states for each
+       segment in a grid.
+       
+    This is done by doing a simulation from start to end and extracting the
+    states at the time points between the segments specified in the grid.
+    
+    Parameters:
+    model -- the model which is to be simulated.
+    grid  -- the segment grid list. Each element in grid corresponds to a
+             segment and contains a tupleconsisting of start and end time of
+             that segment.
+    
+    Keyword parameters:
+    time_step -- the time step size used in the integration.
+    
+    """
     # TODO: Move this to MultipleShooter
     from scipy import interpolate
     _check_grid_consistency(grid)
@@ -1238,11 +1253,13 @@ def _eval_initial_ys(model, grid, time_step=0.2):
     
 
 def _check_normgrid_consistency(normgrid):
-    # TODO: Move this to MultipleShooter
     """Check normalized grid input parameter for errors.
     
     Raises ShootingException on error.
+    
+    By normalized it means the times are from 0 to 1.
     """
+    # TODO: Move this to MultipleShooter
     if math.fabs(normgrid[0][0]) > 0.001:
         raise ShootingException("Warning: The start time of the first segment should usually coinside with the model start time.")
     if math.fabs(normgrid[-1][1]-1) > 0.001:
@@ -1270,16 +1287,18 @@ class MultipleShooter:
     def __init__(self, model, initial_u, normgrid=[(0, 1)], initial_y=None, plot=True):
         """Constructor.
         
-        @param model:
-            The model to simulate/optimize over.
-        @param initial_u:
-            A list of initial inputs for each segment. If not a list, it is
-            assumed to be the same initial input for each segment.
-        @param normgrid:
+        Parameters:
+        model     -- the model to simulate/optimize over.
+        initial_u -- a list of initial inputs for each segment. If not a list,
+                     it is assumed to be the same initial input for each
+                     segment.
+        
+        Keyword parameters:
+        normgrid --
             A list of 2-tuples per segment. The first element in each tuple
             being the segment start time, the second element the segment end
             time. The grid must hold normalized values.
-        @param initial_y:
+        initial_y --
             Can be three things:
              * A list of initial states for all grids. If any of these are
                None they will be replaced by the default model state.
@@ -1288,8 +1307,9 @@ class MultipleShooter:
                If not a list the same initial state will be used for each
                segment.
                
-        NOTE that any states set in the model will be reset when initializing
-        this class with with that model.
+        Note:
+        Any states set in the model will be reset when initializing this class
+        with with that model.
         """
         self.set_model(model)
         self.set_normalized_grid(normgrid)
@@ -1305,15 +1325,17 @@ class MultipleShooter:
         return self._time_step
         
     def set_model(self, model):
-        """Set the model.
+        """Set the OptModel model.
         
-        NOTE that any states set in the model will be reset when initializing
-        this class with with that model.
+        Note:
+        Any states set in the model will be reset when initializing this class
+        with with that model.
         """
         model.reset()
         self._m = model
         
     def get_model(self):
+        """Get the OptModel model."""
         return self._m    
         
     def set_initial_u(self, initial_u):
@@ -1355,9 +1377,12 @@ class MultipleShooter:
         return self._initial_y[0]
         
     def set_normalized_grid(self, grid):
-        """ Set the grid containing normalized times between [0, 1].
+        """Set the grid containing normalized times (between [0, 1]).
         
         The method also checks for inconsistencies in the grid.
+        
+        Each element in grid corresponds to a segment and contains a tuple
+        consisting of start and end time of that segment.
         """
         _check_normgrid_consistency(grid)
         
@@ -1378,13 +1403,16 @@ class MultipleShooter:
         The grid does not necessarily have to be normalized.
         
         The method also checks for inconsistencies in the grid.
+        
+        Each element in grid corresponds to a segment and contains a tuple
+        consisting of start and end time of that segment.
         """
         _check_grid_consistency(grid)
         
         self._grid = grid
         
     def get_grid(self):
-        """ Returned the real grid holding the actual simulation times."""
+        """Returned the real grid holding the actual simulation times."""
         return self._grid
     
     def _shoot_single_segment(self, u, y0, interval, sensi=True):
@@ -1414,11 +1442,10 @@ class MultipleShooter:
         return seg_cost_gradient, seg_last_y, seg_gradparams, sens
     
     def f(self, p):
-        """The cost evaluation function.
+        """Returns the evaluated cost function w.r.t. the vector 'p'.
         
-        @param p:
-            A concatenation of initial states (excluding the first
-            segment) and parameters. See _split_opt_x(...) for details.
+        'p'is a concatenation of initial states (excluding the first segment) 
+        and parameters. See _split_opt_x(...) for details.
         """
         model = self.get_model()
         grid = self.get_grid()
@@ -1439,9 +1466,11 @@ class MultipleShooter:
         return cost
         
     def df(self, p):
-        """Returns the gradient of self.f(p).
+        """Returns the evaluated gradient of the cost function w.r.t.
+           the vector 'p'.
         
-        In the VDP example it depends on the 
+        'p'is a concatenation of initial states (excluding the first segment) 
+        and parameters. See _split_opt_x(...) for details.
         """
         model = self.get_model()
         grid = self.get_grid()
@@ -1494,10 +1523,10 @@ class MultipleShooter:
         return (last_ys - y0s[1:])
         
     def dh(self, p):
-        """ Evaluates the jacobian of self.h(p).
+        """Evaluates the jacobian of self.h(p).
         
-        TODO: Set first initial states to zero (or even better have a mask for
-              which parameters that should not be changed).
+        This function currently assumes the multiple shooting being conducted
+        cannot vary the initial states with respect to the first segment.
         """
         print "Evaluating equality contraints gradient."
         
@@ -1546,14 +1575,31 @@ class MultipleShooter:
         return r
         
     def get_p0(self):
-        """Returns the vector which is to optimized over."""
+        """Returns the initial p-vector which is to optimized over.
+        
+        The vector is constructed based on self.get_initial_y() and
+        self.get_initial_u(). See _split_opt_x(...) for details.
+        """
         initial_y = self.get_initial_y()
         initial_u = self.get_initial_u()
         p0 = N.concatenate( (N.array(initial_y).flatten(), N.array(initial_u).flatten()) )
         return p0
         
-    def runOptimization(self, plot=True, check_gradients=False, only_check_gradients=False):
-        """Start/run optimization procedure and the optimum."""
+    def check_gradients():
+        """Verify that gradients looks correct.
+        
+        This function indirectly uses the built in OpenOPT gradient
+        verification feature which compares finite different quotients with the
+        gives gradient evaluation function.
+        """
+        self.runOptimization(plot=False, _only_check_gradients=True)
+        
+    def runOptimization(self, plot=True, _only_check_gradients=False):
+        """Start/run optimization procedure and the optimum unless.
+        
+        Set the keyword parameter 'plot' to False (default=True) if plotting
+        should not be conducted.
+        """
         grid = self.get_grid()
         model = self.get_model()
         
@@ -1594,12 +1640,11 @@ class MultipleShooter:
             p.plot = 1
         p.iprint = 1
         
-        if check_gradients or only_check_gradients:
+        if _only_check_gradients:
             # Check gradients against finite difference quotients
             p.checkdf(maxViolation=0.05)
             p.checkdh()
-            if only_check_gradients:
-                return None
+            return None
         
         #opt = p.solve('ralg') # does not work - serious convergence issues
         opt = p.solve('scipy_slsqp')
@@ -1611,11 +1656,14 @@ class MultipleShooter:
         
         
 def _verify_gradient(f, df, xstart, xend, SMALL=0.1, STEPS=100):
-    """ Output a comparison plot between f.d. quotient and and df.
+    """Output a comparison plot between f.d. quotient and and df.
     
-    The plot os written to the current matplotlib figure within the interval
+    The plot is written to the current matplotlib figure within the interval
     [xstart, xend] split into STEPS steps. The finite difference quotient has
     an infitesimal equal to SMALL.
+    
+    This function was written before I knew about the built in OpenOPT gradient
+    verification feature. See MultipleShooter.check_gradient().
     """
     assert xstart < xend
     
@@ -1649,7 +1697,7 @@ def _verify_gradient(f, df, xstart, xend, SMALL=0.1, STEPS=100):
     
     
 def test_verify_gradient():
-    """ Testing _verify_gradient(...)."""
+    """Testing _verify_gradient(...)."""
     fig = p.figure()
     f = lambda x: x**2
     df = lambda x: 2*x
@@ -1658,26 +1706,42 @@ def test_verify_gradient():
     
 
 class _PartialEvaluator:
-    """Evaluator used to evaluate a one dimensional function by setting
-       the other fixes. Used by test_gradient_elements().
+    """Evaluator used to evaluate a {f(x): R^n -> R} by setting all variables to
+       fixed values except x_{index} which is varied. Thus a new one
+       dimensional function is created.
        
-    TODO: Clearer documentation :-)   
+    This function is used by test_gradient_elements().
     """
-    def __init__(self, f, df, xbase, index):
-        self._f = f
-        self._df = df
+    def __init__(self, g, dg, xbase, index):
+        """Constructor.
+        
+        Parameters:
+        g  -- the function g: R^n -> R
+        dg -- the gradient of g, namely dg: R^n -> R^n
+        xbase -- the x vector used for all x:s except index.
+        index -- the index in x vector which is to be varied.
+        """
+        self._g = g
+        self._dg = dg
         self._xbase = xbase
         self._index = index
         
-    def f(self, x):
+    def f(self, xi):
+        """Evaluate the one dimensional function f.
+        
+        xi is the value if index index in x before evaluating g.
+        """
         xvec = self._xbase.copy()
-        xvec[self._index] = x
-        return self._f(xvec)
+        xvec[self._index] = xi
+        return self._g(xvec)
         
     def df(self, x):
+        """Returns the index index in the gradient evaluated using xbase except
+           xbase[index]=x.
+        """
         xvec = self._xbase.copy()
         xvec[self._index] = x
-        return self._df(xvec)[self._index]
+        return self._dg(xvec)[self._index]
 
 
 def test_f_gradient_elements(certainindex=None):
@@ -1751,6 +1815,15 @@ def _split_opt_x(model, gridsize, p, prepend_initials):
     
 
 def _plot_control_solution(model, interval, initial_ys, us):
+    """Plots a single shooting solution.
+    
+    Parameters:
+    model      -- the model to simulate.
+    interval   -- a tuple: (start_time, end_time)
+    initial_ys -- the initial states at the beginning of the simulation.
+    us         -- the constant control signal(s) used throughout the
+                  simulation.
+    """
     model.reset()
     model.setStates(initial_ys)
     model.setInputs(us)
@@ -1777,13 +1850,24 @@ def _plot_control_solution(model, interval, initial_ys, us):
     return [T,Y,yS]
 
 
-def plot_control_solutions(model, grid, x, doshow=True):
+def plot_control_solutions(model, grid, opt_p, doshow=True):
     """Plot multiple shooting solution.
     
-    NOTE that the model will be reset when calling this!
+    Parameters:
+    model -- the model to be used in the simulation.
+    grid  -- the grid to be used.
+    p     -- the optimization vector p to be used. See _split_opt_x(...) for
+             more info.
+    
+    Keyword parameters:
+    doshow -- set to False if a plot of the solution not should be shown.
+              (default=True).
+    
+    Note:
+    The model will be reset when calling this!
     """
     model.reset()
-    initial_ys, us = _split_opt_x(model, len(grid), x, model.getStates())
+    initial_ys, us = _split_opt_x(model, len(grid), opt_p, model.getStates())
     
     p.figure()
     p.hold(True)
@@ -1796,7 +1880,7 @@ def plot_control_solutions(model, grid, x, doshow=True):
 
 
 def test_plot_control_solutions():
-    """ Testing plot_control_solutions(...)"""
+    """Testing plot_control_solutions(...)."""
     m = _load_example_standard_model('VDP_pack_VDP_Opt')
     m.reset()
     grid = [(0, 0.1),
@@ -1861,12 +1945,14 @@ def test_control_solution_variations():
 
 
 def cost_graph(model):
-    """ Plot the cost as a function a constant u (single shooting).
+    """Plot the cost as a function a constant u (single shooting) based on the
+       model model.
     
-    @note:
-        Currently written specifically for VDP.
-    @note:
-        Currently only supports inputs.
+    This function was mainly used for testing.
+    
+    Notes:
+     * Currently written specifically for VDP.
+     * Currently only supports inputs.
     """
     start_time = model.getStartTime()
     end_time = model.getFinalTime()
@@ -1911,12 +1997,18 @@ def cost_graph(model):
 
 
 def construct_grid(n):
-    """Construct and return a grid with n segments."""
+    """Construct and return an equally spaced grid with n segments."""
     times = N.linspace(0, 1, n+1)
     return zip(times[:-1], times[1:])
 
 
 def main():
+    """The main method.
+    
+    Uses command line arguments to know what to do. Run
+    $ python shooting.py --help
+    to see what you can do.
+    """
     from optparse import OptionParser
     parser = OptionParser()
     parser.add_option('-w', '--what', default='multiple', type='choice',
