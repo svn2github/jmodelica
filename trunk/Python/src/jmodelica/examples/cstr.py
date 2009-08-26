@@ -6,7 +6,7 @@ import os.path
 
 import jmodelica
 import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler as oc
+from jmodelica.compiler import OptimicaCompiler
 
 import numpy as N
 import scipy as S
@@ -19,6 +19,7 @@ def run_demo():
     """Demonstrate how to solve the 
     CSTR optimization problem."""
 
+    oc = OptimicaCompiler()
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
 

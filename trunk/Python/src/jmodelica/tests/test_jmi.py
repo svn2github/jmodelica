@@ -7,7 +7,7 @@ import os.path
 import nose
 
 import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler as oc
+from jmodelica.compiler import OptimicaCompiler
 import jmodelica.xmlparser as xp
 import jmodelica.io
 import matplotlib.pyplot as plt
@@ -19,12 +19,14 @@ sep = os.path.sep
 jm_home = os.environ.get('JMODELICA_HOME')
 path_to_examples = sep + "Python" + sep + "jmodelica" + sep + "examples"
 
+oc = OptimicaCompiler()
+
 def setup():
     """ 
     Setup test module. Compile test model (only needs to be done once) and 
     set log level. 
     """
-    oc.set_log_level(oc.LOG_ERROR)
+    OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
 
 def test_jmi_opt_sim_set_initial_from_trajectory():
     """ Test of 'jmi_opt_sim_set_initial_from_trajectory'.

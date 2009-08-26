@@ -12,7 +12,7 @@ import numpy as n
 import nose
 import nose.tools
 
-from jmodelica.compiler import OptimicaCompiler as oc
+from jmodelica.compiler import OptimicaCompiler
 import jmodelica as jm
 import jmodelica.jmi as jmi
 
@@ -55,7 +55,8 @@ def setup():
     Setup test module. Compile test model (only needs to be done once) and 
     set log level. 
     """
-    oc.set_log_level(oc.LOG_ERROR)
+    OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
+    oc = OptimicaCompiler()
     oc.compile_model(fpath, cpath, 'ipopt')
     mc.initmodel()
     

@@ -6,7 +6,7 @@ import os
 import sys
 import nose
 
-from jmodelica.compiler import OptimicaCompiler as oc
+from jmodelica.compiler import OptimicaCompiler
 import jmodelica as jm
 
 jm_home = jm.environ['JMODELICA_HOME']
@@ -16,7 +16,8 @@ model = os.sep+'files'+os.sep+'Pendulum_pack.mo'
 fpath = jm_home+path_to_examples+model
 cpath = "Pendulum_pack.Pendulum_Opt"
 
-oc.set_log_level(oc.LOG_ERROR)
+OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
+oc = OptimicaCompiler()
    
 def test_optimica_compile():
     """

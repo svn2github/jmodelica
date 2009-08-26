@@ -44,14 +44,8 @@ if not jpype.isJVMStarted():
     print "JVM started."
 
 
-
 class ModelicaCompiler():
-    """User class for accessing the Java ModelicaCompiler class
-
-    This class is not intended for instantiation. The Java compiler
-    class is accesses through static methods, and this is reflected
-    also on the Python class.
-    """
+    """ User class for accessing the Java ModelicaCompiler class. """
     
     Compiler = org.jmodelica.modelica.compiler.ModelicaCompiler
     
@@ -64,15 +58,18 @@ class ModelicaCompiler():
     xml_var_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_modelica_variables_template.xml')    
     xml_val_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_modelica_values_template.xml')
     c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_modelica_template.c')
+    
+    modelica_path = ""
 
     def __init__(self):
-        raise Exception('Class not intended to be instantiated, see doc.')
-
+        self._modelicacompiler = self.Compiler(self.modelica_path, 
+                                               self.xml_var_path, 
+                                               self.xml_val_path, 
+                                               self.c_tpl_path)
     @classmethod
     def set_log_level(self,level):
         self.Compiler.setLogLevel(self.Compiler.logger.getName(), level)
 
-    @classmethod
     def compile_model(self,
                       model_file_name,
                       model_class_name,
@@ -93,7 +90,7 @@ class ModelicaCompiler():
         Parameters:
 
             model_file_name -- 
-                Path to file in which the model is contained.
+                Path to file or list of paths to files in which the model is contained.
             model_class_name -- 
                 Name of model class in the model file to compile.
             target -- 
@@ -114,14 +111,12 @@ class ModelicaCompiler():
                 If there was a runtime exception thrown by the underlying Java 
                 classes.
 
-        """
-
+        """        
+        if isinstance(model_file_name, str):
+            model_file_name = [model_file_name]           
         try:
-            self.Compiler.compileModel(model_file_name,
-                                       model_class_name,
-                                       self.xml_var_path,
-                                       self.xml_val_path,
-                                       self.c_tpl_path)
+            self._modelicacompiler.compileModel(model_file_name,
+                                                model_class_name)
             c_file = model_class_name.replace('.','_')
             retval = self.compile_dll(c_file, target)
             return retval
@@ -129,7 +124,6 @@ class ModelicaCompiler():
         except jpype.JavaException, ex:
             _handle_exception(ex)
 
-    @classmethod
     def parse_model(self,model_file_name):   
         """ 
         Parses a model.
@@ -140,7 +134,7 @@ class ModelicaCompiler():
         Parameters:    
 
             model_file_name -- 
-                Path to file in which the model is contained.
+                Path to file or list of paths to files in which the model is contained.
 
         Return:
 
@@ -160,14 +154,15 @@ class ModelicaCompiler():
                 If there was a runtime exception thrown by the underlying Java 
                 classes.
 
-        """ 
+        """        
+        if isinstance(model_file_name, str):
+            model_file_name = [model_file_name]
         try:
-            sr = self.Compiler.parseModel(model_file_name)
+            sr = self._modelicacompiler.parseModel(model_file_name)
             return sr        
         except jpype.JavaException, ex:
             _handle_exception(ex)
 
-    @classmethod
     def instantiate_model(self, source_root, model_class_name):
         """ 
         Generates an instance tree representation for a model.
@@ -199,12 +194,11 @@ class ModelicaCompiler():
 
         """    
         try:
-            ipr = self.Compiler.instantiateModel(source_root,model_class_name)
+            ipr = self._modelicacompiler.instantiateModel(source_root, model_class_name)
             return ipr    
         except jpype.JavaException, ex:
             _handle_exception(ex)
 
-    @classmethod
     def flatten_model(self, model_file_name, model_class_name, inst_prg_root):
         """ 
         Computes a flattened representation of a model. 
@@ -241,14 +235,13 @@ class ModelicaCompiler():
 
         """
         try:
-            fclass = self.Compiler.flattenModel(model_file_name,
-                                                 model_class_name,
-                                                 inst_prg_root)
+            fclass = self._modelicacompiler.flattenModel(model_file_name,
+                                                         model_class_name,
+                                                         inst_prg_root)
             return fclass    
         except jpype.JavaException, ex:
             _handle_exception(ex)
 
-    @classmethod
     def generate_code(self,fclass):
     
         """ 
@@ -275,17 +268,11 @@ class ModelicaCompiler():
                 classes.
 
         """
-
- 
         try:
-            self.Compiler.generateCode(fclass,
-                                       self.xml_var_path,
-                                       self.xml_val_path,
-                                       self.c_tpl_path)
+            self._modelicacompiler.generateCode(fclass)
         except jpype.JavaException, ex:
             _handle_exception(ex)
 
-    @classmethod
     def compile_dll(self, c_file_name, target="model"):
 
         """ 
@@ -309,7 +296,6 @@ class ModelicaCompiler():
             System return value. 
 
         """
-
         #make settings
         make_file = os.path.join(self.jm_home, 'Makefiles', 'MakeFile')
         file_name =' FILE_NAME=' + c_file_name
@@ -348,15 +334,8 @@ class ModelicaCompiler():
         return retval
 
 
-
-
 class OptimicaCompiler():
-    """User class for accessing the Java OptimicaCompiler class
-
-    This class is not intended for instantiation. The Java compiler
-    class is accesses through static methods, and this is reflected
-    also on the Python class.
-    """
+    """ User class for accessing the Java OptimicaCompiler class. """
 
     Compiler = org.jmodelica.optimica.compiler.OptimicaCompiler
 
@@ -370,16 +349,20 @@ class OptimicaCompiler():
     xml_val_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_modelica_values_template.xml')
     c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_optimica_template.c')
     xml_prob_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_optimica_problvariables_template.xml')
+    
+    modelica_path = ""
 
     def __init__(self):
-        raise Exception('Class not intended to be instantiated, see doc.')
+        self._optimicacompiler = self.Compiler(self.modelica_path, 
+                                               self.xml_var_path, 
+                                               self.xml_prob_path, 
+                                               self.xml_val_path, 
+                                               self.c_tpl_path)
 
     @classmethod
     def set_log_level(self,level):
         self.Compiler.setLogLevel(self.Compiler.logger.getName(), level)
 
-
-    @classmethod
     def compile_model(self,
                       model_file_name,
                       model_class_name,
@@ -400,7 +383,7 @@ class OptimicaCompiler():
         Parameters:
 
             model_file_name -- 
-                Path to file in which the model is contained.
+                Path to file or list of paths to files in which the model is contained.
             model_class_name -- 
                 Name of model class in the model file to compile.
             target -- 
@@ -422,14 +405,10 @@ class OptimicaCompiler():
                 classes.
 
         """
-
+        if isinstance(model_file_name, str):
+            model_file_name = [model_file_name]            
         try:
-            self.Compiler.compileModel(model_file_name,
-                                     model_class_name,
-                                     self.xml_var_path,
-                                     self.xml_prob_path,
-                                     self.xml_val_path,
-                                     self.c_tpl_path)
+            self._optimicacompiler.compileModel(model_file_name, model_class_name)
             c_file = model_class_name.replace('.','_')
             retval = self.compile_dll(c_file, target)
             return retval
@@ -437,60 +416,6 @@ class OptimicaCompiler():
         except jpype.JavaException, ex:
             _handle_exception(ex)
 
-    @classmethod
-    def compile_models(self,
-                       model_file_names,
-                       model_class_name,
-                       target = "model"):
-    
-        """ 
-        Compiles an Optimica model.
-
-        This function is identical to jmodelica.optimicacompiler.compile_model
-        except that it excepts a list of file names where models are stored.
-
-        Parameters:
-
-            model_file_names -- 
-                A list of paths to files in which the models are contained.
-            model_class_name -- 
-                Name of model class in the model file to compile.
-            target -- 
-                The build target.
-
-        Exceptions:
-
-            CompilerError -- 
-                If one or more error is found during compilation.
-            OptimicaClassNotFoundError -- 
-                If the model class is not found.
-            IOError -- 
-                If the model file is not found, can not be read or any other IO 
-                related error.
-            Exception -- 
-                If there are general errors related to the parsing of the model.       
-            JError -- 
-                If there was a runtime exception thrown by the underlying Java 
-                classes.
-
-        """
-
-        try:
-            self.Compiler.compileModels(model_file_names,
-                                        model_class_name,
-                                        self.xml_var_path,
-                                        self.xml_prob_path,
-                                        self.xml_val_path,
-                                        self.c_tpl_path)
-            c_file = model_class_name.replace('.','_')
-            retval = self.compile_dll(c_file, target)
-            return retval
-
-        except jpype.JavaException, ex:
-            _handle_exception(ex)
-
-
-    @classmethod
     def parse_model(self, model_file_name):
         """ 
         Parses a model.
@@ -501,7 +426,7 @@ class OptimicaCompiler():
         Parameters:    
 
             model_file_name -- 
-                Path to file in which the model is contained.
+                Path to file or list of paths to files in which the model is contained.
 
         Return:
 
@@ -522,54 +447,15 @@ class OptimicaCompiler():
                 classes.
 
         """ 
+        if isinstance(model_file_name, str):
+            model_file_name = [model_file_name]
         try:
-            sr = self.Compiler.parseModel(model_file_name)
-            return sr        
-        except jpype.JavaException, ex:
-            _handle_exception(ex)               
-
-    @classmethod
-    def parse_models(self, *model_file_names):
-        """ 
-        Parses models stored in different files.
-
-        Identical to jmodelica.optimicacompiler.parse_model except
-        that it accepts multiple file names. Parses model stored in
-        different files and returns a reference to the source tree
-        representation containing all models.
-
-        Parameters:    
-
-            model_file_name -- 
-                Path to file in which the model is contained.
-
-        Return:
-
-            Reference to the root of the source tree representation of the parsed 
-            model.
-
-        Exceptions:
-
-            CompilerError --
-                If one or more error is found during compilation.
-            IOError --
-                If the model file is not found, can not be read or any other IO 
-                related error.
-            Exception --
-                If there are general errors related to the parsing of the model.       
-            JError -- 
-                If there was a runtime exception thrown by the underlying Java 
-                classes.
-
-        """ 
-        try:
-            sr = self.Compiler.parseModels(model_file_names)
-            return sr        
+             sr = self._optimicacompiler.parseModel(model_file_name)
+             return sr        
         except jpype.JavaException, ex:
             _handle_exception(ex)               
 
 
-    @classmethod
     def instantiate_model(self, source_root, model_class_name):
         """ 
         Generates an instance tree representation for a model. 
@@ -601,12 +487,11 @@ class OptimicaCompiler():
 
         """   
         try:
-            ipr = self.Compiler.instantiateModel(source_root,model_class_name)
+            ipr = self._optimicacompiler.instantiateModel(source_root, model_class_name)
             return ipr    
         except jpype.JavaException, ex:
             _handle_exception(ex)
 
-    @classmethod
     def flatten_model(self,
                       model_file_name,
                       model_class_name,
@@ -646,14 +531,13 @@ class OptimicaCompiler():
 
         """
         try:
-            fclass = self.Compiler.flattenModel(model_file_name,
-                                                model_class_name,
-                                                inst_prg_root)
+            fclass = self._optimicacompiler.flattenModel(model_file_name, 
+                                                         model_class_name,
+                                                         inst_prg_root)
             return fclass    
         except jpype.JavaException, ex:
             _handle_exception(ex)
 
-    @classmethod
     def generate_code(self, fclass):
         """ 
         Generates code for a model.
@@ -679,19 +563,11 @@ class OptimicaCompiler():
                 classes.
 
         """
-
-
         try:
-            self.Compiler.generateCode(fclass,
-                                       self.xml_var_path,
-                                       self.xml_prob_path,
-                                       self.xml_val_path,
-                                       self.c_tpl_path)
+            self._optimicacompiler.generateCode(fclass)
         except jpype.JavaException, ex:
             _handle_exception(ex)
 
-
-    @classmethod
     def compile_dll(self, c_file_name, target="model"):
         """  Compiles a c code representation of a model.
 

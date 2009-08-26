@@ -7,7 +7,7 @@ import os.path
 # Import the JModelica.org Python packages
 import jmodelica
 import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler as oc
+from jmodelica.compiler import OptimicaCompiler
 
 # Import numerical libraries
 import numpy as N
@@ -19,6 +19,7 @@ def run_demo():
     """Demonstrate how to solve a simple
     parameter estimation problem."""
 
+    oc = OptimicaCompiler()
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
     # Compile the Optimica model first to C code and

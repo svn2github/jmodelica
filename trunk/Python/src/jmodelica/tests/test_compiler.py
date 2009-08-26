@@ -7,7 +7,7 @@ import sys
 
 import nose
 
-from jmodelica.compiler import ModelicaCompiler as mc
+from jmodelica.compiler import ModelicaCompiler
 import jmodelica as jm
 
 
@@ -17,7 +17,9 @@ path_to_examples = os.path.join('Python', 'jmodelica', 'examples')
 model = os.path.join('files', 'Pendulum_pack_no_opt.mo')
 fpath = os.path.join(jm_home,path_to_examples,model)
 cpath = "Pendulum_pack.Pendulum"
-mc.set_log_level(mc.LOG_ERROR)
+
+mc = ModelicaCompiler()
+ModelicaCompiler.set_log_level(ModelicaCompiler.LOG_ERROR)
 
 def test_compile():
     """

@@ -7,7 +7,7 @@ import os.path
 import nose
 
 import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler as oc
+from jmodelica.compiler import OptimicaCompiler
 import jmodelica.xmlparser as xp
 import jmodelica.io
 
@@ -21,7 +21,6 @@ path_to_examples = sep + "Python" + sep + "jmodelica" + sep + "examples"
 model = sep + "files" + sep + "VDP.mo"
 fpath = jm_home+path_to_examples+model
 cpath = "VDP_pack.VDP_Opt_Min_Time"
-
 fname = cpath.replace('.','_',1)
 
 def setup():
@@ -29,7 +28,8 @@ def setup():
     Setup test module. Compile test model (only needs to be done once) and 
     set log level. 
     """
-    oc.set_log_level(oc.LOG_ERROR)
+    oc = OptimicaCompiler()
+    OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
     oc.compile_model(fpath, cpath, target='ipopt')
 
 def test_dymola_export_import():
