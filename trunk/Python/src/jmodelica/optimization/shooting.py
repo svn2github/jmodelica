@@ -1832,20 +1832,14 @@ def _plot_control_solution(model, interval, initial_ys, us):
     p.subplot(211)
     T, Y, yS, parameters = solve_using_sundials(model, end_time=interval[1], start_time=interval[0])
     p.hold(True)
-    p.plot(T,Y[:,0],'b',linewidth=2)
-    p.plot(T,Y[:,1],'g--',linewidth=2)
-    p.subplot(212)
-    p.plot(T,Y[:,2],'b',linewidth=2)
-    p.plot(T,Y[:,3],'g--',linewidth=2)
-    #p.hold(False)
+    for i in range(model.getModelSize()):
+        p.plot(T,Y[:,i],label="State #%s" % (i + 1), linewidth=2)
 
-    p.figure(2)
-    p.subplot(211)
-    p.hold(True)
-    p.plot(interval, [us[0], us[0]],'b')
     p.subplot(212)
-    p.plot(interval, [us[1], us[1]],'b')
-    #p.hold(False)
+    p.hold(True)
+    for i in len(model.getInputs()):
+        p.plot(interval, [us[i], us[i]], label="Input #%s" % (i + 1))
+    p.hold(False)
 
     return [T,Y,yS]
 
