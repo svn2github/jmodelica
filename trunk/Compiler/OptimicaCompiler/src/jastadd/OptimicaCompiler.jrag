@@ -46,7 +46,7 @@ import java.util.Collection;
  * <code>org.jmodelica.applications.OptimicaCompiler myModels/models.mo 
  * models.model1 XMLtemplate1.xml XMLtemplate2.xml XMLtemplate3.xml cppTemplate.cpp</code>
  * <p>
- * Logging can be set with the optional argument -i, -w or -e where:
+ * Logging can be set with the optional argument -log=i, w or e where:
  *	- -i : log info, warning and error messages 
  *	- -w : log warning and error messages
  *	- -e : log error messages only (default if the log option is not used)
@@ -87,65 +87,6 @@ public class OptimicaCompiler extends ModelicaCompiler{
 		this.cTemplatefile = cTemplatefile;
 	}
 			
-//	/**
-//	 * Compiles an Optimica model. A model file name and class must be provided.
-//	 * Template files for XML and c code can be provided to generatate code for
-//	 * this model. Prints an error and returns without completion if, for
-//	 * example, a file can not be found or if the parsing fails.
-//	 * 
-//	 * 
-//	 * @param name
-//	 *            The name of the model file.
-//	 * @param cl
-//	 *            The name of the class in the model file to compile.
-//	 * @param xmlVariablesTempl
-//	 *            The XML template file for model variables (optional).
-//	 * @param xmlProblVariablesTempl
-//	 *            The XML template file for the optimization problem variables.
-//	 *            (optional).
-//	 * @param xmlValuesTempl
-//	 *            The XML template file for independent parameter values.
-//	 *            (optional).
-//	 * @param cTemplatefile
-//	 *            The c template file (optional).
-//	 *            
-//	 * @throws beaver.Parser.Exception If there was an Beaver parsing exception.
-//	 * @throws CompilerException
-//	 *             If errors have been found during the parsing, instantiation
-//	 *             or flattening.
-//	 * @throws FileNotFoundException
-//	 *             If the model file can not be found.
-//	 * @throws IOException
-//	 *             If there was an error reading the model file. (Beaver
-//	 *             exception.)
-//	 * @throws IOException
-//	 *             If there was an error creating the .mof file.
-//	 * @throws ModelicaClassNotFoundException
-//	 *             If the Modelica class to parse, instantiate or flatten is not
-//	 *             found.
-//	 * 
-//	 */
-//	public void compileModel(String name, String cl) 
-//	  throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
-//		logger.info("======= Compiling model =======");
-//		
-//		// build source tree
-//		SourceRoot sr = parseModel(name);
-//
-//		// compute instance tree
-//		InstProgramRoot ipr = instantiateModel(sr, cl);
-//			
-//		// flattening
-//		FOptClass fc = flattenModel(cl+".mof", cl, ipr);
-//
-//		// Generate code?
-//		if (xmlVariablesTempl != null && cTemplatefile != null) {
-//			generateCode(fc, xmlVariablesTempl,xmlProblVariablesTempl, xmlValuesTempl, cTemplatefile);
-//		}
-//		
-//		logger.info("====== Model compiled successfully =======");
-//	}
-
 	/**
 	 * Compiles an Optimica model. A model file name and class must be provided.
 	 * Template files for XML and c code can be provided to generatate code for

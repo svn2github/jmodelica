@@ -58,7 +58,7 @@ import java.util.logging.SimpleFormatter;
  * <code>org.jmodelica.applications.ModelicaCompiler myModels/models.mo models.model1
  * XMLtemplate1.xml XMLtemplate2.xml cppTemplate.cpp</code>
  * <p>
- * Logging can be set with the optional argument -log=i, w or -e where:
+ * Logging can be set with the optional argument -log=i, w or e where:
  * <p>
  * 	- -i : log info, warning and error messages 
  * 	- -w : log warning and error messages
@@ -102,63 +102,7 @@ public class ModelicaCompiler {
 		this.xmlValuesTempl = xmlValuesTempl;
 		this.cTemplatefile = cTemplatefile;		
 	}
-		
-//	/**
-//	 * Compiles a Modelica model. A model file name and class must be provided.
-//	 * Two template files for XML and one for c can be provided to generatate
-//	 * code for this model. Prints an error and returns without completion if,
-//	 * for example, a file can not be found or if the parsing fails.
-//	 * 
-//	 * @param name
-//	 *            The name of the model file.
-//	 * @param cl
-//	 *            The name of the class in the model file to compile.
-//	 * @param xmlVariablesTempl
-//	 *            The XML template file for model variables(optional).
-//	 * @param xmlValuesTempl
-//	 *            The XML template file for independent parameter values
-//	 *            (optional).
-//	 * @param cTemplatefile
-//	 *            The c template file (optional).
-//	 * 
-//	 * @throws beaver.Parser.Exception
-//	 *             If there was an Beaver parsing exception.
-//	 * @throws CompilerException
-//	 *             If errors have been found during the parsing, instantiation
-//	 *             or flattening.
-//	 * @throws FileNotFoundException
-//	 *             If the model file can not be found.
-//	 * @throws IOException
-//	 *             If there was an error reading the model file. (Beaver
-//	 *             exception.)
-//	 * @throws IOException
-//	 *             If there was an error creating the .mof file.
-//	 * @throws ModelicaClassNotFoundException
-//	 *             If the Modelica class to parse, instantiate or flatten is not
-//	 *             found.
-//	 * 
-//	 */
-//	public void compileModel(String name, String cl) 
-//	  throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
-//		logger.info("======= Compiling model =======");
-//		
-//		// build source tree
-//		SourceRoot sr = parseModel(name);
-//
-//		// compute instance tree
-//		InstProgramRoot ipr = instantiateModel(sr, cl);
-//			
-//		// flattening
-//		FClass fc = flattenModel(cl+".mof", cl, ipr);
-//
-//		// Generate code?
-//		if (this.xmlVariablesTempl != null && this.xmlValuesTempl !=null && this.cTemplatefile != null) {
-//			generateCode(fc);
-//		}
-//		
-//		logger.info("====== Model compiled successfully =======");
-//	}
-	
+			
 	/**
 	 * Compiles a Modelica model. A model file name and class must be provided.
 	 * Two template files for XML and one for c can be provided to generatate
