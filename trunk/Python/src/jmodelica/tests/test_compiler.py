@@ -6,6 +6,7 @@ import os, os.path
 import sys
 
 import nose
+import nose.tools
 
 from jmodelica.compiler import ModelicaCompiler
 import jmodelica as jm
@@ -73,5 +74,30 @@ def test_stepbystep():
     fclass = mc.flatten_model(fpath, cpath, ipr)
     assert mc.compile_dll(cpath.replace('.','_',1)) == 0, \
            "Compiling dll failed."
+           
+def test_setget_modelicapath():
+    """ Test modelicapath setter and getter. """
+    newpath = os.path.join(jm_home,'ThirdParty','MSL','Modelica')
+    mc.set_modelicapath(newpath)
+    nose.tools.assert_equal(mc.get_modelicapath(),newpath)
+    
+def test_setget_XMLVariablesTemplate():
+    """ Test XML variables template setter and getter. """
+    newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_modelica_variables_template.xml')
+    mc.set_XMLVariablesTemplate(newtemplate)
+    nose.tools.assert_equal(mc.get_XMLVariablesTemplate(), newtemplate)
+    
+def test_setget_XMLValuesTemplate():
+    """ Test XML values template setter and getter. """
+    newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_modelica_values_template.xml')
+    mc.set_XMLValuesTemplate(newtemplate)
+    nose.tools.assert_equal(mc.get_XMLValuesTemplate(), newtemplate)
+
+def test_setget_cTemplate():
+    """ Test c template setter and getter. """
+    newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_modelica_template.c')
+    mc.set_cTemplate(newtemplate)
+    nose.tools.assert_equal(mc.get_cTemplate(), newtemplate)
+   
 
 

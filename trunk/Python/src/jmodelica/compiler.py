@@ -69,6 +69,38 @@ class ModelicaCompiler():
     @classmethod
     def set_log_level(self,level):
         self.Compiler.setLogLevel(self.Compiler.logger.getName(), level)
+        
+    def get_modelicapath(self):
+        """ Returns the modelicapath set for this compiler."""
+        return self._modelicacompiler.getModelicapath()
+    
+    def set_modelicapath(self, path):
+        """ Sets the modelicapath to path. """
+        self._modelicacompiler.setModelicapath(path)
+        
+    def get_XMLVariablesTemplate(self):
+        """ Returns file path to the XML variables template. """
+        return self._modelicacompiler.getXMLVariablesTemplate()
+
+    def set_XMLVariablesTemplate(self, template):
+        """ Sets the XML variables template to the file pointed out by template."""
+        self._modelicacompiler.setXMLVariablesTemplate(template)
+
+    def get_XMLValuesTemplate(self):
+        """ Returns file path to the XML values template. """
+        return self._modelicacompiler.getXMLValuesTemplate()
+    
+    def set_XMLValuesTemplate(self, template):
+        """ Sets the XML values template to the file pointed out by template."""
+        self._modelicacompiler.setXMLValuesTemplate(template)
+        
+    def get_cTemplate(self):
+        """ Returns file path to the c template. """
+        return self._modelicacompiler.getCTemplate()
+    
+    def set_cTemplate(self, template):
+        """ Sets the c template to the file pointed out by template."""
+        self._modelicacompiler.setCTemplate(template)
 
     def compile_model(self,
                       model_file_name,
@@ -362,6 +394,46 @@ class OptimicaCompiler():
     @classmethod
     def set_log_level(self,level):
         self.Compiler.setLogLevel(self.Compiler.logger.getName(), level)
+
+    def get_modelicapath(self):
+        """ Returns the modelicapath set for this compiler."""
+        return self._optimicacompiler.getModelicapath()
+    
+    def set_modelicapath(self, path):
+        """ Sets the modelicapath to path. """
+        self._optimicacompiler.setModelicapath(path)
+        
+    def get_XMLVariablesTemplate(self):
+        """ Returns file path to the XML variables template. """
+        return self._optimicacompiler.getXMLVariablesTemplate()
+
+    def set_XMLVariablesTemplate(self, template):
+        """ Sets the XML variables template to the file pointed out by template."""
+        self._optimicacompiler.setXMLVariablesTemplate(template)
+
+    def get_XMLProblVariablesTemplate(self):
+        """ Returns file path to the XML problem variables template. """
+        return self._optimicacompiler.getXMLProblVariablesTemplate()
+
+    def set_XMLProblVariablesTemplate(self, template):
+        """ Sets the XML problem variables template to the file pointed out by template."""
+        self._optimicacompiler.setXMLProblVariablesTemplate(template)
+
+    def get_XMLValuesTemplate(self):
+        """ Returns file path to the XML values template. """
+        return self._optimicacompiler.getXMLValuesTemplate()
+    
+    def set_XMLValuesTemplate(self, template):
+        """ Sets the XML values template to the file pointed out by template."""
+        self._optimicacompiler.setXMLValuesTemplate(template)
+        
+    def get_cTemplate(self):
+        """ Returns file path to the c template. """
+        return self._optimicacompiler.getCTemplate()
+    
+    def set_cTemplate(self, template):
+        """ Sets the c template to the file pointed out by template."""
+        self._optimicacompiler.setCTemplate(template)
 
     def compile_model(self,
                       model_file_name,

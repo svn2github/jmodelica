@@ -75,6 +75,36 @@ def test_optimica_stepbystep():
     assert oc.compile_dll(cpath.replace('.','_',1)) == 0, \
            "Compiling dll failed."
 
+def test_setget_modelicapath():
+    """ Test modelicapath setter and getter. """
+    newpath = os.path.join(jm_home,'ThirdParty','MSL','Modelica')
+    oc.set_modelicapath(newpath)
+    nose.tools.assert_equal(oc.get_modelicapath(),newpath)
+    
+def test_setget_XMLVariablesTemplate():
+    """ Test XML variables template setter and getter. """
+    newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_optimica_variables_template.xml')
+    oc.set_XMLVariablesTemplate(newtemplate)
+    nose.tools.assert_equal(oc.get_XMLVariablesTemplate(), newtemplate)
+
+def test_setget_XMLProblVariablesTemplate():
+    """ Test XML variables template setter and getter. """
+    newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_optimica_problvariables_template.xml')
+    oc.set_XMLVariablesTemplate(newtemplate)
+    nose.tools.assert_equal(oc.get_XMLVariablesTemplate(), newtemplate)
+   
+def test_setget_XMLValuesTemplate():
+    """ Test XML values template setter and getter. """
+    newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_modelica_values_template.xml')
+    oc.set_XMLValuesTemplate(newtemplate)
+    nose.tools.assert_equal(oc.get_XMLValuesTemplate(), newtemplate)
+
+def test_setget_cTemplate():
+    """ Test c template setter and getter. """
+    newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_optimica_template.c')
+    oc.set_cTemplate(newtemplate)
+    nose.tools.assert_equal(oc.get_cTemplate(), newtemplate)
+
 def TO_ADDtest_MODELICAPATH():
     """ Test that the MODELICAPATH is loaded correctly.
 
