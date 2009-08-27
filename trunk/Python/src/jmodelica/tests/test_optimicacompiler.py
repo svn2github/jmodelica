@@ -2,7 +2,7 @@
  
 """
 
-import os
+import os, os.path
 import sys
 import nose
 
@@ -10,10 +10,10 @@ from jmodelica.compiler import OptimicaCompiler
 import jmodelica as jm
 
 jm_home = jm.environ['JMODELICA_HOME']
-path_to_examples = os.sep+'Python'+os.sep+'jmodelica'+os.sep+'examples'
+path_to_examples = os.path.join('Python','jmodelica','examples')
 
-model = os.sep+'files'+os.sep+'Pendulum_pack.mo'
-fpath = jm_home+path_to_examples+model
+model = os.path.join('files','Pendulum_pack.mo')
+fpath = os.path.join(jm_home,path_to_examples,model)
 cpath = "Pendulum_pack.Pendulum_Opt"
 
 OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
@@ -74,6 +74,24 @@ def test_optimica_stepbystep():
     fclass = oc.flatten_model(fpath, cpath, ipr)
     assert oc.compile_dll(cpath.replace('.','_',1)) == 0, \
            "Compiling dll failed."
+
+def test_compiler_error():
+    """ Test that a CompilerError is raised if compilation errors are found in the model."""
+    corruptmodel = os.path.join('files','CorruptCodeGenTests.mo')
+    path = os.path.join(jm_home,path_to_examples,corruptmodel)
+    cl = 'CorruptCodeGenTests.CorruptTest1'
+    nose.tools.assert_raises(jm.compiler.CompilerError, oc.compile_model, path, cl)
+    
+def test_class_not_found_error():
+    """ Test that an OptimicaClassNotFoundError is raised if model class is not found. """
+    errorcl = 'NonExisting.OptimicaClass'
+    nose.tools.assert_raises(jm.compiler.OptimicaClassNotFoundError, oc.compile_model, fpath, errorcl)
+
+#def test_IO_error():
+#    """ Test that an IOError is raised if the model file is not found. """          
+#    errormodel = os.path.join('files','NonExistingModel.mo')
+#    errorpath = os.path.join(jm_home,path_to_examples,model)
+#    nose.tools.assert_raises(IOError, oc.compile_model, errorpath, cpath)
 
 def test_setget_modelicapath():
     """ Test modelicapath setter and getter. """

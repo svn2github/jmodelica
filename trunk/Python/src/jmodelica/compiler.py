@@ -754,7 +754,8 @@ class CompilerError(JError):
 def _handle_exception(ex):
     """ Catch and handle all expected Java Exceptions that the
     underlying Java classes might throw."""
-    if ex.javaClass() is org.jmodelica.ast.CompilerException:
+    if ex.javaClass() is org.jmodelica.modelica.compiler.CompilerException \
+        or ex.javaClass() is org.jmodelica.optimica.compiler.CompilerException:
         arraylist = ex.__javaobject__.getProblems()
         itr = arraylist.iterator()
         
@@ -763,12 +764,12 @@ def _handle_exception(ex):
             problems = problems + str(itr.next()) + "\n"
             
             raise CompilerError(problems)
-        
+    
     if ex.javaClass() is org.jmodelica.modelica.compiler.ModelicaClassNotFoundException:
         raise ModelicaClassNotFoundError(str(ex.__javaobject__.getClassName()))
     
     if ex.javaClass() is org.jmodelica.optimica.compiler.ModelicaClassNotFoundException:
-        raise ModelicaClassNotFoundError(str(ex.__javaobject__.getClassName()))
+        raise OptimicaClassNotFoundError(str(ex.__javaobject__.getClassName()))
     
     if ex.javaClass() is jpype.java.io.FileNotFoundException:
         raise IOError(ex.message())
