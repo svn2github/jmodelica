@@ -87,11 +87,11 @@ def test_class_not_found_error():
     errorcl = 'NonExisting.ModelicaClass'
     nose.tools.assert_raises(jm.compiler.ModelicaClassNotFoundError, mc.compile_model, fpath, errorcl)
 
-#def test_IO_error():
-#    """ Test that an IOError is raised if the model file is not found. """          
-#    errormodel = os.path.join('files','NonExistingModel.mo')
-#    errorpath = os.path.join(jm_home,path_to_examples,model)
-#    nose.tools.assert_raises(IOError, mc.compile_model, errorpath, cpath)
+def test_IO_error():
+    """ Test that an IOError is raised if the model file is not found. """          
+    errormodel = os.path.join('files','NonExistingModel.mo')
+    errorpath = os.path.join(jm_home,path_to_examples,errormodel)
+    nose.tools.assert_raises(IOError, mc.compile_model, errorpath, cpath)
            
 def test_setget_modelicapath():
     """ Test modelicapath setter and getter. """
