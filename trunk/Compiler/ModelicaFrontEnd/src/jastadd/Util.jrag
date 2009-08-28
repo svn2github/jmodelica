@@ -49,62 +49,36 @@ aspect RootAccess {
 	 */
 	
 	public SourceRoot ParserHandler.parseFile(String fileName) 
-	   throws ParserException, beaver.Parser.Exception {
+	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
 		SourceRoot sr = null;
-		try {
-			Reader reader = new FileReader(fileName);
-			ModelicaScanner scanner = new ModelicaScanner(new BufferedReader(reader));
-			ModelicaParser parser = new ModelicaParser();
-			parser.setLineBreakMap(scanner.getLineBreakMap());
-			sr = (SourceRoot)parser.parse(scanner);
-			sr.setFileName(fileName);
-		}  catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+		Reader reader = new FileReader(fileName);
+		ModelicaScanner scanner = new ModelicaScanner(new BufferedReader(reader));
+		ModelicaParser parser = new ModelicaParser();
+		parser.setLineBreakMap(scanner.getLineBreakMap());
+		sr = (SourceRoot)parser.parse(scanner);
+		sr.setFileName(fileName);
 		return sr;
 	}
 	
 	public SourceRoot ParserHandler.parseString(String str, String fileName) 
-	   throws ParserException, beaver.Parser.Exception {
+	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
 		SourceRoot sr = null;
-		try {
-			ModelicaScanner scanner = new ModelicaScanner(new StringReader(str));
-			ModelicaParser parser = new ModelicaParser();
-			parser.setLineBreakMap(scanner.getLineBreakMap());
-			sr = (SourceRoot)parser.parse(scanner);
-			sr.setFileName(fileName);
-		}  catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		ModelicaScanner scanner = new ModelicaScanner(new StringReader(str));
+		ModelicaParser parser = new ModelicaParser();
+		parser.setLineBreakMap(scanner.getLineBreakMap());
+		sr = (SourceRoot)parser.parse(scanner);
+		sr.setFileName(fileName);
 		return sr;
 	}
 	
 	public Exp ParserHandler.parseExpString(String str)
-	   throws ParserException, beaver.Parser.Exception {
+	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
 		Exp exp = null;
-		try {
-			ModelicaScanner scanner = new ModelicaScanner(new StringReader(str));
-			ModelicaParser parser = new ModelicaParser();
-			exp = (Exp)parser.parse(scanner,ModelicaParser.AltGoals.exp);
-			//System.out.println("ModelicaParser.parseExpString: "+str);
-			//exp.dumpTreeBasic("");
-		}  catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+		ModelicaScanner scanner = new ModelicaScanner(new StringReader(str));
+		ModelicaParser parser = new ModelicaParser();
+		exp = (Exp)parser.parse(scanner,ModelicaParser.AltGoals.exp);
+		//System.out.println("ModelicaParser.parseExpString: "+str);
+		//exp.dumpTreeBasic("");
 		return exp;
 	}
 
