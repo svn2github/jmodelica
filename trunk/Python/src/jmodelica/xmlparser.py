@@ -231,6 +231,71 @@ class XMLVariablesDoc(XMLdoc):
             print(vals)
             raise Exception("Number of vals does not equal number of keys")
         return dict(zip(keys,vals))
+
+    def get_dx_start_attributes(self):
+        """ 
+        Extract ValueReference and Start attribute for all derivatives in the XML document.
+            
+        Returns:
+            Dict with ValueReference as key and Start attribute as value.
+             
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"][../../Attributes/*/Start]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/*/Start/text()[../../../../VariableCategory=\"derivative\"]")       
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
+        return dict(zip(keys,vals))
+
+    def get_x_start_attributes(self):
+        """ 
+        Extract ValueReference and Start attribute for all differentiated variables in the XML document.
+            
+        Returns:
+            Dict with ValueReference as key and Start attribute as value.
+             
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"][../../Attributes/*/Start]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/*/Start/text()[../../../../VariableCategory=\"state\"]")       
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
+        return dict(zip(keys,vals))
+
+    def get_u_start_attributes(self):
+        """ 
+        Extract ValueReference and Start attribute for all inputs in the XML document.
+            
+        Returns:
+            Dict with ValueReference as key and Start attribute as value.
+             
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"input\"][../../Attributes/*/Start]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/*/Start/text()[../../../../VariableCategory=\"input\"]")       
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
+        return dict(zip(keys,vals))
+
+    def get_w_start_attributes(self):
+        """ 
+        Extract ValueReference and Start attribute for all algebraic variables in the XML document.
+            
+        Returns:
+            Dict with ValueReference as key and Start attribute as value.
+             
+        """
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/*/Start/text()[../../../../VariableCategory=\"algebraic\"]")       
+        if len(keys)!=len(vals):
+            print(keys)
+            print(vals)
+            raise Exception("Number of vals does not equal number of keys")
+        return dict(zip(keys,vals))
+
     
     def get_p_opt_variable_refs(self):
         """ 

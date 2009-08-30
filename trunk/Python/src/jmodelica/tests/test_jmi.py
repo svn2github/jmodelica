@@ -18,6 +18,7 @@ sep = os.path.sep
 
 jm_home = os.environ.get('JMODELICA_HOME')
 path_to_examples = sep + "Python" + sep + "jmodelica" + sep + "examples"
+path_to_tests = sep + "Python" + sep + "jmodelica" + sep + "tests"
 
 oc = OptimicaCompiler()
 
@@ -203,3 +204,50 @@ def test_set_initial_from_dymola():
 ##     plt.grid()
 ##     plt.ylabel('x2')
 ##     plt.show()
+
+
+def test_init_opt():
+    """ Test of DAE initialization optimization problem
+
+    """
+    
+    model = sep + "files" + sep + "DAEInitTest.mo"
+    fpath = jm_home+path_to_tests+model
+    cpath = "DAEInitTest"
+    fname = cpath.replace('.','_',1)
+
+    oc.compile_model(fpath, cpath, target='ipopt')
+
+    # Load the dynamic library and XML data
+    dae_init_test = jmi.Model(fname)
+
+    init_nlp = jmi.DAEInitializationOpt(dae_init_test)
+
+    init_nlp_ipopt = jmi.JMIDAEInitializationOptIPOPT(init_nlp)
+
+    init_nlp_ipopt.init_opt_ipopt_set_string_option("derivative_test","first-order")
+    
+    init_nlp_ipopt.init_opt_ipopt_solve()
+
+    res_Z = N.array([5.,
+                     -198.1585290151921,
+                     -0.2431975046920718,
+                     3.0,
+                     4.0,
+                     1.0,
+                     2197.0,
+                     5.0,
+                     -0.92009689684513785,
+                     0.])
+
+    assert max(N.abs(res_Z-dae_init_test.getZ()))<1e-3, \
+           "test_jmi.py: test_init_opt: Wrong initial solution." 
+    
+    #print(dae_init_test.getZ())
+    #print(dae_init_test.getPI())
+    #print(dae_init_test.getDX())
+    #print(dae_init_test.getX())
+    #print(dae_init_test.getU())
+    #print(dae_init_test.getW())
+
+

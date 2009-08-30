@@ -50,7 +50,9 @@ libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g
 # static inclusion of the runtime libraries when creating model so:s.
 libjmi_la_LDFLAGS = -no-undefined -static-libtool-libs
 
-libjmi_algorithm_la_SOURCES = jmi_opt_sim.h \
+libjmi_algorithm_la_SOURCES = jmi_init_opt.h \
+                              jmi_init_opt.c \
+                              jmi_opt_sim.h \
                               jmi_opt_sim.c \
                               jmi_opt_sim_lp.c
 
@@ -62,7 +64,9 @@ libjmi_algorithm_la_LDFLAGS = -no-undefined -static-libtool-libs
 
 libjmi_solver_la_SOURCES = jmi_opt_sim_lp.c \
                            jmi_opt_sim_ipopt.cpp \
-                           jmi_TNLP.cpp
+                           jmi_TNLP.cpp \
+                           jmi_init_opt_ipopt.cpp \
+                           jmi_init_opt_TNLP.cpp
 
 libjmi_solver_la_CFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE -g
 libjmi_solver_la_CXXFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE -g
@@ -80,7 +84,9 @@ libjmi_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g
 libjmi_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g
 libjmi_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
 
-libjmi_algorithm_cppad_la_SOURCES = jmi_opt_sim.h \
+libjmi_algorithm_cppad_la_SOURCES = jmi_init_opt.h \
+                                    jmi_init_opt.c \
+                                    jmi_opt_sim.h \
                                     jmi_opt_sim.c \
                                     jmi_opt_sim_lp.c
                    
@@ -90,7 +96,10 @@ libjmi_algorithm_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
 #libjmi_cppad_la_LDFLAGS = -no-undefined 
 
 libjmi_solver_cppad_la_SOURCES = jmi_opt_sim_ipopt.cpp \
-                                 jmi_TNLP.cpp
+                                 jmi_TNLP.cpp \
+                                 jmi_init_opt_ipopt.cpp \
+                                 jmi_init_opt_TNLP.cpp
+
                    
 libjmi_solver_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -I$(IPOPT_INC) -DJMI_AD=JMI_AD_CPPAD -g
 libjmi_solver_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_HOME) -I$(IPOPT_INC) -DJMI_AD=JMI_AD_CPPAD -g
@@ -100,9 +109,11 @@ libjmi_solver_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
 
 include_HEADERS = jmi.h \
                   jmi_common.h \
+                  jmi_init_opt.h \
                   jmi_opt_sim.h \
                   jmi_opt_sim_lp.h 
 
 if COMPILE_WITH_IPOPT
 include_HEADERS += jmi_opt_sim_ipopt.h
+include_HEADERS += jmi_init_opt_ipopt.h
 endif

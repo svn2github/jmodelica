@@ -44,6 +44,8 @@
  *    optimization algorithms) are implemented. These includes a framework for implementation of
  *    simultaneous optimization algorithms as well as a particular implementation of an algorithm
  *    based on Lagrange polynomials on Radau points.
+ *     - <a href="group__jmi__init__opt.html"> Documentation of DAE initialization
+ *     optimization algorithm.</a>
  *     - <a href="group__jmi__opt__sim.html"> Documentation of simultaneous
  *     interface optimization </a>
  *     - <a href="group__jmi__opt__sim__lp.html"> Documentation of implementation
@@ -52,6 +54,8 @@
  *    Typically, the JMI Model and Algorithm interfaces are intended to
  *    be integrated with numerical solvers. Currently, the JMI interface provides
  *    an interface to the NLP solver Ipopt (https://projects.coin-or.org/Ipopt).
+ *     - <a href="group__jmi__init__opt__ipopt.html"> Documentation of the Ipopt
+ *     interface to the DAE initialization optimization algorithm</a>
  *     - <a href="group__jmi__opt__sim__ipopt.html"> Documentation of the Ipopt
  *     interface to the JMI simultaneous optimization interface</a>
  *
