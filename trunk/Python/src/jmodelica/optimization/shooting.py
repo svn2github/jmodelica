@@ -1146,14 +1146,6 @@ def _shoot(model, start_time, end_time, sensi=True, time_step=0.2):
      * Assumes cost function is only dependent on state X and control signal U.
     
     """
-
-#     print('******************************************')
-#     print(model._m.getZ())
-#     print(start_time)
-#     print(end_time)
-#     print(sensi)
-#     print(time_step)
-#     print('******************************************')
     
     T, ys, sens, params = solve_using_sundials(model, end_time, start_time, sensi=sensi, time_step=time_step)
     
@@ -1548,14 +1540,6 @@ class MultipleShooter:
         model = self.get_model()
         grid = self.get_grid()
         y0s, us = _split_opt_x(model, len(grid), p, self.get_initial_y_grid0())
-
-#         print('*****')
-#         print('p')
-#         print(p)
-#         print('y0s')
-#         print(y0s)
-#         print('us')
-#         print(us)
         
         def eval_last_ys(u, y0, interval):
             grad, last_y, gradparams, sens = self._shoot_single_segment(u, y0, interval)
@@ -2078,8 +2062,6 @@ def main(args=sys.argv):
     parser.add_option('-p', '--predefined-model', dest='predmodel', default=None, type='choice', choices=['vdp', 'quadtank'], help="A set of predefined example models. Using one of these will override --modelfile, --directory, --modelfile and --directory.")
     
     (options, args) = parser.parse_args(args=args)
-
-    options.predmodel = 'quadtank'
     
     if options.gridsize <= 0:
         raise ShootingException('Grid size must be greater than zero.')
