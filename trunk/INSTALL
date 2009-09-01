@@ -113,7 +113,7 @@ installers for Windows will install JPype, lxml and Nose
 automatically. Linux and Mac OS X users need to install these packages
 manually.
 
-JModelica.org uses the following environment variables:
+JModelica.org supports the following environment variables:
 
  - JMODELICA_HOME containing the path to the JModelica.org installation
    directory (again, without spaces or ~ in the path).
@@ -126,13 +126,13 @@ JModelica.org uses the following environment variables:
  - LD_LIBRARY_PATH containing the path to the $IPOPT_HOME/lib directory
    (Linux only.)
 
-Notice that the environment variables do not need to be set
-globally. For Linux and Mac OS X, start-up scripts for python and
-ipython are provided in $JMODELICA_HOME/Python/jm_python.sh and
-$JMODELICA_HOME/Python/jm_ipython.sh. For Windows, the
-JModelica.org-SDK or the JModelica.org installers set the necessary
-environment variables. It is, however, possible to override the
-default values by setting the variables explicitly.
+It is only necessary to set the variable JMODELICA_HOME as a
+global environment variable, since the others are set in the
+Python script startup.py, which is executed when the jmodelica
+module is imported into Python. The default settings can be
+overridden either by setting an environment variable globally
+or by adding a local startup.py file located in the directory
+$HOME/jmodelica.org
 
 7. Test the distribution
 
@@ -146,9 +146,5 @@ showing the optimization results should be opened.
 
 =======
 Issues:
- - When running on Windows, the file
-   $JMODELICA_HOME/Options/options.xml needs to be edited so that the
-   path identifying the Modelica Standard Library is given on standard
-   Windows format, rather than on MinGW format.
 
 
