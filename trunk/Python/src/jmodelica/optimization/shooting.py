@@ -587,7 +587,7 @@ class TestJmiOptModel:
     
     def setUp(self):
         """Test setUp. Load the test model."""
-        self.m = _load_example_standard_model('VDP_pack_VDP_Opt')
+        self.m = _load_example_standard_model('VDP_pack_VDP_Opt','VDP.mo','VDP_pack.VDP_Opt')
         
     def testModelSize(self):
         """Test JmiOptModel.getModelSize()"""
@@ -1763,7 +1763,7 @@ def test_f_gradient_elements(certainindex=None):
     if run_huge_test is False and certainindex is None:
         return
     
-    m = _load_example_standard_model('VDP_pack_VDP_Opt')
+    m = _load_example_standard_model('VDP_pack_VDP_Opt','VDP.mo','VDP_pack.VDP_Opt')
     grid = [(0, 0.1),
             (0.1, 0.2),
             (0.2, 0.3),
@@ -1877,7 +1877,7 @@ def plot_control_solutions(model, grid, opt_p, doshow=True):
 
 def test_plot_control_solutions():
     """Testing plot_control_solutions(...)."""
-    m = _load_example_standard_model('VDP_pack_VDP_Opt')
+    m = _load_example_standard_model('VDP_pack_VDP_Opt','VDP.mo','VDP_pack.VDP_Opt')
     m.reset()
     grid = [(0, 0.1),
             (0.1, 0.2),
@@ -1908,7 +1908,7 @@ def test_plot_control_solutions():
 
 def test_control_solution_variations():
     """Test different variations of control solutions."""
-    m = _load_example_standard_model('VDP_pack_VDP_Opt')
+    m = _load_example_standard_model('VDP_pack_VDP_Opt','VDP.mo','VDP_pack.VDP_Opt')
     m.reset()
     grid = [(0, 0.1),
             (0.1, 0.2),
