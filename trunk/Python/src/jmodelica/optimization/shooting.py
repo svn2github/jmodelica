@@ -1147,9 +1147,14 @@ def _shoot(model, start_time, end_time, sensi=True, time_step=0.2):
     
     """
     
-    T, ys, sens, params = solve_using_sundials(model, end_time, start_time, sensi=sensi, time_step=time_step)
+    T, last_y, sens, params = solve_using_sundials(model,
+                                                   end_time,
+                                                   start_time,
+                                                   sensi=sensi,
+                                                   time_step=time_step,
+                                                   return_last=True)
     
-    model._m.setX_P(ys[-1], 0)
+    model._m.setX_P(last_y, 0)
     model._m.setDX_P(model.getDiffs(), 0)
     model._m.setU_P(model.getInputs(), 0)
     
@@ -1177,8 +1182,6 @@ def _shoot(model, start_time, end_time, sensi=True, time_step=0.2):
         costgradient = None
         gradparams = None
         sens_mini = None
-    
-    last_y = ys[-1,:]
     
     # TODO: Create a return type instead of returning tuples
     return costgradient, last_y, gradparams, sens_mini
