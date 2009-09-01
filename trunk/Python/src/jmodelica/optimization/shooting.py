@@ -1054,8 +1054,12 @@ def solve_using_sundials(model,
 
     # used for collecting the y's for plotting
     if return_last==False:
-        T, ylist = [t0.value], [model.getStates().copy()]
-    
+        num_samples = int(math.ceil((end_time - start_time) / time_step)) + 1
+        T = N.zeros(num_samples, dtype=pyjmi.c_jmi_real_t)
+        ylist = N.zeros((num_samples, model.getModelSize()), dtype=pyjmi.c_jmi_real_t)
+        ylist[0] = model.getStates().copy()
+        T[0] = t0.value
+        i = 1
     
     while True:
         # run ODE solver
@@ -1067,8 +1071,9 @@ def solve_using_sundials(model,
 
         """Used for return."""
         if return_last==False:
-            T.append(t.value)
-            ylist.append(N.array(y))
+            T[i] = t.value
+            ylist[i] = N.array(y)
+            i = i + 1
             
         if N.abs(tout-end_time)<=1e-6:
             break
@@ -1079,6 +1084,9 @@ def solve_using_sundials(model,
         if tout>end_time:
             tout=end_time
 
+    if return_last==False:
+        assert i == num_samples, "Simulation lacked a couple of samples" \
+                                 " (%s != %s)" % (i, num_samples)
             
     if sensi:
         cvodes.CVodeGetSens(cvode_mem, t, yS)
