@@ -1044,9 +1044,6 @@ def solve_using_sundials(model,
         
         model_parameters = model.getParameters()
         cvodes.CVodeSetSensParams(cvode_mem, parameters.params, None, None)
-
-    # time step
-    time_step = time_step
     
     tout = start_time + time_step
     if tout>end_time:
