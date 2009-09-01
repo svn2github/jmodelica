@@ -23,9 +23,9 @@
        genClean        - removes all generated files and their class files
  -->
 
-  <project name="Optimica" default="build" basedir=".">
+  <project name="OptimicaFrontEnd" default="build" basedir=".">
   
-  <property name = "jmodelica_path" value="../ModelicaFrontEnd"/>
+  <property name = "modelica_front_end_path" value="../ModelicaFrontEnd"/>
 	
   <!-- "package" is the directory where generated files will be stored -->
   <property name="ast_package" value="org.jmodelica.optimica.compiler"/>
@@ -39,14 +39,14 @@
   <property name="junit_dir" value="../../ThirdParty/Junit"/>
   <property name="jflex_dir" value="../../ThirdParty/JFlex/jflex-1.4.3"/>  
   <property name="beaver_dir" value="../../ThirdParty/Beaver/beaver-0.9.6.1"/>  
-  <property name="jmodelica_parser" value="${jmodelica_path}/src/parser"/>
+  <property name="jmodelica_parser" value="${modelica_front_end_path}/src/parser"/>
   <property name="optimica_parser" value="src/parser"/>
-  <property name="ast" value="${jmodelica_path}/src/jastadd"/>
+  <property name="ast" value="${modelica_front_end_path}/src/jastadd"/>
   <property name="optimica_ast" value="src/jastadd"/>	
   <property name="test_junit-gen_dir" value="src/test/junit-generated"/>
 	
-   <property name="applications" value="${jmodelica_path}/${default_src_dir}/org/jmodelica/applications"/> 
-  <property name="debug" value="${jmodelica_path}/${default_src_dir}/org/jmodelica/debug"/> 
+   <property name="applications" value="${modelica_front_end_path}/${default_src_dir}/org/jmodelica/applications"/> 
+  <property name="debug" value="${modelica_front_end_path}/${default_src_dir}/org/jmodelica/debug"/> 
 	
   <!-- "jastadd" is an ant task class in jastadd2.jar -->
   <taskdef classname="jastadd.JastAddTask" name="jastadd" classpath="${jastadd_dir}/jastadd2.jar" />
@@ -65,6 +65,7 @@
   	<mkdir dir="${jar_output_dir}"/>
   	<jar destfile="${jar_output_dir}/optimica.jar">
   		<fileset dir="bin">
+  			<include name="org/jmodelica/util/*.class"/> 
   			<include name="org/jmodelica/optimica/compiler/*.class"/> 
   			<include name="org/jmodelica/optimica/parser/*.class"/> 
   		</fileset>
@@ -75,6 +76,7 @@
   	<mkdir dir="bin"/>
   	<javac classpath="${beaver_dir}/lib/beaver.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" compiler="javac1.5" debug="true" destdir="bin"> 
   		<src path="${base_output}"/> 
+  		<src path="${modelica_front_end_path}/src/java"/> 
   		<include name = "**/*.java"/>
   		<exclude name = "**/*junit*/**"/>
   		<exclude name = "**/*.aj"/>
@@ -177,7 +179,7 @@
 	      classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" 
 	      fork="true" 
 	      dir=".">
-	    	<arg value="${jmodelica_path}/src/test/modelica/NameTests.mo"/>
+	    	<arg value="${modelica_front_end_path}/src/test/modelica/NameTests.mo"/>
 	    	      <arg value="NameTests"/>
 	    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 	    </java>
@@ -186,7 +188,7 @@
 	  		      classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" 
 	  		      fork="true" 
 	  		      dir=".">
-	  		    	<arg value="${jmodelica_path}/src/test/modelica/ModificationTests.mo"/>
+	  		    	<arg value="${modelica_front_end_path}/src/test/modelica/ModificationTests.mo"/>
 	  		    	      <arg value="ModificationTests"/>
 	  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 	    </java>
@@ -195,7 +197,7 @@
 		  		      classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" 
 		  		      fork="true" 
 		  		      dir=".">
-		  		    	<arg value="${jmodelica_path}/src/test/modelica/TypeTests.mo"/>
+		  		    	<arg value="${modelica_front_end_path}/src/test/modelica/TypeTests.mo"/>
 		  		    	      <arg value="TypeTests"/>
 		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 		    </java>

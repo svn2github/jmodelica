@@ -70,6 +70,7 @@
 		<mkdir dir="${jar_output_dir}"/>
 		<jar destfile="${jar_output_dir}/ModelicaCompiler.jar">
 			<fileset dir="bin">
+				<include name="org/jmodelica/util/*.class"/>
 				<include name="org/jmodelica/modelica/compiler/*.class"/>
 				<include name="org/jmodelica/modelica/parser/*.class"/>
 			</fileset>
@@ -80,6 +81,7 @@
 		<mkdir dir="bin"/>
 		<javac classpath="${beaver_dir}/lib/beaver.jar" compiler="javac1.5" debug="true" destdir="bin">
 			<src path="${base_output}"/>
+			<src path="${modelica_front_end_path}/src/java"/>
 			<include name = "**/*.java"/>
 			<exclude name = "**/*junit*/**"/>
 			<exclude name = "**/*.aj"/>
