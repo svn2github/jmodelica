@@ -697,7 +697,37 @@ class TestJmiOptModel:
         fig.savefig('TestJmiOptModel_testSimulationWSensivity.png')
 
     def testFixedSimulation(self):
-        """Test simulation of JmiOptModel."""
+        """Test simulation of JmiOptModel without plotting.
+        
+        No plotting is done to compare times against
+        self.testFixedSimulationReturnLast().
+        """
+        assert self.m.isFixedStartTime(), "Only fixed times supported."
+        assert self.m.isFixedFinalTime(), "Only fixed times supported."
+        
+        self.m.reset()
+        self.m.setInputs([0.25])
+        T, ys, sens, ignore = solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime())
+        assert len(T) == len(ys)
+        
+    def testFixedSimulationReturnLast(self):
+        """Test simulation of JmiOptModel without plotting.
+        
+        No plotting is done to compare times against
+        self.testFixedSimulation().
+        """
+        assert self.m.isFixedStartTime(), "Only fixed times supported."
+        assert self.m.isFixedFinalTime(), "Only fixed times supported."
+        
+        self.m.reset()
+        self.m.setInputs([0.25])
+        T, ys, sens, ignore = solve_using_sundials(self.m, self.m.getFinalTime(), self.m.getStartTime(), return_last=True)
+        assert len(ys) > 0
+        assert T is not None
+        
+        
+    def testFixedSimulationWithPlot(self):
+        """Test simulation of JmiOptModel with result plotting."""
         assert self.m.isFixedStartTime(), "Only fixed times supported."
         assert self.m.isFixedFinalTime(), "Only fixed times supported."
         
@@ -784,15 +814,18 @@ def solve_using_sundials(model,
                          use_jacobian=False,
                          abstol=1.0e-6, # used to be e-14
                          reltol=1.0e-6,
-                         time_step=0.02):
+                         time_step=0.02,
+                         return_last=False):
     """Integrate the model model from 0 to end_time.
     
     The model needs to be initialized before calling this function (all states
     needs to be set etc.
     
     The function returns a tuple consisting of:
-        1. Time samples.
-        2. Corresponding states samples.
+        1. Time samples. If return_last is True only the last time sample is
+           returned.
+        2. Corresponding states samples. If return_last is True only the last
+           states sample is returned.
         3. Sensitivity matrix. None if sensi==False.
         4. An instance of the PyFData class containing the indices
            for the the sensivity matrix.
@@ -816,6 +849,7 @@ def solve_using_sundials(model,
     reltol       -- the relative tolerance. See SUDNIALS' manual for more info.
     time_step    -- the step size when SUNDIALS should return from it's
                     internal loop. See SUNDIALS' manual for more info.
+    return_last  -- see return information.
     
     """
     print "Input innan integration:", model.getInputs()
@@ -1022,7 +1056,9 @@ def solve_using_sundials(model,
     t = cvodes.realtype(t0.value)
 
     # used for collecting the y's for plotting
-    T, ylist = [t0.value], [model.getStates().copy()]
+    if return_last==False:
+        T, ylist = [t0.value], [model.getStates().copy()]
+    
     
     while True:
         # run ODE solver
@@ -1033,8 +1069,10 @@ def solve_using_sundials(model,
                   ("  %-11.6e  "*len(y)) % tuple(y)
 
         """Used for return."""
-        T.append(t.value)
-        ylist.append(N.array(y))
+        if return_last==False:
+            T.append(t.value)
+            ylist.append(N.array(y))
+            
         if N.abs(tout-end_time)<=1e-6:
             break
 
@@ -1063,8 +1101,12 @@ def solve_using_sundials(model,
         print "nst = %-6i nfe  = %-6i nsetups = %-6i nfeLS = %-6i nje = %i"%(nst, nfe, nsetups, nfeLS, nje)
         print "nni = %-6ld ncfn = %-6ld netf = %-6ld nge = %ld\n "%(nni, ncfn, netf, nge)
     
-    ylist = N.array(ylist)
-    T = N.array(T)
+    if return_last:
+        ylist = N.array(y).copy()
+        T = t.value
+    else:
+        ylist = N.array(ylist)
+        T = N.array(T)
     
     if sensi:
         return (T, ylist, N.array(yS), parameters)
