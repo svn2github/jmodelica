@@ -125,14 +125,18 @@ JModelica.org supports the following environment variables:
  - IPOPT_HOME containing the path to an Ipopt installation directory.
  - LD_LIBRARY_PATH containing the path to the $IPOPT_HOME/lib directory
    (Linux only.)
+ - MODELICAPATH containing a sequence of paths representing directories
+   where Modelica libraries are located. On Windows, the paths are 
+   separated by semicolons and on Linux/Mac OS X they are sparated
+   by colons.
 
 It is only necessary to set the variable JMODELICA_HOME as a
-global environment variable, since the others are set in the
+global environment variable, since the other variables are set in the
 Python script startup.py, which is executed when the jmodelica
 module is imported into Python. The default settings can be
-overridden either by setting an environment variable globally
-or by adding a local startup.py file located in the directory
-$HOME/jmodelica.org
+overridden either by setting one of the supported environment 
+variables globally or by adding a local startup.py file located 
+in the directory $HOME/jmodelica.org and change a variable there.
 
 7. Test the distribution
 
