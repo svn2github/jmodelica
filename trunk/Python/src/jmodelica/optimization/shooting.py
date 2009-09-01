@@ -7,6 +7,7 @@
 import ctypes
 import math
 import os
+import sys
 
 import nose
 import numpy as N
@@ -61,9 +62,10 @@ def _load_model(libname, path, mofile=None, optpackage=None):
             raise
             
         print "The model was not found. Trying to compile it..."
-        from jmodelica.compiler import OptimicaCompiler as oc
+        from jmodelica.compiler import OptimicaCompiler
         curdir = os.getcwd()
         os.chdir(path)
+        oc = OptimicaCompiler()
         oc.compile_model(os.path.join(path, mofile), optpackage)
         os.chdir(curdir)
         model = JmiOptModel(libname,'./')
@@ -1996,7 +1998,7 @@ def construct_grid(n):
     return zip(times[:-1], times[1:])
 
 
-def main():
+def main(args=sys.argv):
     """The main method.
     
     Uses command line arguments to know what to do. Run
@@ -2033,7 +2035,7 @@ def main():
     
     parser.add_option('-p', '--predefined-model', dest='predmodel', default=None, type='choice', choices=['vdp', 'quadtank'], help="A set of predefined example models. Using one of these will override --modelfile, --directory, --modelfile and --directory.")
     
-    (options, args) = parser.parse_args()
+    (options, args) = parser.parse_args(args=args)
 
     options.predmodel = 'quadtank'
     
@@ -2076,4 +2078,4 @@ def main():
 
 if __name__ == "__main__":
     # The assignment below allows iPython session to reuse the parameter opt
-    opt = main()
+    opt = main(sys.argv[1:])
