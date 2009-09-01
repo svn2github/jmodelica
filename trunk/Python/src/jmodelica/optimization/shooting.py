@@ -1868,7 +1868,7 @@ def _plot_control_solution(model, interval, initial_ys, us):
 
     p.subplot(212)
     p.hold(True)
-    for i in len(model.getInputs()):
+    for i in range(len(model.getInputs())):
         p.plot(interval, [us[i], us[i]], label="Input #%s" % (i + 1))
     p.hold(False)
 
