@@ -1252,7 +1252,7 @@ def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
     
     Notes:
      * Currently written specifically for VDP.
-     * Currently only supports inputs.
+     * Currently only supports one input/control signal.
     
     Parameters:
     model -- the model which is to be simulated. Only models with one control
@@ -1266,6 +1266,9 @@ def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
                           different.
     
     """
+    assert len(model.get_inputs()) == 1, "More than one control signal is " \
+                                         "not supported as of today."
+    
     start_time = model.get_start_time()
     end_time = model.get_final_time()
     
