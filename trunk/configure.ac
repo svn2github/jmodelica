@@ -211,6 +211,10 @@ ANT_OPTS="ANT_OPTS=-Xmx512M"
 
 AM_CONDITIONAL([HAVE_ANT],[test "x$ANT" != x])
 
+AS_IF([test "x$ANT" = x],
+      [AC_MSG_FAILURE([Cannot find Apache Ant - please install in order to build compiler front-ends.])])
+
+
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h])
