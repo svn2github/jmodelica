@@ -1710,7 +1710,7 @@ class MultipleShooter:
                              N.array(initial_u).flatten()) )
         return p0
         
-    def check_gradients():
+    def check_gradients(self):
         """Verify that gradients looks correct.
         
         This function indirectly uses the built in OpenOPT gradient
@@ -1779,6 +1779,41 @@ class MultipleShooter:
             plot_control_solutions(model, grid, opt.xf)
         
         return opt.xf
+        
+        
+class TestMultipleShooter:
+    def setUp(self):
+        GRIDSIZE = 10
+        SINGLE_INITIAL_U = 2.5
+        TIMESTEP = 0.2
+        
+        DLLFILE = 'VDP_pack_VDP_Opt'
+        MODELICA_FILE = 'VDP.mo'
+        MODEL_PACKAGE = 'VDP_pack.VDP_Opt'
+        
+        model = _load_example_standard_model(DLLFILE, MODELICA_FILE,
+                                             MODEL_PACKAGE)
+        
+        grid = construct_grid(GRIDSIZE)
+        
+        # needed to be able get a reasonable initial
+        model.set_inputs([SINGLE_INITIAL_U] * len(model.get_inputs()))
+        initial_u = [[SINGLE_INITIAL_U] * len(model.get_inputs())] * GRIDSIZE
+        
+        self._shooter = MultipleShooter(model, initial_u, grid)
+    
+    def test_basic_mshooting(self):
+        """Test a basic multiple shoot (might take ~100 seconds)."""
+        optimum = self._shooter.run_optimization(plot=False)
+        print "Optimal p:", optimum
+        
+    def test_gradients(self):
+        """Verify gradients against finite different quotient.
+        
+        This test requires manual validation by goign through the result
+        printed to stdout. Use the '-s' flag in nosetests.
+        """
+        self._shooter.check_gradients()
         
         
 def _verify_gradient(f, df, xstart, xend, SMALL=0.1, STEPS=100):
