@@ -1245,7 +1245,7 @@ def _shoot(model, start_time, end_time, sensi=True, time_step=0.2):
     return costgradient, last_y, gradparams, sens_mini
 
 
-def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
+def single_shooting(model, initial_u=0.4, plot=True):
     """Run single shooting of model model with a constant u.
     
     The function returns the optimal u.
@@ -1261,9 +1261,6 @@ def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
     Keyword parameters:
     initial_u -- the initial input U_0 used to initialize the optimization
                  with.
-    GRADIENT_THRESHOLD -- the threshold in when the inf norm of two different
-                          gradients should consider two gradients same or
-                          different.
     
     """
     assert len(model.get_inputs()) == 1, "More than one control signal is " \
@@ -1281,8 +1278,6 @@ def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
     
     def f(cur_u):
         """The cost evaluation function."""
-        global gradient
-        global gradient_u
         model.reset()
         u[:] = cur_u
         print "u is", u
@@ -1305,21 +1300,32 @@ def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
         
         NOT USED right now.
         """
-        if gradient_u is not None and \
-           max(gradient_u - cur_u) < GRADIENT_THRESHOLD:
-            print "Using existing gradient"
-        else:
-            print "Recalculating gradient"
-            f(cur_u)
-            
+        model.reset()
+        u[:] = cur_u
+        print "u is", u
+        big_gradient, last_y, gradparams, sens = _shoot(model, start_time, end_time)
+        
+        model._m.setX_P(last_y, 0)
+        model._m.setDX_P(model.get_diffs(), 0)
+        model._m.setU_P(model.get_inputs(), 0)
+        cost = model.eval_cost()
+        
+        gradient_u = cur_u.copy()
+        gradient = big_gradient[gradparams['u_start']:gradparams['u_end']]
+        
+        print "Cost:", cost
+        print "Grad:", gradient
         return gradient
     
     p = NLP(f, u0, maxIter = 1e3, maxFunEvals = 1e2)
     p.df = df
-    p.plot = 1
+    if plot:
+        p.plot = 1
+    else:
+        p.plot = 0
     p.iprint = 1
     
-    u_opt = p.solve('ralg')
+    u_opt = p.solve('scipy_slsqp')
     return u_opt
 
 
@@ -1784,7 +1790,7 @@ class MultipleShooter:
         return opt
         
         
-class TestMultipleShooter:
+class TestShooting:
     def setUp(self):
         GRIDSIZE = 10
         SINGLE_INITIAL_U = 2.5
@@ -1804,19 +1810,24 @@ class TestMultipleShooter:
         initial_u = [[SINGLE_INITIAL_U] * len(model.get_inputs())] * GRIDSIZE
         
         self._shooter = MultipleShooter(model, initial_u, grid)
+        self._model = model
     
     def test_basic_mshooting(self):
         """Test a basic multiple shoot (might take ~100 seconds)."""
         optimum = self._shooter.run_optimization(plot=False)
         print "Optimal p:", optimum
         
-    def test_gradients(self):
-        """Verify gradients against finite different quotient.
+    def test_mshooting_gradients(self):
+        """ Verify multiple shooting gradients against finite different
+            quotient.
         
         This test requires manual validation by goign through the result
         printed to stdout. Use the '-s' flag in nosetests.
         """
         self._shooter.check_gradients()
+        
+    def test_basic_sshooting(self):
+        single_shooting(self._model, plot=False)
         
         
 def _verify_gradient(f, df, xstart, xend, SMALL=0.1, STEPS=100):
