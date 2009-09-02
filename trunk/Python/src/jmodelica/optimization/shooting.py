@@ -1270,7 +1270,7 @@ def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
     end_time = model.get_final_time()
     
     u = model.get_inputs()
-    u0 = N.array([0.4])
+    u0 = N.array([initial_u])
     print "Initial u:", u
     
     gradient = None
@@ -1317,7 +1317,7 @@ def single_shooting(model, initial_u=0.4, GRADIENT_THRESHOLD=0.0001):
     p.iprint = 1
     
     u_opt = p.solve('ralg')
-    return u_opt.xf
+    return u_opt
 
 
 def _eval_initial_ys(model, grid, time_step=0.2):
@@ -1778,7 +1778,7 @@ class MultipleShooter:
         if plot:
             plot_control_solutions(model, grid, opt.xf)
         
-        return opt.xf
+        return opt
         
         
 class TestMultipleShooter:
