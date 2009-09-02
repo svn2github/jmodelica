@@ -705,6 +705,7 @@ all-local:
 
 install-exec-local:
 @HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar $(prefix)/lib/
+@HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/util.jar $(prefix)/lib/
 @HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/OptimicaCompiler/bin/OptimicaCompiler.jar $(prefix)/lib/
 	mkdir -p $(prefix)/Makefiles
 	case $(build) in \

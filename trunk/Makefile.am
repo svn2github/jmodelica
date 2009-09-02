@@ -32,6 +32,7 @@ endif
 install-exec-local:
 if HAVE_ANT
 	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar $(prefix)/lib/
+	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/util.jar $(prefix)/lib/
 	cp $(abs_top_srcdir)/Compiler/OptimicaCompiler/bin/OptimicaCompiler.jar $(prefix)/lib/
 endif
 	mkdir -p $(prefix)/Makefiles
