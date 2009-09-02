@@ -65,11 +65,15 @@
 		<mkdir dir="${jar_output_dir}"/>
 		<jar destfile="${jar_output_dir}/jmodelica_xml_backend.jar">
 			<fileset dir="bin">
-				<include name="org/jmodelica/util/*.class"/>
 				<include name="org/jmodelica/modelica/compiler/*.class"/>
 				<include name="org/jmodelica/modelica/parser/*.class"/>
 			</fileset>
 		</jar>
+	  	<jar destfile="${jar_output_dir}/util.jar">
+	  		<fileset dir="bin">
+	  			<include name="org/jmodelica/util/*.class"/> 
+	  		</fileset>
+	  	 </jar>
 	</target>
 
 	<target name="compile-ast" depends="gen,gen-parser">
