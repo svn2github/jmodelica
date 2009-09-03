@@ -893,7 +893,7 @@ def solve_using_sundials(model,
     return_last  -- see return information.
     
     """
-    print "Input innan integration:", model.get_inputs()
+    print "Input before integration:", model.get_inputs()
     print "States:", model.get_states()
     print start_time, "to", end_time
     
