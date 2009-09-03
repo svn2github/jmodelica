@@ -1530,8 +1530,15 @@ class Model(object):
         """
         Sets the dependent parameters of the model.
         """
-        self.setPD(N.zeros(self._n_pd.value))
-        self.jmimodel.init_Fp(self.getPD())
+        pd_tmp = N.zeros(self._n_pd.value)
+        pd = N.zeros(self._n_pd.value)
+        print(self.getPI())
+        for i in range(self._n_pd.value):
+            self.setPD(pd)
+            self.jmimodel.init_Fp(pd_tmp)
+            pd[i] = pd_tmp[i]
+            pd_tmp[:] = pd
+        self.setPD(pd)
 
     def get_variable_names(self):
         """
@@ -4338,10 +4345,11 @@ class SimultaneousOptLagPols(SimultaneousOpt):
         
         refs = values.keys()
         refs.sort(key=int)
-        
+
         for ref in refs:
             (z_i, ptype) = _translate_value_ref(ref)
             i_w = z_i - self._model._offs_w.value
+            #print("%d, %d" %(z_i,i_w))
             w_lb[i_w] = values.get(ref) 
 
     def _set_ub_values(self, p_opt_ub, dx_ub, x_ub, u_ub, w_ub):
