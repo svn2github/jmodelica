@@ -34,8 +34,12 @@ import java.util.logging.SimpleFormatter;
 import java.util.Set;
 import java.util.Iterator;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+
 import org.jmodelica.util.OptionRegistry;
 import org.jmodelica.util.OptionRegistry.UnknownOptionException;
+import org.xml.sax.SAXException;
 
 //import beaver.Parser.Exception;
 
@@ -603,7 +607,31 @@ public class ModelicaCompiler {
 		//look for options.xml in $JMODELICA_HOME/Options/
 		String filesep = System.getProperty("file.separator");
 		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
-		OptionRegistry or = new OptionRegistry(optionsfile);
+		OptionRegistry or = null;
+		try {
+			or = new OptionRegistry(optionsfile);
+		} catch(XPathExpressionException e) {
+			logger.severe("The options XML file could not be loaded.");
+			logger.severe(e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		} catch(ParserConfigurationException e) {
+			logger.severe("The options XML file could not be loaded.");
+			logger.severe(e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		} catch(IOException e) {
+			logger.severe("The options XML file could not be loaded.");
+			logger.severe(e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		} catch(SAXException e) {
+			logger.severe("The options XML file could not be loaded.");
+			logger.severe(e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		
 		//add modelicapath to optionregistry
 		if(modelicapath==null) {
 			//modelicapath was not set in program arguments -> check envir variable or via JMODELICA_HOME

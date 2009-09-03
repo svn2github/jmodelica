@@ -7,6 +7,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+import org.xml.sax.SAXException;
+
 
 /**
  * OptionRegistry contains all options for the compiler. Options
@@ -22,69 +26,57 @@ public class OptionRegistry {
 			optionsMap = new HashMap<String,Option>();
 		}
 		
-		public OptionRegistry(String filepath) {
+		public OptionRegistry(String filepath) throws XPathExpressionException, ParserConfigurationException, IOException, SAXException {
 			this();
 			loadOptions(filepath);
 		}
 		
-	 	private void loadOptions(String filepath) {
+	 	private void loadOptions(String filepath) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
 			//logger.info("Loading options...");
-			try {
-				org.w3c.dom.Document doc = parseAndGetDOM(filepath);
+			org.w3c.dom.Document doc = parseAndGetDOM(filepath);
 			
-				javax.xml.xpath.XPathFactory factory = javax.xml.xpath.XPathFactory.newInstance();
-				javax.xml.xpath.XPath xpath = factory.newXPath();
+			javax.xml.xpath.XPathFactory factory = javax.xml.xpath.XPathFactory.newInstance();
+			javax.xml.xpath.XPath xpath = factory.newXPath();
 				
-				javax.xml.xpath.XPathExpression expr;
+			javax.xml.xpath.XPathExpression expr;
 				
-				//set other options if there are any
-				expr = xpath.compile("OptionRegistry/Options");
-				org.w3c.dom.Node options = (org.w3c.dom.Node)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODE);
-				if(options !=null && options.hasChildNodes()) {
-					//other options set
+			//set other options if there are any
+			expr = xpath.compile("OptionRegistry/Options");
+			org.w3c.dom.Node options = (org.w3c.dom.Node)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODE);
+			if(options !=null && options.hasChildNodes()) {
+				//other options set
 					
-					//types
-					expr = xpath.compile("OptionRegistry/Options/Option/Type");
-					org.w3c.dom.NodeList thetypes = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
+				//types
+				expr = xpath.compile("OptionRegistry/Options/Option/Type");
+				org.w3c.dom.NodeList thetypes = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
 					
-					//keys
-					expr = xpath.compile("OptionRegistry/Options/Option/*/Key");
-					org.w3c.dom.NodeList thekeys = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
+				//keys
+				expr = xpath.compile("OptionRegistry/Options/Option/*/Key");
+				org.w3c.dom.NodeList thekeys = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
 					
-					//values
-					expr = xpath.compile("OptionRegistry/Options/Option/*/Value");
-					org.w3c.dom.NodeList thevalues = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
+				//values
+				expr = xpath.compile("OptionRegistry/Options/Option/*/Value");
+				org.w3c.dom.NodeList thevalues = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
 					
-					for(int i=0; i<thetypes.getLength();i++) {
-						org.w3c.dom.Node n = thetypes.item(i);
-						
-						String type = n.getTextContent();
-						String key = thekeys.item(i).getTextContent();
-						String value = thevalues.item(i).getTextContent();
-						if(type.equals("String")) {
-							setStringOption(key, value);
-						} else if(type.equals("Integer")) {
-							setIntegerOption(key, Integer.parseInt(value));
-						} else if(type.equals("Real")) {
-							setRealOption(key, Double.parseDouble(value));
-						} else if(type.equals("Boolean")) {
-							setBooleanOption(key, Boolean.parseBoolean(value));
-						}
-					}				
-				}
-			
-			} catch(org.xml.sax.SAXException e) {
-				e.printStackTrace();
-			} catch(IOException e) {
-				e.printStackTrace();			
-			} catch(javax.xml.parsers.ParserConfigurationException e) {
-				e.printStackTrace();
-			} catch(javax.xml.xpath.XPathExpressionException e) {
-				e.printStackTrace();
-			} 		
+				for(int i=0; i<thetypes.getLength();i++) {
+					org.w3c.dom.Node n = thetypes.item(i);
+					
+					String type = n.getTextContent();
+					String key = thekeys.item(i).getTextContent();
+					String value = thevalues.item(i).getTextContent();
+					if(type.equals("String")) {
+						setStringOption(key, value);
+					} else if(type.equals("Integer")) {
+						setIntegerOption(key, Integer.parseInt(value));
+					} else if(type.equals("Real")) {
+						setRealOption(key, Double.parseDouble(value));
+					} else if(type.equals("Boolean")) {
+						setBooleanOption(key, Boolean.parseBoolean(value));
+					}
+				}				
+			}	
 	 	}
-
-		
+	 	
 		/**
 		 * Parses an XML file and returns the DOM document instance.
 		 * 

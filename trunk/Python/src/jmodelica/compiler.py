@@ -62,9 +62,13 @@ class ModelicaCompiler():
     options_file_path = os.path.join(jm_home, 'Options','options.xml')
 
     def __init__(self):
-        self.options = OptionRegistry(self.options_file_path)
-        self.options.setStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
-        self._modelicacompiler = self.Compiler(self.options, 
+        try:
+            options = OptionRegistry(self.options_file_path)
+        except jpype.JavaException, ex:
+            _handle_exception(ex)
+            
+        options.setStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
+        self._modelicacompiler = self.Compiler(options, 
                                                self.xml_var_path, 
                                                self.xml_val_path, 
                                                self.c_tpl_path)
@@ -410,7 +414,10 @@ class OptimicaCompiler():
     options_file_path = os.path.join(jm_home, 'Options','options.xml')
 
     def __init__(self):
-        options = OptionRegistry(self.options_file_path)
+        try:
+            options = OptionRegistry(self.options_file_path)
+        except jpype.JavaException, ex:
+            _handle_exception(ex)
         options.setStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
         self._optimicacompiler = self.Compiler(options, 
                                                self.xml_var_path, 
@@ -801,6 +808,14 @@ class CompilerError(JError):
 
     pass
 
+class XPathExpressionError(JError):
+    pass
+
+class ParserConfigurationError(JError):
+    pass
+
+class SAXError(JError):
+    pass
 
 def _handle_exception(ex):
     """ Catch and handle all expected Java Exceptions that the
@@ -823,13 +838,22 @@ def _handle_exception(ex):
         raise OptimicaClassNotFoundError(str(ex.__javaobject__.getClassName()))
     
     if ex.javaClass() is jpype.java.io.FileNotFoundException:
-        raise IOError(ex.message())
+        raise IOError('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
     
     if ex.javaClass() is jpype.java.io.IOException:
-        raise IOError(ex.message())           
+        raise IOError('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
+    
+    if ex.javaClass() is jpype.javax.xml.xpath.XPathExpressionException:
+        raise XPathExpressionException('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
+    
+    if ex.javaClass() is javax.xml.parsers.ParserConfigurationException:
+        raise ParserConfigurationError('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
+    
+    if ex.javaClass() is org.xml.sax.SAXException:
+        raise SAXError('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
     
     if ex.javaClass() is jpype.java.lang.Exception:
-        raise Exception(ex.message())
+        raise Exception('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
     
     if ex.javaClass() is jpype.java.lang.NullPointerException:
         raise JError(str(ex.stacktrace()))
