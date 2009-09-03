@@ -16,6 +16,7 @@ Required keys:
   'MINGW_HOME' : Path to mingw installation directory (only win32)
   'MC_JAR' : Path to ModelicaCompiler jar file
   'OC_JAR' : Path to OptimicaCompiler jar file
+  'UTIL_JAR' : Path to org.jmodelica.Util jar file
   'BEAVER_LIB' : Path to Beaver lib directory
   'CLASSPATH' : Java CLASSPATH
   'JVM_PATH' : Path to JVM dll file
@@ -35,6 +36,7 @@ import jpype
 #import matplotlib
 
 _jm_home = os.environ['JMODELICA_HOME']
+#exception here if jm_home not found
 environ = {}
 environ['JMODELICA_HOME'] = _jm_home
 
@@ -42,13 +44,14 @@ _defaults = [('IPOPT_HOME','',True),
              ('CPPAD_HOME',os.path.join(_jm_home,'ThirdParty','CppAD'),True),
              ('MC_JAR',os.path.join(_jm_home,'lib','OptimicaCompiler.jar'),True),
              ('OC_JAR',os.path.join(_jm_home,'lib','ModelicaCompiler.jar'),True),
+             ('UTIL_JAR',os.path.join(_jm_home,'lib','util.jar'),True),
              ('BEAVER_PATH',os.path.join(_jm_home,'ThirdParty','Beaver','lib'),True),
              ('MODELICAPATH',os.path.join(_jm_home,'ThirdParty','MSL','Modelica'),True),
              ('JVM_PATH',jpype.getDefaultJVMPath(),True),
              ('JVM_ARGS','-Xmx512m',False)]
 
 # Set MODELICAPATH
-os.environ['MODELICAPATH'] = os.path.join(_jm_home,'ThirdParty','MSL')
+#os.environ['MODELICAPATH'] = os.path.join(_jm_home,'ThirdParty','MSL')
 
 if sys.platform == 'win32':
     _defaults.append(('MINGW_HOME',os.path.join(_jm_home,'mingw'),True))

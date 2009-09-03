@@ -235,8 +235,13 @@ aspect Library {
 	syn lazy List Program.getLibNodeList() {
 		List libnodes = new List();
 		// Retrieve MODELICAPATH
-		String modelicaPath = System.getenv("MODELICAPATH");
+//		String modelicaPath = System.getenv("MODELICAPATH");
+		 String modelicaPath = root().options.getStringOption("MODELICAPATH");
+
+		
+		
 		System.out.println("MODELICAPATH="+modelicaPath);
+		
 		
 		// Find the correct separator of path elements: ':' or ';'
 		String pathSeparator;

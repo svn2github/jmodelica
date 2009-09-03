@@ -20,6 +20,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
 
+import org.jmodelica.util.OptionRegistry;
+
 //import beaver.Parser.Exception;
 
 /**
@@ -72,10 +74,10 @@ import java.util.Collection;
 public class OptimicaCompiler extends ModelicaCompiler{
 	
 	private String xmlProblVariablesTempl = null;
-	
-	public OptimicaCompiler(String modelicapath, String xmlVariablesTempl, 
+		
+	public OptimicaCompiler(OptionRegistry options, String xmlVariablesTempl, 
 			String xmlProblVariablesTempl, String xmlValuesTempl, String cTemplatefile) {
-		super(modelicapath, xmlVariablesTempl, xmlValuesTempl, cTemplatefile);
+		super(options, xmlVariablesTempl, xmlValuesTempl, cTemplatefile);
 		this.xmlProblVariablesTempl = xmlProblVariablesTempl;
 	}
 	
@@ -278,15 +280,15 @@ public class OptimicaCompiler extends ModelicaCompiler{
 		String modelicapath = null;
 		
 		//get any options set
-		Hashtable<String, String> options = extractOptions(args, arg);
-		if(options.get("log")!=null) {
-			setLogLevel(logger.getName(),options.get("log"));
+		Hashtable<String, String> programarguments = extractProgramArguments(args, arg);
+		if(programarguments.get("log")!=null) {
+			setLogLevel(logger.getName(),programarguments.get("log"));
 		}else {
 			setLogLevel(logger.getName(),ModelicaCompiler.ERROR);
 		}
-		modelicapath = options.get("modelicapath");
+		modelicapath = programarguments.get("modelicapath");
 		
-		arg = options.size();
+		arg = programarguments.size();
 		if (args.length < arg+2) {
 			logger.severe("OptimicaCompiler expects a file name and a class name as " +
 					"command line arguments.");
@@ -307,7 +309,22 @@ public class OptimicaCompiler extends ModelicaCompiler{
 			ctempl = args[arg+5];
 		}
 		
-		OptimicaCompiler oc = new OptimicaCompiler(modelicapath, xmlVariablesTempl, xmlProblVariablesTempl, xmlValuesTempl, ctempl);
+		//look for options.xml in $JMODELICA_HOME/Options/
+		String filesep = System.getProperty("file.separator");
+		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
+		OptionRegistry or = new OptionRegistry(optionsfile);
+		//add modelicapath to optionregistry
+		if(modelicapath==null) {
+			//modelicapath was not set in program arguments -> check envir variable or via JMODELICA_HOME
+			if(System.getenv("MODELICAPATH")!=null) {
+				modelicapath=System.getenv("MODELICAPATH");
+			} else {
+				modelicapath=System.getenv("JMODELICA_HOME")+filesep+"ThirdParty"+filesep+"MSL";
+			}
+		}
+		or.setStringOption("MODELICAPATH", modelicapath);
+		
+		OptimicaCompiler oc = new OptimicaCompiler(or, xmlVariablesTempl, xmlProblVariablesTempl, xmlValuesTempl, ctempl);
 		
 		try {
 			oc.compileModel(name, cl);
@@ -326,7 +343,9 @@ public class OptimicaCompiler extends ModelicaCompiler{
 			logger.severe("In file: '" + name + "':"+e.getMessage());
 			System.exit(0);
 		} catch (FileNotFoundException e) {
-			logger.severe("Could not find file: " + name);
+			for(int i=0; i<name.length; i++) {
+				logger.severe("Could not find file: " + name[i]);
+			}
 			System.exit(0);
 		} catch (IOException e) {
 			logger.severe(e.getMessage());

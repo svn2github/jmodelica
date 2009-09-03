@@ -31,6 +31,11 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+import java.util.Set;
+import java.util.Iterator;
+
+import org.jmodelica.util.OptionRegistry;
+import org.jmodelica.util.OptionRegistry.UnknownOptionException;
 
 //import beaver.Parser.Exception;
 
@@ -91,18 +96,52 @@ public class ModelicaCompiler {
 	public static final String ERROR = "e";
 	public static final String INHERITED = "inh";
 	
-	private String modelicapath=null;
 	private String xmlVariablesTempl=null;
 	private String xmlValuesTempl=null;
 	private String cTemplatefile=null;
+	private OptionRegistry options = null;
 	
-	public ModelicaCompiler(String modelicapath, String xmlVariablesTempl, String xmlValuesTempl, String cTemplatefile) {
-		this.modelicapath = modelicapath;
+	
+	public ModelicaCompiler(OptionRegistry options, String xmlVariablesTempl, String xmlValuesTempl, String cTemplatefile) {
+		this.options = options;
 		this.xmlVariablesTempl = xmlVariablesTempl;
 		this.xmlValuesTempl = xmlValuesTempl;
-		this.cTemplatefile = cTemplatefile;		
+		this.cTemplatefile = cTemplatefile;
+				
 	}
 	
+	public String getStringOption(String key) throws UnknownOptionException {
+		return options.getStringOption(key);
+	}
+	
+	public void setStringOption(String key, String value) throws UnknownOptionException {
+		options.setStringOption(key,value);
+	}
+	
+	public int getIntegerOption(String key) throws UnknownOptionException {
+		return options.getIntegerOption(key);
+	}
+	
+	public void setIntegerOption(String key, int value) throws UnknownOptionException {
+		options.setIntegerOption(key, value);
+	}
+	
+	public double getRealOption(String key) throws UnknownOptionException {
+		return options.getRealOption(key);
+	}
+	
+	public void setRealOption(String key, double value) throws UnknownOptionException {
+		options.setRealOption(key, value);
+	}
+	
+	public boolean getBooleanOption(String key) throws UnknownOptionException{
+		return options.getBooleanOption(key);
+	}
+	
+	public void setBooleanOption(String key, boolean value) throws UnknownOptionException {
+		options.setBooleanOption(key, value);
+	}
+		
 	/**
 	 * Returns the modelicapath attribute set for this compiler instance.
 	 * 
@@ -110,7 +149,7 @@ public class ModelicaCompiler {
 	 * 
 	 */
 	public String getModelicapath() {
-		return this.modelicapath;
+		return options.getStringOption("MODELICAPATH");
 	}
 	
 	/**
@@ -119,7 +158,7 @@ public class ModelicaCompiler {
 	 * @param path The new modelicapath.
 	 */
 	public void setModelicapath(String path) {
-		this.modelicapath = path;
+		options.setStringOption("MODELICAPATH", path);
 	}
 	
 	/**
@@ -220,7 +259,7 @@ public class ModelicaCompiler {
 		logger.info("======= Compiling model =======");		
 		// build source tree
 		SourceRoot sr = parseModel(name);
-
+		
 		// compute instance tree
 		InstProgramRoot ipr = instantiateModel(sr, cl);
 			
@@ -314,6 +353,8 @@ public class ModelicaCompiler {
 		SourceRoot sr = null;
 		for (int i=0;i<name.length;i++) {
 			SourceRoot sr_tmp = parseModel(name[i]);
+			//copy options from local optionregistry to sourceroot optionregistry
+			sr_tmp.options.copyAllOptions(this.options);
 			if (i==0) {
 				sr = sr_tmp;
 			} else {
@@ -324,7 +365,7 @@ public class ModelicaCompiler {
 		}
 		return sr;
 	}
-
+	
 	/**
 	 * 
 	 * Computes a model instance tree from a source tree. Some error checks such
@@ -493,29 +534,29 @@ public class ModelicaCompiler {
 				logmanager.getLogger(logger).getLevel().toString():ModelicaCompiler.INHERITED;
 	}
 	
-	protected static Hashtable<String, String> extractOptions(String[] args, int pos) {
-		Hashtable<String, String> options = new Hashtable<String,String>();
+	protected static Hashtable<String, String> extractProgramArguments(String[] args, int pos) {
+		Hashtable<String, String> programargs = new Hashtable<String,String>();
 
 		while(pos < args.length && args[pos].trim().substring(0,1).equals("-")) {
-			String option = args[pos].trim().substring(1, args[pos].trim().indexOf("="));
-			if(option.equals("log")) {
+			String progarg = args[pos].trim().substring(1, args[pos].trim().indexOf("="));
+			if(progarg.equals("log")) {
 				//is log option -> override default
 				if(args[pos].trim().indexOf("=")+1 <= args[pos].trim().length()) {
 //					setLogLevel(logger.getName(),args[arg].trim().substring(args[arg].trim().indexOf("=")+1));
-					options.put("log", args[pos].trim().substring(args[pos].trim().indexOf("=")+1));
+					programargs.put("log", args[pos].trim().substring(args[pos].trim().indexOf("=")+1));
 				}
-			} else if(option.equals("modelicapath")) {
+			} else if(progarg.equals("modelicapath")) {
 				// is modelicapath option
 				if(args[pos].trim().indexOf("=")+1 <= args[pos].trim().length()) {
-					options.put("modelicapath", args[pos].trim().substring(args[pos].trim().indexOf("=")+1));
+					programargs.put("modelicapath", args[pos].trim().substring(args[pos].trim().indexOf("=")+1));
 				}
 			} else {
-				//unsupported option
+				//unsupported program argument
 				;
 			}
 			pos++;
 		}
-		return options;
+		return programargs;
 	}
 	
 	public static void main(String args[]) {		
@@ -531,16 +572,16 @@ public class ModelicaCompiler {
 		int arg = 0;
 		String modelicapath = null;
 		
-		//get any options set
-		Hashtable<String, String> options = extractOptions(args, arg);
-		if(options.get("log")!=null) {
-			setLogLevel(logger.getName(),options.get("log"));
+		//get any program options set
+		Hashtable<String, String> programarguments = extractProgramArguments(args, arg);
+		if(programarguments.get("log")!=null) {
+			setLogLevel(logger.getName(),programarguments.get("log"));
 		}else {
 			setLogLevel(logger.getName(),ModelicaCompiler.ERROR);
 		}
-		modelicapath = options.get("modelicapath");
+		modelicapath = programarguments.get("modelicapath");
 		
-		arg = options.size();
+		arg = programarguments.size();
 		if (args.length < arg+2) {
 			logger.severe("ModelicaCompiler expects a file name and a class name as " +
 					"command line arguments.");
@@ -557,9 +598,24 @@ public class ModelicaCompiler {
 			xmlVariablesTempl = args[arg+2];
 			xmlValuesTempl = args[arg+3];
 			ctempl = args[arg+4];
-		}				
+		}
 		
-		ModelicaCompiler mc = new ModelicaCompiler(modelicapath, xmlVariablesTempl, xmlValuesTempl, ctempl);
+		//look for options.xml in $JMODELICA_HOME/Options/
+		String filesep = System.getProperty("file.separator");
+		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
+		OptionRegistry or = new OptionRegistry(optionsfile);
+		//add modelicapath to optionregistry
+		if(modelicapath==null) {
+			//modelicapath was not set in program arguments -> check envir variable or via JMODELICA_HOME
+			if(System.getenv("MODELICAPATH")!=null) { 
+				modelicapath=System.getenv("MODELICAPATH");
+			} else {
+				modelicapath=System.getenv("JMODELICA_HOME")+filesep+"ThirdParty"+filesep+"MSL";
+			}
+		}
+		or.setStringOption("MODELICAPATH", modelicapath);
+		
+		ModelicaCompiler mc = new ModelicaCompiler(or, xmlVariablesTempl, xmlValuesTempl, ctempl);
 		
 		try {
 			mc.compileModel(name, cl);
@@ -578,7 +634,9 @@ public class ModelicaCompiler {
 			logger.severe("In file: '" + name + "':"+e.getMessage());
 			System.exit(0);
 		} catch (FileNotFoundException e) {
-			logger.severe("Could not find file: " + name);
+			for(int i=0; i<name.length; i++) {
+				logger.severe("Could not find file: " + name[i]);
+			}
 			System.exit(0);
 		} catch (IOException e) {
 			logger.severe(e.getMessage());

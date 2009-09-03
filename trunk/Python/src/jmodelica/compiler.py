@@ -34,7 +34,7 @@ import jmodelica as jm
 # note that startJVM() fails after shutdownJVM(), hence, only one start
 if not jpype.isJVMStarted():
     _jvm_args = string.split(jm.environ['JVM_ARGS'],' ')
-    _jvm_class_path = jm.environ['MC_JAR'] + os.pathsep + jm.environ['OC_JAR']
+    _jvm_class_path = jm.environ['MC_JAR'] + os.pathsep + jm.environ['OC_JAR']+ os.pathsep + jm.environ['UTIL_JAR']
     _jvm_ext_dirs = jm.environ['BEAVER_PATH']
     jpype.startJVM(jm.environ['JVM_PATH'],
                    '-Djava.class.path=%s' % _jvm_class_path,
@@ -43,6 +43,7 @@ if not jpype.isJVMStarted():
     org = jpype.JPackage('org')
     print "JVM started."
 
+OptionRegistry = org.jmodelica.util.OptionRegistry
 
 class ModelicaCompiler():
     """ User class for accessing the Java ModelicaCompiler class. """
@@ -57,12 +58,13 @@ class ModelicaCompiler():
     
     xml_var_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_modelica_variables_template.xml')    
     xml_val_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_modelica_values_template.xml')
-    c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_modelica_template.c')
-    
-    modelica_path = ""
+    c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_modelica_template.c')    
+    options_file_path = os.path.join(jm_home, 'Options','options.xml')
 
     def __init__(self):
-        self._modelicacompiler = self.Compiler(self.modelica_path, 
+        self.options = OptionRegistry(self.options_file_path)
+        self.options.setStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
+        self._modelicacompiler = self.Compiler(self.options, 
                                                self.xml_var_path, 
                                                self.xml_val_path, 
                                                self.c_tpl_path)
@@ -77,6 +79,30 @@ class ModelicaCompiler():
     def set_modelicapath(self, path):
         """ Sets the modelicapath to path. """
         self._modelicacompiler.setModelicapath(path)
+        
+    def get_boolean_option(self, key):
+        return self._modelicacompiler.getBooleanOption(key)
+    
+    def set_boolean_option(self, key, value):
+        self._modelicacompiler.setBooleanOption(key, value)
+        
+    def get_integer_option(self, key):
+        return self._modelicacompiler.getIntegerOption(key)
+    
+    def set_integer_option(self, key, value):
+        self._modelicacompiler.setIntegerOption(key, value)
+        
+    def get_real_option(self, key):
+        return self._modelicacompiler.getRealOption(key)
+    
+    def set_real_option(self, key, value):
+        self._modelicacompiler.setRealOption(key, value)
+        
+    def get_string_option(self, key):
+        return self._modelicacompiler.getStringOption(key)
+        
+    def set_string_option(self, key, value):
+        self._modelicacompiler.setStringOption(key, value)   
         
     def get_XMLVariablesTemplate(self):
         """ Returns file path to the XML variables template. """
@@ -381,11 +407,12 @@ class OptimicaCompiler():
     xml_val_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_modelica_values_template.xml')
     c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_optimica_template.c')
     xml_prob_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_optimica_problvariables_template.xml')
-    
-    modelica_path = ""
+    options_file_path = os.path.join(jm_home, 'Options','options.xml')
 
     def __init__(self):
-        self._optimicacompiler = self.Compiler(self.modelica_path, 
+        options = OptionRegistry(self.options_file_path)
+        options.setStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
+        self._optimicacompiler = self.Compiler(options, 
                                                self.xml_var_path, 
                                                self.xml_prob_path, 
                                                self.xml_val_path, 
@@ -403,6 +430,30 @@ class OptimicaCompiler():
         """ Sets the modelicapath to path. """
         self._optimicacompiler.setModelicapath(path)
         
+    def get_boolean_option(self, key):
+        return self._optimicacompiler.getBooleanOption(key)
+    
+    def set_boolean_option(self, key, value):
+        self._optimicacompiler.setBooleanOption(key, value)
+        
+    def get_integer_option(self, key):
+        return self._optimicacompiler.getIntegerOption(key)
+    
+    def set_integer_option(self, key, value):
+        self._optimicacompiler.setIntegerOption(key, value)
+        
+    def get_real_option(self, key):
+        return self._optimicacompiler.getRealOption(key)
+    
+    def set_real_option(self, key, value):
+        self._optimicacompiler.setRealOption(key, value)
+        
+    def get_string_option(self, key):
+        return self._optimicacompiler.getStringOption(key)
+        
+    def set_string_option(self, key, value):
+        self._optimicacompiler.setStringOption(key, value)    
+    
     def get_XMLVariablesTemplate(self):
         """ Returns file path to the XML variables template. """
         return self._optimicacompiler.getXMLVariablesTemplate()
