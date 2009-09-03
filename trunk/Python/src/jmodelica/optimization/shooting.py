@@ -1748,21 +1748,22 @@ class MultipleShooter:
         #                                              len(model.get_inputs()))
         #blt = -0.5*N.ones(NLT)
 
-        N_xvars = (len(grid) - 1) * model.get_model_size()
-        N_uvars = len(grid) * len(model.get_inputs())
-        N_vars = N_xvars + N_uvars
-        Alt = -N.eye(N_vars)
-        blt = N.zeros(N_vars)
-        blt[0:N_xvars] = -N.ones(N_xvars)*0.001
-        blt[N_xvars:] = -N.ones(N_uvars)*1;
+        # TODO: These are currently hard coded. They shouldn't be.
+        #N_xvars = (len(grid) - 1) * model.get_model_size()
+        #N_uvars = len(grid) * len(model.get_inputs())
+        #N_vars = N_xvars + N_uvars
+        #Alt = -N.eye(N_vars)
+        #blt = N.zeros(N_vars)
+        #blt[0:N_xvars] = -N.ones(N_xvars)*0.001
+        #blt[N_xvars:] = -N.ones(N_uvars)*1;
         
         # Get OpenOPT handler
         p = NLP(self.f,
                 p0,
                 maxIter = 1e3,
                 maxFunEvals = 1e3,
-                A=Alt,
-                b=blt,
+                #A=Alt, # See TODO above
+                #b=blt, # See TODO above
                 df=self.df,
                 ftol = 1e-4,
                 xtol = 1e-4,
@@ -1792,29 +1793,32 @@ class MultipleShooter:
         
 class TestShooting:
     def setUp(self):
-        GRIDSIZE = 10
-        SINGLE_INITIAL_U = 2.5
-        TIMESTEP = 0.2
-        
         DLLFILE = 'VDP_pack_VDP_Opt'
         MODELICA_FILE = 'VDP.mo'
         MODEL_PACKAGE = 'VDP_pack.VDP_Opt'
         
         model = _load_example_standard_model(DLLFILE, MODELICA_FILE,
                                              MODEL_PACKAGE)
-        
-        grid = construct_grid(GRIDSIZE)
+        self._model = model
+    
+    def _init_shooter(self, model, gridsize, single_initial_u=2.5):
         
         # needed to be able get a reasonable initial
-        model.set_inputs([SINGLE_INITIAL_U] * len(model.get_inputs()))
-        initial_u = [[SINGLE_INITIAL_U] * len(model.get_inputs())] * GRIDSIZE
+        model.set_inputs([single_initial_u] * len(model.get_inputs()))
+        initial_u = [[single_initial_u] * len(model.get_inputs())] * gridsize
         
-        self._shooter = MultipleShooter(model, initial_u, grid)
-        self._model = model
+        grid = construct_grid(gridsize)
+        shooter = MultipleShooter(model, initial_u, grid)
+        
+        return shooter
     
     def test_basic_mshooting(self):
         """Test a basic multiple shoot (might take ~100 seconds)."""
-        optimum = self._shooter.run_optimization(plot=False)
+        
+        GRIDSIZE = 10
+        shooter = self._init_shooter(self._model, GRIDSIZE)
+        
+        optimum = shooter.run_optimization(plot=False)
         print "Optimal p:", optimum
         
     def test_mshooting_gradients(self):
@@ -1824,10 +1828,25 @@ class TestShooting:
         This test requires manual validation by goign through the result
         printed to stdout. Use the '-s' flag in nosetests.
         """
-        self._shooter.check_gradients()
+        GRIDSIZE = 10
+        shooter = self._init_shooter(self._model, GRIDSIZE)
+        shooter.check_gradients()
         
     def test_basic_sshooting(self):
         single_shooting(self._model, plot=False)
+        
+    def test_single_against_multiple(self):
+        """Compares single shooting against multiple shooting code with only
+           one segment.
+        """
+        GRIDSIZE = 1
+        shooter = self._init_shooter(self._model, GRIDSIZE)
+        moptimum = shooter.run_optimization(plot=False)
+        soptimum = single_shooting(self._model, plot=False)
+        
+        N.testing.assert_array_almost_equal(moptimum.xf, soptimum.xf,
+                                            decimal=3)
+        nose.tools.assert_almost_equal(moptimum.ff, soptimum.ff, places=4)
         
         
 def _verify_gradient(f, df, xstart, xend, SMALL=0.1, STEPS=100):
