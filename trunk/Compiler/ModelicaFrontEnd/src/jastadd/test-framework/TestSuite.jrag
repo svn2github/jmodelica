@@ -40,6 +40,38 @@ public class TestSuite {
 		} catch (Exception e) {
 			System.out.println("Error when parsing file: " + fileName);
 		}
+		String filesep = System.getProperty("file.separator");
+		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
+		OptionRegistry or = null;
+		try {
+			or = new OptionRegistry(optionsfile);
+		} catch(XPathExpressionException e) {
+			System.out.println("The options XML file could not be loaded.");
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		} catch(ParserConfigurationException e) {
+			System.out.println("The options XML file could not be loaded.");
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		} catch(IOException e) {
+			System.out.println("The options XML file could not be loaded.");
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		} catch(SAXException e) {
+			System.out.println("The options XML file could not be loaded.");
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		
+		String modelica_path = System.getenv("JMODELICA_HOME")+filesep+"ThirdParty/MSL";
+		or.setStringOption("MODELICAPATH",modelica_path);
+		
+		sr.options = or;
+
 		sr.collectTestCases(this,className);
 	}
 

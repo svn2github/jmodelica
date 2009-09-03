@@ -14,8 +14,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import org.jmodelica.modelica.parser.FlatModelicaParser;
 import java.util.Collection;
+import org.jmodelica.util.*;
 
 /**
  * @author jakesson
@@ -25,9 +25,7 @@ public class TransformCanonicalTestCase extends TestCase {
 	private String flatModel = "";
     private String flatModelFileName = "";
     private boolean resultOnFile = false;
-	
-    private FlatModelicaParser flatParser = new FlatModelicaParser();
-    
+	    
 	public TransformCanonicalTestCase() {}
     
 	/**
@@ -116,6 +114,38 @@ public class TransformCanonicalTestCase extends TestCase {
 		} catch (Exception e) {
 			System.out.println("Error when parsing file: " + getSourceFileName());
 		}
+		String filesep = System.getProperty("file.separator");
+		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
+		OptionRegistry or = null;
+		try {
+			or = new OptionRegistry(optionsfile);
+		} catch(XPathExpressionException e) {
+			System.out.println("The options XML file could not be loaded.");
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+			return false;
+		} catch(ParserConfigurationException e) {
+			System.out.println("The options XML file could not be loaded.");
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+			return false;
+		} catch(IOException e) {
+			System.out.println("The options XML file could not be loaded.");
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+			return false;
+		} catch(SAXException e) {
+			System.out.println("The options XML file could not be loaded.");
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+			return false;
+		}
+		
+		String modelica_path = System.getenv("JMODELICA_HOME")+filesep+"ThirdParty/MSL";
+		or.setStringOption("MODELICAPATH",modelica_path);
+		
+		sr.options = or;
+
 		sr.setFileName(getSourceFileName());
 	    InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 	    Collection<Problem> problems;
