@@ -1257,17 +1257,11 @@ def load_DLL(libname, path):
         dll.jmi_init_opt_delete.argtypes = [ct.c_void_p]
         
         dll.jmi_init_opt_get_dimensions.argtypes = [ct.c_void_p,
-                                                    Nct.ndpointer(dtype=ct.c_int,
-                                                                  ndim=1,
-                                                                  flags='C'),
-                                                    Nct.ndpointer(dtype=ct.c_int,
-                                                                  ndim=1,
-                                                                  flags='C'),
-                                                    Nct.ndpointer(dtype=ct.c_int,
-                                                                  ndim=1,
-                                                                  flags='C')]    
-        dll.jmi_opt_sim_get_x.argtypes =[ct.c_void_p]
-        dll.jmi_opt_sim_get_initial.argtypes = [ct.c_void_p,
+                                                    ct.POINTER(ct.c_int),
+                                                    ct.POINTER(ct.c_int),
+                                                    ct.POINTER(ct.c_int)]    
+        dll.jmi_init_opt_get_x.argtypes =[ct.c_void_p]
+        dll.jmi_init_opt_get_initial.argtypes = [ct.c_void_p,
                                                 Nct.ndpointer(dtype=c_jmi_real_t,
                                                               ndim=1,
                                                               flags='C')]
@@ -4773,10 +4767,8 @@ class DAEInitializationOpt(object):
                                      " jmi_opt_lp_new returned non-zero."
         except AttributeError,e:
              raise JMIException("Can not create JMISimultaneousOptLagPols object. Try recompiling model with target='algorithms'")
-        print 'Hej2\n' 
         assert self._jmi_init_opt.value is not None, \
             "jmi_init_opt struct has not returned correctly."
-        print 'Hej3\n'
         
     def init_opt_get_dimensions(self):
         """ 
@@ -4792,9 +4784,9 @@ class DAEInitializationOpt(object):
         n_h = ct.c_int()
         dh_n_nz = ct.c_int()
         if self._jmi_model._dll.jmi_init_opt_get_dimensions(self._jmi_init_opt, byref(n_x), 
-                                                        byref(n_h), byref(dg_n_nz)) is not 0:
+                                                        byref(n_h), byref(dh_n_nz)) is not 0:
             raise JMIException("Getting the number of variables and constraints failed.")
-        return n_x, n_h, dh_n_nz
+        return n_x.value, n_h.value, dh_n_nz.value
         
     def init_opt_get_x(self):
         """ Return the x vector of the NLP. """
