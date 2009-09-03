@@ -88,13 +88,13 @@ public class ModelicaCompiler extends AbstractCompiler {
 				if (type == IResource.FOLDER) {
 					// If it is a package, add to library list, otherwise, recurse
 					IFolder folder = (IFolder) resource[i];
-					try {
-						Library lib = examiner.examine(folder.getLocation().toOSString());
-						if (lib.isOK())
-							root.options.addModelicaLibrary(lib.name, lib.version.toString(), lib.path);
-					} catch (FileNotFoundException e) {
-						recursiveCompile((IFolder) resource[i], monitor);
-					}
+//					try {
+//						Library lib = examiner.examine(folder.getLocation().toOSString());
+//						if (lib.isOK())
+//							root.options.addModelicaLibrary(lib.name, lib.version.toString(), lib.path);
+//					} catch (FileNotFoundException e) {
+//						recursiveCompile((IFolder) resource[i], monitor);
+//					}
 				} else if (type == IResource.FILE && extension != null
 						&& extension.equals(IDEConstants.FILE_EXTENSION)) {
 					// Convert to IFile and get content
@@ -139,9 +139,9 @@ public class ModelicaCompiler extends AbstractCompiler {
 			}
 			java.util.List<Library> libraries = Library.fromString(libStr);
 
-			for (Library lib : libraries) 
-				root.options.addModelicaLibrary(lib.name, lib.version.toString(), lib.path);
-			root.options.setStringOption("default_msl_version", defaultMSL);
+//			for (Library lib : libraries) 
+//				root.options.addModelicaLibrary(lib.name, lib.version.toString(), lib.path);
+//			root.options.setStringOption("default_msl_version", defaultMSL);
 		}
 	}
 

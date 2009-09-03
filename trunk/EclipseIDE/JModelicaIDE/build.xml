@@ -24,9 +24,9 @@
 	<property name="package_dir" value="${java_dir}/org/jmodelica" />
 	<!--	
 	<property name="jmodelica_test_framework" value="${jmodelica_dir}/test/test-framework" />
-	<property name="jmodelica_java" value="${jmodelica_dir}/java" />
 	-->
-	<property name="scanner_output" value="${package_dir}/ide/scanners/generated" />
+	<property name="jmodelica_java" value="${jmodelica_dir}/java" />
+	<property name="scanner_output" value="${package_dir}/generated/scanners" />
 	<property name="scanner_dir" value="flex" />
 
 	<property name="parser_output" value="${package_dir}/modelica/parser" />
@@ -86,12 +86,12 @@
 				<include name="**/*.java" />
 			</fileset>
 		</copy>
+-->
 		<copy todir="${java_dir}">
 			<fileset dir="${jmodelica_java}">
-				<include name="**/codegen/*.java" />
+				<include name="**/*.java" />
 			</fileset>
 		</copy>
--->
 		<copy todir="${lib_dir}">
 			<fileset dir="${beaver_dir}">
 				<include name="beaver-rt*" />

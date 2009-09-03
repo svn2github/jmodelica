@@ -143,7 +143,7 @@
          </triggerPoints>
          <possibleChildren>
             <instanceof
-                  value="org.jmodelica.ast.ASTNode">
+                  value="org.jmodelica.modelica.compiler.ASTNode">
             </instanceof>
          </possibleChildren>
          <commonSorter
@@ -152,7 +152,7 @@
             <parentExpression>
                <or>
                   <instanceof
-                        value="org.jmodelica.ast.ASTNode">
+                        value="org.jmodelica.modelica.compiler.ASTNode">
                   </instanceof>
                   <and>
                      <adapt
