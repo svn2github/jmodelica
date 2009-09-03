@@ -1131,8 +1131,11 @@ def solve_using_sundials(model,
             tout=end_time
 
     if return_last==False:
-        assert i == num_samples, "Simulation lacked a couple of samples" \
+        assert i < num_samples, "Allocated a too small array." \
                                  " (%s != %s)" % (i, num_samples)
+        num_samples = i
+        ylist = ylist[:num_samples]
+        T = T[:num_samples]
             
     if sensi:
         cvodes.CVodeGetSens(cvode_mem, t, yS)
