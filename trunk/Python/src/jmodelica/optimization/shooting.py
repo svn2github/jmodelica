@@ -2203,6 +2203,11 @@ def construct_grid(n):
     return zip(times[:-1], times[1:])
 
 
+def _print_openopt_result(optres):
+    print "Optimal p:", optimum.xf
+    print "Cost(p)", optimum.ff
+
+
 def main(args=sys.argv):
     """The main method.
     
@@ -2273,9 +2278,9 @@ def main(args=sys.argv):
         # Whether the cost as a function of input U should be plotted
         cost_graph(m)
     elif options.what=='single':
-        opt_u = single_shooting(m)
-        print "Optimal u:", opt_u
-        return opt_u
+        optimum = single_shooting(m)
+        _print_openopt_result(optimum)
+        return optimum
     elif options.what == 'multiple':
         grid = construct_grid(options.gridsize)
         
@@ -2287,7 +2292,7 @@ def main(args=sys.argv):
         shooter = MultipleShooter(m, initial_u, grid)
         shooter.set_time_step(options.timestep)
         optimum = shooter.run_optimization()
-        print "Optimal p:", optimum
+        _print_openopt_result(optimum)
         return optimum
         
     return None
