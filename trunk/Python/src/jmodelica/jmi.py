@@ -3908,7 +3908,7 @@ class JMISimultaneousOpt(object):
         if self._jmi_model._dll.jmi_opt_sim_get_dimensions(self._jmi_opt_sim, byref(n_x), byref(n_g), 
                                                         byref(n_h), byref(dg_n_nz), byref(dh_n_nz)) is not 0:
             raise JMIException("Getting the number of variables and constraints failed.")
-        return n_x, n_g, n_h, dg_n_nz, dh_n_nz
+        return n_x.value, n_g.value, n_h.value, dg_n_nz.value, dh_n_nz.value
 
     def opt_sim_get_interval_spec(self, start_time, start_time_free, final_time, final_time_free):
         """ 
