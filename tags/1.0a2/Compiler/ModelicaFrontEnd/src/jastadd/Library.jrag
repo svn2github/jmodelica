@@ -1,0 +1,326 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+import java.io.*;
+import java.util.HashSet;
+import org.jmodelica.modelica.parser.*;
+
+aspect Library {
+	
+	syn lazy List InstProgramRoot.getInstLibClassDeclList() = new List();
+
+	eq LibClassDecl.memberClass(String name) {
+		//System.out.println(">> LibClassDecl.memberClass ("+ getName() + ") looking for: " + name + " enter");
+		HashSet set = new HashSet();
+		set.addAll(super.memberClass(name));
+		for (int i=0;i<getNumLibNode();i++) {
+			if (getLibNode(i).getName().equals(name)) {
+				set.add(getLibNode(i).getStoredDefinition().getElement(0));
+			}
+		}
+		//System.out.println(">> LibClassDecl.memberClass ("+ getName() + ") looking for: " + name + " exit");		
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+
+	eq LibClassDecl.numLocalClassDecl() = getNumClassDecl() + getNumLibNode();
+	
+	eq LibClassDecl.localClassDecl(int i) { 
+		if (i<getNumClassDecl()) {
+			return getClassDecl(i); 
+		} else {
+		   return (FullClassDecl)getLibNode(i-getNumClassDecl()).getStoredDefinition().getElement(0);
+		}
+	}	
+		
+	eq LibClassDecl.getLibNode().lookupClass(String name) = genericLookupClass(name);
+	eq LibClassDecl.getLibNode().lookupComponent(String name) = genericLookupComponent(name);
+
+	syn lazy StoredDefinition LibNode.getStoredDefinition() {
+		
+		/* If structured
+		 		a. Read all files
+		 		b. Check for package.mo
+		 		c. Parse package.mo
+		 		d. Read all .mo files
+		 		e. Add LibNodes to the LibClassDecl
+		 		f. Return the LibClassDecl
+		   If unstructured
+		   		a. Parse the .mo file
+		   		b. Return the resulting FullClassDecl  	 
+		*/
+	
+		//System.out.println("LibNode.getStoredDefinition: "+ getName() + " enter");
+		/*
+		if (getName().equals("Utilities")) {
+			throw new RuntimeException("Wow");
+		}
+		*/
+		if (getStructured()) {
+			String dirName = getFileName();
+			try {
+				File baseDir = new File(dirName);
+				File[] allFiles = baseDir.listFiles();
+				if (allFiles==null) {
+					return createErrorStoredDefinition();
+				} 
+				
+				boolean package_mo_present = false;
+				for (int i=0;i<allFiles.length;i++) {
+	   				if (allFiles[i].toString().length()>10)
+	   					if (allFiles[i].toString().substring(allFiles[i].toString().length()-10).equals("package.mo"))
+	   						package_mo_present = true;
+	   			}
+				
+				if (package_mo_present) {
+				    System.out.println("Reading file: " + dirName+"/package.mo...");
+				    ParserHandler ph = new ParserHandler();
+				    SourceRoot sr = ph.parseFile(dirName+"/package.mo");
+				    FullClassDecl fcd = (FullClassDecl)sr.getProgram().getUnstructuredEntity(0).getElement(0);
+		   			sr.getProgram().getUnstructuredEntity(0).setFileName(dirName+"/package.mo");
+		   			LibClassDecl lcd = new LibClassDecl(fcd);
+		   				   				   			
+		   			/* Obtain a list of all files
+	   				   get the corresponding package for each file
+	   				   and add to list of TypeDefs */
+	   			
+	   				List libnodes = new List();
+	   			
+	   				File[] filesUnStructured = baseDir.listFiles(new UnStructuredEntriesFilenameFilter());
+	   				debugPrint("Scanning directory: " + dirName);
+	   				debugPrint(" Unstructured entries: ");
+	   				for (int i=0;i<filesUnStructured.length;i++) {
+	   					debugPrint("*** " + filesUnStructured[i].getName().substring(0,filesUnStructured[i].getName().length()-3));
+	   					debugPrint("  "+filesUnStructured[i]);
+   						libnodes.add(new LibNode(filesUnStructured[i].toString(),
+	   				                         filesUnStructured[i].getName().substring(0,filesUnStructured[i].getName().length()-3),
+	   				                         false));	
+	   					
+	   				}
+	   				File[] dirs = baseDir.listFiles();
+	   				debugPrint(" Structured entries: ");
+		   			for (int i=0;i<dirs.length;i++) {
+		   				if (dirs[i].isDirectory()){
+		   					debugPrint("  " +dirs[i]);
+		   					debugPrint("*** " + dirs[i].getName());
+		   							   						   					
+	   						// Check if the directory contains a package.mo
+	   						// if not, do not add a LibNode
+	   						File baseDir_tmp = new File(dirs[i].getAbsolutePath());			
+							File[] allFiles_tmp = baseDir_tmp.listFiles();
+							package_mo_present = false;
+							for (int k=0;k<allFiles_tmp.length;k++) {
+								debugPrint("   # " + allFiles_tmp[k].toString());
+	   							if (allFiles_tmp[k].toString().length()>10)
+	   								if (allFiles_tmp[k].toString().substring(allFiles_tmp[k].toString().length()-10).equals("package.mo"))
+	   									package_mo_present = true;
+	   						}
+	   					
+	   						if (package_mo_present) {
+		   						libnodes.add(new LibNode(dirs[i].toString(),
+		   				                         dirs[i].getName(),
+		   				                         true));
+							} else {
+								debugPrint("*** " + dirs[i].getName() + " Not added: no package.mo present");
+							}
+						}
+	   			
+		   			}
+					lcd.setLibNodeList(libnodes);
+					sr.getProgram().getUnstructuredEntity(0).setElement(lcd,0);
+					//System.out.println("LibNode.getStoredDefinition: "+ getName() + " exit1");
+	   				return sr.getProgram().getUnstructuredEntity(0);
+	   			}
+			} catch (ParserException e) {
+				e.getProblem().setFileName(getFileName());
+				System.out.println(e.getProblem().toString()+"\n");
+				return createErrorStoredDefinition();		        
+			} catch (Exception e) {
+				System.out.println("Error when parsing file: '"+ dirName+"/package.mo"+ "':");
+				System.out.println("   " + e.getClass().getName());
+				System.err.println(e.getMessage());
+				return createErrorStoredDefinition();		        
+			} 		
+			
+		} else {
+			try {
+				System.out.println("Reading file: " + getFileName() + "...");
+				ParserHandler ph = new ParserHandler();
+				SourceRoot sr = ph.parseFile(getFileName());
+				for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
+					sd.setFileName(getFileName());
+				}
+				//System.out.println("LibNode.getStoredDefinition: "+ getName() + " exit2");
+				return sr.getProgram().getUnstructuredEntity(0);
+			} catch (ParserException e) {
+				e.getProblem().setFileName(getFileName());
+				System.out.println(e.getProblem().toString()+"\n");
+				return createErrorStoredDefinition();		        
+			} catch (Exception e) {
+				System.out.println("Error when parsing file: '"+ getFileName()+ "':");
+				System.out.println("   " + e.getClass().getName());
+				System.err.println(e.getMessage());
+				return createErrorStoredDefinition();		        
+			} 
+		}
+		return null;
+	}
+	
+	private StoredDefinition LibNode.createErrorStoredDefinition() {
+		BadClassDecl bcd = new BadClassDecl();
+		bcd.setName(new IdDecl("_ErrorClassDecl_in_lib"));
+		StoredDefinition sd = new StoredDefinition(new Opt(), new List());
+		sd.addElement(bcd);
+		return sd;		        
+	}
+	
+	public LibNode.LibNode(String fileName, String name, boolean structured) {
+		this(fileName,name,structured,"Unknown");
+		
+	}
+	
+	public LibClassDecl.LibClassDecl(FullClassDecl fcd) {
+		assignFields(fcd);            
+	}
+	
+	public void LibClassDecl.assignFields(FullClassDecl fcd) {
+		setVisibilityType(fcd.getVisibilityType());
+		setEncapsulatedOpt(fcd.getEncapsulatedOpt());
+		setPartialOpt(fcd.getPartialOpt());
+		setRestriction(fcd.getRestriction());
+		setName(fcd.getName());
+		setRedeclareOpt(fcd.getRedeclareOpt());
+		setFinalOpt(fcd.getFinalOpt());
+		setInnerOpt(fcd.getInnerOpt());
+		setOuterOpt(fcd.getOuterOpt());
+		setReplaceableOpt(fcd.getReplaceableOpt());
+		setConstrainingClauseOpt(fcd.getConstrainingClauseOpt());
+	    setConstrainingClauseCommentOpt(fcd.getConstrainingClauseCommentOpt());
+		setStringCommentOpt(fcd.getStringCommentOpt());
+		setEquationList(fcd.getEquationList());
+		setAlgorithmList(fcd.getAlgorithmList());
+		setSuperList(fcd.getSuperList());
+		setImportList(fcd.getImportList());
+		setClassDeclList(fcd.getClassDeclList());
+		setComponentDeclList(fcd.getComponentDeclList());
+		setAnnotationList(fcd.getAnnotationList());
+		setExternalClauseOpt(fcd.getExternalClauseOpt());
+		setEndName(fcd.getEndName());		                     
+	}
+	
+	eq LibClassDecl.getLibNode().enclosingClassDecl() = this; 	
+	eq LibClassDecl.getLibNode().classNamePrefix() = classNamePrefix().equals("")?
+                                                      name(): classNamePrefix() + "." + name();
+                                                      
+	public LibClassDecl FullClassDecl.createLibClassDecl() {
+		return new LibClassDecl(this);
+	}
+	
+	syn lazy List Program.getLibNodeList() {
+		List libnodes = new List();
+		// Retrieve MODELICAPATH
+//		String modelicaPath = System.getenv("MODELICAPATH");
+		 String modelicaPath = root().options.getStringOption("MODELICAPATH");
+
+		
+		
+		System.out.println("MODELICAPATH="+modelicaPath);
+		
+		
+		// Find the correct separator of path elements: ':' or ';'
+		String pathSeparator;
+		String os = System.getProperty("os.name").toLowerCase();
+		//System.out.println(os);
+		if (os.indexOf("win") >= 0) {
+			pathSeparator = ";";
+		} else {
+			pathSeparator = ":";
+		}
+		// Get list of directories from MODELICAPATH
+		String[] modelicaPathElements = modelicaPath.split(pathSeparator);
+		// For each directory detect all libraries
+		for (int i=0;i<modelicaPathElements.length;i++) {
+			try {
+				File baseDir = new File(modelicaPathElements[i]);
+				File[] allFiles = baseDir.listFiles();
+				if (allFiles!=null) {
+					// Get all Unstructured entities:
+	   				File[] filesUnStructured = baseDir.listFiles(new UnStructuredEntriesFilenameFilter());
+	   				for (int j=0;j<filesUnStructured.length;j++) {
+   						libnodes.add(new LibNode(filesUnStructured[j].toString(),
+	   				                         filesUnStructured[j].getName().substring(0,filesUnStructured[j].getName().length()-3),
+	   				                         false));			
+	   				}
+	   				// Get all Structured entities:
+	   				File[] dirs = baseDir.listFiles();
+		   			for (int j=0;j<dirs.length;j++) {
+		   				if (dirs[j].isDirectory()){
+	   						// Check if the directory contains a package.mo
+	   						// if not, do not add a LibNode
+	   						File baseDir_tmp = new File(dirs[j].getAbsolutePath());			
+							File[] allFiles_tmp = baseDir_tmp.listFiles();
+							boolean package_mo_present = false;
+							for (int k=0;k<allFiles_tmp.length;k++) {
+	   							if (allFiles_tmp[k].toString().length()>10)
+	   								if (allFiles_tmp[k].toString().substring(allFiles_tmp[k].toString().length()-10).equals("package.mo"))
+	   									package_mo_present = true;
+	   						}
+	   					
+	   						if (package_mo_present) {
+		   						libnodes.add(new LibNode(dirs[j].toString(),
+		   				                         dirs[j].getName(),
+		   				                         true));
+							} 
+						}
+	   			
+		   			}
+
+				}						        
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				e.printStackTrace();
+			} 		
+
+		}
+					
+		return libnodes;
+				
+	}
+	
+	static class UnStructuredEntriesFilenameFilter implements FilenameFilter {
+	
+			public boolean accept(File dir, String name) {
+				//System.out.println(" * " +name);
+				
+				if (name.equals("package.mo"))
+					return false;
+					
+				if (name.length()<=3)
+					return false;
+					 
+				if (name.substring(name.length()-3,name.length()).equals(".mo")) {
+					return true;
+				} else { 
+					return false;
+				}	
+			}
+		
+		}
+	
+}

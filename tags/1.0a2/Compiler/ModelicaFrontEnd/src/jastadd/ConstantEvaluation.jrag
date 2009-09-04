@@ -1,0 +1,1085 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+/**
+ * \brief Provides methods to evaluate flat constant 
+ * expressions. 
+ * 
+ * Evaluation of constants and parameters is needed in several locations in the
+ * compiler. 
+ * 
+ *  - Array sizes need to be evaluated during flattening and type checking.
+ *  - Expressions need to be evaluated in function calls.
+ *  - Attribute values for primitive variables need to be evaluated in the code 
+ *    generation.
+ *
+ * The evaluation framework relies on the class CValue, which in turn is 
+ * subclassed to CValueReal, CValueInteger, etc. Introducing explicit classes
+ * corresponding to constant values enables convenient type casts and also 
+ * provides means to represent more complex types such as arrays.  
+ * 
+ */
+aspect ConstantEvaluation {
+  
+	/**
+	 * \brief CValue represents a constant value and serves as the super class 
+	 * for constant value classes of the primitive types.
+	 */
+	public abstract class CValue {
+
+		/** 
+		 * \brief Default constructor.
+		 */
+	    protected CValue() {
+	    }
+
+	    /**
+	     * \brief Convert to int, default implementation.
+	     * 
+	     * @return Value converted to int.
+	     */
+	    public int intValue() { 
+	    	throw new UnsupportedOperationException(); 
+	    }
+	    
+	    /**
+	     * \brief Convert to daouble, default implementation.
+	     * 
+	     * @return Value converted to double.
+	     */
+	    public double realValue() { 
+	    	throw new UnsupportedOperationException(); 
+	    }
+	    
+	    /**
+	     * \brief Convert to boolean, default implementation.
+	     * 
+	     * @return Value converted to boolean.
+	     */
+	    public boolean booleanValue() { 
+	    	throw new UnsupportedOperationException(); 
+	    }
+	    
+	    /**
+	     * \brief Convert to string, default implementation.
+	     * 
+	     * @return Value converted to string.	     
+	     */
+	    public String stringValue() { 
+	    	throw new UnsupportedOperationException(); 
+	    }
+	    
+	    /**
+	     * \brief Create a literal AST node from constant, default 
+	     *  implementation.
+	     *  
+	     *  @return Literal expression AST node.
+	     */
+	    public ASTNode buildLiteral() { 
+	    	throw new UnsupportedOperationException(); 
+	    }
+
+	    /**
+	     * \brief Convert to int, default implementation.
+	     * 
+	     * @return Value converted to int.
+	     */
+	    public int intValue(int[] index) { 
+	    	throw new UnsupportedOperationException(); 
+	    }
+	    
+	    /**
+	     * \brief Convert to daouble, default implementation.
+	     * 
+	     * @return Value converted to double.
+	     */
+	    public double realValue(int[] index) { 
+	    	throw new UnsupportedOperationException(); 
+	    }
+	    
+	    /**
+	     * \brief Convert to boolean, default implementation.
+	     * 
+	     * @return Value converted to boolean.
+	     */
+	    public boolean booleanValue(int[] index) { 
+	    	throw new UnsupportedOperationException(); 
+	    }
+	    
+	    /**
+	     * \brief Convert to string, default implementation.
+	     * 
+	     * @return Value converted to string.	     
+	     */
+	    public String stringValue(int[] index) { 
+	    	throw new UnsupportedOperationException(); 
+	    }
+	    
+	    public abstract int ndims();
+	    
+	    public abstract int[] size();
+	    
+	    public boolean isArray() {
+	    	return ndims()>0;
+	    }
+	    
+	    /**
+	     * \brief Returns true if the constant value is of numeric type.
+	     * 
+	     * @return True if the constant is a numerical value.
+	     */
+	    public abstract boolean isNumeric();
+	    
+	    /**
+	     * \brief Check if there was an error in the evaluation.
+	     *
+	     * @return true if there was an error, otherwise true. 
+	     */
+	    public boolean isUnknown() {
+      		return false;
+      	}
+	   
+  }
+  
+  public abstract class CValueScalar extends CValue {
+	    
+	    public int ndims() {
+	    	return 0;
+	    }
+	    
+	    public int[] size() {
+	    	return new int[0];
+	    }
+	  	  
+  }
+	
+	/**
+	 * \brief Constant integer value.
+	 */
+    public class CValueInteger extends CValueScalar {
+        private int value;
+        
+        /** 
+         * \brief Constructor.
+         * 
+  	     * @param i Integer value.
+         */
+        public CValueInteger(int i) { 
+        	this.value = i; 
+        }
+
+        /**
+	     * \brief Convert to int.
+	     * 
+	     * @return Value converted to int.
+	     */
+        public int intValue() { 
+        	return value; 
+        }
+
+        /**
+	     * \brief Convert to double.
+	     * 
+	     *  @return Value converted to double.
+	     */
+        public double realValue() { 
+        	return value; 
+        }
+        
+        /**
+	     * \brief Convert to string.
+	     * 
+	     * @return Value converted to string.
+	     */
+        public String stringValue() { 
+        	return new Integer(value).toString(); 
+        }
+        
+        /**
+         * Create a new integer literal AST node.
+         * 
+         * @return AST node of type FLitExp.
+         */
+        public FLitExp buildLiteral() { 
+        	return new FIntegerLitExp(stringValue()); 
+        }
+
+	    /**
+	     * \brief Returns true if the constant value is of numeric type.
+	     * 
+	     * @return True.
+	     */
+	    public boolean isNumeric() {
+	    	return true;
+	    }
+        
+        /**
+         * Overloading of the toString() method.
+         * 
+         * @return The string.
+         */
+        public String toString() { 
+        	return value+""; 
+        }
+      }
+    
+	/**
+	 * \brief Constant real value.
+	 */      
+    public class CValueReal extends CValueScalar {
+        private double value;
+        
+        /**
+         * Constructor.
+         * 
+         * @param d Double value.
+         */
+        public CValueReal(double d) { 
+        	this.value = d; 
+        }
+
+        /**
+	     * \brief Convert to int.
+	     * 
+	     * @return Value converted to int.
+	     */
+        public int intValue() { 
+        	return (int)value; 
+        }
+        
+        /**
+	     * \brief Convert to double.
+	     * 
+	     * @return Value converted to double.
+	     */
+        public double realValue() { 
+        	return value; 
+        }
+
+        /**
+	     * \brief Convert to string.
+	     * 
+	     * @return Value converted to string.
+	     */
+        public String stringValue() { 
+        	return new Double(value).toString(); 
+        }
+        
+        /**
+         * \brief Create a new literal expression AST node.
+         * 
+         * @return FRealLitExp AST node.
+         */
+        public FLitExp buildLiteral() { 
+        	return new FRealLitExp(stringValue()); 
+        }
+
+	    /**
+	     * \brief Returns true if the constant value is of numeric type.
+	     * 
+	     * @return True.
+	     */
+	    public boolean isNumeric() {
+	    	return true;
+	    }
+        
+        /**
+         * Convert to string.
+         * 
+         * @return The string. 
+         */
+        public String toString() { 
+        	return value+""; 
+        }
+        
+      }
+    
+	/**
+	 * \brief Constant boolean value.
+	 */
+    public class CValueBoolean extends CValueScalar {
+        private boolean value;
+
+        /**
+         * Constructor.
+         * 
+         * @param b Boolean value.
+         */
+        public CValueBoolean(boolean b) { 
+        	this.value = b; 
+        }
+
+        /**
+	     * \brief Convert to boolean.
+	     * 
+	     * @return Value converted to boolean.
+	     */
+        public boolean booleanValue() { 
+        	return value; 
+        }
+        
+        /**
+	     * \brief Convert to string.
+	     * 
+	     * @return Value converted to string.
+	     */
+        public String stringValue() { 
+        	return new Boolean(value).toString(); 
+        }
+        
+        /**
+         * \brief Create a new literal expression AST node.
+         * 
+         * @return FBooleanLitExp AST node.
+         */
+        public FLitExp buildLiteral() { 
+      	  return value? new FBooleanLitExpTrue() :
+      		  new FBooleanLitExpFalse(); 
+      	  }
+        
+	    /**
+	     * \brief Returns true if the constant value is of numeric type.
+	     * 
+	     * @return False.
+	     */
+	    public boolean isNumeric() {
+	    	return false;
+	    }
+        
+        /**
+         * Convert to string.
+         * 
+         * @return The string. 
+         */
+        public String toString() { 
+        	return value+""; 
+        }
+      }
+      
+	/**
+	 * \brief Constant string value.
+	 */
+    public class CValueString extends CValueScalar {
+        private String value;
+        
+        /**
+         * Constructor.
+         * 
+         * @param s String value.
+         */        
+        public CValueString(String s) { this.value = s; }
+        
+        /**
+	     * \brief Convert to string.
+	     * 
+	     * @return Value converted to string.
+	     */        
+        public String stringValue() { return value; }
+
+        /**
+         * \brief Create a new literal expression AST node.
+         * 
+         * @return FStringLitExp AST node.
+         */
+        public FLitExp buildLiteral() { 
+        	return new FStringLitExp(stringValue()); 
+        }
+
+	    /**
+	     * \brief Returns true if the constant value is of numeric type.
+	     * 
+	     * @return False.
+	     */
+        public boolean isNumeric() {
+	    	return false;
+	    }
+                
+        /**
+         * Convert to string.
+         * 
+         * @return The string. 
+         */
+        public String toString() { 
+        	return value+""; 
+        }
+      }
+    
+	/**
+	 * \brief Constant unknown value. This class is used to represent 
+	 * non-constant values and values resulting from expressions with
+	 * type errors.
+	 */
+    public class CValueUnknown extends CValueScalar {
+
+	    /**
+	     * \brief Returns true if the constant value is of numeric type.
+	     * 
+	     * @return False.
+	     */
+    	public boolean isNumeric() {
+	    	return false;
+	    }
+    	
+        /**
+         * Convert to string.
+         * 
+         * @return The string. 
+         */
+    	public String toString() { 
+      		return "CValueUnknown"; 
+      	}
+      	
+      	public boolean isUnknown() {
+      		return true;
+      	}
+      	
+      }
+	
+  public abstract class CValueArray extends CValue {
+	    
+	    public int ndims() {
+	    	return 0;
+	    }
+	    
+	    public int[] size() {
+	    	return new int[0];
+	    }
+	  	  
+  }
+	
+	/**
+	 * \brief Constant integer value.
+	 */
+    public class CValueIntegerArray extends CValueArray {
+        private int value;
+        
+        /** 
+         * \brief Constructor.
+         * 
+  	     * @param i Integer value.
+         */
+        public CValueIntegerArray(int i) { 
+        	this.value = i; 
+        }
+
+        /**
+	     * \brief Convert to int.
+	     * 
+	     * @return Value converted to int.
+	     */
+        public int intValue() { 
+        	return value; 
+        }
+
+        /**
+	     * \brief Convert to double.
+	     * 
+	     *  @return Value converted to double.
+	     */
+        public double realValue() { 
+        	return value; 
+        }
+        
+        /**
+	     * \brief Convert to string.
+	     * 
+	     * @return Value converted to string.
+	     */
+        public String stringValue() { 
+        	return new Integer(value).toString(); 
+        }
+        
+        /**
+         * Create a new integer literal AST node.
+         * 
+         * @return AST node of type FLitExp.
+         */
+        public FLitExp buildLiteral() { 
+        	return new FIntegerLitExp(stringValue()); 
+        }
+
+	    /**
+	     * \brief Returns true if the constant value is of numeric type.
+	     * 
+	     * @return True.
+	     */
+	    public boolean isNumeric() {
+	    	return true;
+	    }
+        
+        /**
+         * Overloading of the toString() method.
+         * 
+         * @return The string.
+         */
+        public String toString() { 
+        	return value+""; 
+        }
+      }
+    
+	/**
+	 * \brief Constant real value.
+	 */      
+    public class CValueRealArray extends CValueArray {
+        private double value;
+        
+        /**
+         * Constructor.
+         * 
+         * @param d Double value.
+         */
+        public CValueRealArray(double d) { 
+        	this.value = d; 
+        }
+
+        /**
+	     * \brief Convert to int.
+	     * 
+	     * @return Value converted to int.
+	     */
+        public int intValue() { 
+        	return (int)value; 
+        }
+        
+        /**
+	     * \brief Convert to double.
+	     * 
+	     * @return Value converted to double.
+	     */
+        public double realValue() { 
+        	return value; 
+        }
+
+        /**
+	     * \brief Convert to string.
+	     * 
+	     * @return Value converted to string.
+	     */
+        public String stringValue() { 
+        	return new Double(value).toString(); 
+        }
+        
+        /**
+         * \brief Create a new literal expression AST node.
+         * 
+         * @return FRealLitExp AST node.
+         */
+        public FLitExp buildLiteral() { 
+        	return new FRealLitExp(stringValue()); 
+        }
+
+	    /**
+	     * \brief Returns true if the constant value is of numeric type.
+	     * 
+	     * @return True.
+	     */
+	    public boolean isNumeric() {
+	    	return true;
+	    }
+        
+        /**
+         * Convert to string.
+         * 
+         * @return The string. 
+         */
+        public String toString() { 
+        	return value+""; 
+        }
+        
+      }
+    
+	/**
+	 * \brief Constant boolean value.
+	 */
+    public class CValueBooleanArray extends CValueArray {
+        private boolean value;
+
+        /**
+         * Constructor.
+         * 
+         * @param b Boolean value.
+         */
+        public CValueBooleanArray(boolean b) { 
+        	this.value = b; 
+        }
+
+        /**
+	     * \brief Convert to boolean.
+	     * 
+	     * @return Value converted to boolean.
+	     */
+        public boolean booleanValue() { 
+        	return value; 
+        }
+        
+        /**
+	     * \brief Convert to string.
+	     * 
+	     * @return Value converted to string.
+	     */
+        public String stringValue() { 
+        	return new Boolean(value).toString(); 
+        }
+        
+        /**
+         * \brief Create a new literal expression AST node.
+         * 
+         * @return FBooleanLitExp AST node.
+         */
+        public FLitExp buildLiteral() { 
+      	  return value? new FBooleanLitExpTrue() :
+      		  new FBooleanLitExpFalse(); 
+      	  }
+        
+	    /**
+	     * \brief Returns true if the constant value is of numeric type.
+	     * 
+	     * @return False.
+	     */
+	    public boolean isNumeric() {
+	    	return false;
+	    }
+        
+        /**
+         * Convert to string.
+         * 
+         * @return The string. 
+         */
+        public String toString() { 
+        	return value+""; 
+        }
+      }
+      
+	/**
+	 * \brief Constant string value.
+	 */
+    public class CValueStringArray extends CValueArray {
+        private String value;
+        
+        /**
+         * Constructor.
+         * 
+         * @param s String value.
+         */        
+        public CValueStringArray(String s) { this.value = s; }
+        
+        /**
+	     * \brief Convert to string.
+	     * 
+	     * @return Value converted to string.
+	     */        
+        public String stringValue() { return value; }
+
+        /**
+         * \brief Create a new literal expression AST node.
+         * 
+         * @return FStringLitExp AST node.
+         */
+        public FLitExp buildLiteral() { 
+        	return new FStringLitExp(stringValue()); 
+        }
+
+	    /**
+	     * \brief Returns true if the constant value is of numeric type.
+	     * 
+	     * @return False.
+	     */
+        public boolean isNumeric() {
+	    	return false;
+	    }
+                
+        /**
+         * Convert to string.
+         * 
+         * @return The string. 
+         */
+        public String toString() { 
+        	return value+""; 
+        }
+      }
+
+    
+    
+  /**
+   * \brief Returns the constant value of a flat expression. 
+   * 
+   * If the expression is not constant, or if it contains type errors, a 
+   * CValueUnknown object is returned.
+   * 
+   * The actual evaluation of concrete FExp nodes is performed by dispatching
+   * with respect to the primitive type of the expression. For example, when an
+   * FAddExp node is evaluated, the computation proceeds in the following steps:
+   * 
+   *  - The primitive type of the expression is retreived using the type()
+   *    attribute.
+   *  - The method add() defined for FPrimitiveType is invoked.
+   *  - The resulting CValue is returned. 
+   *  
+   *  Using this strategy, a particular FExp node need not know the details of
+   *  how to evaluate itself in the case of operands of different types. Rather,
+   *  these computations are delegated to the respective types. In particular,
+   *  this design simplifies the task of extending the evaluation framework
+   *  to composite types such as arrays and complex numbers. In addition
+   *  the type dispatch makes implementation of support for operator overloading
+   *  simpler.
+   * 
+   * @return The constant value of the expression.
+   */
+  syn CValue FExp.ceval() = new CValueUnknown();
+  
+  eq FAddExp.ceval() = type().add(getLeft().ceval(), getRight().ceval());
+  eq FSubExp.ceval() = type().sub(getLeft().ceval(), getRight().ceval());
+  eq FMulExp.ceval() = type().mul(getLeft().ceval(), getRight().ceval());
+  eq FDivExp.ceval() = type().div(getLeft().ceval(), getRight().ceval());
+  eq FPowExp.ceval() = type().pow(getLeft().ceval(), getRight().ceval());
+  
+  eq FNegExp.ceval() = type().neg(getFExp().ceval());
+
+  eq FRealLitExp.ceval() = new CValueReal(Double.parseDouble(getUNSIGNED_NUMBER()));
+  eq FIntegerLitExp.ceval() = new CValueInteger(Integer.parseInt(getUNSIGNED_INTEGER()));
+  eq FBooleanLitExpTrue.ceval() = new CValueBoolean(true);
+  eq FBooleanLitExpFalse.ceval() = new CValueBoolean(false);
+  eq FStringLitExp.ceval() = new CValueString(getString());
+  
+  eq FIdUseExp.ceval() {
+   	if (myFV()!=null && !myFV().isUnknown()) {
+   		return myFV().ceval();
+   	} else {
+   		return new CValueUnknown();
+   	}
+  }
+  eq FInstAccessExp.ceval() { 
+//	  System.out.println(getInstAccess().name());
+//	  System.out.println(getInstAccess());
+//	  System.out.println(getInstAccess().myInstComponentDecl());
+	  return getInstAccess().myInstComponentDecl().isPrimitive()?
+	((InstPrimitive)getInstAccess().myInstComponentDecl()).ceval() : new CValueUnknown(); }
+
+  eq FSinExp.ceval() = new CValueReal(java.lang.Math.sin(getFExp().ceval().realValue()));
+  eq FCosExp.ceval() = new CValueReal(java.lang.Math.cos(getFExp().ceval().realValue()));
+  eq FTanExp.ceval() = new CValueReal(java.lang.Math.tan(getFExp().ceval().realValue()));	  
+  eq FAsinExp.ceval() = new CValueReal(java.lang.Math.asin(getFExp().ceval().realValue()));
+  eq FAcosExp.ceval() = new CValueReal(java.lang.Math.acos(getFExp().ceval().realValue()));
+  eq FAtanExp.ceval() = new CValueReal(java.lang.Math.atan(getFExp().ceval().realValue()));	  
+  eq FAtan2Exp.ceval() = new CValueReal(java.lang.Math.atan2(getFExp().ceval().realValue(),
+		                                                     getY().ceval().realValue()));	  
+  eq FSinhExp.ceval() = new CValueReal(java.lang.Math.sinh(getFExp().ceval().realValue()));
+  eq FCoshExp.ceval() = new CValueReal(java.lang.Math.cosh(getFExp().ceval().realValue()));
+  eq FTanhExp.ceval() = new CValueReal(java.lang.Math.tanh(getFExp().ceval().realValue()));	  
+  eq FExpExp.ceval() = new CValueReal(java.lang.Math.exp(getFExp().ceval().realValue()));
+  eq FLogExp.ceval() = new CValueReal(java.lang.Math.log(getFExp().ceval().realValue()));
+  eq FLog10Exp.ceval() = new CValueReal(java.lang.Math.log10(getFExp().ceval().realValue()));	  
+  eq FSqrtExp.ceval() = new CValueReal(java.lang.Math.sqrt(getFExp().ceval().realValue()));	  
+
+	/**
+	 * \brief Evaluation of a primitive instance node locade in the instance
+	 * AST.
+	 * 
+	 * In some situations, expressions are evaluated in the instance AST. 
+	 * Such expressions are then instantiated, but not yet flattened. As a
+	 * consequence, identifiers in expressions refers to InstPrimitive nodes,
+	 * and accordingly, it it necessary to compute the constant value 
+	 * corresponding to an InstPrimitive node. If the primitive is a
+	 * constant or a parameters, and if it has a binding expressions, then
+	 * a corresponding CValue object is returned, otherwise, CValueUnknown
+	 * is returned.
+	 * 
+	 * @return The constant value.
+	 */
+	syn CValue InstPrimitive.ceval() {
+	  if ((!isConstant() && !isParameter())) {
+		  return new CValueUnknown();
+	  } else if (myBindingInstExp()==null ||
+				myBindingInstExp().type().isUnknown()) { 
+			return new CValueUnknown();
+		} else if (isReal()) {
+			CValue val = myBindingInstExp().ceval();
+			if (val.isNumeric()) {
+				return new CValueReal(val.realValue());
+			} else {
+				return new CValueUnknown();
+			}
+		} else if (isInteger()) {
+			CValue val = myBindingInstExp().ceval();
+			if (val.isNumeric()) {
+				return new CValueInteger(val.intValue());
+			} else {
+				return new CValueUnknown();
+			}
+		} else if (isBoolean()) {
+			return myBindingInstExp().ceval();
+		} else if (isString()) {
+			return myBindingInstExp().ceval();
+		} else {
+			return new CValueUnknown();
+		}
+	}
+
+  /**
+   * \brief Constant evaluation of FVariable binding expressions.
+   * 
+   * If an expression is evaluated in an FClass, then identifiers are 
+   * referencing FVariables. The constant value of an FVariable is computed
+   * by evaluating the binding expression of the variable, if any. If the
+   * FVariable is not a constant or a parameters, or if it has no binding
+   * expressions, then a CValueUnknown object is returned.
+   * 
+   *  @return The constant value.
+   */
+  syn CValue AbstractFVariable.ceval();
+  eq UnknownFVariable.ceval() = new CValueUnknown();
+  eq FDerivativeVariable.ceval() = new CValueUnknown();
+  eq FRealVariable.ceval() {
+	  if ((!isConstant() && !isParameter()) || !hasBindingExp()) {
+		  return new CValueUnknown();
+	  } else {
+			CValue val = getBindingExp().ceval();
+			if (val.isNumeric()) {
+				return new CValueReal(val.realValue());
+			} else {
+				return new CValueUnknown();
+			}
+	  }
+  }
+
+  eq FIntegerVariable.ceval() {
+	  if ((!isConstant() && !isParameter()) || !hasBindingExp()) {
+		  return new CValueUnknown();
+	  } else {
+			CValue val = getBindingExp().ceval();
+			if (val.isNumeric()) {
+				return new CValueInteger(val.intValue());
+			} else {
+				return new CValueUnknown();
+			}
+	  }
+  }
+
+  eq FBooleanVariable.ceval() {
+	  if ((!isConstant() && !isParameter()) || !hasBindingExp()) {
+		  return new CValueUnknown();
+	  } else {
+		  return getBindingExp().ceval();
+	  }
+  }
+
+  eq FStringVariable.ceval() {
+	  if ((!isConstant() && !isParameter()) || !hasBindingExp()) {
+		  return new CValueUnknown();
+	  } else {
+		  return getBindingExp().ceval();
+	  }
+  }
+  
+  /**
+   * \brief Addition of constant values.
+   * 
+   * @param v1 Constant value of left operand.
+   * @param v2 Constant value of right operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FPrimitiveType.add(CValue v1, CValue v2) = 
+	  new CValueUnknown();
+  eq FRealScalarType.add(CValue v1, CValue v2) = 
+	  new CValueReal(v1.realValue() + v2.realValue());
+  eq FIntegerScalarType.add(CValue v1, CValue v2) = 
+	  new CValueInteger(v1.intValue() + v2.intValue());
+
+  /**
+   * \brief Subtraction of constant values.
+   * 
+   * @param v1 Constant value of left operand.
+   * @param v2 Constant value of right operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FPrimitiveType.sub(CValue v1, CValue v2) = 
+	  new CValueUnknown();
+  eq FRealScalarType.sub(CValue v1, CValue v2) = 
+	  new CValueReal(v1.realValue() - v2.realValue());
+  eq FIntegerScalarType.sub(CValue v1, CValue v2) = 
+	  new CValueInteger(v1.intValue() - v2.intValue());
+
+  /**
+   * \brief Multiplication of constant values.
+   * 
+   * @param v1 Constant value of left operand.
+   * @param v2 Constant value of right operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FPrimitiveType.mul(CValue v1, CValue v2) = 
+	  new CValueUnknown();
+  eq FRealScalarType.mul(CValue v1, CValue v2) = 
+	  new CValueReal(v1.realValue()*v2.realValue());
+  eq FIntegerScalarType.mul(CValue v1, CValue v2) = 
+	  new CValueInteger(v1.intValue()*v2.intValue());
+
+  /**
+   * \brief Division of constant values.
+   * 
+   * @param v1 Constant value of left operand.
+   * @param v2 Constant value of right operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FPrimitiveType.div(CValue v1, CValue v2) = 
+	  new CValueUnknown();
+  eq FRealScalarType.div(CValue v1, CValue v2) = 
+	  new CValueReal(v1.realValue()/v2.realValue());
+  eq FIntegerScalarType.div(CValue v1, CValue v2) = 
+	  new CValueReal(v1.realValue()/v2.realValue());
+
+  /**
+   * \brief Power expression for constant values.
+   * 
+   * @param v1 Constant value of left operand.
+   * @param v2 Constant value of right operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FPrimitiveType.pow(CValue v1, CValue v2) = 
+	  new CValueUnknown();
+  eq FRealScalarType.pow(CValue v1, CValue v2) = 
+	  new CValueReal(java.lang.Math.pow(v1.realValue(),v2.realValue()));
+  eq FIntegerScalarType.pow(CValue v1, CValue v2) = 
+	  new CValueInteger(v1.intValue()^v2.intValue());
+
+  /**
+   * \brief Negation of a constant value.
+   * 
+   * @param v Constant value of operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FPrimitiveType.neg(CValue v) = 
+	  new CValueUnknown();
+  eq FRealScalarType.neg(CValue v) = new CValueReal(-v.realValue());
+  eq FIntegerScalarType.neg(CValue v) = new CValueInteger(-v.intValue());
+
+	syn CValue FSubscript.ceval() = new CValueUnknown();
+	eq FExpSubscript.ceval() = getFExp().ceval();
+	  
+}
+
+aspect ArrayConstantEvaluation {
+	
+	public int[] FSubscript.arrayIndices() {
+		return new int[0];
+	}
+	
+	public int[] FExpSubscript.arrayIndices() {
+		int s = getFExp().ceval().intValue();
+		int ind[] = new int[s];
+		for (int i=0;i<s;i++) {
+			ind[i] = i+1;
+		}
+		return ind;
+	}
+	
+}
+
+aspect CircularExpressions {
+
+	syn lazy boolean FExp.isCircular() circular [true] = false;
+	
+	eq FBinExp.isCircular() = getLeft().isCircular() | getRight().isCircular();
+	eq FUnaryExp.isCircular() = getFExp().isCircular();
+	
+	eq FIdUseExp.isCircular() = myFV().isCircular();
+	eq FInstAccessExp.isCircular() = getInstAccess().myInstComponentDecl().isCircular();	
+	eq FFunctionCall.isCircular() {
+		for (FExp e : getArgss()) {
+			if (e.isCircular()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	eq FSumRedExp.isCircular() = getFExp().isCircular() | getFForIndex().isCircular();
+	syn lazy boolean FForIndex.isCircular() circular [true] = hasFExp()? getFExp().isCircular(): false;
+	eq FIfExp.isCircular() {
+		if (getIfExp().isCircular() | getThenExp().isCircular() | getElseExp().isCircular()) {
+			return true;
+		} else {
+			for (FElseIfExp ee : getFElseIfExps()) {
+				if (ee.isCircular()) {
+					return true;
+				}
+			}
+		} 
+		return false;
+	}
+	eq FElseIfExp.isCircular() = getIfExp().isCircular() | getThenExp().isCircular();
+	eq FArray.isCircular() {
+		for (FExp e : getFExps()) {
+			if (e.isCircular()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	// TODO: Add FMatrix
+
+	eq FRangeExp.isCircular() {
+		for (FExp e : getFExps()) {
+			if (e.isCircular()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	eq FBuiltInExp.isCircular() = getFExp().isCircular();
+	eq FAtan2Exp.isCircular() = getFExp().isCircular() | getY().isCircular();
+	eq FSizeExp.isCircular() = getFIdUseExp().isCircular() | getDim().isCircular();
+	eq FOnes.isCircular() {
+		for (FExp e : getFExps()) {
+			if (e.isCircular()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	eq FZeros.isCircular() {
+		for (FExp e : getFExps()) {
+			if (e.isCircular()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
+	
+
+	syn lazy boolean AbstractFVariable.isCircular() circular [true] = false;
+	eq FVariable.isCircular() {
+		if (hasBindingExp()) {
+		 	return getBindingExp().isCircular();
+		} else {
+		    return false;
+		}
+	}
+	
+	syn lazy boolean InstComponentDecl.isCircular() circular [true] = false;
+	eq InstPrimitive.isCircular() {
+		if (myBindingInstExp()!=null) {
+		 	return myBindingInstExp().isCircular();
+		} else {
+		    return false;
+		}	
+	}	
+	
+
+}

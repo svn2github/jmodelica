@@ -1,0 +1,11 @@
+<OptionRegistry>
+	<Options>
+		<Option>
+			<Type>String</Type>
+			<StringAttributes>
+				<Key>default_msl_version</Key>
+				<Value>3.0.1</Value>
+			</StringAttributes>
+		</Option>
+	</Options>	
+</OptionRegistry>
