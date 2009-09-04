@@ -48,11 +48,11 @@ OptionRegistry = org.jmodelica.util.OptionRegistry
 class ModelicaCompiler():
     """ User class for accessing the Java ModelicaCompiler class. """
     
-    Compiler = org.jmodelica.modelica.compiler.ModelicaCompiler
+    ModelicaCompiler = org.jmodelica.modelica.compiler.ModelicaCompiler
     
-    LOG_ERROR = Compiler.ERROR
-    LOG_WARNING = Compiler.WARNING
-    LOG_INFO = Compiler.INFO
+    LOG_ERROR = ModelicaCompiler.ERROR
+    LOG_WARNING = ModelicaCompiler.WARNING
+    LOG_INFO = ModelicaCompiler.INFO
     
     jm_home = jm.environ['JMODELICA_HOME']
     
@@ -68,69 +68,69 @@ class ModelicaCompiler():
             _handle_exception(ex)
             
         options.setStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
-        self._modelicacompiler = self.Compiler(options, 
+        self._compiler = self.ModelicaCompiler(options, 
                                                self.xml_var_path, 
                                                self.xml_val_path, 
                                                self.c_tpl_path)
     @classmethod
     def set_log_level(self,level):
-        self.Compiler.setLogLevel(self.Compiler.logger.getName(), level)
+        self.ModelicaCompiler.setLogLevel(self.ModelicaCompiler.logger.getName(), level)
         
     def get_modelicapath(self):
         """ Returns the modelicapath set for this compiler."""
-        return self._modelicacompiler.getModelicapath()
+        return self._compiler.getModelicapath()
     
     def set_modelicapath(self, path):
         """ Sets the modelicapath to path. """
-        self._modelicacompiler.setModelicapath(path)
+        self._compiler.setModelicapath(path)
         
     def get_boolean_option(self, key):
-        return self._modelicacompiler.getBooleanOption(key)
+        return self._compiler.getBooleanOption(key)
     
     def set_boolean_option(self, key, value):
-        self._modelicacompiler.setBooleanOption(key, value)
+        self._compiler.setBooleanOption(key, value)
         
     def get_integer_option(self, key):
-        return self._modelicacompiler.getIntegerOption(key)
+        return self._compiler.getIntegerOption(key)
     
     def set_integer_option(self, key, value):
-        self._modelicacompiler.setIntegerOption(key, value)
+        self._compiler.setIntegerOption(key, value)
         
     def get_real_option(self, key):
-        return self._modelicacompiler.getRealOption(key)
+        return self._compiler.getRealOption(key)
     
     def set_real_option(self, key, value):
-        self._modelicacompiler.setRealOption(key, value)
+        self._compiler.setRealOption(key, value)
         
     def get_string_option(self, key):
-        return self._modelicacompiler.getStringOption(key)
+        return self._compiler.getStringOption(key)
         
     def set_string_option(self, key, value):
-        self._modelicacompiler.setStringOption(key, value)   
+        self._compiler.setStringOption(key, value)   
         
     def get_XMLVariablesTemplate(self):
         """ Returns file path to the XML variables template. """
-        return self._modelicacompiler.getXMLVariablesTemplate()
+        return self._compiler.getXMLVariablesTemplate()
 
     def set_XMLVariablesTemplate(self, template):
         """ Sets the XML variables template to the file pointed out by template."""
-        self._modelicacompiler.setXMLVariablesTemplate(template)
+        self._compiler.setXMLVariablesTemplate(template)
 
     def get_XMLValuesTemplate(self):
         """ Returns file path to the XML values template. """
-        return self._modelicacompiler.getXMLValuesTemplate()
+        return self._compiler.getXMLValuesTemplate()
     
     def set_XMLValuesTemplate(self, template):
         """ Sets the XML values template to the file pointed out by template."""
-        self._modelicacompiler.setXMLValuesTemplate(template)
+        self._compiler.setXMLValuesTemplate(template)
         
     def get_cTemplate(self):
         """ Returns file path to the c template. """
-        return self._modelicacompiler.getCTemplate()
+        return self._compiler.getCTemplate()
     
     def set_cTemplate(self, template):
         """ Sets the c template to the file pointed out by template."""
-        self._modelicacompiler.setCTemplate(template)
+        self._compiler.setCTemplate(template)
 
     def compile_model(self,
                       model_file_name,
@@ -177,7 +177,7 @@ class ModelicaCompiler():
         if isinstance(model_file_name, str):
             model_file_name = [model_file_name]           
         try:
-            self._modelicacompiler.compileModel(model_file_name,
+            self._compiler.compileModel(model_file_name,
                                                 model_class_name)
             c_file = model_class_name.replace('.','_')
             retval = self.compile_dll(c_file, target)
@@ -220,7 +220,7 @@ class ModelicaCompiler():
         if isinstance(model_file_name, str):
             model_file_name = [model_file_name]
         try:
-            sr = self._modelicacompiler.parseModel(model_file_name)
+            sr = self._compiler.parseModel(model_file_name)
             return sr        
         except jpype.JavaException, ex:
             _handle_exception(ex)
@@ -256,7 +256,7 @@ class ModelicaCompiler():
 
         """    
         try:
-            ipr = self._modelicacompiler.instantiateModel(source_root, model_class_name)
+            ipr = self._compiler.instantiateModel(source_root, model_class_name)
             return ipr    
         except jpype.JavaException, ex:
             _handle_exception(ex)
@@ -297,9 +297,9 @@ class ModelicaCompiler():
 
         """
         try:
-            fclass = self._modelicacompiler.flattenModel(model_file_name,
-                                                         model_class_name,
-                                                         inst_prg_root)
+            fclass = self._compiler.flattenModel(model_file_name,
+                                                 model_class_name,
+                                                 inst_prg_root)
             return fclass    
         except jpype.JavaException, ex:
             _handle_exception(ex)
@@ -331,7 +331,7 @@ class ModelicaCompiler():
 
         """
         try:
-            self._modelicacompiler.generateCode(fclass)
+            self._compiler.generateCode(fclass)
         except jpype.JavaException, ex:
             _handle_exception(ex)
 
@@ -395,23 +395,16 @@ class ModelicaCompiler():
         retval=os.system(cmd)
         return retval
 
-
-class OptimicaCompiler():
+class OptimicaCompiler(ModelicaCompiler):
     """ User class for accessing the Java OptimicaCompiler class. """
 
-    Compiler = org.jmodelica.optimica.compiler.OptimicaCompiler
-
-    LOG_ERROR = Compiler.ERROR
-    LOG_WARNING = Compiler.WARNING
-    LOG_INFO = Compiler.INFO
+    OptimicaCompiler = org.jmodelica.optimica.compiler.OptimicaCompiler
 
     jm_home = jm.environ['JMODELICA_HOME']
     
     xml_var_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_optimica_variables_template.xml')    
-    xml_val_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_modelica_values_template.xml')
     c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_optimica_template.c')
     xml_prob_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_optimica_problvariables_template.xml')
-    options_file_path = os.path.join(jm_home, 'Options','options.xml')
 
     def __init__(self):
         try:
@@ -419,7 +412,7 @@ class OptimicaCompiler():
         except jpype.JavaException, ex:
             _handle_exception(ex)
         options.setStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
-        self._optimicacompiler = self.Compiler(options, 
+        self._compiler = self.OptimicaCompiler(options, 
                                                self.xml_var_path, 
                                                self.xml_prob_path, 
                                                self.xml_val_path, 
@@ -427,335 +420,15 @@ class OptimicaCompiler():
 
     @classmethod
     def set_log_level(self,level):
-        self.Compiler.setLogLevel(self.Compiler.logger.getName(), level)
-
-    def get_modelicapath(self):
-        """ Returns the modelicapath set for this compiler."""
-        return self._optimicacompiler.getModelicapath()
-    
-    def set_modelicapath(self, path):
-        """ Sets the modelicapath to path. """
-        self._optimicacompiler.setModelicapath(path)
-        
-    def get_boolean_option(self, key):
-        return self._optimicacompiler.getBooleanOption(key)
-    
-    def set_boolean_option(self, key, value):
-        self._optimicacompiler.setBooleanOption(key, value)
-        
-    def get_integer_option(self, key):
-        return self._optimicacompiler.getIntegerOption(key)
-    
-    def set_integer_option(self, key, value):
-        self._optimicacompiler.setIntegerOption(key, value)
-        
-    def get_real_option(self, key):
-        return self._optimicacompiler.getRealOption(key)
-    
-    def set_real_option(self, key, value):
-        self._optimicacompiler.setRealOption(key, value)
-        
-    def get_string_option(self, key):
-        return self._optimicacompiler.getStringOption(key)
-        
-    def set_string_option(self, key, value):
-        self._optimicacompiler.setStringOption(key, value)    
-    
-    def get_XMLVariablesTemplate(self):
-        """ Returns file path to the XML variables template. """
-        return self._optimicacompiler.getXMLVariablesTemplate()
-
-    def set_XMLVariablesTemplate(self, template):
-        """ Sets the XML variables template to the file pointed out by template."""
-        self._optimicacompiler.setXMLVariablesTemplate(template)
+        self.OptimicaCompiler.setLogLevel(self.OptimicaCompiler.logger.getName(), level)
 
     def get_XMLProblVariablesTemplate(self):
         """ Returns file path to the XML problem variables template. """
-        return self._optimicacompiler.getXMLProblVariablesTemplate()
+        return self._compiler.getXMLProblVariablesTemplate()
 
     def set_XMLProblVariablesTemplate(self, template):
         """ Sets the XML problem variables template to the file pointed out by template."""
-        self._optimicacompiler.setXMLProblVariablesTemplate(template)
-
-    def get_XMLValuesTemplate(self):
-        """ Returns file path to the XML values template. """
-        return self._optimicacompiler.getXMLValuesTemplate()
-    
-    def set_XMLValuesTemplate(self, template):
-        """ Sets the XML values template to the file pointed out by template."""
-        self._optimicacompiler.setXMLValuesTemplate(template)
-        
-    def get_cTemplate(self):
-        """ Returns file path to the c template. """
-        return self._optimicacompiler.getCTemplate()
-    
-    def set_cTemplate(self, template):
-        """ Sets the c template to the file pointed out by template."""
-        self._optimicacompiler.setCTemplate(template)
-
-    def compile_model(self,
-                      model_file_name,
-                      model_class_name,
-                      target = "model"):
-    
-        """ 
-        Compiles an Optimica model.
-
-        Performs all steps in the compilation of a model: parsing,
-        instantiating, flattening, code generation and dll
-        generation. Outputs are object file, c-code file, xml file and
-        dll which are all written to the folder in which the
-        compilation is performed. All files will get the default name
-        <model_class_name>.<ext>. Set target to specify the contents
-        of the object file used to build the .dll. Default is"model". Other two options are 
-        "algorithms" and "ipopt". See makefile in install folder for details.
-
-        Parameters:
-
-            model_file_name -- 
-                Path to file or list of paths to files in which the model is contained.
-            model_class_name -- 
-                Name of model class in the model file to compile.
-            target -- 
-                The build target.
-
-        Exceptions:
-
-            CompilerError -- 
-                If one or more error is found during compilation.
-            OptimicaClassNotFoundError -- 
-                If the model class is not found.
-            IOError -- 
-                If the model file is not found, can not be read or any other IO 
-                related error.
-            Exception -- 
-                If there are general errors related to the parsing of the model.       
-            JError -- 
-                If there was a runtime exception thrown by the underlying Java 
-                classes.
-
-        """
-        if isinstance(model_file_name, str):
-            model_file_name = [model_file_name]            
-        try:
-            self._optimicacompiler.compileModel(model_file_name, model_class_name)
-            c_file = model_class_name.replace('.','_')
-            retval = self.compile_dll(c_file, target)
-            return retval
-
-        except jpype.JavaException, ex:
-            _handle_exception(ex)
-
-    def parse_model(self, model_file_name):
-        """ 
-        Parses a model.
-
-        Parses a model and returns a reference to the source tree
-        representation.
-
-        Parameters:    
-
-            model_file_name -- 
-                Path to file or list of paths to files in which the model is contained.
-
-        Return:
-
-            Reference to the root of the source tree representation of the parsed 
-            model.
-
-        Exceptions:
-
-            CompilerError --
-                If one or more error is found during compilation.
-            IOError --
-                If the model file is not found, can not be read or any other IO 
-                related error.
-            Exception --
-                If there are general errors related to the parsing of the model.       
-            JError -- 
-                If there was a runtime exception thrown by the underlying Java 
-                classes.
-
-        """ 
-        if isinstance(model_file_name, str):
-            model_file_name = [model_file_name]
-        try:
-             sr = self._optimicacompiler.parseModel(model_file_name)
-             return sr        
-        except jpype.JavaException, ex:
-            _handle_exception(ex)               
-
-
-    def instantiate_model(self, source_root, model_class_name):
-        """ 
-        Generates an instance tree representation for a model. 
-
-        Generates an instance tree representation for a model using
-        the source tree belonging to the model which must first be
-        created with parse_model.
-
-        Parameters:   
-
-            source_root -- 
-                Reference to the root of the source tree representation.
-            model_class_name -- 
-                Name of model class in the model file to compile.
-
-        Returns:
-
-            Reference to the root of the instance tree representation. 
-
-        Exceptions:
-
-            CompilerError -- 
-                If one or more error is found during compilation.
-            ModelicaClassNotFoundError -- 
-                If the model class is not found.
-            JError --
-                If there was a runtime exception thrown by the underlying Java 
-                classes.
-
-        """   
-        try:
-            ipr = self._optimicacompiler.instantiateModel(source_root, model_class_name)
-            return ipr    
-        except jpype.JavaException, ex:
-            _handle_exception(ex)
-
-    def flatten_model(self,
-                      model_file_name,
-                      model_class_name,
-                      inst_prg_root):
-        """ 
-        Computes a flattened representation of a model. 
-
-        Computes a flattened representation of a model using the
-        instance tree belonging to the model which must first be
-        created with instantiate_model.
-
-        Parameters:  
-
-            model_file_name --
-                Path to file in which the model is contained.
-            model_class_name --
-                Name of model class in the model file to compile.
-            inst_prg_root -- 
-                Reference to the instance tree representation. 
-
-        Returns:
-
-            Object (FOptClass) representing the flattened model. 
-
-        Exceptions:
-
-            CompilerError --
-                If one or more error is found during compilation.
-            ModelicaClassNotFoundError --
-                If the model class is not found.
-            IOError --
-                If the model file is not found, can not be read or any other IO 
-                related error.
-            JError -- 
-                If there was a runtime exception thrown by the underlying Java 
-                classes.
-
-        """
-        try:
-            fclass = self._optimicacompiler.flattenModel(model_file_name, 
-                                                         model_class_name,
-                                                         inst_prg_root)
-            return fclass    
-        except jpype.JavaException, ex:
-            _handle_exception(ex)
-
-    def generate_code(self, fclass):
-        """ 
-        Generates code for a model.
-
-        Generates code for a model c and xml code for a model using
-        the FOptClass represenation created with flatten_model and
-        template files located in the JModelica installation
-        folder. Default output folder is the current folder from which
-        this module is run.
-
-        Parameters:
-
-            fclass -- 
-                Reference to the flattened model object representation.  
-
-        Exceptions:
-
-            IOError -- 
-                If the model file is not found, can not be read or any other IO 
-                related error.
-            JError --
-                If there was a runtime exception thrown by the underlying Java 
-                classes.
-
-        """
-        try:
-            self._optimicacompiler.generateCode(fclass)
-        except jpype.JavaException, ex:
-            _handle_exception(ex)
-
-    def compile_dll(self, c_file_name, target="model"):
-        """  Compiles a c code representation of a model.
-
-        Compiles a c code representation of a model and outputs a .dll
-        file. Default output folder is the current folder from which
-        this module is run. Needs a c-file which is generated with
-        generate_code.
-
-        Parameters:
-
-            c_file_name --
-                Name of c-file for which the .dll should be compiled without file 
-                extention.
-            target --
-                Build target.
-
-        Returns:
-
-            System return value. 
-
-        """
-
-        #make settings
-        make_file = os.path.join(self.jm_home,'Makefiles','MakeFile')
-        file_name =' FILE_NAME=' + c_file_name
-        jmodelica_h=' JMODELICA_HOME=' + self.jm_home
-        cppad_h = ' CPPAD_HOME=' + jm.environ['CPPAD_HOME']
-        ipopt_h = ' IPOPT_HOME=' + jm.environ['IPOPT_HOME']
-
-        if sys.platform == 'win32':
-            make = os.path.join(jm.environ['MINGW_HOME'],'bin','mingw32-make') + ' -f '
-            compiler = ' CXX=' + os.path.join(jm.environ['MINGW_HOME'],'bin','g++')
-            ar = ' AR=' + os.path.join(os.environ['MINGW_HOME'],'bin','ar')
-
-            cmd = make + \
-                  make_file + \
-                  compiler + \
-                  ar + \
-                  ' ' + \
-                  target + \
-                  file_name + \
-                  jmodelica_h + \
-                  cppad_h + \
-                  ipopt_h
-        else:
-            cmd = 'make -f' + \
-                  make_file + \
-                  ' ' + \
-                  target + \
-                  file_name + \
-                  jmodelica_h + \
-                  cppad_h + \
-                  ipopt_h
-
-        #run make -> <model_class_name>.dll
-        print cmd
-        retval=os.system(cmd)
-        return retval
+        self._compiler.setXMLProblVariablesTemplate(template)
 
 
 class JError(Exception):
