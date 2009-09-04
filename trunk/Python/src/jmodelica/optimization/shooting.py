@@ -2204,8 +2204,8 @@ def construct_grid(n):
 
 
 def _print_openopt_result(optres):
-    print "Optimal p:", optimum.xf
-    print "Cost(p)", optimum.ff
+    print "Optimal p:", optres.xf
+    print "Cost(p)", optres.ff
 
 
 def main(args=sys.argv):
