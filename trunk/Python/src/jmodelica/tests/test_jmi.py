@@ -2,7 +2,6 @@
 """
 
 import os
-import os.path
 
 import nose
 
@@ -11,16 +10,18 @@ from jmodelica.compiler import OptimicaCompiler
 import jmodelica.xmlparser as xp
 import jmodelica.io
 import matplotlib.pyplot as plt
+import nose.tools as ntools
 
 import numpy as N
 
 sep = os.path.sep
 
 jm_home = os.environ.get('JMODELICA_HOME')
-path_to_examples = sep + "Python" + sep + "jmodelica" + sep + "examples"
-path_to_tests = sep + "Python" + sep + "jmodelica" + sep + "tests"
+path_to_examples = os.path.join(jm_home, "Python", "jmodelica", "examples")
+path_to_tests = os.path.join(jm_home, "Python", "jmodelica", "tests")
 
 oc = OptimicaCompiler()
+
 
 def setup():
     """ 
@@ -28,6 +29,7 @@ def setup():
     set log level. 
     """
     OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
+
 
 def test_jmi_opt_sim_set_initial_from_trajectory():
     """ Test of 'jmi_opt_sim_set_initial_from_trajectory'.
@@ -38,8 +40,8 @@ def test_jmi_opt_sim_set_initial_from_trajectory():
     they match.
     """
     
-    model = sep + "files" + sep + "VDP.mo"
-    fpath = jm_home+path_to_examples+model
+    model = "files" + sep + "VDP.mo"
+    fpath = os.path.join(path_to_examples, model)
     cpath = "VDP_pack.VDP_Opt_Min_Time"
     fname = cpath.replace('.','_',1)
 
@@ -107,8 +109,8 @@ def test_set_initial_from_dymola():
     they match.
     """
     
-    model = sep + "files" + sep + "VDP.mo"
-    fpath = jm_home+path_to_examples+model
+    model = "files" + sep + "VDP.mo"
+    fpath = os.path.join(path_to_examples, model)
     cpath = "VDP_pack.VDP_Opt_Min_Time"
     fname = cpath.replace('.','_',1)
 
@@ -211,8 +213,8 @@ def test_init_opt():
 
     """
     
-    model = sep + "files" + sep + "DAEInitTest.mo"
-    fpath = jm_home+path_to_tests+model
+    model = "files" + sep + "DAEInitTest.mo"
+    fpath = os.path.join(path_to_tests, model)
     cpath = "DAEInitTest"
     fname = cpath.replace('.','_',1)
 
@@ -343,3 +345,41 @@ def test_init_opt():
     #print(dae_init_test.getW())
 
 
+def generic_load_model_test(modelfile, cpath, compiler):
+    """Test the load_model(...) function."""
+    
+    examplefpath = os.path.join(jm_home, path_to_examples, "files")
+    
+    dllfname = cpath.replace('.', '_', 1)
+    
+    DLLSUFFIXES = ['so', 'dll'] # A list of all the suffizes a DLL can have
+    for suffix in DLLSUFFIXES:
+        # Remove all possible DLL files
+        toremove = os.path.join(examplefpath, "%s.%s" % (dllfname, suffix))
+        try:
+            os.unlink(toremove)
+        except OSError:
+            pass
+    
+    # Assert not compiled
+    ntools.assert_raises(IOError, jmi.load_model, dllfname, examplefpath,
+                         compiler)
+    
+    # Compile and load
+    model = jmi.load_model(dllfname, examplefpath, modelfile, cpath,
+                           compiler)
+
+
+def test_load_model_optimica():
+    """Test the load_model(...) function of an Optimica problem."""
+    modelfile = "VDP.mo"
+    cpath = "VDP_pack.VDP_Opt_Min_Time"
+    generic_load_model_test(modelfile, cpath, 'optimica')
+    
+    
+def test_load_model_modelica():
+    """Test the load_model(...) function Modelica model."""
+    modelfile = "Pendulum_pack_no_opt.mo"
+    cpath = "Pendulum_pack.Pendulum"
+    generic_load_model_test(modelfile, cpath, 'modelica')
+    
