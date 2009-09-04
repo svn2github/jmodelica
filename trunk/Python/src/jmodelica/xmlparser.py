@@ -55,17 +55,12 @@ def _parse_XML(filename, schemaname=''):
         xmldoc = etree.ElementTree(file=filename)
     except etree.XMLSyntaxError, detail:
         raise XMLException("The XML file: %s is not well-formed. %s" %(filename, detail))
-    except IOError, detail:
-        raise XMLException("I/O error reading the XML file: %s. %s" %(filename, detail))
     
     if schemaname:
         try:
             schemadoc = etree.ElementTree(file=schemaname)
         except etree.XMLSyntaxError, detail:
-            raise XMLException("The XMLSchema: %s is not well-formed. %s" %(schemaname, detail))
-        except IOError, detail:
-            raise XMLException("I/O error reading the XMLSchema file: %s. %s" %(schemaname, detail))
-         
+            raise XMLException("The XMLSchema: %s is not well-formed. %s" %(schemaname, detail))         
             
         schema = etree.XMLSchema(schemadoc)
         
