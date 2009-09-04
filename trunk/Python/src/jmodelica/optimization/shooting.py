@@ -68,7 +68,7 @@ def _load_model(libname, path, mofile=None, optpackage=None):
         oc = OptimicaCompiler()
         oc.compile_model(os.path.join(path, mofile), optpackage)
         os.chdir(curdir)
-        model = JmiOptModel(libname,'./')
+        model = JmiOptModel(libname,path)
         
     return model
     
