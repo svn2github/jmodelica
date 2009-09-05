@@ -49,6 +49,7 @@ endif
 	[ -e $(prefix)/Options ] && echo "Options directory exists "|| mkdir $(prefix)/Options
 	[ -e $(prefix)/Options/options.xml ] && echo "options.xml exists "|| cp Options/options_tpl.xml $(prefix)/Options/options.xml
 	[ -e $(prefix)/Options/options.py ] && echo "options.py exists "|| cp Options/options_tpl.py $(prefix)/Options/options.py
+	cp $(abs_top_srcdir)/Options/LICENSE $(prefix)/Options/LICENSE
 	mkdir -p $(prefix)/Python
 	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/Python
 	[ -e $(prefix)/Python/jm_python.sh ] && echo "jm_python.sh exists "|| cp Python/jm_python.sh $(prefix)/Python/jm_python.sh
@@ -77,6 +78,7 @@ endif
 	cp  $(abs_top_srcdir)/Compiler/OptimicaXMLBackEnd/templates/jmi_optimica_problvariables_template.xml $(prefix)/CodeGenTemplates
 	mkdir -p $(prefix)/XML
 	cp  $(abs_top_srcdir)/XML/*.xsd $(prefix)/XML
+	cp  $(abs_top_srcdir)/XML/LICENSE $(prefix)/XML
 
 bindistdir: install
 	rm -rf $(bindistdir)
