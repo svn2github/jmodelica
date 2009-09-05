@@ -46,7 +46,7 @@ _defaults = [('IPOPT_HOME','',True),
              ('OC_JAR',os.path.join(_jm_home,'lib','ModelicaCompiler.jar'),True),
              ('UTIL_JAR',os.path.join(_jm_home,'lib','util.jar'),True),
              ('BEAVER_PATH',os.path.join(_jm_home,'ThirdParty','Beaver','lib'),True),
-             ('MODELICAPATH',os.path.join(_jm_home,'ThirdParty','MSL','Modelica'),True),
+             ('MODELICAPATH',os.path.join(_jm_home,'ThirdParty','MSL'),True),
              ('JVM_PATH',jpype.getDefaultJVMPath(),True),
              ('JVM_ARGS','-Xmx512m',False)]
 
