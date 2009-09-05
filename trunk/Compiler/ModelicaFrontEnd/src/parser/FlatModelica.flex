@@ -90,7 +90,23 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
 //     "function"        { return newSymbol(Terminals.FUNCTION); }
 //     "record"        { return newSymbol(Terminals.RECORD); }
   
-   "end"             { return newSymbol(Terminals.END); }
+  "end"             { return newSymbol(Terminals.END); }
+  
+//    "end" {WhiteSpace} "for"   { addLineBreaks(yytext()); 
+//    return newSymbol(Terminals.END_FOR); }
+
+//  "end" {WhiteSpace} "while"   { addLineBreaks(yytext()); 
+//    return newSymbol(Terminals.END_WHILE); }
+
+//  "end" {WhiteSpace} "if"   { addLineBreaks(yytext()); 
+//    return newSymbol(Terminals.END_IF); }
+
+//  "end" {WhiteSpace} "when"   { addLineBreaks(yytext()); 
+//    return newSymbol(Terminals.END_WHEN); }
+ 
+    "end" {WhiteSpace} {ID} { String s = yytext();
+  			  return newSymbol(Terminals.END_ID, s); }
+  
   
    "public"         { return newSymbol(Terminals.PUBLIC); }
    "protected"      { return newSymbol(Terminals.PROTECTED); }

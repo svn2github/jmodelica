@@ -107,8 +107,7 @@ FClass fclass =
     fqname
 	fvariable_list
 	fequation_section?
-	END 
-	fqname.end 
+	END_ID.end_s 
 	SEMICOLON {: List feq = null;
 					if (fequation_section.getNumChild()==0)
 						feq = new List();
@@ -270,6 +269,7 @@ FExp fprimary =
   | fid_use        {: return new FIdUseExp(fid_use); :} 
   | LPAREN fexp.a RPAREN {: return a; :}
   | TIME {: return new FTimeExp(); :}
+  | END                 {: return new FEndExp(); :} 
   ;
 
 FPrimitiveType fprimitive_type =

@@ -1002,7 +1002,7 @@ Exp primary =
   | LBRACK matrix RBRACK {: return matrix; :}
   | LBRACE function_arguments RBRACE {: return new ArrayConstructor(function_arguments); :}
   | TIME                {: return new TimeExp(); :}
-  | END                 {: return new EndExp(); :} // TODO: Make this work.
+  | END                 {: return new EndExp(); :} 
   ;
  
  FunctionCall function_call =

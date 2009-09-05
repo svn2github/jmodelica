@@ -1106,6 +1106,17 @@ model InitialEquationTest1
 end InitialEquationTest1;
 
 model EndExpTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="EndExpTest1",
+        description="Test of end expression",
+                                               flatModel=
+"
+fclass NameTests.EndExpTest1
+ Real x[1];
+equation 
+ x[end] = 2;
+end NameTests.EndExpTest1;
+")})));
 
  Real x[1];
 equation
@@ -1114,6 +1125,14 @@ equation
 end EndExpTest1;
 
 model EndExpTest2
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="EndExpTest2",
+        description="Test if equation.",
+                                               flatModel=
+"
+")})));
+
 
  Real x;
 equation
