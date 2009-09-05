@@ -1562,7 +1562,6 @@ class Model(object):
         """
         pd_tmp = N.zeros(self._n_pd.value)
         pd = N.zeros(self._n_pd.value)
-        print(self.get_pi())
         for i in range(self._n_pd.value):
             self.set_pd(pd)
             self.jmimodel.init_Fp(pd_tmp)
