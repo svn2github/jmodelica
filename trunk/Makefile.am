@@ -35,7 +35,13 @@ if HAVE_ANT
 	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/util.jar $(prefix)/lib/
 	cp $(abs_top_srcdir)/Compiler/OptimicaCompiler/bin/OptimicaCompiler.jar $(prefix)/lib/
 endif
+	cp $(abs_top_srcdir)/LICENSE $(prefix)/
+	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(prefix)/lib/
+	cp $(abs_top_srcdir)/JMI/LICENSE_CPL $(prefix)/lib/
+	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(prefix)/include/
+	cp $(abs_top_srcdir)/JMI/LICENSE_CPL $(prefix)/include/
 	mkdir -p $(prefix)/Makefiles
+	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(prefix)/Makefiles/LICENSE
 	case $(build) in \
 	*-cygwin*) \
 	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(prefix)/Makefiles/Makefile ;; \
@@ -50,6 +56,7 @@ endif
 	cp $(abs_top_srcdir)/Options/options.xml $(prefix)/Options/options.xml
 	cp $(abs_top_srcdir)/Options/LICENSE $(prefix)/Options/LICENSE
 	mkdir -p $(prefix)/Python
+	cp $(abs_top_srcdir)/Python/LICENSE $(prefix)/Python
 	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/Python
 	[ -e $(prefix)/Python/jm_python.sh ] && echo "jm_python.sh exists "|| cp Python/jm_python.sh $(prefix)/Python/jm_python.sh
 	[ -e $(prefix)/Python/jm_ipython.sh ] && echo "jm_ipython.sh exists "|| cp Python/jm_ipython.sh $(prefix)/Python/jm_ipython.sh
@@ -69,6 +76,7 @@ endif
 	cp $(CPPAD_HOME)/cppad/local/*.hpp $(prefix)/ThirdParty/CppAD/cppad/local
 	cd $(abs_top_srcdir)/ThirdParty; find MSL -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/ThirdParty
 	mkdir -p $(prefix)/CodeGenTemplates
+	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(prefix)/CodeGenTemplates/LICENSE
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/jmi_modelica_template.c $(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/OptimicaCBackEnd/templates/jmi_optimica_template.c $(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd/templates/jmi_modelica_variables_template.xml $(prefix)/CodeGenTemplates
@@ -82,6 +90,7 @@ endif
 bindistdir: install
 	rm -rf $(bindistdir)
 	mkdir -p $(bindistdir)
+	cp $(prefix)/LICENSE $(bindistdir)
 	cp -r $(prefix)/CodeGenTemplates $(bindistdir)
 	cp -r $(prefix)/MakeFiles $(bindistdir)
 	cp -r $(prefix)/Options $(bindistdir)
