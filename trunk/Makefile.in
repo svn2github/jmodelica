@@ -53,8 +53,6 @@ DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(top_srcdir)/JMI/examples/FurutaPendulum/Makefile.in \
 	$(top_srcdir)/JMI/examples/Vdp/Makefile.in \
 	$(top_srcdir)/JMI/examples/Vdp_cppad/Makefile.in \
-	$(top_srcdir)/Options/options_tpl.py.in \
-	$(top_srcdir)/Options/options_tpl.xml.in \
 	$(top_srcdir)/Python/jm_ipython.sh.in \
 	$(top_srcdir)/Python/jm_python.sh.in $(top_srcdir)/configure \
 	INSTALL config.guess config.sub depcomp install-sh ltmain.sh \
@@ -71,7 +69,6 @@ CONFIG_CLEAN_FILES = JMI/examples/Vdp/Makefile \
 	JMI/examples/Vdp_cppad/Makefile \
 	JMI/examples/FurutaPendulum/Makefile \
 	JMI/examples/CSTR/Makefile JMI/examples/CSTR2/Makefile \
-	Options/options_tpl.xml Options/options_tpl.py \
 	Python/jm_ipython.sh Python/jm_python.sh
 SOURCES =
 DIST_SOURCES =
@@ -292,10 +289,6 @@ JMI/examples/FurutaPendulum/Makefile: $(top_builddir)/config.status $(top_srcdir
 JMI/examples/CSTR/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI/examples/CSTR/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 JMI/examples/CSTR2/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI/examples/CSTR2/Makefile.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-Options/options_tpl.xml: $(top_builddir)/config.status $(top_srcdir)/Options/options_tpl.xml.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-Options/options_tpl.py: $(top_builddir)/config.status $(top_srcdir)/Options/options_tpl.py.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 Python/jm_ipython.sh: $(top_builddir)/config.status $(top_srcdir)/Python/jm_ipython.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
@@ -718,9 +711,8 @@ install-exec-local:
   	*) \
 	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.linux $(prefix)/Makefiles/MakeFile ;; \
 	esac
-	[ -e $(prefix)/Options ] && echo "Options directory exists "|| mkdir $(prefix)/Options
-	[ -e $(prefix)/Options/options.xml ] && echo "options.xml exists "|| cp Options/options_tpl.xml $(prefix)/Options/options.xml
-	[ -e $(prefix)/Options/options.py ] && echo "options.py exists "|| cp Options/options_tpl.py $(prefix)/Options/options.py
+	mkdir -p $(prefix)/Options
+	cp $(abs_top_srcdir)/Options/options.xml $(prefix)/Options/options.xml
 	cp $(abs_top_srcdir)/Options/LICENSE $(prefix)/Options/LICENSE
 	mkdir -p $(prefix)/Python
 	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/Python

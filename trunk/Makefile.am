@@ -46,9 +46,8 @@ endif
   	*) \
 	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.linux $(prefix)/Makefiles/MakeFile ;; \
 	esac
-	[ -e $(prefix)/Options ] && echo "Options directory exists "|| mkdir $(prefix)/Options
-	[ -e $(prefix)/Options/options.xml ] && echo "options.xml exists "|| cp Options/options_tpl.xml $(prefix)/Options/options.xml
-	[ -e $(prefix)/Options/options.py ] && echo "options.py exists "|| cp Options/options_tpl.py $(prefix)/Options/options.py
+	mkdir -p $(prefix)/Options
+	cp $(abs_top_srcdir)/Options/options.xml $(prefix)/Options/options.xml
 	cp $(abs_top_srcdir)/Options/LICENSE $(prefix)/Options/LICENSE
 	mkdir -p $(prefix)/Python
 	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/Python
