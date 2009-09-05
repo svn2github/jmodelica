@@ -14,7 +14,7 @@ import numpy as N
 import ctypes as ct
 import matplotlib.pyplot as plt
 
-def run_demo():
+def run_demo(with_plots=True):
     """Demonstrate how to solve a dynamic optimization
     problem based on an inverted pendulum system."""
 
@@ -59,41 +59,42 @@ def run_demo():
     
     # Get the result
     nlp.jmi_simoptlagpols.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
-    
-    # Plot
-    plt.figure(1)
-    plt.clf()
-    plt.subplot(211)
-    plt.plot(t_,x_[n_points:2*n_points])
-    plt.grid()
-    plt.ylabel('th')
-    
-    plt.subplot(212)
-    plt.plot(t_,x_[n_points*2:n_points*3])
-    plt.grid()
-    plt.ylabel('dth')
-    plt.xlabel('time')
-    plt.show()
-    
-    plt.figure(2)
-    plt.clf()
-    plt.subplot(311)
-    plt.plot(t_,x_[n_points*3:n_points*4])
-    plt.grid()
-    plt.ylabel('x')
-    
-    plt.subplot(312)
-    plt.plot(t_,x_[n_points*4:n_points*5])
-    plt.grid()
-    plt.ylabel('dx')
-    plt.xlabel('time')
-    
-    plt.subplot(313)
-    plt.plot(t_,u_)
-    plt.grid()
-    plt.ylabel('u')
-    plt.xlabel('time')
-    plt.show()
 
+    if with_plots:
+        # Plot
+        plt.figure(1)
+        plt.clf()
+        plt.subplot(211)
+        plt.plot(t_,x_[n_points:2*n_points])
+        plt.grid()
+        plt.ylabel('th')
+        
+        plt.subplot(212)
+        plt.plot(t_,x_[n_points*2:n_points*3])
+        plt.grid()
+        plt.ylabel('dth')
+        plt.xlabel('time')
+        plt.show()
+        
+        plt.figure(2)
+        plt.clf()
+        plt.subplot(311)
+        plt.plot(t_,x_[n_points*3:n_points*4])
+        plt.grid()
+        plt.ylabel('x')
+        
+        plt.subplot(312)
+        plt.plot(t_,x_[n_points*4:n_points*5])
+        plt.grid()
+        plt.ylabel('dx')
+        plt.xlabel('time')
+        
+        plt.subplot(313)
+        plt.plot(t_,u_)
+        plt.grid()
+        plt.ylabel('u')
+        plt.xlabel('time')
+        plt.show()
+        
 if __name__ == "__main__":
     run_demo()

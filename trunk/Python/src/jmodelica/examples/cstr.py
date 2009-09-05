@@ -15,7 +15,7 @@ import ctypes as ct
 import matplotlib.pyplot as plt
 
 
-def run_demo():
+def run_demo(with_plots=True):
     """Demonstrate how to solve the 
     CSTR optimization problem."""
 
@@ -27,11 +27,11 @@ def run_demo():
 
     cstr = jmi.Model("CSTR_CSTR_Opt")
 
-    pi = cstr.getPI();
-    x = cstr.getX();
-    dx = cstr.getDX();
-    u = cstr.getU();
-    w = cstr.getW();
+    pi = cstr.get_pi();
+    x = cstr.get_x();
+    dx = cstr.get_dx();
+    u = cstr.get_u();
+    w = cstr.get_w();
     
     dx[0] = 0;
     dx[1] = 0;
@@ -91,24 +91,25 @@ def run_demo():
     nlp.jmi_simoptlagpols.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
     
     # Plot
-    plt.figure(1)
-    plt.clf()
-    plt.subplot(311)
-    plt.plot(t_,x_[n_points:2*n_points])
-    plt.grid()
-    plt.ylabel('x1')
-    
-    plt.subplot(312)
-    plt.plot(t_,x_[n_points*2:n_points*3])
-    plt.grid()
-    plt.ylabel('x2')
-    
-    plt.subplot(313)
-    plt.plot(t_,u_)
-    plt.grid()
-    plt.ylabel('u')
-    plt.xlabel('time')
-    plt.show()
+    if with_plots:
+        plt.figure(1)
+        plt.clf()
+        plt.subplot(311)
+        plt.plot(t_,x_[n_points:2*n_points])
+        plt.grid()
+        plt.ylabel('x1')
+        
+        plt.subplot(312)
+        plt.plot(t_,x_[n_points*2:n_points*3])
+        plt.grid()
+        plt.ylabel('x2')
+        
+        plt.subplot(313)
+        plt.plot(t_,u_)
+        plt.grid()
+        plt.ylabel('u')
+        plt.xlabel('time')
+        plt.show()
     
 if __name__ == "__main__":
     run_demo()

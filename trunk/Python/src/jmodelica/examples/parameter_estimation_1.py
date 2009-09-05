@@ -15,7 +15,7 @@ import ctypes as ct
 import matplotlib.pyplot as plt
 import scipy.integrate as integr
 
-def run_demo():
+def run_demo(with_plots=True):
     """Demonstrate how to solve a simple
     parameter estimation problem."""
 
@@ -32,11 +32,11 @@ def run_demo():
     model=jmi.Model("ParEst_ParEst")
     
     # Retreive parameter and variable vectors
-    pi = model.getPI();
-    x = model.getX();
-    dx = model.getDX();
-    u = model.getU();
-    w = model.getW();
+    pi = model.get_pi();
+    x = model.get_x();
+    dx = model.get_dx();
+    u = model.get_u();
+    w = model.get_w();
     
     # Set model input
     w[0] = 1
@@ -73,21 +73,22 @@ def run_demo():
     pi[4:15] = t_meas
     pi[15:26] = xx_meas[:,0]
 
-    # Plot simulation
-    plt.figure(1)
-    plt.clf()
-    plt.subplot(211)
-    plt.plot(t_sim,xx[:,0])
-    plt.grid()
-    plt.plot(t_meas,xx_meas[:,0],'x')
-    plt.ylabel('x1')
-    
-    plt.subplot(212)
-    plt.plot(t_sim,xx[:,1])
-    plt.grid()
-    plt.ylabel('x2')
-    plt.show()
-    
+    if with_plots:
+        # Plot simulation
+        plt.figure(1)
+        plt.clf()
+        plt.subplot(211)
+        plt.plot(t_sim,xx[:,0])
+        plt.grid()
+        plt.plot(t_meas,xx_meas[:,0],'x')
+        plt.ylabel('x1')
+        
+        plt.subplot(212)
+        plt.plot(t_sim,xx[:,1])
+        plt.grid()
+        plt.ylabel('x2')
+        plt.show()
+        
     # Initialize the mesh
     n_e = 50 # Number of elements 
     hs = N.ones(n_e)*1./n_e # Equidistant points
@@ -120,25 +121,26 @@ def run_demo():
     
     # Get the result
     nlp.jmi_simoptlagpols.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
-    
-    # Plot optimization result
-    plt.figure(2)
-    plt.clf()
-    plt.subplot(211)
-    plt.plot(t_,w_[n_points:2*n_points])
-    plt.plot(t_meas,xx_meas[:,0],'x')
-    plt.grid()
-    plt.ylabel('y')
-    
-    plt.subplot(212)
-    plt.plot(t_,w_[0:n_points])
-    plt.grid()
-    plt.ylabel('u')
-    plt.show()
-    
-    print("** Optimal parameter values: **")
-    print("w = %f"%pi[0])
-    print("z = %f"%pi[1])
+
+    if with_plots:
+        # Plot optimization result
+        plt.figure(2)
+        plt.clf()
+        plt.subplot(211)
+        plt.plot(t_,w_[n_points:2*n_points])
+        plt.plot(t_meas,xx_meas[:,0],'x')
+        plt.grid()
+        plt.ylabel('y')
+        
+        plt.subplot(212)
+        plt.plot(t_,w_[0:n_points])
+        plt.grid()
+        plt.ylabel('u')
+        plt.show()
+        
+        print("** Optimal parameter values: **")
+        print("w = %f"%pi[0])
+        print("z = %f"%pi[1])
 
 if __name__ == "__main__":
     run_demo()
