@@ -345,7 +345,7 @@ def test_init_opt():
     #print(dae_init_test.getW())
 
 
-def generic_load_model_test(modelfile, cpath, compiler):
+def _generic_load_model_trial(modelfile, cpath, compiler):
     """Test the load_model(...) function."""
     
     examplefpath = os.path.join(jm_home, path_to_examples, "files")
@@ -374,12 +374,12 @@ def test_load_model_optimica():
     """Test the load_model(...) function of an Optimica problem."""
     modelfile = "VDP.mo"
     cpath = "VDP_pack.VDP_Opt_Min_Time"
-    generic_load_model_test(modelfile, cpath, 'optimica')
+    _generic_load_model_trial(modelfile, cpath, 'optimica')
     
     
 def test_load_model_modelica():
     """Test the load_model(...) function Modelica model."""
     modelfile = "Pendulum_pack_no_opt.mo"
     cpath = "Pendulum_pack.Pendulum"
-    generic_load_model_test(modelfile, cpath, 'modelica')
+    _generic_load_model_trial(modelfile, cpath, 'modelica')
     
