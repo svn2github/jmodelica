@@ -1375,18 +1375,6 @@ def load_DLL(libname, path):
     return dll
 
 
-def load_model(filepath):
-    """Returns a JMI model loaded from file filepath.
-    
-    filepath can be both absolute or relative path to the model file to be
-    loaded.
-    
-    If the model cannot be loaded a JMIException will be raised.
-	
-    """
-    dll = load_DLL(filepath)
-
-
 def _translate_value_ref(valueref):
     """Translate a ValueReference into variable type and index in z-vector.
     
