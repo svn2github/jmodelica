@@ -110,8 +110,13 @@
 	<target name="gen-parser">
 	
 	    <!-- generate the scanner -->
-	    <jflex file="${parser}/Modelica.flex" outdir="${parser_output}" nobak="yes"/>
-	  	<!-- generate the parser phase 1, translating .lalr to .beaver -->
+        <concat destfile="${parser_output}/Modelica_all.flex" force="no">
+          <filelist dir="." files="${parser}/Modelica_header.flex"/>
+          <filelist dir="${parser}" files="Modelica.flex" />	
+         </concat>
+	    <jflex file="${parser_output}/Modelica_all.flex" outdir="${parser_output}" nobak="yes"/>
+
+		<!-- generate the parser phase 1, translating .lalr to .beaver -->
         <concat destfile="${parser_output}/Modelica_all.parser" force="no">
           <filelist dir="." files="${parser}/Modelica_header.parser"/>
           <filelist dir="${parser}" files="Modelica.parser" />	
@@ -127,11 +132,20 @@
 	  	    <beaver file="${parser_output}/ModelicaParser.beaver" terminalNames="yes" compress="no" useSwitch="yes"/>
 	  	  
 	  	
-	  	
-	  	    <jflex file="${parser}/FlatModelica.flex" outdir="${parser_output}" nobak="yes"/>
-	  	  	<!-- generate the parser phase 1, translating .lalr to .beaver -->
+        <concat destfile="${parser_output}/FlatModelica_all.flex" force="no">
+          <filelist dir="." files="${parser}/FlatModelica_header.flex"/>
+          <filelist dir="${parser}" files="FlatModelica.flex" />	
+         </concat>
+	  	    <jflex file="${parser_output}/FlatModelica_all.flex" outdir="${parser_output}" nobak="yes"/>
+
+        <concat destfile="${parser_output}/FlatModelica_all.parser" force="no">
+          <filelist dir="." files="${parser}/FlatModelica_header.parser"/>
+          <filelist dir="${parser}" files="FlatModelica.parser" />	
+         </concat>
+
+		<!-- generate the parser phase 1, translating .lalr to .beaver -->
 	  	 	   <java classpath="${jastadd_dir}/JastAddParser.jar:${beaver_dir}/lib/beaver-rt.jar" classname="Main">
-	  	  	      <arg line="${parser}/FlatModelica.parser ${parser_output}/FlatModelicaParser_raw.beaver"/>
+	  	  	      <arg line="${parser_output}/FlatModelica_all.parser ${parser_output}/FlatModelicaParser_raw.beaver"/>
 	  	  	    </java> 
 	  	        <concat destfile="${parser_output}/FlatModelicaParser.beaver" force="no">
 	  	          <filelist dir="." files="${parser}/beaver.flat.input"/>

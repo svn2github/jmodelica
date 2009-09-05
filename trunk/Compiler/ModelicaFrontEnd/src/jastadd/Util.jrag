@@ -39,10 +39,7 @@ aspect RootAccess {
 	syn lazy ArrayList ASTNode.emptyArrayList() = root().emptyArrayList();
 	eq Root.emptyArrayList() = getEmptyArrayList();
 	syn lazy ArrayList Root.getEmptyArrayList() = new ArrayList();
-	
-//	syn lazy ModelicaParser Root.parser() = new ModelicaParser();
-//	syn lazy FlatModelicaParser Root.flatModelicaParser() = new FlatModelicaParser();
-	
+		
 	/*
 	 * The Parser methods are introduced here so that they can be refined in
 	 * extensions where other parsers are used.
@@ -50,38 +47,94 @@ aspect RootAccess {
 	
 	public SourceRoot ParserHandler.parseFile(String fileName) 
 	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
-		SourceRoot sr = null;
-		Reader reader = new FileReader(fileName);
-		ModelicaScanner scanner = new ModelicaScanner(new BufferedReader(reader));
-		ModelicaParser parser = new ModelicaParser();
-		parser.setLineBreakMap(scanner.getLineBreakMap());
-		sr = (SourceRoot)parser.parse(scanner);
-		sr.setFileName(fileName);
-		return sr;
+		return parseModelicaFile(fileName);
 	}
 	
 	public SourceRoot ParserHandler.parseString(String str, String fileName) 
 	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
+		return parseModelicaString(str,fileName);
+	}
+	
+	public Exp ParserHandler.parseExpString(String str)
+	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
+		return parseModelicaExpString(str);
+	}
+
+	public SourceRoot ParserHandler.parseModelicaFile(String fileName) 
+	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
 		SourceRoot sr = null;
-		ModelicaScanner scanner = new ModelicaScanner(new StringReader(str));
-		ModelicaParser parser = new ModelicaParser();
+		Reader reader = new FileReader(fileName);
+		org.jmodelica.modelica.parser.ModelicaScanner scanner = 
+			new org.jmodelica.modelica.parser.ModelicaScanner(new BufferedReader(reader));
+		org.jmodelica.modelica.parser.ModelicaParser parser = new org.jmodelica.modelica.parser.ModelicaParser();
 		parser.setLineBreakMap(scanner.getLineBreakMap());
 		sr = (SourceRoot)parser.parse(scanner);
 		sr.setFileName(fileName);
 		return sr;
 	}
 	
-	public Exp ParserHandler.parseExpString(String str)
+	public SourceRoot ParserHandler.parseModelicaString(String str, String fileName) 
+	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
+		SourceRoot sr = null;
+		org.jmodelica.modelica.parser.ModelicaScanner scanner = 
+			new org.jmodelica.modelica.parser.ModelicaScanner(new StringReader(str));
+		org.jmodelica.modelica.parser.ModelicaParser parser = 
+			new org.jmodelica.modelica.parser.ModelicaParser();
+		parser.setLineBreakMap(scanner.getLineBreakMap());
+		sr = (SourceRoot)parser.parse(scanner);
+		sr.setFileName(fileName);
+		return sr;
+	}
+	
+	public Exp ParserHandler.parseModelicaExpString(String str)
 	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
 		Exp exp = null;
-		ModelicaScanner scanner = new ModelicaScanner(new StringReader(str));
-		ModelicaParser parser = new ModelicaParser();
-		exp = (Exp)parser.parse(scanner,ModelicaParser.AltGoals.exp);
+		org.jmodelica.modelica.parser.ModelicaScanner scanner = 
+			new org.jmodelica.modelica.parser.ModelicaScanner(new StringReader(str));
+		org.jmodelica.modelica.parser.ModelicaParser parser = 
+			new org.jmodelica.modelica.parser.ModelicaParser();
+		exp = (Exp)parser.parse(scanner,org.jmodelica.modelica.parser.ModelicaParser.AltGoals.exp);
 		//System.out.println("ModelicaParser.parseExpString: "+str);
 		//exp.dumpTreeBasic("");
 		return exp;
 	}
 
+	public FlatRoot ParserHandler.parseFlatModelicaFile(String fileName) 
+	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
+		FlatRoot fr = null;
+		Reader reader = new FileReader(fileName);
+		org.jmodelica.modelica.parser.FlatModelicaScanner scanner = 
+			new org.jmodelica.modelica.parser.FlatModelicaScanner(new BufferedReader(reader));
+		org.jmodelica.modelica.parser.FlatModelicaParser parser = 
+			new org.jmodelica.modelica.parser.FlatModelicaParser();
+		fr = (FlatRoot)parser.parse(scanner);
+		fr.setFileName(fileName);
+		return fr;
+	}
+	
+	public FlatRoot ParserHandler.parseFlatModelicaString(String str, String fileName) 
+	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
+		FlatRoot fr = null;
+		org.jmodelica.modelica.parser.FlatModelicaScanner scanner = 
+			new org.jmodelica.modelica.parser.FlatModelicaScanner(new StringReader(str));
+		org.jmodelica.modelica.parser.FlatModelicaParser parser = 
+			new org.jmodelica.modelica.parser.FlatModelicaParser();
+		fr = (FlatRoot)parser.parse(scanner);
+		fr.setFileName(fileName);
+		return fr;
+	}
+	
+	public FExp ParserHandler.parseFlatModelicaExpString(String str)
+	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
+		FExp fexp = null;
+		org.jmodelica.modelica.parser.FlatModelicaScanner scanner = 
+			new org.jmodelica.modelica.parser.FlatModelicaScanner(new StringReader(str));
+		org.jmodelica.modelica.parser.FlatModelicaParser parser = 
+			new org.jmodelica.modelica.parser.FlatModelicaParser();
+		fexp = (FExp)parser.parse(scanner,org.jmodelica.modelica.parser.FlatModelicaParser.AltGoals.fexp);
+		return fexp;
+	}
+	
 }
 
 aspect DebugPrint {

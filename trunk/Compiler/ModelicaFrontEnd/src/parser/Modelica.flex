@@ -15,12 +15,7 @@
 */
 
 
-package org.jmodelica.modelica.parser;
 
-import java.util.Map;
-import java.util.HashMap;
-import beaver.Scanner;
-import org.jmodelica.modelica.parser.ModelicaParser.Terminals;
 
 %%
 

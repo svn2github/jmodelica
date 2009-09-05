@@ -15,12 +15,6 @@
 */
 
 
-package org.jmodelica.modelica.parser;
-
-import beaver.Symbol;
-import beaver.Scanner;
-import org.jmodelica.modelica.parser.FlatModelicaParser.Terminals;
-
 %%
 
 %public
@@ -36,6 +30,7 @@ import org.jmodelica.modelica.parser.FlatModelicaParser.Terminals;
 %eofval}
 %line
 %column
+
 
 %{
   StringBuffer string = new StringBuffer(128);

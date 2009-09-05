@@ -134,7 +134,6 @@ aspect PredefinedTypes {
 		List l = new List();
 
    		
- 	  	ModelicaParser parser = new ModelicaParser();
   		PrimitiveClassDecl pcd=null;
   
    		try {

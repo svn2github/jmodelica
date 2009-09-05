@@ -14,21 +14,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-// Add array support!!!
-
-%goal flat_root;
-%goal fexp;
-%goal fqname;
-
-
-%header {:
- package org.jmodelica.modelica.parser;
- import org.jmodelica.modelica.compiler.*;
- import java.io.*;
-:};
-%embed {:
-
  class Events extends Parser.Events {
   
     public void syntaxError(Symbol token) {
