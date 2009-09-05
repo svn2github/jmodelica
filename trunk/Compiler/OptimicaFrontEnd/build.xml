@@ -225,16 +225,17 @@
 
 	  	<java 
 	      classname="org.jmodelica.optimica.compiler.JunitGenerator"
-	      classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" 
+	      classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar:bin/util.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" 
 	      fork="true" 
-	      dir=".">
+	      dir="."
+	  	   maxmemory="512M">
 	    	<arg value="${modelica_front_end_path}/src/test/modelica/NameTests.mo"/>
 	    	      <arg value="NameTests"/>
 	    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 	    </java>
 	  	 <java 
 	  		      classname="org.jmodelica.optimica.compiler.JunitGenerator"
-	  		      classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" 
+	  		      classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar:bin/util.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" 
 	  		      fork="true" 
 	  		      dir=".">
 	  		    	<arg value="${modelica_front_end_path}/src/test/modelica/ModificationTests.mo"/>
@@ -243,7 +244,7 @@
 	    </java>
 	  	 <java 
 		  		      classname="org.jmodelica.optimica.compiler.JunitGenerator"
-		  		      classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" 
+		  		      classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar:bin/util.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" 
 		  		      fork="true" 
 		  		      dir=".">
 		  		    	<arg value="${modelica_front_end_path}/src/test/modelica/TypeTests.mo"/>
@@ -261,7 +262,7 @@
 		    </java>
 -->
 	  	<javac compiler="javac1.5" debug="true" destdir="bin" 
-	  		classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar:${junit_dir}/junit-4.5.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" >
+	  		classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar:${junit_dir}/junit-4.5.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar:bin/util.jar" >
 	  		<src path="${test_junit-gen_dir}/"/>
 	  	    <include name = "org/jmodelica/test/junitgenerated/*.java"/>
 	  		<exclude name = "**/*.aj"/>
@@ -277,7 +278,9 @@
   <target name="test" depends="gen-test">
     <!-- Run all tests in dir by using the TestAll java program -->
   	<mkdir dir = "doc/junit-reports"/>
-  	<junit printsummary="yes">
+  	<junit printsummary="yes"
+  		fork="true"
+  		maxmemory="512M">
   	  <classpath>
 		<fileset dir="${junit_dir}">
 			<include name="junit-4.5.jar"/>
@@ -285,11 +288,15 @@
 		<fileset dir="bin">
 			<include name="optimica.jar"/>
 			<include name="junit-tests.jar"/>
+			<include name="util.jar"/>
 		</fileset>
 		<fileset dir="${beaver_dir}/lib">
 			<include name="beaver.jar"/>
 		</fileset>
-  	  </classpath>
+		<fileset dir="../ModelicaCompiler/bin/">
+			<include name="ModelicaCompiler.jar"/>
+		</fileset>
+   	  </classpath>
    		<formatter type="xml"/>
      <!-- <test todir="junit-reports"
   		    name="org.jmodelica.test.junitgenerated.NameTests"/> -->

@@ -70,7 +70,7 @@ public class ErrorTestCase extends TestCase {
 	 */
 	@Override
 	public void dumpJunit(StringBuffer str, int index) {
-		testMe();
+		//testMe();
 		str.append("  @Test public void " + getName() + "() {\n");
 		str.append("    assertTrue(ts.get("+index+").testMe());\n");
 	    str.append("  }\n\n");

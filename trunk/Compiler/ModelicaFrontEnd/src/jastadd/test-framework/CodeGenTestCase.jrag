@@ -103,7 +103,7 @@ public abstract class CodeGenTestCase extends TestCase {
 	public void dumpJunit(StringBuffer str, int index) {
 		//StringBuffer strd=new StringBuffer();
 		//dump(strd,"");
-		testMe();
+		//testMe();
 		//System.out.println(strd);
 		str.append("  @Test public void " + getName() + "() {\n");
 		str.append("    assertTrue(ts.get("+index+").testMe());\n");

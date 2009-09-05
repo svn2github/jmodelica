@@ -59,7 +59,7 @@ aspect RootAccess {
 	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
 		return parseModelicaExpString(str);
 	}
-
+	
 	public SourceRoot ParserHandler.parseModelicaFile(String fileName) 
 	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
 		SourceRoot sr = null;
