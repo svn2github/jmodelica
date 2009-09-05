@@ -133,11 +133,11 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
         f.write("%12.12f" % data[0,0])
         for ref in range(n_parameters):
-            f.write(" %12.12f" % model.getZ()[ref])
+            f.write(" %12.12f" % model.get_z()[ref])
         f.write('\n')
         f.write("%12.12f" % data[-1,0])
         for ref in range(n_parameters):
-            f.write(" %12.12f" % model.getZ()[ref])
+            f.write(" %12.12f" % model.get_z()[ref])
         f.write('\n\n')
 
         # Write data set 2

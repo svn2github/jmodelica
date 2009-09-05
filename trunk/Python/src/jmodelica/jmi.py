@@ -1513,7 +1513,7 @@ class Model(object):
         self.jmimodel.initAD()
         self._set_dependent_parameters()
 
-    def resetModel(self):
+    def reset(self):
         """Reset the internal states of the DLL.
         
         Calling this function is equivalent to reopening the model.
@@ -1562,13 +1562,13 @@ class Model(object):
         """
         pd_tmp = N.zeros(self._n_pd.value)
         pd = N.zeros(self._n_pd.value)
-        print(self.getPI())
+        print(self.get_pi())
         for i in range(self._n_pd.value):
-            self.setPD(pd)
+            self.set_pd(pd)
             self.jmimodel.init_Fp(pd_tmp)
             pd[i] = pd_tmp[i]
             pd_tmp[:] = pd
-        self.setPD(pd)
+        self.set_pd(pd)
 
     def get_variable_names(self):
         """
@@ -1680,24 +1680,24 @@ class Model(object):
         self.jmimodel.get_n_tp(self._n_tp)
         return self._n_tp.value
 
-    def getX(self):
+    def get_x(self):
         """Return a reference to the differentiated variables vector."""
         return self.jmimodel.get_x()
         
-    def setX(self, x):
+    def set_x(self, x):
         """Set the differentiated variables vector."""
         self.jmimodel._x[:] = x
         
-    x = property(getX, setX, "The differentiated variables vector.")
+    x = property(get_x, set_x, "The differentiated variables vector.")
 
-    def getX_P(self, i):
+    def get_x_p(self, i):
         """Returns a reference to the differentiated variables vector
         corresponding to the i:th time point.
         
         """
         return self.jmimodel.get_x_p(i)
         
-    def setX_P(self, new_x_p, i):
+    def set_x_p(self, new_x_p, i):
         """Sets the differentiated variables vector corresponding to the i:th 
         time point. 
         
@@ -1705,142 +1705,142 @@ class Model(object):
         x_p = self.jmimodel.get_x_p(i)
         x_p[:] = new_x_p
     
-    def getPI(self):
+    def get_pi(self):
         """Returns a reference to the independent parameters vector."""
         return self.jmimodel.get_pi()
         
-    def setPI(self, pi):
+    def set_pi(self, pi):
         """Sets the independent parameters vector."""
         self.jmimodel._pi[:] = pi
         
-    pi = property(getPI, setPI, "The independent parameter vector.")
+    pi = property(get_pi, set_pi, "The independent parameter vector.")
 
-    def getPD(self):
+    def get_pd(self):
         """Returns a reference to the dependent parameters vector."""
         return self.jmimodel._pd
         
-    def setPD(self, pd):
+    def set_pd(self, pd):
         """Sets the dependent parameters vector."""
         self.jmimodel._pd[:] = pd
         
-    pd = property(getPD, setPD, "The dependent paramenters vector.")
+    pd = property(get_pd, set_pd, "The dependent paramenters vector.")
 
-    def getCD(self):
+    def get_cd(self):
         """Returns a reference to the dependent constants vector."""
         return self.jmimodel.get_cd()
         
-    def setCD(self, cd):
+    def set_cd(self, cd):
         """Sets the dependent constants vector."""
         self.jmimodel._cd[:] = cd
         
-    cd = property(getCD, setCD, "The dependent constants vector.")
+    cd = property(get_cd, set_cd, "The dependent constants vector.")
 
-    def getCI(self):
+    def get_ci(self):
         """Returns a reference to the independent constants vector."""
         return self.jmimodel.get_ci()
         
-    def setCI(self, ci):
+    def set_ci(self, ci):
         """Sets the independent constants vector."""
         self.jmimodel._ci[:] = ci
         
-    ci = property(getCI, setCI, "The independent constants vector.")
+    ci = property(get_ci, set_ci, "The independent constants vector.")
 
-    def getDX(self):
+    def get_dx(self):
         """Returns a reference to the derivatives vector."""
         return self.jmimodel.get_dx()
         
-    def setDX(self, dx):
+    def set_dx(self, dx):
         """Sets the derivatives vector."""
         self.jmimodel._dx[:] = dx
         
-    dx = property(getDX, setDX, "The derivatives vector.")
+    dx = property(get_dx, set_dx, "The derivatives vector.")
 
-    def getDX_P(self, i):
+    def get_dx_p(self, i):
         """Returns a reference to the derivatives variables vector
         corresponding to the i:th time point.
         """
         return self.jmimodel.get_dx_p(i)
         
-    def setDX_P(self, new_dx_p, i):
+    def set_dx_p(self, new_dx_p, i):
         """Sets the derivatives variables vector corresponding to the i:th
         time point.
         """
         dx_p = self.jmimodel.get_dx_p(i)
         dx_p[:] = new_dx_p
 
-    def getU(self):
+    def get_u(self):
         """Returns a reference to the inputs vector."""
         return self.jmimodel.get_u()
         
-    def setU(self, u):
+    def set_u(self, u):
         """Sets the inputs vector."""
         self.jmimodel._u[:] = u
         
-    u = property(getU, setU, "The inputs vector.")
+    u = property(get_u, set_u, "The inputs vector.")
 
-    def getU_P(self, i):
+    def get_u_p(self, i):
         """Returns a reference to the inputs vector corresponding to the i:th time 
         point.
         """
         return self.jmimodel.get_u_p(i)
         
-    def setU_P(self, new_u_p, i):
+    def set_u_p(self, new_u_p, i):
         """Sets the inputs vector corresponding to the i:th time point."""
         u_p = self.jmimodel.get_u_p(i)
         u_p[:] = new_u_p
 
-    def getW(self):
+    def get_w(self):
         """Returns a reference to the algebraic variables vector."""
         return self.jmimodel.get_w()
         
-    def setW(self, w):
+    def set_w(self, w):
         """Sets the algebraic variables vector."""
         self.jmimodel._w[:] = w
         
-    w = property(getW, setW, "The algebraic variables vector.")
+    w = property(get_w, set_w, "The algebraic variables vector.")
 
-    def getW_P(self, i):
+    def get_w_p(self, i):
         """Returns a reference to the algebraic variables vector corresponding to 
         the i:th time point.
         """
         return self.jmimodel.get_w_p(i)
         
-    def setW_P(self, new_w_p, i):
+    def set_w_p(self, new_w_p, i):
         """Sets the algebraic variables vector corresponding to the i:th time 
         point.
         """
         w_p = self.jmimodel.get_w_p(i)
         w_p[:] = new_w_p
 
-    def getT(self):
+    def get_t(self):
         """Returns a reference to the time value.
         
         The return value is a NumPy array of length 1.
         """
         return self.jmimodel.get_t()
         
-    def setT(self, t):
+    def set_t(self, t):
         """Sets the time value.
         
         Parameter t must be a NumPy array of length 1.
         """
         self.jmimodel._t[:] = t
         
-    t = property(getT, setT, "The time value.")
+    t = property(get_t, set_t, "The time value.")
     
-    def getZ(self):
+    def get_z(self):
         """Returns a reference to the vector containing all parameters,
         variables and point-wise evalutated variables vector.
         """
         return self.jmimodel.get_z()
         
-    def setZ(self, z):
+    def set_z(self, z):
         """Sets the vector containing all parameters, variables and point-wise 
         evalutated variables vector.
         """
         self.jmimodel._z[:] = z
         
-    z = property(getZ, setZ, "All parameters, variables and point-wise evaluated variables vector.")   
+    z = property(get_z, set_z, "All parameters, variables and point-wise evaluated variables vector.")   
 
     def _get_XMLvariables_doc(self):
         """ Return a reference to the XMLDoc instance for model variables. """
@@ -1881,7 +1881,7 @@ class Model(object):
         start_attr = xmldoc.get_start_attributes()
         
         #Real variables vector
-        z = self.getZ()
+        z = self.get_z()
         
         keys = start_attr.keys()
         keys.sort(key=int)
@@ -1911,7 +1911,7 @@ class Model(object):
             xmldoc = self._get_XMLvalues_doc()
         values = xmldoc.get_iparam_values()
        
-        z = self.getZ()
+        z = self.get_z()
        
         keys = values.keys()
         keys.sort(key=int)
@@ -1982,7 +1982,7 @@ class Model(object):
         value = None
         if valref:
             (z_i, ptype) = _translate_value_ref(valref)
-            value = self.getPI()[z_i - self._offs_pi.value]
+            value = self.get_pi()[z_i - self._offs_pi.value]
         else:
             print "Parameter "+name.strip()+" could not be found in model."
         return value
@@ -1993,7 +1993,7 @@ class Model(object):
         valref = xmldoc.get_valueref(name)
         if valref:
             (z_i, ptype) = _translate_value_ref(valref)
-            self.getPI()[z_i - self._offs_pi.value] = value
+            self.get_pi()[z_i - self._offs_pi.value] = value
         else:
             print "Parameter "+name+" could not be found in model."
     
@@ -2035,7 +2035,7 @@ class Model(object):
             filename -- filename of XML file that should be loaded (optional)
             path -- directory where XML file is located (optional)
         """
-        pi = self.getPI()
+        pi = self.get_pi()
         parameters = {}
         # get all indep parameters, translate index in z-vector
         # to valueref and save in dict with parameter value as value
