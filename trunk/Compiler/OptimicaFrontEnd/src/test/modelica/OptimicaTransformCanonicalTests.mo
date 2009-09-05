@@ -3,7 +3,7 @@ package OptimicaTransformCanonicalTests
   optimization LinearityTest1 (objective = cost(finalTime)^2,
                                startTime=0,
                                finalTime=1)
-  /*
+
   	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FClassMethodTestCase(name="LinearityTest1",
       methodName="variableDiagnostics",
@@ -26,20 +26,19 @@ Derivative variables:
  der(cost): number of uses: 1, isLinear: true
 
 Algebraic variables: 
- x1: number of uses: 2, isLinear: true
- x2: number of uses: 2, isLinear: true
- x3: number of uses: 2, isLinear: false
- x4: number of uses: 2, isLinear: true
- x5: number of uses: 2, isLinear: false
- x6: number of uses: 3, isLinear: true
- x7: number of uses: 2, isLinear: false
- x8: number of uses: 1, isLinear: false
- p2: number of uses: 1, isLinear: false
+ x1: number of uses: 2, isLinear: true, alias: no
+ x2: number of uses: 2, isLinear: true, alias: no
+ x3: number of uses: 2, isLinear: false, alias: no
+ x4: number of uses: 2, isLinear: true, alias: no
+ x5: number of uses: 2, isLinear: false, alias: no
+ x6: number of uses: 3, isLinear: true, alias: no
+ x7: number of uses: 2, isLinear: false, alias: no
+ x8: number of uses: 1, isLinear: false, alias: no
 
 Input variables: 
 
   ")})));
-*/
+
         Real cost;
   
   	Real x1;
@@ -70,69 +69,71 @@ Input variables:
   optimization LinearityTest2 (objective = x(finalTime)^2,
                                startTime=0,
                                finalTime=5)
-/*
-      JModelica.UnitTesting.FClassMethodTestCase(name="LinearityTest1",
+
+  	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="LinearityTest2",
       methodName="timedVariablesLinearityDiagnostics",
         description="Test linearity of variables.", methodResult=
         "  
+Linearity of time points:
 t0:
-  0.0: true
-  1.0: true
-  2.0: true
-  3.0: true
-  4.0: true
-  5.0: true
+  0.0, isLinear: true
+  1.0, isLinear: true
+  2.0, isLinear: true
+  3.0, isLinear: true
+  4.0, isLinear: true
+  5.0, isLinear: true
 t1:
-  0.0: true
-  1.0: true
-  2.0: true
-  3.0: true
-  4.0: true
-  5.0: true
+  0.0, isLinear: true
+  1.0, isLinear: true
+  2.0, isLinear: true
+  3.0, isLinear: true
+  4.0, isLinear: true
+  5.0, isLinear: true
 t2:
-  0.0: true
-  1.0: true
-  2.0: true
-  3.0: true
-  4.0: true
-  5.0: true
+  0.0, isLinear: true
+  1.0, isLinear: true
+  2.0, isLinear: true
+  3.0, isLinear: true
+  4.0, isLinear: true
+  5.0, isLinear: true
 t3:
-  0.0: true
-  1.0: true
-  2.0: true
-  3.0: true
-  4.0: true
-  5.0: true
+  0.0, isLinear: true
+  1.0, isLinear: true
+  2.0, isLinear: true
+  3.0, isLinear: true
+  4.0, isLinear: true
+  5.0, isLinear: true
 t4:
-  0.0: true
-  1.0: true
-  2.0: true
-  3.0: true
-  4.0: true
-  5.0: true
+  0.0, isLinear: true
+  1.0, isLinear: true
+  2.0, isLinear: true
+  3.0, isLinear: true
+  4.0, isLinear: true
+  5.0, isLinear: true
 t5:
-  0.0: true
-  1.0: true
-  2.0: true
-  3.0: true
-  4.0: true
-  5.0: true
+  0.0, isLinear: true
+  1.0, isLinear: true
+  2.0, isLinear: true
+  3.0, isLinear: true
+  4.0, isLinear: true
+  5.0, isLinear: true
 x:
-  0.0: true
-  1.0: true
-  2.0: true
-  3.0: true
-  4.0: false
-  5.0: false
+  0.0, isLinear: true
+  1.0, isLinear: true
+  2.0, isLinear: true
+  3.0, isLinear: true
+  4.0, isLinear: false
+  5.0, isLinear: false
 y:
-  0.0: true
-  1.0: false
-  2.0: false
-  3.0: true
-  4.0: true
-  5.0: true
+  0.0, isLinear: true
+  1.0, isLinear: false
+  2.0, isLinear: false
+  3.0, isLinear: true
+  4.0, isLinear: true
+  5.0, isLinear: true
   ")})));
-*/
+
 	parameter Real t0 = 0;
 	parameter Real t1 = 1;
 	parameter Real t2 = 2;

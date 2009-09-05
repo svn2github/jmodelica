@@ -22,6 +22,8 @@ import java.util.LinkedHashSet;
 
 aspect RootAccess {
 	
+	syn String SourceRoot.language() = "Modelica";
+	
 	inh lazy Root ASTNode.retrieveRoot();
 	eq SourceRoot.getChild().retrieveRoot() = this;
 	eq FlatRoot.getFClass().retrieveRoot() = this;
@@ -40,6 +42,11 @@ aspect RootAccess {
 	eq Root.emptyArrayList() = getEmptyArrayList();
 	syn lazy ArrayList Root.getEmptyArrayList() = new ArrayList();
 		
+	
+	public FClass ParserHandler.newFClass() {
+		return new FClass();
+	}
+	
 	/*
 	 * The Parser methods are introduced here so that they can be refined in
 	 * extensions where other parsers are used.

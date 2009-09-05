@@ -113,6 +113,7 @@ public class TransformCanonicalTestCase extends TestCase {
 			sr = ph.parseFile(getSourceFileName());
 		} catch (Exception e) {
 			System.out.println("Error when parsing file: " + getSourceFileName());
+			return false;
 		}
 		String filesep = System.getProperty("file.separator");
 		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
@@ -170,7 +171,9 @@ public class TransformCanonicalTestCase extends TestCase {
 	    
 	    FlatRoot flatRoot = new FlatRoot();
 	    flatRoot.setFileName(getSourceFileName());
+	    
 	    FClass fc = new FClass();
+	    
 	    flatRoot.setFClass(fc);
 	    
 		//FClass fc = new FClass();

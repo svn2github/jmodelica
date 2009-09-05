@@ -39,6 +39,7 @@ public class TestSuite {
 			sr = ph.parseFile(fileName);
 		} catch (Exception e) {
 			System.out.println("Error when parsing file: " + fileName);
+			System.exit(0);
 		}
 		String filesep = System.getProperty("file.separator");
 		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
@@ -103,7 +104,13 @@ public class TestSuite {
 		str.append("package org.jmodelica.test.junitgenerated;\n\n");
 		str.append("import org.junit.*;\n");
 		str.append("import static org.junit.Assert.*;\n");
-		str.append("import org.jmodelica.modelica.compiler.*;\n");
+		
+		SourceRoot sr = new SourceRoot();
+		if (sr.language().equals("Modelica")) {
+			str.append("import org.jmodelica.modelica.compiler.*;\n");
+		} else if (sr.language().equals("Optimica")) {
+			str.append("import org.jmodelica.optimica.compiler.*;\n");	
+		}
 		str.append("\n");
 		str.append("public class " + name + " {\n\n");
 		str.append("  static TestSuite ts;\n\n");

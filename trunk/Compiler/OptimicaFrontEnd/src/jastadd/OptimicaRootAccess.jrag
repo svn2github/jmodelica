@@ -16,8 +16,14 @@
 
 aspect OptimicaRootAccess {
 	
-	//refine RootAccess eq Root.parser() = new OptimicaParser();
+	refine RootAccess eq SourceRoot.language() {
+		return "Optimica";
+	}
 	
+	refine RootAccess FClass ParserHandler.newFClass() {
+		return new FOptClass();
+	}
+
 	refine RootAccess SourceRoot ParserHandler.parseFile(String fileName) 
 	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
 		return parseOptimicaFile(fileName);
