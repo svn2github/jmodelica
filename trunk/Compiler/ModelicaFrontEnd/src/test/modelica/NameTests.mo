@@ -1126,14 +1126,6 @@ end EndExpTest1;
 
 model EndExpTest2
 
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="EndExpTest2",
-        description="Test if equation.",
-                                               flatModel=
-"
-")})));
-
-
  Real x;
 equation
  if true then
