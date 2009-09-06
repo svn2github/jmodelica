@@ -100,8 +100,8 @@ JMI_DER_W_P = 4096
 """Evaluate derivatives w.r.t. all variables, \f$z\f$."""
 JMI_DER_ALL = JMI_DER_CI | JMI_DER_CD | JMI_DER_PI | JMI_DER_PD | \
               JMI_DER_DX | JMI_DER_X | JMI_DER_U | JMI_DER_W | \
-	          JMI_DER_T | JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | \
-	          JMI_DER_W_P
+              JMI_DER_T | JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | \
+              JMI_DER_W_P
 
 
 """Evaluate derivatives w.r.t. all variables in \f$p\f$."""
@@ -125,7 +125,7 @@ class JMIException(Exception):
 
 def fail_error_check(message):
     """A ctypes errcheck that always fails."""
-	
+    
     def fail(errmsg):
         raise JMIException(errmsg)
     
@@ -1431,9 +1431,9 @@ def load_model(libname, path='.', mofile=None, optpackage=None, compiler=None):
     
     If the DLL file does not exist this method tries to build it if mofile, and
     optpackage and compiler all are specified.
-	
-	This function comes very handy when loading test models that needs to be
-	compiled on the fly.
+    
+    This function comes very handy when loading test models that needs to be
+    compiled on the fly.
     
     Keyword parameters:
     mofile -- the Modelica file used to build the DLL file.
@@ -2060,6 +2060,99 @@ class Model(object):
             xmldoc._doc.write(os.path.join(path,filename))
         else:
             xmldoc._doc.write(xmldoc._doc.docinfo.URL)
+            
+    def opt_interval_starttime_free(self):
+        """Evaluate if optimization start time is free.
+        
+        Evaluates to True if so, False otherwise.
+        """
+        start_time, start_time_free, final_time, final_time_free = \
+                                  self.jmimodel.opt_get_optimization_interval()
+        return start_time_free==1
+        
+    def opt_interval_starttime_fixed(self):
+        """Evaluate if optimization start time is fixed.
+        
+        Evaluates to True if so, False otherwise.
+        """
+        return not self.opt_interval_starttime_free()
+            
+    def opt_interval_finaltime_free(self):
+        """Evaluate if optimization final time is free.
+        
+        Evaluates to True if so, False otherwise.
+        """
+        start_time, start_time_free, final_time, final_time_free = \
+                                  self.jmimodel.opt_get_optimization_interval()
+        return final_time_free==1
+        
+    def opt_interval_finaltime_fixed(self):
+        """Evaluate if optimization final time is fixed.
+        
+        Evaluates to True if so, False otherwise.
+        """
+        return not self.opt_interval_finaltime_free()
+        
+    def opt_interval_get_start_time(self):
+        """Returns the start time of the optimization interval."""
+        start_time, start_time_free, final_time, final_time_free = \
+                                  self.jmimodel.opt_get_optimization_interval()
+        return start_time
+        
+    def opt_interval_get_final_time(self):
+        """Returns the final time of the optimization interval."""
+        start_time, start_time_free, final_time, final_time_free = \
+                                  self.jmimodel.opt_get_optimization_interval()
+        return final_time
+        
+    def eval_ode_f(self):
+        """Evaluate an ODE.
+        
+        The ODE is of the form:
+          dx = f(x, t, ...)
+        
+        The input variables to f are expected to be set BEFORE calling this
+        function. The calculated dx can be accessed in two ways:
+         1. By accessing is through the member Model.dx; or
+         2. By using return value of this function which is the same.
+         
+        This function returns Model.dx on success and raises JMIException
+        otherwise.
+        """
+        self.jmimodel.ode_f()
+        return self.dx
+        
+    def opt_eval_J(self):
+        """Return the evaluted optimization cost function, J.
+        
+        All values (such as u, u_p, x_p etc.) are expected to be set before
+        calling this function.
+        """
+        return self.jmimodel.opt_J()
+        
+    def opt_eval_jac_J(self, independent_variables, mask=None):
+        """Evaluate the jacobian of the cost function.
+        
+        Parameters:
+        independent_variables -- the variables witch the jacobian will be based
+                                 on.
+        mask                  -- (optional) if only some independent variables should be
+                                 (re)evaluated.
+                                 
+        Please refer to the JMI documentation for more info.
+        """
+        assert self._n_z.value != 0
+        if mask is None:
+            mask = N.ones(self._n_z.value, dtype=int)
+        
+        n_cols, n_nz = self.jmimodel.opt_dJ_dim(JMI_DER_CPPAD,
+                                                JMI_DER_DENSE_ROW_MAJOR,
+                                                independent_variables, mask)
+        jac = N.zeros(n_nz, dtype=c_jmi_real_t)
+        
+        self.jmimodel.opt_dJ(JMI_DER_CPPAD, JMI_DER_DENSE_ROW_MAJOR,
+                             independent_variables, mask, jac)
+        return jac.reshape( (1, len(jac)) )
 
 
 class JMIModel(object):
@@ -2068,7 +2161,7 @@ class JMIModel(object):
     
     def __init__(self, libname, path='.'):
         """Contructor."""
-		        
+                
         # detect platform specific shared library file extension
         suffix = ''
         if sys.platform == 'win32':
@@ -2119,7 +2212,7 @@ class JMIModel(object):
         """Initializing Algorithmic Differential package.
         
         Raises a JMIException on failure.
-		
+        
         """
         if self._dll.jmi_ad_init(self._jmi) is not 0:
             raise JMIException("Could not initialize AD.")
@@ -2147,7 +2240,7 @@ class JMIModel(object):
                
     def get_sizes(self, n_ci, n_cd, n_pi, n_pd, n_dx, n_x, n_u, n_w, n_tp, n_z):
         """Get the sizes of the variable vectors."""
-		
+        
         retval = self._dll.jmi_get_sizes(self._jmi,
                                  byref(n_ci),
                                  byref(n_cd),
@@ -2165,7 +2258,7 @@ class JMIModel(object):
     def get_offsets(self, offs_ci, offs_cd, offs_pi, offs_pd, offs_dx, offs_x, offs_u, offs_w,
                     offs_t, offs_dx_p, offs_x_p, offs_u_p, offs_w_p):
         """Get the offsets for the variable types in the z vector."""
-		
+        
         retval = self._dll.jmi_get_offsets(self._jmi,
                                          byref(offs_ci),
                                          byref(offs_cd),
@@ -2276,11 +2369,11 @@ class JMIModel(object):
     
     def ode_f(self):
         """Evalutates the right hand side of the ODE.
-		
-		The results is saved to the internal states and can be accessed by
-		accessing 'my_model.x'.
-		
-		"""
+        
+        The results is saved to the internal states and can be accessed by
+        accessing 'my_model.x'.
+        
+        """
         if self._dll.jmi_ode_f(self._jmi) is not 0:
             raise JMIException("Evaluating ODE failed.")
         
@@ -2306,7 +2399,7 @@ class JMIModel(object):
                 included in the Jacobian and zeros for those which should not.
             jac --
                 The Jacobian. (Return)
-				
+                
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2326,7 +2419,7 @@ class JMIModel(object):
                 
         Returns:
             The number of non-zero Jacobian entries.
-			
+            
         """
         n_nz = ct.c_int()
         if self._dll.jmi_ode_df_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
@@ -2355,7 +2448,7 @@ class JMIModel(object):
                 Row indices of the non-zeros in the Jacobian. (Return)
             col --
                 Column indices of the non-zeros in the Jacobian. (Return)
-				
+                
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2389,7 +2482,7 @@ class JMIModel(object):
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
-			
+            
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2413,7 +2506,7 @@ class JMIModel(object):
         
         Parameters:
             res -- DAE residual vector. (Return)
-			
+            
         """
         if self._dll.jmi_dae_F(self._jmi, res) is not 0:
             raise JMIException("Evaluating the DAE residual failed.")
@@ -2440,7 +2533,7 @@ class JMIModel(object):
                 included in the Jacobian and zeros for those which should not.
             jac --
                 The Jacobian. (Return)
-				
+                
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2459,7 +2552,7 @@ class JMIModel(object):
                 
         Returns:
             The number of non-zero Jacobian entries.
-			
+            
         """
         n_nz = ct.c_int()
         if self._dll.jmi_dae_dF_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
@@ -2490,7 +2583,7 @@ class JMIModel(object):
             col --
                 Column indices of the non-zeros in the DAE residual Jacobian.
                 (Return)
-				
+                
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2524,7 +2617,7 @@ class JMIModel(object):
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
-			
+            
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2541,7 +2634,7 @@ class JMIModel(object):
         
         Returns:
             The number of equations in F0, F1 and Fp resp.
-			
+            
         """
         n_eq_f0 = ct.c_int()
         n_eq_f1 = ct.c_int()
@@ -2555,7 +2648,7 @@ class JMIModel(object):
         
         Parameters:
             res -- The residual of F0.
-			
+            
         """
         if self._dll.jmi_init_F0(self._jmi, res) is not 0:
             raise JMIException("Evaluating the F0 residual function failed.")
@@ -2583,9 +2676,9 @@ class JMIModel(object):
                 included in the Jacobian and zeros for those which should not.
             jac --
                 The Jacobian. (Return)
-				 
+                 
         """
-		
+        
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
@@ -2604,7 +2697,7 @@ class JMIModel(object):
                 
         Returns:
             The number of non-zero Jacobian entries in the full Jacobian.
-			
+            
         """
         n_nz = ct.c_int()
         if self._dll.jmi_init_dF0_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
@@ -2633,7 +2726,7 @@ class JMIModel(object):
                 Row indices of the non-zeros in the Jacobian. (Return)
             col --
                 Column indices of the non-zeros in the Jacobian. (Return)
-				
+                
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2663,7 +2756,7 @@ class JMIModel(object):
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
-			
+            
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2680,7 +2773,7 @@ class JMIModel(object):
         
         Parameters:
             res -- The residual of F1.
-			
+            
         """
         if self._dll.jmi_init_F1(self._jmi, res) is not 0:
             raise JMIException("Evaluating the F1 residual function failed.")            
@@ -2708,9 +2801,9 @@ class JMIModel(object):
                 included in the Jacobian and zeros for those which should not.
             jac --
                 The Jacobian. (Return)    
-				
+                
         """
-		
+        
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
@@ -2729,7 +2822,7 @@ class JMIModel(object):
                 
         Returns:
             The number of non-zero Jacobian entries in the full Jacobian.
-			
+            
         """
         n_nz = ct.c_int()
         if self._dll.jmi_init_dF1_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
@@ -2758,7 +2851,7 @@ class JMIModel(object):
                 Row indices of the non-zeros in the Jacobian. (Return)
             col --
                 Column indices of the non-zeros in the Jacobian. (Return)
-				
+                
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2793,7 +2886,7 @@ class JMIModel(object):
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
-			
+            
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2810,7 +2903,7 @@ class JMIModel(object):
         
         Parameters:
             res -- The residual of Fp.
-			
+            
         """
         if self._dll.jmi_init_Fp(self._jmi, res) is not 0:
             raise JMIException("Evaluating the Fp residual function failed.")
@@ -2838,7 +2931,7 @@ class JMIModel(object):
                 included in the Jacobian and zeros for those which should not.
             jac --
                 The Jacobian. (Return)
-				
+                
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2859,7 +2952,7 @@ class JMIModel(object):
                 
         Returns:
             The number of non-zero Jacobian entries in the full Jacobian.
-			
+            
         """
         n_nz = ct.c_int()
         if self._dll.jmi_init_dFp_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
@@ -2888,7 +2981,7 @@ class JMIModel(object):
                 Row indices of the non-zeros in the Jacobian. (Return)
             col --
                 Column indices of the non-zeros in the Jacobian. (Return)
-				
+                
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2921,7 +3014,7 @@ class JMIModel(object):
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
-			
+            
         """
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
@@ -2941,7 +3034,7 @@ class JMIModel(object):
             start_time_free -- 0 if start time should be fixed or 1 if free.
             final_time -- Final time of optimization interval.
             final_time_free -- 0 if final time should be fixed or 1 if free.
-			
+            
         """
         if self._dll.jmi_opt_set_optimization_interval(self._jmi, start_time, start_time_free, final_time, final_time_free) is not 0:
             raise JMIException("Setting the optimization interval failed.")
@@ -2953,7 +3046,7 @@ class JMIModel(object):
             Tuple with: start time of optimization interval, 0 if start time is 
             fixed and 1 if free, final time of optimization interval, 0 if final 
             time is fixed and 1 if free respectively. 
-			
+            
         """
         start_time = ct.c_double()
         start_time_free = ct.c_int()
@@ -3039,7 +3132,7 @@ class JMIModel(object):
                 The gradient. (Return)
                 
         """
-		
+        
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
@@ -3122,7 +3215,7 @@ class JMIModel(object):
             Jacobian.
 
         """
-		
+        
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
@@ -3297,7 +3390,7 @@ class JMIModel(object):
                 The Jacobian. (Return)
 
         """
-		
+        
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
