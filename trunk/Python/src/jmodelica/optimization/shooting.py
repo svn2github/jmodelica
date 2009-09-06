@@ -34,78 +34,13 @@ class ShootingException(Exception):
     pass
 
 
-class TestJmiOptModel:
+class TestModelSimulation:
     """Test the JmiOptModel instance of the Van der Pol oscillator."""
     
     def setUp(self):
         """Test setUp. Load the test model."""
         self.m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo', 
                                               'VDP_pack.VDP_Opt')
-        
-    def test_model_size(self):
-        """Test JmiOptModel length of x"""
-        size = len(self.m.x)
-        nose.tools.assert_equal(size, 3)
-        
-    def test_states_get_set(self):
-        """Test JmiOptModel.set_states(...) and JmiOptModel.x"""
-        new_states = [1.74, 3.38, 12.45]
-        reset = [0, 0, 0]
-        self.m.x = reset
-        states = self.m.x
-        N.testing.assert_array_almost_equal(reset, states)
-        self.m.x = new_states
-        states = self.m.x
-        N.testing.assert_array_almost_equal(new_states, states)
-        
-    def test_diffs(self):
-        """Test JmiOptModel.setDiffs(...) and JmiOptModel.dx"""
-        reset = [0, 0, 0]
-        diffs = self.m.dx
-        diffs[:] = reset
-        diffs2 = self.m.dx
-        N.testing.assert_array_almost_equal(reset, diffs2)
-        
-        new_diffs = [1.54, 3.88, 45.87]
-        diffs[:] = new_diffs
-        N.testing.assert_array_almost_equal(new_diffs, diffs2)
-        
-    def test_inputs(self):
-        """Test JmiOptModel.u(...) and JmiOptModel.u()"""
-        new_inputs = [1.54]
-        reset = [0]
-        self.m.u = reset
-        inputs = self.m.u
-        N.testing.assert_array_almost_equal(reset, inputs)
-        self.m.u = new_inputs
-        inputs = self.m.u
-        N.testing.assert_array_almost_equal(new_inputs, inputs)
-        
-    def test_parameters(self):
-        """Test methods JmiOptModel.[set|get]_parameters(...)"""
-        new_params = [1.54, 19.54, 78.12]
-        reset = [0] * 3
-        self.m.pi = reset
-        params = self.m.pi
-        N.testing.assert_array_almost_equal(reset, params)
-        self.m.pi = new_params
-        params = self.m.pi
-        N.testing.assert_array_almost_equal(new_params, params)
-        
-    def test_time_get_set(self):
-        """Test JmiOptModel.set_time(...) and JmiOptModel.t"""
-        new_time = 0.47
-        reset = 0
-        self.m.t = reset
-        t = self.m.t
-        nose.tools.assert_almost_equal(reset, t)
-        self.m.t = new_time
-        t = self.m.t
-        nose.tools.assert_almost_equal(new_time, t)
-        
-    def test_evaluation(self):
-        """Test JmiOptModel.eval_ode_f() of JmiOptModel."""
-        self.m.eval_ode_f()
         
     def test_simulation_with_sensivity(self, SMALL=0.3):
         """Testing simulation sensivity of JmiOptModel."""
@@ -290,10 +225,6 @@ class TestJmiOptModel:
         self.m.set_dx_p(self.m.dx, 0)
         jac = self.m.opt_eval_jac_J(pyjmi.JMI_DER_X_P)
         N.testing.assert_almost_equal(jac, [[0, 0, 1]])
-        
-    def test_reset(self):
-        """Testing resetting the JmiOptModel model."""
-        self.m.reset()
 
 
 def solve_using_sundials(model,

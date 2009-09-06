@@ -4,15 +4,17 @@
 import os
 
 import nose
+import matplotlib.pyplot as plt
+import nose.tools as ntools
+import numpy as N
 
 import jmodelica.jmi as jmi
 from jmodelica.compiler import OptimicaCompiler
 import jmodelica.xmlparser as xp
 import jmodelica.io
-import matplotlib.pyplot as plt
-import nose.tools as ntools
 
-import numpy as N
+from jmodelica.tests import load_example_standard_model
+
 
 sep = os.path.sep
 
@@ -461,3 +463,97 @@ def test_load_model_modelica():
     cpath = "Pendulum_pack.Pendulum"
     _generic_load_model_trial(modelfile, cpath, 'modelica')
     
+
+class TestModel:
+    """Test the high level model class, jmi.Model.
+    
+    The tests are based on the Van der Pol oscillator.
+    
+    Also note that this class also is tested in simulation tests.
+    """
+    
+    def setUp(self):
+        """Test setUp. Load the test model."""
+        self.m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo', 
+                                              'VDP_pack.VDP_Opt')
+                                              
+    def test_model_size(self):
+        """Test jmi.Model length of x"""
+        size = len(self.m.x)
+        nose.tools.assert_equal(size, 3)
+        
+    def test_states_get_set(self):
+        """Test jmi.Model.set_x(...) and jmi.Model.get_x()."""
+        new_states = [1.74, 3.38, 12.45]
+        reset = [0, 0, 0]
+        self.m.x = reset
+        states = self.m.x
+        N.testing.assert_array_almost_equal(reset, states)
+        self.m.x = new_states
+        states = self.m.x
+        N.testing.assert_array_almost_equal(new_states, states)
+        
+    def test_diffs(self):
+        """Test jmi.Model.set_dx(...) and jmi.Model.get_dx()."""
+        reset = [0, 0, 0]
+        diffs = self.m.dx
+        diffs[:] = reset
+        diffs2 = self.m.dx
+        N.testing.assert_array_almost_equal(reset, diffs2)
+        
+        new_diffs = [1.54, 3.88, 45.87]
+        diffs[:] = new_diffs
+        N.testing.assert_array_almost_equal(new_diffs, diffs2)
+        
+    def test_inputs(self):
+        """Test jmi.Model.set_u(...) and jmi.Model.get_u()."""
+        new_inputs = [1.54]
+        reset = [0]
+        self.m.u = reset
+        inputs = self.m.u
+        N.testing.assert_array_almost_equal(reset, inputs)
+        self.m.u = new_inputs
+        inputs = self.m.u
+        N.testing.assert_array_almost_equal(new_inputs, inputs)
+        
+    def test_parameters(self):
+        """Test methods jmi.Model.[set|get]_pi(...)."""
+        new_params = [1.54, 19.54, 78.12]
+        reset = [0] * 3
+        self.m.pi = reset
+        params = self.m.pi
+        N.testing.assert_array_almost_equal(reset, params)
+        self.m.pi = new_params
+        params = self.m.pi
+        N.testing.assert_array_almost_equal(new_params, params)
+        
+    def test_time_get_set(self):
+        """Test jmi.Model.[set|get]_t(...)."""
+        new_time = 0.47
+        reset = 0
+        self.m.t = reset
+        t = self.m.t
+        nose.tools.assert_almost_equal(reset, t)
+        self.m.t = new_time
+        t = self.m.t
+        nose.tools.assert_almost_equal(new_time, t)
+        
+    def test_evaluation(self):
+        """Test jmi.Model.eval_ode_f()."""
+        self.m.dx = [0, 0, 0]
+        self.m.eval_ode_f()
+        
+        all_zeros = True
+        for value in self.m.dx:
+            if value != 0:
+                all_zeros = False
+                
+        assert not all_zeros
+        
+    def test_reset(self):
+        """Testing resetting the a jmi.Model."""
+        random = N.array([12, 31, 42])
+        self.m.x = random
+        self.m.reset()
+        maxdiff = max(N.abs(random - self.m.x))
+        assert maxdiff > 0.001
