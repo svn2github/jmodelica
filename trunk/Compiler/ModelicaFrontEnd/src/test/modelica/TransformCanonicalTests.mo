@@ -242,6 +242,22 @@ Input variables:
   	
   end EvalTest1;
 
+model EvalTest2_Warn
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="EvalTest2_Warn",
+        description="Short class declaration of Real.",
+                                               errorMessage=
+"
+Warning: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ConstantEvalTests.mo':
+At line 110, column 18:
+  The parameter p does not have a binding expression.
+")})));
+
+  parameter Real p;
+end EvalTest2_Warn;
+
+
   model LinearityTest1
   
   	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

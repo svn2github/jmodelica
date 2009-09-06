@@ -86,13 +86,15 @@ import java.util.ArrayList;
   
     public String toString() {
       String s = "";
-      String lineData = "at line "+beginLine+", column "+beginColumn+":\n";
+      String lineData = "line "+beginLine+", column "+beginColumn+":\n";
       if(this.kind == Kind.LEXICAL) {
-        s = "Lexical error "+lineData;
+        s = "Lexical error at "+lineData;
       } else if(this.kind == Kind.SYNTACTIC) {
-        s = "Syntactic error "+lineData;
+        s = "Syntactic error at "+lineData;
       } else if(this.kind == Kind.SEMANTIC) {
-        s = "Semantic error "+lineData;
+        s = "Semantic error at "+lineData;
+      } else {
+    	  s = "At " + lineData;
       }
       
       if (this.severity == severity.ERROR) {
@@ -212,7 +214,8 @@ import java.util.ArrayList;
 	   * @param n	the node the warning originated from.
 	   */
 	  public void warning(String s, ASTNode n) {
-		  Problem p = new Problem(n.fileName(), "WARNING: " + s, Problem.Severity.WARNING);
+		  Problem p = new Problem(n.fileName(), s, Problem.Severity.WARNING, Problem.Kind.OTHER,
+				  n.lineNumber(), n.columnNumber());
 		  if (!root.warnings.contains(p))
 			  root.warnings.add(p);
 	  }
@@ -267,7 +270,7 @@ aspect ErrorCheck {
    * @param s	the warning message.
    */
   void ASTNode.warning(String s) {
-	  root().getErrorHandler().error(s, this);
+	  root().getErrorHandler().warning(s, this);
   }
 
   
@@ -501,13 +504,13 @@ aspect InstanceErrorCheck {
 	public void InstPrimitive.collectErrors() {
     if (!errorChecked) {
 		super.collectErrors();
-		/*
+		
 			if (isParameter() && myBindingFExp()==null){
-			   error("The parameter " + name() + " does not have a binding expression.");
+			   warning("The parameter " + name() + " does not have a binding expression.");
 			} else if (isConstant() && myBindingFExp()==null){
-			   error("The constant " + name() + " does not have a binding expression.");
+			   warning("The constant " + name() + " does not have a binding expression.");
 			}
-*/			
+			
 			if ((isParameter() || isConstant()) && !(myBindingInstExp()==null)) {
 				if (myBindingInstExp().isCircular()) {
 					error("Could not evaluate binding expression due to circularity: '" + 

@@ -186,6 +186,7 @@
 	  		    	      <arg value="ArrayTests"/>
 	  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 	  		    </java>
+
 	  	<java 
 	  		      classname="org.jmodelica.modelica.compiler.JunitGenerator"
 	  		      classpath=".:bin/jmodelica.jar:bin/util.jar:${beaver_dir}/lib/beaver.jar" 

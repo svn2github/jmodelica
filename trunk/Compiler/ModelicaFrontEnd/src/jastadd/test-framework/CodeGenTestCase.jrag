@@ -157,6 +157,13 @@ public abstract class CodeGenTestCase extends TestCase {
 	    try {
 	    	Collection<Problem> problems = 
 	    		ipr.checkErrorsInInstClass(getClassName());
+		    // Just warnings or errors too?
+		    for (Problem p : problems) {
+		    	if (p.severity() == Problem.Severity.ERROR) {
+		    		return false;
+		    	}
+		    }
+/*
 	    	if (problems.size()>0) {
 	    		System.out.println("***** Errors in Class!");
 	    		for (Problem p : problems) {
@@ -164,6 +171,7 @@ public abstract class CodeGenTestCase extends TestCase {
 	    		}
 	    		return false;
 	    	} 
+	    	*/
 	    }catch (ModelicaClassNotFoundException e) {
 	    	return false;
 	    }

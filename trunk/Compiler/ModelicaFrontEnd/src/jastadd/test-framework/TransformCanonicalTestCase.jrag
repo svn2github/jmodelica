@@ -155,11 +155,12 @@ public class TransformCanonicalTestCase extends TestCase {
 	    } catch (ModelicaClassNotFoundException e){
 	    	return false;
 	    }
-	    if (problems.size()>0) {
-	    	//System.out.println("***** Errors in Class!");
-	    	return false;
+	    // Just warnings or errors too?
+	    for (Problem p : problems) {
+	    	if (p.severity() == Problem.Severity.ERROR) {
+	    		return false;
+	    	}
 	    }
-
 	    
 	    //sr.retrieveFullClassDecl("NameTests.ImportTest1").dumpTree("");
 /*
