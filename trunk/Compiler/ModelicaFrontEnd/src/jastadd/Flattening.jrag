@@ -220,16 +220,18 @@ aspect Flattening {
 		if (hasInstModification()) {
 			FQName fqn = new FQName(new List().add(new FQNamePart(getName().getID(),new Opt())));
             boolean attr_set = false;
+            // Check if attribute is already set
             for (int i=0;i<attrs.getNumChild();i++)
             	if (((FAttribute)attrs.getChild(i)).getName().name().equals(getName().name()))
 					attr_set = true;
+            // If attribute is not set, add to list
 			if (!attr_set) {
-			List my_attr = new List();
-			getInstModification().collectAttributes(my_attr,prefix);
-			FQName fqn2 = new FQName();
-			fqn2.addFQNamePart(new FQNamePart(getName().myInstComponentDecl().myInstClass().name(),
+				List my_attr = new List();
+				getInstModification().collectAttributes(my_attr,prefix);
+				FQName fqn2 = new FQName();
+				fqn2.addFQNamePart(new FQNamePart(getName().myInstComponentDecl().myInstClass().name(),
 					new Opt()));
-			attrs.add(new FAttribute(new FIdUse(fqn2),
+				attrs.add(new FAttribute(new FIdUse(fqn2),
 									new FIdDecl(fqn),
 			                        getInstModification().hasInstValueMod()? new Opt(getInstModification().instValueMod().flatten(prefix)): new Opt(),
 			                        true,
@@ -237,7 +239,7 @@ aspect Flattening {
 			                   		getComponentModification().hasFinal()? new Opt(new FFinal()): new Opt(),
 			                   		my_attr));
 			}
-			}
+		}
 	}
 }
 
@@ -297,6 +299,8 @@ aspect FlatExpressions {
 
 	public FExp FInstAccessExp.flatten(FQName prefix) {
 		// If the FInstAccess referes to a constant, then inline expression
+		// Checks in the instance tree ensures that constants always
+		// has binding expressions
 		if (getInstAccess().myInstComponentDecl() instanceof InstPrimitive) {
 			InstPrimitive ip = null;
 			ip = (InstPrimitive)getInstAccess().myInstComponentDecl();

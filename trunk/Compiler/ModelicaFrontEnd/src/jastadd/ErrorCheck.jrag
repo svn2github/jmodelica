@@ -204,8 +204,9 @@ import java.util.ArrayList;
 	  public void error(String s, ASTNode n) {
 		  Problem p = new Problem(n.fileName(), s, Problem.Severity.ERROR, Problem.Kind.SEMANTIC, 
 				  n.lineNumber(), n.columnNumber());
-		  if (!root.errors.contains(p))
+		  if (!root.errors.contains(p)) {
 			  root.errors.add(p);
+		  }
 	  }
 
 	  /**
@@ -262,6 +263,7 @@ aspect ErrorCheck {
    * @param s	the error message.
    */
   void ASTNode.error(String s) {
+	  System.out.println("Pling: " + s);
 	  root().getErrorHandler().error(s, this);
   }
 
@@ -292,7 +294,7 @@ aspect ErrorCheck {
     
     ArrayList<Problem> problems = new ArrayList<Problem>();
     problems.addAll(allWarnings);
-    problems.addAll(allErrors);
+    problems.addAll(allErrors);    
     
     /*
     if (!allWarnings.isEmpty()) {
@@ -422,6 +424,7 @@ aspect InstanceErrorCheck {
 	}
 
 	boolean InstNode.errorChecked = false;
+	boolean InstModification.errorChecked = false;
 
 
   public void InstNode.collectErrors() {
@@ -490,7 +493,7 @@ aspect InstanceErrorCheck {
 	}
 	
 	public void InstComponentDecl.collectErrors() {
-    debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+    System.out.println(prettyPrint("   ### ") + " errorChecked="+errorChecked);
     if (!errorChecked) {
 		super.collectErrors();
 		getClassName().collectErrors();
@@ -500,30 +503,109 @@ aspect InstanceErrorCheck {
 			getInstConstraining().collectErrors();
 		}
 	}
-
+	
 	public void InstPrimitive.collectErrors() {
-    if (!errorChecked) {
-		super.collectErrors();
-		
-			if (isParameter() && myBindingFExp()==null){
+		System.out.println(toString());
+        if (!errorChecked) {
+        	super.collectErrors();
+	
+			// Check if parameters and constants have binding expressions
+			if (isParameter() && myBindingInstExp()==null){
+			   // Warn if parameter does not have a binding expression (start is used)
 			   warning("The parameter " + name() + " does not have a binding expression.");
-			} else if (isConstant() && myBindingFExp()==null){
-			   warning("The constant " + name() + " does not have a binding expression.");
+			} else if (isConstant() && myBindingInstExp()==null){
+				// Error if a constant does not have a binding expression
+			   error("The constant " + name() + " does not have a binding expression.");
 			}
 			
-			if ((isParameter() || isConstant()) && !(myBindingInstExp()==null)) {
-				if (myBindingInstExp().isCircular()) {
-					error("Could not evaluate binding expression due to circularity: '" + 
-					    myBindingInstExp().prettyPrint("") + "'");
-				} else if (myBindingInstExp().ceval().isUnknown()) {
-					error("Could not evaluate binding expression: '" + 
-					    myBindingInstExp().prettyPrint("") + "'");
+			// Check if the binding expression of parameters can be evaluated
+			try {
+				if ((isParameter() || isConstant()) && !(myBindingInstExp()==null)) {
+					if (myBindingInstExp().isCircular()) {
+						error("Could not evaluate binding expression for "+(isParameter()? "parameter":"constant") + " '"+
+								name() + "' due to circularity: '" + 
+								myBindingInstExp().prettyPrint("") + "'");
+					} else if (myBindingInstExp().ceval().isUnknown()) {
+						error("Could not evaluate binding expression for "+(isParameter()? "parameter":"constant") + " '"+
+								name() + "': '" + 
+								myBindingInstExp().prettyPrint("") + "'");
+					}
 				}
+			} catch (UnsupportedOperationException e) {
+				error("Could not evaluate binding expression for "+(isParameter()? "parameter":"constant") + " '"+
+						name() + "': '" + 
+						myBindingInstExp().prettyPrint("") + "'");
+				
 			}
 
+			// Check if the expressions of the attributes can be evaluated
+			for (InstModification im : totalMergedEnvironment()) {
+				im.dumpTree(" *** ");
+				// Only check attributes, value modifications are checked above
+				if (im instanceof InstComponentModification) {
+					InstComponentModification icm = (InstComponentModification)im;
+					if (icm.getInstModification().hasInstValueMod()) {
+						FExp val_mod = icm.getInstModification().instValueMod();
+						try {
+							if (val_mod.isCircular()) {
+								error("Could not evaluate binding expression for attribute '"+
+										icm.getName().name() + "' due to circularity: '" + 
+										val_mod.prettyPrint("") + "'");
+							} else if (val_mod.ceval().isUnknown()) {
+								error("Could not evaluate binding expression for attribute '"+
+									icm.getName().name() + "': '" + 
+									val_mod.prettyPrint("") + "'");
+							}
+						} catch (UnsupportedOperationException e) {
+							error("Could not evaluate binding expression for attribute '"+
+									icm.getName().name() + "': '" + 
+									val_mod.prettyPrint("") + "'");
+							
+						}
+					}
+				}
+			}
 		}
 	}
-
+	
+	
+	/*
+	public void InstModification.collectErrors() {
+	    if (!errorChecked) {
+			super.collectErrors();
+			errorChecked = true;
+		}			
+	}
+	
+	public void InstComponentModification.collectErrors() {
+		System.out.println("InstComponentModification.collectErrors(): " + getName().name());
+		if (!errorChecked) {
+			super.collectErrors();
+			System.out.println("InstComponentModification.collectErrors(): " + getName().name() + " hepp");
+			if (getInstModification().hasInstValueMod()) {
+				System.out.println("InstComponentModification.collectErrors(): " + getName().name() + " hej");
+				FExp val_mod = getInstModification().instValueMod();
+				try {
+					if (val_mod.isCircular()) {
+						error("Could not evaluate binding expression for attribute '"+
+								getName().name() + "' due to circularity: '" + 
+								val_mod.prettyPrint("") + "'");
+					} else if (val_mod.ceval().isUnknown()) {
+						error("Could not evaluate binding expression for attribute '"+
+							getName().name() + "': '" + 
+							val_mod.prettyPrint("") + "'");
+					}
+				} catch (UnsupportedOperationException e) {
+					error("Could not evaluate binding expression for attribute '"+
+							getName().name() + "': '" + 
+							val_mod.prettyPrint("") + "'");
+					
+				}
+			}
+			
+		}			
+	}
+	*/
 	public void InstArrayComponentDecl.collectErrors() {
 	    if (!errorChecked) {
 	  	  for(InstNode n : getInstComponentDecls()) 

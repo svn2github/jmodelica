@@ -356,7 +356,7 @@ Semantic error at line 297, column 4:
   1 error(s) found...
   Error: in file '/work/jakesson/svn_projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 363, column 18:
-  Could not evaluate binding expression: 'p1'
+  Could not evaluate binding expression for parameter 'p1': 'p1'
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 320, column 9:
   Cannot find class or component declaration for p1
