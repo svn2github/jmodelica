@@ -60,31 +60,6 @@ def _load_example_standard_model(libname, mofile=None, optpackage=None):
                             'optimica')
 
 
-class JmiOptModel:
-    """A Optimica/Modelica optimization model.
-    
-    Contains the common functions used to make this class behave as a DAE/ODE
-    model paired with an optimization problem.
-    
-    See method doctypes for OptModel for method documentation.
-    
-    """
-    def __init__(self, dllname, path):
-        self._m = pyjmi.Model(dllname, path)
-        
-    def eval_jac_x(self):
-        jac  = N.array([0] * self.get_real_model_size()**2, dtype=c_jmi_real_t)
-        mask = N.array([1] * self.get_real_model_size()**2, dtype=N.int32)
-        self._m.jmimodel.jmi_ode_df(pyjmi.JMI_DER_CPPAD,
-                                    pyjmi.JMI_DER_DENSE_ROW_MAJOR,
-                                    pyjmi.JMI_DER_X,
-                                    mask,
-                                    jac)
-        n = self.get_real_model_size()
-        jac = jac.reshape( (n,n) )
-        return jac
-
-
 class TestJmiOptModel:
     """Test the JmiOptModel instance of the Van der Pol oscillator."""
     
@@ -452,7 +427,7 @@ def solve_using_sundials(model,
         
         model.t = t
         model.x = y
-        J_jmi = model.eval_jac_x()
+        J_jmi = model.eval_jac_x() # TODO: Does not exist anymore.
         
         for row in xrange(len(J_jmi)):
             for col in xrange(len(J_jmi[row])):
