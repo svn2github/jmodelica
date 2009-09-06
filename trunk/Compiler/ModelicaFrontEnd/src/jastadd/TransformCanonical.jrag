@@ -79,23 +79,22 @@ aspect TransformCanonical{
 	public void FClass.genInitialEquations() {
 		for (FRealVariable fv : realVariables()) {
 			if (fv.fixedAttribute() ||
-					(fv.isDifferentiatedVariable() && fv.startAttributeSet())) {
+					(root().options.getBooleanOption("state_start_values_fixed") 
+							&&  fv.isDifferentiatedVariable() && fv.startAttributeSet())) {
 				addFInitialEquation(new FEquation(new FIdUseExp(
 						new FIdUse(fv.getFQName().fullCopy())),
 						fv.startAttributeExp()));
 			}	
 		}
 		for (FIntegerVariable fv : integerVariables()) {
-			if (fv.fixedAttribute() ||
-					(fv.isDifferentiatedVariable() && fv.startAttributeSet())) {
+			if (fv.fixedAttribute()) {
 				addFInitialEquation(new FEquation(new FIdUseExp(
 						new FIdUse(fv.getFQName().fullCopy())),
 						fv.startAttributeExp()));
 			}	
 		}
 		for (FBooleanVariable fv : booleanVariables()) {
-			if (fv.fixedAttribute() ||
-					(fv.isDifferentiatedVariable() && fv.startAttributeSet())) {
+			if (fv.fixedAttribute()) {
 				addFInitialEquation(new FEquation(new FIdUseExp(
 						new FIdUse(fv.getFQName().fullCopy())),
 						fv.startAttributeExp()));

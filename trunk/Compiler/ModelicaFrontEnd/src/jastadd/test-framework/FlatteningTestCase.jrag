@@ -166,6 +166,7 @@ public class FlatteningTestCase extends TestCase {
 	    flatRoot.setFileName(getSourceFileName());
 	    FClass fc = new FClass();
 	    flatRoot.setFClass(fc);
+	    flatRoot.options = new OptionRegistry(or);
 	    
 	    InstNode ir;
 	    try {

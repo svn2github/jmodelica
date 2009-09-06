@@ -266,7 +266,8 @@ public class ModelicaCompiler {
 		
 		// compute instance tree
 		InstProgramRoot ipr = instantiateModel(sr, cl);
-			
+		ipr.options = new OptionRegistry(sr.options);
+		
 		// flattening
 		FClass fc = flattenModel(cl+".mof", cl, ipr);
 
@@ -390,7 +391,8 @@ public class ModelicaCompiler {
 	public InstProgramRoot instantiateModel(SourceRoot sr, String cl) 
 		throws ModelicaClassNotFoundException, CompilerException{
 		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-
+		ipr.options = new OptionRegistry(sr.options);
+		
 		logger.info("Checking for errors...");
 		Collection<Problem> problems = ipr.checkErrorsInInstClass(cl);
 		if (problems.size()>0) {
@@ -430,7 +432,8 @@ public class ModelicaCompiler {
 		flatRoot.setFileName(name);
 		FClass fc = new FClass();
 		flatRoot.setFClass(fc);
-
+		flatRoot.options = new OptionRegistry(ipr.options);
+		
 		logger.info("Flattening starts...");
 		
 		ipr.findFlattenInst(cl, fc);

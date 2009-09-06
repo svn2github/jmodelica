@@ -174,7 +174,8 @@ public class TransformCanonicalTestCase extends TestCase {
 	    flatRoot.setFileName(getSourceFileName());
 	    
 	    FClass fc = new FClass();
-	    
+	    flatRoot.options = new OptionRegistry(or);
+	   
 	    flatRoot.setFClass(fc);
 	    
 		//FClass fc = new FClass();

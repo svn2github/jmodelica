@@ -186,7 +186,8 @@ public class OptimicaCompiler extends ModelicaCompiler{
 		flatRoot.setFileName(name);
 		FOptClass fc = new FOptClass();
 		flatRoot.setFClass(fc);
-
+		flatRoot.options = new OptionRegistry(ipr.options);
+		
 		logger.info("Flattening starts...");
 		
 		ipr.findFlattenInst(cl, fc);

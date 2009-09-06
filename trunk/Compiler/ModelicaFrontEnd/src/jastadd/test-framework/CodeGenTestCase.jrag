@@ -182,6 +182,7 @@ public abstract class CodeGenTestCase extends TestCase {
 	    flatRoot.setFileName(getSourceFileName());
 	    FClass fc = new FClass();
 	    flatRoot.setFClass(fc);
+	    flatRoot.options = new OptionRegistry(or);
 	    
 		//FClass fc = new FClass();
 	    InstNode ir;

@@ -165,6 +165,7 @@ public class FClassMethodTestCase extends TestCase {
 	    flatRoot.setFileName(getSourceFileName());
 	    FClass fc = ph.newFClass();
 	    flatRoot.setFClass(fc);
+	    flatRoot.options = new OptionRegistry(or);
 	    
 	    InstNode ir;
 	    try {

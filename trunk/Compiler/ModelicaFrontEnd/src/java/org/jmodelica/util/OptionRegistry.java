@@ -25,6 +25,11 @@ public class OptionRegistry {
 		public OptionRegistry() {
 			optionsMap = new HashMap<String,Option>();
 		}
+
+		public OptionRegistry(OptionRegistry registry) {
+			optionsMap = new HashMap<String,Option>();
+			copyAllOptions(registry);
+		}
 		
 		public OptionRegistry(String filepath) throws XPathExpressionException, ParserConfigurationException, IOException, SAXException {
 			this();
