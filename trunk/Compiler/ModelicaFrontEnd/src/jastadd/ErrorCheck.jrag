@@ -263,7 +263,6 @@ aspect ErrorCheck {
    * @param s	the error message.
    */
   void ASTNode.error(String s) {
-	  System.out.println("Pling: " + s);
 	  root().getErrorHandler().error(s, this);
   }
 
@@ -493,7 +492,7 @@ aspect InstanceErrorCheck {
 	}
 	
 	public void InstComponentDecl.collectErrors() {
-    System.out.println(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+    //System.out.println(prettyPrint("   ### ") + " errorChecked="+errorChecked);
     if (!errorChecked) {
 		super.collectErrors();
 		getClassName().collectErrors();
@@ -505,7 +504,7 @@ aspect InstanceErrorCheck {
 	}
 	
 	public void InstPrimitive.collectErrors() {
-		System.out.println(toString());
+		//System.out.println(toString());
         if (!errorChecked) {
         	super.collectErrors();
 	
@@ -539,8 +538,11 @@ aspect InstanceErrorCheck {
 			}
 
 			// Check if the expressions of the attributes can be evaluated
+			// Notice that this check has to be done locally in the
+			// context of an InstPrimitive node in order to avoid
+			// evaluation of all value modifications also for non
+			// parameters.
 			for (InstModification im : totalMergedEnvironment()) {
-				im.dumpTree(" *** ");
 				// Only check attributes, value modifications are checked above
 				if (im instanceof InstComponentModification) {
 					InstComponentModification icm = (InstComponentModification)im;
@@ -568,44 +570,6 @@ aspect InstanceErrorCheck {
 		}
 	}
 	
-	
-	/*
-	public void InstModification.collectErrors() {
-	    if (!errorChecked) {
-			super.collectErrors();
-			errorChecked = true;
-		}			
-	}
-	
-	public void InstComponentModification.collectErrors() {
-		System.out.println("InstComponentModification.collectErrors(): " + getName().name());
-		if (!errorChecked) {
-			super.collectErrors();
-			System.out.println("InstComponentModification.collectErrors(): " + getName().name() + " hepp");
-			if (getInstModification().hasInstValueMod()) {
-				System.out.println("InstComponentModification.collectErrors(): " + getName().name() + " hej");
-				FExp val_mod = getInstModification().instValueMod();
-				try {
-					if (val_mod.isCircular()) {
-						error("Could not evaluate binding expression for attribute '"+
-								getName().name() + "' due to circularity: '" + 
-								val_mod.prettyPrint("") + "'");
-					} else if (val_mod.ceval().isUnknown()) {
-						error("Could not evaluate binding expression for attribute '"+
-							getName().name() + "': '" + 
-							val_mod.prettyPrint("") + "'");
-					}
-				} catch (UnsupportedOperationException e) {
-					error("Could not evaluate binding expression for attribute '"+
-							getName().name() + "': '" + 
-							val_mod.prettyPrint("") + "'");
-					
-				}
-			}
-			
-		}			
-	}
-	*/
 	public void InstArrayComponentDecl.collectErrors() {
 	    if (!errorChecked) {
 	  	  for(InstNode n : getInstComponentDecls()) 
