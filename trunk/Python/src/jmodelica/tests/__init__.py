@@ -8,6 +8,20 @@ import os
 import jmodelica.jmi as pyjmi
 
 
+def testattr(**kwargs):
+    """Add attributes to a test function/method/class.
+    
+    This function is needed to be able to add
+      @attr(slow = True)
+    for functions.
+    
+    """
+    def wrap(func):
+        func.__dict__.update(kwargs)
+        return func
+    return wrap
+
+
 def get_example_path():
     """Get the absolute path to the examples directory."""
     

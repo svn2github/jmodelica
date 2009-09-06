@@ -71,6 +71,7 @@ class TestMultipleShooterLazy:
         self._shooter.dh(self._p0)
         
 
+@testattr(slow = True)
 class TestShootingHardcore:
     """Test the shooting methods by actually running them.
     
@@ -78,7 +79,6 @@ class TestShootingHardcore:
     you can call nosetests like so:
       $ nosetests -a '!slow'
     """
-    slow = True
     
     def setUp(self):
         DLLFILE = 'VDP_pack_VDP_Opt'
@@ -218,6 +218,7 @@ class _PartialEvaluator:
         return self._dg(xvec)[self._index]
 
 
+@testattr(veryslow = True, slow = True)
 def test_f_gradient_elements(certainindex=None):
     """Basic testing of gradients (disabled by default).
     
