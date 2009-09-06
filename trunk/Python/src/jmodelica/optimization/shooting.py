@@ -398,8 +398,8 @@ def solve_using_sundials(model,
         print "States:", model.x
         print start_time, "to", end_time
     
-    import sys
-    sys.stdout.flush()
+        import sys
+        sys.stdout.flush()
     
     if end_time < start_time:
         raise ShootingException('End time cannot be before start time.')
