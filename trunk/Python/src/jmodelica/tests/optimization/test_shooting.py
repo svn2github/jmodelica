@@ -3,12 +3,20 @@
 """Tests for the jmodelica.optimization.shooting module."""
 
 import numpy as N
+import pylab as p
+import matplotlib
 import nose
 
 from jmodelica.tests import load_example_standard_model
+from jmodelica.tests import testattr
 
 from jmodelica.optimization.shooting import construct_grid
 from jmodelica.optimization.shooting import MultipleShooter
+from jmodelica.optimization.shooting import construct_grid
+from jmodelica.optimization.shooting import _check_normgrid_consistency
+from jmodelica.optimization.shooting import _split_opt_x
+from jmodelica.optimization.shooting import solve_using_sundials
+from jmodelica.optimization.shooting import plot_control_solutions
 
 
 def _lazy_init_shooter(model, gridsize, single_initial_u=2.5):
@@ -118,3 +126,225 @@ class TestShootingHardcore:
         N.testing.assert_array_almost_equal(moptimum.xf, soptimum.xf,
                                             decimal=3)
         nose.tools.assert_almost_equal(moptimum.ff, soptimum.ff, places=4)
+
+
+def _verify_gradient(f, df, xstart, xend, SMALL=0.1, STEPS=100):
+    """Output a comparison plot between f.d. quotient and and df.
+    
+    The plot is written to the current matplotlib figure within the interval
+    [xstart, xend] split into STEPS steps. The finite difference quotient has
+    an infitesimal equal to SMALL.
+    
+    This function was written before I knew about the built in OpenOPT gradient
+    verification feature. See MultipleShooter.check_gradient().
+    """
+    assert xstart < xend
+    
+    x = N.arange(xstart, xend, 1.0*(xend - xstart) / STEPS)
+    
+    # Plot the function evaluated
+    p.subplot(211)
+    fevals = N.array(map(f,x))
+    p.plot(x, fevals, label='The evaluated function')
+    p.title('Derivative check ')
+    p.legend()
+    
+    p.subplot(212)
+    p.title('Derivative comparison')
+    p.hold(True)
+    
+    # Plot the derivative
+    dfs = map(df,x)
+    p.plot(x, dfs, label='Given derivative')
+    
+    # Plot the approximated finite difference
+    fevals_delta = N.array(map(f, x+SMALL))
+    adfs = (fevals_delta - fevals) / SMALL
+    p.plot(x, adfs, label='Approximate derivative')
+    
+    # Plot the difference between approximated derivative and the given
+    # derivative
+    p.plot(x, adfs-dfs, label='Der. method difference')
+    
+    p.hold(False)
+    p.legend(prop=matplotlib.font_manager.FontProperties(size=8))
+    
+    
+def test_verify_gradient():
+    """Testing _verify_gradient(...)."""
+    fig = p.figure()
+    f = lambda x: x**2
+    df = lambda x: 2*x
+    _verify_gradient(f, df, -10, 10)
+    fig.savefig('test_verify_gradient.png')
+    
+
+class _PartialEvaluator:
+    """Evaluator used to evaluate a {f(x): R^n -> R} by setting all variables
+       to fixed values except x_{index} which is varied. Thus a new one
+       dimensional function is created.
+       
+    This function is used by test_gradient_elements().
+    """
+    def __init__(self, g, dg, xbase, index):
+        """Constructor.
+        
+        Parameters:
+        g  -- the function g: R^n -> R
+        dg -- the gradient of g, namely dg: R^n -> R^n
+        xbase -- the x vector used for all x:s except index.
+        index -- the index in x vector which is to be varied.
+        """
+        self._g = g
+        self._dg = dg
+        self._xbase = xbase
+        self._index = index
+        
+    def f(self, xi):
+        """Evaluate the one dimensional function f.
+        
+        xi is the value if index index in x before evaluating g.
+        """
+        xvec = self._xbase.copy()
+        xvec[self._index] = xi
+        return self._g(xvec)
+        
+    def df(self, x):
+        """Returns the index index in the gradient evaluated using xbase except
+           xbase[index]=x.
+        """
+        xvec = self._xbase.copy()
+        xvec[self._index] = x
+        return self._dg(xvec)[self._index]
+
+
+def test_f_gradient_elements(certainindex=None):
+    """Basic testing of gradients (disabled by default).
+    
+    This tests takes slightly less than an hour to run on my computer unless
+    certainindex is defined (whereas only the element of index certainindex
+    will be tested). Therefor it is turned off by default. Set run_huge_test
+    variable to True to run this test by default.
+    
+    Also note that this test is not really supposed to test functionality per
+    se. It is rather a test that can be used to visually verify that gradients
+    behave the way they are expected to.
+    """
+    run_huge_test = False
+    
+    if run_huge_test is False and certainindex is None:
+        return
+    
+    m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo',
+                                     'VDP_pack.VDP_Opt')
+    grid = [(0, 0.1),
+            (0.1, 0.2),
+            (0.2, 0.3),
+            (0.3, 0.4),
+            (0.4, 0.5),
+            (0.5, 0.6),
+            (0.6, 0.7),
+            (0.7, 0.8),
+            (0.8, 0.9),
+            (0.9, 1.0),]
+    initial_u = [0.25] * len(grid)
+    shooter = MultipleShooter(m, initial_u, grid)
+    p0 = shooter.get_p0()
+    
+    if certainindex is not None:
+        indices = [certainindex]
+    else:
+        indices = range(len(p0))
+    
+    for index in indices:
+        fig = p.figure()
+        evaluator = _PartialEvaluator(shooter.f, shooter.df, p0, index)
+        p.suptitle('Partial derivative test (of gradient elements, index=%s)' %
+                                                                         index)
+        _verify_gradient(evaluator.f, evaluator.df, -10, 10)
+        fig.savefig('test_f_gradient_elements_%s.png' % index)
+        fig.savefig('test_f_gradient_elements_%s.eps' % index)
+
+
+def test_f_gradient_element_29():
+    """Testing part. diff. which corresponds to element 29 in grad(f) in VDP.
+    
+    This was a failing test in test_f_gradient_elements(None) which is the
+    reason why I'm adding it here.
+    """
+    test_f_gradient_elements(29)
+
+
+def test_plot_control_solutions():
+    """Testing plot_control_solutions(...)."""
+    m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo',
+                                     'VDP_pack.VDP_Opt')
+    m.reset()
+    grid = [(0, 0.1),
+            (0.1, 0.2),
+            (0.2, 0.3),
+            (0.3, 0.4),
+            (0.4, 0.5),
+            (0.5, 0.6),
+            (0.6, 0.7),
+            (0.7, 0.8),
+            (0.8, 0.9),
+            (0.9, 1.0),]
+    grid = N.array(grid) * (m.opt_interval_get_final_time() - m.opt_interval_get_start_time()) + \
+           m.opt_interval_get_start_time()
+            
+    # Used to be: N.array([1, 1, 1, 1]*len(grid))        
+    us = [ -1.86750972e+00,
+           -1.19613740e+00,  3.21955502e+01,  1.15871750e+00, -9.56876370e-01,
+            7.82651050e+01, -3.35655693e-01,  1.95491165e+00,  1.47923425e+02,
+           -2.32963068e+00, -1.65371763e-01,  1.94340923e+02,  6.82953492e-01,
+           -1.57360749e+00,  2.66717232e+02,  1.46549806e+00,  1.74702679e+00,
+            3.29995167e+02, -1.19712096e+00,  9.57726717e-01,  3.80947471e+02,
+            3.54379487e-01, -1.95842811e+00,  4.52105868e+02,  2.34170339e+00,
+            1.77754406e-01,  4.98700011e+02,  2.50000000e-01,  2.50000000e-01,
+            2.50000000e-01,  2.50000000e-01,  2.50000000e-01,  1.36333570e-01,
+            2.50000000e-01,  2.50000000e-01,  2.50000000e-01,  2.50000000e-01]
+    us = N.array(us)
+    plot_control_solutions(m, grid, us, doshow=False)
+
+
+def test_control_solution_variations():
+    """Test different variations of control solutions."""
+    m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo',
+                                     'VDP_pack.VDP_Opt')
+    m.reset()
+    grid = [(0, 0.1),
+            (0.1, 0.2),
+            (0.2, 0.3),
+            (0.3, 0.4),
+            (0.4, 0.5),
+            (0.5, 0.6),
+            (0.6, 0.7),
+            (0.7, 0.8),
+            (0.8, 0.9),
+            (0.9, 1.0),]
+    start_time = m.opt_interval_get_start_time()
+    final_time = m.opt_interval_get_final_time()
+    grid = N.array(grid) * (final_time - start_time) + start_time    
+            
+    for u in [-0.5, -0.25, 0, 0.25, 0.5]:
+        print "u:", u
+        us = [ -1.86750972e+00, -1.19613740e+00, 3.21955502e+01,
+                1.15871750e+00, -9.56876370e-01, 7.82651050e+01,
+                -3.35655693e-01, 1.95491165e+00, 1.47923425e+02,
+                -2.32963068e+00, -1.65371763e-01, 1.94340923e+02,
+                6.82953492e-01, -1.57360749e+00, 2.66717232e+02,
+                1.46549806e+00, 1.74702679e+00, 3.29995167e+02,
+                -1.19712096e+00, 9.57726717e-01, 3.80947471e+02,
+                3.54379487e-01, -1.95842811e+00, 4.52105868e+02,
+                2.34170339e+00, 1.77754406e-01, 4.98700011e+02] + [u] * 10
+        us = N.array(us)
+        plot_control_solutions(m, grid, us, doshow=False)
+        
+
+def test_grid_consistency():
+    """Testing _check_normgrid_consistency(..) and construct_grid(...)"""
+    _check_normgrid_consistency(construct_grid(1))
+    _check_normgrid_consistency(construct_grid(5))
+    _check_normgrid_consistency(construct_grid(10))
+    _check_normgrid_consistency(construct_grid(523))
