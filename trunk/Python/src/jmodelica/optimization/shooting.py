@@ -21,43 +21,17 @@ except ImportError:
     import cvodes
     import nvecserial
 from openopt import NLP
-    
-import jmodelica.jmi as pyjmi
-from jmodelica.jmi import c_jmi_real_t
 import pylab as p
 import nose
 
+import jmodelica.jmi as pyjmi
+from jmodelica.jmi import c_jmi_real_t
+from jmodelica.tests import get_example_path
+from jmodelica.tests import load_example_standard_model
 
 class ShootingException(Exception):
     """ A shooting exception. """
     pass
-
-
-def _get_example_path():
-    """Get the absolute path to the examples directory.
-    
-    """
-    jmhome = os.environ.get('JMODELICA_HOME')
-    assert jmhome is not None, "You have to specify" \
-                               " JMODELICA_HOME environment" \
-                               " variable."
-    return os.path.join(jmhome, 'Python', 'jmodelica', 'examples', 'files')
-    
-    
-def _load_example_standard_model(libname, mofile=None, optpackage=None):
-    """Load and return a JmiOptModel from DLL file residing in the example
-       path.
-        
-    If the DLL file does not exist this method tries to build it if mofile and
-    optpackage are specified.
-    
-    Keyword parameters:
-    mofile -- the Modelica file used to build the DLL file.
-    optpackage -- the Optimica package in the mofile which is to be compiled.
-    
-    """
-    return pyjmi.load_model(libname, _get_example_path(), mofile, optpackage,
-                            'optimica')
 
 
 class TestJmiOptModel:
@@ -65,7 +39,7 @@ class TestJmiOptModel:
     
     def setUp(self):
         """Test setUp. Load the test model."""
-        self.m = _load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo', 
+        self.m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo', 
                                               'VDP_pack.VDP_Opt')
         
     def test_model_size(self):
@@ -1310,7 +1284,7 @@ class TestMultipleShooterLazy:
         MODELICA_FILE = 'VDP.mo'
         MODEL_PACKAGE = 'VDP_pack.VDP_Opt'
         
-        model = _load_example_standard_model(DLLFILE, MODELICA_FILE,
+        model = load_example_standard_model(DLLFILE, MODELICA_FILE,
                                              MODEL_PACKAGE)
                                              
         GRIDSIZE = 10
@@ -1346,7 +1320,7 @@ class TestShootingHardcore:
         MODELICA_FILE = 'VDP.mo'
         MODEL_PACKAGE = 'VDP_pack.VDP_Opt'
         
-        model = _load_example_standard_model(DLLFILE, MODELICA_FILE,
+        model = load_example_standard_model(DLLFILE, MODELICA_FILE,
                                              MODEL_PACKAGE)
         self._model = model
     
@@ -1499,7 +1473,7 @@ def test_f_gradient_elements(certainindex=None):
     if run_huge_test is False and certainindex is None:
         return
     
-    m = _load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo',
+    m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo',
                                      'VDP_pack.VDP_Opt')
     grid = [(0, 0.1),
             (0.1, 0.2),
@@ -1617,7 +1591,7 @@ def plot_control_solutions(model, grid, opt_p, doshow=True):
 
 def test_plot_control_solutions():
     """Testing plot_control_solutions(...)."""
-    m = _load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo',
+    m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo',
                                      'VDP_pack.VDP_Opt')
     m.reset()
     grid = [(0, 0.1),
@@ -1650,7 +1624,7 @@ def test_plot_control_solutions():
 
 def test_control_solution_variations():
     """Test different variations of control solutions."""
-    m = _load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo',
+    m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo',
                                      'VDP_pack.VDP_Opt')
     m.reset()
     grid = [(0, 0.1),
@@ -1766,7 +1740,7 @@ def main(args=sys.argv):
         metavar="MODELNAME",
         help="The optimica model that should be loaded from within the *.mo "
              "file. (default=%default)")
-    parser.add_option('-D', '--directory', default=_get_example_path(),
+    parser.add_option('-D', '--directory', default=get_example_path(),
         metavar="PATH", help="The directory from which to load the *.mo file. "
                              "(default=%default)")
     parser.add_option('-f', '--modelfile', default='VDP.mo',
@@ -1803,12 +1777,12 @@ def main(args=sys.argv):
     if options.predmodel == 'vdp':
         options.dllfile = 'VDP_pack_VDP_Opt'
         options.model = 'VDP_pack.VDP_Opt'
-        options.directory = _get_example_path()
+        options.directory = get_example_path()
         options.modelfile = 'VDP.mo'
     elif options.predmodel == 'quadtank':
         options.dllfile = 'QuadTank_pack_QuadTank_Opt'
         options.model = 'QuadTank_pack.QuadTank_Opt'
-        options.directory = _get_example_path()
+        options.directory = get_example_path()
         options.modelfile = 'QuadTank.mo'
         options.timestep = 5
     
