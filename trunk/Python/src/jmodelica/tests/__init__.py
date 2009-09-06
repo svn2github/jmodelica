@@ -19,8 +19,8 @@ def get_example_path():
     
     
 def load_example_standard_model(libname, mofile=None, optpackage=None):
-    """Load and return a JmiOptModel from DLL file residing in the example
-       path.
+    """ Load and return a jmodelica.jmi.Model from DLL file libname residing in
+        the example path.
         
     If the DLL file does not exist this method tries to build it if mofile and
     optpackage are specified.
