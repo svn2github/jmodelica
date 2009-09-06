@@ -502,7 +502,7 @@ def _handle_exception(ex):
         while itr.hasNext():
             problems = problems + str(itr.next()) + "\n"
             
-            raise CompilerError(problems)
+        raise CompilerError(problems)
     
     if ex.javaClass() is org.jmodelica.modelica.compiler.ModelicaClassNotFoundException:
         raise ModelicaClassNotFoundError(str(ex.__javaobject__.getClassName()))
