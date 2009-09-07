@@ -15,8 +15,10 @@
 */
 package org.jmodelica.ide.editor;
 
-import static org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE;
-import static org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR;
+import static org.eclipse.ui.texteditor
+    .AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE;
+import static org.eclipse.ui.texteditor
+    .AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,7 +38,6 @@ import org.eclipse.jface.text.rules.FastPartitioner;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
-import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.Color;
@@ -48,10 +49,7 @@ import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.jastadd.plugin.compiler.ast.IFoldingNode;
 import org.jastadd.plugin.registry.IASTRegistryListener;
-import org.jmodelica.folding.CharacterPosition;
-import org.jmodelica.folding.CharacterProjectionAnnotation;
 import org.jmodelica.folding.CharacterProjectionSupport;
 import org.jmodelica.folding.CharacterProjectionViewer;
 import org.jmodelica.generated.scanners.Modelica22PartitionScanner;
@@ -65,14 +63,12 @@ import org.jmodelica.ide.editor.actions.GoToDeclaration;
 import org.jmodelica.ide.editor.actions.ToggleAnnotationsAction;
 import org.jmodelica.ide.editor.actions.ToggleComment;
 import org.jmodelica.ide.folding.AnnotationDrawer;
-import org.jmodelica.ide.folding.IFilePosition;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.namecomplete.Completions;
 import org.jmodelica.ide.outline.InstanceOutlinePage;
 import org.jmodelica.ide.outline.OutlinePage;
 import org.jmodelica.ide.outline.SourceOutlinePage;
 import org.jmodelica.modelica.compiler.ASTNode;
-import org.jmodelica.modelica.compiler.BaseClassDecl;
 
 /**
  * Modelica source editor.
@@ -90,10 +86,9 @@ public class Editor extends AbstractDecoratedTextEditor
     private AnnotationDrawer annotationDrawer;
     
     private ModelicaCompiler compiler;
-    
-    private ASTData ast;
+    private ASTData astData;
     private ModelicaCompilationStrategy strategy;
-    private EditorPath fPath;
+    private EditorFile file;
 
     private ErrorCheckAction errorCheckAction;
     private ToggleAnnotationsAction toggleAnnotationsAction;
@@ -104,9 +99,10 @@ public class Editor extends AbstractDecoratedTextEditor
      * Standard constructor.
      */
     public Editor() {
-        ast = new ASTData(null, this);
-        fPath = new EditorPath(null);
-        strategy = new ModelicaCompilationStrategy(this);
+        super();
+        astData              = new ASTData(null, this);
+        file                 = new EditorFile(null);
+        strategy             = new ModelicaCompilationStrategy(this);
         fSourceOutlinePage   = new SourceOutlinePage(this); 
         fInstanceOutlinePage = new InstanceOutlinePage(this);
         compiler             = new ModelicaCompiler();
@@ -125,11 +121,9 @@ public class Editor extends AbstractDecoratedTextEditor
     protected ISourceViewer createSourceViewer(Composite parent,
             IVerticalRuler ruler, int styles) {
         
-        // Code from the super class implementation of this method
         fAnnotationAccess = getAnnotationAccess();
         fOverviewRuler = createOverviewRuler(getSharedColors());
         
-        // Projection support
         CharacterProjectionViewer viewer = 
             new CharacterProjectionViewer(
                     parent, 
@@ -203,11 +197,10 @@ public class Editor extends AbstractDecoratedTextEditor
         if (!getPreferenceStore().getBoolean(EDITOR_CURRENT_LINE))
             return null;
         
-        return new Color(
-                Display.getCurrent(), 
-                PreferenceConverter.getColor(
-                        getPreferenceStore(), 
-                        EDITOR_CURRENT_LINE_COLOR));
+        return new Color(Display.getCurrent(),
+                         PreferenceConverter.getColor(
+                                 getPreferenceStore(), 
+                                 EDITOR_CURRENT_LINE_COLOR));
     }
 
     /**
@@ -215,13 +208,9 @@ public class Editor extends AbstractDecoratedTextEditor
      * and creates control.
      */
     @Override
-    public void createPartControl(Composite parent) {
-        
-        // Set the source viewer configuration before the call to 
-        // createPartControl to set viewer configuration.
+    public void createPartControl(Composite parent) {        
         super.setSourceViewerConfiguration(new ViewerConfiguration(this));
         super.createPartControl(parent);
-        
         update();
     }
     
@@ -270,17 +259,17 @@ public class Editor extends AbstractDecoratedTextEditor
             ? (IFileEditorInput)input
             : null;
 
-        ast.destruct(this);
-        ast = new ASTData(fInput, this);
-        fPath = new EditorPath(input);
+        astData.destruct(this);
+        astData = new ASTData(fInput, this);
+        file = new EditorFile(input);
         
         if (fInput != null) 
             update();
         
-        strategy.update(fPath, ast);
+        strategy.update(file, astData);
 
-        if (ast.compiledLocal()) {
-            ast.root = compiler.compileFile(fPath.file(), fPath.path());
+        if (astData.compiledLocal()) {
+            astData.setRoot(compiler.compileFile(file.file(), file.path()));
             update();
         }
     }
@@ -320,8 +309,8 @@ public class Editor extends AbstractDecoratedTextEditor
      */
     public void recompileLocal(IDocument document) {
         
-        ast.root = (ASTNode<?>)
-            compiler.compileToAST(document, null, null, fPath.file());
+        astData.setRoot((ASTNode<?>)
+            compiler.compileToAST(document, null, null, file.file()));
         
         Display.getDefault().asyncExec(new Runnable() {
             public void run() {
@@ -330,17 +319,15 @@ public class Editor extends AbstractDecoratedTextEditor
         });
     }
     
-    // ASTRegistry listener methods
-    /**
-     * Is called when AST is updated. 
-     */
+    // ASTRegistry listener method
     public void childASTChanged(IProject project, String key) {
-        ast.childASTChanged(project, key);
+        astData.childASTChanged(project, key);
         update();
     }
 
+    // ASTRegistry listener method
     public void projectASTChanged(IProject project) {
-        ast.projectASTChanged(project);
+        astData.projectASTChanged(project);
         update();
     }
     
@@ -349,7 +336,7 @@ public class Editor extends AbstractDecoratedTextEditor
      */
     protected void update() {
         
-        if (getSourceViewer() == null || ast.rootHasErrors()) 
+        if (getSourceViewer() == null || astData.rootHasErrors()) 
             return;
     
         IDocument document = getDocument();
@@ -357,10 +344,10 @@ public class Editor extends AbstractDecoratedTextEditor
             setupDocumentPartitioner(document);
     
         // Update outline
-        fSourceOutlinePage.updateAST(ast.root);
-        fInstanceOutlinePage.updateAST(ast.root);
-        followReference.updateAST(ast.root);
-        completions.updateAST(ast.root);
+        fSourceOutlinePage.updateAST(astData.root());
+        fInstanceOutlinePage.updateAST(astData.root());
+        followReference.updateAST(astData.root());
+        completions.updateAST(astData.root());
         
         updateProjectionAnnotations();
         updateErrorCheckAction();
@@ -387,85 +374,42 @@ public class Editor extends AbstractDecoratedTextEditor
      */
     @SuppressWarnings("unchecked")
     private void updateProjectionAnnotations() {
-        
-        CharacterProjectionViewer viewer = 
-            (CharacterProjectionViewer)getSourceViewer();
-        
-        if (viewer == null) 
-            return;
-        
-        viewer.enableProjection();
 
-        ProjectionAnnotationModel model = viewer.getProjectionAnnotationModel(); 
+        ProjectionAnnotationModel model = getAnnotationModel();
         if (model == null) 
             return;
 
         Collection<Annotation> oldAnnotations =
             Util.fromIterator(model.getAnnotationIterator());
-                    
-        HashMap<Annotation,Position> newAnnotations = 
-            new HashMap<Annotation,Position>();
 
-        IFoldingNode node = ast.root;
-        ITextSelection sel = getSelection();
+        HashMap<Annotation, Position> newAnnotations = 
+            new EditorAnnotationMap(
+                    astData.foldingPositions(getDocument()),
+                    this);
         
-        for (Position pos : node.foldingPositions(this.getDocument())) {
-            
-            if (fPath.inLibrary() && 
-                    !((IFilePosition) pos).getFileName().equals(fPath))
-                continue;
-            
-            ProjectionAnnotation annotation;
-            if (pos instanceof CharacterPosition) {
-                
-                annotation = new CharacterProjectionAnnotation(
-                        toggleAnnotationsAction.isVisible() ||
-                        pos.overlapsWith(sel.getOffset(), sel.getLength()));
-                
-            } else {
-                annotation = new ProjectionAnnotation();
-            }
-            
-            newAnnotations.put(annotation, pos);
-        }
-
-        // TODO: Only replace annotations that have changed, so that the 
-        // state of the others are kept.
-
         model.modifyAnnotations( 
                 oldAnnotations.toArray(new Annotation[] {}),
                 newAnnotations, 
                 null);
     }
 
+    private ProjectionAnnotationModel getAnnotationModel() {
+        if (getSourceViewer() == null)
+            return null;
+        CharacterProjectionViewer viewer =
+            (CharacterProjectionViewer)getSourceViewer(); 
+        viewer.enableProjection();
+        return viewer.getProjectionAnnotationModel();
+    }
+    
     @Override
     protected void handleCursorPositionChanged() {
         super.handleCursorPositionChanged();
         updateErrorCheckAction();
     }
     
-    /**
-     * Sets error check action to check the class 
-     * currently containing selection.
-     */
     private void updateErrorCheckAction() {
-
-        BaseClassDecl containgClass;
-      
-        try {
-            
-            containgClass = ast.root.containingClass(
-                    getSelection().getOffset(), 
-                    getSelection().getLength());
-            
-        } catch (NullPointerException e) {
-            
-            e.printStackTrace();
-            containgClass = null;
-            
-        }
-        
-        errorCheckAction.setCurClass(containgClass);
+        errorCheckAction.setCurrentClass(astData.classContaining(getSelection()));
     }
 
     /**
@@ -477,7 +421,7 @@ public class Editor extends AbstractDecoratedTextEditor
     public boolean selectNode(ASTNode<?> node) {
         
         boolean matchesInput = 
-            new EditorPath(getEditorInput())
+            new EditorFile(getEditorInput())
                 .path()
                 .equals(node.containingFileName());
         
@@ -495,8 +439,7 @@ public class Editor extends AbstractDecoratedTextEditor
         return getSourceViewer() == null ? null : getSourceViewer().getDocument();
     }
     
-    // getSourceViewer() is final and protected. want public
-    public ISourceViewer publicGetSourceViewer() {
+    public ISourceViewer sourceViewer() {
         return getSourceViewer();
     }
 
@@ -510,5 +453,13 @@ public class Editor extends AbstractDecoratedTextEditor
 
     public Completions getCompletions() {
         return completions;
+    }
+    
+    public EditorFile getFile() {
+        return file;
+    }
+    
+    public boolean annotationsVisible() {
+        return toggleAnnotationsAction.isVisible();
     }
 }

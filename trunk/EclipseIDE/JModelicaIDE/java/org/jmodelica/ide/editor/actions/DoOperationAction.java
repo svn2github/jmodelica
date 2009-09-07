@@ -21,7 +21,7 @@ public DoOperationAction(String text, int action, Editor editor) {
 @Override
 public void run() {
     
-    ISourceViewer sourceViewer = editor.publicGetSourceViewer();
+    ISourceViewer sourceViewer = editor.sourceViewer();
     
     if (sourceViewer instanceof ITextOperationTarget) 
         ((ITextOperationTarget) sourceViewer).doOperation(action);

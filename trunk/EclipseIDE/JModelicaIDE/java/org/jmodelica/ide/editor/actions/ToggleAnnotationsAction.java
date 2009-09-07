@@ -32,7 +32,7 @@ public void run() {
         ? CharacterProjectionViewer.EXPAND_ANNOTATIONS 
         : CharacterProjectionViewer.COLLAPSE_ANNOTATIONS;
     
-    ISourceViewer sourceViewer = editor.publicGetSourceViewer();
+    ISourceViewer sourceViewer = editor.sourceViewer();
     if (sourceViewer instanceof ITextOperationTarget) {
         ((ITextOperationTarget) sourceViewer).doOperation(action);
     }

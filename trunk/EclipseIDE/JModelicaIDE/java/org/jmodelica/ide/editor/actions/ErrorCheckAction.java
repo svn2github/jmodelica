@@ -24,7 +24,7 @@ public ErrorCheckAction() {
     super.setActionDefinitionId("JModelicaIDE.ErrorCheckCommand");
 }
 
-public void setCurClass(BaseClassDecl currentClass) {
+public void setCurrentClass(BaseClassDecl currentClass) {
     if (currentClass != this.currentClass) {
         this.currentClass = currentClass;
         if (currentClass != null) {

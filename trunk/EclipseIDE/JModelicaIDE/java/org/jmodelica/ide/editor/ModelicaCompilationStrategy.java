@@ -19,7 +19,7 @@ public IReconcilingStrategy getStrategy() {
     return compiledLocal ? localStrategy : normalStrategy;
 }
 
-public void update(EditorPath fPath, ASTData ast) {
+public void update(EditorFile fPath, ASTData ast) {
     normalStrategy.setFile(fPath.file()); 
     compiledLocal = ast.compiledLocal();
 }

@@ -2,22 +2,25 @@ package org.jmodelica.ide.editor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.Position;
 import org.eclipse.ui.IFileEditorInput;
+import org.jastadd.plugin.compiler.ast.IFoldingNode;
 import org.jastadd.plugin.registry.ASTRegistry;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.modelica.compiler.BaseClassDecl;
 
 public class ASTData {
 
-public ASTNode<?> root;
-public IProject project;
-public String key;
-public ASTRegistry registry;
-public Editor editor;
+private ASTNode<?> root;
+private IProject project;
+private String key;
+private ASTRegistry registry;
 
 public ASTData(IFileEditorInput input, Editor editor) {
 
-    this.editor = editor;
     registry = org.jastadd.plugin.Activator.getASTRegistry();
     
     if (input == null || input.getFile() == null)
@@ -55,6 +58,26 @@ public boolean compiledLocal() {
 
 public void destruct(Editor editor) {
     registry.removeListener(editor);
+}
+
+public ASTNode<?> root() {
+    return root;
+}
+
+public void setRoot(ASTNode<?> newRoot) {
+    if (newRoot != null)
+        root = newRoot;
+}
+
+public BaseClassDecl classContaining(ITextSelection selection) {
+    if (root == null)
+        return null;
+    return root.containingClass(selection.getOffset(), selection.getLength());
+}
+
+public Iterable<Position> foldingPositions(IDocument document) {
+    IFoldingNode node = root;
+    return node.foldingPositions(document);
 }
 
 }

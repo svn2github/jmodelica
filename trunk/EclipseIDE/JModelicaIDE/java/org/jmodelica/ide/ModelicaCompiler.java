@@ -15,7 +15,6 @@
 */
 package org.jmodelica.ide;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -116,7 +115,7 @@ public class ModelicaCompiler extends AbstractCompiler {
 		// TODO: Only compile the changed region, if possible
 		newRoot(file != null ? file.getProject() : null);
 		parseFile(new DocumentReader(document), file);
-		return list.getChild(0);
+		return list.getNumChild() > 0 ? list.getChild(0) : null;
 	}
 
 	@Override
@@ -188,7 +187,8 @@ public class ModelicaCompiler extends AbstractCompiler {
 	public ASTNode<?> compileFile(IFile file, String path) {
 		newRoot(file != null ? file.getProject() : null);
 		parseFile(file, path);
-		return list.getChild(0);
+		
+		return list.getNumChild() > 0 ? list.getChild(0) : null;
 	}
 
 	@Override
