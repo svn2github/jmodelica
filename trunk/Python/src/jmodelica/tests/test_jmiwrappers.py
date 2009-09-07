@@ -1,8 +1,10 @@
 """ 
-Test module for testing the JMI Model Interface wrappers. (Low-level jmodelica interfaces.)
+Test module for testing the JMI Model Interface wrappers.
+(Low-level jmodelica interfaces.)
 
-The correctness of the methods are not really tested here, only that they can be called 
-without crashing and in some cases that return value has at least the correct type.
+The correctness of the methods are not really tested here, only that they can
+be called without crashing and in some cases that return value has at least the
+correct type.
 """
 
 import os
@@ -308,7 +310,8 @@ def test_init_dF0_dim():
     """ Test JMIModel.init_dF0_dim method. """
     model = mc.getjmimodel()
     mask = n.ones(model.get_z().size, dtype=int)
-    dF_n_cols, dF_n_nz = model.init_dF0_dim(eval_alg, sparsity, indep_vars, mask)
+    dF_n_cols, dF_n_nz = model.init_dF0_dim(eval_alg, sparsity, indep_vars,
+                                            mask)
  
 def test_init_F1():
     """ Test JMIModel.init_F1 method. """
@@ -342,7 +345,8 @@ def test_init_dF1_dim():
     """ Test JMIModel.init_dF1_dim method. """
     model = mc.getjmimodel()
     mask = n.ones(model.get_z().size, dtype=int)
-    dF_n_cols, dF_n_nz = model.init_dF1_dim(eval_alg, sparsity, indep_vars, mask) 
+    dF_n_cols, dF_n_nz = model.init_dF1_dim(eval_alg, sparsity, indep_vars,
+                                            mask) 
 
 #def test_init_Fp():
 #    """ Test JMIModel.init_Fp method. """
@@ -390,12 +394,13 @@ def test_init_dF1_dim():
 #    n_eq_f0, n_eq_f1, n_eq_fp = model.init_get_sizes()
 #    if n_eq_fp > 0:
 #        mask = n.ones(model.get_z().size, dtype=int)
-#        dF_n_cols, dF_n_nz = model.init_dFp_dim(eval_alg, sparsity, indep_vars, mask) 
+#        dF_n_cols, dF_n_nz = model.init_dFp_dim(eval_alg, sparsity,
+                                                 indep_vars, mask) 
 #    else:
 #        assert False, "Cannot perform test, size of Fp is 0. "
 
 def test_opt_getset_optimization_interval():
-    """ Test JMIModel.opt_set_optimization_interval and JMIModel.opt_get_optimization_interval method. """
+    """Test JMIModel.opt_[set|get]_optimization_interval methods."""
     st_set = ct.c_double(5)
     # 0 = fixed, 1 = free (free NOT YET SUPPORTED)
     stf_set = ct.c_int(0)
@@ -470,17 +475,6 @@ def test_opt_dJ_dim():
     """ Test opt_dJ_dim method. """
     model = mc.getjmimodel()
     mask = n.ones(model.get_z().size, dtype=int)
-    dJ_n_cols, dJ_n_nz = model.init_dF0_dim(eval_alg, sparsity, indep_vars, mask)    
-        
+    dJ_n_cols, dJ_n_nz = model.init_dF0_dim(eval_alg, sparsity, indep_vars,
+                                            mask)    
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
