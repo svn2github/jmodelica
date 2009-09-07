@@ -22,4 +22,26 @@ aspect OptimicaErrorCheck {
     	getInstClassModificationOpt().collectErrors();
   	}
 
+	public void FOptClass.checkFClassDimensions() {
+		// Check dimensions of DAE
+		int n_eq_F = numEquations() + numPathEqConstraints();
+		int n_vars_F = numAlgebraicRealVariables() + numDifferentiatedRealVariables();
+		if (n_eq_F!=n_vars_F) {
+			error("The DAE system has " + n_eq_F + " equations and " + n_vars_F + " free variables.");
+		}
+		
+		// Check dimensions of DAE initialization system
+		// Notice that this check is stricter than in the Modelica case,
+		// since here we really need initialization system to be balanced.
+		// The F1 equations can in the simulation case be used to derive
+		// initial conditions for the states, but for the simultaneous
+		// optimization algorithm, this is not the case.
+		int n_eq_F0 = numInitialEquations() + numEquations() + numPathEqConstraints();
+		int n_vars_F0 = numAlgebraicRealVariables() + 2*numDifferentiatedRealVariables();
+		if (n_eq_F0!=n_vars_F0) {
+			error("The DAE initialization system has " + n_eq_F0 + " equations and " + n_vars_F0 + " free variables.");
+		}
+		
+	}
+  	
 }

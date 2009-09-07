@@ -312,6 +312,23 @@ aspect ParameterSorting {
 
 aspect TransformCanonicalErrorCheck {
 	
+	public void FClass.checkFClassDimensions() {
+		// Check dimensions of DAE
+		int n_eq_F = numEquations();
+		int n_vars_F = numAlgebraicRealVariables() + numDifferentiatedRealVariables();
+		if (n_eq_F!=n_vars_F) {
+			error("The DAE system has " + n_eq_F + " equations and " + n_vars_F + " free variables.");
+		}
+		
+		// Check dimensions of DAE initialization system
+		int n_eq_F0 = numInitialEquations() + numEquations();
+		int n_vars_F0 = numAlgebraicRealVariables() + 2*numDifferentiatedRealVariables();
+		if (n_eq_F0>n_vars_F0) {
+			error("The DAE initialization system has " + n_eq_F0 + " equations and " + n_vars_F0 + " free variables.");
+		}
+		
+	}
+	
 	public void FClass.collectErrors() {
 		if (cyclicParameters) {
 			error("The model "+ name() +" contains cyclic parameter dependencies.");
@@ -322,6 +339,7 @@ aspect TransformCanonicalErrorCheck {
 		for (String str : aliasErrors) {
 			error(str);
 		}
+		checkFClassDimensions();
 	}
 	
 }

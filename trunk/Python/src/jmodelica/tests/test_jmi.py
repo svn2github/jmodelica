@@ -10,6 +10,7 @@ import numpy as N
 
 import jmodelica.jmi as jmi
 from jmodelica.compiler import OptimicaCompiler
+from jmodelica.compiler import ModelicaCompiler
 import jmodelica.xmlparser as xp
 import jmodelica.io
 
@@ -253,41 +254,32 @@ def test_state_start_values_fixed():
     """ Test of the dae_get_sizes in Model
     """
     
-    model = "files" + sep + "VDP.mo"
-    fpath = os.path.join(path_to_examples, model)
-    cpath = "VDP_pack.VDP_Opt"
+    model = "files" + sep + "VDP_pack.mo"
+    fpath = os.path.join(path_to_tests, model)
+    cpath = "VDP_pack.VDP"
     fname = cpath.replace('.','_',1)
 
-    oc2 = OptimicaCompiler()
+    mc = ModelicaCompiler()
     
-    oc2.set_boolean_option('state_start_values_fixed',False)
+    mc.set_boolean_option('state_start_values_fixed',False)
 
-    oc2.compile_model(fpath, cpath, target='ipopt')
+    mc.compile_model(fpath, cpath)
 
     # Load the dynamic library and XML data
     vdp = jmi.Model(fname)
 
-    res_n_eq_F = 3
+    res_n_eq_F = 2
     n_eq_F = vdp.jmimodel.dae_get_sizes()
     assert n_eq_F==res_n_eq_F, \
            "test_jmi.py: test_Model_dae_get_sizes: Wrong number of DAE equations." 
 
-    res_n_eq_F0 = 3
-    res_n_eq_F1 = 4
+    res_n_eq_F0 = 2
+    res_n_eq_F1 = 3
     res_n_eq_Fp = 0
     n_eq_F0,n_eq_F1,n_eq_Fp = vdp.jmimodel.init_get_sizes()
     assert n_eq_F0==res_n_eq_F0 and n_eq_F1==res_n_eq_F1 and n_eq_Fp==res_n_eq_Fp,  \
            "test_jmi.py: test_Model_dae_get_sizes: Wrong number of DAE initialization equations." 
 
-    res_n_eq_Ceq = 0
-    res_n_eq_Cineq = 1
-    res_n_eq_Heq = 0
-    res_n_eq_Hineq = 0
-    
-    n_eq_Ceq,n_eq_Cineq,n_eq_Heq,n_eq_Hineq = vdp.jmimodel.opt_get_sizes()
-
-    assert n_eq_Ceq==res_n_eq_Ceq and n_eq_Cineq==res_n_eq_Cineq and n_eq_Heq==res_n_eq_Heq and n_eq_Hineq==res_n_eq_Hineq,  \
-           "test_jmi.py: test_Model_dae_get_sizes: Wrong number of constraints." 
 
 def test_init_opt():
     """ Test of DAE initialization optimization problem
