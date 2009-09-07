@@ -11,7 +11,7 @@ from jmodelica.tests import load_example_standard_model
 from jmodelica.simulation.sundials import solve_using_sundials
 
 
-class TestSundialsSimulation:
+class TestSolveUsingSundials:
     """Test simulation of the VDP model using the SUNDIALS interface."""
     
     def setUp(self):
