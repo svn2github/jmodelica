@@ -15,6 +15,7 @@ import jmodelica.xmlparser as xp
 import jmodelica.io
 
 from jmodelica.tests import load_example_standard_model
+from jmodelica.simulation.sundials import solve_using_sundials
 
 
 sep = os.path.sep
@@ -467,7 +468,7 @@ class TestModel:
     def setUp(self):
         """Test setUp. Load the test model."""
         self.m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo', 
-                                              'VDP_pack.VDP_Opt')
+                                             'VDP_pack.VDP_Opt')
                                               
     def test_model_size(self):
         """Test jmi.Model length of x"""
@@ -549,3 +550,27 @@ class TestModel:
         self.m.reset()
         maxdiff = max(N.abs(random - self.m.x))
         assert maxdiff > 0.001
+        
+    def test_optimization_cost_eval(self):
+        """Test evaluation of optimization cost function."""
+        T, ys, sens, ignore = solve_using_sundials(self.m,
+                                          self.m.opt_interval_get_final_time(),
+                                          self.m.opt_interval_get_start_time())
+        self.m.set_x_p(ys[-1], 0)
+        self.m.set_dx_p(self.m.dx, 0)
+        cost = self.m.opt_eval_J()
+        nose.tools.assert_not_equal(cost, 0)
+        
+    def test_optimization_cost_jacobian(self):
+        """Test evaluation of optimization cost function jacobian.
+        
+        Note:
+        This test is model specific for the VDP oscillator.
+        """
+        T, ys, sens, ignore = solve_using_sundials(self.m,
+                                                   self.m.opt_interval_get_final_time(),
+                                                   self.m.opt_interval_get_start_time())
+        self.m.set_x_p(ys[-1], 0)
+        self.m.set_dx_p(self.m.dx, 0)
+        jac = self.m.opt_eval_jac_J(jmi.JMI_DER_X_P)
+        N.testing.assert_almost_equal(jac, [[0, 0, 1]])

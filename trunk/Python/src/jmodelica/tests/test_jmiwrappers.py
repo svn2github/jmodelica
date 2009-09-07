@@ -18,6 +18,9 @@ from jmodelica.compiler import OptimicaCompiler
 import jmodelica as jm
 import jmodelica.jmi as jmi
 
+from jmodelica.tests import load_example_standard_model
+from jmodelica.simulation.sundials import solve_using_sundials
+
 
 class ModelContainer(object):
     def __init__(self, filename, filepath):
@@ -535,3 +538,34 @@ def test_opt_dJ_dim():
     dJ_n_cols, dJ_n_nz = model.init_dF0_dim(eval_alg, sparsity, indep_vars,
                                             mask)    
     
+    
+class TestModelSimulation:
+    """Test the JMIModel instance of the Van der Pol oscillator."""
+    
+    def setUp(self):
+        """Test setUp. Load the test model."""
+        self.m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo', 
+                                              'VDP_pack.VDP_Opt')
+        
+    def test_opt_jac_non_zeros(self):
+        """Testing the number of non-zero elements in VDP after simulation.
+        
+        Note:
+        This test is model specific and not generic as most other
+        tests in this class.
+        """
+        solve_using_sundials(self.m, self.m.opt_interval_get_final_time(),
+                             self.m.opt_interval_get_start_time())
+        assert self.m._n_z > 0, "Length of z should be greater than zero."
+        print 'n_z.value:', self.m._n_z.value
+        n_cols, n_nz = self.m.jmimodel.opt_dJ_dim(jmi.JMI_DER_CPPAD,
+                                                  jmi.JMI_DER_SPARSE,
+                                                  jmi.JMI_DER_X_P,
+                                                  n.ones(self.m._n_z.value,
+                                                         dtype=int))
+        
+        print 'n_nz:', n_nz
+        
+        assert n_cols > 0, "The resulting should at least of one column."
+        assert n_nz > 0, "The resulting jacobian should at least have" \
+                         " one element (structurally) non-zero."
