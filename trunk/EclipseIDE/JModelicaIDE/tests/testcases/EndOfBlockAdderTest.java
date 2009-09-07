@@ -20,9 +20,8 @@ public void testEndOfBlockAdder(String filename) throws Exception {
     Document d = new Document(doc.replace("^", ""));
 
     EndOfBlockAdder eoba = new EndOfBlockAdder();
-    eoba.addEndIfNotPresent("end p2;", d, caretOffset);
-
-    
+    eoba.addEndIfNotPresent(eoba.endStatementString( d.get(0, caretOffset)),
+            d, caretOffset);
     
     assertEquals(new Scanner(new File(filename + ".wanted"))
             .useDelimiter("\\Z").next(), d.get());
@@ -35,7 +34,6 @@ public void testEndOfBlockAdder() throws Exception {
     IndentedSection.tabbed = true;
     new EndOfBlockAdderTest() .testEndOfBlockAdder(
             "test_data/editing_strategies/end_of_block_adder1.mo");
-    new EndOfBlockAdderTest() .testEndOfBlockAdder(
-            "test_data/editing_strategies/end_of_block_adder2.mo");
+    
 }
 }

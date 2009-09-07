@@ -8,9 +8,9 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.eclipse.jface.text.Document;
+import org.jmodelica.ide.namecomplete.CompletionNode;
 import org.jmodelica.ide.namecomplete.Completions;
 import org.jmodelica.ide.namecomplete.Pair;
-import org.jmodelica.modelica.compiler.InstNode;
 
 
 public class NameCompleteTest extends TestCase {
@@ -23,17 +23,22 @@ public void testCompletions(String path, String failMessage) throws Exception {
     ModelicaTestCase m = new ModelicaTestCase(path);
     Completions c = new Completions(m.root);
     
-    m.document.replace(m.caretOffset, 0, "."); 
+    // if whitespace at caret, don't add '.'. not qualified lookup 
+    if (!("" + m.document.getChar(m.caretOffset-1)).matches("\\s")) 
+        m.document.replace(m.caretOffset, 0, "."); 
     
-    ArrayList<InstNode> decls = c.suggestedDecls(m.document, m.caretOffset+1);
+    ArrayList<CompletionNode> decls = c.suggestedDecls(m.document, m.caretOffset+1);
 
     Set<String> expected = new HashSet<String>(
             Arrays.asList(m.expected().value().split(",\\s*")));
     
+    
     Set<String> actual = new HashSet<String>();
-    for (InstNode node : decls) 
-        actual.add(node.name());
+    for (CompletionNode node : decls) 
+        actual.add(node.completionName());
         
+    System.out.printf("%s, %s\n", expected, actual);
+
     assertEquals(
             failMessage,
             expected, 
@@ -53,6 +58,22 @@ public void testCompletions() throws Exception {
     }
 }
 
+public static void main(String[] args) throws Exception {
+    
+    int i = Integer.parseInt(args[0]);
+    
+    String format = "test_data/completion/suggestedDecls%d.mo";
+    int nbrTestCases = ModelicaTestCase.nbrTestCasesMatchin(format);
+    
+    assertTrue(nbrTestCases > 0);
+ 
+    new NameCompleteTest().testCompletions(
+        String.format(format, i),
+        String.format(ModelicaTestCase.FAIL, i));
+
+    
+}
+
 public void testGetContext() {
     String s = "test.ing";
     Pair<String, String> p = new Completions().getContext(new Document(s), s.length());
@@ -62,9 +83,9 @@ public void testGetContext() {
     p = new Completions().getContext(new Document(s), s.length());
     assertEquals(p, new Pair<String, String>("tes.ti.in", "g"));
 
-    s = "apa";
+    s = "unqualified";
     p = new Completions().getContext(new Document(s), s.length());
-    assertEquals(p, new Pair<String, String>("", "apa"));
+    assertEquals(p, new Pair<String, String>("", "unqualified"));
     
     s = ".test";
     p = new Completions().getContext(new Document(s), s.length());
