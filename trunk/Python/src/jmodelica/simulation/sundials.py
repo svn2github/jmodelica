@@ -59,7 +59,7 @@ def solve_using_sundials(model,
     starting from a different time.
     
     Parameters:
-    model -- the model to use. Should be a derived class from OptModel.
+    model -- the model to use. Must be a jmodelica.jmi.Model.
     end_time -- the time when the model simulation should end.
     
     Keyword parameters:
