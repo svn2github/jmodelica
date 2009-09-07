@@ -115,11 +115,11 @@ def solve_using_sundials(model,
         if data.ignore_p == 0:
             p = data.parameters
             sundials_params = p.params
-        
-        # Copying from sundials space to model space and back again
-        if data.ignore_p == 0:
+            
             model.pi = sundials_params[p.pi_start : p.pi_end]
             model.u = sundials_params[p.u_start : p.u_end]
+            
+        # Copying from sundials space to model space and back again
         model.x = x
         model.eval_ode_f()
         dx[:] = model.dx
