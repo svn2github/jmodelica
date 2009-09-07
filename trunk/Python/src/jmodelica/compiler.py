@@ -519,10 +519,10 @@ def _handle_exception(ex):
     if ex.javaClass() is jpype.javax.xml.xpath.XPathExpressionException:
         raise XPathExpressionException('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
     
-#    if ex.javaClass() is javax.xml.parsers.ParserConfigurationException:
-#        raise ParserConfigurationError('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
+    if ex.javaClass() is jpype.javax.xml.parsers.ParserConfigurationException:
+        raise ParserConfigurationError('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
     
-    if ex.javaClass() is org.xml.sax.SAXException:
+    if ex.javaClass() is jpype.org.xml.sax.SAXException:
         raise SAXError('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
     
     if ex.javaClass() is jpype.java.lang.Exception:
