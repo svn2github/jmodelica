@@ -35,7 +35,7 @@ public class Lookup {
         //TODO: make getNodeAt faster, or use existing method in JastADD core
         Maybe<ClassDecl> result = root.getClassDeclAt(d, offset);
         if (result.isNothing())
-            return Maybe.Nothing(InstClassDecl.class);
+            return Maybe.<InstClassDecl>Nothing();
         
         ClassDecl enclosingClass = result.value();
         
@@ -59,7 +59,7 @@ public class Lookup {
         Maybe<Access> access = root.getAccessAt(d, offset);
 
         if (enclosingClass.isNothing() || access.isNothing()) 
-            return Maybe.Nothing(InstNode.class);
+            return Maybe.<InstNode>Nothing();
 
         Maybe<InstNode> iNode = lookupQualifiedName(
                 enclosingClass.value(),
@@ -72,7 +72,7 @@ public class Lookup {
      * Dynamically add a <code> instAccess </code> to instance tree 
      * as a _Component_.
      */
-    public Maybe<? extends InstNode> tryAddComponentDecl(
+    public Maybe<InstNode> tryAddComponentDecl(
             InstClassDecl encInst, 
             InstAccess instAccess) {
       
@@ -81,14 +81,14 @@ public class Lookup {
                 encInst.getNumDynamicComponentName()-1);
         InstComponentDecl node = a.myInstComponentDecl();
         
-        return Maybe.fromBool(node, !node.isUnknown()); 
+        return Maybe.<InstNode>fromBool(node, !node.isUnknown()); 
     }
 
     /**
      * Dynamically add a <code> instAccess </code> to instance tree 
      * as a _Class_.
      */
-    public Maybe<? extends InstNode> tryAddClassDecl(
+    public Maybe<InstNode> tryAddClassDecl(
             InstClassDecl encInst, 
             InstAccess instAccess) {
         
@@ -97,7 +97,7 @@ public class Lookup {
                 encInst.getNumDynamicClassName()-1);
         InstClassDecl node = a.myInstClassDecl();
         
-        return Maybe.fromBool(node, !node.isUnknown()); 
+        return Maybe.<InstNode>fromBool(node, !node.isUnknown()); 
     }
 
     /**
@@ -109,9 +109,9 @@ public class Lookup {
             InstClassDecl encInst, 
             InstAccess instAccess) {
         
-        return Maybe.Nothing(InstNode.class) // generics are fun
-            .orElse(tryAddClassDecl(encInst, instAccess))
-            .orElse(tryAddComponentDecl(encInst, instAccess));
+        return tryAddClassDecl(encInst, instAccess)
+                .orElse(
+               tryAddComponentDecl(encInst, instAccess));
     }
 
     /**

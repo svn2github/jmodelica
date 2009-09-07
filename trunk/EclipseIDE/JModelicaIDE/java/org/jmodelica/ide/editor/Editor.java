@@ -18,13 +18,9 @@ package org.jmodelica.ide.editor;
 import static org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE;
 import static org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
@@ -44,19 +40,15 @@ import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.jastadd.plugin.ReconcilingStrategy;
 import org.jastadd.plugin.compiler.ast.IFoldingNode;
-import org.jastadd.plugin.registry.ASTRegistry;
 import org.jastadd.plugin.registry.IASTRegistryListener;
 import org.jmodelica.folding.CharacterPosition;
 import org.jmodelica.folding.CharacterProjectionAnnotation;
@@ -74,7 +66,6 @@ import org.jmodelica.ide.editor.actions.ToggleAnnotationsAction;
 import org.jmodelica.ide.editor.actions.ToggleComment;
 import org.jmodelica.ide.folding.AnnotationDrawer;
 import org.jmodelica.ide.folding.IFilePosition;
-import org.jmodelica.ide.helpers.EclipseCruftinessWorkaroundClass;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.namecomplete.Completions;
 import org.jmodelica.ide.outline.InstanceOutlinePage;
@@ -93,33 +84,19 @@ public class Editor extends AbstractDecoratedTextEditor
     private OutlinePage fSourceOutlinePage;
     private InstanceOutlinePage fInstanceOutlinePage;
 
-    // Reconciling strategies
-    private ReconcilingStrategy fStrategy;
-    private LocalReconcilingStrategy fLocalStrategy;
-
-    // ASTRegistry listener fields
-    private ASTRegistry fRegistry; 
-    private ASTNode<?> fRoot;
-    private String fKey;
-    private IProject fProject;
-    
     private IDocumentPartitioner fPartitioner;
     
     // For folding
     private AnnotationDrawer annotationDrawer;
     
-    // Actions that needs to be altered
-    private ErrorCheckAction errorCheckAction;
-    private ToggleAnnotationsAction toggleAnnotationsAction;
-    
     private ModelicaCompiler compiler;
     
-    private boolean fCompiledLocal;
-    private IFile fLocalFile;
-    
-    private boolean fIsLibrary;
-    private String fPath;
+    private ASTData ast;
+    private ModelicaCompilationStrategy strategy;
+    private EditorPath fPath;
 
+    private ErrorCheckAction errorCheckAction;
+    private ToggleAnnotationsAction toggleAnnotationsAction;
     private GoToDeclaration followReference;
     private Completions completions;
 
@@ -127,13 +104,16 @@ public class Editor extends AbstractDecoratedTextEditor
      * Standard constructor.
      */
     public Editor() {
-        fRegistry            = org.jastadd.plugin.Activator.getASTRegistry();
+        ast = new ASTData(null, this);
+        fPath = new EditorPath(null);
+        strategy = new ModelicaCompilationStrategy(this);
         fSourceOutlinePage   = new SourceOutlinePage(this); 
         fInstanceOutlinePage = new InstanceOutlinePage(this);
-        fStrategy            = new ReconcilingStrategy();
-        fLocalStrategy       = new LocalReconcilingStrategy(this);
         compiler             = new ModelicaCompiler();
         completions          = new Completions();
+        fPartitioner         = new FastPartitioner(
+                new Modelica22PartitionScanner(),
+                Modelica22PartitionScanner.LEGAL_PARTITIONS);        
     }
 
     /**
@@ -220,17 +200,14 @@ public class Editor extends AbstractDecoratedTextEditor
 
     private Color getCursorLineBackground() {
 
-        if (!getPreferenceStore().getBoolean(
-                EDITOR_CURRENT_LINE))
-        {
+        if (!getPreferenceStore().getBoolean(EDITOR_CURRENT_LINE))
             return null;
-        }
         
-        RGB color = PreferenceConverter.getColor(
-                getPreferenceStore(), 
-                EDITOR_CURRENT_LINE_COLOR);
-        
-        return new Color(Display.getCurrent(), color);
+        return new Color(
+                Display.getCurrent(), 
+                PreferenceConverter.getColor(
+                        getPreferenceStore(), 
+                        EDITOR_CURRENT_LINE_COLOR));
     }
 
     /**
@@ -288,20 +265,25 @@ public class Editor extends AbstractDecoratedTextEditor
     protected void doSetInput(IEditorInput input) throws CoreException {
         
         super.doSetInput(input);
+        IFileEditorInput fInput = 
+            input instanceof IFileEditorInput  
+            ? (IFileEditorInput)input
+            : null;
 
-        // resetAST sets fRoot
-        resetAST(input instanceof IFileEditorInput  
-                 ? (IFileEditorInput)input
-                 : null); 
+        ast.destruct(this);
+        ast = new ASTData(fInput, this);
+        fPath = new EditorPath(input);
         
-        if (fRoot == null) {
-            compileLocal(input);
-        } else {
-            fCompiledLocal = false;
+        if (fInput != null) 
+            update();
+        
+        strategy.update(fPath, ast);
+
+        if (ast.compiledLocal()) {
+            ast.root = compiler.compileFile(fPath.file(), fPath.path());
+            update();
         }
-        
     }
-    
 
     @Override   
     protected void createActions() {
@@ -316,7 +298,6 @@ public class Editor extends AbstractDecoratedTextEditor
                         new ToggleAnnotationsAction(this),
                     followReference =         
                         new GoToDeclaration(this)); 
-        
         updateErrorCheckAction();
     }
     
@@ -339,11 +320,8 @@ public class Editor extends AbstractDecoratedTextEditor
      */
     public void recompileLocal(IDocument document) {
         
-        fRoot = (ASTNode<?>)
-            compiler.compileToAST(document, 
-                                  null,
-                                  null, 
-                                  fLocalFile);
+        ast.root = (ASTNode<?>)
+            compiler.compileToAST(document, null, null, fPath.file());
         
         Display.getDefault().asyncExec(new Runnable() {
             public void run() {
@@ -352,128 +330,38 @@ public class Editor extends AbstractDecoratedTextEditor
         });
     }
     
-    /**
-     * Compile file locally. Try to get file references from input.
-     * @param input input object (typically {@link IFileEditorInput}
-     *  or {@link IURIEditorInput})
-     */
-    private void compileLocal(IEditorInput input) {
-
-        try {
-            fLocalFile = input instanceof IFileEditorInput
-                    ? ((IFileEditorInput)input).getFile()
-                    : null;
-            fPath = getPathOfInput(input);
-            if (fPath != null) {
-                if (fLocalFile == null) 
-                    fLocalFile = EclipseCruftinessWorkaroundClass.getFileForPath(fPath);
-                fRoot = compiler.compileFile(fLocalFile, fPath);
-            }
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
-
-        fCompiledLocal = true;
-        update();
-    }
- 
-    /**
-     * Check if file is compiled locally.
-     * @return true iff. file is compiled locally
-     */
-    public boolean isCompiledLocally() {
-        return fCompiledLocal;
-    }
-
-    private String getPathOfInput(IEditorInput input) {
-        String path = null;
-            if (input instanceof IFileEditorInput) {
-                IFile file = ((IFileEditorInput) input).getFile();
-                path = file.getRawLocation().toOSString();
-            } else if (input instanceof IURIEditorInput) {
-                URI uri = ((IURIEditorInput) input).getURI();
-                try {
-                    path = new File(uri).getCanonicalPath();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        return path;
-    }
-
     // ASTRegistry listener methods
     /**
      * Is called when AST is updated. 
      */
     public void childASTChanged(IProject project, String key) {
-        if (project == fProject && key.equals(fKey)) {
-            fRoot = (ASTNode<?>) fRegistry.lookupAST(fKey, fProject);
-            update();
-        }
+        ast.childASTChanged(project, key);
+        update();
     }
 
     public void projectASTChanged(IProject project) {
-        if (project == fProject) {
-            fRoot = (ASTNode<?>) fRegistry.lookupAST(fKey, fProject);
-            update();
-        }
+        ast.projectASTChanged(project);
+        update();
     }
-
-    /**
-     * Update to the AST corresponding to the file input
-     * @param fInput The new file input
-     */
-    private void resetAST(IFileEditorInput fInput) {
-        // Reset 
-        fRegistry.removeListener(this);
-        fRoot = null;
-        fProject = null;
-        fKey = null;
-        fIsLibrary = false;
-        fPath = null;
-        IFile file = null;
-        
-        // Update
-        if (fInput != null) {
-            file = fInput.getFile();
-            fIsLibrary = Util.isInLibrary(file);
-            fPath = file.getRawLocation().toOSString();
-            if (fIsLibrary)
-                fKey = Util.getLibraryPath(file);
-            else
-                fKey = fPath;
-            fProject = file.getProject();
-            fRoot = (ASTNode<?>) fRegistry.lookupAST(fKey, fProject);
-            fRegistry.addListener(this, fProject, fKey);
-            update();
-        }
-        
-        fStrategy.setFile(file);
-    }   
     
     /**
      * Updates the outline and the view
      */
-    private void update() {
+    protected void update() {
         
-        if (getSourceViewer() == null || 
-            fRoot == null || 
-            fRoot.isError())
-        {
+        if (getSourceViewer() == null || ast.rootHasErrors()) 
             return;
-        }
     
         IDocument document = getDocument();
         if (document != null) 
             setupDocumentPartitioner(document);
     
         // Update outline
-        fSourceOutlinePage.updateAST(fRoot);
-        fInstanceOutlinePage.updateAST(fRoot);
-        followReference.updateAST(fRoot);
-        completions.updateAST(fRoot);
+        fSourceOutlinePage.updateAST(ast.root);
+        fInstanceOutlinePage.updateAST(ast.root);
+        followReference.updateAST(ast.root);
+        completions.updateAST(ast.root);
         
-        // Update folding
         updateProjectionAnnotations();
         updateErrorCheckAction();
     }
@@ -481,7 +369,7 @@ public class Editor extends AbstractDecoratedTextEditor
     private void setupDocumentPartitioner(IDocument document) {
         
         try {
-            IDocumentPartitioner wanted = getDocumentPartitioner();
+            IDocumentPartitioner wanted = fPartitioner;
             IDocumentPartitioner current = document.getDocumentPartitioner();
             if (wanted != current) {
                 if (current != null)
@@ -492,15 +380,6 @@ public class Editor extends AbstractDecoratedTextEditor
         } catch (Error e) {
             e.printStackTrace();
         }
-    }
-
-    private IDocumentPartitioner getDocumentPartitioner() {
-        if (fPartitioner == null) {
-            fPartitioner = new FastPartitioner(
-                    new Modelica22PartitionScanner(),
-                    Modelica22PartitionScanner.LEGAL_PARTITIONS);
-        }
-        return fPartitioner;
     }
 
     /**
@@ -515,38 +394,34 @@ public class Editor extends AbstractDecoratedTextEditor
         if (viewer == null) 
             return;
         
-        // Enable projection
         viewer.enableProjection();
 
         ProjectionAnnotationModel model = viewer.getProjectionAnnotationModel(); 
         if (model == null) 
             return;
 
-        // Collect old annotations
         Collection<Annotation> oldAnnotations =
             Util.fromIterator(model.getAnnotationIterator());
                     
-        // Collect new annotations
         HashMap<Annotation,Position> newAnnotations = 
             new HashMap<Annotation,Position>();
 
-        IFoldingNode node = fRoot;
+        IFoldingNode node = ast.root;
         ITextSelection sel = getSelection();
         
         for (Position pos : node.foldingPositions(this.getDocument())) {
             
-            if (fIsLibrary && 
+            if (fPath.inLibrary() && 
                     !((IFilePosition) pos).getFileName().equals(fPath))
                 continue;
             
             ProjectionAnnotation annotation;
             if (pos instanceof CharacterPosition) {
-                annotation = new CharacterProjectionAnnotation();
-                if (!toggleAnnotationsAction.isVisible() &&
-                    !pos.overlapsWith(sel.getOffset(), sel.getLength())) 
-                {
-                    annotation.markCollapsed();
-                }
+                
+                annotation = new CharacterProjectionAnnotation(
+                        toggleAnnotationsAction.isVisible() ||
+                        pos.overlapsWith(sel.getOffset(), sel.getLength()));
+                
             } else {
                 annotation = new ProjectionAnnotation();
             }
@@ -554,11 +429,9 @@ public class Editor extends AbstractDecoratedTextEditor
             newAnnotations.put(annotation, pos);
         }
 
-
         // TODO: Only replace annotations that have changed, so that the 
         // state of the others are kept.
 
-        // Update annotations
         model.modifyAnnotations( 
                 oldAnnotations.toArray(new Annotation[] {}),
                 newAnnotations, 
@@ -581,7 +454,7 @@ public class Editor extends AbstractDecoratedTextEditor
       
         try {
             
-            containgClass = fRoot.containingClass(
+            containgClass = ast.root.containingClass(
                     getSelection().getOffset(), 
                     getSelection().getLength());
             
@@ -604,8 +477,9 @@ public class Editor extends AbstractDecoratedTextEditor
     public boolean selectNode(ASTNode<?> node) {
         
         boolean matchesInput = 
-            getPathOfInput(getEditorInput()).equals(
-            node.containingFileName());
+            new EditorPath(getEditorInput())
+                .path()
+                .equals(node.containingFileName());
         
         if (matchesInput) {
 
@@ -621,7 +495,7 @@ public class Editor extends AbstractDecoratedTextEditor
         return getSourceViewer() == null ? null : getSourceViewer().getDocument();
     }
     
-    // superclass method is final and protected
+    // getSourceViewer() is final and protected. want public
     public ISourceViewer publicGetSourceViewer() {
         return getSourceViewer();
     }
@@ -631,7 +505,7 @@ public class Editor extends AbstractDecoratedTextEditor
     }
     
     public IReconcilingStrategy getStrategy() {
-        return fCompiledLocal ? fLocalStrategy : fStrategy;
+        return strategy.getStrategy();
     }
 
     public Completions getCompletions() {

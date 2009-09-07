@@ -56,13 +56,14 @@ public IAutoEditStrategy[] getAutoEditStrategies(
             IndentingAutoEditStrategy.editStrategy,
             EndOfBlockAdder.adder,
             KeywordAdder.adder,
+            // annotation paren adder before normal paren adder
+            AnnotationParenthesisAdder.adder,
             new BracketAdder("(", ")"),
             new BracketAdder("[", "]"),
             new BracketAdder("{", "}"),
             new BracketAdder("\"", "\""),
             new BracketAdder("'", "'"),
             CommentAdder.adder,
-            AnnotationParenthesisAdder.adder,
         };
 }
 

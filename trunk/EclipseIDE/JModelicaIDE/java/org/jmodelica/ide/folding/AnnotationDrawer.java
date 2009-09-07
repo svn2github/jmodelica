@@ -78,7 +78,7 @@ public class AnnotationDrawer implements IDrawingStrategy {
 	}
 
 	private Font getFont(StyleRange style, Font oldFont) {
-		if (oldFont != null && oldFont == lastOldFont) 
+		if (oldFont != null && oldFont == lastOldFont || style == null) 
 			return lastFont;
 
 		lastOldFont = oldFont;

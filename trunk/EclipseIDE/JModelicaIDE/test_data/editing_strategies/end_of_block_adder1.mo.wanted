@@ -1,5 +1,6 @@
 
 package p1
-	package p2
-	end p2;
+	package P
+	
+	end P;
 end p1;

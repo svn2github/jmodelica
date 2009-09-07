@@ -15,7 +15,7 @@ public class Maybe<E> {
     protected E value;
 
     public static <E> Maybe<E> Just(E e) { return new Maybe<E>(e); }
-    @SuppressWarnings("unused") public static <E> Maybe<E> Nothing(Class<E> c) { return new Maybe<E>(); }
+    public static <E> Maybe<E> Nothing() { return new Maybe<E>(); }
     
     /**
      * Sets the contained value to null.
@@ -82,8 +82,8 @@ public class Maybe<E> {
     @Override
     public String toString() {
         return isNothing() 
-        ? "Nothing" 
-                : String.format("Just(%s)", value().toString());
+            ? "Nothing" 
+            : String.format("Just(%s)", value().toString());
     }
     
 }

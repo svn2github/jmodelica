@@ -21,7 +21,7 @@ public class ModelicaQIdentScanner extends StupidScanner {
 String s = "this is a string";
 
 public ModelicaQIdentScanner() {
-    super(QIDENT_BOUNDARY, NORMAL, QIDENT_BOUNDARY, "'", "'");
+    super(Q_IDENT_BOUNDARY, NORMAL, Q_IDENT_BOUNDARY, "'", "'");
 } 
 
 }

@@ -1,7 +1,8 @@
 import org.jmodelica.ide.helpers.Maybe;
-import org.jmodelica.ide.namecomplete.CompletionComment;
-import org.jmodelica.ide.namecomplete.CompletionFilter;
+import org.jmodelica.ide.namecomplete.*;
 import java.util.ArrayList;
+
+import org.eclipse.swt.graphics.Image;
 
 aspect Semantic {
 
@@ -44,13 +45,14 @@ aspect Semantic {
             if (rec.hasValue())
                 return rec;
         }
-        return Maybe.Nothing(ClassDecl.class);
+        return Maybe.<ClassDecl>Nothing();
         
     }
     
     eq FullClassDecl.getClassDeclAt(IDocument d, int offset) {
         return super.getClassDeclAt(d, offset)
-                    .orElse(Maybe.fromBool(this, containsPoint(d, offset)));
+                   .orElse(
+               Maybe.fromBool(this, containsPoint(d, offset)));
     }
     
     /**
@@ -69,40 +71,103 @@ aspect Semantic {
             if (rec.hasValue())
                 return rec;
         }
-        return Maybe.Nothing(Access.class);
+        return Maybe.<Access>Nothing();
     }
     
     eq Dot.getAccessAt(IDocument d, int offset) {
         if (!containsPoint(d, offset))
-            return Maybe.Nothing(Access.class);
+            return Maybe.<Access>Nothing();
         return getLeft().getAccessAt(d, offset).orElse(Maybe.Just(this));
     }
     
     eq Access.getAccessAt(IDocument d, int offset) {
         if (containsPoint(d, offset))
             return Maybe.Just(this);
-        return Maybe.Nothing(Access.class);
+        return Maybe.<Access>Nothing();
     }
     
     
-    syn ArrayList<InstNode> InstNode.completionNodes() = new ArrayList<InstNode>();
+    InstNode implements CompletionNode; //{
+    
+        public String InstNode.completionName() { 
+            return name(); 
+        }
+        public CompletionComment InstNode.completionDoc() { 
+            return proposalComment(); 
+        }
+        public Image InstNode.completionImage() { 
+            return contentOutlineImage(); 
+        }
+    //}
+    
+    InstImportRename implements CompletionNode; // {
+        
+        public String InstImportRename.completionName() { 
+            return ((ImportClauseRename)getImportClause()).getIdDecl().getID(); 
+        }
+        public CompletionComment InstImportRename.completionDoc() {
+            return getPackageName().myInstClassDecl().proposalComment();
+        }
+        public Image InstImportRename.completionImage() { 
+            return null; 
+        }
+    //}
+    
+    syn ArrayList<CompletionNode> InstNode.completionNodes(
+            boolean includeRenamedImports) = new ArrayList<CompletionNode>();
     
     /**
      * Completion proposals for InstClassDecl:s are all classes and
      * (constant) components.
+     * 
+     * @param includeRenamedImports renamed imports should only be included
+     * in completions if looking up an unqualified import. qualified access
+     * to renamed imports is not allowed in Modelica
      */
-    eq InstClassDecl.completionNodes() {
-        ArrayList<InstNode> completions = new ArrayList<InstNode>();
+    eq InstClassDecl.completionNodes(boolean includeRenamedImports) {
+
+        ArrayList<CompletionNode> completions = new ArrayList<CompletionNode>();
+
+        // class decls
         completions.addAll(instClassDecls());
+        
+        // component decls
         completions.addAll(instComponentDecls());
+
+        // imports
+        for (InstImport ii : instImports()) { 
+            if (includeRenamedImports && ii instanceof InstImportRename) { 
+                completions.add((InstImportRename)ii);
+            } else if (ii instanceof InstImportUnqualified) {
+                completions.addAll(ii.getPackageName()
+                                     .myInstClassDecl()
+                                     .completionNodes(includeRenamedImports));
+            }
+        }
+
+        // extends
+        for (InstExtends e : instExtends()) 
+            completions.addAll(e.getClassName()
+                                .myInstClassDecl()
+                                .completionNodes(includeRenamedImports));
+        
         return completions;
     }
     
     /**
      * Completion proposals for InstComponentDecl:s are only components. 
      */
-    eq InstComponentDecl.completionNodes() = 
-        new ArrayList<InstNode>(instComponentDecls()); 
+    eq InstComponentDecl.completionNodes(boolean includeRenamedImports) {
+        System.out.printf("came here %s\n", this);
+        System.out.printf("came here %s\n", myInstClass());
+        
+        ArrayList<CompletionNode> nodes = new ArrayList<CompletionNode>();
+        for (CompletionNode c : myInstClass().completionNodes(includeRenamedImports)) {
+            if (c instanceof InstComponentDecl)
+                nodes.add(c);
+        }
+        return nodes;
+    }
 
     /**
      * Returns a list of completion suggestions for <code>decl</code>, filtering
@@ -112,13 +177,14 @@ aspect Semantic {
      * @param filter Filter for matches
      * @return list of suggestions
      */   
-    public ArrayList<InstNode> InstNode.completionProposals(
-            CompletionFilter filter) {
+    public ArrayList<CompletionNode> InstNode.completionProposals(
+            CompletionFilter filter,
+            boolean unqualified) {
 
-        ArrayList<InstNode> proposals = new ArrayList<InstNode>();
+        ArrayList<CompletionNode> proposals = new ArrayList<CompletionNode>();
 
-        for (InstNode node : completionNodes())
-            if (filter.matches(node.name()))
+        for (CompletionNode node : completionNodes(unqualified))
+            if (filter.matches(node.completionName()))
                 proposals.add(node);
         
         return proposals;
@@ -129,7 +195,7 @@ aspect Semantic {
 /**
  * Get the string comment from classes to display in the content assist. 
  */
-aspect ComletionComment {
+aspect CompletionComment {
     
     syn CompletionComment InstNode.proposalComment() = CompletionComment.NULL;
     eq InstClassDecl.proposalComment() = new CompletionComment(myInstClass().getClassDecl().stringComment());

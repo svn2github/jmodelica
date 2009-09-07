@@ -45,13 +45,13 @@ private static final String[] ACTIONS = {
     IDEConstants.ACTION_ERROR_CHECK_ID,
     IDEConstants.ACTION_TOGGLE_ANNOTATIONS_ID,
     IDEConstants.ACTION_FORMAT_REGION_ID, 
-    IDEConstants.ACTION_COMPLETE_ID, 
+    IDEConstants.ACTION_FOLLOW_REFERENCE_ID, 
     IDEConstants.ACTION_TOGGLE_COMMENT_ID };
 
 private LabelRetargetAction errorCheckAction;
 private RetargetAction toggleAnnotationsAction;
 private LabelRetargetAction formatRegionAction;
-private LabelRetargetAction completeAction;
+private LabelRetargetAction followReferenceAction;
 private LabelRetargetAction toggleCommentAction;
 
 private RetargetAction[] retargetActions;
@@ -78,14 +78,14 @@ public EditorContributor() {
             IDEConstants.ACTION_TOGGLE_COMMENT_ID,
             IDEConstants.ACTION_TOGGLE_COMMENT_TEXT);
     
-    completeAction = new LabelRetargetAction(
+    followReferenceAction = new LabelRetargetAction(
             IDEConstants.ACTION_FOLLOW_REFERENCE_ID,
             IDEConstants.ACTION_FOLLOW_REFERENCE_TEXT);
    
     retargetActions = new RetargetAction[] { 
             errorCheckAction,
             toggleAnnotationsAction, 
-            completeAction,
+            followReferenceAction,
             formatRegionAction,
             toggleCommentAction };
 }
@@ -127,7 +127,7 @@ public void contributeToMenu(IMenuManager menu) {
     editMenu.appendToGroup(IDEConstants.GROUP_ERROR_ID, errorCheckAction);
     editMenu.appendToGroup(IDEConstants.GROUP_ERROR_ID, toggleAnnotationsAction);
     editMenu.appendToGroup(IDEConstants.GROUP_ERROR_ID, formatRegionAction);
-    editMenu.appendToGroup(IDEConstants.GROUP_ERROR_ID, completeAction);
+    editMenu.appendToGroup(IDEConstants.GROUP_ERROR_ID, followReferenceAction);
     editMenu.appendToGroup(IDEConstants.GROUP_ERROR_ID, toggleCommentAction);
 }
 

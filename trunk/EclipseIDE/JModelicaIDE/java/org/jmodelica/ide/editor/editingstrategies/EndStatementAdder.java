@@ -30,11 +30,8 @@ protected boolean endExists(String endStmnt, IDocument d, int offset)
         
         boolean ignoreLine = line.trim().equals("") || 
             ToggleComment.isCommented(line) ||
-            line.trim().startsWith("initial") ||  
-            line.trim().startsWith("equation") ||  
-            line.trim().startsWith("algorithm") ||  
-            line.trim().startsWith("public") ||  
-            line.trim().startsWith("protected");  
+            Util.is(line.trim().split("\\s+")[0]).among(
+                    "intitial", "equation", "algorithm", "public", "protected");  
         
         if (ignoreLine)
             continue;
@@ -57,37 +54,36 @@ protected boolean endExists(String endStmnt, IDocument d, int offset)
 /**
  * Scans document and adds endStmnt if it can't find it already, 
  * within the current scope. 
- * @param endStmnt 
+ * @param end 
  * @param d
  * @param offset
  */
-public void addEndIfNotPresent(String endStmnt, IDocument d, int offset) {
+public void addEndIfNotPresent(String end, IDocument d, int offset) {
 
     try {
 
-        if (endExists(endStmnt, d, offset))
+        if (endExists(end.trim(), d, offset))
             return;
         
         IRegion line = d.getLineInformationOfOffset(offset);
         int lineEnd = line.getOffset() + line.getLength();
 
-        String endStatement; {
+        String endStatement; 
+        {
             int lineStart = line.getOffset();
             int indentWidth = IndentedSection.countIndent(
                 d.get(lineStart, offset - lineStart));
-            String indent = IndentedSection.putIndent("", indentWidth);
-            endStatement = String.format("%s%s%s",
-                    IndentedSection.lineSep,
-                    indent, 
-                    endStmnt);
+            
+            endStatement = IndentedSection.lineSep +
+                new IndentedSection(end).offsetIndentTo(indentWidth);
         }
 
         //
         // another adverse effect of the completely retarded DocumentCommand 
-        // Class:
+        // class:
         // 
         // must insert end statement with d.replace, as if using the
-        // DocumentCommand class, it seems impossible to posititon cursor in 
+        // DocumentCommand class, it seems impossible to position cursor in 
         // the middle of the command.text. this causes this class to create two
         // undo entries. TODO: fix if possible
         d.replace(lineEnd, 0, endStatement);

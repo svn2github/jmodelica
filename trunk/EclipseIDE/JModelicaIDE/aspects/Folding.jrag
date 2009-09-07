@@ -35,6 +35,32 @@ aspect ModelicaFolding {
     eq Annotation.foldingPositions(IDocument document) = makeFoldingPosition();
 
     /*
+     * We need to replace foldingPositions(), since we don't want any rewrites
+     */
+    refine Folding eq ASTNode.foldingPositions(IDocument document) {
+        ArrayList list = new ArrayList();
+        if (hasFolding()) {
+            try {
+                int lineStart = ASTNode.getLine(getStart());
+                int lineEnd = ASTNode.getLine(getEnd());
+                int nbrOfLines = document.getNumberOfLines();
+                int startOffset = document.getLineOffset(lineStart > 1 ? lineStart - 1 : 0);
+                int endOffset = document.getLineOffset(lineEnd < nbrOfLines ? lineEnd : lineEnd - 1);
+                int foldLength = endOffset - startOffset;
+                if ((lineEnd - lineStart) > 0) {
+                    list.add(new Position(startOffset, foldLength));
+                }
+            } catch (BadLocationException e) {
+                e.printStackTrace();
+            }
+        }
+        for (int i = 0; i < getNumChildNoTransform(); i++) {
+            list.addAll(getChildNoTransform(i).foldingPositions(document));
+        }
+        return list;
+    }
+
+    /*
      * Since all children isn't always returned by getChild(), we need new foldingPositions() 
      */
 	eq ClassDecl.foldingPositions(IDocument document) {
@@ -54,9 +80,9 @@ aspect ModelicaFolding {
 				e.printStackTrace();
 			}
 		}
-		for (int i = 0; i < getNumChild(); i++) {
-			if (!(getChild(i) instanceof ClassDecl))
-				list.addAll(getChild(i).foldingPositions(document));
+		for (int i = 0; i < getNumChildNoTransform(); i++) {
+			if (!(getChildNoTransform(i) instanceof ClassDecl))
+				list.addAll(getChildNoTransform(i).foldingPositions(document));
 		}
 		for (ClassDecl decl : classes())
 			list.addAll(decl.foldingPositions(document));
@@ -73,5 +99,6 @@ aspect ModelicaFolding {
 	eq BadArgument.foldingPositions(IDocument document) = EMPTY_LIST;
 	eq AbstractExp.foldingPositions(IDocument document) = EMPTY_LIST;
 	eq Access.foldingPositions(IDocument document) = EMPTY_LIST;
+	eq Equation.foldingPositions(IDocument document) = EMPTY_LIST;
     
 }

@@ -1,4 +1,4 @@
 
 package p1
-	package p2^
+	package P^
 end p1;

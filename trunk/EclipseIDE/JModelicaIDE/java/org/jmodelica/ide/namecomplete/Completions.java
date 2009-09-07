@@ -16,6 +16,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.modelica.compiler.Access;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstNode;
 
@@ -110,7 +111,7 @@ public Pair<String, String> getContext(IDocument d, int caretOffset) {
  * @param offset caret offset
  * @return instance nodes of completion proposals 
  */
-public ArrayList<InstNode> suggestedDecls(IDocument d, int offset) {
+public ArrayList<CompletionNode> suggestedDecls(IDocument d, int offset) {
     
     String qualifedPart, filter;
     {
@@ -119,13 +120,14 @@ public ArrayList<InstNode> suggestedDecls(IDocument d, int offset) {
         filter = p.snd();
     }
     
+    
     InstNode decl;
     {
         Maybe<InstClassDecl> enclosingClass = 
             new Lookup(fRoot).instEnclosingClassAt(d, offset);
         
         if (enclosingClass.isNothing())
-            return new ArrayList<InstNode>();
+            return new ArrayList<CompletionNode>();
 
         if (qualifedPart.equals(""))
             // if no qualified part, do look up in enclosing class
@@ -133,24 +135,26 @@ public ArrayList<InstNode> suggestedDecls(IDocument d, int offset) {
         else {
             // o.w. look up the qualified name leading caret in
             // enclosing class, and use result for lookup
+            Access a = CompletionUtil.createDotAccess(qualifedPart.split("\\.")); 
             Maybe<InstNode> mDecl = new Lookup(fRoot).lookupQualifiedName(
                     enclosingClass.value(), 
-                    CompletionUtil.createDotAccess(qualifedPart.split("\\.")));
+                    a);
         
             if (mDecl.isNothing()) 
-                return new ArrayList<InstNode>();
+                return new ArrayList<CompletionNode>();
             
             decl = mDecl.value();
         }
     }
-    System.out.println("'" + filter + "'");
-    return decl.completionProposals(new CompletionFilter(filter));
+    
+    return decl.completionProposals(
+            new CompletionFilter(filter),
+            qualifedPart.equals(""));
 }
 
 public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer,
         int offset) {
 
-    
     return makeCompletions(
             suggestedDecls(viewer.getDocument(), offset),
             getContext(viewer.getDocument(), offset).snd(),
@@ -161,7 +165,7 @@ public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer,
  *  Create completions from a list of InstNodes. 
  */
 protected ICompletionProposal[] makeCompletions(
-        List<InstNode> completions, 
+        List<CompletionNode> completions, 
         String filter, 
         int offset) {
     
@@ -169,16 +173,16 @@ protected ICompletionProposal[] makeCompletions(
     
     for (int i = 0; i < icps.length; i++) {
 
-        InstNode completion = completions.get(i);
+        CompletionNode completion = completions.get(i);
         
         icps[i] = 
             new CompletionProposal(
-                completion.name(),
+                completion.completionName(),
                 offset - filter.length(), 
                 filter.length(), 
-                completion.name().length(),
-                completion.contentOutlineImage(),
-                completion.name() + completion.proposalComment(),
+                completion.completionName().length(),
+                completion.completionImage(),
+                completion.completionName() + completion.completionDoc(),
                 null,
                 null);
     }

@@ -170,6 +170,9 @@ public class Util {
 	    public boolean among(E... list) {
 	        return Arrays.asList(list).contains(e);
 	    }
+	    public boolean notAmong(E...list) {
+	        return !among(list);
+	    }
 	}
 	
 	/**

@@ -5,6 +5,7 @@ import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.jmodelica.generated.scanners.Modelica22PartitionScanner;
 import org.jmodelica.ide.helpers.Util;
+import org.jmodelica.ide.indent.IndentedSection;
 
 
 /**
@@ -52,18 +53,21 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
         if (!afterClassBegin)
             return;
 
-        super.addEndIfNotPresent(getEndStatementString(doc), d, c.offset);
-                
+        super.addEndIfNotPresent(endStatementString(doc), d, c.offset);
+        c.text = IndentedSection.lineSep + c.text;
 
     } catch (BadLocationException e) {
         e.printStackTrace();
     }
 }
 
-public String getEndStatementString(String doc) {
+public String endStatementString(String doc) {
     
     String[] words = doc.split("\\s+");
-    return String.format("end %s;", words[words.length - 1]);
+    return String.format(
+            "%send %s;", 
+            IndentedSection.lineSep, 
+            words[words.length - 1]);
 }
 
 }
