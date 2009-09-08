@@ -1,14 +1,14 @@
-Build instructions for the JModelica project.
+Build instructions for the JModelica.org project.
 
 0. Requirements.
 
-In order to compile JModelica you will need a unix-like
-environment. Depending on you operating system, different actions are
-required.
+In order to compile JModelica.org you will need a unix-like
+environment. Depending on you operating system, different procedures 
+are required.
 
- - For Linux, make sure that gcc compiler suite, Subversion and
+ - For Linux, make sure that the gcc compiler suite, Subversion and
    Apache Ant are installed.
- - The requrements for Mac OS X are the same as for Linux. The 
+ - The requirements for Mac OS X are the same as for Linux. The 
    gcc compiler suite is available in the XCode distribution 
    provided by Apple.
  - For Windows, it is recommended to use the JModelica.org-SDK
@@ -22,7 +22,7 @@ Check out a working copy of JModelica.org:
  > svn co https://svn.jmodelica.org/trunk JModelica 
 
 Make sure that the full path to the directory where you check out
-JModelica does not contain any spaces nor ~ character. Notice that
+JModelica.org does not contain any spaces nor ~ character. Notice that
 this step can be (optionally) performed by the JModelica.org-SDK
 installer.
 
@@ -49,11 +49,11 @@ directory for building the platform
  > ../configure --with-ipopt=/path/to/ipopt-install-dir 
 
 The argument --with-ipopt is optional. Notice, however, that if it is
-not give, only parts of the software will be built. You may want to
+not given, only parts of the software will be built. You may want to
 give additional arguments to configure. Type configure --help for
 information. By default, the installation directory (--prefix) is set
 to the current directory. It is recommended to set the --prefix
-argument to override this behaviour.
+argument to override this behavior.
 
 4. Build and install
 
@@ -127,20 +127,20 @@ JModelica.org supports the following environment variables:
    (Linux only.)
  - MODELICAPATH containing a sequence of paths representing directories
    where Modelica libraries are located. On Windows, the paths are 
-   separated by semicolons and on Linux/Mac OS X they are sparated
+   separated by semicolons and on Linux/Mac OS X they are separated
    by colons.
 
 It is only necessary to set the variable JMODELICA_HOME as a
 global environment variable, since the other variables are set in the
 Python script startup.py, which is executed when the jmodelica
-module is imported into Python. The default settings can be
+package is imported into Python. The default settings can be
 overridden either by setting one of the supported environment 
 variables globally or by adding a local startup.py file located 
 in the directory $HOME/jmodelica.org and change a variable there.
 
 7. Test the distribution
 
-Start Pyton or IPython. Type 
+Start Python or IPython. Type 
 
  > import jmodelica.examples.cstr as cstr
  > cstr.run_demo()
