@@ -288,8 +288,12 @@ class ResultDymolaTextual:
         Returns:
             In integer index.
         """
-        return self.name.index(name)
-
+        try:
+            return self.name.index(name)
+        except ValueError, ex:
+            raise VariableNotFoundError("Cannot find variable " +
+                                        name + " in data file.")
+            
     def get_variable_data(self,name):
         """
         Retrieve the data sequence for a variable with a given name.
@@ -348,7 +352,12 @@ class ResultDymolaBinary:
         Returns:
             In integer index.
         """
-        return self.name.index(name)
+        try:
+            return self.name.index(name)
+        except ValueError, ex:
+            raise VariableNotFoundError("Cannot find variable " +
+                                        name + " in data file.")
+       
 	
     def get_variable_data(self,name):
         """
@@ -377,3 +386,30 @@ class ResultDymolaBinary:
         if dataMat<1:
             dataMat = 1
         return Trajectory(self.raw['data_%d'%dataMat][0,:],factor*self.raw['data_%d'%dataMat][dataInd,:])
+
+
+class JIOError(Exception):
+    
+    """ Base class for exceptions specific to this module."""
+    
+    def __init__(self, message):
+        """ Create new error with a specific message. """
+        self.message = message
+        
+    def __str__(self):
+        """ 
+        Print error message when class instance is printed.
+         
+        Overrides the general-purpose special method such that a string 
+        representation of an instance of this class will be the error message.
+        
+        """
+        return self.message
+
+
+class VariableNotFoundError(JIOError):
+    """ Exception that is thrown when a variable is not found in a
+    data file.
+    """
+
+    pass
