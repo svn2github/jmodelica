@@ -25,6 +25,7 @@ option settings will be used.
 
 import os
 import sys
+import subprocess
 import jpype
 import string
 import jmodelica as jm
@@ -346,16 +347,12 @@ class ModelicaCompiler():
         generate_code.
 
         Parameters:
-
             c_file_name --
                 Name of c-file for which the .dll should be compiled without file 
                 extention.
             target --
                 Build target.
 
-        Returns:
-
-            System return value. 
 
         """
         #make settings
@@ -390,10 +387,12 @@ class ModelicaCompiler():
                   cppad_h + \
                   ipopt_h
 
-
         #run make -> <model_class_name>.dll
-        retval=os.system(cmd)
-        return retval
+        retcode = subprocess.call(cmd, shell=True)
+        if retcode != 0:
+            raise CcodeCompilationError("Retcode was: "+str(retcode))
+        else:
+            print >>sys.stderr, "make returned", retcode
 
 class OptimicaCompiler(ModelicaCompiler):
     """ User class for accessing the Java OptimicaCompiler class. """
@@ -479,6 +478,9 @@ class CompilerError(JError):
     
     """
 
+    pass
+
+class CcodeCompilationError(JError):
     pass
 
 class XPathExpressionError(JError):
