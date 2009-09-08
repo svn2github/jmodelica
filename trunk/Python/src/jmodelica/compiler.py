@@ -513,22 +513,22 @@ def _handle_exception(ex):
         raise OptimicaClassNotFoundError(str(ex.__javaobject__.getClassName()))
     
     if ex.javaClass() is jpype.java.io.FileNotFoundException:
-        raise IOError('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
+        raise IOError('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
     
     if ex.javaClass() is jpype.java.io.IOException:
-        raise IOError('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
+        raise IOError('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
     
     if ex.javaClass() is jpype.javax.xml.xpath.XPathExpressionException:
-        raise XPathExpressionException('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
+        raise XPathExpressionError('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
     
     if ex.javaClass() is jpype.javax.xml.parsers.ParserConfigurationException:
-        raise ParserConfigurationError('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
+        raise ParserConfigurationError('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
     
-    if ex.javaClass() is jpype.org.xml.sax.SAXException:
-        raise SAXError('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
+#    if ex.javaClass() is jpype.org.xml.sax.SAXException:
+#        raise SAXError('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
     
     if ex.javaClass() is jpype.java.lang.Exception:
-        raise Exception('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
+        raise Exception('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
     
     if ex.javaClass() is jpype.java.lang.NullPointerException:
         raise JError(str(ex.stacktrace()))
