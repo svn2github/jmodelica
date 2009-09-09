@@ -21,6 +21,7 @@ except ImportError:
 from openopt import NLP
 
 from jmodelica.simulation import SimulationException
+from jmodelica.simulation import Simulator
 
 import jmodelica.jmi as pyjmi
 from jmodelica.jmi import c_jmi_real_t
@@ -29,6 +30,179 @@ from jmodelica.jmi import c_jmi_real_t
 class SundialsSimulationException(SimulationException):
     """An exception thrown by the SUNDIALS simulation kit."""
     pass
+
+
+class SundialsOdeSimulator(Simulator):
+    """An object oriented interface for simulating JModelica.org models."""
+    
+    def __init__(self, model):
+        
+        # Setting defaults
+        self.set_absolute_tolerance(1.0e-6)
+        self.set_relative_tolerance(1.0e-6)
+        self.set_return_last(False)
+        self._set_solution(None, None)
+        self.set_sensitivity_analysis(False)
+        self._set_sensitivities(None)
+        self._set_sensitivity_indices(None)
+        self.set_time_step(0.2)
+        if model.opt_interval_starttime_fixed():
+            self._start_time = model.opt_interval_get_start_time()
+        else:
+            self._start_time = None
+        if model.opt_interval_finaltime_fixed():
+            self._final_time = model.opt_interval_get_final_time()
+        else:
+            self._final_time = None
+        
+        # Setting members
+        self.model = model
+        
+    def set_absolute_tolerance(self, abstol):
+        if abstol <= 0:
+            raise SundialsSimulationException("absolute tolerance must be "
+                                              "positive.")
+        self._abstol = abstol
+        
+    def get_absolute_tolerance(self):
+        return self._abstol
+        
+    abstol = property(get_absolute_tolerance, set_absolute_tolerance,
+                      "The absolute tolerance.")
+                      
+    def set_relative_tolerance(self, reltol):
+        if reltol <= 0:
+            raise SundialsSimulationException("relative tolerance must be "
+                                              "positive.")
+        self._reltol = reltol
+        
+    def get_relative_tolerance(self):
+        return self._reltol
+        
+    reltol = property(get_relative_tolerance, set_relative_tolerance,
+                      "The relative tolerance.")
+                      
+    def set_model(self, model):
+        if model is None:
+            raise SundialsSimulationException("model must not be none")
+        self._model = model
+        
+    def get_model(self):
+        return self._model
+        
+    model = property(get_model, set_model, "The model to simulate.")
+    
+    # verbosity levels
+    QUIET = 0
+    WHISPER = 1
+    NORMAL = 2
+    LOUD = 3
+    SCREAM = 4
+    VERBOSE_VALUES = [QUIET, WHISPER, NORMAL, LOUD, SCREAM]
+    def get_verbosity(self):
+        return self._verbosity
+        
+    def set_verbosity(self, verbosity):
+        if verbosity not in self.VERBOSE_VALUES:
+            raise SundialsSimulationException("invalid verbosity value")
+        self._verbosity = verbosity
+        
+    verbosity = property(get_verbosity, set_verbosity, "How explicit the "
+                                                       "output should be")
+        
+    def get_solution(self):
+        return self._T, self._Y
+        
+    def _set_solution(self, T, Y):
+        self._T = T
+        self._Y = Y
+        
+    def get_start_time(self):
+        return self._start_time
+        
+    def set_start_time(self, start_time):
+        if start_time > self.get_final_time():
+            raise SundialsSimulationException("start time must be earlier "
+                                              "than the final time.")
+        elif start_time == self.get_start_time():
+            raise SundialsSimulationException("start time cannot be equal to "
+                                              "the final time")
+        self._start_time = start_time
+        
+    def get_final_time(self):
+        return self._final_time
+        
+    def set_final_time(self, final_time):
+        if final_time < self.get_start_time():
+            raise SundialsSimulationException("final time must be later than "
+                                              "the start time.")
+        elif final_time == self.get_start_time():
+            raise SundialsSimulationException("final time cannot be equal to "
+                                              "the start time")
+        self._final_time = final_time
+        
+    def get_sensitivities(self):
+        return self._sens
+        
+    def _set_sensitivities(self, sens):
+        self._sens = sens
+        
+    def set_return_last(self, return_last):
+        if return_last==1 or return_last==True:
+            self._return_last = True
+        elif return_last==0 or return_last==False:
+            self._return_last = False
+        else:
+            raise SundialsSimulationException("return_last must be either "
+                                              "True, False, 1 or 0.")
+                                              
+    def get_return_last(self):
+        return self._return_last
+        
+    def set_sensitivity_analysis(self, sens_analysis):
+        if sens_analysis==1 or sens_analysis==True:
+            self._sens_analysis = True
+        elif sens_analysis==0 or sens_analysis==False:
+            self._sens_analysis = False
+        else:
+            raise SundialsSimulationException("sens_analysis must be either "
+                                              "True, False, 1 or 0.")
+        
+    def get_sensitivity_analysis(self):
+        return self._sens_analysis
+        
+    def set_time_step(self, time_step):
+        if time_step <= 0:
+            raise SundialsSimulationException("Time step size must be "
+                                              "positive.")
+        self._time_step = time_step
+        
+    def get_time_step(self):
+        return self._time_step
+        
+    time_step = property(get_time_step, set_time_step, "The time step size "
+                                                       "when SUNDIALS should "
+                                                       "return.")
+                                                       
+    def get_sensitivity_indices(self):
+        return self._sens_indices
+        
+    def _set_sensitivity_indices(self, sens_indices):
+        self._sens_indices = sens_indices
+        
+    def run(self):
+        return_last = self.get_return_last()
+        sensi=self.get_sensitivity_analysis()
+        time_step = self.get_time_step()
+        T, Y, sens, sensparams = solve_using_sundials(self.model,
+                                                      self.get_final_time(),
+                                                      self.get_start_time(),
+                                                      return_last=return_last,
+                                                      sensi=sensi,
+                                                      time_step=time_step)
+        self._set_solution(T, Y)
+        self._set_sensitivities(sens)
+        self._set_sensitivity_indices(sensparams)
 
 
 def solve_using_sundials(model,

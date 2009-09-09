@@ -8,3 +8,6 @@ This currently only includes an interface to SUNDIALS.
 class SimulationException(Exception):
     """ A simulation exception. """
     pass
+
+class Simulator(object):
+    pass
