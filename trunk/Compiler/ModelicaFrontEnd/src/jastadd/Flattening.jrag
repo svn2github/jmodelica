@@ -92,8 +92,7 @@ aspect Flattening {
 	
 	public void InstClassDecl.flatten(FClass fc) {}
 	
-	/* TODO: check if it is really a good idea to create FVariables
-	   and then to move them? better to do a fullCopy()? */
+
 	public void InstPrimitive.flatten(FClass fc) {
 		fc.addFVariable(createFVariable());
 	}
@@ -106,6 +105,7 @@ aspect Flattening {
 			im.collectAttributes(attr,im.myInstNode().getFQNamePrefix());
 		}
 		
+		// Check Variability
 		FTypePrefixVariability tpo = null;
 		if (getComponentDecl().isDiscrete()) {
 			tpo = new FDiscrete();	
@@ -140,9 +140,9 @@ aspect Flattening {
 				
 		// Only set prefix for top level inputs and outputs
 		// TODO: Make sure that prefixes specified in short class declarations are propagated
-		if (getComponentDecl().isInput() && getFQName().getNumFQNamePart()==1)
+		if (isInput() && getFQName().getNumFQNamePart()==1)
 			fv.setFTypePrefixInputOutput(new FInput());
-		if (getComponentDecl().isOutput() && getFQName().getNumFQNamePart()==1)
+		if (isOutput() && getFQName().getNumFQNamePart()==1)
 			fv.setFTypePrefixInputOutput(new FOutput());
 			
 		if (getComponentDecl().getComment().hasStringComment())

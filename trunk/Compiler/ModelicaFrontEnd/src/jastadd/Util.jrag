@@ -647,6 +647,18 @@ aspect ComponentDeclMethods {
    		return false;
    	}
    	
+   	syn boolean InstComponentDecl.isInput() {
+   	   	
+   		if (getComponentDecl().hasTypePrefixInputOutput())
+   			if (getComponentDecl().getTypePrefixInputOutput() instanceof Input)
+   				return true;
+   		if (myInstClass().isInput())
+   			return true;
+   		
+   		return false;
+   	}
+   	
+   	
    	/**
    	 * Check if a ComponentDecl is declared discrete.
    	 */
@@ -662,6 +674,17 @@ aspect ComponentDeclMethods {
    		return false;
    	}
 
+   	syn boolean InstComponentDecl.isOutput() {
+   	   	
+   		if (getComponentDecl().hasTypePrefixInputOutput())
+   			if (getComponentDecl().getTypePrefixInputOutput() instanceof Output)
+   				return true;
+   		if (myInstClass().isOutput())
+   			return true;
+   		
+   		return false;
+   	}
+   	
 	syn boolean AbstractEquation.isInitial() {
 		if (hasAbstractEquationModifier())
 			if (getAbstractEquationModifier() instanceof Initial)
@@ -669,8 +692,6 @@ aspect ComponentDeclMethods {
 		return false;
 	
 	}
-
-	
 
 }
 
@@ -693,7 +714,7 @@ aspect ShortClassUtil {
 		if (getExtendsClauseShortClass().hasTypePrefixInputOutput())
    			if (getExtendsClauseShortClass().getTypePrefixInputOutput() instanceof Input)
    				return true;
-		return getExtendsClauseShortClass().getSuper().myClassDecl().isInput();
+		return false;
 	}
 	
 	syn boolean ClassDecl.isOutput() = false;
@@ -701,10 +722,26 @@ aspect ShortClassUtil {
 		if (getExtendsClauseShortClass().hasTypePrefixInputOutput())
    			if (getExtendsClauseShortClass().getTypePrefixInputOutput() instanceof Output)
    				return true;
-		return getExtendsClauseShortClass().getSuper().myClassDecl().isOutput();
-		
+		return false;	
 	}
 
+	syn boolean InstClassDecl.isInput() = false;
+	eq InstShortClassDecl.isInput() {
+		if (getClassDecl().isInput()) {
+			return true;
+		}
+		return getInstExtends(0).getClassName().myInstClassDecl().isInput();
+	}
+
+	syn boolean InstClassDecl.isOutput() = false;
+	eq InstShortClassDecl.isOutput() {
+		if (getClassDecl().isOutput()) {
+			return true;
+		}
+		return getInstExtends(0).getClassName().myInstClassDecl().isOutput();
+	}
+	
+	
 /*
    syn boolean BaseClassDecl.hasModification() = false;
    eq ShortClassDecl.hasModification() = hasClassModification();

@@ -1088,6 +1088,26 @@ Semantic error at line 834, column 14:
 
 end ShortClassDeclTest7_Err;
 
+model ShortClassDeclTest8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="ShortClassDeclTest8",
+        description="Test short class declarations.",
+                                               flatModel=
+"
+fclass NameTests.ShortClassDeclTest8
+ input Real u;
+ input Real u2;
+equation 
+end NameTests.ShortClassDeclTest8;
+")})));
+
+ connector RealInput = input Real;
+
+ RealInput u;
+ Modelica.Blocks.Interfaces.RealInput u2;
+
+end ShortClassDeclTest8;
+
 
 model DerTest1
 	Real x;
