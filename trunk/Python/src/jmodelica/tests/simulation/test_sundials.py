@@ -172,16 +172,13 @@ class TestSundialsOdeSimulator:
         my_start = 2
         my_final = 7
         
-        simulator.set_start_time(my_start)
-        simulator.set_final_time(my_final)
+        simulator.set_simulation_interval(my_start, my_final)
         assert default_start != simulator.get_start_time(), "A setter failed."
         assert default_final != simulator.get_final_time(), "A setter failed."
         
         # Testincorrect interval
         nose.tools.assert_raises(sundials.SundialsSimulationException,
-                                 simulator.set_final_time, 1) # 2 !< 1
-        nose.tools.assert_raises(sundials.SundialsSimulationException,
-                                 simulator.set_start_time, 99) # 99 !< 7
+                                 simulator.set_simulation_interval, 2, 1)
                                  
         # Finally make a test simulation and verify times
         simulator.run()

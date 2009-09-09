@@ -176,39 +176,26 @@ class SundialsOdeSimulator(Simulator):
         self._T = T
         self._Y = Y
         
-    def get_start_time(self):
-        """Get the time when the simulation should start."""
-        return self._start_time
-        
-    def set_start_time(self, start_time):
-        """Set the time when the simulation should start.
-        
-        This defaults to the optimization start time point.
-        """
-        if start_time > self.get_final_time():
+    def set_simulation_interval(self, start_time, final_time):
+        """Set the interval through the simulation will be made."""
+        if start_time >= final_time:
             raise SundialsSimulationException("start time must be earlier "
                                               "than the final time.")
-        elif start_time == self.get_start_time():
-            raise SundialsSimulationException("start time cannot be equal to "
-                                              "the final time")
         self._start_time = start_time
+        self._final_time = final_time
+        
+    def get_simulation_interval(self):
+        """Return the simulation interval.
+        
+        The simulation interval consists of a tuple: (start_time, final_time).
+        """
+        return self._start_time, self._final_time
+        
+    def get_start_time(self):
+        return self._start_time
         
     def get_final_time(self):
-        """Get the time when the simulation should finish."""
         return self._final_time
-        
-    def set_final_time(self, final_time):
-        """Set the time when the simulation should finish.
-        
-        This defaults to the optimization final time point.
-        """
-        if final_time < self.get_start_time():
-            raise SundialsSimulationException("final time must be later than "
-                                              "the start time.")
-        elif final_time == self.get_start_time():
-            raise SundialsSimulationException("final time cannot be equal to "
-                                              "the start time")
-        self._final_time = final_time
         
     def get_sensitivities(self):
         """Return the sensivities calculated at final time by self.run().
