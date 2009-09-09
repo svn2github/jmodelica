@@ -437,7 +437,18 @@ public class ModelicaCompiler {
 		logger.info("Flattening starts...");
 		
 		ipr.findFlattenInst(cl, fc);
-		
+
+		// Output the untransformed flattened model
+		logger.info("Creating raw .mof file...");
+	    	    	// Create file 
+	   	FileWriter fstream = new FileWriter(cl+".mof");
+	   	BufferedWriter out = new BufferedWriter(fstream);
+	   	out.write(fc.prettyPrint(""));
+	   	//Close the output stream
+	   	out.close();
+	   
+	   	logger.info("...raw .mof file created.");
+
 		fc.transformCanonical();
 
 		Collection<Problem> problems = fc.errorCheck();
@@ -449,17 +460,18 @@ public class ModelicaCompiler {
 			throw ce;
 		}
 				
-		logger.info("Creating .mof file...");
+		logger.info("Creating transformed .mof file...");
 	    	    	// Create file 
-	   	FileWriter fstream = new FileWriter(cl+".mof");
-	   	BufferedWriter out = new BufferedWriter(fstream);
+	   	fstream = new FileWriter(cl+"_transformed.mof");
+	   	out = new BufferedWriter(fstream);
 	   	out.write(fc.prettyPrint(""));
 	   	//Close the output stream
 	   	out.close();
 	   
-	   	logger.info("... .mof file created.");
+	   	logger.info("... transformed .mof file created.");
 	    
 		if(getLogLevel("JModelica.ModelicaCompiler").equals("INFO")) {
+			logger.info("Diagnostics for transformed flattened model:");		
 			System.out.println(fc.diagnostics());
 			System.out.print(fc.prettyPrint(""));
 		}

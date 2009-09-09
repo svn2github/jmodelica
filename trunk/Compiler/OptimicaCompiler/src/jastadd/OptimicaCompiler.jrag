@@ -192,6 +192,15 @@ public class OptimicaCompiler extends ModelicaCompiler{
 		
 		ipr.findFlattenInst(cl, fc);
 		
+		// Output the untransformed flattened model
+		logger.info("Creating raw .mof file...");
+	    	    	// Create file 
+	   	FileWriter fstream = new FileWriter(cl+".mof");
+	   	BufferedWriter out = new BufferedWriter(fstream);
+	   	out.write(fc.prettyPrint(""));
+	   	//Close the output stream
+	   	out.close();
+
 		fc.transformCanonical();
 
 		Collection<Problem> problems = fc.errorCheck();
@@ -205,8 +214,8 @@ public class OptimicaCompiler extends ModelicaCompiler{
 				
 		logger.info("Creating .mof file...");
 	    	    	// Create file 
-	   	FileWriter fstream = new FileWriter(cl+".mof");
-	   	BufferedWriter out = new BufferedWriter(fstream);
+	   	fstream = new FileWriter(cl+".mof");
+	   	out = new BufferedWriter(fstream);
 	   	out.write(fc.prettyPrint(""));
 	   	//Close the output stream
 	   	out.close();
