@@ -9,7 +9,9 @@ import nose
 
 from jmodelica.tests import load_example_standard_model
 from jmodelica.simulation.sundials import solve_using_sundials
-
+from jmodelica.simulation.sundials import SundialsOdeSimulator
+import jmodelica.simulation.sundials as sundials
+import jmodelica.simulation
 
 class TestSundialsOdeSimulator:
     def setUp(self):
@@ -20,13 +22,13 @@ class TestSundialsOdeSimulator:
         self.simulator = SundialsOdeSimulator(self.m)
         
     def test_is_simulator(self):
-        assert isinstance(self.simulator, jmodelica.tests.simulation.Simulator)
+        assert isinstance(self.simulator, jmodelica.simulation.Simulator)
                                              
     def test_simulation(self):
         """Run a very basic simulation."""
         
         simulator = self.simulator
-        x_before_simulation = simulation.get_model().x.copy()
+        x_before_simulation = simulator.get_model().x.copy()
         simulator.run()
         Ts, ys = simulator.get_solution()
         
@@ -36,7 +38,7 @@ class TestSundialsOdeSimulator:
         assert simulator.get_sensitivities() == None, "No sensitivity " \
                                                       "calculation should " \
                                                       "have been done."
-        assert not (x_before_simulation==simulation.get_model().x).all(), \
+        assert not (x_before_simulation==simulator.get_model().x).all(), \
                "Simulation does seem to have been performed."
                
         # Plotting
@@ -54,7 +56,17 @@ class TestSundialsOdeSimulator:
         This saves memory and somewhat speed.
         """
         simulator = self.simulator
-        simulator.return_last(True)
+        assert simulator.get_return_last() == False # assert Default
+        simulator.set_return_last(True)
+        assert simulator.get_return_last() == True
+        simulator.set_return_last(0)
+        assert simulator.get_return_last() == False
+        simulator.set_return_last(1)
+        assert simulator.get_return_last() == True
+        nose.tools.assert_raises(sundials.SundialsSimulationException,
+                                 simulator.set_return_last, "Hello")
+        nose.tools.assert_raises(sundials.SundialsSimulationException,
+                                 simulator.set_return_last, 45)
         simulator.run()
         T, Y = simulator.get_solution()
         nose.tools.assert_raises(TypeError, len, T) # Assert scalar
@@ -65,36 +77,43 @@ class TestSundialsOdeSimulator:
         """Run simulation with sensitivity analysis."""
         
         simulator = self.simulator
-        simulator.sensitivity_analysis(False)
+        simulator.set_sensitivity_analysis(False)
+        nose.tools.assert_raises(sundials.SundialsSimulationException,
+                                 simulator.set_sensitivity_analysis, -5465)
+        nose.tools.assert_raises(sundials.SundialsSimulationException,
+                                 simulator.set_sensitivity_analysis, "Hellu")
         simulator.run()
         Ts1, ys1 = simulator.get_solution()
         
-        assert len(Ts) == len(ys), "Time points and solution points must be " \
+        assert len(Ts1) == len(ys1), "Time points and solution points must be " \
                                    "equal lengths."
-        assert len(Ts) >= 5, "A solution was expected got less than 5 points."
+        assert len(Ts1) >= 5, "A solution was expected got less than 5 points."
         assert simulator.get_sensitivities() == None, "No sensitivity " \
                                                       "calculation should " \
                                                       "have been returned."
+        assert simulator.get_sensitivity_indices() == None
                                                       
-        simulator.sensitivity_analysis(True)
+        simulator.set_sensitivity_analysis(True)
         simulator.get_model().reset()
         simulator.run()
         Ts2, ys2 = simulator.get_solution()
-        N.tools.assert_arrays_almost_equal(Ts1, Ts2)
-        N.tools.assert_arrays_almost_equal(ys1, ys2)
-        assert simulator.get_sensitivities() != None, "Sensitivitie should " \
+        N.testing.assert_array_almost_equal(Ts1, Ts2)
+        N.testing.assert_array_almost_equal(ys1, ys2, decimal=2)
+        assert simulator.get_sensitivities() != None, "Sensitivities should " \
                                                       "have been returned."
+        assert simulator.get_sensitivity_indices() != None
         # TODO: Assert exact size of the sensitivity matrix
                                                       
-        simulator.sensitivity_analysis(False)
+        simulator.set_sensitivity_analysis(False)
         simulator.get_model().reset()
         simulator.run()
         Ts3, ys3 = simulator.get_solution()
-        N.tools.assert_arrays_almost_equal(Ts1, Ts3)
-        N.tools.assert_arrays_almost_equal(ys1, ys3)
+        N.testing.assert_array_almost_equal(Ts1, Ts3)
+        N.testing.assert_array_almost_equal(ys1, ys3)
         assert simulator.get_sensitivities() == None, "No sensitivity " \
                                                       "calculation should " \
                                                       "have been returned."
+        assert simulator.get_sensitivity_indices() == None
                                                       
     def test_set_get_verbosity(self):
         """Test the verbosity setter/getter.
@@ -111,12 +130,16 @@ class TestSundialsOdeSimulator:
         assert SundialsOdeSimulator.QUIET == 0, "QUIET constant should be zero"
         simulator.set_verbosity(SundialsOdeSimulator.WHISPER)
         assert simulator.get_verbosity() == SundialsOdeSimulator.WHISPER
-        simulator.set_verbosity(SundialsOdeSimulator.NORMAL)
+        simulator. verbosity = SundialsOdeSimulator.NORMAL # testing property
         assert simulator.get_verbosity() == SundialsOdeSimulator.NORMAL
         simulator.set_verbosity(SundialsOdeSimulator.LOUD)
-        assert simulator.get_verbosity() == SundialsOdeSimulator.LOUD
+        assert simulator.verbosity == SundialsOdeSimulator.LOUD # property test
         simulator.set_verbosity(SundialsOdeSimulator.SCREAM)
         assert simulator.get_verbosity() == SundialsOdeSimulator.SCREAM
+        nose.tools.assert_raises(sundials.SundialsSimulationException,
+                                 simulator.set_verbosity, 65487)
+        nose.tools.assert_raises(sundials.SundialsSimulationException,
+                                 simulator.set_verbosity, -5465)
         
     def test_set_get_model(self):
         """Test the model setter/getter."""
@@ -129,7 +152,16 @@ class TestSundialsOdeSimulator:
         simulator.set_model(another_model)
         assert simulator.get_model() == another_model
         
-    def test_simulation_intervals():
+        nose.tools.assert_raises(sundials.SundialsSimulationException,
+                                 simulator.set_model, None)
+                                 
+        another_model = load_example_standard_model('VDP_pack_VDP_Opt',
+                                                    'VDP.mo', 
+                                                    'VDP_pack.VDP_Opt')
+        simulator.model = another_model # testing property
+        assert another_model == simulator.get_model()
+        
+    def test_simulation_intervals(self):
         simulator = self.simulator
         
         # First test setters and getters
@@ -147,9 +179,9 @@ class TestSundialsOdeSimulator:
         
         # Testincorrect interval
         nose.tools.assert_raises(sundials.SundialsSimulationException,
-                                 simulator.set_final_time(1)) # 2 !< 1
+                                 simulator.set_final_time, 1) # 2 !< 1
         nose.tools.assert_raises(sundials.SundialsSimulationException,
-                                 simulator.set_start_time(99)) # 99 !< 7
+                                 simulator.set_start_time, 99) # 99 !< 7
                                  
         # Finally make a test simulation and verify times
         simulator.run()
@@ -167,8 +199,8 @@ class TestSundialsOdeSimulator:
         
         default_tolerance = simulator.get_absolute_tolerance()
         MY_TOLERANCE = 4e-5
-        nose.tools.assert_not_almost_equal(default_tolerance, MY_TOLERANCE,
-                                           "This test is useless.")
+        nose.tools.assert_not_equal(default_tolerance, MY_TOLERANCE,
+                                    "This test is useless.")
         simulator.set_absolute_tolerance(MY_TOLERANCE)
         nose.tools.assert_almost_equal(MY_TOLERANCE,
                                        simulator.get_absolute_tolerance())
@@ -176,14 +208,14 @@ class TestSundialsOdeSimulator:
         # Testing the property abstol
         MY_TOLERANCE2 = 3e-5
         simulator.abstol = MY_TOLERANCE2
-        nose.tools.assert_almost_equal(MY_TOLERANCE2,
-                                       simulator.get_absolute_tolerance())
+        nose.tools.assert_equal(MY_TOLERANCE2,
+                                simulator.get_absolute_tolerance())
         
         # Testing error checking
         nose.tools.assert_raises(sundials.SundialsSimulationException,
-                                 simulator.set_absolute_tolerance(-1e-4))
+                                 simulator.set_absolute_tolerance, -1e-4)
         nose.tools.assert_raises(sundials.SundialsSimulationException,
-                                 simulator.set_absolute_tolerance(0))
+                                 simulator.set_absolute_tolerance, 0)
                                  
     def test_relative_tolerance(self):
         """Basic testing of setting relative tolerance.
@@ -195,11 +227,11 @@ class TestSundialsOdeSimulator:
         
         default_tolerance = simulator.get_relative_tolerance()
         MY_TOLERANCE = 4e-5
-        nose.tools.assert_not_almost_equal(default_tolerance, MY_TOLERANCE,
-                                           "This test is useless.")
+        nose.tools.assert_not_equal(default_tolerance, MY_TOLERANCE,
+                                    "This test is useless.")
         simulator.set_relative_tolerance(MY_TOLERANCE)
-        nose.tools.assert_almost_equal(MY_TOLERANCE,
-                                       simulator.get_relative_tolerance())
+        nose.tools.assert_equal(MY_TOLERANCE,
+                                simulator.get_relative_tolerance())
         
         # Testing the property reltol
         MY_TOLERANCE2 = 3e-5
@@ -209,9 +241,9 @@ class TestSundialsOdeSimulator:
         
         # Testing error checking
         nose.tools.assert_raises(sundials.SundialsSimulationException,
-                                 simulator.set_relative_tolerance(-1e-4))
+                                 simulator.set_relative_tolerance, -1e-4)
         nose.tools.assert_raises(sundials.SundialsSimulationException,
-                                 simulator.set_relative_tolerance(0))
+                                 simulator.set_relative_tolerance, 0)
                                  
     def test_time_steps(self):
         simulator = self.simulator
@@ -230,6 +262,11 @@ class TestSundialsOdeSimulator:
         nose.tools.assert_almost_equal(T[1]-T[0], MY_TIME_STEP)
         nose.tools.assert_almost_equal(T[2]-T[1], MY_TIME_STEP)
         nose.tools.assert_almost_equal(T[5]-T[4], MY_TIME_STEP)
+        
+        nose.tools.assert_raises(sundials.SundialsSimulationException,
+                                 simulator.set_time_step, 0)
+        nose.tools.assert_raises(sundials.SundialsSimulationException,
+                                 simulator.set_time_step, -3)
 
 
 class TestSolveUsingSundials:
