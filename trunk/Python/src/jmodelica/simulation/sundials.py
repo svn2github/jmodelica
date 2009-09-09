@@ -35,8 +35,16 @@ class SundialsSimulationException(SimulationException):
 class SundialsOdeSimulator(Simulator):
     """An object oriented interface for simulating JModelica.org models."""
     
-    def __init__(self, model):
+    def __init__(self, model=None):
+        """Constructor of a TestSundialsOdeSimulator.
         
+        Every instance of TestSundialsOdeSimulator needs to have a model to
+        simulate. This can be set through this constructor or using the
+        set_model(...) setter.
+        
+        This function also sets some decent default values that can be changed
+        by calling the setter methods.
+        """
         # Setting defaults
         self.set_absolute_tolerance(1.0e-6)
         self.set_relative_tolerance(1.0e-6)
@@ -59,35 +67,64 @@ class SundialsOdeSimulator(Simulator):
         self.model = model
         
     def set_absolute_tolerance(self, abstol):
+        """Set the positive absolute tolerance for simulation.
+        
+        Currently only a single scalar used for all states is supported.
+        
+        This function will raise an exception if the tolerance is not positive. 
+        
+        See the SUNDIALS documentation for more information.
+        """
         if abstol <= 0:
             raise SundialsSimulationException("absolute tolerance must be "
                                               "positive.")
         self._abstol = abstol
         
     def get_absolute_tolerance(self):
+        """Return the absolute tolerance set for this simulator.
+        
+        See the SUNDIALS documentation for more information.
+        """
         return self._abstol
         
     abstol = property(get_absolute_tolerance, set_absolute_tolerance,
                       "The absolute tolerance.")
                       
     def set_relative_tolerance(self, reltol):
+        """Set the positive relative tolerance for simulation.
+        
+        Currently only a single scalar used for all states is supported. 
+        
+        This function will raise an exception if the tolerance is not positive.
+        
+        See the SUNDIALS documentation for more information.
+        """
         if reltol <= 0:
             raise SundialsSimulationException("relative tolerance must be "
                                               "positive.")
         self._reltol = reltol
         
     def get_relative_tolerance(self):
+        """Return the relative tolerance set for this simulator.
+        
+        See the SUNDIALS documentation for more information.
+        """
         return self._reltol
         
     reltol = property(get_relative_tolerance, set_relative_tolerance,
                       "The relative tolerance.")
                       
     def set_model(self, model):
+        """Set the model on which the simulation should be done on.
+        
+        The model needs to be of type jmodelica.jmi.Model.
+        """
         if model is None:
             raise SundialsSimulationException("model must not be none")
         self._model = model
         
     def get_model(self):
+        """Returns the model on which the simulation is being done."""
         return self._model
         
     model = property(get_model, set_model, "The model to simulate.")
@@ -100,9 +137,22 @@ class SundialsOdeSimulator(Simulator):
     SCREAM = 4
     VERBOSE_VALUES = [QUIET, WHISPER, NORMAL, LOUD, SCREAM]
     def get_verbosity(self):
+        """Return the verbosity of the simulator."""
         return self._verbosity
         
     def set_verbosity(self, verbosity):
+        """Specify how much output should be given: 0 <= verbosity <= 4.
+        
+        The verbosity levels can also be specified using the constants:
+         * SundialsOdeSimulator.QUIET
+         * SundialsOdeSimulator.WHISPER
+         * SundialsOdeSimulator.NORMAL
+         * SundialsOdeSimulator.LOUD
+         * SundialsOdeSimulator.SCREAM
+         
+        If the verbosity level is set to something not within the interval, an
+        error is raised.
+        """
         if verbosity not in self.VERBOSE_VALUES:
             raise SundialsSimulationException("invalid verbosity value")
         self._verbosity = verbosity
@@ -111,16 +161,30 @@ class SundialsOdeSimulator(Simulator):
                                                        "output should be")
         
     def get_solution(self):
+        """Return the solution calculated by SundialsOdeSimulator.run().
+        
+        The solution consists of a tuple (T, Y) where T are the time samples
+        and Y contains all the equivalent state samples, one per row.
+        """
         return self._T, self._Y
         
     def _set_solution(self, T, Y):
+        """Internal function used by SundialsOdeSimulator.run().
+        
+        Setter for self.get_solution().
+        """
         self._T = T
         self._Y = Y
         
     def get_start_time(self):
+        """Get the time when the simulation should start."""
         return self._start_time
         
     def set_start_time(self, start_time):
+        """Set the time when the simulation should start.
+        
+        This defaults to the optimization start time point.
+        """
         if start_time > self.get_final_time():
             raise SundialsSimulationException("start time must be earlier "
                                               "than the final time.")
@@ -130,9 +194,14 @@ class SundialsOdeSimulator(Simulator):
         self._start_time = start_time
         
     def get_final_time(self):
+        """Get the time when the simulation should finish."""
         return self._final_time
         
     def set_final_time(self, final_time):
+        """Set the time when the simulation should finish.
+        
+        This defaults to the optimization final time point.
+        """
         if final_time < self.get_start_time():
             raise SundialsSimulationException("final time must be later than "
                                               "the start time.")
@@ -142,12 +211,25 @@ class SundialsOdeSimulator(Simulator):
         self._final_time = final_time
         
     def get_sensitivities(self):
+        """Return the sensivities calculated at final time by self.run().
+        
+        The sensitivites are only calculated if
+        self.set_sensitivity_analysis(True) is called. Otherwise None is
+        returned.
+        """
         return self._sens
         
     def _set_sensitivities(self, sens):
+        """Internal function used by SundialsOdeSimulator.run().
+        
+        This sets the sensitivities returned by self.get_sensitivities().
+        """
         self._sens = sens
         
     def set_return_last(self, return_last):
+        """Set this to True if only the last time point should be returned
+           after simulation by self.get_solution().
+        """
         if return_last==1 or return_last==True:
             self._return_last = True
         elif return_last==0 or return_last==False:
@@ -157,9 +239,17 @@ class SundialsOdeSimulator(Simulator):
                                               "True, False, 1 or 0.")
                                               
     def get_return_last(self):
+        """Returns True if only the last time point should be returned
+           after simulation by self.get_solution(), False otherwise.
+        """
         return self._return_last
         
     def set_sensitivity_analysis(self, sens_analysis):
+        """Set to True of sensitivity analysis should be done while simulating.
+        
+        The result from the sensivity analysis can be later be extracted by
+        self.get_sensitivities().
+        """
         if sens_analysis==1 or sens_analysis==True:
             self._sens_analysis = True
         elif sens_analysis==0 or sens_analysis==False:
@@ -169,15 +259,18 @@ class SundialsOdeSimulator(Simulator):
                                               "True, False, 1 or 0.")
         
     def get_sensitivity_analysis(self):
+        """Getter for self.set_sensitivity_analysis(...)."""
         return self._sens_analysis
         
     def set_time_step(self, time_step):
+        """Sets the time step returned by self.get_solution()."""
         if time_step <= 0:
             raise SundialsSimulationException("Time step size must be "
                                               "positive.")
         self._time_step = time_step
         
     def get_time_step(self):
+        """Returns the time step returned by self.get_solution()."""
         return self._time_step
         
     time_step = property(get_time_step, set_time_step, "The time step size "
@@ -185,12 +278,26 @@ class SundialsOdeSimulator(Simulator):
                                                        "return.")
                                                        
     def get_sensitivity_indices(self):
+        """Returns an object that holds information about the indices of the
+           the sensivity matrix.
+           
+        If no sensitivity analysis is done None is returned.
+        """
         return self._sens_indices
         
     def _set_sensitivity_indices(self, sens_indices):
+        """Internal function used by SundialsOdeSimulator.run().
+        
+        Setter for self.get_sensitivity_indices().
+        """
         self._sens_indices = sens_indices
         
     def run(self):
+        """Do the actual simulation.
+        
+        The input is set using setters/constructor.
+        The solution can be retrieved using self.get_solution()
+        """
         return_last = self.get_return_last()
         sensi=self.get_sensitivity_analysis()
         time_step = self.get_time_step()
