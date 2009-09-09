@@ -950,10 +950,11 @@ aspect ConstantEvaluation {
    */
   syn CValue FPrimitiveType.pow(CValue v1, CValue v2) = 
 	  new CValueUnknown();
-  eq FRealScalarType.pow(CValue v1, CValue v2) = 
+  eq FRealScalarType.pow(CValue v1, CValue v2) =
 	  new CValueReal(java.lang.Math.pow(v1.realValue(),v2.realValue()));
+  
   eq FIntegerScalarType.pow(CValue v1, CValue v2) = 
-	  new CValueInteger(v1.intValue()^v2.intValue());
+	  new CValueReal(java.lang.Math.pow(v1.realValue(),v2.realValue()));
 
   /**
    * \brief Negation of a constant value.
