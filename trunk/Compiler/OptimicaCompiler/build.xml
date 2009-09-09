@@ -109,7 +109,7 @@
 		<!-- create a directory for the generated files -->
 		<mkdir dir="${base_output}"/>
 		<!-- run jastadd to generate AST files -->
-		<jastadd package="${ast_package}" beaver="true" rewrite="true" outdir="${base_output}" NoCacheCycle="false" ComponentCheck="true" visitcheck="false" LazyMaps="true" Deterministic="true" NoStatic="false" Debug="false">
+		<jastadd package="${ast_package}" doxygen="true" beaver="true" rewrite="true" outdir="${base_output}" NoCacheCycle="false" ComponentCheck="true" visitcheck="false" LazyMaps="true" Deterministic="true" NoStatic="false" Debug="false">
 			<fileset dir="${local_ast}">
 							<include name="*.ast"/>
 							<include name="*.jadd"/>
