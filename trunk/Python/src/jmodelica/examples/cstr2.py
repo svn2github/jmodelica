@@ -42,7 +42,6 @@ import numpy.ctypeslib as Nct
 
 curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-
 # Create a Modelica compiler instance
 mc = ModelicaCompiler()
 
@@ -155,7 +154,7 @@ nlp_ipopt.opt_sim_ipopt_set_num_option("tol",0.0001)
 #Solve the optimization problem
 nlp_ipopt.opt_sim_ipopt_solve()
 
-# Write to file. The resulting file (CSTR_Opt_result.txt) can be
+# Write to file. The resulting file (CSTR2_Opt_result.txt) can be
 # loaded into Dymola.
 nlp.export_result_dymola()
 
