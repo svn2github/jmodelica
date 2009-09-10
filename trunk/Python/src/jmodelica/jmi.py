@@ -1687,7 +1687,7 @@ class Model(object):
         """Set the differentiated variables vector."""
         self.jmimodel._x[:] = x
         
-    x = property(get_x, set_x, "The differentiated variables vector.")
+    x = property(get_x, set_x, doc="The differentiated variables vector.")
 
     def get_x_p(self, i):
         """Returns a reference to the differentiated variables vector
@@ -1712,7 +1712,7 @@ class Model(object):
         """Sets the independent parameters vector."""
         self.jmimodel._pi[:] = pi
         
-    pi = property(get_pi, set_pi, "The independent parameter vector.")
+    pi = property(get_pi, set_pi, doc="The independent parameter vector.")
 
     def get_pd(self):
         """Returns a reference to the dependent parameters vector."""
@@ -1722,7 +1722,7 @@ class Model(object):
         """Sets the dependent parameters vector."""
         self.jmimodel._pd[:] = pd
         
-    pd = property(get_pd, set_pd, "The dependent paramenters vector.")
+    pd = property(get_pd, set_pd, doc="The dependent paramenters vector.")
 
     def get_cd(self):
         """Returns a reference to the dependent constants vector."""
@@ -1732,7 +1732,7 @@ class Model(object):
         """Sets the dependent constants vector."""
         self.jmimodel._cd[:] = cd
         
-    cd = property(get_cd, set_cd, "The dependent constants vector.")
+    cd = property(get_cd, set_cd, doc="The dependent constants vector.")
 
     def get_ci(self):
         """Returns a reference to the independent constants vector."""
@@ -1742,7 +1742,7 @@ class Model(object):
         """Sets the independent constants vector."""
         self.jmimodel._ci[:] = ci
         
-    ci = property(get_ci, set_ci, "The independent constants vector.")
+    ci = property(get_ci, set_ci, doc="The independent constants vector.")
 
     def get_dx(self):
         """Returns a reference to the derivatives vector."""
@@ -1752,7 +1752,7 @@ class Model(object):
         """Sets the derivatives vector."""
         self.jmimodel._dx[:] = dx
         
-    dx = property(get_dx, set_dx, "The derivatives vector.")
+    dx = property(get_dx, set_dx, doc="The derivatives vector.")
 
     def get_dx_p(self, i):
         """Returns a reference to the derivatives variables vector
@@ -1775,7 +1775,7 @@ class Model(object):
         """Sets the inputs vector."""
         self.jmimodel._u[:] = u
         
-    u = property(get_u, set_u, "The inputs vector.")
+    u = property(get_u, set_u, doc="The inputs vector.")
 
     def get_u_p(self, i):
         """Returns a reference to the inputs vector corresponding to the i:th time 
@@ -1796,7 +1796,7 @@ class Model(object):
         """Sets the algebraic variables vector."""
         self.jmimodel._w[:] = w
         
-    w = property(get_w, set_w, "The algebraic variables vector.")
+    w = property(get_w, set_w, doc="The algebraic variables vector.")
 
     def get_w_p(self, i):
         """Returns a reference to the algebraic variables vector corresponding to 
@@ -1825,7 +1825,7 @@ class Model(object):
         """
         self.jmimodel._t[:] = t
         
-    t = property(get_t, set_t, "The time value.")
+    t = property(get_t, set_t, doc="The time value.")
     
     def get_z(self):
         """Returns a reference to the vector containing all parameters,
@@ -1839,7 +1839,8 @@ class Model(object):
         """
         self.jmimodel._z[:] = z
         
-    z = property(get_z, set_z, "All parameters, variables and point-wise evaluated variables vector.")   
+    z = property(get_z, set_z, doc="All parameters, variables and point-wise "
+                                   "evaluated variables vector.")   
 
     def _get_XMLvariables_doc(self):
         """ Return a reference to the XMLDoc instance for model variables. """

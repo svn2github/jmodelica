@@ -88,7 +88,7 @@ class SundialsOdeSimulator(Simulator):
         return self._abstol
         
     abstol = property(get_absolute_tolerance, set_absolute_tolerance,
-                      "The absolute tolerance.")
+                      doc="The absolute tolerance.")
                       
     def set_relative_tolerance(self, reltol):
         """Set the positive relative tolerance for simulation.
@@ -112,7 +112,7 @@ class SundialsOdeSimulator(Simulator):
         return self._reltol
         
     reltol = property(get_relative_tolerance, set_relative_tolerance,
-                      "The relative tolerance.")
+                      doc="The relative tolerance.")
                       
     def set_model(self, model):
         """Set the model on which the simulation should be done on.
@@ -127,7 +127,7 @@ class SundialsOdeSimulator(Simulator):
         """Returns the model on which the simulation is being done."""
         return self._model
         
-    model = property(get_model, set_model, "The model to simulate.")
+    model = property(get_model, set_model, doc="The model to simulate.")
     
     # verbosity levels
     QUIET = 0
@@ -157,8 +157,8 @@ class SundialsOdeSimulator(Simulator):
             raise SundialsSimulationException("invalid verbosity value")
         self._verbosity = verbosity
         
-    verbosity = property(get_verbosity, set_verbosity, "How explicit the "
-                                                       "output should be")
+    verbosity = property(get_verbosity, set_verbosity,
+                         doc="How explicit the output should be")
         
     def get_solution(self):
         """Return the solution calculated by SundialsOdeSimulator.run().
@@ -260,9 +260,8 @@ class SundialsOdeSimulator(Simulator):
         """Returns the time step returned by self.get_solution()."""
         return self._time_step
         
-    time_step = property(get_time_step, set_time_step, "The time step size "
-                                                       "when SUNDIALS should "
-                                                       "return.")
+    time_step = property(get_time_step, set_time_step, 
+                         doc="The time step size when SUNDIALS should return.")
                                                        
     def get_sensitivity_indices(self):
         """Returns an object that holds information about the indices of the
