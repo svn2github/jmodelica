@@ -35,6 +35,58 @@ class SundialsSimulationException(SimulationException):
     pass
 
 
+class _SensivityIndices(object):
+    """Used to interpret the columns in the sensivity matrix.
+    
+    This class is used by SundialsOdeSimulator._sundials_f(...) and
+    SundialsOdeSimulator.run().
+    """
+    # Slots is a feature that can be used in new-style Python
+    # classes. It can be used toamke sure that typos are not made
+    # (and is also practical for documentational purposes).
+    #
+    # See:
+    # http://www.geocities.com/foetsch/python/new_style_classes.htm
+    __slots__ = [
+        'params',   # Holds the C type parameter
+                    # vector used by SUNDIALS
+                    # internal sens. analysis.
+        'pi_start', # Start index for where the
+                    # independent parameters are
+                    # stored in params.
+        'pi_end',   # End index for where the
+                    # independent parameters are
+                    # stored in params.
+        'xinit_start',  # Start index for where the
+                        # initial values are stored
+                        # in params.
+        'xinit_end',    # End index for where the
+                        # initial values are stored
+                        # in params.
+        'u_start',  # Start index for where the
+                    # optimal control inputs are
+                    # stored in params.
+        'u_end',    # End index for where the
+                    # optimal control inputs are
+                    # stored in params.
+    ]
+    
+    def __init__(self, model):
+        self.pi_start    = 0
+        self.pi_end      = len(model.pi)
+        self.xinit_start = self.pi_end
+        self.xinit_end   = self.xinit_start + len(model.x)
+        self.u_start     = self.xinit_end
+        self.u_end       = self.u_start + len(model.u)
+        
+        pi_ctype = cvodes.realtype * (len(model.pi) + len(model.x) \
+                                                            + len(model.u))
+        self.params    = pi_ctype()
+        self.params[:] = N.concatenate((model.pi,
+                                        model.x[:len(model.x)],
+                                        model.u,))
+
+
 class SundialsOdeSimulator(Simulator):
     """An object oriented interface for simulating JModelica.org models."""
     
@@ -50,14 +102,17 @@ class SundialsOdeSimulator(Simulator):
         This function also sets some decent default values that can be changed
         by calling the setter methods.
         """
+        # Setting members
+        self._model = model
+        
         # Setting defaults
         self.set_absolute_tolerance(abstol)
         self.set_relative_tolerance(reltol)
         self.set_return_last(return_last)
         self._set_solution(None, None)
+        self._set_sensitivity_indices(None)
         self.set_sensitivity_analysis(sensitivity_analysis)
         self._set_sensitivities(None)
-        self._set_sensitivity_indices(None)
         self.set_time_step(time_step)
         self.set_verbosity(verbosity)
         if start_time is not None:
@@ -77,9 +132,6 @@ class SundialsOdeSimulator(Simulator):
             self._start_time >= self._final_time:
                 raise SundialsSimulationException('Start time must be before '
                                                   'end time.')
-        
-        # Setting members
-        self.model = model
         
     def set_absolute_tolerance(self, abstol):
         """Set the positive absolute tolerance for simulation.
@@ -136,6 +188,12 @@ class SundialsOdeSimulator(Simulator):
         """
         if model is None:
             raise SundialsSimulationException("model must not be none")
+            
+        if self.get_sensitivity_analysis():
+            # A new model will require a new sensivity indices class will have
+            # to be reinitialized.
+            self._set_sensitivity_indices(_SensivityIndices(model))
+            
         self._model = model
         
     def get_model(self):
@@ -263,6 +321,9 @@ class SundialsOdeSimulator(Simulator):
         """
         if sens_analysis==1 or sens_analysis==True:
             self._sens_analysis = True
+            if self.get_sensitivity_indices() is None:
+                # This result cached. Only load if not loaded.
+                self._set_sensitivity_indices(_SensivityIndices(self.model))
         elif sens_analysis==0 or sens_analysis==False:
             self._sens_analysis = False
         else:
@@ -292,12 +353,12 @@ class SundialsOdeSimulator(Simulator):
         
     time_step = property(get_time_step, set_time_step, 
                          doc="The time step size when SUNDIALS should return.")
-                                                       
+    
     def get_sensitivity_indices(self):
         """Returns an object that holds information about the indices of the
            the sensivity matrix.
            
-        If no sensitivity analysis is done None is returned.
+        As soon as sensitivity analysis is activated this object is set.
         """
         return self._sens_indices
         
@@ -366,20 +427,28 @@ class SundialsOdeSimulator(Simulator):
             print "States:", model.x
             print start_time, "to", end_time
 
-        class UserData(ctypes.Structure):
+        class UserData:
             """ctypes structure used to move data in (and out of?) the callback
                functions.
             """
-            _fields_ = [
-                ('parameters', ctypes.py_object), # parameters
-                ('model', ctypes.py_object),    # The evaluation model
-                                                # (RHS if you will).
-                ('ignore_p', ctypes.c_int),     # Whether p should be ignored or
-                                                # not used to reduce unnecessary
-                                                # copying.
-                ('t_sim_start', c_jmi_real_t),  # Start time for simulation.
-                ('t_sim_end', c_jmi_real_t),    # End time for simulation.
-                ('t_sim_duration', c_jmi_real_t), # Time duration for simulation.
+            def __init__(self):
+                self.parameters = None
+                self.model = None
+                self.ignore_p = None
+                self.t_sim_start = None
+                self.t_sim_end = None
+                self.t_sim_duration = None
+            
+            __slots__ = [
+                'parameters',     # parameters
+                'model',          # The evaluation model
+                                  # (RHS if you will).
+                'ignore_p',       # Whether p should be ignored or
+                                  # not used to reduce unnecessary
+                                  # copying.
+                't_sim_start',    # Start time for simulation.
+                't_sim_end',      # End time for simulation.
+                't_sim_duration', # Time duration for simulation.
             ]
         
         # initial y (copying just in case)
@@ -399,69 +468,13 @@ class SundialsOdeSimulator(Simulator):
 
         # Set f_data
         data = UserData()
-        data.model = ctypes.py_object(model)
+        data.model = model
         data.t_sim_start = start_time
         data.t_sim_end   = end_time
         data.t_sim_duration = data.t_sim_end - data.t_sim_start
         if sensi:
-            class PyFData(object):
-                """The Pythonic FData structure corresponding to the fdata
-                   structure sent used by SUNDIALS.
-                
-                An instance of of this structure is referred to by the
-                C data structure UserData.
-                
-                This class can be used to interpret the columns in the
-                sensivity matrix.
-                
-                """
-                # Slots is a feature that can be used in new-style Python
-                # classes. It basically makes sure that typos are not made
-                # (and is also practical for documentational purposes).
-                #
-                # See:
-                # http://www.geocities.com/foetsch/python/new_style_classes.htm
-                __slots__ = [
-                    'params',   # Holds the C type parameter
-                                # vector used by SUNDIALS
-                                # internal sens. analysis.
-                    'pi_start', # Start index for where the
-                                # independent parameters are
-                                # stored in params.
-                    'pi_end',   # End index for where the
-                                # independent parameters are
-                                # stored in params.
-                    'xinit_start',  # Start index for where the
-                                    # initial values are stored
-                                    # in params.
-                    'xinit_end',    # End index for where the
-                                    # initial values are stored
-                                    # in params.
-                    'u_start',  # Start index for where the
-                                # optimal control inputs are
-                                # stored in params.
-                    'u_end',    # End index for where the
-                                # optimal control inputs are
-                                # stored in params.
-                ]
-            parameters           = PyFData()
-            pi_ctype             = cvodes.realtype \
-                                    * (len(model.pi)
-                                        + len(model.x)
-                                        + len(model.u))
-            parameters.params    = pi_ctype()
-            parameters.params[:] = N.concatenate((model.pi,
-                                                  model.x[:len(model.x)],
-                                                  model.u,))
-            # Indices used by sundials_f(...)
-            parameters.pi_start    = 0
-            parameters.pi_end      = len(model.pi)
-            parameters.xinit_start = parameters.pi_end
-            parameters.xinit_end   = parameters.xinit_start + len(model.x)
-            parameters.u_start     = parameters.xinit_end
-            parameters.u_end       = parameters.u_start + len(model.u)
-                                            
-            data.parameters  = ctypes.py_object(parameters)
+            # Sensitivity indices used by sundials_f(...)
+            data.parameters = self.get_sensitivity_indices()
             data.ignore_p = 0
         else:
             data.ignore_p = 1
@@ -488,7 +501,8 @@ class SundialsOdeSimulator(Simulator):
             cvodes.CVodeSetSensDQMethod(cvode_mem, cvodes.CV_CENTERED, 0)
             
             model_parameters = model.pi
-            cvodes.CVodeSetSensParams(cvode_mem, parameters.params, None, None)
+            cvodes.CVodeSetSensParams(cvode_mem, data.parameters.params, None,
+                                      None)
         
         tout = start_time + time_step
         if tout>end_time:
@@ -567,10 +581,8 @@ class SundialsOdeSimulator(Simulator):
         
         if sensi:
             self._set_sensitivities(N.array(yS))
-            self._set_sensitivity_indices(parameters)
         else:
             self._set_sensitivities(None)
-            self._set_sensitivity_indices(None)
         
         self._set_solution(T, ylist)
         
