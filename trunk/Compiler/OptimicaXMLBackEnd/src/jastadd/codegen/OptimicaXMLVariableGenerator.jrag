@@ -55,22 +55,43 @@ public class OptimicaXMLVariableGenerator extends XMLVariableGenerator {
 	@Override
 	protected void addRealAttributes(PrintStream genPrinter, TagGenerator tg, FRealVariable realvariable) {
 		super.addRealAttributes(genPrinter, tg, realvariable);
-		genPrinter.print(tg.generateTag("Free")+realvariable.freeAttribute()+tg.generateTag("Free"));		
-		genPrinter.print(tg.generateTag("InitialGuess")+realvariable.initialGuessAttribute()+tg.generateTag("InitialGuess"));
+		genPrinter.print(tg.generateTag("Free")+realvariable.freeAttribute()+tg.generateTag("Free"));
+		double ig_val = 0;
+		// If initialGuess attribute is not specified, use start attribute
+		if (realvariable.initialGuessAttributeSet()) {
+			ig_val = realvariable.initialGuessAttribute();			
+		} else {
+			ig_val = realvariable.startAttribute();			
+		}
+		genPrinter.print(tg.generateTag("InitialGuess")+ig_val+tg.generateTag("InitialGuess"));
 	}
 	
 	@Override
 	protected void addIntegerAttributes(PrintStream genPrinter, TagGenerator tg, FIntegerVariable integervariable) {
 		super.addIntegerAttributes(genPrinter, tg, integervariable);
 		genPrinter.print(tg.generateTag("Free")+integervariable.freeAttribute()+tg.generateTag("Free"));
-		genPrinter.print(tg.generateTag("InitialGuess")+integervariable.initialGuessAttribute()+tg.generateTag("InitialGuess"));
+		int ig_val = 0;
+		// If initialGuess attribute is not specified, use start attribute
+		if (integervariable.initialGuessAttributeSet()) {
+			ig_val = integervariable.initialGuessAttribute();			
+		} else {
+			ig_val = integervariable.startAttribute();			
+		}
+		genPrinter.print(tg.generateTag("InitialGuess")+ig_val+tg.generateTag("InitialGuess"));
 	}
 	
 	@Override
 	protected void addBooleanAttributes(PrintStream genPrinter, TagGenerator tg, FBooleanVariable booleanvariable) {
 		super.addBooleanAttributes(genPrinter, tg, booleanvariable);
 		genPrinter.print(tg.generateTag("Free")+booleanvariable.freeAttribute()+tg.generateTag("Free"));
-		genPrinter.print(tg.generateTag("InitialGuess")+booleanvariable.initialGuessAttribute()+tg.generateTag("InitialGuess"));
+		boolean ig_val = false;
+		// If initialGuess attribute is not specified, use start attribute
+		if (booleanvariable.initialGuessAttributeSet()) {
+			ig_val = booleanvariable.initialGuessAttribute();			
+		} else {
+			ig_val = booleanvariable.startAttribute();			
+		}
+		genPrinter.print(tg.generateTag("InitialGuess")+ig_val+tg.generateTag("InitialGuess"));
 	}
 	
 	@Override
