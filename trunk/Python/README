@@ -29,12 +29,12 @@ downloaded from:
 
 Run the tests in the tests package with
 
-	nosetests -a stddist -a '!slow'
+	nosetests -a stddist
 	
 standing in the 'tests' directory in the jmodelica package. Nose then finds all
-available tests that are related to the standard JModelica.org bundle, that are
-not marked as "slow", and runs them. For details on how to run specific tests,
-and more, have a look at the Nose website and 'man nosetests'.
+available tests that are related to the standard JModelica.org bundle and runs
+them. For details on how to run specific tests, and more, have a look at the
+Nose website and 'man nosetests'.
 
 If you don't add the '-a stddist' flag packages that are not part of the
 official requirements for JModelica.org might be loaded for tests. This might
