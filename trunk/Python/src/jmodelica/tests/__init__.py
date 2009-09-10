@@ -8,6 +8,9 @@ import os
 import jmodelica.jmi as pyjmi
 
 
+__all__ = ['optimization']
+
+
 def testattr(**kwargs):
     """Add attributes to a test function/method/class.
     

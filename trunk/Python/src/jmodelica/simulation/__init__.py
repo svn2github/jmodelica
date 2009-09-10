@@ -4,6 +4,8 @@
 
 This currently only includes an interface to SUNDIALS.
 """
+__all__ = ['sundials']
+
 
 class SimulationException(Exception):
     """ A simulation exception. """
