@@ -23,6 +23,27 @@ class TestSundialsOdeSimulator:
         
     def test_is_simulator(self):
         assert isinstance(self.simulator, jmodelica.simulation.Simulator)
+        
+    def test_constructor_parameters(self):
+        """Assert that a couple of different parameters exists ni the
+           constructor.
+        """
+        simulator = SundialsOdeSimulator(time_step=0.2,
+                                         model=self.m,
+                                         abstol=1e-5,
+                                         reltol=1e-5,
+                                         sensitivity_analysis=True,
+                                         return_last=True,
+                                         start_time=1,
+                                         final_time=20)
+        assert simulator.time_step == 0.2
+        assert simulator.model == self.m
+        assert simulator.abstol == 1e-5
+        assert simulator.reltol == 1e-5
+        assert simulator.sensitivity_analysis == True
+        assert simulator.return_last == True
+        assert simulator.get_start_time() == 1
+        assert simulator.get_final_time() == 20
                                              
     def test_simulation(self):
         """Run a very basic simulation."""
