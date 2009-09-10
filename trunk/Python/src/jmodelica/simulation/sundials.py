@@ -198,7 +198,7 @@ class SundialsOdeSimulator(Simulator):
         return self._final_time
         
     def get_sensitivities(self):
-        """Return the sensivities calculated at final time by self.run().
+        """Return the sensitivities calculated at final time by self.run().
         
         The sensitivites are only calculated if
         self.set_sensitivity_analysis(True) is called. Otherwise None is
@@ -213,9 +213,13 @@ class SundialsOdeSimulator(Simulator):
         """
         self._sens = sens
         
+    sensitivities = property(get_sensitivities,
+                             doc="The calculated sensitivities at final "
+                                 "time. This is set by self.run().")
+        
     def set_return_last(self, return_last):
         """Set this to True if only the last time point should be returned
-           after simulation by self.get_solution().
+           after simulation by self.get_solution(). False otherwise.
         """
         if return_last==1 or return_last==True:
             self._return_last = True
@@ -231,8 +235,13 @@ class SundialsOdeSimulator(Simulator):
         """
         return self._return_last
         
+    return_last = property(get_return_last, set_return_last,
+                           doc="True if only the last time point should be "
+                               "returned after simulation by "
+                               "self.get_solution(). False otherwise.")
+        
     def set_sensitivity_analysis(self, sens_analysis):
-        """Set to True of sensitivity analysis should be done while simulating.
+        """Set to True if sensitivity analysis should be done while simulating.
         
         The result from the sensivity analysis can be later be extracted by
         self.get_sensitivities().
@@ -248,6 +257,12 @@ class SundialsOdeSimulator(Simulator):
     def get_sensitivity_analysis(self):
         """Getter for self.set_sensitivity_analysis(...)."""
         return self._sens_analysis
+        
+    sensitivity_analysis = property(get_sensitivity_analysis,
+                                    set_sensitivity_analysis,
+                                    doc="True if sensitivity analysis should "
+                                        "be performed in simulating. False "
+                                        "otherwise.")
         
     def set_time_step(self, time_step):
         """Sets the time step returned by self.get_solution()."""
@@ -277,6 +292,11 @@ class SundialsOdeSimulator(Simulator):
         Setter for self.get_sensitivity_indices().
         """
         self._sens_indices = sens_indices
+        
+    sensitivity_indices = property(get_sensitivity_indices,
+                                   doc="Object that holds information about "
+                                       "the indices of the the sensivity "
+                                       "matrix.")
         
     def run(self):
         """Do the actual simulation.
