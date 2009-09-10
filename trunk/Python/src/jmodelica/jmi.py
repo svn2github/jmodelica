@@ -1169,9 +1169,9 @@ def load_DLL(libname, path):
         pass
 
     try:
-        dll.jmi_opt_sim_ipopt_set_double_option.argtypes = [ct.c_void_p,
+        dll.jmi_opt_sim_ipopt_set_num_option.argtypes = [ct.c_void_p,
                                                             ct.c_char_p,
-                                                            ct.c_double]
+                                                            c_jmi_real_t]
     except AttributeError, e:
         pass
     
@@ -1363,9 +1363,9 @@ def load_DLL(libname, path):
         pass
 
     try:
-        dll.jmi_init_opt_ipopt_set_double_option.argtypes = [ct.c_void_p,
+        dll.jmi_init_opt_ipopt_set_num_option.argtypes = [ct.c_void_p,
                                                             ct.c_char_p,
-                                                            ct.c_double]
+                                                            c_jmi_real_t]
     except AttributeError, e:
         pass
    
