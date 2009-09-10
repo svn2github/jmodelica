@@ -35,9 +35,6 @@ class TestSundialsOdeSimulator:
         assert len(Ts) == len(ys), "Time points and solution points must be " \
                                    "equal lengths."
         assert len(Ts) >= 5, "A solution was expected got less than 5 points."
-        assert simulator.get_sensitivities() == None, "No sensitivity " \
-                                                      "calculation should " \
-                                                      "have been done."
         assert not (x_before_simulation==simulator.get_model().x).all(), \
                "Simulation does seem to have been performed."
                
@@ -47,7 +44,7 @@ class TestSundialsOdeSimulator:
         p.title('testFixedSimulation(...) output')
         fig.savefig('TestSundialsOdeSimulator_test_simulation.png')
                
-    def test_simulation_return_last(self):
+    def test_return_last(self):
         """Testing the 'return_last'.
         
         The 'return_last' enables the user to ignore the whole solution
@@ -63,6 +60,28 @@ class TestSundialsOdeSimulator:
         assert simulator.get_return_last() == False
         simulator.set_return_last(1)
         assert simulator.get_return_last() == True
+        
+        # Test property set
+        simulator.return_last = True
+        assert simulator.get_return_last() == True
+        simulator.return_last = 0
+        assert simulator.get_return_last() == False
+        simulator.return_last = 1
+        assert simulator.get_return_last() == True
+        simulator.return_last = False
+        assert simulator.get_return_last() == False
+        
+        # Test property get
+        simulator.set_return_last(True)
+        assert simulator.return_last == True
+        simulator.set_return_last(0)
+        assert simulator.return_last == False
+        simulator.set_return_last(1)
+        assert simulator.return_last == True
+        simulator.set_return_last(False)
+        assert simulator.return_last == False
+        
+        simulator.return_last = True
         nose.tools.assert_raises(sundials.SundialsSimulationException,
                                  simulator.set_return_last, "Hello")
         nose.tools.assert_raises(sundials.SundialsSimulationException,
@@ -91,9 +110,13 @@ class TestSundialsOdeSimulator:
         assert simulator.get_sensitivities() == None, "No sensitivity " \
                                                       "calculation should " \
                                                       "have been returned."
+        assert simulator.sensitivities == None, "No sensitivity calculation " \
+                                                "should have been done."
         assert simulator.get_sensitivity_indices() == None
+        assert simulator.sensitivity_indices == None # test property (get)
                                                       
         simulator.set_sensitivity_analysis(True)
+        assert simulator.sensitivity_analysis == True # testing property (get)
         simulator.get_model().reset()
         simulator.run()
         Ts2, ys2 = simulator.get_solution()
@@ -101,10 +124,14 @@ class TestSundialsOdeSimulator:
         N.testing.assert_array_almost_equal(ys1, ys2, decimal=2)
         assert simulator.get_sensitivities() != None, "Sensitivities should " \
                                                       "have been returned."
+        assert simulator.sensitivities != None, "No sensitivity calculation " \
+                                                "should have been done."
         assert simulator.get_sensitivity_indices() != None
+        assert simulator.sensitivity_indices != None # test property (get)
+        
         # TODO: Assert exact size of the sensitivity matrix
                                                       
-        simulator.set_sensitivity_analysis(False)
+        simulator.sensitivity_analysis = False # testing property (set)
         simulator.get_model().reset()
         simulator.run()
         Ts3, ys3 = simulator.get_solution()
@@ -113,8 +140,11 @@ class TestSundialsOdeSimulator:
         assert simulator.get_sensitivities() == None, "No sensitivity " \
                                                       "calculation should " \
                                                       "have been returned."
+        assert simulator.sensitivities == None, "No sensitivity calculation " \
+                                                "should have been done."
         assert simulator.get_sensitivity_indices() == None
-                                                      
+        assert simulator.sensitivity_indices == None # test property (get)
+        
     def test_set_get_verbosity(self):
         """Test the verbosity setter/getter.
         
