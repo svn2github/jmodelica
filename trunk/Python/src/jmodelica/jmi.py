@@ -1996,6 +1996,42 @@ class Model(object):
             self.get_pi()[z_i - self._offs_pi.value] = value
         else:
             print "Parameter "+name+" could not be found in model."
+
+
+    def get_value(self, name):
+        """ Get value of a variable or parameter.
+
+        Parameters:
+            name -- name of variable or parameter.
+
+        Raises Error if name not present in model."""
+        
+        xmldoc = self._get_XMLvariables_doc()
+        valref = xmldoc.get_valueref(name.strip())
+        value = None
+        if valref:
+            (z_i, ptype) = _translate_value_ref(valref)
+            value = self.get_z()[z_i]
+        else:
+            raise Exception("Parameter or variable "+name.strip()+" could not be found in model.")
+        return value
+        
+    def set_value(self, name, value):
+        """ Set get value of a parameter or variable.
+        
+        Parameters:
+            name -- name of variable or parameter.
+            value -- parameter or variable value.
+
+        Raises Error if name not present in model."""
+        
+        xmldoc = self._get_XMLvariables_doc()
+        valref = xmldoc.get_valueref(name)
+        if valref:
+            (z_i, ptype) = _translate_value_ref(valref)
+            self.get_z()[z_i] = value
+        else:
+            raise Exception("Parameter or variable "+name+" could not be found in model.")
     
     def load_parameters_from_XML(self, filename="", path="."):
         """ 
@@ -4291,7 +4327,7 @@ class SimultaneousOptLagPols(SimultaneousOpt):
         _x_tp_lin = N.ones(model._n_x.value*model._n_tp.value,dtype=int)
         _u_tp_lin = N.ones(model._n_u.value*model._n_tp.value,dtype=int)        
         _w_tp_lin = N.ones(model._n_w.value*model._n_tp.value,dtype=int)
-        
+
         self._set_lin_values(_p_opt_lin, _dx_lin, _x_lin, _u_lin, _w_lin, _dx_tp_lin, _x_tp_lin, _u_tp_lin, _w_tp_lin)
 
         try:       
