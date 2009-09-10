@@ -40,7 +40,7 @@ class SundialsOdeSimulator(Simulator):
     
     def __init__(self, model=None, start_time=None, final_time=None,
                  abstol=1.0e-6, reltol=1.0e-6, time_step=0.2,
-                 return_last=False, sensitivity_analysis=False):
+                 return_last=False, sensitivity_analysis=False, verbosity=0):
         """Constructor of a TestSundialsOdeSimulator.
         
         Every instance of TestSundialsOdeSimulator needs to have a model to
@@ -59,6 +59,7 @@ class SundialsOdeSimulator(Simulator):
         self._set_sensitivities(None)
         self._set_sensitivity_indices(None)
         self.set_time_step(time_step)
+        self.set_verbosity(verbosity)
         if start_time is not None:
             self._start_time = start_time
         elif model.opt_interval_starttime_fixed():
@@ -311,40 +312,8 @@ class SundialsOdeSimulator(Simulator):
                                    doc="Object that holds information about "
                                        "the indices of the the sensivity "
                                        "matrix.")
-        
-    def run(self):
-        """Do the actual simulation.
-        
-        The input is set using setters/constructor.
-        The solution can be retrieved using self.get_solution()
-        """
-        return_last = self.get_return_last()
-        sensi = self.get_sensitivity_analysis()
-        time_step = self.get_time_step()
-        start_time = self.get_start_time()
-        end_time = self.get_final_time()
-        verbose = False
-        model = self.get_model()
-        
-        if verbose:
-            print "Input before integration:", model.u
-            print "States:", model.x
-            print start_time, "to", end_time
-        
-        import sys
-        sys.stdout.flush()
-        
-        if end_time < start_time:
-            raise SundialsSimulationException('End time cannot be before start '
-                                              'time.')
-        if end_time == start_time:
-            raise SundialsSimulationException('End time and start time cannot '
-                                              'currently coinside.')
-            
-        # If this line is not here T[-1] returned will be end_time - time_step
-        #end_time = end_time + time_step
-        
-        def _sundials_f(t, x, dx, f_data):
+                                       
+    def _sundials_f(self, t, x, dx, f_data):
             """The sundials' RHS evaluation function.
             
             This function basically moves data between SUNDIALS arrays and NumPy
@@ -358,7 +327,7 @@ class SundialsOdeSimulator(Simulator):
             
             See SUNDIALS' manual and/or PySUNDIALS demos for more information.
             """
-            data = ctypes.cast(f_data, PUserData).contents
+            data = self._data
             model = data.model
             model.t = (t - data.t_sim_start) / data.t_sim_duration
             if data.ignore_p == 0:
@@ -374,6 +343,28 @@ class SundialsOdeSimulator(Simulator):
             dx[:] = model.dx
             
             return 0
+        
+    def run(self):
+        """Do the actual simulation.
+        
+        The input is set using setters/constructor.
+        The solution can be retrieved using self.get_solution()
+        """
+        return_last = self.get_return_last()
+        sensi = self.get_sensitivity_analysis()
+        time_step = self.get_time_step()
+        start_time = self.get_start_time()
+        end_time = self.get_final_time()
+        verbose = self.get_verbosity()
+        model = self.get_model()
+        
+        if verbose >= self.WHISPER:
+            print "Running simulation with interval (%s, %s)." \
+                    % (start_time, end_time)
+        if verbose >= self.NORMAL:
+            print "Input before integration:", model.u
+            print "States:", model.x
+            print start_time, "to", end_time
 
         class UserData(ctypes.Structure):
             """ctypes structure used to move data in (and out of?) the callback
@@ -390,7 +381,6 @@ class SundialsOdeSimulator(Simulator):
                 ('t_sim_end', c_jmi_real_t),    # End time for simulation.
                 ('t_sim_duration', c_jmi_real_t), # Time duration for simulation.
             ]
-        PUserData = ctypes.POINTER(UserData) # Pointer type of UserData
         
         # initial y (copying just in case)
         y = cvodes.NVector(model.x.copy())
@@ -402,7 +392,7 @@ class SundialsOdeSimulator(Simulator):
         t0 = cvodes.realtype(start_time)
 
         cvode_mem = cvodes.CVodeCreate(cvodes.CV_BDF, cvodes.CV_NEWTON)
-        cvodes.CVodeMalloc(cvode_mem, _sundials_f, t0, y, cvodes.CV_SS, reltol, 
+        cvodes.CVodeMalloc(cvode_mem, self._sundials_f, t0, y, cvodes.CV_SS, reltol, 
                            abstol)
 
         cvodes.CVDense(cvode_mem, len(model.x))
@@ -477,7 +467,7 @@ class SundialsOdeSimulator(Simulator):
             data.ignore_p = 1
             parameters = None # Needed for correct return
             
-        cvodes.CVodeSetFdata(cvode_mem, ctypes.pointer(data))
+        self._data = data
         
         if sensi:
             NP = len(model.pi) # number of model parameters
@@ -522,7 +512,7 @@ class SundialsOdeSimulator(Simulator):
             flag = cvodes.CVode(cvode_mem, tout, y, ctypes.byref(t),
                                 cvodes.CV_NORMAL)
 
-            if verbose:
+            if verbose >= self.SCREAM:
                 print "At t = %-14.4e  y =" % t.value, \
                       ("  %-11.6e  "*len(y)) % tuple(y)
 
@@ -551,7 +541,7 @@ class SundialsOdeSimulator(Simulator):
         if sensi:
             cvodes.CVodeGetSens(cvode_mem, t, yS)
 
-        if verbose:
+        if verbose >= self.LOUD:
             # collecting lots of information about the execution and present it
             nst     = cvodes.CVodeGetNumSteps(cvode_mem)
             nfe     = cvodes.CVodeGetNumRhsEvals(cvode_mem)
