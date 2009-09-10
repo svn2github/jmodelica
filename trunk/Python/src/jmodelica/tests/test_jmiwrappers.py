@@ -611,7 +611,7 @@ class TestModelSimulation:
         This test is model specific and not generic as most other
         tests in this class.
         """
-        simulator = TestSundialsOdeSimulator(self.m)
+        simulator = SundialsOdeSimulator(self.m)
         simulator.run()
         
         assert self.m._n_z > 0, "Length of z should be greater than zero."
