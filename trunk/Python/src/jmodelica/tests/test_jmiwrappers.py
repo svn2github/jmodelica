@@ -595,9 +595,9 @@ def test_opt_dJ_dim():
                                             mask)    
     
     
-@testattr(stddist = True)
 class TestModelSimulation:
     """Test the JMIModel instance of the Van der Pol oscillator."""
+    stddist = True
     
     def setUp(self):
         """Test setUp. Load the test model."""

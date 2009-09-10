@@ -467,7 +467,6 @@ def test_load_model_modelica():
     _generic_load_model_trial(modelfile, cpath, 'modelica')
     
 
-@testattr(stddist = True)
 class TestModel:
     """Test the high level model class, jmi.Model.
     
@@ -475,6 +474,7 @@ class TestModel:
     
     Also note that this class also is tested in simulation tests.
     """
+    stddist = True
     
     def setUp(self):
         """Test setUp. Load the test model."""
