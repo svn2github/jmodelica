@@ -1,0 +1,253 @@
+import org.jmodelica.ide.helpers.Maybe;
+import org.jmodelica.ide.namecomplete.*;
+import java.util.ArrayList;
+
+import org.eclipse.swt.graphics.Image;
+
+aspect Semantic {
+
+    /**
+     * @return true iff. ASTNode contains point (line, col).
+     */
+    public boolean ASTNode.containsPoint(IDocument d, int offset) {
+        
+        int line, col;
+        try {
+
+            line = d.getLineOfOffset(offset);
+            col = offset - d.getLineOffset(line);
+            line++; // go from 0-based to 1-based line number
+        
+        } catch (BadLocationException e) { return false; }
+        
+        
+        boolean beginsBefore = 
+            getBeginLine() == line && getBeginColumn() <= col ||
+            getBeginLine() < line;
+        
+        boolean endsAfter = 
+            getEndLine() == line && getEndColumn() >= col ||
+            getEndLine() > line;
+        
+        return beginsBefore && endsAfter;
+    }    
+    
+       
+    /**
+     * Return class declaration at offset. Favour inner classes over outer.
+     * Ignores short class declarations.
+     */
+    syn Maybe<ClassDecl> ASTNode.getClassDeclAt(IDocument d, int offset);
+    
+    eq ASTNode.getClassDeclAt(IDocument d, int offset) {
+        for (ASTNode<?> child : this) {
+            Maybe<ClassDecl> rec = child.getClassDeclAt(d, offset);  
+            if (rec.hasValue())
+                return rec;
+        }
+        return Maybe.<ClassDecl>Nothing();
+        
+    }
+    
+    eq FullClassDecl.getClassDeclAt(IDocument d, int offset) {
+        return super.getClassDeclAt(d, offset)
+                   .orElse(
+               Maybe.fromBool(this, containsPoint(d, offset)));
+    }
+    
+    /**
+     * Return access at offset. Favour left child of Dot nodes over the Dot
+     * node itself, but not the right child. I.e. (where ^ marks the offset)
+
+     *  ...qualifi^ed.name      returns "qualified", while
+     *  ...qualified.na^me      returns "qualified.name"
+     *     
+     */
+    syn Maybe<Access> ASTNode.getAccessAt(IDocument d, int offset); 
+    
+    eq ASTNode.getAccessAt(IDocument d, int offset) {
+        for (ASTNode<?> child : this) {
+            Maybe<Access> rec = child.getAccessAt(d, offset);  
+            if (rec.hasValue())
+                return rec;
+        }
+        return Maybe.<Access>Nothing();
+    }
+    
+    eq Dot.getAccessAt(IDocument d, int offset) {
+        if (!containsPoint(d, offset))
+            return Maybe.<Access>Nothing();
+        return getLeft().getAccessAt(d, offset).orElse(Maybe.Just(this));
+    }
+    
+    eq Access.getAccessAt(IDocument d, int offset) {
+        if (containsPoint(d, offset))
+            return Maybe.Just(this);
+        return Maybe.<Access>Nothing();
+    }
+    
+    
+    InstNode implements CompletionNode; //{
+    
+        public String InstNode.completionName() { 
+            return name(); 
+        }
+        public CompletionComment InstNode.completionDoc() { 
+            return proposalComment(); 
+        }
+        public Image InstNode.completionImage() { 
+            return contentOutlineImage(); 
+        }
+    //}
+    
+    InstImportRename implements CompletionNode; // {
+        
+        public String InstImportRename.completionName() { 
+            return ((ImportClauseRename)getImportClause()).getIdDecl().getID(); 
+        }
+        public CompletionComment InstImportRename.completionDoc() {
+            return getPackageName().myInstClassDecl().proposalComment();
+        }
+        public Image InstImportRename.completionImage() { 
+            return null; 
+        }
+    //}
+    
+    syn ArrayList<CompletionNode> InstNode.completionNodes(
+            boolean includeRenamedImports) = new ArrayList<CompletionNode>();
+    
+    /**
+     * Completion proposals for InstClassDecl:s are all classes and
+     * (constant) components.
+     * 
+     * @param includeRenamedImports renamed imports should only be included
+     * in completions if looking up an unqualified import. qualified access
+     * to renamed imports is not allowed in Modelica
+     */
+    eq InstClassDecl.completionNodes(boolean includeRenamedImports) {
+
+        ArrayList<CompletionNode> completions = new ArrayList<CompletionNode>();
+
+        // class decls
+        completions.addAll(instClassDecls());
+        
+        // component decls
+        completions.addAll(instComponentDecls());
+
+        // imports
+        for (InstImport ii : instImports()) { 
+            if (includeRenamedImports && ii instanceof InstImportRename) { 
+                completions.add((InstImportRename)ii);
+            } else if (ii instanceof InstImportUnqualified) {
+                completions.addAll(ii.getPackageName()
+                                     .myInstClassDecl()
+                                     .completionNodes(includeRenamedImports));
+            }
+        }
+
+        // extends
+        for (InstExtends e : instExtends()) 
+            completions.addAll(e.getClassName()
+                                .myInstClassDecl()
+                                .completionNodes(includeRenamedImports));
+        
+        return completions;
+    }
+    
+    /**
+     * Completion proposals for InstComponentDecl:s are only components. 
+     */
+    eq InstComponentDecl.completionNodes(boolean includeRenamedImports) {
+        System.out.printf("came here %s\n", this);
+        System.out.printf("came here %s\n", myInstClass());
+        
+        ArrayList<CompletionNode> nodes = new ArrayList<CompletionNode>();
+        for (CompletionNode c : myInstClass().completionNodes(includeRenamedImports)) {
+            if (c instanceof InstComponentDecl)
+                nodes.add(c);
+        }
+        return nodes;
+    }
+
+    /**
+     * Returns a list of completion suggestions for <code>decl</code>, filtering
+     * out suggestions not matching <code>filter</code>.
+     * 
+     * @param access access to give completions for
+     * @param filter Filter for matches
+     * @return list of suggestions
+     */   
+    public ArrayList<CompletionNode> InstNode.completionProposals(
+            CompletionFilter filter,
+            boolean unqualified) {
+
+        ArrayList<CompletionNode> proposals = new ArrayList<CompletionNode>();
+
+        for (CompletionNode node : completionNodes(unqualified))
+            if (filter.matches(node.completionName()))
+                proposals.add(node);
+        
+        return proposals;
+    }
+
+}
+
+/**
+ * Get the string comment from classes to display in the content assist. 
+ */
+aspect CompletionComment {
+    
+    syn CompletionComment InstNode.proposalComment() = CompletionComment.NULL;
+    eq InstClassDecl.proposalComment() = new CompletionComment(myInstClass().getClassDecl().stringComment());
+    
+    syn String ASTNode.stringComment() = null;
+    eq FullClassDecl.stringComment() = hasStringComment() ? getStringComment().getComment() : null;
+    
+}
+
+/**
+ *  Finds location of referencing node for the things we are interested 
+ *  in cross referencing.
+ */
+aspect CrossReference {
+    
+    /**
+     * Get referencing node.
+     */
+    syn HashSet<IJastAddNode> ASTNode.getReference();
+    
+    eq ComponentAccess.getReference()
+        = lookupComponent(getID());
+    
+    eq ClassAccess.getReference()
+        = lookupClass(getID());
+    
+    eq ASTNode.getReference() = new HashSet<IJastAddNode>();
+    
+    /**
+     * Finding the source node of given declaration for lookup.
+     * TODO: why is this not working?
+     */
+    inh StoredDefinition ASTNode.getStoredDefinition();
+    eq StoredDefinition.getChild().getStoredDefinition() = this;
+    eq ASTNode.getChild().getStoredDefinition() = null;
+}
+
+//TODO: remove. only for debugging
+aspect NADebugging {    
+    
+    public void ASTNode.debugNN(String ind) {
+        System.out.printf("%s%s: (%d,%d)-(%d,%d), (%d-%d)\n", ind, 
+                this.getNodeName(), 
+                this.getBeginLine(),   this.getBeginColumn(),
+                this.getEndLine(),     this.getEndColumn(),
+                this.getBeginOffset(), this.getEndOffset());
+    }
+    
+    public void ASTNode.printASTqq(String ind) {
+        this.debugNN(ind);
+        for (ASTNode node : this) 
+            node.printASTqq(ind + "  ");
+    }
+  
+}

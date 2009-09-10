@@ -1,0 +1,570 @@
+<?xml version='1.0'?>
+<?xml-stylesheet type='text/xsl' href='pmathml.xsl'?>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>An ODE Inverse Problem Example</title>
+<meta name="description" id="description" content="An ODE Inverse Problem Example"/>
+<meta name="keywords" id="keywords" content=" ode inverse example "/>
+<style type='text/css'>
+body { color : black }
+body { background-color : white }
+A:link { color : blue }
+A:visited { color : purple }
+A:active { color : purple }
+</style>
+<script type='text/javascript' language='JavaScript' src='_ipopt_cppad_ode_inverse_xml.js'>
+</script>
+</head>
+<body>
+<table><tr>
+<td>
+<a href="http://www.coin-or.org/CppAD/" target="_top"><img border="0" src="_image.gif"/></a>
+</td>
+<td><a href="ipopt_cppad_ode_forward.xml" target="_top">Prev</a>
+</td><td><a href="ipopt_cppad_ode_simulate.xml" target="_top">Next</a>
+</td><td>
+<select onchange='choose_across0(this)'>
+<option>Index-&gt;</option>
+<option>contents</option>
+<option>reference</option>
+<option>index</option>
+<option>search</option>
+<option>external</option>
+</select>
+</td>
+<td>
+<select onchange='choose_up0(this)'>
+<option>Up-&gt;</option>
+<option>CppAD</option>
+<option>Example</option>
+<option>General</option>
+<option>ipopt_cppad_nlp</option>
+<option>ipopt_cppad_ode</option>
+<option>ipopt_cppad_ode_inverse</option>
+</select>
+</td>
+<td>
+<select onchange='choose_down3(this)'>
+<option>General-&gt;</option>
+<option>ipopt_cppad_nlp</option>
+<option>Interface2C.cpp</option>
+<option>JacMinorDet.cpp</option>
+<option>JacLuDet.cpp</option>
+<option>HesMinorDet.cpp</option>
+<option>HesLuDet.cpp</option>
+<option>OdeStiff.cpp</option>
+<option>ode_taylor.cpp</option>
+<option>ode_taylor_adolc.cpp</option>
+<option>StackMachine.cpp</option>
+<option>mul_level</option>
+</select>
+</td>
+<td>
+<select onchange='choose_down2(this)'>
+<option>ipopt_cppad_nlp-&gt;</option>
+<option>ipopt_cppad_windows</option>
+<option>ipopt_cppad_simple.cpp</option>
+<option>ipopt_cppad_ode</option>
+</select>
+</td>
+<td>
+<select onchange='choose_down1(this)'>
+<option>ipopt_cppad_ode-&gt;</option>
+<option>ipopt_cppad_ode_forward</option>
+<option>ipopt_cppad_ode_inverse</option>
+<option>ipopt_cppad_ode_simulate</option>
+<option>ipopt_cppad_ode_represent</option>
+<option>ipopt_cppad_ode.cpp</option>
+</select>
+</td>
+<td>ipopt_cppad_ode_inverse</td>
+<td>
+<select onchange='choose_current0(this)'>
+<option>Headings-&gt;</option>
+<option>Problem</option>
+<option>Black Box Method</option>
+<option>---..Two levels of Iteration</option>
+<option>---..Derivatives</option>
+<option>Simultaneous Method</option>
+</select>
+</td>
+</tr></table><br/>
+
+
+<center><b><big><big>An ODE Inverse Problem Example</big></big></b></center>
+<br/>
+<b><big><a name="Problem" id="Problem">Problem</a></big></b>
+<br/>
+We define 
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow>
+<mi mathvariant='italic'>y</mi>
+<mo stretchy="false">:</mo>
+<mrow><mstyle mathvariant='bold'><mi mathvariant='bold'>R</mi>
+</mstyle></mrow>
+<mo stretchy="false">&#x000D7;</mo>
+<msup><mrow><mstyle mathvariant='bold'><mi mathvariant='bold'>R</mi>
+</mstyle></mrow>
+<mn>3</mn>
+</msup>
+<mo stretchy="false">&#x02192;</mo>
+<msup><mrow><mstyle mathvariant='bold'><mi mathvariant='bold'>R</mi>
+</mstyle></mrow>
+<mn>2</mn>
+</msup>
+</mrow></math>
+
+ as the
+solution of our <a href="ipopt_cppad_ode_forward.xml#Problem" target="_top"><span style='white-space: nowrap'>ode&#xA0;forward&#xA0;problem</span></a>
+.
+Suppose we are also given measurement values 
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow>
+<msub><mi mathvariant='italic'>z</mi>
+<mi mathvariant='italic'>k</mi>
+</msub>
+<mo stretchy="false">&#x02208;</mo>
+<mrow><mstyle mathvariant='bold'><mi mathvariant='bold'>R</mi>
+</mstyle></mrow>
+</mrow></math>
+
+
+for 
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow>
+<mi mathvariant='italic'>k</mi>
+<mo stretchy="false">=</mo>
+<mn>1</mn>
+<mo stretchy="false">,</mo>
+<mn>2</mn>
+<mo stretchy="false">,</mo>
+<mn>3</mn>
+<mo stretchy="false">,</mo>
+<mn>4</mn>
+</mrow></math>
+
+ that are modeled by
+
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow>
+<msub><mi mathvariant='italic'>z</mi>
+<mi mathvariant='italic'>k</mi>
+</msub>
+<mo stretchy="false">=</mo>
+<msub><mi mathvariant='italic'>y</mi>
+<mn>1</mn>
+</msub>
+<mo stretchy="false">(</mo>
+<msub><mi mathvariant='italic'>s</mi>
+<mi mathvariant='italic'>k</mi>
+</msub>
+<mo stretchy="false">,</mo>
+<mi mathvariant='italic'>a</mi>
+<mo stretchy="false">)</mo>
+<mo stretchy="false">+</mo>
+<msub><mi mathvariant='italic'>e</mi>
+<mi mathvariant='italic'>k</mi>
+</msub>
+</mrow></math>
+
+where
+
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow>
+<msub><mi mathvariant='italic'>s</mi>
+<mi mathvariant='italic'>k</mi>
+</msub>
+<mo stretchy="false">&#x02208;</mo>
+<mrow><mstyle mathvariant='bold'><mi mathvariant='bold'>R</mi>
+</mstyle></mrow>
+</mrow></math>
+
+,
+
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow>
+<msub><mi mathvariant='italic'>e</mi>
+<mi mathvariant='italic'>k</mi>
+</msub>
+<mo stretchy="false">&#x0223C;</mo>
+<mrow><mstyle mathvariant='bold'><mi mathvariant='bold'>N</mi>
+</mstyle></mrow>
+<mo stretchy="false">(</mo>
+<mn>0</mn>
+<mo stretchy="false">,</mo>
+<msup><mi mathvariant='normal'>&#x003C3;</mi>
+<mn>2</mn>
+</msup>
+<mo stretchy="false">)</mo>
+</mrow></math>
+
+,
+and 
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow>
+<mi mathvariant='normal'>&#x003C3;</mi>
+<mo stretchy="false">&#x02208;</mo>
+<msub><mrow><mstyle mathvariant='bold'><mi mathvariant='bold'>R</mi>
+</mstyle></mrow>
+<mo stretchy="false">+</mo>
+</msub>
+</mrow></math>
+
+.
+The maximum likelihood estimate for 
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow>
+<mi mathvariant='italic'>a</mi>
+</mrow></math>
+
+ given 
+
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow>
+<mo stretchy="false">(</mo>
+<msub><mi mathvariant='italic'>z</mi>
+<mn>1</mn>
+</msub>
+<mo stretchy="false">,</mo>
+<msub><mi mathvariant='italic'>z</mi>
+<mn>2</mn>
+</msub>
+<mo stretchy="false">,</mo>
+<msub><mi mathvariant='italic'>z</mi>
+<mn>3</mn>
+</msub>
+<mo stretchy="false">,</mo>
+<msub><mi mathvariant='italic'>z</mi>
+<mn>4</mn>
+</msub>
+<mo stretchy="false">)</mo>
+</mrow></math>
+
+ solves the following inverse problem
+
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow>
+<mtable rowalign="center" ><mtr><mtd columnalign="right" >
+<mrow><mstyle mathvariant='normal'><mi mathvariant='normal'>minimize</mi>
+</mstyle></mrow>
+<mspace width='.3em'/>
+</mtd><mtd columnalign="center" >
+<munderover><mo displaystyle='true' largeop='true'>&#x02211;</mo>
+<mrow><mi mathvariant='italic'>k</mi>
+<mo stretchy="false">=</mo>
+<mn>1</mn>
+</mrow>
+<mn>4</mn>
+</munderover>
+<msub><mi mathvariant='italic'>H</mi>
+<mi mathvariant='italic'>k</mi>
+</msub>
+<mo stretchy="false">[</mo>
+<mi mathvariant='italic'>y</mi>
+<mo stretchy="false">(</mo>
+<msub><mi mathvariant='italic'>s</mi>
+<mi mathvariant='italic'>k</mi>
+</msub>
+<mo stretchy="false">,</mo>
+<mi mathvariant='italic'>a</mi>
+<mo stretchy="false">)</mo>
+<mo stretchy="false">,</mo>
+<mi mathvariant='italic'>a</mi>
+<mo stretchy="false">]</mo>
+</mtd><mtd columnalign="left" >
+<mspace width='.3em'/>
+<mrow><mstyle mathvariant='normal'><mi mathvariant='normal'>w</mi>
+<mo stretchy="false">.</mo>
+<mi mathvariant='normal'>r</mi>
+<mo stretchy="false">.</mo>
+<mi mathvariant='normal'>t</mi>
+</mstyle></mrow>
+<mspace width='.3em'/>
+<mi mathvariant='italic'>a</mi>
+<mo stretchy="false">&#x02208;</mo>
+<msup><mrow><mstyle mathvariant='bold'><mi mathvariant='bold'>R</mi>
+</mstyle></mrow>
+<mn>3</mn>
+</msup>
+</mtd></mtr></mtable>
+</mrow></math>
+
+where the function 
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow>
+<msub><mi mathvariant='italic'>H</mi>
+<mi mathvariant='italic'>k</mi>
+</msub>
+<mo stretchy="false">:</mo>
+<msup><mrow><mstyle mathvariant='bold'><mi mathvariant='bold'>R</mi>
+</mstyle></mrow>
+<mn>2</mn>
+</msup>
+<mo stretchy="false">&#x000D7;</mo>
+<msup><mrow><mstyle mathvariant='bold'><mi mathvariant='bold'>R</mi>
+</mstyle></mrow>
+<mn>3</mn>
+</msup>
+<mo stretchy="false">&#x02192;</mo>
+<mrow><mstyle mathvariant='bold'><mi mathvariant='bold'>R</mi>
+</mstyle></mrow>
+</mrow></math>
+
+ is
+defined by
+
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow>
+<msub><mi mathvariant='italic'>H</mi>
+<mi mathvariant='italic'>k</mi>
+</msub>
+<mo stretchy="false">(</mo>
+<mi mathvariant='italic'>y</mi>
+<mo stretchy="false">,</mo>
+<mi mathvariant='italic'>a</mi>
+<mo stretchy="false">)</mo>
+<mo stretchy="false">=</mo>
+<mo stretchy="false">(</mo>
+<msub><mi mathvariant='italic'>z</mi>
+<mi mathvariant='italic'>k</mi>
+</msub>
+<mo stretchy="false">-</mo>
+<msub><mi mathvariant='italic'>y</mi>
+<mn>1</mn>
+</msub>
+<msup><mo stretchy="false">)</mo>
+<mn>2</mn>
+</msup>
+</mrow></math>
+
+<br/>
+<b><big><a name="Black Box Method" id="Black Box Method">Black Box Method</a></big></b>
+<br/>
+A common approach to an inverse problem is to treat the forward problem
+as a black box (that we do not look inside of or try to understand).
+In this approach, for each value of the parameter vector 
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow>
+<mi mathvariant='italic'>a</mi>
+</mrow></math>
+
+
+one uses a 
+<a href="ipopt_cppad_ode_forward.xml#Numerical Procedure" target="_top"><span style='white-space: nowrap'>numerical&#xA0;procedure</span></a>
+
+to solve for 
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow>
+<msub><mi mathvariant='italic'>y</mi>
+<mn>1</mn>
+</msub>
+<mo stretchy="false">(</mo>
+<msub><mi mathvariant='italic'>s</mi>
+<mi mathvariant='italic'>k</mi>
+</msub>
+<mo stretchy="false">,</mo>
+<mi mathvariant='italic'>a</mi>
+<mo stretchy="false">)</mo>
+</mrow></math>
+
+ for 
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow>
+<mi mathvariant='italic'>k</mi>
+<mo stretchy="false">=</mo>
+<mn>1</mn>
+<mo stretchy="false">,</mo>
+<mn>2</mn>
+<mo stretchy="false">,</mo>
+<mn>3</mn>
+<mo stretchy="false">,</mo>
+<mn>4</mn>
+</mrow></math>
+
+.
+
+<br/>
+<br/>
+<b><a name="Black Box Method.Two levels of Iteration" id="Black Box Method.Two levels of Iteration">Two levels of Iteration</a></b>
+<br/>
+As noted above, this numerical procedure often involves iterative
+procedures for solving a set of equations.
+Thus, in this approach, there are two levels of iterations,
+one with respect to the parameter values and the other for solving
+the forward problem.
+
+<br/>
+<br/>
+<b><a name="Black Box Method.Derivatives" id="Black Box Method.Derivatives">Derivatives</a></b>
+<br/>
+In addition, in the black box approach, differentiating the forward problem
+often involves differentiating an iterative procedure.
+Since the iterative procedure only returns an approximate solution,
+finite differences often lead to very inaccurate approximations
+for the derivatives 
+(which in turn create problems for the optimization process).
+On the other hand, 
+direct application of AD to compute the derivatives 
+requires a huge amount of memory and calculations to differentiate the 
+forward iterative procedure.
+(There are special techniques for applying AD to the solutions of iterative
+procedures, but that is outside the scope of this presentation).
+
+<br/>
+<br/>
+<b><big><a name="Simultaneous Method" id="Simultaneous Method">Simultaneous Method</a></big></b>
+<br/>
+The simultaneous forward and inverse method 
+uses constraints to include the solution of 
+the forward problem in the inverse problem.
+To be specific for our example,
+
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow>
+<mtable rowalign="center" ><mtr><mtd columnalign="right" >
+<mrow><mstyle mathvariant='normal'><mi mathvariant='normal'>minimize</mi>
+</mstyle></mrow>
+</mtd><mtd columnalign="center" >
+<munderover><mo displaystyle='true' largeop='true'>&#x02211;</mo>
+<mrow><mi mathvariant='italic'>k</mi>
+<mo stretchy="false">=</mo>
+<mn>1</mn>
+</mrow>
+<mn>4</mn>
+</munderover>
+<msub><mi mathvariant='italic'>H</mi>
+<mi mathvariant='italic'>k</mi>
+</msub>
+<mo stretchy="false">(</mo>
+<msup><mi mathvariant='italic'>y</mi>
+<mrow><mi mathvariant='italic'>k</mi>
+<mo stretchy="false">*</mo>
+<mi mathvariant='italic'>ns</mi>
+</mrow>
+</msup>
+<mo stretchy="false">,</mo>
+<mi mathvariant='italic'>a</mi>
+<mo stretchy="false">)</mo>
+</mtd><mtd columnalign="left" >
+<mspace width='.3em'/>
+<mrow><mstyle mathvariant='normal'><mi mathvariant='normal'>w</mi>
+<mo stretchy="false">.</mo>
+<mi mathvariant='normal'>r</mi>
+<mo stretchy="false">.</mo>
+<mi mathvariant='normal'>t</mi>
+</mstyle></mrow>
+<mspace width='.3em'/>
+<msup><mi mathvariant='italic'>y</mi>
+<mn>1</mn>
+</msup>
+<mo stretchy="false">&#x02208;</mo>
+<msup><mrow><mstyle mathvariant='bold'><mi mathvariant='bold'>R</mi>
+</mstyle></mrow>
+<mn>2</mn>
+</msup>
+<mo stretchy="false">,</mo>
+<mo stretchy="false">&#x02026;</mo>
+<mo stretchy="false">,</mo>
+<msup><mi mathvariant='italic'>y</mi>
+<mrow><mn>4</mn>
+<mo stretchy="false">*</mo>
+<mi mathvariant='italic'>ns</mi>
+</mrow>
+</msup>
+<mo stretchy="false">&#x02208;</mo>
+<msup><mrow><mstyle mathvariant='bold'><mi mathvariant='bold'>R</mi>
+</mstyle></mrow>
+<mn>2</mn>
+</msup>
+<mo stretchy="false">,</mo>
+<mspace width='.3em'/>
+<mi mathvariant='italic'>a</mi>
+<mo stretchy="false">&#x02208;</mo>
+<msup><mrow><mstyle mathvariant='bold'><mi mathvariant='bold'>R</mi>
+</mstyle></mrow>
+<mn>3</mn>
+</msup>
+</mtd></mtr><mtr><mtd columnalign="right" >
+<mrow><mstyle mathvariant='normal'><mi mathvariant='normal'>subject</mi>
+<mspace width='.3em'/>
+<mi mathvariant='normal'>to</mi>
+</mstyle></mrow>
+</mtd><mtd columnalign="center" >
+<msup><mi mathvariant='italic'>y</mi>
+<mrow><mi mathvariant='italic'>M</mi>
+<mo stretchy="false">+</mo>
+<mn>1</mn>
+</mrow>
+</msup>
+<mo stretchy="false">=</mo>
+<msup><mi mathvariant='italic'>y</mi>
+<mi mathvariant='italic'>M</mi>
+</msup>
+<mo stretchy="false">+</mo>
+<mrow><mo stretchy="true">[</mo><mrow><mi mathvariant='italic'>G</mi>
+<mo stretchy="false">(</mo>
+<msup><mi mathvariant='italic'>y</mi>
+<mi mathvariant='italic'>M</mi>
+</msup>
+<mo stretchy="false">,</mo>
+<mi mathvariant='italic'>a</mi>
+<mo stretchy="false">)</mo>
+<mo stretchy="false">+</mo>
+<mi mathvariant='italic'>G</mi>
+<mo stretchy="false">(</mo>
+<msup><mi mathvariant='italic'>y</mi>
+<mrow><mi mathvariant='italic'>M</mi>
+<mo stretchy="false">+</mo>
+<mn>1</mn>
+</mrow>
+</msup>
+<mo stretchy="false">,</mo>
+<mi mathvariant='italic'>a</mi>
+<mo stretchy="false">)</mo>
+</mrow><mo stretchy="true">]</mo></mrow>
+<mo stretchy="false">*</mo>
+<mfrac><mrow><msub><mi mathvariant='italic'>s</mi>
+<mrow><mi mathvariant='italic'>M</mi>
+<mo stretchy="false">+</mo>
+<mn>1</mn>
+</mrow>
+</msub>
+<mo stretchy="false">-</mo>
+<msub><mi mathvariant='italic'>s</mi>
+<mi mathvariant='italic'>M</mi>
+</msub>
+</mrow>
+<mrow><mn>2</mn>
+</mrow>
+</mfrac>
+</mtd><mtd columnalign="left" >
+<mspace width='.3em'/>
+<mrow><mstyle mathvariant='normal'><mi mathvariant='normal'>for</mi>
+</mstyle></mrow>
+<mspace width='.3em'/>
+<mi mathvariant='italic'>M</mi>
+<mo stretchy="false">=</mo>
+<mn>0</mn>
+<mo stretchy="false">,</mo>
+<mo stretchy="false">&#x02026;</mo>
+<mo stretchy="false">,</mo>
+<mn>4</mn>
+<mo stretchy="false">*</mo>
+<mi mathvariant='italic'>ns</mi>
+<mo stretchy="false">-</mo>
+<mn>1</mn>
+</mtd></mtr><mtr><mtd columnalign="right" >
+</mtd><mtd columnalign="center" >
+<msup><mi mathvariant='italic'>y</mi>
+<mn>0</mn>
+</msup>
+<mo stretchy="false">=</mo>
+<mi mathvariant='italic'>F</mi>
+<mo stretchy="false">(</mo>
+<mi mathvariant='italic'>a</mi>
+<mo stretchy="false">)</mo>
+</mtd></mtr></mtable>
+</mrow></math>
+
+where 
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow>
+<mi mathvariant='italic'>ns</mi>
+</mrow></math>
+
+ is the number of time intervals 
+(used by the trapezoidal approximation)
+between each of the measurement times.
+Note that, in this form, the iterations of the optimization procedure
+also solve the forward problem equations.
+In addition, the functions that need to be differentiated
+do not involve an iterative procedure.
+
+
+<hr/>Input File: omh/ipopt_cppad_ode2.omh
+
+</body>
+</html>

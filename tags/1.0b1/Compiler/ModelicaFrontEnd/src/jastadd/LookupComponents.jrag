@@ -1,0 +1,274 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+import java.util.HashSet;
+
+aspect LookupComponents {
+
+	/* The HashSet is used in order to get all matching components.
+	   This is valid, under some conditions, if a component occurs
+	   in a class and in super classes of the same class.
+	*/
+	inh lazy HashSet Access.lookupComponent(String name);
+	inh lazy HashSet BaseClassDecl.lookupComponent(String name);
+	inh lazy HashSet ExtendsClauseShortClass.lookupComponent(String name);
+	
+	eq FullClassDecl.getChild().lookupComponent(String name) = genericLookupComponent(name); 
+
+	eq ShortClassDecl.getExtendsClauseShortClass().lookupComponent(String name) = lookupComponent(name);
+	eq ExtendsClauseShortClass.getChild().lookupComponent(String name) = lookupComponent(name);
+
+	eq Dot.getRight().lookupComponent(String name) {
+	   debugPrint("Dot.getRight().lookupComponent: " + name);
+	   return getLeft().qualifiedLookupComponent(name);
+	}
+	
+	syn lazy HashSet Access.qualifiedLookupComponent(String name) {
+		debugPrint("Access.qualifiedLookupComponent (" + name() + ") looking for: " + name);
+		return emptyHashSet();
+	}
+		
+	eq ComponentAccess.qualifiedLookupComponent(String name) {
+		debugPrint("ComponentAccess.qualifiedLookupComponent (" + name() + ") looking for: " + name);
+		return myComponentDecl().myClass().memberComponent(name);
+	}
+	eq ClassAccess.qualifiedLookupComponent(String name) {
+		debugPrint("ClassAccess.qualifiedLookupComponent (" + name() + ") looking for: " + name);
+		return myClassDecl().memberComponent(name);
+	}
+	
+	eq SourceRoot.getProgram().lookupComponent(String name) = emptyHashSet();
+	
+	syn lazy HashSet FullClassDecl.genericLookupComponent(String name) {
+		debugPrint("FullClassDecl.genericLookupComponent (" + name() + ") looking for " +name);
+		HashSet h = memberComponent(name);
+		/*if (h.size()>0)
+			debugPrint("FullClassDecl.genericLookupComponent (" + name() + ") looking for " +name + " found");
+		else
+			debugPrint("FullClassDecl.genericLookupComponent (" + name() + ") looking for " +name + " not found");
+			*/
+		return h;
+	 }
+	
+	syn lazy HashSet ClassDecl.memberComponent(String name) = emptyHashSet();
+	
+	eq FullClassDecl.memberComponent(String name)  {
+	 	
+	 	debugPrint("FullClassDecl.memberComponent (" + name() + ") looking for: " + name);
+	 	
+	 	HashSet set = new HashSet(4);
+		for (int i=0;i<getNumComponentDecl();i++) {
+		  //  debugPrint("  FullClassDecl.memberComponent (" + name() + ") looking for: " + name + " checking: "+ getComponentDecl(i).getName().name());
+			if (getComponentDecl(i).matchComponentDecl(name))
+				set.add(getComponentDecl(i));
+		}
+		
+		//debugPrint("  FullClassDecl.memberComponent (" + name() + ") looking for: " + name + " matches after components: " +set.size());
+
+
+		
+		for (int i=0;i<getNumSuper();i++) {
+			if (getSuper(i).getSuper().myClassDecl()!=null){
+	//		    HashSet h =  getSuper(i).getSuper().myClassDecl().memberComponent(name);
+	//		    debugPrint("  FullClassDecl.memberComponent (" + name() + ") looking for: " + name + " matches in super ("+ getSuper(i).getSuper().name()+ "): " +h.size());
+				set.addAll(getSuper(i).getSuper().myClassDecl().memberComponent(name));
+			}
+		}
+		
+//	    debugPrint("  FullClassDecl.memberComponent (" + name() + ") looking for: " + name + " matches after super: " +set.size());
+//		if (set.size()>0) 
+//			((ASTNode)set.iterator().next()).dumpTreeBasic("  ");
+		
+		if (set.size()>0) {
+			//debugPrint("  FullClassDecl.memberComponent (" + name() + ") looking for: " + name + " found");
+			return set;
+		} else {
+			//debugPrint("  FullClassDecl.memberComponent (" + name() + ") looking for: " + name + " not found");
+			//debugPrint("  FullClassDecl.memberComponent (" + name() + ") looking for: " + name + " size of emptySetHash(): "+emptyHashSet().size());
+			return emptyHashSet();
+		}
+	}
+	
+	eq ShortClassDecl.memberComponent(String name) = getExtendsClauseShortClass().getSuper().myClassDecl().memberComponent(name);
+	
+	/**
+	 * Simple matching of component names.
+	 */
+	syn boolean ComponentDecl.matchComponentDecl(String name) = getName().getID().equals(name);
+	
+	syn lazy ComponentDecl Access.myComponentDecl() = unknownComponentDecl();
+	eq ComponentAccess.myComponentDecl() {
+		debugPrint("ComponentAccess.myComponentDecl(): " + name());
+		HashSet set = lookupComponent(name());
+		debugPrint("ComponentAccess.myComponentDecl(): " + name() +" Found decls: " + set.size());
+		if (set.size() > 0) {
+			debugPrint("ComponentAccess.myComponentDecl(): " + name() +" Found decls: " + set.size() + " Decl name: " + ((ComponentDecl)set.iterator().next()).name());
+			return (ComponentDecl)set.iterator().next();
+		} else
+			return unknownComponentDecl();
+	}
+	eq Dot.myComponentDecl() { 
+		debugPrint("Dot.myComponentDecl()");
+		return getRight().myComponentDecl();
+	}
+		
+	syn lazy ClassDecl ComponentDecl.myClass() = getClassName().myClassDecl();
+	eq UnknownComponentDecl.myClass() = unknownClassDecl();	
+
+	inh HashSet ForClauseE.lookupComponent(String name);	
+	eq ForClauseE.getForEqns().lookupComponent(String name) {
+		HashSet set = new HashSet(4);
+		for (int i=0;i<getNumForIndex();i++) {
+			if (getForIndex(i).getForIndexDecl().matchComponentDecl(name)) {
+				set.add(getForIndex(i).getForIndexDecl());	
+				return set;
+			}
+		}
+		return lookupComponent(name);
+	}
+
+
+	inh HashSet SumRedExp.lookupComponent(String name);	
+	eq SumRedExp.getExp().lookupComponent(String name) {
+		debugPrint("SumRedExp.getExp().lookupComponent: "+ name);
+		HashSet set = new HashSet(4);
+		if (getForIndex().getForIndexDecl().matchComponentDecl(name)) {
+			set.add(getForIndex().getForIndexDecl());
+			return set;	
+		}
+		return lookupComponent(name);
+	}
+	
+	
+}
+
+
+
+aspect LookupComponentsInModifications {
+
+       
+	/*
+	  Name analysis for modification differs from ordinary name analyis. While the right
+	  hand side of an element modification is looked up in the normal lexical scope, the 
+	  left hand side is looked up in the Class (ClassDef) of the component on which the 
+	  modification is acting. Consequently, a new inherited attribute of ElementModification
+	  defining this lookup mechanism is introduced: lookupComponentInClass. 
+	  */
+
+    /**
+     * The inherited attribute lookupComponentInClass defines the lookup mechanism for
+     * left hand component references in modifications.
+     */
+	inh HashSet ElementModification.lookupComponentInClass(String name);
+	inh HashSet NamedModification.lookupComponentInClass(String name);
+	
+	/**
+	 * Lookup of the left hand component reference of an ElementModification is
+	 * performed by lookupComponentInClass. 
+	 */ 
+	eq ElementModification.getName().lookupComponent(String name) { 
+	    debugPrint("ElementModification.getName().lookupComponent(" +name +"): in "+ getName().getID());
+	    return lookupComponentInClass(name);
+	}
+	
+
+	eq NamedModification.getName().lookupComponent(String name) { 
+	    debugPrint("NamedModification.getName().lookupComponent(" +name +"): in "+ getName().getID());
+	    return lookupComponentInClass(name);
+	}
+	
+	eq ConstrainingClause.getClassModification().lookupComponentInClass(String name) {
+		return getAccess().myClassDecl().memberComponent(name);
+	}
+	
+	
+	/**
+	 * For a ComponentDecl, lookupComponentInClass access the Class of the component and
+	 * initiates the ordinary lookup mechanism in the corresponding ClassDef.
+	 */     
+	eq ComponentDecl.getModification().lookupComponentInClass(String name) {
+	
+		ClassDecl compClass = getClassName().myClassDecl();
+		
+	    if (compClass!=null) {
+			return compClass.memberComponent(name);
+		}
+		return emptyHashSet();
+	}
+
+	/**
+	 * For ElementModification, lookupComponentInClass retreives the Class of the 
+	 * left hand component reference and initiates the memberLookup
+	 * mechanism in the corresponding Class.
+	 */
+	eq ElementModification.getModification().lookupComponentInClass(String name) {
+    
+    	debugPrint("ElementModification.getModification().lookupComponentInClass("+name+") in: "+getName().getID());
+    
+    	ClassDecl c = getName().myComponentDecl().myClass();
+    	    	
+    	if (c != null) {
+    		return c.memberComponent(name);
+    	}
+    	return emptyHashSet();
+    }
+    
+	/**
+	 * For ExtendsClause, the name lookupComponentInClass proceeds by retreiving the 
+	 * Class of the super class and initiate the memberLookup mechanism.
+	 */
+	eq ExtendsClause.getClassModification().lookupComponentInClass(String name) {
+	
+		debugPrint("ExtendsClause.getClassModification().lookupComponentInClass("+name+") in: "+getSuper().getID());
+	
+		ClassDecl superClass = getSuper().myClassDecl();
+			
+	    if (superClass!=null) {
+			return superClass.memberComponent(name);
+		}
+		return emptyHashSet();
+	}
+	
+	/**
+	 * Definition of the lookupComponentInClass attribute for ShortClassDecl.
+	 */
+/*	eq ShortClassDecl.getClassModification().lookupComponentInClass(String name) {
+	
+		ClassDecl Class = getClassName().myClassDecl();
+    	    	
+    	if (Class != null) {
+    		return Class.memberComponent(name);
+    	}
+    	return emptyHashSet();
+	
+	}
+	*/
+	
+	/**
+	 * Name lookup for component redeclarations in modifiers is performed by
+	 * lookupComponentInClass.
+	 */
+	inh HashSet ComponentRedeclare.lookupComponentInClass(String name);
+	eq ComponentRedeclare.getName().lookupComponent(String name) = lookupComponentInClass(name);
+	
+	/**
+	 * Terminating equation for attribute lookupComponentInClass.
+	 */
+	eq SourceRoot.getProgram().lookupComponentInClass(String name) {return emptyHashSet();}
+	  
+}
+

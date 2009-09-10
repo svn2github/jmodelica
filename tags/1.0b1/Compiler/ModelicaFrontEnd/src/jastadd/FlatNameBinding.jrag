@@ -1,0 +1,78 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.util.HashMap;
+
+aspect FlatNameBinding {
+	
+	inh AbstractFVariable FIdUse.lookupFV(String name);
+	syn lazy AbstractFVariable FIdUse.myFV() = lookupFV(getFQName().name());
+	
+	syn AbstractFVariable FIdUseExp.myFV() = getFIdUse().lookupFV(name());
+
+	//inh AbstractFVariable FIdUseExp.lookupFV(FQName fqname);
+	// inh AbstractFVariable FEquationBlock.lookupFV(FQName fqname);
+	// inh AbstractFVariable FVariable.lookupFV(FQName fqname);
+	
+	eq Root.getChild().lookupFV(String name) = null;
+
+	eq FClass.getChild(int index).lookupFV(String name) {
+		FVariable variable = (FVariable) fullyQualifiedVariablesMap().get(name);
+		if (variable == null) {
+			return unknownFVariable();
+		} else {
+			return variable;
+		}		
+	}
+	
+	/*
+	inh AbstractFVariable FDer.lookupFDV(String name);
+	eq Root.getChild().lookupFDV(String name) = null;
+	eq FClass.getChild(int index).lookupFDV(String name) {
+		FVariable variable = (FDerivativeVariable) 
+		   fullyQualifiedVariablesMap().get(name);
+		if (variable == null) {
+			return unknownFVariable();
+		} else {
+			return variable;
+		}		
+	}
+	syn lazy FDerivativeVariable FDer.myFDV() = 
+		(FDerivativeVariable)lookupFDV(getFIdUseExp().derName());	
+	*/
+	
+	syn lazy HashMap FClass.fullyQualifiedVariablesMap() {
+		HashMap map = new HashMap();
+		for(int k = 0; k < getNumFVariable(); k++) {
+			map.put(getFVariable(k).name(),getFVariable(k));
+		}
+		return map;
+	}
+	
+}
+
+aspect UnknownFVariables {
+
+	syn UnknownFVariable FClass.getUnknownFVariable() = new UnknownFVariable();
+
+	syn lazy UnknownFVariable ASTNode.unknownFVariable() = 
+	  root().unknownFVariable();
+	eq FlatRoot.unknownFVariable() = getFClass().getUnknownFVariable();
+
+	syn boolean AbstractFVariable.isUnknown() = false;
+	eq UnknownFVariable.isUnknown() = true;
+	   
+}
