@@ -17,7 +17,7 @@ from jmodelica.compiler import ModelicaCompiler
 import jmodelica.xmlparser as xp
 import jmodelica.io
 
-from jmodelica.simulation.sundials import solve_using_sundials
+from jmodelica.simulation.sundials import SundialsOdeSimulator
 
 
 sep = os.path.sep
@@ -564,9 +564,10 @@ class TestModel:
         
     def test_optimization_cost_eval(self):
         """Test evaluation of optimization cost function."""
-        T, ys, sens, ignore = solve_using_sundials(self.m,
-                                          self.m.opt_interval_get_final_time(),
-                                          self.m.opt_interval_get_start_time())
+        simulator = SundialsOdeSimulator(self.m)
+        simulator.run()
+        T, ys = simulator.get_solution()
+        
         self.m.set_x_p(ys[-1], 0)
         self.m.set_dx_p(self.m.dx, 0)
         cost = self.m.opt_eval_J()
@@ -578,9 +579,10 @@ class TestModel:
         Note:
         This test is model specific for the VDP oscillator.
         """
-        T, ys, sens, ignore = solve_using_sundials(self.m,
-                                                   self.m.opt_interval_get_final_time(),
-                                                   self.m.opt_interval_get_start_time())
+        simulator = SundialsOdeSimulator(self.m)
+        simulator.run()
+        T, ys = simulator.get_solution()
+        
         self.m.set_x_p(ys[-1], 0)
         self.m.set_dx_p(self.m.dx, 0)
         jac = self.m.opt_eval_jac_J(jmi.JMI_DER_X_P)

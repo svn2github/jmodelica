@@ -28,7 +28,7 @@ import jmodelica.jmi as pyjmi
 from jmodelica.jmi import c_jmi_real_t
 from jmodelica.tests import get_example_path
 from jmodelica.tests import load_example_standard_model
-from jmodelica.simulation import solve_using_sundials
+from jmodelica.simulation.sundials import SundialsOdeSimulator
 
 
 class ShootingException(Exception):
@@ -64,11 +64,13 @@ def _shoot(model, start_time, end_time, sensi=True, time_step=0.2):
      * Assumes cost function is only dependent on state X and control signal U.
     
     """
-    
-    T, last_y, sens, params = solve_using_sundials(model, end_time, start_time,
-                                                   sensi=sensi,
-                                                   time_step=time_step,
-                                                   return_last=True)
+    simulator = SundialsOdeSimulator(model, start_time=start_time,
+        final_time=end_time, sensitivity_analysis=sensi, time_step=time_step,
+        return_last=True)
+    simulator.run()
+    T, last_y = simulator.get_solution()
+    sens = simulator.get_sensitivities()
+    params = simulator.get_sensitivity_indices()
     
     model.set_x_p(last_y, 0)
     model.set_dx_p(model.dx, 0)
@@ -213,9 +215,9 @@ def _eval_initial_ys(model, grid, time_step=0.2):
     from scipy import interpolate
     _check_grid_consistency(grid)
     
-    T, ys, sens, params = solve_using_sundials(model, model.opt_interval_get_final_time(),
-                                               model.opt_interval_get_start_time(),
-                                               time_step=time_step)
+    simulator = SundialsOdeSimulator(model, time_step=time_step)
+    simulator.run()
+    T, ys = simulator.get_solution()
     T = N.array(T)
     
     tck = interpolate.interp1d(T, ys, axis=0)
@@ -708,8 +710,10 @@ def _plot_control_solution(model, interval, initial_ys, us):
 
     p.figure(1)
     p.subplot(211)
-    T, Y, yS, parameters = solve_using_sundials(model, end_time=interval[1],
-                                                start_time=interval[0])
+    simulator = SundialsOdeSimulator(model, start_time=interval[0],
+                                     final_time=interval[1])
+    simulator.run()
+    T, Y = simulator.get_solution()
     p.hold(True)
     for i in range(len(model.x)):
         p.plot(T,Y[:,i],label="State #%s" % (i + 1), linewidth=2)
@@ -771,12 +775,17 @@ def cost_graph(model):
     costs = []
     Us = []
     
+    simulator = SundialsOdeSimulator(model, start_time=start_time,
+                                     final_time=end_time)
+    
     for u_elmnt in N.arange(-0.5, 1, 0.02):
         print "u is", u
         model.reset()
         u[0]=u_elmnt
-        T, ys, sens, params = solve_using_sundials(model, end_time, start_time,
-                                                   sensi=True)
+        
+        simulation.run()
+        T, ys = simulation.get_solution()
+        
         model.set_x_p(ys[-1], 0)
         model.set_dx_p(model.dx, 0)
         model.set_u_p(model.u, 0)

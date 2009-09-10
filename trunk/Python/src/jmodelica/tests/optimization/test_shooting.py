@@ -15,7 +15,6 @@ from jmodelica.optimization.shooting import MultipleShooter
 from jmodelica.optimization.shooting import construct_grid
 from jmodelica.optimization.shooting import _check_normgrid_consistency
 from jmodelica.optimization.shooting import _split_opt_x
-from jmodelica.optimization.shooting import solve_using_sundials
 from jmodelica.optimization.shooting import plot_control_solutions
 
 

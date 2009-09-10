@@ -20,7 +20,7 @@ from jmodelica.tests import testattr
 from jmodelica.compiler import OptimicaCompiler
 import jmodelica as jm
 import jmodelica.jmi as jmi
-from jmodelica.simulation.sundials import solve_using_sundials
+from jmodelica.simulation.sundials import SundialsOdeSimulator
 
 
 class ModelContainer(object):
@@ -611,8 +611,9 @@ class TestModelSimulation:
         This test is model specific and not generic as most other
         tests in this class.
         """
-        solve_using_sundials(self.m, self.m.opt_interval_get_final_time(),
-                             self.m.opt_interval_get_start_time())
+        simulator = TestSundialsOdeSimulator(self.m)
+        simulator.run()
+        
         assert self.m._n_z > 0, "Length of z should be greater than zero."
         print 'n_z.value:', self.m._n_z.value
         n_cols, n_nz = self.m.jmimodel.opt_dJ_dim(jmi.JMI_DER_CPPAD,
