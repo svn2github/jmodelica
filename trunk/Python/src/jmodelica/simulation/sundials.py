@@ -35,7 +35,9 @@ class SundialsSimulationException(SimulationException):
 class SundialsOdeSimulator(Simulator):
     """An object oriented interface for simulating JModelica.org models."""
     
-    def __init__(self, model=None):
+    def __init__(self, model=None, start_time=None, final_time=None,
+                 abstol=1.0e-6, reltol=1.0e-6, time_step=0.2,
+                 return_last=False, sensitivity_analysis=False):
         """Constructor of a TestSundialsOdeSimulator.
         
         Every instance of TestSundialsOdeSimulator needs to have a model to
@@ -46,22 +48,31 @@ class SundialsOdeSimulator(Simulator):
         by calling the setter methods.
         """
         # Setting defaults
-        self.set_absolute_tolerance(1.0e-6)
-        self.set_relative_tolerance(1.0e-6)
-        self.set_return_last(False)
+        self.set_absolute_tolerance(abstol)
+        self.set_relative_tolerance(reltol)
+        self.set_return_last(return_last)
         self._set_solution(None, None)
-        self.set_sensitivity_analysis(False)
+        self.set_sensitivity_analysis(sensitivity_analysis)
         self._set_sensitivities(None)
         self._set_sensitivity_indices(None)
-        self.set_time_step(0.2)
-        if model.opt_interval_starttime_fixed():
+        self.set_time_step(time_step)
+        if start_time is not None:
+            self._start_time = start_time
+        elif model.opt_interval_starttime_fixed():
             self._start_time = model.opt_interval_get_start_time()
         else:
             self._start_time = None
-        if model.opt_interval_finaltime_fixed():
+        if final_time is not None:
+            self._final_time = final_time
+        elif model.opt_interval_finaltime_fixed() and final_time is None:
             self._final_time = model.opt_interval_get_final_time()
         else:
             self._final_time = None
+            
+        if self._final_time is not None and self._start_time is not None and \
+            self._start_time >= self._final_time:
+                raise SundialsSimulationException('Start time must be before '
+                                                  'end time.')
         
         # Setting members
         self.model = model
