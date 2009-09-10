@@ -6,8 +6,11 @@ import os, os.path
 import sys
 import nose
 
+from jmodelica.tests import testattr
+
 from jmodelica.compiler import OptimicaCompiler
 import jmodelica as jm
+
 
 jm_home = jm.environ['JMODELICA_HOME']
 path_to_examples = os.path.join('Python','jmodelica','examples')
@@ -18,7 +21,9 @@ cpath = "Pendulum_pack.Pendulum_Opt"
 
 OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
 oc = OptimicaCompiler()
-   
+
+
+@testattr(stddist = True)
 def test_optimica_compile():
     """
     Test that compilation is possible with optimicacompiler
@@ -57,16 +62,21 @@ def test_optimica_compile():
            fname+suffix+" was not created."        
         
 
+@testattr(stddist = True)
 def test_optimica_compile_wtarget_alg():
     """ Test that it is possible to compile (optimicacompiler.py) with target algorithms. """
     assert oc.compile_model(fpath, cpath, target='algorithms') == 0, \
            "Compiling "+cpath+" with target=algorithms failed."
     
+    
+@testattr(stddist = True)
 def test_optimica_compile_wtarget_ipopt():
     """ Test that it is possible to compile (optimicacompiler.py) with target ipopt. """
     assert oc.compile_model(fpath, cpath, target='ipopt') == 0, \
            "Compiling "+cpath+" with target=ipopt failed."
     
+    
+@testattr(stddist = True)
 def test_optimica_stepbystep():
     """ Test that it is possible to compile (optimicacompiler.py) step-by-step. """
     sourceroot = oc.parse_model(fpath)
@@ -75,6 +85,8 @@ def test_optimica_stepbystep():
     assert oc.compile_dll(cpath.replace('.','_',1)) == 0, \
            "Compiling dll failed."
 
+
+@testattr(stddist = True)
 def test_compiler_error():
     """ Test that a CompilerError is raised if compilation errors are found in the model."""
     corruptmodel = os.path.join('files','CorruptCodeGenTests.mo')
@@ -82,47 +94,63 @@ def test_compiler_error():
     cl = 'CorruptCodeGenTests.CorruptTest1'
     nose.tools.assert_raises(jm.compiler.CompilerError, oc.compile_model, path, cl)
     
+    
+@testattr(stddist = True)
 def test_class_not_found_error():
     """ Test that an OptimicaClassNotFoundError is raised if model class is not found. """
     errorcl = 'NonExisting.OptimicaClass'
     nose.tools.assert_raises(jm.compiler.OptimicaClassNotFoundError, oc.compile_model, fpath, errorcl)
 
+
+@testattr(stddist = True)
 def test_IO_error():
     """ Test that an IOError is raised if the model file is not found. """          
     errormodel = os.path.join('files','NonExistingModel.mo')
     errorpath = os.path.join(jm_home,path_to_examples,errormodel)
     nose.tools.assert_raises(IOError, oc.compile_model, errorpath, cpath)
 
+
+@testattr(stddist = True)
 def test_setget_modelicapath():
     """ Test modelicapath setter and getter. """
     newpath = os.path.join(jm_home,'ThirdParty','MSL','Modelica')
     oc.set_modelicapath(newpath)
     nose.tools.assert_equal(oc.get_modelicapath(),newpath)
     
+    
+@testattr(stddist = True)
 def test_setget_XMLVariablesTemplate():
     """ Test XML variables template setter and getter. """
     newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_optimica_variables_template.xml')
     oc.set_XMLVariablesTemplate(newtemplate)
     nose.tools.assert_equal(oc.get_XMLVariablesTemplate(), newtemplate)
 
+
+@testattr(stddist = True)
 def test_setget_XMLProblVariablesTemplate():
     """ Test XML variables template setter and getter. """
     newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_optimica_problvariables_template.xml')
     oc.set_XMLVariablesTemplate(newtemplate)
     nose.tools.assert_equal(oc.get_XMLVariablesTemplate(), newtemplate)
-   
+
+
+@testattr(stddist = True)
 def test_setget_XMLValuesTemplate():
     """ Test XML values template setter and getter. """
     newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_modelica_values_template.xml')
     oc.set_XMLValuesTemplate(newtemplate)
     nose.tools.assert_equal(oc.get_XMLValuesTemplate(), newtemplate)
 
+
+@testattr(stddist = True)
 def test_setget_cTemplate():
     """ Test c template setter and getter. """
     newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_optimica_template.c')
     oc.set_cTemplate(newtemplate)
     nose.tools.assert_equal(oc.get_cTemplate(), newtemplate)
 
+
+@testattr(stddist = True)
 def TO_ADDtest_MODELICAPATH():
     """ Test that the MODELICAPATH is loaded correctly.
 

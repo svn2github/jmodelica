@@ -2,8 +2,12 @@
  
 """
 
+from jmodelica.tests import testattr
+
 from jmodelica.examples import *
 
+
+@testattr(stddist = True)
 def test_parameter_estimation_1():
     """
     Test the parameter_estimation_1 example
@@ -11,6 +15,8 @@ def test_parameter_estimation_1():
 
     parameter_estimation_1.run_demo(False)
 
+
+@testattr(stddist = True)
 def test_vdp():
     """
     Test the vdp example
@@ -18,6 +24,8 @@ def test_vdp():
 
     vdp.run_demo(False)
 
+
+@testattr(stddist = True)
 def test_vdp_minimum_time():
     """
     Test the vdp_minimum_time example
@@ -25,6 +33,8 @@ def test_vdp_minimum_time():
 
     vdp_minimum_time.run_demo(False)
 
+
+@testattr(stddist = True)
 def test_quadtank():
     """
     Test the quadtank example
@@ -32,6 +42,8 @@ def test_quadtank():
 
     quadtank.run_demo(False)
 
+
+@testattr(stddist = True)
 def test_cstr():
     """
     Test the cstr example
@@ -39,6 +51,8 @@ def test_cstr():
 
     cstr.run_demo(False)
 
+
+@testattr(stddist = True)
 def test_pendulum():
     """
     Test the pendulum example

@@ -8,13 +8,15 @@ import matplotlib.pyplot as plt
 import nose.tools as ntools
 import numpy as N
 
+from jmodelica.tests import load_example_standard_model
+from jmodelica.tests import testattr
+
 import jmodelica.jmi as jmi
 from jmodelica.compiler import OptimicaCompiler
 from jmodelica.compiler import ModelicaCompiler
 import jmodelica.xmlparser as xp
 import jmodelica.io
 
-from jmodelica.tests import load_example_standard_model
 from jmodelica.simulation.sundials import solve_using_sundials
 
 
@@ -35,6 +37,7 @@ def setup():
     OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
 
 
+@testattr(stddist = True)
 def test_jmi_opt_sim_set_initial_from_trajectory():
     """ Test of 'jmi_opt_sim_set_initial_from_trajectory'.
 
@@ -104,6 +107,7 @@ def test_jmi_opt_sim_set_initial_from_trajectory():
            "The values used in initialization does not match the values that were read back after initialization."        
 
 
+@testattr(stddist = True)
 def test_set_initial_from_dymola():
     """ Test of 'jmi_opt_sim_set_initial_from_trajectory'.
 
@@ -212,6 +216,7 @@ def test_set_initial_from_dymola():
 ##     plt.show()
 
 
+@testattr(stddist = True)
 def test_Model_dae_get_sizes():
     """ Test of the dae_get_sizes in Model
     """
@@ -249,6 +254,7 @@ def test_Model_dae_get_sizes():
            "test_jmi.py: test_Model_dae_get_sizes: Wrong number of constraints." 
 
 
+@testattr(stddist = True)
 def test_state_start_values_fixed():
     """ Test of the compiler option state_start_values_fixed
     """
@@ -282,6 +288,7 @@ def test_state_start_values_fixed():
            "test_jmi.py: test_Model_dae_get_sizes: Wrong number of DAE initialization equations." 
 
 
+@testattr(stddist = True)
 def test_init_opt():
     """ Test of DAE initialization optimization problem
     """
@@ -418,6 +425,7 @@ def test_init_opt():
     #print(dae_init_test.getW())
 
 
+@testattr(stddist = True)
 def _generic_load_model_trial(modelfile, cpath, compiler):
     """Test the load_model(...) function."""
     
@@ -443,6 +451,7 @@ def _generic_load_model_trial(modelfile, cpath, compiler):
                            compiler)
 
 
+@testattr(stddist = True)
 def test_load_model_optimica():
     """Test the load_model(...) function of an Optimica problem."""
     modelfile = "VDP.mo"
@@ -450,6 +459,7 @@ def test_load_model_optimica():
     _generic_load_model_trial(modelfile, cpath, 'optimica')
     
     
+@testattr(stddist = True)
 def test_load_model_modelica():
     """Test the load_model(...) function Modelica model."""
     modelfile = "Pendulum_pack_no_opt.mo"
@@ -457,6 +467,7 @@ def test_load_model_modelica():
     _generic_load_model_trial(modelfile, cpath, 'modelica')
     
 
+@testattr(stddist = True)
 class TestModel:
     """Test the high level model class, jmi.Model.
     

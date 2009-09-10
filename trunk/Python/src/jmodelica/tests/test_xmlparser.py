@@ -5,6 +5,8 @@ import os
 
 import nose
 
+from jmodelica.tests import testattr
+
 from jmodelica.compiler import OptimicaCompiler
 import jmodelica.xmlparser as xp
 
@@ -27,6 +29,7 @@ def setup():
     oc = OptimicaCompiler()
     oc.compile_model(fpath, cpath)
         
+@testattr(stddist = True)
 def test_create_XMLVariablesDoc():
     """ 
     Test that it is possible to parse the XML file and create a 
@@ -36,6 +39,7 @@ def test_create_XMLVariablesDoc():
     assert xp.XMLVariablesDoc(filename) is not None, \
            "Could not create XMLVariablesDoc from XML file: "+filename
 
+@testattr(stddist = True)
 def test_create_XMLValuesDoc():
     """ 
     Test that it is possible to parse the XML file and create a 
@@ -46,6 +50,7 @@ def test_create_XMLValuesDoc():
     assert xp.XMLValuesDoc(filename) is not None, \
            "Could not create XMLValuesDoc from XML file: "+filename
 
+@testattr(stddist = True)
 def test_create_XMLProblVariablesDoc():
     """ 
     Test that it is possible to parse the XML file and create a 
@@ -55,6 +60,7 @@ def test_create_XMLProblVariablesDoc():
     assert xp.XMLProblVariablesDoc(filename) is not None, \
            "Could not create XMLProblVariablesDoc from XML file: "+filename
 
+@testattr(stddist = True)
 def test_xmlvariablesdoc_methods():
     """ 
     Test that all XMLVariablesDoc methods are callable and returns the 
@@ -116,6 +122,7 @@ def test_xmlvariablesdoc_methods():
     yield t_get_dx_lin_tp_values, xmldoc
     yield t_get_x_lin_tp_values, xmldoc
     
+@testattr(stddist = True)
 def test_xmlvaluesdoc_methods():
     """ 
     Test that all the XMLValuesDoc methods are callable and returns 
@@ -127,6 +134,7 @@ def test_xmlvaluesdoc_methods():
     
     yield t_get_iparam_values, xmldoc
     
+@testattr(stddist = True)
 def test_xmlproblvariablesdoc_methods():
     """
     Test that all the XMLProblVariablesDoc methods are callable and 
@@ -146,141 +154,169 @@ def test_xmlproblvariablesdoc_methods():
     yield t_get_finaltime_free, xmldoc
     yield t_get_timepoints, xmldoc
 
+@testattr(stddist = True)
 def t_get_start_attributes(xmldoc):
     d = xmldoc.get_start_attributes()
     assert d.__class__ is dict, \
            "XMLVariablesDoc.get_start_attributes did not return correctly."
 
+@testattr(stddist = True)
 def t_get_p_opt_variable_refs(xmldoc):
     l = xmldoc.get_p_opt_variable_refs()
     assert l.__class__ is list, \
            "XMLVariablesDoc.get_p_opt_variable_refs did not return correctly."
 
+@testattr(stddist = True)
 def t_get_w_initial_guess_values(xmldoc):
     d = xmldoc.get_w_initial_guess_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_w_initial_guess_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_u_initial_guess_values(xmldoc):
     d = xmldoc.get_u_initial_guess_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_u_initial_guess_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_dx_initial_guess_values(xmldoc):
     d = xmldoc.get_dx_initial_guess_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_dx_initial_guess_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_x_initial_guess_values(xmldoc):
     d = xmldoc.get_x_initial_guess_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_x_initial_guess_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_p_opt_initial_guess_values(xmldoc):
     d = xmldoc.get_p_opt_initial_guess_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_p_opt_initial_guess_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_w_lb_values(xmldoc):
     d = xmldoc.get_w_lb_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_w_lb_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_u_lb_values(xmldoc):
     d = xmldoc.get_u_lb_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_u_lb_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_dx_lb_values(xmldoc):
     d = xmldoc.get_dx_lb_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_dx_lb_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_x_lb_values(xmldoc):
     d = xmldoc.get_x_lb_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_x_lb_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_p_opt_lb_values(xmldoc):
     d = xmldoc.get_p_opt_lb_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_p_opt_lb_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_w_ub_values(xmldoc):
     d = xmldoc.get_w_ub_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_w_ub_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_u_ub_values(xmldoc):
     d = xmldoc.get_u_ub_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_u_ub_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_dx_ub_values(xmldoc):
     d = xmldoc.get_dx_ub_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_dx_ub_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_x_ub_values(xmldoc):
     d = xmldoc.get_x_ub_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_x_ub_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_p_opt_ub_values(xmldoc):
     d = xmldoc.get_p_opt_ub_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_p_opt_ub_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_w_lin_values(xmldoc):
     d = xmldoc.get_w_lin_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_w_lin_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_u_lin_values(xmldoc):
     d = xmldoc.get_u_lin_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_u_lin_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_dx_lin_values(xmldoc):
     d = xmldoc.get_dx_lin_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_dx_lin_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_x_lin_values(xmldoc):
     d = xmldoc.get_x_lin_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_x_lin_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_p_opt_lin_values(xmldoc):
     d = xmldoc.get_p_opt_lin_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_p_opt_lin_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_w_lin_tp_values(xmldoc):
     d = xmldoc.get_w_lin_tp_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_w_lin_tp_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_u_lin_tp_values(xmldoc):
     d = xmldoc.get_u_lin_tp_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_u_lin_tp_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_dx_lin_tp_values(xmldoc):
     d = xmldoc.get_dx_lin_tp_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_dx_lin_tp_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_x_lin_tp_values(xmldoc):
     d = xmldoc.get_x_lin_tp_values()
     assert d.__class__ is dict, \
             "XMLVariablesDoc.get_x_lin_tp_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_iparam_values(xmldoc):
     d = xmldoc.get_iparam_values()
     assert d.__class__ is dict, \
             "XMLValuesDoc.get_iparam_values did not return correctly."
 
+@testattr(stddist = True)
 def t_get_starttime(xmldoc):
     f = xmldoc.get_starttime()
     try:
@@ -290,11 +326,13 @@ def t_get_starttime(xmldoc):
     except ValueError,e:
         "XMLProblVariablesDoc.get_starttime did not return correctly."
     
+@testattr(stddist = True)
 def t_get_starttime_free(xmldoc):
     b = xmldoc.get_starttime_free()
     assert b.__class__ is bool, \
             "XMLProblVariablesDoc.get_starttime_free did not return correctly."
     
+@testattr(stddist = True)
 def t_get_finaltime(xmldoc):
     f = xmldoc.get_finaltime()
     try:
@@ -304,11 +342,13 @@ def t_get_finaltime(xmldoc):
     except ValueError, e:
         "XMLProblVariablesDoc.get_finaltime did not return correctly."
     
+@testattr(stddist = True)
 def t_get_finaltime_free(xmldoc):
     b = xmldoc.get_finaltime_free()
     assert b.__class__ is bool, \
             "XMLProblVariablesDoc.get_finaltime_free did not return correctly."
     
+@testattr(stddist = True)
 def t_get_timepoints(xmldoc):
     l = xmldoc.get_timepoints()
     assert l.__class__ is list, \

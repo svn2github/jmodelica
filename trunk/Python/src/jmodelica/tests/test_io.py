@@ -4,14 +4,16 @@
 import os
 import os.path
 
+import numpy as N
 import nose
+
+from jmodelica.tests import testattr
 
 import jmodelica.jmi as jmi
 from jmodelica.compiler import OptimicaCompiler
 import jmodelica.xmlparser as xp
 import jmodelica.io
 
-import numpy as N
 
 sep = os.path.sep
 
@@ -23,6 +25,7 @@ fpath = jm_home+path_to_examples+model
 cpath = "VDP_pack.VDP_Opt_Min_Time"
 fname = cpath.replace('.','_',1)
 
+
 def setup():
     """ 
     Setup test module. Compile test model (only needs to be done once) and 
@@ -32,6 +35,8 @@ def setup():
     OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
     oc.compile_model(fpath, cpath, target='ipopt')
 
+
+@testattr(stddist = True)
 def test_dymola_export_import():
 
     # Load the dynamic library and XML data

@@ -14,11 +14,12 @@ import numpy as n
 import nose
 import nose.tools
 
+from jmodelica.tests import load_example_standard_model
+from jmodelica.tests import testattr
+
 from jmodelica.compiler import OptimicaCompiler
 import jmodelica as jm
 import jmodelica.jmi as jmi
-
-from jmodelica.tests import load_example_standard_model
 from jmodelica.simulation.sundials import solve_using_sundials
 
 
@@ -72,12 +73,14 @@ def teardown():
     mc.delmodel()
 
 
+@testattr(stddist = True)
 def test_initAD():
     """ Test JMIModel.initAD method. """
     model = mc.getjmimodel()
     model.initAD()
 
 
+@testattr(stddist = True)
 def test_get_sizes():
     """ Test JMIModel.get_sizes method. """
     #model = jmi.JMIModel(fname, '.')
@@ -95,6 +98,7 @@ def test_get_sizes():
     model.get_sizes(n_ci, n_cd, n_pi, n_pd, n_dx, n_x, n_u, n_w, n_tp, n_z)
     
 
+@testattr(stddist = True)
 def test_get_offsets():
     """ Test JMIModel.get_offsets method. """
     model = mc.getjmimodel()
@@ -115,6 +119,7 @@ def test_get_offsets():
                       offs_w, offs_t, offs_dx_p, offs_x_p, offs_u_p, offs_w_p)
 
 
+@testattr(stddist = True)
 def test_get_n_tp():
     """ Test JMIModel.get_n_tp method. """
     model = mc.getjmimodel()
@@ -122,6 +127,7 @@ def test_get_n_tp():
     model.get_n_tp(n_tp)
 
 
+@testattr(stddist = True)
 def test_getset_tp():
     """ Test JMIModel.get_tp and JMIModel.set_tp method. """
     model = mc.getjmimodel()
@@ -140,6 +146,7 @@ def test_getset_tp():
             assert False, "value set with set_tp was not the same as returned by get_tp"   
     
 
+@testattr(stddist = True)
 def test_get_z():
     """ Test JMIModel.get_z method. """
     model = mc.getjmimodel()
@@ -147,6 +154,7 @@ def test_get_z():
         "JMIModel.get_z did not return numpy.ndarray."
     
 
+@testattr(stddist = True)
 def test_get_ci():
     """ Test JMIModel.get_ci method. """
     model = mc.getjmimodel()
@@ -154,6 +162,7 @@ def test_get_ci():
         "JMIModel.get_ci did not return numpy.ndarray."
     
 
+@testattr(stddist = True)
 def test_get_cd():
     """ Test JMIModel.get_cd method. """
     model = mc.getjmimodel()
@@ -161,6 +170,7 @@ def test_get_cd():
         "JMIModel.get_cd did not return numpy.ndarray."
     
 
+@testattr(stddist = True)
 def test_get_pi():
     """ Test JMIModel.get_pi method. """
     model = mc.getjmimodel()
@@ -168,6 +178,7 @@ def test_get_pi():
         "JMIModel.get_pi did not return numpy.ndarray."
         
 
+@testattr(stddist = True)
 def test_get_pd():
     """ Test JMIModel.get_pd method. """
     model = mc.getjmimodel()
@@ -175,6 +186,7 @@ def test_get_pd():
         "JMIModel.get_pd did not return numpy.ndarray."
 
 
+@testattr(stddist = True)
 def test_get_dx():
     """ Test JMIModel.get_dx method. """
     model = mc.getjmimodel()
@@ -182,6 +194,7 @@ def test_get_dx():
         "JMIModel.get_dx did not return numpy.ndarray."
     
 
+@testattr(stddist = True)
 def test_get_x():
     """ Test JMIModel.get_x method. """
     model = mc.getjmimodel()
@@ -189,6 +202,7 @@ def test_get_x():
         "JMIModel.get_x did not return numpy.ndarray."
     
 
+@testattr(stddist = True)
 def test_get_u():
     """ Test JMIModel.get_u method. """
     model = mc.getjmimodel()
@@ -196,6 +210,7 @@ def test_get_u():
         "JMIModel.get_u did not return numpy.ndarray."
     
 
+@testattr(stddist = True)
 def test_get_w():
     """ Test JMIModel.get_w method. """
     model = mc.getjmimodel()
@@ -203,6 +218,7 @@ def test_get_w():
         "JMIModel.get_w did not return numpy.ndarray. "
 
 
+@testattr(stddist = True)
 def test_get_t():
     """ Test JMIModel.get_t method. """
     model = mc.getjmimodel()
@@ -210,6 +226,7 @@ def test_get_t():
         "JMIModel.get_t did not return numpy.ndarray. "
 
 
+@testattr(stddist = True)
 def test_get_dx_p():
     """ Test JMIModel.get_dx_p method. """
     model = mc.getjmimodel()
@@ -217,6 +234,7 @@ def test_get_dx_p():
         "JMIModel.get_dx_p(i) for i=0 did not return numpy.ndarray. "
 
 
+@testattr(stddist = True)
 def test_get_x_p():
     """ Test JMIModel.get_x_p method. """
     model = mc.getjmimodel()
@@ -224,6 +242,7 @@ def test_get_x_p():
         "JMIModel.get_x_p(i) for i=0 did not return numpy.ndarray. "
 
 
+@testattr(stddist = True)
 def test_get_u_p():
     """ Test JMIModel.get_u_p method. """
     model = mc.getjmimodel()
@@ -231,6 +250,7 @@ def test_get_u_p():
         "JMIModel.get_u_p(i) for i=0 did not return numpy.ndarray. " 
 
 
+@testattr(stddist = True)
 def test_get_w_p():
     """ Test JMIModel.get_w_p method. """
     model = mc.getjmimodel()
@@ -238,38 +258,45 @@ def test_get_w_p():
         "JMIModel.get_w_p(i) for i=0 did not return numpy.ndarray. "
 
 
+#@testattr(stddist = True)
 #def test_ode_f():
 #    """ Test JMIModel.ode_f method. """
 #    model = jmi.JMIModel(fname, '.')
 #    model.ode_f()
 #    
 #
+#@testattr(stddist = True)
 #def test_ode_df():
 #    """ Test JMIModel.ode_f method. """
 #    model = jmi.JMIModel(fname, '.')
 #
 #
+#@testattr(stddist = True)
 #def test_ode_df_n_nz():
 #    """ Test JMIModel.ode_df_n_nz method. """
 #    model = jmi.JMIModel(fname, '.')
 # 
 #
+#@testattr(stddist = True)
 #def test_ode_df_nz_indices():
 #    """ Test JMIModel.ode_df_nz_indices method. """
 #    model = jmi.JMIModel(fname, '.')
 #
 #
+#@testattr(stddist = True)
 #def test_ode_df_dim():
 #    """ Test JMIModel.ode_df_dim method. """
 #    model = jmi.JMIModel('.')
 
 
+@testattr(stddist = True)
 def test_dae_get_sizes():
     """ Test JMIModel.dae_get_sizes method. """
     model = mc.getjmimodel()
     model.dae_get_sizes()
       
   
+@testattr(stddist = True)
 def test_dae_F():
     """ Test JMIModel.dae_F method. """
     model = mc.getjmimodel()
@@ -278,6 +305,7 @@ def test_dae_F():
     model.dae_F(res)
     
 
+@testattr(stddist = True)
 def test_dae_dF():
     """ Test JMIModel.dae_dF method. """
     model = mc.getjmimodel()
@@ -286,12 +314,14 @@ def test_dae_dF():
     model.dae_dF(eval_alg,sparsity,indep_vars,mask,jac)
     
 
+@testattr(stddist = True)
 def test_dae_dF_n_nz():
     """ Test JMIModel.dae_dF_n_nz method. """
     model = mc.getjmimodel()
     model.dae_dF_n_nz(eval_alg)
     
 
+@testattr(stddist = True)
 def test_dae_dF_nz_indices():
     """ Test JMIModel.dae_dF_nz_indices method. """ 
     model = mc.getjmimodel()
@@ -302,6 +332,7 @@ def test_dae_dF_nz_indices():
     model.dae_dF_nz_indices(eval_alg, indep_vars, mask, row, col)
     
 
+@testattr(stddist = True)
 def test_dae_dF_dim():
     """ Test JMIModel.dae_dF_dim method. """
     model = mc.getjmimodel()
@@ -309,12 +340,14 @@ def test_dae_dF_dim():
     n_cols, n_n_nz = model.dae_dF_dim(eval_alg, sparsity, indep_vars, mask)
     
 
+@testattr(stddist = True)
 def test_init_get_sizes():
     """ Test JMIModel.init_get_sizes method. """
     model = mc.getjmimodel()
     n_eq_f0, n_eq_f1, n_eq_fp = model.init_get_sizes()
     
 
+@testattr(stddist = True)
 def test_init_F0():
     """ Test JMIModel.init_FO method. """
     model = mc.getjmimodel()
@@ -323,6 +356,7 @@ def test_init_F0():
     model.init_F0(res)
     
 
+@testattr(stddist = True)
 def test_init_dF0():
     """ Test JMIModel.init_dF0 method. """
     model = mc.getjmimodel()
@@ -331,12 +365,14 @@ def test_init_dF0():
     model.init_dF0(eval_alg, sparsity, indep_vars, mask, jac)
     
 
+@testattr(stddist = True)
 def test_init_dF0_n_nz():
     """ Test JMIModel.init_dF0_n_nz method. """
     model = mc.getjmimodel()
     n_nz = model.init_dF0_n_nz(eval_alg)
     
 
+@testattr(stddist = True)
 def test_init_dF0_nz_indices():
     """ Test JMIModel.init_dF0_nz_indices method. """
     model = mc.getjmimodel()
@@ -347,6 +383,7 @@ def test_init_dF0_nz_indices():
     model.init_dF0_nz_indices(eval_alg, indep_vars, mask, row, col)
     
 
+@testattr(stddist = True)
 def test_init_dF0_dim():
     """ Test JMIModel.init_dF0_dim method. """
     model = mc.getjmimodel()
@@ -355,6 +392,7 @@ def test_init_dF0_dim():
                                             mask)
  
 
+@testattr(stddist = True)
 def test_init_F1():
     """ Test JMIModel.init_F1 method. """
     model = mc.getjmimodel()
@@ -363,6 +401,7 @@ def test_init_F1():
     model.init_F1(res)
     
 
+@testattr(stddist = True)
 def test_init_dF1():
     """ Test JMIModel.init_dF1 method. """
     model = mc.getjmimodel()
@@ -371,12 +410,14 @@ def test_init_dF1():
     model.init_dF1(eval_alg, sparsity, indep_vars, mask, jac)
     
 
+@testattr(stddist = True)
 def test_init_dF1_n_nz():
     """ Test JMIModel.init_dF1_n_nz method. """
     model = mc.getjmimodel()
     n_nz = model.init_dF1_n_nz(eval_alg)
     
 
+@testattr(stddist = True)
 def test_init_dF1_nz_indices():
     """ Test JMIModel.init_dF1_nz_indices method. """
     model = mc.getjmimodel()
@@ -387,6 +428,7 @@ def test_init_dF1_nz_indices():
     model.init_dF1_nz_indices(eval_alg, indep_vars, mask, row, col)
     
 
+@testattr(stddist = True)
 def test_init_dF1_dim():
     """ Test JMIModel.init_dF1_dim method. """
     model = mc.getjmimodel()
@@ -395,6 +437,7 @@ def test_init_dF1_dim():
                                             mask) 
 
 
+#@testattr(stddist = True)
 #def test_init_Fp():
 #    """ Test JMIModel.init_Fp method. """
 #    model = mc.getjmimodel()
@@ -403,6 +446,7 @@ def test_init_dF1_dim():
 #    model.init_Fp(res)
 #    
 #
+#@testattr(stddist = True)
 #def test_init_dFp():
 #    """ Test JMIModel.init_dFp method. """
 #    model = mc.getjmimodel()
@@ -415,6 +459,7 @@ def test_init_dF1_dim():
 #        assert False, "Cannot perform test, size of Fp is 0. "
 #    
 #
+#@testattr(stddist = True)
 #def test_init_dFp_n_nz():
 #    """ Test JMIModel.init_dFp_n_nz method. """
 #    model = mc.getjmimodel()
@@ -425,6 +470,7 @@ def test_init_dF1_dim():
 #        assert False, "Cannot perform test, size of Fp is 0. "
 #    
 #
+#@testattr(stddist = True)
 #def test_init_dFp_nz_indices():
 #    """ Test JMIModel.init_dFp_nz_indices method. """
 #    model = mc.getjmimodel()
@@ -439,6 +485,7 @@ def test_init_dF1_dim():
 #       assert False, "Cannot perform test, size of Fp is 0. " 
 #    
 #
+#@testattr(stddist = True)
 #def test_init_dFp_dim():
 #    """ Test JMIModel.init_dFp_dim method. """
 #    model = mc.getjmimodel()
@@ -451,6 +498,7 @@ def test_init_dF1_dim():
 #        assert False, "Cannot perform test, size of Fp is 0. "
 
 
+@testattr(stddist = True)
 def test_opt_getset_optimization_interval():
     """Test JMIModel.opt_[set|get]_optimization_interval methods."""
     st_set = ct.c_double(5)
@@ -469,6 +517,7 @@ def test_opt_getset_optimization_interval():
     nose.tools.assert_equal(ftf_set.value, ftf_get)
     
 
+@testattr(stddist = True)
 def test_opt_get_n_p_opt():
     """ Test opt_get_n_p_opt method. """
     model = mc.getjmimodel()
@@ -476,6 +525,7 @@ def test_opt_get_n_p_opt():
         "Method does not return int."
     
 
+@testattr(stddist = True)
 def test_opt_getset_p_opt_indices():
     """ Test JMIModel.opt_set_p_opt_indices method. """
     model = mc.getjmimodel()
@@ -494,18 +544,21 @@ def test_opt_getset_p_opt_indices():
         assert False, "pi vector is empty"
 
 
+@testattr(stddist = True)
 def test_opt_get_sizes():
     """ Test opt_get_sizes method. """
     model = mc.getjmimodel()
     n_eq_ceq, n_eq_cineq, n_eq_heq, n_eq_hineq = model.opt_get_sizes()
     
 
+@testattr(stddist = True)
 def test_opt_J():
     """ Test opt_J method. """
     model = mc.getjmimodel()
     model.opt_J()
     
 
+@testattr(stddist = True)
 def test_opt_dJ():
     """ Test opt_dJ method. """
     model = mc.getjmimodel()
@@ -514,6 +567,7 @@ def test_opt_dJ():
     model.opt_dJ(eval_alg, sparsity, indep_vars, mask, jac)
 
 
+@testattr(stddist = True)
 def test_opt_dJ_n_nz():
     """ Test opt_dJ_n_nz method. """
     model = mc.getjmimodel()
@@ -521,6 +575,7 @@ def test_opt_dJ_n_nz():
         "Method does not return int."
     
 
+@testattr(stddist = True)
 def test_opt_dJ_nz_indices():
     """ Test opt_dJ_nz_indices method. """
     model = mc.getjmimodel()
@@ -531,6 +586,7 @@ def test_opt_dJ_nz_indices():
     model.opt_dJ_nz_indices(eval_alg, indep_vars, mask, row, col)
     
 
+@testattr(stddist = True)
 def test_opt_dJ_dim():
     """ Test opt_dJ_dim method. """
     model = mc.getjmimodel()
@@ -539,6 +595,7 @@ def test_opt_dJ_dim():
                                             mask)    
     
     
+@testattr(stddist = True)
 class TestModelSimulation:
     """Test the JMIModel instance of the Van der Pol oscillator."""
     
