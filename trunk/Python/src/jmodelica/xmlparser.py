@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-"""
-Module containing XML parser and validator providing an XML object which can be 
-used to extract information from the parsed XML file using XPath queries.
-
+"""Module containing XML parser and validator providing an XML object which 
+can be used to extract information from the parsed XML file using XPath 
+queries.
 """
 #    Copyright (C) 2009 Modelon AB
 #
@@ -28,25 +27,22 @@ def _parse_XML(filename, schemaname=''):
     Parses and validates (optional) an XML file.
     
     Parses an XML file and returns an object representing the parsed XML.
-    If the optional parameter schemaname is set the XML file is also validated 
+    If the optional parameter schemaname is set the XML file is also validated
     against the XML Schema file provided before parsing. 
     
     Parameters:
-
         filename -- 
             Name of XML file to parse including absolute or relative path.
         schemaname --
             Name of XML Schema file including absolute or relative path.
         
-    Exceptions:
-    
+    Exceptions:   
         XMLException -- 
-            If the XML file can not be read or is not well-formed. If a schema is 
-            present and if the schema file can not be read, is not well-formed or 
-            if the validation fails. 
+            If the XML file can not be read or is not well-formed. If a schema 
+            is present and if the schema file can not be read, is not 
+            well-formed or if the validation fails. 
         
-    Returns:
-    
+    Returns:    
         Reference to the ElementTree object containing the parsed XML.
         
     """
@@ -79,10 +75,11 @@ class XMLdoc:
         """ 
         Create an XML document object representation and an XPath evaluator.
         
-        Parse an XML document and create an XML document object representation. 
-        Validate against XML schema before parsing if the parameter schemaname 
-        is set. Instantiates an XPath evaluator object for the parsed XML which 
-        can be used to evaluate XPath expressions on the XML.
+        Parse an XML document and create an XML document object 
+        representation. Validate against XML schema before parsing if the 
+        parameter schemaname is set. Instantiates an XPath evaluator object 
+        for the parsed XML which can be used to evaluate XPath expressions on 
+        the XML.
          
         """
         self._doc = _parse_XML(filename, schemaname)
@@ -213,7 +210,8 @@ class XMLVariablesDoc(XMLdoc):
     
     def get_start_attributes(self):
         """ 
-        Extract ValueReference and Start attribute for all variables in the XML document.
+        Extract ValueReference and Start attribute for all variables in the 
+        XML document.
             
         Returns:
             Dict with ValueReference as key and Start attribute as value.
@@ -229,7 +227,8 @@ class XMLVariablesDoc(XMLdoc):
 
     def get_dx_start_attributes(self):
         """ 
-        Extract ValueReference and Start attribute for all derivatives in the XML document.
+        Extract ValueReference and Start attribute for all derivatives in the 
+        XML document.
             
         Returns:
             Dict with ValueReference as key and Start attribute as value.
@@ -245,7 +244,8 @@ class XMLVariablesDoc(XMLdoc):
 
     def get_x_start_attributes(self):
         """ 
-        Extract ValueReference and Start attribute for all differentiated variables in the XML document.
+        Extract ValueReference and Start attribute for all differentiated 
+        variables in the XML document.
             
         Returns:
             Dict with ValueReference as key and Start attribute as value.
@@ -261,7 +261,8 @@ class XMLVariablesDoc(XMLdoc):
 
     def get_u_start_attributes(self):
         """ 
-        Extract ValueReference and Start attribute for all inputs in the XML document.
+        Extract ValueReference and Start attribute for all inputs in the XML 
+        document.
             
         Returns:
             Dict with ValueReference as key and Start attribute as value.
@@ -277,7 +278,8 @@ class XMLVariablesDoc(XMLdoc):
 
     def get_w_start_attributes(self):
         """ 
-        Extract ValueReference and Start attribute for all algebraic variables in the XML document.
+        Extract ValueReference and Start attribute for all algebraic variables 
+        in the XML document.
             
         Returns:
             Dict with ValueReference as key and Start attribute as value.
@@ -323,7 +325,8 @@ class XMLVariablesDoc(XMLdoc):
     
     def get_u_initial_guess_values(self):
         """ 
-        Extract ValueReference and InitialGuess values for all input variables.
+        Extract ValueReference and InitialGuess values for all input 
+        variables.
         
         Returns:
             Dict with ValueReference as key and InitialGuess as value.
@@ -479,7 +482,8 @@ class XMLVariablesDoc(XMLdoc):
 
     def get_w_ub_values(self):
         """ 
-        Extract ValueReference and upper bound values for all algebraic variables.
+        Extract ValueReference and upper bound values for all algebraic 
+        variables.
         
         Returns:
             Dict with ValueReference as key and upper bound as value.
@@ -545,8 +549,8 @@ class XMLVariablesDoc(XMLdoc):
     
     def get_p_opt_ub_values(self):
         """ 
-        Extract ValueReference and upper bound values for all optimized independent 
-        parameters.
+        Extract ValueReference and upper bound values for all optimized 
+        independent parameters.
         
         Returns:
             Dict with ValueReference as key and upper bound as value.
@@ -564,8 +568,9 @@ class XMLVariablesDoc(XMLdoc):
 
     def get_w_lin_values(self):
         """ 
-        Extract ValueReference and boolean value describing if variable appears 
-        linearly in all equations and constraints for all algebraic variables.
+        Extract ValueReference and boolean value describing if variable 
+        appears linearly in all equations and constraints for all algebraic 
+        variables.
         
         Returns:
             Dict with ValueReference as key and boolean isLinear as value.
@@ -581,8 +586,9 @@ class XMLVariablesDoc(XMLdoc):
 
     def get_u_lin_values(self):
         """ 
-        Extract ValueReference and boolean value describing if variable appears 
-        linearly in all equations and constraints for all input variables.
+        Extract ValueReference and boolean value describing if variable 
+        appears linearly in all equations and constraints for all input 
+        variables.
         
         Returns:
             Dict with ValueReference as key and boolean isLinear as value.
@@ -598,8 +604,9 @@ class XMLVariablesDoc(XMLdoc):
     
     def get_dx_lin_values(self):
         """ 
-        Extract ValueReference and boolean value describing if variable appears 
-        linearly in all equations and constraints for all derivative variables.
+        Extract ValueReference and boolean value describing if variable 
+        appears linearly in all equations and constraints for all derivative 
+        variables.
         
         Returns:
             Dict with ValueReference as key and boolean isLinear as value.
@@ -615,8 +622,9 @@ class XMLVariablesDoc(XMLdoc):
     
     def get_x_lin_values(self):
         """ 
-        Extract ValueReference and boolean value describing if variable appears 
-        linearly in all equations and constraints for all differentiated variables.
+        Extract ValueReference and boolean value describing if variable 
+        appears linearly in all equations and constraints for all 
+        differentiated variables.
         
         Returns:
             Dict with ValueReference as key and boolean isLinear as value.
@@ -632,9 +640,9 @@ class XMLVariablesDoc(XMLdoc):
     
     def get_p_opt_lin_values(self):
         """ 
-        Extract ValueReference and boolean value describing if variable appears 
-        linearly in all equations and constraints for all optimized independent 
-        parameters.
+        Extract ValueReference and boolean value describing if variable 
+        appears linearly in all equations and constraints for all optimized 
+        independent parameters.
         
         Returns:
             Dict with ValueReference as key and boolean isLinear as value.
@@ -717,8 +725,8 @@ class XMLVariablesDoc(XMLdoc):
     
     def get_x_lin_tp_values(self):
         """ 
-        Extract ValueReference and linear timed variables for all differentiated 
-        variables.
+        Extract ValueReference and linear timed variables for all 
+        differentiated variables.
 
         Returns:
             Dict with ValueReference as key and list of linear time variables 
@@ -739,7 +747,11 @@ class XMLVariablesDoc(XMLdoc):
             
 class XMLValuesDoc(XMLdoc):
     
-    """ Class representing a parsed XML file containing values for all independent parameters. """
+    """ 
+    Class representing a parsed XML file containing values for all 
+    independent parameters. 
+    
+    """
                 
     def get_iparam_values(self):
         """ 
@@ -760,7 +772,11 @@ class XMLValuesDoc(XMLdoc):
         
 class XMLProblVariablesDoc(XMLdoc):
     
-    """ Class representing a parsed XML file containing Optimica problem specification meta data. """
+    """ 
+    Class representing a parsed XML file containing Optimica problem 
+    specification meta data. 
+    
+    """
     
     def get_starttime(self):
         """ Extract the interval start time. """
