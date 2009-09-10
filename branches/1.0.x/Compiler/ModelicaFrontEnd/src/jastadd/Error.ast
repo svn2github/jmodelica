@@ -1,0 +1,4 @@
+BadDefinition: StoredDefinition;
+BadClassDecl: BaseClassDecl;
+BadElement: Element;
+BadArgument: Argument;

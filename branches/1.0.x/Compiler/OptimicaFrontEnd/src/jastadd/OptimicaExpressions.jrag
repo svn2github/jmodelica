@@ -1,0 +1,66 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+aspect OptimicaExpressions {
+
+	rewrite FunctionCall {
+		when (((getName() instanceof Dot)? ((Dot)getName()).getLeft()!=null: true) && 
+		      getName().getLastAccess() instanceof ComponentAccess &&
+		      hasFunctionArguments() &&
+		      getFunctionArguments().getNumExp()==1)
+		 to TimedVariable {
+		 	TimedVariable iv = new TimedVariable(getName(),
+		 	    getFunctionArguments().getExp(0));
+		 	iv.setStart(getStart());
+		 	return iv;
+		 }
+	}
+	
+	rewrite FIdUseExp {
+		when (name().equals("startTime")) to FStartTimeExp {
+			return new FStartTimeExp();
+		}
+	}
+
+	rewrite FIdUseExp {
+		when (name().equals("finalTime")) to FFinalTimeExp {
+			return new FFinalTimeExp();
+		}
+	}
+	
+	eq FStartTimeExp.ceval() {
+		if (myFOptClass().startTimeAttributeSet()) {
+			return myFOptClass().startTimeAttributeCValue();
+		} else if (myFOptClass().startTimeInitialGuessAttributeSet()) {
+			return myFOptClass().startTimeInitialGuessAttributeCValue();
+		} else {
+			return myFOptClass().startTimeAttributeCValue();
+		}
+	}
+
+	eq FFinalTimeExp.ceval() {
+		if (myFOptClass().finalTimeAttributeSet()) {
+			return myFOptClass().finalTimeAttributeCValue();
+		} else if (myFOptClass().finalTimeInitialGuessAttributeSet()) {
+			return myFOptClass().finalTimeInitialGuessAttributeCValue();
+		} else {
+			return myFOptClass().finalTimeAttributeCValue();
+		}
+	}
+	
+	
+	
+}
