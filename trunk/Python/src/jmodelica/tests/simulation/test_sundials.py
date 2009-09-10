@@ -8,10 +8,15 @@ import matplotlib
 import nose
 
 from jmodelica.tests import load_example_standard_model
-from jmodelica.simulation.sundials import solve_using_sundials
-from jmodelica.simulation.sundials import SundialsOdeSimulator
-import jmodelica.simulation.sundials as sundials
-import jmodelica.simulation
+
+# Try is needed to make sure nose does not fail when only importing this file.
+try:
+    from jmodelica.simulation.sundials import solve_using_sundials
+    from jmodelica.simulation.sundials import SundialsOdeSimulator
+    import jmodelica.simulation.sundials as sundials
+    import jmodelica.simulation
+except ImportError:
+    pass
 
 class TestSundialsOdeSimulator:
     def setUp(self):
