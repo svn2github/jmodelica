@@ -325,7 +325,6 @@ class SundialsOdeSimulator(Simulator):
         end_time = self.get_final_time()
         verbose = False
         model = self.get_model()
-        use_jacobian = False
         
         if verbose:
             print "Input before integration:", model.u
@@ -376,25 +375,6 @@ class SundialsOdeSimulator(Simulator):
             
             return 0
 
-        def _Jac(N, J, t, y, fy, jac_data, tmp1, tmp2, tmp3):
-            """ Set Jacobian calculated by JMI.
-                
-                This function is a callback function for (Py)SUNDIALS.
-            
-            """
-            data = ctypes.cast(jac_data, PUserData).contents
-            model = data.model
-            
-            model.t = t
-            model.x = y
-            J_jmi = model.eval_jac_x()
-            
-            for row in xrange(len(J_jmi)):
-                for col in xrange(len(J_jmi[row])):
-                    J[row][col] = J_jmi[row][col]
-            
-            return 0
-            
         class UserData(ctypes.Structure):
             """ctypes structure used to move data in (and out of?) the callback
                functions.
@@ -497,9 +477,6 @@ class SundialsOdeSimulator(Simulator):
             data.ignore_p = 1
             parameters = None # Needed for correct return
             
-        if use_jacobian:
-            raise NotImplementedError('Jacobian cannot be used as of now.')
-            cvodes.CVDenseSetJacFn(cvode_mem, _Jac, ctypes.pointer(data))
         cvodes.CVodeSetFdata(cvode_mem, ctypes.pointer(data))
         
         if sensi:
