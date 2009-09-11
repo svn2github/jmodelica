@@ -39,8 +39,7 @@ def test_optimica_compile():
     else:
         suffix = '.so'
         
-    assert oc.compile_model(fpath, cpath) == 0, \
-           "Compiling "+cpath+" failed."
+    oc.compile_model(fpath, cpath)
     
     fname = cpath.replace('.','_',1)
     assert os.access(fname+'_variables.xml',os.F_OK) == True, \
@@ -65,15 +64,13 @@ def test_optimica_compile():
 @testattr(stddist = True)
 def test_optimica_compile_wtarget_alg():
     """ Test that it is possible to compile (optimicacompiler.py) with target algorithms. """
-    assert oc.compile_model(fpath, cpath, target='algorithms') == 0, \
-           "Compiling "+cpath+" with target=algorithms failed."
+    oc.compile_model(fpath, cpath, target='algorithms')
     
     
 @testattr(stddist = True)
 def test_optimica_compile_wtarget_ipopt():
     """ Test that it is possible to compile (optimicacompiler.py) with target ipopt. """
-    assert oc.compile_model(fpath, cpath, target='ipopt') == 0, \
-           "Compiling "+cpath+" with target=ipopt failed."
+    oc.compile_model(fpath, cpath, target='ipopt')
     
     
 @testattr(stddist = True)
@@ -82,8 +79,7 @@ def test_optimica_stepbystep():
     sourceroot = oc.parse_model(fpath)
     ipr = oc.instantiate_model(sourceroot, cpath)
     fclass = oc.flatten_model(fpath, cpath, ipr)
-    assert oc.compile_dll(cpath.replace('.','_',1)) == 0, \
-           "Compiling dll failed."
+    oc.compile_dll(cpath.replace('.','_',1))
 
 
 @testattr(stddist = True)

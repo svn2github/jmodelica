@@ -41,8 +41,7 @@ def test_compile():
     else:
         suffix = '.so'
         
-    assert mc.compile_model(fpath, cpath) == 0, \
-           "Compiling "+cpath+" failed."
+    mc.compile_model(fpath, cpath)
     
     fname = cpath.replace('.','_',1)
     assert os.access(fname+'_variables.xml',os.F_OK) == True, \
@@ -64,16 +63,13 @@ def test_compile():
 @testattr(stddist = True)
 def test_compile_wtarget_alg():
     """ Test that it is possible to compile (compiler.py) with target algorithms. """
-    assert mc.compile_model(fpath, cpath, target='algorithms') == 0, \
-           "Compiling "+cpath+" with target=algorithms failed."
+    mc.compile_model(fpath, cpath, target='algorithms')
     
 
 @testattr(stddist = True)
 def test_compile_wtarget_ipopt():
     """ Test that it is possible to compile (compiler.py) with target ipopt. """
-    assert mc.compile_model(fpath, cpath, target='ipopt') == 0, \
-           "Compiling "+cpath+" with target=ipopt failed."
-    
+    mc.compile_model(fpath, cpath, target='ipopt')    
 
 @testattr(stddist = True)
 def test_stepbystep():
@@ -81,9 +77,7 @@ def test_stepbystep():
     sourceroot = mc.parse_model(fpath)
     ipr = mc.instantiate_model(sourceroot, cpath)
     fclass = mc.flatten_model(fpath, cpath, ipr)
-    assert mc.compile_dll(cpath.replace('.','_',1)) == 0, \
-           "Compiling dll failed."
-   
+    mc.compile_dll(cpath.replace('.','_',1))   
 
 @testattr(stddist = True)
 def test_compiler_error():

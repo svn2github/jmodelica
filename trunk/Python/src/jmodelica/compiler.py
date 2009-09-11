@@ -209,8 +209,7 @@ class ModelicaCompiler():
             self._compiler.compileModel(model_file_name,
                                                 model_class_name)
             c_file = model_class_name.replace('.','_')
-            retval = self.compile_dll(c_file, target)
-            return retval
+            self.compile_dll(c_file, target)
 
         except jpype.JavaException, ex:
             _handle_exception(ex)
