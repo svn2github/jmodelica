@@ -597,7 +597,6 @@ def test_opt_dJ_dim():
     
 class TestModelSimulation:
     """Test the JMIModel instance of the Van der Pol oscillator."""
-    stddist = True
     
     def setUp(self):
         """Test setUp. Load the test model."""

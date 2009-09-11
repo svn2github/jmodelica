@@ -21,7 +21,6 @@ except ImportError:
         import nvecserial
     except ImportError:
         print "Could not load SUNDIALS."
-from openopt import NLP
 
 from jmodelica.simulation import SimulationException
 from jmodelica.simulation import Simulator

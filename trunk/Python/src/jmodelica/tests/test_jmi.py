@@ -474,18 +474,18 @@ class TestModel:
     
     Also note that this class also is tested in simulation tests.
     """
-    stddist = True
     
     def setUp(self):
         """Test setUp. Load the test model."""
         self.m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo', 
                                              'VDP_pack.VDP_Opt')
-                                              
+    @testattr(stddist = True)                                          
     def test_model_size(self):
         """Test jmi.Model length of x"""
         size = len(self.m.x)
         nose.tools.assert_equal(size, 3)
-        
+    
+    @testattr(stddist = True)    
     def test_states_get_set(self):
         """Test jmi.Model.set_x(...) and jmi.Model.get_x()."""
         new_states = [1.74, 3.38, 12.45]
@@ -496,7 +496,8 @@ class TestModel:
         self.m.x = new_states
         states = self.m.x
         N.testing.assert_array_almost_equal(new_states, states)
-        
+    
+    @testattr(stddist = True)   
     def test_diffs(self):
         """Test jmi.Model.set_dx(...) and jmi.Model.get_dx()."""
         reset = [0, 0, 0]
@@ -508,7 +509,8 @@ class TestModel:
         new_diffs = [1.54, 3.88, 45.87]
         diffs[:] = new_diffs
         N.testing.assert_array_almost_equal(new_diffs, diffs2)
-        
+    
+    @testattr(stddist = True)    
     def test_inputs(self):
         """Test jmi.Model.set_u(...) and jmi.Model.get_u()."""
         new_inputs = [1.54]
@@ -519,7 +521,8 @@ class TestModel:
         self.m.u = new_inputs
         inputs = self.m.u
         N.testing.assert_array_almost_equal(new_inputs, inputs)
-        
+    
+    @testattr(stddist = True)    
     def test_parameters(self):
         """Test methods jmi.Model.[set|get]_pi(...)."""
         new_params = [1.54, 19.54, 78.12]
@@ -530,7 +533,8 @@ class TestModel:
         self.m.pi = new_params
         params = self.m.pi
         N.testing.assert_array_almost_equal(new_params, params)
-        
+    
+    @testattr(stddist = True)    
     def test_time_get_set(self):
         """Test jmi.Model.[set|get]_t(...)."""
         new_time = 0.47
@@ -541,7 +545,8 @@ class TestModel:
         self.m.t = new_time
         t = self.m.t
         nose.tools.assert_almost_equal(new_time, t)
-        
+    
+    @testattr(stddist = True)   
     def test_evaluation(self):
         """Test jmi.Model.eval_ode_f()."""
         self.m.dx = [0, 0, 0]
@@ -553,7 +558,8 @@ class TestModel:
                 all_zeros = False
                 
         assert not all_zeros
-        
+    
+    @testattr(stddist = True)    
     def test_reset(self):
         """Testing resetting the a jmi.Model."""
         random = N.array([12, 31, 42])
