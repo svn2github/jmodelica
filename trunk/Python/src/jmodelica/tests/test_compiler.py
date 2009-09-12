@@ -13,7 +13,6 @@ from jmodelica.tests import testattr
 from jmodelica.compiler import ModelicaCompiler
 import jmodelica as jm
 
-
 jm_home = jm.environ['JMODELICA_HOME']
 path_to_examples = os.path.join('Python', 'jmodelica', 'examples')
 
@@ -23,7 +22,7 @@ cpath = "Pendulum_pack.Pendulum"
 
 mc = ModelicaCompiler()
 ModelicaCompiler.set_log_level(ModelicaCompiler.LOG_ERROR)
-
+mc.set_boolean_option('state_start_values_fixed',True)
 
 @testattr(stddist = True)
 def test_compile():

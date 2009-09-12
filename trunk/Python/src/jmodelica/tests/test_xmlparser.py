@@ -27,6 +27,7 @@ def setup():
     """
     OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
     oc = OptimicaCompiler()
+    oc.set_boolean_option('state_start_values_fixed',True)
     oc.compile_model(fpath, cpath)
         
 @testattr(stddist = True)

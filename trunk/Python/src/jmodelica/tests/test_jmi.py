@@ -27,7 +27,7 @@ path_to_examples = os.path.join(jm_home, "Python", "jmodelica", "examples")
 path_to_tests = os.path.join(jm_home, "Python", "jmodelica", "tests")
 
 oc = OptimicaCompiler()
-
+oc.set_boolean_option('state_start_values_fixed',True)
 
 def setup():
     """ 

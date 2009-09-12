@@ -20,6 +20,8 @@ def run_demo(with_plots=True):
     parameter estimation problem."""
 
     oc = OptimicaCompiler()
+    oc.set_boolean_option('state_start_values_fixed',True)
+
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
     # Compile the Optimica model first to C code and
