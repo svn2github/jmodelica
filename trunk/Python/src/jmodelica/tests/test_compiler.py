@@ -132,6 +132,84 @@ def test_setget_cTemplate():
     newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_modelica_template.c')
     mc.set_cTemplate(newtemplate)
     nose.tools.assert_equal(mc.get_cTemplate(), newtemplate)
-   
 
+@testattr(stddist = True)
+def test_setget_boolean_option():
+    """ Test boolean option setter and getter. """
+    option = 'boolean_testoption'
+    setvalue = True
+    # create new option
+    mc.set_boolean_option(option, setvalue)
+    nose.tools.assert_equal(mc.get_boolean_option(option), setvalue)
+    # change value of option
+    setvalue = False
+    mc.set_boolean_option(option, setvalue)
+    nose.tools.assert_equal(mc.get_boolean_option(option), setvalue)
+    
+@testattr(stddist = True)
+def test_setget_boolean_option_error():
+    """ Test that boolean option getter raises the proper error. """
+    option = 'nonexist_boolean'
+    #try to get an unknown option
+    nose.tools.assert_raises(jm.compiler.UnknownOptionError, mc.get_boolean_option, option)
+
+@testattr(stddist = True)
+def test_setget_integer_option():
+    """ Test integer option setter and getter. """
+    option = 'integer_testoption'
+    setvalue = 10
+    # create new option
+    mc.set_integer_option(option, setvalue)
+    nose.tools.assert_equal(mc.get_integer_option(option), setvalue)
+    # change value of option
+    setvalue = 100
+    mc.set_integer_option(option, setvalue)
+    nose.tools.assert_equal(mc.get_integer_option(option), setvalue)
+    
+@testattr(stddist = True)
+def test_setget_integer_option_error():
+    """ Test that integer option getter raises the proper error. """
+    option = 'nonexist_integer'
+    #try to get an unknown option
+    nose.tools.assert_raises(jm.compiler.UnknownOptionError, mc.get_integer_option, option) 
+
+@testattr(stddist = True)
+def test_setget_real_option():
+    """ Test real option setter and getter. """
+    option = 'real_testoption'
+    setvalue = 10.0
+    # create new option
+    mc.set_real_option(option, setvalue)
+    nose.tools.assert_equal(mc.get_real_option(option), setvalue)
+    # change value of option
+    setvalue = 100.0
+    mc.set_real_option(option, setvalue)
+    nose.tools.assert_equal(mc.get_real_option(option), setvalue)
+    
+@testattr(stddist = True)
+def test_setget_real_option_error():
+    """ Test that real option getter raises the proper error. """
+    option = 'nonexist_real'
+    #try to get an unknown option
+    nose.tools.assert_raises(jm.compiler.UnknownOptionError, mc.get_real_option, option)     
+
+@testattr(stddist = True)
+def test_setget_string_option():
+    """ Test string option setter and getter. """
+    option = 'string_testoption'
+    setvalue = 'option 1'
+    # create new option
+    mc.set_string_option(option, setvalue)
+    nose.tools.assert_equal(mc.get_string_option(option), setvalue)
+    # change value of option
+    setvalue = 'option 2'
+    mc.set_string_option(option, setvalue)
+    nose.tools.assert_equal(mc.get_string_option(option), setvalue)
+    
+@testattr(stddist = True)
+def test_setget_string_option_error():
+    """ Test that string option getter raises the proper error. """
+    option = 'nonexist_real'
+    #try to get an unknown option
+    nose.tools.assert_raises(jm.compiler.UnknownOptionError, mc.get_string_option, option)    
 
