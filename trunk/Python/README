@@ -1,27 +1,7 @@
-WARNING: THIS FILE IS OBSOLETE AND NEEDS TO BE UPDATED. DISREGARD THE
-CONTENT UNTIL THIS NOTICE IS REMOVED.
-
-JMODELICA PYTHON INTERFACE
-===================
-The JModelica Python Interface (JMPI) enables you to work with both Modelica and 
-Optimica models in Python. As Python is an interpreted language you can work 
-interactively or using scripts.
-
-HOW TO USE
-===================
-1. Add the folder containing the jmodelica package to your PYTHONPATH.
-2. Add the environment variable JMODELICA_HOME which should point at your 
-JModelica installation root folder.
-3. Import the JMPI by adding
-
-     import jmodelica
-    
-   to your Python source code.
-
-RUNNING TESTS
-===================
-The JMI tests requires the Nose Python testing framework that can be
-downloaded from:
+RUNNING TESTS 
+=================== 
+The Python tests requires the Nose Python testing framework that can
+be downloaded from:
 
   http://somethingaboutorange.com/mrl/projects/nose/
   
@@ -31,27 +11,16 @@ Run the tests in the tests package with
 
 	nosetests -a stddist
 	
-standing in the 'tests' directory in the jmodelica package. Nose then finds all
-available tests that are related to the standard JModelica.org bundle and runs
-them. For details on how to run specific tests, and more, have a look at the
-Nose website and 'man nosetests'.
+standing in the 'tests' directory in the jmodelica package. Notice
+that the environment variable JMODELICA_HOME needs to be set. Nose
+then finds all available tests that are related to the standard
+JModelica.org bundle and runs them. For details on how to run specific
+tests, and more, have a look at the Nose website and 'man nosetests'.
 
-If you don't add the '-a stddist' flag packages that are not part of the
-official requirements for JModelica.org might be loaded for tests. This might
-result in import errors if your system does not contain those packages.
-
-RUNNING EXAMPLES
-===================
-There are a number of example models in the examples package which 
-demonstrate how the JModelica Python Interface can be used. In all 
-examples packages there is one .mo file for the Modelica and Optimica 
-code, describing the model and optimization problem, and one demo.py file 
-which shows the Python code needed to compile, run the model and solve 
-an optimization problem. Take a look at the code or simply run an 
-example with 
-
-	import demo
-	demo.run_demo()
+If you don't add the '-a stddist' flag packages that are not part of
+the official requirements for JModelica.org might be loaded for
+tests. This might result in import errors if your system does not
+contain those packages.
 
 RUNNING TESTS - FAQ
 ===================
@@ -60,8 +29,8 @@ If the test fails and outputs something similar to
   JMIException: libipopt.so.0: cannot open shared object file: No such
   file or directory
   
-you are missing the Ipopt shared library in your library path. This can
-be solved in two ways:
+you are missing the Ipopt shared library in your library path. This
+can be solved in two ways:
 
  1) By installing Ipopt on your system (so that library ends up in
     /usr/local/lib or similar). See Ipopt documentation for this.
@@ -77,8 +46,9 @@ be solved in two ways:
 CODING GUIDELINES
 ===================
 The Python coding standards used are trying to adhere to Python Coding
-Guidelines found in PEP8[1] <http://www.python.org/dev/peps/pep-0008/> 
-with the exception of using UTF-8 encoding and NOT latin-1. Here is a summary:
+Guidelines found in PEP8[1] <http://www.python.org/dev/peps/pep-0008/>
+with the exception of using UTF-8 encoding and NOT latin-1. Here is a
+summary:
 
  * Indent using _spaces_ of width 4.
  * Class names should begin with uppercase and use CamelCase. First
