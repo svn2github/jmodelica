@@ -38,7 +38,7 @@
 			<Type>Boolean</Type>
 			<BooleanAttributes>
 				<Key>state_start_values_fixed</Key>
-				<Value>true</Value>
+				<Value>false</Value>
 			</BooleanAttributes>
 		</Option>
 	</Options>	

@@ -19,6 +19,8 @@ def run_demo(with_plots=True):
     problem based on an inverted pendulum system."""
 
     oc = OptimicaCompiler()
+    oc.set_boolean_option('state_start_values_fixed',True)
+
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     
     # Comile the Optimica model first to C code and

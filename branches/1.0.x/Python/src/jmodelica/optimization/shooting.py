@@ -15,12 +15,10 @@ import scipy as S
 import matplotlib
 
 try:
-    from pysundials import cvodes
-    from pysundials import nvecserial
+    from openopt import NLP
 except ImportError:
-    import cvodes
-    import nvecserial
-from openopt import NLP
+    print "Could not load SUNDIALS."
+
 import pylab as p
 import nose
 

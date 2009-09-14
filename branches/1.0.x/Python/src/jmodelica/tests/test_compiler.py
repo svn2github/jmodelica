@@ -13,7 +13,6 @@ from jmodelica.tests import testattr
 from jmodelica.compiler import ModelicaCompiler
 import jmodelica as jm
 
-
 jm_home = jm.environ['JMODELICA_HOME']
 path_to_examples = os.path.join('Python', 'jmodelica', 'examples')
 
@@ -23,7 +22,7 @@ cpath = "Pendulum_pack.Pendulum"
 
 mc = ModelicaCompiler()
 ModelicaCompiler.set_log_level(ModelicaCompiler.LOG_ERROR)
-
+mc.set_boolean_option('state_start_values_fixed',True)
 
 @testattr(stddist = True)
 def test_compile():
@@ -41,8 +40,7 @@ def test_compile():
     else:
         suffix = '.so'
         
-    assert mc.compile_model(fpath, cpath) == 0, \
-           "Compiling "+cpath+" failed."
+    mc.compile_model(fpath, cpath)
     
     fname = cpath.replace('.','_',1)
     assert os.access(fname+'_variables.xml',os.F_OK) == True, \
@@ -64,16 +62,13 @@ def test_compile():
 @testattr(stddist = True)
 def test_compile_wtarget_alg():
     """ Test that it is possible to compile (compiler.py) with target algorithms. """
-    assert mc.compile_model(fpath, cpath, target='algorithms') == 0, \
-           "Compiling "+cpath+" with target=algorithms failed."
+    mc.compile_model(fpath, cpath, target='algorithms')
     
 
 @testattr(stddist = True)
 def test_compile_wtarget_ipopt():
     """ Test that it is possible to compile (compiler.py) with target ipopt. """
-    assert mc.compile_model(fpath, cpath, target='ipopt') == 0, \
-           "Compiling "+cpath+" with target=ipopt failed."
-    
+    mc.compile_model(fpath, cpath, target='ipopt')    
 
 @testattr(stddist = True)
 def test_stepbystep():
@@ -81,9 +76,7 @@ def test_stepbystep():
     sourceroot = mc.parse_model(fpath)
     ipr = mc.instantiate_model(sourceroot, cpath)
     fclass = mc.flatten_model(fpath, cpath, ipr)
-    assert mc.compile_dll(cpath.replace('.','_',1)) == 0, \
-           "Compiling dll failed."
-   
+    mc.compile_dll(cpath.replace('.','_',1))   
 
 @testattr(stddist = True)
 def test_compiler_error():
@@ -139,6 +132,84 @@ def test_setget_cTemplate():
     newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_modelica_template.c')
     mc.set_cTemplate(newtemplate)
     nose.tools.assert_equal(mc.get_cTemplate(), newtemplate)
-   
 
+@testattr(stddist = True)
+def test_setget_boolean_option():
+    """ Test boolean option setter and getter. """
+    option = 'boolean_testoption'
+    setvalue = True
+    # create new option
+    mc.set_boolean_option(option, setvalue)
+    nose.tools.assert_equal(mc.get_boolean_option(option), setvalue)
+    # change value of option
+    setvalue = False
+    mc.set_boolean_option(option, setvalue)
+    nose.tools.assert_equal(mc.get_boolean_option(option), setvalue)
+    
+@testattr(stddist = True)
+def test_setget_boolean_option_error():
+    """ Test that boolean option getter raises the proper error. """
+    option = 'nonexist_boolean'
+    #try to get an unknown option
+    nose.tools.assert_raises(jm.compiler.UnknownOptionError, mc.get_boolean_option, option)
+
+@testattr(stddist = True)
+def test_setget_integer_option():
+    """ Test integer option setter and getter. """
+    option = 'integer_testoption'
+    setvalue = 10
+    # create new option
+    mc.set_integer_option(option, setvalue)
+    nose.tools.assert_equal(mc.get_integer_option(option), setvalue)
+    # change value of option
+    setvalue = 100
+    mc.set_integer_option(option, setvalue)
+    nose.tools.assert_equal(mc.get_integer_option(option), setvalue)
+    
+@testattr(stddist = True)
+def test_setget_integer_option_error():
+    """ Test that integer option getter raises the proper error. """
+    option = 'nonexist_integer'
+    #try to get an unknown option
+    nose.tools.assert_raises(jm.compiler.UnknownOptionError, mc.get_integer_option, option) 
+
+@testattr(stddist = True)
+def test_setget_real_option():
+    """ Test real option setter and getter. """
+    option = 'real_testoption'
+    setvalue = 10.0
+    # create new option
+    mc.set_real_option(option, setvalue)
+    nose.tools.assert_equal(mc.get_real_option(option), setvalue)
+    # change value of option
+    setvalue = 100.0
+    mc.set_real_option(option, setvalue)
+    nose.tools.assert_equal(mc.get_real_option(option), setvalue)
+    
+@testattr(stddist = True)
+def test_setget_real_option_error():
+    """ Test that real option getter raises the proper error. """
+    option = 'nonexist_real'
+    #try to get an unknown option
+    nose.tools.assert_raises(jm.compiler.UnknownOptionError, mc.get_real_option, option)     
+
+@testattr(stddist = True)
+def test_setget_string_option():
+    """ Test string option setter and getter. """
+    option = 'string_testoption'
+    setvalue = 'option 1'
+    # create new option
+    mc.set_string_option(option, setvalue)
+    nose.tools.assert_equal(mc.get_string_option(option), setvalue)
+    # change value of option
+    setvalue = 'option 2'
+    mc.set_string_option(option, setvalue)
+    nose.tools.assert_equal(mc.get_string_option(option), setvalue)
+    
+@testattr(stddist = True)
+def test_setget_string_option_error():
+    """ Test that string option getter raises the proper error. """
+    option = 'nonexist_real'
+    #try to get an unknown option
+    nose.tools.assert_raises(jm.compiler.UnknownOptionError, mc.get_string_option, option)    
 

@@ -1461,6 +1461,7 @@ def load_model(libname, path='.', mofile=None, optpackage=None, compiler=None):
         curdir = os.getcwd()
         os.chdir(path)
         oc = __Compiler()
+        oc.set_boolean_option('state_start_values_fixed',True)
         oc.compile_model(os.path.join(path, mofile), optpackage)
         os.chdir(curdir)
         model = Model(libname, path)

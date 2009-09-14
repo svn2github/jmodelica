@@ -54,10 +54,7 @@ def run_demo(with_plots=True):
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     # Create a Modelica compiler instance
     oc = OptimicaCompiler()
-    
-    # Don't generate initial equations for states if fixed=false
-    oc.set_boolean_option('state_start_values_fixed',False)
-    
+        
     # Compile the stationary initialization model into a DLL
     oc.compile_model(curr_dir+"/files/CSTR.mo", "CSTR.CSTR_Init", target='ipopt')
 
@@ -107,11 +104,6 @@ def run_demo(with_plots=True):
     print('c = %f' % c_0_B)
     print('T = %f' % T_0_B)
 
-    # Generate initial equations for states if fixed=false
-    # This is just for convenience, the alternative would be to
-    # add fixed=true for all states.
-    oc.set_boolean_option('state_start_values_fixed',True)
-    
     oc.compile_model(curr_dir+"/files/CSTR.mo", "CSTR.CSTR_Opt", target='ipopt')
 
     cstr = jmi.Model("CSTR_CSTR_Opt")

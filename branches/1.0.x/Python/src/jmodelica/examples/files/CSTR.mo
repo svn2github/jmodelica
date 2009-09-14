@@ -17,15 +17,15 @@ model CSTR "A CSTR"
   parameter Modelica.SIunits.Volume V = 100 "Reactor Volume";
   parameter Modelica.SIunits.Concentration c_init = 1000;
   parameter Modelica.SIunits.Temp_K T_init = 350;
-  Real c(start=c_init);
-  Real T(start=T_init);
+  Real c(start=c_init,fixed=true);
+  Real T(start=T_init,fixed=true);
 equation 
   der(c) = F0*(c0-c)/V-k0*c*exp(-EdivR/T);
   der(T) = F0*(T0-T)/V-dH/(rho*Cp)*k0*c*exp(-EdivR/T)+2*U/(r*rho*Cp)*(Tc-T);
 end CSTR;
 
 model CSTR_Init
-  extends CSTR;
+  extends CSTR(c(fixed=false),T(fixed=false));
 initial equation
   der(c) = 0;
   der(T) = 0;
@@ -38,7 +38,7 @@ optimization CSTR_Opt(objective=(cost(finalTime)),
   input Real u(start = 350,initialGuess=350)=cstr.Tc; 
   CSTR cstr(c(initialGuess=300),T(initialGuess=300),Tc(initialGuess=350));
 
-  Real cost(start=0,initialGuess=500);
+  Real cost(start=0,fixed=true,initialGuess=500);
   parameter Real c_ref = 500;
   parameter Real T_ref = 320;
   parameter Real Tc_ref = 300;

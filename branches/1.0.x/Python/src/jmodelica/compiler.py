@@ -44,6 +44,7 @@ if not jpype.isJVMStarted():
     print "JVM started."
 
 OptionRegistry = org.jmodelica.util.OptionRegistry
+UnknownOptionException = jpype.JClass('org.jmodelica.util.OptionRegistry$UnknownOptionException')
 
 class ModelicaCompiler():
     """ User class for accessing the Java ModelicaCompiler class. """
@@ -84,10 +85,14 @@ class ModelicaCompiler():
     def set_modelicapath(self, path):
         """ Set the modelicapath to path. """
         self._compiler.setModelicapath(path)
-        
+
     def get_boolean_option(self, key):
         """ Get the boolean option for the specific key. """
-        return self._compiler.getBooleanOption(key)
+        try:
+            option = self._compiler.getBooleanOption(key)
+        except jpype.JavaException, ex:
+            _handle_exception(ex)
+        return option
     
     def set_boolean_option(self, key, value):
         """ Set the boolean option with key to value. 
@@ -95,11 +100,18 @@ class ModelicaCompiler():
         If the option already exists it will be overwritten. 
         
         """
-        self._compiler.setBooleanOption(key, value)
+        try:
+            self._compiler.setBooleanOption(key, value)
+        except jpype.JavaException, ex:
+            _handle_exception(ex)
         
     def get_integer_option(self, key):
         """ Get the integer option for the specific key. """
-        return self._compiler.getIntegerOption(key)
+        try:
+            option = self._compiler.getIntegerOption(key)
+        except jpype.JavaException, ex:
+            _handle_exception(ex)
+        return option
     
     def set_integer_option(self, key, value):
         """ Set the integer option with key to value. 
@@ -107,21 +119,37 @@ class ModelicaCompiler():
         If the option already exists it will be overwritten.
         
         """
-        self._compiler.setIntegerOption(key, value)
+        try:
+            self._compiler.setIntegerOption(key, value)
+        except jpype.JavaException, ex:
+            _handle_exception(ex)
         
     def get_real_option(self, key):
         """ Get the real option for the specific key. """
-        return self._compiler.getRealOption(key)
+        try:
+            option = self._compiler.getRealOption(key)
+        except jpype.JavaException, ex:
+            _handle_exception(ex)
+        return option
     
     def set_real_option(self, key, value):
         """ Set the real option with key to value.
-        If the option already exists it will be overwritten.
-        """
-        self._compiler.setRealOption(key, value)
         
+        If the option already exists it will be overwritten.
+        
+        """
+        try:
+            self._compiler.setRealOption(key, value)
+        except jpype.JavaException, ex:
+            _handle_exception(ex)
+                    
     def get_string_option(self, key):
         """ Get the string option for the specific key. """
-        return self._compiler.getStringOption(key)
+        try:
+            option = self._compiler.getStringOption(key)
+        except jpype.JavaException, ex:
+            _handle_exception(ex)
+        return option
         
     def set_string_option(self, key, value):
         """ Set the string option with key to value.
@@ -129,7 +157,10 @@ class ModelicaCompiler():
         If the option already exists it will be overwritten.
         
         """
-        self._compiler.setStringOption(key, value)   
+        try:
+            self._compiler.setStringOption(key, value)
+        except jpype.JavaException, ex:
+            _handle_exception(ex)
         
     def get_XMLVariablesTemplate(self):
         """ Return file path to the XML variables template. """
@@ -209,8 +240,7 @@ class ModelicaCompiler():
             self._compiler.compileModel(model_file_name,
                                                 model_class_name)
             c_file = model_class_name.replace('.','_')
-            retval = self.compile_dll(c_file, target)
-            return retval
+            self.compile_dll(c_file, target)
 
         except jpype.JavaException, ex:
             _handle_exception(ex)
@@ -512,6 +542,13 @@ class ParserConfigurationError(JError):
 #class SAXError(JError):
 #    pass
 
+class UnknownOptionError(JError):
+    """ Class for error thrown when trying to access unknown compiler 
+    option. 
+    
+    """
+    pass
+
 def _handle_exception(ex):
     """ Catch and handle all expected Java Exceptions that the underlying 
     Java classes might throw.
@@ -550,6 +587,9 @@ def _handle_exception(ex):
     
 #    if ex.javaClass() is jpype.org.xml.sax.SAXException:
 #        raise SAXError('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
+
+    if ex.javaClass() is UnknownOptionException:
+        raise UnknownOptionError(str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
     
     if ex.javaClass() is jpype.java.lang.Exception:
         raise Exception('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
