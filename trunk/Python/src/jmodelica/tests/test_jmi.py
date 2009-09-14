@@ -433,7 +433,7 @@ def _generic_load_model_trial(modelfile, cpath, compiler):
     
     dllfname = cpath.replace('.', '_', 1)
     
-    DLLSUFFIXES = ['so', 'dll'] # A list of all the suffizes a DLL can have
+    DLLSUFFIXES = ['so', 'dll', 'dylib'] # A list of all the suffizes a DLL can have
     for suffix in DLLSUFFIXES:
         # Remove all possible DLL files
         toremove = os.path.join(examplefpath, "%s.%s" % (dllfname, suffix))
