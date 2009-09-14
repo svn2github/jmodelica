@@ -1,0 +1,8 @@
+#!/bin/sh
+
+JMODELICA_HOME=@prefix@ \
+IPOPT_HOME=@IPOPT_HOME@ \
+CPPAD_HOME=@CPPAD_HOME@ \
+PYTHONPATH=:@prefix@/Python/ \
+LD_LIBRARY_PATH=:@IPOPT_HOME@/lib \
+ipython $@

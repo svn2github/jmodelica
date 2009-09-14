@@ -1,0 +1,38 @@
+CODING GUIDELINES
+===================
+The Python coding standards used are trying to adhere to Python Coding
+Guidelines found in PEP8[1] <http://www.python.org/dev/peps/pep-0008/>
+with the exception of using UTF-8 encoding and NOT latin-1. Here is a
+summary:
+
+ * Indent using _spaces_ of width 4.
+ * Class names should begin with uppercase and use CamelCase. First
+   character should be capitalized.
+ * Function names should be short, lowercase and concise. Use
+   underscores as word delimiter.
+ * Public methods use the same naming convention as with functions. They should
+   avoid having an initial underscore.
+ * Private methods should have ONE initial underscore, followed by only
+   lower case characters. Words should be delimited by underscore.
+ * Never use two initial underscores (activates Python's name mangling scheme
+   and makes debugging difficult).
+ * Every module/file must at least contain a docstring describing the
+   purpose of the module. All public variables, functions and classes
+   should be documentated. Preferably according to PEP 257[2].
+ * All Python files must use UTF-8 encoding and include
+ 
+     # -*- coding: utf-8 -*-
+    
+   in their header.
+ * All runnable Python files must include
+ 
+     #!/usr/bin/env python
+    
+   in their header to make them executable on UNIX/Linux and Mac.
+ * Constants should be UPPERCASE and use underscores (_).
+ * Try to adhere to earlier coding convention as close as possible.
+ 
+ [1] PEP8 - Style Guide for Python Code
+     http://www.python.org/dev/peps/pep-0008/
+ [2] PEP257 - Python Docstring Conventions;
+     http://www.python.org/dev/peps/pep-0257/

@@ -1,0 +1,228 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+aspect FlatVariability {
+	
+	syn boolean FTypePrefixVariability.constantVariability() = false;
+	eq FConstant.constantVariability() = true;	
+	syn boolean FTypePrefixVariability.parameterVariability() = false;
+	eq FParameter.parameterVariability() = true;	
+	syn boolean FTypePrefixVariability.discreteVariability() = false;
+	eq FDiscrete.discreteVariability() = true;	
+	syn boolean FTypePrefixVariability.continuousVariability() = false;
+	eq FContinuous.continuousVariability() = true;	
+
+	syn boolean TypePrefixVariability.constantVariability() = false;
+	eq Constant.constantVariability() = true;	
+	syn boolean TypePrefixVariability.parameterVariability() = false;
+	eq Parameter.parameterVariability() = true;	
+	syn boolean TypePrefixVariability.discreteVariability() = false;
+	eq Discrete.discreteVariability() = true;	
+	syn boolean TypePrefixVariability.continuousVariability() = false;
+	eq Continuous.continuousVariability() = true;	
+
+	
+	syn boolean FVariable.isConstant() = getFTypePrefixVariability().constantVariability();
+    syn boolean FVariable.isParameter() = getFTypePrefixVariability().parameterVariability();
+    syn boolean FVariable.isDiscrete() = getFTypePrefixVariability().discreteVariability();
+    syn boolean FVariable.isContinuous() = getFTypePrefixVariability().continuousVariability();
+    	
+	syn boolean InstPrimitive.isConstant() = 
+		getComponentDecl().hasTypePrefixVariability()?
+		getComponentDecl().getTypePrefixVariability().constantVariability() : false;
+
+	syn boolean InstPrimitive.isParameter() = 
+		getComponentDecl().hasTypePrefixVariability()?
+		getComponentDecl().getTypePrefixVariability().parameterVariability() : false;
+
+	syn boolean InstPrimitive.isDiscrete() = 
+		getComponentDecl().hasTypePrefixVariability()?
+		getComponentDecl().getTypePrefixVariability().discreteVariability() : false;
+
+	syn boolean InstPrimitive.isContinuous() = 
+		getComponentDecl().hasTypePrefixVariability()?
+		getComponentDecl().getTypePrefixVariability().continuousVariability() : true;
+
+		
+		
+	syn boolean FExp.isConstantExp() = variability().constantVariability();
+	syn boolean FExp.isParameterExp() = variability().parameterVariability();
+	syn boolean FExp.isDiscreteExp() = variability().discreteVariability();
+	syn boolean FExp.isContinuousExp() = variability().continuousVariability();
+	
+	syn lazy FTypePrefixVariability FExp.variability();
+	// TODO this must be fixed.
+	eq FInstAccessExp.variability() = null;
+	eq FUnsupportedExp.variability() = null;
+	
+	syn lazy FTypePrefixVariability FVariable.variability() {
+   		if (!isContinuous()) {
+   			return getFTypePrefixVariability();
+   		} else if (isInteger() || isBoolean() || isString()) {
+   			return(fDiscrete());
+   		} else {
+   			return fContinuous();
+   		}
+	}
+	
+	eq FBinExp.variability() = getLeft().variability().combine(getRight().variability());
+	eq FUnaryExp.variability() = getFExp().variability();
+	
+	eq FLitExp.variability() = fConstant();
+
+	eq FNoExp.variability() = fConstant();
+	
+	eq FTimeExp.variability() = fContinuous();
+	
+	eq FEndExp.variability() = fParameter();
+	
+	eq FBuiltInExp.variability() = getFExp().variability();
+	
+	eq FIfExp.variability() {
+		FTypePrefixVariability total = getThenExp().variability();
+		for (int i=0; i<getNumFElseIfExp(); i++) {
+			total = total.combine(getFElseIfExp(i).variability());
+		}
+		total = total.combine(getElseExp().variability());
+		return total;
+	}
+	
+	eq FElseIfExp.variability() = getThenExp().variability();
+
+	eq FSizeExp.variability() = getFIdUseExp().variability();
+
+	eq FMatrix.variability() {
+		FTypePrefixVariability total = fConstant();
+		for (int i=0; i<getNumFExpList(); i++) {
+			total = total.combine(getFExpList(i).variability());
+		}
+		return total;
+	}
+	
+	eq FExpList.variability() {
+		FTypePrefixVariability total = fConstant();		
+		for (int i=0; i<getNumFExp(); i++) {
+			total = total.combine(getFExp(i).variability());
+		}
+		return total;
+	}
+	
+	eq FFunctionCall.variability() {
+		FTypePrefixVariability total = fConstant();
+		for (int i=0; i< getNumArgs(); i++) {
+			total = total.combine(getArgs(i).variability());
+		}
+		return total;
+	}
+
+	eq InstFunctionCall.variability() {
+		FTypePrefixVariability total = fConstant();
+		for (int i=0; i< getNumArgs(); i++) {
+			total = total.combine(getArgs(i).variability());
+		}
+		return total;
+	}
+	
+	eq FIdUseExp.variability() {
+		AbstractFVariable variable = this.myFV();
+		if (variable instanceof FVariable) {
+			FVariable fVariable = (FVariable) variable;
+			return(fVariable.variability());
+		} else {
+			return (fContinuous());
+		}
+	}
+	
+	eq FSumRedExp.variability() {
+		return(getFExp().variability().combine(getFForIndex().variability()));
+	}
+
+	// TODO: Take care of IDENT in range-expr without the 'in rang-expr'
+	syn FTypePrefixVariability FForIndex.variability() {
+		if (hasFExp()) {
+			return getFExp().variability();
+		} else {
+			return null;
+		}
+	}
+
+	eq FRangeExp.variability() {
+		FTypePrefixVariability total = fConstant();
+		for (int i=0; i<getNumFExp(); i++) {
+			total = total.combine(getFExp(i).variability());
+		}
+		return total;		
+	}
+	
+	eq FArray.variability() {
+		FTypePrefixVariability total = fConstant();
+		for (int i=0; i<getNumFExp(); i++) {
+			total = total.combine(getFExp(i).variability());
+		}
+		return total;		
+	}	
+	
+	eq FIdentity.variability() = fConstant();
+	eq FOnes.variability() = fConstant();
+	eq FZeros.variability() = fConstant();
+	
+   	public FTypePrefixVariability FTypePrefixVariability.combine(FTypePrefixVariability other) {   			
+   		if (this instanceof FContinuous) {
+   			return this;
+   		} else if (other instanceof FContinuous) {
+   			return other;
+   		// neither is a continuous variable
+   		} else if (this instanceof FDiscrete) {
+   			return this;
+   		} else if (other instanceof FDiscrete) {
+   			return other;
+   	   		// neither is a continuous variable or discrete variable   			
+   		} else if (this instanceof FParameter) {
+   			return this;
+   		} else if (other instanceof FParameter) {
+   			return other;
+   		// neither is a continuous variable, discrete variable, or a parameter value
+   		} else {
+   			return this;
+   		}
+	}	
+	
+}
+
+aspect VariabilitySingletons {
+	
+	public static final FContinuous FContinuous.singleton = new FContinuous();	
+	public static final FDiscrete FDiscrete.singleton = new FDiscrete();	
+	public static final FParameter FParameter.singleton = new FParameter();
+	public static final FConstant FConstant.singleton = new FConstant();	
+	
+	public static FContinuous ASTNode.fContinuous() {
+		return FContinuous.singleton;
+	}
+
+	public static FDiscrete ASTNode.fDiscrete() {
+		return FDiscrete.singleton;
+	}	
+
+	public static FParameter ASTNode.fParameter() {
+		return FParameter.singleton;
+	}
+	
+	public static FConstant ASTNode.fConstant() {
+		return FConstant.singleton;
+	}
+}
+
