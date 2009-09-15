@@ -105,7 +105,7 @@ def test_IO_error():
 @testattr(stddist = True)
 def test_setget_modelicapath():
     """ Test modelicapath setter and getter. """
-    newpath = os.path.join(jm_home,'ThirdParty','MSL','Modelica')
+    newpath = os.path.join(jm_home,'ThirdParty','MSL')
     mc.set_modelicapath(newpath)
     nose.tools.assert_equal(mc.get_modelicapath(),newpath)
     

@@ -109,7 +109,7 @@ def test_IO_error():
 @testattr(stddist = True)
 def test_setget_modelicapath():
     """ Test modelicapath setter and getter. """
-    newpath = os.path.join(jm_home,'ThirdParty','MSL','Modelica')
+    newpath = os.path.join(jm_home,'ThirdParty','MSL')
     oc.set_modelicapath(newpath)
     nose.tools.assert_equal(oc.get_modelicapath(),newpath)
     
@@ -124,10 +124,10 @@ def test_setget_XMLVariablesTemplate():
 
 @testattr(stddist = True)
 def test_setget_XMLProblVariablesTemplate():
-    """ Test XML variables template setter and getter. """
+    """ Test XML problem variables template setter and getter. """
     newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_optimica_problvariables_template.xml')
-    oc.set_XMLVariablesTemplate(newtemplate)
-    nose.tools.assert_equal(oc.get_XMLVariablesTemplate(), newtemplate)
+    oc.set_XMLProblVariablesTemplate(newtemplate)
+    nose.tools.assert_equal(oc.get_XMLProblVariablesTemplate(), newtemplate)
 
 
 @testattr(stddist = True)
@@ -145,6 +145,19 @@ def test_setget_cTemplate():
     oc.set_cTemplate(newtemplate)
     nose.tools.assert_equal(oc.get_cTemplate(), newtemplate)
 
+@testattr(stddist = True)
+def test_parse_multiple():
+    """ Test that it is possible to parse two model files. """
+    lib = os.path.join(jm_home,path_to_examples,'files','CSTRLib.mo')
+    opt = os.path.join(jm_home,path_to_examples, 'files','CSTR2_Opt.mo')
+    oc.parse_model([lib, opt])
+
+@testattr(stddist = True)
+def test_compile_multiple():
+    """ Test that it is possible to compile two model files. """
+    lib = os.path.join(jm_home,path_to_examples,'files','CSTRLib.mo')
+    opt = os.path.join(jm_home,path_to_examples, 'files','CSTR2_Opt.mo')
+    oc.compile_model([lib,opt],'CSTR2_Opt')
 
 @testattr(stddist = True)
 def TO_ADDtest_MODELICAPATH():
