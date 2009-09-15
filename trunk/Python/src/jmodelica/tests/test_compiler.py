@@ -145,6 +145,8 @@ def test_setget_boolean_option():
     setvalue = False
     mc.set_boolean_option(option, setvalue)
     nose.tools.assert_equal(mc.get_boolean_option(option), setvalue)
+    # option should be of type bool
+    assert isinstance(mc.get_boolean_option(option),bool)
     
 @testattr(stddist = True)
 def test_setget_boolean_option_error():
@@ -165,6 +167,8 @@ def test_setget_integer_option():
     setvalue = 100
     mc.set_integer_option(option, setvalue)
     nose.tools.assert_equal(mc.get_integer_option(option), setvalue)
+    # option should be of type int
+    assert isinstance(mc.get_integer_option(option),int)
     
 @testattr(stddist = True)
 def test_setget_integer_option_error():
@@ -185,6 +189,8 @@ def test_setget_real_option():
     setvalue = 100.0
     mc.set_real_option(option, setvalue)
     nose.tools.assert_equal(mc.get_real_option(option), setvalue)
+    # option should be of type float
+    assert isinstance(mc.get_real_option(option),float)
     
 @testattr(stddist = True)
 def test_setget_real_option_error():
@@ -205,6 +211,8 @@ def test_setget_string_option():
     setvalue = 'option 2'
     mc.set_string_option(option, setvalue)
     nose.tools.assert_equal(mc.get_string_option(option), setvalue)
+    # option should be of type str
+    assert isinstance(mc.get_string_option(option),str)
     
 @testattr(stddist = True)
 def test_setget_string_option_error():

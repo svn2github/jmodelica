@@ -92,7 +92,7 @@ class ModelicaCompiler():
             option = self._compiler.getBooleanOption(key)
         except jpype.JavaException, ex:
             _handle_exception(ex)
-        return option
+        return bool(option)
     
     def set_boolean_option(self, key, value):
         """ Set the boolean option with key to value. 
@@ -149,7 +149,7 @@ class ModelicaCompiler():
             option = self._compiler.getStringOption(key)
         except jpype.JavaException, ex:
             _handle_exception(ex)
-        return option
+        return str(option)
         
     def set_string_option(self, key, value):
         """ Set the string option with key to value.
