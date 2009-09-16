@@ -130,13 +130,27 @@ JModelica.org supports the following environment variables:
    separated by semicolons and on Linux/Mac OS X they are separated
    by colons.
 
-It is only necessary to set the variable JMODELICA_HOME as a
+On Windows is only necessary to set the variable JMODELICA_HOME as a
 global environment variable, since the other variables are set in the
-Python script startup.py, which is executed when the jmodelica
-package is imported into Python. The default settings can be
-overridden either by setting one of the supported environment 
-variables globally or by adding a local startup.py file located 
-in the directory $HOME/jmodelica.org and change a variable there.
+Python script startup.py, which is executed when the jmodelica package
+is imported into Python. 
+
+For Linux and Mac OS X users we recommend using the scripts:
+
+$JMODELICA_HOME/Python/jm_ipython.sh
+
+or
+
+$JMODELICA_HOME/Python/jm_python.sh
+
+to start IPython (recommended) or Python. In these scripts, the
+default values of the environment variables are set to match your
+particular installation configuration.
+
+The default settings can be overridden either by setting one of the
+supported environment variables globally or by adding a local
+startup.py file located in the directory $HOME/jmodelica.org and
+change a variable there.
 
 7. Test the distribution
 
