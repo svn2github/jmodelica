@@ -477,8 +477,11 @@ class ModelicaCompiler():
         if ex.javaClass() is jpype.javax.xml.parsers.ParserConfigurationException:
             raise ParserConfigurationError('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
         
-    #    if ex.javaClass() is jpype.org.xml.sax.SAXException:
-    #        raise SAXError('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
+        if ex.javaClass() is org.xml.sax.SAXException or \
+            ex.javaClass() is org.xml.sax.SAXNotRecognizedException or \
+            ex.javaClass() is org.xml.sax.SAXNotSupportedException or \
+            ex.javaClass() is org.xml.sax.SAXParseException:
+            raise SAXError('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
     
         if ex.javaClass() is UnknownOptionException:
             raise UnknownOptionError(str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
@@ -589,8 +592,9 @@ class ParserConfigurationError(JError):
     """ Class for errors thrown when configuring XML parser. """
     pass
 
-#class SAXError(JError):
-#    pass
+class SAXError(JError):
+    """ Class representing a SAX error. """
+    pass
 
 class UnknownOptionError(JError):
     """ Class for error thrown when trying to access unknown compiler 
