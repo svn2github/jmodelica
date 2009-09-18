@@ -45,8 +45,8 @@ public class TokenTester {
 				Symbol t1 = fms1.nextToken();
 				Symbol t2 = fms2.nextToken();
 
-				//System.out.println("t1: " + t1.getId() + ":"+ (String)t1.value +
-				//		           " "+t2.getId()+ ":"+ (String)t2.value);
+				System.out.println("t1: " + t1.getId() + ":"+ (String)t1.value +
+						           " "+t2.getId()+ ":"+ (String)t2.value);
 				if (!(t1.getId()==t2.getId())||
 				    !(((String)t1.value).equals((String)t2.value)))
 					testSuccess = false;

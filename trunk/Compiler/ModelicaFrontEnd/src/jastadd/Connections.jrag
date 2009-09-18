@@ -155,8 +155,8 @@ aspect Connections {
 
 //			System.out.println("ConnectionSetManager.addVars");
 		
-		    //System.out.println(namePrefix1.name()+" . "+var1.name());
-		    //System.out.println(namePrefix2.name()+" . "+var2.name());
+//		    System.out.println(namePrefix1.name()+" . "+var1.name() + " outside: " + outside1);
+//		    System.out.println(namePrefix2.name()+" . "+var2.name() + " outside: " + outside2);
 		
 			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1,outside1,namePrefix1);
 			ConnectionSetEntry cse2 = new ConnectionSetEntry(var2,outside2,namePrefix2);	
@@ -188,8 +188,10 @@ aspect Connections {
 			else if (h2!=null && h1==null)
 				h2.add(cse1);
 			else if (h1!=null && h2!=null) {
-				h1.addAll(h2);
-				list.remove(h2);
+				if (h1!=h2) {
+					h1.addAll(h2);
+					list.remove(h2);
+				}
 			} else {
 //				System.out.println("ConnectionSetManager.addVars: about to create a new Hash set");
 				LinkedHashSet h = new LinkedHashSet();
@@ -201,7 +203,8 @@ aspect Connections {
 			}
 			
 //			printConnectionSets();
-			
+//			System.out.println("\n");
+				
 		}
 	
 		public LinkedHashSet getConnectionSet(ConnectionSetEntry cse) {

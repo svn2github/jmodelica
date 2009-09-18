@@ -158,6 +158,7 @@ public class FlatteningTestCase extends TestCase {
 	    // Just warnings or errors too?
 	    for (Problem p : problems) {
 	    	if (p.severity() == Problem.Severity.ERROR) {
+	    		System.out.println("Error found in model");
 	    		return false;
 	    	}
 	    }
