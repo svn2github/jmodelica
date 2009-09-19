@@ -240,6 +240,17 @@
 			<arg value="NameTests"/>
 			<arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 		</java>
+
+		<java 
+	  		      classname="org.jmodelica.modelica.compiler.JunitGenerator"
+	  		      classpath=".:bin/ModelicaCompiler.jar:bin/util.jar:${beaver_dir}/lib/beaver.jar" 
+	  		      fork="true" 
+	  		      dir=".">
+			<arg value="${modelica_front_end_path}/src/test/modelica/ArrayTests.mo"/>
+			<arg value="ArrayTests"/>
+			<arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
+		</java>
+
 		<java 
 	  		      classname="org.jmodelica.modelica.compiler.JunitGenerator"
 	  		      classpath=".:bin/ModelicaCompiler.jar:bin/util.jar:${beaver_dir}/lib/beaver.jar" 

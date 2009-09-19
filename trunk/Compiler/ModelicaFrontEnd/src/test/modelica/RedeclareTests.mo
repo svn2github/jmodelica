@@ -2987,5 +2987,44 @@ end RedeclareTests.RedeclareTest27;
 
 end RedeclareTest27;
 
+model RedeclareTest28
+
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RedeclareTest28",
+        description="Test of parametrized classes.",
+                                               flatModel=
+"
+fclass RedeclareTests.RedeclareTest28
+ parameter Real p2 = 3 /* 3.0 */;
+ parameter Real p3 = 1 /* 1.0 */;
+ parameter Real m1.p2 = p2;
+ parameter Real m1.p1 = p3;
+equation 
+end RedeclareTests.RedeclareTest28;
+")})));
+
+
+
+  model M1
+    parameter Real p1=2;
+  end M1;
+
+  model M2
+    extends M1;
+    parameter Real p2=2;
+  end M2;
+
+  model A
+    parameter Real p3 = 1;
+    replaceable M1 m1(p1=p3);
+  end A;
+  
+  parameter Real p2 = 3;
+  extends A(redeclare M2 m1(p2=p2));
+
+
+end RedeclareTest28;
+
 
 end RedeclareTests;
+

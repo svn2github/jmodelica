@@ -545,7 +545,8 @@ model CauerLowPassAnalog
       JModelica.UnitTesting.FlatteningTestCase(name="CauerLowPassAnalog",
         description="Test of generation of connection equations.",
                                                flatModel=
-"fclass ConnectTests.CauerLowPassAnalog
+"
+fclass ConnectTests.CauerLowPassAnalog
  parameter Real l1(final quantity = \"Inductance\",final unit = \"H\") = 1.304 \"filter coefficient I1\" /* 1.304 */;
  parameter Real l2(final quantity = \"Inductance\",final unit = \"H\") = 0.8586 \"filter coefficient I2\" /* 0.8586 */;
  parameter Real c1(final quantity = \"Capacitance\",final unit = \"F\",min = 0) = 1.072 \"filter coefficient c1\" /* 1.072 */;
@@ -604,26 +605,26 @@ model CauerLowPassAnalog
  Real L2.p.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
  Real L2.n.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
  Real L2.n.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
- parameter Real R1.R(start = 1,final quantity = \"Resistance\",final unit = \"Ohm\") \"Resistance\";
+ parameter Real R1.R(start = 1,final quantity = \"Resistance\",final unit = \"Ohm\") = 1 \"Resistance\" /* 1.0 */;
  Real R1.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Voltage drop between the two pins (= p.v - n.v)\";
  Real R1.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing from pin p to pin n\";
  Real R1.p.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
  Real R1.p.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
  Real R1.n.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
  Real R1.n.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
- parameter Real R2.R(start = 1,final quantity = \"Resistance\",final unit = \"Ohm\") \"Resistance\";
+ parameter Real R2.R(start = 1,final quantity = \"Resistance\",final unit = \"Ohm\") = 1 \"Resistance\" /* 1.0 */;
  Real R2.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Voltage drop between the two pins (= p.v - n.v)\";
  Real R2.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing from pin p to pin n\";
  Real R2.p.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
  Real R2.p.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
  Real R2.n.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
  Real R2.n.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
- parameter Real V.V(start = 1,final quantity = \"ElectricPotential\",final unit = \"V\") \"Height of step\";
+ parameter Real V.V(start = 1,final quantity = \"ElectricPotential\",final unit = \"V\") = 0 \"Height of step\" /* 0.0 */;
  parameter Real V.offset(final quantity = \"ElectricPotential\",final unit = \"V\") = 0 \"Voltage offset\" /* 0.0 */;
  parameter Real V.startTime(final quantity = \"Time\",final unit = \"s\") = 1 \"Time offset\" /* 1.0 */;
  parameter Real V.signalSource.height = V.V \"Height of step\";
- parameter Real V.signalSource.offset = V.signalSource.offset \"Offset of output signal y\";
- parameter Real V.signalSource.startTime(final quantity = \"Time\",final unit = \"s\") = V.signalSource.startTime \"Output y = offset for time < startTime\";
+ parameter Real V.signalSource.offset = V.offset \"Offset of output signal y\";
+ parameter Real V.signalSource.startTime(final quantity = \"Time\",final unit = \"s\") = V.startTime \"Output y = offset for time < startTime\";
  Real V.signalSource.y \"Connector of Real output signal\";
  Real V.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Voltage drop between the two pins (= p.v - n.v)\";
  Real V.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing from pin p to pin n\";
@@ -699,7 +700,7 @@ equation
 end ConnectTests.CauerLowPassAnalog;
 ")})));
 
-extends Modelica.Electrical.Analog.Examples.CauerLowPassAnalog;
+extends Modelica.Electrical.Analog.Examples.CauerLowPassAnalog(R1(R=1),R2(R=1),V(V=0));
 
 end CauerLowPassAnalog; 
 

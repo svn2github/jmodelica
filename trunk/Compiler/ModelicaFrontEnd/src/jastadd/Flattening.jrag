@@ -102,6 +102,8 @@ aspect Flattening {
 		FExp e = myBindingFExp();
 		List attr = new List();
 		for (InstModification im : totalMergedEnvironment()) {
+//			System.out.println("createFVariable: " + qualifiedName() + ": " +
+//					im.prettyPrint("") + " " + im.myInstNode().getFQNamePrefix().name());		
 			im.collectAttributes(attr,im.myInstNode().getFQNamePrefix());
 		}
 		
