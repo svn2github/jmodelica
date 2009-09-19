@@ -265,11 +265,10 @@ public class ModelicaCompiler {
 		SourceRoot sr = parseModel(name);
 		
 		// compute instance tree
-		InstProgramRoot ipr = instantiateModel(sr, cl);
-		ipr.options = new OptionRegistry(sr.options);
+		InstClassDecl icl = instantiateModel(sr, cl);
 		
 		// flattening
-		FClass fc = flattenModel(cl+".mof", cl, ipr);
+		FClass fc = flattenModel(icl);
 
 		// Generate code?
 		if (this.xmlVariablesTempl != null && this.xmlValuesTempl !=null && this.cTemplatefile != null) {
@@ -381,14 +380,14 @@ public class ModelicaCompiler {
 	 * @param cl
 	 *            The name of the class in the model file to compile.
 	 * 
-	 * @return The root of the instance tree.
+	 * @return The instance node corresponding to the instantiated model.
 	 * 
 	 * @throws CompilerException
 	 *             If errors have been found during the instantiation.
 	 * @throws ModelicaClassNotFoundException
 	 *             If the Modelica class to instantiate is not found.
 	 */
-	public InstProgramRoot instantiateModel(SourceRoot sr, String cl) 
+	public InstClassDecl instantiateModel(SourceRoot sr, String cl) 
 		throws ModelicaClassNotFoundException, CompilerException{
 		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 		ipr.options = new OptionRegistry(sr.options);
@@ -403,19 +402,14 @@ public class ModelicaCompiler {
 			throw ce;
 		}
 		
-		return ipr;		
+		return ipr.simpleLookupInstClassDecl(cl);		
 	}
 	
 	/**
-	 * Computes the flattened model representation from the parsed instance
-	 * model.
+	 * Computes the flattened model representation from a model instance.
 	 * 
-	 * @param name
-	 *            The name of the model file.
-	 * @param cl
-	 *            The name of the class in the model file to compile.
-	 * @param ipr
-	 *            The reference to the instance tree root.
+	 * @param icd
+	 *            A reference to the model instance node.
 	 * 
 	 * @return FClass object representing the flattened model.
 	 * 
@@ -426,22 +420,22 @@ public class ModelicaCompiler {
 	 * @throws ModelicaClassNotFoundException
 	 *             If the Modelica class to flatten is not found.
 	 */
-	public FClass flattenModel(String name, String cl, InstProgramRoot ipr) 
+	public FClass flattenModel(InstClassDecl icl) 
 		throws CompilerException, ModelicaClassNotFoundException, IOException {
 		FlatRoot flatRoot = new FlatRoot();
-		flatRoot.setFileName(name);
+		flatRoot.setFileName(icl.qualifiedName()+".mof");
 		FClass fc = new FClass();
 		flatRoot.setFClass(fc);
-		flatRoot.options = new OptionRegistry(ipr.options);
+		flatRoot.options = new OptionRegistry(icl.root().options);
 		
 		logger.info("Flattening starts...");
 		
-		ipr.findFlattenInst(cl, fc);
+		icl.flattenInstClassDecl(fc);
 
 		// Output the untransformed flattened model
 		logger.info("Creating raw .mof file...");
 	    	    	// Create file 
-	   	FileWriter fstream = new FileWriter(cl+".mof");
+	   	FileWriter fstream = new FileWriter(icl.qualifiedName()+".mof");
 	   	BufferedWriter out = new BufferedWriter(fstream);
 	   	out.write(fc.prettyPrint(""));
 	   	//Close the output stream
@@ -462,7 +456,7 @@ public class ModelicaCompiler {
 				
 		logger.info("Creating transformed .mof file...");
 	    	    	// Create file 
-	   	fstream = new FileWriter(cl+"_transformed.mof");
+	   	fstream = new FileWriter(icl.qualifiedName()+"_transformed.mof");
 	   	out = new BufferedWriter(fstream);
 	   	out.write(fc.prettyPrint(""));
 	   	//Close the output stream

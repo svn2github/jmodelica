@@ -74,8 +74,8 @@ def test_compile_wtarget_ipopt():
 def test_stepbystep():
     """ Test that it is possible to compile (compiler.py) step-by-step. """
     sourceroot = mc.parse_model(fpath)
-    ipr = mc.instantiate_model(sourceroot, cpath)
-    fclass = mc.flatten_model(fpath, cpath, ipr)
+    icd = mc.instantiate_model(sourceroot, cpath)
+    fclass = mc.flatten_model(icd)
     mc.compile_dll(cpath.replace('.','_',1))   
 
 @testattr(stddist = True)

@@ -77,8 +77,8 @@ def test_optimica_compile_wtarget_ipopt():
 def test_optimica_stepbystep():
     """ Test that it is possible to compile (optimicacompiler.py) step-by-step. """
     sourceroot = oc.parse_model(fpath)
-    ipr = oc.instantiate_model(sourceroot, cpath)
-    fclass = oc.flatten_model(fpath, cpath, ipr)
+    icd = oc.instantiate_model(sourceroot, cpath)
+    fclass = oc.flatten_model(icd)
     oc.compile_dll(cpath.replace('.','_',1))
 
 

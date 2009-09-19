@@ -298,7 +298,7 @@ class ModelicaCompiler():
                 Name of model class in the model file to compile.
 
         Returns:
-            Reference to the root of the instance tree representation. 
+            Reference to the instance AST node representing the model instance. 
 
         Exceptions:
             CompilerError -- 
@@ -316,7 +316,7 @@ class ModelicaCompiler():
         except jpype.JavaException, ex:
             self._handle_exception(ex)
 
-    def flatten_model(self, model_file_name, model_class_name, inst_prg_root):
+    def flatten_model(self, inst_class_decl):
         """ 
         Compute a flattened representation of a model. 
 
@@ -325,12 +325,8 @@ class ModelicaCompiler():
         instantiate_model.
 
         Parameters:  
-            model_file_name --
-                Path to file in which the model is contained.
-            model_class_name --
-                Name of model class in the model file to compile.
-            inst_prg_root -- 
-                Reference to the instance tree representation. 
+            inst_class_decl -- 
+                Reference to a model instance. 
 
         Returns:
             Object (FClass) representing the flattened model. 
@@ -349,9 +345,7 @@ class ModelicaCompiler():
 
         """
         try:
-            fclass = self._compiler.flattenModel(model_file_name,
-                                                 model_class_name,
-                                                 inst_prg_root)
+            fclass = self._compiler.flattenModel(inst_class_decl)
             return fclass    
         except jpype.JavaException, ex:
             self._handle_exception(ex)
