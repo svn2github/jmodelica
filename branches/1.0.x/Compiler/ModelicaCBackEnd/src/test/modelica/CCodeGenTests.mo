@@ -53,14 +53,15 @@ $C_DAE_initial_guess_equation_residuals$",
 
     (*res)[0] =  - ( _x_ ) - (_der_x_);
     (*res)[1] = 4 - (_der_v_);
-    (*res)[2] = _x_ - (_z_);
-    (*res)[3] = 2 - (_w_);
+    (*res)[2] = 3 - (_y_);
+    (*res)[3] = _x_ - (_z_);
+    (*res)[4] = 2 - (_w_);
 
     (*res)[0] =  - ( _x_ ) - (_der_x_);
     (*res)[1] = 4 - (_der_v_);
-    (*res)[2] = _x_ - (_z_);
-    (*res)[3] = 2 - (_w_);
-    (*res)[4] = 1 - (_x_);
+    (*res)[2] = 3 - (_y_);
+    (*res)[3] = _x_ - (_z_);
+    (*res)[4] = 2 - (_w_);
     (*res)[5] = 3 - (_y_);
 
    (*res)[0] = 0.0 - _z_;
@@ -71,7 +72,7 @@ $C_DAE_initial_guess_equation_residuals$",
 
 
 		Real x(start=1);
-		Real y(start=3,fixed=true);
+		Real y(start=3,fixed=true)=3;
 	    Real z = x;
 	    Real w(start=1) = 2;
 	    Real v;

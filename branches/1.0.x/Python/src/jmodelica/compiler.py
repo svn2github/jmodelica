@@ -66,7 +66,7 @@ class ModelicaCompiler():
         try:
             options = OptionRegistry(self.options_file_path)
         except jpype.JavaException, ex:
-            _handle_exception(ex)
+            self._handle_exception(ex)
             
         options.setStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
         self._compiler = self.ModelicaCompiler(options, 
@@ -91,8 +91,8 @@ class ModelicaCompiler():
         try:
             option = self._compiler.getBooleanOption(key)
         except jpype.JavaException, ex:
-            _handle_exception(ex)
-        return option
+            self._handle_exception(ex)
+        return bool(option)
     
     def set_boolean_option(self, key, value):
         """ Set the boolean option with key to value. 
@@ -103,14 +103,14 @@ class ModelicaCompiler():
         try:
             self._compiler.setBooleanOption(key, value)
         except jpype.JavaException, ex:
-            _handle_exception(ex)
+            self._handle_exception(ex)
         
     def get_integer_option(self, key):
         """ Get the integer option for the specific key. """
         try:
             option = self._compiler.getIntegerOption(key)
         except jpype.JavaException, ex:
-            _handle_exception(ex)
+            self._handle_exception(ex)
         return option
     
     def set_integer_option(self, key, value):
@@ -122,14 +122,14 @@ class ModelicaCompiler():
         try:
             self._compiler.setIntegerOption(key, value)
         except jpype.JavaException, ex:
-            _handle_exception(ex)
+            self._handle_exception(ex)
         
     def get_real_option(self, key):
         """ Get the real option for the specific key. """
         try:
             option = self._compiler.getRealOption(key)
         except jpype.JavaException, ex:
-            _handle_exception(ex)
+            self._handle_exception(ex)
         return option
     
     def set_real_option(self, key, value):
@@ -141,15 +141,15 @@ class ModelicaCompiler():
         try:
             self._compiler.setRealOption(key, value)
         except jpype.JavaException, ex:
-            _handle_exception(ex)
+            self._handle_exception(ex)
                     
     def get_string_option(self, key):
         """ Get the string option for the specific key. """
         try:
             option = self._compiler.getStringOption(key)
         except jpype.JavaException, ex:
-            _handle_exception(ex)
-        return option
+            self._handle_exception(ex)
+        return str(option)
         
     def set_string_option(self, key, value):
         """ Set the string option with key to value.
@@ -160,7 +160,7 @@ class ModelicaCompiler():
         try:
             self._compiler.setStringOption(key, value)
         except jpype.JavaException, ex:
-            _handle_exception(ex)
+            self._handle_exception(ex)
         
     def get_XMLVariablesTemplate(self):
         """ Return file path to the XML variables template. """
@@ -243,7 +243,7 @@ class ModelicaCompiler():
             self.compile_dll(c_file, target)
 
         except jpype.JavaException, ex:
-            _handle_exception(ex)
+            self._handle_exception(ex)
 
     def parse_model(self,model_file_name):   
         """ 
@@ -281,7 +281,7 @@ class ModelicaCompiler():
             sr = self._compiler.parseModel(model_file_name)
             return sr        
         except jpype.JavaException, ex:
-            _handle_exception(ex)
+            self._handle_exception(ex)
 
     def instantiate_model(self, source_root, model_class_name):
         """ 
@@ -298,7 +298,7 @@ class ModelicaCompiler():
                 Name of model class in the model file to compile.
 
         Returns:
-            Reference to the root of the instance tree representation. 
+            Reference to the instance AST node representing the model instance. 
 
         Exceptions:
             CompilerError -- 
@@ -314,9 +314,9 @@ class ModelicaCompiler():
             ipr = self._compiler.instantiateModel(source_root, model_class_name)
             return ipr    
         except jpype.JavaException, ex:
-            _handle_exception(ex)
+            self._handle_exception(ex)
 
-    def flatten_model(self, model_file_name, model_class_name, inst_prg_root):
+    def flatten_model(self, inst_class_decl):
         """ 
         Compute a flattened representation of a model. 
 
@@ -325,12 +325,8 @@ class ModelicaCompiler():
         instantiate_model.
 
         Parameters:  
-            model_file_name --
-                Path to file in which the model is contained.
-            model_class_name --
-                Name of model class in the model file to compile.
-            inst_prg_root -- 
-                Reference to the instance tree representation. 
+            inst_class_decl -- 
+                Reference to a model instance. 
 
         Returns:
             Object (FClass) representing the flattened model. 
@@ -349,12 +345,10 @@ class ModelicaCompiler():
 
         """
         try:
-            fclass = self._compiler.flattenModel(model_file_name,
-                                                 model_class_name,
-                                                 inst_prg_root)
+            fclass = self._compiler.flattenModel(inst_class_decl)
             return fclass    
         except jpype.JavaException, ex:
-            _handle_exception(ex)
+            self._handle_exception(ex)
 
     def generate_code(self,fclass):
     
@@ -382,7 +376,7 @@ class ModelicaCompiler():
         try:
             self._compiler.generateCode(fclass)
         except jpype.JavaException, ex:
-            _handle_exception(ex)
+            self._handle_exception(ex)
 
     def compile_dll(self, c_file_name, target="model"):
 
@@ -440,6 +434,59 @@ class ModelicaCompiler():
             raise CcodeCompilationError("Retcode was: "+str(retcode))
         else:
             print >>sys.stderr, "make returned", retcode
+            
+    def _handle_exception(self, ex):
+        """ Catch and handle all expected Java Exceptions that the underlying 
+        Java classes might throw.
+        
+        Raise an appropriate Python error or the default JError.
+        
+        """
+        if ex.javaClass() is org.jmodelica.modelica.compiler.CompilerException \
+            or ex.javaClass() is org.jmodelica.optimica.compiler.CompilerException:
+            arraylist = ex.__javaobject__.getProblems()
+            itr = arraylist.iterator()
+            
+            problems = "\n"
+            while itr.hasNext():
+                problems = problems + str(itr.next()) + "\n"
+                
+            raise CompilerError(problems)
+        
+        if ex.javaClass() is org.jmodelica.modelica.compiler.ModelicaClassNotFoundException:
+            raise ModelicaClassNotFoundError(str(ex.__javaobject__.getClassName()))
+        
+        if ex.javaClass() is org.jmodelica.optimica.compiler.ModelicaClassNotFoundException:
+            raise OptimicaClassNotFoundError(str(ex.__javaobject__.getClassName()))
+        
+        if ex.javaClass() is jpype.java.io.FileNotFoundException:
+            raise IOError('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
+        
+        if ex.javaClass() is jpype.java.io.IOException:
+            raise IOError('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
+        
+        if ex.javaClass() is jpype.javax.xml.xpath.XPathExpressionException:
+            raise XPathExpressionError('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
+        
+        if ex.javaClass() is jpype.javax.xml.parsers.ParserConfigurationException:
+            raise ParserConfigurationError('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
+        
+        if ex.javaClass() is org.xml.sax.SAXException or \
+            ex.javaClass() is org.xml.sax.SAXNotRecognizedException or \
+            ex.javaClass() is org.xml.sax.SAXNotSupportedException or \
+            ex.javaClass() is org.xml.sax.SAXParseException:
+            raise SAXError('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
+    
+        if ex.javaClass() is UnknownOptionException:
+            raise UnknownOptionError(str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
+        
+        if ex.javaClass() is jpype.java.lang.Exception:
+            raise Exception('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
+        
+        if ex.javaClass() is jpype.java.lang.NullPointerException:
+            raise JError(str(ex.stacktrace()))
+        
+        raise JError(str(ex.stacktrace()))
 
 class OptimicaCompiler(ModelicaCompiler):
     """ User class for accessing the Java OptimicaCompiler class. """
@@ -456,7 +503,7 @@ class OptimicaCompiler(ModelicaCompiler):
         try:
             options = OptionRegistry(self.options_file_path)
         except jpype.JavaException, ex:
-            _handle_exception(ex)
+            self._handle_exception(ex)
         options.setStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
         self._compiler = self.OptimicaCompiler(options, 
                                                self.xml_var_path, 
@@ -539,8 +586,9 @@ class ParserConfigurationError(JError):
     """ Class for errors thrown when configuring XML parser. """
     pass
 
-#class SAXError(JError):
-#    pass
+class SAXError(JError):
+    """ Class representing a SAX error. """
+    pass
 
 class UnknownOptionError(JError):
     """ Class for error thrown when trying to access unknown compiler 
@@ -548,54 +596,3 @@ class UnknownOptionError(JError):
     
     """
     pass
-
-def _handle_exception(ex):
-    """ Catch and handle all expected Java Exceptions that the underlying 
-    Java classes might throw.
-    
-    Raise an appropriate Python error or the default JError.
-    
-    """
-    if ex.javaClass() is org.jmodelica.modelica.compiler.CompilerException \
-        or ex.javaClass() is org.jmodelica.optimica.compiler.CompilerException:
-        arraylist = ex.__javaobject__.getProblems()
-        itr = arraylist.iterator()
-        
-        problems = "\n"
-        while itr.hasNext():
-            problems = problems + str(itr.next()) + "\n"
-            
-        raise CompilerError(problems)
-    
-    if ex.javaClass() is org.jmodelica.modelica.compiler.ModelicaClassNotFoundException:
-        raise ModelicaClassNotFoundError(str(ex.__javaobject__.getClassName()))
-    
-    if ex.javaClass() is org.jmodelica.optimica.compiler.ModelicaClassNotFoundException:
-        raise OptimicaClassNotFoundError(str(ex.__javaobject__.getClassName()))
-    
-    if ex.javaClass() is jpype.java.io.FileNotFoundException:
-        raise IOError('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
-    
-    if ex.javaClass() is jpype.java.io.IOException:
-        raise IOError('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
-    
-    if ex.javaClass() is jpype.javax.xml.xpath.XPathExpressionException:
-        raise XPathExpressionError('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
-    
-    if ex.javaClass() is jpype.javax.xml.parsers.ParserConfigurationException:
-        raise ParserConfigurationError('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
-    
-#    if ex.javaClass() is jpype.org.xml.sax.SAXException:
-#        raise SAXError('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
-
-    if ex.javaClass() is UnknownOptionException:
-        raise UnknownOptionError(str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
-    
-    if ex.javaClass() is jpype.java.lang.Exception:
-        raise Exception('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
-    
-    if ex.javaClass() is jpype.java.lang.NullPointerException:
-        raise JError(str(ex.stacktrace()))
-    
-    raise JError(str(ex.stacktrace()))
-

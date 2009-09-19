@@ -158,6 +158,7 @@ public class FlatteningTestCase extends TestCase {
 	    // Just warnings or errors too?
 	    for (Problem p : problems) {
 	    	if (p.severity() == Problem.Severity.ERROR) {
+	    		System.out.println("Error found in model");
 	    		return false;
 	    	}
 	    }
@@ -178,10 +179,10 @@ public class FlatteningTestCase extends TestCase {
 		String testModel = fc.prettyPrint("");
 		String correctModel = getFlatModel();
 		
-		//System.out.println("Test model:");
-		//System.out.println(testModel);
-		//System.out.println("Correct model:");
-		//System.out.println(correctModel);	
+		System.out.println("Test model:");
+		System.out.println(testModel);
+		System.out.println("Correct model:");
+		System.out.println(correctModel);	
 		
 		boolean result =  tt.test(testModel,correctModel);
 		return result;

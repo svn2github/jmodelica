@@ -8,7 +8,7 @@ package TransformCanonicalTests
                                                flatModel=
 "
 fclass TransformCanonicalTests.TransformCanonicalTest1
- Real x(start = 1);
+ Real x(start = 1,fixed=true);
  Real y(start = 3,fixed = true);
  Real z;
  Real w(start = 1);
@@ -19,13 +19,14 @@ initial equation
 equation 
  der(x) =  - ( x );
  der(v) = 4;
+ y = 3;
  z = x;
  w = 2;
 end TransformCanonicalTests.TransformCanonicalTest1;
 ")})));
 
-		Real x(start=1);
-		Real y(start=3,fixed=true);
+		Real x(start=1,fixed=true);
+		Real y(start=3,fixed=true)=3;
 	    Real z = x;
 	    Real w(start=1) = 2;
 	    Real v;

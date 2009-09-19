@@ -146,10 +146,10 @@ public class OptimicaCompiler extends ModelicaCompiler{
 		SourceRoot sr = parseModel(name);
 
 		// compute instance tree
-		InstProgramRoot ipr = instantiateModel(sr, cl);
+		InstClassDecl icd = instantiateModel(sr, cl);
 			
 		// flattening
-		FOptClass fc = flattenModel(cl+".mof", cl, ipr);
+		FOptClass fc = flattenModel(icd);
 
 		// Generate code?
 		if (super.getXMLVariablesTemplate() != null && super.getCTemplate() != null) {
@@ -161,15 +161,10 @@ public class OptimicaCompiler extends ModelicaCompiler{
 
 
 	/**
-	 * Computes the flattened model representation from the parsed instance
-	 * model.
+	 * Computes the flattened model representation from a model instance node.
 	 * 
-	 * @param name
-	 *            The name of the model file.
-	 * @param cl
-	 *            The name of the class in the model file to compile.
-	 * @param ipr
-	 *            The reference to the instance tree root.
+	 * @param icd
+	 *            A reference to the model instance.
 	 * 
 	 * @return FOptClass object representing the flattened Optimica model.
 	 * 
@@ -180,22 +175,22 @@ public class OptimicaCompiler extends ModelicaCompiler{
 	 * @throws ModelicaClassNotFoundException
 	 *             If the Modelica class to flatten is not found.
 	 */
-	public FOptClass flattenModel(String name, String cl, InstProgramRoot ipr) 
+	public FOptClass flattenModel(InstClassDecl icd) 
 		throws CompilerException, ModelicaClassNotFoundException, IOException {
 		FlatRoot flatRoot = new FlatRoot();
-		flatRoot.setFileName(name);
+		flatRoot.setFileName(icd.qualifiedName()+".mof");
 		FOptClass fc = new FOptClass();
 		flatRoot.setFClass(fc);
-		flatRoot.options = new OptionRegistry(ipr.options);
+		flatRoot.options = new OptionRegistry(icd.root().options);
 		
 		logger.info("Flattening starts...");
 		
-		ipr.findFlattenInst(cl, fc);
+		icd.flattenInstClassDecl(fc);
 		
 		// Output the untransformed flattened model
 		logger.info("Creating raw .mof file...");
 	    	    	// Create file 
-	   	FileWriter fstream = new FileWriter(cl+".mof");
+	   	FileWriter fstream = new FileWriter(icd.qualifiedName()+".mof");
 	   	BufferedWriter out = new BufferedWriter(fstream);
 	   	out.write(fc.prettyPrint(""));
 	   	//Close the output stream
@@ -214,7 +209,7 @@ public class OptimicaCompiler extends ModelicaCompiler{
 				
 		logger.info("Creating .mof file...");
 	    	    	// Create file 
-	   	fstream = new FileWriter(cl+".mof");
+	   	fstream = new FileWriter(icd.qualifiedName()+".mof");
 	   	out = new BufferedWriter(fstream);
 	   	out.write(fc.prettyPrint(""));
 	   	//Close the output stream

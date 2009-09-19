@@ -92,7 +92,7 @@ import java.util.ArrayList;
            	  	str.append(indent + " " +  im.getModification().prettyPrint(""));
            	  str.append(": ");
            	//  if (im.myInstNode().toString()!=null)
-	           	  str.append(im.myInstNode().getClass().getName());
+	           	  str.append(im.myInstNode().name());
 
               if (i !=size()-1)
               	str.append(",\n");
@@ -948,6 +948,8 @@ aspect InstanceAST_API {
 	syn BaseClassDecl InstBaseClassDecl.getBaseClassDecl() = (BaseClassDecl)getClassDecl();
 	syn BuiltInClassDecl InstBuiltInClassDecl.getBuiltInClassDecl() = (BuiltInClassDecl)getClassDecl();
 
+    syn String InstComponentDecl.qualifiedName() = getFQName().name();
+	
 	syn ArrayList<AbstractEquation> InstNode.equations() = new ArrayList<AbstractEquation>();
 	eq InstClassRoot.equations() = getClassDecl().equations();
 	eq InstComponentDecl.equations() = myInstClass().equations();

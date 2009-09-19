@@ -26,71 +26,69 @@ aspect OptimicaFlattening {
     	return fcd;
     }
 	
-    
-	/**
-	 * \ingroup aspect_Flattening
-	 * 
-	 * Generic traversal method used to find a particular class instance
-	 * in the instance tree, and if so, flatten it.
-	 */
-    refine Flattening public InstNode InstProgramRoot.findFlattenInst(String className,FClass fc) throws ModelicaClassNotFoundException {
+        refine Flattening public InstNode InstProgramRoot.findFlattenInst(String className,FClass fc) throws ModelicaClassNotFoundException {
     	
     	InstClassDecl icd = simpleLookupInstClassDecl(className);
     	if (!icd.isUnknown()) {
-    		FQName fqn = new FQName();
-    		int index = 0;
-    		int new_index = 0;
-    		String qn = icd.qualifiedName();
-    		while (index>=0) {
-    			new_index = qn.indexOf('.',index);
-     			if (new_index>=0) {
-    				fqn.addFQNamePart(new FQNamePart(qn.substring(index,new_index),new Opt()));
-        			index = new_index + 1;
-    			} else {
-    				fqn.addFQNamePart(new FQNamePart(qn.substring(index,qn.length()),new Opt()));
-        			index = new_index;
-    			}
-    		}
-    		fc.setFQName(fqn); 
-    		fc.addFEquationBlock(new FEquationBlock(new List()));			
-    		for (FAbstractEquation ae : icd.getFAbstractEquations()) {
-    		       ae.flatten(getFQName(),fc);
-    		    }
-    		icd.getInstComponentDeclList().flatten(fc);
-    		icd.getInstExtendsList().flatten(fc);
-    		
-    		if (icd instanceof InstOptClassDecl) {
-    			FOptClass foc = (FOptClass)fc;
-    			InstOptClassDecl iocd = (InstOptClassDecl)icd;
-    			for (FConstraint c : iocd.getFConstraints()) {
- 			       c.flatten(iocd.getFQName(),foc);
- 			    }
-    			OptClassDecl ocd = (OptClassDecl)iocd.getClassDecl();
-    			if (iocd.hasInstClassModification()) {
-    				List attr = new List();
-    				iocd.getInstClassModification().collectAttributes(attr,new FQName(new List()));
-    				foc.setFAttributeList(attr);
-    			}
-    		}
-    		
-			fc.genConnectionEquations();
-
-			//System.out.println(fc.prettyPrint(""));
-			//fc.dumpTree("");
-						
-			HashSet<InstAccess> instAccesses = fc.collectInstAccesses();
-			if (instAccesses.size()>0) {
-				System.out.println("Flat model contains InstAccesses!!!");
-				//return null;
-			}
-
+    		icd.flattenInstClassDecl(fc);
     		
     	} else {
         	throw new ModelicaClassNotFoundException("Class "+ className + "not found");
     	}
     	
     	return icd;
-    }	
+    }
+    
+        
+    refine Flattening void InstClassDecl.flattenInstClassDecl(FClass fc) {
+   		FQName fqn = new FQName();
+		int index = 0;
+		int new_index = 0;
+		String qn = qualifiedName();
+		while (index>=0) {
+			new_index = qn.indexOf('.',index);
+ 			if (new_index>=0) {
+				fqn.addFQNamePart(new FQNamePart(qn.substring(index,new_index),new Opt()));
+    			index = new_index + 1;
+			} else {
+				fqn.addFQNamePart(new FQNamePart(qn.substring(index,qn.length()),new Opt()));
+    			index = new_index;
+			}
+		}
+		fc.setFQName(fqn); 
+		fc.addFEquationBlock(new FEquationBlock(new List()));			
+		for (FAbstractEquation ae : getFAbstractEquations()) {
+		       ae.flatten(getFQName(),fc);
+		    }
+		getInstComponentDeclList().flatten(fc);
+		getInstExtendsList().flatten(fc);
+		
+		if (this instanceof InstOptClassDecl) {
+			FOptClass foc = (FOptClass)fc;
+			InstOptClassDecl iocd = (InstOptClassDecl)this;
+			for (FConstraint c : iocd.getFConstraints()) {
+			       c.flatten(iocd.getFQName(),foc);
+			    }
+			OptClassDecl ocd = (OptClassDecl)iocd.getClassDecl();
+			if (iocd.hasInstClassModification()) {
+				List attr = new List();
+				iocd.getInstClassModification().collectAttributes(attr,new FQName(new List()));
+				foc.setFAttributeList(attr);
+			}
+		}
+		
+		fc.genConnectionEquations();
+
+		//System.out.println(fc.prettyPrint(""));
+		//fc.dumpTree("");
+					
+		HashSet<InstAccess> instAccesses = fc.collectInstAccesses();
+		if (instAccesses.size()>0) {
+			System.out.println("Flat model contains InstAccesses!!!");
+			//return null;
+		}
+	 	
+    }
 	
 	refine Flattening public void InstNode.flatten(FClass fc) {
 		for (FAbstractEquation ae : getFAbstractEquations()) {

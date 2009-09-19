@@ -30,50 +30,50 @@ aspect Flattening {
     	
     	InstClassDecl icd = simpleLookupInstClassDecl(className);
     	if (!icd.isUnknown()) {
-       		FQName fqn = new FQName();
-    		int index = 0;
-    		int new_index = 0;
-    		String qn = icd.qualifiedName();
-    		while (index>=0) {
-    			new_index = qn.indexOf('.',index);
-     			if (new_index>=0) {
-    				fqn.addFQNamePart(new FQNamePart(qn.substring(index,new_index),new Opt()));
-        			index = new_index + 1;
-    			} else {
-    				fqn.addFQNamePart(new FQNamePart(qn.substring(index,qn.length()),new Opt()));
-        			index = new_index;
-    			}
-    		}
-    		fc.setFQName(fqn); 
-    		fc.addFEquationBlock(new FEquationBlock(new List()));			
-    		for (FAbstractEquation ae : icd.getFAbstractEquations()) {
-    		       ae.flatten(getFQName(),fc);
-    		    }
-    		icd.getInstComponentDeclList().flatten(fc);
-    		icd.getInstExtendsList().flatten(fc);
-    		
-			fc.genConnectionEquations();
-
-			//System.out.println(fc.prettyPrint(""));
-			//fc.dumpTree("");
-						
-			HashSet<InstAccess> instAccesses = fc.collectInstAccesses();
-			if (instAccesses.size()>0) {
-				System.out.println("Flat model contains InstAccesses!!!");
-				//return null;
-			}
-
+    		icd.flattenInstClassDecl(fc);
     		
     	} else {
         	throw new ModelicaClassNotFoundException("Class "+ className + "not found");
     	}
     	
     	return icd;
-    	
     }
     
-    
-	
+    public void InstClassDecl.flattenInstClassDecl(FClass fc) {
+   		FQName fqn = new FQName();
+		int index = 0;
+		int new_index = 0;
+		String qn = qualifiedName();
+		while (index>=0) {
+			new_index = qn.indexOf('.',index);
+ 			if (new_index>=0) {
+				fqn.addFQNamePart(new FQNamePart(qn.substring(index,new_index),new Opt()));
+    			index = new_index + 1;
+			} else {
+				fqn.addFQNamePart(new FQNamePart(qn.substring(index,qn.length()),new Opt()));
+    			index = new_index;
+			}
+		}
+		fc.setFQName(fqn); 
+		fc.addFEquationBlock(new FEquationBlock(new List()));			
+		for (FAbstractEquation ae : getFAbstractEquations()) {
+		       ae.flatten(getFQName(),fc);
+		   	}	
+		getInstComponentDeclList().flatten(fc);
+		getInstExtendsList().flatten(fc);
+		
+		fc.genConnectionEquations();
+
+		//System.out.println(fc.prettyPrint(""));
+		//fc.dumpTree("");
+					
+		HashSet<InstAccess> instAccesses = fc.collectInstAccesses();
+		if (instAccesses.size()>0) {
+			System.out.println("Flat model contains InstAccesses!!!");
+			//return null;
+		}
+	 	
+    }
  
 	// Generic method for flattening	
 	public void ASTNode.flatten(FClass fc) {
@@ -102,6 +102,8 @@ aspect Flattening {
 		FExp e = myBindingFExp();
 		List attr = new List();
 		for (InstModification im : totalMergedEnvironment()) {
+//			System.out.println("createFVariable: " + qualifiedName() + ": " +
+//					im.prettyPrint("") + " " + im.myInstNode().getFQNamePrefix().name());		
 			im.collectAttributes(attr,im.myInstNode().getFQNamePrefix());
 		}
 		
