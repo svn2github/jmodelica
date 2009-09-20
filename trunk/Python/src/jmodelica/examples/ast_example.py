@@ -21,7 +21,7 @@ def run_demo(with_plots=True):
     """This example demonstrates how the Python interface to the three
     different ASTs in the compiler can be used. The JPype package is
     used to create Java objects in a Java Virtual Machine which is
-    seemlessly integrated with the Python shell. The Java objects can
+    seamlessly integrated with the Python shell. The Java objects can
     be accessed interactively and methods of the object can be
     invoked.
 
@@ -52,6 +52,7 @@ def run_demo(with_plots=True):
     # Create a compiler
     mc = ModelicaCompiler()
 
+    # Don't parse the file if it har already been parsed.
     try:
         source_root.getProgramRoot()
     except:
@@ -100,14 +101,13 @@ def run_demo(with_plots=True):
     num_classes = count_classes(modelica,0)
     
     print("")
-        
-    # Retrieve the node in the instance tree corresponding to the class
-    # Modelica.Electrical.Analog.Examples.CauerLowPassAnalog
-        
+                
     # Don't instantiate if instance has been computed already
     try:
         filter_instance.components()
     except:
+        # Retrieve the node in the instance tree corresponding to the class
+        # Modelica.Electrical.Analog.Examples.CauerLowPassAnalog
         filter_instance = mc.instantiate_model(source_root,"CauerLowPassAnalog")
 
     def dump_inst_ast(inst_node, indent):
