@@ -103,9 +103,9 @@ class TestSundialsOdeSimulator:
         assert simulator.return_last == False
         
         simulator.return_last = True
-        nose.tools.assert_raises(sundials.SundialsSimulationException,
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
                                  simulator.set_return_last, "Hello")
-        nose.tools.assert_raises(sundials.SundialsSimulationException,
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
                                  simulator.set_return_last, 45)
         simulator.run()
         T, Y = simulator.get_solution()
@@ -187,9 +187,9 @@ class TestSundialsOdeSimulator:
         assert simulator.verbosity == SundialsOdeSimulator.LOUD # property test
         simulator.set_verbosity(SundialsOdeSimulator.SCREAM)
         assert simulator.get_verbosity() == SundialsOdeSimulator.SCREAM
-        nose.tools.assert_raises(sundials.SundialsSimulationException,
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
                                  simulator.set_verbosity, 65487)
-        nose.tools.assert_raises(sundials.SundialsSimulationException,
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
                                  simulator.set_verbosity, -5465)
         
     def test_set_get_model(self):
@@ -203,7 +203,7 @@ class TestSundialsOdeSimulator:
         simulator.set_model(another_model)
         assert simulator.get_model() == another_model
         
-        nose.tools.assert_raises(sundials.SundialsSimulationException,
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
                                  simulator.set_model, None)
                                  
         another_model = load_example_standard_model('VDP_pack_VDP_Opt',
@@ -228,7 +228,7 @@ class TestSundialsOdeSimulator:
         assert default_final != simulator.get_final_time(), "A setter failed."
         
         # Testincorrect interval
-        nose.tools.assert_raises(sundials.SundialsSimulationException,
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
                                  simulator.set_simulation_interval, 2, 1)
                                  
         # Finally make a test simulation and verify times
@@ -311,9 +311,9 @@ class TestSundialsOdeSimulator:
         nose.tools.assert_almost_equal(T[2]-T[1], MY_TIME_STEP)
         nose.tools.assert_almost_equal(T[5]-T[4], MY_TIME_STEP)
         
-        nose.tools.assert_raises(sundials.SundialsSimulationException,
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
                                  simulator.set_time_step, 0)
-        nose.tools.assert_raises(sundials.SundialsSimulationException,
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
                                  simulator.set_time_step, -3)
         
     def test_simulation_with_sensivity(self, SMALL=0.3):
