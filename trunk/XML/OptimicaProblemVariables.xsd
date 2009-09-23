@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
     Copyright (C) 2009 Modelon AB
 
@@ -16,8 +17,6 @@
     see <http://www.gnu.org/licenses/> or
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 -->
-
-<?xml version="1.0" encoding="UTF-8"?>
 <!-- edited with XMLSpy v2009 (http://www.altova.com) by Magnus Gäfvert (Modelon AB) -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
 	<xs:element name="OptimicaProblemVariableInterface">
@@ -47,7 +46,7 @@
 				<xs:element name="TimePoints">
 					<xs:complexType>
 						<xs:sequence minOccurs="0" maxOccurs="unbounded">
-							<xs:element name="Index" type="xs:unsignedLong"/>
+							<xs:element name="Index" type="xs:integer"/>
 							<xs:element name="Value" type="xs:double"/>
 						</xs:sequence>
 					</xs:complexType>
