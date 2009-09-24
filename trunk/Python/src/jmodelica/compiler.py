@@ -94,14 +94,15 @@ class ModelicaCompiler():
             self._handle_exception(ex)
         return bool(option)
     
-    def set_boolean_option(self, key, value):
-        """ Set the boolean option with key to value. 
+    def set_boolean_option(self, key, value, description=""):
+        """ Set the boolean option with key to value and an optional 
+        description. 
         
         If the option already exists it will be overwritten. 
         
         """
         try:
-            self._compiler.setBooleanOption(key, value)
+            self._compiler.setBooleanOption(key, value, description)
         except jpype.JavaException, ex:
             self._handle_exception(ex)
         
@@ -113,14 +114,15 @@ class ModelicaCompiler():
             self._handle_exception(ex)
         return option
     
-    def set_integer_option(self, key, value):
-        """ Set the integer option with key to value. 
+    def set_integer_option(self, key, value, description=""):
+        """ Set the integer option with key to value and an optional 
+        description. 
         
         If the option already exists it will be overwritten.
         
         """
         try:
-            self._compiler.setIntegerOption(key, value)
+            self._compiler.setIntegerOption(key, value, description)
         except jpype.JavaException, ex:
             self._handle_exception(ex)
         
@@ -132,14 +134,15 @@ class ModelicaCompiler():
             self._handle_exception(ex)
         return option
     
-    def set_real_option(self, key, value):
-        """ Set the real option with key to value.
+    def set_real_option(self, key, value, description=""):
+        """ Set the real option with key to value and an optional 
+        description.
         
         If the option already exists it will be overwritten.
         
         """
         try:
-            self._compiler.setRealOption(key, value)
+            self._compiler.setRealOption(key, value, description)
         except jpype.JavaException, ex:
             self._handle_exception(ex)
                     
@@ -151,14 +154,15 @@ class ModelicaCompiler():
             self._handle_exception(ex)
         return str(option)
         
-    def set_string_option(self, key, value):
-        """ Set the string option with key to value.
+    def set_string_option(self, key, value, description=""):
+        """ Set the string option with key to value and an optional 
+        description.
         
         If the option already exists it will be overwritten.
         
         """
         try:
-            self._compiler.setStringOption(key, value)
+            self._compiler.setStringOption(key, value, description)
         except jpype.JavaException, ex:
             self._handle_exception(ex)
         

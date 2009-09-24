@@ -62,26 +62,32 @@ public class OptionRegistry {
 				//values
 				expr = xpath.compile("OptionRegistry/Options/Option/*/Value");
 				org.w3c.dom.NodeList thevalues = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
-					
+									
 				for(int i=0; i<thetypes.getLength();i++) {
 					org.w3c.dom.Node n = thetypes.item(i);
 					
 					String type = n.getTextContent();
 					String key = thekeys.item(i).getTextContent();
 					String value = thevalues.item(i).getTextContent();
+					String description;
+					// description
+					expr = xpath.compile("/OptionRegistry/Options/Option/*/Description[parent::*/parent::Option/Type=\""+type+"\"][parent::*/Key=\""+key+"\"]");
+					org.w3c.dom.Node descr = (org.w3c.dom.Node)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODE);
+					description = descr != null ? descr.getTextContent().trim():"";
+					
 					if(type.equals("String")) {
-						setStringOption(key, value);
+						setStringOption(key, value, description);
 					} else if(type.equals("Integer")) {
-						setIntegerOption(key, Integer.parseInt(value));
+						setIntegerOption(key, Integer.parseInt(value), description);
 					} else if(type.equals("Real")) {
-						setRealOption(key, Double.parseDouble(value));
+						setRealOption(key, Double.parseDouble(value), description);
 					} else if(type.equals("Boolean")) {
-						setBooleanOption(key, Boolean.parseBoolean(value));
+						setBooleanOption(key, Boolean.parseBoolean(value), description);
 					}
 				}				
 			}	
 	 	}
-	 	
+	 		 	
 		/**
 		 * Parses an XML file and returns the DOM document instance.
 		 * 
@@ -115,16 +121,20 @@ public class OptionRegistry {
 					defaultValue));			
 		}
 		
-		public void setIntegerOption(String key, int value) {
+		public void setIntegerOption(String key, int value, String description) {
 			Option o = optionsMap.get(key);
 			if (o == null) {
-				createIntegerOption(key, "IntegerOption", value);
+				createIntegerOption(key, description, value);
 			} else if (o instanceof IntegerOption) {
 				((IntegerOption)o).setValue(value);
 			} else {
 				throw new UnknownOptionException("Option: "+key +" is not of " +
 						"integer type");
 			}			
+		}
+		
+		public void setIntegerOption(String key, int value) {
+			setIntegerOption(key, value, "");
 		}
 
 		public int getIntegerOption(String key) {
@@ -145,16 +155,20 @@ public class OptionRegistry {
 					defaultValue));			
 		}
 		
-		public void setStringOption(String key, String value) {
+		public void setStringOption(String key, String value, String description) {
 			Option o = optionsMap.get(key);
 			if (o == null) {
-				createStringOption(key, "StringOption", value);
+				createStringOption(key, description, value);
 			} else if (o instanceof StringOption) {
 				((StringOption)o).setValue(value);
 			} else {
 				throw new UnknownOptionException("Option: "+key +" is not of " +
 						"string type");
 			}			
+		}
+		
+		public void setStringOption(String key, String value) {
+			setStringOption(key, value, "");
 		}
 
 		public String getStringOption(String key) {
@@ -175,10 +189,10 @@ public class OptionRegistry {
 					defaultValue));			
 		}
 		
-		public void setRealOption(String key, double value) {
+		public void setRealOption(String key, double value, String description) {
 			Option o = optionsMap.get(key);
 			if (o == null) {
-				createRealOption(key, "RealOption", value);
+				createRealOption(key, description, value);
 			} else if (o instanceof RealOption) {
 				((RealOption)o).setValue(value);
 			} else {
@@ -187,6 +201,10 @@ public class OptionRegistry {
 			}			
 		}
 
+		public void setRealOption(String key, double value) {
+			setRealOption(key, value, "");
+		}
+		
 		public double getRealOption(String key) {
 			Option o = optionsMap.get(key);
 			if (o == null) {
@@ -205,10 +223,10 @@ public class OptionRegistry {
 					defaultValue));			
 		}
 		
-		public void setBooleanOption(String key, boolean value) {
+		public void setBooleanOption(String key, boolean value, String description) {
 			Option o = optionsMap.get(key);
 			if (o == null) {
-				createBooleanOption(key, "BooleanOption", value);
+				createBooleanOption(key, description, value);
 			} else if (o instanceof BooleanOption) {
 				((BooleanOption)o).setValue(value);
 			} else {
@@ -217,6 +235,10 @@ public class OptionRegistry {
 			}			
 		}
 
+		public void setBooleanOption(String key, boolean value) {
+			setBooleanOption(key, value, "");
+		}
+		
 		public boolean getBooleanOption(String key) {
 			Option o = optionsMap.get(key);
 			if (o == null) {
