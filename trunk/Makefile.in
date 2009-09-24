@@ -700,7 +700,7 @@ install-exec-local:
 @HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar $(prefix)/lib/
 @HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/util.jar $(prefix)/lib/
 @HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/OptimicaCompiler/bin/OptimicaCompiler.jar $(prefix)/lib/
-	cp $(abs_top_srcdir)/LICENSE $(prefix)/
+	[ $(abs_top_srcdir) == $(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/LICENSE $(prefix)/ 
 	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(prefix)/lib/
 	cp $(abs_top_srcdir)/JMI/LICENSE_CPL $(prefix)/lib/
 	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(prefix)/include/
@@ -718,13 +718,13 @@ install-exec-local:
 	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.linux $(prefix)/Makefiles/MakeFile ;; \
 	esac
 	mkdir -p $(prefix)/Options
-	cp $(abs_top_srcdir)/Options/options.xml $(prefix)/Options/options.xml
-	cp $(abs_top_srcdir)/Options/LICENSE $(prefix)/Options/LICENSE
+	[ $(abs_top_srcdir) == $(prefix) ] && echo "Installing in dist directory, don't copy options file" || cp $(abs_top_srcdir)/Options/options.xml $(prefix)/Options/options.xml
+	[ $(abs_top_srcdir) == $(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Options/LICENSE $(prefix)/Options/LICENSE
 	mkdir -p $(prefix)/Python
-	cp $(abs_top_srcdir)/Python/LICENSE $(prefix)/Python
+	[ $(abs_top_srcdir) == $(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(prefix)/Python
 	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/Python
-	[ -e $(prefix)/Python/jm_python.sh ] && echo "jm_python.sh exists "|| cp Python/jm_python.sh $(prefix)/Python/jm_python.sh
-	[ -e $(prefix)/Python/jm_ipython.sh ] && echo "jm_ipython.sh exists "|| cp Python/jm_ipython.sh $(prefix)/Python/jm_ipython.sh
+	[ -e $(prefix)/Python/jm_python.sh ] && echo "File exists, don't copy jm_python.sh" || cp Python/jm_python.sh $(prefix)/Python/jm_python.sh
+	[ -e $(prefix)/Python/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(prefix)/Python/jm_ipython.sh
 	cp $(abs_top_srcdir)/Python/src/startup.py $(prefix)/
 	chmod u+x $(prefix)/Python/jm_*.sh
 	mkdir -p $(prefix)/ThirdParty
@@ -739,7 +739,7 @@ install-exec-local:
 	cp $(CPPAD_HOME)/cppad/*.hpp $(prefix)/ThirdParty/CppAD/cppad
 	mkdir -p $(prefix)/ThirdParty/CppAD/cppad/local	
 	cp $(CPPAD_HOME)/cppad/local/*.hpp $(prefix)/ThirdParty/CppAD/cppad/local
-	cd $(abs_top_srcdir)/ThirdParty; find MSL -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/ThirdParty
+	[ $(abs_top_srcdir) == $(prefix) ] && echo "Installing in dist directory, don't copy MSL" || cd $(abs_top_srcdir)/ThirdParty; find MSL -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/ThirdParty
 	mkdir -p $(prefix)/CodeGenTemplates
 	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(prefix)/CodeGenTemplates/LICENSE
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/jmi_modelica_template.c $(prefix)/CodeGenTemplates
@@ -749,8 +749,8 @@ install-exec-local:
 	cp  $(abs_top_srcdir)/Compiler/OptimicaXMLBackEnd/templates/jmi_optimica_variables_template.xml $(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/OptimicaXMLBackEnd/templates/jmi_optimica_problvariables_template.xml $(prefix)/CodeGenTemplates
 	mkdir -p $(prefix)/XML
-	cp  $(abs_top_srcdir)/XML/*.xsd $(prefix)/XML
-	cp  $(abs_top_srcdir)/XML/LICENSE $(prefix)/XML
+	[ $(abs_top_srcdir) == $(prefix) ] && echo "Installing in dist directory, don't copy XML schemas"  || cp  $(abs_top_srcdir)/XML/*.xsd $(prefix)/XML
+	[ $(abs_top_srcdir) == $(prefix) ] && echo "Installing in dist directory, don't copy XML LICENSE"  || cp  $(abs_top_srcdir)/XML/LICENSE $(prefix)/XML
 
 bindistdir: install
 	rm -rf $(bindistdir)
