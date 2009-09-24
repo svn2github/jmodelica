@@ -27,14 +27,14 @@ public EditorAnnotationMap(Iterable<Position> ps, Editor editor) {
 
     for (Position pos : ps) {
         
-        if (!editor.getFile().containsFoldingPosition(pos))
+        if (!editor.editorFile().containsFoldingPosition(pos))
             continue;
 
         Annotation annotation;
 
         if (pos instanceof CharacterPosition) {
         
-            ITextSelection sel = editor.getSelection();
+            ITextSelection sel = editor.selection();
             annotation = new CharacterProjectionAnnotation(
                     editor.annotationsVisible() ||
                     pos.overlapsWith(sel.getOffset(), sel.getLength()));

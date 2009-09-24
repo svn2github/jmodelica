@@ -3,7 +3,7 @@ package org.jmodelica.ide.namecomplete;
 
 
 /**
- * This doesn't exist in Java by default?
+ * This doesn't exist in Java? WTF
  * @author philip
  *
  * @param <A>
@@ -11,8 +11,8 @@ package org.jmodelica.ide.namecomplete;
  */
 public class Pair<A,B> { 
 
-A a; 
-B b; 
+final A a; 
+final B b; 
 
 public Pair(A ia, B ib) { a = ia; b = ib; } 
 

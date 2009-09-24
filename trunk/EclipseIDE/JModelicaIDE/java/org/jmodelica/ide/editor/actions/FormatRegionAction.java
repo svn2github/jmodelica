@@ -18,7 +18,7 @@ import org.jmodelica.ide.indent.IndentedSection;
  */
 public class FormatRegionAction extends Action {
 
-protected Editor editor;
+protected final Editor editor;
 
 public FormatRegionAction(Editor editor) {
     super();
@@ -33,8 +33,8 @@ public void run() {
 
     //TODO: make formatting keep the same selection as before formatting 
     
-    IDocument d = editor.getDocument();
-    ITextSelection sel = editor.getSelection();
+    IDocument d = editor.document();
+    ITextSelection sel = editor.selection();
 
     IndentedSection sec = new IndentedSection(d.get());
 

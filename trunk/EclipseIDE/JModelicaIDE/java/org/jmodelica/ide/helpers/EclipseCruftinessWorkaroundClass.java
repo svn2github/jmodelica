@@ -46,6 +46,9 @@ public static Maybe<Editor> getModelicaEditorForFile(IFile file) {
 
 public static IFile getFileForPath(String path) {
     
+    if (path == null)
+        return null;
+    
     IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
     
     // file inside workspace?

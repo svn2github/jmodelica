@@ -1,12 +1,14 @@
 package org.jmodelica.ide.editor;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.jastadd.plugin.ReconcilingStrategy;
 
 class ModelicaCompilationStrategy {
 
-public ReconcilingStrategy normalStrategy;
-public LocalReconcilingStrategy localStrategy;
+public final ReconcilingStrategy normalStrategy;
+public final LocalReconcilingStrategy localStrategy;
+
 public boolean compiledLocal;
 
 public ModelicaCompilationStrategy(Editor editor) {
@@ -19,9 +21,9 @@ public IReconcilingStrategy getStrategy() {
     return compiledLocal ? localStrategy : normalStrategy;
 }
 
-public void update(EditorFile fPath, ASTData ast) {
-    normalStrategy.setFile(fPath.file()); 
-    compiledLocal = ast.compiledLocal();
+public void update(IFile file, boolean compiledLocally) {
+    normalStrategy.setFile(file); 
+    compiledLocal = compiledLocally;
 }
 
 }

@@ -12,13 +12,11 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package org.jmodelica.ide.editor;
 
-import static org.eclipse.ui.texteditor
-    .AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE;
-import static org.eclipse.ui.texteditor
-    .AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR;
+import static org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE;
+import static org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -44,7 +42,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
@@ -70,396 +67,357 @@ import org.jmodelica.ide.outline.OutlinePage;
 import org.jmodelica.ide.outline.SourceOutlinePage;
 import org.jmodelica.modelica.compiler.ASTNode;
 
+
 /**
  * Modelica source editor.
  */
-public class Editor extends AbstractDecoratedTextEditor 
-    implements IASTRegistryListener {
+public class Editor extends AbstractDecoratedTextEditor implements
+        IASTRegistryListener {
 
-    // Content outlines
-    private OutlinePage fSourceOutlinePage;
-    private InstanceOutlinePage fInstanceOutlinePage;
+private final OutlinePage fSourceOutlinePage;
+private final InstanceOutlinePage fInstanceOutlinePage;
 
-    private IDocumentPartitioner fPartitioner;
-    
-    // For folding
-    private AnnotationDrawer annotationDrawer;
-    
-    private ModelicaCompiler compiler;
-    private ASTData astData;
-    private ModelicaCompilationStrategy strategy;
-    private EditorFile file;
+private IDocumentPartitioner fPartitioner;
 
-    private ErrorCheckAction errorCheckAction;
-    private ToggleAnnotationsAction toggleAnnotationsAction;
-    private GoToDeclaration followReference;
-    private Completions completions;
+private AnnotationDrawer annotationDrawer; // For folding
 
-    /**
-     * Standard constructor.
-     */
-    public Editor() {
-        super();
-        astData              = new ASTData(null, this);
-        file                 = new EditorFile(null);
-        strategy             = new ModelicaCompilationStrategy(this);
-        fSourceOutlinePage   = new SourceOutlinePage(this); 
-        fInstanceOutlinePage = new InstanceOutlinePage(this);
-        compiler             = new ModelicaCompiler();
-        completions          = new Completions();
-        fPartitioner         = new FastPartitioner(
-                new Modelica22PartitionScanner(),
-                Modelica22PartitionScanner.LEGAL_PARTITIONS);        
-    }
+private CompilationResult compResult;
+private EditorFile file;
 
-    /**
-     * Create and configure a source viewer. Creates a 
-     * {@link CharacterProjectionViewer} and configures it for folding and
-     * brace matching.
-     */
-    @Override
-    protected ISourceViewer createSourceViewer(Composite parent,
-            IVerticalRuler ruler, int styles) {
-        
-        fAnnotationAccess = getAnnotationAccess();
-        fOverviewRuler = createOverviewRuler(getSharedColors());
-        
-        CharacterProjectionViewer viewer = 
-            new CharacterProjectionViewer(
-                    parent, 
-                    ruler, 
-                    getOverviewRuler(), 
-                    isOverviewRulerVisible(), 
-                    styles);
-        
-        configureProjectionSupport(viewer);
-        configureDecorationSupport(viewer);
-        
-        return viewer;
-    }
+private final ErrorCheckAction errorCheckAction;
+private final ToggleAnnotationsAction toggleAnnotationsAction;
+private final GoToDeclaration goToDeclaration;
+private final Completions completions;
 
-    private void configureProjectionSupport(CharacterProjectionViewer viewer) {
-        CharacterProjectionSupport projectionSupport = 
-            new CharacterProjectionSupport(
-                    viewer, 
-                    getAnnotationAccess(), 
-                    getSharedColors());
-     
-        annotationDrawer = 
-            new AnnotationDrawer(
-                    projectionSupport.getAnnotationPainterDrawingStrategy());
+/**
+ * Standard constructor.
+ */
+public Editor() {
+    super();
+    fSourceOutlinePage = new SourceOutlinePage(this);
+    fInstanceOutlinePage = new InstanceOutlinePage(this);
+    completions = new Completions(this);
+    goToDeclaration = new GoToDeclaration(this);
+    errorCheckAction = new ErrorCheckAction();
+    fPartitioner = new FastPartitioner(new Modelica22PartitionScanner(),
+            Modelica22PartitionScanner.LEGAL_PARTITIONS);
+    toggleAnnotationsAction = new ToggleAnnotationsAction(this);
+}
+
+/**
+ * Create and configure a source viewer. Creates a
+ * {@link CharacterProjectionViewer} and configures it for folding and brace
+ * matching.
+ */
+@Override
+protected ISourceViewer createSourceViewer(Composite parent,
+        IVerticalRuler ruler, int styles) {
+
+    fAnnotationAccess = getAnnotationAccess();
+    fOverviewRuler = createOverviewRuler(getSharedColors());
+
+    CharacterProjectionViewer viewer = new CharacterProjectionViewer(parent,
+            ruler, getOverviewRuler(), isOverviewRulerVisible(), styles);
+
+    configureProjectionSupport(viewer);
+    configureDecorationSupport(viewer);
+
+    return viewer;
+}
+
+private void configureProjectionSupport(CharacterProjectionViewer viewer) {
+    CharacterProjectionSupport projectionSupport = new CharacterProjectionSupport(
+            viewer, getAnnotationAccess(), getSharedColors());
+
+    annotationDrawer = new AnnotationDrawer(projectionSupport
+            .getAnnotationPainterDrawingStrategy());
+    annotationDrawer.setCursorLineBackground(getCursorLineBackground());
+
+    projectionSupport.setAnnotationPainterDrawingStrategy(annotationDrawer);
+    projectionSupport
+            .addSummarizableAnnotationType(ModelicaCompiler.ERROR_MARKER_ID);
+    projectionSupport.install();
+}
+
+private void configureDecorationSupport(CharacterProjectionViewer viewer) {
+
+    // Set default values for brace matching.
+    IPreferenceStore preferenceStore = getPreferenceStore();
+    preferenceStore.setDefault(IDEConstants.KEY_BRACE_MATCHING, true);
+    PreferenceConverter.setDefault(preferenceStore,
+            IDEConstants.KEY_BRACE_MATCHING_COLOR,
+            IDEConstants.BRACE_MATCHING_COLOR);
+
+    // Configure brace matching and ensure decoration support
+    // has been created and configured.
+    SourceViewerDecorationSupport decoration = getSourceViewerDecorationSupport(viewer);
+    decoration
+            .setCharacterPairMatcher(new ModelicaCharacterPairMatcher(viewer));
+    decoration.setMatchingCharacterPainterPreferenceKeys(
+            IDEConstants.KEY_BRACE_MATCHING,
+            IDEConstants.KEY_BRACE_MATCHING_COLOR);
+}
+
+@Override
+protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
+    if (Util.is(event.getProperty()).among(EDITOR_CURRENT_LINE,
+            EDITOR_CURRENT_LINE_COLOR)) {
         annotationDrawer.setCursorLineBackground(getCursorLineBackground());
-        
-        projectionSupport.setAnnotationPainterDrawingStrategy(
-                annotationDrawer);
-        projectionSupport.addSummarizableAnnotationType(
-                ModelicaCompiler.ERROR_MARKER_ID);
-        projectionSupport.install();
     }
+    super.handlePreferenceStoreChanged(event);
+}
 
-    private void configureDecorationSupport(CharacterProjectionViewer viewer) {
+private Color getCursorLineBackground() {
 
-        // Set default values for brace matching.
-        IPreferenceStore preferenceStore = getPreferenceStore();
-        preferenceStore.setDefault(
-                IDEConstants.KEY_BRACE_MATCHING, 
-                true);
-        PreferenceConverter.setDefault(
-                preferenceStore, 
-                IDEConstants.KEY_BRACE_MATCHING_COLOR, 
-                IDEConstants.BRACE_MATCHING_COLOR);
+    if (!getPreferenceStore().getBoolean(EDITOR_CURRENT_LINE))
+        return null;
 
-        // Configure brace matching and ensure decoration support 
-        // has been created and configured.
-        SourceViewerDecorationSupport decoration = 
-            getSourceViewerDecorationSupport(viewer);
-        decoration.setCharacterPairMatcher(
-                new ModelicaCharacterPairMatcher(viewer));
-        decoration.setMatchingCharacterPainterPreferenceKeys(
-                IDEConstants.KEY_BRACE_MATCHING, 
-                IDEConstants.KEY_BRACE_MATCHING_COLOR);
-    }
-    
-    @Override
-    protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
-        if (Util.is(event.getProperty()).among(
-                EDITOR_CURRENT_LINE, 
-                EDITOR_CURRENT_LINE_COLOR)) 
-        {
-            annotationDrawer.setCursorLineBackground(
-                    getCursorLineBackground());
-        }
-        super.handlePreferenceStoreChanged(event);
-    }
+    return new Color(Display.getCurrent(), PreferenceConverter.getColor(
+            getPreferenceStore(), EDITOR_CURRENT_LINE_COLOR));
+}
 
-    private Color getCursorLineBackground() {
+/**
+ * Sets source viewer configuration to a {@link ViewerConfiguration} and creates
+ * control.
+ */
+@Override
+public void createPartControl(Composite parent) {
+    super.setSourceViewerConfiguration(new ViewerConfiguration(this));
+    super.createPartControl(parent);
+    update();
+}
 
-        if (!getPreferenceStore().getBoolean(EDITOR_CURRENT_LINE))
-            return null;
-        
-        return new Color(Display.getCurrent(),
-                         PreferenceConverter.getColor(
-                                 getPreferenceStore(), 
-                                 EDITOR_CURRENT_LINE_COLOR));
-    }
+/**
+ * Can return an {@link IContentOutlinePage}.
+ * 
+ * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
+ */
+@SuppressWarnings("unchecked")
+@Override
+public Object getAdapter(Class required) {
 
-    /**
-     * Sets source viewer configuration to a {@link ViewerConfiguration} 
-     * and creates control.
-     */
-    @Override
-    public void createPartControl(Composite parent) {        
-        super.setSourceViewerConfiguration(new ViewerConfiguration(this));
-        super.createPartControl(parent);
-        update();
-    }
-    
-    /**
-     * Can return an {@link IContentOutlinePage}.
-     * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
-     */
-    @SuppressWarnings("unchecked")
-    @Override
-    public Object getAdapter(Class required) {
-        
-        if (IContentOutlinePage.class.equals(required)) 
-            return fSourceOutlinePage;
-        
-        return super.getAdapter(required);
-    }
-
-    /**
-     * Gets the source outline page associated with this editor.
-     * @return  the source outline page
-     * @see IContentOutlinePage
-     */
-    public IContentOutlinePage getSourceOutlinePage() {
+    if (IContentOutlinePage.class.equals(required))
         return fSourceOutlinePage;
-    }
 
-    /**
-     * Gets the instance outline page associated with this editor.
-     * @return  the instance outline page
-     * @see IContentOutlinePage
-     */
-    public IContentOutlinePage getInstanceOutlinePage() {
-        return fInstanceOutlinePage;
-    }
+    return super.getAdapter(required);
+}
 
-    /**
-     * Updates editor to match input change.
-     * @see AbstractTextEditor#doSetInput(IEditorInput)
-     */
-    @Override
-    protected void doSetInput(IEditorInput input) throws CoreException {
-        
-        super.doSetInput(input);
-        IFileEditorInput fInput = 
-            input instanceof IFileEditorInput  
-            ? (IFileEditorInput)input
-            : null;
+/**
+ * Gets the source outline page associated with this editor.
+ * 
+ * @return the source outline page
+ * @see IContentOutlinePage
+ */
+public IContentOutlinePage getSourceOutlinePage() {
+    return fSourceOutlinePage;
+}
 
-        astData.destruct(this);
-        astData = new ASTData(fInput, this);
-        file = new EditorFile(input);
-        
-        if (fInput != null) 
-            update();
-        
-        strategy.update(file, astData);
+/**
+ * Gets the instance outline page associated with this editor.
+ * 
+ * @return the instance outline page
+ * @see IContentOutlinePage
+ */
+public IContentOutlinePage getInstanceOutlinePage() {
+    return fInstanceOutlinePage;
+}
 
-        if (astData.compiledLocal()) {
-            astData.setRoot(compiler.compileFile(file.file(), file.path()));
-            update();
-        }
-    }
+/**
+ * Updates editor to match input change.
+ * 
+ * @see AbstractTextEditor#doSetInput(IEditorInput)
+ */
+@Override
+protected void doSetInput(IEditorInput input) throws CoreException {
 
-    @Override   
-    protected void createActions() {
-        super.createActions();
-        setActions( new ExpandAllAction(this),
-                    new CollapseAllAction(this),
-                    new FormatRegionAction(this),
-                    new ToggleComment(this),
-                    errorCheckAction =      
-                        new ErrorCheckAction(),
-                    toggleAnnotationsAction = 
-                        new ToggleAnnotationsAction(this),
-                    followReference =         
-                        new GoToDeclaration(this)); 
-        updateErrorCheckAction();
-    }
-    
-    public void setActions(Action... actions) {
-        for (Action action : actions) 
-            super.setAction(action.getId(), action);
-    }
-    
-    @Override
-    protected void rulerContextMenuAboutToShow(IMenuManager menu) {
-        super.rulerContextMenuAboutToShow(menu);
-        addAction(menu, IDEConstants.ACTION_EXPAND_ALL_ID);
-        addAction(menu, IDEConstants.ACTION_COLLAPSE_ALL_ID);
-    }
+    assert input != null : "Null unexpected";
 
-    /**
-     * If edited file is compiled locally, this method is called
-     * by reconciler to compile AST and update editor.
-     * @param document currently edited document
-     */
-    public void recompileLocal(IDocument document) {
-        
-        astData.setRoot((ASTNode<?>)
-            compiler.compileToAST(document, null, null, file.file()));
-        
-        Display.getDefault().asyncExec(new Runnable() {
-            public void run() {
-                update();
-            }
-        });
-    }
-    
-    // ASTRegistry listener method
-    public void childASTChanged(IProject project, String key) {
-        astData.childASTChanged(project, key);
+    super.doSetInput(input);
+
+    if (compResult != null)
+        compResult.destruct(this);
+
+    file = new EditorFile(input);
+
+    compResult = file.inWorkspace() ? new GlobalCompilationResult(file, this)
+            : new LocalCompilationResult(file, this);
+
+    if (getSourceViewer() != null)
         update();
+}
+
+@Override
+protected void createActions() {
+    super.createActions();
+    for (Action action : new Action[] { new ExpandAllAction(this),
+            new CollapseAllAction(this), new FormatRegionAction(this),
+            new ToggleComment(this), errorCheckAction,
+            toggleAnnotationsAction,
+            goToDeclaration }) {
+        super.setAction(action.getId(), action);
     }
 
-    // ASTRegistry listener method
-    public void projectASTChanged(IProject project) {
-        astData.projectASTChanged(project);
-        update();
-    }
-    
-    /**
-     * Updates the outline and the view
-     */
-    protected void update() {
-        
-        if (getSourceViewer() == null || astData.rootHasErrors()) 
-            return;
-    
-        IDocument document = getDocument();
-        if (document != null) 
-            setupDocumentPartitioner(document);
-    
-        // Update outline
-        fSourceOutlinePage.updateAST(astData.root());
-        fInstanceOutlinePage.updateAST(astData.root());
-        followReference.updateAST(astData.root());
-        completions.updateAST(astData.root());
-        
-        updateProjectionAnnotations();
-        updateErrorCheckAction();
-    }
-    
-    private void setupDocumentPartitioner(IDocument document) {
-        
-        try {
-            IDocumentPartitioner wanted = fPartitioner;
-            IDocumentPartitioner current = document.getDocumentPartitioner();
-            if (wanted != current) {
-                if (current != null)
-                    current.disconnect();
-                wanted.connect(document);
-                document.setDocumentPartitioner(wanted);
-            }
-        } catch (Error e) {
-            e.printStackTrace();
+    updateErrorCheckAction();
+}
+
+@Override
+protected void rulerContextMenuAboutToShow(IMenuManager menu) {
+    super.rulerContextMenuAboutToShow(menu);
+    addAction(menu, IDEConstants.ACTION_EXPAND_ALL_ID);
+    addAction(menu, IDEConstants.ACTION_COLLAPSE_ALL_ID);
+}
+
+/**
+ * If edited file is compiled locally, this method is called by reconciler to
+ * compile AST and update editor.
+ * 
+ * @param document currently edited document
+ */
+public void recompileLocal(IDocument document) {
+
+    compResult.recompileLocal(document(), file.iFile());
+
+    Display.getDefault().asyncExec(new Runnable() {
+        public void run() {
+            update();
         }
-    }
+    });
+}
 
-    /**
-     * Update projection annotations
-     */
-    @SuppressWarnings("unchecked")
-    private void updateProjectionAnnotations() {
+// ASTRegistry listener method
+public void childASTChanged(IProject project, String key) {
+    compResult.update(project, key);
+    update();
+}
 
-        ProjectionAnnotationModel model = getAnnotationModel();
-        if (model == null) 
-            return;
+// ASTRegistry listener method
+public void projectASTChanged(IProject project) {
+    compResult.update(project);
+    update();
+}
 
-        Collection<Annotation> oldAnnotations =
-            Util.fromIterator(model.getAnnotationIterator());
+/**
+ * Updates the outline and the view
+ */
+protected void update() {
 
-        HashMap<Annotation, Position> newAnnotations = 
-            new EditorAnnotationMap(
-                    astData.foldingPositions(getDocument()),
-                    this);
-        
-        model.modifyAnnotations( 
-                oldAnnotations.toArray(new Annotation[] {}),
-                newAnnotations, 
-                null);
-    }
+    if (compResult.failed())
+        return;
 
-    private ProjectionAnnotationModel getAnnotationModel() {
-        if (getSourceViewer() == null)
-            return null;
-        CharacterProjectionViewer viewer =
-            (CharacterProjectionViewer)getSourceViewer(); 
-        viewer.enableProjection();
-        return viewer.getProjectionAnnotationModel();
-    }
-    
-    @Override
-    protected void handleCursorPositionChanged() {
-        super.handleCursorPositionChanged();
-        updateErrorCheckAction();
-    }
-    
-    private void updateErrorCheckAction() {
-        errorCheckAction.setCurrentClass(astData.classContaining(getSelection()));
-    }
+    IDocument document = document();
+    if (document != null)
+        setupDocumentPartitioner(document);
 
-    /**
-     * Selects the <code> node </code> in the editor contains file <code>
-     *  node </code> is from. 
-     * @param node node to select
-     * @return whether file <code> node </code> is from matches file in editor
-     */
-    public boolean selectNode(ASTNode<?> node) {
-        
-        boolean matchesInput = 
-            new EditorFile(getEditorInput())
-                .path()
-                .equals(node.containingFileName());
-        
-        if (matchesInput) {
+    // Update outline
+    fSourceOutlinePage.updateAST(compResult.root());
+    fInstanceOutlinePage.updateAST(compResult.root());
+    goToDeclaration.updateAST(compResult.root());
 
-            ASTNode<?> sel = node.getSelectionNode();
-            if (sel.getOffset() >= 0 && sel.getLength() >= 0) 
-                selectAndReveal(sel.getOffset(), sel.getLength());
+    updateProjectionAnnotations();
+    updateErrorCheckAction();
+}
+
+private void setupDocumentPartitioner(IDocument document) {
+
+    try {
+        IDocumentPartitioner wanted = fPartitioner;
+        IDocumentPartitioner current = document.getDocumentPartitioner();
+        if (wanted != current) {
+            if (current != null)
+                current.disconnect();
+            wanted.connect(document);
+            document.setDocumentPartitioner(wanted);
         }
-        
-        return matchesInput;
+    } catch (Error e) {
+        e.printStackTrace();
+    }
+}
+
+/**
+ * Update projection annotations
+ */
+@SuppressWarnings("unchecked")
+private void updateProjectionAnnotations() {
+
+    ProjectionAnnotationModel model = getAnnotationModel();
+    if (model == null)
+        return;
+
+    Collection<Annotation> oldAnnotations = Util.fromIterator(model
+            .getAnnotationIterator());
+
+    HashMap<Annotation, Position> newAnnotations = new EditorAnnotationMap(
+            compResult.root().foldingPositions(document()), this);
+
+    model.modifyAnnotations(oldAnnotations.toArray(new Annotation[] {}),
+            newAnnotations, null);
+}
+
+private ProjectionAnnotationModel getAnnotationModel() {
+    CharacterProjectionViewer viewer = (CharacterProjectionViewer) getSourceViewer();
+
+    viewer.enableProjection();
+    return viewer.getProjectionAnnotationModel();
+}
+
+@Override
+protected void handleCursorPositionChanged() {
+    super.handleCursorPositionChanged();
+    updateErrorCheckAction();
+}
+
+private void updateErrorCheckAction() {
+    errorCheckAction.setCurrentClass(compResult.classContaining(selection()));
+}
+
+/**
+ * Selects the <code> node </code> in the editor contains file <code>
+     *  node </code> is
+ * from.
+ * 
+ * @param node node to select
+ * @return whether file <code> node </code> is from matches file in editor
+ */
+public boolean selectNode(ASTNode<?> node) {
+
+    boolean matchesInput = file.path().equals(node.containingFileName());
+
+    if (matchesInput) {
+
+        ASTNode<?> sel = node.getSelectionNode();
+        if (sel.getOffset() >= 0 && sel.getLength() >= 0)
+            selectAndReveal(sel.getOffset(), sel.getLength());
     }
 
-    public IDocument getDocument() {
-        return getSourceViewer() == null ? null : getSourceViewer().getDocument();
-    }
-    
-    public ISourceViewer sourceViewer() {
-        return getSourceViewer();
-    }
+    return matchesInput;
+}
 
-    public ITextSelection getSelection() {
-        return (ITextSelection)getSelectionProvider().getSelection();
-    }
-    
-    public IReconcilingStrategy getStrategy() {
-        return strategy.getStrategy();
-    }
+public IDocument document() {
+    return getSourceViewer().getDocument();
+}
 
-    public Completions getCompletions() {
-        return completions;
-    }
-    
-    public EditorFile getFile() {
-        return file;
-    }
-    
-    public boolean annotationsVisible() {
-        return toggleAnnotationsAction.isVisible();
-    }
+public ISourceViewer sourceViewer() {
+    return getSourceViewer();
+}
+
+public ITextSelection selection() {
+    return (ITextSelection) getSelectionProvider().getSelection();
+}
+
+public IReconcilingStrategy strategy() {
+    return compResult.compilationStrategy();
+}
+
+public Completions completions() {
+    return completions;
+}
+
+public EditorFile editorFile() {
+    return file;
+}
+
+public boolean annotationsVisible() {
+    return toggleAnnotationsAction.isVisible();
+}
+
 }

@@ -15,7 +15,7 @@ package org.jmodelica.ide.namecomplete;
  */
 public class CompletionFilter {
 
-    String filter;
+    final String filter;
 
     public CompletionFilter(String filter) {
         this.filter = filter;

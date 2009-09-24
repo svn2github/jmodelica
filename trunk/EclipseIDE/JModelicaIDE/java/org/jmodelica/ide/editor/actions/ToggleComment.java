@@ -18,7 +18,7 @@ import org.jmodelica.ide.helpers.Util;
  */
 public class ToggleComment extends Action {
 
-protected Editor editor;
+protected final Editor editor;
 
 public ToggleComment(Editor editor) {
     super();
@@ -33,8 +33,8 @@ public void run() {
 
     try {
         
-    IDocument d = editor.getDocument();
-    ITextSelection sel = editor.getSelection();
+    IDocument d = editor.document();
+    ITextSelection sel = editor.selection();
 
     String[] lines; {
         int nbrLines = sel.getEndLine() - sel.getStartLine() + 1;

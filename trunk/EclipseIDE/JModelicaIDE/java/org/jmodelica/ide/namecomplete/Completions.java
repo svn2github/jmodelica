@@ -14,6 +14,9 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.jastadd.plugin.registry.ASTRegistry;
+import org.jmodelica.ide.ModelicaCompiler;
+import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.Access;
@@ -28,14 +31,13 @@ import org.jmodelica.modelica.compiler.InstNode;
  */
 public class Completions implements IContentAssistProcessor {
 
-public ASTNode<?> fRoot = null;
 
-public Completions() {
-    this(null);
-}
+public final static ModelicaCompiler compiler = new ModelicaCompiler();
 
-public Completions(ASTNode<?> root) {
-    this.fRoot = root;
+public final Editor editor;
+
+public Completions(Editor editor) {
+    this.editor = editor;
 }
 
 /**
@@ -101,15 +103,14 @@ public Pair<String, String> getContext(IDocument d, int caretOffset) {
    
 }
 
-
 /**
- * Looks up completions for name leading caret. If context is qualified,
- * list lookup that class in the context of the enclosing class, o.w. list
- * members of enclosing class.
- *  
+ * Looks up completions for identifier leading caret. If no identifier exists
+ * (e.g. typically if completion was invoked on a new line), do lookup in
+ * enclosing class.
+ * 
  * @param d document
  * @param offset caret offset
- * @return instance nodes of completion proposals 
+ * @return instance nodes of completion proposals
  */
 public ArrayList<CompletionNode> suggestedDecls(IDocument d, int offset) {
     
@@ -120,11 +121,26 @@ public ArrayList<CompletionNode> suggestedDecls(IDocument d, int offset) {
         filter = p.snd();
     }
     
+    Maybe<ASTNode<?>> mRoot = compiler.recompile(d, 
+            editor.editorFile().iFile());
+    
+    ASTNode<?> root = mRoot.value();
+    
+    if (root.isError()) {
+    
+        System.out.println("ASDKLJDASKJDKLASJDLKASDJ!~@@!@!@");
+        
+        ASTRegistry reg = org.jastadd.plugin.Activator.getASTRegistry();
+        root = (ASTNode<?>) 
+            reg.lookupAST(null, editor.editorFile().iFile().getProject());
+    }
+    
+    root.debugNN("");
     
     InstNode decl;
     {
         Maybe<InstClassDecl> enclosingClass = 
-            new Lookup(fRoot).instEnclosingClassAt(d, offset);
+            new Lookup(root).instEnclosingClassAt(d, offset);
         
         if (enclosingClass.isNothing())
             return new ArrayList<CompletionNode>();
@@ -136,7 +152,7 @@ public ArrayList<CompletionNode> suggestedDecls(IDocument d, int offset) {
             // o.w. look up the qualified name leading caret in
             // enclosing class, and use result for lookup
             Access a = CompletionUtil.createDotAccess(qualifedPart.split("\\.")); 
-            Maybe<InstNode> mDecl = new Lookup(fRoot).lookupQualifiedName(
+            Maybe<InstNode> mDecl = new Lookup(root).lookupQualifiedName(
                     enclosingClass.value(), 
                     a);
         
@@ -211,10 +227,6 @@ public IContextInformationValidator getContextInformationValidator() {
 
 public String getErrorMessage() {
     return null;
-}
-
-public void updateAST(ASTNode<?> fRoot) {
-    this.fRoot = fRoot;
 }
 
 }

@@ -38,12 +38,12 @@ import org.jmodelica.ide.scanners.ModelicaStringScanner;
  */
 public class ViewerConfiguration extends SourceViewerConfiguration {
 
-Editor editor;
-Completions completions;
+final Editor editor;
+final Completions completions;
 
 public ViewerConfiguration(Editor editor) {
     this.editor = editor;
-    this.completions = editor.getCompletions();
+    this.completions = editor.completions();
 }
 
 @Override
@@ -127,7 +127,7 @@ private void addScanner(PresentationReconciler reconciler,
 @Override 
 public IReconciler getReconciler(ISourceViewer sourceViewer) {
     return new MonoReconciler(
-            editor.getStrategy(),
+            editor.strategy(),
             false);
 }
 

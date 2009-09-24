@@ -30,8 +30,8 @@ public class IDEConstants {
 
 	public static final String ERROR_MARKER_ID = PLUGIN_ID + ".marker.error";
 
-	public static final String FILE_EXTENSION = "mo";
-	public static final String[] All_FILE_EXTENSIONS = { FILE_EXTENSION };
+	public static final String FILE_EXT = "mo";
+	public static final String[] ALL_FILE_EXTENSIONS = { FILE_EXT };
 	
 	public static final String ACTION_ID = PLUGIN_ID + ".action";
 	public static final String ACTION_EXPAND_ALL_ID = ACTION_ID + ".expand-all";

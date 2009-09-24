@@ -184,7 +184,7 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 			return true;
 		case IResource.FILE:
 			final IFile file = (IFile) source;
-			if (file.getFileExtension().equals(IDEConstants.FILE_EXTENSION)) {
+			if (file.getFileExtension().equals(IDEConstants.FILE_EXT)) {
 				new UIJob("Update Source tree in Project Explorer") {
 					public IStatus runInUIThread(IProgressMonitor monitor) {
 						if (viewer != null && !viewer.getControl().isDisposed())

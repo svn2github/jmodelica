@@ -12,8 +12,9 @@ import org.jmodelica.modelica.compiler.InstNode;
 
 public class GoToDeclaration extends Action {
 
-Editor editor;
-ASTNode<?> fRoot;
+protected final Editor editor;
+
+protected ASTNode<?> fRoot;
 
 public GoToDeclaration(Editor editor) {
     super();
@@ -32,23 +33,27 @@ public void run() {
         return;
     
     Maybe<InstNode> iNode = new Lookup(fRoot).declFromAccessAt(
-            editor.getDocument(),
-            editor.getSelection().getOffset());
+            editor.document(),
+            editor.selection().getOffset());
     
     if (iNode.isNothing()) 
         return;
  
     String pathToDecl = iNode.value().retrieveFileName(); 
     
-    Editor editor = 
+    try {
+    
+    Editor ed = 
         EclipseCruftinessWorkaroundClass.getModelicaEditorForFile(
         EclipseCruftinessWorkaroundClass.getFileForPath(pathToDecl)).value();
-    
-    editor.selectNode(iNode.value());
+    ed.selectNode(iNode.value());
+
+    } catch (Exception e) { }
     
 }
 
 public void updateAST(ASTNode<?> root) {
     this.fRoot = root;
 }
+
 }

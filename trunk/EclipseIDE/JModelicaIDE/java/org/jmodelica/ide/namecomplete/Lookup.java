@@ -19,7 +19,7 @@ import org.jmodelica.modelica.compiler.SourceRoot;
  */
 public class Lookup {
 
-    ASTNode<?> root;
+    final ASTNode<?> root;
 
     public Lookup(ASTNode<?> root) {
         this.root = root;

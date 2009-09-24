@@ -16,7 +16,7 @@ import org.jmodelica.ide.indent.DocUtil;
  */
 public class BracketAdder implements IAutoEditStrategy {
 
-protected String startToken, endToken;
+final protected String startToken, endToken;
 
 public BracketAdder(String startToken, String endToken) {
     this.startToken = startToken;

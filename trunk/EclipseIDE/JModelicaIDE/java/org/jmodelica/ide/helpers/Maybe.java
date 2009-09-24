@@ -12,11 +12,20 @@ package org.jmodelica.ide.helpers;
  */
 public class Maybe<E> {
 
-    protected E value;
+    final protected E value;
 
-    public static <E> Maybe<E> Just(E e) { return new Maybe<E>(e); }
-    public static <E> Maybe<E> Nothing() { return new Maybe<E>(); }
-    
+    public static <T> Maybe<T> Just(T t) {
+        
+        assert t != null : 
+            "Null unexpected. Use .newM(E e) if that behaviour desired.";
+        
+        return new Maybe<T>(t); 
+    }
+
+    public static <T> Maybe<T> Nothing() { 
+        return new Maybe<T>(); 
+    }
+
     /**
      * Sets the contained value to null.
      */
@@ -57,7 +66,7 @@ public class Maybe<E> {
      * @param defaultValue default value
      * @return contained value unless null, <code>defaulValue</code> otherwise.
      */
-    public E fromMaybe(E defaultValue) {
+    public E defaultTo(E defaultValue) {
         return hasValue() ? value() : defaultValue;
     }
     /**
