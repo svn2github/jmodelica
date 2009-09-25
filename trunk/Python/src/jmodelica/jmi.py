@@ -2017,6 +2017,23 @@ class Model(object):
             raise Exception("Parameter or variable "+name.strip()+" could not be found in model.")
         return value
         
+    def get_values(self, names):
+        """ Get values for a list of variables or parameters.
+        
+        Parameters:
+            names -- List of names of variables or parameters
+            
+        Returns:
+            List of values corresponding to the variables/parameters 
+            passed as argument.
+            
+        Raises Error if any of the names is not present in model.
+        """
+        values = []
+        for name in names:
+            values.append(self.get_value(name))
+        return values
+        
     def set_value(self, name, value):
         """ Set get value of a parameter or variable.
         
@@ -2033,6 +2050,23 @@ class Model(object):
             self.get_z()[z_i] = value
         else:
             raise Exception("Parameter or variable "+name+" could not be found in model.")
+    
+    def set_values(self, names, values):
+        """ Set values for several parameters or variables. 
+        
+        Parameters:
+            names -- List of names of parameters or variables
+            values -- List of new values for parameters or variables in names.
+            
+        Raises Error if number of names is not equal to number of values or if 
+        any of the names can not be found in the model.    
+        """
+        if len(names) != len(values):
+            raise Exception("Number of names and values must be the same.")
+        
+        for name, value in zip(names, values):
+            self.set_value(name, value)
+
     
     def load_parameters_from_XML(self, filename="", path="."):
         """ 
