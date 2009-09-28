@@ -110,11 +110,78 @@ class Simulator(object):
     def get_final_time(self):
         """Returns the simulation end time"""
         return self._final_time
+        
+    def get_solution(self):
+        """Return the solution calculated by run().
+        
+        The solution consists of a tuple (T, Y) where T are the time samples
+        and Y contains all the equivalent state samples, one per row.
+        """
+        return self._T, self._Y
+        
+    def _set_solution(self, T, Y):
+        """Internal function used by run().
+        
+        Setter for self.get_solution().
+        """
+        self._T = T
+        self._Y = Y
+    
+    def set_relative_tolerance(self, reltol):
+        """Set the positive relative tolerance for simulation.
+        
+        Currently only a single scalar used for all states is supported. 
+        
+        This function will raise an exception if the tolerance is not positive.
+        
+        See the SUNDIALS documentation for more information.
+        """
+        if reltol <= 0:
+            raise SimulationException("Relative tolerance must be "
+                                      "positive.")
+        self._reltol = reltol
+        
+    def get_relative_tolerance(self):
+        """Return the relative tolerance set for this simulator.
+        
+        See the SUNDIALS documentation for more information.
+        """
+        return self._reltol
+        
+    reltol = property(get_relative_tolerance, set_relative_tolerance,
+                      doc="The relative tolerance.")
+        
+        
+    
+    
+    def set_absolute_tolerance(self, abstol):
+        """Set the positive absolute tolerance for simulation.
+        
+        Currently only a single scalar used for all states is supported.
+        
+        This function will raise an exception if the tolerance is not positive. 
+        
+        See the SUNDIALS documentation for more information.
+        """
+        if abstol <= 0:
+            raise SimulationException("Absolute tolerance must be "
+                                      "positive.")
+        self._abstol = abstol
+        
+    def get_absolute_tolerance(self):
+        """Return the absolute tolerance set for this simulator.
+        
+        See the SUNDIALS documentation for more information.
+        """
+        return self._abstol
+        
+    abstol = property(get_absolute_tolerance, set_absolute_tolerance,
+                      doc="The absolute tolerance.")
      
     def set_simulation_interval(self, start_time, final_time):
         """Set the interval through the simulation will be made."""
         if start_time >= final_time:
-            raise SimulationException("start time must be earlier "
+            raise SimulationException("Start time must be earlier "
                                               "than the final time.")
         self._start_time = start_time
         self._final_time = final_time

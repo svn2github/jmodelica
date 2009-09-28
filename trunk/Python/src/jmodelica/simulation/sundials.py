@@ -112,73 +112,7 @@ class SundialsOdeSimulator(Simulator):
         self._set_sensitivity_indices(None)
         self.set_sensitivity_analysis(sensitivity_analysis)
         self._set_sensitivities(None)
-        
-    def set_absolute_tolerance(self, abstol):
-        """Set the positive absolute tolerance for simulation.
-        
-        Currently only a single scalar used for all states is supported.
-        
-        This function will raise an exception if the tolerance is not positive. 
-        
-        See the SUNDIALS documentation for more information.
-        """
-        if abstol <= 0:
-            raise SundialsSimulationException("absolute tolerance must be "
-                                              "positive.")
-        self._abstol = abstol
-        
-    def get_absolute_tolerance(self):
-        """Return the absolute tolerance set for this simulator.
-        
-        See the SUNDIALS documentation for more information.
-        """
-        return self._abstol
-        
-    abstol = property(get_absolute_tolerance, set_absolute_tolerance,
-                      doc="The absolute tolerance.")
                       
-    def set_relative_tolerance(self, reltol):
-        """Set the positive relative tolerance for simulation.
-        
-        Currently only a single scalar used for all states is supported. 
-        
-        This function will raise an exception if the tolerance is not positive.
-        
-        See the SUNDIALS documentation for more information.
-        """
-        if reltol <= 0:
-            raise SundialsSimulationException("relative tolerance must be "
-                                              "positive.")
-        self._reltol = reltol
-        
-    def get_relative_tolerance(self):
-        """Return the relative tolerance set for this simulator.
-        
-        See the SUNDIALS documentation for more information.
-        """
-        return self._reltol
-        
-    reltol = property(get_relative_tolerance, set_relative_tolerance,
-                      doc="The relative tolerance.")
-                      
-    
-        
-    def get_solution(self):
-        """Return the solution calculated by SundialsOdeSimulator.run().
-        
-        The solution consists of a tuple (T, Y) where T are the time samples
-        and Y contains all the equivalent state samples, one per row.
-        """
-        return self._T, self._Y
-        
-    def _set_solution(self, T, Y):
-        """Internal function used by SundialsOdeSimulator.run().
-        
-        Setter for self.get_solution().
-        """
-        self._T = T
-        self._Y = Y
-        
        
        
     def get_sensitivities(self):
