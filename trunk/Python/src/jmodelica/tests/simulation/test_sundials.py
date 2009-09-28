@@ -260,9 +260,9 @@ class TestSundialsOdeSimulator:
                                 simulator.get_absolute_tolerance())
         
         # Testing error checking
-        nose.tools.assert_raises(sundials.SundialsSimulationException,
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
                                  simulator.set_absolute_tolerance, -1e-4)
-        nose.tools.assert_raises(sundials.SundialsSimulationException,
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
                                  simulator.set_absolute_tolerance, 0)
                                  
     def test_relative_tolerance(self):
@@ -288,9 +288,9 @@ class TestSundialsOdeSimulator:
                                        simulator.get_relative_tolerance())
         
         # Testing error checking
-        nose.tools.assert_raises(sundials.SundialsSimulationException,
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
                                  simulator.set_relative_tolerance, -1e-4)
-        nose.tools.assert_raises(sundials.SundialsSimulationException,
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
                                  simulator.set_relative_tolerance, 0)
                                  
     def test_time_steps(self):
