@@ -17,9 +17,12 @@ queries.
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from lxml import etree
 import os.path
+import numpy as N
+
+int = N.int32
+N.int = N.int32
 
 def _parse_XML(filename, schemaname=''):
     
@@ -219,6 +222,8 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
+        keys = map(N.int,keys)
+        vals = map(N.float,vals)
         return dict(zip(keys,vals))
 
     def get_dx_start_attributes(self):

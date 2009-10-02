@@ -1886,7 +1886,7 @@ class Model(object):
         
         keys = start_attr.keys()
         keys.sort(key=int)
-        
+
         for key in keys:
             value = start_attr.get(key)
             
@@ -2496,7 +2496,7 @@ class JMIModel(object):
         n_nz = ct.c_int()
         if self._dll.jmi_ode_df_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
             raise JMIException("Getting number of non-zeros failed.")
-        return n_nz.value
+        return int(n_nz.value)
     
     def ode_df_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """Get the row and column indices of the non-zero elements in the 
@@ -2564,7 +2564,7 @@ class JMIModel(object):
         df_n_nz = ct.c_int()
         if self._dll.jmi_ode_df_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(df_n_cols), byref(df_n_nz)) is not 0:
             raise JMIException("Getting number of columns and non-zero elements failed.")        
-        return df_n_cols.value, df_n_nz.value
+        return int(df_n_cols.value), int(df_n_nz.value)
     
     def dae_get_sizes(self):
         """Returns the number of equations of the DAE."""
@@ -2629,7 +2629,7 @@ class JMIModel(object):
         n_nz = ct.c_int()
         if self._dll.jmi_dae_dF_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
             raise JMIException("Getting the number of non-zeros failed.")
-        return n_nz.value
+        return int(n_nz.value)
     
     def dae_dF_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """Returns the row and column indices of the non-zero elements in the
@@ -2699,7 +2699,7 @@ class JMIModel(object):
         dF_n_nz = ct.c_int()
         if self._dll.jmi_dae_dF_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
             raise JMIException("Returning the number of columns and non-zero elements failed.")        
-        return dF_n_cols.value, dF_n_nz.value
+        return int(dF_n_cols.value), int(dF_n_nz.value)
     
     def init_get_sizes(self):
         """Gets the number of equations in the DAE initialization functions.
@@ -2774,7 +2774,7 @@ class JMIModel(object):
         n_nz = ct.c_int()
         if self._dll.jmi_init_dF0_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
             raise JMIException("Getting the number of non-zeros failed.")
-        return n_nz.value
+        return int(n_nz.value)
     
     def init_dF0_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """Get the row and column indices of the non-zero elements in the
@@ -2834,11 +2834,11 @@ class JMIModel(object):
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
             pass        
-        dF_n_cols = ct.c_int()
-        dF_n_nz = ct.c_int()
-        if self._dll.jmi_init_dF0_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
+        dF0_n_cols = ct.c_int()
+        dF0_n_nz = ct.c_int()
+        if self._dll.jmi_init_dF0_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF0_n_cols), byref(dF0_n_nz)) is not 0:
             raise JMIException("Returning the number of columns and non-zero elements failed.")             
-        return dF_n_cols.value, dF_n_nz.value
+        return int(dF0_n_cols.value), int(dF0_n_nz.value)
 
     def init_F1(self, res):
         """Evaluates the F1 residual function of the initialization system.
@@ -2899,7 +2899,7 @@ class JMIModel(object):
         n_nz = ct.c_int()
         if self._dll.jmi_init_dF1_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
             raise JMIException("Getting the number of non-zeros failed.")
-        return n_nz.value
+        return int(n_nz.value)
     
     def init_dF1_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """Get the row and column indices of the non-zero elements in the
@@ -2964,11 +2964,11 @@ class JMIModel(object):
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
             pass        
-        dF_n_cols = ct.c_int()
-        dF_n_nz = ct.c_int()
-        if self._dll.jmi_init_dF1_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
+        dF1_n_cols = ct.c_int()
+        dF1_n_nz = ct.c_int()
+        if self._dll.jmi_init_dF1_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF1_n_cols), byref(dF1_n_nz)) is not 0:
             raise JMIException("Getting the number of columns and non-zero elements failed.")        
-        return dF_n_cols.value, dF_n_nz.value
+        return int(dF1_n_cols.value), int(dF1_n_nz.value)
  
     def init_Fp(self, res):
         """Evaluates the Fp residual function of the initialization system.
@@ -3029,7 +3029,7 @@ class JMIModel(object):
         n_nz = ct.c_int()
         if self._dll.jmi_init_dFp_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
             raise JMIException("Getting the number of non-zeros failed.")
-        return n_nz.value
+        return int(n_nz.value)
     
     def init_dFp_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """Get the row and column indices of the non-zero elements in the Jacobian 
@@ -3092,11 +3092,11 @@ class JMIModel(object):
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
             pass        
-        dF_n_cols = ct.c_int()
-        dF_n_nz = ct.c_int()
+        dFp_n_cols = ct.c_int()
+        dFp_n_nz = ct.c_int()
         if self._dll.jmi_init_dFp_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
             raise JMIException("Getting the number of columns and non-zero elements failed.")        
-        return dF_n_cols.value, dF_n_nz.value
+        return int(dFp_n_cols.value), int(dFp_n_nz.value)
     
     def opt_set_optimization_interval(self, start_time, start_time_free, final_time, final_time_free):
         """Set the optimization interval.
@@ -3145,7 +3145,7 @@ class JMIModel(object):
         n_p_opt = ct.c_int()
         if self._dll.jmi_opt_get_n_p_opt(self._jmi, byref(n_p_opt)) is not 0:
             raise JMIException("Getting the number of optimization parameters failed.")
-        return n_p_opt.value
+        return int(n_p_opt.value)
         
     def opt_get_p_opt_indices(self, p_opt_indices):
         """Get the optimization parameter indices.
@@ -3227,7 +3227,7 @@ class JMIModel(object):
         n_nz = ct.c_int()
         if self._dll.jmi_opt_dJ_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
             raise JMIException("Getting the number of non-zeros failed.")
-        return n_nz.value
+        return int(n_nz.value)
         
     def opt_dJ_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """Get the row and column indices of the non-zero elements in the gradient 
@@ -3297,7 +3297,7 @@ class JMIModel(object):
         dJ_n_nz = ct.c_int()
         if self._dll.jmi_opt_dJ_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dJ_n_cols), byref(dJ_n_nz)) is not 0:
             raise JMIException("Computing the number of columns and non-zero elements failed.")
-        return dJ_n_cols.value, dJ_n_nz.value
+        return int(dJ_n_cols.value), int(dJ_n_nz.value)
         
     def opt_Ceq(self, res):
         """Evaluate the residual of the equality path constraint Ceq.
@@ -3357,7 +3357,7 @@ class JMIModel(object):
         n_nz = ct.c_int()
         if self._dll.jmi_opt_dCeq_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
             raise JMIException("Getting the number of non-zeros failed.")
-        return n_nz.value
+        return int(n_nz.value)
         
     def opt_dCeq_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """Get the row and column indices of the non-zero elements in the Jacobian 
@@ -3422,11 +3422,11 @@ class JMIModel(object):
         except TypeError:
             pass
         
-        dF_n_cols = ct.c_int()
-        dF_n_nz = ct.c_int()
-        if self._dll.jmi_opt_dCeq_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
+        dCeq_n_cols = ct.c_int()
+        dCeq_n_nz = ct.c_int()
+        if self._dll.jmi_opt_dCeq_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dCeq_n_cols), byref(dCeq_n_nz)) is not 0:
             raise JMIException("Computing the number of columns and non-zero elements failed.")
-        return dF_n_cols.value, dF_n_nz.value
+        return int(dCeq_n_cols.value), int(dCeq_n_nz.value)
         
     def opt_Cineq(self, res):
         """Evaluate the residual of the inequality path constraint Cineq.
@@ -3487,7 +3487,7 @@ class JMIModel(object):
         n_nz = ct.c_int()
         if self._dll.jmi_opt_dCineq_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
             raise JMIException("Getting the number of non-zeros failed.")
-        return n_nz.value
+        return int(n_nz.value)
         
     def opt_dCineq_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """Get the row and column indices of the non-zero elements in the Jacobian 
@@ -3547,11 +3547,11 @@ class JMIModel(object):
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
             pass        
-        dF_n_cols = ct.c_int()
-        dF_n_nz = ct.c_int()
-        if self._dll.jmi_opt_dCineq_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
+        dCineq_n_cols = ct.c_int()
+        dCineq_n_nz = ct.c_int()
+        if self._dll.jmi_opt_dCineq_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dCineq_n_cols), byref(dCineq_n_nz)) is not 0:
             raise JMIException("Computing the number of columns and non-zero elements failed.")
-        return dF_n_cols.value, dF_n_nz.value
+        return int(dCineq_n_cols.value), int(dCineq_n_nz.value)
 
     def opt_Heq(self, res):
         """Evaluate the residual of the equality point constraint Heq.
@@ -3611,7 +3611,7 @@ class JMIModel(object):
         n_nz = ct.c_int()
         if self._dll.jmi_opt_dHeq_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
             raise JMIException("Getting the number of non-zeros failed.")
-        return n_nz.value
+        return int(n_nz.value)
         
     def opt_dHeq_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """ 
@@ -3677,11 +3677,11 @@ class JMIModel(object):
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
             pass        
-        dF_n_cols = ct.c_int()
-        dF_n_nz = ct.c_int()
-        if self._dll.jmi_opt_dHeq_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
+        dHeq_n_cols = ct.c_int()
+        dHeq_n_nz = ct.c_int()
+        if self._dll.jmi_opt_dHeq_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dHeq_n_cols), byref(dHeq_n_nz)) is not 0:
             raise JMIException("Computing the number of columns and non-zero elements failed.")
-        return dF_n_cols.value, dF_n_nz.value
+        return int(dHeq_n_cols.value), int(dHeq_n_nz.value)
 
     def opt_Hineq(self, res):
         """ 
@@ -3743,7 +3743,7 @@ class JMIModel(object):
         n_nz = ct.c_int()
         if self._dll.jmi_opt_dHineq_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
             raise JMIException("Getting the number of non-zeros failed.")
-        return n_nz.value
+        return int(n_nz.value)
         
     def opt_dHineq_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """ 
@@ -3813,9 +3813,9 @@ class JMIModel(object):
         
         dF_n_cols = ct.c_int()
         dF_n_nz = ct.c_int()
-        if self._dll.jmi_opt_dHineq_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
+        if self._dll.jmi_opt_dHineq_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dHineq_n_cols), byref(dHineq_n_nz)) is not 0:
             raise JMIException("Computing the number of columns and non-zero elements failed.")
-        return dF_n_cols.value, dF_n_nz.value
+        return int(dHineq_n_cols.value), int(dHineq_n_nz.value)
     
 class SimultaneousOpt(object):
     """ High-level interface for JMISimultaneousOpt. """

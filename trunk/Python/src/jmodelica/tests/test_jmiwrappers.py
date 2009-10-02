@@ -22,6 +22,8 @@ import jmodelica as jm
 import jmodelica.jmi as jmi
 from jmodelica.simulation.sundials import SundialsOdeSimulator
 
+int = n.int32
+n.int = n.int32
 
 class ModelContainer(object):
     def __init__(self, filename, filepath):
