@@ -99,7 +99,7 @@ endif
 
 # Compile
 .c.o:
-	$(CC) $(CFLAGS) $(INCL) -c -o $@ $<
+	$(CC) $(CFLAGS) -fPIC $(INCL) -c -o $@ $<
 
 clean:
 	rm -rf $(EXE) $(OBJS) $(SHARED)
