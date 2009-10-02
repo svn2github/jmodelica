@@ -222,8 +222,8 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        keys = map(N.int,keys)
-        vals = map(N.float,vals)
+#        keys = map(N.int,keys)
+#        vals = map(N.float,vals)
         return dict(zip(keys,vals))
 
     def get_dx_start_attributes(self):
