@@ -236,7 +236,7 @@ aspect CrossReference {
 //TODO: remove. only for debugging
 aspect NADebugging {    
     
-    public void ASTNode.debugNN(String ind) {
+    public void ASTNode.debugPrintThis(String ind) {
         System.out.printf("%s%s: (%d,%d)-(%d,%d), (%d-%d)\n", ind, 
                 this.getNodeName(), 
                 this.getBeginLine(),   this.getBeginColumn(),
@@ -244,10 +244,20 @@ aspect NADebugging {
                 this.getBeginOffset(), this.getEndOffset());
     }
     
-    public void ASTNode.printASTqq(String ind) {
-        this.debugNN(ind);
+    public void ASTNode.printDebugInfo(String ind) {
+        this.debugPrintThis(ind);
         for (ASTNode node : this) 
-            node.printASTqq(ind + "  ");
+            node.printDebugInfo(ind + "  ");
+    }
+    
+    public void List.printDebugInfo(String ind) {
+        for (ASTNode node : this) 
+            node.printDebugInfo(ind + "  ");
+    }
+    
+    public void Opt.printDebugInfo(String ind) {
+        for (ASTNode node : this) 
+            node.printDebugInfo(ind + "  ");
     }
   
 }

@@ -31,9 +31,13 @@ public EditorAnnotationMap(Iterable<Position> ps, Editor editor) {
             continue;
 
         Annotation annotation;
-
         if (pos instanceof CharacterPosition) {
-        
+
+            /*
+             * This seems really ugly but I don't really get how this works.
+             * /pni
+             */
+            
             ITextSelection sel = editor.selection();
             annotation = new CharacterProjectionAnnotation(
                     editor.annotationsVisible() ||

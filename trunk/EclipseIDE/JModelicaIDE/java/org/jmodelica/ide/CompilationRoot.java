@@ -1,5 +1,6 @@
 package org.jmodelica.ide;
 
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -7,6 +8,7 @@ import java.io.Reader;
 import org.eclipse.core.resources.IFile;
 import org.jmodelica.ide.error.CompileErrorReport;
 import org.jmodelica.ide.error.InstanceErrorHandler;
+import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.BadDefinition;
 import org.jmodelica.modelica.compiler.List;
 import org.jmodelica.modelica.compiler.Program;
@@ -103,6 +105,19 @@ public CompilationRoot parseFile(Reader reader, IFile file, String path) {
         }
         
     }
+    
+    return this;
+}
+
+public CompilationRoot parseFileAt(String path) {
+    
+    try {
+        this.parseFile(new FileReader(path), null, path);
+    } catch (FileNotFoundException e) {
+        e.printStackTrace();
+    }
+    
+    System.out.println(list.getChild(0));
     
     return this;
 }

@@ -32,6 +32,8 @@ import org.jastadd.plugin.compiler.ast.IASTNode;
 import org.jmodelica.ide.helpers.DocumentReader;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.modelica.compiler.SourceRoot;
+import org.jmodelica.modelica.compiler.StoredDefinition;
 
 
 public class ModelicaCompiler extends AbstractCompiler {
@@ -103,7 +105,9 @@ protected IASTNode compileToAST(IFile file) {
     return compileFile(file, file.getRawLocation().toOSString());
 }
 
-
+public SourceRoot compileFileAt(String path) {
+    return new CompilationRoot().parseFileAt(path).root();
+}
 
 public ASTNode<?> compileFile(IFile file, String path) {
     return new CompilationRoot().parseFile(file, path)

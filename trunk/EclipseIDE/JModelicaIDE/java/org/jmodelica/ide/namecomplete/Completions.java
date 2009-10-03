@@ -22,6 +22,7 @@ import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.Access;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstNode;
+import org.jmodelica.modelica.compiler.StoredDefinition;
 
 /**
  * Completion processor for JModelica
@@ -121,18 +122,16 @@ public ArrayList<CompletionNode> suggestedDecls(IDocument d, int offset) {
         filter = p.snd();
     }
     
-    Maybe<ASTNode<?>> mRoot = compiler.recompile(d, 
-            editor.editorFile().iFile());
+    ASTNode<?> root = compiler.recompile(d, 
+            editor.editorFile().iFile()).value();
     
-    ASTNode<?> root = mRoot.value();
+    if (root.isError() || 
+        ((StoredDefinition)root).getNumElement() == 0) {
     
-    if (root.isError()) {
-    
-        System.out.println("ASDKLJDASKJDKLASJDLKASDJ!~@@!@!@");
-        
         ASTRegistry reg = org.jastadd.plugin.Activator.getASTRegistry();
         root = (ASTNode<?>) 
             reg.lookupAST(null, editor.editorFile().iFile().getProject());
+        
     }
     
     root.debugNN("");
