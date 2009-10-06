@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<book version="5.0" xmlns="http://docbook.org/ns/docbook"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      xmlns:svg="http://www.w3.org/2000/svg"
+      xmlns:m="http://www.w3.org/1998/Math/MathML"
+      xmlns:html="http://www.w3.org/1999/xhtml"
+      xmlns:db="http://docbook.org/ns/docbook">
+  <info>
+    <title>JModelica.org User Guide</title>
+
+    <author>
+      <personname><firstname></firstname><surname></surname></personname>
+
+      <affiliation>
+        <orgname>Modelon AB</orgname>
+      </affiliation>
+    </author>
+
+    <pubdate>2009</pubdate>
+  </info>
+
+  <chapter>
+    <title>Introduction</title>
+
+    <section>
+      <title>About JModelica.org</title>
+
+      <para>JModelica.org is an extensible Modelica-based open source platform
+      for optimization, simulation and analysis of complex dynamic systems.
+      The main objective of the project is to create an industrially viable
+      open source platform for optimization of Modelica models, while offering
+      a flexible platform serving as a virtual lab for algorithm development
+      and research. As such, JModelica.org is intended to provide a platform
+      for technology transfer where industrially relevant problems can inspire
+      new research and where state of the art algorithms can be propagated
+      form academia into industrial use. JModelica.org is a result of research
+      at the Department of Automatic Control, Lund University, and is now
+      maintained and developed by Modelon AB.</para>
+    </section>
+
+    <section>
+      <title>Mission Statement</title>
+
+      <para>To offer a community-based, free, open source, accessible, user
+      and application oriented Modelica environment for optimization and
+      simulation of complex dynamic systems, built on well-recognized
+      technology and supporting major platforms. </para>
+    </section>
+  </chapter>
+
+  <chapter>
+    <title>Installation</title>
+
+    <para>The installation procedure differs between operating systems. Please
+    consult the section corresponding to your operating system.</para>
+
+    <section>
+      <title>Binary Distribution</title>
+
+      <para></para>
+
+      <section>
+        <title>Linux</title>
+
+        <para></para>
+      </section>
+
+      <section>
+        <title>Windows</title>
+
+        <para></para>
+      </section>
+    </section>
+
+    <section>
+      <title>Source Distribution</title>
+
+      <para></para>
+    </section>
+  </chapter>
+</book>
