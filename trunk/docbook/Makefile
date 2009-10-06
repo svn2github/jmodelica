@@ -4,7 +4,7 @@ DOCBOOKDIR=docbook-xsl-$(DOCBOOKVERSION)
 URL=http://downloads.sourceforge.net/project/docbook/docbook-xsl/$(DOCBOOKVERSION)/$(DOCBOOKDIR).tar.gz
 XSLHTMLSTYLE=$(DOCBOOKDIR)/html/docbook.xsl
 XSLPDFSTYLE=$(DOCBOOKDIR)/fo/docbook.xsl
-XSLHTMLHELPSTYLE=/usr/share/xml/docbook/stylesheet/nwalsh5/1.74.0/htmlhelp/htmlhelp.xsl
+XSLHTMLHELPSTYLE=$(DOCBOOKDIR)/htmlhelp/htmlhelp.xsl
 $(DOC).html:  $(DOC).xml 
 	xsltproc  --output  $@  $(XSLHTMLSTYLE)  $<
 
