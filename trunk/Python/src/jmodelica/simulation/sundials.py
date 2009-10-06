@@ -14,9 +14,11 @@ import nose
 
 try:
     from pysundials import cvodes
+    from pysundials import ida
     from pysundials import nvecserial
 except ImportError:
     try:
+        import ida
         import cvodes
         import nvecserial
     except ImportError:
@@ -396,3 +398,197 @@ class SundialsOdeSimulator(Simulator):
         
         self._set_solution(T, ylist)
         
+
+
+class SundialsDAESimulator(Simulator):
+    """An object oriented interface for simulation JModelica.org DAE models."""
+    
+    def __init__(self, model=None, start_time=None, final_time=None,
+                abstol=1.0e-6, reltol=1.0e-6, time_step = 0.2,
+                return_last=False, sensitivity_analysis=False, verbosity=0):
+                    
+        Simulator.__init__(self, model, start_time, final_time,
+                           time_step, return_last, verbosity)
+                           
+        # Setting defaults
+        self.set_absolute_tolerance(abstol)
+        self.set_relative_tolerance(reltol)
+        self._set_solution(None, None)
+        
+        #TODO
+        #self._set_sensitivity_indices(None)
+        #self.set_sensitivity_analysis(sensitivity_analysis)
+        #self._set_sensitivities(None)
+    
+    def _sundials_res_f(self, t, x, dx, res_vector, f_data):
+            """The sundials' Residual evaluation function.
+            
+            This function basically moves data between SUNDIALS arrays and NumPy
+            arrays.
+            
+            Parameters:
+            t               -- the point time on which the evalution is being done.
+            x               -- the states.
+            dx              -- the derivatives of the states.
+            res_vector      -- the output residual_vector F(t,x,dx)
+            f_data          -- contains the model and an array with it's parameters.
+            
+            See SUNDIALS' manual and/or PySUNDIALS demos for more information.
+            """
+
+            #Moving data to the model
+            data = self._data
+            model = data.model
+            model.t = (t - data.t_sim_start) / data.t_sim_duration
+            
+            model.x = x[0:len(model.x)]
+            model.w = x[len(model.x):len(x)]
+            
+            model.dx = dx[0:len(model.dx)]
+
+            #Evaluating the residual function
+            temp = N.array(res_vector)
+            model.jmimodel.dae_F(temp)
+            res_vector[:] = temp
+            
+            return 0
+        
+    def run(self):
+        """Do the actual simulation.
+        
+        The input is set using setters/constructor.
+        The solution can be retrieved using self.get_solution()
+        """
+        return_last = self.get_return_last()
+        time_step = self.get_time_step()
+        start_time = self.get_start_time()
+        end_time = self.get_final_time()
+        verbose = self.get_verbosity()
+        model = self.get_model()
+        #TODO
+        #sensi = self.get_sensitivity_analysis()
+
+        if verbose >= self.WHISPER:
+            print "Running simulation with interval (%s, %s)." \
+                    % (start_time, end_time)
+        if verbose >= self.NORMAL:
+            print "Input before integration:", model.u
+            print "States x:", model.x
+            print "States dx:", model.dx
+            
+            
+        class UserData:
+            """ctypes structure used to move data in (and out of?) the callback
+               functions.
+            """
+            def __init__(self):
+                self.parameters = None
+                self.model = None
+                self.t_sim_start = None
+                self.t_sim_end = None
+                self.t_sim_duration = None
+            
+            __slots__ = [
+                'parameters',     # parameters
+                'model',          # The evaluation model
+                't_sim_start',    # Start time for simulation.
+                't_sim_end',      # End time for simulation.
+                't_sim_duration', # Time duration for simulation.
+            ]
+        
+        # initial y,ydot (copying just in case)
+        #y = ida.NVector(model.x.copy())
+        #ydot = ida.NVector(model.dx.copy())
+        
+        y = ida.NVector(N.append(model.x.copy(),model.w.copy()))
+        ydot = ida.NVector(N.append(model.dx.copy(),model.w.copy()))
+        
+        # converting tolerances to C types
+        abstol = ida.realtype(self.abstol)
+        reltol = ida.realtype(self.reltol)
+
+        t0 = ida.realtype(start_time)
+        
+        
+        ida_mem = ida.IDACreate()
+        
+        ida.IDAMalloc(ida_mem, self._sundials_res_f, t0, y, ydot, ida.IDA_SS, reltol, abstol)
+        ida.IDADense(ida_mem, len(model.x)+len(model.w))
+
+        # Set f_data
+        data = UserData()
+        data.model = model
+        data.t_sim_start = start_time
+        data.t_sim_end   = end_time
+        data.t_sim_duration = data.t_sim_end - data.t_sim_start
+        
+        self._data = data
+        
+        tout = start_time + time_step
+        if tout>end_time:
+            tout=end_time
+
+        # initial time
+        t = ida.realtype(t0.value)
+
+        # used for collecting the y's for plotting
+        if return_last==False:
+            num_samples = int(math.ceil((end_time - start_time) / time_step)) + 1
+            T = N.zeros(num_samples, dtype=pyjmi.c_jmi_real_t)
+            ylist = N.zeros((num_samples, len(model.x)),
+                            dtype=pyjmi.c_jmi_real_t)
+            ylist[0] = model.x.copy()
+            T[0] = t0.value
+            i = 1
+            
+            
+        while True:
+            # run DAE solver
+            flag = ida.IDASolve(ida_mem, tout, ctypes.byref(t), y, ydot, ida.IDA_NORMAL)    
+
+            if verbose >= self.SCREAM:
+                print "At t = %-14.4e  y =" % t.value, \
+                      ("  %-11.6e  "*len(y)) % tuple(y)
+
+            """Used for return."""
+            if return_last==False:
+                T[i] = t.value
+                ylist[i] = N.array(y[0:len(model.x)])
+                i = i + 1
+                
+            if N.abs(tout-end_time)<=1e-6:
+                break
+
+            if flag == ida.IDA_SUCCESS:
+                tout += time_step
+
+            if tout>end_time:
+                tout=end_time
+
+        if return_last==False:
+            assert i <= num_samples, "Allocated a too small array." \
+                                     " (%s > %s)" % (i, num_samples)
+            num_samples = i
+            ylist = ylist[:num_samples]
+            T = T[:num_samples]
+
+        if verbose >= self.LOUD:
+            # collecting lots of information about the execution and present it
+            print "\nFinal Run Statistics: \n"
+            print "Number of steps                    = %ld"%ida.IDAGetNumSteps(ida_mem)
+            print "Number of residual evaluations     = %ld"%(ida.IDAGetNumResEvals(ida_mem)+ida.IDADenseGetNumResEvals(ida_mem))
+            print "Number of Jacobian evaluations     = %ld"%ida.IDADenseGetNumJacEvals(ida_mem)
+            print "Number of nonlinear iterations     = %ld"%ida.IDAGetNumNonlinSolvIters(ida_mem)
+            print "Number of error test failures      = %ld"%ida.IDAGetNumErrTestFails(ida_mem)
+            print "Number of nonlinear conv. failures = %ld"%ida.IDAGetNumNonlinSolvConvFails(ida_mem)
+            print "Number of root fn. evaluations     = %ld"%ida.IDAGetNumGEvals(ida_mem)
+            print "Gradient" #TODO
+        
+        if return_last:
+            ylist = N.array(y).copy()
+            T = t.value
+        else:
+            ylist = N.array(ylist)
+            T = N.array(T)
+        
+        self._set_solution(T, ylist)

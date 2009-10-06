@@ -10,8 +10,64 @@ import nose
 from jmodelica.tests import load_example_standard_model
 
 from jmodelica.simulation.sundials import SundialsOdeSimulator
+from jmodelica.simulation.sundials import SundialsDAESimulator
 import jmodelica.simulation.sundials as sundials
 import jmodelica.simulation
+
+class TestSundialsDAESimulator:
+    def setUp(self):
+        """Load the test model for DAE."""
+        
+        self.m = load_example_standard_model('Pendulum_pack_Pendulum','Pendulum_pack_no_opt.mo',
+                                                'Pendulum_pack.Pendulum')
+
+        self.simulator = SundialsDAESimulator(self.m,verbosity=4)
+        
+    def test_is_simulator(self):
+        assert isinstance(self.simulator, jmodelica.simulation.Simulator)
+        
+    def test_constructor_parameters(self):
+        """Assert that a couple of different parameters exists in the
+           DAE constructor.
+        """
+        simulator = SundialsDAESimulator(time_step=0.2,
+                                         model=self.m,
+                                         abstol=1e-5,
+                                         reltol=1e-5,
+                                         sensitivity_analysis=True,
+                                         return_last=True,
+                                         start_time=1,
+                                         final_time=20)
+        assert simulator.time_step == 0.2
+        assert simulator.model == self.m
+        assert simulator.abstol == 1e-5
+        assert simulator.reltol == 1e-5
+        #TODO
+        #assert simulator.sensitivity_analysis == True
+        assert simulator.return_last == True
+        assert simulator.get_start_time() == 1
+        assert simulator.get_final_time() == 20
+        
+    def test_simulation(self):
+        """Run a very basic DAE simulation."""
+        
+        simulator = self.simulator
+        x_before_simulation = simulator.get_model().x.copy()
+        simulator.run()
+        Ts, ys = simulator.get_solution()
+        
+        assert len(Ts) == len(ys), "Time points and solution points must be " \
+                                   "equal lengths."
+        assert len(Ts) >= 5, "A solution was expected got less than 5 points."
+        assert not (x_before_simulation==simulator.get_model().x).all(), \
+               "Simulation does seem to have been performed."
+        
+        # Plotting
+        fig = p.figure()
+        p.plot(Ts, ys)
+        p.title('testDAESimulation(...) output')
+        fig.savefig('TestSundialsDAESimulator_test_simulation.png')
+    
 
 class TestSundialsOdeSimulator:
     def setUp(self):
@@ -25,7 +81,7 @@ class TestSundialsOdeSimulator:
         assert isinstance(self.simulator, jmodelica.simulation.Simulator)
         
     def test_constructor_parameters(self):
-        """Assert that a couple of different parameters exists ni the
+        """Assert that a couple of different parameters exists in the
            constructor.
         """
         simulator = SundialsOdeSimulator(time_step=0.2,
@@ -58,7 +114,7 @@ class TestSundialsOdeSimulator:
         assert len(Ts) >= 5, "A solution was expected got less than 5 points."
         assert not (x_before_simulation==simulator.get_model().x).all(), \
                "Simulation does seem to have been performed."
-               
+        
         # Plotting
         fig = p.figure()
         p.plot(Ts, ys)
