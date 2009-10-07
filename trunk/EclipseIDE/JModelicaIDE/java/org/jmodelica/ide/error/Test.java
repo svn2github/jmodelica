@@ -1,19 +1,21 @@
 package org.jmodelica.ide.error;
 
 import org.jmodelica.ide.ModelicaCompiler;
-import org.jmodelica.modelica.compiler.ASTNode;
-import org.jmodelica.modelica.compiler.SourceRoot;
+import org.jmodelica.ide.helpers.Maybe;
+import org.jmodelica.modelica.compiler.StoredDefinition;
+import org.jmodelica.modelica.parser.ModelicaParser;
 
 public class Test {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
     
-        ModelicaCompiler mc = new ModelicaCompiler();
+        ModelicaCompiler mc = new ModelicaCompiler(
+                Maybe.Just(new ModelicaParser.CollectingReport()));
         
-        SourceRoot root = mc.compileFileAt("test.mo");        
+        StoredDefinition root = mc.compileFileAt("test.mo");        
         
-        for (ASTNode<?> node : root.getProgram())
-            node.printASTqq("");
+        root.printDebugInfo();
+
     }
     
 }

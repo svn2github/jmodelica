@@ -14,10 +14,12 @@ public class CompletionComment extends Maybe<String> {
 // type erasure sucks
 public final static CompletionComment NULL = new CompletionComment(null);
 
-public CompletionComment(String str) { super(str); }
+public CompletionComment(String str) { 
+    super(str); 
+}
 
 public String toString() {
-    return isNothing() ? "" : "  -  " + value;
+    return isNothing() ? "" : " - " + value;
 }
 
 }

@@ -23,7 +23,7 @@ import org.jmodelica.ide.editor.editingstrategies.CommentAdder;
 import org.jmodelica.ide.editor.editingstrategies.EndOfBlockAdder;
 import org.jmodelica.ide.editor.editingstrategies.KeywordAdder;
 import org.jmodelica.ide.indent.IndentingAutoEditStrategy;
-import org.jmodelica.ide.namecomplete.Completions;
+import org.jmodelica.ide.namecomplete.CompletionProcessor;
 import org.jmodelica.ide.scanners.ModelicaCommentScanner;
 import org.jmodelica.ide.scanners.ModelicaQIdentScanner;
 import org.jmodelica.ide.scanners.ModelicaStringScanner;
@@ -39,7 +39,7 @@ import org.jmodelica.ide.scanners.ModelicaStringScanner;
 public class ViewerConfiguration extends SourceViewerConfiguration {
 
 final Editor editor;
-final Completions completions;
+final CompletionProcessor completions;
 
 public ViewerConfiguration(Editor editor) {
     this.editor = editor;

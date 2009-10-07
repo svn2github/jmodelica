@@ -63,4 +63,20 @@ public static String getLine(IDocument doc, int offset) {
     } 
 }
 
+public static IDocument replaceLineAt(
+        IDocument doc, 
+        int offset, 
+        String subs) 
+{
+    
+    try {
+        int start = lineStartOffsetOfOffset(doc, offset);
+        int end = lineEndOffsetOfOffset(doc, offset);
+        doc.replace(start, end - start, subs);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    
+    return doc;
+}
 }

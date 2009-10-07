@@ -20,7 +20,7 @@ import org.eclipse.core.resources.IResource;
 import org.jastadd.plugin.compiler.ast.IError;
 
 import org.jmodelica.ide.helpers.Util;
-import org.jmodelica.modelica.parser.ModelicaScanner;
+import org.jmodelica.modelica.parser.ModelicaScanner; 
 import org.jmodelica.modelica.parser.ModelicaScanner.Symbol;
 
 public class CompileError implements IError {

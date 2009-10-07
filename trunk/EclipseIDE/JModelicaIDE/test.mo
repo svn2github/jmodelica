@@ -1,9 +1,9 @@
 model m
 	Real r;
 	Int i;
+	
+	class q
+		Real real real;
+	end q;
+	
 end m;
-
-model q
-	Real r;
-	Int i;
-end q;

@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jmodelica.ide;
-
+ 
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -32,20 +32,28 @@ import org.jastadd.plugin.compiler.ast.IASTNode;
 import org.jmodelica.ide.helpers.DocumentReader;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.modelica.compiler.ASTNode;
-import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
-
+import org.jmodelica.modelica.parser.ModelicaParser;
 
 public class ModelicaCompiler extends AbstractCompiler {
 
 public static final String ERROR_MARKER_ID = IDEConstants.ERROR_MARKER_ID;
+public final Maybe<? extends ModelicaParser.Report> report;
+
+public ModelicaCompiler() { 
+    this(Maybe.<ModelicaParser.Report>Nothing());
+}
+
+public ModelicaCompiler(Maybe<? extends ModelicaParser.Report> report) {
+    this.report = report;
+}
 
 @Override
 protected IASTNode compileToProjectAST(IProject project,
         IProgressMonitor monitor) {
-    return recursiveCompile(new CompilationRoot(), project, monitor).root();
+    return recursiveCompile(new CompilationRoot(report), project, monitor).root();
 }
-
+ 
 private CompilationRoot recursiveCompile(
         CompilationRoot lasr, 
         IContainer parent,
@@ -75,9 +83,7 @@ private CompilationRoot recursiveCompile(
         }
         
     } catch (CoreException e) {
-        
         e.printStackTrace();
-        
     }
     
     return lasr;
@@ -87,7 +93,7 @@ private CompilationRoot recursiveCompile(
 public IASTNode compileToAST(IDocument document, DirtyRegion dirtyRegion,
         IRegion region, IFile file) {
     
-    return new CompilationRoot().parseFile(
+    return new CompilationRoot(report).parseFile(
             new DocumentReader(document), 
             file,
             file.getRawLocation().toOSString())
@@ -100,17 +106,23 @@ public Maybe<ASTNode<?>> recompile(IDocument doc, IFile file) {
             compileToAST(doc, null, null, file));
 }
 
+public StoredDefinition recompile(String doc) {
+    return new CompilationRoot(report)
+        .parseDoc(doc)
+        .getStoredDefinition();
+}
+
 @Override
 protected IASTNode compileToAST(IFile file) {
     return compileFile(file, file.getRawLocation().toOSString());
 }
 
-public SourceRoot compileFileAt(String path) {
-    return new CompilationRoot().parseFileAt(path).root();
+public StoredDefinition compileFileAt(String path) {
+    return new CompilationRoot(report).parseFileAt(path).getStoredDefinition();
 }
 
 public ASTNode<?> compileFile(IFile file, String path) {
-    return new CompilationRoot().parseFile(file, path)
+    return new CompilationRoot(report).parseFile(file, path)
             .getStoredDefinition();
 }
 

@@ -18,11 +18,8 @@ package org.jmodelica.ide.outline;
 import java.util.ArrayList;
 
 import org.jastadd.plugin.ui.view.JastAddContentProvider;
-import org.jmodelica.modelica.compiler.ClassDecl;
-import org.jmodelica.modelica.compiler.Element;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstProgramRoot;
-import org.jmodelica.modelica.compiler.Program;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
@@ -30,25 +27,35 @@ public class InstanceOutlineContentProvider extends JastAddContentProvider {
 
 	@Override
 	public Object[] getElements(Object element) {
-		if (element instanceof StoredDefinition) {
-			try {
-				StoredDefinition def = (StoredDefinition) element;
-				Program program = ((SourceRoot) def.root()).getProgram();
-				ArrayList<ClassDecl> classes = new ArrayList<ClassDecl>();
-				for (Element e : def.getElements()) 
-					classes.add((ClassDecl) e);
-				ArrayList<InstClassDecl> instClasses = program.getInstProgramRoot().instClassDecls();
-				ArrayList<InstClassDecl> list = new ArrayList<InstClassDecl>();
-				for (InstClassDecl inst : instClasses) {
-					if (classes.contains(inst.getClassDecl()))
-						list.add(inst);
-				}
-				return list.toArray();
-			} catch (Exception e) {
-				return new Object[0];
-			}
+	
+	    if (!(element instanceof StoredDefinition)) 
+		    return 
+		        super.getElements(element);
+		
+	    try {
+	        
+			StoredDefinition def = 
+			    (StoredDefinition) element;
+			
+			SourceRoot root = 
+			    (SourceRoot) def.root();
+			
+			ArrayList<?> classDecls = 
+			    root
+			    .getProgram()
+			    .getInstProgramRoot()
+			    .instClassDecls();
+			
+			return 
+			    def
+			    .getElements()
+			    .retainAll(classDecls)
+			    .toArray();
+			
+		} catch (Exception e) {
+			return 
+			    new Object[0];
 		}
-		return super.getElements(element);
 	}
 
 	@Override

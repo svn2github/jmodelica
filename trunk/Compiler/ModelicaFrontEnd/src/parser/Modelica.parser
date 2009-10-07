@@ -145,7 +145,7 @@
 	    lineBreakMap = map;
 	}
 
- public String removeWhitespace(String str) {
+	public String removeWhitespace(String str) {
 		String str_res = str;
     	str_res = str_res.replaceAll("\\r", "");
     	str_res = str_res.replaceAll("\\n", "");
@@ -155,119 +155,121 @@
 
 :};
  
-SourceRoot source_root = 
-           {: SourceRoot sr = new SourceRoot(new Program(new List())); 
+SourceRoot source_root
+    = /* nothing */ {: 
+        SourceRoot sr = new SourceRoot(new Program(new List()));
+        return sr; 
+      :}
+   | program {: 
+       SourceRoot sr = new SourceRoot(program); 
+       return sr; 
+   :};
 
-             return sr; :}
-  |program {: SourceRoot sr = new SourceRoot(program); 
-
-             return sr; :}
-  ;
-
-Program program =
-  stored_definition   {: return new Program(new List().add(stored_definition)); :}
-  ;
+Program program
+    = stored_definition   {: 
+        return new Program(new List().add(stored_definition)); 
+    :};
   
-StoredDefinition stored_definition =
-    within?  
-    base_class_decl_list                        {: StoredDefinition def = new StoredDefinition(within, base_class_decl_list);
-                                                   def.setLineBreakMap(lineBreakMap);
-    											   return def; :}
-  | error										{: return new BadDefinition(); :} 
-  ;
+StoredDefinition stored_definition
+    = within? base_class_decl_list {:
+        StoredDefinition def = new StoredDefinition(within, base_class_decl_list);
+        def.setLineBreakMap(lineBreakMap);
+    	return def; 
+    :}
+    | error {: 
+        return new BadDefinition(); 
+    :};
 
-Within within =
-  WITHIN parse_access? SEMICOLON {: return new Within(parse_access); :}
-  ;
+Within within
+    = WITHIN parse_access? SEMICOLON {: 
+        return new Within(parse_access); 
+    :};
   
-List base_class_decl_list = 
-  base_class_decl SEMICOLON                       {: return new List().add(base_class_decl); :}
-  | base_class_decl_list base_class_decl   SEMICOLON {: base_class_decl_list.add(base_class_decl);
-                                         return base_class_decl_list; :}
-  ;
+List base_class_decl_list  
+    = base_class_decl SEMICOLON {: 
+        return new List().add(base_class_decl); 
+    :}
+    | base_class_decl_list base_class_decl SEMICOLON {: 
+        base_class_decl_list.add(base_class_decl);
+        return base_class_decl_list; 
+    :};
 
-BaseClassDecl base_class_decl =               
-  encapsulated? 
-  partial? 
-  restriction  
-  id_decl.start 
-  string_comment? 
-  composition 
-  END_ID.end   {:   String end_s = end.substring(3,end.length());
-	                end_s = removeWhitespace(end_s);
-                 return new PN_FullClassDecl(new UnknownVisibilityType(),
-                                             encapsulated,
-                                             partial,
-                                             restriction,
-                                             start,
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             string_comment,
-                                             composition,
-                                             end_s); :}
-  |encapsulated? 
-  partial? 
-  restriction  
-  id_decl.class_name ASSIGN
-  type_prefix_flow?
-  type_prefix_variability?
-  type_prefix_input_output?
-  class_access/*name*/
-  array_subscripts?
-  class_modification?
-  comment {:        return new PN_ShortClassDecl(new UnknownVisibilityType(),
-                                             encapsulated,
-                                             partial,
-                                             restriction,
-                                             class_name,
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             type_prefix_flow,
-                                             type_prefix_variability,
-                                             type_prefix_input_output,
-                                             class_access,
-                                             array_subscripts,
-                                             class_modification,
-                                             comment); :}     
-  |encapsulated? 
-  partial? 
-  restriction 
-  EXTENDS 
-  id_decl.start 
-  class_modification?
-  string_comment? 
-  composition 
-  END_ID.end   {:   //System.out.println("Hej");
-                       String end_s = end.substring(3,end.length());
-	                end_s = removeWhitespace(end_s);
-                    return new ExtendClassDecl(new UnknownVisibilityType(),
-                                             encapsulated,
-                                             partial,
-                                             restriction,
-                                             start,
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             new Opt(),
-                                             class_modification,
-                 							 string_comment,
-                                             composition,
-                                             end_s); :}  
-  | error		{: return new BadClassDecl(); :}      
-  ;
+BaseClassDecl base_class_decl 
+    =               
+    encapsulated? 
+    partial? 
+    restriction  
+    id_decl.start 
+    string_comment? 
+    composition 
+    END_ID.end   {:   
+        String end_s = end.substring(3,end.length());
+        end_s = removeWhitespace(end_s);
+        return new PN_FullClassDecl(
+            new UnknownVisibilityType(),
+            encapsulated,
+            partial,
+            restriction,
+            start,
+            new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(),
+            string_comment,
+            composition,
+            end_s); 
+    :}
+    |
+    encapsulated? 
+    partial? 
+    restriction  
+    id_decl.class_name ASSIGN
+    type_prefix_flow?
+    type_prefix_variability?
+    type_prefix_input_output?
+    class_access /*name*/
+    array_subscripts?
+    class_modification?
+    comment {:
+        return new PN_ShortClassDecl(
+            new UnknownVisibilityType(),
+            encapsulated, 
+            partial, 
+            restriction, 
+            class_name, 
+            new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(),
+            type_prefix_flow, 
+            type_prefix_variability, 
+            type_prefix_input_output, 
+            class_access,
+            array_subscripts, 
+            class_modification, 
+            comment); 
+    :}
+    |
+    encapsulated? 
+    partial? 
+    restriction 
+    EXTENDS 
+    id_decl.start 
+    class_modification?
+    string_comment? 
+    composition 
+    END_ID.end {:
+        String end_s = end.substring(3,end.length());
+	    end_s = removeWhitespace(end_s);
+        return new ExtendClassDecl(
+            new UnknownVisibilityType(),
+            encapsulated,
+            partial,
+            restriction,
+            start,
+            new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(),
+            class_modification,
+            string_comment,
+            composition,
+            end_s); 
+  :}  
+  | error {: 
+      return new BadClassDecl(); 
+  :};
 
 Partial partial = 
   PARTIAL {: return new Partial(); :}
@@ -342,10 +344,13 @@ List composition_clauses =
   ;
 
 
-List elements =
-    element      {: return new List().add(element); :} 
-   | elements element                      {: return elements.add(element); :}
-   ;
+List elements
+    = element {:
+        return new List().add(element); 
+    :} 
+    | elements element {: 
+        return elements.add(element);
+    :};
 
 Clause composition_clause =  
    PUBLIC            {: return new PublicElementList(new List()); :}
@@ -391,34 +396,45 @@ ParseAccess parse_access_eq =
    	;
 
 	
-Element element = 
-   redeclare? 
-   final_? 
-   inner? 
-   outer? 
-   base_class_decl SEMICOLON {: base_class_decl.setRedeclareOpt(redeclare);
-                                   base_class_decl.setFinalOpt(final_);   
-                                   base_class_decl.setInnerOpt(inner);
-                                   base_class_decl.setOuterOpt(outer);
-                                   return base_class_decl; :}
-  |redeclare? 
-   final_? 
-   inner? 
-   outer? 
-   replaceable
-   base_class_decl
-   constraining_clause? 
-   comment SEMICOLON   {: base_class_decl.setRedeclareOpt(redeclare);
-                           base_class_decl.setFinalOpt(final_);   
-                           base_class_decl.setInnerOpt(inner);
-                           base_class_decl.setOuterOpt(outer);
-                           base_class_decl.setReplaceableOpt(new Opt(replaceable));
-                           base_class_decl.setConstrainingClauseOpt(constraining_clause);
-                           base_class_decl.setConstrainingClauseComment(comment);
-                           return base_class_decl;  :}  
-  | extends_clause SEMICOLON                {: return extends_clause; :}
-  | import_clause SEMICOLON                  {: return import_clause; :}
-  | redeclare? 
+Element element 
+    = 
+    redeclare? 
+    final_? 
+    inner? 
+    outer? 
+    base_class_decl SEMICOLON {: 
+        base_class_decl.setRedeclareOpt(redeclare);
+        base_class_decl.setFinalOpt(final_);   
+        base_class_decl.setInnerOpt(inner);
+        base_class_decl.setOuterOpt(outer);
+        return base_class_decl;
+    :}
+    |
+    redeclare? 
+    final_? 
+    inner? 
+    outer? 
+    replaceable
+    base_class_decl
+    constraining_clause? 
+    comment SEMICOLON {: 
+        base_class_decl.setRedeclareOpt(redeclare);
+        base_class_decl.setFinalOpt(final_);   
+        base_class_decl.setInnerOpt(inner);
+        base_class_decl.setOuterOpt(outer);
+        base_class_decl.setReplaceableOpt(new Opt(replaceable));
+        base_class_decl.setConstrainingClauseOpt(constraining_clause);
+        base_class_decl.setConstrainingClauseComment(comment);
+        return base_class_decl;  
+    :}  
+    | extends_clause SEMICOLON {: 
+        return extends_clause;
+    :}
+    | import_clause SEMICOLON {: 
+        return import_clause;
+    :}
+    |
+    redeclare? 
     final_? 
     inner? 
     outer? 
@@ -428,19 +444,22 @@ Element element =
     class_access/*name*/ 
     array_subscripts? 
     component_list 
-    SEMICOLON {: return new PN_ComponentClause(redeclare,
-                                               final_,
-                                               inner,
-                                               outer,
-                                               new Opt(),
-                                               type_prefix_flow,
-                                               type_prefix_variability,
-                                               type_prefix_input_output,
-                                               class_access,
-                                               array_subscripts,
-                                               component_list,
-                                               new Opt(),
-                                               new Comment(new Opt(), new Opt())); :}
+    SEMICOLON {:
+        return new PN_ComponentClause(
+            redeclare,
+            final_,
+            inner,
+            outer,
+            new Opt(),
+            type_prefix_flow,
+            type_prefix_variability,
+            type_prefix_input_output,
+            class_access,
+            array_subscripts,
+            component_list,
+            new Opt(),
+            new Comment(new Opt(), new Opt()));
+  :}
   | redeclare? 
     final_? 
     inner? 
@@ -454,18 +473,21 @@ Element element =
     component_list 
     constraining_clause? 
     comment 
-    SEMICOLON {: return new PN_ComponentClause(redeclare,
-                                               final_,
-                                               inner,
-                                               outer,
-                                               new Opt(replaceable),
-                                               type_prefix_flow,
-                                               type_prefix_variability,
-                                               type_prefix_input_output,
-                                               class_access,
-                                               array_subscripts,
-                                               component_list,
-                                               constraining_clause,comment); :}
+    SEMICOLON {: 
+        return new PN_ComponentClause(
+            redeclare,
+            final_,
+            inner,
+            outer,
+            new Opt(replaceable),
+            type_prefix_flow,
+            type_prefix_variability,
+            type_prefix_input_output,
+            class_access,
+            array_subscripts,
+            component_list,
+            constraining_clause,comment); 
+  :}
   | annotation SEMICOLON                  {: return new ElementAnnotation(annotation); :} 
   | error SEMICOLON						  {: return new BadElement(); :}
   ;

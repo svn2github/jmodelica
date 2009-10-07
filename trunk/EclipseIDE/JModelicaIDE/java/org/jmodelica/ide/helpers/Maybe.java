@@ -16,8 +16,7 @@ public class Maybe<E> {
 
     public static <T> Maybe<T> Just(T t) {
         
-        assert t != null : 
-            "Null unexpected. Use .newM(E e) if that behaviour desired.";
+        assert t != null;
         
         return new Maybe<T>(t); 
     }

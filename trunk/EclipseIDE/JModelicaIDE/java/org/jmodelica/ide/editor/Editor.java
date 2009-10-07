@@ -61,7 +61,7 @@ import org.jmodelica.ide.editor.actions.ToggleAnnotationsAction;
 import org.jmodelica.ide.editor.actions.ToggleComment;
 import org.jmodelica.ide.folding.AnnotationDrawer;
 import org.jmodelica.ide.helpers.Util;
-import org.jmodelica.ide.namecomplete.Completions;
+import org.jmodelica.ide.namecomplete.CompletionProcessor;
 import org.jmodelica.ide.outline.InstanceOutlinePage;
 import org.jmodelica.ide.outline.OutlinePage;
 import org.jmodelica.ide.outline.SourceOutlinePage;
@@ -87,7 +87,7 @@ private EditorFile file;
 private final ErrorCheckAction errorCheckAction;
 private final ToggleAnnotationsAction toggleAnnotationsAction;
 private final GoToDeclaration goToDeclaration;
-private final Completions completions;
+private final CompletionProcessor completions;
 
 /**
  * Standard constructor.
@@ -96,7 +96,7 @@ public Editor() {
     super();
     fSourceOutlinePage = new SourceOutlinePage(this);
     fInstanceOutlinePage = new InstanceOutlinePage(this);
-    completions = new Completions(this);
+    completions = new CompletionProcessor(this);
     goToDeclaration = new GoToDeclaration(this);
     errorCheckAction = new ErrorCheckAction();
     fPartitioner = new FastPartitioner(new Modelica22PartitionScanner(),
@@ -408,7 +408,7 @@ public IReconcilingStrategy strategy() {
     return compResult.compilationStrategy();
 }
 
-public Completions completions() {
+public CompletionProcessor completions() {
     return completions;
 }
 

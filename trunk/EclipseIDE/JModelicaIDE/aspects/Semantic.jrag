@@ -158,9 +158,7 @@ aspect Semantic {
      * Completion proposals for InstComponentDecl:s are only components. 
      */
     eq InstComponentDecl.completionNodes(boolean includeRenamedImports) {
-        System.out.printf("came here %s\n", this);
-        System.out.printf("came here %s\n", myInstClass());
-        
+       
         ArrayList<CompletionNode> nodes = new ArrayList<CompletionNode>();
         for (CompletionNode c : myInstClass().completionNodes(includeRenamedImports)) {
             if (c instanceof InstComponentDecl)
@@ -190,6 +188,13 @@ aspect Semantic {
         return proposals;
     }
 
+    /**
+     * Dynamically add a StoredDefintion to Program
+     */
+    public void Program.dynamicAddStoredDefinition(StoredDefinition def) {
+        def.setParent(this);
+        //this.addUnstructuredEntity(def);
+    }
 }
 
 /**
@@ -236,16 +241,17 @@ aspect CrossReference {
 //TODO: remove. only for debugging
 aspect NADebugging {    
     
-    public void ASTNode.debugPrintThis(String ind) {
-        System.out.printf("%s%s: (%d,%d)-(%d,%d), (%d-%d)\n", ind, 
-                this.getNodeName(), 
-                this.getBeginLine(),   this.getBeginColumn(),
-                this.getEndLine(),     this.getEndColumn(),
-                this.getBeginOffset(), this.getEndOffset());
+    private void ASTNode.debugPrintThis(String ind) {
+        System.out.printf("%s%s:\n", ind, this.getNodeName());
+    }
+    
+    public void ASTNode.printDebugInfo() {
+        this.printDebugInfo("");
     }
     
     public void ASTNode.printDebugInfo(String ind) {
         this.debugPrintThis(ind);
+        
         for (ASTNode node : this) 
             node.printDebugInfo(ind + "  ");
     }
@@ -259,5 +265,6 @@ aspect NADebugging {
         for (ASTNode node : this) 
             node.printDebugInfo(ind + "  ");
     }
-  
+    
 }
+

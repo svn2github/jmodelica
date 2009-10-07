@@ -43,7 +43,7 @@ public static Maybe<Editor> getModelicaEditorForFile(IFile file) {
     
     return Maybe.Just(part);
 }
-
+    
 public static IFile getFileForPath(String path) {
     
     if (path == null)
