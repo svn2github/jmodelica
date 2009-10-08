@@ -76,5 +76,10 @@ aspect FlatTypeCheck {
 		  }
 	  }
   }
+
+  
+  public void InstComponentAccess.typeCheck() {
+	//  System.out.println("InstComponentAccess.typeCheck: " + printSlice());
+  }
   
 }

@@ -87,7 +87,9 @@ aspect Arrays {
 	
 	eq InstDot.ndims() = getRight().ndims() + getLeft().ndims();
 	
-	syn int InstComponentDecl.ndims() = hasFArraySubscripts()? 
+	syn int InstNode.ndims() = 0;
+	
+	eq InstComponentDecl.ndims() = hasFArraySubscripts()? 
 			getFArraySubscripts().ndims(): 0;
 
 	syn int FVariable.ndims() = getFQName().ndims();
@@ -228,7 +230,9 @@ aspect Arrays {
 		return s;
 	}
 	
-	syn int[] InstComponentDecl.size() = hasFArraySubscripts()? 
+	syn int[] InstNode.size() = new int[0];
+	
+	eq InstComponentDecl.size() = hasFArraySubscripts()? 
 			getFArraySubscripts().size(): new int[0];
 
 	syn int[] FVariable.size() = getFQName().size();
@@ -244,10 +248,18 @@ aspect Arrays {
 				
 	syn boolean FExp.isArray() = ndims()>0;
 	syn boolean FVariable.isArray() = ndims()>0;
-	syn boolean InstPrimitive.isArray() = ndims()>0;
+	syn boolean InstNode.isArray() = ndims()>0;
 
 	// Computation of Arrays from expressions
-	syn nta FArray FExp.array() = null;
+	syn nta FArray FExp.array() {
+		if (!isArray()) {
+			FArray a = new FArray();
+			a.addFExp((FExp)this.fullCopy());
+			return a;
+		} else {
+			return new FArray();
+		}
+	}
 	
 	syn FArray FSubscript.array() = null;
 	
@@ -263,12 +275,10 @@ aspect Arrays {
 		
 		List l = new List();
 		for (int i=0;i<size()[0];i++) {
-			l.add(new RealLitExp(i1 + i*i2 + ""));
+			l.add(new FRealLitExp(i1 + i*i2 + ""));
 		}
 		
 		return new FArray(l);
-		
 	}
-	
 	
 }

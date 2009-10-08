@@ -55,26 +55,34 @@ aspect InstLookupComponents {
 		return h;
 	 }
 	
-	
 	syn lazy HashSet InstNode.memberInstComponent(String name)  {
 
-	 	HashSet set = new HashSet(4);
+		if (isArray()) {
+			int ndims = ndims();
+			InstNode n = getInstComponentDecl(0);
+			for (int i=0;i<ndims-1;i++) {
+				n = n.getInstComponentDecl(0);
+			}
+			return n.memberInstComponent(name);
+			
+		} else {	
+			HashSet set = new HashSet(4);
 		 	
-		for (InstComponentDecl ic : constrainingInstComponentDecls()) {
-			if (ic.matchInstComponentDecl(name))
-				set.add(ic);
-		}
+			for (InstComponentDecl ic : constrainingInstComponentDecls()) {
+				if (ic.matchInstComponentDecl(name))
+					set.add(ic);
+			}
 
-		for (InstExtends ie : constrainingInstExtends()) {
-			set.addAll(ie.memberInstComponent(name));
-		}
+			for (InstExtends ie : constrainingInstExtends()) {
+				set.addAll(ie.memberInstComponent(name));
+			}
 		
-		if (set.size()>0) {
-			return set;
-		} else {
-			return emptyHashSet();
+			if (set.size()>0) {
+				return set;
+			} else {
+				return emptyHashSet();
+			}
 		}
-		
 	}
 
 	// This is needed since the member components of InstPrimitive:s (which are attributes)
@@ -131,14 +139,40 @@ aspect InstLookupComponents {
 
 aspect LookupInstComponentSlices {
 	
-	syn InstComponentDecl[] InstComponentAccess.slice() {
+	syn lazy InstComponentDecl[] InstAccess.slice() = new InstComponentDecl[0];
+	
+	eq InstComponentAccess.slice() {
 		
 		// Access refers to scalar declaration or, access has no array 
 		// subscripts but refers to array declaration
 		if (!hasFArraySubscripts()) {
-			return myInstComponentDecl().slice();
+			ArrayList<InstComponentDecl> slice = 
+				new ArrayList<InstComponentDecl>();
+			InstComponentDecl[] decls = myInstComponentDecls();
+			for (int i=0;i<decls.length;i++) {
+				InstComponentDecl[] slice_tmp = 
+					decls[i].slice(); 
+				for (int j=0;j<slice_tmp.length;j++) {
+					slice.add(slice_tmp[j]);
+				}
+			}
+			InstComponentDecl[] slice_array = new InstComponentDecl[slice.size()];
+			slice.toArray(slice_array);
+			return slice_array;
 		} else { // Access has array subscripts
-			return myInstComponentDecl().slice(getFArraySubscripts());
+			ArrayList<InstComponentDecl> slice = 
+				new ArrayList<InstComponentDecl>();
+			InstComponentDecl[] decls = myInstComponentDecls();
+			for (int i=0;i<decls.length;i++) {
+				InstComponentDecl[] slice_tmp = 
+					decls[i].slice(getFArraySubscripts()); 
+				for (int j=0;j<slice_tmp.length;j++) {
+					slice.add(slice_tmp[j]);
+				}
+			}
+			InstComponentDecl[] slice_array = new InstComponentDecl[slice.size()];
+			slice.toArray(slice_array);
+			return slice_array;
 		}
 	}
 
@@ -150,24 +184,101 @@ aspect LookupInstComponentSlices {
 		} else { // Array declaration: return all "leaf" InstArrayComponentDecls
 			int size[] = size();
 			int n_s = 1;
+			// Compute the number of InstComponentDecls to return
 			for (int i=0;i<size.length;i++) {
 				n_s = n_s*size[i];
 			}
-			InstComponentDecl s[] = new InstComponentDecl[n_s];
-			return s;			
+			// Create vector of InstComponentDecls
+			InstComponentDecl icds[] = new InstComponentDecl[n_s];
+			// The current InstComponentDecl has n_s children of type
+			// InstArrayComponentDecl. Each sub-AST consists of a chain of
+			// size.length InstArrayComponentDecls where each such node has 
+			// exactly one child, exept the last ones. The slice operation collects all 
+			// InstArrayComponentDecls that are at the end of each sub-AST
+			// chain.
+			for (int i=0;i<n_s;i++) {
+				icds[i] = getInstComponentDecl(i);
+				for (int j=0;j<size.length-1;j++) {
+					icds[i] = icds[i].getInstComponentDecl(0);
+				}
+			}
+			return icds;			
 		}
 	}
 
 	syn lazy InstComponentDecl[] InstComponentDecl.slice(FArraySubscripts fas) {
-		int size[] = fas.size();
-		int n_s = 1;
-		for (int i=0;i<size.length;i++) {
-			n_s = n_s*size[i];
+		int ndims = ndims(); // Number of dimensions of decl
+		// Create an ArrayList first, then convert to array
+		ArrayList<InstComponentDecl> decls = new ArrayList<InstComponentDecl>();
+		// Loop over all dimensions
+		decls.add(this);
+		for (int i=0;i<ndims;i++) {
+			ArrayList<InstComponentDecl> decls_tmp = 
+				new ArrayList<InstComponentDecl>();
+			// Get the array of indices
+			FArray indices = fas.getFSubscript(i).array();
+			// Loop over all declarations
+			for (InstComponentDecl decl : decls) {
+				// Loop over all indices
+				for (FExp ind_exp : indices.getFExps()) {
+					// TODO: add check that a value is returned
+					int index = ind_exp.ceval().intValue();
+					// TODO: check that value is inside of the bounds
+					decls_tmp.add(decl.getInstComponentDecl(index-1));
+				}
+			}	
+			decls = decls_tmp;
 		}
-		InstComponentDecl s[] = new InstComponentDecl[n_s];
-	
-		return s;		
+		InstComponentDecl[] decls_array = new InstComponentDecl[decls.size()];
+		decls.toArray(decls_array);
+		return decls_array;
 	}
+	
+	inh lazy InstComponentDecl[] InstAccess.predSlice();
+	eq InstDot.getRight().predSlice() = getLeft().slice();
+	eq Root.getChild().predSlice() = null;
+	
+	syn String InstAccess.printSlice() = "{}";
+	eq InstComponentAccess.printSlice() {
+		InstComponentDecl[] slice = slice();
+		StringBuffer str = new StringBuffer();
+		str.append("{");
+		for (int i=0;i<slice.length;i++) {
+			str.append(slice[i].name() + ", ");
+		}
+		str.append("}");
+		return str.toString();
+	}
+}
+
+aspect LookupInstComponents {
+
+	syn lazy InstComponentDecl[] InstAccess.myInstComponentDecls() = 
+		new InstComponentDecl[0];
+	
+	eq InstComponentAccess.myInstComponentDecls() {
+		InstComponentDecl[] predSlice = predSlice();
+		if (!myInstComponentDecl().isArray() || predSlice==null) { // Scalar variable
+			InstComponentDecl[] decls = new InstComponentDecl[1];
+			decls[0] = myInstComponentDecl();
+			return decls;
+		} else {
+			InstComponentDecl[] decls = new InstComponentDecl[predSlice.length];
+			for (int i=0;i<predSlice.length;i++) {
+				HashSet<InstComponentDecl> set = 
+					predSlice[i].memberInstComponent(name());
+				if (set.size() != 1) {
+					InstComponentDecl[] decls2 = new InstComponentDecl[1];
+					decls2[0] = unknownInstComponentDecl();
+					return decls2;
+				} else {
+					decls[i] = set.iterator().next();
+				}
+			}
+			return decls;
+		}
+	}
+		
 }
 
 aspect LookupInstComponentsInModifications {

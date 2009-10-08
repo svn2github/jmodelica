@@ -463,6 +463,11 @@ public class ModelicaCompiler {
 	   
 	   	logger.info("...raw .mof file created.");
 
+		if(getLogLevel("JModelica.ModelicaCompiler").equals("INFO")) {
+			logger.info("Raw flattened model:");		
+			System.out.print(fc.prettyPrint(""));
+		}
+	   	
 		fc.transformCanonical();
 
 		Collection<Problem> problems = fc.errorCheck();

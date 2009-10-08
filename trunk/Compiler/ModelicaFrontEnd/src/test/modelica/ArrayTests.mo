@@ -216,6 +216,67 @@ Semantic error at line 213, column 9:
 
 end ArrayTest15_Err;
 
+  model ArrayTest16
+    model M
+      Real x[2,1,1,1];
+    end M;
+    M m[2,1,2];
+  equation
+    m[1].x[1] = 1;
+    m[1].x[2] = 2;
+    m[2].x[1] = 3;
+    m[2].x[2] = 4;
+  end ArrayTest16;
+
+
+model ArrayTest17
+  model N
+    model M
+      Real x[2];
+    end M;
+    M m[2,1];
+  end N;
+  N n[2];
+  equation
+//  n.m.x=1;
+  n.m.x[1]={{{1}},{{2}},{{3}},{{4}}};  
+
+end ArrayTest17;
+
+model ArrayTest18_Err
+  Real x[1];
+equation
+  x[1] = 1;
+  x[2] = 2;  
+end ArrayTest18_Err;
+
+model ArrayTest19_Err
+  model N
+    model M
+      Real x[2];
+    end M;
+    M m[2,1];
+  end N;
+  N n[2];
+  equation
+
+  n[3].m[1,1].x[1] = 1;
+
+end ArrayTest19_Err;
+
+model ArrayTest20_Err
+  model N
+    model M
+      Real x[2];
+    end M;
+    M m[2];
+  end N;
+  N n[2];
+  equation
+
+  n[2].m[1].x[0] = 1;
+
+end ArrayTest20_Err;
 
   annotation (uses(Modelica(version="3.0.1")));
-end ArrayTest;
+end ArrayTests;

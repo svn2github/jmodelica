@@ -1306,6 +1306,29 @@ aspect InstanceDumpTree {
 	   //str.append(constrainingType().toString());
 	   return str.toString();	
 	}
+	
+	public String InstArrayComponentDecl.toString() {
+		return toString("");
+    }
+    
+	public String InstArrayComponentDecl.toString(String indent) {
+	   StringBuffer str = new StringBuffer();
+	   str.append(indent+" InstArrayComponent ("+ getIndex() + "):\n");
+	   str.append(indent+" Original decl:  " + getComponentDecl().prettyPrint("") + "\n");
+       str.append(indent+ " "+ getClassName().toString());
+	   str.append(indent+" myEnvironment():\n");
+	   str.append(myEnvironment().toString(indent+" "));
+	   str.append(indent+" myEnvironment('"+name()+"'):\n");
+	   str.append(myEnvironment(name()).toString(indent+" "));
+	   str.append(indent+" mergedEnvironment():\n");
+	   str.append(getMergedEnvironment().toString(indent+" "));
+	   //str.append(" Declared type:\n");
+	   //str.append(declaredType().toString());
+	   //str.append(" Constraining type:\n");
+	   //str.append(constrainingType().toString());
+	   return str.toString();	
+	}
+	
 
   
 	public String InstReplacingComposite.toString() {
