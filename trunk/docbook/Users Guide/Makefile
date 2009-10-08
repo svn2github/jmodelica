@@ -1,6 +1,6 @@
 # Copy this template to your docbook project directory and rename to Makefile.
 # Set the DOC variable to the document name (the prefix of your docbook xml file, exclude the .xml suffix):
-DOC=JModelica-UG
+DOC=JModelicaUsersGuide
 XSLHTMLSTYLE=$(DOCBOOK_HOME)/html/docbook.xsl
 XSLPDFSTYLE=$(DOCBOOK_HOME)/fo/docbook.xsl
 XSLHTMLHELPSTYLE=$(DOCBOOK_HOME)/htmlhelp/htmlhelp.xsl
