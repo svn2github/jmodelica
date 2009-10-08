@@ -251,6 +251,14 @@ public class OptionRegistry {
 			}
 		}
 		
+		public String getDescription(String key){
+			Option o = optionsMap.get(key);
+			if(o == null) {
+				throw new UnknownOptionException("Unknown option: "+key);
+			}
+			return o.getDescription();
+		}
+		
 		public Set<Map.Entry<String, Option>> getAllOptions() {
 			return this.optionsMap.entrySet();
 		}

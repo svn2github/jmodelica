@@ -322,7 +322,16 @@ def test_setget_string_option_error():
     """ Test that string option getter raises the proper error. """
     option = 'nonexist_real'
     #try to get an unknown option
-    nose.tools.assert_raises(jm.compiler.UnknownOptionError, mc.get_string_option, option)    
+    nose.tools.assert_raises(jm.compiler.UnknownOptionError, mc.get_string_option, option) 
+
+@testattr(stddist = True)
+def test_get_option_description():
+    """ Test that it is possible to get a description for an option. """
+    option = 'get_desc_test'
+    value = 'value'
+    description = 'this is the description'
+    mc.set_string_option(option, value, description)
+    nose.tools.assert_equal(mc.get_option_description(option),description)
 
 @testattr(stddist = True)
 def TO_ADDtest_MODELICAPATH():

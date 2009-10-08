@@ -166,6 +166,14 @@ class ModelicaCompiler():
         except jpype.JavaException, ex:
             self._handle_exception(ex)
         
+    def get_option_description(self, key):
+        """ Get the description set for an option. """
+        try:
+            desc = self._compiler.getOptionDescription(key)    
+        except jpype.JavaException, ex:
+            self._handle_exception(ex)
+        return str(desc)
+    
     def get_XMLVariablesTemplate(self):
         """ Return file path to the XML variables template. """
         return self._compiler.getXMLVariablesTemplate()

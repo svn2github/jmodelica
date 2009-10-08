@@ -161,6 +161,10 @@ public class ModelicaCompiler {
 	public void setBooleanOption(String key, boolean value, String description) throws UnknownOptionException {
 		options.setBooleanOption(key, value, description);
 	}
+	
+	public String getOptionDescription(String key) throws UnknownOptionException {
+		return options.getDescription(key);
+	}
 
 	/**
 	 * Returns the modelicapath attribute set for this compiler instance.
