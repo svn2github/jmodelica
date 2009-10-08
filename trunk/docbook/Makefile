@@ -1,10 +1,12 @@
+# Copy this template to your docbook project directory and rename to Makefile.
+# Set the DOC variable to the document name (the prefix of your docbook xml file, exclude the .xml suffix):
 DOC=JModelica-UG
 DOCBOOKVERSION=1.75.2
-DOCBOOKDIR=docbook-xsl-$(DOCBOOKVERSION)
-URL=http://downloads.sourceforge.net/project/docbook/docbook-xsl/$(DOCBOOKVERSION)/$(DOCBOOKDIR).tar.gz
-XSLHTMLSTYLE=$(DOCBOOKDIR)/html/docbook.xsl
-XSLPDFSTYLE=$(DOCBOOKDIR)/fo/docbook.xsl
-XSLHTMLHELPSTYLE=$(DOCBOOKDIR)/htmlhelp/htmlhelp.xsl
+DOCBOOK_HOME=docbook-xsl-$(DOCBOOKVERSION)
+URL=http://downloads.sourceforge.net/project/docbook/docbook-xsl/$(DOCBOOKVERSION)/$(DOCBOOK_HOME).tar.gz
+XSLHTMLSTYLE=$(DOCBOOK_HOME)/html/docbook.xsl
+XSLPDFSTYLE=$(DOCBOOK_HOME)/fo/docbook.xsl
+XSLHTMLHELPSTYLE=$(DOCBOOK_HOME)/htmlhelp/htmlhelp.xsl
 $(DOC).html:  $(DOC).xml 
 	xsltproc  --output  $@  $(XSLHTMLSTYLE)  $<
 
@@ -17,6 +19,7 @@ $(DOC).fo:  $(DOC).xml
 	$(XSLPDFSTYLE)  $<
 
 $(DOC).pdf: $(DOC).fo
+	rm -f $(DOC).fo
 ifeq ($(OS),Windows_NT)
 	cmd /c "fop -fo $< $@"
 else
@@ -25,21 +28,24 @@ endif
 
 pdf:  $(DOC).pdf
 
-$(DOC).hhp: $(DOC).xml
+htmlhelp.hhp: $(DOC).xml
 	xsltproc $(XSLHTMLHELPSTYLE) $<
 
 htmlhelp: $(DOC).hhp
 
+$(DOC).chm: htmlhelp.hhp
+ifneq ($(OS),Windows_NT)
+	@echo "The winhelp target is only available on Windows platform"
+	false
+endif
+	@echo $(HTMLHELPWORKSHOP_HOME)
+	-"$(HTMLHELPWORKSHOP_HOME)/hhc" $<
+	mv htmlhelp.chm $@
 
-$(DOCBOOKDIR) :
-	wget $(URL)
-	tar -xzf $(DOCBOOKDIR).tar.gz
-	rm -f $(DOCBOOKDIR).tar.gz
-
-docbook: $(DOCBOOKDIR)
+winhelp: $(DOC).chm
 
 all: html pdf htmlhelp
 
 clean:
-	rm -f *.pdf *.html *.fo *.hhp *.hhc
+	rm -f *.pdf *.html *.fo *.hhp *.hhc *.chm
 
