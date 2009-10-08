@@ -156,8 +156,8 @@ class XMLVariablesDoc(XMLdoc):
         Returns:
             Dict with ValueReference as key and name as value.
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text() [../../VariableCategory=\"input\"]")
-        vals = self._xpatheval("//ScalarVariable/ScalarVariableName/text()[../../VariableCategory=\"input\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text() [../../Causality=\"input\"][../../VariableCategory=\"algebraic\"]")
+        vals = self._xpatheval("//ScalarVariable/ScalarVariableName/text()[../../Causality=\"input\"][../../VariableCategory=\"algebraic\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))      
@@ -170,8 +170,8 @@ class XMLVariablesDoc(XMLdoc):
         Returns:
             Dict with ValueReference as key and name as value.
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text() [../../VariableCategory=\"algebraic\"]")
-        vals = self._xpatheval("//ScalarVariable/ScalarVariableName/text()[../../VariableCategory=\"algebraic\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text() [../../VariableCategory=\"algebraic\"][../../Causality!=\"input\"]")
+        vals = self._xpatheval("//ScalarVariable/ScalarVariableName/text()[../../VariableCategory=\"algebraic\"][../../Causality!=\"input\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))       
@@ -267,8 +267,8 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and Start attribute as value.
              
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"input\"][../../Attributes/*/Start]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/*/Start/text()[../../../../VariableCategory=\"input\"]")       
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"][../../VariableCategory=\"algebraic\"][../../Attributes/*/Start]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/*/Start/text()[../../../../Causality=\"input\"][../../../../VariableCategory=\"algebraic\"]")       
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -283,8 +283,8 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and Start attribute as value.
              
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/*/Start/text()[../../../../VariableCategory=\"algebraic\"]")       
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"][../../Causality!=\"input\"]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/*/Start/text()[../../../../VariableCategory=\"algebraic\"][../../../../Causality!=\"input\"]")       
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -312,8 +312,8 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and InitialGuess as value.
         
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../VariableCategory=\"algebraic\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"][../../Causality!=\"input\"]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../VariableCategory=\"algebraic\"][../../../../Causality!=\"input\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -328,8 +328,8 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and InitialGuess as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../Causality=\"input\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"][../../VariableCategory=\"algebraic\"]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../Causality=\"input\"][../../../../VariableCategory=\"algebraic\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -394,8 +394,8 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and lower bound as value.
         
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"][../../Attributes/*/Min]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../VariableCategory=\"algebraic\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"][../../Causality!=\"input\"][../../Attributes/*/Min]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../VariableCategory=\"algebraic\"][../../../../Causality!=\"input\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -410,8 +410,8 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and lower bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"] [../../Attributes/*/Min]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../Causality=\"input\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"][../../VariableCategory=\"algebraic\"][../../Attributes/*/Min]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../Causality=\"input\"][../../../../VariableCategory=\"algebraic\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))            
@@ -476,8 +476,8 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and upper bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"] [../../Attributes/*/Max]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../VariableCategory=\"algebraic\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"][../../Causality!=\"input\"][../../Attributes/*/Max]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../VariableCategory=\"algebraic\"][../../../../Causality!=\"input\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))           
@@ -491,8 +491,8 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and upper bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"] [../../Attributes/*/Max]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../Causality=\"input\"]")    
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"][../../VariableCategory=\"algebraic\"][../../Attributes/*/Max]")
+        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../Causality=\"input\"][../../../../VariableCategory=\"algebraic\"]")    
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -558,8 +558,8 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and boolean isLinear as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"] [../../IsLinear]")
-        vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../VariableCategory=\"algebraic\"]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"][../../Causality!=\"input\"][../../IsLinear]")
+        vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../VariableCategory=\"algebraic\"][../../Causality!=\"input\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))       
@@ -575,8 +575,8 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and boolean isLinear as value.
 
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"][../../IsLinear]")
-        vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../Causality=\"input\"]")            
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"][../../VariableCategory=\"algebraic\"][../../IsLinear]")
+        vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../Causality=\"input\"][../../VariableCategory=\"algebraic\"]")            
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -644,10 +644,10 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and boolean isLinear as value.
 
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"][../../IsLinearTimedVariables]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"][../../Causality!=\"input\"][../../IsLinearTimedVariables]")
         vals = []
         for key in keys:
-            tp = self._xpatheval("//ScalarVariable/IsLinearTimedVariables/TimePoint/@isLinear[../../../VariableCategory=\"algebraic\"] \
+            tp = self._xpatheval("//ScalarVariable/IsLinearTimedVariables/TimePoint/@isLinear[../../../VariableCategory=\"algebraic\"][../../../Causality!=\"input\"] \
                 [../../../ValueReference="+key+"]")
             vals.append(tp)        
         if len(keys)!=len(vals):
@@ -665,10 +665,10 @@ class XMLVariablesDoc(XMLdoc):
             as value. 
         
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"][../../IsLinearTimedVariables]")
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"][../../VariableCategory=\"algebraic\"][../../IsLinearTimedVariables]")
         vals = []
         for key in keys:
-            tp = self._xpatheval("//ScalarVariable/IsLinearTimedVariables/TimePoint/@isLinear[../../../Causality=\"input\"] \
+            tp = self._xpatheval("//ScalarVariable/IsLinearTimedVariables/TimePoint/@isLinear[../../../Causality=\"input\"][../../../VariableCategory=\"algebraic\"] \
                 [../../../ValueReference="+key+"]")
             vals.append(tp)
         if len(keys)!=len(vals):
