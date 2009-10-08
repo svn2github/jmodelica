@@ -170,6 +170,13 @@ typedef void jmi_ad_tape_t;                            ///< If JMI_AD_NONE: void
                                                        ///< If JMI_AD_CPPAD: an AD tape.
 typedef jmi_ad_tape_t *jmi_ad_tape_p;                  ///< If JMI_AD_NONE: a pointer to void (not used).<br>
                                                        ///< If JMI_AD_CPPAD: a pointer to an AD tape.
+
+#define COND_EXP_EQ(op1,op2,th,el) ((op1==op2)? (th): (el))
+#define COND_EXP_LE(op1,op2,th,el) ((op1<=op2)? (th): (el))
+#define COND_EXP_LT(op1,op2,th,el) ((op1<op2)? (th): (el))
+#define COND_EXP_GE(op1,op2,th,el) ((op1>=op2)? (th): (el))
+#define COND_Exp_GT(op1,op2,th,el) ((op1>op2)? (th): (el))
+
 #elif JMI_AD == JMI_AD_CPPAD
 typedef CppAD::AD<jmi_real_t> jmi_ad_var_t;
 typedef std::vector<jmi_real_t> jmi_real_vec_t;
@@ -178,6 +185,12 @@ typedef std::vector< jmi_ad_var_t > jmi_ad_var_vec_t;
 typedef jmi_ad_var_vec_t *jmi_ad_var_vec_p;
 typedef CppAD::ADFun<jmi_real_t> jmi_ad_tape_t;
 typedef jmi_ad_tape_t *jmi_ad_tape_p;
+
+#define COND_EXP_EQ(op1,op2,th,el) (CppAD::CondExpEq(op1,op2,th,el))
+#define COND_EXP_LE(op1,op2,th,el) (CppAD::CondExpLe(op1,op2,th,el))
+#define COND_EXP_LT(op1,op2,th,el) (CppAD::CondExpLt(op1,op2,th,el))
+#define COND_EXP_GE(op1,op2,th,el) (CppAD::CondExpGe(op1,op2,th,el))
+#define COND_EXP_GT(op1,op2,th,el) (CppAD::CondExpGt(op1,op2,th,el))
 
 #else
 #error "The directive JMI_AD_NONE or JMI_AD_CPPAD must be set"

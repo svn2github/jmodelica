@@ -64,11 +64,14 @@ $C_DAE_initial_guess_equation_residuals$",
     (*res)[4] = 2 - (_w_);
     (*res)[5] = 3 - (_y_);
 
-   (*res)[0] = 0.0 - _z_;
-   (*res)[1] = 1 - _w_;
-   (*res)[2] = 0.0 - _v_;
-   (*res)[3] = 0.0 - _der_x_;
-   (*res)[4] = 0.0 - _der_v_;")})));
+   (*res)[0] = 1 - _x_;
+   (*res)[1] = 0.0 - _z_;
+   (*res)[2] = 1 - _w_;
+   (*res)[3] = 0.0 - _v_;
+   (*res)[4] = 0.0 - _der_x_;
+   (*res)[5] = 0.0 - _der_v_;
+
+")})));
 
 
 		Real x(start=1);
@@ -96,5 +99,47 @@ $C_DAE_initial_guess_equation_residuals$",
 		parameter Real p1 = 4;
 	end CCodeGenTest3;
 
+
+model CCodeGenTest4
+
+  	  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.CCodeGenTestCase(name="CCodeGenTest4",
+        description="Test of code generation",
+        template = 
+        "$C_DAE_equation_residuals$",
+        generatedCode="
+    (*res)[0] = _y_ - (_der_x_);
+    (*res)[1] = (COND_EXP_LE(time,jmi_divide(3.141592653589793,2,\"Divide by zero: ( 3.141592653589793 ) / ( 2 )\"),sin(time),_x_)) - (_y_);
+")})));
+
+
+
+  Real x(start=0);
+  Real y = if time <= Modelica.Constants.pi/2 then sin(time) else x;
+equation
+  der(x) = y; 
+end CCodeGenTest4;
+
+
+model CCodeGenTest5
+
+  	  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.CCodeGenTestCase(name="CCodeGenTest5",
+        description="Test of code generation",
+        template = 
+        "$C_DAE_equation_residuals$",
+        generatedCode="
+    (*res)[0] = _y_ - (_der_x_);
+    (*res)[1] = (COND_EXP_LE(time,_one_,_x_,(COND_EXP_LE(time,_two_,(  - ( 2 ) ) * ( _x_ ),( 3 ) * ( _x_ ))))) - (_y_);
+")})));
+
+
+  parameter Real one = 1;
+  parameter Real two = 2;
+  Real x(start=0.1,fixed=true);
+  Real y = if time <= one then x else if time <= two then -2*x else 3*x;
+equation
+  der(x) = y; 
+end CCodeGenTest5;
 
 end CCodeGenTests;
