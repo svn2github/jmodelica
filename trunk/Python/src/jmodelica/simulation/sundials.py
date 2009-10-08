@@ -420,7 +420,7 @@ class SundialsDAESimulator(Simulator):
         #self.set_sensitivity_analysis(sensitivity_analysis)
         #self._set_sensitivities(None)
     
-    def _sundials_res_f(self, t, x, dx, res_vector, f_data):
+    def _sundials_res_f(self, t, z, dz, res_vector, f_data):
             """The sundials' Residual evaluation function.
             
             This function basically moves data between SUNDIALS arrays and NumPy
@@ -428,8 +428,8 @@ class SundialsDAESimulator(Simulator):
             
             Parameters:
             t               -- the point time on which the evalution is being done.
-            x               -- the states.
-            dx              -- the derivatives of the states.
+            z               -- the states.
+            dz              -- the derivatives of the states.
             res_vector      -- the output residual_vector F(t,x,dx)
             f_data          -- contains the model and an array with it's parameters.
             
@@ -439,12 +439,12 @@ class SundialsDAESimulator(Simulator):
             #Moving data to the model
             data = self._data
             model = data.model
-            model.t = (t - data.t_sim_start) / data.t_sim_duration
+            model.t = t #(t - data.t_sim_start) / data.t_sim_duration
             
-            model.x = x[0:len(model.x)]
-            model.w = x[len(model.x):len(x)]
+            model.x = z[0:len(model.x)]
+            model.w = z[len(model.x):len(z)]
             
-            model.dx = dx[0:len(model.dx)]
+            model.dx = dz[0:len(model.dx)]
 
             #Evaluating the residual function
             temp = N.array(res_vector)
@@ -469,8 +469,8 @@ class SundialsDAESimulator(Simulator):
         #sensi = self.get_sensitivity_analysis()
 
         if verbose >= self.WHISPER:
-            print "Running simulation with interval (%s, %s)." \
-                    % (start_time, end_time)
+            print "Running simulation with interval (%s, %s) and time step %s" \
+                    % (start_time, end_time, time_step)
         if verbose >= self.NORMAL:
             print "Input before integration:", model.u
             print "States x:", model.x
@@ -501,7 +501,7 @@ class SundialsDAESimulator(Simulator):
         #ydot = ida.NVector(model.dx.copy())
         
         y = ida.NVector(N.append(model.x.copy(),model.w.copy()))
-        ydot = ida.NVector(N.append(model.dx.copy(),model.w.copy()))
+        ydot = ida.NVector(N.append(model.dx.copy(),[0]*len(model.w)))
         
         # converting tolerances to C types
         abstol = ida.realtype(self.abstol)
@@ -535,12 +535,14 @@ class SundialsDAESimulator(Simulator):
         if return_last==False:
             num_samples = int(math.ceil((end_time - start_time) / time_step)) + 1
             T = N.zeros(num_samples, dtype=pyjmi.c_jmi_real_t)
-            ylist = N.zeros((num_samples, len(model.x)),
+            ylist = N.zeros((num_samples, len(model.x)+len(model.w)),
                             dtype=pyjmi.c_jmi_real_t)
-            ylist[0] = model.x.copy()
+            ylist[0] = N.append(model.x.copy(),model.w.copy())
             T[0] = t0.value
             i = 1
             
+        #ida.IDASetId(ida_mem,ida.NVector(N.append([1.0]*len(model.x),[0.0]*len(model.w))))
+        #ida.IDACalcIC(ida_mem,ida.IDA_YA_YDP_INIT,ida.realtype(t0.value+time_step))
             
         while True:
             # run DAE solver
@@ -553,7 +555,7 @@ class SundialsDAESimulator(Simulator):
             """Used for return."""
             if return_last==False:
                 T[i] = t.value
-                ylist[i] = N.array(y[0:len(model.x)])
+                ylist[i] = N.array(y)
                 i = i + 1
                 
             if N.abs(tout-end_time)<=1e-6:
@@ -592,3 +594,54 @@ class SundialsDAESimulator(Simulator):
             T = N.array(T)
         
         self._set_solution(T, ylist)
+        
+    
+    def get_solution(self, *variables):
+        """Return the solution calculated by run().
+        
+        The solution consists of a tuple (T, Y) where T are the time samples
+        and Y contains all the equivalent state samples, one per row. You
+        are also given the option to specify which variables you want to 
+        extract.
+        """
+        if len(variables) > 0:
+            
+            Y = N.array([])
+            
+            # invert the dictionaries so that the variable name is the key
+            invert_diff_names = dict([v,k] for k,v in self.get_model().get_differentiated_variable_names().iteritems())
+            invert_alg_names = dict([v,k] for k,v in self.get_model().get_algebraic_variable_names().iteritems())
+            
+            diff_minimum = N.array(invert_diff_names.values(),dtype=N.int16).min()
+            alg_minimum = N.array(invert_alg_names.values(),dtype=N.int16).min()
+            
+            nbr_found = 0
+            
+            for x in variables:
+                # search for the variable in differentiated variables
+                if invert_diff_names.has_key(x):
+                    abs_index = N.array(invert_diff_names[x],dtype=N.int16)
+                    index = abs_index - diff_minimum
+                    Y = N.append(Y,self._Y[:,index],axis=0)
+                    nbr_found = nbr_found+1
+                
+                # search for the variable in algebraic variables    
+                elif invert_alg_names.has_key(x):
+                    abs_index = N.array(invert_alg_names[x],dtype=N.int16)
+                    abs_model_index = N.array(len(self.get_model().get_x()),dtype=N.int16)
+                    index = abs_index-alg_minimum+abs_model_index
+                    Y = N.append(Y,self._Y[:,index],axis=0)
+                    nbr_found = nbr_found+1
+            
+            if nbr_found > 0:
+                Y=Y.reshape(len(Y)/nbr_found,nbr_found,order='F')
+                if self.get_verbosity() >= self.LOUD:
+                    print "Found %s number of variables"%nbr_found
+            else:
+                if self.get_verbosity() >= self.NORMAL:
+                    print "No variables found."
+        else:
+            Y = self._Y
+                
+        
+        return self._T, Y
