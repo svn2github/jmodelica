@@ -74,8 +74,7 @@ public class CGenerator extends GenericGenerator {
 		public void generate(PrintStream genPrinter) {
 			int i=0;
 			for (FRealVariable fv : fclass.realVariables()) {
-				if (!(fv.fixedAttribute() ||
-						(fv.isDifferentiatedVariable() && fv.startAttributeSet()))) {
+				if (!(fv.fixedAttribute() )) {
 					fv.genStartAttributeResidual_C(i,"   ",genPrinter);
 					i++;
 				}

@@ -237,7 +237,7 @@ def test_Model_dae_get_sizes():
            "test_jmi.py: test_Model_dae_get_sizes: Wrong number of DAE equations." 
 
     res_n_eq_F0 = 6
-    res_n_eq_F1 = 4
+    res_n_eq_F1 = 7
     res_n_eq_Fp = 0
     n_eq_F0,n_eq_F1,n_eq_Fp = vdp.jmimodel.init_get_sizes()
     assert n_eq_F0==res_n_eq_F0 and n_eq_F1==res_n_eq_F1 and n_eq_Fp==res_n_eq_Fp,  \
@@ -281,7 +281,7 @@ def test_state_start_values_fixed():
            "test_jmi.py: test_Model_dae_get_sizes: Wrong number of DAE equations." 
 
     res_n_eq_F0 = 2
-    res_n_eq_F1 = 3
+    res_n_eq_F1 = 5
     res_n_eq_Fp = 0
     n_eq_F0,n_eq_F1,n_eq_Fp = vdp.jmimodel.init_get_sizes()
     assert n_eq_F0==res_n_eq_F0 and n_eq_F1==res_n_eq_F1 and n_eq_Fp==res_n_eq_Fp,  \

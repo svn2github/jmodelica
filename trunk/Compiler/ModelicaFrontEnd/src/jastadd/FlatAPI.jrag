@@ -590,8 +590,7 @@ aspect FlatAPI {
 	syn int FClass.numInitialGuessEquations() {
 		int n_eq = 0;
 		for (FRealVariable fv : realVariables()) {
-			if (!(fv.fixedAttribute() ||
-				(fv.isDifferentiatedVariable() && fv.startAttributeSet()))) {
+			if (!(fv.fixedAttribute())) {
 				n_eq++;
 			}
 		}
