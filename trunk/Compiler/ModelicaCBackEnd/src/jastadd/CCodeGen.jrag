@@ -81,7 +81,7 @@ aspect CCodeGen {
 	eq FLeqExp.macroC() = "COND_EXP_LE";
 	eq FGtExp.macroC() = "COND_EXP_GT";
 	eq FGeqExp.macroC() = "COND_EXP_GE";
-	
+		
 	public void FIfExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 
 		FLogBinExp if_exp = (FLogBinExp)getIfExp();
@@ -90,11 +90,29 @@ aspect CCodeGen {
 		
 		int end_parenthesis = 1;
 		str.print("(" + if_exp.macroC() + "(");
-		p.toString(op1,str,indent,o);
+		if (op1 instanceof FLitExp) {
+			str.print("AD_WRAP_LITERAL(");
+			p.toString(op1,str,indent,o);
+			str.print(")");
+		} else {
+			p.toString(op1,str,indent,o);
+		} 
 		str.print(",");
-		p.toString(op2,str,indent,o);
+		if (op2 instanceof FLitExp) {
+			str.print("AD_WRAP_LITERAL(");
+			p.toString(op2,str,indent,o);
+			str.print(")");
+		} else {
+			p.toString(op2,str,indent,o);
+		} 
 		str.print(",");
-		p.toString(getThenExp(),str,indent,o);
+		if (getThenExp() instanceof FLitExp) {
+			str.print("AD_WRAP_LITERAL(");
+			p.toString(getThenExp(),str,indent,o);
+			str.print(")");
+		} else {
+			p.toString(getThenExp(),str,indent,o);
+		} 
 		str.print(",");
 		for (FElseIfExp el_if : getFElseIfExps()) {
 			end_parenthesis++;
@@ -102,14 +120,38 @@ aspect CCodeGen {
 			op1 = if_exp.getLeft();
 			op2 = if_exp.getRight();
 			str.print("(" + if_exp.macroC() + "(");
-			p.toString(op1,str,indent,o);
+			if (op1 instanceof FLitExp) {
+				str.print("AD_WRAP_LITERAL(");
+				p.toString(op1,str,indent,o);
+				str.print(")");
+			} else {
+				p.toString(op1,str,indent,o);
+			} 
 			str.print(",");
-			p.toString(op2,str,indent,o);
+			if (op2 instanceof FLitExp) {
+				str.print("AD_WRAP_LITERAL(");
+				p.toString(op2,str,indent,o);
+				str.print(")");
+			} else {
+				p.toString(op2,str,indent,o);
+			} 
 			str.print(",");
-			p.toString(el_if.getThenExp(),str,indent,o);
+			if (el_if.getThenExp() instanceof FLitExp) {
+				str.print("AD_WRAP_LITERAL(");
+				p.toString(el_if.getThenExp(),str,indent,o);
+				str.print(")");
+			} else {
+				p.toString(el_if.getThenExp(),str,indent,o);
+			} 
 			str.print(",");
 		}
-		p.toString(getElseExp(),str,indent,o);
+		if (getElseExp() instanceof FLitExp) {
+			str.print("AD_WRAP_LITERAL(");
+			p.toString(getElseExp(),str,indent,o);
+			str.print(")");
+		} else {
+			p.toString(getElseExp(),str,indent,o);
+		} 
 		for (int i=0;i<end_parenthesis*2;i++) {
 			str.print(")");
 		}

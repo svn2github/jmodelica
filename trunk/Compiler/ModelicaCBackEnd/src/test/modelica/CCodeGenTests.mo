@@ -111,9 +111,6 @@ model CCodeGenTest4
     (*res)[0] = _y_ - (_der_x_);
     (*res)[1] = (COND_EXP_LE(time,jmi_divide(3.141592653589793,2,\"Divide by zero: ( 3.141592653589793 ) / ( 2 )\"),sin(time),_x_)) - (_y_);
 ")})));
-
-
-
   Real x(start=0);
   Real y = if time <= Modelica.Constants.pi/2 then sin(time) else x;
 equation
@@ -170,6 +167,27 @@ equation
   der(x) = y; 
   der(z) = -z;
 end CCodeGenTest6;
+
+model CCodeGenTest7
+
+  	  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.CCodeGenTestCase(name="CCodeGenTest7",
+        description="Test of code generation",
+        template = 
+        "$C_DAE_equation_residuals$",
+        generatedCode="
+    (*res)[0] = _y_ - (_der_x_);
+    (*res)[1] = (COND_EXP_LE(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(0),(COND_EXP_GE(AD_WRAP_LITERAL(3),AD_WRAP_LITERAL(4),AD_WRAP_LITERAL(1)
+,(COND_EXP_LT(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(2),(COND_EXP_GT(AD_WRAP_LITERAL(3),AD_WRAP_LITERAL(4),AD_WRAP_LITERAL(4),(COND_EXP_EQ(A
+D_WRAP_LITERAL(4),AD_WRAP_LITERAL(3),AD_WRAP_LITERAL(4),AD_WRAP_LITERAL(7))))))))))) - (_y_);
+")})));
+  Real x(start=0);
+  Real y = if 1 <= 2 then 0 else if 3 >= 4 then 1 
+   else if 1 < 2 then 2 else if 3 > 4 then 4 
+   else if 4 == 3 then 4 else 7;
+equation
+  der(x) = y; 
+end CCodeGenTest7;
 
 
 end CCodeGenTests;
