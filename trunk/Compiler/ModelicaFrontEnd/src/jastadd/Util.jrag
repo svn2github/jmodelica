@@ -794,6 +794,16 @@ aspect Math {
 */
 }
 
+aspect FlatExpressions {
+	
+	inh lazy boolean FExp.inEquationSection();
+	eq FClass.getFEquationBlock().inEquationSection() = true;
+	eq Root.getChild().inEquationSection() = false;
+	inh lazy boolean FExp.inInitialEquationSection();
+	eq FClass.getFInitialEquation().inInitialEquationSection() = true;
+	eq Root.getChild().inInitialEquationSection() = false;
+}
+
 aspect Streams {
 
         // Is this really not in the Standard library???

@@ -296,15 +296,15 @@ def test_get_w_p():
 def test_dae_get_sizes():
     """ Test JMIModel.dae_get_sizes method. """
     model = mc.getjmimodel()
-    model.dae_get_sizes()
+    n_eq_F, n_eq_R = model.dae_get_sizes()
       
   
 @testattr(stddist = True)
 def test_dae_F():
     """ Test JMIModel.dae_F method. """
     model = mc.getjmimodel()
-    size = model.dae_get_sizes()
-    res = n.zeros(size)
+    size_F,size_R = model.dae_get_sizes()
+    res = n.zeros(size_F)
     model.dae_F(res)
     
 
@@ -342,19 +342,27 @@ def test_dae_dF_dim():
     mask = n.ones(model.get_z().size, dtype=int)
     n_cols, n_n_nz = model.dae_dF_dim(eval_alg, sparsity, indep_vars, mask)
     
+@testattr(stddist = True)
+def test_dae_R():
+    """ Test JMIModel.dae_R method. """
+    model = mc.getjmimodel()
+    size_F, size_R = model.dae_get_sizes()
+    res = n.zeros(size_R)
+    model.dae_R(res)
+
 
 @testattr(stddist = True)
 def test_init_get_sizes():
     """ Test JMIModel.init_get_sizes method. """
     model = mc.getjmimodel()
-    n_eq_f0, n_eq_f1, n_eq_fp = model.init_get_sizes()
+    n_eq_f0, n_eq_f1, n_eq_fp, n_eq_r0 = model.init_get_sizes()
     
 
 @testattr(stddist = True)
 def test_init_F0():
     """ Test JMIModel.init_FO method. """
     model = mc.getjmimodel()
-    n_eq_f0, n_eq_f1, n_eq_fp = model.init_get_sizes()
+    n_eq_f0, n_eq_f1, n_eq_fp, n_eq_r0 = model.init_get_sizes()
     res = n.zeros(n_eq_f0)
     model.init_F0(res)
     
@@ -399,7 +407,7 @@ def test_init_dF0_dim():
 def test_init_F1():
     """ Test JMIModel.init_F1 method. """
     model = mc.getjmimodel()
-    n_eq_f0, n_eq_f1, n_eq_fp = model.init_get_sizes()
+    n_eq_f0, n_eq_f1, n_eq_fp, n_eq_r0 = model.init_get_sizes()
     res = n.zeros(n_eq_f1)
     model.init_F1(res)
     
@@ -438,7 +446,13 @@ def test_init_dF1_dim():
     mask = n.ones(model.get_z().size, dtype=int)
     dF_n_cols, dF_n_nz = model.init_dF1_dim(eval_alg, sparsity, indep_vars,
                                             mask) 
-
+@testattr(stddist = True)
+def test_init_R0():
+    """ Test JMIModel.init_R0 method. """
+    model = mc.getjmimodel()
+    n_eq_f0, n_eq_f1, n_eq_fp, n_eq_r0 = model.init_get_sizes()
+    res = n.zeros(n_eq_r0)
+    model.init_R0(res)
 
 #@testattr(stddist = True)
 #def test_init_Fp():

@@ -40,7 +40,25 @@ public class CGenerator extends GenericGenerator {
 		}
 	
 	}
+
+	class DAETag_C_eventIndicatorResiduals extends DAETag {
+		
+		public DAETag_C_eventIndicatorResiduals(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_event_indicator_residuals","C: event indicator residuals in equations",
+			  myGenerator,fclass);
+		}
 	
+		public void generate(PrintStream genPrinter) {
+			int i=0;
+			for (FLogBinExp e : fclass.relExpInEquations()) {
+				e.genResidual_C(i,"    ",genPrinter);				
+				i++;
+			}
+		}
+	
+	}
+
 	class DAETag_C_initialEquationResiduals extends DAETag {
 		
 		public DAETag_C_initialEquationResiduals(AbstractGenerator myGenerator, 
@@ -59,10 +77,30 @@ public class CGenerator extends GenericGenerator {
 				e.genResidual_C(i,"    ",genPrinter);				
 				i++;
 			}
-		}
-	
+		}	
 	}
 
+	class DAETag_C_initialEventIndicatorResiduals extends DAETag {
+		
+		public DAETag_C_initialEventIndicatorResiduals(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_initial_event_indicator_residuals","C: event indicator residuals in initial equations",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			int i=0;
+			for (FLogBinExp e : fclass.relExpInEquations()) {
+				e.genResidual_C(i,"    ",genPrinter);				
+				i++;
+			}
+			for (FLogBinExp e : fclass.relExpInInitialEquations()) {
+				e.genResidual_C(i,"    ",genPrinter);				
+				i++;
+			}
+		}
+	}
+	
 	class DAETag_C_initialGuessEquationResiduals extends DAETag {
 		
 		public DAETag_C_initialGuessEquationResiduals(AbstractGenerator myGenerator, 
@@ -184,6 +222,11 @@ public class CGenerator extends GenericGenerator {
 		tagMap.put(tag.getName(),tag);
 		tag = new DAETag_C_variableAliases(this,fclass);
 		tagMap.put(tag.getName(),tag);		
+		tag = new DAETag_C_eventIndicatorResiduals(this,fclass);
+		tagMap.put(tag.getName(),tag);		
+		tag = new DAETag_C_initialEventIndicatorResiduals(this,fclass);
+		tagMap.put(tag.getName(),tag);		
+
 		
 	}
 

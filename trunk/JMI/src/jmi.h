@@ -688,8 +688,6 @@ int jmi_ode_df_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 
 /* @} */
 
-
-
 /*********************************************
  *
  * DAE interface
@@ -705,13 +703,17 @@ int jmi_ode_df_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 
 
 /**
- * \brief Get the number of equations of the DAE.
+ * \brief Get the number of equations of the DAE and the number of event
+ * indicator residuals.
  *
  * @param jmi A jmi_t struct.
- * @param n_eq_F (Output) The number of DAE equations is stored in this argument.
+ * @param n_eq_F (Output) The number of DAE equations is stored in this
+ * argument.
+ * @param n_eq_R (Output) The number of DAE event indicator residuals is
+ * stored in this argument.
  * @return Error code.
  */
-int jmi_dae_get_sizes(jmi_t* jmi, int* n_eq_F);
+int jmi_dae_get_sizes(jmi_t* jmi, int* n_eq_F, int* n_eq_R);
 
 
 /**
@@ -795,6 +797,19 @@ int jmi_dae_dF_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
 int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz);
 
+/**
+ * \brief Evaluate DAE event indicator residuals.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param res (Output) The event indicator residuals.
+ * @return Error code.
+ *
+ */
+int jmi_dae_R(jmi_t* jmi, jmi_real_t* res);
+
 /* @} */
 
 /*********************************************
@@ -816,10 +831,12 @@ int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
  * @param n_eq_F0 (Output) The number of equations in \f$F_0\f$ is stored in this argument.
  * @param n_eq_F1 (Output) The number of equations in \f$F_1\f$ is stored in this argument.
  * @param n_eq_Fp (Output) The number of equations in \f$F_p\f$ is stored in this argument.
+ * @param n_eq_R0 (Output) The number of equations in \f$R_0\f$ is stored in this argument.
  * @return Error code.
  *
  */
-int jmi_init_get_sizes(jmi_t* jmi, int* n_eq_F0, int* n_eq_F1, int* n_eq_Fp);
+int jmi_init_get_sizes(jmi_t* jmi, int* n_eq_F0, int* n_eq_F1, int* n_eq_Fp,
+		int* n_eq_R0);
 
 /**
  * \brief Evaluate the \f$F_0\f$ residual function of the initialization system.
@@ -1033,6 +1050,19 @@ int jmi_init_dFp_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
  */
 int jmi_init_dFp_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz);
+
+/**
+ * \brief Evaluate DAE event indicator residuals for the initialization system.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param res (Output) The event indicator residuals.
+ * @return Error code.
+ *
+ */
+int jmi_init_R0(jmi_t* jmi, jmi_real_t* res);
 
 /* @} */
 

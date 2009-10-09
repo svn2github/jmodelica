@@ -30,10 +30,12 @@ static const int N_x = $n_real_x$;
 static const int N_u = $n_real_u$;
 static const int N_w = $n_real_w$;
 static const int N_eq_F = $n_equations$;
+static const int N_eq_R = $n_event_indicators$;
 
 static const int N_eq_F0 = $n_equations$ + $n_initial_equations$;
 static const int N_eq_F1 = $n_initial_guess_equations$;
 static const int N_eq_Fp = $n_real_pd$;
+static const int N_eq_R0 = $n_event_indicators$ + $n_initial_event_indicators$;
 
 static const int N_eq_Ceq = $n_ceq$;
 static const int N_eq_Cineq = $n_cineq$;
@@ -79,6 +81,11 @@ $C_DAE_equation_residuals$
 	return 0;
 }
 
+static int model_dae_R(jmi_t* jmi, jmi_ad_var_vec_p res) {
+$C_DAE_event_indicator_residuals$
+	return 0;
+}
+
 static int model_init_F0(jmi_t* jmi, jmi_ad_var_vec_p res) {
 $C_DAE_initial_equation_residuals$
 	return 0;
@@ -91,6 +98,11 @@ $C_DAE_initial_guess_equation_residuals$
 
 static int model_init_Fp(jmi_t* jmi, jmi_ad_var_vec_p res) {
 $C_DAE_initial_dependent_parameter_residuals$
+	return 0;
+}
+
+static int model_init_R0(jmi_t* jmi, jmi_ad_var_vec_p res) {
+$C_DAE_initial_event_indicator_residuals$
 	return 0;
 }
 
@@ -125,13 +137,19 @@ int jmi_new(jmi_t** jmi) {
 			      N_x, N_u, N_w, N_t_p);
 
 	// Initialize the DAE interface
-	jmi_dae_init(*jmi, *model_dae_F, N_eq_F, NULL, 0, NULL, NULL);
+	jmi_dae_init(*jmi, *model_dae_F, N_eq_F, NULL, 0, NULL, NULL,
+		     *model_dae_R, N_eq_R, NULL, 0, NULL, NULL);
 
 	// Initialize the Init interface
 	jmi_init_init(*jmi, *model_init_F0, N_eq_F0, NULL,
-			0, NULL, NULL, *model_init_F1, N_eq_F1, NULL,
-			            0, NULL, NULL,*model_init_Fp, N_eq_Fp, NULL,
-			            0, NULL, NULL);
+		      0, NULL, NULL, 
+		      *model_init_F1, N_eq_F1, NULL,
+		      0, NULL, NULL,
+		      *model_init_Fp, N_eq_Fp, NULL,
+		      0, NULL, NULL,
+		      *model_init_R0, N_eq_R0, NULL,
+		      0, NULL, NULL);
+
 	// Initialize the Opt interface
 	jmi_opt_init(*jmi, *model_opt_J, NULL, 0, NULL, NULL,
 	           *model_opt_Ceq, N_eq_Ceq, NULL, 0, NULL, NULL,

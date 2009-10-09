@@ -578,6 +578,15 @@ aspect FlatAPI {
 		return l;
 	}
 	
+	syn int FClass.numEventIndicators() = numRelExpInEquations();
+	
+    syn int FClass.numRelExpInEquations() = relExpInEquations().size();
+	coll ArrayList<FLogBinExp> FClass.relExpInEquations() 
+	  [new ArrayList<FLogBinExp>()] with add root FlatRoot;
+	FLogBinExp contributes
+ 		this when inEquationSection()
+	to FClass.relExpInEquations() for myFClass();	
+	
 	syn int FClass.numInitialEquations() = initialEquations().size(); 
 	syn ArrayList<FAbstractEquation> FClass.initialEquations() {
 		ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
@@ -597,7 +606,14 @@ aspect FlatAPI {
 		return n_eq;
 	}
 
-
+	syn int FClass.numInitialEventIndicators() = numRelExpInInitialEquations();
+    syn int FClass.numRelExpInInitialEquations() = 
+    	relExpInInitialEquations().size();
+	coll ArrayList<FLogBinExp> FClass.relExpInInitialEquations() 
+	  [new ArrayList<FLogBinExp>()] with add root FlatRoot;
+	FLogBinExp contributes
+ 		this when inInitialEquationSection()
+	to FClass.relExpInInitialEquations() for myFClass();	
 	
 /*	
 
@@ -1101,7 +1117,6 @@ aspect FlatDiagnostics {
 		str.append("  Number of String algebraic variables:       " + 
 		  numAlgebraicStringVariables() + "\n");
 
-		
 		str.append("Number of equations:                          " + 
 		  numEquations() + "\n");
 		
@@ -1115,17 +1130,19 @@ aspect FlatDiagnostics {
 		  numBooleanVariablesWithBindingExp() + "\n");
 		str.append("  Number of String variables binding exp:     " + 
 		  numStringVariablesWithBindingExp() + "\n");
-		
-		
-		
+			
 		str.append("Total number of equations:                    " + 
-		  (numEquations()+numVariablesWithBindingExp()) + "\n");
-		
-		
-		
+				  (numEquations()+numVariablesWithBindingExp()) + "\n");
+	
 		str.append("Number of initial equations:                  " + 
 		  numInitialEquations() + "\n");
-		  
+
+		str.append("Number of relational exps in equations:       " + 
+				  (numRelExpInEquations()) + "\n");
+
+		str.append("Number of relational exps in init equations:  " + 
+				  (numRelExpInInitialEquations()) + "\n");
+		
 		str.append("\n");
 		
 		str.append(variableDiagnostics());

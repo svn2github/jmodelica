@@ -125,6 +125,14 @@ aspect CCodeGen {
 		str.print(");\n");
 	}
 
+	public void FLogBinExp.genResidual_C(int i, String indent, PrintStream str) {
+		str.print(indent + "(*res)[" + i + "] = ");
+		getRight().prettyPrint_C(str,"");
+		str.print(" - (");
+		getLeft().prettyPrint_C(str,"");
+		str.print(");\n");
+	}	
+	
 	public void FRealVariable.genStartAttributeResidual_C(int i, String indent, PrintStream str) {
 		str.print(indent + "(*res)[" + i + "] = ");
 		if (startAttributeSet()) {

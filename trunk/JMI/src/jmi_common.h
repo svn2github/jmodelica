@@ -440,12 +440,20 @@ int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
  * @param n_eq_F Number of equations in the DAE residual.
  * @param dF Function pointer to the symbolic Jacobian function.
  * @param dF_n_nz Number of non-zeros in the symbolic jacobian.
- * @param row Row indices of the non-zeros in the symbolic Jacobain.
- * @param col Column indices of the non-zeros in the symbolic Jacobain.
+ * @param dF_row Row indices of the non-zeros in the symbolic Jacobain.
+ * @param dF_col Column indices of the non-zeros in the symbolic Jacobain.
+ * @param R A function pointer to the DAE event indicator residual function.
+ * @param n_eq_R Number of equations in the event indicator function.
+ * @param dR Function pointer to the symbolic Jacobian function.
+ * @param dR_n_nz Number of non-zeros in the symbolic jacobian.
+ * @param dR_row Row indices of the non-zeros in the symbolic Jacobain.
+ * @param dR_col Column indices of the non-zeros in the symbolic Jacobain.
  * @return Error code.
  */
 int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F,
-                 jmi_jacobian_func_t dF, int dF_n_nz, int* row, int* col);
+        jmi_jacobian_func_t dF, int dF_n_nz, int* dF_row, int* dF_col,
+        jmi_residual_func_t R, int n_eq_R,
+        jmi_jacobian_func_t dR, int dR_n_nz, int* dR_row, int* dR_col);
 
 /**
  * \brief Allocates a jmi_init_t struct.
@@ -481,6 +489,12 @@ int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F,
  *        of \f$F_p\f$.
  * @param dFp_col Column indices of the non-zeros in the symbolic Jacobain
  *        of \f$F_p\f$.
+ * @param R0 A function pointer to the DAE event indicator residual function.
+ * @param n_eq_R0 Number of equations in the event indicator function.
+ * @param dR0 Function pointer to the symbolic Jacobian function.
+ * @param dR0_n_nz Number of non-zeros in the symbolic jacobian.
+ * @param dR0_row Row indices of the non-zeros in the symbolic Jacobain.
+ * @param dR0_col Column indices of the non-zeros in the symbolic Jacobain.
  * @return Error code.
  *
  */
@@ -492,7 +506,10 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 		  int dF1_n_nz, int* dF1_row, int* dF1_col,
 		  jmi_residual_func_t Fp, int n_eq_Fp,
 		  jmi_jacobian_func_t dFp,
-		  int dFp_n_nz, int* dFp_row, int* dFp_col);
+		  int dFp_n_nz, int* dFp_row, int* dFp_col,
+		  jmi_residual_func_t R0, int n_eq_R0,
+		  jmi_jacobian_func_t dR0,
+		  int dR0_n_nz, int* dR0_row, int* dR0_col);
 
 /**
  * \brief Allocates a jmi_opt_t struct.
@@ -633,6 +650,7 @@ struct jmi_t{
  */
 struct jmi_dae_t{
 	jmi_func_t* F;                       ///< A jmi_func_t struct representing the DAE residual \f$F\f$.
+	jmi_func_t* R;                       ///< A jmi_func_t struct representing the DAE event indicator function \f$R\f$.
 };
 
 /**
@@ -642,6 +660,7 @@ struct jmi_init_t{
 	jmi_func_t* F0;                      ///< A jmi_func_t struct representing \f$F_0\f$.
 	jmi_func_t* F1;                      ///< A jmi_func_t struct representing \f$F_1\f$.
 	jmi_func_t* Fp;                      ///< A jmi_func_t struct representing \f$F_p\f$.
+	jmi_func_t* R0;                      ///< A jmi_func_t struct representing \f$R_0\f$.
 };
 
 /**

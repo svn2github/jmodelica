@@ -312,16 +312,17 @@ def load_DLL(libname, path):
                      (dll.jmi_get_u_p, n_u.value),
                      (dll.jmi_get_w_p, n_w.value),
                      (dll.jmi_get_z, n_z.value)]
-    
+
     for (func, length) in int_res_funcs:
         _returns_ndarray(func, c_jmi_real_t, length, order='C')
         
     n_eq_F = ct.c_int()
+    n_eq_R = ct.c_int()
     assert dll.jmi_dae_get_sizes(jmi,
-                                 byref(n_eq_F)) \
+                                 byref(n_eq_F),byref(n_eq_R)) \
            is 0, \
            "getting DAE sizes failed"
-    
+
     dF_n_nz = ct.c_int()
     if dll.jmi_dae_dF_n_nz(jmi, JMI_DER_SYMBOLIC, byref(dF_n_nz)) \
         is not 0:
@@ -453,6 +454,7 @@ def load_DLL(libname, path):
 
     # DAE interface
     dll.jmi_dae_get_sizes.argtypes = [ct.c_void_p,
+                                      ct.POINTER(ct.c_int),
                                       ct.POINTER(ct.c_int)]      
     dll.jmi_dae_F.argtypes = [ct.c_void_p,
                               Nct.ndpointer(dtype=c_jmi_real_t,
@@ -521,9 +523,16 @@ def load_DLL(libname, path):
                                                  flags='C'),
                                    ct.POINTER(ct.c_int),
                                    ct.POINTER(ct.c_int)]
+
+    dll.jmi_dae_R.argtypes = [ct.c_void_p,
+                              Nct.ndpointer(dtype=c_jmi_real_t,
+                                            ndim=1,
+                                            shape=n_eq_R.value,
+                                            flags='C')]
     
     # DAE initialization interface
     dll.jmi_init_get_sizes.argtypes = [ct.c_void_p,
+                                       ct.POINTER(ct.c_int),
                                        ct.POINTER(ct.c_int),
                                        ct.POINTER(ct.c_int),
                                        ct.POINTER(ct.c_int)]                                          
@@ -649,7 +658,11 @@ def load_DLL(libname, path):
                                                  flags='C'),
                                    ct.POINTER(ct.c_int),
                                    ct.POINTER(ct.c_int)]
-    
+
+    dll.jmi_init_R0.argtypes = [ct.c_void_p,
+                              Nct.ndpointer(dtype=c_jmi_real_t,
+                                            ndim=1,
+                                            flags='C')]    
     # Optimization interface
     dll.jmi_opt_set_optimization_interval.argtypes = [ct.c_void_p,
                                                       c_jmi_real_t,
@@ -2569,9 +2582,10 @@ class JMIModel(object):
     def dae_get_sizes(self):
         """Returns the number of equations of the DAE."""
         n_eq_F = ct.c_int()
-        if self._dll.jmi_dae_get_sizes(self._jmi, byref(n_eq_F)) is not 0:
+        n_eq_R = ct.c_int()
+        if self._dll.jmi_dae_get_sizes(self._jmi, byref(n_eq_F), byref(n_eq_R)) is not 0:
             raise JMIException("Getting number of equations failed.")
-        return n_eq_F.value
+        return n_eq_F.value, n_eq_R.value
     
     def dae_F(self, res):
         """Evaluates the DAE residual.
@@ -2582,7 +2596,7 @@ class JMIModel(object):
         """
         if self._dll.jmi_dae_F(self._jmi, res) is not 0:
             raise JMIException("Evaluating the DAE residual failed.")
-    
+
     def dae_dF(self, eval_alg, sparsity, independent_vars, mask, jac):
         """Evaluate the Jacobian of the DAE residual function.
         
@@ -2700,7 +2714,17 @@ class JMIModel(object):
         if self._dll.jmi_dae_dF_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
             raise JMIException("Returning the number of columns and non-zero elements failed.")        
         return int(dF_n_cols.value), int(dF_n_nz.value)
-    
+
+    def dae_R(self, res):
+        """Evaluates the DAE event indicators.
+        
+        Parameters:
+            res -- DAE residual vector. (Return)
+            
+        """
+        if self._dll.jmi_dae_R(self._jmi, res) is not 0:
+            raise JMIException("Evaluating DAE event indicators.")
+        
     def init_get_sizes(self):
         """Gets the number of equations in the DAE initialization functions.
         
@@ -2711,9 +2735,10 @@ class JMIModel(object):
         n_eq_f0 = ct.c_int()
         n_eq_f1 = ct.c_int()
         n_eq_fp = ct.c_int()
-        if self._dll.jmi_init_get_sizes(self._jmi, byref(n_eq_f0), byref(n_eq_f1), byref(n_eq_fp)) is not 0:
+        n_eq_r0 = ct.c_int()
+        if self._dll.jmi_init_get_sizes(self._jmi, byref(n_eq_f0), byref(n_eq_f1), byref(n_eq_fp), byref(n_eq_r0)) is not 0:
             raise JMIException("Getting the number of equations failed.")
-        return n_eq_f0.value, n_eq_f1.value, n_eq_fp.value
+        return n_eq_f0.value, n_eq_f1.value, n_eq_fp.value, n_eq_r0.value
     
     def init_F0(self, res):
         """Evaluates the F0 residual function of the initialization system.
@@ -3097,6 +3122,16 @@ class JMIModel(object):
         if self._dll.jmi_init_dFp_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
             raise JMIException("Getting the number of columns and non-zero elements failed.")        
         return int(dFp_n_cols.value), int(dFp_n_nz.value)
+
+    def init_R0(self, res):
+        """Evaluates the DAE initialization event indicators.
+        
+        Parameters:
+            res -- DAE residual vector. (Return)
+            
+        """
+        if self._dll.jmi_init_R0(self._jmi, res) is not 0:
+            raise JMIException("Evaluating the DAE initialization event indicators.")
     
     def opt_set_optimization_interval(self, start_time, start_time_free, final_time, final_time_free):
         """Set the optimization interval.
@@ -5343,13 +5378,11 @@ class JMIDAEInitializationOptIPOPT(object):
     def __init__(self, jmi_init_opt_model):
         
         """ 
-        Constructor where main data structure is created. Needs a 
-        JMISimultaneousOpt implementation instance, for example a 
-        JMISimultaneousOptLagPols object. The underlying model must have 
-        been compiled with support for ipopt.
+        Class for solving a DAE initialization problem my means
+        of optimization using IPOPT.
         
         Parameters:
-            jmi_opt_sim_model -- JMISimultaneousOpt object.
+            jmi_init_opt_model -- JMIDAEInitializationOpt object.
         
         """
         

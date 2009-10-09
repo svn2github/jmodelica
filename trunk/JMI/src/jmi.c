@@ -308,7 +308,19 @@ int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 		return -1;
 	}
 
+}
 
+int jmi_dae_R(jmi_t* jmi, jmi_real_t* res) {
+
+	int i;
+	for (i=0;i<jmi->n_z;i++) {
+		(*(jmi->z))[i] = (*(jmi->z_val))[i];
+	}
+
+	//jmi->dae->F->F(jmi, &res);
+	jmi_func_F(jmi,jmi->dae->R,res);
+
+	return 0;
 }
 
 int jmi_init_F0(jmi_t* jmi, jmi_real_t* res) {
@@ -514,6 +526,18 @@ int jmi_init_dFp_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
 	}
 }
 
+int jmi_init_R0(jmi_t* jmi, jmi_real_t* res) {
+
+	int i;
+	for (i=0;i<jmi->n_z;i++) {
+		(*(jmi->z))[i] = (*(jmi->z_val))[i];
+	}
+
+	//jmi->dae->F->F(jmi, &res);
+	jmi_func_F(jmi,jmi->init->R0,res);
+
+	return 0;
+}
 
 int jmi_opt_J(jmi_t* jmi, jmi_real_t* res) {
 

@@ -142,4 +142,34 @@ equation
   der(x) = y; 
 end CCodeGenTest5;
 
+model CCodeGenTest6
+  	  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.CCodeGenTestCase(name="CCodeGenTest6",
+        description="Test of code generation",
+        template = 
+        "$C_DAE_event_indicator_residuals$
+$C_DAE_initial_event_indicator_residuals$",
+        generatedCode="
+    (*res)[0] = _one_ - (time);
+    (*res)[1] = _two_ - (time);
+
+    (*res)[0] = _one_ - (time);
+    (*res)[1] = _two_ - (time);
+    (*res)[2] = _one_ - (_p_);
+
+")})));
+  parameter Real p=1;
+  parameter Real one = 1;
+  parameter Real two = 2;
+  Real x(start=0.1,fixed=true);
+  Real y = if time <= one then x else if time <= two then -2*x else 3*x;
+  Real z;
+initial equation
+  z = if p>=one then one else two; 
+equation
+  der(x) = y; 
+  der(z) = -z;
+end CCodeGenTest6;
+
+
 end CCodeGenTests;

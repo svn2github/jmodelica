@@ -127,7 +127,7 @@ int jmi_func_ad_init(jmi_t *jmi, jmi_func_t *func) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
 	CppAD::Independent(*jmi->z);
-	
+
 	if (func->F(jmi, func->ad->F_z_dependent)!=0) {
 	  return -1;
 	}
@@ -610,17 +610,23 @@ int jmi_func_ad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 int jmi_ad_init(jmi_t* jmi) {
 
 	if (jmi->dae!=NULL) {
-		int n_eq_F;
-		jmi_dae_get_sizes(jmi,&n_eq_F);
+		int n_eq_F, n_eq_R;
+		jmi_dae_get_sizes(jmi,&n_eq_F, &n_eq_R);
 		if (n_eq_F>0) {
 		  if (jmi_func_ad_init(jmi, jmi->dae->F)!=0) {
 		    return -1;
 		  }
 		}
+		if (n_eq_R>0) {
+		  if (jmi_func_ad_init(jmi, jmi->dae->R)!=0) {
+		    return -1;
+		  }
+		}
 	}
+
 	if (jmi->init!=NULL) {
-		int n_eq_F0, n_eq_F1, n_eq_Fp;
-		jmi_init_get_sizes(jmi,&n_eq_F0,&n_eq_F1,&n_eq_Fp);
+		int n_eq_F0, n_eq_F1, n_eq_Fp, n_eq_R0;
+		jmi_init_get_sizes(jmi,&n_eq_F0,&n_eq_F1,&n_eq_Fp,&n_eq_R0);
 		if (n_eq_F0>0) {
 		  if (jmi_func_ad_init(jmi, jmi->init->F0)!=0) {
 		    return -1;
@@ -633,6 +639,11 @@ int jmi_ad_init(jmi_t* jmi) {
 		}
 		if (n_eq_Fp>0) {
 		  if (jmi_func_ad_init(jmi, jmi->init->Fp)!=0) {
+		    return -1;
+		  }
+		}
+		if (n_eq_R0>0) {
+		  if (jmi_func_ad_init(jmi, jmi->init->R0)!=0) {
 		    return -1;
 		  }
 		}
@@ -967,6 +978,10 @@ int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 	}
 }
 
+int jmi_dae_R(jmi_t* jmi, jmi_real_t* res) {
+    return jmi_func_F(jmi,jmi->dae->R, res);
+}
+
 int jmi_init_F0(jmi_t* jmi, jmi_real_t* res) {
 	return jmi_func_F(jmi,jmi->init->F0, res);
 }
@@ -1164,6 +1179,10 @@ int jmi_init_dFp_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
 	} else {
 		return -1;
 	}
+}
+
+int jmi_init_R0(jmi_t* jmi, jmi_real_t* res) {
+    return jmi_func_F(jmi,jmi->init->R0, res);
 }
 
 int jmi_opt_J(jmi_t* jmi, jmi_real_t* res) {

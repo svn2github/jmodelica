@@ -463,6 +463,21 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	class DAETag_numEventIndicators extends DAETag {
+		
+		public DAETag_numEventIndicators(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_event_indicators","Number of event indicators in DAE equations",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numEventIndicators());
+		}
+	
+	}
+
+	
 	class DAETag_numInitialEquations extends DAETag {
 		
 		public DAETag_numInitialEquations(AbstractGenerator myGenerator, 
@@ -477,6 +492,21 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	class DAETag_numInitialEventIndicators extends DAETag {
+		
+		public DAETag_numInitialEventIndicators(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_initial_event_indicators","Number of event indicators in DAE initialization equations",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numInitialEventIndicators());
+		}
+	
+	}
+
+	
 	class DAETag_numInitialGuessEquations extends DAETag {
 		
 		public DAETag_numInitialGuessEquations(AbstractGenerator myGenerator, 
@@ -585,14 +615,17 @@ public class GenericGenerator extends AbstractGenerator {
 		tag = new DAETag_numStringInputs(this,fclass);
 		tagMap.put(tag.getName(),tag);
 
-
 		tag = new DAETag_numDifferentiatedRealVariables(this,fclass);
 		tagMap.put(tag.getName(),tag);
 
 		tag = new DAETag_numEquations(this,fclass);
 		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numEventIndicators(this,fclass);
+		tagMap.put(tag.getName(),tag);
 
 		tag = new DAETag_numInitialEquations(this,fclass);
+		tagMap.put(tag.getName(),tag);
+		tag = new DAETag_numInitialEventIndicators(this,fclass);
 		tagMap.put(tag.getName(),tag);
 		tag = new DAETag_numInitialGuessEquations(this,fclass);
 		tagMap.put(tag.getName(),tag);
