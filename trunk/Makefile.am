@@ -159,3 +159,7 @@ docs:
 	cd $(srcdir); doxygen doc/ModelicaCompiler/modelica_compiler_doxydoc.conf
 	cd $(srcdir); doxygen doc/OptimicaCompiler/optimica_compiler_doxydoc.conf
 	cd $(srcdir); doxygen doc/PyJMI/pyjmi_doxydoc.conf
+
+docbook:
+	cd docbook/UsersGuide; $(MAKE) all
+

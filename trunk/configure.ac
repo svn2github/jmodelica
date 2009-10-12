@@ -233,6 +233,7 @@ AC_CONFIG_FILES([
  JMI/examples/FurutaPendulum/Makefile
  JMI/examples/CSTR/Makefile
  JMI/examples/CSTR2/Makefile
+ docbook/UsersGuide/Makefile
  Python/jm_ipython.sh
  Python/jm_python.sh
 ])
