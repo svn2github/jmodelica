@@ -95,7 +95,8 @@ if _p:
 
 # read user startup script
 if sys.platform == 'win32':
-    _p = os.environ['HOMEPATH']
+    _p = os.environ['USERPROFILE']
+#    _p = os.environ['HOMEPATH']
 else:
     _p = os.environ['HOME']
     
