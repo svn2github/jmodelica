@@ -42,34 +42,30 @@ end CCodeGenTest1;
 $C_DAE_equation_residuals$
 $C_DAE_initial_equation_residuals$
 $C_DAE_initial_guess_equation_residuals$",
-        generatedCode="#define _der_x_ ((*(jmi->z))[jmi->offs_dx+0])
+        generatedCode="#define _der_z_ ((*(jmi->z))[jmi->offs_dx+0])
 #define _der_v_ ((*(jmi->z))[jmi->offs_dx+1])
-#define _x_ ((*(jmi->z))[jmi->offs_x+0])
+#define _z_ ((*(jmi->z))[jmi->offs_x+0])
 #define _v_ ((*(jmi->z))[jmi->offs_x+1])
 #define _y_ ((*(jmi->z))[jmi->offs_w+0])
-#define _z_ ((*(jmi->z))[jmi->offs_w+1])
-#define _w_ ((*(jmi->z))[jmi->offs_w+2])
+#define _w_ ((*(jmi->z))[jmi->offs_w+1])
 #define time ((*(jmi->z))[jmi->offs_t])
 
-    (*res)[0] =  - ( _x_ ) - (_der_x_);
+    (*res)[0] =  - ( _z_ ) - (_der_z_);
     (*res)[1] = 4 - (_der_v_);
     (*res)[2] = 3 - (_y_);
-    (*res)[3] = _x_ - (_z_);
-    (*res)[4] = 2 - (_w_);
+    (*res)[3] = 2 - (_w_);
 
-    (*res)[0] =  - ( _x_ ) - (_der_x_);
+    (*res)[0] =  - ( _z_ ) - (_der_z_);
     (*res)[1] = 4 - (_der_v_);
     (*res)[2] = 3 - (_y_);
-    (*res)[3] = _x_ - (_z_);
-    (*res)[4] = 2 - (_w_);
-    (*res)[5] = 3 - (_y_);
+    (*res)[3] = 2 - (_w_);
+    (*res)[4] = 3 - (_y_);
 
-   (*res)[0] = 1 - _x_;
-   (*res)[1] = 0.0 - _z_;
-   (*res)[2] = 1 - _w_;
-   (*res)[3] = 0.0 - _v_;
-   (*res)[4] = 0.0 - _der_x_;
-   (*res)[5] = 0.0 - _der_v_;
+   (*res)[0] = 0.0 - _z_;
+   (*res)[1] = 1 - _w_;
+   (*res)[2] = 0.0 - _v_;
+   (*res)[3] = 0.0 - _der_z_;
+   (*res)[4] = 0.0 - _der_v_;
 
 ")})));
 

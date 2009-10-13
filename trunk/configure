@@ -21266,7 +21266,7 @@ fi
 
 # Checks for library functions.
 
-ac_config_files="$ac_config_files Makefile JMI/src/Makefile JMI/examples/Vdp/Makefile JMI/examples/Vdp_cppad/Makefile JMI/examples/FurutaPendulum/Makefile JMI/examples/CSTR/Makefile JMI/examples/CSTR2/Makefile Python/jm_ipython.sh Python/jm_python.sh"
+ac_config_files="$ac_config_files Makefile JMI/src/Makefile JMI/examples/Vdp/Makefile JMI/examples/Vdp_cppad/Makefile JMI/examples/FurutaPendulum/Makefile JMI/examples/CSTR/Makefile JMI/examples/CSTR2/Makefile docbook/UsersGuide/Makefile Python/jm_ipython.sh Python/jm_python.sh"
 
 
 
@@ -21933,6 +21933,7 @@ do
     "JMI/examples/FurutaPendulum/Makefile") CONFIG_FILES="$CONFIG_FILES JMI/examples/FurutaPendulum/Makefile" ;;
     "JMI/examples/CSTR/Makefile") CONFIG_FILES="$CONFIG_FILES JMI/examples/CSTR/Makefile" ;;
     "JMI/examples/CSTR2/Makefile") CONFIG_FILES="$CONFIG_FILES JMI/examples/CSTR2/Makefile" ;;
+    "docbook/UsersGuide/Makefile") CONFIG_FILES="$CONFIG_FILES docbook/UsersGuide/Makefile" ;;
     "Python/jm_ipython.sh") CONFIG_FILES="$CONFIG_FILES Python/jm_ipython.sh" ;;
     "Python/jm_python.sh") CONFIG_FILES="$CONFIG_FILES Python/jm_python.sh" ;;
 

@@ -7,20 +7,17 @@ package TransformCanonicalTests
         description="Test basic canonical transformations",
                                                flatModel=
 "
-fclass TransformCanonicalTests.TransformCanonicalTest1
- Real x(start = 1,fixed=true);
+fclass TransformCanonicalTests.TransformCanonicalTest1 
  Real y(start = 3,fixed = true);
  Real z;
  Real w(start = 1);
  Real v;
 initial equation 
- x = 1;
  y = 3;
 equation 
- der(x) =  - ( x );
+ der(z) =  - ( z );
  der(v) = 4;
  y = 3;
- z = x;
  w = 2;
 end TransformCanonicalTests.TransformCanonicalTest1;
 ")})));
@@ -618,12 +615,6 @@ Input variables:
 " 1 error found...
 Semantic error at line 0, column 0:
   Alias error: trying to add the negated alias pair (x3,-x1) to the alias set {x1,x2,x3}
-Error: in file 'TransformCanonicalTests.AliasTest16_Err.mof':
-Semantic error at line 0, column 0:
-  The DAE initialization system has 4 equations and 3 free variables.
-Error: in file 'TransformCanonicalTests.AliasTest16_Err.mof':
-Semantic error at line 0, column 0:
-  The DAE system has 4 equations and 3 free variables.
 
 ")})));
 
@@ -645,12 +636,6 @@ Semantic error at line 0, column 0:
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 0, column 0:
   Alias error: trying to add the alias pair (x3,x1) to the alias set {x1,x2,-x3}
-Error: in file 'TransformCanonicalTests.AliasTest17_Err.mof':
-Semantic error at line 0, column 0:
-  The DAE initialization system has 4 equations and 3 free variables.
-Error: in file 'TransformCanonicalTests.AliasTest17_Err.mof':
-Semantic error at line 0, column 0:
-  The DAE system has 4 equations and 3 free variables.
 
 ")})));
 
@@ -672,11 +657,6 @@ Semantic error at line 0, column 0:
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 0, column 0:
   Alias error: trying to add the alias pair (x3,x1) to the alias set {x1,-x2,-x3}
-Semantic error at line 0, column 0:
-  The DAE initialization system has 4 equations and 3 free variables.
-Error: in file 'TransformCanonicalTests.AliasTest18_Err.mof':
-Semantic error at line 0, column 0:
-  The DAE system has 4 equations and 3 free variables.
 
 ")})));
 
@@ -698,12 +678,6 @@ Semantic error at line 0, column 0:
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 0, column 0:
   Alias error: trying to add the negated alias pair (x3,-x1) to the alias set {x1,-x2,x3}
-Error: in file 'TransformCanonicalTests.AliasTest19_Err.mof':
-Semantic error at line 0, column 0:
-  The DAE initialization system has 4 equations and 3 free variables.
-Error: in file 'TransformCanonicalTests.AliasTest19_Err.mof':
-Semantic error at line 0, column 0:
-  The DAE system has 4 equations and 3 free variables.
 
 ")})));
 
@@ -715,6 +689,28 @@ Semantic error at line 0, column 0:
     x3=-x1;
 
   end AliasTest19_Err;
+
+  model AliasTest20
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="AliasTest20",
+        description="Test elimination of alias variables",
+                                               flatModel=
+"
+fclass TransformCanonicalTests.AliasTest20
+ Real x1;
+equation 
+ x1 = 1;
+end TransformCanonicalTests.AliasTest20;
+
+")})));
+
+    Real x1 = 1;
+    Real x2,x3;
+  equation
+    -x1 = x2;
+    x2 = -x3;
+  end AliasTest20;
+
 
 model ParameterBindingExpTest1_Err
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -910,5 +906,6 @@ Semantic error at line 843, column 10:
   Real p2;	
   A a(x(start=p2));
 end AttributeBindingExpTest5_Err;
+
 
 end TransformCanonicalTests;

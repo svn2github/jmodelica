@@ -59,6 +59,9 @@ aspect FlatNameBinding {
 		for(int k = 0; k < getNumFVariable(); k++) {
 			map.put(getFVariable(k).name(),getFVariable(k));
 		}
+		for(int k = 0; k < getNumAliasVariable(); k++) {
+			map.put(getAliasVariable(k).name(),getAliasVariable(k));
+		}
 		return map;
 	}
 	

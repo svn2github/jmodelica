@@ -146,6 +146,13 @@ aspect FlatAPI {
 		return index;
 	}
 
+	eq FClass.getAliasVariable(int i).valueReference() {
+		return getAliasVariable(i).aliasValueReference();
+	}
+	
+	syn int FVariable.aliasValueReference() = alias()!=null? 
+		alias().valueReference(): -1;
+
     syn int FClass.numReals() = reals().size();
 	coll ArrayList<FRealVariable> FClass.reals() 
 	  [new ArrayList<FRealVariable>()] with add root FlatRoot;
@@ -387,8 +394,23 @@ aspect FlatAPI {
 	coll ArrayList<FVariable> FClass.variables() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
- 		this when  !isParameter() && !isConstant()
+ 		this when !isParameter() && !isConstant() && !isAlias()
 	to FClass.variables() for myFClass();
+
+    syn int FClass.numAliasVariables() = aliasVariables().size();
+	coll ArrayList<FVariable> FClass.aliasVariables() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	FVariable contributes
+ 		this when  !isParameter() && !isConstant() && isAlias()
+	to FClass.aliasVariables() for myFClass();
+
+    syn int FClass.numAllVariables() = allVariables().size();
+	syn lazy ArrayList<FVariable> FClass.allVariables() {
+	      ArrayList<FVariable> set = new ArrayList<FVariable>();
+	      set.addAll(variables());
+	      set.addAll(aliasVariables());
+	      return set;
+	}
 	
 	syn int FClass.numRealVariables() = realVariables().size();
 	syn lazy ArrayList<FRealVariable> FClass.realVariables() {

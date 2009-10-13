@@ -20,12 +20,17 @@ aspect TransformCanonical{
 	 */
 	public void FClass.transformCanonical() {
 		genBindingEquations();
+		if (root().options.getBooleanOption("eliminate_alias_variables")) {
+			genAlias();
+			eliminateAliasVariables();
+		}
 		addFDerivativeVariables();
 		genInitialEquations();
 		sortDependentParameters();
-		genAlias();
-		//flushCache(); // TODO: is this enough or should the entire tree be flushed?
- 	}
+		//System.out.println(prettyPrint(""));
+		root().flushAllRecursive();
+		
+	}
 		
 	/**
 	 * \brief Convert variable binding equations into regular equations.
@@ -44,6 +49,7 @@ aspect TransformCanonical{
 				getFEquationBlock(0).addFAbstractEquation(feq);
 			}
 		}
+//		flush();
 		flushAllRecursive();
 	}
 
@@ -65,7 +71,8 @@ aspect TransformCanonical{
 		for (FVariable fv : l) {
 			addFVariable(fv);
 		}
-		root().flushAllRecursive();
+//		flush();
+				root().flushAllRecursive();
 	}
 
 	/**
@@ -100,10 +107,89 @@ aspect TransformCanonical{
 						fv.startAttributeExp()));
 			}	
 		}		
-		root().flushAllRecursive();
+		//flush();
+				root().flushAllRecursive();
 	}
 	
 	ArrayList<String> FClass.aliasErrors = new ArrayList<String>();
+	
+	public class AliasPair {
+		public FVariable fv1;
+		public FVariable fv2;
+		public boolean negated;
+		public AliasPair(FVariable fv1, FVariable fv2, boolean negated) {
+			this.fv1 = fv1;
+			this.fv2 = fv2;
+			this.negated = negated;
+		}
+	}
+	
+	public AliasPair FAbstractEquation.aliasVariables() {
+		return null;
+	}
+	
+	public AliasPair FEquation.aliasVariables() {
+
+		AbstractFVariable afv1 = null;
+		AbstractFVariable afv2 = null;
+		
+		FVariable fv1 = null;
+		FVariable fv2 = null;
+		boolean negated = false;
+		
+		if (getLeft() instanceof FIdUseExp && // x = y
+					getRight() instanceof FIdUseExp) {
+			afv1 = ((FIdUseExp)getLeft()).myFV();
+			afv2 = ((FIdUseExp)getRight()).myFV();
+			if (!afv1.isUnknown() && !afv2.isUnknown()) {
+				fv1 = (FVariable)afv1;
+				fv2 = (FVariable)afv2;
+				negated = false;
+			}
+		} else if (getLeft() instanceof FNegExp && // -x = y
+				((FNegExp)getLeft()).getFExp() instanceof FIdUseExp &&
+				getRight() instanceof FIdUseExp) {
+			afv1 = ((FIdUseExp)((FNegExp)getLeft()).getFExp()).myFV();
+			afv2 = ((FIdUseExp)getRight()).myFV();
+			if (!afv1.isUnknown() && !afv2.isUnknown()) {
+				fv1 = (FVariable)afv1;
+				fv2 = (FVariable)afv2;
+				negated = true;
+			}
+		} else if (getLeft() instanceof FIdUseExp && // x = -y
+					getRight() instanceof FNegExp &&
+				((FNegExp)getRight()).getFExp() instanceof FIdUseExp) {
+			afv1 = ((FIdUseExp)getLeft()).myFV();
+			afv2 = ((FIdUseExp)((FNegExp)getRight()).getFExp()).myFV();	
+			if (!afv1.isUnknown() && !afv2.isUnknown()) {
+				fv1 = (FVariable)afv1;
+				fv2 = (FVariable)afv2;
+				negated = true;
+			}
+		} else if (getLeft() instanceof FNegExp && // -x = -y
+				((FNegExp)getLeft()).getFExp() instanceof FIdUseExp &&
+				getRight() instanceof FNegExp &&
+				((FNegExp)getRight()).getFExp() instanceof FIdUseExp
+				) {
+			afv1 = ((FIdUseExp)((FNegExp)getLeft()).getFExp()).myFV();
+			afv2 = ((FIdUseExp)((FNegExp)getRight()).getFExp()).myFV();	
+			if (!afv1.isUnknown() && !afv2.isUnknown()) {
+				fv1 = (FVariable)afv1;
+				fv2 = (FVariable)afv2;
+				negated = false;
+			}
+		} 
+		
+		if (fv1!=null && fv2!=null) {
+			return new AliasPair(fv1,fv2,negated);
+		} else {
+			return null;
+		}
+		
+	}
+	
+	syn lazy boolean FAbstractEquation.isAliasEquation() = false;
+	eq FEquation.isAliasEquation() = aliasVariables()!=null;
 	
 	/**
 	 * \brief Generate alias information and remove alias equations.
@@ -114,80 +200,73 @@ aspect TransformCanonical{
 		for (FAbstractEquation equation : 
 			getFEquationBlock(0).getFAbstractEquations()) {
 			// Iterate over all equations
-			if (equation instanceof FEquation) {
-				FEquation eqn = (FEquation)equation;
-				if (eqn.getLeft() instanceof FIdUseExp && // x = y
- 						eqn.getRight() instanceof FIdUseExp) {
- 					AbstractFVariable fv1 = ((FIdUseExp)eqn.getLeft()).myFV();
- 					AbstractFVariable fv2 = ((FIdUseExp)eqn.getRight()).myFV();	
- 					if (fv1.isUnknown()) {
- 						aliasErrors.add("During computation of alias sets: the variable " + ((FIdUseExp)eqn.getLeft()).name() + " is unknown.");
- 						break;
- 					}
- 					if (fv2.isUnknown()) {
- 						aliasErrors.add("During computation of alias sets: the variable " + ((FIdUseExp)eqn.getRight()).name() + " is unknown.");
- 						break;
- 					}
-					if (!fv1.isUnknown() && !fv2.isUnknown()) { 					
-						aliasManager.addAliasVariables((FVariable)fv1,
-							(FVariable)fv2,
-							false);
-					}
-				} else if (eqn.getLeft() instanceof FNegExp && // -x = y
-						((FNegExp)eqn.getLeft()).getFExp() instanceof FIdUseExp &&
-						eqn.getRight() instanceof FIdUseExp) {
- 					AbstractFVariable fv1 = ((FIdUseExp)((FNegExp)eqn.getLeft()).getFExp()).myFV();
- 					AbstractFVariable fv2 = ((FIdUseExp)eqn.getRight()).myFV();
- 					if (fv1.isUnknown()) {
- 						aliasErrors.add("During computation of alias sets: the variable " + ((FIdUseExp)((FNegExp)eqn.getLeft()).getFExp()).name() + " is unknown.");
- 					}
- 					if (fv2.isUnknown()) {
- 						aliasErrors.add("During computation of alias sets: the variable " + ((FIdUseExp)eqn.getRight()).name() + " is unknown.");
-  					}
-					if (!fv1.isUnknown() && !fv2.isUnknown()) {
-						aliasManager.addAliasVariables((FVariable)fv1,
-							(FVariable)fv2,
-							true); 
-		            }
-				} else if (eqn.getLeft() instanceof FIdUseExp && // x = -y
- 						eqn.getRight() instanceof FNegExp &&
-						((FNegExp)eqn.getRight()).getFExp() instanceof FIdUseExp) {
-					AbstractFVariable fv1 = ((FIdUseExp)eqn.getLeft()).myFV();
- 					AbstractFVariable fv2 = ((FIdUseExp)((FNegExp)eqn.getRight()).getFExp()).myFV();	
- 					if (fv1.isUnknown()) {
- 						aliasErrors.add("During computation of alias sets: the variable " + ((FIdUseExp)eqn.getLeft()).name() + " is unknown.");
-  					}
- 					if (fv2.isUnknown()) {
- 						aliasErrors.add("During computation of alias sets: the variable " + ((FIdUseExp)((FNegExp)eqn.getRight()).getFExp()).name() + " is unknown.");
- 						break;
- 					}
-					if (!fv1.isUnknown() && !fv2.isUnknown()) {						
-						aliasManager.addAliasVariables((FVariable)fv1,
-							(FVariable)fv2,
-							true);
-					}
-				} else if (eqn.getLeft() instanceof FNegExp && // -x = -y
-						((FNegExp)eqn.getLeft()).getFExp() instanceof FIdUseExp &&
-						eqn.getRight() instanceof FNegExp &&
-						((FNegExp)eqn.getRight()).getFExp() instanceof FIdUseExp
-						) {
-					AbstractFVariable fv1 = ((FIdUseExp)((FNegExp)eqn.getLeft()).getFExp()).myFV();
- 					AbstractFVariable fv2 = ((FIdUseExp)((FNegExp)eqn.getRight()).getFExp()).myFV();	
- 					if (fv1.isUnknown()) {
- 						aliasErrors.add("During computation of alias sets: the variable " + ((FIdUseExp)((FNegExp)eqn.getLeft()).getFExp()).name() + " is unknown.");
- 					}
- 					if (fv2.isUnknown()) {
- 						aliasErrors.add("During computation of alias sets: the variable " + ((FIdUseExp)((FNegExp)eqn.getRight()).getFExp()).name() + " is unknown.");
- 					}	
-					if (!fv1.isUnknown() && !fv2.isUnknown()) { 										
-						aliasManager.addAliasVariables((FVariable)fv1,
-							(FVariable)fv2,
-							false);
-					}
-				}
-			}
+
+			if (equation.isAliasEquation()) {
+				AliasPair aliasPair = equation.aliasVariables();
+				aliasManager.addAliasVariables(aliasPair.fv1,
+						aliasPair.fv2, aliasPair.negated);
+			}			
 		}	
+		//flush();
+				root().flushAllRecursive();
+	}
+
+	public boolean FClass.aliasVariablesEliminated = false;
+	
+	public void FClass.eliminateAliasVariables() {
+		List<FVariable> nonAliasVars = new List<FVariable>();
+		List<FVariable> aliasVars = new List<FVariable>();
+		List<FAbstractEquation> eqns = new List<FAbstractEquation>();
 		
+		for (FVariable fv : getFVariables()) {
+			if (fv.isAlias()) {
+				aliasVars.add(fv);
+			} else {
+				nonAliasVars.add(fv);
+			}
+		}
+
+		for (FAbstractEquation equation : 
+			getFEquationBlock(0).getFAbstractEquations()) {
+			// Iterate over all equations
+			if (!equation.isAliasEquation()) {
+				eqns.add(equation);
+			}			
+		}	
+
+		setFVariableList(nonAliasVars);
+		setAliasVariableList(aliasVars);
+		getFEquationBlock(0).setFAbstractEquationList(eqns);
+		
+		aliasVariablesEliminated = true;
+		
+		//root().flushAllRecursive();
+		flush();
+	}
+	
+	boolean FIdUseExp.rewritten = false;
+	rewrite FIdUseExp {
+		when (!rewritten && myFClass() != null && 
+				myFClass().aliasVariablesEliminated &&
+				!myFV().isUnknown() && myFV().isAlias()) to FIdUseExp {
+			FQName new_name = (FQName)((FVariable)myFV()).alias().getFQName().fullCopy();
+			FQName old_name = getFIdUse().getFQName();
+			FIdUseExp new_exp = new FIdUseExp(new FIdUse(new_name));
+			new_exp.rewritten = true;
+			return new_exp;
+		}
+	}
+	
+	rewrite FDer {
+		when (!rewritten && myFClass() != null && 
+				myFClass().aliasVariablesEliminated &&
+				!getFIdUse().myFV().isUnknown() && getFIdUse().myFV().isAlias()) to FDer {
+			FQName new_name = (FQName)((FVariable)getFIdUse().myFV()).alias().getFQName().fullCopy();
+			FQName old_name = getFIdUse().getFQName();
+			FDer new_exp = new FDer(new FIdUse(new_name));
+			new_exp.rewritten = true;
+			return new_exp;
+		}
 	}
 	
 	/**
@@ -202,13 +281,42 @@ aspect TransformCanonical{
 	 * \brief Flush all caches, including collection attributes, and also
 	 * flush all children.
 	 */
+	public void ASTNode.flushAllRecursiveClearFinal() {
+		flushAll();
+		//is$Final = false;
+		for (int i=0;i<getNumChild();i++) {
+			getChild(i).flushAllRecursiveClearFinal();
+		}
+	}
+	
+	public void FIdUseExp.flushAllRecursiveClearFinal() {
+		flushAll();
+		is$Final = false;
+		for (int i=0;i<getNumChild();i++) {
+			getChild(i).flushAllRecursiveClearFinal();
+		}
+	}
+
+	public void FDer.flushAllRecursiveClearFinal() {
+		flushAll();
+		is$Final = false;
+		for (int i=0;i<getNumChild();i++) {
+			getChild(i).flushAllRecursiveClearFinal();
+		}
+	}
+	
 	public void ASTNode.flushAllRecursive() {
 		flushAll();
 		for (int i=0;i<getNumChild();i++) {
 			getChild(i).flushAllRecursive();
 		}
 	}
-
+	
+	public void FClass.flush() {
+		flushAllRecursiveClearFinal();
+		//is$Final = true;
+	}
+	
 	
 }
 
@@ -305,6 +413,7 @@ aspect ParameterSorting {
 		}
 
 		// Flush AST since the structure has changed.
+		//flush();
 		root().flushAllRecursive();
 	}	
 		

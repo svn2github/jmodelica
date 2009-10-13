@@ -29,6 +29,7 @@ FlatRoot : Root ::= FClass;
  */ 
 FClass ::= FQName 
            FVariable* 
+           AliasVariable:FVariable* 
            FInitialEquation:FAbstractEquation*
            FEquationBlock*
            /UnknownFVariable/; 

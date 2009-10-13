@@ -12,7 +12,8 @@ aspect AliasVariables {
 	 * 
 	 * @return True if alias, else false.
 	 */
-	syn lazy boolean FVariable.isAlias() = aliasVariable() != null; 
+	syn lazy boolean AbstractFVariable.isAlias() = false; 
+	eq FVariable.isAlias() = aliasVariable() != null; 
 	
 	/**
 	 * \brief Get the alias variable of an FVariable. 
@@ -65,7 +66,7 @@ aspect AliasVariables {
 	/**
 	 * \brief An FClass has an alias manager.
 	 */
-	private AliasManager FClass.aliasManager;
+	private AliasManager FClass.aliasManager = new AliasManager();
 
 	/**
 	 * \brief Get the alias manager.
