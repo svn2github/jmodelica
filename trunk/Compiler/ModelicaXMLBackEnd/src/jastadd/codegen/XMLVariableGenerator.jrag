@@ -286,14 +286,6 @@ public class XMLVariableGenerator extends GenericGenerator {
 				//ValueReference
 				genPrinter.print(tg.generateTag("ValueReference")+variable.valueReference()+tg.generateTag("ValueReference"));
 				
-				//Description (optional)
-				if(variable.hasFStringComment()) {
-					genPrinter.print(tg.generateTag("Description")+"<![CDATA[" + variable.getFStringComment().getComment()+"]]>" +tg.generateTag("Description"));
-				}
-				
-				//Private/Protected (Optional)
-				genPrinter.print(tg.generateTag("Protected")+variable.isProtected()+tg.generateTag("Protected"));
-				
 				//DataType
 				genPrinter.print(tg.generateTag("DataType"));
 				if(variable.isReal()) {
@@ -312,6 +304,43 @@ public class XMLVariableGenerator extends GenericGenerator {
 					System.err.println("Invalid or missing DataType");
 				}
 				genPrinter.print(tg.generateTag("DataType"));
+	
+				
+				//Description (optional)
+				if(variable.hasFStringComment()) {
+					genPrinter.print(tg.generateTag("Description")+"<![CDATA[" + variable.getFStringComment().getComment()+"]]>" +tg.generateTag("Description"));
+				}
+				
+				//Private/Protected (Optional) 
+				//genPrinter.print(tg.generateTag("Protected")+variable.isProtected()+tg.generateTag("Protected"));				
+				
+				//Variability (optional with default)
+				genPrinter.print(tg.generateTag("Variability"));
+				if(variable.isConstant()) {
+					genPrinter.print("constant");
+				} else if(variable.isParameter()) {
+					genPrinter.print("parameter");
+				} else if(variable.isContinuous()) {
+					genPrinter.print("continuous");
+				} else {
+					//default
+					genPrinter.print("discrete");
+				}
+				genPrinter.print(tg.generateTag("Variability"));
+				
+				
+				//Causality (optional with default)
+				genPrinter.print(tg.generateTag("Causality"));
+				if(variable.isInput()) {
+					genPrinter.print("input");
+				} else if(variable.isOutput()) {
+					genPrinter.print("output");
+				} else {
+					//default
+					genPrinter.print("internal");
+				}				
+				genPrinter.print(tg.generateTag("Causality"));
+				
 				
 				//Attributes
 				genPrinter.print(tg.generateTag("Attributes"));
@@ -355,11 +384,25 @@ public class XMLVariableGenerator extends GenericGenerator {
 				}
 				
 				genPrinter.print(tg.generateTag("Attributes"));
-				
+
+               				
 				//is linear?
 				addLinearInfo(genPrinter, tg, variable);
 				
-				//variable category
+				
+				//Alias: alias, noAlias, negatedAlias
+                genPrinter.print(tg.generateTag("AliasVariable"));
+                if(variable.isAlias())
+                	if(variable.isNegated())
+                        genPrinter.print("negatedAlias");
+                    else
+                    	genPrinter.print("alias");                             
+                else
+                	genPrinter.print("noAlias");
+                genPrinter.print(tg.generateTag("AliasVariable"));
+				
+				
+                //variable category
 				genPrinter.print(tg.generateTag("VariableCategory"));
 				if(variable.isDerivativeVariable()) {
 					genPrinter.print("derivative");
@@ -379,31 +422,6 @@ public class XMLVariableGenerator extends GenericGenerator {
 				}
 				genPrinter.print(tg.generateTag("VariableCategory"));
 
-				//Variability (optional with default)
-				genPrinter.print(tg.generateTag("Variability"));
-				if(variable.isConstant()) {
-					genPrinter.print("constant");
-				} else if(variable.isParameter()) {
-					genPrinter.print("parameter");
-				} else if(variable.isContinuous()) {
-					genPrinter.print("continuous");
-				} else {
-					//default
-					genPrinter.print("discrete");
-				}
-				genPrinter.print(tg.generateTag("Variability"));
-				
-				//Causality (optional with default)
-				genPrinter.print(tg.generateTag("Causality"));
-				if(variable.isInput()) {
-					genPrinter.print("input");
-				} else if(variable.isOutput()) {
-					genPrinter.print("output");
-				} else {
-					//default
-					genPrinter.print("internal");
-				}				
-				genPrinter.print(tg.generateTag("Causality"));
 				
 				genPrinter.print(tg.generateTag("ScalarVariable"));
 			}			
