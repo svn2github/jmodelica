@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """Interfaces to the JModelica compilers
 
 Module containing functions for compiling models. Options which are user 
@@ -472,33 +474,33 @@ class ModelicaCompiler():
             raise OptimicaClassNotFoundError(str(ex.__javaobject__.getClassName()))
         
         if ex.javaClass() is jpype.java.io.FileNotFoundException:
-            raise IOError('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
+            raise IOError('Message: '+ex.message().encode('utf-8')+'\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
         
         if ex.javaClass() is jpype.java.io.IOException:
-            raise IOError('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
+            raise IOError('Message: '+ex.message().encode('utf-8')+'\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
         
         if ex.javaClass() is jpype.javax.xml.xpath.XPathExpressionException:
-            raise XPathExpressionError('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
+            raise XPathExpressionError('Message: '+ex.message().encode('utf-8')+'\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
         
         if ex.javaClass() is jpype.javax.xml.parsers.ParserConfigurationException:
-            raise ParserConfigurationError('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
+            raise ParserConfigurationError('Message: '+ex.message().encode('utf-8')+'\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
         
         if ex.javaClass() is org.xml.sax.SAXException or \
             ex.javaClass() is org.xml.sax.SAXNotRecognizedException or \
             ex.javaClass() is org.xml.sax.SAXNotSupportedException or \
             ex.javaClass() is org.xml.sax.SAXParseException:
-            raise SAXError('Message: '+ex.message()+'\n Stacktrace: '+ex.stacktrace())
+            raise SAXError('Message: '+ex.message().encode('utf-8')+'\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
     
         if ex.javaClass() is UnknownOptionException:
-            raise UnknownOptionError(str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
+            raise UnknownOptionError(ex.message().encode('utf-8')+'\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
         
         if ex.javaClass() is jpype.java.lang.Exception:
-            raise Exception('Message: '+str(ex.message())+'\n Stacktrace: '+str(ex.stacktrace()))
+            raise Exception('Message: '+ex.message().encode('utf-8')+'\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
         
         if ex.javaClass() is jpype.java.lang.NullPointerException:
-            raise JError(str(ex.stacktrace()))
+            raise JError(ex.stacktrace().encode('utf-8'))
         
-        raise JError(str(ex.stacktrace()))
+        raise JError(ex.stacktrace().encode('utf-8'))
 
 class OptimicaCompiler(ModelicaCompiler):
     """ User class for accessing the Java OptimicaCompiler class. """
