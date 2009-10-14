@@ -6,6 +6,8 @@ This currently only includes an interface to SUNDIALS.
 """
 __all__ = ['sundials']
 
+import jmodelica.io as io
+import numpy as np
 
 class SimulationException(Exception):
     """ A simulation exception. """
@@ -224,4 +226,13 @@ class Simulator(object):
     verbosity = property(get_verbosity, set_verbosity,
                          doc="How explicit the output should be")
     
-    
+        
+    def write_data(self):
+        
+        t, y = self.get_solution()
+        # extends the time array with the states columnwise
+        data = np.c_[t,y]
+        io.export_result_dymola(self.get_model(),data)
+        
+        
+        
