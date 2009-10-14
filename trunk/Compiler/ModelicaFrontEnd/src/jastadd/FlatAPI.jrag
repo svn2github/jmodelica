@@ -407,8 +407,12 @@ aspect FlatAPI {
     syn int FClass.numAllVariables() = allVariables().size();
 	syn lazy ArrayList<FVariable> FClass.allVariables() {
 	      ArrayList<FVariable> set = new ArrayList<FVariable>();
-	      set.addAll(variables());
-	      set.addAll(aliasVariables());
+	      for (FVariable fv : getFVariables()) {
+                  set.add(fv);
+              }
+	      for (FVariable fv : getAliasVariables()) {
+                  set.add(fv);
+              }
 	      return set;
 	}
 	
