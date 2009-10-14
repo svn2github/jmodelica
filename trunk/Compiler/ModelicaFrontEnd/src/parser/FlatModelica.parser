@@ -99,7 +99,7 @@ FClass fclass =
 					else 
 						feq = (List)fequation_section.getChild(0);
 	
-					return new FClass(fqname,fvariable_list,new List(),new List().add(new FEquationBlock(feq))); :}
+					return new FClass(fqname,fvariable_list,new List(),new List(),new List().add(new FEquationBlock(feq))); :}
 	;
 
 List fvariable_list = 
