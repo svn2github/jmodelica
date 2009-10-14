@@ -277,7 +277,7 @@ public class XMLVariableGenerator extends GenericGenerator {
 		public void generate(PrintStream genPrinter) {
 			TagGenerator tg = new TagGenerator(2);
 			
-			for(FVariable variable:fclass.allVariables()) {				
+			for(FVariable variable:fclass.getFVariables()) {				
 				genPrinter.print(tg.generateTag("ScalarVariable"));
 				
 				//ScalarVariableName
