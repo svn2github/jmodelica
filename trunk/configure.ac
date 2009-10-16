@@ -17,7 +17,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT([JModelica.org], 0.0.0, BUG-REPORT-ADDRESS)
+AC_INIT([jmodelica.org], 0.0.0, BUG-REPORT-ADDRESS)
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([JMI/src/jmi.h])
 AC_CONFIG_HEADER([config.h])
@@ -70,9 +70,12 @@ AC_PROG_LIBTOOL
 
 # By default, we want to install bin, lib, and include
 # in the directory where configure is run.
-AS_IF([test "x$JMODELICA_HOME" = x],
- 	AC_PREFIX_DEFAULT([`pwd`]),
-        AC_PREFIX_DEFAULT(["$JMODELICA_HOME"]))
+
+AC_PREFIX_DEFAULT(["/usr/local/jmodelica"])
+
+#AS_IF([test "x$JMODELICA_HOME" = x],
+# 	AC_PREFIX_DEFAULT([`pwd`]),
+#        AC_PREFIX_DEFAULT(["$JMODELICA_HOME"]))
 
 # Checks for libraries.
 AC_ARG_WITH([ipopt],

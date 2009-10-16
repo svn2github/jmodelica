@@ -61,7 +61,7 @@ endif
 	[ -e $(prefix)/Python/jm_python.sh ] && echo "File exists, don't copy jm_python.sh" || cp Python/jm_python.sh $(prefix)/Python/jm_python.sh
 	[ -e $(prefix)/Python/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(prefix)/Python/jm_ipython.sh
 	cp $(abs_top_srcdir)/Python/src/startup.py $(prefix)/
-	chmod u+x $(prefix)/Python/jm_*.sh
+	chmod ugo+x $(prefix)/Python/jm_*.sh
 	mkdir -p $(prefix)/ThirdParty
 	mkdir -p $(prefix)/ThirdParty/Beaver
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE $(prefix)/ThirdParty/Beaver/
