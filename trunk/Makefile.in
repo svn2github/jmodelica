@@ -830,7 +830,7 @@ docs:
 	cd $(srcdir); doxygen doc/OptimicaCompiler/optimica_compiler_doxydoc.conf
 	cd $(srcdir); doxygen doc/PyJMI/pyjmi_doxydoc.conf
 
-docbook:
+docbook-docs:
 	cd docbook/UsersGuide; $(MAKE) all
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

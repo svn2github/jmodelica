@@ -169,6 +169,6 @@ docs:
 	cd $(srcdir); doxygen doc/OptimicaCompiler/optimica_compiler_doxydoc.conf
 	cd $(srcdir); doxygen doc/PyJMI/pyjmi_doxydoc.conf
 
-docbook:
+docbook-docs:
 	cd docbook/UsersGuide; $(MAKE) all
 
