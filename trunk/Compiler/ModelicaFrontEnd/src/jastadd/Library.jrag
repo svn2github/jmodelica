@@ -23,35 +23,6 @@ aspect Library {
 	
 	syn lazy List InstProgramRoot.getInstLibClassDeclList() = new List();
 
-	eq LibClassDecl.memberClass(String name) {
-		//System.out.println(">> LibClassDecl.memberClass ("+ getName() + ") looking for: " + name + " enter");
-		HashSet set = new HashSet();
-		set.addAll(super.memberClass(name));
-		for (int i=0;i<getNumLibNode();i++) {
-			if (getLibNode(i).getName().equals(name)) {
-				set.add(getLibNode(i).getStoredDefinition().getElement(0));
-			}
-		}
-		//System.out.println(">> LibClassDecl.memberClass ("+ getName() + ") looking for: " + name + " exit");		
-		if (set.size()>0)
-			return set;
-		else
-			return emptyHashSet();
-	}
-
-	eq LibClassDecl.numLocalClassDecl() = getNumClassDecl() + getNumLibNode();
-	
-	eq LibClassDecl.localClassDecl(int i) { 
-		if (i<getNumClassDecl()) {
-			return getClassDecl(i); 
-		} else {
-		   return (FullClassDecl)getLibNode(i-getNumClassDecl()).getStoredDefinition().getElement(0);
-		}
-	}	
-		
-	eq LibClassDecl.getLibNode().lookupClass(String name) = genericLookupClass(name);
-	eq LibClassDecl.getLibNode().lookupComponent(String name) = genericLookupComponent(name);
-
 	syn lazy StoredDefinition LibNode.getStoredDefinition() {
 		
 		/* If structured

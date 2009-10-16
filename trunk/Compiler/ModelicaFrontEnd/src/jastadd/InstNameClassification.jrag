@@ -17,19 +17,29 @@
 
 aspect InstNameClassification {
 
+    class Kind {
+    	static Kind CLASS_ACCESS = new Kind();
+    	static Kind COMPONENT_ACCESS = new Kind();
+    	static Kind AMBIGUOUS_ACCESS = new Kind();
+    }
+	
+	
 	rewrite InstParseAccess {
 	   to InstAccess {
   		if (kind()==Kind.COMPONENT_ACCESS) {
+	    	//System.out.println("rewrite InstParseAccess " + name() + " component");
   			    InstComponentAccess a = new InstComponentAccess(getID(),getFArraySubscriptsOpt());
      			a.setStart(getStart());
      			a.setEnd(getEnd());
      			return a;
   		} else if (kind()==Kind.CLASS_ACCESS) {
+	    	//System.out.println("rewrite InstParseAccess " + name() + " class");
 	 			InstClassAccess a =  new InstClassAccess(getID());
      			a.setStart(getStart());
      			a.setEnd(getEnd());
      			return a;
   		} else {
+	    	//System.out.println("rewrite InstParseAccess " + name() + " ambiguous");
   				InstAmbiguousAccess a = new InstAmbiguousAccess(getID(),getFArraySubscriptsOpt());
     			a.setStart(getStart());
     			a.setEnd(getEnd());
@@ -67,7 +77,7 @@ aspect InstNameClassification {
 	
 	eq InstBaseClassDecl.getFAbstractEquation().kind() = Kind.AMBIGUOUS_ACCESS;	
 		
-	eq InstFunctionCall.getName().kind() = Kind.CLASS_ACCESS;
+	//eq InstFunctionCall.getName().kind() = Kind.CLASS_ACCESS;
 
 	/**
 	 * The attribute predKind defines the kind for qualified
@@ -101,19 +111,23 @@ aspect InstResolveAmbiguousNames {
 	rewrite InstAmbiguousAccess {
 	    when(!duringInstNameClassification()&&!rewritten) 
 	    to InstAccess {
+	    	//System.out.println("rewrite InstAmbiguousAccess begin " + name());
 	  		if (!lookupInstComponent(name()).isEmpty()) {
+		    	//System.out.println("rewrite InstAmbiguousAccess " + name() + " component");
      		    InstComponentAccess c = new InstComponentAccess(name(),getFArraySubscriptsOpt());
   	 			c.setStart(getStart());
   	 			c.setEnd(getEnd());
   	 			return c;
   		} else 
             if(!lookupInstClass(name()).isEmpty()) {		
+    	    	//System.out.println("rewrite InstAmbiguousAccess " + name() + " class");
             	InstClassAccess t = new InstClassAccess(name()); 
     			t.setStart(getStart());
     			t.setEnd(getEnd());
   	 			return t;
   			}
   			rewritten = true;
+	    	//System.out.println("rewrite InstAmbiguousAccess end " + name());
   			return this;
   		}
   	}

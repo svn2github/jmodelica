@@ -53,33 +53,8 @@ aspect ClassAttributes {
 		return l;
 	}
 
-	eq OptClassDecl.getClassModification().lookupComponentInClass(String name) {
-		HashSet set = new HashSet();
-		debugPrint("OptClassDecl.getClassModification().lookupComponentInClass: " + name);
-		for (int i=0;i<getNumClassAttribute();i++) {
-			if (getClassAttribute(i).matchComponentDecl(name))
-				set.add(getClassAttribute(i));
-		}
-		debugPrint("OptClassDecl.getClassModification().lookupComponentInClass: " + name +": " + set.size());
-		if (set.size()>0)
-			return set;
-		else
-			return emptyHashSet();
-	}
-
-	eq OptClassDecl.memberComponent(String name) {
-		HashSet set = new HashSet(4);
-		set.addAll(super.memberComponent(name));
-		for (int i=0;i<getNumClassAttribute();i++) {
-			if (getClassAttribute(i).matchComponentDecl(name))
-				set.add(getClassAttribute(i));
-		}
-		if (set.size()>0)
-			return set;
-		else
-			return emptyHashSet();	
-	}
-
+	eq InstTimedVariable.getName().kind() = Kind.COMPONENT_ACCESS;
+	
 	syn lazy List InstOptClassDecl.getInstClassAttributeList() {
 		List l = new List();
 		for (ComponentDecl cd : ((OptClassDecl)getClassDecl()).getClassAttributes()) {
@@ -119,10 +94,13 @@ aspect ClassAttributes {
 			if (getInstClassAttribute(i).matchInstComponentDecl(name))
 				set.add(getInstClassAttribute(i));
 		}
-		if (set.size()>0)
+		if (set.size()>0) {
+			//System.out.println("InstOptClassDecl.memberInstComponent: " + name + " found");
 			return set;
-		else
+		} else {
+			//System.out.println("InstOptClassDecl.memberInstComponent: " + name + " not found");
 			return emptyHashSet();	
+		}
 	}
 
 	

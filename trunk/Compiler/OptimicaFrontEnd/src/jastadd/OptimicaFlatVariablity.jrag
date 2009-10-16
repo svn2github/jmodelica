@@ -11,6 +11,7 @@ aspect OptimicaFlatVariability {
 	syn boolean FExp.isTimedExp() = variability().timedVariability();
 	
 	eq FTimedVariable.variability() = fTimed();
+	eq InstTimedVariable.variability() = fTimed();
 	eq FStartTimeExp.variability() = fParameter();
 	eq FFinalTimeExp.variability() = fParameter();
 	

@@ -46,21 +46,12 @@ aspect DumpTree {
   	} 
 
  	public void ClassAccess.dumpTree(String indent) {
-    	String s = indent + dump() +": "+getID() + " at line: " + beginLine()+ ", ClassDecl at: ";
-    	if (myClassDecl().isUnknown())
-    		s+="Unknown";
-    	else
-    		s+=	myClassDecl().beginLine();
-    	
+    	String s = indent + dump() +": "+getID() + " at line: " + beginLine();
     	System.out.println(s);
   } 
   
    	public void ComponentAccess.dumpTree(String indent) {
-    	String s = indent + dump() +": "+getID() + " at line: " + beginLine()+ ", ComponentDecl at: ";
-    	if (myComponentDecl().isUnknown())
-    		s+="Unknown";
-    	else
-    		s+=	myComponentDecl().beginLine();
+    	String s = indent + dump() +": "+getID() + " at line: " + beginLine();
     	System.out.println(s);
     	for(int i = 0; i < getNumChild(); i++)
       		getChild(i).dumpTree(indent + "  ");

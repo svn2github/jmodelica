@@ -27,7 +27,7 @@ aspect Types {
    eq InstRoot.getChild().constrainingType() = false;
 
    syn String InstNode.className() = "";
-   syn String InstComponentDecl.className() = getComponentDecl().myClass().name();
+   syn String InstComponentDecl.className() = myInstClass().name();
 
    // The double dispatch pattern applied to subtype testing.
    syn boolean InstNode.subType(InstNode t) = false;

@@ -343,45 +343,6 @@ aspect ErrorCheck {
 			return getClassDeclList().retrieveFullClassDecl(className);
 	}
 
-	/* We don't want to error check an entire model, just the classes
-	   that are used. */
-	public Collection<Problem> SourceRoot.checkErrorsInClass(String className) throws ModelicaClassNotFoundException {
-		FullClassDecl fcd = retrieveFullClassDecl(className);
-		if (fcd == null) {
-			throw new ModelicaClassNotFoundException("Class "+ className + "not found");
-		} else
-			return fcd.errorCheck();
-	}
-
-	boolean FullClassDecl.errorChecked = false;
-  	public void FullClassDecl.collectErrors() {
-    	debugPrint("ErrorChecking: " + qualifiedName());
-    	if (!errorChecked) {
-    	errorChecked = true;
-    	getEquationList().collectErrors();
-    	getAlgorithmList().collectErrors();
-    	getSuperList().collectErrors();
-    	getImportList().collectErrors();
-    	getComponentDeclList().collectErrors();
-    	debugPrint("ErrorChecking: " + qualifiedName() + ": done with components");
-    	if (!(getName().getID().equals(getEndName())))
-    		error("The declaration and end names of a class should be the same");
-  		}
-  	}
-	
- 	
-	public void ComponentDecl.collectErrors() {
-		super.collectErrors();
-		if (getClassName().myClassDecl()!=null) {
-		debugPrint("ComponentDecl.collectErrors:  "  + prettyPrint("") + ": " + getClassName().myClassDecl().qualifiedName());
-			getClassName().myClassDecl().collectErrors();
-		}
-	}
-	
-
-	
-   // Don't error check annotation
-   public void Annotation.collectErrors() {}
    
 }
 

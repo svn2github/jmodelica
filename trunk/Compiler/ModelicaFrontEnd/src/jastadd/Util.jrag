@@ -635,20 +635,6 @@ aspect ComponentDeclMethods {
    		return false;
    	}
    	
-   	/**
-   	 * Check if a ComponentDecl is declared discrete.
-   	 */
-   	syn boolean ComponentDecl.isInput() {
-   	
-   		if (hasTypePrefixInputOutput())
-   			if (getTypePrefixInputOutput() instanceof Input)
-   				return true;
-   		if (myClass().isInput())
-   			return true;
-   		
-   		return false;
-   	}
-   	
    	syn boolean InstComponentDecl.isInput() {
    	   	
    		if (getComponentDecl().hasTypePrefixInputOutput())
@@ -661,21 +647,7 @@ aspect ComponentDeclMethods {
    	}
    	
    	
-   	/**
-   	 * Check if a ComponentDecl is declared discrete.
-   	 */
-   	syn boolean ComponentDecl.isOutput() {
-   	
-   		if (hasTypePrefixInputOutput())
-   			if (getTypePrefixInputOutput() instanceof Output)
-   				return true;
-	    if (myClass().isOutput())
-   			return true;
-	    
-   	
-   		return false;
-   	}
-
+ 
    	syn boolean InstComponentDecl.isOutput() {
    	   	
    		if (getComponentDecl().hasTypePrefixInputOutput())
@@ -698,18 +670,10 @@ aspect ComponentDeclMethods {
 }
 
 aspect ShortClassUtil {
-    // TODO: rename this attribute to finalAliasClass
-	syn ClassDecl ClassDecl.finalClass() = this;
-	eq ShortClassDecl.finalClass() = getExtendsClauseShortClass().getSuper().myClassDecl().finalClass();
 
 	syn InstClassDecl InstClassDecl.finalClass() = this;
 	eq InstShortClassDecl.finalClass() = getInstExtends(0).getClassName().myInstClassDecl().finalClass();
 
-	syn BaseClassDecl BaseClassDecl.nextAliasClass() = null;
-	eq ShortClassDecl.nextAliasClass() = (BaseClassDecl)getExtendsClauseShortClass().getSuper().myClassDecl();
-
-	syn boolean BaseClassDecl.isAliasClass() = false;
-	eq ShortClassDecl.isAliasClass() = true;
 
 	syn boolean ClassDecl.isInput() = false;
 	eq ShortClassDecl.isInput() {
@@ -741,41 +705,6 @@ aspect ShortClassUtil {
 			return true;
 		}
 		return getInstExtends(0).getClassName().myInstClassDecl().isOutput();
-	}
-	
-	
-/*
-   syn boolean BaseClassDecl.hasModification() = false;
-   eq ShortClassDecl.hasModification() = hasClassModification();
-   
-   syn Modification BaseClassDecl.getModification() = null;
-   eq ShortClassDecl.getModification() = getClassModification();
-*/
-}
-
-aspect AllElements {
-
-	syn lazy HashSet ClassDecl.allLocalClassDecl() = emptyHashSet();
-	eq ShortClassDecl.allLocalClassDecl() = finalClass().allLocalClassDecl();
-	eq FullClassDecl.allLocalClassDecl() {
-		LinkedHashSet set = new LinkedHashSet(); // This is to get the same order every time
-		for (int i=0;i<numLocalClassDecl();i++) 
-			set.add(localClassDecl(i));
-		for (int i=0;i<getNumSuper();i++)
-			set.addAll(getSuper(i).getSuper().myClassDecl().allLocalClassDecl());
-		return set;
-	}
-	
-    syn lazy HashSet ClassDecl.allLocalComponentDecl() = emptyHashSet();
-	eq ShortClassDecl.allLocalComponentDecl() = finalClass().allLocalComponentDecl();
-	eq FullClassDecl.allLocalComponentDecl() {
-		debugPrint("<<<FullClassDecl.allLocalComponentDecl(): ");
-		LinkedHashSet set = new LinkedHashSet();
-		for (int i=0;i<getNumComponentDecl();i++) 
-			set.add(getComponentDecl(i));
-		for (int i=0;i<getNumSuper();i++)
-			set.addAll(getSuper(i).getSuper().myClassDecl().allLocalComponentDecl());
-		return set;
 	}
 	
 }

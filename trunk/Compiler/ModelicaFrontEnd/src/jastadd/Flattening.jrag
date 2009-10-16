@@ -66,13 +66,11 @@ aspect Flattening {
 
 		//System.out.println(fc.prettyPrint(""));
 		//fc.dumpTree("");
-					
 		HashSet<InstAccess> instAccesses = fc.collectInstAccesses();
 		if (instAccesses.size()>0) {
 			System.out.println("Flat model contains InstAccesses!!!");
 			//return null;
 		}
-	 	
     }
  
 	// Generic method for flattening	
@@ -427,7 +425,16 @@ aspect FlatExpressions {
 		}
 		return new FFunctionCall(getName().flatten(new FQName()),l);		
 	}
-	
+
+	public FExp InstFunctionCall.flatten(FQName prefix) {
+		List l = new List();
+		List args = new List();
+		for (FExp e : getArgss()) {
+			l.add(e.flatten(prefix));
+		}
+		return new FFunctionCall(new FIdUse(getName().flatten(new FQName())),l);		
+	}
+
 	public FExp FSumRedExp.flatten(FQName prefix) {
 		return new FSumRedExp(getFExp().flatten(prefix),
 		                     getFForIndex().flatten(prefix));
@@ -888,6 +895,14 @@ aspect InstantiatedExpressions {
 	rewrite InstFunctionCall {
     	when (!rewritten)
     		to FExp {
+    		    // TODO: WHY is this needed??? If removed, lookup of qualified
+    		    // names in InstFunctionCalls are not not rewritten to
+    		    // InstComponentAccesses for some reason.
+    		    // The difference introduced by calling getName().name() is
+    		    // That the accesses are then accesse left to right in a 
+    		    // qualified name, instead of right to left.
+    		    getName().name();
+    		    
     			FExp n = null;
     			String name = getName().myInstClassDecl().qualifiedName(); 
     			if (name.equals("Modelica.Math.sin")) {

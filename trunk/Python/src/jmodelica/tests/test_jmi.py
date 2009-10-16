@@ -552,7 +552,6 @@ class TestModel:
         """Test jmi.Model.eval_ode_f()."""
         self.m.dx = [0, 0, 0]
         self.m.eval_ode_f()
-        
         all_zeros = True
         for value in self.m.dx:
             if value != 0:

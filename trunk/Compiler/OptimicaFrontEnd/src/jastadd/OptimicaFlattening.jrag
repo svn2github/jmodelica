@@ -81,7 +81,7 @@ aspect OptimicaFlattening {
 
 		//System.out.println(fc.prettyPrint(""));
 		//fc.dumpTree("");
-					
+				
 		HashSet<InstAccess> instAccesses = fc.collectInstAccesses();
 		if (instAccesses.size()>0) {
 			System.out.println("Flat model contains InstAccesses!!!");
@@ -108,13 +108,13 @@ aspect OptimicaFlattening {
 			l.add(c);
 		return l;
 	}
-	eq ShortClassDecl.constraints() = getExtendsClauseShortClass().getSuper().myClassDecl().constraints();
+	//eq ShortClassDecl.constraints() = getExtendsClauseShortClass().getSuper().myClassDecl().constraints();
 	
 	syn ArrayList<Constraint> InstNode.constraints() = new ArrayList<Constraint>();
 	eq InstClassRoot.constraints() = getClassDecl().constraints();
 	eq InstOptClassDecl.constraints() = getClassDecl().constraints();
-	eq InstComponentDecl.constraints() = getComponentDecl().myClass().constraints();
-	eq InstExtends.constraints() = getExtendsClause().getSuper().myClassDecl().constraints();
+	eq InstComponentDecl.constraints() = myInstClass().constraints();
+	eq InstExtends.constraints() = myInstClass().constraints();
 	
     public abstract FConstraint Constraint.instantiate();
 	
@@ -171,6 +171,10 @@ aspect OptimicaFlattening {
 
 	syn List<FConstraint> InstNode.getFConstraints() {
 		return getFConstraintList();	
+	}
+	
+	public FExp InstTimedVariable.flatten(FQName prefix) {
+		return new FTimedVariable(new FIdUse(getName().flatten(new FQName())),getArg().flatten(prefix));		
 	}
 	
 	

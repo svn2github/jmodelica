@@ -16,14 +16,14 @@
 
 aspect OptimicaExpressions {
 
-	rewrite FunctionCall {
-		when (((getName() instanceof Dot)? ((Dot)getName()).getLeft()!=null: true) && 
-		      getName().getLastAccess() instanceof ComponentAccess &&
-		      hasFunctionArguments() &&
-		      getFunctionArguments().getNumExp()==1)
-		 to TimedVariable {
-		 	TimedVariable iv = new TimedVariable(getName(),
-		 	    getFunctionArguments().getExp(0));
+	rewrite InstFunctionCall {
+		when (//((getName() instanceof InstDot)? 
+				//	((InstDot)getName()).getLeft()!=null: true) && 
+				getName().getLastInstAccess() instanceof InstComponentAccess &&
+				getNumArgs()==1)
+		 to InstTimedVariable {
+			//System.out.println("rewrite InstFunctionCall: " + getName().name());
+		 	InstTimedVariable iv = new InstTimedVariable(getName(),getArgs(0));
 		 	iv.setStart(getStart());
 		 	return iv;
 		 }
