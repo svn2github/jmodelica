@@ -106,12 +106,21 @@ if COMPILE_WITH_IPOPT
 # Copy symbolic links
 	cd $(IPOPT_HOME); find * -type l |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/Ipopt
 endif 
+
 if WITH_MINGW	
 	mkdir -p $(bindistdir)/ThirdParty/MinGW
 # Copy files
 	cd $(MINGW_HOME); find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/MinGW
 # Copy symbolic links
 	cd $(MINGW_HOME); find * -type l |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/MinGW
+endif 
+
+if WITH_SUNDIALS	
+	mkdir -p $(bindistdir)/ThirdParty/SUNDIALS
+# Copy files
+	cd $(SUNDIALS_HOME); find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/SUNDIALS
+# Copy symbolic links
+	cd $(SUNDIALS_HOME); find * -type l |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/SUNDIALS
 endif 
 
 bindist: bindistdir

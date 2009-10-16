@@ -164,6 +164,7 @@ SHAREDEXT = @SHAREDEXT@
 SHARED_LDFLAGS = @SHARED_LDFLAGS@
 SHELL = @SHELL@
 STRIP = @STRIP@
+SUNDIALS_HOME = @SUNDIALS_HOME@
 VERSION = @VERSION@
 WITH_CPPAD = @WITH_CPPAD@
 WITH_IPOPT = @WITH_IPOPT@
@@ -772,11 +773,18 @@ bindistdir: install
 @COMPILE_WITH_IPOPT_TRUE@	cd $(IPOPT_HOME); find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/Ipopt
 # Copy symbolic links
 @COMPILE_WITH_IPOPT_TRUE@	cd $(IPOPT_HOME); find * -type l |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/Ipopt
+
 @WITH_MINGW_TRUE@	mkdir -p $(bindistdir)/ThirdParty/MinGW
 # Copy files
 @WITH_MINGW_TRUE@	cd $(MINGW_HOME); find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/MinGW
 # Copy symbolic links
 @WITH_MINGW_TRUE@	cd $(MINGW_HOME); find * -type l |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/MinGW
+
+@WITH_SUNDIALS_TRUE@	mkdir -p $(bindistdir)/ThirdParty/SUNDIALS
+# Copy files
+@WITH_SUNDIALS_TRUE@	cd $(SUNDIALS_HOME); find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/SUNDIALS
+# Copy symbolic links
+@WITH_SUNDIALS_TRUE@	cd $(SUNDIALS_HOME); find * -type l |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(abs_builddir)/$(bindistdir)/ThirdParty/SUNDIALS
 
 bindist: bindistdir
 	tar -cf $(bindistdir).tar $(bindistdir)

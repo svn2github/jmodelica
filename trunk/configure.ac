@@ -112,6 +112,24 @@ AS_IF([test "x$with_ipopt" != xno],
       [WITH_IPOPT="true"],
       [WITH_IPOPT="false"]) 
 
+# Checks for libraries.
+AC_ARG_WITH([sundials],
+   [AS_HELP_STRING([--with-sundials],
+     [SUNDIALS installation directory @<:@default=check@:>@])],
+   [sundials=$withval],
+   [with_sundials=no])
+
+AS_IF([test "x$with_sundials" = xno],
+      [AC_MSG_RESULT([SUNDIALS installation not specified.])],
+      [AC_CHECK_FILE($sundials/bin/sundials-config,
+                     [],
+                     [AC_MSG_FAILURE([SUNDIALS installation specifed, but seems to be corrupt!])])])
+
+AM_CONDITIONAL([WITH_SUNDIALS],[test "x$with_sundials" != xno])
+
+AC_SUBST(SUNDIALS_HOME)
+SUNDIALS_HOME=$sundials
+
 # Checks for mingw.
 AC_ARG_WITH([mingw],
    [AS_HELP_STRING([--with-mingw],
