@@ -489,7 +489,7 @@ class SundialsDAESimulator(Simulator):
                 self.t_sim_duration = None
             
             __slots__ = [
-                'parameters',     # parameters
+                'parameters',     # Parameters
                 'model',          # The evaluation model
                 't_sim_start',    # Start time for simulation.
                 't_sim_end',      # End time for simulation.
@@ -497,11 +497,9 @@ class SundialsDAESimulator(Simulator):
             ]
         
         # initial y,ydot (copying just in case)
-        #y = ida.NVector(model.x.copy())
-        #ydot = ida.NVector(model.dx.copy())
-        
         y = ida.NVector(N.append(model.x.copy(),model.w.copy()))
         ydot = ida.NVector(N.append(model.dx.copy(),[0]*len(model.w)))
+        
         
         # converting tolerances to C types
         abstol = ida.realtype(self.abstol)
@@ -535,11 +533,16 @@ class SundialsDAESimulator(Simulator):
         if return_last==False:
             num_samples = int(math.ceil((end_time - start_time) / time_step)) + 1
             T = N.zeros(num_samples, dtype=pyjmi.c_jmi_real_t)
-            ylist = N.zeros((num_samples, len(model.x)+len(model.w)),
+            ylist = N.zeros((num_samples, len(model.dx)+len(model.x)+len(model.w)),
                             dtype=pyjmi.c_jmi_real_t)
-            ylist[0] = N.append(model.x.copy(),model.w.copy())
+            temp = N.append(model.dx.copy(),model.x.copy())
+            ylist[0] = N.append(temp,model.w.copy())
             T[0] = t0.value
             i = 1
+        else:
+            ylist = N.zeros((1, len(model.dx)+len(model.x)+len(model.w)),
+                            dtype=pyjmi.c_jmi_real_t)
+            
             
         #ida.IDASetId(ida_mem,ida.NVector(N.append([1.0]*len(model.x),[0.0]*len(model.w))))
         #ida.IDACalcIC(ida_mem,ida.IDA_YA_YDP_INIT,ida.realtype(t0.value+time_step))
@@ -555,8 +558,9 @@ class SundialsDAESimulator(Simulator):
             """Used for return."""
             if return_last==False:
                 T[i] = t.value
-                ylist[i] = N.array(y)
-                i = i + 1
+                temp = N.append(N.array(ydot[:len(model.dx)]),N.array(y[:len(model.x)]))
+                ylist[i] = N.append(temp,N.array(y[len(model.x):len(y)]))
+                i = i+1
                 
             if N.abs(tout-end_time)<=1e-6:
                 break
@@ -587,8 +591,8 @@ class SundialsDAESimulator(Simulator):
             print "Gradient" #TODO
         
         if return_last:
-            ylist = N.array(y).copy()
-            T = t.value
+            ylist[0] = N.append(N.array(ydot[:len(model.dx)]),N.array(y))
+            T = N.array(t.value)
         else:
             ylist = N.array(ylist)
             T = N.array(T)
@@ -609,27 +613,37 @@ class SundialsDAESimulator(Simulator):
             Y = N.array([])
             
             # invert the dictionaries so that the variable name is the key
+            invert_der_names = dict([v,k] for k,v in self.get_model().get_derivative_names().iteritems())
             invert_diff_names = dict([v,k] for k,v in self.get_model().get_differentiated_variable_names().iteritems())
             invert_alg_names = dict([v,k] for k,v in self.get_model().get_algebraic_variable_names().iteritems())
             
+            der_minimum = N.array(invert_der_names.values(),dtype=N.int16).min()
             diff_minimum = N.array(invert_diff_names.values(),dtype=N.int16).min()
             alg_minimum = N.array(invert_alg_names.values(),dtype=N.int16).min()
+            
+            nbr_derivative = len(self.get_model().dx)
+            nbr_differentiated = len(self.get_model().x)
             
             nbr_found = 0
             
             for x in variables:
+                # search for the variable in derivative variables
+                if invert_der_names.has_key(x):
+                    abs_index = N.array(invert_der_names[x],dtype=N.int16)
+                    index = abs_index-der_minimum
+                    Y = N.append(Y,self._Y[:,index],axis=0)
+                    nbr_found = nbr_found+1
                 # search for the variable in differentiated variables
-                if invert_diff_names.has_key(x):
+                elif invert_diff_names.has_key(x):
                     abs_index = N.array(invert_diff_names[x],dtype=N.int16)
-                    index = abs_index - diff_minimum
+                    index = abs_index-diff_minimum+nbr_derivative
                     Y = N.append(Y,self._Y[:,index],axis=0)
                     nbr_found = nbr_found+1
                 
                 # search for the variable in algebraic variables    
                 elif invert_alg_names.has_key(x):
                     abs_index = N.array(invert_alg_names[x],dtype=N.int16)
-                    abs_model_index = N.array(len(self.get_model().get_x()),dtype=N.int16)
-                    index = abs_index-alg_minimum+abs_model_index
+                    index = abs_index-alg_minimum+nbr_derivative+nbr_differentiated
                     Y = N.append(Y,self._Y[:,index],axis=0)
                     nbr_found = nbr_found+1
             
