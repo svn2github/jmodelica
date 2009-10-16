@@ -23,6 +23,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.logging.ConsoleHandler;
@@ -415,14 +416,43 @@ public class ModelicaCompiler {
 		logger.info("Checking for errors...");
 		Collection<Problem> problems = ipr.checkErrorsInInstClass(cl);
 		if (problems.size()>0) {
-			CompilerException ce = new CompilerException();
-			for (Problem p : problems) {
-				ce.addProblem(p);
-			}
-			throw ce;
+			handleCompilerProblems(problems);
 		}
 		
 		return ipr.simpleLookupInstClassDecl(cl);		
+	}
+	
+	protected void handleCompilerProblems(Collection<Problem> problems) throws CompilerException{
+		ArrayList<Problem> warnings = new ArrayList<Problem>();
+		ArrayList<Problem> errors = new ArrayList<Problem>();
+		for (Problem p : problems) {
+			if(p.severity() == Problem.Severity.ERROR) {
+				errors.add(p);
+			} else {
+				warnings.add(p);
+			}
+		}
+		
+		if((errors.size() > 0) || (warnings.size() > 0 && options.getBooleanOption("halt_on_warning"))) {
+			// there are errors -> add errors and possible warnings and throw exception or
+			// there are only warnings but compiler option sais throw exception
+			
+			CompilerException ce = new CompilerException();
+			for(Problem e: errors) {
+				ce.addProblem(e);
+			}
+			for(Problem w: warnings) {
+				ce.addProblem(w);
+			}
+			throw ce;
+		} else {
+			// there are only warnings and halt_on_warning = false so just send them to logger
+			logger.warning("------- Compiler Warnings -------");
+			for(Problem p:warnings) {
+				logger.warning(p.toString());
+			}
+			logger.warning("--------------------------------");
+		}
 	}
 	
 	/**
@@ -472,11 +502,7 @@ public class ModelicaCompiler {
 
 		Collection<Problem> problems = fc.errorCheck();
 		if (problems.size()>0) {
-			CompilerException ce = new CompilerException();
-			for (Problem p : problems) {
-				ce.addProblem(p);
-			}
-			throw ce;
+			handleCompilerProblems(problems);
 		}
 				
 		logger.info("Creating transformed .mof file...");

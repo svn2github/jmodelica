@@ -200,11 +200,7 @@ public class OptimicaCompiler extends ModelicaCompiler{
 
 		Collection<Problem> problems = fc.errorCheck();
 		if (problems.size()>0) {
-			CompilerException ce = new CompilerException();
-			for (Problem p : problems) {
-				ce.addProblem(p);
-			}
-			throw ce;
+			super.handleCompilerProblems(problems);
 		}
 				
 		logger.info("Creating .mof file...");

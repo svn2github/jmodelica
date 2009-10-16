@@ -51,5 +51,16 @@
 				</Description>
 			</BooleanAttributes>
 		</Option>
+		<Option>
+			<Type>Boolean</Type>
+			<BooleanAttributes>
+				<Key>halt_on_warning</Key>
+				<Value>false</Value>
+				<Description>
+                                If this option is set to false (default) one or more compiler 
+                                warnings will not stop compilation of the model.
+				</Description>
+			</BooleanAttributes>
+		</Option>
 	</Options>	
 </OptionRegistry>
