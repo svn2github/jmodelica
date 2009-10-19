@@ -39,7 +39,10 @@ public class Library {
 	}
 
 	public String toString() {
-		return Util.implode(PART_SEPARATOR, new String[] { name, version.toString(), path });
+		return 
+		    Util.implode(
+		        PART_SEPARATOR, 
+		        new String[] { name, version.toString(), path });
 	}
 
 	@Override

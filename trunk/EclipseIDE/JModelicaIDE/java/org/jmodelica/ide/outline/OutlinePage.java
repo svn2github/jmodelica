@@ -70,7 +70,7 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 	 * Redraws the tree view 
 	 */
 	public void update() {
-		TreeViewer viewer = getTreeViewer();
+        TreeViewer viewer = getTreeViewer();
 		if (viewer != null) {
 			Control control= viewer.getControl();
 			if (control != null && !control.isDisposed()) {

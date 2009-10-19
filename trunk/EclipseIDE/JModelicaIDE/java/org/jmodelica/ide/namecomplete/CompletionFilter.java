@@ -15,7 +15,7 @@ package org.jmodelica.ide.namecomplete;
  */
 public class CompletionFilter {
 
-    final String filter;
+    public final String filter;
 
     public CompletionFilter(String filter) {
         this.filter = filter;
@@ -75,5 +75,9 @@ public class CompletionFilter {
            return matchesCamel(filter, name, i, j + 1);
            
         throw new RuntimeException("Impossible to come here");
+    }
+    
+    public int length() {
+        return filter.length();
     }
 }

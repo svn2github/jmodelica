@@ -45,19 +45,25 @@ import org.eclipse.ui.dialogs.PropertyPage;
 import org.jmodelica.generated.scanners.PackageExaminer;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.helpers.Library;
+import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.ide.helpers.Library.Version;
 
 public class ProjectPropertyPage extends PropertyPage {
 
 	private List<Library> libraries;
 	private String defaultMSL;
+	private String optionsPath;
 	
 	private Combo defMSLCombo;
 	private Button delLibraryButton;
 	private Button addLibraryButton;
+	private Button optionsBrowse;
+	private org.eclipse.swt.widgets.Text text;
 	private Table libraryTable;
+	private Group optionsGroup;
 	
 	private DirectoryDialog dirDlg;
+	private final DirectoryDialog optionsDlg;
 	private MessageBox error;
 	private PackageExaminer	examiner;
 	
@@ -68,29 +74,73 @@ public class ProjectPropertyPage extends PropertyPage {
 		dirDlg = new DirectoryDialog(shell);
 		dirDlg.setMessage("Select directory containing library");
 		dirDlg.setText("Select library");
+		
+		optionsDlg = new DirectoryDialog(shell);
+		optionsDlg.setMessage("Select directory containing options.xml");
+		optionsDlg.setText("Select directory");
+		
 		error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
 		examiner = new PackageExaminer();
 		changed = false;
+		
+		optionsPath = "";
 	}
 	
 	@Override
 	protected Control createContents(Composite parent) {
-		Group lib = createLibraryGroup(parent);
-		return lib;
+		return 
+		    createLibraryGroup(parent);
 	}
 
-	private Group createLibraryGroup(Composite parent) {
+	private Composite createLibraryGroup(Composite parent) {
 		loadProperties();
-		Group lib = new Group(parent, SWT.NONE);
-		lib.setText("Libraries");
-		GridLayout layout = new GridLayout();
-		layout.numColumns = 1;
-		lib.setLayout(layout);
-		createDefaultMSLComposite(lib);
-		createLibrariesComposite(lib);
+		
+		Group lib = new Group(parent, SWT.NONE); {
+		    lib.setText("Libraries");
+		    GridLayout layout = new GridLayout();
+		    layout.numColumns = 1;
+		    lib.setLayout(layout);
+		    createDefaultMSLComposite(lib);
+		    createLibrariesComposite(lib);
+		};
+		
+		optionsGroup = new Group(parent, SWT.None); 
+		{
+		    optionsGroup.setText("Options.xml");
+		    GridLayout layout = new GridLayout();
+            layout.numColumns = 1;
+            optionsGroup.setLayout(layout);
+            createSomestuff(optionsGroup);
+            optionsGroup.pack();
+		}
+		
 		return lib;
 	}
 
+	private Composite createSomestuff(Composite parent) {
+	    
+	    Composite container 
+	        = new Composite(parent, SWT.NONE);
+	    GridLayout layout 
+	        = createMarginlessGridLayout(3);
+	    container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	    container.setLayout(layout);
+
+    
+        new Label(container, SWT.LEFT)
+	        .setText("Options.xml path:");
+	    
+	    text 
+	        = new org.eclipse.swt.widgets.Text(container, SWT.NONE);
+	    text.setText(optionsPath);
+	    
+	    optionsBrowse 
+	        = createButton(container, "Browse");
+	    optionsBrowse.addSelectionListener(new SetOptionsListener());
+	    
+	    return container;
+    }
+	
 	private Composite createDefaultMSLComposite(Composite parent) {
 		Composite container = new Composite(parent, SWT.NONE);
 		GridLayout layout = createMarginlessGridLayout(2);
@@ -193,24 +243,54 @@ public class ProjectPropertyPage extends PropertyPage {
 	}
 
 	private void loadProperties() {
-		IProject proj = getProject();
+		
+	    IProject proj = getProject();
 		String libStr = null;
+
 		try {
-			libStr = proj.getPersistentProperty(IDEConstants.PROPERTY_LIBRARIES_ID);
-			defaultMSL = proj.getPersistentProperty(IDEConstants.PROPERTY_DEFAULT_MSL_ID);
+		    
+			libStr = 
+			    proj.getPersistentProperty(
+		            IDEConstants.PROPERTY_LIBRARIES_ID);
+
+			defaultMSL = 
+			    proj.getPersistentProperty(
+		            IDEConstants.PROPERTY_DEFAULT_MSL_ID);
+			
+			optionsPath =
+			    new Maybe<String>(
+			            proj.getPersistentProperty(
+		                    IDEConstants.PROPTERTY_OPTIONS_PATH))
+                .defaultTo("");
+			
 		} catch (CoreException e) {
+		    e.printStackTrace();
 		}
+		
 		libraries = Library.fromString(libStr);
+		
 	}
 	
 	private void saveProperties() {
+	    
 		IProject proj = getProject();
+		
 		try {
-			String libStr = Library.toString(libraries);
-			proj.setPersistentProperty(IDEConstants.PROPERTY_LIBRARIES_ID, libStr);
-			proj.setPersistentProperty(IDEConstants.PROPERTY_DEFAULT_MSL_ID, defaultMSL);
+		
+		    String libStr = Library.toString(libraries);
+			
+		    proj.setPersistentProperty(
+			        IDEConstants.PROPERTY_LIBRARIES_ID, libStr);
+			
+			proj.setPersistentProperty(
+			        IDEConstants.PROPERTY_DEFAULT_MSL_ID, defaultMSL);
+			
+			proj.setPersistentProperty(
+			        IDEConstants.PROPTERTY_OPTIONS_PATH, text.getText());
+			
 			if (changed) 
 				proj.build(IncrementalProjectBuilder.FULL_BUILD, null);
+			
 		} catch (CoreException e) {
 		}
 		changed = false;
@@ -242,6 +322,25 @@ public class ProjectPropertyPage extends PropertyPage {
 		}
 	}
 
+	public class SetOptionsListener implements SelectionListener {
+
+        public void widgetDefaultSelected(SelectionEvent e) {        
+        }
+        
+
+        public void widgetSelected(SelectionEvent e) {
+
+            String path = optionsDlg.open();
+            if (path == null)
+                return;
+            else
+                text.setText(path);
+            
+            optionsGroup.pack();
+        }
+	
+	}
+	
 	public class AddListener implements SelectionListener {
 
 		public void widgetDefaultSelected(SelectionEvent e) {
@@ -253,10 +352,13 @@ public class ProjectPropertyPage extends PropertyPage {
 				try {
 					Library lib = examiner.examine(path);
 					if (!lib.isOK()) {
-						error.setMessage("Could not find package information in package.mo file.");
+						error.setMessage(
+					        "Could not find package " +
+					        "information in package.mo file.");
 						error.open();
 					} else if (libraries.contains(lib)) {
-						error.setMessage("Library already added.");
+						error.setMessage(
+					        "Library already added.");
 						error.open();
 					} else {
 						libraries.add(lib);
@@ -266,7 +368,9 @@ public class ProjectPropertyPage extends PropertyPage {
 						changed = true;
 					}
 				} catch (FileNotFoundException ex) {
-					error.setMessage("No package.mo file found.\nDirectory does not seem to contain a library.");
+					error.setMessage(
+				        "No package.mo file found.\n" +
+						"Directory does not seem to contain a library.");
 					error.open();
 				}
 			}

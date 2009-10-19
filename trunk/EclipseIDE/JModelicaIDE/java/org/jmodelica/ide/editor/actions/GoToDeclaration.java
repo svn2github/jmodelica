@@ -2,6 +2,7 @@ package org.jmodelica.ide.editor.actions;
 
 import org.eclipse.jface.action.Action;
 import org.jmodelica.ide.IDEConstants;
+import org.jmodelica.ide.OffsetDocument;
 import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.ide.helpers.EclipseCruftinessWorkaroundClass;
 import org.jmodelica.ide.helpers.Maybe;
@@ -32,10 +33,11 @@ public void run() {
     if (fRoot == null) 
         return;
     
-    Maybe<InstNode> iNode = new Lookup(fRoot).declFromAccessAt(
-            editor.document(),
-            editor.selection().getOffset());
-    
+    Maybe<InstNode> iNode = new Lookup(fRoot).declarationFromAccessAt(
+            new OffsetDocument(
+                editor.document(),
+                editor.selection().getOffset()));
+
     if (iNode.isNothing()) 
         return;
  

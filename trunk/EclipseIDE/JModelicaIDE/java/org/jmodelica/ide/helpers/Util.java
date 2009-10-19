@@ -43,8 +43,8 @@ import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.Access;
-import org.jmodelica.modelica.compiler.ComponentAccess;
 import org.jmodelica.modelica.compiler.Dot;
+import org.jmodelica.modelica.compiler.ParseAccess;
 
 public class Util {
 	public static String DELIM = "|";
@@ -250,7 +250,9 @@ public class Util {
      * @param parts parts of the qualified name
      * @return access created from parts 
      */
-    public static Access createDotAccess(String[] parts) {
+    public static Access createDotAccess(String id) {
+        
+        String[] parts = id.split("\\.");
         
         if (parts.length == 0)
             throw new IllegalArgumentException(
@@ -261,7 +263,7 @@ public class Util {
 
     private static Access createDotAccess(String[] parts, int i) {
 
-        Access res = new ComponentAccess();
+        Access res = new ParseAccess();
         res.setID(parts[i]);
 
         return i == parts.length - 1 

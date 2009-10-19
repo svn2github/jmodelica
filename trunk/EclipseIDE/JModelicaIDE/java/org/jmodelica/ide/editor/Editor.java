@@ -94,14 +94,22 @@ private final CompletionProcessor completions;
  */
 public Editor() {
     super();
-    fSourceOutlinePage = new SourceOutlinePage(this);
-    fInstanceOutlinePage = new InstanceOutlinePage(this);
-    completions = new CompletionProcessor(this);
-    goToDeclaration = new GoToDeclaration(this);
-    errorCheckAction = new ErrorCheckAction();
-    fPartitioner = new FastPartitioner(new Modelica22PartitionScanner(),
+    fSourceOutlinePage = 
+        new SourceOutlinePage(this);
+    fInstanceOutlinePage = 
+        new InstanceOutlinePage(this);
+    completions = 
+        new CompletionProcessor(this);
+    goToDeclaration = 
+        new GoToDeclaration(this);
+    errorCheckAction = 
+        new ErrorCheckAction();
+    toggleAnnotationsAction = 
+        new ToggleAnnotationsAction(this);
+    fPartitioner = 
+        new FastPartitioner(
+            new Modelica22PartitionScanner(),
             Modelica22PartitionScanner.LEGAL_PARTITIONS);
-    toggleAnnotationsAction = new ToggleAnnotationsAction(this);
 }
 
 /**

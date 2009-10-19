@@ -1,7 +1,7 @@
 package org.jmodelica.ide.namecomplete;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
+import org.jmodelica.ide.OffsetDocument;
 
 public class Context {
 
@@ -20,34 +20,33 @@ final CompletionFilter filter;
  * context = "a.b" 
  * filter = "prefix"
  * 
- * @param d document
+ * @param doc document
  * @param caretOffset offset to lookup context at
  * @return a new Pair<String, String> containing context and filter.
  */
-public Context(IDocument d, int caretOffset) {
+public Context(OffsetDocument doc) {
     
     String qPart = "", fPart = "";
 
     try {
 
-        int lineStart = d.getLineOffset(d.getLineOfOffset(caretOffset));
-
-        String line = d.get(lineStart, caretOffset - lineStart);
-        String[] tmp = line.split("[^_A-Za-z_0-9.]", -1);
-
-        qPart = tmp[tmp.length - 1];
-        int i = qPart.lastIndexOf('.');
-        
-        if (qPart.endsWith("."))
-            fPart = "";
-        else if (i == -1) {
-            fPart = qPart;
-            qPart = "";
-        } else {
-            fPart = qPart.substring(i+1, qPart.length());
-            qPart = qPart.substring(0, i);
+        String context; {
+            int lineStart =
+                doc.getLineOffset(doc.getLineOfOffset(doc.offset));
+            String[] tmp = 
+                doc
+                .get(lineStart, doc.offset - lineStart)
+                .split("[^_A-Za-z_0-9.]", -1);
+            context = 
+                tmp[tmp.length - 1];
         }
 
+        int i = 
+            context.lastIndexOf('.');
+        qPart = 
+            context.substring(0, Math.max(0, i));
+        fPart = 
+            context.substring(i+1, context.length());
 
     } catch (BadLocationException e) {
         e.printStackTrace();

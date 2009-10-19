@@ -58,6 +58,7 @@ public class IDEConstants {
 	
 	public static final QualifiedName PROPERTY_LIBRARIES_ID = new QualifiedName(PLUGIN_ID, "libraries");
 	public static final QualifiedName PROPERTY_DEFAULT_MSL_ID = new QualifiedName(PLUGIN_ID, "default_msl");
+	public static final QualifiedName PROPTERTY_OPTIONS_PATH = new QualifiedName(PLUGIN_ID, "options_path");
 
 	public static final String WIZARD_ID = PLUGIN_ID + ".wizard";
 	public static final String WIZARD_FILE_ID = WIZARD_ID + ".file";
