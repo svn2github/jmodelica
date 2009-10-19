@@ -40,6 +40,12 @@ aspect Util {
         return tmp;
     }
 	
+   public Object List.getLast() {
+       if (getNumChild() > 0)
+           return getChild(getNumChild() - 1);
+       return null; 
+   } 
+   
 	// Add a isKnown() method. I hate double negating things! :)
 	
 	public boolean InstClassDecl.isKnown() {

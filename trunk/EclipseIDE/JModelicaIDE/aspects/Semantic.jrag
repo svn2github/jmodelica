@@ -1,8 +1,8 @@
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.ide.namecomplete.*;
-import java.util.ArrayList;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 
-import org.eclipse.swt.graphics.Image;
 
 aspect Semantic {
 
@@ -50,16 +50,16 @@ aspect Semantic {
     }
     
     eq FullClassDecl.getClassDeclAt(IDocument d, int offset) {
-        return super.getClassDeclAt(d, offset)
-                   .orElse(
-               Maybe.fromBool(this, containsPoint(d, offset)));
+        return 
+            super.getClassDeclAt(d, offset)
+            .orElse(
+            Maybe.guard(this, containsPoint(d, offset)));
     }
     
     /**
-     * Return access at offset. Favour left child of Dot nodes over the Dot
-     * node itself, but not the right child. I.e. (where ^ marks the offset)
+     * Return access at offset. Favour left children of Dots. E.g.
 
-     *  ...qualifi^ed.name      returns "qualified", while
+     *  ...qualified.name      returns "qualified", while
      *  ...qualified.na^me      returns "qualified.name"
      *     
      */
@@ -81,10 +81,8 @@ aspect Semantic {
     }
     
     eq Access.getAccessAt(IDocument d, int offset) {
-        if (containsPoint(d, offset))
-            return Maybe.Just(this);
-        return Maybe.<Access>Nothing();
-    }
+        return Maybe.guard(this, containsPoint(d, offset));
+    } 
     
     
     InstNode implements CompletionNode; //{
@@ -193,8 +191,26 @@ aspect Semantic {
      */
     public void Program.dynamicAddStoredDefinition(StoredDefinition def) {
         def.setParent(this);
-        //this.addUnstructuredEntity(def);
+        this.addUnstructuredEntity(def);
     }
+    
+    /**
+     * Used for lookup in name completion. Adds access, then caller calls
+     * myInstClassDecl to lookup access in instance tree.
+     */
+    public InstAccess InstClassDecl.addClassDynamic(InstAccess access) {
+        addDynamicClassName(access);
+        return access;
+    }
+     
+    /**
+     * See above.
+     */
+    public InstAccess InstClassDecl.addComponentDynamic(InstAccess access) {
+        addDynamicComponentName(access);
+        return access;
+    }
+    
 }
 
 /**
@@ -221,12 +237,12 @@ aspect CrossReference {
      */
     syn HashSet<IJastAddNode> ASTNode.getReference();
     
-    eq ComponentAccess.getReference()
-        = lookupComponent(getID());
-    
-    eq ClassAccess.getReference()
-        = lookupClass(getID());
-    
+//    eq ComponentAccess.getReference()
+//        = lookupComponent(getID());
+//    
+//    eq ClassAccess.getReference()
+//        = lookupClass(getID());
+//    
     eq ASTNode.getReference() = new HashSet<IJastAddNode>();
     
     /**
@@ -241,29 +257,35 @@ aspect CrossReference {
 //TODO: remove. only for debugging
 aspect NADebugging {    
     
-    private void ASTNode.debugPrintThis(String ind) {
-        System.out.printf("%s%s:\n", ind, this.getNodeName());
+    private void ASTNode.debugPrintThis(String ind, PrintStream p) {
+        p.printf("%s%s:\n", ind, this.getNodeName());
     }
     
     public void ASTNode.printDebugInfo() {
-        this.printDebugInfo("");
+        this.printDebugInfo("", System.out);
     }
     
-    public void ASTNode.printDebugInfo(String ind) {
-        this.debugPrintThis(ind);
+    public void ASTNode.printDebugInfo(String ind, PrintStream p) {
+        this.debugPrintThis(ind, p);
         
         for (ASTNode node : this) 
-            node.printDebugInfo(ind + "  ");
+            node.printDebugInfo(ind + "  ", p);
     }
     
-    public void List.printDebugInfo(String ind) {
+    public void List.printDebugInfo(String ind, PrintStream p) {
         for (ASTNode node : this) 
-            node.printDebugInfo(ind + "  ");
+            node.printDebugInfo(ind + "  ", p);
     }
     
-    public void Opt.printDebugInfo(String ind) {
+    public void Opt.printDebugInfo(String ind, PrintStream p) {
         for (ASTNode node : this) 
-            node.printDebugInfo(ind + "  ");
+            node.printDebugInfo(ind + "  ", p);
+    }
+    
+    public String ASTNode.toString() {
+        ByteArrayOutputStream b = new ByteArrayOutputStream();
+        printDebugInfo("", new PrintStream(b));
+        return b.toString();
     }
     
 }
