@@ -63,7 +63,8 @@ aspect Outline {
 	}
 	
 	/**
-	 * Return the node that corresponds to the part of the code that we want to select when selecting this node in the outline.
+	 * Return the node that corresponds to the part of the code that we want to 
+	 * select when selecting this node in the outline.
 	 * @jastadd.client-api
 	 */
 	syn ASTNode ASTNode.getSelectionNode() = this;
@@ -80,7 +81,6 @@ aspect Outline {
 	eq InstClassDecl.contentOutlineImage() = ImageLoader.getClassImage(getClassIconName(), false, true);
 	eq InstComponentDecl.contentOutlineImage() = ImageLoader.getClassImage(getClassIconName(), true, true);
 	eq ComponentDecl.contentOutlineImage() = ImageLoader.getFrequentImage(ImageLoader.COMPONENT_IMAGE);
-//	eq InstPrimitive.contentOutlineImage() = ImageLoader.getClassImage(ImageLoader.COMPONENT_IMAGE);
 	
 	/**
 	 * Return the class type for the node as defined by <pre>ImageLoader.*_CLASS</pre>, if applicable.
@@ -89,7 +89,6 @@ aspect Outline {
 	syn String ASTNode.getClassIconName() = null;
 	eq BaseClassDecl.getClassIconName() = getRestriction().getClassIconName();
 	eq InstClassDecl.getClassIconName() = getClassDecl().getClassIconName();
-//	eq ComponentDecl.getClassIconName() = getRestriction().getClassIconName();
 	eq InstComponentDecl.getClassIconName() = myInstClass().getClassIconName();
 	eq InstPrimitive.getClassIconName() = ImageLoader.CLASS_CLASS;
 	eq Block.getClassIconName() = ImageLoader.BLOCK_CLASS;
@@ -121,7 +120,7 @@ aspect Outline {
 	
 	/*
 	 * InstNodes doesn't have their classes as children... why? 
-	 * Anyway we need new hasVisibleChildren & getChildren.
+	 * Anyway we need new hasVisibleChildren() & outlineChildren().
 	 */
    	eq InstNode.hasVisibleChildren() {
    		/* Don't descend into error nodes. */
@@ -163,4 +162,9 @@ aspect Outline {
 	/*
 	 * Prune uninteresting parts of tree.
 	 */
+	eq AbstractEquation.hasVisibleChildren() = false;
+	eq AbstractAlgorithm.hasVisibleChildren() = false;
+	eq Access.hasVisibleChildren() = false;
+	eq Annotation.hasVisibleChildren() = false;
+	eq ComponentDecl.hasVisibleChildren() = false;
 }

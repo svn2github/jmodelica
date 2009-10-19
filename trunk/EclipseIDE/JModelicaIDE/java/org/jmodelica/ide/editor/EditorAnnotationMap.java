@@ -39,9 +39,9 @@ public EditorAnnotationMap(Iterable<Position> ps, Editor editor) {
              */
             
             ITextSelection sel = editor.selection();
-            annotation = new CharacterProjectionAnnotation(
-                    editor.annotationsVisible() ||
-                    pos.overlapsWith(sel.getOffset(), sel.getLength()));
+            boolean collapsed = !editor.annotationsVisible() && 
+            		!pos.overlapsWith(sel.getOffset(), sel.getLength());
+			annotation = new CharacterProjectionAnnotation(collapsed);
             
         } else {
             annotation = new ProjectionAnnotation();

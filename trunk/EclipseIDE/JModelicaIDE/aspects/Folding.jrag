@@ -36,6 +36,7 @@ aspect ModelicaFolding {
 
     /*
      * We need to replace foldingPositions(), since we don't want any rewrites
+     * (copied and altered from folding aspect in JastAdd IDE plugin).
      */
     refine Folding eq ASTNode.foldingPositions(IDocument document) {
         ArrayList list = new ArrayList();
@@ -61,7 +62,9 @@ aspect ModelicaFolding {
     }
 
     /*
-     * Since all children isn't always returned by getChild(), we need new foldingPositions() 
+     * Since all children isn't always returned by getChild(), 
+     * ClassDecl needs new foldingPositions() (copied and altered from folding 
+     * aspect in JastAdd IDE plugin).
      */
 	eq ClassDecl.foldingPositions(IDocument document) {
 		ArrayList list = new ArrayList();
