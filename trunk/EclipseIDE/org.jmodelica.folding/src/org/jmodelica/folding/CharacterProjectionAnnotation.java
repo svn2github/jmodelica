@@ -17,8 +17,16 @@ import org.eclipse.swt.widgets.Canvas;
 
 public class CharacterProjectionAnnotation extends ProjectionAnnotation {
 
+    public CharacterProjectionAnnotation() { }
+    
+    public CharacterProjectionAnnotation(boolean visible) { 
+        if (!visible)
+            markCollapsed();
+    }
+    
 	@Override
 	public void paint(GC gc, Canvas canvas, Rectangle rectangle) {
+	    
 	}
 
 }
