@@ -5,7 +5,7 @@ import java.io.StringReader;
 import java.util.Scanner;
 
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
+import org.jmodelica.ide.OffsetDocument;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.ide.indent.DocUtil;
 import org.jmodelica.modelica.compiler.ClassDecl;
@@ -17,8 +17,7 @@ public class ModelicaTestCase {
     
     static final String FAIL = "<<FAILURE: in test %d>>";
 
-    public int caretOffset;
-    public IDocument document;
+    public OffsetDocument document;
     public SourceRoot root;
     public ClassDecl enclosingClass;
     
@@ -33,7 +32,7 @@ public class ModelicaTestCase {
             }
 
             String testCase = new Scanner(file).useDelimiter("\\Z").next();
-            caretOffset = testCase.indexOf('^');
+            int caretOffset = testCase.indexOf('^');
 
             testCase = testCase.replaceAll("\\^", "");
             
@@ -42,7 +41,7 @@ public class ModelicaTestCase {
             ModelicaParser parser = new ModelicaParser();
 
             root = (SourceRoot) parser.parse(scanner);
-            document = new Document(testCase);
+            document = new OffsetDocument(testCase, caretOffset);
 
             if (caretOffset < 0) {
                 System.out.println("^ not found. not setting related variables. ");
@@ -82,7 +81,7 @@ public class ModelicaTestCase {
         if (!nothingExpected) 
             name = expected.substring(expected.indexOf("Just") + 4) .trim();
         
-        return Maybe.fromBool(name, !nothingExpected);    
+        return Maybe.guard(name, !nothingExpected);    
     }
 
 

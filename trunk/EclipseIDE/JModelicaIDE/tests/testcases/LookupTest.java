@@ -15,7 +15,7 @@ public void testInstEnclosingClassAt(String path, String fail) {
     ModelicaTestCase m = new ModelicaTestCase(path);
 
     Maybe<InstClassDecl> decl = new Lookup(m.root)
-        .instEnclosingClassAt(m.document, m.caretOffset);
+        .instEnclosingClassAt(m.document);
     
     Maybe<String> expected = m.expected();
     
@@ -51,7 +51,7 @@ public void testDeclFromAccessAt(String path, String failMessage) {
     ModelicaTestCase m = new ModelicaTestCase(path);
     
     Maybe<InstNode> node = 
-        new Lookup(m.root).declFromAccessAt(m.document, m.caretOffset);
+        new Lookup(m.root).declarationFromAccessAt(m.document);
     
     Maybe<String> expected = m.expected();
     
