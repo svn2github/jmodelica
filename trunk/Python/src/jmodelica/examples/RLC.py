@@ -10,6 +10,8 @@ import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.tests import get_example_path
 from jmodelica.simulation.sundials import SundialsDAESimulator
+from jmodelica.compiler import ModelicaCompiler
+
 
 def run_demo(with_plots=True):
     """
@@ -21,17 +23,20 @@ def run_demo(with_plots=True):
     path = get_example_path()
     os.chdir(path)
     
-    # Comile the Modelica model first to C code and
-    # then to a dynamic library
+ 
     libname = 'RLC_Circuit'
     mofile = 'RLC_Circuit.mo'
     optpackage = 'RLC_Circuit'
     
+    mc = ModelicaCompiler()
+    
+    # Comile the Modelica model first to C code and
+    # then to a dynamic library
+    mc.compile_model(mofile,libname)
 
-    model = jmi.load_model(libname,path,mofile,
-                     optpackage,compiler='modelica')
-    
-    
+    # Load the dynamic library and XML data
+    model=jmi.Model(optpackage)
+
     simulator = SundialsDAESimulator(model, verbosity=3, start_time=0.0, final_time=30.0, time_step=0.01)
     simulator.run()
     
