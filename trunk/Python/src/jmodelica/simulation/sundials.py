@@ -473,8 +473,10 @@ class SundialsDAESimulator(Simulator):
                     % (start_time, end_time, time_step)
         if verbose >= self.NORMAL:
             print "Input before integration:", model.u
-            print "States x:", model.x
             print "States dx:", model.dx
+            print "States x:", model.x
+            print "States w:", model.w
+            
             
             
         class UserData:
@@ -533,18 +535,23 @@ class SundialsDAESimulator(Simulator):
         if return_last==False:
             num_samples = int(math.ceil((end_time - start_time) / time_step)) + 1
             T = N.zeros(num_samples, dtype=pyjmi.c_jmi_real_t)
-            ylist = N.zeros((num_samples, len(model.dx)+len(model.x)+len(model.w)),
+            ylist = N.zeros((num_samples, len(model.dx)+len(model.x)+len(model.u)+len(model.w)),
                             dtype=pyjmi.c_jmi_real_t)
-            temp = N.append(model.dx.copy(),model.x.copy())
-            ylist[0] = N.append(temp,model.w.copy())
+            temp = N.array([])
+            for j in [model.dx.copy(), model.x.copy(), model.u.copy(), model.w.copy()]:
+                if len(j) > 0:
+                    temp = N.append(temp, j)
+            assert len(model.dx)+len(model.x)+len(model.u)+len(model.w) == len(temp)
+            ylist[0] = temp
             T[0] = t0.value
             i = 1
         else:
-            ylist = N.zeros((1, len(model.dx)+len(model.x)+len(model.w)),
+            ylist = N.zeros((1, len(model.dx)+len(model.x)+len(model.u)+len(model.w)),
                             dtype=pyjmi.c_jmi_real_t)
             
-            
+
         #ida.IDASetId(ida_mem,ida.NVector(N.append([1.0]*len(model.x),[0.0]*len(model.w))))
+        #ida.IDASetSuppressAlg(ida_mem,suppress)
         #ida.IDACalcIC(ida_mem,ida.IDA_YA_YDP_INIT,ida.realtype(t0.value+time_step))
             
         while True:
@@ -558,8 +565,11 @@ class SundialsDAESimulator(Simulator):
             """Used for return."""
             if return_last==False:
                 T[i] = t.value
-                temp = N.append(N.array(ydot[:len(model.dx)]),N.array(y[:len(model.x)]))
-                ylist[i] = N.append(temp,N.array(y[len(model.x):len(y)]))
+                temp = N.array([])
+                for j in [ydot[:len(model.dx)],y[:len(model.x)],model.u.copy(),y[len(model.x):len(y)]]:
+                    if len(j) > 0:
+                        temp = N.append(temp,j)
+                ylist[i] = temp
                 i = i+1
                 
             if N.abs(tout-end_time)<=1e-6:
@@ -591,8 +601,12 @@ class SundialsDAESimulator(Simulator):
             print "Gradient" #TODO
         
         if return_last:
-            ylist[0] = N.append(N.array(ydot[:len(model.dx)]),N.array(y))
-            T = N.array(t.value)
+            temp = N.array([])
+            for j in [ydot[:len(model.dx)],y[:len(model.x)],model.u.copy(),y[len(model.x):len(y)]]:
+                if len(j) > 0:
+                    temp = N.append(temp, j)
+            ylist[0] = temp
+            T = N.array([t.value])
         else:
             ylist = N.array(ylist)
             T = N.array(T)
@@ -615,14 +629,29 @@ class SundialsDAESimulator(Simulator):
             # invert the dictionaries so that the variable name is the key
             invert_der_names = dict([v,k] for k,v in self.get_model().get_derivative_names().iteritems())
             invert_diff_names = dict([v,k] for k,v in self.get_model().get_differentiated_variable_names().iteritems())
+            invert_input_names = dict([v,k] for k,v in self.get_model().get_input_names().iteritems())
             invert_alg_names = dict([v,k] for k,v in self.get_model().get_algebraic_variable_names().iteritems())
             
-            der_minimum = N.array(invert_der_names.values(),dtype=N.int16).min()
-            diff_minimum = N.array(invert_diff_names.values(),dtype=N.int16).min()
-            alg_minimum = N.array(invert_alg_names.values(),dtype=N.int16).min()
-            
+            try:
+                der_minimum = N.array(invert_der_names.values(),dtype=N.int16).min()
+            except ValueError:
+                der_minimum = 0
+            try:
+                diff_minimum = N.array(invert_diff_names.values(),dtype=N.int16).min()
+            except ValueError:
+                diff_minimum = 0
+            try:
+                input_minimum = N.array(invert_input_names.values(),dtype=N.int16).min()
+            except ValueError:
+                input_minimum = 0
+            try:
+                alg_minimum = N.array(invert_alg_names.values(),dtype=N.int16).min()
+            except ValueError:
+                alg_minimum = 0
+                
             nbr_derivative = len(self.get_model().dx)
             nbr_differentiated = len(self.get_model().x)
+            nbr_input = len(self.get_model().u)
             
             nbr_found = 0
             
@@ -639,11 +668,14 @@ class SundialsDAESimulator(Simulator):
                     index = abs_index-diff_minimum+nbr_derivative
                     Y = N.append(Y,self._Y[:,index],axis=0)
                     nbr_found = nbr_found+1
-                
+                # search for the input variables
+                elif invert_input_names.has_key(x):
+                    abs_index = N-array(invert_diff_names[x],dtype=N.int16)
+                    index = abs_index-input_minimum+nbr_derivative+nbr_differentiated
                 # search for the variable in algebraic variables    
                 elif invert_alg_names.has_key(x):
                     abs_index = N.array(invert_alg_names[x],dtype=N.int16)
-                    index = abs_index-alg_minimum+nbr_derivative+nbr_differentiated
+                    index = abs_index-alg_minimum+nbr_derivative+nbr_differentiated+nbr_input
                     Y = N.append(Y,self._Y[:,index],axis=0)
                     nbr_found = nbr_found+1
             
