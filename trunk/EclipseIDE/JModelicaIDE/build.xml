@@ -26,7 +26,6 @@
 	<property name="jmodelica_test_framework" value="${jmodelica_dir}/test/test-framework" />
 	<property name="jmodelica_java" value="${jmodelica_dir}/java" />
 	-->
-	<property name="scanner_output" value="${package_dir}/ide/scanners/generated" />
 	<property name="scanner_dir" value="flex" />
 
 	
@@ -106,7 +105,6 @@
 	<!-- generate the scanners -->
 	<target name="scanner">
 		<mkdir dir="${parser_output}" />
-		<mkdir dir="${scanner_output}" />
 		<foreach target="jflex" param="flex_file" inheritall="true" parallel="true">
 			<path id="scanners">
 				<fileset dir="${scanner_dir}">
@@ -198,7 +196,6 @@
 	<!-- remove generated and copied java files -->
 	<target name="cleanGen" depends="clean">
 		<delete dir="${package_dir}/modelica" />
-		<delete dir="${scanner_output}" />
 		<delete file="${lib_dir}/beaver-rt.jar" />
 		<delete file="${lib_dir}/beaver-rt-src.jar" />
 	</target>

@@ -18,6 +18,7 @@ package org.jmodelica.ide.outline;
 import java.util.ArrayList;
 
 import org.jastadd.plugin.ui.view.JastAddContentProvider;
+import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstProgramRoot;
 import org.jmodelica.modelica.compiler.SourceRoot;
@@ -27,45 +28,56 @@ public class InstanceOutlineContentProvider extends JastAddContentProvider {
 
 	@Override
 	public Object[] getElements(Object element) {
-	
-	    if (!(element instanceof StoredDefinition)) 
-		    return 
-		        super.getElements(element);
+
+		if (!(element instanceof StoredDefinition)) {
+		    return super.getElements(element);
+		}
 		
-	    try {
-	        
+		try {
 			StoredDefinition def = 
 			    (StoredDefinition) element;
 			
-			SourceRoot root = 
-			    (SourceRoot) def.root();
-			
-			ArrayList<?> classDecls = 
-			    root
+			ArrayList<InstClassDecl> instClasses = 
+			    ((SourceRoot)def.root())
 			    .getProgram()
 			    .getInstProgramRoot()
 			    .instClassDecls();
+
+			ArrayList<ClassDecl> classes = 
+			    def.getElements().<ClassDecl>toArrayList(); 
 			
-			return 
-			    def
-			    .getElements()
-			    .retainAll(classDecls)
-			    .toArray();
+			ArrayList<InstClassDecl> result = 
+			    new ArrayList<InstClassDecl>();
+			
+			for (InstClassDecl inst : instClasses) {
+				if (classes.contains(inst.getClassDecl()))
+					result.add(inst);
+			}
+			
+			return result.toArray();
 			
 		} catch (Exception e) {
+		    e.printStackTrace();
 			return 
 			    new Object[0];
 		}
+
 	}
 
 	@Override
 	public Object getParent(Object element) {
-		Object parent = super.getParent(element);
-		if (parent instanceof InstProgramRoot) {
-			InstClassDecl icd = (InstClassDecl) element;
-			parent = icd.getClassDecl().getParent();
-		}
-		return parent;
+	    
+	    boolean parentIsInstRoot =
+	        super.getParent(element) instanceof InstProgramRoot;
+	    
+	    if (parentIsInstRoot)
+    		return
+    		    ((InstClassDecl) element)
+    		    .getClassDecl()
+    		    .getParent();
+	    
+	    return super.getParent(element);
+	
 	}
 
 }

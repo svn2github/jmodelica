@@ -26,12 +26,12 @@ public StoredDefinition recompilePartial(
     
     /* remove the current (partial) line when compiling, to make error
        recovery easier */
-    String fileContents; {
-        Document tmp = new Document(d.get());
-        DocUtil.replaceLineAt(tmp, d.offset, "");
-        fileContents = tmp.get();
-    }
-    
+    String fileContents = 
+        new DocUtil(
+            new Document(d.get()))
+        .replaceLineAt(d.offset, "")
+        .get();
+
     /* re-parse and add new AST to project AST */
     StoredDefinition def; {
         def = compiler.recompile(fileContents, file);

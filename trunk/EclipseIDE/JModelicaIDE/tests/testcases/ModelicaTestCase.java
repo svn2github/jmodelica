@@ -75,8 +75,10 @@ public class ModelicaTestCase {
      * 
      */
     public Maybe<String> expected() {
-        String expected = DocUtil.getLine(document, 0);
-        boolean nothingExpected = expected.matches("//\\s*Nothing.*");
+        String expected = 
+            new DocUtil(document).getLine(0);
+        boolean nothingExpected = 
+            expected.matches("//\\s*Nothing.*");
         String name = "";
         if (!nothingExpected) 
             name = expected.substring(expected.indexOf("Just") + 4) .trim();

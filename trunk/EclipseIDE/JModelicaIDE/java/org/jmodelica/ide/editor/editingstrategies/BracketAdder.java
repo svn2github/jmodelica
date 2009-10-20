@@ -23,16 +23,18 @@ public BracketAdder(String startToken, String endToken) {
     this.endToken = endToken;
 }
 
-public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
+public void customizeDocumentCommand(IDocument doc, DocumentCommand c) {
     try {
         
         int endLine; {
-            int line = d.getLineOfOffset(c.offset);
-            endLine = d.getLineOffset(line) + d.getLineLength(line);
+            int line = 
+                doc.getLineOfOffset(c.offset);
+            endLine = 
+                doc.getLineOffset(line) + doc.getLineLength(line);
         }
 
         boolean endTokenTrailingCaret = 
-            d.get(c.offset, endLine - c.offset).startsWith(endToken);
+            doc.get(c.offset, endLine - c.offset).startsWith(endToken);
         
         if (c.text.equals(endToken) && endTokenTrailingCaret) {
             c.text = "";
@@ -42,14 +44,17 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
         else if (c.text.equals(startToken)) {
             
             boolean afterLastWordOnLine = 
-                d.get(c.offset, endLine - c.offset)
-                    .replaceAll("[^\\w]", "")
-                    .equals("");
+                doc
+                .get(c.offset, endLine - c.offset)
+                .replaceAll("[^\\w]", "")
+                .equals("");
         
             // prevent editor from inserting
             // e.g. ' or " twice, when unwanted
             boolean symmetricTokenOnLine =
-                DocUtil.getLine(d, c.offset).contains(startToken);
+                new DocUtil(doc)
+                .getLine(c.offset)
+                .contains(startToken);
             
             if (afterLastWordOnLine && !symmetricTokenOnLine) {
                 c.text += endToken;

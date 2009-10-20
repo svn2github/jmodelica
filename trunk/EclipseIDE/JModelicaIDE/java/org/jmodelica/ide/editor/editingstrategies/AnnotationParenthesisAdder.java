@@ -6,6 +6,7 @@ import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.jmodelica.generated.scanners.Modelica22PartitionScanner;
 import org.jmodelica.ide.helpers.Util;
+import org.jmodelica.ide.indent.DocUtil;
 
 
 /**
@@ -18,7 +19,7 @@ public class AnnotationParenthesisAdder implements IAutoEditStrategy {
 public final static AnnotationParenthesisAdder adder = 
     new AnnotationParenthesisAdder();
 
-public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
+public void customizeDocumentCommand(IDocument doc, DocumentCommand c) {
     
     if (c.text == null || !(c.text.equals(" ") || c.text.equals("(")))
         return;
@@ -26,27 +27,29 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
     try {
 
         boolean inSourcePartition =
-            Util.is(d.getPartition(c.offset).getType()).among(
-                    IDocument.DEFAULT_CONTENT_TYPE,
-                    Modelica22PartitionScanner.ANNOTATION_PARTITION,
-                    Modelica22PartitionScanner.DEFINITION_PARTITION,
-                    Modelica22PartitionScanner.NORMAL_PARTITION);
+            Util
+            .is(doc.getPartition(c.offset).getType())
+            .among(
+                IDocument.DEFAULT_CONTENT_TYPE,
+                Modelica22PartitionScanner.ANNOTATION_PARTITION,
+                Modelica22PartitionScanner.DEFINITION_PARTITION,
+                Modelica22PartitionScanner.NORMAL_PARTITION);
         
-        boolean atEndLine; {
-            int line = d.getLineOfOffset(c.offset);
-            int endLine = d.getLineOffset(line) + d.getLineLength(line);
-            atEndLine = d.get(c.offset, endLine - c.offset).trim().equals("");
-        }
+        boolean atEndLine = 
+            new DocUtil(doc)
+            .getLine(c.offset)
+            .trim()
+            .equals("");
 
-        boolean afterAnnotation = d.get(0, c.offset).trim().
-            endsWith("annotation");
+        boolean afterAnnotation = 
+            doc
+            .get(0, c.offset)
+            .trim()
+            .endsWith("annotation");
 
         if (inSourcePartition && atEndLine && afterAnnotation) {
-            String suffix = "";
-            if (!c.text.endsWith("("))
-                suffix += "(";
-            suffix += ");";
-            
+            String suffix = 
+                (c.text.endsWith("(") ? "" : "(") + ")";
             c.text += suffix;
             c.shiftsCaret = false;
             c.caretOffset = c.offset + suffix.length() - 1;

@@ -313,11 +313,17 @@ protected void update() {
         return;
 
     IDocument document = document();
-    if (document != null)
-        setupDocumentPartitioner(document);
+    if (document == null) {
+        new Throwable().printStackTrace();
+        return; 
+    }
+    
+    setupDocumentPartitioner(document);
 
     // Update outline
     fSourceOutlinePage.updateAST(compResult.root());
+    System.out.println("-------------------------");
+    System.out.println("Came here!");
     fInstanceOutlinePage.updateAST(compResult.root());
     goToDeclaration.updateAST(compResult.root());
 
@@ -347,23 +353,29 @@ private void setupDocumentPartitioner(IDocument document) {
 @SuppressWarnings("unchecked")
 private void updateProjectionAnnotations() {
 
-    ProjectionAnnotationModel model = getAnnotationModel();
+    ProjectionAnnotationModel model = 
+        getAnnotationModel();
+    
     if (model == null)
         return;
 
-    Collection<Annotation> oldAnnotations = Util.fromIterator(model
-            .getAnnotationIterator());
+    Collection<Annotation> oldAnnotations = 
+        Util.fromIterator(
+            model.getAnnotationIterator());
 
-    HashMap<Annotation, Position> newAnnotations = new EditorAnnotationMap(
-            compResult.root().foldingPositions(document()), this);
+    HashMap<Annotation, Position> newAnnotations =
+        new EditorAnnotationMap(
+            compResult.root().foldingPositions(document()),
+            this);
 
-    model.modifyAnnotations(oldAnnotations.toArray(new Annotation[] {}),
-            newAnnotations, null);
+    model.modifyAnnotations(
+        oldAnnotations.toArray(new Annotation[] {}),
+        newAnnotations,
+        null);
 }
 
 private ProjectionAnnotationModel getAnnotationModel() {
     CharacterProjectionViewer viewer = (CharacterProjectionViewer) getSourceViewer();
-
     viewer.enableProjection();
     return viewer.getProjectionAnnotationModel();
 }
@@ -401,7 +413,10 @@ public boolean selectNode(ASTNode<?> node) {
 }
 
 public IDocument document() {
-    return getSourceViewer().getDocument();
+    return
+        getSourceViewer() == null
+        ? null
+        : getSourceViewer().getDocument();
 }
 
 public ISourceViewer sourceViewer() {

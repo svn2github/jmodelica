@@ -6,8 +6,8 @@ import org.eclipse.jface.text.ITextSelection;
 import org.jmodelica.generated.scanners.IndentationHintScanner;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
-import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.indent.AnchorList;
+import org.jmodelica.ide.indent.DocUtil;
 import org.jmodelica.ide.indent.IndentedSection;
 
 
@@ -33,28 +33,32 @@ public void run() {
 
     //TODO: make formatting keep the same selection as before formatting 
     
-    IDocument d = editor.document();
+    IDocument doc = editor.document();
     ITextSelection sel = editor.selection();
 
-    IndentedSection sec = new IndentedSection(d.get());
+    IndentedSection sec = new IndentedSection(doc.get());
 
     AnchorList<Integer> ancs = new IndentationHintScanner()
         .analyze(sec.toString())
-        .bindEnv(d, IndentedSection.tabWidth);
+        .bindEnv(doc, IndentedSection.tabWidth);
 
     // replace all lines in document if nothing selected
     if (sel.getLength() == 0) {
-        d.set(sec.indent(ancs).toString());
+        doc.set(sec.indent(ancs).toString());
         return;
     }
 
-    int begLine = sel.getStartLine();
-    int endLine = sel.getEndLine();
+    int begLine = 
+        sel.getStartLine();
+    int endLine = 
+        sel.getEndLine();
     
-    String section = sec.indent(ancs, begLine, endLine + 1)
-                        .toString(begLine, endLine + 1);
+    String section = 
+        sec
+        .indent(ancs, begLine, endLine + 1)
+        .toString(begLine, endLine + 1);
 
-    Util.replaceLines(d, begLine, endLine, section);
+    new DocUtil(doc).replaceLines(begLine, endLine, section);
 
 }
 }

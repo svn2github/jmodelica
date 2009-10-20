@@ -20,11 +20,13 @@ public class PastedBlock {
         // adjust block to proper indent
         c.text = block.offsetIndentTo(indent).toString();
         
-        int textStart = DocUtil.textStart(doc, c.offset);
+        int textStart 
+            = new DocUtil(doc).textStart(c.offset);
         
         if (c.offset <= textStart) {
             // if pasting inside the indentation, trim whitespace around caret
-            int lineBegin = DocUtil.lineStartOffsetOfOffset(doc, c.offset);
+            int lineBegin = 
+                new DocUtil(doc).lineStartOffsetOfOffset(c.offset);
             c.length += c.offset - lineBegin;
             c.offset = lineBegin;
         } else {
@@ -33,10 +35,15 @@ public class PastedBlock {
             c.text = IndentedSection.trimIndent(c.text);
         }
         
-        boolean containsNewlines = !Arrays.equals(TextUtilities.indexOf(
-                doc .getLegalLineDelimiters(), c.text, 0), new int[] { -1, -1 });
-        boolean endsWithNewLine = TextUtilities.endsWith(
-                doc.getLegalLineDelimiters(), c.text) != -1;
+        boolean containsNewlines = 
+            !Arrays.equals(
+                TextUtilities.indexOf(
+                    doc.getLegalLineDelimiters(), c.text, 0), 
+                    new int[] { -1, -1 } );
+        boolean endsWithNewLine = 
+            TextUtilities.endsWith(
+                doc.getLegalLineDelimiters(), c.text) 
+            != -1;
 
         if (containsNewlines && !endsWithNewLine) 
             // if pasted block contains newlines, but doesn't end in one

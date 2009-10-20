@@ -159,7 +159,7 @@ aspect Semantic {
        
         ArrayList<CompletionNode> nodes = new ArrayList<CompletionNode>();
         for (CompletionNode c : myInstClass().completionNodes(includeRenamedImports)) {
-            if (c instanceof InstComponentDecl)
+            //if (c instanceof InstComponentDecl)
                 nodes.add(c);
         }
         return nodes;
@@ -200,7 +200,9 @@ aspect Semantic {
      */
     public InstAccess InstClassDecl.addClassDynamic(InstAccess access) {
         addDynamicClassName(access);
-        return access;
+        // return value is equal to access, but this method needs to be called
+        // for proper evaluation of attributes
+        return getDynamicClassName(getNumDynamicClassName() - 1);
     }
      
     /**
@@ -208,7 +210,9 @@ aspect Semantic {
      */
     public InstAccess InstClassDecl.addComponentDynamic(InstAccess access) {
         addDynamicComponentName(access);
-        return access;
+        // return value is equal to access, but this method needs to be called
+        // for proper evaluation of attributes
+        return getDynamicComponentName(getNumDynamicComponentName() - 1);
     }
     
 }
@@ -218,41 +222,25 @@ aspect Semantic {
  */
 aspect CompletionComment {
     
-    syn CompletionComment InstNode.proposalComment() = CompletionComment.NULL;
-    eq InstClassDecl.proposalComment() = new CompletionComment(myInstClass().getClassDecl().stringComment());
+    syn CompletionComment InstNode.proposalComment() = 
+        CompletionComment.NULL;
     
-    syn String ASTNode.stringComment() = null;
-    eq FullClassDecl.stringComment() = hasStringComment() ? getStringComment().getComment() : null;
+    eq InstClassDecl.proposalComment() =
+        new CompletionComment(
+            myInstClass()
+            .getClassDecl()
+            .stringComment());
+    
+    syn String ASTNode.stringComment() = 
+        null;
+    
+    eq FullClassDecl.stringComment() = 
+        hasStringComment() 
+            ? getStringComment().getComment() 
+            : null;
     
 }
 
-/**
- *  Finds location of referencing node for the things we are interested 
- *  in cross referencing.
- */
-aspect CrossReference {
-    
-    /**
-     * Get referencing node.
-     */
-    syn HashSet<IJastAddNode> ASTNode.getReference();
-    
-//    eq ComponentAccess.getReference()
-//        = lookupComponent(getID());
-//    
-//    eq ClassAccess.getReference()
-//        = lookupClass(getID());
-//    
-    eq ASTNode.getReference() = new HashSet<IJastAddNode>();
-    
-    /**
-     * Finding the source node of given declaration for lookup.
-     * TODO: why is this not working?
-     */
-    inh StoredDefinition ASTNode.getStoredDefinition();
-    eq StoredDefinition.getChild().getStoredDefinition() = this;
-    eq ASTNode.getChild().getStoredDefinition() = null;
-}
 
 //TODO: remove. only for debugging
 aspect NADebugging {    

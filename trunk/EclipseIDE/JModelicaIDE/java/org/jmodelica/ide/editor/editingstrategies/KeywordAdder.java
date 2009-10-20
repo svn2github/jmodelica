@@ -1,9 +1,8 @@
 package org.jmodelica.ide.editor.editingstrategies;
 
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
+import org.jmodelica.ide.indent.DocUtil;
 
 
 /**
@@ -17,7 +16,10 @@ public class KeywordAdder extends EndStatementAdder{
 
 public final static KeywordAdder adder = new KeywordAdder();
 
-protected static final String templateRegex = "\\s*(%s)(\\s.*)?";
+protected static final String[] KEYWORDS =
+    {"for", "if", "while", "when"};
+protected static final String TEMPLATE_REGEX = 
+    "\\s*(%s)(\\s.*)?";
 
 public void customizeDocumentCommand(IDocument doc,
             DocumentCommand c) {
@@ -25,24 +27,19 @@ public void customizeDocumentCommand(IDocument doc,
         if (!c.text.matches("(\n|\r)\\s*"))
             return;
         
-        try {
-
-            String line; {
-                IRegion lineReg = doc.getLineInformationOfOffset(c.offset);
-                line = doc.get(lineReg.getOffset(), lineReg.getLength());
-            }
-            
-            for (String keyword : new String[] {"for", "if", "while", "when"})
-                if (line.matches(String.format(templateRegex, keyword)))
-                    addEndIfNotPresent(
-                            String.format("end %s;", keyword), 
-                            doc, 
-                            c.offset);
-                
-        } catch (BadLocationException e) {
-            e.printStackTrace();
-        }
+        String line = 
+            new DocUtil(doc).getLinePartial(c.offset);
         
+        for (String keyword : KEYWORDS) {
+            if (line.matches(
+                    String.format(TEMPLATE_REGEX, keyword))) 
+            {
+                addEndIfNotPresent(
+                    String.format("end %s;", keyword), 
+                    doc, 
+                    c.offset);
+            }
+        }
     }
 
 }

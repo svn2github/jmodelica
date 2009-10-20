@@ -26,18 +26,11 @@ aspect Util {
 			getInstComponentDecl(index).getComponentDecl().getDefinition();
  
 	
-	public ArrayList<T> List.toArrayList() {
-	    ArrayList a = new ArrayList();
-	    for (T t : this)
-	        a.add(t);
-	    return a;
-	}
-	
-   public ArrayList<T> List.retainAll(Iterable<?> col) {
-        java.util.List<?> list = Util.fromIterable(col);
-        ArrayList<T> tmp = toArrayList();
-        tmp.retainAll(list);
-        return tmp;
+    public <E> ArrayList<E> List.toArrayList() {
+        ArrayList<E> a = new ArrayList<E>();
+        for (T t : this)
+            a.add((E)t);
+        return a;
     }
 	
    public Object List.getLast() {

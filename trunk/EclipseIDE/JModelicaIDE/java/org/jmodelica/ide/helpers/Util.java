@@ -199,43 +199,6 @@ public class Util {
 	    return list;
 	}
 	
-	/**
-	 * Returns line of document at line <code> line </code>.
-	 */
-	public static String getLine(IDocument d, int line) throws BadLocationException {
-	    
-	    int end = line < d.getNumberOfLines() - 1
-	        ? d.getLineOffset(line + 1)
-	        : d.getLength();
-	    
-	    return d.get(d.getLineOffset(line), end - d.getLineOffset(line));
-	}
-
-    /**
-     * Replaces lines between <code>begLine</code> and <code>endLine</code> with
-     * <code>str</code>. Returns the diff in number of characters resulting from
-     * replacement.
-     */
-    public static int replaceLines(IDocument d, int begLine, int endLine,
-            String str) {
-
-        try {
-            int startOffset = d.getLineOffset(begLine);
-            int endOffset = endLine < d.getNumberOfLines() - 1
-                ? d.getLineOffset(endLine + 1)
-                : d.getLength();
-            int length = endOffset - startOffset;
-            
-            d.replace(startOffset, length, str);
-            
-            return str.length() - length; 
-            
-        } catch (BadLocationException e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-	
     public static String qualifyName(String prefix, String suffix) {
         return prefix.equals("") 
             ? suffix
@@ -251,14 +214,7 @@ public class Util {
      * @return access created from parts 
      */
     public static Access createDotAccess(String id) {
-        
-        String[] parts = id.split("\\.");
-        
-        if (parts.length == 0)
-            throw new IllegalArgumentException(
-                    "Cannot create access from zero parts");
-        
-        return createDotAccess(parts, 0); 
+        return createDotAccess(id.split("\\."), 0); 
     }
 
     private static Access createDotAccess(String[] parts, int i) {
@@ -268,7 +224,7 @@ public class Util {
 
         return i == parts.length - 1 
             ? res  
-            : new Dot("", res, createDotAccess( parts, i + 1));
+            : new Dot("", res, createDotAccess(parts, i + 1));
         
     }
 

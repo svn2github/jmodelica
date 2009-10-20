@@ -19,13 +19,17 @@ public class IndentingAutoEditStrategy extends
 public final static IndentingAutoEditStrategy editStrategy = 
     new IndentingAutoEditStrategy();
 
-final static IndentationHintScanner ihs = new IndentationHintScanner();
+final static IndentationHintScanner ihs = 
+    new IndentationHintScanner();
 
 /**
  * Count number of tokens in from lineStart of offset up until offset.   
  */
 public static int countTokens(IDocument doc, int offset) {
-    return IndentedSection.spacify(DocUtil.getLinePartial(doc, offset))
+    return 
+        IndentedSection
+        .spacify(
+            new DocUtil(doc).getLinePartial(offset))
         .length();
 }
 
@@ -56,14 +60,20 @@ public void customizeDocumentCommand(IDocument doc, DocumentCommand c) {
         if (!(isSemicolon || isNewLine || isTab || pastedBlock))
             return;
     
-        int lineEnd = DocUtil.lineEndOffsetOfOffset(doc, c.offset);
-        int lineBegin = DocUtil.lineStartOffsetOfOffset(doc, c.offset);
+        DocUtil docUtil
+            = new DocUtil(doc); 
+        
+        int lineEnd = 
+            docUtil.lineEndOffsetOfOffset(c.offset);
+        int lineBegin =
+            docUtil.lineStartOffsetOfOffset(c.offset);
         
         AnchorList<Integer> anchors = 
             ihs.analyze(doc.get(0, lineEnd))
                .bindEnv(doc, IndentedSection.tabWidth);
         
-        int indent = getIndent(c.offset, lineEnd, anchors);
+        int indent = 
+            getIndent(c.offset, lineEnd, anchors);
     
         if (pastedBlock) {
     
@@ -81,10 +91,12 @@ public void customizeDocumentCommand(IDocument doc, DocumentCommand c) {
              * if insert tab before beginning of line, indent all the way to
              * 'correct' indentation
              */
-            int textStart = DocUtil.textStart(doc, c.offset);
+            int textStart =
+                docUtil.textStart(c.offset);
             
             if (c.offset < textStart ||
-                c.offset == textStart && countTokens(doc, textStart) < indent)
+                c.offset == textStart && 
+                countTokens(doc, textStart) < indent)
             {
                 c.offset = lineBegin;
                 c.length = textStart - lineBegin;
@@ -104,12 +116,18 @@ public void customizeDocumentCommand(IDocument doc, DocumentCommand c) {
             if (a == null || a.offset < lineBegin)
                 return;
 
-            int sinkIndent = countTokens(doc, a.reference);
+            int sinkIndent = 
+                countTokens(doc, a.reference);
             String line = 
-                new IndentedSection(DocUtil.getLinePartial(doc, c.offset))
-                    .offsetIndentTo(sinkIndent)
-                    .toString();
-            c.addCommand(lineBegin, c.offset - lineBegin, line, c.owner);
+                new IndentedSection(
+                    docUtil.getLinePartial(c.offset))
+                .offsetIndentTo(sinkIndent)
+                .toString();
+            c.addCommand(
+                lineBegin, 
+                c.offset - lineBegin,
+                line, 
+                c.owner);
         }
     
         c.caretOffset = c.offset + c.length;

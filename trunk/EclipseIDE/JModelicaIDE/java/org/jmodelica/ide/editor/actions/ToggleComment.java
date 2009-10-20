@@ -1,13 +1,14 @@
 package org.jmodelica.ide.editor.actions;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.ide.helpers.Util;
+import org.jmodelica.ide.indent.DocUtil;
+import org.jmodelica.ide.indent.IndentedSection;
 
 
 /**
@@ -23,18 +24,18 @@ protected final Editor editor;
 public ToggleComment(Editor editor) {
     super();
     super.setId(IDEConstants.ACTION_TOGGLE_COMMENT_ID);
-    setActionDefinitionId(
-            "JModelicaIDE.ModelicaToggleCommentCommand");
+    super.setActionDefinitionId(
+        "JModelicaIDE.ModelicaToggleCommentCommand");
     
     this.editor = editor;
 }
 
 public void run() {
 
-    try {
-        
-    IDocument d = editor.document();
-    ITextSelection sel = editor.selection();
+    IDocument doc = 
+        editor.document();
+    ITextSelection sel = 
+        editor.selection();
 
     String[] lines; {
         int nbrLines = sel.getEndLine() - sel.getStartLine() + 1;
@@ -42,29 +43,31 @@ public void run() {
     }
     
     for (int i = 0; i < lines.length; i++) 
-        lines[i] = Util.getLine(d, sel.getStartLine() + i);
+        lines[i] = 
+            new DocUtil(doc).
+            getLineNumbered(sel.getStartLine() + i);
 
     // comment if some selected line uncommented
     boolean doComment = !isCommented(lines[0]);
     for (int i = 0; i < lines.length; i++) 
         lines[i] = toggleComment(lines[i], doComment);    
     
-    int diff = Util.replaceLines(
-            d, 
+    String subs = 
+        Util.implode(IndentedSection.lineSep, lines) 
+        + IndentedSection.lineSep; 
+    
+    int diff =
+        new DocUtil(doc)
+        .replaceLines(
             sel.getStartLine(), 
             sel.getEndLine(), 
-            Util.implode("", lines));
+            subs);
 
     // set selection to keep selection 
     editor.getSelectionProvider().setSelection(
-            new TextSelection(
-                    sel.getOffset(), 
-                    sel.getLength() + diff));
-    
-    } catch (BadLocationException e) {
-        e.printStackTrace();
-        return;
-    }
+        new TextSelection(
+            sel.getOffset(), 
+            sel.getLength() + diff));
 }
 
 public static boolean isCommented(String line) {
@@ -84,7 +87,10 @@ public String uncomment(String line) {
 }
 
 public String toggleComment(String line, boolean doComment) {
-    return doComment ? comment(line) : uncomment(line);
+    return 
+        doComment 
+            ? comment(line) 
+            : uncomment(line);
 }
 
 }

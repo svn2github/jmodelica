@@ -68,15 +68,13 @@ public Maybe<InstNode> declarationFromAccessAt(
         instEnclosingClassAt(d);
     Maybe<Access> access = 
         root.getAccessAt(d, d.offset);
-
-    if (enclosingClass.isNothing() || access.isNothing()) 
-        return Maybe.<InstNode>Nothing();
-
-    Maybe<InstNode> iNode = lookupQualifiedName(
-            access.value(),
-            enclosingClass.value());
     
-    return iNode;
+    return 
+        enclosingClass.isNothing() || access.isNothing() 
+            ? Maybe.<InstNode>Nothing()
+            : lookupQualifiedName(
+                access.value(),
+                enclosingClass.value());
 }
 
 /**
@@ -87,7 +85,6 @@ protected Maybe<InstNode> tryAddComponentDecl(
     InstClassDecl enclosingInstance, 
     InstAccess instAccess)
 {
-
     InstComponentDecl node =
         enclosingInstance
         .addComponentDynamic(instAccess)
@@ -104,6 +101,7 @@ protected Maybe<InstNode> tryAddClassDecl(
     InstClassDecl enclosingInstClass, 
     InstAccess instAccess)
 {
+    System.out.println("CAME HEREHREHREHRHERHE");
     InstClassDecl node =
         enclosingInstClass
         .addClassDynamic(instAccess)
@@ -123,15 +121,6 @@ public Maybe<InstNode> lookupQualifiedName(
         Access access,
         InstClassDecl encInst) 
 { 
-    System.out.println("----------------------------");
-    System.out.println("----------------------------");
-    System.out.println("came here");
-    System.out.println(access.hashCode());
-    access.setParent(encInst.getClassDecl());
-    System.out.println("----------------------------");
-    System.out.println("----------------------------");
-    System.out.println("----------------------------");
-    
     return 
         tryAddComponentDecl(encInst, access.newInstAccess())
         .orElse(
@@ -145,13 +134,16 @@ public Maybe<InstNode> lookupQualifiedName(
     Maybe<InstClassDecl> mEnclosingClass =
         instEnclosingClassAt(doc);
     
-    if (qualifiedPart.equals("") || mEnclosingClass.isNothing()) {
-        return mEnclosingClass.subsume(InstNode.class);
+    if (qualifiedPart.equals("") || 
+        mEnclosingClass.isNothing()) 
+    {
+        return
+            mEnclosingClass.subsume(InstNode.class);
     } else {
-    
-        return lookupQualifiedName(
-            Util.createDotAccess(qualifiedPart),
-            mEnclosingClass.value());
+        return
+            lookupQualifiedName(
+                Util.createDotAccess(qualifiedPart),
+                mEnclosingClass.value());
     }
 }
     

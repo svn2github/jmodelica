@@ -5,7 +5,6 @@ import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.jmodelica.generated.scanners.Modelica22PartitionScanner;
 import org.jmodelica.ide.helpers.Util;
-import org.jmodelica.ide.indent.IndentedSection;
 
 
 /**
@@ -21,40 +20,41 @@ public final static EndOfBlockAdder adder = new EndOfBlockAdder();
 final static String[] openBlockKeywords = { "block", "class",
         "connector", "function", "model", "package", "record", "type" };
 
-final static String classRegex = String.format(
+final static String NEWLINE = "(\r\n|\n|\r)\\s*"; 
+
+final static String classRegex = 
+    String.format(
         "(.|\r|\n)*(^|\\s)(%s)\\s+\\w+(\\ |\t)*",
         Util.implode("|", openBlockKeywords));
 
-public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
+public void customizeDocumentCommand(
+        IDocument doc,
+        DocumentCommand c) 
+{
     try {
 
-        boolean insertingNewline = c.text.matches("(\r\n|\n|\r)\\s*");
-
-        if (!insertingNewline)
+        if (!c.text.matches(NEWLINE) ||
+            Util.is(
+                doc.getPartition(c.offset).getType())
+            .notAmong(
+                IDocument.DEFAULT_CONTENT_TYPE,
+                Modelica22PartitionScanner.DEFINITION_PARTITION,
+                Modelica22PartitionScanner.NORMAL_PARTITION)) 
+        {
             return;
-
-        boolean inSourcePartition =
-            Util.is(d.getPartition(c.offset).getType()).among(
-                    IDocument.DEFAULT_CONTENT_TYPE,
-                    Modelica22PartitionScanner.DEFINITION_PARTITION,
-                    Modelica22PartitionScanner.NORMAL_PARTITION);
-        
-        if (!inSourcePartition)
-            return;
-
-        String doc;
-        boolean afterClassBegin; {
-            // for efficiency, assume class name + identifier <= 100 characters
-            int start = Math.max(0, c.offset - 100);
-            doc = d.get(start, c.offset - start);
-            afterClassBegin = doc.matches(classRegex);
         }
-
-        if (!afterClassBegin)
+        
+        // assume looking back 100 chars will be sufficient
+        String context =
+            doc.get(Math.max(0, c.offset - 100), c.offset);
+        
+        if (!context.matches(classRegex))
             return;
-
-        super.addEndIfNotPresent(endStatementString(doc), d, c.offset);
-        c.text = IndentedSection.lineSep + c.text;
+        
+        super.addEndIfNotPresent(
+            endStatementString(context),
+            doc, 
+            c.offset);
 
     } catch (BadLocationException e) {
         e.printStackTrace();
@@ -63,10 +63,11 @@ public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
 
 public String endStatementString(String doc) {
     
-    String[] words = doc.split("\\s+");
-    return String.format(
-            "%send %s;", 
-            IndentedSection.lineSep, 
+    String[] words =
+        doc.split("\\s+");
+    return 
+        String.format(
+            "end %s;", 
             words[words.length - 1]);
 }
 

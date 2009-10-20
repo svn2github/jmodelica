@@ -1,15 +1,25 @@
 package org.jmodelica.ide.editor.editingstrategies;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 import org.jmodelica.ide.editor.actions.ToggleComment;
-import org.jmodelica.ide.helpers.Util;
+import org.jmodelica.ide.indent.DocUtil;
 import org.jmodelica.ide.indent.IndentedSection;
 
 
 public abstract class EndStatementAdder implements IAutoEditStrategy {
+
+protected static List<String> prefixes = 
+    Arrays.asList(
+        "intitial",
+        "equation",
+        "algorithm",
+        "public",
+        "protected");
 
 /**
  * Checks if endStmnt occurs among the source code lines after
@@ -17,21 +27,38 @@ public abstract class EndStatementAdder implements IAutoEditStrategy {
  * <code> offset </code> (scope heuristically determined by indentation).
  * 
  */
-protected boolean endExists(String endStmnt, IDocument d, int offset)
-        throws BadLocationException {
+protected boolean endExists(
+    String endStmnt, 
+    IDocument doc, 
+    int offset)
+{
     
-    int startLine = d.getLineOfOffset(offset);
-    int startIndent = IndentedSection.countIndent(Util.getLine(d, startLine));
+    DocUtil docUtil = 
+        new DocUtil(doc);
+    
+    int startLine;
+    try {
+        startLine = doc.getLineOfOffset(offset);
+    } catch (BadLocationException e) {
+        e.printStackTrace();
+        return false;
+    }
+    
+    int startIndent = 
+        IndentedSection.countIndent(
+            docUtil.getLineNumbered(startLine));
     
     int i;    
-    for (i = startLine; i < d.getNumberOfLines() - 1; i++) {
+    for (i = startLine; i < doc.getNumberOfLines() - 1; i++) {
         
-        String line = Util.getLine(d, i);
+        String line =
+            docUtil.getLineNumbered(i);
         
-        boolean ignoreLine = line.trim().equals("") || 
+        boolean ignoreLine = 
+            line.trim().equals("") || 
             ToggleComment.isCommented(line) ||
-            Util.is(line.trim().split("\\s+")[0]).among(
-                    "intitial", "equation", "algorithm", "public", "protected");  
+            prefixes.contains(
+                line.trim().split("\\s+")[0]);
         
         if (ignoreLine)
             continue;
@@ -45,51 +72,39 @@ protected boolean endExists(String endStmnt, IDocument d, int offset)
         
         if (endStatementAtLine || leftScope)  
             break;
-        
     }
     
-    return Util.getLine(d, i).contains(endStmnt);
+    return 
+        docUtil
+        .getLineNumbered(i)
+        .contains(endStmnt);
 }
 
 /**
  * Scans document and adds endStmnt if it can't find it already, 
  * within the current scope. 
  * @param end 
- * @param d
+ * @param doc
  * @param offset
  */
-public void addEndIfNotPresent(String end, IDocument d, int offset) {
+public void addEndIfNotPresent(String end, IDocument doc, int offset) {
 
-    try {
+    if (endExists(end.trim(), doc, offset))
+        return;
+    
+    String endStatement = 
+        IndentedSection.lineSep +
+        new IndentedSection(end).offsetIndentTo(
+            IndentedSection.countIndent(
+                new DocUtil(doc).getLinePartial(offset)));
 
-        if (endExists(end.trim(), d, offset))
-            return;
-        
-        IRegion line = d.getLineInformationOfOffset(offset);
-        int lineEnd = line.getOffset() + line.getLength();
+    /*
+     * must insert end statement with a replace, as if using the DocumentCommand
+     * class, it seems impossible to position cursor in the middle of the
+     * command.text. this causes this class to create two undo entries. TODO:
+     * fix if possible
+     */
+    new DocUtil(doc).insertLineAfter(offset, endStatement);
 
-        String endStatement; 
-        {
-            int lineStart = line.getOffset();
-            int indentWidth = IndentedSection.countIndent(
-                d.get(lineStart, offset - lineStart));
-            
-            endStatement = IndentedSection.lineSep +
-                new IndentedSection(end).offsetIndentTo(indentWidth);
-        }
-
-        //
-        // another adverse effect of the completely retarded DocumentCommand 
-        // class:
-        // 
-        // must insert end statement with d.replace, as if using the
-        // DocumentCommand class, it seems impossible to position cursor in 
-        // the middle of the command.text. this causes this class to create two
-        // undo entries. TODO: fix if possible
-        d.replace(lineEnd, 0, endStatement);
-
-    } catch (BadLocationException e) {
-        e.printStackTrace();
-    }
 }
 }
