@@ -143,7 +143,13 @@ public class Library {
 	    for (Library lib : libs)
 	        paths.add(lib.path);
 	    
-	    return Util.implode(File.pathSeparator, paths);
+	    paths.add(
+	        new Maybe<String>(
+                System.getenv("MODELICAPATH"))
+	        .defaultTo(""));
+	    
+	    return 
+	        Util.implode(File.pathSeparator, paths); 
 	}
 	
 }
