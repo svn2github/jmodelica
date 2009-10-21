@@ -17,12 +17,13 @@ package org.jmodelica.ide.helpers;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Library {
 
-	private static final String PART_SEPARATOR = File.pathSeparator;
-	private static final String LIBRARY_SEPARATOR = "|";
+    public static final String PART_SEPARATOR = File.pathSeparator;
+	public static final String LIBRARY_SEPARATOR = "|";
 	
 	public String name;
 	public Version version;
@@ -59,13 +60,13 @@ public class Library {
 	}
 
 	public static String toString(List<Library> libs) {
-		if (libs == null)
+		
+	    if (libs == null)
 			return "";
-		String[] arr = new String[libs.size()];
-		for (int i = 0; i < libs.size(); i++) {
-			arr[i] = libs.get(i).toString();
-		}
-		return Util.implode(LIBRARY_SEPARATOR, arr);
+		
+		return Util.implode(
+		    LIBRARY_SEPARATOR,
+		    libs);
 	}
 	
 	public static List<Library> fromString(String str) {
@@ -130,4 +131,19 @@ public class Library {
 			return res;
 		}
 	}
+
+	public static String makeModelicaPath(String str) {
+	    
+	    List<Library> libs =
+	        Library.fromString(str);
+	    
+	    List<String> paths =
+	        new LinkedList<String>();
+	        
+	    for (Library lib : libs)
+	        paths.add(lib.path);
+	    
+	    return Util.implode(File.pathSeparator, paths);
+	}
+	
 }

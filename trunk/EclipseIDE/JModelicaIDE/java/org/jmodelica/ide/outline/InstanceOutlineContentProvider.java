@@ -18,7 +18,6 @@ package org.jmodelica.ide.outline;
 import java.util.ArrayList;
 
 import org.jastadd.plugin.ui.view.JastAddContentProvider;
-import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstProgramRoot;
 import org.jmodelica.modelica.compiler.SourceRoot;
@@ -29,27 +28,25 @@ public class InstanceOutlineContentProvider extends JastAddContentProvider {
 	@Override
 	public Object[] getElements(Object element) {
 
-		if (!(element instanceof StoredDefinition)) {
+		if (!(element instanceof StoredDefinition))
 		    return super.getElements(element);
-		}
 		
 		try {
+		    
 			StoredDefinition def = 
 			    (StoredDefinition) element;
-			
-			ArrayList<InstClassDecl> instClasses = 
-			    ((SourceRoot)def.root())
+			InstProgramRoot iRoot =
+			    ((SourceRoot)(def.root()))
 			    .getProgram()
-			    .getInstProgramRoot()
-			    .instClassDecls();
-
-			ArrayList<ClassDecl> classes = 
-			    def.getElements().<ClassDecl>toArrayList(); 
+			    .getInstProgramRoot();
+			
+			ArrayList<?> classes = 
+			    def.getElements().toArrayList(); 
 			
 			ArrayList<InstClassDecl> result = 
 			    new ArrayList<InstClassDecl>();
 			
-			for (InstClassDecl inst : instClasses) {
+			for (InstClassDecl inst : iRoot.instClassDecls()) {
 				if (classes.contains(inst.getClassDecl()))
 					result.add(inst);
 			}
@@ -70,14 +67,13 @@ public class InstanceOutlineContentProvider extends JastAddContentProvider {
 	    boolean parentIsInstRoot =
 	        super.getParent(element) instanceof InstProgramRoot;
 	    
-	    if (parentIsInstRoot)
-    		return
-    		    ((InstClassDecl) element)
-    		    .getClassDecl()
-    		    .getParent();
+	    InstClassDecl icd =
+	        (InstClassDecl) element;
 	    
-	    return super.getParent(element);
-	
+	    return 
+	        parentIsInstRoot
+        		? icd.getClassDecl().getParent()
+    		    : super.getParent(element);
 	}
 
 }

@@ -30,8 +30,6 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
@@ -65,6 +63,14 @@ public class Util {
 			str.append(arr[i]);
 		}
 		return str.toString();
+	}
+	
+	public static String implode(String delim, Iterable<?> objs) {
+	    List<String> list = 
+	        new LinkedList<String>();
+	    for (Object o : objs) 
+	        list.add(o.toString());
+	    return implode(delim, list.toArray(new String[] {}));
 	}
 	
 	public static String[] explode(String delim, String str) {

@@ -25,11 +25,10 @@ aspect Util {
 	eq InstNode.getInstComponentDecl(int index).getDefinition() = 
 			getInstComponentDecl(index).getComponentDecl().getDefinition();
  
-	
-    public <E> ArrayList<E> List.toArrayList() {
-        ArrayList<E> a = new ArrayList<E>();
+	public ArrayList<T> List.toArrayList() {
+        ArrayList<T> a = new ArrayList<T>();
         for (T t : this)
-            a.add((E)t);
+            a.add(t);
         return a;
     }
 	

@@ -312,13 +312,10 @@ protected void update() {
     if (compResult.failed())
         return;
 
-    IDocument document = document();
-    if (document == null) {
-        new Throwable().printStackTrace();
+    if (document() == null) 
         return; 
-    }
     
-    setupDocumentPartitioner(document);
+    setupDocumentPartitioner(document());
 
     // Update outline
     fSourceOutlinePage.updateAST(compResult.root());

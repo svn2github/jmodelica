@@ -1,19 +1,19 @@
 package org.jmodelica.ide;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
+import java.util.LinkedList;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.jmodelica.ide.error.CompileErrorReport;
 import org.jmodelica.ide.error.InstanceErrorHandler;
+import org.jmodelica.ide.helpers.Library;
 import org.jmodelica.ide.helpers.Maybe;
+import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.modelica.compiler.BadDefinition;
 import org.jmodelica.modelica.compiler.List;
 import org.jmodelica.modelica.compiler.ParserException;
@@ -23,7 +23,6 @@ import org.jmodelica.modelica.compiler.StoredDefinition;
 import org.jmodelica.modelica.parser.ModelicaParser;
 import org.jmodelica.modelica.parser.ModelicaScanner;
 import org.jmodelica.util.OptionRegistry;
-import org.xml.sax.SAXException;
 
 import beaver.Parser;
 
@@ -55,35 +54,39 @@ public CompilationRoot(
         Maybe<? extends ModelicaParser.Report> report, 
         IProject project) 
 {
-    this.list = new List<StoredDefinition>();
-    this.root = new SourceRoot(new Program(list));
-    this.handler = new InstanceErrorHandler();
+    this.list = 
+        new List<StoredDefinition>();
+    this.root = 
+        new SourceRoot(
+            new Program(list));
+    this.handler = 
+        new InstanceErrorHandler();
+    
     root.setErrorHandler(handler);
+    
     if (report.hasValue())
         PARSER.setReport(report.value());
 
     try {
         
-        String optionsPath = 
-            project
-            .getPersistentProperty(
-                IDEConstants.PROPTERTY_OPTIONS_PATH);
-        
         root.options.copyAllOptions(
-            new OptionRegistry(optionsPath + "/options.xml"));
+            new OptionRegistry(
+                project
+                .getPersistentProperty(
+                    IDEConstants.PROPTERTY_OPTIONS_PATH)
+                + "/options.xml"));
 
+        root.options.setStringOption(
+            "MODELICAPATH", 
+            Library.makeModelicaPath(
+                project
+                .getPersistentProperty(
+                    IDEConstants.PROPERTY_LIBRARIES_ID)));
+        
         root.getProgram().getInstProgramRoot().options =
             root.options;
 
-    } catch (XPathExpressionException e) {
-        e.printStackTrace();
-    } catch (ParserConfigurationException e) {
-        e.printStackTrace();
-    } catch (IOException e) {
-        e.printStackTrace();
-    } catch (SAXException e) {
-        e.printStackTrace();
-    } catch (CoreException e) {
+    } catch (Exception e) {
         e.printStackTrace();
     }
 }

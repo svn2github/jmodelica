@@ -47,7 +47,7 @@ import org.jmodelica.ide.helpers.Library;
     	StringBuilder filePath = new StringBuilder(path);
     	if (!path.endsWith(File.separator))
     		filePath.append(File.separator);
-    	filePath.append("package.mo");
+    	filePath.append("Modelica" + File.separator + "package.mo");
     	FileReader reader = new FileReader(filePath.toString());
     	lib = new Library();
     	lib.path = path;
