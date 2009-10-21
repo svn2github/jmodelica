@@ -38,6 +38,14 @@ aspect Arrays {
 	eq InstArrayAccess.fArraySubscripts() = hasFArraySubscripts()? getFArraySubscripts(): null;
 
 	// Array dimensions
+	syn int FAbstractEquation.ndims() = -1;
+	eq FEquation.ndims() {
+		if (getLeft().ndims() == getRight().ndims()) {
+			return getLeft().ndims();
+		}
+		return -1;
+	}
+	
 	syn int FArraySubscripts.ndims() { 
 		return getNumFSubscript();
 	}
@@ -74,7 +82,7 @@ aspect Arrays {
 	eq FOnes.ndims() = getNumFExp();
 	eq FZeros.ndims() = getNumFExp();
 	
-	syn int FIdUse.ndims() = getFQName().ndims();
+	syn int FIdUse.ndims() = getFQName().accessNdims();
 	eq FIdUseExp.ndims() = getFIdUse().ndims();
 		
 	syn int InstAccess.ndims() = 0;
@@ -92,7 +100,7 @@ aspect Arrays {
 	eq InstComponentDecl.ndims() = hasFArraySubscripts()? 
 			getFArraySubscripts().ndims(): 0;
 
-	syn int FVariable.ndims() = getFQName().ndims();
+	syn int FVariable.ndims() = isScalarized()? 0 : getFQName().ndims();
 	
 	syn int FQName.ndims() {
 		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
@@ -102,7 +110,17 @@ aspect Arrays {
 			return 0;
 		}
 	}
-			
+
+	syn int FQName.accessNdims() {
+		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
+		if (last.hasFArraySubscripts()) {
+			return last.getFArraySubscripts().accessNdims(); 
+		} else {
+			return 0;
+		}
+	}
+
+	
 	// Array sizes		
 	syn int[] FArraySubscripts.size() {
 		int s[] = new int[ndims()];
@@ -235,7 +253,7 @@ aspect Arrays {
 	eq InstComponentDecl.size() = hasFArraySubscripts()? 
 			getFArraySubscripts().size(): new int[0];
 
-	syn int[] FVariable.size() = getFQName().size();
+	syn int[] FVariable.size() = isScalarized()? new int[0]: getFQName().size();
 			
 	syn int[] FQName.size() {
 		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
@@ -250,6 +268,7 @@ aspect Arrays {
 	syn boolean FVariable.isArray() = ndims()>0;
 	syn boolean InstNode.isArray() = ndims()>0;
 
+	
 	// Computation of Arrays from expressions
 	syn nta FArray FExp.array() {
 		if (!isArray()) {

@@ -402,9 +402,9 @@ aspect FlatNames {
 		return this;
 	}
 
-	syn boolean FQName.hasFArraySubscripts() = 
+	syn boolean FQName.hasFArraySubscripts() = isScalarized()? false:
 		getFQNamePart(getNumFQNamePart()-1).hasFArraySubscripts();
-	syn FArraySubscripts FQName.getFArraySubscripts() = 
+	syn FArraySubscripts FQName.getFArraySubscripts() = isScalarized()? null:
 		getFQNamePart(getNumFQNamePart()-1).getFArraySubscripts();
 
 	syn boolean FIdUse.hasFArraySubscripts() = 
@@ -475,11 +475,13 @@ aspect FlatNames {
 		StringBuffer str = new StringBuffer();
 		for (int i=0;i<getNumFQNamePart();i++) {
 			str.append(getFQNamePart(i).getName());
-			if (i<getNumFQNamePart()-1) {
+			if (i<getNumFQNamePart()-1 || isScalarized()) {
 				if (getFQNamePart(i).hasFArraySubscripts()) {
 					str.append(getFQNamePart(i).getFArraySubscripts().prettyPrint(""));
 				}
-				str.append(".");
+				if (i<getNumFQNamePart()-1) {
+					str.append(".");
+				}
 			}
 		}
 		return str.toString();
@@ -511,14 +513,18 @@ aspect FlatNames {
 				str.append("der(");
 			}			
 			str.append(getFQNamePart(i).getName());
-			if (i<getNumFQNamePart()-1) {
-				str.append(".");
-			} 
+			//if (i<getNumFQNamePart()-1 || isScalarized()) {
+				if (getFQNamePart(i).hasFArraySubscripts()) {
+					str.append(getFQNamePart(i).getFArraySubscripts().prettyPrint(""));
+				}
+				if (i<getNumFQNamePart()-1) {
+					str.append(".");
+				}
+			//}
 		}
 		str.append(")");
 		return str.toString();
 	}
-	
 	
 	//syn String FIdUse.derName2() = getFQName().derName2();
 	//syn String FIdUseExp.derName2() = getFIdUse().derName2();
@@ -527,11 +533,22 @@ aspect FlatNames {
 		StringBuffer str = new StringBuffer();
 		for (int i=0;i<getNumFQNamePart();i++) {
 			str.append(getFQNamePart(i).getName());
-			if (i<getNumFQNamePart()-1)
-				str.append("_");
+			if (i<getNumFQNamePart()-1 || isScalarized()) {
+				if (getFQNamePart(i).hasFArraySubscripts()) {
+					for (FSubscript fs : 
+						getFQNamePart(i).getFArraySubscripts().getFSubscripts()) {
+						str.append("_");
+						str.append(fs.prettyPrint(""));
+					}
+				}
+				if (i<getNumFQNamePart()-1) {
+					str.append("_");
+				}
+			}
 		}
 		return str.toString();
 	}
+
 	syn String FQNamePart.nameUnderscore() = getName();
 
 	syn String FIdUse.nameUnderscore() = getFQName().nameUnderscore();
@@ -781,4 +798,69 @@ aspect ParserHelpers {
 		
 	}
 	
+}
+
+aspect ArrayIndices {
+	
+	public class IndexCounter {
+		
+		private int[] size;
+		private int[] counter;
+		private int ndims;
+		
+		public IndexCounter(int[] size) {
+			ndims = size.length;
+			this.size = new int[ndims];
+			this.counter = new int[ndims];
+			
+			for (int i=0;i<ndims;i++) {
+				this.size[i] = size[i];
+				this.counter[i] = 1;
+			}
+		}
+		
+		public void reset() {
+			for (int i=0;i<ndims;i++) {
+				counter[i] = 1;
+			}			
+		}
+		
+		public int numElements() {
+			int n_el = 1;
+			for (int i=0;i<ndims;i++) {
+				n_el *= size[i];
+			}
+			return n_el;
+		}
+		
+		public void inc() {
+			counter[0] += 1;
+			for (int i=0;i<ndims;i++) {
+				if (counter[i]>size[i]) {
+					if (i<ndims-1) {
+						counter[i] = 1;
+						counter[i+1] += 1;
+					} else { 
+						reset();
+					}
+				}
+			}			
+		}
+	
+		public int[] getCounter() {
+			int[] cnt = new int[ndims];
+			for (int i=0;i<ndims;i++) {
+				cnt[i] = counter[i];
+			}
+			return cnt;
+		}
+		
+		public FArraySubscripts newFArraySubscripts() {
+			FArraySubscripts fas = new FArraySubscripts();
+			for (int i=0;i<ndims;i++) {
+				fas.addFSubscript(new FExpSubscript(new FIntegerLitExp(""+counter[i])));
+			}
+			return fas;
+		}
+	}
 }

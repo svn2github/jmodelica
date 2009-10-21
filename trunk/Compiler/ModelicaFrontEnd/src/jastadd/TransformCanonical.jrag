@@ -24,6 +24,7 @@ aspect TransformCanonical{
 			genAlias();
 			eliminateAliasVariables();
 		}
+		scalarize();
 		addFDerivativeVariables();
 		genInitialEquations();
 		sortDependentParameters();
@@ -316,6 +317,178 @@ aspect TransformCanonical{
 		flushAllRecursiveClearFinal();
 		//is$Final = true;
 	}
+	
+}
+
+aspect Scalarization {
+
+	boolean FQName.scalarized = false;
+	syn boolean FVariable.isScalarized() = getFQName().isScalarized();
+	syn boolean FQName.isScalarized() = scalarized;
+	
+	public void FClass.scalarize() {
+		List<FVariable> vars = new List<FVariable>();
+		List<FVariable> alias_vars = new List<FVariable>();
+		for (FVariable fv : getFVariables()) {
+			fv.scalarize(vars);
+		}	
+		for (FVariable fv : getAliasVariables()) {
+			fv.scalarize(alias_vars);
+		}	
+		setFVariableList(vars);
+		setAliasVariableList(alias_vars);
+		
+		List<FAbstractEquation> eqns = new List<FAbstractEquation>();
+		for (FAbstractEquation ae : getFEquationBlock(0).getFAbstractEquations()) {
+			ae.scalarize(eqns);
+		}
+		getFEquationBlock(0).setFAbstractEquationList(eqns);
+	}
+	
+	public void FVariable.scalarize(List<FVariable> vars) {
+		if (isArray()) {
+			int ndims = ndims();
+			int[] size = size();
+			int[] index = new int[ndims];
+			IndexCounter ic = new IndexCounter(size);
+			
+			for (int i=0;i<ic.numElements();i++) {
+				FVariable fv_tmp = (FVariable)fullCopy();
+				fv_tmp.getFQName().getFQNamePart(fv_tmp.getFQName().getNumFQNamePart()-1).
+				  setFArraySubscripts(ic.newFArraySubscripts());
+				fv_tmp.getFQName().scalarized = true;
+				vars.addChild(fv_tmp);
+				ic.inc();
+			}
+			
+		} else {
+			getFQName().scalarized = true;
+			vars.addChild(this);
+		}
+	}
+	
+	public void FAbstractEquation.scalarize(List<FAbstractEquation> eqns) {}
+	
+	public void FEquation.scalarize(List<FAbstractEquation> eqns) {
+		if (ndims()==0) {
+			eqns.addChild(new FEquation(getLeft().scalarize(),
+					getRight().scalarize()));
+		}
+	}
+	
+	public FExp FExp.scalarize() {
+		return null;
+	}
+
+    public FIdUse FIdUse.scalarize() {
+    	FIdUse fid = (FIdUse)fullCopy();
+    	fid.getFQName().scalarized = true;
+    	return fid;
+    }
+
+    public FExp FIdUseExp.scalarize() {
+    	return new FIdUseExp(getFIdUse().scalarize());
+    }
+    
+    public FExp FIfExp.scalarize() {
+		List etl = new List();
+		for (int i=0;i<getNumFElseIfExp();i++) {
+			etl.add(getFElseIfExp(i).scalarize());
+		}
+		return new FIfExp(getIfExp().scalarize(),
+		                  getThenExp().scalarize(),
+		                  etl,
+		                  getElseExp().scalarize());
+	}
+	
+	public FExp FElseIfExp.scalarize() {
+		return new FElseIfExp(getIfExp().scalarize(),
+		                      getThenExp().scalarize());
+	}
+	
+	public FExp FAddExp.scalarize() { return new FAddExp(getLeft().scalarize(),getRight().scalarize()); }
+	public FExp FSubExp.scalarize() { return new FSubExp(getLeft().scalarize(),getRight().scalarize()); }
+	public FExp FMulExp.scalarize() { return new FMulExp(getLeft().scalarize(),getRight().scalarize()); }
+	public FExp FDivExp.scalarize() { return new FDivExp(getLeft().scalarize(),getRight().scalarize()); }
+	public FExp FPowExp.scalarize() { return new FPowExp(getLeft().scalarize(),getRight().scalarize()); }
+	public FExp FNegExp.scalarize() { return new FNegExp(getFExp().scalarize()); }
+
+	public FExp FLtExp.scalarize() { return new FLtExp(getLeft().scalarize(),getRight().scalarize()); }
+	public FExp FLeqExp.scalarize() { return new FLeqExp(getLeft().scalarize(),getRight().scalarize()); }
+	public FExp FGtExp.scalarize() { return new FGtExp(getLeft().scalarize(),getRight().scalarize()); }
+	public FExp FGeqExp.scalarize() { return new FGeqExp(getLeft().scalarize(),getRight().scalarize()); }
+	public FExp FEqExp.scalarize() { return new FEqExp(getLeft().scalarize(),getRight().scalarize()); }
+	public FExp FNeqExp.scalarize() { return new FNeqExp(getLeft().scalarize(),getRight().scalarize()); }
+	public FExp FNotExp.scalarize() { return new FNotExp(getFExp().scalarize()); }
+	public FExp FOrExp.scalarize() { return new FOrExp(getLeft().scalarize(),getRight().scalarize()); }
+	public FExp FAndExp.scalarize() { return new FAndExp(getLeft().scalarize(),getRight().scalarize()); }
+
+	public FExp FRealLitExp.scalarize() { return (FRealLitExp)fullCopy(); }
+	public FExp FIntegerLitExp.scalarize() { return (FIntegerLitExp)fullCopy(); }
+	public FExp FStringLitExp.scalarize() { return (FStringLitExp)fullCopy(); }
+	public FExp FBooleanLitExpTrue.scalarize() { return (FBooleanLitExpTrue)fullCopy(); }
+	public FExp FBooleanLitExpFalse.scalarize() { return (FBooleanLitExpFalse)fullCopy(); }
+	
+	public FExp FDer.scalarize() {return new FDer(getFIdUse().scalarize());}
+	public FExp FSinExp.scalarize() { return new FSinExp(getFExp().scalarize()); }
+	public FExp FCosExp.scalarize() { return new FCosExp(getFExp().scalarize()); }
+	public FExp FTanExp.scalarize() { return new FTanExp(getFExp().scalarize()); }
+	public FExp FAsinExp.scalarize() { return new FAsinExp(getFExp().scalarize()); }
+	public FExp FAcosExp.scalarize() { return new FAcosExp(getFExp().scalarize()); }
+	public FExp FAtanExp.scalarize() { return new FAtanExp(getFExp().scalarize()); }
+	public FExp FAtan2Exp.scalarize() { return new FAtan2Exp(getFExp().scalarize(),getY().scalarize()); }
+	public FExp FSinhExp.scalarize() { return new FSinhExp(getFExp().scalarize()); }
+	public FExp FCoshExp.scalarize() { return new FCoshExp(getFExp().scalarize()); }
+	public FExp FTanhExp.scalarize() { return new FTanhExp(getFExp().scalarize()); }
+	public FExp FExpExp.scalarize() { return new FExpExp(getFExp().scalarize()); }
+	public FExp FLogExp.scalarize() { return new FLogExp(getFExp().scalarize()); }
+	public FExp FLog10Exp.scalarize() { return new FLog10Exp(getFExp().scalarize()); }
+	public FExp FSqrtExp.scalarize() { return new FSqrtExp(getFExp().scalarize()); }
+	
+	public FExp FTimeExp.scalarize() { return new FTimeExp(); }
+	public FExp FEndExp.scalarize() { return new FEndExp(); }
+
+	/*
+	public FExp FFunctionCall.scalarize() {
+		List l = new List();
+		List args = new List();
+		for (FExp e : getArgss()) {
+			l.add(e.scalarize());
+		}
+		return new FFunctionCall(getName().flatten(new FQName()),l);		
+	}
+
+	public FExp FSumRedExp.scalarize() {
+		return new FSumRedExp(getFExp().scalarize(),
+		                     getFForIndex().scalarize());
+	}
+	
+	public FForIndex FForIndex.scalarize() {
+		return new FForIndex(getFIdDecl().scalarize(),
+		                     hasFExp()? new Opt(getFExp().scalarize()): new Opt());
+	}
+
+	//ForClauseE : AbstractEquation ::= ForIndex* ForEqns:AbstractEquation*;
+    //ForIndex ::= ForIndexDecl [Exp];
+	public void FForClauseE.flatten(FQName prefix, FClass fc) {
+		List forIndex = new List();
+		List eqns = new List();
+		for (int i=0;i<getNumFForIndex();i++)
+			forIndex.add(getFForIndex(i).scalarize());
+		FClass fcc = new FClass();
+		fcc.setFQName(new FQName().append("tmp")); 
+		fcc.addFEquationBlock(new FEquationBlock(new List()));
+		//fcc.dumpTree("");
+		for (int i=0;i<getNumForEqns();i++)
+			getForEqns(i).flatten(prefix,fcc);
+		for (int i=0;i<fcc.getFEquationBlock(0).getNumFAbstractEquation();i++)
+			eqns.add(fcc.getFEquationBlock(0).getFAbstractEquation(i));
+		fc.getFEquationBlock(0).addFAbstractEquation(new FForClauseE(forIndex,eqns));
+	}
+
+
+*/	
+	
 	
 	
 }

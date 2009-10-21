@@ -673,6 +673,7 @@ aspect FlatAPI {
 	inh FClass FVariable.myFClass();
 	inh FClass FExp.myFClass();
 	inh FClass FIdUse.myFClass();
+	inh FClass FQName.myFClass();
 	eq FClass.getChild().myFClass() = this;
 	eq Root.getChild().myFClass() = null; 
 

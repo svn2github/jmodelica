@@ -44,19 +44,47 @@ end ArrayTests.ArrayTest1b;
     x[2] = 4;
   end ArrayTest1b;
 
-  model ArrayTest2
-         annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ArrayTest2",
-        description="Flattening of arrays.",
+
+  model ArrayTest1c
+
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest1c",
+        description="Test scalarization of variables",
                                                flatModel=
-                                               " 
+"
+fclass ArrayTests.ArrayTest1c
+ Real x[1];
+ Real x[2];
+equation 
+ der(x[1]) = 3;
+ der(x[2]) = 4;
+end ArrayTests.ArrayTest1c;
+")})));
+  
+    Real x[2];
+  equation
+    der(x[1]) = 3;
+    der(x[2]) = 4;
+  end ArrayTest1c;
+
+
+  model ArrayTest2
+
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest2",
+        description="Test scalarization of variables",
+                                               flatModel=
+"
 fclass ArrayTests.ArrayTest2
+ Real x[1,1];
+ Real x[2,1];
+ Real x[1,2];
  Real x[2,2];
 equation 
  x[1,1] = 1;
  x[1,2] = 2;
  x[2,1] = 3;
- x[2,2] = 4; 
+ x[2,2] = 4;
 end ArrayTests.ArrayTest2;
 ")})));
 
@@ -78,6 +106,26 @@ end ArrayTests.ArrayTest2;
   end ArrayTest3;
 
   model ArrayTest4
+
+
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest4",
+        description="Test scalarization of variables",
+                                               flatModel=
+"fclass ArrayTests.ArrayTest4
+ Real m[1].x[1];
+ Real m[1].x[2];
+ Real m[2].x[1];
+ Real m[2].x[2];
+equation 
+ m[1].x[1] = 1;
+ m[1].x[2] = 2;
+ m[2].x[1] = 3;
+ m[2].x[2] = 4;
+end ArrayTests.ArrayTest4;
+")})));
+
+
     model M
       Real x[2];
     end M;
