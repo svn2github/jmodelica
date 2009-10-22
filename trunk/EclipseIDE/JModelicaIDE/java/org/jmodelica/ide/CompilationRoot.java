@@ -1,19 +1,15 @@
 package org.jmodelica.ide;
 
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.LinkedList;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.jmodelica.ide.error.CompileErrorReport;
 import org.jmodelica.ide.error.InstanceErrorHandler;
-import org.jmodelica.ide.helpers.Library;
 import org.jmodelica.ide.helpers.Maybe;
-import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.modelica.compiler.BadDefinition;
 import org.jmodelica.modelica.compiler.List;
 import org.jmodelica.modelica.compiler.ParserException;
@@ -22,7 +18,6 @@ import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 import org.jmodelica.modelica.parser.ModelicaParser;
 import org.jmodelica.modelica.parser.ModelicaScanner;
-import org.jmodelica.util.OptionRegistry;
 
 import beaver.Parser;
 
@@ -37,10 +32,13 @@ import beaver.Parser;
  */
 public class CompilationRoot {
 
-private final ModelicaParser PARSER = new ModelicaParser();
+private final ModelicaParser PARSER = 
+    new ModelicaParser();
 private final ModelicaScanner SCANNER =  
     new ModelicaScanner(System.in); // Dummy stream
-private final CompileErrorReport errorReport = new CompileErrorReport();
+private final CompileErrorReport errorReport =
+    new CompileErrorReport();
+
 private final SourceRoot root; 
 private final List<StoredDefinition> list;
 private final InstanceErrorHandler handler;
@@ -67,28 +65,12 @@ public CompilationRoot(
     if (report.hasValue())
         PARSER.setReport(report.value());
 
-    try {
-        
-        root.options.copyAllOptions(
-            new OptionRegistry(
-                project
-                .getPersistentProperty(
-                    IDEConstants.PROPTERTY_OPTIONS_PATH)
-                + "/options.xml"));
+    root.options =
+        new IDEOptions(project);
+    
+    root.getProgram().getInstProgramRoot().options =
+        root.options;
 
-        root.options.setStringOption(
-            "MODELICAPATH", 
-            Library.makeModelicaPath(
-                project
-                .getPersistentProperty(
-                    IDEConstants.PROPERTY_LIBRARIES_ID)));
-        
-        root.getProgram().getInstProgramRoot().options =
-            root.options;
-
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
 }
 
 public CompilationRoot(IProject project) {
@@ -111,11 +93,10 @@ public StoredDefinition getStoredDefinition() {
 
 protected StoredDefinition annotatedDefinition(
         StoredDefinition def,
-        IFile file, 
-        String path) {
+        IFile file) {
     
     def.setFile(file);
-    def.setFileName(path == null ? "" : path);
+    def.setFileName(file.getRawLocation().toOSString());
     def.setLineBreakMap(SCANNER.getLineBreakMap());
     
     return def;
@@ -138,7 +119,7 @@ public SourceRoot root() {
  * @return this
  */
 public CompilationRoot parseDoc(String doc, IFile file) {
-    return parseFile(new StringReader(doc), file, null);
+    return parseFile(new StringReader(doc), file);
 }
 
 public CompilationRoot parseDocs(String[] docs, IFile file) {
@@ -150,22 +131,25 @@ public CompilationRoot parseDocs(String[] docs, IFile file) {
 /** 
  * Parse content and add to source root.
  */
-public CompilationRoot parseFile(IFile file, String path) {
+public CompilationRoot parseFile(IFile file) {
     
     try {
-        if (path == null)
-            path = file.getRawLocation().toOSString();
-        parseFile(new FileReader(path), file, path);
+        parseFile(
+            new FileReader(
+                file.getRawLocation().toOSString()), 
+                file);
 
     } catch (IOException e) {
-        list.add(annotatedDefinition(new BadDefinition(), file, path));
+        
+        addBadDef(file);
+        
     }
     
     return this;
 }
 
 
-public CompilationRoot parseFile(Reader reader, IFile file, String path) {
+public CompilationRoot parseFile(Reader reader, IFile file) {
 
     errorReport.setFile(file);
     SCANNER.reset(reader);
@@ -178,20 +162,31 @@ public CompilationRoot parseFile(Reader reader, IFile file, String path) {
         for (StoredDefinition def 
                 : localRoot.getProgram().getUnstructuredEntitys()) 
         {
-            list.add(annotatedDefinition(def, file, path));
+            list.add(annotatedDefinition(def, file));
         }
         
-        
-        
     } catch (Parser.Exception e) {
-        System.out.println("Parse unsuccessful: " + path);
-        list.add(annotatedDefinition(new BadDefinition(), file, path));
+        
+        System.out.println(
+            "Parse unsuccessful: " + 
+            file.getRawLocation().toOSString());
+        
+        addBadDef(file);
+        
     } catch (ParserException e) {
-        System.out.println("Parse unsuccessful: " + path);
-        list.add(annotatedDefinition(new BadDefinition(), file, path));
+       
+        System.out.println(
+            "Parse unsuccessful: " + 
+            file.getRawLocation().toOSString());
+        
+        addBadDef(file);
+        
     } catch (IOException e) { 
+        
         e.printStackTrace();
-        list.add(annotatedDefinition(new BadDefinition(), file, path));
+        
+        addBadDef(file);
+        
     } finally {
         
         errorReport.cleanUp();
@@ -204,6 +199,14 @@ public CompilationRoot parseFile(Reader reader, IFile file, String path) {
     }
     
     return this;
+}
+
+private void addBadDef(IFile file) {
+    
+    list.add(
+        annotatedDefinition(
+            new BadDefinition(),
+            file));
 }
 
 }

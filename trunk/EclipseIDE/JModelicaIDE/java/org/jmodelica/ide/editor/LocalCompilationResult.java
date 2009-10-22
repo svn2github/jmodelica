@@ -15,7 +15,7 @@ private final ModelicaCompiler compiler;
 public LocalCompilationResult(EditorFile ef, Editor ed) {
 
     compiler = new ModelicaCompiler();
-    root = compiler.compileFile(ef.iFile(), ef.path());
+    root = compiler.compileFile(ef.iFile());
     editor = ed;
     
 }

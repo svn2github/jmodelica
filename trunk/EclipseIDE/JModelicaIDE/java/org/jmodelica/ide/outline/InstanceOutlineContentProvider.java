@@ -23,6 +23,7 @@ import org.jmodelica.modelica.compiler.InstProgramRoot;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
+
 public class InstanceOutlineContentProvider extends JastAddContentProvider {
 
 	@Override
@@ -63,16 +64,13 @@ public class InstanceOutlineContentProvider extends JastAddContentProvider {
 
 	@Override
 	public Object getParent(Object element) {
-	    
+
 	    boolean parentIsInstRoot =
 	        super.getParent(element) instanceof InstProgramRoot;
 	    
-	    InstClassDecl icd =
-	        (InstClassDecl) element;
-	    
 	    return 
 	        parentIsInstRoot
-        		? icd.getClassDecl().getParent()
+        		? ((InstClassDecl) element).getClassDecl().getParent()
     		    : super.getParent(element);
 	}
 

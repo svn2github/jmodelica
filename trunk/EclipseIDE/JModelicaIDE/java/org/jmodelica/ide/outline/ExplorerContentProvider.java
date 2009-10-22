@@ -111,7 +111,7 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		String path = file.getRawLocation().toOSString();
 		IASTNode ast = registry.lookupAST(path, project);
 		// TODO: Need to save in registry even if we have to build ourselves
-		return ast == null ? cmp.compileFile(file, path) : ast;
+		return ast == null ? cmp.compileFile(file) : ast;
 	}
 	
 	private ASTNode<?> getParentClass(ASTNode<?> node) {

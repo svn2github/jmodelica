@@ -14,6 +14,7 @@ import org.jmodelica.ide.helpers.Util;
 
 /**
  * File opened in Editor. Wraps different input methods.
+
  * @author philip
  *
  */
@@ -38,6 +39,7 @@ public EditorFile(IEditorInput input) {
     } else if (input instanceof IURIEditorInput) {
         
         String tmp;
+        
         try {
             IURIEditorInput i = (IURIEditorInput)input;
             tmp = new File(i.getURI()).getCanonicalPath();
@@ -46,10 +48,13 @@ public EditorFile(IEditorInput input) {
             tmp = null;
         }
         
-        path = tmp;
-        file = EclipseCruftinessWorkaroundClass.getFileForPath(path);
+        path = 
+            tmp;
+        file = 
+            EclipseCruftinessWorkaroundClass
+            .getFileForPath(path);
         
-    } else { // NOTE!!: includes input == null
+    } else { // NOTE: includes input == null
         throw new IllegalArgumentException();
     }
 }

@@ -112,15 +112,16 @@ static {
             file.createNewFile();
             FileOutputStream fout = new FileOutputStream(file);
             new Properties().store(fout, 
-                       " syntax: name=r,g,b@r,g,b@style\n" +
-                       "# where values for style are 0:Normal, 1:Bold, 2:Italic, 3:Bold Italic\n" +
-                       "\n" +
-                       "# example: keyword=127,0,85@null@1\n" +
-            		   "\n" +
-            		   "# possible values for name are:\n" +
-            		   "# normal, keyword, comment, string, annotationNormal, annotationKeyword,\n"+
-            		   "# annotationLHS, annotationRHS, annotationString, annotationOperator,\n"+
-            		   "# commentBoundary, qIdentBoundary, stringBoundary\n");
+               " syntax: \n" +
+               "# (Name=[FG:Color]@[BG:Color]@[Style])*\n" +
+               "# Color = R,G,B | null, where null is for styles not wishing to set a background color\n" +
+               "# Style = 0 | 1 | 2 | 3, where 0=Normal, 1=Bold, 2=Italic, 3=Bold Italic\n" +
+               "# Name  = normal | keyword | comment | string | annotationNormal | annotationKeyword |\n"+
+               "#         annotationLHS | annotationRHS | annotationString | annotationOperator |\n"+
+               "#         commentBoundary | qIdentBoundary | stringBoundary\n" +
+               "\n" +
+               "# example: keyword=127,0,85@null@1\n" +
+    		   "\n");
             fout.close();
         } else {
             FileInputStream fin = new FileInputStream(file);

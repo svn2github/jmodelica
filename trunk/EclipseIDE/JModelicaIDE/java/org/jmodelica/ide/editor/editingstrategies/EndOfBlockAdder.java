@@ -45,8 +45,10 @@ public void customizeDocumentCommand(
         }
         
         // assume looking back 100 chars will be sufficient
-        String context =
-            doc.get(Math.max(0, c.offset - 100), c.offset);
+        String context; {
+            int i = Math.max(0, c.offset - 100);
+            context = doc.get(i, c.offset - i);
+        }
         
         if (!context.matches(classRegex))
             return;

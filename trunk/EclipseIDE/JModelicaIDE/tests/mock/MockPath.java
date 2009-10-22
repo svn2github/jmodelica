@@ -6,6 +6,16 @@ import org.eclipse.core.runtime.IPath;
 
 public class MockPath implements IPath {
 
+    public String path;
+    
+    public MockPath() {
+        this("");
+    }
+    
+    public MockPath(String path) {
+        this.path = path;
+    }
+
     public MockPath clone() {
         return null;
     }
@@ -156,7 +166,7 @@ public class MockPath implements IPath {
     }
 
     public String toOSString() {
-        return "";
+        return path;
     }
 
     public String toPortableString() {

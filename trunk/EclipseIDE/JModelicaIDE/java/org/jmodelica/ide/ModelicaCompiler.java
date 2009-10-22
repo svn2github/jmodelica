@@ -18,6 +18,8 @@ package org.jmodelica.ide;
 import java.util.Arrays;
 import java.util.Collection;
 
+import mock.MockFile;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -80,7 +82,7 @@ private CompilationRoot recursiveCompile(
             case IResource.FILE:
                 IFile file = (IFile)resource;
                 if (IDEConstants.FILE_EXT.equals(file.getFileExtension()))
-                    lasr = lasr.parseFile(file, null);
+                    lasr = lasr.parseFile(file);
                 break;
             }
             
@@ -94,6 +96,13 @@ private CompilationRoot recursiveCompile(
     return lasr;
 }
 
+protected IFile defaultToMock(IFile file) {
+    return
+        new Maybe<IFile>(file)
+        .defaultTo(
+            new MockFile(null));
+}
+
 @Override
 public IASTNode compileToAST(
     IDocument document,
@@ -101,22 +110,28 @@ public IASTNode compileToAST(
     IRegion region,
     IFile file) 
 {
+    file = 
+        defaultToMock(file); 
+        
     return 
         newCompilationRoot(file.getProject())
         .parseFile(
             new DocumentReader(document), 
-            file,
-            file.getRawLocation().toOSString())
+            file)
         .getStoredDefinition();
 }
 
 public Maybe<ASTNode<?>> recompile(IDocument doc, IFile file) {
+    file = 
+        defaultToMock(file);
     return 
         new Maybe<ASTNode<?>>(
             (ASTNode<?>) compileToAST(doc, null, null, file));
 }
 
 public StoredDefinition recompile(String doc, IFile file) {
+    file =
+        defaultToMock(file);
     return 
         newCompilationRoot(file.getProject())
         .parseDoc(doc, file)
@@ -125,14 +140,19 @@ public StoredDefinition recompile(String doc, IFile file) {
 
 @Override
 protected IASTNode compileToAST(IFile file) {
+    file =
+        defaultToMock(file);
     return 
-        compileFile(file, file.getRawLocation().toOSString());
+        compileFile(
+            file);
 }
 
-public ASTNode<?> compileFile(IFile file, String path) {
+public ASTNode<?> compileFile(IFile file) {
+    file =
+        defaultToMock(file);
     return 
         newCompilationRoot(file.getProject())
-        .parseFile(file, path)
+        .parseFile(file)
         .getStoredDefinition();
 }
 

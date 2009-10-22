@@ -202,7 +202,8 @@ aspect Semantic {
         addDynamicClassName(access);
         // return value is equal to access, but this method needs to be called
         // for proper evaluation of attributes
-        return getDynamicClassName(getNumDynamicClassName() - 1);
+        return 
+            (InstAccess) getDynamicClassNameList().getLast();
     }
      
     /**
@@ -212,7 +213,8 @@ aspect Semantic {
         addDynamicComponentName(access);
         // return value is equal to access, but this method needs to be called
         // for proper evaluation of attributes
-        return getDynamicComponentName(getNumDynamicComponentName() - 1);
+        return 
+            (InstAccess) getDynamicComponentNameList().getLast();
     }
     
 }

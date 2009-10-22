@@ -22,9 +22,7 @@ public final static IndentingAutoEditStrategy editStrategy =
 final static IndentationHintScanner ihs = 
     new IndentationHintScanner();
 
-/**
- * Count number of tokens in from lineStart of offset up until offset.   
- */
+
 public static int countTokens(IDocument doc, int offset) {
     return 
         IndentedSection
@@ -36,8 +34,11 @@ public static int countTokens(IDocument doc, int offset) {
 /**
  * Calculate indent at offset from hints.
  * */
-protected int getIndent(int begin, int end, 
-        AnchorList<Integer> aList) {
+protected int getIndent(
+        int begin, 
+        int end, 
+        AnchorList<Integer> aList) 
+{
     
     Anchor<Integer> a = aList.sinkAt(end + 1);
     
@@ -50,6 +51,7 @@ protected int getIndent(int begin, int end,
 public void customizeDocumentCommand(IDocument doc, DocumentCommand c) {
 
     try {
+        
         boolean pastedBlock = c.text.length() > 1 && !c.text.equals("\r\n");
         boolean isSemicolon = c.text.equals(";");
         boolean isNewLine = c.text.matches("\r|\n|\r\n");

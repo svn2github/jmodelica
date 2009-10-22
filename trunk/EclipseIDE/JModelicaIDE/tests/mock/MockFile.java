@@ -26,12 +26,22 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 @SuppressWarnings({ "deprecation", "unchecked" })
 public class MockFile implements IFile {
 
-    private IProject project;
-
+    IProject project;
+    String path;
+    
+    public MockFile() {
+        this(null, null);
+    }
+    
     public MockFile(IProject project) {
-        this.project = project;
+        this(project, null);
     }
 
+    public MockFile(IProject project, String path) {
+        this.project = project;
+        this.path = path;
+    }
+    
     public void appendContents(InputStream source, int updateFlags,
             IProgressMonitor monitor) throws CoreException {
     }
@@ -249,7 +259,7 @@ public class MockFile implements IFile {
     }
 
     public IPath getRawLocation() {
-        return new MockPath();
+        return new MockPath(path);
     }
 
     public URI getRawLocationURI() {
