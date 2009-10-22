@@ -1996,7 +1996,7 @@ class Model(object):
         xmldoc = self._get_XMLvariables_doc()
         valref = xmldoc.get_valueref(name.strip())
         value = None
-        if valref:
+        if valref != None:
             (z_i, ptype) = _translate_value_ref(valref)
             value = self.get_pi()[z_i - self._offs_pi.value]
         else:
@@ -2007,7 +2007,7 @@ class Model(object):
         """ Set value of a parameter. """
         xmldoc = self._get_XMLvariables_doc()
         valref = xmldoc.get_valueref(name)
-        if valref:
+        if valref != None:
             (z_i, ptype) = _translate_value_ref(valref)
             self.get_pi()[z_i - self._offs_pi.value] = value
         else:
@@ -2025,7 +2025,7 @@ class Model(object):
         xmldoc = self._get_XMLvariables_doc()
         valref = xmldoc.get_valueref(name.strip())
         value = None
-        if valref:
+        if valref != None:
             (z_i, ptype) = _translate_value_ref(valref)
             value = self.get_z()[z_i]
         else:
@@ -2060,7 +2060,7 @@ class Model(object):
         
         xmldoc = self._get_XMLvariables_doc()
         valref = xmldoc.get_valueref(name)
-        if valref:
+        if valref != None:
             (z_i, ptype) = _translate_value_ref(valref)
             self.get_z()[z_i] = value
         else:
