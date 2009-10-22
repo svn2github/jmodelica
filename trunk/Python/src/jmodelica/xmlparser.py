@@ -103,9 +103,16 @@ class XMLVariablesDoc(XMLdoc):
         """
         ref = self._xpatheval("//ScalarVariable/ValueReference/text() [../../ScalarVariableName=\""+variablename+"\"]")
         if len(ref) > 0:
-            return ref[0]
+            return int(ref[0])
         else:
             return None
+        
+    def get_data_type(self, valueref):
+        """ Get data type of variable. """
+        type = self._xpatheval("//ScalarVariable/DataType/text()[../../ValueReference=\""+str(valueref)+"\"]")
+        if len(type)>0:
+            return str(type[0])
+        return None
 
     def get_variable_names(self):
         """
@@ -119,7 +126,13 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys,vals))
+        valrefs=[]
+        names=[]       
+        for index, key in enumerate(keys):
+            valrefs.append(int(key))
+            names.append(str(vals[index]))
+          
+        return dict(zip(valrefs,names))
 
     def get_derivative_names(self):
         """
@@ -135,7 +148,13 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys,vals))
+        valrefs=[]
+        names=[]
+        for index, key in enumerate(keys):
+            valrefs.append(int(key))
+            names.append(str(vals[index]))
+
+        return dict(zip(valrefs,names))
 
     def get_differentiated_variable_names(self):
         """
@@ -151,7 +170,13 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys,vals))
+        valrefs=[]
+        names=[]
+        for index, key in enumerate(keys):
+            valrefs.append(int(key))
+            names.append(str(vals[index]))
+
+        return dict(zip(valrefs,names))
 
     def get_input_names(self):
         """
@@ -166,8 +191,14 @@ class XMLVariablesDoc(XMLdoc):
             [../../AliasVariable=\"noAlias\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
-                Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))      
-        return dict(zip(keys,vals))
+                Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
+        valrefs=[]
+        names=[]
+        for index, key in enumerate(keys):
+            valrefs.append(int(key))
+            names.append(str(vals[index]))
+  
+        return dict(zip(valrefs,names))
 
     def get_algebraic_variable_names(self):
         """
@@ -182,8 +213,14 @@ class XMLVariablesDoc(XMLdoc):
             [../../AliasVariable=\"noAlias\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
-                Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))       
-        return dict(zip(keys,vals))
+                Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
+        valrefs=[]
+        names=[]
+        for index, key in enumerate(keys):
+            valrefs.append(int(key))
+            names.append(str(vals[index]))
+
+        return dict(zip(valrefs,names))
 
     def get_p_opt_names(self):
         """ 
@@ -200,7 +237,13 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys,vals))
+        valrefs=[]
+        names=[]
+        for index, key in enumerate(keys):
+            valrefs.append(int(key))
+            names.append(str(vals[index]))
+
+        return dict(zip(valrefs,names))
 
     def get_variable_descriptions(self):
         """
@@ -214,7 +257,33 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys,vals))
+        valrefs=[]
+        descriptions=[]
+        for index, key in enumerate(keys):
+            valrefs.append(int(key))
+            descriptions.append(str(vals[index]))
+
+        return dict(zip(valrefs,descriptions))
+    
+    def _cast_values(self, keys, vals):
+        valrefs=[]
+        typed_values=[]
+        for index, key in enumerate(keys):
+            valrefs.append(int(key))
+            type = self.get_data_type(int(key))
+            if type == 'Real':
+                typed_values.append(float(vals[index]))
+            elif type == 'Integer':
+                typed_values.append(int(vals[index]))
+            elif type == 'Boolean':
+                typed_values.append(vals[index]=="true")
+            elif type == 'String':
+                typed_values.append(str(vals[index]))
+            else:
+                pass
+                # enumeration not supported yet
+       
+        return dict(zip(valrefs,typed_values))
     
     def get_start_attributes(self):
         """ 
@@ -232,7 +301,7 @@ class XMLVariablesDoc(XMLdoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
 #        keys = map(N.int,keys)
 #        vals = map(N.float,vals)
-        return dict(zip(keys,vals))
+        return self._cast_values(keys, vals)
 
     def get_dx_start_attributes(self):
         """ 
@@ -250,7 +319,7 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys,vals))
+        return self._cast_values(keys, vals)
 
     def get_x_start_attributes(self):
         """ 
@@ -268,7 +337,7 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys,vals))
+        return self._cast_values(keys, vals)
 
     def get_u_start_attributes(self):
         """ 
@@ -286,7 +355,7 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys,vals))
+        return self._cast_values(keys, vals)
 
     def get_w_start_attributes(self):
         """ 
@@ -304,8 +373,7 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys,vals))
-
+        return self._cast_values(keys, vals)
     
     def get_p_opt_variable_refs(self):
         """ 
@@ -317,7 +385,10 @@ class XMLVariablesDoc(XMLdoc):
         """
         refs = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"independentParameter\"] \
                                [../../Attributes/RealAttributes/Free=\"true\"] [../../AliasVariable=\"noAlias\"]")
-        return refs
+        valrefs=[]
+        for ref in refs:
+            valrefs.append(int(ref))
+        return valrefs
     
     def get_w_initial_guess_values(self):
         """ 
@@ -335,7 +406,7 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys,vals))
+        return self._cast_values(keys, vals)
     
     def get_u_initial_guess_values(self):
         """ 
@@ -353,7 +424,7 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys,vals))
+        return self._cast_values(keys, vals)
     
     def get_dx_initial_guess_values(self):
         """ 
@@ -371,7 +442,7 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys, vals))
+        return self._cast_values(keys, vals)
     
     def get_x_initial_guess_values(self):
         """ 
@@ -389,7 +460,7 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))        
-        return dict(zip(keys, vals))
+        return self._cast_values(keys, vals)
     
     def get_p_opt_initial_guess_values(self):
         """ 
@@ -407,7 +478,7 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys, vals))
+        return self._cast_values(keys, vals)
 
     def get_w_lb_values(self):
         """ 
@@ -425,7 +496,7 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys,vals))
+        return self._cast_values(keys, vals)
     
     def get_u_lb_values(self):
         """ 
@@ -443,7 +514,7 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))            
-        return dict(zip(keys,vals))
+        return self._cast_values(keys, vals)
     
     def get_dx_lb_values(self):
         """ 
@@ -461,7 +532,7 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))        
-        return dict(zip(keys, vals))
+        return self._cast_values(keys, vals)
     
     def get_x_lb_values(self):
         """ 
@@ -479,7 +550,7 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys, vals))
+        return self._cast_values(keys, vals)
     
     def get_p_opt_lb_values(self):
         """ 
@@ -497,7 +568,7 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys, vals))
+        return self._cast_values(keys, vals)
 
     def get_w_ub_values(self):
         """ 
@@ -515,7 +586,7 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))           
-        return dict(zip(keys,vals))
+        return self._cast_values(keys, vals)
 
     def get_u_ub_values(self):
         """ 
@@ -532,7 +603,7 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys,vals))
+        return self._cast_values(keys, vals)
     
     def get_dx_ub_values(self):
         """ 
@@ -550,7 +621,7 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys, vals))
+        return self._cast_values(keys, vals)
     
     def get_x_ub_values(self):
         """ 
@@ -568,7 +639,7 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))        
-        return dict(zip(keys, vals))
+        return self._cast_values(keys, vals)
     
     def get_p_opt_ub_values(self):
         """ 
@@ -586,7 +657,8 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys, vals))
+        return self._cast_values(keys, vals)
+    
 
     def get_w_lin_values(self):
         """ 
@@ -604,8 +676,13 @@ class XMLVariablesDoc(XMLdoc):
             [../../AliasVariable=\"noAlias\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
-                Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))       
-        return dict(zip(keys,vals))
+                Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
+        valrefs = []
+        islinears = []
+        for index, key in enumerate(keys):
+            valrefs.append(int(key))
+            islinears.append(vals[index]=="true") 
+        return dict(zip(valrefs, islinears))
 
     def get_u_lin_values(self):
         """ 
@@ -624,7 +701,12 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys,vals))
+        valrefs = []
+        islinears = []
+        for index, key in enumerate(keys):
+            valrefs.append(int(key))
+            islinears.append(vals[index]=="true")    
+        return dict(zip(valrefs, islinears))
     
     def get_dx_lin_values(self):
         """ 
@@ -643,7 +725,12 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys, vals))
+        valrefs = []
+        islinears = []
+        for index, key in enumerate(keys):
+            valrefs.append(int(key))
+            islinears.append(vals[index]=="true")
+        return dict(zip(valrefs, islinears))
     
     def get_x_lin_values(self):
         """ 
@@ -661,7 +748,12 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys, vals))
+        valrefs = []
+        islinears = []
+        for index, key in enumerate(keys):
+            valrefs.append(int(key))
+            islinears.append(vals[index]=="true") 
+        return dict(zip(valrefs, islinears))
     
     def get_p_opt_lin_values(self):
         """ 
@@ -680,7 +772,12 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys, vals))
+        valrefs = []
+        islinears = []
+        for index, key in enumerate(keys):
+            valrefs.append(int(key))
+            islinears.append(vals[index]=="true")    
+        return dict(zip(valrefs, islinears))
 
     def get_w_lin_tp_values(self):
         """ 
@@ -701,7 +798,18 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys,vals))
+        valrefs = []
+        timepoints_islinear = []
+        
+        for index, key in enumerate(keys):
+            valrefs.append(int(key))
+            # get list of timepoints for each valueref
+            tps = vals[index]
+            casted_tps = []
+            for tp in tps:
+                casted_tps.append(tp == "true")    
+            timepoints_islinear.append(casted_tps)             
+        return dict(zip(valrefs, timepoints_islinear))
 
     def get_u_lin_tp_values(self):
         """ 
@@ -723,7 +831,18 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys,vals))
+        valrefs = []
+        timepoints_islinear = []
+        
+        for index, key in enumerate(keys):
+            valrefs.append(int(key))
+            # get list of timepoints for each valueref
+            tps = vals[index]
+            casted_tps = []
+            for tp in tps:
+                casted_tps.append(tp == "true")
+            timepoints_islinear.append(casted_tps)             
+        return dict(zip(valrefs, timepoints_islinear))
     
     def get_dx_lin_tp_values(self):
         """ 
@@ -745,7 +864,18 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys, vals))
+        valrefs = []
+        timepoints_islinear = []
+        
+        for index, key in enumerate(keys):
+            valrefs.append(int(key))
+            # get list of timepoints for each valueref
+            tps = vals[index]
+            casted_tps = []
+            for tp in tps:
+                casted_tps.append(tp == "true")
+            timepoints_islinear.append(casted_tps)             
+        return dict(zip(valrefs, timepoints_islinear))
     
     def get_x_lin_tp_values(self):
         """ 
@@ -767,7 +897,18 @@ class XMLVariablesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys, vals))
+        valrefs = []
+        timepoints_islinear = []
+        
+        for index, key in enumerate(keys):
+            valrefs.append(int(key))
+            # get list of timepoints for each valueref
+            tps = vals[index]
+            casted_tps = []
+            for tp in tps:
+                casted_tps.append(tp == "true")
+            timepoints_islinear.append(casted_tps)             
+        return dict(zip(valrefs, timepoints_islinear))       
             
 class XMLValuesDoc(XMLdoc):
     
@@ -791,7 +932,29 @@ class XMLValuesDoc(XMLdoc):
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        return dict(zip(keys,vals))
+        valrefs=[]
+        iparam_values=[]
+        for index, key in enumerate(keys):
+            valrefs.append(int(key))
+            type = self.get_parameter_type(int(key))
+            if type == 'RealParameter':
+                iparam_values.append(float(vals[index]))
+            elif type == 'IntegerParameter':
+                iparam_values.append(int(vals[index]))
+            elif type == 'BooleanParameter':
+                iparam_values.append(vals[index]=="true")
+            elif type == 'StringParameter':
+                iparam_values.append(str(vals[index]))
+            else:
+                pass
+                # enumeration not supported yet
+        return dict(zip(valrefs, iparam_values))
+    
+    def get_parameter_type(self, valref):
+        type = self._xpatheval("//IndependentParameters/node()[ValueReference=\""+str(valref)+"\"]")
+        if len(type) > 0:
+            return type[0].tag
+        return None
         
 class XMLProblVariablesDoc(XMLdoc):
     
@@ -805,31 +968,37 @@ class XMLProblVariablesDoc(XMLdoc):
         """ Extract the interval start time. """
         time = self._xpatheval("//IntervalStartTime/Value/text()")
         if len(time) > 0:
-            return time[0]
-        else:
-            return None
+            return float(time[0])
+        return None
 
     def get_starttime_free(self):
         """ Extract the start time free attribute value. """
         free = self._xpatheval("//IntervalStartTime/Free/text()")
-        return bool(free.count('true'))
+        if len(free) > 0:
+            return (free[0]=="true")
+        return None
     
     def get_finaltime(self):
         """ Extract the interval final time. """
         time = self._xpatheval("//IntervalFinalTime/Value/text()")
         if len(time) > 0:
-            return time[0]
-        else:
-            return None
+            return float(time[0])
+        return None
 
     def get_finaltime_free(self):
         """ Extract the final time free attribute value. """
         free = self._xpatheval("//IntervalFinalTime/Free/text()")
-        return bool(free.count('true'))
+        if len(free) > 0:
+            return (free[0]=="true")
+        return None
 
     def get_timepoints(self):
         """ Extract all time points. """
-        return self._xpatheval("//TimePoints/Value/text()")       
+        vals = self._xpatheval("//TimePoints/Value/text()")
+        timepoints = []
+        for tp in vals:
+            timepoints.append(float(tp))
+        return timepoints
      
 class XMLException(Exception):
     

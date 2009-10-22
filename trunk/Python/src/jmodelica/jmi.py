@@ -1406,8 +1406,8 @@ def _translate_value_ref(valueref):
     """
     indexmask = 0x0FFFFFFF
     ptypemask = 0xF0000000
-    index = int(valueref) & indexmask
-    ptype = (int(valueref) & ptypemask) >> 28
+    index = valueref & indexmask
+    ptype = (valueref & ptypemask) >> 28
     return (index,ptype)
 
 # list of temporary dll filenames and handles
@@ -1956,19 +1956,21 @@ class Model(object):
         starttimefree = xmldoc.get_starttime_free()
         finaltime = xmldoc.get_finaltime()
         finaltimefree = xmldoc.get_finaltime_free()
-        if starttime and finaltime:
-            self.jmimodel.opt_set_optimization_interval(float(starttime), int(starttimefree),
-                                                        float(finaltime), int(finaltimefree))        
+        if starttime!=None and finaltime!=None:
+            self.jmimodel.opt_set_optimization_interval(starttime, int(starttimefree),
+                                                        finaltime, int(finaltimefree))
+        else:
+            print "Could not set optimization interval. Optimization starttime and/or finaltime was None."   
 
     def _set_timepoints(self):       
         """ Set the optimization timepoints (if Optimica). """        
         xmldoc = self._get_XMLproblvariables_doc()
-        start =  float(xmldoc.get_starttime())
-        final = float(xmldoc.get_finaltime())
+        start =  xmldoc.get_starttime()
+        final = xmldoc.get_finaltime()
         points = []
         for point in xmldoc.get_timepoints():
-            norm_point = (float(point) - start) / (final-start)
-            points.append(float(norm_point))         
+            norm_point = (point - start) / (final-start)
+            points.append(norm_point)         
         self.jmimodel.set_tp(N.array(points))   
         
     def _set_p_opt_indices(self):
@@ -4709,7 +4711,7 @@ class SimultaneousOptLagPols(SimultaneousOpt):
                 (z_i, ptype) = _translate_value_ref(ref)
                 i_pi = z_i - self._model._offs_pi.value
                 i_pi_opt = p_opt_indices.index(i_pi)
-                p_opt_lin[i_pi_opt] = (values.get(ref) == "true").__int__()
+                p_opt_lin[i_pi_opt] = int(values.get(ref))
 
         # dx: derivative
         values = xmldoc.get_dx_lin_values()
@@ -4720,7 +4722,7 @@ class SimultaneousOptLagPols(SimultaneousOpt):
         for ref in refs:
             (z_i, ptype) = _translate_value_ref(ref)
             i_dx = z_i - self._model._offs_dx.value
-            dx_lin[i_dx] = (values.get(ref) == "true").__int__()
+            dx_lin[i_dx] = int(values.get(ref))
         
         # x: differentiate
         values = xmldoc.get_x_lin_values()
@@ -4731,7 +4733,7 @@ class SimultaneousOptLagPols(SimultaneousOpt):
         for ref in refs:
             (z_i, ptype) = _translate_value_ref(ref)
             i_x = z_i - self._model._offs_x.value
-            x_lin[i_x] = (values.get(ref) == "true").__int__()
+            x_lin[i_x] = int(values.get(ref))
             
         # u: input
         values = xmldoc.get_u_lin_values()
@@ -4742,7 +4744,7 @@ class SimultaneousOptLagPols(SimultaneousOpt):
         for ref in refs:
             (z_i, ptype) = _translate_value_ref(ref)
             i_u = z_i - self._model._offs_u.value
-            u_lin[i_u] = (values.get(ref) == "true").__int__()
+            u_lin[i_u] = int(values.get(ref))
         
         # w: algebraic
         values = xmldoc.get_w_lin_values()
@@ -4753,7 +4755,7 @@ class SimultaneousOptLagPols(SimultaneousOpt):
         for ref in refs:
             (z_i, ptype) = _translate_value_ref(ref)
             i_w = z_i - self._model._offs_w.value
-            w_lin[i_w] = (values.get(ref) == "true").__int__()
+            w_lin[i_w] = int(values.get(ref))
 
 
         # number of timepoints
@@ -4769,7 +4771,7 @@ class SimultaneousOptLagPols(SimultaneousOpt):
             for ref in refs:
                 (z_i, ptype) = _translate_value_ref(ref)
                 i_dx = z_i - self._model._offs_dx.value
-                dx_tp_lin[i_dx+no_tp*len(refs)] = (values.get(ref)[no_tp] == "true").__int__()
+                dx_tp_lin[i_dx+no_tp*len(refs)] = int(values.get(ref)[no_tp])
         
         # timepoints x: differentiate
         values = xmldoc.get_x_lin_tp_values()
@@ -4782,7 +4784,7 @@ class SimultaneousOptLagPols(SimultaneousOpt):
                 (z_i, ptype) = _translate_value_ref(ref)
                 i_x = z_i - self._model._offs_x.value
                 
-                x_tp_lin[i_x+no_tp*len(refs)] = (values.get(ref)[no_tp] == "true").__int__()
+                x_tp_lin[i_x+no_tp*len(refs)] = int(values.get(ref)[no_tp])
             
         # timepoints u: input
         values = xmldoc.get_u_lin_tp_values()
@@ -4795,7 +4797,7 @@ class SimultaneousOptLagPols(SimultaneousOpt):
                 (z_i, ptype) = _translate_value_ref(ref)
                 i_u = z_i - self._model._offs_u.value
                 
-                u_tp_lin[i_u+no_tp*len(refs)] = (values.get(ref)[no_tp] == "true").__int__()
+                u_tp_lin[i_u+no_tp*len(refs)] = int(values.get(ref)[no_tp])
         
         # timepoints w: algebraic
         values = xmldoc.get_w_lin_tp_values()
@@ -4807,7 +4809,7 @@ class SimultaneousOptLagPols(SimultaneousOpt):
             for ref in refs:
                 (z_i, ptype) = _translate_value_ref(ref)
                 i_w = z_i - self._model._offs_w.value
-                w_tp_lin[i_w+no_tp*len(refs)] = (values.get(ref)[no_tp] == "true").__int__()
+                w_tp_lin[i_w+no_tp*len(refs)] = int(values.get(ref)[no_tp])                
 
 class JMISimultaneousOptLagPols(JMISimultaneousOpt):
     
