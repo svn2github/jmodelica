@@ -30,11 +30,11 @@ public class MockFile implements IFile {
     String path;
     
     public MockFile() {
-        this(null, null);
+        this(null, "");
     }
     
     public MockFile(IProject project) {
-        this(project, null);
+        this(project, "");
     }
 
     public MockFile(IProject project, String path) {

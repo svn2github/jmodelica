@@ -137,7 +137,7 @@ public CompilationRoot parseFile(IFile file) {
         parseFile(
             new FileReader(
                 file.getRawLocation().toOSString()), 
-                file);
+            file);
 
     } catch (IOException e) {
         

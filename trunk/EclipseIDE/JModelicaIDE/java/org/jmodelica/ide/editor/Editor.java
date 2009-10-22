@@ -247,7 +247,9 @@ protected void doSetInput(IEditorInput input) throws CoreException {
 
     file = new EditorFile(input);
 
-    compResult = file.inWorkspace() ? new GlobalCompilationResult(file, this)
+    compResult = 
+        file.inWorkspace() 
+            ? new GlobalCompilationResult(file, this)
             : new LocalCompilationResult(file, this);
 
     if (getSourceViewer() != null)
