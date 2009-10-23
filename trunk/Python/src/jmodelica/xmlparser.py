@@ -231,9 +231,9 @@ class XMLVariablesDoc(XMLdoc):
             
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"independentParameter\"] \
-                               [../../Attributes/RealAttributes/Free=\"true\"] [../../AliasVariable=\"noAlias\"]")
+                               [../../RealAttributes/Free=\"true\"] [../../AliasVariable=\"noAlias\"]")
         vals = self._xpatheval("//ScalarVariable/ScalarVariableName/text()[../../VariableCategory=\"independentParameter\"] \
-                               [../../Attributes/RealAttributes/Free=\"true\"] [../../AliasVariable=\"noAlias\"]")
+                               [../../RealAttributes/Free=\"true\"] [../../AliasVariable=\"noAlias\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -295,7 +295,7 @@ class XMLVariablesDoc(XMLdoc):
              
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text() [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/*/Start/text() [../../../../AliasVariable=\"noAlias\"]")       
+        vals = self._xpatheval("//ScalarVariable/*/Start/text() [../../../AliasVariable=\"noAlias\"]")       
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -312,10 +312,10 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and Start attribute as value.
              
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"][../../Attributes/*/Start] \
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"][../../*/Start] \
             [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/*/Start/text()[../../../../VariableCategory=\"derivative\"] \
-            [../../../../AliasVariable=\"noAlias\"]")       
+        vals = self._xpatheval("//ScalarVariable/*/Start/text()[../../../VariableCategory=\"derivative\"] \
+            [../../../AliasVariable=\"noAlias\"]")       
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -330,10 +330,10 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and Start attribute as value.
              
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"][../../Attributes/*/Start] \
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"][../../*/Start] \
             [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/*/Start/text()[../../../../VariableCategory=\"state\"] \
-            [../../../../AliasVariable=\"noAlias\"]")       
+        vals = self._xpatheval("//ScalarVariable/*/Start/text()[../../../VariableCategory=\"state\"] \
+            [../../../AliasVariable=\"noAlias\"]")       
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -349,9 +349,9 @@ class XMLVariablesDoc(XMLdoc):
              
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"][../../VariableCategory=\"algebraic\"] \
-            [../../Attributes/*/Start] [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/*/Start/text()[../../../../Causality=\"input\"] \
-            [../../../../VariableCategory=\"algebraic\"] [../../../../AliasVariable=\"noAlias\"]")       
+            [../../*/Start] [../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/*/Start/text()[../../../Causality=\"input\"] \
+            [../../../VariableCategory=\"algebraic\"] [../../../AliasVariable=\"noAlias\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -367,9 +367,9 @@ class XMLVariablesDoc(XMLdoc):
              
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"][../../Causality!=\"input\"] \
-            [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/*/Start/text()[../../../../VariableCategory=\"algebraic\"] \
-            [../../../../Causality!=\"input\"] [../../../../AliasVariable=\"noAlias\"]")       
+            [../../*/Start][../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/*/Start/text()[../../../VariableCategory=\"algebraic\"] \
+            [../../../Causality!=\"input\"] [../../../AliasVariable=\"noAlias\"]")       
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -384,7 +384,7 @@ class XMLVariablesDoc(XMLdoc):
             
         """
         refs = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"independentParameter\"] \
-                               [../../Attributes/RealAttributes/Free=\"true\"] [../../AliasVariable=\"noAlias\"]")
+                               [../../RealAttributes/Free=\"true\"] [../../AliasVariable=\"noAlias\"]")
         valrefs=[]
         for ref in refs:
             valrefs.append(int(ref))
@@ -401,8 +401,8 @@ class XMLVariablesDoc(XMLdoc):
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"] \
             [../../Causality!=\"input\"] [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../VariableCategory=\"algebraic\"] \
-            [../../../../Causality!=\"input\"] [../../../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/RealAttributes/InitialGuess/text()[../../../VariableCategory=\"algebraic\"] \
+            [../../../Causality!=\"input\"] [../../../AliasVariable=\"noAlias\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -419,8 +419,8 @@ class XMLVariablesDoc(XMLdoc):
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"][../../VariableCategory=\"algebraic\"] \
             [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../Causality=\"input\"] \
-            [../../../../VariableCategory=\"algebraic\"] [../../../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/RealAttributes/InitialGuess/text()[../../../Causality=\"input\"] \
+            [../../../VariableCategory=\"algebraic\"] [../../../AliasVariable=\"noAlias\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -437,8 +437,8 @@ class XMLVariablesDoc(XMLdoc):
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"] \
             [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../VariableCategory=\"derivative\"] \
-            [../../../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/RealAttributes/InitialGuess/text()[../../../VariableCategory=\"derivative\"] \
+            [../../../AliasVariable=\"noAlias\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -455,8 +455,8 @@ class XMLVariablesDoc(XMLdoc):
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"] \
             [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../VariableCategory=\"state\"] \
-            [../../../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/RealAttributes/InitialGuess/text()[../../../VariableCategory=\"state\"] \
+            [../../../AliasVariable=\"noAlias\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))        
@@ -472,9 +472,9 @@ class XMLVariablesDoc(XMLdoc):
         
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"independentParameter\"] \
-                                [../../Attributes/RealAttributes/Free=\"true\"] [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/InitialGuess/text()[../../../../VariableCategory=\"independentParameter\"] \
-                                [../../../../Attributes/RealAttributes/Free=\"true\"] [../../../../AliasVariable=\"noAlias\"]")
+                                [../../RealAttributes/Free=\"true\"] [../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/RealAttributes/InitialGuess/text()[../../../VariableCategory=\"independentParameter\"] \
+                                [../../../RealAttributes/Free=\"true\"] [../../../AliasVariable=\"noAlias\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -490,9 +490,9 @@ class XMLVariablesDoc(XMLdoc):
         
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"][../../Causality!=\"input\"] \
-            [../../Attributes/*/Min] [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../VariableCategory=\"algebraic\"] \
-            [../../../../Causality!=\"input\"] [../../../../AliasVariable=\"noAlias\"]")
+            [../../*/Min] [../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/RealAttributes/Min/text()[../../../VariableCategory=\"algebraic\"] \
+            [../../../Causality!=\"input\"] [../../../AliasVariable=\"noAlias\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -508,9 +508,9 @@ class XMLVariablesDoc(XMLdoc):
             
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"][../../VariableCategory=\"algebraic\"] \
-            [../../Attributes/*/Min] [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../Causality=\"input\"] \
-            [../../../../VariableCategory=\"algebraic\"] [../../../../AliasVariable=\"noAlias\"]")
+            [../../*/Min] [../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/RealAttributes/Min/text()[../../../Causality=\"input\"] \
+            [../../../VariableCategory=\"algebraic\"] [../../../AliasVariable=\"noAlias\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))            
@@ -526,9 +526,9 @@ class XMLVariablesDoc(XMLdoc):
             
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"] \
-            [../../Attributes/*/Min] [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../VariableCategory=\"derivative\"] \
-            [../../../../AliasVariable=\"noAlias\"]")
+            [../../*/Min] [../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/RealAttributes/Min/text()[../../../VariableCategory=\"derivative\"] \
+            [../../../AliasVariable=\"noAlias\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))        
@@ -543,10 +543,10 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and lower bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"] [../../Attributes/*/Min] \
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"] [../../*/Min] \
             [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../VariableCategory=\"state\"] \
-            [../../../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/RealAttributes/Min/text()[../../../VariableCategory=\"state\"] \
+            [../../../AliasVariable=\"noAlias\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -562,9 +562,9 @@ class XMLVariablesDoc(XMLdoc):
             
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"independentParameter\"] \
-                               [../../Attributes/RealAttributes/Free=\"true\"] [../../Attributes/*/Min] [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Min/text()[../../../../VariableCategory=\"independentParameter\"] \
-                               [../../../../Attributes/RealAttributes/Free=\"true\"] [../../../../AliasVariable=\"noAlias\"]")
+                               [../../RealAttributes/Free=\"true\"] [../../*/Min] [../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/RealAttributes/Min/text()[../../../VariableCategory=\"independentParameter\"] \
+                               [../../../RealAttributes/Free=\"true\"] [../../../AliasVariable=\"noAlias\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -580,9 +580,9 @@ class XMLVariablesDoc(XMLdoc):
             
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"][../../Causality!=\"input\"] \
-            [../../Attributes/*/Max] [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../VariableCategory=\"algebraic\"] \
-            [../../../../Causality!=\"input\"] [../../../../AliasVariable=\"noAlias\"]")
+            [../../*/Max] [../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/RealAttributes/Max/text()[../../../VariableCategory=\"algebraic\"] \
+            [../../../Causality!=\"input\"] [../../../AliasVariable=\"noAlias\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))           
@@ -597,9 +597,9 @@ class XMLVariablesDoc(XMLdoc):
             
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"][../../VariableCategory=\"algebraic\"] \
-            [../../Attributes/*/Max][../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../Causality=\"input\"] \
-            [../../../../VariableCategory=\"algebraic\"] [../../../../AliasVariable=\"noAlias\"]")    
+            [../../*/Max][../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/RealAttributes/Max/text()[../../../Causality=\"input\"] \
+            [../../../VariableCategory=\"algebraic\"] [../../../AliasVariable=\"noAlias\"]")    
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -614,10 +614,10 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and upper bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"] [../../Attributes/*/Max] \
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"] [../../*/Max] \
             [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../VariableCategory=\"derivative\"] \
-            [../../../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/RealAttributes/Max/text()[../../../VariableCategory=\"derivative\"] \
+            [../../../AliasVariable=\"noAlias\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -632,10 +632,10 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and upper bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"] [../../Attributes/*/Max] \
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"] [../../*/Max] \
             [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../VariableCategory=\"state\"] \
-            [../../../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/RealAttributes/Max/text()[../../../VariableCategory=\"state\"] \
+            [../../../AliasVariable=\"noAlias\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))        
@@ -651,9 +651,9 @@ class XMLVariablesDoc(XMLdoc):
             
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"independentParameter\"] \
-                               [../../Attributes/RealAttributes/Free=\"true\"] [../../Attributes/*/Max] [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/Attributes/RealAttributes/Max/text()[../../../../VariableCategory=\"independentParameter\"] \
-                               [../../../../Attributes/RealAttributes/Free=\"true\"] [../../../../AliasVariable=\"noAlias\"]")        
+                               [../../RealAttributes/Free=\"true\"] [../../*/Max] [../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/RealAttributes/Max/text()[../../../VariableCategory=\"independentParameter\"] \
+                               [../../../RealAttributes/Free=\"true\"] [../../../AliasVariable=\"noAlias\"]")        
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -671,8 +671,8 @@ class XMLVariablesDoc(XMLdoc):
             
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"algebraic\"][../../Causality!=\"input\"] \
-            [../../IsLinear] [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../VariableCategory=\"algebraic\"][../../Causality!=\"input\"] \
+            [../../isLinear] [../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/isLinear/text()[../../VariableCategory=\"algebraic\"][../../Causality!=\"input\"] \
             [../../AliasVariable=\"noAlias\"]")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
@@ -695,8 +695,8 @@ class XMLVariablesDoc(XMLdoc):
 
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../Causality=\"input\"][../../VariableCategory=\"algebraic\"] \
-            [../../IsLinear] [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../Causality=\"input\"][../../VariableCategory=\"algebraic\"] \
+            [../../isLinear] [../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/isLinear/text()[../../Causality=\"input\"][../../VariableCategory=\"algebraic\"] \
             [../../AliasVariable=\"noAlias\"]")            
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
@@ -718,9 +718,9 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and boolean isLinear as value.
 
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"][../../IsLinear] \
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"derivative\"][../../isLinear] \
             [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../VariableCategory=\"derivative\"] \
+        vals = self._xpatheval("//ScalarVariable/isLinear/text()[../../VariableCategory=\"derivative\"] \
             [../../AliasVariable=\"noAlias\"]")        
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
@@ -742,9 +742,9 @@ class XMLVariablesDoc(XMLdoc):
             Dict with ValueReference as key and boolean isLinear as value.
 
         """
-        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"][../../IsLinear] \
+        keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"state\"][../../isLinear] \
             [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../VariableCategory=\"state\"] [../../AliasVariable=\"noAlias\"]")        
+        vals = self._xpatheval("//ScalarVariable/isLinear/text()[../../VariableCategory=\"state\"] [../../AliasVariable=\"noAlias\"]")        
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -766,9 +766,9 @@ class XMLVariablesDoc(XMLdoc):
 
         """
         keys = self._xpatheval("//ScalarVariable/ValueReference/text()[../../VariableCategory=\"independentParameter\"] \
-                               [../../Attributes/RealAttributes/Free=\"true\"][../../IsLinear] [../../AliasVariable=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/IsLinear/text()[../../VariableCategory=\"independentParameter\"] \
-                               [../../Attributes/RealAttributes/Free=\"true\"] [../../AliasVariable=\"noAlias\"]")                
+                               [../../RealAttributes/Free=\"true\"][../../isLinear] [../../AliasVariable=\"noAlias\"]")
+        vals = self._xpatheval("//ScalarVariable/isLinear/text()[../../VariableCategory=\"independentParameter\"] \
+                               [../../RealAttributes/Free=\"true\"] [../../AliasVariable=\"noAlias\"]")                
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
