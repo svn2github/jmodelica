@@ -2,14 +2,16 @@
 # -*- coding: utf-8 -*-
 """Tests for the jmodelica.optimization.shooting module."""
 
+import os
 import numpy as N
 import pylab as p
 import matplotlib
 import nose
 
-from jmodelica.tests import load_example_standard_model
+#from jmodelica.tests import load_example_standard_model
+from jmodelica.compiler import OptimicaCompiler
 from jmodelica.tests import testattr
-
+from jmodelica import jmi
 from jmodelica.optimization.shooting import construct_grid
 from jmodelica.optimization.shooting import MultipleShooter
 from jmodelica.optimization.shooting import construct_grid
@@ -17,6 +19,13 @@ from jmodelica.optimization.shooting import _check_normgrid_consistency
 from jmodelica.optimization.shooting import _split_opt_x
 from jmodelica.optimization.shooting import plot_control_solutions
 
+jm_home = os.environ.get('JMODELICA_HOME')
+path_to_examples = os.path.join(jm_home, "Python", "jmodelica", "examples")
+path_to_tests = os.path.join(jm_home, "Python", "jmodelica", "tests")
+
+oc = OptimicaCompiler()
+oc.set_boolean_option('state_start_values_fixed',True)
+sep = os.path.sep
 
 def _lazy_init_shooter(model, gridsize, single_initial_u=2.5):
     """ A helper function used by TestMultipleShooterLazy and
@@ -39,12 +48,21 @@ class TestMultipleShooterLazy:
     TestShootingHardcore. NOTE that they are also less thourough.
     """
     def setUp(self):
-        DLLFILE = 'VDP_pack_VDP_Opt'
-        MODELICA_FILE = 'VDP.mo'
-        MODEL_PACKAGE = 'VDP_pack.VDP_Opt'
+        #DLLFILE = 'VDP_pack_VDP_Opt'
+        #MODELICA_FILE = 'VDP.mo'
+        #MODEL_PACKAGE = 'VDP_pack.VDP_Opt'
         
-        model = load_example_standard_model(DLLFILE, MODELICA_FILE,
-                                             MODEL_PACKAGE)
+        #model = load_example_standard_model(DLLFILE, MODELICA_FILE,
+        #                                     MODEL_PACKAGE)
+        modelf = "files" + sep + "VDP.mo"
+        fpath = os.path.join(path_to_examples, modelf)
+        cpath = "VDP_pack.VDP_Opt"
+        fname = cpath.replace('.','_',1)
+
+        oc.compile_model(fpath, cpath, target='ipopt')
+
+        # Load the dynamic library and XML data
+        model = jmi.Model(fname)
                                              
         GRIDSIZE = 10
         shooter = _lazy_init_shooter(model, GRIDSIZE)
@@ -80,12 +98,22 @@ class TestShootingHardcore:
     slow = True
     
     def setUp(self):
-        DLLFILE = 'VDP_pack_VDP_Opt'
-        MODELICA_FILE = 'VDP.mo'
-        MODEL_PACKAGE = 'VDP_pack.VDP_Opt'
+#        DLLFILE = 'VDP_pack_VDP_Opt'
+#        MODELICA_FILE = 'VDP.mo'
+#        MODEL_PACKAGE = 'VDP_pack.VDP_Opt'
+#        
+#        model = load_example_standard_model(DLLFILE, MODELICA_FILE,
+#                                             MODEL_PACKAGE)
         
-        model = load_example_standard_model(DLLFILE, MODELICA_FILE,
-                                             MODEL_PACKAGE)
+        modelf = "files" + sep + "VDP.mo"
+        fpath = os.path.join(path_to_examples, modelf)
+        cpath = "VDP_pack.VDP_Opt"
+        fname = cpath.replace('.','_',1)
+
+        oc.compile_model(fpath, cpath, target='ipopt')
+
+        # Load the dynamic library and XML data
+        model = jmi.Model(fname)
         self._model = model
     
     def test_mshooting(self):
@@ -234,9 +262,18 @@ def test_f_gradient_elements(certainindex=None):
     
     if run_huge_test is False and certainindex is None:
         return
-    
-    m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo',
-                                     'VDP_pack.VDP_Opt')
+#    m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo',
+#                                     'VDP_pack.VDP_Opt')
+    modelf = "files" + sep + "VDP.mo"
+    fpath = os.path.join(path_to_examples, modelf)
+    cpath = "VDP_pack.VDP_Opt"
+    fname = cpath.replace('.','_',1)
+
+    oc.compile_model(fpath, cpath, target='ipopt')
+
+    # Load the dynamic library and XML data
+    m = jmi.Model(fname)
+
     grid = [(0, 0.1),
             (0.1, 0.2),
             (0.2, 0.3),
@@ -277,8 +314,18 @@ def test_f_gradient_element_29():
 
 def test_plot_control_solutions():
     """Testing plot_control_solutions(...)."""
-    m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo',
-                                     'VDP_pack.VDP_Opt')
+#    m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo',
+#                                     'VDP_pack.VDP_Opt')
+    
+    modelf = "files" + sep + "VDP.mo"
+    fpath = os.path.join(path_to_examples, modelf)
+    cpath = "VDP_pack.VDP_Opt"
+    fname = cpath.replace('.','_',1)
+
+    oc.compile_model(fpath, cpath, target='ipopt')
+
+    # Load the dynamic library and XML data
+    m = jmi.Model(fname)
     m.reset()
     grid = [(0, 0.1),
             (0.1, 0.2),
@@ -310,8 +357,18 @@ def test_plot_control_solutions():
 
 def test_control_solution_variations():
     """Test different variations of control solutions."""
-    m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo',
-                                     'VDP_pack.VDP_Opt')
+#    m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo',
+#                                     'VDP_pack.VDP_Opt')
+    
+    modelf = "files" + sep + "VDP.mo"
+    fpath = os.path.join(path_to_examples, modelf)
+    cpath = "VDP_pack.VDP_Opt"
+    fname = cpath.replace('.','_',1)
+
+    oc.compile_model(fpath, cpath, target='ipopt')
+
+    # Load the dynamic library and XML data
+    m = jmi.Model(fname)
     m.reset()
     grid = [(0, 0.1),
             (0.1, 0.2),

@@ -14,7 +14,7 @@ import numpy as n
 import nose
 import nose.tools
 
-from jmodelica.tests import load_example_standard_model
+#from jmodelica.tests import load_example_standard_model
 from jmodelica.tests import testattr
 
 from jmodelica.compiler import OptimicaCompiler
@@ -52,6 +52,7 @@ cpath = "VDP_pack.VDP_Opt"
 fname = cpath.replace('.','_')
 
 mc = ModelContainer(fname, '.')
+oc = OptimicaCompiler()
 
 # constants used in all tests that have them
 eval_alg = jmi.JMI_DER_CPPAD
@@ -65,7 +66,6 @@ def setup():
     set log level. 
     """
     OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
-    oc = OptimicaCompiler()
     oc.set_boolean_option('state_start_values_fixed',True)
     oc.compile_model(fpath, cpath, 'ipopt')
     mc.initmodel()
@@ -617,8 +617,16 @@ class TestModelSimulation:
     
     def setUp(self):
         """Test setUp. Load the test model."""
-        self.m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo', 
-                                              'VDP_pack.VDP_Opt')
+        
+#        self.m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo', 
+#                                              'VDP_pack.VDP_Opt')
+        model = os.path.join('files','VDP.mo')
+        fpath = os.path.join(jm_home, path_to_examples, model)
+        cpath = "VDP_pack.VDP_Opt"
+        fname = cpath.replace('.','_')
+        oc.compile_model(fpath, cpath, 'ipopt')
+        
+        self.m = jmi.Model(fname)
         
     def test_opt_jac_non_zeros(self):
         """Testing the number of non-zero elements in VDP after simulation.

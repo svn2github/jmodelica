@@ -22,12 +22,20 @@ except ImportError:
 import pylab as p
 import nose
 
+from jmodelica.compiler import OptimicaCompiler
 import jmodelica.jmi as pyjmi
 from jmodelica.jmi import c_jmi_real_t
 from jmodelica.tests import get_example_path
-from jmodelica.tests import load_example_standard_model
+#from jmodelica.tests import load_example_standard_model
 from jmodelica.simulation.sundials import SundialsOdeSimulator
 
+jm_home = os.environ.get('JMODELICA_HOME')
+path_to_examples = os.path.join(jm_home, "Python", "jmodelica", "examples")
+path_to_tests = os.path.join(jm_home, "Python", "jmodelica", "tests")
+
+oc = OptimicaCompiler()
+oc.set_boolean_option('state_start_values_fixed',True)
+sep = os.path.sep
 
 class ShootingException(Exception):
     """ A shooting exception. """
@@ -875,19 +883,29 @@ def main(args=sys.argv):
         raise ShootingException('Grid size must be greater than zero.')
         
     if options.predmodel == 'vdp':
-        options.dllfile = 'VDP_pack_VDP_Opt'
+        #options.dllfile = 'VDP_pack_VDP_Opt'
         options.model = 'VDP_pack.VDP_Opt'
         options.directory = get_example_path()
         options.modelfile = 'VDP.mo'
     elif options.predmodel == 'quadtank':
-        options.dllfile = 'QuadTank_pack_QuadTank_Opt'
+        #options.dllfile = 'QuadTank_pack_QuadTank_Opt'
         options.model = 'QuadTank_pack.QuadTank_Opt'
         options.directory = get_example_path()
         options.modelfile = 'QuadTank.mo'
         options.timestep = 5
-    
-    m = pyjmi.load_model(options.dllfile, options.directory, options.modelfile,
-                         options.model, 'optimica')
+
+#    m = pyjmi.load_model(options.dllfile, options.directory, options.modelfile,
+#                         options.model, 'optimica')
+   
+    modelf = "files" + sep + options.modelfile
+    fpath = os.path.join(path_to_examples, modelf)
+    cpath = options.model
+    fname = cpath.replace('.','_',1)
+
+    oc.compile_model(fpath, cpath, target='ipopt')
+
+    # Load the dynamic library and XML data
+    m = pyjmi.Model(fname)        
     
     if options.what == 'genplot':
         # Whether the cost as a function of input U should be plotted

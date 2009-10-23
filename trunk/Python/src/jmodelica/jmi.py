@@ -1439,47 +1439,47 @@ atexit.register(_cleanup)
 # ================================================================
 #                        HIGH LEVEL INTERFACE
 # ================================================================
-def load_model(libname, path='.', mofile=None, optpackage=None, compiler=None):
-    """Load and return a Model from DLL file residing in path.
-    
-    If the DLL file does not exist this method tries to build it if mofile, and
-    optpackage and compiler all are specified.
-    
-    This function comes very handy when loading test models that needs to be
-    compiled on the fly.
-    
-    Keyword parameters:
-    mofile -- the Modelica file used to build the DLL file.
-    optpackage -- the Optimica package in the mofile which is to be compiled.
-    compiler -- the compiler to use for compilation. Can be 'optimica' or
-                'modelica'.
-    
-    """
-    try:
-        model = Model(libname, path)
-    except IOError:
-        if mofile is None or optpackage is None:
-            raise
-            
-        print "The model was not found. Trying to compile it..."
-            
-        if compiler=='modelica':
-            from jmodelica.compiler import ModelicaCompiler as __Compiler
-        elif compiler=='optimica':
-            from jmodelica.compiler import OptimicaCompiler as __Compiler
-        else:
-            raise JMIException('You need to specify a compiler.')
-            
-        # Compilation needs to be done in the path where DLL:s should be placed
-        curdir = os.getcwd()
-        os.chdir(path)
-        oc = __Compiler()
-        oc.set_boolean_option('state_start_values_fixed',True)
-        oc.compile_model(os.path.join(path, mofile), optpackage)
-        os.chdir(curdir)
-        model = Model(libname, path)
-        
-    return model
+#def load_model(libname, path='.', mofile=None, optpackage=None, compiler=None):
+#    """Load and return a Model from DLL file residing in path.
+#    
+#    If the DLL file does not exist this method tries to build it if mofile, and
+#    optpackage and compiler all are specified.
+#    
+#    This function comes very handy when loading test models that needs to be
+#    compiled on the fly.
+#    
+#    Keyword parameters:
+#    mofile -- the Modelica file used to build the DLL file.
+#    optpackage -- the Optimica package in the mofile which is to be compiled.
+#    compiler -- the compiler to use for compilation. Can be 'optimica' or
+#                'modelica'.
+#    
+#    """
+#    try:
+#        model = Model(libname, path)
+#    except IOError:
+#        if mofile is None or optpackage is None:
+#            raise
+#            
+#        print "The model was not found. Trying to compile it..."
+#            
+#        if compiler=='modelica':
+#            from jmodelica.compiler import ModelicaCompiler as __Compiler
+#        elif compiler=='optimica':
+#            from jmodelica.compiler import OptimicaCompiler as __Compiler
+#        else:
+#            raise JMIException('You need to specify a compiler.')
+#            
+#        # Compilation needs to be done in the path where DLL:s should be placed
+#        curdir = os.getcwd()
+#        os.chdir(path)
+#        oc = __Compiler()
+#        oc.set_boolean_option('state_start_values_fixed',True)
+#        oc.compile_model(os.path.join(path, mofile), optpackage)
+#        os.chdir(curdir)
+#        model = Model(libname, path)
+#        
+#    return model
 
 
 class Model(object):

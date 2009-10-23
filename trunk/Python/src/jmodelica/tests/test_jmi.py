@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import nose.tools as ntools
 import numpy as N
 
-from jmodelica.tests import load_example_standard_model
+#from jmodelica.tests import load_example_standard_model
 from jmodelica.tests import testattr
 
 import jmodelica.jmi as jmi
@@ -35,7 +35,6 @@ def setup():
     set log level. 
     """
     OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
-
 
 @testattr(stddist = True)
 def test_jmi_opt_sim_set_initial_from_trajectory():
@@ -426,46 +425,46 @@ def test_init_opt():
     #print(dae_init_test.getW())
 
 
-@testattr(stddist = True)
-def _generic_load_model_trial(modelfile, cpath, compiler):
-    """Test the load_model(...) function."""
-    
-    examplefpath = os.path.join(jm_home, path_to_examples, "files")
-    
-    dllfname = cpath.replace('.', '_', 1)
-    
-    DLLSUFFIXES = ['so', 'dll', 'dylib'] # A list of all the suffizes a DLL can have
-    for suffix in DLLSUFFIXES:
-        # Remove all possible DLL files
-        toremove = os.path.join(examplefpath, "%s.%s" % (dllfname, suffix))
-        try:
-            os.unlink(toremove)
-        except OSError:
-            pass
-    
-    # Assert not compiled
-    ntools.assert_raises(IOError, jmi.load_model, dllfname, examplefpath,
-                         compiler)
-    
-    # Compile and load
-    model = jmi.load_model(dllfname, examplefpath, modelfile, cpath,
-                           compiler)
-
-
-@testattr(stddist = True)
-def test_load_model_optimica():
-    """Test the load_model(...) function of an Optimica problem."""
-    modelfile = "VDP.mo"
-    cpath = "VDP_pack.VDP_Opt_Min_Time"
-    _generic_load_model_trial(modelfile, cpath, 'optimica')
-    
-    
-@testattr(stddist = True)
-def test_load_model_modelica():
-    """Test the load_model(...) function Modelica model."""
-    modelfile = "Pendulum_pack_no_opt.mo"
-    cpath = "Pendulum_pack.Pendulum"
-    _generic_load_model_trial(modelfile, cpath, 'modelica')
+#@testattr(stddist = True)
+#def _generic_load_model_trial(modelfile, cpath, compiler):
+#    """Test the load_model(...) function."""
+#    
+#    examplefpath = os.path.join(jm_home, path_to_examples, "files")
+#    
+#    dllfname = cpath.replace('.', '_', 1)
+#    
+#    DLLSUFFIXES = ['so', 'dll', 'dylib'] # A list of all the suffizes a DLL can have
+#    for suffix in DLLSUFFIXES:
+#        # Remove all possible DLL files
+#        toremove = os.path.join(examplefpath, "%s.%s" % (dllfname, suffix))
+#        try:
+#            os.unlink(toremove)
+#        except OSError:
+#            pass
+#    
+#    # Assert not compiled
+#    ntools.assert_raises(IOError, jmi.load_model, dllfname, examplefpath,
+#                         compiler)
+#    
+#    # Compile and load
+#    model = jmi.load_model(dllfname, examplefpath, modelfile, cpath,
+#                           compiler)
+#
+#
+#@testattr(stddist = True)
+#def test_load_model_optimica():
+#    """Test the load_model(...) function of an Optimica problem."""
+#    modelfile = "VDP.mo"
+#    cpath = "VDP_pack.VDP_Opt_Min_Time"
+#    _generic_load_model_trial(modelfile, cpath, 'optimica')
+#    
+#    
+#@testattr(stddist = True)
+#def test_load_model_modelica():
+#    """Test the load_model(...) function Modelica model."""
+#    modelfile = "Pendulum_pack_no_opt.mo"
+#    cpath = "Pendulum_pack.Pendulum"
+#    _generic_load_model_trial(modelfile, cpath, 'modelica')
     
 
 class TestModel:
@@ -478,8 +477,19 @@ class TestModel:
     
     def setUp(self):
         """Test setUp. Load the test model."""
-        self.m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo', 
-                                             'VDP_pack.VDP_Opt')
+        model = "files" + sep + "VDP.mo"
+        fpath = os.path.join(path_to_examples, model)
+        cpath = "VDP_pack.VDP_Opt"
+        fname = cpath.replace('.','_',1)
+
+        oc.compile_model(fpath, cpath, target='ipopt')
+
+        # Load the dynamic library and XML data
+        self.m = jmi.Model(fname)
+        
+#        self.m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo', 
+#                                             'VDP_pack.VDP_Opt')
+
     @testattr(stddist = True)                                          
     def test_model_size(self):
         """Test jmi.Model length of x"""

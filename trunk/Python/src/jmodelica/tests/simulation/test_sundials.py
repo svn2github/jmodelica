@@ -8,21 +8,40 @@ import matplotlib
 import os
 import nose
 
-from jmodelica.tests import load_example_standard_model,get_example_path
-
+#from jmodelica.tests import load_example_standard_model
 from jmodelica.simulation.sundials import SundialsOdeSimulator
 from jmodelica.simulation.sundials import SundialsDAESimulator
 import jmodelica.simulation.sundials as sundials
 import jmodelica.simulation
 import jmodelica.jmi as jmi
 from jmodelica.compiler import ModelicaCompiler
+from jmodelica.compiler import OptimicaCompiler
+
+jm_home = os.environ.get('JMODELICA_HOME')
+path_to_examples = os.path.join(jm_home, "Python", "jmodelica", "examples")
+path_to_tests = os.path.join(jm_home, "Python", "jmodelica", "tests")
+
+mc = ModelicaCompiler()
+oc = OptimicaCompiler()
+oc.set_boolean_option('state_start_values_fixed',True)
+sep = os.path.sep
 
 class TestSundialsDAESimulator:
     def setUp(self):
         """Load the test model for DAE."""
         
-        self.m = load_example_standard_model('Pendulum_pack_Pendulum','Pendulum_pack_no_opt.mo',
-                                                'Pendulum_pack.Pendulum')
+#        self.m = load_example_standard_model('Pendulum_pack_Pendulum','Pendulum_pack_no_opt.mo',
+#                                                'Pendulum_pack.Pendulum')
+
+        modelf = "files" + sep + "Pendulum_pack_no_opt.mo"
+        fpath = os.path.join(path_to_examples, modelf)
+        cpath = "Pendulum_pack.Pendulum"
+        fname = cpath.replace('.','_',1)
+
+        mc.compile_model(fpath, cpath)
+
+        # Load the dynamic library and XML data
+        self.m = jmi.Model(fname)
 
         self.simulator = SundialsDAESimulator(self.m,verbosity=4)
         
@@ -81,8 +100,6 @@ class TestSundialsDAESimulator:
         mofile = 'RLC_Circuit.mo'
         optpackage = 'RLC_Circuit'
     
-        mc = ModelicaCompiler()
-    
         # Comile the Modelica model first to C code and
         # then to a dynamic library
         mc.compile_model(os.path.join(path,mofile),libname)
@@ -137,8 +154,17 @@ class TestSundialsOdeSimulator:
     def setUp(self):
         """Load the test model."""
         
-        self.m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo', 
-                                             'VDP_pack.VDP_Opt')
+#        self.m = load_example_standard_model('VDP_pack_VDP_Opt', 'VDP.mo', 
+#                                             'VDP_pack.VDP_Opt')
+        modelf = "files" + sep + "VDP.mo"
+        fpath = os.path.join(path_to_examples, modelf)
+        cpath = "VDP_pack.VDP_Opt"
+        fname = cpath.replace('.','_',1)
+
+        oc.compile_model(fpath, cpath,'ipopt')
+
+        # Load the dynamic library and XML data
+        self.m = jmi.Model(fname)
         self.simulator = SundialsOdeSimulator(self.m)
         
     def test_is_simulator(self):
@@ -316,20 +342,42 @@ class TestSundialsOdeSimulator:
     def test_set_get_model(self):
         """Test the model setter/getter."""
         simulator = self.simulator
-        assert simulator.get_model() == self.m
+        assert simulator.get_model() == self.m        
         
-        another_model = load_example_standard_model('VDP_pack_VDP_Opt',
-                                                    'VDP.mo', 
-                                                    'VDP_pack.VDP_Opt')
+#        another_model = load_example_standard_model('VDP_pack_VDP_Opt',
+#                                                    'VDP.mo', 
+#                                                    'VDP_pack.VDP_Opt')
+        
+        modelf = "files" + sep + "VDP.mo"
+        fpath = os.path.join(path_to_examples, modelf)
+        cpath = "VDP_pack.VDP_Opt"
+        fname = cpath.replace('.','_',1)
+
+        oc.compile_model(fpath, cpath, target='ipopt')
+
+        # Load the dynamic library and XML data
+        another_model = jmi.Model(fname)
+        
         simulator.set_model(another_model)
         assert simulator.get_model() == another_model
         
         nose.tools.assert_raises(jmodelica.simulation.SimulationException,
                                  simulator.set_model, None)
                                  
-        another_model = load_example_standard_model('VDP_pack_VDP_Opt',
-                                                    'VDP.mo', 
-                                                    'VDP_pack.VDP_Opt')
+#        another_model = load_example_standard_model('VDP_pack_VDP_Opt',
+#                                                    'VDP.mo', 
+#                                                    'VDP_pack.VDP_Opt')
+
+        modelf = "files" + sep + "VDP.mo"
+        fpath = os.path.join(path_to_examples, modelf)
+        cpath = "VDP_pack.VDP_Opt"
+        fname = cpath.replace('.','_',1)
+
+        oc.compile_model(fpath, cpath, target='ipopt')
+
+        # Load the dynamic library and XML data
+        another_model = jmi.Model(fname)
+        
         simulator.model = another_model # testing property
         assert another_model == simulator.get_model()
         
