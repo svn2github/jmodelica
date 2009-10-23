@@ -5,14 +5,17 @@
 import numpy as N
 import pylab as p
 import matplotlib
+import os
 import nose
 
-from jmodelica.tests import load_example_standard_model
+from jmodelica.tests import load_example_standard_model,get_example_path
 
 from jmodelica.simulation.sundials import SundialsOdeSimulator
 from jmodelica.simulation.sundials import SundialsDAESimulator
 import jmodelica.simulation.sundials as sundials
 import jmodelica.simulation
+import jmodelica.jmi as jmi
+from jmodelica.compiler import ModelicaCompiler
 
 class TestSundialsDAESimulator:
     def setUp(self):
@@ -55,6 +58,7 @@ class TestSundialsDAESimulator:
         x_before_simulation = simulator.get_model().x.copy()
         simulator.run()
         Ts, ys = simulator.get_solution()
+        simulator.write_data()
         
         assert len(Ts) == len(ys), "Time points and solution points must be " \
                                    "equal lengths."
@@ -67,6 +71,66 @@ class TestSundialsDAESimulator:
         p.plot(Ts, ys)
         p.title('testDAESimulation(...) output')
         fig.savefig('TestSundialsDAESimulator_test_simulation.png')
+        
+    def test_simulation_with_algebraic_variables(self):
+        """Run a simulation with a model with algebraic variables"""
+        path = get_example_path()
+        os.chdir(path)
+ 
+        libname = 'RLC_Circuit'
+        mofile = 'RLC_Circuit.mo'
+        optpackage = 'RLC_Circuit'
+    
+        mc = ModelicaCompiler()
+    
+        # Comile the Modelica model first to C code and
+        # then to a dynamic library
+        mc.compile_model(os.path.join(path,mofile),libname)
+
+        # Load the dynamic library and XML data
+        model=jmi.Model(optpackage)
+        
+        # Running a simulation with the attribute return_last = True (Only the final result should be returned)
+        simulator = SundialsDAESimulator(model, start_time=0.0, final_time=30.0, time_step=0.01, return_last=True)
+        simulator.run()
+        
+        Ts, ys = simulator.get_solution()
+        
+        assert len(Ts) == len(ys) #Length of the vectors should be the same
+        assert len(ys[0,:]) == 42 #Number of variables in the example
+    
+        Ts, ys = simulator.get_solution('sine.y','resistor.v','inductor1.i')
+        
+        assert len(Ts) == len(ys) #Length of the vectors should be the same
+        assert len(ys[0,:]) == 3 #Should be able to find three variables
+        
+        # Load the dynamic library and XML data
+        model=jmi.Model(optpackage)
+        
+        simulator = SundialsDAESimulator(model, start_time=0.0, final_time=30.0, time_step=0.01)
+        simulator.run()
+        
+        Ts, ys = simulator.get_solution()
+        
+        assert len(Ts) == len(ys) #Length of the vectors should be the same
+        assert len(ys[0,:]) == 42 #Number of variables in the example
+        
+        Ts, ys = simulator.get_solution('sine.y','Not_a_variable','inductor1.i')
+        
+        assert len(Ts) == len(ys) #Length of the vectors should be the same
+        assert len(ys[0,:]) == 2 #Should be able to find two variables
+    
+        Ts, ys = simulator.get_solution('sine.y','resistor.v','inductor1.i')
+        
+        assert len(Ts) == len(ys) #Length of the vectors should be the same
+        assert len(ys[0,:]) == 3 #Should be able to find three variables
+        
+        fig = p.figure()
+        p.plot(Ts, ys)
+        p.legend(('sine.y','resistor.v','inductor1.i'))
+        p.title('testDAESimulationAlgebraic(...) output')
+        fig.savefig('TestSundialsDAESimulator_test_simulation_with_algebraic.png')        
+        
     
 
 class TestSundialsOdeSimulator:
@@ -108,6 +172,7 @@ class TestSundialsOdeSimulator:
         x_before_simulation = simulator.get_model().x.copy()
         simulator.run()
         Ts, ys = simulator.get_solution()
+        simulator.write_data()
         
         assert len(Ts) == len(ys), "Time points and solution points must be " \
                                    "equal lengths."
