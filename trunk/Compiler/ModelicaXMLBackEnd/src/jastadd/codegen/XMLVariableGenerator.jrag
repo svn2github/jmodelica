@@ -253,6 +253,69 @@ public class XMLVariableGenerator extends GenericGenerator {
 		}
 	}
 
+	class DAETag_XML_variableNamingConvention extends DAETag {
+		
+		public DAETag_XML_variableNamingConvention (
+		  AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_VariableNamingConvention","The Variable Naming Convention.",
+			  myGenerator,fclass);
+		}
+		
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
+		public void generate(PrintStream genPrinter) {
+			//TODO: implement when available
+			// Default value for now
+			genPrinter.print("unknown");
+		}
+	}
+
+    // Declared in XMLVariableGenerator.jrag at line 275
+
+	
+	class DAETag_XML_numberOfContinuousStates extends DAETag {
+		
+		public DAETag_XML_numberOfContinuousStates (
+		  AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_NumberOfContinuousStates","Number of continuous states.",
+			  myGenerator,fclass);
+		}
+		
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
+		public void generate(PrintStream genPrinter) {
+			//TODO: implement when available
+			// Default value for now
+			genPrinter.print(fclass.numDifferentiatedRealVariables());
+		}
+	}
+
+    // Declared in XMLVariableGenerator.jrag at line 294
+
+	
+	class DAETag_XML_numberOfEventIndicators extends DAETag {
+		
+		public DAETag_XML_numberOfEventIndicators (
+		  AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_NumberOfEventIndicators","Number event indicators.",
+			  myGenerator,fclass);
+		}
+		
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
+		public void generate(PrintStream genPrinter) {
+			//TODO: implement when available
+			// Default value for now
+			genPrinter.print(fclass.numEventIndicators());
+		}
+	}
+
 	/**
 	 * Internal class used to generate the model variables tags.
 	 * 
@@ -343,7 +406,7 @@ public class XMLVariableGenerator extends GenericGenerator {
 				
 				
 				//Attributes
-				genPrinter.print(tg.generateTag("Attributes"));
+				//genPrinter.print(tg.generateTag("Attributes"));
 
 				if(variable.isReal()) {
 					FRealVariable realvariable=(FRealVariable)variable;
@@ -383,24 +446,11 @@ public class XMLVariableGenerator extends GenericGenerator {
 					System.err.println("Invalid or missing variable type");
 				}
 				
-				genPrinter.print(tg.generateTag("Attributes"));
+				//genPrinter.print(tg.generateTag("Attributes"));
 
                				
 				//is linear?
 				addLinearInfo(genPrinter, tg, variable);
-				
-				
-				//Alias: alias, noAlias, negatedAlias
-                genPrinter.print(tg.generateTag("AliasVariable"));
-                if(variable.isAlias())
-                	if(variable.isNegated())
-                        genPrinter.print("negatedAlias");
-                    else
-                    	genPrinter.print("alias");                             
-                else
-                	genPrinter.print("noAlias");
-                genPrinter.print(tg.generateTag("AliasVariable"));
-				
 				
                 //variable category
 				genPrinter.print(tg.generateTag("VariableCategory"));
@@ -421,8 +471,19 @@ public class XMLVariableGenerator extends GenericGenerator {
 					genPrinter.print("algebraic");
 				}
 				genPrinter.print(tg.generateTag("VariableCategory"));
-
 				
+				//Alias: alias, noAlias, negatedAlias
+                genPrinter.print(tg.generateTag("AliasVariable"));
+                if(variable.isAlias())
+                	if(variable.isNegated())
+                        genPrinter.print("negatedAlias");
+                    else
+                    	genPrinter.print("alias");                             
+                else
+                	genPrinter.print("noAlias");
+                genPrinter.print(tg.generateTag("AliasVariable"));
+				
+                
 				genPrinter.print(tg.generateTag("ScalarVariable"));
 			}			
 		}
@@ -434,7 +495,7 @@ public class XMLVariableGenerator extends GenericGenerator {
 	 */
 	protected void addLinearInfo(PrintStream genPrinter, TagGenerator tg, FVariable variable){
 		//isLinear
-		genPrinter.print(tg.generateTag("IsLinear")+variable.isLinear()+tg.generateTag("IsLinear"));
+		genPrinter.print(tg.generateTag("isLinear")+variable.isLinear()+tg.generateTag("isLinear"));
 	}
 	
 	/*
@@ -610,6 +671,12 @@ public class XMLVariableGenerator extends GenericGenerator {
 		tag = new DAETag_XML_generationDate(this,fclass);
 		tagMap.put(tag.getName(), tag);
 		tag = new DAETag_XML_guid(this,fclass);
+		tagMap.put(tag.getName(), tag);
+		tag = new DAETag_XML_variableNamingConvention(this,fclass);
+		tagMap.put(tag.getName(), tag);
+		tag = new DAETag_XML_numberOfContinuousStates(this,fclass);
+		tagMap.put(tag.getName(), tag);
+		tag = new DAETag_XML_numberOfEventIndicators(this,fclass);
 		tagMap.put(tag.getName(), tag);
 		tag = new DAETag_XML_modelVariables(this,fclass);
 		tagMap.put(tag.getName(), tag);
