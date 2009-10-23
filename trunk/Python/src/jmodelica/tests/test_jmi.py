@@ -603,3 +603,60 @@ class TestModel:
         self.m.set_dx_p(self.m.dx, 0)
         jac = self.m.opt_eval_jac_J(jmi.JMI_DER_X_P)
         N.testing.assert_almost_equal(jac, [[0, 0, 1]])
+    
+    @testattr(stddist = True)    
+    def test_setget_value(self):
+        """ Test set and get a value of a variable or parameter. """
+        parameter = 'p1'
+        # set_value
+        new_value = 2.0
+        self.m.set_value(parameter, new_value)
+        nose.tools.assert_equal(self.m.get_value(parameter), new_value)
+
+    @testattr(stddist = True)        
+    def test_setget_values(self):
+        """ Test set and get a list of variables or parameters."""
+        parameters = ['p1', 'p2', 'p3']
+        real_values = [0.0, 0.0, 0.0]
+        # set_values
+        new_values = [1.0, 2.0, 3.0]
+        self.m.set_values(parameters, new_values)
+        for index, val in enumerate(new_values):
+            nose.tools.assert_equal(val, self.m.get_value(parameters[index]))
+
+class TestModelCSTR:
+    """Test the high level model class, jmi.Model with alias variables 
+        enabled.
+    
+    The tests are based on the CSTR example file.
+
+    """
+    
+    def setUp(self):
+        """Test setUp. Load the test model."""
+        model = "files" + sep + "CSTR.mo"
+        fpath = os.path.join(path_to_examples, model)
+        cpath = "CSTR.CSTR_Opt"
+        fname = cpath.replace('.','_',1)
+
+        oc.set_boolean_option('eliminate_alias_variables', True)
+        oc.compile_model(fpath, cpath, target='ipopt')
+
+        # Load the dynamic library and XML data
+        self.m = jmi.Model(fname)
+            
+    @testattr(stddist = True)
+    def test_setget_alias_value(self):
+       """ Test set and get the value of a alias variable. """ 
+       alias_variable = 'cstr.Tc'
+       aliased_variable = 'u'
+       u = self.m.get_value(aliased_variable)
+       tc = self.m.get_value(alias_variable)
+       nose.tools.assert_equal(u, tc)
+       new_value = 345.0
+       self.m.set_value(alias_variable, new_value)
+       nose.tools.assert_equal(self.m.get_value(aliased_variable), new_value)
+       
+
+
+        
