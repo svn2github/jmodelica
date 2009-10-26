@@ -23,7 +23,8 @@ public GlobalCompilationResult(EditorFile ef, Editor editor) {
     key = ef.toRegistryKey();
     project = ef.iFile().getProject();
 
-    root = (ASTNode<?>) registry.lookupAST(key, project);
+    if (project != null)
+        root = (ASTNode<?>) registry.lookupAST(key, project);
     
     registry.addListener(editor, project, key);
 

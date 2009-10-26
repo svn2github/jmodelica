@@ -7,6 +7,7 @@ import org.eclipse.core.resources.IProject;
 import org.jastadd.plugin.registry.ASTRegistry;
 import org.jmodelica.ide.CompilationRoot;
 import org.jmodelica.ide.OffsetDocument;
+import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.namecomplete.Lookup;
 import org.jmodelica.ide.namecomplete.Recompiler;
@@ -33,7 +34,7 @@ public StoredDefinition make(String[] otherFiles, String file) {
     StoredDefinition def =
         recompiler.recompilePartial(
             new OffsetDocument(file), 
-            (SourceRoot)reg.lookupAST(null, proj), 
+            Maybe.<SourceRoot>Just((SourceRoot)reg.lookupAST(null, proj)), 
             new MockFile(proj));
         
     def.root().printDebugInfo();

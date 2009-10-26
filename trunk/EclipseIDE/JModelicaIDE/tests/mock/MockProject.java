@@ -27,6 +27,9 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 @SuppressWarnings({ "deprecation", "unchecked" })
 public class MockProject implements IProject {
     
+public final static MockProject PROJECT = 
+    new MockProject();
+
 public void build(int kind, IProgressMonitor monitor) throws CoreException {
         
     }

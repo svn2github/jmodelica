@@ -81,16 +81,20 @@ protected IFile getFile() {
 /**
  * Get the SourceRoot of project from ASTRegistry
  */
-protected SourceRoot projectRoot() {
+protected Maybe<SourceRoot> projectRoot() {
 
     ASTRegistry reg = 
         org.jastadd.plugin.Activator.getASTRegistry();
-
+    
+    if (getFile() == null)
+        return Maybe.Nothing();
+    
     return 
-        (SourceRoot) 
-        reg.lookupAST(
-            null,
-            getFile().getProject());
+        new Maybe<SourceRoot>(
+            (SourceRoot) 
+            reg.lookupAST(
+                null,
+                getFile().getProject()));
 }
 
 /*

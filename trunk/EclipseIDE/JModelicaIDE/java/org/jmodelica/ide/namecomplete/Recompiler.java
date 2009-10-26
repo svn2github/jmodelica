@@ -5,6 +5,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.Document;
 import org.jmodelica.ide.ModelicaCompiler;
 import org.jmodelica.ide.OffsetDocument;
+import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.ide.indent.DocUtil;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
@@ -19,9 +20,9 @@ public final static ModelicaCompiler compiler =
  * Recompile active file and add new AST to project AST
  */
 public StoredDefinition recompilePartial(
-        OffsetDocument d, 
-        SourceRoot projectRoot,
-        IFile file) 
+    OffsetDocument d, 
+    Maybe<SourceRoot> mProjectRoot,
+    IFile file) 
 {
     
     /* remove the current (partial) line when compiling, to make error
@@ -35,7 +36,12 @@ public StoredDefinition recompilePartial(
     /* re-parse and add new AST to project AST */
     StoredDefinition def; {
         def = compiler.recompile(fileContents, file);
-        projectRoot.getProgram().dynamicAddStoredDefinition(def);
+        if (mProjectRoot.hasValue())
+            mProjectRoot
+                .value()
+                .getProgram()
+                .dynamicAddStoredDefinition(def);
+        
     }
     
     return def;

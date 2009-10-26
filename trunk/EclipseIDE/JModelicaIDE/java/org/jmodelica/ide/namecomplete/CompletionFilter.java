@@ -1,5 +1,6 @@
 package org.jmodelica.ide.namecomplete;
 
+
 /**
  * When doing name completion, the users should be allowed to type e.g. .ConInt
  * and get a match for the class ContinuousIntegrator.
@@ -56,25 +57,29 @@ public class CompletionFilter {
         if (j >= name.length())
             return false;
         
-        char    ca      = filter.charAt(i), 
+        char    cf      = filter.charAt(i), 
                 cn      = name.charAt(j);
-        boolean lower_a = Character.isLowerCase(ca),
-                lower_n = Character.isLowerCase(cn);
+        boolean f = Character.isLowerCase(cf),
+                n = Character.isLowerCase(cn),
+                F = !f,
+                N = !n;
         
-        if (lower_a == lower_n)
-            return ca == cn && 
-                   matchesCamel(filter, name, i+1, j+1);
+        if (f && n || F && N)
+            return 
+                cf == cn && 
+                matchesCamel(filter, name, i+1, j+1);
         
-        // conInt should match ContinousIntegrator
-        if (lower_a && !lower_n)
-            return i == 0 && 
-                   ca == Character.toLowerCase(cn) && 
-                   matchesCamel(filter, name, i+1, j+1);
+        if (f && N)
+            return 
+               i == 0 && // e.g. 'contin' should match 'ContinousIntegrator' 
+               cf == Character.toLowerCase(cn) && 
+               matchesCamel(filter, name, i+1, j+1);
         
-        if (!lower_a && lower_n)
+        if (F && n)
            return matchesCamel(filter, name, i, j + 1);
-           
-        throw new RuntimeException("Impossible to come here");
+        
+        throw new RuntimeException(
+            "Impossible to come here");
     }
     
     public int length() {

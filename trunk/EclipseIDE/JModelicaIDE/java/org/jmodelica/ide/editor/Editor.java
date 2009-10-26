@@ -237,7 +237,7 @@ public IContentOutlinePage getInstanceOutlinePage() {
  */
 @Override
 protected void doSetInput(IEditorInput input) throws CoreException {
-
+  
     assert input != null : "Null unexpected";
 
     super.doSetInput(input);

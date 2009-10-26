@@ -1,7 +1,7 @@
 package org.jmodelica.ide.editor;
 
-import java.io.File;
-import java.io.IOException;
+import mock.MockFile;
+import mock.MockProject;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.Position;
@@ -29,32 +29,33 @@ private final String path;
  */
 public EditorFile(IEditorInput input) {
     
-    // blergh... java needs better typecase
     if (input instanceof IFileEditorInput) {
         
-        IFileEditorInput i = (IFileEditorInput)input;
-        file = i.getFile();
-        path = file.getRawLocation().toOSString();
+        IFileEditorInput i = 
+            (IFileEditorInput)input;
+        file = 
+            i.getFile();
+        path = 
+            file.getRawLocation().toOSString();
         
     } else if (input instanceof IURIEditorInput) {
         
-        String tmp;
-        
-        try {
-            IURIEditorInput i = (IURIEditorInput)input;
-            tmp = new File(i.getURI()).getCanonicalPath();
-        } catch (IOException e) {
-            e.printStackTrace();
-            tmp = null;
-        }
-        
+        IURIEditorInput i = 
+            (IURIEditorInput)input;
+
         path = 
-            tmp;
-        file = 
+            i.getURI().getRawPath();
+        
+        IFile tmp = 
             EclipseCruftinessWorkaroundClass
             .getFileForPath(path);
         
+        file = tmp;/*== null 
+            ? new MockFile(new MockProject(), path)
+            : tmp; */
+        
     } else { // NOTE: includes input == null
+    
         throw new IllegalArgumentException();
     }
 }
@@ -67,12 +68,16 @@ public boolean inWorkspace() {
     return file != null;
 }
 
+protected boolean nullFile(IFile f) {
+    return f == null || f instanceof MockFile;
+}
+
 /**
  * Returns true if file is located in the library
  * @return true if file is located in the library
  */
 public boolean inLibrary() {
-    return path != null && (file == null || Util.isInLibrary(file));
+    return path != null && (nullFile(file) || Util.isInLibrary(file));
 }
 
 /**
@@ -88,6 +93,7 @@ public String path() {
  * @return file resource of file
  */
 public IFile iFile() {
+    System.out.println(file);
     return file;
 }
 
@@ -107,7 +113,7 @@ public boolean containsFoldingPosition(Position pos) {
  */
 public String toRegistryKey() {
     return inLibrary()
-        ? (file == null ? Util.getLibraryPath(file) : path)
+        ? (!nullFile(file) ? Util.getLibraryPath(file) : path)
         : file.getRawLocation().toOSString();
 }
 

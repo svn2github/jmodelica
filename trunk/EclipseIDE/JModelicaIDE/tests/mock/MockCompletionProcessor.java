@@ -4,6 +4,7 @@ package mock;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.jastadd.plugin.registry.ASTRegistry;
+import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.ide.namecomplete.CompletionProcessor;
 import org.jmodelica.modelica.compiler.SourceRoot;
 
@@ -23,7 +24,10 @@ protected IFile getFile() {
     return new MockFile(proj);
 }
 @Override
-protected SourceRoot projectRoot() {
-    return (SourceRoot) reg.lookupAST(null, proj);
+protected Maybe<SourceRoot> projectRoot() {
+    return 
+        new Maybe<SourceRoot>(
+            (SourceRoot)
+            reg.lookupAST(null, proj));
 }
 }

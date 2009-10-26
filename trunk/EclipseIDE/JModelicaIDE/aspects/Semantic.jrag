@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 
-aspect Semantic {
+aspect DocumentLookup {
 
     /**
      * @return true iff. ASTNode contains point (line, col).
@@ -22,12 +22,12 @@ aspect Semantic {
         
         
         boolean beginsBefore = 
-            getBeginLine() == line && getBeginColumn() <= col ||
-            getBeginLine() < line;
+            getBeginLine() < line ||
+            getBeginLine() == line && getBeginColumn() <= col;
         
         boolean endsAfter = 
-            getEndLine() == line && getEndColumn() >= col ||
-            getEndLine() > line;
+            getEndLine() > line ||
+            getEndLine() == line && getEndColumn() >= col;
         
         return beginsBefore && endsAfter;
     }    
@@ -53,12 +53,12 @@ aspect Semantic {
         return 
             super.getClassDeclAt(d, offset)
             .orElse(
-            Maybe.guard(this, containsPoint(d, offset)));
+            Maybe.guard(this, this.containsPoint(d, offset)));
     }
     
     /**
      * Return access at offset. Favour left children of Dots. E.g.
-
+     *
      *  ...qualified.name      returns "qualified", while
      *  ...qualified.na^me      returns "qualified.name"
      *     
@@ -83,8 +83,14 @@ aspect Semantic {
     eq Access.getAccessAt(IDocument d, int offset) {
         return Maybe.guard(this, containsPoint(d, offset));
     } 
-    
-    
+}
+   
+
+
+
+
+aspect Completion {
+
     InstNode implements CompletionNode; //{
     
         public String InstNode.completionName() { 
@@ -110,9 +116,25 @@ aspect Semantic {
             return null; 
         }
     //}
+        
+    LibNode implements CompletionNode; //{
+        public String LibNode.completionName() {
+            return getName();
+        }
+        public CompletionComment LibNode.completionDoc() {
+            return CompletionComment.NULL;
+        }
+        public Image LibNode.completionImage() {
+            return null;
+        }
+    //}
     
     syn ArrayList<CompletionNode> InstNode.completionNodes(
-            boolean includeRenamedImports) = new ArrayList<CompletionNode>();
+        boolean includeRenamedImports,
+        boolean includeOuterScopes)  
+    { 
+        return new ArrayList<CompletionNode>();
+    }
     
     /**
      * Completion proposals for InstClassDecl:s are all classes and
@@ -122,7 +144,10 @@ aspect Semantic {
      * in completions if looking up an unqualified import. qualified access
      * to renamed imports is not allowed in Modelica
      */
-    eq InstClassDecl.completionNodes(boolean includeRenamedImports) {
+    eq InstClassDecl.completionNodes(
+        boolean includeRenamedImports,
+        boolean includeOuterScopes) 
+    {
 
         ArrayList<CompletionNode> completions = new ArrayList<CompletionNode>();
 
@@ -134,32 +159,80 @@ aspect Semantic {
 
         // imports
         for (InstImport ii : instImports()) { 
+            
             if (includeRenamedImports && ii instanceof InstImportRename) { 
-                completions.add((InstImportRename)ii);
+
+                completions.add(
+                    (InstImportRename)ii);
+            
             } else if (ii instanceof InstImportUnqualified) {
-                completions.addAll(ii.getPackageName()
-                                     .myInstClassDecl()
-                                     .completionNodes(includeRenamedImports));
+                completions.addAll(
+                    ii
+                    .getPackageName()
+                    .myInstClassDecl()
+                    .completionNodes(
+                        includeRenamedImports,
+                        includeOuterScopes));
             }
         }
 
         // extends
         for (InstExtends e : instExtends()) 
-            completions.addAll(e.getClassName()
-                                .myInstClassDecl()
-                                .completionNodes(includeRenamedImports));
-        
+            completions.addAll(
+                e
+                .getClassName()
+                .myInstClassDecl()
+                .completionNodes(
+                    includeRenamedImports,
+                    includeOuterScopes));
+
+        // outer scopes
+        if (includeOuterScopes) {
+            completions.addAll(
+                outerClassDecls());
+        }
+            
         return completions;
     }
     
+    inh ArrayList<CompletionNode> InstClassDecl.outerClassDecls();
+    
+    eq InstClassDecl.getChild().outerClassDecls() {
+        
+        ArrayList<CompletionNode> decls = 
+            new ArrayList<CompletionNode>(this.outerClassDecls());
+        
+        for (InstNode node : this.getInstClassDecls()) 
+            decls.add(node);
+
+        return decls;
+        
+    }
+    
+    eq InstProgramRoot.getChild().outerClassDecls() {
+        
+        ArrayList<CompletionNode> decls =
+            new ArrayList<CompletionNode>();
+        
+        for (InstNode node : this.getInstClassDecls()) 
+            decls.add(node);
+        
+        for (CompletionNode node : this.getProgram().getLibNodes())
+            decls.add(node);
+        
+        return decls;
+    }
+
     /**
      * Completion proposals for InstComponentDecl:s are only components. 
      */
-    eq InstComponentDecl.completionNodes(boolean includeRenamedImports) {
-       
+    eq InstComponentDecl.completionNodes(
+        boolean includeRenamedImports,
+        boolean includeOuterScopes)
+    {
         ArrayList<CompletionNode> nodes = new ArrayList<CompletionNode>();
-        for (CompletionNode c : myInstClass().completionNodes(includeRenamedImports)) {
-            //if (c instanceof InstComponentDecl)
+        for (CompletionNode c : myInstClass().completionNodes(includeRenamedImports, includeOuterScopes)) {
+            if (c instanceof InstComponentDecl)
                 nodes.add(c);
         }
         return nodes;
@@ -177,9 +250,10 @@ aspect Semantic {
             CompletionFilter filter,
             boolean unqualified) {
 
-        ArrayList<CompletionNode> proposals = new ArrayList<CompletionNode>();
+        ArrayList<CompletionNode> proposals =
+            new ArrayList<CompletionNode>();
 
-        for (CompletionNode node : completionNodes(unqualified))
+        for (CompletionNode node : completionNodes(unqualified, unqualified))
             if (filter.matches(node.completionName()))
                 proposals.add(node);
         
@@ -217,7 +291,14 @@ aspect Semantic {
             (InstAccess) getDynamicComponentNameList().getLast();
     }
     
+    
+    
 }
+
+
+
+
+
 
 /**
  * Get the string comment from classes to display in the content assist. 
@@ -256,6 +337,7 @@ aspect NADebugging {
     }
     
     public void ASTNode.printDebugInfo(String ind, PrintStream p) {
+        
         this.debugPrintThis(ind, p);
         
         for (ASTNode node : this) 
