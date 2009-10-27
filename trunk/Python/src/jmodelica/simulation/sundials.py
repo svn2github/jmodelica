@@ -231,6 +231,9 @@ class SundialsOdeSimulator(Simulator):
         verbose = self.get_verbosity()
         model = self.get_model()
         
+        if start_time == None or end_time == None:
+            raise SundialsSimulationException("Start and End-time must be defined.")
+        
         if verbose >= self.WHISPER:
             print "Running simulation with interval (%s, %s)." \
                     % (start_time, end_time)
@@ -318,7 +321,7 @@ class SundialsOdeSimulator(Simulator):
         
         tout = start_time + time_step
         if tout>end_time:
-            tout=end_time
+            raise SundialsSimulationException("Start time must be before final time.")
 
         # initial time
         t = cvodes.realtype(t0.value)
@@ -467,6 +470,8 @@ class SundialsDAESimulator(Simulator):
         model = self.get_model()
         #TODO
         #sensi = self.get_sensitivity_analysis()
+        if start_time == None or end_time == None:
+            raise SundialsSimulationException("Start and End-time must be defined.")
 
         if verbose >= self.WHISPER:
             print "Running simulation with interval (%s, %s) and time step %s" \
@@ -526,7 +531,7 @@ class SundialsDAESimulator(Simulator):
         
         tout = start_time + time_step
         if tout>end_time:
-            tout=end_time
+            raise SundialsSimulationException("Start time must be before final time.")
 
         # initial time
         t = ida.realtype(t0.value)
