@@ -18,6 +18,7 @@ from jmodelica.optimization.shooting import construct_grid
 from jmodelica.optimization.shooting import _check_normgrid_consistency
 from jmodelica.optimization.shooting import _split_opt_x
 from jmodelica.optimization.shooting import plot_control_solutions
+from jmodelica.optimization.shooting import single_shooting
 
 jm_home = os.environ.get('JMODELICA_HOME')
 path_to_examples = os.path.join(jm_home, "Python", "jmodelica", "examples")
@@ -37,6 +38,7 @@ def _lazy_init_shooter(model, gridsize, single_initial_u=2.5):
     
     grid = construct_grid(gridsize)
     shooter = MultipleShooter(model, initial_u, grid)
+    #shooter.set_log_level(3)
     
     return shooter
 
@@ -60,6 +62,7 @@ class TestMultipleShooterLazy:
         fname = cpath.replace('.','_',1)
 
         oc.compile_model(fpath, cpath, target='ipopt')
+        #oc.compile_model(fpath, cpath)
 
         # Load the dynamic library and XML data
         model = jmi.Model(fname)
@@ -148,7 +151,7 @@ class TestShootingHardcore:
         GRIDSIZE = 1
         shooter = _lazy_init_shooter(self._model, GRIDSIZE)
         moptimum = shooter.run_optimization(plot=False)
-        soptimum = single_shooting(self._model, plot=False)
+        soptimum = single_shooting(self._model,initial_u=2.5, plot=False)
         
         N.testing.assert_array_almost_equal(moptimum.xf, soptimum.xf,
                                             decimal=3)

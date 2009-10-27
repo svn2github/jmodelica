@@ -143,7 +143,7 @@ def single_shooting(model, initial_u=0.4, plot=True):
     u = model.u
     u0 = N.array([initial_u])
     print "Initial u:", u
-    
+    model.u = initial_u
     gradient = None
     gradient_u = None
     
@@ -152,18 +152,18 @@ def single_shooting(model, initial_u=0.4, plot=True):
         model.reset()
         u[:] = cur_u
         print "u is", u
-        big_gradient, last_y, gradparams, sens = _shoot(model, start_time, end_time)
+        big_gradient, last_y, gradparams, sens = _shoot(model, start_time, end_time,sensi=False)
         
         model.set_x_p(last_y, 0)
         model.set_dx_p(model.dx, 0)
         model.set_u_p(model.u, 0)
         cost = model.opt_eval_J()
         
-        gradient_u = cur_u.copy()
-        gradient = big_gradient[gradparams['u_start']:gradparams['u_end']]
+        #gradient_u = cur_u.copy()
+        #gradient = big_gradient[gradparams['u_start']:gradparams['u_end']]
         
         print "Cost:", cost
-        print "Grad:", gradient
+        #print "Grad:", gradient
         return cost
     
     def df(cur_u):
@@ -179,16 +179,17 @@ def single_shooting(model, initial_u=0.4, plot=True):
         model.set_x_p(last_y, 0)
         model.set_dx_p(model.dx, 0)
         model.set_u_p(model.u, 0)
-        cost = model.opt_eval_J()
+        #cost = model.opt_eval_J()
         
         gradient_u = cur_u.copy()
         gradient = big_gradient[gradparams['u_start']:gradparams['u_end']]
         
-        print "Cost:", cost
+        #print "Cost:", cost
         print "Grad:", gradient
         return gradient
     
-    p = NLP(f, u0, maxIter = 1e3, maxFunEvals = 1e2)
+    p = NLP(f, u0, maxIter = 1e3, maxFunEvals = 1e3,ftol = 1e-4, xtol = 1e-4,contol=1e-4)
+
     p.df = df
     if plot:
         p.plot = 1
@@ -221,7 +222,9 @@ def _eval_initial_ys(model, grid, time_step=0.2):
     from scipy import interpolate
     _check_grid_consistency(grid)
     
-    simulator = SundialsOdeSimulator(model, time_step=time_step)
+    simulator = SundialsOdeSimulator(model,start_time=model.opt_interval_get_start_time(),
+                                    final_time=model.opt_interval_get_final_time(),
+                                    time_step=time_step)
     simulator.run()
     T, ys = simulator.get_solution()
     T = N.array(T)
@@ -730,7 +733,7 @@ def _plot_control_solution(model, interval, initial_ys, us):
         p.plot(interval, [us[i], us[i]], label="Input #%s" % (i + 1))
     p.hold(False)
 
-    return [T,Y,yS]
+    #return [T,Y,yS]
     
     
 def plot_control_solutions(model, grid, opt_p, doshow=True):
