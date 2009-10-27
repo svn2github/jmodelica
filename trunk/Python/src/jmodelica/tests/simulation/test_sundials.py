@@ -172,7 +172,7 @@ class TestSundialsOdeSimulator:
 
         # Load the dynamic library and XML data
         self.m = jmi.Model(package)
-        self.simulator = SundialsOdeSimulator(self.m)
+        self.simulator = SundialsOdeSimulator(self.m,start_time=0.0, final_time=20.0)
         
     def test_is_simulator(self):
         assert isinstance(self.simulator, jmodelica.simulation.Simulator)
