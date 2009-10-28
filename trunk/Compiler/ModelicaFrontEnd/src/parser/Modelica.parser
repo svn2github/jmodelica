@@ -865,28 +865,29 @@ ElseWhenClauseE else_when_clause_e =
 Statement statement =
   parse_access.left ASSIGN exp.right comment SEMICOLON                  
                                      {: return new AssignStmt(comment, left, right); :}
-  | LPAREN arg_list RPAREN ASSIGN function_call comment SEMICOLON   
-                                     {: return new FunctionCallAssignStmt(comment, 
-                                                                          new OutputExpressionList(arg_list), 
-                                                                          function_call); :}
-  | LPAREN arg_list RPAREN ASSIGN function_call_simple comment SEMICOLON
-                                     {: return new FunctionCallAssignStmt(comment, 
-                                                                          new OutputExpressionList(arg_list), 
-                                                                          function_call_simple); :}
-  //| BREAK comment SEMICOLON          {: return new BreakStmt(comment); :} 
-  | RETURN  comment SEMICOLON        {: return new ReturnStmt(comment); :}
+  | function_call_stmt SEMICOLON     {: return function_call_stmt; :}
+  | BREAK comment SEMICOLON          {: return new BreakStmt(comment); :} 
+  | RETURN comment SEMICOLON         {: return new ReturnStmt(comment); :}
   | if_stmt SEMICOLON                {: return if_stmt; :}
   | when_stmt SEMICOLON              {: return when_stmt; :}
   | for_stmt SEMICOLON               {: return for_stmt; :}
   | while_stmt SEMICOLON             {: return while_stmt; :}
-  | function_call comment SEMICOLON  {: return new FunctionCallEmptyStmt(comment, function_call); :} 
-  | function_call_simple comment SEMICOLON 
-                                     {: return new FunctionCallEmptyStmt(comment, 
-                                                                         function_call_simple); :}  
   | annotation SEMICOLON             {: return new AlgorithmAnnotation(new Comment(new Opt(), new Opt()), 
                                                                        annotation); :}
   | error                            {: return new BadStatement(); :}
-  ; 
+  ;
+  
+FunctionCallStmt function_call_stmt =
+    LPAREN left_list RPAREN ASSIGN function_call comment  
+                           {: return new FunctionCallStmt(comment, left_list, function_call); :}
+  | function_call comment  {: return new FunctionCallStmt(comment, new List(), function_call); :}
+  ;
+
+List left_list =
+    parse_access                 {: return new List().add(parse_access); :}
+  | arg_list COMMA parse_access  {: return arg_list.add(parse_access); :}
+  ;
+
 
 IfStmt if_stmt =
   IF if_clause_list else_stmts END_IF comment {: return new IfStmt(comment, if_clause_list, else_stmts); :}

@@ -313,9 +313,8 @@ ElseWhenClauseE ::= WhenExp:Exp WhenEqns:AbstractEquation*;
 EquationFunctionCall : AbstractEquation ::= FunctionCall;
          
 abstract Statement ::= Comment;
-AssignStmt : Statement ::= Access Exp;
-FunctionCallAssignStmt : Statement ::= OutputExpressionList FunctionCall;
-FunctionCallEmptyStmt : Statement ::= FunctionCall;
+AssignStmt : Statement ::= Left:Access Right:Exp;
+FunctionCallStmt : Statement ::= Left:Access* FunctionCall;
 BreakStmt : Statement;
 ReturnStmt : Statement;
 IfWhenStmt : Statement ::= IfWhenClause*;
