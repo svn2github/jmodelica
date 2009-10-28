@@ -149,8 +149,9 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
    "+"              { return newSymbol(Terminals.PLUS); }  
    "-"              { return newSymbol(Terminals.MINUS); }
    "*"              { return newSymbol(Terminals.MULT); }
-  "/"              { return newSymbol(Terminals.DIV); }
-  "="               { return newSymbol(Terminals.ASSIGN); }
+  "/"               { return newSymbol(Terminals.DIV); }
+  "="               { return newSymbol(Terminals.EQUALS); }
+//  ":="              { return newSymbol(Terminals.ASSIGN); }
   "^"               { return newSymbol(Terminals.POW); }
 
   

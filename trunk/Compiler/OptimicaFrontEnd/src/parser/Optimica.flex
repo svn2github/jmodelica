@@ -233,19 +233,20 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   ","               { return newSymbol(Terminals.COMMA); }
 
 
-  "+"              { return newSymbol(Terminals.PLUS); }  
-  "-"              { return newSymbol(Terminals.MINUS); }
-  "*"              { return newSymbol(Terminals.MULT); }
-  "/"              { return newSymbol(Terminals.DIV); }
-  "="               { return newSymbol(Terminals.ASSIGN); }
+  "+"               { return newSymbol(Terminals.PLUS); }  
+  "-"               { return newSymbol(Terminals.MINUS); }
+  "*"               { return newSymbol(Terminals.MULT); }
+  "/"               { return newSymbol(Terminals.DIV); }
+  "="               { return newSymbol(Terminals.EQUALS); }
+  ":="              { return newSymbol(Terminals.ASSIGN); }
   "^"               { return newSymbol(Terminals.POW); }
 
-  "<"              { return newSymbol(Terminals.LT); }  
+  "<"               { return newSymbol(Terminals.LT); }  
   "<="              { return newSymbol(Terminals.LEQ); }
-  ">"              { return newSymbol(Terminals.GT); }
+  ">"               { return newSymbol(Terminals.GT); }
   ">="              { return newSymbol(Terminals.GEQ); }
-  "=="               { return newSymbol(Terminals.EQ); }
-  "<>"               { return newSymbol(Terminals.NEQ); }
+  "=="              { return newSymbol(Terminals.EQ); }
+  "<>"              { return newSymbol(Terminals.NEQ); }
   
   {STRING}  {  String s = yytext();
                addLineBreaks(s);

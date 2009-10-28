@@ -220,7 +220,7 @@ BaseClassDecl base_class_decl
     encapsulated? 
     partial? 
     restriction  
-    id_decl.class_name ASSIGN
+    id_decl.class_name EQUALS
     type_prefix_flow?
     type_prefix_variability?
     type_prefix_input_output?
@@ -392,7 +392,7 @@ PN_ExternalFunctionCall pn_external_function_call =
    	  	
 ParseAccess parse_access_eq =
 	parse_access
-	ASSIGN {: return parse_access; :}
+	EQUALS {: return parse_access; :}
    	;
 
 	
@@ -509,7 +509,7 @@ ImportClause import_clause =
   comment {: return new ImportClauseUnqualified(parse_access_unqualified_simple,comment); :}
   | IMPORT 
   id_decl.alias 
-  ASSIGN 
+  EQUALS 
   parse_access_simple 
   comment {: return new ImportClauseRename(parse_access_simple,comment,alias); :}
   ;
@@ -594,13 +594,13 @@ CompleteModification complete_modification =
   ;
   
 ValueModification value_modification =
-  ASSIGN exp  {: return new ValueModification(exp); :}
-  | COLON ASSIGN exp  {: return new ValueModification(exp); :}
+  EQUALS exp  {: return new ValueModification(exp); :}
+  | COLON EQUALS exp  {: return new ValueModification(exp); :}
   ;
 
 /*  
 AssignModification assign_modification =
-  COLON ASSIGN exp  {: return new AssignModification(exp); :}
+  COLON EQUALS exp  {: return new AssignModification(exp); :}
   ;  
   */
   
@@ -777,7 +777,7 @@ Annotation annotation =
    
    
 AbstractEquation abstract_equation =
-  simple_expression.left ASSIGN exp.right comment SEMICOLON       {: return new Equation(new Opt(),comment,left,right); :}
+  simple_expression.left EQUALS exp.right comment SEMICOLON       {: return new Equation(new Opt(),comment,left,right); :}
   | conditional_equation_e SEMICOLON                     {: return conditional_equation_e; :}
   | for_clause_e SEMICOLON                                {: return for_clause_e; :}
   | when_clause_e SEMICOLON                               {: return when_clause_e; :}
@@ -864,9 +864,9 @@ ElseWhenClauseE else_when_clause_e =
 
 
 AbstractAlgorithm abstract_algorithm =
-  parse_access COLON ASSIGN exp.right comment SEMICOLON       {: return new Algorithm(new Opt(),comment,parse_access,right); :}
-  | LPAREN arg_list RPAREN COLON ASSIGN function_call comment SEMICOLON{: return new AlgorithmFunctionAssign(new Opt(),comment,new OutputExpressionList(arg_list), function_call); :}
-  | LPAREN arg_list RPAREN COLON ASSIGN function_call_simple comment SEMICOLON{: return new AlgorithmFunctionAssign(new Opt(), comment,new OutputExpressionList(arg_list), function_call_simple); :}
+  parse_access ASSIGN exp.right comment SEMICOLON       {: return new Algorithm(new Opt(),comment,parse_access,right); :}
+  | LPAREN arg_list RPAREN ASSIGN function_call comment SEMICOLON{: return new AlgorithmFunctionAssign(new Opt(),comment,new OutputExpressionList(arg_list), function_call); :}
+  | LPAREN arg_list RPAREN ASSIGN function_call_simple comment SEMICOLON{: return new AlgorithmFunctionAssign(new Opt(), comment,new OutputExpressionList(arg_list), function_call_simple); :}
   //| BREAK comment SEMICOLON        {: return new AlgorithmBreak(new Opt(),comment); :} 
   | RETURN  comment SEMICOLON       {: return new AlgorithmReturn(new Opt(),comment); :}
   | conditional_equation_a SEMICOLON                     {: return conditional_equation_a; :}
@@ -1059,7 +1059,7 @@ List named_arguments =
   ;
   
 NamedArgument named_argument =
-  ID.id ASSIGN exp {: return new NamedArgument(new ParseAccess(id,new Opt()),exp); :}
+  ID.id EQUALS exp {: return new NamedArgument(new ParseAccess(id,new Opt()),exp); :}
   ;
   
 Matrix matrix = 

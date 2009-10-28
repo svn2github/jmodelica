@@ -57,7 +57,7 @@ List oconstraint_list =
    ;  
   
 Constraint oconstraint =
-  artm_exp.a ASSIGN artm_exp.b SEMICOLON{: return new ConstraintEq(a,b); :}
+  artm_exp.a EQUALS artm_exp.b SEMICOLON{: return new ConstraintEq(a,b); :}
   |  artm_exp.a LEQ artm_exp.b SEMICOLON{: return new ConstraintLeq(a,b); :}
   |  artm_exp.a GEQ artm_exp.b SEMICOLON{: return new ConstraintGeq(a,b); :}
   ;
