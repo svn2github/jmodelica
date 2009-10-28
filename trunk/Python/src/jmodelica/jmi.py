@@ -2027,7 +2027,10 @@ class Model(object):
         value = None
         if valref != None:
             (z_i, ptype) = _translate_value_ref(valref)
-            value = self.get_z()[z_i]
+            if xmldoc.is_negated_alias(name):
+                value = -(self.get_z()[z_i])
+            else:
+                value = self.get_z()[z_i]
         else:
             raise Exception("Parameter or variable "+name.strip()+" could not be found in model.")
         return value
@@ -2062,7 +2065,10 @@ class Model(object):
         valref = xmldoc.get_valueref(name)
         if valref != None:
             (z_i, ptype) = _translate_value_ref(valref)
-            self.get_z()[z_i] = value
+            if xmldoc.is_negated_alias(name):
+               self.get_z()[z_i] = -(value)
+            else:
+                self.get_z()[z_i] = value           
         else:
             raise Exception("Parameter or variable "+name+" could not be found in model.")
     
