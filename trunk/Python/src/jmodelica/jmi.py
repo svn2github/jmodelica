@@ -2330,7 +2330,7 @@ class JMIModel(object):
         Freeing jmi data structure. Removing handle and deleting temporary DLL
         file if possible.
         
-        """
+        """        
         if sys.platform == 'win32':
             pass
         else:

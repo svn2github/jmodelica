@@ -12,20 +12,17 @@ from jmodelica.tests import get_example_path
 from jmodelica.simulation.sundials import SundialsDAESimulator
 from jmodelica.compiler import ModelicaCompiler
 
-
 def run_demo(with_plots=True):
     """
     An example on how to simulate a model using the DAE simulator. The
     result can be compared with that of sim_rlc.py which has solved the
     same problem using dymola. Also writes information to a file.
     """
-    
-    path = get_example_path()
-    os.chdir(path)
-    
- 
+
+    curr_dir = os.path.dirname(os.path.abspath(__file__));
+
     libname = 'RLC_Circuit'
-    mofile = 'RLC_Circuit.mo'
+    mofile = curr_dir+'/files/RLC_Circuit.mo'
     optpackage = 'RLC_Circuit'
     
     mc = ModelicaCompiler()
@@ -49,5 +46,4 @@ def run_demo(with_plots=True):
     simulator.write_data()
 
 if __name__=="__main__":
-    
     run_demo()
