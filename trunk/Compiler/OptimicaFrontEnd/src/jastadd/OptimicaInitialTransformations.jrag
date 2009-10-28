@@ -43,11 +43,8 @@ aspect OptimicaInitialTransformations {
   	    			for (int j=0;j<ec.getNumAbstractEquation();j++) {
 		  	    		eqn.add(ec.getAbstractEquation(j));
   	    			}
-		  	    }else if (cl instanceof AlgorithmClause) {
-  	    			AlgorithmClause ac = (AlgorithmClause)cl;
-  	    			for (int j=0;j<ac.getNumAbstractAlgorithm();j++) {
-		  	    		alg.add(ac.getAbstractAlgorithm(j));
-  	    			}
+		  	    } else if (cl instanceof Algorithm) {
+  	    			alg.add((Algorithm) cl);
   	    		}else if (cl instanceof ConstraintClause) {
   	    			ConstraintClause cc = (ConstraintClause)cl;
   	    			for (int j=0;j<cc.getNumConstraint();j++) {

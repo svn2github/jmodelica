@@ -71,17 +71,14 @@
   	    			for (int j=0;j<ec.getNumAbstractEquation();j++) {
 		  	    		eqn.add(ec.getAbstractEquation(j));
   	    			}
-		  	    }else if (cl instanceof AlgorithmClause) {
-  	    			AlgorithmClause ac = (AlgorithmClause)cl;
-  	    			for (int j=0;j<ac.getNumAbstractAlgorithm();j++) {
-		  	    		alg.add(ac.getAbstractAlgorithm(j));
-  	    			}
-		  	    } else if (cl instanceof ExtendsClause) {
-		  	    	sup.add((ExtendsClause)cl);
+		  	    } else if (cl instanceof Algorithm) {
+  	    			alg.add((Algorithm) cl);
+ 		  	    } else if (cl instanceof ExtendsClause) {
+		  	    	sup.add((ExtendsClause) cl);
 		  	    } else if (cl instanceof ClassDecl) {
-		  	    	classd.add((ClassDecl)cl);
+		  	    	classd.add((ClassDecl) cl);
 		  	    } else if (cl instanceof ImportClause) {
-		  	    	imp.add((ImportClause)cl);
+		  	    	imp.add((ImportClause) cl);
 		  	    } else if (cl instanceof ElementAnnotation) {
 		  	    	annotation.add(((ElementAnnotation)cl).getAnnotation());
 		  	    }

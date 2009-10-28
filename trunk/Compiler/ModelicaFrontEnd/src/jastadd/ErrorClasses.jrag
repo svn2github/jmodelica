@@ -6,6 +6,7 @@ aspect ErrorClasses {
 	eq BadClassDecl.isError() = true;
 	eq BadElement.isError() = true;
 	eq BadArgument.isError() = true;
+	eq BadStatement.isError() = true;
 	
 	public InstModification BadArgument.newInstModification() {
 		return null;

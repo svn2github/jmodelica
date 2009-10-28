@@ -353,12 +353,12 @@ List elements
     :};
 
 Clause composition_clause =  
-   PUBLIC            {: return new PublicElementList(new List()); :}
-   | PROTECTED        {: return new ProtectedElementList(new List()); :}
-   | PUBLIC elements            {: return new PublicElementList(elements); :}
-   | PROTECTED elements       {: return new ProtectedElementList(elements); :}
+   PUBLIC                    {: return new PublicElementList(new List()); :}
+   | PROTECTED               {: return new ProtectedElementList(new List()); :}
+   | PUBLIC elements         {: return new PublicElementList(elements); :}
+   | PROTECTED elements      {: return new ProtectedElementList(elements); :}
    | equation_clause         {: return equation_clause; :}
-   | algorithm_clause        {: return algorithm_clause; :}
+   | algorithm               {: return algorithm; :}
    ;
    
 PN_ExternalClause pn_external_clause =
@@ -559,11 +559,10 @@ EquationClause equation_clause =
                                                  return new EquationClause(abstract_equation); :}
   ;  
 
-AlgorithmClause algorithm_clause =
-  ALGORITHM abstract_algorithm_list  {: return new AlgorithmClause(abstract_algorithm_list); :}
-  |INITIAL_ALGORITHM abstract_algorithm_list  {: for (int i=0;i<abstract_algorithm_list.getNumChild();i++)
-  												     	((AbstractAlgorithm)abstract_algorithm_list.getChild(i)).setInitial(new Initial()); 
-                                                     return new AlgorithmClause(abstract_algorithm_list); :}
+Algorithm algorithm =
+  ALGORITHM statement_list            {: return new Algorithm(new Opt(), statement_list); :}
+  | INITIAL_ALGORITHM statement_list  {: return new Algorithm(new Opt(new Initial()), 
+                                                              statement_list); :}
   ;  
 
 /*
@@ -575,11 +574,11 @@ List abstract_equation_list =
   ;  
 */
 
-List abstract_algorithm_list =
-                                  {: return new List(); :}
-  |abstract_algorithm                           {: return new List().add(abstract_algorithm); :}
-  | abstract_algorithm_list abstract_algorithm  {: abstract_algorithm_list.add(abstract_algorithm); 
-                                                 return abstract_algorithm_list; :}
+List statement_list =
+                              {: return new List(); :}
+  | statement                 {: return new List().add(statement); :}
+  | statement_list statement  {: statement_list.add(statement); 
+                                 return statement_list; :}
   ;  
 
 Modification modification =
@@ -839,7 +838,7 @@ ForIndex for_index =
                                                               new Comment(new Opt(),new Opt()),
                                                               new Opt(),
                                                               new Comment(new Opt(),new Opt())),
-                                                              for_in_exp); 
+                                                   for_in_exp); 
                           f.setStart(id_decl.getStart()); 
                           f.setEnd(for_in_exp.getEnd()); 
                           return f; :}
@@ -863,62 +862,70 @@ ElseWhenClauseE else_when_clause_e =
 
 
 
-AbstractAlgorithm abstract_algorithm =
-  parse_access ASSIGN exp.right comment SEMICOLON       {: return new Algorithm(new Opt(),comment,parse_access,right); :}
-  | LPAREN arg_list RPAREN ASSIGN function_call comment SEMICOLON{: return new AlgorithmFunctionAssign(new Opt(),comment,new OutputExpressionList(arg_list), function_call); :}
-  | LPAREN arg_list RPAREN ASSIGN function_call_simple comment SEMICOLON{: return new AlgorithmFunctionAssign(new Opt(), comment,new OutputExpressionList(arg_list), function_call_simple); :}
-  //| BREAK comment SEMICOLON        {: return new AlgorithmBreak(new Opt(),comment); :} 
-  | RETURN  comment SEMICOLON       {: return new AlgorithmReturn(new Opt(),comment); :}
-  | conditional_equation_a SEMICOLON                     {: return conditional_equation_a; :}
-  | for_clause_a SEMICOLON {: return for_clause_a; :}
-  | when_clause_a SEMICOLON {: return when_clause_a; :}
-  | while_clause SEMICOLON {: return while_clause; :}
-  | function_call comment SEMICOLON {: return new AlgorithmFunctionCall(new Opt(),comment, function_call); :} 
-  | function_call_simple comment SEMICOLON {: return new AlgorithmFunctionCall(new Opt(),comment, function_call_simple); :}  
-  | annotation SEMICOLON             {: return new AlgorithmAnnotation(new Opt(),new Comment(new Opt(),new Opt()), annotation); :}
+Statement statement =
+  parse_access.left ASSIGN exp.right comment SEMICOLON                  
+                                     {: return new AssignStmt(comment, left, right); :}
+  | LPAREN arg_list RPAREN ASSIGN function_call comment SEMICOLON   
+                                     {: return new FunctionCallAssignStmt(comment, 
+                                                                          new OutputExpressionList(arg_list), 
+                                                                          function_call); :}
+  | LPAREN arg_list RPAREN ASSIGN function_call_simple comment SEMICOLON
+                                     {: return new FunctionCallAssignStmt(comment, 
+                                                                          new OutputExpressionList(arg_list), 
+                                                                          function_call_simple); :}
+  //| BREAK comment SEMICOLON          {: return new BreakStmt(comment); :} 
+  | RETURN  comment SEMICOLON        {: return new ReturnStmt(comment); :}
+  | if_stmt SEMICOLON                {: return if_stmt; :}
+  | when_stmt SEMICOLON              {: return when_stmt; :}
+  | for_stmt SEMICOLON               {: return for_stmt; :}
+  | while_stmt SEMICOLON             {: return while_stmt; :}
+  | function_call comment SEMICOLON  {: return new FunctionCallEmptyStmt(comment, function_call); :} 
+  | function_call_simple comment SEMICOLON 
+                                     {: return new FunctionCallEmptyStmt(comment, 
+                                                                         function_call_simple); :}  
+  | annotation SEMICOLON             {: return new AlgorithmAnnotation(new Comment(new Opt(), new Opt()), 
+                                                                       annotation); :}
+  | error                            {: return new BadStatement(); :}
   ; 
 
-ConditionalEquationA conditional_equation_a =
-  IF exp.ifexp THEN
-  abstract_algorithm_list
-  else_if_clause_a*
-  else_algorithms
-  END_IF comment {: return new ConditionalEquationA(new Opt(), comment, ifexp,abstract_algorithm_list,else_if_clause_a,else_algorithms); :}
+IfStmt if_stmt =
+  IF if_clause_list else_stmts END_IF comment {: return new IfStmt(comment, if_clause_list, else_stmts); :}
   ;  
 
-ElseIfClauseA else_if_clause_a =
-  ELSEIF exp.eiexp THEN
-  abstract_algorithm_list {: return new ElseIfClauseA(eiexp,abstract_algorithm_list); :}
+List if_clause_list =
+    if_clause                        {: return new List().add(if_clause); :}
+  | if_clause_list ELSEIF if_clause  {: return if_clause_list.add(if_clause); :}
   ;
 
-List else_algorithms =
-   {: return new List(); :}
-  | ELSE
-    abstract_algorithm_list {: return abstract_algorithm_list; :}
-    ;
-
-ForClauseA for_clause_a =
-  FOR for_indices LOOP
-  abstract_algorithm_list
-  END_FOR comment   {: return new ForClauseA(new Opt(), comment, for_indices,abstract_algorithm_list); :}
+IfClause if_clause =
+  exp THEN statement_list  {: return new IfClause(exp, statement_list); :}
   ;
 
-WhenClauseA when_clause_a =
-  WHEN exp.wexp THEN
-  abstract_algorithm_list
-  else_when_clause_a*
-  END_WHEN comment {: return new WhenClauseA(new Opt(), comment, wexp,abstract_algorithm_list,else_when_clause_a); :}
+List else_stmts =
+                         {: return new List(); :}
+  | ELSE statement_list  {: return statement_list; :}
+  ;
+
+WhenStmt when_stmt =
+  WHEN when_clause_list END_WHEN comment {: return new WhenStmt(comment, when_clause_list); :}
   ;  
 
-ElseWhenClauseA else_when_clause_a =
-  ELSEWHEN exp.ewexp THEN
-  abstract_algorithm_list {: return new ElseWhenClauseA(ewexp,abstract_algorithm_list); :}
+List when_clause_list =
+    when_clause                            {: return new List().add(when_clause); :}
+  | when_clause_list ELSEWHEN when_clause  {: return when_clause_list.add(when_clause); :}
   ;
 
-WhileClause while_clause = 
-  WHILE exp.whileexp LOOP
-  abstract_algorithm_list
-  END_WHILE comment               {: return new WhileClause(new Opt(),comment,whileexp,abstract_algorithm_list); :}
+WhenClause when_clause =
+  exp THEN statement_list  {: return new WhenClause(exp, statement_list); :}
+  ;
+
+ForStmt for_stmt =
+  FOR for_indices LOOP statement_list END_FOR comment  
+                         {: return new ForStmt(comment, for_indices, statement_list); :}
+  ;
+
+WhileStmt while_stmt = 
+  WHILE exp LOOP statement_list END_WHILE comment  {: return new WhileStmt(comment, exp, statement_list); :}
   ;
   
 Exp exp =

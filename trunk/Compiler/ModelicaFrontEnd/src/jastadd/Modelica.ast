@@ -104,7 +104,7 @@ PN_FullClassDecl : BaseClassDecl ::= [StringComment]
 	                      
 FullClassDecl : BaseClassDecl ::= [StringComment]  
                                 Equation:AbstractEquation* 
-                                Algorithm:AbstractAlgorithm*
+                                Algorithm*
                                 Super:ExtendsClause*  
                                 Import:ImportClause* 
                                 ClassDecl* 
@@ -198,7 +198,7 @@ abstract ElementList : Clause ::= Element*;
 PublicElementList : ElementList ::=;
 ProtectedElementList : ElementList ::=;
 EquationClause : Clause::= AbstractEquation*;
-AlgorithmClause : Clause ::= AbstractAlgorithm*;
+Algorithm : Clause ::= [Initial] Statement*;
 
 abstract Element : Clause;
 ElementAnnotation : Element ::= Annotation;
@@ -312,22 +312,21 @@ WhenClauseE : AbstractEquation ::= WhenExp:Exp WhenEqns:AbstractEquation*
 ElseWhenClauseE ::= WhenExp:Exp WhenEqns:AbstractEquation*;         
 EquationFunctionCall : AbstractEquation ::= FunctionCall;
          
-abstract AbstractAlgorithm ::= [Initial] Comment;
-Algorithm : AbstractAlgorithm ::= Access Exp;
-AlgorithmFunctionAssign : AbstractAlgorithm ::= OutputExpressionList FunctionCall;
-AlgorithmFunctionCall : AbstractAlgorithm ::= FunctionCall;
-AlgorithmBreak : AbstractAlgorithm ::=;
-AlgorithmReturn : AbstractAlgorithm ::=;
-AlgorithmAnnotation : AbstractAlgorithm ::= Annotation;
-ConditionalEquationA : AbstractAlgorithm ::= IfExp:Exp IfEqns:AbstractAlgorithm*
-                                          ElseIfClauseA*
-                                          ElseEqns:AbstractAlgorithm*;
-ElseIfClauseA ::= IfExp:Exp IfEqns:AbstractAlgorithm*;
-ForClauseA : AbstractAlgorithm ::= ForIndex* ForAlgs:AbstractAlgorithm*;
-WhenClauseA : AbstractAlgorithm ::= WhenExp:Exp WhenAlgs:AbstractAlgorithm*
-                                   ElseWhenClauseA*;
-ElseWhenClauseA ::= WhenExp:Exp WhenAlgs:AbstractAlgorithm*;   
-WhileClause : AbstractAlgorithm ::= WhileExp:Exp WhileAlgs:AbstractAlgorithm*;
+abstract Statement ::= Comment;
+AssignStmt : Statement ::= Access Exp;
+FunctionCallAssignStmt : Statement ::= OutputExpressionList FunctionCall;
+FunctionCallEmptyStmt : Statement ::= FunctionCall;
+BreakStmt : Statement;
+ReturnStmt : Statement;
+IfWhenStmt : Statement ::= IfWhenClause*;
+IfStmt : IfWhenStmt ::= ElseStmts:Statement*;
+WhenStmt : IfWhenStmt;
+IfWhenClause ::= Test:Exp Statement*;
+IfClause : IfWhenClause;                // Subclasses of IfWhenClause might not be needed
+WhenClause : IfWhenClause;
+ForStmt : Statement ::= ForIndex* ForStmts:Statement*;
+WhileStmt : Statement ::= Test:Exp WhileStmts:Statement*;
+AlgorithmAnnotation : Statement ::= Annotation;
 
 IfExp : Exp ::= IfExp:Exp ThenExp:Exp ElseIfExp* ElseExp:Exp;
 ElseIfExp : Exp ::= IfExp:Exp ThenExp:Exp;
