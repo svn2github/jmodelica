@@ -19,6 +19,8 @@
 __all__ = ['jmi', 'xmlparser', 'compiler', 'optimicacompiler','optimization',
            'examples', 'tests','io']
 
+__version__='trunk'
+
 import os, os.path
 import warnings
 
