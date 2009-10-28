@@ -41,19 +41,10 @@ aspect Flattening {
     
     public void InstClassDecl.flattenInstClassDecl(FClass fc) {
    		FQName fqn = new FQName();
-		int index = 0;
-		int new_index = 0;
-		String qn = qualifiedName();
-		while (index>=0) {
-			new_index = qn.indexOf('.',index);
- 			if (new_index>=0) {
-				fqn.addFQNamePart(new FQNamePart(qn.substring(index,new_index),new Opt()));
-    			index = new_index + 1;
-			} else {
-				fqn.addFQNamePart(new FQNamePart(qn.substring(index,qn.length()),new Opt()));
-    			index = new_index;
-			}
-		}
+   		/* Maybe add a new constructor or a factory method for making an FQName from a String?
+   		 * Seems to belong in the FQName class rather than here. */
+   		for (String name : qualifiedName().split("\\."))
+   			fqn.addFQNamePart(new FQNamePart(name, new Opt()));
 		fc.setFQName(fqn); 
 		fc.addFEquationBlock(new FEquationBlock(new List()));			
 		for (FAbstractEquation ae : getFAbstractEquations()) {
