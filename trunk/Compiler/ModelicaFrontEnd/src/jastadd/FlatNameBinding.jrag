@@ -32,8 +32,10 @@ aspect FlatNameBinding {
 	eq FClass.getChild(int index).lookupFV(String name) {
 		FVariable variable = (FVariable) fullyQualifiedVariablesMap().get(name);
 		if (variable == null) {
+			//System.out.println("FClass.getChild().lookupFV: " + name + " " + variable);
 			return unknownFVariable();
 		} else {
+			//System.out.println("FClass.getChild().lookupFV: " + name + " " + variable+ " "+ variable.getParent());
 			return variable;
 		}		
 	}
@@ -55,6 +57,7 @@ aspect FlatNameBinding {
 	*/
 	
 	syn lazy HashMap FClass.fullyQualifiedVariablesMap() {
+		//System.out.println("FClass.fullyQualifiedVariablesMap()");
 		HashMap map = new HashMap();
 		for(int k = 0; k < getNumFVariable(); k++) {
 			map.put(getFVariable(k).name(),getFVariable(k));

@@ -326,5 +326,95 @@ model ArrayTest20_Err
 
 end ArrayTest20_Err;
 
+
+model ArrayTest21
+        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest21",
+        description="Flattening of arrays.",
+                                               flatModel=
+"
+fclass ArrayTests.ArrayTest21
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation 
+ x[1] = y[1];
+ x[2] = y[2];
+ x[1] = 0;
+ x[2] = 0;
+end ArrayTests.ArrayTest21;
+
+")})));
+  
+  Real x[2];
+  Real y[2];
+equation
+  x=y;
+  x=zeros(2);
+end ArrayTest21;
+
+model ArrayTest22
+        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest22",
+        description="Flattening of arrays.",
+                                               flatModel=
+"
+fclass ArrayTests.ArrayTest22
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation 
+ x[1] = y[1];
+ x[2] = y[2];
+ x[1] = 1;
+ x[2] = 1;
+end ArrayTests.ArrayTest22;
+
+")})));
+  
+  Real x[2];
+  Real y[2];
+equation
+  x=y;
+  x=ones(2);
+end ArrayTest22;
+
+model ArrayTest23
+        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest23",
+        description="Flattening of arrays.",
+                                               flatModel=
+"
+fclass ArrayTests.ArrayTest23
+ Real x[1,1];
+ Real x[2,1];
+ Real x[1,2];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[2,1];
+ Real y[1,2];
+ Real y[2,2];
+equation 
+ x[1,1] = y[1,1];
+ x[2,1] = y[2,1];
+ x[1,2] = y[1,2];
+ x[2,2] = y[2,2];
+ x[1,1] = 1;
+ x[2,1] = 1;
+ x[1,2] = 1;
+ x[2,2] = 1;
+end ArrayTests.ArrayTest23;
+")})));
+  
+  Real x[2,2];
+  Real y[2,2];
+equation
+  x=y;
+  x=ones(2,2);
+end ArrayTest23;
+
+
   annotation (uses(Modelica(version="3.0.1")));
 end ArrayTests;

@@ -17,27 +17,67 @@
 
 aspect Arrays {
 
+	/**
+	 * \brief Get the array subscripts of a ComponentDecl.
+	 * 
+	 * @return If the ComponentDecl has subscripts, then return these, otherwise
+	 * null.
+	 */
 	syn lazy ArraySubscripts ComponentDecl.arraySubscripts() =
 		hasVarArraySubscripts()? getVarArraySubscripts():
 			null;
 
+	/**
+	 * \brief Check if an identifier is inside array subscripts.
+	 * 
+	 * @return If the identifier is in an array subscripts sub-AST then true
+	 * else false.
+	 */
 	inh boolean FIdUseExp.inArraySubscripts();
 	eq FArraySubscripts.getChild().inArraySubscripts() = true;
 	eq Root.getChild().inArraySubscripts() = false;
 	
+	/**
+	 * \brief Check if an access is an array access.
+	 * 
+	 * @return True if the access has array subscripts, otherwise false.
+	 */
 	syn boolean Access.isArrayAccess() = false;
 	eq ArrayAccess.isArrayAccess() = hasArraySubscripts();
 	
+	/**
+	 * \brief Get the array subscripts of an access, if any.
+	 * 
+	 * @return The array subscripts of the access, if any, otherwise null.
+	 */
 	syn ArraySubscripts Access.arraySubscripts() = null;
 	eq ArrayAccess.arraySubscripts() = hasArraySubscripts()? getArraySubscripts(): null;
 
+	/**
+	 * \brief Check if an instance access has array subscripts.
+	 * 
+	 * @return True if the access has array subscripts, otherwise false.
+	 */
 	syn boolean InstAccess.isInstArrayAccess() = false;
 	eq InstArrayAccess.isInstArrayAccess() = hasFArraySubscripts();
 	
+	
+	/**
+	 * \brief Get the FArraySubscripts of an InstAccess, if any.
+	 * 
+	 * @return A reference to a FArraySubscripts object, or null.
+	 */
 	syn FArraySubscripts InstAccess.fArraySubscripts() = null;
 	eq InstArrayAccess.fArraySubscripts() = hasFArraySubscripts()? getFArraySubscripts(): null;
 
-	// Array dimensions
+	/**
+	 * \brief Get array dimensions.
+	 * 
+	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
+	 * an error in computation of the array dimensions.
+	 * 
+	 * @return Array dimension.
+	 */	
 	syn int FAbstractEquation.ndims() = -1;
 	eq FEquation.ndims() {
 		if (getLeft().ndims() == getRight().ndims()) {
@@ -45,12 +85,31 @@ aspect Arrays {
 		}
 		return -1;
 	}
-	
+
+	/**
+	 * \brief Get array dimensions.
+	 * 
+	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
+	 * an error in computation of the array dimensions.
+	 * 
+	 * @return Array dimension.
+	 */	
 	syn int FArraySubscripts.ndims() { 
 		return getNumFSubscript();
 	}
 
 	// Array dimensions
+	/**
+	 * \brief Get array dimensions of array subscripts when used in an identifier.
+	 * 
+	 * Here it is not sufficient to check the number of subscripts; the 
+	 * identifier x[1] has the dimension 0, not 1.
+	 * 
+	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
+	 * an error in computation of the array dimensions.
+	 * 
+	 * @return Array dimension.
+	 */	
 	syn int FArraySubscripts.accessNdims() { 
 		//System.out.println("FArraySubscripts.accessNdims()");
 		// Need to check if each individual subscript increases 
@@ -63,18 +122,34 @@ aspect Arrays {
 	}
 
 	
+	/**
+	 * \brief Get array dimensions.
+	 * 
+	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
+	 * an error in computation of the array dimensions.
+	 * 
+	 * @return Array dimension.
+	 */	
 	syn int FSubscript.ndims();
-	// Can only be 0 or 1 for FExpSubscript?
 	eq FExpSubscript.ndims() = getFExp().ndims();
 	eq FColonSubscript.ndims() = 1;
 	
+	/**
+	 * \brief Get array dimensions.
+	 * 
+	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
+	 * an error in computation of the array dimensions.
+	 * 
+	 * @return Array dimension.
+	 */	
 	syn int FExp.ndims() = 0;
 	eq FInstAccessExp.ndims() = getInstAccess().ndims();
 	eq FRangeExp.ndims() = 1;
 	eq FArray.ndims() {
 		if (getNumFExp()==0) { //Empty array
 			return 1;
-		} else {
+		} else { // We assume that the FArray is set up correctly and that
+			     // all brances are equal.
 			return getFExp(0).ndims() + 1;
 		}
 	}
@@ -82,9 +157,31 @@ aspect Arrays {
 	eq FOnes.ndims() = getNumFExp();
 	eq FZeros.ndims() = getNumFExp();
 	
-	syn int FIdUse.ndims() = getFQName().accessNdims();
+	/**
+	 * \brief Get array dimensions.
+	 * 
+	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
+	 * an error in computation of the array dimensions.
+	 * 
+	 * @return Array dimension.
+	 */	
+	syn int FIdUse.ndims() {
+		// Notice here the use of accessNdims. Also, if the access has
+		// no subscripts, it may still have dimension > 0 if its declaration
+		// is an array declaration.
+		return getFQName().hasFArraySubscripts()? 
+				getFArraySubscripts().accessNdims(): myFV().ndims();
+	}
 	eq FIdUseExp.ndims() = getFIdUse().ndims();
 		
+	/**
+	 * \brief Get array dimensions.
+	 * 
+	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
+	 * an error in computation of the array dimensions.
+	 * 
+	 * @return Array dimension.
+	 */	
 	syn int InstAccess.ndims() = 0;
 	eq InstArrayAccess.ndims() {
 		//.out.println("InstArrayAccess.ndims()");
@@ -95,14 +192,34 @@ aspect Arrays {
 	
 	eq InstDot.ndims() = getRight().ndims() + getLeft().ndims();
 	
+	/**
+	 * \brief Get array dimensions.
+	 * 
+	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
+	 * an error in computation of the array dimensions.
+	 * 
+	 * @return Array dimension.
+	 */	
 	syn int InstNode.ndims() = 0;
 	
 	eq InstComponentDecl.ndims() = hasFArraySubscripts()? 
 			getFArraySubscripts().ndims(): 0;
 
-	syn int FVariable.ndims() = isScalarized()? 0 : getFQName().ndims();
+	syn int AbstractFVariable.ndims() = -1;
 	
+	eq FVariable.ndims() = isScalarized()? 0 : getFQName().ndims();
+	
+	/**
+	 * \brief Get array dimensions.
+	 * 
+	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
+	 * an error in computation of the array dimensions.
+	 * 
+	 * @return Array dimension.
+	 */	
 	syn int FQName.ndims() {
+		// Only look at the array subscripts for the last FQNamePart,
+		// all other array subscripts has been expanded in the instantiation.
 		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
 		if (last.hasFArraySubscripts()) {
 			return last.getFArraySubscripts().ndims(); 
@@ -111,6 +228,17 @@ aspect Arrays {
 		}
 	}
 
+	/**
+	 * \brief Get array dimensions of an identifier when used in an identifier.
+	 * 
+	 * Here it is not sufficient to check the number of subscripts; the 
+	 * identifier x[1] has the dimension 0, not 1.
+	 * 
+	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
+	 * an error in computation of the array dimensions.
+	 * 
+	 * @return Array dimension.
+	 */		
 	syn int FQName.accessNdims() {
 		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
 		if (last.hasFArraySubscripts()) {
@@ -121,7 +249,37 @@ aspect Arrays {
 	}
 
 	
-	// Array sizes		
+	// Array sizes
+	
+	/**
+	 * \brief Get the array sizes. 
+	 * 
+	 * @return An array of integers of length ndims(). Each entry holds the
+	 * corresponding array dimension size.
+	 * 
+	 */
+	syn int[] FAbstractEquation.size() = new int[0];
+	eq FEquation.size() {
+		int[] leftSize = getLeft().size();
+		int[] rightSize = getRight().size();
+		if (leftSize.length!=rightSize.length) {
+			return new int[0];
+		}
+		for (int i=0;i<leftSize.length;i++) {
+			if (leftSize[i]!=rightSize[i]) {
+				return new int[0];
+			}
+		}
+		return leftSize;
+	}
+
+	/**
+	 * \brief Get the array sizes. 
+	 * 
+	 * @return An array of integers of length ndims(). Each entry holds the
+	 * corresponding array dimension size.
+	 * 
+	 */
 	syn int[] FArraySubscripts.size() {
 		int s[] = new int[ndims()];
 		int index = 0;
@@ -131,6 +289,14 @@ aspect Arrays {
 		return s;
 	}
 
+	/**
+	 * \brief Get the array sizes when the array subscripts are used in an
+	 * access. See also documentation of accessNdims(). 
+	 * 
+	 * @return An array of integers of length accessNdims(). Each entry holds the
+	 * corresponding array dimension size.
+	 * 
+	 */
 	syn int[] FArraySubscripts.accessSize() {
 		int s[] = new int[accessNdims()];
 		int index = 0;
@@ -143,19 +309,34 @@ aspect Arrays {
 	}
 
 	
+	/**
+	 * \brief Get the array sizes. 
+	 * 
+	 * @return An array of integers of length ndims(). Each entry holds the
+	 * corresponding array dimension size.
+	 * 
+	 */
 	syn int[] FSubscript.size();
 
 	eq FExpSubscript.size() = getFExp().size();
 	
 	eq FColonSubscript.size() = new int[0]; // TODO
 	
+	/**
+	 * \brief Get the array sizes. 
+	 * 
+	 * @return An array of integers of length ndims(). Each entry holds the
+	 * corresponding array dimension size.
+	 * 
+	 */
 	syn int[] FExp.size() = new int[0];
 	eq FInstAccessExp.size() = getInstAccess().size();
 
+	
  	eq FRangeExp.size() {
 		int[] si = new int[1];
 		si[0] = 0;
-		if (getNumFExp()==2) {
+		if (getNumFExp()==2) { // e.g. 1:10
 			si[0] = (int)(getFExp(1).ceval().realValue() - 
 				getFExp(0).ceval().realValue() + 1);
 			if (si[0]<0) {
@@ -166,21 +347,21 @@ aspect Arrays {
 			double i2 = getFExp(1).ceval().realValue();
 			double i3 = getFExp(2).ceval().realValue();
 			
-			if (i3>=i1 && i2>0) { // 1:2:3
+			if (i3>=i1 && i2>0) { // e.g. 1:2:3
 				double i = i1;
 				while (i<=i3) {
 					i += i2;
 				}
 				si[0] = (int)i;
-			} else if (i3<i1 && i2>0) { // 3:2:1
+			} else if (i3<i1 && i2>0) { //e.g. 3:2:1
 				si[0] = 0;
-			} else if (i3<i1 && i2<0) { // 3:-2:1
+			} else if (i3<i1 && i2<0) { // e.g. 3:-2:1
 				double i = i1;
 				while (i<=i3) {
 					i += i2;
 				}
 				si[0] = (int)i;
-			} else if (i3>=i1 && i2<0) { // 1:-2:0
+			} else if (i3>=i1 && i2<0) { // e.g. 1:-2:0
 				si[0] = 0;
 			} else if (i2==0) {
 				si[0] = 0;
@@ -227,14 +408,39 @@ aspect Arrays {
 		
 	}
 	
-	syn int[] FIdUse.size() = getFQName().size();
+	/**
+	 * \brief Get the array sizes. 
+	 * 
+	 * @return An array of integers of length ndims(). Each entry holds the
+	 * corresponding array dimension size.
+	 * 
+	 */
+	syn int[] FIdUse.size() {
+		return getFQName().hasFArraySubscripts()? 
+			getFArraySubscripts().accessSize(): myFV().size();
+	}
+		
 	eq FIdUseExp.size() = getFIdUse().size();
 	
+	/**
+	 * \brief Get the array sizes. 
+	 * 
+	 * @return An array of integers of length ndims(). Each entry holds the
+	 * corresponding array dimension size.
+	 * 
+	 */
 	syn int[] InstAccess.size() = new int[0];
 	eq InstArrayAccess.size() = hasFArraySubscripts()? 
 			getFArraySubscripts().accessSize(): 
 				myInstComponentDecl().size();
 	
+	/**
+	 * \brief Get the array sizes. 
+	 * 
+	 * @return An array of integers of length ndims(). Each entry holds the
+	 * corresponding array dimension size.
+	 * 
+	 */
 	eq InstDot.size() {
 		int s[] = new int[ndims()];
 		int sr[] = getRight().size();
@@ -248,13 +454,35 @@ aspect Arrays {
 		return s;
 	}
 	
+	/**
+	 * \brief Get the array sizes. 
+	 * 
+	 * @return An array of integers of length ndims(). Each entry holds the
+	 * corresponding array dimension size.
+	 * 
+	 */
 	syn int[] InstNode.size() = new int[0];
 	
 	eq InstComponentDecl.size() = hasFArraySubscripts()? 
 			getFArraySubscripts().size(): new int[0];
 
-	syn int[] FVariable.size() = isScalarized()? new int[0]: getFQName().size();
-			
+	/**
+	 * \brief Get the array sizes. 
+	 * 
+	 * @return An array of integers of length ndims(). Each entry holds the
+	 * corresponding array dimension size.
+	 * 
+	 */	
+	syn int[] AbstractFVariable.size() = new int[0];
+	eq FVariable.size() = isScalarized()? new int[0]: getFQName().size();
+		
+	/**
+	 * \brief Get the array sizes. 
+	 * 
+	 * @return An array of integers of length ndims(). Each entry holds the
+	 * corresponding array dimension size.
+	 * 
+	 */
 	syn int[] FQName.size() {
 		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
 		if (last.hasFArraySubscripts()) {
@@ -263,24 +491,82 @@ aspect Arrays {
 			return new int[0];
 		}
 	}
-				
+		
+	/**
+	 * \brief check if an expression is an array expression.
+	 * 
+	 * @return True if array dimension > 0 else false
+	 */
 	syn boolean FExp.isArray() = ndims()>0;
-	syn boolean FVariable.isArray() = ndims()>0;
-	syn boolean InstNode.isArray() = ndims()>0;
 
+	/**
+	 * \brief check if a variable is an array expression.
+	 * 
+	 * @return True if array dimension > 0 else false
+	 */
+	syn boolean FVariable.isArray() = ndims()>0;
 	
-	// Computation of Arrays from expressions
-	syn nta FArray FExp.array() {
-		if (!isArray()) {
-			FArray a = new FArray();
-			a.addFExp((FExp)this.fullCopy());
-			return a;
+	/**
+	 * \brief check if an instance node is an array expression.
+	 * 
+	 * @return True if array dimension > 0 else false
+	 */
+	syn boolean InstNode.isArray() = ndims()>0;
+	
+	/**
+	 * \brief Computes an NTA of type FArray where all elements are scalar
+	 * expressions.
+	 * 
+	 * This NTA is used mainly to scalarize array expressions.
+	 * 
+	 * @return An FArray object with scalar objects.
+	 */
+	syn nta FArray FExp.array() = new FArray();
+	
+	eq FIdUseExp.array() {
+		if (isArray()) {
+			/*
+			 * Based on an array access, say x, corresponding to the declaration
+			 * Real x[2], the array {x[1],x[2]} is generated. 
+			 */
+			int ndims = ndims();
+			int[] size = size();
+			//System.out.println("FIdUseExp.array(): " + size.length);
+			// Create a new array consisting of zeros.
+			FArray array = new FArray(size);
+			// Get array indices
+			Indices ind = indices();
+			// Create an index counter
+			IndexCounter cnt = new IndexCounter(ind);
+			for (int i=0;i<cnt.numElements();i++) {
+				// Create a copy of the identifier
+				FIdUseExp fid_tmp = (FIdUseExp)this.fullCopy();
+				// Set the array subscripts according to the index counter
+				fid_tmp.getFIdUse().getFQName().
+				getFQNamePart(fid_tmp.getFIdUse().
+						getFQName().getNumFQNamePart()-1).setFArraySubscripts(cnt.newFArraySubscripts());
+				// Mark the identifier as scalarized
+				fid_tmp.getFIdUse().getFQName().scalarized = true;
+				// Insert the identifier into the array
+				array.setElement(cnt.getCounterPos(),fid_tmp);
+				cnt.inc();
+			}
+			return array;
+			
 		} else {
 			return new FArray();
 		}
 	}
-	
-	syn FArray FSubscript.array() = null;
+
+	/**
+	 * \brief Computes an NTA of type FArray where all elements are scalar
+	 * expressions.
+	 * 
+	 * This NTA is used mainly to scalarize array expressions.
+	 * 
+	 * @return An FArray object with scalar objects.
+	 */
+	syn nta FArray FSubscript.array() = null;
 	
 	eq FExpSubscript.array() = getFExp().array();
 	eq FRangeExp.array() {
@@ -290,8 +576,7 @@ aspect Arrays {
 			i2 = 1;
 		} else {
 			i2 = getFExp(1).ceval().realValue();
-		}
-		
+		}		
 		List l = new List();
 		for (int i=0;i<size()[0];i++) {
 			l.add(new FRealLitExp(i1 + i*i2 + ""));
@@ -299,5 +584,402 @@ aspect Arrays {
 		
 		return new FArray(l);
 	}
+	
+	eq FZeros.array() = new FArray(size());
+	eq FOnes.array() { 
+		FArray array = new FArray(size());    
+		Indices ind = new Indices(size());
+		IndexCounter cnt = new IndexCounter(ind);
+		// Fill the array with ones.
+		for (int i=0;i<cnt.numElements();i++) {
+			array.setElement(cnt.getCounterPos(),new FIntegerLitExp("1"));
+			cnt.inc();
+		}
+		return array;
+
+	}
+
+	/**
+	 * \brief Helper function for building new FArrays.
+	 * 
+	 * @param index Current array subscript index.
+	 * @param size Array size
+	 * @return A list containing size[index] elements. If index<size.length-1
+	 * then the list contains FArray objects and if index==size.length-1 the
+	 * list contains zeros.
+	 */
+	public static List<FExp> FArray.emptyArray(int index, int[] size) {
+		List<FExp> l = new List<FExp>();
+		if (index < size.length-1) { // Not yet at the last index
+			for (int i=0;i<size[index];i++) {
+				l.add(new FArray(emptyArray(index+1,size)));
+			}
+		} else { // If at the last index, add zeros
+			for (int i=0;i<size[index];i++) {
+				l.add(new FIntegerLitExp("0"));
+			}
+		}
+		return l;
+	}
+
+	/**
+	 * \brief Create an FArray filled with zeros.
+	 * 
+	 * @param size The array sizes of the new array.
+	 * @return A new FArray object.
+	 */
+	public FArray.FArray(int[] size) {
+		this(emptyArray(0,size));
+	}
+	
+	/**
+	 * \brief Get an element in an FArray.
+	 * 
+	 * @param index Index of element to retrieve.
+	 * @return An expression corresponding to the element defined by the 
+	 * parameter index. 
+	 */
+	public FExp FArray.getElement(int[] index) {
+		//System.out.println("FArray.getElement");
+		//dumpTreeBasic("");
+		FArray array = this;
+		for (int i=0;i<index.length;i++) {
+			if (i<index.length-1) {
+				array = (FArray)array.getFExp(index[i]);
+			} else {
+				return array.getFExp(index[i]);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * \brief Set an element in an FArray.
+	 * 
+	 * @param index The index of the element to set.
+	 * @param exp Expression to set.
+	 */
+	public void FArray.setElement(int[] index, FExp exp) {
+		FArray array = this;
+		for (int i=0;i<index.length;i++) {
+			if (i<index.length-1) {
+				array = (FArray)array.getFExp(index[i]);
+			} else {
+				array.setFExp(exp,index[i]);
+			}
+		}
+	}
+	
+	/**
+	 * \brief Get the set of all array indices of an array access. 
+	 * 
+	 * @return An Indices object containing all indices in each array dimension.
+	 */
+	syn Indices FIdUseExp.indices() = getFIdUse().indices();
+
+	/**
+	 * \brief Get the set of all array indices of an array access. 
+	 * 
+	 * @return An Indices object containing all indices in each array dimension.
+	 */
+	syn lazy Indices FIdUse.indices() {
+		return getFQName().hasFArraySubscripts()? 
+				getFArraySubscripts().indices(): myFV().indices();
+	}	
+
+	/**
+	 * \brief Get the set of all array indices of an array access. 
+	 * 
+	 * @return An Indices object containing all indices in each array dimension.
+	 */
+	syn lazy Indices AbstractFVariable.indices() = new Indices();
+	eq FVariable.indices() = isScalarized()? new Indices(): new Indices(size());
+
+	/**
+	 * \brief Get the set of all array indices of an array access. 
+	 * 
+	 * @return An Indices object containing all indices in each array dimension.
+	 */	
+	syn Indices FQName.indices() {
+		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
+		if (last.hasFArraySubscripts()) {
+			return last.getFArraySubscripts().indices(); 
+		} else {
+			return new Indices();
+		}
+	}
+	
+	/**
+	 * \brief Get the set of all array indices of an array access. 
+	 * 
+	 * @return An Indices object containing all indices in each array dimension.
+	 */
+	syn lazy Indices FArraySubscripts.indices() = new Indices(this);
+	
+	/**
+	 * \brief Get the set of all array indices of an array access. 
+	 * 
+	 * @return An Indices object containing all indices in each array dimension.
+	 */
+	syn int[] FSubscript.indices();
+	
+	eq FColonSubscript.indices() {
+		return new int[0];
+	}
+	
+	eq FExpSubscript.indices() {
+		if (ndims()==0) {
+			int[] indices = new int[1];
+			indices[0] = getFExp().ceval().intValue();
+			return indices;
+		} else if (ndims() == 1) {
+			int[] size = size();
+			int[] indices = new int[size[0]];
+			FArray indExps = getFExp().array();
+			for (int i=0;i<size[0];i++) {
+				indices[i] = indExps.getFExp(i).ceval().intValue();
+			}
+			return indices;
+		} else {
+			return new int[0];
+		}
+	}
+	
+	/**
+	 * \brief Indices represents the set of array indices in each dimension.
+	 * 
+	 * For example, consider the declaration Real x[4,4,4] and the access
+	 * x[:,1,1:2:4]. The array indices for the declaration is then
+	 * {1,2,3,4}, {1,2,3,4}, and {1,2,3,4} respectively for the three dimensions.
+	 * For the access, we have {1,2,3,4}, {1} and {1,3} respectively.
+	 * 
+	 * The Indices class is typically used to iterate over all possible indices
+	 * of an array access of declaration.
+	 */
+	public class Indices {
+		int ndims;
+		int size[];
+		// The indices are stored as a list of integer arrays.
+		private ArrayList<int[]> indices; 
+		
+		/**
+		 * \brief Default constructor.
+		 */
+		public Indices() {
+			ndims = -1;
+			size = new int[0];
+			indices = new ArrayList<int[]>();
+		}
+		
+		/**
+		 * \brief Create an Indices object based on FArraySubcripts.
+		 */
+		public Indices(FArraySubscripts fas) {
+			//System.out.print("Indices.Indices(FArraySubscripts fas)");
+			ndims = fas.ndims();
+			size = fas.size();
+			//for (int i=0;i<size.length;i++) {
+			//	System.out.print(size[i]);
+			//}
+			//System.out.println("");
+			indices = new ArrayList<int[]>();
+			for (FSubscript fs : fas.getFSubscripts()) {
+				indices.add(fs.indices());
+			}
+			
+		}
+		
+		/**
+		 * \brief Create an Indices object based in array sizes. 
+		 */
+		public Indices(int[] size) {
+			//System.out.print("Indices.Indices(int[] size): ");
+			//for (int i=0;i<size.length;i++) {
+			//	System.out.print(size[i]);
+			//}
+			//System.out.println("");
+			indices = new ArrayList<int[]>();
+			this.ndims = size.length;
+			this.size = new int[this.ndims];
+			for (int i=0;i<size.length;i++) {
+				int[] ind_tmp = new int[size[i]];
+				for (int j=0;j<size[i];j++) {
+					//System.out.println("Indices.Indices: i,j " + i + " " + j);
+					ind_tmp[j] = j+1;
+				}
+				this.size[i] = size[i];
+				this.indices.add(ind_tmp);
+			}
+		}
+		
+		/**
+		 * \brief Retrieve indices.
+		 * 
+		 * @param indPos Specifies which index configuration to return. The
+		 * range for each argument in this array is defined by the size of the
+		 * Indices object. In the example above, indPos={1,0,1} gives the 
+		 * indices {2,1,3}.
+		 * @param indOut. This is the output index array. It is implemented as
+		 * an input parameter, by reference, in order to avoid creating
+		 * a lot of new arrays.
+		 */
+		public void indices(int[] indPos, int[] indOut) {
+			for (int i=0;i<ndims;i++) {
+				//System.out.println("indices(): i, indPos[i], indices.get(i).length " + 
+				//		i + " " + indPos[i] + " " + indices.get(i).length);
+				indOut[i] = indices.get(i)[indPos[i]];
+			}
+		}
+	}
+}
+
+aspect ArrayIndices {
+	
+	/**
+	 * \brief IndexCounter provides a simple means to iterate over array indices
+	 * specified by array sizes of an Indices object.
+	 */
+	public class IndexCounter {
+		
+		// The index counter which takes on indices specified by the
+		// Indices object
+		private int[] counter;
+		// The position of the counter. Notice that this counter is different
+		// than counter in that it goes from 0 to size[i]-1.
+		private int[] counterPos;
+		
+		// The Indices object
+		Indices indices;
+		
+		/**
+		 * \brief Constructor for creating an IndexCounter based on array
+		 * sizes.
+		 * 
+		 *  @param size Array sizes.
+		 */
+		public IndexCounter(int[] size) {
+			this(new Indices(size));
+		}
+		
+		/**
+		 * \brief Constructor for creating an IndexCounter based on an
+		 * Indices object.
+		 * 
+		 * @param An indices object.
+		 */
+		public IndexCounter(Indices indices) {
+			this.indices =indices;
+			// Create the index position counter
+			counterPos = new int[indices.ndims];
+			// Create the index counter
+			counter = new int[indices.ndims];
+			// Initialize position counter
+			for (int i=0;i<indices.ndims;i++) {
+				this.counterPos[i] = 0;
+			}
+			indices.indices(counterPos,counter);
+		}
+		
+		/**
+		 * \brief Reset counter.
+		 */
+		public void reset() {
+			for (int i=0;i<indices.ndims;i++) {
+				this.counterPos[i] = 0;
+			}
+			indices.indices(counterPos,counter);
+		}
+		
+		/**
+		 * \brief Get the number of index combinations. 
+		 * 
+		 * For example, if the Indices object contains the indices {1,2,3,4}, 
+		 * {1}, {1,3}, then the number of combinations are 4*1*2 = 8.
+		 * 
+		 * @return The number of index combinations.
+		 * 
+		 */
+		public int numElements() {
+			int n_el = 1;
+			for (int i=0;i<indices.ndims;i++) {
+				n_el *= indices.size[i];
+			}
+			return n_el;
+		}
+		
+		/**
+		 * \brief Increment the counter.
+		 */
+		public void inc() {
+			counterPos[0] += 1;
+			for (int i=0;i<indices.ndims;i++) {
+				if (counterPos[i]>=indices.size[i]) {
+					if (i<indices.ndims-1) {
+						counterPos[i] = 0;
+						counterPos[i+1] += 1;
+					} else { 
+						reset();
+					}
+				}
+			}
+			indices.indices(counterPos,counter);			
+		}
+	
+		/**
+		 * \brief Get the indices contained in the index counter.
+		 * 
+		 * @return Counter indices.
+		 */
+		public int[] getCounter() {
+			int[] cnt = new int[indices.ndims];
+			for (int i=0;i<indices.ndims;i++) {
+				cnt[i] = counter[i];
+			}
+			return cnt;
+		}
+
+		/**
+		 * \brief Get the conter indices in C style rather than Modelica style.
+		 * 
+		 * That is, the counter indices subtracted by one is returned.
+		 * 
+		 * @return Counter indices in C style.
+		 */
+		public int[] getCounterMinusOne() {
+			int[] cnt = new int[indices.ndims];
+			for (int i=0;i<indices.ndims;i++) {
+				cnt[i] = counter[i]-1;
+			}
+			return cnt;
+		}
+		
+		/**
+		 * \brief Get the indices of the index position counter.
+		 * 
+		 * @return Position counter indices.
+		 */
+		public int[] getCounterPos() {
+			int[] cnt = new int[indices.ndims];
+			for (int i=0;i<indices.ndims;i++) {
+				cnt[i] = counterPos[i];
+			}
+			return cnt;
+		}
+		
+		/**
+		 * \brief Create a new FArraySubscripts object based on the current
+		 * counter indices.
+		 * 
+		 * @return A new FArraySubscripts object.
+		 */
+		public FArraySubscripts newFArraySubscripts() {
+			FArraySubscripts fas = new FArraySubscripts();
+			for (int i=0;i<indices.ndims;i++) {
+				fas.addFSubscript(new FExpSubscript(new FIntegerLitExp(""+counter[i])));
+			}
+			return fas;
+		}
+	}
+	
 	
 }

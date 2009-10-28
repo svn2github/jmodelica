@@ -203,9 +203,9 @@ aspect FTypeCompatibility {
 			}
 			*/
 			//System.out.println("size_type");
-			for (int i=0;i<size_type.length;i++) {
-				System.out.println(size_type[i]);
-			}
+			//for (int i=0;i<size_type.length;i++) {
+			//	System.out.println(size_type[i]);
+			//}
 
 			for (int i=0;i<ndims();i++) {
 				if (size_me[i] != size_type[i]) {

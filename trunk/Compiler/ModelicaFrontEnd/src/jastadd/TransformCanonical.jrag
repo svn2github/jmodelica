@@ -12,6 +12,9 @@ aspect TransformCanonical{
 	 *  <ul>
 	 *    <li> Binding equations for variables are converted into regular
 	 *         equations by calling genBindingEquations().
+	 *    <li> The model is scalarized, i.e., all array declarations and
+	 *         equations are replaced by scalar declarations and equations
+	 *    <li> Alias variables are eliminated from the model.
 	 *    <li> Derivative variables are generated and inserted in the
 	 *         list of FVariables by calling addFDerivativeVariables().
 	 *    <li> Generate initial equations based on start attribute.
@@ -20,11 +23,11 @@ aspect TransformCanonical{
 	 */
 	public void FClass.transformCanonical() {
 		genBindingEquations();
+		scalarize();
 		if (root().options.getBooleanOption("eliminate_alias_variables")) {
 			genAlias();
 			eliminateAliasVariables();
 		}
-		scalarize();
 		addFDerivativeVariables();
 		genInitialEquations();
 		sortDependentParameters();
@@ -114,6 +117,10 @@ aspect TransformCanonical{
 	
 	ArrayList<String> FClass.aliasErrors = new ArrayList<String>();
 	
+	
+	/**
+	 * \brief A helper class containing information about an alias pair.
+	 */
 	public class AliasPair {
 		public FVariable fv1;
 		public FVariable fv2;
@@ -129,6 +136,12 @@ aspect TransformCanonical{
 		return null;
 	}
 	
+	/**
+	 * \brief Detection of alias variables in equations
+	 * 
+	 * Equations of the type 'x=y', 'x=-y', '-x=y' and '-x=-y' are detected
+	 * as alias equations and an AliasPair object is returned.
+	 */
 	public AliasPair FEquation.aliasVariables() {
 
 		AbstractFVariable afv1 = null;
@@ -202,6 +215,8 @@ aspect TransformCanonical{
 			getFEquationBlock(0).getFAbstractEquations()) {
 			// Iterate over all equations
 
+			// If the equation is an alias equation, then register
+			// the alias variables in the alias manager.
 			if (equation.isAliasEquation()) {
 				AliasPair aliasPair = equation.aliasVariables();
 				aliasManager.addAliasVariables(aliasPair.fv1,
@@ -209,16 +224,29 @@ aspect TransformCanonical{
 			}			
 		}	
 		//flush();
-				root().flushAllRecursive();
+		root().flushAllRecursive();
 	}
 
+	/**
+	 * \brief Flag indicating if alias variables have been eliminated from the
+	 * model.
+	 */
 	public boolean FClass.aliasVariablesEliminated = false;
 	
+	/**
+	 * \brief Eliminate alias variabels from the flat model.
+	 * 
+	 * The non-alias variables are kept in the list FClass.FVariableList but the
+	 * alias variables are moved to FClass.AliasVariablesList.
+	 */
 	public void FClass.eliminateAliasVariables() {
 		List<FVariable> nonAliasVars = new List<FVariable>();
 		List<FVariable> aliasVars = new List<FVariable>();
 		List<FAbstractEquation> eqns = new List<FAbstractEquation>();
 		
+		//System.out.println("FClass.eliminateAliasVariables(): l1 " + nonAliasVars + " l2 " + aliasVars);
+		
+		// Go through all variables and insert in correct list
 		for (FVariable fv : getFVariables()) {
 			if (fv.isAlias()) {
 				aliasVars.add(fv);
@@ -226,7 +254,8 @@ aspect TransformCanonical{
 				nonAliasVars.add(fv);
 			}
 		}
-
+		
+		// Remove alias equations.
 		for (FAbstractEquation equation : 
 			getFEquationBlock(0).getFAbstractEquations()) {
 			// Iterate over all equations
@@ -245,7 +274,18 @@ aspect TransformCanonical{
 		flush();
 	}
 	
+	
 	boolean FIdUseExp.rewritten = false;
+	
+	/**
+	 * \brief FIdUses referring to alias variables need to be changed to 
+	 * FIdUses referring to their alias targets. 
+	 * 
+	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
+	 * is true. Notice that in order for the rewrite to be enable, the is$final
+	 * field of FIdUseExp needs to be set to false: this is done by the recursive
+	 * method ASTNode.flushAllRecursiveClearFinal. 
+	 */
 	rewrite FIdUseExp {
 		when (!rewritten && myFClass() != null && 
 				myFClass().aliasVariablesEliminated &&
@@ -258,6 +298,15 @@ aspect TransformCanonical{
 		}
 	}
 	
+	/**
+	 * \brief FDers referring to alias variables need to be changed to 
+	 * FDers referring to their alias targets. 
+	 * 
+	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
+	 * is true. Notice that in order for the rewrite to be enable, the is$final
+	 * field of FIdUseExp needs to be set to false: this is done by the recursive
+	 * method ASTNode.flushAllRecursiveClearFinal. 
+	 */
 	rewrite FDer {
 		when (!rewritten && myFClass() != null && 
 				myFClass().aliasVariablesEliminated &&
@@ -269,113 +318,121 @@ aspect TransformCanonical{
 			return new_exp;
 		}
 	}
-	
-	/**
-	 * \brief Flush all caches, including collection attributes.
-	 */
-	public void ASTNode.flushAll() {
-		flushCache();
-		flushCollectionCache();
-	}
-
-	/**
-	 * \brief Flush all caches, including collection attributes, and also
-	 * flush all children.
-	 */
-	public void ASTNode.flushAllRecursiveClearFinal() {
-		flushAll();
-		//is$Final = false;
-		for (int i=0;i<getNumChild();i++) {
-			getChild(i).flushAllRecursiveClearFinal();
-		}
-	}
-	
-	public void FIdUseExp.flushAllRecursiveClearFinal() {
-		flushAll();
-		is$Final = false;
-		for (int i=0;i<getNumChild();i++) {
-			getChild(i).flushAllRecursiveClearFinal();
-		}
-	}
-
-	public void FDer.flushAllRecursiveClearFinal() {
-		flushAll();
-		is$Final = false;
-		for (int i=0;i<getNumChild();i++) {
-			getChild(i).flushAllRecursiveClearFinal();
-		}
-	}
-	
-	public void ASTNode.flushAllRecursive() {
-		flushAll();
-		for (int i=0;i<getNumChild();i++) {
-			getChild(i).flushAllRecursive();
-		}
-	}
-	
-	public void FClass.flush() {
-		flushAllRecursiveClearFinal();
-		//is$Final = true;
-	}
-	
 }
 
 aspect Scalarization {
 
+	/**
+	 * \brief Flag indicating if a variable is scalarized.
+	 */
 	boolean FQName.scalarized = false;
+	
 	syn boolean FVariable.isScalarized() = getFQName().isScalarized();
 	syn boolean FQName.isScalarized() = scalarized;
 	
+	/**
+	 * \brief Scalarize all variables and equations in the flat model.
+	 */
 	public void FClass.scalarize() {
 		List<FVariable> vars = new List<FVariable>();
 		List<FVariable> alias_vars = new List<FVariable>();
+		//System.out.println("FClass.scalarize(): l1 " + vars + " l2 " + alias_vars);
+		// Scalarize all non-alias variables
 		for (FVariable fv : getFVariables()) {
 			fv.scalarize(vars);
 		}	
+		// Scalarize alias variables
 		for (FVariable fv : getAliasVariables()) {
 			fv.scalarize(alias_vars);
-		}	
-		setFVariableList(vars);
-		setAliasVariableList(alias_vars);
-		
+		}			
+		// Scalarize equations
 		List<FAbstractEquation> eqns = new List<FAbstractEquation>();
 		for (FAbstractEquation ae : getFEquationBlock(0).getFAbstractEquations()) {
 			ae.scalarize(eqns);
 		}
 		getFEquationBlock(0).setFAbstractEquationList(eqns);
+		setFVariableList(vars);
+		setAliasVariableList(alias_vars);
+
+		flush();		
 	}
 	
+	/**
+	 * \brief Scalarize the FVariable and put all scalarized variables in the
+	 * list vars.
+	 */
 	public void FVariable.scalarize(List<FVariable> vars) {
 		if (isArray()) {
 			int ndims = ndims();
 			int[] size = size();
 			int[] index = new int[ndims];
+			// Create an index counter
 			IndexCounter ic = new IndexCounter(size);
-			
+			// Iterate over all indices
 			for (int i=0;i<ic.numElements();i++) {
+				// Copy original declaration
 				FVariable fv_tmp = (FVariable)fullCopy();
+				// Set new array subscripts corresponding to index counter
 				fv_tmp.getFQName().getFQNamePart(fv_tmp.getFQName().getNumFQNamePart()-1).
 				  setFArraySubscripts(ic.newFArraySubscripts());
+				// Mark variable as scalarized (affects name printing etc.)
 				fv_tmp.getFQName().scalarized = true;
 				vars.addChild(fv_tmp);
+				// Increase index counter
 				ic.inc();
 			}
 			
 		} else {
-			getFQName().scalarized = true;
-			vars.addChild(this);
+			// Duplicate FVariable even if it is not an array declaration.
+			FVariable fv_tmp = (FVariable)fullCopy();
+			fv_tmp.getFQName().scalarized = true;
+			vars.addChild(fv_tmp);
 		}
 	}
 	
 	public void FAbstractEquation.scalarize(List<FAbstractEquation> eqns) {}
 	
+	/**
+	 * \brief Scalarize equation and put all scalarized equations in list eqns.
+	 */
 	public void FEquation.scalarize(List<FAbstractEquation> eqns) {
+		//System.out.println("FEquation.scalarize() " + ndims());
 		if (ndims()==0) {
+			/**
+			 * If the equation is of dimension 0, i.e, already scalar,
+			 * the equations is "scalarized" into a simple equation where
+			 * e.g. built in functions are replaced by elementary operations.
+			 */
 			eqns.addChild(new FEquation(getLeft().scalarize(),
 					getRight().scalarize()));
+		} else if (ndims()>0) {
+			/**
+			 * If the expression is an array expression, then the FExp.array()
+			 * element is used to generate scalar equations.
+			 */
+			// Get array size
+			int[] size = size();
+			// Create index counter
+			IndexCounter cnt = new IndexCounter(size);
+			// Iterate over all indices in index counter
+			for (int i=0;i<cnt.numElements();i++) {
+				eqns.addChild(new FEquation((FExp)getLeft().array().getElement(cnt.getCounterMinusOne()).fullCopy(),
+						(FExp)getRight().array().getElement(cnt.getCounterMinusOne()).fullCopy()));
+				cnt.inc();
+			}
+
 		}
 	}
 	
+	/* Scalarization of expressions is needed in order to compute a simple
+	 * scalar expression from an expression with ndims==0. For example, an
+	 * FIdUse 'x[2]' needs to be marked as scalarized, and the expression
+	 * scalar(x*A*x) needs to be replaced by a double sum.
+	 */
+	
+	/**
+	 * \brief Scalarize expressions.
+	 */
 	public FExp FExp.scalarize() {
 		return null;
 	}
@@ -462,14 +519,13 @@ aspect Scalarization {
 		return new FSumRedExp(getFExp().scalarize(),
 		                     getFForIndex().scalarize());
 	}
-	
+	*/
+	/*	
 	public FForIndex FForIndex.scalarize() {
 		return new FForIndex(getFIdDecl().scalarize(),
 		                     hasFExp()? new Opt(getFExp().scalarize()): new Opt());
 	}
 
-	//ForClauseE : AbstractEquation ::= ForIndex* ForEqns:AbstractEquation*;
-    //ForIndex ::= ForIndexDecl [Exp];
 	public void FForClauseE.flatten(FQName prefix, FClass fc) {
 		List forIndex = new List();
 		List eqns = new List();
@@ -485,12 +541,7 @@ aspect Scalarization {
 			eqns.add(fcc.getFEquationBlock(0).getFAbstractEquation(i));
 		fc.getFEquationBlock(0).addFAbstractEquation(new FForClauseE(forIndex,eqns));
 	}
-
-
-*/	
-	
-	
-	
+	*/
 }
 
 aspect ParameterSorting {
@@ -626,3 +677,64 @@ aspect TransformCanonicalErrorCheck {
 	
 }
 
+
+aspect FlushFClass {
+	/**
+	 * \brief Flush all caches, including collection attributes.
+	 */
+	public void ASTNode.flushAll() {
+		flushCache();
+		flushCollectionCache();
+	}
+
+	/**
+	 * \brief Flush all caches, including collection attributes, and also
+	 * flush all children. In addition, the is$final attribute is set to false
+	 * for FIdUseExps and FDers in order to enable rewrites of such nodes
+	 * after elimination of alias variables.
+	 */
+	public void ASTNode.flushAllRecursiveClearFinal() {
+		flushAll();
+		//is$Final = false;
+		for (int i=0;i<getNumChild();i++) {
+			getChild(i).flushAllRecursiveClearFinal();
+		}
+	}
+	
+	public void FIdUseExp.flushAllRecursiveClearFinal() {
+		flushAll();
+		is$Final = false;
+		for (int i=0;i<getNumChild();i++) {
+			getChild(i).flushAllRecursiveClearFinal();
+		}
+	}
+
+	public void FDer.flushAllRecursiveClearFinal() {
+		flushAll();
+		is$Final = false;
+		for (int i=0;i<getNumChild();i++) {
+			getChild(i).flushAllRecursiveClearFinal();
+		}
+	}
+
+	/**
+	 * \brief Flush all caches, including collection attributes, and also
+	 * flush all children. 
+	 */
+	public void ASTNode.flushAllRecursive() {
+		flushAll();
+		for (int i=0;i<getNumChild();i++) {
+			getChild(i).flushAllRecursive();
+		}
+	}
+	
+	/**
+	 * \brief Flush model AST and enable rewrites of FIdUseExps and FDers
+	 * after alias elimination.
+	 */
+	public void FClass.flush() {
+		flushAllRecursiveClearFinal();
+		//is$Final = true;
+	}
+	
+}

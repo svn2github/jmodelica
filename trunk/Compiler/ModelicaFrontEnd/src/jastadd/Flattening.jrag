@@ -414,6 +414,22 @@ aspect FlatExpressions {
 	public FExp FLog10Exp.flatten(FQName prefix) { return new FLog10Exp(getFExp().flatten(prefix)); }
 	public FExp FSqrtExp.flatten(FQName prefix) { return new FSqrtExp(getFExp().flatten(prefix)); }
 	
+	public FExp FOnes.flatten(FQName prefix) { 
+		List<FExp> l = new List<FExp>();
+		for (FExp e : getFExps()) {
+			l.add(e.flatten(prefix));
+		}
+		return new FOnes(l); 
+	}
+
+	public FExp FZeros.flatten(FQName prefix) { 
+		List<FExp> l = new List<FExp>();
+		for (FExp e : getFExps()) {
+			l.add(e.flatten(prefix));
+		}
+		return new FZeros(l); 
+	}
+	
 	public FExp FTimeExp.flatten(FQName prefix) { return new FTimeExp(); }
 	public FExp FEndExp.flatten(FQName prefix) { return new FEndExp(); }
 		
