@@ -32,6 +32,7 @@ def setup():
     OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
     oc = OptimicaCompiler()
     oc.set_boolean_option('state_start_values_fixed',True)
+    oc.set_boolean_option('eliminate_alias_variables',True)
     oc.compile_model(fpath, cpath)
         
 @testattr(stddist = True)
@@ -74,6 +75,8 @@ def test_xmlvariablesdoc_methods():
     xmldoc = xp.XMLVariablesDoc(fname+'_variables.xml')
     
     t_get_valueref.description = 'test XMLVariablesDoc.get_valueref'
+    t_get_aliases.description = 'test XMLVariablesDoc.get_aliases'
+    t_get_variable_description.description = 'test XMLVariablesDoc.get_variable_description'
     t_get_data_type.description = 'test XMLVariablesDoc.get_data_type'
     t_get_variable_names.description = 'test XMLVariablesDoc.get_variable_names'
     t_get_derivative_names.description = 'test XMLVariablesDoc.get_derivative_names'
@@ -114,6 +117,8 @@ def test_xmlvariablesdoc_methods():
     t_get_x_lin_tp_values.description = ' test XMLVariablesDoc.get_x_lin_tp_values'
     
     yield t_get_valueref, xmldoc
+    yield t_get_aliases, xmldoc
+    yield t_get_variable_description, xmldoc
     yield t_get_data_type, xmldoc
     yield t_get_variable_names, xmldoc
     yield t_get_derivative_names, xmldoc
@@ -190,6 +195,17 @@ def t_get_valueref(xmldoc):
     ref = xmldoc.get_valueref('u')
     assert ref.__class__ is int, \
         "XMLVariablesDoc.get_valueref did not return int."
+        
+@testattr(stddist = True)
+def t_get_aliases(xmldoc):
+    aliases, isnegated = xmldoc.get_aliases('u')
+    nose.tools.assert_equal(aliases[0],'cstr.Tc')
+    nose.tools.assert_equal(isnegated[0], False)
+    
+@testattr(stddist = True)
+def t_get_variable_description(xmldoc):
+    desc = xmldoc.get_variable_description('cstr.F0')
+    nose.tools.assert_equal(desc, 'Inflow')
         
 @testattr(stddist = True)
 def t_get_data_type(xmldoc):

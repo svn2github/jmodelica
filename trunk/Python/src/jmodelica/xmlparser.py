@@ -107,6 +107,38 @@ class XMLVariablesDoc(XMLdoc):
         else:
             return None
         
+    def get_aliases(self, aliased_variable):
+        """ Return list of all alias variables belonging to the aliased 
+            variable along with a list of booleans indicating whether the 
+            alias variable should be negated or not.
+            
+            Raises exception if argument is not an aliased or alias variable.
+
+        """
+        # get value reference of aliased variable
+        val_ref = self.get_valueref(aliased_variable)
+        aliases = self._xpatheval("//ScalarVariable/ScalarVariableName/text()[../../AliasVariable!=\"noAlias\"]\
+            [../../ValueReference=\""+str(val_ref)+"\"]")
+        if len(aliases) > 0:
+            aliasnames=[]
+            isnegated=[]
+            for index, alias in enumerate(aliases):
+                if str(aliased_variable)!=str(alias):
+                    aliasnames.append(str(alias))
+                    aliasvalue = self._xpatheval("//ScalarVariable/AliasVariable/text()[../../ScalarVariableName=\""+str(alias)+"\"]")
+                    isnegated.append(str(aliasvalue[0])=="negatedAlias")
+            return aliasnames, isnegated
+        else:
+            raise Exception("The variable: "+str(aliased_variable)+" is not an aliased or alias variable.")
+        
+    def get_variable_description(self, variablename):
+        """ Return the description of a variable. """
+        description= self._xpatheval("//ScalarVariable/Description/text()[../../ScalarVariableName=\""+str(variablename)+"\"]")
+        if len(description)>0:
+            return str(description[0])
+        else:
+            None
+        
     def get_data_type(self, valueref):
         """ Get data type of variable. """
         type = self._xpatheval("//ScalarVariable/DataType/text()[../../ValueReference=\""+str(valueref)+"\"]")

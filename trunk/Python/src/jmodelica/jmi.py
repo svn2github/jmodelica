@@ -2148,6 +2148,20 @@ class Model(object):
         else:
             xmldoc._doc.write(xmldoc._doc.docinfo.URL)
             
+    def get_aliases(self, variable):
+        """ Return list of all alias variables belonging to the aliased 
+            variable along with a list of booleans indicating whether the 
+            alias variable should be negated or not.
+            
+            Raises exception if argument is not an aliased or alias variable.
+
+        """
+        return self._get_XMLvariables_doc().get_aliases(variable)
+    
+    def get_variable_description(self, variable):
+        """ Return the description of a variable. """
+        return self._get_XMLvariables_doc().get_variable_description(variable)
+            
     def opt_interval_starttime_free(self):
         """Evaluate if optimization start time is free.
         
