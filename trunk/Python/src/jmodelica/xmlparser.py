@@ -123,14 +123,14 @@ class XMLVariablesDoc(XMLdoc):
             variable along with a list of booleans indicating whether the 
             alias variable should be negated or not.
             
-            Raises exception if argument is not an aliased or alias variable.
+            Raises exception if argument is not in model.
 
         """
         # get value reference of aliased variable
         val_ref = self.get_valueref(aliased_variable)
-        aliases = self._xpatheval("//ScalarVariable/ScalarVariableName/text()[../../AliasVariable!=\"noAlias\"]\
-            [../../ValueReference=\""+str(val_ref)+"\"]")
-        if len(aliases) > 0:
+        if val_ref!=None:
+            aliases = self._xpatheval("//ScalarVariable/ScalarVariableName/text()[../../AliasVariable!=\"noAlias\"]\
+                [../../ValueReference=\""+str(val_ref)+"\"]")
             aliasnames=[]
             isnegated=[]
             for index, alias in enumerate(aliases):
@@ -140,7 +140,7 @@ class XMLVariablesDoc(XMLdoc):
                     isnegated.append(str(aliasvalue[0])=="negatedAlias")
             return aliasnames, isnegated
         else:
-            raise Exception("The variable: "+str(aliased_variable)+" is not an aliased or alias variable.")
+            raise Exception("The variable: "+str(aliased_variable)+" can not be found in model.")
         
     def get_variable_description(self, variablename):
         """ Return the description of a variable. """
