@@ -1,5 +1,7 @@
 package org.jmodelica.ide;
 
+import java.io.File;
+
 import org.eclipse.core.resources.IProject;
 import org.jmodelica.ide.helpers.Library;
 import org.jmodelica.util.OptionRegistry;
@@ -14,10 +16,9 @@ public class IDEOptions extends OptionRegistry {
 
 public IDEOptions(IProject project) {
     
-    if (project == null) {
-        setStringOption("MODELICAPATH", "");
-        return;
-    }
+    setStringOption(
+        "MODELICAPATH", 
+        "");
     
     try {
         copyAllOptions(
@@ -25,7 +26,8 @@ public IDEOptions(IProject project) {
                 project
                 .getPersistentProperty(
                     IDEConstants.PROPTERTY_OPTIONS_PATH)
-                + "/options.xml"));
+                + File.separatorChar
+                + "options.xml"));
     } catch (Exception e) {
         e.printStackTrace();
     }
@@ -37,6 +39,7 @@ public IDEOptions(IProject project) {
                 project
                 .getPersistentProperty(
                     IDEConstants.PROPERTY_LIBRARIES_ID)));
+       
     } catch (Exception e ) {
         e.printStackTrace();
     }

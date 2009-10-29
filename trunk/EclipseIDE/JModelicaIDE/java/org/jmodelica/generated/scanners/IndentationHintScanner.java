@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.jmodelica.generated.scanners; 
+package org.jmodelica.generated.scanners;  
 
 import java.util.*;
 import java.io.StringReader;

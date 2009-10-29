@@ -163,7 +163,7 @@ aspect Outline {
 	 * Prune uninteresting parts of tree.
 	 */
 	eq AbstractEquation.hasVisibleChildren() = false;
-	eq AbstractAlgorithm.hasVisibleChildren() = false;
+//	eq AbstractAlgorithm.hasVisibleChildren() = false;
 	eq Access.hasVisibleChildren() = false;
 	eq Annotation.hasVisibleChildren() = false;
 	eq ComponentDecl.hasVisibleChildren() = false;

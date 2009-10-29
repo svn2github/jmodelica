@@ -22,8 +22,9 @@ public DocUtil(IDocument doc) {
  */
 public int textStart(int offset) {
     try {
-        int lo = lineStartOffsetOfOffset(offset);
-        while (lo < doc.getLength()) {
+        offset = lineStartOffsetOfOffset(offset);
+        int le = lineEndOffsetOfOffset(offset);
+        while (offset < le) {
             char c = doc.getChar(offset);
             if (c != ' ' && c != '\t')
                 break;

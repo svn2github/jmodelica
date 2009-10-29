@@ -15,8 +15,10 @@
 */
 package org.jmodelica.ide.ui;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -160,7 +162,7 @@ public class ProjectPropertyPage extends PropertyPage {
 	    optionsBrowse 
 	        = createButton(container, "Browse");
 	    optionsBrowse.addSelectionListener(
-            new SetOptionsListener());
+            new OptionsListener());
 	    
 	    return container;
     }
@@ -362,11 +364,10 @@ public class ProjectPropertyPage extends PropertyPage {
 		}
 	}
 
-	public class SetOptionsListener implements SelectionListener {
+	public class OptionsListener implements SelectionListener {
 
         public void widgetDefaultSelected(SelectionEvent e) {        
         }
-        
 
         public void widgetSelected(SelectionEvent e) {
 
@@ -375,8 +376,22 @@ public class ProjectPropertyPage extends PropertyPage {
             
             if (path == null)
                 return;
-            else
-                text.setText(path);
+            
+            if (path.endsWith("options.xml"))
+                path = path.substring(0, path.length() - "options.xml".length());
+            
+            if (
+                !Arrays.asList(
+                    new Maybe<String[]>(
+                        new File(path).list())
+                    .defaultTo(new String[] {}))
+                .contains("options.xml")) 
+            {
+                error.setMessage("No options.xml found in folder");
+                error.open();
+            }
+            
+            text.setText(path);
             
             optionsGroup.pack();
         }

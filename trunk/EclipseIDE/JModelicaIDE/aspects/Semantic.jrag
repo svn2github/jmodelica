@@ -166,13 +166,14 @@ aspect Completion {
                     (InstImportRename)ii);
             
             } else if (ii instanceof InstImportUnqualified) {
+                
                 completions.addAll(
                     ii
                     .getPackageName()
                     .myInstClassDecl()
                     .completionNodes(
                         includeRenamedImports,
-                        includeOuterScopes));
+                        false));
             }
         }
 
@@ -184,7 +185,7 @@ aspect Completion {
                 .myInstClassDecl()
                 .completionNodes(
                     includeRenamedImports,
-                    includeOuterScopes));
+                    false));
 
         // outer scopes
         if (includeOuterScopes) {
@@ -214,10 +215,10 @@ aspect Completion {
         ArrayList<CompletionNode> decls =
             new ArrayList<CompletionNode>();
         
-        for (InstNode node : this.getInstClassDecls()) 
+        for (InstNode node : this.getInstClassDecls())  
             decls.add(node);
         
-        for (CompletionNode node : this.getProgram().getLibNodes())
+        for (LibNode node : this.getProgram().getLibNodes()) 
             decls.add(node);
         
         return decls;
@@ -290,12 +291,7 @@ aspect Completion {
         return 
             (InstAccess) getDynamicComponentNameList().getLast();
     }
-    
-    
-    
 }
-
-
 
 
 
@@ -323,6 +319,10 @@ aspect CompletionComment {
             : null;
     
 }
+
+
+
+
 
 
 //TODO: remove. only for debugging

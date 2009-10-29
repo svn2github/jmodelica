@@ -149,7 +149,7 @@ public class Library {
 	        .defaultTo(""));
 	    
 	    return 
-	        Util.implode(File.pathSeparator, paths); 
+	        Util.implode(";", paths); 
 	}
 	
 }
