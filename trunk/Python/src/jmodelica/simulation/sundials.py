@@ -440,8 +440,7 @@ class SundialsDAESimulator(Simulator):
             """
 
             #Moving data to the model
-            data = self._data
-            model = data.model
+            model = self.model
             model.t = t #(t - data.t_sim_start) / data.t_sim_duration
             
             model.x = z[0:len(model.x)]
@@ -482,8 +481,7 @@ class SundialsDAESimulator(Simulator):
             print "States x:", model.x
             print "States w:", model.w
             
-            
-            
+
         class UserData:
             """ctypes structure used to move data in (and out of?) the callback
                functions.
@@ -519,7 +517,7 @@ class SundialsDAESimulator(Simulator):
         
         ida.IDAMalloc(ida_mem, self._sundials_res_f, t0, y, ydot, ida.IDA_SS, reltol, abstol)
         ida.IDADense(ida_mem, len(model.x)+len(model.w))
-
+        """
         # Set f_data
         data = UserData()
         data.model = model
@@ -528,7 +526,7 @@ class SundialsDAESimulator(Simulator):
         data.t_sim_duration = data.t_sim_end - data.t_sim_start
         
         self._data = data
-        
+        """
         tout = start_time + time_step
         if tout>end_time:
             raise SundialsSimulationException("Start time must be before final time.")
