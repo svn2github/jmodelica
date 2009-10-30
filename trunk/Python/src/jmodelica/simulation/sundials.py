@@ -1,6 +1,6 @@
 #!/usr/bin/env python 
 # -*- coding: utf-8 -*-
-"""Multiple shooting.
+"""Sundials Simulation.
 
 """
 
@@ -25,7 +25,7 @@ except ImportError:
         print "Could not load SUNDIALS."
 
 from jmodelica.simulation import SimulationException
-from jmodelica.simulation import Simulator
+from jmodelica.simulation import ODESimulator, DAESimulator
 
 import jmodelica.jmi as pyjmi
 from jmodelica.jmi import c_jmi_real_t
@@ -39,8 +39,8 @@ class SundialsSimulationException(SimulationException):
 class _SensivityIndices(object):
     """Used to interpret the columns in the sensivity matrix.
     
-    This class is used by SundialsOdeSimulator._sundials_f(...) and
-    SundialsOdeSimulator.run().
+    This class is used by SundialsODESimulator._sundials_f(...) and
+    SundialsODESimulator.run().
     """
     # Slots is a feature that can be used in new-style Python
     # classes. It can be used toamke sure that typos are not made
@@ -88,29 +88,26 @@ class _SensivityIndices(object):
                                         model.u,))
 
 
-class SundialsOdeSimulator(Simulator):
+class SundialsODESimulator(ODESimulator):
     """An object oriented interface for simulating JModelica.org models."""
     
     def __init__(self, model=None, start_time=None, final_time=None,
                  abstol=1.0e-6, reltol=1.0e-6, time_step=0.2,
                  return_last=False, sensitivity_analysis=False, verbosity=0):
-        """Constructor of a TestSundialsOdeSimulator.
+        """Constructor of a TestSundialsODESimulator.
         
-        Every instance of TestSundialsOdeSimulator needs to have a model to
+        Every instance of TestSundialsODESimulator needs to have a model to
         simulate. This can be set through this constructor or using the
         set_model(...) setter.
         
         This function also sets some decent default values that can be changed
         by calling the setter methods.
         """
-        Simulator.__init__(self, model, start_time, final_time,
-                           time_step, return_last, verbosity)
+        ODESimulator.__init__(self, model, start_time, final_time,
+                           abstol, reltol, time_step, return_last, 
+                           verbosity)
         
         # Setting defaults
-        self.set_absolute_tolerance(abstol)
-        self.set_relative_tolerance(reltol)
-
-        self._set_solution(None, None)
         self._set_sensitivity_indices(None)
         self.set_sensitivity_analysis(sensitivity_analysis)
         self._set_sensitivities(None)
@@ -127,7 +124,7 @@ class SundialsOdeSimulator(Simulator):
         return self._sens
         
     def _set_sensitivities(self, sens):
-        """Internal function used by SundialsOdeSimulator.run().
+        """Internal function used by SundialsODESimulator.run().
         
         This sets the sensitivities returned by self.get_sensitivities().
         """
@@ -175,7 +172,7 @@ class SundialsOdeSimulator(Simulator):
         return self._sens_indices
         
     def _set_sensitivity_indices(self, sens_indices):
-        """Internal function used by SundialsOdeSimulator.run().
+        """Internal function used by SundialsODESimulator.run().
         
         Setter for self.get_sensitivity_indices().
         """
@@ -403,20 +400,17 @@ class SundialsOdeSimulator(Simulator):
         
 
 
-class SundialsDAESimulator(Simulator):
+class SundialsDAESimulator(DAESimulator):
     """An object oriented interface for simulation JModelica.org DAE models."""
     
     def __init__(self, model=None, start_time=None, final_time=None,
                 abstol=1.0e-6, reltol=1.0e-6, time_step = 0.2,
                 return_last=False, sensitivity_analysis=False, verbosity=0):
                     
-        Simulator.__init__(self, model, start_time, final_time,
-                           time_step, return_last, verbosity)
+        DAESimulator.__init__(self, model, start_time, final_time,
+                           abstol, reltol, time_step, return_last, 
+                           verbosity)
                            
-        # Setting defaults
-        self.set_absolute_tolerance(abstol)
-        self.set_relative_tolerance(reltol)
-        self._set_solution(None, None)
         
         #TODO
         #self._set_sensitivity_indices(None)

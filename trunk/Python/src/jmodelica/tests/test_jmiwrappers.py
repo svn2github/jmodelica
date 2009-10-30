@@ -20,7 +20,7 @@ from jmodelica.tests import testattr
 from jmodelica.compiler import OptimicaCompiler
 import jmodelica as jm
 import jmodelica.jmi as jmi
-from jmodelica.simulation.sundials import SundialsOdeSimulator
+from jmodelica.simulation.sundials import SundialsODESimulator
 
 int = n.int32
 n.int = n.int32
@@ -635,7 +635,7 @@ class TestModelSimulation:
         This test is model specific and not generic as most other
         tests in this class.
         """
-        simulator = SundialsOdeSimulator(self.m)
+        simulator = SundialsODESimulator(self.m)
         simulator.run()
         
         assert self.m._n_z > 0, "Length of z should be greater than zero."

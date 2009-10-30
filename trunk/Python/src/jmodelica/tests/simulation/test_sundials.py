@@ -8,7 +8,7 @@ import matplotlib
 import os
 import nose
 
-from jmodelica.simulation.sundials import SundialsOdeSimulator
+from jmodelica.simulation.sundials import SundialsODESimulator
 from jmodelica.simulation.sundials import SundialsDAESimulator
 from jmodelica.tests import testattr
 import jmodelica.simulation.sundials as sundials
@@ -156,7 +156,7 @@ class TestSundialsDAESimulator:
         
     
 
-class TestSundialsOdeSimulator:
+class TestSundialsODESimulator:
     
     @classmethod
     def setUpClass(cls):
@@ -176,7 +176,7 @@ class TestSundialsOdeSimulator:
 
         # Load the dynamic library and XML data
         self.m = jmi.Model(package)
-        self.simulator = SundialsOdeSimulator(self.m,start_time=0.0, final_time=20.0)
+        self.simulator = SundialsODESimulator(self.m,start_time=0.0, final_time=20.0)
     
     @testattr(stddist = True)    
     def test_is_simulator(self):
@@ -187,7 +187,7 @@ class TestSundialsOdeSimulator:
         """Assert that a couple of different parameters exists in the
            constructor.
         """
-        simulator = SundialsOdeSimulator(time_step=0.2,
+        simulator = SundialsODESimulator(time_step=0.2,
                                          model=self.m,
                                          abstol=1e-5,
                                          reltol=1e-5,
@@ -224,7 +224,7 @@ class TestSundialsOdeSimulator:
         fig = p.figure()
         p.plot(Ts, ys)
         p.title('testFixedSimulation(...) output')
-        fig.savefig('TestSundialsOdeSimulator_test_simulation.png')
+        fig.savefig('TestSundialsODESimulator_test_simulation.png')
     
     @testattr(stddist = True)           
     def test_return_last(self):
@@ -340,16 +340,16 @@ class TestSundialsOdeSimulator:
         
         """
         simulator = self.simulator
-        simulator.set_verbosity(SundialsOdeSimulator.QUIET)
-        assert SundialsOdeSimulator.QUIET == 0, "QUIET constant should be zero"
-        simulator.set_verbosity(SundialsOdeSimulator.WHISPER)
-        assert simulator.get_verbosity() == SundialsOdeSimulator.WHISPER
-        simulator. verbosity = SundialsOdeSimulator.NORMAL # testing property
-        assert simulator.get_verbosity() == SundialsOdeSimulator.NORMAL
-        simulator.set_verbosity(SundialsOdeSimulator.LOUD)
-        assert simulator.verbosity == SundialsOdeSimulator.LOUD # property test
-        simulator.set_verbosity(SundialsOdeSimulator.SCREAM)
-        assert simulator.get_verbosity() == SundialsOdeSimulator.SCREAM
+        simulator.set_verbosity(SundialsODESimulator.QUIET)
+        assert SundialsODESimulator.QUIET == 0, "QUIET constant should be zero"
+        simulator.set_verbosity(SundialsODESimulator.WHISPER)
+        assert simulator.get_verbosity() == SundialsODESimulator.WHISPER
+        simulator. verbosity = SundialsODESimulator.NORMAL # testing property
+        assert simulator.get_verbosity() == SundialsODESimulator.NORMAL
+        simulator.set_verbosity(SundialsODESimulator.LOUD)
+        assert simulator.verbosity == SundialsODESimulator.LOUD # property test
+        simulator.set_verbosity(SundialsODESimulator.SCREAM)
+        assert simulator.get_verbosity() == SundialsODESimulator.SCREAM
         nose.tools.assert_raises(jmodelica.simulation.SimulationException,
                                  simulator.set_verbosity, 65487)
         nose.tools.assert_raises(jmodelica.simulation.SimulationException,

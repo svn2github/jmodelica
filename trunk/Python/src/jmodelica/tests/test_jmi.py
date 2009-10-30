@@ -19,7 +19,7 @@ import jmodelica.io
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
 from jmodelica.optimization import ipopt
-from jmodelica.simulation.sundials import SundialsOdeSimulator
+from jmodelica.simulation.sundials import SundialsODESimulator
 
 
 sep = os.path.sep
@@ -582,7 +582,7 @@ class TestModel:
         
     def test_optimization_cost_eval(self):
         """Test evaluation of optimization cost function."""
-        simulator = SundialsOdeSimulator(self.m)
+        simulator = SundialsODESimulator(self.m)
         simulator.run()
         T, ys = simulator.get_solution()
         
@@ -597,7 +597,7 @@ class TestModel:
         Note:
         This test is model specific for the VDP oscillator.
         """
-        simulator = SundialsOdeSimulator(self.m)
+        simulator = SundialsODESimulator(self.m)
         simulator.run()
         T, ys = simulator.get_solution()
         

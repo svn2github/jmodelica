@@ -26,8 +26,7 @@ from jmodelica.compiler import OptimicaCompiler
 import jmodelica.jmi as pyjmi
 from jmodelica.jmi import c_jmi_real_t
 from jmodelica.tests import get_example_path
-#from jmodelica.tests import load_example_standard_model
-from jmodelica.simulation.sundials import SundialsOdeSimulator
+from jmodelica.simulation.sundials import SundialsODESimulator
 
 jm_home = os.environ.get('JMODELICA_HOME')
 path_to_examples = os.path.join(jm_home, "Python", "jmodelica", "examples")
@@ -70,7 +69,7 @@ def _shoot(model, start_time, end_time, sensi=True, time_step=0.2):
      * Assumes cost function is only dependent on state X and control signal U.
     
     """
-    simulator = SundialsOdeSimulator(model, start_time=start_time,
+    simulator = SundialsODESimulator(model, start_time=start_time,
         final_time=end_time, sensitivity_analysis=sensi, time_step=time_step,
         return_last=True)
     simulator.run()
@@ -222,7 +221,7 @@ def _eval_initial_ys(model, grid, time_step=0.2):
     from scipy import interpolate
     _check_grid_consistency(grid)
     
-    simulator = SundialsOdeSimulator(model,start_time=model.opt_interval_get_start_time(),
+    simulator = SundialsODESimulator(model,start_time=model.opt_interval_get_start_time(),
                                     final_time=model.opt_interval_get_final_time(),
                                     time_step=time_step)
     simulator.run()
@@ -719,7 +718,7 @@ def _plot_control_solution(model, interval, initial_ys, us):
 
     p.figure(1)
     p.subplot(211)
-    simulator = SundialsOdeSimulator(model, start_time=interval[0],
+    simulator = SundialsODESimulator(model, start_time=interval[0],
                                      final_time=interval[1])
     simulator.run()
     T, Y = simulator.get_solution()
@@ -784,7 +783,7 @@ def cost_graph(model):
     costs = []
     Us = []
     
-    simulator = SundialsOdeSimulator(model, start_time=start_time,
+    simulator = SundialsODESimulator(model, start_time=start_time,
                                      final_time=end_time)
     
     for u_elmnt in N.arange(-0.5, 1, 0.02):

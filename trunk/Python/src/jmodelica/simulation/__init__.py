@@ -17,7 +17,8 @@ class Simulator(object):
     """An object oriented interface for simulating JModelica.org models."""
     
     def __init__(self, model=None, start_time=None, final_time=None,
-                 time_step=0.2, return_last=False, verbosity=0):
+                 abstol=1.0e-6, reltol=1.0e-6, time_step=0.2, return_last=False, 
+                 verbosity=0):
         
         # Setting members
         self._model = model
@@ -26,6 +27,10 @@ class Simulator(object):
         self.set_return_last(return_last)
         self.set_time_step(time_step)
         self.set_verbosity(verbosity)
+        self.set_absolute_tolerance(abstol)
+        self.set_relative_tolerance(reltol)
+        self._set_solution(None, None)
+        
         if start_time is not None:
             self._start_time = start_time
         else:
@@ -206,11 +211,11 @@ class Simulator(object):
         """Specify how much output should be given: 0 <= verbosity <= 4.
         
         The verbosity levels can also be specified using the constants:
-         * SundialsOdeSimulator.QUIET
-         * SundialsOdeSimulator.WHISPER
-         * SundialsOdeSimulator.NORMAL
-         * SundialsOdeSimulator.LOUD
-         * SundialsOdeSimulator.SCREAM
+         * Simulator.QUIET
+         * Simulator.WHISPER
+         * Simulator.NORMAL
+         * Simulator.LOUD
+         * Simulator.SCREAM
          
         If the verbosity level is set to something not within the interval, an
         error is raised.
@@ -231,4 +236,24 @@ class Simulator(object):
         io.export_result_dymola(self.get_model(),data)
         
         
+
+class ODESimulator(Simulator):
+    
+    def __init__(self, model=None, start_time=None,final_time=None,
+                    abstol=1.0e-6, reltol=1.0e-6, time_step=0.2, return_last=False, 
+                    verbosity=0):
         
+        Simulator.__init__(self, model, start_time, final_time,
+                           abstol, reltol, time_step, return_last, 
+                           verbosity)
+    
+class DAESimulator(Simulator):
+    
+    def __init__(self, model=None, start_time=None,final_time=None,
+                    abstol=1.0e-6, reltol=1.0e-6, time_step=0.2, return_last=False, 
+                    verbosity=0):
+    
+        Simulator.__init__(self, model, start_time, final_time,
+                           abstol, reltol, time_step, return_last, 
+                           verbosity)
+                           
