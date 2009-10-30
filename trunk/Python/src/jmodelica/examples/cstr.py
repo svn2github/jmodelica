@@ -6,6 +6,9 @@ import os.path
 
 import jmodelica
 import jmodelica.jmi as jmi
+from jmodelica.initialization.ipopt import NLPInitialization
+from jmodelica.initialization.ipopt import InitializationOptimizer
+from jmodelica.optimization import ipopt
 from jmodelica.compiler import OptimicaCompiler
 
 import numpy as N
@@ -62,10 +65,10 @@ def run_demo(with_plots=True):
     init_model = jmi.Model("CSTR_CSTR_Init")
     
     # Create DAE initialization object.
-    init_nlp = jmi.DAEInitializationOpt(init_model)
+    init_nlp = NLPInitialization(init_model)
     
     # Create an Ipopt solver object for the DAE initialization system
-    init_nlp_ipopt = jmi.JMIDAEInitializationOptIPOPT(init_nlp)
+    init_nlp_ipopt = InitializationOptimizer(init_nlp)
     
     # Set inputs for Stationary point A
     Tc_0_A = 250
@@ -121,10 +124,10 @@ def run_demo(with_plots=True):
     n_cp = 3; # Number of collocation points in each element
     
     # Create an NLP object
-    nlp = jmi.SimultaneousOptLagPols(cstr,n_e,hs,n_cp)
+    nlp = ipopt.NLPCollocationLagrangePolynomials(cstr,n_e,hs,n_cp)
     
     # Create an Ipopt NLP object
-    nlp_ipopt = jmi.JMISimultaneousOptIPOPT(nlp.jmi_simoptlagpols)
+    nlp_ipopt = ipopt.CollocationOptimizer(nlp)
        
     nlp_ipopt.opt_sim_ipopt_set_int_option("max_iter",500)
 

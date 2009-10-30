@@ -13,7 +13,7 @@ import jmodelica.jmi as jmi
 from jmodelica.compiler import OptimicaCompiler
 import jmodelica.xmlparser as xp
 import jmodelica.io
-
+from jmodelica.optimization import ipopt
 
 sep = os.path.sep
 
@@ -49,10 +49,10 @@ def test_dymola_export_import():
     n_cp = 3; # Number of collocation points in each element
 
     # Create an NLP object
-    nlp = jmi.SimultaneousOptLagPols(vdp,n_e,hs,n_cp)
+    nlp = ipopt.NLPCollocationLagrangePolynomials(vdp,n_e,hs,n_cp)
 
     # Create an Ipopt NLP object
-    nlp_ipopt = jmi.JMISimultaneousOptIPOPT(nlp.jmi_simoptlagpols)
+    nlp_ipopt = ipopt.CollocationOptimizer(nlp)
 
     # Solve the optimization problem
     nlp_ipopt.opt_sim_ipopt_solve()

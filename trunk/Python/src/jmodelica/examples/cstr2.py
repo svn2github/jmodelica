@@ -6,6 +6,9 @@ import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.compiler import OptimicaCompiler
 from jmodelica.compiler import ModelicaCompiler
+from jmodelica.initialization.ipopt import NLPInitialization
+from jmodelica.initialization.ipopt import InitializationOptimizer
+from jmodelica.optimization import ipopt
 
 # Import numerical libraries
 import numpy as N
@@ -56,10 +59,10 @@ mc.compile_model(curr_dir+"/files/CSTRLib.mo", "CSTRLib.Components.Two_CSTRs_sta
 init_model = jmi.Model("CSTRLib_Components_Two_CSTRs_stat_init")
 
 # Create DAE initialization object.
-init_nlp = jmi.DAEInitializationOpt(init_model)
+init_nlp = NLPInitialization(init_model)
 
 # Create an Ipopt solver object for the DAE initialization system
-init_nlp_ipopt = jmi.JMIDAEInitializationOptIPOPT(init_nlp)
+init_nlp_ipopt = InitializationOptimizer(init_nlp)
 
 # Set inputs for Stationary point A
 u1_0_A = 1
@@ -141,10 +144,10 @@ hs = N.ones(n_e)*1./n_e # Equidistant points
 n_cp = 3; # Number of collocation points in each element
 
 # Create an NLP object representing the discretized problem
-nlp = jmi.SimultaneousOptLagPols(model,n_e,hs,n_cp)
+nlp = ipopt.NLPCollocationLagrangePolynomials(model,n_e,hs,n_cp)
 
 # Create an Ipopt NLP object
-nlp_ipopt = jmi.JMISimultaneousOptIPOPT(nlp.jmi_simoptlagpols)
+nlp_ipopt = ipopt.CollocationOptimizer(nlp)
 
 #nlp_ipopt.opt_sim_ipopt_set_string_option("derivative_test","first-order")
 
@@ -221,4 +224,3 @@ plt.plot(u2_ref_res.t,u2_ref_res.x,'--')
 plt.xlabel('t [s]')
 plt.grid()
 plt.show()
-

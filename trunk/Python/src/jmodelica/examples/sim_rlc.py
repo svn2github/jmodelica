@@ -6,6 +6,8 @@ import os
 import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.compiler import ModelicaCompiler
+from jmodelica.initialization.ipopt import NLPInitialization
+from jmodelica.initialization.ipopt import InitializationOptimizer
 from jmodelica.tests import get_example_path
 
 # Import numerical libraries
@@ -34,10 +36,10 @@ def run_demo(with_plots=True):
 
 
     # Create DAE initialization object.
-    init_rlc = jmi.DAEInitializationOpt(rlc)
+    init_rlc = NLPInitialization(rlc)
         
     # Create an Ipopt solver object for the DAE initialization system
-    init_rlc_ipopt = jmi.JMIDAEInitializationOptIPOPT(init_rlc)
+    init_rlc_ipopt = InitializationOptimizer(init_rlc)
 
     # Solve the DAE initialization system with Ipopt
     init_rlc_ipopt.init_opt_ipopt_solve()

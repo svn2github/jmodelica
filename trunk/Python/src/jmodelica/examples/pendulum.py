@@ -8,6 +8,7 @@ import os.path
 import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.compiler import OptimicaCompiler
+from jmodelica.optimization import ipopt
 
 # Import numerical libraries
 import numpy as N
@@ -38,17 +39,17 @@ def run_demo(with_plots=True):
     n_cp = 3; # Number of collocation points in each element
 
     # Create an NLP object
-    nlp = jmi.SimultaneousOptLagPols(pend,n_e,hs,n_cp)
+    nlp = ipopt.NLPCollocationLagrangePolynomials(pend,n_e,hs,n_cp)
 
     # Create an Ipopt NLP object
-    nlp_ipopt = jmi.JMISimultaneousOptIPOPT(nlp.jmi_simoptlagpols)
+    nlp_ipopt = ipopt.CollocationOptimizer(nlp)
 
     # Solve the optimization problem
     nlp_ipopt.opt_sim_ipopt_solve()
 
     # Retreive the number of points in each column in the
     # result matrix
-    n_points = nlp.jmi_simoptlagpols.opt_sim_get_result_variable_vector_length()
+    n_points = nlp.opt_sim_get_result_variable_vector_length()
     n_points = n_points.value
 
     # Create result data vectors
@@ -60,7 +61,7 @@ def run_demo(with_plots=True):
     w_ = N.zeros(n_points)
     
     # Get the result
-    nlp.jmi_simoptlagpols.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
+    nlp.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
 
     if with_plots:
         # Plot

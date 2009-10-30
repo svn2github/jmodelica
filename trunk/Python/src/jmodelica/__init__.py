@@ -16,8 +16,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__all__ = ['jmi', 'xmlparser', 'compiler', 'optimicacompiler','optimization',
-           'examples', 'tests','io']
+__all__ = ['jmi', 'xmlparser', 'compiler','optimization',
+           'examples', 'tests','io','initialization','simulation']
 
 __version__='trunk'
 
