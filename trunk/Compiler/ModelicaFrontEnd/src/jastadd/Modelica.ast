@@ -317,10 +317,10 @@ AssignStmt : Statement ::= Left:Access Right:Exp;
 FunctionCallStmt : Statement ::= Left:Access* FunctionCall;
 BreakStmt : Statement;
 ReturnStmt : Statement;
-IfWhenStmt : Statement ::= IfWhenClause*;
+abstract IfWhenStmt : Statement ::= IfWhenClause*;
 IfStmt : IfWhenStmt ::= ElseStmts:Statement*;
 WhenStmt : IfWhenStmt;
-IfWhenClause ::= Test:Exp Statement*;
+abstract IfWhenClause ::= Test:Exp Statement*;
 IfClause : IfWhenClause;                // Subclasses of IfWhenClause might not be needed
 WhenClause : IfWhenClause;
 ForStmt : Statement ::= ForIndex* ForStmts:Statement*;

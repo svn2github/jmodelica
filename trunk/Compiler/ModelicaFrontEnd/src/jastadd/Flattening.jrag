@@ -48,8 +48,8 @@ aspect Flattening {
 		fc.setFQName(fqn); 
 		fc.addFEquationBlock(new FEquationBlock(new List()));			
 		for (FAbstractEquation ae : getFAbstractEquations()) {
-		       ae.flatten(getFQName(),fc);
-		   	}	
+		    ae.flatten(getFQName(),fc);
+		}	
 		getInstComponentDeclList().flatten(fc);
 		getInstExtendsList().flatten(fc);
 		

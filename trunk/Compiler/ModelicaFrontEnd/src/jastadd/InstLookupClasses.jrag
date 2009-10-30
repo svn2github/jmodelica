@@ -579,23 +579,13 @@ aspect SimpleInstClassLookup {
 		simpleLookupInstClassDeclRecursive(name);
 	
 	public InstClassDecl InstNode.simpleLookupInstClassDeclRecursive(String name) {
-		// Split up name
-		int ind = name.indexOf('.');
-		String firstName = "";
-		String lastName = "";
-		if (ind==-1) {
-			firstName = name;
-			lastName = "";
-		} else {
-			firstName = name.substring(0,ind);
-			lastName = name.substring(ind+1,name.length());
-		}
+		String[] parts = name.split("\\.", 2);
 		for (InstClassDecl icd_tmp : getInstClassDecls()) {
-			if (icd_tmp.name().equals(firstName)) {
-				if (lastName.equals("")) {
+			if (icd_tmp.name().equals(parts[0])) {
+				if (parts.length == 1) {
 					return icd_tmp;
 				} else {
-					return icd_tmp.simpleLookupInstClassDeclRecursive(lastName);
+					return icd_tmp.simpleLookupInstClassDeclRecursive(parts[1]);
 				}
 			}
 		}
@@ -603,33 +593,23 @@ aspect SimpleInstClassLookup {
 	}
 
 	public InstClassDecl InstProgramRoot.simpleLookupInstClassDeclRecursive(String name) {
-		// Split up name
-		int ind = name.indexOf('.');
-		String firstName = "";
-		String lastName = "";
-		if (ind==-1) {
-			firstName = name;
-			lastName = "";
-		} else {
-			firstName = name.substring(0,ind);
-			lastName = name.substring(ind+1,name.length());
-		}
+		String[] parts = name.split("\\.", 2);
 		for (InstClassDecl icd_tmp : getInstClassDecls()) {
-			if (icd_tmp.name().equals(firstName)) {
-				if (lastName.equals("")) {
+			if (icd_tmp.name().equals(parts[0])) {
+				if (parts.length == 1) {
 					return icd_tmp;
 				} else {
-					return icd_tmp.simpleLookupInstClassDeclRecursive(lastName);
+					return icd_tmp.simpleLookupInstClassDeclRecursive(parts[1]);
 				}
 			}
 		}
-		HashSet<InstClassDecl> set = lookupLibrary(firstName);
+		HashSet<InstClassDecl> set = lookupLibrary(parts[0]);
 		for (InstClassDecl icd_tmp : set) {
-			if (icd_tmp.name().equals(firstName)) {
-				if (lastName.equals("")) {
+			if (icd_tmp.name().equals(parts[0])) {
+				if (parts.length == 1) {
 					return icd_tmp;
 				} else {
-					return icd_tmp.simpleLookupInstClassDeclRecursive(lastName);
+					return icd_tmp.simpleLookupInstClassDeclRecursive(parts[1]);
 				}
 			}
 		}
