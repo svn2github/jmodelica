@@ -42,7 +42,9 @@ aspect AliasVariables {
 	 * 
 	 * @return The corresponding iteration variable if alias, otherwise null.
 	 */
-	syn FVariable FVariable.alias() {
+	syn FVariable AbstractFVariable.alias() = null;
+	
+	eq FVariable.alias() {
 		if (aliasVariable()==null) {
 			return null;
 		} else {
@@ -55,12 +57,21 @@ aspect AliasVariables {
 	 * 
 	 * @return True if negated alias, otherwise false.
 	 */
-	syn boolean FVariable.isNegated(){
-		if (aliasVariable()==null) {
+	syn boolean AbstractFVariable.isNegated() = false;
+	
+	eq FVariable.isNegated(){
+		AliasVariable av = myFClass().getAliasManager().getAliasVariable(this);
+		if (av==null) {
+			return false;
+		} else {
+			return av.isNegated();
+		}
+/*		if (aliasVariable()==null) {
 			return false;
 		} else {
 			return aliasVariable().isNegated();
 		}
+*/
 	}
 		
 	/**
@@ -138,6 +149,23 @@ aspect AliasVariables {
 			return aliasSet.iterator().next();
 		}
 
+		/**
+		 * \brief Get the AliasVariable object corresponding to an FVariable
+		 * 
+		 * @param fv An FVariable object
+		 * @return An AliasVariable object if the FVariable is in an alias
+		 * set, otherwise null.
+		 */
+		public AliasVariable getAliasVariable(FVariable fv) {
+			LinkedHashSet<AliasVariable> aliasSet = getAliasSet(fv);
+			for (AliasVariable av : aliasSet) {
+				if (av.getFVariable().equals(fv)) {
+					return av;
+				}
+			}
+			return null;
+		}
+		
 		/**
 		 * \brief Retrieve the alias set corresponding to an alias variable.
 		 * 

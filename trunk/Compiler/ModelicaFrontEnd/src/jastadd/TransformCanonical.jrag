@@ -192,7 +192,18 @@ aspect TransformCanonical{
 				fv2 = (FVariable)afv2;
 				negated = false;
 			}
-		} 
+		} else if (getLeft() instanceof FLitExp && getLeft().ceval().realValue() == 0 && // 0 = x + y
+				getRight() instanceof FAddExp &&
+				((FAddExp)getRight()).getLeft() instanceof FIdUseExp &&
+				((FAddExp)getRight()).getRight() instanceof FIdUseExp) {
+			afv1 = ((FIdUseExp)((FAddExp)getRight()).getLeft()).myFV();
+			afv2 = ((FIdUseExp)((FAddExp)getRight()).getRight()).myFV();
+			if (!afv1.isUnknown() && !afv2.isUnknown()) {
+				fv1 = (FVariable)afv1;
+				fv2 = (FVariable)afv2;
+				negated = true;
+			}
+		}
 		
 		if (fv1!=null && fv2!=null) {
 			return new AliasPair(fv1,fv2,negated);
@@ -289,11 +300,17 @@ aspect TransformCanonical{
 	rewrite FIdUseExp {
 		when (!rewritten && myFClass() != null && 
 				myFClass().aliasVariablesEliminated &&
-				!myFV().isUnknown() && myFV().isAlias()) to FIdUseExp {
+				!myFV().isUnknown() && myFV().isAlias()) to FExp {
 			FQName new_name = (FQName)((FVariable)myFV()).alias().getFQName().fullCopy();
 			FQName old_name = getFIdUse().getFQName();
-			FIdUseExp new_exp = new FIdUseExp(new FIdUse(new_name));
-			new_exp.rewritten = true;
+			FExp new_exp = null;
+			FIdUseExp id = new FIdUseExp(new FIdUse(new_name));
+			id.rewritten = true;
+			if (myFV().isNegated()) {
+				new_exp = new FNegExp(id);
+			} else {
+				new_exp = id;
+			}
 			return new_exp;
 		}
 	}
@@ -310,11 +327,17 @@ aspect TransformCanonical{
 	rewrite FDer {
 		when (!rewritten && myFClass() != null && 
 				myFClass().aliasVariablesEliminated &&
-				!getFIdUse().myFV().isUnknown() && getFIdUse().myFV().isAlias()) to FDer {
+				!getFIdUse().myFV().isUnknown() && getFIdUse().myFV().isAlias()) to FExp {
 			FQName new_name = (FQName)((FVariable)getFIdUse().myFV()).alias().getFQName().fullCopy();
 			FQName old_name = getFIdUse().getFQName();
-			FDer new_exp = new FDer(new FIdUse(new_name));
-			new_exp.rewritten = true;
+			FExp new_exp = null;
+			FDer der_exp = new FDer(new FIdUse(new_name));
+			der_exp.rewritten = true;
+			if (getFIdUse().myFV().isNegated()) {
+				new_exp = new FNegExp(der_exp);
+			} else {
+				new_exp = der_exp;
+			}
 			return new_exp;
 		}
 	}

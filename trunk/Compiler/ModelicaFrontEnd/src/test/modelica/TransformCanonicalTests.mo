@@ -711,6 +711,65 @@ end TransformCanonicalTests.AliasTest20;
     x2 = -x3;
   end AliasTest20;
 
+  model AliasTest21
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="AliasTest21",
+      methodName="aliasDiagnostics",
+        description="Test computation of alias sets.", methodResult=
+        "Alias sets:
+{x1,-x2}
+1 variables can be eliminated
+")})));
+
+    Real x1,x2,x3;
+  equation
+    0 = x1 + x2;
+    x1 = 1;   
+    x3 = x2^2;
+  end AliasTest21;
+
+  model AliasTest22
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="AliasTest22",
+        description="Test elimination of alias variables",
+                                               flatModel=
+"
+fclass TransformCanonicalTests.AliasTest22
+ Real x1;
+ Real x3;
+equation 
+ x1 = 1;
+ x3 = (  - ( x1 ) ) ^ 2;
+end TransformCanonicalTests.AliasTest22;
+")})));
+
+    Real x1,x2,x3;
+  equation
+    0 = x1 + x2;
+    x1 = 1;   
+    x3 = x2^2;
+  end AliasTest22;
+
+
+  model AliasTest23
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="AliasTest23",
+        description="Test elimination of alias variables",
+                                               flatModel=
+"
+fclass TransformCanonicalTests.AliasTest23
+ Real x1;
+equation 
+  - ( der(x1) ) = 0;
+end TransformCanonicalTests.AliasTest23;
+")})));
+
+    Real x1,x2;
+  equation
+    x1 = -x2;
+    der(x2) = 0;
+  end AliasTest23;
+
 
 model ParameterBindingExpTest1_Err
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
