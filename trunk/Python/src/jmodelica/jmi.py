@@ -1550,6 +1550,32 @@ class Model(object):
         """
         return self._get_XMLvariables_doc().get_variable_names()
 
+
+    def is_negated_alias(self, variablename):
+        """ Return if variable is a negated alias or not. 
+        
+            Raises exception if variable is not found in XML document.
+        """
+        return self._get_XMLvariables_doc().is_negated_alias(variablename)
+
+    def get_aliases(self, aliased_variable):
+        """ Return list of all alias variables belonging to the aliased 
+            variable along with a list of booleans indicating whether the 
+            alias variable should be negated or not.
+            
+            Raises exception if argument is not an aliased or alias variable.
+
+            Returns:
+                A list consisting of the alias variable names and another
+                list consisting of booleans indicating if the corresponding
+                alias i negated.
+        """
+        return self._get_XMLvariables_doc().get_aliases(aliased_variable)
+
+    def get_variable_description(self, variablename):
+        """ Return the description of a variable. """
+        return self._get_XMLvariables_doc().get_variable_description(variablename)
+
     def get_derivative_names(self):
         """
         Extract the names of the derivatives in a model.

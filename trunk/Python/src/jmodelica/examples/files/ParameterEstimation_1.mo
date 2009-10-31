@@ -22,7 +22,9 @@ package ParEst
     // Set parameters w and z free and give 
     // initial guesses
     SecondOrder sys(w(free=true,initialGuess=2),
-                   z(free=true,initialGuess=1));
+                    z(free=true,initialGuess=1),
+                    x1(fixed=true),
+                    x2(fixed=true));
     Real u = sys.u;
     
     // Measurement data time points

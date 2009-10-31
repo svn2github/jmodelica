@@ -36,14 +36,21 @@ def run_demo(with_plots=True):
 
     simulator = SundialsDAESimulator(model, verbosity=3, start_time=0.0, final_time=30.0, time_step=0.01)
     simulator.run()
-    
-    Ts, ys = simulator.get_solution('sine.y','resistor.v','inductor1.i')
+        
+    simulator.write_data()
+
+    # Load the file we just wrote to file
+    res = jmodelica.io.ResultDymolaTextual('RLC_Circuit_result.txt')
+    sine_y = res.get_variable_data('sine.y')
+    resistor_v = res.get_variable_data('resistor.v')
+    inductor1_i = res.get_variable_data('inductor1.i')
+
+    #Ts, ys = simulator.get_solution('sine.y','resistor.v','inductor1.i')
     fig = p.figure()
-    p.plot(Ts, ys)
+    p.plot(sine_y.t, sine_y.x, resistor_v.t, resistor_v.x, inductor1_i.t, inductor1_i.x)
     p.legend(('sine.y','resistor.v','inductor1.i'))
     p.show()
-    
-    simulator.write_data()
+
 
 if __name__=="__main__":
     run_demo()

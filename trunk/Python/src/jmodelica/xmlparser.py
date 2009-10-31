@@ -125,6 +125,11 @@ class XMLVariablesDoc(XMLdoc):
             
             Raises exception if argument is not in model.
 
+            Returns:
+                A list consisting of the alias variable names and another
+                list consisting of booleans indicating if the corresponding
+                alias i negated.
+
         """
         # get value reference of aliased variable
         val_ref = self.get_valueref(aliased_variable)

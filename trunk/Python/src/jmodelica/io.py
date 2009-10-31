@@ -73,17 +73,30 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         name_value_refs = names.keys()
         name_value_refs.sort(key=int)
 
+        num_vars = 0
+
         # Find the maximum name length
         max_name_length = len('Time')
         for ref in name_value_refs:
             if (len(names.get(ref))>max_name_length):
                 max_name_length = len(names.get(ref))
+            num_vars = num_vars + 1
+            # Loop over the alias variables
+            alias_names, alias_sign = model.get_aliases(names.get(ref))
+            for n in alias_names:
+                if (len(n)>max_name_length):
+                    max_name_length = len(n)
+                num_vars = num_vars + 1
 
-        f.write('char name(%d,%d)\n' % (len(name_value_refs)+1, max_name_length))
+        f.write('char name(%d,%d)\n' % (num_vars+1, max_name_length))
         f.write('time\n')
 
         for ref in name_value_refs:
             f.write(names.get(ref)+'\n')
+            # Loop over the alias variables
+            alias_names, alias_sign = model.get_aliases(names.get(ref))
+            for n in alias_names:
+                f.write(n+'\n')
 
         f.write('\n')
 
@@ -94,26 +107,41 @@ def export_result_dymola(model, data, file_name='', format='txt'):
 
         # Find the maximum description length
         max_desc_length = len('Time in [s]');
-        for ref in desc_value_refs:
-            if (len(descriptions.get(ref))>max_desc_length):
-                max_desc_length = len(descriptions.get(ref))
+        for ref in name_value_refs:
+            desc = model.get_variable_description(names.get(ref))
+            if desc != None:
+                if (len(desc)>max_desc_length):
+                    max_desc_length = len(desc)
+            # Loop over the alias variables
+            alias_names, alias_sign = model.get_aliases(names.get(ref))
+            for n in alias_names:
+                desc = model.get_variable_description(n)
+                if (len(desc)>max_desc_length):
+                    max_desc_length = len(desc)
 
-        f.write('char description(%d,%d)\n' % (len(name_value_refs)+1, max_desc_length))
+        f.write('char description(%d,%d)\n' % (num_vars + 1, max_desc_length))
         f.write('Time in [s]\n')
 
         # Loop over all variables, not only those with a description
         for ref in name_value_refs:
-            if (desc_value_refs.count(ref)==0):
+            desc = model.get_variable_description(names.get(ref))
+            if desc != None:
+                f.write(desc)
+            f.write('\n')
+            # Loop over the alias variables
+            alias_names, alias_sign = model.get_aliases(names.get(ref))
+            for n in alias_names:
+                desc = model.get_variable_description(n)
+                if desc != None:
+                    f.write(desc)
                 f.write('\n')
-            else:
-                f.write(descriptions.get(ref)+'\n')
-
+            
         f.write('\n')
 
         # Write data meta information
         offs = model.get_offsets()
         n_parameters = offs[4] # offs[4] = offs_dx
-        f.write('int dataInfo(%d,%d)\n' % (len(name_value_refs)+1, 4))
+        f.write('int dataInfo(%d,%d)\n' % (num_vars + 1, 4))
         f.write('0 1 0 -1 # time\n')
 
         cnt_1 = 2
@@ -124,6 +152,15 @@ def export_result_dymola(model, data, file_name='', format='txt'):
                 cnt_1 = cnt_1 + 1
             else:
                 f.write('2 %d 0 -1 # ' % cnt_2 + names.get(ref)+'\n')
+                # Loop over the alias variables
+                alias_names, alias_sign = model.get_aliases(names.get(ref))
+                i = 0
+                for n in alias_names:
+                    if alias_sign[i]:
+                        f.write('2 -%d 0 -1 # ' % cnt_2 + n +'\n')
+                    else:
+                        f.write('2 %d 0 -1 # ' % cnt_2 + n +'\n')
+                    i = i + 1
                 cnt_2 = cnt_2 + 1
 
         f.write('\n')
