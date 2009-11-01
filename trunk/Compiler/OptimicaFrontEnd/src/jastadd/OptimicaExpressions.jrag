@@ -66,4 +66,45 @@ aspect OptimicaExpressions {
 		return new FTimedVariable((FIdUse)getName().fullCopy(),getArg().scalarize()); 
 	}
 	
+	boolean FTimedVariable.rewritten = false;
+	
+	/**
+	 * \brief FTimedVariables referring to alias variables need to be changed to 
+	 * FTimedVariables referring to their alias targets. 
+	 * 
+	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
+	 * is true. Notice that in order for the rewrite to be enable, the is$final
+	 * field of FTimedVariables needs to be set to false: this is done by the recursive
+	 * method ASTNode.flushAllRecursiveClearFinal. 
+	 */
+	rewrite FTimedVariable {
+		when (!rewritten && myFClass() != null && 
+				myFClass().aliasVariablesEliminated &&
+				!getName().myFV().isUnknown() && getName().myFV().isAlias()) to FExp {
+			FQName new_name = (FQName)((FVariable)getName().myFV()).alias().getFQName().fullCopy();
+			//FQName old_name = getName().getFQName();
+			//System.out.println(" ************************************* FIdUseExp.rewrite " + old_name.name() + " -> " + new_name.name());
+
+			FExp new_exp = null;
+			FTimedVariable tv = new FTimedVariable(new FIdUse(new_name),getArg());
+			tv.rewritten = true;
+			if (getName().myFV().isNegated()) {
+				new_exp = new FNegExp(tv);
+			} else {
+				new_exp = tv;
+			}
+			return new_exp;
+		}
+	}
+	
+	public void FTimedVariable.flushAllRecursiveClearFinal() {
+		flushAll();
+		is$Final = false;
+		for (int i=0;i<getNumChild();i++) {
+			getChild(i).flushAllRecursiveClearFinal();
+		}
+	}
+
+	
+	
 }

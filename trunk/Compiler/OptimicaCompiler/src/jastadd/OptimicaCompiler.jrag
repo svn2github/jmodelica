@@ -196,6 +196,13 @@ public class OptimicaCompiler extends ModelicaCompiler{
 	   	//Close the output stream
 	   	out.close();
 
+	   	logger.info("...raw .mof file created.");
+
+		if(getLogLevel("JModelica.ModelicaCompiler").equals("INFO")) {
+			logger.info("Raw flattened model:");		
+			System.out.print(fc.prettyPrint(""));
+		}
+	   	
 		fc.transformCanonical();
 
 		Collection<Problem> problems = fc.errorCheck();
@@ -203,15 +210,15 @@ public class OptimicaCompiler extends ModelicaCompiler{
 			super.handleCompilerProblems(problems);
 		}
 				
-		logger.info("Creating .mof file...");
+		logger.info("Creating transformed .mof file...");
 	    	    	// Create file 
-	   	fstream = new FileWriter(icd.qualifiedName()+".mof");
+	   	fstream = new FileWriter(icd.qualifiedName()+"_transformed.mof");
 	   	out = new BufferedWriter(fstream);
 	   	out.write(fc.prettyPrint(""));
 	   	//Close the output stream
 	   	out.close();
 	   
-	    logger.info("... .mof file created.");
+	    logger.info("... transformed .mof file created.");
 	    
 		if(getLogLevel(logger.getName()).equals("INFO")) {
 			System.out.println(fc.diagnostics());

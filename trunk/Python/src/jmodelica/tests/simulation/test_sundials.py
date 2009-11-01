@@ -118,9 +118,9 @@ class TestSundialsDAESimulator:
         simulator.run()
         
         Ts, ys = simulator.get_solution()
-        
+
         assert len(Ts) == len(ys) #Length of the vectors should be the same
-        assert len(ys[0,:]) == 42 #Number of variables in the example
+        assert len(ys[0,:]) == 20 #Number of variables in the example
     
         Ts, ys = simulator.get_solution('sine.y','resistor.v','inductor1.i')
         

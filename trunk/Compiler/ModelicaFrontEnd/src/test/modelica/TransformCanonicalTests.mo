@@ -7,15 +7,16 @@ package TransformCanonicalTests
         description="Test basic canonical transformations",
                                                flatModel=
 "
-fclass TransformCanonicalTests.TransformCanonicalTest1 
+fclass TransformCanonicalTests.TransformCanonicalTest1
+ Real x(start = 1,fixed = true);
  Real y(start = 3,fixed = true);
- Real z;
  Real w(start = 1);
  Real v;
 initial equation 
+ x = 1;
  y = 3;
 equation 
- der(z) =  - ( z );
+ der(x) =  - ( x );
  der(v) = 4;
  y = 3;
  w = 2;
@@ -769,6 +770,52 @@ end TransformCanonicalTests.AliasTest23;
     x1 = -x2;
     der(x2) = 0;
   end AliasTest23;
+
+  model AliasTest24
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="AliasTest24",
+        description="Test elimination of alias variables",
+                                               flatModel=
+"
+fclass TransformCanonicalTests.AliasTest24
+ Real x1;
+ input Real u;
+equation 
+ der(x1) = u;
+end TransformCanonicalTests.AliasTest24;
+")})));
+
+    Real x1,x2;
+    input Real u;
+  equation
+    x2 = u;
+    der(x1) = u;
+end AliasTest24;
+
+
+  model AliasTest25
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="AliasTest25",
+        description="Test elimination of alias variables",
+                                               flatModel=
+"
+fclass TransformCanonicalTests.AliasTest25
+ Real x2(fixed = true);
+initial equation 
+ x2 = 0.0;
+equation 
+ der(x2) = 1;
+end TransformCanonicalTests.AliasTest25;
+")})));
+
+    Real x1(fixed=false);
+    Real x2(fixed =true);
+    Real x3;
+  equation
+    der(x3) = 1;
+    x1 = x3;
+    x2 = x1;	
+end AliasTest25;
 
 
 model ParameterBindingExpTest1_Err

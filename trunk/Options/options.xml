@@ -44,7 +44,7 @@
 			<Type>Boolean</Type>
 			<BooleanAttributes>
 				<Key>eliminate_alias_variables</Key>
-				<Value>false</Value>
+				<Value>true</Value>
 				<Description>
                                 If this option is set to true (default), then alias variables are 
                                 eliminated from the model.

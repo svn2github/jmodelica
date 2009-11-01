@@ -156,29 +156,29 @@ aspect FlatAPI {
     syn int FClass.numReals() = reals().size();
 	coll ArrayList<FRealVariable> FClass.reals() 
 	  [new ArrayList<FRealVariable>()] with add root FlatRoot;
-	FRealVariable contributes this to FClass.reals() for myFClass();
+	FRealVariable contributes this when !isAlias() to FClass.reals() for myFClass();
 //	FDerivativeVariable contributes this to FClass.reals() for myFClass();
 
     syn int FClass.numIntegers() = integers().size();
 	coll ArrayList<FIntegerVariable> FClass.integers() 
 	  [new ArrayList<FIntegerVariable>()] with add root FlatRoot;
-	FIntegerVariable contributes this to FClass.integers() for myFClass();
+	FIntegerVariable contributes this when !isAlias() to FClass.integers() for myFClass();
 
     syn int FClass.numBooleans() = booleans().size();
 	coll ArrayList<FBooleanVariable> FClass.booleans() 
 	  [new ArrayList<FBooleanVariable>()] with add root FlatRoot;
-	FBooleanVariable contributes this to FClass.booleans() for myFClass();
+	FBooleanVariable contributes this when !isAlias() to FClass.booleans() for myFClass();
 
     syn int FClass.numStrings() = strings().size();
 	coll ArrayList<FStringVariable> FClass.strings() 
 	  [new ArrayList<FStringVariable>()] with add root FlatRoot;
-	FStringVariable contributes this to FClass.strings() for myFClass();
+	FStringVariable contributes this when !isAlias() to FClass.strings() for myFClass();
 
     syn int FClass.numIndependentConstants() = independentConstants().size();
 	coll ArrayList<FVariable> FClass.independentConstants() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
- 		this when isIndependentConstant()
+ 		this when isIndependentConstant() && !isAlias() 
 	to FClass.independentConstants() for myFClass();
 
 	syn int FClass.numIndependentRealConstants() = independentRealConstants().size();
@@ -274,7 +274,7 @@ aspect FlatAPI {
 	coll ArrayList<FVariable> FClass.independentParameters() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
- 		this when isIndependentParameter()
+ 		this when isIndependentParameter() && !isAlias()
 	to FClass.independentParameters() for myFClass();
 	
 	syn int FClass.numIndependentRealParameters() = independentRealParameters().size();
@@ -321,7 +321,7 @@ aspect FlatAPI {
 	coll ArrayList<FVariable> FClass.dependentParameters() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
- 		this when isDependentParameter()
+ 		this when isDependentParameter() && !isAlias()
 	to FClass.dependentParameters() for myFClass();
 
 	syn int FClass.numDependentRealParameters() = dependentRealParameters().size();
@@ -385,7 +385,7 @@ aspect FlatAPI {
 	coll ArrayList<FVariable> FClass.derivativeVariables() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FDerivativeVariable contributes
-		this
+		this when !isAlias()
 	to FClass.derivativeVariables() for myFClass();
 	syn int FVariable.derivativeVariableIndex() =
 		myFClass().derivativeVariables().indexOf(this);
@@ -511,7 +511,7 @@ aspect FlatAPI {
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
  		this when !isParameter() && !isConstant() &&
- 		  hasBindingExp()
+ 		  hasBindingExp() && !isAlias()
 	to FClass.variablesWithBindingExp() for myFClass();
 
 	syn int FClass.numRealVariablesWithBindingExp() = realVariablesWithBindingExp().size();
@@ -550,7 +550,7 @@ aspect FlatAPI {
 	coll ArrayList<FVariable> FClass.inputs() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
- 		this when isInput()
+ 		this when isInput() && !isAlias()
 	to FClass.inputs() for myFClass();
 
 	syn int FClass.numRealInputs() = realInputs().size();

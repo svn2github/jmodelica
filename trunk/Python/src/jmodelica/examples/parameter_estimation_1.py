@@ -52,7 +52,7 @@ def run_demo(with_plots=True):
         dx[1] = 0.
         x[0] = xx[0] # Set states
         x[1] = xx[1]
-        res = N.zeros(5); # Create residual vector
+        res = N.zeros(3); # Create residual vector
         model.jmimodel.dae_F(res) # Evaluate DAE residual
         return N.array([res[1],res[2]])
     
@@ -120,7 +120,7 @@ def run_demo(with_plots=True):
     dx_ = N.zeros(2*n_points)
     x_ = N.zeros(2*n_points)
     u_ = N.zeros(n_points)
-    w_ = N.zeros(4*n_points)
+    w_ = N.zeros(2*n_points)
     
     # Get the result
     nlp.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
@@ -130,7 +130,7 @@ def run_demo(with_plots=True):
         plt.figure(2)
         plt.clf()
         plt.subplot(211)
-        plt.plot(t_,w_[n_points:2*n_points])
+        plt.plot(t_,x_[0:n_points])
         plt.plot(t_meas,xx_meas[:,0],'x')
         plt.grid()
         plt.ylabel('y')

@@ -28,6 +28,7 @@ aspect TransformCanonical{
 			genAlias();
 			eliminateAliasVariables();
 		}
+//		System.out.println(prettyPrint(""));
 		addFDerivativeVariables();
 		genInitialEquations();
 		sortDependentParameters();
@@ -94,21 +95,22 @@ aspect TransformCanonical{
 							&&  fv.isDifferentiatedVariable() && fv.startAttributeSet())) {
 				addFInitialEquation(new FEquation(new FIdUseExp(
 						new FIdUse(fv.getFQName().fullCopy())),
-						fv.startAttributeExp()));
+						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp("0.0")));
 			}	
 		}
+//		System.out.println(prettyPrint(""));
 		for (FIntegerVariable fv : integerVariables()) {
 			if (fv.fixedAttribute()) {
 				addFInitialEquation(new FEquation(new FIdUseExp(
 						new FIdUse(fv.getFQName().fullCopy())),
-						fv.startAttributeExp()));
+						fv.startAttributeSet()? fv.startAttributeExp(): new FIntegerLitExp("0")));
 			}	
 		}
 		for (FBooleanVariable fv : booleanVariables()) {
 			if (fv.fixedAttribute()) {
 				addFInitialEquation(new FEquation(new FIdUseExp(
 						new FIdUse(fv.getFQName().fullCopy())),
-						fv.startAttributeExp()));
+						fv.startAttributeSet()? fv.startAttributeExp(): new FBooleanLitExpFalse()));
 			}	
 		}		
 		//flush();
@@ -302,7 +304,8 @@ aspect TransformCanonical{
 				myFClass().aliasVariablesEliminated &&
 				!myFV().isUnknown() && myFV().isAlias()) to FExp {
 			FQName new_name = (FQName)((FVariable)myFV()).alias().getFQName().fullCopy();
-			FQName old_name = getFIdUse().getFQName();
+			//FQName old_name = getFIdUse().getFQName();
+//			System.out.println(" ************************************* FIdUseExp.rewrite " + old_name.name() + " -> " + new_name.name());
 			FExp new_exp = null;
 			FIdUseExp id = new FIdUseExp(new FIdUse(new_name));
 			id.rewritten = true;
@@ -329,7 +332,7 @@ aspect TransformCanonical{
 				myFClass().aliasVariablesEliminated &&
 				!getFIdUse().myFV().isUnknown() && getFIdUse().myFV().isAlias()) to FExp {
 			FQName new_name = (FQName)((FVariable)getFIdUse().myFV()).alias().getFQName().fullCopy();
-			FQName old_name = getFIdUse().getFQName();
+			//FQName old_name = getFIdUse().getFQName();
 			FExp new_exp = null;
 			FDer der_exp = new FDer(new FIdUse(new_name));
 			der_exp.rewritten = true;

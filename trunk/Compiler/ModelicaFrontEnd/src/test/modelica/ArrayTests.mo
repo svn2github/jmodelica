@@ -336,11 +336,7 @@ model ArrayTest21
 fclass ArrayTests.ArrayTest21
  Real x[1];
  Real x[2];
- Real y[1];
- Real y[2];
 equation 
- x[1] = y[1];
- x[2] = y[2];
  x[1] = 0;
  x[2] = 0;
 end ArrayTests.ArrayTest21;
@@ -363,11 +359,7 @@ model ArrayTest22
 fclass ArrayTests.ArrayTest22
  Real x[1];
  Real x[2];
- Real y[1];
- Real y[2];
 equation 
- x[1] = y[1];
- x[2] = y[2];
  x[1] = 1;
  x[2] = 1;
 end ArrayTests.ArrayTest22;
@@ -392,15 +384,7 @@ fclass ArrayTests.ArrayTest23
  Real x[2,1];
  Real x[1,2];
  Real x[2,2];
- Real y[1,1];
- Real y[2,1];
- Real y[1,2];
- Real y[2,2];
 equation 
- x[1,1] = y[1,1];
- x[2,1] = y[2,1];
- x[1,2] = y[1,2];
- x[2,2] = y[2,2];
  x[1,1] = 1;
  x[2,1] = 1;
  x[1,2] = 1;

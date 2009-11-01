@@ -143,10 +143,25 @@ aspect AliasVariables {
 		 * @return The iteration variable of the alias set.
 		 */
 		public AliasVariable getIterationVariable(LinkedHashSet<AliasVariable> aliasSet) {
-			// Select the first variable in list. 
-			// TODO: This is a bit arbitrary and should probably be done 
-			// in a more intelligent way.
+			// 1. Select an input in the alias set
+			for (AliasVariable av : aliasSet) {
+				if (av.getFVariable().isInput()) {
+					return av;
+				}
+			}
+
+			// 2. Select a variable whith fixed attribute set to true
+			for (AliasVariable av : aliasSet) {
+				FExp fixed = av.getFVariable().fixedAttributeExp();
+				if (fixed!=null) {
+					if (fixed.ceval().booleanValue()) {
+						return av;
+					}
+				}
+			}
+			
 			return aliasSet.iterator().next();
+			
 		}
 
 		/**
@@ -232,8 +247,8 @@ aspect AliasVariables {
 			 *     non-negated in an alias set, not both.
 			 *  
 			 *  These rules are enforced by the algorithm below: if a
-			 *  rule is about to be broken an exception is thrown.
-			 *  
+			 *  rule is about to be broken an error message is generated.
+			 *  			
 			 */
 				
 			// Create all combinations of alias variables, negated and 
