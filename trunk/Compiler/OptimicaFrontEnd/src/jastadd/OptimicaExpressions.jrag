@@ -22,9 +22,10 @@ aspect OptimicaExpressions {
 				getName().getLastInstAccess() instanceof InstComponentAccess &&
 				getNumArgs()==1)
 		 to InstTimedVariable {
-			//System.out.println("rewrite InstFunctionCall: " + getName().name());
+//			System.out.println("rewrite InstFunctionCall: " + getName().name());
 		 	InstTimedVariable iv = new InstTimedVariable(getName(),getArgs(0));
 		 	iv.setStart(getStart());
+		 	iv.setEnd(getEnd());
 		 	return iv;
 		 }
 	}
@@ -61,6 +62,8 @@ aspect OptimicaExpressions {
 		}
 	}
 	
-	
+	public FExp FTimedVariable.scalarize() { 
+		return new FTimedVariable((FIdUse)getName().fullCopy(),getArg().scalarize()); 
+	}
 	
 }

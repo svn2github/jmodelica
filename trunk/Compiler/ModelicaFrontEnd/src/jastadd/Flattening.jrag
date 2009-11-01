@@ -847,45 +847,43 @@ aspect InstantiatedExpressions {
 			args =  getFunctionArguments().getExpList();
 		for (int i=0;i<args.getNumChild();i++) {
 			l.add(((Exp)args.getChild(i)).instantiate());
-			l.getChild(i).setStart(getStart());
-			l.getChild(i).setEnd(getEnd());
+			l.getChildNoTransform(i).setStart(getStart());
+			l.getChildNoTransform(i).setEnd(getEnd());
 		}
-		
-		//System.out.println("*** " + getName().name());
 		
 		FExp n = null;
 		if (getName().name().equals("der")) {
-			n = new FDer(new FIdUseInstAccess(new FQName(), ((FInstAccessExp)l.getChild(0)).getInstAccessNoTransform())); 
+			n = new FDer(new FIdUseInstAccess(new FQName(), ((FInstAccessExp)l.getChildNoTransform(0)).getInstAccessNoTransform())); 
 		} else if (getName().name().equals("sin")) {
-			n = new FSinExp((FExp)l.getChild(0)); 
+			n = new FSinExp((FExp)l.getChildNoTransform(0)); 
 		} else if (getName().name().equals("cos")) {
-			n = new FCosExp((FExp)l.getChild(0)); 
+			n = new FCosExp((FExp)l.getChildNoTransform(0)); 
 		} else if (getName().name().equals("tan")) {
-			n = new FTanExp((FExp)l.getChild(0)); 
+			n = new FTanExp((FExp)l.getChildNoTransform(0)); 
 		} else if (getName().name().equals("asin")) {
-			n = new FAsinExp((FExp)l.getChild(0)); 
+			n = new FAsinExp((FExp)l.getChildNoTransform(0)); 
 		} else if (getName().name().equals("acos")) {
-			n = new FAcosExp((FExp)l.getChild(0)); 
+			n = new FAcosExp((FExp)l.getChildNoTransform(0)); 
 		} else if (getName().name().equals("atan")) {
-			n = new FAtanExp((FExp)l.getChild(0)); 
+			n = new FAtanExp((FExp)l.getChildNoTransform(0)); 
 		} else if (getName().name().equals("atan2")) {
-			n = new FAtan2Exp((FExp)l.getChild(0),(FExp)l.getChild(1)); 
+			n = new FAtan2Exp((FExp)l.getChildNoTransform(0),(FExp)l.getChildNoTransform(1)); 
 		} else if (getName().name().equals("sinh")) {
-			n = new FSinhExp((FExp)l.getChild(0)); 
+			n = new FSinhExp((FExp)l.getChildNoTransform(0)); 
 		} else if (getName().name().equals("cosh")) {
-			n = new FCoshExp((FExp)l.getChild(0)); 
+			n = new FCoshExp((FExp)l.getChildNoTransform(0)); 
 		} else if (getName().name().equals("tanh")) {
-			n = new FTanhExp((FExp)l.getChild(0)); 
+			n = new FTanhExp((FExp)l.getChildNoTransform(0)); 
 		} else if (getName().name().equals("exp")) {
-			n = new FExpExp((FExp)l.getChild(0)); 
+			n = new FExpExp((FExp)l.getChildNoTransform(0)); 
 		} else if (getName().name().equals("log")) {
-			n = new FLogExp((FExp)l.getChild(0)); 
+			n = new FLogExp((FExp)l.getChildNoTransform(0)); 
 		} else if (getName().name().equals("log10")) {
-			n = new FLog10Exp((FExp)l.getChild(0)); 
+			n = new FLog10Exp((FExp)l.getChildNoTransform(0)); 
 		} else if (getName().name().equals("sqrt")) {
-			n = new FSqrtExp((FExp)l.getChild(0)); 
+			n = new FSqrtExp((FExp)l.getChildNoTransform(0)); 
 		} else if (getName().name().equals("identity")) {
-			n = new FIdentity(l.getChild(0));
+			n = new FIdentity(l.getChildNoTransform(0));
 		} else if (getName().name().equals("ones")) {
 			n = new FOnes(l);
 		} else if (getName().name().equals("zeros")) {
@@ -895,6 +893,7 @@ aspect InstantiatedExpressions {
 		}
 		n.setStart(getStart());
 		n.setEnd(getEnd());
+		
 		return n;
 	}
 	
@@ -944,6 +943,7 @@ aspect InstantiatedExpressions {
     			}
 				n.setStart(getStart());
 				n.setEnd(getEnd());
+				
 				return n;	
     	}
   	}

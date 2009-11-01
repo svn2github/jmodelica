@@ -731,7 +731,7 @@ aspect FlushFClass {
 			getChild(i).flushAllRecursiveClearFinal();
 		}
 	}
-
+	
 	public void FDer.flushAllRecursiveClearFinal() {
 		flushAll();
 		is$Final = false;
