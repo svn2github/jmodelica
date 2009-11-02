@@ -2298,7 +2298,6 @@ class JMIModel(object):
         self._z = self._dll.jmi_get_z(self._jmi)
 
         #self.initAD()
-        self._platform=sys.platform
                  
     def initAD(self):
         """Initializing Algorithmic Differential package.
@@ -2318,7 +2317,7 @@ class JMIModel(object):
         """
         import sys
         
-        if self._platform == 'win32':
+        if sys.platform == 'win32':
             pass
         else:
             try:
