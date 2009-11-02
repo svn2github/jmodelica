@@ -14,7 +14,7 @@ def test_parameter_estimation_1():
     """
 
     parameter_estimation_1.run_demo(False)
-
+    
 
 @testattr(stddist = True)
 def test_vdp():
@@ -59,3 +59,4 @@ def test_pendulum():
     """
 
     pendulum.run_demo(False)
+
