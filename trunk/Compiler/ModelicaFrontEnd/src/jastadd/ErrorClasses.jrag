@@ -12,4 +12,7 @@ aspect ErrorClasses {
 		return null;
 	}
 	
+	public FStatement BadStatement.instantiateStatement() {
+		return null;
+	}
 }

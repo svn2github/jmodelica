@@ -32,7 +32,6 @@ FClass ::= FQName
            AliasVariable:FVariable* 
            FInitialEquation:FAbstractEquation*
            FEquationBlock*
-//           FAlgorithm*
            /UnknownFVariable/; 
 
 /**
@@ -324,78 +323,90 @@ FConnectClause : FAbstractEquation ::= [FStringComment]
 /**
  * \brief A flattened algorithm clause.
  */
-//FAlgorithm ::= FStatement*;
+FAlgorithmBlock : FAbstractEquation ::= FStatement*;
 
 /**
  * \brief Base class for statements in flattened algorithms.
  */
-//abstract FStatement;
+abstract FStatement;
+
+/**
+ * \brief An assignment statement in the instance tree.
+ */
+InstAssignStmt : FStatement ::= Left:InstAccess Right:FExp;
 
 /**
  * \brief A flattened assignment statement.
  */
-//FAssignStmt : FStatement ::= Left:FExp Right:FExp;
+FAssignStmt : FStatement ::= Left:FExp Right:FExp;
+
+/**
+ * \brief A function call statement in the instance tree.
+ *
+ * @see FFunctionCallStmt
+ */
+InstFunctionCallStmt : FStatement ::= Left:InstAccess* Call:FExp;
 
 /**
  * \brief A flattened function call statement.
  * 
  * This covers function calls with no used return value or when using 
  * the syntax <code>(vars) := function(args);</code>. Function calls using 
- * exactly one return value are handled by FFunctionCall (that inherits FExp, 
- * since it can be used in expressions).
+ * exactly one return value are handled by FAssignStmt through FFunctionCall. 
+ * (FFunctionCall inherits FExp, since it can be used in expressions).
  */
-//FFunctionCallStmt : FStatement ::= Left:FExp* FFunctionCall;
+FFunctionCallStmt : FStatement ::= Left:FExp* Call:FExp;
 
 /**
  * \brief Flattened break statement.
  */
-//FBreakStmt : FStatement;
+FBreakStmt : FStatement;
 
 /**
  * \brief Flattened return statement.
  */
-//FReturnStmt : FStatement;
+FReturnStmt : FStatement;
 
 /**
  * \brief Base class for flattened if and when statements.
  */
-//abstract FIfWhenStmt : FStatement ::= FIfWhenClause*;
+abstract FIfWhenStmt : FStatement ::= FIfWhenClause*;
 
 /**
  * \brief Flattened if statement.
  */
-//FIfStmt : FIfWhenStmt ::= ElseStmts:FStatement*;
+FIfStmt : FIfWhenStmt ::= ElseStmt:FStatement*;
 
 /**
  * \brief Flattened when statement.
  */
-//FWhenStmt : FIfWhenStmt;
+FWhenStmt : FIfWhenStmt;
 
 /**
  * \brief Base class for flattened [else]if and [else]when clauses in if/when statements.
 
  */
-//abstract FIfWhenClause ::= Test:FExp FStatement*;
+abstract FIfWhenClause ::= Test:FExp FStatement*;
 
 /**
  * \brief Flattened [else]if clause in if statement.
  */
-//FIfClause : FIfWhenClause;
+FIfClause : FIfWhenClause;
 
 /**
  * \brief Flattened [else]when clause in when statement.
  */
-//FWhenClause : FIfWhenClause;
+FWhenClause : FIfWhenClause;
 
 /**
  * \brief Flattened for statement.
  */
-//FForStmt : FStatement ::= FForIndex* ForStmts:FStatement*;
+FForStmt : FStatement ::= FForIndex* ForStmt:FStatement*;
 
 /**
  * \brief Flattened while statement.
  */
-//FWhileStmt : FStatement ::= Test:FExp WhileStmts:FStatement*;
+FWhileStmt : FStatement ::= Test:FExp WhileStmt:FStatement*;
 
 
 /**

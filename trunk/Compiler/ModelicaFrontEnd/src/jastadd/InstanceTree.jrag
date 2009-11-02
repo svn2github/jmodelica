@@ -901,8 +901,10 @@ aspect InstaceConstrainingClauses {
 	    for (AbstractEquation e : equations()) {
 	    	l.add(e.instantiate());
 	    }
+	    for (Algorithm a : algorithms()) {
+	    	l.add(a.instantiate());
+	    }
 	    return l;
-
 	}
 
 }
@@ -955,6 +957,12 @@ aspect InstanceAST_API {
 	eq InstComponentDecl.equations() = myInstClass().equations();
 	eq InstExtends.equations() = getClassName().myInstClassDecl().equations();
 	eq InstFullClassDecl.equations() = getBaseClassDecl().equations();	
+	
+	syn ArrayList<Algorithm> InstNode.algorithms() = new ArrayList<Algorithm>();
+	eq InstClassRoot.algorithms() = getClassDecl().algorithms();
+	eq InstComponentDecl.algorithms() = myInstClass().algorithms();
+	eq InstExtends.algorithms() = getClassName().myInstClassDecl().algorithms();
+	eq InstFullClassDecl.algorithms() = getBaseClassDecl().algorithms();	
 	
 	syn lazy ArrayList<ComponentDecl> InstNode.components() = new ArrayList<ComponentDecl>();
 	eq InstClassRoot.components() = getClassDecl().components();
@@ -1059,7 +1067,6 @@ aspect InstanceAST_API {
 
 aspect SourceAST_API {
 
-
 	syn lazy ArrayList<AbstractEquation> ClassDecl.equations() = new ArrayList<AbstractEquation>();
 	eq FullClassDecl.equations() {
 		ArrayList<AbstractEquation> l = new ArrayList<AbstractEquation>();
@@ -1068,6 +1075,14 @@ aspect SourceAST_API {
 					e instanceof EquationFunctionCall)) {
 				l.add(e);
 			}
+		return l;
+	}
+
+	syn lazy ArrayList<Algorithm> ClassDecl.algorithms() = new ArrayList<Algorithm>();
+	eq FullClassDecl.algorithms() {
+		ArrayList<Algorithm> l = new ArrayList<Algorithm>();
+		for (Algorithm a : getAlgorithms())
+			l.add(a);
 		return l;
 	}
 	

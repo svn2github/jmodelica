@@ -571,6 +571,105 @@ aspect InstantiatedExpressions {
 		c.setEnd(getEnd());
 		return c;
 	}
+	
+	public FAlgorithmBlock Algorithm.instantiate() {
+		List l = Statement.instantiateStatementList(getStatements());
+		FAlgorithmBlock ab = new FAlgorithmBlock(l);
+		ab.setStart(getStart());
+		ab.setEnd(getEnd());
+		return ab;
+	}
+	
+	public static List Statement.instantiateStatementList(List<Statement> l) {
+		List l2 = new List();
+		for (Statement s : l) 
+			if (!(s instanceof AlgorithmAnnotation))
+				l2.add(s.instantiate());
+		return l2;
+	}
+	
+	public FStatement Statement.instantiate() {
+		FStatement s = instantiateStatement();
+		s.setStart(getStart());
+		s.setEnd(getEnd());
+		return s;
+	}
+	
+	protected abstract FStatement Statement.instantiateStatement();
+	
+	protected FStatement AlgorithmAnnotation.instantiateStatement() {
+		return null;
+	}
+	
+	protected InstAssignStmt AssignStmt.instantiateStatement() {
+		return new InstAssignStmt(getLeft().instantiate(), 
+				                  getRight().instantiate());
+	}
+	
+	protected InstFunctionCallStmt FunctionCallStmt.instantiateStatement() {
+		List l = new List();
+		for (Access a : getLefts()) 
+			l.add(a.newInstAccess());
+		return new InstFunctionCallStmt(l, getFunctionCall().instantiate());
+	}
+	
+	protected FBreakStmt BreakStmt.instantiateStatement() {
+		return new FBreakStmt();
+	}
+	
+	protected FReturnStmt ReturnStmt.instantiateStatement() {
+		return new FReturnStmt();
+	}
+	
+	protected FIfWhenStmt IfWhenStmt.instantiateStatement() {
+		List l = new List();
+		for (IfWhenClause c : getIfWhenClauses()) 
+			l.add(c.instantiate());
+		return instantiateIfWhenStmt(l);
+	}
+	
+	protected abstract FIfWhenStmt IfWhenStmt.instantiateIfWhenStmt(List l);
+	
+	protected FIfStmt IfStmt.instantiateIfWhenStmt(List icl) {
+		List esl = Statement.instantiateStatementList(getElseStmts());
+		return new FIfStmt(icl, esl);
+	}
+	
+	protected FWhenStmt WhenStmt.instantiateIfWhenStmt(List l) {
+		return new FWhenStmt(l);
+	}
+	
+	public FIfWhenClause IfWhenClause.instantiate() {
+		FExp t = getTest().instantiate();
+		List l = Statement.instantiateStatementList(getStatements());
+		FIfWhenClause c = instantiateIfWhenClause(t, l);
+		c.setStart(getStart());
+		c.setEnd(getEnd());
+		return c;
+	}
+	
+	protected abstract FIfWhenClause IfWhenClause.instantiateIfWhenClause(FExp t, List l);
+	
+	protected FIfClause IfClause.instantiateIfWhenClause(FExp t, List l) {
+		return new FIfClause(t, l);
+	}
+	
+	protected FWhenClause WhenClause.instantiateIfWhenClause(FExp t, List l) {
+		return new FWhenClause(t, l);
+	}
+	
+	protected FForStmt ForStmt.instantiateStatement() {
+		List il = new List();
+		for (ForIndex i : getForIndexList()) 
+			il.add(i.instantiate());
+		List sl = Statement.instantiateStatementList(getForStmts());
+		return new FForStmt(il, sl);
+	}
+	
+	protected FWhileStmt WhileStmt.instantiateStatement() {
+		List l = Statement.instantiateStatementList(getWhileStmts());
+		return new FWhileStmt(getTest().instantiate(), l);
+	}
 
 	public FArraySubscripts ArraySubscripts.instantiate() {
 		List l = new List();

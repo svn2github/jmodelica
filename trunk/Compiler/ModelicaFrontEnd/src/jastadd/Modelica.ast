@@ -318,13 +318,13 @@ FunctionCallStmt : Statement ::= Left:Access* FunctionCall;
 BreakStmt : Statement;
 ReturnStmt : Statement;
 abstract IfWhenStmt : Statement ::= IfWhenClause*;
-IfStmt : IfWhenStmt ::= ElseStmts:Statement*;
+IfStmt : IfWhenStmt ::= ElseStmt:Statement*;
 WhenStmt : IfWhenStmt;
 abstract IfWhenClause ::= Test:Exp Statement*;
 IfClause : IfWhenClause;                // Subclasses of IfWhenClause might not be needed
 WhenClause : IfWhenClause;
-ForStmt : Statement ::= ForIndex* ForStmts:Statement*;
-WhileStmt : Statement ::= Test:Exp WhileStmts:Statement*;
+ForStmt : Statement ::= ForIndex* ForStmt:Statement*;
+WhileStmt : Statement ::= Test:Exp WhileStmt:Statement*;
 AlgorithmAnnotation : Statement ::= Annotation;
 
 IfExp : Exp ::= IfExp:Exp ThenExp:Exp ElseIfExp* ElseExp:Exp;
