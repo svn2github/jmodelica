@@ -1184,47 +1184,5 @@ equation
  end for;
 end EndExpTest3;
 
-model EndExpTest5
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="EndExpTest5",
-        description="Short class declaration of Real.",
-                                               errorMessage=
-"
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 1185, column 1:
-  Algorithms are not supported
-")})));
-
- Real x;
-algorithm
- if true then
-   x:=3;
- else
-   x:=5;
- end if;
-
-end EndExpTest5;
-
-model EndExpTest6
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="EndExpTest6",
-        description="Short class declaration of Real.",
-                                               errorMessage=
-"
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 1206, column 1:
-  Algorithms are not supported
-")})));
-
- Real x[2];
- Integer i;
-algorithm
- i:=1;
- while i <=2 loop
-  x[i] := i;
-  i:=i+1;
- end while;
-end EndExpTest6;
-
 
 end NameTests;

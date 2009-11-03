@@ -700,7 +700,7 @@ abstract FBuiltInFunctionCall : FAbstractFunctionCall;
 /**
  * \brief Base class for calls to built-in mathematical functions.
  */
-FMathematicalFunctionCall : FBuiltInFunctionCall ::= FExp;
+abstract FMathematicalFunctionCall : FBuiltInFunctionCall ::= FExp;
 
 /**
  * \brief Sin built-in function.

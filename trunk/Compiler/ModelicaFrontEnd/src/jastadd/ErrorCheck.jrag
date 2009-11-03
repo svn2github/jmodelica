@@ -274,10 +274,20 @@ aspect ErrorCheck {
 	  root().getErrorHandler().warning(s, this);
   }
 
+  /**
+   * \brief Call all *Check() methods for this node.
+   * 
+   * Helper method to make it easier to add new check methods 
+   * for all nodes.
+   */
+  protected void ASTNode.allChecks() {
+	  nameCheck();
+	  typeCheck();
+	  contentCheck();	  
+  }
   
   public void ASTNode.collectErrors() {
-	  nameCheck();
-	  typeCheck();	  
+	  allChecks();
 	  for(int i = 0; i < getNumChild(); i++) {
 		  getChild(i).collectErrors();
 	  }
@@ -391,8 +401,7 @@ aspect InstanceErrorCheck {
     debugPrint(prettyPrint("   #### ") + " errorChecked="+errorChecked);
     if (!errorChecked) {
       errorChecked = true;
-	  nameCheck();
-	  typeCheck();	  
+	  allChecks();
 	  for(InstNode n : getInstComponentDecls()) 
 		  n.collectErrors();
 	  for(InstNode n : getInstClassDecls()) 
@@ -435,9 +444,6 @@ aspect InstanceErrorCheck {
 				//System.out.println(fcd.getName().getID() +  " " + fcd.getEndName());
 				if (!(fcd.getName().getID().equals(fcd.getEndName()))) {
 					error("The declaration and end names of a class should be the same");
-				}
-				if (fcd.getNumAlgorithm()>0) {
-					error("Algorithms are not supported");
 				}
 			}
   		}
@@ -554,8 +560,7 @@ aspect InstanceErrorCheck {
     if (!errorChecked) {
       debugPrint(prettyPrint("   ### "));
       errorChecked = true;
-	  nameCheck();
-	  typeCheck();	  
+	  allChecks();
       // Normally the class modifications in an InstExtendsShortClass
       // does not need to be checked, since they are checked in InstShortClassDecl.
       // This is not the case if the short class decl references
