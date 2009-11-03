@@ -264,6 +264,85 @@ aspect FlatExpressions {
 	   	fc.addFInitialEquation(new FInitialEquation(getLeft().flatten(prefix),getRight().flatten(prefix)));
 	}
 
+	public void FAlgorithmBlock.flatten(FQName prefix, FClass fc) {
+		List l = FStatement.flattenFStatementList(prefix, getFStatements());
+		fc.getFEquationBlock(0).addFAbstractEquation(new FAlgorithmBlock(l));
+	}
+	
+	public static List<FStatement> FStatement.flattenFStatementList(FQName prefix, List<FStatement> l) {
+		List<FStatement> l2 = new List<FStatement>();
+		for (FStatement s : l) 
+			l2.add(s.flatten(prefix));
+		return l2;
+	}
+	
+	public abstract FStatement FStatement.flatten(FQName prefix);
+	
+	public FAssignStmt InstAssignStmt.flatten(FQName prefix) {
+		return new FAssignStmt(getLeft().flatten(prefix), 
+				               getRight().flatten(prefix));
+	}
+	
+	public FFunctionCallStmt InstFunctionCallStmt.flatten(FQName prefix) {
+		List<FIdUse> l = new List<FIdUse>();
+		for (FIdUseInstAccess a : getLefts())
+			l.add(a.flatten(prefix));
+		return new FFunctionCallStmt(l, getCall().flatten(prefix));
+	}
+	
+	public FIfWhenStmt FIfWhenStmt.flatten(FQName prefix) {
+		List l = new List();
+		for (FIfWhenClause c : getFIfWhenClauses()) 
+			l.add(c.flatten(prefix));
+		return flattenFIfWhenStmt(prefix, l);
+	}
+	
+	protected abstract FIfWhenStmt FIfWhenStmt.flattenFIfWhenStmt(FQName prefix, List l);
+	
+	protected FIfStmt FIfStmt.flattenFIfWhenStmt(FQName prefix, List icl) {
+		List esl = FStatement.flattenFStatementList(prefix, getElseStmts());
+		return new FIfStmt(icl, esl);
+	}
+	
+	protected FWhenStmt FWhenStmt.flattenFIfWhenStmt(FQName prefix, List l) {
+		return new FWhenStmt(l);
+	}
+	
+	public FIfWhenClause FIfWhenClause.flatten(FQName prefix) {
+		FExp t = getTest().flatten(prefix);
+		List l = FStatement.flattenFStatementList(prefix, getFStatements());
+		return flattenFIfWhenClause(t, l);
+	}
+	
+	protected abstract FIfWhenClause FIfWhenClause.flattenFIfWhenClause(FExp t, List l);
+	
+	protected FIfClause FIfClause.flattenFIfWhenClause(FExp t, List l) {
+		return new FIfClause(t, l);
+	}
+	
+	protected FWhenClause FWhenClause.flattenFIfWhenClause(FExp t, List l) {
+		return new FWhenClause(t, l);
+	}
+	
+	public FForStmt FForStmt.flatten(FQName prefix) {
+		List il = new List();
+		for (FForIndex i : getFForIndexList()) 
+			il.add(i.flatten(prefix));
+		List sl = FStatement.flattenFStatementList(prefix, getForStmts());
+		return new FForStmt(il, sl);
+	}
+	
+	public FWhileStmt FWhileStmt.flatten(FQName prefix) {
+		List l = FStatement.flattenFStatementList(prefix, getWhileStmts());
+		return new FWhileStmt(getTest().flatten(prefix), l);
+	}
+	
+	public FBreakStmt FBreakStmt.flatten(FQName prefix)   { return new FBreakStmt(); }
+	public FReturnStmt FReturnStmt.flatten(FQName prefix) { return new FReturnStmt(); }
+	
+	public FAssignStmt FAssignStmt.flatten(FQName prefix)             { return null; }
+	public FFunctionCallStmt FFunctionCallStmt.flatten(FQName prefix) { return null; }
+
 	public FArraySubscripts FArraySubscripts.flatten(FQName prefix) {
 		List l = new List();
 		for (int i=0;i<getNumFSubscript();i++)
@@ -389,22 +468,32 @@ aspect FlatExpressions {
 	public FExp FBooleanLitExpTrue.flatten(FQName prefix) { return (FBooleanLitExpTrue)fullCopy(); }
 	public FExp FBooleanLitExpFalse.flatten(FQName prefix) { return (FBooleanLitExpFalse)fullCopy(); }
 	
-	public FExp FSinExp.flatten(FQName prefix) { return new FSinExp(getFExp().flatten(prefix)); }
-	public FExp FCosExp.flatten(FQName prefix) { return new FCosExp(getFExp().flatten(prefix)); }
-	public FExp FTanExp.flatten(FQName prefix) { return new FTanExp(getFExp().flatten(prefix)); }
-	public FExp FAsinExp.flatten(FQName prefix) { return new FAsinExp(getFExp().flatten(prefix)); }
-	public FExp FAcosExp.flatten(FQName prefix) { return new FAcosExp(getFExp().flatten(prefix)); }
-	public FExp FAtanExp.flatten(FQName prefix) { return new FAtanExp(getFExp().flatten(prefix)); }
-	public FExp FAtan2Exp.flatten(FQName prefix) { return new FAtan2Exp(getFExp().flatten(prefix),getY().flatten(prefix)); }
-	public FExp FSinhExp.flatten(FQName prefix) { return new FSinhExp(getFExp().flatten(prefix)); }
-	public FExp FCoshExp.flatten(FQName prefix) { return new FCoshExp(getFExp().flatten(prefix)); }
-	public FExp FTanhExp.flatten(FQName prefix) { return new FTanhExp(getFExp().flatten(prefix)); }
-	public FExp FExpExp.flatten(FQName prefix) { return new FExpExp(getFExp().flatten(prefix)); }
-	public FExp FLogExp.flatten(FQName prefix) { return new FLogExp(getFExp().flatten(prefix)); }
-	public FExp FLog10Exp.flatten(FQName prefix) { return new FLog10Exp(getFExp().flatten(prefix)); }
-	public FExp FSqrtExp.flatten(FQName prefix) { return new FSqrtExp(getFExp().flatten(prefix)); }
+	public abstract FAbstractFunctionCall     FAbstractFunctionCall.flatten(FQName prefix);
+	public abstract FBuiltInFunctionCall      FBuiltInFunctionCall.flatten(FQName prefix);
+	public abstract FMathematicalFunctionCall FMathematicalFunctionCall.flatten(FQName prefix);
 	
-	public FExp InstDerExp.flatten(FQName prefix) {
+	public FSinExp   FSinExp.flatten(FQName prefix)   { return new FSinExp(getFExp().flatten(prefix)); }
+	public FCosExp   FCosExp.flatten(FQName prefix)   { return new FCosExp(getFExp().flatten(prefix)); }
+	public FTanExp   FTanExp.flatten(FQName prefix)   { return new FTanExp(getFExp().flatten(prefix)); }
+	public FAsinExp  FAsinExp.flatten(FQName prefix)  { return new FAsinExp(getFExp().flatten(prefix)); }
+	public FAcosExp  FAcosExp.flatten(FQName prefix)  { return new FAcosExp(getFExp().flatten(prefix)); }
+	public FAtanExp  FAtanExp.flatten(FQName prefix)  { return new FAtanExp(getFExp().flatten(prefix)); }
+	public FAtan2Exp FAtan2Exp.flatten(FQName prefix) { return new FAtan2Exp(getFExp().flatten(prefix), getY().flatten(prefix)); }
+	public FSinhExp  FSinhExp.flatten(FQName prefix)  { return new FSinhExp(getFExp().flatten(prefix)); }
+	public FCoshExp  FCoshExp.flatten(FQName prefix)  { return new FCoshExp(getFExp().flatten(prefix)); }
+	public FTanhExp  FTanhExp.flatten(FQName prefix)  { return new FTanhExp(getFExp().flatten(prefix)); }
+	public FExpExp   FExpExp.flatten(FQName prefix)   { return new FExpExp(getFExp().flatten(prefix)); }
+	public FLogExp   FLogExp.flatten(FQName prefix)   { return new FLogExp(getFExp().flatten(prefix)); }
+	public FLog10Exp FLog10Exp.flatten(FQName prefix) { return new FLog10Exp(getFExp().flatten(prefix)); }
+	public FSqrtExp  FSqrtExp.flatten(FQName prefix)  { return new FSqrtExp(getFExp().flatten(prefix)); }
+	
+	// These used to delegate to standard implementation for FExp.flatten(FQName).
+	public FIdentity  FIdentity.flatten(FQName prefix)  { return null; }
+	public FScalar    FScalar.flatten(FQName prefix)    { return null; }
+	public FSizeExp   FSizeExp.flatten(FQName prefix)   { return null; }
+	public FTranspose FTranspose.flatten(FQName prefix) { return null; }
+	
+	public FDerExp InstDerExp.flatten(FQName prefix) {
 		/* This should only ever be called on InstDerExps that has an FInstAccessExp 
 		 * as its FExp. All more complex "der()" expressions should have been either 
 		 * rewritten in the instance tree or have generated an error during checks. 
@@ -413,7 +502,7 @@ aspect FlatExpressions {
 		return new FDerExp(new FIdUse(var));
 	}
 	
-	public FExp FOnes.flatten(FQName prefix) { 
+	public FOnes FOnes.flatten(FQName prefix) { 
 		List<FExp> l = new List<FExp>();
 		for (FExp e : getFExps()) {
 			l.add(e.flatten(prefix));
@@ -421,7 +510,7 @@ aspect FlatExpressions {
 		return new FOnes(l); 
 	}
 
-	public FExp FZeros.flatten(FQName prefix) { 
+	public FZeros FZeros.flatten(FQName prefix) { 
 		List<FExp> l = new List<FExp>();
 		for (FExp e : getFExps()) {
 			l.add(e.flatten(prefix));
@@ -429,10 +518,10 @@ aspect FlatExpressions {
 		return new FZeros(l); 
 	}
 	
-	public FExp FTimeExp.flatten(FQName prefix) { return new FTimeExp(); }
-	public FExp FEndExp.flatten(FQName prefix) { return new FEndExp(); }
+	public FTimeExp FTimeExp.flatten(FQName prefix) { return new FTimeExp(); }
+	public FEndExp  FEndExp.flatten(FQName prefix)  { return new FEndExp(); }
 		
-	public FExp FFunctionCall.flatten(FQName prefix) {
+	public FFunctionCall FFunctionCall.flatten(FQName prefix) {
 		List l = new List();
 		List args = new List();
 		for (FExp e : getArgss()) {
@@ -441,7 +530,7 @@ aspect FlatExpressions {
 		return new FFunctionCall(getName().flatten(new FQName()),l);		
 	}
 
-	public FExp InstFunctionCall.flatten(FQName prefix) {
+	public FFunctionCall InstFunctionCall.flatten(FQName prefix) {
 		List l = new List();
 		List args = new List();
 		for (FExp e : getArgss()) {
@@ -610,14 +699,14 @@ aspect InstantiatedExpressions {
 	}
 	
 	protected InstAssignStmt AssignStmt.instantiateStatement() {
-		return new InstAssignStmt(getLeft().instantiate(), 
-				                  getRight().instantiate());
+		FIdUseInstAccess left = new FIdUseInstAccess(new FQName(), getLeft().newInstAccess());
+		return new InstAssignStmt(left, getRight().instantiate());
 	}
 	
 	protected InstFunctionCallStmt FunctionCallStmt.instantiateStatement() {
 		List l = new List();
 		for (Access a : getLefts()) 
-			l.add(a.newInstAccess());
+			l.add(new FIdUseInstAccess(new FQName(), a.newInstAccess()));
 		return new InstFunctionCallStmt(l, getFunctionCall().instantiate());
 	}
 	

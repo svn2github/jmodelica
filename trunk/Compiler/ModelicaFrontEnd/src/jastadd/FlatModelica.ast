@@ -333,19 +333,19 @@ abstract FStatement;
 /**
  * \brief An assignment statement in the instance tree.
  */
-InstAssignStmt : FStatement ::= Left:InstAccess Right:FExp;
+InstAssignStmt : FStatement ::= Left:FIdUseInstAccess Right:FExp;
 
 /**
  * \brief A flattened assignment statement.
  */
-FAssignStmt : FStatement ::= Left:FExp Right:FExp;
+FAssignStmt : FStatement ::= Left:FIdUse Right:FExp;
 
 /**
  * \brief A function call statement in the instance tree.
  *
  * @see FFunctionCallStmt
  */
-InstFunctionCallStmt : FStatement ::= Left:InstAccess* Call:FExp;
+InstFunctionCallStmt : FStatement ::= Left:FIdUseInstAccess* Call:FAbstractFunctionCall;
 
 /**
  * \brief A flattened function call statement.
@@ -355,7 +355,7 @@ InstFunctionCallStmt : FStatement ::= Left:InstAccess* Call:FExp;
  * exactly one return value are handled by FAssignStmt through FFunctionCall. 
  * (FFunctionCall inherits FExp, since it can be used in expressions).
  */
-FFunctionCallStmt : FStatement ::= Left:FExp* Call:FExp;
+FFunctionCallStmt : FStatement ::= Left:FIdUse* Call:FAbstractFunctionCall;
 
 /**
  * \brief Flattened break statement.
