@@ -72,17 +72,6 @@ XML schemas, third party dependencies and makefiles used to build the
 generated C code are copied into the installation directory. Also, the
 Python code is copied into the installation directory. 
 
-In order to build the JMI examples, type 
-
- > make jmi-examples 
- 
-which will build executables for the examples in the 'JMI/examples'
-directory. Notice that --with-ipopt has to be provided in order to
-build the examples. In order to remove compiled executables and shared
-object files in the 'JMI/examples' directories, run
-
- > make clean-jmi-examples
-
 5. Generate documentation.
 
 The command 
