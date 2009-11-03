@@ -389,7 +389,6 @@ aspect FlatExpressions {
 	public FExp FBooleanLitExpTrue.flatten(FQName prefix) { return (FBooleanLitExpTrue)fullCopy(); }
 	public FExp FBooleanLitExpFalse.flatten(FQName prefix) { return (FBooleanLitExpFalse)fullCopy(); }
 	
-	public FExp FDer.flatten(FQName prefix) {return new FDer(getFIdUse().flatten(prefix));}
 	public FExp FSinExp.flatten(FQName prefix) { return new FSinExp(getFExp().flatten(prefix)); }
 	public FExp FCosExp.flatten(FQName prefix) { return new FCosExp(getFExp().flatten(prefix)); }
 	public FExp FTanExp.flatten(FQName prefix) { return new FTanExp(getFExp().flatten(prefix)); }
@@ -404,6 +403,15 @@ aspect FlatExpressions {
 	public FExp FLogExp.flatten(FQName prefix) { return new FLogExp(getFExp().flatten(prefix)); }
 	public FExp FLog10Exp.flatten(FQName prefix) { return new FLog10Exp(getFExp().flatten(prefix)); }
 	public FExp FSqrtExp.flatten(FQName prefix) { return new FSqrtExp(getFExp().flatten(prefix)); }
+	
+	public FExp InstDerExp.flatten(FQName prefix) {
+		/* This should only ever be called on InstDerExps that has an FInstAccessExp 
+		 * as its FExp. All more complex "der()" expressions should have been either 
+		 * rewritten in the instance tree or have generated an error during checks. 
+		 */
+		FQName var = ((FInstAccessExp) getFExp()).getInstAccess().flatten(prefix);
+		return new FDerExp(new FIdUse(var));
+	}
 	
 	public FExp FOnes.flatten(FQName prefix) { 
 		List<FExp> l = new List<FExp>();
@@ -703,6 +711,14 @@ aspect InstantiatedExpressions {
 		return ue;
 	}
 
+	
+	public InstDerExp DerExp.instantiate() {
+		InstDerExp n = new InstDerExp(getExp().instantiate());
+		n.setStart(getStart());
+		n.setEnd(getEnd());
+		return n;
+	}
+	
 
 	public FExp AccessExp.instantiate() {
 		FInstAccessExp n = new FInstAccessExp(getAccess().newInstAccess());
@@ -939,21 +955,20 @@ aspect InstantiatedExpressions {
 		return n;
 	}	
 	
-	public FExp FunctionCall.instantiate() {
+	public FAbstractFunctionCall FunctionCall.instantiate() {
 		List<FExp> l = new List<FExp>();
-		List args = new List();
+		List<Exp> args = new List<Exp>();
 		if (hasFunctionArguments())
-			args =  getFunctionArguments().getExpList();
-		for (int i=0;i<args.getNumChild();i++) {
-			l.add(((Exp)args.getChild(i)).instantiate());
-			l.getChildNoTransform(i).setStart(getStart());
-			l.getChildNoTransform(i).setEnd(getEnd());
+			args = getFunctionArguments().getExpList();
+		for (Exp arg : args) {
+			FExp exp = arg.instantiate();
+			l.add(exp);
+			exp.setStart(getStart());
+			exp.setEnd(getEnd());
 		}
 		
-		FExp n = null;
-		if (getName().name().equals("der")) {
-			n = new FDer(new FIdUseInstAccess(new FQName(), ((FInstAccessExp)l.getChildNoTransform(0)).getInstAccessNoTransform())); 
-		} else if (getName().name().equals("sin")) {
+		FAbstractFunctionCall n = null;
+		if (getName().name().equals("sin")) {
 			n = new FSinExp((FExp)l.getChildNoTransform(0)); 
 		} else if (getName().name().equals("cos")) {
 			n = new FCosExp((FExp)l.getChildNoTransform(0)); 
@@ -999,7 +1014,7 @@ aspect InstantiatedExpressions {
 	boolean InstFunctionCall.rewritten = false;
 	rewrite InstFunctionCall {
     	when (!rewritten)
-    		to FExp {
+    		to FAbstractFunctionCall {
     		    // TODO: WHY is this needed??? If removed, lookup of qualified
     		    // names in InstFunctionCalls are not not rewritten to
     		    // InstComponentAccesses for some reason.
@@ -1008,7 +1023,7 @@ aspect InstantiatedExpressions {
     		    // qualified name, instead of right to left.
     		    getName().name();
     		    
-    			FExp n = null;
+    		    FAbstractFunctionCall n = null;
     			String name = getName().myInstClassDecl().qualifiedName(); 
     			if (name.equals("Modelica.Math.sin")) {
     				n = new FSinExp(getArgs(0));

@@ -375,7 +375,7 @@ aspect FlatAPI {
   	// The LinkedHashSet is used here to avoid duplicates.
 	coll LinkedHashSet<FVariable> FClass.differentiatedRealVariablesSet() 
 	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
-	FDer contributes
+	FDerExp contributes
  		(FVariable)getFIdUse().myFV() when !getFIdUse().myFV().isUnknown()
 	to FClass.differentiatedRealVariablesSet() for myFClass();
 	syn int FVariable.differentiatedRealVariableIndex() =
@@ -998,7 +998,7 @@ aspect FVariableUses {
 	coll HashSet<FIdUseExp> FVariable.uses() [new HashSet<FIdUseExp>()] 
 	   with add root FlatRoot;
 	
-	FIdUseExp contributes this when !(getParent() instanceof FDer) to 
+	FIdUseExp contributes this when !(getParent() instanceof FDerExp) to 
 	   FVariable.uses() for myFV();
 
 }
@@ -1052,7 +1052,7 @@ aspect LinearFVariables {
 	eq FDivExp.getRight().isLinear() = false;		
     eq FPowExp.getChild().isLinear() = false;
     eq FFunctionCall.getChild().isLinear() = false;
-    eq FBuiltInExp.getChild().isLinear() = false;
+    eq FMathematicalFunctionCall.getChild().isLinear() = false;
 				
 }
 

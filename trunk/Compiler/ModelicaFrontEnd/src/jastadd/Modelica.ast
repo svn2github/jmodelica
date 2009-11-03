@@ -372,6 +372,8 @@ OutputExpressionList : Exp ::= Exp*;
 
 IdDecl ::=<ID>;
 
+DerExp : Exp ::= Exp;
+
 AccessExp : Exp ::= Access;
 
 abstract Access ::= <ID>;

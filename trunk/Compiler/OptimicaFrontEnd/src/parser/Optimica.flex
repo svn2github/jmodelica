@@ -211,11 +211,12 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
 	 "when"      { return newSymbol(Terminals.WHEN); }
 	 "elsewhen"      { return newSymbol(Terminals.ELSEWHEN); }
 	 
-//	 "break"      { return newSymbol(Terminals.BREAK); }
+	 "break"      { return newSymbol(Terminals.BREAK); }
 	 "return"      { return newSymbol(Terminals.RETURN); }
  
  "connect"         { return newSymbol(Terminals.CONNECT); }
  "time"         { return newSymbol(Terminals.TIME); }
+ "der"              { return newSymbol(Terminals.DER); }
    "constraint"         { return newSymbol(Terminals.CONSTRAINT); }
   "optimization"         { return newSymbol(Terminals.OPTIMIZATION); }
  

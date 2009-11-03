@@ -1025,6 +1025,7 @@ Exp primary =
   | FALSE                {: return new BooleanLitExpFalse(); :}
   | STRING.s               {: return new StringLitExp(s); :}
   | access_expression   {: return access_expression; :}
+  | der_expression      {: return der_expression; :}
   | LPAREN exp.a RPAREN {: return a; :}
   | LPAREN arg_list RPAREN {: return new OutputExpressionList(arg_list); :}
   | function_call {: return function_call; :}
@@ -1119,8 +1120,13 @@ StringComment string_comment =
    ;
 
  AccessExp access_expression =
-   parse_access {: return new AccessExp(parse_access); :};
-   
+   parse_access {: return new AccessExp(parse_access); :}
+   ;
+
+ DerExp der_expression = 
+   DER LPAREN exp RPAREN  {: return new DerExp(exp); :}
+   ;
+
  Access parse_access = 
    parse_access_single   {: return parse_access_single; :}
    | parse_access_single DOT parse_access {: return new Dot(parse_access_single.getID(),parse_access_single,parse_access); :}

@@ -974,8 +974,8 @@ aspect FlattPrettyPrint {
 		str.print(getInstAccess().name());
 	}
 	
-	public void FDer.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		debugPrint("FDer.prettyPrint");
+	public void FDerExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		debugPrint("FDerExp.prettyPrint");
 		str.print(name());
 	}
 

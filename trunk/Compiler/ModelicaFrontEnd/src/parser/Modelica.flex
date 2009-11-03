@@ -253,6 +253,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
  
  "connect"         { return newSymbol(Terminals.CONNECT); }
  "time"         { return newSymbol(Terminals.TIME); }
+ "der"              { return newSymbol(Terminals.DER); }
  
   
   

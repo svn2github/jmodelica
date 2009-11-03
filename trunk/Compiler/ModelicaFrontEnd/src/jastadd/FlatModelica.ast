@@ -571,16 +571,6 @@ FBooleanLitExpFalse : FBooleanLitExp;
  */
 FStringLitExp : FLitExp ::= <String>;
 
-/**
- * \brief Function call expression.
- */
-FFunctionCall : FExp ::= Name:FIdUse Args:FExp*;
-
-/**
- * \brief Function call expression in instance trees.
- */
-InstFunctionCall : FExp ::= Name:InstAccess Args:FExp*;
-
 
 /**
  * \brief Summation reduction expression.
@@ -628,9 +618,14 @@ FIdUse ::= FQName;
 FIdUseExp : FExp ::= FIdUse;
 
 /**
+ * \brief The built-in function der in the instance tree.
+ */
+InstDerExp : FUnaryExp; 
+
+/**
  * \brief The built-in function der.
  */
-FDer : FIdUseExp ::=; 
+FDerExp : FIdUseExp; 
 
 /**
  * \brief Identifier in the instance tree.
@@ -680,109 +675,130 @@ FTimeExp : FExp;
 FEndExp : FExp;
 
 
+// Functions and function-like operators
+/**
+ * \brief Base class for all function calls and function call-like operators.
+ */
+abstract FAbstractFunctionCall : FExp;
+ 
+/**
+ * \brief Generic function call expression.
+ */
+FFunctionCall : FAbstractFunctionCall ::= Name:FIdUse Args:FExp*;
+
+/**
+ * \brief Generic function call expression in instance trees.
+ */
+InstFunctionCall : FAbstractFunctionCall ::= Name:InstAccess Args:FExp*;
+
 // Built in functions
 /**
- * \brief Base class for built-in mathematical functions.
+ * \brief Base class for calls to all built-in functions. 
  */
-FBuiltInExp : FExp ::= FExp;
+abstract FBuiltInFunctionCall : FAbstractFunctionCall;
+
+/**
+ * \brief Base class for calls to built-in mathematical functions.
+ */
+FMathematicalFunctionCall : FBuiltInFunctionCall ::= FExp;
 
 /**
  * \brief Sin built-in function.
  */
-FSinExp : FBuiltInExp ::= ;
+FSinExp : FMathematicalFunctionCall ::= ;
 
 /**
  * \brief Cos built-in function.
  */
-FCosExp : FBuiltInExp ::= ;
+FCosExp : FMathematicalFunctionCall ::= ;
 
 /**
  * \brief Tan built-in function.
  */
-FTanExp : FBuiltInExp ::= ;
+FTanExp : FMathematicalFunctionCall ::= ;
 
 /**
  * \brief Asin built-in function.
  */
-FAsinExp : FBuiltInExp ::= ;
+FAsinExp : FMathematicalFunctionCall ::= ;
 
 /**
  * \brief ACos built-in function.
  */
-FAcosExp : FBuiltInExp ::= ;
+FAcosExp : FMathematicalFunctionCall ::= ;
 
 /**
  * \brief ATan built-in function.
  */
-FAtanExp : FBuiltInExp ::= ;
+FAtanExp : FMathematicalFunctionCall ::= ;
 
 /**
  * \brief Atan2 built-in function.
  */
-FAtan2Exp : FBuiltInExp ::= Y:FExp;
+FAtan2Exp : FMathematicalFunctionCall ::= Y:FExp;
 
 /**
  * \brief Sinh built-in function.
  */
-FSinhExp : FBuiltInExp ::= ;
+FSinhExp : FMathematicalFunctionCall ::= ;
 
 /**
  * \brief Cosh built-in function.
  */
-FCoshExp : FBuiltInExp ::= ;
+FCoshExp : FMathematicalFunctionCall ::= ;
 
 /**
  * \brief Tanh built-in function.
  */
-FTanhExp : FBuiltInExp ::= ;
+FTanhExp : FMathematicalFunctionCall ::= ;
 
 /**
  * \brief Exp built-in function.
  */
-FExpExp : FBuiltInExp ::= ;
+FExpExp : FMathematicalFunctionCall ::= ;
 
 /**
  * \brief Log built-in function.
  */
-FLogExp : FBuiltInExp ::= ;
+FLogExp : FMathematicalFunctionCall ::= ;
 
 /**
  * \brief Log10 built-in function.
  */
-FLog10Exp : FBuiltInExp ::= ;
+FLog10Exp : FMathematicalFunctionCall ::= ;
 
 /**
  * \brief Sqrt built-in function.
  */
-FSqrtExp : FBuiltInExp ::= ;
+FSqrtExp : FMathematicalFunctionCall ::= ;
 
 /**
  * \brief Size built-in function.
  */
-FSizeExp : FExp ::= FIdUseExp Dim:FExp;
+FSizeExp : FBuiltInFunctionCall ::= FIdUseExp Dim:FExp;
 
 /**
  * \brief Scalar built-in function.
  */
-FScalar : FUnaryExp ::=;
+FScalar : FBuiltInFunctionCall ::= FExp;
 
 /**
  * \brief Transpose built-in function.
  */
-FTranspose : FUnaryExp ::=;
+FTranspose : FBuiltInFunctionCall ::= FExp;
 
 /**
  * \brief Identity built-in function.
  */
-FIdentity : FUnaryExp ::=;
+FIdentity : FBuiltInFunctionCall ::= FExp;
 
 /**
  * \brief Ones built-in function.
  */
-FOnes : FExp ::= FExp*;
+FOnes : FBuiltInFunctionCall ::= FExp*;
 
 /**
  * \brief Zeros built-in function.
  */
-FZeros : FExp ::= FExp*;
+FZeros : FBuiltInFunctionCall ::= FExp*;
 

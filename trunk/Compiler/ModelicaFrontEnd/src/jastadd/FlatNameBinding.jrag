@@ -41,7 +41,7 @@ aspect FlatNameBinding {
 	}
 	
 	/*
-	inh AbstractFVariable FDer.lookupFDV(String name);
+	inh AbstractFVariable FDerExp.lookupFDV(String name);
 	eq Root.getChild().lookupFDV(String name) = null;
 	eq FClass.getChild(int index).lookupFDV(String name) {
 		FVariable variable = (FDerivativeVariable) 
@@ -52,7 +52,7 @@ aspect FlatNameBinding {
 			return variable;
 		}		
 	}
-	syn lazy FDerivativeVariable FDer.myFDV() = 
+	syn lazy FDerivativeVariable FDerExp.myFDV() = 
 		(FDerivativeVariable)lookupFDV(getFIdUseExp().derName());	
 	*/
 	

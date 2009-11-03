@@ -94,7 +94,7 @@ aspect FlatTypeAnalysis {
 	eq FBooleanLitExp.type() = fBooleanScalarType();
 	eq FStringLitExp.type() = fStringScalarType();
 	eq FTimeExp.type() = fRealScalarType();
-	eq FDer.type() = fRealScalarType();
+	eq FDerExp.type() = fRealScalarType();
 	
 	eq FArray.type() {
 		int[] size = size().clone();
@@ -141,7 +141,7 @@ aspect FlatTypeAnalysis {
 		}
 	}	
 	
-	eq FBuiltInExp.type() = fRealScalarType();		
+	eq FMathematicalFunctionCall.type() = fRealScalarType();		
 			
 }
 
@@ -475,7 +475,7 @@ aspect ExpressionType {
 
 	// TODO: Some error checking should be done here
 	// The expression must be a subtype of real
-	eq FDer.type() {
+	eq FDerExp.type() {
 		warning("Type checking not implemented on der expressions.");
 		return(getFIdUseExp().type());
 	}

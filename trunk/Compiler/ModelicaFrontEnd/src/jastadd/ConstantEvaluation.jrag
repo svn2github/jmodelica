@@ -1041,7 +1041,7 @@ aspect CircularExpressions {
 		return false;
 	}
 	
-	eq FBuiltInExp.isCircular() = getFExp().isCircular();
+	eq FMathematicalFunctionCall.isCircular() = getFExp().isCircular();
 	eq FAtan2Exp.isCircular() = getFExp().isCircular() | getY().isCircular();
 	eq FSizeExp.isCircular() = getFIdUseExp().isCircular() | getDim().isCircular();
 	eq FOnes.isCircular() {

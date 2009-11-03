@@ -319,22 +319,22 @@ aspect TransformCanonical{
 	}
 	
 	/**
-	 * \brief FDers referring to alias variables need to be changed to 
-	 * FDers referring to their alias targets. 
+	 * \brief FDerExps referring to alias variables need to be changed to 
+	 * FDerExps referring to their alias targets. 
 	 * 
 	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
 	 * is true. Notice that in order for the rewrite to be enable, the is$final
 	 * field of FIdUseExp needs to be set to false: this is done by the recursive
 	 * method ASTNode.flushAllRecursiveClearFinal. 
 	 */
-	rewrite FDer {
+	rewrite FDerExp {
 		when (!rewritten && myFClass() != null && 
 				myFClass().aliasVariablesEliminated &&
 				!getFIdUse().myFV().isUnknown() && getFIdUse().myFV().isAlias()) to FExp {
 			FQName new_name = (FQName)((FVariable)getFIdUse().myFV()).alias().getFQName().fullCopy();
 			//FQName old_name = getFIdUse().getFQName();
 			FExp new_exp = null;
-			FDer der_exp = new FDer(new FIdUse(new_name));
+			FDerExp der_exp = new FDerExp(new FIdUse(new_name));
 			der_exp.rewritten = true;
 			if (getFIdUse().myFV().isNegated()) {
 				new_exp = new FNegExp(der_exp);
@@ -512,7 +512,7 @@ aspect Scalarization {
 	public FExp FBooleanLitExpTrue.scalarize() { return (FBooleanLitExpTrue)fullCopy(); }
 	public FExp FBooleanLitExpFalse.scalarize() { return (FBooleanLitExpFalse)fullCopy(); }
 	
-	public FExp FDer.scalarize() {return new FDer(getFIdUse().scalarize());}
+	public FExp FDerExp.scalarize() {return new FDerExp(getFIdUse().scalarize());}
 	public FExp FSinExp.scalarize() { return new FSinExp(getFExp().scalarize()); }
 	public FExp FCosExp.scalarize() { return new FCosExp(getFExp().scalarize()); }
 	public FExp FTanExp.scalarize() { return new FTanExp(getFExp().scalarize()); }
@@ -716,7 +716,7 @@ aspect FlushFClass {
 	/**
 	 * \brief Flush all caches, including collection attributes, and also
 	 * flush all children. In addition, the is$final attribute is set to false
-	 * for FIdUseExps and FDers in order to enable rewrites of such nodes
+	 * for FIdUseExps and FDerExps in order to enable rewrites of such nodes
 	 * after elimination of alias variables.
 	 */
 	public void ASTNode.flushAllRecursiveClearFinal() {
@@ -735,7 +735,7 @@ aspect FlushFClass {
 		}
 	}
 	
-	public void FDer.flushAllRecursiveClearFinal() {
+	public void FDerExp.flushAllRecursiveClearFinal() {
 		flushAll();
 		is$Final = false;
 		for (int i=0;i<getNumChild();i++) {
@@ -755,7 +755,7 @@ aspect FlushFClass {
 	}
 	
 	/**
-	 * \brief Flush model AST and enable rewrites of FIdUseExps and FDers
+	 * \brief Flush model AST and enable rewrites of FIdUseExps and FDerExps
 	 * after alias elimination.
 	 */
 	public void FClass.flush() {

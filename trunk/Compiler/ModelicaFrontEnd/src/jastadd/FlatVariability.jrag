@@ -89,7 +89,11 @@ aspect FlatVariability {
 	
 	eq FEndExp.variability() = fParameter();
 	
-	eq FBuiltInExp.variability() = getFExp().variability();
+	eq FMathematicalFunctionCall.variability() = getFExp().variability();
+	
+	eq FScalar.variability() = getFExp().variability();
+	
+	eq FTranspose.variability() = getFExp().variability();
 	
 	eq FIfExp.variability() {
 		FTypePrefixVariability total = getThenExp().variability();
