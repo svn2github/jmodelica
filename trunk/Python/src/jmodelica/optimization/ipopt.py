@@ -21,6 +21,9 @@ import numpy as N
 from jmodelica import jmi
 from jmodelica import io
 
+int = N.int32
+N.int = N.int32
+
 class CollocationOptimizer(object):
     """ An interface to the NLP solver Ipopt. """
     

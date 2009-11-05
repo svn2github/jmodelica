@@ -20,6 +20,9 @@ import numpy as N
 
 from jmodelica import jmi
 
+int = N.int32
+N.int = N.int32
+
 class InitializationOptimizer(object):
     """ An interface to the NLP solver Ipopt. """
     
