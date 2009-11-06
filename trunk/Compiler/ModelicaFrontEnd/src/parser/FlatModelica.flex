@@ -87,17 +87,10 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   
   "end"             { return newSymbol(Terminals.END); }
   
-//    "end" {WhiteSpace} "for"   { addLineBreaks(yytext()); 
-//    return newSymbol(Terminals.END_FOR); }
-
-//  "end" {WhiteSpace} "while"   { addLineBreaks(yytext()); 
-//    return newSymbol(Terminals.END_WHILE); }
-
-//  "end" {WhiteSpace} "if"   { addLineBreaks(yytext()); 
-//    return newSymbol(Terminals.END_IF); }
-
-//  "end" {WhiteSpace} "when"   { addLineBreaks(yytext()); 
-//    return newSymbol(Terminals.END_WHEN); }
+  "end" {WhiteSpace} "for"     { return newSymbol(Terminals.END_FOR); }
+  "end" {WhiteSpace} "while"   { return newSymbol(Terminals.END_WHILE); }
+  "end" {WhiteSpace} "if"      { return newSymbol(Terminals.END_IF); }
+  "end" {WhiteSpace} "when"    { return newSymbol(Terminals.END_WHEN); }
  
     "end" {WhiteSpace} {ID} { String s = yytext();
   			  return newSymbol(Terminals.END_ID, s); }
@@ -115,7 +108,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   
 //  "initial"         { return newSymbol(Terminals.INITIAL); }
    "equation"        { return newSymbol(Terminals.EQUATION); }
- //  "algorithm"        { return newSymbol(Terminals.ALGORITHM); }
+   "algorithm"       { return newSymbol(Terminals.ALGORITHM); }
   
      "each"        { return newSymbol(Terminals.EACH); }
      "final"        { return newSymbol(Terminals.FINAL); }   
@@ -132,12 +125,51 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
 
   "time"         { return newSymbol(Terminals.TIME); }
 
+//    "and"        { return newSymbol(Terminals.AND); }
+//     "or"        { return newSymbol(Terminals.OR); }
+//     "not"        { return newSymbol(Terminals.NOT); }
+//     "true"        { return newSymbol(Terminals.TRUE); }
+//     "false"        { return newSymbol(Terminals.FALSE); }
+     
+     "if"        { return newSymbol(Terminals.IF); }
+     "then"        { return newSymbol(Terminals.THEN); }
+     "else"        { return newSymbol(Terminals.ELSE); }
+     "elseif"        { return newSymbol(Terminals.ELSEIF); }
+     
+     "for"      { return newSymbol(Terminals.FOR); }
+     "loop"      { return newSymbol(Terminals.LOOP); }
+     "in"      { return newSymbol(Terminals.IN); }
+     
+     "while"      { return newSymbol(Terminals.WHILE); }
+
+	 "when"      { return newSymbol(Terminals.WHEN); }
+	 "elsewhen"      { return newSymbol(Terminals.ELSEWHEN); }
+	 
+	 "break"      { return newSymbol(Terminals.BREAK); }
+	 "return"      { return newSymbol(Terminals.RETURN); }
+	
+//  "sin"              { return newSymbol(Terminals.SIN); }
+//  "cos"              { return newSymbol(Terminals.COS); }
+//  "tan"              { return newSymbol(Terminals.TAN); }
+//  "asin"             { return newSymbol(Terminals.ASIN); }
+//  "acos"             { return newSymbol(Terminals.ACOS); }
+//  "atan"             { return newSymbol(Terminals.ATAN); }
+//  "sinh"             { return newSymbol(Terminals.SINH); }
+//  "cosh"             { return newSymbol(Terminals.COSH); }
+//  "tanh"             { return newSymbol(Terminals.TANH); }
+//  "exp"              { return newSymbol(Terminals.EXP); }
+//  "log"              { return newSymbol(Terminals.LOG); }
+//  "log10"            { return newSymbol(Terminals.LOG10); }
+//  "sqrt"             { return newSymbol(Terminals.SQRT); }
+//  "identity"         { return newSymbol(Terminals.IDENTITY); }
+//  "ones"             { return newSymbol(Terminals.ONES); }
+//  "zeroes"           { return newSymbol(Terminals.ZEROES); }
 
   
   "("               { return newSymbol(Terminals.LPAREN); }
   ")"               { return newSymbol(Terminals.RPAREN); }
- //  "{"               { return newSymbol(Terminals.LBRACE); }
- //  "}"               { return newSymbol(Terminals.RBRACE); }
+//  "{"               { return newSymbol(Terminals.LBRACE); }
+//  "}"               { return newSymbol(Terminals.RBRACE); }
    "["               { return newSymbol(Terminals.LBRACK); }	
    "]"               { return newSymbol(Terminals.RBRACK); }	
    ";"               { return newSymbol(Terminals.SEMICOLON); }
@@ -151,7 +183,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
    "*"              { return newSymbol(Terminals.MULT); }
   "/"               { return newSymbol(Terminals.DIV); }
   "="               { return newSymbol(Terminals.EQUALS); }
-//  ":="              { return newSymbol(Terminals.ASSIGN); }
+  ":="              { return newSymbol(Terminals.ASSIGN); }
   "^"               { return newSymbol(Terminals.POW); }
 
   

@@ -208,16 +208,106 @@ FExp bexp =
 	;
 
 List fequation_section = 
-	EQUATION
-	fequation* {: return fequation; :}
+	EQUATION fabstract_equation* {: return fabstract_equation; :}
 	;
-	
+
+FAbstractEquation fabstract_equation = 
+    fequation
+  | falgorithm;
+
 FEquation fequation = 
 	fexp.left 
 	EQUALS 
 	fexp.right 
 	SEMICOLON  {: return new FEquation(left,right); :} 
 	;
+
+FAlgorithmBlock falgorithm =
+    ALGORITHM fstatement_list  {: return new FAlgorithmBlock(fstatement_list); :}
+    ;
+
+List fstatement_list =
+                                {: return new List(); :}
+  | fstatement                  {: return new List().add(fstatement); :}
+  | fstatement_list fstatement  {: fstatement_list.add(fstatement); 
+                                   return fstatement_list; :}
+  ;  
+
+FStatement fstatement =
+  fid_use.left ASSIGN fexp.right SEMICOLON                  
+                                      {: return new FAssignStmt(left, right); :}
+//  | ffunction_call_stmt SEMICOLON     {: return ffunction_call_stmt; :}
+  | BREAK SEMICOLON                   {: return new FBreakStmt(); :} 
+  | RETURN SEMICOLON                  {: return new FReturnStmt(); :}
+  | fif_stmt SEMICOLON                {: return fif_stmt; :}
+  | fwhen_stmt SEMICOLON              {: return fwhen_stmt; :}
+  | ffor_stmt SEMICOLON               {: return ffor_stmt; :}
+  | fwhile_stmt SEMICOLON             {: return fwhile_stmt; :}
+  ;
+
+/*
+ * Needs ffunction_call - commented out for now.  
+FFunctionCallStmt ffunction_call_stmt =
+    LPAREN fcs_left_list RPAREN ASSIGN ffunction_call
+                      {: return new FFunctionCallStmt(fcs_left_list, ffunction_call); :}
+  | ffunction_call    {: return new FFunctionCallStmt(new List(), ffunction_call); :}
+  ;
+
+List fcs_left_list =
+    fid_use                      {: return new List().add(fid_use); :}
+  | fcs_left_list COMMA fid_use  {: return fcs_left_list.add(fid_use); :}
+  ;
+*/
+
+FIfStmt fif_stmt =
+  IF fif_clause_list else_stmts END_IF  {: return new FIfStmt(fif_clause_list, else_stmts); :}
+  ;  
+
+List fif_clause_list =
+    fif_clause                         {: return new List().add(fif_clause); :}
+  | fif_clause_list ELSEIF fif_clause  {: return fif_clause_list.add(fif_clause); :}
+  ;
+
+FIfClause fif_clause =
+  fexp THEN fstatement_list  {: return new FIfClause(fexp, fstatement_list); :}
+  ;
+
+List else_stmts =
+                          {: return new List(); :}
+  | ELSE fstatement_list  {: return fstatement_list; :}
+  ;
+
+FWhenStmt fwhen_stmt =
+  WHEN fwhen_clause_list END_WHEN  {: return new FWhenStmt(fwhen_clause_list); :}
+  ;  
+
+List fwhen_clause_list =
+    fwhen_clause                             {: return new List().add(fwhen_clause); :}
+  | fwhen_clause_list ELSEWHEN fwhen_clause  {: return fwhen_clause_list.add(fwhen_clause); :}
+  ;
+
+FWhenClause fwhen_clause =
+  fexp THEN fstatement_list  {: return new FWhenClause(fexp, fstatement_list); :}
+  ;
+
+FForStmt ffor_stmt =
+  FOR ffor_indices LOOP fstatement_list END_FOR
+                         {: return new FForStmt(ffor_indices, fstatement_list); :}
+  ;
+
+List ffor_indices = 
+    ffor_index                     {: return new List().add(ffor_index); :}
+  | ffor_indices COMMA ffor_index  {: return ffor_indices.add(ffor_index); :}
+  ;
+
+FForIndex ffor_index =
+    fid_decl IN fexp    {: return new FForIndex(fid_decl, new Opt(fexp)); :}
+  | fid_decl            {: return new FForIndex(fid_decl, new Opt()); :}
+  ;
+
+FWhileStmt fwhile_stmt = 
+  WHILE fexp LOOP fstatement_list END_WHILE  {: return new FWhileStmt(fexp, fstatement_list); :}
+  ;
 
 FTypePrefix ftype_prefix_variability = 
    PARAMETER                          {: return new FParameter(); :}
