@@ -17,11 +17,14 @@
 import ctypes as ct
 from ctypes import byref
 import numpy as N
+import numpy.ctypeslib as Nct
 
 from jmodelica import jmi
 
 int = N.int32
 N.int = N.int32
+
+c_jmi_real_t = ct.c_double
 
 class InitializationOptimizer(object):
     """ An interface to the NLP solver Ipopt. """
@@ -40,6 +43,8 @@ class InitializationOptimizer(object):
         self._nlp_init = nlp_init
         self._ipopt_init = ct.c_voidp()
         
+        self._set_initOpt_typedefs()
+        
         try:
             assert self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_new(byref(self._ipopt_init), 
                                                                                  self._nlp_init._jmi_init_opt) == 0, \
@@ -49,6 +54,23 @@ class InitializationOptimizer(object):
         
         assert self._ipopt_init.value is not None, \
                "jmi struct not returned correctly"
+               
+    def _set_initOpt_typedefs(self):
+        try:
+            self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_new.argtypes = [ct.c_void_p,
+                                                  ct.c_void_p]
+            self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_solve.argtypes = [ct.c_void_p]
+            self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_set_string_option.argtypes = [ct.c_void_p,
+                                                                ct.c_char_p,
+                                                                ct.c_char_p]
+            self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_set_int_option.argtypes = [ct.c_void_p,
+                                                             ct.c_char_p,
+                                                             ct.c_int]
+            self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_set_num_option.argtypes = [ct.c_void_p,
+                                                                ct.c_char_p,
+                                                                c_jmi_real_t]
+        except AttributeError, e:
+            pass        
                
     def init_opt_ipopt_solve(self):
         """ Solve the NLP problem."""
@@ -115,6 +137,8 @@ class NLPInitialization(object):
         self._jmi_init_opt = ct.c_voidp() 
         self._model = model
         self._jmi_model = model.jmimodel
+        
+        self._set_nlpInit_typedefs()
 
         _n_p_free = 0
         _p_free_indices = N.ones(_n_p_free,dtype=int)
@@ -164,7 +188,147 @@ class NLPInitialization(object):
         except AttributeError,e:
              raise jmi.JMIException("Can not create JMISimultaneousOptLagPols object. Try recompiling model with target='algorithms'")
         assert self._jmi_init_opt.value is not None, \
-            "jmi_init_opt struct has not returned correctly."            
+            "jmi_init_opt struct has not returned correctly."
+            
+    def _set_nlpInit_typedefs(self):
+        try:
+            self._jmi_model._dll.jmi_init_opt_new.argtypes = [ct.c_void_p, ct.c_void_p, ct.c_int,Nct.ndpointer(dtype=ct.c_int,
+                                                                                  ndim=1,
+                                                                                  flags='C'),
+                                 Nct.ndpointer(dtype=c_jmi_real_t,
+                                               ndim=1,
+                                               flags='C'),
+                                 Nct.ndpointer(dtype=c_jmi_real_t,
+                                               ndim=1,
+                                               flags='C'),
+                                 Nct.ndpointer(dtype=c_jmi_real_t,
+                                               ndim=1,
+                                               flags='C'),
+                                 Nct.ndpointer(dtype=c_jmi_real_t,
+                                               ndim=1,
+                                               flags='C'),
+                                 Nct.ndpointer(dtype=c_jmi_real_t,
+                                               ndim=1,
+                                               flags='C'),
+                                 Nct.ndpointer(dtype=c_jmi_real_t,
+                                               ndim=1,
+                                               flags='C'),
+                                 Nct.ndpointer(dtype=c_jmi_real_t,
+                                               ndim=1,
+                                               flags='C'),
+                                 Nct.ndpointer(dtype=c_jmi_real_t,
+                                               ndim=1,
+                                               flags='C'),
+                                 Nct.ndpointer(dtype=c_jmi_real_t,
+                                               ndim=1,
+                                               flags='C'),
+                                 Nct.ndpointer(dtype=c_jmi_real_t,
+                                               ndim=1,
+                                               flags='C'),
+                                 Nct.ndpointer(dtype=c_jmi_real_t,
+                                               ndim=1,
+                                               flags='C'),
+                                 Nct.ndpointer(dtype=c_jmi_real_t,
+                                               ndim=1,
+                                               flags='C'),
+                                 ct.c_int,
+                                 Nct.ndpointer(dtype=ct.c_int,
+                                               ndim=1,
+                                               flags='C'),
+                                 Nct.ndpointer(dtype=ct.c_int,
+                                               ndim=1,
+                                               flags='C'),
+                                 Nct.ndpointer(dtype=ct.c_int,
+                                               ndim=1,
+                                               flags='C'),
+                                 Nct.ndpointer(dtype=ct.c_int,
+                                               ndim=1,
+                                               flags='C'),
+                                 ct.c_int]
+    
+            self._jmi_model._dll.jmi_init_opt_delete.argtypes = [ct.c_void_p]
+            
+            self._jmi_model._dll.jmi_init_opt_get_dimensions.argtypes = [ct.c_void_p,
+                                                        ct.POINTER(ct.c_int),
+                                                        ct.POINTER(ct.c_int),
+                                                        ct.POINTER(ct.c_int)]    
+            self._jmi_model._dll.jmi_init_opt_get_x.argtypes =[ct.c_void_p]
+            self._jmi_model._dll.jmi_init_opt_get_initial.argtypes = [ct.c_void_p,
+                                                    Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                  ndim=1,
+                                                                  flags='C')]
+            
+            self._jmi_model._dll.jmi_init_opt_set_initial.argtypes =  [ct.c_void_p,
+                                                      Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                    ndim=1,
+                                                                    flags='C')] 
+    
+            self._jmi_model._dll.jmi_init_opt_get_bounds.argtypes = [ct.c_void_p,
+                                                    Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                  ndim=1,
+                                                                  flags='C'),
+                                                    Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                  ndim=1,
+                                                                  flags='C')]
+            #jmi_init_opt_get_dimensions n_x
+            self._jmi_model._dll.jmi_init_opt_set_bounds.argtypes = [ct.c_void_p,
+                                                    Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                  ndim=1,
+                                                                  flags='C'),
+                                                    Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                  ndim=1,
+                                                                  flags='C')]
+            self._jmi_model._dll.jmi_init_opt_f.argtypes = [ct.c_void_p,
+                                           Nct.ndpointer(dtype=c_jmi_real_t,
+                                                         ndim=1,
+                                                         shape=1,
+                                                         flags='C')]
+            self._jmi_model._dll.jmi_init_opt_df.argtypes = [ct.c_void_p,
+                                            Nct.ndpointer(dtype=c_jmi_real_t,
+                                                          ndim=1,
+                                                          flags='C')]
+            self._jmi_model._dll.jmi_init_opt_h.argtypes = [ct.c_void_p,
+                                           Nct.ndpointer(dtype=c_jmi_real_t,
+                                                         ndim=1,
+                                                         flags='C')]
+            self._jmi_model._dll.jmi_init_opt_dh.argtypes = [ct.c_void_p,
+                                            Nct.ndpointer(dtype=c_jmi_real_t,
+                                                          ndim=1,
+                                                          flags='C')]
+            self._jmi_model._dll.jmi_init_opt_dh_nz_indices.argtypes = [ct.c_void_p,
+                                                       Nct.ndpointer(dtype=ct.c_int,
+                                                                     ndim=1,
+                                                                     flags='C'),
+                                                       Nct.ndpointer(dtype=ct.c_int,
+                                                                     ndim=1,
+                                                                     flags='C')]
+            #dll.jmi_opt_sim_write_file_matlab.argtypes = [ct.c_void_p,
+            #                                              ct.c_char_p]
+            #dll.jmi_opt_sim_get_result.argtypes = [ct.c_void_p,
+            #                                       Nct.ndpointer(dtype=c_jmi_real_t,
+            #                                                     ndim=1,
+            #                                                     flags='C'),
+            #                                       Nct.ndpointer(dtype=c_jmi_real_t,
+            #                                                     ndim=1,
+            #                                                     flags='C'),
+            #                                       Nct.ndpointer(dtype=c_jmi_real_t,
+            #                                                     ndim=1,
+            #                                                     flags='C'),
+            #                                       Nct.ndpointer(dtype=c_jmi_real_t,
+            #                                                     ndim=1,
+            #                                                     flags='C'),
+            #                                       Nct.ndpointer(dtype=c_jmi_real_t,
+            #                                                     ndim=1,
+            #                                                     flags='C'),
+            #                                       Nct.ndpointer(dtype=c_jmi_real_t,
+            #                                                     ndim=1,
+            #                                                     flags='C')]
+            # This is not correct, the n_x referes to the wrong x vector
+            # In this case, n_x refers to the size of the optimization vector
+            # in the initialization problem not to the number of states.
+            # _returns_ndarray(dll.jmi_init_opt_get_x, c_jmi_real_t, n_x.value, order='C')
+        except AttributeError, e:
+            pass                 
         
     def init_opt_get_dimensions(self):
         """ 
