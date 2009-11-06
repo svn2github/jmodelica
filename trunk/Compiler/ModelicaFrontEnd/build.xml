@@ -251,7 +251,6 @@
 		  		    	      <arg value="TransformCanonicalTests"/>
 		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 		    </java>
-
 	  	 <java 
 		  		      classname="org.jmodelica.modelica.compiler.JunitGenerator"
 		  		      classpath=".:bin/jmodelica.jar:bin/util.jar:${beaver_dir}/lib/beaver.jar" 
@@ -259,6 +258,15 @@
 		  		      dir=".">
 		  		    	<arg value="src/test/modelica/ForbiddenOperationsTests.mo"/>
 		  		    	      <arg value="ForbiddenOperationsTests"/>
+		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
+		    </java>
+	  	<java 
+		  		      classname="org.jmodelica.modelica.compiler.JunitGenerator"
+		  		      classpath=".:bin/jmodelica.jar:bin/util.jar:${beaver_dir}/lib/beaver.jar" 
+		  		      fork="true" 
+		  		      dir=".">
+		  		    	<arg value="src/test/modelica/FunctionTests.mo"/>
+		  		    	      <arg value="FunctionTests"/>
 		  		    	      <arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
 		    </java>
 	  	<javac compiler="javac1.5" debug="true" destdir="bin" classpath="${junit_dir}/junit-4.5.jar" >

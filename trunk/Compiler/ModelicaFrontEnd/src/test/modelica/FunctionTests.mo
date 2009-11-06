@@ -16,9 +16,191 @@
 
 
 package FunctionTests 
-model RecordConstructorTest1 
+
+function Test
+ input Real i1 = 0;
+ input Real i2 = 0;
+ output Real o1 = 0;
+ output Real o2 = i2;
+algorithm
+ o1 := i1;
+end Test;
+
+model AlgorithmFlatten1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="AlgorithmFlatten1",
+                                               description="Flattening algorithms: assign stmts",
+                                               flatModel="
+fclass FunctionTests.AlgorithmFlatten1
+ Real x;
+equation 
+algorithm
+ x := 5;
+ x := x + 2;
+end FunctionTests.AlgorithmFlatten1;
+")})));
+
+ Real x;
+algorithm
+ x := 5;
+ x := x + 2;
+end AlgorithmFlatten1;
+
+model AlgorithmFlatten2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="AlgorithmFlatten2",
+                                               description="Flattening algorithms: break & return stmts",
+                                               flatModel="
+fclass FunctionTests.AlgorithmFlatten2
+ Real x;
+equation 
+algorithm
+ break;
+ return;
+end FunctionTests.AlgorithmFlatten2;
+")})));
+
+ Real x;
+algorithm
+ break;
+ return;
+end AlgorithmFlatten2;
+
+model AlgorithmFlatten3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="AlgorithmFlatten3",
+                                               description="Flattening algorithms: if stmts",
+                                               flatModel="
+fclass FunctionTests.AlgorithmFlatten3
+ Real x;
+ Real y;
+equation 
+algorithm
+ if x == 4 then
+  x := 1;
+  y := 2;
+ elseif x == 3 then
+  if y == 0 then
+   y := 1;
+  end if;
+  x := 2;
+  y := 3;
+ else
+  x := 3;
+ end if;
+end FunctionTests.AlgorithmFlatten3;
+")})));
+
+ Real x;
+ Real y;
+algorithm
+ if x == 4 then
+  x := 1;
+  y := 2;
+ elseif x == 3 then
+  if y == 0 then
+   y := 1;
+  end if;
+  x := 2;
+  y := 3;
+ else
+  x := 3;
+ end if;
+end AlgorithmFlatten3;
+
+model AlgorithmFlatten4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="AlgorithmFlatten4",
+                                               description="Flattening algorithms: when stmts",
+                                               flatModel="
+fclass FunctionTests.AlgorithmFlatten4
+ Real x;
+ Real y;
+equation 
+algorithm
+ when x == 4 then
+  x := 1;
+  y := 2;
+ elsewhen x == 3 then
+  x := 2;
+  y := 3;
+  if x == 2 then
+   x := 3;
+  end if;
+ end when;
+end FunctionTests.AlgorithmFlatten4;
+")})));
+
+ Real x;
+ Real y;
+algorithm
+ when x == 4 then
+  x := 1;
+  y := 2;
+ elsewhen x == 3 then
+  x := 2;
+  y := 3;
+  if x == 2 then
+   x := 3;
+  end if;
+ end when;
+end AlgorithmFlatten4;
+
+model AlgorithmFlatten5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="AlgorithmFlatten5",
+                                               description="Flattening algorithms: while stmts",
+                                               flatModel="
+fclass FunctionTests.AlgorithmFlatten5
+ Real x;
+equation 
+algorithm
+ while x < 1 loop
+  while x < 2 loop
+   while x < 3 loop
+    x := x - 1;
+   end while;
+  end while;
+ end while;
+end FunctionTests.AlgorithmFlatten5;
+")})));
+
+ Real x;
+algorithm
+ while x < 1 loop
+  while x < 2 loop
+   while x < 3 loop
+    x := x - 1;
+   end while;
+  end while;
+ end while;
+end AlgorithmFlatten5;
+
+model AlgorithmFlatten6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="AlgorithmFlatten6",
+                                               description="Flattening algorithms: for stmts",
+                                               flatModel="
+fclass FunctionTests.AlgorithmFlatten6
+ Real x;
+equation 
+algorithm
+ for i in {1, 2, 4}, j in 1:3 loop
+  x := x + 1;
+ end for;
+end FunctionTests.AlgorithmFlatten6;
+")})));
+
+ Real x;
+algorithm
+ for i in {1, 2, 4}, j in 1:3 loop
+  x := x + 1;
+ end for;
+end AlgorithmFlatten6;
+
 
 /*
+model RecordConstructorTest1 
 model FunctionTests.RecordConstructorTest1
 
 Real c1.re = 1;
@@ -74,7 +256,6 @@ c3 = FunctionTests.RecordConstructorTest1.add(
 end FunctionTests.RecordConstructorTest1;
 
 
-*/
   record Complex 
      Real re;
      Real im;
@@ -97,5 +278,6 @@ equation
   c2=add(c1,Complex(sin(time),cos(time)));
 c3=add(c1,c1);
 end RecordConstructorTest1;
+*/
   
 end FunctionTests;
