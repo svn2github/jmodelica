@@ -878,14 +878,14 @@ Statement statement =
   ;
   
 FunctionCallStmt function_call_stmt =
-    LPAREN left_list RPAREN ASSIGN function_call comment  
-                           {: return new FunctionCallStmt(comment, left_list, function_call); :}
+    LPAREN fcs_left_list RPAREN ASSIGN function_call comment  
+                           {: return new FunctionCallStmt(comment, fcs_left_list, function_call); :}
   | function_call comment  {: return new FunctionCallStmt(comment, new List(), function_call); :}
   ;
 
-List left_list =
-    parse_access                 {: return new List().add(parse_access); :}
-  | arg_list COMMA parse_access  {: return arg_list.add(parse_access); :}
+List fcs_left_list =
+    parse_access                      {: return new List().add(parse_access); :}
+  | fcs_left_list COMMA parse_access  {: return fcs_left_list.add(parse_access); :}
   ;
 
 

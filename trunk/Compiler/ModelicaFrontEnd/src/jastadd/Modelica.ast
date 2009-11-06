@@ -321,7 +321,7 @@ abstract IfWhenStmt : Statement ::= IfWhenClause*;
 IfStmt : IfWhenStmt ::= ElseStmt:Statement*;
 WhenStmt : IfWhenStmt;
 abstract IfWhenClause ::= Test:Exp Statement*;
-IfClause : IfWhenClause;                // Subclasses of IfWhenClause might not be needed
+IfClause : IfWhenClause;
 WhenClause : IfWhenClause;
 ForStmt : Statement ::= ForIndex* ForStmt:Statement*;
 WhileStmt : Statement ::= Test:Exp WhileStmt:Statement*;

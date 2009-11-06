@@ -85,6 +85,49 @@ aspect PrettyPrint {
    			p.toString(getChild(i),str,indent,o); // distpatch through Printer
 	}
 	
+	/**
+	 * \brief Prints a list of any type of ASTNode, adding <code>sep</code> between nodes.
+	 * 
+	 * Typical use: <code>l.prettyPrintWithSep(p, str, indent, o, ", ");</code> 
+	 * (Prints comma-separated list.)
+	 */
+	public void List.prettyPrintWithSep(Printer p, PrintStream str, String indent, Object o, String sep) {
+		String prefix = "";
+		for (ASTNode n : this) {
+			str.print(prefix);
+			p.toString(n, str, indent, o);
+			prefix = sep;
+		}
+	}
+	
+	/**
+	 * \brief Prints a list of any type of ASTNode, adding <code>prefix</code> before each node and 
+	 * <code>suffix</code> after each node.
+	 */
+	public void List.prettyPrintWithFix(Printer p, PrintStream str, String indent, Object o, String prefix, String suffix) {
+		for (ASTNode n : this) {
+			str.print(prefix);
+			p.toString(n, str, indent, o);
+			str.print(suffix);
+		}
+	}
+	
+	/**
+	 * \brief Prints a list of any type of ASTNode, adding <code>indent</code> before each node and 
+	 * <code>suffix</code> plus a line break after after each node.
+	 */
+	public void List.prettyPrintWithIndent(Printer p, PrintStream str, String indent, Object o, String suffix) {
+		prettyPrintWithFix(p, str, indent, o, indent, suffix + "\n");
+	}
+	
+	/**
+	 * \brief Prints a list of any type of ASTNode, adding <code>indent</code> before each node and 
+	 * a line break after after each node.
+	 */
+	public void List.prettyPrintWithIndent(Printer p, PrintStream str, String indent, Object o) {
+		prettyPrintWithFix(p, str, indent, o, indent, "\n");
+	}
+	
 	public void Program.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		for (StoredDefinition sd : getUnstructuredEntitys()) {
 			p.toString(sd,str,indent,o);
@@ -646,15 +689,33 @@ aspect FlattPrettyPrint {
 			str.print(";\n");
 		}
 	
+	    boolean wroteEquation = true;
+	    str.print(indent + "equation \n");
+	    for (FEquationBlock b : getFEquationBlocks()) {
+	    	for (FAbstractEquation e : b.getFAbstractEquations()) {
+	    		if (e instanceof FAlgorithmBlock) {
+	    			p.toString(e, str, indent, o);
+	    			wroteEquation = false;
+	    		} else {
+	    			if (!wroteEquation) {
+	    				str.print(indent);
+	    				str.print("equation \n");
+	    				wroteEquation = true;
+	    			}
+	    			p.toString(e, str, indent + " ", o);
+		    		str.print(";\n");
+	    		}
+	    	}
+	    }
 		
-		str.print(indent + "equation \n");
-	  	for (int i=0;i<getNumFEquationBlock();i++) {
-			for (int j=0;j<getFEquationBlock(i).getNumFAbstractEquation();j++) {
-				debugPrint("FClass.prettyPrint(): Equation nr: " + j);
-	  			p.toString(getFEquationBlock(i).getFAbstractEquation(j),str, indent+" ",o);
-				str.print(";\n");
-			}
-		}
+//		str.print(indent + "equation \n");
+//	  	for (int i=0;i<getNumFEquationBlock();i++) {
+//			for (int j=0;j<getFEquationBlock(i).getNumFAbstractEquation();j++) {
+//				debugPrint("FClass.prettyPrint(): Equation nr: " + j);
+//	  			p.toString(getFEquationBlock(i).getFAbstractEquation(j),str, indent+" ",o);
+//				str.print(";\n");
+//			}
+//		}
   		str.print(indent);
   		str.print("end ");
   		str.print(name());
@@ -817,6 +878,90 @@ aspect FlattPrettyPrint {
     	p.toString(getLeft(),str,indent,o);
    		str.print(" = ");
    		p.toString(getRight(),str,indent,o);
+	}
+	
+	public void FAlgorithmBlock.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print(indent);
+		str.print("algorithm\n");
+		getFStatements().prettyPrintWithIndent(p, str, indent + " ", o, ";");
+//		str.print(indent);
+//		str.print("end algorithm");
+	}
+	
+	public void FAssignStmt.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getLeft(), str, indent, o);
+		str.print(" := ");
+		p.toString(getRight(), str, indent, o);
+	}
+	
+	public void FFunctionCallStmt.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		if (getNumLeft() > 0) {
+			str.print("(");
+			getLefts().prettyPrintWithSep(p, str, indent, o, ", ");
+			str.print(") := ");
+		}
+		p.toString(getCall(), str, indent, o);
+	}
+	
+	public void FBreakStmt.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("break");
+	}
+	
+	public void FReturnStmt.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("return");
+	}
+	
+	public void FIfWhenStmt.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		getFIfWhenClauses().prettyPrintWithSep(p, str, indent, o, indent + "else");
+		prettyPrintElse(p, str, indent, o);
+		str.print(indent);
+		str.print("end ");
+		str.print(getKeyword());
+	}
+	
+	abstract protected void FIfWhenStmt.prettyPrintElse(Printer p, PrintStream str, String indent, Object o);
+	
+	protected void FIfStmt.prettyPrintElse(Printer p, PrintStream str, String indent, Object o) {
+		if (getNumElseStmt() > 0) {
+			str.print(indent);
+			str.print("else\n");
+			getElseStmts().prettyPrintWithIndent(p, str, indent + " ", o, ";");
+		}
+	}
+	
+	protected void FWhenStmt.prettyPrintElse(Printer p, PrintStream str, String indent, Object o) {
+	}	
+	
+	public void FIfWhenClause.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print(getKeyword());
+		str.print(" ");
+		p.toString(getTest(), str, indent, o);
+		str.print(" then\n");
+		getFStatements().prettyPrintWithIndent(p, str, indent + " ", o, ";");
+	}
+	
+	syn String FIfWhenStmt.getKeyword() = null;
+	eq FIfStmt.getKeyword() = "if";
+	eq FWhenStmt.getKeyword() = "when";
+	inh String FIfWhenClause.getKeyword();
+	eq FIfWhenStmt.getFIfWhenClause(int i).getKeyword() = getKeyword();
+	
+	public void FForStmt.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("for ");
+		getFForIndexList().prettyPrintWithSep(p, str, indent, o, ", ");
+		str.print(" loop\n");
+		getForStmts().prettyPrintWithIndent(p, str, indent + " ", o, ";");
+		str.print(indent);
+		str.print("end for");
+	}
+	
+	public void FWhileStmt.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("while ");
+		p.toString(getTest(), str, indent, o);
+		str.print(" loop\n");
+		getWhileStmts().prettyPrintWithIndent(p, str, indent + " ", o, ";");
+		str.print(indent);
+		str.print("end while");
 	}
 	
 	public void FAddExp.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
