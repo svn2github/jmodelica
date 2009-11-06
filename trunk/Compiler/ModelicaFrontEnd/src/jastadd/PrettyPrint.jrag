@@ -1254,20 +1254,15 @@ aspect FlattPrettyPrint {
 		str.print("sum("); 
 		p.toString(getFExp(),str,indent,o);
 		str.print(" for ");
-		str.print(getFForIndex().getFIdDecl().name());
-		str.print(" in ");
-		if (getFForIndex().hasFExp())
-			p.toString(getFForIndex().getFExp(),str,indent,o);
+		p.toString(getFForIndex(), str, indent, o);
 		str.print(")");
 	}
 	
 	public void FForClauseE.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 	
 		str.print(indent+"for ");
-		str.print(getFForIndex(0).getFIdDecl().name());
-		str.print(" in ");
-		if (getFForIndex(0).hasFExp())
-			p.toString(getFForIndex(0).getFExp(),str,indent,o);
+		// Shouldn't this be a loop through all indices?
+		p.toString(getFForIndex(0), str, indent, o);
 		str.print(" loop\n");
 		for (int j=0;j<getNumForEqns();j++) {
 				//debugPrint("FClass.prettyPrint(): Equation nr: " + j);
@@ -1276,8 +1271,14 @@ aspect FlattPrettyPrint {
 		}
 		
 		str.print(indent+"end loop");
+	}
 	
-	
+	public void FForIndex.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print(getFIdDecl().name());
+		if (hasFExp()) {
+			str.print(" in ");
+			p.toString(getFExp(), str, indent, o);
+		}
 	}
 	
 	public void FSizeExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
