@@ -281,7 +281,59 @@
 	  	 </jar>
 	  </target>
 		
+
+<!-- ========= Prototype replacement gen-test ========= -->
+	<!-- for ant-contrib (foreach, etc) -->
+	<taskdef resource="net/sf/antcontrib/antlib.xml">
+		<classpath>
+			<pathelement location="../../EclipseIDE/JModelicaIDE/lib/ant-contrib.jar"/>
+		</classpath>
+	</taskdef>
 	
+	<property name="gen-test_java-class" value="org.jmodelica.modelica.compiler.JunitGenerator"/>
+	<property name="gen-test_classpath" value=".:bin/jmodelica.jar:bin/util.jar:${beaver_dir}/lib/beaver.jar"/>
+	<property name="gen-test_gen_dir" value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
+
+	<!-- Generates tests from a single .mo file -->
+	<target name="gen-test-file">
+		<propertyregex 
+			property="gen-test_class" 
+			input="${gen-test_path}"
+			regexp="^.*/([^/]*).mo$"
+			replace="\1"
+		/>
+	  	<java 
+	  		classname="${gen-test_java-class}"
+		  	classpath="${gen-test_classpath}" 
+		  	fork="true" dir=".">
+		  		<arg value="${gen-test_path}"/>
+		  		<arg value="${gen-test_class}"/>
+		  		<arg value="${gen-test_gen_dir}"/>
+		    </java>		
+	</target>
+	
+	<target name="gen-test-2" depends="build">
+	  	<mkdir dir="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
+		<foreach target="gen-test-file" param="gen-test_path" inheritall="true" parallel="true">
+			<path>
+				<fileset dir="src/test/modelica">
+					<include name="*.mo"/>
+				</fileset>
+			</path>
+		</foreach>
+	  	<javac compiler="javac1.5" debug="true" destdir="bin" classpath="${junit_dir}/junit-4.5.jar" >
+	  		<src path="${test_junit-gen_dir}/"/>
+	  	    <include name = "org/jmodelica/test/junitgenerated/*.java"/>
+	  		<exclude name = "**/*.aj"/>
+	  	</javac>
+	  	<jar destfile="bin/junit-tests.jar">
+	  		<fileset dir="bin">
+	  			<include name="org/jmodelica/test/junitgenerated/*.class"/> 
+	  		</fileset>
+	    </jar>
+	</target>
+<!-- ========= End prototype replacement gen-test ========= -->
+
 
   <!-- TARGET test -->
   <target name="test" depends="gen-test">
