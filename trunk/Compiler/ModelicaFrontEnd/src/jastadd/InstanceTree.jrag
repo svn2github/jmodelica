@@ -150,15 +150,13 @@ aspect InstModifications{
 		InstComponentModification icm = new InstComponentModification(this,getName().newInstAccess(),new Opt());
 		if (hasModification())
 			icm.setInstModification(getModification().newInstModification());
-		icm.setStart(getStart());
-		icm.setEnd(getEnd());
+		icm.setLocation(this);
 		return icm;
 	}
 	public InstComponentRedeclare ComponentRedeclare.newInstModification() {
 	    // TODO: Can this component be redeclared?
 		InstComponentRedeclare icr = new InstComponentRedeclare(this,getName().newInstAccess());
-		icr.setStart(getStart());
-		icr.setEnd(getEnd());
+		icr.setLocation(this);
 		return icr;
 	}
 	
@@ -168,8 +166,7 @@ aspect InstModifications{
 	
 	public InstClassRedeclare ClassRedeclare.newInstModification() {
 		InstClassRedeclare icr = new InstClassRedeclare(this,getName().newInstAccess());
-		icr.setStart(getStart());
-		icr.setEnd(getEnd());
+		icr.setLocation(this);
 		return icr;
 	}
 	
@@ -642,16 +639,14 @@ aspect InstanceTreeConstruction {
 			if (cd.hasModification())
 				icd.setInstModification(cd.getModification().newInstModification());
 			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
-			icd.setStart(cd.getStart());
-			icd.setEnd(cd.getEnd());
+			icd.setLocation(cd);
 			return icd;
 		} else {
 			InstPrimitive icd = new InstPrimitive(className.newInstAccess(),fas_opt,cd,new Opt(),new Opt());
 			if (cd.hasModification())
 				icd.setInstModification(cd.getModification().newInstModification());
 			icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
-			icd.setStart(cd.getStart());
-			icd.setEnd(cd.getEnd());
+			icd.setLocation(cd);
 			return icd;
 
 		}
@@ -666,8 +661,7 @@ aspect InstanceTreeConstruction {
 		if (cd.hasModification())
 			ipr.setInstModification(cd.getModification().newInstModification());
 		ipr.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
-		ipr.setStart(cd.getStart());
-		ipr.setEnd(cd.getEnd());
+		ipr.setLocation(cd);
 		return ipr;
 	}
 
@@ -689,16 +683,14 @@ aspect InstanceTreeConstruction {
 			if (originalDecl.hasModification()) //TODO: should this really be originalDecl
 				icd.setInstModification(originalDecl.getModification().newInstModification());
 			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
-			icd.setStart(originalDecl.getStart());
-			icd.setEnd(originalDecl.getEnd());
+			icd.setLocation(originalDecl);
 			return icd;
 		} else {
 			InstReplacingPrimitive icd = new InstReplacingPrimitive(replacingDecl.newInstClassAccess(),fas_opt,replacingDecl,new Opt(),new Opt(),originalDecl,icr);
 			if (originalDecl.hasModification()) //TODO: should this really be originalDecl
 				icd.setInstModification(originalDecl.getModification().newInstModification());
 			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
-			icd.setStart(originalDecl.getStart());
-			icd.setEnd(originalDecl.getEnd());
+			icd.setLocation(originalDecl);
 			return icd;
 
 		}
@@ -718,24 +710,21 @@ aspect InstanceTreeConstruction {
     public InstFullClassDecl FullClassDecl.newInstClassDecl() {
     	InstFullClassDecl fcd = new InstFullClassDecl(this,new Opt(), newInstRestriction());
 	    fcd.setInstConstrainingOpt(newInstConstrainingClassOpt());
-    	fcd.setStart(getStart());
-    	fcd.setEnd(getEnd());
+    	fcd.setLocation(this);
    	return fcd;
     }
 
     public InstExtendClassDecl ExtendClassDecl.newInstClassDecl() {
     	InstExtendClassDecl ecd = new InstExtendClassDecl(this,new Opt(), newInstRestriction());
 	    ecd.setInstConstrainingOpt(newInstConstrainingClassOpt());
-    	ecd.setStart(getStart());
-       	ecd.setEnd(getEnd());
+    	ecd.setLocation(this);
     	return ecd;
     }
 
     public InstShortClassDecl ShortClassDecl.newInstClassDecl() {
     	InstShortClassDecl scd =  new InstShortClassDecl(this, new Opt(), newInstRestriction());
 	    scd.setInstConstrainingOpt(newInstConstrainingClassOpt());    	
-    	scd.setStart(getStart());
-    	scd.setEnd(getEnd());
+    	scd.setLocation(this);
     	return scd;
     }
     public InstPrimitiveClassDecl PrimitiveClassDecl.newInstClassDecl() {
@@ -750,16 +739,14 @@ aspect InstanceTreeConstruction {
     	InstRestriction ir = newInstRestriction();
     	InstReplacingFullClassDecl fcd = new InstReplacingFullClassDecl(replacingClass, new Opt(), ir, this, icr);
 	    fcd.setInstConstrainingOpt(newInstConstrainingClassOpt()); //TODO: Should be constr clause of original or redeclared?
-    	fcd.setStart(getStart());
-    	fcd.setEnd(getEnd());
+    	fcd.setLocation(this);
     	return fcd;
     }
     public InstReplacingShortClassDecl ShortClassDecl.newInstReplacingClass(ClassDecl replacingClass,InstClassRedeclare icr) {
     	InstRestriction ir = newInstRestriction();
       	InstReplacingShortClassDecl scd =  new InstReplacingShortClassDecl(replacingClass, new Opt(), ir, this, icr);
 	    scd.setInstConstrainingOpt(newInstConstrainingClassOpt());    	
-    	scd.setStart(getStart());
-    	scd.setEnd(getEnd());
+    	scd.setLocation(this);
    	return scd;
     }
     public InstReplacingFullClassDecl PrimitiveClassDecl.newInstReplacingClass(ClassDecl replacingClass,InstClassRedeclare icr) {
@@ -788,8 +775,7 @@ aspect InstanceTreeConstruction {
 		InstExtends ie = new InstExtends(getSuper().newInstAccess(),this, new Opt());
 		if (hasClassModification())
 			ie.setInstClassModification(getClassModification().newInstModification());
-		ie.setStart(getStart());
-		ie.setEnd(getEnd());
+		ie.setLocation(this);
 		return ie;
 	}
 
@@ -797,8 +783,7 @@ aspect InstanceTreeConstruction {
 		InstExtendsShortClass ie = new InstExtendsShortClass(getSuper().newInstAccess(),this, new Opt());
 		if (hasClassModification())
 			ie.setInstClassModification(getClassModification().newInstModification());
-		ie.setStart(getStart());
-		ie.setEnd(getEnd());
+		ie.setLocation(this);
 		return ie;
     }
 
@@ -814,22 +799,19 @@ aspect InstanceTreeConstruction {
 			as = new Opt();
 		}
 		InstAccess ia =  new InstParseAccess(getID(),as);
-		ia.setStart(getStart());
-		ia.setEnd(getEnd());
+		ia.setLocation(this);
 		return ia;
 	}
 
 	public InstAccess Access.newInstAccess() {
 		InstAccess ia =  new InstParseAccess(getID(),new Opt());
-		ia.setStart(getStart());
-		ia.setEnd(getEnd());
+		ia.setLocation(this);
 		return ia;
 	}
 
 	public InstAccess Dot.newInstAccess() {
 		InstAccess ia = new InstDot("",getLeft().newInstAccess(),getRight().newInstAccess());
-		ia.setStart(getStart());
-		ia.setEnd(getEnd());
+		ia.setLocation(this);
 		return ia;
 	}	
 
@@ -935,8 +917,7 @@ aspect InstImportClauses {
     	List l = new List();
     	for (ImportClause ic : imports()) {
     		InstImport iic = ic.newInstImport();
-    		iic.setStart(ic.getStart());
-    		iic.setEnd(ic.getEnd());
+    		iic.setLocation(ic);
     		l.add(iic);
     	}
     	return l;

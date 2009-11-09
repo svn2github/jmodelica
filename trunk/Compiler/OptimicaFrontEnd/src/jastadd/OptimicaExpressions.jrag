@@ -24,8 +24,7 @@ aspect OptimicaExpressions {
 		 to InstTimedVariable {
 //			System.out.println("rewrite InstFunctionCall: " + getName().name());
 		 	InstTimedVariable iv = new InstTimedVariable(getName(),getArgs(0));
-		 	iv.setStart(getStart());
-		 	iv.setEnd(getEnd());
+		 	iv.setLocation(this);
 		 	return iv;
 		 }
 	}

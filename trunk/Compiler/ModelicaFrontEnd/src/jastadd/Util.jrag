@@ -157,12 +157,41 @@ aspect DebugPrint {
 aspect NodeMethods {
 
   public void ASTNode.setStart(int start) {
-    this.start = start;  
+    this.start = start;
   } 
 
   public void ASTNode.setEnd(int end) {
-    this.end = end;  
-  } 
+    this.end = end;
+  }
+  
+  /**
+   * \brief Sets the <code>start</code> and <code>end</code> members of the node.
+   */
+  public void ASTNode.setLocation(int start, int end) {
+	this.start = start;
+	this.end = end;
+  }
+  
+  /**
+   * \brief Sets the <code>start</code> and <code>end</code> members of the node
+   * to values copied from two other nodes.
+   * 
+   * @param start  the node to copy the <code>start</code> member from.
+   * @param end    the node to copy the <code>end</code> member from.
+   */
+  public void ASTNode.setLocation(ASTNode start, ASTNode end) {
+	this.start = start.start;
+	this.end = end.end;
+  }
+  
+  /**
+   * \brief Sets the <code>start</code> and <code>end</code> members of the node
+   * to values copied another node.
+   */
+  public void ASTNode.setLocation(ASTNode node) {
+	start = node.start;
+	end = node.end;
+  }
  
   public int ASTNode.beginLine() { return getLine(getStart()); }
   public int ASTNode.beginColumn() { return getColumn(getStart()); }

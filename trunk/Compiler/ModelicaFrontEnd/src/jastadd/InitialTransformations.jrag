@@ -111,8 +111,7 @@
  	     	                              annotation,
  	     	                              ext_clause,
  	     	                              getEndName());
- 	     	fc.setStart(getRestriction().getStart());
- 	     	fc.setEnd(getEnd());
+ 	     	fc.setLocation(getRestriction(), this);
  	     	return fc;
  	  	}
    	}
@@ -127,8 +126,7 @@
  	   		                         getClassModificationOpt(),
  	   		                         getAnnotationOpt());
  	  	
- 	  		e.setStart(getStart());
- 	  		e.setEnd(getEnd());
+ 	  		e.setLocation(this);
  	  		return e;
  	  	}
    	}
@@ -159,8 +157,7 @@
  	     	                                        l,
  	     	                                        getConstrainingClauseOpt(),
  	     	                                        getComment());
- 		 	c.setStart(getStart());
- 	  		c.setEnd(getEnd());
+ 		 	c.setLocation(this);
 		 	//System.out.println("PN_ComponentClause->ComponentClause.getStart() = "+c.getStart());
  		 	return c;
  		}
@@ -169,8 +166,7 @@
      rewrite PN_ComponentRedeclare {
    		to ComponentRedeclare {
  	       ComponentRedeclare c = new ComponentRedeclare(getEachOpt(),getFinalOpt(), getName(), (ComponentDecl)getBaseComponentDecl());
- 		   c.setStart(getStart());
-	  	   c.setEnd(getEnd());
+ 		   c.setLocation(this);
  		   return c;
  		}
    	} 	
@@ -226,8 +222,7 @@
        					                                        new List().add(getName(i)),
        					                                        (Opt)getConstrainingClauseOpt().fullCopy(),
        					                                        (Comment)getComment().fullCopy());
-       					c.setStart(getStart());
-       		 	  		c.setEnd(getEnd());
+       					c.setLocation(this);
       					//System.out.println("ComponentClause->ComponentClause.getStart() = "+c.getStart());
        					l.add(c);
        				}
@@ -270,8 +265,7 @@
       			                                    getName(0).getComment(),
       			                                    getConstrainingClauseOpt(),
       			                                    getComment());
-      			c.setStart(getName(0).getStart());
-     	  		c.setEnd(getEnd());
+      			c.setLocation(getName(0), this);
      			//System.out.println("ComponentClause->ComponentDecl.getStart() = "+c.getStart());
       			return c;
   			}
@@ -334,15 +328,11 @@
     				                                getStringCommentOpt()))),
     				                               new Opt())),
     				                       new Opt());
-    		e.getModification().setStart(getStart());
-    		e.getModification().setEnd(getEnd());
-    		((CompleteModification)e.getModification()).getClassModification().setStart(getStart());
-    		((CompleteModification)e.getModification()).getClassModification().setEnd(getEnd());
+    		e.getModification().setLocation(this);
+    		((CompleteModification)e.getModification()).getClassModification().setLocation(this);
     		ClassModification cm = ((CompleteModification)e.getModification()).getClassModification();
-    		((ComponentModification)cm.getArgument(0)).getName().setStart(getStart());
-    		((ComponentModification)cm.getArgument(0)).getName().setEnd(getEnd());
-    		e.setStart(getStart());
- 	  		e.setEnd(getEnd());
+    		((ComponentModification)cm.getArgument(0)).getName().setLocation(this);
+    		e.setLocation(this);
     		return e;
     	}
     
@@ -357,8 +347,7 @@
 		to SumRedExp {
 			SumRedExp sre = new SumRedExp(getFunctionArguments().getExp(0),
 			                              getFunctionArguments().getForIndex(0));
-			sre.setStart(getStart());
- 	  		sre.setEnd(getEnd());
+			sre.setLocation(this);
 			return sre;
 		}
 	}
@@ -375,8 +364,7 @@
 			                          getTypePrefixInputOutputOpt(),
 			                          getArraySubscriptsOpt(),
 			                          getComment());
-			ecsc.setStart(getStart());
-			ecsc.setEnd(getEnd());
+			ecsc.setLocation(this);
 			ShortClassDecl scd = new ShortClassDecl((VisibilityType)ecsc.getVisibilityType().fullCopy(), 
 									  getEncapsulatedOpt(), 
 	                                  getPartialOpt(), 
@@ -391,8 +379,7 @@
                                       getConstrainingClauseCommentOpt(),
                                       ecsc); 
 			                          
-		   scd.setStart(getStart());
-	  	   scd.setEnd(getEnd());
+		   scd.setLocation(this);
 		   return scd;
 		}
 	}
