@@ -26,7 +26,6 @@ model RedeclareTestOx1 "Basic redeclare test"
 "fclass RedeclareTests.RedeclareTestOx1
  Real c.a.x = 2 /*(2)*/;
  Real c.a.y = 3 /*(3)*/;
-equation
 end RedeclareTests.RedeclareTestOx1;
 ")})));
  
@@ -101,7 +100,6 @@ model RedeclareTestOx3 "Redeclare deeper into instance hierarchy."
 "fclass RedeclareTests.RedeclareTestOx3
  Real d.c.a.x = 2 /*(2)*/;
  Real d.c.a.y = 3 /*(3)*/;
-equation 
 end RedeclareTests.RedeclareTestOx3;
 ")})));
 
@@ -191,7 +189,6 @@ model RedeclareTestOx5
  Real e.d.a.x = 2 /*(2)*/;
  Real e.d.a.y = 3 /*(3)*/;
  Real e.d.a.z = 4 /*(4)*/;
-equation 
 end RedeclareTests.RedeclareTestOx5;
 ")})));
  
@@ -354,7 +351,6 @@ model RedeclareTestOx8 "Constraining clause example"
 "fclass RedeclareTests.RedeclareTestOx8
  Real d.c.x = 2 /*(2)*/;
  Real d.c.y = 3 /*(3)*/;
-equation 
 end RedeclareTests.RedeclareTestOx8;
 ")})));
  
@@ -482,7 +478,6 @@ model RedeclareTestOx10 "Constraining clause example."
 "fclass RedeclareTests.RedeclareTestOx10
  Real e.d.c.x = 2;
  Real e.d.c.y = 3;
-equation 
 end RedeclareTests.RedeclareTestOx10;
 ")})));
  
@@ -677,7 +672,6 @@ model RedeclareTestOx12 "Constraining clause example."
                                                flatModel=
 "fclass RedeclareTests.RedeclareTestOx12
  Real d.c.x = 5;
-equation 
 end RedeclareTests.RedeclareTestOx12;
 "
   )})));
@@ -710,7 +704,6 @@ model RedeclareTestOx13 "Constraining clause example."
  Real e.d.c.x = 4 /*(4)*/;
  Real e.d.c.y = 3 /*(3)*/;
  Real e.d.c.z = 5 /*(5)*/;
-equation 
 end RedeclareTests.RedeclareTestOx13;
 "
   )})));
@@ -961,7 +954,6 @@ model RedeclareTest_Classes_1 "Redeclaration of classes example."
  Real e.d.a.x = 4 /*(4)*/;
  Real e.d.a.y = 3 /*(3)*/;
  Real e.d.a.z = 4 /*(4)*/;
-equation 
 end RedeclareTests.RedeclareTest_Classes_1;
 "
   )})));
@@ -1077,7 +1069,6 @@ model RedeclareTest1
  Real b.a.c2.y = 4 /*(4)*/;
  Real b.a.c2.z = 9 /*(9)*/;
  Real b.aa.c2.x = 2 /*(2)*/;
-equation
 end RedeclareTests.RedeclareTest1;
 ")})));
 
@@ -1131,7 +1122,6 @@ fclass RedeclareTests.RedeclareTest2;
   Real p.c3.r = 0;
   Real p.c3.g = 1;
   Real p.c3.b = 0;
-equation 
 end RedeclareTests.RedeclareTest2;
 */
 fclass RedeclareTests.RedeclareTest2
@@ -1144,7 +1134,6 @@ fclass RedeclareTests.RedeclareTest2
  Real p.c3.r = 0 /*(0)*/;
  Real p.c3.g = 1 /*(1)*/;
  Real p.c3.b = 0 /*(0)*/;
-equation
 end RedeclareTests.RedeclareTest2;
 ")})));
   
@@ -1218,7 +1207,6 @@ fclass RedeclareTests.RedeclareTest3
  Real p.c3.g = 0.85 /*(0.85)*/;
  Real p.c3.b = 0.24 /*(0.24)*/;
  Real p.q = 0.4 /*(0.4)*/;
-equation
 end RedeclareTests.RedeclareTest3;
 ")})));
   
@@ -1303,7 +1291,6 @@ fclass RedeclareTests.RedeclareTest4
  Real p.c3.r = 0.56 /*(0.56)*/;
  Real p.c3.g = 0.85 /*(0.85)*/;
  Real p.c3.b = 0.24 /*(0.24)*/;
-equation
 end RedeclareTests.RedeclareTest4;
 ")})));
   
@@ -1361,7 +1348,6 @@ fclass RedeclareTests.RedeclareTest5
  Real u.c1.c2.x = 55 /*(55)*/;
  Real u.c1.c2.y = 4 /*(4)*/;
  Real u.c1.c2.z = 66 /*(66)*/;
-equation
 end RedeclareTests.RedeclareTest5;
 ")})));
 
@@ -1410,7 +1396,6 @@ fclass RedeclareTests.RedeclareTest6
  Real b.a.c2.z = 9 /*(9)*/;
  Real bb.a.c2.x = 55 /*(55)*/;
  Real bb.a.c2.y = 8 /*(8)*/;
-equation
 end RedeclareTests.RedeclareTest6;
 ")})));
   model C2
@@ -1492,7 +1477,6 @@ fclass RedeclareTests.RedeclareTest7
  Real p = 4 /*(4)*/;
  Real a.d.b.x = p;
  Real a.d.b.y = 5 /*(5)*/;
-equation
 end RedeclareTests.RedeclareTest7;
 ")})));
 
@@ -1565,7 +1549,6 @@ model RedeclareTest9
  Real b.a.c2.y = 4 /*(4)*/;
  Real b.a.c2.z = 9 /*(9)*/;
  Real b.aa.c2.x = 2 /*(2)*/;
-equation
 end RedeclareTests.RedeclareTest9;
 ")})));
 
@@ -1777,7 +1760,6 @@ fclass RedeclareTests.RedeclareTest10
  Real p.c3.g = 0.85 /*(0.85)*/;
  Real p.c3.b = 0.24 /*(0.24)*/;
  Real p.q = 0.4 /*(0.4)*/;
-equation
 end RedeclareTests.RedeclareTest10;
 ")})));
     
@@ -1859,7 +1841,6 @@ fclass RedeclareTests.RedeclareTest11
  Real p.c3.r = 0.56 /*(0.56)*/;
  Real p.c3.g = 0.85 /*(0.85)*/;
  Real p.c3.b = 0.24 /*(0.24)*/;
-equation
 end RedeclareTests.RedeclareTest11;
 ")})));
   
@@ -1917,7 +1898,6 @@ fclass RedeclareTests.RedeclareTest12
  Real u.c1.c2.x = 55 /*(55)*/;
  Real u.c1.c2.y = 44 /*(44)*/;
  Real u.c1.c2.z = 66 /*(66)*/;
-equation
 end RedeclareTests.RedeclareTest12;
 ")})));
 
@@ -1967,7 +1947,6 @@ fclass RedeclareTests.RedeclareTest13
  Real c.b2.z = 3 /*(3)*/;
  Real c.b2.x = 5 /*(5)*/;
  Real c.b2.y = 3 /*(3)*/;
-equation
 end RedeclareTests.RedeclareTest13;
 ")})));
 
@@ -2004,7 +1983,6 @@ fclass RedeclareTests.RedeclareTest14
  Real c.b2.z = 5 /*(5)*/;
  Real c.b2.x = 1 /*(1)*/;
  Real c.b2.y = 3 /*(3)*/;
-equation
 end RedeclareTests.RedeclareTest14;
 ")})));
 
@@ -2036,7 +2014,6 @@ class RedeclareTest15 "Test of merging of modifications in parametrized classes"
 "fclass RedeclareTests.RedeclareTest15
  Real d.c.a.x = 4 /*(4)*/;
  Real d.c.a.y = 5 /*(5)*/;
-equation
 end RedeclareTests.RedeclareTest15;
 "
   )})));
@@ -2074,7 +2051,6 @@ class RedeclareTest16 "Test of merging of modifications in parametrized classes"
  Real e.d.a.x = 5 /*(5)*/;
  Real e.d.a.y = 4 /*(4)*/;
  Real e.d.a.z = 6 /*(6)*/;
-equation 
 end RedeclareTests.RedeclareTest16;
 "
   )})));
@@ -2119,7 +2095,6 @@ class RedeclareTest161 "Test of merging of modifications in parametrized classes
  Real e.x = 6 /*(6)*/;
  Real e.y = 4 /*(4)*/;
  Real e.z = 6 /*(6)*/;
-equation 
 end RedeclareTests.RedeclareTest161;
 "
   )})));
@@ -2163,7 +2138,6 @@ class RedeclareTest165
  Real e.d.a.u = 5 /*(5)*/;
  Real e.d.a.v = 6 /*(6)*/;
  Real e.d.a.w = 7 /*(7)*/;
-equation
 end RedeclareTests.RedeclareTest165;
 "
   )})));
@@ -2221,7 +2195,6 @@ model RedeclareTest17
  Real bb.x = 3 /*(3)*/;
  Real bb.y = 3 /*(3)*/;
  Real bb.z = 4 /*(4)*/;
-equation 
 end RedeclareTests.RedeclareTest17;
 
 "
@@ -2264,7 +2237,6 @@ model RedeclareTest175
  Real bb.x = 2 /*(2)*/;
  Real bb.y = 6 /*(6)*/;
  Real bb.z = 5 /*(5)*/;
-equation 
 end RedeclareTests.RedeclareTest175;
 
 "
@@ -2308,7 +2280,6 @@ model RedeclareTest176
  Real bb.x = 3 /*(3)*/;
  Real bb.y = 6 /*(6)*/;
  Real bb.z = 4 /*(4)*/;
-equation 
 end RedeclareTests.RedeclareTest176;
 
 "
@@ -2355,7 +2326,6 @@ fclass RedeclareTests.RedeclareTest18
  Real g.f.e.a.y = 4 /*(4)*/;
  Real g.f.e.a.z = 6 /*(6)*/;
  Real g.f.e.a.w = 5 /*(5)*/;
-equation 
 end RedeclareTests.RedeclareTest18;
 "
   )})));
@@ -2414,7 +2384,6 @@ fclass RedeclareTests.RedeclareTest19
  Real g.f.e.a.y = 4 /*(4)*/;
  Real g.f.e.a.z = 6 /*(6)*/;
  Real g.f.e.a.w = 5 /*(5)*/;
-equation 
 end RedeclareTests.RedeclareTest19;
 "
   )})));
@@ -2477,7 +2446,6 @@ fclass RedeclareTests.RedeclareTest20
  Real g.f.e.a.y = 4 /*(4)*/;
  Real g.f.e.a.z = 6 /*(6)*/;
  Real g.f.e.a.w = 5 /*(5)*/;
-equation 
 end RedeclareTests.RedeclareTest20;
 	
 "
@@ -2547,7 +2515,6 @@ fclass RedeclareTests.RedeclareTest21
  Real g.f.e.a.y = g.f.pF /*(4)*/;
  Real g.f.e.a.z = g.pG /*(6)*/;
  Real g.f.e.a.w = p0 /*(5)*/;
-equation
 end RedeclareTests.RedeclareTest21;	
 "
   )})));
@@ -2617,7 +2584,6 @@ fclass RedeclareTests.RedeclareTest22
  Real g.f.e.b.y = 3 /*(3)*/;
  Real g.f.e.b.z = 4 /*(4)*/;
  Real g.f.e.b.w = p0 /*(5)*/;
-equation
 end RedeclareTests.RedeclareTest22;
 "
   )})));
@@ -2682,7 +2648,6 @@ fclass RedeclareTests.RedeclareTest225
  Real f.e.b.y = 3 /*(3)*/;
  Real f.e.b.z = 4 /*(4)*/;
  Real f.e.b.w = p0 /*(5)*/;
-equation
 end RedeclareTests.RedeclareTest225;	
 "
   )})));
@@ -2740,7 +2705,6 @@ fclass RedeclareTests.RedeclareTest23
  Real d2.b.x = 4 /*(4)*/;
  Real d2.b.y = 3 /*(3)*/;
  Real d2.b.z = 10 /*(10)*/;
-equation
 end RedeclareTests.RedeclareTest23;
 
 "
@@ -2791,7 +2755,6 @@ fclass RedeclareTests.RedeclareTest24
  Real g.f.e.b.y = 3 /*(3)*/;
  Real g.f.e.b.z = 4 /*(4)*/;
  Real g.f.e.b.w = p0 /*(5)*/;
-equation
 end RedeclareTests.RedeclareTest24;
 "
   )})));
@@ -2858,7 +2821,6 @@ fclass RedeclareTests.RedeclareTest25
  Real g.f.e.b.y = 8 /*(8)*/;
  Real g.f.e.b.z = 9 /*(9)*/;
  Real g.f.e.b.w = p0 /*(5)*/;
-equation
 end RedeclareTests.RedeclareTest25;
 "
   )})));
@@ -2919,7 +2881,6 @@ model RedeclareTest26
 fclass RedeclareTests.RedeclareTest26
  Real m.x;
  Real m.y;
-equation 
 end RedeclareTests.RedeclareTest26;
 "
   )})));
@@ -2957,7 +2918,6 @@ model RedeclareTest27
 "
 fclass RedeclareTests.RedeclareTest27
  Real b.y = 3;
-equation 
 end RedeclareTests.RedeclareTest27;
 ")})));
 
@@ -2999,7 +2959,6 @@ fclass RedeclareTests.RedeclareTest28
  parameter Real p3 = 1 /* 1.0 */;
  parameter Real m1.p2 = p2;
  parameter Real m1.p1 = p3;
-equation 
 end RedeclareTests.RedeclareTest28;
 ")})));
 

@@ -46,7 +46,6 @@ fclass TransformCanonicalTests.TransformCanonicalTest2
  parameter Real p2 = ( p1 ) * ( p1 );
  parameter Real p3 = p2 + p1;
  parameter Real p4 = ( p3 ) * ( p3 );
-equation 
 end TransformCanonicalTests.TransformCanonicalTest2;
 ")})));
 
@@ -126,7 +125,6 @@ fclass TransformCanonicalTests.TransformCanonicalTest5
  parameter Real p10 = ( p11 ) * ( p3 );
  parameter Real p2 = p11;
  parameter Real p9 = ( p11 ) * ( p8 );
-equation 
 end TransformCanonicalTests.TransformCanonicalTest5;
 ")})));
 
@@ -163,7 +161,6 @@ fclass TransformCanonicalTests.TransformCanonicalTest6
  parameter Real p11 = exp(1) /* 2.7182818284590455 */;
  parameter Real p12 = log(1) /* 0.0 */;
  parameter Real p13 = log10(1) /* 0.0 */;
-equation 
 end TransformCanonicalTests.TransformCanonicalTest6;
 ")})));
 

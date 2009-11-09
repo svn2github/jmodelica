@@ -33,7 +33,6 @@ model AlgorithmFlatten1
                                                flatModel="
 fclass FunctionTests.AlgorithmFlatten1
  Real x;
-equation 
 algorithm
  x := 5;
  x := x + 2;
@@ -53,7 +52,6 @@ model AlgorithmFlatten2
                                                flatModel="
 fclass FunctionTests.AlgorithmFlatten2
  Real x;
-equation 
 algorithm
  break;
  return;
@@ -74,7 +72,6 @@ model AlgorithmFlatten3
 fclass FunctionTests.AlgorithmFlatten3
  Real x;
  Real y;
-equation 
 algorithm
  if x == 4 then
   x := 1;
@@ -116,7 +113,6 @@ model AlgorithmFlatten4
 fclass FunctionTests.AlgorithmFlatten4
  Real x;
  Real y;
-equation 
 algorithm
  when x == 4 then
   x := 1;
@@ -153,7 +149,6 @@ model AlgorithmFlatten5
                                                flatModel="
 fclass FunctionTests.AlgorithmFlatten5
  Real x;
-equation 
 algorithm
  while x < 1 loop
   while x < 2 loop
@@ -183,7 +178,6 @@ model AlgorithmFlatten6
                                                flatModel="
 fclass FunctionTests.AlgorithmFlatten6
  Real x;
-equation 
 algorithm
  for i in {1, 2, 4}, j in 1:3 loop
   x := x + 1;

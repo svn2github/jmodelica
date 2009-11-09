@@ -52,7 +52,6 @@ class ModTest2
  parameter Real c4.a=55;
  parameter Real c4.b=66;
  parameter Real c4.c=77;
-equation 
 end ModificationTests.ModTest2;
   ")})));
   
@@ -87,7 +86,6 @@ class ModTest3
                                                flatModel=
 "fclass ModificationTests.ModTest3
  Real c.x=5;
-equation 
 end ModificationTests.ModTest3;
  ")})));
   
@@ -108,7 +106,6 @@ class ModTest5
 " fclass ModificationTests.ModTest5
  parameter Real p=3;
  Real y(start=p)=5;
-equation 
 end ModificationTests.ModTest5;")})));
 
   
@@ -125,7 +122,6 @@ class ModTest6
 " fclass ModificationTests.ModTest6
  parameter Real c2.p(nominal=4)=3;
  Real c2.c1.x(min=c2.p)=5;
-equation 
 end ModificationTests.ModTest6;")})));
   
 class C1
@@ -149,7 +145,6 @@ class ModTest7
  Real x=3;
  Real c2.y=3;
  Real c2.c3.z(max=4,nominal=2)=5;
-equation 
 end ModificationTests.ModTest7;")})));
 
   Real x=3;
@@ -172,7 +167,6 @@ class ModTest8
 "fclass ModificationTests.ModTest8
  Real c3.c1.x=44;
  Real c3.x=c3.c1.x;
-equation 
 end ModificationTests.ModTest8;
 ")})));
   
@@ -201,7 +195,6 @@ class ModTest9
 "fclass ModificationTests.ModTest9
  Real c3.c1.x(start=2,quantity=\"qwe\")=44;
  Real c3.x(quantity=\"qqq\",unit=\"m2\",displayUnit=\"m22\",start=4.2,min=4.1,max=9.0,nominal=0.2)=55;
-equation 
 end ModificationTests.ModTest9;
 ")})));
   
@@ -236,7 +229,6 @@ class ModTest10
  Real c2a.x=c2a.B;
  parameter Real c2b.B=1;
  Real c2b.x=A;
-equation 
 end ModificationTests.ModTest10;
 ")})));
   parameter Real A=2;
@@ -265,7 +257,6 @@ class ModTest11
  Real c3.c4a.x=5;
  Real c3.c4b.z=8;
  Real c3.c4b.x=3;
-equation 
 end ModificationTests.ModTest11;
 ")})));
   
@@ -319,7 +310,6 @@ end ModTest11;
  Real c3.c4b.z=a;
  Real c3.c4b.x=c3.b;
  Real c3.c4b.w=3;
-equation 
 end ModificationTests.ModTest_PM_12;")})));
   
   extends C2(c3(c4a(x=5)),c3.c4b.z=a);
@@ -435,7 +425,6 @@ model ShortClassDeclModTest1
 "
 fclass ModificationTests.ShortClassDeclModTest1
  Real aa.x=3;
-equation 
 end ModificationTests.ShortClassDeclModTest1;
 ")})));
 
@@ -457,7 +446,6 @@ end ShortClassDeclModTest1;
 "
 fclass ModificationTests.ShortClassDeclModTest2
  Real aa.x=2.5;
-equation 
 end ModificationTests.ShortClassDeclModTest2;
 ")})));
 
@@ -479,7 +467,6 @@ model ShortClassDeclModTest3
 "
 fclass ModificationTests.ShortClassDeclModTest3
  Real aa.x=3;
-equation 
 end ModificationTests.ShortClassDeclModTest3;
 ")})));
 

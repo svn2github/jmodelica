@@ -171,10 +171,7 @@ Semantic error at line 151, column 15:
   Real y;
 equation
   b.y = y + a.x;
-equation
- 
-
-  end NameTest5_Err;
+end NameTest5_Err;
 
 model NameTest55_Err
   
@@ -197,10 +194,7 @@ Semantic error at line 181, column 11:
   end A;
   
   A a;
-equation
- 
-
-  end NameTest55_Err;
+end NameTest55_Err;
 
 
 model NameTest6_Err
@@ -222,10 +216,7 @@ Semantic error at line 174, column 14:
   end A;
   
   A a;
-equation
- 
-
-  end NameTest6_Err;
+end NameTest6_Err;
 
 model NameTest7_Err
   
@@ -248,10 +239,7 @@ Semantic error at line 196, column 4:
   
   A a1;
   A a2;
-equation
- 
-
-  end NameTest7_Err;
+end NameTest7_Err;
 
 model NameTest8_Err
   
@@ -271,10 +259,7 @@ Semantic error at line 196, column 4:
   model C = D;
   
   C c;
-equation
- 
-
-  end NameTest8_Err;
+end NameTest8_Err;
 
 model NameTest9_Err
   
@@ -524,7 +509,6 @@ class NameTest15
 "
 fclass NameTests.NameTest15
  protected Real x = 1;
-equation 
 end NameTests.NameTest15;
 ")})));
 
@@ -541,7 +525,6 @@ class NameTest16
 fclass NameTests.NameTest16
 constant Real c = 1.0;
 parameter Real p = 1.0;
-equation
 end NameTests.NameTest16;
 ")})));
 
@@ -648,7 +631,6 @@ fclass NameTests.ImportTest1
  Real b.y;
  Real x;
  Real y;
-equation 
 end NameTests.ImportTest1;
 ")})));
   
@@ -681,7 +663,6 @@ model ImportTest2
 fclass NameTests.ImportTest2
  Real a.x;
  Real x;
-equation 
 end NameTests.ImportTest2;
 ")})));
 
@@ -740,7 +721,6 @@ model ImportTest4
 fclass NameTests.ImportTest4
  Real a.x;
  Real x;
-equation 
 end NameTests.ImportTest4;
 ")})));
 
@@ -764,7 +744,6 @@ model ImportTest5
 "
 fclass NameTests.ImportTest5
  Real d.z=3;
-equation 
 end NameTests.ImportTest5;
 ")})));
   package P 
@@ -798,7 +777,6 @@ model ImportTest6
 "
 fclass NameTests.ImportTest6
  Real m.R(start = 1,unit = \"Ohm\");
-equation 
 end NameTests.ImportTest6;
 ")})));
 
@@ -826,7 +804,6 @@ model ImportTest7
 "
 fclass NameTests.ImportTest7
  Real m.R(start = 1,unit = \"Ohm\");
-equation 
 end NameTests.ImportTest7;
 ")})));
 
@@ -884,7 +861,6 @@ model ImportTest9
   parameter Real p1 = cos(9) /* -0.9111302618846769 */;
   parameter Real p2 = sin(9) /* 0.4121184852417566 */;
   parameter Real p3 = sqrt(3) /* 1.7320508075688772 */;
- equation 
  end NameTests.ImportTest9;
  ")})));
 		
@@ -902,7 +878,6 @@ model ShortClassDeclTest1
                                                flatModel=
 "fclass NameTests.ShortClassDeclTest1
  Real aa.x=2;
-equation 
 end NameTests.ShortClassDeclTest1;
 ")})));
 
@@ -925,7 +900,6 @@ model ShortClassDeclTest2
                                                flatModel=
 "fclass NameTests.ShortClassDeclTest2
  Real aa.x=2;
-equation 
 end NameTests.ShortClassDeclTest2;
 ")})));
   model A
@@ -947,7 +921,6 @@ model ShortClassDeclTest3
                                                flatModel=
 "fclass NameTests.ShortClassDeclTest3
  Real x(start=3,min=-(3));
-equation 
 end NameTests.ShortClassDeclTest3;
 ")})));
   
@@ -985,7 +958,6 @@ model ShortClassDeclTest4
                                                flatModel=
 "fclass NameTests.ShortClassDeclTest4
  input Real u(min=3,max=5,nominal=34,unit=\"V\");
-equation 
 end NameTests.ShortClassDeclTest4;
 ")})));
   
@@ -1011,7 +983,6 @@ model ShortClassDeclTest5
 "
 fclass NameTests.ShortClassDeclTest5
  input Real u(nominal=4,start=3,max=2,min=1,unit=\"V\");
-equation 
 end NameTests.ShortClassDeclTest5;
 ")})));
   
@@ -1041,7 +1012,6 @@ model ShortClassDeclTest6
 fclass NameTests.ShortClassDeclTest6
  parameter Real R = 1;
  parameter Real a.R = R /*(0.0)*/;
-equation 
 end NameTests.ShortClassDeclTest6;
 ")})));
   
@@ -1097,7 +1067,6 @@ model ShortClassDeclTest8
 fclass NameTests.ShortClassDeclTest8
  input Real u;
  input Real u2;
-equation 
 end NameTests.ShortClassDeclTest8;
 ")})));
 

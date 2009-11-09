@@ -689,8 +689,7 @@ aspect FlattPrettyPrint {
 			str.print(";\n");
 		}
 	
-	    boolean wroteEquation = true;
-	    str.print(indent + "equation \n");
+	    boolean wroteEquation = false;
 	    for (FEquationBlock b : getFEquationBlocks()) {
 	    	for (FAbstractEquation e : b.getFAbstractEquations()) {
 	    		if (e instanceof FAlgorithmBlock) {
@@ -699,7 +698,7 @@ aspect FlattPrettyPrint {
 	    		} else {
 	    			if (!wroteEquation) {
 	    				str.print(indent);
-	    				str.print("equation \n");
+	    				str.print("equation\n");
 	    				wroteEquation = true;
 	    			}
 	    			p.toString(e, str, indent + " ", o);
@@ -708,14 +707,6 @@ aspect FlattPrettyPrint {
 	    	}
 	    }
 		
-//		str.print(indent + "equation \n");
-//	  	for (int i=0;i<getNumFEquationBlock();i++) {
-//			for (int j=0;j<getFEquationBlock(i).getNumFAbstractEquation();j++) {
-//				debugPrint("FClass.prettyPrint(): Equation nr: " + j);
-//	  			p.toString(getFEquationBlock(i).getFAbstractEquation(j),str, indent+" ",o);
-//				str.print(";\n");
-//			}
-//		}
   		str.print(indent);
   		str.print("end ");
   		str.print(name());
