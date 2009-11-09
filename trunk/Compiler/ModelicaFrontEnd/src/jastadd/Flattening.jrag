@@ -330,7 +330,6 @@ aspect FlatExpressions {
 		
 	public FForStmt InstForStmt.flatten(FQName prefix) {
 		List forIndex = new List();
-		List stmts = new List();
 		for (InstForIndex ifi : getInstForIndexs()) {
 			forIndex.add(ifi.flatten(prefix));
 		}

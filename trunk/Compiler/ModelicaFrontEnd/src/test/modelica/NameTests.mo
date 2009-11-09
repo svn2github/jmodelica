@@ -1175,7 +1175,7 @@ model ForTest1
 fclass NameTests.ForTest1
  Real x[3,3];
 equation 
- for i in 1:3, j in 1:3,  loop
+ for i in 1:3, j in 1:3 loop
   x[i,j] = i + j;
  end for;
 end NameTests.ForTest1;

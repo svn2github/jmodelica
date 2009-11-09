@@ -948,17 +948,7 @@ aspect FlattPrettyPrint {
 	
 	public void FForStmt.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("for ");
-		int i = 0;
-		for (FForIndex fi : getFForIndexs()) {
-			str.print(fi.getFVariable().name());
-			str.print(" in ");
-			if (fi.hasFExp()) {
-				p.toString(fi.getFExp(),str,"",o);
-			}
-			if (i<getNumFForIndex()-1) {
-				str.print(", ");
-			}
-		}
+		getFForIndexList().prettyPrintWithSep(p, str, indent, o, ", ");
 		str.print(" loop\n");
 		getForStmts().prettyPrintWithIndent(p, str, indent + " ", o, ";");
 		str.print(indent);
@@ -1272,26 +1262,19 @@ aspect FlattPrettyPrint {
 	
 	public void FForClauseE.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print(indent+"for ");
-		int i = 0;
-		for (FForIndex fi : getFForIndexs()) {
-			str.print(fi.getFVariable().name());
-			str.print(" in ");
-			if (fi.hasFExp()) {
-				p.toString(fi.getFExp(),str,"",o);
-			}
-			if (i<getNumFForIndex()-1) {
-				str.print(", ");
-			}
-		}
-				
+		getFForIndexList().prettyPrintWithSep(p, str, indent, o, ", ");
 		str.print(" loop\n");
-		for (int j=0;j<getNumForEqns();j++) {
-		  			p.toString(getForEqns(j),str, indent+" ",o);
-				str.print(";\n");
-		}
-		
-		str.print(indent+"end for");
+		getForEqnsList().prettyPrintWithFix(p, str, indent + " ", o, "", ";\n");
+		str.print(indent + "end for");
 	}
+	
+    public void FForIndex.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+        str.print(getFVariable().name());
+        if (hasFExp()) {
+            str.print(" in ");
+        p.toString(getFExp(), str, indent, o);
+        }
+    }
 		
 	public void FSizeExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("size(");
