@@ -469,7 +469,8 @@ aspect InstanceTreeConstruction {
 	syn lazy List InstNode.getDynamicComponentNameList() = new List();
 	syn lazy List InstComponentRedeclare.getDynamicClassNameList() = new List();
 	syn lazy List InstConstrainingComponent.getDynamicClassNameList() = new List();
-
+	syn lazy List InstForIndex.getDynamicClassNameList() = new List();
+	
 	syn lazy List InstNode.getInstComponentDeclList() {
 		
 		List l = new List();
@@ -1166,6 +1167,7 @@ aspect InstArrays {
 		(hasFArraySubscripts() && getFArraySubscripts().getNumFSubscript()>i)?
 				getFArraySubscripts().getFSubscript(i) : null;
 	eq InstRoot.getChild().childFSubscript(int i) = null;
+	eq FlatRoot.getChild().childFSubscript(int i) = null;
 
 	inh InstComponentDecl InstArrayComponentDecl.instComponentDecl();
 	eq InstComponentDecl.getChild().instComponentDecl() = this;

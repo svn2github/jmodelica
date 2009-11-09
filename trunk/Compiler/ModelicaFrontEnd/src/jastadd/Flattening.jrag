@@ -325,12 +325,19 @@ aspect FlatExpressions {
 	}
 	
 	public FForStmt FForStmt.flatten(FQName prefix) {
-		List il = new List();
-		for (FForIndex i : getFForIndexList()) 
-			il.add(i.flatten(prefix));
-		List sl = FStatement.flattenFStatementList(prefix, getForStmts());
-		return new FForStmt(il, sl);
+		return (FForStmt)(this.fullCopy());
 	}
+		
+	public FForStmt InstForStmt.flatten(FQName prefix) {
+		List forIndex = new List();
+		List stmts = new List();
+		for (InstForIndex ifi : getInstForIndexs()) {
+			forIndex.add(ifi.flatten(prefix));
+		}
+		List sl = FStatement.flattenFStatementList(prefix, getForStmts());
+		return new FForStmt(forIndex, sl);		
+	}
+
 	
 	public FWhileStmt FWhileStmt.flatten(FQName prefix) {
 		List l = FStatement.flattenFStatementList(prefix, getWhileStmts());
@@ -539,32 +546,37 @@ aspect FlatExpressions {
 		return new FFunctionCall(new FIdUse(getName().flatten(new FQName())),l);		
 	}
 
+	/*
 	public FExp FSumRedExp.flatten(FQName prefix) {
 		return new FSumRedExp(getFExp().flatten(prefix),
 		                     getFForIndex().flatten(prefix));
 	}
-	
-	public FForIndex FForIndex.flatten(FQName prefix) {
-		return new FForIndex(getFIdDecl().flatten(prefix),
+	*/
+	public FForIndex InstForIndex.flatten(FQName prefix) {
+		return new FForIndex(getInstPrimitive().createFVariable(),
 		                     hasFExp()? new Opt(getFExp().flatten(prefix)): new Opt());
 	}
 
 	//ForClauseE : AbstractEquation ::= ForIndex* ForEqns:AbstractEquation*;
     //ForIndex ::= ForIndexDecl [Exp];
-	public void FForClauseE.flatten(FQName prefix, FClass fc) {
+	public void InstForClauseE.flatten(FQName prefix, FClass fc) {
 		List forIndex = new List();
 		List eqns = new List();
-		for (int i=0;i<getNumFForIndex();i++)
-			forIndex.add(getFForIndex(i).flatten(prefix));
+		for (InstForIndex ifi : getInstForIndexs()) {
+			forIndex.add(ifi.flatten(prefix));
+		}
 		FClass fcc = new FClass();
 		fcc.setFQName(new FQName().append("tmp")); 
 		fcc.addFEquationBlock(new FEquationBlock(new List()));
 		//fcc.dumpTree("");
-		for (int i=0;i<getNumForEqns();i++)
-			getForEqns(i).flatten(prefix,fcc);
-		for (int i=0;i<fcc.getFEquationBlock(0).getNumFAbstractEquation();i++)
-			eqns.add(fcc.getFEquationBlock(0).getFAbstractEquation(i));
+		for (FAbstractEquation ae : getFAbstractEquations()) {
+			ae.flatten(prefix,fcc);
+		}
+		for (FAbstractEquation ae :fcc.getFEquationBlock(0).getFAbstractEquations()) {
+			eqns.add(ae);
+		}	
 		fc.getFEquationBlock(0).addFAbstractEquation(new FForClauseE(forIndex,eqns));
+		
 	}
 
 	public void FConnectClause.flatten(FQName prefix, FClass fc) {
@@ -748,12 +760,13 @@ aspect InstantiatedExpressions {
 		return new FWhenClause(t, l);
 	}
 	
-	protected FForStmt ForStmt.instantiateStatement() {
+	
+	protected InstForStmt ForStmt.instantiateStatement() {
 		List il = new List();
 		for (ForIndex i : getForIndexList()) 
 			il.add(i.instantiate());
 		List sl = Statement.instantiateStatementList(getForStmts());
-		return new FForStmt(il, sl);
+		return new InstForStmt(il, sl);
 	}
 	
 	protected FWhileStmt WhileStmt.instantiateStatement() {
@@ -1105,39 +1118,40 @@ aspect InstantiatedExpressions {
     	}
   	}
   
+	/*
 	public FExp SumRedExp.instantiate() {
 		FSumRedExp n = new FSumRedExp(getExp().instantiate(),
 		                     getForIndex().instantiate());
 		n.setLocation(this);
 		return n;
 	}
-	
-	public FForIndex ForIndex.instantiate() {
-		FForIndex n = new FForIndex(new FIdDecl(new FQName().append(getForIndexDecl().name())),
-		                     hasExp()? new Opt(getExp().instantiate()): new Opt());
+	*/
+
+	public InstForIndex ForIndex.instantiate() {
+		SourceRoot sr = (SourceRoot)root(); // We know we are in the source Tree
+		// This maneuver is pretty ugly, but we need to find an InstClassDecl
+		// in the instance tree from the sourc tree...
+		sr.getProgram().getInstProgramRoot().addDynamicClassName(getForIndexDecl().getClassName().newInstAccess());
+		InstPrimitive ip = (InstPrimitive)(sr.getProgram().getInstProgramRoot().getDynamicClassName(
+				sr.getProgram().getInstProgramRoot().getNumDynamicClassName()-1).myInstClassDecl().newInstComponentDecl(getForIndexDecl()));    			
+		Opt o = hasExp()? new Opt(getExp().instantiate()): new Opt();
+		InstForIndex n = new InstForIndex(ip, o);
 		n.setLocation(this);
 		return n;
 	}
 	
-	//ForClauseE : AbstractEquation ::= ForIndex* ForEqns:AbstractEquation*;
-    //ForIndex ::= ForIndexDecl [Exp];
-/*
-	public void ForClauseE.instantiate() {
-		List forIndex = new List();
-		List eqns = new List();
-		for (int i=0;i<getNumForIndex();i++)
-			forIndex.add(getForIndex(i).instantiate());
-		FClass fcc = new FClass();
-		fcc.setFQName(new FQName().append("tmp")); 
-		fcc.addFEquationBlock(new FEquationBlock(new List()));
-		fcc.dumpTree("");
-		for (int i=0;i<getNumForEqns();i++)
-			getForEqns(i).flatten(prefix,fcc);
-		for (int i=0;i<fcc.getFEquationBlock(0).getNumFAbstractEquation();i++)
-			eqns.add(fcc.getFEquationBlock(0).getFAbstractEquation(i));
-		fc.getFEquationBlock(0).addFAbstractEquation(new FForClauseE(forIndex,eqns));
+	public InstForClauseE ForClauseE.instantiate() {
+		List<InstForIndex> forIndex = new List();
+		List<FAbstractEquation> eqns = new List();
+		for (ForIndex fi : getForIndexs()) {
+    		forIndex.add(fi.instantiate());    	
+		}
+		for (AbstractEquation ae : getAbstractEquations()) {
+			eqns.add(ae.instantiate());
+		}
+		return new InstForClauseE(forIndex,eqns);
 	}
-	*/
+
 
 
 }

@@ -150,6 +150,9 @@ aspect FlatAPI {
 		return getAliasVariable(i).aliasValueReference();
 	}
 	
+	eq FClass.getFEquationBlock().valueReference() = -1;
+	eq Root.getChild().valueReference() = -1;
+	
 	syn int FVariable.aliasValueReference() = alias()!=null? 
 		alias().valueReference(): -1;
 

@@ -1166,23 +1166,47 @@ equation
 
 end EndExpTest2;
 
-model EndExpTest3
+model ForTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="EndExpTest3",
-        description="Short class declaration of Real.",
+      JModelica.UnitTesting.FlatteningTestCase(name="ForTest1",
+        description="Test for equations.",
+                                               flatModel=
+"
+fclass NameTests.ForTest1
+ Real x[3,3];
+equation 
+ for i in 1:3, j in 1:3,  loop
+  x[i,j] = i + j;
+ end for;
+end NameTests.ForTest1;
+")})));
+
+  Real x[3,3];
+equation
+  for i in 1:3, j in 1:3 loop
+    x[i,j] = i + j;
+  end for;
+end ForTest1;
+
+
+model ForTest2_Err
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ForTest2_Err",
+        description="Test for equations.",
                                                errorMessage=
 "
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 1160, column 2:
-  Unsupported equation type
+Semantic error at line 1201, column 18:
+  Cannot find class or component declaration for k
 ")})));
 
- Real x[2];
+
+  Real x[3,3];
 equation
- for i in 1:2 loop
-  x[i] = i;
- end for;
-end EndExpTest3;
+  for i in 1:3, j in 1:3 loop
+    x[i,j] = i + k;
+  end for;
+end ForTest2_Err;
 
 
 end NameTests;

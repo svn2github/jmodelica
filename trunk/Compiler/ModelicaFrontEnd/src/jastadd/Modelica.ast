@@ -302,7 +302,7 @@ ConditionalEquationE : AbstractEquation ::= IfExp:Exp IfEqns:AbstractEquation*
                                           ElseIfClauseE*
                                           ElseEqns:AbstractEquation*;
 ElseIfClauseE ::= IfExp:Exp IfEqns:AbstractEquation*;
-ForClauseE : AbstractEquation ::= ForIndex* ForEqns:AbstractEquation*;
+ForClauseE : AbstractEquation ::= ForIndex* AbstractEquation*;
 ForIndex ::= ForIndexDecl [Exp];
 // ForIndexDecl is introduced basically to make the name-analysis simpler:
 // lookupDecl is supposed to return a ComponentDecls.

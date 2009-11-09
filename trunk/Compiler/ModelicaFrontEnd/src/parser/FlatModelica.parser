@@ -300,9 +300,22 @@ List ffor_indices =
   | ffor_indices COMMA ffor_index  {: return ffor_indices.add(ffor_index); :}
   ;
 
+
 FForIndex ffor_index =
-    fid_decl IN fexp    {: return new FForIndex(fid_decl, new Opt(fexp)); :}
-  | fid_decl            {: return new FForIndex(fid_decl, new Opt()); :}
+    fid_decl IN fexp    {: return new FForIndex(new FIntegerVariable(new FPublicVisibilityType(),
+                                                              new FDiscrete(),
+                                                              new Opt(),
+                                                              new List(),
+                                                              new Opt(),
+                                                              new Opt(),
+                                                              new FQName(fid_decl.name())), new Opt(fexp)); :}
+  | fid_decl            {: return new FForIndex(new FIntegerVariable(new FPublicVisibilityType(),
+                                                              new FDiscrete(),
+                                                              new Opt(),
+                                                              new List(),
+                                                              new Opt(),
+                                                              new Opt(),
+                                                              new FQName(fid_decl.name())), new Opt()); :}
   ;
 
 FWhileStmt fwhile_stmt = 

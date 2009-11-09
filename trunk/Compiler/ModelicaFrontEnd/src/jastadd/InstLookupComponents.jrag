@@ -44,10 +44,27 @@ aspect InstLookupComponents {
 	syn lazy HashSet InstAccess.qualifiedLookupInstComponent(String name) = emptyHashSet();
 	eq InstComponentAccess.qualifiedLookupInstComponent(String name) = myInstComponentDecl().memberInstComponent(name);	
 	eq InstClassAccess.qualifiedLookupInstComponent(String name) = myInstClassDecl().memberInstComponent(name);
-	
+
 	eq SourceRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
 	// This equation is necessary since InstAccesses may be present in FExps.	
 	eq FlatRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
+
+	inh lazy HashSet InstForClauseE.lookupInstComponent(String name);
+	eq InstForClauseE.getChild().lookupInstComponent(String name) {
+		HashSet set = new HashSet(4);
+		for (InstForIndex ifi : getInstForIndexs()) {
+			if (ifi.getInstPrimitive().name().equals(name)) {
+				set.add(ifi.getInstPrimitive());
+			}
+		}
+		if (set.size() > 0) {
+			return set;
+		} else {
+			lookupInstComponent(name);
+		}
+		
+	}
+	
 	
 	syn lazy HashSet InstBaseClassDecl.genericLookupInstComponent(String name) {
 		HashSet h = memberInstComponent(name);
@@ -108,8 +125,8 @@ aspect InstLookupComponents {
 		getLeft(); // FIXME: WHY??? Errors result if removed.
 		return getRight().myInstComponentDecl();
 	}
-		
-/*
+	
+	/*
 	inh HashSet ForClauseE.lookupComponent(String name);	
 	eq ForClauseE.getForEqns().lookupComponent(String name) {
 		HashSet set = new HashSet(4);
@@ -314,6 +331,7 @@ aspect LookupInstComponentsInModifications {
 	eq InstComponentRedeclare.getName().lookupInstComponent(String name) = lookupInstComponentInInstElement(name);
 	
 	eq InstRoot.getChild().lookupInstComponentInInstElement(String name) {return emptyHashSet();}
+	eq FlatRoot.getChild().lookupInstComponentInInstElement(String name) {return emptyHashSet();}
 	  
 }
 

@@ -95,6 +95,11 @@ InstAmbiguousAccess : InstArrayAccess;
 
 InstComponentAccess : InstArrayAccess;
 
+InstForIndex ::= InstPrimitive [FExp] /DynamicClassName:InstAccess*/;
+
+InstForClauseE : FAbstractEquation ::= InstForIndex* FAbstractEquation*;
+InstForStmt : FStatement ::= InstForIndex* ForStmt:FStatement*;
+
 // These nodes are used to create instance copies of modification trees intended for
 // error checking.	
 abstract InstModification ::= <Modification:Modification>;

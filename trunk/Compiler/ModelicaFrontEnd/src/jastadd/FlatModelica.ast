@@ -580,7 +580,7 @@ FSumRedExp : FExp ::= FExp FForIndex;
 /**
  * \brief For indices expression.
  */
-FForIndex ::= FIdDecl [FExp];
+FForIndex ::= FVariable [FExp];
 
 /**
  * \brief Summation function.

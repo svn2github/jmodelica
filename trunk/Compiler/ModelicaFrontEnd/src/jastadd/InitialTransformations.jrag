@@ -39,6 +39,7 @@
   	eq PublicElementList.getElement().visibility() = new PublicVisibilityType();
   	eq ProtectedElementList.getElement().visibility() = new ProtectedVisibilityType();
   	eq SourceRoot.getProgram().visibility() = new PublicVisibilityType(); 
+  	eq Root.getChild().visibility() = new PublicVisibilityType(); 
   	
   	eq ClassRedeclare.getBaseClassDecl().visibility() = new PublicVisibilityType();
   	eq ComponentRedeclare.getComponentDecl().visibility() = new PublicVisibilityType();

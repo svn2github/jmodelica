@@ -18,7 +18,9 @@ aspect PredefinedTypes {
 
 	inh List FullClassDecl.getPredefinedType();
 	eq SourceRoot.getProgram().getPredefinedType() = getProgram().getPredefinedTypeList();
+	eq Root.getChild().getPredefinedType() = null;
 
+	
 	/* The predefined types Real, Integer etc of Modelica are
 	 * much like user-defined classes, in that they have components 
 	 * (called attributes). However, the types of attributes are restricted
@@ -265,6 +267,8 @@ aspect PredefinedTypes {
 	
 	inh ClassDecl Exp.lookupBuiltInFunction(String name);
 	eq SourceRoot.getProgram().lookupBuiltInFunction(String name) = unknownClassDecl();
+	eq Root.getChild().lookupBuiltInFunction(String name) = null;
+	
 	/*
 	rewrite FunctionCall {
    		when (getName().myClassDecl() == lookupBuiltInFunction("size") && 

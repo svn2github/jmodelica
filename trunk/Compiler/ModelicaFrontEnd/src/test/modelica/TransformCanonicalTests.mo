@@ -180,10 +180,7 @@ end TransformCanonicalTests.TransformCanonicalTest6;
     parameter Real p10 = tanh(1); 
     parameter Real p11 = exp(1);
     parameter Real p12 = log(1);
-    parameter Real p13 = log10(1); 
-
-
-  	
+    parameter Real p13 = log10(1);   	
   end TransformCanonicalTest6;
 
 
@@ -1012,6 +1009,7 @@ Semantic error at line 843, column 10:
   Real p2;	
   A a(x(start=p2));
 end AttributeBindingExpTest5_Err;
+
 
 
 end TransformCanonicalTests;

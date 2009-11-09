@@ -287,7 +287,8 @@ aspect Names {
   eq BuiltInClassDecl.qualifiedName() = getName().getID();
   
   eq SourceRoot.getProgram().classNamePrefix() = "";
-  
+  eq Root.getChild().classNamePrefix() = "";
+    
   syn String InstClassDecl.qualifiedName();
   eq InstBaseClassDecl.qualifiedName() = instClassNamePrefix().equals("")? 
                                                   name(): instClassNamePrefix() + "." + name();
@@ -298,6 +299,7 @@ aspect Names {
   eq InstBuiltInClassDecl.qualifiedName() = name();
   
   eq SourceRoot.getChild().instClassNamePrefix() = "";
+  eq FlatRoot.getChild().instClassNamePrefix() = "";
   eq InstRoot.getChild().instClassNamePrefix() = "";
   
   syn String FunctionCall.name() = getName().name();
@@ -357,6 +359,7 @@ aspect Names {
    	inh Access Access.getNextAccess();
    	eq Dot.getLeft().getNextAccess() = getRight().getFirstAccess();
    	eq SourceRoot.getProgram().getNextAccess() = null;
+   	eq Root.getChild().getNextAccess() = null;
 
     /**
      * Access method for the first Access of a qualified or

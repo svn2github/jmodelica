@@ -564,6 +564,7 @@ aspect InstLookupClassesInModifications {
 	 * Terminating equation for attribute lookupInstClassInInstClass.
 	 */
 	eq InstRoot.getChild().lookupInstClassInInstClass(String name) {return emptyHashSet();}
+	eq FlatRoot.getChild().lookupInstClassInInstClass(String name) {return emptyHashSet();}
 	  
 }
 
