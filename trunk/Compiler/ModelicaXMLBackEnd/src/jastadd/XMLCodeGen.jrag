@@ -1,3 +1,5 @@
+import java.io.PrintStream;
+
 /*
 Copyright (C) 2009 Modelon AB
 
@@ -16,8 +18,164 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 aspect XMLCodeGen {
 	
+
+	/************************************************************************************************
+	 *
+	 * TODO Schema : <com:FIdUse>?, atan2
+	 * 
+	 * TODO Generation : <com:FIdUse>?, unary operations, namaspaces definition
+	 * 
+	 * **********************************************************************************************
+	 */
 	
-	syn boolean FClass.testAttribute() = false;
+	class XMLPrettyPrinter extends Printer {
+ 		public void toString(ASTNode node, PrintStream str, String indent, Object o) { 
+ 			node.prettyPrint_XML(this, str, indent, o); 
+ 		}
+	}
+	
+	public String ASTNode.prettyPrint_XML(String indent) {
+		StringOutputStream os = new StringOutputStream();
+		PrintStream str = new PrintStream(os);
+		prettyPrint_XML(str,indent,null);
+		return os.toString();
+	}
+
+	public String ASTNode.prettyPrint_XML(String indent,Object o) {
+		StringOutputStream os = new StringOutputStream();	
+		PrintStream str = new PrintStream(os);
+		prettyPrint_XML(str,indent,o);
+		return os.toString();
+	}
+
+	
+	public void ASTNode.prettyPrint_XML(PrintStream str,String indent) {
+ 		prettyPrint_XML(new XMLPrettyPrinter(),str,indent,null);
+	}
+
+	public void ASTNode.prettyPrint_XML(PrintStream str,String indent, Object o) {
+ 		prettyPrint_XML(new XMLPrettyPrinter(),str,indent,o);
+	}
+	
+	public void ASTNode.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o) {
+		prettyPrint(p,str,indent,o);
+		/*for(int i = 0; i < getNumChild(); i++)
+   			p.toString(getChild(i),str,indent,o); // distpatch through Printer
+	    */
+	}
+	
+	//PrettyPrint of equation in residual form: expression1-expression2 = 0
+	public void FAbstractEquation.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		ASTNode left = getChild(this,0);
+		ASTNode right = getChild(this,1);
+		
+		str.println(indent+"<equ:FEquation>");
+		str.println(indent+"\t<exp:FSubExp>");
+		left.prettyPrint_XML(str,indent+"\t\t");
+		right.prettyPrint_XML(str,indent+"\t\t");
+		str.println(indent+"\t</exp:FSubExp>");
+		str.println(indent+"</equ:FEquation>");
+	}
+
+	
+	public void FLitExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		String namespace ="exp";
+		String tag = this.getClass().getSimpleName();
+		
+		if (tag.equals("FBooleanLitExpTrue") || tag.equals("FBooleanLitExpFalse") )
+			tag="FBooleanLitExp";
+			
+		str.print(indent + "<" + namespace + ":" + tag + ">");
+		prettyPrint(p,str,"",o);
+		str.println("</"+ namespace + ":" + tag + ">");
+		
+	}
+	
+	public void FArtmBinExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		String namespace = "exp";
+		String tag = this.getClass().getSimpleName();
+		ASTNode left = getLeft();
+		ASTNode right= getRight();
+		
+		str.println(indent + "<" + namespace + ":" + tag + ">");
+		left.prettyPrint_XML(str,indent+"\t");
+		right.prettyPrint_XML(str,indent+"\t");
+		str.println(indent + "</"+ namespace + ":" + tag + ">");	
+	}
 	
 	
+	public void FLogBinExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		String namespace = "exp";
+		String tag = this.getClass().getSimpleName();
+		ASTNode left = getLeft();
+		ASTNode right= getRight();
+		
+		str.println(indent + "<" + namespace + ":" + tag + ">");
+		left.prettyPrint_XML(str,indent+"\t");
+		right.prettyPrint_XML(str,indent+"\t");
+		str.println(indent + "</"+ namespace + ":" + tag + ">");	
+	}
+	
+	
+	public void FUnaryExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		String namespace="exp";
+		String tag = this.getClass().getSimpleName();
+		ASTNode child = getChild(this,0);	
+		
+		str.println(indent + "<" + namespace + ":" + tag + ">");
+		child.prettyPrint_XML(str,indent+"\t");
+		str.println(indent + "</"+ namespace + ":" + tag + ">");
+	}
+	
+	
+	public void FMathematicalFunctionCall.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		String namespace ="exp";
+		String tag = this.getClass().getSimpleName();
+		ASTNode child = getChild(this,0);
+		
+		str.println(indent + "<" + namespace + ":" + tag + ">");
+		child.prettyPrint_XML(str,indent+"\t");
+		str.println(indent + "</"+ namespace + ":" + tag + ">");
+	}
+	
+	
+	//TODO: test ************************************************
+	public void FAtan2Exp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		String namespace="exp";
+		String tag= this.getClass().getSimpleName();
+		ASTNode x_arg = getChild(this,0);
+		ASTNode y_arg= getChild(this,1);
+		
+		str.println(indent + "<" + namespace + ":" + tag + ">");
+		x_arg.prettyPrint_XML(str,indent+"\t");
+		y_arg.prettyPrint_XML(str,indent+"\t");
+		str.println(indent + "</"+ namespace + ":" + tag + ">");
+	}
+	
+	
+	public void FDerExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		ASTNode child = getChild(this,0);	
+		
+		str.println(indent + "<exp:FDer>");
+		child.prettyPrint_XML(str,indent+"\t");
+		str.println(indent + "</exp:FDer>");
+	}
+	
+	public void FIdUseExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		ASTNode child = getChild(this,0);
+		ASTNode idUse = child.getChild(0);
+		
+		str.print(indent + "<exp:FIdUse>");
+		idUse.prettyPrint_XML(str,"");
+		str.println("</exp:FIdUse>");		
+	}
+	
+	
+	public void FIdUse.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		ASTNode child = getChild(this,0);
+		
+		str.print(indent + "<exp:FIdUse>");
+		child.prettyPrint_XML(str,"");
+		str.println("</exp:FIdUse>");
+	}
 }

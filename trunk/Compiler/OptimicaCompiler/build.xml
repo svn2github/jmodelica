@@ -130,17 +130,21 @@
 					<include name="*.jadd"/>
 					<include name="*.jrag"/>
 				</fileset>
+			<fileset dir="${modelica_xml_back_end_ast}">
+					<include name="*.ast"/>
+					<include name="*.jadd"/>
+					<include name="*.jrag"/>
+					<exclude name="TestFramework.jrag"/>
+			</fileset>
 			<fileset dir="${modelica_xml_back_end_ast}/codegen">
 				<include name="*.ast"/>
 				<include name="*.jadd"/>
 				<include name="*.jrag"/>
-				<exclude name="TestFramework.jrag"/>
 			</fileset>
 			<fileset dir="${modelica_xml_back_end_ast}/test-framework">
 				<include name="*.ast"/>
 				<include name="*.jadd"/>
 				<include name="*.jrag"/>
-				<exclude name="TestFramework.jrag"/>
 			</fileset>
 			<fileset dir="${modelica_c_back_end_ast}">
 				<include name="*.ast"/>
