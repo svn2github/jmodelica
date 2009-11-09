@@ -728,8 +728,13 @@ aspect InstanceTreeConstruction {
     	scd.setLocation(this);
     	return scd;
     }
+
     public InstPrimitiveClassDecl PrimitiveClassDecl.newInstClassDecl() {
     	return new InstPrimitiveClassDecl(this, new Opt(), newInstRestriction());
+    }
+
+    public InstBuiltInClassDecl BuiltInClassDecl.newInstClassDecl() {
+    	return new InstBuiltInClassDecl(this);
     }
 
     public InstClassDecl ClassDecl.newInstReplacingClass(ClassDecl replacingClass,InstClassRedeclare icr) {
