@@ -34,7 +34,7 @@ InstProgramRoot : InstRoot ::= <Program:Program>
                                /InstLibClassDecl:InstClassDecl*/;
 
 abstract InstClassDecl: InstNode ::= <ClassDecl:ClassDecl>;
-abstract InstBaseClassDecl : InstClassDecl ::= [InstConstraining];
+abstract InstBaseClassDecl : InstClassDecl ::= [InstConstraining] InstRestriction;
 InstFullClassDecl : InstBaseClassDecl ::= ;
 InstExtendClassDecl : InstFullClassDecl ::= ;
 InstShortClassDecl : InstBaseClassDecl ::= ;
@@ -45,6 +45,17 @@ UnknownInstClassDecl : InstFullClassDecl;
 InstReplacingFullClassDecl : InstFullClassDecl ::= <OriginalClassDecl:ClassDecl> /OriginalInstClass:InstClassDecl/ <InstClassRedeclare:InstClassRedeclare>;
 InstReplacingShortClassDecl : InstShortClassDecl ::= <OriginalClassDecl:ClassDecl> /OriginalInstClass:InstClassDecl/ <InstClassRedeclare:InstClassRedeclare>;
 InstReplacingPrimitiveClassDecl : InstReplacingFullClassDecl ::=;
+
+abstract InstRestriction;
+InstModel : InstRestriction;
+InstBlock : InstRestriction;
+InstMClass : InstRestriction;
+InstConnector : InstRestriction;
+InstExpandableConnector : InstConnector;
+InstMType : InstRestriction;
+InstMPackage : InstRestriction;
+InstFunction : InstRestriction;
+InstRecord : InstRestriction;
  
 abstract InstImport ::= PackageName:InstAccess <ImportClause:ImportClause>;
 InstImportQualified : InstImport;

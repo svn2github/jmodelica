@@ -17,7 +17,7 @@
 aspect OptimicaFlattening {
 
     public InstFullClassDecl OptClassDecl.newInstClassDecl() {
-    	InstOptClassDecl fcd = new InstOptClassDecl(this,new Opt(),new Opt());
+    	InstOptClassDecl fcd = new InstOptClassDecl(this, new Opt(), newInstRestriction(), new Opt());
 	    fcd.setInstConstrainingOpt(newInstConstrainingClassOpt());
 	    if (hasClassModification()) {
 	    	fcd.setInstClassModification(getClassModification().newInstModification());
@@ -25,8 +25,12 @@ aspect OptimicaFlattening {
     	fcd.setStart(getStart());
     	return fcd;
     }
+    
+    public InstOptimizationClass OptimizationClass.newInstRestriction() {
+    	return new InstOptimizationClass();
+    }
 	
-        refine Flattening public InstNode InstProgramRoot.findFlattenInst(String className,FClass fc) throws ModelicaClassNotFoundException {
+    refine Flattening public InstNode InstProgramRoot.findFlattenInst(String className,FClass fc) throws ModelicaClassNotFoundException {
     	
     	InstClassDecl icd = simpleLookupInstClassDecl(className);
     	if (!icd.isUnknown()) {
@@ -38,7 +42,6 @@ aspect OptimicaFlattening {
     	
     	return icd;
     }
-    
         
     refine Flattening void InstClassDecl.flattenInstClassDecl(FClass fc) {
    		FQName fqn = new FQName();

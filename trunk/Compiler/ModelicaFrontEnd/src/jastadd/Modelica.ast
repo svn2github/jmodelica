@@ -72,9 +72,9 @@ SourceRoot : Root ::= Program ;
 Program ::= UnstructuredEntity:StoredDefinition* 
             /UnknownClassDecl/
             /UnknownComponentDecl/
-            /PredefinedType:ClassDecl*/ 
+            /PredefinedType:BaseClassDecl*/ 
             /BuiltInType:ClassDecl*/   
-            /BuiltInFunction:ClassDecl*/
+            /BuiltInFunction:BaseClassDecl*/
             /LibNode*/
             /InstProgramRoot/;
 

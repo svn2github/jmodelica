@@ -716,7 +716,7 @@ aspect InstanceTreeConstruction {
     }    
 
     public InstFullClassDecl FullClassDecl.newInstClassDecl() {
-    	InstFullClassDecl fcd = new InstFullClassDecl(this,new Opt());
+    	InstFullClassDecl fcd = new InstFullClassDecl(this,new Opt(), newInstRestriction());
 	    fcd.setInstConstrainingOpt(newInstConstrainingClassOpt());
     	fcd.setStart(getStart());
     	fcd.setEnd(getEnd());
@@ -724,7 +724,7 @@ aspect InstanceTreeConstruction {
     }
 
     public InstExtendClassDecl ExtendClassDecl.newInstClassDecl() {
-    	InstExtendClassDecl ecd = new InstExtendClassDecl(this,new Opt());
+    	InstExtendClassDecl ecd = new InstExtendClassDecl(this,new Opt(), newInstRestriction());
 	    ecd.setInstConstrainingOpt(newInstConstrainingClassOpt());
     	ecd.setStart(getStart());
        	ecd.setEnd(getEnd());
@@ -732,14 +732,14 @@ aspect InstanceTreeConstruction {
     }
 
     public InstShortClassDecl ShortClassDecl.newInstClassDecl() {
-    	InstShortClassDecl scd =  new InstShortClassDecl(this, new Opt());
+    	InstShortClassDecl scd =  new InstShortClassDecl(this, new Opt(), newInstRestriction());
 	    scd.setInstConstrainingOpt(newInstConstrainingClassOpt());    	
     	scd.setStart(getStart());
     	scd.setEnd(getEnd());
     	return scd;
     }
     public InstPrimitiveClassDecl PrimitiveClassDecl.newInstClassDecl() {
-    	return new InstPrimitiveClassDecl(this, new Opt());
+    	return new InstPrimitiveClassDecl(this, new Opt(), newInstRestriction());
     }
 
     public InstClassDecl ClassDecl.newInstReplacingClass(ClassDecl replacingClass,InstClassRedeclare icr) {
@@ -747,24 +747,43 @@ aspect InstanceTreeConstruction {
     }    
 
     public InstReplacingFullClassDecl FullClassDecl.newInstReplacingClass(ClassDecl replacingClass,InstClassRedeclare icr) {
-    	InstReplacingFullClassDecl fcd = new InstReplacingFullClassDecl(replacingClass,new Opt(),this,icr);
+    	InstRestriction ir = newInstRestriction();
+    	InstReplacingFullClassDecl fcd = new InstReplacingFullClassDecl(replacingClass, new Opt(), ir, this, icr);
 	    fcd.setInstConstrainingOpt(newInstConstrainingClassOpt()); //TODO: Should be constr clause of original or redeclared?
     	fcd.setStart(getStart());
     	fcd.setEnd(getEnd());
     	return fcd;
     }
     public InstReplacingShortClassDecl ShortClassDecl.newInstReplacingClass(ClassDecl replacingClass,InstClassRedeclare icr) {
-    	InstReplacingShortClassDecl scd =  new InstReplacingShortClassDecl(replacingClass, new Opt(),this,icr);
+    	InstRestriction ir = newInstRestriction();
+      	InstReplacingShortClassDecl scd =  new InstReplacingShortClassDecl(replacingClass, new Opt(), ir, this, icr);
 	    scd.setInstConstrainingOpt(newInstConstrainingClassOpt());    	
     	scd.setStart(getStart());
     	scd.setEnd(getEnd());
    	return scd;
     }
     public InstReplacingFullClassDecl PrimitiveClassDecl.newInstReplacingClass(ClassDecl replacingClass,InstClassRedeclare icr) {
-    	return new InstReplacingPrimitiveClassDecl(replacingClass, new Opt(),this,icr);
+    	InstRestriction ir = newInstRestriction();
+        return new InstReplacingPrimitiveClassDecl(replacingClass, new Opt(), ir, this, icr);
     }
+    
+    // Create InstRestriction
+    public InstRestriction BaseClassDecl.newInstRestriction() {
+    	return getRestriction().newInstRestriction();
+    }
+    
+    public abstract InstRestriction Restriction.newInstRestriction();
+    public InstModel Model.newInstRestriction()         { return new InstModel(); }
+    public InstBlock Block.newInstRestriction()         { return new InstBlock(); }
+    public InstMClass MClass.newInstRestriction()       { return new InstMClass(); }
+    public InstConnector Connector.newInstRestriction() { return new InstConnector(); }
+    public InstExpandableConnector ExpandableConnector.newInstRestriction() { return new InstExpandableConnector(); }
+    public InstMType MType.newInstRestriction()         { return new InstMType(); }
+    public InstMPackage MPackage.newInstRestriction()   { return new InstMPackage(); }
+    public InstFunction Function.newInstRestriction()   { return new InstFunction(); }
+    public InstRecord Record.newInstRestriction()       { return new InstRecord(); }
 
-	// Build an InstExtends
+    // Build an InstExtends
 	public InstExtends ExtendsClause.newInstExtends() {
 		InstExtends ie = new InstExtends(getSuper().newInstAccess(),this, new Opt());
 		if (hasClassModification())
