@@ -14,4 +14,5 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__all__ = ['ipopt','sundials','gen_nice_qt_plot']
+__all__ = ['ipopt','sundials']
+
