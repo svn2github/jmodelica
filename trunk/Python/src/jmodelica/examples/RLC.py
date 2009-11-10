@@ -11,6 +11,8 @@ import jmodelica.jmi as jmi
 from jmodelica.tests import get_example_path
 from jmodelica.simulation.sundials import SundialsDAESimulator
 from jmodelica.compiler import ModelicaCompiler
+from jmodelica.initialization.ipopt import NLPInitialization
+from jmodelica.initialization.ipopt import InitializationOptimizer
 
 def run_demo(with_plots=True):
     """
@@ -21,18 +23,27 @@ def run_demo(with_plots=True):
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    libname = 'RLC_Circuit'
+    model_name = 'RLC_Circuit'
     mofile = curr_dir+'/files/RLC_Circuit.mo'
-    optpackage = 'RLC_Circuit'
+    
     
     mc = ModelicaCompiler()
     
     # Comile the Modelica model first to C code and
     # then to a dynamic library
-    mc.compile_model(mofile,libname)
+    mc.compile_model(mofile,model_name,target='ipopt')
 
     # Load the dynamic library and XML data
-    model=jmi.Model(optpackage)
+    model=jmi.Model(model_name)
+
+    # Create DAE initialization object.
+    init_nlp = NLPInitialization(model)
+    
+    # Create an Ipopt solver object for the DAE initialization system
+    init_nlp_ipopt = InitializationOptimizer(init_nlp)
+        
+    # Solve the DAE initialization system with Ipopt
+    init_nlp_ipopt.init_opt_ipopt_solve()
 
     simulator = SundialsDAESimulator(model, verbosity=3, start_time=0.0, final_time=30.0, time_step=0.01)
     simulator.run()
