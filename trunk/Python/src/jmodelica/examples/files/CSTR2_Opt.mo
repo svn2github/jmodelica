@@ -1,8 +1,10 @@
 optimization CSTR2_Opt(startTime=0,finalTime=10,objective=cost(finalTime))
 
-  extends CSTRLib.Examples.CSTRs_Opt(u1(min=0.1,max=3,start=1),u2(min=0.1,max=3,start=1));
+  extends CSTRLib.Examples.CSTRs_Opt(u1(min=0.1,max=3,start=1),u2(min=0.1,max=3,start=1),
+                                     two_CSTRs_Series.V1(fixed=true),two_CSTRs_Series.T1(fixed=true),two_CSTRs_Series.CA1(fixed=true),
+                                     two_CSTRs_Series.V2(fixed=true),two_CSTRs_Series.T2(fixed=true),two_CSTRs_Series.CA2(fixed=true));
 
-  Real cost(start=0);
+  Real cost(start=0,fixed=true);
 
   parameter Real CA1_ref = 0.03;
   parameter Real CA2_ref = 0.001;
