@@ -9,12 +9,13 @@
 	<property name="beaver_dir" value="${jmodelica_root}/ThirdParty/Beaver/beaver-0.9.6.1/lib" />
 	<property name="jflex_dir" value="${jmodelica_root}/ThirdParty/JFlex/jflex-1.4.3/lib" />
 	<property name="jastadd_dir" value="${jmodelica_root}/ThirdParty/JastAdd" />
+	<property name="ant-contrib_dir" value="${jmodelica_root}/ThirdParty/Ant-Contrib/ant-contrib-1.0b3"/>  
 
 	<property name="java_dir" value="java" />
 	<property name="bin_dir" value="bin" />
 	<property name="output_dir" value="site" />
 
-	<property name="jmodelica_dir" value="../Compiler/ModelicaFrontEnd/src" />
+	<property name="jmodelica_dir" value="${jmodelica_root}/Compiler/ModelicaFrontEnd/src" />
 	<condition property="core_dir" value="../org.jastadd.plugin" else="${jastadd_dir}/org.jastadd.plugin">
 		<available file="../org.jastadd.plugin" type="dir" property=""/>
 	</condition>
@@ -47,7 +48,7 @@
 	<!-- for ant-contrib (foreach, etc) -->
 	<taskdef resource="net/sf/antcontrib/antlib.xml">
 		<classpath>
-			<pathelement location="${lib_dir}/ant-contrib.jar"/>
+			<pathelement location="${ant-contrib_dir}/target/ant-contrib.jar"/>
 		</classpath>
 	</taskdef>
 
