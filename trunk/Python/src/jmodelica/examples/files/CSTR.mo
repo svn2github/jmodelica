@@ -54,4 +54,29 @@ constraint
   u<=370;
 end CSTR_Opt;
 
+optimization CSTR_Opt_MPC(objective=(cost(finalTime)),
+                      startTime=0.0,
+                      finalTime=50)
+ 
+  input Real u(start = 350,initialGuess=350)=cstr.Tc; 
+  CSTR cstr(c(initialGuess=300),T(initialGuess=300),Tc(initialGuess=350));
+
+  Real cost(start=0,fixed=true,initialGuess=500);
+  parameter Real c_ref = 500;
+  parameter Real T_ref = 320;
+  parameter Real Tc_ref = 300;
+  parameter Real q_c = 1;
+  parameter Real q_T = 1;
+  parameter Real q_Tc = 1;	
+equation
+  der(cost) = q_c*(c_ref-cstr.c)^2 + q_T*(T_ref-cstr.T)^2 + 
+                  q_Tc*(Tc_ref-cstr.Tc)^2 + 
+                  1000*(if cstr.T <= 345 then 0 else (cstr.T-345)^4);
+constraint
+  cstr.T<=350;
+  u>=230;
+  u<=370;
+end CSTR_Opt_MPC;
+
+
 end CSTR;
