@@ -109,34 +109,29 @@ def run_demo(with_plots=True):
     # Solve the optimization problem
     nlp_ipopt.opt_sim_ipopt_solve()
 
-    # Retreive the number of points in each column in the
-    # result matrix
-    n_points = nlp.opt_sim_get_result_variable_vector_length()
-    n_points = n_points.value
-
-    # Create optimization result data vectors
-    p_opt = N.zeros(2)
-    t_ = N.zeros(n_points)
-    dx_ = N.zeros(2*n_points)
-    x_ = N.zeros(2*n_points)
-    u_ = N.zeros(n_points)
-    w_ = N.zeros(2*n_points)
+    # Write to file. The resulting file can also be
+    # loaded into Dymola.
+    nlp.export_result_dymola()
     
-    # Get the result
-    nlp.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
+    # Load the file we just wrote to file
+    res = jmodelica.io.ResultDymolaTextual('ParEst_ParEst_result.txt')
 
+    # Extract variable profiles
+    x1 = res.get_variable_data('sys.x1')
+    u = res.get_variable_data('u')
+    
     if with_plots:
         # Plot optimization result
         plt.figure(2)
         plt.clf()
         plt.subplot(211)
-        plt.plot(t_,x_[0:n_points])
+        plt.plot(x1.t,x1.x)
         plt.plot(t_meas,xx_meas[:,0],'x')
         plt.grid()
         plt.ylabel('y')
         
         plt.subplot(212)
-        plt.plot(t_,w_[0:n_points])
+        plt.plot(u.t,u.x)
         plt.grid()
         plt.ylabel('u')
         plt.show()
