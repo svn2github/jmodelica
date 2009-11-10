@@ -116,8 +116,9 @@ def export_result_dymola(model, data, file_name='', format='txt'):
             alias_names, alias_sign = model.get_aliases(names.get(ref))
             for n in alias_names:
                 desc = model.get_variable_description(n)
-                if (len(desc)>max_desc_length):
-                    max_desc_length = len(desc)
+                if (desc!=None):
+                    if (len(desc)>max_desc_length):
+                        max_desc_length = len(desc)
 
         f.write('char description(%d,%d)\n' % (num_vars + 1, max_desc_length))
         f.write('Time in [s]\n')
