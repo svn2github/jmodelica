@@ -63,19 +63,6 @@ public class ErrorTestCase extends TestCase {
 		
 	}
 
-	
-	
-	/* (non-Javadoc)
-	 * @see org.jmodelica.test.ast.TestCase#dumpJunit(java.lang.StringBuffer, int)
-	 */
-	@Override
-	public void dumpJunit(StringBuffer str, int index) {
-		//testMe();
-		str.append("  @Test public void " + getName() + "() {\n");
-		str.append("    assertTrue(ts.get("+index+").testMe());\n");
-	    str.append("  }\n\n");
-	}
-
 	/* (non-Javadoc)
 	 * @see org.jmodelica.test.ast.TestCase#printTest(java.lang.StringBuffer)
 	 */

@@ -49,9 +49,13 @@ abstract public class TestCase {
 	
 	abstract public void dump(StringBuffer str, String indent);
 	
-	abstract public void dumpJunit(StringBuffer str, int index);
-	
 	abstract public boolean printTest(StringBuffer str);
+		
+	public void dumpJunit(StringBuffer str, int index) {
+		str.append("  @Test public void " + getName() + "() {\n");
+		str.append("    assertTrue(ts.get("+index+").getDescription(), ts.get("+index+").testMe());\n");
+	    str.append("  }\n\n");
+	}
 	
 	/**
 	 * @return the name

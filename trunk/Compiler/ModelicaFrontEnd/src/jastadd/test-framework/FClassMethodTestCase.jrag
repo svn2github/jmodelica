@@ -96,16 +96,6 @@ public class FClassMethodTestCase extends TestCase {
 		}
 	}
 	
-	public void dumpJunit(StringBuffer str, int index) {
-		//StringBuffer strd=new StringBuffer();
-		//dump(strd,"");
-		//testMe();
-		//System.out.println(strd);
-		str.append("  @Test public void " + getName() + "() {\n");
-		str.append("    assertTrue(ts.get("+index+").testMe());\n");
-	    str.append("  }\n\n");
-	}
-	
 	public boolean testMe() {
         System.out.println("Running test: " + getClassName());
 		ParserHandler ph = new ParserHandler();
