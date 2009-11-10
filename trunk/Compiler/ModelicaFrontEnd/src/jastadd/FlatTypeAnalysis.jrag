@@ -46,6 +46,7 @@ aspect FlatTypeAnalysis {
 		}
 	}
 	eq FDerivativeVariable.type() = fRealScalarType();
+	eq FFunctionVariable.type() = getType();
 	eq UnknownFVariable.type() = fUnknownType();
 
 	syn FPrimitiveType InstPrimitive.type() {

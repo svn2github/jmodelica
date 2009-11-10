@@ -63,7 +63,7 @@ aspect Flattening {
 			//return null;
 		}
     }
- 
+
 	// Generic method for flattening	
 	public void ASTNode.flatten(FClass fc) {
 		for (int i=0;i<getNumChild();i++) {

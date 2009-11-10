@@ -91,15 +91,15 @@ FClass fclass =
     ID.restriction
     fqname
 	fvariable_list
-	fequation_section?
+//	ffunction*
+	fequation_section
 	END_ID.end_s 
-	SEMICOLON {: List feq = null;
-					if (fequation_section.getNumChild()==0)
-						feq = new List();
-					else 
-						feq = (List)fequation_section.getChild(0);
-	
-					return new FClass(fqname,fvariable_list,new List(),new List(),new List().add(new FEquationBlock(feq))); :}
+	SEMICOLON {: return new FClass(fqname, 
+	                               fvariable_list, 
+	                               new List(), 
+	                               new List(), 
+	                               new List().add(new FEquationBlock(fequation_section)), 
+	                               new List()); :}
 	;
 
 List fvariable_list = 
@@ -207,13 +207,25 @@ FExp bexp =
 	fexp {: return fexp; :}
 	;
 
-List fequation_section = 
-	EQUATION fabstract_equation* {: return fabstract_equation; :}
-	;
+/*
+FFunctionDecl ffunction = 
+    FUNCTION 
+    ID.name
+    ffunc_variable*
+    falgorithm?
+    END
+    ID.end
+    SEMICOLON        {: return new FFunctionDecl(); :}
+    ;
+*/
 
-FAbstractEquation fabstract_equation = 
-    fequation
-  | falgorithm;
+List fequation_section = 
+                                          {: return new List(); :}
+  | fequation_section EQUATION fequation* {: for (Object e : fequation)
+                                                 fequation_section.add((FEquation) e);
+                                             return fequation_section; :}
+  | fequation_section falgorithm          {: return fequation_section.add(falgorithm); :}
+  ;
 
 FEquation fequation = 
 	fexp.left 

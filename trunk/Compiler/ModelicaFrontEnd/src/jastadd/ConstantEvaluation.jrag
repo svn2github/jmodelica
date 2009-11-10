@@ -843,6 +843,7 @@ aspect ConstantEvaluation {
   syn CValue AbstractFVariable.ceval();
   eq UnknownFVariable.ceval() = new CValueUnknown();
   eq FDerivativeVariable.ceval() = new CValueUnknown();
+  eq FFunctionVariable.ceval() = new CValueUnknown(); // TODO: Can they be constant? maybe parameters? 
   eq FRealVariable.ceval() {
 	  if ((!isConstant() && !isParameter()) || !hasBindingExp()) {
 		  return new CValueUnknown();

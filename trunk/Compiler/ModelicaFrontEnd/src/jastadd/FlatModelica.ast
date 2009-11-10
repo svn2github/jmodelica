@@ -20,19 +20,27 @@
 FlatRoot : Root ::= FClass;
 
 /**
- * \brief A flat Modelica model containing variables, initial equations and
- * DAE equations.
+ * \brief A flat Modelica model containing variables, initial equations,
+ * DAE equations and functions.
  *
  * FClass corresponds to a flattened Modelica model and contains essentially
- * a list of variables and variables and a list of equations, of which some
- * are initial equations. FClass will be extended to include also functions.
+ * a list of variables and variables, a list of functions and a list of equations, 
+ * of which some are initial equations.
  */ 
 FClass ::= FQName 
            FVariable* 
            AliasVariable:FVariable* 
            FInitialEquation:FAbstractEquation*
            FEquationBlock*
+           FFunctionDecl*
            /UnknownFVariable/; 
+
+/**
+ * \brief A flattened user-defined function.
+ *
+ * Results from a class with the restriction "function".
+ */
+FFunctionDecl ::= FQName FFunctionVariable* [FAlgorithmBlock];
 
 /**
  * \brief A list of equations corresponding to a BLT block.
@@ -43,6 +51,14 @@ FEquationBlock ::= FAbstractEquation*;
  * \brief Abstract base class for flat variables.
  */
 abstract AbstractFVariable;
+
+/**
+ * \brief Binds an FVariable as an input or output to a function.
+ */
+FFunctionVariable : AbstractFVariable ::= [FTypePrefixInputOutput]
+                                          Type:FPrimitiveType
+                                          [Init:FExp]
+                                          FQName;
 
 /**
  * \brief A flat variable corresponding to an unknown declaration.
@@ -139,7 +155,7 @@ FStringVariable : FVariable;
  * \brief FVariable corresponding to a derivative variable.
  *
  * Notice that this kind of variables does not result from flattening, but are
- * introduced when a flattened model is transformed into a cononical form.
+ * introduced when a flattened model is transformed into a canonical form.
  */
 FDerivativeVariable : FRealVariable;
 
