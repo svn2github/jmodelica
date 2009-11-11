@@ -44,14 +44,11 @@ aspect OptimicaFlattening {
     }
         
     refine Flattening void InstClassDecl.flattenInstClassDecl(FClass fc) {
-   		FQName fqn = new FQName();
-   		for (String name : qualifiedName().split("\\."))
-   			fqn.addFQNamePart(new FQNamePart(name, new Opt()));
-		fc.setFQName(fqn); 
+		fc.setFQName(new FQName(qualifiedName())); 
 		fc.addFEquationBlock(new FEquationBlock(new List()));			
 		for (FAbstractEquation ae : getFAbstractEquations()) {
 		       ae.flatten(getFQName(),fc);
-		    }
+		}
 		getInstComponentDeclList().flatten(fc);
 		getInstExtendsList().flatten(fc);
 		
