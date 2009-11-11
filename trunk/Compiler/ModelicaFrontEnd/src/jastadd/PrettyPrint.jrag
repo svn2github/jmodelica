@@ -706,6 +706,9 @@ aspect FlattPrettyPrint {
 	    		}
 	    	}
 	    }
+	    
+	    for (FFunctionDecl ffd : getFFunctionDecls())
+	    	p.toString(ffd, str, indent + " ", o);
 		
   		str.print(indent);
   		str.print("end ");
@@ -822,6 +825,27 @@ aspect FlattPrettyPrint {
 						}
 	}
 
+    public void FFunctionDecl.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+    	str.print("\n" + indent + "function " + name() + "\n");
+    	getFFunctionVariables().prettyPrintWithIndent(p, str, indent + " ", o, ";");
+    	p.toString(getFAlgorithmBlockOpt(), str, indent, o);
+    	str.print(indent + "end " + name() + ";\n");
+    }
+
+    public void FFunctionVariable.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+    	if (hasFTypePrefixInputOutput()) {
+    		str.print(getFTypePrefixInputOutput());
+    		str.print(" ");
+    	}
+    	str.print(getType());
+		str.print(" ");
+    	str.print(name());
+    	if (hasBindingExp()) {
+    		str.print(" := ");
+    		p.toString(getBindingExp(), str, indent, o);
+    	}
+    }
+    
     public void FQNamePart.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
     	str.print(getName());
 		if (hasFArraySubscripts())
@@ -1154,6 +1178,8 @@ aspect FlattPrettyPrint {
 	public void FAtan2Exp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("atan2(");
 		p.toString(getFExp(), str, indent, o);
+		str.print(", ");
+		p.toString(getY(), str, indent, o);
 		str.print(")");
 	}
 
@@ -1221,22 +1247,14 @@ aspect FlattPrettyPrint {
 		debugPrint("FFunctionCall.prettyPrint:");
 		str.print(getName().name());
 		str.print("(");
-		for (int i=0; i<getNumArgs(); i++) {
-				p.toString(getArgs(i),str,"",o);
-				if (i<getNumArgs()-1)
-					str.print(",");
-		}
+		getArgsList().prettyPrintWithSep(p, str, "", 0, ", ");
 		str.print(")");
 	}
 
 	public void InstFunctionCall.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print(getName().name());
 		str.print("(");
-		for (int i=0; i<getNumArgs(); i++) {
-				p.toString(getArgs(i),str,"",o);
-				if (i<getNumArgs()-1)
-					str.print(",");
-		}
+		getArgsList().prettyPrintWithSep(p, str, "", 0, ", ");
 		str.print(")");
 	}
 

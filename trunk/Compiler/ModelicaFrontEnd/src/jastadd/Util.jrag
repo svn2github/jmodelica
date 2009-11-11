@@ -530,7 +530,9 @@ aspect FlatNames {
 	syn String FIdDecl.name() = getFQName().name();
 
 	syn String FClass.name() = getFQName().name();
+	syn String FFunctionDecl.name() = getFQName().name();
 	syn String FVariable.name() = getFQName().name();
+	syn String FFunctionVariable.name() = getFQName().name();
 
 //	syn lazy String FQName.derName() = "der(" + name() + ")";
 	
