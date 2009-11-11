@@ -62,9 +62,23 @@ aspect InstLookupComponents {
 		} else {
 			lookupInstComponent(name);
 		}
-		
 	}
 	
+	inh lazy HashSet InstForStmt.lookupInstComponent(String name);
+	eq InstForStmt.getChild().lookupInstComponent(String name) {
+		HashSet set = new HashSet(4);
+		for (InstForIndex ifi : getInstForIndexs()) {
+			if (ifi.getInstPrimitive().name().equals(name)) {
+				set.add(ifi.getInstPrimitive());
+			}
+		}
+		if (set.size() > 0) {
+			return set;
+		} else {
+			lookupInstComponent(name);
+		}
+	}
+
 	
 	syn lazy HashSet InstBaseClassDecl.genericLookupInstComponent(String name) {
 		HashSet h = memberInstComponent(name);

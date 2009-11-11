@@ -180,7 +180,7 @@ fclass FunctionTests.AlgorithmFlatten6
  Real x;
 algorithm
  for i in {1, 2, 4}, j in 1:3 loop
-  x := x + 1;
+  x := x + ( i ) * ( j );
  end for;
 end FunctionTests.AlgorithmFlatten6;
 ")})));
@@ -188,7 +188,7 @@ end FunctionTests.AlgorithmFlatten6;
  Real x;
 algorithm
  for i in {1, 2, 4}, j in 1:3 loop
-  x := x + 1;
+  x := x + i * j;
  end for;
 end AlgorithmFlatten6;
 
