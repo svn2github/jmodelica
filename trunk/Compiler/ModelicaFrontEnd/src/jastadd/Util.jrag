@@ -395,7 +395,9 @@ aspect Names {
 aspect FlatNames {
 	
 	public FQName.FQName(String name) {
-		this(new List().add(new FQNamePart(name,new Opt())));
+		this(new List());
+   		for (String part : name.split("\\."))
+   			addFQNamePart(new FQNamePart(part, new Opt()));
 	}
 
 	public FQName.FQName(FQName fqname) {

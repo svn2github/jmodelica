@@ -40,12 +40,7 @@ aspect Flattening {
     }
     
     public void InstClassDecl.flattenInstClassDecl(FClass fc) {
-   		FQName fqn = new FQName();
-   		/* Maybe add a new constructor or a factory method for making an FQName from a String?
-   		 * Seems to belong in the FQName class rather than here. */
-   		for (String name : qualifiedName().split("\\."))
-   			fqn.addFQNamePart(new FQNamePart(name, new Opt()));
-		fc.setFQName(fqn);
+		fc.setFQName(new FQName(qualifiedName()));
 		fc.addFEquationBlock(new FEquationBlock(new List()));			
 		for (FAbstractEquation ae : getFAbstractEquations()) {
 		    ae.flatten(getFQName(), fc);
@@ -108,12 +103,7 @@ aspect Flattening {
 	public void InstFullClassDecl.flattenThisFunction(FClass fc) {
    		FFunctionDecl ffd = new FFunctionDecl();
 
-   		FQName fqn = new FQName();
-   		/* Maybe add a new constructor or a factory method for making an FQName from a String?
-   		 * Seems to belong in the FQName class rather than here. */
-   		for (String name : qualifiedName().split("\\."))
-   			fqn.addFQNamePart(new FQNamePart(name, new Opt()));
-   		ffd.setFQName(fqn);
+   		ffd.setFQName(new FQName(qualifiedName()));
 
    		for (InstComponentDecl icd : getInstComponentDecls())
 			icd.flattenInFunction(ffd);
