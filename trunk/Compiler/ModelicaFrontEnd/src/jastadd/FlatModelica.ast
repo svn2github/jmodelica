@@ -606,7 +606,7 @@ FSumExp : FUnaryExp ::=;
 /**
  * \brief For clause expression.
  */
-FForClauseE : FAbstractEquation ::= FForIndex* ForEqns:FAbstractEquation*;
+FForClauseE : FAbstractEquation ::= FForIndex* FAbstractEquation*;
 
 /**
  * \brief If expression.

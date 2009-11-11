@@ -399,6 +399,23 @@ equation
   x=ones(2,2);
 end ArrayTest23;
 
+model ArrayTest24
+/*
+        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest23",
+        description="Flattening of arrays.",
+                                               flatModel=
+"
+")})));
+  */
+  Real x[2,2];
+  Real y[2,2];
+equation
+  for i in 1:2, j in 1:2 loop
+    x[i,j] = 1;
+    y[i,j] = x[i,j]+1;
+  end for;
+end ArrayTest24;
 
   annotation (uses(Modelica(version="3.0.1")));
 end ArrayTests;

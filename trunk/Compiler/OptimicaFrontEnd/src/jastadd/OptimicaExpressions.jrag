@@ -61,8 +61,8 @@ aspect OptimicaExpressions {
 		}
 	}
 	
-	public FExp FTimedVariable.scalarize() { 
-		return new FTimedVariable((FIdUse)getName().fullCopy(),getArg().scalarize()); 
+	public FExp FTimedVariable.scalarize(HashMap<String,Integer> indexMap) { 
+		return new FTimedVariable((FIdUse)getName().fullCopy(),getArg().scalarize(indexMap)); 
 	}
 	
 	boolean FTimedVariable.rewritten = false;

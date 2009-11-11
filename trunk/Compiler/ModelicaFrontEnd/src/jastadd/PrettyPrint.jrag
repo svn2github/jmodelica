@@ -1273,7 +1273,7 @@ aspect FlattPrettyPrint {
 		str.print(indent+"for ");
 		getFForIndexList().prettyPrintWithSep(p, str, indent, o, ", ");
 		str.print(" loop\n");
-		getForEqnsList().prettyPrintWithFix(p, str, indent + " ", o, "", ";\n");
+		getFAbstractEquationList().prettyPrintWithFix(p, str, indent + " ", o, "", ";\n");
 		str.print(indent + "end for");
 	}
 	

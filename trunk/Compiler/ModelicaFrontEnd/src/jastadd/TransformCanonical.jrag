@@ -422,15 +422,15 @@ aspect Scalarization {
 	 * \brief Scalarize equation and put all scalarized equations in list eqns.
 	 */
 	public void FEquation.scalarize(List<FAbstractEquation> eqns) {
-		//System.out.println("FEquation.scalarize() " + ndims());
+		System.out.println("FEquation.scalarize() " + ndims());
 		if (ndims()==0) {
 			/**
 			 * If the equation is of dimension 0, i.e, already scalar,
 			 * the equations is "scalarized" into a simple equation where
 			 * e.g. built in functions are replaced by elementary operations.
 			 */
-			eqns.addChild(new FEquation(getLeft().scalarize(),
-					getRight().scalarize()));
+			eqns.addChild(new FEquation(getLeft().scalarize(new HashMap<String,Integer>()),
+					getRight().scalarize(new HashMap<String,Integer>())));
 		} else if (ndims()>0) {
 			/**
 			 * If the expression is an array expression, then the FExp.array()
@@ -446,8 +446,27 @@ aspect Scalarization {
 						(FExp)getRight().array().getElement(cnt.getCounterMinusOne()).fullCopy()));
 				cnt.inc();
 			}
-
 		}
+	}
+	
+	public void FForClauseE.scalarize(List<FAbstractEquation> eqns) {
+		ArrayList<int[]> ind = new ArrayList<int[]>();
+		System.out.println("Hej!");
+		for (FForIndex fi : getFForIndexs()) {
+			if (fi.hasFExp()) {
+				System.out.println("Hoj!");
+				ind.add(fi.getFExp().myIndices().clone());
+			}
+		}
+		Indices indices = new Indices(ind);
+		IndexCounter cnt = new IndexCounter(indices);
+		for (int i=0;i<cnt.numElements();i++) {
+			for (FAbstractEquation ae : getFAbstractEquations()) {
+				System.out.println("Hooj!");
+				ae.scalarize(eqns);
+			}
+			cnt.inc();
+		}		
 	}
 	
 	/* Scalarization of expressions is needed in order to compute a simple
@@ -459,77 +478,77 @@ aspect Scalarization {
 	/**
 	 * \brief Scalarize expressions.
 	 */
-	public FExp FExp.scalarize() {
+	public FExp FExp.scalarize(HashMap<String,Integer> indexMap) {
 		return null;
 	}
 
-    public FIdUse FIdUse.scalarize() {
+    public FIdUse FIdUse.scalarize(HashMap<String,Integer> indexMap) {
     	FIdUse fid = (FIdUse)fullCopy();
     	fid.getFQName().scalarized = true;
     	return fid;
     }
 
-    public FExp FIdUseExp.scalarize() {
-    	return new FIdUseExp(getFIdUse().scalarize());
+    public FExp FIdUseExp.scalarize(HashMap<String,Integer> indexMap) {
+    	return new FIdUseExp(getFIdUse().scalarize(indexMap));
     }
     
-    public FExp FIfExp.scalarize() {
+    public FExp FIfExp.scalarize(HashMap<String,Integer> indexMap) {
 		List etl = new List();
 		for (int i=0;i<getNumFElseIfExp();i++) {
-			etl.add(getFElseIfExp(i).scalarize());
+			etl.add(getFElseIfExp(i).scalarize(indexMap));
 		}
-		return new FIfExp(getIfExp().scalarize(),
-		                  getThenExp().scalarize(),
+		return new FIfExp(getIfExp().scalarize(indexMap),
+		                  getThenExp().scalarize(indexMap),
 		                  etl,
-		                  getElseExp().scalarize());
+		                  getElseExp().scalarize(indexMap));
 	}
 	
-	public FExp FElseIfExp.scalarize() {
-		return new FElseIfExp(getIfExp().scalarize(),
-		                      getThenExp().scalarize());
+	public FExp FElseIfExp.scalarize(HashMap<String,Integer> indexMap) {
+		return new FElseIfExp(getIfExp().scalarize(indexMap),
+		                      getThenExp().scalarize(indexMap));
 	}
 	
-	public FExp FAddExp.scalarize() { return new FAddExp(getLeft().scalarize(),getRight().scalarize()); }
-	public FExp FSubExp.scalarize() { return new FSubExp(getLeft().scalarize(),getRight().scalarize()); }
-	public FExp FMulExp.scalarize() { return new FMulExp(getLeft().scalarize(),getRight().scalarize()); }
-	public FExp FDivExp.scalarize() { return new FDivExp(getLeft().scalarize(),getRight().scalarize()); }
-	public FExp FPowExp.scalarize() { return new FPowExp(getLeft().scalarize(),getRight().scalarize()); }
-	public FExp FNegExp.scalarize() { return new FNegExp(getFExp().scalarize()); }
+	public FExp FAddExp.scalarize(HashMap<String,Integer> indexMap) { return new FAddExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
+	public FExp FSubExp.scalarize(HashMap<String,Integer> indexMap) { return new FSubExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
+	public FExp FMulExp.scalarize(HashMap<String,Integer> indexMap) { return new FMulExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
+	public FExp FDivExp.scalarize(HashMap<String,Integer> indexMap) { return new FDivExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
+	public FExp FPowExp.scalarize(HashMap<String,Integer> indexMap) { return new FPowExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
+	public FExp FNegExp.scalarize(HashMap<String,Integer> indexMap) { return new FNegExp(getFExp().scalarize(indexMap)); }
 
-	public FExp FLtExp.scalarize() { return new FLtExp(getLeft().scalarize(),getRight().scalarize()); }
-	public FExp FLeqExp.scalarize() { return new FLeqExp(getLeft().scalarize(),getRight().scalarize()); }
-	public FExp FGtExp.scalarize() { return new FGtExp(getLeft().scalarize(),getRight().scalarize()); }
-	public FExp FGeqExp.scalarize() { return new FGeqExp(getLeft().scalarize(),getRight().scalarize()); }
-	public FExp FEqExp.scalarize() { return new FEqExp(getLeft().scalarize(),getRight().scalarize()); }
-	public FExp FNeqExp.scalarize() { return new FNeqExp(getLeft().scalarize(),getRight().scalarize()); }
-	public FExp FNotExp.scalarize() { return new FNotExp(getFExp().scalarize()); }
-	public FExp FOrExp.scalarize() { return new FOrExp(getLeft().scalarize(),getRight().scalarize()); }
-	public FExp FAndExp.scalarize() { return new FAndExp(getLeft().scalarize(),getRight().scalarize()); }
+	public FExp FLtExp.scalarize(HashMap<String,Integer> indexMap) { return new FLtExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
+	public FExp FLeqExp.scalarize(HashMap<String,Integer> indexMap) { return new FLeqExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
+	public FExp FGtExp.scalarize(HashMap<String,Integer> indexMap) { return new FGtExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
+	public FExp FGeqExp.scalarize(HashMap<String,Integer> indexMap) { return new FGeqExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
+	public FExp FEqExp.scalarize(HashMap<String,Integer> indexMap) { return new FEqExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
+	public FExp FNeqExp.scalarize(HashMap<String,Integer> indexMap) { return new FNeqExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
+	public FExp FNotExp.scalarize(HashMap<String,Integer> indexMap) { return new FNotExp(getFExp().scalarize(indexMap)); }
+	public FExp FOrExp.scalarize(HashMap<String,Integer> indexMap) { return new FOrExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
+	public FExp FAndExp.scalarize(HashMap<String,Integer> indexMap) { return new FAndExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
 
-	public FExp FRealLitExp.scalarize() { return (FRealLitExp)fullCopy(); }
-	public FExp FIntegerLitExp.scalarize() { return (FIntegerLitExp)fullCopy(); }
-	public FExp FStringLitExp.scalarize() { return (FStringLitExp)fullCopy(); }
-	public FExp FBooleanLitExpTrue.scalarize() { return (FBooleanLitExpTrue)fullCopy(); }
-	public FExp FBooleanLitExpFalse.scalarize() { return (FBooleanLitExpFalse)fullCopy(); }
+	public FExp FRealLitExp.scalarize(HashMap<String,Integer> indexMap) { return (FRealLitExp)fullCopy(); }
+	public FExp FIntegerLitExp.scalarize(HashMap<String,Integer> indexMap) { return (FIntegerLitExp)fullCopy(); }
+	public FExp FStringLitExp.scalarize(HashMap<String,Integer> indexMap) { return (FStringLitExp)fullCopy(); }
+	public FExp FBooleanLitExpTrue.scalarize(HashMap<String,Integer> indexMap) { return (FBooleanLitExpTrue)fullCopy(); }
+	public FExp FBooleanLitExpFalse.scalarize(HashMap<String,Integer> indexMap) { return (FBooleanLitExpFalse)fullCopy(); }
 	
-	public FExp FDerExp.scalarize() {return new FDerExp(getFIdUse().scalarize());}
-	public FExp FSinExp.scalarize() { return new FSinExp(getFExp().scalarize()); }
-	public FExp FCosExp.scalarize() { return new FCosExp(getFExp().scalarize()); }
-	public FExp FTanExp.scalarize() { return new FTanExp(getFExp().scalarize()); }
-	public FExp FAsinExp.scalarize() { return new FAsinExp(getFExp().scalarize()); }
-	public FExp FAcosExp.scalarize() { return new FAcosExp(getFExp().scalarize()); }
-	public FExp FAtanExp.scalarize() { return new FAtanExp(getFExp().scalarize()); }
-	public FExp FAtan2Exp.scalarize() { return new FAtan2Exp(getFExp().scalarize(),getY().scalarize()); }
-	public FExp FSinhExp.scalarize() { return new FSinhExp(getFExp().scalarize()); }
-	public FExp FCoshExp.scalarize() { return new FCoshExp(getFExp().scalarize()); }
-	public FExp FTanhExp.scalarize() { return new FTanhExp(getFExp().scalarize()); }
-	public FExp FExpExp.scalarize() { return new FExpExp(getFExp().scalarize()); }
-	public FExp FLogExp.scalarize() { return new FLogExp(getFExp().scalarize()); }
-	public FExp FLog10Exp.scalarize() { return new FLog10Exp(getFExp().scalarize()); }
-	public FExp FSqrtExp.scalarize() { return new FSqrtExp(getFExp().scalarize()); }
+	public FExp FDerExp.scalarize(HashMap<String,Integer> indexMap) {return new FDerExp(getFIdUse().scalarize(indexMap));}
+	public FExp FSinExp.scalarize(HashMap<String,Integer> indexMap) { return new FSinExp(getFExp().scalarize(indexMap)); }
+	public FExp FCosExp.scalarize(HashMap<String,Integer> indexMap) { return new FCosExp(getFExp().scalarize(indexMap)); }
+	public FExp FTanExp.scalarize(HashMap<String,Integer> indexMap) { return new FTanExp(getFExp().scalarize(indexMap)); }
+	public FExp FAsinExp.scalarize(HashMap<String,Integer> indexMap) { return new FAsinExp(getFExp().scalarize(indexMap)); }
+	public FExp FAcosExp.scalarize(HashMap<String,Integer> indexMap) { return new FAcosExp(getFExp().scalarize(indexMap)); }
+	public FExp FAtanExp.scalarize(HashMap<String,Integer> indexMap) { return new FAtanExp(getFExp().scalarize(indexMap)); }
+	public FExp FAtan2Exp.scalarize(HashMap<String,Integer> indexMap) { return new FAtan2Exp(getFExp().scalarize(indexMap),getY().scalarize(indexMap)); }
+	public FExp FSinhExp.scalarize(HashMap<String,Integer> indexMap) { return new FSinhExp(getFExp().scalarize(indexMap)); }
+	public FExp FCoshExp.scalarize(HashMap<String,Integer> indexMap) { return new FCoshExp(getFExp().scalarize(indexMap)); }
+	public FExp FTanhExp.scalarize(HashMap<String,Integer> indexMap) { return new FTanhExp(getFExp().scalarize(indexMap)); }
+	public FExp FExpExp.scalarize(HashMap<String,Integer> indexMap) { return new FExpExp(getFExp().scalarize(indexMap)); }
+	public FExp FLogExp.scalarize(HashMap<String,Integer> indexMap) { return new FLogExp(getFExp().scalarize(indexMap)); }
+	public FExp FLog10Exp.scalarize(HashMap<String,Integer> indexMap) { return new FLog10Exp(getFExp().scalarize(indexMap)); }
+	public FExp FSqrtExp.scalarize(HashMap<String,Integer> indexMap) { return new FSqrtExp(getFExp().scalarize(indexMap)); }
 	
-	public FExp FTimeExp.scalarize() { return new FTimeExp(); }
-	public FExp FEndExp.scalarize() { return new FEndExp(); }
+	public FExp FTimeExp.scalarize(HashMap<String,Integer> indexMap) { return new FTimeExp(); }
+	public FExp FEndExp.scalarize(HashMap<String,Integer> indexMap) { return new FEndExp(); }
 
 	/*
 	public FExp FFunctionCall.scalarize() {

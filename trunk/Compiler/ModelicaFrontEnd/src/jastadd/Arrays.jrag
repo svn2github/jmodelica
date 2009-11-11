@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 
 /*
     Copyright (C) 2009 Modelon AB
@@ -721,21 +723,23 @@ aspect Arrays {
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn int[] FSubscript.indices();
+	syn int[] FSubscript.myIndices();
 	
-	eq FColonSubscript.indices() {
+	eq FColonSubscript.myIndices() {
 		return new int[0];
 	}
 	
-	eq FExpSubscript.indices() {
+	eq FExpSubscript.myIndices() = getFExp().myIndices();
+	
+	syn int[] FExp.myIndices() {
 		if (ndims()==0) {
 			int[] indices = new int[1];
-			indices[0] = getFExp().ceval().intValue();
+			indices[0] = ceval().intValue();
 			return indices;
 		} else if (ndims() == 1) {
 			int[] size = size();
 			int[] indices = new int[size[0]];
-			FArray indExps = getFExp().array();
+			FArray indExps = array();
 			for (int i=0;i<size[0];i++) {
 				indices[i] = indExps.getFExp(i).ceval().intValue();
 			}
@@ -772,6 +776,21 @@ aspect Arrays {
 		}
 		
 		/**
+		 * \brief Create an Indices object based on a list of int arrays
+		 */
+		public Indices(ArrayList<int[]> ind) {
+			indices = new ArrayList<int[]>();
+			ndims = ind.size();
+			size = new int[ndims];
+			int i = 0;
+			for (int[] ii : ind) {
+				size[i] = ii.length;
+				indices.add(ii.clone());
+				i++;
+			}
+		}
+		
+		/**
 		 * \brief Create an Indices object based on FArraySubcripts.
 		 */
 		public Indices(FArraySubscripts fas) {
@@ -784,7 +803,7 @@ aspect Arrays {
 			//System.out.println("");
 			indices = new ArrayList<int[]>();
 			for (FSubscript fs : fas.getFSubscripts()) {
-				indices.add(fs.indices());
+				indices.add(fs.myIndices());
 			}
 			
 		}
