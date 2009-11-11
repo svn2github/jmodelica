@@ -82,7 +82,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
 //   "connector"       { return newSymbol(Terminals.CONNECTOR); }
 //   "type"            { return newSymbol(Terminals.TYPE); }
 //   "package"         { return newSymbol(Terminals.PACKAGE); }
-//     "function"        { return newSymbol(Terminals.FUNCTION); }
+     "function"        { return newSymbol(Terminals.FUNCTION); }
 //     "record"        { return newSymbol(Terminals.RECORD); }
   
   "end"             { return newSymbol(Terminals.END); }

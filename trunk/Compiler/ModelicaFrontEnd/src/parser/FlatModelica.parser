@@ -91,8 +91,8 @@ FClass fclass =
     ID.restriction
     fqname
 	fvariable_list
-//	ffunction*
 	fequation_section
+	ffunction*
 	END_ID.end_s 
 	SEMICOLON {: return new FClass(fqname, 
 	                               fvariable_list, 
@@ -206,18 +206,32 @@ FExp bexp =
 	EQUALS
 	fexp {: return fexp; :}
 	;
+	
+FExp fbexp =
+	ASSIGN
+	fexp {: return fexp; :}
+	;
 
-/*
 FFunctionDecl ffunction = 
     FUNCTION 
-    ID.name
-    ffunc_variable*
+    fqname.name
+    ffunction_variable*
     falgorithm?
     END
-    ID.end
-    SEMICOLON        {: return new FFunctionDecl(); :}
+    fqname.end
+    SEMICOLON        {: return new FFunctionDecl(name, ffunction_variable, falgorithm); :}
     ;
-*/
+
+FFunctionVariable ffunction_variable =
+    ftype_prefix_input_output?
+	fprimitive_type
+	fqname
+	fbexp?
+	SEMICOLON        {: return new FFunctionVariable(ftype_prefix_input_output, 
+	                                                 fprimitive_type, 
+	                                                 fbexp, 
+	                                                 fqname);  :}
+    ;
 
 List fequation_section = 
                                           {: return new List(); :}
