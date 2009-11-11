@@ -70,7 +70,7 @@ InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl> /
 // redeclaration of classes.
 abstract InstComponentDecl : InstNode ::= ClassName:InstAccess [FArraySubscripts] <ComponentDecl:ComponentDecl> [InstModification] [InstConstraining];
 InstComposite : InstComponentDecl;
-InstPrimitive : InstComponentDecl ;
+InstPrimitive : InstComponentDecl;
 InstBuiltIn : InstComponentDecl;
 UnknownInstComponentDecl : InstComponentDecl;
 

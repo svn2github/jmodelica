@@ -45,13 +45,16 @@ aspect Flattening {
    		 * Seems to belong in the FQName class rather than here. */
    		for (String name : qualifiedName().split("\\."))
    			fqn.addFQNamePart(new FQNamePart(name, new Opt()));
-		fc.setFQName(fqn); 
+		fc.setFQName(fqn);
 		fc.addFEquationBlock(new FEquationBlock(new List()));			
 		for (FAbstractEquation ae : getFAbstractEquations()) {
-		    ae.flatten(getFQName(),fc);
+		    ae.flatten(getFQName(), fc);
 		}	
 		getInstComponentDeclList().flatten(fc);
 		getInstExtendsList().flatten(fc);
+		
+		getInstComponentDeclList().flattenCalledFunctions(fc);
+		getFAbstractEquationList().flattenCalledFunctions(fc);
 		
 		fc.genConnectionEquations();
 
@@ -69,6 +72,70 @@ aspect Flattening {
 		for (int i=0;i<getNumChild();i++) {
 			getChild(i).flatten(fc);
 		}
+	}
+
+	public void ASTNode.flattenCalledFunctions(FClass fc) {
+		for (int i = 0; i < getNumChild(); i++) 
+			getChild(i).flattenCalledFunctions(fc);
+	}
+
+	public void InstValueModification.flattenCalledFunctions(FClass fc) {
+		getFExp().flattenCalledFunctions(fc);
+	}
+	
+	public void InstFunctionCall.flattenCalledFunctions(FClass fc) {
+		InstClassDecl icd = getName().myInstClassDecl();
+		if (icd instanceof InstFullClassDecl)
+			((InstFullClassDecl) icd).flattenFunction(fc);
+		getArgsList().flattenCalledFunctions(fc);
+	}
+	
+	public void InstFullClassDecl.flattenFunction(FClass fc) {
+		getInstRestriction().flattenFunction(fc);
+	}
+	
+	public void InstRestriction.flattenFunction(FClass fc) {}
+	
+	private FClass InstFunction.flatFunctionAddedTo = null;
+	
+	public void InstFunction.flattenFunction(FClass fc) {
+		if (flatFunctionAddedTo != fc) {
+			((InstFullClassDecl) getParent()).flattenThisFunction(fc);
+			flatFunctionAddedTo = fc;
+		}
+	}
+	
+	public void InstFullClassDecl.flattenThisFunction(FClass fc) {
+   		FFunctionDecl ffd = new FFunctionDecl();
+
+   		FQName fqn = new FQName();
+   		/* Maybe add a new constructor or a factory method for making an FQName from a String?
+   		 * Seems to belong in the FQName class rather than here. */
+   		for (String name : qualifiedName().split("\\."))
+   			fqn.addFQNamePart(new FQNamePart(name, new Opt()));
+   		ffd.setFQName(fqn);
+
+   		for (InstComponentDecl icd : getInstComponentDecls())
+			icd.flattenInFunction(ffd);
+		
+   		FAlgorithmBlock fab = (FAlgorithmBlock) getFAbstractEquation(0);
+		ffd.setFAlgorithmBlock(fab.flatten(new FQName()));
+
+		fc.addFFunctionDecl(ffd);
+	}
+	
+	public void InstComponentDecl.flattenInFunction(FFunctionDecl ffd) {}
+	
+	public void InstPrimitive.flattenInFunction(FFunctionDecl ffd) {
+		FExp e = myBindingFExp();
+		Opt eo = (e == null) ? new Opt() : new Opt(e);
+		FQName fqn = new FQName(getFQName());
+		FFunctionVariable ffv = new FFunctionVariable(new Opt(), type(), eo, fqn);
+		if (isInput())
+			ffv.setFTypePrefixInputOutput(new FInput());
+		if (isOutput())
+			ffv.setFTypePrefixInputOutput(new FOutput());
+		ffd.addFFunctionVariable(ffv);
 	}
 
 	public void InstNode.flatten(FClass fc) {
@@ -140,7 +207,6 @@ aspect Flattening {
 			fv.setFStringComment(new FStringComment(getComponentDecl().getComment().getStringComment().getComment()));
 		
 		return fv;
-				
 	}
 	
 	/**
@@ -264,9 +330,13 @@ aspect FlatExpressions {
 	   	fc.addFInitialEquation(new FInitialEquation(getLeft().flatten(prefix),getRight().flatten(prefix)));
 	}
 
-	public void FAlgorithmBlock.flatten(FQName prefix, FClass fc) {
+	public FAlgorithmBlock FAlgorithmBlock.flatten(FQName prefix) {
 		List l = FStatement.flattenFStatementList(prefix, getFStatements());
-		fc.getFEquationBlock(0).addFAbstractEquation(new FAlgorithmBlock(l));
+		return new FAlgorithmBlock(l);
+	}
+
+	public void FAlgorithmBlock.flatten(FQName prefix, FClass fc) {
+		fc.getFEquationBlock(0).addFAbstractEquation(flatten(prefix));
 	}
 	
 	public static List<FStatement> FStatement.flattenFStatementList(FQName prefix, List<FStatement> l) {
@@ -528,21 +598,19 @@ aspect FlatExpressions {
 	public FEndExp  FEndExp.flatten(FQName prefix)  { return new FEndExp(); }
 		
 	public FFunctionCall FFunctionCall.flatten(FQName prefix) {
-		List l = new List();
 		List args = new List();
-		for (FExp e : getArgss()) {
-			l.add(e.flatten(prefix));
+		for (FExp e : getArgsList()) {
+			args.add(e.flatten(prefix));
 		}
-		return new FFunctionCall(getName().flatten(new FQName()),l);		
+		return new FFunctionCall(getName().flatten(new FQName()), args);		
 	}
 
 	public FFunctionCall InstFunctionCall.flatten(FQName prefix) {
-		List l = new List();
 		List args = new List();
-		for (FExp e : getArgss()) {
-			l.add(e.flatten(prefix));
+		for (FExp e : getArgsList()) {
+			args.add(e.flatten(prefix));
 		}
-		return new FFunctionCall(new FIdUse(getName().flatten(new FQName())),l);		
+		return new FFunctionCall(new FIdUse(getName().flatten(new FQName())), args);		
 	}
 
 	/*

@@ -57,7 +57,7 @@ abstract AbstractFVariable;
  */
 FFunctionVariable : AbstractFVariable ::= [FTypePrefixInputOutput]
                                           Type:FPrimitiveType
-                                          [Init:FExp]
+                                          [BindingExp:FExp]
                                           FQName;
 
 /**
