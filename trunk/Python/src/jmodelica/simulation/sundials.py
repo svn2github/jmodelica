@@ -411,11 +411,44 @@ class SundialsDAESimulator(DAESimulator):
                            abstol, reltol, time_step, return_last, 
                            verbosity)
                            
-        
+        self.solver_memory = None
+        #self.pointer = ctypes.c_void_p()
         #TODO
         #self._set_sensitivity_indices(None)
         #self.set_sensitivity_analysis(sensitivity_analysis)
         #self._set_sensitivities(None)
+        
+    def __del__(self):
+
+        #import ctypes
+        
+        del self.solver_memory
+    
+    def init_solver(self, start_time):
+        
+        # converting tolerances to C types
+        abstol = ida.realtype(self.abstol)
+        reltol = ida.realtype(self.reltol)
+        
+        # initial y,ydot (copying just in case)
+        y = ida.NVector(N.append(self.model.x,self.model.w))
+        ydot = ida.NVector(N.append(self.model.dx,[0]*len(self.model.w)))
+        
+        
+        t0 = ida.realtype(start_time)
+        
+        if self.solver_memory is None:
+            self.solver_memory = ida.IDACreate()
+        
+            ida.IDAMalloc(self.solver_memory, self._sundials_res_f, t0, y, ydot, ida.IDA_SS, reltol, abstol)
+            ida.IDADense(self.solver_memory, len(self.model.x)+len(self.model.w))
+            
+        else:
+
+            ida.IDAReInit(self.solver_memory, self._sundials_res_f,t0, y, ydot,ida.IDA_SS, reltol, abstol)
+            
+        
+        return [y, ydot]
     
     def _sundials_res_f(self, t, z, dz, res_vector, f_data):
             """The sundials' Residual evaluation function.
@@ -449,7 +482,7 @@ class SundialsDAESimulator(DAESimulator):
             
             return 0
         
-    def run(self):
+    def run(self, start_time=None, final_time=None):
         """Do the actual simulation.
         
         The input is set using setters/constructor.
@@ -457,80 +490,42 @@ class SundialsDAESimulator(DAESimulator):
         """
         return_last = self.get_return_last()
         time_step = self.get_time_step()
-        start_time = self.get_start_time()
-        end_time = self.get_final_time()
         verbose = self.get_verbosity()
         model = self.get_model()
+        
+        if start_time is None:
+            start_time = self.get_start_time()
+        
+        if final_time is None:
+            final_time = self.get_final_time()
+        
         #TODO
         #sensi = self.get_sensitivity_analysis()
-        if start_time == None or end_time == None:
+        if start_time == None or final_time == None:
             raise SundialsSimulationException("Start and End-time must be defined.")
 
         if verbose >= self.WHISPER:
             print "Running simulation with interval (%s, %s) and time step %s" \
-                    % (start_time, end_time, time_step)
+                    % (start_time, final_time, time_step)
         if verbose >= self.NORMAL:
             print "Input before integration:", model.u
             print "States dx:", model.dx
             print "States x:", model.x
             print "States w:", model.w
             
-
-        class UserData:
-            """ctypes structure used to move data in (and out of?) the callback
-               functions.
-            """
-            def __init__(self):
-                self.parameters = None
-                self.model = None
-                self.t_sim_start = None
-                self.t_sim_end = None
-                self.t_sim_duration = None
-            
-            __slots__ = [
-                'parameters',     # Parameters
-                'model',          # The evaluation model
-                't_sim_start',    # Start time for simulation.
-                't_sim_end',      # End time for simulation.
-                't_sim_duration', # Time duration for simulation.
-            ]
+        #Initiate the solver or reinitiate
+        [y , ydot] = self.init_solver(start_time)
         
-        # initial y,ydot (copying just in case)
-        y = ida.NVector(N.append(model.x.copy(),model.w.copy()))
-        ydot = ida.NVector(N.append(model.dx.copy(),[0]*len(model.w)))
-        
-        
-        # converting tolerances to C types
-        abstol = ida.realtype(self.abstol)
-        reltol = ida.realtype(self.reltol)
-
-        t0 = ida.realtype(start_time)
-        
-        
-        ida_mem = ida.IDACreate()
-        
-        ida.IDAMalloc(ida_mem, self._sundials_res_f, t0, y, ydot, ida.IDA_SS, reltol, abstol)
-        ida.IDADense(ida_mem, len(model.x)+len(model.w))
-        """
-        # Set f_data
-        data = UserData()
-        data.model = model
-        data.t_sim_start = start_time
-        data.t_sim_end   = end_time
-        data.t_sim_duration = data.t_sim_end - data.t_sim_start
-        
-        self._data = data
-        """
         tout = start_time + time_step
-        if tout>end_time:
+        if tout>final_time:
             raise SundialsSimulationException("Start time must be before final time.")
 
         # initial time
-        t = ida.realtype(t0.value)
+        t = ida.realtype(start_time)
 
         # used for collecting the y's for plotting
         if return_last==False:
-            num_samples = int(math.ceil((end_time - start_time) / time_step)) + 1
+            num_samples = int(math.ceil((final_time - start_time) / time_step)) + 1
             T = N.zeros(num_samples, dtype=pyjmi.c_jmi_real_t)
             ylist = N.zeros((num_samples, len(model.dx)+len(model.x)+len(model.u)+len(model.w)),
                             dtype=pyjmi.c_jmi_real_t)
@@ -540,7 +535,7 @@ class SundialsDAESimulator(DAESimulator):
                     temp = N.append(temp, j)
             assert len(model.dx)+len(model.x)+len(model.u)+len(model.w) == len(temp)
             ylist[0] = temp
-            T[0] = t0.value
+            T[0] = start_time
             i = 1
         else:
             ylist = N.zeros((1, len(model.dx)+len(model.x)+len(model.u)+len(model.w)),
@@ -553,7 +548,7 @@ class SundialsDAESimulator(DAESimulator):
             
         while True:
             # run DAE solver
-            flag = ida.IDASolve(ida_mem, tout, ctypes.byref(t), y, ydot, ida.IDA_NORMAL)    
+            flag = ida.IDASolve(self.solver_memory, tout, ctypes.byref(t), y, ydot, ida.IDA_NORMAL)    
 
             if verbose >= self.SCREAM:
                 print "At t = %-14.4e  y =" % t.value, \
@@ -569,14 +564,14 @@ class SundialsDAESimulator(DAESimulator):
                 ylist[i] = temp
                 i = i+1
                 
-            if N.abs(tout-end_time)<=1e-6:
+            if N.abs(tout-final_time)<=1e-6:
                 break
 
             if flag == ida.IDA_SUCCESS:
                 tout += time_step
 
-            if tout>end_time:
-                tout=end_time
+            if tout>final_time:
+                tout=final_time
 
         if return_last==False:
             assert i <= num_samples, "Allocated a too small array." \
@@ -586,16 +581,14 @@ class SundialsDAESimulator(DAESimulator):
             T = T[:num_samples]
 
         if verbose >= self.LOUD:
-            # collecting lots of information about the execution and present it
-            print "\nFinal Run Statistics: \n"
-            print "Number of steps                    = %ld"%ida.IDAGetNumSteps(ida_mem)
-            print "Number of residual evaluations     = %ld"%(ida.IDAGetNumResEvals(ida_mem)+ida.IDADenseGetNumResEvals(ida_mem))
-            print "Number of Jacobian evaluations     = %ld"%ida.IDADenseGetNumJacEvals(ida_mem)
-            print "Number of nonlinear iterations     = %ld"%ida.IDAGetNumNonlinSolvIters(ida_mem)
-            print "Number of error test failures      = %ld"%ida.IDAGetNumErrTestFails(ida_mem)
-            print "Number of nonlinear conv. failures = %ld"%ida.IDAGetNumNonlinSolvConvFails(ida_mem)
-            print "Number of root fn. evaluations     = %ld"%ida.IDAGetNumGEvals(ida_mem)
-            print "Gradient" #TODO
+            self.print_statistics()
+        
+        #Set the models values to the last of sundials calculated
+        model.dx = ydot[:len(model.dx)]
+        model.x = y[:len(model.x)]
+        model.w = y[len(model.x):len(y)]
+        model.t = t.value
+            
         
         if return_last:
             temp = N.array([])
@@ -610,3 +603,15 @@ class SundialsDAESimulator(DAESimulator):
         
         self._set_solution(T, ylist)
         
+
+    def print_statistics(self):
+        # collecting lots of information about the execution and present it
+        print "\nFinal Run Statistics: \n"
+        print "Number of steps                    = %ld"%ida.IDAGetNumSteps(self.solver_memory)
+        print "Number of residual evaluations     = %ld"%(ida.IDAGetNumResEvals(self.solver_memory)+ida.IDADenseGetNumResEvals(self.solver_memory))
+        print "Number of Jacobian evaluations     = %ld"%ida.IDADenseGetNumJacEvals(self.solver_memory)
+        print "Number of nonlinear iterations     = %ld"%ida.IDAGetNumNonlinSolvIters(self.solver_memory)
+        print "Number of error test failures      = %ld"%ida.IDAGetNumErrTestFails(self.solver_memory)
+        print "Number of nonlinear conv. failures = %ld"%ida.IDAGetNumNonlinSolvConvFails(self.solver_memory)
+        print "Number of root fn. evaluations     = %ld"%ida.IDAGetNumGEvals(self.solver_memory)
+        print "Gradient" #TODO

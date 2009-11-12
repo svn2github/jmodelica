@@ -83,6 +83,7 @@ class TestSundialsDAESimulator:
         simulator = self.simulator
         x_before_simulation = simulator.get_model().x.copy()
         simulator.run()
+        simulator.run(10.0,20.0)
         Ts, ys = simulator.get_solution()
         simulator.write_data()
         
@@ -114,9 +115,11 @@ class TestSundialsDAESimulator:
         model=jmi.Model(optpackage)
         
         # Running a simulation with the attribute return_last = True (Only the final result should be returned)
-        simulator = SundialsDAESimulator(model, start_time=0.0, final_time=30.0, time_step=0.01, return_last=True)
+        simulator = SundialsDAESimulator(model, start_time=0.0, final_time=30.0, time_step=0.01, return_last=True, verbosity=4)
         simulator.run()
-        
+        memory = simulator.solver_memory
+        simulator.run(30.0,40.0)
+        assert memory is simulator.solver_memory
         Ts, ys = simulator.get_solution()
 
         assert len(Ts) == len(ys) #Length of the vectors should be the same
