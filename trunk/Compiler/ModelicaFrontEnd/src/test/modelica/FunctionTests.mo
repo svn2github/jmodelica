@@ -17,14 +17,102 @@
 
 package FunctionTests 
 
-function Test
+function TestFunction1
  input Real i1 = 0;
  input Real i2 = 0;
  output Real o1 = 0;
  output Real o2 = i2;
 algorithm
  o1 := i1;
-end Test;
+end TestFunction1;
+
+function TestFunction2
+ input Real i1 = 0;
+ output Real o1 = i1;
+end TestFunction2;
+
+model FunctionFlatten1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="FunctionFlatten1",
+          description="Flattening functions: simple function call",
+          flatModel="
+fclass FunctionTests.FunctionFlatten1
+ Real x;
+equation
+ x = FunctionTests.TestFunction2(1);
+
+ function FunctionTests.TestFunction2
+  input Real i1 := 0;
+  output Real o1 := i1;
+ end FunctionTests.TestFunction2;
+end FunctionTests.FunctionFlatten1;
+")})));
+
+ Real x;
+equation
+ x = TestFunction2(1);
+end FunctionFlatten1;
+
+model FunctionFlatten2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="FunctionFlatten2",
+          description="Flattening functions: two calls to same function",
+          flatModel="
+fclass FunctionTests.FunctionFlatten2
+ Real x;
+ Real y = FunctionTests.TestFunction1(2, 3);
+equation
+ x = FunctionTests.TestFunction1(1);
+
+ function FunctionTests.TestFunction1
+  input Real i1 := 0;
+  input Real i2 := 0;
+  output Real o1 := 0;
+  output Real o2 := i2;
+ algorithm
+  o1 := i1;
+ end FunctionTests.TestFunction1;
+end FunctionTests.FunctionFlatten2;
+")})));
+
+ Real x;
+ Real y = TestFunction1(2, 3);
+equation
+ x = TestFunction1(1);
+end FunctionFlatten2;
+
+model FunctionFlatten3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="FunctionFlatten3",
+          description="Flattening functions: calls to two functions",
+          flatModel="
+fclass FunctionTests.FunctionFlatten3
+ Real x;
+ Real y = FunctionTests.TestFunction1(2, 3);
+equation
+ x = FunctionTests.TestFunction2(( y ) * ( 2 ));
+
+ function FunctionTests.TestFunction1
+  input Real i1 := 0;
+  input Real i2 := 0;
+  output Real o1 := 0;
+  output Real o2 := i2;
+ algorithm
+  o1 := i1;
+ end FunctionTests.TestFunction1;
+
+ function FunctionTests.TestFunction2
+  input Real i1 := 0;
+  output Real o1 := i1;
+ end FunctionTests.TestFunction2;
+end FunctionTests.FunctionFlatten3;
+")})));
+
+ Real x;
+ Real y = TestFunction1(2, 3);
+equation
+ x = TestFunction2(y * 2);
+end FunctionFlatten3;
 
 model AlgorithmFlatten1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

@@ -106,8 +106,10 @@ aspect Flattening {
    		for (InstComponentDecl icd : getInstComponentDecls())
 			icd.flattenInFunction(ffd);
 		
-   		FAlgorithmBlock fab = (FAlgorithmBlock) getFAbstractEquation(0);
-		ffd.setFAlgorithmBlock(fab.flatten(new FQName()));
+   		if (getNumFAbstractEquation() > 0) {
+	   		FAlgorithmBlock fab = (FAlgorithmBlock) getFAbstractEquation(0);
+			ffd.setFAlgorithmBlock(fab.flatten(new FQName()));
+   		}
 
 		fc.addFFunctionDecl(ffd);
 	}
