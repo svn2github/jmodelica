@@ -776,8 +776,6 @@ AbstractEquation abstract_equation =
   | when_clause_e SEMICOLON                               {: return when_clause_e; :}
   | CONNECT LPAREN parse_access.a COMMA parse_access.b RPAREN comment SEMICOLON {: return new ConnectClause(new Opt(), comment,a,b); :}
   | function_call comment SEMICOLON {: return new EquationFunctionCall(new Opt(),comment,function_call); :}
-  | function_call_simple comment SEMICOLON {: return new EquationFunctionCall(new Opt(),comment, function_call_simple); :}
-  //| function_call_initial comment SEMICOLON {: return new EquationFunctionCall(new Opt(),comment, function_call_initial); :}
   | annotation SEMICOLON             {: return new EquationAnnotation(new Opt(),new Comment(new Opt(), new Opt()), annotation); :}
   ;
 
@@ -1021,8 +1019,7 @@ Exp primary =
   | der_expression      {: return der_expression; :}
   | LPAREN exp.a RPAREN {: return a; :}
   | LPAREN arg_list RPAREN {: return new OutputExpressionList(arg_list); :}
-  | function_call {: return function_call; :}
-  | function_call_simple {: return function_call_simple; :}
+  | function_call        {: return function_call; :}
   | LBRACK matrix RBRACK {: return matrix; :}
   | LBRACE function_arguments RBRACE {: return new ArrayConstructor(function_arguments); :}
   | TIME                {: return new TimeExp(); :}
@@ -1030,16 +1027,12 @@ Exp primary =
   ;
  
  FunctionCall function_call =
-  parse_access LPAREN function_arguments? RPAREN {: return new FunctionCall(parse_access,function_arguments); :}
-  ;
-  
-FunctionCall function_call_simple =
-  ID.id LPAREN function_arguments? RPAREN {: ParseAccess p = new ParseAccess(id,new Opt());
-                                             p.setLocation(function_arguments);
-                                             return new FunctionCall(p,function_arguments); :}
-  |INITIAL LPAREN function_arguments? RPAREN {: ParseAccess p = new ParseAccess("initial",new Opt());
-                                                p.setLocation(function_arguments);
-                                                return new FunctionCall(p,function_arguments); :}
+    parse_access LPAREN function_arguments? RPAREN 
+                                      {: return new FunctionCall(parse_access, function_arguments); :}
+  | INITIAL LPAREN function_arguments? RPAREN 
+                                      {: ParseAccess p = new ParseAccess("initial", new Opt());
+                                         p.setLocation(function_arguments);
+                                         return new FunctionCall(p, function_arguments);  :}
   ;  
   
 FunctionArguments function_arguments =
