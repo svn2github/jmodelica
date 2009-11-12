@@ -374,7 +374,7 @@ aspect Scalarization {
 		// Scalarize equations
 		List<FAbstractEquation> eqns = new List<FAbstractEquation>();
 		for (FAbstractEquation ae : getFEquationBlock(0).getFAbstractEquations()) {
-			ae.scalarize(eqns);
+			ae.scalarize(eqns,new HashMap<String,Integer>());
 		}
 		getFEquationBlock(0).setFAbstractEquationList(eqns);
 		setFVariableList(vars);
@@ -416,21 +416,23 @@ aspect Scalarization {
 		}
 	}
 	
-	public void FAbstractEquation.scalarize(List<FAbstractEquation> eqns) {}
+	public void FAbstractEquation.scalarize(List<FAbstractEquation> eqns,
+			HashMap<String,Integer> indexMap) {}
 	
 	/**
 	 * \brief Scalarize equation and put all scalarized equations in list eqns.
 	 */
-	public void FEquation.scalarize(List<FAbstractEquation> eqns) {
-		System.out.println("FEquation.scalarize() " + ndims());
+	public void FEquation.scalarize(List<FAbstractEquation> eqns, 
+			HashMap<String,Integer> indexMap) {
+		//System.out.println("FEquation.scalarize() " + ndims());
 		if (ndims()==0) {
 			/**
 			 * If the equation is of dimension 0, i.e, already scalar,
 			 * the equations is "scalarized" into a simple equation where
 			 * e.g. built in functions are replaced by elementary operations.
 			 */
-			eqns.addChild(new FEquation(getLeft().scalarize(new HashMap<String,Integer>()),
-					getRight().scalarize(new HashMap<String,Integer>())));
+			eqns.addChild(new FEquation(getLeft().scalarize(indexMap),
+					getRight().scalarize(indexMap)));
 		} else if (ndims()>0) {
 			/**
 			 * If the expression is an array expression, then the FExp.array()
@@ -442,6 +444,7 @@ aspect Scalarization {
 			IndexCounter cnt = new IndexCounter(size);
 			// Iterate over all indices in index counter
 			for (int i=0;i<cnt.numElements();i++) {
+				// TODO: shouldn't these expressions be scalarized as well?
 				eqns.addChild(new FEquation((FExp)getLeft().array().getElement(cnt.getCounterMinusOne()).fullCopy(),
 						(FExp)getRight().array().getElement(cnt.getCounterMinusOne()).fullCopy()));
 				cnt.inc();
@@ -449,21 +452,28 @@ aspect Scalarization {
 		}
 	}
 	
-	public void FForClauseE.scalarize(List<FAbstractEquation> eqns) {
+	public void FForClauseE.scalarize(List<FAbstractEquation> eqns,
+			HashMap<String,Integer> indexMap) {
 		ArrayList<int[]> ind = new ArrayList<int[]>();
-		System.out.println("Hej!");
 		for (FForIndex fi : getFForIndexs()) {
 			if (fi.hasFExp()) {
-				System.out.println("Hoj!");
 				ind.add(fi.getFExp().myIndices().clone());
 			}
 		}
 		Indices indices = new Indices(ind);
 		IndexCounter cnt = new IndexCounter(indices);
+		HashMap<String,Integer> myIndexMap = new HashMap<String,Integer>();
+		myIndexMap.putAll(indexMap);
 		for (int i=0;i<cnt.numElements();i++) {
+			int j = 0;
+			int[] cnt_ind = cnt.getCounter();
+			for (FForIndex fi : getFForIndexs()) {
+				myIndexMap.put(fi.getFVariable().name(),Integer.valueOf(cnt_ind[j]));
+				j++;
+			}
+			
 			for (FAbstractEquation ae : getFAbstractEquations()) {
-				System.out.println("Hooj!");
-				ae.scalarize(eqns);
+				ae.scalarize(eqns,myIndexMap);
 			}
 			cnt.inc();
 		}		
@@ -482,13 +492,53 @@ aspect Scalarization {
 		return null;
 	}
 
+	public FSubscript FSubscript.scalarize(HashMap<String,Integer> indexMap) {
+		return (FSubscript)this.fullCopy();
+	}
+	
+	public FSubscript FExpSubscript.scalarize(HashMap<String,Integer> indexMap) {
+		return new FExpSubscript(getFExp().scalarize(indexMap));
+	}
+	
+	public FArraySubscripts FArraySubscripts.scalarize(HashMap<String,Integer> indexMap) {
+		FArraySubscripts fas = new FArraySubscripts();
+		for (FSubscript fs : getFSubscripts()) {
+			fas.addFSubscript(fs.scalarize(indexMap));
+		}
+		return fas;
+	}
+	
+	public FQNamePart FQNamePart.scalarize(HashMap<String,Integer> indexMap) {
+		return new FQNamePart(getName(),hasFArraySubscripts()? 
+				new Opt(getFArraySubscripts().scalarize(indexMap)): new Opt());
+	}
+	
+	public FQName FQName.scalarize(HashMap<String,Integer> indexMap) {
+		FQName fqn = new FQName();
+		for (FQNamePart fqnp : getFQNameParts()) {
+			fqn.addFQNamePart(fqnp.scalarize(indexMap));
+		}
+		fqn.scalarized = true;
+		return fqn;
+	}
+	
     public FIdUse FIdUse.scalarize(HashMap<String,Integer> indexMap) {
+    	return new FIdUse(getFQName().scalarize(indexMap));
+    	/*
     	FIdUse fid = (FIdUse)fullCopy();
     	fid.getFQName().scalarized = true;
     	return fid;
+    	*/
     }
 
     public FExp FIdUseExp.scalarize(HashMap<String,Integer> indexMap) {
+    	//System.out.println("FIdUseExp.scalarize: " + name());
+    	for (String ind : indexMap.keySet()) {
+    		System.out.println(" " + ind);
+    	}
+    	if (indexMap.get(name())!=null) {
+    		return new FIntegerLitExp(""+indexMap.get(getFIdUse().name()).intValue());
+    	}
     	return new FIdUseExp(getFIdUse().scalarize(indexMap));
     }
     
