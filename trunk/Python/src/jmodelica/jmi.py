@@ -358,6 +358,9 @@ class Model(object):
 
         self.get_offsets()
         
+        #n_p_opt set in _setDefaultValuesFromMetadata() -> _set_p_opt_indices()
+        self._n_p_opt=0
+        
         self._path = os.path.abspath(path)
         self._libname = libname
         self._setDefaultValuesFromMetadata()
@@ -372,6 +375,20 @@ class Model(object):
         """
         self._setDefaultValuesFromMetadata()
         
+    def _reset_jmimodel_typedefs(self):
+        """ Type c-functions could not be set before."""
+        self.jmimodel._dll.jmi_opt_set_p_opt_indices.argtypes = [ct.c_void_p,
+                                                                 ct.c_int,
+                                                                 Nct.ndpointer(dtype=ct.c_int,
+                                                                               ndim=1,
+                                                                               shape=self._n_p_opt,
+                                                                               flags='C')]      
+        self.jmimodel._dll.jmi_opt_get_p_opt_indices.argtypes = [ct.c_void_p,
+                                                                 Nct.ndpointer(dtype=ct.c_int,
+                                                                               ndim=1,
+                                                                               shape=self._n_p_opt,
+                                                                               flags='C')]  
+                
     def _setDefaultValuesFromMetadata(self, libname=None, path=None):
         """Load metadata saved in XML files.
         
@@ -848,6 +865,7 @@ class Model(object):
                 (z_i, ptype) = _translate_value_ref(ref)
                 p_opt_indices.append(z_i - self._offs_pi.value)
                 n_p_opt = n_p_opt +1
+            self._n_p_opt = n_p_opt
             self.jmimodel.opt_set_p_opt_indices(n_p_opt,N.array(p_opt_indices,dtype=int))
 
     def get_name(self):
@@ -1227,13 +1245,6 @@ class JMIModel(object):
         for (func, length) in int_res_funcs:
             _returns_ndarray(func, c_jmi_real_t, length, order='C')
             
-        n_eq_F = ct.c_int()
-        n_eq_R = ct.c_int()
-        assert self._dll.jmi_dae_get_sizes(self._jmi,
-                                     byref(n_eq_F),byref(n_eq_R)) \
-               is 0, \
-               "getting DAE sizes failed"
-
         #===============================================   
         # The return types for these functions are set in jmi.py's
         # function load_DLL(...)
@@ -1350,7 +1361,14 @@ class JMIModel(object):
         # DAE interface
         self._dll.jmi_dae_get_sizes.argtypes = [ct.c_void_p,
                                                 ct.POINTER(ct.c_int),
-                                                ct.POINTER(ct.c_int)]      
+                                                ct.POINTER(ct.c_int)]
+        n_eq_F = ct.c_int()
+        n_eq_R = ct.c_int()
+        assert self._dll.jmi_dae_get_sizes(self._jmi,
+                                     byref(n_eq_F),byref(n_eq_R)) \
+               is 0, \
+               "getting DAE sizes failed"        
+         
         self._dll.jmi_dae_F.argtypes = [ct.c_void_p,
                                         Nct.ndpointer(dtype=c_jmi_real_t,
                                                       ndim=1,
@@ -1403,10 +1421,20 @@ class JMIModel(object):
                                                  ct.POINTER(ct.c_int),
                                                  ct.POINTER(ct.c_int),
                                                  ct.POINTER(ct.c_int),
-                                                 ct.POINTER(ct.c_int)]                                          
+                                                 ct.POINTER(ct.c_int)]
+        n_eq_F0 = ct.c_int()
+        n_eq_F1 = ct.c_int()
+        n_eq_Fp = ct.c_int()
+        n_eq_R0 = ct.c_int()
+        assert self._dll.jmi_init_get_sizes(self._jmi, byref(n_eq_F0), byref(n_eq_F1),
+                                            byref(n_eq_Fp), byref(n_eq_R0)) \
+                                            is 0, \
+                                            "getting DAE init sizes failed"         
+                                                
         self._dll.jmi_init_F0.argtypes = [ct.c_void_p,
                                           Nct.ndpointer(dtype=c_jmi_real_t,
                                                         ndim=1,
+                                                        shape=n_eq_F0.value,
                                                         flags='C')]
         self._dll.jmi_init_dF0.argtypes = [ct.c_void_p,
                                            ct.c_int,
@@ -1448,6 +1476,7 @@ class JMIModel(object):
         self._dll.jmi_init_F1.argtypes = [ct.c_void_p,
                                           Nct.ndpointer(dtype=c_jmi_real_t,
                                                         ndim=1,
+                                                        shape=n_eq_F1.value,
                                                         flags='C')]
         self._dll.jmi_init_dF1.argtypes = [ct.c_void_p,
                                            ct.c_int,
@@ -1489,6 +1518,7 @@ class JMIModel(object):
         self._dll.jmi_init_Fp.argtypes = [ct.c_void_p,
                                           Nct.ndpointer(dtype=c_jmi_real_t,
                                                         ndim=1,
+                                                        shape=n_eq_Fp.value,
                                                         flags='C')]
         self._dll.jmi_init_dFp.argtypes = [ct.c_void_p,
                                            ct.c_int,
@@ -1530,6 +1560,7 @@ class JMIModel(object):
         self._dll.jmi_init_R0.argtypes = [ct.c_void_p,
                                           Nct.ndpointer(dtype=c_jmi_real_t,
                                                         ndim=1,
+                                                        shape=n_eq_R0.value,
                                                         flags='C')]    
         # Optimization interface
         self._dll.jmi_opt_set_optimization_interval.argtypes = [ct.c_void_p,
@@ -1599,10 +1630,22 @@ class JMIModel(object):
                                                            shape=n_z.value,
                                                            flags='C'),
                                              ct.POINTER(ct.c_int),
-                                             ct.POINTER(ct.c_int)]    
+                                             ct.POINTER(ct.c_int)]
+        
+        n_eq_Ceq = ct.c_int()
+        n_eq_Cineq = ct.c_int()
+        n_eq_Heq = ct.c_int()
+        n_eq_Hineq = ct.c_int()
+        assert self._dll.jmi_dae_get_sizes(self._jmi, byref(n_eq_Ceq), byref(n_eq_Cineq),
+                                           byref(n_eq_Heq), byref(n_eq_Hineq)) \
+               is 0, \
+               "getting optimization function sizes failed"
+        
+         
         self._dll.jmi_opt_Ceq.argtypes = [ct.c_void_p,
                                           Nct.ndpointer(dtype=c_jmi_real_t,
                                                         ndim=1,
+                                                        shape=n_eq_Ceq.value,
                                                         flags='C')]    
         self._dll.jmi_opt_dCeq.argtypes = [ct.c_void_p,
                                            ct.c_int,
@@ -1614,7 +1657,7 @@ class JMIModel(object):
                                                          flags='C'),
                                            Nct.ndpointer(dtype=c_jmi_real_t,
                                                          ndim=1,
-                                                         flags='C')]   
+                                                         flags='C')]  
         self._dll.jmi_opt_dCeq_n_nz.argtypes = [ct.c_void_p,
                                                 ct.c_int,
                                                 ct.POINTER(ct.c_int)]   
@@ -1644,6 +1687,7 @@ class JMIModel(object):
         self._dll.jmi_opt_Cineq.argtypes = [ct.c_void_p,
                                             Nct.ndpointer(dtype=c_jmi_real_t,
                                                           ndim=1,
+                                                          shape=n_eq_Cineq.value,
                                                           flags='C')]    
         self._dll.jmi_opt_dCineq.argtypes = [ct.c_void_p,
                                              ct.c_int,
@@ -1685,6 +1729,7 @@ class JMIModel(object):
         self._dll.jmi_opt_Heq.argtypes = [ct.c_void_p,
                                           Nct.ndpointer(dtype=c_jmi_real_t,
                                                         ndim=1,
+                                                        shape=n_eq_Heq.value,
                                                         flags='C')]    
         self._dll.jmi_opt_dHeq.argtypes = [ct.c_void_p,
                                            ct.c_int,
@@ -1726,6 +1771,7 @@ class JMIModel(object):
         self._dll.jmi_opt_Hineq.argtypes = [ct.c_void_p,
                                             Nct.ndpointer(dtype=c_jmi_real_t,
                                                           ndim=1,
+                                                          shape=n_eq_Hineq.value,
                                                           flags='C')]    
         self._dll.jmi_opt_dHineq.argtypes = [ct.c_void_p,
                                              ct.c_int,
@@ -1763,8 +1809,7 @@ class JMIModel(object):
                                                                shape=n_z.value,
                                                                flags='C'),
                                                  ct.POINTER(ct.c_int),
-                                                 ct.POINTER(ct.c_int)]
-    
+                                                 ct.POINTER(ct.c_int)]   
                  
     def initAD(self):
         """Initializing Algorithmic Differential package.

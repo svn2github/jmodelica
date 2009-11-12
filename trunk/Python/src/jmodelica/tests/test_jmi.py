@@ -84,7 +84,7 @@ def test_jmi_opt_sim_set_initial_from_trajectory():
     dx_ = N.zeros(2*n_points)
     x_ = N.zeros(2*n_points)
     u_ = N.zeros(n_points)
-    w_ = N.zeros(n_points)
+    w_ = N.zeros(0)
     
     # Get the result
     nlp.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
@@ -99,7 +99,7 @@ def test_jmi_opt_sim_set_initial_from_trajectory():
     dx_2 = N.zeros(2*n_points)
     x_2 = N.zeros(2*n_points)
     u_2 = N.zeros(n_points)
-    w_2 = N.zeros(n_points)
+    w_2 = N.zeros(0)
         
     # Get the result
     nlp.opt_sim_get_result(p_opt2,t_2,dx_2,x_2,u_2,w_2)
@@ -154,7 +154,7 @@ def test_set_initial_from_dymola():
     dx_ = N.zeros(2*n_points)
     x_ = N.zeros(2*n_points)
     u_ = N.zeros(n_points)
-    w_ = N.zeros(n_points)
+    w_ = N.zeros(0)
     
     # Get the result
     nlp.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
@@ -173,7 +173,7 @@ def test_set_initial_from_dymola():
     dx_2 = N.zeros(2*n_points)
     x_2 = N.zeros(2*n_points)
     u_2 = N.zeros(n_points)
-    w_2 = N.zeros(n_points)
+    w_2 = N.zeros(0)
     
     # Get the result
     nlp.opt_sim_get_result(p_opt_2,t_2,dx_2,x_2,u_2,w_2)
@@ -187,8 +187,8 @@ def test_set_initial_from_dymola():
            "The values used in initialization does not match the values that were read back after initialization." 
     assert max(N.abs(u_-u_2))<1e-3, \
            "The values used in initialization does not match the values that were read back after initialization." 
-    assert max(N.abs(w_-w_2))<1e-3, \
-           "The values used in initialization does not match the values that were read back after initialization." 
+#    assert max(N.abs(w_-w_2))<1e-3, \
+#           "The values used in initialization does not match the values that were read back after initialization." 
 
 ##     print(p_opt)
 ##     print(p_opt_2)

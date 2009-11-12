@@ -119,12 +119,12 @@ def run_demo(with_plots=True):
     n_points = n_points.value
     
     # Create result data vectors
-    p_opt = N.zeros(1)
+    p_opt = N.zeros(0)
     t_ = N.zeros(n_points)
     dx_ = N.zeros(5*n_points)
     x_ = N.zeros(5*n_points)
     u_ = N.zeros(2*n_points)
-    w_ = N.zeros(n_points)
+    w_ = N.zeros(0)
     
     # Get the result
     nlp.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)

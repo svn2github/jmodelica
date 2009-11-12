@@ -59,7 +59,7 @@ def run_demo(with_plots=True):
     dx_ = N.zeros(2*n_points)
     x_ = N.zeros(2*n_points)
     u_ = N.zeros(n_points)
-    w_ = N.zeros(n_points)
+    w_ = N.zeros(0)
     
     # Get the result
     nlp.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)

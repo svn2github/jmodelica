@@ -61,17 +61,17 @@ class CollocationOptimizer(object):
     def _set_collocationOpt_typedefs(self):
         try:
             self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_new.argtypes = [ct.c_void_p,
-                                                  ct.c_void_p]
+                                                                                         ct.c_void_p]
             self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_solve.argtypes = [ct.c_void_p]
             self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_string_option.argtypes = [ct.c_void_p,
-                                                                ct.c_char_p,
-                                                                ct.c_char_p]
+                                                                                                       ct.c_char_p,
+                                                                                                       ct.c_char_p]
             self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_int_option.argtypes = [ct.c_void_p,
-                                                             ct.c_char_p,
-                                                             ct.c_int]
+                                                                                                    ct.c_char_p,
+                                                                                                    ct.c_int]
             self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_num_option.argtypes = [ct.c_void_p,
-                                                                ct.c_char_p,
-                                                                c_jmi_real_t]
+                                                                                                    ct.c_char_p,
+                                                                                                    c_jmi_real_t]
         except AttributeError, e:
             pass       
                
@@ -130,138 +130,158 @@ class NLPCollocation(object):
     def _initialize(self, model):
         self._model = model
         self._jmi_opt_sim = ct.c_voidp()
-        self._set_nlpCollocation_typedefs()
      
     def _set_nlpCollocation_typedefs(self):
         try:
             self._model.jmimodel._dll.jmi_opt_sim_get_dimensions.argtypes = [ct.c_void_p,
-                                                       ct.POINTER(ct.c_int),
-                                                       ct.POINTER(ct.c_int),
-                                                       ct.POINTER(ct.c_int),
-                                                       ct.POINTER(ct.c_int),
-                                                       ct.POINTER(ct.c_int)]
-            #change to real, int (skalar)
+                                                                             ct.POINTER(ct.c_int),
+                                                                             ct.POINTER(ct.c_int),
+                                                                             ct.POINTER(ct.c_int),
+                                                                             ct.POINTER(ct.c_int),
+                                                                             ct.POINTER(ct.c_int)]
+            n_x = ct.c_int()
+            n_g = ct.c_int()
+            n_h = ct.c_int()
+            dg_n_nz = ct.c_int()
+            dh_n_nz = ct.c_int()
+            assert self._model.jmimodel._dll.jmi_opt_sim_get_dimensions(self._jmi_opt_sim, byref(n_x), byref(n_g),
+                                           byref(n_h), byref(dg_n_nz), byref(dh_n_nz)) \
+            is 0, \
+               "getting NLP problem dimensions failed"        
+            
             self._model.jmimodel._dll.jmi_opt_sim_get_interval_spec.argtypes = [ct.c_void_p,
-                                                          Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                        ndim=1,
-                                                                        flags='C'),
-                                                          Nct.ndpointer(dtype=ct.c_int,
-                                                                        ndim=1,
-                                                                        flags='C'),
-                                                          Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                        ndim=1,
-                                                                        flags='C'),
-                                                          Nct.ndpointer(dtype=ct.c_int,
-                                                                        ndim=1,
-                                                                        flags='C')]
+                                                                                ct.POINTER(c_jmi_real_t),
+                                                                                ct.POINTER(ct.c_int),
+                                                                                ct.POINTER(c_jmi_real_t),
+                                                                                ct.POINTER(ct.c_int)]
             self._model.jmimodel._dll.jmi_opt_sim_get_x.argtypes =[ct.c_void_p]
             self._model.jmimodel._dll.jmi_opt_sim_get_initial.argtypes = [ct.c_void_p,
-                                                    Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                  ndim=1,
-                                                                  flags='C')]
-            
+                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                        ndim=1,
+                                                                                        shape=n_x.value,
+                                                                                        flags='C')]
             self._model.jmimodel._dll.jmi_opt_sim_set_initial.argtypes =  [ct.c_void_p,
-                                                    Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                  ndim=1,
-                                                                  flags='C')] 
-    
+                                                                           Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                         ndim=1,
+                                                                                         shape=n_x.value,
+                                                                                         flags='C')]
             self._model.jmimodel._dll.jmi_opt_sim_set_initial_from_trajectory.argtypes = [ct.c_void_p,
-                                                                    Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                  ndim=1,
-                                                                                  flags='C'),
-                                                                    Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                  ndim=1,
-                                                                                  flags='C'),
-                                                                    ct.c_int,
-                                                                    Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                  ndim=1,
-                                                                                  flags='C'),
-                                                                    c_jmi_real_t,
-                                                                    c_jmi_real_t] 
-    
+                                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                                        ndim=1,
+                                                                                                        shape=self._model._n_p_opt,
+                                                                                                        flags='C'),
+                                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                                        ndim=1,
+                                                                                                        flags='C'),
+                                                                                          ct.c_int,
+                                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                                        ndim=1,
+                                                                                                        flags='C'),
+                                                                                          c_jmi_real_t,
+                                                                                          c_jmi_real_t]
             self._model.jmimodel._dll.jmi_opt_sim_get_bounds.argtypes = [ct.c_void_p,
-                                                    Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                  ndim=1,
-                                                                  flags='C'),
-                                                    Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                  ndim=1,
-                                                                  flags='C')]
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       shape=n_x.value,
+                                                                                       flags='C'),
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       shape=n_x.value,
+                                                                                       flags='C')]
             self._model.jmimodel._dll.jmi_opt_sim_set_bounds.argtypes = [ct.c_void_p,
-                                                    Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                  ndim=1,
-                                                                  flags='C'),
-                                                    Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                  ndim=1,
-                                                                  flags='C')]
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       shape=n_x.value,
+                                                                                       flags='C'),
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       shape=n_x.value,
+                                                                                       flags='C')]
             self._model.jmimodel._dll.jmi_opt_sim_f.argtypes = [ct.c_void_p,
-                                          Nct.ndpointer(dtype=c_jmi_real_t,
-                                                        ndim=1,
-                                                        flags='C')]
+                                                                ct.POINTER(c_jmi_real_t)]
             self._model.jmimodel._dll.jmi_opt_sim_df.argtypes = [ct.c_void_p,
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C')]
+                                                                 Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                               ndim=1,
+                                                                               shape=n_x.value,
+                                                                               flags='C')]
             self._model.jmimodel._dll.jmi_opt_sim_g.argtypes = [ct.c_void_p,
-                                          Nct.ndpointer(dtype=c_jmi_real_t,
-                                                        ndim=1,
-                                                        flags='C')]
+                                                                Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                              ndim=1,
+                                                                              shape=n_g.value,
+                                                                              flags='C')]
             self._model.jmimodel._dll.jmi_opt_sim_dg.argtypes = [ct.c_void_p,
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C')]
-            #dg_n_nz
+                                                                 Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                               ndim=1,
+                                                                               shape=dg_n_nz.value,
+                                                                               flags='C')]
             self._model.jmimodel._dll.jmi_opt_sim_dg_nz_indices.argtypes = [ct.c_void_p,
-                                                      Nct.ndpointer(dtype=ct.c_int,
-                                                                    ndim=1,
-                                                                    flags='C'),
-                                                      Nct.ndpointer(dtype=ct.c_int,
-                                                                    ndim=1,
-                                                                    flags='C')]
+                                                                            Nct.ndpointer(dtype=ct.c_int,
+                                                                                          ndim=1,
+                                                                                          shape=dg_n_nz.value,
+                                                                                          flags='C'),
+                                                                            Nct.ndpointer(dtype=ct.c_int,
+                                                                                          ndim=1,
+                                                                                          shape=dg_n_nz.value,
+                                                                                          flags='C')]
             self._model.jmimodel._dll.jmi_opt_sim_h.argtypes = [ct.c_void_p,
-                                          Nct.ndpointer(dtype=c_jmi_real_t,
-                                                        ndim=1,
-                                                        flags='C')]
+                                                                Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                              ndim=1,
+                                                                              shape=n_h.value,
+                                                                              flags='C')]
             self._model.jmimodel._dll.jmi_opt_sim_dh.argtypes = [ct.c_void_p,
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C')]
-            #dh_n_nz
+                                                                 Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                               ndim=1,
+                                                                               shape=dh_n_nz.value,
+                                                                               flags='C')]
             self._model.jmimodel._dll.jmi_opt_sim_dh_nz_indices.argtypes = [ct.c_void_p,
-                                                      Nct.ndpointer(dtype=ct.c_int,
-                                                                    ndim=1,
-                                                                    flags='C'),
-                                                      Nct.ndpointer(dtype=ct.c_int,
-                                                                    ndim=1,
-                                                                    flags='C')]
+                                                                            Nct.ndpointer(dtype=ct.c_int,
+                                                                                          ndim=1,
+                                                                                          shape=dh_n_nz.value,
+                                                                                          flags='C'),
+                                                                            Nct.ndpointer(dtype=ct.c_int,
+                                                                                          ndim=1,
+                                                                                          shape=dh_n_nz.value,
+                                                                                          flags='C')]
             self._model.jmimodel._dll.jmi_opt_sim_write_file_matlab.argtypes = [ct.c_void_p,
-                                                          ct.c_char_p]
+                                                                                ct.c_char_p]
             self._model.jmimodel._dll.jmi_opt_sim_get_result_variable_vector_length.argtypes = [ct.c_void_p,
-                                                                          ct.POINTER(ct.c_int)]
-            #jmi_opt_sim_get_result_variable_vector_length * n_dx osv
+                                                                                                ct.POINTER(ct.c_int)]
+            timepoints = ct.c_int()
+            assert self._model.jmimodel._dll.jmi_opt_sim_get_result_variable_vector_length(self._jmi_opt_sim, byref(timepoints)) \
+            is 0, \
+               "getting number of points in the independent time vector failed"
+
+            res_dx = timepoints.value*self._model._n_dx.value
+            res_x = timepoints.value*self._model._n_x.value
+            res_u = timepoints.value*self._model._n_u.value
+            res_w = timepoints.value*self._model._n_w.value
             self._model.jmimodel._dll.jmi_opt_sim_get_result.argtypes = [ct.c_void_p,
-                                                   Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                 ndim=1,
-                                                                 flags='C'),
-                                                   Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                 ndim=1,
-                                                                 flags='C'),
-                                                   Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                 ndim=1,
-                                                                 flags='C'),
-                                                   Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                 ndim=1,
-                                                                 flags='C'),
-                                                   Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                 ndim=1,
-                                                                 flags='C'),
-                                                   Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                 ndim=1,
-                                                                 flags='C')]
-            # This is not correct, the n_x referes to the wrong x vector
-            # In this case, n_x refers to the size of the optimization vector
-            # not to the number of states.
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       shape=self._model._n_p_opt,
+                                                                                       flags='C'),
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       shape=timepoints.value,
+                                                                                       flags='C'),
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       shape=res_dx,
+                                                                                       flags='C'),
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       shape=res_x,
+                                                                                       flags='C'),
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       shape=res_u,
+                                                                                       flags='C'),
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       shape=res_w,
+                                                                                       flags='C')]
             # n_x from jmi_opt_sim_get_dimensions
-            # _returns_ndarray(dll.jmi_opt_sim_get_x, c_jmi_real_t, n_x.value, order='C')
+            jmi._returns_ndarray(self._model.jmimodel._dll.jmi_opt_sim_get_x, c_jmi_real_t, n_x.value, order='C')
         except AttributeError, e:
             pass
        
@@ -551,6 +571,10 @@ class NLPCollocation(object):
             Initial guess of interval final time. This argument is neglected if
             the final time is fixed.
         """
+        # check sum (n_x, n_dx, n_u, n_w +1 (time)) mult with traj_n_points = size trajectory_data_init
+        sum = self._model._n_x.value + self._model._n_dx.value + self._model._n_u.value + self._model._n_w.value + 1
+        if sum*traj_n_points != len(trajectory_data_init):
+            raise jmi.JMIException("trajectory_data_init vector has the wrong size.")        
         if self._model.jmimodel._dll.jmi_opt_sim_set_initial_from_trajectory(self._jmi_opt_sim, \
                                                                         p_opt_init, \
                                                                         trajectory_data_init, \
@@ -741,19 +765,27 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
             n_cp -- Number of collocation points. 
         
         """
+        if len(hs) != n_e:
+            raise jmi.JMIException("arg hs is not of length n_e")
+        
+        self._model=model
+        self._n_e = n_e
+        self._n_cp = n_cp
+        self._hs=hs
+        self.n_p_opt=model.jmimodel.opt_get_n_p_opt()
+        
         NLPCollocation._initialize(self, model)
-
         self._set_nlpLagrangePols_typedefs()
-
+        
         # Initialization
-        _p_opt_init = N.zeros(model.jmimodel.opt_get_n_p_opt())
+        _p_opt_init = N.zeros(self.n_p_opt)
         _dx_init = N.zeros(model._n_dx.value)
         _x_init = N.zeros(model._n_x.value)
         _u_init = N.zeros(model._n_u.value)
         _w_init = N.zeros(model._n_w.value)
     
         # Bounds
-        _p_opt_lb = -1.0e20*N.ones(model.jmimodel.opt_get_n_p_opt())
+        _p_opt_lb = -1.0e20*N.ones(self.n_p_opt)
         _dx_lb = -1.0e20*N.ones(model._n_dx.value)
         _x_lb = -1.0e20*N.ones(model._n_x.value)
         _u_lb = -1.0e20*N.ones(model._n_u.value)
@@ -762,7 +794,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         _tf_lb = 0.; # not yet supported
         _hs_lb = N.zeros(n_e); # not yet supported
         
-        _p_opt_ub = 1.0e20*N.ones(model.jmimodel.opt_get_n_p_opt())
+        _p_opt_ub = 1.0e20*N.ones(self.n_p_opt)
         _dx_ub = 1.0e20*N.ones(model._n_dx.value)
         _x_ub = 1.0e20*N.ones(model._n_x.value)
         _u_ub = 1.0e20*N.ones(model._n_u.value)
@@ -779,7 +811,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         self._set_ub_values(_p_opt_ub, _dx_ub, _x_ub, _u_ub, _w_ub)
 
         _linearity_information_provided = 1;
-        _p_opt_lin = N.ones(model.jmimodel.opt_get_n_p_opt(),dtype=int)
+        _p_opt_lin = N.ones(self.n_p_opt,dtype=int)
         _dx_lin = N.ones(model._n_dx.value,dtype=int)
         _x_lin = N.ones(model._n_x.value,dtype=int)
         _u_lin = N.ones(model._n_u.value,dtype=int)        
@@ -812,6 +844,8 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         
         assert self._jmi_opt_sim.value is not None, \
             "jmi_opt_sim_lp struct has not returned correctly."
+                        
+        self._set_nlpCollocation_typedefs()
             
     def __del__(self):
         """ Free jmi_opt_sim data structure. """
@@ -823,149 +857,173 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 
     def _set_nlpLagrangePols_typedefs(self):
         try:
-            #from xml
-            self._model.jmimodel._dll.jmi_opt_sim_lp_new.argtypes = [ct.c_void_p,
-                                           ct.c_void_p,
-                                           ct.c_int,
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C'),
-                                           ct.c_int,
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C'),
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C'),
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C'),
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C'),
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C'),
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C'),
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C'),
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C'),
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C'),
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C'),
-                                           c_jmi_real_t,
-                                           c_jmi_real_t,
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C'),
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C'),
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C'),
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C'),
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C'),
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C'),
-                                           c_jmi_real_t,
-                                           c_jmi_real_t,
-                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                         ndim=1,
-                                                         flags='C'),
-                                           ct.c_int,
-                                           Nct.ndpointer(dtype=ct.c_int,
-                                                         ndim=1,
-                                                         flags='C'),                                           
-                                           Nct.ndpointer(dtype=ct.c_int,
-                                                         ndim=1,
-                                                         flags='C'),                                           
-                                           Nct.ndpointer(dtype=ct.c_int,
-                                                         ndim=1,
-                                                         flags='C'),                                           
-                                           Nct.ndpointer(dtype=ct.c_int,
-                                                         ndim=1,
-                                                         flags='C'),                                           
-                                           Nct.ndpointer(dtype=ct.c_int,
-                                                         ndim=1,
-                                                         flags='C'),                                           
-                                           Nct.ndpointer(dtype=ct.c_int,
-                                                         ndim=1,
-                                                         flags='C'),                                           
-                                           Nct.ndpointer(dtype=ct.c_int,
-                                                         ndim=1,
-                                                         flags='C'),                                           
-                                           Nct.ndpointer(dtype=ct.c_int,
-                                                         ndim=1,
-                                                         flags='C'),                                           
-                                           Nct.ndpointer(dtype=ct.c_int,
-                                                         ndim=1,
-                                                         flags='C'),                                           
-                                           ct.c_int,
-                                           ct.c_int]
+            self._model.jmimodel._dll.jmi_opt_sim_lp_new.argtypes = [ct.c_void_p,                                   # jmi_opt_sim
+                                                                     ct.c_void_p,                                   # jmi
+                                                                     ct.c_int,                                      # n_e
+                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # hs             
+                                                                                   ndim=1,
+                                                                                   shape=self._n_e,
+                                                                                   flags='C'),
+                                                                     ct.c_int,                                      # hs_free               
+                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # p_opt_init             
+                                                                                   ndim=1,
+                                                                                   shape=self.n_p_opt,
+                                                                                   flags='C'),
+                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # dx_init             
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_dx.value,   
+                                                                                   flags='C'),
+                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # x_init
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_x.value,
+                                                                                   flags='C'),
+                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # u_init              
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_u.value,
+                                                                                   flags='C'),
+                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # w_init
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_w.value,
+                                                                                   flags='C'),
+                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # p_opt_lb
+                                                                                   ndim=1,
+                                                                                   shape=self.n_p_opt,
+                                                                                   flags='C'),
+                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # dx_lb
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_dx.value,
+                                                                                   flags='C'),
+                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # x_lb
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_x.value,
+                                                                                   flags='C'),
+                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # u_lb
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_u.value,
+                                                                                   flags='C'),
+                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # w_lb
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_w.value,
+                                                                                   flags='C'),
+                                                                     c_jmi_real_t,                                  # t0_lb
+                                                                     c_jmi_real_t,                                  # tf_lb
+                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # hs_lb
+                                                                                   ndim=1,
+                                                                                   flags='C'),
+                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # p_opt_ub
+                                                                                   ndim=1,
+                                                                                   shape=self.n_p_opt,
+                                                                                   flags='C'),
+                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # dx_ub
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_dx.value,
+                                                                                   flags='C'),
+                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # x_ub
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_x.value,
+                                                                                   flags='C'),
+                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # u_ub
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_u.value,
+                                                                                   flags='C'),
+                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # w_ub
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_w.value,
+                                                                                   flags='C'),
+                                                                     c_jmi_real_t,                                  # t0_ub
+                                                                     c_jmi_real_t,                                  # tf_ub
+                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # hs_ub
+                                                                                   ndim=1,
+                                                                                   flags='C'),
+                                                                     ct.c_int,                                      # linearity_information_provided
+                                                                     Nct.ndpointer(dtype=ct.c_int,                  # p_opt_lin
+                                                                                   ndim=1,
+                                                                                   shape=self.n_p_opt,
+                                                                                   flags='C'),                                           
+                                                                     Nct.ndpointer(dtype=ct.c_int,                  # dx_lin
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_dx.value,
+                                                                                   flags='C'),                                           
+                                                                     Nct.ndpointer(dtype=ct.c_int,                  # x_lin
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_x.value,
+                                                                                   flags='C'),                                           
+                                                                     Nct.ndpointer(dtype=ct.c_int,                  # u_lin
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_u.value,
+                                                                                   flags='C'),                                           
+                                                                     Nct.ndpointer(dtype=ct.c_int,                  # w_lin
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_w.value,
+                                                                                   flags='C'),                                           
+                                                                     Nct.ndpointer(dtype=ct.c_int,                  # dx_tp_lin
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_dx.value*self._model._n_tp.value,
+                                                                                   flags='C'),                                           
+                                                                     Nct.ndpointer(dtype=ct.c_int,                  # x_tp_lin
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_x.value*self._model._n_tp.value,
+                                                                                   flags='C'),                                           
+                                                                     Nct.ndpointer(dtype=ct.c_int,                  # u_tp_lin
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_u.value*self._model._n_tp.value,
+                                                                                   flags='C'),                                           
+                                                                     Nct.ndpointer(dtype=ct.c_int,                  # w_tp_lin
+                                                                                   ndim=1,
+                                                                                   shape=self._model._n_w.value*self._model._n_tp.value,
+                                                                                   flags='C'),                                           
+                                                                     ct.c_int,                                      # n_cp
+                                                                     ct.c_int]                                      # der_eval_alg
             self._model.jmimodel._dll.jmi_opt_sim_lp_delete.argtypes = [ct.c_void_p]
-            #n_e n_cp from init
+            self._model.jmimodel._dll.jmi_opt_sim_lp_eval_pol.argtypes = [c_jmi_real_t,
+                                                                          ct.c_int,
+                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                        ndim=1,
+                                                                                        flags='C'),
+                                                                          ct.c_int]
             self._model.jmimodel._dll.jmi_opt_sim_lp_get_pols.argtypes = [ct.c_int,
-                                                    Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                  ndim=1,
-                                                                  flags='C'),
-                                                    Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                  ndim=1,
-                                                                  flags='C'),
-                                                    Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                  ndim=1,
-                                                                  flags='C'),
-                                                    Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                  ndim=1,
-                                                                  flags='C'),
-                                                    Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                  ndim=1,
-                                                                  flags='C'),
-                                                    Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                  ndim=1,
-                                                                  flags='C'),
-                                                    Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                  ndim=1,
-                                                                  flags='C'),
-                                                    Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                  ndim=1,
-                                                                  flags='C')]
-            self._model.jmimodel._dll.jmi_opt_sim_get_result.argtypes = [ct.c_void_p,
-                                               Nct.ndpointer(dtype=c_jmi_real_t,
-                                                             ndim=1,
-                                                             flags='C'),
-                                               Nct.ndpointer(dtype=c_jmi_real_t,
-                                                             ndim=1,
-                                                             flags='C'),
-                                               Nct.ndpointer(dtype=c_jmi_real_t,
-                                                             ndim=1,
-                                                             flags='C'),
-                                               Nct.ndpointer(dtype=c_jmi_real_t,
-                                                             ndim=1,
-                                                             flags='C'),
-                                               Nct.ndpointer(dtype=c_jmi_real_t,
-                                                             ndim=1,
-                                                             flags='C'),
-                                               Nct.ndpointer(dtype=c_jmi_real_t,
-                                                             ndim=1,
-                                                             flags='C')]
+                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                        ndim=1,
+                                                                                        flags='C'),
+                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                        ndim=1,
+                                                                                        flags='C'),
+                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                        ndim=1,
+                                                                                        flags='C'),
+                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                        ndim=1,
+                                                                                        flags='C'),
+                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                        ndim=1,
+                                                                                        flags='C'),
+                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                        ndim=1,
+                                                                                       flags='C'),
+                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                        ndim=1,
+                                                                                        flags='C'),
+                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                        ndim=1,
+                                                                                        flags='C')]
         except AttributeError, e:
             pass
         
-
+    def opt_sim_lp_eval_pol(self, tau, n, pol, k):
+        """ Evaluate Lagrange polynomial. 
+        
+        Parameters:
+            tau -- Value of independent variable in polynomial evaluation.
+            n -- Order of polynomials.
+            pol -- Vector containing the polynomial coefficients. 
+            k -- Specify evaluation of the k:th Lagrange polynomial.
+        """
+        if len(pol)!=n*n:
+            raise jmi.JMIException("argument pol has the wrong size. Should be n*n.")
+        if self._model.jmimodel._dll.jmi_opt_sim_lp_eval_pol(tau, n, pol, k) is not 0:
+            raise jmi.JMIException("Evaluating Lagrange polynomial failed.")
+        
+    
     def opt_sim_lp_get_pols(self, n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, Lp_dot_coeffs, Lpp_dot_coeffs, Lp_dot_vals, Lpp_dot_vals):
         """
         Get the Lagrange polynomials of a specified order.
@@ -994,6 +1052,40 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
                 at the collocation points. (Return)
             
         """
+        self._model.jmimodel._dll.jmi_opt_sim_lp_get_pols.argtypes = [ct.c_int,
+                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                    ndim=1,
+                                                                                    shape=self._n_cp-1,
+                                                                                    flags='C'),
+                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                    ndim=1,
+                                                                                    shape=self._n_cp,
+                                                                                    flags='C'),
+                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                    ndim=1,
+                                                                                    shape=self._n_cp*self._n_cp,
+                                                                                    flags='C'),
+                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                    ndim=1,
+                                                                                    shape=(self._n_cp+1)*(self._n_cp+1),
+                                                                                    flags='C'),
+                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                    ndim=1,
+                                                                                    shape=self._n_cp*(self._n_cp-1),
+                                                                                    flags='C'),
+                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                    ndim=1,
+                                                                                    shape=(self._n_cp+1)*self._n_cp,
+                                                                                    flags='C'),
+                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                    ndim=1,
+                                                                                    shape=self._n_cp,
+                                                                                    flags='C'),
+                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                    ndim=1,
+                                                                                    shape=self._n_cp+1,
+                                                                                    flags='C')]
+
         if self._model.jmimodel._dll.jmi_opt_sim_lp_get_pols(n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, Lp_dot_coeffs, 
                                                         Lpp_dot_coeffs, Lp_dot_vals, Lpp_dot_vals) is not 0:
             raise jmi.JMIException("Getting sim lp pols failed.")
