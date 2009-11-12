@@ -17,19 +17,34 @@
 
 package FunctionTests 
 
+/* Functions used in tests. */
+function TestFunction0
+ output Real o1 = 0;
+algorithm
+end TestFunction0;
+
 function TestFunction1
+ input Real i1 = 0;
+ output Real o1 = i1;
+algorithm
+end TestFunction1;
+
+function TestFunction2
  input Real i1 = 0;
  input Real i2 = 0;
  output Real o1 = 0;
  output Real o2 = i2;
 algorithm
  o1 := i1;
-end TestFunction1;
-
-function TestFunction2
- input Real i1 = 0;
- output Real o1 = i1;
 end TestFunction2;
+
+function TestFunction3
+ input Real i1;
+ input Real i2;
+ input Real i3 = 0;
+ output Real o1 = i1 + i2 + i3;
+algorithm
+end TestFunction3;
 
 model FunctionFlatten1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -39,18 +54,19 @@ model FunctionFlatten1
 fclass FunctionTests.FunctionFlatten1
  Real x;
 equation
- x = FunctionTests.TestFunction2(1);
+ x = FunctionTests.TestFunction1(1);
 
- function FunctionTests.TestFunction2
+ function FunctionTests.TestFunction1
   input Real i1 := 0;
   output Real o1 := i1;
- end FunctionTests.TestFunction2;
+ algorithm
+ end FunctionTests.TestFunction1;
 end FunctionTests.FunctionFlatten1;
 ")})));
 
  Real x;
 equation
- x = TestFunction2(1);
+ x = TestFunction1(1);
 end FunctionFlatten1;
 
 model FunctionFlatten2
@@ -60,25 +76,25 @@ model FunctionFlatten2
           flatModel="
 fclass FunctionTests.FunctionFlatten2
  Real x;
- Real y = FunctionTests.TestFunction1(2, 3);
+ Real y = FunctionTests.TestFunction2(2, 3);
 equation
- x = FunctionTests.TestFunction1(1);
+ x = FunctionTests.TestFunction2(1);
 
- function FunctionTests.TestFunction1
+ function FunctionTests.TestFunction2
   input Real i1 := 0;
   input Real i2 := 0;
   output Real o1 := 0;
   output Real o2 := i2;
  algorithm
   o1 := i1;
- end FunctionTests.TestFunction1;
+ end FunctionTests.TestFunction2;
 end FunctionTests.FunctionFlatten2;
 ")})));
 
  Real x;
- Real y = TestFunction1(2, 3);
+ Real y = TestFunction2(2, 3);
 equation
- x = TestFunction1(1);
+ x = TestFunction2(1);
 end FunctionFlatten2;
 
 model FunctionFlatten3
@@ -88,31 +104,145 @@ model FunctionFlatten3
           flatModel="
 fclass FunctionTests.FunctionFlatten3
  Real x;
- Real y = FunctionTests.TestFunction1(2, 3);
+ Real y = FunctionTests.TestFunction2(2, 3);
 equation
- x = FunctionTests.TestFunction2(( y ) * ( 2 ));
+ x = FunctionTests.TestFunction1(( y ) * ( 2 ));
 
- function FunctionTests.TestFunction1
+ function FunctionTests.TestFunction2
   input Real i1 := 0;
   input Real i2 := 0;
   output Real o1 := 0;
   output Real o2 := i2;
  algorithm
   o1 := i1;
- end FunctionTests.TestFunction1;
+ end FunctionTests.TestFunction2;
 
- function FunctionTests.TestFunction2
+ function FunctionTests.TestFunction1
   input Real i1 := 0;
   output Real o1 := i1;
- end FunctionTests.TestFunction2;
+ algorithm
+ end FunctionTests.TestFunction1;
 end FunctionTests.FunctionFlatten3;
 ")})));
 
  Real x;
- Real y = TestFunction1(2, 3);
+ Real y = TestFunction2(2, 3);
 equation
- x = TestFunction2(y * 2);
+ x = TestFunction1(y * 2);
 end FunctionFlatten3;
+
+
+model FunctionBinding1
+ /* Should bind as TestFunction1(0) */
+ Real x = TestFunction1();
+end FunctionBinding1;
+
+model FunctionBinding2
+ /* Should bind as TestFunction1(1) */
+ Real x = TestFunction1(1);
+end FunctionBinding2;
+
+model FunctionBinding3
+ /* Should generate error (too many args) */
+ Real x = TestFunction1(1, 2);
+end FunctionBinding3;
+
+model FunctionBinding4
+ /* Should generate error (i1 has no value, i2 has no value) */
+ Real x = TestFunction3();
+end FunctionBinding4;
+
+model FunctionBinding5
+ /* Should generate error (i2 has no value) */
+ Real x = TestFunction3(1);
+end FunctionBinding5;
+
+model FunctionBinding6
+ /* Should bind as TestFunction3(1, 2, 0) */
+ Real x = TestFunction3(1, 2);
+end FunctionBinding6;
+
+model FunctionBinding7
+ /* Should bind as TestFunction0() */
+ Real x = TestFunction0();
+end FunctionBinding7;
+
+model FunctionBinding8
+ /* Should bind as TestFunction1(1) */
+ Real x = TestFunction1(i1=1);
+end FunctionBinding8;
+
+model FunctionBinding9
+ /* Should bind as TestFunction2(1, 2) */
+ Real x = TestFunction2(i2=2, i1=1);
+end FunctionBinding9;
+
+model FunctionBinding10
+ /* Should generate error (i2 has no value) */
+ Real x = TestFunction3(1, i3=2);
+end FunctionBinding10;
+
+model FunctionBinding11
+ /* Should generate error (no input "i3") */
+ Real x = TestFunction2(i3=1);
+end FunctionBinding11;
+
+model FunctionBinding12
+ /* Should generate error (no input "o1") */
+ Real x = TestFunction2(o1=1);
+end FunctionBinding12;
+
+model FunctionBinding13
+ /* Should generate error (i1 given value twice) */
+ Real x = TestFunction2(1, 2, i1=3);
+end FunctionBinding13;
+
+
+model FunctionType1
+ /* Should go through */
+ Real x = TestFunction1(1.0);
+end FunctionType1;
+
+model FunctionType2
+ /* Should go through? */
+ Integer x = TestFunction1(1.0);
+end FunctionType2;
+
+model FunctionType3
+ /* Should go through */
+ Real a = 1.0;
+ Real x = TestFunction1(a);
+end FunctionType3;
+
+model FunctionType4
+ /* Should go through */
+ Integer a = 1;
+ Real x = TestFunction1(a);
+end FunctionType3;
+
+model FunctionType5
+ /* Should generate error (type mismatch: i2) */
+ Real x = TestFunction2(1, true);
+end FunctionType5;
+
+model FunctionType6
+ /* Should generate error (type mismatch: i2) */
+ Boolean a;
+ Real x = TestFunction2(1, a);
+end FunctionType6;
+
+model FunctionType7
+ /* Should go through */
+ Integer a = 1;
+ Real x = TestFunction2(TestFunction2(), TestFunction2(1));
+end FunctionType7;
+
+model FunctionType8
+ /* Should generate error (type mismatch: TestFunction1.i1) */
+ Integer a = 1;
+ Real x = TestFunction2(TestFunction1(True), TestFunction2(1));
+end FunctionType8;
+
 
 model AlgorithmFlatten1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
