@@ -52,6 +52,9 @@ aspect OptimicaFlattening {
 		getInstComponentDeclList().flatten(fc);
 		getInstExtendsList().flatten(fc);
 		
+		getInstComponentDeclList().flattenCalledFunctions(fc);
+		getFAbstractEquationList().flattenCalledFunctions(fc);
+		
 		if (this instanceof InstOptClassDecl) {
 			FOptClass foc = (FOptClass)fc;
 			InstOptClassDecl iocd = (InstOptClassDecl)this;
