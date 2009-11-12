@@ -998,11 +998,11 @@ aspect FVariableUses {
 	/**
 	 * \brief Collection attribute returning all variable uses in expressions.
 	 */
-	coll HashSet<FIdUseExp> FVariable.uses() [new HashSet<FIdUseExp>()] 
-	   with add root FlatRoot;
+	coll HashSet<FIdUseExp> AbstractFVariable.uses() [new HashSet<FIdUseExp>()] 
+		with add root FlatRoot;
 	
 	FIdUseExp contributes this when !(getParent() instanceof FDerExp) to 
-	   FVariable.uses() for myFV();
+		AbstractFVariable.uses() for myFV();
 
 }
 

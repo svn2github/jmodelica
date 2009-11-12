@@ -39,9 +39,27 @@ aspect FlatNameBinding {
 			return variable;
 		}		
 	}
+
+	eq FFunctionDecl.getChild(int index).lookupFV(String name) {
+		AbstractFVariable variable = (AbstractFVariable) fullyQualifiedVariablesMap().get(name);
+		if (variable == null) 
+			return unknownFVariable();
+		else
+			return variable;
+	}
 	
 	inh AbstractFVariable FForClauseE.lookupFV(String name);
 	eq FForClauseE.getChild().lookupFV(String name) {
+		for (FForIndex fi : getFForIndexs()) {
+			if (fi.getFVariable().name().equals(name)) {
+				return fi.getFVariable();
+			}
+		}
+		lookupFV(name);
+	}
+	
+	inh AbstractFVariable FForStmt.lookupFV(String name);
+	eq FForStmt.getChild().lookupFV(String name) {
 		for (FForIndex fi : getFForIndexs()) {
 			if (fi.getFVariable().name().equals(name)) {
 				return fi.getFVariable();
@@ -69,12 +87,17 @@ aspect FlatNameBinding {
 	syn lazy HashMap FClass.fullyQualifiedVariablesMap() {
 		//System.out.println("FClass.fullyQualifiedVariablesMap()");
 		HashMap map = new HashMap();
-		for(int k = 0; k < getNumFVariable(); k++) {
-			map.put(getFVariable(k).name(),getFVariable(k));
-		}
-		for(int k = 0; k < getNumAliasVariable(); k++) {
-			map.put(getAliasVariable(k).name(),getAliasVariable(k));
-		}
+		for (FVariable v : getFVariables()) 
+			map.put(v.name(), v);
+		for (FVariable v : getAliasVariables()) 
+			map.put(v.name(), v);
+		return map;
+	}
+	
+	syn lazy HashMap FFunctionDecl.fullyQualifiedVariablesMap() {
+		HashMap map = new HashMap();
+		for (FFunctionVariable v : getFFunctionVariables()) 
+			map.put(v.name(), v);
 		return map;
 	}
 	
