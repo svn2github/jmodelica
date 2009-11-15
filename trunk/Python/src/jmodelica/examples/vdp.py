@@ -56,33 +56,34 @@ def run_demo(with_plots=True):
     n_points = nlp.opt_sim_get_result_variable_vector_length()
     n_points = n_points.value
 
-    # Create result data vectors
-    p_opt = N.zeros(0)
-    t_ = N.zeros(n_points)
-    dx_ = N.zeros(3*n_points)
-    x_ = N.zeros(3*n_points)
-    u_ = N.zeros(n_points)
-    w_ = N.zeros(0)
+    # Write to file. The resulting file can also be
+    # loaded into Dymola.
+    nlp.export_result_dymola()
     
-    # Get the result
-    nlp.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
+    # Load the file we just wrote to file
+    res = jmodelica.io.ResultDymolaTextual('VDP_pack_VDP_Opt_result.txt')
+
+    # Extract variable profiles
+    x1=res.get_variable_data('x1')
+    x2=res.get_variable_data('x2')
+    u=res.get_variable_data('u')
 
     if with_plots:
         # Plot
         plt.figure(1)
         plt.clf()
         plt.subplot(311)
-        plt.plot(t_,x_[0:n_points])
+        plt.plot(x1.t,x1.x)
         plt.grid()
         plt.ylabel('x1')
         
         plt.subplot(312)
-        plt.plot(t_,x_[n_points:n_points*2])
+        plt.plot(x2.t,x2.x)
         plt.grid()
         plt.ylabel('x2')
         
         plt.subplot(313)
-        plt.plot(t_,u_[0:n_points])
+        plt.plot(u.t,u.x)
         plt.grid()
         plt.ylabel('u')
         plt.xlabel('time')
