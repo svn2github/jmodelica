@@ -56,6 +56,9 @@ def run_demo(with_plots=True):
     resistor_v = res.get_variable_data('resistor.v')
     inductor1_i = res.get_variable_data('inductor1.i')
 
+    assert N.abs(resistor_v.x[-1] - 0.159255008028) < 1e-3, \
+           "Wrong value in simulation result in RLC.py"
+    
     #Ts, ys = simulator.get_solution('sine.y','resistor.v','inductor1.i')
     fig = p.figure()
     p.plot(sine_y.t, sine_y.x, resistor_v.t, resistor_v.x, inductor1_i.t, inductor1_i.x)

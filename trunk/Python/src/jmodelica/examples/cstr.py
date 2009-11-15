@@ -150,6 +150,11 @@ def run_demo(with_plots=True):
     T_ref=res.get_variable_data('T_ref')
     Tc_ref=res.get_variable_data('Tc_ref')
 
+    cost=res.get_variable_data('cost')
+    
+    assert N.abs(cost.x[-1]/1.e7 - 1.8585429) < 1e-3, \
+            "Wrong value of cost function in cstr.py"  
+
     # Plot the results
     if with_plots:
         plt.figure(1)
