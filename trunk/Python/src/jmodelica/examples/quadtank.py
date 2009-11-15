@@ -113,43 +113,47 @@ def run_demo(with_plots=True):
     # Solve the optimization problem
     nlp_ipopt.opt_sim_ipopt_solve()
     
-    # Retreive the number of points in each column in the
-    # result matrix
-    n_points = nlp.opt_sim_get_result_variable_vector_length()
-    n_points = n_points.value
+    # Write to file. The resulting file can also be
+    # loaded into Dymola.
+    nlp.export_result_dymola()
     
-    # Create result data vectors
-    p_opt = N.zeros(0)
-    t_ = N.zeros(n_points)
-    dx_ = N.zeros(5*n_points)
-    x_ = N.zeros(5*n_points)
-    u_ = N.zeros(2*n_points)
-    w_ = N.zeros(0)
+    # Load the file we just wrote to file
+    res = jmodelica.io.ResultDymolaTextual('QuadTank_pack_QuadTank_Opt_result.txt')
+
+    # Extract variable profiles
+    x1=res.get_variable_data('x1')
+    x2=res.get_variable_data('x2')
+    x3=res.get_variable_data('x3')
+    x4=res.get_variable_data('x4')
+    u1=res.get_variable_data('u1')
+    u2=res.get_variable_data('u2')
+
+#    cost=res.get_variable_data('cost')
     
-    # Get the result
-    nlp.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
+#    assert N.abs(cost.x[-1] - 5.0333257e+02) < 1e-3, \
+#            "Wrong value of cost function in vdp.py"  
 
     if with_plots:
         # Plot
         plt.figure(2)
         plt.clf()
         plt.subplot(411)
-        plt.plot(t_,x_[0:n_points])
+        plt.plot(x1.t,x1.x)
         plt.grid()
         plt.ylabel('x1')
         
         plt.subplot(412)
-        plt.plot(t_,x_[n_points:n_points*2])
+        plt.plot(x2.t,x2.x)
         plt.grid()
         plt.ylabel('x2')
         
         plt.subplot(413)
-        plt.plot(t_,x_[n_points*2:n_points*3])
+        plt.plot(x3.t,x3.x)
         plt.grid()
         plt.ylabel('x3')
         
         plt.subplot(414)
-        plt.plot(t_,x_[n_points*3:n_points*4])
+        plt.plot(x4.t,x4.x)
         plt.grid()
         plt.ylabel('x4')
         plt.show()
@@ -157,15 +161,14 @@ def run_demo(with_plots=True):
         plt.figure(3)
         plt.clf()
         plt.subplot(211)
-        plt.plot(t_,u_[0:n_points])
+        plt.plot(u1.t,u1.x)
         plt.grid()
         plt.ylabel('u1')
         
         plt.subplot(212)
-        plt.plot(t_,u_[n_points:n_points*2])
+        plt.plot(u2.t,u2.x)
         plt.grid()
         plt.ylabel('u2')
         
-    
     if __name__ == "__main__":
         run_demo()

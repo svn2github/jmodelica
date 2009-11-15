@@ -47,33 +47,31 @@ def run_demo(with_plots=True):
     # Solve the optimization problem
     nlp_ipopt.opt_sim_ipopt_solve()
 
-    # Retreive the number of points in each column in the
-    # result matrix
-    n_points = nlp.opt_sim_get_result_variable_vector_length()
-    n_points = n_points.value
-
-    # Create result data vectors
-    p_opt = N.zeros(0)
-    t_ = N.zeros(n_points)
-    dx_ = N.zeros(5*n_points)
-    x_ = N.zeros(5*n_points)
-    u_ = N.zeros(n_points)
-    w_ = N.zeros(0)
+    # Write to file. The resulting file can also be
+    # loaded into Dymola.
+    nlp.export_result_dymola()
     
-    # Get the result
-    nlp.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
+    # Load the file we just wrote to file
+    res = jmodelica.io.ResultDymolaTextual('Pendulum_pack_Pendulum_Opt_result.txt')
+
+    # Extract variable profiles
+    theta=res.get_variable_data('pend.theta')
+    dtheta=res.get_variable_data('pend.dtheta')
+    x=res.get_variable_data('pend.x')
+    dx=res.get_variable_data('pend.dx')
+    u=res.get_variable_data('u')
 
     if with_plots:
         # Plot
         plt.figure(1)
         plt.clf()
         plt.subplot(211)
-        plt.plot(t_,x_[n_points:2*n_points])
+        plt.plot(theta.t,theta.x)
         plt.grid()
         plt.ylabel('th')
         
         plt.subplot(212)
-        plt.plot(t_,x_[n_points*2:n_points*3])
+        plt.plot(theta.t,theta.x)
         plt.grid()
         plt.ylabel('dth')
         plt.xlabel('time')
@@ -82,18 +80,18 @@ def run_demo(with_plots=True):
         plt.figure(2)
         plt.clf()
         plt.subplot(311)
-        plt.plot(t_,x_[n_points*3:n_points*4])
+        plt.plot(x.t,x.x)
         plt.grid()
         plt.ylabel('x')
         
         plt.subplot(312)
-        plt.plot(t_,x_[n_points*4:n_points*5])
+        plt.plot(dx.t,dx.x)
         plt.grid()
         plt.ylabel('dx')
         plt.xlabel('time')
         
         plt.subplot(313)
-        plt.plot(t_,u_)
+        plt.plot(u.t,u.x)
         plt.grid()
         plt.ylabel('u')
         plt.xlabel('time')
