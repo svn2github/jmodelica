@@ -59,7 +59,11 @@ def run_demo(with_plots=True):
     x1=res.get_variable_data('x1')
     x2=res.get_variable_data('x2')
     u=res.get_variable_data('u')
+    tf=res.get_variable_data('tf')
 
+    assert N.abs(tf.x[-1] - 2.2811587) < 1e-3, \
+            "Wrong value of cost function in cstr_minimum_time.py"
+    
     if with_plots:
         # Plot
         plt.figure(1)
