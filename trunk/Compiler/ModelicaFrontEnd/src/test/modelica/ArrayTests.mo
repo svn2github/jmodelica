@@ -485,14 +485,80 @@ end ArrayTest25;
 
 
 model ArrayTest26
-/*
+
         annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest26",
         description="Flattening of arrays.",
                                                flatModel=
-"
+"fclass ArrayTests.ArrayTest26
+ Real x[1,1];
+ Real x[2,1];
+ Real x[3,1];
+ Real x[4,1];
+ Real x[1,2];
+ Real x[2,2];
+ Real x[3,2];
+ Real x[4,2];
+ Real x[1,3];
+ Real x[2,3];
+ Real x[3,3];
+ Real x[4,3];
+ Real x[1,4];
+ Real x[2,4];
+ Real x[3,4];
+ Real x[4,4];
+ Real y[1,1];
+ Real y[2,1];
+ Real y[3,1];
+ Real y[4,1];
+ Real y[1,2];
+ Real y[2,2];
+ Real y[3,2];
+ Real y[4,2];
+ Real y[1,3];
+ Real y[2,3];
+ Real y[3,3];
+ Real y[4,3];
+ Real y[1,4];
+ Real y[2,4];
+ Real y[3,4];
+ Real y[4,4];
+equation
+ x[2,2] = 2;
+ y[2,2] = x[2,2] + 2;
+ x[2,4] = 2;
+ y[2,4] = x[2,4] + 4;
+ x[4,2] = 4;
+ y[4,2] = x[4,2] + 2;
+ x[4,4] = 4;
+ y[4,4] = x[4,4] + 4;
+ x[1,1] = 1 + 2;
+ y[1,1] = x[1,1] + 1 + 2;
+ x[1,3] = 1 + 2;
+ y[1,3] = x[1,3] + 3 + 2;
+ x[3,1] = 3 + 2;
+ y[3,1] = x[3,1] + 1 + 2;
+ x[3,3] = 3 + 2;
+ y[3,3] = x[3,3] + 3 + 2;
+ x[3,1] = 3 + 2;
+ y[3,1] = x[3,1] + 1 + 2;
+ x[3,3] = 3 + 2;
+ y[3,3] = x[3,3] + 3 + 2;
+ x[1,1] = 1 + 2;
+ y[1,1] = x[1,1] + 1 + 2;
+ x[1,3] = 1 + 2;
+ y[1,3] = x[1,3] + 3 + 2;
+ x[2,3] = 2 + 2;
+ y[2,3] = x[2,3] + 3 + 2;
+ x[2,1] = 2 + 2;
+ y[2,1] = x[2,1] + 1 + 2;
+ x[4,3] = 4 + 2;
+ y[4,3] = x[4,3] + 3 + 2;
+ x[4,1] = 4 + 2;
+ y[4,1] = x[4,1] + 1 + 2;
+end ArrayTests.ArrayTest26;
 ")})));
-  */
+  
   Real x[4,4];
   Real y[4,4];
 equation
@@ -504,6 +570,18 @@ equation
   end for;
   for i in 1:2:4 loop
    for j in 1:2:4 loop
+    x[i,j] = i+2;
+    y[i,j] = x[i,j]+j+2;
+   end for;
+  end for;
+  for i in 3:-2:1 loop
+   for j in 1:2:4 loop
+    x[i,j] = i+2;
+    y[i,j] = x[i,j]+j+2;
+   end for;
+  end for;
+  for i in 2:2:4 loop
+   for j in 3:-2:1 loop
     x[i,j] = i+2;
     y[i,j] = x[i,j]+j+2;
    end for;

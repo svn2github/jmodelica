@@ -533,9 +533,6 @@ aspect Scalarization {
 
     public FExp FIdUseExp.scalarize(HashMap<String,Integer> indexMap) {
     	//System.out.println("FIdUseExp.scalarize: " + name());
-    	for (String ind : indexMap.keySet()) {
-    		System.out.println(" " + ind);
-    	}
     	if (indexMap.get(name())!=null) {
     		return new FIntegerLitExp(""+indexMap.get(getFIdUse().name()).intValue());
     	}

@@ -349,21 +349,27 @@ aspect Arrays {
 			double i2 = getFExp(1).ceval().realValue();
 			double i3 = getFExp(2).ceval().realValue();
 			
+			//System.out.println("FRangeExp.size(): i1="+i1+" i2="+i2+" i3="+i3);
+			
 			if (i3>=i1 && i2>0) { // e.g. 1:2:3
 				double i = i1;
+				int size_tmp = 0;
 				while (i<=i3) {
 					i += i2;
+					size_tmp++;
 				}
-				si[0] = (int)i;
+				si[0] = size_tmp;
 			} else if (i3<i1 && i2>0) { //e.g. 3:2:1
 				si[0] = 0;
 			} else if (i3<i1 && i2<0) { // e.g. 3:-2:1
 				double i = i1;
-				while (i<=i3) {
+				int size_tmp = 0;
+				while (i>=i3) {
 					i += i2;
+					size_tmp++;
 				}
-				si[0] = (int)i;
-			} else if (i3>=i1 && i2<0) { // e.g. 1:-2:0
+				si[0] = size_tmp;
+			} else if (i3>=i1 && i2<0) { // e.g. 1:-2:3
 				si[0] = 0;
 			} else if (i2==0) {
 				si[0] = 0;
@@ -572,6 +578,7 @@ aspect Arrays {
 	
 	eq FExpSubscript.array() = getFExp().array();
 	eq FRangeExp.array() {
+		System.out.println("FRangeExp.array(): size = " + size()[0]);	
 		double i1 = getFExp(0).ceval().realValue();
 		double i2;
 		if (getNumFExp()==2) {
