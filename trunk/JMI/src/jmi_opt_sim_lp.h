@@ -56,7 +56,7 @@
  *
  * and where the initial and final times can be free or fixed respectively. For
  * details, see the <a href="group__Jmi.html"> JMI Model interface </a> for
- * details. Notice that the DAE initialization function \f$F_0\f$ is not
+ * details. Notice that the DAE initialization function \f$F_1\f$ is not
  * included in the optimization formulation considered here.
  *
  * The simultaneous transcription method implemented in this interfaces is based
