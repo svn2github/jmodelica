@@ -60,6 +60,10 @@ def run_demo(with_plots=True):
     x=res.get_variable_data('pend.x')
     dx=res.get_variable_data('pend.dx')
     u=res.get_variable_data('u')
+    
+    cost=res.get_variable_data('cost')
+    assert N.abs(cost.x[-1] - 1.2921683e-01) < 1e-3, \
+           "Wrong value of cost function in pendulum.py"  
 
     if with_plots:
         # Plot

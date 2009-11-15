@@ -128,10 +128,10 @@ def run_demo(with_plots=True):
     u1=res.get_variable_data('u1')
     u2=res.get_variable_data('u2')
 
-#    cost=res.get_variable_data('cost')
-    
-#    assert N.abs(cost.x[-1] - 5.0333257e+02) < 1e-3, \
-#            "Wrong value of cost function in vdp.py"  
+    cost=res.get_variable_data('cost')
+
+    assert N.abs(cost.x[-1] - 5.0333257e+02) < 1e-3, \
+           "Wrong value of cost function in quadtank.py"  
 
     if with_plots:
         # Plot
