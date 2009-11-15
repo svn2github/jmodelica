@@ -86,11 +86,13 @@ endif
 	mkdir -p $(prefix)/XML
 	[ $(abs_top_srcdir) == $(prefix) ] && echo "Installing in dist directory, don't copy XML schemas"  || cp  $(abs_top_srcdir)/XML/*.xsd $(prefix)/XML
 	[ $(abs_top_srcdir) == $(prefix) ] && echo "Installing in dist directory, don't copy XML LICENSE"  || cp  $(abs_top_srcdir)/XML/LICENSE $(prefix)/XML
+	cp  $(abs_top_srcdir)/version.txt $(prefix)
 
 bindistdir: install
 	rm -rf $(bindistdir)
 	mkdir -p $(bindistdir)
 	cp $(prefix)/LICENSE $(bindistdir)
+	cp $(prefix)/version.txt $(bindistdir)
 	cp -r $(prefix)/CodeGenTemplates $(bindistdir)
 	cp -r $(prefix)/MakeFiles $(bindistdir)
 	cp -r $(prefix)/Options $(bindistdir)
