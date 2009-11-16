@@ -20,10 +20,10 @@ aspect OptimicaExpressions {
 		when (//((getName() instanceof InstDot)? 
 				//	((InstDot)getName()).getLeft()!=null: true) && 
 				getName().getLastInstAccess() instanceof InstComponentAccess &&
-				getNumArgs()==1)
+				getNumArg()==1)
 		 to InstTimedVariable {
 //			System.out.println("rewrite InstFunctionCall: " + getName().name());
-		 	InstTimedVariable iv = new InstTimedVariable(getName(),getArgs(0));
+		 	InstTimedVariable iv = new InstTimedVariable(getName(), getArg(0).getFExp());
 		 	iv.setLocation(this);
 		 	return iv;
 		 }

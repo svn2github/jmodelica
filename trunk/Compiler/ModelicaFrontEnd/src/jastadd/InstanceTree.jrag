@@ -861,7 +861,10 @@ aspect InstanceTreeConstruction {
 		return getOriginalClassDecl().newInstClassDecl();
 	}
 
-
+	/**
+	 * \brief Returns the FExp associated with this argument, if any.
+	 */
+	public FExp InstFunctionArgument.getFExp() { return null; }
 
 }
 

@@ -1247,14 +1247,14 @@ aspect FlattPrettyPrint {
 		debugPrint("FFunctionCall.prettyPrint:");
 		str.print(getName().name());
 		str.print("(");
-		getArgsList().prettyPrintWithSep(p, str, "", 0, ", ");
+		getArgs().prettyPrintWithSep(p, str, "", 0, ", ");
 		str.print(")");
 	}
 
 	public void InstFunctionCall.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print(getName().name());
 		str.print("(");
-		getArgsList().prettyPrintWithSep(p, str, "", 0, ", ");
+		getArgs().prettyPrintWithSep(p, str, "", 0, ", ");
 		str.print(")");
 	}
 

@@ -700,12 +700,47 @@ abstract FAbstractFunctionCall : FExp;
 /**
  * \brief Generic function call expression.
  */
-FFunctionCall : FAbstractFunctionCall ::= Name:FIdUse Args:FExp*;
+FFunctionCall : FAbstractFunctionCall ::= Name:FIdUse Arg:FExp*;
 
 /**
  * \brief Generic function call expression in instance trees.
  */
-InstFunctionCall : FAbstractFunctionCall ::= Name:InstAccess Args:FExp*;
+InstFunctionCall : FAbstractFunctionCall ::= Name:InstAccess Arg:InstFunctionArgument*;
+
+/**
+ * \brief Base class for function call arguments in the instance tree.
+ */
+abstract InstFunctionArgument;
+
+/**
+ * \brief Positional function call argument in the instance tree.
+ */
+InstPositionalArgument : InstFunctionArgument ::= <Pos:int> FExp;
+
+/**
+ * \brief Named function call argument in the instance tree.
+ */
+InstNamedArgument : InstFunctionArgument ::= Name:InstAccess FExp;
+
+/**
+ * \brief Missing function call argument in the instance tree.
+ *  
+ * This node indicates a semantic error.
+ */
+InstMissingArgument : InstFunctionArgument;
+
+/**
+ * \brief Function call argument in the instance tree for when several 
+ * arguments are bound to the same input parameter.
+ *  
+ * This node indicates a semantic error.
+ */
+InstMultipleBoundArgument : InstFunctionArgument ::= Arg:InstFunctionArgument*;
+
+/**
+ * \brief Function call argument using default value in the instance tree.
+ */
+InstDefaultArgument : InstFunctionArgument ::= [FExp:FExp];
 
 // Built in functions
 /**
@@ -809,12 +844,17 @@ FTranspose : FBuiltInFunctionCall ::= FExp;
 FIdentity : FBuiltInFunctionCall ::= FExp;
 
 /**
+ * \brief Base class for function call-like operators with no maximum number of arguments.
+ */
+abstract FInfArgsFunctionCall : FBuiltInFunctionCall ::= FExp*;
+
+/**
  * \brief Ones built-in function.
  */
-FOnes : FBuiltInFunctionCall ::= FExp*;
+FOnes : FInfArgsFunctionCall;
 
 /**
  * \brief Zeros built-in function.
  */
-FZeros : FBuiltInFunctionCall ::= FExp*;
+FZeros : FInfArgsFunctionCall;
 

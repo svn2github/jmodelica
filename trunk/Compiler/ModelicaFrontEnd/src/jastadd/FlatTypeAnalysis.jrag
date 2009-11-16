@@ -384,9 +384,53 @@ aspect FTypeCompatibility {
  		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1); 		
  	}
 
- 	
  }
 
+ aspect FunctionArgumentBinding {
+	 
+	 /**
+	  * \brief Returns a list of all InstComponentDecls declared as "input".
+	  */
+	 syn lazy ArrayList<InstComponentDecl> InstClassDecl.myInputs() {
+		 ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
+		 for (InstComponentDecl icd : getInstComponentDecls())
+			 if (icd.isInput())
+				 l.add(icd);
+		 return l;
+	 }
+	 
+	 /**
+	  * \brief Returns a list of all InstComponentDecls declared as "output".
+	  */
+	 syn lazy ArrayList<InstComponentDecl> InstClassDecl.myOutputs() {
+		 ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
+		 for (InstComponentDecl icd : getInstComponentDecls())
+			 if (icd.isOutput())
+				 l.add(icd);
+		 return l;
+	 }
+	 
+	 syn ArrayList<InstComponentDecl> InstFunctionCall.myInputs()  = getName().myInstClassDecl().myInputs();
+	 syn ArrayList<InstComponentDecl> InstFunctionCall.myOutputs() = getName().myInstClassDecl().myOutputs();
+
+ }
+ 
+aspect InstClassRestriction {
+	
+	/**
+	 * \brief Is this class a function?
+	 */
+	syn boolean InstClassDecl.isFunction() = false;
+	eq InstBaseClassDecl.isFunction() = getInstRestriction().isFunction();
+	eq UnknownInstClassDecl.isFunction() = false;
+	
+	/**
+	 * \brief Is this restriction "function"?
+	 */
+	syn boolean InstRestriction.isFunction() = false;
+	eq InstFunction.isFunction() = true;
+	
+}
  
 /*
 aspect ExpressionType {

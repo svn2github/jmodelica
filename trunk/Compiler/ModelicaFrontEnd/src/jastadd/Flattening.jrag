@@ -77,7 +77,7 @@ aspect Flattening {
 		InstClassDecl icd = getName().myInstClassDecl();
 		if (icd instanceof InstFullClassDecl)
 			((InstFullClassDecl) icd).flattenFunction(fc);
-		getArgsList().flattenCalledFunctions(fc);
+		getArgs().flattenCalledFunctions(fc);
 	}
 	
 	// Flatten function if not already done
@@ -597,7 +597,7 @@ aspect FlatExpressions {
 		
 	public FFunctionCall FFunctionCall.flatten(FQName prefix) {
 		List args = new List();
-		for (FExp e : getArgsList()) {
+		for (FExp e : getArgs()) {
 			args.add(e.flatten(prefix));
 		}
 		return new FFunctionCall(getName().flatten(new FQName()), args);		
@@ -605,13 +605,17 @@ aspect FlatExpressions {
 
 	public FFunctionCall InstFunctionCall.flatten(FQName prefix) {
 		List args = new List();
-		for (FExp e : getArgsList()) {
+		for (InstFunctionArgument e : getArgs()) {
 			args.add(e.flatten(prefix));
 		}
 		FIdUse name = new FIdUse(new FQName(getName().myInstClassDecl().qualifiedName()));
 		return new FFunctionCall(name, args);		
 	}
 
+	public FExp InstFunctionArgument.flatten(FQName prefix) {
+		return getFExp().flatten(prefix);
+	}
+	
 	/*
 	public FExp FSumRedExp.flatten(FQName prefix) {
 		return new FSumRedExp(getFExp().flatten(prefix),
@@ -1078,109 +1082,273 @@ aspect InstantiatedExpressions {
 		FExp n = new FEndExp(); 
 		n.setLocation(this);
 		return n;
-	}	
+	}
+	
+	public InstNamedArgument NamedArgument.instantiate() {
+		InstNamedArgument iarg = new InstNamedArgument(getName().instantiate(), getExp().instantiate());
+		iarg.setLocation(this);
+		return iarg;
+	}
 	
 	public FAbstractFunctionCall FunctionCall.instantiate() {
-		List<FExp> l = new List<FExp>();
-		List<Exp> args = new List<Exp>();
-		if (hasFunctionArguments())
-			args = getFunctionArguments().getExpList();
-		for (Exp arg : args) {
-			FExp exp = arg.instantiate();
-			l.add(exp);
-			exp.setLocation(this);
+		// Instantiate arguments
+		List<InstFunctionArgument> args = new List<InstFunctionArgument>();
+		if (hasFunctionArguments()) {
+			int i = 0;
+			for (Exp arg : getFunctionArguments().getExpList()) {
+				InstPositionalArgument iarg = new InstPositionalArgument(i++, arg.instantiate());
+				iarg.setLocation(arg);
+				args.add(iarg);
+			}
+			for (NamedArgument arg : getFunctionArguments().getNamedArguments())
+				args.add(arg.instantiate());
 		}
 		
-		FAbstractFunctionCall n = null;
-		if (getName().name().equals("sin")) {
-			n = new FSinExp((FExp)l.getChildNoTransform(0)); 
-		} else if (getName().name().equals("cos")) {
-			n = new FCosExp((FExp)l.getChildNoTransform(0)); 
-		} else if (getName().name().equals("tan")) {
-			n = new FTanExp((FExp)l.getChildNoTransform(0)); 
-		} else if (getName().name().equals("asin")) {
-			n = new FAsinExp((FExp)l.getChildNoTransform(0)); 
-		} else if (getName().name().equals("acos")) {
-			n = new FAcosExp((FExp)l.getChildNoTransform(0)); 
-		} else if (getName().name().equals("atan")) {
-			n = new FAtanExp((FExp)l.getChildNoTransform(0)); 
-		} else if (getName().name().equals("atan2")) {
-			n = new FAtan2Exp((FExp)l.getChildNoTransform(0),(FExp)l.getChildNoTransform(1)); 
-		} else if (getName().name().equals("sinh")) {
-			n = new FSinhExp((FExp)l.getChildNoTransform(0)); 
-		} else if (getName().name().equals("cosh")) {
-			n = new FCoshExp((FExp)l.getChildNoTransform(0)); 
-		} else if (getName().name().equals("tanh")) {
-			n = new FTanhExp((FExp)l.getChildNoTransform(0)); 
-		} else if (getName().name().equals("exp")) {
-			n = new FExpExp((FExp)l.getChildNoTransform(0)); 
-		} else if (getName().name().equals("log")) {
-			n = new FLogExp((FExp)l.getChildNoTransform(0)); 
-		} else if (getName().name().equals("log10")) {
-			n = new FLog10Exp((FExp)l.getChildNoTransform(0)); 
-		} else if (getName().name().equals("sqrt")) {
-			n = new FSqrtExp((FExp)l.getChildNoTransform(0)); 
-		} else if (getName().name().equals("identity")) {
-			n = new FIdentity(l.getChildNoTransform(0));
-		} else if (getName().name().equals("ones")) {
-			n = new FOnes(l);
-		} else if (getName().name().equals("zeros")) {
-			n = new FZeros(l);
-		} else {
-			n = new InstFunctionCall(getName().newInstAccess(),l);	
-		}
+		// Create InstFunctionCall
+		FAbstractFunctionCall n = new InstFunctionCall(getName().newInstAccess(), args);	
 		n.setLocation(this);
-		
 		return n;
 	}
 	
+	/**
+	 * \brief Finds which, if any, of the inputs for its function a single argument should 
+	 * bind to, and adds it to an array in the corresponding place.
+	 * 
+	 * If the place in the array is taken, an InstMultipleBoundArgument containing both arguments 
+	 * is placed there.
+	 * 
+	 * @param arr     the array to place the argument in
+	 * @param inputs  the list of inputs for the function
+	 * @return        <code>true</code> it the position for the argument could be found, 
+	 *                <code>false</code> otherwise.
+	 */
+	public boolean InstFunctionArgument.bindArgument(InstFunctionArgument[] arr, 
+			                                         ArrayList<InstComponentDecl> inputs) {
+		int pos = findArgumentPosition(inputs);
+		if (pos < 0 || pos >= arr.length)
+			return false;
+		
+		if (arr[pos] == null)
+			arr[pos] = (InstFunctionArgument) fullCopy();
+		else
+			arr[pos] = arr[pos].addMultipleBoundArgument(this);
+		return true;
+	}
+	
+	/**
+	 * \brief Return an InstMultipleBoundArgument containing both <code>this</code> and <code>arg</code>.
+	 * 
+	 * If <code>this</code> is an InstMultipleBoundArgument, <code>arg</code> is simply added to it.
+	 */
+	protected InstMultipleBoundArgument InstFunctionArgument.addMultipleBoundArgument(InstFunctionArgument arg) {
+		return new InstMultipleBoundArgument(new List().add(this).add(arg));
+	}
+	
+	protected InstMultipleBoundArgument InstMultipleBoundArgument.addMultipleBoundArgument(InstFunctionArgument arg) {
+		addArg(arg);
+		return this;
+	}
+	
+	/**
+	 * \brief Return the position of the input the argument corresponds to.
+	 */
+	protected int InstFunctionArgument.findArgumentPosition(ArrayList<InstComponentDecl> inputs) {
+		return -1;
+	}
+	
+	protected int InstPositionalArgument.findArgumentPosition(ArrayList<InstComponentDecl> inputs) {
+		return getPos();
+	}
+	
+	protected int InstNamedArgument.findArgumentPosition(ArrayList<InstComponentDecl> inputs) {
+		int i = 0;
+		for (InstComponentDecl in : inputs) {
+			if (getName().name().equals(in.name()))
+				return i;
+			i++;
+		}
+		return -1;
+	}
+	
+	/**
+	 * \brief Argument nodes representing arguments that are missing or given multiple times do 
+	 * not get a location set when they are created. Set the location for those nodes, do nothing 
+	 * for other nodes.
+	 */
+	public void InstFunctionArgument.setErrorArgLocation(ASTNode node) {}
+	public void InstMissingArgument.setErrorArgLocation(ASTNode node) { setLocation(node); }
+	public void InstMultipleBoundArgument.setErrorArgLocation(ASTNode node) { setLocation(node); }
+	
+	/**
+	 * \brief Returns <code>false</code> if this argument node represents an error, 
+	 * e.g. a missing argument.
+	 */
+	syn boolean InstFunctionArgument.isOKArg() = true;
+	eq InstMissingArgument.isOKArg() = false;
+	eq InstMultipleBoundArgument.isOKArg() = false;
+	
+	/*
+	 * List of arguments that could not be bound to inputs.
+	 */
+	private ArrayList<InstFunctionArgument> InstFunctionCall.unbindableArgs = 
+		new ArrayList<InstFunctionArgument>();
+
+	/**
+	 * \brief Add an argument to the list of the arguments from the original InstFunctionCall.
+	 * 
+	 * Used for error checking FBuiltInFunctionCalls in the instance tree. 
+	 * Empty in the flattened tree.
+	 */
+	public void FBuiltInFunctionCall.addOriginalArg(InstFunctionArgument arg) {
+		originalArgs.add(arg);
+	}
+	private ArrayList<InstFunctionArgument> FBuiltInFunctionCall.originalArgs = 
+		new ArrayList<InstFunctionArgument>();
+	
+	/**
+	 * \brief Set the input the missing argument should have referred to.
+	 */
+	public void InstMissingArgument.setMissingInput(InstComponentDecl input) {
+		missingInput = input;
+	}
+	private InstComponentDecl InstMissingArgument.missingInput = null;
+	
+	/**
+	 * \brief Called for inputs that no argument was bound to. Creates an InstDefaultArgument 
+	 * if the input has a default value and an InstMissingArgument otherwise.
+	 */
+	public InstFunctionArgument InstComponentDecl.createInstDefaultArgument() {
+		if (getInstModification() instanceof InstValueModification) {
+			InstValueModification mod = (InstValueModification) getInstModification();
+			FExp exp = (FExp) mod.getFExp().fullCopy();
+			return new InstDefaultArgument(new Opt(exp));
+		} else {
+			InstMissingArgument arg = new InstMissingArgument();
+			arg.setMissingInput(this);
+			return arg;
+		}
+	}
+	
+	// Helper function for rewrite InstFunctionCall -> FAbstractFunctionCall
+	private static boolean InstFunctionCall.matchesBuiltin(String foundName, String funcName) {
+		return foundName.equals(funcName) || foundName.equals("Modelica.Math." + funcName);
+	}
+
+	/*
+	 * Bind arguments to inputs and replace InstFunctionCall with specialized nodes 
+	 * for built-in functions.
+	 */
 	boolean InstFunctionCall.rewritten = false;
 	rewrite InstFunctionCall {
-    	when (!rewritten)
-    		to FAbstractFunctionCall {
-    		    // TODO: WHY is this needed??? If removed, lookup of qualified
-    		    // names in InstFunctionCalls are not not rewritten to
-    		    // InstComponentAccesses for some reason.
-    		    // The difference introduced by calling getName().name() is
-    		    // That the accesses are then accesse left to right in a 
-    		    // qualified name, instead of right to left.
-    		    getName().name();
-    		    
-    		    FAbstractFunctionCall n = null;
-    			String name = getName().myInstClassDecl().qualifiedName(); 
-    			if (name.equals("Modelica.Math.sin")) {
-    				n = new FSinExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.cos")) {
-    				n = new FCosExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.tan")) {
-    				n = new FTanExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.asin")) {
-    				n = new FAsinExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.acos")) {
-    				n = new FAcosExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.atan")) {
-    				n = new FAtanExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.atan2")) {
-    				n = new FAtan2Exp(getArgs(0),getArgs(1));  
-    			} else if (name.equals("Modelica.Math.sinh")) {
-    				n = new FSinhExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.cosh")) {
-    				n = new FCoshExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.tanh")) {
-    				n = new FTanhExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.exp")) {
-    				n = new FExpExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.log")) {
-    				n = new FLogExp(getArgs(0));
-    			} else if (name.equals("Modelica.Math.log10")) {
-    				n = new FLog10Exp(getArgs(0));
-    			} else {
-    				n = this;
-    				rewritten = true;
-    			}
-				n.setLocation(this);
-				
-				return n;	
+    	when (!rewritten) to FAbstractFunctionCall {
+		    /* TODO: WHY is this needed??? If removed, lookup of qualified
+		     * names in InstFunctionCalls are not not rewritten to
+		     * InstComponentAccesses for some reason.
+		     * The difference introduced by calling getName().name() is
+		     * That the accesses are then accessed left to right in a 
+		     * qualified name, instead of right to left.
+		     */
+			/* Note that removing this will no longer introduce an error, 
+			 * since it is used below as well. It is left anyway, as a 
+			 * reminder of the above problem. 
+			 */
+		    getName().name();
+		    
+		    // Make sure we only do this once.
+		    rewritten = true;
+		    
+		    // Special handling for function-like operators without maximum number of args.
+		    String unQName = getName().name();
+		    if (unQName.equals("ones") || unQName.equals("zeros")) {
+		    	FInfArgsFunctionCall iafc = null;
+		        if (unQName.equals("ones")) 
+		        	iafc = new FOnes(new List());
+		        else if (unQName.equals("zeros")) 
+		        	iafc = new FZeros(new List());
+		    	for (InstFunctionArgument arg : getArgs()) {
+		    		if (arg instanceof InstPositionalArgument)
+		    			iafc.addFExp((FExp) arg.getFExp().fullCopy());
+		    		iafc.addOriginalArg(arg);
+		    		iafc.setLocation(this);
+		    	}
+		    	return iafc;
+		    }
+		    
+		    /* If we can't resolve the name as a function, don't try to bind arguments, 
+		     * just leave it for the error check. */
+		    if (!getName().myInstClassDecl().isFunction())
+		    	return this;
+		    
+    		// Bind arguments
+    		ArrayList<InstComponentDecl> inputs = myInputs();
+    		InstFunctionArgument[] temp = new InstFunctionArgument[inputs.size()];
+    		for (InstFunctionArgument arg : getArgs()) 
+    			if (!arg.bindArgument(temp, inputs))
+    				unbindableArgs.add(arg);
+    		
+    		// Add default argument and check for problems.
+    		boolean argsOK = unbindableArgs.isEmpty();
+    		for (int i = 0; i < temp.length; i++) {
+    			if (temp[i] == null) 
+    				temp[i] = inputs.get(i).createInstDefaultArgument();
+    			temp[i].setErrorArgLocation(this);
+    			argsOK = argsOK && temp[i].isOKArg();
+    		}
+    		
+    		// Create replacement node.
+		    FAbstractFunctionCall n = null;
+		    if (argsOK) {
+		    	String name = getName().myInstClassDecl().qualifiedName();
+		    	FBuiltInFunctionCall bfc = null;
+				if (matchesBuiltin(name, "sin")) {
+					bfc = new FSinExp(temp[0].getFExp());
+				} else if (matchesBuiltin(name, "cos")) {
+					bfc = new FCosExp(temp[0].getFExp());
+				} else if (matchesBuiltin(name, "tan")) {
+					bfc = new FTanExp(temp[0].getFExp());
+				} else if (matchesBuiltin(name, "asin")) {
+					bfc = new FAsinExp(temp[0].getFExp());
+				} else if (matchesBuiltin(name, "acos")) {
+					bfc = new FAcosExp(temp[0].getFExp());
+				} else if (matchesBuiltin(name, "atan")) {
+					bfc = new FAtanExp(temp[0].getFExp());
+				} else if (matchesBuiltin(name, "atan2")) {
+					bfc = new FAtan2Exp(temp[0].getFExp(), temp[1].getFExp());  
+				} else if (matchesBuiltin(name, "sinh")) {
+					bfc = new FSinhExp(temp[0].getFExp());
+				} else if (matchesBuiltin(name, "cosh")) {
+					bfc = new FCoshExp(temp[0].getFExp());
+				} else if (matchesBuiltin(name, "tanh")) {
+					bfc = new FTanhExp(temp[0].getFExp());
+				} else if (matchesBuiltin(name, "exp")) {
+					bfc = new FExpExp(temp[0].getFExp());
+				} else if (matchesBuiltin(name, "log")) {
+					bfc = new FLogExp(temp[0].getFExp());
+				} else if (matchesBuiltin(name, "log10")) {
+					bfc = new FLog10Exp(temp[0].getFExp());
+				} else if (name.equals("identity")) {
+					bfc = new FIdentity(temp[0].getFExp());
+				} else if (name.equals("sqrt")) {
+					bfc = new FSqrtExp(temp[0].getFExp());
+                }
+				if (bfc != null) {
+					for (InstFunctionArgument arg : temp)
+						bfc.addOriginalArg(arg);
+					n = bfc;
+				}
+		    }
+		    if (n == null) {
+	    		List<InstFunctionArgument> args = new List<InstFunctionArgument>();
+				for (InstFunctionArgument arg : temp)
+					args.add(arg);
+		    	InstFunctionCall ifc = new InstFunctionCall(getName(), args);
+				ifc.unbindableArgs = unbindableArgs;
+				ifc.rewritten = true;
+				n = ifc;
+			}
+			n.setLocation(this);
+			
+			return n;	
     	}
   	}
   

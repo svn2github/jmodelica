@@ -1000,7 +1000,7 @@ aspect CircularExpressions {
 	eq FIdUseExp.isCircular() = myFV().isCircular();
 	eq FInstAccessExp.isCircular() = getInstAccess().myInstComponentDecl().isCircular();	
 	eq FFunctionCall.isCircular() {
-		for (FExp e : getArgss()) {
+		for (FExp e : getArgs()) {
 			if (e.isCircular()) {
 				return true;
 			}

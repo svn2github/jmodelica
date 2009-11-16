@@ -126,17 +126,15 @@ aspect FlatVariability {
 	
 	eq FFunctionCall.variability() {
 		FTypePrefixVariability total = fConstant();
-		for (int i=0; i< getNumArgs(); i++) {
-			total = total.combine(getArgs(i).variability());
-		}
+		for (FExp e : getArgs()) 
+			total = total.combine(e.variability());
 		return total;
 	}
 
 	eq InstFunctionCall.variability() {
 		FTypePrefixVariability total = fConstant();
-		for (int i=0; i< getNumArgs(); i++) {
-			total = total.combine(getArgs(i).variability());
-		}
+		for (InstFunctionArgument arg : getArgs()) 
+			total = total.combine(arg.getFExp().variability());
 		return total;
 	}
 	

@@ -78,7 +78,7 @@ fclass FunctionTests.FunctionFlatten2
  Real x;
  Real y = FunctionTests.TestFunction2(2, 3);
 equation
- x = FunctionTests.TestFunction2(1);
+ x = FunctionTests.TestFunction2(1, 0);
 
  function FunctionTests.TestFunction2
   input Real i1 := 0;
