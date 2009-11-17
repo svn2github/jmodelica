@@ -19,7 +19,7 @@
 __all__ = ['jmi', 'xmlparser', 'compiler','optimization',
            'examples', 'tests','io','initialization','simulation']
 
-__version__='trunk'
+__version__=''
 
 import os, os.path
 import warnings
@@ -31,6 +31,16 @@ try:
 except KeyError, IOError:
     raise EnvironmentError('The environment variable JMODELICA_HOME is not '
                            'set or points to a non-existing location.')
+    
+# set version
+try:
+    _fpath=os.path.join(os.environ['JMODELICA_HOME'],'version.txt')
+    f = open(_fpath)
+    __version__=f.readline()
+except IOError:
+    warnings.warn('Version file not found. Environment may be corrupt.')
+finally:
+    f.close()    
 
 try:
     _f = os.path.join(os.environ['JMODELICA_HOME'],'startup.py')
