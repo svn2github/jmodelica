@@ -301,7 +301,6 @@ class NLPCollocation(object):
         """
 
         n_points = self.opt_sim_get_result_variable_vector_length()
-        n_points = n_points.value
 
         sizes = self._model.get_sizes()
         n_dx = sizes[4]
@@ -723,7 +722,7 @@ class NLPCollocation(object):
         n = ct.c_int()
         if self._model.jmimodel._dll.jmi_opt_sim_get_result_variable_vector_length(self._jmi_opt_sim, byref(n)) is not 0:
             raise jmi.JMIException("Getting the length of the result variable vectors failed.")
-        return n
+        return n.value
         
     def opt_sim_get_result(self, p_opt, t, dx, x, u, w):
         """ 

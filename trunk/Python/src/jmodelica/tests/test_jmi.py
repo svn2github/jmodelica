@@ -76,7 +76,6 @@ def test_jmi_opt_sim_set_initial_from_trajectory():
     # Retreive the number of points in each column in the
     # result matrix
     n_points = nlp.opt_sim_get_result_variable_vector_length()
-    n_points = n_points.value
     
     # Create result data vectors
     p_opt = N.zeros(1)
@@ -146,7 +145,6 @@ def test_set_initial_from_dymola():
     # Retreive the number of points in each column in the
     # result matrix
     n_points = nlp.opt_sim_get_result_variable_vector_length()
-    n_points = n_points.value
 
     # Create result data vectors
     p_opt = N.zeros(1)

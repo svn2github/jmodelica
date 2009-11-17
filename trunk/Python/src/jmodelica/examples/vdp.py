@@ -54,7 +54,6 @@ def run_demo(with_plots=True):
     # Retreive the number of points in each column in the
     # result matrix
     n_points = nlp.opt_sim_get_result_variable_vector_length()
-    n_points = n_points.value
 
     # Write to file. The resulting file can also be
     # loaded into Dymola.
