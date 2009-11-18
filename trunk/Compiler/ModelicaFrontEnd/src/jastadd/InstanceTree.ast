@@ -71,7 +71,7 @@ InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl> /
 abstract InstComponentDecl : InstNode ::= ClassName:InstAccess [FArraySubscripts] <ComponentDecl:ComponentDecl> [InstModification] [InstConstraining];
 InstComposite : InstComponentDecl;
 InstPrimitive : InstComponentDecl;
-InstBuiltIn : InstComponentDecl;
+InstBuiltIn : InstPrimitive;
 UnknownInstComponentDecl : InstComponentDecl;
 
 InstArrayComponentDecl : InstComponentDecl ::= <Index:int>;
@@ -107,7 +107,7 @@ InstCompleteModification : InstModification ::= InstClassModification [InstValue
 InstValueModification : InstModification ::= /FExp/;
 
 InstClassModification : InstModification ::= InstArgument*;
-abstract InstArgument : InstModification ::=;
+abstract InstArgument : InstModification ::= <Each:boolean> <Final:boolean>;
 
 abstract InstNamedModification : InstArgument ::= Name:InstAccess;
 abstract InstElementModification : InstNamedModification ::= [InstModification];

@@ -103,4 +103,34 @@ Semantic error at line 66, column 4:
 	  x+y=3;  
 	end TypeTest5;
 
+	model TypeTest6
+	   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="TypeTest6",
+                                               description="Basic expression type test.",
+                                               errorMessage=
+"
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 130, column 10:
+  The type of the binding expression of the attribute start does not match the declared type of the variable
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 130, column 21:
+  The type of the binding expression of the attribute unit does not match the declared type of the variable
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 130, column 28:
+  The type of the binding expression of the attribute nominal does not match the declared type of the variable
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 130, column 40:
+  The type of the binding expression of the attribute min does not match the declared type of the variable
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 130, column 49:
+  The type of the binding expression of the attribute max does not match the declared type of the variable
+")})));
+	
+	  Real x = 1;
+	  Real y(start=true,unit=3,nominal="N",min=true,max="M");
+	equation
+	  x+y=3;  
+	end TypeTest6;
+
+
 end TypeTests;

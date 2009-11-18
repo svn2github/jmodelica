@@ -401,8 +401,21 @@ aspect Scalarization {
 				// Set new array subscripts corresponding to index counter
 				fv_tmp.getFQName().getFQNamePart(fv_tmp.getFQName().getNumFQNamePart()-1).
 				  setFArraySubscripts(ic.newFArraySubscripts());
+				// Iterate over all attributes and scalarize.
+				List<FAttribute> l = new List<FAttribute>();
+				for (FAttribute a : getFAttributes()) {
+					if (a.getAttributeSet() && a.hasValue() && a.getValue().ndims()>0) {
+						FAttribute a_new = (FAttribute)a.fullCopy();
+						a_new.setValue(a.getValue().array().getElement(ic.getCounterMinusOne()));
+						l.add(a_new);
+					} else {
+						l.add((FAttribute)a.fullCopy());
+					}
+				}
+				fv_tmp.setFAttributeList(l);
 				// Mark variable as scalarized (affects name printing etc.)
 				fv_tmp.getFQName().scalarized = true;
+				
 				vars.addChild(fv_tmp);
 				// Increase index counter
 				ic.inc();

@@ -265,6 +265,8 @@ aspect Names {
   syn String InstComponentAccess.name() = getID();
   syn String InstDot.name() = getLeft().name() + "." + getRight().name(); 
   
+  syn String InstNamedModification.name() = getName().name();
+  
   syn lazy String Access.qualifiedName() = getID();
   eq Dot.qualifiedName() = getLeft().qualifiedName() + "." + getRight().qualifiedName();
   

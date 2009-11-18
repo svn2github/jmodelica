@@ -470,6 +470,41 @@ aspect InstanceErrorCheck {
 		}
 	}
 	
+	public void FExp.checkConstantScalarExpression(ASTNode node, String varKind, String varName) {
+
+		try {
+			if (isCircular()) {
+				node.error("Could not evaluate binding expression for " + varKind + " '"+
+						varName + "' due to circularity: '" + 
+						prettyPrint("") + "'");
+				} else if (ceval().isUnknown()) {
+					node.error("Could not evaluate binding expression for " + varKind + " '" +
+							varName+ "': '" + 
+							prettyPrint("") + "'");
+				}	
+			
+			} catch (UnsupportedOperationException e) {
+				node.error("Could not evaluate binding expression for "+ varKind + " '"+
+						varName + "': '" + 
+						prettyPrint("") + "'");
+			}
+	}
+	
+	public void FExp.checkConstantExpression(ASTNode node, String varKind, String varName) {
+		if (ndims() == 0) {
+//			System.out.println("FExp.checkConstantExpression ndims=0, "+getClass().getName());
+			checkConstantScalarExpression(node,varKind,varName);
+		} else {
+//			System.out.println("FExp.checkConstantExpression ndims="+ndims() + " "+getClass().getName());
+			IndexCounter cnt = new IndexCounter(size());
+			for (int i=0;i<cnt.numElements();i++) {
+				//System.out.println(Indices.printIndices(cnt.getCounterMinusOne()) + " " + i + " " + cnt.numElements());
+				array().getElement(cnt.getCounterMinusOne()).checkConstantScalarExpression(node,varKind,varName);
+				cnt.inc();
+			}
+		}
+	}
+	
 	public void InstPrimitive.collectErrors() {
 		//System.out.println(toString());
         if (!errorChecked) {
@@ -485,25 +520,9 @@ aspect InstanceErrorCheck {
 			}
 			
 			// Check if the binding expression of parameters can be evaluated
-			try {
-				if ((isParameter() || isConstant()) && !(myBindingInstExp()==null)) {
-					if (myBindingInstExp().isCircular()) {
-						error("Could not evaluate binding expression for "+(isParameter()? "parameter":"constant") + " '"+
-								qualifiedName() + "' due to circularity: '" + 
-								myBindingFExp().prettyPrint("") + "'");
-					} else if (myBindingInstExp().ceval().isUnknown()) {
-						error("Could not evaluate binding expression for "+(isParameter()? "parameter":"constant") + " '"+
-								qualifiedName() + "': '" + 
-								myBindingFExp().prettyPrint("") + "'");
-					}
-				}
-			} catch (UnsupportedOperationException e) {
-				error("Could not evaluate binding expression for "+(isParameter()? "parameter":"constant") + " '"+
-						qualifiedName() + "': '" + 
-						myBindingFExp().prettyPrint("") + "'");
-				
+			if ((isParameter() || isConstant()) && !(myBindingInstExp()==null)) {
+				myBindingInstExp().checkConstantExpression(this,isParameter()? "parameter":"constant",qualifiedName());
 			}
-
 			// Check if the expressions of the attributes can be evaluated
 			// Notice that this check has to be done locally in the
 			// context of an InstPrimitive node in order to avoid
@@ -515,22 +534,7 @@ aspect InstanceErrorCheck {
 					InstComponentModification icm = (InstComponentModification)im;
 					if (icm.getInstModification().hasInstValueMod()) {
 						FExp val_mod = icm.getInstModification().instValueMod();
-						try {
-							if (val_mod.isCircular()) {
-								error("Could not evaluate binding expression for attribute '"+
-										icm.getName().name() + "' due to circularity: '" + 
-										val_mod.prettyPrint("") + "'");
-							} else if (val_mod.ceval().isUnknown()) {
-								error("Could not evaluate binding expression for attribute '"+
-									icm.getName().name() + "': '" + 
-									val_mod.prettyPrint("") + "'");
-							}
-						} catch (UnsupportedOperationException e) {
-							error("Could not evaluate binding expression for attribute '"+
-									icm.getName().name() + "': '" + 
-									val_mod.prettyPrint("") + "'");
-							
-						}
+						val_mod.checkConstantExpression(this,"attribute",icm.getName().name());
 					}
 				}
 			}

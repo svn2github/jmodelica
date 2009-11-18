@@ -128,7 +128,6 @@ aspect InstModifications{
 		return l;	
 	}
 
-
 	public abstract InstModification Modification.newInstModification();
 	public InstCompleteModification CompleteModification.newInstModification() {
 		InstCompleteModification icm = new InstCompleteModification(this,getClassModification().newInstModification(),new Opt());
@@ -147,7 +146,7 @@ aspect InstModifications{
 		return new InstClassModification(this,l);
 	}
 	public InstComponentModification ComponentModification.newInstModification() {
-		InstComponentModification icm = new InstComponentModification(this,getName().newInstAccess(),new Opt());
+		InstComponentModification icm = new InstComponentModification(this,hasEach(),hasFinal(),getName().newInstAccess(),new Opt());
 		if (hasModification())
 			icm.setInstModification(getModification().newInstModification());
 		icm.setLocation(this);
@@ -155,7 +154,7 @@ aspect InstModifications{
 	}
 	public InstComponentRedeclare ComponentRedeclare.newInstModification() {
 	    // TODO: Can this component be redeclared?
-		InstComponentRedeclare icr = new InstComponentRedeclare(this,getName().newInstAccess());
+		InstComponentRedeclare icr = new InstComponentRedeclare(this,hasEach(),hasFinal(),getName().newInstAccess());
 		icr.setLocation(this);
 		return icr;
 	}
@@ -165,7 +164,7 @@ aspect InstModifications{
 	}	
 	
 	public InstClassRedeclare ClassRedeclare.newInstModification() {
-		InstClassRedeclare icr = new InstClassRedeclare(this,getName().newInstAccess());
+		InstClassRedeclare icr = new InstClassRedeclare(this,hasEach(),hasFinal(),getName().newInstAccess());
 		icr.setLocation(this);
 		return icr;
 	}

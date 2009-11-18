@@ -254,10 +254,9 @@ model ArrayTest15_Err
         description="Test type checking of arrays",
                                                errorMessage=
 "
-JError: 1 problems found:
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 213, column 9:
-  Type dimension mismatch in declaration x: dimension of declaration is 1, dimension of binding expression is 2
+Semantic error at line 263, column 9:
+  Type array size mismatch in declaration x: size of declaration is [3] and size of binding expression is [3,1]
 ")})));
 
    Real x[3] = {{2},{2},{3}};
@@ -588,6 +587,97 @@ equation
   end for;
 
 end ArrayTest26;
+
+model ArrayTest27_Err
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ArrayTest27_Err",
+        description="Test type checking of arrays",
+                                               errorMessage=
+"
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 604, column 13:
+  Array size mismatch for attribute start: size of declaration is [3] and size of start expression is [2]
+")})));
+
+   Real x[3](start={1,2});
+equation
+   der(x) = ones(3);
+
+end ArrayTest27_Err;
+
+model ArrayTest28_Err
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ArrayTest28_Err",
+        description="Test type checking of arrays",
+                                               errorMessage=
+"
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 622, column 14:
+  The 'each' keyword is specified for the attribute start but the expression provided is not scalar.
+")})));
+
+   Real x[3](each start={1,2,3});
+equation
+   der(x) = ones(3);
+
+end ArrayTest28_Err;
+
+model ArrayTest29
+
+        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest29",
+        description="Flattening of arrays.",
+                                               flatModel=
+"fclass ArrayTests.ArrayTest29
+ Real x[1](start = 1);
+ Real x[2](start = 2);
+ Real x[3](start = 3);
+equation
+ der(x[1]) = 1;
+ der(x[2]) = 1;
+ der(x[3]) = 1;
+end ArrayTests.ArrayTest29;
+")})));
+
+   Real x[3](start={1,2,3});
+equation
+   der(x) = ones(3);
+
+end ArrayTest29;
+
+model ArrayTest30
+
+        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest30",
+        description="Flattening of arrays.",
+                                               flatModel=
+"
+fclass ArrayTests.ArrayTest30
+ Real x[1,1](start = 1);
+ Real x[2,1](start = 3);
+ Real x[3,1](start = 5);
+ Real x[1,2](start = 2);
+ Real x[2,2](start = 4);
+ Real x[3,2](start = 6);
+equation
+ der(x[1,1]) =  - ( 1 );
+ der(x[2,1]) =  - ( 3 );
+ der(x[3,1]) =  - ( 5 );
+ der(x[1,2]) =  - ( 2 );
+ der(x[2,2]) =  - ( 4 );
+ der(x[3,2]) =  - ( 6 );
+end ArrayTests.ArrayTest30;
+")})));
+
+   Real x[3,2](start={{1,2},{3,4},{5,6}});
+equation
+   der(x) = {{-1,-2},{-3,-4},{-5,-6}};
+
+end ArrayTest30;
+
+
 
   annotation (uses(Modelica(version="3.0.1")));
 end ArrayTests;

@@ -49,6 +49,17 @@ aspect FlatTypeAnalysis {
 	eq FFunctionVariable.type() = getType();
 	eq UnknownFVariable.type() = fUnknownType();
 
+	syn FPrimitiveType InstComponentModification.type() {
+//		System.out.println("InstComponentModification.type(): " + getName().myInstComponentDecl().getClass().getName() + 
+//				" " + getName().myInstComponentDecl().isPrimitive());
+		if (getName().myInstComponentDecl().isPrimitive()) {
+			InstPrimitive ip = ((InstPrimitive)getName().myInstComponentDecl());
+			return ip.type().scalarType();
+		} else {
+			return fUnknownType();
+		}
+	}
+	
 	syn FPrimitiveType InstPrimitive.type() {
 		if (isReal()) {
 			if (ndims()==0) {
@@ -264,6 +275,16 @@ aspect FTypeCompatibility {
  	syn boolean InstPrimitive.isString() = 
  		myInstClass().finalClass().primitiveName().equals("String");
 
+ 	syn boolean InstBuiltIn.isReal() = 
+ 		myInstClass().finalClass().primitiveName().equals("RealType");
+ 	syn boolean InstBuiltIn.isInteger() = 
+ 		myInstClass().finalClass().primitiveName().equals("IntegerType");
+ 	syn boolean InstBuiltIn.isBoolean() = 
+ 		myInstClass().finalClass().primitiveName().equals("BooleanType");
+ 	syn boolean InstBuiltIn.isString() = 
+ 		myInstClass().finalClass().primitiveName().equals("StringType");
+
+ 	
  	syn boolean FPrimitiveType.isReal() = false;
  	eq FRealScalarType.isReal() = true;
  	eq FRealArrayType.isReal() = true;

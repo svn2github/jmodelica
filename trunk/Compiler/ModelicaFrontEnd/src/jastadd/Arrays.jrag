@@ -531,7 +531,10 @@ aspect Arrays {
 	 */
 	syn nta FArray FExp.array() = new FArray();
 	
+	eq FArray.array() = this;
+	
 	eq FIdUseExp.array() {
+		System.out.println("FIdUseExp.array() begin: " + isArray());
 		if (isArray()) {
 			/*
 			 * Based on an array access, say x, corresponding to the declaration
@@ -539,7 +542,7 @@ aspect Arrays {
 			 */
 			int ndims = ndims();
 			int[] size = size();
-			//System.out.println("FIdUseExp.array(): " + size.length);
+			System.out.println("FIdUseExp.array(): " + size.length);
 			// Create a new array consisting of zeros.
 			FArray array = new FArray(size);
 			// Get array indices
@@ -566,6 +569,43 @@ aspect Arrays {
 		}
 	}
 
+	boolean InstAccess.scalarized = false;
+	
+	eq FInstAccessExp.array() {
+		//System.out.println("FInstAccessExp.array() begin: " + isArray());
+		if (isArray()) {
+			/*
+			 * Based on an array access, say x, corresponding to the declaration
+			 * Real x[2], the array {x[1],x[2]} is generated. 
+			 */
+			int ndims = ndims();
+			int[] size = size();
+			//System.out.println("FInstAccessExp.array(): " + size.length);
+			// Create a new array consisting of zeros.
+			FArray array = new FArray(size);
+			// Get array indices
+			Indices ind = indices();
+			// Create an index counter
+			IndexCounter cnt = new IndexCounter(ind);
+			for (int i=0;i<cnt.numElements();i++) {
+				// Create a copy of the identifier
+				FInstAccessExp ia_tmp = (FInstAccessExp)this.fullCopy();
+				// Set the array subscripts according to the index counter
+				((InstArrayAccess)ia_tmp.getInstAccess().getLastInstAccess()).setFArraySubscripts(cnt.newFArraySubscripts());
+				// Mark the identifier as scalarized
+				ia_tmp.getInstAccess().scalarized = true;
+				// Insert the identifier into the array
+				array.setElement(cnt.getCounterPos(),ia_tmp);
+				cnt.inc();
+			}
+			return array;
+			
+		} else {
+			return new FArray();
+		}
+	}
+
+	
 	/**
 	 * \brief Computes an NTA of type FArray where all elements are scalar
 	 * expressions.
@@ -578,7 +618,7 @@ aspect Arrays {
 	
 	eq FExpSubscript.array() = getFExp().array();
 	eq FRangeExp.array() {
-		System.out.println("FRangeExp.array(): size = " + size()[0]);	
+		//System.out.println("FRangeExp.array(): size = " + size()[0]);	
 		double i1 = getFExp(0).ceval().realValue();
 		double i2;
 		if (getNumFExp()==2) {
@@ -697,13 +737,35 @@ aspect Arrays {
 	}	
 
 	/**
-	 * \brief Get the set of all array indices of an array access. 
+	 * \brief Get the set of all array indices of an instance array access. 
+	 * 
+	 * @return An Indices object containing all indices in each array dimension.
+	 */
+	syn Indices FInstAccessExp.indices() = getInstAccess().indices();
+
+	/**
+	 * \brief Get the set of all array indices of an instance array access. 
+	 * 
+	 * @return An Indices object containing all indices in each array dimension.
+	 */
+	syn lazy Indices InstAccess.indices() = ((InstArrayAccess)getLastInstAccess()).hasFArraySubscripts()?
+			((InstArrayAccess)getLastInstAccess()).getFArraySubscripts().indices(): myInstComponentDecl().indices();
+
+	/**
+	 * \brief Get the set of all array indices of an FVariable. 
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
 	syn lazy Indices AbstractFVariable.indices() = new Indices();
 	eq FVariable.indices() = isScalarized()? new Indices(): new Indices(size());
 
+	/**
+	 * \brief Get the set of all array indices of an InstComponentDecl. 
+	 * 
+	 * @return An Indices object containing all indices in each array dimension.
+	 */
+	syn lazy Indices InstComponentDecl.indices() = new Indices(size());
+		
 	/**
 	 * \brief Get the set of all array indices of an array access. 
 	 * 
@@ -855,6 +917,19 @@ aspect Arrays {
 				//		i + " " + indPos[i] + " " + indices.get(i).length);
 				indOut[i] = indices.get(i)[indPos[i]];
 			}
+		}
+		
+		public static String printIndices(int[] indices) {
+			StringBuffer str = new StringBuffer();
+			str.append("[");
+			for (int i=0;i<indices.length;i++) {
+				str.append(""+indices[i]);
+				if (i<indices.length-1) {
+					str.append(",");
+				}
+			}
+			str.append("]");
+			return str.toString();
 		}
 	}
 }

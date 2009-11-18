@@ -25,11 +25,11 @@ aspect FlatTypeCheck {
   public void InstPrimitive.typeCheck() {
 	  if (myBindingInstExp() != null) {
 		  // Check type compatibility
-/*		  System.out.println("Type check " + name() + " type: " + 
+		  /*
+		  System.out.println("Type check " + name() + " type: " + 
 				  type().toString() + " (" + type().toString() + ") "+ " binding exp type: " + 
 				  myBindingInstExp().type().toString() + "( "+ myBindingInstExp().type().toString() + ") " + " binding exp:");
-		  myBindingInstExp().dumpTree("");
-*/
+		  */
 		  
 /*		  if (myBindingInstExp().type().isUnknown()) {
 			  error("The binding expression of the variable " + name() + " has unknown type.");
@@ -37,10 +37,15 @@ aspect FlatTypeCheck {
 	*/	  
 		  if (!myBindingInstExp().type().isUnknown() && // Avoid duplicate error messages
 				  !type().typeCompatible(myBindingInstExp().type())) {
-			  if (ndims() != myBindingInstExp().ndims()) {
+			  if (!type().dimensionCompatible(myBindingInstExp().type())) {
+				  error("Type array size mismatch in declaration " + name() +
+							": size of declaration is " + Indices.printIndices(size()) + 
+							" and size of binding expression is " + Indices.printIndices(myBindingInstExp().size()));
+/*				  
 				  error("Type dimension mismatch in declaration " + name() +
 						  ": dimension of declaration is " + ndims() + 
 						  ", dimension of binding expression is "+ myBindingInstExp().ndims());
+*/
 			  } else {
 			  
 /*
@@ -53,9 +58,35 @@ aspect FlatTypeCheck {
 					  " does not match the declared type of the variable");
 			  }
 		  }
-		  // Check Variability compatibility
 		  
 	  }
+	  
+	// Check the type correctness of attributes
+	  for (InstModification im : totalMergedEnvironment()) {
+		  // Only check attributes, value modifications are checked above
+		  if (im instanceof InstComponentModification) {
+			  InstComponentModification icm = (InstComponentModification)im;
+				if (icm.getInstModification().hasInstValueMod()) {
+					FExp val_mod = icm.getInstModification().instValueMod();
+					if (!icm.getName().myInstComponentDecl().isUnknown() && !val_mod.type().isUnknown()) {
+						if (!icm.type().typeCompatible(val_mod.type().scalarType())) {
+							icm.error("The type of the binding expression of the attribute " + icm.name() +
+							  " does not match the declared type of the variable");							
+						} else if (!icm.getEach() && val_mod.ndims()!=0 && !type().dimensionCompatible(val_mod.type())) { 
+							icm.error("Array size mismatch for attribute " + icm.name() +
+									": size of declaration is " + Indices.printIndices(size()) + 
+									" and size of " + icm.name() + " expression is " + Indices.printIndices(val_mod.size()));
+						} else if (icm.getEach()){ // If the each keyword is specified, then the dimension should be 0.
+							if (val_mod.ndims()>0) {
+								icm.error("The 'each' keyword is specified for the attribute " + icm.name() + 
+								        " but the expression provided is not scalar.");
+							}
+						}
+					}
+				}
+			}
+		}
+	  
 	  
   }
  
