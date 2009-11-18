@@ -83,7 +83,7 @@ def check_packages():
     sys.stdout.write("%s %s" % (("-"*len(modstr)).ljust(le), ("-"*len(verstr)).ljust(le)))
     sys.stdout.write("\n")
     
-    modules=["IPython", "numpy", "scipy", "matplotlib", "jpype", "lxml", "nose", "pysundials"]
+    modules=["numpy", "scipy", "matplotlib", "jpype", "lxml", "nose", "pysundials"]
     if platform == "win32":
         modules.append("pyreadline")
         
