@@ -90,6 +90,8 @@ In order to run the JModelica.org compilers from Python, the packages
  - lxml (http://codespeak.net/lxml/) 
  - NumPy 1.2.0 (http://numpy.scipy.org/)
  - SciPy 0.7 (http://www.scipy.org/)
+ - PySundials 2.3 (http://sourceforge.net/projects/pysundials/)
+ - pyreadline >=1.5 (http://ipython.scipy.org/dist/)
  - Matplotlib (http://matplotlib.sourceforge.net/)
  - Nose (http://code.google.com/p/python-nose/) (Only needed to run
    the test suits.)
@@ -101,6 +103,12 @@ recommended. Notice that the JModelica.org-SDK and JModelica.org
 installers for Windows will install JPype, lxml and Nose
 automatically. Linux and Mac OS X users need to install these packages
 manually.
+
+You may check that your Python distribution has all the required
+dependencies installed by running the Python commands
+
+  import jmodelica
+  jmodelica.check_packages()
 
 JModelica.org supports the following environment variables:
 
