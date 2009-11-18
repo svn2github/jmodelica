@@ -52,7 +52,7 @@ except IOError:
 def check_packages():
     import sys, time
     le=30
-    startstr = "Performing JModelica environment check"
+    startstr = "Performing JModelica package check"
     sys.stdout.write("\n")
     sys.stdout.write(startstr+" \n")
     sys.stdout.write("="*len(startstr))
@@ -82,12 +82,16 @@ def check_packages():
     sys.stdout.write("\n")
     sys.stdout.write("%s %s" % (("-"*len(modstr)).ljust(le), ("-"*len(verstr)).ljust(le)))
     sys.stdout.write("\n")
-    modules=["IPython", "pyreadline", "numpy", "scipy", "matplotlib", "jpype", "lxml", "nose", "pysundials"]
+    
+    modules=["IPython", "numpy", "scipy", "matplotlib", "jpype", "lxml", "nose", "pysundials"]
+    if platform == "win32":
+        modules.append("pyreadline")
+        
     for module in modules:
         try:
+            vers="--"            
             fp, path, desc = imp.find_module(module)
             mod = imp.load_module(module, fp, path, desc)
-            vers="--"
             try:
                 if module == "pyreadline":
                     vers = mod.release.version
