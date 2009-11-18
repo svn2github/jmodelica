@@ -151,6 +151,20 @@ Start Python or IPython. Type
 You should now see the output of Ipopt and windows containing plots
 showing the optimization results should be opened.
 
+8. Check Python packages
+
+There is a function in the jmodelica package to check the 
+status of the Python packages required by JModelica. Type
+
+ > import jmodelica
+ > jmodelica.check_packages()
+
+This will list all required packages, if they are installed and 
+package version (if available). Compare your status output to the 
+list of required packages which can be found in this file under: 
+'Running JModelica.org from Python' or on the homepage www.jmodelica.org.
+
+
 =======
 Issues:
 
