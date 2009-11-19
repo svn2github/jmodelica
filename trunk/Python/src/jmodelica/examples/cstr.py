@@ -239,20 +239,20 @@ def run_demo(with_plots=True):
         plt.plot(c_res.t,c_res.x)
         plt.plot(c_ref.t,c_ref.x,'--')
         plt.grid()
-        plt.ylabel('c')
+        plt.ylabel('Concentration')
 
         plt.subplot(312)
         plt.plot(T_res.t,T_res.x)
         plt.plot(T_ref.t,T_ref.x,'--')
         plt.grid()
-        plt.ylabel('T')
+        plt.ylabel('Temperature')
 
         plt.subplot(313)
         plt.plot(Tc_res.t,Tc_res.x)
         plt.plot(Tc_ref.t,Tc_ref.x,'--')
         plt.grid()
-        plt.ylabel('Tc')
-        plt.xlabel('t')
+        plt.ylabel('Cooling temperature')
+        plt.xlabel('time')
         plt.show()
 
     # Simulate to verify the optimal solution

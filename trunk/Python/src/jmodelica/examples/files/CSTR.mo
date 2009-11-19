@@ -57,7 +57,7 @@ end CSTR_Init_Optimization;
 
 optimization CSTR_Opt(objective=(cost(finalTime)),
                       startTime=0.0,
-                      finalTime=160)
+                      finalTime=150)
  
   input Real u(start = 350,initialGuess=350)=cstr.Tc; 
   CSTR cstr(c(initialGuess=300),T(initialGuess=300),Tc(initialGuess=350));
