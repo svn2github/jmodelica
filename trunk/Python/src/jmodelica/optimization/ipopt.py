@@ -401,18 +401,42 @@ class NLPCollocation(object):
         # Obtain vector sizes
         n_points = 0
         if len(dx_names) > 0:
-            traj = res.get_variable_data(dx_names.get(dx_name_value_refs[0]))
+            for ref in dx_name_value_refs:
+                try:
+                    traj = res.get_variable_data(dx_names.get(ref))
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
+
         elif len(x_names) > 0:
-            traj = res.get_variable_data(x_names.get(x_name_value_refs[0]))
+            for ref in x_name_value_refs:
+                try:
+                    traj = res.get_variable_data(x_names.get(ref))
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
+
         elif len(u_names) > 0:
-            traj = res.get_variable_data(u_names.get(u_name_value_refs[0]))
+            for ref in u_name_value_refs:
+                try:
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    print u_names.get(ref)
+                    pass
+
         elif len(w_names) > 0:
             for ref in w_name_value_refs:
-                traj = res.get_variable_data(w_names.get(ref))
-                if N.size(traj.x)>2:
-                    break
+                try:
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    print w_names.get(ref)
+                    pass
         else:
-            return
+            raise Exception("None of the model variables not found in result file.")
 
         #print(traj.t)
 
@@ -434,44 +458,61 @@ class NLPCollocation(object):
             p_opt_indices = p_opt_indices.tolist()
 
             for ref in p_opt_name_value_refs:
-                (z_i, ptype) = jmi._translate_value_ref(ref)
-                i_pi = z_i - self._model._offs_pi.value
-                i_pi_opt = p_opt_indices.index(i_pi)
-                traj = res.get_variable_data(p_opt_names.get(ref))
-                p_opt_data[i_pi_opt] = traj.x[0]
-
+                try:
+                    (z_i, ptype) = jmi._translate_value_ref(ref)
+                    i_pi = z_i - self._model._offs_pi.value
+                    i_pi_opt = p_opt_indices.index(i_pi)
+                    traj = res.get_variable_data(p_opt_names.get(ref))
+                    p_opt_data[i_pi_opt] = traj.x[0]
+                except:
+                    print "Warning: Could not find value for parameter" + p_opt_names.get(ref)
+                    
         #print(N.size(var_data))
 
         # Initialize variable names
         # Loop over all the names
         col_index = 1;
         for ref in dx_name_value_refs:
-            #print(dx_names.get(ref))
-            #print(col_index)
-            traj = res.get_variable_data(dx_names.get(ref))
-            var_data[:,col_index] = traj.x
-            col_index = col_index + 1
-        for ref in x_name_value_refs:
-            #print(x_names.get(ref))
-            #print(col_index)
-            traj = res.get_variable_data(x_names.get(ref))
-            var_data[:,col_index] = traj.x
-            col_index = col_index + 1
-        for ref in u_name_value_refs:
-            #print(u_names.get(ref))
-            #print(col_index)
-            traj = res.get_variable_data(u_names.get(ref))
-            var_data[:,col_index] = traj.x
-            col_index = col_index + 1
-        for ref in w_name_value_refs:
-            #print(w_names.get(ref))
-            #print(col_index)
-            traj = res.get_variable_data(w_names.get(ref))
-            if N.size(traj.x)==2:
-                var_data[:,col_index] = N.ones(n_points)*traj.x[0]
-            else:
+            try:
+                #print(dx_names.get(ref))
+                #print(col_index)
+                traj = res.get_variable_data(dx_names.get(ref))
                 var_data[:,col_index] = traj.x
-            col_index = col_index + 1
+                col_index = col_index + 1
+            except:
+                print "Warning: Could not find trajectory for variable " + dx_names.get(ref)
+        for ref in x_name_value_refs:
+            try:
+                #print(x_names.get(ref))
+                #print(col_index)
+                traj = res.get_variable_data(x_names.get(ref))
+                var_data[:,col_index] = traj.x
+                col_index = col_index + 1
+            except:
+                print "Warning: Could not find trajectory for variable " + x_names.get(ref)
+
+        for ref in u_name_value_refs:
+            try:
+                #print(u_names.get(ref))
+                #print(col_index)
+                traj = res.get_variable_data(u_names.get(ref))
+                var_data[:,col_index] = traj.x
+                col_index = col_index + 1
+            except:
+                print "Warning: Could not find trajectory for variable " + u_names.get(ref)
+
+        for ref in w_name_value_refs:
+            try:
+                #print(w_names.get(ref))
+                #print(col_index)
+                traj = res.get_variable_data(w_names.get(ref))
+                if N.size(traj.x)==2:
+                    var_data[:,col_index] = N.ones(n_points)*traj.x[0]
+                else:
+                    var_data[:,col_index] = traj.x
+                col_index = col_index + 1
+            except:
+                print "Warning: Could not find trajectory for variable " + w_names.get(ref)
 
         #print(var_data)
         #print(N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0])
