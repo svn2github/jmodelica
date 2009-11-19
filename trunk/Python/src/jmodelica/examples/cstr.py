@@ -42,8 +42,12 @@ def run_demo(with_plots=True):
 
        For more information about the DAE initialization algorithm, see
        http://www.jmodelica.org/page/10.
+
+    2. How to generate an initial guess for a direct collocation method
+       by means of simulation. The trajectories resulting from simulation
+       are used to initialize the variables in the transcribed NLP.
        
-    2. An optimal control problem is solved where the objective Is to
+    3. An optimal control problem is solved where the objective Is to
        transfer the state of the system from stationary point A to point
        B. The challenge is to ignite the reactor while avoiding
        uncontrolled temperature increase. It is also demonstrated how to
@@ -52,8 +56,13 @@ def run_demo(with_plots=True):
        More information about the simultaneous optimization algorithm
        can be found at http://www.jmodelica.org/page/10.
 
-    3. The optimization result is saved to file and then
+    4. The optimization result is saved to file and then
        the important variables are plotted.
+
+    5. Simulate the system with the optimal control profile. This step
+       is important in order to verify that the approximation in the
+       transcription step is valid.
+       
 """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
@@ -109,23 +118,17 @@ def run_demo(with_plots=True):
     print('c = %f' % c_0_B)
     print('T = %f' % T_0_B)
 
-    oc.compile_model(curr_dir+"/files/CSTR.mo", "CSTR.CSTR_Opt", target='ipopt')
-
-    cstr = jmi.Model("CSTR_CSTR_Opt")
-
-    cstr.set_value('Tc_ref',Tc_0_B)
-    cstr.set_value('c_ref',c_0_B)
-    cstr.set_value('T_ref',T_0_B)
-
-    cstr.set_value('cstr.c_init',c_0_A)
-    cstr.set_value('cstr.T_init',T_0_A)
-
     # Compute initial guess trajectories by means of simulation
 
-    t = N.linspace(1,150.,100) 
+    # Create the time vector
+    t = N.linspace(1,150.,100)
+    # Create the input vector from the target input value. The
+    # target input value is here increased in order to get a
+    # better initial guess.
     u = (Tc_0_B+35)*N.ones(N.size(t,0))
     u = N.array([u])
     u = N.transpose(u)
+    # Create a Trajectory object that can be passed to the simulator
     u_traj = TrajectoryLinearInterpolation(t,u)
 
     # Comile the Modelica model first to C code and
@@ -191,6 +194,19 @@ def run_demo(with_plots=True):
         plt.xlabel('time')
         plt.show()
 
+
+    # Solve optimal control problem    
+    oc.compile_model(curr_dir+"/files/CSTR.mo", "CSTR.CSTR_Opt", target='ipopt')
+
+    cstr = jmi.Model("CSTR_CSTR_Opt")
+
+    cstr.set_value('Tc_ref',Tc_0_B)
+    cstr.set_value('c_ref',c_0_B)
+    cstr.set_value('T_ref',T_0_B)
+
+    cstr.set_value('cstr.c_init',c_0_A)
+    cstr.set_value('cstr.T_init',T_0_A)
+
     # Initialize the mesh
     n_e = 100 # Number of elements 
     hs = N.ones(n_e)*1./n_e # Equidistant points
@@ -199,6 +215,7 @@ def run_demo(with_plots=True):
     # Create an NLP object
     nlp = ipopt.NLPCollocationLagrangePolynomials(cstr,n_e,hs,n_cp)
 
+    # Use the simulated trajectories to initialize the model
     nlp.set_initial_from_dymola(res, hs, 0, 0)
     
     # Create an Ipopt NLP object
@@ -256,7 +273,7 @@ def run_demo(with_plots=True):
         plt.show()
 
     # Simulate to verify the optimal solution
-    # Generate input
+    # Set up input trajectory
     t = Tc_res.t 
     u = Tc_res.x
     u = N.array([u])
@@ -285,8 +302,10 @@ def run_demo(with_plots=True):
 
     simulator = SundialsDAESimulator(sim_model, verbosity=3, start_time=0.0, \
                                      final_time=150, time_step=0.01,input=u_traj)
+    # Run simulation
     simulator.run()
-        
+
+    # Store simulation data to file    
     simulator.write_data()
 
     # Load the file we just wrote to file
