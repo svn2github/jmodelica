@@ -31,6 +31,30 @@ initial equation
   der(T) = 0;
 end CSTR_Init;
 
+model CSTR_Init_Optimization
+
+  CSTR cstr "CSTR component";
+  input Real Tc_ref "Target input value";
+  parameter Real Tc_0 = 300 "Initial input value";
+  Real Tc(start=Tc_0,fixed=true) "Filtered input";
+  Real u = Tc;
+  parameter Real a_filt = 1/20 "Filter coefficient";
+  Real cost(start=0,fixed=true);
+
+  parameter Real c_ref = 500;
+  parameter Real T_ref = 320;
+  parameter Real q_c = 1;
+  parameter Real q_T = 1;
+  parameter Real q_Tc = 1;	
+
+equation
+  1/a_filt*der(Tc) = -Tc + Tc_ref;
+  cstr.Tc = Tc; 
+  der(cost) = q_c*(c_ref-cstr.c)^2 + q_T*(T_ref-cstr.T)^2 + 
+                  q_Tc*(Tc_ref-cstr.Tc)^2;
+
+end CSTR_Init_Optimization;
+
 optimization CSTR_Opt(objective=(cost(finalTime)),
                       startTime=0.0,
                       finalTime=150)

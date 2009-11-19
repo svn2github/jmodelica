@@ -405,13 +405,14 @@ class SundialsDAESimulator(DAESimulator):
     
     def __init__(self, model=None, start_time=None, final_time=None,
                 abstol=1.0e-6, reltol=1.0e-6, time_step = 0.2,
-                return_last=False, sensitivity_analysis=False, verbosity=0):
+                return_last=False, sensitivity_analysis=False, verbosity=0, input=None):
                     
         DAESimulator.__init__(self, model, start_time, final_time,
                            abstol, reltol, time_step, return_last, 
                            verbosity)
                            
         self.solver_memory = None
+        self._input = input
         #self.pointer = ctypes.c_void_p()
         #TODO
         #self._set_sensitivity_indices(None)
@@ -474,6 +475,9 @@ class SundialsDAESimulator(DAESimulator):
             model.w = z[len(model.x):len(z)]
             
             model.dx = dz[0:len(model.dx)]
+
+            if self._input!=None:
+                model.u = self._input.eval(t)[0,:]
 
             #Evaluating the residual function
             temp = N.array(res_vector)
@@ -557,8 +561,11 @@ class SundialsDAESimulator(DAESimulator):
             """Used for return."""
             if return_last==False:
                 T[i] = t.value
+                u_tmp = model.u.copy()
+                if self._input!=None:
+                    u_tmp = self._input.eval(t.value)[0,:]
                 temp = N.array([])
-                for j in [ydot[:len(model.dx)],y[:len(model.x)],model.u.copy(),y[len(model.x):len(y)]]:
+                for j in [ydot[:len(model.dx)],y[:len(model.x)],u_tmp,y[len(model.x):len(y)]]:
                     if len(j) > 0:
                         temp = N.append(temp,j)
                 ylist[i] = temp
@@ -615,3 +622,81 @@ class SundialsDAESimulator(DAESimulator):
         print "Number of nonlinear conv. failures = %ld"%ida.IDAGetNumNonlinSolvConvFails(self.solver_memory)
         print "Number of root fn. evaluations     = %ld"%ida.IDAGetNumGEvals(self.solver_memory)
         print "Gradient" #TODO
+
+
+class Trajectory:
+    """Base class for represenation of trajectories."""
+    
+    def __init__(self, abscissa, ordinate):
+        """
+        Default constructor for creating a tracjectory object.
+
+        Parameters:
+            abscissa -- One dimensional numpy array containing
+                        the n abscissa (independent) values
+            ordinate -- Two dimensional n x m numpy matrix containing
+                        the ordiate values. The matrix has the same
+                        number of rows as the abscissa has elements.
+                        The number of columns is equal to the number of
+                        output variables.
+        """
+        self._abscissa = abscissa
+        self._ordinate = ordinate
+        self._n = N.size(abscissa)
+        self._x0 = abscissa[0]
+        self._xf = abscissa[-1]
+
+    def eval(self,x):
+        """
+        Evaluate the trajectory at a specifed abscissa.
+
+        Parameters:
+            x -- One dimensional numpy array, or scalar number,
+                 containing n abscissa value(s).
+
+        Returns:
+            Two dimensional n x m matrix containing the
+            ordinate values corresponding to the argument x.
+        """
+        pass
+
+    def set_abscissa(self, absscissa):
+        """ Set the abscissa of the trajectory."""
+        self._abscissa[:] = abscissa
+
+    def get_abscissa(self):
+        """ Get the abscissa of the trajectory."""
+        return self._abscissa
+
+    abscissa = property(get_abscissa, set_abscissa, doc="Abscissa")
+
+    def set_ordinate(self, absscissa):
+        """ Set the ordinate of the trajectory."""
+        self._ordinate[:] = ordinate
+
+    def get_ordinate(self):
+        """ Get the ordinate of the trajectory."""
+        return self._ordinate
+
+    ordinate = property(get_ordinate, set_ordinate, doc="Ordinate")
+
+
+
+class TrajectoryLinearInterpolation(Trajectory):
+
+    def eval(self,x):
+        """
+        Evaluate the trajectory at a specifed abscissa.
+
+        Parameters:
+            x -- One dimensional numpy array, or scalar number,
+                 containing n abscissa value(s).
+
+        Returns:
+            Two dimensional n x m matrix containing the
+            ordinate values corresponding to the argument x.
+        """        
+        y = N.zeros([N.size(x),N.size(self.ordinate,1)])
+        for i in range(N.size(y,1)):
+            y[:,i] = N.interp(x,self.abscissa,self.ordinate[:,i])
+        return y

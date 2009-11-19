@@ -8,6 +8,8 @@ import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
+from jmodelica.simulation.sundials import TrajectoryLinearInterpolation
+from jmodelica.simulation.sundials import SundialsDAESimulator
 from jmodelica.optimization import ipopt
 from jmodelica.compiler import OptimicaCompiler
 
@@ -118,13 +120,86 @@ def run_demo(with_plots=True):
     cstr.set_value('cstr.c_init',c_0_A)
     cstr.set_value('cstr.T_init',T_0_A)
 
+    # Compute initial guess trajectories by means of simulation
+
+    t = N.linspace(1,150.,100) 
+    u = (Tc_0_B+35)*N.ones(N.size(t,0))
+    u = N.array([u])
+    u = N.transpose(u)
+    u_traj = TrajectoryLinearInterpolation(t,u)
+
+    # Comile the Modelica model first to C code and
+    # then to a dynamic library
+    oc.compile_model(curr_dir+"/files/CSTR.mo","CSTR.CSTR_Init_Optimization",target='ipopt')
+
+    # Load the dynamic library and XML data
+    init_sim_model=jmi.Model("CSTR_CSTR_Init_Optimization")
+
+    # Set model parameters
+    init_sim_model.set_value('cstr.c_init',c_0_A)
+    init_sim_model.set_value('cstr.T_init',T_0_A)
+    init_sim_model.set_value('Tc_0',Tc_0_A)
+    init_sim_model.set_value('c_ref',c_0_B)
+    init_sim_model.set_value('T_ref',T_0_B)
+    init_sim_model.set_value('Tc_ref',u_traj.eval(0.)[0])
+
+    # Create DAE initialization object.
+    init_nlp = NLPInitialization(init_sim_model)
+    
+    # Create an Ipopt solver object for the DAE initialization system
+    init_nlp_ipopt = InitializationOptimizer(init_nlp)
+        
+    # Solve the DAE initialization system with Ipopt
+    init_nlp_ipopt.init_opt_ipopt_solve()
+
+    # Create a simulator
+    simulator = SundialsDAESimulator(init_sim_model, verbosity=3, start_time=0.0, \
+                                     final_time=150, time_step=0.01,input=u_traj)
+    # Run simulation
+    simulator.run()
+    
+    # Write data to file 
+    simulator.write_data()
+
+    # Load the file we just wrote to file
+    res = jmodelica.io.ResultDymolaTextual('CSTR_CSTR_Init_Optimization_result.txt')
+
+    # Extract variable profiles
+    c_init_sim=res.get_variable_data('cstr.c')
+    T_init_sim=res.get_variable_data('cstr.T')
+    Tc_init_sim=res.get_variable_data('cstr.Tc')
+
+    # Plot the results
+    if with_plots:
+        plt.figure(1)
+        plt.clf()
+        plt.hold(True)
+        plt.subplot(311)
+        plt.plot(c_init_sim.t,c_init_sim.x)
+        plt.grid()
+        plt.ylabel('Concentration')
+
+        plt.subplot(312)
+        plt.plot(T_init_sim.t,T_init_sim.x)
+        plt.grid()
+        plt.ylabel('Temperature')
+
+        plt.subplot(313)
+        plt.plot(Tc_init_sim.t,Tc_init_sim.x)
+        plt.grid()
+        plt.ylabel('Cooling temperature')
+        plt.xlabel('time')
+        plt.show()
+
     # Initialize the mesh
-    n_e = 150 # Number of elements 
+    n_e = 100 # Number of elements 
     hs = N.ones(n_e)*1./n_e # Equidistant points
     n_cp = 3; # Number of collocation points in each element
     
     # Create an NLP object
     nlp = ipopt.NLPCollocationLagrangePolynomials(cstr,n_e,hs,n_cp)
+
+    nlp.set_initial_from_dymola(res, hs, 0, 0)
     
     # Create an Ipopt NLP object
     nlp_ipopt = ipopt.CollocationOptimizer(nlp)
@@ -157,7 +232,7 @@ def run_demo(with_plots=True):
 
     # Plot the results
     if with_plots:
-        plt.figure(1)
+        plt.figure(2)
         plt.clf()
         plt.hold(True)
         plt.subplot(311)
@@ -179,6 +254,77 @@ def run_demo(with_plots=True):
         plt.ylabel('Cooling temperature')
         plt.xlabel('time')
         plt.show()
+
+    # Simulate to verify the optimal solution
+    # Generate input
+    t = Tc_res.t 
+    u = Tc_res.x
+    u = N.array([u])
+    u = N.transpose(u)
+    u_traj = TrajectoryLinearInterpolation(t,u)
+    
+    # Comile the Modelica model first to C code and
+    # then to a dynamic library
+    oc.compile_model(curr_dir+"/files/CSTR.mo","CSTR.CSTR",target='ipopt')
+
+    # Load the dynamic library and XML data
+    sim_model=jmi.Model("CSTR_CSTR")
+
+    sim_model.set_value('c_init',c_0_A)
+    sim_model.set_value('T_init',T_0_A)
+    sim_model.set_value('Tc',u_traj.eval(0.)[0])
+
+    # Create DAE initialization object.
+    init_nlp = NLPInitialization(sim_model)
+    
+    # Create an Ipopt solver object for the DAE initialization system
+    init_nlp_ipopt = InitializationOptimizer(init_nlp)
+        
+    # Solve the DAE initialization system with Ipopt
+    init_nlp_ipopt.init_opt_ipopt_solve()
+
+    simulator = SundialsDAESimulator(sim_model, verbosity=3, start_time=0.0, \
+                                     final_time=150, time_step=0.01,input=u_traj)
+    simulator.run()
+        
+    simulator.write_data()
+
+    # Load the file we just wrote to file
+    res = jmodelica.io.ResultDymolaTextual('CSTR_CSTR_result.txt')
+
+    # Extract variable profiles
+    c_sim=res.get_variable_data('c')
+    T_sim=res.get_variable_data('T')
+    Tc_sim=res.get_variable_data('Tc')
+
+    # Plot the results
+    if with_plots:
+        plt.figure(3)
+        plt.clf()
+        plt.hold(True)
+        plt.subplot(311)
+        plt.plot(c_res.t,c_res.x,'--')
+        plt.plot(c_sim.t,c_sim.x)
+        plt.legend(('optimized','simulated'))
+        plt.grid()
+        plt.ylabel('Concentration')
+
+        plt.subplot(312)
+        plt.plot(T_res.t,T_res.x,'--')
+        plt.plot(T_sim.t,T_sim.x)
+        plt.legend(('optimized','simulated'))
+        plt.grid()
+        plt.ylabel('Temperature')
+
+        plt.subplot(313)
+        plt.plot(Tc_res.t,Tc_res.x,'--')
+        plt.plot(Tc_sim.t,Tc_sim.x)
+        plt.legend(('optimized','simulated'))
+        plt.grid()
+        plt.ylabel('Cooling temperature')
+        plt.xlabel('time')
+        plt.show()
+
     
 if __name__ == "__main__":
     run_demo()

@@ -214,7 +214,6 @@ class Trajectory:
         self.t = t
         self.x = x
 
-        
 class ResultDymolaTextual:
     """ Class representing a simulation or optimization result loaded from a
     Dymola binary file.
