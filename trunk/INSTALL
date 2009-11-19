@@ -104,12 +104,6 @@ installers for Windows will install JPype, lxml and Nose
 automatically. Linux and Mac OS X users need to install these packages
 manually.
 
-You may check that your Python distribution has all the required
-dependencies installed by running the Python commands
-
-  import jmodelica
-  jmodelica.check_packages()
-
 JModelica.org supports the following environment variables:
 
  - JMODELICA_HOME containing the path to the JModelica.org installation
