@@ -26,12 +26,15 @@ from jmodelica.tests import testattr
 from jmodelica.compiler import OptimicaCompiler
 from jmodelica import jmi
 from jmodelica.initialization.ipopt import NLPInitialization
+from jmodelica.initialization.ipopt import InitializationOptimizer
 
 int = N.int32
 N.int = N.int32
 
 jm_home = jmodelica.environ['JMODELICA_HOME']
 path_to_examples = os.path.join('Python','jmodelica','examples')
+path_to_tests = os.path.join(jm_home, "Python", "jmodelica", "tests")
+
 oc = OptimicaCompiler()
 
 model = os.path.join('files','CSTR.mo')
@@ -114,4 +117,142 @@ class TestNLPInit:
         irow=N.zeros(dh_n_nz,dtype=int)
         icol=N.zeros(dh_n_nz,dtype=int)
         self.init_nlp.init_opt_dh_nz_indices(irow,icol)
+        
+    @testattr(stddist = True)
+    def test_init_opt(self):
+        """ Test of DAE initialization optimization problem
+        """
+        
+        model_daeinit = os.path.join("files", "DAEInitTest.mo")
+        fpath_daeinit = os.path.join(path_to_tests, model_daeinit)
+        cpath_daeinit = "DAEInitTest"
+        fname_daeinit = cpath_daeinit.replace('.','_',1)
+        
+        oc.set_boolean_option('state_start_values_fixed',True)
+        oc.compile_model(fpath_daeinit, cpath_daeinit, target='ipopt')
+    
+        # Load the dynamic library and XML data
+        dae_init_test = jmi.Model(fname_daeinit)
+    
+        init_nlp = NLPInitialization(dae_init_test)
+    
+        # Test init_opt_get_dimensions
+        res_n_x = 8
+        res_n_h = 8
+        res_dh_n_nz = 17
+    
+        n_x, n_h, dh_n_nz = init_nlp.init_opt_get_dimensions()
+    
+        assert N.abs(res_n_x-n_x) + N.abs(res_n_h-n_h) + \
+               N.abs(res_dh_n_nz-dh_n_nz)==0, \
+               "test_jmi.py: test_init_opt: init_opt_get_dimensions returns wrong problem dimensions." 
+    
+        # Test init_opt_get_x_init
+        res_x_init = N.array([0,0,3,4,1,0,0,0])
+        x_init = N.zeros(n_x)
+        init_nlp.init_opt_get_initial(x_init)
+        assert N.sum(N.abs(res_x_init-x_init))<1e-3, \
+               "test_jmi.py: test_init_opt: init_opt_get_x_init returns wrong values." 
+    
+        # Test init_opt_set_x_init
+        res_x_init = N.ones(n_x)
+        x_init = N.ones(n_x)
+        init_nlp.init_opt_set_initial(x_init)
+        init_nlp.init_opt_get_initial(x_init)
+        assert N.sum(N.abs(res_x_init-x_init))<1e-3, \
+               "test_jmi.py: test_init_opt: init_opt_get_x_init returns wrong values after setting the initial values with init_opt_get_x_init." 
+    
+        # Test init_opt_get_bounds
+        res_x_lb = -1e20*N.ones(n_x)
+        res_x_ub = 1e20*N.ones(n_x)
+        x_lb = N.zeros(n_x)
+        x_ub = N.zeros(n_x)
+        init_nlp.init_opt_get_bounds(x_lb,x_ub)
+        assert N.sum(N.abs(res_x_lb-x_lb))<1e-3, \
+               "test_jmi.py: test_init_opt: init_opt_get_bounds returns wrong lower bounds." 
+        assert N.sum(N.abs(res_x_lb-x_lb))<1e-3, \
+               "test_jmi.py: test_init_opt: init_opt_get_bounds returns wrong upper bounds." 
+    
+        # Test init_opt_set_bounds
+        res_x_lb = -5000*N.ones(n_x)
+        res_x_ub = 5000*N.ones(n_x)
+        x_lb = -5000*N.ones(n_x)
+        x_ub = 5000*N.ones(n_x)
+        init_nlp.init_opt_set_bounds(x_lb,x_ub)
+        init_nlp.init_opt_get_bounds(x_lb,x_ub)
+        assert N.sum(N.abs(res_x_lb-x_lb))<1e-3, \
+               "test_jmi.py: test_init_opt: init_opt_get_bounds returns wrong lower bounds after calling init_opt_set_bounds." 
+        assert N.sum(N.abs(res_x_lb-x_lb))<1e-3, \
+               "test_jmi.py: test_init_opt: init_opt_get_bounds returns wrong upper bounds after calling init_opt_set_bounds." 
+    
+        # Test init_opt_f
+        res_f = N.array([0.])
+        f = N.zeros(1)
+        init_nlp.init_opt_f(f)
+        assert N.sum(N.abs(res_f-f))<1e-3, \
+               "test_jmi.py: test_init_opt: init_opt_f returns wrong value" 
+    
+        # Test init_opt_df
+        res_df = N.array([0.,0,0,0,0,0,0,0])
+        df = N.ones(n_x)
+        init_nlp.init_opt_df(df)
+        assert N.sum(N.abs(res_df-df))<1e-3, \
+               "test_jmi.py: test_init_opt: init_opt_df returns wrong value" 
+    
+        # Test init_opt_h
+        res_h = N.array([ -1.98158529e+02,  -2.43197505e-01,   5.12000000e+02,   5.00000000e+00,
+                          1.41120008e-01,   0.00000000e+00,   0.00000000e+00,   0.00000000e+00])
+        h = N.zeros(n_h)
+        init_nlp.init_opt_h(h)
+        assert N.sum(N.abs(res_h-h))<1e-3, \
+               "test_jmi.py: test_init_opt: init_opt_h returns wrong value" 
+    
+        # Test init_opt_dh
+        res_dh = N.array([  -1.,           -1.,         -135.,          192.,           -0.9899925,    -1.,
+      -48.,            0.65364362,   -1.,            0.54030231,   -2.,           -1.,
+       -1.,            0.9899925,   192.,           -1.,           -1.,        ])
+        dh = N.ones(dh_n_nz)
+        init_nlp.init_opt_dh(dh)
+        assert N.sum(N.abs(res_dh-dh))<1e-3, \
+               "test_jmi.py: test_init_opt: init_opt_dh returns wrong value" 
+    
+        # Test init_opt_dh_nz_inidices
+        res_dh_irow = N.array([1, 2, 1, 3, 5, 7, 1, 2, 8, 1, 2, 6, 3, 5, 3, 4, 5])
+        res_dh_icol = N.array([1, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 7, 7, 8])
+        dh_irow = N.zeros(dh_n_nz,dtype=N.int32)
+        dh_icol = N.zeros(dh_n_nz,dtype=N.int32)
+        init_nlp.init_opt_dh_nz_indices(dh_irow,dh_icol)
+        assert N.sum(N.abs(res_dh_irow-dh_irow))<1e-3, \
+               "test_jmi.py: test_init_opt: init_opt_dh_nz_indices returns wrong values for the row indices." 
+        assert N.sum(N.abs(res_dh_icol-dh_icol))<1e-3, \
+               "test_jmi.py: test_init_opt: init_opt_dh_nz_indices returns wrong values for the column indices" 
+    
+        # Test optimization of initialization system
+        init_nlp_ipopt = InitializationOptimizer(init_nlp)
+    
+        # init_nlp_ipopt.init_opt_ipopt_set_string_option("derivative_test","first-order")
+        
+        init_nlp_ipopt.init_opt_ipopt_solve()
+    
+        res_Z = N.array([5.,
+                         -198.1585290151921,
+                         -0.2431975046920718,
+                         3.0,
+                         4.0,
+                         1.0,
+                         2197.0,
+                         5.0,
+                         -0.92009689684513785,
+                         0.])
+    
+        assert max(N.abs(res_Z-dae_init_test.get_z()))<1e-3, \
+               "test_jmi.py: test_init_opt: Wrong solution to initialization system." 
+        
+        #print(dae_init_test.getZ())
+        #print(dae_init_test.getPI())
+        #print(dae_init_test.getDX())
+        #print(dae_init_test.getX())
+        #print(dae_init_test.getU())
+        #print(dae_init_test.getW())
+
         
