@@ -71,7 +71,64 @@ class TestModel_VDP:
         """Test jmi.Model length of x"""
         size = len(self.vdp.x)
         nose.tools.assert_equal(size, 3)
+
+    @testattr(stddist = True)    
+    def test_reset(self):
+        """Testing resetting the a jmi.Model."""
+        random = N.array([12, 31, 42])
+        self.vdp.x = random
+        self.vdp.reset()
+        maxdiff = max(N.abs(random - self.vdp.x))
+        assert maxdiff > 0.001
+
+    @testattr(stddist = True)    
+    def test_get_variable_names(self):
+        names = self.vdp.get_variable_names()
+        ntools.assert_equal(names.get(0),"p1")
+        
+    @testattr(stddist = True)
+    def test_get_derivative_names(self):
+        names = self.vdp.get_derivative_names()
+        ntools.assert_equal(names.get(4),"der(x2)")
     
+    @testattr(stddist = True)
+    def test_get_differentiated_variable_names(self):
+        names = self.vdp.get_differentiated_variable_names()
+        ntools.assert_equal(names.get(8),"cost")
+    
+    @testattr(stddist = True)
+    def test_get_input_names(self):
+        names = self.vdp.get_input_names()
+        ntools.assert_equal(names.get(9),"u")
+    
+    @testattr(stddist = True)
+    def test_get_algebraic_variable_names(self):
+        # TODO improve test 
+        # there are no algebraic variables in the vdp model
+        names = self.vdp.get_algebraic_variable_names()
+        ntools.assert_equal(len(names),0)
+    
+    @testattr(stddist = True)
+    def test_get_p_opt_names(self):
+        # TODO improve test 
+        # there are no popt variables in the model
+        names = self.vdp.get_p_opt_names()
+        ntools.assert_equal(len(names),0)
+     
+    @testattr(stddist = True)   
+    def test_get_sizes(self):
+        sizes = [0, 0, 3, 0, 3, 3, 1, 0, 1, 18]
+        ntools.assert_equal(self.vdp.get_sizes(),sizes)
+    
+    @testattr(stddist = True)    
+    def test_get_offsets(self):
+        offsets = [0, 0, 0, 3, 3, 6, 9, 10, 10, 11, 14, 17, 18]
+        ntools.assert_equal(self.vdp.get_offsets(),offsets)
+    
+    @testattr(stddist = True)
+    def test_get_n_tp(self):
+        ntools.assert_equal(self.vdp.get_n_tp(),1)
+        
     @testattr(stddist = True)    
     def test_states_get_set(self):
         """Test jmi.Model.set_x(...) and jmi.Model.get_x()."""
@@ -83,6 +140,38 @@ class TestModel_VDP:
         self.vdp.x = new_states
         states = self.vdp.x
         N.testing.assert_array_almost_equal(new_states, states)
+
+    @testattr(stddist = True)    
+    def test_states_p_get_set(self):
+        """Test jmi.Model.set_x_p(...) and jmi.Model.get_x_p()."""
+        new_states = N.ones(3)
+        timepoint=0
+        self.vdp.set_x_p(new_states, 0)
+        N.testing.assert_array_almost_equal(self.vdp.get_x_p(0),new_states)
+        
+    @testattr(stddist = True)    
+    def test_pd_get_set(self):
+        """Test jmi.Model.set_pd(...) and jmi.Model.get_pd()."""
+        # pd is empty
+        pd_new = N.ones(1)
+        self.vdp.set_pd(pd_new)
+        N.testing.assert_array_almost_equal(self.vdp.get_pd(),N.zeros(0))
+
+    @testattr(stddist = True)    
+    def test_cd_get_set(self):
+        """Test jmi.Model.set_cd(...) and jmi.Model.get_cd()."""
+        # cd is empty
+        cd_new = N.ones(1)
+        self.vdp.set_cd(cd_new)
+        N.testing.assert_array_almost_equal(self.vdp.get_cd(),N.zeros(0))
+
+    @testattr(stddist = True)    
+    def test_ci_get_set(self):
+        """Test jmi.Model.set_ci(...) and jmi.Model.get_ci()."""
+        # cd is empty
+        ci_new = N.ones(1)
+        self.vdp.set_ci(ci_new)
+        N.testing.assert_array_almost_equal(self.vdp.get_ci(),N.zeros(0))
     
     @testattr(stddist = True)   
     def test_diffs(self):
@@ -96,7 +185,15 @@ class TestModel_VDP:
         new_diffs = [1.54, 3.88, 45.87]
         diffs[:] = new_diffs
         N.testing.assert_array_almost_equal(new_diffs, diffs2)
-    
+
+    @testattr(stddist = True)    
+    def test_diffs_p_get_set(self):
+        """Test jmi.Model.set_dx_p(...) and jmi.Model.get_dx_p()."""
+        new_diffs = N.ones(3)
+        timepoint=0
+        self.vdp.set_dx_p(new_diffs, 0)
+        N.testing.assert_array_almost_equal(self.vdp.get_dx_p(0),new_diffs)
+            
     @testattr(stddist = True)    
     def test_inputs(self):
         """Test jmi.Model.set_u(...) and jmi.Model.get_u()."""
@@ -108,6 +205,38 @@ class TestModel_VDP:
         self.vdp.u = new_inputs
         inputs = self.vdp.u
         N.testing.assert_array_almost_equal(new_inputs, inputs)
+
+    @testattr(stddist = True)    
+    def test_inputs_p_get_set(self):
+        """Test jmi.Model.set_u_p(...) and jmi.Model.get_u_p()."""
+        new_inputs = N.ones(1)
+        timepoint=0
+        self.vdp.set_u_p(new_inputs, 0)
+        N.testing.assert_array_almost_equal(self.vdp.get_u_p(0),new_inputs)
+        
+    @testattr(stddist = True)    
+    def test_w_get_set(self):
+        """Test jmi.Model.set_w(...) and jmi.Model.get_w()."""
+        # w is empty
+        w_new = N.ones(1)
+        self.vdp.set_w(w_new)
+        N.testing.assert_array_almost_equal(self.vdp.get_w(),N.zeros(0))
+
+    @testattr(stddist = True)    
+    def test_w_p_get_set(self):
+        """Test jmi.Model.set_w_p(...) and jmi.Model.get_w_p()."""
+        new_alg = N.ones(1)
+        timepoint=0
+        self.vdp.set_w_p(new_alg, 0)
+        N.testing.assert_array_almost_equal(self.vdp.get_w_p(0),N.zeros(0))
+        
+    @testattr(stddist = True)    
+    def test_z_get_set(self):
+        """Test jmi.Model.set_z(...) and jmi.Model.get_z()."""
+        z_new = self.vdp.get_z()
+        z_new.itemset(0,2)
+        self.vdp.set_z(z_new)
+        N.testing.assert_array_almost_equal(self.vdp.get_z(),z_new)
     
     @testattr(stddist = True)    
     def test_parameters(self):
@@ -144,16 +273,7 @@ class TestModel_VDP:
                 all_zeros = False
                 
         assert not all_zeros
-    
-    @testattr(stddist = True)    
-    def test_reset(self):
-        """Testing resetting the a jmi.Model."""
-        random = N.array([12, 31, 42])
-        self.vdp.x = random
-        self.vdp.reset()
-        maxdiff = max(N.abs(random - self.vdp.x))
-        assert maxdiff > 0.001
-        
+            
     def test_optimization_cost_eval(self):
         """Test evaluation of optimization cost function."""
         simulator = SundialsODESimulator(self.m)
@@ -199,7 +319,81 @@ class TestModel_VDP:
         self.vdp.set_values(parameters, new_values)
         for index, val in enumerate(new_values):
             nose.tools.assert_equal(val, self.vdp.get_value(parameters[index]))
+            
+#    @testattr(stddist = True)
+#    def test_writeload_parameters_from_XML(self):
+#        original_values = self.vdp.get_pi()
+#        new_values = N.ones(3)
+#        self.vdp.set_pi(new_values)
+#
+#        # new values are set
+#        N.testing.assert_array_equal(self.vdp.get_pi(),new_values)
+#        
+#        #load original values, pi are now = old values
+#        self.vdp.load_parameters_from_XML()
+#        N.testing.assert_array_equal(self.vdp.get_pi(),original_values)
+#        
+#        # set new values and write to xml
+#        self.vdp.set_pi(new_values)
+#        self.vdp.write_parameters_to_XML()
+#        
+#        #load values, pi are now = new values
+#        self.vdp.load_parameters_from_XML()
+#        N.testing.assert_array_equal(self.vdp.get_pi(),new_values)
 
+    @testattr(stddist = True)
+    def test_writeload_params_from_XML(self):
+        original_values = self.vdp.get_pi()
+        new_values = N.ones(3)
+        self.vdp.set_pi(new_values)
+
+        # new values are set
+        N.testing.assert_array_equal(self.vdp.get_pi(),new_values)
+        
+        #load original values, pi are now = old values
+        self.vdp.load_parameters_from_XML()
+        N.testing.assert_array_equal(self.vdp.get_pi(),original_values)
+        
+        # set new values and write to xml
+        self.vdp.set_pi(new_values)
+        self.vdp.write_parameters_to_XML("test_jmi.xml")
+        
+        #load values, pi are now = new values
+        self.vdp.load_parameters_from_XML("test_jmi.xml")
+        N.testing.assert_array_equal(self.vdp.get_pi(),new_values)
+        
+        #load original values, pi are now = old values
+        self.vdp.load_parameters_from_XML()
+        N.testing.assert_array_equal(self.vdp.get_pi(),original_values)        
+            
+    @testattr(stddist = True)        
+    def test_get_name(self):
+        ntools.assert_equal(self.vdp.get_name(),"VDP_pack_VDP_Opt")
+    
+    @testattr(stddist = True)    
+    def test_opt_interval_starttime_free(self):
+        ntools.assert_equal(self.vdp.opt_interval_starttime_free(),False)
+    
+    @testattr(stddist = True)    
+    def test_opt_interval_starttime_fixed(self):
+        ntools.assert_equal(self.vdp.opt_interval_starttime_fixed(),True)
+    
+    @testattr(stddist = True)        
+    def test_opt_interval_finaltime_free(self):
+        ntools.assert_equal(self.vdp.opt_interval_finaltime_free(),False)
+    
+    @testattr(stddist = True)    
+    def test_opt_interval_finaltime_fixed(self):
+        ntools.assert_equal(self.vdp.opt_interval_finaltime_fixed(),True)
+    
+    @testattr(stddist = True)   
+    def test_opt_interval_get_start_time(self):
+        ntools.assert_equal(self.vdp.opt_interval_get_start_time(),0.0)
+    
+    @testattr(stddist = True)   
+    def test_opt_interval_get_final_time(self):
+        ntools.assert_equal(self.vdp.opt_interval_get_final_time(),20.0)
+        
 class TestModel_CSTR:
     """Test the high level model class, jmi.Model with alias variables 
         enabled.
@@ -212,6 +406,25 @@ class TestModel_CSTR:
         """Load the test model."""
         # Load the dynamic library and XML data
         self.cstr = jmi.Model(fname_cstr)
+
+    @testattr(stddist = True)
+    def test_get_variable_description(self):
+        ntools.assert_equal(self.cstr.get_variable_description("cstr.F0"),"Inflow")
+        
+    @testattr(stddist = True)
+    def test_get_variable_descriptions(self):
+        descriptions = self.cstr.get_variable_descriptions()
+        ntools.assert_equal(descriptions.get(2),"Outflow")
+
+    @testattr(stddist = True)
+    def test_is_negated_alias(self):
+        ntools.assert_equal(self.cstr.is_negated_alias("cstr.Tc"),False)
+    
+    @testattr(stddist = True)
+    def test_get_aliases(self):
+        (aliases,isalias) = self.cstr.get_aliases("u")
+        ntools.assert_equal(aliases[0],"cstr.Tc")
+        ntools.assert_equal(isalias[0],False)
             
     @testattr(stddist = True)
     def test_setget_alias_value(self):

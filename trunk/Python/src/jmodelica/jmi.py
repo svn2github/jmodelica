@@ -454,20 +454,6 @@ class Model(object):
         """
         return self._get_XMLvariables_doc().is_negated_alias(variablename)
 
-    def get_aliases(self, aliased_variable):
-        """ Return list of all alias variables belonging to the aliased 
-            variable along with a list of booleans indicating whether the 
-            alias variable should be negated or not.
-            
-            Raises exception if argument is not an aliased or alias variable.
-
-            Returns:
-                A list consisting of the alias variable names and another
-                list consisting of booleans indicating if the corresponding
-                alias i negated.
-        """
-        return self._get_XMLvariables_doc().get_aliases(aliased_variable)
-
     def get_variable_description(self, variablename):
         """ Return the description of a variable. """
         return self._get_XMLvariables_doc().get_variable_description(variablename)
@@ -1044,10 +1030,6 @@ class Model(object):
 
         """
         return self._get_XMLvariables_doc().get_aliases(variable)
-    
-    def get_variable_description(self, variable):
-        """ Return the description of a variable. """
-        return self._get_XMLvariables_doc().get_variable_description(variable)
             
     def opt_interval_starttime_free(self):
         """Evaluate if optimization start time is free.
