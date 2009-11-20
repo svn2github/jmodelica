@@ -667,7 +667,43 @@ aspect InstanceErrorCheck {
 			//	myInstClassDecl().collectErrors();
 		}
 	}
+	
+	boolean InstFunctionCall.errorChecked = false;
+	public void InstFunctionCall.collectErrors() {
+	    if (!errorChecked) {
+	    	// Check that the function exists
+	    	InstClassDecl func = getName().myInstClassDecl();
+	    	if (!func.isFunction()) {
+	    		// Report that function does not exist
+		    	String name = getName().name();
+	    		if (func.isUnknown()) 
+	    			error("The function " + name + " is undeclared");
+	    		else
+	    			error("The class " + name + " is not a function");
+	    		
+	    		// To avoid duplicate error from InstAccess, don't call super.collectErrors()
+		    	allChecks();
+		    	getArgs().collectErrors();	    		
+	    	} else {
+	    		// Function exists, check everything
+	    		super.collectErrors();
+	    		
+	    		// We need to check the function definition as well.
+	    	    func.collectErrors();
+	    	    
+	    	    // TODO: Check if there were any unbindable args
+	    	}
+	    }
+	}
  
+	boolean InstNamedArgument.errorChecked = false;
+	public void InstNamedArgument.collectErrors() {
+	    if (!errorChecked) {
+			allChecks();
+			getFExp().collectErrors();
+	    }
+	}
+	
 }
 
 aspect FlatExpressionErrorCheck {

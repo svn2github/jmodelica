@@ -133,12 +133,40 @@ end FunctionFlatten3;
 
 
 model FunctionBinding1
- /* Should bind as TestFunction1(0) */
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="FunctionBinding1",
+          description="Binding function arguments: 1 input, use default",
+          flatModel="
+fclass FunctionTests.FunctionBinding1
+ Real x = FunctionTests.TestFunction1(0);
+
+ function FunctionTests.TestFunction1
+  input Real i1 := 0;
+  output Real o1 := i1;
+ algorithm
+ end FunctionTests.TestFunction1;
+end FunctionTests.FunctionBinding1;
+")})));
+
  Real x = TestFunction1();
 end FunctionBinding1;
 
 model FunctionBinding2
- /* Should bind as TestFunction1(1) */
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="FunctionBinding2",
+          description="Binding function arguments: 1 input, 1 arg",
+          flatModel="
+fclass FunctionTests.FunctionBinding2
+ Real x = FunctionTests.TestFunction1(1);
+
+ function FunctionTests.TestFunction1
+  input Real i1 := 0;
+  output Real o1 := i1;
+ algorithm
+ end FunctionTests.TestFunction1;
+end FunctionTests.FunctionBinding2;
+")})));
+
  Real x = TestFunction1(1);
 end FunctionBinding2;
 
@@ -158,22 +186,82 @@ model FunctionBinding5
 end FunctionBinding5;
 
 model FunctionBinding6
- /* Should bind as TestFunction3(1, 2, 0) */
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="FunctionBinding6",
+          description="Binding function arguments: 3 inputs, 2 args, 1 default",
+          flatModel="
+fclass FunctionTests.FunctionBinding6
+ Real x = FunctionTests.TestFunction3(1, 2, 0);
+
+ function FunctionTests.TestFunction3
+  input Real i1;
+  input Real i2;
+  input Real i3 := 0;
+  output Real o1 := i1 + i2 + i3;
+ algorithm
+ end FunctionTests.TestFunction3;
+end FunctionTests.FunctionBinding6;
+")})));
+
  Real x = TestFunction3(1, 2);
 end FunctionBinding6;
 
 model FunctionBinding7
- /* Should bind as TestFunction0() */
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="FunctionBinding7",
+          description="Binding function arguments: 3 inputs, 2 args, 1 default",
+          flatModel="
+fclass FunctionTests.FunctionBinding7
+ Real x = FunctionTests.TestFunction0();
+
+ function FunctionTests.TestFunction0
+  output Real o1 := 0;
+ algorithm
+ end FunctionTests.TestFunction0;
+end FunctionTests.FunctionBinding7;
+")})));
+
  Real x = TestFunction0();
 end FunctionBinding7;
 
 model FunctionBinding8
- /* Should bind as TestFunction1(1) */
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="FunctionBinding8",
+          description="Binding function arguments: 1 input, 1 named arg",
+          flatModel="
+fclass FunctionTests.FunctionBinding8
+ Real x = FunctionTests.TestFunction1(1);
+
+ function FunctionTests.TestFunction1
+  input Real i1 := 0;
+  output Real o1 := i1;
+ algorithm
+ end FunctionTests.TestFunction1;
+end FunctionTests.FunctionBinding8;
+")})));
+
  Real x = TestFunction1(i1=1);
 end FunctionBinding8;
 
 model FunctionBinding9
- /* Should bind as TestFunction2(1, 2) */
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="FunctionBinding9",
+          description="Binding function arguments: 2 inputs, 2 named arg (inverted order)",
+          flatModel="
+fclass FunctionTests.FunctionBinding9
+ Real x = FunctionTests.TestFunction2(1, 2);
+
+ function FunctionTests.TestFunction2
+  input Real i1 := 0;
+  input Real i2 := 0;
+  output Real o1 := 0;
+  output Real o2 := i2;
+ algorithm
+  o1 := i1;
+ end FunctionTests.TestFunction2;
+end FunctionTests.FunctionBinding9;
+")})));
+
  Real x = TestFunction2(i2=2, i1=1);
 end FunctionBinding9;
 
@@ -197,6 +285,63 @@ model FunctionBinding13
  Real x = TestFunction2(1, 2, i1=3);
 end FunctionBinding13;
 
+model FunctionBinding14
+ /* Should bind to TestFunction1(1.0)? */
+ parameter Real a = 1;
+ Real x = TestFunction1(a);
+end FunctionBinding14;
+
+
+model BadFunctionCall1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="BadFunctionCall1",
+          description="Call to non-existing function",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  The function NonExistingFunction is undeclared
+")})));
+
+  Real x = NonExistingFunction();
+end BadFunctionCall1;
+
+model BadFunctionCall2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="BadFunctionCall2",
+          description="Call to component as function",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  The function notAFunction is undeclared
+")})));
+
+  Real notAFunction = 0;
+  Real x = notAFunction();
+end BadFunctionCall2;
+
+class NotAFunctionClass
+ Real x;
+end NotAFunctionClass;
+
+model BadFunctionCall3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="BadFunctionCall3",
+          description="Call to non-function class as function",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  The class NotAFunctionClass is not a function
+")})));
+
+  Real x = NotAFunctionClass();
+end BadFunctionCall3;
+
 
 model FunctionType1
  /* Should go through */
@@ -204,7 +349,7 @@ model FunctionType1
 end FunctionType1;
 
 model FunctionType2
- /* Should go through? */
+ /* Should go through? Should generate error? */
  Integer x = TestFunction1(1.0);
 end FunctionType2;
 
