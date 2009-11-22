@@ -1,0 +1,109 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+aspect OptimicaExpressions {
+
+	rewrite InstFunctionCall {
+		when (//((getName() instanceof InstDot)? 
+				//	((InstDot)getName()).getLeft()!=null: true) && 
+				getName().getLastInstAccess() instanceof InstComponentAccess &&
+				getNumArg()==1)
+		 to InstTimedVariable {
+//			System.out.println("rewrite InstFunctionCall: " + getName().name());
+		 	InstTimedVariable iv = new InstTimedVariable(getName(), getArg(0).getFExp());
+		 	iv.setLocation(this);
+		 	return iv;
+		 }
+	}
+	
+	rewrite FIdUseExp {
+		when (name().equals("startTime")) to FStartTimeExp {
+			return new FStartTimeExp();
+		}
+	}
+
+	rewrite FIdUseExp {
+		when (name().equals("finalTime")) to FFinalTimeExp {
+			return new FFinalTimeExp();
+		}
+	}
+	
+	eq FStartTimeExp.ceval() {
+		if (myFOptClass().startTimeAttributeSet()) {
+			return myFOptClass().startTimeAttributeCValue();
+		} else if (myFOptClass().startTimeInitialGuessAttributeSet()) {
+			return myFOptClass().startTimeInitialGuessAttributeCValue();
+		} else {
+			return myFOptClass().startTimeAttributeCValue();
+		}
+	}
+
+	eq FFinalTimeExp.ceval() {
+		if (myFOptClass().finalTimeAttributeSet()) {
+			return myFOptClass().finalTimeAttributeCValue();
+		} else if (myFOptClass().finalTimeInitialGuessAttributeSet()) {
+			return myFOptClass().finalTimeInitialGuessAttributeCValue();
+		} else {
+			return myFOptClass().finalTimeAttributeCValue();
+		}
+	}
+	
+	public FExp FTimedVariable.scalarize(HashMap<String,Integer> indexMap) { 
+		return new FTimedVariable((FIdUse)getName().fullCopy(),getArg().scalarize(indexMap)); 
+	}
+	
+	boolean FTimedVariable.rewritten = false;
+	
+	/**
+	 * \brief FTimedVariables referring to alias variables need to be changed to 
+	 * FTimedVariables referring to their alias targets. 
+	 * 
+	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
+	 * is true. Notice that in order for the rewrite to be enable, the is$final
+	 * field of FTimedVariables needs to be set to false: this is done by the recursive
+	 * method ASTNode.flushAllRecursiveClearFinal. 
+	 */
+	rewrite FTimedVariable {
+		when (!rewritten && myFClass() != null && 
+				myFClass().aliasVariablesEliminated &&
+				!getName().myFV().isUnknown() && getName().myFV().isAlias()) to FExp {
+			FQName new_name = (FQName)((FVariable)getName().myFV()).alias().getFQName().fullCopy();
+			//FQName old_name = getName().getFQName();
+			//System.out.println(" ************************************* FIdUseExp.rewrite " + old_name.name() + " -> " + new_name.name());
+
+			FExp new_exp = null;
+			FTimedVariable tv = new FTimedVariable(new FIdUse(new_name),getArg());
+			tv.rewritten = true;
+			if (getName().myFV().isNegated()) {
+				new_exp = new FNegExp(tv);
+			} else {
+				new_exp = tv;
+			}
+			return new_exp;
+		}
+	}
+	
+	public void FTimedVariable.flushAllRecursiveClearFinal() {
+		flushAll();
+		is$Final = false;
+		for (int i=0;i<getNumChild();i++) {
+			getChild(i).flushAllRecursiveClearFinal();
+		}
+	}
+
+	
+	
+}

@@ -1,0 +1,54 @@
+<!--
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 3 as published
+    by the Free Software Foundation, or optionally, under the terms of the
+    Common Public License version 1.0 as published by IBM.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License, or the Common Public License, for more details.
+
+    You should have received copies of the GNU General Public License
+    and the Common Public License along with this program.  If not,
+    see <http://www.gnu.org/licenses/> or
+    <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
+
+-->
+
+<OptionRegistry>
+	<Options>
+		<Option>
+			<Type>String</Type>
+			<StringAttributes>
+				<Key>default_msl_version</Key>
+				<Value>3.0.1</Value>
+			</StringAttributes>
+		</Option>
+		<Option>
+                 <!--
+                   This option enables the user to specify if initial equations
+                   should be generated automatically for differentiated variables
+                   even though the fixed attribute is equal to fixed. Setting
+                   this option to true is, however, often practical in optimization
+                   problems.
+                 -->
+			<Type>Boolean</Type>
+			<BooleanAttributes>
+				<Key>state_start_values_fixed</Key>
+				<Value>false</Value>
+			</BooleanAttributes>
+		</Option>
+		
+		<Option>
+		  <Type>String</Type>
+		  <StringAttribute>
+		      <Key>MODELICAPATH</Key>
+		      <Value>exjobb/repo/svn.jmodelica.org/trunk/ThirdParty/MSL/</Value>
+		  </StringAttribute>
+        </Option>
+        		
+	</Options>	
+</OptionRegistry>
