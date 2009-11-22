@@ -1,0 +1,392 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Collection;
+
+import org.jmodelica.util.OptionRegistry;
+
+//import beaver.Parser.Exception;
+
+/**
+ * 
+ * Main compiler class which bundles the tasks needed to compile an Optimica
+ * model. This class is an extension of ModelicaCompiler.
+ * <p>
+ * There are two usages with this class:
+ * 	-# Compile in one step either from the command line or by calling the static 
+ * method <compileModel> in your own class.
+ *	-# Split compilation into several steps by calling the static methods in your
+ *  own class.
+ *  <p>
+ * Use (1) for a simple and compact way of compiling an Optimica model. As a
+ * minimum, provide the modelfile name and class name as command line arguments.
+ * Optional arguments are XML templates and c template files which are needed
+ * for code generation. If any of these are ommitted no code generation will be
+ * performed.
+ * <p>
+ * Example without code generation: <br>
+ * <code>org.jmodelica.applications.OptimicaCompiler myModels/models.mo models.model1</code>
+ * <p>
+ * Example with code generation: <br> 
+ * <code>org.jmodelica.applications.OptimicaCompiler myModels/models.mo 
+ * models.model1 XMLtemplate1.xml XMLtemplate2.xml XMLtemplate3.xml cppTemplate.cpp</code>
+ * <p>
+ * Logging can be set with the optional argument -log=i, w or e where:
+ *	- -i : log info, warning and error messages 
+ *	- -w : log warning and error messages
+ *	- -e : log error messages only (default if the log option is not used)
+ * <p>
+ * Example with log level set to INFO: <br>
+ * <code>org.jmodelica.applications.OptimicaCompiler -i myModels/models.mo
+ * models.model1</code> <br>
+ * The logs will be printed to standard out.
+ * <p>
+ * 
+ * For method (2), the compilation steps are divided into 4 tasks which can be
+ * used via the methods:
+ *	-# parseModel (source code -> attributed source representation) - ModelicaCompiler
+ *	-# instantiateModel (source representation -> instance model) - ModelicaCompiler
+ *	-# flattenModel (instance model -> flattened model)
+ *	-# generateCode (flattened model -> c code and XML code)
+ * 
+ * <p>
+ * They must be called in this order. Use provided methods in ModelicaCompiler
+ * to get/set logging level.
+ * 
+ */
+public class OptimicaCompiler extends ModelicaCompiler{
+	
+	private String xmlProblVariablesTempl = null;
+		
+	public OptimicaCompiler(OptionRegistry options, String xmlVariablesTempl, 
+			String xmlProblVariablesTempl, String xmlValuesTempl, String cTemplatefile) {
+		super(options, xmlVariablesTempl, xmlValuesTempl, cTemplatefile);
+		this.xmlProblVariablesTempl = xmlProblVariablesTempl;
+	}
+	
+	/**
+	 * Returns the XML problem variables template file path set for this compiler instance.
+	 * 
+	 * @return Reference to the XML variables template file path attribute. 
+	 * 
+	 */
+	public String getXMLProblVariablesTemplate() {
+		return this.xmlProblVariablesTempl;
+	}
+
+	/**
+	 * Set the XML problem variables template file path attribute.
+	 * 
+	 * @param template The new XML problem variables template file path.
+	 */
+	public void setXMLProblVariablesTemplate(String template) {
+		this.xmlProblVariablesTempl = template;
+	}
+	
+	/**
+	 * Compiles an Optimica model. A model file name and class must be provided.
+	 * Template files for XML and c code can be provided to generatate code for
+	 * this model. Prints an error and returns without completion if, for
+	 * example, a file can not be found or if the parsing fails. Supports 
+	 * multiple model files.
+	 * 
+	 * @param name
+	 *            Array of names of the model files.
+	 * @param cl
+	 *            The name of the class in the model file to compile.
+	 * @param xmlVariablesTempl
+	 *            The XML template file for model variables (optional).
+	 * @param xmlProblVariablesTempl
+	 *            The XML template file for the optimization problem variables.
+	 *            (optional).
+	 * @param xmlValuesTempl
+	 *            The XML template file for independent parameter values.
+	 *            (optional).
+	 * @param cTemplatefile
+	 *            The c template file (optional).
+	 *            
+	 * @throws beaver.Parser.Exception If there was an Beaver parsing exception.
+	 * @throws CompilerException
+	 *             If errors have been found during the parsing, instantiation
+	 *             or flattening.
+	 * @throws FileNotFoundException
+	 *             If the model file can not be found.
+	 * @throws IOException
+	 *             If there was an error reading the model file. (Beaver
+	 *             exception.)
+	 * @throws IOException
+	 *             If there was an error creating the .mof file.
+	 * @throws ModelicaClassNotFoundException
+	 *             If the Modelica class to parse, instantiate or flatten is not
+	 *             found.
+	 * 
+	 */
+	public void compileModel(String name[], String cl) 
+	  throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		logger.info("======= Compiling model =======");
+		
+		// build source tree
+		SourceRoot sr = parseModel(name);
+
+		// compute instance tree
+		InstClassDecl icd = instantiateModel(sr, cl);
+			
+		// flattening
+		FOptClass fc = flattenModel(icd);
+
+		// Generate code?
+		if (super.getXMLVariablesTemplate() != null && super.getCTemplate() != null) {
+			generateCode(fc);
+		}
+		
+		logger.info("====== Model compiled successfully =======");
+	}
+
+
+	/**
+	 * Computes the flattened model representation from a model instance node.
+	 * 
+	 * @param icd
+	 *            A reference to the model instance.
+	 * 
+	 * @return FOptClass object representing the flattened Optimica model.
+	 * 
+	 * @throws CompilerException
+	 *             If errors have been found during the flattening.
+	 * @throws IOException
+	 *             If there was an error creating the .mof file.
+	 * @throws ModelicaClassNotFoundException
+	 *             If the Modelica class to flatten is not found.
+	 */
+	public FOptClass flattenModel(InstClassDecl icd) 
+		throws CompilerException, ModelicaClassNotFoundException, IOException {
+		FlatRoot flatRoot = new FlatRoot();
+		flatRoot.setFileName(icd.qualifiedName()+".mof");
+		FOptClass fc = new FOptClass();
+		flatRoot.setFClass(fc);
+		flatRoot.options = new OptionRegistry(icd.root().options);
+		
+		logger.info("Flattening starts...");
+		
+		icd.flattenInstClassDecl(fc);
+		
+		// Output the untransformed flattened model
+		logger.info("Creating raw .mof file...");
+	    	    	// Create file 
+	   	FileWriter fstream = new FileWriter(icd.qualifiedName()+".mof");
+	   	BufferedWriter out = new BufferedWriter(fstream);
+	   	out.write(fc.prettyPrint(""));
+	   	//Close the output stream
+	   	out.close();
+
+	   	logger.info("...raw .mof file created.");
+
+		if(getLogLevel("JModelica.ModelicaCompiler").equals("INFO")) {
+			logger.info("Raw flattened model:");		
+			System.out.print(fc.prettyPrint(""));
+		}
+	   	
+		fc.transformCanonical();
+
+		Collection<Problem> problems = fc.errorCheck();
+		if (problems.size()>0) {
+			super.handleCompilerProblems(problems);
+		}
+				
+		logger.info("Creating transformed .mof file...");
+	    	    	// Create file 
+	   	fstream = new FileWriter(icd.qualifiedName()+"_transformed.mof");
+	   	out = new BufferedWriter(fstream);
+	   	out.write(fc.prettyPrint(""));
+	   	//Close the output stream
+	   	out.close();
+	   
+	    logger.info("... transformed .mof file created.");
+	    
+		if(getLogLevel(logger.getName()).equals("INFO")) {
+			System.out.println(fc.diagnostics());
+			System.out.print(fc.prettyPrint(""));
+		}
+		
+		return fc;
+	}
+
+	/**
+	 * 
+	 * Generates XML and c code for a flattened Optimica model represented as an
+	 * instance of FOptClass using template files. The XML and c files are given
+	 * the default names <modelname>_variable.xml, <modelname>_values.xml,
+	 * <modelname>_problvariables.xml and <modelname>.c respectively.
+	 * 
+	 * @param fc
+	 *            The FOptClass instance for which the code generation should be
+	 *            computed.
+	 * @param xmlVariablesTempl
+	 *            The XML template file for model variables (optional).
+	 * @param xmlProblVariablesTempl
+	 *            The XML template file for the optimization problem variables
+	 *            (optional).
+	 * @param xmlValuesTempl
+	 *            The XML template file for independent parameter values
+	 *            (optional).
+	 * @param ctemplate
+	 *            The path to the c template file.
+	 *            
+	 * @throws FileNotFoundException
+	 *             Throws the exception if either of the four template files 
+	 *             can not be found.
+	 */
+	public void generateCode(FOptClass fc) throws FileNotFoundException {
+		logger.info("Generating code...");
+
+		OptimicaXMLVariableGenerator variablegenerator = new OptimicaXMLVariableGenerator(new PrettyPrinter(), '$', fc);
+		String output = fc.nameUnderscore() + "_variables.xml";
+		variablegenerator.generate(super.getXMLVariablesTemplate(), output);
+
+		XMLProblemVariableGenerator problVariableGenerator = new XMLProblemVariableGenerator(new PrettyPrinter(), '$', fc);
+		output = fc.nameUnderscore() + "_problvariables.xml";
+		problVariableGenerator.generate(this.xmlProblVariablesTempl, output);
+
+		XMLValueGenerator valuegenerator = new XMLValueGenerator(new PrettyPrinter(), '$', fc);
+		output = fc.nameUnderscore() + "_values.xml";
+		valuegenerator.generate(super.getXMLValuesTemplate(), output);
+
+		OptimicaCGenerator cgenerator = new OptimicaCGenerator(new PrettyPrinter(), '$', fc);
+		output = fc.nameUnderscore() + ".c";
+		cgenerator.generate(super.getCTemplate(), output);
+
+		logger.info("...code generated.");
+	}
+
+	public static void main(String args[]) {
+		if(args.length < 1) {
+			logger.severe("OptimicaCompiler expects the command line arguments: \n" +
+					"[-options] <file name> <class name> [<xml variables template> <xml values template> <xml problem variables template> <c template>]\n" +
+					"where options could be: \n" +
+					"-log=<i or w or e> \n" +
+					"-modelicapath=<path to modelica library>");
+		}
+		
+		int arg = 0;
+		String modelicapath = null;
+		
+		//get any options set
+		Hashtable<String, String> programarguments = extractProgramArguments(args, arg);
+		if(programarguments.get("log")!=null) {
+			setLogLevel(logger.getName(),programarguments.get("log"));
+		}else {
+			setLogLevel(logger.getName(),ModelicaCompiler.ERROR);
+		}
+		modelicapath = programarguments.get("modelicapath");
+		
+		arg = programarguments.size();
+		if (args.length < arg+2) {
+			logger.severe("OptimicaCompiler expects a file name and a class name as " +
+					"command line arguments.");
+			System.exit(1);
+		}		
+		
+		String[] name = args[arg].split(",");
+		String cl = args[arg+1];
+		String xmlVariablesTempl = null;
+		String xmlProblVariablesTempl = null;
+		String xmlValuesTempl = null;
+		String ctempl = null;
+		
+		if (args.length >= arg+6) {
+			xmlVariablesTempl = args[arg+2];
+			xmlProblVariablesTempl = args[arg+3];
+			xmlValuesTempl = args[arg+4];
+			ctempl = args[arg+5];
+		}
+		
+		//look for options.xml in $JMODELICA_HOME/Options/
+		String filesep = System.getProperty("file.separator");
+		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
+		OptionRegistry or = null;
+		try {
+			or = new OptionRegistry(optionsfile);
+		} catch(XPathExpressionException e) {
+			logger.severe("The options XML file could not be loaded.");
+			logger.severe(e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		} catch(ParserConfigurationException e) {
+			logger.severe("The options XML file could not be loaded.");
+			logger.severe(e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		} catch(IOException e) {
+			logger.severe("The options XML file could not be loaded.");
+			logger.severe(e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		} catch(SAXException e) {
+			logger.severe("The options XML file could not be loaded.");
+			logger.severe(e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+		
+		//add modelicapath to optionregistry
+		if(modelicapath==null) {
+			//modelicapath was not set in program arguments -> check envir variable or via JMODELICA_HOME
+			if(System.getenv("MODELICAPATH")!=null) {
+				modelicapath=System.getenv("MODELICAPATH");
+			} else {
+				modelicapath=System.getenv("JMODELICA_HOME")+filesep+"ThirdParty"+filesep+"MSL";
+			}
+		}
+		or.setStringOption("MODELICAPATH", modelicapath);
+		
+		OptimicaCompiler oc = new OptimicaCompiler(or, xmlVariablesTempl, xmlProblVariablesTempl, xmlValuesTempl, ctempl);
+		
+		try {
+			oc.compileModel(name, cl);
+		} catch  (ModelicaClassNotFoundException e){
+			logger.severe("Could not find the class "+ cl);
+			System.exit(0);
+		} catch (CompilerException ce) {
+			StringBuffer str = new StringBuffer();
+			str.append(ce.getProblems().size() + " errors found:\n");
+			for (Problem p : ce.getProblems()) {
+				str.append(p.toString()+"\n");
+			}
+			logger.severe(str.toString());
+			System.exit(0);
+		} catch (Error e) {
+			logger.severe("In file: '" + name + "':"+e.getMessage());
+			System.exit(0);
+		} catch (FileNotFoundException e) {
+			for(int i=0; i<name.length; i++) {
+				logger.severe("Could not find file: " + name[i]);
+			}
+			System.exit(0);
+		} catch (IOException e) {
+			logger.severe(e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		} catch (Exception e) {
+			logger.severe(e.getMessage());
+			e.printStackTrace();
+			System.exit(0);
+		}
+	}	
+}

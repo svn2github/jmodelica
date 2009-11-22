@@ -1,0 +1,117 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.util.HashMap;
+
+aspect FlatNameBinding {
+	
+	inh AbstractFVariable FIdUse.lookupFV(String name);
+	syn lazy AbstractFVariable FIdUse.myFV() = lookupFV(getFQName().name());
+	
+	syn AbstractFVariable FIdUseExp.myFV() = getFIdUse().lookupFV(name());
+
+	//inh AbstractFVariable FIdUseExp.lookupFV(FQName fqname);
+	// inh AbstractFVariable FEquationBlock.lookupFV(FQName fqname);
+	// inh AbstractFVariable FVariable.lookupFV(FQName fqname);
+	
+	eq Root.getChild().lookupFV(String name) = null;
+
+	eq FClass.getChild(int index).lookupFV(String name) {
+		FVariable variable = (FVariable) fullyQualifiedVariablesMap().get(name);
+		if (variable == null) {
+			//System.out.println("FClass.getChild().lookupFV: " + name + " " + variable);
+			return unknownFVariable();
+		} else {
+			//System.out.println("FClass.getChild().lookupFV: " + name + " " + variable+ " "+ variable.getParent());
+			return variable;
+		}		
+	}
+
+	eq FFunctionDecl.getChild(int index).lookupFV(String name) {
+		AbstractFVariable variable = (AbstractFVariable) fullyQualifiedVariablesMap().get(name);
+		if (variable == null) 
+			return unknownFVariable();
+		else
+			return variable;
+	}
+	
+	inh AbstractFVariable FForClauseE.lookupFV(String name);
+	eq FForClauseE.getChild().lookupFV(String name) {
+		for (FForIndex fi : getFForIndexs()) {
+			if (fi.getFVariable().name().equals(name)) {
+				return fi.getFVariable();
+			}
+		}
+		lookupFV(name);
+	}
+	
+	inh AbstractFVariable FForStmt.lookupFV(String name);
+	eq FForStmt.getChild().lookupFV(String name) {
+		for (FForIndex fi : getFForIndexs()) {
+			if (fi.getFVariable().name().equals(name)) {
+				return fi.getFVariable();
+			}
+		}
+		lookupFV(name);
+	}
+	
+	/*
+	inh AbstractFVariable FDerExp.lookupFDV(String name);
+	eq Root.getChild().lookupFDV(String name) = null;
+	eq FClass.getChild(int index).lookupFDV(String name) {
+		FVariable variable = (FDerivativeVariable) 
+		   fullyQualifiedVariablesMap().get(name);
+		if (variable == null) {
+			return unknownFVariable();
+		} else {
+			return variable;
+		}		
+	}
+	syn lazy FDerivativeVariable FDerExp.myFDV() = 
+		(FDerivativeVariable)lookupFDV(getFIdUseExp().derName());	
+	*/
+	
+	syn lazy HashMap FClass.fullyQualifiedVariablesMap() {
+		//System.out.println("FClass.fullyQualifiedVariablesMap()");
+		HashMap map = new HashMap();
+		for (FVariable v : getFVariables()) 
+			map.put(v.name(), v);
+		for (FVariable v : getAliasVariables()) 
+			map.put(v.name(), v);
+		return map;
+	}
+	
+	syn lazy HashMap FFunctionDecl.fullyQualifiedVariablesMap() {
+		HashMap map = new HashMap();
+		for (FFunctionVariable v : getFFunctionVariables()) 
+			map.put(v.name(), v);
+		return map;
+	}
+	
+}
+
+aspect UnknownFVariables {
+
+	syn UnknownFVariable FClass.getUnknownFVariable() = new UnknownFVariable();
+
+	syn lazy UnknownFVariable ASTNode.unknownFVariable() = 
+	  root().unknownFVariable();
+	eq FlatRoot.unknownFVariable() = getFClass().getUnknownFVariable();
+
+	syn boolean AbstractFVariable.isUnknown() = false;
+	eq UnknownFVariable.isUnknown() = true;
+	   
+}
