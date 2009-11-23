@@ -384,5 +384,5 @@ any file belonging to the package";
 
   */
   
-  annotation (uses(Modelica(version="2.2.2")));
+
 end Annotations;
