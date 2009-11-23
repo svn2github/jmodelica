@@ -103,7 +103,7 @@ aspect FlatTypeCheck {
   public void FArtmBinExp.typeCheck() {
 	  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
 		  if (type().isUnknown()) {
-			  error("Type error in expression");		  
+			  error("Type error in expression");	  
 		  }
 	  }
   }
@@ -111,6 +111,35 @@ aspect FlatTypeCheck {
   
   public void InstComponentAccess.typeCheck() {
 	//  System.out.println("InstComponentAccess.typeCheck: " + printSlice());
+  }
+  
+  public void InstFunctionArgument.typeCheck() {
+	  if (!getFExp().type().isUnknown() && !getBoundInput().type().isUnknown()) {
+		  if (!getBoundInput().type().typeCompatible(getFExp().type())) {
+			  error("Types of " + argumentDesc() + " and input " + getBoundInput().name() + 
+					  " are not compatible");
+		  }
+	  }
+  }
+  
+  public void InstMissingArgument.typeCheck() {
+	  error("Missing argument for required input " + getBoundInput().name());
+  }
+  
+  public void InstMultipleBoundArgument.typeCheck() {
+	  error("Multiple arguments matches input " + getBoundInput().name());
+  }
+  
+  public void InstDefaultArgument.typeCheck() {}
+  
+  protected String InstFunctionArgument.argumentDesc() { return null; }
+  
+  protected String InstPositionalArgument.argumentDesc() {
+	  return "positional argument " + (getPos() + 1);
+  }
+  
+  protected String InstNamedArgument.argumentDesc() {
+	  return "named argument " + getName().prettyPrint("");
   }
   
 }

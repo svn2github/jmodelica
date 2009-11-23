@@ -153,6 +153,10 @@ aspect FlatTypeAnalysis {
 		}
 	}	
 	
+	// We can't simply assume that our outputs are of primitive types, so make them unknown for now
+	syn lazy FPrimitiveType InstComponentDecl.type() = fUnknownType();
+	
+	eq InstFunctionCall.type() = (!myOutputs().isEmpty()) ? myOutputs().get(0).type() : fUnknownType();
 	eq FMathematicalFunctionCall.type() = fRealScalarType();		
 			
 }
@@ -407,7 +411,7 @@ aspect FTypeCompatibility {
 
  }
 
- aspect FunctionArgumentBinding {
+ aspect FunctionDefinitionUtils {
 	 
 	 /**
 	  * \brief Returns a list of all InstComponentDecls declared as "input".

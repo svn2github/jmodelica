@@ -668,7 +668,7 @@ aspect InstanceErrorCheck {
 		}
 	}
 	
-	boolean InstFunctionCall.errorChecked = false;
+	protected boolean FAbstractFunctionCall.errorChecked = false;
 	public void InstFunctionCall.collectErrors() {
 	    if (!errorChecked) {
 	    	// Check that the function exists
@@ -691,12 +691,38 @@ aspect InstanceErrorCheck {
 	    		// We need to check the function definition as well.
 	    	    func.collectErrors();
 	    	    
-	    	    // TODO: Check if there were any unbindable args
+	    	    // Check if there were any unbindable args
+			    boolean pos = true;
+			    for (InstFunctionArgument arg : unbindableArgs) 
+			    	pos = !arg.generateUnbindableError(pos) && pos;
 	    	}
 	    }
 	}
+	  
+	public boolean InstFunctionArgument.generateUnbindableError(boolean generateForPositional) {
+		return false;
+	}
+	  
+	public boolean InstPositionalArgument.generateUnbindableError(boolean generateForPositional) {
+		if (generateForPositional)
+			error("Too many positional arguments");
+		return generateForPositional;
+	}
+	  
+	public boolean InstNamedArgument.generateUnbindableError(boolean generateForPositional) {
+		error("No input matching named argument " + getName().name() + " found");
+		return false;
+	}
+//	
+//	public void FBuiltInFunctionCall.collectErrors() {
+//	    if (!errorChecked) {
+//	    	super.collectErrors();
+//	    	for (InstFunctionArgument arg : originalArgs)
+//	    		arg.collectErrors();
+//	    }
+//	}
  
-	boolean InstNamedArgument.errorChecked = false;
+	protected boolean InstNamedArgument.errorChecked = false;
 	public void InstNamedArgument.collectErrors() {
 	    if (!errorChecked) {
 			allChecks();

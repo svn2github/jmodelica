@@ -46,6 +46,16 @@ function TestFunction3
 algorithm
 end TestFunction3;
 
+function TestFunctionString
+ input String i1;
+ output String o1 = i1;
+algorithm
+end TestFunctionString;
+
+
+
+/* ====================== Functions ====================== */
+
 model FunctionFlatten1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FlatteningTestCase(name="FunctionFlatten1",
@@ -132,6 +142,8 @@ equation
 end FunctionFlatten3;
 
 
+/* ====================== Function calls ====================== */
+
 model FunctionBinding1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FlatteningTestCase(name="FunctionBinding1",
@@ -171,17 +183,49 @@ end FunctionTests.FunctionBinding2;
 end FunctionBinding2;
 
 model FunctionBinding3
- /* Should generate error (too many args) */
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="FunctionBinding3",
+          description="Function call with too many arguments",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Too many positional arguments
+")})));
  Real x = TestFunction1(1, 2);
 end FunctionBinding3;
 
 model FunctionBinding4
- /* Should generate error (i1 has no value, i2 has no value) */
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="FunctionBinding4",
+          description="Function call with too few arguments: no arguments",
+          errorMessage=
+"
+2 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Missing argument for required input i1
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Missing argument for required input i2
+")})));
+
  Real x = TestFunction3();
 end FunctionBinding4;
 
 model FunctionBinding5
- /* Should generate error (i2 has no value) */
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="FunctionBinding5",
+          description="Function call with too few arguments: one positional argument",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Missing argument for required input i2
+")})));
+
  Real x = TestFunction3(1);
 end FunctionBinding5;
 
@@ -266,30 +310,85 @@ end FunctionTests.FunctionBinding9;
 end FunctionBinding9;
 
 model FunctionBinding10
- /* Should generate error (i2 has no value) */
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="FunctionBinding10",
+          description="Function call with too few arguments: missing middle argument",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Missing argument for required input i2
+")})));
+
  Real x = TestFunction3(1, i3=2);
 end FunctionBinding10;
 
 model FunctionBinding11
- /* Should generate error (no input "i3") */
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="FunctionBinding11",
+          description="Function call with named arguments: non-existing input",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  No input matching named argument i3 found
+")})));
+
  Real x = TestFunction2(i3=1);
 end FunctionBinding11;
 
 model FunctionBinding12
- /* Should generate error (no input "o1") */
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="FunctionBinding12",
+          description="Function call with named arguments: using output as input",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  No input matching named argument o1 found
+")})));
+
  Real x = TestFunction2(o1=1);
 end FunctionBinding12;
 
 model FunctionBinding13
- /* Should generate error (i1 given value twice) */
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="FunctionBinding13",
+          description="Function call with named arguments: giving an input value twice",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Multiple arguments matches input i1
+")})));
+
  Real x = TestFunction2(1, 2, i1=3);
 end FunctionBinding13;
 
 model FunctionBinding14
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="FunctionBinding14",
+          description="Function call with named arguments: giving an input value four times",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Multiple arguments matches input i1
+")})));
+
+ Real x = TestFunction2(1, 2, i1=3, i1=3, i1=3);
+end FunctionBinding14;
+
+model FunctionBinding15
  /* Should bind to TestFunction1(1.0)? */
  parameter Real a = 1;
  Real x = TestFunction1(a);
-end FunctionBinding14;
+end FunctionBinding15;
 
 
 model BadFunctionCall1
@@ -343,51 +442,258 @@ Semantic error at line 1, column 1:
 end BadFunctionCall3;
 
 
-model FunctionType1
- /* Should go through */
+model FunctionType0
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="FunctionType0",
+          description="Function type checks: Real literal arg, Real input",
+          flatModel="
+fclass FunctionTests.FunctionType0
+ Real x = FunctionTests.TestFunction1(1.0);
+
+ function FunctionTests.TestFunction1
+  input Real i1 := 0;
+  output Real o1 := i1;
+ algorithm
+ end FunctionTests.TestFunction1;
+end FunctionTests.FunctionType0;
+")})));
+
  Real x = TestFunction1(1.0);
+end FunctionType0;
+
+model FunctionType1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="FunctionType1",
+          description="Function type checks: Integer literal arg, Real input",
+          flatModel="
+fclass FunctionTests.FunctionType1
+ Real x = FunctionTests.TestFunction1(1);
+
+ function FunctionTests.TestFunction1
+  input Real i1 := 0;
+  output Real o1 := i1;
+ algorithm
+ end FunctionTests.TestFunction1;
+end FunctionTests.FunctionType1;
+")})));
+
+ Real x = TestFunction1(1);
 end FunctionType1;
 
 model FunctionType2
- /* Should go through? Should generate error? */
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="FunctionType2",
+          description="Function type checks: function with Real output as binding exp for Integer component",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+
  Integer x = TestFunction1(1.0);
 end FunctionType2;
 
 model FunctionType3
- /* Should go through */
- Real a = 1.0;
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="FunctionType3",
+          description="Function type checks: Real component arg, Real input",
+          flatModel="
+fclass FunctionTests.FunctionType3
+ parameter Real a = 1.0 /* 1.0 */;
+ Real x = FunctionTests.TestFunction1(a);
+
+ function FunctionTests.TestFunction1
+  input Real i1 := 0;
+  output Real o1 := i1;
+ algorithm
+ end FunctionTests.TestFunction1;
+end FunctionTests.FunctionType3;
+")})));
+
+ parameter Real a = 1.0;
  Real x = TestFunction1(a);
 end FunctionType3;
 
 model FunctionType4
- /* Should go through */
- Integer a = 1;
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="FunctionType4",
+          description="Function type checks: Integer component arg, Real input",
+          flatModel="
+fclass FunctionTests.FunctionType4
+ parameter Integer a = 1 /* 1 */;
+ Real x = FunctionTests.TestFunction1(a);
+
+ function FunctionTests.TestFunction1
+  input Real i1 := 0;
+  output Real o1 := i1;
+ algorithm
+ end FunctionTests.TestFunction1;
+end FunctionTests.FunctionType4;
+")})));
+
+ parameter Integer a = 1;
  Real x = TestFunction1(a);
-end FunctionType3;
+end FunctionType4;
 
 model FunctionType5
- /* Should generate error (type mismatch: i2) */
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="FunctionType5",
+          description="Function type checks: Boolean literal arg, Real input",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Types of positional argument 2 and input i2 are not compatible
+")})));
+
  Real x = TestFunction2(1, true);
 end FunctionType5;
 
 model FunctionType6
- /* Should generate error (type mismatch: i2) */
- Boolean a;
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="FunctionType6",
+          description="Function type checks: Boolean component arg, Real input",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Types of positional argument 2 and input i2 are not compatible
+")})));
+
+ parameter Boolean a = true;
  Real x = TestFunction2(1, a);
 end FunctionType6;
 
 model FunctionType7
- /* Should go through */
- Integer a = 1;
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="FunctionType7",
+          description="Function type checks: nestled function calls",
+          flatModel="
+fclass FunctionTests.FunctionType7
+ parameter Integer a = 1 /* 1 */;
+ Real x = FunctionTests.TestFunction2(FunctionTests.TestFunction2(0, 0), FunctionTests.TestFunction2(1, 0));
+
+ function FunctionTests.TestFunction2
+  input Real i1 := 0;
+  input Real i2 := 0;
+  output Real o1 := 0;
+  output Real o2 := i2;
+ algorithm
+  o1 := i1;
+ end FunctionTests.TestFunction2;
+end FunctionTests.FunctionType7;
+")})));
+
+ parameter Integer a = 1;
  Real x = TestFunction2(TestFunction2(), TestFunction2(1));
 end FunctionType7;
 
 model FunctionType8
- /* Should generate error (type mismatch: TestFunction1.i1) */
- Integer a = 1;
- Real x = TestFunction2(TestFunction1(True), TestFunction2(1));
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="FunctionType8",
+          description="Function type checks: nestled function calls, type mismatch in inner",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Types of positional argument 1 and input i1 are not compatible
+")})));
+
+ parameter Integer a = 1;
+ Real x = TestFunction2(TestFunction1(true), TestFunction2(1));
 end FunctionType8;
 
+model FunctionType9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="FunctionType9",
+          description="Function type checks: String literal arg, String input",
+          flatModel="
+fclass FunctionTests.FunctionType9
+ String x = FunctionTests.TestFunctionString(\"test\");
+
+ function FunctionTests.TestFunctionString
+  input String i1;
+  output String o1 := i1;
+ algorithm
+ end FunctionTests.TestFunctionString;
+end FunctionTests.FunctionType9;
+")})));
+
+ String x = TestFunctionString("test");
+end FunctionType9;
+
+model FunctionType10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="FunctionType10",
+          description="Function type checks: String component arg, String input",
+          flatModel="
+fclass FunctionTests.FunctionType10
+ parameter String a = \"test\" /* test */;
+ String x = FunctionTests.TestFunctionString(a);
+
+ function FunctionTests.TestFunctionString
+  input String i1;
+  output String o1 := i1;
+ algorithm
+ end FunctionTests.TestFunctionString;
+end FunctionTests.FunctionType10;
+")})));
+
+ parameter String a = "test";
+ String x = TestFunctionString(a);
+end FunctionType10;
+
+model FunctionType11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="FunctionType11",
+          description="Function type checks: Integer literal arg, String input",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Types of positional argument 1 and input i1 are not compatible
+")})));
+
+ String x = TestFunctionString(1);
+end FunctionType11;
+
+
+model BuiltInCallType1
+  Real x = sin(true);
+end BuiltInCallType1;
+
+model BuiltInCallType2
+  Real x = sqrt("test");
+end BuiltInCallType2;
+
+model BuiltInCallType3
+  Real x = sqrt(1);
+end BuiltInCallType3;
+
+model BuiltInCallType4
+  Integer x = sqrt(9.0);
+end BuiltInCallType4;
+
+model BuiltInCallType5
+  Real x = sin();
+end BuiltInCallType5;
+
+model BuiltInCallType6
+  Real x = atan2(9.0);
+end BuiltInCallType6;
+
+model BuiltInCallType7
+  Real x = atan2(9.0, "test");
+end BuiltInCallType7;
+
+
+/* ====================== Algorithms ====================== */
 
 model AlgorithmFlatten1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

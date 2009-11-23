@@ -1132,6 +1132,8 @@ aspect InstantiatedExpressions {
 			arr[pos] = (InstFunctionArgument) fullCopy();
 		else
 			arr[pos] = arr[pos].addMultipleBoundArgument(this);
+		
+		arr[pos].setBoundInput(inputs.get(pos));
 		return true;
 	}
 	
@@ -1171,6 +1173,29 @@ aspect InstantiatedExpressions {
 	}
 	
 	/**
+	 * \brief The input component this argument is bound to.
+	 */
+	protected InstComponentDecl InstFunctionArgument.boundInput = null;
+	
+	/**
+	 * \brief Set the input component this argument is bound to.
+	 */
+	public void InstFunctionArgument.setBoundInput(InstComponentDecl input) {
+		boundInput = input;
+	}
+	
+	public void InstMultipleBoundArgument.setBoundInput(InstComponentDecl input) {
+		boundInput = input;
+		for (InstFunctionArgument arg : getArgs())
+			arg.setBoundInput(input);
+	}
+	
+	/**
+	 * \brief Get the input component this argument is bound to.
+	 */
+	syn InstComponentDecl InstFunctionArgument.getBoundInput() = boundInput;
+	
+	/**
 	 * \brief Argument nodes representing arguments that are missing or given multiple times do 
 	 * not get a location set when they are created. Set the location for those nodes, do nothing 
 	 * for other nodes.
@@ -1187,12 +1212,14 @@ aspect InstantiatedExpressions {
 	eq InstMissingArgument.isOKArg() = false;
 	eq InstMultipleBoundArgument.isOKArg() = false;
 	
+	// TODO: Probably needs to be children instead, to prevent problems from inh attributes
 	/*
 	 * List of arguments that could not be bound to inputs.
 	 */
 	private ArrayList<InstFunctionArgument> InstFunctionCall.unbindableArgs = 
 		new ArrayList<InstFunctionArgument>();
 
+	// TODO: Probably needs to be children instead, to prevent problems from inh attributes
 	/**
 	 * \brief Add an argument to the list of the arguments from the original InstFunctionCall.
 	 * 
@@ -1206,27 +1233,20 @@ aspect InstantiatedExpressions {
 		new ArrayList<InstFunctionArgument>();
 	
 	/**
-	 * \brief Set the input the missing argument should have referred to.
-	 */
-	public void InstMissingArgument.setMissingInput(InstComponentDecl input) {
-		missingInput = input;
-	}
-	private InstComponentDecl InstMissingArgument.missingInput = null;
-	
-	/**
 	 * \brief Called for inputs that no argument was bound to. Creates an InstDefaultArgument 
 	 * if the input has a default value and an InstMissingArgument otherwise.
 	 */
 	public InstFunctionArgument InstComponentDecl.createInstDefaultArgument() {
-		if (getInstModification() instanceof InstValueModification) {
+		InstFunctionArgument arg = null;
+		if (hasInstModification() && getInstModification() instanceof InstValueModification) {
 			InstValueModification mod = (InstValueModification) getInstModification();
 			FExp exp = (FExp) mod.getFExp().fullCopy();
-			return new InstDefaultArgument(new Opt(exp));
+			arg = new InstDefaultArgument(new Opt(exp));
 		} else {
-			InstMissingArgument arg = new InstMissingArgument();
-			arg.setMissingInput(this);
-			return arg;
+			arg = new InstMissingArgument();
 		}
+		arg.setBoundInput(this);
+		return arg;
 	}
 	
 	// Helper function for rewrite InstFunctionCall -> FAbstractFunctionCall
