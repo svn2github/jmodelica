@@ -929,6 +929,22 @@ end NameTests.ShortClassDeclTest3;
 
 end ShortClassDeclTest3;
 
+model ShortClassDeclTest31
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="ShortClassDeclTest31",
+        description="Short class declaration of Real.",
+                                               flatModel=
+"
+fclass NameTests.ShortClassDeclTest31
+ Real x(start = 3,final quantity = "Angle",final unit = "rad",displayUnit = "deg");
+end NameTests.ShortClassDeclTest31;
+")})));
+  
+  Modelica.SIunits.Angle x(start=3);
+
+end ShortClassDeclTest31;
+
+
 model ShortClassDeclTest35_Err
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.ErrorTestCase(name="ShortClassDeclTest35_Err",
