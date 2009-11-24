@@ -936,7 +936,7 @@ model ShortClassDeclTest31
                                                flatModel=
 "
 fclass NameTests.ShortClassDeclTest31
- Real x(start = 3,final quantity = "Angle",final unit = "rad",displayUnit = "deg");
+ Real x(start = 3,final quantity = \"Angle\",final unit = \"rad\",displayUnit = \"deg\");
 end NameTests.ShortClassDeclTest31;
 ")})));
   

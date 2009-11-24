@@ -1229,7 +1229,7 @@ aspect InstantiatedExpressions {
 	public void FBuiltInFunctionCall.addOriginalArg(InstFunctionArgument arg) {
 		originalArgs.add(arg);
 	}
-	private ArrayList<InstFunctionArgument> FBuiltInFunctionCall.originalArgs = 
+	protected ArrayList<InstFunctionArgument> FBuiltInFunctionCall.originalArgs = 
 		new ArrayList<InstFunctionArgument>();
 	
 	/**

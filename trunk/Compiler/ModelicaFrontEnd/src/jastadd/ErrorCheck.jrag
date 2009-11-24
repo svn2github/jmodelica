@@ -671,6 +671,7 @@ aspect InstanceErrorCheck {
 	protected boolean FAbstractFunctionCall.errorChecked = false;
 	public void InstFunctionCall.collectErrors() {
 	    if (!errorChecked) {
+	    	errorChecked = true;
 	    	// Check that the function exists
 	    	InstClassDecl func = getName().myInstClassDecl();
 	    	if (!func.isFunction()) {
@@ -713,14 +714,22 @@ aspect InstanceErrorCheck {
 		error("No input matching named argument " + getName().name() + " found");
 		return false;
 	}
-//	
-//	public void FBuiltInFunctionCall.collectErrors() {
-//	    if (!errorChecked) {
-//	    	super.collectErrors();
-//	    	for (InstFunctionArgument arg : originalArgs)
-//	    		arg.collectErrors();
-//	    }
-//	}
+	
+	public void FBuiltInFunctionCall.collectErrors() {
+	    if (!errorChecked) {
+	    	errorChecked = true;
+	    	super.collectErrors();
+	    	for (InstFunctionArgument arg : originalArgs)
+	    		arg.collectErrors();
+	    }
+	}
+	
+	public void FInfArgsFunctionCall.collectErrors() {
+	    if (!errorChecked) {
+	    	errorChecked = true;
+	    	super.collectErrors();
+	    }
+	}
  
 	protected boolean InstNamedArgument.errorChecked = false;
 	public void InstNamedArgument.collectErrors() {

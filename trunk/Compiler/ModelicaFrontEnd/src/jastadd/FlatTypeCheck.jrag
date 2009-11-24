@@ -113,6 +113,21 @@ aspect FlatTypeCheck {
 	//  System.out.println("InstComponentAccess.typeCheck: " + printSlice());
   }
   
+  public void FInfArgsFunctionCall.typeCheck() {
+		for (InstFunctionArgument arg : originalArgs) {
+			FExp exp = arg.getFExp();
+			if (!exp.type().isUnknown() && !typeOfArgIsOK(exp)) {
+				exp.error("Argument of " + getBuiltInName() + "() is not " + getOKArgTypeString());
+			}
+		}
+  }
+  
+  syn boolean FInfArgsFunctionCall.typeOfArgIsOK(FExp exp) = fIntegerScalarType().typeCompatible(exp.type());
+  syn String FInfArgsFunctionCall.getOKArgTypeString() = "compatible with Integer";
+  syn String FInfArgsFunctionCall.getBuiltInName();
+  eq FOnes.getBuiltInName() = "ones";
+  eq FZeros.getBuiltInName() = "zeros";
+  
   public void InstFunctionArgument.typeCheck() {
 	  if (!getFExp().type().isUnknown() && !getBoundInput().type().isUnknown()) {
 		  if (!getBoundInput().type().typeCompatible(getFExp().type())) {
