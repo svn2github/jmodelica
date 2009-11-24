@@ -1139,106 +1139,8 @@ aspect FlattPrettyPrint {
 		str.print(name());
 	}
 
-	public void FSinExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("sin(");
-		p.toString(getFExp(), str, indent, o);
-		str.print(")");
-	}
-
-	public void FCosExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("cos(");
-		p.toString(getFExp(), str, indent, o);
-		str.print(")");
-	}
-
-	public void FTanExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("tan(");
-		p.toString(getFExp(), str, indent, o);
-		str.print(")");
-	}
-	
-	public void FAsinExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("asin(");
-		p.toString(getFExp(), str, indent, o);
-		str.print(")");
-	}
-
-	public void FAcosExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("acos(");
-		p.toString(getFExp(), str, indent, o);
-		str.print(")");
-	}
-
-	public void FAtanExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("atan(");
-		p.toString(getFExp(), str, indent, o);
-		str.print(")");
-	}
-
-	public void FAtan2Exp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("atan2(");
-		p.toString(getFExp(), str, indent, o);
-		str.print(", ");
-		p.toString(getY(), str, indent, o);
-		str.print(")");
-	}
-
-	public void FSinhExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("sinh(");
-		p.toString(getFExp(), str, indent, o);
-		str.print(")");
-	}
-
-	public void FCoshExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("cosh(");
-		p.toString(getFExp(), str, indent, o);
-		str.print(")");
-	}
-
-	public void FTanhExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("tanh(");
-		p.toString(getFExp(), str, indent, o);
-		str.print(")");
-	}
-
-	public void FExpExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("exp(");
-		p.toString(getFExp(), str, indent, o);
-		str.print(")");
-	}
-
-	public void FLogExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("log(");
-		p.toString(getFExp(), str, indent, o);
-		str.print(")");
-	}
-
-	public void FLog10Exp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("log10(");
-		p.toString(getFExp(), str, indent, o);
-		str.print(")");
-	}
-
-	public void FSqrtExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("sqrt(");
-		p.toString(getFExp(), str, indent, o);
-		str.print(")");
-	}
-
 	public void FSumExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("sum(");
-		p.toString(getFExp(),str,indent,o);
-		str.print(")");
-	}
-	
-	public void FScalar.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("scalar(");
-		p.toString(getFExp(),str,indent,o);
-		str.print(")");
-	}
-	
-	public void FTranspose.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("transpose(");
 		p.toString(getFExp(),str,indent,o);
 		str.print(")");
 	}
@@ -1257,6 +1159,69 @@ aspect FlattPrettyPrint {
 		getArgs().prettyPrintWithSep(p, str, "", 0, ", ");
 		str.print(")");
 	}
+	
+	public void FBuiltInFunctionCall.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print(getBuiltInName());
+		str.print("(");
+		prettyPrintArguments(p, str, indent, o);
+		str.print(")");		
+	}
+	
+	protected void FBuiltInFunctionCall.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {}
+	
+	protected void FMathematicalFunctionCall.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getFExp(),str,indent,o);
+	}
+	
+	protected void FAtan2Exp.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getFExp(),str,indent,o);
+		str.print(", ");
+		p.toString(getY(),str,indent,o);
+	}
+	
+	protected void FSizeExp.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getFIdUseExp(),str,indent,o);
+		str.print(", ");
+		p.toString(getDim(),str,indent,o);
+	}
+	
+	protected void FScalar.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getFExp(),str,indent,o);
+	}
+	
+	protected void FTranspose.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getFExp(),str,indent,o);
+	}
+	
+	protected void FIdentity.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getFExp(),str,indent,o);
+	}
+	
+	protected void FInfArgsFunctionCall.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
+		getFExpList().prettyPrintWithSep(p, str, "", 0, ", ");
+	}
+
+	syn String FBuiltInFunctionCall.getBuiltInName();
+	eq FSinExp.getBuiltInName() = "sin";
+	eq FCosExp.getBuiltInName() = "cos";
+	eq FTanExp.getBuiltInName() = "tan";
+	eq FAsinExp.getBuiltInName() = "asin";
+	eq FAcosExp.getBuiltInName() = "acos";
+	eq FAtanExp.getBuiltInName() = "atan";
+	eq FAtan2Exp.getBuiltInName() = "atan2";
+	eq FSinhExp.getBuiltInName() = "sinh";
+	eq FCoshExp.getBuiltInName() = "cosh";
+	eq FTanhExp.getBuiltInName() = "tanh";
+	eq FExpExp.getBuiltInName() = "exp";
+	eq FLogExp.getBuiltInName() = "log";
+	eq FLog10Exp.getBuiltInName() = "log10";
+	eq FSqrtExp.getBuiltInName() = "sqrt";
+	eq FScalar.getBuiltInName() = "scalar";
+	eq FTranspose.getBuiltInName() = "transpose";
+	eq FSizeExp.getBuiltInName() = "size";
+	eq FIdentity.getBuiltInName() = "identity";
+	eq FOnes.getBuiltInName() = "ones";
+	eq FZeros.getBuiltInName() = "zeros";
 
 /*
 	public void FSumRedExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {

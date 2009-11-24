@@ -665,32 +665,152 @@ end FunctionType11;
 
 
 model BuiltInCallType1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="BuiltInCallType1",
+          description="Built-in type checks: passing Boolean literal to sin()",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Types of positional argument 1 and input u are not compatible
+")})));
+
   Real x = sin(true);
 end BuiltInCallType1;
 
 model BuiltInCallType2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="BuiltInCallType2",
+          description="Built-in type checks: passing String literal to sqrt()",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Types of positional argument 1 and input x are not compatible
+")})));
+
   Real x = sqrt("test");
 end BuiltInCallType2;
 
 model BuiltInCallType3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="BuiltInCallType3",
+          description="Built-in type checks: passing Integer literal to sqrt()",
+          flatModel="
+fclass FunctionTests.BuiltInCallType3
+ Real x = sqrt(1);
+end FunctionTests.BuiltInCallType3;
+")})));
+
   Real x = sqrt(1);
 end BuiltInCallType3;
 
 model BuiltInCallType4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="BuiltInCallType4",
+          description="Built-in type checks: using return value from sqrt() as Integer",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+
   Integer x = sqrt(9.0);
 end BuiltInCallType4;
 
 model BuiltInCallType5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="BuiltInCallType5",
+          description="Built-in type checks: calling sin() without arguments",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Missing argument for required input u
+")})));
+
   Real x = sin();
 end BuiltInCallType5;
 
 model BuiltInCallType6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="BuiltInCallType6",
+          description="Built-in type checks: calling atan2() with only one argument",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Missing argument for required input u2
+")})));
+
   Real x = atan2(9.0);
 end BuiltInCallType6;
 
 model BuiltInCallType7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="BuiltInCallType7",
+          description="Built-in type checks: calling atan2() with String literal as second argument",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Types of positional argument 2 and input u2 are not compatible
+")})));
+
   Real x = atan2(9.0, "test");
 end BuiltInCallType7;
+
+model BuiltInCallType8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="BuiltInCallType8",
+          description="Built-in type checks: using ones and zeros",
+          flatModel="
+fclass FunctionTests.BuiltInCallType8
+ Real x[3] = zeros(3);
+ Real y[3,2] = ones(3, 2);
+end FunctionTests.BuiltInCallType8;
+")})));
+
+  Real x[3] = zeros(3);
+  Real y[3,2] = ones(3,2);
+end BuiltInCallType8;
+
+model BuiltInCallType9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="BuiltInCallType9",
+          description="Built-in type checks: calling zeros() with Real literal as argument",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Argument of zeros() is not compatible with Integer
+")})));
+
+   Real x[3] = zeros(3.0);
+end BuiltInCallType9;
+
+model BuiltInCallType10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="BuiltInCallType10",
+          description="Built-in type checks: calling ones() with String literal as second argument",
+          errorMessage=
+"
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Argument of ones() is not compatible with Integer
+")})));
+
+   Real x[3] = ones(3, "test");
+end BuiltInCallType10;
 
 
 /* ====================== Algorithms ====================== */

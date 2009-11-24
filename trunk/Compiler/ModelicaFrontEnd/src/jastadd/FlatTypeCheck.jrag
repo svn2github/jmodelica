@@ -124,9 +124,6 @@ aspect FlatTypeCheck {
   
   syn boolean FInfArgsFunctionCall.typeOfArgIsOK(FExp exp) = fIntegerScalarType().typeCompatible(exp.type());
   syn String FInfArgsFunctionCall.getOKArgTypeString() = "compatible with Integer";
-  syn String FInfArgsFunctionCall.getBuiltInName();
-  eq FOnes.getBuiltInName() = "ones";
-  eq FZeros.getBuiltInName() = "zeros";
   
   public void InstFunctionArgument.typeCheck() {
 	  if (!getFExp().type().isUnknown() && !getBoundInput().type().isUnknown()) {
