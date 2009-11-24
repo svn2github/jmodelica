@@ -34,11 +34,12 @@ class Simulator(object):
         if start_time is not None:
             self._start_time = start_time
         else:
-            self._start_time = None
+            raise SundialsSimulationException('Start-time must be defined.')
         if final_time is not None:
             self._final_time = final_time
         else:
-            self._final_time = None
+            raise SundialsSimulationException("End-time must be defined.")
+
             
         if self._final_time is not None and self._start_time is not None and \
             self._start_time > self._final_time:

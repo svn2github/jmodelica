@@ -505,9 +505,7 @@ class SundialsDAESimulator(DAESimulator):
         
         #TODO
         #sensi = self.get_sensitivity_analysis()
-        if start_time == None or final_time == None:
-            raise SundialsSimulationException("Start and End-time must be defined.")
-
+        
         if verbose >= self.WHISPER:
             print "Running simulation with interval (%s, %s) and time step %s" \
                     % (start_time, final_time, time_step)
