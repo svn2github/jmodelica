@@ -197,6 +197,22 @@ public class CGenerator extends GenericGenerator {
 		}
 	}
 	
+	/**
+	 * Generates definitions for Modelica functions.
+	 */
+	class DAETag_C_functions extends DAETag {
+		
+		public DAETag_C_functions(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_functions","C: C functions representing Modelica functions",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			for (FFunctionDecl func : fclass.getFFunctionDecls())
+				func.prettyPrint_C(genPrinter, "");
+		}
+	}
+	
 	
 	/**
 	 * Constructor.
@@ -207,26 +223,21 @@ public class CGenerator extends GenericGenerator {
 	 */
 	public CGenerator(Printer expPrinter, char escapeCharacter,
 			FClass fclass) {
-		super(expPrinter,escapeCharacter, fclass);
+		super(expPrinter, escapeCharacter, fclass);
 
-		// Create tags			
-		AbstractTag tag = null;
-		
-		tag = new DAETag_C_equationResiduals(this,fclass);
-		tagMap.put(tag.getName(),tag);
-		tag = new DAETag_C_initialEquationResiduals(this,fclass);
-		tagMap.put(tag.getName(),tag);
-		tag = new DAETag_C_initialGuessEquationResiduals(this,fclass);
-		tagMap.put(tag.getName(),tag);
-		tag = new DAETag_C_initialDependentParameterResiduals(this,fclass);
-		tagMap.put(tag.getName(),tag);
-		tag = new DAETag_C_variableAliases(this,fclass);
-		tagMap.put(tag.getName(),tag);		
-		tag = new DAETag_C_eventIndicatorResiduals(this,fclass);
-		tagMap.put(tag.getName(),tag);		
-		tag = new DAETag_C_initialEventIndicatorResiduals(this,fclass);
-		tagMap.put(tag.getName(),tag);		
-
+		// Create tags
+		AbstractTag[] tags = { 
+				new DAETag_C_equationResiduals(this, fclass), 
+				new DAETag_C_initialEquationResiduals(this, fclass), 
+				new DAETag_C_initialGuessEquationResiduals(this, fclass), 
+				new DAETag_C_initialDependentParameterResiduals(this, fclass), 
+				new DAETag_C_variableAliases(this, fclass), 
+				new DAETag_C_eventIndicatorResiduals(this, fclass), 
+				new DAETag_C_initialEventIndicatorResiduals(this, fclass), 
+				new DAETag_C_functions(this, fclass)
+		};
+		for (AbstractTag tag : tags)
+			tagMap.put(tag.getName(),tag);
 		
 	}
 

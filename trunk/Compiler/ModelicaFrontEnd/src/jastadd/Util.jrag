@@ -600,6 +600,9 @@ aspect FlatNames {
 	syn String FClass.nameUnderscore() = getFQName().nameUnderscore();
 	syn String FVariable.nameUnderscore() = getFQName().nameUnderscore();
 	syn String FDerivativeVariable.nameUnderscore() = "der_" + getFQName().nameUnderscore();
+	
+	syn String FQName.funcNameUnderscore() = "func_" + nameUnderscore();
+	syn String FIdUse.funcNameUnderscore() = getFQName().funcNameUnderscore();
 }
 
 aspect Visibility {

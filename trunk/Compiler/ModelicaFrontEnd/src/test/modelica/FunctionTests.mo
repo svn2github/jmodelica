@@ -53,6 +53,66 @@ algorithm
 end TestFunctionString;
 
 
+/* Temporary functions for C-tests */
+
+function Func01
+ output Real o1 = 0;
+algorithm
+ return;
+end Func01;
+
+function Func11
+ input Real i1 = 0;
+ output Real o1 = i1;
+algorithm
+ return;
+end Func11;
+
+function Func21
+ input Real i1 = 0;
+ input Real i2 = 0;
+ output Real o1 = i1 + i2;
+algorithm
+ return;
+end Func21;
+
+function Func02
+ output Real o1 = 0;
+ output Real o2 = 1;
+algorithm
+ return;
+end Func02;
+
+function Func12
+ input Real i1 = 0;
+ output Real o1 = i1;
+ output Real o2 = 1;
+algorithm
+ return;
+end Func12;
+
+function Func22
+ input Real i1 = 0;
+ input Real i2 = 0;
+ output Real o1 = i1 + i2;
+ output Real o2 = 1;
+algorithm
+ for i in 1:3 loop
+   o1 := o1 + 1;
+   o2 := o2 - o1;
+ end for;
+ return;
+end Func22;
+
+model Test
+ Real a1 = Func01();
+ Real a2 = Func11();
+ Real a3 = Func21();
+ Real a4 = Func02();
+ Real a5 = Func12();
+ Real a6 = Func22();
+end Test;
+
 
 /* ====================== Functions ====================== */
 
@@ -968,10 +1028,11 @@ model AlgorithmFlatten6
 fclass FunctionTests.AlgorithmFlatten6
  Real x;
 algorithm
- for i in {1, 2, 4}, j in 1:3 loop
-  x := x + ( i ) * ( j );
+ for i in {1,2,4} loop
+  for j in 1:3 loop
+   x := x + ( i ) * ( j );
+  end for;
  end for;
-end FunctionTests.AlgorithmFlatten6;
 ")})));
 
  Real x;

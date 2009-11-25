@@ -413,6 +413,9 @@ aspect FTypeCompatibility {
 
  aspect FunctionDefinitionUtils {
 	 
+	 syn boolean FFunctionVariable.isInput() = getFTypePrefixInputOutput().inputCausality();
+	 syn boolean FFunctionVariable.isOutput() = getFTypePrefixInputOutput().outputCausality();
+	 
 	 /**
 	  * \brief Returns a list of all InstComponentDecls declared as "input".
 	  */
@@ -435,8 +438,52 @@ aspect FTypeCompatibility {
 		 return l;
 	 }
 	 
+	 /**
+	  * \brief Returns a list of all FFunctionVariables declared as "input".
+	  */
+	 syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myInputs() {
+		 ArrayList<FFunctionVariable> l = new ArrayList<FFunctionVariable>();
+		 for (FFunctionVariable var : getFFunctionVariables())
+			 if (var.isInput())
+				 l.add(var);
+		 return l;
+	 }
+	 
+	 /**
+	  * \brief Returns a list of all FFunctionVariables not declared as "input".
+	  */
+	 syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myNonInputs() {
+		 ArrayList<FFunctionVariable> l = new ArrayList<FFunctionVariable>();
+		 for (FFunctionVariable var : getFFunctionVariables())
+			 if (!var.isInput())
+				 l.add(var);
+		 return l;
+	 }
+	 
+	 /**
+	  * \brief Returns a list of all FFunctionVariables declared as "output".
+	  */
+	 syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myOutputs() {
+		 ArrayList<FFunctionVariable> l = new ArrayList<FFunctionVariable>();
+		 for (FFunctionVariable var : getFFunctionVariables())
+			 if (var.isOutput())
+				 l.add(var);
+		 return l;
+	 }
+	 
 	 syn ArrayList<InstComponentDecl> InstFunctionCall.myInputs()  = getName().myInstClassDecl().myInputs();
 	 syn ArrayList<InstComponentDecl> InstFunctionCall.myOutputs() = getName().myInstClassDecl().myOutputs();
+	
+	 syn lazy FunctionReturnDefinition FFunctionDecl.returnDefinition() = new FunctionReturnDefinition(this);
+	 inh FunctionReturnDefinition FReturnStmt.returnDefinition();
+	 eq FFunctionDecl.getFAlgorithmBlock().returnDefinition() = returnDefinition();
+	 eq InstProgramRoot.getChild().returnDefinition() = null;
+	 eq FClass.getChild().returnDefinition() = null;
+	 
+	 inh boolean FIdUseExp.inFunction();
+	 eq FFunctionDecl.getChild().inFunction() = true;
+	 eq InstProgramRoot.getChild().inFunction() = false;
+	 eq FClass.getChild().inFunction() = false;
 
  }
  

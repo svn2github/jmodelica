@@ -109,6 +109,7 @@ aspect Flattening {
    		if (getNumFAbstractEquation() > 0) {
 	   		FAlgorithmBlock fab = (FAlgorithmBlock) getFAbstractEquation(0);
 			ffd.setFAlgorithmBlock(fab.flatten(new FQName()));
+			// TODO: If last statement wasn't return, insert one.
    		}
 
 		fc.addFFunctionDecl(ffd);
@@ -397,12 +398,14 @@ aspect FlatExpressions {
 	}
 		
 	public FForStmt InstForStmt.flatten(FQName prefix) {
-		List forIndex = new List();
-		for (InstForIndex ifi : getInstForIndexs()) {
-			forIndex.add(ifi.flatten(prefix));
-		}
 		List sl = FStatement.flattenFStatementList(prefix, getForStmts());
-		return new FForStmt(forIndex, sl);		
+		int i = getNumInstForIndex() - 1;
+		FForStmt res = new FForStmt(getInstForIndex(i).flatten(prefix), sl);
+		for (i--; i >= 0; i--) {
+			sl = new List().add(res);
+			res = new FForStmt(getInstForIndex(i).flatten(prefix), sl);
+		}
+		return res;		
 	}
 
 	

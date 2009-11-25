@@ -1,6 +1,3 @@
-import java.io.PrintStream;
-
-
 /*
 Copyright (C) 2009 Modelon AB
 
@@ -16,6 +13,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+import java.io.PrintStream;
 
 aspect CCodeGen {
 	
@@ -63,9 +62,154 @@ aspect CCodeGen {
 	}
 		
 	public void FIdUseExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		str.print("_"+nameUnderscore()+"_");
+		if (inFunction())
+			str.print(nameUnderscore());
+		else
+			str.print("_"+nameUnderscore()+"_");
+	}
+	
+	public void FFunctionCall.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print(getName().funcNameUnderscore());
+		str.print("(");
+		getArgs().prettyPrintWithSep(p, str, "", o, ", ");
+		str.print(")");
+	}
+	
+	public void FunctionReturnDefinition.printDeclaredType_C(PrintStream str) {
+		if (outputs.size() > 0) { 
+			str.print(outputs.get(0).type_C());
+		} else {
+			str.print("void");
+		}		
+	}
+	
+	public void FunctionReturnDefinition.printExpression_C(PrintStream str) {
+		if (outputs.size() > 0) { 
+			str.print(" ");
+			str.print(outputs.get(0).name_C());
+		}		
+	}
+	
+	public void FFunctionDecl.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		String next = indent + "   ";
+		str.print(indent);
+		returnDefinition().printDeclaredType_C(str);
+		str.print(" ");
+		str.print(getFQName().funcNameUnderscore());
+		str.print("(");
+		prettyPrintWithSep(myInputs(), p, str, "", o, ", ");
+		str.print(") {\n");
+		prettyPrintWithIndent(myNonInputs(), p, str, next, o, ";");
+    	p.toString(getFAlgorithmBlockOpt(), str, next, o);
+    	str.print(indent);
+    	str.print("}\n\n");
+	}
+	
+	syn String FFunctionVariable.name_C() = getFQName().nameUnderscore();
+	// TODO: Delegate to Type to support other types than Real
+	syn String FFunctionVariable.type_C() = "jmi_ad_var_t";
+	
+	public void FFunctionVariable.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print(type_C());
+		str.print(" ");
+		str.print(name_C());
+		if (hasBindingExp() && !isInput()) {
+			str.print(" = ");
+			p.toString(getBindingExp(), str, "", o);
+		}
+	}
+	
+	public void FAlgorithmBlock.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		getFStatements().prettyPrintWithIndent(p, str, indent, o);
 	}
 
+	public void FAssignStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getLeft(), str, indent, o);
+		str.print(" = ");
+		p.toString(getRight(), str, indent, o);
+		str.print(";");
+	}
+	
+	/* TODO: FFunctionCallStmt handles (res1, res2, ...) := func(args) and function calls that don't 
+	 * use the return value. The former isn't handled yet anyway and the later is of limited use.
+	 * Not implemented for now.
+	 */
+	
+	public void FReturnStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("return");
+		returnDefinition().printExpression_C(str);
+		str.print(";");
+	}
+	
+	public void FIfWhenStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		getFIfWhenClauses().prettyPrintWithSep(p, str, indent, o, indent + "} else ");
+		prettyPrintElse(p, str, indent, o);
+		str.print(indent);
+		str.print("}");
+	}
+	
+	protected void FIfWhenStmt.prettyPrintElse_C(Printer p, PrintStream str, String indent, Object o) {}
+	
+	protected void FIfStmt.prettyPrintElse_C(Printer p, PrintStream str, String indent, Object o) {
+		if (getNumElseStmt() > 0) {
+			str.print(indent);
+			str.print("} else {\n");
+			getElseStmts().prettyPrintWithIndent(p, str, indent + "    ", o);
+		}
+	}
+	
+	public void FIfWhenClause.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("if (");
+		p.toString(getTest(), str, indent, o);
+		str.print(") {\n");
+		getFStatements().prettyPrintWithIndent(p, str, indent + "    ", o);
+	}
+	
+	public void FForStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("for (");
+		p.toString(getIndex(), str, indent, o);
+		str.print(") {\n");
+		getForStmts().prettyPrintWithIndent(p, str, indent + "    ", o);
+		str.print("}");		
+	}
+	
+	// Very limited test implementation
+	public void FForIndex.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		String type = "jmi_ad_var_t";
+		String name = getFVariable().nameUnderscore();
+		
+		if (hasFExp()) {
+			if (getFExp() instanceof FRangeExp) {
+				FRangeExp re = (FRangeExp) getFExp();
+				boolean hasStep = re.getNumFExp() > 2;
+				str.print(type);
+				str.print(" ");
+				str.print(name);
+				str.print(" = ");
+				p.toString(re.getFExp(0), str, indent, o);
+				str.print("; ");
+				str.print(name);
+				str.print(" <= ");
+				p.toString(re.getFExp(hasStep ? 2 : 1), str, indent, o);
+				str.print("; ");
+				str.print(name);
+				str.print(" += ");
+				if (hasStep) 
+					p.toString(re.getFExp(1), str, indent, o);
+				else
+					str.print("1");
+			}
+		}
+	}
+	
+	public void FWhileStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("while (");
+		p.toString(getTest(), str, "", o);
+		str.print(") {\n");
+		getWhileStmts().prettyPrintWithIndent(p, str, indent + "    ", o);
+		str.print("}");		
+	}
+	
 	public void FDivExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		str.print("jmi_divide(");
 		p.toString(getLeft(),str,indent,o);

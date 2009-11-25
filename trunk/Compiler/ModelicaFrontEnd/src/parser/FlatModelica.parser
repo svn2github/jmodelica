@@ -317,15 +317,9 @@ FWhenClause fwhen_clause =
   ;
 
 FForStmt ffor_stmt =
-  FOR ffor_indices LOOP fstatement_list END_FOR
-                         {: return new FForStmt(ffor_indices, fstatement_list); :}
+  FOR ffor_index LOOP fstatement_list END_FOR
+                         {: return new FForStmt(ffor_index, fstatement_list); :}
   ;
-
-List ffor_indices = 
-    ffor_index                     {: return new List().add(ffor_index); :}
-  | ffor_indices COMMA ffor_index  {: return ffor_indices.add(ffor_index); :}
-  ;
-
 
 FForIndex ffor_index =
     fid_decl IN fexp    {: return new FForIndex(new FIntegerVariable(new FPublicVisibilityType(),

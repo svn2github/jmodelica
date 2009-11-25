@@ -88,12 +88,27 @@ aspect PrettyPrint {
 	/**
 	 * \brief Prints a list of any type of ASTNode, adding <code>sep</code> between nodes.
 	 * 
-	 * Typical use: <code>l.prettyPrintWithSep(p, str, indent, o, ", ");</code> 
+	 * Typical use: <code>list.prettyPrintWithSep(p, str, indent, o, ", ");</code> 
 	 * (Prints comma-separated list.)
 	 */
 	public void List.prettyPrintWithSep(Printer p, PrintStream str, String indent, Object o, String sep) {
 		String prefix = "";
 		for (ASTNode n : this) {
+			str.print(prefix);
+			p.toString(n, str, indent, o);
+			prefix = sep;
+		}
+	}
+	
+	/**
+	 * \brief Prints an ArrayList of any type of ASTNode, adding <code>sep</code> between nodes.
+	 * 
+	 * Typical use: <code>prettyPrintWithSep(list, p, str, indent, o, ", ");</code> 
+	 * (Prints comma-separated list.)
+	 */
+	public static void ASTNode.prettyPrintWithSep(java.util.List<? extends ASTNode> l, Printer p, PrintStream str, String indent, Object o, String sep) {
+		String prefix = "";
+		for (ASTNode n : l) {
 			str.print(prefix);
 			p.toString(n, str, indent, o);
 			prefix = sep;
@@ -113,6 +128,18 @@ aspect PrettyPrint {
 	}
 	
 	/**
+	 * \brief Prints an ArrayList of any type of ASTNode, adding <code>prefix</code> before each node and 
+	 * <code>suffix</code> after each node.
+	 */
+	public static void ASTNode.prettyPrintWithFix(java.util.List<? extends ASTNode> l, Printer p, PrintStream str, String indent, Object o, String prefix, String suffix) {
+		for (ASTNode n : l) {
+			str.print(prefix);
+			p.toString(n, str, indent, o);
+			str.print(suffix);
+		}
+	}
+	
+	/**
 	 * \brief Prints a list of any type of ASTNode, adding <code>indent</code> before each node and 
 	 * <code>suffix</code> plus a line break after after each node.
 	 */
@@ -121,11 +148,27 @@ aspect PrettyPrint {
 	}
 	
 	/**
+	 * \brief Prints an ArrayList of any type of ASTNode, adding <code>indent</code> before each node and 
+	 * <code>suffix</code> plus a line break after after each node.
+	 */
+	public static void ASTNode.prettyPrintWithIndent(java.util.List<? extends ASTNode> l, Printer p, PrintStream str, String indent, Object o, String suffix) {
+		prettyPrintWithFix(l, p, str, indent, o, indent, suffix + "\n");
+	}
+	
+	/**
 	 * \brief Prints a list of any type of ASTNode, adding <code>indent</code> before each node and 
 	 * a line break after after each node.
 	 */
 	public void List.prettyPrintWithIndent(Printer p, PrintStream str, String indent, Object o) {
 		prettyPrintWithFix(p, str, indent, o, indent, "\n");
+	}
+	
+	/**
+	 * \brief Prints an ArrayList of any type of ASTNode, adding <code>indent</code> before each node and 
+	 * a line break after after each node.
+	 */
+	public static void ASTNode.prettyPrintWithIndent(java.util.List<? extends ASTNode> l, Printer p, PrintStream str, String indent, Object o) {
+		prettyPrintWithFix(l, p, str, indent, o, indent, "\n");
 	}
 	
 	public void Program.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
@@ -934,7 +977,7 @@ aspect FlattPrettyPrint {
 		str.print(getKeyword());
 	}
 	
-	abstract protected void FIfWhenStmt.prettyPrintElse(Printer p, PrintStream str, String indent, Object o);
+	protected void FIfWhenStmt.prettyPrintElse(Printer p, PrintStream str, String indent, Object o) {}
 	
 	protected void FIfStmt.prettyPrintElse(Printer p, PrintStream str, String indent, Object o) {
 		if (getNumElseStmt() > 0) {
@@ -943,9 +986,6 @@ aspect FlattPrettyPrint {
 			getElseStmts().prettyPrintWithIndent(p, str, indent + " ", o, ";");
 		}
 	}
-	
-	protected void FWhenStmt.prettyPrintElse(Printer p, PrintStream str, String indent, Object o) {
-	}	
 	
 	public void FIfWhenClause.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print(getKeyword());
@@ -963,7 +1003,7 @@ aspect FlattPrettyPrint {
 	
 	public void FForStmt.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("for ");
-		getFForIndexList().prettyPrintWithSep(p, str, indent, o, ", ");
+		p.toString(getIndex(), str, indent, o);
 		str.print(" loop\n");
 		getForStmts().prettyPrintWithIndent(p, str, indent + " ", o, ";");
 		str.print(indent);
@@ -1149,14 +1189,14 @@ aspect FlattPrettyPrint {
 		debugPrint("FFunctionCall.prettyPrint:");
 		str.print(getName().name());
 		str.print("(");
-		getArgs().prettyPrintWithSep(p, str, "", 0, ", ");
+		getArgs().prettyPrintWithSep(p, str, "", o, ", ");
 		str.print(")");
 	}
 
 	public void InstFunctionCall.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print(getName().name());
 		str.print("(");
-		getArgs().prettyPrintWithSep(p, str, "", 0, ", ");
+		getArgs().prettyPrintWithSep(p, str, "", o, ", ");
 		str.print(")");
 	}
 	
@@ -1198,7 +1238,7 @@ aspect FlattPrettyPrint {
 	}
 	
 	protected void FInfArgsFunctionCall.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
-		getFExpList().prettyPrintWithSep(p, str, "", 0, ", ");
+		getFExpList().prettyPrintWithSep(p, str, "", o, ", ");
 	}
 
 	syn String FBuiltInFunctionCall.getBuiltInName();

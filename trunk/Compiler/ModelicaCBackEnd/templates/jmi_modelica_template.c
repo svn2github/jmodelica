@@ -63,6 +63,8 @@ $C_variable_aliases$
 #define _w_p(j,i) ((*(jmi->z))[jmi->offs_w_p + \
   j*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w) + i])
 
+$C_functions$
+
 /*
  * The res argument is of type pointer to a vector. This means that
  * in the case of no AD, the type of res is double**. This is
@@ -135,7 +137,7 @@ int jmi_new(jmi_t** jmi) {
 
 	// Initialize the Init interface
 	jmi_init_init(*jmi, *model_init_F0, N_eq_F0, NULL,
-		      0, NULL, NULL, 
+		      0, NULL, NULL,
 		      *model_init_F1, N_eq_F1, NULL,
 		      0, NULL, NULL,
 		      *model_init_Fp, N_eq_Fp, NULL,

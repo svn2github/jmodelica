@@ -417,7 +417,7 @@ FWhenClause : FIfWhenClause;
 /**
  * \brief Flattened for statement.
  */
-FForStmt : FStatement ::= FForIndex* ForStmt:FStatement*;
+FForStmt : FStatement ::= Index:FForIndex ForStmt:FStatement*;
 
 /**
  * \brief Flattened while statement.
