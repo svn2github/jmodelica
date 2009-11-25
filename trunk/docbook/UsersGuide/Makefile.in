@@ -4,8 +4,15 @@ DOCDIR=@abs_top_srcdir@/docbook/UsersGuide
 DOC=JModelicaUsersGuide
 DOCFILE=$(DOCDIR)/$(DOC).xml
 XSLHTMLSTYLE=$(DOCBOOK_HOME)/html/docbook.xsl
+XSLXHTMLSTYLE=$(DOCBOOK_HOME)/xhtml/docbook.xsl
 XSLPDFSTYLE=$(DOCBOOK_HOME)/fo/docbook.xsl
 XSLHTMLHELPSTYLE=$(DOCBOOK_HOME)/htmlhelp/htmlhelp.xsl
+
+$(DOC).xhtml:  $(DOCFILE)
+	xsltproc  --output  $@  $(XSLXHTMLSTYLE)  $<
+
+xhtml:  $(DOC).xhtml
+
 $(DOC).html:  $(DOCFILE)
 	xsltproc  --output  $@  $(XSLHTMLSTYLE)  $<
 
@@ -40,9 +47,9 @@ winhelp:
 endif
 
 ifeq ($(OS),Windows_NT)
-all: html pdf winhelp
+all: xhtml html pdf winhelp
 else
-all: html pdf
+all: xhtml html pdf
 endif
 
 clean:
