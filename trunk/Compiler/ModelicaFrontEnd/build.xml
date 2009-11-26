@@ -26,180 +26,154 @@
 
 <project name="JModelica" default="build" basedir=".">
 
-  <!-- "package" is the directory where generated files will be stored -->
-  <property name="ast_package" value="org.jmodelica.modelica.compiler"/>
-  
-	<property name="base_output" value="src/java-generated"/>
-	<property name="parser_output" value="${base_output}/org/jmodelica/modelica/parser"/>
-	
-  <property name="jar_output_dir" value="bin"/>
-  <property name="jastadd_dir" value="../../ThirdParty/JastAdd"/>
-  <property name="junit_dir" value="../../ThirdParty/Junit"/>
-  <property name="jflex_dir" value="../../ThirdParty/JFlex/jflex-1.4.3"/>  
-  <property name="beaver_dir" value="../../ThirdParty/Beaver/beaver-0.9.6.1"/>  
-  <property name="ant-contrib_dir" value="../../ThirdParty/Ant-Contrib/ant-contrib-1.0b3"/>  
-  <property name="parser" value="src/parser"/>
-  <property name="ast" value="src/jastadd"/>
-  <property name="test_junit_dir" value="src/test/junit"/>
-  <property name="test_junit-gen_dir" value="src/test/junit-generated"/>
-  <property name="test_benchmarks" value="src/test/benchmarks"/>
-	
-<!--  <property name="beaver" value="@srcdir@/src/third-party/beaver"/> -->
-  <property name="applications" value="${default_src_dir}/org/jmodelica/applications"/> 
-  <property name="debug" value="${default_src_dir}/org/jmodelica/debug"/> 
-	
+	<!-- "package" is the directory where generated files will be stored -->
+	<property name="ast_package" value="org.jmodelica.modelica.compiler" />
+
+	<property name="base_output" value="src/java-generated" />
+	<property name="parser_output" value="${base_output}/org/jmodelica/modelica/parser" />
+
+	<property name="jar_output_dir" value="bin" />
+	<property name="jastadd_dir" value="../../ThirdParty/JastAdd" />
+	<property name="junit_dir" value="../../ThirdParty/Junit" />
+	<property name="jflex_dir" value="../../ThirdParty/JFlex/jflex-1.4.3" />
+	<property name="beaver_dir" value="../../ThirdParty/Beaver/beaver-0.9.6.1" />
+	<property name="ant-contrib_dir" value="../../ThirdParty/Ant-Contrib/ant-contrib-1.0b3" />
+	<property name="parser" value="src/parser" />
+	<property name="ast" value="src/jastadd" />
+	<property name="test_junit_dir" value="src/test/junit" />
+	<property name="test_junit-gen_dir" value="src/test/junit-generated" />
+	<property name="test_benchmarks" value="src/test/benchmarks" />
+
+	<!--  <property name="beaver" value="@srcdir@/src/third-party/beaver"/> -->
+	<property name="applications" value="${default_src_dir}/org/jmodelica/applications" />
+	<property name="debug" value="${default_src_dir}/org/jmodelica/debug" />
+
 	<!-- for ant-contrib (foreach, etc) -->
 	<taskdef resource="net/sf/antcontrib/antlib.xml">
 		<classpath>
-			<pathelement location="${ant-contrib_dir}/target/ant-contrib.jar"/>
+			<pathelement location="${ant-contrib_dir}/target/ant-contrib.jar" />
 		</classpath>
 	</taskdef>
-  <!-- "jastadd" is an ant task class in jastadd3.jar -->
-  <taskdef classname="jastadd.JastAddTask" name="jastadd" classpath="${jastadd_dir}/jastadd2.jar" />
-  <!-- "jflex" is an ant task class for the scanner generator in JFlex.jar -->
-  <taskdef name="jflex" classname="JFlex.anttask.JFlexTask" classpath="${jflex_dir}/lib/JFlex.jar"/>
-  <!-- "beaver" is an ant task class for the parser generator in beaver.jar -->
-  <taskdef name="beaver" 
-  	       classname="beaver.comp.run.AntTask" 
-  	       classpath="${beaver_dir}/lib/beaver.jar"/>
+	<!-- "jastadd" is an ant task class in jastadd3.jar -->
+	<taskdef classname="jastadd.JastAddTask" name="jastadd" classpath="${jastadd_dir}/jastadd2.jar" />
+	<!-- "jflex" is an ant task class for the scanner generator in JFlex.jar -->
+	<taskdef name="jflex" classname="JFlex.anttask.JFlexTask" classpath="${jflex_dir}/lib/JFlex.jar" />
+	<!-- "beaver" is an ant task class for the parser generator in beaver.jar -->
+	<taskdef name="beaver" classname="beaver.comp.run.AntTask" classpath="${beaver_dir}/lib/beaver.jar" />
 
- <!-- TARGET build -->
-  <target name="build" depends="compile-ast">
-    <mkdir dir="${jar_output_dir}"/>
-  	<jar destfile="${jar_output_dir}/jmodelica.jar">
-  		<fileset dir="bin">
-  			<include name="org/jmodelica/modelica/compiler/*.class"/> 
-  			<include name="org/jmodelica/modelica/parser/*.class"/> 
-  		</fileset>
-  	 </jar>
-  	<jar destfile="${jar_output_dir}/util.jar">
-  		<fileset dir="bin">
-  			<include name="org/jmodelica/util/*.class"/> 
-  		</fileset>
-  	 </jar>
-  </target>
-	
-  <target name="compile-ast" depends="gen,gen-parser">
-	<mkdir dir="bin"/>
-  	<javac classpath="${beaver_dir}/lib/beaver.jar" compiler="javac1.5" debug="true" destdir="bin">
-  		<src path="${base_output}"/> 
-  		<src path="src/java"/>
-  		<include name = "**/*.java"/>
-  		<exclude name = "**/*junit*/**"/>
-  		<exclude name = "**/*.aj"/>
-  	</javac>
-  	</target>
+	<!-- TARGET build -->
+	<target name="build" depends="compile-ast">
+		<mkdir dir="${jar_output_dir}" />
+		<jar destfile="${jar_output_dir}/jmodelica.jar">
+			<fileset dir="bin">
+				<include name="org/jmodelica/modelica/compiler/*.class" />
+				<include name="org/jmodelica/modelica/parser/*.class" />
+			</fileset>
+		</jar>
+		<jar destfile="${jar_output_dir}/util.jar">
+			<fileset dir="bin">
+				<include name="org/jmodelica/util/*.class" />
+			</fileset>
+		</jar>
+	</target>
 
-	
-  <!-- TARGET gen -->
+	<target name="compile-ast" depends="gen,gen-parser">
+		<mkdir dir="bin" />
+		<javac classpath="${beaver_dir}/lib/beaver.jar" compiler="javac1.5" debug="true" destdir="bin">
+			<src path="${base_output}" />
+			<src path="src/java" />
+			<include name="**/*.java" />
+			<exclude name="**/*junit*/**" />
+			<exclude name="**/*.aj" />
+		</javac>
+	</target>
 
-  <target name="gen">
-    <mkdir dir="${base_output}"/>
-    <jastadd package="${ast_package}" beaver="true" rewrite="true" outdir="${base_output}" NoCacheCycle="false" ComponentCheck="true" visitcheck="false" LazyMaps="true" Deterministic="true" NoStatic="false" Debug="false">
-    	<fileset dir="${ast}">
-      	<include name="*.ast"/>
-      	<include name="*.jadd"/>
-      	<include name="*.jrag"/>
-      </fileset>
-    	<fileset dir="${ast}/codegen">
-          	<include name="*.ast"/>
-          	<include name="*.jadd"/>
-          	<include name="*.jrag"/>
-          </fileset>
-    	<fileset dir="${ast}/test-framework">
-          	<include name="*.ast"/>
-          	<include name="*.jadd"/>
-          	<include name="*.jrag"/>
-          </fileset>
-    </jastadd>
- </target>
+
+	<!-- TARGET gen -->
+
+	<target name="gen">
+		<mkdir dir="${base_output}" />
+		<jastadd package="${ast_package}" beaver="true" rewrite="true" outdir="${base_output}" 
+				NoCacheCycle="false" ComponentCheck="true" visitcheck="false" LazyMaps="true" 
+				Deterministic="true" NoStatic="false" Debug="false">
+			<fileset dir="${ast}">
+				<include name="*.ast" />
+				<include name="*.jadd" />
+				<include name="*.jrag" />
+			</fileset>
+			<fileset dir="${ast}/codegen">
+				<include name="*.ast" />
+				<include name="*.jadd" />
+				<include name="*.jrag" />
+			</fileset>
+			<fileset dir="${ast}/test-framework">
+				<include name="*.ast" />
+				<include name="*.jadd" />
+				<include name="*.jrag" />
+			</fileset>
+		</jastadd>
+	</target>
 
 	<target name="gen-parser">
-	
-	    <!-- generate the scanner -->
-        <concat destfile="${parser_output}/Modelica_all.flex" force="no">
-          <filelist dir="." files="${parser}/Modelica_header.flex"/>
-          <filelist dir="${parser}" files="Modelica.flex" />	
-         </concat>
-	    <jflex file="${parser_output}/Modelica_all.flex" outdir="${parser_output}" nobak="yes"/>
+
+		<!-- generate the scanner -->
+		<concat destfile="${parser_output}/Modelica_all.flex" force="no">
+			<filelist dir="." files="${parser}/Modelica_header.flex" />
+			<filelist dir="${parser}" files="Modelica.flex" />
+		</concat>
+		<jflex file="${parser_output}/Modelica_all.flex" outdir="${parser_output}" nobak="yes" />
 
 		<!-- generate the parser phase 1, translating .lalr to .beaver -->
-        <concat destfile="${parser_output}/Modelica_all.parser" force="no">
-          <filelist dir="." files="${parser}/Modelica_header.parser"/>
-          <filelist dir="${parser}" files="Modelica.parser" />	
-         </concat>
+		<concat destfile="${parser_output}/Modelica_all.parser" force="no">
+			<filelist dir="." files="${parser}/Modelica_header.parser" />
+			<filelist dir="${parser}" files="Modelica.parser" />
+		</concat>
 		<java classpath="${jastadd_dir}/JastAddParser.jar:${beaver_dir}/lib/beaver-rt.jar" classname="Main">
-	  	      <arg line="${parser_output}/Modelica_all.parser ${parser_output}/ModelicaParser_raw.beaver"/>
-	  	    </java> 
-	        <concat destfile="${parser_output}/ModelicaParser.beaver" force="no">
-	          <filelist dir="." files="${parser}/beaver.input"/>
-	          <filelist dir="${parser_output}" files="ModelicaParser_raw.beaver" />	
-	         </concat>
-	  	    <!-- generate the parser phase 2, translating .beaver to .java -->
-	  	    <beaver file="${parser_output}/ModelicaParser.beaver" terminalNames="yes" compress="no" useSwitch="yes"/>
-	  	  
-	  	
-        <concat destfile="${parser_output}/FlatModelica_all.flex" force="no">
-          <filelist dir="." files="${parser}/FlatModelica_header.flex"/>
-          <filelist dir="${parser}" files="FlatModelica.flex" />	
-         </concat>
-	  	    <jflex file="${parser_output}/FlatModelica_all.flex" outdir="${parser_output}" nobak="yes"/>
+			<arg line="${parser_output}/Modelica_all.parser ${parser_output}/ModelicaParser_raw.beaver" />
+		</java>
+		<concat destfile="${parser_output}/ModelicaParser.beaver" force="no">
+			<filelist dir="." files="${parser}/beaver.input" />
+			<filelist dir="${parser_output}" files="ModelicaParser_raw.beaver" />
+		</concat>
+		<!-- generate the parser phase 2, translating .beaver to .java -->
+		<beaver file="${parser_output}/ModelicaParser.beaver" terminalNames="yes" compress="no" useSwitch="yes" />
 
-        <concat destfile="${parser_output}/FlatModelica_all.parser" force="no">
-          <filelist dir="." files="${parser}/FlatModelica_header.parser"/>
-          <filelist dir="${parser}" files="FlatModelica.parser" />	
-         </concat>
 
-		<!-- generate the parser phase 1, translating .lalr to .beaver -->
-	  	 	   <java classpath="${jastadd_dir}/JastAddParser.jar:${beaver_dir}/lib/beaver-rt.jar" classname="Main">
-	  	  	      <arg line="${parser_output}/FlatModelica_all.parser ${parser_output}/FlatModelicaParser_raw.beaver"/>
-	  	  	    </java> 
-	  	        <concat destfile="${parser_output}/FlatModelicaParser.beaver" force="no">
-	  	          <filelist dir="." files="${parser}/beaver.flat.input"/>
-	  	          <filelist dir="${parser_output}" files="FlatModelicaParser_raw.beaver" />	
-	  	         </concat>
-	  	  	    <!-- generate the parser phase 2, translating .beaver to .java -->
-	  	  	    <beaver file="${parser_output}/FlatModelicaParser.beaver" terminalNames="yes" compress="no" useSwitch="yes"/>
-	 
-	
+		<concat destfile="${parser_output}/FlatModelica_all.flex" force="no">
+			<filelist dir="." files="${parser}/FlatModelica_header.flex" />
+			<filelist dir="${parser}" files="FlatModelica.flex" />
+		</concat>
+		<jflex file="${parser_output}/FlatModelica_all.flex" outdir="${parser_output}" nobak="yes" />
+
 	</target>
-	
-	
-  <!-- TARGET clean -->
-  <target name="clean" depends="cleanGen">
-    <!-- Delete all classfiles in dir and recursively in subdirectories -->
-  	<delete dir = "bin"/>
-  	<delete dir = "doc"/>
-  	<delete dir="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
-  </target>
 
-  <!-- TARGET cleanGen -->
-  <target name="cleanGen">
-    <!-- Delete the directory containing generated files and their class files -->
-    <delete dir="${base_output}"/>
-  	<!--<delete dir="bin"/>-->
-  </target>
+
+	<!-- TARGET clean -->
+	<target name="clean" depends="cleanGen">
+		<!-- Delete all classfiles in dir and recursively in subdirectories -->
+		<delete dir="bin" />
+		<delete dir="doc" />
+		<delete dir="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated" />
+	</target>
+
+	<!-- TARGET cleanGen -->
+	<target name="cleanGen">
+		<!-- Delete the directory containing generated files and their class files -->
+		<delete dir="${base_output}" />
+		<!--<delete dir="bin"/>-->
+	</target>
 
 	<!-- Generates tests from a single .mo file -->
 	<target name="gen-test-file">
-		<propertyregex 
-			property="gen-test_class" 
-			input="${gen-test_path}"
-			regexp="^.*/([^/]*).mo$"
-			replace="\1"
-		/>
+		<propertyregex property="gen-test_class" input="${gen-test_path}" regexp="^.*/([^/]*).mo$" replace="\1" />
 		<trycatch>
 			<try>
-			  	<java 
-			  		classname="org.jmodelica.modelica.compiler.JunitGenerator"
-				  	classpath=".:bin/jmodelica.jar:bin/util.jar:${beaver_dir}/lib/beaver.jar" 
-				  	fork="true" 
-			  		failonerror="true" 
-			  		dir="." 
-			  		maxmemory="512M">
-				  		<arg value="${gen-test_path}"/>
-				  		<arg value="${gen-test_class}"/>
-				  		<arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
+				<java classname="org.jmodelica.modelica.compiler.JunitGenerator" 
+						classpath=".:bin/jmodelica.jar:bin/util.jar:${beaver_dir}/lib/beaver.jar" 
+						fork="true" failonerror="true" dir="." maxmemory="512M">
+					<arg value="${gen-test_path}" />
+					<arg value="${gen-test_class}" />
+					<arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated" />
 				</java>
 			</try>
 			<catch>
@@ -210,68 +184,66 @@
 
 	<!-- TARGET gen-test -->
 	<target name="gen-test" depends="build">
-		<delete file="gen-test-file-fail"/>
-	  	<mkdir dir="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated"/>
+		<delete file="gen-test-file-fail" />
+		<mkdir dir="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated" />
 		<foreach target="gen-test-file" param="gen-test_path" inheritall="true" parallel="true">
 			<path>
 				<fileset dir="src/test/modelica">
-					<include name="*.mo"/>
+					<include name="*.mo" />
 				</fileset>
 			</path>
 		</foreach>
 		<if>
-			<available file="gen-test-file-fail"/>
+			<available file="gen-test-file-fail" />
 			<then>
-				<delete file="gen-test-file-fail"/>
+				<delete file="gen-test-file-fail" />
 				<fail>Generating tests failed.</fail>
 			</then>
 		</if>
-	  	<javac compiler="javac1.5" debug="true" destdir="bin" classpath="${junit_dir}/junit-4.5.jar" >
-	  		<src path="${test_junit-gen_dir}/"/>
-	  	    <include name = "org/jmodelica/test/junitgenerated/*.java"/>
-	  		<exclude name = "**/*.aj"/>
-	  	</javac>
-	  	<jar destfile="bin/junit-tests.jar">
-	  		<fileset dir="bin">
-	  			<include name="org/jmodelica/test/junitgenerated/*.class"/> 
-	  		</fileset>
-	    </jar>
+		<javac compiler="javac1.5" debug="true" destdir="bin" classpath="${junit_dir}/junit-4.5.jar">
+			<src path="${test_junit-gen_dir}/" />
+			<include name="org/jmodelica/test/junitgenerated/*.java" />
+			<exclude name="**/*.aj" />
+		</javac>
+		<jar destfile="bin/junit-tests.jar">
+			<fileset dir="bin">
+				<include name="org/jmodelica/test/junitgenerated/*.class" />
+			</fileset>
+		</jar>
 	</target>
-		
-  <!-- TARGET test -->
-  <target name="test" depends="gen-test">
-    <!-- Run all tests in dir by using the TestAll java program -->
-  	<mkdir dir = "doc/junit-reports"/>
-  	<junit printsummary="yes" 
-  		   fork="true"
-  		   maxmemory="512M">
-  	  <classpath>
-  	  <fileset dir="${junit_dir}">
-  	     <include name="junit-4.5.jar"/>
-  	  </fileset>
-  	  <fileset dir="bin">
-  	   	<include name="jmodelica.jar"/>
-  	   	<include name="util.jar"/>
-  	   	<include name="junit-tests.jar"/>
-  	  </fileset>
-  	  <fileset dir="${beaver_dir}/lib">
-  	   	<include name="beaver.jar"/>
-  	  </fileset>
-  	  </classpath>
-   		<formatter type="xml"/>
-     <!-- <test todir="junit-reports"
+
+	<!-- TARGET test -->
+	<target name="test" depends="gen-test">
+		<!-- Run all tests in dir by using the TestAll java program -->
+		<mkdir dir="doc/junit-reports" />
+		<junit printsummary="yes" fork="true" maxmemory="512M">
+			<classpath>
+				<fileset dir="${junit_dir}">
+					<include name="junit-4.5.jar" />
+				</fileset>
+				<fileset dir="bin">
+					<include name="jmodelica.jar" />
+					<include name="util.jar" />
+					<include name="junit-tests.jar" />
+				</fileset>
+				<fileset dir="${beaver_dir}/lib">
+					<include name="beaver.jar" />
+				</fileset>
+			</classpath>
+			<formatter type="xml" />
+			<!-- <test todir="junit-reports"
   		    name="org.jmodelica.test.junitgenerated.NameTests"/> -->
-  		
-      <batchtest fork="yes" todir="doc/junit-reports">
-      <fileset dir="${test_junit-gen_dir}/">
-        <include name="org/jmodelica/test/junitgenerated/*.java"/>
-      </fileset>
-    </batchtest> 
-  	</junit>
-  	<junitreport todir="doc/junit-reports">
-  	  		            <fileset dir="doc/junit-reports" includes="TEST-*.xml"/>
-  	  		            <report todir="doc/junit-reports"/>
-  	  		        </junitreport>
-  </target>
+
+			<batchtest fork="yes" todir="doc/junit-reports">
+				<fileset dir="${test_junit-gen_dir}/">
+					<include name="org/jmodelica/test/junitgenerated/*.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+		<junitreport todir="doc/junit-reports">
+			<fileset dir="doc/junit-reports" includes="TEST-*.xml" />
+			<report todir="doc/junit-reports" />
+		</junitreport>
+	</target>
 
 </project>

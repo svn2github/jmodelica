@@ -105,42 +105,6 @@ aspect RootAccess {
 		//exp.dumpTreeBasic("");
 		return exp;
 	}
-
-	public FlatRoot ParserHandler.parseFlatModelicaFile(String fileName) 
-	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
-		FlatRoot fr = null;
-		Reader reader = new FileReader(fileName);
-		org.jmodelica.modelica.parser.FlatModelicaScanner scanner = 
-			new org.jmodelica.modelica.parser.FlatModelicaScanner(new BufferedReader(reader));
-		org.jmodelica.modelica.parser.FlatModelicaParser parser = 
-			new org.jmodelica.modelica.parser.FlatModelicaParser();
-		fr = (FlatRoot)parser.parse(scanner);
-		fr.setFileName(fileName);
-		return fr;
-	}
-	
-	public FlatRoot ParserHandler.parseFlatModelicaString(String str, String fileName) 
-	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
-		FlatRoot fr = null;
-		org.jmodelica.modelica.parser.FlatModelicaScanner scanner = 
-			new org.jmodelica.modelica.parser.FlatModelicaScanner(new StringReader(str));
-		org.jmodelica.modelica.parser.FlatModelicaParser parser = 
-			new org.jmodelica.modelica.parser.FlatModelicaParser();
-		fr = (FlatRoot)parser.parse(scanner);
-		fr.setFileName(fileName);
-		return fr;
-	}
-	
-	public FExp ParserHandler.parseFlatModelicaExpString(String str)
-	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
-		FExp fexp = null;
-		org.jmodelica.modelica.parser.FlatModelicaScanner scanner = 
-			new org.jmodelica.modelica.parser.FlatModelicaScanner(new StringReader(str));
-		org.jmodelica.modelica.parser.FlatModelicaParser parser = 
-			new org.jmodelica.modelica.parser.FlatModelicaParser();
-		fexp = (FExp)parser.parse(scanner,org.jmodelica.modelica.parser.FlatModelicaParser.AltGoals.fexp);
-		return fexp;
-	}
 	
 }
 

@@ -15,8 +15,3 @@
 */
 
 package org.jmodelica.optimica.parser;
-
-import beaver.Symbol;
-import beaver.Scanner;
-import org.jmodelica.optimica.parser.FlatModelicaParser.Terminals;
-

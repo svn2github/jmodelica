@@ -1002,7 +1002,7 @@ algorithm
  while x < 1 loop
   while x < 2 loop
    while x < 3 loop
-    x := x - 1;
+    x := x - ( 1 );
    end while;
   end while;
  end while;
@@ -1033,6 +1033,7 @@ algorithm
    x := x + ( i ) * ( j );
   end for;
  end for;
+end FunctionTests.AlgorithmFlatten6;
 ")})));
 
  Real x;

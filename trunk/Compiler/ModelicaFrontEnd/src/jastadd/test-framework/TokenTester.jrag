@@ -18,14 +18,11 @@
  * 
  */
 
-import org.jmodelica.modelica.parser.FlatModelicaParser.Terminals;
 import org.jmodelica.modelica.parser.FlatModelicaScanner;
-import org.jmodelica.modelica.parser.FlatModelicaParser;
 import java.io.StringReader;
 import java.io.FileReader;
 import java.io.Reader;
 import java.io.BufferedReader;
-import beaver.Symbol;
 
 /**
  * @author jakesson
@@ -42,23 +39,27 @@ public class TokenTester {
 
 		try {
 			while (!done && testSuccess) {
-				Symbol t1 = fms1.nextToken();
-				Symbol t2 = fms2.nextToken();
+				String t1 = fms1.nextToken();
+				String t2 = fms2.nextToken();
+				System.out.println("t1: " + t1 + " t2: " + t2);
 
-				System.out.println("t1: " + t1.getId() + ":"+ (String)t1.value +
-						           " t2: "+t2.getId()+ ":"+ (String)t2.value);
-				if (!(t1.getId()==t2.getId())||
-				    !(((String)t1.value).equals((String)t2.value))) {
+				boolean match;
+				if (t1 == null || t2 == null) {
+					done = true;
+					match = t1 == t2;
+				} else {
+					match = t1.equals(t2);
+				}
+
+				if (!match) {
 					System.out.println("Token error - test failed");
 					testSuccess = false;
 				}
-
-				if (t1.getId()==Terminals.EOF ||
-						t2.getId()==Terminals.EOF)
-					done = true;
-
 			}
-		} catch (Exception e) {e.printStackTrace();}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 
 		return testSuccess;
 	}
