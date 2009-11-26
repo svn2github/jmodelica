@@ -114,18 +114,6 @@ public class XMLProblemVariableGenerator extends GenericGenerator{
 	public XMLProblemVariableGenerator(Printer expPrinter,
 			char escapeCharacter, FClass fclass) {
 		super(expPrinter, escapeCharacter, fclass);
-		
-		// Create tags			
-		AbstractTag tag = null;
-
-		tag = new DAETag_XML_startTime(this,fclass);
-		tagMap.put(tag.getName(), tag);
-		tag = new DAETag_XML_finalTime(this,fclass);
-		tagMap.put(tag.getName(), tag);
-		tag = new DAETag_XML_timePoints(this,fclass);
-		tagMap.put(tag.getName(), tag);
-
-
 	}
 
 }

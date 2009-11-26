@@ -24,6 +24,7 @@
 
 import java.util.HashMap;
 import java.io.*;
+import java.lang.reflect.Constructor;
 
 /**
  * Abstract base class for code generation classes. 
@@ -70,11 +71,37 @@ public abstract class AbstractGenerator {
 	 * 
 	 * @param expPrinter A Printer for code generation of expressions.
 	 * @param escapeCharacter Escape character used when decoding tags.
+	 * @param fclass An FClass object used as a basis for the code generation.
 	 */
-	public AbstractGenerator(Printer expPrinter, char escapeCharacter) {
+	public AbstractGenerator(Printer expPrinter, char escapeCharacter, FClass fclass) {
 		this.expPrinter = expPrinter;
 		this.escapeCharacter = (int)escapeCharacter;
 		tagMap = new HashMap<String,AbstractTag>();
+		instantiateTags(getClass(), fclass);
+	}
+	
+	/**
+	 * \brief Recursive method to instantiate all inner classes inheriting AbstractTag.
+	 * 
+	 * Recursion is needed to instantiate classes from a superclass before classes from a subclass. 
+	 * This ensures that subclasses can override tags added by superclasses.
+	 * 
+	 * @param cur The class to search for classes in.
+	 * @param fclass An FClass object used as a basis for the code generation.
+	 */
+	private void instantiateTags(Class<?> cur, FClass fclass) {
+		if (cur.equals(AbstractGenerator.class)) return;
+		instantiateTags(cur.getSuperclass(), fclass);
+		for (Class<?> inner : cur.getDeclaredClasses()) {
+			for (Constructor<?> con : inner.getConstructors()) {
+				try {
+					AbstractTag tag = (AbstractTag) con.newInstance(this, this, fclass);
+					tagMap.put(tag.getName(), tag);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	/**

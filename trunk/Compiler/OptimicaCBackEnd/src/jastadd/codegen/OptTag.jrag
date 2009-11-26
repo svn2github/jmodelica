@@ -36,7 +36,7 @@ public abstract class OptTag extends AbstractTag {
 	 * @param name Tag name.
 	 * @param description Tag description.
 	 * @param myGenerator The tag's generator.
-	 * @param fclass An FOptClass object used as a basis in the code generation.
+	 * @param foptclass An FOptClass object used as a basis in the code generation.
 	 */
 	public OptTag(String name, String description, 
 	  AbstractGenerator myGenerator, FOptClass foptclass) {

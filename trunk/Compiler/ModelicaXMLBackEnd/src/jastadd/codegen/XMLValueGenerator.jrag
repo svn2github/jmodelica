@@ -128,11 +128,6 @@ public class XMLValueGenerator extends GenericGenerator{
 	 */
 	public XMLValueGenerator(Printer expPrinter, char escapeCharacter, FClass fclass) {
 		super(expPrinter, escapeCharacter, fclass);
-		
-		// Create tags			
-		AbstractTag tag = null;
-		tag = new DAETag_XML_parameters(this,fclass);
-		tagMap.put(tag.getName(), tag);
 	}
 
 }

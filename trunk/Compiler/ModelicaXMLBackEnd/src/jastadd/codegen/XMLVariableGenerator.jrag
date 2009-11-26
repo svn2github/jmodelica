@@ -764,47 +764,6 @@ public class XMLVariableGenerator extends GenericGenerator {
 	public XMLVariableGenerator(Printer expPrinter, char escapeCharacter,
 			FClass fclass) {
 		super(expPrinter,escapeCharacter, fclass);
-		
-		// Create tags			
-		AbstractTag tag = null;
-
-		tag = new DAETag_XML_modelName(this,fclass);
-		tagMap.put(tag.getName(), tag);
-		tag = new DAETag_XML_modelIdentifier(this,fclass);
-		tagMap.put(tag.getName(), tag);
-		tag = new DAETag_XML_modelDescription(this,fclass);
-		tagMap.put(tag.getName(), tag);
-		tag = new DAETag_XML_modelAuthor(this,fclass);
-		tagMap.put(tag.getName(), tag);
-		tag = new DAETag_XML_modelVersion(this,fclass);
-		tagMap.put(tag.getName(), tag);
-		tag = new DAETag_XML_schemaVersion(this,fclass);
-		tagMap.put(tag.getName(), tag);
-		tag = new DAETag_XML_generationTool(this,fclass);
-		tagMap.put(tag.getName(), tag);
-		tag = new DAETag_XML_generationDate(this,fclass);
-		tagMap.put(tag.getName(), tag);
-		tag = new DAETag_XML_guid(this,fclass);
-		tagMap.put(tag.getName(), tag);
-		tag = new DAETag_XML_variableNamingConvention(this,fclass);
-		tagMap.put(tag.getName(), tag);
-		tag = new DAETag_XML_numberOfContinuousStates(this,fclass);
-		tagMap.put(tag.getName(), tag);
-		tag = new DAETag_XML_numberOfEventIndicators(this,fclass);
-		tagMap.put(tag.getName(), tag);
-		tag = new DAETag_XML_modelVariables(this,fclass);
-		tagMap.put(tag.getName(), tag);
-		tag = new DAETag_XML_defaultExperiment(this,fclass);
-		tagMap.put(tag.getName(), tag);
-		tag = new DAETag_XML_vendorAnnotations(this,fclass);
-		tagMap.put(tag.getName(), tag);
-		tag = new DAETag_XML_bindingEquations(this,fclass);
-		tagMap.put(tag.getName(), tag);
-		tag = new DAETag_XML_equations(this,fclass);
-		tagMap.put(tag.getName(), tag);
-		tag = new DAETag_XML_initialEquations(this,fclass);
-		tagMap.put(tag.getName(),tag);
-
 	}
 }
 

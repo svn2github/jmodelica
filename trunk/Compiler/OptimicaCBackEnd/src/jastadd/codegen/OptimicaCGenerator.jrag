@@ -236,43 +236,6 @@ public class OptimicaCGenerator extends CGenerator {
 	public OptimicaCGenerator(Printer expPrinter, char escapeCharacter,
 			FOptClass fclass) {
 		super(expPrinter,escapeCharacter, fclass);
-
-		// Create tags			
-		AbstractTag tag = null;
-		
-		tag = new OptTag_C_numPathEqConstraints(this,fclass);
-		tagMap.put(tag.getName(),tag);
-
-		tag = new OptTag_C_numPathIneqConstraints(this,fclass);
-		tagMap.put(tag.getName(),tag);
-
-		tag = new OptTag_C_numPointEqConstraints(this,fclass);
-		tagMap.put(tag.getName(),tag);
-
-		tag = new OptTag_C_numPointIneqConstraints(this,fclass);
-		tagMap.put(tag.getName(),tag);
-
-		tag = new OptTag_C_numTimePoints(this,fclass);
-		tagMap.put(tag.getName(),tag);
-
-		tag = new OptTag_C_pointVariableAliases(this,fclass);
-		tagMap.put(tag.getName(),tag);
-		
-		tag = new OptTag_C_CostFunction(this,fclass);
-		tagMap.put(tag.getName(),tag);
-
-		tag = new OptTag_C_PathEqualityConstraints(this,fclass);
-		tagMap.put(tag.getName(),tag);
-
-		tag = new OptTag_C_PathInequalityConstraints(this,fclass);
-		tagMap.put(tag.getName(),tag);
-
-		tag = new OptTag_C_PointEqualityConstraints(this,fclass);
-		tagMap.put(tag.getName(),tag);
-
-		tag = new OptTag_C_PointInequalityConstraints(this,fclass);
-		tagMap.put(tag.getName(),tag);
-
 	}
 }
 
