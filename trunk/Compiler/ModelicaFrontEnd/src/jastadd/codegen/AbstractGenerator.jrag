@@ -49,6 +49,9 @@ import java.lang.reflect.Constructor;
  * essentially its name (the string enclosed by an escape character, $ in the 
  * example above), and a method for generating the corresponding code.
  * 
+ * A subclass need only define Tag classes as inner classes for them to be 
+ * instantiated and added to the list of Tags.
+ * 
  * When the method generate is invoked, template file is loaded and an output
  * file is written where all tags has been replaced with their corresponding
  * generated code.
@@ -68,6 +71,9 @@ public abstract class AbstractGenerator {
 	
 	/**
 	 * \brief Constructor for AbstractGenerator.
+	 * 
+	 * All inner classes inheriting {@link AbstractTag} in the subclass being instantited 
+	 * (and in any superclasses) are automatically instantiated and added to {@link #tagMap}.
 	 * 
 	 * @param expPrinter A Printer for code generation of expressions.
 	 * @param escapeCharacter Escape character used when decoding tags.

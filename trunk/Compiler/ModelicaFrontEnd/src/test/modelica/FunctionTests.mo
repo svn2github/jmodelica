@@ -457,13 +457,17 @@ model BadFunctionCall1
           description="Call to non-existing function",
           errorMessage=
 "
-1 error(s) found...
+2 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  The function NonExistingFunction is undeclared
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   The function NonExistingFunction is undeclared
 ")})));
 
-  Real x = NonExistingFunction();
+  Real x = NonExistingFunction(1, 2);
+  Real y = NonExistingFunction();
 end BadFunctionCall1;
 
 model BadFunctionCall2
@@ -472,14 +476,18 @@ model BadFunctionCall2
           description="Call to component as function",
           errorMessage=
 "
-1 error(s) found...
+2 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  The function notAFunction is undeclared
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   The function notAFunction is undeclared
 ")})));
 
   Real notAFunction = 0;
-  Real x = notAFunction();
+  Real x = notAFunction(1, 2);
+  Real y = notAFunction();
 end BadFunctionCall2;
 
 class NotAFunctionClass
@@ -492,15 +500,21 @@ model BadFunctionCall3
           description="Call to non-function class as function",
           errorMessage=
 "
-1 error(s) found...
+2 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  The class NotAFunctionClass is not a function
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   The class NotAFunctionClass is not a function
 ")})));
 
-  Real x = NotAFunctionClass();
+  Real x = NotAFunctionClass(1, 2);
+  Real y = NotAFunctionClass();
 end BadFunctionCall3;
 
+
+/* ====================== Function call type checks ====================== */
 
 model FunctionType0
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

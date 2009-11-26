@@ -682,9 +682,7 @@ aspect InstanceErrorCheck {
 	    		else
 	    			error("The class " + name + " is not a function");
 	    		
-	    		// To avoid duplicate error from InstAccess, don't call super.collectErrors()
-		    	allChecks();
-		    	getArgs().collectErrors();	    		
+	    		// To avoid duplicate errors, don't check anything more
 	    	} else {
 	    		// Function exists, check everything
 	    		super.collectErrors();
