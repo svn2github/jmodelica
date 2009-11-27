@@ -9,38 +9,39 @@
       xmlns:html="http://www.w3.org/1999/xhtml"
       xmlns:db="http://docbook.org/ns/docbook">
   <info>
-    <title>JModelica.org User Guide</title>
+    <title><productname>JModelica.org</productname> User Guide</title>
 
-    <author>
-      <personname><firstname></firstname><surname></surname></personname>
+    <subtitle>Version <productnumber>trunk</productnumber></subtitle>
 
-      <affiliation>
-        <orgname>Modelon AB</orgname>
-      </affiliation>
-    </author>
+    <pubdate></pubdate>
 
-    <pubdate>2009</pubdate>
+    <copyright>
+      <year>2009</year>
+
+      <holder>Modelon AB</holder>
+    </copyright>
   </info>
 
-  <chapter>
-    <title>Introduction</title>
+  <acknowledgements>
+    <para>This document is produced with DocBook 5 using XMLMind XML Editor
+    for authoring, Norman Walsh's XSL stylesheets and a GNOME xsltproc +
+    Apache fop toolchain. Math contents is converted from LaTeX using the
+    TeX/LaTeX to MathML Online Translator by the Ontario Research Centre for
+    Computer Algebra and processed by JEuclid.</para>
+  </acknowledgements>
 
-    <section>
-      <title>About JModelica.org</title>
+  <xi:include href="Introduction.xml"
+              xpointer="element(/1)" />
 
-      <para>JModelica.org is an extensible Modelica-based open source platform
-      for optimization, simulation and analysis of complex dynamic systems.
-      The main objective of the project is to create an industrially viable
-      open source platform for optimization of Modelica models, while offering
-      a flexible platform serving as a virtual lab for algorithm development
-      and research. As such, JModelica.org is intended to provide a platform
-      for technology transfer where industrially relevant problems can inspire
-      new research and where state of the art algorithms can be propagated
-      form academia into industrial use. JModelica.org is a result of research
-      at the Department of Automatic Control, Lund University, and is now
-      maintained and developed by Modelon AB.</para>
+  <xi:include href="Installation.xml"
+              xpointer="element(/1)" />
 
-      <informalequation>
+  <appendix>
+    <title>Sandbox</title>
+
+    <para>hej test index</para>
+
+    <para><informalequation>
         <m:math display="block" overflow="scroll">
           <m:munder>
             <m:mi>min</m:mi>
@@ -96,31 +97,18 @@
 
           <m:mspace linebreak="newline" />
         </m:math>
-      </informalequation>
-
-      <figure>
+      </informalequation><figure>
         <title>Console output from VDP example</title>
 
         <screenshot>
           <mediaobject>
             <imageobject>
               <imagedata fileref="images/vdp-console.preview.png" scalefit="1"
-                         width="100%"></imagedata>
+                         width="70%"></imagedata>
             </imageobject>
           </mediaobject>
         </screenshot>
-      </figure>
-    </section>
-
-    <section>
-      <title>Mission Statement</title>
-
-      <para>To offer a community-based, free, open source, accessible, user
-      and application oriented Modelica environment for optimization and
-      simulation of complex dynamic systems, built on well-recognized
-      technology and supporting major platforms.</para>
-
-      <equation>
+      </figure><equation>
         <title>MathML example from <link
         xlink:href="http://www.orcca.on.ca/MathML/texmml/textomml.html">LaTeX
         to MathML online translator</link></title>
@@ -384,38 +372,522 @@
             </m:mtr>
           </m:mtable>
         </m:math>
-      </equation>
-    </section>
-  </chapter>
+      </equation><informalequation>
+        <m:math display="block" overflow="scroll">
+          <m:mfenced close="]" open="[">
+            <m:mtable columnalign="center center center center center">
+              <m:mtr>
+                <m:mtd>
+                  <m:mi>B</m:mi>
+                </m:mtd>
 
-  <chapter>
-    <title>Installation</title>
+                <m:mtd></m:mtd>
 
-    <para>The installation procedure differs between operating systems. Please
-    consult the section corresponding to your operating system.</para>
+                <m:mtd></m:mtd>
 
-    <section>
-      <title>Binary Distribution</title>
+                <m:mtd></m:mtd>
 
-      <para></para>
+                <m:mtd>
+                  <m:msub>
+                    <m:mi>Y</m:mi>
 
-      <section>
-        <title>Linux</title>
+                    <m:mn>1</m:mn>
+                  </m:msub>
 
-        <para></para>
-      </section>
+                  <m:mi>B</m:mi>
+                </m:mtd>
+              </m:mtr>
 
-      <section>
-        <title>Windows</title>
+              <m:mtr>
+                <m:mtd></m:mtd>
 
-        <para></para>
-      </section>
-    </section>
+                <m:mtd>
+                  <m:mi>B</m:mi>
+                </m:mtd>
 
-    <section>
-      <title>Source Distribution</title>
+                <m:mtd></m:mtd>
 
-      <para></para>
-    </section>
-  </chapter>
+                <m:mtd></m:mtd>
+
+                <m:mtd>
+                  <m:msub>
+                    <m:mi>Y</m:mi>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+
+                  <m:mi>B</m:mi>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd></m:mtd>
+
+                <m:mtd></m:mtd>
+
+                <m:mtd>
+                  <m:mo>⋱</m:mo>
+                </m:mtd>
+
+                <m:mtd></m:mtd>
+
+                <m:mtd>
+                  <m:mo>⋮</m:mo>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd></m:mtd>
+
+                <m:mtd></m:mtd>
+
+                <m:mtd></m:mtd>
+
+                <m:mtd>
+                  <m:mi>B</m:mi>
+                </m:mtd>
+
+                <m:mtd>
+                  <m:msub>
+                    <m:mi>Y</m:mi>
+
+                    <m:mi>p</m:mi>
+                  </m:msub>
+
+                  <m:mi>B</m:mi>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+          </m:mfenced>
+        </m:math>
+      </informalequation><informalequation>
+        <m:math display="block" overflow="scroll">
+          <m:mi>Re</m:mi>
+
+          <m:mfenced close="}" open="{" separators="">
+            <m:mfrac>
+              <m:mn>1</m:mn>
+
+              <m:mrow>
+                <m:mn>2</m:mn>
+
+                <m:mi>π</m:mi>
+              </m:mrow>
+            </m:mfrac>
+
+            <m:munderover>
+              <m:mo>∫</m:mo>
+
+              <m:mn>0</m:mn>
+
+              <m:mrow>
+                <m:mn>2</m:mn>
+
+                <m:mi>π</m:mi>
+              </m:mrow>
+            </m:munderover>
+
+            <m:mfenced separators="">
+              <m:mi>f</m:mi>
+
+              <m:mo>⁡</m:mo>
+
+              <m:mfenced>
+                <m:mi>z</m:mi>
+              </m:mfenced>
+
+              <m:mo>-</m:mo>
+
+              <m:munderover>
+                <m:mo>∑</m:mo>
+
+                <m:mrow>
+                  <m:mo>ℓ</m:mo>
+
+                  <m:mo>=</m:mo>
+
+                  <m:mn>0</m:mn>
+                </m:mrow>
+
+                <m:mi>m</m:mi>
+              </m:munderover>
+
+              <m:msub>
+                <m:mi>g</m:mi>
+
+                <m:mo>ℓ</m:mo>
+              </m:msub>
+
+              <m:msup>
+                <m:mi>h</m:mi>
+
+                <m:mo>ℓ</m:mo>
+              </m:msup>
+
+              <m:mfenced>
+                <m:mi>z</m:mi>
+              </m:mfenced>
+            </m:mfenced>
+
+            <m:mover>
+              <m:mrow>
+                <m:msup>
+                  <m:mi>h</m:mi>
+
+                  <m:mi>k</m:mi>
+                </m:msup>
+
+                <m:mfenced>
+                  <m:mi>z</m:mi>
+                </m:mfenced>
+              </m:mrow>
+
+              <m:mo stretchy="true">¯</m:mo>
+            </m:mover>
+
+            <m:mspace width="0.22222em" />
+
+            <m:mrow>
+              <m:mi>d</m:mi>
+
+              <m:mi>t</m:mi>
+            </m:mrow>
+          </m:mfenced>
+
+          <m:mo>=</m:mo>
+
+          <m:mn>0</m:mn>
+        </m:math>
+      </informalequation><informalequation>
+        <m:math display="block" overflow="scroll">
+          <m:mn>2</m:mn>
+
+          <m:mfrac>
+            <m:mrow>
+              <m:mfrac>
+                <m:mn>1</m:mn>
+
+                <m:msqrt>
+                  <m:mn>2</m:mn>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mn>2</m:mn>
+
+                  <m:mo> </m:mo>
+
+                  <m:mi>z</m:mi>
+                </m:msqrt>
+              </m:mfrac>
+
+              <m:mo>-</m:mo>
+
+              <m:mfrac>
+                <m:mi>i</m:mi>
+
+                <m:msqrt>
+                  <m:mn>2</m:mn>
+
+                  <m:mo>-</m:mo>
+
+                  <m:mn>2</m:mn>
+
+                  <m:mo> </m:mo>
+
+                  <m:mi>z</m:mi>
+                </m:msqrt>
+              </m:mfrac>
+            </m:mrow>
+
+            <m:mrow>
+              <m:msqrt>
+                <m:mn>2</m:mn>
+
+                <m:mo>+</m:mo>
+
+                <m:mn>2</m:mn>
+
+                <m:mo> </m:mo>
+
+                <m:mi>z</m:mi>
+              </m:msqrt>
+
+              <m:mo>+</m:mo>
+
+              <m:mi>i</m:mi>
+
+              <m:msqrt>
+                <m:mn>2</m:mn>
+
+                <m:mo>-</m:mo>
+
+                <m:mn>2</m:mn>
+
+                <m:mo> </m:mo>
+
+                <m:mi>z</m:mi>
+              </m:msqrt>
+            </m:mrow>
+          </m:mfrac>
+
+          <m:mo>-</m:mo>
+
+          <m:mfrac>
+            <m:mrow>
+              <m:mn>1</m:mn>
+
+              <m:mo>-</m:mo>
+
+              <m:mfrac>
+                <m:mrow>
+                  <m:mi>i</m:mi>
+
+                  <m:mi>z</m:mi>
+                </m:mrow>
+
+                <m:msqrt>
+                  <m:mn>1</m:mn>
+
+                  <m:mo>-</m:mo>
+
+                  <m:msup>
+                    <m:mi>z</m:mi>
+
+                    <m:mn>2</m:mn>
+                  </m:msup>
+                </m:msqrt>
+              </m:mfrac>
+            </m:mrow>
+
+            <m:mrow>
+              <m:mi>z</m:mi>
+
+              <m:mo>+</m:mo>
+
+              <m:mi>i</m:mi>
+
+              <m:msqrt>
+                <m:mn>1</m:mn>
+
+                <m:mo>-</m:mo>
+
+                <m:msup>
+                  <m:mi>z</m:mi>
+
+                  <m:mn>2</m:mn>
+                </m:msup>
+              </m:msqrt>
+            </m:mrow>
+          </m:mfrac>
+
+          <m:mi>.</m:mi>
+
+          <m:mspace linebreak="newline" />
+        </m:math>
+      </informalequation><informalequation>
+        <m:math display="block" overflow="scroll">
+          <m:msub>
+            <m:mi>N</m:mi>
+
+            <m:mi>f</m:mi>
+          </m:msub>
+
+          <m:mfenced separators="">
+            <m:mi>g</m:mi>
+
+            <m:mo>+</m:mo>
+
+            <m:mi>Δ</m:mi>
+
+            <m:mi>g</m:mi>
+
+            <m:mi>,</m:mi>
+
+            <m:mi>h</m:mi>
+
+            <m:mo>+</m:mo>
+
+            <m:mi>Δ</m:mi>
+
+            <m:mi>h</m:mi>
+          </m:mfenced>
+
+          <m:mo>=</m:mo>
+
+          <m:msub>
+            <m:mi>N</m:mi>
+
+            <m:mi>f</m:mi>
+          </m:msub>
+
+          <m:mfenced>
+            <m:mi>g</m:mi>
+
+            <m:mi>h</m:mi>
+          </m:mfenced>
+
+          <m:mo>+</m:mo>
+
+          <m:msup>
+            <m:mi mathvariant="bold">b</m:mi>
+
+            <m:mi>t</m:mi>
+          </m:msup>
+
+          <m:mi mathvariant="bold">x</m:mi>
+
+          <m:mo>+</m:mo>
+
+          <m:msup>
+            <m:mi mathvariant="bold">x</m:mi>
+
+            <m:mi>t</m:mi>
+          </m:msup>
+
+          <m:mi mathvariant="bold">A</m:mi>
+
+          <m:mi mathvariant="bold">x</m:mi>
+
+          <m:mo>+</m:mo>
+
+          <m:mo>⋯</m:mo>
+
+          <m:mspace linebreak="newline" />
+        </m:math>
+      </informalequation><informalequation>
+        <m:math display="block" overflow="scroll">
+          <m:mfenced close="∣ " open="∣ ">
+            <m:mi>x</m:mi>
+          </m:mfenced>
+
+          <m:mo>=</m:mo>
+
+          <m:mrow>
+            <m:mo stretchy="true">{</m:mo>
+
+            <m:mtable columnalign="left" columnspacing="2em">
+              <m:mtr>
+                <m:mtd>
+                  <m:mi>x</m:mi>
+
+                  <m:mi>,</m:mi>
+                </m:mtd>
+
+                <m:mtd>
+                  <m:mi>x</m:mi>
+
+                  <m:mo>≥</m:mo>
+
+                  <m:mn>0</m:mn>
+
+                  <m:mi>;</m:mi>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd>
+                  <m:mo>-</m:mo>
+
+                  <m:mi>x</m:mi>
+
+                  <m:mi>,</m:mi>
+                </m:mtd>
+
+                <m:mtd>
+                  <m:mi>otherwise.</m:mi>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+          </m:mrow>
+        </m:math>
+      </informalequation></para>
+
+    <para>test index <citation>Jak2007</citation> foo<programlisting>10 print "magnus"
+20 goto 10</programlisting></para>
+  </appendix>
+
+  <bibliography>
+    <title>Bibliography</title>
+
+    <biblioentry role="phd thesis">
+      <abbrev>Jak2007</abbrev>
+
+      <author>
+        <personname><firstname>Johan</firstname><surname>Åkesson</surname></personname>
+      </author>
+
+      <title>Tools and Languages for Optimization of Large-Scale
+      Systems</title>
+
+      <biblioid class="isrn">LUTFD2/TFRT--1081--SE</biblioid>
+
+      <publisher>
+        <publishername>Lund University</publishername>
+
+        <address>Sweden</address>
+      </publisher>
+
+      <pubdate>2007</pubdate>
+    </biblioentry>
+
+    <biblioentry role="article">
+      <abbrev>Jak2008b</abbrev>
+
+      <biblioset role="article">
+        <authorgroup>
+          <author>
+            <personname><firstname>Johan</firstname><surname>Åkesson</surname></personname>
+          </author>
+
+          <author>
+            <personname><firstname>Görel</firstname><surname>Hedin</surname></personname>
+          </author>
+
+          <author>
+            <personname><firstname>Torbjörn</firstname><surname>Ekman</surname></personname>
+          </author>
+        </authorgroup>
+
+        <title>Tools and Languages for Optimization of Large-Scale
+        Systems</title>
+
+        <pagenums>117-131</pagenums>
+      </biblioset>
+
+      <biblioset relation="journal">
+        <title>Electronic Notes in Theoretical Computer Science</title>
+
+        <volumenum>203:2</volumenum>
+
+        <pubdate>April 2008</pubdate>
+      </biblioset>
+    </biblioentry>
+
+    <biblioentry role="article">
+      <abbrev>Jak2008a</abbrev>
+
+      <biblioset role="article">
+        <authorgroup>
+          <author>
+            <personname><firstname>Johan</firstname><surname>Åkesson</surname></personname>
+          </author>
+        </authorgroup>
+
+        <title>Optimica—An Extension of Modelica Supporting Dynamic
+        Optimization</title>
+      </biblioset>
+
+      <biblioset relation="proceedings">
+        <title>Proc. 6th International Modelica Conference 2008</title>
+
+        <publisher>
+          <publishername>Modelica Association</publishername>
+        </publisher>
+
+        <pubdate>March 2008</pubdate>
+      </biblioset>
+    </biblioentry>
+  </bibliography>
+
+  <index></index>
 </book>

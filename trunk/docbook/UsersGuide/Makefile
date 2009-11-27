@@ -1,27 +1,30 @@
 # Copy this template to your docbook project directory and rename to Makefile.
 # Set the DOC variable to the document name (the prefix of your docbook xml file, exclude the .xml suffix):
-DOCDIR=@abs_top_srcdir@/docbook/UsersGuide
+DOCDIR=/C/JModelica.org-SDK/src/docbook/UsersGuide
 DOC=JModelicaUsersGuide
 DOCFILE=$(DOCDIR)/$(DOC).xml
 XSLHTMLSTYLE=$(DOCBOOK_HOME)/html/docbook.xsl
-XSLXHTMLSTYLE=$(DOCBOOK_HOME)/xhtml/docbook.xsl
-XSLPDFSTYLE=$(DOCBOOK_HOME)/fo/docbook.xsl
+XSLXHTMLSTYLE=$(DOCBOOK_HOME)/xhtml.xsl
+XSLPDFSTYLE=$(DOCBOOK_HOME)/fo.xsl
 XSLHTMLHELPSTYLE=$(DOCBOOK_HOME)/htmlhelp/htmlhelp.xsl
 
+#http://docbook.sourceforge.net/release/xsl/current/doc/html/index.html
 $(DOC).xhtml:  $(DOCFILE)
-	xsltproc --xinclude  --output  $@  $(XSLXHTMLSTYLE)  $<
+	xsltproc  --xinclude  --output  $@ \
+	$(XSLXHTMLSTYLE)  $<
 
 xhtml:  $(DOC).xhtml
 
 $(DOC).html:  $(DOCFILE)
-	xsltproc --xinclude  --output  $@  $(XSLHTMLSTYLE)  $<
+	xsltproc --xinclude  --output  $@ \
+	$(XSLHTMLSTYLE)  $<
 
 html:  $(DOC).html
 
+# http://docbook.sourceforge.net/release/xsl/current/doc/fo/index.html
 $(DOC).fo:  $(DOCFILE)
 	rm -f $(DOC).fo
 	xsltproc --xinclude  --output  $@ \
-	--stringparam paper.type A4 \
 	--stringparam fop1.extensions 1 \
 	$(XSLPDFSTYLE)  $<
 
@@ -47,7 +50,8 @@ winhelp:
 endif
 
 ifeq ($(OS),Windows_NT)
-all: xhtml html pdf winhelp
+#all: xhtml html pdf winhelp
+all: xhtml pdf
 else
 all: xhtml html pdf
 endif
