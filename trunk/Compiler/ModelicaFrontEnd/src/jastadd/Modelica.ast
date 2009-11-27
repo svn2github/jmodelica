@@ -310,7 +310,7 @@ ForIndexDecl : ComponentDecl; // Is this really ok: FIXME!
 WhenClauseE : AbstractEquation ::= WhenExp:Exp WhenEqns:AbstractEquation*
                                    ElseWhenClauseE*;
 ElseWhenClauseE ::= WhenExp:Exp WhenEqns:AbstractEquation*;         
-EquationFunctionCall : AbstractEquation ::= FunctionCall;
+FunctionCallEquation : AbstractEquation ::= Left:Access* Call:FunctionCall;
          
 abstract Statement ::= Comment;
 AssignStmt : Statement ::= Left:Access Right:Exp;

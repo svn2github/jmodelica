@@ -97,7 +97,7 @@ import java.util.ArrayList;
     	  s = "At " + lineData;
       }
       
-      if (this.severity == severity.ERROR) {
+      if (this.severity == Severity.ERROR) {
     	  return "Error: in file '"+fileName + "':\n" + s +"  "+ message;
       } else {
     	  return "Warning: in file '"+fileName + "':\n" + s +"  "+ message;

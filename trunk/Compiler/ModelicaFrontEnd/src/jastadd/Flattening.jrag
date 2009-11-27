@@ -329,11 +329,30 @@ aspect FlatExpressions {
 	public void FAbstractEquation.flatten(FQName prefix, FClass fc) {}
 
 	public void FEquation.flatten(FQName prefix, FClass fc) {
-		fc.getFEquationBlock(0).addFAbstractEquation(new FEquation(getLeft().flatten(prefix),getRight().flatten(prefix)));
+		FEquation e = new FEquation(getType().flatten(prefix), getLeft().flatten(prefix), getRight().flatten(prefix));
+		getType().addEquationTo(fc, e);
 	}
-
-	public void FInitialEquation.flatten(FQName prefix, FClass fc) {
-	   	fc.addFInitialEquation(new FInitialEquation(getLeft().flatten(prefix),getRight().flatten(prefix)));
+	
+	public void FFunctionCallEquation.flatten(FQName prefix, FClass fc) {
+		List<FIdUse> l = new List<FIdUse>();
+		for (FIdUse a : getLefts()) 
+			l.add(a.flatten(prefix));
+		FFunctionCallEquation f = new FFunctionCallEquation(getType().flatten(prefix), l, getCall().flatten(prefix));
+		getType().addEquationTo(fc, f);
+	}
+	
+	public FEquationType FEquationType.flatten(FQName prefix) {
+		return (FEquationType) fullCopy();
+	}
+	
+	abstract public void FEquationType.addEquationTo(FClass fc, FAbstractEquation f);
+	
+	public void FNormalEquation.addEquationTo(FClass fc, FAbstractEquation f) {
+		fc.getFEquationBlock(0).addFAbstractEquation(f);
+	}
+	
+	public void FInitialEquationTemp.addEquationTo(FClass fc, FAbstractEquation f) {
+		fc.addFInitialEquation(f);
 	}
 
 	public FAlgorithmBlock FAlgorithmBlock.flatten(FQName prefix) {
@@ -733,15 +752,10 @@ aspect InstantiatedExpressions {
 	}
 
 	public FAbstractEquation Equation.instantiate() {
-	    if (isInitial()) {
-	    	FInitialEquation fie = new FInitialEquation(getLeft().instantiate(),getRight().instantiate());
-	    	fie.setLocation(this);
-	    	return fie;
-		} else {
-			FEquation e = new FEquation(getLeft().instantiate(),getRight().instantiate());
-			e.setLocation(this);
-			return e;
-	    }
+		FEquationType t = isInitial() ? new FInitialEquationTemp() : new FNormalEquation();
+		FEquation e = new FEquation(t, getLeft().instantiate(),getRight().instantiate());
+		e.setLocation(this);
+		return e;
 	}
 
 	public FAbstractEquation ConnectClause.instantiate() {
@@ -755,6 +769,16 @@ aspect InstantiatedExpressions {
 				new FIdUseInstAccess(new FQName(),getConnector2().newInstAccess()));
 		c.setLocation(this);
 		return c;
+	}
+	
+	public FFunctionCallEquation FunctionCallEquation.instantiate() {
+		FEquationType t = isInitial() ? new FInitialEquationTemp() : new FNormalEquation();
+		List l = new List();
+		for (Access a : getLefts()) 
+			l.add(new FIdUseInstAccess(new FQName(), a.newInstAccess()));
+		FFunctionCallEquation f = new FFunctionCallEquation(t, l, getCall().instantiate());
+		f.setLocation(this);
+		return f;
 	}
 	
 	public FAlgorithmBlock Algorithm.instantiate() {

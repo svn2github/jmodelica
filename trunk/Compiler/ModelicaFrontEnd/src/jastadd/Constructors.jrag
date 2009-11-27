@@ -26,6 +26,13 @@ aspect Constructors {
 	}
 	*/
 	
+	/**
+	 * \brief Constructs an equation that is not initial.
+	 */
+	public FEquation.FEquation(FExp left, FExp right) {
+		this(new FNormalEquation(), left, right);
+	}
+	
 	public ComponentDecl.ComponentDecl(boolean isParameter,
 	                                   String type,
 	                                   String name,

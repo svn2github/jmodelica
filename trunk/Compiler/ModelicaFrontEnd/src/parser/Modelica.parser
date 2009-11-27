@@ -770,13 +770,17 @@ Annotation annotation =
    
    
 AbstractEquation abstract_equation =
-  simple_expression.left EQUALS exp.right comment SEMICOLON       {: return new Equation(new Opt(),comment,left,right); :}
-  | conditional_equation_e SEMICOLON                     {: return conditional_equation_e; :}
-  | for_clause_e SEMICOLON                                {: return for_clause_e; :}
-  | when_clause_e SEMICOLON                               {: return when_clause_e; :}
-  | CONNECT LPAREN parse_access.a COMMA parse_access.b RPAREN comment SEMICOLON {: return new ConnectClause(new Opt(), comment,a,b); :}
-  | function_call comment SEMICOLON {: return new EquationFunctionCall(new Opt(),comment,function_call); :}
-  | annotation SEMICOLON             {: return new EquationAnnotation(new Opt(),new Comment(new Opt(), new Opt()), annotation); :}
+  simple_expression.left EQUALS exp.right comment SEMICOLON
+                                      {: return new Equation(new Opt(),comment,left,right); :}
+  | conditional_equation_e SEMICOLON  {: return conditional_equation_e; :}
+  | for_clause_e SEMICOLON            {: return for_clause_e; :}
+  | when_clause_e SEMICOLON           {: return when_clause_e; :}
+  | CONNECT LPAREN parse_access.a COMMA parse_access.b RPAREN comment SEMICOLON
+                                      {: return new ConnectClause(new Opt(), comment,a,b); :}
+  | LPAREN fcs_left_list RPAREN EQUALS function_call comment SEMICOLON
+                                      {: return new FunctionCallEquation(new Opt(),comment,new List(),function_call); :}
+  | function_call comment SEMICOLON   {: return new FunctionCallEquation(new Opt(),comment,new List(),function_call); :}
+  | annotation SEMICOLON              {: return new EquationAnnotation(new Opt(),new Comment(new Opt(), new Opt()), annotation); :}
   ;
 
 ConditionalEquationE conditional_equation_e =
@@ -875,8 +879,8 @@ FunctionCallStmt function_call_stmt =
   ;
 
 List fcs_left_list =
-    parse_access                      {: return new List().add(parse_access); :}
-  | fcs_left_list COMMA parse_access  {: return fcs_left_list.add(parse_access); :}
+    parse_access.a COMMA parse_access.b  {: return new List().add(a).add(b); :}
+  | fcs_left_list COMMA parse_access     {: return fcs_left_list.add(parse_access); :}
   ;
 
 
