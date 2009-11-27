@@ -108,11 +108,18 @@ aspect Flattening {
 		
    		if (getNumFAbstractEquation() > 0) {
 	   		FAlgorithmBlock fab = (FAlgorithmBlock) getFAbstractEquation(0);
-			ffd.setFAlgorithmBlock(fab.flatten(new FQName()));
-			// TODO: If last statement wasn't return, insert one.
+	   		fab = fab.flatten(new FQName());
+			ffd.setFAlgorithmBlock(fab);
+			fab.ensureReturn();
    		}
 
 		fc.addFFunctionDecl(ffd);
+	}
+	
+	public void FAlgorithmBlock.ensureReturn() {
+		int num = getNumFStatement();
+		if (num == 0 || !(getFStatement(num - 1) instanceof FReturnStmt)) 
+			addFStatement(new FReturnStmt());
 	}
 	
 	public void InstComponentDecl.flattenInFunction(FFunctionDecl ffd) {}

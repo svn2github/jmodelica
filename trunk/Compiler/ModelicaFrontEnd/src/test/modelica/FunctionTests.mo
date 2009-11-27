@@ -130,6 +130,7 @@ equation
   input Real i1 := 0;
   output Real o1 := i1;
  algorithm
+  return;
  end FunctionTests.TestFunction1;
 end FunctionTests.FunctionFlatten1;
 ")})));
@@ -157,6 +158,7 @@ equation
   output Real o2 := i2;
  algorithm
   o1 := i1;
+  return;
  end FunctionTests.TestFunction2;
 end FunctionTests.FunctionFlatten2;
 ")})));
@@ -185,12 +187,14 @@ equation
   output Real o2 := i2;
  algorithm
   o1 := i1;
+  return;
  end FunctionTests.TestFunction2;
 
  function FunctionTests.TestFunction1
   input Real i1 := 0;
   output Real o1 := i1;
  algorithm
+  return;
  end FunctionTests.TestFunction1;
 end FunctionTests.FunctionFlatten3;
 ")})));
@@ -216,6 +220,7 @@ fclass FunctionTests.FunctionBinding1
   input Real i1 := 0;
   output Real o1 := i1;
  algorithm
+  return;
  end FunctionTests.TestFunction1;
 end FunctionTests.FunctionBinding1;
 ")})));
@@ -235,6 +240,7 @@ fclass FunctionTests.FunctionBinding2
   input Real i1 := 0;
   output Real o1 := i1;
  algorithm
+  return;
  end FunctionTests.TestFunction1;
 end FunctionTests.FunctionBinding2;
 ")})));
@@ -303,6 +309,7 @@ fclass FunctionTests.FunctionBinding6
   input Real i3 := 0;
   output Real o1 := i1 + i2 + i3;
  algorithm
+  return;
  end FunctionTests.TestFunction3;
 end FunctionTests.FunctionBinding6;
 ")})));
@@ -321,6 +328,7 @@ fclass FunctionTests.FunctionBinding7
  function FunctionTests.TestFunction0
   output Real o1 := 0;
  algorithm
+  return;
  end FunctionTests.TestFunction0;
 end FunctionTests.FunctionBinding7;
 ")})));
@@ -340,6 +348,7 @@ fclass FunctionTests.FunctionBinding8
   input Real i1 := 0;
   output Real o1 := i1;
  algorithm
+  return;
  end FunctionTests.TestFunction1;
 end FunctionTests.FunctionBinding8;
 ")})));
@@ -362,6 +371,7 @@ fclass FunctionTests.FunctionBinding9
   output Real o2 := i2;
  algorithm
   o1 := i1;
+  return;
  end FunctionTests.TestFunction2;
 end FunctionTests.FunctionBinding9;
 ")})));
@@ -528,6 +538,7 @@ fclass FunctionTests.FunctionType0
   input Real i1 := 0;
   output Real o1 := i1;
  algorithm
+  return;
  end FunctionTests.TestFunction1;
 end FunctionTests.FunctionType0;
 ")})));
@@ -547,6 +558,7 @@ fclass FunctionTests.FunctionType1
   input Real i1 := 0;
   output Real o1 := i1;
  algorithm
+  return;
  end FunctionTests.TestFunction1;
 end FunctionTests.FunctionType1;
 ")})));
@@ -582,6 +594,7 @@ fclass FunctionTests.FunctionType3
   input Real i1 := 0;
   output Real o1 := i1;
  algorithm
+  return;
  end FunctionTests.TestFunction1;
 end FunctionTests.FunctionType3;
 ")})));
@@ -603,6 +616,7 @@ fclass FunctionTests.FunctionType4
   input Real i1 := 0;
   output Real o1 := i1;
  algorithm
+  return;
  end FunctionTests.TestFunction1;
 end FunctionTests.FunctionType4;
 ")})));
@@ -658,6 +672,7 @@ fclass FunctionTests.FunctionType7
   output Real o2 := i2;
  algorithm
   o1 := i1;
+  return;
  end FunctionTests.TestFunction2;
 end FunctionTests.FunctionType7;
 ")})));
@@ -694,6 +709,7 @@ fclass FunctionTests.FunctionType9
   input String i1;
   output String o1 := i1;
  algorithm
+  return;
  end FunctionTests.TestFunctionString;
 end FunctionTests.FunctionType9;
 ")})));
@@ -714,6 +730,7 @@ fclass FunctionTests.FunctionType10
   input String i1;
   output String o1 := i1;
  algorithm
+  return;
  end FunctionTests.TestFunctionString;
 end FunctionTests.FunctionType10;
 ")})));

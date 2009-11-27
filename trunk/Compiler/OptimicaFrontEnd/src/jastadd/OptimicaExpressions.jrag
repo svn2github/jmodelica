@@ -41,6 +41,8 @@ aspect OptimicaExpressions {
 		}
 	}
 	
+	refine InstNameClassification eq InstFunctionCall.getName().kind() = Kind.AMBIGUOUS_ACCESS;
+	
 	eq FStartTimeExp.ceval() {
 		if (myFOptClass().startTimeAttributeSet()) {
 			return myFOptClass().startTimeAttributeCValue();

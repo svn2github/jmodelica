@@ -32,6 +32,7 @@ aspect InstLookupClasses {
 		
 	eq InstNode.getInstClassDecl(int i).lookupInstClass(String name) = genericLookupInstClass(name); 
 	eq InstNode.getInstComponentDecl(int i).lookupInstClass(String name) = genericLookupInstClass(name); 
+	eq InstNode.getFAbstractEquation(int i).lookupInstClass(String name) = genericLookupInstClass(name); 
 	eq InstNode.getInstExtends(int i).lookupInstClass(String name) = superLookupInstClass(name);
 
     eq InstNode.getDynamicClassName().lookupInstClass(String name) = genericLookupInstClass(name);

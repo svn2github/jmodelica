@@ -413,8 +413,8 @@ aspect FTypeCompatibility {
 
  aspect FunctionDefinitionUtils {
 	 
-	 syn boolean FFunctionVariable.isInput() = getFTypePrefixInputOutput().inputCausality();
-	 syn boolean FFunctionVariable.isOutput() = getFTypePrefixInputOutput().outputCausality();
+	 syn boolean FFunctionVariable.isInput() = hasFTypePrefixInputOutput() && getFTypePrefixInputOutput().inputCausality();
+	 syn boolean FFunctionVariable.isOutput() = hasFTypePrefixInputOutput() && getFTypePrefixInputOutput().outputCausality();
 	 
 	 /**
 	  * \brief Returns a list of all InstComponentDecls declared as "input".
