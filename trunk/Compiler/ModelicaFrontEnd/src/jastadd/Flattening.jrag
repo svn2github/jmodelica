@@ -326,19 +326,8 @@ aspect InstNodeInterface {
 
 aspect FlatExpressions {
 
-	public void FAbstractEquation.flatten(FQName prefix, FClass fc) {}
-
-	public void FEquation.flatten(FQName prefix, FClass fc) {
-		FEquation e = new FEquation(getType().flatten(prefix), getLeft().flatten(prefix), getRight().flatten(prefix));
-		getType().addEquationTo(fc, e);
-	}
-	
-	public void FFunctionCallEquation.flatten(FQName prefix, FClass fc) {
-		List<FIdUse> l = new List<FIdUse>();
-		for (FIdUse a : getLefts()) 
-			l.add(a.flatten(prefix));
-		FFunctionCallEquation f = new FFunctionCallEquation(getType().flatten(prefix), l, getCall().flatten(prefix));
-		getType().addEquationTo(fc, f);
+	public void FAbstractEquation.flatten(FQName prefix, FClass fc) {
+		getType().addEquationTo(fc, flatten(prefix));
 	}
 	
 	public FEquationType FEquationType.flatten(FQName prefix) {
@@ -355,13 +344,25 @@ aspect FlatExpressions {
 		fc.addFInitialEquation(f);
 	}
 
+	public FAbstractEquation FAbstractEquation.flatten(FQName prefix) {
+		/* Default implementation should never be called - will result in NullPointerException. */
+		return null; 
+	}
+
+	public FEquation FEquation.flatten(FQName prefix) {
+		return new FEquation(getType().flatten(prefix), getLeft().flatten(prefix), getRight().flatten(prefix));
+	}
+	
+	public FFunctionCallEquation FFunctionCallEquation.flatten(FQName prefix) {
+		List<FIdUse> l = new List<FIdUse>();
+		for (FIdUse a : getLefts()) 
+			l.add(a.flatten(prefix));
+		return new FFunctionCallEquation(getType().flatten(prefix), l, getCall().flatten(prefix));
+	}
+
 	public FAlgorithmBlock FAlgorithmBlock.flatten(FQName prefix) {
 		List l = FStatement.flattenFStatementList(prefix, getFStatements());
 		return new FAlgorithmBlock(l);
-	}
-
-	public void FAlgorithmBlock.flatten(FQName prefix, FClass fc) {
-		fc.getFEquationBlock(0).addFAbstractEquation(flatten(prefix));
 	}
 	
 	public static List<FStatement> FStatement.flattenFStatementList(FQName prefix, List<FStatement> l) {
@@ -746,7 +747,7 @@ aspect FlatExpressions {
 aspect InstantiatedExpressions {
 
 	public FAbstractEquation AbstractEquation.instantiate() {
-		FUnsupportedEquation ue = new FUnsupportedEquation();
+		FUnsupportedEquation ue = new FUnsupportedEquation(new FNormalEquation());
 		ue.setLocation(this);
 		return ue;
 	}

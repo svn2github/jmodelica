@@ -937,6 +937,16 @@ aspect FlattPrettyPrint {
    		str.print(" = ");
    		p.toString(getRight(),str,indent,o);
 	}
+
+	public void FFunctionCallEquation.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print(indent);
+		if (getNumLeft() > 0) {
+	   		str.print("(");
+	   		getLefts().prettyPrintWithSep(p, str, indent, o, ", ");
+	   		str.print(") = ");
+		}
+   		p.toString(getCall(), str, indent, o);
+	}
 	
 	public void FAlgorithmBlock.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print(indent);

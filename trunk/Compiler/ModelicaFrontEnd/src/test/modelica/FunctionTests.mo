@@ -523,6 +523,37 @@ Semantic error at line 1, column 1:
   Real y = NotAFunctionClass();
 end BadFunctionCall3;
 
+model MultipleOutput1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="MultipleOutput1",
+          description="Functions with multiple outputs: flattening of equation",
+          flatModel="
+fclass FunctionTests.MultipleOutput1
+ Real x;
+ Real y;
+equation
+ (x, y) = FunctionTests.TestFunction2(1, 2);
+ FunctionTests.TestFunction2(1, 2);
+
+ function FunctionTests.TestFunction2
+  input Real i1 := 0;
+  input Real i2 := 0;
+  output Real o1 := 0;
+  output Real o2 := i2;
+ algorithm
+  o1 := i1;
+  return;
+ end FunctionTests.TestFunction2;
+end FunctionTests.MultipleOutput1;
+")})));
+
+  Real x;
+  Real y;
+equation
+  (x, y) = TestFunction2(1, 2);
+  TestFunction2(1, 2);
+end MultipleOutput1;
+
 
 /* ====================== Function call type checks ====================== */
 

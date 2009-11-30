@@ -33,6 +33,41 @@ aspect Constructors {
 		this(new FNormalEquation(), left, right);
 	}
 	
+	/**
+	 * \brief Constructs a function call equation that is not initial.
+	 */
+	public FFunctionCallEquation.FFunctionCallEquation(List<FIdUse> left, FAbstractFunctionCall call) {
+		this(new FNormalEquation(), left, call);
+	}
+	
+	/**
+	 * \brief Constructs a connection clause that is not initial.
+	 */
+	public FConnectClause.FConnectClause(Opt<FStringComment> comment, FIdUseInstAccess left, FIdUseInstAccess right) {
+		this(new FNormalEquation(), comment, left, right);
+	}
+	
+	/**
+	 * \brief Constructs a for clause equation that is not initial.
+	 */
+	public FForClauseE.FForClauseE(List<FForIndex> indices, List<FAbstractEquation> eqns) {
+		this(new FNormalEquation(), indices, eqns);
+	}
+	
+	/**
+	 * \brief Constructs a for clause equation that is not initial.
+	 */
+	public InstForClauseE.InstForClauseE(List<InstForIndex> indices, List<FAbstractEquation> eqns) {
+		this(new FNormalEquation(), indices, eqns);
+	}
+	
+	/**
+	 * \brief Constructs an algorithm block that is not initial.
+	 */
+	public FAlgorithmBlock.FAlgorithmBlock(List<FStatement> stmts) {
+		this(new FNormalEquation(), stmts);
+	}
+	
 	public ComponentDecl.ComponentDecl(boolean isParameter,
 	                                   String type,
 	                                   String name,

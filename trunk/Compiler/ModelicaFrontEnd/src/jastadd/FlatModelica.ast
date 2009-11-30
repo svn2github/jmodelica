@@ -321,7 +321,7 @@ FInitialEquationTemp : FEquationType;
 /**
  * \brief Base class for flattened equations.
  */
-abstract FAbstractEquation;
+abstract FAbstractEquation ::= Type:FEquationType;
 
 /**
  * \brief Unsupported equation.
@@ -331,7 +331,7 @@ FUnsupportedEquation : FAbstractEquation;
 /**
  * \brief An equation consisting of a right and a left hand side expression.
  */
-FEquation : FAbstractEquation ::= Type:FEquationType Left:FExp Right:FExp;
+FEquation : FAbstractEquation ::= Left:FExp Right:FExp;
 
 /**
  * \brief An equation consisting of a left hand side that is a list of component 
@@ -339,7 +339,7 @@ FEquation : FAbstractEquation ::= Type:FEquationType Left:FExp Right:FExp;
  *
  * Example: (x, y, z) = func(a, b);
  */
-FFunctionCallEquation : FAbstractEquation ::= Type:FEquationType Left:FIdUse* Call:FAbstractFunctionCall;
+FFunctionCallEquation : FAbstractEquation ::= Left:FIdUse* Call:FAbstractFunctionCall;
 
 /**
  * \brief A flattened connect statement.
@@ -352,11 +352,16 @@ FConnectClause : FAbstractEquation ::= [FStringComment]
                                        Connector1:FIdUseInstAccess 
                                        Connector2:FIdUseInstAccess;
 
+/**
+ * \brief For clause expression.
+ */
+FForClauseE : FAbstractEquation ::= FForIndex* FAbstractEquation*;
 
 /**
  * \brief A flattened algorithm clause.
  */
 FAlgorithmBlock : FAbstractEquation ::= FStatement*;
+
 
 /**
  * \brief Base class for statements in flattened algorithms.
@@ -619,11 +624,6 @@ FForIndex ::= FVariable [FExp];
  * \brief Summation function.
  */
 FSumExp : FUnaryExp ::=;
-
-/**
- * \brief For clause expression.
- */
-FForClauseE : FAbstractEquation ::= FForIndex* FAbstractEquation*;
 
 /**
  * \brief If expression.

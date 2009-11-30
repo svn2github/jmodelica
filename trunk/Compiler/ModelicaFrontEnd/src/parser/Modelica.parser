@@ -778,7 +778,7 @@ AbstractEquation abstract_equation =
   | CONNECT LPAREN parse_access.a COMMA parse_access.b RPAREN comment SEMICOLON
                                       {: return new ConnectClause(new Opt(), comment,a,b); :}
   | LPAREN fcs_left_list RPAREN EQUALS function_call comment SEMICOLON
-                                      {: return new FunctionCallEquation(new Opt(),comment,new List(),function_call); :}
+                                      {: return new FunctionCallEquation(new Opt(),comment,fcs_left_list,function_call); :}
   | function_call comment SEMICOLON   {: return new FunctionCallEquation(new Opt(),comment,new List(),function_call); :}
   | annotation SEMICOLON              {: return new EquationAnnotation(new Opt(),new Comment(new Opt(), new Opt()), annotation); :}
   ;
