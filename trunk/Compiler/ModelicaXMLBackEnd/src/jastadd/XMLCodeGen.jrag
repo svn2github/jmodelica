@@ -56,13 +56,11 @@ aspect XMLCodeGen {
 	
 	//PrettyPrint of equation in residual form: expression1-expression2 = 0
 	public void FEquation.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
-		//ASTNode left = getChild(this,1);
-		//ASTNode right = getChild(this,2);
 		ASTNode left = getLeft();
 		ASTNode right = getRight();
-		String eqXMLtag = this.getXMLTag();
+		String eqXMLtag = this.xmlTag();
 		FSubExp fsubexp = new FSubExp();
-		String subXMLtag = fsubexp.getXMLTag();
+		String subXMLtag = fsubexp.xmlTag();
 		String eqNamespace = "equ";
 		String expNamespace = "exp";
 		
@@ -77,7 +75,7 @@ aspect XMLCodeGen {
 	
 	public void FLitExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
 		String namespace ="exp";
-		String tag = this.getXMLTag();
+		String tag = this.xmlTag();
 		
 		if (tag.equals("FBooleanLitExpTrue") || tag.equals("FBooleanLitExpFalse") )
 			tag="FBooleanLitExp";
@@ -90,7 +88,7 @@ aspect XMLCodeGen {
 	
 	public void FArtmBinExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
 		String namespace = "exp";
-		String tag = this.getXMLTag();		
+		String tag = this.xmlTag();		
 		ASTNode left = getLeft();
 		ASTNode right= getRight();
 		
@@ -103,7 +101,7 @@ aspect XMLCodeGen {
 	
 	public void FLogBinExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
 		String namespace = "exp";
-		String tag = this.getXMLTag();
+		String tag = this.xmlTag();
 		ASTNode left = getLeft();
 		ASTNode right= getRight();
 		
@@ -116,7 +114,7 @@ aspect XMLCodeGen {
 	
 	public void FUnaryExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
 		String namespace="exp";
-		String tag = this.getXMLTag();
+		String tag = this.xmlTag();
 		ASTNode child = getChild(this,0);	
 		
 		str.println(indent + "<" + namespace + ":" + tag + ">");
@@ -127,7 +125,7 @@ aspect XMLCodeGen {
 	
 	public void FMathematicalFunctionCall.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
 		String namespace ="exp";
-		String tag = this.getXMLTag();
+		String tag = this.xmlTag();
 		ASTNode child = getChild(this,0);
 		
 		str.println(indent + "<" + namespace + ":" + tag + ">");
@@ -139,7 +137,7 @@ aspect XMLCodeGen {
 	//TODO: test ************************************************
 	public void FAtan2Exp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
 		String namespace="exp";
-		String tag= this.getXMLTag();
+		String tag= this.xmlTag();
 		ASTNode x_arg = getChild(this,0);
 		ASTNode y_arg= getChild(this,1);
 		
@@ -153,8 +151,7 @@ aspect XMLCodeGen {
 	public void FDerExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
 		ASTNode child = getChild(this,0);	
 		String namespace = "exp";
-		String tag = this.getXMLTag();
-		//String tag = "FDer";
+		String tag = this.xmlTag();
 		
 		str.println(indent + "<" + namespace + ":" + tag + ">");
 		child.prettyPrint_XML(str,indent+"\t");
@@ -165,7 +162,7 @@ aspect XMLCodeGen {
 		ASTNode child = getChild(this,0);
 		ASTNode idUse = child.getChild(0);
 		String namespace = "exp";
-		String tag = this.getXMLTag();
+		String tag = this.xmlTag();
 		
 		str.print(indent + "<" + namespace + ":" + tag + ">");
 		idUse.prettyPrint_XML(str,"");
@@ -176,7 +173,7 @@ aspect XMLCodeGen {
 	public void FIdUse.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
 		ASTNode child = getChild(this,0);
 		String namespace = "exp";
-		String tag = this.getXMLTag();
+		String tag = this.xmlTag();
 		
 		str.print(indent + "<" + namespace + ":" + tag + ">");
 		child.prettyPrint_XML(str,"");
@@ -186,93 +183,56 @@ aspect XMLCodeGen {
 
 
 aspect XMLTagBinding{
-	
-	//syn String FExp.xmlTag();
-	//eq FAddExp.xmlTag() = "add";
-	
-	public String ASTNode.getXMLTag(){
-		
+			
 		//XML tags definition for expressions
-		final String $FIdUse_XMLtag = "FIdUse";
-		final String $FAddExp_XMLtag = "FAddExp";
-		final String $FSubExp_XMLtag = "FSubExp";
-		final String $FMulExp_XMLtag = "FMulExp";
-		final String $FDivExp_XMLtag = "FDivExp";
-		final String $FPowExp_XMLtag = "FPowExp";
-		final String $FNegExp_XMLtag = "FNegExp";		
-		final String $FLtExp_XMLtag = "FLogLtExp";
-		final String $FLeqExp_XMLtag = "FLogLeqExp";
-		final String $FGtExp_XMLtag = "FLogGtExp";
-		final String $FGeqExp_XMLtag = "FLogGeqExp";
-		final String $FEqExp_XMLtag = "FLogEqExp";
-		final String $FNeqExp_XMLtag = "FLogNeqExp";
-		final String $FNotExp_XMLtag = "FNotExp";
-		final String $FOrExp_XMLtag = "FOrExp";
-		final String $FAndExp_XMLtag = "FAndExp";
-		final String $FRealLitExp_XMLtag = "FRealLitExp";
-		final String $FIntegerLitExp_XMLtag = "FIntegerLitExp";
-		final String $FBooleanLitExp_XMLtag = "FBooleanLitExp";
-		final String $FStringLitExp_XMLtag = "FStringLitExp";
-		final String $FDerExp_XMLtag = "FDerExp";
-		final String $FSinExp_XMLtag = "FSinExp";
-		final String $FCosExp_XMLtag = "FCosExp";
-		final String $FTanExp_XMLtag = "FTanExp";
-		final String $FAsinExp_XMLtag = "FAsinExp";
-		final String $FAcosExp_XMLtag = "FAcosExp";
-		final String $FAtanExp_XMLtag = "FAtanExp";
-		final String $FSinhExp_XMLtag = "FSinhExp";
-		final String $FCoshExp_XMLtag = "FCoshExp";
-		final String $FTanhExp_XMLtag = "FTanhExp";
-		final String $FExpExp_XMLtag = "FExpExp";
-		final String $FLogExp_XMLtag = "FLogExp";
-		final String $FLog10Exp_XMLtag = "FLog10Exp";
-		final String $FSqrtExp_XMLtag = "FSqrtExp";
-		final String $FAtan2Exp_XMLtag = "FAtan2Exp";			
+		syn String FIdUse.xmlTag();
+		//syn String FIdUseExp.xmlTag();
+		syn String FExp.xmlTag();
 		
-		//XML tags definition for non-expressions nodes
-		final String $FUnsupportedTag_XMLtag = "** Not supported tag **";
-		final String $FAbstractEquation_XMLtag ="FEquation";
+		eq FIdUse.xmlTag() = "FIdUse";
+		eq FIdUseExp.xmlTag() = "FIdUse";
+		eq FAddExp.xmlTag() = "FAddExp";
+		eq FSubExp.xmlTag() = "FSubExp";
+		eq FMulExp.xmlTag() = "FMulExp";
+		eq FDivExp.xmlTag() = "FDivExp";
+		eq FPowExp.xmlTag() = "FPowExp";
+		eq FNegExp.xmlTag() = "FNegExp";
+		eq FLtExp.xmlTag() = "FLogLtExp";
+		eq FLeqExp.xmlTag() = "FLogLeqExp";
+		eq FGtExp.xmlTag() = "FLogGtExp";
+		eq FGeqExp.xmlTag()= "FLogGeqExp";
+		eq FEqExp.xmlTag()= "FLogEqExp";
+		eq FNeqExp.xmlTag()= "FLogNeqExp";
+		eq FNotExp.xmlTag() = "FNotExp";
+		eq FOrExp.xmlTag() = "FOrExp";
+		eq FAndExp.xmlTag() = "FAndExp";
+		eq FIntegerLitExp.xmlTag() = "FIntegerLitExp";
+		eq FRealLitExp.xmlTag() = "FRealLitExp";
+		eq FBooleanLitExpFalse.xmlTag() = "FBooleanLitExp";
+		eq FBooleanLitExpTrue.xmlTag() = "FBooleanLitExp";
+		eq FStringLitExp.xmlTag() = "FIntegerLitExp";
+		eq FDerExp.xmlTag() = "FDerExp";
+		eq FSinExp.xmlTag() = "FSinExp";
+		eq FCosExp.xmlTag() = "FCosExp";
+		eq FTanExp.xmlTag() = "FTanExp";
+		eq FAsinExp.xmlTag() = "FAsinExp";
+		eq FAcosExp.xmlTag() = "FAcosExp";
+		eq FAtanExp.xmlTag() = "FAtanExp";
+		eq FSinhExp.xmlTag() = "FSinhExp";
+		eq FCoshExp.xmlTag() = "FCoshExp";
+		eq FTanhExp.xmlTag() = "FTanhExp";
+		eq FExpExp.xmlTag() = "FExpExp";
+		eq FLogExp.xmlTag() = "FLogExp";
+		eq FLog10Exp.xmlTag() = "FLog10Exp";
+		eq FSqrtExp.xmlTag() = "FSqrtExp";
+		eq FAtan2Exp.xmlTag() = "FAtan2Exp";
 		
+		eq FExp.xmlTag() = "*** Not supported expression ***";
+		eq FUnsupportedExp.xmlTag() = "*** not supported tag ***";
 		
-		if (this instanceof FAddExp) return $FAddExp_XMLtag;
-		if (this instanceof FSubExp) return $FSubExp_XMLtag;
-		if (this instanceof FMulExp) return $FMulExp_XMLtag;
-		if (this instanceof FDivExp) return $FDivExp_XMLtag;
-		if (this instanceof FPowExp) return $FPowExp_XMLtag;
-		if (this instanceof FNegExp) return $FNegExp_XMLtag;
-		if (this instanceof FLtExp) return $FLtExp_XMLtag;
-		if (this instanceof FLeqExp) return $FLeqExp_XMLtag;
-		if (this instanceof FGtExp) return $FGtExp_XMLtag;
-		if (this instanceof FGeqExp) return $FGeqExp_XMLtag;
-		if (this instanceof FEqExp) return $FEqExp_XMLtag;
-		if (this instanceof FNeqExp) return $FNeqExp_XMLtag;
-		if (this instanceof FNotExp) return $FNotExp_XMLtag;
-		if (this instanceof FOrExp) return $FOrExp_XMLtag;
-		if (this instanceof FAndExp) return $FAndExp_XMLtag;
-		if (this instanceof FRealLitExp) return $FRealLitExp_XMLtag;
-		if (this instanceof FIntegerLitExp) return $FIntegerLitExp_XMLtag;
-		if (this instanceof FBooleanLitExpTrue || this instanceof FBooleanLitExpFalse) return $FBooleanLitExp_XMLtag;
-		if (this instanceof FStringLitExp) return $FStringLitExp_XMLtag;
-		if (this instanceof FDerExp) return $FDerExp_XMLtag;		
-		if (this instanceof FSinExp) return $FSinExp_XMLtag;
-		if (this instanceof FCosExp) return $FCosExp_XMLtag;
-		if (this instanceof FTanExp) return $FTanExp_XMLtag;
-		if (this instanceof FAsinExp) return $FAsinExp_XMLtag;
-		if (this instanceof FAcosExp) return $FAcosExp_XMLtag;
-		if (this instanceof FAtanExp) return $FAtanExp_XMLtag;
-		if (this instanceof FSinhExp) return $FSinhExp_XMLtag;
-		if (this instanceof FCoshExp) return $FCoshExp_XMLtag;
-		if (this instanceof FTanhExp) return $FTanhExp_XMLtag;
-		if (this instanceof FExpExp) return $FExpExp_XMLtag;
-		if (this instanceof FLogExp) return $FLogExp_XMLtag;
-		if (this instanceof FLog10Exp) return $FLog10Exp_XMLtag;
-		if (this instanceof FSqrtExp) return $FSqrtExp_XMLtag;
-		if (this instanceof FAtan2Exp) return $FAtan2Exp_XMLtag;
-		if (this instanceof FIdUse || this instanceof FIdUseExp) return $FIdUse_XMLtag;
-		
-		if (this instanceof FAbstractEquation) return $FAbstractEquation_XMLtag;
-		
-		System.out.println("Warning: the model can cointains unsopported expressions and the generated XML document can be unvalid");
-		return $FUnsupportedTag_XMLtag;
-	}
+		syn String FEquation.xmlTag();
+		eq FEquation.xmlTag() = "FEquation";
+				
+		//System.out.println("Warning: the model can cointains unsopported expressions and the generated XML document can be unvalid");
+	
 }
