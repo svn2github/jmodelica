@@ -18,16 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 aspect XMLCodeGen {
 	
-
-	/************************************************************************************************
-	 *
-	 * TODO Schema : complete expression list
-	 * 
-	 * TODO Generation : not statical namespace definition; add the missing exp (time, notsupported,...)
-	 * 
-	 * **********************************************************************************************
-	 */
-	
 	class XMLPrettyPrinter extends Printer {
  		public void toString(ASTNode node, PrintStream str, String indent, Object o) { 
  			node.prettyPrint_XML(this, str, indent, o); 
@@ -65,9 +55,11 @@ aspect XMLCodeGen {
 	}
 	
 	//PrettyPrint of equation in residual form: expression1-expression2 = 0
-	public void FAbstractEquation.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
-		ASTNode left = getChild(this,0);
-		ASTNode right = getChild(this,1);
+	public void FEquation.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		//ASTNode left = getChild(this,1);
+		//ASTNode right = getChild(this,2);
+		ASTNode left = getLeft();
+		ASTNode right = getRight();
 		String eqXMLtag = this.getXMLTag();
 		FSubExp fsubexp = new FSubExp();
 		String subXMLtag = fsubexp.getXMLTag();
@@ -194,6 +186,9 @@ aspect XMLCodeGen {
 
 
 aspect XMLTagBinding{
+	
+	//syn String FExp.xmlTag();
+	//eq FAddExp.xmlTag() = "add";
 	
 	public String ASTNode.getXMLTag(){
 		
