@@ -3,15 +3,16 @@
 DOCDIR=/C/JModelica.org-SDK/src/docbook/UsersGuide
 DOC=JModelicaUsersGuide
 DOCFILE=$(DOCDIR)/$(DOC).xml
-XSLHTMLSTYLE=$(DOCBOOK_HOME)/html/docbook.xsl
-XSLXHTMLSTYLE=$(DOCBOOK_HOME)/xhtml.xsl
-XSLPDFSTYLE=$(DOCBOOK_HOME)/fo.xsl
-XSLHTMLHELPSTYLE=$(DOCBOOK_HOME)/htmlhelp/htmlhelp.xsl
+XSLHTMLSTYLE=$(DOCBOOK_HOME)/modelon-html-IE.xsl
+XSLXHTMLSTYLE=$(DOCBOOK_HOME)/modelon-xhtml.xsl
+XSLPDFSTYLE=$(DOCBOOK_HOME)/modelon-fo.xsl
+XSLHTMLHELPSTYLE=$(DOCBOOK_HOME)/modelon-htmlhelp.xsl
 
 #http://docbook.sourceforge.net/release/xsl/current/doc/html/index.html
 $(DOC).xhtml:  $(DOCFILE)
 	xsltproc  --xinclude  --output  $@ \
 	$(XSLXHTMLSTYLE)  $<
+	mv index.html $(DOC).xhtml
 
 xhtml:  $(DOC).xhtml
 
@@ -37,7 +38,7 @@ pdf:  $(DOC).pdf
 htmlhelp.hhp: $(DOCFILE)
 	xsltproc --xinclude $(XSLHTMLHELPSTYLE) $<
 
-htmlhelp: $(DOC).hhp
+htmlhelp: $(DOC).chm
 
 $(DOC).chm: htmlhelp.hhp
 	-"$(HTMLHELPWORKSHOP_HOME)/hhc" $<
@@ -51,7 +52,8 @@ endif
 
 ifeq ($(OS),Windows_NT)
 #all: xhtml html pdf winhelp
-all: xhtml pdf
+all: htmlhelp
+#all: winhelp xhtml pdf
 else
 all: xhtml html pdf
 endif
