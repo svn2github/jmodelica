@@ -20,4 +20,5 @@
 	</IntervalFinalTime>
 	<TimePoints>$XML_timePoints$
 	</TimePoints>
+	
 </OptimicaProblemVariableInterface>

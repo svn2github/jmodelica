@@ -100,14 +100,101 @@ public class OptimicaXMLVariableGenerator extends XMLVariableGenerator {
 		boolean[] linearTimedVariables = variable.isLinearTimedVariables();
 		
 		if(linearTimedVariables.length > 0) {
-			genPrinter.print(tg.generateTag("IsLinearTimedVariables"));
+			genPrinter.print(tg.generateTag("isLinearTimedVariables"));
 			for(int i=0;i<linearTimedVariables.length;i++) {
 				genPrinter.print(tg.generateTag("TimePoint", true));
 				genPrinter.print("index=\""+i+"\" isLinear=\""+linearTimedVariables[i]+"\"");
 				genPrinter.print(tg.generateTag("TimePoint", true));
 			}
-			genPrinter.print(tg.generateTag("IsLinearTimedVariables"));
+			genPrinter.print(tg.generateTag("isLinearTimedVariables"));
 		}
 	}
+	
+	class DAETag_XML_Optimization extends DAETag {
+		
+		public DAETag_XML_Optimization (
+		  AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_Optimization","Optimization problem's representation",
+			  myGenerator,fclass);
+		}
+		
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
+		public void generate(PrintStream genPrinter) {
+			String indent="\t\t";
+			FOptClass optClass = (FOptClass) fclass;
+			
+			genPrinter.println("<opt:Optimization>");			
+			
+			//Objective function
+			genPrinter.println(indent+"<opt:ObjectiveFunction>");
+			objectiveFunction_XML(genPrinter,optClass,indent+"\t");
+			genPrinter.println(indent+"</opt:ObjectiveFunction>");
+			
+			//Interval start time
+			genPrinter.println(indent+"<opt:IntervalStartTime>");	
+			intervalStartTime_XML(genPrinter,optClass,indent+"\t");
+			genPrinter.println(indent+"</opt:IntervalStartTime>");
+			
+			//Interval final time
+			genPrinter.println(indent+"<opt:IntervalFinalTime>");	
+			intervalFinalTime_XML(genPrinter,optClass,indent+"\t");
+			genPrinter.println(indent+"</opt:IntervalFinalTime>");
+			
+			//Time points
+			genPrinter.println(indent+"<opt:TimePoints>");	
+			timePoints_XML(genPrinter,optClass,indent+"\t");
+			genPrinter.println(indent+"</opt:TimePoints>");
+						
+			//Constraints
+			genPrinter.println(indent+"<opt:Constraints>");
+			for(FConstraint c : optClass.constraints())
+				c.prettyPrint_XML(genPrinter,indent+"\t",c);	
+			genPrinter.println(indent+"</opt:Constraints>");
+			
+			genPrinter.println("\t</opt:Optimization>");
+		}
+	}
+	
+	
+	//XML code generation for the objective function
+	private void objectiveFunction_XML(PrintStream genPrinter, FOptClass optClass, String indent){
+		if(optClass.objectiveExp()!=null){
+			FExp objFunct = (FExp)optClass.objectiveExp();
+			objFunct.prettyPrint_XML(genPrinter,indent);
+		}else{
+			FStringLitExp strLit = new FStringLitExp();
+			genPrinter.println(indent+"<exp:" + strLit.xmlTag() + ">No objective function</exp:"+strLit.xmlTag()+">");
+		}	
+	}
+	
+	//XML code generation for interval start time
+	private void intervalStartTime_XML(PrintStream genPrinter, FOptClass optClass, String indent){
+		genPrinter.println(indent + "<opt:Value>" + optClass.startTimeAttribute() + "</opt:Value>");
+		genPrinter.println(indent + "<opt:Free>" + optClass.startTimeFreeAttribute() + "</opt:Free>");
+		genPrinter.println(indent + "<opt:InitialGuess>" + optClass.startTimeInitialGuessAttribute() + "</opt:InitialGuess>");
+	}
+	
+	//XML code generation for interval final time
+	private void intervalFinalTime_XML(PrintStream genPrinter, FOptClass optClass, String indent){
+		genPrinter.println(indent + "<opt:Value>" + optClass.finalTimeAttribute() + "</opt:Value>");
+		genPrinter.println(indent + "<opt:Free>" + optClass.finalTimeFreeAttribute() + "</opt:Free>");
+		genPrinter.println(indent + "<opt:InitialGuess>" + optClass.finalTimeInitialGuessAttribute() + "</opt:InitialGuess>");
+	}
+	
+	//XML code generatorio for the time points
+	private void timePoints_XML(PrintStream genPrinter, FOptClass optClass, String indent){
+		double[] points = optClass.timePoints();
+		
+		for(int i=0;i<points.length;i++) {
+			genPrinter.println(indent + "<opt:Index>" + optClass.timePointIndex(points[i]) + "</opt:Index>");
+			genPrinter.println(indent + "<opt:Value>" + points[i] + "</opt:Value>");
+		}
+	}
+	
+	
+	
 }
 

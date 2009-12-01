@@ -210,7 +210,7 @@ aspect XMLTagBinding{
 		eq FRealLitExp.xmlTag() = "FRealLitExp";
 		eq FBooleanLitExpFalse.xmlTag() = "FBooleanLitExp";
 		eq FBooleanLitExpTrue.xmlTag() = "FBooleanLitExp";
-		eq FStringLitExp.xmlTag() = "FIntegerLitExp";
+		eq FStringLitExp.xmlTag() = "FStringLitExp";
 		eq FDerExp.xmlTag() = "FDerExp";
 		eq FSinExp.xmlTag() = "FSinExp";
 		eq FCosExp.xmlTag() = "FCosExp";

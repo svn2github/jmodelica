@@ -15,6 +15,51 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 aspect XMLCodeGen_Optimica {
+
+	//
+	public void FTimedVariable.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		String namespace = "exp";
+		String tag = "TimedVariable";	
+		String tagId = "Identifier";
+		String tagExp = "Instant";
 		
+		ASTNode name = getChild(this,0);
+		FExp arg= (FExp)getChild(this,1);
+		
+		str.println(indent + "<" + namespace + ":" + tag + ">");
+		
+		//Identifier
+		str.print(indent+"\t<" + namespace + ":" + tagId + ">");		
+		name.prettyPrint(str,indent+"\t");
+		str.println("</" + namespace + ":" + tagId + ">");
+		//Expression argument
+		str.print(indent+"\t<" + namespace + ":" + tagExp + ">");		
+		str.print(arg.ceval().realValue());
+		//arg.prettyPrint_XML(str,indent+"\t");
+		str.println("</" + namespace + ":" + tagExp + ">");
+		
+		str.println(indent + "</"+ namespace + ":" + tag + ">");	
+	}
 	
+	public void FConstraint.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		String namespace="opt";
+		String tag = xmlTag();	
+		ASTNode left = getChild(this,0);
+		ASTNode right= getChild(this,1);
+		
+		str.println(indent + "<" + namespace + ":" + tag + ">");
+		left.prettyPrint_XML(str,indent+"\t");
+		right.prettyPrint_XML(str,indent+"\t");
+		str.println(indent + "</" + namespace + ":" + tag + ">");
+	}
+		
+}
+
+aspect OptimicaXMLTagBinding{
+	
+		syn String FConstraint.xmlTag();
+		eq FConstraintEq.xmlTag() = "ConstraintEq";
+		eq FConstraintGeq.xmlTag() = "ConstraintGeq";
+		eq FConstraintLeq.xmlTag() = "ConstraintLeq";
+		
 }

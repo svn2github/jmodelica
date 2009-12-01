@@ -684,19 +684,6 @@ public class XMLVariableGenerator extends GenericGenerator {
 			}
 		}
 			
-			/*for(FVariable variable:fclass.allVariables()){
-				if(variable.hasBindingExp()){
-					FExp expression = variable.getBindingExp();
-					genPrinter.println("\t\t<equ:BindingEquation>");
-					genPrinter.print("\t\t\t<equ:BondedParameter>");
-					genPrinter.print(variable.name());
-					genPrinter.println("</equ:BondedParameter>");
-					genPrinter.println("\t\t\t<equ:BindingExp>");
-					expression.prettyPrint_XML(genPrinter,"\t\t\t\t",expression);
-					genPrinter.println("\t\t\t</equ:BindingExp>");
-					genPrinter.println("\t\t</equ:BindingEquation>");
-				}
-			}*/
 			genPrinter.println("\t</equ:BindingEquations>");
 		}
 	}
@@ -753,6 +740,7 @@ public class XMLVariableGenerator extends GenericGenerator {
 			genPrinter.println("\t</equ:InitialEquations>");
 		}
 	}
+		
 	
 	/**
 	 * Constructor.

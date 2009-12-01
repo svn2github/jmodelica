@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<OptimicaModelVariableInterface>
+<ModelVariableInterface xmlns:equ="http://www.robertoparrotto.it/DAEXML/FEqu.xsd" xmlns:exp="http://www.robertoparrotto.it/DAEXML/FExp.xsd" xmlns:opt="http://www.robertoparrotto.it/DAEXML/Optimization.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<ModelName>$XML_modelName$</ModelName>
 	<ModelAttributes>
 		<ModelIdentifier>$XML_modelIdentifier$</ModelIdentifier>
@@ -25,9 +25,17 @@
 		<GenerationTool>$XML_generationTool$</GenerationTool>
 		<GenerationDate>$XML_generationDate$</GenerationDate>
 		<GUID>$XML_guid$</GUID>
+		<VariableNamingConvention>$XML_VariableNamingConvention$</VariableNamingConvention>
+		<NumberOfContinuousStates>$XML_NumberOfContinuousStates$</NumberOfContinuousStates>
+		<NumberOfEventIndicators>$XML_NumberOfEventIndicators$</NumberOfEventIndicators>
 	</ModelAttributes>
 	<ModelVariables>$XML_variables$
 	</ModelVariables>
 	$XML_defaultExperiment$
-	$XML_vendorAnnotations$	
-</OptimicaModelVariableInterface>
+	$XML_vendorAnnotations$		
+	$XML_bindingEquations$
+	$XML_Equations$
+	$XML_initialEquations$
+	$XML_Optimization$
+	
+</ModelVariableInterface>
