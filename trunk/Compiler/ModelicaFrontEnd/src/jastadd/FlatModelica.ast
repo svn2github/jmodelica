@@ -316,7 +316,7 @@ FNormalEquation : FEquationType;
 /**
  * \brief Classifies a flattened equation as initial.
  */
-FInitialEquationTemp : FEquationType;
+FInitialEquation : FEquationType;
 
 /**
  * \brief Base class for flattened equations.

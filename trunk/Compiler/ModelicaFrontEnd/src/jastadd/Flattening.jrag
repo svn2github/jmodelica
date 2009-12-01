@@ -340,7 +340,7 @@ aspect FlatExpressions {
 		fc.getFEquationBlock(0).addFAbstractEquation(f);
 	}
 	
-	public void FInitialEquationTemp.addEquationTo(FClass fc, FAbstractEquation f) {
+	public void FInitialEquation.addEquationTo(FClass fc, FAbstractEquation f) {
 		fc.addFInitialEquation(f);
 	}
 
@@ -753,7 +753,7 @@ aspect InstantiatedExpressions {
 	}
 
 	public FAbstractEquation Equation.instantiate() {
-		FEquationType t = isInitial() ? new FInitialEquationTemp() : new FNormalEquation();
+		FEquationType t = isInitial() ? new FInitialEquation() : new FNormalEquation();
 		FEquation e = new FEquation(t, getLeft().instantiate(),getRight().instantiate());
 		e.setLocation(this);
 		return e;
@@ -773,7 +773,7 @@ aspect InstantiatedExpressions {
 	}
 	
 	public FFunctionCallEquation FunctionCallEquation.instantiate() {
-		FEquationType t = isInitial() ? new FInitialEquationTemp() : new FNormalEquation();
+		FEquationType t = isInitial() ? new FInitialEquation() : new FNormalEquation();
 		List l = new List();
 		for (Access a : getLefts()) 
 			l.add(new FIdUseInstAccess(new FQName(), a.newInstAccess()));

@@ -596,8 +596,14 @@ aspect FlatAPI {
 	syn int FVariable.stringInputIndex() =
 		myFClass().stringInputs().indexOf(this);
 
+    syn lazy int FClass.numScalarEquations() {
+    	int res = 0;
+    	for (FAbstractEquation e : equations())
+    		res += e.numScalarEquations();
+    	return res;
+    }
     syn int FClass.numEquations() = equations().size();
-	syn ArrayList<FAbstractEquation> FClass.equations() {
+	syn lazy ArrayList<FAbstractEquation> FClass.equations() {
 		ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
 		for (FEquationBlock b : getFEquationBlocks()) {
 			for (FAbstractEquation e : b.getFAbstractEquations()) {
@@ -606,6 +612,9 @@ aspect FlatAPI {
 		}
 		return l;
 	}
+	
+	syn int FAbstractEquation.numScalarEquations() = 1;
+	eq FFunctionCallEquation.numScalarEquations() = getNumLeft();
 	
 	syn int FClass.numEventIndicators() = numRelExpInEquations();
 	
@@ -617,7 +626,13 @@ aspect FlatAPI {
 	to FClass.relExpInEquations() for myFClass();	
 	
 	syn int FClass.numInitialEquations() = initialEquations().size(); 
-	syn ArrayList<FAbstractEquation> FClass.initialEquations() {
+    syn lazy int FClass.numInitialScalarEquations() {
+    	int res = 0;
+    	for (FAbstractEquation e : initialEquations())
+    		res += e.numScalarEquations();
+    	return res;
+    }
+	syn lazy ArrayList<FAbstractEquation> FClass.initialEquations() {
 		ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
 		for (FAbstractEquation e : getFInitialEquations()) {
 			l.add(e);

@@ -533,7 +533,6 @@ fclass FunctionTests.MultipleOutput1
  Real y;
 equation
  (x, y) = FunctionTests.TestFunction2(1, 2);
- FunctionTests.TestFunction2(1, 2);
 
  function FunctionTests.TestFunction2
   input Real i1 := 0;
@@ -551,9 +550,9 @@ end FunctionTests.MultipleOutput1;
   Real y;
 equation
   (x, y) = TestFunction2(1, 2);
-  TestFunction2(1, 2);
 end MultipleOutput1;
 
+// TODO: Add test for function call that uses no output
 
 /* ====================== Function call type checks ====================== */
 
