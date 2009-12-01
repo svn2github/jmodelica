@@ -339,7 +339,15 @@ FEquation : FAbstractEquation ::= Left:FExp Right:FExp;
  *
  * Example: (x, y, z) = func(a, b);
  */
-FFunctionCallEquation : FAbstractEquation ::= Left:FIdUse* Call:FAbstractFunctionCall;
+FFunctionCallEquation : FAbstractEquation ::= Left:FFunctionCallLeft* Call:FAbstractFunctionCall;
+
+/**
+ * \brief One of the left hand side variables in a function call equation. 
+ *
+ * Needed because it is allowed to leave places in the variable list empty.
+ * Example: (x, , z) = func(a, b);
+ */
+FFunctionCallLeft ::= [FIdUse];
 
 /**
  * \brief A flattened connect statement.

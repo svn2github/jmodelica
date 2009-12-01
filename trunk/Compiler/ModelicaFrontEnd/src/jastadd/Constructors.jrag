@@ -36,7 +36,7 @@ aspect Constructors {
 	/**
 	 * \brief Constructs a function call equation that is not initial.
 	 */
-	public FFunctionCallEquation.FFunctionCallEquation(List<FIdUse> left, FAbstractFunctionCall call) {
+	public FFunctionCallEquation.FFunctionCallEquation(List<FFunctionCallLeft> left, FAbstractFunctionCall call) {
 		this(new FNormalEquation(), left, call);
 	}
 	

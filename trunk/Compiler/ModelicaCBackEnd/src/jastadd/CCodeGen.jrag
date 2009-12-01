@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 
 aspect CCodeGen {
 	
@@ -23,6 +24,8 @@ aspect CCodeGen {
  			node.prettyPrint_C(this, str, indent, o); 
  		}
 	}
+	
+	static CPrettyPrinter ASTNode.printer_C = new CPrettyPrinter();
 	
 	public String ASTNode.prettyPrint_C(String indent) {
 		StringOutputStream os = new StringOutputStream();
@@ -39,11 +42,11 @@ aspect CCodeGen {
 	}
 
 	public void ASTNode.prettyPrint_C(PrintStream str,String indent) {
- 		prettyPrint_C(new CPrettyPrinter(),str,indent,null);
+ 		prettyPrint_C(printer_C, str, indent, null);
 	}
 
 	public void ASTNode.prettyPrint_C(PrintStream str,String indent, Object o) {
- 		prettyPrint_C(new CPrettyPrinter(),str,indent,o);
+ 		prettyPrint_C(printer_C, str, indent, o);
 	}
 	
 	public void ASTNode.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
@@ -61,26 +64,40 @@ aspect CCodeGen {
 		str.print(")");
 	}
 		
+	public void FDerExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("_"+nameUnderscore()+"_");
+	}
+	
 	public void FIdUseExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getFIdUse(), str, indent, o);
+	}
+		
+	public void FIdUse.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		if (inFunction())
-			str.print(nameUnderscore());
+			str.print(nameUnderscore() + "_v");
 		else
 			str.print("_"+nameUnderscore()+"_");
 	}
 	
-	public void FFunctionCall.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		str.print(getName().funcNameUnderscore());
+	public void FAbstractFunctionCall.genOpenCall_C(Printer p, PrintStream str, String indent, Object o, String suffix) {}
+	
+	public void FFunctionCall.genOpenCall_C(Printer p, PrintStream str, String indent, Object o, String suffix) {
+		str.print(indent);
+		str.print(getName().funcNameUnderscore(suffix));
 		str.print("(");
-		getArgs().prettyPrintWithSep(p, str, "", o, ", ");
+		getArgs().prettyPrintWithSep(p, str, "", o, ", ");		
+	}
+	
+	public void FFunctionCall.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		genOpenCall_C(p, str, "", o, suffixExpression());
 		str.print(")");
 	}
 	
-	public void FunctionReturnDefinition.printDeclaredType_C(PrintStream str) {
-		if (outputs.size() > 0) { 
-			str.print(outputs.get(0).type_C());
-		} else {
-			str.print("void");
-		}		
+	public String FunctionReturnDefinition.getDeclaredType_C() {
+		if (outputs.size() > 0) 
+			return outputs.get(0).type_C();
+		else
+			return "void";
 	}
 	
 	public void FunctionReturnDefinition.printExpression_C(PrintStream str) {
@@ -90,24 +107,95 @@ aspect CCodeGen {
 		}		
 	}
 	
-	public void FFunctionDecl.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		String next = indent + "   ";
+	public void FunctionReturnDefinition.printReturnWrite_C(PrintStream str, String indent) {
+		for (FFunctionVariable v : outputs) 
+			v.printReturnWrite_C(str, indent);
+	}
+	
+	private void FFunctionDecl.prettyPrintHead_C(Printer p, PrintStream str, String indent, Object o, 
+			String type, String suffix, boolean returnArgs) {
 		str.print(indent);
-		returnDefinition().printDeclaredType_C(str);
+		str.print(type);
 		str.print(" ");
-		str.print(getFQName().funcNameUnderscore());
+		str.print(getFQName().funcNameUnderscore(suffix));
 		str.print("(");
 		prettyPrintWithSep(myInputs(), p, str, "", o, ", ");
+		if (returnArgs)
+			for (FFunctionVariable v : myOutputs())
+				v.printReturnArgument_C(str);
 		str.print(") {\n");
+	}
+	
+	private void FFunctionDecl.prettyPrintWrappedCall_C(PrintStream str, String indent) {
+		str.print(indent);
+		str.print(getFQName().funcNameUnderscore(suffixDefinition()));
+		str.print("(");
+		for (FFunctionVariable v : myInputs()) {
+			str.print(v.name_C());
+			str.print(", ");
+		}
+		str.print("&");
+		str.print(myOutputs().get(0).name_C());
+		for (int i = myOutputs().size() - 1; i > 0; i--)
+			str.print(", NULL");
+		str.print(");\n");
+	}
+	
+	public void FFunctionDecl.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		String next = indent + "   ";
+		// Print definition
+		// - head
+		prettyPrintHead_C(p, str, indent, o, "void", suffixDefinition(), true);
+		// - variables
 		prettyPrintWithIndent(myNonInputs(), p, str, next, o, ";");
+		// - statements (including return)
     	p.toString(getFAlgorithmBlockOpt(), str, next, o);
+    	// - close
+    	str.print(indent);
+    	str.print("}\n\n");
+    	
+    	// Print wrapper for expressions
+		// - head
+    	String type = returnDefinition().getDeclaredType_C();
+		prettyPrintHead_C(p, str, indent, o, type, suffixExpression(), false);
+		// - recieving variable for return value
+		str.print(next);
+		p.toString(myOutputs().get(0), str, next, o);
+		str.print(";\n");
+		// - wrapped call
+		prettyPrintWrappedCall_C(str, next);
+		// - return
+		str.print(next);
+		str.print("return");
+		returnDefinition().printExpression_C(str);
+		str.print(";\n");
+    	// - close
     	str.print(indent);
     	str.print("}\n\n");
 	}
 	
-	syn String FFunctionVariable.name_C() = getFQName().nameUnderscore();
+	syn String FFunctionVariable.name_C() = getFQName().nameUnderscore() + "_v";
+	syn String FFunctionVariable.nameReturn_C() = getFQName().nameUnderscore() + "_r";
 	// TODO: Delegate to Type to support other types than Real
 	syn String FFunctionVariable.type_C() = "jmi_ad_var_t";
+	
+	public void FFunctionVariable.printReturnArgument_C(PrintStream str) {
+		str.print(", ");
+		str.print(type_C());
+		str.print("* ");
+		str.print(nameReturn_C());
+	}
+	
+	public void FFunctionVariable.printReturnWrite_C(PrintStream str, String indent) {
+		str.print("if (");
+		str.print(nameReturn_C());
+		str.print(" != NULL) *");
+		str.print(nameReturn_C());
+		str.print(" = ");
+		str.print(name_C());
+		str.print(";\n");
+		str.print(indent);
+	}
 	
 	public void FFunctionVariable.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		str.print(type_C());
@@ -130,15 +218,9 @@ aspect CCodeGen {
 		str.print(";");
 	}
 	
-	/* TODO: FFunctionCallStmt handles (res1, res2, ...) := func(args) and function calls that don't 
-	 * use the return value. The former isn't handled yet anyway and the later is of limited use.
-	 * Not implemented for now.
-	 */
-	
 	public void FReturnStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		str.print("return");
-		returnDefinition().printExpression_C(str);
-		str.print(";");
+		returnDefinition().printReturnWrite_C(str, indent);
+		str.print("return;");
 	}
 	
 	public void FIfWhenStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
@@ -309,6 +391,58 @@ aspect CCodeGen {
 		str.print(" - (");
 		getLeft().prettyPrint_C(str,"");
 		str.print(");\n");
+	}
+	
+	syn String FFunctionCallLeft.name_C(int baseIndex) {
+		StringBuilder b = new StringBuilder();
+		b.append("tmp_var_");
+		b.append(baseIndex + myIndex());
+		return b.toString();
+	}
+	// TODO: Delegate to output (FFunctionVariable) to support other types than Real
+	syn String FFunctionCallLeft.type_C() = "jmi_ad_var_t";
+	
+	public void FFunctionCallEquation.genResidual_C(int i, String indent, PrintStream str) {
+		for (FFunctionCallLeft l : getLefts())
+			l.genTempVar_C(i, indent, str);
+		getCall().genOpenCall_C(printer_C, str, indent, null, getCall().suffixDefinition());
+		for (FFunctionCallLeft l : getLefts())
+			l.genArgument_C(i, str);
+		str.print(");\n");
+		for (FFunctionCallLeft l : getLefts())
+			l.genWriteBack_C(i, indent, str);
+	}
+	
+	public void FFunctionCallLeft.genTempVar_C(int baseIndex, String indent, PrintStream str) {
+		if (hasFIdUse()) {
+			str.print(indent);
+			str.print(type_C());
+			str.print(" ");
+			str.print(name_C(baseIndex));
+			str.print(";\n");
+		}
+	}
+	
+	public void FFunctionCallLeft.genArgument_C(int baseIndex, PrintStream str) {
+		if (hasFIdUse()) {
+			str.print(", &");
+			str.print(name_C(baseIndex));
+		} else {
+			str.print(", NULL");
+		}
+	}
+	
+	public void FFunctionCallLeft.genWriteBack_C(int baseIndex, String indent, PrintStream str) {
+		if (hasFIdUse()) {
+			str.print(indent);
+			str.print("(*res)[");
+			str.print(baseIndex + myIndex());
+			str.print("] = ");
+			str.print(name_C(baseIndex));
+			str.print(" - (");
+			getFIdUse().prettyPrint_C(str, "");
+			str.print(");\n");
+		}
 	}
 
 	public void FLogBinExp.genResidual_C(int i, String indent, PrintStream str) {

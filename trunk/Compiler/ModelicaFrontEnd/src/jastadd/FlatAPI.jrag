@@ -614,7 +614,13 @@ aspect FlatAPI {
 	}
 	
 	syn int FAbstractEquation.numScalarEquations() = 1;
-	eq FFunctionCallEquation.numScalarEquations() = getNumLeft();
+	eq FFunctionCallEquation.numScalarEquations() {
+		 int res = 0;
+		 for (FFunctionCallLeft l : getLefts())
+			 if (l.hasFIdUse())
+				 res++;
+		 return res;
+	}
 	
 	syn int FClass.numEventIndicators() = numRelExpInEquations();
 	

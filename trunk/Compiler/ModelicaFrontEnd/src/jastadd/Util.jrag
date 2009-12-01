@@ -565,8 +565,13 @@ aspect FlatNames {
 	syn String FVariable.nameUnderscore() = getFQName().nameUnderscore();
 	syn String FDerivativeVariable.nameUnderscore() = "der_" + getFQName().nameUnderscore();
 	
-	syn String FQName.funcNameUnderscore() = "func_" + nameUnderscore();
-	syn String FIdUse.funcNameUnderscore() = getFQName().funcNameUnderscore();
+	syn String FQName.funcNameUnderscore(String suffix) = "func_" + nameUnderscore() + "_" + suffix;
+	syn String FIdUse.funcNameUnderscore(String suffix) = getFQName().funcNameUnderscore(suffix);
+	
+	syn String FAbstractFunctionCall.suffixDefinition() = "def";
+	syn String FFunctionDecl.suffixDefinition()         = "def";
+	syn String FAbstractFunctionCall.suffixExpression() = "exp";
+	syn String FFunctionDecl.suffixExpression()         = "exp";
 }
 
 aspect Visibility {

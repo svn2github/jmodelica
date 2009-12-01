@@ -480,10 +480,19 @@ aspect FTypeCompatibility {
 	 eq InstProgramRoot.getChild().returnDefinition() = null;
 	 eq FClass.getChild().returnDefinition() = null;
 	 
-	 inh boolean FIdUseExp.inFunction();
+	 inh boolean FIdUse.inFunction();
 	 eq FFunctionDecl.getChild().inFunction() = true;
 	 eq InstProgramRoot.getChild().inFunction() = false;
 	 eq FClass.getChild().inFunction() = false;
+	 
+	 inh lazy int FFunctionCallLeft.myIndex();
+	 eq FFunctionCallEquation.getLeft(int i).myIndex() {
+		 int res = 0;
+		 for (int j = 0; j < i; j++)
+			 if (getLeft(j).hasFIdUse())
+				 res++;
+		 return res;
+	 }
 
  }
  

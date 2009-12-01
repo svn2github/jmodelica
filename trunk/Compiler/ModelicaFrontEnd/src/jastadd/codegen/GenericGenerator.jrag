@@ -458,7 +458,7 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			genPrinter.print(fclass.numEquations());
+			genPrinter.print(fclass.numScalarEquations());
 		}
 	
 	}
@@ -487,7 +487,7 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			genPrinter.print(fclass.numInitialEquations());
+			genPrinter.print(fclass.numInitialScalarEquations());
 		}
 	
 	}

@@ -470,9 +470,8 @@ aspect Scalarization {
 	 */
 	public void FFunctionCallEquation.scalarize(List<FAbstractEquation> eqns, 
 			HashMap<String,Integer> indexMap) {
-		// TODO: Handle case like "arr[3:8] = sin(1:5)", but for general functions
-		List<FIdUse> lefts = new List<FIdUse>();
-		for (FIdUse id : getLefts())
+		List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
+		for (FFunctionCallLeft id : getLefts())
 			lefts.add(id.scalarize(indexMap));
 		eqns.addChild(new FFunctionCallEquation(lefts, (FAbstractFunctionCall) getCall().scalarize(indexMap)));
 	}
@@ -502,6 +501,10 @@ aspect Scalarization {
 			}
 			cnt.inc();
 		}		
+	}
+	
+	public FFunctionCallLeft FFunctionCallLeft.scalarize(HashMap<String,Integer> indexMap) {
+		return new FFunctionCallLeft(new Opt(hasFIdUse() ? getFIdUse().scalarize(indexMap) : null));
 	}
 	
 	/* Scalarization of expressions is needed in order to compute a simple
