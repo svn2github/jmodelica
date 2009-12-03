@@ -78,16 +78,12 @@ aspect CCodeGen {
 		str.print(name_C());
 	}
 	
-	public void FAbstractFunctionCall.genOpenCall_C(Printer p, PrintStream str, String indent, Object o, String suffix) {}
-	
 	public void FFunctionCall.genOpenCall_C(Printer p, PrintStream str, String indent, Object o, String suffix) {
 		str.print(indent);
 		str.print(getName().funcNameUnderscore(suffix));
 		str.print("(");
 		getArgs().prettyPrintWithSep(p, str, "", o, ", ");		
 	}
-	
-	public void FAbstractFunctionCall.genDefinitionCallEnd_C(PrintStream str, int nDoneOutputs) {}
 	
 	public void FFunctionCall.genDefinitionCallEnd_C(PrintStream str, int nDoneOutputs) {
 		String arg = (nDoneOutputs == 0 && getNumArg() == 0) ? "NULL" : ", NULL";
@@ -99,7 +95,8 @@ aspect CCodeGen {
 	
 	public void FFunctionCall.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		boolean exp = functionCallIsExp();
-		str.print(indent);
+		if (!exp)
+			str.print(indent);
 		str.print(getName().funcNameUnderscore(exp ? suffixExpression() : suffixDefinition()));
 		str.print("(");
 		getArgs().prettyPrintWithSep(p, str, "", o, ", ");		
@@ -266,7 +263,7 @@ aspect CCodeGen {
 	
 	public void FIfWhenStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		getFIfWhenClauses().prettyPrintWithSep(p, str, indent, o, indent + "} else ");
-		prettyPrintElse(p, str, indent, o);
+		prettyPrintElse_C(p, str, indent, o);
 		str.print(indent);
 		str.print("}");
 	}

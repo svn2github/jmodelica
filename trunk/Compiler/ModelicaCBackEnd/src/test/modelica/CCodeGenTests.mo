@@ -186,4 +186,430 @@ equation
 end CCodeGenTest7;
 
 
+/* ========= Function tests ========= */
+
+/* Functions used in tests */
+function TestFunction1
+ input Real i1 = 0;
+ output Real o1 = i1;
+algorithm
+end TestFunction1;
+
+function TestFunction2
+ input Real i1 = 0;
+ input Real i2 = 0;
+ output Real o1 = 0;
+ output Real o2 = i2;
+algorithm
+ o1 := i1;
+end TestFunction2;
+
+function TestFunction3
+ input Real i1;
+ input Real i2;
+ input Real i3 = 0;
+ output Real o1 = i1 + i2 + i3;
+ output Real o2 = i2 + i3;
+ output Real o3 = i1 + i2;
+algorithm
+end TestFunction3;
+
+function TestFunctionCallingFunction
+ input Real i1;
+ output Real o1;
+algorithm
+ o1 := TestFunction1(i1);
+end TestFunctionCallingFunction;
+
+function TestFunctionRecursive
+ input Integer i1;
+ output Integer o1;
+algorithm
+ if i1 < 3 then
+  o1 := 1;
+ else
+  o1 := TestFunctionRecursive(i1 - 1) + TestFunctionRecursive(i1 - 2);
+ end if;
+end TestFunctionRecursive;
+
+
+/* Function tests */
+model CFunctionTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest1",
+         description="C code gen: functions: simple function",
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+", 
+         generatedCode="
+void func_CCodeGenTests_TestFunction1_def(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_r);
+jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp(jmi_ad_var_t i1_v);
+
+void func_CCodeGenTests_TestFunction1_def(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_r) {
+   jmi_ad_var_t o1_v = i1_v;
+   if (o1_r != NULL) *o1_r = o1_v;
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp(jmi_ad_var_t i1_v) {
+   jmi_ad_var_t o1_v = i1_v;
+   func_CCodeGenTests_TestFunction1_def(i1_v, &o1_v);
+   return o1_v;
+}
+
+
+    (*res)[0] = func_CCodeGenTests_TestFunction1_exp(2.0) - (_x_);
+")})));
+
+ Real x;
+equation
+ x = TestFunction1(2.0);
+end CFunctionTest1;
+
+model CFunctionTest2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest2",
+         description="C code gen: functions: using multiple outputs",
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+void func_CCodeGenTests_TestFunction2_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t* o1_r, jmi_ad_var_t* o2_r);
+jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v);
+
+void func_CCodeGenTests_TestFunction2_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t* o1_r, jmi_ad_var_t* o2_r) {
+   jmi_ad_var_t o1_v = 0;
+   jmi_ad_var_t o2_v = i2_v;
+   o1_v = i1_v;
+   if (o1_r != NULL) *o1_r = o1_v;
+   if (o2_r != NULL) *o2_r = o2_v;
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v) {
+   jmi_ad_var_t o1_v = 0;
+   func_CCodeGenTests_TestFunction2_def(i1_v, i2_v, &o1_v, NULL);
+   return o1_v;
+}
+
+
+    jmi_ad_var_t tmp_var_0;
+    jmi_ad_var_t tmp_var_1;
+    func_CCodeGenTests_TestFunction2_def(1, 2, &tmp_var_0, &tmp_var_1);
+    (*res)[0] = tmp_var_0 - (_x_);
+    (*res)[1] = tmp_var_1 - (_y_);
+")})));
+
+ Real x;
+ Real y;
+equation
+ (x, y) = TestFunction2(1, 2);
+end CFunctionTest2;
+
+model CFunctionTest3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest3",
+         description="C code gen: functions: two calls to same function",
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+void func_CCodeGenTests_TestFunction2_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t* o1_r, jmi_ad_var_t* o2_r);
+jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v);
+
+void func_CCodeGenTests_TestFunction2_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t* o1_r, jmi_ad_var_t* o2_r) {
+   jmi_ad_var_t o1_v = 0;
+   jmi_ad_var_t o2_v = i2_v;
+   o1_v = i1_v;
+   if (o1_r != NULL) *o1_r = o1_v;
+   if (o2_r != NULL) *o2_r = o2_v;
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v) {
+   jmi_ad_var_t o1_v = 0;
+   func_CCodeGenTests_TestFunction2_def(i1_v, i2_v, &o1_v, NULL);
+   return o1_v;
+}
+
+
+    (*res)[0] = func_CCodeGenTests_TestFunction2_exp(1, 0) - (_x_);
+    (*res)[1] = func_CCodeGenTests_TestFunction2_exp(2, 3) - (_y_);
+")})));
+
+ Real x;
+ Real y = TestFunction2(2, 3);
+equation
+ x = TestFunction2(1);
+end CFunctionTest3;
+
+model CFunctionTest4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest4",
+         description="C code gen: functions: calls to two functions",
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+void func_CCodeGenTests_TestFunction2_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t* o1_r, jmi_ad_var_t* o2_r);
+jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v);
+void func_CCodeGenTests_TestFunction1_def(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_r);
+jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp(jmi_ad_var_t i1_v);
+
+void func_CCodeGenTests_TestFunction2_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t* o1_r, jmi_ad_var_t* o2_r) {
+   jmi_ad_var_t o1_v = 0;
+   jmi_ad_var_t o2_v = i2_v;
+   o1_v = i1_v;
+   if (o1_r != NULL) *o1_r = o1_v;
+   if (o2_r != NULL) *o2_r = o2_v;
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v) {
+   jmi_ad_var_t o1_v = 0;
+   func_CCodeGenTests_TestFunction2_def(i1_v, i2_v, &o1_v, NULL);
+   return o1_v;
+}
+
+void func_CCodeGenTests_TestFunction1_def(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_r) {
+   jmi_ad_var_t o1_v = i1_v;
+   if (o1_r != NULL) *o1_r = o1_v;
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp(jmi_ad_var_t i1_v) {
+   jmi_ad_var_t o1_v = i1_v;
+   func_CCodeGenTests_TestFunction1_def(i1_v, &o1_v);
+   return o1_v;
+}
+
+
+    (*res)[0] = func_CCodeGenTests_TestFunction1_exp(( _y_ ) * ( 2 )) - (_x_);
+    (*res)[1] = func_CCodeGenTests_TestFunction2_exp(2, 3) - (_y_);
+")})));
+ Real x;
+ Real y = TestFunction2(2, 3);
+equation
+ x = TestFunction1(y * 2);
+end CFunctionTest4;
+
+model CFunctionTest5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest5",
+         description="C code gen: functions: fewer components assigned than outputs",
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+void func_CCodeGenTests_TestFunction3_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t i3_v, jmi_ad_var_t* o1_r, jmi_ad_var_t* o2_r, jmi_ad_var_t* o3_r);
+jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t i3_v);
+
+void func_CCodeGenTests_TestFunction3_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t i3_v, jmi_ad_var_t* o1_r, jmi_ad_var_t* o2_r, jmi_ad_var_t* o3_r) {
+   jmi_ad_var_t o1_v = i1_v + i2_v + i3_v;
+   jmi_ad_var_t o2_v = i2_v + i3_v;
+   jmi_ad_var_t o3_v = i1_v + i2_v;
+   if (o1_r != NULL) *o1_r = o1_v;
+   if (o2_r != NULL) *o2_r = o2_v;
+   if (o3_r != NULL) *o3_r = o3_v;
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t i3_v) {
+   jmi_ad_var_t o1_v = i1_v + i2_v + i3_v;
+   func_CCodeGenTests_TestFunction3_def(i1_v, i2_v, i3_v, &o1_v, NULL, NULL);
+   return o1_v;
+}
+
+
+    jmi_ad_var_t tmp_var_0;
+    jmi_ad_var_t tmp_var_1;
+    func_CCodeGenTests_TestFunction3_def(1, 2, 3, &tmp_var_0, &tmp_var_1, NULL);
+    (*res)[0] = tmp_var_0 - (_x_);
+    (*res)[1] = tmp_var_1 - (_y_);
+")})));
+  Real x;
+  Real y;
+equation
+  (x, y) = TestFunction3(1, 2, 3);
+end CFunctionTest5;
+
+model CFunctionTest6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest6",
+         description="C code gen: functions: one output skipped",
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+void func_CCodeGenTests_TestFunction3_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t i3_v, jmi_ad_var_t* o1_r, jmi_ad_var_t* o2_r, jmi_ad_var_t* o3_r);
+jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t i3_v);
+
+void func_CCodeGenTests_TestFunction3_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t i3_v, jmi_ad_var_t* o1_r, jmi_ad_var_t* o2_r, jmi_ad_var_t* o3_r) {
+   jmi_ad_var_t o1_v = i1_v + i2_v + i3_v;
+   jmi_ad_var_t o2_v = i2_v + i3_v;
+   jmi_ad_var_t o3_v = i1_v + i2_v;
+   if (o1_r != NULL) *o1_r = o1_v;
+   if (o2_r != NULL) *o2_r = o2_v;
+   if (o3_r != NULL) *o3_r = o3_v;
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t i3_v) {
+   jmi_ad_var_t o1_v = i1_v + i2_v + i3_v;
+   func_CCodeGenTests_TestFunction3_def(i1_v, i2_v, i3_v, &o1_v, NULL, NULL);
+   return o1_v;
+}
+
+
+    jmi_ad_var_t tmp_var_0;
+    jmi_ad_var_t tmp_var_1;
+    func_CCodeGenTests_TestFunction3_def(1, 2, 3, &tmp_var_0, NULL, &tmp_var_1);
+    (*res)[0] = tmp_var_0 - (_x_);
+    (*res)[1] = tmp_var_1 - (_z_);
+")})));
+  Real x;
+  Real z;
+equation
+  (x, , z) = TestFunction3(1, 2, 3);
+end CFunctionTest6;
+
+model CFunctionTest7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest7",
+         description="C code gen: functions: no components assigned",
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+void func_CCodeGenTests_TestFunction2_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t* o1_r, jmi_ad_var_t* o2_r);
+jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v);
+
+void func_CCodeGenTests_TestFunction2_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t* o1_r, jmi_ad_var_t* o2_r) {
+   jmi_ad_var_t o1_v = 0;
+   jmi_ad_var_t o2_v = i2_v;
+   o1_v = i1_v;
+   if (o1_r != NULL) *o1_r = o1_v;
+   if (o2_r != NULL) *o2_r = o2_v;
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v) {
+   jmi_ad_var_t o1_v = 0;
+   func_CCodeGenTests_TestFunction2_def(i1_v, i2_v, &o1_v, NULL);
+   return o1_v;
+}
+
+
+    func_CCodeGenTests_TestFunction2_def(1, 2, NULL, NULL);
+")})));
+equation
+  TestFunction2(1, 2);
+end CFunctionTest7;
+
+model CFunctionTest8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest8",
+         description="C code gen: functions: function calling other function",
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+void func_CCodeGenTests_TestFunctionCallingFunction_def(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_r);
+jmi_ad_var_t func_CCodeGenTests_TestFunctionCallingFunction_exp(jmi_ad_var_t i1_v);
+void func_CCodeGenTests_TestFunction1_def(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_r);
+jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp(jmi_ad_var_t i1_v);
+
+void func_CCodeGenTests_TestFunctionCallingFunction_def(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_r) {
+   jmi_ad_var_t o1_v;
+   o1_v = func_CCodeGenTests_TestFunction1_exp(i1_v);
+   if (o1_r != NULL) *o1_r = o1_v;
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_TestFunctionCallingFunction_exp(jmi_ad_var_t i1_v) {
+   jmi_ad_var_t o1_v;
+   func_CCodeGenTests_TestFunctionCallingFunction_def(i1_v, &o1_v);
+   return o1_v;
+}
+
+void func_CCodeGenTests_TestFunction1_def(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_r) {
+   jmi_ad_var_t o1_v = i1_v;
+   if (o1_r != NULL) *o1_r = o1_v;
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp(jmi_ad_var_t i1_v) {
+   jmi_ad_var_t o1_v = i1_v;
+   func_CCodeGenTests_TestFunction1_def(i1_v, &o1_v);
+   return o1_v;
+}
+
+
+    (*res)[0] = func_CCodeGenTests_TestFunctionCallingFunction_exp(1) - (_x_);
+")})));
+ Real x = TestFunctionCallingFunction(1);
+end CFunctionTest8;
+
+model CFunctionTest9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest9",
+         description="C code gen: functions:",
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+void func_CCodeGenTests_TestFunctionRecursive_def(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_r);
+jmi_ad_var_t func_CCodeGenTests_TestFunctionRecursive_exp(jmi_ad_var_t i1_v);
+
+void func_CCodeGenTests_TestFunctionRecursive_def(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_r) {
+   jmi_ad_var_t o1_v;
+   if (i1_v < 3) {
+       o1_v = 1;
+   } else {
+       o1_v = func_CCodeGenTests_TestFunctionRecursive_exp(i1_v - ( 1 )) + func_CCodeGenTests_TestFunctionRecursive_exp(i1_v - ( 2 ));
+   }
+   if (o1_r != NULL) *o1_r = o1_v;
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_TestFunctionRecursive_exp(jmi_ad_var_t i1_v) {
+   jmi_ad_var_t o1_v;
+   func_CCodeGenTests_TestFunctionRecursive_def(i1_v, &o1_v);
+   return o1_v;
+}
+
+
+    (*res)[0] = func_CCodeGenTests_TestFunctionRecursive_exp(5) - (_x_);
+")})));
+ Real x = TestFunctionRecursive(5);
+end CFunctionTest9;
+
+
 end CCodeGenTests;
