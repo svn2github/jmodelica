@@ -43,6 +43,8 @@ function TestFunction3
  input Real i2;
  input Real i3 = 0;
  output Real o1 = i1 + i2 + i3;
+ output Real o2 = i2 + i3;
+ output Real o3 = i1 + i2;
 algorithm
 end TestFunction3;
 
@@ -51,6 +53,24 @@ function TestFunctionString
  output String o1 = i1;
 algorithm
 end TestFunctionString;
+
+function TestFunctionCallingFunction
+ input Real i1;
+ output Real o1;
+algorithm
+ o1 := TestFunction1(i1);
+end TestFunctionCallingFunction;
+
+function TestFunctionRecursive
+ input Integer i1;
+ output Integer o1;
+algorithm
+ if i1 < 3 then
+  o1 := 1;
+ else
+  o1 := TestFunctionRecursive(i1 - 1) + TestFunctionRecursive(i1 - 2);
+ end if;
+end TestFunctionRecursive;
 
 
 /* Temporary functions for C-tests */
@@ -308,6 +328,8 @@ fclass FunctionTests.FunctionBinding6
   input Real i2;
   input Real i3 := 0;
   output Real o1 := i1 + i2 + i3;
+  output Real o2 := i2 + i3;
+  output Real o3 := i1 + i2;
  algorithm
   return;
  end FunctionTests.TestFunction3;
@@ -552,7 +574,147 @@ equation
   (x, y) = TestFunction2(1, 2);
 end MultipleOutput1;
 
-// TODO: Add test for function call that uses no output
+model MultipleOutput2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="MultipleOutput2",
+          description="Functions with multiple outputs: flattening, fewer components assigned than outputs",
+          flatModel="
+fclass FunctionTests.MultipleOutput2
+ Real x;
+ Real y;
+equation
+ (x, y) = FunctionTests.TestFunction3(1, 2, 3);
+
+ function FunctionTests.TestFunction3
+  input Real i1;
+  input Real i2;
+  input Real i3 := 0;
+  output Real o1 := i1 + i2 + i3;
+  output Real o2 := i2 + i3;
+  output Real o3 := i1 + i2;
+ algorithm
+  return;
+ end FunctionTests.TestFunction3;
+end FunctionTests.MultipleOutput2;
+")})));
+
+  Real x;
+  Real y;
+equation
+  (x, y) = TestFunction3(1, 2, 3);
+end MultipleOutput2;
+
+model MultipleOutput3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="MultipleOutput3",
+          description="Functions with multiple outputs: flattening, one output skipped",
+          flatModel="
+fclass FunctionTests.MultipleOutput3
+ Real x;
+ Real z;
+equation
+ (x, , z) = FunctionTests.TestFunction3(1, 2, 3);
+
+ function FunctionTests.TestFunction3
+  input Real i1;
+  input Real i2;
+  input Real i3 := 0;
+  output Real o1 := i1 + i2 + i3;
+  output Real o2 := i2 + i3;
+  output Real o3 := i1 + i2;
+ algorithm
+  return;
+ end FunctionTests.TestFunction3;
+end FunctionTests.MultipleOutput3;
+")})));
+
+  Real x;
+  Real z;
+equation
+  (x, , z) = TestFunction3(1, 2, 3);
+end MultipleOutput3;
+
+model MultipleOutput4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="MultipleOutput4",
+          description="Functions with multiple outputs: flattening, no components assigned",
+          flatModel="
+fclass FunctionTests.MultipleOutput4
+ Real x;
+ Real y;
+equation
+ FunctionTests.TestFunction2(1, 2);
+
+ function FunctionTests.TestFunction2
+  input Real i1 := 0;
+  input Real i2 := 0;
+  output Real o1 := 0;
+  output Real o2 := i2;
+ algorithm
+  o1 := i1;
+  return;
+ end FunctionTests.TestFunction2;
+end FunctionTests.MultipleOutput4;
+")})));
+
+  Real x;
+  Real y;
+equation
+  TestFunction2(1, 2);
+end MultipleOutput4;
+
+model RecursionTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RecursionTest1",
+          description="Flattening function calling other function",
+          flatModel="
+fclass FunctionTests.RecursionTest1
+ Real x = FunctionTests.TestFunctionCallingFunction(1);
+
+ function FunctionTests.TestFunctionCallingFunction
+  input Real i1;
+  output Real o1;
+ algorithm
+  o1 := FunctionTests.TestFunction1(i1);
+  return;
+ end FunctionTests.TestFunctionCallingFunction;
+
+ function FunctionTests.TestFunction1
+  input Real i1 := 0;
+  output Real o1 := i1;
+ algorithm
+  return;
+ end FunctionTests.TestFunction1;
+end FunctionTests.RecursionTest1;
+")})));
+
+ Real x = TestFunctionCallingFunction(1);
+end RecursionTest1;
+
+model RecursionTest2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="RecursionTest2",
+          description="Flattening function calling other function",
+          flatModel="
+fclass FunctionTests.RecursionTest2
+ Real x = FunctionTests.TestFunctionRecursive(5);
+
+ function FunctionTests.TestFunctionRecursive
+  input Integer i1;
+  output Integer o1;
+ algorithm
+  if i1 < 3 then
+   o1 := 1;
+  else
+   o1 := FunctionTests.TestFunctionRecursive(i1 - ( 1 )) + FunctionTests.TestFunctionRecursive(i1 - ( 2 ));
+  end if;
+  return;
+ end FunctionTests.TestFunctionRecursive;
+end FunctionTests.RecursionTest2;
+")})));
+
+ Real x = TestFunctionRecursive(5);
+end RecursionTest2;
 
 /* ====================== Function call type checks ====================== */
 
@@ -773,8 +935,7 @@ model FunctionType11
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.ErrorTestCase(name="FunctionType11",
           description="Function type checks: Integer literal arg, String input",
-          errorMessage=
-"
+          errorMessage="
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
@@ -783,6 +944,96 @@ Semantic error at line 1, column 1:
 
  String x = TestFunctionString(1);
 end FunctionType11;
+
+model FunctionType12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="FunctionType12",
+          description="Function type checks: 2 outputs, 2nd wrong type",
+          errorMessage="
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Types of component y and output o2 are not compatible
+")})));
+
+ Real x;
+ Integer y;
+equation
+ (x, y) = TestFunction2(1, 2);
+end FunctionType12;
+
+model FunctionType13
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="FunctionType13",
+          description="Function type checks: 3 outputs, 1st and 3rd wrong type",
+          errorMessage="
+2 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Types of component x and output o1 are not compatible
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Types of component z and output o3 are not compatible
+")})));
+
+ Integer x;
+ Real y;
+ Integer z;
+equation
+ (x, y, z) = TestFunction3(1, 2);
+end FunctionType13;
+
+model FunctionType14
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="FunctionType14",
+          description="Function type checks: 2 outputs, 3 components assigned",
+          errorMessage="
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Too many components assigned from function call: TestFunction2() has 2 output(s)
+")})));
+
+ Real x;
+ Real y;
+ Real z;
+equation
+ (x, y, z) = TestFunction2(1, 2);
+end FunctionType14;
+
+model FunctionType15
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="FunctionType15",
+          description="Function type checks: 3 outputs, 2nd skipped, 3rd wrong type",
+          errorMessage="
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Types of component z and output o3 are not compatible
+")})));
+
+ Real x;
+ Integer z;
+equation
+ (x, , z) = TestFunction3(1, 2);
+end FunctionType15;
+
+model FunctionType16
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="FunctionType16",
+          description="Function type checks: assigning 2 components from sin()",
+          errorMessage="
+1 error(s) found...
+In file 'FunctionTests.mo':
+Semantic error at line 1, column 1:
+  Too many components assigned from function call: sin() has 1 output(s)
+")})));
+
+ Real x;
+ Real y;
+equation
+ (x, y) = sin(1);
+end FunctionType16;
 
 
 model BuiltInCallType1

@@ -63,6 +63,8 @@ $C_variable_aliases$
 #define _w_p(j,i) ((*(jmi->z))[jmi->offs_w_p + \
   j*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w) + i])
 
+$C_function_headers$
+
 $C_functions$
 
 /*

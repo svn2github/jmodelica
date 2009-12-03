@@ -151,7 +151,15 @@ aspect FlatTypeAnalysis {
 		} else {
 			return fUnknownType();
 		}
-	}	
+	}
+	
+	syn lazy FPrimitiveType FFunctionCallLeft.type() {
+		if (hasFIdUse() && getFIdUse() instanceof FIdUseInstAccess) {
+			return ((FIdUseInstAccess) getFIdUse()).getInstAccess().myInstComponentDecl().type();
+		} else {
+			return fUnknownType();
+		}
+	}
 	
 	// We can't simply assume that our outputs are of primitive types, so make them unknown for now
 	syn lazy FPrimitiveType InstComponentDecl.type() = fUnknownType();
@@ -408,91 +416,6 @@ aspect FTypeCompatibility {
  		// Make sure the returned type is final
  		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1); 		
  	}
-
- }
-
- aspect FunctionDefinitionUtils {
-	 
-	 syn boolean FFunctionVariable.isInput() = hasFTypePrefixInputOutput() && getFTypePrefixInputOutput().inputCausality();
-	 syn boolean FFunctionVariable.isOutput() = hasFTypePrefixInputOutput() && getFTypePrefixInputOutput().outputCausality();
-	 
-	 /**
-	  * \brief Returns a list of all InstComponentDecls declared as "input".
-	  */
-	 syn lazy ArrayList<InstComponentDecl> InstClassDecl.myInputs() {
-		 ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
-		 for (InstComponentDecl icd : getInstComponentDecls())
-			 if (icd.isInput())
-				 l.add(icd);
-		 return l;
-	 }
-	 
-	 /**
-	  * \brief Returns a list of all InstComponentDecls declared as "output".
-	  */
-	 syn lazy ArrayList<InstComponentDecl> InstClassDecl.myOutputs() {
-		 ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
-		 for (InstComponentDecl icd : getInstComponentDecls())
-			 if (icd.isOutput())
-				 l.add(icd);
-		 return l;
-	 }
-	 
-	 /**
-	  * \brief Returns a list of all FFunctionVariables declared as "input".
-	  */
-	 syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myInputs() {
-		 ArrayList<FFunctionVariable> l = new ArrayList<FFunctionVariable>();
-		 for (FFunctionVariable var : getFFunctionVariables())
-			 if (var.isInput())
-				 l.add(var);
-		 return l;
-	 }
-	 
-	 /**
-	  * \brief Returns a list of all FFunctionVariables not declared as "input".
-	  */
-	 syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myNonInputs() {
-		 ArrayList<FFunctionVariable> l = new ArrayList<FFunctionVariable>();
-		 for (FFunctionVariable var : getFFunctionVariables())
-			 if (!var.isInput())
-				 l.add(var);
-		 return l;
-	 }
-	 
-	 /**
-	  * \brief Returns a list of all FFunctionVariables declared as "output".
-	  */
-	 syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myOutputs() {
-		 ArrayList<FFunctionVariable> l = new ArrayList<FFunctionVariable>();
-		 for (FFunctionVariable var : getFFunctionVariables())
-			 if (var.isOutput())
-				 l.add(var);
-		 return l;
-	 }
-	 
-	 syn ArrayList<InstComponentDecl> InstFunctionCall.myInputs()  = getName().myInstClassDecl().myInputs();
-	 syn ArrayList<InstComponentDecl> InstFunctionCall.myOutputs() = getName().myInstClassDecl().myOutputs();
-	
-	 syn lazy FunctionReturnDefinition FFunctionDecl.returnDefinition() = new FunctionReturnDefinition(this);
-	 inh FunctionReturnDefinition FReturnStmt.returnDefinition();
-	 eq FFunctionDecl.getFAlgorithmBlock().returnDefinition() = returnDefinition();
-	 eq InstProgramRoot.getChild().returnDefinition() = null;
-	 eq FClass.getChild().returnDefinition() = null;
-	 
-	 inh boolean FIdUse.inFunction();
-	 eq FFunctionDecl.getChild().inFunction() = true;
-	 eq InstProgramRoot.getChild().inFunction() = false;
-	 eq FClass.getChild().inFunction() = false;
-	 
-	 inh lazy int FFunctionCallLeft.myIndex();
-	 eq FFunctionCallEquation.getLeft(int i).myIndex() {
-		 int res = 0;
-		 for (int j = 0; j < i; j++)
-			 if (getLeft(j).hasFIdUse())
-				 res++;
-		 return res;
-	 }
 
  }
  

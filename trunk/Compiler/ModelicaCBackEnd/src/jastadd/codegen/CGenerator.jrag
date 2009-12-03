@@ -192,6 +192,22 @@ public class CGenerator extends GenericGenerator {
 	}
 	
 	/**
+	 * Generates headers for Modelica functions.
+	 */
+	class DAETag_C_function_headers extends DAETag {
+		
+		public DAETag_C_function_headers(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_function_headers","C: C function headers representing Modelica functions",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			for (FFunctionDecl func : fclass.getFFunctionDecls())
+				func.genHeader_C(genPrinter, "");
+		}
+	}
+	
+	/**
 	 * Generates definitions for Modelica functions.
 	 */
 	class DAETag_C_functions extends DAETag {

@@ -310,11 +310,12 @@ ForIndexDecl : ComponentDecl; // Is this really ok: FIXME!
 WhenClauseE : AbstractEquation ::= WhenExp:Exp WhenEqns:AbstractEquation*
                                    ElseWhenClauseE*;
 ElseWhenClauseE ::= WhenExp:Exp WhenEqns:AbstractEquation*;         
-FunctionCallEquation : AbstractEquation ::= Left:Access* Call:FunctionCall;
+FunctionCallEquation : AbstractEquation ::= Left:FunctionCallLeft* Call:FunctionCall;
+FunctionCallLeft ::= [Access];
          
 abstract Statement ::= Comment;
 AssignStmt : Statement ::= Left:Access Right:Exp;
-FunctionCallStmt : Statement ::= Left:Access* FunctionCall;
+FunctionCallStmt : Statement ::= Left:FunctionCallLeft* FunctionCall;
 BreakStmt : Statement;
 ReturnStmt : Statement;
 abstract IfWhenStmt : Statement ::= IfWhenClause*;
@@ -367,8 +368,6 @@ AndExp : LogBinExp;
 abstract BooleanLitExp : Exp ::=;
 BooleanLitExpTrue : BooleanLitExp;
 BooleanLitExpFalse : BooleanLitExp;
-
-OutputExpressionList : Exp ::= Exp*;
 
 IdDecl ::=<ID>;
 

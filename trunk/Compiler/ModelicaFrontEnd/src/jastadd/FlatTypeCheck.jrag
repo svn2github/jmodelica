@@ -114,16 +114,38 @@ aspect FlatTypeCheck {
   }
   
   public void FInfArgsFunctionCall.typeCheck() {
-		for (InstFunctionArgument arg : originalArgs) {
-			FExp exp = arg.getFExp();
-			if (!exp.type().isUnknown() && !typeOfArgIsOK(exp)) {
-				exp.error("Argument of " + getBuiltInName() + "() is not " + getOKArgTypeString());
-			}
-		}
+      super.typeCheck();
+      for (InstFunctionArgument arg : originalArgs) {
+    	  FExp exp = arg.getFExp();
+          if (!exp.type().isUnknown() && !typeOfArgIsOK(exp)) {
+              exp.error("Argument of " + getBuiltInName() + "() is not " + getOKArgTypeString());
+          }
+      }
   }
   
   syn boolean FInfArgsFunctionCall.typeOfArgIsOK(FExp exp) = fIntegerScalarType().typeCompatible(exp.type());
   syn String FInfArgsFunctionCall.getOKArgTypeString() = "compatible with Integer";
+  
+  public void FBuiltInFunctionCall.typeCheck() {
+	  if (myLefts().size() > 1)
+		  error("Too many components assigned from function call: " + getBuiltInName() + 
+				  "() has 1 output(s)");
+  }
+  
+  public void InstFunctionCall.typeCheck() {
+	  if (myOutputs().size() < myLefts().size())
+		  error("Too many components assigned from function call: " + getName().name() + 
+				  "() has " + myOutputs().size() + " output(s)");
+  }
+  
+  public void FFunctionCallLeft.typeCheck() {
+	  if (!type().isUnknown() && !myOutput().isUnknown()) { // Avoid duplicate error
+		  if (!type().typeCompatible(myOutput().type())) {
+			  error("Types of component " + getFIdUse().name() + " and output " + 
+					  myOutput().name() + " are not compatible");
+		  }
+	  }
+  }
   
   public void InstFunctionArgument.typeCheck() {
 	  if (!getFExp().type().isUnknown() && !getBoundInput().type().isUnknown()) {

@@ -387,13 +387,6 @@ InstAssignStmt : FStatement ::= Left:FIdUseInstAccess Right:FExp;
 FAssignStmt : FStatement ::= Left:FIdUse Right:FExp;
 
 /**
- * \brief A function call statement in the instance tree.
- *
- * @see FFunctionCallStmt
- */
-InstFunctionCallStmt : FStatement ::= Left:FIdUseInstAccess* Call:FAbstractFunctionCall;
-
-/**
  * \brief A flattened function call statement.
  * 
  * This covers function calls with no used return value or when using 
@@ -401,7 +394,7 @@ InstFunctionCallStmt : FStatement ::= Left:FIdUseInstAccess* Call:FAbstractFunct
  * exactly one return value are handled by FAssignStmt through FAbstractFunctionCall. 
  * (FAbstractFunctionCall inherits FExp, since it can be used in expressions).
  */
-FFunctionCallStmt : FStatement ::= Left:FIdUse* Call:FAbstractFunctionCall;
+FFunctionCallStmt : FStatement ::= Left:FFunctionCallLeft* Call:FAbstractFunctionCall;
 
 /**
  * \brief Flattened break statement.

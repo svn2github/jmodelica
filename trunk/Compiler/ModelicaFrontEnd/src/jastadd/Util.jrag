@@ -179,6 +179,16 @@ aspect NodeMethods {
 	public String InstComponentDecl.getNodeName() {
 		return dump() + ": '" + getComponentDecl().getClassName().qualifiedName() + " " + getComponentDecl().getName().getID() + "'";
 	}
+	
+	/**
+	 * \brief Creates a new ArrayList containing all the elements in this list, in the same order.
+	 */
+	public ArrayList<T> List.toArrayList() {
+		ArrayList<T> l = new ArrayList<T>();
+		for (T e : this)
+			l.add(e);
+		return l;
+	}
 
 }
 
@@ -568,10 +578,111 @@ aspect FlatNames {
 	syn String FQName.funcNameUnderscore(String suffix) = "func_" + nameUnderscore() + "_" + suffix;
 	syn String FIdUse.funcNameUnderscore(String suffix) = getFQName().funcNameUnderscore(suffix);
 	
-	syn String FAbstractFunctionCall.suffixDefinition() = "def";
-	syn String FFunctionDecl.suffixDefinition()         = "def";
-	syn String FAbstractFunctionCall.suffixExpression() = "exp";
-	syn String FFunctionDecl.suffixExpression()         = "exp";
+	syn String FFunctionCall.suffixDefinition() = "def";
+	syn String FFunctionDecl.suffixDefinition() = "def";
+	syn String FFunctionCall.suffixExpression() = "exp";
+	syn String FFunctionDecl.suffixExpression() = "exp";
+}
+
+aspect FlatFunctionUtils {
+	 
+	 syn boolean FFunctionVariable.isInput() = hasFTypePrefixInputOutput() && getFTypePrefixInputOutput().inputCausality();
+	 syn boolean FFunctionVariable.isOutput() = hasFTypePrefixInputOutput() && getFTypePrefixInputOutput().outputCausality();
+	 
+	 /**
+	  * \brief Returns a list of all InstComponentDecls declared as "input".
+	  */
+	 syn lazy ArrayList<InstComponentDecl> InstClassDecl.myInputs() {
+		 ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
+		 for (InstComponentDecl icd : getInstComponentDecls())
+			 if (icd.isInput())
+				 l.add(icd);
+		 return l;
+	 }
+	 
+	 /**
+	  * \brief Returns a list of all InstComponentDecls declared as "output".
+	  */
+	 syn lazy ArrayList<InstComponentDecl> InstClassDecl.myOutputs() {
+		 ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
+		 for (InstComponentDecl icd : getInstComponentDecls())
+			 if (icd.isOutput())
+				 l.add(icd);
+		 return l;
+	 }
+	 
+	 /**
+	  * \brief Returns a list of all FFunctionVariables declared as "input".
+	  */
+	 syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myInputs() {
+		 ArrayList<FFunctionVariable> l = new ArrayList<FFunctionVariable>();
+		 for (FFunctionVariable var : getFFunctionVariables())
+			 if (var.isInput())
+				 l.add(var);
+		 return l;
+	 }
+	 
+	 /**
+	  * \brief Returns a list of all FFunctionVariables not declared as "input".
+	  */
+	 syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myNonInputs() {
+		 ArrayList<FFunctionVariable> l = new ArrayList<FFunctionVariable>();
+		 for (FFunctionVariable var : getFFunctionVariables())
+			 if (!var.isInput())
+				 l.add(var);
+		 return l;
+	 }
+	 
+	 /**
+	  * \brief Returns a list of all FFunctionVariables declared as "output".
+	  */
+	 syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myOutputs() {
+		 ArrayList<FFunctionVariable> l = new ArrayList<FFunctionVariable>();
+		 for (FFunctionVariable var : getFFunctionVariables())
+			 if (var.isOutput())
+				 l.add(var);
+		 return l;
+	 }
+	 
+	 syn ArrayList<InstComponentDecl> InstFunctionCall.myInputs()  = getName().myInstClassDecl().myInputs();
+	 syn ArrayList<InstComponentDecl> InstFunctionCall.myOutputs() = getName().myInstClassDecl().myOutputs();
+	
+	 syn lazy FunctionReturnDefinition FFunctionDecl.returnDefinition() = new FunctionReturnDefinition(this);
+	 inh FunctionReturnDefinition FReturnStmt.returnDefinition();
+	 eq FFunctionDecl.getFAlgorithmBlock().returnDefinition() = returnDefinition();
+	 eq InstProgramRoot.getChild().returnDefinition() = null;
+	 eq FClass.getChild().returnDefinition() = null;
+	 
+	 inh boolean FIdUse.inFunction();
+	 eq FFunctionDecl.getChild().inFunction() = true;
+	 eq InstProgramRoot.getChild().inFunction() = false;
+	 eq FClass.getChild().inFunction() = false;
+	 
+	 syn lazy int FFunctionCallLeft.myIndex() = prevIndex() + (hasFIdUse() ? 1 : 0);
+	 inh int FFunctionCallLeft.prevIndex();
+	 eq FFunctionCallEquation.getLeft(int i).prevIndex() = (i == 0) ? -1 : getLeft(i - 1).myIndex();
+	 eq FFunctionCallStmt.getLeft(int i).prevIndex() = (i == 0) ? -1 : getLeft(i - 1).myIndex();
+	 
+	 inh lazy InstComponentDecl FFunctionCallLeft.myOutput();
+	 eq FFunctionCallEquation.getLeft(int i).myOutput() = getCall().findOutput(i);
+	 eq FFunctionCallStmt.getLeft(int i).myOutput()     = getCall().findOutput(i);
+	 syn InstComponentDecl FAbstractFunctionCall.findOutput(int i) = unknownInstComponentDecl();
+	 eq InstFunctionCall.findOutput(int i) = (i >= myOutputs().size()) ? unknownInstComponentDecl() : myOutputs().get(i);
+	 
+	 inh boolean FAbstractFunctionCall.functionCallIsExp();
+	 eq FExp.getChild().functionCallIsExp() = true;
+	 eq FClass.getChild().functionCallIsExp() = true;
+	 eq InstNode.getChild().functionCallIsExp() = true;
+	 eq FFunctionCallEquation.getCall().functionCallIsExp() = false;
+	 eq FFunctionCallStmt.getCall().functionCallIsExp() = false;
+	 
+	 inh lazy ArrayList<FFunctionCallLeft> FAbstractFunctionCall.myLefts();
+	 eq FExp.getChild().myLefts() = new ArrayList<FFunctionCallLeft>();
+	 eq FClass.getChild().myLefts() = new ArrayList<FFunctionCallLeft>();
+	 eq InstNode.getChild().myLefts() = new ArrayList<FFunctionCallLeft>();
+	 eq FFunctionCallEquation.getCall().myLefts() = getLefts().toArrayList();
+	 eq FFunctionCallStmt.getCall().myLefts() = getLefts().toArrayList();
+
 }
 
 aspect Visibility {

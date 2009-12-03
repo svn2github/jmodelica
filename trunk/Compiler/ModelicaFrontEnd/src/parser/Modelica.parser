@@ -777,8 +777,8 @@ AbstractEquation abstract_equation =
   | when_clause_e SEMICOLON           {: return when_clause_e; :}
   | CONNECT LPAREN parse_access.a COMMA parse_access.b RPAREN comment SEMICOLON
                                       {: return new ConnectClause(new Opt(), comment,a,b); :}
-  | LPAREN fcs_left_list RPAREN EQUALS function_call comment SEMICOLON
-                                      {: return new FunctionCallEquation(new Opt(),comment,fcs_left_list,function_call); :}
+  | LPAREN function_call_left_list RPAREN EQUALS function_call comment SEMICOLON
+                                      {: return new FunctionCallEquation(new Opt(),comment,function_call_left_list,function_call); :}
   | function_call comment SEMICOLON   {: return new FunctionCallEquation(new Opt(),comment,new List(),function_call); :}
   | annotation SEMICOLON              {: return new EquationAnnotation(new Opt(),new Comment(new Opt(), new Opt()), annotation); :}
   ;
@@ -873,16 +873,20 @@ Statement statement =
   ;
   
 FunctionCallStmt function_call_stmt =
-    LPAREN fcs_left_list RPAREN ASSIGN function_call comment  
-                           {: return new FunctionCallStmt(comment, fcs_left_list, function_call); :}
+    LPAREN function_call_left_list RPAREN ASSIGN function_call comment  
+                           {: return new FunctionCallStmt(comment, function_call_left_list, function_call); :}
   | function_call comment  {: return new FunctionCallStmt(comment, new List(), function_call); :}
   ;
 
-List fcs_left_list =
-    parse_access.a COMMA parse_access.b  {: return new List().add(a).add(b); :}
-  | fcs_left_list COMMA parse_access     {: return fcs_left_list.add(parse_access); :}
+List function_call_left_list =
+    function_call_left.a COMMA function_call_left.b   {: return new List().add(a).add(b); :}
+  | function_call_left_list COMMA function_call_left  {: return function_call_left_list.add(function_call_left); :}
   ;
 
+FunctionCallLeft function_call_left =
+                   {: return new FunctionCallLeft(new Opt()); :}
+  | parse_access   {: return new FunctionCallLeft(new Opt(parse_access)); :}
+  ;
 
 IfStmt if_stmt =
   IF if_clause_list else_stmts END_IF comment {: return new IfStmt(comment, if_clause_list, else_stmts); :}
@@ -1022,7 +1026,6 @@ Exp primary =
   | access_expression   {: return access_expression; :}
   | der_expression      {: return der_expression; :}
   | LPAREN exp.a RPAREN {: return a; :}
-  | LPAREN arg_list RPAREN {: return new OutputExpressionList(arg_list); :}
   | function_call        {: return function_call; :}
   | LBRACK matrix RBRACK {: return matrix; :}
   | LBRACE function_arguments RBRACE {: return new ArrayConstructor(function_arguments); :}

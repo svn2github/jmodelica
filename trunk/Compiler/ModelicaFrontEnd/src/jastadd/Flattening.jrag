@@ -47,9 +47,7 @@ aspect Flattening {
 		}	
 		getInstComponentDeclList().flatten(fc);
 		getInstExtendsList().flatten(fc);
-		
-		getInstComponentDeclList().flattenCalledFunctions(fc);
-		getFAbstractEquationList().flattenCalledFunctions(fc);
+		flattenCalledFunctions(fc);
 		
 		fc.genConnectionEquations();
 
@@ -60,6 +58,11 @@ aspect Flattening {
 			System.out.println("Flat model contains InstAccesses!!!");
 			//return null;
 		}
+    }
+    
+    public void InstClassDecl.flattenCalledFunctions(FClass fc) {
+		getInstComponentDeclList().flattenCalledFunctions(fc);
+		getFAbstractEquationList().flattenCalledFunctions(fc);
     }
 	
 
@@ -93,8 +96,8 @@ aspect Flattening {
 	
 	public void InstFunction.flattenFunction(FClass fc) {
 		if (flatFunctionAddedTo != fc) {
-			((InstFullClassDecl) getParent()).flattenThisFunction(fc);
 			flatFunctionAddedTo = fc;
+			((InstFullClassDecl) getParent()).flattenThisFunction(fc);
 		}
 	}
 	
@@ -114,6 +117,8 @@ aspect Flattening {
    		}
 
 		fc.addFFunctionDecl(ffd);
+		
+		flattenCalledFunctions(fc);
 	}
 	
 	public void FAlgorithmBlock.ensureReturn() {
@@ -361,7 +366,7 @@ aspect FlatExpressions {
 	}
 	
 	public FFunctionCallLeft FFunctionCallLeft.flatten(FQName prefix) {
-		return new FFunctionCallLeft(new Opt(hasFIdUse() ? getFIdUse().flatten(prefix) : null));
+		return new FFunctionCallLeft(hasFIdUse() ? new Opt(getFIdUse().flatten(prefix)) : new Opt());
 	}
 
 	public FAlgorithmBlock FAlgorithmBlock.flatten(FQName prefix) {
@@ -383,9 +388,9 @@ aspect FlatExpressions {
 				               getRight().flatten(prefix));
 	}
 	
-	public FFunctionCallStmt InstFunctionCallStmt.flatten(FQName prefix) {
-		List<FIdUse> l = new List<FIdUse>();
-		for (FIdUseInstAccess a : getLefts())
+	public FFunctionCallStmt FFunctionCallStmt.flatten(FQName prefix) {
+		List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
+		for (FFunctionCallLeft a : getLefts())
 			l.add(a.flatten(prefix));
 		return new FFunctionCallStmt(l, getCall().flatten(prefix));
 	}
@@ -449,7 +454,6 @@ aspect FlatExpressions {
 	public FReturnStmt FReturnStmt.flatten(FQName prefix) { return new FReturnStmt(); }
 	
 	public FAssignStmt FAssignStmt.flatten(FQName prefix)             { return null; }
-	public FFunctionCallStmt FFunctionCallStmt.flatten(FQName prefix) { return null; }
 
 	public FArraySubscripts FArraySubscripts.flatten(FQName prefix) {
 		List l = new List();
@@ -779,11 +783,16 @@ aspect InstantiatedExpressions {
 	public FFunctionCallEquation FunctionCallEquation.instantiate() {
 		FEquationType t = isInitial() ? new FInitialEquation() : new FNormalEquation();
 		List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
-		for (Access a : getLefts()) 
-			l.add(new FFunctionCallLeft(new Opt(new FIdUseInstAccess(new FQName(), a.newInstAccess()))));
+		for (FunctionCallLeft a : getLefts()) 
+			l.add(a.instantiate());
 		FFunctionCallEquation f = new FFunctionCallEquation(t, l, getCall().instantiate());
 		f.setLocation(this);
 		return f;
+	}
+	
+	public 	FFunctionCallLeft FunctionCallLeft.instantiate() {
+		Opt id = hasAccess() ? new Opt(new FIdUseInstAccess(new FQName(), getAccess().newInstAccess())) : new Opt();
+		return new FFunctionCallLeft(id);
 	}
 	
 	public FAlgorithmBlock Algorithm.instantiate() {
@@ -818,11 +827,11 @@ aspect InstantiatedExpressions {
 		return new InstAssignStmt(left, getRight().instantiate());
 	}
 	
-	protected InstFunctionCallStmt FunctionCallStmt.instantiateStatement() {
-		List l = new List();
-		for (Access a : getLefts()) 
-			l.add(new FIdUseInstAccess(new FQName(), a.newInstAccess()));
-		return new InstFunctionCallStmt(l, getFunctionCall().instantiate());
+	protected FFunctionCallStmt FunctionCallStmt.instantiateStatement() {
+		List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
+		for (FunctionCallLeft a : getLefts()) 
+			l.add(a.instantiate());
+		return new FFunctionCallStmt(l, getFunctionCall().instantiate());
 	}
 	
 	protected FBreakStmt BreakStmt.instantiateStatement() {

@@ -504,7 +504,7 @@ aspect Scalarization {
 	}
 	
 	public FFunctionCallLeft FFunctionCallLeft.scalarize(HashMap<String,Integer> indexMap) {
-		return new FFunctionCallLeft(new Opt(hasFIdUse() ? getFIdUse().scalarize(indexMap) : null));
+		return new FFunctionCallLeft(hasFIdUse() ? new Opt(getFIdUse().scalarize(indexMap)) : new Opt());
 	}
 	
 	/* Scalarization of expressions is needed in order to compute a simple
