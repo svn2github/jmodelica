@@ -21,6 +21,7 @@ package FunctionTests
 function TestFunction0
  output Real o1 = 0;
 algorithm
+ return;
 end TestFunction0;
 
 function TestFunction1
@@ -1209,20 +1210,18 @@ end AlgorithmFlatten1;
 model AlgorithmFlatten2
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FlatteningTestCase(name="AlgorithmFlatten2",
-                                               description="Flattening algorithms: break & return stmts",
+                                               description="Flattening algorithms: break stmts",
                                                flatModel="
 fclass FunctionTests.AlgorithmFlatten2
  Real x;
 algorithm
  break;
- return;
 end FunctionTests.AlgorithmFlatten2;
 ")})));
 
  Real x;
 algorithm
  break;
- return;
 end AlgorithmFlatten2;
 
 model AlgorithmFlatten3

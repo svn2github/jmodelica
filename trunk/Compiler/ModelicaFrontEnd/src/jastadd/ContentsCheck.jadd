@@ -29,4 +29,16 @@ aspect ContentCheck {
 			error("Expressions within der() not supported");
 	}
 	
+	public void FReturnStmt.contentCheck() {
+		if (!inFunction())
+			error("Return statements are only allowed in functions");
+	}
+	
+	public void FWhenStmt.contentCheck() {
+		if (inFunction())
+			error("When statements are not allowed in functions");
+		else if (insideBlockStmt())
+			error("When statements are not allowed inside if, for, while and when clauses");
+	}
+	
 }

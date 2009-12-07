@@ -654,9 +654,18 @@ aspect FlatFunctionUtils {
 	 eq FClass.getChild().returnDefinition() = null;
 	 
 	 inh boolean FIdUse.inFunction();
+	 inh boolean FStatement.inFunction();
+	 eq InstBaseClassDecl.getChild().inFunction() = isFunction();
 	 eq FFunctionDecl.getChild().inFunction() = true;
 	 eq InstProgramRoot.getChild().inFunction() = false;
 	 eq FClass.getChild().inFunction() = false;
+	 
+	 inh boolean FWhenStmt.insideBlockStmt();
+	 eq FAlgorithmBlock.getChild().insideBlockStmt() = false;
+	 eq FIfWhenStmt.getChild().insideBlockStmt() = true;
+	 eq FWhileStmt.getChild().insideBlockStmt() = true;
+	 eq FForStmt.getChild().insideBlockStmt() = true;
+	 eq InstForStmt.getChild().insideBlockStmt() = true;
 	 
 	 syn lazy int FFunctionCallLeft.myIndex() = prevIndex() + (hasFIdUse() ? 1 : 0);
 	 inh int FFunctionCallLeft.prevIndex();
