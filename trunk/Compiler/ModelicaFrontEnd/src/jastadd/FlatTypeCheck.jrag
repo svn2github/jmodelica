@@ -113,6 +113,37 @@ aspect FlatTypeCheck {
 	//  System.out.println("InstComponentAccess.typeCheck: " + printSlice());
   }
   
+  
+  public void InstAssignStmt.typeCheck() {
+	  FPrimitiveType leftType = getLeft().getInstAccess().myInstComponentDecl().type();
+	  if (!leftType.isUnknown() && !getRight().type().isUnknown()) {
+		  if (!leftType.typeCompatible(getRight().type())) {
+			  error("Types of right and left side of assignment are not compatible");		  
+		  }
+	  }
+  }
+  
+  public void FWhileStmt.typeCheck() {
+	  if (!getTest().type().isUnknown() && !fBooleanScalarType().typeCompatible(getTest().type())) 
+		  error("Type of test expression of while statement is not Boolean");
+  }
+  
+  public void FIfClause.typeCheck() {
+	  if (!getTest().type().isUnknown() && !fBooleanScalarType().typeCompatible(getTest().type())) 
+		  error("Type of test expression of if statement is not Boolean");
+  }
+  
+  public void FWhenClause.typeCheck() {
+	  if (!getTest().type().isUnknown()) {
+		  if (!getTest().type().isBoolean() || getTest().type().ndims() > 1) 
+			  error("Test expression of when statement isn't Boolean scalar or vector expression");
+		  // TODO: This will cause NullPointerException until FInstAccessExp.variability() is defined
+//		  if (!getTest().variability().lessOrEqual(fDiscrete()))
+//			  error("Test expression of when statement isn't discrete-time");
+	  }
+  }
+  
+  
   public void FInfArgsFunctionCall.typeCheck() {
       super.typeCheck();
       for (InstFunctionArgument arg : originalArgs) {

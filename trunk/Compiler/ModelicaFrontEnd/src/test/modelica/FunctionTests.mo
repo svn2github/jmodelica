@@ -1185,7 +1185,7 @@ Semantic error at line 1, column 1:
 end BuiltInCallType10;
 
 
-/* ====================== Algorithms ====================== */
+/* ====================== Algorithm flattening ====================== */
 
 model AlgorithmFlatten1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -1334,9 +1334,10 @@ end AlgorithmFlatten5;
 
 model AlgorithmFlatten6
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="AlgorithmFlatten6",
-                                               description="Flattening algorithms: for stmts",
-                                               flatModel="
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="AlgorithmFlatten6",
+         description="Flattening algorithms: for stmts",
+         flatModel="
 fclass FunctionTests.AlgorithmFlatten6
  Real x;
 algorithm
@@ -1356,6 +1357,388 @@ algorithm
 end AlgorithmFlatten6;
 
 
+/* ====================== Algorithm type checks ====================== */
+
+/* ----- if ----- */
+
+model AlgorithmTypeIf1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AlgorithmTypeIf1",
+         description="Type checks in algorithms: Integer literal as test in if",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 1363, column 5:
+  Type of test expression of if statement is not Boolean
+")})));
+
+ Real x;
+algorithm
+ if 1 then
+  x := 1.0;
+ end if;
+end AlgorithmTypeIf1;
+
+model AlgorithmTypeIf2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AlgorithmTypeIf2",
+         description="Type checks in algorithms: Integer component as test in if",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 1382, column 5:
+  Type of test expression of if statement is not Boolean
+")})));
+
+ Integer a = 1;
+ Real x;
+algorithm
+ if a then
+  x := 1.0;
+ end if;
+end AlgorithmTypeIf2;
+
+model AlgorithmTypeIf3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AlgorithmTypeIf3",
+         description="Type checks in algorithms: arithmetic expression as test in if",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 1403, column 5:
+  Type of test expression of if statement is not Boolean
+")})));
+
+ Integer a = 1;
+ Real x;
+algorithm
+ if a + x then
+  x := 1.0;
+ end if;
+end AlgorithmTypeIf3;
+
+model AlgorithmTypeIf4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AlgorithmTypeIf4",
+         description="Type checks in algorithms: Boolean vector as test in if",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 1422, column 5:
+  Type of test expression of if statement is not Boolean
+")})));
+
+ Real x;
+algorithm
+ if { true, false } then
+  x := 1.0;
+ end if;
+end AlgorithmTypeIf4;
+
+model AlgorithmTypeIf5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="AlgorithmTypeIf5",
+         description="Type checks in algorithms: Boolean literal as test in if",
+         flatModel="
+fclass FunctionTests.AlgorithmTypeIf5
+ Real x;
+algorithm
+ if true then
+  x := 1.0;
+ end if;
+end FunctionTests.AlgorithmTypeIf5;
+")})));
+
+ Real x;
+algorithm
+ if true then
+  x := 1.0;
+ end if;
+end AlgorithmTypeIf5;
+
+/* ----- when ----- */
+
+model AlgorithmTypeWhen1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AlgorithmTypeWhen1",
+         description="Type checks in algorithms: Integer literal as test in when",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 1469, column 7:
+  Test expression of when statement isn't Boolean scalar or vector expression
+")})));
+
+ Real x;
+algorithm
+ when 1 then
+  x := 1.0;
+ end when;
+end AlgorithmTypeWhen1;
+
+model AlgorithmTypeWhen2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AlgorithmTypeWhen2",
+         description="Type checks in algorithms: Integer component as test in when",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 1489, column 7:
+  Test expression of when statement isn't Boolean scalar or vector expression
+")})));
+
+ Integer a = 1;
+ Real x;
+algorithm
+ when a then
+  x := 1.0;
+ end when;
+end AlgorithmTypeWhen2;
+
+model AlgorithmTypeWhen3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AlgorithmTypeWhen3",
+         description="Type checks in algorithms: arithmetic expression as test in when",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 1509, column 7:
+  Test expression of when statement isn't Boolean scalar or vector expression
+")})));
+
+ Integer a = 1;
+ Real x;
+algorithm
+ when a + x then
+  x := 1.0;
+ end when;
+end AlgorithmTypeWhen3;
+
+model AlgorithmTypeWhen4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="AlgorithmTypeWhen4",
+         description="Type checks in algorithms: Boolean vector as test in when",
+         flatModel="
+fclass FunctionTests.AlgorithmTypeWhen4
+ Real x;
+algorithm
+ when {true,false} then
+  x := 1.0;
+ end when;
+end FunctionTests.AlgorithmTypeWhen4;
+")})));
+
+ Real x;
+algorithm
+ when { true, false } then
+  x := 1.0;
+ end when;
+end AlgorithmTypeWhen4;
+
+model AlgorithmTypeWhen5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="AlgorithmTypeWhen5",
+         description="Type checks in algorithms: Boolean literal as test in when",
+         flatModel="
+fclass FunctionTests.AlgorithmTypeWhen5
+ Real x;
+algorithm
+ when true then
+  x := 1.0;
+ end when;
+end FunctionTests.AlgorithmTypeWhen5;
+")})));
+
+ Real x;
+algorithm
+ when true then
+  x := 1.0;
+ end when;
+end AlgorithmTypeWhen5;
+
+/* ----- while ----- */
+
+model AlgorithmTypeWhile1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AlgorithmTypeWhile1",
+         description="Type checks in algorithms: Integer literal as test in while",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 1363, column 5:
+  Type of test expression of while statement is not Boolean
+")})));
+
+ Real x;
+algorithm
+ while 1 loop
+  x := 1.0;
+ end while;
+end AlgorithmTypeWhile1;
+
+model AlgorithmTypeWhile2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AlgorithmTypeWhile2",
+         description="Type checks in algorithms: Integer component as test in while",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 1382, column 5:
+  Type of test expression of while statement is not Boolean
+")})));
+
+ Integer a = 1;
+ Real x;
+algorithm
+ while a loop
+  x := 1.0;
+ end while;
+end AlgorithmTypeWhile2;
+
+model AlgorithmTypeWhile3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AlgorithmTypeWhile3",
+         description="Type checks in algorithms: arithmetic expression as test in while",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 1403, column 5:
+  Type of test expression of while statement is not Boolean
+")})));
+
+ Integer a = 1;
+ Real x;
+algorithm
+ while a + x loop
+  x := 1.0;
+ end while;
+end AlgorithmTypeWhile3;
+
+model AlgorithmTypeWhile4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AlgorithmTypeWhile4",
+         description="Type checks in algorithms: Boolean vector as test in while",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 1422, column 5:
+  Type of test expression of while statement is not Boolean
+")})));
+
+ Real x;
+algorithm
+ while { true, false } loop
+  x := 1.0;
+ end while;
+end AlgorithmTypeWhile4;
+
+model AlgorithmTypeWhile5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="AlgorithmTypeWhile5",
+         description="Type checks in algorithms: Boolean literal as test in while",
+         flatModel="
+fclass FunctionTests.AlgorithmTypeWhile5
+ Real x;
+algorithm
+ while true loop
+  x := 1.0;
+ end while;
+end FunctionTests.AlgorithmTypeWhile5;
+")})));
+
+ Real x;
+algorithm
+ while true loop
+  x := 1.0;
+ end while;
+end AlgorithmTypeWhile5;
+
+model AlgorithmTypeAssign1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AlgorithmTypeAssign1",
+         description="Type checks in algorithms: assign Real to Integer component",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 1674, column 2:
+  Types of right and left side of assignment are not compatible
+")})));
+
+ Integer x;
+algorithm
+ x := 1.0;
+end AlgorithmTypeAssign1;
+
+model AlgorithmTypeAssign2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="AlgorithmTypeAssign2",
+         description="Type checks in algorithms: assign Integer to Real component",
+         flatModel="
+fclass FunctionTests.AlgorithmTypeAssign2
+ Real x;
+algorithm
+ x := 1;
+end FunctionTests.AlgorithmTypeAssign2;
+")})));
+
+ Real x;
+algorithm
+ x := 1;
+end AlgorithmTypeAssign2;
+
+model AlgorithmTypeAssign3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="AlgorithmTypeAssign3",
+         description="Type checks in algorithms: assign Real to Real component",
+         flatModel="
+fclass FunctionTests.AlgorithmTypeAssign3
+ Real x;
+algorithm
+ x := 1.0;
+end FunctionTests.AlgorithmTypeAssign3;
+")})));
+
+ Real x;
+algorithm
+ x := 1.0;
+end AlgorithmTypeAssign3;
+
+model AlgorithmTypeAssign4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AlgorithmTypeAssign4",
+         description="Type checks in algorithms: assign String to Real component",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 1715, column 2:
+  Types of right and left side of assignment are not compatible
+")})));
+
+ Real x;
+algorithm
+ x := "foo";
+end AlgorithmTypeAssign4;
+
+/* =========================== Records =========================== */
 /*
 model RecordConstructorTest1 
 model FunctionTests.RecordConstructorTest1

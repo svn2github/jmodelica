@@ -27,6 +27,11 @@ aspect OptimicaFlatVariability {
 		
 	public static final FOptParameter FOptParameter.singleton = new FOptParameter();	
 	
+	protected int FTimed.variabilityLevel()        { return VARIABILITY_LEVEL; }
+	protected int FOptParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
+	protected static final int FTimed.VARIABILITY_LEVEL        = FContinuous.VARIABILITY_LEVEL;
+	protected static final int FOptParameter.VARIABILITY_LEVEL = FParameter.VARIABILITY_LEVEL;
+	
 	// Notice that the attribute FVariable.isParameter is not redefined in order
 	// not to render a lot of attributes in FlatAPI to be redefined as a
 	// consequence.

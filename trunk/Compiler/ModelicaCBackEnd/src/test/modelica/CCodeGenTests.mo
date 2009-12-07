@@ -399,6 +399,7 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp(jmi_ad_var_t i1_v) {
     (*res)[0] = func_CCodeGenTests_TestFunction1_exp(( _y_ ) * ( 2 )) - (_x_);
     (*res)[1] = func_CCodeGenTests_TestFunction2_exp(2, 3) - (_y_);
 ")})));
+
  Real x;
  Real y = TestFunction2(2, 3);
 equation
@@ -442,6 +443,7 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp(jmi_ad_var_t i1_v, jmi_ad_var_
     (*res)[0] = tmp_var_0 - (_x_);
     (*res)[1] = tmp_var_1 - (_y_);
 ")})));
+
   Real x;
   Real y;
 equation
@@ -485,6 +487,7 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp(jmi_ad_var_t i1_v, jmi_ad_var_
     (*res)[0] = tmp_var_0 - (_x_);
     (*res)[1] = tmp_var_1 - (_z_);
 ")})));
+
   Real x;
   Real z;
 equation
@@ -523,6 +526,7 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_
 
     func_CCodeGenTests_TestFunction2_def(1, 2, NULL, NULL);
 ")})));
+
 equation
   TestFunction2(1, 2);
 end CFunctionTest7;
@@ -571,6 +575,7 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp(jmi_ad_var_t i1_v) {
 
     (*res)[0] = func_CCodeGenTests_TestFunctionCallingFunction_exp(1) - (_x_);
 ")})));
+
  Real x = TestFunctionCallingFunction(1);
 end CFunctionTest8;
 
@@ -608,6 +613,7 @@ jmi_ad_var_t func_CCodeGenTests_TestFunctionRecursive_exp(jmi_ad_var_t i1_v) {
 
     (*res)[0] = func_CCodeGenTests_TestFunctionRecursive_exp(5) - (_x_);
 ")})));
+
  Real x = TestFunctionRecursive(5);
 end CFunctionTest9;
 

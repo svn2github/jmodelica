@@ -32,8 +32,27 @@ aspect FlatVariability {
 	syn boolean TypePrefixVariability.discreteVariability() = false;
 	eq Discrete.discreteVariability() = true;	
 	syn boolean TypePrefixVariability.continuousVariability() = false;
-	eq Continuous.continuousVariability() = true;	
-
+	eq Continuous.continuousVariability() = true;
+	
+	
+	syn boolean FTypePrefixVariability.lessOrEqual(FTypePrefixVariability other) = 
+		variabilityLevel() <= other.variabilityLevel();
+	/**
+	 * \brief An ordering of the variability types.
+	 * 
+	 *  To be used by methods for comparing variabilities. 
+	 *  Should <em>never</em> be compared to literals, only to the return value from other 
+	 *   FTypePrefixVariability objects. This simplifies adding new variabilities. 
+	 */
+	abstract protected int FTypePrefixVariability.variabilityLevel();
+	protected int FConstant.variabilityLevel()   { return VARIABILITY_LEVEL; }
+	protected int FParameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
+	protected int FDiscrete.variabilityLevel()   { return VARIABILITY_LEVEL; }
+	protected int FContinuous.variabilityLevel() { return VARIABILITY_LEVEL; }
+	protected static final int FConstant.VARIABILITY_LEVEL   = 0;
+	protected static final int FParameter.VARIABILITY_LEVEL  = 1;
+	protected static final int FDiscrete.VARIABILITY_LEVEL   = 2;
+	protected static final int FContinuous.VARIABILITY_LEVEL = 3;
 	
 	syn boolean FVariable.isConstant() = getFTypePrefixVariability().constantVariability();
     syn boolean FVariable.isParameter() = getFTypePrefixVariability().parameterVariability();
@@ -72,6 +91,9 @@ aspect FlatVariability {
    		if (!isContinuous()) {
    			return getFTypePrefixVariability();
    		} else if (isInteger() || isBoolean() || isString()) {
+   			/* TODO: Can this really occur?
+   			 * This seems to cover the exact same cases as the first if.
+   			 */
    			return(fDiscrete());
    		} else {
    			return fContinuous();

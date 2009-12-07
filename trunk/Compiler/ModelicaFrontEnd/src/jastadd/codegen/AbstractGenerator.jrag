@@ -140,13 +140,12 @@ public abstract class AbstractGenerator {
 	/**
 	 * \brief See generate(String templateFile, String outputFile).
 	 * 
-	 * @param templateReader A BufferedReader object from which the template 
+	 * @param templateReader A Reader object from which the template 
 	 * file can be used.
 	 * @param genPrinter A PrintStream object to which the generated code
 	 * is written.
 	 */
-	public void generate(BufferedReader templateReader, 
-	  PrintStream genPrinter) {
+	public void generate(Reader templateReader, PrintStream genPrinter) {
 
 		try {
 		AbstractTag tag = null;
