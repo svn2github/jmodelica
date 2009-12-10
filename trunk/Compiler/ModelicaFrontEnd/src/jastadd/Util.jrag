@@ -189,6 +189,23 @@ aspect NodeMethods {
 			l.add(e);
 		return l;
 	}
+	
+	/**
+	 * \brief Replace <code>from</code> with <code>to</code>.
+	 * 
+	 * Search through children after <code>from</code>. If it is found, 
+	 * replace it with <code>to</code> and return <code>true</code>.
+	 * Comparisons are done with ==, not with equals().
+	 */
+	public boolean List.replaceChild(T oldNode, T newNode) {
+		for (int i = 0; i < getNumChild(); i++) {
+			if (getChild(i) == oldNode) {
+				setChild(newNode, i);
+				return true;
+			}
+		}
+		return false;
+	}
 
 }
 
@@ -582,11 +599,33 @@ aspect FlatNames {
 	syn String FFunctionDecl.suffixDefinition() = "def";
 	syn String FFunctionCall.suffixExpression() = "exp";
 	syn String FFunctionDecl.suffixExpression() = "exp";
+	
+	/**
+	 * \brief Copy this FQName, append a String to the copy and return the copy.
+	 */
+	public FQName FQName.copyAndAppend(String name) {
+		return ((FQName)fullCopy()).append(name);
+	}
+	
+	/**
+	 * \brief Create an FIdUseExp using a copy of this name.
+	 */
+	public FIdUseExp FQName.createFIdUseExp() {
+		return new FIdUseExp(createFIdUse()); 
+	}
+	
+	/**
+	 * \brief Create an FIdUse using a copy of this name.
+	 */
+	public FIdUse FQName.createFIdUse() {
+		return new FIdUse(fullCopy()); 
+	}
+	
 }
 
 aspect FlatFunctionUtils {
 	 
-	 syn boolean FFunctionVariable.isInput() = hasFTypePrefixInputOutput() && getFTypePrefixInputOutput().inputCausality();
+	 syn boolean FFunctionVariable.isInput()  = hasFTypePrefixInputOutput() && getFTypePrefixInputOutput().inputCausality();
 	 syn boolean FFunctionVariable.isOutput() = hasFTypePrefixInputOutput() && getFTypePrefixInputOutput().outputCausality();
 	 
 	 /**
@@ -650,47 +689,48 @@ aspect FlatFunctionUtils {
 	 syn lazy FunctionReturnDefinition FFunctionDecl.returnDefinition() = new FunctionReturnDefinition(this);
 	 inh FunctionReturnDefinition FReturnStmt.returnDefinition();
 	 eq FFunctionDecl.getFAlgorithmBlock().returnDefinition() = returnDefinition();
-	 eq InstProgramRoot.getChild().returnDefinition() = null;
-	 eq FClass.getChild().returnDefinition() = null;
+	 eq InstProgramRoot.getChild().returnDefinition()         = null;
+	 eq FClass.getChild().returnDefinition()                  = null;
 	 
 	 inh boolean FIdUse.inFunction();
 	 inh boolean FStatement.inFunction();
+	 inh boolean FAlgorithmBlock.inFunction();
 	 eq InstBaseClassDecl.getChild().inFunction() = isFunction();
-	 eq FFunctionDecl.getChild().inFunction() = true;
-	 eq InstProgramRoot.getChild().inFunction() = false;
-	 eq FClass.getChild().inFunction() = false;
+	 eq FFunctionDecl.getChild().inFunction()     = true;
+	 eq Root.getChild().inFunction()              = false;
 	 
 	 inh boolean FWhenStmt.insideBlockStmt();
 	 eq FAlgorithmBlock.getChild().insideBlockStmt() = false;
-	 eq FIfWhenStmt.getChild().insideBlockStmt() = true;
-	 eq FWhileStmt.getChild().insideBlockStmt() = true;
-	 eq FForStmt.getChild().insideBlockStmt() = true;
-	 eq InstForStmt.getChild().insideBlockStmt() = true;
+	 eq FIfWhenStmt.getChild().insideBlockStmt()     = true;
+	 eq FWhileStmt.getChild().insideBlockStmt()      = true;
+	 eq FForStmt.getChild().insideBlockStmt()        = true;
+	 eq InstForStmt.getChild().insideBlockStmt()     = true;
 	 
 	 syn lazy int FFunctionCallLeft.myIndex() = prevIndex() + (hasFIdUse() ? 1 : 0);
 	 inh int FFunctionCallLeft.prevIndex();
 	 eq FFunctionCallEquation.getLeft(int i).prevIndex() = (i == 0) ? -1 : getLeft(i - 1).myIndex();
-	 eq FFunctionCallStmt.getLeft(int i).prevIndex() = (i == 0) ? -1 : getLeft(i - 1).myIndex();
+	 eq FFunctionCallStmt.getLeft(int i).prevIndex()     = (i == 0) ? -1 : getLeft(i - 1).myIndex();
 	 
 	 inh lazy InstComponentDecl FFunctionCallLeft.myOutput();
 	 eq FFunctionCallEquation.getLeft(int i).myOutput() = getCall().findOutput(i);
 	 eq FFunctionCallStmt.getLeft(int i).myOutput()     = getCall().findOutput(i);
 	 syn InstComponentDecl FAbstractFunctionCall.findOutput(int i) = unknownInstComponentDecl();
-	 eq InstFunctionCall.findOutput(int i) = (i >= myOutputs().size()) ? unknownInstComponentDecl() : myOutputs().get(i);
+	 eq InstFunctionCall.findOutput(int i)                         = 
+		 (i >= myOutputs().size()) ? unknownInstComponentDecl() : myOutputs().get(i);
 	 
 	 inh boolean FAbstractFunctionCall.functionCallIsExp();
-	 eq FExp.getChild().functionCallIsExp() = true;
-	 eq FClass.getChild().functionCallIsExp() = true;
-	 eq InstNode.getChild().functionCallIsExp() = true;
+	 eq FExp.getChild().functionCallIsExp()                 = true;
+	 eq FClass.getChild().functionCallIsExp()               = true;
+	 eq InstNode.getChild().functionCallIsExp()             = true;
 	 eq FFunctionCallEquation.getCall().functionCallIsExp() = false;
-	 eq FFunctionCallStmt.getCall().functionCallIsExp() = false;
+	 eq FFunctionCallStmt.getCall().functionCallIsExp()     = false;
 	 
 	 inh lazy ArrayList<FFunctionCallLeft> FAbstractFunctionCall.myLefts();
-	 eq FExp.getChild().myLefts() = new ArrayList<FFunctionCallLeft>();
-	 eq FClass.getChild().myLefts() = new ArrayList<FFunctionCallLeft>();
-	 eq InstNode.getChild().myLefts() = new ArrayList<FFunctionCallLeft>();
+	 eq FExp.getChild().myLefts()                 = new ArrayList<FFunctionCallLeft>();
+	 eq FClass.getChild().myLefts()               = new ArrayList<FFunctionCallLeft>();
+	 eq InstNode.getChild().myLefts()             = new ArrayList<FFunctionCallLeft>();
 	 eq FFunctionCallEquation.getCall().myLefts() = getLefts().toArrayList();
-	 eq FFunctionCallStmt.getCall().myLefts() = getLefts().toArrayList();
+	 eq FFunctionCallStmt.getCall().myLefts()     = getLefts().toArrayList();
 
 }
 

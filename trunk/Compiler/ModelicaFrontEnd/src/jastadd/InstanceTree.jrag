@@ -184,6 +184,7 @@ aspect Environments {
 
  	syn lazy ArrayList<InstModification> InstNode.localInstModifications() 
  	   = new ArrayList<InstModification>();
+
  	
  	eq InstComponentDecl.localInstModifications() {
 		ArrayList<InstModification> l = new ArrayList<InstModification>();
@@ -1070,6 +1071,11 @@ aspect InstanceAST_API {
 	eq InstShortClassDecl.extendsPrimitive() = getNumInstExtends()==1 && getInstExtends(0).extendsPrimitive();
 	eq InstExtends.extendsPrimitive() = getClassName().myInstClassDecl().isPrimitive() || getClassName().myInstClassDecl().extendsPrimitive();
 	eq InstFullClassDecl.extendsPrimitive() = getNumInstExtends()==1 && getInstExtends(0).extendsPrimitive();
+	
+	syn InstClassDecl InstClassDecl.getBaseInstClass() = 
+		(getNumInstExtends() > 0) ? getInstExtends(0).getBaseInstClass() : this;
+	syn InstClassDecl InstExtends.getBaseInstClass()   = 
+		getClassName().myInstClassDecl().getBaseInstClass();
 	
 }
 

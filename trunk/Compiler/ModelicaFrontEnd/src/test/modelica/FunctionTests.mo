@@ -76,6 +76,17 @@ end TestFunctionRecursive;
 
 /* Temporary functions for C-tests */
 
+function Func00
+algorithm
+ return;
+end Func00;
+
+function Func10
+ input Real i1 = 0;
+algorithm
+ return;
+end Func10;
+
 function Func01
  output Real o1 = 0;
 algorithm
@@ -132,6 +143,9 @@ model Test
  Real a4 = Func02();
  Real a5 = Func12();
  Real a6 = Func22();
+equation
+ Func10();
+ Func00();
 end Test;
 
 
@@ -1736,6 +1750,547 @@ Semantic error at line 1715, column 2:
 algorithm
  x := "foo";
 end AlgorithmTypeAssign4;
+
+
+/* ====================== Algorithm transformations ===================== */
+
+model AlgorithmTransformation1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="AlgorithmTransformation1",
+         description="Generating functions from algorithms: simple algorithm",
+         flatModel="
+fclass FunctionTests.AlgorithmTransformation1
+ Real a;
+ Real b;
+ Real x;
+ Real y;
+equation
+ (x, y) = FunctionTests.AlgorithmTransformation1.algorithm_1(a, b);
+ a = 1;
+ b = 2;
+
+ function FunctionTests.AlgorithmTransformation1.algorithm_1
+  output Real x;
+  output Real y;
+  input Real a;
+  input Real b;
+ algorithm
+  x := a;
+  y := b;
+  return;
+ end FunctionTests.AlgorithmTransformation1.algorithm_1;
+end FunctionTests.AlgorithmTransformation1;
+")})));
+
+ Real a = 1;
+ Real b = 2;
+ Real x;
+ Real y;
+algorithm
+ x := a;
+ y := b;
+end AlgorithmTransformation1;
+
+
+model AlgorithmTransformation2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="AlgorithmTransformation2",
+         description="Generating functions from algorithms: vars used several times",
+         flatModel="
+fclass FunctionTests.AlgorithmTransformation2
+ Real a;
+ Real x;
+ Real y;
+equation
+ (x, y) = FunctionTests.AlgorithmTransformation2.algorithm_1(a);
+ a = 1;
+
+ function FunctionTests.AlgorithmTransformation2.algorithm_1
+  output Real x;
+  output Real y;
+  input Real a;
+ algorithm
+  x := a;
+  y := a;
+  x := a;
+  y := a;
+  return;
+ end FunctionTests.AlgorithmTransformation2.algorithm_1;
+end FunctionTests.AlgorithmTransformation2;
+")})));
+
+ Real a = 1;
+ Real x;
+ Real y;
+algorithm
+ x := a;
+ y := a;
+ x := a;
+ y := a;
+end AlgorithmTransformation2;
+
+
+model AlgorithmTransformation3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="AlgorithmTransformation3",
+         description="Generating functions from algorithms: complex algorithm",
+         flatModel="
+fclass FunctionTests.AlgorithmTransformation3
+ Real a;
+ Real b;
+ Real x;
+ Real y;
+equation
+ (x, y) = FunctionTests.AlgorithmTransformation3.algorithm_1(a, b);
+ a = 1;
+ b = 2;
+
+ function FunctionTests.AlgorithmTransformation3.algorithm_1
+  output Real x;
+  output Real y;
+  input Real a;
+  input Real b;
+ algorithm
+  x := a + 1;
+  if b > 1 then
+   y := a + 2;
+  end if;
+  return;
+ end FunctionTests.AlgorithmTransformation3.algorithm_1;
+end FunctionTests.AlgorithmTransformation3;
+")})));
+
+ Real a = 1;
+ Real b = 2;
+ Real x;
+ Real y;
+algorithm
+ x := a + 1;
+ if b > 1 then
+  y := a + 2;
+ end if;
+end AlgorithmTransformation3;
+
+
+model AlgorithmTransformation4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="AlgorithmTransformation4",
+         description="Generating functions from algorithms: complex algorithm",
+         flatModel="
+fclass FunctionTests.AlgorithmTransformation4
+ Real a;
+ Real b;
+ Real x;
+ Real y;
+equation
+ (x, y) = FunctionTests.AlgorithmTransformation4.algorithm_1(b, a);
+ a = 1;
+ b = 2;
+
+ function FunctionTests.AlgorithmTransformation4.algorithm_1
+  output Real x;
+  output Real y;
+  input Real b;
+  input Real a;
+ algorithm
+  while b > 1 loop
+   x := a;
+   if a < 2 then
+    y := b;
+   else
+    y := a + 2;
+   end if;
+  end while;
+  return;
+ end FunctionTests.AlgorithmTransformation4.algorithm_1;
+end FunctionTests.AlgorithmTransformation4;
+")})));
+
+ Real a = 1;
+ Real b = 2;
+ Real x;
+ Real y;
+algorithm
+ while b > 1 loop
+  x := a;
+  if a < 2 then
+   y := b;
+  else
+   y := a + 2;
+  end if;
+ end while;
+end AlgorithmTransformation4;
+
+
+model AlgorithmTransformation5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="AlgorithmTransformation5",
+         description="Generating functions from algorithms: no used variables",
+         flatModel="
+fclass FunctionTests.AlgorithmTransformation5
+ Real x;
+ Real y;
+equation
+ (x, y) = FunctionTests.AlgorithmTransformation5.algorithm_1();
+
+ function FunctionTests.AlgorithmTransformation5.algorithm_1
+  output Real x;
+  output Real y;
+ algorithm
+  x := 1;
+  y := 2;
+  return;
+ end FunctionTests.AlgorithmTransformation5.algorithm_1;
+end FunctionTests.AlgorithmTransformation5;
+")})));
+
+ Real x;
+ Real y;
+algorithm
+ x := 1;
+ y := 2;
+end AlgorithmTransformation5;
+
+
+model AlgorithmTransformation6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="AlgorithmTransformation6",
+         description="Generating functions from algorithms: 2 algorithms",
+         flatModel="
+fclass FunctionTests.AlgorithmTransformation6
+ Real x;
+ Real y;
+equation
+ (x) = FunctionTests.AlgorithmTransformation6.algorithm_1();
+ (y) = FunctionTests.AlgorithmTransformation6.algorithm_2();
+
+ function FunctionTests.AlgorithmTransformation6.algorithm_1
+  output Real x;
+ algorithm
+  x := 1;
+  return;
+ end FunctionTests.AlgorithmTransformation6.algorithm_1;
+
+ function FunctionTests.AlgorithmTransformation6.algorithm_2
+  output Real y;
+ algorithm
+  y := 2;
+  return;
+ end FunctionTests.AlgorithmTransformation6.algorithm_2;
+end FunctionTests.AlgorithmTransformation6;
+")})));
+
+ Real x;
+ Real y;
+algorithm
+ x := 1;
+algorithm
+ y := 2;
+end AlgorithmTransformation6;
+
+
+model AlgorithmTransformation7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="AlgorithmTransformation7",
+         description="Generating functions from algorithms: generated name exists - function",
+         flatModel="
+fclass FunctionTests.AlgorithmTransformation7
+ Real x;
+equation
+ (x) = FunctionTests.AlgorithmTransformation7.algorithm_2();
+
+ function FunctionTests.AlgorithmTransformation7.algorithm_1
+  input Real i;
+  output Real o := ( i ) * ( 2 );
+ algorithm
+  return;
+ end FunctionTests.AlgorithmTransformation7.algorithm_1;
+
+ function FunctionTests.AlgorithmTransformation7.algorithm_2
+  output Real x;
+ algorithm
+  x := FunctionTests.AlgorithmTransformation7.algorithm_1(2);
+  return;
+ end FunctionTests.AlgorithmTransformation7.algorithm_2;
+end FunctionTests.AlgorithmTransformation7;
+")})));
+
+ function algorithm_1
+  input Real i;
+  output Real o = i * 2;
+  algorithm
+ end algorithm_1;
+ 
+ Real x;
+algorithm
+ x := algorithm_1(2);
+end AlgorithmTransformation7;
+
+
+model AlgorithmTransformation8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="AlgorithmTransformation8",
+         description="Generating functions from algorithms: generated name exists - model",
+         flatModel="
+fclass FunctionTests.AlgorithmTransformation8
+ Real x.a;
+ Real x.b;
+equation
+ (x.a, x.b) = FunctionTests.AlgorithmTransformation8.algorithm_1();
+
+ function FunctionTests.AlgorithmTransformation8.algorithm_1
+  output Real x.a;
+  output Real x.b;
+ algorithm
+  x.a := 2;
+  x.b := 3;
+  return;
+ end FunctionTests.AlgorithmTransformation8.algorithm_1;
+end FunctionTests.AlgorithmTransformation8;
+")})));
+
+ model algorithm_1
+  Real a;
+  Real b;
+ end algorithm_1;
+ 
+ algorithm_1 x;
+algorithm
+ x.a := 2;
+ x.b := 3;
+end AlgorithmTransformation8;
+
+
+model AlgorithmTransformation9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="AlgorithmTransformation9",
+         description="Generating functions from algorithms: generated name exists - component",
+         flatModel="
+fclass FunctionTests.AlgorithmTransformation9
+ Real algorithm_1;
+ Real algorithm_3;
+equation
+ (algorithm_1) = FunctionTests.AlgorithmTransformation9.algorithm_2();
+ (algorithm_3) = FunctionTests.AlgorithmTransformation9.algorithm_4();
+
+ function FunctionTests.AlgorithmTransformation9.algorithm_2
+  output Real algorithm_1;
+ algorithm
+  algorithm_1 := 1;
+  return;
+ end FunctionTests.AlgorithmTransformation9.algorithm_2;
+
+ function FunctionTests.AlgorithmTransformation9.algorithm_4
+  output Real algorithm_3;
+ algorithm
+  algorithm_3 := 3;
+  return;
+ end FunctionTests.AlgorithmTransformation9.algorithm_4;
+end FunctionTests.AlgorithmTransformation9;
+")})));
+
+ Real algorithm_1;
+ Real algorithm_3;
+algorithm
+ algorithm_1 := 1;
+algorithm
+ algorithm_3 := 3;
+end AlgorithmTransformation9;
+
+
+model AlgorithmTransformation10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="AlgorithmTransformation10",
+         description="Generating functions from algorithms: generated arg name exists",
+         flatModel="
+fclass FunctionTests.AlgorithmTransformation10
+ Real x;
+ Real x_0;
+ Real x_1;
+equation
+ x_0 = 0;
+ (x, x_1) = FunctionTests.AlgorithmTransformation10.algorithm_1(x_0, 0);
+
+ function FunctionTests.AlgorithmTransformation10.algorithm_1
+  output Real x := x_2;
+  output Real x_1;
+  input Real x_0;
+  input Real x_2;
+ algorithm
+  x := x_0;
+  x_1 := x;
+  return;
+ end FunctionTests.AlgorithmTransformation10.algorithm_1;
+end FunctionTests.AlgorithmTransformation10;
+")})));
+
+ Real x;
+ Real x_0;
+ Real x_1;
+algorithm
+ x := x_0;
+ x_1 := x;
+equation
+ x_0 = 0;
+end AlgorithmTransformation10;
+
+
+model AlgorithmTransformation11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="AlgorithmTransformation11",
+         description="Generating functions from algorithms: assigned variable used",
+         flatModel="
+fclass FunctionTests.AlgorithmTransformation11
+ Real x;
+ Real y;
+equation
+ (x, y) = FunctionTests.AlgorithmTransformation11.algorithm_1(0);
+
+ function FunctionTests.AlgorithmTransformation11.algorithm_1
+  output Real x := x_0;
+  output Real y;
+  input Real x_0;
+ algorithm
+  x := 1;
+  y := x;
+  return;
+ end FunctionTests.AlgorithmTransformation11.algorithm_1;
+end FunctionTests.AlgorithmTransformation11;
+")})));
+
+ Real x;
+ Real y;
+algorithm
+ x := 1;
+ y := x;
+end AlgorithmTransformation11;
+
+
+model AlgorithmTransformation12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="AlgorithmTransformation12",
+         description="Generating functions from algorithms: assigned variables used, different start values",
+         flatModel="
+fclass FunctionTests.AlgorithmTransformation12
+ Real x0;
+ Real x1(start = 1);
+ Real x2(start = 2);
+ Real y;
+equation
+ (x0, x1, x2, y) = FunctionTests.AlgorithmTransformation12.algorithm_1(0, 1, 2);
+
+ function FunctionTests.AlgorithmTransformation12.algorithm_1
+  output Real x0 := x0_0;
+  output Real x1 := x1_0;
+  output Real x2 := x2_0;
+  output Real y;
+  input Real x0_0;
+  input Real x1_0;
+  input Real x2_0;
+ algorithm
+  x0 := 1;
+  x1 := x0;
+  x2 := x1;
+  y := x2;
+  return;
+ end FunctionTests.AlgorithmTransformation12.algorithm_1;
+end FunctionTests.AlgorithmTransformation12;
+")})));
+
+ Real x0;
+ Real x1(start=1);
+ Real x2(start=2);
+ Real y;
+algorithm
+ x0 := 1;
+ x1 := x0;
+ x2 := x1;
+ y := x2;
+end AlgorithmTransformation12;
+
+
+model AlgorithmTransformation13
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="AlgorithmTransformation13",
+         description="Generating functions from algorithms: no assignments",
+         flatModel="
+fclass FunctionTests.AlgorithmTransformation13
+ Real x;
+equation
+ FunctionTests.AlgorithmTransformation13.algorithm_1(x);
+ x = 2;
+
+ function FunctionTests.TestFunction1
+  input Real i1 := 0;
+  output Real o1 := i1;
+ algorithm
+  return;
+ end FunctionTests.TestFunction1;
+
+ function FunctionTests.AlgorithmTransformation13.algorithm_1
+  input Real x;
+ algorithm
+  if x < 3 then
+   FunctionTests.TestFunction1(x);
+  end if;
+  return;
+ end FunctionTests.AlgorithmTransformation13.algorithm_1;
+end FunctionTests.AlgorithmTransformation13;
+")})));
+
+ Real x = 2;
+algorithm
+ if x < 3 then
+  TestFunction1(x);
+ end if;
+end AlgorithmTransformation13;
+
+
+model AlgorithmTransformation14
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="AlgorithmTransformation14",
+         description="Generating functions from algorithms: using for index",
+         flatModel="
+fclass FunctionTests.AlgorithmTransformation14
+ Real x;
+equation
+ (x) = FunctionTests.AlgorithmTransformation14.algorithm_1(0);
+
+ function FunctionTests.AlgorithmTransformation14.algorithm_1
+  output Real x := x_0;
+  input Real x_0;
+ algorithm
+  x := 0;
+  for i in 1:3 loop
+   x := x + i;
+  end for;
+  return;
+ end FunctionTests.AlgorithmTransformation14.algorithm_1;
+end FunctionTests.AlgorithmTransformation14;
+")})));
+
+ Real x;
+algorithm
+ x := 0;
+ for i in 1:3 loop
+  x := x + i;
+ end for;
+end AlgorithmTransformation14;
+
 
 /* =========================== Records =========================== */
 /*

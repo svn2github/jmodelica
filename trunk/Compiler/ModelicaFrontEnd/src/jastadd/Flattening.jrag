@@ -167,11 +167,29 @@ aspect Flattening {
 	syn FVariable InstPrimitive.createFVariable() {
 		//System.out.println("**  " + name() + " = " + ceval());
 		FExp e = myBindingFExp();
-		List attr = new List();
+		List<FAttribute> attr = new List<FAttribute>();
 		for (InstModification im : totalMergedEnvironment()) {
 //			System.out.println("createFVariable: " + qualifiedName() + ": " +
 //					im.prettyPrint("") + " " + im.myInstNode().getFQNamePrefix().name());		
 			im.collectAttributes(attr,im.myInstNode().getFQNamePrefix());
+		}
+		// Add default values for parameters from primitive class
+		// TODO: Maybe this needs a more generalized solution? Or to be moved to instantiation step?
+		PrimitiveClassDecl pcd = (PrimitiveClassDecl) myInstClass().getBaseInstClass().getClassDecl();
+		for (ComponentDecl c : pcd.getComponentDecls()) {
+			if (c.isParameter()) {
+				FIdDecl name = new FIdDecl(new FQName(c.getName().name()));
+				boolean exists = false;
+				for (FAttribute a2 : attr)
+					if (a2.getName().name().equals(name.name()))
+						exists = true;
+				if (!exists) {
+					FIdUse type = new FIdUse(new FQName(c.getClassName().name()));
+					// TODO: Can we really trust that parameters in primitive classes only have ValueModifications?
+					FExp value = ((ValueModification) c.getModification()).getExp().instantiate().flatten(new FQName());
+					attr.add(new FAttribute(type, name, new Opt(value), false, new Opt(), new Opt(), new List()));				
+				}
+			}
 		}
 		
 		// Check Variability
@@ -275,26 +293,26 @@ aspect Flattening {
 	eq InstValueModification.instValueMod() = getFExp();
 	eq InstCompleteModification.instValueMod() = getInstValueModification().getFExp();
 	
-	public void ASTNode.collectAttributes(List attrs, FQName prefix) {
+	public void ASTNode.collectAttributes(List<FAttribute> attrs, FQName prefix) {
 		for (int i=0;i<getNumChild();i++)
 			getChild(i).collectAttributes(attrs, prefix);
 	}
 
 	// This is just to avoid collecting ComponentModification:s that resides inside
 	// ClassRedeclares.
-    public void InstClassRedeclare.collectAttributes(List attrs, FQName prefix) {}
+    public void InstClassRedeclare.collectAttributes(List<FAttribute> attrs, FQName prefix) {}
 
-	public void InstComponentModification.collectAttributes(List attrs, FQName prefix) {
+	public void InstComponentModification.collectAttributes(List<FAttribute> attrs, FQName prefix) {
 		if (hasInstModification()) {
 			FQName fqn = new FQName(new List().add(new FQNamePart(getName().getID(),new Opt())));
             boolean attr_set = false;
             // Check if attribute is already set
             for (int i=0;i<attrs.getNumChild();i++)
-            	if (((FAttribute)attrs.getChild(i)).getName().name().equals(getName().name()))
+            	if (attrs.getChild(i).getName().name().equals(getName().name()))
 					attr_set = true;
             // If attribute is not set, add to list
 			if (!attr_set) {
-				List my_attr = new List();
+				List<FAttribute> my_attr = new List<FAttribute>();
 				getInstModification().collectAttributes(my_attr,prefix);
 				FQName fqn2 = new FQName();
 				fqn2.addFQNamePart(new FQNamePart(getName().myInstComponentDecl().myInstClass().name(),

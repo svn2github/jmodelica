@@ -30,24 +30,24 @@ aspect OptimicaPredefinedTypes {
 			    ComponentDecl compDecl = new ComponentDecl(true,
 				                                      "RealType",
 				                                      "initialGuess",
-				                                      ""); 
+				                                      "0.0"); 
 				cd.addComponentDecl(compDecl);
 				compDecl = new ComponentDecl(true,
 				                                      "BooleanType",
 				                                      "free",
-				                                      ""); 
+				                                      "false"); 
 				cd.addComponentDecl(compDecl);
 			}
 			if (cd.name().equals("Integer")) {
 			    ComponentDecl compDecl = new ComponentDecl(true,
 				                                      "IntegerType",
 				                                      "initialGuess",
-				                                      ""); 
+				                                      "0"); 
 				cd.addComponentDecl(compDecl);
 				compDecl = new ComponentDecl(true,
 				                                      "BooleanType",
 				                                      "free",
-				                                      ""); 
+				                                      "false"); 
 				cd.addComponentDecl(compDecl);
 			}
 

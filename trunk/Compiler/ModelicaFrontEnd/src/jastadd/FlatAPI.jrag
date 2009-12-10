@@ -660,10 +660,10 @@ aspect FlatAPI {
     syn int FClass.numRelExpInInitialEquations() = 
     	relExpInInitialEquations().size();
 	coll ArrayList<FLogBinExp> FClass.relExpInInitialEquations() 
-	  [new ArrayList<FLogBinExp>()] with add root FlatRoot;
+	    [new ArrayList<FLogBinExp>()] with add root FlatRoot;
 	FLogBinExp contributes
  		this when inInitialEquationSection()
-	to FClass.relExpInInitialEquations() for myFClass();	
+	    to FClass.relExpInInitialEquations() for myFClass();	
 	
 /*	
 
@@ -698,6 +698,7 @@ aspect FlatAPI {
 	inh FClass FExp.myFClass();
 	inh FClass FIdUse.myFClass();
 	inh FClass FQName.myFClass();
+	inh FClass FAlgorithmBlock.myFClass();
 	eq FClass.getChild().myFClass() = this;
 	eq Root.getChild().myFClass() = null; 
 
@@ -1326,6 +1327,53 @@ aspect FlatDiagnostics {
 		
 	}
 
+}
 
-
+aspect FlatAlgorithmAPI {
+	
+	syn boolean FIdUse.inFAlgorithm() = myFAlgorithm() != null;
+	
+	inh lazy FAlgorithmBlock FStatement.myFAlgorithm();
+	inh lazy FAlgorithmBlock FIdUse.myFAlgorithm();
+	eq FAlgorithmBlock.getChild().myFAlgorithm() = this;
+	eq Root.getChild().myFAlgorithm() = null;
+	
+	coll ArrayList<FAlgorithmBlock> FClass.myAlgorithms()
+	    [new ArrayList<FAlgorithmBlock>()] with add root FClass;
+	FAlgorithmBlock contributes this when !inFunction()
+	    to FClass.myAlgorithms() for myFClass();
+	
+	coll ArrayList<FIdUse> FAlgorithmBlock.assignedFIdUses() 
+	    [new ArrayList<FIdUse>()] with add root FAlgorithmBlock;
+	FAssignStmt contributes getLeft() to FAlgorithmBlock.assignedFIdUses() for myFAlgorithm();
+	
+	coll ArrayList<FIdUse> FAlgorithmBlock.usedFIdUses() 
+	    [new ArrayList<FIdUse>()] with add root FAlgorithmBlock;
+	FIdUse contributes this when !useIsAssignment() // TODO: need to check for *ForIndex?
+	    to FAlgorithmBlock.usedFIdUses() for myFAlgorithm();
+	
+	inh boolean FIdUse.useIsAssignment();
+	eq FAssignStmt.getLeft().useIsAssignment() = true;
+	eq FExp.getChild().useIsAssignment() = false;
+	eq FStatement.getChild().useIsAssignment() = false;
+	eq FAlgorithmBlock.getChild().useIsAssignment() = false;
+	eq Root.getChild().useIsAssignment() = false;
+	
+	private String FAlgorithmBlock.functionName = null;
+	public String FAlgorithmBlock.generateFunctionName() {
+		if (functionName == null)
+			functionName = myFClass().generateFunctionName();
+		return functionName;
+	}
+	private int FClass.generatedFunctionNumber = 1;
+	public String FClass.generateFunctionName() {
+		String name, part;
+		do {
+			part = "algorithm_" + generatedFunctionNumber;
+			name = name() + "." + part;
+			generatedFunctionNumber++;
+		} while (lookupFFunc(name) != null || fullyQualifiedVariablesMap().get(part) != null);
+		return name;
+	}
+	
 }

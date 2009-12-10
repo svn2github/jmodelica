@@ -3,7 +3,7 @@
  * \brief Contains transformations on the flattened model which converts
  * it into a canonical form.
  */
-aspect TransformCanonical{
+aspect TransformCanonical {
 
 	/**
 	 * \brief Transform the raw flattened model into a structured form.
@@ -12,6 +12,14 @@ aspect TransformCanonical{
 	 *  <ul>
 	 *    <li> Binding equations for variables are converted into regular
 	 *         equations by calling genBindingEquations().
+	 *    <li> For each non-function algorithm:
+	 *         <ul>
+	 *           <li> A function is generated with the algorithm as body, 
+	 *                any assigned variables as outputs and any used 
+	 *                variables as inputs.
+	 *           <li> The original algorithm is replaced with a call to 
+	 *                the generated function.
+	 *         </ul>
 	 *    <li> The model is scalarized, i.e., all array declarations and
 	 *         equations are replaced by scalar declarations and equations
 	 *    <li> Alias variables are eliminated from the model.
@@ -23,6 +31,7 @@ aspect TransformCanonical{
 	 */
 	public void FClass.transformCanonical() {
 		genBindingEquations();
+		genAlgorithmFunctions();
 		scalarize();
 		if (root().options.getBooleanOption("eliminate_alias_variables")) {
 			genAlias();
@@ -56,6 +65,140 @@ aspect TransformCanonical{
 		}
 //		flush();
 		flushAllRecursive();
+	}
+	
+	/**
+	 * \brief Generate functions from algorithms.
+	 */
+	public void FClass.genAlgorithmFunctions() {
+		for (FAlgorithmBlock a : myAlgorithms()) {
+			// Create function declaration
+			List<FFunctionVariable> vars = new List<FFunctionVariable>();
+			FQName funcName = new FQName(a.generateFunctionName());
+			
+			// - Find inputs
+			ArrayList<FVariable> inVars = new ArrayList<FVariable>();
+			ArrayList<FFunctionVariable> bothInVars = new ArrayList<FFunctionVariable>();
+			for (FIdUse use : a.usedFIdUses()) {
+				AbstractFVariable fv = use.myFV();
+				if (!fv.isUnknown() && !inVars.contains(fv) && !fv.isFForIndex()) {
+					inVars.add((FVariable) fv);
+					bothInVars.add(null);
+				}
+			}
+			
+			// - Create outputs, add to vars and locate those that are inputs as well
+			ArrayList<FVariable> outVars = new ArrayList<FVariable>();
+			for (FIdUse use : a.assignedFIdUses()) {
+				if (!use.myFV().isUnknown() && !outVars.contains(use.myFV())) {
+					FVariable fv = (FVariable) use.myFV();
+					FFunctionVariable ffv = fv.createFFunctionOutput();
+					vars.add(ffv);
+					outVars.add(fv);
+					int i = inVars.indexOf(fv);
+					if (i >= 0) 
+						bothInVars.set(i, ffv);
+				}
+			}
+			
+			// - Create inputs, add to vars and update inputs and outputs that are the same
+			ArrayList<FVariable> allVars = new ArrayList<FVariable>();
+			allVars.addAll(inVars);
+			allVars.addAll(outVars);
+			
+			for (int i = 0; i < inVars.size(); i++) {
+				FVariable fv = inVars.get(i);
+				FFunctionVariable ffv = fv.createFFunctionInput();
+				vars.add(ffv);
+				if (bothInVars.get(i) != null) {
+					
+					// Generate a new (unique) name for variable
+					boolean nameExists = true;
+					String name = null;
+					for (int j = 0; nameExists; j++) {
+						name = fv.name() + "_" + j;
+						nameExists = false;
+						for (FVariable fv2 : allVars)
+							if (fv2.name().equals(name))
+								nameExists = true;
+					}
+					
+					// Rename input
+					FQName fqn = new FQName(name);
+					ffv.setFQName(fqn);
+					
+					// Create and add binding expression for output
+					bothInVars.get(i).setBindingExp(fqn.createFIdUseExp());
+				}
+			}
+			
+			// Create function call equation and replace algorithm
+			List<FExp> args = new List<FExp>();
+			for (int i = 0, j = 0; i < inVars.size(); i++) 
+				args.add(inVars.get(i).createAlgorithmArgument(bothInVars.get(i) != null));
+			FFunctionCall call = new FFunctionCall(funcName.createFIdUse(), args);
+			List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
+			for (FVariable fv : outVars)
+				lefts.add(fv.getFQName().createFFunctionCallLeft());
+			replaceEquation(a, new FFunctionCallEquation(lefts, call));
+			
+			// Add return statement, create function declaration and add it to FClass 
+			a.addFStatement(new FReturnStmt());
+			addFFunctionDecl(new FFunctionDecl(funcName, vars, new Opt(a)));
+		}
+	}
+	
+	/**
+	 * \brief Replace one equation with another.
+	 */
+	public void FClass.replaceEquation(FAbstractEquation oldEq, FAbstractEquation newEq) {
+		for (FEquationBlock b : getFEquationBlocks())
+			if (b.getFAbstractEquations().replaceChild(oldEq, newEq))
+				return;
+	}
+	
+	/**
+	 * \brief Create an FFunctionCallLeft using a copy of this name.
+	 */
+	public FFunctionCallLeft FQName.createFFunctionCallLeft() {
+		return new FFunctionCallLeft(new Opt(createFIdUse()));
+	}
+
+	/**
+	 * \brief Create an expression to serve as argument to a generated algorithm function.
+	 * 
+	 * @param init  <code>true</code> if the argument is to initialize an assigned variable
+	 */
+	public FExp FVariable.createAlgorithmArgument(boolean init) {
+		if (init) {
+			if (isDiscrete())
+				return null; // TODO: Return pre() value.
+			if (isContinuous())
+				return startAttributeExp();
+		}
+		return getFQName().createFIdUseExp();
+	}
+	
+	/**
+	 * \brief Create an input representing this variable in a generated algorithm function.
+	 */
+	public FFunctionVariable FVariable.createFFunctionOutput() {
+		return createFFunctionVariable(new FOutput());
+	}
+
+	/**
+	 * \brief Create an output representing this variable in a generated algorithm function.
+	 */
+	public FFunctionVariable FVariable.createFFunctionInput() {
+		return createFFunctionVariable(new FInput());
+	}
+
+	/**
+	 * \brief Create an function variable representing this variable in a generated algorithm function.
+	 */
+	public FFunctionVariable FVariable.createFFunctionVariable(FTypePrefixInputOutput io) {
+		FPrimitiveType type = (FPrimitiveType) type().fullCopy();
+		return new FFunctionVariable(new Opt(io), type, new Opt(), getFQName().fullCopy());
 	}
 
 	/**

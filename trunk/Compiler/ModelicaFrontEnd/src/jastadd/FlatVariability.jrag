@@ -35,8 +35,14 @@ aspect FlatVariability {
 	eq Continuous.continuousVariability() = true;
 	
 	
+	/**
+	 * \brief Test if variablilty is at most the same as <code>other</code>.
+	 * 
+	 * Uses ordering of variabilities imposed by {@link #variabilityLevel()}.
+	 */
 	syn boolean FTypePrefixVariability.lessOrEqual(FTypePrefixVariability other) = 
 		variabilityLevel() <= other.variabilityLevel();
+	
 	/**
 	 * \brief An ordering of the variability types.
 	 * 
