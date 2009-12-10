@@ -130,15 +130,17 @@ aspect Flattening {
 	public void InstComponentDecl.flattenInFunction(FFunctionDecl ffd) {}
 	
 	public void InstPrimitive.flattenInFunction(FFunctionDecl ffd) {
-		FExp e = myBindingFExp();
-		Opt eo = (e == null) ? new Opt() : new Opt(e);
-		FQName fqn = new FQName(getFQName());
-		FFunctionVariable ffv = new FFunctionVariable(new Opt(), type(), eo, fqn);
-		if (isInput())
-			ffv.setFTypePrefixInputOutput(new FInput());
-		if (isOutput())
-			ffv.setFTypePrefixInputOutput(new FOutput());
-		ffd.addFFunctionVariable(ffv);
+		if (!getComponentDecl().isConstant()) {
+			FExp e = myBindingFExp();
+			Opt eo = (e == null) ? new Opt() : new Opt(e);
+			FQName fqn = new FQName(getFQName());
+			FFunctionVariable ffv = new FFunctionVariable(new Opt(), type(), eo, fqn);
+			if (isInput())
+				ffv.setFTypePrefixInputOutput(new FInput());
+			if (isOutput())
+				ffv.setFTypePrefixInputOutput(new FOutput());
+			ffd.addFFunctionVariable(ffv);
+		}
 	}
 
 

@@ -73,6 +73,16 @@ algorithm
  end if;
 end TestFunctionRecursive;
 
+function TestFunctionWithConst
+ input Real x = 1;
+ output Real y = x + A + B + C;
+protected
+ constant Real A = 1;
+ constant Real B = 2;
+ constant Real C = 3;
+algorithm
+end TestFunctionWithConst;
+
 
 /* Temporary functions for manual C-tests */
 
@@ -175,6 +185,7 @@ equation
  x = TestFunction1(1);
 end FunctionFlatten1;
 
+
 model FunctionFlatten2
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FlatteningTestCase(name="FunctionFlatten2",
@@ -203,6 +214,7 @@ end FunctionTests.FunctionFlatten2;
 equation
  x = TestFunction2(1);
 end FunctionFlatten2;
+
 
 model FunctionFlatten3
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -239,6 +251,29 @@ end FunctionTests.FunctionFlatten3;
 equation
  x = TestFunction1(y * 2);
 end FunctionFlatten3;
+
+
+model FunctionFlatten4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="FunctionFlatten4",
+         description="Flattening functions: function containing constants",
+         flatModel="
+fclass FunctionTests.FunctionFlatten4
+ Real x = FunctionTests.TestFunctionWithConst(2);
+
+ function FunctionTests.TestFunctionWithConst
+  input Real x := 1;
+  output Real y := x + 1.0 + 2.0 + 3.0;
+ algorithm
+  return;
+ end FunctionTests.TestFunctionWithConst;
+end FunctionTests.FunctionFlatten4;
+")})));
+
+ Real x = TestFunctionWithConst(2);
+end FunctionFlatten4;
+
 
 
 /* ====================== Function calls ====================== */
