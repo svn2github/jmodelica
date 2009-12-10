@@ -74,7 +74,7 @@ algorithm
 end TestFunctionRecursive;
 
 
-/* Temporary functions for C-tests */
+/* Temporary functions for manual C-tests */
 
 function Func00
 algorithm

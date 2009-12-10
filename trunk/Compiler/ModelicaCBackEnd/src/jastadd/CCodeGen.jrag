@@ -123,11 +123,22 @@ aspect CCodeGen {
 			return "void";
 	}
 	
-	public void FunctionReturnDefinition.printExpression_C(PrintStream str) {
+	public void FunctionReturnDefinition.printReturnForExp_C(PrintStream str, String indent) {
+		str.print(indent);
+		str.print("return");
 		if (outputs.size() > 0) { 
 			str.print(" ");
 			str.print(outputs.get(0).name_C());
-		}		
+		}
+		str.print(";\n");
+	}
+	
+	public void FunctionReturnDefinition.printDeclarationForExp_C(Printer p, PrintStream str, String indent, Object o) {
+		if (outputs.size() > 0) { 
+			str.print(indent);
+			p.toString(outputs.get(0), str, "", null);
+			str.print(";\n");
+		}
 	}
 	
 	public void FunctionReturnDefinition.printReturnWrite_C(PrintStream str, String indent) {
@@ -143,9 +154,14 @@ aspect CCodeGen {
 		str.print(getFQName().funcNameUnderscore(suffix));
 		str.print("(");
 		prettyPrintWithSep(myInputs(), p, str, "", o, ", ");
-		if (returnArgs)
-			for (FFunctionVariable v : myOutputs())
+		String sep = myInputs().size() > 0 ? ", " : "";
+		if (returnArgs) {
+			for (FFunctionVariable v : myOutputs()) {
+				str.print(sep);
 				v.printReturnArgument_C(str);
+				sep = ", ";
+			}
+		}
 		str.print(")");
 	}
 	
@@ -153,14 +169,19 @@ aspect CCodeGen {
 		str.print(indent);
 		str.print(getFQName().funcNameUnderscore(suffixDefinition()));
 		str.print("(");
+		String sep = "";
 		for (FFunctionVariable v : myInputs()) {
+			str.print(sep);
 			str.print(v.name_C());
-			str.print(", ");
+			sep = ", ";
 		}
-		str.print("&");
-		str.print(myOutputs().get(0).name_C());
-		for (int i = myOutputs().size() - 1; i > 0; i--)
-			str.print(", NULL");
+		if (myOutputs().size() > 0) {
+			str.print(sep);
+			str.print("&");
+			str.print(myOutputs().get(0).name_C());
+			for (int i = myOutputs().size() - 1; i > 0; i--)
+				str.print(", NULL");
+		}
 		str.print(");\n");
 	}
 	
@@ -175,34 +196,20 @@ aspect CCodeGen {
 	public void FFunctionDecl.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		String next = indent + "   ";
 		// Print definition
-		// - head
 		prettyPrintHead_C(p, str, indent, o, "void", suffixDefinition(), true);
 		str.print(" {\n");
-		// - variables
 		prettyPrintWithIndent(myNonInputs(), p, str, next, o, ";");
-		// - statements (including return)
     	p.toString(getFAlgorithmBlockOpt(), str, next, o);
-    	// - close
     	str.print(indent);
     	str.print("}\n\n");
     	
     	// Print wrapper for expressions
-		// - head
     	String type = returnDefinition().getDeclaredType_C();
 		prettyPrintHead_C(p, str, indent, o, type, suffixExpression(), false);
 		str.print(" {\n");
-		// - recieving variable for return value
-		str.print(next);
-		p.toString(myOutputs().get(0), str, next, o);
-		str.print(";\n");
-		// - wrapped call
+		returnDefinition().printDeclarationForExp_C(p, str, next, o);
 		prettyPrintWrappedCall_C(str, next);
-		// - return
-		str.print(next);
-		str.print("return");
-		returnDefinition().printExpression_C(str);
-		str.print(";\n");
-    	// - close
+		returnDefinition().printReturnForExp_C(str, next);
     	str.print(indent);
     	str.print("}\n\n");
 	}
@@ -213,7 +220,6 @@ aspect CCodeGen {
 	syn String FFunctionVariable.type_C() = "jmi_ad_var_t";
 	
 	public void FFunctionVariable.printReturnArgument_C(PrintStream str) {
-		str.print(", ");
 		str.print(type_C());
 		str.print("* ");
 		str.print(nameReturn_C());
