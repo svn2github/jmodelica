@@ -186,9 +186,14 @@ equation
 end CCodeGenTest7;
 
 
-/* ========= Function tests ========= */
+/* ====================== Function tests =================== */
 
 /* Functions used in tests */
+function TestFunction0
+ output Real o1 = 0;
+algorithm
+end TestFunction0;
+
 function TestFunction1
  input Real i1 = 0;
  output Real o1 = i1;
@@ -213,6 +218,11 @@ function TestFunction3
  output Real o3 = i1 + i2;
 algorithm
 end TestFunction3;
+
+function TestFunctionNoOut
+ input Real i1;
+algorithm
+end TestFunctionNoOut;
 
 function TestFunctionCallingFunction
  input Real i1;
@@ -617,5 +627,68 @@ jmi_ad_var_t func_CCodeGenTests_TestFunctionRecursive_exp(jmi_ad_var_t i1_v) {
  Real x = TestFunctionRecursive(5);
 end CFunctionTest9;
 
+model CFunctionTest10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest10",
+         description="C code gen: functions: no inputs",
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+void func_CCodeGenTests_TestFunction0_def(jmi_ad_var_t* o1_r);
+jmi_ad_var_t func_CCodeGenTests_TestFunction0_exp();
+
+void func_CCodeGenTests_TestFunction0_def(jmi_ad_var_t* o1_r) {
+   jmi_ad_var_t o1_v = 0;
+   if (o1_r != NULL) *o1_r = o1_v;
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_TestFunction0_exp() {
+   jmi_ad_var_t o1_v = 0;
+   func_CCodeGenTests_TestFunction0_def(&o1_v);
+   return o1_v;
+}
+
+
+    (*res)[0] = func_CCodeGenTests_TestFunction0_exp() - (_x_);
+")})));
+
+ Real x = TestFunction0();
+end CFunctionTest10;
+
+model CFunctionTest11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest11",
+         description="C code gen: functions: no outputs",
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+void func_CCodeGenTests_TestFunctionNoOut_def(jmi_ad_var_t i1_v);
+void func_CCodeGenTests_TestFunctionNoOut_exp(jmi_ad_var_t i1_v);
+
+void func_CCodeGenTests_TestFunctionNoOut_def(jmi_ad_var_t i1_v) {
+   return;
+}
+
+void func_CCodeGenTests_TestFunctionNoOut_exp(jmi_ad_var_t i1_v) {
+   func_CCodeGenTests_TestFunctionNoOut_def(i1_v);
+   return;
+}
+
+
+    func_CCodeGenTests_TestFunctionNoOut_def(1);
+")})));
+
+equation
+ TestFunctionNoOut(1);
+end CFunctionTest11;
 
 end CCodeGenTests;
