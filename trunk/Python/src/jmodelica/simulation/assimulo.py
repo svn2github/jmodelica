@@ -35,13 +35,22 @@ class Simulator(object):
         self._model.t = t0
         
         if solver in self.sup_solvers:
-            if solver == self.sup_solvers[0]:
+            
+            if solver == self.sup_solvers[0]: #IDA
                 
                 y0 = N.append(self._model.x,self._model.w)
                 yd0 = N.append(self._model.dx,[0]*len(self._model.w))
                 
-                self.solver = IDA(self.f_DAE, y0, yd0, self._model.t)
+                self.solver = IDA(self.f_DAE, y0, yd0, self._model.t) #Creates a IDA solver
                 self.solver.algvar = [1.0]*len(self._model.x) + [0.0]*len(self._model.w) #Sets the algebraic components of the model
+                solf.DAE = True #It's an DAE solver
+        
+            if solver == self.sup_solvers[1]: #CVode
+                
+                y0 = self._model.x
+                
+                self.solver = CVode(self.f_ODE, y0, self._model.t) #Creates a CVode solver
+                self.DAE = False #It's an ODE solver
         else:
             raise Simulator_Exception('The solver is not supported. '\
             'The supported solvers are the following: %s' %sup_solvers)
@@ -65,18 +74,21 @@ class Simulator(object):
         """
         Writes simulation data to file.
         """
-        t = N.array(self.solver.t)
-        
-        y = N.array(self.solver.y)
-        yd = N.array(self.solver.yd)
-        u = N.ones((len(t),len(self._model.u)))*self._model.u
-        # extends the time array with the states columnwise
-        data = N.c_[t,yd[:,0:len(self._model.dx)]]
-        data = N.c_[data, y[:,0:len(self._model.x)]]
-        data = N.c_[data, u]
-        data = N.c_[data, y[:,len(self._model.x):len(self._model.x)+len(self._model.w)]]
-        
-        io.export_result_dymola(self._model,data)
+        if self.DAE:
+            t = N.array(self.solver.t)
+            y = N.array(self.solver.y)
+            yd = N.array(self.solver.yd)
+            u = N.ones((len(t),len(self._model.u)))*self._model.u
+            
+            # extends the time array with the states columnwise
+            data = N.c_[t,yd[:,0:len(self._model.dx)]]
+            data = N.c_[data, y[:,0:len(self._model.x)]]
+            data = N.c_[data, u]
+            data = N.c_[data, y[:,len(self._model.x):len(self._model.x)+len(self._model.w)]]
+            
+            io.export_result_dymola(self._model,data)
+        else:
+            raise Simulator_Exception('Currently not supported for ODEs.')
         
 
     def f_DAE(self, t, y, yd, sw=None):
@@ -94,8 +106,21 @@ class Simulator(object):
         self._model.jmimodel.dae_F(residual)
         
         return residual
+    
+    def f_ODE(self, t, y, sw=None):
+        """
+        The rhs (right-hand-side) for an ODE problem.
+        """
         
+        #Moving data to the model
+        self._model.t = t
+        self._model.x = y
+        
+        #Evaluating the rhs
+        self._model.eval_ode_f()
+        rhs = self._model.dx
 
+        return rhs
 
 
 class IDA_wrapper(object):
