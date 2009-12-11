@@ -544,9 +544,9 @@ class SundialsDAESimulator(DAESimulator):
                             dtype=pyjmi.c_jmi_real_t)
             
 
-        #ida.IDASetId(ida_mem,ida.NVector(N.append([1.0]*len(model.x),[0.0]*len(model.w))))
+        #ida.IDASetId(self.solver_memory,ida.NVector(N.append([1.0]*len(model.x),[0.0]*len(model.w))))
         #ida.IDASetSuppressAlg(ida_mem,suppress)
-        #ida.IDACalcIC(ida_mem,ida.IDA_YA_YDP_INIT,ida.realtype(t0.value+time_step))
+        #ida.IDACalcIC(self.solver_memory,ida.IDA_YA_YDP_INIT,ida.realtype(t.value+0.0001))
             
         while True:
             # run DAE solver
