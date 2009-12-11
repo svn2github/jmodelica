@@ -43,7 +43,7 @@ class Simulator(object):
                 
                 self.solver = IDA(self.f_DAE, y0, yd0, self._model.t) #Creates a IDA solver
                 self.solver.algvar = [1.0]*len(self._model.x) + [0.0]*len(self._model.w) #Sets the algebraic components of the model
-                solf.DAE = True #It's an DAE solver
+                self.DAE = True #It's an DAE solver
         
             if solver == self.sup_solvers[1]: #CVode
                 
@@ -53,7 +53,7 @@ class Simulator(object):
                 self.DAE = False #It's an ODE solver
         else:
             raise Simulator_Exception('The solver is not supported. '\
-            'The supported solvers are the following: %s' %sup_solvers)
+            'The supported solvers are the following: %s' %self.sup_solvers)
         
     def run(self, tfinal, ncp=0):
         """
@@ -111,7 +111,6 @@ class Simulator(object):
         """
         The rhs (right-hand-side) for an ODE problem.
         """
-        
         #Moving data to the model
         self._model.t = t
         self._model.x = y
