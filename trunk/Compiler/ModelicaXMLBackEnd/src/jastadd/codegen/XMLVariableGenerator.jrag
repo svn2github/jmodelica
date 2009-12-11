@@ -708,10 +708,10 @@ public class XMLVariableGenerator extends GenericGenerator {
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
 		public void generate(PrintStream genPrinter) {
-			genPrinter.println("<equ:Equations>");			
+			genPrinter.println("<equ:DynamicEquations>");			
 			for(FAbstractEquation e : fclass.equations())
 				e.prettyPrint_XML(genPrinter,"\t\t",e);								
-			genPrinter.println("\t</equ:Equations>");
+			genPrinter.println("\t</equ:DynamicEquations>");
 		}
 	}
 	
