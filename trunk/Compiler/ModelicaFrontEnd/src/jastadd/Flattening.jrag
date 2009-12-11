@@ -1332,15 +1332,11 @@ aspect InstantiatedExpressions {
 		    /* TODO: WHY is this needed??? If removed, lookup of qualified
 		     * names in InstFunctionCalls are not not rewritten to
 		     * InstComponentAccesses for some reason.
-		     * The difference introduced by calling getName().name() is
+		     * The difference introduced by calling getName().ensureRewritten() is
 		     * That the accesses are then accessed left to right in a 
 		     * qualified name, instead of right to left.
 		     */
-			/* Note that removing this will no longer introduce an error, 
-			 * since it is used below as well. It is left anyway, as a 
-			 * reminder of the above problem. 
-			 */
-		    getName().name();
+		    getName().ensureRewritten();
 		    
 		    // Make sure we only do this once.
 		    rewritten = true;

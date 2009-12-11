@@ -22,7 +22,7 @@ aspect InstLookupComponents {
 	inh lazy HashSet InstAccess.lookupInstComponent(String name);	
 	inh lazy HashSet InstNode.lookupInstComponent(String name);	
 	eq InstBaseClassDecl.getChild().lookupInstComponent(String name) = genericLookupInstComponent(name); 	
-	eq InstNode.getChild().lookupInstComponent(String name) = memberInstComponent(name); 
+	eq InstNode.getChild().lookupInstComponent(String name) = genericLookupInstComponent(name); 
 	
 	eq InstComponentDecl.getInstModification().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstReplacingComposite.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);
@@ -80,10 +80,14 @@ aspect InstLookupComponents {
 	}
 
 	
-	syn lazy HashSet InstBaseClassDecl.genericLookupInstComponent(String name) {
-		HashSet h = memberInstComponent(name);
-		// TODO: add scoped lookup to find constants.
-		return h;
+	syn lazy HashSet InstNode.genericLookupInstComponent(String name) {
+		HashSet set = new HashSet(4);
+		set.addAll(memberInstComponent(name));
+		for (InstImport ii : instImports()) 
+			set.addAll(ii.lookupInstConstantInImport(name));		
+		if (set.isEmpty())
+			set.addAll(lookupInstConstant(name));
+		return set.isEmpty() ? emptyHashSet() : set;
 	 }
 	
 	syn lazy HashSet InstNode.memberInstComponent(String name)  {
@@ -114,6 +118,44 @@ aspect InstLookupComponents {
 				return emptyHashSet();
 			}
 		}
+	}
+	
+	inh lazy HashSet InstNode.lookupInstConstant(String name);
+	eq Root.getChild().lookupInstConstant(String name) = emptyHashSet();
+	eq InstNode.getChild().lookupInstConstant(String name) {
+		HashSet set = new HashSet(4);
+		set.addAll(memberInstConstant(name));
+		if (set.isEmpty())
+			set.addAll(lookupInstConstant(name));
+		return set.isEmpty() ? emptyHashSet() : set;
+	}
+	
+	syn lazy HashSet InstNode.memberInstConstant(String name) {
+		HashSet set = new HashSet(4);
+		for (InstComponentDecl ic : constrainingInstComponentDecls()) {
+			if (ic.getComponentDecl().isConstant() && ic.matchInstComponentDecl(name))
+				set.add(ic);
+		}
+		return set.isEmpty() ? emptyHashSet() : set;
+	}
+
+	syn lazy HashSet InstImport.lookupInstConstantInImport(String name) {
+		// Assume import points to a single (constant) component
+	    if (name.equals(name())) {
+	    	String className = getPackageName().enclosingName();
+	    	if (!className.equals("")) {
+		    	InstClassDecl icd = ((SourceRoot)root()).getProgram().getInstProgramRoot().
+		           simpleLookupInstClassDecl(className);
+		    	return icd.memberInstConstant(getPackageName().getLastInstAccess().name());
+	    	}
+		}
+		return emptyHashSet();
+	}
+	
+	eq InstImportUnqualified.lookupInstConstantInImport(String name)  {
+        InstClassDecl myIcd = ((SourceRoot)root()).getProgram().getInstProgramRoot().
+           simpleLookupInstClassDecl(getPackageName().name());
+        return myIcd.memberInstConstant(name);
 	}
 
 	// This is needed since the member components of InstPrimitive:s (which are attributes)

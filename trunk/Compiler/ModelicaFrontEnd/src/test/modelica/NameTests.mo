@@ -533,6 +533,251 @@ parameter Real p = c;
 
 end NameTest16;
 
+
+
+/* Used for tests ConstantLookup1-3. */
+constant Real constant_1 = 1.0;
+
+/* Used for tests ConstantLookup10,13-15 */
+package TestPackage
+ parameter Real x;
+protected
+ constant Real prot = 1.0;
+end TestPackage;
+
+class ConstantLookup1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup1",
+         description="Constant lookup: simple lookup in enclosing class",
+         flatModel="
+fclass NameTests.ConstantLookup1
+ Real x = 1.0;
+end NameTests.ConstantLookup1;
+")})));
+
+ Real x = constant_1;
+end ConstantLookup1;
+
+
+class ConstantLookup2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup2",
+         description="Constant lookup: lookup in second enclosing class",
+         flatModel="
+fclass NameTests.ConstantLookup2
+ Real i.x = 1.0;
+end NameTests.ConstantLookup2;
+")})));
+
+ model Inner
+  Real x = constant_1;
+ end Inner;
+ 
+ Inner i;
+end ConstantLookup2;
+
+
+class ConstantLookup3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup3",
+         description="Constant lookup: enclosing class overriding constant in second enclosing class",
+         flatModel="
+fclass NameTests.ConstantLookup3
+ constant Real constant_1 = 2.0;
+ Real i.x = 2.0;
+end NameTests.ConstantLookup3;
+")})));
+
+ constant Real constant_1 = 2.0;
+ 
+ model Inner
+  Real x = constant_1;
+ end Inner;
+ 
+ Inner i;
+end ConstantLookup3;
+
+
+class ConstantLookup4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup4",
+         description="Constant lookup: directly from package",
+         flatModel="
+fclass NameTests.ConstantLookup4
+ parameter Real p = 3.141592653589793 /* 3.141592653589793 */;
+end NameTests.ConstantLookup4;
+")})));
+
+ parameter Real p = Modelica.Constants.pi;
+end ConstantLookup4;
+
+
+class ConstantLookup5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup5",
+         description="Constant lookup: import all from enclosing class",
+         flatModel="
+fclass NameTests.ConstantLookup5
+ parameter Real p = 3.141592653589793 /* 3.141592653589793 */;
+end NameTests.ConstantLookup5;
+")})));
+
+ import Modelica.Constants.*;
+ parameter Real p = pi;
+end ConstantLookup5;
+
+
+class ConstantLookup6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup6",
+         description="Constant lookup: import enclosing package with rename",
+         flatModel="
+fclass NameTests.ConstantLookup6
+ parameter Real p = 3.141592653589793 /* 3.141592653589793 */;
+end NameTests.ConstantLookup6;
+")})));
+
+ import C = Modelica.Constants;
+ parameter Real p = C.pi;
+end ConstantLookup6;
+
+
+class ConstantLookup7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup7",
+         description="Constant lookup: import all in top package, access via enclosing class",
+         flatModel="
+fclass NameTests.ConstantLookup7
+ parameter Real p = 3.141592653589793 /* 3.141592653589793 */;
+end NameTests.ConstantLookup7;
+")})));
+
+ import Modelica.*;
+ parameter Real p = Constants.pi;
+end ConstantLookup7;
+
+
+class ConstantLookup8 
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup8",
+         description="Constant lookup: named import of specific constant",
+         flatModel="
+fclass NameTests.ConstantLookup8
+ parameter Real p = 3.141592653589793 /* 3.141592653589793 */;
+end NameTests.ConstantLookup8;
+")})));
+
+ import pi2 = Modelica.Constants.pi;
+ parameter Real p = pi2;
+end ConstantLookup8;
+
+
+class ConstantLookup9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup9",
+         description="Constant lookup: import of specific constant",
+         flatModel="
+fclass NameTests.ConstantLookup9
+ parameter Real p = 3.141592653589793 /* 3.141592653589793 */;
+end NameTests.ConstantLookup9;
+")})));
+
+ import Modelica.Constants.pi;
+ parameter Real p = pi;
+end ConstantLookup9;
+
+
+// TODO: Maybe a better error message is needed for the errors in ConstantLookup10-12
+class ConstantLookup10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ConstantLookup10",
+         description="Constant lookup: trying to import non-constant component",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 700, column 17:
+  Could not evaluate binding expression for parameter 'p': 'x'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 700, column 21:
+  Cannot find class or component declaration for x
+")})));
+
+ import NameTests.TestPackage.x;
+ parameter Real p = x;
+end ConstantLookup10;
+
+
+class ConstantLookup11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ConstantLookup11",
+         description="Constant lookup: trying to import non-constant component (named import)",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 720, column 17:
+  Could not evaluate binding expression for parameter 'p': 'x2'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 720, column 21:
+  Cannot find class or component declaration for x2
+")})));
+
+ import x2 = NameTests.TestPackage.x;
+ parameter Real p = x2;
+end ConstantLookup11;
+
+
+class ConstantLookup12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ConstantLookup12",
+         description="Constant lookup: trying to import non-constant component (unqualified import)",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 740, column 17:
+  Could not evaluate binding expression for parameter 'p': 'x'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 740, column 21:
+  Cannot find class or component declaration for x
+")})));
+
+ import NameTests.TestPackage.*;
+ parameter Real p = x;
+end ConstantLookup12;
+
+
+/* TODO: Tests ConstantLookup13-15 should produce errors. Add annotations  
+ *       when there are error checks for accesses to protected elements. */
+class ConstantLookup13
+  import NameTests.TestPackage.*;
+  parameter Real p = prot;
+end ConstantLookup13;
+
+
+class ConstantLookup14
+  import NameTests.TestPackage.prot;
+  parameter Real p = prot;
+end ConstantLookup14;
+
+
+class ConstantLookup15
+  import prot2 = NameTests.TestPackage.prot;
+  parameter Real p = prot2;
+end ConstantLookup15;
+
+
+
 class ExtendsTest1
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FlatteningTestCase(name="ExtendsTest1",

@@ -21,6 +21,7 @@ aspect InstNameClassification {
     	static Kind CLASS_ACCESS = new Kind();
     	static Kind COMPONENT_ACCESS = new Kind();
     	static Kind AMBIGUOUS_ACCESS = new Kind();
+    	static Kind LAST_AMBIGUOUS_ACCESS = new Kind();
     }
 	
 	
@@ -57,12 +58,12 @@ aspect InstNameClassification {
 	eq FlatRoot.getChild().kind() = Kind.AMBIGUOUS_ACCESS;
 
 	eq InstDot.getLeft().kind() {
-	 	return getRight().predKind();
+	 	return (kind() == Kind.LAST_AMBIGUOUS_ACCESS) ? Kind.CLASS_ACCESS : getRight().predKind();
 	}
 
 	eq InstExtends.getClassName().kind() = Kind.CLASS_ACCESS;
 //	eq FunctionCall.getName().kind() = Kind.AMBIGUOUS_ACCESS;
-	eq InstImport.getPackageName().kind() = Kind.CLASS_ACCESS;
+	eq InstImport.getPackageName().kind() = Kind.LAST_AMBIGUOUS_ACCESS;
 //	eq InstShortClassDecl.getClassName().kind() = Kind.CLASS_ACCESS;
 	eq InstComponentDecl.getClassName().kind() = Kind.CLASS_ACCESS;	
 	eq InstComponentModification.getName().kind() = Kind.COMPONENT_ACCESS;

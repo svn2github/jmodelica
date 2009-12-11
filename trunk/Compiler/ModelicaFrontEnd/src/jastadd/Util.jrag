@@ -254,7 +254,7 @@ aspect Names {
   syn String InstClassAccess.name() = getID();
   syn String InstAmbiguousAccess.name() = getID();
   syn String InstComponentAccess.name() = getID();
-  syn String InstDot.name() = getLeft().name() + "." + getRight().name(); 
+  syn String InstDot.name() = getLeftNoTransform().name() + "." + getRightNoTransform().name(); 
   
   syn String InstNamedModification.name() = getName().name();
   
@@ -270,6 +270,14 @@ aspect Names {
   //eq LibNode.name() = getName();
   
   syn String ComponentDecl.name() = getName().getID();
+  
+  syn String FunctionCall.name() = getName().name();
+  
+  syn String InstImport.name();
+  eq InstImportQualified.name()   = getPackageName().getLastInstAccess().name();
+  eq InstImportRename.name()      = ((ImportClauseRename) getImportClause()).getIdDecl().getID();
+  eq InstImportUnqualified.name() = "*";    // To avoid returning null
+  
   
   syn String ClassDecl.qualifiedName();
   eq BaseClassDecl.qualifiedName() = classNamePrefix().equals("")? 
@@ -295,8 +303,6 @@ aspect Names {
   eq FlatRoot.getChild().instClassNamePrefix() = "";
   eq InstRoot.getChild().instClassNamePrefix() = "";
   
-  syn String FunctionCall.name() = getName().name();
-  
   syn String InstClassDecl.primitiveName();
   eq InstBaseClassDecl.primitiveName() = name();
   eq InstBuiltInClassDecl.primitiveName() = name();
@@ -307,6 +313,20 @@ aspect Names {
   	else 
   		return name();
   }
+  
+  
+  // Used to make sure that all rewrites are performed
+  public void InstAccess.ensureRewritten() {}
+  public void InstDot.ensureRewritten() {
+	  getLeft().ensureRewritten();
+	  getRight().ensureRewritten();
+  }
+  
+  
+  
+  syn String InstAccess.enclosingName() = "";
+  eq InstDot.enclosingName() = name().substring(0, name().lastIndexOf('.'));
+  
   
   inh InstClassDecl ASTNode.enclosingInstClassDecl();
   eq SourceRoot.getProgram().enclosingInstClassDecl() = null;
