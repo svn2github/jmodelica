@@ -138,10 +138,15 @@ aspect FlatTypeAnalysis {
 		
 	}
 	
-	eq FIdUseExp.type() = myFV().type();
-	eq FInstAccessExp.type() {
-		if (getInstAccess().myInstComponentDecl().isPrimitive()) {
-			InstPrimitive ip = ((InstPrimitive)getInstAccess().myInstComponentDecl());
+	eq FIdUseExp.type() = getFIdUse().type();
+	eq FInstAccessExp.type() = getInstAccess().type();
+	
+	syn lazy FPrimitiveType FIdUse.type() = myFV().type();
+	eq FIdUseInstAccess.type() = getInstAccess().type();
+
+	syn lazy FPrimitiveType InstAccess.type() {
+		if (myInstComponentDecl().isPrimitive()) {
+			InstPrimitive ip = (InstPrimitive) myInstComponentDecl();
 			if (ndims()==0) {
 				return ip.type().scalarType();
 			} else {
@@ -161,7 +166,7 @@ aspect FlatTypeAnalysis {
 		}
 	}
 	
-	// We can't simply assume that our outputs are of primitive types, so make them unknown for now
+	// TODO: Can't anything be inferred here?
 	syn lazy FPrimitiveType InstComponentDecl.type() = fUnknownType();
 	
 	eq InstFunctionCall.type() = (!myOutputs().isEmpty()) ? myOutputs().get(0).type() : fUnknownType();

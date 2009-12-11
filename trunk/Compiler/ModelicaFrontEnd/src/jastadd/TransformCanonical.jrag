@@ -81,7 +81,7 @@ aspect TransformCanonical {
 			ArrayList<FFunctionVariable> bothInVars = new ArrayList<FFunctionVariable>();
 			for (FIdUse use : a.usedFIdUses()) {
 				AbstractFVariable fv = use.myFV();
-				if (!fv.isUnknown() && !inVars.contains(fv) && !fv.isFForIndex()) {
+				if (!fv.isUnknown() && !inVars.contains(fv) && !fv.isForIndex()) {
 					inVars.add((FVariable) fv);
 					bothInVars.add(null);
 				}

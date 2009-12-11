@@ -115,11 +115,11 @@ aspect FlatTypeCheck {
   
   
   public void InstAssignStmt.typeCheck() {
-	  FPrimitiveType leftType = getLeft().getInstAccess().myInstComponentDecl().type();
-	  if (!leftType.isUnknown() && !getRight().type().isUnknown()) {
-		  if (!leftType.typeCompatible(getRight().type())) {
+	  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
+		  if (getLeft().isForIndex())
+			  error("Can not assign a value to a for loop index");
+		  else if (!getLeft().type().typeCompatible(getRight().type())) 
 			  error("Types of right and left side of assignment are not compatible");		  
-		  }
 	  }
   }
   
@@ -170,11 +170,12 @@ aspect FlatTypeCheck {
   }
   
   public void FFunctionCallLeft.typeCheck() {
-	  if (!type().isUnknown() && !myOutput().isUnknown()) { // Avoid duplicate error
-		  if (!type().typeCompatible(myOutput().type())) {
+	  if (hasFIdUse() && !type().isUnknown() && !myOutput().isUnknown()) { // Avoid duplicate error
+		  if (getFIdUse().isForIndex())
+			  error("Can not assign a value to a for loop index");
+		  else if (!type().typeCompatible(myOutput().type())) 
 			  error("Types of component " + getFIdUse().name() + " and output " + 
 					  myOutput().name() + " are not compatible");
-		  }
 	  }
   }
   

@@ -99,10 +99,15 @@ aspect FlatNameBinding {
 		return map;
 	}
 	
-	syn boolean AbstractFVariable.isFForIndex() = false;
-	inh boolean FVariable.isFForIndex();
-	eq FForIndex.getFVariable().isFForIndex() = true;
-	eq FClass.getChild().isFForIndex() = false;
+	syn boolean FIdUse.isForIndex()            = myFV().isForIndex();
+	syn boolean FIdUseInstAccess.isForIndex()  = getInstAccess().myInstComponentDecl().isForIndex();
+	syn boolean AbstractFVariable.isForIndex() = false;
+	inh boolean FVariable.isForIndex();
+	inh boolean InstComponentDecl.isForIndex();
+	eq FForIndex.getFVariable().isForIndex()        = true;
+	eq InstForIndex.getInstPrimitive().isForIndex() = true;
+	eq InstNode.getChild().isForIndex()             = false;
+	eq FClass.getChild().isForIndex()               = false;
 	
 }
 

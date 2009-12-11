@@ -1787,6 +1787,47 @@ algorithm
 end AlgorithmTypeAssign4;
 
 
+model AlgorithmTypeForIndex1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AlgorithmTypeForIndex1",
+         description="Type checks in algorithms: assigning to for index",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 1794, column 3:
+  Can not assign a value to a for loop index
+")})));
+
+ Real x;
+algorithm
+ for i in 1:3 loop
+  i := 2;
+  x := i;
+ end for;
+end AlgorithmTypeForIndex1;
+
+
+model AlgorithmTypeForIndex2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AlgorithmTypeForIndex2",
+         description="Type checks in algorithms: assigning to for index (FunctionCallStmt)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 1815, column 3:
+  Can not assign a value to a for loop index
+")})));
+
+ Real x;
+algorithm
+ for i in 1:3 loop
+  (i, x) := TestFunction2(1, 2);
+ end for;
+end AlgorithmTypeForIndex2;
+
+
 /* ====================== Algorithm transformations ===================== */
 
 model AlgorithmTransformation1
