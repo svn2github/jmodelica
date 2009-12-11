@@ -55,14 +55,25 @@ class Simulator(object):
             raise Simulator_Exception('The solver is not supported. '\
             'The supported solvers are the following: %s' %self.sup_solvers)
         
-    def run(self, tfinal, ncp=0):
+    def run(self, tfinal, tstart=0.0, ncp=0):
         """
         This is the method that runs the simulation.
         
             tfinal = Time to integrate to.
             ncp = Number of communication points.
         """
-        self.solver(tfinal,ncp) #Runs the simulation
+        if tstart != self._model.t: #If start time is specified, re initialize the solver
+            self._model.t = tstart
+            
+            if self.DAE:
+                y0 = N.append(self._model.x,self._model.w)
+                yd0 = N.append(self._model.dx,[0]*len(self._model.w))
+                
+                self.solver.re_init(self._model.t, y0, yd0) #re_init a DAE
+            else:
+                self.solver.re_init(self._model.t, self._model.x) #re_init a ODE
+            
+        return self.solver(tfinal,ncp) #Runs the simulation
         
     def plot(self):
         """
