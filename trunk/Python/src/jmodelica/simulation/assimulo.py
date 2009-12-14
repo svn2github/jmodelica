@@ -71,11 +71,20 @@ class Simulator(object):
             self.solver.re_init(self._model.t, self._model.x) #re_init a ODE
         
     
-    def re_init(self, t0, y0, yd0=None):
+    def re_init(self, t0, y0, yd0=None, u0=None):
         """
         Re initializes the solver.
         """
         self._model.t = t0
+        
+        if u0 != None:
+            if isinstance(u0, int) or isinstance(u0, float):
+                u0 = list([u0])
+            if len(u0) == len(self._model.u):
+                self._model.u = u0
+            else:
+                raise Simulator_Exception('u0 must be of the same lenght as the models input'\
+                                            ' vector.')
         
         if self.DAE:
             if len(y0) != len(self._model.x)+len(self._model.w):

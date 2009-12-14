@@ -106,3 +106,14 @@ class TestSimulator:
         nose.tools.assert_raises(Simulator_Exception, self.ODE.re_init, 10.0, [1., 1.])
         nose.tools.assert_raises(Simulator_Exception, self.DAE.re_init, 10.0, [1.,1.,1.,1.])
         nose.tools.assert_raises(Simulator_Exception, self.DAE.re_init, 10.0, [1.,1.,1.,1.], [1.,1.])
+
+        u = [10.1]
+        self.ODE.re_init(10.0, [1., 1., 1.], u0 = u)
+        self.DAE.re_init(10.0, [1., 1., 1., 1.], [1., 1., 1., 1.], u)
+        
+        assert self.ODE._model.u == u
+        assert self.DAE._model.u == u
+        
+        nose.tools.assert_raises(Simulator_Exception, self.ODE.re_init, 10.0, [1., 1., 1.], u0=[1, 1])
+        nose.tools.assert_raises(Simulator_Exception, self.DAE.re_init, 10.0, [1,1,1,1],[1,1,1,1],'Test')
+        nose.tools.assert_raises(Simulator_Exception, self.DAE.re_init, 10.0, [1,1,1,1],[1,1,1,1],[1.0,1.0])
