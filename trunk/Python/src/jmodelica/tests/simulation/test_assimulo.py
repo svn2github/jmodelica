@@ -95,7 +95,7 @@ class TestSimulator:
         ODE_pre_y = self.ODE._model.x.copy()
         DAE_pre_y = self.DAE._model.x.copy()
         DAE_pre_t = self.DAE._model.t.copy()
-        print ODE_pre_y
+
         self.ODE.re_init(10.0, [1., 1., 1.])
         self.DAE.re_init(10.0, [1., 1., 1., 1.], [1., 1., 1., 1.])
         
