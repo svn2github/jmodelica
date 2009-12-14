@@ -26,7 +26,187 @@ oc = OptimicaCompiler()
 oc.set_boolean_option('state_start_values_fixed',True)
 sep = os.path.sep
 
+class TestSimulator:
+    
+    @classmethod
+    def setUpClass(cls):
+        """Compile the test model. (This is only run once during the test)"""
 
+        modelf = "files" + sep + "VDP.mo"
+        fpath = os.path.join(path_to_examples, modelf)
+        cpath = "VDP_pack.VDP_Opt"
+        fname = cpath.replace('.','_',1)
+
+        oc.compile_model(fpath, cpath)
+        
+    
+    def setUp(self):
+        """Load the test model."""
+        package = "VDP_pack_VDP_Opt"
+
+        # Load the dynamic library and XML data
+        self.m = jmi.Model(package)
+        self.simulator = SundialsODESimulator(self.m,start_time=0.0, final_time=20.0)
+        
+    @testattr(stddist = True)    
+    def test_set_get_model(self):
+        """Test the model setter/getter."""
+        simulator = self.simulator
+        assert simulator.get_model() == self.m        
+        
+        package = "VDP_pack_VDP_Opt"
+
+        # Load the dynamic library and XML data
+        another_model = jmi.Model(package)
+        
+        simulator.set_model(another_model)
+        assert simulator.get_model() == another_model
+        
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
+                                 simulator.set_model, None)
+                                 
+
+        # Load the dynamic library and XML data
+        another_model = jmi.Model(package)
+        
+        simulator.model = another_model # testing property
+        assert another_model == simulator.get_model()
+        
+    @testattr(stddist = True)                             
+    def test_absolute_tolerance(self):
+        """Basic testing of setting absolute tolerance.
+        
+        The abstol can be set through a property or a setter.
+        The abstol can be gotten through a property or a getter.
+        """
+        simulator = self.simulator
+        
+        default_tolerance = simulator.get_absolute_tolerance()
+        MY_TOLERANCE = 4e-5
+        nose.tools.assert_not_equal(default_tolerance, MY_TOLERANCE,
+                                    "This test is useless.")
+        simulator.set_absolute_tolerance(MY_TOLERANCE)
+        nose.tools.assert_almost_equal(MY_TOLERANCE,
+                                       simulator.get_absolute_tolerance())
+        
+        # Testing the property abstol
+        MY_TOLERANCE2 = 3e-5
+        simulator.abstol = MY_TOLERANCE2
+        nose.tools.assert_equal(MY_TOLERANCE2,
+                                simulator.get_absolute_tolerance())
+        
+        # Testing error checking
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
+                                 simulator.set_absolute_tolerance, -1e-4)
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
+                                 simulator.set_absolute_tolerance, 0)
+    
+    @testattr(stddist = True)                             
+    def test_relative_tolerance(self):
+        """Basic testing of setting relative tolerance.
+        
+        The reltol can be set through a property or a setter.
+        The reltol can be gotten through a property or a getter.
+        """
+        simulator = self.simulator
+        
+        default_tolerance = simulator.get_relative_tolerance()
+        MY_TOLERANCE = 4e-5
+        nose.tools.assert_not_equal(default_tolerance, MY_TOLERANCE,
+                                    "This test is useless.")
+        simulator.set_relative_tolerance(MY_TOLERANCE)
+        nose.tools.assert_equal(MY_TOLERANCE,
+                                simulator.get_relative_tolerance())
+        
+        # Testing the property reltol
+        MY_TOLERANCE2 = 3e-5
+        simulator.reltol = MY_TOLERANCE2
+        nose.tools.assert_almost_equal(MY_TOLERANCE2,
+                                       simulator.get_relative_tolerance())
+        
+        # Testing error checking
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
+                                 simulator.set_relative_tolerance, -1e-4)
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
+                                 simulator.set_relative_tolerance, 0)
+                                 
+    @testattr(stddist = True)    
+    def test_set_get_verbosity(self):
+        """Test the verbosity setter/getter.
+        
+        Setting verbosity is highly useful for debugging, but can at the same
+        time be very annoying if too much output is cluttering the console.
+        
+        This test test not only tests getters and setters but als documents the
+        available verbosities.
+        
+        """
+        simulator = self.simulator
+        simulator.set_verbosity(SundialsODESimulator.QUIET)
+        assert SundialsODESimulator.QUIET == 0, "QUIET constant should be zero"
+        simulator.set_verbosity(SundialsODESimulator.WHISPER)
+        assert simulator.get_verbosity() == SundialsODESimulator.WHISPER
+        simulator. verbosity = SundialsODESimulator.NORMAL # testing property
+        assert simulator.get_verbosity() == SundialsODESimulator.NORMAL
+        simulator.set_verbosity(SundialsODESimulator.LOUD)
+        assert simulator.verbosity == SundialsODESimulator.LOUD # property test
+        simulator.set_verbosity(SundialsODESimulator.SCREAM)
+        assert simulator.get_verbosity() == SundialsODESimulator.SCREAM
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
+                                 simulator.set_verbosity, 65487)
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
+                                 simulator.set_verbosity, -5465)
+
+    @testattr(stddist = True)                             
+    def test_time_steps(self):
+        simulator = self.simulator
+        
+        default_time_step = simulator.get_time_step()
+        assert default_time_step == simulator.time_step # Test property
+        
+        MY_TIME_STEP = 2 * default_time_step
+        simulator.set_time_step(MY_TIME_STEP)
+        assert MY_TIME_STEP == simulator.time_step # Test property
+        assert MY_TIME_STEP == simulator.get_time_step()
+        
+        simulator.run()
+        T, Y = simulator.get_solution()
+        assert len(T) > 7, "The asserts below might not hold."
+        nose.tools.assert_almost_equal(T[1]-T[0], MY_TIME_STEP)
+        nose.tools.assert_almost_equal(T[2]-T[1], MY_TIME_STEP)
+        nose.tools.assert_almost_equal(T[5]-T[4], MY_TIME_STEP)
+        
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
+                                 simulator.set_time_step, 0)
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
+                                 simulator.set_time_step, -3)
+    
+    @testattr(stddist = True)    
+    def test_simulation_intervals(self):
+        simulator = self.simulator
+        
+        # First test setters and getters
+        default_start = simulator.get_start_time()
+        default_final = simulator.get_final_time()
+        assert default_start < default_final
+        
+        my_start = 2
+        my_final = 7
+        
+        simulator.set_simulation_interval(my_start, my_final)
+        assert default_start != simulator.get_start_time(), "A setter failed."
+        assert default_final != simulator.get_final_time(), "A setter failed."
+        
+        # Testincorrect interval
+        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
+                                 simulator.set_simulation_interval, 2, 1)
+                                 
+        # Finally make a test simulation and verify times
+        simulator.run()
+        T, Y = simulator.get_solution()
+        nose.tools.assert_almost_equal(T[0], my_start)
+        nose.tools.assert_almost_equal(T[-1], my_final)
+        
 class TestSundialsDAESimulator:
     
     @classmethod
@@ -333,164 +513,17 @@ class TestSundialsODESimulator:
         assert simulator.get_sensitivity_indices() == None
         assert simulator.sensitivity_indices == None # test property (get)
     
-    @testattr(stddist = True)    
-    def test_set_get_verbosity(self):
-        """Test the verbosity setter/getter.
-        
-        Setting verbosity is highly useful for debugging, but can at the same
-        time be very annoying if too much output is cluttering the console.
-        
-        This test test not only tests getters and setters but als documents the
-        available verbosities.
-        
-        """
-        simulator = self.simulator
-        simulator.set_verbosity(SundialsODESimulator.QUIET)
-        assert SundialsODESimulator.QUIET == 0, "QUIET constant should be zero"
-        simulator.set_verbosity(SundialsODESimulator.WHISPER)
-        assert simulator.get_verbosity() == SundialsODESimulator.WHISPER
-        simulator. verbosity = SundialsODESimulator.NORMAL # testing property
-        assert simulator.get_verbosity() == SundialsODESimulator.NORMAL
-        simulator.set_verbosity(SundialsODESimulator.LOUD)
-        assert simulator.verbosity == SundialsODESimulator.LOUD # property test
-        simulator.set_verbosity(SundialsODESimulator.SCREAM)
-        assert simulator.get_verbosity() == SundialsODESimulator.SCREAM
-        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
-                                 simulator.set_verbosity, 65487)
-        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
-                                 simulator.set_verbosity, -5465)
     
-    @testattr(stddist = True)    
-    def test_set_get_model(self):
-        """Test the model setter/getter."""
-        simulator = self.simulator
-        assert simulator.get_model() == self.m        
-        
-        package = "VDP_pack_VDP_Opt"
-
-        # Load the dynamic library and XML data
-        another_model = jmi.Model(package)
-        
-        simulator.set_model(another_model)
-        assert simulator.get_model() == another_model
-        
-        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
-                                 simulator.set_model, None)
-                                 
-
-        # Load the dynamic library and XML data
-        another_model = jmi.Model(package)
-        
-        simulator.model = another_model # testing property
-        assert another_model == simulator.get_model()
     
-    @testattr(stddist = True)    
-    def test_simulation_intervals(self):
-        simulator = self.simulator
-        
-        # First test setters and getters
-        default_start = simulator.get_start_time()
-        default_final = simulator.get_final_time()
-        assert default_start < default_final
-        
-        my_start = 2
-        my_final = 7
-        
-        simulator.set_simulation_interval(my_start, my_final)
-        assert default_start != simulator.get_start_time(), "A setter failed."
-        assert default_final != simulator.get_final_time(), "A setter failed."
-        
-        # Testincorrect interval
-        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
-                                 simulator.set_simulation_interval, 2, 1)
-                                 
-        # Finally make a test simulation and verify times
-        simulator.run()
-        T, Y = simulator.get_solution()
-        nose.tools.assert_almost_equal(T[0], my_start)
-        nose.tools.assert_almost_equal(T[-1], my_final)
     
-    @testattr(stddist = True)                             
-    def test_absolute_tolerance(self):
-        """Basic testing of setting absolute tolerance.
-        
-        The abstol can be set through a property or a setter.
-        The abstol can be gotten through a property or a getter.
-        """
-        simulator = self.simulator
-        
-        default_tolerance = simulator.get_absolute_tolerance()
-        MY_TOLERANCE = 4e-5
-        nose.tools.assert_not_equal(default_tolerance, MY_TOLERANCE,
-                                    "This test is useless.")
-        simulator.set_absolute_tolerance(MY_TOLERANCE)
-        nose.tools.assert_almost_equal(MY_TOLERANCE,
-                                       simulator.get_absolute_tolerance())
-        
-        # Testing the property abstol
-        MY_TOLERANCE2 = 3e-5
-        simulator.abstol = MY_TOLERANCE2
-        nose.tools.assert_equal(MY_TOLERANCE2,
-                                simulator.get_absolute_tolerance())
-        
-        # Testing error checking
-        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
-                                 simulator.set_absolute_tolerance, -1e-4)
-        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
-                                 simulator.set_absolute_tolerance, 0)
     
-    @testattr(stddist = True)                             
-    def test_relative_tolerance(self):
-        """Basic testing of setting relative tolerance.
-        
-        The reltol can be set through a property or a setter.
-        The reltol can be gotten through a property or a getter.
-        """
-        simulator = self.simulator
-        
-        default_tolerance = simulator.get_relative_tolerance()
-        MY_TOLERANCE = 4e-5
-        nose.tools.assert_not_equal(default_tolerance, MY_TOLERANCE,
-                                    "This test is useless.")
-        simulator.set_relative_tolerance(MY_TOLERANCE)
-        nose.tools.assert_equal(MY_TOLERANCE,
-                                simulator.get_relative_tolerance())
-        
-        # Testing the property reltol
-        MY_TOLERANCE2 = 3e-5
-        simulator.reltol = MY_TOLERANCE2
-        nose.tools.assert_almost_equal(MY_TOLERANCE2,
-                                       simulator.get_relative_tolerance())
-        
-        # Testing error checking
-        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
-                                 simulator.set_relative_tolerance, -1e-4)
-        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
-                                 simulator.set_relative_tolerance, 0)
     
-    @testattr(stddist = True)                             
-    def test_time_steps(self):
-        simulator = self.simulator
-        
-        default_time_step = simulator.get_time_step()
-        assert default_time_step == simulator.time_step # Test property
-        
-        MY_TIME_STEP = 2 * default_time_step
-        simulator.set_time_step(MY_TIME_STEP)
-        assert MY_TIME_STEP == simulator.time_step # Test property
-        assert MY_TIME_STEP == simulator.get_time_step()
-        
-        simulator.run()
-        T, Y = simulator.get_solution()
-        assert len(T) > 7, "The asserts below might not hold."
-        nose.tools.assert_almost_equal(T[1]-T[0], MY_TIME_STEP)
-        nose.tools.assert_almost_equal(T[2]-T[1], MY_TIME_STEP)
-        nose.tools.assert_almost_equal(T[5]-T[4], MY_TIME_STEP)
-        
-        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
-                                 simulator.set_time_step, 0)
-        nose.tools.assert_raises(jmodelica.simulation.SimulationException,
-                                 simulator.set_time_step, -3)
+    
+    
+    
+    
+    
+    
     
     @testattr(stddist = True)    
     def test_simulation_with_sensivity(self, SMALL=0.3):
