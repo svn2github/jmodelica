@@ -32,7 +32,7 @@ class Simulator(object):
         Initiates the solver.
         """
         self._model = model
-        self._model.t = t0
+        self._model.t = self._t0 = t0
         
         if solver in self.sup_solvers:
             
@@ -54,25 +54,58 @@ class Simulator(object):
         else:
             raise Simulator_Exception('The solver is not supported. '\
             'The supported solvers are the following: %s' %self.sup_solvers)
+    
+    def reset(self):
+        """
+        Resets the model to it's default values.
+        """
+        self._model.reset()
+        self._model.t = self._t0 #Set time to the default value
         
-    def run(self, tfinal, tstart=0.0, ncp=0):
+        if self.DAE:
+            y0 = N.append(self._model.x,self._model.w)
+            yd0 = N.append(self._model.dx,[0]*len(self._model.w))
+                
+            self.solver.re_init(self._model.t, y0, yd0) #re_init a DAE
+        else:
+            self.solver.re_init(self._model.t, self._model.x) #re_init a ODE
+        
+    
+    def re_init(self, t0, y0, yd0=None):
+        """
+        Re initializes the solver.
+        """
+        self._model.t = t0
+        
+        if self.DAE:
+            if len(y0) != len(self._model.x)+len(self._model.w):
+                raise Simulator_Exception('y0 must be of the same length as the differential'\
+                                            ' plus the algebraic variables.')
+            if yd0==None:
+                raise Simulator_Exception('yd0 must not be None for a DAE.')
+            if len(yd0) != len(self._model.dx):
+                raise Simulator_Exception('y0d must be of the same length as the derivative'\
+                                            ' variables.')
+            self._model.x = y0[0:len(self._model.x)]
+            self._model.w = y0[len(self._model.x):len(self._model.x)+len(self._model.w)]
+            self._model.dx = yd0
+            yd0 = N.append(self._model.dx,[0.]*len(self._model.w))
+            
+            self.solver.re_init(self._model.t, y0, yd0) #re_init a DAE
+        else:
+            if len(y0) != len(self._model.x):
+                raise Simulator_Exception('y0 must be of the same length as the differential'\
+                                            ' variables.')
+            self._model.x = y0
+            self.solver.re_init(self._model.t, self._model.x) #re_init a ODE
+    
+    def run(self, tfinal, ncp=0):
         """
         This is the method that runs the simulation.
         
             tfinal = Time to integrate to.
             ncp = Number of communication points.
         """
-        if tstart != self._model.t: #If start time is specified, re initialize the solver
-            self._model.t = tstart
-            
-            if self.DAE:
-                y0 = N.append(self._model.x,self._model.w)
-                yd0 = N.append(self._model.dx,[0]*len(self._model.w))
-                
-                self.solver.re_init(self._model.t, y0, yd0) #re_init a DAE
-            else:
-                self.solver.re_init(self._model.t, self._model.x) #re_init a ODE
-            
         return self.solver(tfinal,ncp) #Runs the simulation
         
     def plot(self):
