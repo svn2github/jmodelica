@@ -1,13 +1,14 @@
+package org.jmodelica.util;
+
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.StringReader;
 import java.lang.reflect.Constructor;
-import org.jmodelica.util.OptionRegistry;
-
-aspect TestAnnotationizer {
+import org.jmodelica.modelica.compiler.*;
 
 abstract public class TestAnnotationizer {
 
@@ -202,7 +203,7 @@ abstract public class TestAnnotationizer {
 			template = data.replaceAll("\\\\n", "\n");
 			FClass fc = compile();
 			CGenerator cgenerator = new CGenerator(new PrettyPrinter(), '$', fc);
-			StringOutputStream os = new StringOutputStream();
+			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			cgenerator.generate(new StringReader(template), new PrintStream(os));
 			code = os.toString();
 		}
@@ -271,7 +272,5 @@ abstract public class TestAnnotationizer {
 		}
 
 	}
-
-}
 
 }
