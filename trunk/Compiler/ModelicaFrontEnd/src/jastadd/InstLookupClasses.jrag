@@ -490,15 +490,17 @@ aspect InstLookupClasses {
 }
 
 aspect InstLookupImport {
-
-	syn HashSet InstImport.lookupInstClassInImport(String name) circular [emptyHashSet()];
 	
-	eq InstImportQualified.lookupInstClassInImport(String name)   {
+	syn lazy InstClassDecl InstImport.getImportedClass() {
+		// Use simple lookup: only classes which are not inherited can be
+		// imported. 
+    	return ((SourceRoot)root()).getProgram().getInstProgramRoot().
+    		simpleLookupInstClassDecl(getPackageNameNoTransform().name());
+	}
+
+	syn HashSet InstImport.lookupInstClassInImport(String name) circular [emptyHashSet()] {
 	    if (name.equals(name())) {	
-			// Use simple lookup: only classes which are not inherited can be
-			// imported. 
-	    	InstClassDecl icd = ((SourceRoot)root()).getProgram().getInstProgramRoot().
-	           simpleLookupInstClassDecl(getPackageName().name());
+	    	InstClassDecl icd = getImportedClass();
 	    	if (!icd.isUnknown()) {
 	    		HashSet set = new HashSet(4);
 	    		set.add(icd);
@@ -509,29 +511,7 @@ aspect InstLookupImport {
 	}
 	
 	eq InstImportUnqualified.lookupInstClassInImport(String name)  {
-		// Use simple lookup: only classes which are not inherited can be
-		// imported. 
-        InstClassDecl myIcd = ((SourceRoot)root()).getProgram().getInstProgramRoot().
-           simpleLookupInstClassDecl(getPackageName().name());
-		
-        return myIcd.memberInstClass(name);
-	}
-	
-	eq InstImportRename.lookupInstClassInImport(String name)  {
-	    
-		// Does the alias name match?
-		if (name.equals(name())) {
-			// Use simple lookup: only classes which are not inherited can be
-			// imported. 
-			InstClassDecl icd = ((SourceRoot)root()).getProgram().getInstProgramRoot().
-	           simpleLookupInstClassDecl(getPackageName().name());
-			if (!icd.isUnknown()) {
-	    		HashSet set = new HashSet(4);
-	    		set.add(icd);
-	    		return set;
-	    	} 
-		} 
-		return emptyHashSet();
+        return getImportedClass().memberInstClass(name);
 	}
 	
 }

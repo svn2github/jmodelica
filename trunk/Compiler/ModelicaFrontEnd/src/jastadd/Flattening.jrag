@@ -1329,15 +1329,6 @@ aspect InstantiatedExpressions {
 	boolean InstFunctionCall.rewritten = false;
 	rewrite InstFunctionCall {
     	when (!rewritten) to FAbstractFunctionCall {
-		    /* TODO: WHY is this needed??? If removed, lookup of qualified
-		     * names in InstFunctionCalls are not not rewritten to
-		     * InstComponentAccesses for some reason.
-		     * The difference introduced by calling getName().ensureRewritten() is
-		     * That the accesses are then accessed left to right in a 
-		     * qualified name, instead of right to left.
-		     */
-		    getName().ensureRewritten();
-		    
 		    // Make sure we only do this once.
 		    rewritten = true;
 		    

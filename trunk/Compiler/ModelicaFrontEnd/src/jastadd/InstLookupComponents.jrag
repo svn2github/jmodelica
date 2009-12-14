@@ -139,7 +139,7 @@ aspect InstLookupComponents {
 		return set.isEmpty() ? emptyHashSet() : set;
 	}
 
-	syn lazy HashSet InstImport.lookupInstConstantInImport(String name) {
+	syn HashSet InstImport.lookupInstConstantInImport(String name) {
 		// Assume import points to a single (constant) component
 	    if (name.equals(name())) {
 	    	String className = getPackageName().enclosingName();
@@ -153,9 +153,7 @@ aspect InstLookupComponents {
 	}
 	
 	eq InstImportUnqualified.lookupInstConstantInImport(String name)  {
-        InstClassDecl myIcd = ((SourceRoot)root()).getProgram().getInstProgramRoot().
-           simpleLookupInstClassDecl(getPackageName().name());
-        return myIcd.memberInstConstant(name);
+        return getImportedClass().memberInstConstant(name);
 	}
 
 	// This is needed since the member components of InstPrimitive:s (which are attributes)
@@ -178,7 +176,6 @@ aspect InstLookupComponents {
 	}
 	
 	eq InstDot.myInstComponentDecl() {
-		getLeft(); // FIXME: WHY??? Errors result if removed.
 		return getRight().myInstComponentDecl();
 	}
 	

@@ -48,10 +48,10 @@ function junit_test() {
       ;;
     q)
       ant_test 2>&1 \
-        | egrep "(\[ja.*\]|BUILD FAILED|\[java\] Error when parsing file:)" \
+        | egrep "(\[(jastadd|junit)\]|BUILD FAILED|\[java\] Error when parsing file:)" \
 	| sed -n \
 	    -e '1 i0 0' \
-            -e 's/^.*\[jastadd\] [A-Za-z.]*:[1-9][0-9]* .*$/BUILD FAILED/' \
+            -e 's/^.*\[jastadd\] \([A-Za-z.]*:[1-9][0-9]*\|Syntax error\) .*$/BUILD FAILED/' \
 	    -e 's/^.*\[java\] Error when parsing file:.*$/BUILD FAILED/' \
 	    -e 's/^.*Failures: \([0-9]*\), Errors: \([0-9]*\),.*$/r\1+r\2+/p' \
 	    -e 's/^.*\(BUILD FAILED\).*$/[\1]pq/p' \
@@ -61,7 +61,7 @@ function junit_test() {
 	    -e 's/\(failures=.*, errors=.*\)/TEST FAILED (\1)/'
       ;;
     n)
-      ant_test | egrep "(\[junit\]|\[(java|jastadd)\].*[Ee]rror)"
+      ant_test | egrep "(\[junit\]|\[(java|jastadd)\].*([Ee]rror|[A-Za-z.]*:[1-9][0-9]*))"
       ;;
   esac
 }
@@ -151,7 +151,7 @@ export JAVA_HOME JMODELICA_HOME IPOPT_HOME CPPAD_HOME PYTHONPATH LD_LIBRARY_PATH
 TIME=$(date +%s)
 
 for a in ${DEFAULT_ARGS} $*; do
-  for b in $(echo ${a}|sed 's/\(.\)/\1 /g'); do
+  for b in $(echo "" ${a}|sed 's/\(.\)/\1 /g'); do
     case ${b} in
       -)
         ;;

@@ -17,37 +17,66 @@
 
 aspect InstNameClassification {
 
-    class Kind {
-    	static Kind CLASS_ACCESS = new Kind();
-    	static Kind COMPONENT_ACCESS = new Kind();
-    	static Kind AMBIGUOUS_ACCESS = new Kind();
-    	static Kind LAST_AMBIGUOUS_ACCESS = new Kind();
+	/**
+	 * \brief Helper class for definition of kinds.
+	 */
+    abstract public class Kind {
+    	static Kind CLASS_ACCESS          = new ClassAccess();
+    	static Kind COMPONENT_ACCESS      = new ComponentAccess();
+    	static Kind AMBIGUOUS_ACCESS      = new AmbigousAccess();
+    	static Kind LAST_AMBIGUOUS_ACCESS = new LastAmbigousAccess();
+    	
+    	public boolean isClassAccess()     { return false; }
+    	public boolean isComponentAccess() { return false; }
+    	public boolean isAmbigousAccess()  { return false; }
+    	
+    	public abstract Kind predKind();
+    	
+    	static protected class ClassAccess extends Kind {
+    		public Kind     predKind()      { return CLASS_ACCESS; }
+    		public boolean isClassAccess() { return true; }
+    	}
+    	
+    	static protected class ComponentAccess extends Kind {
+    		public Kind     predKind()          { return AMBIGUOUS_ACCESS; }
+    		public boolean isComponentAccess() { return true; }
+    	}
+    	
+    	static protected class AmbigousAccess extends Kind {
+    		public Kind     predKind()         { return AMBIGUOUS_ACCESS; }
+    		public boolean isAmbigousAccess() { return true; }
+    	}
+    	
+    	static protected class LastAmbigousAccess extends AmbigousAccess {
+    		public Kind predKind() { return CLASS_ACCESS; }
+    	}
     }
 	
 	
 	rewrite InstParseAccess {
-	   to InstAccess {
-  		if (kind()==Kind.COMPONENT_ACCESS) {
-	    	//System.out.println("rewrite InstParseAccess " + name() + " component");
-  			    InstComponentAccess a = new InstComponentAccess(getID(),getFArraySubscriptsOpt());
-     			a.setStart(getStart());
-     			a.setEnd(getEnd());
-     			return a;
-  		} else if (kind()==Kind.CLASS_ACCESS) {
-	    	//System.out.println("rewrite InstParseAccess " + name() + " class");
-	 			InstClassAccess a =  new InstClassAccess(getID());
-     			a.setStart(getStart());
-     			a.setEnd(getEnd());
-     			return a;
-  		} else {
-	    	//System.out.println("rewrite InstParseAccess " + name() + " ambiguous");
-  				InstAmbiguousAccess a = new InstAmbiguousAccess(getID(),getFArraySubscriptsOpt());
-    			a.setStart(getStart());
-    			a.setEnd(getEnd());
-     			return a;
-  		}
+		to InstAccess {
+			if (kind().isComponentAccess()) {
+				//System.out.println("rewrite InstParseAccess " + name() + " component");
+				    InstComponentAccess a = new InstComponentAccess(getID(),getFArraySubscriptsOpt());
+					a.setStart(getStart());
+					a.setEnd(getEnd());
+					return a;
+			} else if (kind().isClassAccess()) {
+				//System.out.println("rewrite InstParseAccess " + name() + " class");
+					InstClassAccess a =  new InstClassAccess(getID());
+					a.setStart(getStart());
+					a.setEnd(getEnd());
+					return a;
+			} else {
+				//System.out.println("rewrite InstParseAccess " + name() + " ambiguous");
+					InstAmbiguousAccess a = new InstAmbiguousAccess(getID(),getFArraySubscriptsOpt());
+					a.setStart(getStart());
+					a.setEnd(getEnd());
+					return a;
+			}
   		}
 	}
+
 	
 	// TODO: Check this section so that all inh calls are caught at the right level
 	/**
@@ -58,7 +87,7 @@ aspect InstNameClassification {
 	eq FlatRoot.getChild().kind() = Kind.AMBIGUOUS_ACCESS;
 
 	eq InstDot.getLeft().kind() {
-	 	return (kind() == Kind.LAST_AMBIGUOUS_ACCESS) ? Kind.CLASS_ACCESS : getRight().predKind();
+	 	return getRightNoTransform().predKind();
 	}
 
 	eq InstExtends.getClassName().kind() = Kind.CLASS_ACCESS;
@@ -82,27 +111,16 @@ aspect InstNameClassification {
 	//eq InstFunctionCall.getName().kind() = Kind.CLASS_ACCESS;
 
 	/**
-	 * The attribute predKind defines the kind for qualified
-	 * names.
+	 * The attribute predKind defines the kind for the previous part of a 
+	 * qualified name.
 	 */
-	syn Kind InstAccess.predKind() = Kind.AMBIGUOUS_ACCESS;
+	syn Kind InstAccess.predKind() {
+		return kind().predKind();
+	}
 	eq InstDot.predKind() {
-		return getLeft().predKind();
+		return getLeftNoTransform().predKind();
 	}
-	eq InstClassAccess.predKind() = Kind.CLASS_ACCESS;
-	eq InstComponentAccess.predKind() = Kind.AMBIGUOUS_ACCESS;
-	eq InstAmbiguousAccess.predKind() = Kind.AMBIGUOUS_ACCESS;
 
-
-	/**
-	 * Helper class for definition of kinds.
-	 */
-/*	static class Kind {
-   		static Kind CLASS_ACCESS = new Kind();
-   		static Kind COMPONENT_ACCESS = new Kind();
-   		static Kind AMBIGUOUS_ACCESS = new Kind();
-	}
-*/
 }
 aspect InstResolveAmbiguousNames {
 	/**
@@ -111,7 +129,7 @@ aspect InstResolveAmbiguousNames {
 	 */
 	boolean InstAmbiguousAccess.rewritten = false;
 	rewrite InstAmbiguousAccess {
-	    when(!duringInstNameClassification()&&!rewritten) 
+	    when(!rewritten) 
 	    to InstAccess {
 	    	//System.out.println("rewrite InstAmbiguousAccess begin " + name());
 	  		if (!lookupInstComponent(name()).isEmpty()) {
