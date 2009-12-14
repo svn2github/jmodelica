@@ -1,0 +1,216 @@
+#!/bin/bash
+# Script for running JModelica.org test suites.
+# Copy this file to somewhere in your PATH.
+# Change variables below (in the copy) to match your system.
+# Type "tests -h" for usage.
+# Requres Unix-like system with bash, grep and sed.
+
+# ====== Variables to set ======
+
+# You must change these
+JMODELICA_HOME=/path/to/jmodelica/install/dir
+JMODELICA_SRC=/path/to/jmodelica/source/root
+IPOPT_HOME=/path/to/ipopt/install/dir
+
+# You may need to change these
+JAVA_HOME=/opt/java/jdk1.6.0_04/
+PYTHON_HOME=/opt/python/python2.6/
+BUILD=${JMODELICA_SRC}/build
+
+# You most likely don't need to change these
+CPPAD_HOME=${JMODELICA_SRC}/ThirdParty/CppAD/cppad-20090303.0/
+PYTHONPATH=${PYTHON_HOME}:${JMODELICA_HOME}/Python/ 
+LD_LIBRARY_PATH=/lib:${IPOPT_HOME}/lib 
+
+# Default tests - run if no tests are chosen
+# Possible values: modelica, optimica, python or combination (e.g. "modelica optimica")
+DEFAULT_TESTS="optimica python"
+
+# Default arguments - always parse these arguments before command line
+DEFAULT_ARGS=""
+
+# ====== End variables to set ======
+
+function print_name() {
+  if [[ "${OUTPUT}" == q ]]; then
+    echo -n "$1... "
+  else
+    echo ======= $1 =======
+  fi
+}
+  
+function junit_test() {
+  print_name $1
+  cd ${JMODELICA_SRC}/Compiler/$1Compiler
+  case ${OUTPUT} in
+    v)
+      ant_test
+      ;;
+    q)
+      ant_test 2>&1 \
+        | egrep "(\[ja.*\]|BUILD FAILED|\[java\] Error when parsing file:)" \
+	| sed -n \
+	    -e '1 i0 0' \
+            -e 's/^.*\[jastadd\] [A-Za-z.]*:[1-9][0-9]* .*$/BUILD FAILED/' \
+	    -e 's/^.*\[java\] Error when parsing file:.*$/BUILD FAILED/' \
+	    -e 's/^.*Failures: \([0-9]*\), Errors: \([0-9]*\),.*$/r\1+r\2+/p' \
+	    -e 's/^.*\(BUILD FAILED\).*$/[\1]pq/p' \
+	    -e '$ ar[failures=]nn[, errors=]np' \
+	| dc \
+	| sed -e 's/failures=0, errors=0/PASSED/' \
+	    -e 's/\(failures=.*, errors=.*\)/TEST FAILED (\1)/'
+      ;;
+    n)
+      ant_test | egrep "(\[junit\]|\[(java|jastadd)\].*[Ee]rror)"
+      ;;
+  esac
+}
+
+function modelica_tests() {
+  junit_test Modelica
+}
+
+function optimica_tests() {
+  junit_test Optimica
+}
+
+function ant_test() {
+  ant ${CLEAN_JUNIT} test
+}
+
+function build_jmodelica() {
+  if [[ -d ${BUILD} ]]; then
+    cd ${BUILD}
+    ${CLEAN_BUILD}
+    make && make install
+  else
+    echo Cannot build, build dir does not exist!
+    exit 1
+  fi
+}
+
+function python_tests() {
+  TEST_DIR=$(mktemp -dq --tmpdir)
+  TESTS=${JMODELICA_HOME}/Python/jmodelica/tests
+  PATTERN=----------------------------------------------------------------------
+  print_name Python
+  case ${OUTPUT} in
+    v)
+      if build_jmodelica; then
+        cd ${TEST_DIR}
+        nosetests -a stddist -v ${TESTS}
+      fi
+      ;;
+    q)
+      if build_jmodelica 2> /dev/null > /dev/null; then
+        cd ${TEST_DIR}
+        nosetests -a stddist -v ${TESTS} 2>&1 \
+	  | egrep -v '^Exception .* ignored$' \
+	  | tail -n1 \
+	  | sed -e 's/OK/PASSED/' -e 's/FAILED/TEST FAILED /'
+      else
+        echo BUILD FAILED
+      fi
+      ;;
+    n)
+#      build_jmodelica 2>&1 | egrep -i "([^0].|.[^ ])error"
+      if build_jmodelica > /dev/null; then
+        cd ${TEST_DIR}
+        nosetests -a stddist -v ${TESTS} 2>&1 \
+	  | egrep -v '^Exception .* ignored$' \
+	  | grep -B1 -A500 -e${PATTERN}
+      fi
+      ;;
+  esac
+  cd ..
+  rm -rf ${TEST_DIR}
+}
+
+function switch_test_flags() {
+  STATE=0
+  for a in $*; do
+    if [[ "${test[$a]}" != 1 ]]; then 
+      STATE=1
+    fi
+  done
+  for a in $*; do
+    test[$a]=${STATE}
+  done
+}
+
+tests="modelica optimica python"
+test_set_a="modelica optimica python"
+test_set_j="modelica optimica"
+test_set_m="modelica"
+test_set_o="optimica"
+test_set_p="python"
+declare -A test=([modelica]=0 [optimica]=0 [python]=0)
+OUTPUT=n
+
+export JAVA_HOME JMODELICA_HOME IPOPT_HOME CPPAD_HOME PYTHONPATH LD_LIBRARY_PATH
+TIME=$(date +%s)
+
+for a in ${DEFAULT_ARGS} $*; do
+  for b in $(echo ${a}|sed 's/\(.\)/\1 /g'); do
+    case ${b} in
+      -)
+        ;;
+      v|q|n)
+        OUTPUT=${b}
+        ;;
+      a|j|m|o|p)
+        test_set="test_set_${b}"
+        switch_test_flags ${!test_set}
+        ;;
+      c|C)
+        CLEAN_JUNIT=clean
+        if [[ "${b}" == C ]]; then
+          CLEAN_BUILD="make clean"
+        fi
+        ;;
+      h)
+        echo "usage: tests [-ajmopvnqcCh]"
+        echo "The -ajmop options each control a set of tests, and select all"
+        echo "tests in set for running, or, if all in set are already selected,"
+        echo "deselects them. Thus, \"tests -am\" runs all tests except"
+        echo "modelica. If no tests are chosen, a default set is run (${DEFAULT_TESTS})."
+        echo "  -a  Select/deselect all tests"
+        echo "  -j  Select/deselect junit tests"
+        echo "  -m  Select/deselect modelica tests"
+        echo "  -o  Select/deselect optimca tests"
+        echo "  -p  Select/deselect python tests"
+        echo "  -v  Verbose output, show everything"
+        echo "  -n  Normal output, only show results and compilation errors"
+        echo "  -q  Quiet output, only show brief resuls and compilation errors"
+        echo "  -c  Do a clean before junit tests"
+        echo "  -C  Do a clean before each test"
+        echo "  -h  Print this help and exit"
+	exit
+        ;;
+      *)
+        echo "Unknown flag -${b}."
+	exit
+    esac
+  done
+done
+
+ANY_ON=0
+for a in ${tests}; do
+  if [[ "${test[$a]}" == 1 ]]; then
+    ANY_ON=1
+  fi
+done
+if [[ "${ANY_ON}" == 0 ]]; then
+  switch_test_flags ${DEFAULT_TESTS}
+fi
+
+for a in ${tests}; do
+  if [[ "${test[$a]}" == 1 ]]; then
+    ${a}_tests
+  fi
+done
+
+if [[ "${OUTPUT}" != q ]]; then
+  echo ========================
+fi
+echo $(date +%s) ${TIME}"-[Total time: ]nd60/n[:]n60%[0n]sxd10>xp" | dc
