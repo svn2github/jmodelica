@@ -1,4 +1,5 @@
 import java.io.PrintStream;
+import java.io.ByteArrayOutputStream;
 
 /*
     Copyright (C) 2009 Modelon AB
@@ -55,14 +56,14 @@ aspect PrettyPrint {
 	}
 
 	public String ASTNode.prettyPrint(String indent) {
-		StringOutputStream os = new StringOutputStream();
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		PrintStream str = new PrintStream(os);
 		prettyPrint(str,indent,null);
 		return os.toString();
 	}
 
 	public String ASTNode.prettyPrint(String indent,Object o) {
-		StringOutputStream os = new StringOutputStream();	
+		ByteArrayOutputStream os = new ByteArrayOutputStream();	
 		PrintStream str = new PrintStream(os);
 		prettyPrint(str,indent,o);
 		return os.toString();

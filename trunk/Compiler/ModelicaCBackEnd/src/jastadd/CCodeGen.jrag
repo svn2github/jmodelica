@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import java.io.PrintStream;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 aspect CCodeGen {
@@ -28,14 +29,14 @@ aspect CCodeGen {
 	static CPrettyPrinter ASTNode.printer_C = new CPrettyPrinter();
 	
 	public String ASTNode.prettyPrint_C(String indent) {
-		StringOutputStream os = new StringOutputStream();
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		PrintStream str = new PrintStream(os);
 		prettyPrint_C(str,indent,null);
 		return os.toString();
 	}
 
 	public String ASTNode.prettyPrint_C(String indent,Object o) {
-		StringOutputStream os = new StringOutputStream();	
+		ByteArrayOutputStream os = new ByteArrayOutputStream();	
 		PrintStream str = new PrintStream(os);
 		prettyPrint_C(str,indent,o);
 		return os.toString();
