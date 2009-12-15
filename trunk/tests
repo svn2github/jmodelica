@@ -3,7 +3,7 @@
 # Copy this file to somewhere in your PATH.
 # Change variables below (in the copy) to match your system.
 # Type "tests -h" for usage.
-# Requres Unix-like system with bash, grep and sed.
+# Requres Unix-like system with bash, grep, dc, mktemp and sed.
 
 # ====== Variables to set ======
 
@@ -31,6 +31,60 @@ DEFAULT_ARGS=""
 
 # ====== End variables to set ======
 
+# Test sets
+tests="modelica optimica python"
+test_set_a="modelica optimica python"
+test_set_j="modelica optimica"
+test_set_m="modelica"
+test_set_o="optimica"
+test_set_p="python"
+
+# Functions for running specific tests
+function modelica_tests() {
+  junit_test Modelica
+}
+
+function optimica_tests() {
+  junit_test Optimica
+}
+
+function python_tests() {
+  TEST_DIR=$(mktemp -dqt)
+  TESTS=${JMODELICA_HOME}/Python/jmodelica/tests
+  PATTERN=----------------------------------------------------------------------
+  print_name Python
+  case ${OUTPUT} in
+    v)
+      if build_jmodelica; then
+        cd ${TEST_DIR}
+        nosetests -a stddist -v ${TESTS}
+      fi
+      ;;
+    q)
+      if build_jmodelica 2> /dev/null > /dev/null; then
+        cd ${TEST_DIR}
+        nosetests -a stddist -v ${TESTS} 2>&1 \
+	  | egrep -v '^Exception .* ignored$' \
+	  | tail -n1 \
+	  | sed -e 's/OK/PASSED/' -e 's/FAILED/TEST FAILED /'
+      else
+        echo BUILD FAILED
+      fi
+      ;;
+    n)
+      if build_jmodelica > /dev/null; then
+        cd ${TEST_DIR}
+        nosetests -a stddist -v ${TESTS} 2>&1 \
+	  | egrep -v '^Exception .* ignored$' \
+	  | grep -B1 -A500 -e${PATTERN}
+      fi
+      ;;
+  esac
+  cd ..
+  rm -rf ${TEST_DIR}
+}
+
+# Helper functions
 function print_name() {
   if [[ "${OUTPUT}" == q ]]; then
     echo -n "$1... "
@@ -66,14 +120,6 @@ function junit_test() {
   esac
 }
 
-function modelica_tests() {
-  junit_test Modelica
-}
-
-function optimica_tests() {
-  junit_test Optimica
-}
-
 function ant_test() {
   ant ${CLEAN_JUNIT} test
 }
@@ -89,64 +135,24 @@ function build_jmodelica() {
   fi
 }
 
-function python_tests() {
-  TEST_DIR=$(mktemp -dq --tmpdir)
-  TESTS=${JMODELICA_HOME}/Python/jmodelica/tests
-  PATTERN=----------------------------------------------------------------------
-  print_name Python
-  case ${OUTPUT} in
-    v)
-      if build_jmodelica; then
-        cd ${TEST_DIR}
-        nosetests -a stddist -v ${TESTS}
-      fi
-      ;;
-    q)
-      if build_jmodelica 2> /dev/null > /dev/null; then
-        cd ${TEST_DIR}
-        nosetests -a stddist -v ${TESTS} 2>&1 \
-	  | egrep -v '^Exception .* ignored$' \
-	  | tail -n1 \
-	  | sed -e 's/OK/PASSED/' -e 's/FAILED/TEST FAILED /'
-      else
-        echo BUILD FAILED
-      fi
-      ;;
-    n)
-#      build_jmodelica 2>&1 | egrep -i "([^0].|.[^ ])error"
-      if build_jmodelica > /dev/null; then
-        cd ${TEST_DIR}
-        nosetests -a stddist -v ${TESTS} 2>&1 \
-	  | egrep -v '^Exception .* ignored$' \
-	  | grep -B1 -A500 -e${PATTERN}
-      fi
-      ;;
-  esac
-  cd ..
-  rm -rf ${TEST_DIR}
-}
-
 function switch_test_flags() {
   STATE=0
   for a in $*; do
-    if [[ "${test[$a]}" != 1 ]]; then 
+    if [[ "${test[${!a}]}" != 1 ]]; then 
       STATE=1
     fi
   done
   for a in $*; do
-    test[$a]=${STATE}
+    test[${!a}]=${STATE}
   done
 }
 
-tests="modelica optimica python"
-test_set_a="modelica optimica python"
-test_set_j="modelica optimica"
-test_set_m="modelica"
-test_set_o="optimica"
-test_set_p="python"
-declare -A test=([modelica]=0 [optimica]=0 [python]=0)
 OUTPUT=n
-
+i=0
+for a in ${tests}; do
+    test[${i}]=0
+    (( ${a}=i++ ))
+done
 export JAVA_HOME JMODELICA_HOME IPOPT_HOME CPPAD_HOME PYTHONPATH LD_LIBRARY_PATH
 TIME=$(date +%s)
 
@@ -196,7 +202,7 @@ done
 
 ANY_ON=0
 for a in ${tests}; do
-  if [[ "${test[$a]}" == 1 ]]; then
+  if [[ "${test[${!a}]}" == 1 ]]; then
     ANY_ON=1
   fi
 done
@@ -205,7 +211,7 @@ if [[ "${ANY_ON}" == 0 ]]; then
 fi
 
 for a in ${tests}; do
-  if [[ "${test[$a]}" == 1 ]]; then
+  if [[ "${test[${!a}]}" == 1 ]]; then
     ${a}_tests
   fi
 done
