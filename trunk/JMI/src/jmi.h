@@ -387,12 +387,14 @@ int jmi_delete(jmi_t* jmi);
  * @param n_u (Output) number of inputs.
  * @param n_w (Output) number of algebraic variables.
  * @param n_tp (Output) number of time points included in the model.
+ * @param n_sw (output) number of switching functions in the DAE \f$F\f$.
+ * @param n_sw_init (output) number of switching functions in the initialization system \f$F_0\f$.
  * @param n_z (Output) total number of variables in the \f$z\f$ vector.
  * @return Error code.
  *
  */
 int jmi_get_sizes(jmi_t* jmi, int* n_ci, int* n_cd, int* n_pi, int* n_pd,
-		int* n_dx, int* n_x, int* n_u, int* n_w, int* n_tp, int* n_z);
+		int* n_dx, int* n_x, int* n_u, int* n_w, int* n_tp, int* n_sw, int* n_sw_init, int* n_z);
 
 /**
  * \brief Get the offsets for the variable types in the \f$z\f$ vector.
@@ -411,11 +413,13 @@ int jmi_get_sizes(jmi_t* jmi, int* n_ci, int* n_cd, int* n_pi, int* n_pd,
  * @param offs_x_p (Output) offset of the first differentiated variables in the time point part of \f$z\f$.
  * @param offs_u_p (Output) offset of the first inputs in the time point part of \f$z\f$.
  * @param offs_w_p (Output) offset of the first algebraic variables in the time point part of \f$z\f$.
+ * @param offs_sw (Output) offset of the first switching function in the DAE \f$F_0\f$.
+ * @param offs_sw_init (Output) offset of the first switching function in the initialization system \f$F_0\f$.
  * @return Error code.
  */
 int jmi_get_offsets(jmi_t* jmi, int* offs_ci, int* offs_cd, int* offs_pi, int* offs_pd,
 		int* offs_dx, int* offs_x, int* offs_u, int* offs_w, int* offs_t,
-		int* offs_dx_p, int* offs_x_p, int* offs_u_p, int* offs_w_p);
+		int* offs_dx_p, int* offs_x_p, int* offs_u_p, int* offs_w_p, int* offs_sw, int* offs_sw_init);
 
 /**
  * \brief Get the number of time points.
@@ -581,6 +585,25 @@ jmi_real_t* jmi_get_u_p(jmi_t* jmi, int i);
  *
  */
 jmi_real_t* jmi_get_w_p(jmi_t* jmi, int i);
+
+/**
+ * \brief Get a pointer to the first switching function in the DAE \$fF\$f.
+ *
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the vector of switching functions.
+ *
+ */
+jmi_real_t* jmi_get_sw(jmi_t* jmi);
+
+/**
+ * \brief Get a pointer to the first switching function in the initialization system \$fF_0\$f.
+ *
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the vector of switching functions.
+ *
+ */
+jmi_real_t* jmi_get_sw_init(jmi_t* jmi);
+
 
 /* @} */
 

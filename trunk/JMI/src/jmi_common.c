@@ -166,7 +166,7 @@ int jmi_func_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independent_
 }
 
 int jmi_get_sizes(jmi_t* jmi, int* n_ci, int* n_cd, int* n_pi, int* n_pd,
-		                        int* n_dx, int* n_x, int* n_u, int* n_w, int* n_tp, int* n_z) {
+		                        int* n_dx, int* n_x, int* n_u, int* n_w, int* n_tp, int* n_sw, int* n_sw_init, int* n_z) {
 
 	*n_ci = jmi->n_ci;
 	*n_cd = jmi->n_cd;
@@ -177,6 +177,8 @@ int jmi_get_sizes(jmi_t* jmi, int* n_ci, int* n_cd, int* n_pi, int* n_pd,
 	*n_u = jmi->n_u;
 	*n_w = jmi->n_w;
     *n_tp = jmi->n_tp;
+    *n_sw = jmi->n_sw;
+    *n_sw_init = jmi->n_sw_init;
     *n_z = jmi->n_z;
 
 	return 0;
@@ -184,7 +186,7 @@ int jmi_get_sizes(jmi_t* jmi, int* n_ci, int* n_cd, int* n_pi, int* n_pd,
 
 int jmi_get_offsets(jmi_t* jmi, int* offs_ci, int* offs_cd, int* offs_pi, int* offs_pd,
 		int* offs_dx, int* offs_x, int* offs_u, int* offs_w, int *offs_t,
-		int* offs_dx_p, int* offs_x_p, int* offs_u_p, int* offs_w_p) {
+		int* offs_dx_p, int* offs_x_p, int* offs_u_p, int* offs_w_p, int* offs_sw, int* offs_sw_init) {
 	*offs_ci = jmi->offs_ci;
 	*offs_cd = jmi->offs_cd;
 	*offs_pi = jmi->offs_pi;
@@ -198,6 +200,8 @@ int jmi_get_offsets(jmi_t* jmi, int* offs_ci, int* offs_cd, int* offs_pi, int* o
 	*offs_x_p = jmi->offs_x_p;
 	*offs_u_p = jmi->offs_u_p;
 	*offs_w_p = jmi->offs_w_p;
+	*offs_sw = jmi->offs_sw;
+	*offs_sw_init = jmi->offs_sw_init;
 
 	return 0;
 }
@@ -542,6 +546,14 @@ jmi_real_t* jmi_get_w_p(jmi_t* jmi, int i) {
 	return *(jmi->z_val) + jmi->offs_w_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i;
 }
 
+jmi_real_t* jmi_get_sw(jmi_t* jmi) {
+	return *(jmi->z_val) + jmi->offs_sw;
+}
+
+jmi_real_t* jmi_get_sw_init(jmi_t* jmi) {
+	return *(jmi->z_val) + jmi->offs_sw_init;
+}
+
 
 void jmi_print_summary(jmi_t *jmi) {
 	printf("Number of interactive constants:               %d\n",jmi->n_ci);
@@ -553,6 +565,8 @@ void jmi_print_summary(jmi_t *jmi) {
 	printf("Number of inputs:                              %d\n",jmi->n_u);
 	printf("Number of algebraics:                          %d\n",jmi->n_w);
 	printf("Number of time points:                         %d\n",jmi->n_tp);
+	printf("Number of switching functions in DAE:          %d\n",jmi->n_sw);
+	printf("Number of switching functions in DAE init:     %d\n",jmi->n_sw_init);
 	if (jmi->dae != NULL) {
 		printf("DAE interface:\n");
 		printf("  Number of DAE equations:                     %d\n",jmi->dae->F->n_eq_F);

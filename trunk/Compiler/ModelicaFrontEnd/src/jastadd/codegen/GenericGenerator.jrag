@@ -323,6 +323,34 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	class DAETag_numSwitchingFunctions extends DAETag {
+		
+		public DAETag_numSwitchingFunctions(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_switches","Number switching functions",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numEventIndicators());
+		}
+	
+	}
+
+	class DAETag_numInitialSwitchingFunctions extends DAETag {
+		
+		public DAETag_numInitialSwitchingFunctions(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_initial_switches","Number switching functions in the initial equations",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numInitialEventIndicators());
+		}
+	
+	}
+	
 	class DAETag_numAlgebraicRealVariables extends DAETag {
 		
 		public DAETag_numAlgebraicRealVariables(AbstractGenerator myGenerator, 

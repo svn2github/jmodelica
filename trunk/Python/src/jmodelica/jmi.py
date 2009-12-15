@@ -337,6 +337,8 @@ class Model(object):
         self._n_u  = ct.c_int()
         self._n_w  = ct.c_int()
         self._n_tp = ct.c_int()
+        self._n_sw = ct.c_int()
+        self._n_sw_init = ct.c_int()
         self._n_z  = ct.c_int()
         
         self.get_sizes()
@@ -355,6 +357,8 @@ class Model(object):
         self._offs_x_p = ct.c_int()
         self._offs_u_p = ct.c_int()
         self._offs_w_p = ct.c_int()
+        self._offs_sw = ct.c_int()
+        self._offs_sw_init = ct.c_int()
 
         self.get_offsets()
         
@@ -524,10 +528,13 @@ class Model(object):
                                 self._n_u,
                                 self._n_w,
                                 self._n_tp,
+                                self._n_sw,
+                                self._n_sw_init,
                                 self._n_z)
         
         l = [self._n_ci.value, self._n_cd.value, self._n_pi.value, self._n_pd.value, self._n_dx.value, 
-             self._n_x.value, self._n_u.value, self._n_w.value, self._n_tp.value, self._n_z.value]
+             self._n_x.value, self._n_u.value, self._n_w.value, self._n_tp.value, self._n_sw.value,
+             self._n_sw_init.value, self._n_z.value]
         return l
     
     def get_offsets(self):
@@ -545,12 +552,14 @@ class Model(object):
                                   self._offs_dx_p,
                                   self._offs_x_p,
                                   self._offs_u_p,
-                                  self._offs_w_p)
+                                  self._offs_w_p,
+                                  self._offs_sw,
+                                  self._offs_sw_init)
         
         l = [self._offs_ci.value, self._offs_cd.value, self._offs_pi.value, self._offs_pd.value, 
              self._offs_dx.value, self._offs_x.value, self._offs_u.value, self._offs_w.value, 
              self._offs_t.value, self._offs_dx_p.value, self._offs_x_p.value, self._offs_u_p.value, 
-             self._offs_w_p.value]
+             self._offs_w_p.value, self._offs_sw.value, self._offs_sw_init.value]
         return l
 
     def get_n_tp(self):
@@ -558,31 +567,6 @@ class Model(object):
         
         self.jmimodel.get_n_tp(self._n_tp)
         return self._n_tp.value
-
-    def get_x(self):
-        """Return a reference to the differentiated variables vector."""
-        return self.jmimodel.get_x()
-        
-    def set_x(self, x):
-        """Set the differentiated variables vector."""
-        self.jmimodel._x[:] = x
-        
-    x = property(get_x, set_x, doc="The differentiated variables vector.")
-
-    def get_x_p(self, i):
-        """Returns a reference to the differentiated variables vector
-        corresponding to the i:th time point.
-        
-        """
-        return self.jmimodel.get_x_p(i)
-        
-    def set_x_p(self, new_x_p, i):
-        """Sets the differentiated variables vector corresponding to the i:th 
-        time point. 
-        
-        """
-        x_p = self.jmimodel.get_x_p(i)
-        x_p[:] = new_x_p
     
     def get_pi(self):
         """Returns a reference to the independent parameters vector."""
@@ -647,6 +631,31 @@ class Model(object):
         dx_p = self.jmimodel.get_dx_p(i)
         dx_p[:] = new_dx_p
 
+    def get_x(self):
+        """Return a reference to the differentiated variables vector."""
+        return self.jmimodel.get_x()
+        
+    def set_x(self, x):
+        """Set the differentiated variables vector."""
+        self.jmimodel._x[:] = x
+        
+    x = property(get_x, set_x, doc="The differentiated variables vector.")
+
+    def get_x_p(self, i):
+        """Returns a reference to the differentiated variables vector
+        corresponding to the i:th time point.
+        
+        """
+        return self.jmimodel.get_x_p(i)
+        
+    def set_x_p(self, new_x_p, i):
+        """Sets the differentiated variables vector corresponding to the i:th 
+        time point. 
+        
+        """
+        x_p = self.jmimodel.get_x_p(i)
+        x_p[:] = new_x_p
+
     def get_u(self):
         """Returns a reference to the inputs vector."""
         return self.jmimodel.get_u()
@@ -706,7 +715,27 @@ class Model(object):
         self.jmimodel._t[:] = t
         
     t = property(get_t, set_t, doc="The time value.")
-    
+
+    def get_sw(self):
+        """Returns a reference to the switch function vector of the DAE."""
+        return self.jmimodel.get_sw()
+        
+    def set_sw(self, sw):
+        """Sets the switch function vector of the DAE."""
+        self.jmimodel._sw[:] = sw
+        
+    sw = property(get_sw, set_sw, doc="The switching function vector of the DAE.")
+
+    def get_sw_init(self):
+        """Returns a reference to the switch function vector of the DAE initialization system."""
+        return self.jmimodel.get_sw()
+        
+    def set_sw_init(self, sw_init):
+        """Sets the switch function vector of the DAE initialization system."""
+        self.jmimodel._sw[:] = sw_init
+        
+    sw_init = property(get_sw, set_sw, doc="The switching function vector of the DAE initialization system.")
+
     def get_z(self):
         """Returns a reference to the vector containing all parameters,
         variables and point-wise evalutated variables vector.
@@ -1177,8 +1206,10 @@ class JMIModel(object):
         self._u = self._dll.jmi_get_u(self._jmi)
         self._w = self._dll.jmi_get_w(self._jmi)
         self._t = self._dll.jmi_get_t(self._jmi)
+        self._sw = self._dll.jmi_get_sw(self._jmi)
+        self._sw_init = self._dll.jmi_get_sw_init(self._jmi)
         self._z = self._dll.jmi_get_z(self._jmi)
-
+        
         #self.initAD()
         
     def _set_jmimodel_typedefs(self):
@@ -1193,19 +1224,23 @@ class JMIModel(object):
         n_u  = ct.c_int()
         n_w  = ct.c_int()
         n_tp = ct.c_int()
+        n_sw = ct.c_int()
+        n_sw_init = ct.c_int()
         n_z  = ct.c_int()
         assert self._dll.jmi_get_sizes(self._jmi,
-                                 byref(n_ci),
-                                 byref(n_cd),
-                                 byref(n_pi),
-                                 byref(n_pd),
-                                 byref(n_dx),
-                                 byref(n_x),
-                                 byref(n_u),
-                                 byref(n_w),
-                                 byref(n_tp),
-                                 byref(n_z)) \
-               is 0, \
+                                       byref(n_ci),
+                                       byref(n_cd),
+                                       byref(n_pi),
+                                       byref(n_pd),
+                                       byref(n_dx),
+                                       byref(n_x),
+                                       byref(n_u),
+                                       byref(n_w),
+                                       byref(n_tp),
+                                       byref(n_sw),
+                                       byref(n_sw_init),
+                                       byref(n_z)) \
+        is 0, \
                "getting sizes failed"
            
         # Setting return type to numpy.array for some functions
@@ -1222,6 +1257,8 @@ class JMIModel(object):
                          (self._dll.jmi_get_x_p, n_x.value),
                          (self._dll.jmi_get_u_p, n_u.value),
                          (self._dll.jmi_get_w_p, n_w.value),
+                         (self._dll.jmi_get_sw, n_sw.value),
+                         (self._dll.jmi_get_sw_init, n_sw_init.value),
                          (self._dll.jmi_get_z, n_z.value)]
 
         for (func, length) in int_res_funcs:
@@ -1239,6 +1276,8 @@ class JMIModel(object):
 #        u      = self._dll.jmi_get_u(self._jmi);
 #        w      = self._dll.jmi_get_w(self._jmi);
 #        t      = self._dll.jmi_get_t(self._jmi);
+#        sw     = self._dll.jmi_get_sw(self._jmi);
+#        sw_init     = self._dll.jmi_get_sw_init(self._jmi);
 #        z      = self._dll.jmi_get_z(self._jmi)        
         #===============================================
         
@@ -1258,8 +1297,12 @@ class JMIModel(object):
                                             ct.POINTER(ct.c_int),
                                             ct.POINTER(ct.c_int),
                                             ct.POINTER(ct.c_int),
+                                            ct.POINTER(ct.c_int),
+                                            ct.POINTER(ct.c_int),
                                             ct.POINTER(ct.c_int)]   
         self._dll.jmi_get_offsets.argtypes = [ct.c_void_p,
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
                                               ct.POINTER(ct.c_int),
                                               ct.POINTER(ct.c_int),
                                               ct.POINTER(ct.c_int),
@@ -1292,14 +1335,16 @@ class JMIModel(object):
         self._dll.jmi_get_pd.argtypes   = [ct.c_void_p]
         self._dll.jmi_get_dx.argtypes   = [ct.c_void_p]
         self._dll.jmi_get_dx_p.argtypes = [ct.c_void_p, ct.c_int]
-        self._dll.jmi_get_t.argtypes    = [ct.c_void_p]
+        self._dll.jmi_get_x.argtypes    = [ct.c_void_p]
+        self._dll.jmi_get_x_p.argtypes  = [ct.c_void_p, ct.c_int]
         self._dll.jmi_get_u.argtypes    = [ct.c_void_p]
         self._dll.jmi_get_u_p.argtypes  = [ct.c_void_p, ct.c_int]
         self._dll.jmi_get_w.argtypes    = [ct.c_void_p]
         self._dll.jmi_get_w_p.argtypes  = [ct.c_void_p, ct.c_int]
-        self._dll.jmi_get_x.argtypes    = [ct.c_void_p]
-        self._dll.jmi_get_x_p.argtypes  = [ct.c_void_p, ct.c_int]
- 
+        self._dll.jmi_get_sw.argtypes  = [ct.c_void_p]
+        self._dll.jmi_get_sw_init.argtypes  = [ct.c_void_p]
+        self._dll.jmi_get_t.argtypes    = [ct.c_void_p]
+         
         # ODE interface
         self._dll.jmi_ode_f.argtypes  = [ct.c_void_p]
         self._dll.jmi_ode_df.argtypes = [ct.c_void_p,
@@ -1825,41 +1870,45 @@ class JMIModel(object):
                 # Error caused if constructor crashes
                 pass
                
-    def get_sizes(self, n_ci, n_cd, n_pi, n_pd, n_dx, n_x, n_u, n_w, n_tp, n_z):
+    def get_sizes(self, n_ci, n_cd, n_pi, n_pd, n_dx, n_x, n_u, n_w, n_tp, n_sw, n_sw_init, n_z):
         """Get the sizes of the variable vectors."""
         
         retval = self._dll.jmi_get_sizes(self._jmi,
-                                 byref(n_ci),
-                                 byref(n_cd),
-                                 byref(n_pi),
-                                 byref(n_pd),
-                                 byref(n_dx),
-                                 byref(n_x),
-                                 byref(n_u),
-                                 byref(n_w),
-                                 byref(n_tp),
-                                 byref(n_z))
+                                         byref(n_ci),
+                                         byref(n_cd),
+                                         byref(n_pi),
+                                         byref(n_pd),
+                                         byref(n_dx),
+                                         byref(n_x),
+                                         byref(n_u),
+                                         byref(n_w),
+                                         byref(n_tp),
+                                         byref(n_sw),
+                                         byref(n_sw_init),
+                                         byref(n_z))
         if retval is not 0:
             raise JMIException("Getting sizes failed.")                     
             
     def get_offsets(self, offs_ci, offs_cd, offs_pi, offs_pd, offs_dx, offs_x, offs_u, offs_w,
-                    offs_t, offs_dx_p, offs_x_p, offs_u_p, offs_w_p):
+                    offs_t, offs_dx_p, offs_x_p, offs_u_p, offs_w_p, offs_sw, offs_sw_init):
         """Get the offsets for the variable types in the z vector."""
         
         retval = self._dll.jmi_get_offsets(self._jmi,
-                                         byref(offs_ci),
-                                         byref(offs_cd),
-                                         byref(offs_pi),
-                                         byref(offs_pd),
-                                         byref(offs_dx),
-                                         byref(offs_x),
-                                         byref(offs_u),
-                                         byref(offs_w),
-                                         byref(offs_t),
-                                         byref(offs_dx_p),
-                                         byref(offs_x_p),
-                                         byref(offs_u_p),
-                                         byref(offs_w_p))
+                                           byref(offs_ci),
+                                           byref(offs_cd),
+                                           byref(offs_pi),
+                                           byref(offs_pd),
+                                           byref(offs_dx),
+                                           byref(offs_x),
+                                           byref(offs_u),
+                                           byref(offs_w),
+                                           byref(offs_t),
+                                           byref(offs_dx_p),
+                                           byref(offs_x_p),
+                                           byref(offs_u_p),
+                                           byref(offs_w_p),
+                                           byref(offs_sw),
+                                           byref(offs_sw_init))
         if retval is not 0:
             raise JMIException("Getting offsets failed.")        
             
@@ -1953,6 +2002,16 @@ class JMIModel(object):
         the i:th time point.
         """
         return self._dll.jmi_get_w_p(self._jmi, i) 
+
+    def get_sw(self):
+        """Returns a reference to the switching function vector of the DAE.
+        """
+        return self._dll.jmi_get_sw(self._jmi) 
+
+    def get_sw_init(self):
+        """Returns a reference to the switching function vector of the DAE initialization system.
+        """
+        return self._dll.jmi_get_sw_init(self._jmi) 
     
     def ode_f(self):
         """Evalutates the right hand side of the ODE.

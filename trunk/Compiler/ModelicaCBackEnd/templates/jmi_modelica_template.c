@@ -29,6 +29,7 @@ static const int N_dx = $n_real_x$;
 static const int N_x = $n_real_x$;
 static const int N_u = $n_real_u$;
 static const int N_w = $n_real_w$;
+static const int N_sw = $n_switches$;
 static const int N_eq_F = $n_equations$;
 static const int N_eq_R = $n_event_indicators$;
 
@@ -36,6 +37,7 @@ static const int N_eq_F0 = $n_equations$ + $n_initial_equations$;
 static const int N_eq_F1 = $n_initial_guess_equations$;
 static const int N_eq_Fp = $n_real_pd$;
 static const int N_eq_R0 = $n_event_indicators$ + $n_initial_event_indicators$;
+static const int N_sw_init = $n_switches$ + $n_initial_switches$;
 
 static const int N_eq_Ceq = 0;
 static const int N_eq_Cineq = 0;
@@ -131,7 +133,7 @@ static int model_opt_Hineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
 int jmi_new(jmi_t** jmi) {
 
 	jmi_init(jmi, N_ci, N_cd, N_pi, N_pd, N_dx,
-			      N_x, N_u, N_w, N_t_p);
+		 N_x, N_u, N_w, N_t_p,N_sw,N_sw_init);
 
 	// Initialize the DAE interface
 	jmi_dae_init(*jmi, *model_dae_F, N_eq_F, NULL, 0, NULL, NULL,

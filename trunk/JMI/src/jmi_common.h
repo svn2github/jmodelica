@@ -430,10 +430,12 @@ struct jmi_func_ad_t{
  * @param n_u Number of inputs.
  * @param n_w Number of algebraics.
  * @param n_tp Number of interpolation time points.
+ * @param n_sw Number of switching functions in DAE \$fF\$f.
+ * @param n_sw_init Number of switching functions in DAE initialization system \$fF_0\$f.
  * @return Error code.
  */
 int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
-		int n_x, int n_u, int n_w, int n_tp);
+		int n_x, int n_u, int n_w, int n_tp, int n_sw, int n_sw_init);
 
 /**
  * \brief Allocates a jmi_dae_t struct.
@@ -610,6 +612,8 @@ struct jmi_t{
 	int n_x;                             ///< \brief Number of differentiated states.
 	int n_u;                             ///< \brief Number of inputs.
 	int n_w;                             ///< \brief Number of algebraics.
+	int n_sw;                            ///< \brief Number of switching functions in the DAE \f$F\f$.
+	int n_sw_init;                       ///< \brief Number of switching functions in the DAE initialization system\f$F_0\f$.
 
 	int n_p;                             ///< \brief Number of elements in \f$p\f$.
 	int n_v;                             ///< \brief Number of elements in \f$v\f$.
@@ -635,6 +639,8 @@ struct jmi_t{
 	int offs_x_p;                        ///< Offset of the first time point differentiated variable vector in \f$z\f$.
 	int offs_u_p;                        ///< Offset of the first time point input vector in \f$z\f$.
 	int offs_w_p;                        ///< Offset of the first time point algebraic variable vector in \f$z\f$.
+	int offs_sw;                        ///< Offset of the first switching function in the DAE \f$F\f$
+	int offs_sw_init;                        ///< Offset of the first switching function in the DAE initialization system \f$F_0\f$
 
 	int offs_p;                          ///< Offset of the \f$p\f$ vector in \f$z\f$.
 	int offs_v;                          ///< Offset of the \f$v\f$ vector in \f$z\f$.

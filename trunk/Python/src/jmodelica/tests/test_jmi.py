@@ -117,12 +117,12 @@ class TestModel_VDP:
      
     @testattr(stddist = True)   
     def test_get_sizes(self):
-        sizes = [0, 0, 3, 0, 3, 3, 1, 0, 1, 18]
+        sizes = [0, 0, 3, 0, 3, 3, 1, 0, 1, 0, 0, 18]
         ntools.assert_equal(self.vdp.get_sizes(),sizes)
     
     @testattr(stddist = True)    
     def test_get_offsets(self):
-        offsets = [0, 0, 0, 3, 3, 6, 9, 10, 10, 11, 14, 17, 18]
+        offsets = [0, 0, 0, 3, 3, 6, 9, 10, 10, 11, 14, 17, 18, 18, 18]
         ntools.assert_equal(self.vdp.get_offsets(),offsets)
     
     @testattr(stddist = True)
@@ -472,8 +472,10 @@ class TestJMIModel_VDP:
         n_u  = ct.c_int()
         n_w  = ct.c_int()
         n_tp = ct.c_int()
+        n_sw = ct.c_int()
+        n_sw_init = ct.c_int()
         n_z  = ct.c_int()
-        self.vdp.jmimodel.get_sizes(n_ci, n_cd, n_pi, n_pd, n_dx, n_x, n_u, n_w, n_tp, n_z)
+        self.vdp.jmimodel.get_sizes(n_ci, n_cd, n_pi, n_pd, n_dx, n_x, n_u, n_w, n_tp, n_sw, n_sw_init, n_z)
 
     @testattr(stddist = True)
     def test_get_offsets(self):
@@ -490,9 +492,11 @@ class TestJMIModel_VDP:
         offs_dx_p = ct.c_int()
         offs_x_p = ct.c_int()
         offs_u_p = ct.c_int()
-        offs_w_p = ct.c_int()   
+        offs_w_p = ct.c_int()
+        offs_sw = ct.c_int()
+        offs_sw_init = ct.c_int()   
         self.vdp.jmimodel.get_offsets(offs_ci, offs_cd, offs_pi, offs_pd, offs_dx, offs_x, offs_u, 
-                          offs_w, offs_t, offs_dx_p, offs_x_p, offs_u_p, offs_w_p)
+                          offs_w, offs_t, offs_dx_p, offs_x_p, offs_u_p, offs_w_p, offs_sw, offs_sw_init)
         
     @testattr(stddist = True)
     def test_get_n_tp(self):

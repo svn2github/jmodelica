@@ -1333,10 +1333,10 @@ static int lp_set_initial_from_trajectory(
 	int i;
 	int j;
 
-	int n_ci, n_cd, n_pi, n_pd, n_dx, n_x, n_u, n_w, n_tp, n_z;
+	int n_ci, n_cd, n_pi, n_pd, n_dx, n_x, n_u, n_w, n_tp, n_sw, n_sw_init, n_z;
 
 	jmi_get_sizes(jmi, &n_ci, &n_cd, &n_pi, &n_pd,
-			&n_dx, &n_x, &n_u, &n_w, &n_tp, &n_z);
+			&n_dx, &n_x, &n_u, &n_w, &n_tp, &n_sw, &n_sw_init, &n_z);
 
 	jmi_real_t *tp = (jmi_real_t*)calloc(n_tp,sizeof(jmi_real_t));
 	jmi_get_tp(jmi,tp);

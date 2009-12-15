@@ -26,7 +26,7 @@
 #include "jmi.h"
 
 int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
-		int n_x, int n_u, int n_w, int n_tp) {
+		int n_x, int n_u, int n_w, int n_tp, int n_sw, int n_sw_init) {
 
 	// Create jmi struct
 	*jmi = (jmi_t*)calloc(1,sizeof(jmi_t));
@@ -45,6 +45,8 @@ int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
 	jmi_->n_x = n_x;
 	jmi_->n_u = n_u;
 	jmi_->n_w = n_w;
+	jmi_->n_sw = n_sw;
+	jmi_->n_sw_init = n_sw_init;
 
 	jmi_->n_tp = n_tp;
 
@@ -61,6 +63,8 @@ int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
 	jmi_->offs_x_p = jmi_->offs_dx_p + n_dx;
 	jmi_->offs_u_p = jmi_->offs_x_p + n_x;
 	jmi_->offs_w_p = jmi_->offs_u_p + n_u;
+	jmi_->offs_sw = jmi_->offs_w_p + n_w;
+	jmi_->offs_sw_init = jmi_->offs_sw + n_sw;
 
 	jmi_->offs_p = 0;
 	jmi_->offs_v = jmi_->offs_dx;
@@ -74,7 +78,7 @@ int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
 	jmi_->n_v = n_dx + n_x + n_u + n_w + 1;
 	jmi_->n_q = (n_dx + n_x + n_u + n_w)*n_tp;
 
-	jmi_->n_z = jmi_->n_p + jmi_->n_v + jmi_->n_q;
+	jmi_->n_z = jmi_->n_p + jmi_->n_v + jmi_->n_q + jmi_->n_sw + jmi_->n_sw_init;
 
 	jmi_->z = (jmi_ad_var_vec_p)calloc(1,sizeof(jmi_ad_var_vec_t));
 	*(jmi_->z) = (jmi_ad_var_vec_t)calloc(jmi_->n_z,sizeof(jmi_ad_var_t));
