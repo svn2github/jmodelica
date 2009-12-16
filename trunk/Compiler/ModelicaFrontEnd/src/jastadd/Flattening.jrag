@@ -1280,23 +1280,27 @@ aspect InstantiatedExpressions {
 	eq InstMissingArgument.isOKArg() = false;
 	eq InstMultipleBoundArgument.isOKArg() = false;
 	
-	// TODO: Probably needs to be children instead, to prevent problems from inh attributes
-	/*
-	 * List of arguments that could not be bound to inputs.
+	// TODO: Probably needs to be children instead, to prevent problems from inh attributes?
+	/**
+	 * \brief List of arguments that could not be bound to inputs.
 	 */
 	private ArrayList<InstFunctionArgument> InstFunctionCall.unbindableArgs = 
 		new ArrayList<InstFunctionArgument>();
 
-	// TODO: Probably needs to be children instead, to prevent problems from inh attributes
+	/* TODO: Replace the children of FBuiltInFunctionCall subclasses with InstFunctionArgument, 
+	 *        and add get methods that gets the FExp from each InstFunctionArgument? */
 	/**
 	 * \brief Add an argument to the list of the arguments from the original InstFunctionCall.
-	 * 
-	 * Used for error checking FBuiltInFunctionCalls in the instance tree. 
-	 * Empty in the flattened tree.
 	 */
 	public void FBuiltInFunctionCall.addOriginalArg(InstFunctionArgument arg) {
 		originalArgs.add(arg);
 	}
+	/**
+	 * \brief List of the arguments from the original InstFunctionCall.
+	 * 
+	 * Used for error checking FBuiltInFunctionCalls in the instance tree. 
+	 * Empty in the flattened tree.
+	 */
 	protected ArrayList<InstFunctionArgument> FBuiltInFunctionCall.originalArgs = 
 		new ArrayList<InstFunctionArgument>();
 	
@@ -1322,9 +1326,17 @@ aspect InstantiatedExpressions {
 		return foundName.equals(funcName) || foundName.equals("Modelica.Math." + funcName);
 	}
 
-	/*
-	 * Bind arguments to inputs and replace InstFunctionCall with specialized nodes 
+	/**
+	 * \brief Bind arguments to inputs and replace InstFunctionCall with specialized nodes 
 	 * for built-in functions.
+	 * 
+	 * If arguments could not be bound to inputs properly (to few args, to many args, bad 
+	 * named args, etc), then the node remains an InstFunctionCall.
+	 * 
+	 * Any arguments that could not be bound to an input are gathered in unbindableArgs.
+	 * 
+	 * If function call was rewritten to a FBuiltinFunctionCall, then the InstFunctionArgument 
+	 * nodes describing them are gathered in originalArgs.
 	 */
 	boolean InstFunctionCall.rewritten = false;
 	rewrite InstFunctionCall {

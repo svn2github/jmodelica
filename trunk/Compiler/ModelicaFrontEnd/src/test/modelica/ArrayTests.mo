@@ -77,8 +77,8 @@ end ArrayTests.ArrayTest1c;
 "
 fclass ArrayTests.ArrayTest2
  Real x[1,1];
- Real x[2,1];
  Real x[1,2];
+ Real x[2,1];
  Real x[2,2];
 equation 
  x[1,1] = 1;
@@ -256,7 +256,7 @@ model ArrayTest15_Err
 "
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 263, column 9:
-  Type array size mismatch in declaration x: size of declaration is [3] and size of binding expression is [3,1]
+  Type array size mismatch in declaration x: size of declaration is [3] and size of binding expression is [3, 1]
 ")})));
 
    Real x[3] = {{2},{2},{3}};
@@ -380,13 +380,13 @@ model ArrayTest23
 "
 fclass ArrayTests.ArrayTest23
  Real x[1,1];
- Real x[2,1];
  Real x[1,2];
+ Real x[2,1];
  Real x[2,2];
 equation 
  x[1,1] = 1;
- x[2,1] = 1;
  x[1,2] = 1;
+ x[2,1] = 1;
  x[2,2] = 1;
 end ArrayTests.ArrayTest23;
 ")})));
@@ -407,20 +407,20 @@ model ArrayTest24
 "
 fclass ArrayTests.ArrayTest24
  Real x[1,1];
- Real x[2,1];
  Real x[1,2];
+ Real x[2,1];
  Real x[2,2];
  Real y[1,1];
- Real y[2,1];
  Real y[1,2];
+ Real y[2,1];
  Real y[2,2];
 equation
  x[1,1] = 1;
  y[1,1] = x[1,1] + 1;
- x[2,1] = 2;
- y[2,1] = x[2,1] + 1;
  x[1,2] = 1;
  y[1,2] = x[1,2] + 2;
+ x[2,1] = 2;
+ y[2,1] = x[2,1] + 1;
  x[2,2] = 2;
  y[2,2] = x[2,2] + 2;
 end ArrayTests.ArrayTest24;
@@ -444,16 +444,16 @@ model ArrayTest25
 "
 fclass ArrayTests.ArrayTest25
  Real x[1,1];
- Real x[2,1];
  Real x[1,2];
- Real x[2,2];
  Real x[1,3];
+ Real x[2,1];
+ Real x[2,2];
  Real x[2,3];
  Real y[1,1];
- Real y[2,1];
  Real y[1,2];
- Real y[2,2];
  Real y[1,3];
+ Real y[2,1];
+ Real y[2,2];
  Real y[2,3];
 equation
  x[1,1] = 1;
@@ -491,36 +491,36 @@ model ArrayTest26
                                                flatModel=
 "fclass ArrayTests.ArrayTest26
  Real x[1,1];
- Real x[2,1];
- Real x[3,1];
- Real x[4,1];
  Real x[1,2];
- Real x[2,2];
- Real x[3,2];
- Real x[4,2];
  Real x[1,3];
- Real x[2,3];
- Real x[3,3];
- Real x[4,3];
  Real x[1,4];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[2,3];
  Real x[2,4];
+ Real x[3,1];
+ Real x[3,2];
+ Real x[3,3];
  Real x[3,4];
+ Real x[4,1];
+ Real x[4,2];
+ Real x[4,3];
  Real x[4,4];
  Real y[1,1];
- Real y[2,1];
- Real y[3,1];
- Real y[4,1];
  Real y[1,2];
- Real y[2,2];
- Real y[3,2];
- Real y[4,2];
  Real y[1,3];
- Real y[2,3];
- Real y[3,3];
- Real y[4,3];
  Real y[1,4];
+ Real y[2,1];
+ Real y[2,2];
+ Real y[2,3];
  Real y[2,4];
+ Real y[3,1];
+ Real y[3,2];
+ Real y[3,3];
  Real y[3,4];
+ Real y[4,1];
+ Real y[4,2];
+ Real y[4,3];
  Real y[4,4];
 equation
  x[2,2] = 2;
@@ -656,17 +656,17 @@ model ArrayTest30
 "
 fclass ArrayTests.ArrayTest30
  Real x[1,1](start = 1);
- Real x[2,1](start = 3);
- Real x[3,1](start = 5);
  Real x[1,2](start = 2);
+ Real x[2,1](start = 3);
  Real x[2,2](start = 4);
+ Real x[3,1](start = 5);
  Real x[3,2](start = 6);
 equation
  der(x[1,1]) =  - ( 1 );
- der(x[2,1]) =  - ( 3 );
- der(x[3,1]) =  - ( 5 );
  der(x[1,2]) =  - ( 2 );
+ der(x[2,1]) =  - ( 3 );
  der(x[2,2]) =  - ( 4 );
+ der(x[3,1]) =  - ( 5 );
  der(x[3,2]) =  - ( 6 );
 end ArrayTests.ArrayTest30;
 ")})));

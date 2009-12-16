@@ -39,8 +39,8 @@ aspect FlatTypeCheck {
 				  !type().typeCompatible(myBindingInstExp().type())) {
 			  if (!type().dimensionCompatible(myBindingInstExp().type())) {
 				  error("Type array size mismatch in declaration " + name() +
-							": size of declaration is " + Indices.printIndices(size()) + 
-							" and size of binding expression is " + Indices.printIndices(myBindingInstExp().size()));
+							": size of declaration is " + Arrays.toString(size()) + 
+							" and size of binding expression is " + Arrays.toString(myBindingInstExp().size()));
 /*				  
 				  error("Type dimension mismatch in declaration " + name() +
 						  ": dimension of declaration is " + ndims() + 
@@ -74,8 +74,8 @@ aspect FlatTypeCheck {
 							  " does not match the declared type of the variable");							
 						} else if (!icm.getEach() && val_mod.ndims()!=0 && !type().dimensionCompatible(val_mod.type())) { 
 							icm.error("Array size mismatch for attribute " + icm.name() +
-									": size of declaration is " + Indices.printIndices(size()) + 
-									" and size of " + icm.name() + " expression is " + Indices.printIndices(val_mod.size()));
+									": size of declaration is " + Arrays.toString(size()) + 
+									" and size of " + icm.name() + " expression is " + Arrays.toString(val_mod.size()));
 						} else if (icm.getEach()){ // If the each keyword is specified, then the dimension should be 0.
 							if (val_mod.ndims()>0) {
 								icm.error("The 'each' keyword is specified for the attribute " + icm.name() + 

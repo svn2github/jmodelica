@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 
 
 /*
@@ -112,7 +114,7 @@ aspect Arrays {
 	 * 
 	 * @return Array dimension.
 	 */	
-	syn int FArraySubscripts.accessNdims() { 
+	syn lazy int FArraySubscripts.accessNdims() { 
 		//System.out.println("FArraySubscripts.accessNdims()");
 		// Need to check if each individual subscript increases 
 		// dimension. (ndims(x[1])=0)
@@ -144,7 +146,7 @@ aspect Arrays {
 	 * 
 	 * @return Array dimension.
 	 */	
-	syn int FExp.ndims() = 0;
+	syn lazy int FExp.ndims() = 0;
 	eq FInstAccessExp.ndims() = getInstAccess().ndims();
 	eq FRangeExp.ndims() = 1;
 	eq FArray.ndims() {
@@ -219,7 +221,7 @@ aspect Arrays {
 	 * 
 	 * @return Array dimension.
 	 */	
-	syn int FQName.ndims() {
+	syn lazy int FQName.ndims() {
 		// Only look at the array subscripts for the last FQNamePart,
 		// all other array subscripts has been expanded in the instantiation.
 		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
@@ -260,7 +262,7 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn int[] FAbstractEquation.size() = new int[0];
+	syn lazy int[] FAbstractEquation.size() = new int[0];
 	eq FEquation.size() {
 		int[] leftSize = getLeft().size();
 		int[] rightSize = getRight().size();
@@ -282,7 +284,7 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn int[] FArraySubscripts.size() {
+	syn lazy int[] FArraySubscripts.size() {
 		int s[] = new int[ndims()];
 		int index = 0;
 		for (FSubscript fs : getFSubscripts()) {
@@ -299,7 +301,7 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn int[] FArraySubscripts.accessSize() {
+	syn lazy int[] FArraySubscripts.accessSize() {
 		int s[] = new int[accessNdims()];
 		int index = 0;
 		for (FSubscript fs : getFSubscripts()) {
@@ -318,7 +320,7 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn int[] FSubscript.size();
+	syn lazy int[] FSubscript.size();
 
 	eq FExpSubscript.size() = getFExp().size();
 	
@@ -331,7 +333,7 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn int[] FExp.size() = new int[0];
+	syn lazy int[] FExp.size() = new int[0];
 	eq FInstAccessExp.size() = getInstAccess().size();
 
 	
@@ -345,35 +347,16 @@ aspect Arrays {
 				si[0] = 0;
 			}
 		} else if (getNumFExp()==3) {
-			double i1 = getFExp(0).ceval().realValue();
-			double i2 = getFExp(1).ceval().realValue();
-			double i3 = getFExp(2).ceval().realValue();
+			double first = getFExp(0).ceval().realValue();
+			double step = getFExp(1).ceval().realValue();
+			double last = getFExp(2).ceval().realValue();
 			
-			//System.out.println("FRangeExp.size(): i1="+i1+" i2="+i2+" i3="+i3);
-			
-			if (i3>=i1 && i2>0) { // e.g. 1:2:3
-				double i = i1;
-				int size_tmp = 0;
-				while (i<=i3) {
-					i += i2;
-					size_tmp++;
-				}
-				si[0] = size_tmp;
-			} else if (i3<i1 && i2>0) { //e.g. 3:2:1
-				si[0] = 0;
-			} else if (i3<i1 && i2<0) { // e.g. 3:-2:1
-				double i = i1;
-				int size_tmp = 0;
-				while (i>=i3) {
-					i += i2;
-					size_tmp++;
-				}
-				si[0] = size_tmp;
-			} else if (i3>=i1 && i2<0) { // e.g. 1:-2:3
-				si[0] = 0;
-			} else if (i2==0) {
-				si[0] = 0;
-			}
+			if (step > 0.0) 
+				for (double i = first; i <= last; i += step)
+					si[0]++;
+			else if (step < 0.0)
+				for (double i = first; i >= last; i += step)
+					si[0]++;
 		}
 		return si;
 	}
@@ -423,7 +406,7 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn int[] FIdUse.size() {
+	syn lazy int[] FIdUse.size() {
 		return getFQName().hasFArraySubscripts()? 
 			getFArraySubscripts().accessSize(): myFV().size();
 	}
@@ -437,7 +420,7 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn int[] InstAccess.size() = new int[0];
+	syn lazy int[] InstAccess.size() = new int[0];
 	eq InstArrayAccess.size() = hasFArraySubscripts()? 
 			getFArraySubscripts().accessSize(): 
 				myInstComponentDecl().size();
@@ -469,7 +452,7 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn int[] InstNode.size() = new int[0];
+	syn lazy int[] InstNode.size() = new int[0];
 	
 	eq InstComponentDecl.size() = hasFArraySubscripts()? 
 			getFArraySubscripts().size(): new int[0];
@@ -481,7 +464,7 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */	
-	syn int[] AbstractFVariable.size() = new int[0];
+	syn lazy int[] AbstractFVariable.size() = new int[0];
 	eq FVariable.size() = isScalarized()? new int[0]: getFQName().size();
 		
 	/**
@@ -491,7 +474,7 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn int[] FQName.size() {
+	syn lazy int[] FQName.size() {
 		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
 		if (last.hasFArraySubscripts()) {
 			return last.getFArraySubscripts().size(); 
@@ -522,16 +505,53 @@ aspect Arrays {
 	syn boolean InstNode.isArray() = ndims()>0;
 	
 	/**
-	 * \brief Computes an NTA of type FArray where all elements are scalar
-	 * expressions.
-	 * 
-	 * This NTA is used mainly to scalarize array expressions.
-	 * 
-	 * @return An FArray object with scalar objects.
+	 * \brief Set the array subscripts of the last name part.
 	 */
-	syn nta FArray FExp.array() = new FArray();
+	public void FQName.setLastFArraySubscripts(FArraySubscripts fas) {
+		getFQNamePart(getNumFQNamePart()-1).setFArraySubscripts(fas);
+	}
 	
-	eq FArray.array() = this;
+	/**
+	 * \brief Set the array subscripts of the last name part.
+	 */
+	public void InstAccess.setLastFArraySubscripts(FArraySubscripts fas) {
+		((InstArrayAccess) getLastInstAccess()).setFArraySubscripts(fas);
+	}
+	
+	/**
+	 * \brief Computes an Array where all elements are scalar expressions.
+	 * 
+	 * This is used mainly to scalarize array expressions.
+	 * 
+	 * @return An Array with scalar expressions if this is an array expression, 
+	 *          <code>null</code> otherwise.
+	 */
+	syn lazy Array FExp.array() = null;
+	
+	eq FArray.array() {
+		Array arr = new Array(indices());
+		for (Index i : arr.indices())
+			fillArray(arr, i, 0);
+		return arr;
+	}
+	
+	/**
+	 * \brief Add a copy of this expression to arr at position i. 
+	 */
+	public void FExp.fillArray(Array arr, Index i, int level) {
+		arr.set(i, (FExp) fullCopy());
+	}
+	
+	/**
+	 * \brief Add a copy of the expression at position i to arr. 
+	 * 
+	 * @param arr    the Array to add the expression to.
+	 * @param i      the index to add at, denotes position in both Array and FArray.
+	 * @param level  the level this FArray is at in a structure of nestled FArrays.
+	 */
+	public void FArray.fillArray(Array arr, Index i, int level) {
+		getFExp(i.index()[level] - 1).fillArray(arr, i, level + 1);
+	}
 	
 	eq FIdUseExp.array() {
 		System.out.println("FIdUseExp.array() begin: " + isArray());
@@ -540,32 +560,20 @@ aspect Arrays {
 			 * Based on an array access, say x, corresponding to the declaration
 			 * Real x[2], the array {x[1],x[2]} is generated. 
 			 */
-			int ndims = ndims();
-			int[] size = size();
-			System.out.println("FIdUseExp.array(): " + size.length);
-			// Create a new array consisting of zeros.
-			FArray array = new FArray(size);
-			// Get array indices
-			Indices ind = indices();
-			// Create an index counter
-			IndexCounter cnt = new IndexCounter(ind);
-			for (int i=0;i<cnt.numElements();i++) {
-				// Create a copy of the identifier
-				FIdUseExp fid_tmp = (FIdUseExp)this.fullCopy();
-				// Set the array subscripts according to the index counter
-				fid_tmp.getFIdUse().getFQName().
-				getFQNamePart(fid_tmp.getFIdUse().
-						getFQName().getNumFQNamePart()-1).setFArraySubscripts(cnt.newFArraySubscripts());
-				// Mark the identifier as scalarized
-				fid_tmp.getFIdUse().getFQName().scalarized = true;
-				// Insert the identifier into the array
-				array.setElement(cnt.getCounterPos(),fid_tmp);
-				cnt.inc();
+			System.out.println("FIdUseExp.array(): " + size().length);
+			
+			Array array = new Array(indices());
+			for (Index i : array.indices()) {
+				FIdUseExp fid_tmp = (FIdUseExp) fullCopy();
+				FQName fqn = fid_tmp.getFIdUse().getFQName();
+				fqn.setLastFArraySubscripts(i.newFArraySubscripts());
+				fqn.scalarized = true;
+				array.set(i, fid_tmp);
 			}
 			return array;
 			
 		} else {
-			return new FArray();
+			return null;
 		}
 	}
 
@@ -578,146 +586,56 @@ aspect Arrays {
 			 * Based on an array access, say x, corresponding to the declaration
 			 * Real x[2], the array {x[1],x[2]} is generated. 
 			 */
-			int ndims = ndims();
-			int[] size = size();
-			//System.out.println("FInstAccessExp.array(): " + size.length);
-			// Create a new array consisting of zeros.
-			FArray array = new FArray(size);
-			// Get array indices
-			Indices ind = indices();
-			// Create an index counter
-			IndexCounter cnt = new IndexCounter(ind);
-			for (int i=0;i<cnt.numElements();i++) {
-				// Create a copy of the identifier
+			//System.out.println("FInstAccessExp.array(): " + size().length);
+			Array array = new Array(indices());
+			for (Index i : array.indices()) {
 				FInstAccessExp ia_tmp = (FInstAccessExp)this.fullCopy();
-				// Set the array subscripts according to the index counter
-				((InstArrayAccess)ia_tmp.getInstAccess().getLastInstAccess()).setFArraySubscripts(cnt.newFArraySubscripts());
-				// Mark the identifier as scalarized
-				ia_tmp.getInstAccess().scalarized = true;
-				// Insert the identifier into the array
-				array.setElement(cnt.getCounterPos(),ia_tmp);
-				cnt.inc();
+				InstAccess ia = ia_tmp.getInstAccess();
+				ia.setLastFArraySubscripts(i.newFArraySubscripts());
+				ia.scalarized = true;
+				array.set(i, ia_tmp);
 			}
 			return array;
-			
 		} else {
-			return new FArray();
+			return null;
 		}
 	}
 
 	
 	/**
-	 * \brief Computes an NTA of type FArray where all elements are scalar
-	 * expressions.
+	 * \brief Computes an Array where all elements are scalar expressions.
 	 * 
-	 * This NTA is used mainly to scalarize array expressions.
+	 * This is used mainly to scalarize array expressions.
 	 * 
-	 * @return An FArray object with scalar objects.
+	 * @return An Array object with scalar objects.
 	 */
-	syn nta FArray FSubscript.array() = null;
+	syn lazy Array FSubscript.array() = null;
 	
 	eq FExpSubscript.array() = getFExp().array();
 	eq FRangeExp.array() {
 		//System.out.println("FRangeExp.array(): size = " + size()[0]);	
 		double i1 = getFExp(0).ceval().realValue();
-		double i2;
-		if (getNumFExp()==2) {
-			i2 = 1;
-		} else {
+		double i2 = 1.0;
+		if (getNumFExp() > 2) 
 			i2 = getFExp(1).ceval().realValue();
-		}		
-		List l = new List();
-		for (int i=0;i<size()[0];i++) {
-			l.add(new FRealLitExp(i1 + i*i2 + ""));
+		Array array = new Array(indices());
+		for (Index i : array.indices()) { 
+			array.set(i, new FRealLitExp(i1));
+			i1 += i2;
 		}
 		
-		return new FArray(l);
-	}
-	
-	eq FZeros.array() = new FArray(size());
-	eq FOnes.array() { 
-		FArray array = new FArray(size());    
-		Indices ind = new Indices(size());
-		IndexCounter cnt = new IndexCounter(ind);
-		// Fill the array with ones.
-		for (int i=0;i<cnt.numElements();i++) {
-			array.setElement(cnt.getCounterPos(),new FIntegerLitExp("1"));
-			cnt.inc();
-		}
 		return array;
-
-	}
-
-	/**
-	 * \brief Helper function for building new FArrays.
-	 * 
-	 * @param index Current array subscript index.
-	 * @param size Array size
-	 * @return A list containing size[index] elements. If index<size.length-1
-	 * then the list contains FArray objects and if index==size.length-1 the
-	 * list contains zeros.
-	 */
-	public static List<FExp> FArray.emptyArray(int index, int[] size) {
-		List<FExp> l = new List<FExp>();
-		if (index < size.length-1) { // Not yet at the last index
-			for (int i=0;i<size[index];i++) {
-				l.add(new FArray(emptyArray(index+1,size)));
-			}
-		} else { // If at the last index, add zeros
-			for (int i=0;i<size[index];i++) {
-				l.add(new FIntegerLitExp("0"));
-			}
-		}
-		return l;
-	}
-
-	/**
-	 * \brief Create an FArray filled with zeros.
-	 * 
-	 * @param size The array sizes of the new array.
-	 * @return A new FArray object.
-	 */
-	public FArray.FArray(int[] size) {
-		this(emptyArray(0,size));
 	}
 	
+	eq FZeros.array() = new Array(indices()).fill(new FIntegerLitExp(0));
+	eq FOnes.array()  = new Array(indices()).fill(new FIntegerLitExp(1));
+	
 	/**
-	 * \brief Get an element in an FArray.
+	 * \brief Get the set of all array indices of an array access. 
 	 * 
-	 * @param index Index of element to retrieve.
-	 * @return An expression corresponding to the element defined by the 
-	 * parameter index. 
+	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	public FExp FArray.getElement(int[] index) {
-		//System.out.println("FArray.getElement");
-		//dumpTreeBasic("");
-		FArray array = this;
-		for (int i=0;i<index.length;i++) {
-			if (i<index.length-1) {
-				array = (FArray)array.getFExp(index[i]);
-			} else {
-				return array.getFExp(index[i]);
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * \brief Set an element in an FArray.
-	 * 
-	 * @param index The index of the element to set.
-	 * @param exp Expression to set.
-	 */
-	public void FArray.setElement(int[] index, FExp exp) {
-		FArray array = this;
-		for (int i=0;i<index.length;i++) {
-			if (i<index.length-1) {
-				array = (FArray)array.getFExp(index[i]);
-			} else {
-				array.setFExp(exp,index[i]);
-			}
-		}
-	}
+	syn lazy Indices FExp.indices() = Indices.create(size());
 	
 	/**
 	 * \brief Get the set of all array indices of an array access. 
@@ -748,44 +666,53 @@ aspect Arrays {
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn lazy Indices InstAccess.indices() = ((InstArrayAccess)getLastInstAccess()).hasFArraySubscripts()?
-			((InstArrayAccess)getLastInstAccess()).getFArraySubscripts().indices(): myInstComponentDecl().indices();
+	syn lazy Indices InstAccess.indices() = myInstComponentDecl().indices();
+	eq InstDot.indices()                  = getLastInstAccess().indices();
+	eq InstArrayAccess.indices()          = 
+		hasFArraySubscripts() ? getFArraySubscripts().indices() : myInstComponentDecl().indices();
 
 	/**
 	 * \brief Get the set of all array indices of an FVariable. 
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn lazy Indices AbstractFVariable.indices() = new Indices();
-	eq FVariable.indices() = isScalarized()? new Indices(): new Indices(size());
+	syn lazy Indices AbstractFVariable.indices() = null;
+	eq FVariable.indices() = isScalarized() ? null : Indices.create(size());
 
 	/**
 	 * \brief Get the set of all array indices of an InstComponentDecl. 
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn lazy Indices InstComponentDecl.indices() = new Indices(size());
+	syn lazy Indices InstComponentDecl.indices() = Indices.create(size());
 		
 	/**
 	 * \brief Get the set of all array indices of an array access. 
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */	
-	syn Indices FQName.indices() {
-		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
-		if (last.hasFArraySubscripts()) {
-			return last.getFArraySubscripts().indices(); 
-		} else {
-			return new Indices();
-		}
-	}
+//	syn Indices FQName.indices() {
+//		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
+//		if (last.hasFArraySubscripts()) {
+//			return last.getFArraySubscripts().indices(); 
+//		} else {
+//			return myFV().indices();
+//		}
+//	}
 	
 	/**
 	 * \brief Get the set of all array indices of an array access. 
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn lazy Indices FArraySubscripts.indices() = new Indices(this);
+	syn Indices FEquation.indices() = getLeft().indices();
+	
+	/**
+	 * \brief Get the set of all array indices of an array access. 
+	 * 
+	 * @return An Indices object containing all indices in each array dimension.
+	 */
+	syn lazy Indices FArraySubscripts.indices() = Indices.create(this);
 	
 	/**
 	 * \brief Get the set of all array indices of an array access. 
@@ -795,62 +722,455 @@ aspect Arrays {
 	syn int[] FSubscript.myIndices();
 	
 	eq FColonSubscript.myIndices() {
+		// TODO: should return 1..n
 		return new int[0];
 	}
 	
 	eq FExpSubscript.myIndices() = getFExp().myIndices();
 	
 	syn int[] FExp.myIndices() {
-		if (ndims()==0) {
-			int[] indices = new int[1];
-			indices[0] = ceval().intValue();
-			return indices;
+		if (ndims() == 0) {
+			return new int[] { ceval().intValue() };
 		} else if (ndims() == 1) {
-			int[] size = size();
-			int[] indices = new int[size[0]];
-			FArray indExps = array();
-			for (int i=0;i<size[0];i++) {
-				indices[i] = indExps.getFExp(i).ceval().intValue();
-			}
+			int[] indices = new int[size()[0]];
+			Array indExps = array();
+			int j = 0;
+			for (FExp exp : indExps) 
+				indices[j++] = exp.ceval().intValue();
 			return indices;
 		} else {
 			return new int[0];
 		}
 	}
+
+}
+
+aspect ArrayIndices {
+	
+	/**
+	 * \brief Array describes the set of scalarized FExp nodes corresponding to an array expression.
+	 */
+	public class Array implements Iterable<FExp> {
+		
+		private FExp[]  expressions;
+		private Indices indices;
+		
+		// TODO: add more constructors?
+		
+		/**
+		 * \brief Create an Array spanning a given Indices.
+		 */
+		public Array(Indices indices) {
+			this.indices = indices;
+			expressions = new FExp[indices.numElements()];
+		}
+		
+		/**
+		 * \brief Create an Array with dimentions <code>size</code>.
+		 */
+//		public Array(int[] size) {
+//			this(Indices.create(size));
+//		}
+		
+		/**
+		 * \brief Creates an iterator that iterates over all FExp nodes in this Array.
+		 */
+		public Iterator<FExp> iterator() {
+			return new AIterator();
+		}
+		
+		/**
+		 * \brief Returns the FExp node referenced by <code>i</code> in this Array.
+		 */
+		public FExp get(Index i) {
+			return expressions[i.internal(indices)];
+		}
+		
+		/**
+		 * \brief Sets the FExp node referenced by <code>i</code> in this Array to <code>exp</code>.
+		 */
+		public void set(Index i, FExp exp) {
+			expressions[i.internal(indices)] = exp;
+		}
+		
+		/**
+		 * \brief Returns the Indices associated with this Array.
+		 */
+		public Indices indices() {
+			return indices;
+		}
+		
+		/**
+		 * \brief Set all expressions in Array to copies of <code>exp</code>.
+		 * 
+		 * @return <code>this</code> 
+		 */
+		public Array fill(FExp exp) {
+			for (int i = 0; i < expressions.length; i++)
+				expressions[i] = (FExp) exp.fullCopy();
+			return this;
+		}
+		
+		/**
+		 * \brief Returns the number of dimensions spanned by this Array.
+		 */
+		public int ndims() {
+			return indices.ndims();
+		}
+		
+		/**
+		 * \brief Returns the size of this Array in each dimension.
+		 */
+		public int[] size() {
+			return indices.size();
+		}
+		
+		/**
+		 * \brief Iterates over all FExp nodes in this Array.
+		 */
+		private class AIterator implements Iterator<FExp> {
+			
+			private int i = 0;
+			
+			public boolean hasNext() {
+				return i < expressions.length;
+			}
+			
+			public FExp next() {
+				return expressions[i++];
+			}
+			
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+			
+		}
+	}
+	
+	/**
+	 * \brief Represents the index/indices of a single cell in an (possibly 
+	 *        multi-dimensional) array. 
+	 */
+	public class Index implements Cloneable {
+		
+		protected int[] index;
+		
+		/**
+		 * \brief Construct an Index representing the indices given in <code>ind</code>.
+		 */
+		protected Index(int[] ind) {
+			index = ind;
+		}
+		
+		/**
+		 * \brief Returns the indices that specify this cell.
+		 */
+		public int[] index() {
+			return index;
+		}
+		
+		/**
+		 * \brief Create a new FArraySubscripts object describing this index.
+		 */
+		public FArraySubscripts newFArraySubscripts() {
+			FArraySubscripts fas = new FArraySubscripts();
+			for (int i = 0; i < index.length; i++) {
+				fas.addFSubscript(new FExpSubscript(new FIntegerLitExp(index[i])));
+			}
+			return fas;
+		}
+		
+		/**
+		 * \brief Copies this Index. Always use clone() when saving an Index.
+		 */
+		public Index clone() {
+			try {
+				Index i = (Index) super.clone();
+				i.index = index.clone();
+				return i;
+			} catch (CloneNotSupportedException e) {
+				return null;
+			}
+		}
+		
+		/**
+		 * \brief Return a String represetation of this Index.
+		 */
+		public String toString() {
+			return Arrays.toString(index);
+		}
+		
+		
+		/**
+		 * \brief Return the internal index in an Array of the cell this Index refers to.
+		 *        Only for use from Array.
+		 * 
+		 * @param indices  the indices to resolve the internal index with
+		 */
+		public int internal(Indices ind) {
+			return ind.internal(this);
+		}
+		
+		/**
+		 * \brief Construct an empty Index.
+		 */
+		protected Index() {
+		}
+		
+		/**
+		 * \brief Construct an Index of ndims dimensions, 
+		 *        pointing at the spot before the first cell.
+		 */
+		protected Index(int ndims) {
+			index = new int[ndims];
+			for (int i = ndims - 2; i >= 0; i--)
+				index[i] = 1;
+			index[ndims - 1] = 0;
+		}
+		
+	}
 	
 	/**
 	 * \brief Indices represents the set of array indices in each dimension.
+	 * 
+	 * Only supports indices of the form (1..n1, 1..n2, ... , 1..nk). 
+	 * See {@see NonConsecutiveIndices}. 
+	 * 
+	 * New Indices objects should be created with the create() methods. 
+	 * The subclass used is selected automatically. 
+	 * 
+	 * The Indices class is typically used to iterate over all possible indices
+	 * of an array access of declaration.
+	 */
+	public class Indices implements Iterable<Index> {
+		protected int ndims;
+		protected int size[];
+		
+		/**
+		 * \brief Create an Indices object based on array sizes. 
+		 */
+		public static Indices create(int[] size) {
+			return new Indices(size);
+		}
+		
+		/**
+		 * \brief Create an Indices object based on FArraySubcripts.
+		 */
+		public static Indices create(FArraySubscripts fas) {
+			return NonConsecutiveIndices.create(fas);
+		}
+		
+		/**
+		 * \brief Create an Indices object based on a list of int arrays.
+		 */
+		public static Indices create(ArrayList<int[]> ind) {
+			return NonConsecutiveIndices.create(ind);
+		}
+		
+		/**
+		 * \brief Check that i is valid for this Indices object.
+		 */
+		public boolean isValid(Index i) {
+			int[] index = i.index();
+			for (int j = 0; j < ndims; j++)
+				if (index[j] > size[j])
+					return false;
+			return true;
+		}
+		
+		/**
+		 * \brief Returns an Iterator, that iterates over all indices spanned by this Indices object.
+		 */
+		public Iterator<Index> iterator() {
+			return new IIterator();
+		}
+		
+		/**
+		 * \brief Returns the number of elements spanned by this Indices object.
+		 */
+		public int numElements() {
+			int res = 1;
+			for (int i = 0; i < ndims; i++)
+				res *= size[i];
+			return res;
+		}
+		
+		/**
+		 * \brief Returns the number of dimensions spanned by this Indices object.
+		 */
+		public int ndims() {
+			return ndims;
+		}
+		
+		/**
+		 * \brief Returns the size of this Indices object in each dimension.
+		 */
+		public int[] size() {
+			return size;
+		}
+		
+		
+		/**
+		 * \brief Internal constructor to create an Indices object with ndim dimensions. 
+		 *        For use by subclasses.
+		 */
+		protected Indices(int ndims) {
+			this.ndims = ndims;
+			size = new int[ndims];
+		}
+		
+		/**
+		 * \brief Internal constructor to create an Indices object based on array sizes. 
+		 */
+		protected Indices(int[] size) {
+			ndims = size.length;
+			this.size = size.clone();
+		}
+		
+		/**
+		 * \brief Calculate the internal index in an Array that spans this Indices.
+		 */
+		protected int internal(Index i) {
+			int[] index = i.index();
+			int res = 0;
+			for (int j = 0; j < ndims; j++)
+				res = res * size[j] + index[j] - 1;
+			return res;
+		}
+		
+		/**
+		 * \brief Iterates over all indices spanned by this Indices.
+		 */
+		protected class IIterator implements Iterator<Index> {
+			
+			protected IIndex index;
+			protected int max;
+			
+			public IIterator() {
+				index = new IIndex();
+				max = numElements() - 1;
+			}
+			
+			public boolean hasNext() {
+				return index.internal < max;
+			}
+			
+			public Index next() {
+				index.internal++;
+				int[] ind = index.index();
+				int i;
+				for (i = ndims - 1; i > 0 && ind[i] >= size[i]; i--)
+					ind[i] = 1;
+				ind[i]++;
+				return index;
+			}
+			
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+			
+		}
+		
+		/**
+		 * \brief Internal implementation of Index.
+		 */
+		protected class IIndex extends Index {
+			
+			public int internal;
+			
+			/**
+			 * \brief Construct an Index over the number of dimensions of the enclosing Indices, 
+			 *        pointing at the spot before the first cell.
+			 */
+			public IIndex() {
+				super(ndims);
+				internal = -1;
+			}
+			
+			/**
+			 * \brief Return the internal index in an Array of the cell this Index refers to.
+			 *        Only for use from Array.
+			 * 
+			 * @param indices  the indices to resolve the internal index with
+			 */
+			public int internal(Indices ind) {
+				if (ind == Indices.this) 
+					return internal;
+				else
+					return ind.internal(this);
+			}
+			
+		}
+		
+	}
+
+	/**
+	 * \brief NonConsecutiveIndices describes a set of array indices that isn't 
+	 *        limited to 1..n.
 	 * 
 	 * For example, consider the declaration Real x[4,4,4] and the access
 	 * x[:,1,1:2:4]. The array indices for the declaration is then
 	 * {1,2,3,4}, {1,2,3,4}, and {1,2,3,4} respectively for the three dimensions.
 	 * For the access, we have {1,2,3,4}, {1} and {1,3} respectively.
+	 */			/**
 	 * 
-	 * The Indices class is typically used to iterate over all possible indices
-	 * of an array access of declaration.
 	 */
-	public class Indices {
-		int ndims;
-		int size[];
+	public class NonConsecutiveIndices extends Indices {
 		// The indices are stored as a list of integer arrays.
-		private ArrayList<int[]> indices; 
+		protected ArrayList<int[]> indices; 
 		
 		/**
-		 * \brief Default constructor.
+		 * \brief Create a NonConsecutiveIndices object based on FArraySubcripts.
+		 *        Use Indices.create(FArraySubscripts fas).
 		 */
-		public Indices() {
-			ndims = -1;
-			size = new int[0];
-			indices = new ArrayList<int[]>();
+		public static NonConsecutiveIndices create(FArraySubscripts fas) {
+			return new NonConsecutiveIndices(fas);
 		}
 		
 		/**
-		 * \brief Create an Indices object based on a list of int arrays
+		 * \brief Create a NonConsecutiveIndices object based on a list of int arrays
+		 *        Use Indices.create(ArrayList<int[]> ind).
 		 */
-		public Indices(ArrayList<int[]> ind) {
+		public static NonConsecutiveIndices create(ArrayList<int[]> ind) {
+			return new NonConsecutiveIndices(ind);
+		}
+		
+		/**
+		 * \brief Check that i is valid for this Indices object.
+		 */
+		public boolean isValid(Index i) {
+			int[] index = i.index();
+			for (int j = 0; j < ndims; j++)
+				if (Arrays.binarySearch(indices.get(j), index[j]) < 0)
+					return false;
+			return true;
+		}
+		
+		/**
+		 * \brief Returns an Iterator, that iterates over all indices spanned by this Indices object.
+		 */
+		public Iterator<Index> iterator() {
+			return new NCIIterator();
+		}
+
+		
+		/**
+		 * \brief Internal constructor to create a NonConsecutiveIndices object based on FArraySubcripts.
+		 */
+		protected NonConsecutiveIndices(FArraySubscripts fas) {
+			super(fas.size());
 			indices = new ArrayList<int[]>();
-			ndims = ind.size();
-			size = new int[ndims];
+			for (FSubscript fs : fas.getFSubscripts()) {
+				indices.add(fs.myIndices());
+			}
+		}
+		
+		/**
+		 * \brief Internal constructor to create a NonConsecutiveIndices object based on a list of int arrays
+		 */
+		protected NonConsecutiveIndices(ArrayList<int[]> ind) {
+			super(ind.size());
+			indices = new ArrayList<int[]>();
 			int i = 0;
 			for (int[] ii : ind) {
 				size[i] = ii.length;
@@ -860,227 +1180,30 @@ aspect Arrays {
 		}
 		
 		/**
-		 * \brief Create an Indices object based on FArraySubcripts.
+		 * \brief Calculate the internal index in an Array that spans this Indices.
 		 */
-		public Indices(FArraySubscripts fas) {
-			//System.out.print("Indices.Indices(FArraySubscripts fas)");
-			ndims = fas.ndims();
-			size = fas.size();
-			//for (int i=0;i<size.length;i++) {
-			//	System.out.print(size[i]);
-			//}
-			//System.out.println("");
-			indices = new ArrayList<int[]>();
-			for (FSubscript fs : fas.getFSubscripts()) {
-				indices.add(fs.myIndices());
+		protected int internal(Index i) {
+			int[] index = i.index();
+			int res = 0;
+			for (int j = 0; j < ndims; j++)
+				res = res * size[j] + Arrays.binarySearch(indices.get(j), index[j]) - 1;
+			return res;
+		}
+		
+		/**
+		 * \brief Iterates over all indices spanned by this Indices.
+		 */
+		protected class NCIIterator extends IIterator {
+			
+			public Index next() {
+				index.internal++;
+				for (int i = index.internal, j = ndims - 1; j >= 0; i /= size[j], j--)
+					index.index[j] = indices.get(j)[i % size[j]];
+				return index;
 			}
 			
 		}
 		
-		/**
-		 * \brief Create an Indices object based in array sizes. 
-		 */
-		public Indices(int[] size) {
-			//System.out.print("Indices.Indices(int[] size): ");
-			//for (int i=0;i<size.length;i++) {
-			//	System.out.print(size[i]);
-			//}
-			//System.out.println("");
-			indices = new ArrayList<int[]>();
-			this.ndims = size.length;
-			this.size = new int[this.ndims];
-			for (int i=0;i<size.length;i++) {
-				int[] ind_tmp = new int[size[i]];
-				for (int j=0;j<size[i];j++) {
-					//System.out.println("Indices.Indices: i,j " + i + " " + j);
-					ind_tmp[j] = j+1;
-				}
-				this.size[i] = size[i];
-				this.indices.add(ind_tmp);
-			}
-		}
-		
-		/**
-		 * \brief Retrieve indices.
-		 * 
-		 * @param indPos Specifies which index configuration to return. The
-		 * range for each argument in this array is defined by the size of the
-		 * Indices object. In the example above, indPos={1,0,1} gives the 
-		 * indices {2,1,3}.
-		 * @param indOut. This is the output index array. It is implemented as
-		 * an input parameter, by reference, in order to avoid creating
-		 * a lot of new arrays.
-		 */
-		public void indices(int[] indPos, int[] indOut) {
-			for (int i=0;i<ndims;i++) {
-				//System.out.println("indices(): i, indPos[i], indices.get(i).length " + 
-				//		i + " " + indPos[i] + " " + indices.get(i).length);
-				indOut[i] = indices.get(i)[indPos[i]];
-			}
-		}
-		
-		public static String printIndices(int[] indices) {
-			StringBuffer str = new StringBuffer();
-			str.append("[");
-			for (int i=0;i<indices.length;i++) {
-				str.append(""+indices[i]);
-				if (i<indices.length-1) {
-					str.append(",");
-				}
-			}
-			str.append("]");
-			return str.toString();
-		}
 	}
-}
-
-aspect ArrayIndices {
-	
-	/**
-	 * \brief IndexCounter provides a simple means to iterate over array indices
-	 * specified by array sizes of an Indices object.
-	 */
-	public class IndexCounter {
-		
-		// The index counter which takes on indices specified by the
-		// Indices object
-		private int[] counter;
-		// The position of the counter. Notice that this counter is different
-		// than counter in that it goes from 0 to size[i]-1.
-		private int[] counterPos;
-		
-		// The Indices object
-		Indices indices;
-		
-		/**
-		 * \brief Constructor for creating an IndexCounter based on array
-		 * sizes.
-		 * 
-		 *  @param size Array sizes.
-		 */
-		public IndexCounter(int[] size) {
-			this(new Indices(size));
-		}
-		
-		/**
-		 * \brief Constructor for creating an IndexCounter based on an
-		 * Indices object.
-		 * 
-		 * @param An indices object.
-		 */
-		public IndexCounter(Indices indices) {
-			this.indices =indices;
-			// Create the index position counter
-			counterPos = new int[indices.ndims];
-			// Create the index counter
-			counter = new int[indices.ndims];
-			// Initialize position counter
-			for (int i=0;i<indices.ndims;i++) {
-				this.counterPos[i] = 0;
-			}
-			indices.indices(counterPos,counter);
-		}
-		
-		/**
-		 * \brief Reset counter.
-		 */
-		public void reset() {
-			for (int i=0;i<indices.ndims;i++) {
-				this.counterPos[i] = 0;
-			}
-			indices.indices(counterPos,counter);
-		}
-		
-		/**
-		 * \brief Get the number of index combinations. 
-		 * 
-		 * For example, if the Indices object contains the indices {1,2,3,4}, 
-		 * {1}, {1,3}, then the number of combinations are 4*1*2 = 8.
-		 * 
-		 * @return The number of index combinations.
-		 * 
-		 */
-		public int numElements() {
-			int n_el = 1;
-			for (int i=0;i<indices.ndims;i++) {
-				n_el *= indices.size[i];
-			}
-			return n_el;
-		}
-		
-		/**
-		 * \brief Increment the counter.
-		 */
-		public void inc() {
-			counterPos[0] += 1;
-			for (int i=0;i<indices.ndims;i++) {
-				if (counterPos[i]>=indices.size[i]) {
-					if (i<indices.ndims-1) {
-						counterPos[i] = 0;
-						counterPos[i+1] += 1;
-					} else { 
-						reset();
-					}
-				}
-			}
-			indices.indices(counterPos,counter);			
-		}
-	
-		/**
-		 * \brief Get the indices contained in the index counter.
-		 * 
-		 * @return Counter indices.
-		 */
-		public int[] getCounter() {
-			int[] cnt = new int[indices.ndims];
-			for (int i=0;i<indices.ndims;i++) {
-				cnt[i] = counter[i];
-			}
-			return cnt;
-		}
-
-		/**
-		 * \brief Get the conter indices in C style rather than Modelica style.
-		 * 
-		 * That is, the counter indices subtracted by one is returned.
-		 * 
-		 * @return Counter indices in C style.
-		 */
-		public int[] getCounterMinusOne() {
-			int[] cnt = new int[indices.ndims];
-			for (int i=0;i<indices.ndims;i++) {
-				cnt[i] = counter[i]-1;
-			}
-			return cnt;
-		}
-		
-		/**
-		 * \brief Get the indices of the index position counter.
-		 * 
-		 * @return Position counter indices.
-		 */
-		public int[] getCounterPos() {
-			int[] cnt = new int[indices.ndims];
-			for (int i=0;i<indices.ndims;i++) {
-				cnt[i] = counterPos[i];
-			}
-			return cnt;
-		}
-		
-		/**
-		 * \brief Create a new FArraySubscripts object based on the current
-		 * counter indices.
-		 * 
-		 * @return A new FArraySubscripts object.
-		 */
-		public FArraySubscripts newFArraySubscripts() {
-			FArraySubscripts fas = new FArraySubscripts();
-			for (int i=0;i<indices.ndims;i++) {
-				fas.addFSubscript(new FExpSubscript(new FIntegerLitExp(""+counter[i])));
-			}
-			return fas;
-		}
-	}
-	
 	
 }

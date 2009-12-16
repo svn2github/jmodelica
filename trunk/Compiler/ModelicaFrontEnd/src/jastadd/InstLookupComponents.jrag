@@ -286,11 +286,11 @@ aspect LookupInstComponentSlices {
 			ArrayList<InstComponentDecl> decls_tmp = 
 				new ArrayList<InstComponentDecl>();
 			// Get the array of indices
-			FArray indices = fas.getFSubscript(i).array();
+			Array array = fas.getFSubscript(i).array();
 			// Loop over all declarations
 			for (InstComponentDecl decl : decls) {
 				// Loop over all indices
-				for (FExp ind_exp : indices.getFExps()) {
+				for (FExp ind_exp : array) {
 					// TODO: add check that a value is returned
 					int index = ind_exp.ceval().intValue();
 					// TODO: check that value is inside of the bounds

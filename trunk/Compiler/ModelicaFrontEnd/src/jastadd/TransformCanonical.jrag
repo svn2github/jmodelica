@@ -232,6 +232,7 @@ aspect TransformCanonical {
 	 * attribute into account.
 	 */
 	public void FClass.genInitialEquations() {
+		// TODO: Isn't there always a value for fv.startAttributeExp() now?
 		for (FRealVariable fv : realVariables()) {
 			if (fv.fixedAttribute() ||
 					(root().options.getBooleanOption("state_start_values_fixed") 
@@ -532,41 +533,23 @@ aspect Scalarization {
 	 */
 	public void FVariable.scalarize(List<FVariable> vars) {
 		if (isArray()) {
-			int ndims = ndims();
-			int[] size = size();
-			int[] index = new int[ndims];
-			// Create an index counter
-			IndexCounter ic = new IndexCounter(size);
-			// Iterate over all indices
-			for (int i=0;i<ic.numElements();i++) {
+			for (Index i : indices()) {
 				// Copy original declaration
-				FVariable fv_tmp = (FVariable)fullCopy();
-				// Set new array subscripts corresponding to index counter
-				fv_tmp.getFQName().getFQNamePart(fv_tmp.getFQName().getNumFQNamePart()-1).
-				  setFArraySubscripts(ic.newFArraySubscripts());
+				FVariable fv_tmp = (FVariable) fullCopy();
+				// Set new array subscripts corresponding to index
+				fv_tmp.getFQName().setLastFArraySubscripts(i.newFArraySubscripts());
 				// Iterate over all attributes and scalarize.
-				List<FAttribute> l = new List<FAttribute>();
-				for (FAttribute a : getFAttributes()) {
-					if (a.getAttributeSet() && a.hasValue() && a.getValue().ndims()>0) {
-						FAttribute a_new = (FAttribute)a.fullCopy();
-						a_new.setValue(a.getValue().array().getElement(ic.getCounterMinusOne()));
-						l.add(a_new);
-					} else {
-						l.add((FAttribute)a.fullCopy());
-					}
-				}
-				fv_tmp.setFAttributeList(l);
+				for (FAttribute a : fv_tmp.getFAttributes()) 
+					if (a.getAttributeSet() && a.hasValue() && a.getValue().ndims() > 0) 
+						a.setValue(a.getValue().array().get(i));
 				// Mark variable as scalarized (affects name printing etc.)
 				fv_tmp.getFQName().scalarized = true;
-				
+				// Add altered copy to list
 				vars.addChild(fv_tmp);
-				// Increase index counter
-				ic.inc();
 			}
-			
 		} else {
-			// Duplicate FVariable even if it is not an array declaration.
-			FVariable fv_tmp = (FVariable)fullCopy();
+			// Duplicate FVariable even if it is not an array declaration. - Why?
+			FVariable fv_tmp = (FVariable) fullCopy();
 			fv_tmp.getFQName().scalarized = true;
 			vars.addChild(fv_tmp);
 		}
@@ -594,17 +577,12 @@ aspect Scalarization {
 			 * If the expression is an array expression, then the FExp.array()
 			 * element is used to generate scalar equations.
 			 */
-			// Get array size
-			int[] size = size();
-			// Create index counter
-			IndexCounter cnt = new IndexCounter(size);
-			// Iterate over all indices in index counter
-			for (int i=0;i<cnt.numElements();i++) {
-				// TODO: shouldn't these expressions be scalarized as well?
-				eqns.addChild(new FEquation((FExp)getLeft().array().getElement(cnt.getCounterMinusOne()).fullCopy(),
-						(FExp)getRight().array().getElement(cnt.getCounterMinusOne()).fullCopy()));
-				cnt.inc();
-			}
+			// Iterate over array elements and create scalarized equation for each
+			/* TODO: shouldn't these expressions be scalarized as well?
+			 *        call scalarize(indexMap) insted of fullCopy()? */
+			for (Index i : indices()) 
+				eqns.addChild(new FEquation((FExp) getLeft().array().get(i).fullCopy(), 
+						(FExp) getRight().array().get(i).fullCopy()));
 		}
 	}
 	
@@ -621,28 +599,27 @@ aspect Scalarization {
 	
 	public void FForClauseE.scalarize(List<FAbstractEquation> eqns,
 			HashMap<String,Integer> indexMap) {
+		// TODO: Refactor this to FForClauseE.indices()?
 		ArrayList<int[]> ind = new ArrayList<int[]>();
 		for (FForIndex fi : getFForIndexs()) {
 			if (fi.hasFExp()) {
 				ind.add(fi.getFExp().myIndices().clone());
 			}
 		}
-		Indices indices = new Indices(ind);
-		IndexCounter cnt = new IndexCounter(indices);
+		Indices indices = Indices.create(ind);
+		
 		HashMap<String,Integer> myIndexMap = new HashMap<String,Integer>();
 		myIndexMap.putAll(indexMap);
-		for (int i=0;i<cnt.numElements();i++) {
+		for (Index i : indices) {
 			int j = 0;
-			int[] cnt_ind = cnt.getCounter();
 			for (FForIndex fi : getFForIndexs()) {
-				myIndexMap.put(fi.getFVariable().name(),Integer.valueOf(cnt_ind[j]));
+				myIndexMap.put(fi.getFVariable().name(), Integer.valueOf(i.index()[j]));
 				j++;
 			}
 			
 			for (FAbstractEquation ae : getFAbstractEquations()) {
-				ae.scalarize(eqns,myIndexMap);
+				ae.scalarize(eqns, myIndexMap);
 			}
-			cnt.inc();
 		}		
 	}
 	
@@ -704,7 +681,7 @@ aspect Scalarization {
 
     public FExp FIdUseExp.scalarize(HashMap<String,Integer> indexMap) {
     	//System.out.println("FIdUseExp.scalarize: " + name());
-    	if (indexMap.get(name())!=null) {
+    	if (indexMap.containsKey(name())) {
     		return new FIntegerLitExp(""+indexMap.get(getFIdUse().name()).intValue());
     	}
     	return new FIdUseExp(getFIdUse().scalarize(indexMap));
@@ -712,7 +689,7 @@ aspect Scalarization {
     
     public FExp FIfExp.scalarize(HashMap<String,Integer> indexMap) {
 		List etl = new List();
-		for (int i=0;i<getNumFElseIfExp();i++) {
+		for (int i = 0; i < getNumFElseIfExp(); i++) {
 			etl.add(getFElseIfExp(i).scalarize(indexMap));
 		}
 		return new FIfExp(getIfExp().scalarize(indexMap),
@@ -766,7 +743,7 @@ aspect Scalarization {
 	public FExp FSqrtExp.scalarize(HashMap<String,Integer> indexMap) { return new FSqrtExp(getFExp().scalarize(indexMap)); }
 
 	// TODO: Need to examine scalarization for generic functions more closely 
-	public FExp FFunctionCall.scalarize(HashMap<String,Integer> indexMap) { return (FFunctionCall)fullCopy(); }
+	public FExp FFunctionCall.scalarize(HashMap<String,Integer> indexMap) { return (FFunctionCall) fullCopy(); }
 	
 	public FExp FTimeExp.scalarize(HashMap<String,Integer> indexMap) { return new FTimeExp(); }
 	public FExp FEndExp.scalarize(HashMap<String,Integer> indexMap) { return new FEndExp(); }

@@ -68,6 +68,30 @@ aspect Constructors {
 		this(new FNormalEquation(), stmts);
 	}
 	
+	/**
+	 * Constructs a real literal expression from a double.
+	 */
+	public FRealLitExp.FRealLitExp(double val) {
+		this(String.valueOf(val));
+	}
+	
+	/**
+	 * Constructs an integer literal expression from an integer.
+	 */
+	public FIntegerLitExp.FIntegerLitExp(int val) {
+		this(String.valueOf(val));
+	}
+	
+	/**
+	 * Constructs a boolean literal expression from a boolean.
+	 */
+	public static FBooleanLitExp FBooleanLitExp.createFBooleanLitExp(boolean val) {
+		if (val)
+			return new FBooleanLitExpTrue();
+		else
+			return new FBooleanLitExpFalse();
+	}
+	
 	public ComponentDecl.ComponentDecl(boolean isParameter,
 	                                   String type,
 	                                   String name,

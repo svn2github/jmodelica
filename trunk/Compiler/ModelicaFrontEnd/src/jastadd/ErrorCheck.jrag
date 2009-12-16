@@ -496,12 +496,8 @@ aspect InstanceErrorCheck {
 			checkConstantScalarExpression(node,varKind,varName);
 		} else {
 //			System.out.println("FExp.checkConstantExpression ndims="+ndims() + " "+getClass().getName());
-			IndexCounter cnt = new IndexCounter(size());
-			for (int i=0;i<cnt.numElements();i++) {
-				//System.out.println(Indices.printIndices(cnt.getCounterMinusOne()) + " " + i + " " + cnt.numElements());
-				array().getElement(cnt.getCounterMinusOne()).checkConstantScalarExpression(node,varKind,varName);
-				cnt.inc();
-			}
+			for (Index i : array().indices())  
+				array().get(i).checkConstantScalarExpression(node, varKind, varName);
 		}
 	}
 	
