@@ -491,26 +491,6 @@ FSubExp : FArtmBinExp::=;
 FMulExp : FArtmBinExp::=;
 
 /**
- * \brief Matrix multiplied by matrix expression.
- */
-FMulExpMM : FMulExp::=;
-
-/**
- * \brief Vector multiplied by matrix expression.
- */
-FMulExpVM : FMulExp::=;
-
-/**
- * \brief Matrix multiplied by vector expression.
- */
-FMulExpMV : FMulExp::=;
-
-/**
- * \brief Vector multiplied by vector expression.
- */
-FMulExpVV : FMulExp::=;
-
-/**
  * \brief Division expression.
  */
 FDivExp : FArtmBinExp::=;
@@ -677,16 +657,6 @@ FInstAccessExp : FExp ::= InstAccess;
  * \brief Array constructor expression.
  */
 FArray : FExp ::= FExp*;
-
-/**
- * \brief A matrix expression.
- */
-FMatrix : FExp ::= FExpList*;
-
-/**
- * \brief An expression list used in FMatrix nodes.
- */
-FExpList : FExp ::= FExp*;
 
 /**
  * \brief Range expression.

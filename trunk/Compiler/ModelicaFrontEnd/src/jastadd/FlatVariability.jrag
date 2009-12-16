@@ -135,22 +135,6 @@ aspect FlatVariability {
 	eq FElseIfExp.variability() = getThenExp().variability();
 
 	eq FSizeExp.variability() = getFIdUseExp().variability();
-
-	eq FMatrix.variability() {
-		FTypePrefixVariability total = fConstant();
-		for (int i=0; i<getNumFExpList(); i++) {
-			total = total.combine(getFExpList(i).variability());
-		}
-		return total;
-	}
-	
-	eq FExpList.variability() {
-		FTypePrefixVariability total = fConstant();		
-		for (int i=0; i<getNumFExp(); i++) {
-			total = total.combine(getFExp(i).variability());
-		}
-		return total;
-	}
 	
 	eq FFunctionCall.variability() {
 		FTypePrefixVariability total = fConstant();

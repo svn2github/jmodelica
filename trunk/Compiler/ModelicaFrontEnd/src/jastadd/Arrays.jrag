@@ -161,6 +161,8 @@ aspect Arrays {
 	eq FOnes.ndims() = getNumFExp();
 	eq FZeros.ndims() = getNumFExp();
 	
+	eq FBinExp.ndims() = getLeft().ndims();
+	
 	/**
 	 * \brief Get array dimensions.
 	 * 
@@ -335,7 +337,8 @@ aspect Arrays {
 	 */
 	syn lazy int[] FExp.size() = new int[0];
 	eq FInstAccessExp.size() = getInstAccess().size();
-
+	
+	eq FBinExp.size() = getLeft().size();
 	
  	eq FRangeExp.size() {
 		int[] si = new int[1];
@@ -526,7 +529,24 @@ aspect Arrays {
 	 * @return An Array with scalar expressions if this is an array expression, 
 	 *          <code>null</code> otherwise.
 	 */
-	syn lazy Array FExp.array() = null;
+	syn lazy Array FExp.array() = new ScalarAsArray(this);
+	
+	eq FBinExp.array() {
+		if (isArray()) {
+			/* Standard implementation covers many binary operators.
+			 * Apply operator element-wise, if one operand is scalar, use it with 
+			 * all elements in other operand.
+			 */
+			Array left  = getLeft().array();
+			Array right = getRight().array();
+			Array res   = new Array(indices());
+			for (Index i : res.indices())
+				res.set(i, createNode(left.get(i), right.get(i)));
+			return res;
+		} else {
+			return new ScalarAsArray(this);
+		}
+	}
 	
 	eq FArray.array() {
 		Array arr = new Array(indices());
@@ -573,7 +593,7 @@ aspect Arrays {
 			return array;
 			
 		} else {
-			return null;
+			return new ScalarAsArray(this);
 		}
 	}
 
@@ -597,7 +617,7 @@ aspect Arrays {
 			}
 			return array;
 		} else {
-			return null;
+			return new ScalarAsArray(this);
 		}
 	}
 
@@ -685,20 +705,6 @@ aspect Arrays {
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
 	syn lazy Indices InstComponentDecl.indices() = Indices.create(size());
-		
-	/**
-	 * \brief Get the set of all array indices of an array access. 
-	 * 
-	 * @return An Indices object containing all indices in each array dimension.
-	 */	
-//	syn Indices FQName.indices() {
-//		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
-//		if (last.hasFArraySubscripts()) {
-//			return last.getFArraySubscripts().indices(); 
-//		} else {
-//			return myFV().indices();
-//		}
-//	}
 	
 	/**
 	 * \brief Get the set of all array indices of an array access. 
@@ -752,8 +758,8 @@ aspect ArrayIndices {
 	 */
 	public class Array implements Iterable<FExp> {
 		
-		private FExp[]  expressions;
-		private Indices indices;
+		protected FExp[]  expressions;
+		protected Indices indices;
 		
 		// TODO: add more constructors?
 		
@@ -766,13 +772,6 @@ aspect ArrayIndices {
 		}
 		
 		/**
-		 * \brief Create an Array with dimentions <code>size</code>.
-		 */
-//		public Array(int[] size) {
-//			this(Indices.create(size));
-//		}
-		
-		/**
 		 * \brief Creates an iterator that iterates over all FExp nodes in this Array.
 		 */
 		public Iterator<FExp> iterator() {
@@ -780,14 +779,14 @@ aspect ArrayIndices {
 		}
 		
 		/**
-		 * \brief Returns the FExp node referenced by <code>i</code> in this Array.
+		 * \brief Returns the element referenced by <code>i</code> in this Array.
 		 */
 		public FExp get(Index i) {
 			return expressions[i.internal(indices)];
 		}
 		
 		/**
-		 * \brief Sets the FExp node referenced by <code>i</code> in this Array to <code>exp</code>.
+		 * \brief Sets the element referenced by <code>i</code> in this Array to <code>exp</code>.
 		 */
 		public void set(Index i, FExp exp) {
 			expressions[i.internal(indices)] = exp;
@@ -825,6 +824,13 @@ aspect ArrayIndices {
 			return indices.size();
 		}
 		
+		
+		/**
+		 * \brief Standard constuctor - only for subclasses.
+		 */
+		protected Array() {
+		}
+		
 		/**
 		 * \brief Iterates over all FExp nodes in this Array.
 		 */
@@ -845,6 +851,41 @@ aspect ArrayIndices {
 			}
 			
 		}
+	}
+	
+	/**
+	 * \brief Dummy array for representing a scalar expression in algorithms handling Arrays. 
+	 * 
+	 * Iterator and Indices acts as if on a vector of length 1.
+	 * 
+	 * The get() and set() methods ignore the Index and always operate on the single element.
+	 * This allows a ScalarAsArray to be used with an Array in an algorithm that expects 
+	 * two Array objects, as long as the Indices from a real Array is used to iterate. 
+	 */
+	public class ScalarAsArray extends Array {
+		
+		/**
+		 * \brief Constructs a ScalarAsArray containing <code>exp</code>.
+		 */
+		public ScalarAsArray(FExp exp) {
+			expressions = new FExp[] { exp };
+			indices = Indices.create(new int[] { 1 });
+		}
+		
+		/**
+		 * \brief Returns the single element wrapped by this Array. 
+		 */
+		public FExp get(Index i) {
+			return expressions[0];
+		}
+		
+		/**
+		 * \brief Sets the single element wrapped by this Array to <code>exp</code>.
+		 */
+		public void set(Index i, FExp exp) {
+			expressions[0] = exp;
+		}
+
 	}
 	
 	/**

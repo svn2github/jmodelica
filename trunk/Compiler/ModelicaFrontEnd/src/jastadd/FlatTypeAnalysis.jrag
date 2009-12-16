@@ -14,6 +14,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.util.Arrays;
+
 aspect FlatTypeAnalysis {
 
 	syn lazy FPrimitiveType AbstractFVariable.type();
@@ -95,9 +97,9 @@ aspect FlatTypeAnalysis {
 	
 	syn lazy FPrimitiveType FExp.type() = fUnknownType();
 	
-	eq FUnaryExp.type() = getFExp().type();
-	eq FArtmBinExp.type() = getLeft().type().
-	  binaryNumericPromotion(getRight().type());
+	eq FUnaryExp.type()   = getFExp().type();
+	eq FArtmBinExp.type() = getLeft().type().binaryLooseNumericPromotion(getRight().type());
+	eq FAddExp.type()     = getLeft().type().binaryNumericPromotion(getRight().type());
 	
 	eq FLogBinExp.type() = fBooleanScalarType();
 
@@ -158,13 +160,8 @@ aspect FlatTypeAnalysis {
 		}
 	}
 	
-	syn lazy FPrimitiveType FFunctionCallLeft.type() {
-		if (hasFIdUse() && getFIdUse() instanceof FIdUseInstAccess) {
-			return ((FIdUseInstAccess) getFIdUse()).getInstAccess().myInstComponentDecl().type();
-		} else {
-			return fUnknownType();
-		}
-	}
+	syn lazy FPrimitiveType FFunctionCallLeft.type() = 
+		hasFIdUse() ? getFIdUse().type() : fUnknownType();
 	
 	// TODO: Can't anything be inferred here?
 	syn lazy FPrimitiveType InstComponentDecl.type() = fUnknownType();
@@ -176,22 +173,73 @@ aspect FlatTypeAnalysis {
 
 aspect FNumericPromotion {
 	
-	syn FPrimitiveType FPrimitiveType.
-	    binaryNumericPromotion(FPrimitiveType type) = fUnknownType();
+	/**
+	 * \brief Combine two types to the smallest common denominator.
+	 * 
+	 * If either is non-numeric or if sizes doesn't match, 
+	 * the unknown type is returned.
+	 */
+	syn FPrimitiveType FPrimitiveType.binaryNumericPromotion(FPrimitiveType type) = fUnknownType();
+	
+	/**
+	 * \brief Combine two types to the smallest common denominator.
+	 * 
+	 * If either is non-numeric or if both are array and sizes doesn't match, 
+	 * the unknown type is returned.
+	 */
+	syn FPrimitiveType FPrimitiveType.binaryLooseNumericPromotion(FPrimitiveType type) = fUnknownType();
+	
+	/**
+	 * \brief Combine two types to the smallest common scalar denominator.
+	 * 
+	 * If either is non-numeric, the unknown type is returned.
+	 */
+	syn FPrimitiveType FPrimitiveType.binaryScalarNumericPromotion(FPrimitiveType type) = fUnknownType();
+	
 	eq FPrimitiveScalarNumericType.binaryNumericPromotion(FPrimitiveType type) {
-		if (!type.isNumeric()) {
-			return fUnknownType();
+		if (type.isScalar()) {
+			return binaryScalarNumericPromotion(type);
 		} else {
-			return isReal()? this : type; 
+			return fUnknownType(); 
 		}
 	}
 
 	eq FPrimitiveArrayNumericType.binaryNumericPromotion(FPrimitiveType type) {
-		if (!type.isNumeric()) {
-			return fUnknownType();
+		if (type.isScalar() || dimensionCompatible(type)) {
+			return binaryScalarNumericPromotion(type).arrayType(size());
 		} else {
-			return isReal()? this : type; 
+			return fUnknownType();
 		}
+	}
+	
+	eq FPrimitiveScalarNumericType.binaryLooseNumericPromotion(FPrimitiveType type) {
+		if (type.isScalar()) {
+			return binaryScalarNumericPromotion(type);
+		} else {
+			return binaryScalarNumericPromotion(type).arrayType(type.size()); 
+		}
+	}
+
+	eq FPrimitiveArrayNumericType.binaryLooseNumericPromotion(FPrimitiveType type) {
+		if (type.isScalar() || dimensionCompatible(type)) {
+			return binaryScalarNumericPromotion(type).arrayType(size());
+		} else {
+			return fUnknownType();
+		}
+	}
+	
+	eq FPrimitiveScalarNumericType.binaryScalarNumericPromotion(FPrimitiveType type) {
+		if (type.isNumeric()) 
+			return isReal() ? this : type.scalarType(); 
+		else 
+			return fUnknownType();
+	}
+
+	eq FPrimitiveArrayNumericType.binaryScalarNumericPromotion(FPrimitiveType type) {
+		if (type.isNumeric()) 
+			return isReal() ? scalarType() : type.scalarType(); 
+		else 
+			return fUnknownType();
 	}
 
 }
@@ -218,32 +266,8 @@ aspect FTypeCompatibility {
 	
 	syn boolean FPrimitiveType.dimensionCompatible(FPrimitiveType type) = false;
 	eq FPrimitiveScalarType.dimensionCompatible(FPrimitiveType type) = type.isScalar();
-	eq FPrimitiveArrayType.dimensionCompatible(FPrimitiveType type) {
-		//System.out.println("hej: " + ndims()+" " + type.ndims());
-		if (ndims() != type.ndims()) {
-			return false;
-		} else {
-			int[] size_me = size();
-			int[] size_type = type.size();
-			/*
-			System.out.println("size_me");
-			for (int i=0;i<size_me.length;i++) {
-				System.out.println(size_me[i]);
-			}
-			*/
-			//System.out.println("size_type");
-			//for (int i=0;i<size_type.length;i++) {
-			//	System.out.println(size_type[i]);
-			//}
-
-			for (int i=0;i<ndims();i++) {
-				if (size_me[i] != size_type[i]) {
-					return false;
-				}
-			}
-			return true;
-		}
-	}
+	eq FPrimitiveArrayType.dimensionCompatible(FPrimitiveType type) = 
+		Arrays.equals(size(), type.size());
 	
 }
 
@@ -390,7 +414,10 @@ aspect FTypeCompatibility {
  		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1);
  	}
  	
- 	syn FPrimitiveArrayType FPrimitiveScalarType.arrayType(int[] size);
+ 	syn FPrimitiveArrayType FPrimitiveType.arrayType(int[] size);
+ 	eq FUnknownType.arrayType(int[] size) = fUnknownArrayType(size);
+ 	eq FPrimitiveArrayType.arrayType(int[] size) = scalarType().arrayType(size);
+ 	// TODO: Why repeat implementation of ASTNode.f*ArrayType(int[] size)?
  	eq FRealScalarType.arrayType(int[] size) {
  		FPrimitiveType t = new FRealArrayType(size);
  		root().getDynamicArrayTypeList().add(t);

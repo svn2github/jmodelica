@@ -135,3 +135,39 @@ aspect Constructors {
 	}
 	
 }
+
+/*
+ * Some algorithms are the same for many node types, but require a new node 
+ * to be created of the same type as the node being processed. These methods allow 
+ * those algorithms to be generalized.
+ */
+aspect InheritedFactoryMethods {
+	
+	/**
+	 * \brief Create a new empty node.
+	 * 
+	 * Base implementation returns null - override for subclasses.
+	 * Should be replaced with abstract method once all subclasses are added.
+	 * Base implementation or abstract needed for abstract node classes with 
+	 * declared (i.e. not inherited) children.
+	 */
+	public FExp    FExp.createEmptyNode()    { return null; }
+	public FBinExp FBinExp.createEmptyNode() { return null; }
+
+	public FAddExp FAddExp.createEmptyNode() { return new FAddExp(); }
+	
+	/**
+	 * \brief Create new node of same class as this, with the specified 
+	 *        children.
+	 *        
+	 * If this throws NullPointerException, createEmptyNode() needs to be 
+	 * implemented for specific class.
+	 */
+	public FBinExp FBinExp.createNode(FExp left, FExp right) {
+		FBinExp node = createEmptyNode();
+		node.setLeft(left);
+		node.setRight(right);
+		return node;
+	}
+	
+}
