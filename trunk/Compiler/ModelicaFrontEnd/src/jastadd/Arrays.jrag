@@ -17,6 +17,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 aspect Arrays {
 
@@ -161,6 +162,23 @@ aspect Arrays {
 	eq FZeros.ndims() = getNumFExp();
 	
 	eq FBinExp.ndims() = getLeft().ndims();
+	
+	eq FMulExp.ndims() {
+		int left = getLeft().ndims();
+		int right = getRight().ndims();
+		if (isElementWise())
+			return Math.max(left, right);
+		if (left > 2 || right > 2)
+			return -1;
+		return left + right - 2;
+	}
+	
+	/**
+	 * \brief Check if multiplication is equivalent with an element-wise multiplication.
+	 * 
+	 * True if any operand is scalar.
+	 */
+	syn boolean FMulExp.isElementWise() = (getLeft().ndims() * getRight().ndims() == 0);
 	
 	/**
 	 * \brief Get array dimensions.
@@ -339,28 +357,31 @@ aspect Arrays {
 	
 	eq FBinExp.size() = getLeft().size();
 	
+	eq FMulExp.size() {
+		if (getLeft().ndims() == 0)
+			return getRight().size();
+		if (getRight().ndims() == 0)
+			return getLeft().size();
+		int[] si = new int[ndims()];
+		if (getLeft().ndims() == 2)
+			si[0] = getLeft().size()[0];
+		if (getRight().ndims() == 2)
+			si[si.length - 1] = getRight().size()[1];
+		return si;
+	}
+	
  	eq FRangeExp.size() {
-		int[] si = new int[1];
-		si[0] = 0;
+		int si = 0;
 		if (getNumFExp()==2) { // e.g. 1:10
-			si[0] = (int)(getFExp(1).ceval().realValue() - 
-				getFExp(0).ceval().realValue() + 1);
-			if (si[0]<0) {
-				si[0] = 0;
-			}
+			si = (int)(getFExp(1).ceval().realValue() - 
+		               getFExp(0).ceval().realValue() + 1.0);
 		} else if (getNumFExp()==3) {
 			double first = getFExp(0).ceval().realValue();
 			double step = getFExp(1).ceval().realValue();
 			double last = getFExp(2).ceval().realValue();
-			
-			if (step > 0.0) 
-				for (double i = first; i <= last; i += step)
-					si[0]++;
-			else if (step < 0.0)
-				for (double i = first; i >= last; i += step)
-					si[0]++;
+			si = (int) ((last - first) / step + 1.0);
 		}
-		return si;
+		return new int[] { (si < 0) ? 0 : si };
 	}
 	
 	eq FArray.size() {
@@ -547,6 +568,28 @@ aspect Arrays {
 		} else {
 			return new ScalarAsArray(this);
 		}
+	}
+	
+	eq FMulExp.array() {
+		if (isElementWise())
+			return super.array();
+		
+		if (ndims() == 0)
+			return new ScalarAsArray(composeScalarCellExp(new Index(0)));
+		
+		Array res = new Array(indices());
+		for (Index i : res.indices()) 
+			res.set(i, composeScalarCellExp(i));
+		return res;
+	}
+	
+	protected FExp FMulExp.composeScalarCellExp(Index i) {
+		Iterator<FExp> left = getLeft().array().leftMulIterator(i);
+		Iterator<FExp> right = getRight().array().rightMulIterator(i);
+		FExp cur = new FMulExp(left.next(), right.next());
+		while (left.hasNext()) 
+			cur = new FAddExp(cur, new FMulExp(left.next(), right.next()));
+		return cur;
 	}
 	
 	eq FArray.array() {
@@ -780,6 +823,46 @@ aspect ArrayIndices {
 		}
 		
 		/**
+		 * \brief Creates a left-hand iterator for multiplication. 
+		 * 
+		 * Creates an iterator that iterates over all FExp nodes involved in 
+		 * calculating the cell i in a multiplication with this Array at the 
+		 * left side. 
+		 * 
+		 * If this Array is a vector, i is ignored and an iterator that iterates 
+		 * over all elements in the Array is returned. 
+		 * 
+		 * If this Array is a matrix, an iterator that iterates over the row 
+		 * specified by i is returned.
+		 */
+		public Iterator<FExp> leftMulIterator(Index i) {
+			if (ndims() < 2)
+				return iterator();
+			else
+				return new AIterator(i.first(), size()[1]);
+		}
+		
+		/**
+		 * \brief Creates a right-hand iterator for multiplication. 
+		 * 
+		 * Creates an iterator that iterates over all FExp nodes involved in 
+		 * calculating the cell i in a multiplication with this Array at the 
+		 * right side. 
+		 * 
+		 * If this Array is a vector, i is ignored and an iterator that iterates 
+		 * over all elements in the Array is returned. 
+		 * 
+		 * If this Array is a matrix, an iterator that iterates over the column 
+		 * specified by i is returned.
+		 */
+		public Iterator<FExp> rightMulIterator(Index i) {
+			if (ndims() < 2)
+				return iterator();
+			else
+				return new AIterator(i.last(), size()[1], size()[0]);
+		}
+		
+		/**
 		 * \brief Returns the element referenced by <code>i</code> in this Array.
 		 */
 		public FExp get(Index i) {
@@ -833,18 +916,50 @@ aspect ArrayIndices {
 		}
 		
 		/**
-		 * \brief Iterates over all FExp nodes in this Array.
+		 * \brief Iterates over FExp nodes in this Array.
 		 */
 		private class AIterator implements Iterator<FExp> {
 			
 			private int i = 0;
+			private int s;
+			private int l;
+			private int n;
+			
+			/**
+			 * Create an iterator that iterates over all elements in the Array. 
+			 */
+			public AIterator() {
+				s = 0;
+				l = 1;
+				n = expressions.length;
+			}
+			
+			/**
+			 * Create an iterator that iterates over a row. Assumes the Array is a matrix.
+			 */
+			public AIterator(int row, int width) {
+				s = (row - 1) * width;
+				l = 1;
+				n = width;
+			}
+			
+			/**
+			 * Create an iterator that iterates over a column. Assumes the Array is a matrix.
+			 */
+			public AIterator(int col, int width, int height) {
+				s = col - 1;
+				l = width;
+				n = height;
+			}
 			
 			public boolean hasNext() {
-				return i < expressions.length;
+				return i < n;
 			}
 			
 			public FExp next() {
-				return expressions[i++];
+				if (i >= n)
+					throw new NoSuchElementException();
+				return expressions[s + l * i++];
 			}
 			
 			public void remove() {
@@ -862,6 +977,11 @@ aspect ArrayIndices {
 	 * The get() and set() methods ignore the Index and always operate on the single element.
 	 * This allows a ScalarAsArray to be used with an Array in an algorithm that expects 
 	 * two Array objects, as long as the Indices from a real Array is used to iterate. 
+	 * 
+	 * Since the indices of a scalar makes no sense, the Iterator returned by 
+	 * indices().iterator() will have no elements. 
+	 * 
+	 * The Iterator returned by iterator() will have one element.
 	 */
 	public class ScalarAsArray extends Array {
 		
@@ -870,7 +990,7 @@ aspect ArrayIndices {
 		 */
 		public ScalarAsArray(FExp exp) {
 			expressions = new FExp[] { exp };
-			indices = Indices.create(new int[] { 1 });
+			indices = Indices.create(new int[] { });
 		}
 		
 		/**
@@ -909,6 +1029,20 @@ aspect ArrayIndices {
 		 */
 		public int[] index() {
 			return index;
+		}
+		
+		/**
+		 * \brief Returns the index for the first dimension.
+		 */
+		public int first() {
+			return index.length > 0 ? index[0] : -1;
+		}
+		
+		/**
+		 * \brief Returns the index for the last dimension.
+		 */
+		public int last() {
+			return index.length > 0 ? index[index.length - 1] : -1;
 		}
 		
 		/**
@@ -967,7 +1101,8 @@ aspect ArrayIndices {
 			index = new int[ndims];
 			for (int i = ndims - 2; i >= 0; i--)
 				index[i] = 1;
-			index[ndims - 1] = 0;
+			if (ndims > 0)
+				index[ndims - 1] = 0;
 		}
 		
 	}
@@ -1098,6 +1233,8 @@ aspect ArrayIndices {
 			}
 			
 			public Index next() {
+				if (index.internal >= max)
+					throw new NoSuchElementException();
 				index.internal++;
 				int[] ind = index.index();
 				int i;
@@ -1238,6 +1375,8 @@ aspect ArrayIndices {
 		protected class NCIIterator extends IIterator {
 			
 			public Index next() {
+				if (index.internal >= max)
+					throw new NoSuchElementException();
 				index.internal++;
 				for (int i = index.internal, j = ndims - 1; j >= 0; i /= size[j], j--)
 					index.index[j] = indices.get(j)[i % size[j]];

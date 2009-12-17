@@ -102,6 +102,14 @@ aspect FlatTypeAnalysis {
 	eq FAddExp.type()     = getLeft().type().binaryNumericPromotion(getRight().type());
 	eq FSubExp.type()     = getLeft().type().binaryNumericPromotion(getRight().type());
 	
+	eq FMulExp.type() {
+		if (ndims() < 0)
+			return fUnknownType();
+		if (isElementWise())
+			return super.type();
+		return getLeft().type().binaryScalarNumericPromotion(getRight().type()).arrayType(size());
+	}
+	
 	eq FLogBinExp.type() = fBooleanScalarType();
 
 	eq FRealLitExp.type() = fRealScalarType();
