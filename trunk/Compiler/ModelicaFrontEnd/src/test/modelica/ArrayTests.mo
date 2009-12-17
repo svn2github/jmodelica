@@ -960,6 +960,290 @@ equation
 end ArrayAdd12;
 
 
+
+model ArraySub1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArraySub1",
+         description="Scalarization of subtraction: Real[2] - Integer[2]",
+         flatModel="
+fclass ArrayTests.ArraySub1
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] - ( 10 );
+ x[2] = y[2] - ( 20 );
+ y[1] = 1;
+ y[2] = 2;
+end ArrayTests.ArraySub1;
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y - { 10, 20 };
+end ArraySub1;
+
+
+model ArraySub2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArraySub2",
+         description="Scalarization of subtraction: Real[2,2] - Integer[2,2]",
+         flatModel="
+fclass ArrayTests.ArraySub2
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] - ( 10 );
+ x[1,2] = y[1,2] - ( 20 );
+ x[2,1] = y[2,1] - ( 30 );
+ x[2,2] = y[2,2] - ( 40 );
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+end ArrayTests.ArraySub2;
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y - { { 10, 20 }, { 30, 40 } };
+end ArraySub2;
+
+
+model ArraySub3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArraySub3",
+         description="Scalarization of subtraction: Real[2,2,2] - Integer[2,2,2]",
+         flatModel="
+fclass ArrayTests.ArraySub3
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] - ( 10 );
+ x[1,1,2] = y[1,1,2] - ( 20 );
+ x[1,2,1] = y[1,2,1] - ( 30 );
+ x[1,2,2] = y[1,2,2] - ( 40 );
+ x[2,1,1] = y[2,1,1] - ( 50 );
+ x[2,1,2] = y[2,1,2] - ( 60 );
+ x[2,2,1] = y[2,2,1] - ( 70 );
+ x[2,2,2] = y[2,2,2] - ( 80 );
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
+end ArrayTests.ArraySub3;
+")})));
+
+ Real x[2,2,2];
+ Real y[2,2,2] = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+equation
+ x = y - { { { 10, 20 }, { 30, 40 } }, { { 50, 60 }, { 70, 80 } } };
+end ArraySub3;
+
+
+model ArraySub4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArraySub4",
+         description="Scalarization of subtraction: Real[2] - Integer",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1078, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y - 10;
+end ArraySub4;
+
+
+model ArraySub5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArraySub5",
+         description="Scalarization of subtraction: Real[2,2] - Integer",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1097, column 6:
+  Type error in expression
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y - 10;
+end ArraySub5;
+
+
+model ArraySub6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArraySub6",
+         description="Scalarization of subtraction: Real[2,2,2] - Integer",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1116, column 6:
+  Type error in expression
+")})));
+
+ Real x[2,2,2];
+ Real y[2,2,2] = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+equation
+ x = y - 10;
+end ArraySub6;
+
+
+model ArraySub7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArraySub7",
+         description="Scalarization of subtraction: Real - Integer[2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1135, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y = 1;
+equation
+ x = y - { 10, 20 };
+end ArraySub7;
+
+
+model ArraySub8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArraySub8",
+         description="Scalarization of subtraction: Real - Integer[2,2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1154, column 6:
+  Type error in expression
+")})));
+
+ Real x[2,2];
+ Real y = 1;
+equation
+ x = y - { { 10, 20 }, { 30, 40 } };
+end ArraySub8;
+
+
+model ArraySub9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArraySub9",
+         description="Scalarization of subtraction: Real - Integer[2,2,2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1173, column 6:
+  Type error in expression
+")})));
+
+ Real x[2,2,2];
+ Real y = 1;
+equation
+ x = y - { { { 10, 20 }, { 30, 40 } }, { { 50, 60 }, { 70, 80 } } };
+end ArraySub9;
+
+
+model ArraySub10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArraySub10",
+         description="Scalarization of subtraction: Real[2] - Integer[3]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1192, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y - { 10, 20, 30 };
+end ArraySub10;
+
+
+model ArraySub11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArraySub11",
+         description="Scalarization of subtraction: Real[2] - Integer[2,2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1211, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y - { { 10, 20 }, { 30, 40 } };
+end ArraySub11;
+
+
+model ArraySub12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArraySub12",
+         description="Scalarization of subtraction: Real[2] - String[2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1230, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y - { "1", "2" };
+end ArraySub12;
+
+
+
+
 /* -- Standard test array for scalarisation of operators -- */
 /* 
 model ArrayAdd1

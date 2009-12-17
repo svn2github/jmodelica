@@ -195,7 +195,7 @@ aspect InheritedFactoryMethods {
 	public FTimeExp   FTimeExp.createEmptyNode()   { return new FTimeExp(); }
 	
 	// Identifier expressions
-	public FIdUseExp      FIdUseExp.createEmptyNode()      { return new FIdUseExp(); } //
+	public FIdUseExp      FIdUseExp.createEmptyNode()      { return new FIdUseExp(); }
 	public InstDerExp     InstDerExp.createEmptyNode()     { return new InstDerExp(); }
 	public FDerExp        FDerExp.createEmptyNode()        { return new FDerExp(); }
 	public FInstAccessExp FInstAccessExp.createEmptyNode() { return new FInstAccessExp(); }
@@ -251,6 +251,16 @@ aspect InheritedFactoryMethods {
 	public FUnaryExp FUnaryExp.createNode(FExp exp) {
 		FUnaryExp node = createEmptyNode();
 		node.setFExp(exp);
+		return node;
+	}
+	
+	/**
+	 * \brief Create new node of same class as this, with the specified 
+	 *        children.
+	 */
+	public FIdUseExp FIdUseExp.createNode(FIdUse use) {
+		FIdUseExp node = createEmptyNode();
+		node.setFIdUse(use);
 		return node;
 	}
 	

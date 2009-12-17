@@ -534,7 +534,9 @@ aspect Arrays {
 		if (isArray()) {
 			/* Standard implementation covers many binary operators.
 			 * Apply operator element-wise, if one operand is scalar, use it with 
-			 * all elements in other operand.
+			 * all elements in other operand. Used for operators that does not 
+			 * allow a scalar and an array as well, since that is caught by the 
+			 * error check.
 			 */
 			Array left  = getLeft().array();
 			Array right = getRight().array();
