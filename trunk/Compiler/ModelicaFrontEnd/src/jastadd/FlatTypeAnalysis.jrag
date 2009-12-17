@@ -205,7 +205,7 @@ aspect FNumericPromotion {
 	}
 
 	eq FPrimitiveArrayNumericType.binaryNumericPromotion(FPrimitiveType type) {
-		if (type.isScalar() || dimensionCompatible(type)) {
+		if (dimensionCompatible(type)) {
 			return binaryScalarNumericPromotion(type).arrayType(size());
 		} else {
 			return fUnknownType();

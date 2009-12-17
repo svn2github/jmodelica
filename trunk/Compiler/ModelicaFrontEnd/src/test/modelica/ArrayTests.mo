@@ -679,5 +679,384 @@ end ArrayTest30;
 
 
 
+model ArrayAdd1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayAdd1",
+         description="Scalarization of addition: Real[2] + Integer[2]",
+         flatModel="
+fclass ArrayTests.ArrayAdd1
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] + 10;
+ x[2] = y[2] + 20;
+ y[1] = 1;
+ y[2] = 2;
+end ArrayTests.ArrayAdd1;
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y + { 10, 20 };
+end ArrayAdd1;
+
+
+model ArrayAdd2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayAdd2",
+         description="Scalarization of addition: Real[2,2] + Integer[2,2]",
+         flatModel="
+fclass ArrayTests.ArrayAdd2
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] + 10;
+ x[1,2] = y[1,2] + 20;
+ x[2,1] = y[2,1] + 30;
+ x[2,2] = y[2,2] + 40;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+end ArrayTests.ArrayAdd2;
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y + { { 10, 20 }, { 30, 40 } };
+end ArrayAdd2;
+
+
+model ArrayAdd3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayAdd3",
+         description="Scalarization of addition: Real[2,2,2] + Integer[2,2,2]",
+         flatModel="
+fclass ArrayTests.ArrayAdd3
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] + 10;
+ x[1,1,2] = y[1,1,2] + 20;
+ x[1,2,1] = y[1,2,1] + 30;
+ x[1,2,2] = y[1,2,2] + 40;
+ x[2,1,1] = y[2,1,1] + 50;
+ x[2,1,2] = y[2,1,2] + 60;
+ x[2,2,1] = y[2,2,1] + 70;
+ x[2,2,2] = y[2,2,2] + 80;
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
+end ArrayTests.ArrayAdd3;
+")})));
+
+ Real x[2,2,2];
+ Real y[2,2,2] = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+equation
+ x = y + { { { 10, 20 }, { 30, 40 } }, { { 50, 60 }, { 70, 80 } } };
+end ArrayAdd3;
+
+
+model ArrayAdd4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayAdd4",
+         description="Scalarization of addition: Real[2] + Integer",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 796, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y + 10;
+end ArrayAdd4;
+
+
+model ArrayAdd5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayAdd5",
+         description="Scalarization of addition: Real[2,2] + Integer",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 815, column 6:
+  Type error in expression
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y + 10;
+end ArrayAdd5;
+
+
+model ArrayAdd6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayAdd6",
+         description="Scalarization of addition: Real[2,2,2] + Integer",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 834, column 6:
+  Type error in expression
+")})));
+
+ Real x[2,2,2];
+ Real y[2,2,2] = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+equation
+ x = y + 10;
+end ArrayAdd6;
+
+
+model ArrayAdd7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayAdd7",
+         description="Scalarization of addition: Real + Integer[2,2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 853, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y = 1;
+equation
+ x = y + { 10, 20 };
+end ArrayAdd7;
+
+
+model ArrayAdd8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayAdd8",
+         description="Scalarization of addition: Real + Integer[2,2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 861, column 6:
+  Type error in expression
+")})));
+
+ Real x[2,2];
+ Real y = 1;
+equation
+ x = y + { { 10, 20 }, { 30, 40 } };
+end ArrayAdd8;
+
+
+model ArrayAdd9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayAdd9",
+         description="Scalarization of addition: Real + Integer[2,2,2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 869, column 6:
+  Type error in expression
+")})));
+
+ Real x[2,2,2];
+ Real y = 1;
+equation
+ x = y + { { { 10, 20 }, { 30, 40 } }, { { 50, 60 }, { 70, 80 } } };
+end ArrayAdd9;
+
+
+model ArrayAdd10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayAdd10",
+         description="Scalarization of addition: Real[2] + Integer[3]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 910, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y + { 10, 20, 30 };
+end ArrayAdd10;
+
+
+model ArrayAdd11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayAdd11",
+         description="Scalarization of addition: Real[2] + Integer[2,2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 929, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y + { { 10, 20 }, { 30, 40 } };
+end ArrayAdd11;
+
+
+model ArrayAdd12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayAdd12",
+         description="Scalarization of addition: Real[2] + String[2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 948, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y + { "1", "2" };
+end ArrayAdd12;
+
+
+/* -- Standard test array for scalarisation of operators -- */
+/* 
+model ArrayAdd1
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y + { 10, 20 };
+end ArrayAdd1;
+
+
+model ArrayAdd2
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y + { { 10, 20 }, { 30, 40 } };
+end ArrayAdd2;
+
+
+model ArrayAdd3
+ Real x[2,2,2];
+ Real y[2,2,2] = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+equation
+ x = y + { { { 10, 20 }, { 30, 40 } }, { { 50, 60 }, { 70, 80 } } };
+end ArrayAdd3;
+
+
+model ArrayAdd4
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y + 10;
+end ArrayAdd4;
+
+
+model ArrayAdd5
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y + 10;
+end ArrayAdd5;
+
+
+model ArrayAdd6
+ Real x[2,2,2];
+ Real y[2,2,2] = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+equation
+ x = y + 10;
+end ArrayAdd6;
+
+
+model ArrayAdd7
+ Real x[2];
+ Real y = 1;
+equation
+ x = y + { 10, 20 };
+end ArrayAdd7;
+
+
+model ArrayAdd8
+ Real x[2,2];
+ Real y = 1;
+equation
+ x = y + { { 10, 20 }, { 30, 40 } };
+end ArrayAdd8;
+
+
+model ArrayAdd9
+ Real x[2,2,2];
+ Real y = 1;
+equation
+ x = y + { { { 10, 20 }, { 30, 40 } }, { { 50, 60 }, { 70, 80 } } };
+end ArrayAdd9;
+
+
+model ArrayAdd10
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y + { 10, 20, 30 };
+end ArrayAdd10;
+
+
+model ArrayAdd11
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y + { { 10, 20 }, { 30, 40 } };
+end ArrayAdd11;
+
+
+model ArrayAdd12
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y + { "1", "2" };
+end ArrayAdd12;
+*/
+
   annotation (uses(Modelica(version="3.0.1")));
 end ArrayTests;
