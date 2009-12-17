@@ -536,7 +536,7 @@ FGeqExp : FLogBinExp;
 FEqExp : FLogBinExp;
 
 /**
- * \brief Negation expression.
+ * \brief Inequality expression.
  */
 FNeqExp : FLogBinExp;
 
@@ -558,7 +558,7 @@ FAndExp : FLogBinExp;
 /**
  * \brief Base class for literal expressions.
  */
-FLitExp : FExp;
+abstract FLitExp : FExp;
 
 /**
  * \brief Real literal expression.

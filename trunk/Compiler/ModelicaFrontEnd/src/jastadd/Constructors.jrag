@@ -14,6 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.util.ArrayList;
 
 aspect Constructors {
 
@@ -146,22 +147,95 @@ aspect InheritedFactoryMethods {
 	/**
 	 * \brief Create a new empty node.
 	 * 
-	 * Base implementation returns null - override for subclasses.
-	 * Should be replaced with abstract method once all subclasses are added.
-	 * Base implementation or abstract needed for abstract node classes with 
-	 * declared (i.e. not inherited) children.
+	 * Abstract method needed for abstract node classes with declared 
+	 * (i.e. not inherited) children.
 	 */
-	public FExp    FExp.createEmptyNode()    { return null; }
-	public FBinExp FBinExp.createEmptyNode() { return null; }
+	public abstract FExp                      FExp.createEmptyNode();
+	public abstract FBinExp                   FBinExp.createEmptyNode();
+	public abstract FUnaryExp                 FUnaryExp.createEmptyNode();
+	public abstract FBooleanLitExp            FBooleanLitExp.createEmptyNode();   // No children, but can be useful
+	public abstract FMathematicalFunctionCall FMathematicalFunctionCall.createEmptyNode();
+	public abstract FInfArgsFunctionCall      FInfArgsFunctionCall.createEmptyNode();
 
+	// Unsupported expressions
+	public FUnsupportedExp FUnsupportedExp.createEmptyNode() { return new FUnsupportedExp(); }
+	
+	// Arithmetic oprerators
 	public FAddExp FAddExp.createEmptyNode() { return new FAddExp(); }
+	public FSubExp FSubExp.createEmptyNode() { return new FSubExp(); }
+	public FMulExp FMulExp.createEmptyNode() { return new FMulExp(); }
+	public FDivExp FDivExp.createEmptyNode() { return new FDivExp(); }
+	public FPowExp FPowExp.createEmptyNode() { return new FPowExp(); }
+	public FNegExp FNegExp.createEmptyNode() { return new FNegExp(); }
+	
+	// Logical operators
+	public FLtExp  FLtExp.createEmptyNode()  { return new FLtExp(); }
+	public FLeqExp FLeqExp.createEmptyNode() { return new FLeqExp(); }
+	public FGtExp  FGtExp.createEmptyNode()  { return new FGtExp(); }
+	public FGeqExp FGeqExp.createEmptyNode() { return new FGeqExp(); }
+	public FEqExp  FEqExp.createEmptyNode()  { return new FEqExp(); }
+	public FNeqExp FNeqExp.createEmptyNode() { return new FNeqExp(); }
+	public FNotExp FNotExp.createEmptyNode() { return new FNotExp(); }
+	public FOrExp  FOrExp.createEmptyNode()  { return new FOrExp(); }
+	public FAndExp FAndExp.createEmptyNode() { return new FAndExp(); }
+	
+	// Literal expressions (all have different children, so mostly here for completeness)
+	public FRealLitExp         FRealLitExp.createEmptyNode()         { return new FRealLitExp(); }
+	public FIntegerLitExp      FIntegerLitExp.createEmptyNode()      { return new FIntegerLitExp(); }
+	public FBooleanLitExpTrue  FBooleanLitExpTrue.createEmptyNode()  { return new FBooleanLitExpTrue(); }
+	public FBooleanLitExpFalse FBooleanLitExpFalse.createEmptyNode() { return new FBooleanLitExpFalse(); }
+	public FStringLitExp       FStringLitExp.createEmptyNode()       { return new FStringLitExp(); }
+	
+	// Misc expressions
+	public FSumRedExp FSumRedExp.createEmptyNode() { return new FSumRedExp(); }
+	public FSumExp    FSumExp.createEmptyNode()    { return new FSumExp(); }
+	public FIfExp     FIfExp.createEmptyNode()     { return new FIfExp(); }
+	public FElseIfExp FElseIfExp.createEmptyNode() { return new FElseIfExp(); }
+	public FNoExp     FNoExp.createEmptyNode()     { return new FNoExp(); }
+	public FTimeExp   FTimeExp.createEmptyNode()   { return new FTimeExp(); }
+	
+	// Identifier expressions
+	public FIdUseExp      FIdUseExp.createEmptyNode()      { return new FIdUseExp(); } //
+	public InstDerExp     InstDerExp.createEmptyNode()     { return new InstDerExp(); }
+	public FDerExp        FDerExp.createEmptyNode()        { return new FDerExp(); }
+	public FInstAccessExp FInstAccessExp.createEmptyNode() { return new FInstAccessExp(); }
+	
+	// Array expressions
+	public FArray    FArray.createEmptyNode()    { return new FArray(); }
+	public FRangeExp FRangeExp.createEmptyNode() { return new FRangeExp(); }
+	public FEndExp   FEndExp.createEmptyNode()   { return new FEndExp(); }
+	
+	// Function calls
+	public FFunctionCall    FFunctionCall.createEmptyNode()    { return new FFunctionCall(); }
+	public InstFunctionCall InstFunctionCall.createEmptyNode() { return new InstFunctionCall(); }
+	
+	// Calls to built-in mathematical functions
+	public FSinExp   FSinExp.createEmptyNode()   { return new FSinExp(); }
+	public FCosExp   FCosExp.createEmptyNode()   { return new FCosExp(); }
+	public FTanExp   FTanExp.createEmptyNode()   { return new FTanExp(); }
+	public FAsinExp  FAsinExp.createEmptyNode()  { return new FAsinExp(); }
+	public FAcosExp  FAcosExp.createEmptyNode()  { return new FAcosExp(); }
+	public FAtanExp  FAtanExp.createEmptyNode()  { return new FAtanExp(); }
+	public FAtan2Exp FAtan2Exp.createEmptyNode() { return new FAtan2Exp(); }
+	public FSinhExp  FSinhExp.createEmptyNode()  { return new FSinhExp(); }
+	public FCoshExp  FCoshExp.createEmptyNode()  { return new FCoshExp(); }
+	public FTanhExp  FTanhExp.createEmptyNode()  { return new FTanhExp(); }
+	public FExpExp   FExpExp.createEmptyNode()   { return new FExpExp(); }
+	public FLogExp   FLogExp.createEmptyNode()   { return new FLogExp(); }
+	public FLog10Exp FLog10Exp.createEmptyNode() { return new FLog10Exp(); }
+	public FSqrtExp  FSqrtExp.createEmptyNode()  { return new FSqrtExp(); }
+	
+	// Built-in function calls and function call-like operators
+	public FSizeExp   FSizeExp.createEmptyNode()   { return new FSizeExp(); }
+	public FScalar    FScalar.createEmptyNode()    { return new FScalar(); }
+	public FTranspose FTranspose.createEmptyNode() { return new FTranspose(); }
+	public FIdentity  FIdentity.createEmptyNode()  { return new FIdentity(); }
+	public FOnes      FOnes.createEmptyNode()      { return new FOnes(); }
+	public FZeros     FZeros.createEmptyNode()     { return new FZeros(); }
 	
 	/**
 	 * \brief Create new node of same class as this, with the specified 
 	 *        children.
-	 *        
-	 * If this throws NullPointerException, createEmptyNode() needs to be 
-	 * implemented for specific class.
 	 */
 	public FBinExp FBinExp.createNode(FExp left, FExp right) {
 		FBinExp node = createEmptyNode();
@@ -170,4 +244,45 @@ aspect InheritedFactoryMethods {
 		return node;
 	}
 	
+	/**
+	 * \brief Create new node of same class as this, with the specified 
+	 *        children.
+	 */
+	public FUnaryExp FUnaryExp.createNode(FExp exp) {
+		FUnaryExp node = createEmptyNode();
+		node.setFExp(exp);
+		return node;
+	}
+	
+	/**
+	 * \brief Create new node of same class as this, with the specified 
+	 *        children.
+	 */
+	public FMathematicalFunctionCall FMathematicalFunctionCall.createNode(FExp exp) {
+		FMathematicalFunctionCall node = createEmptyNode();
+		node.setFExp(exp);
+		return node;
+	}
+	
+	/**
+	 * \brief Create new node of same class as this, with the specified 
+	 *        children.
+	 */
+	public FInfArgsFunctionCall FInfArgsFunctionCall.createNode(List<FExp> exps) {
+		FInfArgsFunctionCall node = createEmptyNode();
+		node.setFExpList(exps);
+		return node;
+	}
+	
+	/**
+	 * \brief Create new node of same class as this, with the specified 
+	 *        children.
+	 */
+	public FInfArgsFunctionCall FInfArgsFunctionCall.createNode(ArrayList<FExp> exps) {
+		FInfArgsFunctionCall node = createEmptyNode();
+		for (FExp e : exps)
+			node.addFExp(e);
+		return node;
+	}
+
 }

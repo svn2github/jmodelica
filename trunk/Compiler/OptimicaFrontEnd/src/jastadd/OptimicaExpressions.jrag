@@ -105,7 +105,15 @@ aspect OptimicaExpressions {
 			getChild(i).flushAllRecursiveClearFinal();
 		}
 	}
-
 	
+}
+
+aspect OptimicaInheritedFactoryMethods {
+
+	public FTimedVariable    FTimedVariable.createEmptyNode()    { return new FTimedVariable(); }
+	public InstTimedVariable InstTimedVariable.createEmptyNode() { return new InstTimedVariable(); }
+	
+	public FStartTimeExp FStartTimeExp.createEmptyNode() { return new FStartTimeExp(); }
+	public FFinalTimeExp FFinalTimeExp.createEmptyNode() { return new FFinalTimeExp(); }
 	
 }
