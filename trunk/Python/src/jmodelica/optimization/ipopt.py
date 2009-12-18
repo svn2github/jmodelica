@@ -480,6 +480,7 @@ class NLPCollocation(object):
                 var_data[:,col_index] = traj.x
                 col_index = col_index + 1
             except:
+                col_index = col_index + 1
                 print "Warning: Could not find trajectory for variable " + dx_names.get(ref)
         for ref in x_name_value_refs:
             try:
@@ -489,6 +490,7 @@ class NLPCollocation(object):
                 var_data[:,col_index] = traj.x
                 col_index = col_index + 1
             except:
+                col_index = col_index + 1
                 print "Warning: Could not find trajectory for variable " + x_names.get(ref)
 
         for ref in u_name_value_refs:
@@ -499,6 +501,7 @@ class NLPCollocation(object):
                 var_data[:,col_index] = traj.x
                 col_index = col_index + 1
             except:
+                col_index = col_index + 1
                 print "Warning: Could not find trajectory for variable " + u_names.get(ref)
 
         for ref in w_name_value_refs:
@@ -512,6 +515,7 @@ class NLPCollocation(object):
                     var_data[:,col_index] = traj.x
                 col_index = col_index + 1
             except:
+                col_index = col_index + 1
                 print "Warning: Could not find trajectory for variable " + w_names.get(ref)
 
         #print(var_data)
