@@ -180,8 +180,7 @@ public abstract class CodeGenTestCase extends TestCase {
 	    try {
 	    	ir = ipr.findFlattenInst(getClassName(), fc);
 	    } catch (ModelicaClassNotFoundException e) {
-	    	System.out.println("Modelica class " + getClassName() + 
-	    			" not found.");
+	    	System.out.println("Modelica class " + getClassName() + " not found.");
 	    	return false;
 	    }
    	  	fc.transformCanonical();

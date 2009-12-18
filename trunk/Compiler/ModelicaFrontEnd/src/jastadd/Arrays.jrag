@@ -191,9 +191,16 @@ aspect Arrays {
 	syn int FIdUse.ndims() {
 		// Notice here the use of accessNdims. Also, if the access has
 		// no subscripts, it may still have dimension > 0 if its declaration
-		// is an array declaration.
-		return getFQName().hasFArraySubscripts()? 
-				getFArraySubscripts().accessNdims(): myFV().ndims();
+		// is an array declaration. 
+		// If the FQName is marked as scalarized, then dimension must 
+		// be 0 and using myFV() might cause a NullPointerException.
+		// This is because if scalarization is in progress, 
+		// then this node will be hanging without a proper AST.
+		if (getFQName().isScalarized())
+			return 0;
+		if (getFQName().hasFArraySubscripts())
+			return getFArraySubscripts().accessNdims();
+		return myFV().ndims();
 	}
 	eq FIdUseExp.ndims() = getFIdUse().ndims();
 		
@@ -575,7 +582,7 @@ aspect Arrays {
 			return super.array();
 		
 		if (ndims() == 0)
-			return new ScalarAsArray(composeScalarCellExp(new Index(0)));
+			return new ScalarAsArray(composeScalarCellExp(Index.NULL));
 		
 		Array res = new Array(indices());
 		for (Index i : res.indices()) 
@@ -1014,6 +1021,8 @@ aspect ArrayIndices {
 	 *        multi-dimensional) array. 
 	 */
 	public class Index implements Cloneable {
+		
+		public static final Index NULL = new Index(0);
 		
 		protected int[] index;
 		

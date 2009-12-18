@@ -1243,6 +1243,579 @@ end ArraySub12;
 
 
 
+model ArrayMulOK1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayMulOK1",
+         description="Scalarization of multiplication: Real[3] * Integer[3]",
+         flatModel="
+fclass ArrayTests.ArrayMulOK1
+ Real x;
+ Real y[1];
+ Real y[2];
+ Real y[3];
+equation
+ x = ( y[1] ) * ( 10 ) + ( y[2] ) * ( 20 ) + ( y[3] ) * ( 30 );
+ y[1] = 1;
+ y[2] = 2;
+ y[3] = 3;
+end ArrayTests.ArrayMulOK1;
+")})));
+
+ Real x;
+ Real y[3] = { 1, 2, 3 };
+equation
+ x = y * { 10, 20, 30 };
+end ArrayMulOK1;
+
+
+model ArrayMulOK2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayMulOK2",
+         description="Scalarization of multiplication: Real[2,2] * Integer[2,2]",
+         flatModel="
+fclass ArrayTests.ArrayMulOK2
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = ( y[1,1] ) * ( 10 ) + ( y[1,2] ) * ( 30 );
+ x[1,2] = ( y[1,1] ) * ( 20 ) + ( y[1,2] ) * ( 40 );
+ x[2,1] = ( y[2,1] ) * ( 10 ) + ( y[2,2] ) * ( 30 );
+ x[2,2] = ( y[2,1] ) * ( 20 ) + ( y[2,2] ) * ( 40 );
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+end ArrayTests.ArrayMulOK2;
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y * { { 10, 20 }, { 30, 40 } };
+end ArrayMulOK2;
+
+
+model ArrayMulOK3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayMulOK3",
+         description="Scalarization of multiplication: Integer[3,2] * Real[2,4]",
+         flatModel="
+fclass ArrayTests.ArrayMulOK3
+ Real x[1,1];
+ Real x[1,2];
+ Real x[1,3];
+ Real x[1,4];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[2,3];
+ Real x[2,4];
+ Real x[3,1];
+ Real x[3,2];
+ Real x[3,3];
+ Real x[3,4];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[1,3];
+ Real y[1,4];
+ Real y[2,1];
+ Real y[2,2];
+ Real y[2,3];
+ Real y[2,4];
+equation
+ x[1,1] = ( 10 ) * ( y[1,1] ) + ( 20 ) * ( y[2,1] );
+ x[1,2] = ( 10 ) * ( y[1,2] ) + ( 20 ) * ( y[2,2] );
+ x[1,3] = ( 10 ) * ( y[1,3] ) + ( 20 ) * ( y[2,3] );
+ x[1,4] = ( 10 ) * ( y[1,4] ) + ( 20 ) * ( y[2,4] );
+ x[2,1] = ( 30 ) * ( y[1,1] ) + ( 40 ) * ( y[2,1] );
+ x[2,2] = ( 30 ) * ( y[1,2] ) + ( 40 ) * ( y[2,2] );
+ x[2,3] = ( 30 ) * ( y[1,3] ) + ( 40 ) * ( y[2,3] );
+ x[2,4] = ( 30 ) * ( y[1,4] ) + ( 40 ) * ( y[2,4] );
+ x[3,1] = ( 50 ) * ( y[1,1] ) + ( 60 ) * ( y[2,1] );
+ x[3,2] = ( 50 ) * ( y[1,2] ) + ( 60 ) * ( y[2,2] );
+ x[3,3] = ( 50 ) * ( y[1,3] ) + ( 60 ) * ( y[2,3] );
+ x[3,4] = ( 50 ) * ( y[1,4] ) + ( 60 ) * ( y[2,4] );
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[1,3] = 3;
+ y[1,4] = 4;
+ y[2,1] = 5;
+ y[2,2] = 6;
+ y[2,3] = 7;
+ y[2,4] = 8;
+end ArrayTests.ArrayMulOK3;
+")})));
+
+ Real x[3,4];
+ Real y[2,4] = { { 1, 2, 3, 4 }, { 5, 6, 7, 8 } };
+equation
+ x = { { 10, 20 }, { 30, 40 }, { 50, 60 } } * y;
+end ArrayMulOK3;
+
+
+model ArrayMulOK4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayMulOK4",
+         description="Scalarization of multiplication: Real[2] * Integer[2,2]",
+         flatModel="
+fclass ArrayTests.ArrayMulOK4
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = ( y[1] ) * ( 10 ) + ( y[2] ) * ( 30 );
+ x[2] = ( y[1] ) * ( 20 ) + ( y[2] ) * ( 40 );
+ y[1] = 1;
+ y[2] = 2;
+end ArrayTests.ArrayMulOK4;
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y * { { 10, 20 }, { 30, 40 } };
+end ArrayMulOK4;
+
+
+model ArrayMulOK5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayMulOK5",
+         description="Scalarization of multiplication: Real[2,2] * Integer[2]",
+         flatModel="
+fclass ArrayTests.ArrayMulOK5
+ Real x[1];
+ Real x[2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1] = ( y[1,1] ) * ( 10 ) + ( y[1,2] ) * ( 20 );
+ x[2] = ( y[2,1] ) * ( 10 ) + ( y[2,2] ) * ( 20 );
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+end ArrayTests.ArrayMulOK5;
+")})));
+
+ Real x[2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y * { 10, 20 };
+end ArrayMulOK5;
+
+
+model ArrayMulOK6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayMulOK6",
+         description="Scalarization of multiplication: Real[2] * Integer",
+         flatModel="
+fclass ArrayTests.ArrayMulOK6
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = ( y[1] ) * ( 10 );
+ x[2] = ( y[2] ) * ( 10 );
+ y[1] = 1;
+ y[2] = 2;
+end ArrayTests.ArrayMulOK6;
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y * 10;
+end ArrayMulOK6;
+
+
+model ArrayMulOK7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayMulOK7",
+         description="Scalarization of multiplication: Real[2,2] * Integer",
+         flatModel="
+fclass ArrayTests.ArrayMulOK7
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = ( y[1,1] ) * ( 10 );
+ x[1,2] = ( y[1,2] ) * ( 10 );
+ x[2,1] = ( y[2,1] ) * ( 10 );
+ x[2,2] = ( y[2,2] ) * ( 10 );
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+end ArrayTests.ArrayMulOK7;
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y * 10;
+end ArrayMulOK7;
+
+
+model ArrayMulOK8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayMulOK8",
+         description="Scalarization of multiplication: Real[2,2,2] * Integer",
+         flatModel="
+fclass ArrayTests.ArrayMulOK8
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = ( y[1,1,1] ) * ( 10 );
+ x[1,1,2] = ( y[1,1,2] ) * ( 10 );
+ x[1,2,1] = ( y[1,2,1] ) * ( 10 );
+ x[1,2,2] = ( y[1,2,2] ) * ( 10 );
+ x[2,1,1] = ( y[2,1,1] ) * ( 10 );
+ x[2,1,2] = ( y[2,1,2] ) * ( 10 );
+ x[2,2,1] = ( y[2,2,1] ) * ( 10 );
+ x[2,2,2] = ( y[2,2,2] ) * ( 10 );
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
+end ArrayTests.ArrayMulOK8;
+")})));
+
+ Real x[2,2,2];
+ Real y[2,2,2] = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+equation
+ x = y * 10;
+end ArrayMulOK8;
+
+
+model ArrayMulOK9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayMulOK9",
+         description="Scalarization of multiplication: Real * Integer[2]",
+         flatModel="
+fclass ArrayTests.ArrayMulOK9
+ Real x[1];
+ Real x[2];
+ Real y;
+equation
+ x[1] = ( y ) * ( 10 );
+ x[2] = ( y ) * ( 20 );
+ y = 1;
+end ArrayTests.ArrayMulOK9;
+")})));
+
+ Real x[2];
+ Real y = 1;
+equation
+ x = y * { 10, 20 };
+end ArrayMulOK9;
+
+
+model ArrayMulOK10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayMulOK10",
+         description="Scalarization of multiplication: Real * Integer[2,2]",
+         flatModel="
+fclass ArrayTests.ArrayMulOK10
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y;
+equation
+ x[1,1] = ( y ) * ( 10 );
+ x[1,2] = ( y ) * ( 20 );
+ x[2,1] = ( y ) * ( 30 );
+ x[2,2] = ( y ) * ( 40 );
+ y = 1;
+end ArrayTests.ArrayMulOK10;
+")})));
+
+ Real x[2,2];
+ Real y = 1;
+equation
+ x = y * { { 10, 20 }, { 30, 40 } };
+end ArrayMulOK10;
+
+
+model ArrayMulOK11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayMulOK11",
+         description="Scalarization of multiplication: Real * Integer[2,2,2]",
+         flatModel="
+fclass ArrayTests.ArrayMulOK11
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y;
+equation
+ x[1,1,1] = ( y ) * ( 10 );
+ x[1,1,2] = ( y ) * ( 20 );
+ x[1,2,1] = ( y ) * ( 30 );
+ x[1,2,2] = ( y ) * ( 40 );
+ x[2,1,1] = ( y ) * ( 50 );
+ x[2,1,2] = ( y ) * ( 60 );
+ x[2,2,1] = ( y ) * ( 70 );
+ x[2,2,2] = ( y ) * ( 80 );
+ y = 1;
+end ArrayTests.ArrayMulOK11;
+")})));
+
+ Real x[2,2,2];
+ Real y = 1;
+equation
+ x = y * { { { 10, 20 }, { 30, 40 } }, { { 50, 60 }, { 70, 80 } } };
+end ArrayMulOK11;
+
+
+model ArrayMulOK12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayMulOK12",
+         description="Scalarization of multiplication: Real[2,2] * Integer[2,1]",
+         flatModel="
+fclass ArrayTests.ArrayMulOK12
+ Real x[1,1];
+ Real x[2,1];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = ( y[1,1] ) * ( 10 ) + ( y[1,2] ) * ( 20 );
+ x[2,1] = ( y[2,1] ) * ( 10 ) + ( y[2,2] ) * ( 20 );
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+end ArrayTests.ArrayMulOK12;
+")})));
+
+ Real x[2,1];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y * { { 10 }, { 20 } };
+end ArrayMulOK12;
+
+
+model ArrayMulErr1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayMulErr1",
+         description="Scalarization of multiplication: Real[2,2,2] * Integer[2,2,2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1602, column 6:
+  Type error in expression
+")})));
+
+ Real x[2,2,2];
+ Real y[2,2,2] = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+equation
+ x = y * { { { 10, 20 }, { 30, 40 } }, { { 50, 60 }, { 70, 80 } } };
+end ArrayMulErr1;
+
+
+model ArrayMulErr2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayMulErr2",
+         description="Scalarization of multiplication: Real[2] * Integer[3]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1621, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y * { 10, 20, 30 };
+end ArrayMulErr2;
+
+
+model ArrayMulErr3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayMulErr3",
+         description="Scalarization of multiplication: Real[2] * String[2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1640, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y * { "1", "2" };
+end ArrayMulErr3;
+
+
+model ArrayMulErr4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayMulErr4",
+         description="Scalarization of multiplication: Real[2,2] * Integer[3,2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1659, column 6:
+  Type error in expression
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y * { { 10, 20 }, { 30, 40 }, { 50, 60 } };
+end ArrayMulErr4;
+
+
+model ArrayMulErr5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayMulErr5",
+         description="Scalarization of multiplication: Real[2,3] * Integer[2,2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1678, column 6:
+  Type error in expression
+")})));
+
+ Real x[2,2];
+ Real y[2,3] = { { 1, 2, 3 }, { 4, 5, 6 } };
+equation
+ x = y * { { 10, 20 }, { 30, 40 } };
+end ArrayMulErr5;
+
+
+model ArrayMulErr6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayMulErr6",
+         description="Scalarization of multiplication: Real[2,3] * Integer[2,3]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1697, column 6:
+  Type error in expression
+")})));
+
+ Real x[2,2];
+ Real y[2,3] = { { 1, 2, 3 }, { 4, 5, 6 } };
+equation
+ x = y * { { 10, 20, 30 }, { 40, 50, 60 } };
+end ArrayMulErr6;
+
+
+model ArrayMulErr7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayMulErr7",
+         description="Scalarization of multiplication: Real[2,2] * Integer[3]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1716, column 6:
+  Type error in expression
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y * { 10, 20, 30 };
+end ArrayMulErr7;
+
+
+model ArrayMulErr8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayMulErr8",
+         description="Scalarization of multiplication: Real[3] * Integer[2,2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1735, column 6:
+  Type error in expression
+")})));
+
+ Real x[2,2];
+ Real y[3] = { 1, 2, 3 };
+equation
+ x = y * { { 10, 20 }, { 30, 40 } };
+end ArrayMulErr8;
+
+
+model ArrayMulErr9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayMulErr9",
+         description="Scalarization of multiplication: Real[2,2] * Integer[1,2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1754, column 6:
+  Type error in expression
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y * { { 10, 20 } };
+end ArrayMulErr9;
+
+
 
 /* -- Standard test array for scalarisation of operators -- */
 /* 

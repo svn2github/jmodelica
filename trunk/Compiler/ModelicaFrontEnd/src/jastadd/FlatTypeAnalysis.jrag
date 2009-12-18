@@ -107,6 +107,9 @@ aspect FlatTypeAnalysis {
 			return fUnknownType();
 		if (isElementWise())
 			return super.type();
+		int[] left = getLeft().size();
+		if (left[left.length - 1] != getRight().size()[0])
+			return fUnknownType();
 		return getLeft().type().binaryScalarNumericPromotion(getRight().type()).arrayType(size());
 	}
 	

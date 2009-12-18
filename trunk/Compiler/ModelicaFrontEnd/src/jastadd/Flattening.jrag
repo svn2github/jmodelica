@@ -33,7 +33,7 @@ aspect Flattening {
     		icd.flattenInstClassDecl(fc);
     		
     	} else {
-        	throw new ModelicaClassNotFoundException("Class "+ className + "not found");
+        	throw new ModelicaClassNotFoundException(className);
     	}
     	
     	return icd;

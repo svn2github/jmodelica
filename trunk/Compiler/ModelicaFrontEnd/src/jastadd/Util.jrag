@@ -41,7 +41,9 @@ aspect RootAccess {
 	syn lazy ArrayList ASTNode.emptyArrayList() = root().emptyArrayList();
 	eq Root.emptyArrayList() = getEmptyArrayList();
 	syn lazy ArrayList Root.getEmptyArrayList() = new ArrayList();
-		
+	
+	public boolean ASTNode.hasRoot() { return (getParent() == null) ? false : getParent().hasRoot(); }
+	public boolean Root.hasRoot()    { return true; }
 	
 	public FClass ParserHandler.newFClass() {
 		return new FClass();

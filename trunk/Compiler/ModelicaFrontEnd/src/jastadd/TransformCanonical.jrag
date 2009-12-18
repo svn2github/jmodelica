@@ -444,7 +444,7 @@ aspect TransformCanonical {
 	 * method ASTNode.flushAllRecursiveClearFinal. 
 	 */
 	rewrite FIdUseExp {
-		when (!rewritten && myFClass() != null && 
+		when (!rewritten && hasRoot() && myFClass() != null && 
 				myFClass().aliasVariablesEliminated &&
 				!myFV().isUnknown() && myFV().isAlias()) to FExp {
 			FQName new_name = (FQName)((FVariable)myFV()).alias().getFQName().fullCopy();
@@ -472,7 +472,7 @@ aspect TransformCanonical {
 	 * method ASTNode.flushAllRecursiveClearFinal. 
 	 */
 	rewrite FDerExp {
-		when (!rewritten && myFClass() != null && 
+		when (!rewritten && hasRoot() && myFClass() != null && 
 				myFClass().aliasVariablesEliminated &&
 				!getFIdUse().myFV().isUnknown() && getFIdUse().myFV().isAlias()) to FExp {
 			FQName new_name = (FQName)((FVariable)getFIdUse().myFV()).alias().getFQName().fullCopy();
@@ -641,7 +641,7 @@ aspect Scalarization {
 	}
 
 	public FSubscript FSubscript.scalarize(HashMap<String,Integer> indexMap) {
-		return (FSubscript)this.fullCopy();
+		return (FSubscript) fullCopy();
 	}
 	
 	public FSubscript FExpSubscript.scalarize(HashMap<String,Integer> indexMap) {
@@ -689,9 +689,8 @@ aspect Scalarization {
     
     public FExp FIfExp.scalarize(HashMap<String,Integer> indexMap) {
 		List etl = new List();
-		for (int i = 0; i < getNumFElseIfExp(); i++) {
-			etl.add(getFElseIfExp(i).scalarize(indexMap));
-		}
+		for (FElseIfExp elif : getFElseIfExps()) 
+			etl.add(elif.scalarize(indexMap));
 		return new FIfExp(getIfExp().scalarize(indexMap),
 		                  getThenExp().scalarize(indexMap),
 		                  etl,
@@ -703,44 +702,19 @@ aspect Scalarization {
 		                      getThenExp().scalarize(indexMap));
 	}
 	
-	public FExp FAddExp.scalarize(HashMap<String,Integer> indexMap) { return new FAddExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
-	public FExp FSubExp.scalarize(HashMap<String,Integer> indexMap) { return new FSubExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
-	public FExp FMulExp.scalarize(HashMap<String,Integer> indexMap) { return new FMulExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
-	public FExp FDivExp.scalarize(HashMap<String,Integer> indexMap) { return new FDivExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
-	public FExp FPowExp.scalarize(HashMap<String,Integer> indexMap) { return new FPowExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
-	public FExp FNegExp.scalarize(HashMap<String,Integer> indexMap) { return new FNegExp(getFExp().scalarize(indexMap)); }
-
-	public FExp FLtExp.scalarize(HashMap<String,Integer> indexMap) { return new FLtExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
-	public FExp FLeqExp.scalarize(HashMap<String,Integer> indexMap) { return new FLeqExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
-	public FExp FGtExp.scalarize(HashMap<String,Integer> indexMap) { return new FGtExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
-	public FExp FGeqExp.scalarize(HashMap<String,Integer> indexMap) { return new FGeqExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
-	public FExp FEqExp.scalarize(HashMap<String,Integer> indexMap) { return new FEqExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
-	public FExp FNeqExp.scalarize(HashMap<String,Integer> indexMap) { return new FNeqExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
-	public FExp FNotExp.scalarize(HashMap<String,Integer> indexMap) { return new FNotExp(getFExp().scalarize(indexMap)); }
-	public FExp FOrExp.scalarize(HashMap<String,Integer> indexMap) { return new FOrExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
-	public FExp FAndExp.scalarize(HashMap<String,Integer> indexMap) { return new FAndExp(getLeft().scalarize(indexMap),getRight().scalarize(indexMap)); }
-
-	public FExp FRealLitExp.scalarize(HashMap<String,Integer> indexMap) { return (FRealLitExp)fullCopy(); }
-	public FExp FIntegerLitExp.scalarize(HashMap<String,Integer> indexMap) { return (FIntegerLitExp)fullCopy(); }
-	public FExp FStringLitExp.scalarize(HashMap<String,Integer> indexMap) { return (FStringLitExp)fullCopy(); }
-	public FExp FBooleanLitExpTrue.scalarize(HashMap<String,Integer> indexMap) { return (FBooleanLitExpTrue)fullCopy(); }
-	public FExp FBooleanLitExpFalse.scalarize(HashMap<String,Integer> indexMap) { return (FBooleanLitExpFalse)fullCopy(); }
+	public FExp FMulExp.scalarize(HashMap<String,Integer> indexMap) {
+		if (getLeft().isArray() && !isArray()) 
+			return composeScalarCellExp(Index.NULL).scalarize(indexMap);
+		else
+			return super.scalarize(indexMap);
+	}
 	
-	public FExp FDerExp.scalarize(HashMap<String,Integer> indexMap) {return new FDerExp(getFIdUse().scalarize(indexMap));}
-	public FExp FSinExp.scalarize(HashMap<String,Integer> indexMap) { return new FSinExp(getFExp().scalarize(indexMap)); }
-	public FExp FCosExp.scalarize(HashMap<String,Integer> indexMap) { return new FCosExp(getFExp().scalarize(indexMap)); }
-	public FExp FTanExp.scalarize(HashMap<String,Integer> indexMap) { return new FTanExp(getFExp().scalarize(indexMap)); }
-	public FExp FAsinExp.scalarize(HashMap<String,Integer> indexMap) { return new FAsinExp(getFExp().scalarize(indexMap)); }
-	public FExp FAcosExp.scalarize(HashMap<String,Integer> indexMap) { return new FAcosExp(getFExp().scalarize(indexMap)); }
-	public FExp FAtanExp.scalarize(HashMap<String,Integer> indexMap) { return new FAtanExp(getFExp().scalarize(indexMap)); }
-	public FExp FAtan2Exp.scalarize(HashMap<String,Integer> indexMap) { return new FAtan2Exp(getFExp().scalarize(indexMap),getY().scalarize(indexMap)); }
-	public FExp FSinhExp.scalarize(HashMap<String,Integer> indexMap) { return new FSinhExp(getFExp().scalarize(indexMap)); }
-	public FExp FCoshExp.scalarize(HashMap<String,Integer> indexMap) { return new FCoshExp(getFExp().scalarize(indexMap)); }
-	public FExp FTanhExp.scalarize(HashMap<String,Integer> indexMap) { return new FTanhExp(getFExp().scalarize(indexMap)); }
-	public FExp FExpExp.scalarize(HashMap<String,Integer> indexMap) { return new FExpExp(getFExp().scalarize(indexMap)); }
-	public FExp FLogExp.scalarize(HashMap<String,Integer> indexMap) { return new FLogExp(getFExp().scalarize(indexMap)); }
-	public FExp FLog10Exp.scalarize(HashMap<String,Integer> indexMap) { return new FLog10Exp(getFExp().scalarize(indexMap)); }
-	public FExp FSqrtExp.scalarize(HashMap<String,Integer> indexMap) { return new FSqrtExp(getFExp().scalarize(indexMap)); }
+	public FExp FBinExp.scalarize(HashMap<String,Integer> indexMap) { return createNode(getLeft().scalarize(indexMap), getRight().scalarize(indexMap)); }
+	public FExp FUnaryExp.scalarize(HashMap<String,Integer> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
+	public FExp FMathematicalFunctionCall.scalarize(HashMap<String,Integer> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
+	
+	public FExp FLitExp.scalarize(HashMap<String,Integer> indexMap) { return (FLitExp) fullCopy(); }
+	public FExp FDerExp.scalarize(HashMap<String,Integer> indexMap) { return new FDerExp(getFIdUse().scalarize(indexMap)); }
 
 	// TODO: Need to examine scalarization for generic functions more closely 
 	public FExp FFunctionCall.scalarize(HashMap<String,Integer> indexMap) { return (FFunctionCall) fullCopy(); }

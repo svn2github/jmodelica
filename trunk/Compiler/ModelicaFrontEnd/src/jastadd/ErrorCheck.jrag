@@ -134,15 +134,13 @@ import java.util.ArrayList;
 	  }
 
 	  /**
-	   * Convert to string.
+	   * Convert to error message.
 	   */
-	  public String toString() {
+	  public String getMessage() {
 		  StringBuffer str = new StringBuffer();
 		  str.append(problems.size() + " problems found:\n");
-		  for(Iterator iter = problems.iterator(); iter.hasNext(); ) {
-			  Problem problem = (Problem) iter.next();
+		  for (Problem problem : problems)
 			  str.append(problem+"\n");
-		  }
 		  return str.toString();
 	  }
   }
@@ -155,6 +153,7 @@ import java.util.ArrayList;
 	  private String className;
 	  
 	  public ModelicaClassNotFoundException(String className) {
+		  super("Class "+ className + " not found");
 		  this.className = className;
 	  }
 	  
@@ -387,7 +386,7 @@ aspect InstanceErrorCheck {
 	public Collection<Problem> InstProgramRoot.checkErrorsInInstClass(String className) throws ModelicaClassNotFoundException{
 		InstFullClassDecl fcd = retrieveInstFullClassDecl(className);
 		if (fcd == null) {
-			throw new ModelicaClassNotFoundException("Class "+ className + " not found");
+			throw new ModelicaClassNotFoundException(className);
 		} else {
 			return fcd.errorCheck();
 		}

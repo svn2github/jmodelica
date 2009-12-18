@@ -8,6 +8,10 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.StringReader;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.jmodelica.modelica.compiler.*;
 
 abstract public class TestAnnotationizer {
@@ -54,19 +58,26 @@ abstract public class TestAnnotationizer {
 			testType = in.readLine().trim();			
 		}
 		
-		for (Class cl : TestAnnotationizer.class.getClasses()) {
-			if (cl.getSimpleName().equals(testType)) {
-				Constructor constructor = cl.getConstructor(String.class, String.class, String.class, String.class);
-				TestAnnotationizer ta = (TestAnnotationizer) constructor.newInstance(filePath, className, description, data);
-				if (write)
-					ta.writeAnnotation();
-				else
-					ta.printAnnotation();
-				System.exit(0);
+		try {
+			for (Class cl : TestAnnotationizer.class.getClasses()) {
+				if (cl.getSimpleName().equals(testType)) {
+					Constructor constructor = cl.getConstructor(String.class, String.class, String.class, String.class);
+					TestAnnotationizer ta = (TestAnnotationizer) constructor.newInstance(filePath, className, description, data);
+					if (write)
+						ta.writeAnnotation();
+					else
+						ta.printAnnotation();
+					System.exit(0);
+				}
 			}
+		} catch (InvocationTargetException e) {
+			System.out.println("Creating annotation failed:");
+			System.out.println(e.getCause().getMessage());
+			System.exit(1);
 		}
 		
 		System.out.println("Test type " + testType + " not found.");
+		System.exit(1);
 	}
 
 	private static String composeClassName(String extracted, String entered) {
@@ -140,7 +151,13 @@ abstract public class TestAnnotationizer {
         PrintStream out = new PrintStream(altered);
         for (int i = 0, n = getLine(); i < n; i++)
         	out.println(in.readLine());
-		outputAnnotation(out);
+        try {
+        	outputAnnotation(out);
+        } catch (Exception e) {
+    		out.close();
+			altered.delete();
+			throw e;
+       }
 		for (String line = in.readLine(); line != null; line = in.readLine())
 			out.println(line);
 		out.close();
@@ -184,11 +201,20 @@ abstract public class TestAnnotationizer {
 		return fc;
 	}
 
-	protected InstClassDecl instantiate() {
+	protected InstClassDecl instantiate() throws Exception {
 		InstProgramRoot ipr = root.getProgram().getInstProgramRoot();
 		ipr.options = new OptionRegistry(root.options);
-		InstClassDecl icl = ipr.simpleLookupInstClassDecl(className);
-		return icl;
+		handleCompilerProblems(ipr.checkErrorsInInstClass(className));
+		return ipr.simpleLookupInstClassDecl(className);
+	}
+	
+	protected void handleCompilerProblems(Collection<Problem> problems) throws CompilerException {
+		CompilerException ce = new CompilerException();
+		for (Problem p : problems) 
+			if(p.severity() == Problem.Severity.ERROR) 
+				ce.addProblem(p);
+		if (!ce.getProblems().isEmpty())
+			throw ce;
 	}
 
 	abstract protected void printSpecific(PrintStream out, String indent) throws Exception;
@@ -256,6 +282,7 @@ abstract public class TestAnnotationizer {
 			super(filePath, className, description, data);
 			try {
 				mc.instantiateModel(root, className);
+				throw new Exception("No errors reported in ErrorTestCase.");
 			} catch (CompilerException e) {
 				StringBuffer str = new StringBuffer();
 				str.append(e.getProblems().size() + " errors found:\n");
