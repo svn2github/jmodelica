@@ -149,17 +149,24 @@ aspect AliasVariables {
 					return av;
 				}
 			}
-
+			
 			// 2. Select a variable whith fixed attribute set to true
 			for (AliasVariable av : aliasSet) {
 				FExp fixed = av.getFVariable().fixedAttributeExp();
-				if (fixed!=null) {
+				if (!av.getFVariable().isParameter() && fixed!=null) {
 					if (fixed.ceval().booleanValue()) {
 						return av;
 					}
 				}
 			}
-			
+
+			// 3. Select a variable that is a parameter
+			for (AliasVariable av : aliasSet) {
+				if (av.getFVariable().isParameter()) {
+					return av;
+				}
+			}
+
 			return aliasSet.iterator().next();
 			
 		}

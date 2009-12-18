@@ -811,6 +811,27 @@ end TransformCanonicalTests.AliasTest25;
     x2 = x1;	
 end AliasTest25;
 
+model AliasTest26
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="AliasTest26",
+        description="Test elimination of alias variables",
+                                               flatModel=
+"
+fclass TransformCanonicalTests.AliasTest26
+ parameter Real p = 1 /* 1.0 */;
+ Real y;
+equation
+ y = p + 3;
+end TransformCanonicalTests.AliasTest26;
+")})));
+
+ parameter Real p = 1;
+ Real x,y;
+equation
+ x = p;
+ y = x+3;
+end AliasTest26;
+
 
 model ParameterBindingExpTest1_Err
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
