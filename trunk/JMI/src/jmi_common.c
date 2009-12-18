@@ -326,7 +326,7 @@ int jmi_variable_type(jmi_t *jmi, int col_index) {
     	return JMI_DER_U;
     } else if (col_index>=jmi->offs_w && col_index<jmi->offs_t) {
     	return JMI_DER_W;
-    } else if (col_index>=jmi->offs_t && col_index<jmi->offs_dx_p) {
+    } else if (col_index==jmi->offs_t) {
     	return JMI_DER_T;
     }
 
@@ -351,17 +351,18 @@ int jmi_variable_type(jmi_t *jmi, int col_index) {
 
 int jmi_check_Jacobian_column_index(jmi_t *jmi, int independent_vars, int *mask, int col_index) {
 
-//	printf("<<< %d %d\n", col_index, mask[col_index]);
-//	printf("<< %d %d\n", independent_vars, jmi_variable_type(jmi, col_index));
+	//printf("%d\n",jmi->n_z);
+	//printf("<<< %d %d\n", col_index, mask[col_index]);
+	//printf("<< %d %d\n", independent_vars, jmi_variable_type(jmi, col_index));
 
 	if (mask[col_index] == 0) {
-//		printf("Hej\n");
+		//printf("Hej\n");
 		return 0;
 	} else if ((independent_vars & jmi_variable_type(jmi, col_index))) {
-//		printf("Hojj\n");
+		//printf("Hojj\n");
 		return 1;
 	} else {
-//		printf("Hepp\n");
+		//printf("Hepp\n");
 		return 0;
 	}
 }

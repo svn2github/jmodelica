@@ -716,6 +716,8 @@ aspect Scalarization {
 	public FExp FLitExp.scalarize(HashMap<String,Integer> indexMap) { return (FLitExp) fullCopy(); }
 	public FExp FDerExp.scalarize(HashMap<String,Integer> indexMap) { return new FDerExp(getFIdUse().scalarize(indexMap)); }
 
+	public FExp FNoEventExp.scalarize(HashMap<String,Integer> indexMap) { return new FNoEventExp(getFExp().scalarize(indexMap)); }
+	
 	// TODO: Need to examine scalarization for generic functions more closely 
 	public FExp FFunctionCall.scalarize(HashMap<String,Integer> indexMap) { return (FFunctionCall) fullCopy(); }
 	

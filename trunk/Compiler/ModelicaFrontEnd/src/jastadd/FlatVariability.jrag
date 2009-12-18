@@ -189,6 +189,7 @@ aspect FlatVariability {
 		return total;		
 	}	
 	
+	eq FNoEventExp.variability() = getFExp().variability();
 	eq FIdentity.variability() = fConstant();
 	eq FOnes.variability() = fConstant();
 	eq FZeros.variability() = fConstant();

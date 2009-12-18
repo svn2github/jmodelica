@@ -164,6 +164,7 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 	}
 
 	//printf("*** %d, %d\n",dF0_dv_n_nz,dF0_dv_n_cols);
+
 	jmi_init_opt->dh_n_nz = dF0_dv_n_nz;
 
 	// Allocate memory
@@ -179,11 +180,12 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 		return retval;
 	}
 
-	/*
+/*
 	for (i=0;i<jmi_init_opt->dh_n_nz;i++) {
 		printf("%d %d %d\n",i,jmi_init_opt->dh_irow[i],jmi_init_opt->dh_icol[i]);
 	}
 */
+
 	print_problem_stats(jmi_init_opt);
 
 	return 0;

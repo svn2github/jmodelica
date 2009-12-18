@@ -940,6 +940,23 @@ aspect FlatExpressions {
 	inh lazy boolean FExp.inInitialEquationSection();
 	eq FClass.getFInitialEquation().inInitialEquationSection() = true;
 	eq Root.getChild().inInitialEquationSection() = false;
+
+	inh boolean FExp.inNoEventExp();
+	eq FNoEventExp.getChild().inNoEventExp() = true;
+	eq FAlgorithmBlock.getChild().inNoEventExp() = true;
+	eq FAbstractEquation.getChild().inNoEventExp() = false;
+	eq SourceRoot.getChild().inNoEventExp() = false;
+	eq FlatRoot.getChild().inNoEventExp() = false;
+	
+	inh boolean FExp.inIfCondition();
+	eq FIfExp.getChild().inIfCondition() = true;
+	eq FElseIfExp.getChild().inIfCondition() = true;
+	eq FArtmBinExp.getChild().inIfCondition() = false;
+	eq FNegExp.getChild().inIfCondition() = false;
+	eq FAbstractEquation.getChild().inIfCondition() = false;
+	eq SourceRoot.getChild().inIfCondition() = false;
+	eq FlatRoot.getChild().inIfCondition() = false;
+	
 }
 
 aspect LineOffsets {

@@ -102,6 +102,8 @@ aspect FlatTypeAnalysis {
 	eq FAddExp.type()     = getLeft().type().binaryNumericPromotion(getRight().type());
 	eq FSubExp.type()     = getLeft().type().binaryNumericPromotion(getRight().type());
 	
+	eq FNoEventExp.type() = getFExp().type();
+	
 	eq FMulExp.type() {
 		if (ndims() < 0)
 			return fUnknownType();

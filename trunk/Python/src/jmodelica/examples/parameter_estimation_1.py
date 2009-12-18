@@ -70,7 +70,10 @@ def run_demo(with_plots=True):
     xx_meas = integr.odeint(F,xx0,t_meas)
 
     # Add measurement noice
-    xx_meas[:,0] = xx_meas[:,0] + N.random.random(N_points_meas)*0.2-0.1
+    #noice = N.random.random(N_points_meas)*0.2-0.1
+    noice = [ 0.01463904,  0.0139424,   0.09834249,  0.0768069,   0.01971631, -0.03827911,
+  0.05266659, -0.02608245,  0.05270525,  0.04717024,  0.0779514, ]
+    xx_meas[:,0] = xx_meas[:,0] + noice
     
     # Set parameters corresponding to measurement data in model
     pi[4:15] = t_meas
@@ -119,6 +122,13 @@ def run_demo(with_plots=True):
     # Extract variable profiles
     x1 = res.get_variable_data('sys.x1')
     u = res.get_variable_data('u')
+    w = res.get_variable_data('sys.w')
+    z = res.get_variable_data('sys.z')
+    
+    assert N.abs(w.x[-1] - 1.038809) < 1e-4, \
+            "Wrong value of parameter w in parameter_estimation_1.py"  
+    assert N.abs(z.x[-1] - 0.454533) < 1e-4, \
+            "Wrong value of parameter z in parameter_estimation_1.py"  
     
     if with_plots:
         # Plot optimization result

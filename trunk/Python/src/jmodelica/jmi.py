@@ -367,7 +367,7 @@ class Model(object):
         
         self._path = os.path.abspath(path)
         self._libname = libname
-        self._setDefaultValuesFromMetadata()
+        self._setDefaultValuesFromMetadata()        
         self.jmimodel.initAD()
         self._set_dependent_parameters()
 
@@ -717,24 +717,28 @@ class Model(object):
     t = property(get_t, set_t, doc="The time value.")
 
     def get_sw(self):
-        """Returns a reference to the switch function vector of the DAE."""
+        """Returns a reference to the switch function vector of the DAE.
+        A switch value of 1 corresponds to true and 0 corresponds to false."""
         return self.jmimodel.get_sw()
         
     def set_sw(self, sw):
-        """Sets the switch function vector of the DAE."""
+        """Sets the switch function vector of the DAE.
+        A switch value of 1 corresponds to true and 0 corresponds to false."""
         self.jmimodel._sw[:] = sw
         
     sw = property(get_sw, set_sw, doc="The switching function vector of the DAE.")
 
     def get_sw_init(self):
-        """Returns a reference to the switch function vector of the DAE initialization system."""
-        return self.jmimodel.get_sw()
+        """Returns a reference to the switch function vector of the DAE initialization system.
+        A switch value of 1 corresponds to true and 0 corresponds to false."""
+        return self.jmimodel.get_sw_init()
         
     def set_sw_init(self, sw_init):
-        """Sets the switch function vector of the DAE initialization system."""
-        self.jmimodel._sw[:] = sw_init
+        """Sets the switch function vector of the DAE initialization system.
+        A switch value of 1 corresponds to true and 0 corresponds to false."""
+        self.jmimodel._sw_init[:] = sw_init
         
-    sw_init = property(get_sw, set_sw, doc="The switching function vector of the DAE initialization system.")
+    sw_init = property(get_sw_init, set_sw_init, doc="The switching function vector of the DAE initialization system.")
 
     def get_z(self):
         """Returns a reference to the vector containing all parameters,
@@ -2005,13 +2009,17 @@ class JMIModel(object):
 
     def get_sw(self):
         """Returns a reference to the switching function vector of the DAE.
+        A switch value of 1 corresponds to true and 0 corresponds to false.
         """
-        return self._dll.jmi_get_sw(self._jmi) 
+        return self._sw
+        #return self._dll.jmi_get_sw(self._jmi) 
 
     def get_sw_init(self):
         """Returns a reference to the switching function vector of the DAE initialization system.
+        A switch value of 1 corresponds to true and 0 corresponds to false.
         """
-        return self._dll.jmi_get_sw_init(self._jmi) 
+        return _self.sw_init
+        #return self._dll.jmi_get_sw_init(self._jmi) 
     
     def ode_f(self):
         """Evalutates the right hand side of the ODE.

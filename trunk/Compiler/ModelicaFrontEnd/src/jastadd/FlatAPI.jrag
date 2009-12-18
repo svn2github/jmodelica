@@ -630,6 +630,10 @@ aspect FlatAPI {
 	FLogBinExp contributes
  		this when inEquationSection()
 	to FClass.relExpInEquations() for myFClass();	
+		
+	public int FLogBinExp.relExpInEquationsIndex() {
+		return myFClass().relExpInEquations().indexOf(this);
+	}
 	
 	syn int FClass.numInitialEquations() = initialEquations().size(); 
     syn lazy int FClass.numInitialScalarEquations() {
@@ -664,7 +668,11 @@ aspect FlatAPI {
 	FLogBinExp contributes
  		this when inInitialEquationSection()
 	    to FClass.relExpInInitialEquations() for myFClass();	
-	
+
+	public int FLogBinExp.relExpInInitialEquationsIndex() {
+		return myFClass().relExpInInitialEquations().indexOf(this);
+	}
+ 
 /*	
 
 	coll ArrayList<FVariable> FClass.structuralParameters() [new ArrayList<FVariable>()] with add root FlatRoot;

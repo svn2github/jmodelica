@@ -188,6 +188,7 @@ public class CGenerator extends GenericGenerator {
 				generateVar(genPrinter, fv, "w", fv.algebraicRealVariableIndex());
 			
 			genPrinter.print("#define time ((*(jmi->z))[jmi->offs_t])\n"); 
+			
 		}
 	}
 	

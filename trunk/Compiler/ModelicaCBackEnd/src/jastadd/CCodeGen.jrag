@@ -352,82 +352,62 @@ aspect CCodeGen {
 	eq FLeqExp.macroC() = "COND_EXP_LE";
 	eq FGtExp.macroC() = "COND_EXP_GT";
 	eq FGeqExp.macroC() = "COND_EXP_GE";
-		
+	
 	public void FIfExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-
-		FLogBinExp if_exp = (FLogBinExp)getIfExp();
-		FExp op1 = if_exp.getLeft();
-		FExp op2 = if_exp.getRight();
 		
 		int end_parenthesis = 1;
-		str.print("(" + if_exp.macroC() + "(");
-		if (op1 instanceof FLitExp) {
-			str.print("AD_WRAP_LITERAL(");
-			p.toString(op1,str,indent,o);
-			str.print(")");
-		} else {
-			p.toString(op1,str,indent,o);
-		} 
-		str.print(",");
-		if (op2 instanceof FLitExp) {
-			str.print("AD_WRAP_LITERAL(");
-			p.toString(op2,str,indent,o);
-			str.print(")");
-		} else {
-			p.toString(op2,str,indent,o);
-		} 
-		str.print(",");
-		if (getThenExp() instanceof FLitExp) {
-			str.print("AD_WRAP_LITERAL(");
-			p.toString(getThenExp(),str,indent,o);
-			str.print(")");
-		} else {
-			p.toString(getThenExp(),str,indent,o);
-		} 
+		
+		str.print("(COND_EXP_EQ(");
+		p.toString(getIfExp(),str,indent,o);
+		str.print(",AD_WRAP_LITERAL(1),");
+		p.toString(getThenExp(),str,indent,o);
 		str.print(",");
 		for (FElseIfExp el_if : getFElseIfExps()) {
 			end_parenthesis++;
-			if_exp = (FLogBinExp)el_if.getIfExp();
-			op1 = if_exp.getLeft();
-			op2 = if_exp.getRight();
-			str.print("(" + if_exp.macroC() + "(");
-			if (op1 instanceof FLitExp) {
-				str.print("AD_WRAP_LITERAL(");
-				p.toString(op1,str,indent,o);
-				str.print(")");
-			} else {
-				p.toString(op1,str,indent,o);
-			} 
-			str.print(",");
-			if (op2 instanceof FLitExp) {
-				str.print("AD_WRAP_LITERAL(");
-				p.toString(op2,str,indent,o);
-				str.print(")");
-			} else {
-				p.toString(op2,str,indent,o);
-			} 
-			str.print(",");
-			if (el_if.getThenExp() instanceof FLitExp) {
-				str.print("AD_WRAP_LITERAL(");
-				p.toString(el_if.getThenExp(),str,indent,o);
-				str.print(")");
-			} else {
-				p.toString(el_if.getThenExp(),str,indent,o);
-			} 
-			str.print(",");
+
+			str.print("(COND_EXP_EQ(");
+			p.toString(el_if.getIfExp(),str,indent,o);
+			str.print(",AD_WRAP_LITERAL(1),");
+			p.toString(el_if.getThenExp(),str,indent,o);
+			str.print(",");			
 		}
-		if (getElseExp() instanceof FLitExp) {
-			str.print("AD_WRAP_LITERAL(");
-			p.toString(getElseExp(),str,indent,o);
-			str.print(")");
-		} else {
-			p.toString(getElseExp(),str,indent,o);
-		} 
+		p.toString(getElseExp(),str,indent,o);
 		for (int i=0;i<end_parenthesis*2;i++) {
 			str.print(")");
 		}
 	}	
+
+	public void FNoEventExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getFExp(),str,indent,o);
+	}
+	
+	public void FLogBinExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		
+		if (inNoEventExp()) {
+			str.append(macroC()+"(");
+			p.toString(getLeft(),str,indent,o);
+			str.append(",");
+			p.toString(getRight(),str,indent,o);
+			str.append(",AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0))");
+		} else {
+			str.append("_sw");
+			str.append("("+relExpInEquationsIndex()+")");
+		}
+
+	}
+			 	
+	public void FRealLitExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		if (inIfCondition()) str.print("AD_WRAP_LITERAL(");
+		str.print(getUNSIGNED_NUMBER());
+		if (inIfCondition()) str.print(")");
+	}
+
+	public void FIntegerLitExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		if (inIfCondition()) str.print("AD_WRAP_LITERAL(");
+		str.print(getUNSIGNED_INTEGER());
+		if (inIfCondition()) str.print(")");
+	}
+	
 	public void FAbstractEquation.genResidual_C(int i, String indent, PrintStream str) {}
 	
 	public void FEquation.genResidual_C(int i, String indent, PrintStream str) {
@@ -503,6 +483,22 @@ aspect CCodeGen {
 		getRight().prettyPrint_C(str,"");
 		str.print(" - (");
 		getLeft().prettyPrint_C(str,"");
+		str.print(");\n");
+	}	
+
+	public void FGtExp.genResidual_C(int i, String indent, PrintStream str) {
+		str.print(indent + "(*res)[" + i + "] = ");
+		getLeft().prettyPrint_C(str,"");
+		str.print(" - (");
+		getRight().prettyPrint_C(str,"");
+		str.print(");\n");
+	}	
+
+	public void FGeqExp.genResidual_C(int i, String indent, PrintStream str) {
+		str.print(indent + "(*res)[" + i + "] = ");
+		getLeft().prettyPrint_C(str,"");
+		str.print(" - (");
+		getRight().prettyPrint_C(str,"");
 		str.print(");\n");
 	}	
 	

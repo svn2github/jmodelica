@@ -620,6 +620,7 @@ aspect FlatExpressions {
 	public FSqrtExp  FSqrtExp.flatten(FQName prefix)  { return new FSqrtExp(getFExp().flatten(prefix)); }
 	
 	// These used to delegate to standard implementation for FExp.flatten(FQName).
+	public FNoEventExp FNoEventExp.flatten(FQName prefix)  { return new FNoEventExp(getFExp().flatten(prefix)); }
 	public FIdentity  FIdentity.flatten(FQName prefix)  { return null; }
 	public FScalar    FScalar.flatten(FQName prefix)    { return null; }
 	public FSizeExp   FSizeExp.flatten(FQName prefix)   { return null; }
@@ -1413,6 +1414,8 @@ aspect InstantiatedExpressions {
 					bfc = new FLogExp(temp[0].getFExp());
 				} else if (matchesBuiltin(name, "log10")) {
 					bfc = new FLog10Exp(temp[0].getFExp());
+				} else if (name.equals("noEvent")) {
+					bfc = new FNoEventExp(temp[0].getFExp());
 				} else if (name.equals("identity")) {
 					bfc = new FIdentity(temp[0].getFExp());
 				} else if (name.equals("sqrt")) {

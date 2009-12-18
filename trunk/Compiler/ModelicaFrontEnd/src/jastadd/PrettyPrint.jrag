@@ -1219,6 +1219,10 @@ aspect FlattPrettyPrint {
 	}
 	
 	protected void FBuiltInFunctionCall.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {}
+
+	protected void FNoEventExp.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getFExp(),str,indent,o);
+	}
 	
 	protected void FMathematicalFunctionCall.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
 		p.toString(getFExp(),str,indent,o);
@@ -1270,6 +1274,7 @@ aspect FlattPrettyPrint {
 	eq FScalar.getBuiltInName() = "scalar";
 	eq FTranspose.getBuiltInName() = "transpose";
 	eq FSizeExp.getBuiltInName() = "size";
+	eq FNoEventExp.getBuiltInName() = "noEvent";
 	eq FIdentity.getBuiltInName() = "identity";
 	eq FOnes.getBuiltInName() = "ones";
 	eq FZeros.getBuiltInName() = "zeros";

@@ -588,6 +588,7 @@ jmi_real_t* jmi_get_w_p(jmi_t* jmi, int i);
 
 /**
  * \brief Get a pointer to the first switching function in the DAE \$fF\$f.
+ * A switch value of 1 corresponds to true and 0 corresponds to false.
  *
  * @param jmi The jmi_t struct.
  * @return A pointer to the vector of switching functions.
@@ -597,7 +598,7 @@ jmi_real_t* jmi_get_sw(jmi_t* jmi);
 
 /**
  * \brief Get a pointer to the first switching function in the initialization system \$fF_0\$f.
- *
+ * A switch value of 1 corresponds to true and 0 corresponds to false.
  * @param jmi The jmi_t struct.
  * @return A pointer to the vector of switching functions.
  *

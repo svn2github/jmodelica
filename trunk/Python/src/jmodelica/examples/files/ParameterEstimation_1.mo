@@ -14,7 +14,16 @@ package ParEst
     der(x2) = -w^2*x1 + w^2*u;
   end SecondOrder;
 
-  optimization ParEst (objective = cost(finalTime),
+  optimization ParEst (objective = (sys.y(t0) - y0)^2 +
+             (sys.y(t1) - y1)^2 +
+             (sys.y(t3) - y3)^2 +
+             (sys.y(t4) - y4)^2 +
+             (sys.y(t5) - y5)^2 +
+             (sys.y(t6) - y6)^2 +
+             (sys.y(t7) - y7)^2 +
+             (sys.y(t8) - y8)^2 +
+             (sys.y(t9) - y9)^2 +
+             (sys.y(t10) - y10)^2,
                        startTime = 0,
                        finalTime = 15)
 
@@ -53,24 +62,8 @@ package ParEst
     parameter Real y9 = 0.99987659;
     parameter Real y10 = 0.9999546; 
 
-    // Cost function
-    Real cost;
-
     equation 
       u=1;
-
-    constraint
-      // Squared sum of errors
-      cost = (sys.y(t0) - y0)^2 +
-             (sys.y(t1) - y1)^2 +
-             (sys.y(t3) - y3)^2 +
-             (sys.y(t4) - y4)^2 +
-             (sys.y(t5) - y5)^2 +
-             (sys.y(t6) - y6)^2 +
-             (sys.y(t7) - y7)^2 +
-             (sys.y(t8) - y8)^2 +
-             (sys.y(t9) - y9)^2 +
-             (sys.y(t10) - y10)^2;
 
   end ParEst;
 
