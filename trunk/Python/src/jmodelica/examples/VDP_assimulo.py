@@ -7,8 +7,9 @@ import pylab as p
 
 import jmodelica
 import jmodelica.jmi as jmi
-from jmodelica.simulation.assimulo import Simulator
+from jmodelica.simulation.assimulo import AJMIExplModel
 from jmodelica.compiler import OptimicaCompiler
+from Integrator.Explicit_ODE import CVode
 
 def run_demo(with_plots=True):
     """
@@ -32,11 +33,13 @@ def run_demo(with_plots=True):
     # Load the dynamic library and XML data
     model=jmi.Model(package)
     
-    VDP_sim = Simulator(model, 'CVode')
-    VDP_sim.solver.discr = 'BDF' #discretication method, default Adams
-    VDP_sim.solver.iter = 'Newton' #iteration method, default FixedPoint
-    VDP_sim.run(20) #Runs the simulation
-    VDP_sim.solver.stats_print() #Prints the integration statistics
+    VDP_mod = AJMIExplModel(model)
+    
+    VDP_sim = CVode(VDP_mod)
+    VDP_sim.discr = 'BDF' #discretication method, default Adams
+    VDP_sim.iter = 'Newton' #iteration method, default FixedPoint
+    VDP_sim(20) #Runs the simulation
+    VDP_sim.stats_print() #Prints the integration statistics
     VDP_sim.plot() #Plots the solution
 
 if __name__=="__main__":
