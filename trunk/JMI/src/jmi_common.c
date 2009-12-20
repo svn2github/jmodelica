@@ -358,7 +358,7 @@ int jmi_check_Jacobian_column_index(jmi_t *jmi, int independent_vars, int *mask,
 	if (mask[col_index] == 0) {
 		//printf("Hej\n");
 		return 0;
-	} else if ((independent_vars & jmi_variable_type(jmi, col_index))) {
+	} else if (jmi_variable_type(jmi,col_index)!=-1 && (independent_vars & jmi_variable_type(jmi, col_index))) {
 		//printf("Hojj\n");
 		return 1;
 	} else {
