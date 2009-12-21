@@ -645,6 +645,19 @@ aspect FlatNames {
 	
 }
 
+aspect DebugHelpers {
+	
+	/**
+	 * \brief Convert to string. Primarily useful for debugging.
+	 * 
+	 * Default implementation uses prettyPrint().
+	 */
+	public String ASTNode.toString() {
+		return prettyPrint("");
+	}
+	
+}
+
 aspect FlatFunctionUtils {
 	 
 	 syn boolean FFunctionVariable.isInput()  = hasFTypePrefixInputOutput() && getFTypePrefixInputOutput().inputCausality();
