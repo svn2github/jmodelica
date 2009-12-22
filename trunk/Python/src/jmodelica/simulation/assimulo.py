@@ -1,7 +1,7 @@
 #!/usr/bin/env python 
 # -*- coding: utf-8 -*-
 """
-This file contains code for mapping our Models the Problem specifications
+This file contains code for mapping our Models to the Problem specifications
 required by Assimulo.
 """
 

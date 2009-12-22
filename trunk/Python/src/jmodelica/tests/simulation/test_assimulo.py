@@ -4,7 +4,7 @@
 import nose
 import os
 import jmodelica.jmi as jmi
-from jmodelica.simulation.assimulo import Simulator, Simulator_Exception
+from jmodelica.simulation.assimulo import AJMIExplModel, AJMIImplModel
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
 
@@ -45,12 +45,12 @@ class TestSimulator:
         package_ODE = 'VDP_pack_VDP_Opt'
 
         # Load the dynamic library and XML data
-        self.m_DAE = jmi.Model(package_DAE)
-        self.m_ODE = jmi.Model(package_ODE)
+        #self.m_DAE = jmi.Model(package_DAE)
+        #self.m_ODE = jmi.Model(package_ODE)
         
         # Creates the solvers
-        self.DAE = Simulator(self.m_DAE, 'IDA')
-        self.ODE = Simulator(self.m_ODE, 'CVode')
+        #self.DAE = Simulator(self.m_DAE, 'IDA')
+        #self.ODE = Simulator(self.m_ODE, 'CVode')
         
     
     def test_init(self):
