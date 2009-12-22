@@ -451,14 +451,14 @@ aspect PrettyPrint {
 		str.print(")");
 	}
 	
-	public void AddExp.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
+	public void DotAddExp.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
 		p.toString(getLeft(),str,indent,o);
 		if(!(getRight() instanceof NegExp)) 
 			str.print("+");
 		p.toString(getRight(),str,indent,o);
 	}
 		
-	public void SubExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+	public void DotSubExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		p.toString(getLeft(),str,indent,o);
 		str.print("-");
 		if (getRight().isAddOrSub()) {
@@ -469,7 +469,7 @@ aspect PrettyPrint {
 			p.toString(getRight(),str,indent,o);
 	}
 		
-	public void MulExp.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
+	public void DotMulExp.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
 		if (getLeft().isAddOrSub()) {
 			str.print("(");
 			p.toString(getLeft(),str,indent,o);
@@ -485,7 +485,7 @@ aspect PrettyPrint {
 			p.toString(getRight(),str,indent,o);
 	}
 		
-	public void DivExp.prettyPrint(Printer p, PrintStream str, String indent, Object o){
+	public void DotDivExp.prettyPrint(Printer p, PrintStream str, String indent, Object o){
 		if (getLeft().isAddOrSub()) {
 			str.print("(");
 			p.toString(getLeft(),str,indent,o);
@@ -498,7 +498,7 @@ aspect PrettyPrint {
 		str.print(")");
 	}
 		
-	public void PowExp.prettyPrint(Printer p, PrintStream str, String indent, Object o){
+	public void DotPowExp.prettyPrint(Printer p, PrintStream str, String indent, Object o){
 		if (!(getLeft().isPrimary())) {
 			str.print("(");
 			p.toString(getLeft(),str,indent,o);
@@ -628,8 +628,8 @@ aspect PrettyPrint {
 	}
 	
 	syn boolean Exp.isAddOrSub() = false;
-	eq AddExp.isAddOrSub() = true;
-	eq SubExp.isAddOrSub() = true;
+	eq DotAddExp.isAddOrSub() = true;
+	eq DotSubExp.isAddOrSub() = true;
 	syn boolean Exp.isPrimary() = false;
 	eq AccessExp.isPrimary() = true;
 	eq RealLitExp.isPrimary() = true;
@@ -1030,14 +1030,14 @@ aspect FlattPrettyPrint {
 		str.print("end while");
 	}
 	
-	public void FAddExp.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
+	public void FDotAddExp.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
 		p.toString(getLeft(),str,indent,o);
 		if(!(getRight() instanceof FNegExp)) 
 			str.print(" + ");
 		p.toString(getRight(),str,indent,o);
 	}
 		
-	public void FSubExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+	public void FDotSubExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		p.toString(getLeft(),str,indent,o);
 		str.print(" - ");
 //		if (getRight().isAddOrSub()) {
@@ -1048,7 +1048,7 @@ aspect FlattPrettyPrint {
 //			p.toString(getRight(),str,indent,o);
 	}
 		
-	public void FMulExp.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
+	public void FDotMulExp.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
 		str.print("( ");
 		p.toString(getLeft(),str,indent,o);
 		str.print(" )");
@@ -1058,7 +1058,7 @@ aspect FlattPrettyPrint {
 		str.print(" )");
 	}
 		
-	public void FDivExp.prettyPrint(Printer p, PrintStream str, String indent, Object o){
+	public void FDotDivExp.prettyPrint(Printer p, PrintStream str, String indent, Object o){
 		str.print("( ");
 		p.toString(getLeft(),str,indent,o);
 		str.print(" )");
@@ -1068,7 +1068,7 @@ aspect FlattPrettyPrint {
 		str.print(" )");
 	}
 		
-	public void FPowExp.prettyPrint(Printer p, PrintStream str, String indent, Object o){
+	public void FDotPowExp.prettyPrint(Printer p, PrintStream str, String indent, Object o){
 		if (!(getLeft().isPrimary())) {
 			str.print("( ");
 			p.toString(getLeft(),str,indent,o);
@@ -1325,8 +1325,8 @@ aspect FlattPrettyPrint {
 	}
 	
 	syn boolean FExp.isAddOrSub() = false;
-	eq FAddExp.isAddOrSub() = true;
-	eq FSubExp.isAddOrSub() = true;
+	eq FDotAddExp.isAddOrSub() = true;
+	eq FDotSubExp.isAddOrSub() = true;
 	syn boolean FExp.isPrimary() = false;
 	eq FIdUseExp.isPrimary() = true;
 	eq FRealLitExp.isPrimary() = true;

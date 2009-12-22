@@ -161,12 +161,17 @@ aspect InheritedFactoryMethods {
 	public FUnsupportedExp FUnsupportedExp.createEmptyNode() { return new FUnsupportedExp(); }
 	
 	// Arithmetic oprerators
-	public FAddExp FAddExp.createEmptyNode() { return new FAddExp(); }
-	public FSubExp FSubExp.createEmptyNode() { return new FSubExp(); }
-	public FMulExp FMulExp.createEmptyNode() { return new FMulExp(); }
-	public FDivExp FDivExp.createEmptyNode() { return new FDivExp(); }
-	public FPowExp FPowExp.createEmptyNode() { return new FPowExp(); }
-	public FNegExp FNegExp.createEmptyNode() { return new FNegExp(); }
+	public FAddExp    FAddExp.createEmptyNode()    { return new FAddExp(); }
+	public FSubExp    FSubExp.createEmptyNode()    { return new FSubExp(); }
+	public FMulExp    FMulExp.createEmptyNode()    { return new FMulExp(); }
+	public FDivExp    FDivExp.createEmptyNode()    { return new FDivExp(); }
+	public FPowExp    FPowExp.createEmptyNode()    { return new FPowExp(); }
+	public FDotAddExp FDotAddExp.createEmptyNode() { return new FDotAddExp(); }
+	public FDotSubExp FDotSubExp.createEmptyNode() { return new FDotSubExp(); }
+	public FDotMulExp FDotMulExp.createEmptyNode() { return new FDotMulExp(); }
+	public FDotDivExp FDotDivExp.createEmptyNode() { return new FDotDivExp(); }
+	public FDotPowExp FDotPowExp.createEmptyNode() { return new FDotPowExp(); }
+	public FNegExp    FNegExp.createEmptyNode()    { return new FNegExp(); }
 	
 	// Logical operators
 	public FLtExp  FLtExp.createEmptyNode()  { return new FLtExp(); }

@@ -995,14 +995,18 @@ Exp relation =
 
   Exp additive_exp =
      multiplicative_exp.e    {: return e; :}
-   | additive_exp.e1 PLUS multiplicative_exp.e2   {: return new AddExp(e1, e2); :}
-   | additive_exp.e1 MINUS multiplicative_exp.e2  {: return new SubExp(e1, e2); :}
+   | additive_exp.e1 PLUS multiplicative_exp.e2      {: return new AddExp(e1, e2); :}
+   | additive_exp.e1 MINUS multiplicative_exp.e2     {: return new SubExp(e1, e2); :}
+   | additive_exp.e1 DOTPLUS multiplicative_exp.e2   {: return new DotAddExp(e1, e2); :}
+   | additive_exp.e1 DOTMINUS multiplicative_exp.e2  {: return new DotSubExp(e1, e2); :}
    ;
 
   Exp multiplicative_exp =
      unary_exp.e                                     {: return e; :}
-   | multiplicative_exp.e1 MULT unary_exp.e2  {: return new MulExp(e1, e2); :}
-   | multiplicative_exp.e1 DIV unary_exp.e2   {: return new DivExp(e1, e2); :}
+   | multiplicative_exp.e1 MULT unary_exp.e2     {: return new MulExp(e1, e2); :}
+   | multiplicative_exp.e1 DIV unary_exp.e2      {: return new DivExp(e1, e2); :}
+   | multiplicative_exp.e1 DOTMULT unary_exp.e2  {: return new DotMulExp(e1, e2); :}
+   | multiplicative_exp.e1 DOTDIV unary_exp.e2   {: return new DotDivExp(e1, e2); :} 
    ;
 
 
@@ -1014,7 +1018,8 @@ Exp unary_exp =
 
 Exp pow_exp =
     primary {:return primary; :}
-    | primary.a POW primary.e {: return new PowExp(a,e); :}
+    | primary.a POW primary.e    {: return new PowExp(a,e); :}
+    | primary.a DOTPOW primary.e {: return new DotPowExp(a,e); :}
     ;
 
 Exp primary =        
@@ -1137,12 +1142,10 @@ StringComment string_comment =
    ;      
  
  Access parse_access_unqualified_simple = 
-   parse_access_single_simple
-   DOT
-   MULT {: return parse_access_single_simple; :} 
-   | parse_access_single_simple 
-   DOT 
-   parse_access_unqualified_simple {: return new Dot("",parse_access_single_simple,parse_access_unqualified_simple); :}
+   parse_access_single_simple DOTMULT  
+            {: return parse_access_single_simple; :} 
+ | parse_access_single_simple DOT parse_access_unqualified_simple 
+            {: return new Dot("",parse_access_single_simple,parse_access_unqualified_simple); :}
    ;    
  
  

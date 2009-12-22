@@ -382,16 +382,14 @@ aspect Arrays {
 	}
 	
  	eq FRangeExp.size() {
-		int si = 0;
-		if (getNumFExp()==2) { // e.g. 1:10
-			si = (int)(getFExp(1).ceval().realValue() - 
-		               getFExp(0).ceval().realValue() + 1.0);
-		} else if (getNumFExp()==3) {
-			double first = getFExp(0).ceval().realValue();
-			double step = getFExp(1).ceval().realValue();
-			double last = getFExp(2).ceval().realValue();
-			si = (int) ((last - first) / step + 1.0);
+		double start = getFExp(0).ceval().realValue();
+		double step = 1.0;
+		double stop = getFExp(1).ceval().realValue();
+		if (getNumFExp() > 2) {
+			step = stop;
+			stop = getFExp(2).ceval().realValue();
 		}
+		int si = (int) ((stop - start) / step + 1.0);
 		return new int[] { (si < 0) ? 0 : si };
 	}
 	

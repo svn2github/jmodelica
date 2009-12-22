@@ -209,6 +209,11 @@ aspect XMLTagBinding{
 		eq FMulExp.xmlTag() = "Mul";
 		eq FDivExp.xmlTag() = "Div";
 		eq FPowExp.xmlTag() = "Pow";
+		eq FDotAddExp.xmlTag() = "DotAdd";
+		eq FDotSubExp.xmlTag() = "DotSub";
+		eq FDotMulExp.xmlTag() = "DotMul";
+		eq FDotDivExp.xmlTag() = "DotDiv";
+		eq FDotPowExp.xmlTag() = "DotPow";
 		eq FNegExp.xmlTag() = "Neg";
 		eq FLtExp.xmlTag() = "LogLt";
 		eq FLeqExp.xmlTag() = "LogLeq";

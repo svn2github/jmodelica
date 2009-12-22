@@ -232,6 +232,11 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   ":"               { return newSymbol(Terminals.COLON); }
   "."               { return newSymbol(Terminals.DOT); }
   ","               { return newSymbol(Terminals.COMMA); }
+  ".+"              { return newSymbol(Terminals.DOTPLUS); }  
+  ".-"              { return newSymbol(Terminals.DOTMINUS); }
+  ".*"              { return newSymbol(Terminals.DOTMULT); }
+  "./"              { return newSymbol(Terminals.DOTDIV); }
+  ".^"              { return newSymbol(Terminals.DOTPOW); }
 
 
   "+"               { return newSymbol(Terminals.PLUS); }  

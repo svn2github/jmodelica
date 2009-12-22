@@ -354,11 +354,11 @@ aspect TransformCanonical {
 				negated = false;
 			}
 		} else if (getLeft() instanceof FLitExp && getLeft().ceval().realValue() == 0 && // 0 = x + y
-				getRight() instanceof FAddExp &&
-				((FAddExp)getRight()).getLeft() instanceof FIdUseExp &&
-				((FAddExp)getRight()).getRight() instanceof FIdUseExp) {
-			afv1 = ((FIdUseExp)((FAddExp)getRight()).getLeft()).myFV();
-			afv2 = ((FIdUseExp)((FAddExp)getRight()).getRight()).myFV();
+				getRight() instanceof FDotAddExp &&
+				((FDotAddExp)getRight()).getLeft() instanceof FIdUseExp &&
+				((FDotAddExp)getRight()).getRight() instanceof FIdUseExp) {
+			afv1 = ((FIdUseExp)((FDotAddExp)getRight()).getLeft()).myFV();
+			afv2 = ((FIdUseExp)((FDotAddExp)getRight()).getRight()).myFV();
 			if (!afv1.isUnknown() && !afv2.isUnknown()) {
 				fv1 = (FVariable)afv1;
 				fv2 = (FVariable)afv2;

@@ -741,11 +741,11 @@ aspect ConstantEvaluation {
    */
   syn CValue FExp.ceval() = new CValueUnknown();
   
-  eq FAddExp.ceval() = type().add(getLeft().ceval(), getRight().ceval());
-  eq FSubExp.ceval() = type().sub(getLeft().ceval(), getRight().ceval());
-  eq FMulExp.ceval() = type().mul(getLeft().ceval(), getRight().ceval());
-  eq FDivExp.ceval() = type().div(getLeft().ceval(), getRight().ceval());
-  eq FPowExp.ceval() = type().pow(getLeft().ceval(), getRight().ceval());
+  eq FDotAddExp.ceval() = type().add(getLeft().ceval(), getRight().ceval());
+  eq FDotSubExp.ceval() = type().sub(getLeft().ceval(), getRight().ceval());
+  eq FDotMulExp.ceval() = type().mul(getLeft().ceval(), getRight().ceval());
+  eq FDotDivExp.ceval() = type().div(getLeft().ceval(), getRight().ceval());
+  eq FDotPowExp.ceval() = type().pow(getLeft().ceval(), getRight().ceval());
   
   eq FNegExp.ceval() = type().neg(getFExp().ceval());
 

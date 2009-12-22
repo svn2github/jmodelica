@@ -334,11 +334,16 @@ ElseIfExp : Exp ::= IfExp:Exp ThenExp:Exp;
 abstract BinExp : Exp::= Left:Exp Right:Exp;
 
 abstract ArtmBinExp : BinExp::=;
-AddExp : ArtmBinExp::=;
-SubExp : ArtmBinExp::=;
-MulExp : ArtmBinExp::=;
-DivExp : ArtmBinExp::=;
-PowExp : ArtmBinExp::=; // Easy to make parser take care of this: should be a Primary
+DotAddExp : ArtmBinExp::=;
+DotSubExp : ArtmBinExp::=;
+DotMulExp : ArtmBinExp::=;
+DotDivExp : ArtmBinExp::=;
+DotPowExp : ArtmBinExp::=; // Easy to make parser take care of this: should be a Primary
+AddExp : DotAddExp::=;
+SubExp : DotSubExp::=;
+MulExp : DotMulExp::=;
+DivExp : DotDivExp::=;
+PowExp : DotPowExp::=; // Easy to make parser take care of this: should be a Primary
 NegExp : Exp::= Exp;
 
 RealLitExp : Exp ::= <UNSIGNED_NUMBER>;

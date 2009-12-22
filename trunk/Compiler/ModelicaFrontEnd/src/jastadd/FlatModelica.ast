@@ -476,34 +476,59 @@ abstract FUnaryExp : FExp ::= FExp;
 abstract FArtmBinExp : FBinExp;
 
 /**
+ * \brief Element-wise addition expression.
+ */
+FDotAddExp : FArtmBinExp;
+
+/**
  * \brief Addition expression.
  */
-FAddExp : FArtmBinExp::=;
+FAddExp : FDotAddExp;
+
+/**
+ * \brief Element-wise subtraction expression.
+ */
+FDotSubExp : FArtmBinExp;
 
 /**
  * \brief Subtraction expression.
  */
-FSubExp : FArtmBinExp::=;
+FSubExp : FDotSubExp;
+
+/**
+ * \brief Element-wise multiplicative expression.
+ */
+FDotMulExp : FArtmBinExp;
 
 /**
  * \brief Multiplicative expression.
  */
-FMulExp : FArtmBinExp::=;
+FMulExp : FDotMulExp;
+
+/**
+ * \brief Element-wise division expression.
+ */
+FDotDivExp : FArtmBinExp;
 
 /**
  * \brief Division expression.
  */
-FDivExp : FArtmBinExp::=;
+FDivExp : FDotDivExp;
+
+/**
+ * \brief Element-wise power expression.
+ */
+FDotPowExp : FArtmBinExp;
 
 /**
  * \brief Power expression.
  */
-FPowExp : FArtmBinExp::=;
+FPowExp : FDotPowExp;
 
 /**
  * \brief Unary negation expression.
  */
-FNegExp : FUnaryExp ::=;
+FNegExp : FUnaryExp;
 
 /**
  * \brief Base class for logical binary expressions.

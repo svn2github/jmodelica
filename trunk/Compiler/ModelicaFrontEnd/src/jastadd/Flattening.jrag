@@ -610,50 +610,19 @@ aspect FlatExpressions {
 	}
 	
 
-	public FExp FAddExp.flatten(FQName prefix) { return new FAddExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
-	public FExp FSubExp.flatten(FQName prefix) { return new FSubExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
-	public FExp FMulExp.flatten(FQName prefix) { return new FMulExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
-	public FExp FDivExp.flatten(FQName prefix) { return new FDivExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
-	public FExp FPowExp.flatten(FQName prefix) { return new FPowExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
-	public FExp FNegExp.flatten(FQName prefix) { return new FNegExp(getFExp().flatten(prefix)); }
-
-	public FExp FLtExp.flatten(FQName prefix) { return new FLtExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
-	public FExp FLeqExp.flatten(FQName prefix) { return new FLeqExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
-	public FExp FGtExp.flatten(FQName prefix) { return new FGtExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
-	public FExp FGeqExp.flatten(FQName prefix) { return new FGeqExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
-	public FExp FEqExp.flatten(FQName prefix) { return new FEqExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
-	public FExp FNeqExp.flatten(FQName prefix) { return new FNeqExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
-	public FExp FNotExp.flatten(FQName prefix) { return new FNotExp(getFExp().flatten(prefix)); }
-	public FExp FOrExp.flatten(FQName prefix) { return new FOrExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
-	public FExp FAndExp.flatten(FQName prefix) { return new FAndExp(getLeft().flatten(prefix),getRight().flatten(prefix)); }
-
-	public FExp FRealLitExp.flatten(FQName prefix) { return (FRealLitExp)fullCopy(); }
-	public FExp FIntegerLitExp.flatten(FQName prefix) { return (FIntegerLitExp)fullCopy(); }
-	public FExp FStringLitExp.flatten(FQName prefix) { return (FStringLitExp)fullCopy(); }
-	public FExp FBooleanLitExpTrue.flatten(FQName prefix) { return (FBooleanLitExpTrue)fullCopy(); }
-	public FExp FBooleanLitExpFalse.flatten(FQName prefix) { return (FBooleanLitExpFalse)fullCopy(); }
+	public FExp FBinExp.flatten(FQName prefix)   { return createNode(getLeft().flatten(prefix), getRight().flatten(prefix)); }
+	public FExp FUnaryExp.flatten(FQName prefix) { return createNode(getFExp().flatten(prefix)); }
+	public FExp FLitExp.flatten(FQName prefix)   { return (FLitExp) fullCopy(); }
 	
-	public abstract FAbstractFunctionCall     FAbstractFunctionCall.flatten(FQName prefix);
-	public abstract FBuiltInFunctionCall      FBuiltInFunctionCall.flatten(FQName prefix);
-	public abstract FMathematicalFunctionCall FMathematicalFunctionCall.flatten(FQName prefix);
+	public abstract FAbstractFunctionCall FAbstractFunctionCall.flatten(FQName prefix);
+	public abstract FBuiltInFunctionCall  FBuiltInFunctionCall.flatten(FQName prefix);
 	
-	public FSinExp   FSinExp.flatten(FQName prefix)   { return new FSinExp(getFExp().flatten(prefix)); }
-	public FCosExp   FCosExp.flatten(FQName prefix)   { return new FCosExp(getFExp().flatten(prefix)); }
-	public FTanExp   FTanExp.flatten(FQName prefix)   { return new FTanExp(getFExp().flatten(prefix)); }
-	public FAsinExp  FAsinExp.flatten(FQName prefix)  { return new FAsinExp(getFExp().flatten(prefix)); }
-	public FAcosExp  FAcosExp.flatten(FQName prefix)  { return new FAcosExp(getFExp().flatten(prefix)); }
-	public FAtanExp  FAtanExp.flatten(FQName prefix)  { return new FAtanExp(getFExp().flatten(prefix)); }
-	public FAtan2Exp FAtan2Exp.flatten(FQName prefix) { return new FAtan2Exp(getFExp().flatten(prefix), getY().flatten(prefix)); }
-	public FSinhExp  FSinhExp.flatten(FQName prefix)  { return new FSinhExp(getFExp().flatten(prefix)); }
-	public FCoshExp  FCoshExp.flatten(FQName prefix)  { return new FCoshExp(getFExp().flatten(prefix)); }
-	public FTanhExp  FTanhExp.flatten(FQName prefix)  { return new FTanhExp(getFExp().flatten(prefix)); }
-	public FExpExp   FExpExp.flatten(FQName prefix)   { return new FExpExp(getFExp().flatten(prefix)); }
-	public FLogExp   FLogExp.flatten(FQName prefix)   { return new FLogExp(getFExp().flatten(prefix)); }
-	public FLog10Exp FLog10Exp.flatten(FQName prefix) { return new FLog10Exp(getFExp().flatten(prefix)); }
-	public FSqrtExp  FSqrtExp.flatten(FQName prefix)  { return new FSqrtExp(getFExp().flatten(prefix)); }
+	public FBuiltInFunctionCall FMathematicalFunctionCall.flatten(FQName prefix) { return createNode(getFExp().flatten(prefix)); }
+	public FAtan2Exp            FAtan2Exp.flatten(FQName prefix)                 { return new FAtan2Exp(getFExp().flatten(prefix), getY().flatten(prefix)); }
+	
+	public FNoEventExp FNoEventExp.flatten(FQName prefix) { return new FNoEventExp(getFExp().flatten(prefix)); }
 	
 	// These used to delegate to standard implementation for FExp.flatten(FQName).
-	public FNoEventExp FNoEventExp.flatten(FQName prefix)  { return new FNoEventExp(getFExp().flatten(prefix)); }
 	public FIdentity  FIdentity.flatten(FQName prefix)  { return null; }
 	public FScalar    FScalar.flatten(FQName prefix)    { return null; }
 	public FSizeExp   FSizeExp.flatten(FQName prefix)   { return null; }
@@ -1062,6 +1031,7 @@ aspect InstantiatedExpressions {
 		ae.setLocation(this);
 		return ae;
 	}
+	
 	public FExp SubExp.instantiate() { 
 		FExp n = new FSubExp(getLeft().instantiate(),getRight().instantiate()); 
 		n.setLocation(this);
@@ -1073,6 +1043,7 @@ aspect InstantiatedExpressions {
 		n.setLocation(this);
 		return n;
 	}
+	
 	public FExp DivExp.instantiate() { 
 		FExp n = new FDivExp(getLeft().instantiate(),getRight().instantiate()); 
 		n.setLocation(this);
@@ -1084,6 +1055,37 @@ aspect InstantiatedExpressions {
 		n.setLocation(this);
 		return n;	
 	}
+	
+	public FExp DotAddExp.instantiate() { 
+		FExp ae = new FDotAddExp(getLeft().instantiate(),getRight().instantiate()); 
+		ae.setLocation(this);
+		return ae;
+	}
+	
+	public FExp DotSubExp.instantiate() { 
+		FExp n = new FDotSubExp(getLeft().instantiate(),getRight().instantiate()); 
+		n.setLocation(this);
+		return n;
+	}
+
+	public FExp DotMulExp.instantiate() { 
+		FExp n = new FDotMulExp(getLeft().instantiate(),getRight().instantiate()); 
+		n.setLocation(this);
+		return n;
+	}
+	
+	public FExp DotDivExp.instantiate() { 
+		FExp n = new FDotDivExp(getLeft().instantiate(),getRight().instantiate()); 
+		n.setLocation(this);
+		return n;
+	}
+	
+	public FExp DotPowExp.instantiate() { 
+		FExp n = new FDotPowExp(getLeft().instantiate(),getRight().instantiate()); 
+		n.setLocation(this);
+		return n;	
+	}
+	
 	public FExp NegExp.instantiate() { 
 		FExp n = new FNegExp(getExp().instantiate()); 
 		n.setLocation(this);
