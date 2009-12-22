@@ -1987,7 +1987,213 @@ end ArrayMulErr9;
 
 
 
-/* -- Standard test array for scalarisation of operators -- */
+model ArrayDiv1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayDiv1",
+         description="Division of arrays: Real[2] / Integer[2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1994, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y / { 10, 20 };
+end ArrayDiv1;
+
+
+model ArrayDiv2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayDiv2",
+         description="Division of arrays: Real[2,2] / Integer[2,2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 2013, column 6:
+  Type error in expression
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y / { { 10, 20 }, { 30, 40 } };
+end ArrayDiv2;
+
+
+model ArrayDiv3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDiv3",
+         description="Division of arrays: Real[2] / Integer",
+         flatModel="
+fclass ArrayTests.ArrayDiv3
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = ( y[1] ) / ( 10 );
+ x[2] = ( y[2] ) / ( 10 );
+ y[1] = 1;
+ y[2] = 2;
+end ArrayTests.ArrayDiv3;
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y / 10;
+end ArrayDiv3;
+
+
+model ArrayDiv4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDiv4",
+         description="Division of arrays: Real[2,2] / Integer",
+         flatModel="
+fclass ArrayTests.ArrayDiv4
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = ( y[1,1] ) / ( 10 );
+ x[1,2] = ( y[1,2] ) / ( 10 );
+ x[2,1] = ( y[2,1] ) / ( 10 );
+ x[2,2] = ( y[2,2] ) / ( 10 );
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+end ArrayTests.ArrayDiv4;
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y / 10;
+end ArrayDiv4;
+
+
+model ArrayDiv5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDiv5",
+         description="Division of arrays: Real[2,2,2] / Integer",
+         flatModel="
+fclass ArrayTests.ArrayDiv5
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = ( y[1,1,1] ) / ( 10 );
+ x[1,1,2] = ( y[1,1,2] ) / ( 10 );
+ x[1,2,1] = ( y[1,2,1] ) / ( 10 );
+ x[1,2,2] = ( y[1,2,2] ) / ( 10 );
+ x[2,1,1] = ( y[2,1,1] ) / ( 10 );
+ x[2,1,2] = ( y[2,1,2] ) / ( 10 );
+ x[2,2,1] = ( y[2,2,1] ) / ( 10 );
+ x[2,2,2] = ( y[2,2,2] ) / ( 10 );
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
+end ArrayTests.ArrayDiv5;
+")})));
+
+ Real x[2,2,2];
+ Real y[2,2,2] = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+equation
+ x = y / 10;
+end ArrayDiv5;
+
+
+model ArrayDiv6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayDiv6",
+         description="Division of arrays: Real / Integer[2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 2056, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y = 1;
+equation
+ x = y / { 10, 20 };
+end ArrayDiv6;
+
+
+model ArrayDiv7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayDiv7",
+         description="Division of arrays: Real / Integer[2,2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 2075, column 6:
+  Type error in expression
+")})));
+
+ Real x[2,2];
+ Real y = 1;
+equation
+ x = y / { { 10, 20 }, { 30, 40 } };
+end ArrayDiv7;
+
+
+model ArrayDiv8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayDiv8",
+         description="Division of arrays: Real[2] / String",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 2094, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y / "1";
+end ArrayDiv8;
+
+
+
+/* -- Standard test series for scalarisation of operators on arrays -- */
 /* 
 model ArrayAdd1
  Real x[2];

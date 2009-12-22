@@ -104,6 +104,13 @@ aspect FlatTypeAnalysis {
 	
 	eq FNoEventExp.type() = getFExp().type();
 	
+	eq FDivExp.type() {
+		if (getRight().type().isScalar())
+			return super.type();
+		else
+			return fUnknownType();
+	}
+	
 	eq FMulExp.type() {
 		if (ndims() < 0)
 			return fUnknownType();
