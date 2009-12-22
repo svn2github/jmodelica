@@ -4,9 +4,13 @@
 import nose
 import os
 import jmodelica.jmi as jmi
-from jmodelica.simulation.assimulo import AJMIExplModel, AJMIImplModel
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
+
+try:
+    from jmodelica.simulation.assimulo import JMIExplicit, JMIImplicit
+except NameError:
+    print 'Could not load Assimulo module.'
 
 jm_home = os.environ.get('JMODELICA_HOME')
 path_to_examples = os.path.join(jm_home, 'Python', 'jmodelica', 'examples')

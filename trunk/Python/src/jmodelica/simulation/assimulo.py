@@ -9,10 +9,10 @@ import numpy as N
 import jmodelica.io as io
 
 try:
-    from Integrator.Problem import Implicit_Problem
-    from Integrator.Problem import Explicit_Problem
+    from Assimulo.Problem import Implicit_Problem
+    from Assimulo.Problem import Explicit_Problem
 except ImportError:
-    print 'Could not load Integrator package.'
+    print 'Could not load Assimulo package.'
 
 
 class AJMIModel_Exception(Exception):
@@ -22,7 +22,7 @@ class AJMIModel_Exception(Exception):
     pass
 
 
-class AJMIExplModel(Explicit_Problem):
+class JMIExplicit(Explicit_Problem):
     """
     An Assimulo Explicit Model extended to JMI interface.
     
@@ -73,7 +73,7 @@ class AJMIExplModel(Explicit_Problem):
         self.y0 = self._model.x
  
     
-class AJMIImplModel(Implicit_Problem):
+class JMIImplicit(Implicit_Problem):
     """
     An Assimulo Implicit Model extended to JMI interface.
     """
@@ -126,6 +126,12 @@ class AJMIImplModel(Implicit_Problem):
         self._model.jmimodel.dae_R(eventInd)
         
         return eventInd
+        
+    def init_mode(self, simulator):
+        """
+        Overrides Assimulos default initiate mode setting.
+        """
+        pass
 
     def reset(self):
         """
