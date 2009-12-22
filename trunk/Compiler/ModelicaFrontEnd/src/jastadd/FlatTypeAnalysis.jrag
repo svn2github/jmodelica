@@ -283,6 +283,24 @@ aspect FTypeCompatibility {
 	eq FPrimitiveArrayType.dimensionCompatible(FPrimitiveType type) = 
 		Arrays.equals(size(), type.size());
 	
+	/**
+	 * \brief Check if sizes of this and type match for the last type.ndims() dimensions.
+	 */
+	syn boolean FPrimitiveType.dimensionCompatibleFromRight(FPrimitiveType type) = false;
+	eq FPrimitiveScalarType.dimensionCompatibleFromRight(FPrimitiveType type) = type.isScalar();
+	eq FPrimitiveArrayType.dimensionCompatibleFromRight(FPrimitiveType type) {
+		int n = type.ndims();
+		int dn = ndims() - n;
+		int[] s1 = size();
+		int[] s2 = type.size();
+		if (n > ndims())
+			return false;
+		for (int i = 0; i < n; i++)
+			if (s1[dn + i] != s2[i])
+				return false;
+		return true;
+	}
+	
 }
 
  aspect FTypeEquivalent {

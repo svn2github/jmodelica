@@ -1,3 +1,18 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 /**
  * \brief Contains transformations on the flattened model which converts
@@ -540,8 +555,7 @@ aspect Scalarization {
 				fv_tmp.getFQName().setLastFArraySubscripts(i.newFArraySubscripts());
 				// Iterate over all attributes and scalarize.
 				for (FAttribute a : fv_tmp.getFAttributes()) 
-					if (a.getAttributeSet() && a.hasValue() && a.getValue().ndims() > 0) 
-						a.setValue(a.getValue().array().get(i));
+					a.scalarize(i);
 				// Mark variable as scalarized (affects name printing etc.)
 				fv_tmp.getFQName().scalarized = true;
 				// Add altered copy to list
@@ -552,6 +566,19 @@ aspect Scalarization {
 			FVariable fv_tmp = (FVariable) fullCopy();
 			fv_tmp.getFQName().scalarized = true;
 			vars.addChild(fv_tmp);
+		}
+	}
+	
+	/**
+	 * \brief Scalarize the attribute, picking out the specific element from an array 
+	 *        expression or removing "each".
+	 */
+	public void FAttribute.scalarize(Index i) {
+		if (getAttributeSet()) {
+			if (hasFEach())
+				setFEachOpt(new Opt());
+			else if (hasValue() && getValue().ndims() > 0) 
+				setValue(getValue().array().get(i));
 		}
 	}
 	
@@ -572,7 +599,7 @@ aspect Scalarization {
 			 */
 			eqns.addChild(new FEquation(getLeft().scalarize(indexMap),
 					getRight().scalarize(indexMap)));
-		} else if (ndims()>0) {
+		} else if (ndims() > 0) {
 			/**
 			 * If the expression is an array expression, then the FExp.array()
 			 * element is used to generate scalar equations.

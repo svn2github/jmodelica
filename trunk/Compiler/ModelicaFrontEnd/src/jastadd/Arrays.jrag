@@ -161,6 +161,8 @@ aspect Arrays {
 	eq FOnes.ndims() = getNumFExp();
 	eq FZeros.ndims() = getNumFExp();
 	
+	eq FEachExp.ndims() = getFVBoundByMe().ndims();
+	
 	eq FBinExp.ndims() = getLeft().ndims();
 	
 	eq FMulExp.ndims() {
@@ -362,6 +364,8 @@ aspect Arrays {
 	syn lazy int[] FExp.size() = new int[0];
 	eq FInstAccessExp.size() = getInstAccess().size();
 	
+	eq FEachExp.size() = getFVBoundByMe().size();
+	
 	eq FBinExp.size() = getLeft().size();
 	
 	eq FMulExp.size() {
@@ -558,6 +562,8 @@ aspect Arrays {
 	 */
 	syn lazy Array FExp.array() = new ScalarAsArray(this);
 	
+	eq FEachExp.array() = new ScalarAsArray(getFExp(), indices());
+	
 	eq FBinExp.array() {
 		if (isArray()) {
 			/* Standard implementation covers many binary operators.
@@ -707,6 +713,8 @@ aspect Arrays {
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
 	syn lazy Indices FExp.indices() = Indices.create(size());
+	
+	eq FEachExp.indices() = getFVBoundByMe().indices();
 	
 	/**
 	 * \brief Get the set of all array indices of an array access. 
@@ -1001,6 +1009,17 @@ aspect ArrayIndices {
 		}
 		
 		/**
+		 * \brief Constructs a ScalarAsArray containing <code>exp</code>, 
+		 *        pretending to have <code>ind</code> indices.
+		 * 
+		 * This makes indices().iterator() meaningful.
+		 */
+		public ScalarAsArray(FExp exp, Indices ind) {
+			expressions = new FExp[] { exp };
+			indices = ind;
+		}
+		
+		/**
 		 * \brief Returns the single element wrapped by this Array. 
 		 */
 		public FExp get(Index i) {
@@ -1133,6 +1152,13 @@ aspect ArrayIndices {
 		protected int size[];
 		
 		/**
+		 * \brief A perfect hash for all Indices that have consecutive indicies, 
+		 *        ndims <= 3 and size[i] <= 1023 for 0 <= i < ndims. -1 for other 
+		 *        Indices.
+		 */
+		protected int hash;
+		
+		/**
 		 * \brief Create an Indices object based on array sizes. 
 		 */
 		public static Indices create(int[] size) {
@@ -1194,7 +1220,7 @@ aspect ArrayIndices {
 		public int[] size() {
 			return size;
 		}
-		
+				
 		
 		/**
 		 * \brief Internal constructor to create an Indices object with ndim dimensions. 
@@ -1203,6 +1229,7 @@ aspect ArrayIndices {
 		protected Indices(int ndims) {
 			this.ndims = ndims;
 			size = new int[ndims];
+			hash = -1;
 		}
 		
 		/**
@@ -1211,8 +1238,18 @@ aspect ArrayIndices {
 		protected Indices(int[] size) {
 			ndims = size.length;
 			this.size = size.clone();
+			hash = -1;
+			if (ndims < 4) {
+				int h = 0;
+				for (int i = 0; i < size.length; i++) {
+					if (size[i] > 1023) 
+						return;
+					h = (h << 10) & size[i];
+				}
+				hash = h;
+			}
 		}
-		
+				
 		/**
 		 * \brief Calculate the internal index in an Array that spans this Indices.
 		 */
@@ -1282,7 +1319,7 @@ aspect ArrayIndices {
 			 * @param indices  the indices to resolve the internal index with
 			 */
 			public int internal(Indices ind) {
-				if (ind == Indices.this) 
+				if (Indices.this == ind || (hash != -1 && hash == ind.hash)) 
 					return internal;
 				else
 					return ind.internal(this);
@@ -1351,6 +1388,7 @@ aspect ArrayIndices {
 			for (FSubscript fs : fas.getFSubscripts()) {
 				indices.add(fs.myIndices());
 			}
+			hash = -1;
 		}
 		
 		/**
@@ -1365,6 +1403,7 @@ aspect ArrayIndices {
 				indices.add(ii.clone());
 				i++;
 			}
+			hash = -1;
 		}
 		
 		/**

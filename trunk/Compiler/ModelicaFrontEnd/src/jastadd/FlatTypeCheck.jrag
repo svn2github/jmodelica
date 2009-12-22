@@ -22,50 +22,50 @@ aspect FlatTypeCheck {
   }
  
  
-  public void InstPrimitive.typeCheck() {
-	  if (myBindingInstExp() != null) {
-		  // Check type compatibility
-		  /*
-		  System.out.println("Type check " + name() + " type: " + 
-				  type().toString() + " (" + type().toString() + ") "+ " binding exp type: " + 
-				  myBindingInstExp().type().toString() + "( "+ myBindingInstExp().type().toString() + ") " + " binding exp:");
-		  */
-		  
-/*		  if (myBindingInstExp().type().isUnknown()) {
-			  error("The binding expression of the variable " + name() + " has unknown type.");
-		  }
-	*/	  
-		  if (!myBindingInstExp().type().isUnknown() && // Avoid duplicate error messages
-				  !type().typeCompatible(myBindingInstExp().type())) {
-			  if (!type().dimensionCompatible(myBindingInstExp().type())) {
-				  error("Type array size mismatch in declaration " + name() +
-							": size of declaration is " + Arrays.toString(size()) + 
-							" and size of binding expression is " + Arrays.toString(myBindingInstExp().size()));
-/*				  
-				  error("Type dimension mismatch in declaration " + name() +
-						  ": dimension of declaration is " + ndims() + 
-						  ", dimension of binding expression is "+ myBindingInstExp().ndims());
-*/
-			  } else {
-			  
-/*
-			  System.out.println("Error in " + name() + " type: " + 
-					  type().toString() + " (" + type().toString() + ") "+ " binding exp type: " + 
-					  myBindingInstExp().type().toString() + "( "+ myBindingInstExp().type().toString() + ") " + " binding exp:");
-			  myBindingInstExp().dumpTree("");
-			  */
-			  error("The binding expression of the variable " + name() +
-					  " does not match the declared type of the variable");
-			  }
-		  }
-		  
-	  }
+    public void InstPrimitive.typeCheck() {
+    	FExp bexp = myBindingInstExp();
+    	if (bexp != null && !bexp.type().isUnknown()) {
+    		boolean badType = false;
+    		String badSizeName = null;
+    		if (myBindingExpHasEach()) {
+    			if (!type().scalarType().typeCompatible(bexp.type().scalarType())) {
+    				badType = true;
+    			} else if (ndims() == 0) {
+    				error("The 'each' keyword cannot be applied to scalar members of non-array components");
+    			} else if (bexp.ndims() >= ndims()) {
+					error("Array size mismatch in declaration: each " + name() +
+						  ", declaration has " + ndims() + " dimension(s) and binding expression has " +
+						  bexp.ndims() + ", expression must have fewer than declaration");
+    			} else if (!type().dimensionCompatibleFromRight(bexp.type())) {
+    				badSizeName = "each " + name();
+    			}
+    		} else {
+    			if (!type().typeCompatible(bexp.type())) {
+    				if (!type().dimensionCompatible(bexp.type())) {
+        				badSizeName = name();
+    				} else {
+    					badType = true;
+    				}
+    			}
+    		}
+    		
+		    if (badType) {
+			    error("The binding expression of the variable " + name() +
+			    	  " does not match the declared type of the variable");
+		    } else if (badSizeName != null) {
+				error("Array size mismatch in declaration: " + badSizeName +
+					  ", size of declaration is " + Arrays.toString(size()) + 
+					  " and size of binding expression is " + 
+					  Arrays.toString(bexp.size()));
+		    }
+	    }
 	  
-	// Check the type correctness of attributes
-	  for (InstModification im : totalMergedEnvironment()) {
-		  // Only check attributes, value modifications are checked above
-		  if (im instanceof InstComponentModification) {
-			  InstComponentModification icm = (InstComponentModification)im;
+    	// TODO: Can't this be moved to InstComponentModification.typeCheck()?
+	    // Check the type correctness of attributes
+	    for (InstModification im : totalMergedEnvironment()) {
+		    // Only check attributes, value modifications are checked above
+		    if (im instanceof InstComponentModification) {
+			    InstComponentModification icm = (InstComponentModification) im;
 				if (icm.getInstModification().hasInstValueMod()) {
 					FExp val_mod = icm.getInstModification().instValueMod();
 					if (!icm.getName().myInstComponentDecl().isUnknown() && !val_mod.type().isUnknown()) {
@@ -73,23 +73,30 @@ aspect FlatTypeCheck {
 							icm.error("The type of the binding expression of the attribute " + icm.name() +
 							  " does not match the declared type of the variable");							
 						} else if (!icm.getEach() && val_mod.ndims()!=0 && !type().dimensionCompatible(val_mod.type())) { 
-							icm.error("Array size mismatch for attribute " + icm.name() +
-									": size of declaration is " + Arrays.toString(size()) + 
-									" and size of " + icm.name() + " expression is " + Arrays.toString(val_mod.size()));
-						} else if (icm.getEach()){ // If the each keyword is specified, then the dimension should be 0.
-							if (val_mod.ndims()>0) {
-								icm.error("The 'each' keyword is specified for the attribute " + icm.name() + 
-								        " but the expression provided is not scalar.");
+							icm.error("Array size mismatch for attribute: " + icm.name() +
+									", size of declaration is " + Arrays.toString(size()) + 
+									" and size of " + icm.name() + " expression is " + 
+									Arrays.toString(val_mod.size()));
+						} else if (icm.getEach()) { 
+							if (ndims() == 0) {
+								icm.error("The 'each' keyword cannot be applied to attributes of scalar components");
+							} else if (val_mod.ndims() >= ndims()) {
+								icm.error("Array size mismatch for attribute: each " + icm.name() +
+										  ", declaration has " + ndims() + " dimension(s) and expression has " +
+										  val_mod.ndims() + ", expression must have fewer than declaration");
+							} else if (!type().dimensionCompatibleFromRight(val_mod.type())) {
+								icm.error("Array size mismatch for attribute: each " + icm.name() +
+										", size of declaration is " + Arrays.toString(size()) + 
+										" and size of " + icm.name() + " expression is " + 
+										Arrays.toString(val_mod.size()));
 							}
 						}
 					}
 				}
 			}
 		}
-	  
-	  
-  }
- 
+    }
+    
   public void FEquation.typeCheck() {
 	  //System.out.println("FEquation.typeCheck(): " + getLeft().type() + " " + getRight().type());
 	  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {

@@ -669,6 +669,13 @@ FRangeExp : FExp ::= FExp*;
 FNoExp : FExp::=;
 
 /**
+ * \brief Wrapper node for binding expressions declared with "each".
+ *
+ * Always has size() that matches the FVarible it is connected to.
+ */
+FEachExp : FUnaryExp;
+
+/**
  * \brief Built-in variable time.
  */
 FTimeExp : FExp;

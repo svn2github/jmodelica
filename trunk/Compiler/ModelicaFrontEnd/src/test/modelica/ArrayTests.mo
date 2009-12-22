@@ -248,19 +248,18 @@ end ArrayTests.ArrayTest4;
       end ArrayTest14;
 
 model ArrayTest15_Err
-
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ArrayTest15_Err",
-        description="Test type checking of arrays",
-                                               errorMessage=
-"
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 263, column 9:
-  Type array size mismatch in declaration x: size of declaration is [3] and size of binding expression is [3, 1]
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayTest15_Err",
+         description="Test type checking of arrays",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 251, column 9:
+  Array size mismatch in declaration: x, size of declaration is [3] and size of binding expression is [3, 1]
 ")})));
 
    Real x[3] = {{2},{2},{3}};
-
 end ArrayTest15_Err;
 
   model ArrayTest16
@@ -588,44 +587,44 @@ equation
 
 end ArrayTest26;
 
-model ArrayTest27_Err
 
+model ArrayTest27_Err
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ArrayTest27_Err",
-        description="Test type checking of arrays",
-                                               errorMessage=
-"
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 604, column 13:
-  Array size mismatch for attribute start: size of declaration is [3] and size of start expression is [2]
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayTest27_Err",
+         description="Test type checking of arrays",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 592, column 13:
+  Array size mismatch for attribute: start, size of declaration is [3] and size of start expression is [2]
 ")})));
 
    Real x[3](start={1,2});
 equation
    der(x) = ones(3);
-
 end ArrayTest27_Err;
 
-model ArrayTest28_Err
 
+model ArrayTest28_Err
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ArrayTest28_Err",
-        description="Test type checking of arrays",
-                                               errorMessage=
-"
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 622, column 14:
-  The 'each' keyword is specified for the attribute start but the expression provided is not scalar.
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayTest28_Err",
+         description="Test type checking of arrays",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 610, column 14:
+  Array size mismatch for attribute: each start, declaration has 1 dimension(s) and expression has 1, expression must have fewer than declaration
 ")})));
 
    Real x[3](each start={1,2,3});
 equation
    der(x) = ones(3);
-
 end ArrayTest28_Err;
 
-model ArrayTest29
 
+model ArrayTest29
         annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest29",
         description="Flattening of arrays.",
@@ -676,6 +675,177 @@ equation
    der(x) = {{-1,-2},{-3,-4},{-5,-6}};
 
 end ArrayTest30;
+
+
+
+
+model ArrayModifiers1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayModifiers1",
+         description="Modifiers to arrays: array attributes",
+         flatModel="
+fclass ArrayTests.ArrayModifiers1
+ Real a[1](start = 3);
+ Real a[2](start = 3);
+ Real a[3](start = 3);
+ Real b[1](start = 1);
+ Real b[2](start = 2);
+ Real b[3](start = 3);
+equation
+ a[1] = 0;
+ a[2] = 0;
+ a[3] = 0;
+ b[1] = 0;
+ b[2] = 0;
+ b[3] = 0;
+end ArrayTests.ArrayModifiers1;
+")})));
+
+ Real a[3](each start=3) = zeros(3);
+ Real b[3](start={1,2,3}) = zeros(3);
+end ArrayModifiers1;
+
+
+model ArrayModifiers2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers2",
+         description="Modifiers to arrays: [](start=[])",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 712, column 9:
+  The 'each' keyword cannot be applied to attributes of scalar components
+")})));
+
+ Real a(each start=3) = zeros(3);
+end ArrayModifiers2;
+
+
+model ArrayModifiers3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers3",
+         description="Modifiers to arrays: [3](start=[4])",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 728, column 11:
+  Array size mismatch for attribute: start, size of declaration is [3] and size of start expression is [4]
+")})));
+
+ Real b[3](start={1,2,3,4}) = zeros(3);
+end ArrayModifiers3;
+
+
+model ArrayModifiers4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers4",
+         description="Modifiers to arrays: [3](each start=[2])",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 744, column 12:
+  Array size mismatch for attribute: each start, declaration has 1 dimension(s) and expression has 1, expression must have fewer than declaration
+")})));
+
+ Real a[3](each start={1,2}) = zeros(3);
+end ArrayModifiers4;
+
+
+model ArrayModifiers5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayModifiers5",
+         description="Modifiers to arrays: members that are arrays",
+         flatModel="
+fclass ArrayTests.ArrayModifiers5
+ Real b.x[1];
+ Real b.x[2];
+ Real b.x[3];
+ Real b.y[1];
+ Real b.y[2];
+ Real b.y[3];
+equation
+ b.x[1] = 1;
+ b.x[2] = 2;
+ b.x[3] = 3;
+ b.y[1] = 2;
+ b.y[2] = 2;
+ b.y[3] = 2;
+end ArrayTests.ArrayModifiers5;
+")})));
+
+ model B
+  Real x[3];
+  Real y[3];
+ end B;
+ 
+ B b(x={1,2,3}, each y=2);
+end ArrayModifiers5;
+
+
+model ArrayModifiers6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers6",
+         description="Modifiers to arrays: [3] = [4]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 792, column 8:
+  Array size mismatch in declaration: x, size of declaration is [3] and size of binding expression is [4]
+")})));
+
+ model B
+  Real x[3];
+ end B;
+ 
+ B b(x={1,2,3,4});
+end ArrayModifiers6;
+
+
+model ArrayModifiers7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers7",
+         description="Modifiers to arrays: each [] = []",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 813, column 8:
+  The 'each' keyword cannot be applied to scalar members of non-array components
+")})));
+
+ model B
+  Real y;
+ end B;
+ 
+ B b(each y=2);
+end ArrayModifiers7;
+
+
+model ArrayModifiers8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers8",
+         description="Modifiers to arrays: each [3] = [2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 833, column 8:
+  Array size mismatch in declaration: each y, declaration has 1 dimension(s) and binding expression has 1, expression must have fewer than declaration
+")})));
+
+ model B
+  Real y[3];
+ end B;
+ 
+ B b(each y={1,2});
+end ArrayModifiers8;
+
 
 
 

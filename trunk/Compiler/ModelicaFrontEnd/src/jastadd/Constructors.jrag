@@ -70,14 +70,14 @@ aspect Constructors {
 	}
 	
 	/**
-	 * Constructs a real literal expression from a double.
+	 * \brief Constructs a real literal expression from a double.
 	 */
 	public FRealLitExp.FRealLitExp(double val) {
 		this(String.valueOf(val));
 	}
 	
 	/**
-	 * Constructs an integer literal expression from an integer.
+	 * \brief Constructs an integer literal expression from an integer.
 	 */
 	public FIntegerLitExp.FIntegerLitExp(int val) {
 		this(String.valueOf(val));
@@ -192,6 +192,7 @@ aspect InheritedFactoryMethods {
 	public FIfExp     FIfExp.createEmptyNode()     { return new FIfExp(); }
 	public FElseIfExp FElseIfExp.createEmptyNode() { return new FElseIfExp(); }
 	public FNoExp     FNoExp.createEmptyNode()     { return new FNoExp(); }
+	public FEachExp   FEachExp.createEmptyNode()   { return new FEachExp(); }
 	public FTimeExp   FTimeExp.createEmptyNode()   { return new FTimeExp(); }
 	
 	public FNoEventExp FNoEventExp.createEmptyNode() {return new FNoEventExp(); }

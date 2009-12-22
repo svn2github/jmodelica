@@ -169,6 +169,8 @@ aspect Flattening {
 	syn FVariable InstPrimitive.createFVariable() {
 		//System.out.println("**  " + name() + " = " + ceval());
 		FExp e = myBindingFExp();
+		if (myBindingExpHasEach()) 
+			e = new FEachExp(e);
 		List<FAttribute> attr = new List<FAttribute>();
 		for (InstModification im : totalMergedEnvironment()) {
 //			System.out.println("createFVariable: " + qualifiedName() + ": " +
@@ -226,7 +228,7 @@ aspect Flattening {
 			fv = new FStringVariable(fvt,tpo, new Opt(), attr, eo, new Opt(), 
 					new FQName(getFQName()));
 		}
-				
+		
 		// Only set prefix for top level inputs and outputs
 		// TODO: Make sure that prefixes specified in short class declarations are propagated
 		if (isInput() && getFQName().getNumFQNamePart()==1)
@@ -245,28 +247,54 @@ aspect Flattening {
 	 * 
 	 * Retrieve the binding expression of an InstPrimitive node.
 	 */
-	syn lazy FExp InstPrimitive.myBindingInstExp() {
-
-		for (InstModification im : totalMergedEnvironment()) {
-			if (im.hasInstValueMod()) {
-				return im.instValueMod();
-			}
-		}
-		return null;
+	syn FExp InstPrimitive.myBindingInstExp() {
+		return hasInstValueMod() ? myInstValueMod().getFExp() : null;
 	}
 
 	syn lazy FExp InstPrimitive.myBindingFExp() {
         //System.out.println("In file: " + fileName() + " at line: " + beginLine() + ": " + prettyPrint(""));
-		for (InstModification im : totalMergedEnvironment()) {
-			if (im.hasInstValueMod()) {
-				FExp fe = im.instValueMod().flatten(im.myInstNode().getFQNamePrefix());
-				fe.setParent(this);
-				return fe;
-			}
+		if (hasInstValueMod()) {
+			InstValueModification im = myInstValueMod();
+			FExp fe = im.getFExp().flatten(im.myInstNode().getFQNamePrefix());
+			fe.setParent(this);  // TODO: This seems like an ugly hack. Is there no better way?
+			return fe;
 		}
 		return null;
 	}
 
+	// TODO: The names here needs to be clearer. (Down to and including getInstValueMod().)
+	/**
+	 * \brief Check if the binding expression of an InstPrimitive node is set 
+	 *        through a modification that is declared "each".
+	 */
+	syn lazy boolean InstPrimitive.myBindingExpHasEach() {
+		return hasInstValueMod() ? myInstValueMod().hasEach() : false;
+	}
+	
+	/**
+	 * \brief Check if this InstPrimitive node has an InstModification setting 
+	 *        its binding expression.
+	 */
+	syn boolean InstPrimitive.hasInstValueMod() = (myInstValueMod() != null);
+	
+	/**
+	 * \brief Retrieve the InstModification setting the binding expression of 
+	 *        this InstPrimitive node.
+	 */
+	syn lazy InstValueModification InstPrimitive.myInstValueMod() {
+		for (InstModification im : totalMergedEnvironment()) 
+			if (im.hasInstValueMod()) 
+				return im.getInstValueMod();
+		return null;
+	}
+
+	/**
+	 * \brief Check if this InstValueModificationis part of a modification 
+	 *        that is declared "each".
+	 */
+	inh boolean InstValueModification.hasEach();
+	eq InstArgument.getChild().hasEach() = getEach();
+	eq InstNode.getChild().hasEach()     = false;
 	
 	/**
 	 * \ingroup aspect_Flattening
@@ -291,10 +319,15 @@ aspect Flattening {
 	 */
 	eq InstCompleteModification.hasInstValueMod() = hasInstValueModification();
 	
-	syn FExp InstModification.instValueMod() = null;
-	eq InstValueModification.instValueMod() = getFExp();
+	syn FExp InstModification.instValueMod()   = null;
+	eq InstValueModification.instValueMod()    = getFExp();
 	eq InstCompleteModification.instValueMod() = getInstValueModification().getFExp();
 	
+	syn InstValueModification InstModification.getInstValueMod() = null;
+	eq InstValueModification.getInstValueMod()    = this;
+	eq InstCompleteModification.getInstValueMod() = getInstValueModification();
+	
+
 	public void ASTNode.collectAttributes(List<FAttribute> attrs, FQName prefix) {
 		for (int i=0;i<getNumChild();i++)
 			getChild(i).collectAttributes(attrs, prefix);
