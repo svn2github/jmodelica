@@ -372,7 +372,7 @@ aspect Arrays {
 	eq FBinExp.size() = getLeft().size();
 	eq FArtmBinExp.size() = getLeft().isArray() ? getLeft().size() : getRight().size();
 
-	eq FBinExp.size() = getLeft().size();
+	eq FDivExp.size() = getLeft().size();
 	
 	eq FMulExp.size() {
 		if (!getLeft().isArray())
