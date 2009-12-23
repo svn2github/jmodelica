@@ -164,7 +164,7 @@ aspect Arrays {
 	eq FEachExp.ndims() = getFVBoundByMe().ndims();
 	
 	eq FBinExp.ndims() = getLeft().ndims();
-	eq FArtmBinExp.ndims() = Math.max(getLeft().ndims(), getLeft().ndims());
+	eq FArtmBinExp.ndims() = Math.max(getLeft().ndims(), getRight().ndims());
 	
 	eq FDivExp.ndims() = getLeft().ndims();
 	

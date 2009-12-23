@@ -24,6 +24,8 @@ aspect CCodeGen {
  		public void toString(ASTNode node, PrintStream str, String indent, Object o) { 
  			node.prettyPrint_C(this, str, indent, o); 
  		}
+  		
+  		public String op(FBinExp e) { return e.op_C(); }
 	}
 	
 	static CPrettyPrinter ASTNode.printer_C = new CPrettyPrinter();
@@ -57,7 +59,7 @@ aspect CCodeGen {
 	    */
 	}
 	
-	public void FPowExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+	public void FDotPowExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		str.print("pow(");
 		p.toString(getLeft(),str,indent,o); 
 		str.print(",");
@@ -337,7 +339,13 @@ aspect CCodeGen {
 		str.print("}");		
 	}
 	
-	public void FDivExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+	syn String FBinExp.op_C() = op();
+	eq FDotAddExp.op_C() = " + ";
+	eq FDotSubExp.op_C() = " - ";
+	eq FDotMulExp.op_C() = " * ";
+	eq FDotDivExp.op_C() = " / ";
+
+	public void FDotDivExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		str.print("jmi_divide(");
 		p.toString(getLeft(),str,indent,o);
 		str.print(","); 

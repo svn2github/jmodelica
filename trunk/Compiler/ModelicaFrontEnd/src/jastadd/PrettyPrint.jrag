@@ -22,6 +22,8 @@ import java.io.ByteArrayOutputStream;
 	class Printer {
   		public void toString(ASTNode node, PrintStream str, String indent, Object o) { 
   		}
+  		
+  		public String op(FBinExp e) { return e.op(); }
 	}
 
 	// select first variant
@@ -1033,13 +1035,13 @@ aspect FlattPrettyPrint {
 	public void FDotAddExp.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
 		p.toString(getLeft(),str,indent,o);
 		if(!(getRight() instanceof FNegExp)) 
-			str.print(" .+ ");
+			str.print(p.op(this));
 		p.toString(getRight(),str,indent,o);
 	}
 		
 	public void FDotSubExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		p.toString(getLeft(),str,indent,o);
-		str.print(" .- ");
+		str.print(p.op(this));
 //		if (getRight().isAddOrSub()) {
 			str.print("( ");
 			p.toString(getRight(),str,indent,o);
@@ -1052,7 +1054,7 @@ aspect FlattPrettyPrint {
 		str.print("( ");
 		p.toString(getLeft(),str,indent,o);
 		str.print(" )");
-		str.print(" .* ");
+		str.print(p.op(this));
 		str.print("( ");
 		p.toString(getRight(),str,indent,o);
 		str.print(" )");
@@ -1062,7 +1064,7 @@ aspect FlattPrettyPrint {
 		str.print("( ");
 		p.toString(getLeft(),str,indent,o);
 		str.print(" )");
-		str.print(" ./ ");	
+		str.print(p.op(this));	
 		str.print("( ");
 		p.toString(getRight(),str,indent,o);
 		str.print(" )");
@@ -1075,61 +1077,7 @@ aspect FlattPrettyPrint {
 			str.print(" )");
 		} else
 			p.toString(getLeft(),str,indent,o);
-		str.print(" .^ ");
-		if (!(getRight().isPrimary())) {
-			str.print("( ");
-			p.toString(getRight(),str,indent,o);
-			str.print(" )");
-		} else
-			p.toString(getRight(),str,indent,o);
-	}
-	
-	public void FAddExp.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
-		p.toString(getLeft(),str,indent,o);
-		if(!(getRight() instanceof FNegExp)) 
-			str.print(" + ");
-		p.toString(getRight(),str,indent,o);
-	}
-		
-	public void FSubExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		p.toString(getLeft(),str,indent,o);
-		str.print(" - ");
-//		if (getRight().isAddOrSub()) {
-			str.print("( ");
-			p.toString(getRight(),str,indent,o);
-			str.print(" )");
-//		} else
-//			p.toString(getRight(),str,indent,o);
-	}
-		
-	public void FMulExp.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
-		str.print("( ");
-		p.toString(getLeft(),str,indent,o);
-		str.print(" )");
-		str.print(" * ");
-		str.print("( ");
-		p.toString(getRight(),str,indent,o);
-		str.print(" )");
-	}
-		
-	public void FDivExp.prettyPrint(Printer p, PrintStream str, String indent, Object o){
-		str.print("( ");
-		p.toString(getLeft(),str,indent,o);
-		str.print(" )");
-		str.print(" / ");	
-		str.print("( ");
-		p.toString(getRight(),str,indent,o);
-		str.print(" )");
-	}
-		
-	public void FPowExp.prettyPrint(Printer p, PrintStream str, String indent, Object o){
-		if (!(getLeft().isPrimary())) {
-			str.print("( ");
-			p.toString(getLeft(),str,indent,o);
-			str.print(" )");
-		} else
-			p.toString(getLeft(),str,indent,o);
-		str.print(" ^ ");
+		str.print(p.op(this));
 		if (!(getRight().isPrimary())) {
 			str.print("( ");
 			p.toString(getRight(),str,indent,o);
@@ -1154,15 +1102,25 @@ aspect FlattPrettyPrint {
 		p.toString(getRight(),str,indent,o);
 	}
 	
-	syn String FLogBinExp.op();
-	eq FLtExp.op() = " < ";
-	eq FLeqExp.op() = " <= ";
-	eq FGtExp .op() = " > ";
-	eq FGeqExp.op() = " >= ";
-	eq FEqExp.op() = " == ";
-	eq FNeqExp.op() = " <> ";
-	eq FOrExp.op() = " or ";
-	eq FAndExp.op() = " and ";
+	syn String FBinExp.op();
+	eq FLtExp.op()     = " < ";
+	eq FLeqExp.op()    = " <= ";
+	eq FGtExp .op()    = " > ";
+	eq FGeqExp.op()    = " >= ";
+	eq FEqExp.op()     = " == ";
+	eq FNeqExp.op()    = " <> ";
+	eq FOrExp.op()     = " or ";
+	eq FAndExp.op()    = " and ";
+	eq FAddExp.op()    = " + ";
+	eq FSubExp.op()    = " - ";
+	eq FMulExp.op()    = " * ";
+	eq FDivExp.op()    = " / ";
+	eq FPowExp.op()    = " ^ ";
+	eq FDotAddExp.op() = " .+ ";
+	eq FDotSubExp.op() = " .- ";
+	eq FDotMulExp.op() = " .* ";
+	eq FDotDivExp.op() = " ./ ";
+	eq FDotPowExp.op() = " .^ ";
 	
 	public static final int FExp.PRIO_LOWEST  = 0;
 	public static final int FExp.PRIO_RANGE   = 1;
