@@ -3291,6 +3291,372 @@ end ArrayDotMul12;
 
 
 
+model ArrayDotDiv1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotDiv1",
+         description="Scalarization of element-wise division: Real[2] ./ Integer[2]",
+         flatModel="
+fclass ArrayTests.ArrayDotDiv1
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = ( y[1] ) ./ ( 10 );
+ x[2] = ( y[2] ) ./ ( 20 );
+ y[1] = 1;
+ y[2] = 2;
+end ArrayTests.ArrayDotDiv1;
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y ./ { 10, 20 };
+end ArrayDotDiv1;
+
+
+model ArrayDotDiv2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotDiv2",
+         description="Scalarization of element-wise division: Real[2,2] ./ Integer[2,2]",
+         flatModel="
+fclass ArrayTests.ArrayDotDiv2
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = ( y[1,1] ) ./ ( 10 );
+ x[1,2] = ( y[1,2] ) ./ ( 20 );
+ x[2,1] = ( y[2,1] ) ./ ( 30 );
+ x[2,2] = ( y[2,2] ) ./ ( 40 );
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+end ArrayTests.ArrayDotDiv2;
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y ./ { { 10, 20 }, { 30, 40 } };
+end ArrayDotDiv2;
+
+
+model ArrayDotDiv3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotDiv3",
+         description="Scalarization of element-wise division: Real[2,2,2] ./ Integer[2,2,2]",
+         flatModel="
+fclass ArrayTests.ArrayDotDiv3
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = ( y[1,1,1] ) ./ ( 10 );
+ x[1,1,2] = ( y[1,1,2] ) ./ ( 20 );
+ x[1,2,1] = ( y[1,2,1] ) ./ ( 30 );
+ x[1,2,2] = ( y[1,2,2] ) ./ ( 40 );
+ x[2,1,1] = ( y[2,1,1] ) ./ ( 50 );
+ x[2,1,2] = ( y[2,1,2] ) ./ ( 60 );
+ x[2,2,1] = ( y[2,2,1] ) ./ ( 70 );
+ x[2,2,2] = ( y[2,2,2] ) ./ ( 80 );
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
+end ArrayTests.ArrayDotDiv3;
+")})));
+
+ Real x[2,2,2];
+ Real y[2,2,2] = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+equation
+ x = y ./ { { { 10, 20 }, { 30, 40 } }, { { 50, 60 }, { 70, 80 } } };
+end ArrayDotDiv3;
+
+
+model ArrayDotDiv4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotDiv4",
+         description="Scalarization of element-wise division: Real[2] ./ Integer",
+         flatModel="
+fclass ArrayTests.ArrayDotDiv4
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = ( y[1] ) ./ ( 10 );
+ x[2] = ( y[2] ) ./ ( 10 );
+ y[1] = 1;
+ y[2] = 2;
+end ArrayTests.ArrayDotDiv4;
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y ./ 10;
+end ArrayDotDiv4;
+
+
+model ArrayDotDiv5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotDiv5",
+         description="Scalarization of element-wise division: Real[2,2] ./ Integer",
+         flatModel="
+fclass ArrayTests.ArrayDotDiv5
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = ( y[1,1] ) ./ ( 10 );
+ x[1,2] = ( y[1,2] ) ./ ( 10 );
+ x[2,1] = ( y[2,1] ) ./ ( 10 );
+ x[2,2] = ( y[2,2] ) ./ ( 10 );
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+end ArrayTests.ArrayDotDiv5;
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y ./ 10;
+end ArrayDotDiv5;
+
+
+model ArrayDotDiv6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotDiv6",
+         description="Scalarization of element-wise division: Real[2,2,2] ./ Integer",
+         flatModel="
+fclass ArrayTests.ArrayDotDiv6
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = ( y[1,1,1] ) ./ ( 10 );
+ x[1,1,2] = ( y[1,1,2] ) ./ ( 10 );
+ x[1,2,1] = ( y[1,2,1] ) ./ ( 10 );
+ x[1,2,2] = ( y[1,2,2] ) ./ ( 10 );
+ x[2,1,1] = ( y[2,1,1] ) ./ ( 10 );
+ x[2,1,2] = ( y[2,1,2] ) ./ ( 10 );
+ x[2,2,1] = ( y[2,2,1] ) ./ ( 10 );
+ x[2,2,2] = ( y[2,2,2] ) ./ ( 10 );
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
+end ArrayTests.ArrayDotDiv6;
+")})));
+
+ Real x[2,2,2];
+ Real y[2,2,2] = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+equation
+ x = y ./ 10;
+end ArrayDotDiv6;
+
+
+model ArrayDotDiv7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotDiv7",
+         description="Scalarization of element-wise division: Real ./ Integer[2]",
+         flatModel="
+fclass ArrayTests.ArrayDotDiv7
+ Real x[1];
+ Real x[2];
+ Real y;
+equation
+ x[1] = ( y ) ./ ( 10 );
+ x[2] = ( y ) ./ ( 20 );
+ y = 1;
+end ArrayTests.ArrayDotDiv7;
+")})));
+
+ Real x[2];
+ Real y = 1;
+equation
+ x = y ./ { 10, 20 };
+end ArrayDotDiv7;
+
+
+model ArrayDotDiv8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotDiv8",
+         description="Scalarization of element-wise division: Real ./ Integer[2,2]",
+         flatModel="
+fclass ArrayTests.ArrayDotDiv8
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y;
+equation
+ x[1,1] = ( y ) ./ ( 10 );
+ x[1,2] = ( y ) ./ ( 20 );
+ x[2,1] = ( y ) ./ ( 30 );
+ x[2,2] = ( y ) ./ ( 40 );
+ y = 1;
+end ArrayTests.ArrayDotDiv8;
+")})));
+
+ Real x[2,2];
+ Real y = 1;
+equation
+ x = y ./ { { 10, 20 }, { 30, 40 } };
+end ArrayDotDiv8;
+
+
+model ArrayDotDiv9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotDiv9",
+         description="Scalarization of element-wise division: Real ./ Integer[2,2,2]",
+         flatModel="
+fclass ArrayTests.ArrayDotDiv9
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y;
+equation
+ x[1,1,1] = ( y ) ./ ( 10 );
+ x[1,1,2] = ( y ) ./ ( 20 );
+ x[1,2,1] = ( y ) ./ ( 30 );
+ x[1,2,2] = ( y ) ./ ( 40 );
+ x[2,1,1] = ( y ) ./ ( 50 );
+ x[2,1,2] = ( y ) ./ ( 60 );
+ x[2,2,1] = ( y ) ./ ( 70 );
+ x[2,2,2] = ( y ) ./ ( 80 );
+ y = 1;
+end ArrayTests.ArrayDotDiv9;
+")})));
+
+ Real x[2,2,2];
+ Real y = 1;
+equation
+ x = y ./ { { { 10, 20 }, { 30, 40 } }, { { 50, 60 }, { 70, 80 } } };
+end ArrayDotDiv9;
+
+
+model ArrayDotDiv10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayDotDiv10",
+         description="Scalarization of element-wise division: Real[2] ./ Integer[3]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 2638, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y ./ { 10, 20, 30 };
+end ArrayDotDiv10;
+
+
+model ArrayDotDiv11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayDotDiv11",
+         description="Scalarization of element-wise division: Real[2] ./ Integer[2,2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 2657, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y ./ { { 10, 20 }, { 30, 40 } };
+end ArrayDotDiv11;
+
+
+model ArrayDotDiv12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayDotDiv12",
+         description="Scalarization of element-wise division: Real[2] ./ String[2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 2676, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y ./ { "1", "2" };
+end ArrayDotDiv12;
+
+
+
 /* -- Standard test series for scalarisation of operators on arrays -- */
 /* 
 model ArrayAdd1
