@@ -760,7 +760,7 @@ InstMultipleBoundArgument : InstFunctionArgument ::= Arg:InstFunctionArgument*;
 /**
  * \brief Function call argument using default value in the instance tree.
  */
-InstDefaultArgument : InstFunctionArgument ::= [FExp:FExp];
+InstDefaultArgument : InstFunctionArgument ::= [FExp];
 
 // Built in functions
 /**

@@ -164,6 +164,9 @@ aspect Arrays {
 	eq FEachExp.ndims() = getFVBoundByMe().ndims();
 	
 	eq FBinExp.ndims() = getLeft().ndims();
+	eq FArtmBinExp.ndims() = Math.max(getLeft().ndims(), getLeft().ndims());
+	
+	eq FDivExp.ndims() = getLeft().ndims();
 	
 	eq FMulExp.ndims() {
 		int left = getLeft().ndims();
@@ -367,11 +370,14 @@ aspect Arrays {
 	eq FEachExp.size() = getFVBoundByMe().size();
 	
 	eq FBinExp.size() = getLeft().size();
+	eq FArtmBinExp.size() = getLeft().isArray() ? getLeft().size() : getRight().size();
+
+	eq FBinExp.size() = getLeft().size();
 	
 	eq FMulExp.size() {
-		if (getLeft().ndims() == 0)
+		if (!getLeft().isArray())
 			return getRight().size();
-		if (getRight().ndims() == 0)
+		if (!getRight().isArray())
 			return getLeft().size();
 		int[] si = new int[ndims()];
 		if (getLeft().ndims() == 2)

@@ -1033,13 +1033,13 @@ aspect FlattPrettyPrint {
 	public void FDotAddExp.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
 		p.toString(getLeft(),str,indent,o);
 		if(!(getRight() instanceof FNegExp)) 
-			str.print(" + ");
+			str.print(" .+ ");
 		p.toString(getRight(),str,indent,o);
 	}
 		
 	public void FDotSubExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		p.toString(getLeft(),str,indent,o);
-		str.print(" - ");
+		str.print(" .- ");
 //		if (getRight().isAddOrSub()) {
 			str.print("( ");
 			p.toString(getRight(),str,indent,o);
@@ -1052,7 +1052,7 @@ aspect FlattPrettyPrint {
 		str.print("( ");
 		p.toString(getLeft(),str,indent,o);
 		str.print(" )");
-		str.print(" * ");
+		str.print(" .* ");
 		str.print("( ");
 		p.toString(getRight(),str,indent,o);
 		str.print(" )");
@@ -1062,13 +1062,67 @@ aspect FlattPrettyPrint {
 		str.print("( ");
 		p.toString(getLeft(),str,indent,o);
 		str.print(" )");
-		str.print(" / ");	
+		str.print(" ./ ");	
 		str.print("( ");
 		p.toString(getRight(),str,indent,o);
 		str.print(" )");
 	}
 		
 	public void FDotPowExp.prettyPrint(Printer p, PrintStream str, String indent, Object o){
+		if (!(getLeft().isPrimary())) {
+			str.print("( ");
+			p.toString(getLeft(),str,indent,o);
+			str.print(" )");
+		} else
+			p.toString(getLeft(),str,indent,o);
+		str.print(" .^ ");
+		if (!(getRight().isPrimary())) {
+			str.print("( ");
+			p.toString(getRight(),str,indent,o);
+			str.print(" )");
+		} else
+			p.toString(getRight(),str,indent,o);
+	}
+	
+	public void FAddExp.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
+		p.toString(getLeft(),str,indent,o);
+		if(!(getRight() instanceof FNegExp)) 
+			str.print(" + ");
+		p.toString(getRight(),str,indent,o);
+	}
+		
+	public void FSubExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getLeft(),str,indent,o);
+		str.print(" - ");
+//		if (getRight().isAddOrSub()) {
+			str.print("( ");
+			p.toString(getRight(),str,indent,o);
+			str.print(" )");
+//		} else
+//			p.toString(getRight(),str,indent,o);
+	}
+		
+	public void FMulExp.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
+		str.print("( ");
+		p.toString(getLeft(),str,indent,o);
+		str.print(" )");
+		str.print(" * ");
+		str.print("( ");
+		p.toString(getRight(),str,indent,o);
+		str.print(" )");
+	}
+		
+	public void FDivExp.prettyPrint(Printer p, PrintStream str, String indent, Object o){
+		str.print("( ");
+		p.toString(getLeft(),str,indent,o);
+		str.print(" )");
+		str.print(" / ");	
+		str.print("( ");
+		p.toString(getRight(),str,indent,o);
+		str.print(" )");
+	}
+		
+	public void FPowExp.prettyPrint(Printer p, PrintStream str, String indent, Object o){
 		if (!(getLeft().isPrimary())) {
 			str.print("( ");
 			p.toString(getLeft(),str,indent,o);
@@ -1109,6 +1163,53 @@ aspect FlattPrettyPrint {
 	eq FNeqExp.op() = " <> ";
 	eq FOrExp.op() = " or ";
 	eq FAndExp.op() = " and ";
+	
+	public static final int FExp.PRIO_LOWEST  = 0;
+	public static final int FExp.PRIO_RANGE   = 1;
+	public static final int FExp.PRIO_OR      = 2;
+	public static final int FExp.PRIO_AND     = 3;
+	public static final int FExp.PRIO_NOT     = 4;
+	public static final int FExp.PRIO_COMPARE = 5;
+	public static final int FExp.PRIO_ADD     = 6;
+	public static final int FExp.PRIO_MUL     = 7;
+	public static final int FExp.PRIO_POW     = 8;
+	public static final int FExp.PRIO_HIGHEST = 9;
+	
+	/*
+	 * Expressions that have a high priority, but never need extra parenthesis around 
+	 * their operands, such as array constructors ({}) and function calls, have 
+	 * priority() PRIO_LOWEST, since their children doesn't need to be surrounded with 
+	 * parenthesis.
+	 */
+	syn int FExp.priority()  = PRIO_LOWEST;
+	eq FRangeExp.priority()  = PRIO_RANGE;
+	eq FOrExp.priority()     = PRIO_OR;
+	eq FAndExp.priority()    = PRIO_AND;
+	eq FNotExp.priority()    = PRIO_NOT;
+	eq FLogBinExp.priority() = PRIO_COMPARE;
+	eq FNegExp.priority()    = PRIO_ADD;
+	eq FAddExp.priority()    = PRIO_ADD;
+	eq FSubExp.priority()    = PRIO_ADD;
+	eq FDotAddExp.priority() = PRIO_ADD;
+	eq FDotSubExp.priority() = PRIO_ADD;
+	eq FMulExp.priority()    = PRIO_MUL;
+	eq FDivExp.priority()    = PRIO_MUL;
+	eq FDotMulExp.priority() = PRIO_MUL;
+	eq FDotDivExp.priority() = PRIO_MUL;
+	eq FPowExp.priority()    = PRIO_POW;
+	eq FDotPowExp.priority() = PRIO_POW;
+	
+	syn int FExp.parentPriority() = getParent() != null ? getParentPriority() : FExp.PRIO_LOWEST;
+	syn int List.parentPriority() = getParent() != null ? getParentPriority() : FExp.PRIO_LOWEST;
+	syn int Opt.parentPriority()  = getParent() != null ? getParentPriority() : FExp.PRIO_LOWEST;
+	
+	inh int FExp.getParentPriority();
+	inh int List.getParentPriority();
+	inh int Opt.getParentPriority();
+	eq FExp.getChild().getParentPriority()    = priority();
+	eq List.getChild().getParentPriority()    = parentPriority();
+	eq Opt.getChild().getParentPriority()     = parentPriority();
+	eq ASTNode.getChild().getParentPriority() = FExp.PRIO_LOWEST;
 	
 	public void FNotExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("not ");
