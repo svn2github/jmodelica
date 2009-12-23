@@ -2559,6 +2559,738 @@ end ArrayDotAdd12;
 
 
 
+model ArrayDotSub1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotSub1",
+         description="Scalarization of element-wise subtraction: Real[2] .- Integer[2]",
+         flatModel="
+fclass ArrayTests.ArrayDotSub1
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] .- ( 10 );
+ x[2] = y[2] .- ( 20 );
+ y[1] = 1;
+ y[2] = 2;
+end ArrayTests.ArrayDotSub1;
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y .- { 10, 20 };
+end ArrayDotSub1;
+
+
+model ArrayDotSub2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotSub2",
+         description="Scalarization of element-wise subtraction: Real[2,2] .- Integer[2,2]",
+         flatModel="
+fclass ArrayTests.ArrayDotSub2
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] .- ( 10 );
+ x[1,2] = y[1,2] .- ( 20 );
+ x[2,1] = y[2,1] .- ( 30 );
+ x[2,2] = y[2,2] .- ( 40 );
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+end ArrayTests.ArrayDotSub2;
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y .- { { 10, 20 }, { 30, 40 } };
+end ArrayDotSub2;
+
+
+model ArrayDotSub3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotSub3",
+         description="Scalarization of element-wise subtraction: Real[2,2,2] .- Integer[2,2,2]",
+         flatModel="
+fclass ArrayTests.ArrayDotSub3
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] .- ( 10 );
+ x[1,1,2] = y[1,1,2] .- ( 20 );
+ x[1,2,1] = y[1,2,1] .- ( 30 );
+ x[1,2,2] = y[1,2,2] .- ( 40 );
+ x[2,1,1] = y[2,1,1] .- ( 50 );
+ x[2,1,2] = y[2,1,2] .- ( 60 );
+ x[2,2,1] = y[2,2,1] .- ( 70 );
+ x[2,2,2] = y[2,2,2] .- ( 80 );
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
+end ArrayTests.ArrayDotSub3;
+")})));
+
+ Real x[2,2,2];
+ Real y[2,2,2] = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+equation
+ x = y .- { { { 10, 20 }, { 30, 40 } }, { { 50, 60 }, { 70, 80 } } };
+end ArrayDotSub3;
+
+
+model ArrayDotSub4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotSub4",
+         description="Scalarization of element-wise subtraction: Real[2] .- Integer",
+         flatModel="
+fclass ArrayTests.ArrayDotSub4
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] .- ( 10 );
+ x[2] = y[2] .- ( 10 );
+ y[1] = 1;
+ y[2] = 2;
+end ArrayTests.ArrayDotSub4;
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y .- 10;
+end ArrayDotSub4;
+
+
+model ArrayDotSub5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotSub5",
+         description="Scalarization of element-wise subtraction: Real[2,2] .- Integer",
+         flatModel="
+fclass ArrayTests.ArrayDotSub5
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] .- ( 10 );
+ x[1,2] = y[1,2] .- ( 10 );
+ x[2,1] = y[2,1] .- ( 10 );
+ x[2,2] = y[2,2] .- ( 10 );
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+end ArrayTests.ArrayDotSub5;
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y .- 10;
+end ArrayDotSub5;
+
+
+model ArrayDotSub6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotSub6",
+         description="Scalarization of element-wise subtraction: Real[2,2,2] .- Integer",
+         flatModel="
+fclass ArrayTests.ArrayDotSub6
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] .- ( 10 );
+ x[1,1,2] = y[1,1,2] .- ( 10 );
+ x[1,2,1] = y[1,2,1] .- ( 10 );
+ x[1,2,2] = y[1,2,2] .- ( 10 );
+ x[2,1,1] = y[2,1,1] .- ( 10 );
+ x[2,1,2] = y[2,1,2] .- ( 10 );
+ x[2,2,1] = y[2,2,1] .- ( 10 );
+ x[2,2,2] = y[2,2,2] .- ( 10 );
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
+end ArrayTests.ArrayDotSub6;
+")})));
+
+ Real x[2,2,2];
+ Real y[2,2,2] = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+equation
+ x = y .- 10;
+end ArrayDotSub6;
+
+
+model ArrayDotSub7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotSub7",
+         description="Scalarization of element-wise subtraction: Real .- Integer[2]",
+         flatModel="
+fclass ArrayTests.ArrayDotSub7
+ Real x[1];
+ Real x[2];
+ Real y;
+equation
+ x[1] = y .- ( 10 );
+ x[2] = y .- ( 20 );
+ y = 1;
+end ArrayTests.ArrayDotSub7;
+")})));
+
+ Real x[2];
+ Real y = 1;
+equation
+ x = y .- { 10, 20 };
+end ArrayDotSub7;
+
+
+model ArrayDotSub8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotSub8",
+         description="Scalarization of element-wise subtraction: Real .- Integer[2,2]",
+         flatModel="
+fclass ArrayTests.ArrayDotSub8
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y;
+equation
+ x[1,1] = y .- ( 10 );
+ x[1,2] = y .- ( 20 );
+ x[2,1] = y .- ( 30 );
+ x[2,2] = y .- ( 40 );
+ y = 1;
+end ArrayTests.ArrayDotSub8;
+")})));
+
+ Real x[2,2];
+ Real y = 1;
+equation
+ x = y .- { { 10, 20 }, { 30, 40 } };
+end ArrayDotSub8;
+
+
+model ArrayDotSub9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotSub9",
+         description="Scalarization of element-wise subtraction: Real .- Integer[2,2,2]",
+         flatModel="
+fclass ArrayTests.ArrayDotSub9
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y;
+equation
+ x[1,1,1] = y .- ( 10 );
+ x[1,1,2] = y .- ( 20 );
+ x[1,2,1] = y .- ( 30 );
+ x[1,2,2] = y .- ( 40 );
+ x[2,1,1] = y .- ( 50 );
+ x[2,1,2] = y .- ( 60 );
+ x[2,2,1] = y .- ( 70 );
+ x[2,2,2] = y .- ( 80 );
+ y = 1;
+end ArrayTests.ArrayDotSub9;
+")})));
+
+ Real x[2,2,2];
+ Real y = 1;
+equation
+ x = y .- { { { 10, 20 }, { 30, 40 } }, { { 50, 60 }, { 70, 80 } } };
+end ArrayDotSub9;
+
+
+model ArrayDotSub10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayDotSub10",
+         description="Scalarization of element-wise subtraction: Real[2] .- Integer[3]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 2638, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y .- { 10, 20, 30 };
+end ArrayDotSub10;
+
+
+model ArrayDotSub11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayDotSub11",
+         description="Scalarization of element-wise subtraction: Real[2] .- Integer[2,2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 2657, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y .- { { 10, 20 }, { 30, 40 } };
+end ArrayDotSub11;
+
+
+model ArrayDotSub12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayDotSub12",
+         description="Scalarization of element-wise subtraction: Real[2] .- String[2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 2676, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y .- { "1", "2" };
+end ArrayDotSub12;
+
+
+
+model ArrayDotMul1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotMul1",
+         description="Scalarization of element-wise multiplication: Real[2] .* Integer[2]",
+         flatModel="
+fclass ArrayTests.ArrayDotMul1
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = ( y[1] ) .* ( 10 );
+ x[2] = ( y[2] ) .* ( 20 );
+ y[1] = 1;
+ y[2] = 2;
+end ArrayTests.ArrayDotMul1;
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y .* { 10, 20 };
+end ArrayDotMul1;
+
+
+model ArrayDotMul2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotMul2",
+         description="Scalarization of element-wise multiplication: Real[2,2] .* Integer[2,2]",
+         flatModel="
+fclass ArrayTests.ArrayDotMul2
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = ( y[1,1] ) .* ( 10 );
+ x[1,2] = ( y[1,2] ) .* ( 20 );
+ x[2,1] = ( y[2,1] ) .* ( 30 );
+ x[2,2] = ( y[2,2] ) .* ( 40 );
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+end ArrayTests.ArrayDotMul2;
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y .* { { 10, 20 }, { 30, 40 } };
+end ArrayDotMul2;
+
+
+model ArrayDotMul3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotMul3",
+         description="Scalarization of element-wise multiplication: Real[2,2,2] .* Integer[2,2,2]",
+         flatModel="
+fclass ArrayTests.ArrayDotMul3
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = ( y[1,1,1] ) .* ( 10 );
+ x[1,1,2] = ( y[1,1,2] ) .* ( 20 );
+ x[1,2,1] = ( y[1,2,1] ) .* ( 30 );
+ x[1,2,2] = ( y[1,2,2] ) .* ( 40 );
+ x[2,1,1] = ( y[2,1,1] ) .* ( 50 );
+ x[2,1,2] = ( y[2,1,2] ) .* ( 60 );
+ x[2,2,1] = ( y[2,2,1] ) .* ( 70 );
+ x[2,2,2] = ( y[2,2,2] ) .* ( 80 );
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
+end ArrayTests.ArrayDotMul3;
+")})));
+
+ Real x[2,2,2];
+ Real y[2,2,2] = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+equation
+ x = y .* { { { 10, 20 }, { 30, 40 } }, { { 50, 60 }, { 70, 80 } } };
+end ArrayDotMul3;
+
+
+model ArrayDotMul4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotMul4",
+         description="Scalarization of element-wise multiplication: Real[2] .* Integer",
+         flatModel="
+fclass ArrayTests.ArrayDotMul4
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = ( y[1] ) .* ( 10 );
+ x[2] = ( y[2] ) .* ( 10 );
+ y[1] = 1;
+ y[2] = 2;
+end ArrayTests.ArrayDotMul4;
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y .* 10;
+end ArrayDotMul4;
+
+
+model ArrayDotMul5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotMul5",
+         description="Scalarization of element-wise multiplication: Real[2,2] .* Integer",
+         flatModel="
+fclass ArrayTests.ArrayDotMul5
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = ( y[1,1] ) .* ( 10 );
+ x[1,2] = ( y[1,2] ) .* ( 10 );
+ x[2,1] = ( y[2,1] ) .* ( 10 );
+ x[2,2] = ( y[2,2] ) .* ( 10 );
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+end ArrayTests.ArrayDotMul5;
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y .* 10;
+end ArrayDotMul5;
+
+
+model ArrayDotMul6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotMul6",
+         description="Scalarization of element-wise multiplication: Real[2,2,2] .* Integer",
+         flatModel="
+fclass ArrayTests.ArrayDotMul6
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = ( y[1,1,1] ) .* ( 10 );
+ x[1,1,2] = ( y[1,1,2] ) .* ( 10 );
+ x[1,2,1] = ( y[1,2,1] ) .* ( 10 );
+ x[1,2,2] = ( y[1,2,2] ) .* ( 10 );
+ x[2,1,1] = ( y[2,1,1] ) .* ( 10 );
+ x[2,1,2] = ( y[2,1,2] ) .* ( 10 );
+ x[2,2,1] = ( y[2,2,1] ) .* ( 10 );
+ x[2,2,2] = ( y[2,2,2] ) .* ( 10 );
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
+end ArrayTests.ArrayDotMul6;
+")})));
+
+ Real x[2,2,2];
+ Real y[2,2,2] = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+equation
+ x = y .* 10;
+end ArrayDotMul6;
+
+
+model ArrayDotMul7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotMul7",
+         description="Scalarization of element-wise multiplication: Real .* Integer[2]",
+         flatModel="
+fclass ArrayTests.ArrayDotMul7
+ Real x[1];
+ Real x[2];
+ Real y;
+equation
+ x[1] = ( y ) .* ( 10 );
+ x[2] = ( y ) .* ( 20 );
+ y = 1;
+end ArrayTests.ArrayDotMul7;
+")})));
+
+ Real x[2];
+ Real y = 1;
+equation
+ x = y .* { 10, 20 };
+end ArrayDotMul7;
+
+
+model ArrayDotMul8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotMul8",
+         description="Scalarization of element-wise multiplication: Real .* Integer[2,2]",
+         flatModel="
+fclass ArrayTests.ArrayDotMul8
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y;
+equation
+ x[1,1] = ( y ) .* ( 10 );
+ x[1,2] = ( y ) .* ( 20 );
+ x[2,1] = ( y ) .* ( 30 );
+ x[2,2] = ( y ) .* ( 40 );
+ y = 1;
+end ArrayTests.ArrayDotMul8;
+")})));
+
+ Real x[2,2];
+ Real y = 1;
+equation
+ x = y .* { { 10, 20 }, { 30, 40 } };
+end ArrayDotMul8;
+
+
+model ArrayDotMul9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotMul9",
+         description="Scalarization of element-wise multiplication: Real .* Integer[2,2,2]",
+         flatModel="
+fclass ArrayTests.ArrayDotMul9
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y;
+equation
+ x[1,1,1] = ( y ) .* ( 10 );
+ x[1,1,2] = ( y ) .* ( 20 );
+ x[1,2,1] = ( y ) .* ( 30 );
+ x[1,2,2] = ( y ) .* ( 40 );
+ x[2,1,1] = ( y ) .* ( 50 );
+ x[2,1,2] = ( y ) .* ( 60 );
+ x[2,2,1] = ( y ) .* ( 70 );
+ x[2,2,2] = ( y ) .* ( 80 );
+ y = 1;
+end ArrayTests.ArrayDotMul9;
+")})));
+
+ Real x[2,2,2];
+ Real y = 1;
+equation
+ x = y .* { { { 10, 20 }, { 30, 40 } }, { { 50, 60 }, { 70, 80 } } };
+end ArrayDotMul9;
+
+
+model ArrayDotMul10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayDotMul10",
+         description="Scalarization of element-wise multiplication: Real[2] .* Integer[3]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 2638, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y .* { 10, 20, 30 };
+end ArrayDotMul10;
+
+
+model ArrayDotMul11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayDotMul11",
+         description="Scalarization of element-wise multiplication: Real[2] .* Integer[2,2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 2657, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y .* { { 10, 20 }, { 30, 40 } };
+end ArrayDotMul11;
+
+
+model ArrayDotMul12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayDotMul12",
+         description="Scalarization of element-wise multiplication: Real[2] .* String[2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 2676, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y .* { "1", "2" };
+end ArrayDotMul12;
+
+
+
 /* -- Standard test series for scalarisation of operators on arrays -- */
 /* 
 model ArrayAdd1
