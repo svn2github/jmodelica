@@ -456,13 +456,13 @@ aspect PrettyPrint {
 	public void DotAddExp.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
 		p.toString(getLeft(),str,indent,o);
 		if(!(getRight() instanceof NegExp)) 
-			str.print("+");
+			str.print(op());
 		p.toString(getRight(),str,indent,o);
 	}
 		
 	public void DotSubExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		p.toString(getLeft(),str,indent,o);
-		str.print("-");
+		str.print(op());
 		if (getRight().isAddOrSub()) {
 			str.print("(");
 			p.toString(getRight(),str,indent,o);
@@ -478,7 +478,7 @@ aspect PrettyPrint {
 			str.print(")");
 		} else
 			p.toString(getLeft(),str,indent,o);	
-		str.print("*");
+		str.print(op());
 		if (getRight().isAddOrSub()) {
 			str.print("(");
 			p.toString(getRight(),str,indent,o);
@@ -494,7 +494,7 @@ aspect PrettyPrint {
 			str.print(")");
 		} else
 			p.toString(getLeft(),str,indent,o);
-		str.print("/");	
+		str.print(op());	
 		str.print("(");
 		p.toString(getRight(),str,indent,o);
 		str.print(")");
@@ -507,7 +507,7 @@ aspect PrettyPrint {
 			str.print(")");
 		} else
 			p.toString(getLeft(),str,indent,o);
-		str.print("^");
+		str.print(op());
 		if (!(getRight().isPrimary())) {
 			str.print("(");
 			p.toString(getRight(),str,indent,o);
@@ -645,15 +645,25 @@ aspect PrettyPrint {
 		//str.print("))");
 	}
 	
-	syn String LogBinExp.op();
-	eq LtExp.op() = "<";
-	eq LeqExp.op() = "<=";
-	eq GtExp .op() = ">";
-	eq GeqExp.op() = ">=";
-	eq EqExp.op() = "==";
-	eq NeqExp.op() = "<>";
-	eq OrExp.op() = " or ";
-	eq AndExp.op() = " and ";
+	syn String BinExp.op();
+	eq LtExp.op()     = "<";
+	eq LeqExp.op()    = "<=";
+	eq GtExp .op()    = ">";
+	eq GeqExp.op()    = ">=";
+	eq EqExp.op()     = "==";
+	eq NeqExp.op()    = "<>";
+	eq OrExp.op()     = " or ";
+	eq AndExp.op()    = " and ";
+	eq AddExp.op()    = "+";
+	eq SubExp.op()    = "-";
+	eq MulExp.op()    = "*";
+	eq DivExp.op()    = "/";
+	eq PowExp.op()    = "^";
+	eq DotAddExp.op() = ".+";
+	eq DotSubExp.op() = ".-";
+	eq DotMulExp.op() = ".*";
+	eq DotDivExp.op() = "./";
+	eq DotPowExp.op() = ".^";
 	
 	public void NotExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("not ");
