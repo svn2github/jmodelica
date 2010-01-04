@@ -72,7 +72,11 @@ abstract public class TestAnnotationizer {
 			}
 		} catch (InvocationTargetException e) {
 			System.out.println("Creating annotation failed:");
-			System.out.println(e.getCause().getMessage());
+			String message = e.getCause().getMessage();
+			if (message == null)
+				System.out.println(e.getCause());
+			else
+				System.out.println(message);
 			System.exit(1);
 		}
 		

@@ -90,7 +90,7 @@ aspect FlatVariability {
 	
 	syn lazy FTypePrefixVariability FExp.variability();
 	// TODO this must be fixed.
-	eq FInstAccessExp.variability() = null;
+	eq FInstAccessExp.variability() = getInstAccess().myInstComponentDecl().variability();
 	eq FUnsupportedExp.variability() = null;
 	
 	syn lazy FTypePrefixVariability FVariable.variability() {
@@ -104,6 +104,17 @@ aspect FlatVariability {
    		} else {
    			return fContinuous();
    		}
+	}
+	
+	syn lazy FTypePrefixVariability InstComponentDecl.variability() = null;
+	eq InstPrimitive.variability() {
+		if (isContinuous())
+			return fContinuous();
+		if (isDiscrete())
+			return fDiscrete();
+		if (isParameter())
+			return fParameter();
+		return fConstant();
 	}
 	
 	eq FBinExp.variability() = getLeft().variability().combine(getRight().variability());

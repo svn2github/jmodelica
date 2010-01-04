@@ -167,6 +167,7 @@ aspect Arrays {
 	eq FArtmBinExp.ndims() = Math.max(getLeft().ndims(), getRight().ndims());
 	
 	eq FDivExp.ndims() = getLeft().ndims();
+	eq FPowExp.ndims() = getLeft().ndims();
 	
 	eq FMulExp.ndims() {
 		int left = getLeft().ndims();
@@ -373,6 +374,7 @@ aspect Arrays {
 	eq FArtmBinExp.size() = getLeft().isArray() ? getLeft().size() : getRight().size();
 
 	eq FDivExp.size() = getLeft().size();
+	eq FPowExp.size() = getLeft().size();
 	
 	eq FMulExp.size() {
 		if (!getLeft().isArray())
@@ -415,9 +417,10 @@ aspect Arrays {
 	eq FIdentity.size() {
 		int s[] = new int[2];
 		s[0] = getFExp().ceval().intValue();
-		s[1] = getFExp().ceval().intValue();
+		s[1] = s[0];
 		return s;
 	}
+	
 	eq FOnes.size() {
 		int s[] = new int[ndims()];
 		int index = 0;
@@ -591,7 +594,7 @@ aspect Arrays {
 		if (isElementWise())
 			return super.array();
 		
-		if (ndims() == 0)
+		if (!isArray())
 			return new ScalarAsArray(composeScalarCellExp(Index.NULL));
 		
 		Array res = new Array(indices());
@@ -601,12 +604,44 @@ aspect Arrays {
 	}
 	
 	protected FExp FMulExp.composeScalarCellExp(Index i) {
-		Iterator<FExp> left = getLeft().array().leftMulIterator(i);
-		Iterator<FExp> right = getRight().array().rightMulIterator(i);
+		return vectorMultiplication(getLeft().array().leftMulIterator(i), 
+		                            getRight().array().rightMulIterator(i));
+	}
+	
+	protected static FExp FExp.vectorMultiplication(Iterator<FExp> left, Iterator<FExp> right) {
 		FExp cur = new FMulExp(left.next(), right.next());
 		while (left.hasNext()) 
 			cur = new FAddExp(cur, new FMulExp(left.next(), right.next()));
 		return cur;
+	}
+	
+	eq FPowExp.array() {
+		if (!isArray())
+			return new ScalarAsArray(this);
+		
+		int e = getRight().ceval().intValue();
+		if (e <= 0)
+			return new FIdentity(new FIntegerLitExp(size()[0])).array();
+		
+		Array base = getLeft().array();
+		Array res = base;
+		for (; e > 1; e--) {
+			Array cur = new Array(indices());
+			for (Index i : cur.indices()) {
+				Iterator<FExp> left = res.leftMulIterator(i);
+				Iterator<FExp> right = base.rightMulIterator(i);
+				cur.set(i, vectorMultiplication(left, right));
+			}
+			res = cur;
+		}
+		return res;
+	}
+	
+	eq FIdentity.array() {
+		Array arr = new Array(indices());
+		for (Index i : arr.indices())
+			arr.set(i, new FIntegerLitExp((i.index()[0] == i.index()[1]) ? 1 : 0));
+		return arr;
 	}
 	
 	eq FArray.array() {

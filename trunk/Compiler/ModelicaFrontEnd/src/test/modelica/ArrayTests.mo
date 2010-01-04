@@ -4023,6 +4023,373 @@ end ArrayDotPow12;
 
 
 
+model ArrayPow1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayPow1",
+         description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 0",
+         flatModel="
+fclass ArrayTests.ArrayPow1
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation
+ x[1,1] = 1;
+ x[1,2] = 0;
+ x[2,1] = 0;
+ x[2,2] = 1;
+end ArrayTests.ArrayPow1;
+")})));
+
+ Real x[2,2] = { { 1, 2 }, { 3, 4 } } ^ 0;
+end ArrayPow1;
+
+
+model ArrayPow2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayPow2",
+         description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 1",
+         flatModel="
+fclass ArrayTests.ArrayPow2
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation
+ x[1,1] = 1;
+ x[1,2] = 2;
+ x[2,1] = 3;
+ x[2,2] = 4;
+end ArrayTests.ArrayPow2;
+")})));
+
+ Real x[2,2] = { { 1, 2 }, { 3, 4 } } ^ 1;
+end ArrayPow2;
+
+
+model ArrayPow3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayPow3",
+         description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 2",
+         flatModel="
+fclass ArrayTests.ArrayPow3
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation
+ x[1,1] = ( 1 ) * ( 1 ) + ( 2 ) * ( 3 );
+ x[1,2] = ( 1 ) * ( 2 ) + ( 2 ) * ( 4 );
+ x[2,1] = ( 3 ) * ( 1 ) + ( 4 ) * ( 3 );
+ x[2,2] = ( 3 ) * ( 2 ) + ( 4 ) * ( 4 );
+end ArrayTests.ArrayPow3;
+")})));
+
+ Real x[2,2] = { { 1, 2 }, { 3, 4 } } ^ 2;
+end ArrayPow3;
+
+
+model ArrayPow4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayPow4",
+         description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 3",
+         flatModel="
+fclass ArrayTests.ArrayPow4
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation
+ x[1,1] = ( ( 1 ) * ( 1 ) + ( 2 ) * ( 3 ) ) * ( 1 ) + ( ( 1 ) * ( 2 ) + ( 2 ) * ( 4 ) ) * ( 3 );
+ x[1,2] = ( ( 1 ) * ( 1 ) + ( 2 ) * ( 3 ) ) * ( 2 ) + ( ( 1 ) * ( 2 ) + ( 2 ) * ( 4 ) ) * ( 4 );
+ x[2,1] = ( ( 3 ) * ( 1 ) + ( 4 ) * ( 3 ) ) * ( 1 ) + ( ( 3 ) * ( 2 ) + ( 4 ) * ( 4 ) ) * ( 3 );
+ x[2,2] = ( ( 3 ) * ( 1 ) + ( 4 ) * ( 3 ) ) * ( 2 ) + ( ( 3 ) * ( 2 ) + ( 4 ) * ( 4 ) ) * ( 4 );
+end ArrayTests.ArrayPow4;
+")})));
+
+ Real x[2,2] = { { 1, 2 }, { 3, 4 } } ^ 3;
+end ArrayPow4;
+
+
+model ArrayPow5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayPow5",
+         description="Scalarization of element-wise exponentiation: Integer[3,3] ^ 2",
+         flatModel="
+fclass ArrayTests.ArrayPow5
+ Real x[1,1];
+ Real x[1,2];
+ Real x[1,3];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[2,3];
+ Real x[3,1];
+ Real x[3,2];
+ Real x[3,3];
+equation
+ x[1,1] = ( 1 ) * ( 1 ) + ( 2 ) * ( 4 ) + ( 3 ) * ( 7 );
+ x[1,2] = ( 1 ) * ( 2 ) + ( 2 ) * ( 5 ) + ( 3 ) * ( 8 );
+ x[1,3] = ( 1 ) * ( 3 ) + ( 2 ) * ( 6 ) + ( 3 ) * ( 9 );
+ x[2,1] = ( 4 ) * ( 1 ) + ( 5 ) * ( 4 ) + ( 6 ) * ( 7 );
+ x[2,2] = ( 4 ) * ( 2 ) + ( 5 ) * ( 5 ) + ( 6 ) * ( 8 );
+ x[2,3] = ( 4 ) * ( 3 ) + ( 5 ) * ( 6 ) + ( 6 ) * ( 9 );
+ x[3,1] = ( 7 ) * ( 1 ) + ( 8 ) * ( 4 ) + ( 9 ) * ( 7 );
+ x[3,2] = ( 7 ) * ( 2 ) + ( 8 ) * ( 5 ) + ( 9 ) * ( 8 );
+ x[3,3] = ( 7 ) * ( 3 ) + ( 8 ) * ( 6 ) + ( 9 ) * ( 9 );
+end ArrayTests.ArrayPow5;
+")})));
+
+ Real x[3,3] = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } } ^ 2;
+end ArrayPow5;
+
+
+model ArrayPow6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayPow6",
+         description="Scalarization of element-wise exponentiation: component Real[2,2] ^ 2",
+         flatModel="
+fclass ArrayTests.ArrayPow6
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = ( y[1,1] ) * ( y[1,1] ) + ( y[1,2] ) * ( y[2,1] );
+ x[1,2] = ( y[1,1] ) * ( y[1,2] ) + ( y[1,2] ) * ( y[2,2] );
+ x[2,1] = ( y[2,1] ) * ( y[1,1] ) + ( y[2,2] ) * ( y[2,1] );
+ x[2,2] = ( y[2,1] ) * ( y[1,2] ) + ( y[2,2] ) * ( y[2,2] );
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+end ArrayTests.ArrayPow6;
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation 
+ x = y ^ 2;
+end ArrayPow6;
+
+
+model ArrayPow7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayPow7",
+         description="Scalarization of element-wise exponentiation:component Real[2,2] ^ 0",
+         flatModel="
+fclass ArrayTests.ArrayPow7
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = 1;
+ x[1,2] = 0;
+ x[2,1] = 0;
+ x[2,2] = 1;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+end ArrayTests.ArrayPow7;
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation 
+ x = y ^ 0;
+end ArrayPow7;
+
+
+model ArrayPow8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayPow8",
+         description="Scalarization of element-wise exponentiation: Integer[2,2] ^ (negative Integer)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 4068, column 16:
+  Type error in expression
+")})));
+
+ Real x[2,2] = { { 1, 2 }, { 3, 4 } } ^ (-1);
+end ArrayPow8;
+
+
+model ArrayPow9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayPow9",
+         description="Scalarization of element-wise exponentiation: Integer[2,2] ^ Real",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 4084, column 16:
+  Type error in expression
+")})));
+
+ Real x[2,2] = { { 1, 2 }, { 3, 4 } } ^ 1.0;
+end ArrayPow9;
+
+
+model ArrayPow10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayPow10",
+         description="Scalarization of element-wise exponentiation: Integer[2,2] ^ Integer[2,2]",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 4100, column 16:
+  Type error in expression
+")})));
+
+ Real x[2,2] = { { 1, 2 }, { 3, 4 } } ^ { { 1, 2 }, { 3, 4 } };
+end ArrayPow10;
+
+
+model ArrayPow11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayPow11",
+         description="Scalarization of element-wise exponentiation: Integer[2,3] ^ 2",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 4116, column 16:
+  Type error in expression
+")})));
+
+ Real x[2,3] = { { 1, 2 }, { 3, 4 }, { 5, 6 } } ^ 2;
+end ArrayPow11;
+
+
+model ArrayPow12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayPow12",
+         description="Scalarization of element-wise exponentiation: Real[2,2] ^ Integer component",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 4286, column 16:
+  Type error in expression
+")})));
+
+ Real x[2,2] = { { 1, 2 }, { 3, 4 } } ^ y;
+ Integer y = 2;
+end ArrayPow12;
+
+
+model ArrayPow13
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayPow13",
+         description="Scalarization of element-wise exponentiation: Real[2,2] ^ constant Integer component",
+         flatModel="
+fclass ArrayTests.ArrayPow13
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ constant Integer y = 2;
+equation
+ x[1,1] = ( 1 ) * ( 1 ) + ( 2 ) * ( 3 );
+ x[1,2] = ( 1 ) * ( 2 ) + ( 2 ) * ( 4 );
+ x[2,1] = ( 3 ) * ( 1 ) + ( 4 ) * ( 3 );
+ x[2,2] = ( 3 ) * ( 2 ) + ( 4 ) * ( 4 );
+end ArrayTests.ArrayPow13;
+")})));
+
+ Real x[2,2] = { { 1, 2 }, { 3, 4 } } ^ y;
+ constant Integer y = 2;
+end ArrayPow13;
+
+
+model ArrayPow14
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayPow14",
+         description="Scalarization of element-wise exponentiation: Real[2,2] ^ parameter Integer component",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 4326, column 16:
+  Type error in expression
+")})));
+
+ Real x[2,2] = { { 1, 2 }, { 3, 4 } } ^ y;
+ parameter Integer y = 2;
+end ArrayPow14;
+
+
+model ArrayPow15
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayPow15",
+         description="Scalarization of element-wise exponentiation: Integer[1,1] ^ 2",
+         flatModel="
+fclass ArrayTests.ArrayPow15
+ Real x[1,1];
+equation
+ x[1,1] = ( 1 ) * ( 1 );
+end ArrayTests.ArrayPow15;
+")})));
+
+ Real x[1,1] = { { 1 } } ^ 2;
+end ArrayPow15;
+
+
+model ArrayPow16
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayPow16",
+         description="Scalarization of element-wise exponentiation: Integer[1] ^ 2",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 4177, column 16:
+  Type error in expression
+")})));
+
+ Real x[1] = { 1 } ^ 2;
+end ArrayPow16;
+
+
+model ArrayPow17
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayPow17",
+         description="Scalarization of element-wise exponentiation: Integer ^ 2",
+         flatModel="
+fclass ArrayTests.ArrayPow17
+ Real x;
+equation
+ x = 1 ^ 2;
+end ArrayTests.ArrayPow17;
+")})));
+
+ Real x = 1 ^ 2;
+end ArrayPow17;
+
+
+
 /* -- Standard test series for scalarisation of operators on arrays -- */
 /* 
 model ArrayAdd1

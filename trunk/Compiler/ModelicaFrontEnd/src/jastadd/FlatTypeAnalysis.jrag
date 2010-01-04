@@ -122,6 +122,21 @@ aspect FlatTypeAnalysis {
 		return getLeft().type().binaryScalarNumericPromotion(getRight().type()).arrayType(size());
 	}
 	
+	eq FPowExp.type() {
+		if (getRight().type().isUnknown() || getRight().ndims() != 0)
+			return fUnknownType();
+		if (getLeft().ndims() == 0)
+			return super.type();
+		// Left operand is not scalar, must be matrix exponentiation
+		if (ndims() != 2 || size()[0] != size()[1])
+			return fUnknownType();
+		if (!getRight().type().isInteger() || !getRight().isConstantExp())
+			return fUnknownType();
+		if (getRight().ceval().intValue() < 0)
+			return fUnknownType();
+		return getLeft().type();
+	}
+	
 	eq FLogBinExp.type() = fBooleanScalarType();
 
 	eq FRealLitExp.type() = fRealScalarType();
@@ -195,25 +210,28 @@ aspect FlatTypeAnalysis {
 aspect FNumericPromotion {
 	
 	/**
-	 * \brief Combine two types to the smallest common denominator.
+	 * \brief Combine two types to the broadest common denominator.
 	 * 
 	 * If either is non-numeric or if sizes doesn't match, 
 	 * the unknown type is returned.
+	 * If any type is a Real type, the result will be a Real type.
 	 */
 	syn FPrimitiveType FPrimitiveType.binaryNumericPromotion(FPrimitiveType type) = fUnknownType();
 	
 	/**
-	 * \brief Combine two types to the smallest common denominator.
+	 * \brief Combine two types to the broadest common denominator.
 	 * 
 	 * If either is non-numeric or if both are array and sizes doesn't match, 
-	 * the unknown type is returned.
+	 * the unknown type is returned. 
+	 * If any type is a Real type, the result will be a Real type.
 	 */
 	syn FPrimitiveType FPrimitiveType.binaryLooseNumericPromotion(FPrimitiveType type) = fUnknownType();
 	
 	/**
-	 * \brief Combine two types to the smallest common scalar denominator.
+	 * \brief Combine two types to the broadest common scalar denominator.
 	 * 
 	 * If either is non-numeric, the unknown type is returned.
+	 * If any type is a Real type, the result will be a Real type.
 	 */
 	syn FPrimitiveType FPrimitiveType.binaryScalarNumericPromotion(FPrimitiveType type) = fUnknownType();
 	
