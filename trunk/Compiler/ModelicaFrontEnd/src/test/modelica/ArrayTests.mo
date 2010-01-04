@@ -3657,6 +3657,372 @@ end ArrayDotDiv12;
 
 
 
+model ArrayDotPow1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotPow1",
+         description="Scalarization of element-wise exponentiation:",
+         flatModel="
+fclass ArrayTests.ArrayDotPow1
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] .^ 10;
+ x[2] = y[2] .^ 20;
+ y[1] = 1;
+ y[2] = 2;
+end ArrayTests.ArrayDotPow1;
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y .^ { 10, 20 };
+end ArrayDotPow1;
+
+
+model ArrayDotPow2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotPow2",
+         description="Scalarization of element-wise exponentiation:",
+         flatModel="
+fclass ArrayTests.ArrayDotPow2
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] .^ 10;
+ x[1,2] = y[1,2] .^ 20;
+ x[2,1] = y[2,1] .^ 30;
+ x[2,2] = y[2,2] .^ 40;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+end ArrayTests.ArrayDotPow2;
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y .^ { { 10, 20 }, { 30, 40 } };
+end ArrayDotPow2;
+
+
+model ArrayDotPow3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotPow3",
+         description="Scalarization of element-wise exponentiation:",
+         flatModel="
+fclass ArrayTests.ArrayDotPow3
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] .^ 10;
+ x[1,1,2] = y[1,1,2] .^ 20;
+ x[1,2,1] = y[1,2,1] .^ 30;
+ x[1,2,2] = y[1,2,2] .^ 40;
+ x[2,1,1] = y[2,1,1] .^ 50;
+ x[2,1,2] = y[2,1,2] .^ 60;
+ x[2,2,1] = y[2,2,1] .^ 70;
+ x[2,2,2] = y[2,2,2] .^ 80;
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
+end ArrayTests.ArrayDotPow3;
+")})));
+
+ Real x[2,2,2];
+ Real y[2,2,2] = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+equation
+ x = y .^ { { { 10, 20 }, { 30, 40 } }, { { 50, 60 }, { 70, 80 } } };
+end ArrayDotPow3;
+
+
+model ArrayDotPow4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotPow4",
+         description="Scalarization of element-wise exponentiation:",
+         flatModel="
+fclass ArrayTests.ArrayDotPow4
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = y[1] .^ 10;
+ x[2] = y[2] .^ 10;
+ y[1] = 1;
+ y[2] = 2;
+end ArrayTests.ArrayDotPow4;
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y .^ 10;
+end ArrayDotPow4;
+
+
+model ArrayDotPow5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotPow5",
+         description="Scalarization of element-wise exponentiation:",
+         flatModel="
+fclass ArrayTests.ArrayDotPow5
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1,1] = y[1,1] .^ 10;
+ x[1,2] = y[1,2] .^ 10;
+ x[2,1] = y[2,1] .^ 10;
+ x[2,2] = y[2,2] .^ 10;
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+end ArrayTests.ArrayDotPow5;
+")})));
+
+ Real x[2,2];
+ Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+equation
+ x = y .^ 10;
+end ArrayDotPow5;
+
+
+model ArrayDotPow6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotPow6",
+         description="Scalarization of element-wise exponentiation:",
+         flatModel="
+fclass ArrayTests.ArrayDotPow6
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+equation
+ x[1,1,1] = y[1,1,1] .^ 10;
+ x[1,1,2] = y[1,1,2] .^ 10;
+ x[1,2,1] = y[1,2,1] .^ 10;
+ x[1,2,2] = y[1,2,2] .^ 10;
+ x[2,1,1] = y[2,1,1] .^ 10;
+ x[2,1,2] = y[2,1,2] .^ 10;
+ x[2,2,1] = y[2,2,1] .^ 10;
+ x[2,2,2] = y[2,2,2] .^ 10;
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,2,1] = 3;
+ y[1,2,2] = 4;
+ y[2,1,1] = 5;
+ y[2,1,2] = 6;
+ y[2,2,1] = 7;
+ y[2,2,2] = 8;
+end ArrayTests.ArrayDotPow6;
+")})));
+
+ Real x[2,2,2];
+ Real y[2,2,2] = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+equation
+ x = y .^ 10;
+end ArrayDotPow6;
+
+
+model ArrayDotPow7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotPow7",
+         description="Scalarization of element-wise exponentiation:",
+         flatModel="
+fclass ArrayTests.ArrayDotPow7
+ Real x[1];
+ Real x[2];
+ Real y;
+equation
+ x[1] = y .^ 10;
+ x[2] = y .^ 20;
+ y = 1;
+end ArrayTests.ArrayDotPow7;
+")})));
+
+ Real x[2];
+ Real y = 1;
+equation
+ x = y .^ { 10, 20 };
+end ArrayDotPow7;
+
+
+model ArrayDotPow8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotPow8",
+         description="Scalarization of element-wise exponentiation:",
+         flatModel="
+fclass ArrayTests.ArrayDotPow8
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y;
+equation
+ x[1,1] = y .^ 10;
+ x[1,2] = y .^ 20;
+ x[2,1] = y .^ 30;
+ x[2,2] = y .^ 40;
+ y = 1;
+end ArrayTests.ArrayDotPow8;
+")})));
+
+ Real x[2,2];
+ Real y = 1;
+equation
+ x = y .^ { { 10, 20 }, { 30, 40 } };
+end ArrayDotPow8;
+
+
+model ArrayDotPow9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayDotPow9",
+         description="Scalarization of element-wise exponentiation:",
+         flatModel="
+fclass ArrayTests.ArrayDotPow9
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real y;
+equation
+ x[1,1,1] = y .^ 10;
+ x[1,1,2] = y .^ 20;
+ x[1,2,1] = y .^ 30;
+ x[1,2,2] = y .^ 40;
+ x[2,1,1] = y .^ 50;
+ x[2,1,2] = y .^ 60;
+ x[2,2,1] = y .^ 70;
+ x[2,2,2] = y .^ 80;
+ y = 1;
+end ArrayTests.ArrayDotPow9;
+")})));
+
+ Real x[2,2,2];
+ Real y = 1;
+equation
+ x = y .^ { { { 10, 20 }, { 30, 40 } }, { { 50, 60 }, { 70, 80 } } };
+end ArrayDotPow9;
+
+
+model ArrayDotPow10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayDotPow10",
+         description="Scalarization of element-wise exponentiation:",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 3972, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y .^ { 10, 20, 30 };
+end ArrayDotPow10;
+
+
+model ArrayDotPow11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayDotPow11",
+         description="Scalarization of element-wise exponentiation:",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 3991, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y .^ { { 10, 20 }, { 30, 40 } };
+end ArrayDotPow11;
+
+
+model ArrayDotPow12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayDotPow12",
+         description="Scalarization of element-wise exponentiation:",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 4010, column 6:
+  Type error in expression
+")})));
+
+ Real x[2];
+ Real y[2] = { 1, 2 };
+equation
+ x = y .^ { "1", "2" };
+end ArrayDotPow12;
+
+
+
 /* -- Standard test series for scalarisation of operators on arrays -- */
 /* 
 model ArrayAdd1
