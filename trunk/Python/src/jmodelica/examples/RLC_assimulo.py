@@ -9,9 +9,9 @@ import matplotlib
 import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.tests import get_example_path
-from jmodelica.simulation.assimulo import AJMIImplModel
+from jmodelica.simulation.assimulo import JMIImplicit, write_data
 from jmodelica.compiler import ModelicaCompiler
-from Integrator.Implicit_ODE import IDA
+from Assimulo.Implicit_ODE import IDA
 
 def run_demo(with_plots=True):
     """
@@ -35,12 +35,12 @@ def run_demo(with_plots=True):
     # Load the dynamic library and XML data
     model=jmi.Model(model_name)
     
-    RLC_mod = AJMIImplModel(model)
+    RLC_mod = JMIImplicit(model)
     RLC_sim = IDA(RLC_mod)
     RLC_sim(30)
-    RLC_sim.plot()
-    """
-    RLC_sim.write_data()
+    #RLC_sim.plot()
+
+    write_data(RLC_sim)
 
     # Load the file we just wrote to file
     res = jmodelica.io.ResultDymolaTextual('RLC_Circuit_result.txt')
@@ -56,7 +56,7 @@ def run_demo(with_plots=True):
     p.plot(sine_y.t, sine_y.x, resistor_v.t, resistor_v.x, inductor1_i.t, inductor1_i.x)
     p.legend(('sine.y','resistor.v','inductor1.i'))
     p.show()
-    """
+
 
 if __name__=="__main__":
     run_demo()

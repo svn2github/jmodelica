@@ -15,12 +15,36 @@ except ImportError:
     print 'Could not load Assimulo package.'
 
 
-class AJMIModel_Exception(Exception):
+class JMIModel_Exception(Exception):
     """
-    A AJMIModel Exception.
+    A JMIModel Exception.
     """
     pass
 
+def write_data(simulator):
+    """
+    Writes simulation data to a file.
+    
+    Takes as input a simulated model.
+    """
+    if isinstance(simulator._problem, Implicit_Problem):
+        
+        model = simulator._problem._model
+        
+        t = N.array(simulator.t)
+        y = N.array(simulator.y)
+        yd = N.array(simulator.yd)
+        u = N.ones((len(t),len(model.u)))*model.u
+        
+        # extends the time array with the states columnwise
+        data = N.c_[t,yd[:,0:len(model.dx)]]
+        data = N.c_[data, y[:,0:len(model.x)]]
+        data = N.c_[data, u]
+        data = N.c_[data, y[:,len(model.x):len(model.x)+len(model.w)]]
+        
+        io.export_result_dymola(model,data)
+    else:
+        raise Simulator_Exception('Currently not supported for ODEs.')
 
 class JMIExplicit(Explicit_Problem):
     """
@@ -60,7 +84,7 @@ class JMIExplicit(Explicit_Problem):
         
         #Evaluating the switching functions
         #TODO
-        raise AJMIModel_Exception('Not implemented.')
+        raise JMIModel_Exception('Not implemented.')
    
     
     def reset(self):

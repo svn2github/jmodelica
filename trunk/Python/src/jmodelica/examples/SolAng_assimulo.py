@@ -15,7 +15,8 @@ from jmodelica.compiler import ModelicaCompiler
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
 
-from jmodelica.simulation.assimulo import Simulator
+from jmodelica.simulation.assimulo import JMIImplicit, write_data
+from Assimulo.Implicit_ODE import IDA
 
 def run_demo(with_plots=True):
     """
@@ -73,19 +74,20 @@ def run_demo(with_plots=True):
     p.show()
     
     #Simulation with the new package
-    SolAng_sim = Simulator(model, 'IDA')
+    SolAng_mod = JMIImplicit(model)
+    SolAng_sim = IDA(SolAng_mod)
     SolAng_sim.reset() #Resets to the initial values from the model
-    SolAng_sim.solver.make_consistency('IDA_YA_YDP_INIT') #Calculates initial values
+    SolAng_sim.make_consistency('IDA_YA_YDP_INIT') #Calculates initial values
     
     #Time the run method for assimulo
     time_begin = time()
-    SolAng_sim.run(86400.0, 86400) #Simulate the same time and with the same number of output points
+    SolAng_sim(86400.0, 86400) #Simulate the same time and with the same number of output points
     #rtol and atol is by default 1.0e-6 the same as with pySundials
     assimulo = time()-time_begin #Elapsed time
     
-    SolAng_sim.solver.stats_print() #Print statistics
-
-    SolAng_sim.write_data()
+    SolAng_sim.stats_print() #Print statistics
+    
+    write_data(SolAng_sim)
     
     # Load the data we just wrote to file
     res = jmodelica.io.ResultDymolaTextual('SolAngles_result.txt')

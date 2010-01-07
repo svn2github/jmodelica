@@ -7,9 +7,10 @@ import pylab as p
 
 import jmodelica
 import jmodelica.jmi as jmi
-from jmodelica.simulation.assimulo import AJMIExplModel
+from jmodelica.simulation.assimulo import JMIExplicit
 from jmodelica.compiler import OptimicaCompiler
-from Integrator.Explicit_ODE import CVode
+from Assimulo.Explicit_ODE import CVode
+
 
 def run_demo(with_plots=True):
     """
@@ -33,7 +34,7 @@ def run_demo(with_plots=True):
     # Load the dynamic library and XML data
     model=jmi.Model(package)
     
-    VDP_mod = AJMIExplModel(model)
+    VDP_mod = JMIExplicit(model)
     
     VDP_sim = CVode(VDP_mod)
     VDP_sim.discr = 'BDF' #discretication method, default Adams
