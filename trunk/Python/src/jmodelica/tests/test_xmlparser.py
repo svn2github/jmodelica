@@ -57,16 +57,6 @@ def test_create_XMLValuesDoc():
            "Could not create XMLValuesDoc from XML file: "+filename
 
 @testattr(stddist = True)
-def test_create_XMLProblVariablesDoc():
-    """ 
-    Test that it is possible to parse the XML file and create a 
-    XMLProblVariablesDoc object.
-    """
-    filename = fname+'_problvariables.xml'
-    assert xp.XMLProblVariablesDoc(filename) is not None, \
-           "Could not create XMLProblVariablesDoc from XML file: "+filename
-
-@testattr(stddist = True)
 def test_xmlvariablesdoc_methods():
     """ 
     Test that all XMLVariablesDoc methods are callable and returns the 
@@ -114,7 +104,13 @@ def test_xmlvariablesdoc_methods():
     t_get_w_lin_tp_values.description = ' test XMLVariablesDoc.get_w_lin_tp_values'
     t_get_u_lin_tp_values.description = ' test XMLVariablesDoc.get_u_lin_tp_values'
     t_get_dx_lin_tp_values.description = ' test XMLVariablesDoc.get_dx_lin_tp_values'
-    t_get_x_lin_tp_values.description = ' test XMLVariablesDoc.get_x_lin_tp_values'
+    t_get_x_lin_tp_values.description = ' test XMLVariablesDoc.get_x_lin_tp_values'    
+    t_get_starttime.description = ' test XMLVariablesDoc.get_starttime'
+    t_get_starttime_free.description = ' test XMLVariablesDoc.get_starttime_free'
+    t_get_finaltime.description = ' test XMLVariablesDoc.get_finaltime'
+    t_get_finaltime_free.description = ' test XMLVariablesDoc.get_finaltime_free'
+    t_get_timepoints.description = ' test XMLVariablesDoc.get_timepoints'
+
     
     yield t_get_valueref, xmldoc
     yield t_get_aliases, xmldoc
@@ -156,7 +152,12 @@ def test_xmlvariablesdoc_methods():
     yield t_get_w_lin_tp_values, xmldoc
     yield t_get_u_lin_tp_values, xmldoc
     yield t_get_dx_lin_tp_values, xmldoc
-    yield t_get_x_lin_tp_values, xmldoc
+    yield t_get_x_lin_tp_values, xmldoc    
+    yield t_get_starttime, xmldoc
+    yield t_get_starttime_free, xmldoc
+    yield t_get_finaltime, xmldoc
+    yield t_get_finaltime_free, xmldoc
+    yield t_get_timepoints, xmldoc    
     
 @testattr(stddist = True)
 def test_xmlvaluesdoc_methods():
@@ -170,26 +171,6 @@ def test_xmlvaluesdoc_methods():
     
     yield t_get_iparam_values, xmldoc
     
-@testattr(stddist = True)
-def test_xmlproblvariablesdoc_methods():
-    """
-    Test that all the XMLProblVariablesDoc methods are callable and 
-    returns the correct data type.
-    """
-    xmldoc = xp.XMLProblVariablesDoc(fname+'_problvariables.xml')
-    
-    t_get_starttime.description = ' test XMLProblVariables.get_starttime'
-    t_get_starttime_free.description = ' test XMLProblVariables.get_starttime_free'
-    t_get_finaltime.description = ' test XMLProblVariables.get_finaltime'
-    t_get_finaltime_free.description = ' test XMLProblVariables.get_finaltime_free'
-    t_get_timepoints.description = ' test XMLProblVariables.get_timepoints'
-
-    yield t_get_starttime, xmldoc
-    yield t_get_starttime_free, xmldoc
-    yield t_get_finaltime, xmldoc
-    yield t_get_finaltime_free, xmldoc
-    yield t_get_timepoints, xmldoc
-
 @testattr(stddist = True)
 def t_get_valueref(xmldoc):
     ref = xmldoc.get_valueref('u')
@@ -858,25 +839,25 @@ def t_get_iparam_values(xmldoc):
 def t_get_starttime(xmldoc):
     time = xmldoc.get_starttime()
     assert time.__class__ is float, \
-        "XMLProblVariablesDoc.get_starttime did not return float."
+        "XMLVariablesDoc.get_starttime did not return float."
     
 @testattr(stddist = True)
 def t_get_starttime_free(xmldoc):
     b = xmldoc.get_starttime_free()
     assert b.__class__ is bool, \
-            "XMLProblVariablesDoc.get_starttime_free did not return boolean."
+            "XMLVariablesDoc.get_starttime_free did not return boolean."
     
 @testattr(stddist = True)
 def t_get_finaltime(xmldoc):
     time = xmldoc.get_finaltime()
     assert time.__class__ is float, \
-        "XMLProblVariablesDoc.get_finaltime did not return float."
+        "XMLVariablesDoc.get_finaltime did not return float."
     
 @testattr(stddist = True)
 def t_get_finaltime_free(xmldoc):
     b = xmldoc.get_finaltime_free()
     assert b.__class__ is bool, \
-            "XMLProblVariablesDoc.get_finaltime_free did not return boolean."
+            "XMLVariablesDoc.get_finaltime_free did not return boolean."
     
 @testattr(stddist = True)
 def t_get_timepoints(xmldoc):

@@ -91,10 +91,7 @@ def test_optimica_compile():
     
     assert os.access(fname+'_values.xml', os.F_OK) == True, \
            fname+'_values.xml'+" was not created."
-    
-    assert os.access(fname+'_problvariables.xml', os.F_OK) == True, \
-           fname+'_values.xml'+" was not created."
-    
+        
     assert os.access(fname+'.o', os.F_OK) == True, \
            fname+'.o'+" was not created."        
     
@@ -186,13 +183,6 @@ def test_setget_XMLVariablesTemplate():
     newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_optimica_variables_template.xml')
     oc.set_XMLVariablesTemplate(newtemplate)
     nose.tools.assert_equal(oc.get_XMLVariablesTemplate(), newtemplate)
-
-@testattr(stddist = True)
-def test_setget_XMLProblVariablesTemplate():
-    """ Test XML problem variables template setter and getter. """
-    newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_optimica_problvariables_template.xml')
-    oc.set_XMLProblVariablesTemplate(newtemplate)
-    nose.tools.assert_equal(oc.get_XMLProblVariablesTemplate(), newtemplate)
     
 @testattr(stddist = True)
 def test_setget_XMLValuesTemplate():

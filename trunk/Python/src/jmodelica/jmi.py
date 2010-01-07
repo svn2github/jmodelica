@@ -32,6 +32,7 @@ import tempfile
 import shutil
 import _ctypes
 import atexit
+from lxml import etree
 
 import xmlparser
 import io
@@ -415,19 +416,16 @@ class Model(object):
         xml_values_name = libname+'_values.xml'
         self._set_XMLvalues_doc(xmlparser.XMLValuesDoc(path+os.sep+xml_values_name))
         self._set_iparam_values()
-                
-        # set optimizataion interval, time points and optimization indices (if Optimica)
-        xml_problvariables_name = libname+'_problvariables.xml'
+        
+        # set optimizataion interval, time points and optimization indices
         try:
-            self._set_XMLproblvariables_doc(xmlparser.XMLProblVariablesDoc(path+os.sep+xml_problvariables_name))
             self._set_opt_interval()
             self._set_timepoints()
             self._set_p_opt_indices()
-            
-        except IOError, e:
-            # Modelica model - can not load Optimica specific xml
+        except etree.XPathEvalError, e:
+            # Modelica model, opt specific data does not exist
             pass
-
+              
     def _set_dependent_parameters(self):
         """
         Sets the dependent parameters of the model.
@@ -770,14 +768,6 @@ class Model(object):
     def _set_XMLvalues_doc(self, doc):
         """ Set the XMLDoc for independent parameter values. """
         self._xmlvalues_doc = doc
-
-    def _get_XMLproblvariables_doc(self):
-        """ Return a reference to the XMLDoc instance for optimization problem variables. """
-        return self._xmlproblvariables_doc
-    
-    def _set_XMLproblvariables_doc(self, doc):
-        """ Set the XMLDoc for optimization problem variables. """
-        self._xmlproblvariables_doc = doc
        
     def _set_start_attributes(self):
         
@@ -850,7 +840,7 @@ class Model(object):
             
     def _set_opt_interval(self):
         """ Set the optimization intervals (if Optimica). """
-        xmldoc = self._get_XMLproblvariables_doc()
+        xmldoc = self._get_XMLvariables_doc()
         starttime = xmldoc.get_starttime()
         starttimefree = xmldoc.get_starttime_free()
         finaltime = xmldoc.get_finaltime()
@@ -863,7 +853,7 @@ class Model(object):
 
     def _set_timepoints(self):       
         """ Set the optimization timepoints (if Optimica). """        
-        xmldoc = self._get_XMLproblvariables_doc()
+        xmldoc = self._get_XMLvariables_doc()
         start =  xmldoc.get_starttime()
         final = xmldoc.get_finaltime()
         points = []

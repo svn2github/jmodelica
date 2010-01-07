@@ -511,7 +511,6 @@ class OptimicaCompiler(ModelicaCompiler):
     
     xml_var_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_optimica_variables_template.xml')    
     c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_optimica_template.c')
-    xml_prob_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_optimica_problvariables_template.xml')
 
     def __init__(self):
         try:
@@ -521,26 +520,14 @@ class OptimicaCompiler(ModelicaCompiler):
         options.setStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
         self._compiler = self.OptimicaCompiler(options, 
                                                self.xml_var_path, 
-                                               self.xml_prob_path, 
                                                self.xml_val_path, 
                                                self.c_tpl_path)
+
 
     @classmethod
     def set_log_level(self,level):
         """ Set the level of log prints. """
         self.OptimicaCompiler.setLogLevel(self.OptimicaCompiler.logger.getName(), level)
-
-    def get_XMLProblVariablesTemplate(self):
-        """ Return file path to the XML problem variables template. """
-        return self._compiler.getXMLProblVariablesTemplate()
-
-    def set_XMLProblVariablesTemplate(self, template):
-        """ Set the XML problem variables template to the file pointed out by 
-        template.
-        
-        """
-        self._compiler.setXMLProblVariablesTemplate(template)
-
 
 class JError(Exception):
     

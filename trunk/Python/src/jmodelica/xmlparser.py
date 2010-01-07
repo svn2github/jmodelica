@@ -86,7 +86,8 @@ class XMLdoc:
          
         """
         self._doc = _parse_XML(filename, schemaname)
-        self._xpatheval = etree.XPathEvaluator(self._doc)
+        root = self._doc.getroot()
+        self._xpatheval = etree.XPathEvaluator(self._doc, namespaces=root.nsmap)
 
 class XMLVariablesDoc(XMLdoc):    
     """ Class representing a parsed XML file containing model variable meta data. """
@@ -956,7 +957,44 @@ class XMLVariablesDoc(XMLdoc):
             for tp in tps:
                 casted_tps.append(tp == "true")
             timepoints_islinear.append(casted_tps)             
-        return dict(zip(valrefs, timepoints_islinear))       
+        return dict(zip(valrefs, timepoints_islinear))
+    
+    def get_starttime(self):
+        """ Extract the interval start time. """
+        time = self._xpatheval("//opt:IntervalStartTime/opt:Value/text()")
+        if len(time) > 0:
+            return float(time[0])
+        return None
+
+    def get_starttime_free(self):
+        """ Extract the start time free attribute value. """
+        free = self._xpatheval("//opt:IntervalStartTime/opt:Free/text()")
+        if len(free) > 0:
+            return (free[0]=="true")
+        return None
+    
+    def get_finaltime(self):
+        """ Extract the interval final time. """
+        time = self._xpatheval("//opt:IntervalFinalTime/opt:Value/text()")
+        if len(time) > 0:
+            return float(time[0])
+        return None
+
+    def get_finaltime_free(self):
+        """ Extract the final time free attribute value. """
+        free = self._xpatheval("//opt:IntervalFinalTime/opt:Free/text()")
+        if len(free) > 0:
+            return (free[0]=="true")
+        return None
+
+    def get_timepoints(self):
+        """ Extract all time points. """
+        vals = self._xpatheval("//opt:TimePoints/opt:Value/text()")
+        timepoints = []
+        for tp in vals:
+            timepoints.append(float(tp))
+        return timepoints
+     
             
 class XMLValuesDoc(XMLdoc):
     
@@ -1004,50 +1042,7 @@ class XMLValuesDoc(XMLdoc):
             return type[0].tag
         return None
         
-class XMLProblVariablesDoc(XMLdoc):
-    
-    """ 
-    Class representing a parsed XML file containing Optimica problem 
-    specification meta data. 
-    
-    """
-    
-    def get_starttime(self):
-        """ Extract the interval start time. """
-        time = self._xpatheval("//IntervalStartTime/Value/text()")
-        if len(time) > 0:
-            return float(time[0])
-        return None
-
-    def get_starttime_free(self):
-        """ Extract the start time free attribute value. """
-        free = self._xpatheval("//IntervalStartTime/Free/text()")
-        if len(free) > 0:
-            return (free[0]=="true")
-        return None
-    
-    def get_finaltime(self):
-        """ Extract the interval final time. """
-        time = self._xpatheval("//IntervalFinalTime/Value/text()")
-        if len(time) > 0:
-            return float(time[0])
-        return None
-
-    def get_finaltime_free(self):
-        """ Extract the final time free attribute value. """
-        free = self._xpatheval("//IntervalFinalTime/Free/text()")
-        if len(free) > 0:
-            return (free[0]=="true")
-        return None
-
-    def get_timepoints(self):
-        """ Extract all time points. """
-        vals = self._xpatheval("//TimePoints/Value/text()")
-        timepoints = []
-        for tp in vals:
-            timepoints.append(float(tp))
-        return timepoints
-     
+             
 class XMLException(Exception):
     
     """ Class for all XML related errors that can occur in this module. """
