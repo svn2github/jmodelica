@@ -31,77 +31,77 @@ endif
 
 install-exec-local:
 if HAVE_ANT
-	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar $(prefix)/lib/
-	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/util.jar $(prefix)/lib/
-	cp $(abs_top_srcdir)/Compiler/OptimicaCompiler/bin/OptimicaCompiler.jar $(prefix)/lib/
+	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
+	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/util.jar $(DESTDIR)$(prefix)/lib/
+	cp $(abs_top_srcdir)/Compiler/OptimicaCompiler/bin/OptimicaCompiler.jar $(DESTDIR)$(prefix)/lib/
 endif
-	[ $(abs_top_srcdir) == $(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/LICENSE $(prefix)/ 
-	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(prefix)/lib/
-	cp $(abs_top_srcdir)/JMI/LICENSE_CPL $(prefix)/lib/
-	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(prefix)/include/
-	cp $(abs_top_srcdir)/JMI/LICENSE_CPL $(prefix)/include/
-	mkdir -p $(prefix)/Makefiles
-	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(prefix)/Makefiles/LICENSE
+	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/LICENSE $(DESTDIR)$(prefix)/ 
+	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/lib/
+	cp $(abs_top_srcdir)/JMI/LICENSE_CPL $(DESTDIR)$(prefix)/lib/
+	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/include/
+	cp $(abs_top_srcdir)/JMI/LICENSE_CPL $(DESTDIR)$(prefix)/include/
+	mkdir -p $(DESTDIR)$(prefix)/Makefiles
+	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/Makefiles/LICENSE
 	case $(build) in \
 	*-cygwin*) \
-	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(prefix)/Makefiles/Makefile ;; \
+	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/Makefile ;; \
   	*-mingw*) \
-	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(prefix)/Makefiles/MakeFile ;; \
+	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
   	*-apple*) \
-	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.macosx $(prefix)/Makefiles/MakeFile ;; \
+	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.macosx $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
   	*) \
-	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.linux $(prefix)/Makefiles/MakeFile ;; \
+	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
 	esac
-	mkdir -p $(prefix)/Options
-	[ $(abs_top_srcdir) == $(prefix) ] && echo "Installing in dist directory, don't copy options file" || cp $(abs_top_srcdir)/Options/options.xml $(prefix)/Options/options.xml
-	[ $(abs_top_srcdir) == $(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Options/LICENSE $(prefix)/Options/LICENSE
-	mkdir -p $(prefix)/Python
-	[ $(abs_top_srcdir) == $(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(prefix)/Python
-	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/Python
-	[ -e $(prefix)/Python/jm_python.sh ] && echo "File exists, don't copy jm_python.sh" || cp Python/jm_python.sh $(prefix)/Python/jm_python.sh
-	[ -e $(prefix)/Python/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(prefix)/Python/jm_ipython.sh
-	cp $(abs_top_srcdir)/Python/src/startup.py $(prefix)/
-	chmod ugo+x $(prefix)/Python/jm_*.sh
-	mkdir -p $(prefix)/ThirdParty
-	mkdir -p $(prefix)/ThirdParty/Beaver
-	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE $(prefix)/ThirdParty/Beaver/
-	mkdir -p $(prefix)/ThirdParty/Beaver/lib
-	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar $(prefix)/ThirdParty/Beaver/lib/ 
-	mkdir -p $(prefix)/ThirdParty/CppAD
-	cp $(CPPAD_HOME)/COPYING $(prefix)/ThirdParty/CppAD
-	mkdir -p $(prefix)/ThirdParty/CppAD/cppad	
-	cp $(CPPAD_HOME)/cppad/*.h $(prefix)/ThirdParty/CppAD/cppad
-	cp $(CPPAD_HOME)/cppad/*.hpp $(prefix)/ThirdParty/CppAD/cppad
-	mkdir -p $(prefix)/ThirdParty/CppAD/cppad/local	
-	cp $(CPPAD_HOME)/cppad/local/*.hpp $(prefix)/ThirdParty/CppAD/cppad/local
-	[ $(abs_top_srcdir) == $(prefix) ] && echo "Installing in dist directory, don't copy MSL" || cd $(abs_top_srcdir)/ThirdParty; find MSL -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(prefix)/ThirdParty
-	mkdir -p $(prefix)/CodeGenTemplates
-	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(prefix)/CodeGenTemplates/LICENSE
-	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/jmi_modelica_template.c $(prefix)/CodeGenTemplates
-	cp  $(abs_top_srcdir)/Compiler/OptimicaCBackEnd/templates/jmi_optimica_template.c $(prefix)/CodeGenTemplates
-	cp  $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd/templates/jmi_modelica_variables_template.xml $(prefix)/CodeGenTemplates
-	cp  $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd/templates/jmi_modelica_values_template.xml $(prefix)/CodeGenTemplates
-	cp  $(abs_top_srcdir)/Compiler/OptimicaXMLBackEnd/templates/jmi_optimica_variables_template.xml $(prefix)/CodeGenTemplates
-	cp  $(abs_top_srcdir)/Compiler/OptimicaXMLBackEnd/templates/jmi_optimica_problvariables_template.xml $(prefix)/CodeGenTemplates
-	mkdir -p $(prefix)/XML
-	[ $(abs_top_srcdir) == $(prefix) ] && echo "Installing in dist directory, don't copy XML schemas"  || cp  $(abs_top_srcdir)/XML/*.xsd $(prefix)/XML
-	[ $(abs_top_srcdir) == $(prefix) ] && echo "Installing in dist directory, don't copy XML LICENSE"  || cp  $(abs_top_srcdir)/XML/LICENSE $(prefix)/XML
-	cp  $(abs_top_srcdir)/version.txt $(prefix)
+	mkdir -p $(DESTDIR)$(prefix)/Options
+	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy options file" || cp $(abs_top_srcdir)/Options/options.xml $(DESTDIR)$(prefix)/Options/options.xml
+	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Options/LICENSE $(DESTDIR)$(prefix)/Options/LICENSE
+	mkdir -p $(DESTDIR)$(prefix)/Python
+	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python
+	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python
+	[ -e $(DESTDIR)$(prefix)/Python/jm_python.sh ] && echo "File exists, don't copy jm_python.sh" || cp Python/jm_python.sh $(DESTDIR)$(prefix)/Python/jm_python.sh
+	[ -e $(DESTDIR)$(prefix)/Python/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/Python/jm_ipython.sh
+	cp $(abs_top_srcdir)/Python/src/startup.py $(DESTDIR)$(prefix)/
+	chmod ugo+x $(DESTDIR)$(prefix)/Python/jm_*.sh
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver
+	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Beaver/
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib
+	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/ 
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD
+	cp $(CPPAD_HOME)/COPYING $(DESTDIR)$(prefix)/ThirdParty/CppAD
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad	
+	cp $(CPPAD_HOME)/cppad/*.h $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad
+	cp $(CPPAD_HOME)/cppad/*.hpp $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad/local	
+	cp $(CPPAD_HOME)/cppad/local/*.hpp $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad/local
+	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy MSL" || cd $(abs_top_srcdir)/ThirdParty; find MSL -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/ThirdParty
+	mkdir -p $(DESTDIR)$(prefix)/CodeGenTemplates
+	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/CodeGenTemplates/LICENSE
+	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/jmi_modelica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
+	cp  $(abs_top_srcdir)/Compiler/OptimicaCBackEnd/templates/jmi_optimica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
+	cp  $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd/templates/jmi_modelica_variables_template.xml $(DESTDIR)$(prefix)/CodeGenTemplates
+	cp  $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd/templates/jmi_modelica_values_template.xml $(DESTDIR)$(prefix)/CodeGenTemplates
+	cp  $(abs_top_srcdir)/Compiler/OptimicaXMLBackEnd/templates/jmi_optimica_variables_template.xml $(DESTDIR)$(prefix)/CodeGenTemplates
+	cp  $(abs_top_srcdir)/Compiler/OptimicaXMLBackEnd/templates/jmi_optimica_problvariables_template.xml $(DESTDIR)$(prefix)/CodeGenTemplates
+	mkdir -p $(DESTDIR)$(prefix)/XML
+	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML schemas"  || cp  $(abs_top_srcdir)/XML/*.xsd $(DESTDIR)$(prefix)/XML
+	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML LICENSE"  || cp  $(abs_top_srcdir)/XML/LICENSE $(DESTDIR)$(prefix)/XML
+	cp  $(abs_top_srcdir)/version.txt $(DESTDIR)$(prefix)
 
 bindistdir: install
 	rm -rf $(bindistdir)
 	mkdir -p $(bindistdir)
-	cp $(prefix)/LICENSE $(bindistdir)
-	cp $(prefix)/startup.py $(bindistdir)
-	cp $(prefix)/version.txt $(bindistdir)
-	cp -r $(prefix)/CodeGenTemplates $(bindistdir)
-	cp -r $(prefix)/Makefiles $(bindistdir)
-	cp -r $(prefix)/Options $(bindistdir)
-	cp -r $(prefix)/Python $(bindistdir)
-	cp -r $(prefix)/ThirdParty $(bindistdir)
-	cp -r $(prefix)/XML $(bindistdir)
-	cp -r $(prefix)/include $(bindistdir)
-	cp -r $(prefix)/lib $(bindistdir)
+	cp $(DESTDIR)$(prefix)/LICENSE $(bindistdir)
+	cp $(DESTDIR)$(prefix)/startup.py $(bindistdir)
+	cp $(DESTDIR)$(prefix)/version.txt $(bindistdir)
+	cp -r $(DESTDIR)$(prefix)/CodeGenTemplates $(bindistdir)
+	cp -r $(DESTDIR)$(prefix)/Makefiles $(bindistdir)
+	cp -r $(DESTDIR)$(prefix)/Options $(bindistdir)
+	cp -r $(DESTDIR)$(prefix)/Python $(bindistdir)
+	cp -r $(DESTDIR)$(prefix)/ThirdParty $(bindistdir)
+	cp -r $(DESTDIR)$(prefix)/XML $(bindistdir)
+	cp -r $(DESTDIR)$(prefix)/include $(bindistdir)
+	cp -r $(DESTDIR)$(prefix)/lib $(bindistdir)
 if COMPILE_WITH_IPOPT	
 	mkdir -p $(bindistdir)/ThirdParty/Ipopt
 # Copy files
