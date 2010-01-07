@@ -194,7 +194,6 @@ def run_demo(with_plots=True):
         plt.xlabel('time')
         plt.show()
 
-
     # Solve optimal control problem    
     oc.compile_model(curr_dir+"/files/CSTR.mo", "CSTR.CSTR_Opt", target='ipopt')
 

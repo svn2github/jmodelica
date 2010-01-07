@@ -995,6 +995,3 @@ class TestModelSimulation:
         assert n_cols > 0, "The resulting should at least of one column."
         assert n_nz > 0, "The resulting jacobian should at least have" \
                          " one element (structurally) non-zero."
-
-    
-      
