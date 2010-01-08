@@ -176,11 +176,15 @@ aspect InstLookupClasses {
 
 	eq InstProgramRoot.getInstPredefinedType().lookupInstClass(String name) {
 		HashSet set = new HashSet(4);
+		for (InstClassDecl bcd : getInstPredefinedTypes()) {
+			if (bcd.matchInstClassDecl(name))
+				set.add(bcd);	
+		}		
+
 		for (InstClassDecl bcd : getInstBuiltInTypes()) {
 			if (bcd.matchInstClassDecl(name))
 				set.add(bcd);	
 		}		
-		
 
 		if (set.size()>0)
 			return set;

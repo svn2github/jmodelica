@@ -53,6 +53,7 @@ aspect PredefinedTypes {
     	builtInDef += "parameter RealType start=0;\n";
     	builtInDef += "parameter BooleanType fixed=false;\n";
     	builtInDef += "parameter RealType nominal=0;\n";
+    	builtInDef += "parameter IntegerType stateSelect=0;\n";
     	builtInDef += "end Real;\n";
     	
     	builtInDef += "type Integer\n"; 
@@ -75,7 +76,16 @@ aspect PredefinedTypes {
     	builtInDef += "parameter StringType quantity=\"\";\n";
        	builtInDef += "parameter StringType start=\"\";\n";
     	builtInDef += "end String;\n"; 	
-   
+
+    	// Since we don't support Enumerations, this is a workaround
+		builtInDef += "package StateSelect\n"; 
+		builtInDef += "constant Integer never = 0;\n";
+    	builtInDef += "constant Integer avoid = 1;\n";
+    	builtInDef += "constant Integer default = 2;\n";
+    	builtInDef += "constant Integer prefer = 3;\n";
+    	builtInDef += "constant Integer always = 4;\n";
+    	builtInDef += "end StateSelect;\n";
+    	
 //   		java.io.StringReader builtInDefReader = new java.io.StringReader(builtInDef);
 // 	  	ModelicaParser parser = new ModelicaParser();
  		PrimitiveClassDecl pcd=null;

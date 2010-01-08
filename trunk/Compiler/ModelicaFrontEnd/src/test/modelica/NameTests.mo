@@ -1438,5 +1438,37 @@ equation
   end for;
 end ForTest2_Err;
 
+model StateSelectTest 
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="StateSelectTest",
+        description="Test for equations.",
+                                               flatModel=
+"fclass NameTests.StateSelectTest
+ Real x(stateSelect = 0);
+ Real y(stateSelect = 1);
+ Real z(stateSelect = 2);
+ Real w(stateSelect = 3);
+ Real v(stateSelect = 4);
+equation
+ x = 2;
+ y = 1;
+ der(z) = 1;
+ der(w) = 1;
+ der(v) = 1;
+end NameTests.StateSelectTest;
+")})));
+
+ Real x(stateSelect=StateSelect.never);
+ Real y(stateSelect=StateSelect.avoid);
+ Real z(stateSelect=StateSelect.default);
+ Real w(stateSelect=StateSelect.prefer);
+ Real v(stateSelect=StateSelect.always);
+equation
+ x = 2;
+ y = 1;
+ der(z) = 1;
+ der(w) = 1;
+ der(v) = 1;
+end StateSelectTest;
 
 end NameTests;
