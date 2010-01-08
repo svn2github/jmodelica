@@ -676,7 +676,24 @@ equation
 
 end ArrayTest30;
 
+model ArrayTest31
+        annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest31",
+        description="Flattening of arrays.",
+                                               flatModel=
+"fclass ArrayTests.ArrayTest31
+ Real x[1];
+ Real x[2];
+equation
+ x[1] = sin(time);
+ x[2] = cos(time);
+end ArrayTests.ArrayTest31;
+")})));
 
+  Real x[2];
+equation
+x = {sin(time),cos(time)};
+end ArrayTest31;
 
 
 model ArrayModifiers1
