@@ -82,7 +82,6 @@ endif
 	cp  $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd/templates/jmi_modelica_variables_template.xml $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd/templates/jmi_modelica_values_template.xml $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/OptimicaXMLBackEnd/templates/jmi_optimica_variables_template.xml $(DESTDIR)$(prefix)/CodeGenTemplates
-	cp  $(abs_top_srcdir)/Compiler/OptimicaXMLBackEnd/templates/jmi_optimica_problvariables_template.xml $(DESTDIR)$(prefix)/CodeGenTemplates
 	mkdir -p $(DESTDIR)$(prefix)/XML
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML schemas"  || cp  $(abs_top_srcdir)/XML/*.xsd $(DESTDIR)$(prefix)/XML
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML LICENSE"  || cp  $(abs_top_srcdir)/XML/LICENSE $(DESTDIR)$(prefix)/XML
