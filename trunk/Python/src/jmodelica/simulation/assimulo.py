@@ -115,7 +115,7 @@ class JMIImplicit(Implicit_Problem):
         [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes() #Used for determine if there are discontinuities
         
         if g_nbr > 0:
-            switches0 = [bool(x) for x in self._model.sw] #Change the models values of the switches from ints to booleans
+            self.switches0 = [bool(x) for x in self._model.sw] #Change the models values of the switches from ints to booleans
             self.event_fcn = self.g #Activates the event function
     
     def f(self, t, y, yd, sw=None):
@@ -143,8 +143,8 @@ class JMIImplicit(Implicit_Problem):
         self._model.x = y[0:len(self._model.x)]
         self._model.w = y[len(self._model.x):len(y)]
         self._model.dx = yd[0:len(self._model.dx)]
-        self._model.sw = [int(x) for x in sw] #Sets the switches
-
+        #self._model.sw = [int(x) for x in sw] #Sets the switches
+        
         #Evaluating the switching functions
         eventInd = N.array([.0]*len(sw))
         self._model.jmimodel.dae_R(eventInd)
@@ -155,7 +155,7 @@ class JMIImplicit(Implicit_Problem):
         """
         Overrides Assimulos default initiate mode setting.
         """
-        pass
+        self._model.sw = [int(x) for x in simulator.switches]
 
     def reset(self):
         """
