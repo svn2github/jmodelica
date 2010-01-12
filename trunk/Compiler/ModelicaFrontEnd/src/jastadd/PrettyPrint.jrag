@@ -1251,7 +1251,17 @@ aspect FlattPrettyPrint {
 
 	public void FInstAccessExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		debugPrint("FIdUse.prettyPrint(): " + name());
-		str.print(getInstAccess().name());
+		p.toString(getInstAccess(), str, indent, o);
+	}
+	
+	public void InstAccess.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print(name());
+	}
+	
+	public void InstArrayAccess.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print(name());
+		if (hasFArraySubscripts())
+			p.toString(getFArraySubscripts(), str, indent, o);
 	}
 	
 	public void FDerExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
