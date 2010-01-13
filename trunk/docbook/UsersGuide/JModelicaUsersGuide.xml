@@ -30,11 +30,17 @@
     Computer Algebra and processed by JEuclid.</para>
   </acknowledgements>
 
-  <xi:include href="Introduction.xml"
-              xpointer="element(/1)" />
+  <xi:include href="Introduction.xml" xpointer="element(/1)" />
 
-  <xi:include href="Installation.xml"
-              xpointer="element(/1)" />
+  <xi:include href="Installation.xml" xpointer="element(/1)" />
+
+  <xi:include href="GettingStarted.xml" xpointer="element(/1)" />
+
+  <xi:include href="AdvancedTopics.xml" xpointer="element(/1)" />
+
+  <xi:include href="Optimica.xml" xpointer="element(/1)" />
+
+  <xi:include href="Limitations.xml" xpointer="element(/1)" />
 
   <appendix>
     <title>Sandbox</title>
