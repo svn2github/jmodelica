@@ -200,6 +200,13 @@ aspect FlatVariability {
 		return total;		
 	}	
 	
+	eq FSubscriptedExp.variability() {
+		FTypePrefixVariability total = fConstant();
+		for (FExp e : getArray().iterable())
+			total = total.combine(e.variability());
+		return total;		
+	}	
+	
 	eq FNoEventExp.variability() = getFExp().variability();
 	eq FIdentity.variability() = fConstant();
 	eq FOnes.variability() = fConstant();

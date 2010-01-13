@@ -38,6 +38,7 @@ aspect InstLookupComponents {
 	
 	eq InstPrimitive.getChild().lookupInstComponent(String name) = myInstClass().memberInstComponent(name); 
 	eq InstPrimitive.getFArraySubscripts().lookupInstComponent(String name) = lookupInstComponent(name);
+	eq InstPrimitive.getBindingFExp().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstDot.getRight().lookupInstComponent(String name) = getLeft().qualifiedLookupInstComponent(name);
 	eq InstRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
 		
@@ -286,22 +287,18 @@ aspect LookupInstComponentSlices {
 			ArrayList<InstComponentDecl> decls_tmp = 
 				new ArrayList<InstComponentDecl>();
 			// Get the array of indices
-			Array array = fas.getFSubscript(i).array();
+			int[] indices = fas.getFSubscript(i).myIndices();
 			// Loop over all declarations
 			for (InstComponentDecl decl : decls) {
 				// Loop over all indices
-				for (FExp ind_exp : array) {
-					// TODO: add check that a value is returned
-					int index = ind_exp.ceval().intValue();
+				for (int index : indices) {
 					// TODO: check that value is inside of the bounds
 					decls_tmp.add(decl.getInstComponentDecl(index-1));
 				}
 			}	
 			decls = decls_tmp;
 		}
-		InstComponentDecl[] decls_array = new InstComponentDecl[decls.size()];
-		decls.toArray(decls_array);
-		return decls_array;
+		return decls.toArray(new InstComponentDecl[decls.size()]);
 	}
 	
 	inh lazy InstComponentDecl[] InstAccess.predSlice();

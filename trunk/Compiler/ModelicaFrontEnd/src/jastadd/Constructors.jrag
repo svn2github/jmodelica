@@ -86,11 +86,8 @@ aspect Constructors {
 	/**
 	 * Constructs a boolean literal expression from a boolean.
 	 */
-	public static FBooleanLitExp FBooleanLitExp.createFBooleanLitExp(boolean val) {
-		if (val)
-			return new FBooleanLitExpTrue();
-		else
-			return new FBooleanLitExpFalse();
+	public static FBooleanLitExp FBooleanLitExp.create(boolean val) {
+		return val ? new FBooleanLitExpTrue() : new FBooleanLitExpFalse();
 	}
 	
 	public ComponentDecl.ComponentDecl(boolean isParameter,
@@ -132,7 +129,30 @@ aspect Constructors {
 			//bexp_ast.dumpTreeBasic("");	
 		    this.setModification(new ValueModification(bexp_ast));
         }                     	
+	}
 	
+	/**
+	 * \brief Create a new FSubscriptedExp with a new FArraySubscripts, containing the 
+	 *        proper number of FSubscripts (according to <code>exp</code>).
+	 * 
+	 * All FSubscripts except the first will be FColonSubscripts.
+	 * 
+	 * @param exp    the expression this FSubscriptedExp should wrap.
+	 * @param index  the index to use for the first FSubscript.
+	 */
+	public FSubscriptedExp.FSubscriptedExp(FExp exp, int index) {
+		this(exp, FArraySubscripts.createFColonSubscripts(exp.ndims()));
+		getFArraySubscripts().specifyNext(index);
+	}
+	
+	/**
+	 * \brief Create a new FArraySubscripts containing <code>n</code> {@see FColonSubscript}s.
+	 */
+	public static FArraySubscripts FArraySubscripts.createFColonSubscripts(int n) {
+		List<FSubscript> l = new List<FSubscript>();
+		for (int i = 0; i < n; i++)
+			l.add(new FColonSubscript());
+		return new FArraySubscripts(l);
 	}
 	
 }
@@ -197,7 +217,6 @@ aspect InheritedFactoryMethods {
 	public FIfExp     FIfExp.createEmptyNode()     { return new FIfExp(); }
 	public FElseIfExp FElseIfExp.createEmptyNode() { return new FElseIfExp(); }
 	public FNoExp     FNoExp.createEmptyNode()     { return new FNoExp(); }
-	public FEachExp   FEachExp.createEmptyNode()   { return new FEachExp(); }
 	public FTimeExp   FTimeExp.createEmptyNode()   { return new FTimeExp(); }
 	
 	public FNoEventExp FNoEventExp.createEmptyNode() {return new FNoEventExp(); }
@@ -209,9 +228,10 @@ aspect InheritedFactoryMethods {
 	public FInstAccessExp FInstAccessExp.createEmptyNode() { return new FInstAccessExp(); }
 	
 	// Array expressions
-	public FArray    FArray.createEmptyNode()    { return new FArray(); }
-	public FRangeExp FRangeExp.createEmptyNode() { return new FRangeExp(); }
-	public FEndExp   FEndExp.createEmptyNode()   { return new FEndExp(); }
+	public FArray          FArray.createEmptyNode()          { return new FArray(); }
+	public FSubscriptedExp FSubscriptedExp.createEmptyNode() { return new FSubscriptedExp(); }
+	public FRangeExp       FRangeExp.createEmptyNode()       { return new FRangeExp(); }
+	public FEndExp         FEndExp.createEmptyNode()         { return new FEndExp(); }
 	
 	// Function calls
 	public FFunctionCall    FFunctionCall.createEmptyNode()    { return new FFunctionCall(); }

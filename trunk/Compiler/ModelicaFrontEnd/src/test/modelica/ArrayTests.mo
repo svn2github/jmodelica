@@ -256,7 +256,7 @@ model ArrayTest15_Err
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 251, column 9:
-  Array size mismatch in declaration: x, size of declaration is [3] and size of binding expression is [3, 1]
+  Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [3, 1]
 ")})));
 
    Real x[3] = {{2},{2},{3}};
@@ -597,31 +597,13 @@ model ArrayTest27_Err
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 592, column 13:
-  Array size mismatch for attribute: start, size of declaration is [3] and size of start expression is [2]
+  Array size mismatch for the attribute start, size of declaration is [3] and size of start expression is [2]
 ")})));
 
    Real x[3](start={1,2});
 equation
    der(x) = ones(3);
 end ArrayTest27_Err;
-
-
-model ArrayTest28_Err
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArrayTest28_Err",
-         description="Test type checking of arrays",
-         errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 610, column 14:
-  Array size mismatch for attribute: each start, declaration has 1 dimension(s) and expression has 1, expression must have fewer than declaration
-")})));
-
-   Real x[3](each start={1,2,3});
-equation
-   der(x) = ones(3);
-end ArrayTest28_Err;
 
 
 model ArrayTest29
@@ -736,7 +718,7 @@ Semantic error at line 712, column 9:
   The 'each' keyword cannot be applied to attributes of scalar components
 ")})));
 
- Real a(each start=3) = zeros(3);
+ Real a(each start=3) = 0;
 end ArrayModifiers2;
 
 
@@ -749,7 +731,7 @@ model ArrayModifiers3
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 728, column 11:
-  Array size mismatch for attribute: start, size of declaration is [3] and size of start expression is [4]
+  Array size mismatch for the attribute start, size of declaration is [3] and size of start expression is [4]
 ")})));
 
  Real b[3](start={1,2,3,4}) = zeros(3);
@@ -765,7 +747,7 @@ model ArrayModifiers4
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 744, column 12:
-  Array size mismatch for attribute: each start, declaration has 1 dimension(s) and expression has 1, expression must have fewer than declaration
+  The attribute start is declared 'each' and the binding expression is not scalar
 ")})));
 
  Real a[3](each start={1,2}) = zeros(3);
@@ -779,19 +761,31 @@ model ArrayModifiers5
          description="Modifiers to arrays: members that are arrays",
          flatModel="
 fclass ArrayTests.ArrayModifiers5
- Real b.x[1];
- Real b.x[2];
- Real b.x[3];
- Real b.y[1];
- Real b.y[2];
- Real b.y[3];
+ Real b[1].x[1];
+ Real b[1].x[2];
+ Real b[1].x[3];
+ Real b[1].y[1];
+ Real b[1].y[2];
+ Real b[1].y[3];
+ Real b[2].x[1];
+ Real b[2].x[2];
+ Real b[2].x[3];
+ Real b[2].y[1];
+ Real b[2].y[2];
+ Real b[2].y[3];
 equation
- b.x[1] = 1;
- b.x[2] = 2;
- b.x[3] = 3;
- b.y[1] = 2;
- b.y[2] = 2;
- b.y[3] = 2;
+ b[1].x[1] = 1;
+ b[1].x[2] = 2;
+ b[1].x[3] = 3;
+ b[1].y[1] = 10;
+ b[1].y[2] = 20;
+ b[1].y[3] = 30;
+ b[2].x[1] = 4;
+ b[2].x[2] = 5;
+ b[2].x[3] = 6;
+ b[2].y[1] = 10;
+ b[2].y[2] = 20;
+ b[2].y[3] = 30;
 end ArrayTests.ArrayModifiers5;
 ")})));
 
@@ -800,7 +794,7 @@ end ArrayTests.ArrayModifiers5;
   Real y[3];
  end B;
  
- B b(x={1,2,3}, each y=2);
+ B b[2](x={{1,2,3},{4,5,6}}, each y={10,20,30});
 end ArrayModifiers5;
 
 
@@ -813,7 +807,7 @@ model ArrayModifiers6
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 792, column 8:
-  Array size mismatch in declaration: x, size of declaration is [3] and size of binding expression is [4]
+  Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [4]
 ")})));
 
  model B
@@ -833,7 +827,7 @@ model ArrayModifiers7
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 813, column 8:
-  The 'each' keyword cannot be applied to scalar members of non-array components
+  The 'each' keyword cannot be applied to members of non-array components
 ")})));
 
  model B
@@ -846,25 +840,1146 @@ end ArrayModifiers7;
 
 model ArrayModifiers8
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
+     JModelica.UnitTesting.TransformCanonicalTestCase(
          name="ArrayModifiers8",
-         description="Modifiers to arrays: each [3] = [2]",
-         errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 833, column 8:
-  Array size mismatch in declaration: each y, declaration has 1 dimension(s) and binding expression has 1, expression must have fewer than declaration
+         description="Modifiers to arrays: arrays of composites: same name on different levels",
+         flatModel="
+fclass ArrayTests.ArrayModifiers8
+ Real x[1].y[1].x[1];
+ Real x[1].y[1].x[2];
+ Real x[1].y[2].x[1];
+ Real x[1].y[2].x[2];
+ Real x[1].x[1];
+ Real x[1].x[2];
+ Real x[2].y[1].x[1];
+ Real x[2].y[1].x[2];
+ Real x[2].y[2].x[1];
+ Real x[2].y[2].x[2];
+ Real x[2].x[1];
+ Real x[2].x[2];
+equation
+ x[1].y[1].x[1] = 1;
+ x[1].y[1].x[2] = 2;
+ x[1].y[2].x[1] = 1;
+ x[1].y[2].x[2] = 2;
+ x[1].x[1] = 10;
+ x[1].x[2] = 20;
+ x[2].y[1].x[1] = 1;
+ x[2].y[1].x[2] = 2;
+ x[2].y[2].x[1] = 1;
+ x[2].y[2].x[2] = 2;
+ x[2].x[1] = 30;
+ x[2].x[2] = 40;
+end ArrayTests.ArrayModifiers8;
 ")})));
 
+ model C
+  Real x[2];
+ end C;
+ 
  model B
-  Real y[3];
+  C y[2];
+  Real x[2];
  end B;
  
- B b(each y={1,2});
+ B x[2](y(each x={1,2}), x={{10,20},{30,40}});
 end ArrayModifiers8;
 
 
+model ArrayModifiers9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayModifiers9",
+         description="Modifiers to arrays: arrays of composites: same name on different levels, attribute",
+         flatModel="
+fclass ArrayTests.ArrayModifiers9
+ Real x[1].y[1].x[1](start = 1);
+ Real x[1].y[1].x[2](start = 1);
+ Real x[1].y[2].x[1](start = 1);
+ Real x[1].y[2].x[2](start = 1);
+ Real x[1].x[1](start = 10);
+ Real x[1].x[2](start = 20);
+ Real x[2].y[1].x[1](start = 1);
+ Real x[2].y[1].x[2](start = 1);
+ Real x[2].y[2].x[1](start = 1);
+ Real x[2].y[2].x[2](start = 1);
+ Real x[2].x[1](start = 30);
+ Real x[2].x[2](start = 40);
+equation
+ x[1].y[1].x[1] = 0;
+ x[1].y[1].x[2] = 0;
+ x[1].y[2].x[1] = 0;
+ x[1].y[2].x[2] = 0;
+ x[1].x[1] = 0;
+ x[1].x[2] = 0;
+ x[2].y[1].x[1] = 0;
+ x[2].y[1].x[2] = 0;
+ x[2].y[2].x[1] = 0;
+ x[2].y[2].x[2] = 0;
+ x[2].x[1] = 0;
+ x[2].x[2] = 0;
+end ArrayTests.ArrayModifiers9;
+")})));
 
+ model C
+  Real x[2] = zeros(2);
+ end C;
+ 
+ model B
+  C y[2];
+  Real x[2] = zeros(2);
+ end B;
+ 
+ B x[2](y(x(each start=1)), x(start={{10,20},{30,40}}));
+end ArrayModifiers9;
+
+
+model ArrayModifiers10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayModifiers10",
+         description="Modifiers to arrays: arrays of composites: 3 levels deep, literal modifier on outer",
+         flatModel="
+fclass ArrayTests.ArrayModifiers10
+ Real x[1].y[1].z[1];
+ Real x[1].y[1].z[2];
+ Real x[1].y[1].z[3];
+ Real x[1].y[2].z[1];
+ Real x[1].y[2].z[2];
+ Real x[1].y[2].z[3];
+ Real x[2].y[1].z[1];
+ Real x[2].y[1].z[2];
+ Real x[2].y[1].z[3];
+ Real x[2].y[2].z[1];
+ Real x[2].y[2].z[2];
+ Real x[2].y[2].z[3];
+equation
+ x[1].y[1].z[1] = 1;
+ x[1].y[1].z[2] = 2;
+ x[1].y[1].z[3] = 3;
+ x[1].y[2].z[1] = 4;
+ x[1].y[2].z[2] = 5;
+ x[1].y[2].z[3] = 6;
+ x[2].y[1].z[1] = 7;
+ x[2].y[1].z[2] = 8;
+ x[2].y[1].z[3] = 9;
+ x[2].y[2].z[1] = 10;
+ x[2].y[2].z[2] = 11;
+ x[2].y[2].z[3] = 12;
+end ArrayTests.ArrayModifiers10;
+")})));
+
+ model C
+  Real z[3];
+ end C;
+ 
+ model B
+  C y[2];
+ end B;
+ 
+ B x[2](y(z={{{1,2,3},{4,5,6}},{{7,8,9},{10,11,12}}}));
+end ArrayModifiers10;
+
+
+model ArrayModifiers11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayModifiers11",
+         description="Modifiers to arrays: arrays of composites: 3 levels deep, literal attribute on outer",
+         flatModel="
+fclass ArrayTests.ArrayModifiers11
+ Real x[1].y[1].z[1](start = 1);
+ Real x[1].y[1].z[2](start = 2);
+ Real x[1].y[1].z[3](start = 3);
+ Real x[1].y[2].z[1](start = 4);
+ Real x[1].y[2].z[2](start = 5);
+ Real x[1].y[2].z[3](start = 6);
+ Real x[2].y[1].z[1](start = 7);
+ Real x[2].y[1].z[2](start = 8);
+ Real x[2].y[1].z[3](start = 9);
+ Real x[2].y[2].z[1](start = 10);
+ Real x[2].y[2].z[2](start = 11);
+ Real x[2].y[2].z[3](start = 12);
+equation
+ x[1].y[1].z[1] = 0;
+ x[1].y[1].z[2] = 0;
+ x[1].y[1].z[3] = 0;
+ x[1].y[2].z[1] = 0;
+ x[1].y[2].z[2] = 0;
+ x[1].y[2].z[3] = 0;
+ x[2].y[1].z[1] = 0;
+ x[2].y[1].z[2] = 0;
+ x[2].y[1].z[3] = 0;
+ x[2].y[2].z[1] = 0;
+ x[2].y[2].z[2] = 0;
+ x[2].y[2].z[3] = 0;
+end ArrayTests.ArrayModifiers11;
+")})));
+
+ model C
+  Real z[3] = zeros(3);
+ end C;
+ 
+ model B
+  C y[2];
+ end B;
+ 
+ B x[2](y(z(start={{{1,2,3},{4,5,6}},{{7,8,9},{10,11,12}}})));
+end ArrayModifiers11;
+
+
+model ArrayModifiers12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ArrayModifiers12",
+         description="Modifiers to arrays: arrays of composites: 3 levels deep, component modifier on outer",
+         flatModel="
+fclass ArrayTests.ArrayModifiers12
+ Real xa[1].yb[1].zc[3] = ya[1,1,:];
+ Real xa[1].yb[2].zc[3] = ya[1,2,:];
+ Real xa[2].yb[1].zc[3] = ya[2,1,:];
+ Real xa[2].yb[2].zc[3] = ya[2,2,:];
+ Real ya[2,2,3] = {{{1,2,3},{4,5,6}},{{7,8,9},{10,11,12}}};
+end ArrayTests.ArrayModifiers12;
+")})));
+
+ model C
+  Real zc[3];
+ end C;
+ 
+ model B
+  C yb[2];
+ end B;
+ 
+ B xa[2](yb(zc=ya));
+ Real ya[2,2,3] = {{{1,2,3},{4,5,6}},{{7,8,9},{10,11,12}}};
+end ArrayModifiers12;
+
+
+model ArrayModifiers13
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayModifiers13",
+         description="Modifiers to arrays: arrays of composites: 3 levels deep, attribute modifier on outer",
+         flatModel="
+fclass ArrayTests.ArrayModifiers13
+ Real xa[1].yb[1].zc[1](start = 1.0);
+ Real xa[1].yb[1].zc[2](start = 2.0);
+ Real xa[1].yb[1].zc[3](start = 3.0);
+ Real xa[1].yb[2].zc[1](start = 4.0);
+ Real xa[1].yb[2].zc[2](start = 5.0);
+ Real xa[1].yb[2].zc[3](start = 6.0);
+ Real xa[2].yb[1].zc[1](start = 7.0);
+ Real xa[2].yb[1].zc[2](start = 8.0);
+ Real xa[2].yb[1].zc[3](start = 9.0);
+ Real xa[2].yb[2].zc[1](start = 10.0);
+ Real xa[2].yb[2].zc[2](start = 11.0);
+ Real xa[2].yb[2].zc[3](start = 12.0);
+ constant Real za[1,1,1] = 1;
+ constant Real za[1,1,2] = 2;
+ constant Real za[1,1,3] = 3;
+ constant Real za[1,2,1] = 4;
+ constant Real za[1,2,2] = 5;
+ constant Real za[1,2,3] = 6;
+ constant Real za[2,1,1] = 7;
+ constant Real za[2,1,2] = 8;
+ constant Real za[2,1,3] = 9;
+ constant Real za[2,2,1] = 10;
+ constant Real za[2,2,2] = 11;
+ constant Real za[2,2,3] = 12;
+equation
+ xa[1].yb[1].zc[1] = 0;
+ xa[1].yb[1].zc[2] = 0;
+ xa[1].yb[1].zc[3] = 0;
+ xa[1].yb[2].zc[1] = 0;
+ xa[1].yb[2].zc[2] = 0;
+ xa[1].yb[2].zc[3] = 0;
+ xa[2].yb[1].zc[1] = 0;
+ xa[2].yb[1].zc[2] = 0;
+ xa[2].yb[1].zc[3] = 0;
+ xa[2].yb[2].zc[1] = 0;
+ xa[2].yb[2].zc[2] = 0;
+ xa[2].yb[2].zc[3] = 0;
+end ArrayTests.ArrayModifiers13;
+")})));
+
+ model C
+  Real zc[3] = zeros(3);
+ end C;
+ 
+ model B
+  C yb[2];
+ end B;
+ 
+ B xa[2](yb(zc(start=za)));
+ constant Real za[2,2,3] = {{{1,2,3},{4,5,6}},{{7,8,9},{10,11,12}}};
+end ArrayModifiers13;
+
+
+model ArrayModifiers14
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayModifiers14",
+         description="Modifiers to arrays: arrays of composites: array expression modifier on outer level",
+         flatModel="
+fclass ArrayTests.ArrayModifiers14
+ Real x[1].yb[1];
+ Real x[1].yb[2];
+ Real x[2].yb[1];
+ Real x[2].yb[2];
+equation
+ x[1].yb[1] = ( 1 ) * ( 10 ) + ( 2 ) * ( 30 );
+ x[1].yb[2] = ( 1 ) * ( 20 ) + ( 2 ) * ( 40 );
+ x[2].yb[1] = ( 3 ) * ( 10 ) + ( 4 ) * ( 30 );
+ x[2].yb[2] = ( 3 ) * ( 20 ) + ( 4 ) * ( 40 );
+end ArrayTests.ArrayModifiers14;
+")})));
+
+ model B
+  Real yb[2];
+ end B;
+ 
+ B x[2](yb={{1,2},{3,4}}*{{10,20},{30,40}});
+end ArrayModifiers14;
+
+
+model ArrayModifiers15
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayModifiers15",
+         description="Modifiers to arrays: arrays of composites: array expression modifier on outer level",
+         flatModel="
+fclass ArrayTests.ArrayModifiers15
+ Real x[1].yb[1];
+ Real x[1].yb[2];
+ Real x[2].yb[1];
+ Real x[2].yb[2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+ Real z[1,1];
+ Real z[1,2];
+ Real z[2,1];
+ Real z[2,2];
+equation
+ x[1].yb[1] = ( y[1,1] ) * ( z[1,1] ) + ( y[1,2] ) * ( z[2,1] );
+ x[1].yb[2] = ( y[1,1] ) * ( z[1,2] ) + ( y[1,2] ) * ( z[2,2] );
+ x[2].yb[1] = ( y[2,1] ) * ( z[1,1] ) + ( y[2,2] ) * ( z[2,1] );
+ x[2].yb[2] = ( y[2,1] ) * ( z[1,2] ) + ( y[2,2] ) * ( z[2,2] );
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+ z[1,1] = 10;
+ z[1,2] = 20;
+ z[2,1] = 30;
+ z[2,2] = 40;
+end ArrayTests.ArrayModifiers15;
+")})));
+
+ model B
+  Real yb[2];
+ end B;
+ 
+ B x[2](yb=y*z);
+ Real y[2,2] = {{1,2},{3,4}};
+ Real z[2,2] = {{10,20},{30,40}};
+end ArrayModifiers15;
+
+
+model ArrayModifiers16
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers16",
+         description="Modifiers to arrays: arrays of composites: bad size for 'each'",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1176, column 8:
+  Array size mismatch in declaration of each x, size of declaration is [2] and size of binding expression is []
+")})));
+
+ model C
+  Real x[2];
+ end C;
+ 
+ model B
+  C y[2];
+ end B;
+ 
+ B x[2](y(each x=1));
+end ArrayModifiers16;
+
+
+model ArrayModifiers17
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers17",
+         description="Modifiers to arrays: arrays of composites: bad size for 'each'",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1200, column 8:
+  Array size mismatch in declaration of each x, size of declaration is [2] and size of binding expression is [3]
+")})));
+
+ model C
+  Real x[2];
+ end C;
+ 
+ model B
+  C y[2];
+ end B;
+ 
+ B x[2](y(each x={1,2,3}));
+end ArrayModifiers17;
+
+
+model ArrayModifiers18
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers18",
+         description="Modifiers to arrays: arrays of composites: non-scalar attribute",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1231, column 13:
+  The attribute start is declared 'each' and the binding expression is not scalar
+")})));
+
+ model C
+  Real x[2] = zeros(2);
+ end C;
+ 
+ model B
+  C y[2];
+ end B;
+ 
+ B x[2](y(x(each start={1,2})));
+end ArrayModifiers18;
+
+
+model ArrayModifiers19
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayModifiers19",
+         description="Modifiers to arrays: arrays of composites: example from MLS v3.1 section 7.2.5",
+         flatModel="
+fclass ArrayTests.ArrayModifiers19
+ parameter Real c[1].a[1] = 1 /* 1.0 */;
+ parameter Real c[1].a[2] = 2 /* 2.0 */;
+ parameter Real c[1].a[3] = 3 /* 3.0 */;
+ parameter Real c[1].d = 1 /* 1.0 */;
+ parameter Real c[2].a[1] = 1 /* 1.0 */;
+ parameter Real c[2].a[2] = 2 /* 2.0 */;
+ parameter Real c[2].a[3] = 3 /* 3.0 */;
+ parameter Real c[2].d = 2 /* 2.0 */;
+ parameter Real c[3].a[1] = 1 /* 1.0 */;
+ parameter Real c[3].a[2] = 2 /* 2.0 */;
+ parameter Real c[3].a[3] = 3 /* 3.0 */;
+ parameter Real c[3].d = 3 /* 3.0 */;
+ parameter Real c[4].a[1] = 1 /* 1.0 */;
+ parameter Real c[4].a[2] = 2 /* 2.0 */;
+ parameter Real c[4].a[3] = 3 /* 3.0 */;
+ parameter Real c[4].d = 4 /* 4.0 */;
+ parameter Real c[5].a[1] = 1 /* 1.0 */;
+ parameter Real c[5].a[2] = 2 /* 2.0 */;
+ parameter Real c[5].a[3] = 3 /* 3.0 */;
+ parameter Real c[5].d = 5 /* 5.0 */;
+end ArrayTests.ArrayModifiers19;
+")})));
+
+ model C
+  parameter Real a [3];
+  parameter Real d;
+ end C;
+ 
+ C c[5](each a ={1,2,3}, d={1,2,3,4,5});
+end ArrayModifiers19;
+
+
+model ArrayModifiers20
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers20",
+         description="Modifiers to arrays: arrays of composites: wrong size of binding exp",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1248, column 8:
+  Array size mismatch in declaration of z, size of declaration is [2, 2, 3] and size of binding expression is [2, 3, 2]
+")})));
+
+ model C
+  Real z[3];
+ end C;
+ 
+ model B
+  C y[2];
+ end B;
+ 
+ B x[2](y(z={{{1,2},{3,4},{5,6}},{{7,8},{9,10},{11,12}}}));
+end ArrayModifiers20;
+
+
+model ArrayModifiers21
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers21",
+         description="Modifiers to arrays: arrays of composites: wrong size of attribute",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1279, column 12:
+  Array size mismatch for the attribute start, size of declaration is [2, 2, 3] and size of start expression is [2, 3, 2]
+")})));
+
+ model C
+  Real z[3] = zeros(3);
+ end C;
+ 
+ model B
+  C y[2];
+ end B;
+ 
+ B x[2](y(z(start={{{1,2},{3,4},{5,6}},{{7,8},{9,10},{11,12}}})));
+end ArrayModifiers21;
+
+
+model ArrayModifiers22
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers22",
+         description="Modifiers to arrays: arrays of composites: wrong size of binding exp (through access)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1296, column 8:
+  Array size mismatch in declaration of zc, size of declaration is [2, 2, 3] and size of binding expression is [2, 3, 2]
+")})));
+
+ model C
+  Real zc[3];
+ end C;
+ 
+ model B
+  C yb[2];
+ end B;
+ 
+ B xa[2](yb(zc=ya));
+ Real ya[2,3,2] = {{{1,2},{3,4},{5,6}},{{7,8},{9,10},{11,12}}};
+end ArrayModifiers22;
+
+
+model ArrayModifiers23
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers23",
+         description="Modifiers to arrays: arrays of composites: wrong size of attribute (through access)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1328, column 15:
+  Array size mismatch for the attribute start, size of declaration is [2, 2, 3] and size of start expression is [2, 3, 2]
+")})));
+
+ model C
+  Real zc[3] = zeros(3);
+ end C;
+ 
+ model B
+  C yb[2];
+ end B;
+ 
+ B xa[2](yb(zc(start=za)));
+ constant Real za[2,3,2] = {{{1,2},{3,4},{5,6}},{{7,8},{9,10},{11,12}}};
+end ArrayModifiers23;
+
+
+model ArrayModifiers24
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers24",
+         description="Modifiers to arrays: arrays of composites: wrong size of binding exp (through expression)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1346, column 8:
+  Array size mismatch in declaration of yb, size of declaration is [2, 2] and size of binding expression is [2, 3]
+")})));
+
+ model B
+  Real yb[2];
+ end B;
+ 
+ B x[2](yb={{1,2},{3,4}}*{{10,20,30},{40,50,60}});
+end ArrayModifiers24;
+
+
+model ArrayModifiers25
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers25",
+         description="Modifiers to arrays: arrays of composites: wrong size of binding exp (through expression with accesses)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1366, column 8:
+  Array size mismatch in declaration of yb, size of declaration is [2, 2] and size of binding expression is [2, 3]
+")})));
+
+ model B
+  Real yb[2];
+ end B;
+ 
+ B x[2](yb=y*z);
+ Real y[2,2] = {{1,2},{3,4}};
+ Real z[2,3] = {{10,20,30},{40,50,60}};
+end ArrayModifiers25;
+
+
+model ArrayModifiers26
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayModifiers26",
+         description="Modifiers to arrays: scalarisation of accesses with colon subscrpt",
+         flatModel="
+fclass ArrayTests.ArrayModifiers26
+ Real x1[1,1];
+ Real x1[1,2];
+ Real x1[1,3];
+ Real x1[2,1];
+ Real x1[2,2];
+ Real x1[2,3];
+ Real x2[1,1];
+ Real x2[1,2];
+ Real x2[1,3];
+ Real x2[2,1];
+ Real x2[2,2];
+ Real x2[2,3];
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,1,3];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[1,2,3];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,1,3];
+ Real y[2,2,1];
+ Real y[2,2,2];
+ Real y[2,2,3];
+equation
+ x1[1,1] = y[1,1,1] .+ 1;
+ x1[1,2] = y[1,1,2] .+ 1;
+ x1[1,3] = y[1,1,3] .+ 1;
+ x1[2,1] = y[1,2,1] .+ 1;
+ x1[2,2] = y[1,2,2] .+ 1;
+ x1[2,3] = y[1,2,3] .+ 1;
+ x2[1,1] = y[2,1,1] .+ 1;
+ x2[1,2] = y[2,1,2] .+ 1;
+ x2[1,3] = y[2,1,3] .+ 1;
+ x2[2,1] = y[2,2,1] .+ 1;
+ x2[2,2] = y[2,2,2] .+ 1;
+ x2[2,3] = y[2,2,3] .+ 1;
+ y[1,1,1] = 1;
+ y[1,1,2] = 2;
+ y[1,1,3] = 3;
+ y[1,2,1] = 4;
+ y[1,2,2] = 5;
+ y[1,2,3] = 6;
+ y[2,1,1] = 7;
+ y[2,1,2] = 8;
+ y[2,1,3] = 9;
+ y[2,2,1] = 10;
+ y[2,2,2] = 11;
+ y[2,2,3] = 12;
+end ArrayTests.ArrayModifiers26;
+")})));
+
+ Real x1[2,3] = y[1,:,:] .+ 1;
+ Real x2[2,3] = y[2,:,:] .+ 1;
+ Real y[2,2,3] = {{{1,2,3},{4,5,6}},{{7,8,9},{10,11,12}}};
+end ArrayModifiers26;
+
+
+model ArrayModifiers27
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayModifiers27",
+         description="Modifiers to arrays: arrays of composites: array expression attribute on outer level",
+         flatModel="
+fclass ArrayTests.ArrayModifiers27
+ Real x[1].yb[1](start = ( 1 ) * ( 10 ) + ( 2 ) * ( 30 ));
+ Real x[1].yb[2](start = ( 1 ) * ( 20 ) + ( 2 ) * ( 40 ));
+ Real x[2].yb[1](start = ( 3 ) * ( 10 ) + ( 4 ) * ( 30 ));
+ Real x[2].yb[2](start = ( 3 ) * ( 20 ) + ( 4 ) * ( 40 ));
+end ArrayTests.ArrayModifiers27;
+")})));
+
+ model B
+  Real yb[2];
+ end B;
+ 
+ B x[2](yb(start={{1,2},{3,4}}*{{10,20},{30,40}}));
+end ArrayModifiers27;
+
+
+model ArrayModifiers28
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayModifiers28",
+         description="Modifiers to arrays: arrays of composites: array expression (with constants) attribute on outer level",
+         flatModel="
+fclass ArrayTests.ArrayModifiers28
+ Real x[1].yb[1](start = ( 1.0 ) * ( 10.0 ) + ( 2.0 ) * ( 30.0 ));
+ Real x[1].yb[2](start = ( 1.0 ) * ( 20.0 ) + ( 2.0 ) * ( 40.0 ));
+ Real x[2].yb[1](start = ( 3.0 ) * ( 10.0 ) + ( 4.0 ) * ( 30.0 ));
+ Real x[2].yb[2](start = ( 3.0 ) * ( 20.0 ) + ( 4.0 ) * ( 40.0 ));
+ constant Real y[1,1] = 1;
+ constant Real y[1,2] = 2;
+ constant Real y[2,1] = 3;
+ constant Real y[2,2] = 4;
+ constant Real z[1,1] = 10;
+ constant Real z[1,2] = 20;
+ constant Real z[2,1] = 30;
+ constant Real z[2,2] = 40;
+end ArrayTests.ArrayModifiers28;
+")})));
+
+ model B
+  Real yb[2];
+ end B;
+ 
+ B x[2](yb(start=y*z));
+ constant Real y[2,2] = {{1,2},{3,4}};
+ constant Real z[2,2] = {{10,20},{30,40}};
+end ArrayModifiers28;
+
+
+model ArrayModifiers29
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers29",
+         description="Modifiers to arrays: arrays of composites: wrong size of attribute (through expression)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1510, column 11:
+  Array size mismatch for the attribute start, size of declaration is [2, 2] and size of start expression is [2, 3]
+")})));
+
+ model B
+  Real yb[2];
+ end B;
+ 
+ B x[2](yb(start={{1,2},{3,4}}*{{10,20,30},{40,50,60}}));
+end ArrayModifiers29;
+
+
+model ArrayModifiers30
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers30",
+         description="Modifiers to arrays: arrays of composites: wrong size of attribute (through expression with accesses)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1530, column 11:
+  Array size mismatch for the attribute start, size of declaration is [2, 2] and size of start expression is [2, 3]
+")})));
+
+ model B
+  Real yb[2];
+ end B;
+ 
+ B x[2](yb(start=y*z));
+ constant Real y[2,2] = {{1,2},{3,4}};
+ constant Real z[2,3] = {{10,20,30},{40,50,60}};
+end ArrayModifiers30;
+
+
+model ArrayModifiers31
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayModifiers31",
+         description="Modifiers to arrays: arrays of composites: 3 levels deep, binding exp on inner",
+         flatModel="
+fclass ArrayTests.ArrayModifiers31
+ Real x[1].y[1].x[1];
+ Real x[1].y[1].x[2];
+ Real x[1].y[2].x[1];
+ Real x[1].y[2].x[2];
+ Real x[2].y[1].x[1];
+ Real x[2].y[1].x[2];
+ Real x[2].y[2].x[1];
+ Real x[2].y[2].x[2];
+equation
+ x[1].y[1].x[1] = 1;
+ x[1].y[1].x[2] = 2;
+ x[1].y[2].x[1] = 1;
+ x[1].y[2].x[2] = 2;
+ x[2].y[1].x[1] = 1;
+ x[2].y[1].x[2] = 2;
+ x[2].y[2].x[1] = 1;
+ x[2].y[2].x[2] = 2;
+end ArrayTests.ArrayModifiers31;
+")})));
+
+ model C
+  Real x[2] = {1,2};
+ end C;
+ 
+ model B
+  C y[2];
+ end B;
+ 
+ B x[2];
+end ArrayModifiers31;
+
+
+model ArrayModifiers32
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayModifiers32",
+         description="Modifiers to arrays: arrays of composites: 3 levels deep, attribute on inner",
+         flatModel="
+fclass ArrayTests.ArrayModifiers32
+ Real x[1].y[1].x[1](start = 1);
+ Real x[1].y[1].x[2](start = 2);
+ Real x[1].y[2].x[1](start = 1);
+ Real x[1].y[2].x[2](start = 2);
+ Real x[2].y[1].x[1](start = 1);
+ Real x[2].y[1].x[2](start = 2);
+ Real x[2].y[2].x[1](start = 1);
+ Real x[2].y[2].x[2](start = 2);
+end ArrayTests.ArrayModifiers32;
+")})));
+
+ model C
+  Real x[2](start={1,2});
+ end C;
+ 
+ model B
+  C y[2];
+ end B;
+ 
+ B x[2];
+end ArrayModifiers32;
+
+
+model ArrayModifiers33
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayModifiers33",
+         description="Modifiers to arrays: arrays of composites: 3 levels deep, binding exp on middle",
+         flatModel="
+fclass ArrayTests.ArrayModifiers33
+ Real x[1].y[1].x[1];
+ Real x[1].y[1].x[2];
+ Real x[1].y[2].x[1];
+ Real x[1].y[2].x[2];
+ Real x[2].y[1].x[1];
+ Real x[2].y[1].x[2];
+ Real x[2].y[2].x[1];
+ Real x[2].y[2].x[2];
+equation
+ x[1].y[1].x[1] = 1;
+ x[1].y[1].x[2] = 2;
+ x[1].y[2].x[1] = 3;
+ x[1].y[2].x[2] = 4;
+ x[2].y[1].x[1] = 1;
+ x[2].y[1].x[2] = 2;
+ x[2].y[2].x[1] = 3;
+ x[2].y[2].x[2] = 4;
+end ArrayTests.ArrayModifiers33;
+")})));
+
+ model C
+  Real x[2];
+ end C;
+ 
+ model B
+  C y[2](x={{1,2},{3,4}});
+ end B;
+ 
+ B x[2];
+end ArrayModifiers33;
+
+
+model ArrayModifiers34
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayModifiers34",
+         description="Modifiers to arrays: arrays of composites: 3 levels deep, attribute on middle",
+         flatModel="
+fclass ArrayTests.ArrayModifiers34
+ Real x[1].y[1].x[1](start = 1);
+ Real x[1].y[1].x[2](start = 2);
+ Real x[1].y[2].x[1](start = 3);
+ Real x[1].y[2].x[2](start = 4);
+ Real x[2].y[1].x[1](start = 1);
+ Real x[2].y[1].x[2](start = 2);
+ Real x[2].y[2].x[1](start = 3);
+ Real x[2].y[2].x[2](start = 4);
+end ArrayTests.ArrayModifiers34;
+")})));
+
+ model C
+  Real x[2];
+ end C;
+ 
+ model B
+  C y[2](x(start={{1,2},{3,4}}));
+ end B;
+ 
+ B x[2];
+end ArrayModifiers34;
+
+
+model ArrayModifiers35
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers35",
+         description="Modifiers to arrays: arrays of composites: 3 levels deep, binding exp on inner, wrong size",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1687, column 8:
+  Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [3]
+")})));
+
+ model C
+  Real x[2] = {1,2,3};
+ end C;
+ 
+ model B
+  C y[2];
+ end B;
+ 
+ B x[2];
+end ArrayModifiers35;
+
+
+model ArrayModifiers36
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers36",
+         description="Modifiers to arrays: arrays of composites: 3 levels deep, binding exp on inner, wrong size",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1711, column 8:
+  Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [2, 2]
+")})));
+
+ model C
+  Real x[2] = {{1,2},{3,4}};
+ end C;
+ 
+ model B
+  C y[2];
+ end B;
+ 
+ B x[2];
+end ArrayModifiers36;
+
+
+model ArrayModifiers37
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers37",
+         description="Modifiers to arrays: arrays of composites: 3 levels deep, binding exp on middle, wrong size",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1735, column 8:
+  Array size mismatch in declaration of x, size of declaration is [2, 2] and size of binding expression is [2]
+")})));
+
+ model C
+  Real x[2];
+ end C;
+ 
+ model B
+  C y[2](x = {1,2});
+ end B;
+ 
+ B x[2];
+end ArrayModifiers37;
+
+
+model ArrayModifiers38
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers38",
+         description="Modifiers to arrays: arrays of composites: 3 levels deep, binding exp on middle, wrong size",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1759, column 8:
+  Array size mismatch in declaration of x, size of declaration is [2, 2] and size of binding expression is [2, 3]
+")})));
+
+ model C
+  Real x[2];
+ end C;
+ 
+ model B
+  C y[2](x = {{1,2,3},{4,5,6}});
+ end B;
+ 
+ B x[2];
+end ArrayModifiers38;
+
+
+model ArrayModifiers39
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers39",
+         description="Modifiers to arrays: arrays of composites: 3 levels deep, binding exp on middle, wrong size",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1783, column 8:
+  Array size mismatch in declaration of x, size of declaration is [2, 2] and size of binding expression is [2, 2, 2]
+")})));
+
+ model C
+  Real x[2];
+ end C;
+ 
+ model B
+  C y[2](x = {{{1,2},{3,4}},{{5,6},{7,8}}});
+ end B;
+ 
+ B x[2];
+end ArrayModifiers39;
+
+
+model ArrayModifiers40
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers40",
+         description="Modifiers to arrays: arrays of composites: 3 levels deep, attribute on inner, wrong size",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1807, column 12:
+  Array size mismatch for the attribute start, size of declaration is [2] and size of start expression is [3]
+")})));
+
+ model C
+  Real x[2](start = {1,2,3});
+ end C;
+ 
+ model B
+  C y[2];
+ end B;
+ 
+ B x[2];
+end ArrayModifiers40;
+
+
+model ArrayModifiers41
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers41",
+         description="Modifiers to arrays: arrays of composites: 3 levels deep, attribute on inner, wrong size",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1831, column 12:
+  Array size mismatch for the attribute start, size of declaration is [2] and size of start expression is [2, 2]
+")})));
+
+ model C
+  Real x[2](start = {{1,2},{3,4}});
+ end C;
+ 
+ model B
+  C y[2];
+ end B;
+ 
+ B x[2];
+end ArrayModifiers41;
+
+
+model ArrayModifiers42
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers42",
+         description="Modifiers to arrays: arrays of composites: 3 levels deep, attribute on middle, wrong size",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1859, column 11:
+  Array size mismatch for the attribute start, size of declaration is [2, 2] and size of start expression is [2]
+")})));
+
+ model C
+  Real x[2];
+ end C;
+ 
+ model B
+  C y[2](x(start = {1,2}));
+ end B;
+ 
+ B x[2];
+end ArrayModifiers42;
+
+
+model ArrayModifiers43
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers43",
+         description="Modifiers to arrays: arrays of composites: 3 levels deep, attribute on middle, wrong size",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1883, column 11:
+  Array size mismatch for the attribute start, size of declaration is [2, 2] and size of start expression is [2, 3]
+")})));
+
+ model C
+  Real x[2];
+ end C;
+ 
+ model B
+  C y[2](x(start = {{1,2,3},{4,5,6}}));
+ end B;
+ 
+ B x[2];
+end ArrayModifiers43;
+
+
+model ArrayModifiers44
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayModifiers44",
+         description="Modifiers to arrays: arrays of composites: 3 levels deep, attribute on middle, wrong size",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1907, column 11:
+  Array size mismatch for the attribute start, size of declaration is [2, 2] and size of start expression is [2, 2, 2]
+")})));
+
+ model C
+  Real x[2];
+ end C;
+ 
+ model B
+  C y[2](x(start = {{{1,2},{3,4}},{{5,6},{7,8}}}));
+ end B;
+ 
+ B x[2];
+end ArrayModifiers44;
+
+
+
+/* ========== Array algebra ========== */
 
 model ArrayAdd1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

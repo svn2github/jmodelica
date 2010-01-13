@@ -175,6 +175,9 @@ aspect FlatTypeAnalysis {
 		}
 		
 	}
+
+	// TODO: Assumes same general functionality as zeros and ones - may need change for new subclasses
+	eq FInfArgsFunctionCall.type() = (size().length > 0) ? fIntegerArrayType(size()) : fUnknownType();
 	
 	eq FIdUseExp.type() = getFIdUse().type();
 	eq FInstAccessExp.type() = getInstAccess().type();
@@ -205,6 +208,73 @@ aspect FlatTypeAnalysis {
 	eq InstFunctionCall.type() = (!myOutputs().isEmpty()) ? myOutputs().get(0).type() : fUnknownType();
 	eq FMathematicalFunctionCall.type() = fRealScalarType();		
 			
+}
+
+aspect InstBindingType {
+	
+	/**
+	 * \brief Returns the type the binding expression should have.
+	 */
+	syn FPrimitiveType InstPrimitive.bindingType() {
+		InstNode decl = myInstValueMod().myInstNode();
+		if (myBindingExpHasEach() || decl == this) 
+			return type();
+		else
+			return expandBindingType(type(), decl);
+	}
+		
+	/**
+	 * \brief Constructs the type a specific attribute to this primitive should 
+	 *        have, given the scalar type of the attribute.
+	 */
+	syn FPrimitiveType InstPrimitive.attributeType(InstComponentModification icm) {
+		FPrimitiveType res = icm.type().arrayType(size());
+		InstNode decl = icm.myInstNode();
+		if (icm.getEach() || decl == this) 
+			return res;
+		else
+			return expandBindingType(res, decl);
+	}
+	
+	/**
+	 * \brief Add array dimensions for surrounding InstArrayComponentDecls to 
+	 *        type for binding expression.
+	 */
+	inh FPrimitiveType InstPrimitive.expandBindingType(FPrimitiveType type, InstNode node);
+	inh FPrimitiveType InstArrayComponentDecl.expandBindingType(FPrimitiveType type, InstNode node);
+	inh FPrimitiveType InstComposite.expandBindingType(FPrimitiveType type, InstNode node);
+	
+	eq InstClassDecl.getChild().expandBindingType(FPrimitiveType type, InstNode node) = type;
+	eq InstRoot.getChild().expandBindingType(FPrimitiveType type, InstNode node)      = type;
+	eq FlatRoot.getChild().expandBindingType(FPrimitiveType type, InstNode node)      = type;
+	eq InstArrayComponentDecl.getChild().expandBindingType(FPrimitiveType type, InstNode node) = 
+		expandBindingType(type.enclosingArrayType(childFSubscript(0).numIndices()), node);
+	eq InstComposite.getChild().expandBindingType(FPrimitiveType type, InstNode node) = 
+		(node == this) ? type : expandBindingType(type, node);
+	
+	inh boolean InstPrimitive.inArrayComponent();
+	eq InstClassDecl.getChild().inArrayComponent()          = false;
+	eq InstRoot.getChild().inArrayComponent()               = false;
+	eq FlatRoot.getChild().inArrayComponent()               = false;
+	eq InstArrayComponentDecl.getChild().inArrayComponent() = true;
+	
+	/**
+	 * \brief Add an enclosing dimension to type. 
+	 * 
+	 * Returns a FPrimitiveType that is a copy of this one, but with one 
+	 * more dimension, added first. If this type is scalar, an array type is 
+	 * created instead.
+	 */
+	syn FPrimitiveType FPrimitiveType.enclosingArrayType(int size);
+	eq FUnknownType.enclosingArrayType(int size)         = this;
+	eq FPrimitiveScalarType.enclosingArrayType(int size) = arrayType(new int[] { size });
+	eq FPrimitiveArrayType.enclosingArrayType(int size) {
+		int len = size().length;
+		int[] nSize = new int[len + 1];
+		System.arraycopy(getSize(), 0, nSize, 1, len);
+		nSize[0] = size;
+		return arrayType(nSize);
+	}
 }
 
 aspect FNumericPromotion {
@@ -307,24 +377,6 @@ aspect FTypeCompatibility {
 	eq FPrimitiveScalarType.dimensionCompatible(FPrimitiveType type) = type.isScalar();
 	eq FPrimitiveArrayType.dimensionCompatible(FPrimitiveType type) = 
 		Arrays.equals(size(), type.size());
-	
-	/**
-	 * \brief Check if sizes of this and type match for the last type.ndims() dimensions.
-	 */
-	syn boolean FPrimitiveType.dimensionCompatibleFromRight(FPrimitiveType type) = false;
-	eq FPrimitiveScalarType.dimensionCompatibleFromRight(FPrimitiveType type) = type.isScalar();
-	eq FPrimitiveArrayType.dimensionCompatibleFromRight(FPrimitiveType type) {
-		int n = type.ndims();
-		int dn = ndims() - n;
-		int[] s1 = size();
-		int[] s2 = type.size();
-		if (n > ndims())
-			return false;
-		for (int i = 0; i < n; i++)
-			if (s1[dn + i] != s2[i])
-				return false;
-		return true;
-	}
 	
 }
 

@@ -1403,6 +1403,13 @@ aspect FlattPrettyPrint {
 		str.print("}");
 	}
 	
+	public void FSubscriptedExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
+		p.toString(getFArraySubscripts(), str, indent, o);
+	}
+	
 	syn boolean FExp.isAddOrSub() = false;
 	eq FDotAddExp.isAddOrSub() = true;
 	eq FDotSubExp.isAddOrSub() = true;

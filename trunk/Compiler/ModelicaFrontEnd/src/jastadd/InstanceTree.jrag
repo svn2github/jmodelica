@@ -467,9 +467,95 @@ aspect InstanceTreeConstruction {
 	
 	syn lazy List InstNode.getDynamicClassNameList() = new List();
 	syn lazy List InstNode.getDynamicComponentNameList() = new List();
+	syn lazy List InstNode.getDynamicFExpList() = new List();
 	syn lazy List InstComponentRedeclare.getDynamicClassNameList() = new List();
 	syn lazy List InstConstrainingComponent.getDynamicClassNameList() = new List();
 	syn lazy List InstForIndex.getDynamicClassNameList() = new List();
+	
+	/**
+	 * \brief Dynamically places a class name in the tree under this InstNode.
+	 * 
+	 * @returns  the final version of the dynamically placed node.
+	 */
+	public InstAccess InstNode.dynamicClassName(InstAccess name) {
+		addDynamicClassName(name);
+		return getDynamicClassName(getNumDynamicClassName() - 1);
+	}
+	
+	
+	/**
+	 * \brief Dynamically places a component name in the tree under this InstNode.
+	 * 
+	 * @returns  the final version of the dynamically placed node.
+	 */
+	public InstAccess InstNode.dynamicComponentName(InstAccess name) {
+		addDynamicComponentName(name);
+		return getDynamicComponentName(getNumDynamicComponentName() - 1);
+	}
+	
+	
+	/**
+	 * \brief Dynamically places an FExp in the tree under this InstNode.
+	 * 
+	 * @returns  the final version of the dynamically placed node.
+	 */
+	public FExp InstNode.dynamicFExp(FExp exp) {
+		addDynamicFExp(exp);
+		return getDynamicFExp(getNumDynamicFExp() - 1);
+	}
+	
+	
+	/**
+	 * \brief Dynamically places an FExp in the tree under the closest 
+	 *        InstNode ancestor, if any.
+	 * 
+	 * @returns  the final version of the dynamically placed node.
+	 */
+	public FExp FExp.dynamicFExp(FExp exp) {
+		InstNode inst = ancestorInstNode();
+		return (inst == null) ? null : inst.dynamicFExp(exp);
+	}
+	
+	/**
+	 * \brief Find the closest InstNode ancestor.
+	 */
+	inh InstNode FExp.ancestorInstNode();
+	eq InstNode.getChild().ancestorInstNode() = this;
+	eq InstRoot.getChild().ancestorInstNode() = null;
+	eq FlatRoot.getChild().ancestorInstNode() = null;
+	
+	
+	/**
+	 * \brief Dynamically places a component name in the tree under this InstComponentRedeclare.
+	 * 
+	 * @returns  the final version of the dynamically placed node.
+	 */
+	public InstAccess InstComponentRedeclare.dynamicClassName(InstAccess name) {
+		addDynamicClassName(name);
+		return getDynamicClassName(getNumDynamicClassName() - 1);
+	}
+	
+	
+	/**
+	 * \brief Dynamically places a component name in the tree under this InstConstrainingComponent.
+	 * 
+	 * @returns  the final version of the dynamically placed node.
+	 */
+	public InstAccess InstConstrainingComponent.dynamicClassName(InstAccess name) {
+		addDynamicClassName(name);
+		return getDynamicClassName(getNumDynamicClassName() - 1);
+	}
+	
+	
+	/**
+	 * \brief Dynamically places a component name in the tree under this InstForIndex.
+	 * 
+	 * @returns  the final version of the dynamically placed node.
+	 */
+	public InstAccess InstForIndex.dynamicClassName(InstAccess name) {
+		addDynamicClassName(name);
+		return getDynamicClassName(getNumDynamicClassName() - 1);
+	}
 	
 	syn lazy List InstNode.getInstComponentDeclList() {
 		
@@ -484,28 +570,12 @@ aspect InstanceTreeConstruction {
 	}
 
 	eq InstComponentDecl.getInstComponentDeclList() {
-		
 		if (isArrayDecl()) { // Take care of array declarations separately
-			// Get the array indices
-			int[] ind = getFArraySubscripts().getFSubscript(0).arrayIndices();
-			// Create FArraySubscripts for remaining subscripts
-			/*
-			Opt subscript_opt = new Opt();
-			if (getFArraySubscripts().getNumFSubscript()>1) {
-				FArraySubscripts fas = new FArraySubscripts();
-				for (int i=1;i<getFArraySubscripts().getNumFSubscript();i++) {
-					fas.addFSubscript((FSubscript)getFArraySubscripts().
-							getFSubscript(i).fullCopy());
-				}
-				subscript_opt.setChild(fas,0);
-			}
-			*/
 			// Loop over indices and create new InstArrayComponentDecls
 			List l = new List();
-			for (int i=0;i<ind.length;i++) {
-				l.add(new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"),new Opt(),
-						getComponentDecl(),new Opt(),new Opt(),ind[i]));
-			}
+			for (int i : getFArraySubscripts().getFSubscript(0).arrayIndices()) 
+				l.add(new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"), new Opt(), 
+						getComponentDecl(), new Opt(), new Opt(), i));
 			return l;
 		} else { // If not array, then proceed as usual
 			return super.getInstComponentDeclList();
@@ -514,14 +584,12 @@ aspect InstanceTreeConstruction {
 
 	eq InstArrayComponentDecl.getInstComponentDeclList() {
 		FSubscript fs = childFSubscript(1);
-		if (fs!=null) {
-			int[] ind = fs.arrayIndices();
+		if (fs != null) {
 			// Loop over indices and create new InstArrayComponentDecls
 			List l = new List();
-			for (int i=0;i<ind.length;i++) {
-				l.add(new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"),new Opt(),
-						instComponentDecl().getComponentDecl(),new Opt(),new Opt(),ind[i]));
-			}
+			for (int i : fs.arrayIndices()) 
+				l.add(new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"), new Opt(), 
+						instComponentDecl(). getComponentDecl(), new Opt(), new Opt(), i));
 			return l;
 		} else {
 			List l = new List();
@@ -563,13 +631,11 @@ aspect InstanceTreeConstruction {
 	eq InstPrimitive.getInstComponentDeclList() {
 		
 		if (isArrayDecl()) { // Take care of array declarations separately
-			// Get the array indices
-			int[] ind = getFArraySubscripts().getFSubscript(0).arrayIndices();
 			// Loop over indices and create new InstArrayComponentDecls
 			List l = new List();
-			for (int i=0;i<ind.length;i++) {
-				l.add(new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"),new Opt(),
-					getComponentDecl(),new Opt(),new Opt(),ind[i]));
+			for (int i : getFArraySubscripts().getFSubscript(0).arrayIndices()) {
+				l.add(new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"), new Opt(), 
+					getComponentDecl(), new Opt(), new Opt(), i));
 			}
 			return l;
 		} else { // If not array, then proceed as usual
@@ -588,11 +654,9 @@ aspect InstanceTreeConstruction {
     	if (irc!=null) {
     		ComponentDecl replacingComp = irc.getComponentRedeclare().getComponentDecl();
     		// Add the new access to the InstComponentRedeclare node in order to get lookup in the right scope
-    		irc.addDynamicClassName(replacingComp.getClassName().newInstAccess());
-    		return irc.getDynamicClassName(irc.getNumDynamicClassName()-1).myInstClassDecl().newInstReplacingComponent(replacingComp,cd,irc);    	    		
+    		return irc.dynamicClassName(replacingComp.getClassName().newInstAccess()).myInstClassDecl().newInstReplacingComponent(replacingComp,cd,irc);    	    		
     	} else { 
-    		addDynamicClassName(cd.getClassName().newInstAccess());
-    		return getDynamicClassName(getNumDynamicClassName()-1).myInstClassDecl().newInstComponentDecl(cd);    	
+    		return dynamicClassName(cd.getClassName().newInstAccess()).myInstClassDecl().newInstComponentDecl(cd);    	
     	}
      }
         
@@ -834,16 +898,16 @@ aspect InstanceTreeConstruction {
 	    // TODO: Check if the component is redeclared. Really...?
     	// -> Yes: Create an InstReplacingComponent component
     	// -> No: Create an InstComponent 
-	   	addDynamicClassName(getComponentRedeclare().getComponentDecl().getClassName().newInstAccess());
-    	return getDynamicClassName(getNumDynamicClassName()-1).myInstClassDecl().newInstComponentDecl(getComponentRedeclare().getComponentDecl());
+		InstAccess name = dynamicClassName(getComponentRedeclare().getComponentDecl().getClassName().newInstAccess());
+    	return name.myInstClassDecl().newInstComponentDecl(getComponentRedeclare().getComponentDecl());
 	}
 
 	syn lazy InstComponentDecl InstReplacingComposite.getOriginalInstComponent()  {
 		// TODO: Check if the component is redeclared. Really...?
     	// -> Yes: Create an InstReplacingComponent component
     	// -> No: Create an InstComponent 
-	   	addDynamicClassName(getOriginalDecl().getClassName().newInstAccess());
-    	return getDynamicClassName(getNumDynamicClassName()-1).myInstClassDecl().newInstComponentDecl(getOriginalDecl());
+		InstAccess name = dynamicClassName(getOriginalDecl().getClassName().newInstAccess());
+    	return name.myInstClassDecl().newInstComponentDecl(getOriginalDecl());
 	}
 
 
@@ -950,6 +1014,7 @@ aspect InstImportClauses {
 aspect InstanceAST_API {
 	syn boolean InstNode.nameScope() = false;
 	eq InstComponentDecl.nameScope() = true;
+	eq InstArrayComponentDecl.nameScope() = false;
     eq InstBaseClassDecl.nameScope() = true;
     
     syn String InstNode.name() = "";

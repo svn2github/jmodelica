@@ -21,7 +21,8 @@ abstract InstNode ::= /InstComponentDecl*/
                       /FAbstractEquation*/ 
                       /FQName/ 
                       /DynamicClassName:InstAccess*/ 
-                      /DynamicComponentName:InstAccess*/; 
+                      /DynamicComponentName:InstAccess*/ 
+                      /DynamicFExp:FExp*/;
 abstract InstRoot : InstNode ::= ;
 InstClassRoot : InstRoot ::= <ClassDecl:ClassDecl>;
 //InstFullClassDeclRoot :InstRoot ::= InstFullClassDecl;
@@ -70,7 +71,7 @@ InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl> /
 // redeclaration of classes.
 abstract InstComponentDecl : InstNode ::= ClassName:InstAccess [FArraySubscripts] <ComponentDecl:ComponentDecl> [InstModification] [InstConstraining];
 InstComposite : InstComponentDecl;
-InstPrimitive : InstComponentDecl;
+InstPrimitive : InstComponentDecl ::= /BindingFExp:FExp/;
 InstBuiltIn : InstPrimitive;
 UnknownInstComponentDecl : InstComponentDecl;
 

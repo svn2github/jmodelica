@@ -131,7 +131,7 @@ aspect Flattening {
 	
 	public void InstPrimitive.flattenInFunction(FFunctionDecl ffd) {
 		if (!getComponentDecl().isConstant()) {
-			FExp e = myBindingFExp();
+			FExp e = flattenBindingFExp();
 			Opt eo = (e == null) ? new Opt() : new Opt(e);
 			FQName fqn = new FQName(getFQName());
 			FFunctionVariable ffv = new FFunctionVariable(new Opt(), type(), eo, fqn);
@@ -168,14 +168,19 @@ aspect Flattening {
 	
 	syn FVariable InstPrimitive.createFVariable() {
 		//System.out.println("**  " + name() + " = " + ceval());
-		FExp e = myBindingFExp();
-		if (myBindingExpHasEach()) 
-			e = new FEachExp(e);
+		FExp e = flattenBindingFExp();
 		List<FAttribute> attr = new List<FAttribute>();
+		AttributeExpRetriever mut = new AttributeExpRetriever() {
+			public FExp retrieve(InstValueModification im, boolean isEach) { 
+				FExp exp = super.retrieve(im, isEach);
+				return isEach || im.myInstNode() == InstPrimitive.this ? exp : 
+					exp.dynamicFExp(splitBindingFExp(exp, im.myInstNode())); 
+			}
+		};
 		for (InstModification im : totalMergedEnvironment()) {
 //			System.out.println("createFVariable: " + qualifiedName() + ": " +
 //					im.prettyPrint("") + " " + im.myInstNode().getFQNamePrefix().name());		
-			im.collectAttributes(attr,im.myInstNode().getFQNamePrefix());
+			im.collectAttributes(attr,im.myInstNode().getFQNamePrefix(), mut);
 		}
 		// Add default values for parameters from primitive class
 		// TODO: Maybe this needs a more generalized solution? Or to be moved to instantiation step?
@@ -247,20 +252,111 @@ aspect Flattening {
 	 * 
 	 * Retrieve the binding expression of an InstPrimitive node.
 	 */
-	syn FExp InstPrimitive.myBindingInstExp() {
-		return hasInstValueMod() ? myInstValueMod().getFExp() : null;
-	}
+	syn FExp InstPrimitive.myBindingInstExp() = hasInstValueMod() ? myInstValueMod().getFExp() : null;
 
-	syn lazy FExp InstPrimitive.myBindingFExp() {
-        //System.out.println("In file: " + fileName() + " at line: " + beginLine() + ": " + prettyPrint(""));
+
+	syn lazy FExp InstPrimitive.getBindingFExp() {
+		//System.out.println("In file: " + fileName() + " at line: " + beginLine() + ": " + prettyPrint(""));
 		if (hasInstValueMod()) {
 			InstValueModification im = myInstValueMod();
-			FExp fe = im.getFExp().flatten(im.myInstNode().getFQNamePrefix());
-			fe.setParent(this);  // TODO: This seems like an ugly hack. Is there no better way?
-			return fe;
+			FExp fe = im.getFExp();
+			if (!im.hasEach() && im.myInstNode() != this)
+				fe = splitBindingFExp(fe, im.myInstNode());
+			return (FExp) fe.unboundCopy();
 		}
 		return null;
 	}
+	
+	public FExp InstPrimitive.flattenBindingFExp() {
+		if (hasInstValueMod()) {
+			InstValueModification im = myInstValueMod();
+			return getBindingFExp().flatten(im.myInstNode().getFQNamePrefix());
+		}
+		return null;
+	}
+		
+	
+	/**
+	 * \brief Extract the part of a binding array expression that refers to this primitive.
+	 * 
+	 * Will not create new nodes unless necessary.
+	 * 
+	 * @param fe    the expression to split
+	 * @param node  the node where the binding expression was declared 
+	 */
+	inh FExp InstPrimitive.splitBindingFExp(FExp fe, InstNode node);
+	inh FExp InstArrayComponentDecl.splitBindingFExp(FExp fe, InstNode node);
+	inh FExp InstComposite.splitBindingFExp(FExp fe, InstNode node);
+	
+	eq InstClassDecl.getChild().splitBindingFExp(FExp fe, InstNode node) = fe;
+	eq InstRoot.getChild().splitBindingFExp(FExp fe, InstNode node)      = fe;
+	eq FlatRoot.getChild().splitBindingFExp(FExp fe, InstNode node)      = fe;
+	eq InstArrayComponentDecl.getChild().splitBindingFExp(FExp fe, InstNode node) =
+		splitBindingFExp(fe, node).splitArrayExp(getIndex());
+	eq InstComposite.getChild().splitBindingFExp(FExp fe, InstNode node) =
+		(node == this) ? fe : splitBindingFExp(fe, node);
+	
+	/**
+	 * \brief Return the expression corresponding to the given index in this array expression. 
+	 * 
+	 * Will not create new nodes unless necessary.
+	 */
+	syn FExp FExp.splitArrayExp(int index)     = new FSubscriptedExp((FExp) unboundCopy(), index);
+	eq FArray.splitArrayExp(int index)         = getFExp(index - 1);
+	eq FIdUseExp.splitArrayExp(int index)      = createNode(getFIdUse().splitArrayAccess(index));
+	eq FInstAccessExp.splitArrayExp(int index) = new FInstAccessExp(getInstAccess().splitArrayAccess(index));
+	eq InstDerExp.splitArrayExp(int index)     = new InstDerExp(getFExp().splitArrayExp(index));
+	eq FSubscriptedExp.splitArrayExp(int index) {
+		FSubscriptedExp exp = (FSubscriptedExp) unboundCopy();
+		exp.getFArraySubscripts().specifyNext(index);
+		return exp;
+	}
+	// TODO: consider if expressions
+	
+	/**
+	 * \brief Return a new access that has index instead of the first array subscript 
+	 *        with ndims() > 1.
+	 * 
+	 * If access has no subscripts, a set of subscripts with all colons is first created.
+	 */
+	syn FIdUse FIdUse.splitArrayAccess(int index) {
+		FIdUse use = (FIdUse) fullCopy();
+		if (hasFArraySubscripts()) {
+			use.getFArraySubscripts().specifyNext(index);
+		} else {
+			FArraySubscripts fas = FArraySubscripts.createFColonSubscripts(ndims());
+			use.getFQName().lastFQNamePart().setFArraySubscripts(fas);
+			fas.specifyNext(index);
+		}
+		return use;
+	}
+	syn InstAccess InstAccess.splitArrayAccess(int index) = this;
+	eq InstDot.splitArrayAccess(int index) = 
+		new InstDot(getID(), (InstAccess) getLeft().fullCopy(), getRight().splitArrayAccess(index));
+	eq InstArrayAccess.splitArrayAccess(int index) {
+		InstArrayAccess access = (InstArrayAccess) fullCopy();
+		if (hasFArraySubscripts()) {
+			access.getFArraySubscripts().specifyNext(index);
+		} else {
+			FArraySubscripts fas = FArraySubscripts.createFColonSubscripts(ndims());
+			access.setFArraySubscripts(fas);
+			fas.specifyNext(index);
+		}
+		return access;
+	}
+	
+	public void FArraySubscripts.specifyNext(int index) {
+		for (int i = 0; i < getNumFSubscript(); i++) {
+			if (getFSubscript(i).ndims() > 0) {
+				setFSubscript(getFSubscript(i).specify(index), i);
+				return;
+			}
+		}
+	}
+	
+	syn FSubscript FSubscript.specify(int index);
+	eq FExpSubscript.specify(int index)   = this; // TODO: add array index to expression
+	eq FColonSubscript.specify(int index) = new FExpSubscript(new FIntegerLitExp(index));
 
 	// TODO: The names here needs to be clearer. (Down to and including getInstValueMod().)
 	/**
@@ -327,37 +423,56 @@ aspect Flattening {
 	eq InstValueModification.getInstValueMod()    = this;
 	eq InstCompleteModification.getInstValueMod() = getInstValueModification();
 	
+	/**
+	 * \brief Delegate object that retrieves the FExp of an InstValueModification, and 
+	 *        possibly alters it.
+	 * 
+	 * Default implementation only retrieves the expression.
+	 */
+	public class AttributeExpRetriever {
+		public FExp retrieve(InstValueModification im, boolean isEach) { return im.instValueMod(); }
+		public static final AttributeExpRetriever DEFAULT = new AttributeExpRetriever();
+	}
 
-	public void ASTNode.collectAttributes(List<FAttribute> attrs, FQName prefix) {
-		for (int i=0;i<getNumChild();i++)
-			getChild(i).collectAttributes(attrs, prefix);
+	public void ASTNode.collectAttributes(List<FAttribute> attrs, FQName prefix, AttributeExpRetriever aer) {
+		for (int i = 0; i < getNumChild(); i++)
+			getChild(i).collectAttributes(attrs, prefix, aer);
 	}
 
 	// This is just to avoid collecting ComponentModification:s that resides inside
 	// ClassRedeclares.
-    public void InstClassRedeclare.collectAttributes(List<FAttribute> attrs, FQName prefix) {}
+    public void InstClassRedeclare.collectAttributes(List<FAttribute> attrs, FQName prefix, AttributeExpRetriever aer) {}
 
-	public void InstComponentModification.collectAttributes(List<FAttribute> attrs, FQName prefix) {
+	public void InstComponentModification.collectAttributes(List<FAttribute> attrs, FQName prefix, AttributeExpRetriever aer) {
 		if (hasInstModification()) {
 			FQName fqn = new FQName(new List().add(new FQNamePart(getName().getID(),new Opt())));
             boolean attr_set = false;
             // Check if attribute is already set
-            for (int i=0;i<attrs.getNumChild();i++)
+            for (int i = 0; !attr_set && i < attrs.getNumChild(); i++)
             	if (attrs.getChild(i).getName().name().equals(getName().name()))
 					attr_set = true;
             // If attribute is not set, add to list
 			if (!attr_set) {
 				List<FAttribute> my_attr = new List<FAttribute>();
-				getInstModification().collectAttributes(my_attr,prefix);
+				getInstModification().collectAttributes(my_attr, prefix, aer);
 				FQName fqn2 = new FQName();
 				fqn2.addFQNamePart(new FQNamePart(getName().myInstComponentDecl().myInstClass().name(),
 					new Opt()));
+				boolean isEach  = getComponentModification().hasEach();
+				boolean isFinal = getComponentModification().hasFinal();
+				Opt oe;
+				if (getInstModification().hasInstValueMod()) {
+					InstValueModification im = getInstModification().getInstValueMod();
+					oe = new Opt(aer.retrieve(im, isEach).flatten(prefix));
+				} else {
+					oe = new Opt();
+				}
 				attrs.add(new FAttribute(new FIdUse(fqn2),
 									new FIdDecl(fqn),
-			                        getInstModification().hasInstValueMod()? new Opt(getInstModification().instValueMod().flatten(prefix)): new Opt(),
+			                        oe,
 			                        true,
-			                        getComponentModification().hasEach()? new Opt(new FEach()): new Opt(),
-			                   		getComponentModification().hasFinal()? new Opt(new FFinal()): new Opt(),
+			                        isEach ? new Opt(new FEach()) : new Opt(),
+			                        isFinal ? new Opt(new FFinal()) : new Opt(),
 			                   		my_attr));
 			}
 		}
@@ -537,30 +652,17 @@ aspect FlatExpressions {
 		// Checks in the instance tree ensures that constants always
 		// has binding expressions
 		if (getInstAccess().myInstComponentDecl() instanceof InstPrimitive) {
-			InstPrimitive ip = null;
-			ip = (InstPrimitive)getInstAccess().myInstComponentDecl();
+			InstPrimitive ip = (InstPrimitive) getInstAccess().myInstComponentDecl();
 			if (ip.isConstant()) {
-				if (ip.isReal()) {
-					return new FRealLitExp(
-							Double.toString(ip.myBindingFExp().ceval().realValue()));
+				if (isArray()) {
+					return getArray().buildLiteral(ip.isReal());
+				} else {
+					CValue cval = ceval();
+					if (ip.isReal())
+						cval = cval.convertReal();
+					return cval.buildLiteral();
 				}
-				if (ip.isInteger()) {
-					return new FIntegerLitExp(
-							Integer.toString(ip.myBindingFExp().ceval().intValue()));
-				}
-				if (ip.isBoolean()) {
-					if (ip.myBindingFExp().ceval().booleanValue()) {
-						return new FBooleanLitExpTrue();
-					} else {
-						return new FBooleanLitExpFalse();
-					}
-				}
-				if (ip.isReal()) {
-					return new FStringLitExp(ip.myBindingFExp().ceval().stringValue());
-				}
-
 			}
-
 		} 
 		return new FIdUseExp(new FIdUse(getInstAccess().flatten(prefix)));
 	}
@@ -580,6 +682,10 @@ aspect FlatExpressions {
 	   for (int i=0;i<getNumFExp();i++)
 	   	 l.add(getFExp(i).flatten(prefix));
 	   return new FArray(l);
+	}
+
+	public FExp FSubscriptedExp.flatten(FQName prefix) {
+		return new FSubscriptedExp(getFExp().flatten(prefix), getFArraySubscripts().flatten(prefix));
 	}
 
 	public FIdDecl FIdDecl.flatten(FQName prefix) {
@@ -1381,6 +1487,7 @@ aspect InstantiatedExpressions {
 		    rewritten = true;
 		    
 		    // Special handling for function-like operators without maximum number of args.
+		    // TODO: generate error for named arguments
 		    String unQName = getName().name();
 		    if (unQName.equals("ones") || unQName.equals("zeros")) {
 		    	FInfArgsFunctionCall iafc = null;
@@ -1487,12 +1594,12 @@ aspect InstantiatedExpressions {
 	*/
 
 	public InstForIndex ForIndex.instantiate() {
-		SourceRoot sr = (SourceRoot)root(); // We know we are in the source Tree
+		SourceRoot sr = (SourceRoot)root(); // We know we are in the source tree
 		// This maneuver is pretty ugly, but we need to find an InstClassDecl
-		// in the instance tree from the sourc tree...
-		sr.getProgram().getInstProgramRoot().addDynamicClassName(getForIndexDecl().getClassName().newInstAccess());
-		InstPrimitive ip = (InstPrimitive)(sr.getProgram().getInstProgramRoot().getDynamicClassName(
-				sr.getProgram().getInstProgramRoot().getNumDynamicClassName()-1).myInstClassDecl().newInstComponentDecl(getForIndexDecl()));    			
+		// in the instance tree from the source tree...
+		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
+		InstAccess name = ipr.dynamicClassName(getForIndexDecl().getClassName().newInstAccess());
+		InstPrimitive ip = (InstPrimitive) name.myInstClassDecl().newInstComponentDecl(getForIndexDecl());
 		Opt o = hasExp()? new Opt(getExp().instantiate()): new Opt();
 		InstForIndex n = new InstForIndex(ip, o);
 		n.setLocation(this);

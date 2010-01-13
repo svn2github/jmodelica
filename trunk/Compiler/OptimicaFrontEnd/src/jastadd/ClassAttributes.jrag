@@ -58,8 +58,8 @@ aspect ClassAttributes {
 	syn lazy List InstOptClassDecl.getInstClassAttributeList() {
 		List l = new List();
 		for (ComponentDecl cd : ((OptClassDecl)getClassDecl()).getClassAttributes()) {
-    		addDynamicClassName(cd.getClassName().newInstAccess());
-			l.add(getDynamicClassName(getNumDynamicClassName()-1).myInstClassDecl().newInstComponentDecl(cd));
+    		InstAccess name = dynamicClassName(cd.getClassName().newInstAccess());
+			l.add(name.myInstClassDecl().newInstComponentDecl(cd));
 		}
 		return l;
 	}

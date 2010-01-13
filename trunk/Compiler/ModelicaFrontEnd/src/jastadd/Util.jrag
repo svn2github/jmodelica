@@ -208,6 +208,15 @@ aspect NodeMethods {
 		}
 		return false;
 	}
+	
+	/**
+	 * \brief Return a copy of node that is not in any tree.
+	 * 
+	 * Returns <code>this</code> if node has no parent, <code>fullCopy()</code> otherwise.
+	 */
+	public ASTNode ASTNode.unboundCopy() {
+		return (getParent() == null) ? this : fullCopy();
+	}
 
 }
 
@@ -450,11 +459,13 @@ aspect FlatNames {
 			addFQNamePart((FQNamePart)fqname.getFQNamePart(i).fullCopy());
 		return this;
 	}
+	
+	syn FQNamePart FQName.lastFQNamePart() = getFQNamePart(getNumFQNamePart()-1);
 
 	syn boolean FQName.hasFArraySubscripts() = isScalarized()? false:
-		getFQNamePart(getNumFQNamePart()-1).hasFArraySubscripts();
+		lastFQNamePart().hasFArraySubscripts();
 	syn FArraySubscripts FQName.getFArraySubscripts() = isScalarized()? null:
-		getFQNamePart(getNumFQNamePart()-1).getFArraySubscripts();
+		lastFQNamePart().getFArraySubscripts();
 
 	syn boolean FIdUse.hasFArraySubscripts() = 
 		getFQName().hasFArraySubscripts();
@@ -465,7 +476,7 @@ aspect FlatNames {
 		getFIdUse().hasFArraySubscripts();
 	syn FArraySubscripts FIdUseExp.getFArraySubscripts() = 
 		getFIdUse().getFArraySubscripts();
-
+	
 	
 	syn lazy FQName InstNode.getFQNamePrefix() {
 		FQName prefix = retrieveFQName();
@@ -500,10 +511,10 @@ aspect FlatNames {
 		FArraySubscripts fas = new FArraySubscripts(
 				new List().add(new FExpSubscript(new FIntegerLitExp(getIndex()+""))));
 
-		if (myName.getFQNamePart(myName.getNumFQNamePart()-1).hasFArraySubscripts()) {
-			myName.getFQNamePart(myName.getNumFQNamePart()-1).getFArraySubscripts().addFSubscript(fas.getFSubscript(0));
+		if (myName.hasFArraySubscripts()) {
+			myName.getFArraySubscripts().addFSubscript(fas.getFSubscript(0));
 		} else {
-			myName.getFQNamePart(myName.getNumFQNamePart()-1).setFArraySubscripts(fas);
+			myName.lastFQNamePart().setFArraySubscripts(fas);
 		}
 		return myName;
 	}	

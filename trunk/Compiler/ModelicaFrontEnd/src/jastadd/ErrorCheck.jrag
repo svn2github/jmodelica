@@ -495,8 +495,8 @@ aspect InstanceErrorCheck {
 			checkConstantScalarExpression(node,varKind,varName);
 		} else {
 //			System.out.println("FExp.checkConstantExpression ndims="+ndims() + " "+getClass().getName());
-			for (Index i : array().indices())  
-				array().get(i).checkConstantScalarExpression(node, varKind, varName);
+			for (Index i : getArray().indices())  
+				getArray().get(i).checkConstantScalarExpression(node, varKind, varName);
 		}
 	}
 	

@@ -57,7 +57,7 @@ aspect ConstantEvaluation {
 	    }
 	    
 	    /**
-	     * \brief Convert to daouble, default implementation.
+	     * \brief Convert to double, default implementation.
 	     * 
 	     * @return Value converted to double.
 	     */
@@ -89,8 +89,36 @@ aspect ConstantEvaluation {
 	     *  
 	     *  @return Literal expression AST node.
 	     */
-	    public ASTNode buildLiteral() { 
+	    public FExp buildLiteral() { 
 	    	throw new UnsupportedOperationException(); 
+	    }
+	    
+	    /**
+	     * \brief Convert to CValueInteger, default implementation.
+	     */
+	    public CValueInteger convertInteger() {
+	    	return new CValueInteger(intValue());
+	    }
+	    
+	    /**
+	     * \brief Convert to CValueReal, default implementation.
+	     */
+	    public CValueReal convertReal() {
+	    	return new CValueReal(realValue());
+	    }
+	    
+	    /**
+	     * \brief Convert to CValueBoolean, default implementation.
+	     */
+	    public CValueBoolean convertBoolean() {
+	    	return new CValueBoolean(booleanValue());
+	    }
+	    
+	    /**
+	     * \brief Convert to CValueString, default implementation.
+	     */
+	    public CValueString convertString() {
+	    	return new CValueString(stringValue());
 	    }
 
 	    /**
@@ -152,10 +180,19 @@ aspect ConstantEvaluation {
 	    public boolean isUnknown() {
       		return false;
       	}
+        
+        /**
+         * Overloading of the toString() method.
+         * 
+         * @return The string.
+         */
+        public String toString() { 
+        	return stringValue(); 
+        }
 	   
-  }
+	}
   
-  public abstract class CValueScalar extends CValue {
+	public abstract class CValueScalar extends CValue {
 	    
 	    public int ndims() {
 	    	return 0;
@@ -165,7 +202,7 @@ aspect ConstantEvaluation {
 	    	return new int[0];
 	    }
 	  	  
-  }
+	}
 	
 	/**
 	 * \brief Constant integer value.
@@ -199,6 +236,13 @@ aspect ConstantEvaluation {
         public double realValue() { 
         	return value; 
         }
+	    
+	    /**
+	     * \brief Convert to CValueInteger.
+	     */
+	    public CValueInteger convertInteger() {
+	    	return this;
+	    }
         
         /**
 	     * \brief Convert to string.
@@ -226,16 +270,8 @@ aspect ConstantEvaluation {
 	    public boolean isNumeric() {
 	    	return true;
 	    }
-        
-        /**
-         * Overloading of the toString() method.
-         * 
-         * @return The string.
-         */
-        public String toString() { 
-        	return value+""; 
-        }
-      }
+
+    }
     
 	/**
 	 * \brief Constant real value.
@@ -269,6 +305,13 @@ aspect ConstantEvaluation {
         public double realValue() { 
         	return value; 
         }
+	    
+	    /**
+	     * \brief Convert to CValueReal.
+	     */
+	    public CValueReal convertReal() {
+	    	return this;
+	    }
 
         /**
 	     * \brief Convert to string.
@@ -285,7 +328,7 @@ aspect ConstantEvaluation {
          * @return FRealLitExp AST node.
          */
         public FLitExp buildLiteral() { 
-        	return new FRealLitExp(stringValue()); 
+        	return new FRealLitExp(value); 
         }
 
 	    /**
@@ -296,15 +339,6 @@ aspect ConstantEvaluation {
 	    public boolean isNumeric() {
 	    	return true;
 	    }
-        
-        /**
-         * Convert to string.
-         * 
-         * @return The string. 
-         */
-        public String toString() { 
-        	return value+""; 
-        }
         
       }
     
@@ -331,7 +365,14 @@ aspect ConstantEvaluation {
         public boolean booleanValue() { 
         	return value; 
         }
-        
+	    
+	    /**
+	     * \brief Convert to CValueBoolean.
+	     */
+	    public CValueBoolean convertBoolean() {
+	    	return this;
+	    }
+       
         /**
 	     * \brief Convert to string.
 	     * 
@@ -347,8 +388,7 @@ aspect ConstantEvaluation {
          * @return FBooleanLitExp AST node.
          */
         public FLitExp buildLiteral() { 
-      	  return value? new FBooleanLitExpTrue() :
-      		  new FBooleanLitExpFalse(); 
+      	  return FBooleanLitExp.create(value); 
       	  }
         
 	    /**
@@ -359,15 +399,7 @@ aspect ConstantEvaluation {
 	    public boolean isNumeric() {
 	    	return false;
 	    }
-        
-        /**
-         * Convert to string.
-         * 
-         * @return The string. 
-         */
-        public String toString() { 
-        	return value+""; 
-        }
+
       }
       
 	/**
@@ -389,6 +421,13 @@ aspect ConstantEvaluation {
 	     * @return Value converted to string.
 	     */        
         public String stringValue() { return value; }
+	    
+	    /**
+	     * \brief Convert to CValueString.
+	     */
+	    public CValueString convertString() {
+	    	return this;
+	    }
 
         /**
          * \brief Create a new literal expression AST node.
@@ -396,7 +435,7 @@ aspect ConstantEvaluation {
          * @return FStringLitExp AST node.
          */
         public FLitExp buildLiteral() { 
-        	return new FStringLitExp(stringValue()); 
+        	return new FStringLitExp(value); 
         }
 
 	    /**
@@ -408,14 +447,6 @@ aspect ConstantEvaluation {
 	    	return false;
 	    }
                 
-        /**
-         * Convert to string.
-         * 
-         * @return The string. 
-         */
-        public String toString() { 
-        	return value+""; 
-        }
       }
     
 	/**
@@ -713,6 +744,46 @@ aspect ConstantEvaluation {
       }
 
     
+    /** 
+     * \build Creates an FExp with literals from this Array.
+     * 
+     * Creates a (possibly nested) FArray containing FLitExp nodes.
+     * 
+     * @param toReal  if <code>true</code>, convert all values to real.
+     * 
+     * @throws UnsupportedOperationException  if the expressions aren't constant.
+     */
+    public FExp Array.buildLiteral(boolean toReal) {
+    	return buildLiteralHelper(iteratorFExp(), toReal, 1);
+    }
+    
+    /**
+     * \brief Recursive helper method for {@see #buildLiteral(boolean)}.
+     */
+    protected FExp Array.buildLiteralHelper(Iterator<FExp> it, boolean toReal, int dim) {
+    	FArray arr = new FArray(new List<FExp>());
+    	int n = size()[dim - 1];
+    	if (dim < ndims()) {
+    		for (int i = 0; i < n; i++)
+    			arr.addFExp(buildLiteralHelper(it, toReal, dim + 1));
+    	} else {
+    		if (toReal) {
+	    		for (int i = 0; i < n; i++) 
+	    			arr.addFExp(it.next().ceval().convertReal().buildLiteral());
+        	} else {
+	    		for (int i = 0; i < n; i++) 
+	    			arr.addFExp(it.next().ceval().buildLiteral());
+        	}
+    	}
+    	return arr;
+    }
+    
+    /**
+     * \brief Recursive helper method for {@see #buildLiteral(boolean)}.
+     */
+    protected FExp ScalarAsArray.buildLiteralHelper(Iterator<FExp> it, boolean toReal, int dim) {
+    	return it.next();
+    }
     
   /**
    * \brief Returns the constant value of a flat expression. 
@@ -762,13 +833,17 @@ aspect ConstantEvaluation {
    		return new CValueUnknown();
    	}
   }
-  eq FInstAccessExp.ceval() { 
-//	  System.out.println("FInstAccessExp: " + getInstAccess().name());
-//	  System.out.println(getInstAccess());
-//	  System.out.println(getInstAccess().myInstComponentDecl());
-//	  System.out.println(getInstAccess().myInstComponentDecl().isPrimitive());
-	  return getInstAccess().myInstComponentDecl().isPrimitive()?
-	((InstPrimitive)getInstAccess().myInstComponentDecl()).ceval() : new CValueUnknown(); }
+  eq FInstAccessExp.ceval() = getInstAccess().ceval();
+  
+  syn CValue InstAccess.ceval() = new CValueUnknown();
+  eq InstDot.ceval()            = getRight().ceval();
+  eq InstComponentAccess.ceval() {
+	  if (myInstComponentDecl().isPrimitive()) {
+		  InstPrimitive prim = (InstPrimitive) myInstComponentDecl();
+		  return prim.ceval(hasFArraySubscripts() ? getFArraySubscripts().asIndex() : Index.NULL);
+	  }
+	  return new CValueUnknown();
+  }
 
   eq FSinExp.ceval() = new CValueReal(java.lang.Math.sin(getFExp().ceval().realValue()));
   eq FCosExp.ceval() = new CValueReal(java.lang.Math.cos(getFExp().ceval().realValue()));
@@ -787,7 +862,7 @@ aspect ConstantEvaluation {
   eq FSqrtExp.ceval() = new CValueReal(java.lang.Math.sqrt(getFExp().ceval().realValue()));	  
 
 	/**
-	 * \brief Evaluation of a primitive instance node locade in the instance
+	 * \brief Evaluation of a primitive instance node located in the instance
 	 * AST.
 	 * 
 	 * In some situations, expressions are evaluated in the instance AST. 
@@ -802,30 +877,38 @@ aspect ConstantEvaluation {
 	 * @return The constant value.
 	 */
 	syn CValue InstPrimitive.ceval() {
-	  if ((!isConstant() && !isParameter())) {
-		  return new CValueUnknown();
-	  } else if (myBindingInstExp()==null ||
-				myBindingInstExp().type().isUnknown()) { 
-			return new CValueUnknown();
-		} else if (isReal()) {
-			CValue val = myBindingInstExp().ceval();
-			if (val.isNumeric()) {
-				return new CValueReal(val.realValue());
-			} else {
-				return new CValueUnknown();
-			}
-		} else if (isInteger()) {
-			CValue val = myBindingInstExp().ceval();
-			if (val.isNumeric()) {
-				return new CValueInteger(val.intValue());
-			} else {
-				return new CValueUnknown();
-			}
-		} else if (isBoolean()) {
-			return myBindingInstExp().ceval();
-		} else if (isString()) {
-			return myBindingInstExp().ceval();
-		} else {
+		return ceval(Index.NULL);
+	}
+	
+
+	/**
+	 * \brief Evaluation of a primitive instance node located in the instance
+	 * AST. Evaluates a specific cell if this primitive is an array.
+	 * 
+	 * If primitive is not an array, <code>i</code> should be Index.NULL.
+	 *  
+	 * In some situations, expressions are evaluated in the instance AST. 
+	 * Such expressions are then instantiated, but not yet flattened. As a
+	 * consequence, identifiers in expressions refers to InstPrimitive nodes,
+	 * and accordingly, it it necessary to compute the constant value 
+	 * corresponding to an InstPrimitive node. If the primitive is a
+	 * constant or a parameters, and if it has a binding expressions, then
+	 * a corresponding CValue object is returned, otherwise, CValueUnknown
+	 * is returned.
+	 * 
+	 * @return The constant value.
+	 */
+	syn CValue InstPrimitive.ceval(Index i) {
+	    if ((isConstant() || isParameter()) && 
+	    		myBindingInstExp() != null &&
+	    		!myBindingInstExp().type().isUnknown() && 
+	    		indices().isValid(i)) {
+	    	CValue val = myBindingInstExp().getArray().get(i).ceval();
+	    	// Reals can be have a binding exp that is Integer - convert
+			if (isReal())
+				val = new CValueReal(val.realValue());
+			return val;
+		} else { 
 			return new CValueUnknown();
 		}
 	}
@@ -976,19 +1059,25 @@ aspect ConstantEvaluation {
 
 aspect ArrayConstantEvaluation {
 	
-	public int[] FSubscript.arrayIndices() {
-		return new int[0];
-	}
-	
-	public int[] FExpSubscript.arrayIndices() {
-		int s = getFExp().ceval().intValue();
+	/**
+	 * \brief Returns the set of array indices spanned by a component declared with this subscript.
+	 */
+	syn int[] FSubscript.arrayIndices() = new int[0];
+	eq FExpSubscript.arrayIndices() {
+		int s = numIndices();
 		int ind[] = new int[s];
-		for (int i=0;i<s;i++) {
-			ind[i] = i+1;
-		}
+		for (int i = 0; i < s; i++) 
+			ind[i] = i + 1;
 		return ind;
 	}
+
 	
+	/**
+	 * \brief Get the number of array indices spanned by a component declared with this subscript.
+	 */
+	syn int FSubscript.numIndices() = 0;
+	eq FExpSubscript.numIndices() = getFExp().ceval().intValue();
+
 }
 
 aspect CircularExpressions {

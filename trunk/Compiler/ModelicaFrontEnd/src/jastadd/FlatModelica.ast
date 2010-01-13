@@ -449,9 +449,30 @@ FWhileStmt : FStatement ::= Test:FExp WhileStmt:FStatement*;
 
 
 /**
+ * \brief Describes the set of scalarized FExp nodes corresponding to an array expression.
+ */
+Array ::= FExp*;
+
+/**
+ * \brief Dummy array for representing a scalar expression in algorithms handling Arrays. 
+ * 
+ * Iterator acts as if on a vector of length 1.
+ * 
+ * The get() and set() methods ignore the Index and always operate on the single element.
+ * This allows a ScalarAsArray to be used with an Array in an algorithm that expects 
+ * two Array objects, as long as the Indices from a real Array is used to iterate. 
+ * 
+ * Since the indices of a scalar makes no sense, the Iterator returned by 
+ * indices().iterator() will have no elements. 
+ * 
+ * The Iterator returned by iterator() will have one element.
+ */
+ScalarAsArray : Array;
+
+/**
  * \brief Abstract base class for all flattened expressions.
  */
-abstract FExp;
+abstract FExp ::= /Array/;
 
 /**
  * \brief Unsupported expression.
@@ -684,6 +705,13 @@ FInstAccessExp : FExp ::= InstAccess;
 FArray : FExp ::= FExp*;
 
 /**
+ * \brief Generated expression that applies array subscripts to any expression.
+ *
+ * Generated when slices are flattened.
+ */
+FSubscriptedExp : FExp ::= FExp FArraySubscripts;
+
+/**
  * \brief Range expression.
  */
 FRangeExp : FExp ::= FExp*;
@@ -692,13 +720,6 @@ FRangeExp : FExp ::= FExp*;
  * \brief Dummy node.
  */
 FNoExp : FExp::=;
-
-/**
- * \brief Wrapper node for binding expressions declared with "each".
- *
- * Always has size() that matches the FVarible it is connected to.
- */
-FEachExp : FUnaryExp;
 
 /**
  * \brief Built-in variable time.

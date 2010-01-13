@@ -25,70 +25,48 @@ aspect FlatTypeCheck {
     public void InstPrimitive.typeCheck() {
     	FExp bexp = myBindingInstExp();
     	if (bexp != null && !bexp.type().isUnknown()) {
-    		boolean badType = false;
-    		String badSizeName = null;
-    		if (myBindingExpHasEach()) {
-    			if (!type().scalarType().typeCompatible(bexp.type().scalarType())) {
-    				badType = true;
-    			} else if (ndims() == 0) {
-    				error("The 'each' keyword cannot be applied to scalar members of non-array components");
-    			} else if (bexp.ndims() >= ndims()) {
-					error("Array size mismatch in declaration: each " + name() +
-						  ", declaration has " + ndims() + " dimension(s) and binding expression has " +
-						  bexp.ndims() + ", expression must have fewer than declaration");
-    			} else if (!type().dimensionCompatibleFromRight(bexp.type())) {
-    				badSizeName = "each " + name();
-    			}
-    		} else {
-    			if (!type().typeCompatible(bexp.type())) {
-    				if (!type().dimensionCompatible(bexp.type())) {
-        				badSizeName = name();
+    		if (myBindingExpHasEach() && !inArrayComponent()) {
+    			error("The 'each' keyword cannot be applied to members of non-array components");
+     		} else {
+    			if (!bindingType().typeCompatible(bexp.type())) {
+    				if (!bindingType().dimensionCompatible(bexp.type())) {
+    					error("Array size mismatch in declaration of " + 
+    							(myBindingExpHasEach() ? "each " : "") + name() +
+    							", size of declaration is " + Arrays.toString(bindingType().size()) + 
+    							" and size of binding expression is " + 
+    							Arrays.toString(bexp.size()));
     				} else {
-    					badType = true;
+    				    error("The binding expression of the variable " + name() +
+  			    	  " does not match the declared type of the variable");
     				}
     			}
     		}
-    		
-		    if (badType) {
-			    error("The binding expression of the variable " + name() +
-			    	  " does not match the declared type of the variable");
-		    } else if (badSizeName != null) {
-				error("Array size mismatch in declaration: " + badSizeName +
-					  ", size of declaration is " + Arrays.toString(size()) + 
-					  " and size of binding expression is " + 
-					  Arrays.toString(bexp.size()));
-		    }
 	    }
 	  
     	// TODO: Can't this be moved to InstComponentModification.typeCheck()?
-	    // Check the type correctness of attributes
+ 	    // Check the type correctness of attributes
 	    for (InstModification im : totalMergedEnvironment()) {
 		    // Only check attributes, value modifications are checked above
 		    if (im instanceof InstComponentModification) {
 			    InstComponentModification icm = (InstComponentModification) im;
 				if (icm.getInstModification().hasInstValueMod()) {
 					FExp val_mod = icm.getInstModification().instValueMod();
-					if (!icm.getName().myInstComponentDecl().isUnknown() && !val_mod.type().isUnknown()) {
+					if (!icm.type().isUnknown() && !val_mod.type().isUnknown()) {
+						FPrimitiveType attr_type = attributeType(icm);
 						if (!icm.type().typeCompatible(val_mod.type().scalarType())) {
 							icm.error("The type of the binding expression of the attribute " + icm.name() +
 							  " does not match the declared type of the variable");							
-						} else if (!icm.getEach() && val_mod.ndims()!=0 && !type().dimensionCompatible(val_mod.type())) { 
-							icm.error("Array size mismatch for attribute: " + icm.name() +
-									", size of declaration is " + Arrays.toString(size()) + 
+						} else if (!icm.getEach() && !attr_type.dimensionCompatible(val_mod.type())) { 
+							icm.error("Array size mismatch for the attribute " + icm.name() +
+									", size of declaration is " + Arrays.toString(attr_type.size()) + 
 									" and size of " + icm.name() + " expression is " + 
 									Arrays.toString(val_mod.size()));
 						} else if (icm.getEach()) { 
 							if (ndims() == 0) {
 								icm.error("The 'each' keyword cannot be applied to attributes of scalar components");
-							} else if (val_mod.ndims() >= ndims()) {
-								icm.error("Array size mismatch for attribute: each " + icm.name() +
-										  ", declaration has " + ndims() + " dimension(s) and expression has " +
-										  val_mod.ndims() + ", expression must have fewer than declaration");
-							} else if (!type().dimensionCompatibleFromRight(val_mod.type())) {
-								icm.error("Array size mismatch for attribute: each " + icm.name() +
-										", size of declaration is " + Arrays.toString(size()) + 
-										" and size of " + icm.name() + " expression is " + 
-										Arrays.toString(val_mod.size()));
+							} else if (val_mod.ndims() > 0) {
+								icm.error("The attribute " + icm.name() + 
+										" is declared 'each' and the binding expression is not scalar");
 							}
 						}
 					}
@@ -114,6 +92,8 @@ aspect FlatTypeCheck {
 		  }
 	  }
   }
+  
+  // TODO: Add typeCheck for other FExp types (e.g. FZeros)
 
   
   public void InstComponentAccess.typeCheck() {

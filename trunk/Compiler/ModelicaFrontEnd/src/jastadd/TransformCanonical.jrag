@@ -548,11 +548,19 @@ aspect Scalarization {
 	 */
 	public void FVariable.scalarize(List<FVariable> vars) {
 		if (isArray()) {
+			// Constants and parameters still have binding expressions, 
+			// they should be scalarized but can't contain any FForIndex
+			HashMap<String,Integer> constIndexMap = null;;
+			if (isParameter() || isConstant())
+				constIndexMap = new HashMap<String,Integer>();
 			for (Index i : indices()) {
 				// Copy original declaration
 				FVariable fv_tmp = (FVariable) fullCopy();
 				// Set new array subscripts corresponding to index
 				fv_tmp.getFQName().setLastFArraySubscripts(i.newFArraySubscripts());
+				// Constants and parameters still have binding expressions
+				if (constIndexMap != null)
+					fv_tmp.setBindingExp(getBindingExp().getArray().get(i).scalarize(constIndexMap));
 				// Iterate over all attributes and scalarize.
 				for (FAttribute a : fv_tmp.getFAttributes()) 
 					a.scalarize(i);
@@ -578,7 +586,7 @@ aspect Scalarization {
 			if (hasFEach())
 				setFEachOpt(new Opt());
 			else if (hasValue() && getValue().ndims() > 0) 
-				setValue(getValue().array().get(i));
+				setValue(getValue().getArray().get(i));
 		}
 	}
 	
@@ -601,15 +609,13 @@ aspect Scalarization {
 					getRight().scalarize(indexMap)));
 		} else if (ndims() > 0) {
 			/**
-			 * If the expression is an array expression, then the FExp.array()
+			 * If the expression is an array expression, then the FExp.getArray()
 			 * element is used to generate scalar equations.
 			 */
 			// Iterate over array elements and create scalarized equation for each
-			/* TODO: shouldn't these expressions be scalarized as well?
-			 *        call scalarize(indexMap) insted of fullCopy()? */
 			for (Index i : indices()) 
-				eqns.addChild(new FEquation((FExp) getLeft().array().get(i).fullCopy(), 
-						(FExp) getRight().array().get(i).fullCopy()));
+				eqns.addChild(new FEquation((FExp) getLeft().getArray().get(i).scalarize(indexMap), 
+						(FExp) getRight().getArray().get(i).scalarize(indexMap)));
 		}
 	}
 	
@@ -626,12 +632,14 @@ aspect Scalarization {
 	
 	public void FForClauseE.scalarize(List<FAbstractEquation> eqns,
 			HashMap<String,Integer> indexMap) {
+		// TODO: Can be simplified a lot when FForClauseE is refactored to have only one FForIndex (#506)
 		// TODO: Refactor this to FForClauseE.indices()?
 		ArrayList<int[]> ind = new ArrayList<int[]>();
 		for (FForIndex fi : getFForIndexs()) {
 			if (fi.hasFExp()) {
 				ind.add(fi.getFExp().myIndices().clone());
 			}
+			// TODO: else add indices as for FColonSubscript
 		}
 		Indices indices = Indices.create(ind);
 		
@@ -639,8 +647,9 @@ aspect Scalarization {
 		myIndexMap.putAll(indexMap);
 		for (Index i : indices) {
 			int j = 0;
+			int[] ii = indices.translate(i).index();
 			for (FForIndex fi : getFForIndexs()) {
-				myIndexMap.put(fi.getFVariable().name(), Integer.valueOf(i.index()[j]));
+				myIndexMap.put(fi.getFVariable().name(), Integer.valueOf(ii[j]));
 				j++;
 			}
 			
@@ -709,7 +718,7 @@ aspect Scalarization {
     public FExp FIdUseExp.scalarize(HashMap<String,Integer> indexMap) {
     	//System.out.println("FIdUseExp.scalarize: " + name());
     	if (indexMap.containsKey(name())) {
-    		return new FIntegerLitExp(""+indexMap.get(getFIdUse().name()).intValue());
+    		return new FIntegerLitExp(indexMap.get(getFIdUse().name()).intValue());
     	}
     	return new FIdUseExp(getFIdUse().scalarize(indexMap));
     }
