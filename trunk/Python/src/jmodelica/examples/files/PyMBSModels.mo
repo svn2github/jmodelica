@@ -21,9 +21,9 @@ model CraneCrab_recursive_der_state
 
 // State
 	// Positions
-	Real[2] q (start={1, 0}, stateSelect=StateSelect.prefer) "q_TransCrab,q_RotLoad";
+	Real[2] q (start={1, 0}, each stateSelect=StateSelect.prefer) "q_TransCrab,q_RotLoad";
 	// Velocities
-	Real[2] qd (start={0, 0}, stateSelect=StateSelect.prefer) "qd_TransCrab,qd_RotLoad";
+	Real[2] qd (start={0, 0}, each stateSelect=StateSelect.prefer) "qd_TransCrab,qd_RotLoad";
 
 // Inputs
 	input Real F;
