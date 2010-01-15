@@ -111,6 +111,12 @@
 				<include name="*.jadd" />
 				<include name="*.jrag" />
 			</fileset>
+			<fileset dir="${ast}/structural">
+				<include name="*.ast" />
+				<include name="*.jadd" />
+				<include name="*.jrag" />
+			</fileset>
+
 		</jastadd>
 	</target>
 

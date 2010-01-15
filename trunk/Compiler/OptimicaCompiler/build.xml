@@ -138,6 +138,11 @@
 				<include name="*.jadd" />
 				<include name="*.jrag" />
 			</fileset>
+			<fileset dir="${ast}/structural">
+				<include name="*.ast" />
+				<include name="*.jadd" />
+				<include name="*.jrag" />
+			</fileset>
 			<fileset dir="${modelica_xml_back_end_ast}">
 				<include name="*.ast" />
 				<include name="*.jadd" />
