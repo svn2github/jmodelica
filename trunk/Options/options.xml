@@ -72,6 +72,26 @@
 				</Description>
 			</BooleanAttributes>
 		</Option>
+		<Option>
+			<Type>Boolean</Type>
+			<BooleanAttributes>
+				<Key>index_reduction</Key>
+				<Value>false</Value>
+				<Description>
+                                If this option is true (default is false), index reduction is performed.
+				</Description>
+			</BooleanAttributes>
+		</Option>
+		<Option>
+			<Type>Boolean</Type>
+			<BooleanAttributes>
+				<Key>equation_sorting</Key>
+				<Value>true</Value>
+				<Description>
+                                If this option is true (default is false), equations are sorted using the BLT algorithm.
+				</Description>
+			</BooleanAttributes>
+		</Option>
 
 	</Options>	
 </OptionRegistry>
