@@ -1028,6 +1028,97 @@ Semantic error at line 843, column 10:
   A a(x(start=p2));
 end AttributeBindingExpTest5_Err;
 
+model IncidenceTest1
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="IncidenceTest1",
+      methodName="incidence",
+        description="Test computation of incidence information", methodResult=
+        "Incidence:
+ eq 0: der(x) 
+ eq 1: y 
+")})));
+
+
+ Real x(start=1);
+ Real y;
+ input Real u;
+equation
+ der(x) = -x + u;
+ y = x^2;
+end IncidenceTest1;
+
+
+model IncidenceTest2
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="IncidenceTest2",
+      methodName="incidence",
+        description="Test computation of incidence information", methodResult=
+        "Incidence:
+ eq 0: der(x) z 
+ eq 1: y 
+ eq 2: z 
+")})));
+
+ Real x(start=1);
+ Real y,z;
+ input Real u;
+equation
+ z+der(x) = -sin(x) + u;
+ y = x^2;
+ z = 4;
+end IncidenceTest2;
+
+model IncidenceTest3
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="IncidenceTest3",
+      methodName="incidence",
+        description="Test computation of incidence information", methodResult=
+        "Incidence:
+ eq 0: der(x[1]) 
+ eq 1: der(x[2]) 
+ eq 2: y 
+")})));
+
+
+ Real x[2](each start=1);
+ Real y;
+ input Real u;
+
+ parameter Real A[2,2] = {{-1,0},{1,-1}};
+ parameter Real B[2] = {1,2};
+ parameter Real C[2] = {1,-1};
+ parameter Real D = 0;
+equation
+ der(x) = A*x+B*u;
+ y = C*x + D*u;
+end IncidenceTest3;
+
+model DiffsAndDersTest1
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="DiffsAndDersTest1",
+      methodName="dersAndDiffs",
+        description="Test that derivatives and differentiated variables can be cross referenced", methodResult=
+        "Derivatives and differentiated variables:
+ der(x[1]), x[1]
+ der(x[2]), x[2]
+Differentiated variables and derivatives:
+ x[1], der(x[1])
+ x[2], der(x[2])
+")})));
+
+
+ Real x[2](each start=1);
+ Real y;
+ input Real u;
+
+ parameter Real A[2,2] = {{-1,0},{1,-1}};
+ parameter Real B[2] = {1,2};
+ parameter Real C[2] = {1,-1};
+ parameter Real D = 0;
+equation
+ der(x) = A*x+B*u;
+ y = C*x + D*u;
+end DiffsAndDersTest1;
 
 
 end TransformCanonicalTests;

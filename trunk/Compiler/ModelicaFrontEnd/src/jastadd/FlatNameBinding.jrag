@@ -82,7 +82,7 @@ aspect FlatNameBinding {
 		(FDerivativeVariable)lookupFDV(getFIdUseExp().derName());	
 	*/
 	
-	syn lazy HashMap FClass.fullyQualifiedVariablesMap() {
+	syn lazy HashMap<String,FVariable> FClass.fullyQualifiedVariablesMap() {
 		//System.out.println("FClass.fullyQualifiedVariablesMap()");
 		HashMap map = new HashMap();
 		for (FVariable v : getFVariables()) 

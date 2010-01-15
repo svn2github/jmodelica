@@ -385,8 +385,8 @@ aspect FlatAPI {
 		myFClass().differentiatedRealVariables().indexOf(this);
 
     syn int FClass.numDerivativeVariables() = derivativeVariables().size();
-	coll ArrayList<FVariable> FClass.derivativeVariables() 
-	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	coll ArrayList<FDerivativeVariable> FClass.derivativeVariables() 
+	  [new ArrayList<FDerivativeVariable>()] with add root FlatRoot;
 	FDerivativeVariable contributes
 		this when !isAlias()
 	to FClass.derivativeVariables() for myFClass();
@@ -694,14 +694,16 @@ aspect FlatAPI {
 	
 	}
 	
+	*/
+	
 	inh boolean FExp.inFEquation();
-	eq FEquation.getChild().inFEquation()=true;
+	eq FAbstractEquation.getChild().inFEquation()=true;
 	eq Root.getChild().inFEquation()=false;
 	
-	inh FEquation FExp.myFEquation();
-	eq FEquation.getChild().myFEquation()=this;
+	inh FAbstractEquation FExp.myFEquation();
+	eq FAbstractEquation.getChild().myFEquation()=this;
 	eq Root.getChild().myFEquation()=null;
-*/	
+	
 	inh FClass FVariable.myFClass();
 	inh FClass FExp.myFClass();
 	inh FClass FIdUse.myFClass();
@@ -1034,6 +1036,53 @@ aspect FVariableUses {
 	FIdUseExp contributes this when !(getParent() instanceof FDerExp) to 
 		AbstractFVariable.uses() for myFV();
 
+	/**
+	 * \brief Collection attribute returning all algebraic variables (FVariables)
+	 * referenced in an equation.
+	 */
+	coll LinkedHashSet<FVariable> FAbstractEquation.algebraicVariables() 
+		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
+
+	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
+		!(getParent() instanceof FDerExp) && ((FVariable)myFV()).isAlgebraicVariable() to 
+		FAbstractEquation.algebraicVariables() for myFEquation();
+
+	/**
+	 * \brief Collection attribute returning all derivative variables (FDerivativeVariables)
+	 * referenced in an equation.
+	 */
+	coll LinkedHashSet<FDerivativeVariable> FAbstractEquation.derivativeVariables() 
+		[new LinkedHashSet<FDerivativeVariable>()] with add root FAbstractEquation;
+
+	FDerExp contributes (FDerivativeVariable)myFV() when !myFV().isUnknown() && 
+		((FDerivativeVariable)myFV()).isDerivativeVariable() to 
+		FAbstractEquation.derivativeVariables() for myFEquation();
+
+	/**
+	 * \brief Collection attribute returning all differentiated variables (FVariables)
+	 * referenced in an equation.
+	 */
+	coll LinkedHashSet<FVariable> FAbstractEquation.differentiatedVariables() 
+		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
+
+	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
+	    !(getParent() instanceof FDerExp) && ((FVariable)myFV()).isDifferentiatedVariable() to 
+		FAbstractEquation.differentiatedVariables() for myFEquation();
+
+	/**
+	 * \brief Get the differenetiated variabel (FVariable) corresponding to 
+	 * a derivative variable (FDerivativeVariable)
+	 */
+	syn FVariable FDerivativeVariable.myDifferentiatedVariable() =
+		myFClass().fullyQualifiedVariablesMap().get(getFQName().name());
+
+	/**
+	 * \brief Get the derivative variabel (FDerivativeVariable) corresponding to 
+	 * a differentiated variable (FVariable)
+	 */
+	syn FDerivativeVariable FVariable.myDerivativeVariable() =
+		(FDerivativeVariable)myFClass().fullyQualifiedVariablesMap().get("der("+name()+")");
+	
 }
 
 aspect LinearFVariables {
@@ -1212,7 +1261,13 @@ aspect FlatDiagnostics {
 		str.append(aliasDiagnostics());
 		
 		str.append("\n");  
+		
+		str.append(incidence());
 
+//		str.append("\n");
+		
+//		str.append(dersAndDiffs());
+		
 		return str.toString();
 	}
 
@@ -1226,7 +1281,7 @@ aspect FlatDiagnostics {
 				getAliasManager().getAliasSets()) {
 				n_elim += aliasSet.size() - 1;
 			}
-			str.append(n_elim + " variables can be eliminated");
+			str.append(n_elim + " variables can be eliminated\n");
 				
 		} else {
 			str.append("  Alias sets not computed.\n");
@@ -1335,6 +1390,51 @@ aspect FlatDiagnostics {
 		
 	}
 
+	public String FClass.incidence() {
+		StringBuffer str = new StringBuffer();
+		
+		LinkedHashSet<FVariable> h;
+		LinkedHashSet<FDerivativeVariable> dh;
+		
+		str.append("Incidence:\n");
+		
+		int i = 0;
+		for (FAbstractEquation fe : equations()) {
+			str.append(" eq " + i + ": ");
+			dh = fe.derivativeVariables();
+			for (FVariable fv : dh) {
+				str.append(fv.name() + " ");
+			}
+			h = fe.algebraicVariables();
+			for (FVariable fv : h) {
+				str.append(fv.name() + " ");
+			}
+			str.append("\n");
+			i++;
+		}
+		
+		return str.toString();
+		
+	}
+	
+	public String FClass.dersAndDiffs() {
+		StringBuffer str = new StringBuffer();
+		str.append("Derivatives and differentiated variables:\n");
+		for (FDerivativeVariable fdv : derivativeVariables()) {
+			if (fdv.myDifferentiatedVariable()!=null) {
+				str.append(" " + fdv.name() + ", " + fdv.myDifferentiatedVariable().name() + "\n");
+			}
+		}	
+		str.append("Differentiated variables and derivatives:\n");
+		for (FVariable fv : differentiatedRealVariables()) {
+			if (fv.myDerivativeVariable()!=null) {
+				str.append(" " + fv.name() + ", " + fv.myDerivativeVariable().name() + "\n");
+			}
+		}
+		return str.toString();
+		
+	}
+	
 }
 
 aspect FlatAlgorithmAPI {
