@@ -100,7 +100,7 @@ aspect XMLCodeGen {
 	}
 	
 	
-	public void FLogBinExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+	public void FBoolBinExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
 		String namespace = "exp";
 		String tag = this.xmlTag();
 		ASTNode left = getLeft();

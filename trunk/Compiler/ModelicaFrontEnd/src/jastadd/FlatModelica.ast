@@ -554,42 +554,47 @@ FNegExp : FUnaryExp;
 /**
  * \brief Base class for logical binary expressions.
  */
-abstract FLogBinExp : FBinExp;
+abstract FBoolBinExp : FBinExp;
 
 /**
  * \brief Less than expression.
  */
-FLtExp : FLogBinExp;
+FLtExp : FBoolBinExp;
 
 /**
  * \brief Less than or equal expression.
  */
-FLeqExp : FLogBinExp;
+FLeqExp : FBoolBinExp;
 
 /**
  * \brief Greater than expression.
  */
-FGtExp : FLogBinExp;
+FGtExp : FBoolBinExp;
 
 /**
  * \brief Greater than or equal expression.
  */
-FGeqExp : FLogBinExp;
+FGeqExp : FBoolBinExp;
 
 /**
  * \brief Equality expression.
  */
-FEqExp : FLogBinExp;
+FEqExp : FBoolBinExp;
 
 /**
  * \brief Inequality expression.
  */
-FNeqExp : FLogBinExp;
+FNeqExp : FBoolBinExp;
 
 /**
  * \brief Not expression.
  */
 FNotExp : FUnaryExp ::=;
+
+/**
+ * \brief Base class for binary boolean operators.
+ */
+abstract FLogBinExp : FBoolBinExp;
 
 /**
  * \brief Or expression.

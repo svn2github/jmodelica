@@ -85,7 +85,7 @@ aspect FlatTypeCheck {
 	  }
   }
   
-  public void FArtmBinExp.typeCheck() {
+  public void FBinExp.typeCheck() {
 	  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
 		  if (type().isUnknown()) {
 			  error("Type error in expression");	  

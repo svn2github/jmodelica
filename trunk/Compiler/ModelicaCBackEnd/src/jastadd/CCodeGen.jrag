@@ -354,7 +354,7 @@ aspect CCodeGen {
 		str.print("\"Divide by zero: "+prettyPrint("")+"\")");
 	}
 	
-	syn String FLogBinExp.macroC() = "ERROR_IN_CONDITIONAL_EXPRESSION";
+	syn String FBoolBinExp.macroC() = "ERROR_IN_CONDITIONAL_EXPRESSION";
 	eq FEqExp.macroC() = "COND_EXP_EQ";
 	eq FLtExp.macroC() = "COND_EXP_LT";
 	eq FLeqExp.macroC() = "COND_EXP_LE";
@@ -389,7 +389,7 @@ aspect CCodeGen {
 		p.toString(getFExp(),str,indent,o);
 	}
 	
-	public void FLogBinExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+	public void FBoolBinExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		
 		if (inNoEventExp()) {
 			str.append(macroC()+"(");
@@ -486,7 +486,7 @@ aspect CCodeGen {
 		}
 	}
 
-	public void FLogBinExp.genResidual_C(int i, String indent, PrintStream str) {
+	public void FBoolBinExp.genResidual_C(int i, String indent, PrintStream str) {
 		str.print(indent + "(*res)[" + i + "] = ");
 		getRight().prettyPrint_C(str,"");
 		str.print(" - (");

@@ -625,13 +625,13 @@ aspect FlatAPI {
 	syn int FClass.numEventIndicators() = numRelExpInEquations();
 	
     syn int FClass.numRelExpInEquations() = relExpInEquations().size();
-	coll ArrayList<FLogBinExp> FClass.relExpInEquations() 
-	  [new ArrayList<FLogBinExp>()] with add root FlatRoot;
-	FLogBinExp contributes
+	coll ArrayList<FBoolBinExp> FClass.relExpInEquations() 
+	  [new ArrayList<FBoolBinExp>()] with add root FlatRoot;
+	FBoolBinExp contributes
  		this when inEquationSection()
 	to FClass.relExpInEquations() for myFClass();	
 		
-	public int FLogBinExp.relExpInEquationsIndex() {
+	public int FBoolBinExp.relExpInEquationsIndex() {
 		return myFClass().relExpInEquations().indexOf(this);
 	}
 	
@@ -663,13 +663,13 @@ aspect FlatAPI {
 	syn int FClass.numInitialEventIndicators() = numRelExpInInitialEquations();
     syn int FClass.numRelExpInInitialEquations() = 
     	relExpInInitialEquations().size();
-	coll ArrayList<FLogBinExp> FClass.relExpInInitialEquations() 
-	    [new ArrayList<FLogBinExp>()] with add root FlatRoot;
-	FLogBinExp contributes
+	coll ArrayList<FBoolBinExp> FClass.relExpInInitialEquations() 
+	    [new ArrayList<FBoolBinExp>()] with add root FlatRoot;
+	FBoolBinExp contributes
  		this when inInitialEquationSection()
 	    to FClass.relExpInInitialEquations() for myFClass();	
 
-	public int FLogBinExp.relExpInInitialEquationsIndex() {
+	public int FBoolBinExp.relExpInInitialEquationsIndex() {
 		return myFClass().relExpInInitialEquations().indexOf(this);
 	}
  

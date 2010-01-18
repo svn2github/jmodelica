@@ -819,6 +819,10 @@ aspect ConstantEvaluation {
   eq FDotPowExp.ceval() = type().pow(getLeft().ceval(), getRight().ceval());
   
   eq FNegExp.ceval() = type().neg(getFExp().ceval());
+  
+  eq FAndExp.ceval() = type().and(getLeft().ceval(), getRight().ceval());
+  eq FOrExp.ceval()  = type().or(getLeft().ceval(), getRight().ceval());
+  eq FNotExp.ceval() = type().not(getFExp().ceval());
 
   eq FRealLitExp.ceval() = new CValueReal(Double.parseDouble(getUNSIGNED_NUMBER()));
   eq FIntegerLitExp.ceval() = new CValueInteger(Integer.parseInt(getUNSIGNED_INTEGER()));
@@ -1054,6 +1058,41 @@ aspect ConstantEvaluation {
 
 	syn CValue FSubscript.ceval() = new CValueUnknown();
 	eq FExpSubscript.ceval() = getFExp().ceval();
+
+  /**
+   * \brief And expression for constant values.
+   * 
+   * @param v1 Constant value of left operand.
+   * @param v2 Constant value of right operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FPrimitiveType.and(CValue v1, CValue v2) = 
+	  new CValueUnknown();
+  eq FBooleanScalarType.and(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.booleanValue() && v2.booleanValue());
+
+  /**
+   * \brief Or expression for constant values.
+   * 
+   * @param v1 Constant value of left operand.
+   * @param v2 Constant value of right operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FPrimitiveType.or(CValue v1, CValue v2) = 
+	  new CValueUnknown();
+  eq FBooleanScalarType.or(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.booleanValue() || v2.booleanValue());
+
+  /**
+   * \brief Not expression for constant value.
+   * 
+   * @param v Constant value of operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FPrimitiveType.not(CValue v) = 
+	  new CValueUnknown();
+  eq FBooleanScalarType.not(CValue v) = 
+	  new CValueBoolean(!v.booleanValue());
 	  
 }
 

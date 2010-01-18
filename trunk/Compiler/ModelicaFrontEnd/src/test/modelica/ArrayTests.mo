@@ -5522,6 +5522,342 @@ end ArrayPow17;
 
 
 
+model ArrayAnd1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayAnd1",
+         description="Scalarization of logical and: arrays of Booleans (literal)",
+         flatModel="
+fclass ArrayTests.ArrayAnd1
+ Boolean x[1];
+ Boolean x[2];
+equation
+ x[1] = true and true;
+ x[2] = true and false;
+end ArrayTests.ArrayAnd1;
+")})));
+
+ Boolean x[2] = { true, true } and { true, false };
+end ArrayAnd1;
+
+
+model ArrayAnd2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayAnd2",
+         description="Scalarization of logical and: arrays of Booleans (component)",
+         flatModel="
+fclass ArrayTests.ArrayAnd2
+ Boolean y[1];
+ Boolean y[2];
+ Boolean x[1];
+ Boolean x[2];
+equation
+ y[1] = true;
+ y[2] = false;
+ x[1] = true and y[1];
+ x[2] = true and y[2];
+end ArrayTests.ArrayAnd2;
+")})));
+
+ Boolean y[2] = { true, false };
+ Boolean x[2] = { true, true } and y;
+end ArrayAnd2;
+
+
+model ArrayAnd3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayAnd3",
+         description="Scalarization of logical and: different array sizes (literal)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 5569, column 17:
+  Type error in expression
+")})));
+
+ Boolean x[2] = { true, true } and { true, false, true };
+end ArrayAnd3;
+
+
+model ArrayAnd4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayAnd4",
+         description="Scalarization of logical and: different array sizes (component)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 5586, column 17:
+  Type error in expression
+")})));
+
+ Boolean y[3] = { true, false, true };
+ Boolean x[2] = { true, true } and y;
+end ArrayAnd4;
+
+
+model ArrayAnd5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayAnd5",
+         description="Scalarization of logical and: array and scalar (literal)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 5602, column 17:
+  Type error in expression
+")})));
+
+ Boolean x[2] = { true, true } and true;
+end ArrayAnd5;
+
+
+model ArrayAnd6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayAnd6",
+         description="Scalarization of logical and: array and scalar (component)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 5619, column 17:
+  Type error in expression
+")})));
+
+ Boolean y = true;
+ Boolean x[2] = { true, true } and y;
+end ArrayAnd6;
+
+
+model ArrayAnd7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayAnd7",
+         description="Scalarization of logical and: Boolean[2] and Integer[2] (literal)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 5635, column 17:
+  Type error in expression
+")})));
+
+ Boolean x[2] = { true, true } and { 1, 0 };
+end ArrayAnd7;
+
+
+model ArrayAnd8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayAnd8",
+         description="Scalarization of logical or: Boolean[2] and Integer[2] (component)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 5652, column 17:
+  Type error in expression
+")})));
+
+ Integer y[2] = { 1, 0 };
+ Boolean x[2] = { true, true } and y;
+end ArrayAnd8;
+
+
+model ArrayAnd9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayAnd9",
+         description="Scalarization of logical and: constant array",
+         flatModel="
+fclass ArrayTests.ArrayAnd9
+ constant Boolean y[1] = true and true;
+ constant Boolean y[2] = false and true;
+ constant Boolean y[3] = false and false;
+ Boolean x[1];
+ Boolean x[2];
+ Boolean x[3];
+equation
+ x[1] = true;
+ x[2] = false;
+ x[3] = false;
+end ArrayTests.ArrayAnd9;
+")})));
+
+ constant Boolean y[3] = { true, false, false } and { true, true, false };
+ Boolean x[3] = y;
+end ArrayAnd9;
+
+
+
+model ArrayOr1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOr1",
+         description="Scalarization of logical or: arrays of Booleans",
+         flatModel="
+fclass ArrayTests.ArrayOr1
+ Boolean x[1];
+ Boolean x[2];
+equation
+ x[1] = true or true;
+ x[2] = true or false;
+end ArrayTests.ArrayOr1;
+")})));
+
+ Boolean x[2] = { true, true } or { true, false };
+end ArrayOr1;
+
+
+model ArrayOr2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOr2",
+         description="Scalarization of logical or: arrays of Booleans",
+         flatModel="
+fclass ArrayTests.ArrayOr2
+ Boolean y[1];
+ Boolean y[2];
+ Boolean x[1];
+ Boolean x[2];
+equation
+ y[1] = true;
+ y[2] = false;
+ x[1] = true or y[1];
+ x[2] = true or y[2];
+end ArrayTests.ArrayOr2;
+")})));
+
+ Boolean y[2] = { true, false };
+ Boolean x[2] = { true, true } or y;
+end ArrayOr2;
+
+
+model ArrayOr3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayOr3",
+         description="Scalarization of logical or: different array sizes (literal)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 5723, column 17:
+  Type error in expression
+")})));
+
+ Boolean x[2] = { true, true } or { true, false, true };
+end ArrayOr3;
+
+
+model ArrayOr4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayOr4",
+         description="Scalarization of logical or: different array sizes (component)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 5740, column 17:
+  Type error in expression
+")})));
+
+ Boolean y[3] = { true, false, true };
+ Boolean x[2] = { true, true } or y;
+end ArrayOr4;
+
+
+model ArrayOr5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayOr5",
+         description="Scalarization of logical or: array and scalar (literal)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 5759, column 17:
+  Type error in expression
+")})));
+
+ Boolean x[2] = { true, true } or true;
+end ArrayOr5;
+
+
+model ArrayOr6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayOr6",
+         description="Scalarization of logical or: array and scalar (component)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 5776, column 17:
+  Type error in expression
+")})));
+
+ Boolean y = true;
+ Boolean x[2] = { true, true } or y;
+end ArrayOr6;
+
+
+model ArrayOr7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayOr7",
+         description="Scalarization of logical or: Boolean[2] or Integer[2] (literal)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 5792, column 17:
+  Type error in expression
+")})));
+
+ Boolean x[2] = { true, true } or { 1, 0 };
+end ArrayOr7;
+
+
+model ArrayOr8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayOr8",
+         description="Scalarization of logical or: Boolean[2] or Integer[2] (component)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 5809, column 17:
+  Type error in expression
+")})));
+
+ Integer y[2] = { 1, 0 };
+ Boolean x[2] = { true, true } or y;
+end ArrayOr8;
+
+
+model ArrayOr9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOr9",
+         description="Scalarization of logical or: constant array",
+         flatModel="
+fclass ArrayTests.ArrayOr9
+ constant Boolean y[1] = true or true;
+ constant Boolean y[2] = true or false;
+ constant Boolean y[3] = false or false;
+ Boolean x[1];
+ Boolean x[2];
+ Boolean x[3];
+equation
+ x[1] = true;
+ x[2] = true;
+ x[3] = false;
+end ArrayTests.ArrayOr9;
+")})));
+
+ constant Boolean y[3] = { true, true, false } or { true, false, false };
+ Boolean x[3] = y;
+end ArrayOr9;
+
+
+
 /* -- Standard test series for scalarisation of operators on arrays -- */
 /* 
 model ArrayAdd1

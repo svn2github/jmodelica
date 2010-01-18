@@ -112,7 +112,7 @@ aspect RootAccess {
 
 aspect DebugPrint {
 
-	public int ASTNode.printLevel = 0;
+	public static final int ASTNode.printLevel = 0;
 	public void ASTNode.debugPrint(Object msg) {
 		if (printLevel>0)
 			System.out.println(msg);
