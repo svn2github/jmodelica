@@ -138,7 +138,13 @@ aspect FlatTypeAnalysis {
 		return getLeft().type();
 	}
 	
-	eq FBoolBinExp.type() = fBooleanScalarType();
+	eq FRelExp.type() {
+		FPrimitiveType left  = getLeft().type();
+		if (left.equivalentTo(getRight().type()) && left.isScalar())
+			return fBooleanScalarType();
+		else
+			return fUnknownType();
+	}
 	eq FLogBinExp.type() {
 		FPrimitiveType left = getLeft().type();
 		if (left.typeCompatible(getRight().type()) && left.isBoolean())

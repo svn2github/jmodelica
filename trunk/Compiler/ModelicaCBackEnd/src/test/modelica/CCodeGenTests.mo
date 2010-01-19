@@ -198,6 +198,43 @@ equation
 end CCodeGenTest7;
 
 
+
+model CCodeGenDotOp
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenDotOp",
+         description="C code generation of dot operators (.+, .*, etc)",
+         template="
+$C_variable_aliases$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+#define _x_1_1_ ((*(jmi->z))[jmi->offs_w+0])
+#define _x_1_2_ ((*(jmi->z))[jmi->offs_w+1])
+#define _x_2_1_ ((*(jmi->z))[jmi->offs_w+2])
+#define _x_2_2_ ((*(jmi->z))[jmi->offs_w+3])
+#define _y_1_1_ ((*(jmi->z))[jmi->offs_w+4])
+#define _y_1_2_ ((*(jmi->z))[jmi->offs_w+5])
+#define _y_2_1_ ((*(jmi->z))[jmi->offs_w+6])
+#define _y_2_2_ ((*(jmi->z))[jmi->offs_w+7])
+#define time ((*(jmi->z))[jmi->offs_t])
+
+    (*res)[0] = jmi_divide(( _y_1_1_ ) * ( _y_1_1_ ),pow(_y_1_1_ + _y_1_1_ - ( 2 ),_y_1_1_),\"Divide by zero: ( ( y[1,1] ) .* ( y[1,1] ) ) ./ ( ( y[1,1] .+ y[1,1] .- ( 2 ) ) .^ y[1,1] )\") - (_x_1_1_);
+    (*res)[1] = jmi_divide(( _y_1_2_ ) * ( _y_1_2_ ),pow(_y_1_2_ + _y_1_2_ - ( 2 ),_y_1_2_),\"Divide by zero: ( ( y[1,2] ) .* ( y[1,2] ) ) ./ ( ( y[1,2] .+ y[1,2] .- ( 2 ) ) .^ y[1,2] )\") - (_x_1_2_);
+    (*res)[2] = jmi_divide(( _y_2_1_ ) * ( _y_2_1_ ),pow(_y_2_1_ + _y_2_1_ - ( 2 ),_y_2_1_),\"Divide by zero: ( ( y[2,1] ) .* ( y[2,1] ) ) ./ ( ( y[2,1] .+ y[2,1] .- ( 2 ) ) .^ y[2,1] )\") - (_x_2_1_);
+    (*res)[3] = jmi_divide(( _y_2_2_ ) * ( _y_2_2_ ),pow(_y_2_2_ + _y_2_2_ - ( 2 ),_y_2_2_),\"Divide by zero: ( ( y[2,2] ) .* ( y[2,2] ) ) ./ ( ( y[2,2] .+ y[2,2] .- ( 2 ) ) .^ y[2,2] )\") - (_x_2_2_);
+    (*res)[4] = 1 - (_y_1_1_);
+    (*res)[5] = 2 - (_y_1_2_);
+    (*res)[6] = 3 - (_y_2_1_);
+    (*res)[7] = 4 - (_y_2_2_);
+")})));
+
+ Real x[2,2] = y .* y ./ (y .+ y .- 2) .^ y;
+ Real y[2,2] = {{1,2},{3,4}};
+end CCodeGenDotOp;
+
+
+
 /* ====================== Function tests =================== */
 
 /* Functions used in tests */

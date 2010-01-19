@@ -133,4 +133,176 @@ Semantic error at line 130, column 49:
 	end TypeTest6;
 
 
+model TypeRel1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="TypeRel1",
+         description="Type checks of relational operators: Real/Real",
+         flatModel="
+fclass TypeTests.TypeRel1
+ Boolean eq = 1.0 == 2.0;
+ Boolean ne = 1.0 <> 2.0;
+ Boolean gt = 1.0 > 2.0;
+ Boolean ge = 1.0 >= 2.0;
+ Boolean lt = 1.0 < 2.0;
+ Boolean le = 1.0 <= 2.0;
+end TypeTests.TypeRel1;
+")})));
+
+ Boolean eq = 1.0 == 2.0;
+ Boolean ne = 1.0 <> 2.0;
+ Boolean gt = 1.0 >  2.0;
+ Boolean ge = 1.0 >= 2.0;
+ Boolean lt = 1.0 <  2.0;
+ Boolean le = 1.0 <= 2.0;
+end TypeRel1;
+
+
+model TypeRel2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="TypeRel2",
+         description="Type checks of relational operators: Real/Integer",
+         flatModel="
+fclass TypeTests.TypeRel2
+ Boolean eq = 1 == 2.0;
+ Boolean ne = 1 <> 2.0;
+ Boolean gt = 1 > 2.0;
+ Boolean ge = 1 >= 2.0;
+ Boolean lt = 1 < 2.0;
+ Boolean le = 1 <= 2.0;
+end TypeTests.TypeRel2;
+")})));
+
+ Boolean eq = 1 == 2.0;
+ Boolean ne = 1 <> 2.0;
+ Boolean gt = 1 >  2.0;
+ Boolean ge = 1 >= 2.0;
+ Boolean lt = 1 <  2.0;
+ Boolean le = 1 <= 2.0;
+end TypeRel2;
+
+
+model TypeRel3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="TypeRel3",
+         description="Type checks of relational operators: Boolean/Boolean",
+         flatModel="
+fclass TypeTests.TypeRel3
+ Boolean eq = true == false;
+ Boolean ne = true <> false;
+ Boolean gt = true > false;
+ Boolean ge = true >= false;
+ Boolean lt = true < false;
+ Boolean le = true <= false;
+end TypeTests.TypeRel3;
+")})));
+
+ Boolean eq = true == false;
+ Boolean ne = true <> false;
+ Boolean gt = true >  false;
+ Boolean ge = true >= false;
+ Boolean lt = true <  false;
+ Boolean le = true <= false;
+end TypeRel3;
+
+
+model TypeRel4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="TypeRel4",
+         description="Type checks of relational operators: String/String",
+         flatModel="
+fclass TypeTests.TypeRel4
+ Boolean eq = \"1.0\" == \"2.0\";
+ Boolean ne = \"1.0\" <> \"2.0\";
+ Boolean gt = \"1.0\" > \"2.0\";
+ Boolean ge = \"1.0\" >= \"2.0\";
+ Boolean lt = \"1.0\" < \"2.0\";
+ Boolean le = \"1.0\" <= \"2.0\";
+end TypeTests.TypeRel4;
+")})));
+
+ Boolean eq = "1.0" == "2.0";
+ Boolean ne = "1.0" <> "2.0";
+ Boolean gt = "1.0" >  "2.0";
+ Boolean ge = "1.0" >= "2.0";
+ Boolean lt = "1.0" <  "2.0";
+ Boolean le = "1.0" <= "2.0";
+end TypeRel4;
+
+
+model TypeRel5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="TypeRel5",
+         description="Type checks of relational operators: Real[1]/Real[1]",
+         errorMessage="
+6 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 222, column 15:
+  Type error in expression
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 223, column 15:
+  Type error in expression
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 224, column 15:
+  Type error in expression
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 225, column 15:
+  Type error in expression
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 226, column 15:
+  Type error in expression
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 227, column 15:
+  Type error in expression
+")})));
+
+ Boolean eq = {1.0} == {2.0};
+ Boolean ne = {1.0} <> {2.0};
+ Boolean gt = {1.0} >  {2.0};
+ Boolean ge = {1.0} >= {2.0};
+ Boolean lt = {1.0} <  {2.0};
+ Boolean le = {1.0} <= {2.0};
+end TypeRel5;
+
+
+model TypeRel6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="TypeRel6",
+         description="Type checks of relational operators: Real/String",
+         errorMessage="
+6 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 258, column 15:
+  Type error in expression
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 259, column 15:
+  Type error in expression
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 260, column 15:
+  Type error in expression
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 261, column 15:
+  Type error in expression
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 262, column 15:
+  Type error in expression
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 263, column 15:
+  Type error in expression
+")})));
+
+ Boolean eq = 1.0 == "2.0";
+ Boolean ne = 1.0 <> "2.0";
+ Boolean gt = 1.0 >  "2.0";
+ Boolean ge = 1.0 >= "2.0";
+ Boolean lt = 1.0 <  "2.0";
+ Boolean le = 1.0 <= "2.0";
+end TypeRel6;
+
+
 end TypeTests;

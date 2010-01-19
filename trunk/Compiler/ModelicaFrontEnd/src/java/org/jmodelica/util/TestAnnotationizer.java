@@ -129,7 +129,7 @@ abstract public class TestAnnotationizer {
 	public TestAnnotationizer(String filePath, String className, String description, String data) throws Exception {
 		this.filePath = filePath;
 		this.className = className;
-		this.description = description;
+		this.description = prepare(description);
 		testName = className.substring(className.lastIndexOf('.') + 1);
 		
 		String filesep = File.separator;
@@ -187,6 +187,12 @@ abstract public class TestAnnotationizer {
 	protected int getLine() throws Exception {
 		return root.getProgram().getInstProgramRoot().simpleLookupInstClassDecl(className).beginLine();
 	}
+	
+	protected String prepare(String str) {
+		String s1 = str.replaceAll("\\\\", "\\\\");
+		String s2 = s1.replaceAll("\"", "\\\"");
+		return str.replaceAll("\\\\", "\\\\").replaceAll("\"", "\\\\\"");	
+	}
 
 	protected FClass compile() throws Exception {
 		InstClassDecl icl = instantiate();		
@@ -230,12 +236,12 @@ abstract public class TestAnnotationizer {
 
 		public CCodeGenTestCase(String filePath, String className, String description, String data) throws Exception {
 			super(filePath, className, description, data);
-			template = data.replaceAll("\\\\n", "\n");
+			template = prepare(data.replaceAll("\\\\n", "\n"));
 			FClass fc = compile();
 			CGenerator cgenerator = new CGenerator(new PrettyPrinter(), '$', fc);
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			cgenerator.generate(new StringReader(template), new PrintStream(os));
-			code = os.toString();
+			code = prepare(os.toString());
 		}
 		
 		public static void usage(String cl, String extra) {
@@ -263,7 +269,7 @@ abstract public class TestAnnotationizer {
 		@Override
 		protected void printSpecific(PrintStream out, String indent) throws Exception {
 			out.println(indent + "flatModel=\"");
-			fc.prettyPrint(out, "");
+			out.print(prepare(fc.prettyPrint("")));
 			out.print("\"");
 		}
 		
@@ -293,7 +299,7 @@ abstract public class TestAnnotationizer {
 				for (Problem p : e.getProblems()) {
 					str.append(p.toString()+"\n");
 				}
-				message = str.toString();
+				message = prepare(str.toString());
 			}
 		}
 

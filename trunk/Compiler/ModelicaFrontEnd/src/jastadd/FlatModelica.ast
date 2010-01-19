@@ -557,34 +557,39 @@ FNegExp : FUnaryExp;
 abstract FBoolBinExp : FBinExp;
 
 /**
+ * \brief Base class for relational expressions.
+ */
+abstract FRelExp : FBoolBinExp;
+
+/**
  * \brief Less than expression.
  */
-FLtExp : FBoolBinExp;
+FLtExp : FRelExp;
 
 /**
  * \brief Less than or equal expression.
  */
-FLeqExp : FBoolBinExp;
+FLeqExp : FRelExp;
 
 /**
  * \brief Greater than expression.
  */
-FGtExp : FBoolBinExp;
+FGtExp : FRelExp;
 
 /**
  * \brief Greater than or equal expression.
  */
-FGeqExp : FBoolBinExp;
+FGeqExp : FRelExp;
 
 /**
  * \brief Equality expression.
  */
-FEqExp : FBoolBinExp;
+FEqExp : FRelExp;
 
 /**
  * \brief Inequality expression.
  */
-FNeqExp : FBoolBinExp;
+FNeqExp : FRelExp;
 
 /**
  * \brief Not expression.

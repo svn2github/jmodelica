@@ -6054,7 +6054,6 @@ end ArrayNeg5;
 
 
 
-
 /* -- Standard test series for scalarisation of operators on arrays -- */
 /* 
 model ArrayAdd1
