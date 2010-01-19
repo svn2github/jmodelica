@@ -61,7 +61,7 @@ aspect PredefinedTypes {
     	builtInDef += "parameter StringType quantity=\"\";\n";
     	builtInDef += "parameter IntegerType min=-1e20, max=1e20;\n";
     	builtInDef += "parameter IntegerType start=0;\n";
-    	builtInDef += "parameter BooleanType fixed=\"false\";\n";
+    	builtInDef += "parameter BooleanType fixed=false;\n";
     	builtInDef += "end Integer;\n";
     	
 		builtInDef += "type Boolean\n"; 

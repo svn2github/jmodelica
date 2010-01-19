@@ -5957,6 +5957,103 @@ end ArrayNot5;
 
 
 
+model ArrayNeg1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayNeg1",
+         description="Scalarization of negation: array of Integer (literal)",
+         flatModel="
+fclass ArrayTests.ArrayNeg1
+ Integer x[1];
+ Integer x[2];
+ Integer x[3];
+equation
+ x[1] =  - ( 1 );
+ x[2] =  - ( 0 );
+ x[3] =  - (  - ( 1 ) );
+end ArrayTests.ArrayNeg1;
+")})));
+
+ Integer x[3] = -{ 1, 0, -1 };
+end ArrayNeg1;
+
+
+model ArrayNeg2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ArrayNeg2",
+         description="Scalarization of negation: array of Integer (component)",
+         flatModel="
+fclass ArrayTests.ArrayNeg2
+ Integer x[3] =  - ( y );
+ Integer y[3] = {1,0, - ( 1 )};
+end ArrayTests.ArrayNeg2;
+")})));
+
+ Integer x[3] = -y;
+ Integer y[3] = { 1, 0, -1 };
+end ArrayNeg2;
+
+
+model ArrayNeg3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayNeg3",
+         description="Scalarization of negation: constant evaluation",
+         flatModel="
+fclass ArrayTests.ArrayNeg3
+ Integer x[1];
+ Integer x[2];
+ Integer x[3];
+ constant Integer y[1] =  - ( 1 );
+ constant Integer y[2] =  - ( 0 );
+ constant Integer y[3] =  - (  - ( 1 ) );
+equation
+ x[1] = -1;
+ x[2] = 0;
+ x[3] = 1;
+end ArrayTests.ArrayNeg3;
+")})));
+
+ Integer x[3] = y;
+ constant Integer y[3] = -{ 1, 0, -1 };
+end ArrayNeg3;
+
+
+model ArrayNeg4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayNeg4",
+         description="Scalarization of negation: -Boolean[2] (literal)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6029, column 17:
+  Type error in expression
+")})));
+
+ Boolean x[2] = -{ true, false };
+end ArrayNeg4;
+
+
+model ArrayNeg5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayNeg5",
+         description="Scalarization of negation: -Boolean[2] (component)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6045, column 17:
+  Type error in expression
+")})));
+
+ Boolean x[2] = -y;
+ Boolean y[2] = { true, false };
+end ArrayNeg5;
+
+
+
 
 /* -- Standard test series for scalarisation of operators on arrays -- */
 /* 
