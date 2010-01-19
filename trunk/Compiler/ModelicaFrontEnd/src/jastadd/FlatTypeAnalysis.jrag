@@ -145,6 +145,7 @@ aspect FlatTypeAnalysis {
 		else
 			return fUnknownType();
 	}
+	eq FNotExp.type() = getFExp().type().isBoolean() ? getFExp().type() : fUnknownType();
 
 	eq FRealLitExp.type() = fRealScalarType();
 	eq FIntegerLitExp.type() = fIntegerScalarType();
@@ -156,31 +157,14 @@ aspect FlatTypeAnalysis {
 	eq FArray.type() {
 		int[] size = size().clone();
 		// Check that the types of the elements are consistent
-		//System.out.println("FArray.type() hej!");
 		FPrimitiveType t = getFExp(0).type();
-		for (int i=1;i<getNumFExp();i++) {
-			if (!t.equivalentTo(getFExp(i).type())) {
-				//System.out.println("FArray.type() hoj!");
+		for (int i = 1; i < getNumFExp(); i++) {
+			if (!t.equivalentTo(getFExp(i).type())) 
 				return fUnknownType();
-			}
-			if (t.isNumeric()) {
-				//System.out.println("FArray.type() hopp!");
+			if (t.isNumeric()) 
 				t = t.binaryNumericPromotion(getFExp(i).type());
-			}
 		}
-		if (t.isReal()) {
-			return fRealArrayType(size);
-		} else if (t.isInteger()) {
-			return fIntegerArrayType(size);
-		} if (t.isBoolean()) {
-			return fBooleanArrayType(size);
-		} if (t.isString()) {
-			return fStringArrayType(size);
-		} else {
-			//System.out.println("FArray.type() oj!");
-			return fUnknownType();
-		}
-		
+		return t.arrayType(size);
 	}
 
 	// TODO: Assumes same general functionality as zeros and ones - may need change for new subclasses

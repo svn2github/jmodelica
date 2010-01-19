@@ -177,6 +177,7 @@ aspect Arrays {
 	eq FInfArgsFunctionCall.ndims() = getNumFExp();
 	
 	eq FBinExp.ndims() = getLeft().ndims();
+	eq FUnaryExp.ndims() = getFExp().ndims();
 	eq FArtmBinExp.ndims() = Math.max(getLeft().ndims(), getRight().ndims());
 	
 	eq FDivExp.ndims() = getLeft().ndims();
@@ -404,6 +405,7 @@ aspect Arrays {
 	eq FInstAccessExp.size() = getInstAccess().size();
 	
 	eq FBinExp.size() = getLeft().size();
+	eq FUnaryExp.size() = getFExp().size();
 	eq FArtmBinExp.size() = getLeft().isArray() ? getLeft().size() : getRight().size();
 
 	eq FDivExp.size() = getLeft().size();
@@ -620,6 +622,18 @@ aspect Arrays {
 			Array res   = new Array(indices());
 			for (Index i : res.indices())
 				res.set(i, createNode((FExp) left.get(i).fullCopy(), (FExp) right.get(i).fullCopy()));
+			return res;
+		} else {
+			return new ScalarAsArray(this);
+		}
+	}
+	
+	eq FUnaryExp.getArray() {
+		if (isArray()) {
+			Array src = getFExp().getArray();
+			Array res = new Array(indices());
+			for (Index i : res.indices())
+				res.set(i, createNode((FExp) src.get(i).fullCopy()));
 			return res;
 		} else {
 			return new ScalarAsArray(this);

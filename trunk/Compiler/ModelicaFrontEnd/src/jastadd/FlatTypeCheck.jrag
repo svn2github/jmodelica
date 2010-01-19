@@ -93,6 +93,14 @@ aspect FlatTypeCheck {
 	  }
   }
   
+  public void FUnaryExp.typeCheck() {
+	  if (!getFExp().type().isUnknown()) {
+		  if (type().isUnknown()) {
+			  error("Type error in expression");	  
+		  }
+	  }
+  }
+  
   // TODO: Add typeCheck for other FExp types (e.g. FZeros)
 
   
