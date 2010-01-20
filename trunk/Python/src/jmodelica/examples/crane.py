@@ -36,7 +36,7 @@ def run_demo(with_plots=True):
     mc.compile_model(mofile,model_name,target='ipopt')
 
     # Load the dynamic library and XML data
-    model=jmi.Model(model_name)
+    model=jmi.Model(model_name.replace('.', '_'))
 
     # Create DAE initialization object.
     init_nlp = NLPInitialization(model)

@@ -193,6 +193,8 @@ aspect Arrays {
 		return left + right - 2;
 	}
 	
+	eq FTranspose.ndims() = getFExp().ndims();
+	
 	/**
 	 * \brief Check if multiplication is equivalent with an element-wise multiplication.
 	 * 
@@ -344,10 +346,18 @@ aspect Arrays {
 		int s[] = new int[ndims()];
 		int index = 0;
 		for (FSubscript fs : getFSubscripts()) {
-			s[index++] = fs.ceval().intValue();
+			s[index++] = fs.declarationSize();
 		}
 		return s;
 	}
+	
+	/**
+	 * \brief Get the size of the dimension denoted by this subscript when used 
+	 *        in a declaration. -1 means unknown size (legal in functions).
+	 */
+	syn int FSubscript.declarationSize();
+	eq FExpSubscript.declarationSize()   = ceval().intValue();
+	eq FColonSubscript.declarationSize() = -1;
 
 	/**
 	 * \brief Get the array sizes when the array subscripts are used in an
@@ -422,6 +432,14 @@ aspect Arrays {
 		if (getRight().ndims() == 2)
 			si[si.length - 1] = getRight().size()[1];
 		return si;
+	}
+	
+	eq FTranspose.size() {
+		int[] size = getFExp().size().clone();
+		int temp = size[0];
+		size[0] = size[1];
+		size[1] = temp;
+		return size;
 	}
 	
  	eq FRangeExp.size() {
@@ -687,6 +705,21 @@ aspect Arrays {
 		return res;
 	}
 	
+	eq FTranspose.getArray() {
+		Array inner = getFExp().getArray();
+		Array res = new Array(indices());
+		int[] ind = new int[ndims()];
+		Index ti = new Index(ind);
+		for (Index i : res.indices()) {
+			ind[0] = i.index()[1];
+			ind[1] = i.index()[0];
+			for (int j = 2; j < ind.length; j++)
+				ind[j] = i.index()[j];
+			res.set(i, inner.get(ti));
+		}
+		return res;
+	}
+	
 	eq FIdentity.getArray() {
 		Array arr = new Array(indices());
 		for (Index i : arr.indices())
@@ -729,14 +762,11 @@ aspect Arrays {
 	}
 	
 	eq FIdUseExp.getArray() {
-		System.out.println("FIdUseExp.getArray() begin: " + isArray());
 		if (isArray()) {
 			/*
 			 * Based on an array access, say x, corresponding to the declaration
 			 * Real x[2], the array {x[1],x[2]} is generated. 
 			 */
-			System.out.println("FIdUseExp.getArray(): " + size().length);
-			
 			Array array = new Array(indices());
 			Indices ind = array.indices();
 			for (Index i : ind) {
@@ -756,13 +786,11 @@ aspect Arrays {
 	boolean InstAccess.scalarized = false;
 	
 	eq FInstAccessExp.getArray() {
-		//System.out.println("FInstAccessExp.getArray() begin: " + isArray());
 		if (isArray()) {
 			/*
 			 * Based on an array access, say x, corresponding to the declaration
 			 * Real x[2], the array {x[1],x[2]} is generated. 
 			 */
-			//System.out.println("FInstAccessExp.getArray(): " + size().length);
 			Array array = new Array(indices());
 			Indices ind = array.indices();
 			for (Index i : ind) {
@@ -1016,7 +1044,7 @@ aspect ArrayIndices {
 		 * \brief Sets the element referenced by <code>i</code> in this Array to <code>exp</code>.
 		 */
 		public void set(Index i, FExp exp) {
-			setFExp(exp, i.internal(indices));
+			setFExp((FExp) exp.unboundCopy(), i.internal(indices));
 		}
 		
 		/**
@@ -1161,7 +1189,7 @@ aspect ArrayIndices {
 		/**
 		 * \brief Construct an Index representing the indices given in <code>ind</code>.
 		 */
-		protected Index(int[] ind) {
+		public Index(int[] ind) {
 			index = ind;
 		}
 		

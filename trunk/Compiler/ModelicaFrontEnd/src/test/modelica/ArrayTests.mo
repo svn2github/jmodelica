@@ -1647,6 +1647,34 @@ equation
 end ArrayMulOK12;
 
 
+model ArrayMulOK13
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayMulOK13",
+         description="Scalarization of multiplication: check that type() of Real[3] * Real[3] is correct",
+         flatModel="
+fclass ArrayTests.ArrayMulOK13
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real y[1];
+ Real y[2];
+ Real y[3];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 3;
+ y[1] = ( ( x[1] ) * ( x[1] ) + ( x[2] ) * ( x[2] ) + ( x[3] ) * ( x[3] ) ) * ( x[1] );
+ y[2] = ( ( x[1] ) * ( x[1] ) + ( x[2] ) * ( x[2] ) + ( x[3] ) * ( x[3] ) ) * ( x[2] );
+ y[3] = ( ( x[1] ) * ( x[1] ) + ( x[2] ) * ( x[2] ) + ( x[3] ) * ( x[3] ) ) * ( x[3] );
+end ArrayTests.ArrayMulOK13;
+")})));
+
+ Real x[3] = { 1, 2, 3 };
+ Real y[3] = x * x * x;
+end ArrayMulOK13;
+
+
 model ArrayMulErr1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(

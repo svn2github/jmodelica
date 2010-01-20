@@ -796,8 +796,10 @@ InstDefaultArgument : InstFunctionArgument ::= [FExp];
 // Built in functions
 /**
  * \brief Base class for calls to all built-in functions. 
+ *
+ * OriginalArg list is empty in flattened tree.
  */
-abstract FBuiltInFunctionCall : FAbstractFunctionCall;
+abstract FBuiltInFunctionCall : FAbstractFunctionCall ::= /OriginalArg:InstFunctionArgument*/;
 
 /**
  * \brief Base class for calls to all built-in functions for which the

@@ -711,15 +711,14 @@ aspect InstanceErrorCheck {
 	public void FBuiltInFunctionCall.collectErrors() {
 	    if (!errorChecked) {
 	    	errorChecked = true;
-	    	for (InstFunctionArgument arg : originalArgs)
-	    		arg.collectErrors();
+	    	getOriginalArgs().collectErrors();
 	    }
     	super.collectErrors();
 	}
 	
 	public void FInfArgsFunctionCall.collectErrors() {
-    	errorChecked = true;
-    	super.collectErrors();
+		// Don't error check children
+		allChecks();
 	}
  
 	protected boolean InstNamedArgument.errorChecked = false;

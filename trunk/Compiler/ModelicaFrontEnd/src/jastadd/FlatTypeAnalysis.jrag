@@ -116,9 +116,14 @@ aspect FlatTypeAnalysis {
 		if (isElementWise())
 			return super.type();
 		int[] left = getLeft().size();
-		if (left[left.length - 1] != getRight().size()[0])
+		int[] right = getRight().size();
+		if (left[left.length - 1] != right[0])
 			return fUnknownType();
-		return getLeft().type().binaryScalarNumericPromotion(getRight().type()).arrayType(size());
+		FPrimitiveType res = getLeft().type().binaryScalarNumericPromotion(getRight().type());
+		if (left.length == 1 && right.length == 1) 
+			return res;
+		else
+			return res.arrayType(size());
 	}
 	
 	eq FPowExp.type() {
@@ -135,6 +140,8 @@ aspect FlatTypeAnalysis {
 			return fUnknownType();
 		return getLeft().type();
 	}
+	
+	eq FTranspose.type() = (getFExp().ndims() < 2) ? fUnknownType() : getFExp().type().arrayType(size());
 	
 	eq FRelExp.type() {
 		FPrimitiveType left  = getLeft().type();

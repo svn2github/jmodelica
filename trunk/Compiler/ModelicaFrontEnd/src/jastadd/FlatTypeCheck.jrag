@@ -141,7 +141,7 @@ aspect FlatTypeCheck {
   
   public void FInfArgsFunctionCall.typeCheck() {
       super.typeCheck();
-      for (InstFunctionArgument arg : originalArgs) {
+      for (InstFunctionArgument arg : getOriginalArgs()) {
     	  FExp exp = arg.getFExp();
           if (!exp.type().isUnknown() && !typeOfArgIsOK(exp)) {
               exp.error("Argument of " + getBuiltInName() + "() is not " + getOKArgTypeString());
@@ -176,7 +176,12 @@ aspect FlatTypeCheck {
   
   public void InstFunctionArgument.typeCheck() {
 	  if (!getFExp().type().isUnknown() && !getBoundInput().type().isUnknown()) {
-		  if (!getBoundInput().type().typeCompatible(getFExp().type())) {
+		  boolean typeOk;
+		  if (argumentDefinedTypeValid()) 
+			  typeOk = getBoundInput().type().typeCompatible(getFExp().type());
+		  else
+			  typeOk = argumentTypeValid(getFExp().type());
+		  if (!typeOk) {
 			  error("Types of " + argumentDesc() + " and input " + getBoundInput().name() + 
 					  " are not compatible");
 		  }
@@ -202,5 +207,21 @@ aspect FlatTypeCheck {
   protected String InstNamedArgument.argumentDesc() {
 	  return "named argument " + getName().prettyPrint("");
   }
+  
+  /**
+   * \brief Check if the type defined for this argument in the built-in function list 
+   *        is valid.
+   */
+  inh boolean InstFunctionArgument.argumentDefinedTypeValid();
+  eq FAbstractFunctionCall.getChild().argumentDefinedTypeValid() = true;
+  eq FTranspose.getChild().argumentDefinedTypeValid()            = false;
+  
+  /**
+   * \brief Check if the type supplied is valid for this argument. Assumes that the 
+   *        type defined in the built-in function list isn't valid.
+   */
+  inh boolean InstFunctionArgument.argumentTypeValid(FPrimitiveType type);
+  eq FAbstractFunctionCall.getChild().argumentTypeValid(FPrimitiveType type) = false;
+  eq FTranspose.getChild().argumentTypeValid(FPrimitiveType type)            = type.ndims() >= 2;
   
 }

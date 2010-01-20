@@ -212,14 +212,13 @@ aspect InheritedFactoryMethods {
 	public FStringLitExp       FStringLitExp.createEmptyNode()       { return new FStringLitExp(); }
 	
 	// Misc expressions
-	public FSumRedExp FSumRedExp.createEmptyNode() { return new FSumRedExp(); }
-	public FSumExp    FSumExp.createEmptyNode()    { return new FSumExp(); }
-	public FIfExp     FIfExp.createEmptyNode()     { return new FIfExp(); }
-	public FElseIfExp FElseIfExp.createEmptyNode() { return new FElseIfExp(); }
-	public FNoExp     FNoExp.createEmptyNode()     { return new FNoExp(); }
-	public FTimeExp   FTimeExp.createEmptyNode()   { return new FTimeExp(); }
-	
-	public FNoEventExp FNoEventExp.createEmptyNode() {return new FNoEventExp(); }
+	public FSumRedExp  FSumRedExp.createEmptyNode()  { return new FSumRedExp(); }
+	public FSumExp     FSumExp.createEmptyNode()     { return new FSumExp(); }
+	public FIfExp      FIfExp.createEmptyNode()      { return new FIfExp(); }
+	public FElseIfExp  FElseIfExp.createEmptyNode()  { return new FElseIfExp(); }
+	public FNoExp      FNoExp.createEmptyNode()      { return new FNoExp(); }
+	public FTimeExp    FTimeExp.createEmptyNode()    { return new FTimeExp(); }
+	public FNoEventExp FNoEventExp.createEmptyNode() { return new FNoEventExp(); }
 	
 	// Identifier expressions
 	public FIdUseExp      FIdUseExp.createEmptyNode()      { return new FIdUseExp(); }

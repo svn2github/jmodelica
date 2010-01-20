@@ -16,6 +16,7 @@
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 aspect Flattening {
@@ -730,10 +731,11 @@ aspect FlatExpressions {
 	public FNoEventExp FNoEventExp.flatten(FQName prefix) { return new FNoEventExp(getFExp().flatten(prefix)); }
 	
 	// These used to delegate to standard implementation for FExp.flatten(FQName).
-	public FIdentity  FIdentity.flatten(FQName prefix)  { return null; }
 	public FScalar    FScalar.flatten(FQName prefix)    { return null; }
 	public FSizeExp   FSizeExp.flatten(FQName prefix)   { return null; }
-	public FTranspose FTranspose.flatten(FQName prefix) { return null; }
+	
+	public FIdentity  FIdentity.flatten(FQName prefix)  { return new FIdentity(getFExp().flatten(prefix)); }
+	public FTranspose FTranspose.flatten(FQName prefix) { return new FTranspose(getFExp().flatten(prefix)); }
 	
 	public FDerExp InstDerExp.flatten(FQName prefix) {
 		/* This should only ever be called on InstDerExps that has an FInstAccessExp 
@@ -1429,23 +1431,19 @@ aspect InstantiatedExpressions {
 	 */
 	private ArrayList<InstFunctionArgument> InstFunctionCall.unbindableArgs = 
 		new ArrayList<InstFunctionArgument>();
-
-	/* TODO: Replace the children of FBuiltInFunctionCall subclasses with InstFunctionArgument, 
-	 *        and add get methods that gets the FExp from each InstFunctionArgument? */
-	/**
-	 * \brief Add an argument to the list of the arguments from the original InstFunctionCall.
-	 */
-	public void FBuiltInFunctionCall.addOriginalArg(InstFunctionArgument arg) {
+	
+	private ArrayList<InstFunctionArgument> FBuiltInFunctionCall.originalArgs = 
+		new ArrayList<InstFunctionArgument>();
+	public void FBuiltInFunctionCall.addToOriginalArgs(InstFunctionArgument arg) { 
 		originalArgs.add(arg);
 	}
-	/**
-	 * \brief List of the arguments from the original InstFunctionCall.
-	 * 
-	 * Used for error checking FBuiltInFunctionCalls in the instance tree. 
-	 * Empty in the flattened tree.
-	 */
-	protected ArrayList<InstFunctionArgument> FBuiltInFunctionCall.originalArgs = 
-		new ArrayList<InstFunctionArgument>();
+
+	syn lazy List<InstFunctionArgument> FBuiltInFunctionCall.getOriginalArgList() {
+		List<InstFunctionArgument> res = new List<InstFunctionArgument>();
+		for (InstFunctionArgument arg : originalArgs)
+			res.add(arg);
+		return res;
+	}
 	
 	/**
 	 * \brief Called for inputs that no argument was bound to. Creates an InstDefaultArgument 
@@ -1464,9 +1462,110 @@ aspect InstantiatedExpressions {
 		return arg;
 	}
 	
-	// Helper function for rewrite InstFunctionCall -> FAbstractFunctionCall
-	private static boolean InstFunctionCall.matchesBuiltin(String foundName, String funcName) {
-		return foundName.equals(funcName) || foundName.equals("Modelica.Math." + funcName);
+	public class InstFunctionCall {
+		
+		private static BuiltInTranslator builtInTranslator = new BuiltInTranslator();
+		
+		/**
+		 * \brief Helper class for rewrite InstFunctionCall -> FAbstractFunctionCall. 
+		 *        Creates an instance of the specific subclass of FBuiltInFunctionCall matching 
+		 *        the name of the function, if one matches. 
+		 */
+		private static class BuiltInTranslator {
+			
+			private static class BuiltInCreator {
+				
+				public boolean matchMath;
+				protected FBuiltInFunctionCall template;
+				protected int numArgs;
+				
+				public BuiltInCreator(boolean math, FBuiltInFunctionCall tmpl, int nArgs) { 
+					matchMath = math;
+					template = tmpl;
+					numArgs = nArgs;
+				}
+				
+				public FBuiltInFunctionCall create(InstFunctionArgument[] args) {
+					FExp res = template.createEmptyNode();
+					for (int i = 0; i < numArgs; i++)
+						res.setChild(args[i].getFExp(), i);
+					return (FBuiltInFunctionCall) res;
+				}
+				
+				public boolean isInfArgs() {
+					return false;
+				}
+				
+			}
+			
+			private static class InfArgsBuiltInCreator extends BuiltInCreator {
+				
+				public InfArgsBuiltInCreator(FBuiltInFunctionCall tmpl, int nFixed) {
+					super(false, tmpl, nFixed);
+				}
+				
+				public FBuiltInFunctionCall create(InstFunctionArgument[] args) {
+					FExp res = template.createEmptyNode();
+					List<FExp> exps = new List<FExp>();
+					for (int i = numArgs; i < args.length; i++)
+						exps.add(args[i].getFExp());
+					res.setChild(exps, 0);
+					for (int i = 1; i < numArgs + 1; i++)
+						res.setChild(args[i - 1].getFExp(), i);
+					return (FBuiltInFunctionCall) res;
+				}
+				
+				public boolean isInfArgs() {
+					return true;
+				}
+				
+			}
+			
+			private HashMap<String, BuiltInCreator> map;
+			private static final String MATH_PREF = "Modelica.Math.";
+			private static final int MATH_LEN = MATH_PREF.length();
+			
+			public FBuiltInFunctionCall create(String name, InstFunctionArgument[] args) {
+				boolean math = name.startsWith(MATH_PREF);
+				if (math) 
+					name = name.substring(MATH_LEN);
+				BuiltInCreator creator = map.get(name);
+				if (creator == null || (math && !creator.matchMath))
+					return null;
+				FBuiltInFunctionCall res = creator.create(args);
+				for (InstFunctionArgument arg : args)
+					res.addToOriginalArgs((InstFunctionArgument) arg.unboundCopy());
+				return res;
+			}
+			
+			public boolean isInfArgs(String name) {
+				BuiltInCreator creator = map.get(name);
+				return creator != null && creator.isInfArgs();
+			}
+			
+			public BuiltInTranslator() {
+				map = new HashMap<String, BuiltInCreator>();
+				map.put("sin",       new BuiltInCreator(true,  new FSinExp(),     1));
+				map.put("cos",       new BuiltInCreator(true,  new FCosExp(),     1));
+				map.put("tan",       new BuiltInCreator(true,  new FTanExp(),     1));
+				map.put("asin",      new BuiltInCreator(true,  new FAsinExp(),    1));
+				map.put("acos",      new BuiltInCreator(true,  new FAcosExp(),    1));
+				map.put("atan",      new BuiltInCreator(true,  new FAtanExp(),    1));
+				map.put("atan2",     new BuiltInCreator(true,  new FAtan2Exp(),   2));
+				map.put("sinh",      new BuiltInCreator(true,  new FSinhExp(),    1));
+				map.put("cosh",      new BuiltInCreator(true,  new FCoshExp(),    1));
+				map.put("tanh",      new BuiltInCreator(true,  new FTanhExp(),    1));
+				map.put("exp",       new BuiltInCreator(true,  new FExpExp(),     1));
+				map.put("log",       new BuiltInCreator(true,  new FLogExp(),     1));
+				map.put("log10",     new BuiltInCreator(true,  new FLog10Exp(),   1));
+				map.put("noEvent",   new BuiltInCreator(false, new FNoEventExp(), 1));
+				map.put("identity",  new BuiltInCreator(false, new FIdentity(),   1));
+				map.put("sqrt",      new BuiltInCreator(false, new FSqrtExp(),    1));
+				map.put("transpose", new BuiltInCreator(false, new FTranspose(),  1));
+				map.put("ones",  new InfArgsBuiltInCreator(new FOnes(),  0));
+				map.put("zeros", new InfArgsBuiltInCreator(new FZeros(), 0));
+			}
+		}
 	}
 
 	/**
@@ -1487,89 +1586,69 @@ aspect InstantiatedExpressions {
 		    // Make sure we only do this once.
 		    rewritten = true;
 		    
-		    // Special handling for function-like operators without maximum number of args.
-		    // TODO: generate error for named arguments
-		    String unQName = getName().name();
-		    if (unQName.equals("ones") || unQName.equals("zeros")) {
-		    	FInfArgsFunctionCall iafc = null;
-		        if (unQName.equals("ones")) 
-		        	iafc = new FOnes(new List());
-		        else if (unQName.equals("zeros")) 
-		        	iafc = new FZeros(new List());
-		    	for (InstFunctionArgument arg : getArgs()) {
-		    		if (arg instanceof InstPositionalArgument)
-		    			iafc.addFExp((FExp) arg.getFExp().fullCopy());
-		    		iafc.addOriginalArg(arg);
-		    		iafc.setLocation(this);
-		    	}
-		    	return iafc;
-		    }
+//		    // Special handling for function-like operators without maximum number of args.
+//		    // TODO: generate error for named arguments
+//		    String unQName = getName().name();
+//		    if (unQName.equals("ones") || unQName.equals("zeros")) {
+//		    	FInfArgsFunctionCall iafc = null;
+//		        if (unQName.equals("ones")) 
+//		        	iafc = new FOnes(new List());
+//		        else if (unQName.equals("zeros")) 
+//		        	iafc = new FZeros(new List());
+//		    	for (InstFunctionArgument arg : getArgs()) {
+//		    		if (arg instanceof InstPositionalArgument)
+//		    			iafc.addFExp((FExp) arg.getFExp().fullCopy());
+//		    		iafc.addToOriginalArgs(arg);
+//		    		iafc.setLocation(this);
+//		    	}
+//		    	return iafc;
+//		    }
 		    
 		    /* If we can't resolve the name as a function, don't try to bind arguments, 
 		     * just leave it for the error check. */
 		    if (!getName().myInstClassDecl().isFunction())
 		    	return this;
+
+		    // Check if we should try to bind arguments
+	    	String name = getName().myInstClassDecl().qualifiedName();
+	    	InstFunctionArgument[] temp;
+	    	boolean argsOK = true;
+	    	if (builtInTranslator.isInfArgs(name)) {
+	    		
+	    		// Just collect all positional arguments
+	    		ArrayList<InstFunctionArgument> args = new ArrayList<InstFunctionArgument>();
+	    		for (InstFunctionArgument arg : getArgs()) {
+	    			if (arg instanceof InstPositionalArgument)
+	    				args.add(arg);
+	    			else
+	    				unbindableArgs.add(arg);
+	    		}
+	    		temp = args.toArray(new InstFunctionArgument[args.size()]);
+	    		
+	    	} else {
 		    
-    		// Bind arguments
-    		ArrayList<InstComponentDecl> inputs = myInputs();
-    		InstFunctionArgument[] temp = new InstFunctionArgument[inputs.size()];
-    		for (InstFunctionArgument arg : getArgs()) 
-    			if (!arg.bindArgument(temp, inputs))
-    				unbindableArgs.add(arg);
-    		
-    		// Add default argument and check for problems.
-    		boolean argsOK = unbindableArgs.isEmpty();
-    		for (int i = 0; i < temp.length; i++) {
-    			if (temp[i] == null) 
-    				temp[i] = inputs.get(i).createInstDefaultArgument();
-    			temp[i].setErrorArgLocation(this);
-    			argsOK = argsOK && temp[i].isOKArg();
-    		}
-    		
+	    		// Bind arguments
+	    		ArrayList<InstComponentDecl> inputs = myInputs();
+	    		temp = new InstFunctionArgument[inputs.size()];
+	    		for (InstFunctionArgument arg : getArgs()) 
+	    			if (!arg.bindArgument(temp, inputs))
+	    				unbindableArgs.add(arg);
+		    		
+	    		// Add default argument and check for problems.
+	    		for (int i = 0; i < temp.length; i++) {
+	    			if (temp[i] == null) 
+	    				temp[i] = inputs.get(i).createInstDefaultArgument();
+	    			temp[i].setErrorArgLocation(this);
+	    			argsOK = argsOK && temp[i].isOKArg();
+	    		}
+		
+	    	}
+	    	argsOK = argsOK && unbindableArgs.isEmpty();
+	    		
     		// Create replacement node.
 		    FAbstractFunctionCall n = null;
-		    if (argsOK) {
-		    	String name = getName().myInstClassDecl().qualifiedName();
-		    	FBuiltInFunctionCall bfc = null;
-				if (matchesBuiltin(name, "sin")) {
-					bfc = new FSinExp(temp[0].getFExp());
-				} else if (matchesBuiltin(name, "cos")) {
-					bfc = new FCosExp(temp[0].getFExp());
-				} else if (matchesBuiltin(name, "tan")) {
-					bfc = new FTanExp(temp[0].getFExp());
-				} else if (matchesBuiltin(name, "asin")) {
-					bfc = new FAsinExp(temp[0].getFExp());
-				} else if (matchesBuiltin(name, "acos")) {
-					bfc = new FAcosExp(temp[0].getFExp());
-				} else if (matchesBuiltin(name, "atan")) {
-					bfc = new FAtanExp(temp[0].getFExp());
-				} else if (matchesBuiltin(name, "atan2")) {
-					bfc = new FAtan2Exp(temp[0].getFExp(), temp[1].getFExp());  
-				} else if (matchesBuiltin(name, "sinh")) {
-					bfc = new FSinhExp(temp[0].getFExp());
-				} else if (matchesBuiltin(name, "cosh")) {
-					bfc = new FCoshExp(temp[0].getFExp());
-				} else if (matchesBuiltin(name, "tanh")) {
-					bfc = new FTanhExp(temp[0].getFExp());
-				} else if (matchesBuiltin(name, "exp")) {
-					bfc = new FExpExp(temp[0].getFExp());
-				} else if (matchesBuiltin(name, "log")) {
-					bfc = new FLogExp(temp[0].getFExp());
-				} else if (matchesBuiltin(name, "log10")) {
-					bfc = new FLog10Exp(temp[0].getFExp());
-				} else if (name.equals("noEvent")) {
-					bfc = new FNoEventExp(temp[0].getFExp());
-				} else if (name.equals("identity")) {
-					bfc = new FIdentity(temp[0].getFExp());
-				} else if (name.equals("sqrt")) {
-					bfc = new FSqrtExp(temp[0].getFExp());
-                }
-				if (bfc != null) {
-					for (InstFunctionArgument arg : temp)
-						bfc.addOriginalArg(arg);
-					n = bfc;
-				}
-		    }
+		    if (argsOK) 
+		    	n = builtInTranslator.create(name, temp);
 		    if (n == null) {
 	    		List<InstFunctionArgument> args = new List<InstFunctionArgument>();
 				for (InstFunctionArgument arg : temp)
