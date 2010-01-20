@@ -52,11 +52,9 @@ aspect FlatTypeAnalysis {
 	eq UnknownFVariable.type() = fUnknownType();
 
 	syn FPrimitiveType InstComponentModification.type() {
-//		System.out.println("InstComponentModification.type(): " + getName().myInstComponentDecl().getClass().getName() + 
-//				" " + getName().myInstComponentDecl().isPrimitive());
 		if (getName().myInstComponentDecl().isPrimitive()) {
 			InstPrimitive ip = ((InstPrimitive)getName().myInstComponentDecl());
-			return ip.type().scalarType();
+			return ip.type();
 		} else {
 			return fUnknownType();
 		}
@@ -226,12 +224,14 @@ aspect InstBindingType {
 	 *        have, given the scalar type of the attribute.
 	 */
 	syn FPrimitiveType InstPrimitive.attributeType(InstComponentModification icm) {
-		FPrimitiveType res = icm.type().arrayType(size());
+		FPrimitiveType res = icm.type();
 		InstNode decl = icm.myInstNode();
-		if (icm.getEach() || decl == this) 
+		if (decl == this)
+			return res.arrayType(size());
+		if (icm.getEach() || !enclosedBy(decl)) 
 			return res;
 		else
-			return expandBindingType(res, decl);
+			return expandBindingType(res.arrayType(size()), decl);
 	}
 	
 	/**

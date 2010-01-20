@@ -1142,6 +1142,10 @@ aspect InstanceAST_API {
 	syn InstClassDecl InstExtends.getBaseInstClass()   = 
 		getClassName().myInstClassDecl().getBaseInstClass();
 	
+	inh boolean InstNode.enclosedBy(InstNode node);
+	eq InstNode.getChild().enclosedBy(InstNode node) = (node == this) || enclosedBy(node);
+	eq InstRoot.getChild().enclosedBy(InstNode node) = (node == this);
+	
 }
 
 aspect SourceAST_API {

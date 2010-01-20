@@ -173,8 +173,9 @@ aspect Flattening {
 		AttributeExpRetriever mut = new AttributeExpRetriever() {
 			public FExp retrieve(InstValueModification im, boolean isEach) { 
 				FExp exp = super.retrieve(im, isEach);
-				return isEach || im.myInstNode() == InstPrimitive.this ? exp : 
-					exp.dynamicFExp(splitBindingFExp(exp, im.myInstNode())); 
+				InstNode decl = im.myInstNode();
+				return (isEach || decl == InstPrimitive.this || !enclosedBy(decl)) ? 
+						exp : exp.dynamicFExp(splitBindingFExp(exp, decl)); 
 			}
 		};
 		for (InstModification im : totalMergedEnvironment()) {
