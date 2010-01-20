@@ -600,7 +600,9 @@ aspect FlatNames {
 					for (FSubscript fs : 
 						getFQNamePart(i).getFArraySubscripts().getFSubscripts()) {
 						str.append("_");
-						str.append(fs.prettyPrint(""));
+						//str.append(fs.prettyPrint(""));
+						// TODO: This is a temporary fix for #610
+						str.append(fs.ceval());
 					}
 				}
 				if (i<getNumFQNamePart()-1) {

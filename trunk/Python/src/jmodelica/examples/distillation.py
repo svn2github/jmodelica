@@ -67,8 +67,8 @@ def run_demo(with_plots=True):
     # print(' *** Stationary point A ***')
     print '(Tray index, x_i_A, y_i_A)'
     for i in range(N.size(y_A)):
-        y_A[i] = init_model.get_value('y' + str(i+1))
-        x_A[i] = init_model.get_value('x' + str(i+1))
+        y_A[i] = init_model.get_value('y[' + str(i+1) + ']')
+        x_A[i] = init_model.get_value('x[' + str(i+1) + ']')
         print '(' + str(i+1) + ', %f, %f)' %(x_A[i], y_A[i])
     
     # Set inputs for stationary point B
@@ -87,8 +87,8 @@ def run_demo(with_plots=True):
     # print(' *** Stationary point B ***')
     print '(Tray index, x_i_B, y_i_B)'
     for i in range(N.size(y_B)):
-        y_B[i] = init_model.get_value('y' + str(i+1))
-        x_B[i] = init_model.get_value('x' + str(i+1))
+        y_B[i] = init_model.get_value('y[' + str(i+1) + ']')
+        x_B[i] = init_model.get_value('x[' + str(i+1) + ']')
         print '(' + str(i+1) + ', %f, %f)' %(x_B[i], y_B[i])
 
     # ## Set up and solve an optimal control problem. 
@@ -110,7 +110,7 @@ def run_demo(with_plots=True):
 
     # Initialize the model to stationary point A
     for i in range(N.size(x_A)):
-        model.set_value('x' + str(i+1) + '_0', x_A[i])
+        model.set_value('x_0[' + str(i+1) + ']', x_A[i])
 
     # Set the target values to stationary point B
     model.set_value('u1_ref',u1_0_B)
@@ -150,11 +150,11 @@ def run_demo(with_plots=True):
     x_res = []
     x_ref_res = []
     for i in range(N.size(x_B)):
-        x_res.append(res.get_variable_data('x' + str(i+1)))
+        x_res.append(res.get_variable_data('x[' + str(i+1) + ']'))
 
     y_res = []
     for i in range(N.size(x_B)):
-        y_res.append(res.get_variable_data('y' + str(i+1)))
+        y_res.append(res.get_variable_data('y[' + str(i+1) + ']'))
 
 
     # Plot the results

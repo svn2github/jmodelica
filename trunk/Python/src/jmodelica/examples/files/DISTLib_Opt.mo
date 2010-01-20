@@ -11,7 +11,7 @@ package DISTLib_Opt
     parameter Real y1_ref = 0.8;
 
    equation
-    der(cost)  = alpha*(y1-y1_ref)^2 + rho*(u1-u1_ref)^2 ; 
+    der(cost)  = alpha*(y[1]-y1_ref)^2 + rho*(u1-u1_ref)^2 ; 
 
 //   constraint
 //     x32>=0.08;
