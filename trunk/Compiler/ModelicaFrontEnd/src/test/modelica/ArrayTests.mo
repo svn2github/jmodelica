@@ -674,8 +674,33 @@ end ArrayTests.ArrayTest31;
 
   Real x[2];
 equation
-x = {sin(time),cos(time)};
+ x = {sin(time),cos(time)};
 end ArrayTest31;
+
+model ArrayTest32
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayTest32",
+         description="Scalarization of initial equation",
+         flatModel="
+fclass ArrayTests.ArrayTest32
+ Real x[1];
+ Real x[2];
+initial equation 
+ x[1] = 1;
+ x[2] =  - ( 2 );
+equation
+ der(x[1]) =  - ( x[1] );
+ der(x[2]) =  - ( x[2] );
+end ArrayTests.ArrayTest32;
+")})));
+
+ Real x[2];
+initial equation
+ x = {1,-2};
+equation
+ der(x) = -x;
+end ArrayTest32;
 
 
 
@@ -4786,7 +4811,7 @@ model Transpose1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="Transpose1",
-         description="Scalarization of transpose operator:",
+         description="Scalarization of transpose operator: Integer[2,2]",
          flatModel="
 fclass ArrayTests.Transpose1
  Real x[1,1];
@@ -4809,7 +4834,7 @@ model Transpose2
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="Transpose2",
-         description="Scalarization of transpose operator:",
+         description="Scalarization of transpose operator: Integer[3,2]",
          flatModel="
 fclass ArrayTests.Transpose2
  Real x[1,1];
@@ -4836,7 +4861,7 @@ model Transpose3
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="Transpose3",
-         description="Scalarization of transpose operator:",
+         description="Scalarization of transpose operator: Integer[1,2]",
          flatModel="
 fclass ArrayTests.Transpose3
  Real x[1,1];
@@ -4855,7 +4880,7 @@ model Transpose4
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="Transpose4",
-         description="Scalarization of transpose operator:",
+         description="Scalarization of transpose operator: Integer[2,2,2]",
          flatModel="
 fclass ArrayTests.Transpose4
  Integer x[1,1,1];
@@ -4886,7 +4911,7 @@ model Transpose5
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(
          name="Transpose5",
-         description="Scalarization of transpose operator:",
+         description="Scalarization of transpose operator: Integer[2]",
          errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
@@ -4902,7 +4927,7 @@ model Transpose6
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(
          name="Transpose6",
-         description="Scalarization of transpose operator:",
+         description="Scalarization of transpose operator: Integer",
          errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
@@ -4918,7 +4943,7 @@ model Transpose7
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(
          name="Transpose7",
-         description="Scalarization of transpose operator:",
+         description="Scalarization of transpose operator: Real[1,2] -> Integer[2,1]",
          errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
