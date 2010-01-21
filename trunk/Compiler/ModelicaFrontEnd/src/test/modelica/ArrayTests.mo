@@ -4782,103 +4782,154 @@ end ArrayNeg5;
 
 
 
-/* -- Standard test series for scalarisation of operators on arrays -- */
-/* 
-model ArrayAdd1
- Real x[2];
- Real y[2] = { 1, 2 };
-equation
- x = y + { 10, 20 };
-end ArrayAdd1;
-
-
-model ArrayAdd2
+model Transpose1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="Transpose1",
+         description="Scalarization of transpose operator:",
+         flatModel="
+fclass ArrayTests.Transpose1
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
  Real x[2,2];
- Real y[2,2] = { { 1, 2 }, { 3, 4 } };
 equation
- x = y + { { 10, 20 }, { 30, 40 } };
-end ArrayAdd2;
+ x[1,1] = 1;
+ x[1,2] = 3;
+ x[2,1] = 2;
+ x[2,2] = 4;
+end ArrayTests.Transpose1;
+")})));
+
+ Real x[2,2] = transpose({{1,2},{3,4}});
+end Transpose1;
 
 
-model ArrayAdd3
- Real x[2,2,2];
- Real y[2,2,2] = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
-equation
- x = y + { { { 10, 20 }, { 30, 40 } }, { { 50, 60 }, { 70, 80 } } };
-end ArrayAdd3;
-
-
-model ArrayAdd4
- Real x[2];
- Real y[2] = { 1, 2 };
-equation
- x = y + 10;
-end ArrayAdd4;
-
-
-model ArrayAdd5
+model Transpose2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="Transpose2",
+         description="Scalarization of transpose operator:",
+         flatModel="
+fclass ArrayTests.Transpose2
+ Real x[1,1];
+ Real x[1,2];
+ Real x[1,3];
+ Real x[2,1];
  Real x[2,2];
- Real y[2,2] = { { 1, 2 }, { 3, 4 } };
+ Real x[2,3];
 equation
- x = y + 10;
-end ArrayAdd5;
+ x[1,1] = 1;
+ x[1,2] = 3;
+ x[1,3] = 5;
+ x[2,1] = 2;
+ x[2,2] = 4;
+ x[2,3] = 6;
+end ArrayTests.Transpose2;
+")})));
+
+ Real x[2,3] = transpose({{1,2},{3,4},{5,6}});
+end Transpose2;
 
 
-model ArrayAdd6
- Real x[2,2,2];
- Real y[2,2,2] = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+model Transpose3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="Transpose3",
+         description="Scalarization of transpose operator:",
+         flatModel="
+fclass ArrayTests.Transpose3
+ Real x[1,1];
+ Real x[2,1];
 equation
- x = y + 10;
-end ArrayAdd6;
+ x[1,1] = 1;
+ x[2,1] = 2;
+end ArrayTests.Transpose3;
+")})));
+
+ Real x[2,1] = transpose({{1,2}});
+end Transpose3;
 
 
-model ArrayAdd7
- Real x[2];
- Real y = 1;
+model Transpose4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="Transpose4",
+         description="Scalarization of transpose operator:",
+         flatModel="
+fclass ArrayTests.Transpose4
+ Integer x[1,1,1];
+ Integer x[1,1,2];
+ Integer x[1,2,1];
+ Integer x[1,2,2];
+ Integer x[2,1,1];
+ Integer x[2,1,2];
+ Integer x[2,2,1];
+ Integer x[2,2,2];
 equation
- x = y + { 10, 20 };
-end ArrayAdd7;
+ x[1,1,1] = 1;
+ x[1,1,2] = 2;
+ x[1,2,1] = 5;
+ x[1,2,2] = 6;
+ x[2,1,1] = 3;
+ x[2,1,2] = 4;
+ x[2,2,1] = 7;
+ x[2,2,2] = 8;
+end ArrayTests.Transpose4;
+")})));
+
+ Integer x[2,2,2] = transpose({{{1,2},{3,4}},{{5,6},{7,8}}});
+end Transpose4;
 
 
-model ArrayAdd8
- Real x[2,2];
- Real y = 1;
-equation
- x = y + { { 10, 20 }, { 30, 40 } };
-end ArrayAdd8;
+model Transpose5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="Transpose5",
+         description="Scalarization of transpose operator:",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 4886, column 24:
+  Types of positional argument 1 and input A are not compatible
+")})));
+
+ Real x[2] = transpose({1,2});
+end Transpose5;
 
 
-model ArrayAdd9
- Real x[2,2,2];
- Real y = 1;
-equation
- x = y + { { { 10, 20 }, { 30, 40 } }, { { 50, 60 }, { 70, 80 } } };
-end ArrayAdd9;
+model Transpose6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="Transpose6",
+         description="Scalarization of transpose operator:",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 4876, column 24:
+  Types of positional argument 1 and input A are not compatible
+")})));
+
+ Real x[2] = transpose(1);
+end Transpose6;
 
 
-model ArrayAdd10
- Real x[2];
- Real y[2] = { 1, 2 };
-equation
- x = y + { 10, 20, 30 };
-end ArrayAdd10;
+model Transpose7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="Transpose7",
+         description="Scalarization of transpose operator:",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 4892, column 10:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+
+ Integer x[2,1] = transpose({{1.0,2}});
+end Transpose7;
 
 
-model ArrayAdd11
- Real x[2];
- Real y[2] = { 1, 2 };
-equation
- x = y + { { 10, 20 }, { 30, 40 } };
-end ArrayAdd11;
-
-
-model ArrayAdd12
- Real x[2];
- Real y[2] = { 1, 2 };
-equation
- x = y + { "1", "2" };
-end ArrayAdd12;
-*/
 
   annotation (uses(Modelica(version="3.0.1")));
 end ArrayTests;
