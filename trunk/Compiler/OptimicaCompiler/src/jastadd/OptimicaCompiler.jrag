@@ -352,7 +352,9 @@ public class OptimicaCompiler extends ModelicaCompiler{
 			logger.severe(str.toString());
 			System.exit(0);
 		} catch (Error e) {
-			logger.severe("In file: '" + name + "':"+e.getMessage());
+			for(int i=0; i<name.length; i++) {
+				logger.severe("In file: '" + name[i] + "':"+e.getMessage());
+			}
 			System.exit(0);
 		} catch (FileNotFoundException e) {
 			for(int i=0; i<name.length; i++) {
