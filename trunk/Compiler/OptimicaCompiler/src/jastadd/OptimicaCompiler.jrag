@@ -232,7 +232,7 @@ public class OptimicaCompiler extends ModelicaCompiler{
 		logger.info("Generating code...");
 
 		OptimicaXMLVariableGenerator variablegenerator = new OptimicaXMLVariableGenerator(new PrettyPrinter(), '$', fc);
-		String output = fc.nameUnderscore() + "_variables.xml";
+		String output = fc.nameUnderscore() + ".xml";
 		variablegenerator.generate(super.getXMLVariablesTemplate(), output);
 
 		XMLValueGenerator valuegenerator = new XMLValueGenerator(new PrettyPrinter(), '$', fc);
@@ -247,12 +247,15 @@ public class OptimicaCompiler extends ModelicaCompiler{
 	}
 
 	public static void main(String args[]) {
+		String filesep = System.getProperty("file.separator");
 		if(args.length < 1) {
 			logger.severe("OptimicaCompiler expects the command line arguments: \n" +
 					"[-options] <file name> <class name> [<xml variables template> <xml values template> <c template>]\n" +
 					"where options could be: \n" +
 					"-log=<i or w or e> \n" +
-					"-modelicapath=<path to modelica library>");
+					"-modelicapath=<path to modelica library> \n"+
+					"-optfile=<path to XML options file>");
+			System.exit(1);
 		}
 		
 		int arg = 0;
@@ -285,10 +288,18 @@ public class OptimicaCompiler extends ModelicaCompiler{
 			xmlValuesTempl = args[arg+3];
 			ctempl = args[arg+4];
 		}
+
+		String optionsfile = null;
+		//look for options.xml in $JMODELICA_HOME/Options/ and program arguments
+		if(programarguments.get("optfile")!=null) {
+			optionsfile = programarguments.get("optfile");
+		}else{
+			optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
+		}		
 		
-		//look for options.xml in $JMODELICA_HOME/Options/
-		String filesep = System.getProperty("file.separator");
-		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
+//		//look for options.xml in $JMODELICA_HOME/Options/
+//		String filesep = System.getProperty("file.separator");
+//		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
 		OptionRegistry or = null;
 		try {
 			or = new OptionRegistry(optionsfile);

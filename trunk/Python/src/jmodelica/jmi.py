@@ -407,7 +407,7 @@ class Model(object):
             path = self._path
         
         # set start attributes
-        xml_variables_name=libname+'_variables.xml' 
+        xml_variables_name=libname+'.xml' 
         # assumes libname is name of model and xmlfile is located in the same dir as the dll
         self._set_XMLvariables_doc(xmlparser.XMLVariablesDoc(path+os.sep+xml_variables_name))
         self._set_start_attributes()

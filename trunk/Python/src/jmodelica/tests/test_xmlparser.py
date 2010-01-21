@@ -13,27 +13,45 @@ import jmodelica.xmlparser as xp
 
 
 jm_home = os.environ.get('JMODELICA_HOME')
-path_to_examples = os.sep+'Python'+os.sep+'jmodelica'+os.sep+'examples'
+path_to_examples = os.path.join('Python','jmodelica','examples')
 
-model = os.sep+'files'+os.sep+'CSTR.mo'
-fpath = jm_home+path_to_examples+model
-cpath = "CSTR.CSTR_Opt"
+# cstr model
+cstr_model = os.path.join('files','CSTR.mo')
+cstr_fpath = os.path.join(jm_home,path_to_examples,cstr_model)
+cstr_cpath = "CSTR.CSTR_Opt"
+cstr_fname = cstr_cpath.replace('.','_',1)
 
-fname = cpath.replace('.','_',1)
+# parameter estimation model
+parest_model = os.path.join('files','ParameterEstimation_1.mo')
+parest_fpath = os.path.join(jm_home,path_to_examples,parest_model)
+parest_cpath = "ParEst.ParEst"
+parest_fname = parest_cpath.replace('.','_',1)
+
+# vdp min time model
+vdpmin_model = os.path.join('files','VDP.mo')
+vdpmin_fpath = os.path.join(jm_home,path_to_examples,vdpmin_model)
+vdpmin_cpath = "VDP_pack.VDP_Opt_Min_Time"
+vdpmin_fname = vdpmin_cpath.replace('.','_',1)
 
 #type defs
 int = n.int32
 
 def setup():
     """ 
-    Setup test module. Compile test model (only needs to be done once) and 
+    Setup test module. Compile test models (only needs to be done once) and 
     set log level. 
     """
     OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
     oc = OptimicaCompiler()
     oc.set_boolean_option('state_start_values_fixed',True)
     oc.set_boolean_option('eliminate_alias_variables',True)
-    oc.compile_model(fpath, cpath)
+    # cstr model
+    oc.compile_model(cstr_fpath, cstr_cpath)
+    # parameter est model
+    oc.compile_model(parest_fpath, parest_cpath)
+    # vdp min time model
+    oc.compile_model(vdpmin_fpath, vdpmin_cpath,'ipopt')
+    
         
 @testattr(stddist = True)
 def test_create_XMLVariablesDoc():
@@ -41,7 +59,7 @@ def test_create_XMLVariablesDoc():
     Test that it is possible to parse the XML file and create a 
     XMLVariablesDoc object. 
     """
-    filename = fname+'_variables.xml'
+    filename = cstr_fname+'.xml'
     assert xp.XMLVariablesDoc(filename) is not None, \
            "Could not create XMLVariablesDoc from XML file: "+filename
 
@@ -52,7 +70,7 @@ def test_create_XMLValuesDoc():
     XMLValuesDoc object. 
     """
     
-    filename = fname+'_values.xml'
+    filename = cstr_fname+'_values.xml'
     assert xp.XMLValuesDoc(filename) is not None, \
            "Could not create XMLValuesDoc from XML file: "+filename
 
@@ -62,7 +80,9 @@ def test_xmlvariablesdoc_methods():
     Test that all XMLVariablesDoc methods are callable and returns the 
     correct data type. 
     """
-    xmldoc = xp.XMLVariablesDoc(fname+'_variables.xml')
+    cstr_xmldoc = xp.XMLVariablesDoc(cstr_fname+'.xml')
+    parest_xmldoc = xp.XMLVariablesDoc(parest_fname+'.xml')
+    vdpmin_xmldoc = xp.XMLVariablesDoc(vdpmin_fname+'.xml')
     
     t_get_valueref.description = 'test XMLVariablesDoc.get_valueref'
     t_get_aliases.description = 'test XMLVariablesDoc.get_aliases'
@@ -112,52 +132,52 @@ def test_xmlvariablesdoc_methods():
     t_get_timepoints.description = ' test XMLVariablesDoc.get_timepoints'
 
     
-    yield t_get_valueref, xmldoc
-    yield t_get_aliases, xmldoc
-    yield t_get_variable_description, xmldoc
-    yield t_get_data_type, xmldoc
-    yield t_get_variable_names, xmldoc
-    yield t_get_derivative_names, xmldoc
-    yield t_get_differentiated_variable_names, xmldoc
-    yield t_get_input_names, xmldoc
-    yield t_get_algebraic_variable_names, xmldoc
-    yield t_get_p_opt_names, xmldoc
-    yield t_get_variable_descriptions, xmldoc
-    yield t_get_start_attributes, xmldoc
-    yield t_get_dx_start_attributes, xmldoc
-    yield t_get_x_start_attributes, xmldoc
-    yield t_get_u_start_attributes, xmldoc
-    yield t_get_w_start_attributes, xmldoc
-    yield t_get_p_opt_variable_refs, xmldoc
-    yield t_get_w_initial_guess_values, xmldoc
-    yield t_get_u_initial_guess_values, xmldoc
-    yield t_get_dx_initial_guess_values, xmldoc
-    yield t_get_x_initial_guess_values, xmldoc
-    yield t_get_p_opt_initial_guess_values, xmldoc
-    yield t_get_w_lb_values, xmldoc
-    yield t_get_u_lb_values, xmldoc
-    yield t_get_dx_lb_values, xmldoc
-    yield t_get_x_lb_values, xmldoc
-    yield t_get_p_opt_lb_values, xmldoc
-    yield t_get_w_ub_values, xmldoc
-    yield t_get_u_ub_values, xmldoc
-    yield t_get_dx_ub_values, xmldoc
-    yield t_get_x_ub_values, xmldoc
-    yield t_get_p_opt_ub_values, xmldoc
-    yield t_get_w_lin_values, xmldoc
-    yield t_get_u_lin_values, xmldoc
-    yield t_get_dx_lin_values, xmldoc
-    yield t_get_x_lin_values, xmldoc
-    yield t_get_p_opt_lin_values, xmldoc
-    yield t_get_w_lin_tp_values, xmldoc
-    yield t_get_u_lin_tp_values, xmldoc
-    yield t_get_dx_lin_tp_values, xmldoc
-    yield t_get_x_lin_tp_values, xmldoc    
-    yield t_get_starttime, xmldoc
-    yield t_get_starttime_free, xmldoc
-    yield t_get_finaltime, xmldoc
-    yield t_get_finaltime_free, xmldoc
-    yield t_get_timepoints, xmldoc    
+    yield t_get_valueref, cstr_xmldoc
+    yield t_get_aliases, cstr_xmldoc
+    yield t_get_variable_description, cstr_xmldoc
+    yield t_get_data_type, cstr_xmldoc
+    yield t_get_variable_names, cstr_xmldoc
+    yield t_get_derivative_names, cstr_xmldoc
+    yield t_get_differentiated_variable_names, cstr_xmldoc
+    yield t_get_input_names, cstr_xmldoc
+    yield t_get_algebraic_variable_names, cstr_xmldoc
+    yield t_get_p_opt_names, parest_xmldoc
+    yield t_get_variable_descriptions, cstr_xmldoc
+    yield t_get_start_attributes, cstr_xmldoc
+    yield t_get_dx_start_attributes, cstr_xmldoc
+    yield t_get_x_start_attributes, cstr_xmldoc
+    yield t_get_u_start_attributes, cstr_xmldoc
+    yield t_get_w_start_attributes, parest_xmldoc
+    yield t_get_p_opt_variable_refs, parest_xmldoc
+    yield t_get_w_initial_guess_values, parest_xmldoc
+    yield t_get_u_initial_guess_values, cstr_xmldoc
+    yield t_get_dx_initial_guess_values, cstr_xmldoc
+    yield t_get_x_initial_guess_values, cstr_xmldoc
+    yield t_get_p_opt_initial_guess_values, parest_xmldoc
+    yield t_get_w_lb_values, cstr_xmldoc # no example in testfiles
+    yield t_get_u_lb_values, vdpmin_xmldoc
+    yield t_get_dx_lb_values, cstr_xmldoc # no example in testfiles
+    yield t_get_x_lb_values, cstr_xmldoc # no example in testfiles
+    yield t_get_p_opt_lb_values, vdpmin_xmldoc
+    yield t_get_w_ub_values, cstr_xmldoc # no example in testfiles
+    yield t_get_u_ub_values, vdpmin_xmldoc
+    yield t_get_dx_ub_values, cstr_xmldoc # no example in testfiles
+    yield t_get_x_ub_values, cstr_xmldoc # no example in testfiles
+    yield t_get_p_opt_ub_values, cstr_xmldoc # no example in testfiles
+    yield t_get_w_lin_values, parest_xmldoc
+    yield t_get_u_lin_values, cstr_xmldoc
+    yield t_get_dx_lin_values, cstr_xmldoc
+    yield t_get_x_lin_values, cstr_xmldoc
+    yield t_get_p_opt_lin_values, parest_xmldoc
+    yield t_get_w_lin_tp_values, parest_xmldoc
+    yield t_get_u_lin_tp_values, cstr_xmldoc
+    yield t_get_dx_lin_tp_values, cstr_xmldoc
+    yield t_get_x_lin_tp_values, cstr_xmldoc    
+    yield t_get_starttime, cstr_xmldoc
+    yield t_get_starttime_free, cstr_xmldoc
+    yield t_get_finaltime, cstr_xmldoc
+    yield t_get_finaltime_free, cstr_xmldoc
+    yield t_get_timepoints, cstr_xmldoc 
     
 @testattr(stddist = True)
 def test_xmlvaluesdoc_methods():
@@ -165,7 +185,7 @@ def test_xmlvaluesdoc_methods():
     Test that all the XMLValuesDoc methods are callable and returns 
     the correct data type.
     """
-    xmldoc = xp.XMLValuesDoc(fname+'_values.xml')
+    xmldoc = xp.XMLValuesDoc(cstr_fname+'_values.xml')
     
     t_get_iparam_values.description = 'test XMLValuesDoc.get_iparam_values'
     
@@ -204,7 +224,8 @@ def t_get_variable_names(xmldoc):
         assert key.__class__ is int, \
             "Value reference is not int"
         assert value.__class__ is str, \
-            "Variable name is not string"       
+            "Variable name is not string"
+    nose.tools.assert_equal(d.get(26),'u')     
     
 @testattr(stddist = True)
 def t_get_derivative_names(xmldoc):
@@ -213,7 +234,8 @@ def t_get_derivative_names(xmldoc):
         assert key.__class__ is int, \
             "Value reference is not int"
         assert value.__class__ is str, \
-            "Variable name is not string"    
+            "Variable name is not string"
+    nose.tools.assert_equal(d.get(20),'der(cost)')
 
 @testattr(stddist = True)
 def t_get_differentiated_variable_names(xmldoc):
@@ -222,7 +244,8 @@ def t_get_differentiated_variable_names(xmldoc):
         assert key.__class__ is int, \
             "Value reference is not int"
         assert value.__class__ is str, \
-            "Variable name is not string"  
+            "Variable name is not string"
+    nose.tools.assert_equal(d.get(24),'cstr.c')
 
 @testattr(stddist = True)    
 def t_get_input_names(xmldoc):
@@ -231,7 +254,8 @@ def t_get_input_names(xmldoc):
         assert key.__class__ is int, \
             "Value reference is not int"
         assert value.__class__ is str, \
-            "Variable name is not string"  
+            "Variable name is not string"
+    nose.tools.assert_equal(d.get(26),'u')
 
 @testattr(stddist = True)    
 def t_get_algebraic_variable_names(xmldoc):
@@ -240,7 +264,8 @@ def t_get_algebraic_variable_names(xmldoc):
         assert key.__class__ is int, \
             "Value reference is not int"
         assert value.__class__ is str, \
-            "Variable name is not string"  
+            "Variable name is not string"
+    # no example in testfile
 
 @testattr(stddist = True)    
 def t_get_p_opt_names(xmldoc):
@@ -249,7 +274,8 @@ def t_get_p_opt_names(xmldoc):
         assert key.__class__ is int, \
             "Value reference is not int"
         assert value.__class__ is str, \
-            "Variable name is not string"  
+            "Variable name is not string"
+    nose.tools.assert_equal(d.get(0),'sys.w')
 
 @testattr(stddist = True)    
 def t_get_variable_descriptions(xmldoc):
@@ -258,7 +284,8 @@ def t_get_variable_descriptions(xmldoc):
         assert key.__class__ is int, \
             "Value reference is not int"
         assert value.__class__ is str, \
-            "Variable name is not string"  
+            "Variable name is not string"
+    nose.tools.assert_equal(d.get(0),'Inflow')
 
 @testattr(stddist = True)
 def t_get_start_attributes(xmldoc):
@@ -282,6 +309,7 @@ def t_get_start_attributes(xmldoc):
         else:
             pass
             # enumeration not supported
+    nose.tools.assert_equal(d.get(0),0.0)
             
 @testattr(stddist = True)
 def t_get_dx_start_attributes(xmldoc):
@@ -305,6 +333,7 @@ def t_get_dx_start_attributes(xmldoc):
         else:
             pass
             # enumeration not supported
+    nose.tools.assert_equal(d.get(22),0.0)
             
 @testattr(stddist = True)
 def t_get_x_start_attributes(xmldoc):
@@ -327,7 +356,8 @@ def t_get_x_start_attributes(xmldoc):
                 "Start attribute of String is not str."
         else:
             pass
-            # enumeration not supported            
+            # enumeration not supported
+    nose.tools.assert_equal(d.get(24),1000.0)          
 
 @testattr(stddist = True)
 def t_get_u_start_attributes(xmldoc):
@@ -351,6 +381,7 @@ def t_get_u_start_attributes(xmldoc):
         else:
             pass
             # enumeration not supported
+    nose.tools.assert_equal(d.get(26),350.0)
             
 @testattr(stddist = True)
 def t_get_w_start_attributes(xmldoc):
@@ -373,7 +404,8 @@ def t_get_w_start_attributes(xmldoc):
                 "Start attribute of String is not str."
         else:
             pass
-            # enumeration not supported             
+            # enumeration not supported
+    nose.tools.assert_equal(d.get(30),0.0)         
 
 @testattr(stddist = True)
 def t_get_p_opt_variable_refs(xmldoc):
@@ -381,6 +413,7 @@ def t_get_p_opt_variable_refs(xmldoc):
     for ref in refs:
         assert ref.__class__ is int, \
            "Value ref is not int."
+    nose.tools.assert_equal(refs[0],0)
 
 @testattr(stddist = True)
 def t_get_w_initial_guess_values(xmldoc):
@@ -404,6 +437,7 @@ def t_get_w_initial_guess_values(xmldoc):
         else:
             pass
             # enumeration not supported
+    nose.tools.assert_equal(d.get(30), 0.0)
 
 @testattr(stddist = True)
 def t_get_u_initial_guess_values(xmldoc):
@@ -427,6 +461,7 @@ def t_get_u_initial_guess_values(xmldoc):
         else:
             pass
             # enumeration not supported
+    nose.tools.assert_equal(d.get(26),350.0)
 
 @testattr(stddist = True)
 def t_get_dx_initial_guess_values(xmldoc):
@@ -450,6 +485,7 @@ def t_get_dx_initial_guess_values(xmldoc):
         else:
             pass
             # enumeration not supported
+    nose.tools.assert_equal(d.get(20),0.0)
 
 @testattr(stddist = True)
 def t_get_x_initial_guess_values(xmldoc):
@@ -473,6 +509,7 @@ def t_get_x_initial_guess_values(xmldoc):
         else:
             pass
             # enumeration not supported
+    nose.tools.assert_equal(d.get(24),300.0)
 
 @testattr(stddist = True)
 def t_get_p_opt_initial_guess_values(xmldoc):
@@ -496,6 +533,7 @@ def t_get_p_opt_initial_guess_values(xmldoc):
         else:
             pass
             # enumeration not supported
+    nose.tools.assert_equal(d.get(0),2.0)
 
 @testattr(stddist = True)
 def t_get_w_lb_values(xmldoc):
@@ -519,6 +557,7 @@ def t_get_w_lb_values(xmldoc):
         else:
             pass
             # enumeration not supported
+    # no example in testfiles
 
 @testattr(stddist = True)
 def t_get_u_lb_values(xmldoc):
@@ -542,6 +581,7 @@ def t_get_u_lb_values(xmldoc):
         else:
             pass
             # enumeration not supported
+    nose.tools.assert_equal(d.get(5),-1.0)
 
 @testattr(stddist = True)
 def t_get_dx_lb_values(xmldoc):
@@ -565,6 +605,7 @@ def t_get_dx_lb_values(xmldoc):
         else:
             pass
             # enumeration not supported
+    # no example in testfile
 
 @testattr(stddist = True)
 def t_get_x_lb_values(xmldoc):
@@ -588,6 +629,7 @@ def t_get_x_lb_values(xmldoc):
         else:
             pass
             # enumeration not supported
+    # no example in testfile
 
 @testattr(stddist = True)
 def t_get_p_opt_lb_values(xmldoc):
@@ -611,6 +653,7 @@ def t_get_p_opt_lb_values(xmldoc):
         else:
             pass
             # enumeration not supported
+    nose.tools.assert_equal(d.get(0),0.2)
 
 @testattr(stddist = True)
 def t_get_w_ub_values(xmldoc):
@@ -634,6 +677,7 @@ def t_get_w_ub_values(xmldoc):
         else:
             pass
             # enumeration not supported
+    # no example in testfile
 
 @testattr(stddist = True)
 def t_get_u_ub_values(xmldoc):
@@ -657,6 +701,7 @@ def t_get_u_ub_values(xmldoc):
         else:
             pass
             # enumeration not supported
+    nose.tools.assert_equal(d.get(5),1.0)
 
 @testattr(stddist = True)
 def t_get_dx_ub_values(xmldoc):
@@ -680,6 +725,7 @@ def t_get_dx_ub_values(xmldoc):
         else:
             pass
             # enumeration not supported
+    # no example in testfile
 
 @testattr(stddist = True)
 def t_get_x_ub_values(xmldoc):
@@ -703,6 +749,7 @@ def t_get_x_ub_values(xmldoc):
         else:
             pass
             # enumeration not supported
+    # no example in testfile
 
 @testattr(stddist = True)
 def t_get_p_opt_ub_values(xmldoc):
@@ -726,6 +773,7 @@ def t_get_p_opt_ub_values(xmldoc):
         else:
             pass
             # enumeration not supported
+    # no example in testfile
 
 @testattr(stddist = True)
 def t_get_w_lin_values(xmldoc):
@@ -735,6 +783,7 @@ def t_get_w_lin_values(xmldoc):
             "Value reference is not int"
         assert value.__class__ is bool, \
                 "Is linear value is not bool."
+    nose.tools.assert_equal(d.get(30),False)
 
 @testattr(stddist = True)
 def t_get_u_lin_values(xmldoc):
@@ -744,6 +793,7 @@ def t_get_u_lin_values(xmldoc):
             "Value reference is not int"
         assert value.__class__ is bool, \
                 "Is linear value is not bool."
+    nose.tools.assert_equal(d.get(26),False)
 
 @testattr(stddist = True)
 def t_get_dx_lin_values(xmldoc):
@@ -753,6 +803,7 @@ def t_get_dx_lin_values(xmldoc):
             "Value reference is not int"
         assert value.__class__ is bool, \
                 "Is linear value is not bool."
+    nose.tools.assert_equal(d.get(20),True)
 
 @testattr(stddist = True)
 def t_get_x_lin_values(xmldoc):
@@ -762,6 +813,7 @@ def t_get_x_lin_values(xmldoc):
             "Value reference is not int"
         assert value.__class__ is bool, \
                 "Is linear value is not bool."
+    nose.tools.assert_equal(d.get(25),False)
 
 @testattr(stddist = True)
 def t_get_p_opt_lin_values(xmldoc):
@@ -771,6 +823,7 @@ def t_get_p_opt_lin_values(xmldoc):
             "Value reference is not int"
         assert value.__class__ is bool, \
                 "Is linear value is not bool."
+    nose.tools.assert_equal(d.get(1),False)
 
 @testattr(stddist = True)
 def t_get_w_lin_tp_values(xmldoc):
@@ -781,6 +834,9 @@ def t_get_w_lin_tp_values(xmldoc):
         for val in value:
             assert val.__class__ is bool, \
                 "Time point value is not bool."
+    tps = d.get(30)
+    nose.tools.assert_equal(len(tps),10)
+    nose.tools.assert_equal(tps[0],True)
 
 @testattr(stddist = True)
 def t_get_u_lin_tp_values(xmldoc):
@@ -791,6 +847,8 @@ def t_get_u_lin_tp_values(xmldoc):
         for val in value:
             assert val.__class__ is bool, \
                 "Time point value is not bool."
+    tps = d.get(26)
+    nose.tools.assert_equal(tps[0],True)
 
 @testattr(stddist = True)
 def t_get_dx_lin_tp_values(xmldoc):
@@ -801,6 +859,8 @@ def t_get_dx_lin_tp_values(xmldoc):
         for val in value:
             assert val.__class__ is bool, \
                 "Time point value is not bool."
+    tps = d.get(20)
+    nose.tools.assert_equal(tps[0],True)
 
 @testattr(stddist = True)
 def t_get_x_lin_tp_values(xmldoc):
@@ -811,6 +871,8 @@ def t_get_x_lin_tp_values(xmldoc):
         for val in value:
             assert val.__class__ is bool, \
                 "Time point value is not bool."
+    tps = d.get(24)
+    nose.tools.assert_equal(tps[0],True)    
                 
 @testattr(stddist = True)
 def t_get_iparam_values(xmldoc):
@@ -840,24 +902,28 @@ def t_get_starttime(xmldoc):
     time = xmldoc.get_starttime()
     assert time.__class__ is float, \
         "XMLVariablesDoc.get_starttime did not return float."
+    nose.tools.assert_equal(time,0.0)
     
 @testattr(stddist = True)
 def t_get_starttime_free(xmldoc):
     b = xmldoc.get_starttime_free()
     assert b.__class__ is bool, \
             "XMLVariablesDoc.get_starttime_free did not return boolean."
+    nose.tools.assert_equal(b, False)
     
 @testattr(stddist = True)
 def t_get_finaltime(xmldoc):
     time = xmldoc.get_finaltime()
     assert time.__class__ is float, \
         "XMLVariablesDoc.get_finaltime did not return float."
+    nose.tools.assert_equal(time,150.0)
     
 @testattr(stddist = True)
 def t_get_finaltime_free(xmldoc):
     b = xmldoc.get_finaltime_free()
     assert b.__class__ is bool, \
             "XMLVariablesDoc.get_finaltime_free did not return boolean."
+    nose.tools.assert_equal(b, False)
     
 @testattr(stddist = True)
 def t_get_timepoints(xmldoc):
@@ -865,3 +931,4 @@ def t_get_timepoints(xmldoc):
     for tp in timepoints:
         assert tp.__class__ is float, \
             "timepoint is not float."
+    nose.tools.assert_equal(timepoints[0], 150.0) 

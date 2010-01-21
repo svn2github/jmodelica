@@ -52,8 +52,8 @@ def test_compile():
     mc.compile_model(fpath_mc, cpath_mc)
     
     fname = cpath_mc.replace('.','_',1)
-    assert os.access(fname+'_variables.xml',os.F_OK) == True, \
-           fname+'_variables.xml'+" was not created."
+    assert os.access(fname+'.xml',os.F_OK) == True, \
+           fname+'.xml'+" was not created."
     
     assert os.access(fname+'_values.xml', os.F_OK) == True, \
            fname+'_values.xml'+" was not created."
@@ -86,8 +86,8 @@ def test_optimica_compile():
     oc.compile_model(fpath_oc, cpath_oc)
     
     fname = cpath_oc.replace('.','_',1)
-    assert os.access(fname+'_variables.xml',os.F_OK) == True, \
-           fname+'_variables.xml'+" was not created."
+    assert os.access(fname+'.xml',os.F_OK) == True, \
+           fname+'.xml'+" was not created."
     
     assert os.access(fname+'_values.xml', os.F_OK) == True, \
            fname+'_values.xml'+" was not created."

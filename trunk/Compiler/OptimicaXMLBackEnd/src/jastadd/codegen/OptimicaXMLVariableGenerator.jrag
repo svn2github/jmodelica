@@ -53,60 +53,71 @@ public class OptimicaXMLVariableGenerator extends XMLVariableGenerator {
 	}
 	
 	@Override
-	protected void addRealAttributes(PrintStream genPrinter, TagGenerator tg, FRealVariable realvariable) {
-		super.addRealAttributes(genPrinter, tg, realvariable);
-		genPrinter.print(tg.generateTag("Free")+realvariable.freeAttribute()+tg.generateTag("Free"));
-		double ig_val = 0;
-		// If initialGuess attribute is not specified, use start attribute
-		if (realvariable.initialGuessAttributeSet()) {
-			ig_val = realvariable.initialGuessAttribute();			
-		} else {
-			ig_val = realvariable.startAttribute();			
-		}
-		genPrinter.print(tg.generateTag("InitialGuess")+ig_val+tg.generateTag("InitialGuess"));
-	}
-	
-	@Override
-	protected void addIntegerAttributes(PrintStream genPrinter, TagGenerator tg, FIntegerVariable integervariable) {
-		super.addIntegerAttributes(genPrinter, tg, integervariable);
-		genPrinter.print(tg.generateTag("Free")+integervariable.freeAttribute()+tg.generateTag("Free"));
-		int ig_val = 0;
-		// If initialGuess attribute is not specified, use start attribute
-		if (integervariable.initialGuessAttributeSet()) {
-			ig_val = integervariable.initialGuessAttribute();			
-		} else {
-			ig_val = integervariable.startAttribute();			
-		}
-		genPrinter.print(tg.generateTag("InitialGuess")+ig_val+tg.generateTag("InitialGuess"));
-	}
-	
-	@Override
-	protected void addBooleanAttributes(PrintStream genPrinter, TagGenerator tg, FBooleanVariable booleanvariable) {
-		super.addBooleanAttributes(genPrinter, tg, booleanvariable);
-		genPrinter.print(tg.generateTag("Free")+booleanvariable.freeAttribute()+tg.generateTag("Free"));
-		boolean ig_val = false;
-		// If initialGuess attribute is not specified, use start attribute
-		if (booleanvariable.initialGuessAttributeSet()) {
-			ig_val = booleanvariable.initialGuessAttribute();			
-		} else {
-			ig_val = booleanvariable.startAttribute();			
-		}
-		genPrinter.print(tg.generateTag("InitialGuess")+ig_val+tg.generateTag("InitialGuess"));
-	}
-	
-	@Override
-	protected void addLinearInfo(PrintStream genPrinter, TagGenerator tg, FVariable variable) {
-		super.addLinearInfo(genPrinter, tg, variable);
-		boolean[] linearTimedVariables = variable.isLinearTimedVariables();
-		
-		if(linearTimedVariables.length > 0) {
-			genPrinter.print(tg.generateTag("isLinearTimedVariables"));
-			for(int i=0;i<linearTimedVariables.length;i++) {
-				genPrinter.print(tg.generateTag("TimePoint", true));
-				genPrinter.print("index=\""+i+"\" isLinear=\""+linearTimedVariables[i]+"\"");
-				genPrinter.print(tg.generateTag("TimePoint", true));
+	protected void addRealAttributes(PrintStream genPrinter, FRealVariable realvariable) {
+		super.addRealAttributes(genPrinter, realvariable);
+		Boolean generateFMI = realvariable.root().options.getBooleanOption("generate_fmi_xml");
+		if(!generateFMI) {
+			genPrinter.print("free=\""+realvariable.freeAttribute()+"\" ");
+			double ig_val = 0;
+			// If initialGuess attribute is not specified, use start attribute
+			if (realvariable.initialGuessAttributeSet()) {
+				ig_val = realvariable.initialGuessAttribute();			
+			} else {
+				ig_val = realvariable.startAttribute();			
 			}
-			genPrinter.print(tg.generateTag("isLinearTimedVariables"));
+			genPrinter.print("initialGuess=\""+ig_val+"\" ");
+		}
+	}
+	
+	@Override
+	protected void addIntegerAttributes(PrintStream genPrinter, FIntegerVariable integervariable) {
+		super.addIntegerAttributes(genPrinter, integervariable);
+		Boolean generateFMI = integervariable.root().options.getBooleanOption("generate_fmi_xml");
+		if(!generateFMI) {
+			genPrinter.print("free=\""+integervariable.freeAttribute()+"\" ");
+			int ig_val = 0;
+			// If initialGuess attribute is not specified, use start attribute
+			if (integervariable.initialGuessAttributeSet()) {
+				ig_val = integervariable.initialGuessAttribute();			
+			} else {
+				ig_val = integervariable.startAttribute();			
+			}
+			genPrinter.print("initialGuess"+ig_val+"\" ");
+		}
+	}
+	
+	@Override
+	protected void addBooleanAttributes(PrintStream genPrinter, FBooleanVariable booleanvariable) {
+		super.addBooleanAttributes(genPrinter, booleanvariable);
+		Boolean generateFMI = booleanvariable.root().options.getBooleanOption("generate_fmi_xml");
+		if(!generateFMI) {
+			genPrinter.print("free=\""+booleanvariable.freeAttribute()+"\" ");
+			boolean ig_val = false;
+			// If initialGuess attribute is not specified, use start attribute
+			if (booleanvariable.initialGuessAttributeSet()) {
+				ig_val = booleanvariable.initialGuessAttribute();			
+			} else {
+				ig_val = booleanvariable.startAttribute();			
+			}
+			genPrinter.print("initialGuess=\""+ig_val+"\" ");
+		}
+	}
+	
+	@Override
+	protected void addLinearInfo(PrintStream genPrinter, FVariable variable) {
+		super.addLinearInfo(genPrinter, variable);
+		boolean[] linearTimedVariables = variable.isLinearTimedVariables();
+		Boolean generateFMI = variable.root().options.getBooleanOption("generate_fmi_xml");
+		if(!generateFMI) {
+			if(linearTimedVariables.length > 0) {
+				genPrinter.print("\n\t\t\t <isLinearTimedVariables>");
+				for(int i=0;i<linearTimedVariables.length;i++) {
+					genPrinter.print("\n\t\t\t\t <TimePoint ");
+					genPrinter.print("index=\""+i+"\" isLinear=\""+linearTimedVariables[i]+"\"");
+					genPrinter.print("/>");
+				}
+				genPrinter.print("\n\t\t\t </isLinearTimedVariables>");
+			}
 		}
 	}
 	
@@ -123,16 +134,19 @@ public class OptimicaXMLVariableGenerator extends XMLVariableGenerator {
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
 		public void generate(PrintStream genPrinter) {
+			Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
+			
 			String indent="\t\t";
 			FOptClass optClass = (FOptClass) fclass;
 			
-			genPrinter.println("<opt:Optimization>");			
+			genPrinter.println("<opt:Optimization>");
 			
-			//Objective function
-			genPrinter.println(indent+"<opt:ObjectiveFunction>");
-			objectiveFunction_XML(genPrinter,optClass,indent+"\t");
-			genPrinter.println(indent+"</opt:ObjectiveFunction>");
-			
+			if(generateEqu){
+				//Objective function
+				genPrinter.println(indent+"<opt:ObjectiveFunction>");
+				objectiveFunction_XML(genPrinter,optClass,indent+"\t");
+				genPrinter.println(indent+"</opt:ObjectiveFunction>");
+			}			
 			//Interval start time
 			genPrinter.println(indent+"<opt:IntervalStartTime>");	
 			intervalStartTime_XML(genPrinter,optClass,indent+"\t");
@@ -147,13 +161,14 @@ public class OptimicaXMLVariableGenerator extends XMLVariableGenerator {
 			genPrinter.println(indent+"<opt:TimePoints>");	
 			timePoints_XML(genPrinter,optClass,indent+"\t");
 			genPrinter.println(indent+"</opt:TimePoints>");
-						
-			//Constraints
-			genPrinter.println(indent+"<opt:Constraints>");
-			for(FConstraint c : optClass.constraints())
-				c.prettyPrint_XML(genPrinter,indent+"\t",c);	
-			genPrinter.println(indent+"</opt:Constraints>");
 			
+			if(generateEqu){
+				//Constraints
+				genPrinter.println(indent+"<opt:Constraints>");
+				for(FConstraint c : optClass.constraints())
+					c.prettyPrint_XML(genPrinter,indent+"\t",c);	
+				genPrinter.println(indent+"</opt:Constraints>");
+			}
 			genPrinter.println("\t</opt:Optimization>");
 		}
 	}

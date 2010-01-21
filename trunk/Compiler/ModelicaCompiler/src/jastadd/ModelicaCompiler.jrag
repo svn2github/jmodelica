@@ -549,7 +549,7 @@ public class ModelicaCompiler {
 		logger.info("Generating code...");
 		
 		XMLVariableGenerator variablegenerator = new XMLVariableGenerator(new PrettyPrinter(), '$', fc);
-		String output = fc.nameUnderscore()+"_variables.xml";
+		String output = fc.nameUnderscore()+".xml";
 		variablegenerator.generate(this.xmlVariablesTempl, output);
 
 		XMLValueGenerator valuegenerator = new XMLValueGenerator(new PrettyPrinter(), '$', fc);
@@ -601,35 +601,46 @@ public class ModelicaCompiler {
 	protected static Hashtable<String, String> extractProgramArguments(String[] args, int pos) {
 		Hashtable<String, String> programargs = new Hashtable<String,String>();
 
+//		while(pos < args.length && args[pos].trim().substring(0,1).equals("-")) {
+//			String progarg = args[pos].trim().substring(1, args[pos].trim().indexOf("="));
+//			if(progarg.equals("log")) {
+//				//is log option -> override default
+//				if(args[pos].trim().indexOf("=")+1 <= args[pos].trim().length()) {
+////					setLogLevel(logger.getName(),args[arg].trim().substring(args[arg].trim().indexOf("=")+1));
+//					programargs.put("log", args[pos].trim().substring(args[pos].trim().indexOf("=")+1));
+//				}
+//			} else if(progarg.equals("modelicapath")) {
+//				// is modelicapath option
+//				if(args[pos].trim().indexOf("=")+1 <= args[pos].trim().length()) {
+//					programargs.put("modelicapath", args[pos].trim().substring(args[pos].trim().indexOf("=")+1));
+//				}
+//			} else {
+//				//unsupported program argument
+//				;
+//			}
+//			pos++;
+//		}
+		
+		
 		while(pos < args.length && args[pos].trim().substring(0,1).equals("-")) {
 			String progarg = args[pos].trim().substring(1, args[pos].trim().indexOf("="));
-			if(progarg.equals("log")) {
-				//is log option -> override default
-				if(args[pos].trim().indexOf("=")+1 <= args[pos].trim().length()) {
-//					setLogLevel(logger.getName(),args[arg].trim().substring(args[arg].trim().indexOf("=")+1));
-					programargs.put("log", args[pos].trim().substring(args[pos].trim().indexOf("=")+1));
-				}
-			} else if(progarg.equals("modelicapath")) {
-				// is modelicapath option
-				if(args[pos].trim().indexOf("=")+1 <= args[pos].trim().length()) {
-					programargs.put("modelicapath", args[pos].trim().substring(args[pos].trim().indexOf("=")+1));
-				}
-			} else {
-				//unsupported program argument
-				;
+			if(args[pos].trim().indexOf("=")+1 <= args[pos].trim().length()) {
+				programargs.put(progarg, args[pos].trim().substring(args[pos].trim().indexOf("=")+1));
 			}
 			pos++;
 		}
 		return programargs;
 	}
 	
-	public static void main(String args[]) {		
+	public static void main(String args[]) {
+		String filesep = System.getProperty("file.separator");
 		if(args.length < 1) {
 			logger.severe("ModelicaCompiler expects the command line arguments: \n" +
 					"[-options] <file name> <class name> [<xml variables template> <xml values template> <c template>]\n" +
 					"where options could be: \n" +
 					"-log=<i or w or e> \n" +
-					"-modelicapath=<path to modelica library>");
+					"-modelicapath=<path to modelica library> \n" +
+					"-optfile=<path to XML options file>");
 			System.exit(1);
 		}
 		
@@ -638,11 +649,13 @@ public class ModelicaCompiler {
 		
 		//get any program options set
 		Hashtable<String, String> programarguments = extractProgramArguments(args, arg);
+		//log option
 		if(programarguments.get("log")!=null) {
 			setLogLevel(logger.getName(),programarguments.get("log"));
 		}else {
 			setLogLevel(logger.getName(),ModelicaCompiler.ERROR);
 		}
+		//modelicapath option
 		modelicapath = programarguments.get("modelicapath");
 		
 		arg = programarguments.size();
@@ -664,9 +677,14 @@ public class ModelicaCompiler {
 			ctempl = args[arg+4];
 		}
 		
-		//look for options.xml in $JMODELICA_HOME/Options/
-		String filesep = System.getProperty("file.separator");
-		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
+		String optionsfile = null;
+		//look for options.xml in $JMODELICA_HOME/Options/ and program arguments
+		if(programarguments.get("optfile")!=null) {
+			optionsfile = programarguments.get("optfile");
+		}else{
+			optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
+		}
+
 		OptionRegistry or = null;
 		try {
 			or = new OptionRegistry(optionsfile);

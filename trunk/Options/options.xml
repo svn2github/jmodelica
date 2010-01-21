@@ -66,9 +66,9 @@
 			<Type>Boolean</Type>
 			<BooleanAttributes>
 				<Key>generate_xml_equations</Key>
-				<Value>true</Value>
+				<Value>false</Value>
 				<Description>
-                                If this option is true (default), then model equations are generated in XML format.
+                                If this option is true, then model equations are generated in XML format. Default is false.
 				</Description>
 			</BooleanAttributes>
 		</Option>
@@ -92,6 +92,16 @@
 				</Description>
 			</BooleanAttributes>
 		</Option>
-
+		<Option>
+			<Type>Boolean</Type>
+			<BooleanAttributes>
+				<Key>generate_fmi_xml</Key>
+				<Value>false</Value>
+				<Description>
+                                If this option is true the model description part of the XML variables file will be FMI compliant. Default is false. 
+                                To generate an XML which will validate with FMI schema the option generate_xml_equations must also be false.
+				</Description>
+			</BooleanAttributes>
+		</Option>
 	</Options>	
 </OptionRegistry>

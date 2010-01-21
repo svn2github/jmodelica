@@ -23,6 +23,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.Stack;
 
 /**
@@ -37,184 +41,18 @@ import java.util.Stack;
  */
 public class XMLVariableGenerator extends GenericGenerator {
 	
-	/**
-	 * Internal class used to generate the model name tag.
-	 * 
-	 * @see DAETag
-	 */
-	class DAETag_XML_modelName extends DAETag {
-		
-		public DAETag_XML_modelName(
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_modelName","Model name.",
-			  myGenerator,fclass);
-		}
-		
-		/*
-		 * (non-Javadoc)
-		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
-		 */
-		public void generate(PrintStream genPrinter) {
-			genPrinter.print(fclass.name());
-		}
-	}
+	private HashMap<String,String> illegalCharsSub;
 	
 	/**
-	 * Internal class used to generate the model identifier tag.
+	 * Internal class used to generate the model root attributes.
 	 * 
 	 * @see DAETag
 	 */
-	class DAETag_XML_modelIdentifier extends DAETag {
-		
-		public DAETag_XML_modelIdentifier(
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_modelIdentifier","Model identifier.",
-			  myGenerator,fclass);
-		}
-	
-		/*
-		 * (non-Javadoc)
-		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
-		 */
-		public void generate(PrintStream genPrinter) {
-			//TODO: implement when available
-			// Dummy value for now
-			genPrinter.print("ModelId");
-		}
-	}
-	
-	/**
-	 * Internal class used to generate the model description tag.
-	 * 
-	 * @see DAETag
-	 */
-	class DAETag_XML_modelDescription extends DAETag {
-		
-		public DAETag_XML_modelDescription(
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_modelDescription","Model description.",
-			  myGenerator,fclass);
-		}
-		
-		/*
-		 * (non-Javadoc)
-		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
-		 */
-		public void generate(PrintStream genPrinter) {
-			//TODO: implement when available
-			// Dummy value for now
-			genPrinter.print("A description of the model.");
-		}
-	}
-	
-	/**
-	 * Internal class used to generate the model author tag.
-	 * 
-	 * @see DAETag
-	 */
-	class DAETag_XML_modelAuthor extends DAETag {
-		
-		public DAETag_XML_modelAuthor(
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_modelAuthor","The author of the model.",
-			  myGenerator,fclass);
-		}
-		
-		/*
-		 * (non-Javadoc)
-		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
-		 */
-		public void generate(PrintStream genPrinter) {
-			//TODO: implement when available
-			// Dummy value for now
-			genPrinter.print("Model author");
-		}
-	}
-
-	/**
-	 * Internal class used to generate the model version tag.
-	 * 
-	 * @see DAETag
-	 */
-	class DAETag_XML_modelVersion extends DAETag {
-		
-		public DAETag_XML_modelVersion(
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_modelVersion","Model version.",
-			  myGenerator,fclass);
-		}
-		
-		/*
-		 * (non-Javadoc)
-		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
-		 */
-		public void generate(PrintStream genPrinter) {
-			//TODO: implement when available
-			// Dummy value for now
-			genPrinter.print("Model version nbr: 1");
-		}
-	}
-
-	/**
-	 * Internal class used to generate the model schema version tag.
-	 * 
-	 * @see DAETag
-	 */
-	class DAETag_XML_schemaVersion extends DAETag {
-		
-		public DAETag_XML_schemaVersion(
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_schemaVersion","Schema version.",
-			  myGenerator,fclass);
-		}
-		
-		/*
-		 * (non-Javadoc)
-		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
-		 */
-		public void generate(PrintStream genPrinter) {
-			//TODO: implement when available
-			// Dummy value for now
-			genPrinter.print("Schema version nbr: 1");
-		}
-	}
-
-	/**
-	 * Internal class used to generate the model generation tool tag.
-	 * 
-	 * @see DAETag
-	 */
-	class DAETag_XML_generationTool extends DAETag {
-		
-		public DAETag_XML_generationTool (
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_generationTool","Generation tool.",
-			  myGenerator,fclass);
-		}
-		
-		/*
-		 * (non-Javadoc)
-		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
-		 */
-		public void generate(PrintStream genPrinter) {
-			//TODO: implement when available
-			// Dummy value for now
-			genPrinter.print("The generation tool");
-		}
-	}
-
-	/**
-	 * Internal class used to generate the model generation date tag.
-	 * 
-	 * @see DAETag
-	 */
-	class DAETag_XML_generationDate extends DAETag {
+	class DAETag_XML_rootAttributes extends DAETag {
 		private static final String df = "yyyy-MM-dd'T'HH:mm:ss";
 		
-		public DAETag_XML_generationDate (
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_generationDate","Generation date.",
-			  myGenerator,fclass);
+		public DAETag_XML_rootAttributes(AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_rootAttributes", "Model attributes.", myGenerator, fclass);
 		}
 		
 		/*
@@ -222,366 +60,101 @@ public class XMLVariableGenerator extends GenericGenerator {
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
 		public void generate(PrintStream genPrinter) {
-			//TODO: implement when available
+			genPrinter.print("fmiVersion=\"1.0\" ");
+			genPrinter.print("modelName=\""+fclass.name()+"\" ");
+			genPrinter.print("modelIdentifier=\""+fclass.nameUnderscore()+"\" ");
+			genPrinter.print("guid=\"unsupported\" ");
+			//genPrinter.print("description=\"String\" ");
+			//genPrinter.print("author=\"String\" ");
+			//genPrinter.print("version=\"0.0\" ");
+			//genPrinter.print("generationTool=\"normalizedString\" ");
 			// Todays date for now
 			SimpleDateFormat dateformat = new SimpleDateFormat(df);
-			genPrinter.print(dateformat.format(new Date()));
+			genPrinter.print("generationDateAndTime=\""+dateformat.format(new Date())+"\" ");
+			genPrinter.print("variableNamingConvention=\"flat\" ");
+			genPrinter.print("numberOfContinuousStates=\""+fclass.numDifferentiatedRealVariables()+"\" ");
+			genPrinter.print("numberOfEventIndicators=\""+fclass.numEventIndicators()+"\"");
 		}
 	}
-	
+		
 	/**
-	 * Internal class used to generate the model global unique identifier tag.
+	 * Internal class used to generate the unit definitions tag.
 	 * 
 	 * @see DAETag
 	 */
-	class DAETag_XML_guid extends DAETag {
+	class DAETag_XML_unitDefinitions extends DAETag {
 		
-		public DAETag_XML_guid (
+		public DAETag_XML_unitDefinitions(
 		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_guid","The Globally Unique Identifier.",
+			super("XML_unitDefinitions","Unit definitions (optional).",
 			  myGenerator,fclass);
 		}
-		
+				
 		/*
 		 * (non-Javadoc)
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
 		public void generate(PrintStream genPrinter) {
-			//TODO: implement when available
-			// Dummy value for now
-			genPrinter.print("Global id");
-		}
-	}
-
-	class DAETag_XML_variableNamingConvention extends DAETag {
-		
-		public DAETag_XML_variableNamingConvention (
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_VariableNamingConvention","The Variable Naming Convention.",
-			  myGenerator,fclass);
-		}
-		
-		/*
-		 * (non-Javadoc)
-		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
-		 */
-		public void generate(PrintStream genPrinter) {
-			//TODO: implement when available
-			// Default value for now
-			genPrinter.print("unknown");
-		}
-	}
-
-    // Declared in XMLVariableGenerator.jrag at line 275
-
-	
-	class DAETag_XML_numberOfContinuousStates extends DAETag {
-		
-		public DAETag_XML_numberOfContinuousStates (
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_NumberOfContinuousStates","Number of continuous states.",
-			  myGenerator,fclass);
-		}
-		
-		/*
-		 * (non-Javadoc)
-		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
-		 */
-		public void generate(PrintStream genPrinter) {
-			genPrinter.print(fclass.numDifferentiatedRealVariables());
-		}
-	}
-
-    // Declared in XMLVariableGenerator.jrag at line 294
-
-	
-	class DAETag_XML_numberOfEventIndicators extends DAETag {
-		
-		public DAETag_XML_numberOfEventIndicators (
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_NumberOfEventIndicators","Number event indicators.",
-			  myGenerator,fclass);
-		}
-		
-		/*
-		 * (non-Javadoc)
-		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
-		 */
-		public void generate(PrintStream genPrinter) {
-			genPrinter.print(fclass.numEventIndicators());
-		}
-	}
-
-	/**
-	 * Internal class used to generate the model variables tags.
-	 * 
-	 * The model variables tags may vary in number and content. Therefore 
-	 * the template file can not be used for this part of the XML. Instead, 
-	 * all model variable tags are generated dynamically using this tag class.
-	 * 
-	 * @see DAETag
-	 */
-	class DAETag_XML_modelVariables extends DAETag {
-		
-		public DAETag_XML_modelVariables(
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_variables","Model variables. (Optional)",
-			  myGenerator,fclass);
-		}
-	
-		/*
-		 * (non-Javadoc)
-		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
-		 */
-		public void generate(PrintStream genPrinter) {
-			TagGenerator tg = new TagGenerator(2);
+			// extract all units and beloning unit definitions
+			HashMap<String,HashSet<String>> map = new HashMap<String,HashSet<String>>();
+			for(FVariable variable:fclass.allVariables()) {
+				if(variable instanceof FRealVariable && ((FRealVariable)variable).unitAttributeSet() && ((FRealVariable)variable).displayUnitAttributeSet()) {
+					String attribute = ((FRealVariable)variable).unitAttribute();
+					if(map.containsKey(attribute)) {
+						HashSet<String> temp=map.get(attribute);
+						temp.add(((FRealVariable)variable).displayUnitAttribute());
+					} else {
+						HashSet<String> set = new HashSet<String>();
+						set.add(((FRealVariable)variable).displayUnitAttribute());
+						map.put(attribute, set);
+					}
+				}
+			}
 			
-			for(FVariable variable:fclass.allVariables()) {				
-				genPrinter.print(tg.generateTag("ScalarVariable"));
-				
-				//ScalarVariableName
-				genPrinter.print(tg.generateTag("ScalarVariableName")+variable.name()+tg.generateTag("ScalarVariableName"));
-				
-				//ValueReference
-				genPrinter.print(tg.generateTag("ValueReference")+variable.valueReference()+tg.generateTag("ValueReference"));
-				
-				//DataType
-				genPrinter.print(tg.generateTag("DataType"));
-				if(variable.isReal()) {
-					genPrinter.print("Real");
-				} else if(variable.isInteger()) {
-					genPrinter.print("Integer");
-				} else if(variable.isBoolean()) {
-					genPrinter.print("Boolean");
-				} else if(variable.isString()) {
-					genPrinter.print("String");
-				} else if(false) {
-//					TODO: Enumeration variable
-				}
-				 else {
-					//TODO: errorhandling
-					System.err.println("Invalid or missing DataType");
-				}
-				genPrinter.print(tg.generateTag("DataType"));
-	
-				
-				//Description (optional)
-				if(variable.hasFStringComment()) {
-					genPrinter.print(tg.generateTag("Description")+"<![CDATA[" + variable.getFStringComment().getComment()+"]]>" +tg.generateTag("Description"));
-				}
-				
-				//Private/Protected (Optional) 
-				//genPrinter.print(tg.generateTag("Protected")+variable.isProtected()+tg.generateTag("Protected"));				
-				
-				//Variability (optional with default)
-				genPrinter.print(tg.generateTag("Variability"));
-				if(variable.isConstant()) {
-					genPrinter.print("constant");
-				} else if(variable.isParameter()) {
-					genPrinter.print("parameter");
-				} else if(variable.isContinuous()) {
-					genPrinter.print("continuous");
-				} else {
-					//default
-					genPrinter.print("discrete");
-				}
-				genPrinter.print(tg.generateTag("Variability"));
-				
-				
-				//Causality (optional with default)
-				genPrinter.print(tg.generateTag("Causality"));
-				if(variable.isInput()) {
-					genPrinter.print("input");
-				} else if(variable.isOutput()) {
-					genPrinter.print("output");
-				} else {
-					//default
-					genPrinter.print("internal");
+			//generate code if any units defined
+			Set<String> units = map.keySet();
+			if(!units.isEmpty()) {
+				genPrinter.print("<UnitDefinitions>");
+				Iterator<String> it = units.iterator();
+				while(it.hasNext()) {
+					String unit = it.next();
+					genPrinter.print("\n\t\t <BaseUnit unit=\""+unit+"\">");
+					HashSet<String> defs = map.get(unit);
+					Iterator<String> defsit = defs.iterator();
+					while(defsit.hasNext()) {
+						genPrinter.print("\n\t\t\t <DisplayUnitDefinition ");
+						genPrinter.print("displayUnit=\""+ defsit.next()+"\" ");
+						genPrinter.print("gain=\"1\" ");
+						genPrinter.print("offset=\"0\"/>");
+					}
+					genPrinter.print("\n\t\t </BaseUnit>");
 				}				
-				genPrinter.print(tg.generateTag("Causality"));
-				
-				
-				//Attributes
-				//genPrinter.print(tg.generateTag("Attributes"));
+				genPrinter.print("\n\t </UnitDefinitions>");
+			}
+		}
+	}
 
-				if(variable.isReal()) {
-					FRealVariable realvariable=(FRealVariable)variable;
-					genPrinter.print(tg.generateTag("RealAttributes"));
-					addRealAttributes(genPrinter, tg, realvariable);					
-					genPrinter.print(tg.generateTag("RealAttributes"));
-					
-				} else if(variable.isInteger()) {
-					FIntegerVariable integervariable = (FIntegerVariable)variable;					
-					genPrinter.print(tg.generateTag("IntegerAttributes"));
-					addIntegerAttributes(genPrinter, tg, integervariable);
-					genPrinter.print(tg.generateTag("IntegerAttributes"));
-						
-				} else if(variable.isBoolean()) {
-					genPrinter.print(tg.generateTag("BooleanAttributes"));
-					addBooleanAttributes(genPrinter, tg, (FBooleanVariable)variable);
-					genPrinter.print(tg.generateTag("BooleanAttributes"));
-					
-				} else if(variable.isString()) {
-					genPrinter.print(tg.generateTag("StringAttributes"));
-					addStringAttributes(genPrinter, tg, (FStringVariable)variable);
-					genPrinter.print(tg.generateTag("StringAttributes"));
-					
-				} else if(false){
-					//TODO: Enumeration
-					genPrinter.print(tg.generateTag("EnumerationAttributes"));
-					//startattribute
-					if(variable.startAttributeSet()) {
-						//TODO:evaluate attribute
-						// Dummy value for now
-						genPrinter.print(tg.generateTag("Start")+1+tg.generateTag("Start"));
-					}						
-					genPrinter.print(tg.generateTag("EnumerationAttributes"));
-				} 
-				else {
-					//TODO: errorhandling
-					System.err.println("Invalid or missing variable type");
-				}
-				
-				//genPrinter.print(tg.generateTag("Attributes"));
-
-               				
-				//is linear?
-				addLinearInfo(genPrinter, tg, variable);
-				
-                //variable category
-				genPrinter.print(tg.generateTag("VariableCategory"));
-				if(variable.isDerivativeVariable()) {
-					genPrinter.print("derivative");
-				} else if(variable.isDifferentiatedVariable()) {
-					genPrinter.print("state");
-				} else if(variable.isDependentConstant()) {
-					genPrinter.print("dependentConstant");
-				} else if(variable.isIndependentConstant()) {
-					genPrinter.print("independentConstant");
-				} else if(variable.isDependentParameter()) {
-					genPrinter.print("dependentParamenter");
-				} else if(variable.isIndependentParameter()) {
-					genPrinter.print("independentParameter");
-				} else {
-					//default is algebraic
-					genPrinter.print("algebraic");
-				}
-				genPrinter.print(tg.generateTag("VariableCategory"));
-				
-				//Alias: alias, noAlias, negatedAlias
-                genPrinter.print(tg.generateTag("AliasVariable"));
-                if(variable.isAlias())
-                	if(variable.isNegated())
-                        genPrinter.print("negatedAlias");
-                    else
-                    	genPrinter.print("alias");                             
-                else
-                	genPrinter.print("noAlias");
-                genPrinter.print(tg.generateTag("AliasVariable"));
-				
-                
-				genPrinter.print(tg.generateTag("ScalarVariable"));
-			}			
-		}
-	}
-	
-	/*
-	 * Helper method generating linear variable tag such that it can be overridden in 
-	 * OptimicaXMLVariableGenerator.
+	/**
+	 * Internal class used to generate the type definitions tag.
+	 * 
+	 * @see DAETag
 	 */
-	protected void addLinearInfo(PrintStream genPrinter, TagGenerator tg, FVariable variable){
-		//isLinear
-		genPrinter.print(tg.generateTag("isLinear")+variable.isLinear()+tg.generateTag("isLinear"));
-	}
-	
-	/*
-	 * Helper method generating all real attributes.
-	 */
-	protected void addRealAttributes(PrintStream genPrinter, TagGenerator tg, FRealVariable realvariable) {
+	class DAETag_XML_typeDefinitions extends DAETag {
 		
-		//quantity
-		if(realvariable.quantityAttributeSet()) {
-			genPrinter.print(tg.generateTag("Quantity")+realvariable.quantityAttribute()+tg.generateTag("Quantity"));
+		public DAETag_XML_typeDefinitions(
+		  AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_typeDefinitions","Type definitions (optional).",
+			  myGenerator,fclass);
 		}
-		//unit
-		if(realvariable.unitAttributeSet()) {
-			genPrinter.print(tg.generateTag("Unit")+realvariable.unitAttribute()+tg.generateTag("Unit"));
-		}
-		//default display unit
-		if(realvariable.displayUnitAttributeSet()) {
-			genPrinter.print(tg.generateTag("DefaultDisplayUnit"));
-			genPrinter.print(tg.generateTag("DisplayUnit")+realvariable.displayUnitAttribute()+tg.generateTag("DisplayUnit"));
-			//TODO:this is default value
-			genPrinter.print(tg.generateTag("Gain")+1.0+tg.generateTag("Gain"));
-			//TODO:offset(optional)
-			genPrinter.print(tg.generateTag("DefaultDisplayUnit"));
-		}
-		//min
-		if(realvariable.minAttributeSet()) {
-			genPrinter.print(tg.generateTag("Min")+realvariable.minAttribute()+tg.generateTag("Min"));
-		}
-		//max
-		if(realvariable.maxAttributeSet()) {
-			genPrinter.print(tg.generateTag("Max")+realvariable.maxAttribute()+tg.generateTag("Max"));
-		}
-		//start
-		if (realvariable.isDependentParameter() && !realvariable.startAttributeSet()) {
-			genPrinter.print(tg.generateTag("Start") +realvariable.getBindingExp().ceval().realValue() + tg.generateTag("Start"));
-		} else {
-			genPrinter.print(tg.generateTag("Start") +realvariable.startAttribute()+tg.generateTag("Start"));
-		}
-		//nominal
-		if(realvariable.nominalAttributeSet()) {
-			genPrinter.print(tg.generateTag("Nominal")+realvariable.nominalAttribute()+tg.generateTag("Nominal"));
-		}
-	}
-	
-	/*
-	 * Helper method generating all integer attributes.
-	 */
-	protected void addIntegerAttributes(PrintStream genPrinter, TagGenerator tg, FIntegerVariable integervariable) {
 		
-		//quantity
-		if(integervariable.quantityAttributeSet()) {
-			genPrinter.print(tg.generateTag("Quantity")+integervariable.quantityAttribute()+tg.generateTag("Quantity"));
-		}					
-		//min
-		if(integervariable.minAttributeSet()) {
-			genPrinter.print(tg.generateTag("Min")+integervariable.minAttribute()+tg.generateTag("Min"));
-		}
-		//max
-		if(integervariable.maxAttributeSet()) {
-			genPrinter.print(tg.generateTag("Max")+integervariable.maxAttribute()+tg.generateTag("Max"));
-		}
-		//start
-		if (integervariable.isDependentParameter() && !integervariable.startAttributeSet()) {
-			genPrinter.print(tg.generateTag("Start") +integervariable.getBindingExp().ceval().intValue() + tg.generateTag("Start"));
-		} else {
-			genPrinter.print(tg.generateTag("Start") +integervariable.startAttribute()+tg.generateTag("Start"));
-		}
-	}
-	
-	/*
-	 * Helper method generating all boolean attributes.
-	 */
-	protected void addBooleanAttributes(PrintStream genPrinter, TagGenerator tg, FBooleanVariable booleanvariable) {
-		//start attribute
-		if (booleanvariable.isDependentParameter() && !booleanvariable.startAttributeSet()) {
-			genPrinter.print(tg.generateTag("Start") +booleanvariable.getBindingExp().ceval().intValue() + tg.generateTag("Start"));
-		} else if(booleanvariable.startAttributeSet()) {
-			genPrinter.print(tg.generateTag("Start") +booleanvariable.startAttribute()+tg.generateTag("Start"));
-		}		
-	}
-	
-	/*
-	 * Helper class generating all string attributes.
-	 */
-	protected void addStringAttributes(PrintStream genPrinter, TagGenerator tg, FStringVariable stringvariable) {
-		//start attribute
-		if (stringvariable.isDependentParameter() && !stringvariable.startAttributeSet()) {
-			genPrinter.print(tg.generateTag("Start") +stringvariable.getBindingExp().ceval().intValue() + tg.generateTag("Start"));
-		} else if(stringvariable.startAttributeSet()) {
-			genPrinter.print(tg.generateTag("Start")+stringvariable.startAttribute()+tg.generateTag("Start"));
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
+		public void generate(PrintStream genPrinter) {
+//				genPrinter.print("<TypeDefinitions>");
+//				genPrinter.print("\n\t\t TODO (optional element)");
+//				genPrinter.print("\n\t </TypeDefinitions>");
 		}
 	}
 	
@@ -603,7 +176,6 @@ public class XMLVariableGenerator extends GenericGenerator {
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
 		public void generate(PrintStream genPrinter) {
-			//TODO: default experiment (optional)
 //				genPrinter.print("<DefaultExperiment>");
 //				genPrinter.print("\n\t\t TODO (optional element)");
 //				genPrinter.print("\n\t </DefaultExperiment>");
@@ -628,14 +200,252 @@ public class XMLVariableGenerator extends GenericGenerator {
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
 		public void generate(PrintStream genPrinter) {
-			//TODO: vendor annotations (optional)
 //				genPrinter.print("<VendorAnnotations>");
 //				genPrinter.print("\n\t\t TODO (optional element)");
 //				genPrinter.print("\n\t </VendorAnnotations>");
 		}
+	}	
+
+	/**
+	 * Internal class used to generate the model variables tags.
+	 * 
+	 * The model variables tags may vary in number and content. Therefore 
+	 * the template file can not be used for this part of the XML. Instead, 
+	 * all model variable tags are generated dynamically using this tag class.
+	 * 
+	 * @see DAETag
+	 */
+	class DAETag_XML_modelVariables extends DAETag {
+		
+		public DAETag_XML_modelVariables(
+		  AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_variables","Model variables. (Optional)",
+			  myGenerator,fclass);
+		}
+	
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
+		public void generate(PrintStream genPrinter) {			
+			for(FVariable variable:fclass.allVariables()) {		
+				genPrinter.print("\n\t\t <ScalarVariable ");
+				genPrinter.print("name=\""+variable.name()+"\" ");
+				genPrinter.print("valueReference=\""+variable.valueReference()+"\" ");
+				if(variable.hasFStringComment()) {
+					genPrinter.print("description=\"");
+					//genPrinter.print("![CDATA[" + variable.getFStringComment().getComment()+"]]"+"\" ");
+					genPrinter.print(replaceIllegalChars(variable.getFStringComment().getComment())+"\" ");
+				}
+				genPrinter.print("variability=\"");
+				if(variable.isConstant()) {
+					genPrinter.print("constant\" ");
+				} else if(variable.isParameter()) {
+					genPrinter.print("parameter\" ");
+				} else if(variable.isDiscrete()) {
+					genPrinter.print("discrete\" ");
+				} else {
+					//default
+					genPrinter.print("continuous\" ");
+				}
+				genPrinter.print("causality=\"");
+				if(variable.isInput()) {
+					genPrinter.print("input\" ");
+				} else if(variable.isOutput()) {
+					genPrinter.print("output\" ");
+				} else {
+					//default
+					genPrinter.print("internal\" ");
+				}
+                genPrinter.print("alias=\"");
+                if(variable.isAlias()) {
+                	if(variable.isNegated()) {
+                        genPrinter.print("negatedAlias\" ");
+                	} else {
+                    	genPrinter.print("alias\" ");
+                	}
+                } else {
+                	genPrinter.print("noAlias\"");
+                }
+                genPrinter.print(">");
+
+				if(variable.isReal()) {
+					genPrinter.print("\n\t\t\t <Real ");
+					addRealAttributes(genPrinter, (FRealVariable)variable);
+					genPrinter.print("/>");					
+				} else if(variable.isInteger()) {
+					genPrinter.print("\n\t\t\t <Integer");
+					addIntegerAttributes(genPrinter, (FIntegerVariable)variable);
+					genPrinter.print("/>");
+				} else if(variable.isBoolean()) {
+					genPrinter.print("\n\t\t\t <Boolean");
+					addBooleanAttributes(genPrinter, (FBooleanVariable)variable);
+					genPrinter.print("/>");
+				} else if(variable.isString()) {
+					genPrinter.print("\n\t\t\t <String");
+					addStringAttributes(genPrinter, (FStringVariable)variable);
+					genPrinter.print("/>");
+				} else if(false) {
+//					TODO: Enumeration variable
+				}
+				 else {
+					//TODO: errorhandling
+					System.err.println("Invalid or missing variable type definition");
+				}
+				
+				//direct dependency - not supported
+               				
+				//is linear?
+				Boolean generateFMI = fclass.root().options.getBooleanOption("generate_fmi_xml");
+				if(!generateFMI) {
+					addLinearInfo(genPrinter, variable);
+				
+					//variable category
+					genPrinter.print("\n\t\t\t <VariableCategory>");
+					if(variable.isDerivativeVariable()) {
+						genPrinter.print("derivative");
+					} else if(variable.isDifferentiatedVariable()) {
+						genPrinter.print("state");
+					} else if(variable.isDependentConstant()) {
+						genPrinter.print("dependentConstant");
+					} else if(variable.isIndependentConstant()) {
+						genPrinter.print("independentConstant");
+					} else if(variable.isDependentParameter()) {
+						genPrinter.print("dependentParamenter");
+					} else if(variable.isIndependentParameter()) {
+						genPrinter.print("independentParameter");
+					} else {
+						//default is algebraic
+						genPrinter.print("algebraic");
+					}
+					genPrinter.print("</VariableCategory>");
+				}
+				
+				genPrinter.print("\n\t\t </ScalarVariable>");
+			}
+		}
 	}
 	
+	protected String replaceIllegalChars(String s) {
+		Iterator<String> itr = illegalCharsSub.keySet().iterator();
+		while(itr.hasNext()) {
+			String illegalChar = itr.next();
+			if(s.contains(illegalChar)){
+				s = s.replace(illegalChar, illegalCharsSub.get(illegalChar));
+			}
+		}
+		return s;
+	}
 	
+	/*
+	 * Helper method generating linear variable tag such that it can be overridden in 
+	 * OptimicaXMLVariableGenerator.
+	 */
+	protected void addLinearInfo(PrintStream genPrinter, FVariable variable){
+		//isLinear
+		genPrinter.print("\n\t\t\t <isLinear>"+variable.isLinear()+"</isLinear>");
+	}
+
+	/*
+	 * Helper method generating all real attributes.
+	 */
+	protected void addRealAttributes(PrintStream genPrinter, FRealVariable realvariable) {
+		//declaredType
+		//genPrinter.print("declaredType=\"String\" ");		
+		//quantity
+		if(realvariable.quantityAttributeSet()) {
+			genPrinter.print("quantity=\""+realvariable.quantityAttribute()+"\" ");
+		}
+		//unit
+		if(realvariable.unitAttributeSet()) {
+			genPrinter.print("unit=\""+realvariable.unitAttribute()+"\" ");
+		}
+		//default display unit
+		if(realvariable.displayUnitAttributeSet()) {
+			genPrinter.print("displayUnit=\""+realvariable.displayUnitAttribute()+"\" ");
+		}		
+		//relativeQuantity
+		genPrinter.print("relativeQuantity=\"false\" ");
+		
+		//min
+		if(realvariable.minAttributeSet()) {
+			genPrinter.print("min=\""+realvariable.minAttribute()+"\" ");
+		}
+		//max
+		if(realvariable.maxAttributeSet()) {
+			genPrinter.print("max=\""+realvariable.maxAttribute()+"\" ");
+		}
+		//nominal
+		if(realvariable.nominalAttributeSet()) {
+			genPrinter.print("nominal=\""+realvariable.nominalAttribute()+"\" ");
+		}
+		//start
+		if (realvariable.isDependentParameter() && !realvariable.startAttributeSet()) {
+			genPrinter.print("start=\""+realvariable.getBindingExp().ceval().realValue()+"\"");
+		} else {
+			genPrinter.print("start=\""+realvariable.startAttribute()+"\" ");
+		}
+		// fixed - unsupported
+		
+	}
+	
+	/*
+	 * Helper method generating all integer attributes.
+	 */
+	protected void addIntegerAttributes(PrintStream genPrinter, FIntegerVariable integervariable) {
+		//declaredType
+		//genPrinter.print("declaredType=\"String\" ");		
+		//quantity
+		if(integervariable.quantityAttributeSet()) {
+			genPrinter.print("quantity=\""+integervariable.quantityAttribute()+"\" ");
+		}					
+		//min
+		if(integervariable.minAttributeSet()) {
+			genPrinter.print("min=\""+integervariable.minAttribute()+"\" ");
+		}
+		//max
+		if(integervariable.maxAttributeSet()) {
+			genPrinter.print("max=\""+integervariable.maxAttribute()+"\" ");
+		}
+		//start
+		if (integervariable.isDependentParameter() && !integervariable.startAttributeSet()) {
+			genPrinter.print("start=\"" +integervariable.getBindingExp().ceval().intValue() +"\" ");
+		} else {
+			genPrinter.print("start=\"" +integervariable.startAttribute()+"\" ");
+		}
+		// fixed - unsupported
+	}
+	
+	/*
+	 * Helper method generating all boolean attributes.
+	 */
+	protected void addBooleanAttributes(PrintStream genPrinter, FBooleanVariable booleanvariable) {
+		//declaredType
+		//genPrinter.print("declaredType=\"String\" ");
+		//start attribute
+		if (booleanvariable.isDependentParameter() && !booleanvariable.startAttributeSet()) {
+			genPrinter.print("start=\"" +booleanvariable.getBindingExp().ceval().intValue() + "\" ");
+		} else if(booleanvariable.startAttributeSet()) {
+			genPrinter.print("start" +booleanvariable.startAttribute()+"\" ");
+		}
+		// fixed - unsupported
+	}
+	
+	/*
+	 * Helper class generating all string attributes.
+	 */
+	protected void addStringAttributes(PrintStream genPrinter, FStringVariable stringvariable) {
+		//declaredType
+		//genPrinter.print("declaredType=\"String\" ");
+		//start attribute
+		if (stringvariable.isDependentParameter() && !stringvariable.startAttributeSet()) {
+			genPrinter.print("start=\"" +stringvariable.getBindingExp().ceval().intValue() + "\" ");
+		} else if(stringvariable.startAttributeSet()) {
+			genPrinter.print("start=\""+stringvariable.startAttribute()+"\" ");
+		}
+		// fixed - unsupported
+	}
+		
 	/**
 	 * Internal class used to generate the tags for parameters binding equations.
 	 * 
@@ -654,37 +464,40 @@ public class XMLVariableGenerator extends GenericGenerator {
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
 		public void generate(PrintStream genPrinter) {
-			genPrinter.println("<equ:BindingEquations>");			
+			Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
+			if(generateEqu) {
+				genPrinter.println("<equ:BindingEquations>");			
 			
-		for(FVariable variable:fclass.independentParameters()){
-			if(variable.hasBindingExp()){
-				FExp expression = variable.getBindingExp();
-				genPrinter.println("\t\t<equ:BindingEquation>");
-				genPrinter.print("\t\t\t<equ:Parameter>");
-				genPrinter.print(variable.name());
-				genPrinter.println("</equ:Parameter>");
-				genPrinter.println("\t\t\t<equ:BindingExp>");
-				expression.prettyPrint_XML(genPrinter,"\t\t\t\t",expression);
-				genPrinter.println("\t\t\t</equ:BindingExp>");
-				genPrinter.println("\t\t</equ:BindingEquation>");
-			}
-		}
+				for(FVariable variable:fclass.independentParameters()){
+					if(variable.hasBindingExp()){
+						FExp expression = variable.getBindingExp();
+						genPrinter.println("\t\t<equ:BindingEquation>");
+						genPrinter.print("\t\t\t<equ:Parameter>");
+						genPrinter.print(variable.name());
+						genPrinter.println("</equ:Parameter>");
+						genPrinter.println("\t\t\t<equ:BindingExp>");
+						expression.prettyPrint_XML(genPrinter,"\t\t\t\t",expression);
+						genPrinter.println("\t\t\t</equ:BindingExp>");
+						genPrinter.println("\t\t</equ:BindingEquation>");
+					}
+				}
 		
-		for(FVariable variable:fclass.dependentParameters()){
-			if(variable.hasBindingExp()){
-				FExp expression = variable.getBindingExp();
-				genPrinter.println("\t\t<equ:BindingEquation>");
-				genPrinter.print("\t\t\t<equ:Parameter>");
-				genPrinter.print(variable.name());
-				genPrinter.println("</equ:Parameter>");
-				genPrinter.println("\t\t\t<equ:BindingExp>");
-				expression.prettyPrint_XML(genPrinter,"\t\t\t\t",expression);
-				genPrinter.println("\t\t\t</equ:BindingExp>");
-				genPrinter.println("\t\t</equ:BindingEquation>");
-			}
-		}
+				for(FVariable variable:fclass.dependentParameters()){
+					if(variable.hasBindingExp()){
+						FExp expression = variable.getBindingExp();
+						genPrinter.println("\t\t<equ:BindingEquation>");
+						genPrinter.print("\t\t\t<equ:Parameter>");
+						genPrinter.print(variable.name());
+						genPrinter.println("</equ:Parameter>");
+						genPrinter.println("\t\t\t<equ:BindingExp>");
+						expression.prettyPrint_XML(genPrinter,"\t\t\t\t",expression);
+						genPrinter.println("\t\t\t</equ:BindingExp>");
+						genPrinter.println("\t\t</equ:BindingEquation>");
+					}
+				}
 			
-			genPrinter.println("\t</equ:BindingEquations>");
+				genPrinter.println("\t</equ:BindingEquations>");
+			}
 		}
 	}
 	
@@ -708,10 +521,13 @@ public class XMLVariableGenerator extends GenericGenerator {
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
 		public void generate(PrintStream genPrinter) {
-			genPrinter.println("<equ:DynamicEquations>");			
-			for(FAbstractEquation e : fclass.equations())
-				e.prettyPrint_XML(genPrinter,"\t\t",e);								
-			genPrinter.println("\t</equ:DynamicEquations>");
+			Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
+			if(generateEqu){
+				genPrinter.println("<equ:DynamicEquations>");			
+				for(FAbstractEquation e : fclass.equations())
+					e.prettyPrint_XML(genPrinter,"\t\t",e);								
+				genPrinter.println("\t</equ:DynamicEquations>");
+			}
 		}
 	}
 	
@@ -734,10 +550,13 @@ public class XMLVariableGenerator extends GenericGenerator {
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
 		public void generate(PrintStream genPrinter) {
-			genPrinter.println("<equ:InitialEquations>");			
-			for(FAbstractEquation e : fclass.initialEquations())
-				e.prettyPrint_XML(genPrinter,"\t\t",e);								
-			genPrinter.println("\t</equ:InitialEquations>");
+			Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
+			if(generateEqu) {
+				genPrinter.println("<equ:InitialEquations>");			
+				for(FAbstractEquation e : fclass.initialEquations())
+					e.prettyPrint_XML(genPrinter,"\t\t",e);								
+				genPrinter.println("\t</equ:InitialEquations>");
+			}
 		}
 	}
 		
@@ -752,6 +571,10 @@ public class XMLVariableGenerator extends GenericGenerator {
 	public XMLVariableGenerator(Printer expPrinter, char escapeCharacter,
 			FClass fclass) {
 		super(expPrinter,escapeCharacter, fclass);
+		
+		illegalCharsSub=new HashMap<String,String>();
+		illegalCharsSub.put("<","&lt;");
+		illegalCharsSub.put("&","&amp");
 	}
 }
 
