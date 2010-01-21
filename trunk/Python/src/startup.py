@@ -70,20 +70,6 @@ if sys.platform == 'win32':
 #else:
 #    # MINGW_HOME only on win32
 #    del environ['MINGW_HOME']
-    
-# set working directory
-if sys.platform == 'win32':
-    _p = os.path.join(os.environ['JMODELICA_HOME'],'work')
-else:
-    _p = os.path.join(os.environ['HOME'],'jmodelica.org','work')
-
-if not os.path.exists(_p):
-    try:
-        os.mkdir(_p)
-    except Exception:
-        _p = ""
-if _p:
-    os.chdir(_p)
 
 
 # set matplotlib backend

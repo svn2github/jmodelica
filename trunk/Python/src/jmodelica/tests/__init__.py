@@ -4,11 +4,27 @@ This __init__.py file holds functions used to load
 """
 
 import os
-
+import sys
+import os, os.path
 import jmodelica.jmi as pyjmi
 
 
-__all__ = ['optimization']
+__all__ = ['optimization','initialization','simulation']
+
+
+#create working directory for tests
+if sys.platform == 'win32':
+    _p = os.path.join(os.environ['JMODELICA_HOME'],'tests')
+else:
+    _p = os.path.join(os.environ['HOME'],'jmodelica.org','tests')
+
+if not os.path.exists(_p):
+    try:
+        os.mkdir(_p)
+    except Exception:
+        _p = ""
+if _p:
+    os.chdir(_p)
 
 
 def testattr(**kwargs):
