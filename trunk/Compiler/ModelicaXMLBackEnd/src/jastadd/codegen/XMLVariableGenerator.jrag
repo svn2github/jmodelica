@@ -274,15 +274,15 @@ public class XMLVariableGenerator extends GenericGenerator {
 					addRealAttributes(genPrinter, (FRealVariable)variable);
 					genPrinter.print("/>");					
 				} else if(variable.isInteger()) {
-					genPrinter.print("\n\t\t\t <Integer");
+					genPrinter.print("\n\t\t\t <Integer ");
 					addIntegerAttributes(genPrinter, (FIntegerVariable)variable);
 					genPrinter.print("/>");
 				} else if(variable.isBoolean()) {
-					genPrinter.print("\n\t\t\t <Boolean");
+					genPrinter.print("\n\t\t\t <Boolean ");
 					addBooleanAttributes(genPrinter, (FBooleanVariable)variable);
 					genPrinter.print("/>");
 				} else if(variable.isString()) {
-					genPrinter.print("\n\t\t\t <String");
+					genPrinter.print("\n\t\t\t <String ");
 					addStringAttributes(genPrinter, (FStringVariable)variable);
 					genPrinter.print("/>");
 				} else if(false) {
@@ -381,7 +381,7 @@ public class XMLVariableGenerator extends GenericGenerator {
 		}
 		//start
 		if (realvariable.isDependentParameter() && !realvariable.startAttributeSet()) {
-			genPrinter.print("start=\""+realvariable.getBindingExp().ceval().realValue()+"\"");
+			genPrinter.print("start=\""+realvariable.getBindingExp().ceval().realValue()+"\" ");
 		} else {
 			genPrinter.print("start=\""+realvariable.startAttribute()+"\" ");
 		}

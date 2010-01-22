@@ -82,7 +82,7 @@ public class OptimicaXMLVariableGenerator extends XMLVariableGenerator {
 			} else {
 				ig_val = integervariable.startAttribute();			
 			}
-			genPrinter.print("initialGuess"+ig_val+"\" ");
+			genPrinter.print("initialGuess=\""+ig_val+"\" ");
 		}
 	}
 	
