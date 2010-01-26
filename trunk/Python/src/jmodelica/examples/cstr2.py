@@ -174,6 +174,11 @@ def run_demo(with_plots=True):
     u1_ref_res=res.get_variable_data('u1_ref')
     u2_ref_res=res.get_variable_data('u2_ref')
     
+    cost=res.get_variable_data('cost')
+    
+    assert N.abs(cost.x[-1]/1.e1 - 1.9282732) < 1e-3, \
+            "Wrong value of cost function in cstr2.py"
+    
     # Plot the results
     if with_plots:
         plt.figure(1)

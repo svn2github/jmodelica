@@ -55,14 +55,19 @@ def run_demo(with_plots=True):
     res = jmodelica.io.ResultDymolaTextual('IfExpExamples_IfExpExample1_result.txt')
     x = res.get_variable_data('x')
     u = res.get_variable_data('u')
+    
+    assert N.abs(x.x[-1] - 3.5297357) < 1e-3, \
+            "Wrong value, last value of x in if_example.py"
+    assert N.abs(u.x[-1] - (-0.2836625)) < 1e-3, \
+            "Wrong value, last value of u in if_example.py"            
 
     #assert N.abs(resistor_v.x[-1] - 0.159255008028) < 1e-3, \
 #           "Wrong value in simulation result in RLC.py"
-    
-    fig = p.figure()
-    p.plot(x.t, x.x, u.t, u.x)
-    p.legend(('x','u'))
-    p.show()
+    if with_plots:
+        fig = p.figure()
+        p.plot(x.t, x.x, u.t, u.x)
+        p.legend(('x','u'))
+        p.show()
 
 
 if __name__=="__main__":

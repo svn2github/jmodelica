@@ -59,11 +59,12 @@ def run_demo(with_plots=True):
     assert N.abs(resistor_v.x[-1] - 0.159255008028) < 1e-3, \
            "Wrong value in simulation result in RLC.py"
     
-    #Ts, ys = simulator.get_solution('sine.y','resistor.v','inductor1.i')
-    fig = p.figure()
-    p.plot(sine_y.t, sine_y.x, resistor_v.t, resistor_v.x, inductor1_i.t, inductor1_i.x)
-    p.legend(('sine.y','resistor.v','inductor1.i'))
-    p.show()
+    if with_plots:
+        #Ts, ys = simulator.get_solution('sine.y','resistor.v','inductor1.i')
+        fig = p.figure()
+        p.plot(sine_y.t, sine_y.x, resistor_v.t, resistor_v.x, inductor1_i.t, inductor1_i.x)
+        p.legend(('sine.y','resistor.v','inductor1.i'))
+        p.show()
 
 
 if __name__=="__main__":

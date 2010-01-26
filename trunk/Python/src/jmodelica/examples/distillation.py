@@ -155,6 +155,11 @@ def run_demo(with_plots=True):
     y_res = []
     for i in range(N.size(x_B)):
         y_res.append(res.get_variable_data('y[' + str(i+1) + ']'))
+        
+    cost=res.get_variable_data('cost')
+    
+    assert N.abs(cost.x[-1]/1.e1 - 2.8527469) < 1e-3, \
+            "Wrong value of cost function in distillation.py"
 
 
     # Plot the results

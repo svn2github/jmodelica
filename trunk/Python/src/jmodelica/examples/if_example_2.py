@@ -74,12 +74,32 @@ def run_demo(with_plots=True):
     u2 = res2.get_variable_data('u')
     x3 = res3.get_variable_data('x')
     u3 = res3.get_variable_data('u')
+       
+    assert N.abs(x1.x[-1] - 1.0000027) < 1e-3, \
+            "Wrong value, last value of x1 in if_example_2.py"
 
-    #Plot
-    fig = p.figure()
-    p.plot(x1.t, x1.x, u1.t, u1.x,x2.t, x2.x, u2.t, u2.x,x3.t, x3.x, u3.t, u3.x)
-    p.legend(('x','u'))
-    p.show()
+    assert N.abs(u1.x[-1] - 0.9999999) < 1e-3, \
+            "Wrong value, last value of u1 in if_example_2.py"
+
+    assert N.abs(x2.x[-1] - 2.5707990) < 1e-3, \
+            "Wrong value, last value of x2 in if_example_2.py"
+
+    assert N.abs(u2.x[-1] - 1.0) < 1e-3, \
+            "Wrong value, last value of u2 in if_example_2.py"
+
+    assert N.abs(x3.x[-1] - 3.5297217) < 1e-3, \
+            "Wrong value, last value of x3 in if_example_2.py"
+
+    assert N.abs(u3.x[-1] - (-0.2836621)) < 1e-3, \
+            "Wrong value, last value of u3 in if_example_2.py"        
+  
+
+    if with_plots:
+        #Plot
+        fig = p.figure()
+        p.plot(x1.t, x1.x, u1.t, u1.x,x2.t, x2.x, u2.t, u2.x,x3.t, x3.x, u3.t, u3.x)
+        p.legend(('x','u'))
+        p.show()
 
 if __name__=="__main__":
     run_demo()

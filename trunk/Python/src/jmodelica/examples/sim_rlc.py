@@ -54,6 +54,16 @@ def run_demo(with_plots=True):
     V_resistor = res.get_variable_data('resistor.v')
     I_inductor1 = res.get_variable_data('inductor1.i')
 
+    assert N.abs(V_in.x[-1]*1.e14 - 9.2128345) < 1e-3, \
+            "Wrong value of V_in function in sim_rlc.py"  
+
+    assert N.abs(V_resistor.x[-1]*1.e1 - 1.5932719) < 1e-3, \
+            "Wrong value of V_resistor function in sim_rlc.py"  
+
+    assert N.abs(I_inductor1.x[-1]*1.e3 - 4.1748262) < 1e-3, \
+            "Wrong value of I_inductor1 function in sim_rlc.py"  
+
+
     if with_plots:
         plt.figure(1)
         plt.clf()
