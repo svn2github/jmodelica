@@ -880,29 +880,6 @@ class Model(object):
     def get_name(self):
         """ Return the name of the model. """
         return self._libname
-    
-    def getparameter(self, name):
-        """ Get value of a parameter. """
-        xmldoc = self._get_XMLDoc()
-        valref = xmldoc.get_valueref(name.strip())
-        value = None
-        if valref != None:
-            (z_i, ptype) = _translate_value_ref(valref)
-            value = self.get_pi()[z_i - self._offs_pi.value]
-        else:
-            print "Parameter "+name.strip()+" could not be found in model."
-        return value
-        
-    def setparameter(self, name, value):
-        """ Set value of a parameter. """
-        xmldoc = self._get_XMLDoc()
-        valref = xmldoc.get_valueref(name)
-        if valref != None:
-            (z_i, ptype) = _translate_value_ref(valref)
-            self.get_pi()[z_i - self._offs_pi.value] = value
-        else:
-            print "Parameter "+name+" could not be found in model."
-
 
     def get_value(self, name):
         """ Get value of a variable or parameter.
