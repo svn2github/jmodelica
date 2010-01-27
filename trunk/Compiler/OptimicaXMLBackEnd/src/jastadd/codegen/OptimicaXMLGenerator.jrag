@@ -36,7 +36,7 @@ import java.io.PrintStream;
  * @see TagGenerator
  * 
  */
-public class OptimicaXMLVariableGenerator extends XMLVariableGenerator {
+public class OptimicaXMLGenerator extends XMLGenerator {
 		
 
 	/**
@@ -46,7 +46,7 @@ public class OptimicaXMLVariableGenerator extends XMLVariableGenerator {
 	 * @param escapeCharacter Escape characters used to decode tags.
 	 * @param fclass An FClass object used as a basis for the code generation.
 	 */
-	public OptimicaXMLVariableGenerator(Printer expPrinter, char escapeCharacter,
+	public OptimicaXMLGenerator(Printer expPrinter, char escapeCharacter,
 			FClass fclass) {
 		super(expPrinter,escapeCharacter, fclass);
 
@@ -121,18 +121,19 @@ public class OptimicaXMLVariableGenerator extends XMLVariableGenerator {
 		}
 	}
 	
-	class DAETag_XML_Optimization extends DAETag {
+	class DAETag_XML_Optimization extends XMLGenerator.DAETag_XML_Optimization {
 		
-		public DAETag_XML_Optimization (
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_Optimization","Optimization problem's representation",
-			  myGenerator,fclass);
+		public DAETag_XML_Optimization(AbstractGenerator myGenerator, FClass fclass) {
+			super(myGenerator, fclass);
+//			super("XML_Optimization","Optimization problem's representation",
+//			  myGenerator,fclass);
 		}
 		
 		/*
 		 * (non-Javadoc)
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
+		@Override
 		public void generate(PrintStream genPrinter) {
 			Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
 			

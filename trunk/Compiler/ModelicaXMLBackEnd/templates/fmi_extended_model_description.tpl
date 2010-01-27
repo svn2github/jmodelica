@@ -14,8 +14,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<fmiModelDescription $XML_rootAttributes$ xmlns:equ="http://www.robertoparrotto.it/DAEXML/FEqu.xsd" xmlns:exp="http://www.robertoparrotto.it/DAEXML/FExp.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	$XML_unitDefinitions$	
+<fmiExtendedModelDescription $XML_rootAttributes$ xmlns:equ="http://www.robertoparrotto.it/DAEXML/FEqu.xsd" xmlns:exp="http://www.robertoparrotto.it/DAEXML/FExp.xsd" xmlns:opt="http://www.robertoparrotto.it/DAEXML/Optimization.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	$XML_unitDefinitions$
 	$XML_typeDefinitions$
 	$XML_defaultExperiment$
 	$XML_vendorAnnotations$	
@@ -23,5 +23,6 @@
 	</ModelVariables>
 	$XML_bindingEquations$
 	$XML_Equations$
-	$XML_initialEquations$	
-</fmiModelDescription>
+	$XML_initialEquations$
+	$XML_Optimization$	
+</fmiExtendedModelDescription>

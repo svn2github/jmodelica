@@ -73,29 +73,20 @@ import org.jmodelica.util.OptionRegistry;
  */
 public class OptimicaCompiler extends ModelicaCompiler{
 	
-	public OptimicaCompiler(OptionRegistry options, String xmlVariablesTempl, 
-			String xmlValuesTempl, String cTemplatefile) {
-		super(options, xmlVariablesTempl, xmlValuesTempl, cTemplatefile);
+	public OptimicaCompiler(OptionRegistry options, String xmlTpl, 
+			String xmlValuesTpl, String cTemplatefile) {
+		super(options, xmlTpl, xmlValuesTpl, cTemplatefile);
 	}	
 		
 	/**
 	 * Compiles an Optimica model. A model file name and class must be provided.
-	 * Template files for XML and c code can be provided to generatate code for
-	 * this model. Prints an error and returns without completion if, for
-	 * example, a file can not be found or if the parsing fails. Supports 
-	 * multiple model files.
+	 * Prints an error and returns without completion if, for example, a file 
+	 * can not be found or if the parsing fails. Supports multiple model files.
 	 * 
 	 * @param name
 	 *            Array of names of the model files.
 	 * @param cl
 	 *            The name of the class in the model file to compile.
-	 * @param xmlVariablesTempl
-	 *            The XML template file for model variables (optional).
-	 * @param xmlValuesTempl
-	 *            The XML template file for independent parameter values.
-	 *            (optional).
-	 * @param cTemplatefile
-	 *            The c template file (optional).
 	 *            
 	 * @throws beaver.Parser.Exception If there was an Beaver parsing exception.
 	 * @throws CompilerException
@@ -127,7 +118,7 @@ public class OptimicaCompiler extends ModelicaCompiler{
 		FOptClass fc = flattenModel(icd);
 
 		// Generate code?
-		if (super.getXMLVariablesTemplate() != null && super.getXMLValuesTemplate() != null && super.getCTemplate() != null) {
+		if (super.getXMLTpl() != null && super.getXMLValuesTpl() != null && super.getCTemplate() != null) {
 			generateCode(fc);
 		}
 		
@@ -207,22 +198,12 @@ public class OptimicaCompiler extends ModelicaCompiler{
 	 * 
 	 * Generates XML and c code for a flattened Optimica model represented as an
 	 * instance of FOptClass using template files. The XML and c files are given
-	 * the default names <modelname>_variable.xml, <modelname>_values.xml and 
+	 * the default names <modelname>.xml, <modelname>_values.xml and 
 	 * <modelname>.c respectively.
 	 * 
 	 * @param fc
 	 *            The FOptClass instance for which the code generation should be
 	 *            computed.
-	 * @param xmlVariablesTempl
-	 *            The XML template file for model variables (optional).
-	 * @param xmlProblVariablesTempl
-	 *            The XML template file for the optimization problem variables
-	 *            (optional).
-	 * @param xmlValuesTempl
-	 *            The XML template file for independent parameter values
-	 *            (optional).
-	 * @param ctemplate
-	 *            The path to the c template file.
 	 *            
 	 * @throws FileNotFoundException
 	 *             Throws the exception if either of the four template files 
@@ -231,13 +212,13 @@ public class OptimicaCompiler extends ModelicaCompiler{
 	public void generateCode(FOptClass fc) throws FileNotFoundException {
 		logger.info("Generating code...");
 
-		OptimicaXMLVariableGenerator variablegenerator = new OptimicaXMLVariableGenerator(new PrettyPrinter(), '$', fc);
+		OptimicaXMLGenerator xmlgenerator = new OptimicaXMLGenerator(new PrettyPrinter(), '$', fc);
 		String output = fc.nameUnderscore() + ".xml";
-		variablegenerator.generate(super.getXMLVariablesTemplate(), output);
+		xmlgenerator.generate(super.getXMLTpl(), output);
 
 		XMLValueGenerator valuegenerator = new XMLValueGenerator(new PrettyPrinter(), '$', fc);
 		output = fc.nameUnderscore() + "_values.xml";
-		valuegenerator.generate(super.getXMLValuesTemplate(), output);
+		valuegenerator.generate(super.getXMLValuesTpl(), output);
 
 		OptimicaCGenerator cgenerator = new OptimicaCGenerator(new PrettyPrinter(), '$', fc);
 		output = fc.nameUnderscore() + ".c";
@@ -250,7 +231,7 @@ public class OptimicaCompiler extends ModelicaCompiler{
 		String filesep = System.getProperty("file.separator");
 		if(args.length < 1) {
 			logger.severe("OptimicaCompiler expects the command line arguments: \n" +
-					"[-options] <file name> <class name> [<xml variables template> <xml values template> <c template>]\n" +
+					"[-options] <file name> <class name> [<xml model description template> <xml model values template> <c template>]\n" +
 					"where options could be: \n" +
 					"-log=<i or w or e> \n" +
 					"-modelicapath=<path to modelica library> \n"+
@@ -279,13 +260,13 @@ public class OptimicaCompiler extends ModelicaCompiler{
 		
 		String[] name = args[arg].split(",");
 		String cl = args[arg+1];
-		String xmlVariablesTempl = null;
-		String xmlValuesTempl = null;
+		String xmlTpl = null;
+		String xmlValuesTpl = null;
 		String ctempl = null;
 		
 		if (args.length >= arg+5) {
-			xmlVariablesTempl = args[arg+2];
-			xmlValuesTempl = args[arg+3];
+			xmlTpl = args[arg+2];
+			xmlValuesTpl = args[arg+3];
 			ctempl = args[arg+4];
 		}
 
@@ -336,7 +317,7 @@ public class OptimicaCompiler extends ModelicaCompiler{
 		}
 		or.setStringOption("MODELICAPATH", modelicapath);
 		
-		OptimicaCompiler oc = new OptimicaCompiler(or, xmlVariablesTempl, xmlValuesTempl, ctempl);
+		OptimicaCompiler oc = new OptimicaCompiler(or, xmlTpl, xmlValuesTpl, ctempl);
 		
 		try {
 			oc.compileModel(name, cl);

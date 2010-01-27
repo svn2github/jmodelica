@@ -70,7 +70,7 @@ def _parse_XML(filename, schemaname=''):
         
     return xmldoc
 
-class XMLdoc:
+class XMLBaseDoc:
     
     """ Base class representing a parsed XML file."""
     
@@ -89,7 +89,7 @@ class XMLdoc:
         root = self._doc.getroot()
         self._xpatheval = etree.XPathEvaluator(self._doc, namespaces=root.nsmap)
 
-class XMLVariablesDoc(XMLdoc):    
+class XMLDoc(XMLBaseDoc):
     """ Class representing a parsed XML file containing model variable meta data. """
     
     def get_valueref(self, variablename):
@@ -999,7 +999,7 @@ class XMLVariablesDoc(XMLdoc):
         return timepoints
      
             
-class XMLValuesDoc(XMLdoc):
+class XMLValuesDoc(XMLBaseDoc):
     
     """ 
     Class representing a parsed XML file containing values for all 

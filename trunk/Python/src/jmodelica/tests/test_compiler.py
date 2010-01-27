@@ -171,32 +171,32 @@ def test_setget_modelicapath():
     
 
 @testattr(stddist = True)
-def test_setget_XMLVariablesTemplate():
-    """ Test XML variables template setter and getter. """
-    newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_modelica_variables_template.xml')
-    mc.set_XMLVariablesTemplate(newtemplate)
-    nose.tools.assert_equal(mc.get_XMLVariablesTemplate(), newtemplate)
+def test_setget_XML_tpl():
+    """ Test XML template setter and getter. """
+    newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmodelica_model_description.tpl')
+    mc.set_XML_tpl(newtemplate)
+    nose.tools.assert_equal(mc.get_XML_tpl(), newtemplate)
+    
+#@testattr(stddist = True)
+#def test_setget_XMLTemplate():
+#    """ Test XML template setter and getter. """
+#    newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_optimica_variables_template.xml')
+#    oc.set_XMLVariablesTemplate(newtemplate)
+#    nose.tools.assert_equal(oc.get_XMLVariablesTemplate(), newtemplate)
     
 @testattr(stddist = True)
-def test_setget_XMLVariablesTemplate():
-    """ Test XML variables template setter and getter. """
-    newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_optimica_variables_template.xml')
-    oc.set_XMLVariablesTemplate(newtemplate)
-    nose.tools.assert_equal(oc.get_XMLVariablesTemplate(), newtemplate)
-    
-@testattr(stddist = True)
-def test_setget_XMLValuesTemplate():
+def test_setget_XML_values_tpl():
     """ Test XML values template setter and getter. """
-    newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_modelica_values_template.xml')
-    mc.set_XMLValuesTemplate(newtemplate)
-    nose.tools.assert_equal(mc.get_XMLValuesTemplate(), newtemplate)
+    newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmodelica_model_values.tpl')
+    mc.set_XML_values_tpl(newtemplate)
+    nose.tools.assert_equal(mc.get_XML_values_tpl(), newtemplate)
 
-@testattr(stddist = True)
-def test_setget_XMLValuesTemplate():
-    """ Test XML values template setter and getter. """
-    newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_modelica_values_template.xml')
-    oc.set_XMLValuesTemplate(newtemplate)
-    nose.tools.assert_equal(oc.get_XMLValuesTemplate(), newtemplate)
+#@testattr(stddist = True)
+#def test_setget_XMLValuesTemplate():
+#    """ Test XML values template setter and getter. """
+#    newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_modelica_values_template.xml')
+#    oc.set_XMLValuesTemplate(newtemplate)
+#    nose.tools.assert_equal(oc.get_XMLValuesTemplate(), newtemplate)
     
 @testattr(stddist = True)
 def test_setget_cTemplate():

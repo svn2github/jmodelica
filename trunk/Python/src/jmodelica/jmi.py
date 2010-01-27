@@ -407,14 +407,14 @@ class Model(object):
             path = self._path
         
         # set start attributes
-        xml_variables_name=libname+'.xml' 
+        xml_file=libname+'.xml' 
         # assumes libname is name of model and xmlfile is located in the same dir as the dll
-        self._set_XMLvariables_doc(xmlparser.XMLVariablesDoc(path+os.sep+xml_variables_name))
+        self._set_XMLDoc(xmlparser.XMLDoc(os.path.join(path,xml_file)))
         self._set_start_attributes()
         
         # set independent parameter values
-        xml_values_name = libname+'_values.xml'
-        self._set_XMLvalues_doc(xmlparser.XMLValuesDoc(path+os.sep+xml_values_name))
+        xml_values_file = libname+'_values.xml'
+        self._set_XMLValuesDoc(xmlparser.XMLValuesDoc(os.path.join(path,xml_values_file)))
         self._set_iparam_values()
         
         # set optimizataion interval, time points and optimization indices
@@ -446,7 +446,7 @@ class Model(object):
         Returns:
             Dict with ValueReference as key and name as value.
         """
-        return self._get_XMLvariables_doc().get_variable_names()
+        return self._get_XMLDoc().get_variable_names()
 
 
     def is_negated_alias(self, variablename):
@@ -454,11 +454,11 @@ class Model(object):
         
             Raises exception if variable is not found in XML document.
         """
-        return self._get_XMLvariables_doc().is_negated_alias(variablename)
+        return self._get_XMLDoc().is_negated_alias(variablename)
 
     def get_variable_description(self, variablename):
         """ Return the description of a variable. """
-        return self._get_XMLvariables_doc().get_variable_description(variablename)
+        return self._get_XMLDoc().get_variable_description(variablename)
 
     def get_derivative_names(self):
         """
@@ -467,7 +467,7 @@ class Model(object):
         Returns:
             Dict with ValueReference as key and name as value.
         """
-        return self._get_XMLvariables_doc().get_derivative_names()
+        return self._get_XMLDoc().get_derivative_names()
 
     def get_differentiated_variable_names(self):
         """
@@ -476,7 +476,7 @@ class Model(object):
         Returns:
             Dict with ValueReference as key and name as value.
         """
-        return self._get_XMLvariables_doc().get_differentiated_variable_names()
+        return self._get_XMLDoc().get_differentiated_variable_names()
 
     def get_input_names(self):
         """
@@ -485,7 +485,7 @@ class Model(object):
         Returns:
             Dict with ValueReference as key and name as value.
         """
-        return self._get_XMLvariables_doc().get_input_names()
+        return self._get_XMLDoc().get_input_names()
 
     def get_algebraic_variable_names(self):
         """
@@ -494,7 +494,7 @@ class Model(object):
         Returns:
             Dict with ValueReference as key and name as value.
         """
-        return self._get_XMLvariables_doc().get_algebraic_variable_names()
+        return self._get_XMLDoc().get_algebraic_variable_names()
 
     def get_p_opt_names(self):
         """
@@ -503,7 +503,7 @@ class Model(object):
         Returns:
             Dict with ValueReference as key and name as value.
         """
-        return self._get_XMLvariables_doc().get_p_opt_names()
+        return self._get_XMLDoc().get_p_opt_names()
 
 
     def get_variable_descriptions(self):
@@ -513,7 +513,7 @@ class Model(object):
         Returns:
             Dict with ValueReference as key and description as value.
         """
-        return self._get_XMLvariables_doc().get_variable_descriptions()
+        return self._get_XMLDoc().get_variable_descriptions()
 
     def get_sizes(self):
         """Get and return a list of the sizes of the variable vectors."""
@@ -753,21 +753,21 @@ class Model(object):
     z = property(get_z, set_z, doc="All parameters, variables and point-wise "
                                    "evaluated variables vector.")   
 
-    def _get_XMLvariables_doc(self):
-        """ Return a reference to the XMLDoc instance for model variables. """
-        return self._xmlvariables_doc
+    def _get_XMLDoc(self):
+        """ Return a reference to the XMLDoc instance for model description. """
+        return self._xmldoc
     
-    def _set_XMLvariables_doc(self, doc):
+    def _set_XMLDoc(self, doc):
         """ Set the XMLDoc for model variables. """
-        self._xmlvariables_doc = doc
+        self._xmldoc = doc
 
-    def _get_XMLvalues_doc(self):
+    def _get_XMLValuesDoc(self):
         """ Return a reference to the XMLDoc instance for independent parameter values. """
-        return self._xmlvalues_doc
+        return self._xmlvaluesdoc
     
-    def _set_XMLvalues_doc(self, doc):
+    def _set_XMLValuesDoc(self, doc):
         """ Set the XMLDoc for independent parameter values. """
-        self._xmlvalues_doc = doc
+        self._xmlvaluesdoc = doc
        
     def _set_start_attributes(self):
         
@@ -780,7 +780,7 @@ class Model(object):
             
         """
         
-        xmldoc = self._get_XMLvariables_doc()
+        xmldoc = self._get_XMLDoc()
         start_attr = xmldoc.get_start_attributes()
         
         #Real variables vector
@@ -811,7 +811,7 @@ class Model(object):
     def _set_iparam_values(self, xmldoc=None):
         """ Set values for the independent parameters. """
         if not xmldoc:
-            xmldoc = self._get_XMLvalues_doc()
+            xmldoc = self._get_XMLValuesDoc()
         values = xmldoc.get_iparam_values()
        
         z = self.get_z()
@@ -840,7 +840,7 @@ class Model(object):
             
     def _set_opt_interval(self):
         """ Set the optimization intervals (if Optimica). """
-        xmldoc = self._get_XMLvariables_doc()
+        xmldoc = self._get_XMLDoc()
         starttime = xmldoc.get_starttime()
         starttimefree = xmldoc.get_starttime_free()
         finaltime = xmldoc.get_finaltime()
@@ -853,7 +853,7 @@ class Model(object):
 
     def _set_timepoints(self):       
         """ Set the optimization timepoints (if Optimica). """        
-        xmldoc = self._get_XMLvariables_doc()
+        xmldoc = self._get_XMLDoc()
         start =  xmldoc.get_starttime()
         final = xmldoc.get_finaltime()
         points = []
@@ -864,7 +864,7 @@ class Model(object):
         
     def _set_p_opt_indices(self):
         """ Set the optimization parameter indices (if Optimica). """
-        xmldoc = self._get_XMLvariables_doc()
+        xmldoc = self._get_XMLDoc()
         refs = xmldoc.get_p_opt_variable_refs()       
         if len(refs) > 0:
             n_p_opt = 0
@@ -883,7 +883,7 @@ class Model(object):
     
     def getparameter(self, name):
         """ Get value of a parameter. """
-        xmldoc = self._get_XMLvariables_doc()
+        xmldoc = self._get_XMLDoc()
         valref = xmldoc.get_valueref(name.strip())
         value = None
         if valref != None:
@@ -895,7 +895,7 @@ class Model(object):
         
     def setparameter(self, name, value):
         """ Set value of a parameter. """
-        xmldoc = self._get_XMLvariables_doc()
+        xmldoc = self._get_XMLDoc()
         valref = xmldoc.get_valueref(name)
         if valref != None:
             (z_i, ptype) = _translate_value_ref(valref)
@@ -912,7 +912,7 @@ class Model(object):
 
         Raises Error if name not present in model."""
         
-        xmldoc = self._get_XMLvariables_doc()
+        xmldoc = self._get_XMLDoc()
         valref = xmldoc.get_valueref(name.strip())
         value = None
         if valref != None:
@@ -951,7 +951,7 @@ class Model(object):
 
         Raises Error if name not present in model."""
         
-        xmldoc = self._get_XMLvariables_doc()
+        xmldoc = self._get_XMLDoc()
         valref = xmldoc.get_valueref(name)
         if valref != None:
             (z_i, ptype) = _translate_value_ref(valref)
@@ -1029,7 +1029,7 @@ class Model(object):
         # get all parameters in XMLvaluesdoc, go through them all and 
         # for each, find corresponding parameter in dict created above
         # and set new value saved in dict (which comes from pi vector)
-        xmldoc = self._get_XMLvalues_doc()
+        xmldoc = self._get_XMLValuesDoc()
         elements=xmldoc._doc.findall("/RealParameter")
         for e in elements:
             ref = e.getchildren()[0]
@@ -1052,7 +1052,7 @@ class Model(object):
             Raises exception if argument is not an aliased or alias variable.
 
         """
-        return self._get_XMLvariables_doc().get_aliases(variable)
+        return self._get_XMLDoc().get_aliases(variable)
             
     def opt_interval_starttime_free(self):
         """Evaluate if optimization start time is free.

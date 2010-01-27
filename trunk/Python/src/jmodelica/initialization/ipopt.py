@@ -537,7 +537,7 @@ class NLPInitialization(object):
         
         """
         
-        xmldoc = self._model._get_XMLvariables_doc()
+        xmldoc = self._model._get_XMLDoc()
 
         # p_free: free variables, not supported
         #values = xmldoc.get_p_free_startial_guess_values()
@@ -604,7 +604,7 @@ class NLPInitialization(object):
         
         """
         
-        xmldoc = self._model._get_XMLvariables_doc()
+        xmldoc = self._model._get_XMLDoc()
 
 #         # p_free: free parameters
 #         values = xmldoc.get_p_free_lb_values()
@@ -671,7 +671,7 @@ class NLPInitialization(object):
         
         """
         
-        xmldoc = self._model._get_XMLvariables_doc()
+        xmldoc = self._model._get_XMLDoc()
 
 #         # p_free: free parameters
 #         values = xmldoc.get_p_opt_ub_values()

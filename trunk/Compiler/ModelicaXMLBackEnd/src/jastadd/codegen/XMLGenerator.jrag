@@ -39,7 +39,7 @@ import java.util.Stack;
  * @see AbstractGenerator
  * 
  */
-public class XMLVariableGenerator extends GenericGenerator {
+public class XMLGenerator extends GenericGenerator {
 	
 	private HashMap<String,String> illegalCharsSub;
 	
@@ -559,6 +559,24 @@ public class XMLVariableGenerator extends GenericGenerator {
 			}
 		}
 	}
+	
+	class DAETag_XML_Optimization extends DAETag {
+		
+		public DAETag_XML_Optimization (
+		  AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_Optimization","Optimization problem's representation",
+			  myGenerator,fclass);
+		}
+		
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
+		public void generate(PrintStream genPrinter) {
+			//do nothing
+		}
+	}
+
 		
 	
 	/**
@@ -568,7 +586,7 @@ public class XMLVariableGenerator extends GenericGenerator {
 	 * @param escapeCharacter Escape characters used to decode tags.
 	 * @param fclass An FClass object used as a basis for the code generation.
 	 */
-	public XMLVariableGenerator(Printer expPrinter, char escapeCharacter,
+	public XMLGenerator(Printer expPrinter, char escapeCharacter,
 			FClass fclass) {
 		super(expPrinter,escapeCharacter, fclass);
 		

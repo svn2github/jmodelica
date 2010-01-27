@@ -59,8 +59,10 @@ class ModelicaCompiler():
     
     jm_home = jm.environ['JMODELICA_HOME']
     
-    xml_var_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_modelica_variables_template.xml')    
-    xml_val_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_modelica_values_template.xml')
+    fmi_tpl = os.path.join(jm_home, 'CodeGenTemplates', 'fmi_model_description.tpl') 
+    fmi_ext_tpl = os.path.join(jm_home, 'CodeGenTemplates', 'fmi_extended_model_description.tpl')
+    jmodelica_tpl = os.path.join(jm_home, 'CodeGenTemplates','jmodelica_model_description.tpl')
+    model_values_tpl = os.path.join(jm_home, 'CodeGenTemplates', 'jmodelica_model_values.tpl')
     c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_modelica_template.c')    
     options_file_path = os.path.join(jm_home, 'Options','options.xml')
 
@@ -71,10 +73,24 @@ class ModelicaCompiler():
             self._handle_exception(ex)
             
         options.setStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
-        self._compiler = self.ModelicaCompiler(options, 
-                                               self.xml_var_path, 
-                                               self.xml_val_path, 
-                                               self.c_tpl_path)
+        fmi = options.getBooleanOption('generate_fmi_xml')
+        equ = options.getBooleanOption('generate_xml_equations')
+        if fmi and not equ:
+            self._compiler = self.ModelicaCompiler(options, 
+                                                   self.fmi_tpl,
+                                                   self.model_values_tpl,
+                                                   self.c_tpl_path)
+        elif fmi and equ:
+            self._compiler = self.ModelicaCompiler(options, 
+                                                   self.fmi_ext_tpl,
+                                                   self.model_values_tpl,
+                                                   self.c_tpl_path)
+        else:
+            self._compiler = self.ModelicaCompiler(options, 
+                                                   self.jmodelica_tpl,
+                                                   self.model_values_tpl,
+                                                   self.c_tpl_path)           
+            
     @classmethod
     def set_log_level(self,level):
         """ Set the level of log prints. """
@@ -97,7 +113,7 @@ class ModelicaCompiler():
         return bool(option)
     
     def set_boolean_option(self, key, value, description=""):
-        """ Set the boolean option with key to value and an optional 
+        """ Set the boolean option with key to value and an optional
         description. 
         
         If the option already exists it will be overwritten. 
@@ -105,6 +121,17 @@ class ModelicaCompiler():
         """
         try:
             self._compiler.setBooleanOption(key, value, description)
+            
+            if key.strip() == 'generate_fmi_xml' or key.strip() == 'generate_xml_equations':
+                fmi = self.get_boolean_option('generate_fmi_xml')
+                equ = self.get_boolean_option('generate_xml_equations')
+                if fmi and not equ:
+                    self.set_XML_tpl(self.fmi_tpl)
+                elif fmi and equ:
+                    self.set_XML_tpl(self.fmi_ext_tpl)
+                else:
+                    self.set_XML_tpl(self.jmodelica_tpl)
+                    
         except jpype.JavaException, ex:
             self._handle_exception(ex)
         
@@ -176,27 +203,29 @@ class ModelicaCompiler():
             self._handle_exception(ex)
         return str(desc)
     
-    def get_XMLVariablesTemplate(self):
-        """ Return file path to the XML variables template. """
-        return self._compiler.getXMLVariablesTemplate()
+    def get_XML_tpl(self):
+        """ 
+        Return file path to the XML model description template.
+        """
+        return self._compiler.getXMLTpl()
 
-    def set_XMLVariablesTemplate(self, template):
-        """ Set the XML variables template to the file pointed out by 
+    def set_XML_tpl(self, template):
+        """ Set the XML model description template to the file pointed out by 
         template.
         
         """
-        self._compiler.setXMLVariablesTemplate(template)
+        self._compiler.setXMLTpl(template)
 
-    def get_XMLValuesTemplate(self):
-        """ Return file path to the XML values template. """
-        return self._compiler.getXMLValuesTemplate()
+    def get_XML_values_tpl(self):
+        """ Return file path to the XML model values template. """
+        return self._compiler.getXMLValuesTpl()
     
-    def set_XMLValuesTemplate(self, template):
+    def set_XML_values_tpl(self, template):
         """ Set the XML values template to the file pointed out by 
         template.
         
         """
-        self._compiler.setXMLValuesTemplate(template)
+        self._compiler.setXMLValuesTpl(template)
         
     def get_cTemplate(self):
         """ Return file path to the c template. """
@@ -252,7 +281,7 @@ class ModelicaCompiler():
             model_file_name = [model_file_name]           
         try:
             self._compiler.compileModel(model_file_name,
-                                                model_class_name)
+                                        model_class_name)
             c_file = model_class_name.replace('.','_')
             self.compile_dll(c_file, target)
 
@@ -508,8 +537,6 @@ class OptimicaCompiler(ModelicaCompiler):
     OptimicaCompiler = org.jmodelica.optimica.compiler.OptimicaCompiler
 
     jm_home = jm.environ['JMODELICA_HOME']
-    
-    xml_var_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_optimica_variables_template.xml')    
     c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_optimica_template.c')
 
     def __init__(self):
@@ -517,17 +544,39 @@ class OptimicaCompiler(ModelicaCompiler):
             options = OptionRegistry(self.options_file_path)
         except jpype.JavaException, ex:
             self._handle_exception(ex)
+            
         options.setStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
-        self._compiler = self.OptimicaCompiler(options, 
-                                               self.xml_var_path, 
-                                               self.xml_val_path, 
-                                               self.c_tpl_path)
-
-
+        
+        fmi = options.getBooleanOption('generate_fmi_xml')
+        if fmi:
+            self._compiler = self.OptimicaCompiler(options, 
+                                                   self.fmi_ext_tpl,
+                                                   self.model_values_tpl,
+                                                   self.c_tpl_path)
+        else:
+            self._compiler = self.OptimicaCompiler(options, 
+                                                   self.jmodelica_tpl,
+                                                   self.model_values_tpl,
+                                                   self.c_tpl_path)
     @classmethod
     def set_log_level(self,level):
         """ Set the level of log prints. """
         self.OptimicaCompiler.setLogLevel(self.OptimicaCompiler.logger.getName(), level)
+
+    def set_boolean_option(self, key, value, description=""):
+        try:
+            self._compiler.setBooleanOption(key, value, description)
+            
+            if key.strip() == 'generate_fmi_xml':
+                fmi = self.get_boolean_option('generate_fmi_xml')
+                if fmi:
+                    self.set_XML_tpl(self.fmi_ext_tpl)
+                else:
+                    self.set_XML_tpl(self.jmodelica_tpl)            
+                          
+        except jpype.JavaException, ex:
+            self._handle_exception(ex)
+              
 
 class JError(Exception):
     

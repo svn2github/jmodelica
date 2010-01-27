@@ -1137,7 +1137,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
     def _set_initial_values(self, p_opt_init, dx_init, x_init, u_init, w_init):
         
         """ 
-        Set initial guess values from the XML variables meta data file. 
+        Set initial guess values from the XML meta data file. 
         
         Parameters:
             p_opt_init -- The optimized parameters initial guess vector.
@@ -1148,7 +1148,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         
         """
         
-        xmldoc = self._model._get_XMLvariables_doc()
+        xmldoc = self._model._get_XMLDoc()
 
         # p_opt: free variables
         values = xmldoc.get_p_opt_initial_guess_values()
@@ -1216,7 +1216,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
     def _set_lb_values(self, p_opt_lb, dx_lb, x_lb, u_lb, w_lb):
         
         """ 
-        Set lower bounds from the XML variables meta data file. 
+        Set lower bounds from the XML meta data file. 
         
         Parameters:
             p_opt_lb -- The optimized parameters lower bounds vector.
@@ -1227,7 +1227,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         
         """
         
-        xmldoc = self._model._get_XMLvariables_doc()
+        xmldoc = self._model._get_XMLDoc()
 
         # p_opt: free variables
         values = xmldoc.get_p_opt_lb_values()
@@ -1296,7 +1296,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
     def _set_ub_values(self, p_opt_ub, dx_ub, x_ub, u_ub, w_ub):
         
         """ 
-        Set upper bounds from the XML variables meta data file. 
+        Set upper bounds from the XML meta data file. 
         
         Parameters:
             p_opt_ub -- The optimized parameters upper bounds vector.
@@ -1307,7 +1307,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         
         """
         
-        xmldoc = self._model._get_XMLvariables_doc()
+        xmldoc = self._model._get_XMLDoc()
 
         # p_opt: free variables
         values = xmldoc.get_p_opt_ub_values()
@@ -1376,7 +1376,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
     def _set_lin_values(self, p_opt_lin, dx_lin, x_lin, u_lin, w_lin, dx_tp_lin, x_tp_lin, u_tp_lin, w_tp_lin):
         
         """ 
-        Set linearity information from the XML variables meta data file. 
+        Set linearity information from the XML meta data file. 
         
         For the linearity vectors, a "1" indicates that the variable appears 
         linearly and a "0" otherwise. The same convention is used for the 
@@ -1402,7 +1402,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         """
         
         
-        xmldoc = self._model._get_XMLvariables_doc()
+        xmldoc = self._model._get_XMLDoc()
 
         # p_opt: free variables
         values = xmldoc.get_p_opt_lin_values()

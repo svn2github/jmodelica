@@ -101,18 +101,17 @@ public class ModelicaCompiler {
 	public static final String ERROR = "e";
 	public static final String INHERITED = "inh";
 	
-	private String xmlVariablesTempl=null;
-	private String xmlValuesTempl=null;
+	private String xmlTpl=null;
+	private String xmlValuesTpl=null;
 	private String cTemplatefile=null;
 	private OptionRegistry options = null;
 	
 	
-	public ModelicaCompiler(OptionRegistry options, String xmlVariablesTempl, String xmlValuesTempl, String cTemplatefile) {
+	public ModelicaCompiler(OptionRegistry options, String xmlTpl, String xmlValuesTpl, String cTemplatefile) {
 		this.options = options;
-		this.xmlVariablesTempl = xmlVariablesTempl;
-		this.xmlValuesTempl = xmlValuesTempl;
-		this.cTemplatefile = cTemplatefile;
-				
+		this.xmlTpl = xmlTpl;
+		this.xmlValuesTpl = xmlValuesTpl;
+		this.cTemplatefile = cTemplatefile;				
 	}
 	
 	public String getStringOption(String key) throws UnknownOptionException {
@@ -187,22 +186,22 @@ public class ModelicaCompiler {
 	}
 	
 	/**
-	 * Returns the XML variables template file path set for this compiler instance.
+	 * Returns the XML model description template file path set for this compiler instance.
 	 * 
 	 * @return Reference to the XML variables template file path attribute. 
 	 * 
 	 */
-	public String getXMLVariablesTemplate() {
-		return this.xmlVariablesTempl;
+	public String getXMLTpl() {
+		return this.xmlTpl;
 	}
 
 	/**
-	 * Set the XML variables template file path attribute.
+	 * Set the XML model description template file path attribute.
 	 * 
 	 * @param template The new XML variables template file path.
 	 */
-	public void setXMLVariablesTemplate(String template) {
-		this.xmlVariablesTempl = template;
+	public void setXMLTpl(String template) {
+		this.xmlTpl = template;
 	}
 	
 	/**
@@ -211,8 +210,8 @@ public class ModelicaCompiler {
 	 * @return Reference to the XML values template file path attribute.
 	 * 
 	 */
-	public String getXMLValuesTemplate() {
-		return this.xmlValuesTempl;
+	public String getXMLValuesTpl() {
+		return this.xmlValuesTpl;
 	}
 
 	/**
@@ -220,8 +219,8 @@ public class ModelicaCompiler {
 	 * 
 	 * @param template The new XML values template file path.
 	 */
-	public void setXMLValuesTemplate(String template) {
-		this.xmlValuesTempl = template;
+	public void setXMLValuesTpl(String template) {
+		this.xmlValuesTpl = template;
 	}
 
 	/**
@@ -245,23 +244,13 @@ public class ModelicaCompiler {
 			
 	/**
 	 * Compiles a Modelica model. A model file name and class must be provided.
-	 * Two template files for XML and one for c can be provided to generatate
-	 * code for this model. Prints an error and returns without completion if,
-	 * for example, a file can not be found or if the parsing fails.
-	 * Supports multiple model files.
+	 * Prints an error and returns without completion if, for example, a file 
+	 * can not be found or if the parsing fails. Supports multiple model files.
 	 * 
 	 * @param name
 	 *            Array of names of the model files.
 	 * @param cl
 	 *            The name of the class in the model file to compile.
-	 * @param xmlVariablesTempl
-	 *            The XML template file for model variables(optional).
-	 * @param xmlValuesTempl
-	 *            The XML template file for independent parameter values
-	 *            (optional).
-	 * @param cTemplatefile
-	 *            The c template file (optional).
-	 * 
 	 * @throws beaver.Parser.Exception
 	 *             If there was an Beaver parsing exception.
 	 * @throws CompilerException
@@ -292,7 +281,7 @@ public class ModelicaCompiler {
 		FClass fc = flattenModel(icl);
 
 		// Generate code?
-		if (this.xmlVariablesTempl != null && this.xmlValuesTempl !=null && this.cTemplatefile != null) {
+		if (this.xmlTpl != null && this.xmlValuesTpl !=null && this.cTemplatefile != null) {
 			generateCode(fc);
 		}		
 		logger.info("====== Model compiled successfully =======");
@@ -528,33 +517,25 @@ public class ModelicaCompiler {
 	 * 
 	 * Generates XML and c code for a flattened model represented as an instance
 	 * of FClass using template files. The XML variables, XML values and c files
-	 * are given the default names <modelname>_variables.xml,
-	 * <modelname>_values.xml and <modelname>.c respectively.
+	 * are given the default names <modelname>.xml, <modelname>_values.xml and 
+	 * <modelname>.c respectively.
 	 * 
 	 * @param fc
 	 *            The FClass instance for which the code generation should be
 	 *            computed.
-	 * @param xmlVariablesTempl
-	 *            The path to the XML template file for model variables.
-	 * @param xmlValuesTempl
-	 *            The path to the XML template file for independent parameter
-	 *            values.
-	 * @param ctemplate
-	 *            The path to the c template file.
-	 * 
 	 * @throws FileNotFoundException
 	 *             If either of the three template files can not be found.
 	 */
 	public void generateCode(FClass fc) throws FileNotFoundException {
 		logger.info("Generating code...");
 		
-		XMLVariableGenerator variablegenerator = new XMLVariableGenerator(new PrettyPrinter(), '$', fc);
+		XMLGenerator xmlgenerator = new XMLGenerator(new PrettyPrinter(), '$', fc);
 		String output = fc.nameUnderscore()+".xml";
-		variablegenerator.generate(this.xmlVariablesTempl, output);
+		xmlgenerator.generate(this.xmlTpl, output);
 
 		XMLValueGenerator valuegenerator = new XMLValueGenerator(new PrettyPrinter(), '$', fc);
 		output = fc.nameUnderscore()+"_values.xml";
-		valuegenerator.generate(this.xmlValuesTempl, output);
+		valuegenerator.generate(this.xmlValuesTpl, output);
 		
 		CGenerator cgenerator = new CGenerator(new PrettyPrinter(), '$', fc);
 		output = fc.nameUnderscore() + ".c";
@@ -599,28 +580,7 @@ public class ModelicaCompiler {
 	}
 	
 	protected static Hashtable<String, String> extractProgramArguments(String[] args, int pos) {
-		Hashtable<String, String> programargs = new Hashtable<String,String>();
-
-//		while(pos < args.length && args[pos].trim().substring(0,1).equals("-")) {
-//			String progarg = args[pos].trim().substring(1, args[pos].trim().indexOf("="));
-//			if(progarg.equals("log")) {
-//				//is log option -> override default
-//				if(args[pos].trim().indexOf("=")+1 <= args[pos].trim().length()) {
-////					setLogLevel(logger.getName(),args[arg].trim().substring(args[arg].trim().indexOf("=")+1));
-//					programargs.put("log", args[pos].trim().substring(args[pos].trim().indexOf("=")+1));
-//				}
-//			} else if(progarg.equals("modelicapath")) {
-//				// is modelicapath option
-//				if(args[pos].trim().indexOf("=")+1 <= args[pos].trim().length()) {
-//					programargs.put("modelicapath", args[pos].trim().substring(args[pos].trim().indexOf("=")+1));
-//				}
-//			} else {
-//				//unsupported program argument
-//				;
-//			}
-//			pos++;
-//		}
-		
+		Hashtable<String, String> programargs = new Hashtable<String,String>();		
 		
 		while(pos < args.length && args[pos].trim().substring(0,1).equals("-")) {
 			String progarg = args[pos].trim().substring(1, args[pos].trim().indexOf("="));
@@ -636,7 +596,7 @@ public class ModelicaCompiler {
 		String filesep = System.getProperty("file.separator");
 		if(args.length < 1) {
 			logger.severe("ModelicaCompiler expects the command line arguments: \n" +
-					"[-options] <file name> <class name> [<xml variables template> <xml values template> <c template>]\n" +
+					"[-options] <file name> <class name> [<xml model description template> <xml model values template> <c template>]\n" +
 					"where options could be: \n" +
 					"-log=<i or w or e> \n" +
 					"-modelicapath=<path to modelica library> \n" +
@@ -667,13 +627,13 @@ public class ModelicaCompiler {
 		
 		String[] name = args[arg].split(",");
 		String cl = args[arg+1];
-		String xmlVariablesTempl = null;
-		String xmlValuesTempl = null;
+		String xmlTpl = null;
+		String xmlValuesTpl = null;
 		String ctempl = null;
 		
 		if (args.length >= arg+5) {
-			xmlVariablesTempl = args[arg+2];
-			xmlValuesTempl = args[arg+3];
+			xmlTpl = args[arg+2];
+			xmlValuesTpl = args[arg+3];
 			ctempl = args[arg+4];
 		}
 		
@@ -721,7 +681,7 @@ public class ModelicaCompiler {
 		}
 		or.setStringOption("MODELICAPATH", modelicapath);
 		
-		ModelicaCompiler mc = new ModelicaCompiler(or, xmlVariablesTempl, xmlValuesTempl, ctempl);
+		ModelicaCompiler mc = new ModelicaCompiler(or, xmlTpl, xmlValuesTpl, ctempl);
 		
 		try {
 			mc.compileModel(name, cl);

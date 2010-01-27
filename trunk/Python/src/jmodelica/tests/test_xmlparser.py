@@ -54,14 +54,14 @@ def setup():
     
         
 @testattr(stddist = True)
-def test_create_XMLVariablesDoc():
+def test_create_XMLDoc():
     """ 
     Test that it is possible to parse the XML file and create a 
-    XMLVariablesDoc object. 
+    XMLDoc object. 
     """
     filename = cstr_fname+'.xml'
-    assert xp.XMLVariablesDoc(filename) is not None, \
-           "Could not create XMLVariablesDoc from XML file: "+filename
+    assert xp.XMLDoc(filename) is not None, \
+           "Could not create XMLDoc from XML file: "+filename
 
 @testattr(stddist = True)
 def test_create_XMLValuesDoc():
@@ -75,61 +75,61 @@ def test_create_XMLValuesDoc():
            "Could not create XMLValuesDoc from XML file: "+filename
 
 @testattr(stddist = True)
-def test_xmlvariablesdoc_methods():
+def test_xmldoc_methods():
     """ 
-    Test that all XMLVariablesDoc methods are callable and returns the 
+    Test that all XMLDoc methods are callable and returns the 
     correct data type. 
     """
-    cstr_xmldoc = xp.XMLVariablesDoc(cstr_fname+'.xml')
-    parest_xmldoc = xp.XMLVariablesDoc(parest_fname+'.xml')
-    vdpmin_xmldoc = xp.XMLVariablesDoc(vdpmin_fname+'.xml')
+    cstr_xmldoc = xp.XMLDoc(cstr_fname+'.xml')
+    parest_xmldoc = xp.XMLDoc(parest_fname+'.xml')
+    vdpmin_xmldoc = xp.XMLDoc(vdpmin_fname+'.xml')
     
-    t_get_valueref.description = 'test XMLVariablesDoc.get_valueref'
-    t_get_aliases.description = 'test XMLVariablesDoc.get_aliases'
-    t_get_variable_description.description = 'test XMLVariablesDoc.get_variable_description'
-    t_get_data_type.description = 'test XMLVariablesDoc.get_data_type'
-    t_get_variable_names.description = 'test XMLVariablesDoc.get_variable_names'
-    t_get_derivative_names.description = 'test XMLVariablesDoc.get_derivative_names'
-    t_get_differentiated_variable_names.description = 'test XMLVariablesDoc.get_differentiated_variable_names'
-    t_get_input_names.description = 'test XMLVariablesDoc.get_input_names'
-    t_get_algebraic_variable_names.description = 'test XMLVariablesDoc.get_algebraic_variable_names'
-    t_get_p_opt_names.description = 'test XMLVariablesDoc.get_p_opt_names'
-    t_get_variable_descriptions.description = 'test XMLVariablesDoc.get_variable_descriptions'
-    t_get_start_attributes.description = 'test XMLVariablesDoc.get_start_attributes'
-    t_get_dx_start_attributes.description = 'test XMLVariables.get_dx_start_attributes' 
-    t_get_x_start_attributes.description = 'test XMLVariables.get_x_start_attributes'
-    t_get_u_start_attributes.description = 'test XMLVariables.get_u_start_attributes'
-    t_get_w_start_attributes.description = 'test XMLVariables.get_w_start_attributes'
-    t_get_p_opt_variable_refs.description = 'test XMLVariablesDoc.get_p_opt_variable_refs'
-    t_get_w_initial_guess_values.description = 'test XMLVariablesDoc.get_w_initial_guess_values'
-    t_get_u_initial_guess_values.description = ' test XMLVariablesDoc.get_u_initial_guess_values'
-    t_get_dx_initial_guess_values.description = ' test XMLVariablesDoc.get_dx_initial_guess_values'
-    t_get_x_initial_guess_values.description = ' test XMLVariablesDoc.get_x_initial_guess_values'
-    t_get_p_opt_initial_guess_values.description = ' test XMLVariablesDoc.get_p_opt_initial_guess_values'
-    t_get_w_lb_values.description = ' test XMLVariablesDoc.get_w_lb_values'
-    t_get_u_lb_values.description = ' test XMLVariablesDoc.get_u_lb_values'
-    t_get_dx_lb_values.description = ' test XMLVariablesDoc.get_dx_lb_values'
-    t_get_x_lb_values.description = ' test XMLVariablesDoc.get_x_lb_values'
-    t_get_p_opt_lb_values.description = ' test XMLVariablesDoc.get_p_opt_lb_values'
-    t_get_w_ub_values.description = ' test XMLVariablesDoc.get_w_ub_values'
-    t_get_u_ub_values.description = ' test XMLVariablesDoc.get_u_ub_values'
-    t_get_dx_ub_values.description = ' test XMLVariablesDoc.get_dx_ub_values'
-    t_get_x_ub_values.description = ' test XMLVariablesDoc.get_x_ub_values'
-    t_get_p_opt_ub_values.description = ' test XMLVariablesDoc.get_p_opt_ub_values'   
-    t_get_w_lin_values.description = ' test XMLVariablesDoc.get_w_lin_values'
-    t_get_u_lin_values.description = ' test XMLVariablesDoc.get_u_lin_values'
-    t_get_dx_lin_values.description = ' test XMLVariablesDoc.get_dx_lin_values'
-    t_get_x_lin_values.description = ' test XMLVariablesDoc.get_x_lin_values'
-    t_get_p_opt_lin_values.description = ' test XMLVariablesDoc.get_p_opt_lin_values'   
-    t_get_w_lin_tp_values.description = ' test XMLVariablesDoc.get_w_lin_tp_values'
-    t_get_u_lin_tp_values.description = ' test XMLVariablesDoc.get_u_lin_tp_values'
-    t_get_dx_lin_tp_values.description = ' test XMLVariablesDoc.get_dx_lin_tp_values'
-    t_get_x_lin_tp_values.description = ' test XMLVariablesDoc.get_x_lin_tp_values'    
-    t_get_starttime.description = ' test XMLVariablesDoc.get_starttime'
-    t_get_starttime_free.description = ' test XMLVariablesDoc.get_starttime_free'
-    t_get_finaltime.description = ' test XMLVariablesDoc.get_finaltime'
-    t_get_finaltime_free.description = ' test XMLVariablesDoc.get_finaltime_free'
-    t_get_timepoints.description = ' test XMLVariablesDoc.get_timepoints'
+    t_get_valueref.description = 'test XMLDoc.get_valueref'
+    t_get_aliases.description = 'test XMLDoc.get_aliases'
+    t_get_variable_description.description = 'test XMLDoc.get_variable_description'
+    t_get_data_type.description = 'test XMLDoc.get_data_type'
+    t_get_variable_names.description = 'test XMLDoc.get_variable_names'
+    t_get_derivative_names.description = 'test XMLDoc.get_derivative_names'
+    t_get_differentiated_variable_names.description = 'test XMLDoc.get_differentiated_variable_names'
+    t_get_input_names.description = 'test XMLDoc.get_input_names'
+    t_get_algebraic_variable_names.description = 'test XMLDoc.get_algebraic_variable_names'
+    t_get_p_opt_names.description = 'test XMLDoc.get_p_opt_names'
+    t_get_variable_descriptions.description = 'test XMLDoc.get_variable_descriptions'
+    t_get_start_attributes.description = 'test XMLDoc.get_start_attributes'
+    t_get_dx_start_attributes.description = 'test XMLDoc.get_dx_start_attributes' 
+    t_get_x_start_attributes.description = 'test XMLDoc.get_x_start_attributes'
+    t_get_u_start_attributes.description = 'test XMLDoc.get_u_start_attributes'
+    t_get_w_start_attributes.description = 'test XMLDoc.get_w_start_attributes'
+    t_get_p_opt_variable_refs.description = 'test XMLDoc.get_p_opt_variable_refs'
+    t_get_w_initial_guess_values.description = 'test XMLDoc.get_w_initial_guess_values'
+    t_get_u_initial_guess_values.description = ' test XMLDoc.get_u_initial_guess_values'
+    t_get_dx_initial_guess_values.description = ' test XMLDoc.get_dx_initial_guess_values'
+    t_get_x_initial_guess_values.description = ' test XMLDoc.get_x_initial_guess_values'
+    t_get_p_opt_initial_guess_values.description = ' test XMLDoc.get_p_opt_initial_guess_values'
+    t_get_w_lb_values.description = ' test XMLDoc.get_w_lb_values'
+    t_get_u_lb_values.description = ' test XMLDoc.get_u_lb_values'
+    t_get_dx_lb_values.description = ' test XMLDoc.get_dx_lb_values'
+    t_get_x_lb_values.description = ' test XMLDoc.get_x_lb_values'
+    t_get_p_opt_lb_values.description = ' test XMLDoc.get_p_opt_lb_values'
+    t_get_w_ub_values.description = ' test XMLDoc.get_w_ub_values'
+    t_get_u_ub_values.description = ' test XMLDoc.get_u_ub_values'
+    t_get_dx_ub_values.description = ' test XMLDoc.get_dx_ub_values'
+    t_get_x_ub_values.description = ' test XMLDoc.get_x_ub_values'
+    t_get_p_opt_ub_values.description = ' test XMLDoc.get_p_opt_ub_values'   
+    t_get_w_lin_values.description = ' test XMLDoc.get_w_lin_values'
+    t_get_u_lin_values.description = ' test XMLDoc.get_u_lin_values'
+    t_get_dx_lin_values.description = ' test XMLDoc.get_dx_lin_values'
+    t_get_x_lin_values.description = ' test XMLDoc.get_x_lin_values'
+    t_get_p_opt_lin_values.description = ' test XMLDoc.get_p_opt_lin_values'   
+    t_get_w_lin_tp_values.description = ' test XMLDoc.get_w_lin_tp_values'
+    t_get_u_lin_tp_values.description = ' test XMLDoc.get_u_lin_tp_values'
+    t_get_dx_lin_tp_values.description = ' test XMLDoc.get_dx_lin_tp_values'
+    t_get_x_lin_tp_values.description = ' test XMLDoc.get_x_lin_tp_values'    
+    t_get_starttime.description = ' test XMLDoc.get_starttime'
+    t_get_starttime_free.description = ' test XMLDoc.get_starttime_free'
+    t_get_finaltime.description = ' test XMLDoc.get_finaltime'
+    t_get_finaltime_free.description = ' test XMLDoc.get_finaltime_free'
+    t_get_timepoints.description = ' test XMLDoc.get_timepoints'
 
     
     yield t_get_valueref, cstr_xmldoc
@@ -901,28 +901,28 @@ def t_get_iparam_values(xmldoc):
 def t_get_starttime(xmldoc):
     time = xmldoc.get_starttime()
     assert time.__class__ is float, \
-        "XMLVariablesDoc.get_starttime did not return float."
+        "XMLDoc.get_starttime did not return float."
     nose.tools.assert_equal(time,0.0)
     
 @testattr(stddist = True)
 def t_get_starttime_free(xmldoc):
     b = xmldoc.get_starttime_free()
     assert b.__class__ is bool, \
-            "XMLVariablesDoc.get_starttime_free did not return boolean."
+            "XMLDoc.get_starttime_free did not return boolean."
     nose.tools.assert_equal(b, False)
     
 @testattr(stddist = True)
 def t_get_finaltime(xmldoc):
     time = xmldoc.get_finaltime()
     assert time.__class__ is float, \
-        "XMLVariablesDoc.get_finaltime did not return float."
+        "XMLDoc.get_finaltime did not return float."
     nose.tools.assert_equal(time,150.0)
     
 @testattr(stddist = True)
 def t_get_finaltime_free(xmldoc):
     b = xmldoc.get_finaltime_free()
     assert b.__class__ is bool, \
-            "XMLVariablesDoc.get_finaltime_free did not return boolean."
+            "XMLDoc.get_finaltime_free did not return boolean."
     nose.tools.assert_equal(b, False)
     
 @testattr(stddist = True)
