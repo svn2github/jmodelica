@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Stack;
 
+
 /**
  * A generator class for XML code generation which takes a model described by
  * <FClass> and provides an XML document for the meta-data in the model. Uses a
@@ -380,7 +381,7 @@ public class XMLGenerator extends GenericGenerator {
 			genPrinter.print("nominal=\""+realvariable.nominalAttribute()+"\" ");
 		}
 		//start
-		if (realvariable.isDependentParameter() && !realvariable.startAttributeSet()) {
+		if ((realvariable.isDependentParameter() && !realvariable.startAttributeSet()) || realvariable.isIndependentConstant()) {
 			genPrinter.print("start=\""+realvariable.getBindingExp().ceval().realValue()+"\" ");
 		} else {
 			genPrinter.print("start=\""+realvariable.startAttribute()+"\" ");
@@ -408,7 +409,7 @@ public class XMLGenerator extends GenericGenerator {
 			genPrinter.print("max=\""+integervariable.maxAttribute()+"\" ");
 		}
 		//start
-		if (integervariable.isDependentParameter() && !integervariable.startAttributeSet()) {
+		if ((integervariable.isDependentParameter() && !integervariable.startAttributeSet()) || integervariable.isIndependentConstant()) {
 			genPrinter.print("start=\"" +integervariable.getBindingExp().ceval().intValue() +"\" ");
 		} else {
 			genPrinter.print("start=\"" +integervariable.startAttribute()+"\" ");
@@ -423,7 +424,7 @@ public class XMLGenerator extends GenericGenerator {
 		//declaredType
 		//genPrinter.print("declaredType=\"String\" ");
 		//start attribute
-		if (booleanvariable.isDependentParameter() && !booleanvariable.startAttributeSet()) {
+		if ((booleanvariable.isDependentParameter() && !booleanvariable.startAttributeSet()) || booleanvariable.isIndependentConstant()) {
 			genPrinter.print("start=\"" +booleanvariable.getBindingExp().ceval().intValue() + "\" ");
 		} else if(booleanvariable.startAttributeSet()) {
 			genPrinter.print("start" +booleanvariable.startAttribute()+"\" ");
@@ -438,7 +439,7 @@ public class XMLGenerator extends GenericGenerator {
 		//declaredType
 		//genPrinter.print("declaredType=\"String\" ");
 		//start attribute
-		if (stringvariable.isDependentParameter() && !stringvariable.startAttributeSet()) {
+		if ((stringvariable.isDependentParameter() && !stringvariable.startAttributeSet()) || stringvariable.isIndependentConstant()) {
 			genPrinter.print("start=\"" +stringvariable.getBindingExp().ceval().intValue() + "\" ");
 		} else if(stringvariable.startAttributeSet()) {
 			genPrinter.print("start=\""+stringvariable.startAttribute()+"\" ");

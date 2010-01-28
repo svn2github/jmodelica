@@ -926,11 +926,14 @@ class Model(object):
             name -- name of variable or parameter.
             value -- parameter or variable value.
 
-        Raises Error if name not present in model."""
+        Raises Error if name not present in model or if variable can 
+        not be set."""
         
         xmldoc = self._get_XMLDoc()
         valref = xmldoc.get_valueref(name)
         if valref != None:
+            if xmldoc.is_constant(name):
+               raise Exception("%s is a constant, it can not be modified." %name)
             (z_i, ptype) = _translate_value_ref(valref)
             if xmldoc.is_negated_alias(name):
                self.get_z()[z_i] = -(value)

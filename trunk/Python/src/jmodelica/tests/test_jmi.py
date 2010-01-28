@@ -30,6 +30,7 @@ jm_home = os.environ.get('JMODELICA_HOME')
 path_to_examples = os.path.join(jm_home, "Python", "jmodelica", "examples")
 path_to_tests = os.path.join(jm_home, "Python", "jmodelica", "tests")
 # get a compiler
+mc = ModelicaCompiler()
 oc = OptimicaCompiler()
 
 # compile VDP
@@ -45,13 +46,13 @@ eval_alg = jmi.JMI_DER_CPPAD
 sparsity = jmi.JMI_DER_SPARSE
 indep_vars = jmi.JMI_DER_ALL
 
-# compile CSTR with alias variables elimination
-model_cstr = os.path.join("files", "CSTR.mo")
-fpath_cstr = os.path.join(path_to_examples, model_cstr)
-cpath_cstr = "CSTR.CSTR_Opt"
-fname_cstr = cpath_cstr.replace('.','_',1)      
-oc.set_boolean_option('eliminate_alias_variables', True)
-oc.compile_model(fpath_cstr, cpath_cstr, target='ipopt')
+# compile RLC_Circuit with alias variables elimination
+model_rlc = os.path.join("files", "RLC_Circuit.mo")
+fpath_rlc = os.path.join(path_to_examples, model_rlc)
+cpath_rlc = "RLC_Circuit"
+fname_rlc = cpath_rlc.replace('.','_',1)      
+mc.set_boolean_option('eliminate_alias_variables', True)
+mc.compile_model(fpath_rlc, cpath_rlc, target='ipopt')
 
 
 
@@ -397,50 +398,57 @@ class TestModel_VDP:
     def test_opt_interval_get_final_time(self):
         ntools.assert_equal(self.vdp.opt_interval_get_final_time(),20.0)
         
-class TestModel_CSTR:
+class TestModel_RLC:
     """Test the high level model class, jmi.Model with alias variables 
         enabled.
     
-    The tests are based on the CSTR example file.
+    The tests are based on the RLC_Circuit example file.
 
     """
     
     def __init__(self):
         """Load the test model."""
         # Load the dynamic library and XML data
-        self.cstr = jmi.Model(fname_cstr)
+        self.rlc = jmi.Model(fname_rlc)
 
     @testattr(stddist = True)
     def test_get_variable_description(self):
-        ntools.assert_equal(self.cstr.get_variable_description("cstr.F0"),"Inflow")
+        ntools.assert_equal(self.rlc.get_variable_description("resistor.R"),"Resistance")
         
     @testattr(stddist = True)
     def test_get_variable_descriptions(self):
-        descriptions = self.cstr.get_variable_descriptions()
-        ntools.assert_equal(descriptions.get(2),"Outflow")
+        descriptions = self.rlc.get_variable_descriptions()
+        ntools.assert_equal(descriptions.get(2),"Capacitance")
 
     @testattr(stddist = True)
     def test_is_negated_alias(self):
-        ntools.assert_equal(self.cstr.is_negated_alias("cstr.Tc"),False)
+        ntools.assert_equal(self.rlc.is_negated_alias("resistor.n.i"),True)
     
     @testattr(stddist = True)
     def test_get_aliases(self):
-        (aliases,isalias) = self.cstr.get_aliases("u")
-        ntools.assert_equal(aliases[0],"cstr.Tc")
-        ntools.assert_equal(isalias[0],False)
+        (aliases,is_neg_alias) = self.rlc.get_aliases("capacitor.p.i")
+        ntools.assert_equal(aliases[0],"capacitor.i")
+        ntools.assert_equal(aliases[1], "capacitor.n.i")
+        ntools.assert_equal(is_neg_alias[0],False)
+        ntools.assert_equal(is_neg_alias[1], True)
             
     @testattr(stddist = True)
     def test_setget_alias_value(self):
        """ Test set and get the value of a alias variable. """ 
-       alias_variable = 'cstr.Tc'
-       aliased_variable = 'u'
-       u = self.cstr.get_value(aliased_variable)
-       tc = self.cstr.get_value(alias_variable)
-       nose.tools.assert_equal(u, tc)
-       new_value = 345.0
-       self.cstr.set_value(alias_variable, new_value)
-       nose.tools.assert_equal(self.cstr.get_value(aliased_variable), new_value)
+       alias_variable = 'capacitor.i'
+       aliased_variable = 'capacitor.p.i'
+       cap_i = self.rlc.get_value(aliased_variable)
+       cap_p_i = self.rlc.get_value(alias_variable)
+       nose.tools.assert_equal(cap_i, cap_p_i)
+       new_value = 1.0
+       self.rlc.set_value(alias_variable, new_value)
+       nose.tools.assert_equal(self.rlc.get_value(aliased_variable), new_value)
        
+    @testattr(stddist = True)
+    def test_set_constant(self):
+        """ Test that set_value of constant should raise error."""
+        nose.tools.assert_raises(Exception, self.rlc.set_value, 'sine.pi',1.0)
+               
 
 class TestJMIModel_VDP:
     """ Test the JMI Model Interface wrappers.

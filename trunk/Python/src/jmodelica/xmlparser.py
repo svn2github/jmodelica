@@ -117,7 +117,18 @@ class XMLDoc(XMLBaseDoc):
         if len(negated_alias)>0:
             return (negated_alias[0] == "negatedAlias")
         else:
-            raise Exception("The variable: "+str(variablename)+" can not be found in XML document.")        
+            raise Exception("The variable: "+str(variablename)+" can not be found in XML document.")
+        
+    def is_constant(self, variablename):
+        """ Find out if variable is a constant.
+        
+        Raises exception if variable is not found in XML document.
+        """
+        variability = self._xpatheval("//ScalarVariable/@variability[../@name=\""+str(variablename)+"\"]")
+        if len(variability) > 0:
+            return (variability[0] == "constant")
+        else:
+            raise Exception("The variable: "+str(variablename)+" can not be found in XML document.")
         
     def get_aliases(self, aliased_variable):
         """ Return list of all alias variables belonging to the aliased 
@@ -129,7 +140,7 @@ class XMLDoc(XMLBaseDoc):
             Returns:
                 A list consisting of the alias variable names and another
                 list consisting of booleans indicating if the corresponding
-                alias i negated.
+                alias is negated.
 
         """
         # get value reference of aliased variable
