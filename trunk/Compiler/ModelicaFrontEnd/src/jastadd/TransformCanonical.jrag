@@ -546,9 +546,26 @@ aspect Scalarization {
 		// Replace variables
 		setFVariableList(vars);
 		setAliasVariableList(alias_vars);
+		
+		// Replace subscript expressions with literals
+		eqns.makeSubscriptsLiteral();
+		ieqns.makeSubscriptsLiteral();
 
 		flush();		
 	}
+	
+	/**
+	 * \brief Replace all expressions in array subscripts with literals.
+	 */
+	public void ASTNode.makeSubscriptsLiteral() {
+		for (ASTNode child : this)
+			child.makeSubscriptsLiteral();
+	}
+	
+	public void FExpSubscript.makeSubscriptsLiteral() {
+		setFExp(getFExp().ceval().buildLiteral());
+	}
+	
 	
 	/**
 	 * \brief Scalarize the FVariable and put all scalarized variables in the
@@ -640,16 +657,7 @@ aspect Scalarization {
 	
 	public void FForClauseE.scalarize(List<FAbstractEquation> eqns,
 			HashMap<String,Integer> indexMap) {
-		// TODO: Can be simplified a lot when FForClauseE is refactored to have only one FForIndex (#506)
-		// TODO: Refactor this to FForClauseE.indices()?
-		ArrayList<int[]> ind = new ArrayList<int[]>();
-		for (FForIndex fi : getFForIndexs()) {
-			if (fi.hasFExp()) {
-				ind.add(fi.getFExp().myIndices().clone());
-			}
-			// TODO: else add indices as for FColonSubscript
-		}
-		Indices indices = Indices.create(ind);
+		Indices indices = Indices.create(getFForIndexs());
 		
 		HashMap<String,Integer> myIndexMap = new HashMap<String,Integer>();
 		myIndexMap.putAll(indexMap);
@@ -716,21 +724,43 @@ aspect Scalarization {
 	
     public FIdUse FIdUse.scalarize(HashMap<String,Integer> indexMap) {
     	return new FIdUse(getFQName().scalarize(indexMap));
-    	/*
-    	FIdUse fid = (FIdUse)fullCopy();
-    	fid.getFQName().scalarized = true;
-    	return fid;
-    	*/
     }
 
     public FExp FIdUseExp.scalarize(HashMap<String,Integer> indexMap) {
-    	//System.out.println("FIdUseExp.scalarize: " + name());
-    	if (indexMap.containsKey(name())) {
-    		return new FIntegerLitExp(indexMap.get(getFIdUse().name()).intValue());
-    	}
+    	if (indexMap.containsKey(name())) 
+    		return new FIntegerLitExp(indexMap.get(name()).intValue());
     	return new FIdUseExp(getFIdUse().scalarize(indexMap));
     }
     
+    /* These are needed because scalarize() is reused in Array.createExpanded(), that 
+     * might be called on an instance tree.
+     */
+    public FExp FInstAccessExp.scalarize(HashMap<String,Integer> indexMap) {
+    	if (indexMap.containsKey(name())) 
+    		return new FIntegerLitExp(indexMap.get(name()).intValue());
+    	return new FInstAccessExp(getInstAccess().scalarize(indexMap));
+    }
+	
+    public FIdUseInstAccess FIdUseInstAccess.scalarize(HashMap<String,Integer> indexMap) {
+    	return new FIdUseInstAccess(new FQName(), getInstAccess().scalarize(indexMap));
+    }
+	
+    public InstAccess InstAccess.scalarize(HashMap<String,Integer> indexMap) {
+    	return (InstAccess) fullCopy();
+    }
+	
+    public InstDot InstDot.scalarize(HashMap<String,Integer> indexMap) {
+    	return new InstDot("", getLeft().scalarize(indexMap), getRight().scalarize(indexMap));
+    }
+	
+    public InstArrayAccess InstArrayAccess.scalarize(HashMap<String,Integer> indexMap) {
+    	InstArrayAccess res = (InstArrayAccess) fullCopy();
+    	if (hasFArraySubscripts())
+    		res.setFArraySubscripts(getFArraySubscripts().scalarize(indexMap));
+    	return res;
+    }
+    // End of instance classes that need scalarize()
+ 
     public FExp FIfExp.scalarize(HashMap<String,Integer> indexMap) {
 		List etl = new List();
 		for (FElseIfExp elif : getFElseIfExps()) 

@@ -301,7 +301,7 @@ FColonSubscript : FSubscript::=;
 /**
  * \brief Expression subscript.
  */
-FExpSubscript : FSubscript ::= FExp;
+FExpSubscript : FSubscript ::= FExp /Expanded:Array/;
 
 /**
  * \brief Classifies a flattened equation as initial or normal.

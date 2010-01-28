@@ -14,6 +14,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.util.Arrays;
+import java.util.Collections;
 
 aspect FlatTypeCheck {
 	
@@ -103,6 +105,26 @@ aspect FlatTypeCheck {
   
   // TODO: Add typeCheck for other FExp types (e.g. FZeros)
 
+  
+  public void FExpSubscript.typeCheck() {
+	  if (ndims() > 1) { 
+		  error("Array index must be scalar or vector expression: " + getFExp().prettyPrint(""));
+	  } else if (!type().isInteger()) { // TODO: Expand to support Boolean and enums
+		  error("Array index must be Integer expression: " + getFExp().prettyPrint(""));
+	  } else if (!inFunction() && !getFExp().variability().lessOrEqual(fParameter())) {
+		  error("Array index in equation must be constant, parameter or loop index: " + getFExp().prettyPrint(""));
+	  } else {
+		  int max = mySize()[0];
+		  for (FExp e : getExpanded().iterable()) {
+			  int i = e.ceval().intValue();
+			  if (i < 1 || i > max) {
+				  error("Array index out of bounds: " + i + ", index expression: "+ getFExp().prettyPrint(""));
+				  return;
+			  }
+		  }
+	  }
+  }
+  
   
   public void InstComponentAccess.typeCheck() {
 	//  System.out.println("InstComponentAccess.typeCheck: " + printSlice());

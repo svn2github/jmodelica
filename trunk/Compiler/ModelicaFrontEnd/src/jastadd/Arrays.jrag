@@ -14,6 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -386,7 +387,7 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn lazy int[] FSubscript.size();
+	syn int[] FSubscript.size();
 
 	eq FExpSubscript.size() = getFExp().size();
 	
@@ -395,7 +396,7 @@ aspect Arrays {
 	/**
 	 * \brief Get the size this subscript(s) would have if all subscripts were colons.
 	 */
-	inh int[] FColonSubscript.mySize();
+	inh lazy int[] FSubscript.mySize();
 	inh lazy int[] FArraySubscripts.mySize();
 	eq FArraySubscripts.getFSubscript(int i).mySize() = new int[] { mySize()[i] };
 	eq FIdUse.getChild().mySize()                     = myFV().size();
@@ -618,12 +619,105 @@ aspect Arrays {
 	}
 	
 	/**
+	 * \brief A common interface for InstForIndex & FForIndex, to allow common handling.
+	 */
+	interface CommonForIndex {
+		public int[] myIndices();
+		public String name();
+	}
+	
+	public class FForIndex implements CommonForIndex {}
+	public class InstForIndex implements CommonForIndex {}
+	
+	/**
+	 * \brief Expand for all values of for indices given in <code>indices</code>.
+	 * 
+	 * This is used to get the set of values for array indices while error checking 
+	 * and to expand summation reduction expressions.
+	 * 
+	 * Size of new Array will be (n + m), where n = indices.size() and m = ndims().  
+	 */
+	public Array Array.createExpanded(Iterable<? extends CommonForIndex> forIndices) {
+		if (!forIndices.iterator().hasNext())
+			return (Array) fullCopy();
+		Indices newIndices = Indices.create(forIndices);
+		Array arr = new Array(Indices.create(expandedSize(newIndices.size())));
+		HashMap<String,Integer> indexMap = new HashMap<String,Integer>();
+		for (Index i : newIndices) {
+			int j = 0;
+			int[] ii = newIndices.translate(i).index();
+			for (CommonForIndex fi : forIndices) {
+				indexMap.put(fi.name(), Integer.valueOf(ii[j]));
+				j++;
+			}
+			fillSubset(arr, i, indexMap);
+		}
+		return arr;
+	}
+	
+	protected int[] Array.expandedSize(int[] size) {
+		int ndims = size.length + ndims();
+		int[] nsize = new int[ndims];
+		System.arraycopy(size, 0, nsize, 0, size.length);
+		System.arraycopy(size(), 0, nsize, size.length, ndims());
+		return nsize;
+	}
+	protected int[] ScalarAsArray.expandedSize(int[] size) {
+		return size;
+	}
+	
+	protected void Array.fillSubset(Array arr, Index i, HashMap<String,Integer> indexMap) {
+		for (Index i2 : indices().subset(i))
+			arr.set(i2, get(i).scalarize(indexMap));
+	}
+	protected void ScalarAsArray.fillSubset(Array arr, Index i, HashMap<String,Integer> indexMap) {
+		arr.set(i, get(i).scalarize(indexMap));
+	}
+	
+	/**
+	 * \brief Expand index for all values of each for index used in expression.
+	 */
+	syn lazy Array FExpSubscript.getExpanded() = getFExp().getArray().createExpanded(collectForIndices());
+	
+	/**
+	 * \brief Collect all ForIndexs used in the expression of this FExpSubscript.
+	 */
+	coll HashSet<CommonForIndex> FExpSubscript.collectForIndices() 
+		[new HashSet<CommonForIndex>()] with add root FExpSubscript;
+	FIdUse contributes myForIndex() when isForIndex()
+		to FExpSubscript.collectForIndices() for surroundingFExpSubscript();
+	FInstAccessExp contributes myForIndex() when isForIndex()
+		to FExpSubscript.collectForIndices() for surroundingFExpSubscript();
+	
+	/**
+	 * \brief Return the FForIndex or InstForIndex that this variable belongs to, if any.
+	 */
+	syn CommonForIndex FIdUse.myForIndex()            = myFV().myForIndex();
+	syn CommonForIndex FIdUseInstAccess.myForIndex()  = getInstAccess().myInstComponentDecl().myForIndex();
+	syn CommonForIndex FInstAccessExp.myForIndex()    = getInstAccess().myInstComponentDecl().myForIndex();
+	inh CommonForIndex AbstractFVariable.myForIndex();
+	inh CommonForIndex InstComponentDecl.myForIndex();
+	eq FForIndex.getFVariable().myForIndex()        = this;
+	eq InstForIndex.getInstPrimitive().myForIndex() = this;
+	eq FClass.getChild().myForIndex()               = null;
+	eq FFunctionDecl.getChild().myForIndex()        = null;
+	eq InstNode.getChild().myForIndex()             = null;
+	
+	/**
+	 * \brief Find the closest ancestor that is an FExpSubscript, if any.
+	 */
+	inh FExpSubscript FIdUse.surroundingFExpSubscript();
+	inh FExpSubscript FInstAccessExp.surroundingFExpSubscript();
+	eq FExpSubscript.getChild().surroundingFExpSubscript() = this;
+	eq Root.getChild().surroundingFExpSubscript()          = null;
+
+	/**
 	 * \brief Computes an Array where all elements are scalar expressions.
 	 * 
 	 * This is used mainly to scalarize array expressions.
 	 * 
 	 * @return An Array with scalar expressions if this is an array expression, 
-	 *          <code>null</code> otherwise.
+	 *          a ScalarAsArray containing <code>this</code> otherwise.
 	 */
 	syn lazy Array FExp.getArray() = new ScalarAsArray(this);
 	
@@ -923,9 +1017,9 @@ aspect Arrays {
 	syn Indices FEquation.indices() = getLeft().indices();
 	
 	/**
-	 * \brief Get the set of all array indices of an array access. 
+	 * \brief Get the set of all indices this array subscript spans.
 	 * 
-	 * @return An Indices object containing all indices in each array dimension.
+	 * @return an int array containing the indices spanned
 	 */
 	syn int[] FSubscript.myIndices();
 	
@@ -952,6 +1046,30 @@ aspect Arrays {
 			return new int[0];
 		}
 	}
+	
+	/**
+	 * \brief Get the set of all values this for index spans.
+	 * 
+	 * @return an int array containing the values spanned
+	 */
+	syn int[] FForIndex.myIndices() {
+		if (hasFExp())
+			return getFExp().myIndices();
+		else
+			return new int[0]; // TODO: return 1..n, where n is given by use.
+	}
+	
+	/**
+	 * \brief Get the set of all values this for index spans.
+	 * 
+	 * @return an int array containing the values spanned
+	 */
+	syn int[] InstForIndex.myIndices() {
+		if (hasFExp())
+			return getFExp().myIndices();
+		else
+			return new int[0]; // TODO: return 1..n, where n is given by use.
+	}
 
 }
 
@@ -969,7 +1087,8 @@ aspect ArrayIndices {
 			this.indices = indices;
 			setChild(new List<FExp>(), 0);
 			length = indices.numElements();
-			setFExp(null, length - 1);
+			if (length > 0)
+				setFExp(null, length - 1);
 		}
 		
 		/**
@@ -1328,6 +1447,16 @@ aspect ArrayIndices {
 		}
 		
 		/**
+		 * \brief Create an Indices object based on a list of CommonForIndexes.
+		 */
+		public static Indices create(Iterable<? extends CommonForIndex> forIndices) {
+			ArrayList<int[]> ind = new ArrayList<int[]>();
+			for (CommonForIndex fi : forIndices) 
+				ind.add(fi.myIndices());
+			return NonConsecutiveIndices.create(ind);
+		}
+		
+		/**
 		 * \brief Check that i is valid for this Indices object.
 		 */
 		public boolean isValid(Index i) {
@@ -1351,6 +1480,8 @@ aspect ArrayIndices {
 		 * \brief Returns the number of elements spanned by this Indices object.
 		 */
 		public int numElements() {
+			if (ndims == 0)
+				return 0;
 			int res = 1;
 			for (int i = 0; i < ndims; i++)
 				res *= size[i];
@@ -1379,6 +1510,15 @@ aspect ArrayIndices {
 		 */
 		public Index translate(Index i) {
 			return i;
+		}
+		
+		/**
+		 * \brief Returns an Iterable<Index> that represents the subset of the indices 
+		 *        represented by this Indices where the first n subscripts are given by
+		 *        <code>i</code>
+		 */
+		public Iterable<Index> subset(Index i) {
+			return new ISubset(i);
 		}
 				
 		
@@ -1416,9 +1556,26 @@ aspect ArrayIndices {
 		protected int internal(Index i) {
 			int[] index = i.index();
 			int res = 0;
-			for (int j = 0; j < ndims; j++)
+			for (int j = 0; j < index.length; j++)
 				res = res * size[j] + index[j] - 1;
 			return res;
+		}
+		
+		/**
+		 * \brief A subset of the indices described by this Indices.
+		 */
+		protected class ISubset implements Iterable<Index> {
+			
+			protected Index i;
+			
+			public ISubset(Index ii) {
+				ii = i;
+			}
+			
+			public Iterator<Index> iterator() {
+				return new IIterator(i); 
+			}
+			
 		}
 		
 		/**
@@ -1432,6 +1589,20 @@ aspect ArrayIndices {
 			public IIterator() {
 				index = new IIndex();
 				max = numElements() - 1;
+			}
+			
+			public IIterator(Index i) {
+				index = new IIndex();
+				System.arraycopy(index.index(), 0, i.index(), 0, i.ndims());
+				index.internal = internal(i) - 1;
+				if (i.ndims() < ndims) {
+					max = 1;
+					for (int j = i.ndims(); j < ndims; j++)
+						max *= size[j];
+					max += index.internal;
+				} else {
+					max = index.internal + 1;
+				}
 			}
 			
 			public boolean hasNext() {

@@ -325,14 +325,9 @@ aspect Names {
   		return name();
   }
   
-  
-  // Used to make sure that all rewrites are performed
-  public void InstAccess.ensureRewritten() {}
-  public void InstDot.ensureRewritten() {
-	  getLeft().ensureRewritten();
-	  getRight().ensureRewritten();
-  }
-  
+  syn String InstForIndex.name() = getInstPrimitive().name();
+  syn String FForIndex.name()    = getFVariable().name();
+ 
   
   
   syn String InstAccess.enclosingName() = "";
@@ -600,9 +595,7 @@ aspect FlatNames {
 					for (FSubscript fs : 
 						getFQNamePart(i).getFArraySubscripts().getFSubscripts()) {
 						str.append("_");
-						//str.append(fs.prettyPrint(""));
-						// TODO: This is a temporary fix for #610
-						str.append(fs.ceval());
+						str.append(fs.prettyPrint(""));
 					}
 				}
 				if (i<getNumFQNamePart()-1) {
@@ -740,12 +733,31 @@ aspect FlatFunctionUtils {
 	 eq InstProgramRoot.getChild().returnDefinition()         = null;
 	 eq FClass.getChild().returnDefinition()                  = null;
 	 
+	 /**
+	  * \brief Check is this node is in a function.
+	  */
 	 inh boolean FIdUse.inFunction();
 	 inh boolean FStatement.inFunction();
 	 inh boolean FAlgorithmBlock.inFunction();
+	 inh boolean FSubscript.inFunction();
 	 eq InstBaseClassDecl.getChild().inFunction() = isFunction();
 	 eq FFunctionDecl.getChild().inFunction()     = true;
 	 eq Root.getChild().inFunction()              = false;
+	 
+	 /**
+	  * \brief Check is this node is in a non-function algorithm.
+	  */
+	 inh boolean FSubscript.inAlgorithm();
+	 eq FAlgorithmBlock.getChild().inAlgorithm()   = !inFunction();
+	 eq InstNode.getChild().inAlgorithm()          = false;
+	 eq FAbstractEquation.getChild().inAlgorithm() = false;
+	 eq FClass.getChild().inAlgorithm()            = false;
+	 
+	 /**
+	  * \brief Check is this node is in an algorithm or a function.
+	  */
+	 syn boolean FSubscript.inAlgorithmOrFunction() = inFunction() || inAlgorithm();
+	 
 	 
 	 inh boolean FWhenStmt.insideBlockStmt();
 	 eq FAlgorithmBlock.getChild().insideBlockStmt() = false;

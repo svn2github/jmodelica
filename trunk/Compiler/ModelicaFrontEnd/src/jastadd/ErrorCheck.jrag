@@ -506,7 +506,7 @@ aspect InstanceErrorCheck {
         	super.collectErrors();
 	
 			// Check if parameters and constants have binding expressions
-			if (isParameter() && myBindingInstExp()==null){
+			if (isParameter() && !isForIndex() && myBindingInstExp()==null){
 			   // Warn if parameter does not have a binding expression (start is used)
 			   warning("The parameter " + qualifiedName() + " does not have a binding expression.");
 			} else if (isConstant() && myBindingInstExp()==null){

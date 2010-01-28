@@ -41,4 +41,9 @@ aspect ContentCheck {
 			error("When statements are not allowed inside if, for, while and when clauses");
 	}
 	
+	public void FForIndex.contentCheck() {
+		if (!hasFExp())
+			warning("For index without in expression not supported");
+	}
+	
 }

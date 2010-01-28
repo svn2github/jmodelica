@@ -704,6 +704,107 @@ end ArrayTest32;
 
 
 
+model SubscriptExpression1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="SubscriptExpression1",
+         description="Replacing expressions in array subscripts with literals: basic test",
+         flatModel="
+fclass ArrayTests.SubscriptExpression1
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real x[4];
+equation
+ x[1] = 1;
+ x[2] = ( x[1] ) * ( 2 );
+ x[3] = ( x[2] ) * ( 2 );
+ x[4] = ( x[3] ) * ( 2 );
+end ArrayTests.SubscriptExpression1;
+")})));
+
+ Real x[4];
+equation
+ x[1] = 1;
+ for i in 2:4 loop
+  x[i] = x[i-1] * 2;
+ end for;
+end SubscriptExpression1;
+
+model SubscriptExpression2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="SubscriptExpression2",
+         description="Type checking array subscripts: literal < 1",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 737, column 4:
+  Array index out of bounds: 0, index expression: 0
+")})));
+
+ Real x[4];
+equation
+ x[0] = 1;
+end SubscriptExpression2;
+
+model SubscriptExpression3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="SubscriptExpression3",
+         description="Type checking array subscripts: literal > end",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 754, column 4:
+  Array index out of bounds: 5, index expression: 5
+")})));
+
+ Real x[4];
+equation
+ x[5] = 1;
+end SubscriptExpression3;
+
+model SubscriptExpression4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="SubscriptExpression4",
+         description="Type checking array subscripts: expression < 1",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 750, column 12:
+  Array index out of bounds: 0, index expression: i - ( 1 )
+")})));
+
+ Real x[4];
+equation
+ for i in 1:4 loop
+  x[i] = x[i-1] * 2;
+ end for;
+end SubscriptExpression4;
+
+model SubscriptExpression5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="SubscriptExpression5",
+         description="Type checking array subscripts: expression > end",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 769, column 12:
+  Array index out of bounds: 5, index expression: i + 1
+")})));
+
+ Real x[4];
+equation
+ for i in 1:4 loop
+  x[i] = x[i+1] * 2;
+ end for;
+end SubscriptExpression5;
+
+
+
 /* ========== Array algebra ========== */
 
 model ArrayAdd1
