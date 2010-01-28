@@ -49,6 +49,115 @@ except IOError:
     warnings.warn('Startup script ''%s'' not found. Environment may be corrupt'
                   % _f)
 
+
+import jmodelica
+import jmodelica.jmi as jmi
+from jmodelica.compiler import ModelicaCompiler
+from jmodelica.compiler import OptimicaCompiler
+from jmodelica.optimization import ipopt
+from jmodelica.simulation.sundials import SundialsDAESimulator
+from jmodelica.initialization.ipopt import NLPInitialization
+from jmodelica.initialization.ipopt import InitializationOptimizer
+
+import numpy as N 
+    
+def optimize(file, model_name, compiler_options={'state_start_values_fixed':True}, 
+             n_e=50, n_cp=3, max_iter=-1):
+    """ Compact function for model optimization.
+    
+    Path to mo-file and model class must be provided. There are default values 
+    for all other settings. These can be changed in function call.
+    """
+    oc = OptimicaCompiler()
+    # set compiler options
+    for key, value in compiler_options.iteritems():
+        try:
+            if isinstance(value, bool):
+                oc.set_boolean_option(key, value)
+            elif isinstance(value, str):
+                oc.set_string_option(key,value)
+            elif isinstance(value, int):
+                oc.set_integer_option(key,value)
+            elif isinstance(value, float):
+                oc.set_real_options(key,value)
+            else:
+                warnings.warn("Unknown compiler option, key: %s. " %key)
+        except UnknownOptionError, e:
+            warnings.warn("Unknown compiler option, key: %s. " %key)
+    # compile model       
+    oc.compile_model(file, model_name, target='ipopt')
+    # Load the dynamic library and XML data
+    compiled_name = model_name.replace('.','_',1)
+    model = jmi.Model(compiled_name)
+    # Create an NLP object
+    hs = N.ones(n_e)*1./n_e # Equidistant points
+    nlp = ipopt.NLPCollocationLagrangePolynomials(model,n_e,hs,n_cp)
+    # Create an Ipopt NLP object
+    nlp_ipopt = ipopt.CollocationOptimizer(nlp)
+    if max_iter > 0:
+        nlp_ipopt.opt_sim_ipopt_set_int_option("max_iter",max_iter)
+    # Solve the optimization problem                                       )
+    nlp_ipopt.opt_sim_ipopt_solve()
+    # Write to file.
+    nlp.export_result_dymola()
+    res = jmodelica.io.ResultDymolaTextual(compiled_name+'_result.txt')
+    
+    return res
+
+def simulate(file, model_name, compiler='modelica', compiler_options={},
+             verbosity=3, start_time=0.0,final_time=10.0, abstol=1.0e-6, 
+             reltol=1.0e-6, time_step=0.01, return_last=False, 
+             sensitivity_analysis=False, input=None):
+    """ Compact function for model simulation.
+    
+    Path to mo-file and model class must be provided. There are default values 
+    for all other settings. These can be changed in function call.    
+    """
+    
+    comp=None
+    if compiler.lower() == 'modelica':
+        comp = ModelicaCompiler()
+    else:
+        comp = OptimicaCompiler()
+    # set compiler options
+    for key, value in compiler_options.iteritems():
+        try:
+            if isinstance(value, bool):
+                comp.set_boolean_option(key, value)
+            elif isinstance(value, str):
+                comp.set_string_option(key,value)
+            elif isinstance(value, int):
+                comp.set_integer_option(key,value)
+            elif isinstance(value, float):
+                comp.set_real_options(key,value)
+            else:
+                warnings.warn("Unknown compiler option, key: %s. " %key)
+        except UnknownOptionError, e:
+            warnings.warn("Unknown compiler option, key: %s. " %key)
+        
+    #compile model
+    comp.compile_model(file, model_name, target='ipopt')
+    # Load the dynamic library and XML data
+    compiled_name = model_name.replace('.','_',1)
+    model = jmi.Model(compiled_name)
+    
+    # Create DAE initialization object.
+    init_nlp = NLPInitialization(model)
+    # Create an Ipopt solver object for the DAE initialization system
+    init_nlp_ipopt = InitializationOptimizer(init_nlp)
+    # Solve the DAE initialization system with Ipopt
+    init_nlp_ipopt.init_opt_ipopt_solve()
+    
+    simulator = SundialsDAESimulator(model, verbosity=verbosity, start_time=start_time, 
+                                     final_time=final_time, abstol=abstol, reltol=reltol,
+                                     time_step=time_step, return_last=return_last, 
+                                     sensitivity_analysis=sensitivity_analysis, input=input)
+    simulator.run()
+    simulator.write_data()
+    res = jmodelica.io.ResultDymolaTextual(compiled_name+'_result.txt')
+    
+    return res
+
 def check_packages():
     import sys, time
     le=30
