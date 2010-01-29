@@ -7,7 +7,7 @@ import org.eclipse.swt.graphics.Image;
  * suggestion list.
  */
 public interface CompletionNode {
-    public String completionName();
+    public String            completionName();
     public CompletionComment completionDoc();
-    public Image completionImage();
+    public Image             completionImage();
 }

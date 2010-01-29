@@ -11,14 +11,13 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.jmodelica.ide.editor.Editor;
 
-
 /**
- * Workaround class for things in Eclipse that are ridiculously verbose.
+ * Some things in Eclipse that are ridiculously verbose.
  * 
  * @author philip
  *
  */
-public class EclipseCruftinessWorkaroundClass {
+public class EclipseSucks {
 
 public static Maybe<Editor> getModelicaEditorForFile(IFile file) {
 
@@ -51,10 +50,10 @@ public static Maybe<Editor> getModelicaEditorForFile(IFile file) {
     } 
 }
     
-public static IFile getFileForPath(String path) {
+public static Maybe<IFile> getFileForPath(String path) {
     
     if (path == null)
-        return null;
+        return Maybe.<IFile>Nothing();
     
     IWorkspaceRoot workspace =
         ResourcesPlugin.getWorkspace().getRoot();
@@ -62,7 +61,7 @@ public static IFile getFileForPath(String path) {
     // file inside workspace?
     // TODO: If file is outside workspace, add linked resource?
     if (!path.startsWith(workspace.getRawLocation().toOSString())) 
-        return null;
+        return Maybe.<IFile>Nothing();
 
     // find files matching URI
     IFile candidates[] = 
@@ -70,8 +69,11 @@ public static IFile getFileForPath(String path) {
         .findFilesForLocationURI(
             new File(path).toURI());
     
-    //just take first candidate if several possible
-    return candidates.length > 0 ? candidates[0] : null;
+    // just take first candidate if several possible for some reason. i have no
+    // idea why we do this
+    return candidates.length > 0 
+        ? Maybe.Just(candidates[0]) 
+        : Maybe.<IFile>Nothing();
 }
 
 

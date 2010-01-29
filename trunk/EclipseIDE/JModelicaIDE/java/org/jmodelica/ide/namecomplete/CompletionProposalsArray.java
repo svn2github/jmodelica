@@ -1,8 +1,9 @@
 package org.jmodelica.ide.namecomplete;
 
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -16,7 +17,14 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
  */
 public class CompletionProposalsArray {
 
-final ICompletionProposal[] icps;
+final Set<ICompletionProposal> icps;
+
+final static Comparator<ICompletionProposal> proposalComparator = 
+    new Comparator<ICompletionProposal>() {
+    public int compare(ICompletionProposal o1, ICompletionProposal o2) {
+        return o1.getDisplayString().compareTo(o2.getDisplayString());
+    }
+};
 
 /**
  * Instantiate from list of CompletionNodes
@@ -31,13 +39,12 @@ public CompletionProposalsArray(
         int filterLength, 
         int offset) {
     
-    icps = new ICompletionProposal[completions.size()];
+    icps = 
+        new TreeSet<ICompletionProposal>(proposalComparator);
     
-    for (int i = 0; i < icps.length; i++) {
+    for (CompletionNode completion : completions) {
 
-        CompletionNode completion = completions.get(i);
-        
-        icps[i] = 
+        icps.add(
             new CompletionProposal(
                 completion.completionName(),
                 offset - filterLength, 
@@ -46,22 +53,14 @@ public CompletionProposalsArray(
                 completion.completionImage(),
                 completion.completionName() + completion.completionDoc(),
                 null,
-                null);
+                null));
     }
-    
-    Comparator<ICompletionProposal> proposalComparator = 
-        new Comparator<ICompletionProposal>() {
-        public int compare(ICompletionProposal o1, ICompletionProposal o2) {
-            return o1.getDisplayString().compareTo(o2.getDisplayString());
-        }
-    };
-    
-    Arrays.sort(icps, proposalComparator);
+
     
 }
 
 public ICompletionProposal[] toArray() {
-    return icps;
+    return icps.toArray(new ICompletionProposal[]{});
 }
 
 }

@@ -37,10 +37,11 @@ public InstClassDecl instClassDeclFromQualifiedName(String qualifiedName) {
 }
 
 /**
- * Finds node in instance tree of the class at offset.
- *  
+ * Finds node in instance tree of the class at offset, with no modification
+ * environment.
+ * 
  * @param offset offset to look up in
- * @return Just(instNode) if node found, o.w. Nothing  
+ * @return Just(instNode) if node found, o.w. Nothing
  */
 public Maybe<InstClassDecl> instEnclosingClassAt(OffsetDocument d) {
     
@@ -79,7 +80,7 @@ public Maybe<InstNode> declarationFromAccessAt(
 
 /**
  * Dynamically add <code> instAccess </code> to instance tree 
- * as a _Component_.
+ * as a <i>Component</i>.
  */
 protected Maybe<InstNode> tryAddComponentDecl(
     InstClassDecl enclosingInstance, 
@@ -92,16 +93,15 @@ protected Maybe<InstNode> tryAddComponentDecl(
 
     return Maybe.<InstNode>guard(node, node.isKnown()); 
 }
-
+ 
 /**
  * Dynamically add <code> instAccess </code> to instance tree 
- * as a _Class_.
+ * as a <i>Class</i>.
  */
 protected Maybe<InstNode> tryAddClassDecl(
     InstClassDecl enclosingInstClass, 
     InstAccess instAccess)
 {
-    System.out.println("CAME HEREHREHREHRHERHE");
     InstClassDecl node =
         enclosingInstClass
         .addClassDynamic(instAccess)
@@ -139,12 +139,12 @@ public Maybe<InstNode> lookupQualifiedName(
     {
         return
             mEnclosingClass.subsume(InstNode.class);
-    } else {
-        return
-            lookupQualifiedName(
-                Util.createDotAccess(qualifiedPart),
-                mEnclosingClass.value());
     }
+    
+    return
+        lookupQualifiedName(
+            Util.createDotAccess(qualifiedPart),
+            mEnclosingClass.value());
 }
     
 }

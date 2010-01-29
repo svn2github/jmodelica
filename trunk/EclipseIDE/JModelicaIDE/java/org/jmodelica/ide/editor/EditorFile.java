@@ -9,7 +9,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IURIEditorInput;
 import org.jmodelica.ide.folding.IFilePosition;
-import org.jmodelica.ide.helpers.EclipseCruftinessWorkaroundClass;
+import org.jmodelica.ide.helpers.EclipseSucks;
 import org.jmodelica.ide.helpers.Util;
 
 /**
@@ -47,15 +47,13 @@ public EditorFile(IEditorInput input) {
             i.getURI().getRawPath();
         
         IFile tmp = 
-            EclipseCruftinessWorkaroundClass
-            .getFileForPath(path);
+            EclipseSucks
+            .getFileForPath(path)
+            .value();
         
-        file = tmp;/*== null 
-            ? new MockFile(new MockProject(), path)
-            : tmp; */
+        file = tmp;
         
-    } else { // NOTE: includes input == null
-    
+    } else {
         throw new IllegalArgumentException();
     }
 }

@@ -4,7 +4,7 @@ import org.eclipse.jface.action.Action;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.OffsetDocument;
 import org.jmodelica.ide.editor.Editor;
-import org.jmodelica.ide.helpers.EclipseCruftinessWorkaroundClass;
+import org.jmodelica.ide.helpers.EclipseSucks;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.ide.namecomplete.Lookup;
 import org.jmodelica.modelica.compiler.ASTNode;
@@ -18,6 +18,7 @@ protected final Editor editor;
 protected ASTNode<?> fRoot;
 
 public GoToDeclaration(Editor editor) {
+    
     super();
     super.setActionDefinitionId("JModelicaIDE.GoToDeclarationCommand");
     super.setId(IDEConstants.ACTION_FOLLOW_REFERENCE_ID);
@@ -28,8 +29,7 @@ public GoToDeclaration(Editor editor) {
 public void run() {
     
     // not initialised, or not able to create AST.
-    // TODO: if possible: if AST not yet created, wait for it to complete
-    // TODO: apply bridge parsing to try get AST if failed 
+
     if (fRoot == null) 
         return;
     
@@ -44,13 +44,19 @@ public void run() {
     String pathToDecl = iNode.value().retrieveFileName(); 
     
     try {
-    
-    Editor ed = 
-        EclipseCruftinessWorkaroundClass.getModelicaEditorForFile(
-        EclipseCruftinessWorkaroundClass.getFileForPath(pathToDecl)).value();
-    ed.selectNode(iNode.value());
+        
+        Editor ed = 
+            EclipseSucks.getModelicaEditorForFile(
+                EclipseSucks
+                    .getFileForPath(pathToDecl)
+                    .value())
+            .value();
+        ed.selectNode(iNode.value());
 
-    } catch (Exception e) { }
+    } catch (Exception e) { 
+        // fucka yuuuu dorphiiiin
+        e.printStackTrace(); 
+    }
     
 }
 

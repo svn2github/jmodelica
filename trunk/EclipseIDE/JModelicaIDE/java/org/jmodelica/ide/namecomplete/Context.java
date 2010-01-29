@@ -5,7 +5,7 @@ import org.jmodelica.ide.OffsetDocument;
 
 public class Context {
 
-final String qualifiedPart;
+final String           qualifiedPart;
 final CompletionFilter filter;
 
 /**
@@ -26,7 +26,8 @@ final CompletionFilter filter;
  */
 public Context(OffsetDocument doc) {
     
-    String qPart = "", fPart = "";
+    String qPart = "", 
+           fPart = "";
 
     try {
 

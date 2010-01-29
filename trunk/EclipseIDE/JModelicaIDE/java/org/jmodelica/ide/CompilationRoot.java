@@ -30,7 +30,7 @@ import beaver.Parser;
  * @author philip 
  * 
  */
-public class CompilationRoot { 
+public class CompilationRoot {
 
 private final ModelicaParser PARSER = 
     new ModelicaParser();

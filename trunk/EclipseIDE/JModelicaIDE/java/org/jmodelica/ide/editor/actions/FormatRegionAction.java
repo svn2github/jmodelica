@@ -9,7 +9,7 @@ import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.ide.indent.AnchorList;
 import org.jmodelica.ide.indent.DocUtil;
 import org.jmodelica.ide.indent.IndentedSection;
-
+ 
 
 /**
  * Action for auto indenting the selected region.

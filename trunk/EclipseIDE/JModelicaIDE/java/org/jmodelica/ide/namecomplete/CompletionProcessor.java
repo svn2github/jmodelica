@@ -126,7 +126,8 @@ public ICompletionProposal[] computeCompletionProposals(
         .toArray();
 }
 
-public IContextInformation[] computeContextInformation(ITextViewer viewer,
+public IContextInformation[] computeContextInformation(
+        ITextViewer viewer,
         int offset) {
     return null;
 }

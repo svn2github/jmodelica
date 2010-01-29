@@ -36,7 +36,7 @@ import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 import org.jmodelica.modelica.parser.ModelicaParser;
-
+ 
 public class ModelicaCompiler extends AbstractCompiler {
 
 public static final String ERROR_MARKER_ID = IDEConstants.ERROR_MARKER_ID;

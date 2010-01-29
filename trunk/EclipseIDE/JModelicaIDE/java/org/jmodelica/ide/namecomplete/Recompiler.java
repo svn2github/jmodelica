@@ -34,16 +34,14 @@ public StoredDefinition recompilePartial(
         .get();
 
     /* re-parse and add new AST to project AST */
-    StoredDefinition def; {
-        def = compiler.recompile(fileContents, file);
-        if (mProjectRoot.hasValue())
-            mProjectRoot
-                .value()
-                .getProgram()
-                .dynamicAddStoredDefinition(def);
-        
-    }
-    
+    StoredDefinition def
+        = compiler.recompile(fileContents, file);
+    if (mProjectRoot.hasValue())
+        mProjectRoot
+        .value()
+        .getProgram()
+        .dynamicAddStoredDefinition(def);
+
     return def;
 }
 

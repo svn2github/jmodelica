@@ -79,7 +79,7 @@ public class CompletionFilter {
            return matchesCamel(filter, name, i, j + 1);
         
         throw new RuntimeException(
-            "Impossible to come here");
+            "Impossible exectution path");
     }
     
     public int length() {

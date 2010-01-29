@@ -18,9 +18,9 @@ package org.jmodelica.ide.indent;
  */
 public class Anchor<E> {
 
-public int reference;
-public int offset;
-public E indent;
+public int    reference;
+public int    offset;
+public E      indent;
 public String id;
 
 /**
@@ -37,9 +37,9 @@ public String id;
  */
 public Anchor(int offset, int reference, E indent, String id) {
     this.reference = reference;
-    this.offset = offset;
-    this.indent = indent;
-    this.id = id;
+    this.offset    = offset;
+    this.indent    = indent;
+    this.id        = id;
 }
 
 public String toString() {
