@@ -740,6 +740,25 @@ int jmi_check_Jacobian_column_index(jmi_t *jmi, int independent_vars,
 int jmi_map_Jacobian_column_index(jmi_t *jmi, int independent_vars,
                                   int *mask, int col_index);
 
+/**
+ * \brief Compute the class of variable in Jacobian specified by independent_vars
+ * and mask.
+ *
+ * The return value is one of JMI_DER_NN if a valid Jacobian column index is
+ * given, otherwise -1. For example JMI_DER_X indicats a differentiated
+ * variable.
+ *
+ * @param jmi A jmi_t struct.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param col_index The column index for which to compute the variable class.
+ * @return Variable class.
+ */
+int jmi_variable_type_spec(jmi_t *jmi, int independent_vars,
+                                  int *mask, int col_index);
+
+
+
 /* @} */
 
 /* @} */

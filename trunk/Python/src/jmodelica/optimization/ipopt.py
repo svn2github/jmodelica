@@ -793,7 +793,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
     """
 
     
-    def __init__(self, model, n_e, hs, n_cp):
+    def __init__(self, model, n_e, hs, n_cp, blocking_factors=N.array([],dtype=int)):
         """
         Constructor where main data structure is created. 
         
@@ -817,6 +817,8 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         self._n_cp = n_cp
         self._hs=hs
         self.n_p_opt=model.jmimodel.opt_get_n_p_opt()
+
+        self._blocking_factors = blocking_factors
         
         NLPCollocation._initialize(self, model)
         self._set_nlpLagrangePols_typedefs()
@@ -881,7 +883,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
                                      _linearity_information_provided,                
                                      _p_opt_lin, _dx_lin, _x_lin, _u_lin, _w_lin,
                                      _dx_tp_lin, _x_tp_lin, _u_tp_lin, _w_tp_lin,                
-                                     n_cp,jmi.JMI_DER_CPPAD) is 0, \
+                                     n_cp,jmi.JMI_DER_CPPAD,N.size(blocking_factors),blocking_factors) is 0, \
                                      " jmi_opt_lp_new returned non-zero."
         except AttributeError,e:
              raise jmi.JMIException("Can not create NLPCollocationLagrangePolynomials object. Try recompiling model with target='algorithms'")
@@ -1017,7 +1019,13 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
                                                                                    shape=self._model._n_w.value*self._model._n_tp.value,
                                                                                    flags='C'),                                           
                                                                      ct.c_int,                                      # n_cp
-                                                                     ct.c_int]                                      # der_eval_alg
+                                                                     ct.c_int,                                      # der_eval_alg
+                                                                     ct.c_int,                                      #n_blocking_factors
+                                                                     Nct.ndpointer(dtype=ct.c_int,                  # blocking_factors
+                                                                                   ndim=1,
+                                                                                   shape=N.size(self._blocking_factors),
+                                                                                   flags='C')]                                           
+   
             self._model.jmimodel._dll.jmi_opt_sim_lp_delete.argtypes = [ct.c_void_p]
             self._model.jmimodel._dll.jmi_opt_sim_lp_eval_pol.argtypes = [c_jmi_real_t,
                                                                           ct.c_int,

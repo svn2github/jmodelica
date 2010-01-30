@@ -188,6 +188,24 @@ jmi_real_t* jmi_opt_sim_get_x(jmi_opt_sim_t *jmi_opt_sim);
 int jmi_opt_sim_get_initial(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_init);
 
 /**
+ * \brief Get blocking factors.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param blocking_factors (Output) A vector of blocking factors.
+ * @return Error code.
+ */
+int jmi_opt_sim_get_blocking_factors(jmi_opt_sim_t *jmi_opt_sim, int *blocking_Factors);
+
+/**
+ * \brief Get number of blocking factors.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param n_blocking_factors (Output) Number of blocking factors.
+ * @return Error code.
+ */
+int jmi_opt_sim_get_blocking_factors(jmi_opt_sim_t *jmi_opt_sim, int *n_blocking_Factors);
+
+/**
  * \brief Set the initial point of the NLP.
  *
  * @param jmi_opt_sim A jmi_opt_sim_t struct.
@@ -245,6 +263,8 @@ struct jmi_opt_sim_t{
 	jmi_real_t *x_lb;                 // Lower bounds for variables
 	jmi_real_t *x_ub;                 // Upper bound for variables
 	jmi_real_t *x_init;               // Initial starting point
+	int *blocking_factors;             // Specification of blocking factors
+	int n_blocking_factors;            // Number of blocking factors
 	int dg_n_nz;
 	int dh_n_nz;
 	int *dg_row;

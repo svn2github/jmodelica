@@ -100,6 +100,19 @@ int jmi_opt_sim_set_initial(jmi_opt_sim_t *jmi_opt_sim,
 	return 0;
 }
 
+int jmi_opt_sim_get_blocking_factors(jmi_opt_sim_t *jmi_opt_sim, int *blocking_factors) {
+	int i;
+	for (i=0;i<jmi_opt_sim->n_blocking_factors;i++) {
+		blocking_factors[i] = jmi_opt_sim->blocking_factors[i];
+	}
+	return 0;
+}
+
+int jmi_opt_sim_get_n_blocking_factors(jmi_opt_sim_t *jmi_opt_sim, int *n_blocking_factors) {
+	*n_blocking_factors = jmi_opt_sim->n_blocking_factors;
+	return 0;
+}
+
 int jmi_opt_sim_set_initial_from_trajectory(
 		jmi_opt_sim_t *jmi_opt_sim,
 		jmi_real_t *p_opt_init, jmi_real_t *trajectory_data_init,

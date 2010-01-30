@@ -1035,7 +1035,8 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 		            int linearity_information_provided,
 		            int* p_opt_lin, int* dx_lin, int* x_lin, int* u_lin, int* w_lin,
 		            int* dx_tp_lin, int* x_tp_lin, int* u_tp_lin, int* w_tp_lin,
-		            int n_cp, int der_eval_alg);
+		            int n_cp, int der_eval_alg, int n_blocking_factors,
+		            int *blocking_factors);
 
 /**
  * \brief Deallocate the fields of a jmi_opt_sim_t struct created by the function

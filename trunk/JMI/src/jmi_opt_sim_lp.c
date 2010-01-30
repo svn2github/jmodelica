@@ -46,7 +46,11 @@ static jmi_real_t w_0(jmi_opt_sim_t *jmi_opt_sim, int i) {
 static jmi_real_t dx_coll(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
 	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
-	return jmi_opt_sim->x[nlp->offs_dx_coll + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*(nlp->n_cp*i + j-1) + k];
+	return ((jmi_opt_sim->n_blocking_factors>0)?
+			(jmi_opt_sim->x[nlp->offs_dx_coll + ((jmi->n_dx + jmi->n_x + jmi->n_w)*nlp->n_cp + jmi->n_u)*i +
+			                (j>1? 1 : 0)*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w) +
+			                (j>2? 1 : 0)*(jmi->n_dx + jmi->n_x + jmi->n_w)*(j-2) + k]) :
+			(jmi_opt_sim->x[nlp->offs_dx_coll + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*(nlp->n_cp*i + j-1) + k]));
 }
 // i is element, j is collocation point, k is variable index
 static jmi_real_t x_coll(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
@@ -58,20 +62,30 @@ static jmi_real_t x_coll(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
 	} else if (i>0 && j==0) {
 		return jmi_opt_sim->x[nlp->offs_x_el_junc + jmi->n_x*(i-1) + k];
 	} else {
-		return jmi_opt_sim->x[nlp->offs_x_coll + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*(nlp->n_cp*i + j - 1) + k];
+		return ((jmi_opt_sim->n_blocking_factors>0)?
+				(jmi_opt_sim->x[nlp->offs_x_coll + ((jmi->n_dx + jmi->n_x + jmi->n_w)*nlp->n_cp + jmi->n_u)*i +
+				                (j>1? 1 : 0)*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w) +
+				                (j>2? 1 : 0)*(jmi->n_dx + jmi->n_x + jmi->n_w)*(j-2) + k]) :
+				(jmi_opt_sim->x[nlp->offs_x_coll + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*(nlp->n_cp*i + j - 1) + k]));
 	}
 }
 // i is element, j is collocation point, k is variable index
 static jmi_real_t u_coll(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
 	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
-	return jmi_opt_sim->x[nlp->offs_u_coll + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*(nlp->n_cp*i + j - 1) + k];
+	return ((jmi_opt_sim->n_blocking_factors>0)?
+			(jmi_opt_sim->x[nlp->offs_u_coll + ((jmi->n_dx + jmi->n_x + jmi->n_w)*nlp->n_cp + jmi->n_u)*i + k]) :
+			(jmi_opt_sim->x[nlp->offs_u_coll + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*(nlp->n_cp*i + j - 1) + k]));
 }
 // i is element, j is collocation point, k is variable index
 static jmi_real_t w_coll(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
 	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
-	return jmi_opt_sim->x[nlp->offs_w_coll + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*(nlp->n_cp*i + j - 1) + k];
+	return ((jmi_opt_sim->n_blocking_factors>0)?
+			(jmi_opt_sim->x[nlp->offs_w_coll + ((jmi->n_dx + jmi->n_x + jmi->n_w)*nlp->n_cp + jmi->n_u)*i +
+			                (j>1? 1 : 0)*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w) +
+			                (j>2? 1 : 0)*(jmi->n_dx + jmi->n_x + jmi->n_w)*(j-2) + k]) :
+			(jmi_opt_sim->x[nlp->offs_w_coll + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*(nlp->n_cp*i + j - 1) + k]));
 }
 
 // i is time point, j is variable index
@@ -97,6 +111,100 @@ static jmi_real_t w_p(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
 	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	return jmi_opt_sim->x[nlp->offs_w_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i + j];
+}
+
+static int offs_p_opt(jmi_opt_sim_t *jmi_opt_sim, int i) {
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
+	return nlp->offs_p_opt + i;
+}
+static int offs_dx_0(jmi_opt_sim_t *jmi_opt_sim, int i) {
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
+	return nlp->offs_dx_0 + i;
+}
+static int offs_x_0(jmi_opt_sim_t *jmi_opt_sim, int i) {
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
+	return nlp->offs_x_0 + i;
+}
+static int offs_u_0(jmi_opt_sim_t *jmi_opt_sim, int i) {
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
+	return nlp->offs_u_0 + i;
+}
+static int offs_w_0(jmi_opt_sim_t *jmi_opt_sim, int i) {
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
+	return nlp->offs_w_0 + i;
+}
+
+// i is element, j is collocation point, k is variable index
+static int offs_dx_coll(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
+	jmi_t *jmi = jmi_opt_sim->jmi;
+	return ((jmi_opt_sim->n_blocking_factors>0)?
+			(nlp->offs_dx_coll + ((jmi->n_dx + jmi->n_x + jmi->n_w)*nlp->n_cp + jmi->n_u)*i +
+			                (j>1? 1 : 0)*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w) +
+			                (j>2? 1 : 0)*(jmi->n_dx + jmi->n_x + jmi->n_w)*(j-2) + k) :
+			(nlp->offs_dx_coll + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*(nlp->n_cp*i + j-1) + k));
+}
+
+// i is element, j is collocation point, k is variable index
+static int offs_x_coll(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
+	jmi_t *jmi = jmi_opt_sim->jmi;
+	//printf("* %d %d *\n",i,j);
+	if (i==0 && j==0) {
+		return nlp->offs_x_0 + k;
+	} else if (i>0 && j==0) {
+		return nlp->offs_x_el_junc + jmi->n_x*(i-1) + k;
+	} else {
+		return ((jmi_opt_sim->n_blocking_factors>0)?
+				(nlp->offs_x_coll + ((jmi->n_dx + jmi->n_x + jmi->n_w)*nlp->n_cp + jmi->n_u)*i +
+				                (j>1? 1 : 0)*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w) +
+				                (j>2? 1 : 0)*(jmi->n_dx + jmi->n_x + jmi->n_w)*(j-2) + k) :
+				(nlp->offs_x_coll + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*(nlp->n_cp*i + j - 1) + k));
+	}
+}
+
+// i is element, j is collocation point, k is variable index
+static int offs_u_coll(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
+	jmi_t *jmi = jmi_opt_sim->jmi;
+	return ((jmi_opt_sim->n_blocking_factors>0)?
+			(nlp->offs_u_coll + ((jmi->n_dx + jmi->n_x + jmi->n_w)*nlp->n_cp + jmi->n_u)*i + k) :
+			(nlp->offs_u_coll + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*(nlp->n_cp*i + j - 1) + k));
+}
+// i is element, j is collocation point, k is variable index
+static int offs_w_coll(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
+	jmi_t *jmi = jmi_opt_sim->jmi;
+	return ((jmi_opt_sim->n_blocking_factors>0)?
+			(nlp->offs_w_coll + ((jmi->n_dx + jmi->n_x + jmi->n_w)*nlp->n_cp + jmi->n_u)*i +
+			                (j>1? 1 : 0)*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w) +
+			                (j>2? 1 : 0)*(jmi->n_dx + jmi->n_x + jmi->n_w)*(j-2) + k) :
+			(nlp->offs_w_coll + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*(nlp->n_cp*i + j - 1) + k));
+}
+
+// i is time point, j is variable index
+static int offs_dx_p(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
+	jmi_t *jmi = jmi_opt_sim->jmi;
+	return nlp->offs_dx_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i + j;
+}
+// i is time point, j is variable index
+static int offs_x_p(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
+	jmi_t *jmi = jmi_opt_sim->jmi;
+	return nlp->offs_x_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i + j;
+}
+// i is time point, j is variable index
+static int offs_u_p(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
+	jmi_t *jmi = jmi_opt_sim->jmi;
+	return nlp->offs_u_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i + j;
+}
+// i is time point, j is variable index
+static int offs_w_p(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
+	jmi_t *jmi = jmi_opt_sim->jmi;
+	return nlp->offs_w_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i + j;
 }
 
 // i equation index
@@ -220,7 +328,6 @@ static int dg_coll_spare_offs(jmi_opt_sim_t *jmi_opt_sim, int i, int j, int k) {
 static void print_problem_stats(jmi_opt_sim_t *jmi_opt_sim);
 
 static void print_lp_pols(jmi_opt_sim_t *jmi_opt_sim);
-
 
 // Copy optimization parameters
 static void lp_radau_copy_p(jmi_opt_sim_t *jmi_opt_sim) {
@@ -587,14 +694,17 @@ static int lp_radau_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
 	int k,l;
 	for (k=0;k<jmi->n_u;k++) {
 		res[dh_u0_eq_offs(jmi_opt_sim,k)] = u_0(jmi_opt_sim,k);
-		for (l=0;l<nlp->n_cp;l++) {
-			//printf("--- %d %d %d %d %d\n",i,jmi_opt_sim->tp_e[i],k,dh_dx_p_eq_offs(jmi_opt_sim, i, k),l);
-			res[dh_u0_eq_offs(jmi_opt_sim, k)] -=
-				jmi_opt_sim_lp_eval_pol(0,nlp->n_cp, nlp->Lp_coeffs, l)*
-				u_coll(jmi_opt_sim,0,l+1,k);
+		if (jmi_opt_sim->n_blocking_factors>0) {
+			res[dh_u0_eq_offs(jmi_opt_sim,k)] -= u_coll(jmi_opt_sim,0,1,k);
+		} else {
+			for (l=0;l<nlp->n_cp;l++) {
+				//printf("--- %d %d %d %d %d\n",i,jmi_opt_sim->tp_e[i],k,dh_dx_p_eq_offs(jmi_opt_sim, i, k),l);
+				res[dh_u0_eq_offs(jmi_opt_sim, k)] -=
+					jmi_opt_sim_lp_eval_pol(0,nlp->n_cp, nlp->Lp_coeffs, l)*
+					u_coll(jmi_opt_sim,0,l+1,k);
+			}
 		}
 	}
-
 
 	// Collocation equations
 	for (i=0;i<jmi_opt_sim->n_e;i++) {
@@ -778,14 +888,24 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 	}
 
 	// Entries for u_0,j
-	for (j=0;j<nlp->n_cp;j++) {
+	if (jmi_opt_sim->n_blocking_factors==0) {
+		for (j=0;j<nlp->n_cp;j++) {
+			for (k=0;k<jmi->n_u;k++) {
+				jac[nlp->dF0_n_nz +
+				    (nlp->dF_dp_n_nz +
+				    		nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
+				    		jmi->n_x*2*jmi_opt_sim->n_e +
+				    		jmi->n_u*j + k] =
+				    			-jmi_opt_sim_lp_eval_pol(0,nlp->n_cp, nlp->Lp_coeffs, j);
+			}
+		}
+	} else {
 		for (k=0;k<jmi->n_u;k++) {
 			jac[nlp->dF0_n_nz +
 			    (nlp->dF_dp_n_nz +
 			    		nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 			    		jmi->n_x*2*jmi_opt_sim->n_e +
-			    		jmi->n_u*j + k] =
-			    			-jmi_opt_sim_lp_eval_pol(0,nlp->n_cp, nlp->Lp_coeffs, j);
+			    		jmi->n_u*0 + k] = -1;
 		}
 	}
 
@@ -795,7 +915,7 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 		    (nlp->dF_dp_n_nz +
 		    		nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 		    		jmi->n_x*2*jmi_opt_sim->n_e +
-		    		jmi->n_u*nlp->n_cp + k] = 1;
+		    		jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 1 : nlp->n_cp) + k] = 1;
 	}
 
 
@@ -820,7 +940,7 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 				    (nlp->dF_dp_n_nz +
 				    		nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 				    		jmi->n_x*2*jmi_opt_sim->n_e +
-				    		jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*(nlp->n_cp*i + j) + k] = 1;
+				    		jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) + jmi->n_x*(nlp->n_cp + 2)*(nlp->n_cp*i + j) + k] = 1;
 			}
 
 			// x_i,j
@@ -836,7 +956,8 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 					    (nlp->dF_dp_n_nz +
 					    		nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 					    		jmi->n_x*2*jmi_opt_sim->n_e +
-					    		jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*(nlp->n_cp*i + j) + jmi->n_x +
+					    		jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+					    		jmi->n_x*(nlp->n_cp + 2)*(nlp->n_cp*i + j) + jmi->n_x +
 					    		jmi->n_x*k + l] = -nlp->Lpp_dot_vals[(nlp->n_cp+1)*(j + 1) + k + 1]/el_length;
 				}
 			}
@@ -847,7 +968,8 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 				    (nlp->dF_dp_n_nz +
 				    		nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 				    		jmi->n_x*2*jmi_opt_sim->n_e +
-				    		jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*(nlp->n_cp*i + j) + jmi->n_x +
+				    		jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+				    		jmi->n_x*(nlp->n_cp + 2)*(nlp->n_cp*i + j) + jmi->n_x +
 				    		jmi->n_x*nlp->n_cp + l] = -nlp->Lpp_dot_vals[(nlp->n_cp+1)*(j + 1) + 0]/el_length;
 			}
 		}
@@ -875,7 +997,8 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 			    (nlp->dF_dp_n_nz +
 			    		nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 			    		jmi->n_x*2*jmi_opt_sim->n_e +
-			    		jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+			    		jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+			    		jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
 			    		(jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
 			    				jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*i + k] =
 			    					-jmi_opt_sim_lp_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp+1, nlp->Lpp_dot_coeffs, 0)/el_length;
@@ -888,7 +1011,8 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 				    (nlp->dF_dp_n_nz +
 				    		nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 				    		jmi->n_x*2*jmi_opt_sim->n_e +
-				    		jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+				    		jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+				    		jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
 				    		jmi->n_x*(j+1) +
 				    		(jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
 				    				jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*i + k] =
@@ -902,7 +1026,8 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 			    (nlp->dF_dp_n_nz +
 			    		nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 			    		jmi->n_x*2*jmi_opt_sim->n_e +
-			    		jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+			    		jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+			    		jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
 			    		jmi->n_x*(nlp->n_cp+1) +
 			    		(jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
 			    				jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*i + k] = 1;
@@ -916,7 +1041,8 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 			    (nlp->dF_dp_n_nz +
 			    		nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 			    		jmi->n_x*2*jmi_opt_sim->n_e +
-			    		jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+			    		jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+			    		jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
 			    		jmi->n_x*(nlp->n_cp + 2) +
 			    		(jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
 			    				jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*i + k] =
@@ -930,7 +1056,8 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 				    (nlp->dF_dp_n_nz +
 				    		nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 				    		jmi->n_x*2*jmi_opt_sim->n_e +
-				    		jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+				    		jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+				    		jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
 				    		jmi->n_x*(nlp->n_cp + 2) +
 				    		jmi->n_x*(j+1) +
 				    		(jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
@@ -945,7 +1072,8 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 			    (nlp->dF_dp_n_nz +
 			    		nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 			    		jmi->n_x*2*jmi_opt_sim->n_e +
-			    		jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+			    		jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+			    		jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
 			    		jmi->n_x*(nlp->n_cp + 2) +
 			    		jmi->n_x*(nlp->n_cp+1) +
 			    		(jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
@@ -956,19 +1084,39 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 		// Interpolation equations for u
 
 		// Entries for u_i,j
-		for (j=0;j<nlp->n_cp;j++) {
+		if (jmi_opt_sim->n_blocking_factors>0) {
 			for (k=0;k<jmi->n_u;k++) {
 				jac[nlp->dF0_n_nz +
 				    (nlp->dF_dp_n_nz +
 				    		nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 				    		jmi->n_x*2*jmi_opt_sim->n_e +
-				    		jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+				    		jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+				    		jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
 				    		jmi->n_x*(nlp->n_cp + 2) +
 				    		jmi->n_x*(nlp->n_cp + 2) +
-				    		jmi->n_u*j +
+				    		jmi->n_u*0 +
 				    		(jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
-				    				jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*i + k] =
+			    				2*jmi->n_u +
+			    				jmi->n_w*(nlp->n_cp + 1))*i + k] =
+			    					-1;
+			}
+		} else {
+			for (j=0;j<nlp->n_cp;j++) {
+				for (k=0;k<jmi->n_u;k++) {
+					jac[nlp->dF0_n_nz +
+					    (nlp->dF_dp_n_nz +
+					    		nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
+					    		jmi->n_x*2*jmi_opt_sim->n_e +
+					    		jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+					    		jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+					    		jmi->n_x*(nlp->n_cp + 2) +
+					    		jmi->n_x*(nlp->n_cp + 2) +
+					    		jmi->n_u*j +
+					    		(jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
+					    				jmi->n_u*(nlp->n_cp + 1) +
+					    				jmi->n_w*(nlp->n_cp + 1))*i + k] =
 				    					-jmi_opt_sim_lp_eval_pol(jmi_opt_sim->tp_tau[i],nlp->n_cp, nlp->Lp_coeffs, j);
+				}
 			}
 		}
 
@@ -978,12 +1126,14 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 			    (nlp->dF_dp_n_nz +
 			    		nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 			    		jmi->n_x*2*jmi_opt_sim->n_e +
-			    		jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+			    		jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+			    		jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
 			    		jmi->n_x*(nlp->n_cp + 2) +
 			    		jmi->n_x*(nlp->n_cp + 2) +
-			    		jmi->n_u*nlp->n_cp +
+			    		(jmi_opt_sim->n_blocking_factors>0? jmi->n_u : jmi->n_u*nlp->n_cp) + //jmi->n_u*nlp->n_cp +
 			    		(jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
-			    				jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*i + k] = 1;
+			    				(jmi_opt_sim->n_blocking_factors>0? 2* jmi->n_u : jmi->n_u*(nlp->n_cp + 1)) +
+			    				jmi->n_w*(nlp->n_cp + 1))*i + k] = 1;
 		}
 
 		// Interpolation equations for w
@@ -995,7 +1145,8 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 				    (nlp->dF_dp_n_nz +
 				    		nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 				    		jmi->n_x*2*jmi_opt_sim->n_e +
-				    		jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+				    		jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+				    		jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
 				    		jmi->n_x*(nlp->n_cp + 2) +
 				    		jmi->n_x*(nlp->n_cp + 2) +
 				    		jmi->n_u*(nlp->n_cp + 1) +
@@ -1012,7 +1163,8 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 			    (nlp->dF_dp_n_nz +
 			    		nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 			    		jmi->n_x*2*jmi_opt_sim->n_e +
-			    		jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+			    		jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+			    		jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
 			    		jmi->n_x*(nlp->n_cp + 2) +
 			    		jmi->n_x*(nlp->n_cp + 2) +
 			    		jmi->n_u*(nlp->n_cp + 1) +
@@ -1031,7 +1183,8 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 			(nlp->dF_dp_n_nz +
 					nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 					jmi->n_x*2*jmi_opt_sim->n_e +
-					jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+					jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+					jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
 					(jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
 							jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp);
 	jmi_opt_dCeq(jmi_opt_sim->jmi,nlp->der_eval_alg, JMI_DER_SPARSE,
@@ -1039,7 +1192,8 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 			(nlp->dF_dp_n_nz +
 					nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 					jmi->n_x*2*jmi_opt_sim->n_e +
-					jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+					jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+					jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
 					(jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
 							jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp + nlp->dCeq_dp_n_nz);
 	jmi_opt_dCeq(jmi_opt_sim->jmi,nlp->der_eval_alg, JMI_DER_SPARSE,
@@ -1048,7 +1202,8 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 			(nlp->dF_dp_n_nz +
 					nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 					jmi->n_x*2*jmi_opt_sim->n_e +
-					jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+					jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+					jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
 					(jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
 							jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp +
 							nlp->dCeq_dp_n_nz + nlp->dCeq_ddx_dx_du_dw_n_nz);
@@ -1063,7 +1218,7 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 					(nlp->dF_dp_n_nz +
 							nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 							jmi->n_x*2*jmi_opt_sim->n_e +
-							jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+							jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
 							(jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
 									jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp +
 									(nlp->dCeq_dp_n_nz + nlp->dCeq_ddx_dx_du_dw_n_nz + nlp->dCeq_ddx_p_dx_p_du_p_dw_p_n_nz)*
@@ -1074,7 +1229,8 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 					(nlp->dF_dp_n_nz +
 							nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 							jmi->n_x*2*jmi_opt_sim->n_e +
-							jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+							jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+							jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
 							(jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
 									jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp +
 									(nlp->dCeq_dp_n_nz + nlp->dCeq_ddx_dx_du_dw_n_nz + nlp->dCeq_ddx_p_dx_p_du_p_dw_p_n_nz)*
@@ -1085,7 +1241,8 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 					(nlp->dF_dp_n_nz +
 							nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 							jmi->n_x*2*jmi_opt_sim->n_e +
-							jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+							jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+							jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
 							(jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
 									jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp +
 									(nlp->dCeq_dp_n_nz + nlp->dCeq_ddx_dx_du_dw_n_nz + nlp->dCeq_ddx_p_dx_p_du_p_dw_p_n_nz)*
@@ -1101,7 +1258,8 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 			(nlp->dF_dp_n_nz +
 					nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
 					jmi->n_x*2*jmi_opt_sim->n_e +
-					jmi->n_u*(nlp->n_cp+1) + jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+					jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+					jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
 					(jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
 							jmi->n_u*(nlp->n_cp + 1) + jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp +
 							(nlp->dCeq_dp_n_nz + nlp->dCeq_ddx_dx_du_dw_n_nz + nlp->dCeq_ddx_p_dx_p_du_p_dw_p_n_nz)*
@@ -1435,7 +1593,8 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 		int linearity_information_provided,
 		int* p_opt_lin, int* dx_lin, int* x_lin, int* u_lin, int* w_lin,
 		int* dx_tp_lin, int* x_tp_lin, int* u_tp_lin, int* w_tp_lin,
-		int n_cp, int der_eval_alg) {
+		int n_cp, int der_eval_alg, int n_blocking_factors,
+        int *blocking_factors) {
 
 	if (jmi->opt == NULL) {
 		return -1;
@@ -1445,6 +1604,17 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 
 	jmi_opt_sim_lp_t* opt = (jmi_opt_sim_lp_t*)calloc(1,sizeof(jmi_opt_sim_lp_t));
 	*jmi_opt_sim = (jmi_opt_sim_t*)opt;
+
+	(*jmi_opt_sim)->jmi = jmi;
+
+	// Set blocking factors
+	(*jmi_opt_sim)->blocking_factors = (int*)calloc(n_blocking_factors,sizeof(int));
+	(*jmi_opt_sim)->n_blocking_factors = n_blocking_factors;
+	for (i=0;i<(*jmi_opt_sim)->n_blocking_factors;i++) {
+		(*jmi_opt_sim)->blocking_factors[i] = blocking_factors[i];
+	}
+
+	(*jmi_opt_sim)->n_e = n_e;
 
 	// Compute offsets
 	opt->offs_p_opt = 0;
@@ -1457,7 +1627,8 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 	opt->offs_u_coll = opt->offs_x_coll + jmi->n_x;
 	opt->offs_w_coll = opt->offs_u_coll + jmi->n_u;
 	opt->offs_x_el_junc = opt->offs_dx_coll +
-	(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*(n_e)*n_cp;
+	(jmi->n_dx + jmi->n_x + jmi->n_w)*(n_e)*n_cp +
+	((*jmi_opt_sim)->n_blocking_factors>0? jmi->n_u*n_e: jmi->n_u*n_e*n_cp);
 	opt->offs_dx_p = opt->offs_x_el_junc + n_e*jmi->n_x;
 	opt->offs_x_p = opt->offs_dx_p + jmi->n_dx;
 	opt->offs_u_p = opt->offs_x_p + jmi->n_x;
@@ -1515,7 +1686,8 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 
 	// Compute vector sizes
 	(*jmi_opt_sim)->n_x = jmi->opt->n_p_opt +                                   // Number of parameters to be optimized
-	(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*(n_e*n_cp + 1) +   // Collocation variables + initial variables
+	(jmi->n_dx + jmi->n_x + jmi->n_w)*(n_e*n_cp + 1) +   // Collocation variables + initial variables
+	((*jmi_opt_sim)->n_blocking_factors>0? jmi->n_u*(n_e+1): jmi->n_u*(n_e*n_cp +1)) +
 	jmi->n_x*n_e +                                        // States at element junctions
 	(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*jmi->n_tp;         // Pointwise values
 
@@ -1656,10 +1828,11 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 			(*jmi_opt_sim)->dh_n_nz = dF0_n_nz +           // Initial equations
 			(dF_dp_n_nz + dF_ddx_dx_du_dw_n_nz)*n_e*n_cp +   // Dynamic residuals
 			2*jmi->n_x*n_e +     // Continuity equations
-			jmi->n_u*(n_cp + 1)  + // Interpolation of u_0
+			(((*jmi_opt_sim)->n_blocking_factors>0)? 2*jmi->n_u: jmi->n_u*(n_cp + 1))  + // Interpolation of u_0
 			(jmi->n_x*(n_cp+1) + jmi->n_dx)*n_e*n_cp + // Collocation equations
 			((jmi->n_x+jmi->n_dx)*(n_cp+1) +jmi->n_x + jmi->n_dx+  // Time points
-					(jmi->n_u + jmi->n_w)*(n_cp) + jmi->n_u + jmi->n_w)*jmi->n_tp +
+					(((*jmi_opt_sim)->n_blocking_factors>0)? 2*jmi->n_u: jmi->n_u*(n_cp + 1)) +
+					jmi->n_w*(n_cp+1))*jmi->n_tp +
 					(dCeq_dp_n_nz + dCeq_ddx_dx_du_dw_n_nz + // Equality path constraints
 							dCeq_ddx_p_dx_p_du_p_dw_p_n_nz)*(n_e*n_cp+1) +
 							(dHeq_dp_n_nz + dHeq_ddx_p_dx_p_du_p_dw_p_n_nz); // Equality point constraints
@@ -1881,33 +2054,48 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 			}
 
 			// Sparsity for dynamic residuals
-			for (i=0;i<n_e*n_cp;i++) {
-				row_index = jmi->init->F0->n_eq_F + jmi->dae->F->n_eq_F*i;
+			for (i=0;i<n_e;i++) {
+			  for (j=0;j<n_cp;j++) {
+			    row_index = jmi->init->F0->n_eq_F + jmi->dae->F->n_eq_F*(i*n_cp + j);
 				col_index = 0;
 				for (k=0;k<dF_dp_n_nz;k++) {
 					(*jmi_opt_sim)->dh_row[rc_ind] = dF_dp_irow[k] + row_index;
 					(*jmi_opt_sim)->dh_col[rc_ind] = dF_dp_icol[k] + col_index;
 					rc_ind++;
 				}
-				col_index = dF0_n_cols + dF_ddx_dx_du_dw_n_cols*i;
+
+				col_index = offs_dx_coll((*jmi_opt_sim),i,j+1,0);/*(((*jmi_opt_sim)->n_blocking_factors>0)?
+						dF0_n_cols + offs_dx_coll((*jmi_opt_sim),i,j+1,0):
+							dF0_n_cols + dF_ddx_dx_du_dw_n_cols*(i*n_cp + j));*/
 				for (k=0;k<dF_ddx_dx_du_dw_n_nz;k++) {
+				  if (((*jmi_opt_sim)->n_blocking_factors>0) &&
+				       jmi_variable_type_spec(jmi, JMI_DER_DX | JMI_DER_X |
+							 JMI_DER_U | JMI_DER_W,
+							      opt->der_mask,dF_ddx_dx_du_dw_icol[k])==JMI_DER_U) {
+					(*jmi_opt_sim)->dh_row[rc_ind] = dF_ddx_dx_du_dw_irow[k] + row_index;
+					(*jmi_opt_sim)->dh_col[rc_ind] = dF_ddx_dx_du_dw_icol[k] +
+					col_index -
+					  j*dF_ddx_dx_du_dw_n_cols + (j>1? (j-1)*(jmi->n_u): 0);
+				  } else {
 					(*jmi_opt_sim)->dh_row[rc_ind] = dF_ddx_dx_du_dw_irow[k] + row_index;
 					(*jmi_opt_sim)->dh_col[rc_ind] = dF_ddx_dx_du_dw_icol[k] + col_index;
+				  }
 					rc_ind++;
 				}
+			}
 			}
 
 			// Sparsity for element junctions
 			for (i=0;i<n_e;i++) {
 				row_index = jmi->init->F0->n_eq_F + jmi->dae->F->n_eq_F*n_e*n_cp + jmi->n_x*i;
-				col_index = dF0_n_cols + dF_ddx_dx_du_dw_n_cols*n_cp*i +
-				dF_ddx_dx_du_dw_n_cols*(n_cp - 1) + jmi->n_dx;
+				col_index = offs_x_coll((*jmi_opt_sim),i,n_cp,0); //dF0_n_cols + dF_ddx_dx_du_dw_n_cols*n_cp*i +
+				//dF_ddx_dx_du_dw_n_cols*(n_cp - 1) + jmi->n_dx;
 				for (j=0;j<jmi->n_x;j++) {
 					(*jmi_opt_sim)->dh_row[rc_ind] = j + 1 + row_index;
 					(*jmi_opt_sim)->dh_col[rc_ind] = j + 1 + col_index;
 					rc_ind++;
 				}
-				col_index = dF0_n_cols + dF_ddx_dx_du_dw_n_cols*n_cp*n_e +
+				col_index = opt->offs_x_el_junc + //dF0_n_cols + dF_ddx_dx_du_dw_n_cols*n_cp*n_e +
 				jmi->n_x*i;
 				for (j=0;j<jmi->n_x;j++) {
 					(*jmi_opt_sim)->dh_row[rc_ind] = j + 1 + row_index;
@@ -1919,22 +2107,31 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 			// Sparsity for u_0 interpolation equation
 
 			row_index = jmi->init->F0->n_eq_F + jmi->dae->F->n_eq_F*n_e*n_cp + jmi->n_x*n_e;
-			for (i=0;i<n_cp;i++) {
-				col_index = dF0_n_cols + dF_ddx_dx_du_dw_n_cols*i + jmi->n_dx + jmi->n_x;
+			if ((*jmi_opt_sim)->n_blocking_factors==0) {
+				for (i=0;i<n_cp;i++) {
+					col_index = dF0_n_cols + dF_ddx_dx_du_dw_n_cols*i + jmi->n_dx + jmi->n_x;
+					for (j=0;j<jmi->n_u;j++) {
+						(*jmi_opt_sim)->dh_row[rc_ind] = j + 1 + row_index;
+						(*jmi_opt_sim)->dh_col[rc_ind] = j + 1 + col_index;
+						rc_ind++;
+					}
+				}
+			} else {
+				col_index = dF0_n_cols + dF_ddx_dx_du_dw_n_cols*0 + jmi->n_dx + jmi->n_x;
 				for (j=0;j<jmi->n_u;j++) {
 					(*jmi_opt_sim)->dh_row[rc_ind] = j + 1 + row_index;
 					(*jmi_opt_sim)->dh_col[rc_ind] = j + 1 + col_index;
 					rc_ind++;
 				}
 			}
+
+
 			col_index = jmi->opt->n_p_opt + jmi->n_dx + jmi->n_x;
 			for (j=0;j<jmi->n_u;j++) {
 				(*jmi_opt_sim)->dh_row[rc_ind] = j + 1 + row_index;
 				(*jmi_opt_sim)->dh_col[rc_ind] = j + 1 + col_index;
 				rc_ind++;
 			}
-
-
 
 			// Sparsity for collocation equations
 			// Take care of the first point separately
@@ -1945,7 +2142,7 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 				// Elements corresponding to dx_{0,1}
 				for (j=0;j<jmi->n_dx;j++) {
 					(*jmi_opt_sim)->dh_row[rc_ind] = j + 1 + row_index;
-					(*jmi_opt_sim)->dh_col[rc_ind] = j + 1 + dF0_n_cols + dF_ddx_dx_du_dw_n_cols*i;
+					(*jmi_opt_sim)->dh_col[rc_ind] = offs_dx_coll((*jmi_opt_sim),0,i+1,j) + 1;  //j + 1 + dF0_n_cols + dF_ddx_dx_du_dw_n_cols*i;
 					rc_ind++;
 				}
 
@@ -1953,7 +2150,7 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 				for (k=0;k<n_cp;k++) {
 					for (j=0;j<jmi->n_x;j++) {
 						(*jmi_opt_sim)->dh_row[rc_ind] = j + 1 + row_index;
-						(*jmi_opt_sim)->dh_col[rc_ind] = j + 1 + dF0_n_cols + jmi->n_dx + dF_ddx_dx_du_dw_n_cols*k;
+						(*jmi_opt_sim)->dh_col[rc_ind] = offs_x_coll((*jmi_opt_sim),0,k+1,j) + 1; // j + 1 + dF0_n_cols + jmi->n_dx + dF_ddx_dx_du_dw_n_cols*k;
 						rc_ind++;
 					}
 				}
@@ -1977,8 +2174,8 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 					// Elements for dx_{l,i}
 					for (j=0;j<jmi->n_dx;j++) {
 						(*jmi_opt_sim)->dh_row[rc_ind] = j + 1 + row_index;
-						(*jmi_opt_sim)->dh_col[rc_ind] = j + 1 + dF0_n_cols + dF_ddx_dx_du_dw_n_cols*n_cp*l +
-						dF_ddx_dx_du_dw_n_cols*i;
+						(*jmi_opt_sim)->dh_col[rc_ind] = offs_dx_coll((*jmi_opt_sim),l,i+1,j) + 1; //j + 1 + dF0_n_cols + dF_ddx_dx_du_dw_n_cols*n_cp*l +
+						//dF_ddx_dx_du_dw_n_cols*i;
 						rc_ind++;
 					}
 
@@ -1986,9 +2183,9 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 					for (k=0;k<n_cp;k++) {
 						for (j=0;j<jmi->n_x;j++) {
 							(*jmi_opt_sim)->dh_row[rc_ind] = j + 1 + row_index;
-							(*jmi_opt_sim)->dh_col[rc_ind] = j + 1 + dF0_n_cols +
-							dF_ddx_dx_du_dw_n_cols*n_cp*l + jmi->n_dx +
-							dF_ddx_dx_du_dw_n_cols*k;
+							(*jmi_opt_sim)->dh_col[rc_ind] = offs_x_coll((*jmi_opt_sim),l,k+1,j) + 1; // j + 1 + dF0_n_cols +
+							//dF_ddx_dx_du_dw_n_cols*n_cp*l + jmi->n_dx +
+							//dF_ddx_dx_du_dw_n_cols*k;
 							rc_ind++;
 						}
 					}
@@ -1996,9 +2193,9 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 					// Elements for x_{j,0}
 					for (j=0;j<jmi->n_x;j++) {
 						(*jmi_opt_sim)->dh_row[rc_ind] = j + 1 + row_index;
-						(*jmi_opt_sim)->dh_col[rc_ind] = j + 1 + dF0_n_cols +
-						dF_ddx_dx_du_dw_n_cols*n_cp*n_e +
-						jmi->n_x*(l-1);
+						(*jmi_opt_sim)->dh_col[rc_ind] = offs_x_coll((*jmi_opt_sim),l,0,j) + 1; //   j + 1 + dF0_n_cols +
+						 //dF_ddx_dx_du_dw_n_cols*n_cp*n_e +
+						 //jmi->n_x*(l-1);
 						rc_ind++;
 					}
 
@@ -2028,12 +2225,13 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 					}
 				}
 
-				// Elements corresponding x_{0,k}
+				// Elements corresponding x_{t_p[i],k}
 				for (k=0;k<n_cp;k++) {
 					for (j=0;j<jmi->n_x;j++) {
 						(*jmi_opt_sim)->dh_row[rc_ind] = j + 1 + row_index;
-						(*jmi_opt_sim)->dh_col[rc_ind] = j + 1 + dF0_n_cols + jmi->n_dx +
-						dF_ddx_dx_du_dw_n_cols*((*jmi_opt_sim)->tp_e[i]*n_cp + k);
+						(*jmi_opt_sim)->dh_col[rc_ind] = offs_x_coll((*jmi_opt_sim),(*jmi_opt_sim)->tp_e[i],k+1,j) + 1;
+		//						j + 1 + dF0_n_cols + jmi->n_dx +
+		//				dF_ddx_dx_du_dw_n_cols*((*jmi_opt_sim)->tp_e[i]*n_cp + k);
 						rc_ind++;
 					}
 				}
@@ -2061,12 +2259,13 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 					}
 				}
 
-				// Elements corresponding x_{0,k}
+				// Elements corresponding x_{t_p[i],k}
 				for (k=0;k<n_cp;k++) {
 					for (j=0;j<jmi->n_x;j++) {
 						(*jmi_opt_sim)->dh_row[rc_ind] = j + 1 + row_index + jmi->n_dx;
-						(*jmi_opt_sim)->dh_col[rc_ind] = j + 1 + dF0_n_cols + jmi->n_dx +
-						dF_ddx_dx_du_dw_n_cols*((*jmi_opt_sim)->tp_e[i]*n_cp + k);
+						(*jmi_opt_sim)->dh_col[rc_ind] = offs_x_coll((*jmi_opt_sim),(*jmi_opt_sim)->tp_e[i],k+1,j) + 1;
+						//j + 1 + dF0_n_cols + jmi->n_dx +
+						//dF_ddx_dx_du_dw_n_cols*((*jmi_opt_sim)->tp_e[i]*n_cp + k);
 						rc_ind++;
 					}
 				}
@@ -2078,13 +2277,28 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 				}
 
 				// Elements for u^p_i
-				// Elements corresponding u_{0,k}
-				for (k=0;k<n_cp;k++) {
+				// Elements corresponding u_{t_p[i],k}
+				if ((*jmi_opt_sim)->n_blocking_factors>0) {
 					for (j=0;j<jmi->n_u;j++) {
 						(*jmi_opt_sim)->dh_row[rc_ind] = j + 1 + row_index + jmi->n_dx + jmi->n_x;
-						(*jmi_opt_sim)->dh_col[rc_ind] = j + 1 + dF0_n_cols + jmi->n_dx +
-						jmi->n_x + dF_ddx_dx_du_dw_n_cols*((*jmi_opt_sim)->tp_e[i]*n_cp + k);
+						(*jmi_opt_sim)->dh_col[rc_ind] = offs_u_coll((*jmi_opt_sim),
+								(*jmi_opt_sim)->tp_e[i],1,j) + 1;
+
+//							j + 1 + dF0_n_cols + jmi->n_dx +
+//						jmi->n_x + dF_ddx_dx_du_dw_n_cols*((*jmi_opt_sim)->tp_e[i]*n_cp + k);
 						rc_ind++;
+					}
+				} else {
+					for (k=0;k<n_cp;k++) {
+						for (j=0;j<jmi->n_u;j++) {
+							(*jmi_opt_sim)->dh_row[rc_ind] = j + 1 + row_index + jmi->n_dx + jmi->n_x;
+							(*jmi_opt_sim)->dh_col[rc_ind] =
+							(*jmi_opt_sim)->dh_col[rc_ind] = offs_u_coll((*jmi_opt_sim),
+									(*jmi_opt_sim)->tp_e[i],k+1,j) + 1;
+						//		j + 1 + dF0_n_cols + jmi->n_dx +
+						//	jmi->n_x + dF_ddx_dx_du_dw_n_cols*((*jmi_opt_sim)->tp_e[i]*n_cp + k);
+							rc_ind++;
+						}
 					}
 				}
 				// Elements corresponding to u^p_i
@@ -2095,12 +2309,13 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 				}
 
 				// Elements for w^p_i
-				// Elements corresponding w_{0,k}
+				// Elements corresponding w_{t_p[i],k}
 				for (k=0;k<n_cp;k++) {
 					for (j=0;j<jmi->n_w;j++) {
 						(*jmi_opt_sim)->dh_row[rc_ind] = j + 1 + row_index + jmi->n_dx + jmi->n_x + jmi->n_u;
-						(*jmi_opt_sim)->dh_col[rc_ind] = j + 1 + dF0_n_cols + jmi->n_dx +
-						jmi->n_x + jmi->n_u + dF_ddx_dx_du_dw_n_cols*((*jmi_opt_sim)->tp_e[i]*n_cp + k);
+						(*jmi_opt_sim)->dh_col[rc_ind] = offs_w_coll((*jmi_opt_sim),(*jmi_opt_sim)->tp_e[i],k+1,j) + 1;
+						//j + 1 + dF0_n_cols + jmi->n_dx +
+						//jmi->n_x + jmi->n_u + dF_ddx_dx_du_dw_n_cols*((*jmi_opt_sim)->tp_e[i]*n_cp + k);
 						rc_ind++;
 					}
 				}
@@ -2260,16 +2475,126 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 			ind_dg,ind_dh,1)");
 			fclose(f);
 
-			// Set the bounds vector
 
+			// Set the bounds vector
 			// Bounds for optimization parameters
+			for (i=0;i<jmi->opt->n_p_opt;i++) {
+				(*jmi_opt_sim)->x_lb[offs_p_opt((*jmi_opt_sim),i)] = p_opt_lb[i];
+				(*jmi_opt_sim)->x_ub[offs_p_opt((*jmi_opt_sim),i)] = p_opt_ub[i];
+				(*jmi_opt_sim)->x_init[offs_p_opt((*jmi_opt_sim),i)] = p_opt_init[i];
+			}
+
+			// Bounds on initial point
+			for (k=0;k<jmi->n_dx;k++) {
+				(*jmi_opt_sim)->x_lb[offs_dx_0((*jmi_opt_sim),k)] = dx_lb[k];
+				(*jmi_opt_sim)->x_ub[offs_dx_0((*jmi_opt_sim),k)] = dx_ub[k];
+				(*jmi_opt_sim)->x_init[offs_dx_0((*jmi_opt_sim),k)] = dx_init[k];
+			}
+
+			for (k=0;k<jmi->n_x;k++) {
+				(*jmi_opt_sim)->x_lb[offs_x_0((*jmi_opt_sim),k)] = x_lb[k];
+				(*jmi_opt_sim)->x_ub[offs_x_0((*jmi_opt_sim),k)] = x_ub[k];
+				(*jmi_opt_sim)->x_init[offs_x_0((*jmi_opt_sim),k)] = x_init[k];
+			}
+
+			for (k=0;k<jmi->n_u;k++) {
+				(*jmi_opt_sim)->x_lb[offs_u_0((*jmi_opt_sim),k)] = u_lb[k];
+				(*jmi_opt_sim)->x_ub[offs_u_0((*jmi_opt_sim),k)] = u_ub[k];
+				(*jmi_opt_sim)->x_init[offs_u_0((*jmi_opt_sim),k)] = u_init[k];
+			}
+
+			for (k=0;k<jmi->n_w;k++) {
+				(*jmi_opt_sim)->x_lb[offs_w_0((*jmi_opt_sim),k)] = w_lb[k];
+				(*jmi_opt_sim)->x_ub[offs_w_0((*jmi_opt_sim),k)] = w_ub[k];
+				(*jmi_opt_sim)->x_init[offs_w_0((*jmi_opt_sim),k)] = w_init[k];
+			}
+
+			// Bounds on collocation points
+			for (i=0;i<(*jmi_opt_sim)->n_e;i++) {
+				for (j=1;j<=opt->n_cp;j++) {
+					for (k=0;k<jmi->n_dx;k++) {
+						(*jmi_opt_sim)->x_lb[offs_dx_coll((*jmi_opt_sim),i,j,k)] = dx_lb[k];
+						(*jmi_opt_sim)->x_ub[offs_dx_coll((*jmi_opt_sim),i,j,k)] = dx_ub[k];
+						(*jmi_opt_sim)->x_init[offs_dx_coll((*jmi_opt_sim),i,j,k)] = dx_init[k];
+					}
+
+					for (k=0;k<jmi->n_x;k++) {
+						(*jmi_opt_sim)->x_lb[offs_x_coll((*jmi_opt_sim),i,j,k)] = x_lb[k];
+						(*jmi_opt_sim)->x_ub[offs_x_coll((*jmi_opt_sim),i,j,k)] = x_ub[k];
+						(*jmi_opt_sim)->x_init[offs_x_coll((*jmi_opt_sim),i,j,k)] = x_init[k];
+					}
+
+					for (k=0;k<jmi->n_u;k++) {
+						(*jmi_opt_sim)->x_lb[offs_u_coll((*jmi_opt_sim),i,j,k)] = u_lb[k];
+						(*jmi_opt_sim)->x_ub[offs_u_coll((*jmi_opt_sim),i,j,k)] = u_ub[k];
+						(*jmi_opt_sim)->x_init[offs_u_coll((*jmi_opt_sim),i,j,k)] = u_init[k];
+					}
+
+					for (k=0;k<jmi->n_w;k++) {
+						(*jmi_opt_sim)->x_lb[offs_w_coll((*jmi_opt_sim),i,j,k)] = w_lb[k];
+						(*jmi_opt_sim)->x_ub[offs_w_coll((*jmi_opt_sim),i,j,k)] = w_ub[k];
+						(*jmi_opt_sim)->x_init[offs_w_coll((*jmi_opt_sim),i,j,k)] = w_init[k];
+					}
+
+				}
+			}
+
+			// Bounds for the x variables at element junctions
+			for (i=0;i<n_e;i++) {
+				for (j=0;j<jmi->n_x;j++) {
+					(*jmi_opt_sim)->x_lb[opt->offs_x_el_junc + (jmi->n_x)*i + j] = x_lb[j];
+					(*jmi_opt_sim)->x_ub[opt->offs_x_el_junc + (jmi->n_x)*i + j] = x_ub[j];
+					(*jmi_opt_sim)->x_init[opt->offs_x_el_junc + (jmi->n_x)*i + j] = x_init[j];
+				}
+			}
+
+			// Bounds for the time points
+			for (i=0;i<jmi->n_tp;i++) {
+				for (k=0;k<jmi->n_dx;k++) {
+				        (*jmi_opt_sim)->x_lb[offs_dx_p((*jmi_opt_sim),i,k)] = dx_lb[k];
+					(*jmi_opt_sim)->x_ub[offs_dx_p((*jmi_opt_sim),i,k)] = dx_ub[k];
+					(*jmi_opt_sim)->x_init[offs_dx_p((*jmi_opt_sim),i,k)] = dx_init[k];
+				}
+
+				for (k=0;k<jmi->n_x;k++) {
+					(*jmi_opt_sim)->x_lb[offs_x_p((*jmi_opt_sim),i,k)] = x_lb[k];
+					(*jmi_opt_sim)->x_ub[offs_x_p((*jmi_opt_sim),i,k)] = x_ub[k];
+					(*jmi_opt_sim)->x_init[offs_x_p((*jmi_opt_sim),i,k)] = x_init[k];
+				}
+
+				for (k=0;k<jmi->n_u;k++) {
+					(*jmi_opt_sim)->x_lb[offs_u_p((*jmi_opt_sim),i,k)] = u_lb[k];
+					(*jmi_opt_sim)->x_ub[offs_u_p((*jmi_opt_sim),i,k)] = u_ub[k];
+					(*jmi_opt_sim)->x_init[offs_u_p((*jmi_opt_sim),i,k)] = u_init[k];
+				}
+
+				for (k=0;k<jmi->n_w;k++) {
+					(*jmi_opt_sim)->x_lb[offs_w_p((*jmi_opt_sim),i,k)] = w_lb[k];
+					(*jmi_opt_sim)->x_ub[offs_w_p((*jmi_opt_sim),i,k)] = w_ub[k];
+					(*jmi_opt_sim)->x_init[offs_w_p((*jmi_opt_sim),i,k)] = w_init[k];
+				}
+
+			}
+
+			/*
+			for (i=0;i<(*jmi_opt_sim)->n_x;i++) {
+			  (*jmi_opt_sim)->x_lb[i] = -1.e10;
+			  (*jmi_opt_sim)->x_ub[i] = 1.e10;
+			  (*jmi_opt_sim)->x_init[i] = 0.;
+			}
+			*/
+
+			/*
 			int offs = 0;
+
 			for (i=0;i<jmi->opt->n_p_opt;i++) {
 				(*jmi_opt_sim)->x_lb[i] = p_opt_lb[i];
 				(*jmi_opt_sim)->x_ub[i] = p_opt_ub[i];
 				(*jmi_opt_sim)->x_init[i] = p_opt_init[i];
 			}
+
 			offs += jmi->opt->n_p_opt;
+
 
 			// Bounds for initial point and collocation points
 			for (i=0;i<(n_e*n_cp + 1);i++) {
@@ -2296,7 +2621,8 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 					(*jmi_opt_sim)->x_ub[offs + jmi->n_dx + jmi->n_x + jmi->n_u + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i + j] = w_ub[j];
 					(*jmi_opt_sim)->x_init[offs + jmi->n_dx + jmi->n_x + jmi->n_u + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i + j] = w_init[j];
 				}
-			}
+				}
+
 			offs += (n_e*n_cp + 1)*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w);
 
 			// Bounds for the x variables at element junctions
@@ -2307,6 +2633,7 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 					(*jmi_opt_sim)->x_init[offs + (jmi->n_x)*i + j] = x_init[j];
 				}
 			}
+
 			offs += n_e*jmi->n_x;
 
 			// Bounds for variables at the time points
@@ -2336,32 +2663,37 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 				}
 
 			}
-			offs += jmi->n_tp*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w);
 
+			offs += jmi->n_tp*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w);
+			*/
 			// Bounds for the element length variables (if free)
 			if (hs_free == 1) {
 				for (i=0;i<n_e;i++) {
-					(*jmi_opt_sim)->x_lb[offs + i] = hs_lb[i];
-					(*jmi_opt_sim)->x_ub[offs + i] = hs_ub[i];
+					(*jmi_opt_sim)->x_lb[opt->offs_h + i] = hs_lb[i];
+					(*jmi_opt_sim)->x_ub[opt->offs_h + i] = hs_ub[i];
 				}
 			}
-			offs += n_e;
+			//offs += n_e;
 
 			// Bounds for interval end points (if free)
 			if (jmi->opt->start_time_free == 1) {
-				(*jmi_opt_sim)->x_lb[offs] = t0_lb;
-				(*jmi_opt_sim)->x_ub[offs] = t0_ub;
+				(*jmi_opt_sim)->x_lb[opt->offs_t0] = t0_lb;
+				(*jmi_opt_sim)->x_ub[opt->offs_t0] = t0_ub;
 			}
-			offs += 1;
+			//offs += 1;
 
 			if (jmi->opt->final_time_free == 1) {
-				(*jmi_opt_sim)->x_lb[offs] = tf_lb;
-				(*jmi_opt_sim)->x_ub[offs] = tf_ub;
+				(*jmi_opt_sim)->x_lb[opt->offs_tf] = tf_lb;
+				(*jmi_opt_sim)->x_ub[opt->offs_tf] = tf_ub;
 			}
-			offs += 1;
+			//offs += 1;
+			/*
+			for (i=0;i<(*jmi_opt_sim)->n_x;i++) {
+			  printf("%d, %f, %f, %f\n",i,(*jmi_opt_sim)->x_lb[i],(*jmi_opt_sim)->x_ub[i],(*jmi_opt_sim)->x_init[i]);
+			}
+			*/
 
 			// Set mesh
-			(*jmi_opt_sim)->n_e = n_e;
 			for (i=0;i<n_e;i++) {
 				(*jmi_opt_sim)->hs[i] = hs[i];
 			}
@@ -2438,7 +2770,7 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 				// Compute the total number of non linear variables in the NLP x vector
 				n_nl_vars += n_nl_p_opt + n_nl_dx*(1+n_cp*n_e) +
 				n_nl_x*(1+n_cp*n_e) +
-				n_nl_u*(1+n_cp*n_e) +
+				  ((*jmi_opt_sim)->n_blocking_factors>0? n_nl_u*(n_e+1): n_nl_u*(1+n_cp*n_e)) +
 				n_nl_w*(1+n_cp*n_e);
 
 //				printf("--- %d\n",n_nl_vars);
@@ -2451,7 +2783,7 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 					(int*)calloc(n_nl_vars,sizeof(int));
 
 				int ind = 0;   // Counter for the non_linear_variables_indices vector
-				int ind_x = 1; // Counter for the indices in the NLP x vector
+				int ind_x = 1; // Counter for the indices in the NLP x vector, Fortran style
 
 				// Set non linear variable indices corresponding to optimization parameters
 				for (i=0;i<jmi->opt->n_p_opt;i++) {
@@ -2511,11 +2843,14 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 							ind_x++;
 						}
 						// Iterate over inputs
-						for (k=0;k<jmi->n_u;k++) {
+						if (!((*jmi_opt_sim)->n_blocking_factors>0 && j>0)) {
+
+						  for (k=0;k<jmi->n_u;k++) {
 							if (u_lin[k]==0) {
 								(*jmi_opt_sim)->non_linear_variables_indices[ind++] = ind_x;
 							}
 							ind_x++;
+						  }
 						}
 						// Iterate over algebraic variables
 						for (k=0;k<jmi->n_w;k++) {
@@ -2572,7 +2907,6 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 			}
 
 			//Set function pointers
-			(*jmi_opt_sim)->jmi = jmi;
 			(*jmi_opt_sim)->get_dimensions = *jmi_opt_sim_get_dimensions;
 			(*jmi_opt_sim)->get_interval_spec = *jmi_opt_sim_get_interval_spec;
 			(*jmi_opt_sim)->f = *lp_radau_f;

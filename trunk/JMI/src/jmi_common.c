@@ -386,6 +386,24 @@ int jmi_map_Jacobian_column_index(jmi_t *jmi, int independent_vars, int *mask, i
 	return new_col_index;
 }
 
+int jmi_variable_type_spec(jmi_t *jmi, int independent_vars,
+			   int *mask, int col_index) {
+
+  int spec_jac_index = 0;
+  int i = 0;
+  for(i=0;i<jmi->n_z;i++) {
+    if (jmi_check_Jacobian_column_index(jmi,independent_vars,mask,i)==1) {
+      spec_jac_index++;
+    } 
+    if (col_index==spec_jac_index) {
+      return jmi_variable_type(jmi,i);
+    }
+  }
+  return -1;
+}
+
+
+
 int jmi_dae_get_sizes(jmi_t* jmi, int* n_eq_F, int* n_eq_R) {
 	if (jmi->dae == NULL) {
 		return -1;
