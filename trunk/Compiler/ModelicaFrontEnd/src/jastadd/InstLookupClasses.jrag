@@ -83,7 +83,7 @@ aspect InstLookupClasses {
 			if (bcd.matchInstClassDecl(name))
 				set.add(bcd);	
 		}
-
+		
 		if (set.size()>0)
 			return set;
 		else
@@ -208,7 +208,8 @@ aspect InstLookupClasses {
 		// TODO: propagate information about the class from where
 		// the lookup is requested, so that version information
 		// stored in annotations can be retreived. 
-		if (lookupLibrary(name).size()>0)
+		if (set.size()==0 /* Enable shadowing of libraries */&& 
+				lookupLibrary(name).size()>0)
 			set.addAll(lookupLibrary(name));
 
 		if (set.size()>0)
