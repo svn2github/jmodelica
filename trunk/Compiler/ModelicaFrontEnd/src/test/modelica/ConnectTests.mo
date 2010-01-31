@@ -31,8 +31,8 @@ model ConnectTests
 equation
   - ( c2.ca.x ) - ( c2.cb.x ) = 0.0;
  c2.ca.y = c2.cb.y;
- c2.ca.x = 0;
- c2.cb.x = 0;
+ c2.ca.x = 0.0;
+ c2.cb.x = 0.0;
 end ConnectTests.ConnectTest1;
 ")})));
 
@@ -158,6 +158,52 @@ equation
 
 end ConnectTest3;
 
+  class ConnectTest4
+
+  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="ConnectTest4",
+        description="Test of generation of connection equations.",
+                                               flatModel=
+"
+fclass ConnectTests.ConnectTest4
+ Real c2.ca.x;
+ Real c2.ca.y;
+ Real c2.cb.x;
+ Real c2.cb.y;
+ Real c2.ca2.x;
+ Real c2.ca2.y;
+equation
+ c2.ca2.x = 3;
+  - ( c2.ca.x ) - ( c2.cb.x ) = 0.0;
+ c2.ca.y = c2.cb.y;
+ c2.ca.x = 0.0;
+ c2.cb.x = 0.0;
+ c2.ca2.x = 0.0;
+end ConnectTests.ConnectTest4;
+")})));
+
+	connector Ca
+		flow Real x;
+		Real y;
+	end Ca;
+	
+	connector Cb
+		flow Real x;
+		Real y;
+	end Cb;
+	
+	model C2
+		Ca ca;
+		Cb cb;
+                Ca ca2;
+	equation
+        ca2.x =3;
+      connect(ca,cb);
+    end C2;
+    
+    C2 c2;  
+      
+   end ConnectTest4;
 
 
 model Electrical

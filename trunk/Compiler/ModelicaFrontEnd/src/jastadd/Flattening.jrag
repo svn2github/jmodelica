@@ -162,9 +162,11 @@ aspect Flattening {
 	
 	public void InstClassDecl.flatten(FClass fc) {}
 	
-
 	public void InstPrimitive.flatten(FClass fc) {
 		fc.addFVariable(createFVariable());
+		if (isFlow()) {
+			fc.getConnectionSetManager().addInsideFlowVar(this,getFQNamePrefix().append(name()));
+		}
 	}
 	
 	syn FVariable InstPrimitive.createFVariable() {

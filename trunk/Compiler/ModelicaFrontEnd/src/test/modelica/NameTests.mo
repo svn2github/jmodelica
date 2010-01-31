@@ -1089,6 +1089,8 @@ model ImportTest8
   r.v = r.p.v - ( r.n.v );
   0 = r.p.i + r.n.i;
   r.i = r.p.i; 
+ r.p.i = 0.0;
+ r.n.i = 0.0;
  end NameTests.ImportTest8;
  ")})));
 

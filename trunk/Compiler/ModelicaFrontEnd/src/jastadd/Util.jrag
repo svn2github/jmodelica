@@ -914,6 +914,17 @@ aspect ComponentDeclMethods {
 	
 	}
 
+   	/**
+   	 * Check if a InstComponentDecl is declared flow.
+   	 */
+   	syn boolean InstComponentDecl.isFlow() {
+   	
+   		if (getComponentDecl().hasTypePrefixFlow())
+   			return true;
+   	
+   		return false;
+   	}
+	
 }
 
 aspect ShortClassUtil {

@@ -76,15 +76,6 @@ aspect Connections {
 			}
 
 		}
-
-		// Generate equations for flow variables of connectors not
-		// appearing as inside.
-		LinkedHashSet notInsideConnectedFlowVars = connectionSetManager.getNotInsideConnectedFlowVars();		
-		for (Iterator iter=notInsideConnectedFlowVars.iterator();iter.hasNext();) {
-			ConnectionSetEntry cse = (ConnectionSetEntry)iter.next();
-				getFEquationBlock(0).addFAbstractEquation(new FEquation(new FIdUseExp(new FIdUse((FQName)cse.getFQName().fullCopy())),new FRealLitExp("0")));
-		}
-			
 	}
 
 	static public class MyLinkedHashSet extends LinkedHashSet {
@@ -100,21 +91,24 @@ aspect Connections {
 	static public class ConnectionSetManager {
 	
 		private ArrayList list = new ArrayList();
-		private MyLinkedHashSet notInsideConnectedFlowVars = new MyLinkedHashSet();
-		private LinkedHashSet insideConnectedFlowVars = new LinkedHashSet();
 		
 		public ArrayList getConnectionSetList() {
 			return list;
 		}
-		
-		public LinkedHashSet getNotInsideConnectedFlowVars() {
-			return notInsideConnectedFlowVars;
+			
+		public void addInsideFlowVar(InstComponentDecl var1, FQName namePrefix1) {
+			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1,false,namePrefix1);
+
+			LinkedHashSet h1 = getConnectionSet(cse1);
+			
+			if (h1==null) {
+				LinkedHashSet h = new LinkedHashSet();
+				h.add(cse1);
+				list.add(h);
+			}
+
 		}
 		
-		public LinkedHashSet getInsideConnectedFlowVars() {
-			return insideConnectedFlowVars;
-		}
-				
 		public void addVars(InstComponentDecl var1, boolean outside1, FQName namePrefix1,
 		                    InstComponentDecl var2, boolean outside2, FQName namePrefix2) {
 
@@ -125,25 +119,7 @@ aspect Connections {
 		
 			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1,outside1,namePrefix1);
 			ConnectionSetEntry cse2 = new ConnectionSetEntry(var2,outside2,namePrefix2);	
-						
-			if (cse1.isFlow() && !insideConnectedFlowVars.contains(new ConnectionSetEntry(var1,false,namePrefix1))) {
-				if (outside1) {
-					notInsideConnectedFlowVars.add(cse1);
-				} else {
-					notInsideConnectedFlowVars.remove(new ConnectionSetEntry(var1,true,namePrefix1));
-					insideConnectedFlowVars.add(cse1);
-				}	
-			}
-			
-			if (cse2.isFlow() && !insideConnectedFlowVars.contains(new ConnectionSetEntry(var2,false,namePrefix2))) {
-				if (outside2) {
-					notInsideConnectedFlowVars.add(cse2);
-				} else {
-					notInsideConnectedFlowVars.remove(new ConnectionSetEntry(var2,true,namePrefix2));
-					insideConnectedFlowVars.add(cse2);
-				}	
-			}
-			
+
 			LinkedHashSet h1 = getConnectionSet(cse1);
 			LinkedHashSet h2 = getConnectionSet(cse2);
 			
@@ -157,15 +133,11 @@ aspect Connections {
 					list.remove(h2);
 				}
 			} else {
-//				System.out.println("ConnectionSetManager.addVars: about to create a new Hash set");
 				LinkedHashSet h = new LinkedHashSet();
 				h.add(cse1);
-//				System.out.println("ConnectionSetManager.addVars: cse1 added");
 				h.add(cse2);
-//				System.out.println("ConnectionSetManager.addVars: cse1 added");
 				list.add(h);
 			}
-							
 		}
 	
 		public LinkedHashSet getConnectionSet(ConnectionSetEntry cse) {
@@ -207,26 +179,6 @@ aspect Connections {
 				}	
 				str.append("}\n");
 			}
-			
-			// Print flow variables appearing in inside/outside connectors
-			str.append("Flow variables appearing in inside connectors:\n{");
-			for (Iterator iter=insideConnectedFlowVars.iterator();iter.hasNext();) {
-				ConnectionSetEntry cse = (ConnectionSetEntry)iter.next();
-					str.append(cse.name());
-					if (iter.hasNext())
-						str.append(", ");
-			}
-			str.append("}\n");
-			str.append("Flow variables appearing only in outside connectors:\n{");
-			for (Iterator iter=notInsideConnectedFlowVars.iterator();iter.hasNext();) {
-				ConnectionSetEntry cse = (ConnectionSetEntry)iter.next();
-					str.append(cse.name());
-					if (iter.hasNext())
-						str.append(", ");
-			}
-			str.append("}\n");
-			
-			
 			
 			System.out.println(str.toString());
 		}
@@ -287,17 +239,12 @@ aspect Connections {
 			
 			ConnectionSetEntry cse = (ConnectionSetEntry)o;
 			boolean res;
-			
-			
+						
 			if (name().equals(cse.name()) && outside==cse.isOutside())
 				res = true;
 			else
 				res = false;
 			
-			//System.out.println("ConnectionSetEntry.equals: "+res);
-			//cd.dumpTree("");
-			//cse.getVar().dumpTree("");
-		
 			return res;
 		
 		}
@@ -310,8 +257,5 @@ aspect Connections {
 		}
 	
 	}
-
-
-
 
 }
