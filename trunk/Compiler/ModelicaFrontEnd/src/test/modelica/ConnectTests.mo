@@ -19,6 +19,23 @@ model ConnectTests
 
   class ConnectTest1
 
+  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="ConnectTest2",
+        description="Test of generation of connection equations.",
+                                               flatModel=
+"fclass ConnectTests.ConnectTest1
+ Real c2.ca.x;
+ Real c2.ca.y;
+ Real c2.cb.x;
+ Real c2.cb.y;
+equation
+  - ( c2.ca.x ) - ( c2.cb.x ) = 0.0;
+ c2.ca.y = c2.cb.y;
+ c2.ca.x = 0;
+ c2.cb.x = 0;
+end ConnectTests.ConnectTest1;
+")})));
+
 	connector Ca
 		flow Real x;
 		Real y;

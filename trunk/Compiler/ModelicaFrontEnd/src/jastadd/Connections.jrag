@@ -33,8 +33,7 @@ aspect Connections {
 		debugPrint("<<<FClass.genConnectionEquations()");
 		ArrayList l = connectionSetManager.getConnectionSetList();
 		debugPrint("<<<FClass.genConnectionEquations(): "+ l.size() + " sets in manager");
-		//getConnectionSetManager().printConnectionSets();
-		
+		getConnectionSetManager().printConnectionSets();
 		
 		for (int i=0; i<l.size();i++) {
 			LinkedHashSet h = (LinkedHashSet)(l.get(i));
@@ -86,40 +85,6 @@ aspect Connections {
 				getFEquationBlock(0).addFAbstractEquation(new FEquation(new FIdUseExp(new FIdUse((FQName)cse.getFQName().fullCopy())),new FRealLitExp("0")));
 		}
 			
-			/*
-			Iterator it = h.iterator();
-			if (((ConnectionSetEntry)it.next()).isFlow()) {
-				FExp e = new FNoExp();
-				// Treat first element separately
-				Iterator iter = h.iterator();
-				ConnectionSetEntry cse = (ConnectionSetEntry)iter.next();
-				if (cse.isOutside())
-					e = new FNegExp(new FIdUse(cse.name()));
-				else
-					e = new FIdUse(cse.name());		
-			
-				while (iter.hasNext()) {
-					cse = (ConnectionSetEntry)iter.next();
-					if (cse.isOutside())
-					e = new FSubExp(e,new FIdUse(cse.name()));
-				else
-					e = new FAddExp(e,new FIdUse(cse.name()));		
-				}
-				addFEquation(new FEquation(e,new FRealLitExp("0.0")));	
-			} else {
-				// Treat first element separately
-				Iterator iter = h.iterator();
-				FExp e1=new FNoExp(),e2=new FNoExp();
-				ConnectionSetEntry cse = (ConnectionSetEntry)iter.next();
-				e1 = new FIdUse(cse.name());
-				while (iter.hasNext()) {
-					cse = (ConnectionSetEntry)iter.next();
-					e2 = new FIdUse(cse.name());
-					addFEquation(new FEquation(e1,e2));
-					e1 = e2;
-				}
-			}
-				*/	
 	}
 
 	static public class MyLinkedHashSet extends LinkedHashSet {
@@ -160,28 +125,27 @@ aspect Connections {
 		
 			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1,outside1,namePrefix1);
 			ConnectionSetEntry cse2 = new ConnectionSetEntry(var2,outside2,namePrefix2);	
-			
-			if (cse1.isFlow() && !insideConnectedFlowVars.contains(cse1))
+						
+			if (cse1.isFlow() && !insideConnectedFlowVars.contains(new ConnectionSetEntry(var1,false,namePrefix1))) {
 				if (outside1) {
-					//notInsideConnectedFlowVars.add(cse1);
+					notInsideConnectedFlowVars.add(cse1);
 				} else {
-					//notInsideConnectedFlowVars.remove(cse1);
 					notInsideConnectedFlowVars.remove(new ConnectionSetEntry(var1,true,namePrefix1));
 					insideConnectedFlowVars.add(cse1);
-				}
-				
-			if (cse2.isFlow() && !insideConnectedFlowVars.contains(cse2))
-				if (outside1) {
-					//notInsideConnectedFlowVars.add(cse2);
+				}	
+			}
+			
+			if (cse2.isFlow() && !insideConnectedFlowVars.contains(new ConnectionSetEntry(var2,false,namePrefix2))) {
+				if (outside2) {
+					notInsideConnectedFlowVars.add(cse2);
 				} else {
-					//notInsideConnectedFlowVars.remove(cse2);
 					notInsideConnectedFlowVars.remove(new ConnectionSetEntry(var2,true,namePrefix2));
 					insideConnectedFlowVars.add(cse2);
 				}	
+			}
 			
 			LinkedHashSet h1 = getConnectionSet(cse1);
 			LinkedHashSet h2 = getConnectionSet(cse2);
-
 			
 			if (h1!=null && h2==null)
 				h1.add(cse2);
@@ -201,10 +165,7 @@ aspect Connections {
 //				System.out.println("ConnectionSetManager.addVars: cse1 added");
 				list.add(h);
 			}
-			
-//			printConnectionSets();
-//			System.out.println("\n");
-				
+							
 		}
 	
 		public LinkedHashSet getConnectionSet(ConnectionSetEntry cse) {
@@ -304,7 +265,10 @@ aspect Connections {
 		   return fqName.name();
 		}
 		
-	
+		public String print() {
+			return fqName.name()+"("+(outside? "o": "i")+")";
+		}
+		
 		public FQName getFQName() {
 			return fqName;
 		}
