@@ -20,86 +20,61 @@
 
 <OptionRegistry>
 	<Options>
-		<Option>
-			<Type>String</Type>
-			<StringAttributes>
-				<Key>default_msl_version</Key>
-				<Value>3.0.1</Value>
-			</StringAttributes>
+		<Option type="string">
+			<StringAttributes key="default_msl_version" value="3.0.1"/>
 		</Option>
-		<Option>
-			<Type>Boolean</Type>
-			<BooleanAttributes>
-				<Key>state_start_values_fixed</Key>
-				<Value>false</Value>
+		<Option type="boolean">
+			<BooleanAttributes key="state_start_values_fixed" value="false">
 				<Description>
-				This option enables the user to specify if initial equations should be 
-				generated automatically for differentiated variables even though the fixed 
-				attribute is equal to fixed. Setting this option to true is, however, often 
-				practical in optimization problems.
+					This option enables the user to specify if initial equations should be 
+					generated automatically for differentiated variables even though the fixed 
+					attribute is equal to fixed. Setting this option to true is, however, often 
+					practical in optimization problems.
 				</Description>
 			</BooleanAttributes>
 		</Option>
-		<Option>
-			<Type>Boolean</Type>
-			<BooleanAttributes>
-				<Key>eliminate_alias_variables</Key>
-				<Value>true</Value>
+		<Option type="boolean">
+			<BooleanAttributes key="eliminate_alias_variables" value="true">
 				<Description>
-                                If this option is set to true (default), then alias variables are 
-                                eliminated from the model.
+					If this option is set to true (default), then alias variables are 
+                    eliminated from the model.
 				</Description>
 			</BooleanAttributes>
 		</Option>
-		<Option>
-			<Type>Boolean</Type>
-			<BooleanAttributes>
-				<Key>halt_on_warning</Key>
-				<Value>false</Value>
+		<Option type="boolean">
+			<BooleanAttributes key="halt_on_warning" value="false">
 				<Description>
-                                If this option is set to false (default) one or more compiler 
-                                warnings will not stop compilation of the model.
+					If this option is set to false (default) one or more compiler 
+                    warnings will not stop compilation of the model.
 				</Description>
 			</BooleanAttributes>
 		</Option>
-		<Option>
-			<Type>Boolean</Type>
-			<BooleanAttributes>
-				<Key>generate_xml_equations</Key>
-				<Value>false</Value>
+		<Option type="boolean">
+			<BooleanAttributes key="generate_xml_equations" value="false">
 				<Description>
-                                If this option is true, then model equations are generated in XML format. Default is false.
+					If this option is true, then model equations are generated in XML format. Default is false.
 				</Description>
 			</BooleanAttributes>
 		</Option>
-		<Option>
-			<Type>Boolean</Type>
-			<BooleanAttributes>
-				<Key>index_reduction</Key>
-				<Value>false</Value>
+		<Option type="boolean">
+			<BooleanAttributes key="index_reduction" value="false">
 				<Description>
-                                If this option is true (default is false), index reduction is performed.
+					If this option is true (default is false), index reduction is performed.
 				</Description>
 			</BooleanAttributes>
 		</Option>
-		<Option>
-			<Type>Boolean</Type>
-			<BooleanAttributes>
-				<Key>equation_sorting</Key>
-				<Value>true</Value>
+		<Option type="boolean">
+			<BooleanAttributes key="equation_sorting" value="true">
 				<Description>
-                                If this option is true (default is false), equations are sorted using the BLT algorithm.
+					If this option is true (default is false), equations are sorted using the BLT algorithm.
 				</Description>
 			</BooleanAttributes>
 		</Option>
-		<Option>
-			<Type>Boolean</Type>
-			<BooleanAttributes>
-				<Key>generate_fmi_xml</Key>
-				<Value>false</Value>
+		<Option type="boolean">
+			<BooleanAttributes key="generate_fmi_xml" value="false">
 				<Description>
-                                If this option is true the model description part of the XML variables file will be FMI compliant. Default is false. 
-                                To generate an XML which will validate with FMI schema the option generate_xml_equations must also be false.
+					If this option is true the model description part of the XML variables file will be FMI compliant. Default is false. 
+                    To generate an XML which will validate with FMI schema the option generate_xml_equations must also be false.
 				</Description>
 			</BooleanAttributes>
 		</Option>

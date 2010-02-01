@@ -48,40 +48,35 @@ public class OptionRegistry {
 			//set other options if there are any
 			expr = xpath.compile("OptionRegistry/Options");
 			org.w3c.dom.Node options = (org.w3c.dom.Node)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODE);
-			if(options !=null && options.hasChildNodes()) {
-				//other options set
+			if(options !=null && options.hasChildNodes()) {				
+				expr = xpath.compile("OptionRegistry/Options/Option");
+				org.w3c.dom.NodeList theOptions = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
+				expr = xpath.compile("OptionRegistry/Options/Option/*");
+				org.w3c.dom.NodeList theAttributes = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
+				
+				for(int i=0; i<theOptions.getLength();i++) {
+					org.w3c.dom.Node n = theOptions.item(i);
+					org.w3c.dom.NamedNodeMap attributes = n.getAttributes();					
+					String type = attributes.getNamedItem("type").getTextContent();
 					
-				//types
-				expr = xpath.compile("OptionRegistry/Options/Option/Type");
-				org.w3c.dom.NodeList thetypes = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
+					org.w3c.dom.Node a = theAttributes.item(i);
+					attributes = a.getAttributes();
+					String key = attributes.getNamedItem("key").getTextContent();
+					String value = attributes.getNamedItem("value").getTextContent();
 					
-				//keys
-				expr = xpath.compile("OptionRegistry/Options/Option/*/Key");
-				org.w3c.dom.NodeList thekeys = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
-					
-				//values
-				expr = xpath.compile("OptionRegistry/Options/Option/*/Value");
-				org.w3c.dom.NodeList thevalues = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
-									
-				for(int i=0; i<thetypes.getLength();i++) {
-					org.w3c.dom.Node n = thetypes.item(i);
-					
-					String type = n.getTextContent();
-					String key = thekeys.item(i).getTextContent();
-					String value = thevalues.item(i).getTextContent();
 					String description;
 					// description
-					expr = xpath.compile("/OptionRegistry/Options/Option/*/Description[parent::*/parent::Option/Type=\""+type+"\"][parent::*/Key=\""+key+"\"]");
+					expr = xpath.compile("/OptionRegistry/Options/Option/*/Description[parent::*/parent::Option[attribute::type=\""+type+"\"]][parent::*[attribute::key=\""+key+"\"]]");
 					org.w3c.dom.Node descr = (org.w3c.dom.Node)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODE);
 					description = descr != null ? descr.getTextContent().trim():"";
 					
-					if(type.equals("String")) {
+					if(type.equals("string")) {
 						setStringOption(key, value, description);
-					} else if(type.equals("Integer")) {
+					} else if(type.equals("integer")) {
 						setIntegerOption(key, Integer.parseInt(value), description);
-					} else if(type.equals("Real")) {
+					} else if(type.equals("real")) {
 						setRealOption(key, Double.parseDouble(value), description);
-					} else if(type.equals("Boolean")) {
+					} else if(type.equals("boolean")) {
 						setBooleanOption(key, Boolean.parseBoolean(value), description);
 					}
 				}				
