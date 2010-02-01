@@ -438,6 +438,396 @@ class Model(object):
             pd[i] = pd_tmp[i]
             pd_tmp[:] = pd
         self.set_pd(pd)
+        
+        
+    def _set_initial_values(self, p_opt_init, dx_init, x_init, u_init, w_init):
+        
+        """ 
+        Set initial guess values from the XML meta data file. 
+        
+        Parameters:
+            p_opt_init -- The optimized parameters initial guess vector.
+            dx_init -- The derivatives initial guess vector.
+            x_init -- The states initial guess vector.
+            u_init -- The input initial guess vector.
+            w_init -- The algebraic variables initial guess vector.
+        
+        """
+        
+        xmldoc = self._get_XMLDoc()
+
+        # p_opt: free variables
+        values = xmldoc.get_p_opt_initial_guess_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+
+        n_p_opt = self.jmimodel.opt_get_n_p_opt()
+        if n_p_opt > 0:
+            p_opt_indices = N.zeros(n_p_opt, dtype=int)
+        
+            self.jmimodel.opt_get_p_opt_indices(p_opt_indices)
+            p_opt_indices = p_opt_indices.tolist()
+            
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_pi = z_i - self._offs_pi.value
+                i_pi_opt = p_opt_indices.index(i_pi)
+                p_opt_init[i_pi_opt] = values.get(ref)
+        
+        # dx: derivative
+        values = xmldoc.get_dx_initial_guess_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_dx = z_i - self._offs_dx.value
+            dx_init[i_dx] = values.get(ref)
+        
+        # x: differentiate
+        values = xmldoc.get_x_initial_guess_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_x = z_i - self._offs_x.value
+            x_init[i_x] = values.get(ref)
+            
+        # u: input
+        values = xmldoc.get_u_initial_guess_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_u = z_i - self._offs_u.value
+            u_init[i_u] = values.get(ref)
+        
+        # w: algebraic
+        values = xmldoc.get_w_initial_guess_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_w = z_i - self._offs_w.value
+            w_init[i_w] = values.get(ref) 
+
+
+    def _set_lb_values(self, p_opt_lb, dx_lb, x_lb, u_lb, w_lb):
+        
+        """ 
+        Set lower bounds from the XML meta data file. 
+        
+        Parameters:
+            p_opt_lb -- The optimized parameters lower bounds vector.
+            dx_lb -- The derivatives lower bounds vector.
+            x_lb -- The states lower bounds vector.
+            u_lb -- The input lower bounds vector.
+            w_lb -- The algebraic variables lower bounds vector.        
+        
+        """
+        
+        xmldoc = self._get_XMLDoc()
+
+        # p_opt: free variables
+        values = xmldoc.get_p_opt_lb_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+
+        n_p_opt = self.jmimodel.opt_get_n_p_opt()
+        if n_p_opt > 0:
+            p_opt_indices = N.zeros(n_p_opt, dtype=int)
+        
+            self.jmimodel.opt_get_p_opt_indices(p_opt_indices)
+            p_opt_indices = p_opt_indices.tolist()
+            
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_pi = z_i - self._offs_pi.value
+                i_pi_opt = p_opt_indices.index(i_pi)
+                p_opt_lb[i_pi_opt] = values.get(ref)
+
+        # dx: derivative
+        values = xmldoc.get_dx_lb_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_dx = z_i - self._offs_dx.value
+            dx_lb[i_dx] = values.get(ref) 
+        
+        # x: differentiate
+        values = xmldoc.get_x_lb_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_x = z_i - self._offs_x.value
+            x_lb[i_x] = values.get(ref)
+            
+        # u: input
+        values = xmldoc.get_u_lb_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_u = z_i - self._offs_u.value
+            u_lb[i_u] = values.get(ref)
+        
+        # w: algebraic
+        values = xmldoc.get_w_lb_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_w = z_i - self._offs_w.value
+            #print("%d, %d" %(z_i,i_w))
+            w_lb[i_w] = values.get(ref) 
+
+    def _set_ub_values(self, p_opt_ub, dx_ub, x_ub, u_ub, w_ub):
+        
+        """ 
+        Set upper bounds from the XML meta data file. 
+        
+        Parameters:
+            p_opt_ub -- The optimized parameters upper bounds vector.
+            dx_ub -- The derivatives upper bounds vector.
+            x_ub -- The states upper bounds vector.
+            u_ub -- The input upper bounds vector.
+            w_ub -- The algebraic variables upper bounds vector.        
+        
+        """
+        
+        xmldoc = self._get_XMLDoc()
+
+        # p_opt: free variables
+        values = xmldoc.get_p_opt_ub_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+
+        n_p_opt = self.jmimodel.opt_get_n_p_opt()
+        if n_p_opt > 0:
+            p_opt_indices = N.zeros(n_p_opt, dtype=int)
+        
+            self.jmimodel.opt_get_p_opt_indices(p_opt_indices)
+            p_opt_indices = p_opt_indices.tolist()
+            
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_pi = z_i - self._offs_pi.value
+                i_pi_opt = p_opt_indices.index(i_pi)
+                p_opt_ub[i_pi_opt] = values.get(ref)
+
+        # dx: derivative
+        values = xmldoc.get_dx_ub_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_dx = z_i - self._offs_dx.value
+            dx_ub[i_dx] = values.get(ref) 
+        
+        # x: differentiate
+        values = xmldoc.get_x_ub_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_x = z_i - self._offs_x.value
+            x_ub[i_x] = values.get(ref)
+            
+        # u: input
+        values = xmldoc.get_u_ub_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_u = z_i - self._offs_u.value
+            u_ub[i_u] = values.get(ref)
+        
+        # w: algebraic
+        values = xmldoc.get_w_ub_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_w = z_i - self._offs_w.value
+            w_ub[i_w] = values.get(ref) 
+
+    def _set_lin_values(self, p_opt_lin, dx_lin, x_lin, u_lin, w_lin, dx_tp_lin, x_tp_lin, u_tp_lin, w_tp_lin):
+        
+        """ 
+        Set linearity information from the XML meta data file. 
+        
+        For the linearity vectors, a "1" indicates that the variable appears 
+        linearly and a "0" otherwise. The same convention is used for the 
+        linear time point vectors. 
+        
+        For the linear time point vectors, the information about the first 
+        time point is stored in the first n positions in the vector, where 
+        n is equal to the number of parameters/derivatives/states/inputs or 
+        variables, followed by the second time point and so on for all time 
+        points.
+                
+        Parameters:
+            p_opt_lin -- The optimized parameters linear information vector.
+            dx_lin -- The derivatives linear information vector.
+            x_lin -- The states linear information vector.
+            u_lin -- The input linear information vector.
+            w_lin -- The algebraic variables linear information vector.        
+            dx_tp_lin -- The derivatives linear time point vector.
+            x_tp_lin -- The states linear time point vector.
+            u_tp_lin -- The input linear time point vector.
+            w_tp_lin -- The algebraic variables linear time point vector.        
+        
+        """
+        
+        
+        xmldoc = self._get_XMLDoc()
+
+        # p_opt: free variables
+        values = xmldoc.get_p_opt_lin_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+
+        n_p_opt = self.jmimodel.opt_get_n_p_opt()
+        if n_p_opt > 0:
+            p_opt_indices = N.zeros(n_p_opt, dtype=int)
+        
+            self.jmimodel.opt_get_p_opt_indices(p_opt_indices)
+            p_opt_indices = p_opt_indices.tolist()
+
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_pi = z_i - self._offs_pi.value
+                i_pi_opt = p_opt_indices.index(i_pi)
+                p_opt_lin[i_pi_opt] = int(values.get(ref))
+
+        # dx: derivative
+        values = xmldoc.get_dx_lin_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_dx = z_i - self._offs_dx.value
+            dx_lin[i_dx] = int(values.get(ref))
+        
+        # x: differentiate
+        values = xmldoc.get_x_lin_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_x = z_i - self._offs_x.value
+            x_lin[i_x] = int(values.get(ref))
+            
+        # u: input
+        values = xmldoc.get_u_lin_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_u = z_i - self._offs_u.value
+            u_lin[i_u] = int(values.get(ref))
+        
+        # w: algebraic
+        values = xmldoc.get_w_lin_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for ref in refs:
+            (z_i, ptype) = _translate_value_ref(ref)
+            i_w = z_i - self._offs_w.value
+            w_lin[i_w] = int(values.get(ref))
+
+
+        # number of timepoints
+        no_of_tp = self._n_tp.value
+
+        # timepoints dx: derivative
+        values = xmldoc.get_dx_lin_tp_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for no_tp in range(no_of_tp):
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_dx = z_i - self._offs_dx.value
+                dx_tp_lin[i_dx+no_tp*len(refs)] = int(values.get(ref)[no_tp])
+        
+        # timepoints x: differentiate
+        values = xmldoc.get_x_lin_tp_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)       
+        
+        for no_tp in range(no_of_tp):
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_x = z_i - self._offs_x.value
+                
+                x_tp_lin[i_x+no_tp*len(refs)] = int(values.get(ref)[no_tp])
+            
+        # timepoints u: input
+        values = xmldoc.get_u_lin_tp_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+        
+        for no_tp in range(no_of_tp):
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_u = z_i - self._offs_u.value
+                
+                u_tp_lin[i_u+no_tp*len(refs)] = int(values.get(ref)[no_tp])
+        
+        # timepoints w: algebraic
+        values = xmldoc.get_w_lin_tp_values()
+        
+        refs = values.keys()
+        refs.sort(key=int)
+
+        for no_tp in range(no_of_tp):
+            for ref in refs:
+                (z_i, ptype) = _translate_value_ref(ref)
+                i_w = z_i - self._offs_w.value
+                w_tp_lin[i_w+no_tp*len(refs)] = int(values.get(ref)[no_tp])                
+
 
     def get_variable_names(self):
         """
