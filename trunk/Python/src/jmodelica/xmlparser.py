@@ -1027,8 +1027,8 @@ class XMLValuesDoc(XMLBaseDoc):
             Dict with ValueReference as key and parameter as value.
             
         """
-        keys = self._xpatheval("//ValueReference/text()")
-        vals = self._xpatheval("//Value/text()")
+        keys = self._xpatheval("//*/@valueReference")
+        vals = self._xpatheval("//*/@value")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -1051,7 +1051,7 @@ class XMLValuesDoc(XMLBaseDoc):
         return dict(zip(valrefs, iparam_values))
     
     def get_parameter_type(self, valref):
-        type = self._xpatheval("//IndependentParameters/node()[ValueReference=\""+str(valref)+"\"]")
+        type = self._xpatheval("//IndependentParameters/node()[@valueReference=\""+str(valref)+"\"]")
         if len(type) > 0:
             return type[0].tag
         return None

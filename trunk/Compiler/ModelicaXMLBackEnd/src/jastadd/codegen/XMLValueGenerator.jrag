@@ -62,59 +62,54 @@ public class XMLValueGenerator extends GenericGenerator{
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
 		public void generate(PrintStream genPrinter) {
-			TagGenerator tg = new TagGenerator(1);
 			ArrayList<FBooleanVariable> booleans = fclass.independentBooleanParameters();
-			
 			for(FBooleanVariable variable: booleans) {
-				genPrinter.print(tg.generateTag("BooleanParameter"));
-				genPrinter.print(tg.generateTag("ValueReference")+variable.valueReference()+tg.generateTag("ValueReference"));
+				genPrinter.print("\n\t <BooleanParameter ");
+				genPrinter.print("valueReference=\""+variable.valueReference()+"\" ");
 				if(variable.hasBindingExp()) {
-					genPrinter.print(tg.generateTag("Value")+variable.getBindingExp().ceval().booleanValue()+tg.generateTag("Value"));
+					genPrinter.print("value=\""+variable.getBindingExp().ceval().booleanValue()+"\"");
 				}else{
-					genPrinter.print(tg.generateTag("Value")+variable.startAttribute()+tg.generateTag("Value"));
+					genPrinter.print("value=\""+variable.startAttribute()+"\"");
 				}
-				genPrinter.print(tg.generateTag("BooleanParameter"));
+				genPrinter.print("/>");
 			}
 			
 			ArrayList<FIntegerVariable> integers = fclass.independentIntegerParameters();
-			
 			for(FIntegerVariable variable: integers) {
-				genPrinter.print(tg.generateTag("IntegerParameter"));
-				genPrinter.print(tg.generateTag("ValueReference")+variable.valueReference()+tg.generateTag("ValueReference"));
+				genPrinter.print("\n\t <IntegerParameter ");
+				genPrinter.print("valueReference=\""+variable.valueReference()+"\" ");
 				if(variable.hasBindingExp()) {
-					genPrinter.print(tg.generateTag("Value")+variable.getBindingExp().ceval().intValue()+tg.generateTag("Value"));
+					genPrinter.print("value=\""+variable.getBindingExp().ceval().intValue()+"\"");
 				}else{
-					genPrinter.print(tg.generateTag("Value")+variable.startAttribute()+tg.generateTag("Value"));
+					genPrinter.print("value=\""+variable.startAttribute()+"\"");
 				}
-				genPrinter.print(tg.generateTag("IntegerParameter"));
+				genPrinter.print("/>");
 
 			}
-			
-			ArrayList<FStringVariable> strings = fclass.independentStringParameters();
-			
-			for(FStringVariable variable: strings) {
-				genPrinter.print(tg.generateTag("StringParameter"));
-				genPrinter.print(tg.generateTag("ValueReference")+variable.valueReference()+tg.generateTag("ValueReference"));
-				if(variable.hasBindingExp()) {
-					genPrinter.print(tg.generateTag("Value")+variable.getBindingExp().ceval().stringValue()+tg.generateTag("Value"));
-				}else{
-					genPrinter.print(tg.generateTag("Value")+variable.startAttribute()+tg.generateTag("Value"));
-				}
-				genPrinter.print(tg.generateTag("StringParameter"));
-
-			}
-			
+						
 			ArrayList<FRealVariable> reals = fclass.independentRealParameters();
-			
 			for(FRealVariable variable: reals) {
-				genPrinter.print(tg.generateTag("RealParameter"));
-				genPrinter.print(tg.generateTag("ValueReference")+variable.valueReference()+tg.generateTag("ValueReference"));
+				genPrinter.print("\n\t <RealParameter ");
+				genPrinter.print("valueReference=\""+variable.valueReference()+"\" ");
 				if(variable.hasBindingExp()) {
-					genPrinter.print(tg.generateTag("Value")+variable.getBindingExp().ceval().realValue()+tg.generateTag("Value"));
+					genPrinter.print("value=\""+variable.getBindingExp().ceval().realValue()+"\"");
 				}else{
-					genPrinter.print(tg.generateTag("Value")+variable.startAttribute()+tg.generateTag("Value"));
+					genPrinter.print("value=\""+variable.startAttribute()+"\"");
 				}
-				genPrinter.print(tg.generateTag("RealParameter"));
+				genPrinter.print("/>");
+			}
+			
+			ArrayList<FStringVariable> strings = fclass.independentStringParameters();			
+			for(FStringVariable variable: strings) {
+				genPrinter.print("\n\t <StringParameter ");
+				genPrinter.print("valueReference=\""+variable.valueReference()+"\" ");
+				if(variable.hasBindingExp()) {
+					genPrinter.print("value=\""+variable.getBindingExp().ceval().stringValue()+"\"");
+				}else{
+					genPrinter.print("value=\""+variable.startAttribute()+"\"");
+				}
+				genPrinter.print("/>");
+
 			}
 		}
 	}

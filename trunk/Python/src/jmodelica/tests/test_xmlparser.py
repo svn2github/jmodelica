@@ -896,6 +896,7 @@ def t_get_iparam_values(xmldoc):
         else:
             pass
             # enumeration not supported
+    nose.tools.assert_equal(d.get(3), 350.0)
 
 @testattr(stddist = True)
 def t_get_starttime(xmldoc):
