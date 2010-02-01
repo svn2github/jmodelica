@@ -1,6 +1,21 @@
+# -*- coding: utf-8 -*-
 """
 Test module for functions directly in jmodelica.
 """
+#    Copyright (C) 2009 Modelon AB
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, version 3 of the License.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import os
 
 import numpy as N
@@ -131,6 +146,18 @@ def test_simulate_3():
     theta = res.get_variable_data('theta')
     assert N.abs(theta.x[-1] -  6.0979443) < 1e-3, \
             "Wrong value of x1_sim function in simulation_with_input.py"
+            
+@testattr(stddist = True)
+def test_exception_raised():
+    """ Test compact functions without passing mofile raises exception."""
+    cpath = "Pendulum_pack.Pendulum"
+    nose.tools.assert_raises(Exception, jmodelica.initialize, cpath)
+    
+    nose.tools.assert_raises(Exception, jmodelica.simulate, cpath)
+
+    nose.tools.assert_raises(Exception, jmodelica.optimize, cpath)
+    
+
    
     
 
