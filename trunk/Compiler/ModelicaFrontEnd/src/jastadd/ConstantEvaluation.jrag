@@ -859,7 +859,7 @@ aspect ConstantEvaluation {
   
   syn boolean FMinMaxExp.selectLesser();
   eq FMinExp.selectLesser() = true;
-//  eq FMaxExp.selectLesser() = false;
+  eq FMaxExp.selectLesser() = false;
   
   inh int FEndExp.retrieveEnd();
   eq FExpSubscript.getChild().retrieveEnd() = mySize()[0];

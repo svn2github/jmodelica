@@ -925,3 +925,8 @@ abstract FMinMaxExp : FBuiltInFunctionCall ::= X:FExp [Y:FExp];
  * \brief Min built-in function.
  */
 FMinExp : FMinMaxExp;
+
+/**
+ * \brief Max built-in function.
+ */
+FMaxExp : FMinMaxExp;

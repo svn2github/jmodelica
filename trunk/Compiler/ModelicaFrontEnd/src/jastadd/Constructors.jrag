@@ -261,6 +261,7 @@ aspect InheritedFactoryMethods {
 	public FOnes      FOnes.createEmptyNode()      { return new FOnes(); }
 	public FZeros     FZeros.createEmptyNode()     { return new FZeros(); }
 	public FMinExp    FMinExp.createEmptyNode()    { return new FMinExp(); }
+	public FMaxExp    FMaxExp.createEmptyNode()    { return new FMaxExp(); }
 	
 	/**
 	 * \brief Create new node of same class as this, with the specified 

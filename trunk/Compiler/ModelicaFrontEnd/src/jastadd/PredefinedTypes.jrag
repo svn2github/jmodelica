@@ -213,7 +213,11 @@ aspect PredefinedTypes {
 +"  input Real y = 0;\n"  // Type and default value not used
 +"  output Real z;\n"     // Type not used
 +"end min;\n"
-+"function max end max;\n"
++"function max\n"
++"  input Real x;\n"      // Type not used
++"  input Real y = 0;\n"  // Type and default value not used
++"  output Real z;\n"     // Type not used
++"end max;\n"
 +"function sum end sum;\n"
 +"function product end product;\n"
 +"function symmetric end symmetric;\n"

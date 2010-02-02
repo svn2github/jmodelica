@@ -1006,6 +1006,134 @@ end MinExp7;
 
 
 
+model MaxExp1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MaxExp1",
+         description="Max operator: 2 scalar args",
+         flatModel="
+fclass ArrayTests.MaxExp1
+ constant Real x = max(1 + 2, 3 + 4);
+ Real y;
+equation
+ y = 7.0;
+end ArrayTests.MaxExp1;
+")})));
+
+ constant Real x = max(1+2, 3+4);
+ Real y = x;
+end MaxExp1;
+
+
+model MaxExp2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MaxExp2",
+         description="Max operator: 1 array arg",
+         flatModel="
+fclass ArrayTests.MaxExp2
+ constant Real x = max({{1,2},{3,4}});
+ Real y;
+equation
+ y = 4.0;
+end ArrayTests.MaxExp2;
+")})));
+
+ constant Real x = max({{1,2},{3,4}});
+ Real y = x;
+end MaxExp2;
+
+
+model MaxExp3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MaxExp3",
+         description="Max operator: strings",
+         flatModel="
+fclass ArrayTests.MaxExp3
+ constant String x = max(\"foo\", \"bar\");
+ String y;
+equation
+ y = \"foo\";
+end ArrayTests.MaxExp3;
+")})));
+
+ constant String x = max("foo", "bar");
+ String y = x;
+end MaxExp3;
+
+
+model MaxExp4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MaxExp4",
+         description="Max operator: booleans",
+         flatModel="
+fclass ArrayTests.MaxExp4
+ constant Boolean x = max(true, false);
+ Boolean y;
+equation
+ y = true;
+end ArrayTests.MaxExp4;
+")})));
+
+ constant Boolean x = max(true, false);
+ Boolean y = x;
+end MaxExp4;
+
+
+model MaxExp5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="MaxExp5",
+         description="Max operator: mixed types",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 958, column 11:
+  Type error in expression
+")})));
+
+ Real x = max(true, 0);
+end MaxExp5;
+
+
+model MaxExp6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="MaxExp6",
+         description="Max operator: 2 array args",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 974, column 15:
+  Types of positional argument 1 and input x are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 974, column 22:
+  Types of positional argument 2 and input y are not compatible
+")})));
+
+ Real x = max({1,2}, {3,4});
+end MaxExp6;
+
+
+model MaxExp7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="MaxExp7",
+         description="Max operator: 1 scalar arg",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 993, column 15:
+  Types of positional argument 1 and input x are not compatible
+")})));
+
+ Real x = max(1);
+end MaxExp7;
+
+
+
 model SubscriptExpression1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(

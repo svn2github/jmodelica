@@ -288,6 +288,7 @@ aspect InstFunctionBinding {
 				map.put("zeros", new InfArgsBuiltInCreator(new FZeros(), 0));
 				map.put("size",  new VariableArgsBuiltInCreator(new FSizeExp(), 1, 2));
 				map.put("min",   new VariableArgsBuiltInCreator(new FMinExp(),  1, 2));
+				map.put("max",   new VariableArgsBuiltInCreator(new FMaxExp(),  1, 2));
 			}
 		}
 	}

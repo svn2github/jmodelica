@@ -1341,6 +1341,7 @@ aspect FlattPrettyPrint {
 	eq FOnes.getBuiltInName()       = "ones";
 	eq FZeros.getBuiltInName()      = "zeros";
 	eq FMinExp.getBuiltInName()     = "min";
+	eq FMaxExp.getBuiltInName()     = "max";
 
 /*
 	public void FSumRedExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
