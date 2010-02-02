@@ -783,6 +783,12 @@ aspect Scalarization {
 			return super.scalarize(indexMap);
 	}
 	
+	public FExp FSizeExp.scalarize(HashMap<String,Integer> indexMap) {
+		int dim = getDim().ceval().intValue() - 1;
+		int[] size = getFExp().size();
+		return new FIntegerLitExp(size[dim]);
+	}
+	
 	public FExp FBinExp.scalarize(HashMap<String,Integer> indexMap) { return createNode(getLeft().scalarize(indexMap), getRight().scalarize(indexMap)); }
 	public FExp FUnaryExp.scalarize(HashMap<String,Integer> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
 	public FExp FMathematicalFunctionCall.scalarize(HashMap<String,Integer> indexMap) { return createNode(getFExp().scalarize(indexMap)); }

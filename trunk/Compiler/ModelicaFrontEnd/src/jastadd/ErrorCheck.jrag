@@ -505,18 +505,18 @@ aspect InstanceErrorCheck {
         if (!errorChecked) {
         	super.collectErrors();
 	
-			// Check if parameters and constants have binding expressions
-			if (isParameter() && !isForIndex() && myBindingInstExp()==null){
-			   // Warn if parameter does not have a binding expression (start is used)
-			   warning("The parameter " + qualifiedName() + " does not have a binding expression.");
-			} else if (isConstant() && myBindingInstExp()==null){
+			// Check binding expression
+			if (myBindingInstExp() == null) {
+				// Warn if parameter does not have a binding expression (start is used)
+				if (isParameter() && !isForIndex()) 
+				   warning("The parameter " + qualifiedName() + " does not have a binding expression.");
 				// Error if a constant does not have a binding expression
-			   error("The constant " + qualifiedName() + " does not have a binding expression.");
-			}
-			
-			// Check if the binding expression of parameters can be evaluated
-			if ((isParameter() || isConstant()) && !(myBindingInstExp()==null)) {
-				myBindingInstExp().checkConstantExpression(this,isParameter()? "parameter":"constant",qualifiedName());
+				else if (isConstant()) 
+				   error("The constant " + qualifiedName() + " does not have a binding expression.");
+			} else {
+				// Check if the binding expression of constants and parameters can be evaluated
+				if (isParameter() || isConstant()) 
+					myBindingInstExp().checkConstantExpression(this,isParameter()? "parameter":"constant",qualifiedName());
 			}
 			// Check if the expressions of the attributes can be evaluated
 			// Notice that this check has to be done locally in the

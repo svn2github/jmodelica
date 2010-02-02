@@ -734,10 +734,14 @@ aspect FlatExpressions {
 	
 	// These used to delegate to standard implementation for FExp.flatten(FQName).
 	public FScalar    FScalar.flatten(FQName prefix)    { return null; }
-	public FSizeExp   FSizeExp.flatten(FQName prefix)   { return null; }
 	
 	public FIdentity  FIdentity.flatten(FQName prefix)  { return new FIdentity(getFExp().flatten(prefix)); }
 	public FTranspose FTranspose.flatten(FQName prefix) { return new FTranspose(getFExp().flatten(prefix)); }
+	
+	public FSizeExp   FSizeExp.flatten(FQName prefix) {
+		Opt<FExp> dim = hasDim() ? new Opt<FExp>(getDim().flatten(prefix)) : new Opt<FExp>();
+		return new FSizeExp(getFExp().flatten(prefix), dim); 
+	}
 	
 	public FDerExp InstDerExp.flatten(FQName prefix) {
 		/* This should only ever be called on InstDerExps that has an FInstAccessExp 
@@ -1388,6 +1392,13 @@ aspect InstantiatedExpressions {
 	}
 	
 	/**
+	 * \brief Check if the argument was explicitly given in the call.
+	 */
+	syn boolean InstFunctionArgument.isGiven() = false;
+	eq InstPositionalArgument.isGiven() = true;
+	eq InstNamedArgument.isGiven()      = true;
+	
+	/**
 	 * \brief The input component this argument is bound to.
 	 */
 	protected InstComponentDecl InstFunctionArgument.boundInput = null;
@@ -1523,6 +1534,24 @@ aspect InstantiatedExpressions {
 				
 			}
 			
+			private static class VariableArgsBuiltInCreator extends BuiltInCreator {
+				
+				private int maxArgs;
+				
+				public VariableArgsBuiltInCreator(FBuiltInFunctionCall tmpl, int minArgs, int maxArgs) {
+					super(false, tmpl, minArgs);
+					this.maxArgs = maxArgs;
+				}
+				
+				public FBuiltInFunctionCall create(InstFunctionArgument[] args) {
+					FBuiltInFunctionCall res = super.create(args);
+					for (int i = numArgs; i < maxArgs; i++)
+						res.setChild(args[i].isGiven() ? new Opt(args[i].getFExp()) : new Opt(), i);
+					return res;
+				}
+				
+			}
+			
 			private HashMap<String, BuiltInCreator> map;
 			private static final String MATH_PREF = "Modelica.Math.";
 			private static final int MATH_LEN = MATH_PREF.length();
@@ -1566,6 +1595,7 @@ aspect InstantiatedExpressions {
 				map.put("transpose", new BuiltInCreator(false, new FTranspose(),  1));
 				map.put("ones",  new InfArgsBuiltInCreator(new FOnes(),  0));
 				map.put("zeros", new InfArgsBuiltInCreator(new FZeros(), 0));
+				map.put("size",  new VariableArgsBuiltInCreator(new FSizeExp(), 1, 2));
 			}
 		}
 	}
@@ -1587,24 +1617,6 @@ aspect InstantiatedExpressions {
     	when (!rewritten) to FAbstractFunctionCall {
 		    // Make sure we only do this once.
 		    rewritten = true;
-		    
-//		    // Special handling for function-like operators without maximum number of args.
-//		    // TODO: generate error for named arguments
-//		    String unQName = getName().name();
-//		    if (unQName.equals("ones") || unQName.equals("zeros")) {
-//		    	FInfArgsFunctionCall iafc = null;
-//		        if (unQName.equals("ones")) 
-//		        	iafc = new FOnes(new List());
-//		        else if (unQName.equals("zeros")) 
-//		        	iafc = new FZeros(new List());
-//		    	for (InstFunctionArgument arg : getArgs()) {
-//		    		if (arg instanceof InstPositionalArgument)
-//		    			iafc.addFExp((FExp) arg.getFExp().fullCopy());
-//		    		iafc.addToOriginalArgs(arg);
-//		    		iafc.setLocation(this);
-//		    	}
-//		    	return iafc;
-//		    }
 		    
 		    /* If we can't resolve the name as a function, don't try to bind arguments, 
 		     * just leave it for the error check. */

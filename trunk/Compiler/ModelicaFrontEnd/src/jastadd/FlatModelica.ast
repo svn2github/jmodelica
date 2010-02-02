@@ -802,15 +802,9 @@ InstDefaultArgument : InstFunctionArgument ::= [FExp];
 abstract FBuiltInFunctionCall : FAbstractFunctionCall ::= /OriginalArg:InstFunctionArgument*/;
 
 /**
- * \brief Base class for calls to all built-in functions for which the
- * arguments should not be type checked, e.g., noEvent(). 
- */
-abstract FUnCheckedBuiltInFunctionCall : FBuiltInFunctionCall;
-
-/**
  * \brief noEvent built-in function.
  */
-FNoEventExp : FUnCheckedBuiltInFunctionCall ::= FExp;
+FNoEventExp : FBuiltInFunctionCall ::= FExp;
 
 /**
  * \brief Base class for calls to built-in mathematical functions.
@@ -890,7 +884,7 @@ FSqrtExp : FMathematicalFunctionCall ::= ;
 /**
  * \brief Size built-in function.
  */
-FSizeExp : FBuiltInFunctionCall ::= FIdUseExp Dim:FExp;
+FSizeExp : FBuiltInFunctionCall ::= FExp [Dim:FExp];
 
 /**
  * \brief Scalar built-in function.

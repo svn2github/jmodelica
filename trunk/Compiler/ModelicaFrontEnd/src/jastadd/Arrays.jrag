@@ -174,7 +174,12 @@ aspect Arrays {
 		}
 	}
 	eq FSubscriptedExp.ndims() = getFArraySubscripts().accessNdims();
+	
+	eq FTranspose.ndims() = getFExp().ndims();
 	eq FIdentity.ndims() = 2;
+	
+	eq FSizeExp.ndims() = hasDim() ? 0 : 1;
+	
 	eq FInfArgsFunctionCall.ndims() = getNumFExp();
 	
 	eq FBinExp.ndims() = getLeft().ndims();
@@ -193,8 +198,6 @@ aspect Arrays {
 			return -1;
 		return left + right - 2;
 	}
-	
-	eq FTranspose.ndims() = getFExp().ndims();
 	
 	/**
 	 * \brief Check if multiplication is equivalent with an element-wise multiplication.
@@ -435,14 +438,6 @@ aspect Arrays {
 		return si;
 	}
 	
-	eq FTranspose.size() {
-		int[] size = getFExp().size().clone();
-		int temp = size[0];
-		size[0] = size[1];
-		size[1] = temp;
-		return size;
-	}
-	
  	eq FRangeExp.size() {
 		double start = getFExp(0).ceval().realValue();
 		double step = 1.0;
@@ -470,12 +465,22 @@ aspect Arrays {
 	
 	eq FSubscriptedExp.size() = getFArraySubscripts().accessSize();
 	
+	eq FTranspose.size() {
+		int[] size = getFExp().size().clone();
+		int temp = size[0];
+		size[0] = size[1];
+		size[1] = temp;
+		return size;
+	}
+	
 	eq FIdentity.size() {
 		int s[] = new int[2];
 		s[0] = getFExp().ceval().intValue();
 		s[1] = s[0];
 		return s;
 	}
+	
+	eq FSizeExp.size() = hasDim() ? new int[0] : new int[] { getFExp().ndims() };
 	
 	eq FInfArgsFunctionCall.size() {
 		try {
@@ -818,6 +823,17 @@ aspect Arrays {
 		Array arr = new Array(indices());
 		for (Index i : arr.indices())
 			arr.set(i, new FIntegerLitExp((i.index()[0] == i.index()[1]) ? 1 : 0));
+		return arr;
+	}
+	
+	eq FSizeExp.getArray() {
+		if (hasDim()) 
+			return super.getArray();
+		
+		Array arr = new Array(indices());
+		int[] size = getFExp().size();
+		for (Index i : arr.indices())
+			arr.set(i, new FIntegerLitExp(size[i.index()[0] - 1]));
 		return arr;
 	}
 	

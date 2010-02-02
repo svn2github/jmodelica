@@ -87,24 +87,37 @@ aspect FlatTypeCheck {
 	  }
   }
   
-  public void FBinExp.typeCheck() {
-	  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
-		  if (type().isUnknown()) {
-			  error("Type error in expression");	  
+  // Generic typeCheck() that calls typeError() if type is unknown and no FExp child has unknown type
+  public void FExp.typeCheck() {
+	  if (type().isUnknown()) {
+		  for (ASTNode n : this) {
+			  if (isUnknownFExp(n))
+				  return;
+			  if (n instanceof List) 
+				  for (ASTNode n2 : (List<ASTNode>) n) 
+					  if (isUnknownFExp(n2))
+						  return;
+			  if (n instanceof Opt && n.getNumChild() > 0 && isUnknownFExp(n.getChild(0)))
+				  return;
 		  }
+		  typeError();
 	  }
   }
   
-  public void FUnaryExp.typeCheck() {
-	  if (!getFExp().type().isUnknown()) {
-		  if (type().isUnknown()) {
-			  error("Type error in expression");	  
-		  }
-	  }
+  protected static boolean FExp.isUnknownFExp(ASTNode n) {
+	  return n instanceof FExp && ((FExp) n).type().isUnknown();
   }
   
-  // TODO: Add typeCheck for other FExp types (e.g. FZeros)
+  // TODO: Add specialized typeError() methods that gived better error message
+  
+  public void FExp.typeError() {
+	  error("Type error in expression");	  
+  }
 
+  
+  // FIdUseExp and FInstAccessExp ska inte kollas, det görs i InstAccess
+  public void FIdUseExp.typeCheck() {}
+  public void FInstAccessExp.typeCheck() {}
   
   public void FExpSubscript.typeCheck() {
 	  if (ndims() > 1) { 
@@ -175,10 +188,15 @@ aspect FlatTypeCheck {
   syn String FInfArgsFunctionCall.getOKArgTypeString() = "compatible with Integer";
   
   public void FBuiltInFunctionCall.typeCheck() {
+	  if (checkTypeAsExpression())
+		  super.typeCheck();
 	  if (myLefts().size() > 1)
 		  error("Too many components assigned from function call: " + getBuiltInName() + 
 				  "() has 1 output(s)");
   }
+  
+  syn boolean FBuiltInFunctionCall.checkTypeAsExpression() = false;
+  eq FSizeExp.checkTypeAsExpression() = true;
   
   public void InstFunctionCall.typeCheck() {
 	  if (myOutputs().size() < myLefts().size())
@@ -237,13 +255,16 @@ aspect FlatTypeCheck {
   inh boolean InstFunctionArgument.argumentDefinedTypeValid();
   eq FAbstractFunctionCall.getChild().argumentDefinedTypeValid() = true;
   eq FTranspose.getChild().argumentDefinedTypeValid()            = false;
+  eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()   = i != 0;
   
   /**
-   * \brief Check if the type supplied is valid for this argument. Assumes that the 
-   *        type defined in the built-in function list isn't valid.
+   * \brief Check if the type supplied is valid for this argument.
+   * 
+   * Only used if argumentDefinedTypeValid() returns <code>false</code>.
    */
   inh boolean InstFunctionArgument.argumentTypeValid(FPrimitiveType type);
   eq FAbstractFunctionCall.getChild().argumentTypeValid(FPrimitiveType type) = false;
   eq FTranspose.getChild().argumentTypeValid(FPrimitiveType type)            = type.ndims() >= 2;
+  eq FSizeExp.getChild().argumentTypeValid(FPrimitiveType type)              = true;
   
 }

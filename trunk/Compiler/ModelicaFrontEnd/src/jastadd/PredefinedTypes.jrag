@@ -186,7 +186,11 @@ aspect PredefinedTypes {
 +"function semiLinear end semiLinear;\n"
 +"function promote end promote;\n"
 +"function ndims end ndims;\n"
-+"function size end size;\n"
++"function size"
++"  input Real A;"      // Type not used
++"  input Real d = 0;"  // Default value not used
++"  output Integer s;"
++"end size;\n"
 +"function scalar end scalar;\n"
 +"function vector end vector;\n"
 +"function matrix end matrix;\n"

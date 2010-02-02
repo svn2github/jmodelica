@@ -560,15 +560,6 @@ aspect PrettyPrint {
 		str.print(")");
 	}
 
-
-	public void SizeExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("size(");
-		p.toString(getAccess(),str,"",o);
-		str.print(",");
-		p.toString(getDim(),str,"",o);
-		str.print(")");
-	}
-
 	public void FunctionArguments.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		for (int i=0; i<getNumExp(); i++) {
 			p.toString(getExp(i),str,indent,o);
@@ -1296,9 +1287,11 @@ aspect FlattPrettyPrint {
 	}
 	
 	protected void FSizeExp.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
-		p.toString(getFIdUseExp(),str,indent,o);
-		str.print(", ");
-		p.toString(getDim(),str,indent,o);
+		p.toString(getFExp(),str,indent,o);
+		if (hasDim()) {
+			str.print(", ");
+			p.toString(getDim(),str,indent,o);
+		}
 	}
 	
 	protected void FScalar.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
@@ -1366,14 +1359,6 @@ aspect FlattPrettyPrint {
         p.toString(getFExp(), str, indent, o);
         }
     }
-		
-	public void FSizeExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("size(");
-		p.toString(getFIdUseExp(),str,"",o);
-		str.print(",");
-		p.toString(getDim(),str,"",o);
-		str.print(")");
-	}
 	
 	public void FArray.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("{");

@@ -406,11 +406,6 @@ EndExp : Exp;
 // Dummy node used in the compilation
 PN_DummyClause : Clause ::=;
 
-
-// Built in functions
-abstract BuiltInFunctionExp : Exp ::=;
-SizeExp : BuiltInFunctionExp ::= Access Dim:Exp;
-
 QName ::= QNamePart*;
 QNamePart ::= <Name> QNameSubscript*;
 QNameSubscript ::= <Value:Integer>;

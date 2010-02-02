@@ -704,6 +704,180 @@ end ArrayTest32;
 
 
 
+model SizeExpression1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="SizeExpression1",
+         description="Size operator: first dim",
+         flatModel="
+fclass ArrayTests.SizeExpression1
+ Real x;
+equation
+ x = 2;
+end ArrayTests.SizeExpression1;
+")})));
+
+ Real x = size(ones(2), 1);
+end SizeExpression1;
+
+
+model SizeExpression2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="SizeExpression2",
+         description="Size operator: second dim",
+         flatModel="
+fclass ArrayTests.SizeExpression2
+ Real x;
+equation
+ x = 3;
+end ArrayTests.SizeExpression2;
+")})));
+
+ Real x = size(ones(2, 3), 2);
+end SizeExpression2;
+
+
+model SizeExpression3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="SizeExpression3",
+         description="Size operator: without dim",
+         flatModel="
+fclass ArrayTests.SizeExpression3
+ Real x[1];
+equation
+ x[1] = 2;
+end ArrayTests.SizeExpression3;
+")})));
+
+ Real x[1] = size(ones(2));
+end SizeExpression3;
+
+
+model SizeExpression4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="SizeExpression4",
+         description="Size operator: without dim",
+         flatModel="
+fclass ArrayTests.SizeExpression4
+ Real x[1];
+ Real x[2];
+equation
+ x[1] = 2;
+ x[2] = 3;
+end ArrayTests.SizeExpression4;
+")})));
+
+ Real x[2] = size(ones(2, 3));
+end SizeExpression4;
+
+
+model SizeExpression5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="SizeExpression5",
+         description="Size operator: using parameter",
+         flatModel="
+fclass ArrayTests.SizeExpression5
+ parameter Integer p = 1 /* 1 */;
+ Real x;
+equation
+ x = 2;
+end ArrayTests.SizeExpression5;
+")})));
+
+ parameter Integer p = 1;
+ Real x = size(ones(2, 3), p);
+end SizeExpression5;
+
+
+model SizeExpression6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="SizeExpression6",
+         description="Size operator: too high variability of dim",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 793, column 11:
+  Type error in expression
+")})));
+
+ Integer d = 1;
+ Real x = size(ones(2, 3), d);
+end SizeExpression6;
+
+
+model SizeExpression7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="SizeExpression7",
+         description="Size operator: array as dim",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 809, column 11:
+  Type error in expression
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 809, column 28:
+  Types of positional argument 2 and input d are not compatible
+")})));
+
+ Real x = size(ones(2, 3), {1, 2});
+end SizeExpression7;
+
+
+model SizeExpression8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="SizeExpression8",
+         description="Size operator: Real as dim",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 828, column 11:
+  Type error in expression
+")})));
+
+ Real x = size(ones(2, 3), 1.0);
+end SizeExpression8;
+
+
+model SizeExpression9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="SizeExpression9",
+         description="Size operator: too low dim",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 844, column 11:
+  Type error in expression
+")})));
+
+ Real x = size(ones(2, 3), 0);
+end SizeExpression9;
+
+
+model SizeExpression10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="SizeExpression10",
+         description="Size operator: too high dim",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 860, column 11:
+  Type error in expression
+")})));
+
+ Real x = size(ones(2, 3), 3);
+end SizeExpression10;
+
+
+
 model SubscriptExpression1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(

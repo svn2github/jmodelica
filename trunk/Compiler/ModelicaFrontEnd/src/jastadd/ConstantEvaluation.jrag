@@ -782,7 +782,10 @@ aspect ConstantEvaluation {
      * \brief Recursive helper method for {@see #buildLiteral(boolean)}.
      */
     protected FExp ScalarAsArray.buildLiteralHelper(Iterator<FExp> it, boolean toReal, int dim) {
-    	return it.next();
+    	CValue c = it.next().ceval();
+    	if (toReal)
+    		c = c.convertReal();
+    	return c.buildLiteral();
     }
     
   /**
@@ -826,6 +829,14 @@ aspect ConstantEvaluation {
   
   // TODO: expand to handle boolean end enum index
   eq FEndExp.ceval() = new CValueInteger(retrieveEnd());
+  
+  eq FSizeExp.ceval() {
+	  if (!hasDim())
+		  return new CValueUnknown();
+	  int dim = getDim().ceval().intValue() - 1;
+	  int[] size = getFExp().size();
+	  return new CValueInteger(size[dim]);
+  }
   
   inh int FEndExp.retrieveEnd();
   eq FExpSubscript.getChild().retrieveEnd() = mySize()[0];
@@ -1179,8 +1190,8 @@ aspect CircularExpressions {
 	}
 	
 	eq FMathematicalFunctionCall.isCircular() = getFExp().isCircular();
-	eq FAtan2Exp.isCircular() = getFExp().isCircular() | getY().isCircular();
-	eq FSizeExp.isCircular() = getFIdUseExp().isCircular() | getDim().isCircular();
+	eq FAtan2Exp.isCircular() = getFExp().isCircular() || getY().isCircular();
+	eq FSizeExp.isCircular() = getFExp().isCircular() || (hasDim() && getDim().isCircular());
 	eq FOnes.isCircular() {
 		for (FExp e : getFExps()) {
 			if (e.isCircular()) {
