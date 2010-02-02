@@ -784,9 +784,22 @@ aspect Scalarization {
 	}
 	
 	public FExp FSizeExp.scalarize(HashMap<String,Integer> indexMap) {
+		// Only the form with dim can be in the tree at this point
 		int dim = getDim().ceval().intValue() - 1;
 		int[] size = getFExp().size();
 		return new FIntegerLitExp(size[dim]);
+	}
+	
+	public FExp FMinMaxExp.scalarize(HashMap<String,Integer> indexMap) {
+		if (hasY()) {
+			return createNode(getX().scalarize(indexMap), getY().scalarize(indexMap));
+		} else {
+			Iterator<FExp> it = getX().getArray().iteratorFExp();
+			FExp res = it.next().scalarize(indexMap);
+			while (it.hasNext())
+				res = createNode(res, it.next().scalarize(indexMap));
+			return res;
+		}
 	}
 	
 	public FExp FBinExp.scalarize(HashMap<String,Integer> indexMap) { return createNode(getLeft().scalarize(indexMap), getRight().scalarize(indexMap)); }

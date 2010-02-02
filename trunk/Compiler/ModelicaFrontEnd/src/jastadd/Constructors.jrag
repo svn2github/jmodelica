@@ -176,6 +176,7 @@ aspect InheritedFactoryMethods {
 	public abstract FBooleanLitExp            FBooleanLitExp.createEmptyNode();   // No children, but can be useful
 	public abstract FMathematicalFunctionCall FMathematicalFunctionCall.createEmptyNode();
 	public abstract FInfArgsFunctionCall      FInfArgsFunctionCall.createEmptyNode();
+	public abstract FMinMaxExp      			FMinMaxExp.createEmptyNode();
 
 	// Unsupported expressions
 	public FUnsupportedExp FUnsupportedExp.createEmptyNode() { return new FUnsupportedExp(); }
@@ -259,6 +260,7 @@ aspect InheritedFactoryMethods {
 	public FIdentity  FIdentity.createEmptyNode()  { return new FIdentity(); }
 	public FOnes      FOnes.createEmptyNode()      { return new FOnes(); }
 	public FZeros     FZeros.createEmptyNode()     { return new FZeros(); }
+	public FMinExp    FMinExp.createEmptyNode()    { return new FMinExp(); }
 	
 	/**
 	 * \brief Create new node of same class as this, with the specified 
@@ -298,6 +300,18 @@ aspect InheritedFactoryMethods {
 	public FMathematicalFunctionCall FMathematicalFunctionCall.createNode(FExp exp) {
 		FMathematicalFunctionCall node = createEmptyNode();
 		node.setFExp(exp);
+		return node;
+	}
+	
+	/**
+	 * \brief Create new node of same class as this, with the specified 
+	 *        children. For missing y, use null.
+	 */
+	public FMinMaxExp FMinMaxExp.createNode(FExp x, FExp y) {
+		FMinMaxExp node = createEmptyNode();
+		node.setX(x);
+		if (y != null)
+			node.setY(y);
 		return node;
 	}
 	

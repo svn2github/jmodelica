@@ -1294,6 +1294,14 @@ aspect FlattPrettyPrint {
 		}
 	}
 	
+	protected void FMinMaxExp.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getX(), str, indent, o);
+		if (hasY()) {
+			str.print(", ");
+			p.toString(getY(), str, indent, o);
+		}
+	}
+	
 	protected void FScalar.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
 		p.toString(getFExp(),str,indent,o);
 	}
@@ -1311,27 +1319,28 @@ aspect FlattPrettyPrint {
 	}
 
 	syn String FBuiltInFunctionCall.getBuiltInName();
-	eq FSinExp.getBuiltInName() = "sin";
-	eq FCosExp.getBuiltInName() = "cos";
-	eq FTanExp.getBuiltInName() = "tan";
-	eq FAsinExp.getBuiltInName() = "asin";
-	eq FAcosExp.getBuiltInName() = "acos";
-	eq FAtanExp.getBuiltInName() = "atan";
-	eq FAtan2Exp.getBuiltInName() = "atan2";
-	eq FSinhExp.getBuiltInName() = "sinh";
-	eq FCoshExp.getBuiltInName() = "cosh";
-	eq FTanhExp.getBuiltInName() = "tanh";
-	eq FExpExp.getBuiltInName() = "exp";
-	eq FLogExp.getBuiltInName() = "log";
-	eq FLog10Exp.getBuiltInName() = "log10";
-	eq FSqrtExp.getBuiltInName() = "sqrt";
-	eq FScalar.getBuiltInName() = "scalar";
-	eq FTranspose.getBuiltInName() = "transpose";
-	eq FSizeExp.getBuiltInName() = "size";
+	eq FSinExp.getBuiltInName()     = "sin";
+	eq FCosExp.getBuiltInName()     = "cos";
+	eq FTanExp.getBuiltInName()     = "tan";
+	eq FAsinExp.getBuiltInName()    = "asin";
+	eq FAcosExp.getBuiltInName()    = "acos";
+	eq FAtanExp.getBuiltInName()    = "atan";
+	eq FAtan2Exp.getBuiltInName()   = "atan2";
+	eq FSinhExp.getBuiltInName()    = "sinh";
+	eq FCoshExp.getBuiltInName()    = "cosh";
+	eq FTanhExp.getBuiltInName()    = "tanh";
+	eq FExpExp.getBuiltInName()     = "exp";
+	eq FLogExp.getBuiltInName()     = "log";
+	eq FLog10Exp.getBuiltInName()   = "log10";
+	eq FSqrtExp.getBuiltInName()    = "sqrt";
+	eq FScalar.getBuiltInName()     = "scalar";
+	eq FTranspose.getBuiltInName()  = "transpose";
+	eq FSizeExp.getBuiltInName()    = "size";
 	eq FNoEventExp.getBuiltInName() = "noEvent";
-	eq FIdentity.getBuiltInName() = "identity";
-	eq FOnes.getBuiltInName() = "ones";
-	eq FZeros.getBuiltInName() = "zeros";
+	eq FIdentity.getBuiltInName()   = "identity";
+	eq FOnes.getBuiltInName()       = "ones";
+	eq FZeros.getBuiltInName()      = "zeros";
+	eq FMinExp.getBuiltInName()     = "min";
 
 /*
 	public void FSumRedExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {

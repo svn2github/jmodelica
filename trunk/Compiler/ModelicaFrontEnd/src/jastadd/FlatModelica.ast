@@ -916,3 +916,12 @@ FOnes : FInfArgsFunctionCall;
  */
 FZeros : FInfArgsFunctionCall;
 
+/**
+ * \brief Common base class for FMinExp & FMaxExp.
+ */
+abstract FMinMaxExp : FBuiltInFunctionCall ::= X:FExp [Y:FExp];
+
+/**
+ * \brief Min built-in function.
+ */
+FMinExp : FMinMaxExp;

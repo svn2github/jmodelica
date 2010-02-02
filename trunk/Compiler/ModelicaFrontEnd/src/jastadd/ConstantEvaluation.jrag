@@ -838,6 +838,29 @@ aspect ConstantEvaluation {
 	  return new CValueInteger(size[dim]);
   }
   
+  eq FMinMaxExp.ceval() {
+	  if (hasY()) {
+		  CValue x = getX().ceval();
+		  CValue y = getY().ceval();
+		  boolean selectX = type().lt(x, y).booleanValue() ^ !selectLesser();
+		  return selectX ? x : y;
+	  } else {
+		  Iterator<FExp> it = getX().getArray().iteratorFExp();
+		  boolean less = selectLesser();
+		  CValue sel = it.next().ceval();
+		  while (it.hasNext()) {
+			  CValue val = it.next().ceval();
+			  if (type().lt(val, sel).booleanValue() ^ !less)
+				  sel = val;
+		  }
+		  return sel;
+	  }
+  }
+  
+  syn boolean FMinMaxExp.selectLesser();
+  eq FMinExp.selectLesser() = true;
+//  eq FMaxExp.selectLesser() = false;
+  
   inh int FEndExp.retrieveEnd();
   eq FExpSubscript.getChild().retrieveEnd() = mySize()[0];
   eq Root.getChild().retrieveEnd()          = 0;
@@ -1102,7 +1125,7 @@ aspect ConstantEvaluation {
 	  new CValueBoolean(v1.booleanValue() || v2.booleanValue());
 
   /**
-   * \brief Not expression for constant value.
+   * \brief Not expression for constant values.
    * 
    * @param v Constant value of operand.
    * @return Resulting constant value.
@@ -1111,6 +1134,24 @@ aspect ConstantEvaluation {
 	  new CValueUnknown();
   eq FBooleanScalarType.not(CValue v) = 
 	  new CValueBoolean(!v.booleanValue());
+  
+  /**
+   * \brief Less than comparison for constant values.
+   * 
+   * @param v1 Constant value of left operand.
+   * @param v2 Constant value of right operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FPrimitiveType.lt(CValue v1, CValue v2) = 
+	  new CValueUnknown();
+  eq FBooleanScalarType.lt(CValue v1, CValue v2) = 
+	  new CValueBoolean(!v1.booleanValue() && v2.booleanValue());
+  eq FRealScalarType.lt(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.realValue() < v2.realValue());
+  eq FIntegerScalarType.lt(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.intValue() < v2.intValue());
+  eq FStringScalarType.lt(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) < 0);
 	  
 }
 
@@ -1192,6 +1233,7 @@ aspect CircularExpressions {
 	eq FMathematicalFunctionCall.isCircular() = getFExp().isCircular();
 	eq FAtan2Exp.isCircular() = getFExp().isCircular() || getY().isCircular();
 	eq FSizeExp.isCircular() = getFExp().isCircular() || (hasDim() && getDim().isCircular());
+	eq FMinMaxExp.isCircular() = getX().isCircular() || (hasY() && getY().isCircular());
 	eq FOnes.isCircular() {
 		for (FExp e : getFExps()) {
 			if (e.isCircular()) {

@@ -704,99 +704,99 @@ end ArrayTest32;
 
 
 
-model SizeExpression1
+model SizeExp1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="SizeExpression1",
+         name="SizeExp1",
          description="Size operator: first dim",
          flatModel="
-fclass ArrayTests.SizeExpression1
+fclass ArrayTests.SizeExp1
  Real x;
 equation
  x = 2;
-end ArrayTests.SizeExpression1;
+end ArrayTests.SizeExp1;
 ")})));
 
  Real x = size(ones(2), 1);
-end SizeExpression1;
+end SizeExp1;
 
 
-model SizeExpression2
+model SizeExp2
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="SizeExpression2",
+         name="SizeExp2",
          description="Size operator: second dim",
          flatModel="
-fclass ArrayTests.SizeExpression2
+fclass ArrayTests.SizeExp2
  Real x;
 equation
  x = 3;
-end ArrayTests.SizeExpression2;
+end ArrayTests.SizeExp2;
 ")})));
 
  Real x = size(ones(2, 3), 2);
-end SizeExpression2;
+end SizeExp2;
 
 
-model SizeExpression3
+model SizeExp3
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="SizeExpression3",
+         name="SizeExp3",
          description="Size operator: without dim",
          flatModel="
-fclass ArrayTests.SizeExpression3
+fclass ArrayTests.SizeExp3
  Real x[1];
 equation
  x[1] = 2;
-end ArrayTests.SizeExpression3;
+end ArrayTests.SizeExp3;
 ")})));
 
  Real x[1] = size(ones(2));
-end SizeExpression3;
+end SizeExp3;
 
 
-model SizeExpression4
+model SizeExp4
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="SizeExpression4",
+         name="SizeExp4",
          description="Size operator: without dim",
          flatModel="
-fclass ArrayTests.SizeExpression4
+fclass ArrayTests.SizeExp4
  Real x[1];
  Real x[2];
 equation
  x[1] = 2;
  x[2] = 3;
-end ArrayTests.SizeExpression4;
+end ArrayTests.SizeExp4;
 ")})));
 
  Real x[2] = size(ones(2, 3));
-end SizeExpression4;
+end SizeExp4;
 
 
-model SizeExpression5
+model SizeExp5
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="SizeExpression5",
+         name="SizeExp5",
          description="Size operator: using parameter",
          flatModel="
-fclass ArrayTests.SizeExpression5
+fclass ArrayTests.SizeExp5
  parameter Integer p = 1 /* 1 */;
  Real x;
 equation
  x = 2;
-end ArrayTests.SizeExpression5;
+end ArrayTests.SizeExp5;
 ")})));
 
  parameter Integer p = 1;
  Real x = size(ones(2, 3), p);
-end SizeExpression5;
+end SizeExp5;
 
 
-model SizeExpression6
+model SizeExp6
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(
-         name="SizeExpression6",
+         name="SizeExp6",
          description="Size operator: too high variability of dim",
          errorMessage="
 1 errors found:
@@ -807,13 +807,13 @@ Semantic error at line 793, column 11:
 
  Integer d = 1;
  Real x = size(ones(2, 3), d);
-end SizeExpression6;
+end SizeExp6;
 
 
-model SizeExpression7
+model SizeExp7
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(
-         name="SizeExpression7",
+         name="SizeExp7",
          description="Size operator: array as dim",
          errorMessage="
 2 errors found:
@@ -826,13 +826,13 @@ Semantic error at line 809, column 28:
 ")})));
 
  Real x = size(ones(2, 3), {1, 2});
-end SizeExpression7;
+end SizeExp7;
 
 
-model SizeExpression8
+model SizeExp8
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(
-         name="SizeExpression8",
+         name="SizeExp8",
          description="Size operator: Real as dim",
          errorMessage="
 1 errors found:
@@ -842,13 +842,13 @@ Semantic error at line 828, column 11:
 ")})));
 
  Real x = size(ones(2, 3), 1.0);
-end SizeExpression8;
+end SizeExp8;
 
 
-model SizeExpression9
+model SizeExp9
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(
-         name="SizeExpression9",
+         name="SizeExp9",
          description="Size operator: too low dim",
          errorMessage="
 1 errors found:
@@ -858,13 +858,13 @@ Semantic error at line 844, column 11:
 ")})));
 
  Real x = size(ones(2, 3), 0);
-end SizeExpression9;
+end SizeExp9;
 
 
-model SizeExpression10
+model SizeExp10
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(
-         name="SizeExpression10",
+         name="SizeExp10",
          description="Size operator: too high dim",
          errorMessage="
 1 errors found:
@@ -874,7 +874,135 @@ Semantic error at line 860, column 11:
 ")})));
 
  Real x = size(ones(2, 3), 3);
-end SizeExpression10;
+end SizeExp10;
+
+
+
+model MinExp1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MinExp1",
+         description="Min operator: 2 scalar args",
+         flatModel="
+fclass ArrayTests.MinExp1
+ constant Real x = min(1 + 2, 3 + 4);
+ Real y;
+equation
+ y = 3.0;
+end ArrayTests.MinExp1;
+")})));
+
+ constant Real x = min(1+2, 3+4);
+ Real y = x;
+end MinExp1;
+
+
+model MinExp2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MinExp2",
+         description="Min operator: 1 array arg",
+         flatModel="
+fclass ArrayTests.MinExp2
+ constant Real x = min({{1,2},{3,4}});
+ Real y;
+equation
+ y = 1.0;
+end ArrayTests.MinExp2;
+")})));
+
+ constant Real x = min({{1,2},{3,4}});
+ Real y = x;
+end MinExp2;
+
+
+model MinExp3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MinExp3",
+         description="Min operator: strings",
+         flatModel="
+fclass ArrayTests.MinExp3
+ constant String x = min(\"foo\", \"bar\");
+ String y;
+equation
+ y = \"bar\";
+end ArrayTests.MinExp3;
+")})));
+
+ constant String x = min("foo", "bar");
+ String y = x;
+end MinExp3;
+
+
+model MinExp4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MinExp4",
+         description="Min operator: booleans",
+         flatModel="
+fclass ArrayTests.MinExp4
+ constant Boolean x = min(true, false);
+ Boolean y;
+equation
+ y = false;
+end ArrayTests.MinExp4;
+")})));
+
+ constant Boolean x = min(true, false);
+ Boolean y = x;
+end MinExp4;
+
+
+model MinExp5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="MinExp5",
+         description="Min operator: mixed types",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 958, column 11:
+  Type error in expression
+")})));
+
+ Real x = min(true, 0);
+end MinExp5;
+
+
+model MinExp6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="MinExp6",
+         description="Min operator: 2 array args",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 974, column 15:
+  Types of positional argument 1 and input x are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 974, column 22:
+  Types of positional argument 2 and input y are not compatible
+")})));
+
+ Real x = min({1,2}, {3,4});
+end MinExp6;
+
+
+model MinExp7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="MinExp7",
+         description="Min operator: 1 scalar arg",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 993, column 15:
+  Types of positional argument 1 and input x are not compatible
+")})));
+
+ Real x = min(1);
+end MinExp7;
 
 
 
@@ -905,6 +1033,7 @@ equation
  end for;
 end SubscriptExpression1;
 
+
 model SubscriptExpression2
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(
@@ -922,6 +1051,7 @@ equation
  x[0] = 1;
 end SubscriptExpression2;
 
+
 model SubscriptExpression3
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(
@@ -938,6 +1068,7 @@ Semantic error at line 754, column 4:
 equation
  x[5] = 1;
 end SubscriptExpression3;
+
 
 model SubscriptExpression4
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -957,6 +1088,7 @@ equation
   x[i] = x[i-1] * 2;
  end for;
 end SubscriptExpression4;
+
 
 model SubscriptExpression5
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

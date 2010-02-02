@@ -186,10 +186,10 @@ aspect PredefinedTypes {
 +"function semiLinear end semiLinear;\n"
 +"function promote end promote;\n"
 +"function ndims end ndims;\n"
-+"function size"
-+"  input Real A;"      // Type not used
-+"  input Real d = 0;"  // Default value not used
-+"  output Integer s;"
++"function size\n"
++"  input Real A;\n"      // Type not used
++"  input Real d = 0;\n"  // Default value not used
++"  output Integer s;\n"
 +"end size;\n"
 +"function scalar end scalar;\n"
 +"function vector end vector;\n"
@@ -208,7 +208,11 @@ aspect PredefinedTypes {
 +"function ones end ones;\n"
 +"function fill end fill;\n"
 +"function linspace end linspace;\n"
-+"function min end min;\n"
++"function min\n"
++"  input Real x;\n"      // Type not used
++"  input Real y = 0;\n"  // Type and default value not used
++"  output Real z;\n"     // Type not used
++"end min;\n"
 +"function max end max;\n"
 +"function sum end sum;\n"
 +"function product end product;\n"

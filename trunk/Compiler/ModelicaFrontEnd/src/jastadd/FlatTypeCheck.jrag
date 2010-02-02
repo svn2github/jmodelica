@@ -31,16 +31,16 @@ aspect FlatTypeCheck {
     			error("The 'each' keyword cannot be applied to members of non-array components");
      		} else {
     			if (!bindingType().typeCompatible(bexp.type())) {
-    				if (!bindingType().dimensionCompatible(bexp.type())) {
+    				if (!bindingType().scalarType().typeCompatible(bexp.type().scalarType())) {
+    					error("The binding expression of the variable " + name() +
+    							" does not match the declared type of the variable");
+    				} else {
     					error("Array size mismatch in declaration of " + 
     							(myBindingExpHasEach() ? "each " : "") + name() +
     							", size of declaration is " + Arrays.toString(bindingType().size()) + 
     							" and size of binding expression is " + 
     							Arrays.toString(bexp.size()));
-    				} else {
-    				    error("The binding expression of the variable " + name() +
-  			    	  " does not match the declared type of the variable");
-    				}
+     				}
     			}
     		}
 	    }
@@ -197,6 +197,7 @@ aspect FlatTypeCheck {
   
   syn boolean FBuiltInFunctionCall.checkTypeAsExpression() = false;
   eq FSizeExp.checkTypeAsExpression() = true;
+  eq FMinMaxExp.checkTypeAsExpression() = true;
   
   public void InstFunctionCall.typeCheck() {
 	  if (myOutputs().size() < myLefts().size())
@@ -255,8 +256,9 @@ aspect FlatTypeCheck {
   inh boolean InstFunctionArgument.argumentDefinedTypeValid();
   eq FAbstractFunctionCall.getChild().argumentDefinedTypeValid() = true;
   eq FTranspose.getChild().argumentDefinedTypeValid()            = false;
+  eq FMinMaxExp.getChild().argumentDefinedTypeValid()            = false;
   eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()   = i != 0;
-  
+ 
   /**
    * \brief Check if the type supplied is valid for this argument.
    * 
@@ -266,5 +268,7 @@ aspect FlatTypeCheck {
   eq FAbstractFunctionCall.getChild().argumentTypeValid(FPrimitiveType type) = false;
   eq FTranspose.getChild().argumentTypeValid(FPrimitiveType type)            = type.ndims() >= 2;
   eq FSizeExp.getChild().argumentTypeValid(FPrimitiveType type)              = true;
+  eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FPrimitiveType type) = 
+	  hasY() ^ getOriginalArg(i).getFExp().isArray();
   
 }

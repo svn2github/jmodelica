@@ -147,6 +147,13 @@ aspect FlatVariability {
 
 	eq FSizeExp.variability() = hasDim() ? getDim().variability() : fConstant();
 	
+	eq FMinMaxExp.variability() {
+		FTypePrefixVariability res = getX().variability();
+		if (hasY())
+			res = res.combine(getY().variability());
+		return res;
+	}
+	
 	eq FFunctionCall.variability() {
 		FTypePrefixVariability total = fConstant();
 		for (FExp e : getArgs()) 
