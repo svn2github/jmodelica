@@ -41,7 +41,6 @@ def run_demo(with_plots=True):
     #Simulate
     if_mod = JMIImplicit(model)
     if_sim = IDA(if_mod)
-    if_sim.verbosity = if_sim.SCREAM
     if_sim(5.0)
     
     #Write Data
