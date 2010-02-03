@@ -1402,6 +1402,116 @@ equation
 end SubscriptExpression5;
 
 
+model SubscriptExpression6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="SubscriptExpression6",
+         description="Type checking array subscripts: simulating [4,4] with [16]",
+         flatModel="
+fclass ArrayTests.SubscriptExpression6
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real x[4];
+ Real x[5];
+ Real x[6];
+ Real x[7];
+ Real x[8];
+ Real x[9];
+ Real x[10];
+ Real x[11];
+ Real x[12];
+ Real x[13];
+ Real x[14];
+ Real x[15];
+ Real x[16];
+equation
+ x[1] = 1 + ( 1 ) * ( 2 );
+ x[2] = 1 + ( 2 ) * ( 2 );
+ x[3] = 1 + ( 3 ) * ( 2 );
+ x[4] = 1 + ( 4 ) * ( 2 );
+ x[5] = 2 + ( 1 ) * ( 2 );
+ x[6] = 2 + ( 2 ) * ( 2 );
+ x[7] = 2 + ( 3 ) * ( 2 );
+ x[8] = 2 + ( 4 ) * ( 2 );
+ x[9] = 3 + ( 1 ) * ( 2 );
+ x[10] = 3 + ( 2 ) * ( 2 );
+ x[11] = 3 + ( 3 ) * ( 2 );
+ x[12] = 3 + ( 4 ) * ( 2 );
+ x[13] = 4 + ( 1 ) * ( 2 );
+ x[14] = 4 + ( 2 ) * ( 2 );
+ x[15] = 4 + ( 3 ) * ( 2 );
+ x[16] = 4 + ( 4 ) * ( 2 );
+end ArrayTests.SubscriptExpression6;
+")})));
+
+ Real x[16];
+equation
+ for i in 1:4, j in 1:4 loop
+  x[4*(i-1) + j] = i + j * 2;
+ end for;
+end SubscriptExpression6;
+
+
+model SubscriptExpression7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="SubscriptExpression7",
+         description="Type checking array subscripts: using min in subscripts",
+         flatModel="
+fclass ArrayTests.SubscriptExpression7
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real x[4];
+equation
+ x[1] = 1 + ( 1 ) * ( 2 );
+ x[2] = 1 + ( 2 ) * ( 2 );
+ x[3] = 1 + ( 3 ) * ( 2 );
+ x[4] = 1 + ( 4 ) * ( 2 );
+ x[2] = 2 + ( 1 ) * ( 2 );
+ x[2] = 2 + ( 2 ) * ( 2 );
+ x[3] = 2 + ( 3 ) * ( 2 );
+ x[4] = 2 + ( 4 ) * ( 2 );
+ x[3] = 3 + ( 1 ) * ( 2 );
+ x[3] = 3 + ( 2 ) * ( 2 );
+ x[3] = 3 + ( 3 ) * ( 2 );
+ x[4] = 3 + ( 4 ) * ( 2 );
+ x[4] = 4 + ( 1 ) * ( 2 );
+ x[4] = 4 + ( 2 ) * ( 2 );
+ x[4] = 4 + ( 3 ) * ( 2 );
+ x[4] = 4 + ( 4 ) * ( 2 );
+end ArrayTests.SubscriptExpression7;
+")})));
+
+ Real x[4];
+equation
+ for i in 1:4, j in 1:4 loop
+  x[j + i - min(i, j)] = i + j * 2;
+ end for;
+end SubscriptExpression7;
+
+
+model SubscriptExpression8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="SubscriptExpression8",
+         description="Type checking array subscripts: complex expression, several bad indices",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1499, column 5:
+  Array index out of bounds: 5, index expression: i + ( j ) * ( max(( i ) * ( 1:4 )) )
+")})));
+
+ Real x[4];
+equation
+ for i in 1:4, j in 1:4 loop
+  x[i + j * max(i*(1:4))] = i + j * 2;
+ end for;
+end SubscriptExpression8;
+
+
 
 /* ========== Array algebra ========== */
 
