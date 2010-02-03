@@ -176,22 +176,35 @@ aspect FlatTypeCheck {
   
   public void FInfArgsFunctionCall.typeCheck() {
       super.typeCheck();
-      for (InstFunctionArgument arg : getOriginalArgs()) {
-    	  FExp exp = arg.getFExp();
-          if (!exp.type().isUnknown() && !typeOfArgIsOK(exp)) {
-              exp.error("Argument of " + getBuiltInName() + "() is not " + getOKArgTypeString());
-          }
+      if (getNumOriginalArg() < minNumArgs()) {
+    	  error("Too few arguments to " + builtInName() + "(), must have at least " + minNumArgs());
+      } else {
+	      for (FExp exp : getFExps()) {
+	          if (!exp.type().isUnknown() && !typeOfArgIsOK(exp)) {
+	              exp.error("Argument of " + builtInName() + "() is not " + 
+	            		  getOKArgTypeString() + ": " + exp.prettyPrint(""));
+	          } else if (!variabilityOfArgIsOK(exp)) {
+	        	  exp.error("Argument of " + builtInName() + "() does not have " + 
+	        			  getOKArgVariabilityString() + " variability: " + exp.prettyPrint(""));
+	          }
+	      }
       }
   }
   
+  syn int FInfArgsFunctionCall.minNumArgs() = 1;
+  eq FFillExp.minNumArgs() = 2;
+  
   syn boolean FInfArgsFunctionCall.typeOfArgIsOK(FExp exp) = fIntegerScalarType().typeCompatible(exp.type());
   syn String FInfArgsFunctionCall.getOKArgTypeString() = "compatible with Integer";
+  
+  syn boolean FInfArgsFunctionCall.variabilityOfArgIsOK(FExp exp) = exp.variability().lessOrEqual(fParameter());
+  syn String FInfArgsFunctionCall.getOKArgVariabilityString() = "constant or parameter";
   
   public void FBuiltInFunctionCall.typeCheck() {
 	  if (checkTypeAsExpression())
 		  super.typeCheck();
 	  if (myLefts().size() > 1)
-		  error("Too many components assigned from function call: " + getBuiltInName() + 
+		  error("Too many components assigned from function call: " + builtInName() + 
 				  "() has 1 output(s)");
   }
   

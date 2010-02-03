@@ -218,6 +218,7 @@ aspect FlatVariability {
 	eq FIdentity.variability() = fConstant();
 	eq FOnes.variability() = fConstant();
 	eq FZeros.variability() = fConstant();
+	eq FFillExp.variability() = getFillExp().variability();
 	
    	public FTypePrefixVariability FTypePrefixVariability.combine(FTypePrefixVariability other) {   			
    		if (this instanceof FContinuous) {

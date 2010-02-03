@@ -878,6 +878,170 @@ end SizeExp10;
 
 
 
+model FillExp1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="FillExp1",
+         description="Fill operator: one dim",
+         flatModel="
+fclass ArrayTests.FillExp1
+ Real x[1];
+ Real x[2];
+equation
+ x[1] = 1 + 2;
+ x[2] = 1 + 2;
+end ArrayTests.FillExp1;
+")})));
+
+ Real x[2] = fill(1 + 2, 2);
+end FillExp1;
+
+
+model FillExp2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="FillExp2",
+         description="Fill operator: three dims",
+         flatModel="
+fclass ArrayTests.FillExp2
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,1,3];
+ Real x[1,1,4];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[1,2,3];
+ Real x[1,2,4];
+ Real x[1,3,1];
+ Real x[1,3,2];
+ Real x[1,3,3];
+ Real x[1,3,4];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,1,3];
+ Real x[2,1,4];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real x[2,2,3];
+ Real x[2,2,4];
+ Real x[2,3,1];
+ Real x[2,3,2];
+ Real x[2,3,3];
+ Real x[2,3,4];
+equation
+ x[1,1,1] = 1 + 2;
+ x[1,1,2] = 1 + 2;
+ x[1,1,3] = 1 + 2;
+ x[1,1,4] = 1 + 2;
+ x[1,2,1] = 1 + 2;
+ x[1,2,2] = 1 + 2;
+ x[1,2,3] = 1 + 2;
+ x[1,2,4] = 1 + 2;
+ x[1,3,1] = 1 + 2;
+ x[1,3,2] = 1 + 2;
+ x[1,3,3] = 1 + 2;
+ x[1,3,4] = 1 + 2;
+ x[2,1,1] = 1 + 2;
+ x[2,1,2] = 1 + 2;
+ x[2,1,3] = 1 + 2;
+ x[2,1,4] = 1 + 2;
+ x[2,2,1] = 1 + 2;
+ x[2,2,2] = 1 + 2;
+ x[2,2,3] = 1 + 2;
+ x[2,2,4] = 1 + 2;
+ x[2,3,1] = 1 + 2;
+ x[2,3,2] = 1 + 2;
+ x[2,3,3] = 1 + 2;
+ x[2,3,4] = 1 + 2;
+end ArrayTests.FillExp2;
+")})));
+
+ Real x[2,3,4] = fill(1 + 2, 2, 3, 4);
+end FillExp2;
+
+
+model FillExp3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="FillExp3",
+         description="Fill operator: no size args",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 892, column 11:
+  Too few arguments to fill(), must have at least 2
+")})));
+
+ Real x = fill(1 + 2);
+end FillExp3;
+
+
+model FillExp4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="FillExp4",
+         description="Fill operator:",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 897, column 7:
+  Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [3]
+")})));
+
+ Real x[2] = fill(1 + 2, 3);
+end FillExp4;
+
+
+model FillExp5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="FillExp5",
+         description="Fill operator: Real size arg",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 897, column 26:
+  Argument of fill() is not compatible with Integer: 2.0
+")})));
+
+ Real x[2] = fill(1 + 2, 2.0);
+end FillExp5;
+
+
+model FillExp6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="FillExp6",
+         description="Fill operator: too high variability of size arg",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 930, column 26:
+  Argument of fill() does not have constant or parameter variability: n
+")})));
+
+ Integer n = 2;
+ Real x[2] = fill(1 + 2, n);
+end FillExp6;
+
+
+model FillExp7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="FillExp7",
+         description="Fill operator: no arguments at all",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1029, column 14:
+  Missing argument for required input s
+")})));
+
+ Real x[2] = fill();
+end FillExp7;
+ 
+
+
 model MinExp1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(

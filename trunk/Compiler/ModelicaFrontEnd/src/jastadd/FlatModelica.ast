@@ -917,6 +917,11 @@ FOnes : FInfArgsFunctionCall;
 FZeros : FInfArgsFunctionCall;
 
 /**
+ * \brief Fill built-in function.
+ */
+FFillExp : FInfArgsFunctionCall ::= FillExp:FExp;
+
+/**
  * \brief Common base class for FMinExp & FMaxExp.
  */
 abstract FMinMaxExp : FBuiltInFunctionCall ::= X:FExp [Y:FExp];

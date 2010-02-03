@@ -751,20 +751,17 @@ aspect FlatExpressions {
 		return new FDerExp(new FIdUse(var));
 	}
 	
-	public FOnes FOnes.flatten(FQName prefix) { 
+	public FInfArgsFunctionCall FInfArgsFunctionCall.flatten(FQName prefix) {
 		List<FExp> l = new List<FExp>();
-		for (FExp e : getFExps()) {
+		for (FExp e : getFExps()) 
 			l.add(e.flatten(prefix));
-		}
-		return new FOnes(l); 
+		return createNode(l); 
 	}
-
-	public FZeros FZeros.flatten(FQName prefix) { 
-		List<FExp> l = new List<FExp>();
-		for (FExp e : getFExps()) {
-			l.add(e.flatten(prefix));
-		}
-		return new FZeros(l); 
+	
+	public FFillExp FFillExp.flatten(FQName prefix) {
+		FFillExp res = (FFillExp) super.flatten(prefix);
+		res.setFillExp(getFillExp().flatten(prefix));
+		return res;
 	}
 	
 	public FTimeExp FTimeExp.flatten(FQName prefix) { return new FTimeExp(); }

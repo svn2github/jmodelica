@@ -260,6 +260,7 @@ aspect InheritedFactoryMethods {
 	public FIdentity  FIdentity.createEmptyNode()  { return new FIdentity(); }
 	public FOnes      FOnes.createEmptyNode()      { return new FOnes(); }
 	public FZeros     FZeros.createEmptyNode()     { return new FZeros(); }
+	public FFillExp   FFillExp.createEmptyNode()   { return new FFillExp(); }
 	public FMinExp    FMinExp.createEmptyNode()    { return new FMinExp(); }
 	public FMaxExp    FMaxExp.createEmptyNode()    { return new FMaxExp(); }
 	

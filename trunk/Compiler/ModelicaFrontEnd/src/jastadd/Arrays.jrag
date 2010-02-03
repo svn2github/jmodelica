@@ -931,8 +931,9 @@ aspect Arrays {
 		return array;
 	}
 	
-	eq FZeros.getArray() = new Array(indices()).fill(new FIntegerLitExp(0));
-	eq FOnes.getArray()  = new Array(indices()).fill(new FIntegerLitExp(1));
+	eq FZeros.getArray()   = new Array(indices()).fill(new FIntegerLitExp(0));
+	eq FOnes.getArray()    = new Array(indices()).fill(new FIntegerLitExp(1));
+	eq FFillExp.getArray() = new Array(indices()).fill(getFillExp());
 	
 	/**
 	 * \brief Get the set of all array indices of an array access. 

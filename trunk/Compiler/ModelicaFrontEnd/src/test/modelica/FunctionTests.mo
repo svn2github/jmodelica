@@ -1213,7 +1213,7 @@ model BuiltInCallType9
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Argument of zeros() is not compatible with Integer
+  Argument of zeros() is not compatible with Integer: 3.0
 ")})));
 
    Real x[3] = zeros(3.0);
@@ -1221,14 +1221,14 @@ end BuiltInCallType9;
 
 model BuiltInCallType10
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="BuiltInCallType10",
-          description="Built-in type checks: calling ones() with String literal as second argument",
-          errorMessage=
-"
-1 error(s) found...
-In file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
-  Argument of ones() is not compatible with Integer
+     JModelica.UnitTesting.ErrorTestCase(
+         name="BuiltInCallType10",
+         description="Built-in type checks: calling ones() with String literal as second argument",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 1223, column 24:
+  Argument of ones() is not compatible with Integer: \"test\"
 ")})));
 
    Real x[3] = ones(3, "test");

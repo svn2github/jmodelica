@@ -172,76 +172,11 @@ aspect InstFunctionBinding {
 		
 		/**
 		 * \brief Helper class for rewrite InstFunctionCall -> FAbstractFunctionCall. 
-		 *        Creates an instance of the specific subclass of FBuiltInFunctionCall matching 
-		 *        the name of the function, if one matches. 
+		 * 
+		 * Creates an instance of the specific subclass of FBuiltInFunctionCall matching 
+		 * the name of the function, if one matches. 
 		 */
 		private static class BuiltInTranslator {
-			
-			private static class BuiltInCreator {
-				
-				public boolean matchMath;
-				protected FBuiltInFunctionCall template;
-				protected int numArgs;
-				
-				public BuiltInCreator(boolean math, FBuiltInFunctionCall tmpl, int nArgs) { 
-					matchMath = math;
-					template = tmpl;
-					numArgs = nArgs;
-				}
-				
-				public FBuiltInFunctionCall create(InstFunctionArgument[] args) {
-					FExp res = template.createEmptyNode();
-					for (int i = 0; i < numArgs; i++)
-						res.setChild(args[i].getFExp(), i);
-					return (FBuiltInFunctionCall) res;
-				}
-				
-				public boolean isInfArgs() {
-					return false;
-				}
-				
-			}
-			
-			private static class InfArgsBuiltInCreator extends BuiltInCreator {
-				
-				public InfArgsBuiltInCreator(FBuiltInFunctionCall tmpl, int nFixed) {
-					super(false, tmpl, nFixed);
-				}
-				
-				public FBuiltInFunctionCall create(InstFunctionArgument[] args) {
-					FExp res = template.createEmptyNode();
-					List<FExp> exps = new List<FExp>();
-					for (int i = numArgs; i < args.length; i++)
-						exps.add(args[i].getFExp());
-					res.setChild(exps, 0);
-					for (int i = 1; i < numArgs + 1; i++)
-						res.setChild(args[i - 1].getFExp(), i);
-					return (FBuiltInFunctionCall) res;
-				}
-				
-				public boolean isInfArgs() {
-					return true;
-				}
-				
-			}
-			
-			private static class VariableArgsBuiltInCreator extends BuiltInCreator {
-				
-				private int maxArgs;
-				
-				public VariableArgsBuiltInCreator(FBuiltInFunctionCall tmpl, int minArgs, int maxArgs) {
-					super(false, tmpl, minArgs);
-					this.maxArgs = maxArgs;
-				}
-				
-				public FBuiltInFunctionCall create(InstFunctionArgument[] args) {
-					FBuiltInFunctionCall res = super.create(args);
-					for (int i = numArgs; i < maxArgs; i++)
-						res.setChild(args[i].isGiven() ? new Opt(args[i].getFExp()) : new Opt(), i);
-					return res;
-				}
-				
-			}
 			
 			private HashMap<String, BuiltInCreator> map;
 			private static final String MATH_PREF = "Modelica.Math.";
@@ -255,8 +190,9 @@ aspect InstFunctionBinding {
 				if (creator == null || (math && !creator.matchMath))
 					return null;
 				FBuiltInFunctionCall res = creator.create(args);
-				for (InstFunctionArgument arg : args)
-					res.addToOriginalArgs((InstFunctionArgument) arg.unboundCopy());
+				if (res != null)
+					for (InstFunctionArgument arg : args)
+						res.addToOriginalArgs((InstFunctionArgument) arg.unboundCopy());
 				return res;
 			}
 			
@@ -286,11 +222,83 @@ aspect InstFunctionBinding {
 				map.put("transpose", new BuiltInCreator(false, new FTranspose(),  1));
 				map.put("ones",  new InfArgsBuiltInCreator(new FOnes(),  0));
 				map.put("zeros", new InfArgsBuiltInCreator(new FZeros(), 0));
+				map.put("fill",  new InfArgsBuiltInCreator(new FFillExp(), 1));
 				map.put("size",  new VariableArgsBuiltInCreator(new FSizeExp(), 1, 2));
 				map.put("min",   new VariableArgsBuiltInCreator(new FMinExp(),  1, 2));
 				map.put("max",   new VariableArgsBuiltInCreator(new FMaxExp(),  1, 2));
 			}
+			
+			private static class BuiltInCreator {
+				
+				public boolean matchMath;
+				protected FBuiltInFunctionCall template;
+				protected int numArgs;
+				
+				public BuiltInCreator(boolean math, FBuiltInFunctionCall tmpl, int nArgs) { 
+					matchMath = math;
+					template = tmpl;
+					numArgs = nArgs;
+				}
+				
+				public FBuiltInFunctionCall create(InstFunctionArgument[] args) {
+					if (args.length < numArgs)
+						return null;
+					FBuiltInFunctionCall res = (FBuiltInFunctionCall) template.createEmptyNode();
+					setArguments(res, args);
+					return res;
+				}
+				
+				protected void setArguments(FBuiltInFunctionCall res, InstFunctionArgument[] args) {
+					for (int i = 0; i < numArgs; i++)
+						res.setChild(args[i].getFExp(), i);
+				}
+				
+				public boolean isInfArgs() {
+					return false;
+				}
+				
+			}
+			
+			private static class InfArgsBuiltInCreator extends BuiltInCreator {
+				
+				public InfArgsBuiltInCreator(FBuiltInFunctionCall tmpl, int nFixed) {
+					super(false, tmpl, nFixed);
+				}
+				
+				protected void setArguments(FBuiltInFunctionCall res, InstFunctionArgument[] args) {
+					List<FExp> exps = new List<FExp>();
+					for (int i = numArgs; i < args.length; i++)
+						exps.add(args[i].getFExp());
+					res.setChild(exps, 0);
+					for (int i = 1; i < numArgs + 1; i++)
+						res.setChild(args[i - 1].getFExp(), i);
+				}
+				
+				public boolean isInfArgs() {
+					return true;
+				}
+				
+			}
+			
+			private static class VariableArgsBuiltInCreator extends BuiltInCreator {
+				
+				private int maxArgs;
+				
+				public VariableArgsBuiltInCreator(FBuiltInFunctionCall tmpl, int minArgs, int maxArgs) {
+					super(false, tmpl, minArgs);
+					this.maxArgs = maxArgs;
+				}
+				
+				protected void setArguments(FBuiltInFunctionCall res, InstFunctionArgument[] args) {
+					super.setArguments(res, args);
+					for (int i = numArgs; i < maxArgs; i++)
+						res.setChild(args[i].isGiven() ? new Opt(args[i].getFExp()) : new Opt(), i);
+				}
+				
+			}
+
 		}
+		
 	}
 
 	/**
@@ -316,8 +324,11 @@ aspect InstFunctionBinding {
 		    if (!getName().myInstClassDecl().isFunction())
 		    	return this;
 
-		    // Check if we should try to bind arguments
+		    // Get info
 	    	String name = getName().myInstClassDecl().qualifiedName();
+    		ArrayList<InstComponentDecl> inputs = myInputs();
+
+	    	// Check if we should try to bind arguments
 	    	InstFunctionArgument[] temp;
 	    	boolean argsOK = true;
 	    	if (builtInTranslator.isInfArgs(name)) {
@@ -330,12 +341,19 @@ aspect InstFunctionBinding {
 	    			else
 	    				unbindableArgs.add(arg);
 	    		}
+	    		
+	    		// Make sure we have any fixed arguments
+	    		for (int i = args.size(); i < inputs.size(); i++) {
+	    			InstMissingArgument arg = new InstMissingArgument();
+	    			arg.setBoundInput(inputs.get(i));
+	    			args.add(arg);
+	    			argsOK = false;
+	    		}
 	    		temp = args.toArray(new InstFunctionArgument[args.size()]);
 	    		
 	    	} else {
 		    
 	    		// Bind arguments
-	    		ArrayList<InstComponentDecl> inputs = myInputs();
 	    		temp = new InstFunctionArgument[inputs.size()];
 	    		for (InstFunctionArgument arg : getArgs()) 
 	    			if (!arg.bindArgument(temp, inputs))

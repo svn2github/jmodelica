@@ -185,7 +185,7 @@ aspect TestFramework {
 					else if (na.getName().name().equals("description"))
 						etc.setDescription(((StringLitExp)na.getExp()).getSTRING());	
 					else if (na.getName().name().equals("errorMessage"))
-						etc.setErrorMessage(((StringLitExp)na.getExp()).getSTRING());		
+						etc.setErrorMessage(((StringLitExp)na.getExp()).getSTRING().replace("\\\"","\""));		
 				}
 				etc.setSourceFileName(root().fileName());
 				etc.setClassName(enclosingClassDecl().qualifiedName());

@@ -206,7 +206,9 @@ aspect PredefinedTypes {
 +"end identity;\n"
 +"function zeros end zeros;\n"
 +"function ones end ones;\n"
-+"function fill end fill;\n"
++"function fill\n"
++"  input Real s;\n"      // Type not used
++"end fill;\n"
 +"function linspace end linspace;\n"
 +"function min\n"
 +"  input Real x;\n"      // Type not used
