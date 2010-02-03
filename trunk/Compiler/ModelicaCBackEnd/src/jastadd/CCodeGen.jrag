@@ -66,6 +66,14 @@ aspect CCodeGen {
 		p.toString(getRight(),str,indent,o);
 		str.print(")");
 	}
+	
+	public void FMinMaxExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("jmi_" + builtInName() + "(");
+		p.toString(getX(), str, indent, o); 
+		str.print(", ");
+		p.toString(getY(), str, indent, o);
+		str.print(")");
+	}
 		
 	public void FDerExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		str.print("_"+nameUnderscore()+"_");

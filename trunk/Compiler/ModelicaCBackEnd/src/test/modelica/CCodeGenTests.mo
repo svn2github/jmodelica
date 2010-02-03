@@ -205,20 +205,9 @@ model CCodeGenDotOp
          name="CCodeGenDotOp",
          description="C code generation of dot operators (.+, .*, etc)",
          template="
-$C_variable_aliases$
 $C_DAE_equation_residuals$
 ",
          generatedCode="
-#define _x_1_1_ ((*(jmi->z))[jmi->offs_w+0])
-#define _x_1_2_ ((*(jmi->z))[jmi->offs_w+1])
-#define _x_2_1_ ((*(jmi->z))[jmi->offs_w+2])
-#define _x_2_2_ ((*(jmi->z))[jmi->offs_w+3])
-#define _y_1_1_ ((*(jmi->z))[jmi->offs_w+4])
-#define _y_1_2_ ((*(jmi->z))[jmi->offs_w+5])
-#define _y_2_1_ ((*(jmi->z))[jmi->offs_w+6])
-#define _y_2_2_ ((*(jmi->z))[jmi->offs_w+7])
-#define time ((*(jmi->z))[jmi->offs_t])
-
     (*res)[0] = jmi_divide(( _y_1_1_ ) * ( _y_1_1_ ),pow(_y_1_1_ + _y_1_1_ - ( 2 ),_y_1_1_),\"Divide by zero: ( ( y[1,1] ) .* ( y[1,1] ) ) ./ ( ( y[1,1] .+ y[1,1] .- ( 2 ) ) .^ y[1,1] )\") - (_x_1_1_);
     (*res)[1] = jmi_divide(( _y_1_2_ ) * ( _y_1_2_ ),pow(_y_1_2_ + _y_1_2_ - ( 2 ),_y_1_2_),\"Divide by zero: ( ( y[1,2] ) .* ( y[1,2] ) ) ./ ( ( y[1,2] .+ y[1,2] .- ( 2 ) ) .^ y[1,2] )\") - (_x_1_2_);
     (*res)[2] = jmi_divide(( _y_2_1_ ) * ( _y_2_1_ ),pow(_y_2_1_ + _y_2_1_ - ( 2 ),_y_2_1_),\"Divide by zero: ( ( y[2,1] ) .* ( y[2,1] ) ) ./ ( ( y[2,1] .+ y[2,1] .- ( 2 ) ) .^ y[2,1] )\") - (_x_2_1_);
@@ -232,6 +221,34 @@ $C_DAE_equation_residuals$
  Real x[2,2] = y .* y ./ (y .+ y .- 2) .^ y;
  Real y[2,2] = {{1,2},{3,4}};
 end CCodeGenDotOp;
+
+
+
+model CCodeGenMinMax
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenMinMax",
+         description="C code generation of min() and max()",
+         template="
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+    (*res)[0] = 1 - (_x_1_1_);
+    (*res)[1] = 2 - (_x_1_2_);
+    (*res)[2] = 3 - (_x_2_1_);
+    (*res)[3] = 4 - (_x_2_2_);
+    (*res)[4] = jmi_min(jmi_min(jmi_min(_x_1_1_, _x_1_2_), _x_2_1_), _x_2_2_) - (_y1_);
+    (*res)[5] = jmi_min(1, 2) - (_y2_);
+    (*res)[6] = jmi_max(jmi_max(jmi_max(_x_1_1_, _x_1_2_), _x_2_1_), _x_2_2_) - (_y3_);
+    (*res)[7] = jmi_max(1, 2) - (_y4_);
+")})));
+
+ Real x[2,2] = {{1,2},{3,4}};
+ Real y1 = min(x);
+ Real y2 = min(1, 2);
+ Real y3 = max(x);
+ Real y4 = max(1, 2);
+end CCodeGenMinMax;
 
 
 

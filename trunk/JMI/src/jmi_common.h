@@ -204,6 +204,18 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
  */
 jmi_ad_var_t jmi_divide(jmi_ad_var_t num, jmi_ad_var_t den,const char msg[]);
 
+/**
+ * Function to get the smaller of two values.
+ * Is a separate function to avoid evaluating expressions twice.
+ */
+jmi_ad_var_t jmi_min(jmi_ad_var_t x, jmi_ad_var_t y);
+
+/**
+ * Function to get the larger of two values.
+ * Is a separate function to avoid evaluating expressions twice.
+ */
+jmi_ad_var_t jmi_max(jmi_ad_var_t x, jmi_ad_var_t y);
+
 /* @} */
 
 /**

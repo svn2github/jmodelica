@@ -36,6 +36,14 @@ jmi_ad_var_t jmi_divide(jmi_ad_var_t num, jmi_ad_var_t den,const char msg[]) {
   }
 }
 
+jmi_ad_var_t jmi_min(jmi_ad_var_t x, jmi_ad_var_t y) {
+	return COND_EXP_LT(x, y, x ,y);
+}
+
+jmi_ad_var_t jmi_max(jmi_ad_var_t x, jmi_ad_var_t y) {
+	return COND_EXP_GT(x, y, x ,y);
+}
+
 
 int jmi_func_new(jmi_func_t** jmi_func, jmi_residual_func_t F, int n_eq_F, jmi_jacobian_func_t dF,
 		int dF_n_nz, int* dF_row, int* dF_col) {
@@ -394,7 +402,7 @@ int jmi_variable_type_spec(jmi_t *jmi, int independent_vars,
   for(i=0;i<jmi->n_z;i++) {
     if (jmi_check_Jacobian_column_index(jmi,independent_vars,mask,i)==1) {
       spec_jac_index++;
-    } 
+    }
     if (col_index==spec_jac_index) {
       return jmi_variable_type(jmi,i);
     }
