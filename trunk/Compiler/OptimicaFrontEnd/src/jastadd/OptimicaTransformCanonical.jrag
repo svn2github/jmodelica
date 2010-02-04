@@ -1,0 +1,86 @@
+aspect OptimicaTransformCanonical {
+	
+	public void FOptClass.scalarize() {
+		
+		super.scalarize();
+				
+		// Scalarize constraints
+		List<FConstraint> constr = new List<FConstraint>();
+		for (FConstraint c : getFConstraints()) {
+			c.scalarize(constr,new HashMap<String,Integer>());
+		}
+		
+		setFConstraintList(constr);
+		
+		// Replace subscript expressions with literals
+		constr.makeSubscriptsLiteral();
+
+		flush();		
+	}
+	
+	public void FConstraint.scalarize(List<FConstraint> constr,
+			HashMap<String,Integer> indexMap) {}
+	
+	/**
+	 * \brief Scalarize equation and put all scalarized equations in list eqns.
+	 */
+	public void FConstraintEq.scalarize(List<FConstraint> constr, 
+			HashMap<String,Integer> indexMap) {
+		//System.out.println("FEquation.scalarize() " + ndims());
+		if (ndims()==0) {
+			/**
+			 * If the constraint is of dimension 0, i.e, already scalar,
+			 * the equations is "scalarized" into a simple equation where
+			 * e.g. built in functions are replaced by elementary operations.
+			 */
+			constr.addChild(new FConstraintEq(getLeft().scalarize(indexMap),
+					getRight().scalarize(indexMap)));
+		} else if (ndims() > 0) {
+			/**
+			 * If the expression is an array expression, then the FExp.getArray()
+			 * element is used to generate scalar equations.
+			 */
+			// Iterate over array elements and create scalarized equation for each
+			for (Index i : indices()) 
+				constr.addChild(new FConstraintEq((FExp) getLeft().getArray().get(i).scalarize(indexMap), 
+						(FExp) getRight().getArray().get(i).scalarize(indexMap)));
+		}
+	}
+	
+	/**
+	 * \brief Scalarize equation and put all scalarized equations in list eqns.
+	 */
+/*	public void FFunctionCallEquation.scalarize(List<FAbstractEquation> eqns, 
+			HashMap<String,Integer> indexMap) {
+		List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
+		for (FFunctionCallLeft id : getLefts())
+			lefts.add(id.scalarize(indexMap));
+		eqns.addChild(new FFunctionCallEquation(lefts, (FAbstractFunctionCall) getCall().scalarize(indexMap)));
+	}
+	*/
+	/*
+	public void FForClauseE.scalarize(List<FAbstractEquation> eqns,
+			HashMap<String,Integer> indexMap) {
+		Indices indices = Indices.create(getFForIndexs());
+		
+		HashMap<String,Integer> myIndexMap = new HashMap<String,Integer>();
+		myIndexMap.putAll(indexMap);
+		for (Index i : indices) {
+			int j = 0;
+			int[] ii = indices.translate(i).index();
+			for (FForIndex fi : getFForIndexs()) {
+				myIndexMap.put(fi.getFVariable().name(), Integer.valueOf(ii[j]));
+				j++;
+			}
+			
+			for (FAbstractEquation ae : getFAbstractEquations()) {
+				ae.scalarize(eqns, myIndexMap);
+			}
+		}		
+	}
+	
+	public FFunctionCallLeft FFunctionCallLeft.scalarize(HashMap<String,Integer> indexMap) {
+		return new FFunctionCallLeft(hasFIdUse() ? new Opt(getFIdUse().scalarize(indexMap)) : new Opt());
+	}
+	*/
+}

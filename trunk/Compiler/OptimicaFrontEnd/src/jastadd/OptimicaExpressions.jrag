@@ -117,3 +117,52 @@ aspect OptimicaInheritedFactoryMethods {
 	public FFinalTimeExp FFinalTimeExp.createEmptyNode() { return new FFinalTimeExp(); }
 	
 }
+
+aspect OptimicaArrays {
+	
+	/**
+	 * \brief Get array dimensions.
+	 * 
+	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
+	 * an error in computation of the array dimensions.
+	 * 
+	 * @return Array dimension.
+	 */	
+	syn int FConstraint.ndims() {
+		if (getLeft().ndims() == getRight().ndims()) {
+			return getLeft().ndims();
+		}
+		return -1;
+	}	
+	
+	/**
+	 * \brief Get the array sizes. 
+	 * 
+	 * @return An array of integers of length ndims(). Each entry holds the
+	 * corresponding array dimension size.
+	 * 
+	 */
+	syn int[] FConstraint.size() {
+		int[] leftSize = getLeft().size();
+		int[] rightSize = getRight().size();
+		if (leftSize.length!=rightSize.length) {
+			return new int[0];
+		}
+		for (int i=0;i<leftSize.length;i++) {
+			if (leftSize[i]!=rightSize[i]) {
+				return new int[0];
+			}
+		}
+		return leftSize;
+	}
+
+	
+	/**
+	 * \brief Get the set of all array indices of an array access. 
+	 * 
+	 * @return An Indices object containing all indices in each array dimension.
+	 */
+	syn Indices FConstraint.indices() = getLeft().indices();
+
+}
+
