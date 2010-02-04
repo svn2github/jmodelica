@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<fmiModelDescription $XML_rootAttributes$ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<fmiModelDescription $XML_rootAttributes$>
 	$XML_unitDefinitions$	
 	$XML_typeDefinitions$
 	$XML_defaultExperiment$

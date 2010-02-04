@@ -184,10 +184,8 @@ aspect XMLCodeGen {
 	public void FTimeExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
 		String namespace="exp";
 		String tag = this.xmlTag();
-		//ASTNode child = getChild(this,0);	
 		
 		str.print(indent + "<" + namespace + ":" + tag + ">");
-		//child.prettyPrint_XML(str,"");
 		prettyPrint(str,"");
 		str.println("</"+ namespace + ":" + tag + ">");
 	}

@@ -14,7 +14,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<jmodelicaModelDescription $XML_rootAttributes$ xmlns:equ="http://www.robertoparrotto.it/DAEXML/FEqu.xsd" xmlns:exp="http://www.robertoparrotto.it/DAEXML/FExp.xsd" xmlns:opt="http://www.robertoparrotto.it/DAEXML/Optimization.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<jmodelicaModelDescription $XML_namespaces$ 
+$XML_rootAttributes$>
 	$XML_unitDefinitions$
 	$XML_typeDefinitions$
 	$XML_defaultExperiment$

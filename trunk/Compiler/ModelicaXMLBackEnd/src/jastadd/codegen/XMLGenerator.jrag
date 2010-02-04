@@ -77,6 +77,38 @@ public class XMLGenerator extends GenericGenerator {
 			genPrinter.print("numberOfEventIndicators=\""+fclass.numEventIndicators()+"\"");
 		}
 	}
+	
+	/**
+	 * Internal class used to generate roots attributes of the XML document.
+	 * 
+	 * @see DAETag
+	 */
+	class DAETag_XML_namespaces extends DAETag {
+		
+		public DAETag_XML_namespaces (AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_namespaces","Namespaces definition",
+			  myGenerator,fclass);
+		}
+		
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		*/
+		
+		public void generate(PrintStream genPrinter) {
+			
+			//XML standard namespace
+			String xsiNS = "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"";
+			//extensions' namespaces definitions
+			String expNS= "xmlns:exp=\"https://svn.jmodelica.org/trunk/XML/daeExpressions.xsd\"";
+			String equNS= "xmlns:equ=\"https://svn.jmodelica.org/trunk/XML/daeEquations.xsd\"";
+			String funNS= "xmlns:fun=\"https://svn.jmodelica.org/trunk/XML/daeFunctions.xsd\"";
+			String optNS= "xmlns:opt=\"https://svn.jmodelica.org/trunk/XML/daeOptimization.xsd\"";
+			
+			genPrinter.print(expNS + " " + equNS + " " + funNS + " " + optNS + " " + xsiNS);			
+		
+		}
+	}
 		
 	/**
 	 * Internal class used to generate the unit definitions tag.
@@ -561,6 +593,11 @@ public class XMLGenerator extends GenericGenerator {
 		}
 	}
 	
+	/**
+	 * Internal class used to generate the tags for optimization problems
+	 * 
+	 * @see DAETag
+	 */
 	class DAETag_XML_Optimization extends DAETag {
 		
 		public DAETag_XML_Optimization (
@@ -577,8 +614,6 @@ public class XMLGenerator extends GenericGenerator {
 			//do nothing
 		}
 	}
-
-		
 	
 	/**
 	 * Constructor.
