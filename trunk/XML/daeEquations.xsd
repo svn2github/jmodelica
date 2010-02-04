@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2010 (http://www.altova.com) by Magnus Gäfvert (Modelon AB) -->
+<xs:schema xmlns:equ="https://svn.jmodelica.org/trunk/XML/daeEquations.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:exp="https://svn.jmodelica.org/trunk/XML/daeExpressions.xsd" targetNamespace="https://svn.jmodelica.org/trunk/XML/daeEquations.xsd" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:import namespace="https://svn.jmodelica.org/trunk/XML/daeExpressions.xsd" schemaLocation="daeExpressions.xsd"/>
+	<xs:complexType name="AbstractEquation">
+		<xs:annotation>
+			<xs:documentation>Definition of the equation type in residual form</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element ref="exp:Sub"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="BindingEquation">
+		<xs:annotation>
+			<xs:documentation>Definition of the equation type for binding expressions in form parameter=expression</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Parameter" type="xs:normalizedString"/>
+			<xs:element name="BindingExp" type="exp:Exp"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="DynamicEquations">
+		<xs:annotation>
+			<xs:documentation>List of flat dynamic equations of the model</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element name="Equation" type="equ:AbstractEquation"/>
+				<xs:element name="FunctionCallEquation">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="ScalarOutput" type="xs:normalizedString" maxOccurs="unbounded"/>
+							<xs:element name="SourceFunction" type="exp:FunctionCall"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="BindingEquations">
+		<xs:annotation>
+			<xs:documentation>List of binding equations for parameters</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
+				<xs:element name="BindingEquation" type="equ:BindingEquation"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="InitialEquations">
+		<xs:annotation>
+			<xs:documentation>List of initial equations for the model</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
+				<xs:element name="Equation" type="equ:AbstractEquation"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

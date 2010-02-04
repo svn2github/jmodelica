@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2010 (http://www.altova.com) by Magnus Gäfvert (Modelon AB) -->
+<xs:schema xmlns:opt="https://svn.jmodelica.org/trunk/XML/daeExpressions.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="https://svn.jmodelica.org/trunk/XML/daeExpressions.xsd" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:redefine schemaLocation="daeExpressions.xsd"/>
+	<xs:complexType name="OptExp">
+		<xs:annotation>
+			<xs:documentation>Expression definition extended for optimization purpose</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="opt:Exp"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="TimedVariable">
+		<xs:annotation>
+			<xs:documentation>Timed variable type definition</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Identifier" type="xs:normalizedString"/>
+			<xs:element name="Instant" type="xs:float"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="TimedVariable" type="opt:TimedVariable">
+		<xs:annotation>
+			<xs:documentation>Timed variable</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+</xs:schema>

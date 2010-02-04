@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2010 (http://www.altova.com) by Magnus Gäfvert (Modelon AB) -->
+<xs:schema xmlns:alg="https://svn.jmodelica.org/trunk/XML/daeAlgorithms.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:exp="https://svn.jmodelica.org/trunk/XML/daeExpressions.xsd" targetNamespace="https://svn.jmodelica.org/trunk/XML/daeAlgorithms.xsd" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:import namespace="https://svn.jmodelica.org/trunk/XML/daeExpressions.xsd" schemaLocation="daeExpressions.xsd"/>
+	<xs:complexType name="Statement">
+		<xs:annotation>
+			<xs:documentation>base statement</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:any namespace="##targetNamespace"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ConditionalStatement">
+		<xs:annotation>
+			<xs:documentation>statement with a condition (if, while, when...)</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Condition" type="exp:Exp"/>
+			<xs:element name="Statements">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:any namespace="##targetNamespace" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Algorithm">
+		<xs:annotation>
+			<xs:documentation>algorithm complex type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:any namespace="##targetNamespace" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Algorithm" type="alg:Algorithm">
+		<xs:annotation>
+			<xs:documentation>algorithm element</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Assign">
+		<xs:annotation>
+			<xs:documentation>Assign statement</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="exp:Identifier"/>
+				<xs:element name="Expression" type="exp:Exp"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Break" fixed="">
+		<xs:annotation>
+			<xs:documentation>Break statement (used in While and For statements only)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Return" fixed="">
+		<xs:annotation>
+			<xs:documentation>Return statement</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="If">
+		<xs:annotation>
+			<xs:documentation>IF statement with ElseIf and Else branches</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="alg:ConditionalStatement">
+					<xs:sequence>
+						<xs:element name="ElseIf" type="alg:ConditionalStatement" minOccurs="0" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>additional conditional branches</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="Else" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>optional branch executed if ALL the other conditions are not satisfied</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:sequence>
+									<xs:any namespace="##targetNamespace"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="While" type="alg:ConditionalStatement">
+		<xs:annotation>
+			<xs:documentation>While loop statament</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="For">
+		<xs:annotation>
+			<xs:documentation>For loop statement</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Index">
+					<xs:annotation>
+						<xs:documentation>Iteration index</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:simpleContent>
+							<xs:extension base="xs:normalizedString">
+								<xs:attribute name="StartValue" use="required"/>
+								<xs:attribute name="FinalValue" use="required"/>
+								<xs:attribute name="Step"/>
+							</xs:extension>
+						</xs:simpleContent>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Statements">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:any namespace="##targetNamespace" minOccurs="0" maxOccurs="unbounded"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="FunctionCall" type="exp:FunctionCall">
+		<xs:annotation>
+			<xs:documentation>Function call statement</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Assertion">
+		<xs:annotation>
+			<xs:documentation>Assertion statement</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Condition" type="exp:Exp"/>
+				<xs:element name="Message" type="xs:string" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>returned message</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="level" default="error">
+				<xs:annotation>
+					<xs:documentation>If condition is false: if level="error" procedure is aborted; level="warning" message is returned and procedure is not aborted </xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:normalizedString">
+						<xs:enumeration value="error"/>
+						<xs:enumeration value="warning"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
