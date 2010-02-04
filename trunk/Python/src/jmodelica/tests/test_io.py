@@ -15,6 +15,8 @@ import jmodelica.xmlparser as xp
 import jmodelica.io
 from jmodelica.optimization import ipopt
 
+from jmodelica import simulate
+
 sep = os.path.sep
 
 jm_home = os.environ.get('JMODELICA_HOME')
@@ -74,4 +76,8 @@ def test_dymola_export_import():
     assert N.abs(p_opt[0]-2.2811587)<1e-5, \
            "The optimal value is not correct."
 
-    
+@testattr(stddist = True)
+def test_parameter_alias():
+    model_file = os.path.join(jm_home, "Python", "jmodelica", "tests", "files", "ParameterAlias.mo")
+
+    simulate("ParameterAlias",model_file)

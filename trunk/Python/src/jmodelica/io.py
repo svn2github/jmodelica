@@ -151,6 +151,16 @@ def export_result_dymola(model, data, file_name='', format='txt'):
             if int(ref)<n_parameters: # Put parameters in data set
                 f.write('1 %d 0 -1 # ' % cnt_1 + names.get(ref)+'\n')
                 cnt_1 = cnt_1 + 1
+                # Loop over the alias variables
+                alias_names, alias_sign = model.get_aliases(names.get(ref))
+                i = 0
+                for n in alias_names:
+                    if alias_sign[i]:
+                        f.write('1 -%d 0 -1 # ' % cnt_2 + n +'\n')
+                    else:
+                        f.write('1 %d 0 -1 # ' % cnt_2 + n +'\n')
+                    i = i + 1
+
             else:
                 f.write('2 %d 0 -1 # ' % cnt_2 + names.get(ref)+'\n')
                 # Loop over the alias variables
