@@ -7,6 +7,8 @@ required by Assimulo.
 
 import numpy as N
 import jmodelica.io as io
+from jmodelica.initialization.ipopt import NLPInitialization
+from jmodelica.initialization.ipopt import InitializationOptimizer
 
 try:
     from Assimulo.Problem import Implicit_Problem
@@ -122,6 +124,7 @@ class JMIImplicit(Implicit_Problem):
         #Sets default values
         self.max_eIter = 50 #Maximum number of event iterations allowed.
         self.eps = 1e-9 #Epsilon for adjusting the event indicators
+        self._initiate_problem = False
     
     def f(self, t, y, yd, sw=None):
         """
@@ -234,12 +237,24 @@ class JMIImplicit(Implicit_Problem):
         Initiates the new mode.
         """
         self._model.sw = [int(x) for x in solver.switches]
-        try:
-            solver.make_consistency('IDA_YA_YDP_INIT')
-        except Sundials_Exception, data:
-            print data
-            print 'Failed to calculate initial conditions. Trying to continue...'
         
+        if self._initiate_problem:
+            # Create DAE initialization object.
+            init_nlp = NLPInitialization(self._model)
+            # Create an Ipopt solver object for the DAE initialization system
+            init_nlp_ipopt = InitializationOptimizer(init_nlp)
+            # Solve the DAE initialization system with Ipopt
+            init_nlp_ipopt.init_opt_ipopt_solve()
+            
+            solver.y[-1] = N.append(self._model.x,self._model.w)
+            solver.yd[-1] = N.append(self._model.dx,[0]*len(self._model.w)) 
+        else:
+            try:
+                solver.make_consistency('IDA_YA_YDP_INIT')
+            except Sundials_Exception, data:
+                print data
+                print 'Failed to calculate initial conditions. Trying to continue...'
+                
         #print max(self.f(solver.t[-1], solver.y[-1], solver.yd[-1], solver.switches))
         
     def check_eIter(self, before, after):
@@ -309,3 +324,26 @@ class JMIImplicit(Implicit_Problem):
         return self.__eps
     epsdocstring='Value used for adjusting the event indicators'
     eps = property(_get_eps,_set_eps, doc=epsdocstring)
+
+    def initiate(self,solver):
+        """
+        Initiates the problem.
+        """
+        self._initiate_problem = True
+        
+        if hasattr(self, 'switches0'):
+            
+            sw_val = N.array([.0]*len(self._model.sw))
+            self._model.jmimodel.dae_R(sw_val)
+            
+            for i in range(len(sw_val)):
+                if sw_val[i] >= 0.0:
+                    solver.switches[i] = True
+                else:
+                    solver.switches[i] = False
+        
+            self.handle_event(solver, [0])
+        else:
+            self.init_mode(solver)
+        
+        self._initiate_problem = False 
