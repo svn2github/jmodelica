@@ -122,8 +122,8 @@ aspect InstLookupClasses {
 	HashMap<String,LibNode> InstProgramRoot.libraryMap = 
 		new HashMap<String,LibNode>();
 	
-	syn lazy HashSet InstProgramRoot.lookupLibrary(String name) {
-		HashSet set = new HashSet(4);
+	syn lazy HashSet<InstFullClassDecl> InstProgramRoot.lookupLibrary(String name) {
+		HashSet<InstFullClassDecl> set = new HashSet<InstFullClassDecl>(4);
 		Program prog = ((SourceRoot)root()).getProgram();
 		
 		LibNode ln = null;
@@ -564,44 +564,28 @@ aspect SimpleInstClassLookup {
 	 */
 	syn lazy InstClassDecl InstProgramRoot.simpleLookupInstClassDecl(String name) = 
 		simpleLookupInstClassDeclRecursive(name);
+
+	// For findMatching()
+	eq InstClassDecl.matches(String str) = name().equals(str);
 	
 	public InstClassDecl InstNode.simpleLookupInstClassDeclRecursive(String name) {
 		String[] parts = name.split("\\.", 2);
-		for (InstClassDecl icd_tmp : getInstClassDecls()) {
-			if (icd_tmp.name().equals(parts[0])) {
-				if (parts.length == 1) {
-					return icd_tmp;
-				} else {
-					return icd_tmp.simpleLookupInstClassDeclRecursive(parts[1]);
-				}
-			}
-		}
-		return unknownInstClassDecl();
+	    InstClassDecl icd = findMatching(getInstClassDecls(), parts[0]);
+	    if (icd != null)
+	    	return icd = (parts.length == 1) ? icd : icd.simpleLookupInstClassDeclRecursive(parts[1]);
+	    else
+	    	return unknownInstClassDecl();
 	}
-
+	
 	public InstClassDecl InstProgramRoot.simpleLookupInstClassDeclRecursive(String name) {
 		String[] parts = name.split("\\.", 2);
-		for (InstClassDecl icd_tmp : getInstClassDecls()) {
-			if (icd_tmp.name().equals(parts[0])) {
-				if (parts.length == 1) {
-					return icd_tmp;
-				} else {
-					return icd_tmp.simpleLookupInstClassDeclRecursive(parts[1]);
-				}
-			}
-		}
-		HashSet<InstClassDecl> set = lookupLibrary(parts[0]);
-		for (InstClassDecl icd_tmp : set) {
-			if (icd_tmp.name().equals(parts[0])) {
-				if (parts.length == 1) {
-					return icd_tmp;
-				} else {
-					return icd_tmp.simpleLookupInstClassDeclRecursive(parts[1]);
-				}
-			}
-		}
-
-		return unknownInstClassDecl();
+	    InstClassDecl icd = findMatching(getInstClassDecls(), parts[0]);
+	    if (icd == null) 
+	        icd = findMatching(lookupLibrary(parts[0]), parts[0]);
+	    if (icd != null)
+	    	return icd = (parts.length == 1) ? icd : icd.simpleLookupInstClassDeclRecursive(parts[1]);
+	    else
+	    	return unknownInstClassDecl();
 	}
 
 	

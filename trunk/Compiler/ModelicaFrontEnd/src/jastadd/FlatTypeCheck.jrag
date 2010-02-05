@@ -119,19 +119,42 @@ aspect FlatTypeCheck {
   public void FIdUseExp.typeCheck() {}
   public void FInstAccessExp.typeCheck() {}
   
+  /**
+   * \brief Check if the FExp of this InstIterExp must be scalar.
+   */
+  inh boolean InstIterExp.iterExpMustBeScalar();
+  eq FExp.getChild().iterExpMustBeScalar()       = false;
+  eq Root.getChild().iterExpMustBeScalar()       = false;
+  eq InstNode.getChild().iterExpMustBeScalar()   = false;
+  eq FMinMaxExp.getChild().iterExpMustBeScalar() = true;
+  // TODO: Add product() when it is implemented
+  
+  // InstIterExp has simplified type() that cannot be unknown if getFExp().type() isn't unknown
+  public void InstIterExp.typeCheck() {
+	  if (iterExpMustBeScalar() && !getFExp().type().isUnknown() && getFExp().ndims() != 0)
+		  error("The expression of a reduction-expression must be scalar, except for sum(): " +
+				  getFExp() + " has ndims() = " + getFExp().ndims());
+  }
+  
+  public void InstForIndex.typeCheck() {
+	  if (hasFExp() && !getFExp().type().isUnknown() && getFExp().ndims() != 1)
+		  error("The expression of for index " + name() + " must be a vector expression: " + 
+				  getFExp() + " has ndims() = " + getFExp().ndims());
+  }
+  
   public void FExpSubscript.typeCheck() {
 	  if (ndims() > 1) { 
-		  error("Array index must be scalar or vector expression: " + getFExp().prettyPrint(""));
+		  error("Array index must be scalar or vector expression: " + getFExp());
 	  } else if (!type().isInteger()) { // TODO: Expand to support Boolean and enums
-		  error("Array index must be Integer expression: " + getFExp().prettyPrint(""));
+		  error("Array index must be Integer expression: " + getFExp());
 	  } else if (!inFunction() && !getFExp().variability().lessOrEqual(fParameter())) {
-		  error("Array index in equation must be constant, parameter or loop index: " + getFExp().prettyPrint(""));
+		  error("Array index in equation must be constant, parameter or loop index: " + getFExp());
 	  } else {
 		  int max = mySize()[0];
 		  for (FExp e : getExpanded().iterable()) {
 			  int i = e.ceval().intValue();
 			  if (i < 1 || i > max) {
-				  error("Array index out of bounds: " + i + ", index expression: "+ getFExp().prettyPrint(""));
+				  error("Array index out of bounds: " + i + ", index expression: "+ getFExp());
 				  return;
 			  }
 		  }

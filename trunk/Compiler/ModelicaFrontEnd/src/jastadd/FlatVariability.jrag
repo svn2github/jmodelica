@@ -177,10 +177,6 @@ aspect FlatVariability {
 			return (fContinuous());
 		}
 	}
-	
-	eq FSumRedExp.variability() {
-		return(getFExp().variability().combine(getFForIndex().variability()));
-	}
 
 	// TODO: Take care of IDENT in range-expr without the 'in rang-expr'
 	syn FTypePrefixVariability FForIndex.variability() {
@@ -204,8 +200,11 @@ aspect FlatVariability {
 		for (int i=0; i<getNumFExp(); i++) {
 			total = total.combine(getFExp(i).variability());
 		}
-		return total;		
-	}	
+		return total;
+	}
+	
+	eq FIterExp.variability()    = getFExp().variability();
+	eq InstIterExp.variability() = getFExp().variability();
 	
 	eq FSubscriptedExp.variability() {
 		FTypePrefixVariability total = fConstant();

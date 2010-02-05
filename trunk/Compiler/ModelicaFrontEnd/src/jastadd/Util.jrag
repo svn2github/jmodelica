@@ -130,6 +130,21 @@ aspect NodeMethods {
     this.end = end;
   }
   
+  public class ASTNode{
+	  /**
+	   * \brief Copies the <code>start</code> and <code>end</code> members to 
+	   *        another node.
+	   *        
+	   * @param n  the node to copy the location to.
+	   * @return  the node given as <code>n</code>.
+	   */
+	  public <N extends ASTNode> N copyLocationTo(N n) {
+		  n.start = this.start;
+		  n.end = this.end;
+		  return n;
+	  }
+  }
+  
   /**
    * \brief Sets the <code>start</code> and <code>end</code> members of the node.
    */
@@ -522,6 +537,7 @@ aspect FlatNames {
 	eq InstReplacingPrimitive.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
 	eq InstReplacingShortClassDecl.getChild().retrieveFQName() = retrieveFQName();
 	eq InstClassDecl.getChild().retrieveFQName() = null; //getFQName();
+	eq InstForIndex.getChild().retrieveFQName() = null;
 	
 	eq InstRoot.getChild().retrieveFQName() = null;
 	eq SourceRoot.getProgram().retrieveFQName() = null;
@@ -1042,35 +1058,39 @@ aspect ParserHelpers {
 	
 }
 
-//aspect NodeSearch {
-//	/**
-//	 * \brief Does node match <code>string</code>? Override for node types that 
-//	 * need to be searched for.
-//	 * 
-//	 * Base implementation always returns <code>false</code.
-//	 * Generally, this is implemented with something like 
-//	 * <code>str.equals(name())</code>.
-//	 * 
-//	 * @param str  the string to match
-//	 * @return     <code>true</code if <code>str</code> matches this node, 
-//	 *             <code>false</code> otherwise
-//	 */
-//	syn boolean ASTNode.matches(String str) = false;
-//	
-//	/**
-//	 * \brief Searches <code>set</code> for a node that returns <code>true</code> for 
-//	 * <code>node.matches(str)</code>.
-//	 * 
-//	 * @param set  the container to search for a matching node
-//	 * @param str  the string to match nodes to
-//	 * @return     a matching node if one is found, <code>null</code> otherwise
-//	 */
-//	public static <T extends ASTNode> T ASTNode.findMatching(Iterable<T> set, String str) {
-//	    for (T node : set) {
-//	        if (node.matches(str)) {
-//	            return node;
-//	        }
-//	    }
-//	    return null;
-//	}
-//}
+aspect NodeSearch {
+	
+	/**
+	 * \brief Does node match <code>string</code>? Override for node types that 
+	 * need to be searched for.
+	 * 
+	 * Base implementation always returns <code>false</code.
+	 * Generally, this is implemented with something like 
+	 * <code>str.equals(name())</code>.
+	 * 
+	 * @param str  the string to match
+	 * @return     <code>true</code if <code>str</code> matches this node, 
+	 *             <code>false</code> otherwise
+	 */
+	syn boolean ASTNode.matches(String str) = false;
+	
+	public class ASTNode {
+		
+		/**
+		 * \brief Searches <code>set</code> for a node that returns <code>true</code> for 
+		 * <code>node.matches(str)</code>.
+		 * 
+		 * @param set  the container to search for a matching node
+		 * @param str  the string to match nodes to
+		 * @return     a matching node if one is found, <code>null</code> otherwise
+		 */
+		public static <T extends ASTNode> T findMatching(Iterable<T> set, String str) {
+		    for (T node : set) 
+		        if (node.matches(str)) 
+		            return node;
+		    return null;
+		}
+		
+	}
+	
+}

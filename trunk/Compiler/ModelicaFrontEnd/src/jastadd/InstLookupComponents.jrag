@@ -58,11 +58,7 @@ aspect InstLookupComponents {
 				set.add(ifi.getInstPrimitive());
 			}
 		}
-		if (set.size() > 0) {
-			return set;
-		} else {
-			lookupInstComponent(name);
-		}
+		return (set.size() > 0) ? set : lookupInstComponent(name);
 	}
 	
 	inh lazy HashSet InstForStmt.lookupInstComponent(String name);
@@ -73,11 +69,18 @@ aspect InstLookupComponents {
 				set.add(ifi.getInstPrimitive());
 			}
 		}
-		if (set.size() > 0) {
-			return set;
-		} else {
-			lookupInstComponent(name);
+		return (set.size() > 0) ? set : lookupInstComponent(name);
+	}
+	
+	inh lazy HashSet InstIterExp.lookupInstComponent(String name);
+	eq InstIterExp.getChild().lookupInstComponent(String name) {
+		HashSet set = new HashSet(4);
+		for (InstForIndex ifi : getInstForIndexs()) {
+			if (ifi.getInstPrimitive().name().equals(name)) {
+				set.add(ifi.getInstPrimitive());
+			}
 		}
+		return (set.size() > 0) ? set : lookupInstComponent(name);
 	}
 
 	
@@ -113,11 +116,7 @@ aspect InstLookupComponents {
 				set.addAll(ie.memberInstComponent(name));
 			}
 		
-			if (set.size()>0) {
-				return set;
-			} else {
-				return emptyHashSet();
-			}
+			return (set.size() > 0) ? set : emptyHashSet();
 		}
 	}
 	
@@ -193,18 +192,6 @@ aspect InstLookupComponents {
 		return lookupComponent(name);
 	}
 
-
-	inh HashSet SumRedExp.lookupComponent(String name);	
-	eq SumRedExp.getExp().lookupComponent(String name) {
-		debugPrint("SumRedExp.getExp().lookupComponent: "+ name);
-		HashSet set = new HashSet(4);
-		if (getForIndex().getForIndexDecl().matchComponentDecl(name)) {
-			set.add(getForIndex().getForIndexDecl());
-			return set;	
-		}
-		return lookupComponent(name);
-	}
-*/	
 	
 }
 

@@ -103,6 +103,10 @@ aspect PrettyPrint {
 		}
 	}
 	
+	public void List.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		prettyPrintWithSep(p, str, indent, o, ", ");
+	}
+	
 	/**
 	 * \brief Prints an ArrayList of any type of ASTNode, adding <code>sep</code> between nodes.
 	 * 
@@ -546,17 +550,6 @@ aspect PrettyPrint {
 		p.toString(getName(),str,indent,o);
 		str.print("("); 
 		p.toString(getFunctionArgumentsOpt(),str,indent,o);
-		str.print(")");
-	}
-
-	public void SumRedExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("sum("); 
-		p.toString(getExp(),str,indent,o);
-		str.print(" for ");
-		str.print(getForIndex().getForIndexDecl().name());
-		str.print(" in ");
-		if (getForIndex().hasExp())
-			p.toString(getForIndex().getExp(),str,indent,o);
 		str.print(")");
 	}
 
@@ -1349,16 +1342,6 @@ aspect FlattPrettyPrint {
 	eq FFillExp.builtInName()    = "fill";
 	eq FMinExp.builtInName()     = "min";
 	eq FMaxExp.builtInName()     = "max";
-
-/*
-	public void FSumRedExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print("sum("); 
-		p.toString(getFExp(),str,indent,o);
-		str.print(" for ");
-		p.toString(getFForIndex(), str, indent, o);
-		str.print(")");
-	}
-	*/
 	
 	
 	public void FForClauseE.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
@@ -1377,6 +1360,14 @@ aspect FlattPrettyPrint {
         }
     }
 	
+    public void InstForIndex.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+        str.print(getInstPrimitive().name());
+        if (hasFExp()) {
+            str.print(" in ");
+        p.toString(getFExp(), str, indent, o);
+        }
+    }
+	
 	public void FArray.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("{");
 		for (int i=0; i<getNumFExp(); i++) {
@@ -1385,6 +1376,18 @@ aspect FlattPrettyPrint {
 				str.print(",");
 		}
 		str.print("}");
+	}
+	
+	public void FIterExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getFExp(), str, indent, o);
+		str.print(" for ");
+		getFForIndexList().prettyPrintWithSep(p, str, indent, o, ", ");
+	}
+	
+	public void InstIterExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getFExp(), str, indent, o);
+		str.print(" for ");
+		getInstForIndexList().prettyPrintWithSep(p, str, indent, o, ", ");
 	}
 	
 	public void FSubscriptedExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {

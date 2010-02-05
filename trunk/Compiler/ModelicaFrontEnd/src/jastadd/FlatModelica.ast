@@ -648,9 +648,9 @@ FStringLitExp : FLitExp ::= <String>;
 
 
 /**
- * \brief Summation reduction expression.
+ * Expressions of the form "<exp> for i in <exp>" in the flat tree.
  */
-FSumRedExp : FExp ::= FExp FForIndex;
+FIterExp : FExp ::= FExp FForIndex*;
 
 /**
  * \brief For indices expression.

@@ -90,12 +90,12 @@ aspect OptimicaFlatVariability {
    	eq FOptParameter.toString() = "opt_parameter";
 	
 	syn boolean FConstraint.isTimed() = 
-		(getRight().isTimedExp() | getRight().isParameterExp() | getRight().isConstantExp()) & 
-		(getLeft().isTimedExp() | getLeft().isParameterExp() | getLeft().isConstantExp());
+		(getRight().isTimedExp() || getRight().isParameterExp() || getRight().isConstantExp()) & 
+		(getLeft().isTimedExp() || getLeft().isParameterExp() || getLeft().isConstantExp());
 
 	syn boolean FConstraint.isParameter() = 
-		(getRight().isParameterExp() | getRight().isConstantExp()) & 
-		(getLeft().isParameterExp() | getLeft().isConstantExp());
+		(getRight().isParameterExp() || getRight().isConstantExp()) & 
+		(getLeft().isParameterExp() || getLeft().isConstantExp());
 
 	
 }

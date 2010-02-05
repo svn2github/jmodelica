@@ -1068,7 +1068,7 @@ model MinExp2
          description="Min operator: 1 array arg",
          flatModel="
 fclass ArrayTests.MinExp2
- constant Real x = min({{1,2},{3,4}});
+ constant Real x = min(min(min(1, 2), 3), 4);
  Real y;
 equation
  y = 1.0;
@@ -1169,6 +1169,93 @@ Semantic error at line 993, column 15:
 end MinExp7;
 
 
+model MinExp8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MinExp8",
+         description="Reduction-expression with min(): constant expression",
+         flatModel="
+fclass ArrayTests.MinExp8
+ constant Real x = min(min(min(min(min(min(min(min(min(min(min(1.0, 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0);
+ Real y;
+equation
+ y = 1.0;
+end ArrayTests.MinExp8;
+")})));
+
+ constant Real x = min(1.0 for i in 1:4, j in {2,3,5});
+ Real y = x;
+end MinExp8;
+
+
+model MinExp9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MinExp9",
+         description="Reduction-expression with min(): basic test",
+         flatModel="
+fclass ArrayTests.MinExp9
+ Real x;
+equation
+ x = min(min(min(min(min(min(min(min(( 1 ) * ( 2 ), ( 1 ) * ( 3 )), ( 1 ) * ( 5 )), ( 2 ) * ( 2 )), ( 2 ) * ( 3 )), ( 2 ) * ( 5 )), ( 3 ) * ( 2 )), ( 3 ) * ( 3 )), ( 3 ) * ( 5 ));
+end ArrayTests.MinExp9;
+")})));
+
+ Real x = min(i * j for i in 1:3, j in {2,3,5});
+end MinExp9;
+
+
+model MinExp10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="MinExp10",
+         description="Reduction-expression with min(): non-vector index expressions",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1183, column 25:
+  The expression of for index i must be a vector expression: {{1,2},{3,4}} has ndims() = 2
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1183, column 45:
+  The expression of for index j must be a vector expression: 2 has ndims() = 0
+")})));
+
+ Real x = min(i * j for i in {{1,2},{3,4}}, j in 2);
+end MinExp10;
+
+
+model MinExp11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="MinExp11",
+         description="Reduction-expression with min(): non-scalar expression",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1188, column 11:
+  The expression of a reduction-expression must be scalar, except for sum(): {( i ) * ( j ),2} has ndims() = 1
+")})));
+
+ Real x = min({i * j, 2} for i in 1:4, j in 2:5);
+end MinExp11;
+
+
+model MinExp12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="MinExp12",
+         description="Reduction-expression with min(): wrong type in expression",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1193, column 7:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+
+ Real x = min(false for i in 1:4, j in 2:5);
+end MinExp12;
+
+
 
 model MaxExp1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -1196,7 +1283,7 @@ model MaxExp2
          description="Max operator: 1 array arg",
          flatModel="
 fclass ArrayTests.MaxExp2
- constant Real x = max({{1,2},{3,4}});
+ constant Real x = max(max(max(1, 2), 3), 4);
  Real y;
 equation
  y = 4.0;
@@ -1295,6 +1382,147 @@ Semantic error at line 993, column 15:
 
  Real x = max(1);
 end MaxExp7;
+
+
+model MaxExp8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MaxExp8",
+         description="Reduction-expression with max(): constant expression",
+         flatModel="
+fclass ArrayTests.MaxExp8
+ Real x;
+equation
+ x = max(max(max(max(max(max(max(max(max(max(max(1.0, 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0);
+end ArrayTests.MaxExp8;
+")})));
+
+ Real x = max(1.0 for i in 1:4, j in {2,3,5});
+end MaxExp8;
+
+
+model MaxExp9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MaxExp9",
+         description="Reduction-expression with max(): basic test",
+         flatModel="
+fclass ArrayTests.MaxExp9
+ constant Real x = max(max(max(max(max(max(max(max(max(max(max(( 1 ) * ( 2 ), ( 1 ) * ( 3 )), ( 1 ) * ( 5 )), ( 2 ) * ( 2 )), ( 2 ) * ( 3 )), ( 2 ) * ( 5 )), ( 3 ) * ( 2 )), ( 3 ) * ( 3 )), ( 3 ) * ( 5 )), ( 4 ) * ( 2 )), ( 4 ) * ( 3 )), ( 4 ) * ( 5 ));
+ Real y;
+equation
+ y = 20.0;
+end ArrayTests.MaxExp9;
+")})));
+
+ constant Real x = max(i * j for i in 1:4, j in {2,3,5});
+ Real y = x;
+end MaxExp9;
+
+
+model MaxExp10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="MaxExp10",
+         description="Reduction-expression with max(): non-vector index expressions",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1424, column 25:
+  The expression of for index i must be a vector expression: {{1,2},{3,4}} has ndims() = 2
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1424, column 45:
+  The expression of for index j must be a vector expression: 2 has ndims() = 0
+")})));
+
+ Real x = max(i * j for i in {{1,2},{3,4}}, j in 2);
+end MaxExp10;
+
+
+model MaxExp11
+ Real x = max({i * j, 2} for i in 1:4, j in 2:5);
+end MaxExp11;
+
+
+model MaxExp12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="MaxExp12",
+         description="Reduction-expression with max(): wrong type in expression",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1462, column 7:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+
+ Real x = max(false for i in 1:4, j in 2:5);
+end MaxExp12;
+
+
+
+model ArrayIterTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayIterTest1",
+         description="Array constructor with 'exp for i in exp' syntax",
+         flatModel="
+fclass ArrayTests.ArrayIterTest1
+ Real x[1,1];
+ Real x[1,2];
+ Real x[1,3];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[2,3];
+ Real x[3,1];
+ Real x[3,2];
+ Real x[3,3];
+equation
+ x[1,1] = ( 1 ) * ( 2 );
+ x[1,2] = ( 1 ) * ( 3 );
+ x[1,3] = ( 1 ) * ( 5 );
+ x[2,1] = ( 2 ) * ( 2 );
+ x[2,2] = ( 2 ) * ( 3 );
+ x[2,3] = ( 2 ) * ( 5 );
+ x[3,1] = ( 3 ) * ( 2 );
+ x[3,2] = ( 3 ) * ( 3 );
+ x[3,3] = ( 3 ) * ( 5 );
+end ArrayTests.ArrayIterTest1;
+")})));
+
+ Real x[3,3] = {i * j for i in 1:3, j in {2,3,5}};
+end ArrayIterTest1;
+
+
+model ArrayIterTest2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayIterTest2",
+         description="Array constructor with 'exp for i in exp' syntax",
+         flatModel="
+fclass ArrayTests.ArrayIterTest2
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+equation
+ x[1,1,1] = ( 1 ) * ( 1 );
+ x[1,1,2] = 2;
+ x[1,2,1] = ( 1 ) * ( 1 );
+ x[1,2,2] = 5;
+ x[2,1,1] = ( 2 ) * ( 2 );
+ x[2,1,2] = 2;
+ x[2,2,1] = ( 2 ) * ( 2 );
+ x[2,2,2] = 5;
+end ArrayTests.ArrayIterTest2;
+")})));
+
+ Real x[2,2,2] = {{i * i, j} for i in 1:2, j in {2,5}};
+end ArrayIterTest2;
 
 
 

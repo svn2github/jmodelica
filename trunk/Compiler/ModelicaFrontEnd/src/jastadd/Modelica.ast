@@ -352,10 +352,10 @@ StringLitExp : Exp ::= <STRING>;
 //BooleanLitExp : Exp ::= <Value:boolean>;
 FunctionCall : Exp ::= Name:Access [FunctionArguments];
 
-FunctionArguments ::= Exp* ForIndex* NamedArgument*;
+FunctionArguments ::= Exp* NamedArgument*;
 NamedArgument ::= Name:Access Exp;
 
-SumRedExp : Exp ::= Exp ForIndex;
+IterExp : Exp ::= Exp ForIndex*;
 
 RangeExp : Exp ::= Exp*;
 

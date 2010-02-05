@@ -682,6 +682,15 @@ aspect FlatExpressions {
 	   	 l.add(getFExp(i).flatten(prefix));
 	   return new FArray(l);
 	}
+	
+	public FExp InstIterExp.flatten(FQName prefix) {
+		List<FForIndex> fil = new List<FForIndex>();
+		for (InstForIndex fi : getInstForIndexList())
+			fil.add(fi.flatten(prefix));
+		return new FIterExp(getFExp().flatten(prefix), fil);
+	}
+	
+	public FExp FIterExp.flatten(FQName prefix) { return (FExp) fullCopy(); }
 
 	public FExp FSubscriptedExp.flatten(FQName prefix) {
 		return new FSubscriptedExp(getFExp().flatten(prefix), getFArraySubscripts().flatten(prefix));
@@ -788,12 +797,6 @@ aspect FlatExpressions {
 		return getFExp().flatten(prefix);
 	}
 	
-	/*
-	public FExp FSumRedExp.flatten(FQName prefix) {
-		return new FSumRedExp(getFExp().flatten(prefix),
-		                     getFForIndex().flatten(prefix));
-	}
-	*/
 	public FForIndex InstForIndex.flatten(FQName prefix) {
 		return new FForIndex(getInstPrimitive().createFVariable(),
 		                     hasFExp()? new Opt(getFExp().flatten(prefix)): new Opt());
@@ -889,16 +892,12 @@ aspect FlatExpressions {
 aspect InstantiatedExpressions {
 
 	public FAbstractEquation AbstractEquation.instantiate() {
-		FUnsupportedEquation ue = new FUnsupportedEquation(new FNormalEquation());
-		ue.setLocation(this);
-		return ue;
+		return copyLocationTo(new FUnsupportedEquation(new FNormalEquation()));
 	}
 
 	public FAbstractEquation Equation.instantiate() {
 		FEquationType t = isInitial() ? new FInitialEquation() : new FNormalEquation();
-		FEquation e = new FEquation(t, getLeft().instantiate(),getRight().instantiate());
-		e.setLocation(this);
-		return e;
+		return copyLocationTo(new FEquation(t, getLeft().instantiate(),getRight().instantiate()));
 	}
 
 	public FAbstractEquation ConnectClause.instantiate() {
@@ -919,9 +918,7 @@ aspect InstantiatedExpressions {
 		List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
 		for (FunctionCallLeft a : getLefts()) 
 			l.add(a.instantiate());
-		FFunctionCallEquation f = new FFunctionCallEquation(t, l, getCall().instantiate());
-		f.setLocation(this);
-		return f;
+		return copyLocationTo(new FFunctionCallEquation(t, l, getCall().instantiate()));
 	}
 	
 	public 	FFunctionCallLeft FunctionCallLeft.instantiate() {
@@ -931,9 +928,7 @@ aspect InstantiatedExpressions {
 	
 	public FAlgorithmBlock Algorithm.instantiate() {
 		List l = Statement.instantiateStatementList(getStatements());
-		FAlgorithmBlock ab = new FAlgorithmBlock(l);
-		ab.setLocation(this);
-		return ab;
+		return copyLocationTo(new FAlgorithmBlock(l));
 	}
 	
 	public static List Statement.instantiateStatementList(List<Statement> l) {
@@ -1030,42 +1025,30 @@ aspect InstantiatedExpressions {
 		List l = new List();
 		for (int i=0;i<getNumSubscript();i++)
 			l.add(getSubscript(i).instantiate());
-		FArraySubscripts as = new FArraySubscripts(l);
-		as.setLocation(this);
-		return as;
+		return copyLocationTo(new FArraySubscripts(l));
 	}
 	
 	abstract public FSubscript Subscript.instantiate();
 	public FSubscript ColonSubscript.instantiate() { 
-		FColonSubscript fcs = new FColonSubscript();
-		fcs.setLocation(this);
-		return fcs;
+		return copyLocationTo(new FColonSubscript());
 	}
 	
 	public FSubscript ExpSubscript.instantiate() {
-		FExpSubscript fes = new FExpSubscript(getExp().instantiate());
-		fes.setLocation(this);
-		return fes;
+		return copyLocationTo(new FExpSubscript(getExp().instantiate()));
 	}
 	
 	public FExp Exp.instantiate() {
-		FUnsupportedExp ue = new FUnsupportedExp();
-		ue.setLocation(this);
-		return ue;
+		return copyLocationTo(new FUnsupportedExp());
 	}
 
 	
 	public InstDerExp DerExp.instantiate() {
-		InstDerExp n = new InstDerExp(getExp().instantiate());
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new InstDerExp(getExp().instantiate()));
 	}
 	
 
 	public FExp AccessExp.instantiate() {
-		FInstAccessExp n = new FInstAccessExp(getAccess().newInstAccess());
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FInstAccessExp(getAccess().newInstAccess()));
 	}
 
 
@@ -1081,9 +1064,14 @@ aspect InstantiatedExpressions {
 	   	 l.add(getFunctionArguments().getExp(i).instantiate());
 	   	l.getChildNoTransform(i).setLocation(this);
 	   }
-	   FArray n = new FArray(l);
-	   n.setLocation(this);
-	   return n;
+	   return copyLocationTo(new FArray(l));
+	}
+	
+	public FExp IterExp.instantiate() {
+		List<InstForIndex> ifil = new List<InstForIndex>();
+		for (ForIndex fi : getForIndexList())
+			ifil.add(fi.instantiate());
+		return copyLocationTo(new InstIterExp(getExp().instantiate(), ifil));
 	}
 
 	public FExp RangeExp.instantiate() {
@@ -1092,9 +1080,7 @@ aspect InstantiatedExpressions {
 			l.add(getExp(i).instantiate());
 			l.getChildNoTransform(i).setLocation(this);
 		}
-		FRangeExp n = new FRangeExp(l);
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FRangeExp(l));
 	}
 
     public FExp IfExp.instantiate() {
@@ -1138,171 +1124,115 @@ aspect InstantiatedExpressions {
 	*/
 	
 	public FExp AddExp.instantiate() { 
-		FExp ae = new FAddExp(getLeft().instantiate(),getRight().instantiate()); 
-		ae.setLocation(this);
-		return ae;
+		return copyLocationTo(new FAddExp(getLeft().instantiate(),getRight().instantiate()));
 	}
 	
 	public FExp SubExp.instantiate() { 
-		FExp n = new FSubExp(getLeft().instantiate(),getRight().instantiate()); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FSubExp(getLeft().instantiate(),getRight().instantiate()));
 	}
 
 	public FExp MulExp.instantiate() { 
-		FExp n = new FMulExp(getLeft().instantiate(),getRight().instantiate()); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FMulExp(getLeft().instantiate(),getRight().instantiate()));
 	}
 	
 	public FExp DivExp.instantiate() { 
-		FExp n = new FDivExp(getLeft().instantiate(),getRight().instantiate()); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FDivExp(getLeft().instantiate(),getRight().instantiate()));
 	}
 	
 	public FExp PowExp.instantiate() { 
-		FExp n = new FPowExp(getLeft().instantiate(),getRight().instantiate()); 
-		n.setLocation(this);
-		return n;	
+		return copyLocationTo(new FPowExp(getLeft().instantiate(),getRight().instantiate()));
 	}
 	
 	public FExp DotAddExp.instantiate() { 
-		FExp ae = new FDotAddExp(getLeft().instantiate(),getRight().instantiate()); 
-		ae.setLocation(this);
-		return ae;
+		return copyLocationTo(new FDotAddExp(getLeft().instantiate(),getRight().instantiate()));
 	}
 	
 	public FExp DotSubExp.instantiate() { 
-		FExp n = new FDotSubExp(getLeft().instantiate(),getRight().instantiate()); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FDotSubExp(getLeft().instantiate(),getRight().instantiate()));
 	}
 
 	public FExp DotMulExp.instantiate() { 
-		FExp n = new FDotMulExp(getLeft().instantiate(),getRight().instantiate()); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FDotMulExp(getLeft().instantiate(),getRight().instantiate()));
 	}
 	
 	public FExp DotDivExp.instantiate() { 
-		FExp n = new FDotDivExp(getLeft().instantiate(),getRight().instantiate()); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FDotDivExp(getLeft().instantiate(),getRight().instantiate()));
 	}
 	
 	public FExp DotPowExp.instantiate() { 
-		FExp n = new FDotPowExp(getLeft().instantiate(),getRight().instantiate()); 
-		n.setLocation(this);
-		return n;	
+		return copyLocationTo(new FDotPowExp(getLeft().instantiate(),getRight().instantiate()));
 	}
 	
 	public FExp NegExp.instantiate() { 
-		FExp n = new FNegExp(getExp().instantiate()); 
-		n.setLocation(this);
-		return n;	
+		return copyLocationTo(new FNegExp(getExp().instantiate()));
 	}
 
 	public FExp LtExp.instantiate() { 
-		FExp n = new FLtExp(getLeft().instantiate(),getRight().instantiate());
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FLtExp(getLeft().instantiate(),getRight().instantiate()));
 	}
 
 	public FExp LeqExp.instantiate() { 
-		FExp n = new FLeqExp(getLeft().instantiate(),getRight().instantiate()); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FLeqExp(getLeft().instantiate(),getRight().instantiate()));
 	}
 	
 	public FExp GtExp.instantiate() { 
-		FExp n = new FGtExp(getLeft().instantiate(),getRight().instantiate()); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FGtExp(getLeft().instantiate(),getRight().instantiate()));
 	}
 	
 	public FExp GeqExp.instantiate() { 
-		FExp n = new FGeqExp(getLeft().instantiate(),getRight().instantiate()); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FGeqExp(getLeft().instantiate(),getRight().instantiate()));
 	}
 	
 	public FExp EqExp.instantiate() { 
-		FExp n = new FEqExp(getLeft().instantiate(),getRight().instantiate()); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FEqExp(getLeft().instantiate(),getRight().instantiate()));
 	}
 	
 	public FExp NeqExp.instantiate() { 
-		FExp n = new FNeqExp(getLeft().instantiate(),getRight().instantiate()); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FNeqExp(getLeft().instantiate(),getRight().instantiate()));
 	}
 	
 	public FExp NotExp.instantiate() { 
-		FExp n = new FNotExp(getExp().instantiate()); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FNotExp(getExp().instantiate()));
 	}
 	
 	public FExp OrExp.instantiate() { 
-		FExp n = new FOrExp(getLeft().instantiate(),getRight().instantiate()); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FOrExp(getLeft().instantiate(),getRight().instantiate()));
 	}
 	
 	public FExp AndExp.instantiate() { 
-		FExp n = new FAndExp(getLeft().instantiate(),getRight().instantiate()); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FAndExp(getLeft().instantiate(),getRight().instantiate()));
 	}
 
 	public FExp RealLitExp.instantiate() { 
-		FExp n = new FRealLitExp(getUNSIGNED_NUMBER()); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FRealLitExp(getUNSIGNED_NUMBER()));
 	}
 	
 	public FExp IntegerLitExp.instantiate() { 
-		FExp n = new FIntegerLitExp(getUNSIGNED_INTEGER()); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FIntegerLitExp(getUNSIGNED_INTEGER()));
 	}
 	
 	public FExp StringLitExp.instantiate() { 
-		FExp n = new FStringLitExp(getSTRING()); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FStringLitExp(getSTRING()));
 	}
 	
 	public FExp BooleanLitExpTrue.instantiate() { 
-		FExp n = new FBooleanLitExpTrue(); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FBooleanLitExpTrue());
 	}
 	
 	public FExp BooleanLitExpFalse.instantiate() { 
-		FExp n = new FBooleanLitExpFalse(); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FBooleanLitExpFalse());
 	}
 	
 	public FExp TimeExp.instantiate() { 
-		FExp n = new FTimeExp(); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FTimeExp());
 	}	
 
 	public FExp EndExp.instantiate() { 
-		FExp n = new FEndExp(); 
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new FEndExp());
 	}
 	
 	public InstNamedArgument NamedArgument.instantiate() {
-		InstNamedArgument iarg = new InstNamedArgument(getName().instantiate(), getExp().instantiate());
-		iarg.setLocation(this);
-		return iarg;
+		return copyLocationTo(new InstNamedArgument(getName().instantiate(), getExp().instantiate()));
 	}
 	
 	public FAbstractFunctionCall FunctionCall.instantiate() {
@@ -1320,20 +1250,9 @@ aspect InstantiatedExpressions {
 		}
 		
 		// Create InstFunctionCall
-		FAbstractFunctionCall n = new InstFunctionCall(getName().newInstAccess(), args);	
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new InstFunctionCall(getName().newInstAccess(), args));
 	}
   
-	/*
-	public FExp SumRedExp.instantiate() {
-		FSumRedExp n = new FSumRedExp(getExp().instantiate(),
-		                     getForIndex().instantiate());
-		n.setLocation(this);
-		return n;
-	}
-	*/
-
 	public InstForIndex ForIndex.instantiate() {
 		SourceRoot sr = (SourceRoot)root(); // We know we are in the source tree
 		// This maneuver is pretty ugly, but we need to find an InstClassDecl
@@ -1342,9 +1261,7 @@ aspect InstantiatedExpressions {
 		InstAccess name = ipr.dynamicClassName(getForIndexDecl().getClassName().newInstAccess());
 		InstPrimitive ip = (InstPrimitive) name.myInstClassDecl().newInstComponentDecl(getForIndexDecl());
 		Opt o = hasExp()? new Opt(getExp().instantiate()): new Opt();
-		InstForIndex n = new InstForIndex(ip, o);
-		n.setLocation(this);
-		return n;
+		return copyLocationTo(new InstForIndex(ip, o));
 	}
 	
 	public InstForClauseE ForClauseE.instantiate() {

@@ -1182,7 +1182,7 @@ aspect CircularExpressions {
 
 	syn lazy boolean FExp.isCircular() circular [true] = false;
 	
-	eq FBinExp.isCircular() = getLeft().isCircular() | getRight().isCircular();
+	eq FBinExp.isCircular() = getLeft().isCircular() || getRight().isCircular();
 	eq FUnaryExp.isCircular() = getFExp().isCircular();
 	
 	eq FIdUseExp.isCircular() = myFV().isCircular();
@@ -1195,10 +1195,9 @@ aspect CircularExpressions {
 		}
 		return false;
 	}
-	eq FSumRedExp.isCircular() = getFExp().isCircular() | getFForIndex().isCircular();
 	syn lazy boolean FForIndex.isCircular() circular [true] = hasFExp()? getFExp().isCircular(): false;
 	eq FIfExp.isCircular() {
-		if (getIfExp().isCircular() | getThenExp().isCircular() | getElseExp().isCircular()) {
+		if (getIfExp().isCircular() || getThenExp().isCircular() || getElseExp().isCircular()) {
 			return true;
 		} else {
 			for (FElseIfExp ee : getFElseIfExps()) {
@@ -1209,7 +1208,7 @@ aspect CircularExpressions {
 		} 
 		return false;
 	}
-	eq FElseIfExp.isCircular() = getIfExp().isCircular() | getThenExp().isCircular();
+	eq FElseIfExp.isCircular() = getIfExp().isCircular() || getThenExp().isCircular();
 	eq FArray.isCircular() {
 		for (FExp e : getFExps()) {
 			if (e.isCircular()) {
@@ -1218,9 +1217,23 @@ aspect CircularExpressions {
 		}
 		return false;
 	}
+	eq FIterExp.isCircular() {
+		if (getFExp().isCircular()) 
+			return true;
+		for (FForIndex i : getFForIndexList()) 
+			if (i.getFExp().isCircular()) 
+				return true;
+		return false;
+	}	
+	eq InstIterExp.isCircular() {
+		if (getFExp().isCircular()) 
+			return true;
+		for (InstForIndex i : getInstForIndexList()) 
+			if (i.getFExp().isCircular()) 
+				return true;
+		return false;
+	}	
 	
-	// TODO: Add FMatrix
-
 	eq FRangeExp.isCircular() {
 		for (FExp e : getFExps()) {
 			if (e.isCircular()) {

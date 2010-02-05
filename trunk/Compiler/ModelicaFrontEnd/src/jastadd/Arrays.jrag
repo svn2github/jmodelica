@@ -166,13 +166,16 @@ aspect Arrays {
 	eq FInstAccessExp.ndims() = getInstAccess().ndims();
 	eq FRangeExp.ndims() = 1;
 	eq FArray.ndims() {
-		if (getNumFExp()==0) { //Empty array
+		if (isIterArray())
+			return getFExp(0).ndims();
+		if (getNumFExp()==0)  //Empty array
 			return 1;
-		} else { // We assume that the FArray is set up correctly and that
-			     // all brances are equal.
-			return getFExp(0).ndims() + 1;
-		}
+		// We assume that the FArray is set up correctly and that
+		// all brances are equal.
+		return getFExp(0).ndims() + 1;
 	}
+	eq FIterExp.ndims()        = getFExp().ndims() + getNumFForIndex();
+	eq InstIterExp.ndims()     = getFExp().ndims() + getNumInstForIndex();
 	eq FSubscriptedExp.ndims() = getFArraySubscripts().accessNdims();
 	
 	eq FTranspose.ndims() = getFExp().ndims();
@@ -451,6 +454,8 @@ aspect Arrays {
 	}
 	
 	eq FArray.size() {
+		if (isIterArray())
+			return getFExp(0).size();
 		int s[] = new int[ndims()];
 		if (getNumFExp()==0) {
 		} else {
@@ -461,6 +466,24 @@ aspect Arrays {
 			}
 		}
 		return s;
+	}
+	
+	eq FIterExp.size() {
+		int[] size = new int[ndims()];
+		int i = 0;
+		for (FForIndex fi : getFForIndexList())
+			size[i++] = fi.getFExp().isArray() ? fi.getFExp().size()[0] : 1;
+		System.arraycopy(getFExp().size(), 0, size, i, getFExp().ndims());
+		return size;
+	}
+	
+	eq InstIterExp.size() {
+		int[] size = new int[ndims()];
+		int i = 0;
+		for (InstForIndex fi : getInstForIndexList())
+			size[i++] = fi.getFExp().isArray() ? fi.getFExp().size()[0] : 1;
+		System.arraycopy(getFExp().size(), 0, size, i, getFExp().ndims());
+		return size;
 	}
 	
 	eq FSubscriptedExp.size() = getFArraySubscripts().accessSize();
@@ -672,8 +695,8 @@ aspect Arrays {
 	}
 	
 	protected void Array.fillSubset(Array arr, Index i, HashMap<String,Integer> indexMap) {
-		for (Index i2 : indices().subset(i))
-			arr.set(i2, get(i).scalarize(indexMap));
+		for (Index i2 : indices())
+			arr.set(i.expand(i2), get(i2).scalarize(indexMap));
 	}
 	protected void ScalarAsArray.fillSubset(Array arr, Index i, HashMap<String,Integer> indexMap) {
 		arr.set(i, get(i).scalarize(indexMap));
@@ -725,6 +748,27 @@ aspect Arrays {
 	 *          a ScalarAsArray containing <code>this</code> otherwise.
 	 */
 	syn lazy Array FExp.getArray() = new ScalarAsArray(this);
+	
+	/**
+	 * \brief Allows for more efficient execution of {@see getArray()} in some cases.
+	 * 
+	 * When the Array of a parent node is the same as a childs, replace 
+	 * getArray() with {@see createArray()} for the types the child can have, 
+	 * let getArray() for those types delegate to copyArray() and use copyArray() 
+	 * on the child in getArray() for the parent.
+	 * 
+	 * This ensures that the Array is created only once and that only as many copies 
+	 * as neccesary are made.
+	 */
+	syn Array FExp.copyArray() = (Array) createArray().unboundCopy();
+	
+	/**
+	 * \brief Allows for more efficient execution of {@see getArray()} in some cases.
+	 * 
+	 * See {@see copyArray()} for instructions. 
+	 * When overriding createArray(), always declare it as lazy.
+	 */
+	syn Array FExp.createArray() = getArray();
 	
 	eq FBinExp.getArray() {
 		if (isArray()) {
@@ -838,11 +882,18 @@ aspect Arrays {
 	}
 	
 	eq FArray.getArray() {
+		if (isIterArray())
+			return getFExp(0).copyArray();
 		Array arr = new Array(indices());
 		for (Index i : arr.indices())
 			fillArray(arr, i, 0);
 		return arr;
 	}
+	
+	syn lazy Array FIterExp.createArray()    = getFExp().getArray().createExpanded(getFForIndexList());
+	syn lazy Array InstIterExp.createArray() = getFExp().getArray().createExpanded(getInstForIndexList());
+	eq FIterExp.getArray()    = copyArray();
+	eq InstIterExp.getArray() = copyArray();
 	
 	eq FSubscriptedExp.getArray() {
 		Array arr = new Array(indices());
@@ -1319,6 +1370,7 @@ aspect ArrayIndices {
 	public class Index implements Cloneable {
 		
 		public static final Index NULL = new Index(0);
+		public static Index expanded = NULL;
 		
 		protected int[] index;
 		
@@ -1379,6 +1431,20 @@ aspect ArrayIndices {
 			} catch (CloneNotSupportedException e) {
 				return null;
 			}
+		}
+		
+		/**
+		 * \brief Return an Index that is the result of appending <code>i</code>
+		 *        to this Index.
+		 * 
+		 * @param i  the Index to append.
+		 */
+		public Index expand(Index i) {
+			if (index.length + i.index.length != expanded.index.length) 
+				expanded = new Index(index.length + i.index.length);
+			System.arraycopy(index, 0, expanded.index, 0, index.length);
+			System.arraycopy(i.index, 0, expanded.index, index.length, i.index.length);
+			return expanded;
 		}
 		
 		/**
@@ -1528,15 +1594,6 @@ aspect ArrayIndices {
 		public Index translate(Index i) {
 			return i;
 		}
-		
-		/**
-		 * \brief Returns an Iterable<Index> that represents the subset of the indices 
-		 *        represented by this Indices where the first n subscripts are given by
-		 *        <code>i</code>
-		 */
-		public Iterable<Index> subset(Index i) {
-			return new ISubset(i);
-		}
 				
 		
 		/**
@@ -1571,28 +1628,13 @@ aspect ArrayIndices {
 		 * \brief Calculate the internal index in an Array that spans this Indices.
 		 */
 		protected int internal(Index i) {
+			if (i.ndims() != ndims)
+				throw new UnsupportedOperationException("Index dimensions does not match.");
 			int[] index = i.index();
 			int res = 0;
-			for (int j = 0; j < index.length; j++)
+			for (int j = 0; j < ndims; j++)
 				res = res * size[j] + index[j] - 1;
 			return res;
-		}
-		
-		/**
-		 * \brief A subset of the indices described by this Indices.
-		 */
-		protected class ISubset implements Iterable<Index> {
-			
-			protected Index i;
-			
-			public ISubset(Index ii) {
-				ii = i;
-			}
-			
-			public Iterator<Index> iterator() {
-				return new IIterator(i); 
-			}
-			
 		}
 		
 		/**
@@ -1606,20 +1648,6 @@ aspect ArrayIndices {
 			public IIterator() {
 				index = new IIndex();
 				max = numElements() - 1;
-			}
-			
-			public IIterator(Index i) {
-				index = new IIndex();
-				System.arraycopy(index.index(), 0, i.index(), 0, i.ndims());
-				index.internal = internal(i) - 1;
-				if (i.ndims() < ndims) {
-					max = 1;
-					for (int j = i.ndims(); j < ndims; j++)
-						max *= size[j];
-					max += index.internal;
-				} else {
-					max = index.internal + 1;
-				}
 			}
 			
 			public boolean hasNext() {

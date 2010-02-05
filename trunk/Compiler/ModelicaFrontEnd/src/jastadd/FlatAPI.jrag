@@ -772,256 +772,97 @@ aspect FlatTypes {
  * \brief Evaluation of attriutes for primitive types.
  */
 aspect Attributes {
+	
+	eq FAttribute.matches(String str) = getName().name().equals(str);
+	
+	syn lazy FAttribute FVariable.findAttribute(String name) = findMatching(getFAttributes(), name);
+	syn boolean FVariable.attributeSet(FAttribute a) = (a != null) ? a.getAttributeSet() : false;
+	syn FExp    FVariable.attributeExp(FAttribute a) = (a != null && a.hasValue()) ? a.getValue() : null;
+	syn boolean FVariable.attributeSet(String name)  = attributeSet(findAttribute(name));
+	syn FExp    FVariable.attributeExp(String name)  = attributeExp(findAttribute(name));
+	
+	syn CValue FVariable.attributeCValueString(String name) {
+		FAttribute a = findAttribute(name);
+		return attributeSet(a) ? attributeExp(a).ceval() : new CValueString("");
+	}
+	syn CValue FVariable.attributeCValueBoolean(String name, boolean def) {
+		FAttribute a = findAttribute(name);
+		return attributeSet(a) ? attributeExp(a).ceval() : new CValueBoolean(def);
+	}
+	syn CValue FVariable.attributeCValueReal(String name, double def) {
+		FAttribute a = findAttribute(name);
+		return attributeSet(a) ? attributeExp(a).ceval() : new CValueReal(def);
+	}
+	syn CValue FVariable.attributeCValueInteger(String name, int def) {
+		FAttribute a = findAttribute(name);
+		return attributeSet(a) ? attributeExp(a).ceval() : new CValueInteger(def);
+	}
 
 	// Quantity attribute
-	syn lazy boolean FVariable.quantityAttributeSet() {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("quantity")) {
-				return a.getAttributeSet();
-			}
-		}
-		return false;
-	}
-		
-	syn lazy FExp FVariable.quantityAttributeExp() {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("quantity")) {
-				return a.hasValue()? a.getValue(): null;
-			}
-		}
-		return null;
-	}
-
-	syn CValue FVariable.quantityAttributeCValue() =
-		quantityAttributeSet()? quantityAttributeExp().ceval():
-			new CValueString("");
-		
-	syn String FVariable.quantityAttribute() = 
-		quantityAttributeCValue().stringValue();
+	syn boolean FVariable.quantityAttributeSet()    = attributeSet("quantity");
+	syn FExp    FVariable.quantityAttributeExp()    = attributeExp("quantity");
+	syn CValue  FVariable.quantityAttributeCValue() = attributeCValueString("quantity");
+	syn String  FVariable.quantityAttribute()       = quantityAttributeCValue().stringValue();
 
 	// Unit attribute
-	syn lazy boolean FRealVariable.unitAttributeSet() {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("unit")) {
-				return a.getAttributeSet();
-			}
-		}
-		return false;
-	}
-		
-	syn lazy FExp FRealVariable.unitAttributeExp()  {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("unit")) {
-				return a.hasValue()? a.getValue(): null;
-			}
-		}
-		return null;
-	}
-
-	syn CValue FRealVariable.unitAttributeCValue() =
-		unitAttributeSet()? unitAttributeExp().ceval():
-			new CValueString("");
-		
-	syn String FRealVariable.unitAttribute() =  
-		unitAttributeCValue().stringValue();
+	syn boolean FVariable.unitAttributeSet()    = attributeSet("unit");
+	syn FExp    FVariable.unitAttributeExp()    = attributeExp("unit");
+	syn CValue  FVariable.unitAttributeCValue() = attributeCValueString("unit");
+	syn String  FVariable.unitAttribute()       = unitAttributeCValue().stringValue();
 
 	// Display Unit attribute
-	syn lazy boolean FRealVariable.displayUnitAttributeSet() {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("displayUnit")) {
-				return a.getAttributeSet();
-			}
-		}
-		return false;
-	}
-		
-	syn lazy FExp FRealVariable.displayUnitAttributeExp()  {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("displayUnit")) {
-				return a.hasValue()? a.getValue(): null;
-			}
-		}
-		return null;
-	}
-
-	syn CValue FRealVariable.displayUnitAttributeCValue() =
-		displayUnitAttributeSet()? displayUnitAttributeExp().ceval():
-			new CValueString("");
-		
-	syn String FRealVariable.displayUnitAttribute() =  
-		displayUnitAttributeCValue().stringValue();
+	syn boolean FVariable.displayUnitAttributeSet()    = attributeSet("displayUnit");
+	syn FExp    FVariable.displayUnitAttributeExp()    = attributeExp("displayUnit");
+	syn CValue  FVariable.displayUnitAttributeCValue() = attributeCValueString("displayUnit");
+	syn String  FVariable.displayUnitAttribute()       = displayUnitAttributeCValue().stringValue();
 
 	// min attribute
-	syn lazy boolean FVariable.minAttributeSet() {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("min")) {
-				return a.getAttributeSet();
-			}
-		}
-		return false;
-	}
-	
-	syn lazy FExp FVariable.minAttributeExp() {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("min")) {
-				return a.hasValue()? a.getValue(): null;
-			}
-		}
-		return null;
-	}
-
-	syn CValue FRealVariable.minAttributeCValue() =
-		minAttributeSet()? minAttributeExp().ceval():
-			new CValueReal(-1e20);
-	syn CValue FIntegerVariable.minAttributeCValue() =
-		minAttributeSet()? minAttributeExp().ceval():
-			new CValueInteger((int)-1e10);
-	
-	syn double FRealVariable.minAttribute() = 
-		minAttributeCValue().realValue();
-	syn int FIntegerVariable.minAttribute() = 
-		minAttributeCValue().intValue();	
+	syn boolean FVariable.minAttributeSet()           = attributeSet("min");
+	syn FExp    FVariable.minAttributeExp()           = attributeExp("min");
+	syn CValue  FRealVariable.minAttributeCValue()    = attributeCValueReal("min", -1e20);
+	syn CValue  FIntegerVariable.minAttributeCValue() = attributeCValueInteger("min", (int) -1e10);
+	syn double  FRealVariable.minAttribute()          = minAttributeCValue().realValue();
+	syn int     FIntegerVariable.minAttribute()       = minAttributeCValue().intValue();
 
 	// max attribute
-	syn lazy boolean FVariable.maxAttributeSet() {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("max")) {
-				return a.getAttributeSet();
-			}
-		}
-		return false;
-	}
-	
-	syn lazy FExp FVariable.maxAttributeExp() {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("max")) {
-				return a.hasValue()? a.getValue(): null;
-			}
-		}
-		return null;
-	}
-
-	syn CValue FRealVariable.maxAttributeCValue() =
-		maxAttributeSet()? maxAttributeExp().ceval():
-			new CValueReal(1e20);
-	syn CValue FIntegerVariable.maxAttributeCValue() =
-		maxAttributeSet()? maxAttributeExp().ceval():
-			new CValueInteger((int)1e10);
-	
-	syn double FRealVariable.maxAttribute() = 
-		maxAttributeCValue().realValue();
-	syn int FIntegerVariable.maxAttribute() = 
-		maxAttributeCValue().intValue();	
+	syn boolean FVariable.maxAttributeSet()           = attributeSet("max");
+	syn FExp    FVariable.maxAttributeExp()           = attributeExp("max");
+	syn CValue  FRealVariable.maxAttributeCValue()    = attributeCValueReal("max", 1e20);
+	syn CValue  FIntegerVariable.maxAttributeCValue() = attributeCValueInteger("max", (int) 1e10);
+	syn double  FRealVariable.maxAttribute()          = maxAttributeCValue().realValue();
+	syn int     FIntegerVariable.maxAttribute()       = maxAttributeCValue().intValue();
 
 	// start attribute
-	syn lazy boolean FVariable.startAttributeSet() {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("start")) {
-				return a.getAttributeSet();
-			}
-		}
-		return false;
-	}
+	syn boolean FVariable.startAttributeSet()           = attributeSet("start");
+	syn FExp    FVariable.startAttributeExp()           = attributeExp("start");
 	
-	syn lazy FExp FVariable.startAttributeExp() {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("start")) {
-				return  a.hasValue()? a.getValue(): null;
-			}
-		}
-		return null;
-	}
-
 	syn CValue FVariable.startAttributeCValue();
-	eq FRealVariable.startAttributeCValue() =
-		startAttributeSet()? startAttributeExp().ceval():
-			new CValueReal(0.0);
+	eq FRealVariable.startAttributeCValue()       = attributeCValueReal("start", 0.0);
 	eq FDerivativeVariable.startAttributeCValue() = new CValueReal(0.0);
-		eq FIntegerVariable.startAttributeCValue() =
-		startAttributeSet()? startAttributeExp().ceval():
-			new CValueInteger(0);
-	eq FBooleanVariable.startAttributeCValue() =
-		startAttributeSet()? startAttributeExp().ceval():
-			new CValueBoolean(false);
-	eq FStringVariable.startAttributeCValue() =
-		startAttributeSet()? startAttributeExp().ceval():
-			new CValueString("");
-	
-	syn double FRealVariable.startAttribute() = 
-		startAttributeCValue().realValue();
-	syn int FIntegerVariable.startAttribute() = 
-		startAttributeCValue().intValue();
-	syn boolean FBooleanVariable.startAttribute() = 
-		startAttributeCValue().booleanValue();
-	syn String FStringVariable.startAttribute() = 
-		startAttributeCValue().stringValue();
+	eq FIntegerVariable.startAttributeCValue()    = attributeCValueInteger("start", 0);
+	eq FBooleanVariable.startAttributeCValue()    = attributeCValueBoolean("start", false);
+	eq FStringVariable.startAttributeCValue()     = attributeCValueString("start");
+
+	syn double  FRealVariable.startAttribute()    = startAttributeCValue().realValue();
+	syn int     FIntegerVariable.startAttribute() = startAttributeCValue().intValue();
+	syn boolean FBooleanVariable.startAttribute() = startAttributeCValue().booleanValue();
+	syn String  FStringVariable.startAttribute()  = startAttributeCValue().stringValue();
 
 	// fixed attribute
-	syn lazy boolean FVariable.fixedAttributeSet() {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("fixed")) {
-				return a.getAttributeSet();
-			}
-		}
-		return false;
-	}
-	
-	syn lazy FExp FVariable.fixedAttributeExp() {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("fixed")) {
-				return a.hasValue()? a.getValue(): null;
-			}
-		}
-		return null;
-	}
-	
-	syn CValue FRealVariable.fixedAttributeCValue() =
-		fixedAttributeSet()? fixedAttributeExp().ceval():
-			isParameter() || isConstant()? new CValueBoolean(true):
-				new CValueBoolean(false);
-
-	syn CValue FIntegerVariable.fixedAttributeCValue() =
-		fixedAttributeSet()? fixedAttributeExp().ceval():
-			isParameter() || isConstant()? new CValueBoolean(true):
-				new CValueBoolean(false);
-
-	syn CValue FBooleanVariable.fixedAttributeCValue() =
-		fixedAttributeSet()? fixedAttributeExp().ceval():
-			isParameter() || isConstant()? new CValueBoolean(true):
-				new CValueBoolean(false);
-
-	syn boolean FRealVariable.fixedAttribute() = 
-		fixedAttributeCValue().booleanValue();
-	syn boolean FIntegerVariable.fixedAttribute() = 
-		fixedAttributeCValue().booleanValue();	
-	syn boolean FBooleanVariable.fixedAttribute() = 
-		fixedAttributeCValue().booleanValue();	
+	syn boolean FVariable.fixedAttributeSet()           = attributeSet("fixed");
+	syn FExp    FVariable.fixedAttributeExp()           = attributeExp("fixed");
+	syn CValue  FRealVariable.fixedAttributeCValue()    = attributeCValueBoolean("fixed", isParameter() || isConstant());
+	syn CValue  FIntegerVariable.fixedAttributeCValue() = attributeCValueBoolean("fixed", isParameter() || isConstant());
+	syn CValue  FBooleanVariable.fixedAttributeCValue() = attributeCValueBoolean("fixed", isParameter() || isConstant());
+	syn boolean FRealVariable.fixedAttribute()          = fixedAttributeCValue().booleanValue();
+	syn boolean FIntegerVariable.fixedAttribute()       = fixedAttributeCValue().booleanValue();	
+	syn boolean FBooleanVariable.fixedAttribute()       = fixedAttributeCValue().booleanValue();	
 		
 	// Nominal attribute
-	syn lazy boolean FRealVariable.nominalAttributeSet() {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("nominal")) {
-				return a.getAttributeSet();
-			}
-		}
-		return false;
-	}
-		
-	syn lazy FExp FRealVariable.nominalAttributeExp()  {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("nominal")) {
-				return a.hasValue()? a.getValue(): null;
-			}
-		}
-		return null;
-	}
-
-	syn CValue FRealVariable.nominalAttributeCValue() =
-		nominalAttributeSet()? nominalAttributeExp().ceval():
-			new CValueReal(1.0);
-		
-	syn double FRealVariable.nominalAttribute() =  
-		nominalAttributeCValue().realValue();
+	syn boolean FRealVariable.nominalAttributeSet()    = attributeSet("nominal");
+	syn FExp    FRealVariable.nominalAttributeExp()    = attributeExp("nominal");
+	syn CValue  FRealVariable.nominalAttributeCValue() = attributeCValueReal("nominal", 1.0);
+	syn double  FRealVariable.nominalAttribute()       = nominalAttributeCValue().realValue();
 				
 }
 

@@ -213,7 +213,6 @@ aspect InheritedFactoryMethods {
 	public FStringLitExp       FStringLitExp.createEmptyNode()       { return new FStringLitExp(); }
 	
 	// Misc expressions
-	public FSumRedExp  FSumRedExp.createEmptyNode()  { return new FSumRedExp(); }
 	public FSumExp     FSumExp.createEmptyNode()     { return new FSumExp(); }
 	public FIfExp      FIfExp.createEmptyNode()      { return new FIfExp(); }
 	public FElseIfExp  FElseIfExp.createEmptyNode()  { return new FElseIfExp(); }
@@ -232,6 +231,8 @@ aspect InheritedFactoryMethods {
 	public FSubscriptedExp FSubscriptedExp.createEmptyNode() { return new FSubscriptedExp(); }
 	public FRangeExp       FRangeExp.createEmptyNode()       { return new FRangeExp(); }
 	public FEndExp         FEndExp.createEmptyNode()         { return new FEndExp(); }
+	public FIterExp        FIterExp.createEmptyNode()        { return new FIterExp(); }
+	public InstIterExp     InstIterExp.createEmptyNode()     { return new InstIterExp(); }
 	
 	// Function calls
 	public FFunctionCall    FFunctionCall.createEmptyNode()    { return new FFunctionCall(); }

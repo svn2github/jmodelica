@@ -339,20 +339,6 @@
     
     }
 
-	rewrite FunctionCall {
-		when (getName().name().equals("sum") &&
-		      hasFunctionArguments() &&
-			  getFunctionArguments().getNumExp()==1 && 
-			  getFunctionArguments().getNumForIndex()==1 && 
-		      getFunctionArguments().getNumNamedArgument()==0)
-		to SumRedExp {
-			SumRedExp sre = new SumRedExp(getFunctionArguments().getExp(0),
-			                              getFunctionArguments().getForIndex(0));
-			sre.setLocation(this);
-			return sre;
-		}
-	}
-
 	rewrite PN_ShortClassDecl {
 		to ShortClassDecl {
 			ExtendsClauseShortClass ecsc = 

@@ -217,7 +217,22 @@ aspect FlatTypeAnalysis {
 	// TODO: expand to handle boolean end enum index
 	eq FEndExp.type() = fIntegerScalarType();
 	
+	/**
+	 * \brief Check if this FArray is on the form "{exp for i in exp}".
+	 */
+	syn boolean FArray.isIterArray() = getNumFExp() == 1 && getFExp(0).isIterExp();
+	
+	/**
+	 * \brief Check if this FExp is on the form "exp for i in exp".
+	 */
+	syn boolean FExp.isIterExp() = false;
+	eq FIterExp.isIterExp()       = true;
+	eq InstIterExp.isIterExp()    = true;
+	
 	eq FArray.type() {
+		if (isIterArray())
+			return getFExp(0).type();
+		
 		int[] size = size().clone();
 		// Check that the types of the elements are consistent
 		FPrimitiveType t = getFExp(0).type();
@@ -229,6 +244,9 @@ aspect FlatTypeAnalysis {
 		}
 		return t.arrayType(size);
 	}
+	
+	eq FIterExp.type()    = getFExp().type().arrayType(size());
+	eq InstIterExp.type() = getFExp().type().arrayType(size());
 
 	// TODO: Assumes same general functionality as zeros and ones - may need change for new subclasses
 	eq FInfArgsFunctionCall.type() = (size().length > 0) ? fIntegerArrayType(size()) : fUnknownType();
@@ -809,10 +827,6 @@ aspect ExpressionType {
 	
 	eq FNoExp.type() {
 		return emptyType();
-	}
-	
-	eq FSumRedExp.type() {
-		return getFExp().type();
 	}
 
 	// TODO: type checking on this expression

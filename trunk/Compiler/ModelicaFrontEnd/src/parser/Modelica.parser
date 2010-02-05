@@ -1048,18 +1048,15 @@ Exp primary =
   ;  
   
 FunctionArguments function_arguments =
-  arg_list_p function_arguments_for_clause   {: return new FunctionArguments(arg_list_p,function_arguments_for_clause, new List()); :}  
-  |arg_list_p COMMA named_arguments                        {: return new FunctionArguments(arg_list_p,new List(),named_arguments); :}
-  |named_arguments                        {: return new FunctionArguments(new List(),new List(),named_arguments); :}
-  ;
-  
-List function_arguments_for_clause =
-                    {: return new List(); :}
-  | FOR for_indices {: return for_indices; :}
+    exp FOR for_indices               {: List arg_list_f = new List().add(new IterExp(exp, for_indices));
+                                         return new FunctionArguments(arg_list_f, new List()); :} 
+  | arg_list_p                        {: return new FunctionArguments(arg_list_p, new List()); :}  
+  | arg_list_p COMMA named_arguments  {: return new FunctionArguments(arg_list_p, named_arguments); :}
+  | named_arguments                   {: return new FunctionArguments(new List(), named_arguments); :}
   ;
   
 List named_arguments =
-  named_argument {: return new List().add(named_argument); :}
+    named_argument                       {: return new List().add(named_argument); :}
   | named_arguments COMMA named_argument {: return named_arguments.add(named_argument); :}
   ;
   
@@ -1092,10 +1089,8 @@ List arg_list =
   ;
   
 List arg_list_p = 
-  exp                   {: //System.out.println("arg_list at line " + exp.beginLine());
-                           return new List().add(exp); :}
-  | arg_list_p COMMA exp  {: arg_list_p.add(exp); 
-                           return arg_list_p; :}
+    exp                   {: return new List().add(exp); :}
+  | arg_list_p COMMA exp  {: return arg_list_p.add(exp); :}
   ;
   
 Comment comment = 

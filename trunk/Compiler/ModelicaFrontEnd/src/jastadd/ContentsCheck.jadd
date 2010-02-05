@@ -43,7 +43,20 @@ aspect ContentCheck {
 	
 	public void FForIndex.contentCheck() {
 		if (!hasFExp())
-			warning("For index without in expression not supported");
+			error("For index without in expression not supported");
+	}
+	
+	inh boolean InstIterExp.iterExpUseOK();
+	eq FExp.getChild().iterExpUseOK()       = false;
+	eq Root.getChild().iterExpUseOK()       = false;
+	eq InstNode.getChild().iterExpUseOK()   = false;
+	eq FArray.getChild().iterExpUseOK()     = true;
+	eq FMinMaxExp.getChild().iterExpUseOK() = true;
+	// TODO: Add sum() and product() when they are implemented
+	
+	public void InstIterExp.contentCheck() {
+		if (!iterExpUseOK())
+			error("Reduction-expressions are only allowed with sum(), min(), max() and product()");
 	}
 	
 }
