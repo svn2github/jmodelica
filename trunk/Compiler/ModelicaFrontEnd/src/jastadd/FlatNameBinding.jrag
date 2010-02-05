@@ -68,9 +68,13 @@ aspect FlatNameBinding {
 	
 	inh AbstractFVariable FIterExp.lookupFV(String name);
 	eq FIterExp.getChild().lookupFV(String name) {
-		for (FForIndex fi : getFForIndexs()) 
-			if (fi.getFVariable().name().equals(name)) 
-				return fi.getFVariable();
+		for (CommonForIndex fi : getForIndexs()) {
+			if (fi instanceof FForIndex) {
+				FForIndex ffi = (FForIndex) fi;
+				if (ffi.getFVariable().name().equals(name)) 
+					return ffi.getFVariable();
+			}
+		}
 		return lookupFV(name);
 	}
 	

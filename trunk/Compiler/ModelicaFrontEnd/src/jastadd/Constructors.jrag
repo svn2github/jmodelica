@@ -176,7 +176,7 @@ aspect InheritedFactoryMethods {
 	public abstract FBooleanLitExp            FBooleanLitExp.createEmptyNode();   // No children, but can be useful
 	public abstract FMathematicalFunctionCall FMathematicalFunctionCall.createEmptyNode();
 	public abstract FInfArgsFunctionCall      FInfArgsFunctionCall.createEmptyNode();
-	public abstract FMinMaxExp      			FMinMaxExp.createEmptyNode();
+	public abstract FMinMaxExp      		  FMinMaxExp.createEmptyNode();
 
 	// Unsupported expressions
 	public FUnsupportedExp FUnsupportedExp.createEmptyNode() { return new FUnsupportedExp(); }
@@ -213,7 +213,6 @@ aspect InheritedFactoryMethods {
 	public FStringLitExp       FStringLitExp.createEmptyNode()       { return new FStringLitExp(); }
 	
 	// Misc expressions
-	public FSumExp     FSumExp.createEmptyNode()     { return new FSumExp(); }
 	public FIfExp      FIfExp.createEmptyNode()      { return new FIfExp(); }
 	public FElseIfExp  FElseIfExp.createEmptyNode()  { return new FElseIfExp(); }
 	public FNoExp      FNoExp.createEmptyNode()      { return new FNoExp(); }
@@ -232,7 +231,6 @@ aspect InheritedFactoryMethods {
 	public FRangeExp       FRangeExp.createEmptyNode()       { return new FRangeExp(); }
 	public FEndExp         FEndExp.createEmptyNode()         { return new FEndExp(); }
 	public FIterExp        FIterExp.createEmptyNode()        { return new FIterExp(); }
-	public InstIterExp     InstIterExp.createEmptyNode()     { return new InstIterExp(); }
 	
 	// Function calls
 	public FFunctionCall    FFunctionCall.createEmptyNode()    { return new FFunctionCall(); }
@@ -264,6 +262,7 @@ aspect InheritedFactoryMethods {
 	public FFillExp   FFillExp.createEmptyNode()   { return new FFillExp(); }
 	public FMinExp    FMinExp.createEmptyNode()    { return new FMinExp(); }
 	public FMaxExp    FMaxExp.createEmptyNode()    { return new FMaxExp(); }
+	public FSumExp    FSumExp.createEmptyNode()    { return new FSumExp(); }
 	
 	/**
 	 * \brief Create new node of same class as this, with the specified 
@@ -338,5 +337,26 @@ aspect InheritedFactoryMethods {
 			node.addFExp(e);
 		return node;
 	}
+	
+	/**
+	 * \brief Create new node of same class as this, with the specified 
+	 *        children. Used to allow common algorithms to handle unrelated types.
+	 */
+	public FExp FExp.createNodeBinary(FExp a, FExp b) {
+		throw new UnsupportedOperationException();
+	}
+	
+	/**
+	 * \brief Create new node of same class as this, with the specified 
+	 *        children. Used to allow common algorithms to handle unrelated types.
+	 */
+	public FExp FExp.createNodeUnary(FExp a) {
+		throw new UnsupportedOperationException();
+	}
+	
+	// Add support to new types as needed.
+	public FExp FBinExp.createNodeBinary(FExp a, FExp b)    { return createNode(a, b); }
+	public FExp FMinMaxExp.createNodeBinary(FExp a, FExp b) { return createNode(a, b); }
+	public FExp FUnaryExp.createNodeUnary(FExp a)           { return createNode(a); }
 
 }

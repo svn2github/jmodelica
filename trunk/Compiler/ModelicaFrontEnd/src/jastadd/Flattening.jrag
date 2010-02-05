@@ -683,14 +683,16 @@ aspect FlatExpressions {
 	   return new FArray(l);
 	}
 	
-	public FExp InstIterExp.flatten(FQName prefix) {
-		List<FForIndex> fil = new List<FForIndex>();
-		for (InstForIndex fi : getInstForIndexList())
+	public FSumExp FSumExp.flatten(FQName prefix) {
+		return new FSumExp(getFExp().flatten(prefix));
+	}
+	
+	public FExp FIterExp.flatten(FQName prefix) {
+		List<CommonForIndex> fil = new List<CommonForIndex>();
+		for (CommonForIndex fi : getForIndexList())
 			fil.add(fi.flatten(prefix));
 		return new FIterExp(getFExp().flatten(prefix), fil);
 	}
-	
-	public FExp FIterExp.flatten(FQName prefix) { return (FExp) fullCopy(); }
 
 	public FExp FSubscriptedExp.flatten(FQName prefix) {
 		return new FSubscriptedExp(getFExp().flatten(prefix), getFArraySubscripts().flatten(prefix));
@@ -797,9 +799,15 @@ aspect FlatExpressions {
 		return getFExp().flatten(prefix);
 	}
 	
+	public abstract FForIndex CommonForIndex.flatten(FQName prefix);
+	
 	public FForIndex InstForIndex.flatten(FQName prefix) {
-		return new FForIndex(getInstPrimitive().createFVariable(),
-		                     hasFExp()? new Opt(getFExp().flatten(prefix)): new Opt());
+		return new FForIndex(hasFExp()? new Opt(getFExp().flatten(prefix)): new Opt(),
+				getInstPrimitive().createFVariable());
+	}
+	
+	public FForIndex FForIndex.flatten(FQName prefix) {
+		return (FForIndex) fullCopy();
 	}
 
 	//ForClauseE : AbstractEquation ::= ForIndex* ForEqns:AbstractEquation*;
@@ -1068,10 +1076,10 @@ aspect InstantiatedExpressions {
 	}
 	
 	public FExp IterExp.instantiate() {
-		List<InstForIndex> ifil = new List<InstForIndex>();
+		List<CommonForIndex> ifil = new List<CommonForIndex>();
 		for (ForIndex fi : getForIndexList())
 			ifil.add(fi.instantiate());
-		return copyLocationTo(new InstIterExp(getExp().instantiate(), ifil));
+		return copyLocationTo(new FIterExp(getExp().instantiate(), ifil));
 	}
 
 	public FExp RangeExp.instantiate() {
@@ -1261,7 +1269,7 @@ aspect InstantiatedExpressions {
 		InstAccess name = ipr.dynamicClassName(getForIndexDecl().getClassName().newInstAccess());
 		InstPrimitive ip = (InstPrimitive) name.myInstClassDecl().newInstComponentDecl(getForIndexDecl());
 		Opt o = hasExp()? new Opt(getExp().instantiate()): new Opt();
-		return copyLocationTo(new InstForIndex(ip, o));
+		return copyLocationTo(new InstForIndex(o, ip));
 	}
 	
 	public InstForClauseE ForClauseE.instantiate() {

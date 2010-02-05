@@ -120,17 +120,17 @@ aspect FlatTypeCheck {
   public void FInstAccessExp.typeCheck() {}
   
   /**
-   * \brief Check if the FExp of this InstIterExp must be scalar.
+   * \brief Check if the FExp of this FIterExp must be scalar.
    */
-  inh boolean InstIterExp.iterExpMustBeScalar();
+  inh boolean FIterExp.iterExpMustBeScalar();
   eq FExp.getChild().iterExpMustBeScalar()       = false;
   eq Root.getChild().iterExpMustBeScalar()       = false;
   eq InstNode.getChild().iterExpMustBeScalar()   = false;
   eq FMinMaxExp.getChild().iterExpMustBeScalar() = true;
   // TODO: Add product() when it is implemented
   
-  // InstIterExp has simplified type() that cannot be unknown if getFExp().type() isn't unknown
-  public void InstIterExp.typeCheck() {
+  // FIterExp has simplified type() that cannot be unknown if getFExp().type() isn't unknown
+  public void FIterExp.typeCheck() {
 	  if (iterExpMustBeScalar() && !getFExp().type().isUnknown() && getFExp().ndims() != 0)
 		  error("The expression of a reduction-expression must be scalar, except for sum(): " +
 				  getFExp() + " has ndims() = " + getFExp().ndims());
@@ -293,6 +293,7 @@ aspect FlatTypeCheck {
   eq FAbstractFunctionCall.getChild().argumentDefinedTypeValid() = true;
   eq FTranspose.getChild().argumentDefinedTypeValid()            = false;
   eq FMinMaxExp.getChild().argumentDefinedTypeValid()            = false;
+  eq FSumExp.getChild().argumentDefinedTypeValid()               = false;
   eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()   = i != 0;
  
   /**
@@ -304,6 +305,7 @@ aspect FlatTypeCheck {
   eq FAbstractFunctionCall.getChild().argumentTypeValid(FPrimitiveType type) = false;
   eq FTranspose.getChild().argumentTypeValid(FPrimitiveType type)            = type.ndims() >= 2;
   eq FSizeExp.getChild().argumentTypeValid(FPrimitiveType type)              = true;
+  eq FSumExp.getChild().argumentTypeValid(FPrimitiveType type)               = type.ndims() > 0;
   eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FPrimitiveType type) = 
 	  hasY() ^ getOriginalArg(i).getFExp().isArray();
   

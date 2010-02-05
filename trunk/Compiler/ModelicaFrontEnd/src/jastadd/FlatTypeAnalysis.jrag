@@ -226,8 +226,13 @@ aspect FlatTypeAnalysis {
 	 * \brief Check if this FExp is on the form "exp for i in exp".
 	 */
 	syn boolean FExp.isIterExp() = false;
-	eq FIterExp.isIterExp()       = true;
-	eq InstIterExp.isIterExp()    = true;
+	eq FIterExp.isIterExp()      = true;
+	
+	/**
+	 * \brief Returns the expression being iterated over in an FIterExp child. 
+	 *        Only valid if {@see #isIterExp()} returns <code>true</code>.
+	 */
+	public FExp FSumExp.iterExp() { return ((FIterExp) getFExp()).getFExp(); }
 	
 	eq FArray.type() {
 		if (isIterArray())
@@ -245,8 +250,13 @@ aspect FlatTypeAnalysis {
 		return t.arrayType(size);
 	}
 	
-	eq FIterExp.type()    = getFExp().type().arrayType(size());
-	eq InstIterExp.type() = getFExp().type().arrayType(size());
+	eq FSumExp.type() {
+		if (getFExp().isIterExp())
+			return iterExp().type();
+		return getFExp().type().scalarType();
+	}
+	
+	eq FIterExp.type() = getFExp().type().arrayType(size());
 
 	// TODO: Assumes same general functionality as zeros and ones - may need change for new subclasses
 	eq FInfArgsFunctionCall.type() = (size().length > 0) ? fIntegerArrayType(size()) : fUnknownType();

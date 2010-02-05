@@ -41,20 +41,21 @@ aspect ContentCheck {
 			error("When statements are not allowed inside if, for, while and when clauses");
 	}
 	
-	public void FForIndex.contentCheck() {
+	public void InstForIndex.contentCheck() {
 		if (!hasFExp())
-			error("For index without in expression not supported");
+			error("For index without in expression isn't supported");
 	}
 	
-	inh boolean InstIterExp.iterExpUseOK();
+	inh boolean FIterExp.iterExpUseOK();
 	eq FExp.getChild().iterExpUseOK()       = false;
 	eq Root.getChild().iterExpUseOK()       = false;
 	eq InstNode.getChild().iterExpUseOK()   = false;
 	eq FArray.getChild().iterExpUseOK()     = true;
 	eq FMinMaxExp.getChild().iterExpUseOK() = true;
-	// TODO: Add sum() and product() when they are implemented
+	eq FSumExp.getChild().iterExpUseOK()    = true;
+	// TODO: Add product() when it is implemented
 	
-	public void InstIterExp.contentCheck() {
+	public void FIterExp.contentCheck() {
 		if (!iterExpUseOK())
 			error("Reduction-expressions are only allowed with sum(), min(), max() and product()");
 	}

@@ -204,7 +204,7 @@ aspect FlatVariability {
 	}
 	
 	eq FIterExp.variability()    = getFExp().variability();
-	eq InstIterExp.variability() = getFExp().variability();
+	eq FSumExp.variability()     = getFExp().variability();
 	
 	eq FSubscriptedExp.variability() {
 		FTypePrefixVariability total = fConstant();

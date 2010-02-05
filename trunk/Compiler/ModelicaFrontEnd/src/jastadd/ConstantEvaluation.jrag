@@ -857,6 +857,16 @@ aspect ConstantEvaluation {
 	  }
   }
   
+  eq FSumExp.ceval() {
+	  if (isArray())
+		  return new CValueUnknown();
+	  Iterator<FExp> it = getFExp().getArray().iteratorFExp();
+	  CValue sum = it.next().ceval();
+	  while (it.hasNext())
+		  sum = type().add(sum, it.next().ceval());
+	  return sum;
+  }
+  
   syn boolean FMinMaxExp.selectLesser();
   eq FMinExp.selectLesser() = true;
   eq FMaxExp.selectLesser() = false;
@@ -1217,19 +1227,12 @@ aspect CircularExpressions {
 		}
 		return false;
 	}
+	eq FSumExp.isCircular() = getFExp().isCircular();
 	eq FIterExp.isCircular() {
 		if (getFExp().isCircular()) 
 			return true;
-		for (FForIndex i : getFForIndexList()) 
-			if (i.getFExp().isCircular()) 
-				return true;
-		return false;
-	}	
-	eq InstIterExp.isCircular() {
-		if (getFExp().isCircular()) 
-			return true;
-		for (InstForIndex i : getInstForIndexList()) 
-			if (i.getFExp().isCircular()) 
+		for (CommonForIndex i : getForIndexList()) 
+			if (i.hasFExp() && i.getFExp().isCircular()) 
 				return true;
 		return false;
 	}	

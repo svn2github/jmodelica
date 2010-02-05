@@ -1307,6 +1307,10 @@ aspect FlattPrettyPrint {
 		p.toString(getFExp(),str,indent,o);
 	}
 	
+	protected void FSumExp.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getFExp(),str,indent,o);
+	}
+	
 	protected void FInfArgsFunctionCall.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
 		getFExpList().prettyPrintWithSep(p, str, "", o, ", ");
 	}
@@ -1342,6 +1346,7 @@ aspect FlattPrettyPrint {
 	eq FFillExp.builtInName()    = "fill";
 	eq FMinExp.builtInName()     = "min";
 	eq FMaxExp.builtInName()     = "max";
+	eq FSumExp.builtInName()     = "sum";
 	
 	
 	public void FForClauseE.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
@@ -1351,6 +1356,8 @@ aspect FlattPrettyPrint {
 		getFAbstractEquationList().prettyPrintWithFix(p, str, indent + " ", o, "", ";\n");
 		str.print(indent + "end for");
 	}
+	
+	public abstract void CommonForIndex.prettyPrint(Printer p, PrintStream str, String indent, Object o);
 	
     public void FForIndex.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
         str.print(getFVariable().name());
@@ -1381,13 +1388,7 @@ aspect FlattPrettyPrint {
 	public void FIterExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		p.toString(getFExp(), str, indent, o);
 		str.print(" for ");
-		getFForIndexList().prettyPrintWithSep(p, str, indent, o, ", ");
-	}
-	
-	public void InstIterExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		p.toString(getFExp(), str, indent, o);
-		str.print(" for ");
-		getInstForIndexList().prettyPrintWithSep(p, str, indent, o, ", ");
+		getForIndexList().prettyPrintWithSep(p, str, indent, o, ", ");
 	}
 	
 	public void FSubscriptedExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {

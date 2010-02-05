@@ -72,12 +72,14 @@ aspect InstLookupComponents {
 		return (set.size() > 0) ? set : lookupInstComponent(name);
 	}
 	
-	inh lazy HashSet InstIterExp.lookupInstComponent(String name);
-	eq InstIterExp.getChild().lookupInstComponent(String name) {
+	inh lazy HashSet FIterExp.lookupInstComponent(String name);
+	eq FIterExp.getChild().lookupInstComponent(String name) {
 		HashSet set = new HashSet(4);
-		for (InstForIndex ifi : getInstForIndexs()) {
-			if (ifi.getInstPrimitive().name().equals(name)) {
-				set.add(ifi.getInstPrimitive());
+		for (CommonForIndex fi : getForIndexs()) {
+			if (fi instanceof InstForIndex) {
+				InstForIndex ifi = (InstForIndex) fi;
+				if (ifi.getInstPrimitive().name().equals(name)) 
+					set.add(ifi.getInstPrimitive());
 			}
 		}
 		return (set.size() > 0) ? set : lookupInstComponent(name);

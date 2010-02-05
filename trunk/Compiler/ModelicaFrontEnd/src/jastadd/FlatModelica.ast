@@ -650,17 +650,17 @@ FStringLitExp : FLitExp ::= <String>;
 /**
  * Expressions of the form "<exp> for i in <exp>" in the flat tree.
  */
-FIterExp : FExp ::= FExp FForIndex*;
+FIterExp : FExp ::= FExp ForIndex:CommonForIndex*;
+
+/**
+ * \brief Common subclass for for indices in instance and flat trees.
+ */
+abstract CommonForIndex ::= [FExp];
 
 /**
  * \brief For indices expression.
  */
-FForIndex ::= FVariable [FExp];
-
-/**
- * \brief Summation function.
- */
-FSumExp : FUnaryExp ::=;
+FForIndex : CommonForIndex ::= FVariable;
 
 /**
  * \brief If expression.
@@ -935,3 +935,8 @@ FMinExp : FMinMaxExp;
  * \brief Max built-in function.
  */
 FMaxExp : FMinMaxExp;
+
+/**
+ * \brief Sum built-in function.
+ */
+FSumExp : FBuiltInFunctionCall ::= FExp;

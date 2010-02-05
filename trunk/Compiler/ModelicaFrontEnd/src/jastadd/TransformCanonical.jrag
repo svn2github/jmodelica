@@ -794,15 +794,27 @@ aspect Scalarization {
 	}
 	
 	public FExp FMinMaxExp.scalarize(HashMap<String,Integer> indexMap) {
-		if (hasY()) {
+		if (hasY())
 			return createNode(getX().scalarize(indexMap), getY().scalarize(indexMap));
-		} else {
-			Iterator<FExp> it = getX().getArray().iteratorFExp();
-			FExp res = it.next().scalarize(indexMap);
-			while (it.hasNext())
-				res = createNode(res, it.next().scalarize(indexMap));
-			return res;
-		}
+		else
+			return getX().reduceToScalarized(this, indexMap);
+	}
+	
+	public FExp FSumExp.scalarize(HashMap<String,Integer> indexMap) {
+		return getFExp().reduceToScalarized(new FAddExp(), indexMap);
+	}
+	
+	/**
+	 * \brief Scalarize an expression by recursively scalarizing and combining the contents in its Array.
+	 * 
+	 * New nodes are created with <code>template.createNodeBinary()</code>.
+	 */
+	public FExp FExp.reduceToScalarized(FExp template, HashMap<String,Integer> indexMap) {
+		Iterator<FExp> it = getArray().iteratorFExp();
+		FExp res = it.next().scalarize(indexMap);
+		while (it.hasNext())
+			res = template.createNodeBinary(res, it.next().scalarize(indexMap));
+		return res;
 	}
 	
 	public FExp FBinExp.scalarize(HashMap<String,Integer> indexMap) { return createNode(getLeft().scalarize(indexMap), getRight().scalarize(indexMap)); }

@@ -174,8 +174,8 @@ aspect Arrays {
 		// all brances are equal.
 		return getFExp(0).ndims() + 1;
 	}
-	eq FIterExp.ndims()        = getFExp().ndims() + getNumFForIndex();
-	eq InstIterExp.ndims()     = getFExp().ndims() + getNumInstForIndex();
+	eq FSumExp.ndims()         = getFExp().isIterExp() ? iterExp().ndims() : 0;
+	eq FIterExp.ndims()        = getFExp().ndims() + getNumForIndex();
 	eq FSubscriptedExp.ndims() = getFArraySubscripts().accessNdims();
 	
 	eq FTranspose.ndims() = getFExp().ndims();
@@ -468,20 +468,13 @@ aspect Arrays {
 		return s;
 	}
 	
+	eq FSumExp.size() = getFExp().isIterExp() ? iterExp().size() : new int[0];
+	
 	eq FIterExp.size() {
 		int[] size = new int[ndims()];
 		int i = 0;
-		for (FForIndex fi : getFForIndexList())
-			size[i++] = fi.getFExp().isArray() ? fi.getFExp().size()[0] : 1;
-		System.arraycopy(getFExp().size(), 0, size, i, getFExp().ndims());
-		return size;
-	}
-	
-	eq InstIterExp.size() {
-		int[] size = new int[ndims()];
-		int i = 0;
-		for (InstForIndex fi : getInstForIndexList())
-			size[i++] = fi.getFExp().isArray() ? fi.getFExp().size()[0] : 1;
+		for (CommonForIndex fi : getForIndexList())
+			size[i++] = (fi.hasFExp() && fi.getFExp().isArray()) ? fi.getFExp().size()[0] : 1;
 		System.arraycopy(getFExp().size(), 0, size, i, getFExp().ndims());
 		return size;
 	}
@@ -646,16 +639,8 @@ aspect Arrays {
 		((InstArrayAccess) getLastInstAccess()).setFArraySubscripts(fas);
 	}
 	
-	/**
-	 * \brief A common interface for InstForIndex & FForIndex, to allow common handling.
-	 */
-	interface CommonForIndex {
-		public int[] myIndices();
-		public String name();
-	}
-	
-	public class FForIndex implements CommonForIndex {}
-	public class InstForIndex implements CommonForIndex {}
+	public abstract int[]  CommonForIndex.myIndices();
+	public abstract String CommonForIndex.name();
 	
 	/**
 	 * \brief Expand for all values of for indices given in <code>indices</code>.
@@ -890,10 +875,25 @@ aspect Arrays {
 		return arr;
 	}
 	
-	syn lazy Array FIterExp.createArray()    = getFExp().getArray().createExpanded(getFForIndexList());
-	syn lazy Array InstIterExp.createArray() = getFExp().getArray().createExpanded(getInstForIndexList());
-	eq FIterExp.getArray()    = copyArray();
-	eq InstIterExp.getArray() = copyArray();
+	eq FSumExp.getArray() {
+		if (!isArray())
+			return super.getArray();
+		
+		FIterExp exp = (FIterExp) getFExp();
+		Array arr = new Array(indices());
+		for (Index i : arr.indices())
+			arr.set(i, new FSumExp(exp.extract(i)));
+		return arr;
+	}
+	
+	public FExp FIterExp.extract(Index i) {
+		FExp exp = (FExp) getFExp().getArray().get(i).fullCopy();
+		List fil = (List) getForIndexList().fullCopy();
+		return new FIterExp(exp, fil);
+	}
+	
+	syn lazy Array FIterExp.createArray() = getFExp().getArray().createExpanded(getForIndexList());
+	eq FIterExp.getArray() = copyArray();
 	
 	eq FSubscriptedExp.getArray() {
 		Array arr = new Array(indices());

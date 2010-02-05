@@ -220,6 +220,7 @@ aspect InstFunctionBinding {
 				map.put("identity",  new BuiltInCreator(false, new FIdentity(),   1));
 				map.put("sqrt",      new BuiltInCreator(false, new FSqrtExp(),    1));
 				map.put("transpose", new BuiltInCreator(false, new FTranspose(),  1));
+				map.put("sum",       new BuiltInCreator(false, new FSumExp(),     1));
 				map.put("ones",  new InfArgsBuiltInCreator(new FOnes(),  0));
 				map.put("zeros", new InfArgsBuiltInCreator(new FZeros(), 0));
 				map.put("fill",  new InfArgsBuiltInCreator(new FFillExp(), 1));

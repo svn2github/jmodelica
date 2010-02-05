@@ -96,8 +96,7 @@ InstAmbiguousAccess : InstArrayAccess;
 
 InstComponentAccess : InstArrayAccess;
 
-InstForIndex ::= InstPrimitive [FExp] /DynamicClassName:InstAccess*/;
-InstIterExp : FExp ::= FExp InstForIndex*;
+InstForIndex : CommonForIndex ::= InstPrimitive /DynamicClassName:InstAccess*/;
 
 InstForClauseE : FAbstractEquation ::= InstForIndex* FAbstractEquation*;
 InstForStmt : FStatement ::= InstForIndex* ForStmt:FStatement*;

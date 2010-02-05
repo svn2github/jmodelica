@@ -1461,11 +1461,107 @@ end MaxExp12;
 
 
 
+model SumExp1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="SumExp1",
+         description="sum() expressions: basic test",
+         flatModel="
+fclass ArrayTests.SumExp1
+ constant Real x = 1 + 2 + 3 + 4;
+ Real y;
+equation
+ y = 10.0;
+end ArrayTests.SumExp1;
+")})));
+
+ constant Real x = sum({1,2,3,4});
+ Real y = x;
+end SumExp1;
+
+
+model SumExp2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="SumExp2",
+         description="sum() expressions: reduction-expression",
+         flatModel="
+fclass ArrayTests.SumExp2
+ constant Real x = ( 1 ) * ( 1 ) + ( 1 ) * ( 2 ) + ( 1 ) * ( 3 ) + ( 2 ) * ( 1 ) + ( 2 ) * ( 2 ) + ( 2 ) * ( 3 ) + ( 3 ) * ( 1 ) + ( 3 ) * ( 2 ) + ( 3 ) * ( 3 );
+ Real y;
+equation
+ y = 36.0;
+end ArrayTests.SumExp2;
+")})));
+
+ constant Real x = sum(i * j for i in 1:3, j in 1:3);
+ Real y = x;
+end SumExp2;
+
+
+model SumExp3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="SumExp3",
+         description="sum() expressions: reduction-expression over array",
+         flatModel="
+fclass ArrayTests.SumExp3
+ constant Real x[1] = 1 + 1 + 1 + 2 + 2 + 2 + 3 + 3 + 3;
+ constant Real x[2] = 2 + 3 + 4 + 2 + 3 + 4 + 2 + 3 + 4;
+ Real y[1];
+ Real y[2];
+equation
+ y[1] = 18.0;
+ y[2] = 27.0;
+end ArrayTests.SumExp3;
+")})));
+
+ constant Real x[2] = sum({i, j} for i in 1:3, j in 2:4);
+ Real y[2] = x;
+end SumExp3;
+
+
+model SumExp4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="SumExp4",
+         description="sum() expressions: over array constructor with iterators",
+         flatModel="
+fclass ArrayTests.SumExp4
+ constant Real x = 1 + 2 + 1 + 3 + 1 + 4 + 2 + 2 + 2 + 3 + 2 + 4 + 3 + 2 + 3 + 3 + 3 + 4;
+ Real y;
+equation
+ y = 45.0;
+end ArrayTests.SumExp4;
+")})));
+
+ constant Real x = sum( { {i, j} for i in 1:3, j in 2:4 } );
+ Real y = x;
+end SumExp4;
+
+
+model SumExp5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="SumExp5",
+         description="sum() expressions: scalar input",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1489, column 15:
+  Types of positional argument 1 and input A are not compatible
+")})));
+
+ Real x = sum(1);
+end SumExp5;
+
+
+
 model ArrayIterTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="ArrayIterTest1",
-         description="Array constructor with 'exp for i in exp' syntax",
+         description="Array constructor with iterators: over scalar exp",
          flatModel="
 fclass ArrayTests.ArrayIterTest1
  Real x[1,1];
@@ -1498,7 +1594,7 @@ model ArrayIterTest2
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="ArrayIterTest2",
-         description="Array constructor with 'exp for i in exp' syntax",
+         description="Array constructor with iterators: over array exp",
          flatModel="
 fclass ArrayTests.ArrayIterTest2
  Real x[1,1,1];
@@ -1523,6 +1619,75 @@ end ArrayTests.ArrayIterTest2;
 
  Real x[2,2,2] = {{i * i, j} for i in 1:2, j in {2,5}};
 end ArrayIterTest2;
+
+
+model ArrayIterTest3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayIterTest3",
+         description="Array constructor with iterators: without in",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1529, column 28:
+  For index without in expression isn't supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1529, column 31:
+  For index without in expression isn't supported
+")})));
+
+ Real x[1,1] = { i * j for i, j };
+end ArrayIterTest3;
+
+
+model ArrayIterTest4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayIterTest4",
+         description="Array constructor with iterators: nestled constructors, masking index",
+         flatModel="
+fclass ArrayTests.ArrayIterTest4
+ Real i;
+ Real x[1,1,1,1];
+ Real x[1,1,1,2];
+ Real x[1,1,2,1];
+ Real x[1,1,2,2];
+ Real x[1,2,1,1];
+ Real x[1,2,1,2];
+ Real x[1,2,2,1];
+ Real x[1,2,2,2];
+ Real x[2,1,1,1];
+ Real x[2,1,1,2];
+ Real x[2,1,2,1];
+ Real x[2,1,2,2];
+ Real x[2,2,1,1];
+ Real x[2,2,1,2];
+ Real x[2,2,2,1];
+ Real x[2,2,2,2];
+equation
+ i = 1;
+ x[1,1,1,1] = 3;
+ x[1,1,1,2] = 1;
+ x[1,1,2,1] = 3;
+ x[1,1,2,2] = 2;
+ x[1,2,1,1] = 4;
+ x[1,2,1,2] = 1;
+ x[1,2,2,1] = 4;
+ x[1,2,2,2] = 2;
+ x[2,1,1,1] = 3;
+ x[2,1,1,2] = 1;
+ x[2,1,2,1] = 3;
+ x[2,1,2,2] = 2;
+ x[2,2,1,1] = 4;
+ x[2,2,1,2] = 1;
+ x[2,2,2,1] = 4;
+ x[2,2,2,2] = 2;
+end ArrayTests.ArrayIterTest4;
+")})));
+
+ Real i = 1;
+ Real x[2,2,2,2] = { { { {i, j} for j in 1:2 } for i in 3:4 } for i in 5:6 };
+end ArrayIterTest4;
 
 
 
