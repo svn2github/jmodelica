@@ -615,6 +615,8 @@ aspect Scalarization {
 				setFEachOpt(new Opt());
 			else if (hasValue() && getValue().ndims() > 0) 
 				setValue(getValue().getArray().get(i));
+			else if (hasValue())
+				setValue(getValue().scalarize(new HashMap<String,Integer>()));
 		}
 	}
 	

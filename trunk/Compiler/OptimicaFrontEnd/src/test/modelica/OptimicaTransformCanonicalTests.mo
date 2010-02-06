@@ -190,6 +190,10 @@ constraint
  u<=1;
  x[1](finalTime)=0;
  x[2](finalTime)=0;
+ x[1]<=1;
+ x[2]<=1;
+ x[1]>= - ( 1 );
+ x[2]>= - ( 1 );
 end OptimicaTransformCanonicalTests.ArrayTest1;
 ")})));
 */
@@ -209,19 +213,86 @@ end OptimicaTransformCanonicalTests.ArrayTest1;
     u >= -1;
     u <= 1;
     x(finalTime) = {0,0};
+    x<={1,1}; // This constraint has no effect but is added for testing
+    x>={-1,-1}; // This constraint has no effect but is added for testing
   end ArrayTest1;
 
+  optimization ArrayTest2 (objective=cost(finalTime)+x[1](finalTime)^2 + x[2](finalTime)^2,startTime=0,finalTime=2)
+
 /*
-  optimization ArrayTest2 (objective=x[1](finalTime),startTime=0,finalTime=1)
-     Real x(start=0,fixed=true);
-     input Real u;
-   equation
-     der(x) = u;
-   constraint
-     u>=-1;
-     u<=1;
-  end ArrayTest2;
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest1",
+        description="Test arrays in Optimica",
+                                               flatModel=
+"
+optimization OptimicaTransformCanonicalTests.ArrayTest2(objective = cost(finalTime) + ( x[1](finalTime) ) ^ 2 + ( x[2](finalTime) ) ^ 2,startTime = 0,finalTime = 2)
+ Real cost(start = 0,fixed = true);
+ Real x[1](start = 1,fixed = true);
+ Real x[2](start = 1,fixed = true);
+ Real y;
+ input Real u;
+ parameter Real A[1,1] =  - ( 1 );
+ parameter Real A[1,2] = 0;
+ parameter Real A[2,1] = 1;
+ parameter Real A[2,2] =  - ( 1 );
+ parameter Real B[1] = 1 ;
+ parameter Real B[2] = 2 ;
+ parameter Real C[1] = 1 ;
+ parameter Real C[2] = 1 ;
+ Real der(x[1]);
+ Real der(x[2]);
+ Real der(cost);
+initial equation 
+ cost = 0;
+ x[1] = 1;
+ x[2] = 1;
+equation 
+ der(x[1]) = ( A[1,1] ) * ( x[1] ) + ( A[1,2] ) * ( x[2] ) + ( B[1] ) * ( u );
+ der(x[2]) = ( A[2,1] ) * ( x[1] ) + ( A[2,2] ) * ( x[2] ) + ( B[2] ) * ( u );
+ y = ( C[1] ) * ( x[1] ) + ( C[2] ) * ( x[2] );
+ der(cost) = y ^ 2 + u ^ 2;
+constraint 
+ u>= - ( 1 );
+ u<=1;
+end OptimicaTransformCanonicalTests.ArrayTest2;
+")})));
 */
+
+    Real cost(start=0,fixed=true);
+    Real x[2](start={1,1},each fixed=true);
+    Real y;
+    input Real u;
+    parameter Real A[2,2] = {{-1,0},{1,-1}};
+    parameter Real B[2] = {1,2};
+    parameter Real C[2] = {1,1};
+  equation 
+    der(x) = A*x+B*u;
+    y = C*x;
+    der(cost) = y^2 + u^2;
+  constraint
+    u >= -1;
+    u <= 1;
+  end ArrayTest2;
+
+  optimization ArrayTest3_Err (objective=x(finalTime),startTime=0,startTime=3)
+
+   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ArrayTest3_Err",
+                                               description="Test type checking of class attributes in Optimica.",
+                                               errorMessage=
+"
+1 Error(s) found
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTransformCanonicalTests.mo':
+Semantic error at line 271, column 27:
+  Array size mismatch for the attribute objective, size of declaration is [] and size of objective expression is [2]
+  
+")})));
+
+    Real x[2](each start=1,each fixed=true);
+  equation
+    der(x) = -x;
+  end ArrayTest3_Err;
+
 
 end OptimicaTransformCanonicalTests;
 

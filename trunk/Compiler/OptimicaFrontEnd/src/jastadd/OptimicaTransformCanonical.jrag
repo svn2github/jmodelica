@@ -39,6 +39,9 @@ aspect OptimicaTransformCanonical {
 		setFConstraintList(constr);
 
 		// Scalarize class attributes
+		// Iterate over all attributes and scalarize.
+		for (FAttribute a : getFAttributes()) 
+			a.scalarize(new Index());
 		
 		// Replace variables
 		setFVariableList(vars);
@@ -52,13 +55,10 @@ aspect OptimicaTransformCanonical {
 		flush();		
 	}
 	
-	public void FConstraint.scalarize(List<FConstraint> constr,
-			HashMap<String,Integer> indexMap) {}
-	
 	/**
-	 * \brief Scalarize equation and put all scalarized equations in list eqns.
+	 * \brief Scalarize constraint and put all scalarized equations in list eqns.
 	 */
-	public void FConstraintEq.scalarize(List<FConstraint> constr, 
+	public void FConstraint.scalarize(List<FConstraint> constr, 
 			HashMap<String,Integer> indexMap) {
 		//System.out.println("FEquation.scalarize() " + ndims());
 		if (ndims()==0) {
@@ -67,73 +67,25 @@ aspect OptimicaTransformCanonical {
 			 * the equations is "scalarized" into a simple equation where
 			 * e.g. built in functions are replaced by elementary operations.
 			 */
-			constr.addChild(new FConstraintEq(getLeft().scalarize(indexMap),
-					getRight().scalarize(indexMap)));
+			FConstraint c = createEmptyNode();
+			c.setLeft(getLeft().scalarize(indexMap));
+			c.setRight(getRight().scalarize(indexMap));
+			constr.addChild(c);
 		} else if (ndims() > 0) {
 			/**
 			 * If the expression is an array expression, then the FExp.getArray()
 			 * element is used to generate scalar equations.
 			 */
 			// Iterate over array elements and create scalarized equation for each
-			for (Index i : indices()) 
-				constr.addChild(new FConstraintEq((FExp) getLeft().getArray().get(i).scalarize(indexMap), 
-						(FExp) getRight().getArray().get(i).scalarize(indexMap)));
+			for (Index i : indices()) { 
+				FConstraint c = createEmptyNode();
+				c.setLeft((FExp) getLeft().getArray().get(i).scalarize(indexMap));
+				c.setRight((FExp) getRight().getArray().get(i).scalarize(indexMap));
+				constr.addChild(c);
+			}
 		}
 	}
 
-	/**
-	 * \brief Scalarize equation and put all scalarized equations in list eqns.
-	 */
-	public void FConstraintGeq.scalarize(List<FConstraint> constr, 
-			HashMap<String,Integer> indexMap) {
-		//System.out.println("FEquation.scalarize() " + ndims());
-		if (ndims()==0) {
-			/**
-			 * If the constraint is of dimension 0, i.e, already scalar,
-			 * the equations is "scalarized" into a simple equation where
-			 * e.g. built in functions are replaced by elementary operations.
-			 */
-			constr.addChild(new FConstraintGeq(getLeft().scalarize(indexMap),
-					getRight().scalarize(indexMap)));
-		} else if (ndims() > 0) {
-			/**
-			 * If the expression is an array expression, then the FExp.getArray()
-			 * element is used to generate scalar equations.
-			 */
-			// Iterate over array elements and create scalarized equation for each
-			for (Index i : indices()) 
-				constr.addChild(new FConstraintGeq((FExp) getLeft().getArray().get(i).scalarize(indexMap), 
-						(FExp) getRight().getArray().get(i).scalarize(indexMap)));
-		}
-	}
-
-	/**
-	 * \brief Scalarize equation and put all scalarized equations in list eqns.
-	 */
-	public void FConstraintLeq.scalarize(List<FConstraint> constr, 
-			HashMap<String,Integer> indexMap) {
-		//System.out.println("FEquation.scalarize() " + ndims());
-		if (ndims()==0) {
-			/**
-			 * If the constraint is of dimension 0, i.e, already scalar,
-			 * the equations is "scalarized" into a simple equation where
-			 * e.g. built in functions are replaced by elementary operations.
-			 */
-			constr.addChild(new FConstraintLeq(getLeft().scalarize(indexMap),
-					getRight().scalarize(indexMap)));
-		} else if (ndims() > 0) {
-			/**
-			 * If the expression is an array expression, then the FExp.getArray()
-			 * element is used to generate scalar equations.
-			 */
-			
-			// Iterate over array elements and create scalarized equation for each
-			for (Index i : indices()) 
-				constr.addChild(new FConstraintLeq((FExp) getLeft().getArray().get(i).scalarize(indexMap), 
-						(FExp) getRight().getArray().get(i).scalarize(indexMap)));
-		}
-
-	}
 	
 	/**
 	 * \brief Scalarize equation and put all scalarized equations in list eqns.
@@ -167,9 +119,6 @@ aspect OptimicaTransformCanonical {
 		}		
 	}
 	
-	public FFunctionCallLeft FFunctionCallLeft.scalarize(HashMap<String,Integer> indexMap) {
-		return new FFunctionCallLeft(hasFIdUse() ? new Opt(getFIdUse().scalarize(indexMap)) : new Opt());
-	}
 	*/
 	
 	public FExp FTimedVariable.scalarize(HashMap<String,Integer> indexMap) { 

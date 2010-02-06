@@ -20,6 +20,43 @@ aspect OptimicaErrorCheck {
     	super.collectErrors();
     	getFConstraintList().collectErrors();
     	getInstClassModificationOpt().collectErrors();
+    	
+    	//TODO: this code is duplicated from InstPrimitive.typeCheck()
+    	// which is pretty brute force. There is a note on refactorization
+    	// of this code in ModelicaFrontEnd which possibly could simplify things.
+    	if (hasInstClassModification()) {
+    		for (InstModification im : getInstClassModification().getInstArgumentList()) {
+    			// Only check attributes, value modifications are checked above
+    			if (im instanceof InstComponentModification) {
+    				InstComponentModification icm = (InstComponentModification) im;
+    				if (icm.getInstModification().hasInstValueMod()) {
+    					FExp val_mod = icm.getInstModification().instValueMod();
+    					if (!icm.type().isUnknown() && !val_mod.type().isUnknown()) {
+    						//FPrimitiveType attr_type = attributeType(icm);
+    						FPrimitiveType attr_type = icm.type();
+    						if (!icm.type().typeCompatible(val_mod.type().scalarType())) {
+    							icm.error("The type of the binding expression of the attribute " + icm.name() +
+    							" does not match the declared type of the variable");							
+    						} else if (!icm.getEach() && !attr_type.dimensionCompatible(val_mod.type())) { 
+    							icm.error("Array size mismatch for the attribute " + icm.name() +
+    									", size of declaration is " + Arrays.toString(attr_type.size()) + 
+    									" and size of " + icm.name() + " expression is " + 
+    									Arrays.toString(val_mod.size()));
+    						} else if (icm.getEach()) { 
+    							if (ndims() == 0) {
+    								icm.error("The 'each' keyword cannot be applied to attributes of scalar components");
+    							} else if (val_mod.ndims() > 0) {
+    								icm.error("The attribute " + icm.name() + 
+    								" is declared 'each' and the binding expression is not scalar");
+    							}
+    						}
+    					}
+    				}
+    			}
+    		}
+    	}
+
+    	
   	}
 
 	public void FOptClass.checkFClassDimensions() {

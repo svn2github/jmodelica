@@ -46,6 +46,9 @@ aspect FlatTypeCheck {
 	    }
 	  
     	// TODO: Can't this be moved to InstComponentModification.typeCheck()?
+    	// This code is duplicated in FOptClass in OptimicaFrontEnd 
+    	// (OptimicaErrorCheck.jrag). If the suggested factorization is
+    	// done then that code could probably be simplified too.
  	    // Check the type correctness of attributes
 	    for (InstModification im : totalMergedEnvironment()) {
 		    // Only check attributes, value modifications are checked above
