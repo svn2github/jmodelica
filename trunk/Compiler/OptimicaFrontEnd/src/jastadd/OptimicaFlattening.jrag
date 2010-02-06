@@ -146,12 +146,12 @@ aspect OptimicaFlattening {
 		FOptClass foc = (FOptClass)fc;
 		foc.addFConstraint(new FConstraintGeq(getLeft().flatten(prefix),getRight().flatten(prefix)));
 	}
-
+/*
 	public FExp FTimedVariable.flatten(FQName prefix) {
 		return new FTimedVariable(getName().flatten(prefix),
 		   getArg().flatten(prefix));
 	}
-	
+	*/
 	syn nta List<FConstraint> InstNode.getFConstraintList()  { 
 	    List l = new List();
 	    for (Constraint c : constraints()) {
@@ -164,10 +164,16 @@ aspect OptimicaFlattening {
 	syn List<FConstraint> InstNode.getFConstraints() {
 		return getFConstraintList();	
 	}
+
 	
 	public FExp InstTimedVariable.flatten(FQName prefix) {
 		return new FTimedVariable(new FIdUse(getName().flatten(new FQName())),getArg().flatten(prefix));		
 	}
-	
+
+	/*
+	public FExp FTimedVariable.flatten(FQName prefix) {
+		return new FTimedVariable(new FIdUse(getName().flatten(new FQName())),getArg().flatten(prefix));		
+	}
+*/
 	
 }

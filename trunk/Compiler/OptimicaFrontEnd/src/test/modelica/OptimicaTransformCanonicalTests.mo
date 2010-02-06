@@ -153,4 +153,76 @@ y:
 
   end LinearityTest2;	
 
+  optimization ArrayTest1 (objective=cost(finalTime),startTime=0,finalTime=2)
+/*
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest1",
+        description="Test arrays in Optimica",
+                                               flatModel=
+"optimization OptimicaTransformCanonicalTests.ArrayTest1(objective = cost(finalTime),startTime = 0,finalTime = 2)
+ Real cost(start = 0,fixed = true);
+ Real x[1](start = 1,fixed = true);
+ Real x[2](start = 1,fixed = true);
+ Real y;
+ input Real u;
+ parameter Real A[1,1] =  - ( 1 ) ;
+ parameter Real A[1,2] = 0;
+ parameter Real A[2,1] = 1 ;
+ parameter Real A[2,2] =  - ( 1 );
+ parameter Real B[1] = 1;
+ parameter Real B[2] = 2;
+ parameter Real C[1] = 1;
+ parameter Real C[2] = 1;
+ Real der(x[1]);
+ Real der(x[2]);
+ Real der(cost);
+initial equation 
+ cost = 0;
+ x[1] = 1;
+ x[2] = 1;
+equation 
+ der(x[1]) = ( A[1,1] ) * ( x[1] ) + ( A[1,2] ) * ( x[2] ) + ( B[1] ) * ( u );
+ der(x[2]) = ( A[2,1] ) * ( x[1] ) + ( A[2,2] ) * ( x[2] ) + ( B[2] ) * ( u );
+ y = ( C[1] ) * ( x[1] ) + ( C[2] ) * ( x[2] );
+ der(cost) = y ^ 2 + u ^ 2;
+constraint 
+ u>= - ( 1 );
+ u<=1;
+ x[1](finalTime)=0;
+ x[2](finalTime)=0;
+end OptimicaTransformCanonicalTests.ArrayTest1;
+")})));
+*/
+
+    Real cost(start=0,fixed=true);
+    Real x[2](start={1,1},each fixed=true);
+    Real y;
+    input Real u;
+    parameter Real A[2,2] = {{-1,0},{1,-1}};
+    parameter Real B[2] = {1,2};
+    parameter Real C[2] = {1,1};
+  equation 
+    der(x) = A*x+B*u;
+    y = C*x;
+    der(cost) = y^2 + u^2;
+  constraint
+    u >= -1;
+    u <= 1;
+    x(finalTime) = {0,0};
+  end ArrayTest1;
+
+/*
+  optimization ArrayTest2 (objective=x[1](finalTime),startTime=0,finalTime=1)
+     Real x(start=0,fixed=true);
+     input Real u;
+   equation
+     der(x) = u;
+   constraint
+     u>=-1;
+     u<=1;
+  end ArrayTest2;
+*/
+
 end OptimicaTransformCanonicalTests;
+
+

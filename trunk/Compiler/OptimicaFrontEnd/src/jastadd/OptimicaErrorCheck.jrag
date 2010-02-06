@@ -41,7 +41,15 @@ aspect OptimicaErrorCheck {
 		if (n_eq_F0!=n_vars_F0) {
 			error("The DAE initialization system has " + n_eq_F0 + " equations and " + n_vars_F0 + " free variables.");
 		}
-		
 	}
   	
+	  public void FConstraint.typeCheck() {
+		  //System.out.println("FEquation.typeCheck(): " + getLeft().type() + " " + getRight().type());
+		  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
+			  if (!getLeft().type().equivalentTo(getRight().type())) {
+				  error("The right and left expression types of constraint are" +
+			  			" not compatible");		  
+			  }
+		  }
+	  }
 }

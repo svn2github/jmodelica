@@ -62,11 +62,7 @@ aspect OptimicaExpressions {
 			return myFOptClass().finalTimeAttributeCValue();
 		}
 	}
-	
-	public FExp FTimedVariable.scalarize(HashMap<String,Integer> indexMap) { 
-		return new FTimedVariable((FIdUse)getName().fullCopy(),getArg().scalarize(indexMap)); 
-	}
-	
+		
 	boolean FTimedVariable.rewritten = false;
 	
 	/**
@@ -163,6 +159,39 @@ aspect OptimicaArrays {
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
 	syn Indices FConstraint.indices() = getLeft().indices();
+	
+	eq InstTimedVariable.ndims() = getName().ndims();
+	eq FTimedVariable.ndims() = getName().ndims();
+	eq FStartTimeExp.ndims() = 0;
+	eq FFinalTimeExp.ndims() = 0;
 
+	eq InstTimedVariable.size() = getName().size();
+	eq FTimedVariable.size() = getName().size();
+	eq FStartTimeExp.size() = null;
+	eq FFinalTimeExp.size() = null;
+
+	eq InstTimedVariable.indices() = getName().indices();
+	eq FTimedVariable.indices() = getName().indices();
+	eq FStartTimeExp.indices() = null;
+	eq FFinalTimeExp.indices() = null;
+
+	eq FTimedVariable.getArray() {
+		if (isArray()) {
+			Array array = new Array(indices());
+			Indices ind = array.indices();
+			for (Index i : ind) {
+				FTimedVariable ftv_tmp = (FTimedVariable) fullCopy();
+				FQName fqn = ftv_tmp.getName().getFQName();
+				fqn.setLastFArraySubscripts(ind.translate(i).newFArraySubscripts());
+				fqn.scalarized = true;
+				array.set(i, ftv_tmp);
+			}
+			return array;
+			
+		} else {
+			return new ScalarAsArray(this);
+		}
+	}
+	
 }
 

@@ -169,6 +169,9 @@ aspect FlatOptimicaPrettyPrint {
 	public void FTimedVariable.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		//debugPrint("FFunctionCall.prettyPrint:");
 		str.print(getName().name());
+		if (getName().hasFArraySubscripts()) {
+			p.toString(getName().getFArraySubscripts(),str,indent,o);
+		}
 		str.print("(");
 			p.toString(getArg(),str,"",o);
 		str.print(")");

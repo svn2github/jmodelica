@@ -1,23 +1,57 @@
 aspect OptimicaTransformCanonical {
-	/*
+	
 	public void FOptClass.scalarize() {
 		
-		super.scalarize();
+		/* Notice that it is not ok to call super.scalarize() here, since
+		 * then the scalarized variable lists will be set prior to
+		 * scalarizing the constraints and costfunctions, which will make
+		 * lookup in the constraint scalarization fail.
+		 */
 				
+		List<FVariable> vars = new List<FVariable>();
+		List<FVariable> alias_vars = new List<FVariable>();
+		// Scalarize all non-alias variables
+		for (FVariable fv : getFVariables()) {
+			fv.scalarize(vars);
+		}
+		// Scalarize alias variables
+		for (FVariable fv : getAliasVariables()) {
+			fv.scalarize(alias_vars);
+		}
+		
+		// Scalarize equations
+		List<FAbstractEquation> eqns = new List<FAbstractEquation>();
+		for (FAbstractEquation ae : getFEquationBlock(0).getFAbstractEquations()) {
+			ae.scalarize(eqns,new HashMap<String,Integer>());
+		}
+		getFEquationBlock(0).setFAbstractEquationList(eqns);
+		List<FAbstractEquation> ieqns = new List<FAbstractEquation>();
+		for (FAbstractEquation ae : getFInitialEquations()) {
+			ae.scalarize(ieqns,new HashMap<String,Integer>());
+		}
+		setFInitialEquationList(ieqns);		
+		
 		// Scalarize constraints
 		List<FConstraint> constr = new List<FConstraint>();
 		for (FConstraint c : getFConstraints()) {
 			c.scalarize(constr,new HashMap<String,Integer>());
 		}
-		
 		setFConstraintList(constr);
+
+		// Scalarize class attributes
+		
+		// Replace variables
+		setFVariableList(vars);
+		setAliasVariableList(alias_vars);
 		
 		// Replace subscript expressions with literals
+		eqns.makeSubscriptsLiteral();
+		ieqns.makeSubscriptsLiteral();
 		constr.makeSubscriptsLiteral();
 
 		flush();		
 	}
-	*/
+	
 	public void FConstraint.scalarize(List<FConstraint> constr,
 			HashMap<String,Integer> indexMap) {}
 	
@@ -47,7 +81,6 @@ aspect OptimicaTransformCanonical {
 		}
 	}
 
-	
 	/**
 	 * \brief Scalarize equation and put all scalarized equations in list eqns.
 	 */
@@ -93,11 +126,13 @@ aspect OptimicaTransformCanonical {
 			 * If the expression is an array expression, then the FExp.getArray()
 			 * element is used to generate scalar equations.
 			 */
+			
 			// Iterate over array elements and create scalarized equation for each
 			for (Index i : indices()) 
 				constr.addChild(new FConstraintLeq((FExp) getLeft().getArray().get(i).scalarize(indexMap), 
 						(FExp) getRight().getArray().get(i).scalarize(indexMap)));
 		}
+
 	}
 	
 	/**
@@ -137,6 +172,11 @@ aspect OptimicaTransformCanonical {
 	}
 	*/
 	
-	//eq FTimedExp.scalarize() = (FTimedVariable)fullCopy();
+	public FExp FTimedVariable.scalarize(HashMap<String,Integer> indexMap) { 
+		return new FTimedVariable(getName().scalarize(indexMap),getArg().scalarize(indexMap)); 
+	}
+	
+	public FExp FStartTimeExp.scalarize(HashMap<String,Integer> indexMap) { return new FStartTimeExp(); } 
+	public FExp FFinalTimeExp.scalarize(HashMap<String,Integer> indexMap) { return new FFinalTimeExp(); } 
 	
 }
