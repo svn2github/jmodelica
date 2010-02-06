@@ -67,5 +67,28 @@ package ParEst
 
   end ParEst;
 
+  optimization ParEst_V (objective = sum(sys.y[i] - y[i] for i in 1:11),
+                       startTime = 0,
+                       finalTime = 15)
+
+    // Create second order system instance,
+    // Set parameters w and z free and give 
+    // initial guesses
+    SecondOrder sys(w(free=true,initialGuess=2),
+                    z(free=true,initialGuess=1),
+                    x1(fixed=true),
+                    x2(fixed=true));
+    Real u = sys.u;
+    
+    // Measurement data time points
+    parameter Real t[11] = {0,1,2,3,4,5,6,7,8,9,10};
+
+    // Measurement data output values
+    parameter Real y[11] = {0.,0.63212056,0.86466472,0.95021293, 0.98168436,0.99326205,  0.99752125,0.99908812,0.99966454,0.99987659,0.9999546}; 
+
+    equation 
+      u=1;
+
+  end ParEst_V;
 
 end ParEst;
