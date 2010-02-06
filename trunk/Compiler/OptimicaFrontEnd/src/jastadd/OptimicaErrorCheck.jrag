@@ -38,9 +38,14 @@ aspect OptimicaErrorCheck {
 		// optimization algorithm, this is not the case.
 		int n_eq_F0 = numInitialEquations() + numScalarEquations() + numPathEqConstraints();
 		int n_vars_F0 = numAlgebraicRealVariables() + 2*numDifferentiatedRealVariables();
-		if (n_eq_F0!=n_vars_F0) {
+		if (n_eq_F0<n_vars_F0) {
+			warning("The DAE initialization system has " + n_eq_F0 + " equations and " + n_vars_F0 + " free variables.");
+		}
+		if (n_eq_F0>n_vars_F0) {
 			error("The DAE initialization system has " + n_eq_F0 + " equations and " + n_vars_F0 + " free variables.");
 		}
+
+	
 	}
   	
 	  public void FConstraint.typeCheck() {

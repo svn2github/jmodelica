@@ -42,3 +42,22 @@ class TestIfExp(OptimizationTest):
     def test_cost_end(self):
         self.assert_end_value('cost', 1.0590865e+00)
 
+class TestFreeInitialConditions(OptimizationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        OptimizationTest.setup_class_base(
+                'FreeInitialConditions.mo', 'FreeInitialConditions')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        n_e = 50
+        hs = N.ones(n_e)*1./n_e
+        n_cp = 3
+        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 })
+        self.run()
+
+    @testattr(stddist = True)
+    def test_cost_end(self):
+        self.assert_end_value('cost', 1.9179767e+01)
+
