@@ -404,7 +404,7 @@ aspect Arrays {
 	 */
 	inh lazy int[] FSubscript.mySize();
 	inh lazy int[] FArraySubscripts.mySize();
-	eq FArraySubscripts.getFSubscript(int i).mySize() = new int[] { mySize()[i] };
+	eq FArraySubscripts.getFSubscript(int i).mySize() = new int[] { mySize().length > i ? mySize()[i] : 0 };
 	eq FIdUse.getChild().mySize()                     = myFV().size();
 	eq InstArrayAccess.getFArraySubscripts().mySize() = myInstComponentDecl().size();
 	eq FSubscriptedExp.getFArraySubscripts().mySize() = getFExp().size();

@@ -424,6 +424,27 @@ aspect Names {
    	
 	syn boolean Access.isQualified() = false;
 	eq Dot.isQualified() = true;
+	
+	/**
+	 * \brief Get the top node in an access (possibly qualified).
+	 */
+	syn Access Access.getTopAccess() {
+		// This can be done with inherited attributes, but is much simpler with getParent()
+		if (getParent() instanceof Dot)
+			return ((Dot) getParent()).getTopAccess();
+		return this;
+	}
+	
+	/**
+	 * \brief Get the top node in an access (possibly qualified).
+	 */
+	syn InstAccess InstAccess.getTopAccess() {
+		// This can be done with inherited attributes, but is much simpler with getParent()
+		if (getParent() instanceof InstDot)
+			return ((InstDot) getParent()).getTopAccess();
+		return this;
+	}
+	
 }
 
 aspect FlatNames {

@@ -1473,4 +1473,53 @@ equation
  der(v) = 1;
 end StateSelectTest;
 
+
+
+model IndexLookup1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="IndexLookup1",
+         description="Name lookup from within array subscript",
+         flatModel="
+fclass NameTests.IndexLookup1
+ parameter Integer i = 2 /* 2 */;
+ Real y.z[2] = {1,2};
+ Real x = y.z[i];
+end NameTests.IndexLookup1;
+")})));
+
+  model B
+    Real z[2] = {1, 2};
+  end B;
+
+  parameter Integer i = 2;
+  B y;
+  Real x = y.z[i];
+end IndexLookup1;
+
+
+model IndexLookup2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="IndexLookup2",
+         description="Name lookup from within array subscript",
+         flatModel="
+fclass NameTests.IndexLookup2
+ parameter Integer i = 2 /* 2 */;
+ parameter Integer y.i = 1 /* 1 */;
+ Real y.z[2] = {1,2};
+ Real x = y.z[i];
+end NameTests.IndexLookup2;
+")})));
+
+  model B
+    parameter Integer i = 1;
+    Real z[2] = {1, 2};
+  end B;
+
+  parameter Integer i = 2;
+  B y;
+  Real x = y.z[i];
+end IndexLookup2;
+
 end NameTests;
