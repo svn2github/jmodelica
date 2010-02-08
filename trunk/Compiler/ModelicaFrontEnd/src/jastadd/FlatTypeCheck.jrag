@@ -45,35 +45,31 @@ aspect FlatTypeCheck {
     		}
 	    }
 	  
-    	// TODO: Can't this be moved to InstComponentModification.typeCheck()?
-    	// This code is duplicated in FOptClass in OptimicaFrontEnd 
-    	// (OptimicaErrorCheck.jrag). If the suggested factorization is
-    	// done then that code could probably be simplified too.
- 	    // Check the type correctness of attributes
-	    for (InstModification im : totalMergedEnvironment()) {
-		    // Only check attributes, value modifications are checked above
-		    if (im instanceof InstComponentModification) {
-			    InstComponentModification icm = (InstComponentModification) im;
-				if (icm.getInstModification().hasInstValueMod()) {
-					FExp val_mod = icm.getInstModification().instValueMod();
-					if (!icm.type().isUnknown() && !val_mod.type().isUnknown()) {
-						FPrimitiveType attr_type = attributeType(icm);
-						if (!icm.type().typeCompatible(val_mod.type().scalarType())) {
-							icm.error("The type of the binding expression of the attribute " + icm.name() +
-							  " does not match the declared type of the variable");							
-						} else if (!icm.getEach() && !attr_type.dimensionCompatible(val_mod.type())) { 
-							icm.error("Array size mismatch for the attribute " + icm.name() +
-									", size of declaration is " + Arrays.toString(attr_type.size()) + 
-									" and size of " + icm.name() + " expression is " + 
-									Arrays.toString(val_mod.size()));
-						} else if (icm.getEach()) { 
-							if (ndims() == 0) {
-								icm.error("The 'each' keyword cannot be applied to attributes of scalar components");
-							} else if (val_mod.ndims() > 0) {
-								icm.error("The attribute " + icm.name() + 
-										" is declared 'each' and the binding expression is not scalar");
-							}
-						}
+	    for (InstModification im : totalMergedEnvironment()) 
+	    	im.typeCheckAttribute(this);
+    }
+    
+    public void InstModification.typeCheckAttribute(InstNode owner) {}
+
+    public void InstComponentModification.typeCheckAttribute(InstNode owner) {
+		if (getInstModification().hasInstValueMod()) {
+			FExp val_mod = getInstModification().instValueMod();
+			if (!type().isUnknown() && !val_mod.type().isUnknown()) {
+				FPrimitiveType attr_type = owner.attributeType(this);
+				if (!type().typeCompatible(val_mod.type().scalarType())) {
+					error("The type of the binding expression of the attribute " + name() +
+					  " does not match the declared type of the variable");
+				} else if (!getEach() && !attr_type.dimensionCompatible(val_mod.type())) { 
+					error("Array size mismatch for the attribute " + name() +
+							", size of declaration is " + Arrays.toString(attr_type.size()) + 
+							" and size of " + name() + " expression is " + 
+							Arrays.toString(val_mod.size()));
+				} else if (getEach()) { 
+					if (owner.ndims() == 0) {
+						error("The 'each' keyword cannot be applied to attributes of scalar components");
+					} else if (val_mod.ndims() > 0) {
+						error("The attribute " + name() + 
+								" is declared 'each' and the binding expression is not scalar");
 					}
 				}
 			}

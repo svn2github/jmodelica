@@ -1690,6 +1690,23 @@ end ArrayTests.ArrayIterTest4;
 end ArrayIterTest4;
 
 
+model ArrayIterTest5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayIterTest5",
+         description="Array constructor with iterators: vectors of length 1",
+         flatModel="
+fclass ArrayTests.ArrayIterTest5
+ Real x[1,1,1];
+equation
+ x[1,1,1] = 1;
+end ArrayTests.ArrayIterTest5;
+")})));
+
+ Real x[1,1,1] = { {1} for i in {1}, j in {1} };
+end ArrayIterTest5;
+
+
 
 model SubscriptExpression1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

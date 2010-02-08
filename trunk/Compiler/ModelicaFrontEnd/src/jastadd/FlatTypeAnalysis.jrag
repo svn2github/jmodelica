@@ -311,10 +311,19 @@ aspect InstBindingType {
 	}
 		
 	/**
+	 * \brief Constructs the type a specific attribute to this instance tree node should 
+	 *        have, given the scalar type of the attribute. 
+	 *        
+	 * Default is <code>null</code>, so override is necessary for all InstNode 
+	 * subclasses that needs this check.
+	 */
+	syn FPrimitiveType InstNode.attributeType(InstComponentModification icm) = null;
+		
+	/**
 	 * \brief Constructs the type a specific attribute to this primitive should 
 	 *        have, given the scalar type of the attribute.
 	 */
-	syn FPrimitiveType InstPrimitive.attributeType(InstComponentModification icm) {
+	eq InstPrimitive.attributeType(InstComponentModification icm) {
 		FPrimitiveType res = icm.type();
 		InstNode decl = icm.myInstNode();
 		if (decl == this)

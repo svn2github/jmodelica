@@ -20,5 +20,8 @@ aspect OptimicaFlatTypeAnalysis {
 		// TODO: Check that Arg is OK. (type, variability, etc)
 		return getName().type();
 	}
+
+	// TODO: It seems like this assumes that attributes of InstOptClassDecl always have correct dimensions.
+	eq InstOptClassDecl.attributeType(InstComponentModification icm) = icm.type();
 	
 }

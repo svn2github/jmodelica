@@ -113,9 +113,20 @@ aspect OptimicaInheritedFactoryMethods {
 	public FFinalTimeExp FFinalTimeExp.createEmptyNode() { return new FFinalTimeExp(); }
 
 	public abstract FConstraint FConstraint.createEmptyNode();
-	public FConstraintEq FConstraintEq.createEmptyNode() { return new FConstraintEq(); }
+	public FConstraintEq FConstraintEq.createEmptyNode()   { return new FConstraintEq(); }
 	public FConstraintGeq FConstraintGeq.createEmptyNode() { return new FConstraintGeq(); }
 	public FConstraintLeq FConstraintLeq.createEmptyNode() { return new FConstraintLeq(); }
+	
+	/**
+	 * \brief Create new node of same class as this, with the specified 
+	 *        children.
+	 */
+	public FConstraint FConstraint.createNode(FExp left, FExp right) {
+		FConstraint node = createEmptyNode();
+		node.setLeft(left);
+		node.setRight(right);
+		return node;
+	}
 	
 }
 

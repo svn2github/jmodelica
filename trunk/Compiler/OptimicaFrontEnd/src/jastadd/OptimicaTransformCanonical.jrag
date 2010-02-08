@@ -41,7 +41,7 @@ aspect OptimicaTransformCanonical {
 		// Scalarize class attributes
 		// Iterate over all attributes and scalarize.
 		for (FAttribute a : getFAttributes()) 
-			a.scalarize(new Index());
+			a.scalarize(Index.NULL);
 		
 		// Replace variables
 		setFVariableList(vars);
@@ -64,24 +64,19 @@ aspect OptimicaTransformCanonical {
 		if (ndims()==0) {
 			/**
 			 * If the constraint is of dimension 0, i.e, already scalar,
-			 * the equations is "scalarized" into a simple equation where
+			 * the constraint is "scalarized" into a simple constraint where
 			 * e.g. built in functions are replaced by elementary operations.
 			 */
-			FConstraint c = createEmptyNode();
-			c.setLeft(getLeft().scalarize(indexMap));
-			c.setRight(getRight().scalarize(indexMap));
-			constr.addChild(c);
+			constr.add(createNode(getLeft().scalarize(indexMap), getRight().scalarize(indexMap)));
 		} else if (ndims() > 0) {
 			/**
 			 * If the expression is an array expression, then the FExp.getArray()
-			 * element is used to generate scalar equations.
+			 * element is used to generate scalar constraints.
 			 */
 			// Iterate over array elements and create scalarized equation for each
-			for (Index i : indices()) { 
-				FConstraint c = createEmptyNode();
-				c.setLeft((FExp) getLeft().getArray().get(i).scalarize(indexMap));
-				c.setRight((FExp) getRight().getArray().get(i).scalarize(indexMap));
-				constr.addChild(c);
+			for (Index i : indices()) {
+				constr.add(createNode(getLeft().getArray().get(i).scalarize(indexMap), 
+						getRight().getArray().get(i).scalarize(indexMap)));
 			}
 		}
 	}

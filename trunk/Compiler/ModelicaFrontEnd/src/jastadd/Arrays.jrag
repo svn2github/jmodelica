@@ -1526,7 +1526,7 @@ aspect ArrayIndices {
 		 * \brief Create an Indices object based on a list of int arrays.
 		 */
 		public static Indices create(ArrayList<int[]> ind) {
-			return NonConsecutiveIndices.create(ind);
+			return NonConsecutiveIndices.create(ind, true);
 		}
 		
 		/**
@@ -1536,7 +1536,7 @@ aspect ArrayIndices {
 			ArrayList<int[]> ind = new ArrayList<int[]>();
 			for (CommonForIndex fi : forIndices) 
 				ind.add(fi.myIndices());
-			return NonConsecutiveIndices.create(ind);
+			return NonConsecutiveIndices.create(ind, false);
 		}
 		
 		/**
@@ -1719,7 +1719,8 @@ aspect ArrayIndices {
 	public class NonConsecutiveIndices extends Indices {
 		// The indices are stored as a list of integer arrays.
 		protected ArrayList<int[]> indices; 
-		protected Index trans; 
+		protected Index trans;
+		protected boolean trim;
 		
 		/**
 		 * \brief Create a NonConsecutiveIndices object based on FArraySubcripts.
@@ -1729,15 +1730,15 @@ aspect ArrayIndices {
 			ArrayList<int[]> ind = new ArrayList<int[]>();
 			for (FSubscript fs : fas.getFSubscripts()) 
 				ind.add(fs.myIndices());
-			return new NonConsecutiveIndices(ind);
+			return new NonConsecutiveIndices(ind, true);
 		}
 		
 		/**
 		 * \brief Create a NonConsecutiveIndices object based on a list of int arrays
 		 *        Use Indices.create(ArrayList<int[]> ind).
 		 */
-		public static NonConsecutiveIndices create(ArrayList<int[]> ind) {
-			return new NonConsecutiveIndices(ind);
+		public static NonConsecutiveIndices create(ArrayList<int[]> ind, boolean trim) {
+			return new NonConsecutiveIndices(ind, trim);
 		}
 		
 		/**
@@ -1748,7 +1749,7 @@ aspect ArrayIndices {
 			int[] ii = i.index();
 			int[] ti = trans.index();
 			for (int ji = 0, jt = 0; ji < ndims; ji++, jt++) {
-				while (indices.get(jt).length == 1) 
+				while (indices.get(jt).length == 1 && trim) 
 					jt++;
 				ti[jt] = indices.get(jt)[ii[ji] - 1];
 			}
@@ -1760,8 +1761,9 @@ aspect ArrayIndices {
 		 * \brief Internal constructor to create a NonConsecutiveIndices object based on a 
 		 *        list of int arrays containing the used indexes on the underlying array.
 		 */
-		protected NonConsecutiveIndices(ArrayList<int[]> ind) {
-			super(getSize(ind));
+		protected NonConsecutiveIndices(ArrayList<int[]> ind, boolean trim) {
+			super(getSize(ind, trim));
+			this.trim = trim;
 			indices = ind;
 			trans = new Index(ind.size());
 			for (int i = 0; i < ind.size(); i++)
@@ -1772,14 +1774,14 @@ aspect ArrayIndices {
 		 * \brief Calculate size for this indices from a list of int arrays containing the 
 		 *        used indexes on the underlying array
 		 */
-		protected static int[] getSize(ArrayList<int[]> ind) {
+		protected static int[] getSize(ArrayList<int[]> ind, boolean trim) {
 			int n = 0;
 			for (int i = 0; i < ind.size(); i++)
-				if (ind.get(i).length > 1)
+				if (ind.get(i).length > 1 || !trim)
 					n++;
 			int[] size = new int[n];
 			for (int i = 0, j = 0; i < ind.size(); i++)
-				if (ind.get(i).length > 1)
+				if (ind.get(i).length > 1 || !trim)
 					size[j++] = ind.get(i).length;
 			return size;
 		}
