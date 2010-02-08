@@ -251,7 +251,7 @@ aspect FlatTypeCheck {
   }
   
   public void InstFunctionArgument.typeCheck() {
-	  if (!getFExp().type().isUnknown() && !getBoundInput().type().isUnknown()) {
+	  if (!getFExp().type().isUnknown() && (getBoundInput() == null || !getBoundInput().type().isUnknown())) {
 		  boolean typeOk;
 		  if (argumentDefinedTypeValid()) 
 			  typeOk = getBoundInput().type().typeCompatible(getFExp().type());
@@ -294,7 +294,8 @@ aspect FlatTypeCheck {
   eq FMinMaxExp.getChild().argumentDefinedTypeValid()            = false;
   eq FSumExp.getChild().argumentDefinedTypeValid()               = false;
   eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()   = i != 0;
- 
+  eq FInfArgsFunctionCall.getChild().argumentDefinedTypeValid()  = false;
+
   /**
    * \brief Check if the type supplied is valid for this argument.
    * 
@@ -304,6 +305,7 @@ aspect FlatTypeCheck {
   eq FAbstractFunctionCall.getChild().argumentTypeValid(FPrimitiveType type) = false;
   eq FTranspose.getChild().argumentTypeValid(FPrimitiveType type)            = type.ndims() >= 2;
   eq FSizeExp.getChild().argumentTypeValid(FPrimitiveType type)              = true;
+  eq FInfArgsFunctionCall.getChild().argumentTypeValid(FPrimitiveType type)  = true;
   eq FSumExp.getChild().argumentTypeValid(FPrimitiveType type)               = type.ndims() > 0;
   eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FPrimitiveType type) = 
 	  hasY() ^ getOriginalArg(i).getFExp().isArray();

@@ -1923,6 +1923,41 @@ end SubscriptExpression8;
 
 
 
+model NumSubscripts1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="NumSubscripts1",
+         description="Check number of array subscripts:",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1928, column 12:
+  Too many array subscripts for access: 1 subscripts given, component has 0 dimensions
+")})));
+
+ Real x = 1;
+ Real y = x[1];
+end NumSubscripts1;
+
+
+model NumSubscripts2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="NumSubscripts2",
+         description="Check number of array subscripts:",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1945, column 12:
+  Too many array subscripts for access: 3 subscripts given, component has 2 dimensions
+")})));
+
+ Real x[1,1] = {{1}};
+ Real y = x[1,1,1];
+end NumSubscripts2;
+
+
+
 /* ========== Array algebra ========== */
 
 model ArrayAdd1
