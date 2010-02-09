@@ -37,9 +37,8 @@ aspect FlatTypeCheck {
     				} else {
     					error("Array size mismatch in declaration of " + 
     							(myBindingExpHasEach() ? "each " : "") + name() +
-    							", size of declaration is " + Arrays.toString(bindingType().size()) + 
-    							" and size of binding expression is " + 
-    							Arrays.toString(bexp.size()));
+    							", size of declaration is " + bindingType().size() + 
+    							" and size of binding expression is " + bexp.size());
      				}
     			}
     		}
@@ -61,9 +60,8 @@ aspect FlatTypeCheck {
 					  " does not match the declared type of the variable");
 				} else if (!getEach() && !attr_type.dimensionCompatible(val_mod.type())) { 
 					error("Array size mismatch for the attribute " + name() +
-							", size of declaration is " + Arrays.toString(attr_type.size()) + 
-							" and size of " + name() + " expression is " + 
-							Arrays.toString(val_mod.size()));
+							", size of declaration is " + attr_type.size() + 
+							" and size of " + name() + " expression is " + val_mod.size());
 				} else if (getEach()) { 
 					if (owner.ndims() == 0) {
 						error("The 'each' keyword cannot be applied to attributes of scalar components");
@@ -128,17 +126,16 @@ aspect FlatTypeCheck {
   eq FMinMaxExp.getChild().iterExpMustBeScalar() = true;
   // TODO: Add product() when it is implemented
   
-  // FIterExp has simplified type() that cannot be unknown if getFExp().type() isn't unknown
   public void FIterExp.typeCheck() {
 	  if (iterExpMustBeScalar() && !getFExp().type().isUnknown() && getFExp().ndims() != 0)
 		  error("The expression of a reduction-expression must be scalar, except for sum(): " +
-				  getFExp() + " has ndims() = " + getFExp().ndims());
+				  getFExp() + " has " + getFExp().ndims() + " dimension(s)");
   }
   
   public void InstForIndex.typeCheck() {
 	  if (hasFExp() && !getFExp().type().isUnknown() && getFExp().ndims() != 1)
 		  error("The expression of for index " + name() + " must be a vector expression: " + 
-				  getFExp() + " has ndims() = " + getFExp().ndims());
+				  getFExp() + " has " + getFExp().ndims() + " dimension(s)");
   }
   
   public void FExpSubscript.typeCheck() {
@@ -149,7 +146,7 @@ aspect FlatTypeCheck {
 	  } else if (!inFunction() && !getFExp().variability().lessOrEqual(fParameter())) {
 		  error("Array index in equation must be constant, parameter or loop index: " + getFExp());
 	  } else {
-		  int max = mySize()[0];
+		  int max = mySize().get(0);
 		  for (FExp e : getExpanded().iterable()) {
 			  int i = e.ceval().intValue();
 			  if (i < 1 || i > max) {

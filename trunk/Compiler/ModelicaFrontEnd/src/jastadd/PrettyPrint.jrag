@@ -676,10 +676,10 @@ aspect PrettyPrint {
 	eq FStringScalarType.toString() = "String";
 	eq FBooleanScalarType.toString() = "Boolean";	
 	
-	eq FRealArrayType.toString()    = "Real"    + Arrays.toString(size());
-	eq FIntegerArrayType.toString() = "Integer" + Arrays.toString(size());	
-	eq FStringArrayType.toString()  = "String"  + Arrays.toString(size());
-	eq FBooleanArrayType.toString() = "Boolean" + Arrays.toString(size());	
+	eq FRealArrayType.toString()    = "Real"    + size();
+	eq FIntegerArrayType.toString() = "Integer" + size();	
+	eq FStringArrayType.toString()  = "String"  + size();
+	eq FBooleanArrayType.toString() = "Boolean" + size();	
 	
 	eq FUnknownScalarType.toString() = "FUnknownScalarType";	
 	eq FUnknownArrayType.toString() = "FUnknownArrayType";	

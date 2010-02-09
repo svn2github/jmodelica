@@ -115,12 +115,12 @@ aspect FlatTypeAnalysis {
 			return fUnknownType();
 		if (isElementWise())
 			return super.type();
-		int[] left = getLeft().size();
-		int[] right = getRight().size();
-		if (left[left.length - 1] != right[0])
+		Size left = getLeft().size();
+		Size right = getRight().size();
+		if (left.last() != right.get(0) || left.ndims() > 2 || right.ndims() > 2)
 			return fUnknownType();
 		FPrimitiveType res = getLeft().type().scalarNumericPromotion(getRight().type());
-		if (left.length == 1 && right.length == 1) 
+		if (left.ndims() == 1 && right.ndims() == 1) 
 			return res;
 		else
 			return res.arrayType(size());
@@ -132,7 +132,7 @@ aspect FlatTypeAnalysis {
 		if (getLeft().ndims() == 0)
 			return super.type();
 		// Left operand is not scalar, must be matrix exponentiation
-		if (ndims() != 2 || size()[0] != size()[1])
+		if (ndims() != 2 || size().get(0) != size().get(1))
 			return fUnknownType();
 		if (!getRight().type().isInteger() || !getRight().isConstantExp())
 			return fUnknownType();
@@ -238,7 +238,6 @@ aspect FlatTypeAnalysis {
 		if (isIterArray())
 			return getFExp(0).type();
 		
-		int[] size = size().clone();
 		// Check that the types of the elements are consistent
 		FPrimitiveType t = getFExp(0).type();
 		for (int i = 1; i < getNumFExp(); i++) {
@@ -247,7 +246,7 @@ aspect FlatTypeAnalysis {
 			if (t.isNumeric()) 
 				t = t.numericPromotion(getFExp(i).type());
 		}
-		return t.arrayType(size);
+		return t.arrayType(size());
 	}
 	
 	eq FSumExp.type() {
@@ -256,10 +255,14 @@ aspect FlatTypeAnalysis {
 		return getFExp().type().scalarType();
 	}
 	
-	eq FIterExp.type() = getFExp().type().arrayType(size());
+	eq FIterExp.type() {
+		if (size().numElements() == 0)
+			return fUnknownType();
+		return getFExp().type().arrayType(size());
+	}
 
 	// TODO: Assumes same general functionality as zeros and ones - may need change for new subclasses
-	eq FInfArgsFunctionCall.type() = (size().length > 0) ? fIntegerArrayType(size()) : fUnknownType();
+	eq FInfArgsFunctionCall.type() = (size().ndims() > 0) ? fIntegerArrayType(size()) : fUnknownType();
 	
 	eq FIdUseExp.type() = getFIdUse().type();
 	eq FInstAccessExp.type() = getInstAccess().type();
@@ -270,12 +273,8 @@ aspect FlatTypeAnalysis {
 	syn lazy FPrimitiveType InstAccess.type() {
 		if (myInstComponentDecl().isPrimitive()) {
 			InstPrimitive ip = (InstPrimitive) myInstComponentDecl();
-			if (ndims()==0) {
-				return ip.type().scalarType();
-			} else {
-				int[] size = size().clone();
-				return ip.type().scalarType().arrayType(size);
-			}
+			FPrimitiveType t = ip.type().scalarType();
+			return isArray() ? t.arrayType(size()) : t.scalarType();
 		} else {
 			return fUnknownType();
 		}
@@ -324,10 +323,11 @@ aspect InstBindingType {
 	 *        have, given the scalar type of the attribute.
 	 */
 	eq InstPrimitive.attributeType(InstComponentModification icm) {
+		// TODO: This is only used to get the size of the type - perhaps it should return Size instead
 		FPrimitiveType res = icm.type();
 		InstNode decl = icm.myInstNode();
 		if (decl == this)
-			return res.arrayType(size());
+			return res.arrayType(size());  // TODO: Take care of scalars as well
 		if (icm.getEach() || !enclosedBy(decl)) 
 			return res;
 		else
@@ -365,14 +365,9 @@ aspect InstBindingType {
 	 */
 	syn FPrimitiveType FPrimitiveType.enclosingArrayType(int size);
 	eq FUnknownType.enclosingArrayType(int size)         = this;
-	eq FPrimitiveScalarType.enclosingArrayType(int size) = arrayType(new int[] { size });
-	eq FPrimitiveArrayType.enclosingArrayType(int size) {
-		int len = size().length;
-		int[] nSize = new int[len + 1];
-		System.arraycopy(getSize(), 0, nSize, 1, len);
-		nSize[0] = size;
-		return arrayType(nSize);
-	}
+	eq FPrimitiveScalarType.enclosingArrayType(int size) = arrayType(new Size(size));
+	eq FPrimitiveArrayType.enclosingArrayType(int size)  = arrayType(size().expand(size));
+	
 }
 
 aspect TypePromotion {
@@ -484,9 +479,8 @@ aspect FTypeCompatibility {
 		type.isString() && dimensionCompatible(type);
 	
 	syn boolean FPrimitiveType.dimensionCompatible(FPrimitiveType type) = false;
-	eq FPrimitiveScalarType.dimensionCompatible(FPrimitiveType type) = type.isScalar();
-	eq FPrimitiveArrayType.dimensionCompatible(FPrimitiveType type) = 
-		Arrays.equals(size(), type.size());
+	eq FPrimitiveScalarType.dimensionCompatible(FPrimitiveType type)    = type.isScalar();
+	eq FPrimitiveArrayType.dimensionCompatible(FPrimitiveType type)     = size().equals(type.size());
 	
 }
 
@@ -569,10 +563,10 @@ aspect FTypeCompatibility {
  	eq FPrimitiveArrayNumericType.isNumeric() = true;
 
  	syn int FPrimitiveType.ndims() = 0;
- 	eq FPrimitiveArrayType.ndims() = getSize().length;
+ 	eq FPrimitiveArrayType.ndims() = getSize().ndims();
  	
- 	syn lazy int[] FPrimitiveType.size() = new int[0];
- 	eq FPrimitiveArrayType.size() = getSize().clone();
+ 	syn lazy Size FPrimitiveType.size() = Size.SCALAR;
+ 	eq FPrimitiveArrayType.size() = getSize();
  	
  	syn FPrimitiveScalarType FPrimitiveType.scalarType() = fUnknownScalarType();
  	syn FPrimitiveScalarType FRealScalarType.scalarType() = this;
@@ -599,74 +593,35 @@ aspect FTypeCompatibility {
  	syn FPrimitiveScalarType ASTNode.fUnknownScalarType() = root().getFUnknownScalarType();
  	syn FPrimitiveType ASTNode.fUnknownType() = root().getFUnknownType();
  	
- 	syn FPrimitiveArrayType ASTNode.fRealArrayType(int[] size) {
- 		FPrimitiveType t = new FRealArrayType(size);
- 		root().getDynamicArrayTypeList().add(t);
- 		// Make sure the returned type is final
- 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1);
- 	}
-
- 	syn FPrimitiveArrayType ASTNode.fIntegerArrayType(int[] size) {
- 		FPrimitiveType t = new FIntegerArrayType(size);
- 		root().getDynamicArrayTypeList().add(t);
- 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1);
- 	}
-
- 	syn FPrimitiveArrayType ASTNode.fBooleanArrayType(int[] size) {
- 		FPrimitiveType t = new FBooleanArrayType(size);
- 		root().getDynamicArrayTypeList().add(t);
- 		// Make sure the returned type is final
- 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1);
- 	}
-
- 	syn FPrimitiveArrayType ASTNode.fStringArrayType(int[] size) {
- 		FPrimitiveType t = new FStringArrayType(size);
- 		root().getDynamicArrayTypeList().add(t);
- 		// Make sure the returned type is final
- 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1);
- 	}
-
- 	syn FPrimitiveArrayType ASTNode.fUnknownArrayType(int[] size) {
- 		FPrimitiveType t = new FUnknownArrayType(size);
- 		root().getDynamicArrayTypeList().add(t);
- 		// Make sure the returned type is final
- 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1);
- 	}
+	/**
+	 * \brief Dynamically places an array type in the tree under this Root.
+	 * 
+	 * @returns  the final version of the dynamically placed node.
+	 */
+	public FPrimitiveArrayType Root.dynamicArrayType(FPrimitiveArrayType type) {
+		getDynamicArrayTypeList().add(type);
+		return getDynamicArrayType(getNumDynamicArrayType() - 1);
+	}
  	
- 	syn FPrimitiveArrayType FPrimitiveType.arrayType(int[] size);
- 	eq FUnknownType.arrayType(int[] size) = fUnknownArrayType(size);
- 	eq FPrimitiveArrayType.arrayType(int[] size) = scalarType().arrayType(size);
- 	// TODO: Why repeat implementation of ASTNode.f*ArrayType(int[] size)?
- 	eq FRealScalarType.arrayType(int[] size) {
- 		FPrimitiveType t = new FRealArrayType(size);
- 		root().getDynamicArrayTypeList().add(t);
- 		// Make sure the returned type is final
- 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1); 		
- 	}
- 	eq FIntegerScalarType.arrayType(int[] size) {
- 		FPrimitiveType t = new FIntegerArrayType(size);
- 		root().getDynamicArrayTypeList().add(t);
- 		// Make sure the returned type is final
- 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1); 		
- 	}
- 	eq FBooleanScalarType.arrayType(int[] size) {
- 		FPrimitiveType t = new FBooleanArrayType(size);
- 		root().getDynamicArrayTypeList().add(t);
- 		// Make sure the returned type is final
- 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1); 		
- 	}
- 	eq FStringScalarType.arrayType(int[] size) {
- 		FPrimitiveType t = new FStringArrayType(size);
- 		root().getDynamicArrayTypeList().add(t);
- 		// Make sure the returned type is final
- 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1); 		
- 	}
- 	eq FUnknownScalarType.arrayType(int[] size) {
- 		FPrimitiveType t = new FUnknownArrayType(size);
- 		root().getDynamicArrayTypeList().add(t);
- 		// Make sure the returned type is final
- 		return (FPrimitiveArrayType)root().getDynamicArrayType(root().getNumDynamicArrayType()-1); 		
- 	}
+ 	syn FPrimitiveArrayType ASTNode.fRealArrayType(Size size) = 
+ 		root().dynamicArrayType(new FRealArrayType(size));
+ 	syn FPrimitiveArrayType ASTNode.fIntegerArrayType(Size size) =
+ 		root().dynamicArrayType(new FIntegerArrayType(size));
+ 	syn FPrimitiveArrayType ASTNode.fBooleanArrayType(Size size) =
+ 		root().dynamicArrayType(new FBooleanArrayType(size));
+ 	syn FPrimitiveArrayType ASTNode.fStringArrayType(Size size) =
+ 		root().dynamicArrayType(new FStringArrayType(size));
+ 	syn FPrimitiveArrayType ASTNode.fUnknownArrayType(Size size) =
+ 		root().dynamicArrayType(new FUnknownArrayType(size));
+ 	
+ 	syn FPrimitiveArrayType FPrimitiveType.arrayType(Size size);
+ 	eq FUnknownType.arrayType(Size size)        = fUnknownArrayType(size);
+ 	eq FPrimitiveArrayType.arrayType(Size size) = scalarType().arrayType(size);
+ 	eq FRealScalarType.arrayType(Size size)     = fRealArrayType(size);
+ 	eq FIntegerScalarType.arrayType(Size size)  = fIntegerArrayType(size);
+ 	eq FStringScalarType.arrayType(Size size)   = fStringArrayType(size);
+ 	eq FBooleanScalarType.arrayType(Size size)  = fBooleanArrayType(size);
+ 	eq FUnknownScalarType.arrayType(Size size)  = fUnknownArrayType(size);
 
  }
  

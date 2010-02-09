@@ -122,50 +122,6 @@ aspect ConstantEvaluation {
 	    }
 
 	    /**
-	     * \brief Convert to int, default implementation.
-	     * 
-	     * @return Value converted to int.
-	     */
-	    public int intValue(int[] index) { 
-	    	throw new UnsupportedOperationException(); 
-	    }
-	    
-	    /**
-	     * \brief Convert to daouble, default implementation.
-	     * 
-	     * @return Value converted to double.
-	     */
-	    public double realValue(int[] index) { 
-	    	throw new UnsupportedOperationException(); 
-	    }
-	    
-	    /**
-	     * \brief Convert to boolean, default implementation.
-	     * 
-	     * @return Value converted to boolean.
-	     */
-	    public boolean booleanValue(int[] index) { 
-	    	throw new UnsupportedOperationException(); 
-	    }
-	    
-	    /**
-	     * \brief Convert to string, default implementation.
-	     * 
-	     * @return Value converted to string.	     
-	     */
-	    public String stringValue(int[] index) { 
-	    	throw new UnsupportedOperationException(); 
-	    }
-	    
-	    public abstract int ndims();
-	    
-	    public abstract int[] size();
-	    
-	    public boolean isArray() {
-	    	return ndims()>0;
-	    }
-	    
-	    /**
 	     * \brief Returns true if the constant value is of numeric type.
 	     * 
 	     * @return True if the constant is a numerical value.
@@ -191,23 +147,11 @@ aspect ConstantEvaluation {
         }
 	   
 	}
-  
-	public abstract class CValueScalar extends CValue {
-	    
-	    public int ndims() {
-	    	return 0;
-	    }
-	    
-	    public int[] size() {
-	    	return new int[0];
-	    }
-	  	  
-	}
 	
 	/**
 	 * \brief Constant integer value.
 	 */
-    public class CValueInteger extends CValueScalar {
+    public class CValueInteger extends CValue {
         private int value;
         
         /** 
@@ -276,7 +220,7 @@ aspect ConstantEvaluation {
 	/**
 	 * \brief Constant real value.
 	 */      
-    public class CValueReal extends CValueScalar {
+    public class CValueReal extends CValue {
         private double value;
         
         /**
@@ -345,7 +289,7 @@ aspect ConstantEvaluation {
 	/**
 	 * \brief Constant boolean value.
 	 */
-    public class CValueBoolean extends CValueScalar {
+    public class CValueBoolean extends CValue {
         private boolean value;
 
         /**
@@ -405,7 +349,7 @@ aspect ConstantEvaluation {
 	/**
 	 * \brief Constant string value.
 	 */
-    public class CValueString extends CValueScalar {
+    public class CValueString extends CValue {
         private String value;
         
         /**
@@ -454,7 +398,7 @@ aspect ConstantEvaluation {
 	 * non-constant values and values resulting from expressions with
 	 * type errors.
 	 */
-    public class CValueUnknown extends CValueScalar {
+    public class CValueUnknown extends CValue {
 
 	    /**
 	     * \brief Returns true if the constant value is of numeric type.
@@ -479,269 +423,6 @@ aspect ConstantEvaluation {
       	}
       	
       }
-	
-  public abstract class CValueArray extends CValue {
-	    
-	    public int ndims() {
-	    	return 0;
-	    }
-	    
-	    public int[] size() {
-	    	return new int[0];
-	    }
-	  	  
-  }
-	
-	/**
-	 * \brief Constant integer value.
-	 */
-    public class CValueIntegerArray extends CValueArray {
-        private int value;
-        
-        /** 
-         * \brief Constructor.
-         * 
-  	     * @param i Integer value.
-         */
-        public CValueIntegerArray(int i) { 
-        	this.value = i; 
-        }
-
-        /**
-	     * \brief Convert to int.
-	     * 
-	     * @return Value converted to int.
-	     */
-        public int intValue() { 
-        	return value; 
-        }
-
-        /**
-	     * \brief Convert to double.
-	     * 
-	     *  @return Value converted to double.
-	     */
-        public double realValue() { 
-        	return value; 
-        }
-        
-        /**
-	     * \brief Convert to string.
-	     * 
-	     * @return Value converted to string.
-	     */
-        public String stringValue() { 
-        	return new Integer(value).toString(); 
-        }
-        
-        /**
-         * Create a new integer literal AST node.
-         * 
-         * @return AST node of type FLitExp.
-         */
-        public FLitExp buildLiteral() { 
-        	return new FIntegerLitExp(stringValue()); 
-        }
-
-	    /**
-	     * \brief Returns true if the constant value is of numeric type.
-	     * 
-	     * @return True.
-	     */
-	    public boolean isNumeric() {
-	    	return true;
-	    }
-        
-        /**
-         * Overloading of the toString() method.
-         * 
-         * @return The string.
-         */
-        public String toString() { 
-        	return value+""; 
-        }
-      }
-    
-	/**
-	 * \brief Constant real value.
-	 */      
-    public class CValueRealArray extends CValueArray {
-        private double value;
-        
-        /**
-         * Constructor.
-         * 
-         * @param d Double value.
-         */
-        public CValueRealArray(double d) { 
-        	this.value = d; 
-        }
-
-        /**
-	     * \brief Convert to int.
-	     * 
-	     * @return Value converted to int.
-	     */
-        public int intValue() { 
-        	return (int)value; 
-        }
-        
-        /**
-	     * \brief Convert to double.
-	     * 
-	     * @return Value converted to double.
-	     */
-        public double realValue() { 
-        	return value; 
-        }
-
-        /**
-	     * \brief Convert to string.
-	     * 
-	     * @return Value converted to string.
-	     */
-        public String stringValue() { 
-        	return new Double(value).toString(); 
-        }
-        
-        /**
-         * \brief Create a new literal expression AST node.
-         * 
-         * @return FRealLitExp AST node.
-         */
-        public FLitExp buildLiteral() { 
-        	return new FRealLitExp(stringValue()); 
-        }
-
-	    /**
-	     * \brief Returns true if the constant value is of numeric type.
-	     * 
-	     * @return True.
-	     */
-	    public boolean isNumeric() {
-	    	return true;
-	    }
-        
-        /**
-         * Convert to string.
-         * 
-         * @return The string. 
-         */
-        public String toString() { 
-        	return value+""; 
-        }
-        
-      }
-    
-	/**
-	 * \brief Constant boolean value.
-	 */
-    public class CValueBooleanArray extends CValueArray {
-        private boolean value;
-
-        /**
-         * Constructor.
-         * 
-         * @param b Boolean value.
-         */
-        public CValueBooleanArray(boolean b) { 
-        	this.value = b; 
-        }
-
-        /**
-	     * \brief Convert to boolean.
-	     * 
-	     * @return Value converted to boolean.
-	     */
-        public boolean booleanValue() { 
-        	return value; 
-        }
-        
-        /**
-	     * \brief Convert to string.
-	     * 
-	     * @return Value converted to string.
-	     */
-        public String stringValue() { 
-        	return new Boolean(value).toString(); 
-        }
-        
-        /**
-         * \brief Create a new literal expression AST node.
-         * 
-         * @return FBooleanLitExp AST node.
-         */
-        public FLitExp buildLiteral() { 
-      	  return value? new FBooleanLitExpTrue() :
-      		  new FBooleanLitExpFalse(); 
-      	  }
-        
-	    /**
-	     * \brief Returns true if the constant value is of numeric type.
-	     * 
-	     * @return False.
-	     */
-	    public boolean isNumeric() {
-	    	return false;
-	    }
-        
-        /**
-         * Convert to string.
-         * 
-         * @return The string. 
-         */
-        public String toString() { 
-        	return value+""; 
-        }
-      }
-      
-	/**
-	 * \brief Constant string value.
-	 */
-    public class CValueStringArray extends CValueArray {
-        private String value;
-        
-        /**
-         * Constructor.
-         * 
-         * @param s String value.
-         */        
-        public CValueStringArray(String s) { this.value = s; }
-        
-        /**
-	     * \brief Convert to string.
-	     * 
-	     * @return Value converted to string.
-	     */        
-        public String stringValue() { return value; }
-
-        /**
-         * \brief Create a new literal expression AST node.
-         * 
-         * @return FStringLitExp AST node.
-         */
-        public FLitExp buildLiteral() { 
-        	return new FStringLitExp(stringValue()); 
-        }
-
-	    /**
-	     * \brief Returns true if the constant value is of numeric type.
-	     * 
-	     * @return False.
-	     */
-        public boolean isNumeric() {
-	    	return false;
-	    }
-                
-        /**
-         * Convert to string.
-         * 
-         * @return The string. 
-         */
-        public String toString() { 
-        	return value+""; 
-        }
-      }
 
     
     /** 
@@ -762,7 +443,7 @@ aspect ConstantEvaluation {
      */
     protected FExp Array.buildLiteralHelper(Iterator<FExp> it, boolean toReal, int dim) {
     	FArray arr = new FArray(new List<FExp>());
-    	int n = size()[dim - 1];
+    	int n = size().get(dim - 1);
     	if (dim < ndims()) {
     		for (int i = 0; i < n; i++)
     			arr.addFExp(buildLiteralHelper(it, toReal, dim + 1));
@@ -834,8 +515,7 @@ aspect ConstantEvaluation {
 	  if (!hasDim())
 		  return new CValueUnknown();
 	  int dim = getDim().ceval().intValue() - 1;
-	  int[] size = getFExp().size();
-	  return new CValueInteger(size[dim]);
+	  return new CValueInteger(getFExp().size().get(dim));
   }
   
   eq FMinMaxExp.ceval() {
@@ -872,7 +552,7 @@ aspect ConstantEvaluation {
   eq FMaxExp.selectLesser() = false;
   
   inh int FEndExp.retrieveEnd();
-  eq FExpSubscript.getChild().retrieveEnd() = mySize()[0];
+  eq FExpSubscript.getChild().retrieveEnd() = mySize().get(0);
   eq Root.getChild().retrieveEnd()          = 0;
 
   eq FRealLitExp.ceval() = new CValueReal(Double.parseDouble(getUNSIGNED_NUMBER()));

@@ -184,7 +184,7 @@ FProtectedVisibilityType : FVisibilityType ::=;
 abstract FPrimitiveType;
 
 abstract FPrimitiveScalarType : FPrimitiveType;
-abstract FPrimitiveArrayType : FPrimitiveType ::= <Size:int[]>;
+abstract FPrimitiveArrayType : FPrimitiveType ::= <Size:Size>;
 abstract FPrimitiveScalarNumericType : FPrimitiveScalarType;
 abstract FPrimitiveArrayNumericType : FPrimitiveArrayType;
 

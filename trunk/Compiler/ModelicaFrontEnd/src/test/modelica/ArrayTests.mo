@@ -1214,10 +1214,10 @@ model MinExp10
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1183, column 25:
-  The expression of for index i must be a vector expression: {{1,2},{3,4}} has ndims() = 2
+  The expression of for index i must be a vector expression: {{1,2},{3,4}} has 2 dimension(s)
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1183, column 45:
-  The expression of for index j must be a vector expression: 2 has ndims() = 0
+  The expression of for index j must be a vector expression: 2 has 0 dimension(s)
 ")})));
 
  Real x = min(i * j for i in {{1,2},{3,4}}, j in 2);
@@ -1233,7 +1233,7 @@ model MinExp11
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1188, column 11:
-  The expression of a reduction-expression must be scalar, except for sum(): {( i ) * ( j ),2} has ndims() = 1
+  The expression of a reduction-expression must be scalar, except for sum(): {( i ) * ( j ),2} has 1 dimension(s)
 ")})));
 
  Real x = min({i * j, 2} for i in 1:4, j in 2:5);
@@ -1429,10 +1429,10 @@ model MaxExp10
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1424, column 25:
-  The expression of for index i must be a vector expression: {{1,2},{3,4}} has ndims() = 2
+  The expression of for index i must be a vector expression: {{1,2},{3,4}} has 2 dimension(s)
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1424, column 45:
-  The expression of for index j must be a vector expression: 2 has ndims() = 0
+  The expression of for index j must be a vector expression: 2 has 0 dimension(s)
 ")})));
 
  Real x = max(i * j for i in {{1,2},{3,4}}, j in 2);

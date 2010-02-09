@@ -478,7 +478,7 @@ aspect InstanceTreeConstruction {
 	 * @returns  the final version of the dynamically placed node.
 	 */
 	public InstAccess InstNode.dynamicClassName(InstAccess name) {
-		addDynamicClassName(name);
+		getDynamicClassNameList().add(name);
 		return getDynamicClassName(getNumDynamicClassName() - 1);
 	}
 	
@@ -489,7 +489,7 @@ aspect InstanceTreeConstruction {
 	 * @returns  the final version of the dynamically placed node.
 	 */
 	public InstAccess InstNode.dynamicComponentName(InstAccess name) {
-		addDynamicComponentName(name);
+		getDynamicComponentNameList().add(name);
 		return getDynamicComponentName(getNumDynamicComponentName() - 1);
 	}
 	
@@ -500,7 +500,7 @@ aspect InstanceTreeConstruction {
 	 * @returns  the final version of the dynamically placed node.
 	 */
 	public FExp InstNode.dynamicFExp(FExp exp) {
-		addDynamicFExp(exp);
+		getDynamicFExpList().add(exp);
 		return getDynamicFExp(getNumDynamicFExp() - 1);
 	}
 	
@@ -521,7 +521,6 @@ aspect InstanceTreeConstruction {
 	 */
 	inh InstNode FExp.ancestorInstNode();
 	eq InstNode.getChild().ancestorInstNode() = this;
-	eq InstRoot.getChild().ancestorInstNode() = null;
 	eq FlatRoot.getChild().ancestorInstNode() = null;
 	
 	

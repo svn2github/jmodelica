@@ -669,10 +669,10 @@ aspect InstanceErrorCheck {
 	
 	public void FArraySubscripts.collectErrors() {
 		// Should this check be in the access instead?
-		int ndims = mySize().length;
+		int ndims = mySize().ndims();
 		if (getNumFSubscript() > ndims) {
 			error("Too many array subscripts for access: " + getNumFSubscript() + 
-					" subscripts given, component has " + mySize().length + " dimensions");
+					" subscripts given, component has " + mySize().ndims() + " dimensions");
 			allChecks();
 			for (int i = 0; i < ndims; i++)
 				getFSubscript(i).collectErrors();

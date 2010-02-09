@@ -154,18 +154,10 @@ aspect OptimicaArrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn int[] FConstraint.size() {
-		int[] leftSize = getLeft().size();
-		int[] rightSize = getRight().size();
-		if (leftSize.length!=rightSize.length) {
-			return new int[0];
-		}
-		for (int i=0;i<leftSize.length;i++) {
-			if (leftSize[i]!=rightSize[i]) {
-				return new int[0];
-			}
-		}
-		return leftSize;
+	syn Size FConstraint.size() {
+		Size left = getLeft().size();
+		Size right = getRight().size();
+		return left.equals(right) ? left : Size.SCALAR;
 	}
 
 	

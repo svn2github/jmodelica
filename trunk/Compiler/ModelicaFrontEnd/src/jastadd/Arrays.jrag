@@ -327,19 +327,11 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn lazy int[] FAbstractEquation.size() = new int[0];
+	syn lazy Size FAbstractEquation.size() = Size.SCALAR;
 	eq FEquation.size() {
-		int[] leftSize = getLeft().size();
-		int[] rightSize = getRight().size();
-		if (leftSize.length!=rightSize.length) {
-			return new int[0];
-		}
-		for (int i=0;i<leftSize.length;i++) {
-			if (leftSize[i]!=rightSize[i]) {
-				return new int[0];
-			}
-		}
-		return leftSize;
+		Size left = getLeft().size();
+		Size right = getRight().size();
+		return left.equals(right) ? left : Size.SCALAR;
 	}
 
 	/**
@@ -349,12 +341,10 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn lazy int[] FArraySubscripts.size() {
-		int s[] = new int[ndims()];
-		int index = 0;
-		for (FSubscript fs : getFSubscripts()) {
-			s[index++] = fs.declarationSize();
-		}
+	syn lazy Size FArraySubscripts.size() {
+		MutableSize s = new MutableSize(ndims());
+		for (FSubscript fs : getFSubscripts())
+			s.add(fs.declarationSize());
 		return s;
 	}
 	
@@ -374,14 +364,11 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn lazy int[] FArraySubscripts.accessSize() {
-		int s[] = new int[accessNdims()];
-		int index = 0;
-		for (FSubscript fs : getFSubscripts()) {
-			if (fs.ndims() == 1) {
-				s[index++] = fs.size()[0];
-			}
-		}
+	syn lazy Size FArraySubscripts.accessSize() {
+		MutableSize s = new MutableSize(accessNdims());
+		for (FSubscript fs : getFSubscripts()) 
+			if (fs.ndims() == 1)
+				s.add(fs.size());
 		return s;
 	}
 
@@ -393,7 +380,7 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn int[] FSubscript.size();
+	syn Size FSubscript.size();
 
 	eq FExpSubscript.size() = getFExp().size();
 	
@@ -402,14 +389,14 @@ aspect Arrays {
 	/**
 	 * \brief Get the size this subscript(s) would have if all subscripts were colons.
 	 */
-	inh lazy int[] FSubscript.mySize();
-	inh lazy int[] FArraySubscripts.mySize();
-	eq FArraySubscripts.getFSubscript(int i).mySize() = new int[] { mySize().length > i ? mySize()[i] : 0 };
+	inh lazy Size FSubscript.mySize();
+	inh lazy Size FArraySubscripts.mySize();
+	eq FArraySubscripts.getFSubscript(int i).mySize() = new Size(mySize().has(i) ? mySize().get(i) : 0);
 	eq FIdUse.getChild().mySize()                     = myFV().size();
 	eq InstArrayAccess.getFArraySubscripts().mySize() = myInstComponentDecl().size();
 	eq FSubscriptedExp.getFArraySubscripts().mySize() = getFExp().size();
-	eq FlatRoot.getChild().mySize()                   = new int[0];
-	eq InstRoot.getChild().mySize()                   = new int[0];
+	eq FlatRoot.getChild().mySize()                   = Size.SCALAR;
+	eq InstRoot.getChild().mySize()                   = Size.SCALAR;
 	
 	/**
 	 * \brief Get the array sizes. 
@@ -418,7 +405,7 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn lazy int[] FExp.size() = new int[0];
+	syn lazy Size FExp.size() = Size.SCALAR;
 	eq FInstAccessExp.size() = getInstAccess().size();
 	
 	eq FBinExp.size() = getLeft().size();
@@ -433,12 +420,12 @@ aspect Arrays {
 			return getRight().size();
 		if (!getRight().isArray())
 			return getLeft().size();
-		int[] si = new int[ndims()];
+		MutableSize s = new MutableSize(ndims());
 		if (getLeft().ndims() == 2)
-			si[0] = getLeft().size()[0];
+			s.add(getLeft().size().get(0));
 		if (getRight().ndims() == 2)
-			si[si.length - 1] = getRight().size()[1];
-		return si;
+			s.add(getRight().size().get(1));
+		return s;
 	}
 	
  	eq FRangeExp.size() {
@@ -450,63 +437,53 @@ aspect Arrays {
 			stop = getFExp(2).ceval().realValue();
 		}
 		int si = (int) ((stop - start) / step + 1.0);
-		return new int[] { (si < 0) ? 0 : si };
+		return new Size((si < 0) ? 0 : si);
 	}
 	
 	eq FArray.size() {
 		if (isIterArray())
 			return getFExp(0).size();
-		int s[] = new int[ndims()];
-		if (getNumFExp()==0) {
-		} else {
-			int ss[] = getFExp(0).size();
-			s[0] = getNumFExp();
-			for (int i=1;i<ndims();i++) {
-				s[i] = ss[i-1];
-			}
-		}
-		return s;
+		return getFExp(0).size().expand(getNumFExp());
 	}
 	
-	eq FSumExp.size() = getFExp().isIterExp() ? iterExp().size() : new int[0];
+	eq FSumExp.size() = getFExp().isIterExp() ? iterExp().size() : Size.SCALAR;
 	
 	eq FIterExp.size() {
-		int[] size = new int[ndims()];
-		int i = 0;
+		MutableSize s = new MutableSize(ndims());
 		for (CommonForIndex fi : getForIndexList())
-			size[i++] = (fi.hasFExp() && fi.getFExp().isArray()) ? fi.getFExp().size()[0] : 1;
-		System.arraycopy(getFExp().size(), 0, size, i, getFExp().ndims());
-		return size;
+			if (fi.hasFExp() && fi.getFExp().ndims() == 1)
+				s.add(fi.getFExp().size());
+		s.add(getFExp().size());
+		return s;
 	}
 	
 	eq FSubscriptedExp.size() = getFArraySubscripts().accessSize();
 	
 	eq FTranspose.size() {
-		int[] size = getFExp().size().clone();
-		int temp = size[0];
-		size[0] = size[1];
-		size[1] = temp;
-		return size;
-	}
-	
-	eq FIdentity.size() {
-		int s[] = new int[2];
-		s[0] = getFExp().ceval().intValue();
-		s[1] = s[0];
+		Size size = getFExp().size();
+		MutableSize s = new MutableSize(size.ndims());
+		s.add(size.get(1));
+		s.add(size.get(0));
+		for (int i = 2; i < s.ndims(); i++)
+			s.add(size.get(i));
 		return s;
 	}
 	
-	eq FSizeExp.size() = hasDim() ? new int[0] : new int[] { getFExp().ndims() };
+	eq FIdentity.size() {
+		int s = getFExp().ceval().intValue();
+		return new Size(new int[] { s, s });
+	}
+	
+	eq FSizeExp.size() = hasDim() ? Size.SCALAR : new Size(getFExp().ndims());
 	
 	eq FInfArgsFunctionCall.size() {
 		try {
-			int s[] = new int[ndims()];
-			int index = 0;
+			MutableSize s = new MutableSize(ndims());
 			for (FExp fe : getFExps()) 
-				s[index++] = fe.ceval().intValue();
+				s.add(fe.ceval().intValue());
 			return s;
 		} catch (UnsupportedOperationException e) {
-			return new int[0];
+			return Size.SCALAR;
 		}
 	}
 	
@@ -517,7 +494,7 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn lazy int[] FIdUse.size() {
+	syn lazy Size FIdUse.size() {
 		return getFQName().hasFArraySubscripts()? 
 			getFArraySubscripts().accessSize(): myFV().size();
 	}
@@ -531,7 +508,7 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn lazy int[] InstAccess.size() = new int[0];
+	syn lazy Size InstAccess.size() = Size.SCALAR;
 	eq InstArrayAccess.size() = hasFArraySubscripts()? 
 			getFArraySubscripts().accessSize(): 
 				myInstComponentDecl().size();
@@ -543,8 +520,8 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn lazy int[] InstPrimitive.size() = hasFArraySubscripts() ? 
-			getFArraySubscripts().size() : new int[0];
+	syn lazy Size InstPrimitive.size() = hasFArraySubscripts() ? 
+			getFArraySubscripts().size() : Size.SCALAR;
 	
 	/**
 	 * \brief Get the array sizes. 
@@ -554,16 +531,7 @@ aspect Arrays {
 	 * 
 	 */
 	eq InstDot.size() {
-		int s[] = new int[ndims()];
-		int sr[] = getRight().size();
-		int sl[] = getLeft().size();
-		for (int i=0;i<sl.length;i++) {
-			s[i] = sl[i];
-		}
-		for (int i=0;i<sr.length;i++) {
-			s[i+sl.length] = sr[i];
-		}
-		return s;
+		return getRight().size().expand(getLeft().size());
 	}
 	
 	/**
@@ -573,10 +541,10 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn lazy int[] InstNode.size() = new int[0];
+	syn lazy Size InstNode.size() = Size.SCALAR;
 	
 	eq InstComponentDecl.size() = hasFArraySubscripts()? 
-			getFArraySubscripts().size(): new int[0];
+			getFArraySubscripts().size(): Size.SCALAR;
 
 	/**
 	 * \brief Get the array sizes. 
@@ -585,8 +553,8 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */	
-	syn lazy int[] AbstractFVariable.size() = new int[0];
-	eq FVariable.size() = isScalarized()? new int[0]: getFQName().size();
+	syn lazy Size AbstractFVariable.size() = Size.SCALAR;
+	eq FVariable.size() = isScalarized()? Size.SCALAR: getFQName().size();
 		
 	/**
 	 * \brief Get the array sizes. 
@@ -595,12 +563,12 @@ aspect Arrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn lazy int[] FQName.size() {
+	syn lazy Size FQName.size() {
 		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
 		if (last.hasFArraySubscripts()) {
 			return last.getFArraySubscripts().size(); 
 		} else {
-			return new int[0];
+			return Size.SCALAR;
 		}
 	}
 		
@@ -610,6 +578,13 @@ aspect Arrays {
 	 * @return True if array dimension > 0 else false
 	 */
 	syn boolean FExp.isArray() = ndims()>0;
+	
+	/**
+	 * \brief check if an access is an array expression.
+	 * 
+	 * @return True if array dimension > 0 else false
+	 */
+	syn boolean InstAccess.isArray() = ndims()>0;
 
 	/**
 	 * \brief check if a variable is an array expression.
@@ -668,15 +643,8 @@ aspect Arrays {
 		return arr;
 	}
 	
-	protected int[] Array.expandedSize(int[] size) {
-		int ndims = size.length + ndims();
-		int[] nsize = new int[ndims];
-		System.arraycopy(size, 0, nsize, 0, size.length);
-		System.arraycopy(size(), 0, nsize, size.length, ndims());
-		return nsize;
-	}
-	protected int[] ScalarAsArray.expandedSize(int[] size) {
-		return size;
+	protected Size Array.expandedSize(Size size) {
+		return size().expand(size);
 	}
 	
 	protected void Array.fillSubset(Array arr, Index i, HashMap<String,Integer> indexMap) {
@@ -817,7 +785,7 @@ aspect Arrays {
 		
 		int e = getRight().ceval().intValue();
 		if (e <= 0)
-			return new FIdentity(new FIntegerLitExp(size()[0])).getArray();
+			return new FIdentity(new FIntegerLitExp(size().get(0))).getArray();
 		
 		Array base = getLeft().getArray();
 		Array res = base;
@@ -839,10 +807,10 @@ aspect Arrays {
 		int[] ind = new int[ndims()];
 		Index ti = new Index(ind);
 		for (Index i : res.indices()) {
-			ind[0] = i.index()[1];
-			ind[1] = i.index()[0];
+			ind[0] = i.get(1);
+			ind[1] = i.get(0);
 			for (int j = 2; j < ind.length; j++)
-				ind[j] = i.index()[j];
+				ind[j] = i.get(j);
 			res.set(i, inner.get(ti));
 		}
 		return res;
@@ -851,7 +819,7 @@ aspect Arrays {
 	eq FIdentity.getArray() {
 		Array arr = new Array(indices());
 		for (Index i : arr.indices())
-			arr.set(i, new FIntegerLitExp((i.index()[0] == i.index()[1]) ? 1 : 0));
+			arr.set(i, new FIntegerLitExp((i.get(0) == i.get(1)) ? 1 : 0));
 		return arr;
 	}
 	
@@ -860,9 +828,9 @@ aspect Arrays {
 			return super.getArray();
 		
 		Array arr = new Array(indices());
-		int[] size = getFExp().size();
+		Size size = getFExp().size();
 		for (Index i : arr.indices())
-			arr.set(i, new FIntegerLitExp(size[i.index()[0] - 1]));
+			arr.set(i, new FIntegerLitExp(size.get(i.first() - 1)));
 		return arr;
 	}
 	
@@ -919,7 +887,7 @@ aspect Arrays {
 	 * @param level  the level this FArray is at in a structure of nestled FArrays.
 	 */
 	public void FArray.fillArray(Array arr, Index i, int level) {
-		getFExp(i.index()[level] - 1).fillArray(arr, i, level + 1);
+		getFExp(i.get(level) - 1).fillArray(arr, i, level + 1);
 	}
 	
 	eq FIdUseExp.getArray() {
@@ -928,6 +896,7 @@ aspect Arrays {
 			 * Based on an array access, say x, corresponding to the declaration
 			 * Real x[2], the array {x[1],x[2]} is generated. 
 			 */
+			// TODO: This does not support FIdUseInstAccess
 			Array array = new Array(indices());
 			Indices ind = array.indices();
 			for (Index i : ind) {
@@ -955,7 +924,7 @@ aspect Arrays {
 			Array array = new Array(indices());
 			Indices ind = array.indices();
 			for (Index i : ind) {
-				FInstAccessExp ia_tmp = (FInstAccessExp)this.fullCopy();
+				FInstAccessExp ia_tmp = (FInstAccessExp) fullCopy();
 				InstAccess ia = ia_tmp.getInstAccess();
 				ia.setLastFArraySubscripts(ind.translate(i).newFArraySubscripts());
 				ia.scalarized = true;
@@ -968,7 +937,7 @@ aspect Arrays {
 	}
 
 	eq FRangeExp.getArray() {
-		//System.out.println("FRangeExp.getArray(): size = " + size()[0]);	
+		//System.out.println("FRangeExp.getArray(): size = " + size().get(0));	
 		double i1 = getFExp(0).ceval().realValue();
 		double i2 = 1.0;
 		if (getNumFExp() > 2) 
@@ -1092,7 +1061,7 @@ aspect Arrays {
 	syn int[] FSubscript.myIndices();
 	
 	eq FColonSubscript.myIndices() {
-		int n = size()[0];
+		int n = size().get(0);
 		int[] ind = new int[n];
 		for (int i = 0; i < n; i++)
 			ind[i] = i + 1;
@@ -1105,7 +1074,7 @@ aspect Arrays {
 		if (ndims() == 0) {
 			return new int[] { ceval().intValue() };
 		} else if (ndims() == 1) {
-			int[] indices = new int[size()[0]];
+			int[] indices = new int[size().get(0)];
 			int j = 0;
 			for (FExp exp : getArray().getFExps()) 
 				indices[j++] = exp.ceval().intValue();
@@ -1142,6 +1111,168 @@ aspect Arrays {
 }
 
 aspect ArrayIndices {
+	
+	/**
+	 * \brief An array size. Can be multi-dimensional.
+	 */
+	public class Size {
+		
+		/**
+		 * \brief Used to represent the size of scalar expressions.
+		 */
+		public static final Size SCALAR = new Size(new int[0]);
+		
+		protected int[] size;
+		
+		/**
+		 * \brief Constructs a Size with the given lengths.
+		 */
+		public Size(int[] size) {
+			this.size = size;
+		}
+		
+		/**
+		 * \brief Convenience constructor to create a on-dimensional size with the given length.
+		 */
+		public Size(int s) {
+			size = new int[] { s };
+		}
+		
+		/**
+		 * \brief Get the number of dimensions.
+		 */
+		public int ndims() {
+			return size.length;
+		}
+		
+		/**
+		 * \brief Get length in the <code>i</code>th dimension.
+		 */
+		public int get(int i) {
+			return size[i];
+		}
+		
+		/**
+		 * \brief Get length in the last dimension.
+		 */
+		public int last() {
+			return size[size.length - 1];
+		}
+		
+		/**
+		 * \brief Check if this size has an <code>i</code>th dimension.
+		 */
+		public boolean has(int i) {
+			return size.length > i;
+		}
+		
+		/**
+		 * \brief Returns the number of elements spanned by this Size.
+		 */
+		public int numElements() {
+			if (size.length == 0)
+				return 0;
+			int res = 1;
+			for (int i = 0; i < size.length; i++)
+				res *= size[i];
+			return res;
+		}
+		
+		/**
+		 * \brief Check if another object is equal to this one.
+		 */
+		public boolean equals(Object s) {
+			return s instanceof Size && Arrays.equals(size, ((Size) s).size);
+		}
+		
+		/**
+		 * \brief Returns a string representation on the form "[l1, l2, l3]".
+		 */
+		public String toString() {
+			return Arrays.toString(size);
+		}
+		
+		/**
+		 * \brief Returns a string representation on the form "l1, l2, l3".
+		 */
+		public String toUnclosedString() {
+			String tmp = toString();
+			return tmp.substring(1, tmp.length() - 1);
+		}
+		
+		/**
+		 * \brief Creates a new Size that is a copy of this one, but with one more dimension.
+		 * 
+		 * @param s  the length of the new dimension
+		 */
+		public Size expand(int s) {
+			int[] ns = new int[size.length + 1];
+			ns[0] = s;
+			System.arraycopy(size, 0, ns, 1, size.length);
+			return new Size(ns);
+		}
+		
+		/**
+		 * \brief Creates a new Size that is a concatenation of <code>s</code> and this size.
+		 */
+		public Size expand(Size s) {
+			int[] ns = new int[size.length + s.size.length];
+			System.arraycopy(s.size, 0, ns, 0, s.size.length);
+			System.arraycopy(size, 0, ns, s.size.length, size.length);
+			return new Size(ns);
+		}
+
+		/**
+		 * \brief Creates a copy of this size.
+		 */
+		public Size clone() {
+			return new Size(size.clone());
+		}
+		
+	}
+	
+	/**
+	 * \brief A mutable Size.
+	 */
+	public class MutableSize extends Size {
+		
+		private int i;
+		
+		/**
+		 * \brief Constructs a new mutable Size of <code>ndims</code> dimensions.
+		 */
+		public MutableSize(int ndims) {
+			super(new int[ndims]);
+			i = 0;
+		}
+		
+		/**
+		 * \brief Sets the next length to <code>s</code>.
+		 * 
+		 * May overwrite lengths set with <code>set()</code>.
+		 */
+		public void add(int s) {
+			size[i++] = s;
+		}
+		
+		/**
+		 * \brief Sets the next <code>s.ndims()</code> lengths from <code>s</code>.
+		 * 
+		 * May overwrite lengths set with <code>set()</code>.
+		 */
+		public void add(Size s) {
+			for (int si : s.size)
+				size[i++] = si;
+		}
+		
+		/**
+		 * \brief Sets length <code>i</code> to <code>s</code>.
+		 */
+		public void set(int i, int s) {
+			size[i] = s;
+		}
+		
+	}
 	
 	public class Array {
 		
@@ -1197,7 +1328,7 @@ aspect ArrayIndices {
 			if (ndims() < 2)
 				return new AIterator();
 			else
-				return new AIterator(i.first(), size()[1]);
+				return new AIterator(i.first(), size().get(1));
 		}
 		
 		/**
@@ -1217,7 +1348,7 @@ aspect ArrayIndices {
 			if (ndims() < 2)
 				return new AIterator();
 			else
-				return new AIterator(i.last(), size()[1], size()[0]);
+				return new AIterator(i.last(), size().get(1), size().get(0));
 		}
 		
 		/**
@@ -1262,7 +1393,7 @@ aspect ArrayIndices {
 		/**
 		 * \brief Returns the size of this Array in each dimension.
 		 */
-		public int[] size() {
+		public Size size() {
 			return indices.size();
 		}
 		
@@ -1328,7 +1459,7 @@ aspect ArrayIndices {
 		 * \brief Constructs a ScalarAsArray containing <code>exp</code>.
 		 */
 		public ScalarAsArray(FExp exp) {
-			this(exp, Indices.create(new int[] { }));
+			this(exp, Indices.create(Size.SCALAR));
 		}
 		
 		/**
@@ -1407,6 +1538,13 @@ aspect ArrayIndices {
 		 */
 		public int last() {
 			return index.length > 0 ? index[index.length - 1] : -1;
+		}
+		
+		/**
+		 * \brief Returns the index for the <code>i</code>th dimension.
+		 */
+		public int get(int i) {
+			return index[i];
 		}
 		
 		/**
@@ -1499,7 +1637,7 @@ aspect ArrayIndices {
 	 */
 	public class Indices implements Iterable<Index> {
 		protected int ndims;
-		protected int size[];
+		protected Size size;
 		
 		/**
 		 * \brief A perfect hash for all Indices that have consecutive indicies, 
@@ -1511,7 +1649,7 @@ aspect ArrayIndices {
 		/**
 		 * \brief Create an Indices object based on array sizes. 
 		 */
-		public static Indices create(int[] size) {
+		public static Indices create(Size size) {
 			return new Indices(size);
 		}
 		
@@ -1547,7 +1685,7 @@ aspect ArrayIndices {
 				return false;
 			int[] index = i.index();
 			for (int j = 0; j < ndims; j++)
-				if (index[j] > size[j])
+				if (index[j] > size.get(j))
 					return false;
 			return true;
 		}
@@ -1563,12 +1701,7 @@ aspect ArrayIndices {
 		 * \brief Returns the number of elements spanned by this Indices object.
 		 */
 		public int numElements() {
-			if (ndims == 0)
-				return 0;
-			int res = 1;
-			for (int i = 0; i < ndims; i++)
-				res *= size[i];
-			return res;
+			return size.numElements();
 		}
 		
 		/**
@@ -1581,7 +1714,7 @@ aspect ArrayIndices {
 		/**
 		 * \brief Returns the size of this Indices object in each dimension.
 		 */
-		public int[] size() {
+		public Size size() {
 			return size;
 		}
 		
@@ -1597,28 +1730,18 @@ aspect ArrayIndices {
 				
 		
 		/**
-		 * \brief Internal constructor to create an Indices object with ndim dimensions. 
-		 *        For use by subclasses.
-		 */
-		protected Indices(int ndims) {
-			this.ndims = ndims;
-			size = new int[ndims];
-			hash = -1;
-		}
-		
-		/**
 		 * \brief Internal constructor to create an Indices object based on array sizes. 
 		 */
-		protected Indices(int[] size) {
-			ndims = size.length;
+		protected Indices(Size size) {
+			ndims = size.ndims();
 			this.size = size.clone();
 			hash = -1;
 			if (ndims < 4) {
 				int h = 0;
-				for (int i = 0; i < size.length; i++) {
-					if (size[i] > 1023) 
+				for (int i = 0; i < ndims; i++) {
+					if (size.get(i) > 1023) 
 						return;
-					h = (h << 10) & size[i];
+					h = (h << 10) & size.get(i);
 				}
 				hash = h;
 			}
@@ -1633,7 +1756,7 @@ aspect ArrayIndices {
 			int[] index = i.index();
 			int res = 0;
 			for (int j = 0; j < ndims; j++)
-				res = res * size[j] + index[j] - 1;
+				res = res * size.get(j) + index[j] - 1;
 			return res;
 		}
 		
@@ -1660,7 +1783,7 @@ aspect ArrayIndices {
 				index.internal++;
 				int[] ind = index.index();
 				int i;
-				for (i = ndims - 1; i > 0 && ind[i] >= size[i]; i--)
+				for (i = ndims - 1; i > 0 && ind[i] >= size.get(i); i--)
 					ind[i] = 1;
 				ind[i]++;
 				return index;
@@ -1774,15 +1897,15 @@ aspect ArrayIndices {
 		 * \brief Calculate size for this indices from a list of int arrays containing the 
 		 *        used indexes on the underlying array
 		 */
-		protected static int[] getSize(ArrayList<int[]> ind, boolean trim) {
+		protected static Size getSize(ArrayList<int[]> ind, boolean trim) {
 			int n = 0;
-			for (int i = 0; i < ind.size(); i++)
-				if (ind.get(i).length > 1 || !trim)
+			for (int[] i : ind)
+				if (i.length > 1 || !trim)
 					n++;
-			int[] size = new int[n];
-			for (int i = 0, j = 0; i < ind.size(); i++)
-				if (ind.get(i).length > 1 || !trim)
-					size[j++] = ind.get(i).length;
+			MutableSize size = new MutableSize(n);
+			for (int[] i : ind)
+				if (i.length > 1 || !trim)
+					size.add(i.length);
 			return size;
 		}
 		
