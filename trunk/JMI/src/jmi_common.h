@@ -174,9 +174,11 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;                  ///< If JMI_AD_NONE: a po
 #define COND_EXP_LE(op1,op2,th,el) ((op1<=op2)? (th): (el)) ///< Macro for conditional expression <= <br>
 #define COND_EXP_LT(op1,op2,th,el) ((op1<op2)? (th): (el)) ///< Macro for conditional expression < <br>
 #define COND_EXP_GE(op1,op2,th,el) ((op1>=op2)? (th): (el)) ///< Macro for conditional expression >= <br>
-#define COND_Exp_GT(op1,op2,th,el) ((op1>op2)? (th): (el)) ///< Macro for conditional expression > <br>
+#define COND_EXP_GT(op1,op2,th,el) ((op1>op2)? (th): (el)) ///< Macro for conditional expression > <br>
 
 #define AD_WRAP_LITERAL(x) x ///< Macro for inserting an AD object based on a literal. Has no effect when compiling without CppAD  <br>
+
+#include "jmi_array_none.h"
 
 #elif JMI_AD == JMI_AD_CPPAD
 typedef CppAD::AD<jmi_real_t> jmi_ad_var_t;
@@ -194,6 +196,8 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 #define COND_EXP_GT(op1,op2,th,el) (CppAD::CondExpGt(op1,op2,th,el))
 
 #define AD_WRAP_LITERAL(x) CppAD::AD<jmi_real_t>(x)
+
+#include "jmi_array_cppad.h"
 
 #else
 #error "The directive JMI_AD_NONE or JMI_AD_CPPAD must be set"

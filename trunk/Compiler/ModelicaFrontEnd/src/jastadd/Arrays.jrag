@@ -276,7 +276,9 @@ aspect Arrays {
 
 	syn int AbstractFVariable.ndims() = -1;
 	
-	eq FVariable.ndims() = isScalarized()? 0 : getFQName().ndims();
+	eq FVariable.ndims()         = isScalarized()? 0 : getFQName().ndims();
+	eq FFunctionArray.ndims()    = getFQName().ndims();
+	eq FFunctionVariable.ndims() = 0;
 	
 	/**
 	 * \brief Get array dimensions.
@@ -554,7 +556,8 @@ aspect Arrays {
 	 * 
 	 */	
 	syn lazy Size AbstractFVariable.size() = Size.SCALAR;
-	eq FVariable.size() = isScalarized()? Size.SCALAR: getFQName().size();
+	eq FVariable.size()      = isScalarized()? Size.SCALAR: getFQName().size();
+	eq FFunctionArray.size() = getFQName().size();
 		
 	/**
 	 * \brief Get the array sizes. 
@@ -591,7 +594,7 @@ aspect Arrays {
 	 * 
 	 * @return True if array dimension > 0 else false
 	 */
-	syn boolean FVariable.isArray() = ndims()>0;
+	syn boolean AbstractFVariable.isArray() = ndims()>0;
 	
 	/**
 	 * \brief check if an instance node is an array expression.
@@ -599,20 +602,6 @@ aspect Arrays {
 	 * @return True if array dimension > 0 else false
 	 */
 	syn boolean InstNode.isArray() = ndims()>0;
-	
-	/**
-	 * \brief Set the array subscripts of the last name part.
-	 */
-	public void FQName.setLastFArraySubscripts(FArraySubscripts fas) {
-		getFQNamePart(getNumFQNamePart()-1).setFArraySubscripts(fas);
-	}
-	
-	/**
-	 * \brief Set the array subscripts of the last name part.
-	 */
-	public void InstAccess.setLastFArraySubscripts(FArraySubscripts fas) {
-		((InstArrayAccess) getLastInstAccess()).setFArraySubscripts(fas);
-	}
 	
 	public abstract int[]  CommonForIndex.myIndices();
 	public abstract String CommonForIndex.name();
@@ -1037,7 +1026,8 @@ aspect Arrays {
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
 	syn lazy Indices AbstractFVariable.indices() = null;
-	eq FVariable.indices() = isScalarized() ? null : Indices.create(size());
+	eq FVariable.indices()      = isScalarized() ? null : Indices.create(size());
+	eq FFunctionArray.indices() = Indices.create(size());
 
 	/**
 	 * \brief Get the set of all array indices of an InstComponentDecl. 

@@ -42,7 +42,9 @@ libjmi_la_SOURCES = jmi.h \
                     jmi_common.h \
                     jmi.c \
                     jmi_common.c \
-                    jmi_opt_sim.h 
+                    jmi_opt_sim.h \
+                    jmi_array_common.h \
+                    jmi_array_none.h
 
 libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g
 # Don't build shared libraries of libjmi and libjmicppad. This is not
@@ -78,7 +80,9 @@ libjmi_solver_la_LDFLAGS = -no-undefined -static-libtool-libs
 libjmi_cppad_la_SOURCES = jmi.h \
                     jmi_common.c \
                     jmi_cppad.cpp\
-                    jmi_common.c 
+                    jmi_common.c \
+                    jmi_array_common.h \
+                    jmi_array_cppad.h
                    
 libjmi_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g
 libjmi_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g
@@ -111,7 +115,10 @@ include_HEADERS = jmi.h \
                   jmi_common.h \
                   jmi_init_opt.h \
                   jmi_opt_sim.h \
-                  jmi_opt_sim_lp.h 
+                  jmi_opt_sim_lp.h \
+                  jmi_array_common.h \
+                  jmi_array_none.h \
+                  jmi_array_cppad.h
 
 if COMPILE_WITH_IPOPT
 include_HEADERS += jmi_opt_sim_ipopt.h

@@ -445,6 +445,21 @@ aspect Names {
 		return this;
 	}
 	
+	/**
+	 * \brief Get the array subscripts of the last name part.
+	 */
+	syn FArraySubscripts InstAccess.getLastFArraySubscripts() = 
+		getLastInstAccess().getFArraySubscripts();
+	
+	syn FArraySubscripts InstAccess.getFArraySubscripts() = null;
+	
+	/**
+	 * \brief Set the array subscripts of the last name part.
+	 */
+	public void InstAccess.setLastFArraySubscripts(FArraySubscripts fas) {
+		((InstArrayAccess) getLastInstAccess()).setFArraySubscripts(fas);
+	}
+	
 }
 
 aspect FlatNames {
@@ -508,6 +523,19 @@ aspect FlatNames {
 	syn FArraySubscripts FIdUseExp.getFArraySubscripts() = 
 		getFIdUse().getFArraySubscripts();
 	
+	
+	/**
+	 * \brief Get the array subscripts of the last name part.
+	 */
+	syn FArraySubscripts FQName.getLastFArraySubscripts() =
+		hasFArraySubscripts() ? lastFQNamePart().getFArraySubscripts() : null;
+	
+	/**
+	 * \brief Set the array subscripts of the last name part.
+	 */
+	public void FQName.setLastFArraySubscripts(FArraySubscripts fas) {
+		lastFQNamePart().setFArraySubscripts(fas);
+	}
 	
 	syn lazy FQName InstNode.getFQNamePrefix() {
 		FQName prefix = retrieveFQName();

@@ -130,7 +130,11 @@ aspect Flattening {
 			FExp e = flattenBindingFExp();
 			Opt eo = (e == null) ? new Opt() : new Opt(e);
 			FQName fqn = new FQName(getFQName());
-			FFunctionVariable ffv = new FFunctionVariable(new Opt(), type(), eo, fqn);
+			FFunctionVariable ffv;
+			if (isArray())
+				ffv = new FFunctionArray(new Opt(), type(), eo, fqn);
+			else
+				ffv = new FFunctionVariable(new Opt(), type(), eo, fqn);
 			if (isInput())
 				ffv.setFTypePrefixInputOutput(new FInput());
 			if (isOutput())

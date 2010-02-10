@@ -83,10 +83,32 @@ aspect CCodeGen {
 		p.toString(getFIdUse(), str, indent, o);
 	}
 	
-	syn String FIdUse.name_C() = inFunction() ? nameUnderscore() + "_v" : "_" + nameUnderscore() + "_";
+	syn String FIdUse.name_C() = myFV().name_C();
+	
+	inh boolean FIdUse.isAssignUse();
+	eq InstNode.getChild().isAssignUse()          = false;
+	eq FClass.getChild().isAssignUse()            = false;
+	eq FIdUseExp.getChild().isAssignUse()         = false;
+	eq FFunctionCallLeft.getChild().isAssignUse() = true;
+	eq FAssignStmt.getChild().isAssignUse()       = true;
 	
 	public void FIdUse.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		myFV().genUse_C(p, str, o, getFQName().getLastFArraySubscripts(), isAssignUse());
+	}
+	
+	public void AbstractFVariable.genUse_C(Printer p, PrintStream str, Object o, FArraySubscripts fas, boolean assign) {
 		str.print(name_C());
+	}
+	
+	public void FFunctionArray.genUse_C(Printer p, PrintStream str, Object o, FArraySubscripts fas, boolean assign) {
+		str.print("jmi_array_");
+		str.print(assign ? "ref_" : "val_");
+		str.print(ndims());
+		str.print("(");
+		str.print(name_C());
+		str.print(", ");
+		p.toString(fas.getFSubscripts(), str, "", o);
+		str.print(")");
 	}
 	
 	public void FFunctionCall.genOpenCall_C(Printer p, PrintStream str, String indent, Object o, String suffix) {
@@ -225,10 +247,16 @@ aspect CCodeGen {
     	str.print("}\n\n");
 	}
 	
-	syn String FFunctionVariable.name_C() = getFQName().nameUnderscore() + "_v";
+	syn String AbstractFVariable.name_C() = null;
+	eq FVariable.name_C()         = "_" + getFQName().nameUnderscore() + "_";
+	eq FFunctionVariable.name_C() = getFQName().nameUnderscore() + "_v";
+	eq FFunctionArray.name_C()    = getFQName().nameUnderscore() + "_a";
+	
 	syn String FFunctionVariable.nameReturn_C() = getFQName().nameUnderscore() + "_r";
+	syn String FFunctionArray.nameReturn_C()    = name_C();
 	// TODO: Delegate to Type to support other types than Real
 	syn String FFunctionVariable.type_C() = "jmi_ad_var_t";
+	syn String FFunctionArray.type_C()    = "jmi_array_t";
 	
 	public void FFunctionVariable.printReturnArgument_C(PrintStream str) {
 		str.print(type_C());
@@ -247,6 +275,8 @@ aspect CCodeGen {
 		str.print(indent);
 	}
 	
+	public void FFunctionArray.printReturnWrite_C(PrintStream str, String indent) {}
+	
 	public void FFunctionVariable.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		str.print(type_C());
 		str.print(" ");
@@ -255,6 +285,16 @@ aspect CCodeGen {
 			str.print(" = ");
 			p.toString(getBindingExp(), str, "", o);
 		}
+	}
+	
+	public void FFunctionArray.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("JMI_ARRAY_DECL(");
+		str.print(name_C());
+		str.print(", ");
+		str.print(size().numElements());
+		str.print(", { ");
+		str.print(size().toUnclosedString());
+		str.print(" })");
 	}
 	
 	public void FAlgorithmBlock.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {

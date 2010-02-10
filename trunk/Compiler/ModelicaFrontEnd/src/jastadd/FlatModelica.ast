@@ -53,12 +53,17 @@ FEquationBlock ::= FAbstractEquation*;
 abstract AbstractFVariable;
 
 /**
- * \brief Binds an FVariable as an input or output to a function.
+ * \brief A flat variable in a function.
  */
 FFunctionVariable : AbstractFVariable ::= [FTypePrefixInputOutput]
                                           Type:FPrimitiveType
                                           [BindingExp:FExp]
                                           FQName;
+
+/**
+ * \brief An array variable in a function. 
+ */
+FFunctionArray : FFunctionVariable;
 
 /**
  * \brief A flat variable corresponding to an unknown declaration.
