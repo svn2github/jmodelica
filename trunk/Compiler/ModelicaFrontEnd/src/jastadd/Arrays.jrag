@@ -692,10 +692,10 @@ aspect Arrays {
 	syn lazy Array FExp.getArray() = new ScalarAsArray(this);
 	
 	/**
-	 * \brief Allows for more efficient execution of {@see getArray()} in some cases.
+	 * \brief Allows for more efficient execution of {@link getArray()} in some cases.
 	 * 
 	 * When the Array of a parent node is the same as a childs, replace 
-	 * getArray() with {@see createArray()} for the types the child can have, 
+	 * getArray() with {@link createArray()} for the types the child can have, 
 	 * let getArray() for those types delegate to copyArray() and use copyArray() 
 	 * on the child in getArray() for the parent.
 	 * 
@@ -705,9 +705,9 @@ aspect Arrays {
 	syn Array FExp.copyArray() = (Array) createArray().unboundCopy();
 	
 	/**
-	 * \brief Allows for more efficient execution of {@see getArray()} in some cases.
+	 * \brief Allows for more efficient execution of {@link getArray()} in some cases.
 	 * 
-	 * See {@see copyArray()} for instructions. 
+	 * See {@link copyArray()} for instructions. 
 	 * When overriding createArray(), always declare it as lazy.
 	 */
 	syn Array FExp.createArray() = getArray();
@@ -886,20 +886,37 @@ aspect Arrays {
 			 * Real x[2], the array {x[1],x[2]} is generated. 
 			 */
 			// TODO: This does not support FIdUseInstAccess
+			boolean scalarize = !inFunction();
 			Array array = new Array(indices());
-			Indices ind = array.indices();
-			for (Index i : ind) {
-				FIdUseExp fid_tmp = (FIdUseExp) fullCopy();
-				FQName fqn = fid_tmp.getFIdUse().getFQName();
-				fqn.setLastFArraySubscripts(ind.translate(i).newFArraySubscripts());
-				fqn.scalarized = true;
-				array.set(i, fid_tmp);
-			}
+			for (Index i : array.indices()) 
+				array.set(i, createNode(getFIdUse().specify(i, scalarize)));
 			return array;
-			
 		} else {
 			return new ScalarAsArray(this);
 		}
+	}
+	
+	/**
+	 * \brief Returns a scalar FIdUse, as specified by an index.
+	 * 
+	 * @param i          the Index specifying what array subscripts to use
+	 * @param scalarize  <code>true</code> if the use should be marked as scalarized 
+	 */
+	public FIdUse FIdUse.specify(Index i, boolean scalarize) {
+		FIdUse res = (FIdUse) fullCopy();
+		res.getFQName().specify(indices().translate(i), scalarize);
+		return res;
+	}
+	
+	/**
+	 * \brief Sets the last FArraySubscripts to the same as the Index.
+	 * 
+	 * @param i          the Index specifying what array subscripts to use
+	 * @param scalarize  <code>true</code> if the FQName should be marked as scalarized 
+	 */
+	public void FQName.specify(Index i, boolean scalarize) {
+		setLastFArraySubscripts(i.newFArraySubscripts());
+		scalarized = scalarize;
 	}
 
 	boolean InstAccess.scalarized = false;
@@ -910,13 +927,14 @@ aspect Arrays {
 			 * Based on an array access, say x, corresponding to the declaration
 			 * Real x[2], the array {x[1],x[2]} is generated. 
 			 */
+			boolean scalarize = !inFunction();
 			Array array = new Array(indices());
 			Indices ind = array.indices();
 			for (Index i : ind) {
 				FInstAccessExp ia_tmp = (FInstAccessExp) fullCopy();
 				InstAccess ia = ia_tmp.getInstAccess();
 				ia.setLastFArraySubscripts(ind.translate(i).newFArraySubscripts());
-				ia.scalarized = true;
+				ia.scalarized = scalarize;
 				array.set(i, ia_tmp);
 			}
 			return array;
@@ -1617,7 +1635,7 @@ aspect ArrayIndices {
 	 * \brief Indices represents the set of array indices in each dimension.
 	 * 
 	 * Only supports indices of the form (1..n1, 1..n2, ... , 1..nk). 
-	 * See {@see NonConsecutiveIndices}. 
+	 * See {@link NonConsecutiveIndices}. 
 	 * 
 	 * New Indices objects should be created with the create() methods. 
 	 * The subclass used is selected automatically. 

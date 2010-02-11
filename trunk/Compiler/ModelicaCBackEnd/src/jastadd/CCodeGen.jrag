@@ -21,6 +21,11 @@ import java.util.ArrayList;
 aspect CCodeGen {
 	
 	class CPrettyPrinter extends Printer {
+		
+		public CPrettyPrinter() {
+			super("    ");
+		}
+		
  		public void toString(ASTNode node, PrintStream str, String indent, Object o) { 
  			node.prettyPrint_C(this, str, indent, o); 
  		}
@@ -227,7 +232,7 @@ aspect CCodeGen {
 	}
 	
 	public void FFunctionDecl.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		String next = indent + "   ";
+		String next = p.indent(indent);
 		// Print definition
 		prettyPrintHead_C(p, str, indent, o, "void", suffixDefinition(), true);
 		str.print(" {\n");
@@ -248,7 +253,9 @@ aspect CCodeGen {
 	}
 	
 	syn String AbstractFVariable.name_C() = null;
-	eq FVariable.name_C()         = "_" + getFQName().nameUnderscore() + "_";
+	eq FVariable.name_C()         = isForIndex() ? 
+			                        getFQName().nameUnderscore() + "_i" :
+			                        "_" + getFQName().nameUnderscore() + "_";
 	eq FFunctionVariable.name_C() = getFQName().nameUnderscore() + "_v";
 	eq FFunctionArray.name_C()    = getFQName().nameUnderscore() + "_a";
 	
@@ -331,7 +338,7 @@ aspect CCodeGen {
 		if (getNumElseStmt() > 0) {
 			str.print(indent);
 			str.print("} else {\n");
-			getElseStmts().prettyPrintWithIndent(p, str, indent + "    ", o);
+			getElseStmts().prettyPrintWithIndent(p, str, p.indent(indent), o);
 		}
 	}
 	
@@ -339,51 +346,92 @@ aspect CCodeGen {
 		str.print("if (");
 		p.toString(getTest(), str, indent, o);
 		str.print(") {\n");
-		getFStatements().prettyPrintWithIndent(p, str, indent + "    ", o);
+		getFStatements().prettyPrintWithIndent(p, str, p.indent(indent), o);
 	}
 	
 	public void FForStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		getIndex().printForArrayDecl_C(p, str, indent, o);
 		str.print("for (");
 		p.toString(getIndex(), str, indent, o);
 		str.print(") {\n");
-		getForStmts().prettyPrintWithIndent(p, str, indent + "    ", o);
+		getIndex().printForArrayNext_C(p, str, p.indent(indent), o);
+		getForStmts().prettyPrintWithIndent(p, str, p.indent(indent), o);
+		str.print(indent);		
 		str.print("}");		
 	}
 	
-	// Very limited test implementation
 	public void FForIndex.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		String type = "jmi_ad_var_t";
-		String name = getFVariable().nameUnderscore();
-		
-		if (hasFExp()) {
-			if (getFExp() instanceof FRangeExp) {
-				FRangeExp re = (FRangeExp) getFExp();
-				boolean hasStep = re.getNumFExp() > 2;
-				str.print(type);
-				str.print(" ");
-				str.print(name);
-				str.print(" = ");
-				p.toString(re.getFExp(0), str, indent, o);
-				str.print("; ");
-				str.print(name);
-				str.print(" <= ");
-				p.toString(re.getFExp(hasStep ? 2 : 1), str, indent, o);
-				str.print("; ");
-				str.print(name);
-				str.print(" += ");
-				if (hasStep) 
-					p.toString(re.getFExp(1), str, indent, o);
-				else
-					str.print("1");
-			}
+		if (hasFExp()) 
+			getFExp().printForIndex_C(p, str, indent, o, getFVariable().name_C());
+	}
+	
+	public void FForIndex.printForArrayDecl_C(Printer p, PrintStream str, String indent, Object o) {
+		if (needsForArray()) {
+			str.print("jmi_ad_var_t ");
+			str.print(getFVariable().name_C());
+			str.print("a[] = { ");
+			p.toString(getFExp().getArray().getFExps(), str, indent, o);
+			str.print(" };\n");
+			str.print(indent);
 		}
+	}
+	
+	public void FForIndex.printForArrayNext_C(Printer p, PrintStream str, String indent, Object o) {
+		if (needsForArray()) {
+			String name = getFVariable().name_C();
+			str.print(indent);
+			str.print("jmi_ad_var_t ");
+			str.print(name);
+			str.print(" = ");
+			str.print(name);
+			str.print("a[");
+			str.print(name);
+			str.print("i];\n");
+			
+		}
+	}
+	
+	syn boolean FForIndex.needsForArray() = hasFExp() && getFExp().needsForArray();
+	syn boolean FExp.needsForArray()      = true;
+	eq FRangeExp.needsForArray()          = false;
+	
+	// TODO: Add adjustment of end value to compensate for rounding errors?
+	public void FRangeExp.printForIndex_C(Printer p, PrintStream str, String indent, Object o, String name) {
+		boolean hasStep = getNumFExp() > 2;
+		str.print("jmi_ad_var_t ");
+		str.print(name);
+		str.print(" = ");
+		p.toString(getFExp(0), str, indent, o);
+		str.print("; ");
+		str.print(name);
+		str.print(" <= ");
+		p.toString(getFExp(hasStep ? 2 : 1), str, indent, o);
+		str.print("; ");
+		str.print(name);
+		str.print(" += ");
+		if (hasStep) 
+			p.toString(getFExp(1), str, indent, o);
+		else
+			str.print("1");
+	}
+	
+	public void FExp.printForIndex_C(Printer p, PrintStream str, String indent, Object o, String name) {
+		str.print("int ");
+		str.print(name);
+		str.print("i = 0; ");
+		str.print(name);
+		str.print("i < ");
+		str.print(size().numElements());
+		str.print("; ");
+		str.print(name);
+		str.print("i++");
 	}
 	
 	public void FWhileStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		str.print("while (");
 		p.toString(getTest(), str, "", o);
 		str.print(") {\n");
-		getWhileStmts().prettyPrintWithIndent(p, str, indent + "    ", o);
+		getWhileStmts().prettyPrintWithIndent(p, str, p.indent(indent), o);
 		str.print("}");		
 	}
 	

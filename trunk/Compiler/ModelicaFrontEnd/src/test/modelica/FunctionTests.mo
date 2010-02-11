@@ -2368,6 +2368,382 @@ algorithm
 end AlgorithmTransformation14;
 
 
+
+/* =========================== Arrays in functions =========================== */
+
+model ArrayExpInFunc1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayExpInFunc1",
+         description="Scalarization of functions: assign from array",
+         flatModel="
+fclass FunctionTests.ArrayExpInFunc1
+ Real x;
+equation
+ x = FunctionTests.ArrayExpInFunc1.f();
+
+ function FunctionTests.ArrayExpInFunc1.f
+  output Real o := 1.0;
+  Real[3] x;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  x[3] := 3;
+  return;
+ end FunctionTests.ArrayExpInFunc1.f;
+end FunctionTests.ArrayExpInFunc1;
+")})));
+
+ function f
+  output Real o = 1.0;
+  protected Real x[3];
+ algorithm
+  x := { 1, 2, 3 };
+ end f;
+ 
+ Real x = f();
+end ArrayExpInFunc1;
+
+
+model ArrayExpInFunc2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayExpInFunc2",
+         description="Scalarization of functions: assign from array exp",
+         flatModel="
+fclass FunctionTests.ArrayExpInFunc2
+ Real x;
+equation
+ x = FunctionTests.ArrayExpInFunc2.f();
+
+ function FunctionTests.ArrayExpInFunc2.f
+  output Real o := 1.0;
+  Real[2, 2] x;
+ algorithm
+  x[1,1] := ( 1 ) * ( 1 ) + ( 2 ) * ( 3 );
+  x[1,2] := ( 1 ) * ( 2 ) + ( 2 ) * ( 4 );
+  x[2,1] := ( 3 ) * ( 1 ) + ( 4 ) * ( 3 );
+  x[2,2] := ( 3 ) * ( 2 ) + ( 4 ) * ( 4 );
+  return;
+ end FunctionTests.ArrayExpInFunc2.f;
+end FunctionTests.ArrayExpInFunc2;
+")})));
+
+ function f
+  output Real o = 1.0;
+  protected Real x[2,2];
+ algorithm
+  x := {{1,2},{3,4}} * {{1,2},{3,4}};
+ end f;
+ 
+ Real x = f();
+end ArrayExpInFunc2;
+
+
+model ArrayExpInFunc3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayExpInFunc3",
+         description="Scalarization of functions: assign to slice",
+         flatModel="
+fclass FunctionTests.ArrayExpInFunc3
+ Real x;
+equation
+ x = FunctionTests.ArrayExpInFunc3.f();
+
+ function FunctionTests.ArrayExpInFunc3.f
+  output Real o := 1.0;
+  Real[2, 2] x;
+ algorithm
+  x[1,1] := 1;
+  x[1,2] := 2;
+  x[2,1] := 3;
+  x[2,2] := 4;
+  return;
+ end FunctionTests.ArrayExpInFunc3.f;
+end FunctionTests.ArrayExpInFunc3;
+")})));
+
+ function f
+  output Real o = 1.0;
+  protected Real x[2,2];
+ algorithm
+  x[1,:] := {1,2};
+  x[2,:] := {3,4};
+ end f;
+ 
+ Real x = f();
+end ArrayExpInFunc3;
+
+
+model ArrayExpInFunc4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayExpInFunc4",
+         description="Scalarization of functions: binding exp to array var",
+         flatModel="
+fclass FunctionTests.ArrayExpInFunc4
+ Real x;
+equation
+ x = FunctionTests.ArrayExpInFunc4.f();
+
+ function FunctionTests.ArrayExpInFunc4.f
+  output Real o := 1.0;
+  Real[2, 2] x;
+ algorithm
+  x[1,1] := ( 1 ) * ( 1 ) + ( 2 ) * ( 3 );
+  x[1,2] := ( 1 ) * ( 2 ) + ( 2 ) * ( 4 );
+  x[2,1] := ( 3 ) * ( 1 ) + ( 4 ) * ( 3 );
+  x[2,2] := ( 3 ) * ( 2 ) + ( 4 ) * ( 4 );
+  return;
+ end FunctionTests.ArrayExpInFunc4.f;
+end FunctionTests.ArrayExpInFunc4;
+")})));
+
+ function f
+  output Real o = 1.0;
+  protected Real x[2,2] = {{1,2},{3,4}} * {{1,2},{3,4}};
+ algorithm
+ end f;
+ 
+ Real x = f();
+end ArrayExpInFunc4;
+
+
+model ArrayExpInFunc5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayExpInFunc5",
+         description="Scalarization of functions: (x, y) := f(...) syntax",
+         flatModel="
+fclass FunctionTests.ArrayExpInFunc5
+ Real x;
+equation
+ x = FunctionTests.ArrayExpInFunc5.f(( 1 ) * ( 1 ) + ( 2 ) * ( 2 ) + ( 3 ) * ( 3 ));
+
+ function FunctionTests.ArrayExpInFunc5.f
+  input Real a;
+  output Real o;
+  Real x;
+  Real y;
+ algorithm
+  (x, y) := FunctionTests.ArrayExpInFunc5.f2(( 1 ) * ( 1 ) + ( 2 ) * ( 2 ) + ( 3 ) * ( 3 ));
+  o := a + x + y;
+  return;
+ end FunctionTests.ArrayExpInFunc5.f;
+
+ function FunctionTests.ArrayExpInFunc5.f2
+  input Real a;
+  output Real b := a;
+  output Real c := a;
+ algorithm
+  return;
+ end FunctionTests.ArrayExpInFunc5.f2;
+end FunctionTests.ArrayExpInFunc5;
+")})));
+
+ function f
+  input Real a;
+  output Real o;
+  protected Real x;
+  protected Real y;
+ algorithm
+  (x, y) := f2({1,2,3} * {1,2,3});
+  o := a + x + y;
+ end f;
+ 
+ function f2
+  input Real a;
+  output Real b = a;
+  output Real c = a;
+ algorithm
+ end f2;
+ 
+ Real x = f({1,2,3} * {1,2,3});
+end ArrayExpInFunc5;
+
+
+model ArrayExpInFunc6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayExpInFunc6",
+         description="Scalarization of functions: if statements",
+         flatModel="
+fclass FunctionTests.ArrayExpInFunc6
+ Real x;
+equation
+ x = FunctionTests.ArrayExpInFunc6.f();
+
+ function FunctionTests.ArrayExpInFunc6.f
+  output Real o := 1.0;
+  Real[3] x;
+ algorithm
+  if o < 2.0 then
+   x[1] := 1;
+   x[2] := 2;
+   x[3] := 3;
+  elseif o < 1.5 then
+   x[1] := 4;
+   x[2] := 5;
+   x[3] := 6;
+  else
+   x[1] := 7;
+   x[2] := 8;
+   x[3] := 9;
+  end if;
+  return;
+ end FunctionTests.ArrayExpInFunc6.f;
+end FunctionTests.ArrayExpInFunc6;
+")})));
+
+ function f
+  output Real o = 1.0;
+  protected Real x[3];
+ algorithm
+  if o < 2.0 then
+   x := { 1, 2, 3 };
+  elseif o < 1.5 then
+   x := { 4, 5, 6 };
+  else
+   x := { 7, 8, 9 };
+  end if;
+ end f;
+ 
+ Real x = f();
+end ArrayExpInFunc6;
+
+
+model ArrayExpInFunc7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayExpInFunc7",
+         description="Scalarization of functions: when statements",
+         flatModel="
+fclass FunctionTests.ArrayExpInFunc7
+ Real o;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ (x[3]) = FunctionTests.ArrayExpInFunc7.algorithm_1(o);
+ o = 1.0;
+
+ function FunctionTests.ArrayExpInFunc7.algorithm_1
+  output Real[3] x;
+  input Real o;
+ algorithm
+  when o < 2.0 or o > 3.0 then
+   x[1] := 1;
+   x[2] := 2;
+   x[3] := 3;
+  elsewhen o < 1.5 then
+   x[1] := 4;
+   x[2] := 5;
+   x[3] := 6;
+  end when;
+  return;
+ end FunctionTests.ArrayExpInFunc7.algorithm_1;
+end FunctionTests.ArrayExpInFunc7;
+")})));
+
+ Real o = 1.0;
+ Real x[3];
+algorithm
+ when {o < 2.0, o > 3.0} then
+  x := { 1, 2, 3 };
+ elsewhen o < 1.5 then
+  x := { 4, 5, 6 };
+ end when;
+end ArrayExpInFunc7;
+
+
+model ArrayExpInFunc8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayExpInFunc8",
+         description="Scalarization of functions: for statements",
+         flatModel="
+fclass FunctionTests.ArrayExpInFunc8
+ Real x;
+equation
+ x = FunctionTests.ArrayExpInFunc8.f();
+
+ function FunctionTests.ArrayExpInFunc8.f
+  output Real o := 1.0;
+  Real[3] x;
+  Real[3] y;
+ algorithm
+  for i in 1:3 loop
+   x[i] := i;
+   y[1] := ( 1 ) * ( 1 );
+   y[2] := ( 2 ) * ( 2 );
+   y[3] := ( 3 ) * ( 3 );
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc8.f;
+end FunctionTests.ArrayExpInFunc8;
+")})));
+
+ function f
+  output Real o = 1.0;
+  protected Real x[3];
+  protected Real y[3];
+ algorithm
+  for i in 1:3 loop
+   x[i] := i;
+   y := {i*i for i in 1:3};
+  end for;
+ end f;
+ 
+ Real x = f();
+end ArrayExpInFunc8;
+
+
+model ArrayExpInFunc9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayExpInFunc9",
+         description="Scalarization of functions: while statements",
+         flatModel="
+fclass FunctionTests.ArrayExpInFunc9
+ Real x;
+equation
+ x = FunctionTests.ArrayExpInFunc9.f();
+
+ function FunctionTests.ArrayExpInFunc9.f
+  output Real o := 1.0;
+  Real[3] x;
+  Integer y := 3;
+ algorithm
+  while y > 0 loop
+   x[1] := 1.0;
+   x[2] := 2.0;
+   x[3] := 3.0;
+   x[y] := y;
+   y := y - ( 1 );
+  end while;
+  return;
+ end FunctionTests.ArrayExpInFunc9.f;
+end FunctionTests.ArrayExpInFunc9;
+")})));
+
+ function f
+  output Real o = 1.0;
+  protected Real x[3];
+  protected Integer y = 3;
+ algorithm
+  while y > 0 loop
+   x := 1:3;
+   x[y] := y;
+   y := y - 1;
+  end while;
+ end f;
+ 
+ Real x = f();
+end ArrayExpInFunc9;
+
+
+
 /* =========================== Records =========================== */
 /*
 model RecordConstructorTest1 

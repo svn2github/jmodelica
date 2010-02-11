@@ -757,4 +757,89 @@ equation
  TestFunctionNoOut(1);
 end CFunctionTest11;
 
+
+
+model CForLoop1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CForLoop1",
+         description="C code generation for for loops:",
+         template="
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_CForLoop1_f_def(jmi_ad_var_t* o_r) {
+    jmi_ad_var_t o_v = 1.0;
+    jmi_ad_var_t x_v = 0;
+    for (jmi_ad_var_t i_i = 1; i_i <= 3; i_i += 1) {
+        x_v = x_v + i_i;
+    }
+    if (o_r != NULL) *o_r = o_v;
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CForLoop1_f_exp() {
+    jmi_ad_var_t o_v = 1.0;
+    func_CCodeGenTests_CForLoop1_f_def(&o_v);
+    return o_v;
+}
+
+")})));
+
+ function f
+  output Real o = 1.0;
+  protected Real x = 0;
+  algorithm
+  for i in 1:3 loop
+   x := x + i;
+  end for;
+ end f;
+ 
+ Real x = f();
+end CForLoop1;
+
+
+model CForLoop2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CForLoop2",
+         description="C code generation for for loops:",
+         template="
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_CForLoop2_f_def(jmi_ad_var_t* o_r) {
+    jmi_ad_var_t o_v = 1.0;
+    jmi_ad_var_t x_v = 0;
+    jmi_ad_var_t i_ia[] = { 2, 3, 5 };
+    for (int i_ii = 0; i_ii < 3; i_ii++) {
+    jmi_ad_var_t i_i = i_ia[i_ii];
+        x_v = x_v + i_i;
+    }
+    if (o_r != NULL) *o_r = o_v;
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CForLoop2_f_exp() {
+    jmi_ad_var_t o_v = 1.0;
+    func_CCodeGenTests_CForLoop2_f_def(&o_v);
+    return o_v;
+}
+
+")})));
+
+ function f
+  output Real o = 1.0;
+  protected Real x = 0;
+  algorithm
+  for i in {2,3,5} loop
+   x := x + i;
+  end for;
+ end f;
+ 
+ Real x = f();
+end CForLoop2;
+
+
+
 end CCodeGenTests;

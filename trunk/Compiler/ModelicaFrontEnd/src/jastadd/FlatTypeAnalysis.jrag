@@ -230,7 +230,7 @@ aspect FlatTypeAnalysis {
 	
 	/**
 	 * \brief Returns the expression being iterated over in an FIterExp child. 
-	 *        Only valid if {@see #isIterExp()} returns <code>true</code>.
+	 *        Only valid if {@link #isIterExp()} returns <code>true</code>.
 	 */
 	public FExp FSumExp.iterExp() { return ((FIterExp) getFExp()).getFExp(); }
 	

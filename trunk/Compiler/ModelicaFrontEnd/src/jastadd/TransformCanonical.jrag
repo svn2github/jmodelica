@@ -550,6 +550,12 @@ aspect Scalarization {
 		// Replace subscript expressions with literals
 		eqns.makeSubscriptsLiteral();
 		ieqns.makeSubscriptsLiteral();
+		
+		// Scalarize functions
+		List<FFunctionDecl> funcs = new List<FFunctionDecl>();
+		for (FFunctionDecl f : getFFunctionDecls()) 
+			funcs.add(f.scalarize());
+		setFFunctionDeclList(funcs);
 
 		flush();		
 	}
@@ -596,7 +602,7 @@ aspect Scalarization {
 				vars.addChild(fv_tmp);
 			}
 		} else {
-			// Duplicate FVariable even if it is not an array declaration. - Why?
+			// Duplicate FVariable even if it is not an array declaration.
 			FVariable fv_tmp = (FVariable) fullCopy();
 			if (constIndexMap != null && hasBindingExp())
 				fv_tmp.setBindingExp(getBindingExp().scalarize(constIndexMap));
@@ -619,6 +625,161 @@ aspect Scalarization {
 				setValue(getValue().scalarize(new HashMap<String,Integer>()));
 		}
 	}
+	
+	/**
+	 * \brief Scalarize the function variable, scalarizing any binding expression.
+	 *        Binding expressions for array variables are added to statement list 
+	 *        as an assignment instead.
+	 */
+	public FFunctionVariable FFunctionVariable.scalarize(List<FStatement> stmts, HashMap<String,Integer> indexMap) {
+		FFunctionVariable var = (FFunctionVariable) fullCopy();
+		if (hasBindingExp())
+			var.setBindingExpOpt(scalarizeBindingExp(stmts, indexMap));
+		return var;
+	}
+	
+	/**
+	 * \brief Scalarize the binding expression of this variable. An array variables 
+	 *        adds an assignment to list of statements and returns an empty Opt.
+	 * 
+	 * Assumes that the variable has a binding expression.
+	 */
+	public Opt<FExp> FFunctionVariable.scalarizeBindingExp(List<FStatement> stmts, HashMap<String,Integer> indexMap) {
+		return new Opt<FExp>(getBindingExp().scalarize(indexMap));
+	}
+	
+	public Opt<FExp> FFunctionArray.scalarizeBindingExp(List<FStatement> stmts, HashMap<String,Integer> indexMap) {
+		if (isInput())
+			return super.scalarizeBindingExp(stmts, indexMap);
+		
+		FIdUse id = new FIdUse(new FQName(name()));
+		Array arr = getBindingExp().getArray();
+		for (Index i : arr.indices()) {
+			FExp exp = arr.get(i).scalarize(indexMap);
+			FIdUse nid = (FIdUse) id.fullCopy();
+			nid.getFQName().specify(i, false);
+			stmts.add(new FAssignStmt(nid, exp));
+		}
+		return new Opt<FExp>();
+	}
+	
+	/**
+	 * \brief Scalarize the statement and put all resulting statements in the
+	 *        list of statements.
+	 */
+	public void FStatement.scalarize(List<FStatement> stmts, HashMap<String,Integer> indexMap) {
+		stmts.add((FStatement) fullCopy());
+	}
+	
+	public void FAssignStmt.scalarize(List<FStatement> stmts, HashMap<String,Integer> indexMap) {
+		FIdUse left = getLeft();
+		if (left.ndims() > 0) {
+			Array right = getRight().getArray();
+			for (Index i : right.indices()) {
+				FExp exp = right.get(i).scalarize(indexMap);
+				stmts.add(new FAssignStmt(left.specify(i, false), exp));
+			}
+		} else {
+			FExp exp = getRight().scalarize(indexMap);
+			stmts.add(new FAssignStmt(left.scalarize(indexMap), exp));
+		}
+	}
+	
+	public void FFunctionCallStmt.scalarize(List<FStatement> stmts, HashMap<String,Integer> indexMap) {
+		FFunctionCallStmt stmt = new FFunctionCallStmt();
+		for (FFunctionCallLeft left : getLefts())
+			stmt.addLeft(left.scalarize(indexMap));
+		stmt.setCall((FAbstractFunctionCall) getCall().scalarize(indexMap));
+		stmts.add(stmt);
+	}
+	
+	public void FIfWhenStmt.scalarize(List<FStatement> stmts, HashMap<String,Integer> indexMap) {
+		FIfWhenStmt stmt = createEmptyNode();
+		for (FIfWhenClause cl : getFIfWhenClauses())
+			stmt.addFIfWhenClause(cl.scalarize(indexMap));
+		scalarizeElse(stmt, indexMap);
+		stmts.add(stmt);
+	}
+	
+	/**
+	 * \brief Scalarize the else part of an if statement. Does nothing for when statements.
+	 */
+	public void FIfWhenStmt.scalarizeElse(FIfWhenStmt stmt, HashMap<String,Integer> indexMap) {}
+	
+	public void FIfStmt.scalarizeElse(FIfWhenStmt stmt, HashMap<String,Integer> indexMap) {
+		FIfStmt ifstmt = (FIfStmt) stmt;
+		for (FStatement es : getElseStmts())
+			es.scalarize(ifstmt.getElseStmtList(), indexMap);
+	}
+	
+	/**
+	 * \brief Scalarize the if or when clause.
+	 */
+	public FIfWhenClause FIfWhenClause.scalarize(HashMap<String,Integer> indexMap) {
+		FExp test = getTest().reduceToScalarized(new FOrExp(), indexMap);
+		List<FStatement> stmts = new List<FStatement>();
+		for (FStatement stmt : getFStatements())
+			stmt.scalarize(stmts, indexMap);
+		return createNode(test, stmts);
+	}
+	
+	public void FForStmt.scalarize(List<FStatement> stmts, HashMap<String,Integer> indexMap) {
+		FForStmt stmt = new FForStmt();
+		stmt.setIndex(getIndex().fullCopy());
+		for (FStatement fs : getForStmts())
+			fs.scalarize(stmt.getForStmtList(), indexMap);
+		stmts.add(stmt);
+	}
+	
+	public void FWhileStmt.scalarize(List<FStatement> stmts, HashMap<String,Integer> indexMap) {
+		FWhileStmt stmt = new FWhileStmt();
+		stmt.setTest(getTest().scalarize(indexMap));
+		for (FStatement ws : getWhileStmts())
+			ws.scalarize(stmt.getWhileStmtList(), indexMap);
+		stmts.add(stmt);
+	}
+	
+	/**
+	 * \brief Scalarize the function, replacing all array assignments with separate scalar 
+	 *        assignments and scalarize all expressions.
+	 */
+	public FFunctionDecl FFunctionDecl.scalarize() {
+		HashMap<String,Integer> emptyIndexMap = new HashMap<String,Integer>();
+		List<FFunctionVariable> vars = new List<FFunctionVariable>();
+		List<FStatement> stmts = new List<FStatement>();
+		for (FFunctionVariable var : getFFunctionVariables())
+			vars.add(var.scalarize(stmts, emptyIndexMap));
+		
+		if (hasFAlgorithmBlock())
+			for (FStatement stmt : getFAlgorithmBlock().getFStatements())
+				stmt.scalarize(stmts, emptyIndexMap);
+		
+		// During scalarization, FQNames got their scalarized flag set, we need to clear it
+		vars.clearScalarized();
+		stmts.clearScalarized();
+		
+		Opt<FAlgorithmBlock> alg;
+		if (stmts.getNumChild() > 0)
+			alg = new Opt<FAlgorithmBlock>(new FAlgorithmBlock(stmts));
+		else 
+			alg = new Opt<FAlgorithmBlock>();
+		
+		FQName name = (FQName) getFQName().fullCopy();
+		return new FFunctionDecl(name, vars, alg);
+	}
+	
+	/**
+	 * Clear the scalarized flag for all FQNames.
+	 */
+	public void ASTNode.clearScalarized() {
+		for (ASTNode node : this)
+			node.clearScalarized();
+	}
+	
+	public void FQName.clearScalarized() {
+		scalarized = false;
+	}
+	
 	
 	public void FAbstractEquation.scalarize(List<FAbstractEquation> eqns,
 			HashMap<String,Integer> indexMap) {}
@@ -828,8 +989,12 @@ aspect Scalarization {
 
 	public FExp FNoEventExp.scalarize(HashMap<String,Integer> indexMap) { return new FNoEventExp(getFExp().scalarize(indexMap)); }
 	
-	// TODO: Need to examine scalarization for generic functions more closely 
-	public FExp FFunctionCall.scalarize(HashMap<String,Integer> indexMap) { return (FFunctionCall) fullCopy(); }
+	public FExp FFunctionCall.scalarize(HashMap<String,Integer> indexMap) {
+		List<FExp> args = new List<FExp>();
+		for (FExp arg : getArgs())
+			args.add(arg.scalarize(indexMap));
+		return new FFunctionCall((FIdUse) getName().fullCopy(), args); 
+	}
 	
 	public FExp FTimeExp.scalarize(HashMap<String,Integer> indexMap) { return new FTimeExp(); }
 	public FExp FEndExp.scalarize(HashMap<String,Integer> indexMap) { return new FEndExp(); }

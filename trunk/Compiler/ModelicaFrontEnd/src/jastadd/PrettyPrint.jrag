@@ -20,14 +20,30 @@ import java.io.ByteArrayOutputStream;
 
 	// superclass to all classes that perform the dispatch
 	class Printer {
-  		public void toString(ASTNode node, PrintStream str, String indent, Object o) { 
+		
+		protected String step;
+		
+		public Printer(String step) {
+			this.step = step;
+		}
+		
+		public String indent(String old) {
+			return old + step;
+		}
+
+		public void toString(ASTNode node, PrintStream str, String indent, Object o) { 
   		}
   		
   		public String op(FBinExp e) { return e.op(); }
+  		
 	}
 
 	// select first variant
 	class PrettyPrinter extends Printer {
+		public PrettyPrinter() {
+			super(" ");
+		}
+		
  		public void toString(ASTNode node, PrintStream str, String indent, Object o) { 
  			node.prettyPrint(this, str, indent, o); 
  		}
@@ -35,6 +51,10 @@ import java.io.ByteArrayOutputStream;
 	
 	// select second variant
 	class DumpTreePrinter extends Printer {
+		public DumpTreePrinter() {
+			super(" ");
+		}
+		
 		public void toString(ASTNode node, PrintStream str, String indent, Object o) { 
  			node._dumpTree(this, str, indent, o); 
  		}
@@ -54,7 +74,7 @@ aspect PrettyPrint {
 	public void ASTNode._dumpTree(Printer p, PrintStream str, String indent, Object o) {
  		str.print(indent + getClass().getName() + "\n");
  		for(int i = 0; i < getNumChild(); i++)
-   			p.toString(getChild(i),str,indent + " ",o); // distpatch through Printer
+   			p.toString(getChild(i),str,p.indent(indent),o); // distpatch through Printer
 	}
 
 	public String ASTNode.prettyPrint(String indent) {
@@ -300,7 +320,7 @@ aspect PrettyPrint {
 		if (getNumEquation()>0) {
 			str.print(indent + "equation\n");
 			for (int i=0;i<getNumEquation();i++) {
-				str.print(indent + "  ");
+				str.print(p.indent(indent));
 				p.toString(getEquation(i),str,indent,o);
 				str.print(";\n");
 			}
@@ -719,14 +739,14 @@ aspect FlattPrettyPrint {
 	    				str.print("equation\n");
 	    				wroteEquation = true;
 	    			}
-	    			p.toString(e, str, indent + " ", o);
+	    			p.toString(e, str, p.indent(indent), o);
 		    		str.print(";\n");
 	    		}
 	    	}
 	    }
 	    
 	    for (FFunctionDecl ffd : getFFunctionDecls())
-	    	p.toString(ffd, str, indent + " ", o);
+	    	p.toString(ffd, str, p.indent(indent), o);
 		
   		str.print(indent);
   		str.print("end ");
@@ -845,7 +865,7 @@ aspect FlattPrettyPrint {
 
     public void FFunctionDecl.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
     	str.print("\n" + indent + "function " + name() + "\n");
-    	getFFunctionVariables().prettyPrintWithIndent(p, str, indent + " ", o, ";");
+    	getFFunctionVariables().prettyPrintWithIndent(p, str, p.indent(indent), o, ";");
     	p.toString(getFAlgorithmBlockOpt(), str, indent, o);
     	str.print(indent + "end " + name() + ";\n");
     }
@@ -926,7 +946,7 @@ aspect FlattPrettyPrint {
 	public void FAlgorithmBlock.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print(indent);
 		str.print("algorithm\n");
-		getFStatements().prettyPrintWithIndent(p, str, indent + " ", o, ";");
+		getFStatements().prettyPrintWithIndent(p, str, p.indent(indent), o, ";");
 //		str.print(indent);
 //		str.print("end algorithm");
 	}
@@ -968,7 +988,7 @@ aspect FlattPrettyPrint {
 		if (getNumElseStmt() > 0) {
 			str.print(indent);
 			str.print("else\n");
-			getElseStmts().prettyPrintWithIndent(p, str, indent + " ", o, ";");
+			getElseStmts().prettyPrintWithIndent(p, str, p.indent(indent), o, ";");
 		}
 	}
 	
@@ -977,7 +997,7 @@ aspect FlattPrettyPrint {
 		str.print(" ");
 		p.toString(getTest(), str, indent, o);
 		str.print(" then\n");
-		getFStatements().prettyPrintWithIndent(p, str, indent + " ", o, ";");
+		getFStatements().prettyPrintWithIndent(p, str, p.indent(indent), o, ";");
 	}
 	
 	syn String FIfWhenStmt.getKeyword() = null;
@@ -990,7 +1010,7 @@ aspect FlattPrettyPrint {
 		str.print("for ");
 		p.toString(getIndex(), str, indent, o);
 		str.print(" loop\n");
-		getForStmts().prettyPrintWithIndent(p, str, indent + " ", o, ";");
+		getForStmts().prettyPrintWithIndent(p, str, p.indent(indent), o, ";");
 		str.print(indent);
 		str.print("end for");
 	}
@@ -999,7 +1019,7 @@ aspect FlattPrettyPrint {
 		str.print("while ");
 		p.toString(getTest(), str, indent, o);
 		str.print(" loop\n");
-		getWhileStmts().prettyPrintWithIndent(p, str, indent + " ", o, ";");
+		getWhileStmts().prettyPrintWithIndent(p, str, p.indent(indent), o, ";");
 		str.print(indent);
 		str.print("end while");
 	}
@@ -1204,7 +1224,10 @@ aspect FlattPrettyPrint {
 	
 	public void FIdUse.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		debugPrint("FIdUse.prettyPrint(): " + name());
-		str.print(name());
+		if (getFQName().isScalarized())
+			str.print(name());
+		else 
+			p.toString(getFQName(), str, indent, o);
 	}
 
 	public void FIdUseExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
@@ -1353,7 +1376,7 @@ aspect FlattPrettyPrint {
 		str.print(indent+"for ");
 		getFForIndexList().prettyPrintWithSep(p, str, indent, o, ", ");
 		str.print(" loop\n");
-		getFAbstractEquationList().prettyPrintWithFix(p, str, indent + " ", o, "", ";\n");
+		getFAbstractEquationList().prettyPrintWithFix(p, str, p.indent(indent), o, "", ";\n");
 		str.print(indent + "end for");
 	}
 	

@@ -146,7 +146,7 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Create a new FArraySubscripts containing <code>n</code> {@see FColonSubscript}s.
+	 * \brief Create a new FArraySubscripts containing <code>n</code> {@link FColonSubscript}s.
 	 */
 	public static FArraySubscripts FArraySubscripts.createFColonSubscripts(int n) {
 		List<FSubscript> l = new List<FSubscript>();
@@ -348,7 +348,7 @@ aspect InheritedFactoryMethods {
 	
 	/**
 	 * \brief Create new node of same class as this, with the specified 
-	 *        children. Used to allow common algorithms to handle unrelated types.
+	 *        child. Used to allow common algorithms to handle unrelated types.
 	 */
 	public FExp FExp.createNodeUnary(FExp a) {
 		throw new UnsupportedOperationException();
@@ -359,4 +359,25 @@ aspect InheritedFactoryMethods {
 	public FExp FMinMaxExp.createNodeBinary(FExp a, FExp b) { return createNode(a, b); }
 	public FExp FUnaryExp.createNodeUnary(FExp a)           { return createNode(a); }
 
+	
+	// The createNode() structure applied to various other nodes that requre common handling
+	public abstract FIfWhenClause FIfWhenClause.createEmptyNode();
+	public FIfClause   FIfClause.createEmptyNode()   { return new FIfClause(); }
+	public FWhenClause FWhenClause.createEmptyNode() { return new FWhenClause(); }
+	
+	public abstract FIfWhenStmt FIfWhenStmt.createEmptyNode();
+	public FIfStmt   FIfStmt.createEmptyNode()   { return new FIfStmt(); }
+	public FWhenStmt FWhenStmt.createEmptyNode() { return new FWhenStmt(); }
+	
+	/**
+	 * \brief Create new node of same class as this, with the specified 
+	 *        children.
+	 */
+	public FIfWhenClause FIfWhenClause.createNode(FExp test, List<FStatement> stmts) {
+		FIfWhenClause node = createEmptyNode();
+		node.setTest(test);
+		node.setFStatementList(stmts);
+		return node;
+	}
+	
 }

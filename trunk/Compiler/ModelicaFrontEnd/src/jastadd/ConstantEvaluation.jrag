@@ -439,7 +439,7 @@ aspect ConstantEvaluation {
     }
     
     /**
-     * \brief Recursive helper method for {@see #buildLiteral(boolean)}.
+     * \brief Recursive helper method for {@link #buildLiteral(boolean)}.
      */
     protected FExp Array.buildLiteralHelper(Iterator<FExp> it, boolean toReal, int dim) {
     	FArray arr = new FArray(new List<FExp>());
@@ -460,7 +460,7 @@ aspect ConstantEvaluation {
     }
     
     /**
-     * \brief Recursive helper method for {@see #buildLiteral(boolean)}.
+     * \brief Recursive helper method for {@link #buildLiteral(boolean)}.
      */
     protected FExp ScalarAsArray.buildLiteralHelper(Iterator<FExp> it, boolean toReal, int dim) {
     	CValue c = it.next().ceval();

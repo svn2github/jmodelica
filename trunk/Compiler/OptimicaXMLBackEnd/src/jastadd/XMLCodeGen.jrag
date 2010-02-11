@@ -30,12 +30,12 @@ aspect XMLCodeGen_Optimica {
 		
 		//Identifier
 		str.print(indent+"\t<" + namespace + ":" + tagId + ">");		
-		name.prettyPrint(str,indent+"\t");
+		name.prettyPrint(str,p.indent(indent));
 		str.println("</" + namespace + ":" + tagId + ">");
 		//Expression argument
 		str.print(indent+"\t<" + namespace + ":" + tagExp + ">");		
 		str.print(arg.ceval().realValue());
-		//arg.prettyPrint_XML(str,indent+"\t");
+		//arg.prettyPrint_XML(str,p.indent(indent));
 		str.println("</" + namespace + ":" + tagExp + ">");
 		
 		str.println(indent + "</"+ namespace + ":" + tag + ">");	
@@ -48,8 +48,8 @@ aspect XMLCodeGen_Optimica {
 		ASTNode right= getChild(this,1);
 		
 		str.println(indent + "<" + namespace + ":" + tag + ">");
-		left.prettyPrint_XML(str,indent+"\t");
-		right.prettyPrint_XML(str,indent+"\t");
+		left.prettyPrint_XML(str,p.indent(indent));
+		right.prettyPrint_XML(str,p.indent(indent));
 		str.println(indent + "</" + namespace + ":" + tag + ">");
 	}
 		

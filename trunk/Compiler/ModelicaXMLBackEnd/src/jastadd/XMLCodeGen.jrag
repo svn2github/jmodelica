@@ -20,6 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 aspect XMLCodeGen {
 	
 	class XMLPrettyPrinter extends Printer {
+		public XMLPrettyPrinter() {
+			super("\t");
+		}
+		
  		public void toString(ASTNode node, PrintStream str, String indent, Object o) { 
  			node.prettyPrint_XML(this, str, indent, o); 
  		}
@@ -94,8 +98,8 @@ aspect XMLCodeGen {
 		ASTNode right= getRight();
 		
 		str.println(indent + "<" + namespace + ":" + tag + ">");
-		left.prettyPrint_XML(str,indent+"\t");
-		right.prettyPrint_XML(str,indent+"\t");
+		left.prettyPrint_XML(str,p.indent(indent));
+		right.prettyPrint_XML(str,p.indent(indent));
 		str.println(indent + "</"+ namespace + ":" + tag + ">");	
 	}
 	
@@ -107,8 +111,8 @@ aspect XMLCodeGen {
 		ASTNode right= getRight();
 		
 		str.println(indent + "<" + namespace + ":" + tag + ">");
-		left.prettyPrint_XML(str,indent+"\t");
-		right.prettyPrint_XML(str,indent+"\t");
+		left.prettyPrint_XML(str,p.indent(indent));
+		right.prettyPrint_XML(str,p.indent(indent));
 		str.println(indent + "</"+ namespace + ":" + tag + ">");	
 	}
 	
@@ -119,7 +123,7 @@ aspect XMLCodeGen {
 		ASTNode child = getChild(this,0);	
 		
 		str.println(indent + "<" + namespace + ":" + tag + ">");
-		child.prettyPrint_XML(str,indent+"\t");
+		child.prettyPrint_XML(str,p.indent(indent));
 		str.println(indent + "</"+ namespace + ":" + tag + ">");
 	}
 	
@@ -130,7 +134,7 @@ aspect XMLCodeGen {
 		ASTNode child = getChild(this,0);
 		
 		str.println(indent + "<" + namespace + ":" + tag + ">");
-		child.prettyPrint_XML(str,indent+"\t");
+		child.prettyPrint_XML(str,p.indent(indent));
 		str.println(indent + "</"+ namespace + ":" + tag + ">");
 	}
 	
@@ -143,8 +147,8 @@ aspect XMLCodeGen {
 		ASTNode y_arg= getChild(this,1);
 		
 		str.println(indent + "<" + namespace + ":" + tag + ">");
-		x_arg.prettyPrint_XML(str,indent+"\t");
-		y_arg.prettyPrint_XML(str,indent+"\t");
+		x_arg.prettyPrint_XML(str,p.indent(indent));
+		y_arg.prettyPrint_XML(str,p.indent(indent));
 		str.println(indent + "</"+ namespace + ":" + tag + ">");
 	}
 	
@@ -155,7 +159,7 @@ aspect XMLCodeGen {
 		String tag = this.xmlTag();
 		
 		str.println(indent + "<" + namespace + ":" + tag + ">");
-		child.prettyPrint_XML(str,indent+"\t");
+		child.prettyPrint_XML(str,p.indent(indent));
 		str.println(indent + "</"+ namespace + ":" + tag + ">");
 	}
 	
