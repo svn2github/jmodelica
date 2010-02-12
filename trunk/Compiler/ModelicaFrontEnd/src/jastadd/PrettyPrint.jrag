@@ -123,8 +123,11 @@ aspect PrettyPrint {
 		}
 	}
 	
-	public void List.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		prettyPrintWithSep(p, str, indent, o, ", ");
+	public String List.toString() {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		PrintStream str = new PrintStream(os);
+		prettyPrintWithSep(new PrettyPrinter(), str, "", null, ", ");
+		return os.toString();
 	}
 	
 	/**

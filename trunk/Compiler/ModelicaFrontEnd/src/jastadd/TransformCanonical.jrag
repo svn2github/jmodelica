@@ -852,9 +852,46 @@ aspect Scalarization {
 	 */
 	
 	/**
-	 * \brief Scalarize expressions.
+	 * \brief Create an FArray containing scalarized subexpressions.
+	 */
+	public FExp Array.buildScalarized(HashMap<String,Integer> indexMap) {
+    	return buildFArray(iteratorFExp(), new ScalarizedBuilder(indexMap), 1);
+    }
+    
+	public static class Array {
+	    /**
+	     * Helper object for {@link #buildScalarized(java.util.HashMap<String,Integer>)}.
+	     */
+	    protected class ScalarizedBuilder implements ElementBuilder {
+	    	private HashMap<String,Integer> indexMap;
+	    	
+	    	public ScalarizedBuilder(HashMap<String,Integer> indexMap) {
+	    		this.indexMap = indexMap;
+	    	}
+	    	
+			public FExp build(FExp e) {
+				return e.scalarize(indexMap);
+			}
+	    }
+	}
+
+	/**
+	 * \brief Scalarize expressions, replacing array expressions with FArrays of scalarized subexpressions.
+	 * 
+	 * The Farrays are needed because function calls need arrays to be passed as arrays.
 	 */
 	public FExp FExp.scalarize(HashMap<String,Integer> indexMap) {
+		// TODO: Handle situations like "x = {1, 2} + func(...)" without duplicating function call - new node type?
+		if (isArray()) 
+			return getArray().buildScalarized(indexMap);
+		else
+			return scalarizeExp(indexMap);
+	}
+	
+	/**
+	 * \brief Scalarize expressions.
+	 */
+	public FExp FExp.scalarizeExp(HashMap<String,Integer> indexMap) {
 		return null;
 	}
 
@@ -892,7 +929,7 @@ aspect Scalarization {
     	return new FIdUse(getFQName().scalarize(indexMap));
     }
 
-    public FExp FIdUseExp.scalarize(HashMap<String,Integer> indexMap) {
+    public FExp FIdUseExp.scalarizeExp(HashMap<String,Integer> indexMap) {
     	if (indexMap.containsKey(name())) 
     		return new FIntegerLitExp(indexMap.get(name()).intValue());
     	return new FIdUseExp(getFIdUse().scalarize(indexMap));
@@ -901,7 +938,7 @@ aspect Scalarization {
     /* These are needed because scalarize() is reused in Array.createExpanded(), that 
      * might be called on an instance tree.
      */
-    public FExp FInstAccessExp.scalarize(HashMap<String,Integer> indexMap) {
+    public FExp FInstAccessExp.scalarizeExp(HashMap<String,Integer> indexMap) {
     	if (indexMap.containsKey(name())) 
     		return new FIntegerLitExp(indexMap.get(name()).intValue());
     	return new FInstAccessExp(getInstAccess().scalarize(indexMap));
@@ -927,7 +964,7 @@ aspect Scalarization {
     }
     // End of instance classes that need scalarize()
  
-    public FExp FIfExp.scalarize(HashMap<String,Integer> indexMap) {
+    public FExp FIfExp.scalarizeExp(HashMap<String,Integer> indexMap) {
 		List etl = new List();
 		for (FElseIfExp elif : getFElseIfExps()) 
 			etl.add(elif.scalarize(indexMap));
@@ -937,32 +974,32 @@ aspect Scalarization {
 		                  getElseExp().scalarize(indexMap));
 	}
 	
-	public FExp FElseIfExp.scalarize(HashMap<String,Integer> indexMap) {
+	public FExp FElseIfExp.scalarizeExp(HashMap<String,Integer> indexMap) {
 		return new FElseIfExp(getIfExp().scalarize(indexMap),
 		                      getThenExp().scalarize(indexMap));
 	}
 	
-	public FExp FMulExp.scalarize(HashMap<String,Integer> indexMap) {
+	public FExp FMulExp.scalarizeExp(HashMap<String,Integer> indexMap) {
 		if (getLeft().isArray() && !isArray()) 
 			return composeScalarCellExp(Index.NULL).scalarize(indexMap);
 		else
-			return super.scalarize(indexMap);
+			return super.scalarizeExp(indexMap);
 	}
 	
-	public FExp FSizeExp.scalarize(HashMap<String,Integer> indexMap) {
+	public FExp FSizeExp.scalarizeExp(HashMap<String,Integer> indexMap) {
 		// Only the form with dim can be in the tree at this point
 		int dim = getDim().ceval().intValue() - 1;
 		return new FIntegerLitExp(getFExp().size().get(dim));
 	}
 	
-	public FExp FMinMaxExp.scalarize(HashMap<String,Integer> indexMap) {
+	public FExp FMinMaxExp.scalarizeExp(HashMap<String,Integer> indexMap) {
 		if (hasY())
 			return createNode(getX().scalarize(indexMap), getY().scalarize(indexMap));
 		else
 			return getX().reduceToScalarized(this, indexMap);
 	}
 	
-	public FExp FSumExp.scalarize(HashMap<String,Integer> indexMap) {
+	public FExp FSumExp.scalarizeExp(HashMap<String,Integer> indexMap) {
 		return getFExp().reduceToScalarized(new FAddExp(), indexMap);
 	}
 	
@@ -979,15 +1016,15 @@ aspect Scalarization {
 		return res;
 	}
 	
-	public FExp FBinExp.scalarize(HashMap<String,Integer> indexMap) { return createNode(getLeft().scalarize(indexMap), getRight().scalarize(indexMap)); }
-	public FExp FUnaryExp.scalarize(HashMap<String,Integer> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
-	public FExp FMathematicalFunctionCall.scalarize(HashMap<String,Integer> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
-	public FExp FAtan2Exp.scalarize(HashMap<String,Integer> indexMap) { return new FAtan2Exp(getFExp().scalarize(indexMap), getY().scalarize(indexMap)); }
+	public FExp FBinExp.scalarizeExp(HashMap<String,Integer> indexMap) { return createNode(getLeft().scalarize(indexMap), getRight().scalarize(indexMap)); }
+	public FExp FUnaryExp.scalarizeExp(HashMap<String,Integer> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
+	public FExp FMathematicalFunctionCall.scalarizeExp(HashMap<String,Integer> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
+	public FExp FAtan2Exp.scalarizeExp(HashMap<String,Integer> indexMap) { return new FAtan2Exp(getFExp().scalarize(indexMap), getY().scalarize(indexMap)); }
 	
-	public FExp FLitExp.scalarize(HashMap<String,Integer> indexMap) { return (FLitExp) fullCopy(); }
-	public FExp FDerExp.scalarize(HashMap<String,Integer> indexMap) { return new FDerExp(getFIdUse().scalarize(indexMap)); }
+	public FExp FLitExp.scalarizeExp(HashMap<String,Integer> indexMap) { return (FLitExp) fullCopy(); }
+	public FExp FDerExp.scalarizeExp(HashMap<String,Integer> indexMap) { return new FDerExp(getFIdUse().scalarize(indexMap)); }
 
-	public FExp FNoEventExp.scalarize(HashMap<String,Integer> indexMap) { return new FNoEventExp(getFExp().scalarize(indexMap)); }
+	public FExp FNoEventExp.scalarizeExp(HashMap<String,Integer> indexMap) { return new FNoEventExp(getFExp().scalarize(indexMap)); }
 	
 	public FExp FFunctionCall.scalarize(HashMap<String,Integer> indexMap) {
 		List<FExp> args = new List<FExp>();
@@ -996,8 +1033,8 @@ aspect Scalarization {
 		return new FFunctionCall((FIdUse) getName().fullCopy(), args); 
 	}
 	
-	public FExp FTimeExp.scalarize(HashMap<String,Integer> indexMap) { return new FTimeExp(); }
-	public FExp FEndExp.scalarize(HashMap<String,Integer> indexMap) { return new FEndExp(); }
+	public FExp FTimeExp.scalarizeExp(HashMap<String,Integer> indexMap) { return new FTimeExp(); }
+	public FExp FEndExp.scalarizeExp(HashMap<String,Integer> indexMap) { return new FEndExp(); }
 
 	/*
 	public FExp FFunctionCall.scalarize() {

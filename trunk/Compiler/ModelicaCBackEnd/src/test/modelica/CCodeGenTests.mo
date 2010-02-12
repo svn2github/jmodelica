@@ -763,7 +763,7 @@ model CForLoop1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
          name="CForLoop1",
-         description="C code generation for for loops:",
+         description="C code generation for for loops: range exp",
          template="
 $C_functions$
 ",
@@ -803,7 +803,7 @@ model CForLoop2
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
          name="CForLoop2",
-         description="C code generation for for loops:",
+         description="C code generation for for loops: generic exp",
          template="
 $C_functions$
 ",
@@ -813,7 +813,7 @@ void func_CCodeGenTests_CForLoop2_f_def(jmi_ad_var_t* o_r) {
     jmi_ad_var_t x_v = 0;
     jmi_ad_var_t i_ia[] = { 2, 3, 5 };
     for (int i_ii = 0; i_ii < 3; i_ii++) {
-    jmi_ad_var_t i_i = i_ia[i_ii];
+        jmi_ad_var_t i_i = i_ia[i_ii];
         x_v = x_v + i_i;
     }
     if (o_r != NULL) *o_r = o_v;
@@ -839,6 +839,511 @@ jmi_ad_var_t func_CCodeGenTests_CForLoop2_f_exp() {
  
  Real x = f();
 end CForLoop2;
+
+
+
+model CArrayInput1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayInput1",
+         description="C code generation: array inputs to functions: basic test",
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+void func_CCodeGenTests_CArrayInput1_f_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r);
+jmi_ad_var_t func_CCodeGenTests_CArrayInput1_f_exp(jmi_array_t* inp_a);
+
+void func_CCodeGenTests_CArrayInput1_f_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r) {
+    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    if (out_r != NULL) *out_r = out_v;
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CArrayInput1_f_exp(jmi_array_t* inp_a) {
+    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    func_CCodeGenTests_CArrayInput1_f_def(inp_a, &out_v);
+    return out_v;
+}
+
+
+    JMI_ARRAY_DECL(tmp_array_1, 3, 3);
+    jmi_array_ref_1(tmp_array_1, 1) = 1.0;
+    jmi_array_ref_1(tmp_array_1, 2) = 2.0;
+    jmi_array_ref_1(tmp_array_1, 3) = 3.0;
+    (*res)[0] = func_CCodeGenTests_CArrayInput1_f_exp(tmp_array_1) - (_x_);
+")})));
+
+ function f
+  input Real inp[3];
+  output Real out = sum(inp);
+ algorithm
+ end f;
+ 
+ Real x = f(1:3);
+end CArrayInput1;
+
+
+model CArrayInput2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayInput2",
+         description="C code generation: array inputs to functions: expressions around call",
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+void func_CCodeGenTests_CArrayInput2_f_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r);
+jmi_ad_var_t func_CCodeGenTests_CArrayInput2_f_exp(jmi_array_t* inp_a);
+
+void func_CCodeGenTests_CArrayInput2_f_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r) {
+    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    if (out_r != NULL) *out_r = out_v;
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CArrayInput2_f_exp(jmi_array_t* inp_a) {
+    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    func_CCodeGenTests_CArrayInput2_f_def(inp_a, &out_v);
+    return out_v;
+}
+
+
+    JMI_ARRAY_DECL(tmp_array_1, 3, 3);
+    jmi_array_ref_1(tmp_array_1, 1) = 1.0 + 3;
+    jmi_array_ref_1(tmp_array_1, 2) = 2.0 + 5;
+    jmi_array_ref_1(tmp_array_1, 3) = 3.0 + 7;
+    (*res)[0] = 2 + ( 5 ) * ( func_CCodeGenTests_CArrayInput2_f_exp(tmp_array_1) ) - (_x_);
+")})));
+
+ function f
+  input Real inp[3];
+  output Real out = sum(inp);
+ algorithm
+ end f;
+ 
+ Real x = 2 + 5 * f((1:3) + {3, 5, 7});
+end CArrayInput2;
+
+
+model CArrayInput3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayInput3",
+         description="C code generation: array inputs to functions: nestled calls",
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+void func_CCodeGenTests_CArrayInput3_f_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r);
+jmi_ad_var_t func_CCodeGenTests_CArrayInput3_f_exp(jmi_array_t* inp_a);
+
+void func_CCodeGenTests_CArrayInput3_f_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r) {
+    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    if (out_r != NULL) *out_r = out_v;
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CArrayInput3_f_exp(jmi_array_t* inp_a) {
+    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    func_CCodeGenTests_CArrayInput3_f_def(inp_a, &out_v);
+    return out_v;
+}
+
+
+    JMI_ARRAY_DECL(tmp_array_1, 3, 3);
+    jmi_array_ref_1(tmp_array_1, 1) = 1.0;
+    jmi_array_ref_1(tmp_array_1, 2) = 2.0;
+    jmi_array_ref_1(tmp_array_1, 3) = 3.0;
+    JMI_ARRAY_DECL(tmp_array_2, 3, 3);
+    jmi_array_ref_1(tmp_array_2, 1) = 4.0;
+    jmi_array_ref_1(tmp_array_2, 2) = 5.0;
+    jmi_array_ref_1(tmp_array_2, 3) = 6.0;
+    JMI_ARRAY_DECL(tmp_array_3, 3, 3);
+    jmi_array_ref_1(tmp_array_3, 1) = 7.0;
+    jmi_array_ref_1(tmp_array_3, 2) = 8.0;
+    jmi_array_ref_1(tmp_array_3, 3) = 9.0;
+    JMI_ARRAY_DECL(tmp_array_4, 3, 3);
+    jmi_array_ref_1(tmp_array_4, 1) = func_CCodeGenTests_CArrayInput3_f_exp(tmp_array_1);
+    jmi_array_ref_1(tmp_array_4, 2) = func_CCodeGenTests_CArrayInput3_f_exp(tmp_array_2);
+    jmi_array_ref_1(tmp_array_4, 3) = func_CCodeGenTests_CArrayInput3_f_exp(tmp_array_3);
+    (*res)[0] = func_CCodeGenTests_CArrayInput3_f_exp(tmp_array_4) - (_x_);
+")})));
+
+ function f
+  input Real inp[3];
+  output Real out = sum(inp);
+ algorithm
+ end f;
+ 
+ Real x = f({f(1:3),f(4:6),f(7:9)});
+end CArrayInput3;
+
+
+model CArrayInput4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayInput4",
+         description="C code generation: array inputs to functions: in assign statement",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_CArrayInput4_f1_def(jmi_ad_var_t* out_r);
+jmi_ad_var_t func_CCodeGenTests_CArrayInput4_f1_exp();
+void func_CCodeGenTests_CArrayInput4_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r);
+jmi_ad_var_t func_CCodeGenTests_CArrayInput4_f2_exp(jmi_array_t* inp_a);
+
+void func_CCodeGenTests_CArrayInput4_f1_def(jmi_ad_var_t* out_r) {
+    jmi_ad_var_t out_v = 1.0;
+    JMI_ARRAY_DECL(tmp_array_1, 3, 3);
+    jmi_array_ref_1(tmp_array_1, 1) = 1.0;
+    jmi_array_ref_1(tmp_array_1, 2) = 2.0;
+    jmi_array_ref_1(tmp_array_1, 3) = 3.0;
+    out_v = func_CCodeGenTests_CArrayInput4_f2_exp(tmp_array_1);
+    if (out_r != NULL) *out_r = out_v;
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CArrayInput4_f1_exp() {
+    jmi_ad_var_t out_v = 1.0;
+    func_CCodeGenTests_CArrayInput4_f1_def(&out_v);
+    return out_v;
+}
+
+void func_CCodeGenTests_CArrayInput4_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r) {
+    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    if (out_r != NULL) *out_r = out_v;
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CArrayInput4_f2_exp(jmi_array_t* inp_a) {
+    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    func_CCodeGenTests_CArrayInput4_f2_def(inp_a, &out_v);
+    return out_v;
+}
+
+")})));
+
+ function f1
+  output Real out = 1.0;
+ algorithm
+  out := f2(1:3);
+ end f1;
+ 
+ function f2
+  input Real inp[3];
+  output Real out = sum(inp);
+ algorithm
+ end f2;
+ 
+ Real x = f1();
+end CArrayInput4;
+
+
+model CArrayInput5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayInput5",
+         description="C code generation: array inputs to functions: function call stmt",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_CArrayInput5_f1_def(jmi_ad_var_t* out_r);
+jmi_ad_var_t func_CCodeGenTests_CArrayInput5_f1_exp();
+void func_CCodeGenTests_CArrayInput5_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* out1_r, jmi_ad_var_t* out2_r);
+jmi_ad_var_t func_CCodeGenTests_CArrayInput5_f2_exp(jmi_array_t* inp_a);
+
+void func_CCodeGenTests_CArrayInput5_f1_def(jmi_ad_var_t* out_r) {
+    jmi_ad_var_t out_v = 1.0;
+    jmi_ad_var_t t_v;
+    JMI_ARRAY_DECL(tmp_array_1, 3, 3);
+    jmi_array_ref_1(tmp_array_1, 1) = 1.0;
+    jmi_array_ref_1(tmp_array_1, 2) = 2.0;
+    jmi_array_ref_1(tmp_array_1, 3) = 3.0;
+    func_CCodeGenTests_CArrayInput5_f2_def(tmp_array_1, &out_v, &t_v);
+    if (out_r != NULL) *out_r = out_v;
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CArrayInput5_f1_exp() {
+    jmi_ad_var_t out_v = 1.0;
+    func_CCodeGenTests_CArrayInput5_f1_def(&out_v);
+    return out_v;
+}
+
+void func_CCodeGenTests_CArrayInput5_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* out1_r, jmi_ad_var_t* out2_r) {
+    jmi_ad_var_t out1_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    jmi_ad_var_t out2_v = jmi_max(jmi_max(jmi_array_val_1(inp_a, 1), jmi_array_val_1(inp_a, 2)), jmi_array_val_1(inp_a, 3));
+    if (out1_r != NULL) *out1_r = out1_v;
+    if (out2_r != NULL) *out2_r = out2_v;
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CArrayInput5_f2_exp(jmi_array_t* inp_a) {
+    jmi_ad_var_t out1_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    func_CCodeGenTests_CArrayInput5_f2_def(inp_a, &out1_v, NULL);
+    return out1_v;
+}
+
+")})));
+
+ function f1
+  output Real out = 1.0;
+  protected Real t;
+ algorithm
+  (out, t) := f2(1:3);
+ end f1;
+ 
+ function f2
+  input Real inp[3];
+  output Real out1 = sum(inp);
+  output Real out2 = max(inp);
+ algorithm
+ end f2;
+ 
+ Real x = f1();
+end CArrayInput5;
+
+
+model CArrayInput6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayInput6",
+         description="C code generation: array inputs to functions: if statement",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_CArrayInput6_f1_def(jmi_ad_var_t* out_r);
+jmi_ad_var_t func_CCodeGenTests_CArrayInput6_f1_exp();
+void func_CCodeGenTests_CArrayInput6_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r);
+jmi_ad_var_t func_CCodeGenTests_CArrayInput6_f2_exp(jmi_array_t* inp_a);
+
+void func_CCodeGenTests_CArrayInput6_f1_def(jmi_ad_var_t* out_r) {
+    jmi_ad_var_t out_v = 1.0;
+    JMI_ARRAY_DECL(tmp_array_1, 2, 2);
+    jmi_array_ref_1(tmp_array_1, 1) = 1.0;
+    jmi_array_ref_1(tmp_array_1, 2) = 2.0;
+    JMI_ARRAY_DECL(tmp_array_2, 2, 2);
+    jmi_array_ref_1(tmp_array_2, 1) = 3.0;
+    jmi_array_ref_1(tmp_array_2, 2) = 4.0;
+    if (COND_EXP_LT(func_CCodeGenTests_CArrayInput6_f2_exp(tmp_array_1),4,AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0))) {
+        JMI_ARRAY_DECL(tmp_array_3, 2, 2);
+        jmi_array_ref_1(tmp_array_3, 1) = 5.0;
+        jmi_array_ref_1(tmp_array_3, 2) = 6.0;
+        out_v = func_CCodeGenTests_CArrayInput6_f2_exp(tmp_array_3);
+    } else if (COND_EXP_GT(func_CCodeGenTests_CArrayInput6_f2_exp(tmp_array_2),5,AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0))) {
+        JMI_ARRAY_DECL(tmp_array_4, 2, 2);
+        jmi_array_ref_1(tmp_array_4, 1) = 7.0;
+        jmi_array_ref_1(tmp_array_4, 2) = 8.0;
+        out_v = func_CCodeGenTests_CArrayInput6_f2_exp(tmp_array_4);
+    } else {
+        JMI_ARRAY_DECL(tmp_array_5, 2, 2);
+        jmi_array_ref_1(tmp_array_5, 1) = 9.0;
+        jmi_array_ref_1(tmp_array_5, 2) = 10.0;
+        out_v = func_CCodeGenTests_CArrayInput6_f2_exp(tmp_array_5);
+    }
+    if (out_r != NULL) *out_r = out_v;
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CArrayInput6_f1_exp() {
+    jmi_ad_var_t out_v = 1.0;
+    func_CCodeGenTests_CArrayInput6_f1_def(&out_v);
+    return out_v;
+}
+
+void func_CCodeGenTests_CArrayInput6_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r) {
+    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2);
+    if (out_r != NULL) *out_r = out_v;
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CArrayInput6_f2_exp(jmi_array_t* inp_a) {
+    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2);
+    func_CCodeGenTests_CArrayInput6_f2_def(inp_a, &out_v);
+    return out_v;
+}
+
+")})));
+
+ function f1
+  output Real out = 1.0;
+ algorithm
+  if f2(1:2) < 4 then
+   out := f2(5:6);
+  elseif f2(3:4) > 5 then
+   out := f2(7:8);
+  else
+   out := f2(9:10);
+  end if;
+ end f1;
+ 
+ function f2
+  input Real inp[2];
+  output Real out = sum(inp);
+ algorithm
+ end f2;
+ 
+ Real x = f1();
+end CArrayInput6;
+
+
+model CArrayInput7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayInput7",
+         description="C code generation: array inputs to functions: while stmt",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_CArrayInput7_f1_def(jmi_ad_var_t* out_r);
+jmi_ad_var_t func_CCodeGenTests_CArrayInput7_f1_exp();
+void func_CCodeGenTests_CArrayInput7_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r);
+jmi_ad_var_t func_CCodeGenTests_CArrayInput7_f2_exp(jmi_array_t* inp_a);
+
+void func_CCodeGenTests_CArrayInput7_f1_def(jmi_ad_var_t* out_r) {
+    jmi_ad_var_t out_v = 1.0;
+    JMI_ARRAY_DECL(tmp_array_1, 3, 3);
+    jmi_array_ref_1(tmp_array_1, 1) = 1.0;
+    jmi_array_ref_1(tmp_array_1, 2) = 2.0;
+    jmi_array_ref_1(tmp_array_1, 3) = 3.0;
+    while (COND_EXP_LT(func_CCodeGenTests_CArrayInput7_f2_exp(tmp_array_1),2,AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0))) {
+        JMI_ARRAY_DECL(tmp_array_2, 3, 3);
+        jmi_array_ref_1(tmp_array_2, 1) = 4.0;
+        jmi_array_ref_1(tmp_array_2, 2) = 5.0;
+        jmi_array_ref_1(tmp_array_2, 3) = 6.0;
+        out_v = func_CCodeGenTests_CArrayInput7_f2_exp(tmp_array_2);
+}
+    if (out_r != NULL) *out_r = out_v;
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CArrayInput7_f1_exp() {
+    jmi_ad_var_t out_v = 1.0;
+    func_CCodeGenTests_CArrayInput7_f1_def(&out_v);
+    return out_v;
+}
+
+void func_CCodeGenTests_CArrayInput7_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r) {
+    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    if (out_r != NULL) *out_r = out_v;
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CArrayInput7_f2_exp(jmi_array_t* inp_a) {
+    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    func_CCodeGenTests_CArrayInput7_f2_def(inp_a, &out_v);
+    return out_v;
+}
+
+")})));
+
+ function f1
+  output Real out = 1.0;
+ algorithm
+  while f2(1:3) < 2 loop
+   out := f2(4:6);
+  end while;
+ end f1;
+ 
+ function f2
+  input Real inp[3];
+  output Real out = sum(inp);
+ algorithm
+ end f2;
+ 
+ Real x = f1();
+end CArrayInput7;
+
+
+model CArrayInput8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayInput8",
+         description="C code generation: array inputs to functions: for stmt",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_CArrayInput8_f1_def(jmi_ad_var_t* out_r);
+jmi_ad_var_t func_CCodeGenTests_CArrayInput8_f1_exp();
+void func_CCodeGenTests_CArrayInput8_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r);
+jmi_ad_var_t func_CCodeGenTests_CArrayInput8_f2_exp(jmi_array_t* inp_a);
+
+void func_CCodeGenTests_CArrayInput8_f1_def(jmi_ad_var_t* out_r) {
+    jmi_ad_var_t out_v = 1.0;
+    JMI_ARRAY_DECL(tmp_array_1, 3, 3);
+    jmi_array_ref_1(tmp_array_1, 1) = 1.0;
+    jmi_array_ref_1(tmp_array_1, 2) = 2.0;
+    jmi_array_ref_1(tmp_array_1, 3) = 3.0;
+    JMI_ARRAY_DECL(tmp_array_2, 3, 3);
+    jmi_array_ref_1(tmp_array_2, 1) = 4.0;
+    jmi_array_ref_1(tmp_array_2, 2) = 5.0;
+    jmi_array_ref_1(tmp_array_2, 3) = 6.0;
+    jmi_ad_var_t i_ia[] = { func_CCodeGenTests_CArrayInput8_f2_exp(tmp_array_1), func_CCodeGenTests_CArrayInput8_f2_exp(tmp_array_2) };
+    for (int i_ii = 0; i_ii < 2; i_ii++) {
+        jmi_ad_var_t i_i = i_ia[i_ii];
+        JMI_ARRAY_DECL(tmp_array_3, 3, 3);
+        jmi_array_ref_1(tmp_array_3, 1) = 7.0;
+        jmi_array_ref_1(tmp_array_3, 2) = 8.0;
+        jmi_array_ref_1(tmp_array_3, 3) = 9.0;
+        out_v = func_CCodeGenTests_CArrayInput8_f2_exp(tmp_array_3);
+    }
+    if (out_r != NULL) *out_r = out_v;
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CArrayInput8_f1_exp() {
+    jmi_ad_var_t out_v = 1.0;
+    func_CCodeGenTests_CArrayInput8_f1_def(&out_v);
+    return out_v;
+}
+
+void func_CCodeGenTests_CArrayInput8_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r) {
+    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    if (out_r != NULL) *out_r = out_v;
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CArrayInput8_f2_exp(jmi_array_t* inp_a) {
+    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    func_CCodeGenTests_CArrayInput8_f2_def(inp_a, &out_v);
+    return out_v;
+}
+
+")})));
+
+ function f1
+  output Real out = 1.0;
+ algorithm
+  for i in {f2(1:3), f2(4:6)} loop
+   out := f2(7:9);
+  end for;
+ end f1;
+ 
+ function f2
+  input Real inp[3];
+  output Real out = sum(inp);
+ algorithm
+ end f2;
+ 
+ Real x = f1();
+end CArrayInput8;
 
 
 

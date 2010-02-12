@@ -230,7 +230,7 @@ aspect NodeMethods {
 	 * Returns <code>this</code> if node has no parent, <code>fullCopy()</code> otherwise.
 	 */
 	public ASTNode ASTNode.unboundCopy() {
-		return (getParent() == null) ? this : fullCopy();
+		return (parent == null) ? this : fullCopy();
 	}
 
 }

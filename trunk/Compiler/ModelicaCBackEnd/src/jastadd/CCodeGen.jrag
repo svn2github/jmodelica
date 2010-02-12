@@ -116,30 +116,19 @@ aspect CCodeGen {
 		str.print(")");
 	}
 	
-	public void FFunctionCall.genOpenCall_C(Printer p, PrintStream str, String indent, Object o, String suffix) {
-		str.print(indent);
-		str.print(getName().funcNameUnderscore(suffix));
-		str.print("(");
-		getArgs().prettyPrintWithSep(p, str, "", o, ", ");		
-	}
-	
-	public void FFunctionCall.genDefinitionCallEnd_C(PrintStream str, int nDoneOutputs) {
-		String arg = (nDoneOutputs == 0 && getNumArg() == 0) ? "NULL" : ", NULL";
-		for (int i = myFFunctionDecl().myOutputs().size(); i > nDoneOutputs; i--) {
-			str.print(arg);
-			arg = ", NULL";
-		}
-	}
-	
 	public void FFunctionCall.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		boolean exp = functionCallIsExp();
 		if (!exp)
 			str.print(indent);
 		str.print(getName().funcNameUnderscore(exp ? suffixExpression() : suffixDefinition()));
 		str.print("(");
-		getArgs().prettyPrintWithSep(p, str, "", o, ", ");		
+		String sep = "";
+		for (FExp arg : getArgs()) {
+			str.print(sep);
+			arg.genArgument_C(p, str, indent, o);
+			sep = ", ";
+		}
 		if (!exp) {
-			String sep = (getNumArg() == 0) ? "" : ", ";
 			int tot = myFFunctionDecl().myOutputs().size();
 			int lefts = myLefts().size();
 			for (int i = 0; i < tot; i++) {
@@ -191,8 +180,12 @@ aspect CCodeGen {
 		str.print(" ");
 		str.print(getFQName().funcNameUnderscore(suffix));
 		str.print("(");
-		prettyPrintWithSep(myInputs(), p, str, "", o, ", ");
-		String sep = myInputs().size() > 0 ? ", " : "";
+		String sep = "";
+		for (FFunctionVariable v : myInputs()) {
+			str.print(sep);
+			v.printArgument_C(str);
+			sep = ", ";
+		}
 		if (returnArgs) {
 			for (FFunctionVariable v : myOutputs()) {
 				str.print(sep);
@@ -263,7 +256,7 @@ aspect CCodeGen {
 	syn String FFunctionArray.nameReturn_C()    = name_C();
 	// TODO: Delegate to Type to support other types than Real
 	syn String FFunctionVariable.type_C() = "jmi_ad_var_t";
-	syn String FFunctionArray.type_C()    = "jmi_array_t";
+	syn String FFunctionArray.type_C()    = "jmi_array_t*";
 	
 	public void FFunctionVariable.printReturnArgument_C(PrintStream str) {
 		str.print(type_C());
@@ -272,6 +265,7 @@ aspect CCodeGen {
 	}
 	
 	public void FFunctionVariable.printReturnWrite_C(PrintStream str, String indent) {
+		str.print(indent);
 		str.print("if (");
 		str.print(nameReturn_C());
 		str.print(" != NULL) *");
@@ -279,10 +273,15 @@ aspect CCodeGen {
 		str.print(" = ");
 		str.print(name_C());
 		str.print(";\n");
-		str.print(indent);
 	}
 	
 	public void FFunctionArray.printReturnWrite_C(PrintStream str, String indent) {}
+	
+	public void FFunctionVariable.printArgument_C(PrintStream str) {
+		str.print(type_C());
+		str.print(" ");
+		str.print(name_C());
+	}
 	
 	public void FFunctionVariable.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		str.print(type_C());
@@ -295,41 +294,54 @@ aspect CCodeGen {
 	}
 	
 	public void FFunctionArray.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		size().printArrayDecl_C(str, indent, name_C());
+	}
+	
+	public void Size.printArrayDecl_C(PrintStream str, String indent, String name) {
+		str.print(indent);
 		str.print("JMI_ARRAY_DECL(");
-		str.print(name_C());
+		str.print(name);
 		str.print(", ");
-		str.print(size().numElements());
-		str.print(", { ");
-		str.print(size().toUnclosedString());
-		str.print(" })");
+		str.print(numElements());
+		str.print(", ");
+		str.print(toUnclosedString());
+		str.print(");\n");
 	}
 	
 	public void FAlgorithmBlock.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		getFStatements().prettyPrintWithIndent(p, str, indent, o);
+		p.toString(getFStatements(), str, indent, o);
 	}
 	
 	public void FFunctionCallStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		genTempArrays_C(printer_C, str, indent, null);
+		str.print(indent);
 		p.toString(getCall(), str, "", o);
-		str.print(";");
+		str.print(";\n");
 	}
 
 	public void FAssignStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		genTempArrays_C(printer_C, str, indent, null);
+		str.print(indent);
 		p.toString(getLeft(), str, indent, o);
 		str.print(" = ");
 		p.toString(getRight(), str, indent, o);
-		str.print(";");
+		str.print(";\n");
 	}
 	
 	public void FReturnStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		returnDefinition().printReturnWrite_C(str, indent);
-		str.print("return;");
+		str.print(indent);
+		str.print("return;\n");
 	}
 	
 	public void FIfWhenStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		for (FIfWhenClause clause : getFIfWhenClauses())
+			clause.getTest().genTempArrays_C(printer_C, str, indent, null);
+		str.print(indent);
 		getFIfWhenClauses().prettyPrintWithSep(p, str, indent, o, indent + "} else ");
 		prettyPrintElse_C(p, str, indent, o);
 		str.print(indent);
-		str.print("}");
+		str.print("}\n");
 	}
 	
 	protected void FIfWhenStmt.prettyPrintElse_C(Printer p, PrintStream str, String indent, Object o) {}
@@ -338,7 +350,7 @@ aspect CCodeGen {
 		if (getNumElseStmt() > 0) {
 			str.print(indent);
 			str.print("} else {\n");
-			getElseStmts().prettyPrintWithIndent(p, str, p.indent(indent), o);
+			p.toString(getElseStmts(), str, p.indent(indent), o);
 		}
 	}
 	
@@ -346,18 +358,30 @@ aspect CCodeGen {
 		str.print("if (");
 		p.toString(getTest(), str, indent, o);
 		str.print(") {\n");
-		getFStatements().prettyPrintWithIndent(p, str, p.indent(indent), o);
+		p.toString(getFStatements(), str, p.indent(indent), o);
+	}
+	
+	public void FWhileStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		getTest().genTempArrays_C(printer_C, str, indent, null);
+		str.print(indent);
+		str.print("while (");
+		p.toString(getTest(), str, "", o);
+		str.print(") {\n");
+		p.toString(getWhileStmts(), str, p.indent(indent), o);
+		str.print("}\n");		
 	}
 	
 	public void FForStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		getIndex().genTempArrays_C(printer_C, str, indent, null);
 		getIndex().printForArrayDecl_C(p, str, indent, o);
+		str.print(indent);
 		str.print("for (");
 		p.toString(getIndex(), str, indent, o);
 		str.print(") {\n");
 		getIndex().printForArrayNext_C(p, str, p.indent(indent), o);
-		getForStmts().prettyPrintWithIndent(p, str, p.indent(indent), o);
+		p.toString(getForStmts(), str, p.indent(indent), o);
 		str.print(indent);		
-		str.print("}");		
+		str.print("}\n");		
 	}
 	
 	public void FForIndex.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
@@ -367,12 +391,12 @@ aspect CCodeGen {
 	
 	public void FForIndex.printForArrayDecl_C(Printer p, PrintStream str, String indent, Object o) {
 		if (needsForArray()) {
+			str.print(indent);
 			str.print("jmi_ad_var_t ");
 			str.print(getFVariable().name_C());
 			str.print("a[] = { ");
-			p.toString(getFExp().getArray().getFExps(), str, indent, o);
+			getFExp().getArray().getFExps().prettyPrintWithSep(p, str, indent, o, ", ");
 			str.print(" };\n");
-			str.print(indent);
 		}
 	}
 	
@@ -425,14 +449,6 @@ aspect CCodeGen {
 		str.print("; ");
 		str.print(name);
 		str.print("i++");
-	}
-	
-	public void FWhileStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		str.print("while (");
-		p.toString(getTest(), str, "", o);
-		str.print(") {\n");
-		getWhileStmts().prettyPrintWithIndent(p, str, p.indent(indent), o);
-		str.print("}");		
 	}
 	
 	syn String FBinExp.op_C() = op();
@@ -512,9 +528,63 @@ aspect CCodeGen {
 		if (inIfCondition()) str.print(")");
 	}
 	
+	public void ASTNode.genTempArrays_C(Printer p, PrintStream str, String indent, Object o) {
+		for (ASTNode node : this)
+			node.genTempArrays_C(p, str, indent, o);
+	}
+	
+	public void FExp.genTempArrays_C(Printer p, PrintStream str, String indent, Object o) {
+		if (isArray())
+			getArray().genTempArrays_C(p, str, indent, o);
+		else
+			super.genTempArrays_C(p, str, indent, o);
+	}
+	
+	public void FFunctionCall.genTempArrays_C(Printer p, PrintStream str, String indent, Object o) {
+		getArgs().genTempArrays_C(p, str, indent, o);
+		for (FExp arg : getArgs()) 
+			if (arg.isArray()) 
+				arg.genTempInputArray_C(p, str, indent, o);
+	}
+	
+	
+	syn lazy String FExp.tempArrayName_C() {
+		return "tmp_array_" + nextTempArrayNbr();
+	}
+	
+	private int FClass.nextTempArrayNbr        = 1;
+	private int FFunctionDecl.nextTempArrayNbr = 1;
+	
+	inh int FExp.nextTempArrayNbr();
+	eq InstNode.getChild().nextTempArrayNbr()      = 0;
+	eq FClass.getChild().nextTempArrayNbr()        = nextTempArrayNbr++;
+	eq FFunctionDecl.getChild().nextTempArrayNbr() = nextTempArrayNbr++;
+	
+	public void FExp.genTempInputArray_C(Printer p, PrintStream str, String indent, Object o) {
+		String name = tempArrayName_C();
+		size().printArrayDecl_C(str, indent, name);
+		String pre = indent + "jmi_array_ref_" + ndims() + "(" + name;
+		Array arr = getArray();
+		for (Index i : arr.indices()) {
+			str.print(pre);
+			i.printWithPrefix_C(str, ", ");
+			str.print(") = ");
+			p.toString(arr.get(i), str, indent, o);
+			str.print(";\n");
+		}
+	}
+	
+	public void Index.printWithPrefix_C(PrintStream str, String prefix) {
+		for (int i : index) {
+			str.print(prefix);
+			str.print(i);
+		}
+	}
+	
 	public void FAbstractEquation.genResidual_C(int i, String indent, PrintStream str) {}
 	
 	public void FEquation.genResidual_C(int i, String indent, PrintStream str) {
+		genTempArrays_C(printer_C, str, indent, null);
 		str.print(indent + "(*res)[" + i + "] = ");
 		getRight().prettyPrint_C(str,"");
 		str.print(" - (");
@@ -523,6 +593,7 @@ aspect CCodeGen {
 	}
 	
 	public void FFunctionCallEquation.genResidual_C(int i, String indent, PrintStream str) {
+		genTempArrays_C(printer_C, str, indent, null);
 		for (FFunctionCallLeft l : getLefts()) {
 			l.setBaseIndex(i);
 			l.genTempVar_C(indent, str);
@@ -538,7 +609,7 @@ aspect CCodeGen {
 		equationIndex = i + myIndex();
 	}
 	syn String FFunctionCallLeft.name_C() {
-		if (equationIndex >=  0) {
+		if (equationIndex >= 0) {
 			StringBuilder b = new StringBuilder();
 			b.append("tmp_var_");
 			b.append(equationIndex);
@@ -580,6 +651,13 @@ aspect CCodeGen {
 			getFIdUse().prettyPrint_C(str, "");
 			str.print(");\n");
 		}
+	}
+	
+	public void FExp.genArgument_C(Printer p, PrintStream str, String indent, Object o) {
+		if (isArray())
+			str.print(tempArrayName_C());
+		else
+			p.toString(this, str, indent, o);
 	}
 
 	public void FBoolBinExp.genResidual_C(int i, String indent, PrintStream str) {

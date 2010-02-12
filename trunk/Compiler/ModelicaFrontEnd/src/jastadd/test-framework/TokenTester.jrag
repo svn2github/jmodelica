@@ -41,7 +41,7 @@ public class TokenTester {
 			while (!done && testSuccess) {
 				String t1 = fms1.nextToken();
 				String t2 = fms2.nextToken();
-				System.out.println("t1: " + t1 + " t2: " + t2);
+//				System.out.println("t1: " + t1 + " t2: " + t2);
 
 				boolean match;
 				if (t1 == null || t2 == null) {

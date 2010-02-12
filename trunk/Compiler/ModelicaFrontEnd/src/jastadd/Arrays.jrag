@@ -1301,13 +1301,6 @@ aspect ArrayIndices {
 		/**
 		 * \brief Creates an iterator that iterates over all FExp nodes in this Array.
 		 */
-		public Iterator<ASTNode> iterator() {
-			return children[0].iterator();
-		}
-		
-		/**
-		 * \brief Creates an iterator that iterates over all FExp nodes in this Array.
-		 */
 		public Iterator<FExp> iteratorFExp() {
 			return getFExps().iterator();
 		}
@@ -1405,7 +1398,38 @@ aspect ArrayIndices {
 			return indices.size();
 		}
 		
+	    /**
+	     * \brief Recursive method for building an FArray describing this Array.
+	     *        For use by methods creating specific types of FArrays.
+	     *  
+	     * @param it       the iterator returned by a call to {@link #iteratorFExp()}
+	     * @param builder  helper object that processes each subexpression
+	     * @param dim      the dimension to process, always use 1
+	     * 
+	     * @see #buildLiteral(boolean)
+	     * @see #buildScalarized(java.util.HashMap<String,Integer>)
+	     */
+	    protected FExp buildFArray(Iterator<FExp> it, ElementBuilder builder, int dim) {
+	    	FArray arr = new FArray(new List<FExp>());
+	    	int n = size().get(dim - 1);
+	    	if (dim < ndims()) {
+	    		for (int i = 0; i < n; i++)
+	    			arr.addFExp(buildFArray(it, builder, dim + 1));
+	    	} else {
+	    		for (int i = 0; i < n; i++) 
+	    			arr.addFExp((FExp) builder.build(it.next()).unboundCopy());
+	    	}
+	    	return arr;
+	    }
 		
+	    /**
+	     * \brief Discribes the helper object for {@link #buildFArray(Iterator<FExp>,ElementBuilder,int)}. 
+	     */
+	    protected interface ElementBuilder {
+	    	public FExp build(FExp e);
+	    }
+		
+	    
 		/**
 		 * \brief Iterates over FExp nodes in this Array.
 		 */
@@ -1482,6 +1506,20 @@ aspect ArrayIndices {
 			length = 1;
 		}
 		
+	    /**
+	     * \brief Recursive method for building an FArray describing this Array.
+	     *        For use by methods creating specific types of FArrays.
+	     *        
+	     * This implementation only applies builder to the single expression of this 
+	     * ScalarAsArray.
+	     * 
+	     * @see #buildLiteral(boolean)
+	     * @see #buildScalarized(java.util.HashMap<String,Integer>)
+	     */
+	    protected FExp buildFArray(Iterator<FExp> it, ElementBuilder builder, int dim) {
+	    	return (FExp) builder.build(it.next()).unboundCopy();
+	    }
+	    
 		/**
 		 * \brief Returns the single element wrapped by this Array. 
 		 */

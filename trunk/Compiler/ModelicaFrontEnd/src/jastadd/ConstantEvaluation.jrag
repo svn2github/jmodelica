@@ -435,38 +435,24 @@ aspect ConstantEvaluation {
      * @throws UnsupportedOperationException  if the expressions aren't constant.
      */
     public FExp Array.buildLiteral(boolean toReal) {
-    	return buildLiteralHelper(iteratorFExp(), toReal, 1);
+    	return buildFArray(iteratorFExp(), new LiteralBuilder(toReal), 1);
     }
     
-    /**
-     * \brief Recursive helper method for {@link #buildLiteral(boolean)}.
-     */
-    protected FExp Array.buildLiteralHelper(Iterator<FExp> it, boolean toReal, int dim) {
-    	FArray arr = new FArray(new List<FExp>());
-    	int n = size().get(dim - 1);
-    	if (dim < ndims()) {
-    		for (int i = 0; i < n; i++)
-    			arr.addFExp(buildLiteralHelper(it, toReal, dim + 1));
-    	} else {
-    		if (toReal) {
-	    		for (int i = 0; i < n; i++) 
-	    			arr.addFExp(it.next().ceval().convertReal().buildLiteral());
-        	} else {
-	    		for (int i = 0; i < n; i++) 
-	    			arr.addFExp(it.next().ceval().buildLiteral());
-        	}
-    	}
-    	return arr;
-    }
-    
-    /**
-     * \brief Recursive helper method for {@link #buildLiteral(boolean)}.
-     */
-    protected FExp ScalarAsArray.buildLiteralHelper(Iterator<FExp> it, boolean toReal, int dim) {
-    	CValue c = it.next().ceval();
-    	if (toReal)
-    		c = c.convertReal();
-    	return c.buildLiteral();
+    public static class Array {
+	    /**
+	     * Helper object for {@link #buildLiteral(boolean)}.
+	     */
+	    protected class LiteralBuilder implements ElementBuilder {
+	    	private boolean toReal;
+	    	
+	    	public LiteralBuilder(boolean toReal) {
+	    		this.toReal = toReal;
+	    	}
+	    	
+			public FExp build(FExp e) {
+				return toReal ? e.ceval().convertReal().buildLiteral() : e.ceval().buildLiteral();
+			}
+	    }
     }
     
   /**

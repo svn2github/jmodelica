@@ -37,10 +37,10 @@ struct jmi_array_t {
 #include "jmi_array_common.h"
 
 // Array creation macro
-#define JMI_ARRAY_DECL(name, n, size) int name##_size[] = size;\
-                                      jmi_real_t name##_var[n];\
-                                      jmi_array_t name##_arr = { name##_size, &name##_var };\
-                                      jmi_array_t* name = &name##_arr;
+#define JMI_ARRAY_DECL(name, n, ...) int name##_size[] = { __VA_ARGS__ };\
+                                     jmi_real_t name##_var[n];\
+                                     jmi_array_t name##_arr = { name##_size, &name##_var };\
+                                     jmi_array_t* name = &name##_arr;
 
 // Access macros
 #define jmi_array_val_1(arr, i1) (arr)->var[(int) i1]
