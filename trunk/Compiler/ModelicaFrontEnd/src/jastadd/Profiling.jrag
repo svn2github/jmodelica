@@ -1,0 +1,420 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Map.Entry;
+import beaver.Symbol;
+
+aspect MemoryUse {
+	
+	/**
+	 * \brief Output a view of an AST, showing the classname and approximate memory footprint of the subtree.
+	 * 
+	 * As {@link #dumpMemoryUse(PrintStream, boolean, int, int)}, with <code>deep = false</code>, 
+	 * <code>maxDepth = -1</code>, <code>minSize = 0</code>, and saving the output to a file.
+	 * 
+	 * @param file     filename to save output as
+	 */
+	public void ASTNode.dumpMemoryUse(String file) throws FileNotFoundException {
+		dumpMemoryUse(file, false);
+	}
+	
+	/**
+	 * \brief Output a view of an AST, showing the classname and approximate memory footprint of the subtree.
+	 * 
+	 * As {@link #dumpMemoryUse(PrintStream, boolean, int, int)}, with <code>maxDepth = -1</code>, 
+	 * <code>minSize = 0</code>, and saving the output to a file.
+	 * 
+	 * @param file     filename to save output as
+	 * @param deep     if the memory calculation should include the contents of non-ASTNode members
+	 */
+	public void ASTNode.dumpMemoryUse(String file, boolean deep) throws FileNotFoundException {
+		dumpMemoryUse(file, deep, -1, 0);
+	}
+	
+	/**
+	 * \brief Output a view of an AST, showing the classname and approximate memory footprint of the subtree.
+	 * 
+	 * As {@link #dumpMemoryUse(PrintStream, boolean, int, int)}, but saving the output to a file.
+	 * 
+	 * @param file     filename to save output as
+	 * @param deep     if the memory calculation should include the contents of non-ASTNode members
+	 * @param maxDepth the maximum depth to display nodes from, -1 means infinite depth
+	 * @param minSize  the minimum memory size to display a node
+	 */
+	public void ASTNode.dumpMemoryUse(String file, boolean deep, int maxDepth, int minSize) throws FileNotFoundException {
+		dumpMemoryUse(new PrintStream(file), deep, maxDepth, minSize);
+	}
+	
+	
+	/**
+	 * \brief Output a view of an AST, showing the classname and approximate memory footprint of the subtree.
+	 * 
+	 * As {@link #dumpMemoryUse(PrintStream, boolean, int, int)}, with <code>deep = false</code>, 
+	 * <code>maxDepth = -1</code> and <code>minSize = 0</code>.
+	 * 
+	 * @param out      stream to use for output
+	 */
+	public void ASTNode.dumpMemoryUse(PrintStream out) {
+		dumpMemoryUse(out, false, -1, 0);
+	}
+	
+	/**
+	 * \brief Output a view of an AST, showing the classname and approximate memory footprint of the subtree.
+	 * 
+	 * As {@link #dumpMemoryUse(PrintStream, boolean, int, int)}, with <code>maxDepth = -1</code> and 
+	 * <code>minSize = 0</code>.
+	 * 
+	 * @param out      stream to use for output
+	 * @param deep     if the memory calculation should include the contents of non-ASTNode members
+	 */
+	public void ASTNode.dumpMemoryUse(PrintStream out, boolean deep) {
+		dumpMemoryUse(out, deep, -1, 0);
+	}
+	
+	/**
+	 * \brief Output a view of an AST, showing the classname and approximate memory footprint of the subtree.
+	 * 
+	 * @param out      stream to use for output
+	 * @param deep     if the memory calculation should include the contents of non-ASTNode members
+	 * @param maxDepth the maximum depth to display nodes from, -1 means infinite depth
+	 * @param minSize  the minimum memory size to display a node
+	 */
+	public void ASTNode.dumpMemoryUse(PrintStream out, boolean deep, int maxDepth, int minSize) {
+		ArrayList<String> rows = new ArrayList<String>();
+		gatherMemoryUse(rows, "", deep, maxDepth, minSize, 0);
+		for (int i = rows.size() - 1; i >= 0; i--)
+			out.println(rows.get(i));
+	}
+	
+	/**
+	 * \brief Traversal method for {@link #dumpMemoryUse(PrintStream, boolean, int, int)}.
+	 * 
+	 * @return approximation of the memory footprint for the subtree
+	 */
+	protected int ASTNode.gatherMemoryUse(ArrayList<String> rows, String indent, boolean deep, int maxDepth, int minSize, int depth) {
+		int mem = Profiler.getNodeSize(this, deep);
+		for (int i = numChildren - 1; i >= 0; i--) {
+			ASTNode node = getChildNoTransform(i);
+			if (node != null)
+				mem += node.gatherMemoryUse(rows, indent + " ", deep, maxDepth, minSize, depth+1);
+		}
+		if ((depth == 0 || mem >= minSize) && (maxDepth < 0 || depth < maxDepth))
+			addMemoryUseRow(rows, indent, mem);
+		return mem;
+	}
+	
+	/**
+	 * \brief Output method for {@link #dumpMemoryUse(PrintStream, boolean, int, int)}.
+	 */
+	protected void ASTNode.addMemoryUseRow(ArrayList<String> rows, String indent, int mem) {
+		rows.add(indent + getClass().getSimpleName() + ": " + Profiler.formatMem(mem));
+	}
+	
+	protected void Opt.addMemoryUseRow(ArrayList<String> rows, String indent, int mem) {}
+
+	/**
+	 * \brief Counts the number of ASTNodes of each type created.
+	 * 
+	 * Activated by changing the superclass of ASTNode to ProfilingNode.
+	 */
+	public class ProfilingNode extends Symbol {
+
+		private static int objects = 0;
+		private static HashMap<String, Counter> names = new HashMap<String, Counter>();
+
+		/**
+		 * \brief If set to <code>true</code>, each instance will be counted as an instance each of 
+		 *        every super class.
+		 */
+		public static boolean COUNT_SUPER = false;
+	    
+		public ProfilingNode() {
+			super();
+			objects++;
+			count(getClass());
+		}
+		
+		private static void count(Class type) {
+			String name = type.getSimpleName();
+			if (names.containsKey(name)) 
+				names.get(name).i++;
+			else
+				names.put(name, new Counter());
+			
+			if (COUNT_SUPER && !name.equals("ASTNode"))
+				count(type.getSuperclass());
+		}
+
+		private static class Counter {
+			public int i = 1;
+		}
+
+		/**
+		 * \brief Resets the counters to 0.
+		 */
+		public static void reset() {
+			objects = 0;
+			names.clear();
+		}
+		
+		/**
+		 * \brief Prints out the collected info.
+		 * 
+		 * @param out     stream to write output to
+		 * @param sorter  comparator for class count entries, use SORT_* constants
+		 */
+		public static void printInfo(PrintStream out, CountSorter sorter) {
+			out.println("Number of AST nodes: " + objects);
+			ArrayList<Map.Entry<String, Counter>> list = new ArrayList<Map.Entry<String, Counter>>();
+			list.addAll(names.entrySet());
+			Collections.sort(list, sorter);
+			for (Map.Entry<String, Counter> e : list) 
+				out.println("  " + e.getKey() + ": " + e.getValue().i);
+		}
+		
+		/**
+		 * \brief Type for the sorter argument for {@link printInfo(PrintStream, CountSorter)}.
+		 */
+		public static abstract class CountSorter implements Comparator<Entry<String, Counter>> {}
+		
+		/**
+		 * \brief Sort output by count, ascending.
+		 */
+		public static final Comparator<Entry<String, Counter>> SORT_COUNT_DESC = new CmpCount(false);
+		
+		/**
+		 * \brief Sort output by count, descending.
+		 */
+		public static final Comparator<Entry<String, Counter>> SORT_COUNT_ASC  = new CmpCount(true);
+		
+		/**
+		 * \brief Sort output by class name, ascending.
+		 */
+		public static final Comparator<Entry<String, Counter>> SORT_CLASS_DESC = new CmpName(false);
+		
+		/**
+		 * \brief Sort output by class name, descending.
+		 */
+		public static final Comparator<Entry<String, Counter>> SORT_CLASS_ASC = new CmpName(true);
+		
+		private static class CmpCount extends CountSorter {
+			
+			private int mul;
+			
+			public CmpCount(boolean reverse) {
+				mul = reverse ? -1 : 1;
+			}
+
+			@Override
+			public int compare(Entry<String, Counter> o1, Entry<String, Counter> o2) {
+				return mul * (o1.getValue().i - o2.getValue().i);
+			}
+
+		}
+		
+		private static class CmpName extends CountSorter {
+			
+			private int mul;
+			
+			public CmpName(boolean reverse) {
+				mul = reverse ? -1 : 1;
+			}
+
+			@Override
+			public int compare(Entry<String, Counter> o1, Entry<String, Counter> o2) {
+				return mul * o1.getKey().compareTo(o2.getKey());
+			}
+
+		}
+		
+	}
+
+	/**
+	 * \brief Contains methods for calculating the size of AST nodes.
+	 * 
+	 * Uses minimum sizes stipulated by language standard, and ignores padding for memory alignment 
+	 * used by many JVMs. Thus values should be treated as minimum values.
+	 */
+	public abstract class Profiler {
+		
+		/**
+		 * \brief Approximates the memory footpring of an AST node.
+		 * 
+		 * @param deep  if the approximation should include the contents of non-ASTNode members
+		 */
+		public static int getNodeSize(ASTNode node, boolean deep) {
+			visited.clear();
+			if (deep)
+				return getObjectSize(node);
+			else 
+				return OBJECT_SHELL_SIZE + getTotalFieldSize(node.getClass());
+		}
+		
+		/**
+		 * \brief Creates a human-readable memory size string (e.g. 2.34 kB).
+		 */
+		public static String formatMem(int mem) {
+			int i;
+			double scaledMem = mem;
+			for (i = 0; i < 4 && scaledMem >= 1000.0; i++)
+				scaledMem /= 1024.0;
+			double round = scaledMem < 10.0 ? 100.0 : 10.0;
+			scaledMem = Math.round(scaledMem * round) / round;
+			StringBuilder buf = new StringBuilder();
+			if (i == 0)
+				buf.append(mem);
+			else
+				buf.append(scaledMem);
+			buf.append(prefix[i]);
+			buf.append("B");
+			return buf.toString();
+		}
+		
+		private static final String[] prefix = { "", "k", "M", "G" };
+
+	    private static final int OBJECT_SHELL_SIZE   = 8;
+	    private static final int OBJREF_SIZE         = 4;
+	    private static final int LONG_FIELD_SIZE     = 8;
+	    private static final int INT_FIELD_SIZE      = 4;
+	    private static final int SHORT_FIELD_SIZE    = 2;
+	    private static final int CHAR_FIELD_SIZE     = 2;
+	    private static final int BYTE_FIELD_SIZE     = 1;
+	    private static final int BOOLEAN_FIELD_SIZE  = 1;
+	    private static final int DOUBLE_FIELD_SIZE   = 8;
+	    private static final int FLOAT_FIELD_SIZE    = 4;
+
+		private static HashMap<Class, Integer> totalFieldSize = new HashMap<Class, Integer>();
+		private static IdentityHashMap<Object, Object> visited = new IdentityHashMap<Object, Object>();
+	    
+	    private static class GetFieldsAction implements PrivilegedAction {
+	    	
+	    	private Class cls;
+
+			public GetFieldsAction set(Class cl) {
+	    		cls = cl;
+	    		return this;
+	    	}
+
+			public Object run() {
+				return cls.getDeclaredFields();
+			}
+	    	
+	    }
+	    
+	    private static class GetValueAction implements PrivilegedExceptionAction {
+	    	
+	    	private Field field;
+
+			public GetValueAction set(Field f) {
+	    		field = f;
+	    		return this;
+	   	}
+
+			public Object run() throws Exception {
+				field.setAccessible(true);
+				return null;
+			}
+	    	
+	    }
+	    
+		private static GetFieldsAction getFields = new GetFieldsAction();
+		private static GetValueAction  getValue  = new GetValueAction();
+		
+		private static int getObjectSize(Object o) {
+			if (o == null || visited.containsKey(o))
+				return 0;
+			visited.put(o, null);
+			
+			Class type = o.getClass();
+			if (type.isArray())
+				return getArraySize(o, type);
+			
+			int mem = getTotalFieldSize(type);
+			for (; type != null; type = type.getSuperclass())
+				for (Field f : (Field[]) AccessController.doPrivileged(getFields.set(type))) 
+					if ((f.getModifiers() & Modifier.STATIC) == 0) 
+						mem += getObjectFieldSize(f, o);
+			return mem;
+		}
+		
+		private static int getTotalFieldSize(Class type) {
+			if (totalFieldSize.containsKey(type))
+				return totalFieldSize.get(type);
+			
+			int mem = 0;
+			if (type != Object.class)
+				mem = getTotalFieldSize(type.getSuperclass());
+			
+			for (Field f : (Field[]) AccessController.doPrivileged(getFields.set(type))) 
+				if ((f.getModifiers() & Modifier.STATIC) == 0) 
+					mem += getFieldSize(f.getType());
+			
+			totalFieldSize.put(type, mem);
+			return mem;
+		}
+		
+		private static int getFieldSize(Class type) {
+	        if (type == int.class)
+	            return INT_FIELD_SIZE;
+	        else if (type == long.class)
+	        	return LONG_FIELD_SIZE;
+	        else if (type == short.class)
+	        	return SHORT_FIELD_SIZE;
+	        else if (type == byte.class)
+	        	return BYTE_FIELD_SIZE;
+	        else if (type == boolean.class)
+	        	return BOOLEAN_FIELD_SIZE;
+	        else if (type == char.class)
+	        	return CHAR_FIELD_SIZE;
+	        else if (type == double.class)
+	        	return DOUBLE_FIELD_SIZE;
+	        else if (type == float.class)
+	        	return FLOAT_FIELD_SIZE;
+        	return OBJREF_SIZE;
+		}
+		
+		private static int getObjectFieldSize(Field f, Object o) {
+			Class type = f.getType();
+			if (type.isPrimitive() || ASTNode.class.isAssignableFrom(type))
+				return 0;
+			try {
+				AccessController.doPrivileged(getValue.set(f));
+				return getObjectSize(f.get(o));
+			} catch (Exception e) {
+				System.err.println("Could not read member: " + o.getClass().getSimpleName() + "." + f.getName());
+				return OBJREF_SIZE;
+			}
+		}
+		
+		private static int getArraySize(Object o, Class type) {
+			int len = java.lang.reflect.Array.getLength(o);
+			int size = getFieldSize(type.getComponentType());
+			return OBJECT_SHELL_SIZE + INT_FIELD_SIZE + OBJREF_SIZE + len * size;
+		}
+
+	}
+
+}
