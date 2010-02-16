@@ -22,6 +22,9 @@ CPPAD_HOME=${JMODELICA_SRC}/ThirdParty/CppAD/cppad-20090303.0/
 PYTHONPATH=${PYTHON_HOME}:${JMODELICA_HOME}/Python/ 
 LD_LIBRARY_PATH=/lib:${IPOPT_HOME}/lib 
 
+# Memory allocation for the ant process
+ANT_OPTS="-Xmx512m"
+
 # Default tests - run if no tests are chosen
 # Possible values: modelica, optimica, python or combination (e.g. "modelica optimica")
 DEFAULT_TESTS="optimica python"
@@ -153,7 +156,7 @@ for a in ${tests}; do
     test[${i}]=0
     (( ${a}=i++ ))
 done
-export JAVA_HOME JMODELICA_HOME IPOPT_HOME CPPAD_HOME PYTHONPATH LD_LIBRARY_PATH
+export JAVA_HOME JMODELICA_HOME IPOPT_HOME CPPAD_HOME PYTHONPATH LD_LIBRARY_PATH ANT_OPTS
 TIME=$(date +%s)
 
 for a in ${DEFAULT_ARGS} $*; do
