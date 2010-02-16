@@ -228,7 +228,6 @@ aspect MemoryUse {
 				mul = reverse ? -1 : 1;
 			}
 
-			@Override
 			public int compare(Entry<String, Counter> o1, Entry<String, Counter> o2) {
 				return mul * (o1.getValue().i - o2.getValue().i);
 			}
@@ -243,7 +242,6 @@ aspect MemoryUse {
 				mul = reverse ? -1 : 1;
 			}
 
-			@Override
 			public int compare(Entry<String, Counter> o1, Entry<String, Counter> o2) {
 				return mul * o1.getKey().compareTo(o2.getKey());
 			}
