@@ -105,8 +105,8 @@ model CCodeGenTest4
         "$C_DAE_equation_residuals$",
         generatedCode="
     (*res)[0] = _y_ - (_der_x_);
-    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(time,jmi_divide(3.141592653589793,2,\"Divide by zero: ( 3.141592653589793 ) / ( 2 )\"),AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0)),AD_WRAP_LITERAL(1),si
-n(time),_x_)) - (_y_);
+    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(time,jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: ( 3.141592653589793 ) / ( 2 )\"),AD_WRAP_LITERAL(1
+),AD_WRAP_LITERAL(0)),AD_WRAP_LITERAL(1),sin(time),_x_)) - (_y_);
 ")})));
   Real x(start=0);
   Real y = noEvent(if time <= Modelica.Constants.pi/2 then sin(time) else x);
@@ -124,8 +124,8 @@ model CCodeGenTest5
         "$C_DAE_equation_residuals$",
         generatedCode="
     (*res)[0] = _y_ - (_der_x_);
-    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(time,_one_,AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0)),AD_WRAP_LITERAL(1),_x_,(COND_EXP_EQ(COND_EXP_LE(time,_two_,AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0
-)),AD_WRAP_LITERAL(1),(  - ( 2 ) ) * ( _x_ ),( 3 ) * ( _x_ ))))) - (_y_);
+    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(time,_one_,AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0)),AD_WRAP_LITERAL(1),_x_,(COND_EXP_EQ(COND_EXP_LE(time,_two_,AD_WRAP_LITERAL(1),AD_WRAP_
+LITERAL(0)),AD_WRAP_LITERAL(1),(  - ( AD_WRAP_LITERAL(2) ) ) * ( _x_ ),( AD_WRAP_LITERAL(3) ) * ( _x_ ))))) - (_y_);
 ")})));
 
 
@@ -197,6 +197,30 @@ equation
  der(x) = y; 
 end CCodeGenTest7;
 
+model CCodeGenTest8
+
+  	  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.CCodeGenTestCase(name="CCodeGenTest8",
+        description="Test of code generation",
+        template = 
+        "$C_DAE_equation_residuals$",
+        generatedCode="
+
+    (*res)[0] = (COND_EXP_EQ(_sw(0),AD_WRAP_LITERAL(1), - ( AD_WRAP_LITERAL(1) ) + _y_, - ( _y_ ))) - (_x_);
+    (*res)[1] = _z_ + _x_ + (COND_EXP_EQ(_sw(1),AD_WRAP_LITERAL(1), - ( AD_WRAP_LITERAL(3) ),AD_WRAP_LITERAL(3))) - (_y_);
+    (*res)[2] =  - ( _y_ ) - ( _x_ ) + (COND_EXP_EQ(_sw(2),AD_WRAP_LITERAL(1), - ( AD_WRAP_LITERAL(1) ),AD_WRAP_LITERAL(1))) - (_z_);
+
+")})));
+
+  Real x(start=0);
+  Real y(start=1);
+  Real z(start=0);
+equation
+   x = if time>=1 then (-1 + y) else  (- y);
+   y = z + x +(if z>=-1.5 then -3 else 3);
+   z = -y  - x + (if y>=0.5 then -1 else 1);
+
+end CCodeGenTest8;
 
 
 model CCodeGenDotOp
@@ -1344,7 +1368,6 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput8_f2_exp(jmi_array_t* inp_a) {
  
  Real x = f1();
 end CArrayInput8;
-
 
 
 end CCodeGenTests;
