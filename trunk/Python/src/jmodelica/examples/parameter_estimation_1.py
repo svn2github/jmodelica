@@ -125,9 +125,9 @@ def run_demo(with_plots=True):
     w = res.get_variable_data('sys.w')
     z = res.get_variable_data('sys.z')
     
-    assert N.abs(w.x[-1] - 1.038809) < 1e-4, \
+    assert N.abs(w.x[-1] - 1.051198) < 1e-4, \
             "Wrong value of parameter w in parameter_estimation_1.py"  
-    assert N.abs(z.x[-1] - 0.454533) < 1e-4, \
+    assert N.abs(z.x[-1] - 0.448710 ) < 1e-4, \
             "Wrong value of parameter z in parameter_estimation_1.py"  
     
     if with_plots:

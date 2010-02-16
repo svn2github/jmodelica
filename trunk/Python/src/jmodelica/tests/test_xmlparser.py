@@ -835,7 +835,7 @@ def t_get_w_lin_tp_values(xmldoc):
             assert val.__class__ is bool, \
                 "Time point value is not bool."
     tps = d.get(30)
-    nose.tools.assert_equal(len(tps),10)
+    nose.tools.assert_equal(len(tps),11)
     nose.tools.assert_equal(tps[0],True)
 
 @testattr(stddist = True)
