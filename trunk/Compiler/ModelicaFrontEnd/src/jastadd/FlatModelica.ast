@@ -180,6 +180,13 @@ FPublicVisibilityType : FVisibilityType ::=;
 FProtectedVisibilityType : FVisibilityType ::=;
 
 /**
+ * \brief Visibility for temporary variable. 
+ *
+ * Used to mark temporary variables added to handle function calls returning array.
+ */
+FTemporaryVisibilityType : FPublicVisibilityType ::=;
+
+/**
  * \brief Base class for primitive type nodes.
  *
  * The flat type system is based on explicit representations of the primitive
@@ -352,7 +359,7 @@ FFunctionCallEquation : FAbstractEquation ::= Left:FFunctionCallLeft* Call:FAbst
  * Needed because it is allowed to leave places in the variable list empty.
  * Example: (x, , z) = func(a, b);
  */
-FFunctionCallLeft ::= [FIdUse];
+FFunctionCallLeft ::= [FExp];
 
 /**
  * \brief A flattened connect statement.

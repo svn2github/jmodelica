@@ -1,3 +1,19 @@
+/*
+    Copyright (C) 2010 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package org.jmodelica.util;
 
 import java.io.BufferedReader;
@@ -9,6 +25,7 @@ import java.io.PrintStream;
 import java.io.StringReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -60,7 +77,7 @@ abstract public class TestAnnotationizer {
 		
 		try {
 			for (Class cl : TestAnnotationizer.class.getClasses()) {
-				if (cl.getSimpleName().equals(testType)) {
+				if (cl.getSimpleName().equals(testType) && !Modifier.isAbstract(cl.getModifiers())) {
 					Constructor constructor = cl.getConstructor(String.class, String.class, String.class, String.class);
 					TestAnnotationizer ta = (TestAnnotationizer) constructor.newInstance(filePath, className, description, data);
 					if (write)
@@ -72,9 +89,10 @@ abstract public class TestAnnotationizer {
 			}
 		} catch (InvocationTargetException e) {
 			System.out.println("Creating annotation failed:");
-			String message = e.getCause().getMessage();
-			if (message == null || message.length() < 30)
-				System.out.println(e.getCause());
+			Throwable cause = e.getCause();
+			String message = cause.getMessage();
+			if (message == null || !(cause instanceof ModelicaException))
+				cause.printStackTrace();
 			else
 				System.out.println(message);
 			System.exit(1);
@@ -103,7 +121,8 @@ abstract public class TestAnnotationizer {
 		System.out.println("  User will be prompted for type and/or class if not set with options.");
 		System.out.println("  Available test types:");
 		for (Class cl : TestAnnotationizer.class.getClasses()) 
-			cl.getMethod("usage", String.class, String.class).invoke(null, cl.getSimpleName(), null);
+			if (!Modifier.isAbstract(cl.getModifiers()))
+				cl.getMethod("usage", String.class, String.class).invoke(null, cl.getSimpleName(), null);
 		System.exit(errorLevel);
 	}
 	
@@ -229,19 +248,36 @@ abstract public class TestAnnotationizer {
 
 	abstract protected void printSpecific(PrintStream out, String indent) throws Exception;
 
-	public static class CCodeGenTestCase extends TestAnnotationizer {
+	public static abstract class CodeGenTestCase extends TestAnnotationizer {
 
-		private String template;
-		private String code;
+		protected String template;
+		protected String code;
 
-		public CCodeGenTestCase(String filePath, String className, String description, String data) throws Exception {
+		public CodeGenTestCase(String filePath, String className, String description, String data) throws Exception {
 			super(filePath, className, description, data);
 			template = prepare(data.replaceAll("\\\\n", "\n"));
 			FClass fc = compile();
-			CGenerator cgenerator = new CGenerator(new PrettyPrinter(), '$', fc);
+			AbstractGenerator generator = createGenerator(fc);
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
-			cgenerator.generate(new StringReader(template), new PrintStream(os));
+			generator.generate(new StringReader(template), new PrintStream(os));
 			code = prepare(os.toString());
+		}
+		
+		public abstract AbstractGenerator createGenerator(FClass fc);
+
+		@Override
+		protected void printSpecific(PrintStream out, String indent) throws Exception {
+			out.print(indent + "template=\"\n" + template);
+			out.print("\n\",\n" + indent + "generatedCode=\"\n" + code);
+			out.print("\"");
+		}
+		
+	}
+
+	public static class CCodeGenTestCase extends CodeGenTestCase {
+
+		public CCodeGenTestCase(String filePath, String className, String description, String data) throws Exception {
+			super(filePath, className, description, data);
 		}
 		
 		public static void usage(String cl, String extra) {
@@ -249,10 +285,25 @@ abstract public class TestAnnotationizer {
 		}
 
 		@Override
-		protected void printSpecific(PrintStream out, String indent) throws Exception {
-			out.print(indent + "template=\"\n" + template);
-			out.print("\n\",\n" + indent + "generatedCode=\"\n" + code);
-			out.print("\"");
+		public AbstractGenerator createGenerator(FClass fc) {
+			return new CGenerator(new PrettyPrinter(), '$', fc);
+		}
+		
+	}
+
+	public static class GenericCodeGenTestCase extends CodeGenTestCase {
+
+		public GenericCodeGenTestCase(String filePath, String className, String description, String data) throws Exception {
+			super(filePath, className, description, data);
+		}
+		
+		public static void usage(String cl, String extra) {
+			TestAnnotationizer.usage(cl, "generic code template");
+		}
+
+		@Override
+		public AbstractGenerator createGenerator(FClass fc) {
+			return new GenericGenerator(new PrettyPrinter(), '$', fc);
 		}
 		
 	}
@@ -292,7 +343,7 @@ abstract public class TestAnnotationizer {
 			super(filePath, className, description, data);
 			try {
 				mc.instantiateModel(root, className);
-				throw new Exception("No errors reported in ErrorTestCase.");
+				throw new ModelicaException("No errors reported in ErrorTestCase.");
 			} catch (CompilerException e) {
 				StringBuffer str = new StringBuffer();
 				str.append(e.getProblems().size() + " errors found:\n");

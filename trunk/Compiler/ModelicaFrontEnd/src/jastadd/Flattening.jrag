@@ -537,7 +537,7 @@ aspect FlatExpressions {
 	}
 	
 	public FFunctionCallLeft FFunctionCallLeft.flatten(FQName prefix) {
-		return new FFunctionCallLeft(hasFIdUse() ? new Opt(getFIdUse().flatten(prefix)) : new Opt());
+		return new FFunctionCallLeft(hasFExp() ? new Opt(getFExp().flatten(prefix)) : new Opt());
 	}
 
 	public FAlgorithmBlock FAlgorithmBlock.flatten(FQName prefix) {
@@ -648,6 +648,11 @@ aspect FlatExpressions {
 
     public FIdUse FIdUse.flatten(FQName prefix) {
     	return (FIdUse)fullCopy();
+    }
+    
+    public FExp FIdUseExp.flatten(FQName prefix) {
+    	// TODO: Replace with constant exp for constants? Do this for FExp in general instead?
+		return new FIdUseExp(getFIdUse().flatten(prefix));
     }
 
 	public FExp FInstAccessExp.flatten(FQName prefix) {
@@ -934,7 +939,9 @@ aspect InstantiatedExpressions {
 	}
 	
 	public 	FFunctionCallLeft FunctionCallLeft.instantiate() {
-		Opt id = hasAccess() ? new Opt(new FIdUseInstAccess(new FQName(), getAccess().newInstAccess())) : new Opt();
+		Opt id = hasAccess() ? 
+				new Opt(new FIdUseExp(new FIdUseInstAccess(new FQName(), getAccess().newInstAccess()))) : 
+				new Opt();
 		return new FFunctionCallLeft(id);
 	}
 	

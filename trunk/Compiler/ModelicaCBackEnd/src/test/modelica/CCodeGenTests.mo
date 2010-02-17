@@ -343,21 +343,22 @@ model CFunctionTest1
 $C_function_headers$
 $C_functions$
 $C_DAE_equation_residuals$
-", 
+",
          generatedCode="
 void func_CCodeGenTests_TestFunction1_def(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_r);
 jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp(jmi_ad_var_t i1_v);
 
 void func_CCodeGenTests_TestFunction1_def(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_r) {
-   jmi_ad_var_t o1_v = i1_v;
-   if (o1_r != NULL) *o1_r = o1_v;
-   return;
+    jmi_ad_var_t o1_v;
+    o1_v = i1_v;
+    if (o1_r != NULL) *o1_r = o1_v;
+    return;
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp(jmi_ad_var_t i1_v) {
-   jmi_ad_var_t o1_v = i1_v;
-   func_CCodeGenTests_TestFunction1_def(i1_v, &o1_v);
-   return o1_v;
+    jmi_ad_var_t o1_v;
+    func_CCodeGenTests_TestFunction1_def(i1_v, &o1_v);
+    return o1_v;
 }
 
 
@@ -384,8 +385,10 @@ void func_CCodeGenTests_TestFunction2_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, 
 jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v);
 
 void func_CCodeGenTests_TestFunction2_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t* o1_r, jmi_ad_var_t* o2_r) {
-   jmi_ad_var_t o1_v = 0;
-   jmi_ad_var_t o2_v = i2_v;
+   jmi_ad_var_t o1_v;
+   jmi_ad_var_t o2_v;
+   o1_v = 0;
+   o2_v = i2_v;
    o1_v = i1_v;
    if (o1_r != NULL) *o1_r = o1_v;
    if (o2_r != NULL) *o2_r = o2_v;
@@ -393,7 +396,7 @@ void func_CCodeGenTests_TestFunction2_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, 
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v) {
-   jmi_ad_var_t o1_v = 0;
+   jmi_ad_var_t o1_v;
    func_CCodeGenTests_TestFunction2_def(i1_v, i2_v, &o1_v, NULL);
    return o1_v;
 }
@@ -427,8 +430,10 @@ void func_CCodeGenTests_TestFunction2_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, 
 jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v);
 
 void func_CCodeGenTests_TestFunction2_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t* o1_r, jmi_ad_var_t* o2_r) {
-   jmi_ad_var_t o1_v = 0;
-   jmi_ad_var_t o2_v = i2_v;
+   jmi_ad_var_t o1_v;
+   jmi_ad_var_t o2_v;
+   o1_v = 0;
+   o2_v = i2_v;
    o1_v = i1_v;
    if (o1_r != NULL) *o1_r = o1_v;
    if (o2_r != NULL) *o2_r = o2_v;
@@ -436,7 +441,7 @@ void func_CCodeGenTests_TestFunction2_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, 
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v) {
-   jmi_ad_var_t o1_v = 0;
+   jmi_ad_var_t o1_v;
    func_CCodeGenTests_TestFunction2_def(i1_v, i2_v, &o1_v, NULL);
    return o1_v;
 }
@@ -469,8 +474,10 @@ void func_CCodeGenTests_TestFunction1_def(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_r)
 jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp(jmi_ad_var_t i1_v);
 
 void func_CCodeGenTests_TestFunction2_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t* o1_r, jmi_ad_var_t* o2_r) {
-   jmi_ad_var_t o1_v = 0;
-   jmi_ad_var_t o2_v = i2_v;
+   jmi_ad_var_t o1_v;
+   jmi_ad_var_t o2_v;
+   o1_v = 0;
+   o2_v = i2_v;
    o1_v = i1_v;
    if (o1_r != NULL) *o1_r = o1_v;
    if (o2_r != NULL) *o2_r = o2_v;
@@ -478,19 +485,20 @@ void func_CCodeGenTests_TestFunction2_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, 
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v) {
-   jmi_ad_var_t o1_v = 0;
+   jmi_ad_var_t o1_v;
    func_CCodeGenTests_TestFunction2_def(i1_v, i2_v, &o1_v, NULL);
    return o1_v;
 }
 
 void func_CCodeGenTests_TestFunction1_def(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_r) {
-   jmi_ad_var_t o1_v = i1_v;
+   jmi_ad_var_t o1_v;
+   o1_v = i1_v;
    if (o1_r != NULL) *o1_r = o1_v;
    return;
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp(jmi_ad_var_t i1_v) {
-   jmi_ad_var_t o1_v = i1_v;
+   jmi_ad_var_t o1_v;
    func_CCodeGenTests_TestFunction1_def(i1_v, &o1_v);
    return o1_v;
 }
@@ -521,9 +529,12 @@ void func_CCodeGenTests_TestFunction3_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, 
 jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t i3_v);
 
 void func_CCodeGenTests_TestFunction3_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t i3_v, jmi_ad_var_t* o1_r, jmi_ad_var_t* o2_r, jmi_ad_var_t* o3_r) {
-   jmi_ad_var_t o1_v = i1_v + i2_v + i3_v;
-   jmi_ad_var_t o2_v = i2_v + i3_v;
-   jmi_ad_var_t o3_v = i1_v + i2_v;
+   jmi_ad_var_t o1_v;
+   jmi_ad_var_t o2_v;
+   jmi_ad_var_t o3_v;
+   o1_v = i1_v + i2_v + i3_v;
+   o2_v = i2_v + i3_v;
+   o3_v = i1_v + i2_v;
    if (o1_r != NULL) *o1_r = o1_v;
    if (o2_r != NULL) *o2_r = o2_v;
    if (o3_r != NULL) *o3_r = o3_v;
@@ -531,7 +542,7 @@ void func_CCodeGenTests_TestFunction3_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, 
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t i3_v) {
-   jmi_ad_var_t o1_v = i1_v + i2_v + i3_v;
+   jmi_ad_var_t o1_v;
    func_CCodeGenTests_TestFunction3_def(i1_v, i2_v, i3_v, &o1_v, NULL, NULL);
    return o1_v;
 }
@@ -565,9 +576,12 @@ void func_CCodeGenTests_TestFunction3_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, 
 jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t i3_v);
 
 void func_CCodeGenTests_TestFunction3_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t i3_v, jmi_ad_var_t* o1_r, jmi_ad_var_t* o2_r, jmi_ad_var_t* o3_r) {
-   jmi_ad_var_t o1_v = i1_v + i2_v + i3_v;
-   jmi_ad_var_t o2_v = i2_v + i3_v;
-   jmi_ad_var_t o3_v = i1_v + i2_v;
+   jmi_ad_var_t o1_v;
+   jmi_ad_var_t o2_v;
+   jmi_ad_var_t o3_v;
+   o1_v = i1_v + i2_v + i3_v;
+   o2_v = i2_v + i3_v;
+   o3_v = i1_v + i2_v;
    if (o1_r != NULL) *o1_r = o1_v;
    if (o2_r != NULL) *o2_r = o2_v;
    if (o3_r != NULL) *o3_r = o3_v;
@@ -575,7 +589,7 @@ void func_CCodeGenTests_TestFunction3_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, 
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t i3_v) {
-   jmi_ad_var_t o1_v = i1_v + i2_v + i3_v;
+   jmi_ad_var_t o1_v;
    func_CCodeGenTests_TestFunction3_def(i1_v, i2_v, i3_v, &o1_v, NULL, NULL);
    return o1_v;
 }
@@ -609,8 +623,10 @@ void func_CCodeGenTests_TestFunction2_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, 
 jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v);
 
 void func_CCodeGenTests_TestFunction2_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t* o1_r, jmi_ad_var_t* o2_r) {
-   jmi_ad_var_t o1_v = 0;
-   jmi_ad_var_t o2_v = i2_v;
+   jmi_ad_var_t o1_v;
+   jmi_ad_var_t o2_v;
+   o1_v = 0;
+   o2_v = i2_v;
    o1_v = i1_v;
    if (o1_r != NULL) *o1_r = o1_v;
    if (o2_r != NULL) *o2_r = o2_v;
@@ -618,7 +634,7 @@ void func_CCodeGenTests_TestFunction2_def(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, 
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v) {
-   jmi_ad_var_t o1_v = 0;
+   jmi_ad_var_t o1_v;
    func_CCodeGenTests_TestFunction2_def(i1_v, i2_v, &o1_v, NULL);
    return o1_v;
 }
@@ -661,13 +677,14 @@ jmi_ad_var_t func_CCodeGenTests_TestFunctionCallingFunction_exp(jmi_ad_var_t i1_
 }
 
 void func_CCodeGenTests_TestFunction1_def(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_r) {
-   jmi_ad_var_t o1_v = i1_v;
+   jmi_ad_var_t o1_v;
+   o1_v = i1_v;
    if (o1_r != NULL) *o1_r = o1_v;
    return;
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp(jmi_ad_var_t i1_v) {
-   jmi_ad_var_t o1_v = i1_v;
+   jmi_ad_var_t o1_v;
    func_CCodeGenTests_TestFunction1_def(i1_v, &o1_v);
    return o1_v;
 }
@@ -678,7 +695,9 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp(jmi_ad_var_t i1_v) {
 
  Real x = TestFunctionCallingFunction(1);
 end CFunctionTest8;
-/*
+
+
+/* TODO: Why is this commented out?
 model CFunctionTest9
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
@@ -717,6 +736,7 @@ jmi_ad_var_t func_CCodeGenTests_TestFunctionRecursive_exp(jmi_ad_var_t i1_v) {
  Real x = TestFunctionRecursive(5);
 end CFunctionTest9;
 */
+
 model CFunctionTest10
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
@@ -732,13 +752,14 @@ void func_CCodeGenTests_TestFunction0_def(jmi_ad_var_t* o1_r);
 jmi_ad_var_t func_CCodeGenTests_TestFunction0_exp();
 
 void func_CCodeGenTests_TestFunction0_def(jmi_ad_var_t* o1_r) {
-   jmi_ad_var_t o1_v = 0;
+   jmi_ad_var_t o1_v;
+   o1_v = 0;
    if (o1_r != NULL) *o1_r = o1_v;
    return;
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction0_exp() {
-   jmi_ad_var_t o1_v = 0;
+   jmi_ad_var_t o1_v;
    func_CCodeGenTests_TestFunction0_def(&o1_v);
    return o1_v;
 }
@@ -762,14 +783,8 @@ $C_DAE_equation_residuals$
 ",
          generatedCode="
 void func_CCodeGenTests_TestFunctionNoOut_def(jmi_ad_var_t i1_v);
-void func_CCodeGenTests_TestFunctionNoOut_exp(jmi_ad_var_t i1_v);
 
 void func_CCodeGenTests_TestFunctionNoOut_def(jmi_ad_var_t i1_v) {
-   return;
-}
-
-void func_CCodeGenTests_TestFunctionNoOut_exp(jmi_ad_var_t i1_v) {
-   func_CCodeGenTests_TestFunctionNoOut_def(i1_v);
    return;
 }
 
@@ -793,8 +808,10 @@ $C_functions$
 ",
          generatedCode="
 void func_CCodeGenTests_CForLoop1_f_def(jmi_ad_var_t* o_r) {
-    jmi_ad_var_t o_v = 1.0;
-    jmi_ad_var_t x_v = 0;
+    jmi_ad_var_t o_v;
+    jmi_ad_var_t x_v;
+    o_v = 1.0;
+    x_v = 0;
     for (jmi_ad_var_t i_i = 1; i_i <= 3; i_i += 1) {
         x_v = x_v + i_i;
     }
@@ -803,7 +820,7 @@ void func_CCodeGenTests_CForLoop1_f_def(jmi_ad_var_t* o_r) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CForLoop1_f_exp() {
-    jmi_ad_var_t o_v = 1.0;
+    jmi_ad_var_t o_v;
     func_CCodeGenTests_CForLoop1_f_def(&o_v);
     return o_v;
 }
@@ -833,8 +850,10 @@ $C_functions$
 ",
          generatedCode="
 void func_CCodeGenTests_CForLoop2_f_def(jmi_ad_var_t* o_r) {
-    jmi_ad_var_t o_v = 1.0;
-    jmi_ad_var_t x_v = 0;
+    jmi_ad_var_t o_v;
+    jmi_ad_var_t x_v;
+    o_v = 1.0;
+    x_v = 0;
     jmi_ad_var_t i_ia[] = { 2, 3, 5 };
     for (int i_ii = 0; i_ii < 3; i_ii++) {
         jmi_ad_var_t i_i = i_ia[i_ii];
@@ -845,7 +864,7 @@ void func_CCodeGenTests_CForLoop2_f_def(jmi_ad_var_t* o_r) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CForLoop2_f_exp() {
-    jmi_ad_var_t o_v = 1.0;
+    jmi_ad_var_t o_v;
     func_CCodeGenTests_CForLoop2_f_def(&o_v);
     return o_v;
 }
@@ -881,13 +900,14 @@ void func_CCodeGenTests_CArrayInput1_f_def(jmi_array_t* inp_a, jmi_ad_var_t* out
 jmi_ad_var_t func_CCodeGenTests_CArrayInput1_f_exp(jmi_array_t* inp_a);
 
 void func_CCodeGenTests_CArrayInput1_f_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r) {
-    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    jmi_ad_var_t out_v;
+    out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
     if (out_r != NULL) *out_r = out_v;
     return;
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput1_f_exp(jmi_array_t* inp_a) {
-    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    jmi_ad_var_t out_v;
     func_CCodeGenTests_CArrayInput1_f_def(inp_a, &out_v);
     return out_v;
 }
@@ -925,13 +945,14 @@ void func_CCodeGenTests_CArrayInput2_f_def(jmi_array_t* inp_a, jmi_ad_var_t* out
 jmi_ad_var_t func_CCodeGenTests_CArrayInput2_f_exp(jmi_array_t* inp_a);
 
 void func_CCodeGenTests_CArrayInput2_f_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r) {
-    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    jmi_ad_var_t out_v;
+    out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
     if (out_r != NULL) *out_r = out_v;
     return;
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput2_f_exp(jmi_array_t* inp_a) {
-    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    jmi_ad_var_t out_v;
     func_CCodeGenTests_CArrayInput2_f_def(inp_a, &out_v);
     return out_v;
 }
@@ -969,13 +990,14 @@ void func_CCodeGenTests_CArrayInput3_f_def(jmi_array_t* inp_a, jmi_ad_var_t* out
 jmi_ad_var_t func_CCodeGenTests_CArrayInput3_f_exp(jmi_array_t* inp_a);
 
 void func_CCodeGenTests_CArrayInput3_f_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r) {
-    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    jmi_ad_var_t out_v;
+    out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
     if (out_r != NULL) *out_r = out_v;
     return;
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput3_f_exp(jmi_array_t* inp_a) {
-    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    jmi_ad_var_t out_v;
     func_CCodeGenTests_CArrayInput3_f_def(inp_a, &out_v);
     return out_v;
 }
@@ -1026,7 +1048,8 @@ void func_CCodeGenTests_CArrayInput4_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* ou
 jmi_ad_var_t func_CCodeGenTests_CArrayInput4_f2_exp(jmi_array_t* inp_a);
 
 void func_CCodeGenTests_CArrayInput4_f1_def(jmi_ad_var_t* out_r) {
-    jmi_ad_var_t out_v = 1.0;
+    jmi_ad_var_t out_v;
+    out_v = 1.0;
     JMI_ARRAY_DECL(tmp_array_1, 3, 3);
     jmi_array_ref_1(tmp_array_1, 1) = 1.0;
     jmi_array_ref_1(tmp_array_1, 2) = 2.0;
@@ -1037,19 +1060,20 @@ void func_CCodeGenTests_CArrayInput4_f1_def(jmi_ad_var_t* out_r) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput4_f1_exp() {
-    jmi_ad_var_t out_v = 1.0;
+    jmi_ad_var_t out_v;
     func_CCodeGenTests_CArrayInput4_f1_def(&out_v);
     return out_v;
 }
 
 void func_CCodeGenTests_CArrayInput4_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r) {
-    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    jmi_ad_var_t out_v;
+    out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
     if (out_r != NULL) *out_r = out_v;
     return;
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput4_f2_exp(jmi_array_t* inp_a) {
-    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    jmi_ad_var_t out_v;
     func_CCodeGenTests_CArrayInput4_f2_def(inp_a, &out_v);
     return out_v;
 }
@@ -1088,8 +1112,9 @@ void func_CCodeGenTests_CArrayInput5_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* ou
 jmi_ad_var_t func_CCodeGenTests_CArrayInput5_f2_exp(jmi_array_t* inp_a);
 
 void func_CCodeGenTests_CArrayInput5_f1_def(jmi_ad_var_t* out_r) {
-    jmi_ad_var_t out_v = 1.0;
+    jmi_ad_var_t out_v;
     jmi_ad_var_t t_v;
+    out_v = 1.0;
     JMI_ARRAY_DECL(tmp_array_1, 3, 3);
     jmi_array_ref_1(tmp_array_1, 1) = 1.0;
     jmi_array_ref_1(tmp_array_1, 2) = 2.0;
@@ -1100,21 +1125,23 @@ void func_CCodeGenTests_CArrayInput5_f1_def(jmi_ad_var_t* out_r) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput5_f1_exp() {
-    jmi_ad_var_t out_v = 1.0;
+    jmi_ad_var_t out_v;
     func_CCodeGenTests_CArrayInput5_f1_def(&out_v);
     return out_v;
 }
 
 void func_CCodeGenTests_CArrayInput5_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* out1_r, jmi_ad_var_t* out2_r) {
-    jmi_ad_var_t out1_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
-    jmi_ad_var_t out2_v = jmi_max(jmi_max(jmi_array_val_1(inp_a, 1), jmi_array_val_1(inp_a, 2)), jmi_array_val_1(inp_a, 3));
+    jmi_ad_var_t out1_v;
+    jmi_ad_var_t out2_v;
+    out1_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    out2_v = jmi_max(jmi_max(jmi_array_val_1(inp_a, 1), jmi_array_val_1(inp_a, 2)), jmi_array_val_1(inp_a, 3));
     if (out1_r != NULL) *out1_r = out1_v;
     if (out2_r != NULL) *out2_r = out2_v;
     return;
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput5_f2_exp(jmi_array_t* inp_a) {
-    jmi_ad_var_t out1_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    jmi_ad_var_t out1_v;
     func_CCodeGenTests_CArrayInput5_f2_def(inp_a, &out1_v, NULL);
     return out1_v;
 }
@@ -1155,7 +1182,8 @@ void func_CCodeGenTests_CArrayInput6_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* ou
 jmi_ad_var_t func_CCodeGenTests_CArrayInput6_f2_exp(jmi_array_t* inp_a);
 
 void func_CCodeGenTests_CArrayInput6_f1_def(jmi_ad_var_t* out_r) {
-    jmi_ad_var_t out_v = 1.0;
+    jmi_ad_var_t out_v;
+    out_v = 1.0;
     JMI_ARRAY_DECL(tmp_array_1, 2, 2);
     jmi_array_ref_1(tmp_array_1, 1) = 1.0;
     jmi_array_ref_1(tmp_array_1, 2) = 2.0;
@@ -1183,19 +1211,20 @@ void func_CCodeGenTests_CArrayInput6_f1_def(jmi_ad_var_t* out_r) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput6_f1_exp() {
-    jmi_ad_var_t out_v = 1.0;
+    jmi_ad_var_t out_v;
     func_CCodeGenTests_CArrayInput6_f1_def(&out_v);
     return out_v;
 }
 
 void func_CCodeGenTests_CArrayInput6_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r) {
-    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2);
+    jmi_ad_var_t out_v;
+    out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2);
     if (out_r != NULL) *out_r = out_v;
     return;
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput6_f2_exp(jmi_array_t* inp_a) {
-    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2);
+    jmi_ad_var_t out_v;
     func_CCodeGenTests_CArrayInput6_f2_def(inp_a, &out_v);
     return out_v;
 }
@@ -1240,7 +1269,8 @@ void func_CCodeGenTests_CArrayInput7_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* ou
 jmi_ad_var_t func_CCodeGenTests_CArrayInput7_f2_exp(jmi_array_t* inp_a);
 
 void func_CCodeGenTests_CArrayInput7_f1_def(jmi_ad_var_t* out_r) {
-    jmi_ad_var_t out_v = 1.0;
+    jmi_ad_var_t out_v;
+    out_v = 1.0;
     JMI_ARRAY_DECL(tmp_array_1, 3, 3);
     jmi_array_ref_1(tmp_array_1, 1) = 1.0;
     jmi_array_ref_1(tmp_array_1, 2) = 2.0;
@@ -1257,19 +1287,20 @@ void func_CCodeGenTests_CArrayInput7_f1_def(jmi_ad_var_t* out_r) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput7_f1_exp() {
-    jmi_ad_var_t out_v = 1.0;
+    jmi_ad_var_t out_v;
     func_CCodeGenTests_CArrayInput7_f1_def(&out_v);
     return out_v;
 }
 
 void func_CCodeGenTests_CArrayInput7_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r) {
-    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    jmi_ad_var_t out_v;
+    out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
     if (out_r != NULL) *out_r = out_v;
     return;
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput7_f2_exp(jmi_array_t* inp_a) {
-    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    jmi_ad_var_t out_v;
     func_CCodeGenTests_CArrayInput7_f2_def(inp_a, &out_v);
     return out_v;
 }
@@ -1310,7 +1341,8 @@ void func_CCodeGenTests_CArrayInput8_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* ou
 jmi_ad_var_t func_CCodeGenTests_CArrayInput8_f2_exp(jmi_array_t* inp_a);
 
 void func_CCodeGenTests_CArrayInput8_f1_def(jmi_ad_var_t* out_r) {
-    jmi_ad_var_t out_v = 1.0;
+    jmi_ad_var_t out_v;
+    out_v = 1.0;
     JMI_ARRAY_DECL(tmp_array_1, 3, 3);
     jmi_array_ref_1(tmp_array_1, 1) = 1.0;
     jmi_array_ref_1(tmp_array_1, 2) = 2.0;
@@ -1333,19 +1365,20 @@ void func_CCodeGenTests_CArrayInput8_f1_def(jmi_ad_var_t* out_r) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput8_f1_exp() {
-    jmi_ad_var_t out_v = 1.0;
+    jmi_ad_var_t out_v;
     func_CCodeGenTests_CArrayInput8_f1_def(&out_v);
     return out_v;
 }
 
 void func_CCodeGenTests_CArrayInput8_f2_def(jmi_array_t* inp_a, jmi_ad_var_t* out_r) {
-    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    jmi_ad_var_t out_v;
+    out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
     if (out_r != NULL) *out_r = out_v;
     return;
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput8_f2_exp(jmi_array_t* inp_a) {
-    jmi_ad_var_t out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
+    jmi_ad_var_t out_v;
     func_CCodeGenTests_CArrayInput8_f2_def(inp_a, &out_v);
     return out_v;
 }
@@ -1368,6 +1401,277 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput8_f2_exp(jmi_array_t* inp_a) {
  
  Real x = f1();
 end CArrayInput8;
+
+
+model CArrayOutputs1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayOutputs1",
+         description="C code generation: array outputs from functions: in equation",
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+void func_CCodeGenTests_CArrayOutputs1_f_def(jmi_array_t* o_a);
+
+void func_CCodeGenTests_CArrayOutputs1_f_def(jmi_array_t* o_a) {
+    JMI_ARRAY_DECL(o_ar, 2, 2);
+    if (o_a == NULL) o_a = o_ar;
+    jmi_array_ref_1(o_a, 1) = 1;
+    jmi_array_ref_1(o_a, 2) = 2;
+    return;
+}
+
+
+    JMI_ARRAY_DECL(tmp_array_1, 2, 2);
+    func_CCodeGenTests_CArrayOutputs1_f_def(tmp_array_1);
+    (*res)[0] = jmi_array_val_1(tmp_array_1, 1) - (_x_1_);
+    (*res)[1] = jmi_array_val_1(tmp_array_1, 2) - (_x_2_);
+")})));
+
+ function f
+  output Real o[2] = {1,2};
+ algorithm
+ end f;
+ 
+ Real x[2] = f();
+end CArrayOutputs1;
+
+
+model CArrayOutputs2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayOutputs2",
+         description="C code generation: array outputs from functions: in expression in equation",
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+void func_CCodeGenTests_CArrayOutputs2_f_def(jmi_array_t* o_a);
+
+void func_CCodeGenTests_CArrayOutputs2_f_def(jmi_array_t* o_a) {
+    JMI_ARRAY_DECL(o_ar, 2, 2);
+    if (o_a == NULL) o_a = o_ar;
+    jmi_array_ref_1(o_a, 1) = 1;
+    jmi_array_ref_1(o_a, 2) = 2;
+    return;
+}
+
+
+    JMI_ARRAY_DECL(tmp_array_1, 2, 2);
+    func_CCodeGenTests_CArrayOutputs2_f_def(tmp_array_1);
+    (*res)[0] = jmi_array_val_1(tmp_array_1, 1) - (_temp_1_);
+    (*res)[1] = jmi_array_val_1(tmp_array_1, 2) - (_temp_2_);
+    (*res)[2] = ( _temp_1_ ) * ( 3 ) + ( _temp_2_ ) * ( 4 ) - (_x_);
+")})));
+
+ function f
+  output Real o[2] = {1,2};
+ algorithm
+ end f;
+ 
+ Real x;
+equation
+ x = f() * {3,4};
+end CArrayOutputs2;
+
+
+model CArrayOutputs3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayOutputs3",
+         description="C code generation: array outputs from functions: in expression in function",
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+void func_CCodeGenTests_CArrayOutputs3_f1_def(jmi_ad_var_t* o_r);
+jmi_ad_var_t func_CCodeGenTests_CArrayOutputs3_f1_exp();
+void func_CCodeGenTests_CArrayOutputs3_f2_def(jmi_array_t* o_a);
+
+void func_CCodeGenTests_CArrayOutputs3_f1_def(jmi_ad_var_t* o_r) {
+    jmi_ad_var_t o_v;
+    jmi_ad_var_t x_v;
+    JMI_ARRAY_DECL(temp_1_a, 2, 2);
+    o_v = 0;
+    func_CCodeGenTests_CArrayOutputs3_f2_def(temp_1_a);
+    x_v = ( jmi_array_val_1(temp_1_a, 1) ) * ( 3 ) + ( jmi_array_val_1(temp_1_a, 2) ) * ( 4 );
+    if (o_r != NULL) *o_r = o_v;
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CArrayOutputs3_f1_exp() {
+    jmi_ad_var_t o_v;
+    func_CCodeGenTests_CArrayOutputs3_f1_def(&o_v);
+    return o_v;
+}
+
+void func_CCodeGenTests_CArrayOutputs3_f2_def(jmi_array_t* o_a) {
+    JMI_ARRAY_DECL(o_ar, 2, 2);
+    if (o_a == NULL) o_a = o_ar;
+    jmi_array_ref_1(o_a, 1) = 1;
+    jmi_array_ref_1(o_a, 2) = 2;
+    return;
+}
+
+
+    (*res)[0] = func_CCodeGenTests_CArrayOutputs3_f1_exp() - (_x_);
+")})));
+
+ function f1
+  output Real o = 0;
+  protected Real x;
+ algorithm
+  x := f2() * {3,4};
+ end f1;
+ 
+ function f2
+  output Real o[2] = {1,2};
+ algorithm
+ end f2;
+ 
+ Real x = f1();
+end CArrayOutputs3;
+
+
+model CArrayOutputs4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayOutputs4",
+         description="C code generation: array outputs from functions: function call statement",
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+void func_CCodeGenTests_CArrayOutputs4_f1_def(jmi_ad_var_t* o_r);
+jmi_ad_var_t func_CCodeGenTests_CArrayOutputs4_f1_exp();
+void func_CCodeGenTests_CArrayOutputs4_f2_def(jmi_array_t* o1_a, jmi_ad_var_t* o2_r);
+
+void func_CCodeGenTests_CArrayOutputs4_f1_def(jmi_ad_var_t* o_r) {
+    jmi_ad_var_t o_v;
+    JMI_ARRAY_DECL(x_a, 2, 2);
+    jmi_ad_var_t y_v;
+    o_v = 0;
+    func_CCodeGenTests_CArrayOutputs4_f2_def(x_a, &y_v);
+    if (o_r != NULL) *o_r = o_v;
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CArrayOutputs4_f1_exp() {
+    jmi_ad_var_t o_v;
+    func_CCodeGenTests_CArrayOutputs4_f1_def(&o_v);
+    return o_v;
+}
+
+void func_CCodeGenTests_CArrayOutputs4_f2_def(jmi_array_t* o1_a, jmi_ad_var_t* o2_r) {
+    jmi_ad_var_t o2_v;
+    JMI_ARRAY_DECL(o1_ar, 2, 2);
+    if (o1_a == NULL) o1_a = o1_ar;
+    jmi_array_ref_1(o1_a, 1) = 1;
+    jmi_array_ref_1(o1_a, 2) = 2;
+    o2_v = 3;
+    if (o2_r != NULL) *o2_r = o2_v;
+    return;
+}
+
+
+    (*res)[0] = func_CCodeGenTests_CArrayOutputs4_f1_exp() - (_x_);
+")})));
+
+ function f1
+  output Real o = 0;
+  protected Real x[2];
+  protected Real y;
+ algorithm
+  (x,y) := f2();
+ end f1;
+ 
+ function f2
+  output Real o1[2] = {1,2};
+  output Real o2 = 3;
+ algorithm
+ end f2;
+ 
+ Real x = f1();
+end CArrayOutputs4;
+
+
+model CArrayOutputs5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CArrayOutputs5",
+         description="C code generation: array outputs from functions: passing input array",
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+void func_CCodeGenTests_CArrayOutputs5_f1_def(jmi_array_t* i_a, jmi_ad_var_t* o_r);
+jmi_ad_var_t func_CCodeGenTests_CArrayOutputs5_f1_exp(jmi_array_t* i_a);
+void func_CCodeGenTests_CArrayOutputs5_f2_def(jmi_array_t* i_a, jmi_array_t* o1_a, jmi_ad_var_t* o2_r);
+
+void func_CCodeGenTests_CArrayOutputs5_f1_def(jmi_array_t* i_a, jmi_ad_var_t* o_r) {
+    jmi_ad_var_t o_v;
+    JMI_ARRAY_DECL(x_a, 2, 2);
+    jmi_ad_var_t y_v;
+    o_v = 0;
+    func_CCodeGenTests_CArrayOutputs5_f2_def(i_a, x_a, &y_v);
+    if (o_r != NULL) *o_r = o_v;
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CArrayOutputs5_f1_exp(jmi_array_t* i_a) {
+    jmi_ad_var_t o_v;
+    func_CCodeGenTests_CArrayOutputs5_f1_def(i_a, &o_v);
+    return o_v;
+}
+
+void func_CCodeGenTests_CArrayOutputs5_f2_def(jmi_array_t* i_a, jmi_array_t* o1_a, jmi_ad_var_t* o2_r) {
+    jmi_ad_var_t o2_v;
+    JMI_ARRAY_DECL(o1_ar, 2, 2);
+    if (o1_a == NULL) o1_a = o1_ar;
+    jmi_array_ref_1(o1_a, 1) = jmi_array_val_1(i_a, 1);
+    jmi_array_ref_1(o1_a, 2) = jmi_array_val_1(i_a, 2);
+    o2_v = 3;
+    if (o2_r != NULL) *o2_r = o2_v;
+    return;
+}
+
+
+    JMI_ARRAY_DECL(tmp_array_1, 2, 2);
+    jmi_array_ref_1(tmp_array_1, 1) = 1;
+    jmi_array_ref_1(tmp_array_1, 2) = 2;
+    (*res)[0] = func_CCodeGenTests_CArrayOutputs5_f1_exp(tmp_array_1) - (_x_);
+")})));
+
+ function f1
+  input Real i[2];
+  output Real o = 0;
+  protected Real x[2];
+  protected Real y;
+ algorithm
+  (x, y) := f2(i);
+ end f1;
+ 
+ function f2
+  input Real i[2];
+  output Real o1[2] = i;
+  output Real o2 = 3;
+ algorithm
+ end f2;
+ 
+ Real x = f1({1,2});
+end CArrayOutputs5;
+
 
 
 end CCodeGenTests;

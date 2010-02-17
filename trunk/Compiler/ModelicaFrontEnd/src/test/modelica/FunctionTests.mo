@@ -2084,8 +2084,9 @@ equation
 
  function FunctionTests.AlgorithmTransformation7.algorithm_1
   input Real i;
-  output Real o := ( i ) * ( 2 );
+  output Real o;
  algorithm
+  o := ( i ) * ( 2 );
   return;
  end FunctionTests.AlgorithmTransformation7.algorithm_1;
 
@@ -2198,11 +2199,12 @@ equation
  (x, x_1) = FunctionTests.AlgorithmTransformation10.algorithm_1(x_0, 0);
 
  function FunctionTests.AlgorithmTransformation10.algorithm_1
-  output Real x := x_2;
+  output Real x;
   output Real x_1;
   input Real x_0;
   input Real x_2;
  algorithm
+  x := x_2;
   x := x_0;
   x_1 := x;
   return;
@@ -2234,10 +2236,11 @@ equation
  (x, y) = FunctionTests.AlgorithmTransformation11.algorithm_1(0);
 
  function FunctionTests.AlgorithmTransformation11.algorithm_1
-  output Real x := x_0;
+  output Real x;
   output Real y;
   input Real x_0;
  algorithm
+  x := x_0;
   x := 1;
   y := x;
   return;
@@ -2268,14 +2271,17 @@ equation
  (x0, x1, x2, y) = FunctionTests.AlgorithmTransformation12.algorithm_1(0, 1, 2);
 
  function FunctionTests.AlgorithmTransformation12.algorithm_1
-  output Real x0 := x0_0;
-  output Real x1 := x1_0;
-  output Real x2 := x2_0;
+  output Real x0;
+  output Real x1;
+  output Real x2;
   output Real y;
   input Real x0_0;
   input Real x1_0;
   input Real x2_0;
  algorithm
+  x0 := x0_0;
+  x1 := x1_0;
+  x2 := x2_0;
   x0 := 1;
   x1 := x0;
   x2 := x1;
@@ -2310,9 +2316,10 @@ equation
  x = 2;
 
  function FunctionTests.TestFunction1
-  input Real i1 := 0;
-  output Real o1 := i1;
+  input Real i1;
+  output Real o1;
  algorithm
+  o1 := i1;
   return;
  end FunctionTests.TestFunction1;
 
@@ -2347,9 +2354,10 @@ equation
  (x) = FunctionTests.AlgorithmTransformation14.algorithm_1(0);
 
  function FunctionTests.AlgorithmTransformation14.algorithm_1
-  output Real x := x_0;
+  output Real x;
   input Real x_0;
  algorithm
+  x := x_0;
   x := 0;
   for i in 1:3 loop
    x := x + i;
@@ -2383,9 +2391,10 @@ equation
  x = FunctionTests.ArrayExpInFunc1.f();
 
  function FunctionTests.ArrayExpInFunc1.f
-  output Real o := 1.0;
+  output Real o;
   Real[3] x;
  algorithm
+  o := 1.0;
   x[1] := 1;
   x[2] := 2;
   x[3] := 3;
@@ -2417,9 +2426,10 @@ equation
  x = FunctionTests.ArrayExpInFunc2.f();
 
  function FunctionTests.ArrayExpInFunc2.f
-  output Real o := 1.0;
+  output Real o;
   Real[2, 2] x;
  algorithm
+  o := 1.0;
   x[1,1] := ( 1 ) * ( 1 ) + ( 2 ) * ( 3 );
   x[1,2] := ( 1 ) * ( 2 ) + ( 2 ) * ( 4 );
   x[2,1] := ( 3 ) * ( 1 ) + ( 4 ) * ( 3 );
@@ -2452,9 +2462,10 @@ equation
  x = FunctionTests.ArrayExpInFunc3.f();
 
  function FunctionTests.ArrayExpInFunc3.f
-  output Real o := 1.0;
+  output Real o;
   Real[2, 2] x;
  algorithm
+  o := 1.0;
   x[1,1] := 1;
   x[1,2] := 2;
   x[2,1] := 3;
@@ -2488,9 +2499,10 @@ equation
  x = FunctionTests.ArrayExpInFunc4.f();
 
  function FunctionTests.ArrayExpInFunc4.f
-  output Real o := 1.0;
+  output Real o;
   Real[2, 2] x;
  algorithm
+  o := 1.0;
   x[1,1] := ( 1 ) * ( 1 ) + ( 2 ) * ( 3 );
   x[1,2] := ( 1 ) * ( 2 ) + ( 2 ) * ( 4 );
   x[2,1] := ( 3 ) * ( 1 ) + ( 4 ) * ( 3 );
@@ -2534,9 +2546,11 @@ equation
 
  function FunctionTests.ArrayExpInFunc5.f2
   input Real a;
-  output Real b := a;
-  output Real c := a;
+  output Real b;
+  output Real c;
  algorithm
+  b := a;
+  c := a;
   return;
  end FunctionTests.ArrayExpInFunc5.f2;
 end FunctionTests.ArrayExpInFunc5;
@@ -2575,9 +2589,10 @@ equation
  x = FunctionTests.ArrayExpInFunc6.f();
 
  function FunctionTests.ArrayExpInFunc6.f
-  output Real o := 1.0;
+  output Real o;
   Real[3] x;
  algorithm
+  o := 1.0;
   if o < 2.0 then
    x[1] := 1;
    x[2] := 2;
@@ -2669,10 +2684,11 @@ equation
  x = FunctionTests.ArrayExpInFunc8.f();
 
  function FunctionTests.ArrayExpInFunc8.f
-  output Real o := 1.0;
+  output Real o;
   Real[3] x;
   Real[3] y;
  algorithm
+  o := 1.0;
   for i in 1:3 loop
    x[i] := i;
    y[1] := ( 1 ) * ( 1 );
@@ -2711,10 +2727,12 @@ equation
  x = FunctionTests.ArrayExpInFunc9.f();
 
  function FunctionTests.ArrayExpInFunc9.f
-  output Real o := 1.0;
+  output Real o;
   Real[3] x;
-  Integer y := 3;
+  Integer y;
  algorithm
+  o := 1.0;
+  y := 3;
   while y > 0 loop
    x[1] := 1.0;
    x[2] := 2.0;
@@ -2741,6 +2759,811 @@ end FunctionTests.ArrayExpInFunc9;
  
  Real x = f();
 end ArrayExpInFunc9;
+
+
+
+model ArrayOutputScalarization1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOutputScalarization1",
+         description="Scalarization of array function outputs: function call equation",
+         flatModel="
+fclass FunctionTests.ArrayOutputScalarization1
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ ({x[1],x[2]}, {y[1],y[2]}) = FunctionTests.ArrayOutputScalarization1.f();
+
+ function FunctionTests.ArrayOutputScalarization1.f
+  output Real[2] x;
+  output Real[2] y;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  y[1] := 1;
+  y[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization1.f;
+end FunctionTests.ArrayOutputScalarization1;
+")})));
+
+ function f
+  output Real x[2] = {1,2};
+  output Real y[2] = {1,2};
+ algorithm
+ end f;
+ 
+ Real x[2];
+ Real y[2];
+equation
+ (x,y) = f();
+end ArrayOutputScalarization1;
+
+
+model ArrayOutputScalarization2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOutputScalarization2",
+         description="Scalarization of array function outputs: expression with func call",
+         flatModel="
+fclass FunctionTests.ArrayOutputScalarization2
+ Real x[1];
+ Real x[2];
+ Real temp[1];
+ Real temp[2];
+equation
+ ({temp[1],temp[2]}) = FunctionTests.ArrayOutputScalarization2.f();
+ x[1] = 3 + temp[1];
+ x[2] = 4 + temp[2];
+
+ function FunctionTests.ArrayOutputScalarization2.f
+  output Real[2] x;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization2.f;
+end FunctionTests.ArrayOutputScalarization2;
+")})));
+
+ function f
+  output Real x[2] = {1,2};
+ algorithm
+ end f;
+ 
+ Real x[2];
+equation
+ x = {3,4} + f();
+end ArrayOutputScalarization2;
+
+
+model ArrayOutputScalarization3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOutputScalarization3",
+         description="Scalarization of array function outputs: finding free temp name",
+         flatModel="
+fclass FunctionTests.ArrayOutputScalarization3
+ Real x[1];
+ Real x[2];
+ Real temp;
+ Real temp_1;
+ Real temp_3;
+ Real temp_2[1];
+ Real temp_2[2];
+equation
+ ({temp_2[1],temp_2[2]}) = FunctionTests.ArrayOutputScalarization3.f();
+ x[1] = 1 + temp_2[1];
+ x[2] = 2 + temp_2[2];
+ temp = 1;
+ temp_1 = 2;
+ temp_3 = 3;
+
+ function FunctionTests.ArrayOutputScalarization3.f
+  output Real[2] x;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization3.f;
+end FunctionTests.ArrayOutputScalarization3;
+")})));
+
+ function f
+  output Real x[2] = {1, 2};
+ algorithm
+ end f;
+ 
+ Real x[2];
+ Real temp = 1;
+ Real temp_1 = 2;
+ Real temp_3 = 3;
+equation
+ x = {1,2} + f();
+end ArrayOutputScalarization3;
+
+
+model ArrayOutputScalarization4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOutputScalarization4",
+         description="Scalarization of array function outputs: function call statement",
+         flatModel="
+fclass FunctionTests.ArrayOutputScalarization4
+ Real x;
+equation
+ x = FunctionTests.ArrayOutputScalarization4.f2();
+
+ function FunctionTests.ArrayOutputScalarization4.f2
+  output Real x;
+  Real[2] y;
+  Real[2] z;
+ algorithm
+  (y, z) := FunctionTests.ArrayOutputScalarization4.f1();
+  x := y[1];
+  return;
+ end FunctionTests.ArrayOutputScalarization4.f2;
+
+ function FunctionTests.ArrayOutputScalarization4.f1
+  output Real[2] x;
+  output Real[2] y;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  y[1] := 1;
+  y[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization4.f1;
+end FunctionTests.ArrayOutputScalarization4;
+")})));
+
+ function f1
+  output Real x[2] = {1,2};
+  output Real y[2] = {1,2};
+ algorithm
+ end f1;
+ 
+ function f2
+  output Real x;
+  protected Real y[2];
+  protected Real z[2];
+ algorithm
+  (y,z) := f1();
+  x := y[1];
+ end f2;
+ 
+ Real x = f2();
+end ArrayOutputScalarization4;
+
+
+model ArrayOutputScalarization5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOutputScalarization5",
+         description="Scalarization of array function outputs: assign statement with expression",
+         flatModel="
+fclass FunctionTests.ArrayOutputScalarization5
+ Real x;
+equation
+ x = FunctionTests.ArrayOutputScalarization5.f2();
+
+ function FunctionTests.ArrayOutputScalarization5.f2
+  output Real x;
+  Real[2] y;
+  Real[2] temp_1;
+ algorithm
+  (temp_1) := FunctionTests.ArrayOutputScalarization5.f1();
+  y[1] := 1 + temp_1[1];
+  y[2] := 2 + temp_1[2];
+  x := y[1];
+  return;
+ end FunctionTests.ArrayOutputScalarization5.f2;
+
+ function FunctionTests.ArrayOutputScalarization5.f1
+  output Real[2] x;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization5.f1;
+end FunctionTests.ArrayOutputScalarization5;
+")})));
+
+ function f1
+  output Real x[2] = {1, 2};
+ algorithm
+ end f1;
+ 
+ function f2
+  output Real x;
+  protected Real y[2];
+ algorithm
+  y := {1,2} + f1();
+  x := y[1];
+ end f2;
+ 
+ Real x = f2();
+end ArrayOutputScalarization5;
+
+
+model ArrayOutputScalarization6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOutputScalarization6",
+         description="Scalarization of array function outputs: finding free temp name",
+         flatModel="
+fclass FunctionTests.ArrayOutputScalarization6
+ Real x;
+equation
+ x = FunctionTests.ArrayOutputScalarization6.f2();
+
+ function FunctionTests.ArrayOutputScalarization6.f2
+  output Real x;
+  Real[2] y;
+  Real temp_1;
+  Real[2] temp_2;
+ algorithm
+  (temp_2) := FunctionTests.ArrayOutputScalarization6.f1();
+  y[1] := temp_2[1];
+  y[2] := temp_2[2];
+  x := y[1];
+  return;
+ end FunctionTests.ArrayOutputScalarization6.f2;
+
+ function FunctionTests.ArrayOutputScalarization6.f1
+  output Real[2] x;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization6.f1;
+end FunctionTests.ArrayOutputScalarization6;
+")})));
+
+ function f1
+  output Real x[2] = {1, 2};
+ algorithm
+ end f1;
+ 
+ function f2
+  output Real x;
+  protected Real y[2];
+  protected Real temp_1;
+ algorithm
+  y := f1();
+  x := y[1];
+ end f2;
+ 
+ Real x = f2();
+end ArrayOutputScalarization6;
+
+
+model ArrayOutputScalarization7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOutputScalarization7",
+         description="Scalarization of array function outputs: if statement",
+         flatModel="
+fclass FunctionTests.ArrayOutputScalarization7
+ Real x;
+equation
+ x = FunctionTests.ArrayOutputScalarization7.f2();
+
+ function FunctionTests.ArrayOutputScalarization7.f2
+  output Real x;
+  Real[2] y;
+  Real[2] temp_1;
+  Real[2] temp_2;
+  Real[2] temp_3;
+  Real[2] temp_4;
+ algorithm
+  (temp_1) := FunctionTests.ArrayOutputScalarization7.f1();
+  (temp_2) := FunctionTests.ArrayOutputScalarization7.f1();
+  if temp_1[1] + temp_1[2] < 4 then
+   x := 1;
+   (temp_3) := FunctionTests.ArrayOutputScalarization7.f1();
+   y[1] := 1 + temp_3[1];
+   y[2] := 2 + temp_3[2];
+  elseif temp_2[1] + temp_2[2] < 5 then
+   y[1] := 3;
+   y[2] := 4;
+  else
+   x := 1;
+   (temp_4) := FunctionTests.ArrayOutputScalarization7.f1();
+   y[1] := temp_4[1];
+   y[2] := temp_4[2];
+  end if;
+  x := y[1];
+  return;
+ end FunctionTests.ArrayOutputScalarization7.f2;
+
+ function FunctionTests.ArrayOutputScalarization7.f1
+  output Real[2] x;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization7.f1;
+end FunctionTests.ArrayOutputScalarization7;
+")})));
+
+ function f1
+  output Real x[2] = {1, 2};
+ algorithm
+ end f1;
+ 
+ function f2
+  output Real x;
+  protected Real y[2];
+ algorithm
+  if sum(f1()) < 4 then
+   x := 1;
+   y := {1,2} + f1();
+  elseif sum(f1()) < 5 then
+   y := {3,4};
+  else
+   x := 1;
+   y := f1();
+  end if;
+  x := y[1];
+ end f2;
+ 
+ Real x = f2();
+end ArrayOutputScalarization7;
+
+
+model ArrayOutputScalarization8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOutputScalarization8",
+         description="Scalarization of array function outputs: for statement",
+         flatModel="
+fclass FunctionTests.ArrayOutputScalarization8
+ Real x;
+equation
+ x = FunctionTests.ArrayOutputScalarization8.f2();
+
+ function FunctionTests.ArrayOutputScalarization8.f2
+  output Real x;
+  Real[2] y;
+  Real[2] temp_1;
+  Real[2] temp_2;
+ algorithm
+  (temp_1) := FunctionTests.ArrayOutputScalarization8.f1();
+  for i in {temp_1[1],temp_1[2]} loop
+   y[1] := i;
+   (temp_2) := FunctionTests.ArrayOutputScalarization8.f1();
+   y[1] := temp_2[1];
+   y[2] := temp_2[2];
+  end for;
+  x := y[1];
+  return;
+ end FunctionTests.ArrayOutputScalarization8.f2;
+
+ function FunctionTests.ArrayOutputScalarization8.f1
+  output Real[2] x;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization8.f1;
+end FunctionTests.ArrayOutputScalarization8;
+")})));
+
+ function f1
+  output Real x[2] = {1, 2};
+ algorithm
+ end f1;
+ 
+ function f2
+  output Real x;
+  protected Real y[2];
+ algorithm
+  for i in f1() loop
+   y[1] := i;
+   y := f1();
+  end for;
+  x := y[1];
+ end f2;
+ 
+ Real x = f2();
+end ArrayOutputScalarization8;
+
+
+// TODO: Redo test to run without alias elimination once there is support for that in test framework.
+model ArrayOutputScalarization9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOutputScalarization9",
+         description="Scalarization of array function outputs: equation without expression",
+         flatModel="
+fclass FunctionTests.ArrayOutputScalarization9
+ Real x[1];
+ Real x[2];
+equation
+ ({x[1],x[2]}) = FunctionTests.ArrayOutputScalarization9.f();
+
+ function FunctionTests.ArrayOutputScalarization9.f
+  output Real[2] x;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization9.f;
+end FunctionTests.ArrayOutputScalarization9;
+")})));
+
+ function f
+  output Real x[2] = {1, 2};
+ algorithm
+ end f;
+ 
+ Real x[2];
+equation
+ x = f();
+end ArrayOutputScalarization9;
+
+
+model ArrayOutputScalarization10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOutputScalarization10",
+         description="Scalarization of array function outputs: while statement",
+         flatModel="
+fclass FunctionTests.ArrayOutputScalarization10
+ Real x;
+equation
+ x = FunctionTests.ArrayOutputScalarization10.f2();
+
+ function FunctionTests.ArrayOutputScalarization10.f2
+  output Real x;
+  Real[2] temp_1;
+ algorithm
+  x := 0;
+  (temp_1) := FunctionTests.ArrayOutputScalarization10.f1();
+  while x < temp_1[1] + temp_1[2] loop
+   x := x + 1;
+   (temp_1) := FunctionTests.ArrayOutputScalarization10.f1();
+  end while;
+  return;
+ end FunctionTests.ArrayOutputScalarization10.f2;
+
+ function FunctionTests.ArrayOutputScalarization10.f1
+  output Real[2] x;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization10.f1;
+end FunctionTests.ArrayOutputScalarization10;
+")})));
+
+ function f1
+  output Real x[2] = {1, 2};
+ algorithm
+ end f1;
+ 
+ function f2
+  output Real x = 0;
+ algorithm
+  while x < sum(f1()) loop
+   x := x + 1;
+  end while;
+ end f2;
+ 
+ Real x = f2();
+end ArrayOutputScalarization10;
+
+
+model ArrayOutputScalarization11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOutputScalarization11",
+         description="Scalarization of array function outputs: binding expression",
+         flatModel="
+fclass FunctionTests.ArrayOutputScalarization11
+ Real x;
+equation
+ x = FunctionTests.ArrayOutputScalarization11.f2();
+
+ function FunctionTests.ArrayOutputScalarization11.f2
+  output Real x;
+  Real[2] temp_1;
+  Real[2] y;
+ algorithm
+  (temp_1) := FunctionTests.ArrayOutputScalarization11.f1();
+  y[1] := temp_1[1];
+  y[2] := temp_1[2];
+  x := y[1];
+  return;
+ end FunctionTests.ArrayOutputScalarization11.f2;
+
+ function FunctionTests.ArrayOutputScalarization11.f1
+  output Real[2] x;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization11.f1;
+end FunctionTests.ArrayOutputScalarization11;
+")})));
+
+ function f1
+  output Real x[2] = {1, 2};
+ algorithm
+ end f1;
+ 
+ function f2
+  output Real x;
+  protected Real y[2] = f1();
+ algorithm
+  x := y[1];
+ end f2;
+ 
+ Real x = f2();
+end ArrayOutputScalarization11;
+
+
+model ArrayOutputScalarization12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOutputScalarization12",
+         description="Scalarization of array function outputs: part of binding expression",
+         flatModel="
+fclass FunctionTests.ArrayOutputScalarization12
+ Real x;
+equation
+ x = FunctionTests.ArrayOutputScalarization12.f2();
+
+ function FunctionTests.ArrayOutputScalarization12.f2
+  output Real x;
+  Real[2] temp_1;
+  Real[2] y;
+ algorithm
+  (temp_1) := FunctionTests.ArrayOutputScalarization12.f1();
+  y[1] := temp_1[1] + 3;
+  y[2] := temp_1[2] + 4;
+  x := y[1];
+  return;
+ end FunctionTests.ArrayOutputScalarization12.f2;
+
+ function FunctionTests.ArrayOutputScalarization12.f1
+  output Real[2] x;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization12.f1;
+end FunctionTests.ArrayOutputScalarization12;
+")})));
+
+ function f1
+  output Real x[2] = {1, 2};
+ algorithm
+ end f1;
+ 
+ function f2
+  output Real x;
+  protected Real y[2] = f1() + {3, 4};
+ algorithm
+  x := y[1];
+ end f2;
+ 
+ Real x = f2();
+end ArrayOutputScalarization12;
+
+
+model ArrayOutputScalarization13
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOutputScalarization13",
+         description="Scalarization of array function outputs: part of scalar binding exp",
+         flatModel="
+fclass FunctionTests.ArrayOutputScalarization13
+ Real x;
+equation
+ x = FunctionTests.ArrayOutputScalarization13.f2();
+
+ function FunctionTests.ArrayOutputScalarization13.f2
+  output Real x;
+  Real[2] temp_1;
+  Real y;
+ algorithm
+  (temp_1) := FunctionTests.ArrayOutputScalarization13.f1();
+  y := temp_1[1] + temp_1[2];
+  x := y;
+  return;
+ end FunctionTests.ArrayOutputScalarization13.f2;
+
+ function FunctionTests.ArrayOutputScalarization13.f1
+  output Real[2] x;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization13.f1;
+end FunctionTests.ArrayOutputScalarization13;
+")})));
+
+ function f1
+  output Real x[2] = {1, 2};
+ algorithm
+ end f1;
+ 
+ function f2
+  output Real x;
+  protected Real y = sum(f1());
+ algorithm
+  x := y;
+ end f2;
+ 
+ Real x = f2();
+end ArrayOutputScalarization13;
+
+
+model ArrayOutputScalarization14
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOutputScalarization14",
+         description="Scalarization of array function outputs: part of scalar expression",
+         flatModel="
+fclass FunctionTests.ArrayOutputScalarization14
+ Real x;
+ Real temp[1];
+ Real temp[2];
+equation
+ ({temp[1],temp[2]}) = FunctionTests.ArrayOutputScalarization14.f();
+ x = ( temp[1] ) * ( 3 ) + ( temp[2] ) * ( 4 );
+
+ function FunctionTests.ArrayOutputScalarization14.f
+  output Real[2] x;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization14.f;
+end FunctionTests.ArrayOutputScalarization14;
+")})));
+
+ function f
+  output Real x[2] = {1, 2};
+ algorithm
+ end f;
+ 
+ Real x = f() * {3, 4};
+end ArrayOutputScalarization14;
+
+
+model ArrayOutputScalarization15
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.GenericCodeGenTestCase(
+         name="ArrayOutputScalarization15",
+         description="Scalarization of array function outputs: number of equations",
+         template="$n_equations$",
+         generatedCode="3"
+)})));
+
+ function f
+  output Real x[2] = {1,2};
+  output Real y = 2;
+ algorithm
+ end f;
+ 
+ Real x[2];
+ Real y;
+equation
+ (x, y) = f();
+end ArrayOutputScalarization15;
+
+
+model ArrayOutputScalarization16
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOutputScalarization16",
+         description="Scalarization of array function outputs: using original arrays",
+         flatModel="
+fclass FunctionTests.ArrayOutputScalarization16
+ Real x;
+equation
+ x = FunctionTests.ArrayOutputScalarization16.f1();
+
+ function FunctionTests.ArrayOutputScalarization16.f1
+  output Real o;
+  Real[2] x;
+  Real[2] y;
+  Real[2] temp_1;
+ algorithm
+  o := 2;
+  x[1] := 1;
+  x[2] := 2;
+  (temp_1) := FunctionTests.ArrayOutputScalarization16.f2(x);
+  y[1] := temp_1[1];
+  y[2] := temp_1[2];
+  return;
+ end FunctionTests.ArrayOutputScalarization16.f1;
+
+ function FunctionTests.ArrayOutputScalarization16.f2
+  input Real[2] x;
+  output Real[2] y;
+ algorithm
+  y[1] := x[1];
+  y[2] := x[2];
+  return;
+ end FunctionTests.ArrayOutputScalarization16.f2;
+end FunctionTests.ArrayOutputScalarization16;
+")})));
+
+ function f1
+  output Real o = 2;
+  protected Real x[2] = {1,2};
+  protected Real y[2];
+ algorithm
+  y := f2(x);
+ end f1;
+ 
+ function f2
+  input Real x[2];
+  output Real y[2] = x;
+ algorithm
+ end f2;
+ 
+ Real x = f1();
+end ArrayOutputScalarization16;
+
+
+model ArrayOutputScalarization17
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayOutputScalarization17",
+         description="Scalarization of array function outputs: using original arrays",
+         flatModel="
+fclass FunctionTests.ArrayOutputScalarization17
+ Real x;
+equation
+ x = FunctionTests.ArrayOutputScalarization17.f1();
+
+ function FunctionTests.ArrayOutputScalarization17.f1
+  output Real o;
+  Real[2] y;
+  Real[2] temp_1;
+  Real[2] temp_2;
+ algorithm
+  o := 2;
+  (temp_1) := FunctionTests.ArrayOutputScalarization17.f2({1,2});
+  (temp_2) := FunctionTests.ArrayOutputScalarization17.f2(temp_1);
+  y[1] := temp_2[1];
+  y[2] := temp_2[2];
+  return;
+ end FunctionTests.ArrayOutputScalarization17.f1;
+
+ function FunctionTests.ArrayOutputScalarization17.f2
+  input Real[2] x;
+  output Real[2] y;
+ algorithm
+  y[1] := x[1];
+  y[2] := x[2];
+  return;
+ end FunctionTests.ArrayOutputScalarization17.f2;
+end FunctionTests.ArrayOutputScalarization17;
+")})));
+
+ function f1
+  output Real o = 2;
+  protected Real y[2];
+ algorithm
+  y := f2(f2({1,2}));
+ end f1;
+ 
+ function f2
+  input Real x[2];
+  output Real y[2] = x;
+ algorithm
+ end f2;
+ 
+ Real x = f1();
+end ArrayOutputScalarization17;
 
 
 

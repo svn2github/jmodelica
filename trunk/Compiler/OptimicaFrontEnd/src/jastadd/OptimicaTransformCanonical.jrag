@@ -22,12 +22,12 @@ aspect OptimicaTransformCanonical {
 		// Scalarize equations
 		List<FAbstractEquation> eqns = new List<FAbstractEquation>();
 		for (FAbstractEquation ae : getFEquationBlock(0).getFAbstractEquations()) {
-			ae.scalarize(eqns,new HashMap<String,Integer>());
+			ae.scalarize(eqns, vars, new HashMap<String,Integer>());
 		}
 		getFEquationBlock(0).setFAbstractEquationList(eqns);
 		List<FAbstractEquation> ieqns = new List<FAbstractEquation>();
 		for (FAbstractEquation ae : getFInitialEquations()) {
-			ae.scalarize(ieqns,new HashMap<String,Integer>());
+			ae.scalarize(ieqns, vars, new HashMap<String,Integer>());
 		}
 		setFInitialEquationList(ieqns);		
 		
@@ -60,6 +60,7 @@ aspect OptimicaTransformCanonical {
 	 */
 	public void FConstraint.scalarize(List<FConstraint> constr, 
 			HashMap<String,Integer> indexMap) {
+		// TODO: Handle function calls with array output
 		//System.out.println("FEquation.scalarize() " + ndims());
 		if (ndims()==0) {
 			/**

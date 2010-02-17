@@ -19,9 +19,9 @@ import java.util.HashMap;
 aspect FlatNameBinding {
 	
 	inh AbstractFVariable FIdUse.lookupFV(String name);
-	syn lazy AbstractFVariable FIdUse.myFV() = lookupFV(getFQName().name());
+	syn lazy AbstractFVariable FIdUse.myFV() = lookupFV(name());
 	
-	syn AbstractFVariable FIdUseExp.myFV() = getFIdUse().lookupFV(name());
+	syn lazy AbstractFVariable FIdUseExp.myFV() = getFIdUse().lookupFV(name());
 
 	//inh AbstractFVariable FIdUseExp.lookupFV(FQName fqname);
 	// inh AbstractFVariable FEquationBlock.lookupFV(FQName fqname);
@@ -30,7 +30,7 @@ aspect FlatNameBinding {
 	eq Root.getChild().lookupFV(String name) = null;
 
 	eq FClass.getChild(int index).lookupFV(String name) {
-		FVariable variable = (FVariable) fullyQualifiedVariablesMap().get(name);
+		FVariable variable = fullyQualifiedVariablesMap().get(name);
 		if (variable == null) {
 			//System.out.println("FClass.getChild().lookupFV: " + name + " " + variable);
 			return unknownFVariable();
@@ -104,8 +104,8 @@ aspect FlatNameBinding {
 		return map;
 	}
 	
-	syn lazy HashMap FFunctionDecl.fullyQualifiedVariablesMap() {
-		HashMap map = new HashMap();
+	syn lazy HashMap<String, FFunctionVariable> FFunctionDecl.fullyQualifiedVariablesMap() {
+		HashMap<String, FFunctionVariable> map = new HashMap<String, FFunctionVariable>();
 		for (FFunctionVariable v : getFFunctionVariables()) 
 			map.put(v.name(), v);
 		return map;

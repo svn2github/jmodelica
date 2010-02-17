@@ -617,8 +617,7 @@ aspect FlatAPI {
 	eq FFunctionCallEquation.numScalarEquations() {
 		 int res = 0;
 		 for (FFunctionCallLeft l : getLefts())
-			 if (l.hasFIdUse())
-				 res++;
+			 res += l.numScalarVars();
 		 return res;
 	}
 	

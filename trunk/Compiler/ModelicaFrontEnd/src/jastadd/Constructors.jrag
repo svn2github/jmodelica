@@ -90,6 +90,20 @@ aspect Constructors {
 		return val ? new FBooleanLitExpTrue() : new FBooleanLitExpFalse();
 	}
 	
+	/**
+	 * Constructs an FIdUse that refers to the variable with the given name.
+	 */
+	public FIdUse.FIdUse(String name) {
+		this(new FQName(name));
+	}
+	
+	/**
+	 * Constructs an FIdUseExp that refers to the variable with the given name.
+	 */
+	public FIdUseExp.FIdUseExp(String name) {
+		this(new FIdUse(name));
+	}
+	
 	public ComponentDecl.ComponentDecl(boolean isParameter,
 	                                   String type,
 	                                   String name,
@@ -132,6 +146,15 @@ aspect Constructors {
 	}
 	
 	/**
+	 * \brief Create an FFunctionArray with the given name and type. 
+	 *        Extracts array subscripts from type.
+	 */
+	public FFunctionArray.FFunctionArray(FPrimitiveType type, String name) {
+		this(new Opt(), type, new Opt(), new FQName(name));
+		getFQName().setLastFArraySubscripts(type.size().newFArraySubscripts());
+	}
+	
+	/**
 	 * \brief Create a new FSubscriptedExp with a new FArraySubscripts, containing the 
 	 *        proper number of FSubscripts (according to <code>exp</code>).
 	 * 
@@ -152,6 +175,25 @@ aspect Constructors {
 		List<FSubscript> l = new List<FSubscript>();
 		for (int i = 0; i < n; i++)
 			l.add(new FColonSubscript());
+		return new FArraySubscripts(l);
+	}
+	
+	/**
+	 * \brief Create a new FArraySubscripts containing an integer literal.
+	 */
+	public static FArraySubscripts FArraySubscripts.createLiteralSubscripts(int i) {
+		List<FSubscript> l = new List<FSubscript>();
+		l.add(new FExpSubscript(new FIntegerLitExp(i)));
+		return new FArraySubscripts(l);
+	}
+	
+	/**
+	 * \brief Create a new FArraySubscripts containing integer literals.
+	 */
+	public static FArraySubscripts FArraySubscripts.createLiteralSubscripts(int[] index) {
+		List<FSubscript> l = new List<FSubscript>();
+		for (int i : index)
+			l.add(new FExpSubscript(new FIntegerLitExp(i)));
 		return new FArraySubscripts(l);
 	}
 	

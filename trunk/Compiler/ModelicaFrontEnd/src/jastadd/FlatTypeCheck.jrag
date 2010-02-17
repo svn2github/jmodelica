@@ -240,12 +240,15 @@ aspect FlatTypeCheck {
   }
   
   public void FFunctionCallLeft.typeCheck() {
-	  if (hasFIdUse() && !type().isUnknown() && !myOutput().isUnknown()) { // Avoid duplicate error
-		  if (getFIdUse().isForIndex())
-			  error("Can not assign a value to a for loop index");
-		  else if (!type().typeCompatible(myOutput().type())) 
-			  error("Types of component " + getFIdUse().name() + " and output " + 
-					  myOutput().name() + " are not compatible");
+	  if (hasFExp() && !type().isUnknown() && !myOutput().isUnknown()) { // Avoid duplicate error
+		  if (getFExp() instanceof FIdUseExp) {  // Should never be false - add check? 
+			  FIdUse use = ((FIdUseExp) getFExp()).getFIdUse();
+			  if (use.isForIndex())
+				  error("Can not assign a value to a for loop index");
+			  else if (!type().typeCompatible(myOutput().type())) 
+				  error("Types of component " + use.name() + " and output " + 
+						  myOutput().name() + " are not compatible");
+		  }
 	  }
   }
   

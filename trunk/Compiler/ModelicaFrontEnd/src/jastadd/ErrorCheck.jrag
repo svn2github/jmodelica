@@ -107,9 +107,21 @@ import java.util.ArrayList;
   
   
   /**
+   * \brief Common super class for all JModelica exceptions.
+   */
+  public class ModelicaException extends Exception {
+	  public ModelicaException() {
+	  }
+	  
+	  public ModelicaException(String message) {
+		  super(message);
+	  }
+  }
+  
+  /**
    * Exception containing a list of compiler errors/warnings. 
    */
-  public class CompilerException extends Exception {
+  public class CompilerException extends ModelicaException {
 	  private ArrayList<Problem> problems;
 	  
 	  /**
@@ -149,7 +161,7 @@ import java.util.ArrayList;
    * Exception to be thrown when the Modelica class to instantiate is not
    * found.
    */
-  public class ModelicaClassNotFoundException extends Exception{
+  public class ModelicaClassNotFoundException extends ModelicaException {
 	  private String className;
 	  
 	  public ModelicaClassNotFoundException(String className) {

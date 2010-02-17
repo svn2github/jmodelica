@@ -452,6 +452,8 @@ aspect Names {
 		getLastInstAccess().getFArraySubscripts();
 	
 	syn FArraySubscripts InstAccess.getFArraySubscripts() = null;
+
+	syn boolean InstAccess.hasFArraySubscripts() = false;
 	
 	/**
 	 * \brief Set the array subscripts of the last name part.
@@ -517,6 +519,11 @@ aspect FlatNames {
 		getFQName().hasFArraySubscripts();
 	syn FArraySubscripts FIdUse.getFArraySubscripts() = 
 		getFQName().getFArraySubscripts();
+
+	syn boolean FIdUseInstAccess.hasFArraySubscripts() = 
+		getInstAccess().hasFArraySubscripts();
+	syn FArraySubscripts FIdUseInstAccess.getFArraySubscripts() = 
+		getInstAccess().getFArraySubscripts();
 
 	syn boolean FIdUseExp.hasFArraySubscripts() = 
 		getFIdUse().hasFArraySubscripts();
@@ -593,15 +600,14 @@ aspect FlatNames {
 
 	syn lazy String FQName.name() {
 		StringBuffer str = new StringBuffer();
-		for (int i=0;i<getNumFQNamePart();i++) {
-			str.append(getFQNamePart(i).getName());
-			if (i<getNumFQNamePart()-1 || isScalarized()) {
-				if (getFQNamePart(i).hasFArraySubscripts()) {
-					str.append(getFQNamePart(i).getFArraySubscripts().prettyPrint(""));
-				}
-				if (i<getNumFQNamePart()-1) {
+		for (Iterator<FQNamePart> it = getFQNameParts().iterator(); it.hasNext(); ) {
+			FQNamePart part = it.next();
+			str.append(part.getName());
+			if (it.hasNext() || isScalarized()) {
+				if (part.hasFArraySubscripts()) 
+					str.append(part.getFArraySubscripts());
+				if (it.hasNext()) 
 					str.append(".");
-				}
 			}
 		}
 		return str.toString();
@@ -791,12 +797,27 @@ aspect FlatFunctionUtils {
 	 
 	 syn ArrayList<InstComponentDecl> InstFunctionCall.myInputs()  = getName().myInstClassDecl().myInputs();
 	 syn ArrayList<InstComponentDecl> InstFunctionCall.myOutputs() = getName().myInstClassDecl().myOutputs();
+	 syn ArrayList<FFunctionVariable> FFunctionCall.myInputs()     = myFFunctionDecl().myInputs();
+	 syn ArrayList<FFunctionVariable> FFunctionCall.myOutputs()    = myFFunctionDecl().myOutputs();
+	 
+	 syn boolean InstFunctionCall.hasOutputs() = !myOutputs().isEmpty();
+	 syn boolean FFunctionDecl.hasOutputs()    = !myOutputs().isEmpty();
+	 syn boolean FFunctionCall.hasOutputs()    = myFFunctionDecl().hasOutputs();
+	 
+	 syn InstComponentDecl InstFunctionCall.expOutput() = myOutputs().get(0);
+	 syn FFunctionVariable FFunctionDecl.expOutput()    = myOutputs().get(0);
+	 syn FFunctionVariable FFunctionCall.expOutput()    = myFFunctionDecl().expOutput();
 	
 	 syn lazy FunctionReturnDefinition FFunctionDecl.returnDefinition() = new FunctionReturnDefinition(this);
 	 inh FunctionReturnDefinition FReturnStmt.returnDefinition();
 	 eq FFunctionDecl.getFAlgorithmBlock().returnDefinition() = returnDefinition();
 	 eq InstProgramRoot.getChild().returnDefinition()         = null;
 	 eq FClass.getChild().returnDefinition()                  = null;
+	 
+	 /**
+	  * \brief Check if this function returns an array when used as an expression.
+	  */
+	 syn boolean FFunctionDecl.isArray() = hasOutputs() ? expOutput().isArray() : false;
 	 
 	 /**
 	  * \brief Check is this node is in a function.
@@ -807,6 +828,7 @@ aspect FlatFunctionUtils {
 	 inh boolean FStatement.inFunction();
 	 inh boolean FAlgorithmBlock.inFunction();
 	 inh boolean FSubscript.inFunction();
+	 inh boolean FFunctionCallLeft.inFunction();
 	 eq InstBaseClassDecl.getChild().inFunction() = isFunction();
 	 eq FFunctionDecl.getChild().inFunction()     = true;
 	 eq Root.getChild().inFunction()              = false;
@@ -825,6 +847,15 @@ aspect FlatFunctionUtils {
 	  */
 	 syn boolean FSubscript.inAlgorithmOrFunction() = inFunction() || inAlgorithm();
 	 
+	 /**
+	  * \brief Check if this function call is the call of a function call equation 
+	  *        or function call statement.
+	  */
+	 inh boolean FFunctionCall.isFunctionCallClause();
+	 eq ASTNode.getChild().isFunctionCallClause()              = false;
+	 eq FFunctionCallEquation.getCall().isFunctionCallClause() = true;
+	 eq FFunctionCallStmt.getCall().isFunctionCallClause()     = true;
+	 
 	 
 	 inh boolean FWhenStmt.insideBlockStmt();
 	 eq FAlgorithmBlock.getChild().insideBlockStmt() = false;
@@ -833,10 +864,21 @@ aspect FlatFunctionUtils {
 	 eq FForStmt.getChild().insideBlockStmt()        = true;
 	 eq InstForStmt.getChild().insideBlockStmt()     = true;
 	 
-	 syn lazy int FFunctionCallLeft.myIndex() = prevIndex() + (hasFIdUse() ? 1 : 0);
+	 /**
+	  * \brief Return the index of the variable assigned by this FFunctionCallLeft among 
+	  *        all those assigned by the same FFUnctionCallEquation/Stmt
+	  */
+	 syn lazy int FFunctionCallLeft.myIndex() = prevIndex() + (hasFExp() ? 1 : 0);
 	 inh int FFunctionCallLeft.prevIndex();
-	 eq FFunctionCallEquation.getLeft(int i).prevIndex() = (i == 0) ? -1 : getLeft(i - 1).myIndex();
-	 eq FFunctionCallStmt.getLeft(int i).prevIndex()     = (i == 0) ? -1 : getLeft(i - 1).myIndex();
+	 eq FFunctionCallEquation.getLeft(int i).prevIndex() = (i == 0) ? -1 : getLeft(i - 1).myLastIndex();
+	 eq FFunctionCallStmt.getLeft(int i).prevIndex()     = (i == 0) ? -1 : getLeft(i - 1).myLastIndex();
+	 
+	 syn int FFunctionCallLeft.myLastIndex() = myIndex() + (hasFExp() ? numScalarVars() - 1 : 0);
+	 
+	 /**
+	  * \brief Get the number of scalar variables assigned by this FFunctionCallLeft.
+	  */
+	 syn int FFunctionCallLeft.numScalarVars() = (hasFExp() ? getFExp().size().numElements() : 0);
 	 
 	 inh lazy InstComponentDecl FFunctionCallLeft.myOutput();
 	 eq FFunctionCallEquation.getLeft(int i).myOutput() = getCall().findOutput(i);
@@ -859,6 +901,30 @@ aspect FlatFunctionUtils {
 	 eq FFunctionCallEquation.getCall().myLefts() = getLefts().toArrayList();
 	 eq FFunctionCallStmt.getCall().myLefts()     = getLefts().toArrayList();
 
+	 syn lazy String FClass.tempVarName() {
+		 String name = "temp";
+		 HashMap<String,FVariable> vars = fullyQualifiedVariablesMap();
+		 for (int n = 1; vars.get(name) != null; n++)
+			 name = "temp_" + n;
+		 return name;
+	 }
+	 
+	 inh lazy String FFunctionCall.tempVarName();
+	 eq InstNode.getChild().tempVarName()      = null;
+	 eq FFunctionCall.getArray().tempVarName() = tempVarName();
+	 eq FClass.getChild().tempVarName()        = tempVarName();
+	 eq FFunctionDecl.getChild().tempVarName() {
+		 HashMap<String,FFunctionVariable> vars = fullyQualifiedVariablesMap();
+		 String name;
+		 do {
+			 name = "temp_" + nextTempVarIndex++;
+		 } while (vars.get(name) != null);
+		 return name;
+	 }
+	 
+	 private int FFunctionDecl.nextTempVarIndex = 1;
+	 private int FClass.nextTempVarIndex = 1;
+	 public int FClass.tempVarIndex() { return nextTempVarIndex++; }
 }
 
 aspect Visibility {

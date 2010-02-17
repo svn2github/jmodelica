@@ -184,6 +184,8 @@ aspect Arrays {
 	eq FSizeExp.ndims() = hasDim() ? 0 : 1;
 	
 	eq FInfArgsFunctionCall.ndims() = getNumFExp();
+	eq FFunctionCall.ndims()        = hasOutputs() ? expOutput().ndims() : -1;
+	eq InstFunctionCall.ndims()     = hasOutputs() ? expOutput().ndims() : -1;
 	
 	eq FBinExp.ndims() = getLeft().ndims();
 	eq FUnaryExp.ndims() = getFExp().ndims();
@@ -488,6 +490,9 @@ aspect Arrays {
 			return Size.SCALAR;
 		}
 	}
+	
+	eq FFunctionCall.size()    = hasOutputs() ? expOutput().size() : Size.SCALAR;
+	eq InstFunctionCall.size() = hasOutputs() ? expOutput().size() : Size.SCALAR;
 	
 	/**
 	 * \brief Get the array sizes. 
@@ -879,6 +884,23 @@ aspect Arrays {
 		getFExp(i.get(level) - 1).fillArray(arr, i, level + 1);
 	}
 	
+	eq FFunctionCall.getArray() {
+		FClass fc = myFClass();
+		if (!isArray() || fc == null)
+			return super.getArray();
+		
+		boolean inFunc = inFunction();
+		Array arr = new Array(indices());
+		for (Index i : arr.indices()) {
+			FQName n = new FQName(tempVarName());
+			FArraySubscripts fas = inFunc ? i.newFArraySubscripts() : 
+				FArraySubscripts.createLiteralSubscripts(fc.tempVarIndex());
+			n.setLastFArraySubscripts(fas);
+			arr.set(i, new FIdUseExp(new FIdUse(n)));
+		}
+		return arr;
+	}
+	
 	eq FIdUseExp.getArray() {
 		if (isArray()) {
 			/*
@@ -1178,12 +1200,17 @@ aspect ArrayIndices {
 		 * \brief Returns the number of elements spanned by this Size.
 		 */
 		public int numElements() {
-			if (size.length == 0)
-				return 0;
 			int res = 1;
 			for (int i = 0; i < size.length; i++)
 				res *= size[i];
 			return res;
+		}
+		
+		/**
+		 * \brief Create a new FArraySubscripts object describing this size.
+		 */
+		public FArraySubscripts newFArraySubscripts() {
+			return FArraySubscripts.createLiteralSubscripts(size);
 		}
 		
 		/**
@@ -1597,11 +1624,7 @@ aspect ArrayIndices {
 		 * \brief Create a new FArraySubscripts object describing this index.
 		 */
 		public FArraySubscripts newFArraySubscripts() {
-			FArraySubscripts fas = new FArraySubscripts();
-			for (int i = 0; i < index.length; i++) {
-				fas.addFSubscript(new FExpSubscript(new FIntegerLitExp(index[i])));
-			}
-			return fas;
+			return FArraySubscripts.createLiteralSubscripts(index);
 		}
 		
 		/**
@@ -1632,10 +1655,18 @@ aspect ArrayIndices {
 		}
 		
 		/**
-		 * \brief Return a String represetation of this Index.
+		 * \brief Return a string representation on the form "[i1, i2, i3]".
 		 */
 		public String toString() {
 			return Arrays.toString(index);
+		}
+		
+		/**
+		 * \brief Return a string representation on the form "i1, i2, i3".
+		 */
+		public String toUnclosedString() {
+			String tmp = toString();
+			return tmp.substring(1, tmp.length() - 1);
 		}
 		
 		
