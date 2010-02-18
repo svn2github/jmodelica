@@ -1139,20 +1139,19 @@ class Model(object):
             else:
                 "Unknown type"
     
-    def _set_iparam_values(self, xmldoc=None):
+    def _set_iparam_values(self, xml_values_doc=None):
         """ Set values for the independent parameters. """
-        if not xmldoc:
-            xmldoc = self._get_XMLValuesDoc()
-        values = xmldoc.get_iparam_values()
+        if not xml_values_doc:
+            xml_values_doc = self._get_XMLValuesDoc()
+        values = xml_values_doc.get_iparam_values() #{variablename:value}
+        xmldoc = self._get_XMLDoc()
+        variables = xmldoc.get_variable_names(include_alias=False) # {variablename:value reference}
        
-        z = self.get_z()
-       
-        keys = values.keys()
-        keys.sort(key=str)
-       
-        for key in keys:
-            value = values.get(key)
-            (i, ptype) = _translate_value_ref(key)
+        z = self.get_z()       
+        for name in values.keys():
+            value = values.get(name)
+            value_ref = variables.get(name)
+            (i, ptype) = _translate_value_ref(value_ref)
            
             if(ptype == 0):
                # Primitive type is Real
@@ -1183,7 +1182,7 @@ class Model(object):
             print "Could not set optimization interval. Optimization starttime and/or finaltime was None."
 
     def _set_timepoints(self):       
-        """ Set the optimization timepoints (if Optimica). """        
+        """ Set the optimization timepoints (if Optimica). """
         xmldoc = self._get_XMLDoc()
         start =  xmldoc.get_starttime()
         final = xmldoc.get_finaltime()

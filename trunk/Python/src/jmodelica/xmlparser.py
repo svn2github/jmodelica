@@ -1244,16 +1244,16 @@ class XMLValuesDoc(XMLBaseDoc):
             Dict with ValueReference as key and parameter as value.
             
         """
-        keys = self._xpatheval("//*/@valueReference")
+        keys = self._xpatheval("//*/@name")
         vals = self._xpatheval("//*/@value")
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        valrefs=[]
+        names=[]
         iparam_values=[]
         for index, key in enumerate(keys):
-            valrefs.append(int(key))
-            type = self.get_parameter_type(int(key))
+            names.append(str(key))
+            type = self.get_parameter_type(str(key))
             if type == 'RealParameter':
                 iparam_values.append(float(vals[index]))
             elif type == 'IntegerParameter':
@@ -1265,10 +1265,10 @@ class XMLValuesDoc(XMLBaseDoc):
             else:
                 pass
                 # enumeration not supported yet
-        return dict(zip(valrefs, iparam_values))
+        return dict(zip(names, iparam_values))
     
-    def get_parameter_type(self, valref):
-        type = self._xpatheval("//IndependentParameters/node()[@valueReference=\""+str(valref)+"\"]")
+    def get_parameter_type(self, variablename):
+        type = self._xpatheval("//IndependentParameters/node()[@name=\""+str(variablename)+"\"]")
         if len(type) > 0:
             return type[0].tag
         return None

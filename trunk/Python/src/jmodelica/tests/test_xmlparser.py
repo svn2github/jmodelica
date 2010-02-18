@@ -877,7 +877,7 @@ def t_get_x_lin_tp_values(xmldoc):
 def t_get_iparam_values(xmldoc):
     d = xmldoc.get_iparam_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
+        assert key.__class__ is str, \
             "Value reference is not int"
         type = xmldoc.get_parameter_type(key)
         if type == 'RealParameter':
@@ -895,7 +895,7 @@ def t_get_iparam_values(xmldoc):
         else:
             pass
             # enumeration not supported
-    nose.tools.assert_equal(d.get(3), 350.0)
+    nose.tools.assert_equal(d.get('cstr.T0'), 350.0)
 
 @testattr(stddist = True)
 def t_get_starttime(xmldoc):

@@ -24,25 +24,25 @@
 			<xs:choice minOccurs="0" maxOccurs="unbounded">
 				<xs:element name="BooleanParameter">
 					<xs:complexType>
-						<xs:attribute name="valueReference" type="xs:unsignedLong" use="required"/>
+						<xs:attribute name="name" type="xs:string" use="required"/>
 						<xs:attribute name="value" type="xs:boolean" use="required"/>
 					</xs:complexType>
 				</xs:element>
 				<xs:element name="IntegerParameter">
 					<xs:complexType>
-						<xs:attribute name="valueReference" type="xs:unsignedLong" use="required"/>
+						<xs:attribute name="name" type="xs:string" use="required"/>
 						<xs:attribute name="value" type="xs:integer" use="required"/>
 					</xs:complexType>
 				</xs:element>
 				<xs:element name="RealParameter">
 					<xs:complexType>
-						<xs:attribute name="valueReference" type="xs:unsignedLong" use="required"/>
+						<xs:attribute name="name" type="xs:string" use="required"/>
 						<xs:attribute name="value" type="xs:double" use="required"/>
 					</xs:complexType>
 				</xs:element>
 				<xs:element name="StringParameter">
 					<xs:complexType>
-						<xs:attribute name="valueReference" use="required"/>
+						<xs:attribute name="name" type="xs:string" use="required"/>
 						<xs:attribute name="value" type="xs:string" use="required"/>
 					</xs:complexType>
 				</xs:element>
