@@ -263,7 +263,8 @@ aspect Flattening {
 		if (hasInstValueMod()) {
 			InstValueModification im = myInstValueMod();
 			FExp fe = im.getFExp();
-			if (!im.hasEach() && im.myInstNode() != this)
+			boolean hasEach = im.hasEach() || type().typeCompatible(fe.type());  // Assume each if types match
+			if (!hasEach && im.myInstNode() != this)
 				fe = splitBindingFExp(fe, im.myInstNode());
 			return (FExp) fe.unboundCopy();
 		}

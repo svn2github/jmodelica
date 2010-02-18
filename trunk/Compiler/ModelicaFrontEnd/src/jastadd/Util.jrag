@@ -688,16 +688,19 @@ aspect FlatNames {
 	syn String FIdDecl.nameUnderscore() = getFQName().nameUnderscore();
 
 	syn String FClass.nameUnderscore() = getFQName().nameUnderscore();
-	syn String FVariable.nameUnderscore() = getFQName().nameUnderscore();
-	syn String FDerivativeVariable.nameUnderscore() = "der_" + getFQName().nameUnderscore();
+	
+	syn String AbstractFVariable.nameUnderscore() = null;
+	eq FVariable.nameUnderscore()           = getFQName().nameUnderscore();
+	eq FDerivativeVariable.nameUnderscore() = "der_" + getFQName().nameUnderscore();
+	eq FFunctionVariable.nameUnderscore()   = getFQName().nameUnderscore();
 	
 	syn String FQName.funcNameUnderscore(String suffix) = "func_" + nameUnderscore() + "_" + suffix;
 	syn String FIdUse.funcNameUnderscore(String suffix) = getFQName().funcNameUnderscore(suffix);
-	
-	syn String FFunctionCall.suffixDefinition() = "def";
-	syn String FFunctionDecl.suffixDefinition() = "def";
-	syn String FFunctionCall.suffixExpression() = "exp";
-	syn String FFunctionDecl.suffixExpression() = "exp";
+
+	inh int FVariable.variableIndex();
+	eq FClass.getFVariable(int i).variableIndex()     = i;
+	eq FClass.getAliasVariable(int i).variableIndex() = getNumFVariable() + i;
+	eq FForIndex.getFVariable().variableIndex()       = -1;
 	
 	/**
 	 * \brief Copy this FQName, append a String to the copy and return the copy.

@@ -135,7 +135,7 @@ public class CGenerator extends GenericGenerator {
 				genPrinter.print("   " + "(*res)[" + i + "] = ");
 				fv.getBindingExp().prettyPrint_C(genPrinter,"");
 				genPrinter.print(" - ");
-				genPrinter.print("_"+fv.nameUnderscore()+"_");
+				genPrinter.print(fv.name_C());
 				genPrinter.print(";\n");
 
 				i++;
@@ -153,9 +153,9 @@ public class CGenerator extends GenericGenerator {
 		}
 		
 		private void generateVar(PrintStream genPrinter, FVariable fv, String offset, int index) {
-			genPrinter.print("#define _");
-			genPrinter.print(fv.nameUnderscore());
-			genPrinter.print("_ ((*(jmi->z))[jmi->offs_");
+			genPrinter.print("#define ");
+			genPrinter.print(fv.name_C());
+			genPrinter.print(" ((*(jmi->z))[jmi->offs_");
 			genPrinter.print(offset);
 			genPrinter.print("+");
 			genPrinter.print(index);

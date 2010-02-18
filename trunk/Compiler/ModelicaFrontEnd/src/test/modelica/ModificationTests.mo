@@ -1592,14 +1592,29 @@ end ArrayModifications36;
 
 model ArrayModifications37
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
+     JModelica.UnitTesting.TransformCanonicalTestCase(
          name="ArrayModifications37",
-         description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on middle, wrong size",
-         errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1735, column 8:
-  Array size mismatch in declaration of x, size of declaration is [2, 2] and size of binding expression is [2]
+         description="Modifications to arrays: inferring each: 3 levels deep, binding exp on middle",
+         flatModel="
+fclass ModificationTests.ArrayModifications37
+ Real x[1].y[1].x[1];
+ Real x[1].y[1].x[2];
+ Real x[1].y[2].x[1];
+ Real x[1].y[2].x[2];
+ Real x[2].y[1].x[1];
+ Real x[2].y[1].x[2];
+ Real x[2].y[2].x[1];
+ Real x[2].y[2].x[2];
+equation
+ x[1].y[1].x[1] = 1;
+ x[1].y[1].x[2] = 2;
+ x[1].y[2].x[1] = 1;
+ x[1].y[2].x[2] = 2;
+ x[2].y[1].x[1] = 1;
+ x[2].y[1].x[2] = 2;
+ x[2].y[2].x[1] = 1;
+ x[2].y[2].x[2] = 2;
+end ModificationTests.ArrayModifications37;
 ")})));
 
  model C
@@ -1780,6 +1795,50 @@ Semantic error at line 1907, column 11:
  
  B x[2];
 end ArrayModifications44;
+
+
+model ArrayModifications45
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayModifications45",
+         description="Modifications to arrays: inferring each: attribute",
+         flatModel="
+fclass ModificationTests.ArrayModifications45
+ Real x[1](start = 0);
+ Real x[2](start = 0);
+end ModificationTests.ArrayModifications45;
+")})));
+
+ Real x[2](start=0);
+end ArrayModifications45;
+
+
+model ArrayModifications46
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayModifications46",
+         description="Modifications to arrays: inferring each: binding expression",
+         flatModel="
+fclass ModificationTests.ArrayModifications46
+ Real y[1].x[1];
+ Real y[1].x[2];
+ Real y[2].x[1];
+ Real y[2].x[2];
+equation
+ y[1].x[1] = 1;
+ y[1].x[2] = 2;
+ y[2].x[1] = 1;
+ y[2].x[2] = 2;
+end ModificationTests.ArrayModifications46;
+")})));
+
+ model A
+  Real x[2];
+ end A;
+ 
+ A y[2](x = {1,2});
+end ArrayModifications46;
+
 
 
 /* ========= Modifications on type declarations ========= */

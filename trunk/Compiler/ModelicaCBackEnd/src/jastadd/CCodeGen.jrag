@@ -81,7 +81,7 @@ aspect CCodeGen {
 	}
 		
 	public void FDerExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		str.print("_"+nameUnderscore()+"_");
+		str.print(myFV().name_C());
 	}
 	
 	public void FIdUseExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
@@ -124,7 +124,7 @@ aspect CCodeGen {
 		boolean exp = functionCallIsExp();
 		if (!exp)
 			str.print(indent);
-		str.print(getName().funcNameUnderscore(exp ? suffixExpression() : suffixDefinition()));
+		str.print(getName().funcNameUnderscore(exp ? SUFFIX_EXP : SUFFIX_DEF));
 		str.print("(");
 		String sep = "";
 		for (FExp arg : getArgs()) {
@@ -174,6 +174,11 @@ aspect CCodeGen {
 			v.printReturnWrite_C(str, indent);
 	}
 	
+	public static final String FFunctionDecl.SUFFIX_DEF = "def";
+	public static final String FFunctionDecl.SUFFIX_EXP = "exp";
+	public static final String FFunctionCall.SUFFIX_DEF = FFunctionDecl.SUFFIX_DEF;
+	public static final String FFunctionCall.SUFFIX_EXP = FFunctionDecl.SUFFIX_EXP;
+	
 	private void FFunctionDecl.prettyPrintHead_C(Printer p, PrintStream str, String indent, Object o, 
 			String type, String suffix, boolean returnArgs) {
 		str.print(indent);
@@ -199,7 +204,7 @@ aspect CCodeGen {
 	
 	private void FFunctionDecl.prettyPrintWrappedCall_C(PrintStream str, String indent) {
 		str.print(indent);
-		str.print(getFQName().funcNameUnderscore(suffixDefinition()));
+		str.print(getFQName().funcNameUnderscore(SUFFIX_DEF));
 		str.print("(");
 		String sep = "";
 		for (FFunctionVariable v : myInputs()) {
@@ -218,11 +223,11 @@ aspect CCodeGen {
 	}
 	
 	public void FFunctionDecl.genHeader_C(PrintStream str, String indent) {
-		prettyPrintHead_C(printer_C, str, indent, null, "void", suffixDefinition(), true);
+		prettyPrintHead_C(printer_C, str, indent, null, "void", SUFFIX_DEF, true);
 		str.print(";\n");
     	if (generateExpFunction()) {
     		String type = returnDefinition().getDeclaredType_C();
-			prettyPrintHead_C(printer_C, str, indent, null, type, suffixExpression(), false);
+			prettyPrintHead_C(printer_C, str, indent, null, type, SUFFIX_EXP, false);
 			str.print(";\n");
     	}
 	}
@@ -230,7 +235,7 @@ aspect CCodeGen {
 	public void FFunctionDecl.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		String next = p.indent(indent);
 		// Print definition
-		prettyPrintHead_C(p, str, indent, o, "void", suffixDefinition(), true);
+		prettyPrintHead_C(p, str, indent, o, "void", SUFFIX_DEF, true);
 		str.print(" {\n");
 		for (FFunctionVariable ffv : myNonInputs())
 			p.toString(ffv, str, next, o);
@@ -243,7 +248,7 @@ aspect CCodeGen {
     	// Print wrapper for expressions
     	if (generateExpFunction()) {
 	    	String type = returnDefinition().getDeclaredType_C();
-			prettyPrintHead_C(p, str, indent, o, type, suffixExpression(), false);
+			prettyPrintHead_C(p, str, indent, o, type, SUFFIX_EXP, false);
 			str.print(" {\n");
 			returnDefinition().printDeclarationForExp_C(p, str, next, o);
 			prettyPrintWrappedCall_C(str, next);
@@ -260,10 +265,10 @@ aspect CCodeGen {
 	
 	syn String AbstractFVariable.name_C() = null;
 	eq FVariable.name_C()         = isForIndex() ? 
-			                        getFQName().nameUnderscore() + "_i" :
-			                        "_" + getFQName().nameUnderscore() + "_";
-	eq FFunctionVariable.name_C() = getFQName().nameUnderscore() + "_v";
-	eq FFunctionArray.name_C()    = getFQName().nameUnderscore() + "_a";
+			                        nameUnderscore() + "_i" :
+			                        '_' + nameUnderscore() + '_' + variableIndex();
+	eq FFunctionVariable.name_C() = nameUnderscore() + "_v";
+	eq FFunctionArray.name_C()    = nameUnderscore() + "_a";
 	
 	syn String FFunctionVariable.nameReturn_C() = getFQName().nameUnderscore() + "_r";
 	syn String FFunctionArray.nameReturn_C()    = name_C();
@@ -750,7 +755,7 @@ aspect CCodeGen {
 			str.print("0.0");
 		}
 		str.print(" - ");
-		str.print("_"+nameUnderscore()+"_");
+		str.print(name_C());
 		str.print(";\n");
 	}
 

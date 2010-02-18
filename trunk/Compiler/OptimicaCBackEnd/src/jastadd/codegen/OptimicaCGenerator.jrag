@@ -106,25 +106,25 @@ public class OptimicaCGenerator extends CGenerator {
 	
 		public void generate(PrintStream genPrinter) {
 			for (FVariable fv : foptclass.derivativeVariables()) {
-				genPrinter.print("#define _" + fv.nameUnderscore());
+				genPrinter.print("#define " + fv.name_C());
 				genPrinter.print("_p_(j) ((*(jmi->z))[jmi->offs_dx_p+" + 
 						"j*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w) +" +
 						fv.derivativeVariableIndex() + "])\n");
 			}
 			for (FVariable fv : foptclass.differentiatedRealVariables()) {
-				genPrinter.print("#define _" + fv.nameUnderscore());
+				genPrinter.print("#define " + fv.name_C());
 				genPrinter.print("_p_(j) ((*(jmi->z))[jmi->offs_x_p+" + 
 						"j*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w) +" +
 						fv.differentiatedRealVariableIndex() + "])\n");
 			}
 			for (FVariable fv : foptclass.realInputs()) {
-				genPrinter.print("#define _" + fv.nameUnderscore());
+				genPrinter.print("#define " + fv.name_C());
 				genPrinter.print("_p_(j) ((*(jmi->z))[jmi->offs_u_p+" + 
 						"j*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w) +" +
 						fv.realInputIndex() + "])\n");
 			}
 			for (FVariable fv : foptclass.algebraicRealVariables()) {
-				genPrinter.print("#define _" + fv.nameUnderscore());
+				genPrinter.print("#define " + fv.name_C());
 				genPrinter.print("_p_(j) ((*(jmi->z))[jmi->offs_w_p+" +
 						"j*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w) +" +
 						fv.algebraicRealVariableIndex() + "])\n");

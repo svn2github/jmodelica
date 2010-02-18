@@ -31,7 +31,9 @@ aspect FlatTypeCheck {
     			error("The 'each' keyword cannot be applied to members of non-array components");
      		} else {
     			if (!bindingType().typeCompatible(bexp.type())) {
-    				if (!bindingType().scalarType().typeCompatible(bexp.type().scalarType())) {
+    				if (!myBindingExpHasEach() && type().typeCompatible(bexp.type())) {
+						warning("Assuming 'each' for the binding expression to the variable " + name());
+    				} else if (!bindingType().scalarType().typeCompatible(bexp.type().scalarType())) {
     					error("The binding expression of the variable " + name() +
     							" does not match the declared type of the variable");
     				} else {
@@ -59,9 +61,13 @@ aspect FlatTypeCheck {
 					error("The type of the binding expression of the attribute " + name() +
 					  " does not match the declared type of the variable");
 				} else if (!getEach() && !attr_type.dimensionCompatible(val_mod.type())) { 
-					error("Array size mismatch for the attribute " + name() +
-							", size of declaration is " + attr_type.size() + 
-							" and size of " + name() + " expression is " + val_mod.size());
+					if (val_mod.ndims() == 0) {
+						warning("Assuming 'each' for the attribute " + name());
+					} else {
+						error("Array size mismatch for the attribute " + name() +
+								", size of declaration is " + attr_type.size() + 
+								" and size of " + name() + " expression is " + val_mod.size());
+					}
 				} else if (getEach()) { 
 					if (owner.ndims() == 0) {
 						error("The 'each' keyword cannot be applied to attributes of scalar components");

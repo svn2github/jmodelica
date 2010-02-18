@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 aspect OptimicaCCodeGen {
 	
 	public void FTimedVariable.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		str.print("_"+getName().nameUnderscore()+"_p_(" + 
+		str.print(getName().name_C()+"_p_(" + 
 				myFOptClass().timePointIndex(getArg().ceval().realValue()) + ")");
 	}
 

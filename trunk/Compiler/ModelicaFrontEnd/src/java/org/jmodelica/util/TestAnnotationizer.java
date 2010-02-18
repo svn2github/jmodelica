@@ -267,8 +267,12 @@ abstract public class TestAnnotationizer {
 
 		@Override
 		protected void printSpecific(PrintStream out, String indent) throws Exception {
-			out.print(indent + "template=\"\n" + template);
-			out.print("\n\",\n" + indent + "generatedCode=\"\n" + code);
+			out.print(indent + "template=\"");
+			if (template.indexOf('\n') < 0 && template.indexOf('\r') < 0) 
+				out.print(template);
+			else
+				out.print("\n" + template + "\n");
+			out.print("\",\n" + indent + "generatedCode=\"\n" + code);
 			out.print("\"");
 		}
 		
