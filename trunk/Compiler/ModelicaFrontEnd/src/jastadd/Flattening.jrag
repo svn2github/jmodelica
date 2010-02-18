@@ -130,6 +130,7 @@ aspect Flattening {
 			FExp e = flattenBindingFExp();
 			Opt eo = (e == null) ? new Opt() : new Opt(e);
 			FQName fqn = new FQName(getFQName());
+			fqn.setLastFArraySubscripts(size().newFArraySubscripts());
 			FFunctionVariable ffv;
 			if (isArray())
 				ffv = new FFunctionArray(new Opt(), type(), eo, fqn);
@@ -223,19 +224,17 @@ aspect Flattening {
 		FVisibilityType fvt = getComponentDecl().isPublic()? 
 				new FPublicVisibilityType() : new FProtectedVisibilityType();
 				
-		if (isReal()) {
-			fv = new FRealVariable(fvt, tpo, new Opt(), attr, eo, new Opt(), 
-					new FQName(getFQName()));
-		} else if (isInteger()) {
-			fv = new FIntegerVariable(fvt,tpo, new Opt(), attr, eo, new Opt(), 
-					new FQName(getFQName()));
-		} else if (isBoolean()) {
-			fv = new FBooleanVariable(fvt,tpo, new Opt(), attr, eo, new Opt(), 
-					new FQName(getFQName()));
-		} else if (isString()) {
-			fv = new FStringVariable(fvt,tpo, new Opt(), attr, eo, new Opt(), 
-					new FQName(getFQName()));
-		}
+		FQName fqn = new FQName(getFQName());
+		fqn.setLastFArraySubscripts(size().newFArraySubscripts());
+				
+		if (isReal()) 
+			fv = new FRealVariable(fvt, tpo, new Opt(), attr, eo, new Opt(), fqn);
+		else if (isInteger()) 
+			fv = new FIntegerVariable(fvt,tpo, new Opt(), attr, eo, new Opt(), fqn);
+		else if (isBoolean()) 
+			fv = new FBooleanVariable(fvt,tpo, new Opt(), attr, eo, new Opt(), fqn);
+		else if (isString()) 
+			fv = new FStringVariable(fvt,tpo, new Opt(), attr, eo, new Opt(), fqn);
 		
 		// Only set prefix for top level inputs and outputs
 		// TODO: Make sure that prefixes specified in short class declarations are propagated
@@ -251,19 +250,22 @@ aspect Flattening {
 	}
 	
 	/**
-	 * \ingroup aspect_Flattening
-	 * 
-	 * Retrieve the binding expression of an InstPrimitive node.
+	 * \brief Retrieve the binding expression of an InstPrimitive node.
 	 */
 	syn FExp InstPrimitive.myBindingInstExp() = hasInstValueMod() ? myInstValueMod().getFExp() : null;
 
+	/**
+	 * \brief Check if this primitive has a binding expression.
+	 */
+	syn boolean InstPrimitive.hasBindingFExp() = myBindingInstExp() != null;
 
 	syn lazy FExp InstPrimitive.getBindingFExp() {
 		//System.out.println("In file: " + fileName() + " at line: " + beginLine() + ": " + prettyPrint(""));
 		if (hasInstValueMod()) {
 			InstValueModification im = myInstValueMod();
 			FExp fe = im.getFExp();
-			boolean hasEach = im.hasEach() || type().typeCompatible(fe.type());  // Assume each if types match
+			boolean hasEach = im.hasEach() || 
+				(declaredSize().isKnown() && type().typeCompatible(fe.type()));  // Assume each if types match
 			if (!hasEach && im.myInstNode() != this)
 				fe = splitBindingFExp(fe, im.myInstNode());
 			return (FExp) fe.unboundCopy();

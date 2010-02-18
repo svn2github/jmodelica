@@ -326,10 +326,6 @@ aspect Arrays {
 	
 	/**
 	 * \brief Get the array sizes. 
-	 * 
-	 * @return An array of integers of length ndims(). Each entry holds the
-	 * corresponding array dimension size.
-	 * 
 	 */
 	syn lazy Size FAbstractEquation.size() = Size.SCALAR;
 	eq FEquation.size() {
@@ -340,10 +336,6 @@ aspect Arrays {
 
 	/**
 	 * \brief Get the array sizes. 
-	 * 
-	 * @return An array of integers of length ndims(). Each entry holds the
-	 * corresponding array dimension size.
-	 * 
 	 */
 	syn lazy Size FArraySubscripts.size() {
 		MutableSize s = new MutableSize(ndims());
@@ -363,10 +355,6 @@ aspect Arrays {
 	/**
 	 * \brief Get the array sizes when the array subscripts are used in an
 	 * access. See also documentation of accessNdims(). 
-	 * 
-	 * @return An array of integers of length accessNdims(). Each entry holds the
-	 * corresponding array dimension size.
-	 * 
 	 */
 	syn lazy Size FArraySubscripts.accessSize() {
 		MutableSize s = new MutableSize(accessNdims());
@@ -379,10 +367,6 @@ aspect Arrays {
 	
 	/**
 	 * \brief Get the array sizes. 
-	 * 
-	 * @return An array of integers of length ndims(). Each entry holds the
-	 * corresponding array dimension size.
-	 * 
 	 */
 	syn Size FSubscript.size();
 
@@ -404,10 +388,6 @@ aspect Arrays {
 	
 	/**
 	 * \brief Get the array sizes. 
-	 * 
-	 * @return An array of integers of length ndims(). Each entry holds the
-	 * corresponding array dimension size.
-	 * 
 	 */
 	syn lazy Size FExp.size() = Size.SCALAR;
 	eq FInstAccessExp.size() = getInstAccess().size();
@@ -496,10 +476,6 @@ aspect Arrays {
 	
 	/**
 	 * \brief Get the array sizes. 
-	 * 
-	 * @return An array of integers of length ndims(). Each entry holds the
-	 * corresponding array dimension size.
-	 * 
 	 */
 	syn lazy Size FIdUse.size() {
 		return getFQName().hasFArraySubscripts()? 
@@ -510,10 +486,6 @@ aspect Arrays {
 	
 	/**
 	 * \brief Get the array sizes. 
-	 * 
-	 * @return An array of integers of length ndims(). Each entry holds the
-	 * corresponding array dimension size.
-	 * 
 	 */
 	syn lazy Size InstAccess.size() = Size.SCALAR;
 	eq InstArrayAccess.size() = hasFArraySubscripts()? 
@@ -522,20 +494,22 @@ aspect Arrays {
 			
 	/**
 	 * \brief Get the array sizes. 
-	 * 
-	 * @return An array of integers of length ndims(). Each entry holds the
-	 * corresponding array dimension size.
-	 * 
 	 */
-	syn lazy Size InstPrimitive.size() = hasFArraySubscripts() ? 
-			getFArraySubscripts().size() : Size.SCALAR;
+	syn lazy Size InstPrimitive.size() {
+		Size s = declaredSize();
+		if (hasBindingFExp() && !s.isKnown())
+			s = s.createKnown(getBindingFExp().size());
+		return s;
+	}
+	
+	/**
+	 * \brief Get the array sizes as declared. May be unknown. 
+	 */
+	syn Size InstPrimitive.declaredSize() = 
+		hasFArraySubscripts() ? getFArraySubscripts().size() : Size.SCALAR;
 	
 	/**
 	 * \brief Get the array sizes. 
-	 * 
-	 * @return An array of integers of length ndims(). Each entry holds the
-	 * corresponding array dimension size.
-	 * 
 	 */
 	eq InstDot.size() {
 		return getRight().size().expand(getLeft().size());
@@ -543,10 +517,6 @@ aspect Arrays {
 	
 	/**
 	 * \brief Get the array sizes. 
-	 * 
-	 * @return An array of integers of length ndims(). Each entry holds the
-	 * corresponding array dimension size.
-	 * 
 	 */
 	syn lazy Size InstNode.size() = Size.SCALAR;
 	
@@ -555,10 +525,6 @@ aspect Arrays {
 
 	/**
 	 * \brief Get the array sizes. 
-	 * 
-	 * @return An array of integers of length ndims(). Each entry holds the
-	 * corresponding array dimension size.
-	 * 
 	 */	
 	syn lazy Size AbstractFVariable.size() = Size.SCALAR;
 	eq FVariable.size()      = isScalarized()? Size.SCALAR: getFQName().size();
@@ -566,10 +532,6 @@ aspect Arrays {
 		
 	/**
 	 * \brief Get the array sizes. 
-	 * 
-	 * @return An array of integers of length ndims(). Each entry holds the
-	 * corresponding array dimension size.
-	 * 
 	 */
 	syn lazy Size FQName.size() {
 		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
@@ -1214,17 +1176,61 @@ aspect ArrayIndices {
 		}
 		
 		/**
+		 * \brief Check that all lengths are known.
+		 */
+		public boolean isKnown() {
+			for (int s : size)
+				if (s < 0)
+					return false;
+			return true;
+		}
+		
+		/**
+		 * \brief Return a Size that have the same lengths as this size where they are known, 
+		 *        and any that are unknown copied from <code>other</code>. 
+		 * 
+		 * If <code>other</code> have more dimensions, the last part is assumed to match this size.
+		 */
+		public Size createKnown(Size other) {
+			Size known = clone();
+			known.fillUnknownFrom(other);
+			return known;
+		}
+		
+		/**
+		 * \brief For each unknown length, copy the equivalent length from <code>other</code>. 
+		 * 
+		 * If <code>other</code> have more dimensions, the last part is assumed to match this size.
+		 */
+		protected void fillUnknownFrom(Size other) {
+			if (other.size.length >= size.length)
+				for (int i = 0, j = other.size.length - size.length; i < size.length; i++, j++) 
+					if (size[i] < 0)
+						size[i] = other.size[j];
+		}
+		
+		/**
 		 * \brief Check if another object is equal to this one.
 		 */
 		public boolean equals(Object s) {
-			return s instanceof Size && Arrays.equals(size, ((Size) s).size);
+			return s instanceof Size && Arrays.equals(size, ((Size) s).size) && isKnown();
 		}
+		
+		private static final String SEP = ", ";
 		
 		/**
 		 * \brief Returns a string representation on the form "[l1, l2, l3]".
 		 */
 		public String toString() {
-			return Arrays.toString(size);
+			StringBuilder buf = new StringBuilder("[");
+			String prefix = "";
+			for (int s : size) {
+				buf.append(prefix);
+				buf.append((s < 0) ? ":" : Integer.toString(s));
+				prefix = SEP;
+			}
+			buf.append("]");
+			return buf.toString();
 		}
 		
 		/**
@@ -1305,6 +1311,15 @@ aspect ArrayIndices {
 		 */
 		public void set(int i, int s) {
 			size[i] = s;
+		}
+		
+		/**
+		 * \brief For each unknown length, copy the equivalent length from <code>other</code>. 
+		 * 
+		 * If <code>other</code> have more dimensions, the last part is assumed to match this size.
+		 */
+		public void makeKnown(Size other) {
+			fillUnknownFrom(other);
 		}
 		
 	}

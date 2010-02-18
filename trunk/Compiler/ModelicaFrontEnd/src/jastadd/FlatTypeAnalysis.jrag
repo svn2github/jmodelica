@@ -61,36 +61,16 @@ aspect FlatTypeAnalysis {
 	}
 	
 	syn FPrimitiveType InstPrimitive.type() {
-		if (isReal()) {
-			if (ndims()==0) {
-				return fRealScalarType();				
-			} else {
-				return fRealArrayType(size().clone());
-			}
-		} else if (isInteger()) {
-			if (ndims()==0) {
-				return fIntegerScalarType();				
-			} else {
-				return fIntegerArrayType(size().clone());
-			}
-
-		} else if (isBoolean()) {
-			if (ndims()==0) {
-				return fBooleanScalarType();				
-			} else {
-				return fBooleanArrayType(size().clone());
-			}
-
-		} else if (isString()) {
-			if (ndims()==0) {
-				return fStringScalarType();				
-			} else {
-				return fStringArrayType(size().clone());
-			}
-
-		} else {
-			return fUnknownType();
-		}
+		FPrimitiveType scalar = fUnknownType();
+		if (isReal()) 
+			scalar = fRealScalarType();
+		else if (isInteger()) 
+			scalar = fIntegerScalarType();
+		else if (isBoolean()) 
+			scalar = fBooleanScalarType();
+		else if (isString()) 
+			scalar = fStringScalarType();
+		return isArray() ? scalar.arrayType(size().clone()) : scalar;
 	}
 	
 	syn lazy FPrimitiveType FExp.type() = fUnknownType();

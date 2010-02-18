@@ -30,7 +30,7 @@ end ArrayTests.ArrayTest1;
                                                " 
 fclass ArrayTests.ArrayTest1b
  parameter Integer n = 2 /* 2 */;
- Real x[n];
+ Real x[2];
 equation 
  x[1] = 3;
  x[2] = 4; 
@@ -701,6 +701,138 @@ initial equation
 equation
  der(x) = -x;
 end ArrayTest32;
+
+
+
+model UnknownSize1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownSize1",
+         description="Using unknown array sizes: deciding with binding exp",
+         flatModel="
+fclass ArrayTests.UnknownSize1
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation
+ x[1,1] = 1;
+ x[1,2] = 2;
+ x[2,1] = 3;
+ x[2,2] = 4;
+end ArrayTests.UnknownSize1;
+")})));
+
+ Real x[:,:] = {{1,2},{3,4}};
+end UnknownSize1;
+
+
+model UnknownSize2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownSize2",
+         description="Using unknown array sizes: binding exp through modification on array",
+         flatModel="
+fclass ArrayTests.UnknownSize2
+ Real x[1].y[1].z[1];
+ Real x[1].y[1].z[2];
+ Real x[1].y[2].z[1];
+ Real x[1].y[2].z[2];
+ Real x[2].y[1].z[1];
+ Real x[2].y[1].z[2];
+ Real x[2].y[2].z[1];
+ Real x[2].y[2].z[2];
+equation
+ x[1].y[1].z[1] = 1;
+ x[1].y[1].z[2] = 2;
+ x[1].y[2].z[1] = 3;
+ x[1].y[2].z[2] = 4;
+ x[2].y[1].z[1] = 1;
+ x[2].y[1].z[2] = 2;
+ x[2].y[2].z[1] = 3;
+ x[2].y[2].z[2] = 4;
+end ArrayTests.UnknownSize2;
+")})));
+
+ model A
+  Real z[:];
+ end A;
+ 
+ model B
+  A y[2](z={{1,2},{3,4}});
+ end B;
+ 
+ B x[2];
+end UnknownSize2;
+
+
+model UnknownSize3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownSize3",
+         description="Using unknown array sizes: one dim known, one unknown",
+         flatModel="
+fclass ArrayTests.UnknownSize3
+ Real x[1,1];
+ Real x[1,2];
+equation
+ x[1,1] = 1;
+ x[1,2] = 2;
+end ArrayTests.UnknownSize3;
+")})));
+
+ Real x[1,:] = {{1,2}};
+end UnknownSize3;
+
+
+model UnknownSize4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="UnknownSize4",
+         description="Using unknown array sizes: too few dims",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 789, column 7:
+  Array size mismatch in declaration of x, size of declaration is [1, :] and size of binding expression is [2]
+")})));
+
+ Real x[1,:] = {1,2};
+end UnknownSize4;
+
+
+model UnknownSize5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="UnknownSize5",
+         description="Using unknown array sizes: one dim specified and does not match",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 805, column 7:
+  Array size mismatch in declaration of x, size of declaration is [1, 2] and size of binding expression is [2, 2]
+")})));
+
+ Real x[1,:] = {{1,2},{3,4}};
+end UnknownSize5;
+
+
+model UnknownSize6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="UnknownSize6",
+         description="Using unknown array sizes:",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 823, column 2:
+  The right and left expression types of equation are not compatible
+")})));
+
+ Real x[:,:];
+equation
+ x = {{1,2},{3,4}};
+end UnknownSize6;
 
 
 
