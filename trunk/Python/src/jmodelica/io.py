@@ -23,6 +23,8 @@ import numpy
 import array
 import scipy.io
 
+from operator import itemgetter
+
 def export_result_dymola(model, data, file_name='', format='txt'):
     """
     Export an optimization or simulation result to file in Dymolas
@@ -68,75 +70,68 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         f.write('1.1\n')
         f.write('\n')
 
-        # Write names
-        names = model.get_variable_names()
-        name_value_refs = names.keys()
-        name_value_refs.sort(key=int)
-
+        # Write names and create dicts that will be used later
+        # dicts:
+        # names_without_alias: dict with {variablename:valueref}
+        # alias_names_ref: dict with {aliasname:valueref}
+        # alias_names_sign: dict with {aliasname:sign}
+        
+        names_without_alias = model.get_variable_names(include_alias=False)
+        alias_names_ref = {}
+        alias_names_sign = {}
+        # sort in value reference order
+        sorted_names = sorted(names_without_alias.items(),key=itemgetter(1))
+        all_names=[]
+        all_names_without_alias = []
+        for n in sorted_names:
+            # add variable name to list
+            all_names.append(n[0])
+            all_names_without_alias.append(n[0])
+            # add alias variables
+            alias_names, alias_sign = model.get_aliases(n[0])
+            for i, an in enumerate(alias_names):
+                alias_names_ref[an] = n[1]
+                alias_names_sign[an] = alias_sign[i]
+                all_names.append(an)
+                
         num_vars = 0
 
         # Find the maximum name length
         max_name_length = len('Time')
-        for ref in name_value_refs:
-            if (len(names.get(ref))>max_name_length):
-                max_name_length = len(names.get(ref))
+        for name in all_names:
+            if (len(name)>max_name_length):
+                max_name_length = len(name)
             num_vars = num_vars + 1
-            # Loop over the alias variables
-            alias_names, alias_sign = model.get_aliases(names.get(ref))
-            for n in alias_names:
-                if (len(n)>max_name_length):
-                    max_name_length = len(n)
-                num_vars = num_vars + 1
 
         f.write('char name(%d,%d)\n' % (num_vars+1, max_name_length))
         f.write('time\n')
 
-        for ref in name_value_refs:
-            f.write(names.get(ref)+'\n')
-            # Loop over the alias variables
-            alias_names, alias_sign = model.get_aliases(names.get(ref))
-            for n in alias_names:
-                f.write(n+'\n')
+        for name in all_names:
+            f.write(name +'\n')
 
         f.write('\n')
 
-        # Write descriptions
+        # Write descriptions       
         descriptions = model.get_variable_descriptions()
-        desc_value_refs = descriptions.keys()
-        desc_value_refs.sort(key=int)
+        desc_names = descriptions.keys()
 
         # Find the maximum description length
         max_desc_length = len('Time in [s]');
-        for ref in name_value_refs:
-            desc = model.get_variable_description(names.get(ref))
+        for name in desc_names:
+            desc = descriptions.get(name)
             if desc != None:
                 if (len(desc)>max_desc_length):
                     max_desc_length = len(desc)
-            # Loop over the alias variables
-            alias_names, alias_sign = model.get_aliases(names.get(ref))
-            for n in alias_names:
-                desc = model.get_variable_description(n)
-                if (desc!=None):
-                    if (len(desc)>max_desc_length):
-                        max_desc_length = len(desc)
 
         f.write('char description(%d,%d)\n' % (num_vars + 1, max_desc_length))
         f.write('Time in [s]\n')
 
         # Loop over all variables, not only those with a description
-        for ref in name_value_refs:
-            desc = model.get_variable_description(names.get(ref))
+        for name in all_names:
+            desc = descriptions.get(name)
             if desc != None:
                 f.write(desc)
-            f.write('\n')
-            # Loop over the alias variables
-            alias_names, alias_sign = model.get_aliases(names.get(ref))
-            for n in alias_names:
-                desc = model.get_variable_description(n)
-                if desc != None:
-                    f.write(desc)
-                f.write('\n')
-            
+            f.write('\n')            
         f.write('\n')
 
         # Write data meta information
@@ -147,36 +142,33 @@ def export_result_dymola(model, data, file_name='', format='txt'):
 
         cnt_1 = 2
         cnt_2 = 2
-        for ref in name_value_refs:
+        for name in all_names_without_alias:
+            ref = model.get_valueref(name)
             if int(ref)<n_parameters: # Put parameters in data set
-                f.write('1 %d 0 -1 # ' % cnt_1 + names.get(ref)+'\n')
+                f.write('1 %d 0 -1 # ' % cnt_1 + name+'\n')                
+                # find out if variable has aliases
+                aliases = [item[0] for item in alias_names_ref.items() if item[1] == ref]
+                # loop through aliases and set sign
+                for alias in aliases:
+                    if alias_names_sign.get(alias):
+                        f.write('1 -%d 0 -1 # ' % cnt_1 + alias +'\n')
+                    else:
+                        f.write('1 %d 0 -1 # ' % cnt_1 + alias +'\n')               
                 cnt_1 = cnt_1 + 1
-                # Loop over the alias variables
-                alias_names, alias_sign = model.get_aliases(names.get(ref))
-                i = 0
-                for n in alias_names:
-                    if alias_sign[i]:
-                        f.write('1 -%d 0 -1 # ' % cnt_2 + n +'\n')
-                    else:
-                        f.write('1 %d 0 -1 # ' % cnt_2 + n +'\n')
-                    i = i + 1
-
             else:
-                f.write('2 %d 0 -1 # ' % cnt_2 + names.get(ref)+'\n')
-                # Loop over the alias variables
-                alias_names, alias_sign = model.get_aliases(names.get(ref))
-                i = 0
-                for n in alias_names:
-                    if alias_sign[i]:
-                        f.write('2 -%d 0 -1 # ' % cnt_2 + n +'\n')
+                f.write('2 %d 0 -1 # ' % cnt_2 + name +'\n')
+                # find out if variable has aliases
+                aliases = [item[0] for item in alias_names_ref.items() if item[1] == ref]
+                # loop through aliases and set sign
+                for alias in aliases:
+                    if alias_names_sign.get(alias):
+                        f.write('2 -%d 0 -1 # ' % cnt_2 + alias +'\n')
                     else:
-                        f.write('2 %d 0 -1 # ' % cnt_2 + n +'\n')
-                    i = i + 1
+                        f.write('2 %d 0 -1 # ' % cnt_2 + alias +'\n')
                 cnt_2 = cnt_2 + 1
-
         f.write('\n')
+        
         # Write data
-
         # Write data set 1
         f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
         f.write("%12.12f" % data[0,0])

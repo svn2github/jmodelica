@@ -17,13 +17,11 @@ from jmodelica.optimization import ipopt
 
 from jmodelica import simulate
 
-sep = os.path.sep
-
 jm_home = os.environ.get('JMODELICA_HOME')
-path_to_examples = sep + "Python" + sep + "jmodelica" + sep + "examples"
+path_to_examples = os.path.join("Python","jmodelica","examples")
 
-model = sep + "files" + sep + "VDP.mo"
-fpath = jm_home+path_to_examples+model
+model = os.path.join("files", "VDP.mo")
+fpath = os.path.join(jm_home,path_to_examples,model)
 cpath = "VDP_pack.VDP_Opt_Min_Time"
 fname = cpath.replace('.','_',1)
 

@@ -210,8 +210,7 @@ def t_get_variable_description(xmldoc):
         
 @testattr(stddist = True)
 def t_get_data_type(xmldoc):
-    ref = xmldoc.get_valueref('u')
-    type = xmldoc.get_data_type(ref)
+    type = xmldoc.get_data_type('u')
     assert type.__class__ is str, \
         "XMLVariablesDoc.get_data_type did not return string."
     nose.tools.assert_equal(type,'Real'),  \
@@ -221,78 +220,78 @@ def t_get_data_type(xmldoc):
 def t_get_variable_names(xmldoc):
     d = xmldoc.get_variable_names()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
-        assert value.__class__ is str, \
+        assert key.__class__ is str, \
             "Variable name is not string"
-    nose.tools.assert_equal(d.get(26),'u')     
+        assert value.__class__ is int, \
+            "Value reference is not int"
+    nose.tools.assert_equal(d.get('u'),26)     
     
 @testattr(stddist = True)
 def t_get_derivative_names(xmldoc):
     d = xmldoc.get_derivative_names()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
-        assert value.__class__ is str, \
+        assert key.__class__ is str, \
             "Variable name is not string"
-    nose.tools.assert_equal(d.get(20),'der(cost)')
+        assert value.__class__ is int, \
+            "Value reference is not int"
+    nose.tools.assert_equal(d.get('der(cost)'),20)
 
 @testattr(stddist = True)
 def t_get_differentiated_variable_names(xmldoc):
     d = xmldoc.get_differentiated_variable_names()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
-        assert value.__class__ is str, \
+        assert key.__class__ is str, \
             "Variable name is not string"
-    nose.tools.assert_equal(d.get(24),'cstr.c')
+        assert value.__class__ is int, \
+            "Value reference is not int"
+    nose.tools.assert_equal(d.get('cstr.c'),24)
 
 @testattr(stddist = True)    
 def t_get_input_names(xmldoc):
     d = xmldoc.get_input_names()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
-        assert value.__class__ is str, \
+        assert key.__class__ is str, \
             "Variable name is not string"
-    nose.tools.assert_equal(d.get(26),'u')
+        assert value.__class__ is int, \
+            "Value reference is not int"
+    nose.tools.assert_equal(d.get('u'),26)
 
 @testattr(stddist = True)    
 def t_get_algebraic_variable_names(xmldoc):
     d = xmldoc.get_algebraic_variable_names()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
-        assert value.__class__ is str, \
+        assert key.__class__ is str, \
             "Variable name is not string"
+        assert value.__class__ is int, \
+            "Value reference is not int"
     # no example in testfile
 
 @testattr(stddist = True)    
 def t_get_p_opt_names(xmldoc):
     d = xmldoc.get_p_opt_names()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
-        assert value.__class__ is str, \
+        assert key.__class__ is str, \
             "Variable name is not string"
-    nose.tools.assert_equal(d.get(0),'sys.w')
+        assert value.__class__ is int, \
+            "Value reference is not int"
+    nose.tools.assert_equal(d.get('sys.w'),0)
 
 @testattr(stddist = True)    
 def t_get_variable_descriptions(xmldoc):
     d = xmldoc.get_variable_descriptions()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
-        assert value.__class__ is str, \
+        assert key.__class__ is str, \
             "Variable name is not string"
-    nose.tools.assert_equal(d.get(0),'Inflow')
+        assert value.__class__ is str, \
+            "Description is not string"
+    nose.tools.assert_equal(d.get('cstr.F0'),'Inflow')
 
 @testattr(stddist = True)
 def t_get_start_attributes(xmldoc):
     d = xmldoc.get_start_attributes()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -309,14 +308,14 @@ def t_get_start_attributes(xmldoc):
         else:
             pass
             # enumeration not supported
-    nose.tools.assert_equal(d.get(0),0.0)
+    nose.tools.assert_equal(d.get('cstr.F0'),0.0)
             
 @testattr(stddist = True)
 def t_get_dx_start_attributes(xmldoc):
     d = xmldoc.get_dx_start_attributes()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -333,14 +332,14 @@ def t_get_dx_start_attributes(xmldoc):
         else:
             pass
             # enumeration not supported
-    nose.tools.assert_equal(d.get(22),0.0)
+    nose.tools.assert_equal(d.get('cstr.der(T)'),0.0)
             
 @testattr(stddist = True)
 def t_get_x_start_attributes(xmldoc):
     d = xmldoc.get_x_start_attributes()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -357,14 +356,14 @@ def t_get_x_start_attributes(xmldoc):
         else:
             pass
             # enumeration not supported
-    nose.tools.assert_equal(d.get(24),1000.0)          
+    nose.tools.assert_equal(d.get('cstr.c'),1000.0)          
 
 @testattr(stddist = True)
 def t_get_u_start_attributes(xmldoc):
     d = xmldoc.get_u_start_attributes()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -381,14 +380,14 @@ def t_get_u_start_attributes(xmldoc):
         else:
             pass
             # enumeration not supported
-    nose.tools.assert_equal(d.get(26),350.0)
+    nose.tools.assert_equal(d.get('u'),350.0)
             
 @testattr(stddist = True)
 def t_get_w_start_attributes(xmldoc):
     d = xmldoc.get_w_start_attributes()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -405,22 +404,22 @@ def t_get_w_start_attributes(xmldoc):
         else:
             pass
             # enumeration not supported
-    nose.tools.assert_equal(d.get(30),0.0)         
+    nose.tools.assert_equal(d.get('u'),0.0)         
 
 @testattr(stddist = True)
 def t_get_p_opt_variable_refs(xmldoc):
     refs = xmldoc.get_p_opt_variable_refs()   
     for ref in refs:
         assert ref.__class__ is int, \
-           "Value ref is not int."
+           "Value reference is not int."
     nose.tools.assert_equal(refs[0],0)
 
 @testattr(stddist = True)
 def t_get_w_initial_guess_values(xmldoc):
     d = xmldoc.get_w_initial_guess_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -437,14 +436,14 @@ def t_get_w_initial_guess_values(xmldoc):
         else:
             pass
             # enumeration not supported
-    nose.tools.assert_equal(d.get(30), 0.0)
+    nose.tools.assert_equal(d.get('u'), 0.0)
 
 @testattr(stddist = True)
 def t_get_u_initial_guess_values(xmldoc):
     d = xmldoc.get_u_initial_guess_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -461,14 +460,14 @@ def t_get_u_initial_guess_values(xmldoc):
         else:
             pass
             # enumeration not supported
-    nose.tools.assert_equal(d.get(26),350.0)
+    nose.tools.assert_equal(d.get('u'),350.0)
 
 @testattr(stddist = True)
 def t_get_dx_initial_guess_values(xmldoc):
     d = xmldoc.get_dx_initial_guess_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -485,14 +484,14 @@ def t_get_dx_initial_guess_values(xmldoc):
         else:
             pass
             # enumeration not supported
-    nose.tools.assert_equal(d.get(20),0.0)
+    nose.tools.assert_equal(d.get('der(cost)'),0.0)
 
 @testattr(stddist = True)
 def t_get_x_initial_guess_values(xmldoc):
     d = xmldoc.get_x_initial_guess_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -509,14 +508,14 @@ def t_get_x_initial_guess_values(xmldoc):
         else:
             pass
             # enumeration not supported
-    nose.tools.assert_equal(d.get(24),300.0)
+    nose.tools.assert_equal(d.get('cstr.c'),300.0)
 
 @testattr(stddist = True)
 def t_get_p_opt_initial_guess_values(xmldoc):
     d = xmldoc.get_p_opt_initial_guess_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -533,14 +532,14 @@ def t_get_p_opt_initial_guess_values(xmldoc):
         else:
             pass
             # enumeration not supported
-    nose.tools.assert_equal(d.get(0),2.0)
+    nose.tools.assert_equal(d.get('sys.w'),2.0)
 
 @testattr(stddist = True)
 def t_get_w_lb_values(xmldoc):
     d = xmldoc.get_w_lb_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -563,8 +562,8 @@ def t_get_w_lb_values(xmldoc):
 def t_get_u_lb_values(xmldoc):
     d = xmldoc.get_u_lb_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -581,14 +580,14 @@ def t_get_u_lb_values(xmldoc):
         else:
             pass
             # enumeration not supported
-    nose.tools.assert_equal(d.get(5),-1.0)
+    nose.tools.assert_equal(d.get('u'),-1.0)
 
 @testattr(stddist = True)
 def t_get_dx_lb_values(xmldoc):
     d = xmldoc.get_dx_lb_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -611,8 +610,8 @@ def t_get_dx_lb_values(xmldoc):
 def t_get_x_lb_values(xmldoc):
     d = xmldoc.get_x_lb_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -635,8 +634,8 @@ def t_get_x_lb_values(xmldoc):
 def t_get_p_opt_lb_values(xmldoc):
     d = xmldoc.get_p_opt_lb_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -653,14 +652,14 @@ def t_get_p_opt_lb_values(xmldoc):
         else:
             pass
             # enumeration not supported
-    nose.tools.assert_equal(d.get(0),0.2)
+    nose.tools.assert_equal(d.get('tf'),0.2)
 
 @testattr(stddist = True)
 def t_get_w_ub_values(xmldoc):
     d = xmldoc.get_w_ub_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -683,8 +682,8 @@ def t_get_w_ub_values(xmldoc):
 def t_get_u_ub_values(xmldoc):
     d = xmldoc.get_u_ub_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -701,14 +700,14 @@ def t_get_u_ub_values(xmldoc):
         else:
             pass
             # enumeration not supported
-    nose.tools.assert_equal(d.get(5),1.0)
+    nose.tools.assert_equal(d.get('u'),1.0)
 
 @testattr(stddist = True)
 def t_get_dx_ub_values(xmldoc):
     d = xmldoc.get_dx_ub_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -731,8 +730,8 @@ def t_get_dx_ub_values(xmldoc):
 def t_get_x_ub_values(xmldoc):
     d = xmldoc.get_x_ub_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -755,8 +754,8 @@ def t_get_x_ub_values(xmldoc):
 def t_get_p_opt_ub_values(xmldoc):
     d = xmldoc.get_p_opt_ub_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         type = xmldoc.get_data_type(key)
         if type == 'Real':
             assert value.__class__ is float, \
@@ -779,62 +778,62 @@ def t_get_p_opt_ub_values(xmldoc):
 def t_get_w_lin_values(xmldoc):
     d = xmldoc.get_w_lin_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         assert value.__class__ is bool, \
                 "Is linear value is not bool."
-    nose.tools.assert_equal(d.get(30),False)
+    nose.tools.assert_equal(d.get('u'),False)
 
 @testattr(stddist = True)
 def t_get_u_lin_values(xmldoc):
     d = xmldoc.get_u_lin_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         assert value.__class__ is bool, \
                 "Is linear value is not bool."
-    nose.tools.assert_equal(d.get(26),False)
+    nose.tools.assert_equal(d.get('u'),False)
 
 @testattr(stddist = True)
 def t_get_dx_lin_values(xmldoc):
     d = xmldoc.get_dx_lin_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         assert value.__class__ is bool, \
                 "Is linear value is not bool."
-    nose.tools.assert_equal(d.get(20),True)
+    nose.tools.assert_equal(d.get('der(cost)'),True)
 
 @testattr(stddist = True)
 def t_get_x_lin_values(xmldoc):
     d = xmldoc.get_x_lin_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         assert value.__class__ is bool, \
                 "Is linear value is not bool."
-    nose.tools.assert_equal(d.get(25),False)
+    nose.tools.assert_equal(d.get('cstr.T'),False)
 
 @testattr(stddist = True)
 def t_get_p_opt_lin_values(xmldoc):
     d = xmldoc.get_p_opt_lin_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         assert value.__class__ is bool, \
                 "Is linear value is not bool."
-    nose.tools.assert_equal(d.get(1),False)
+    nose.tools.assert_equal(d.get('sys.z'),False)
 
 @testattr(stddist = True)
 def t_get_w_lin_tp_values(xmldoc):
     d = xmldoc.get_w_lin_tp_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         for val in value:
             assert val.__class__ is bool, \
                 "Time point value is not bool."
-    tps = d.get(30)
+    tps = d.get('u')
     nose.tools.assert_equal(len(tps),11)
     nose.tools.assert_equal(tps[0],True)
 
@@ -842,36 +841,36 @@ def t_get_w_lin_tp_values(xmldoc):
 def t_get_u_lin_tp_values(xmldoc):
     d = xmldoc.get_u_lin_tp_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         for val in value:
             assert val.__class__ is bool, \
                 "Time point value is not bool."
-    tps = d.get(26)
+    tps = d.get('u')
     nose.tools.assert_equal(tps[0],True)
 
 @testattr(stddist = True)
 def t_get_dx_lin_tp_values(xmldoc):
     d = xmldoc.get_dx_lin_tp_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         for val in value:
             assert val.__class__ is bool, \
                 "Time point value is not bool."
-    tps = d.get(20)
+    tps = d.get('der(cost)')
     nose.tools.assert_equal(tps[0],True)
 
 @testattr(stddist = True)
 def t_get_x_lin_tp_values(xmldoc):
     d = xmldoc.get_x_lin_tp_values()
     for key, value in d.iteritems():
-        assert key.__class__ is int, \
-            "Value reference is not int"
+        assert key.__class__ is str, \
+            "Variable name is not string"
         for val in value:
             assert val.__class__ is bool, \
                 "Time point value is not bool."
-    tps = d.get(24)
+    tps = d.get('cstr.c')
     nose.tools.assert_equal(tps[0],True)    
                 
 @testattr(stddist = True)

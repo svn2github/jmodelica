@@ -108,6 +108,14 @@ class XMLDoc(XMLBaseDoc):
         else:
             return None
         
+    def is_alias(self, variablename):
+        """ Return true is variable is an alias or negated alias. """
+        alias = self._xpatheval("//ScalarVariable/@alias[../@name=\""+str(variablename)+"\"]")
+        if len(alias)>0:
+            return (alias[0] == "alias" or alias[0] == "negatedAlias")
+        else:
+            raise Exception("The variable: "+str(variablename)+" can not be found in XML document.")
+        
     def is_negated_alias(self, variablename):
         """ Return if variable is a negated alias or not. 
         
@@ -167,124 +175,135 @@ class XMLDoc(XMLBaseDoc):
         else:
             None
     
-    def get_data_type(self, valueref):
+    def get_data_type(self, variablename):
         """ Get data type of variable. """
-        node=self._xpatheval("//ScalarVariable[@valueReference=\""+str(valueref)+"\"][@alias=\"noAlias\"]")
+        node=self._xpatheval("//ScalarVariable[@name=\""+str(variablename)+"\"]")
         if len(node)>0:
             children=node[0].getchildren()
             if len(children)>0:
                 return children[0].tag
         return None
 
-    def get_variable_names(self):
+    def get_variable_names(self, include_alias=True):
         """
         Extract the names of the variables in a model.
 
         Returns:
-            Dict with ValueReference as key and name as value.
+            Dict with variable name as key and value reference as value.
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/@name[../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name")
+            vals = self._xpatheval("//ScalarVariable/@valueReference")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/@valueReference[../@alias=\"noAlias\"]")        
+   
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
-                Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        valrefs=[]
-        names=[]       
+                Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))           
+        d={}
         for index, key in enumerate(keys):
-            valrefs.append(int(key))
-            names.append(str(vals[index]))
-          
-        return dict(zip(valrefs,names))
+            d[str(key)]=int(vals[index])
+        return d
 
-    def get_derivative_names(self):
+
+    def get_derivative_names(self, include_alias=True):
         """
         Extract the names of the derivatives in a model.
 
         Returns:
-            Dict with ValueReference as key and name as value.
+            Dict with variable name as key and value reference as value.
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference [../VariableCategory=\"derivative\"] \
-            [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"] \
-            [../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"]")
+            vals = self._xpatheval("//ScalarVariable/@valueReference [../VariableCategory=\"derivative\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/@valueReference [../VariableCategory=\"derivative\"][../@alias=\"noAlias\"]")
+            
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
-                Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        valrefs=[]
-        names=[]
+                Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))           
+        d={}
         for index, key in enumerate(keys):
-            valrefs.append(int(key))
-            names.append(str(vals[index]))
-
-        return dict(zip(valrefs,names))
-
-    def get_differentiated_variable_names(self):
+            d[str(key)]=int(vals[index])
+        return d
+        
+    def get_differentiated_variable_names(self, include_alias=True):
         """
         Extract the names of the differentiated variables in a model.
 
         Returns:
-            Dict with ValueReference as key and name as value.
+            Dict with variable name as key and value reference as value.
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"state\"] \
-            [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"] \
-            [../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"]")
+            vals = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"state\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"state\"][../@alias=\"noAlias\"]")
+           
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
-                Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        valrefs=[]
-        names=[]
+                Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))            
+        d = {}
         for index, key in enumerate(keys):
-            valrefs.append(int(key))
-            names.append(str(vals[index]))
+            d[str(key)] = int(vals[index])
+        return d
 
-        return dict(zip(valrefs,names))
-
-    def get_input_names(self):
+    def get_input_names(self, include_alias=True):
         """
         Extract the names of the inputs in a model.
 
         Returns:
             Dict with ValueReference as key and name as value.
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../@causality=\"input\"][../VariableCategory=\"algebraic\"] \
-            [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"][../VariableCategory=\"algebraic\"] \
-            [../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"]\
+                [../VariableCategory=\"algebraic\"]")
+            vals = self._xpatheval("//ScalarVariable/@valueReference[../@causality=\"input\"]\
+                [../VariableCategory=\"algebraic\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"]\
+                [../VariableCategory=\"algebraic\"][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/@valueReference[../@causality=\"input\"]\
+                [../VariableCategory=\"algebraic\"][../@alias=\"noAlias\"]")
+            
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        valrefs=[]
-        names=[]
+        d = {}
         for index, key in enumerate(keys):
-            valrefs.append(int(key))
-            names.append(str(vals[index]))
-  
-        return dict(zip(valrefs,names))
+            d[str(key)] = int(vals[index])
+        return d
 
-    def get_algebraic_variable_names(self):
+    def get_algebraic_variable_names(self, include_alias=True):
         """
         Extract the names of the algebraic variables in a model.
 
         Returns:
             Dict with ValueReference as key and name as value.
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"algebraic\"][../@causality!=\"input\"] \
-            [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"][../@causality!=\"input\"] \
-            [../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"]\
+                [../@causality!=\"input\"]")
+            vals = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"algebraic\"]\
+                [../@causality!=\"input\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"]\
+                [../@causality!=\"input\"][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"algebraic\"]\
+                [../@causality!=\"input\"][../@alias=\"noAlias\"]")
+
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
-                Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        valrefs=[]
-        names=[]
+                Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))       
+        d = {}
         for index, key in enumerate(keys):
-            valrefs.append(int(key))
-            names.append(str(vals[index]))
+            d[str(key)] = int(vals[index])
+        return d
 
-        return dict(zip(valrefs,names))
-
-    def get_p_opt_names(self):
+    def get_p_opt_names(self, include_alias=True):
         """ 
         Extract the names for all optimized independent parameters.
         
@@ -292,72 +311,79 @@ class XMLDoc(XMLBaseDoc):
             Dict with ValueReference as key and name as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"independentParameter\"] \
-                               [../*/@free=\"true\"] [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"] \
-                               [../*/@free=\"true\"] [../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"]\
+                [../*/@free=\"true\"]")
+            vals = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"independentParameter\"]\
+                [../*/@free=\"true\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"]\
+                [../*/@free=\"true\"][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"independentParameter\"]\
+                [../*/@free=\"true\"][../@alias=\"noAlias\"]")
+
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        valrefs=[]
-        names=[]
+        d = {}
         for index, key in enumerate(keys):
-            valrefs.append(int(key))
-            names.append(str(vals[index]))
+            d[str(key)] = int(vals[index])
+        return d
 
-        return dict(zip(valrefs,names))
-
-    def get_variable_descriptions(self):
+    def get_variable_descriptions(self, include_alias=True):
         """
         Extract the descriptions of the variables in a model.
 
         Returns:
-            Dict with ValueReference as key and description as value.
+            Dict with name as key and description as value.
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../@description] [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/@description[../@description] [../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../@description]")
+            vals = self._xpatheval("//ScalarVariable/@description[../@description]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../@description][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/@description[../@description][../@alias=\"noAlias\"]")
+            
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
-                Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        valrefs=[]
-        descriptions=[]
+                Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))       
+        d={}
         for index, key in enumerate(keys):
-            valrefs.append(int(key))
-            descriptions.append(str(vals[index]))
-
-        return dict(zip(valrefs,descriptions))
-    
+            d[str(key)]=str(vals[index])
+        return d
+                
     def _cast_values(self, keys, vals):
-        valrefs=[]
-        typed_values=[]
+        d={}
         for index, key in enumerate(keys):
-            valrefs.append(int(key))
-            type = self.get_data_type(int(key))
+            type = self.get_data_type(key)
             if type == 'Real':
-                typed_values.append(float(vals[index]))
+                d[str(key)]= float(vals[index])
             elif type == 'Integer':
-                typed_values.append(int(vals[index]))
+                d[str(key)]= int(vals[index])
             elif type == 'Boolean':
-                typed_values.append(vals[index]=="true")
+                d[str(key)]= (vals[index]=="true")
             elif type == 'String':
-                typed_values.append(str(vals[index]))
+                d[str(key)]= str(vals[index])
             else:
                 pass
-                # enumeration not supported yet
-       
-        return dict(zip(valrefs,typed_values))
+                # enumeration not supported yet      
+        return d
     
-    def get_start_attributes(self):
+    def get_start_attributes(self, include_alias=True):
         """ 
-        Extract ValueReference and Start attribute for all (non-alias) variables 
+        Extract variable name and Start attribute for all variables 
         in the XML document.
             
         Returns:
-            Dict with ValueReference as key and Start attribute as value.
+            Dict with variable name as key and Start attribute as value.
              
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@start [../../@alias=\"noAlias\"]")     
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name")
+            vals = self._xpatheval("//ScalarVariable/*/@start")
+        else:  
+            keys = self._xpatheval("//ScalarVariable/@name[../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@start[../../@alias=\"noAlias\"]")   
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -365,73 +391,97 @@ class XMLDoc(XMLBaseDoc):
 #        vals = map(N.float,vals)
         return self._cast_values(keys, vals)
 
-    def get_dx_start_attributes(self):
+    def get_dx_start_attributes(self, include_alias=True):
         """ 
-        Extract ValueReference and Start attribute for all derivatives in the 
+        Extract variable name and Start attribute for all derivatives in the 
         XML document.
             
         Returns:
-            Dict with ValueReference as key and Start attribute as value.
+            Dict with variable name as key and Start attribute as value.
              
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"derivative\"][../*/@start] \
-            [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@start[../../VariableCategory=\"derivative\"] \
-            [../../@alias=\"noAlias\"]")       
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"][../*/@start]")
+            vals = self._xpatheval("//ScalarVariable/*/@start[../../VariableCategory=\"derivative\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"][../*/@start]\
+                [../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@start[../../VariableCategory=\"derivative\"]\
+                [../../@alias=\"noAlias\"]")
+                 
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
 
-    def get_x_start_attributes(self):
+    def get_x_start_attributes(self, include_alias=True):
         """ 
-        Extract ValueReference and Start attribute for all differentiated 
+        Extract variable name and Start attribute for all differentiated 
         variables in the XML document.
             
         Returns:
-            Dict with ValueReference as key and Start attribute as value.
+            Dict with variable name as key and Start attribute as value.
              
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"state\"][../*/@start] \
-            [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@start[../../VariableCategory=\"state\"] \
-            [../../@alias=\"noAlias\"]")       
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"][../*/@start]")
+            vals = self._xpatheval("//ScalarVariable/*/@start[../../VariableCategory=\"state\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"][../*/@start]\
+                [../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@start[../../VariableCategory=\"state\"]\
+                [../../@alias=\"noAlias\"]")
+            
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
 
-    def get_u_start_attributes(self):
+    def get_u_start_attributes(self, include_alias=True):
         """ 
-        Extract ValueReference and Start attribute for all inputs in the XML 
+        Extract variable name and Start attribute for all inputs in the XML 
         document.
             
         Returns:
-            Dict with ValueReference as key and Start attribute as value.
+            Dict with variable name as key and Start attribute as value.
              
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../@causality=\"input\"][../VariableCategory=\"algebraic\"] \
-            [../*/@start] [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@start[../../@causality=\"input\"] \
-            [../../VariableCategory=\"algebraic\"] [../../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"] \
+                [../VariableCategory=\"algebraic\"][../*/@start]")
+            vals = self._xpatheval("//ScalarVariable/*/@start[../../@causality=\"input\"] \
+                [../../VariableCategory=\"algebraic\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"] \
+                [../VariableCategory=\"algebraic\"][../*/@start][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@start[../../@causality=\"input\"] \
+                [../../VariableCategory=\"algebraic\"][../../@alias=\"noAlias\"]")            
+            
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
 
-    def get_w_start_attributes(self):
+    def get_w_start_attributes(self, include_alias=True):
         """ 
-        Extract ValueReference and Start attribute for all algebraic variables 
+        Extract variable name and Start attribute for all algebraic variables 
         in the XML document.
             
         Returns:
-            Dict with ValueReference as key and Start attribute as value.
+            Dict with variable name as key and Start attribute as value.
              
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"algebraic\"][../@causality!=\"input\"] \
-            [../*/@start][../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@start[../../VariableCategory=\"algebraic\"] \
-            [../../@causality!=\"input\"] [../../@alias=\"noAlias\"]")       
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"]\
+                [../@causality!=\"input\"][../*/@start]")
+            vals = self._xpatheval("//ScalarVariable/*/@start[../../VariableCategory=\"algebraic\"] \
+                [../../@causality!=\"input\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"]\
+                [../@causality!=\"input\"][../*/@start][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@start[../../VariableCategory=\"algebraic\"] \
+                [../../@causality!=\"input\"][../../@alias=\"noAlias\"]")            
+             
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
@@ -439,539 +489,706 @@ class XMLDoc(XMLBaseDoc):
     
     def get_p_opt_variable_refs(self):
         """ 
-        Extract ValueReference for all optimized independent parameters.
+        Extract value reference for all optimized independent parameters.
         
         Returns:
-            List of ValueReferences for all optimized independent parameters.
+            List of value reference for all optimized independent parameters.
             
         """
-        refs = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"independentParameter\"] \
-                               [../*/@free=\"true\"] [../@alias=\"noAlias\"]")
+        refs = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"independentParameter\"]\
+            [../*/@free=\"true\"]")
         valrefs=[]
         for ref in refs:
             valrefs.append(int(ref))
         return valrefs
     
-    def get_w_initial_guess_values(self):
+    def get_w_initial_guess_values(self, include_alias=True):
         """ 
-        Extract ValueReference and InitialGuess values for all algebraic 
+        Extract variable name and InitialGuess values for all algebraic 
         variables.
         
         Returns:
-            Dict with ValueReference as key and InitialGuess as value.
+            Dict with variable name as key and InitialGuess as value.
         
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"algebraic\"] \
-            [../@causality!=\"input\"] [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../VariableCategory=\"algebraic\"] \
-            [../../@causality!=\"input\"] [../../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"] \
+                [../@causality!=\"input\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../VariableCategory=\"algebraic\"] \
+                [../../@causality!=\"input\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"] \
+                [../@causality!=\"input\"][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../VariableCategory=\"algebraic\"] \
+                [../../@causality!=\"input\"][../../@alias=\"noAlias\"]")
+
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
     
-    def get_u_initial_guess_values(self):
+    def get_u_initial_guess_values(self, include_alias=True):
         """ 
-        Extract ValueReference and InitialGuess values for all input 
+        Extract variable name and InitialGuess values for all input 
         variables.
         
         Returns:
-            Dict with ValueReference as key and InitialGuess as value.
+            Dict with variable name as key and InitialGuess as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../@causality=\"input\"][../VariableCategory=\"algebraic\"] \
-            [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../@causality=\"input\"] \
-            [../../VariableCategory=\"algebraic\"] [../../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"]\
+                [../VariableCategory=\"algebraic\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../@causality=\"input\"] \
+                [../../VariableCategory=\"algebraic\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"]\
+                [../VariableCategory=\"algebraic\"][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../@causality=\"input\"] \
+                [../../VariableCategory=\"algebraic\"][../../@alias=\"noAlias\"]")
+            
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
     
-    def get_dx_initial_guess_values(self):
+    def get_dx_initial_guess_values(self, include_alias=True):
         """ 
-        Extract ValueReference and InitialGuess values for all derivative 
+        Extract variable name and InitialGuess values for all derivative 
         variables.
         
         Returns:
-            Dict with ValueReference as key and InitialGuess as value.
+            Dict with variable name as key and InitialGuess as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"derivative\"] \
-            [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../VariableCategory=\"derivative\"] \
-            [../../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@initialGuess\
+                [../../VariableCategory=\"derivative\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"]\
+                [../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../VariableCategory=\"derivative\"]\
+                [../../@alias=\"noAlias\"]")
+
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
     
-    def get_x_initial_guess_values(self):
+    def get_x_initial_guess_values(self, include_alias=True):
         """ 
-        Extract ValueReference and InitialGuess values for all differentiated 
+        Extract variable name and InitialGuess values for all differentiated 
         variables.
         
         Returns:
-            Dict with ValueReference as key and InitialGuess as value.
+            Dict with variable name as key and InitialGuess as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"state\"] \
-            [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../VariableCategory=\"state\"] \
-            [../../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@initialGuess\
+                [../../VariableCategory=\"state\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"]\
+                [../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../VariableCategory=\"state\"]\
+                [../../@alias=\"noAlias\"]")
+
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))        
         return self._cast_values(keys, vals)
     
-    def get_p_opt_initial_guess_values(self):
+    def get_p_opt_initial_guess_values(self, include_alias=True):
         """ 
-        Extract ValueReference and InitialGuess values for all optimized 
+        Extract variable name and InitialGuess values for all optimized 
         independent parameters.
         
         Returns:
-            Dict with ValueReference as key and InitialGuess as value.
+            Dict with variable name as key and InitialGuess as value.
         
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"independentParameter\"] \
-                                [../*/@free=\"true\"] [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../VariableCategory=\"independentParameter\"] \
-                                [../../*/@free=\"true\"] [../../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name\
+                [../VariableCategory=\"independentParameter\"][../*/@free=\"true\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@initialGuess\
+                [../../VariableCategory=\"independentParameter\"][../../*/@free=\"true\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"]\
+                [../*/@free=\"true\"][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../VariableCategory=\"independentParameter\"]\
+                [../../*/@free=\"true\"][../../@alias=\"noAlias\"]")
+
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
 
-    def get_w_lb_values(self):
+    def get_w_lb_values(self, include_alias=True):
         """ 
-        Extract ValueReference and lower bound values for all algebraic 
+        Extract variable name and lower bound values for all algebraic 
         variables.
         
         Returns:
-            Dict with ValueReference as key and lower bound as value.
+            Dict with variable name as key and lower bound as value.
         
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"algebraic\"] \
-                               [../@causality!=\"input\"] [../*/@min] [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@min[../../VariableCategory=\"algebraic\"] \
-            [../../@causality!=\"input\"] [../../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"] \
+                                   [../@causality!=\"input\"] [../*/@min]")
+            vals = self._xpatheval("//ScalarVariable/*/@min[../../VariableCategory=\"algebraic\"] \
+                [../../@causality!=\"input\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"] \
+                                   [../@causality!=\"input\"] [../*/@min][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@min[../../VariableCategory=\"algebraic\"] \
+                [../../@causality!=\"input\"][../../@alias=\"noAlias\"]")
+
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
     
-    def get_u_lb_values(self):
+    def get_u_lb_values(self, include_alias=True):
         """ 
-        Extract ValueReference and lower bound values for all input 
+        Extract variable name and lower bound values for all input 
         variables.
         
         Returns:
-            Dict with ValueReference as key and lower bound as value.
+            Dict with variable name as key and lower bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../@causality=\"input\"] \
-            [../VariableCategory=\"algebraic\"] [../*/@min] [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@min[../../@causality=\"input\"] \
-            [../../VariableCategory=\"algebraic\"] [../../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"] \
+                [../VariableCategory=\"algebraic\"] [../*/@min]")
+            vals = self._xpatheval("//ScalarVariable/*/@min[../../@causality=\"input\"] \
+                [../../VariableCategory=\"algebraic\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"] \
+                [../VariableCategory=\"algebraic\"][../*/@min][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@min[../../@causality=\"input\"] \
+                [../../VariableCategory=\"algebraic\"][../../@alias=\"noAlias\"]")
+
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))            
         return self._cast_values(keys, vals)
     
-    def get_dx_lb_values(self):
+    def get_dx_lb_values(self, include_alias=True):
         """ 
-        Extract ValueReference and lower bound values for all derivative 
+        Extract variable name and lower bound values for all derivative 
         variables.
         
         Returns:
-            Dict with ValueReference as key and lower bound as value.
+            Dict with variable name as key and lower bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"derivative\"] \
-            [../*/@min] [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@min[../../VariableCategory=\"derivative\"] \
-            [../../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"] \
+                [../*/@min]")
+            vals = self._xpatheval("//ScalarVariable/*/@min[../../VariableCategory=\"derivative\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"] \
+                [../*/@min][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@min[../../VariableCategory=\"derivative\"]\
+                [../../@alias=\"noAlias\"]")
+
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))        
         return self._cast_values(keys, vals)
     
-    def get_x_lb_values(self):
+    def get_x_lb_values(self, include_alias=True):
         """ 
-        Extract ValueReference and lower bound values for all differentiated 
+        Extract variable name and lower bound values for all differentiated 
         variables.
         
         Returns:
-            Dict with ValueReference as key and lower bound as value.
+            Dict with variable name as key and lower bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"state\"] [../*/@min] \
-            [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@min[../../VariableCategory=\"state\"] \
-            [../../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"]\
+                [../*/@min]")
+            vals = self._xpatheval("//ScalarVariable/*/@min[../../VariableCategory=\"state\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"]\
+                [../*/@min][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@min[../../VariableCategory=\"state\"]\
+                [../../@alias=\"noAlias\"]")
+
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
     
-    def get_p_opt_lb_values(self):
+    def get_p_opt_lb_values(self, include_alias=True):
         """ 
-        Extract ValueReference and lower bound values for all optimized 
+        Extract variable name and lower bound values for all optimized 
         independent parameters.
         
         Returns:
-            Dict with ValueReference as key and lower bound as value.
+            Dict with variable name as key and lower bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"independentParameter\"] \
-                               [../*/@free=\"true\"] [../*/@min] [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@min[../../VariableCategory=\"independentParameter\"] \
-                               [../../*/@free=\"true\"] [../../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"] \
+                                   [../*/@free=\"true\"] [../*/@min]")
+            vals = self._xpatheval("//ScalarVariable/*/@min[../../VariableCategory=\"independentParameter\"] \
+                                   [../../*/@free=\"true\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"] \
+                                   [../*/@free=\"true\"] [../*/@min][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@min[../../VariableCategory=\"independentParameter\"] \
+                                   [../../*/@free=\"true\"][../../@alias=\"noAlias\"]")
+
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
 
-    def get_w_ub_values(self):
+    def get_w_ub_values(self, include_alias=True):
         """ 
-        Extract ValueReference and upper bound values for all algebraic 
+        Extract variable name and upper bound values for all algebraic 
         variables.
         
         Returns:
-            Dict with ValueReference as key and upper bound as value.
+            Dict with variable name as key and upper bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"algebraic\"] \
-            [../@causality!=\"input\"] [../*/@max] [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@max[../../VariableCategory=\"algebraic\"] \
-            [../../@causality!=\"input\"] [../../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"] \
+                [../@causality!=\"input\"] [../*/@max]")
+            vals = self._xpatheval("//ScalarVariable/*/@max[../../VariableCategory=\"algebraic\"] \
+                [../../@causality!=\"input\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"] \
+                [../@causality!=\"input\"] [../*/@max][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@max[../../VariableCategory=\"algebraic\"] \
+                [../../@causality!=\"input\"][../../@alias=\"noAlias\"]")
+
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))           
         return self._cast_values(keys, vals)
 
-    def get_u_ub_values(self):
+    def get_u_ub_values(self, include_alias=True):
         """ 
-        Extract ValueReference and upper bound values for all input variables.
+        Extract variable name and upper bound values for all input variables.
         
         Returns:
-            Dict with ValueReference as key and upper bound as value.
+            Dict with variable name as key and upper bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../@causality=\"input\"] \
-            [../VariableCategory=\"algebraic\"] [../*/@max][../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@max[../../@causality=\"input\"] \
-            [../../VariableCategory=\"algebraic\"] [../../@alias=\"noAlias\"]")    
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"] \
+                [../VariableCategory=\"algebraic\"] [../*/@max]")
+            vals = self._xpatheval("//ScalarVariable/*/@max[../../@causality=\"input\"] \
+                [../../VariableCategory=\"algebraic\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"] \
+                [../VariableCategory=\"algebraic\"][../*/@max][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@max[../../@causality=\"input\"] \
+                [../../VariableCategory=\"algebraic\"][../../@alias=\"noAlias\"]")    
+ 
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
     
-    def get_dx_ub_values(self):
+    def get_dx_ub_values(self, include_alias=True):
         """ 
-        Extract ValueReference and upper bound values for all derivative 
+        Extract variable name and upper bound values for all derivative 
         variables.
         
         Returns:
-            Dict with ValueReference as key and upper bound as value.
+            Dict with variable name as key and upper bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"derivative\"] \
-            [../*/@max] [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@max[../../VariableCategory=\"derivative\"] \
-            [../../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"] \
+                [../*/@max]")
+            vals = self._xpatheval("//ScalarVariable/*/@max[../../VariableCategory=\"derivative\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"] \
+                [../*/@max][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@max[../../VariableCategory=\"derivative\"]\
+                [../../@alias=\"noAlias\"]")
+
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
     
-    def get_x_ub_values(self):
+    def get_x_ub_values(self, include_alias=True):
         """ 
-        Extract ValueReference and upper bound values for all differentiated 
+        Extract variable name and upper bound values for all differentiated 
         variables.
         
         Returns:
-            Dict with ValueReference as key and upper bound as value.
+            Dict with variable name as key and upper bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"state\"] \
-            [../*/@max] [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@max[../../VariableCategory=\"state\"] \
-            [../../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"] \
+                [../*/@max]")
+            vals = self._xpatheval("//ScalarVariable/*/@max[../../VariableCategory=\"state\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"] \
+                [../*/@max][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@max[../../VariableCategory=\"state\"]\
+                [../../@alias=\"noAlias\"]")
+
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))        
         return self._cast_values(keys, vals)
     
-    def get_p_opt_ub_values(self):
+    def get_p_opt_ub_values(self, include_alias=True):
         """ 
-        Extract ValueReference and upper bound values for all optimized 
+        Extract variable name and upper bound values for all optimized 
         independent parameters.
         
         Returns:
-            Dict with ValueReference as key and upper bound as value.
+            Dict with variable name as key and upper bound as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"independentParameter\"] \
-                               [../*/@free=\"true\"] [../*/@max] [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/*/@max[../../VariableCategory=\"independentParameter\"] \
-                               [../../*/@free=\"true\"] [../../@alias=\"noAlias\"]")        
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"] \
+                                   [../*/@free=\"true\"] [../*/@max]")
+            vals = self._xpatheval("//ScalarVariable/*/@max[../../VariableCategory=\"independentParameter\"] \
+                                   [../../*/@free=\"true\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"] \
+                                   [../*/@free=\"true\"][../*/@max][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/*/@max[../../VariableCategory=\"independentParameter\"] \
+                                   [../../*/@free=\"true\"][../../@alias=\"noAlias\"]")        
+ 
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
     
 
-    def get_w_lin_values(self):
+    def get_w_lin_values(self, include_alias=True):
         """ 
-        Extract ValueReference and boolean value describing if variable 
+        Extract variable name and boolean value describing if variable 
         appears linearly in all equations and constraints for all algebraic 
         variables.
         
         Returns:
-            Dict with ValueReference as key and boolean isLinear as value.
+            Dict with variable name as key and boolean isLinear as value.
             
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"algebraic\"] \
-            [../@causality!=\"input\"] [../isLinear] [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/isLinear/text()[../../VariableCategory=\"algebraic\"] \
-            [../../@causality!=\"input\"] [../../@alias=\"noAlias\"]")
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"] \
+                [../@causality!=\"input\"] [../isLinear]")
+            vals = self._xpatheval("//ScalarVariable/isLinear/text()\
+                [../../VariableCategory=\"algebraic\"][../../@causality!=\"input\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"] \
+                [../@causality!=\"input\"][../isLinear][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/isLinear/text()\
+                [../../VariableCategory=\"algebraic\"][../../@causality!=\"input\"][../../@alias=\"noAlias\"]")
+
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        valrefs = []
-        islinears = []
+        d={}
         for index, key in enumerate(keys):
-            valrefs.append(int(key))
-            islinears.append(vals[index]=="true") 
-        return dict(zip(valrefs, islinears))
+            d[str(key)] = (vals[index]=="true")
+        return d
 
-    def get_u_lin_values(self):
+    def get_u_lin_values(self, include_alias=True):
         """ 
-        Extract ValueReference and boolean value describing if variable 
+        Extract variable name and boolean value describing if variable 
         appears linearly in all equations and constraints for all input 
         variables.
         
         Returns:
-            Dict with ValueReference as key and boolean isLinear as value.
+            Dict with variable name as key and boolean isLinear as value.
 
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../@causality=\"input\"] \
-            [../VariableCategory=\"algebraic\"] [../isLinear] [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/isLinear/text()[../../@causality=\"input\"] \
-            [../../VariableCategory=\"algebraic\"] [../../@alias=\"noAlias\"]")            
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"] \
+                [../VariableCategory=\"algebraic\"] [../isLinear]")
+            vals = self._xpatheval("//ScalarVariable/isLinear/text()[../../@causality=\"input\"] \
+                [../../VariableCategory=\"algebraic\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"] \
+                [../VariableCategory=\"algebraic\"] [../isLinear][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/isLinear/text()[../../@causality=\"input\"] \
+                [../../VariableCategory=\"algebraic\"][../../@alias=\"noAlias\"]")            
+          
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        valrefs = []
-        islinears = []
+        d={}
         for index, key in enumerate(keys):
-            valrefs.append(int(key))
-            islinears.append(vals[index]=="true")    
-        return dict(zip(valrefs, islinears))
-    
-    def get_dx_lin_values(self):
+            d[str(key)] = (vals[index]=="true")
+        return d
+   
+    def get_dx_lin_values(self, include_alias=True):
         """ 
-        Extract ValueReference and boolean value describing if variable 
+        Extract variable name and boolean value describing if variable 
         appears linearly in all equations and constraints for all derivative 
         variables.
         
         Returns:
-            Dict with ValueReference as key and boolean isLinear as value.
+            Dict with variable name as key and boolean isLinear as value.
 
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"derivative\"] \
-            [../isLinear] [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/isLinear/text()[../../VariableCategory=\"derivative\"] \
-            [../../@alias=\"noAlias\"]")       
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"] \
+                [../isLinear]")
+            vals = self._xpatheval("//ScalarVariable/isLinear/text()\
+                [../../VariableCategory=\"derivative\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"] \
+                [../isLinear][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/isLinear/text()\
+                [../../VariableCategory=\"derivative\"][../../@alias=\"noAlias\"]")       
+      
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        valrefs = []
-        islinears = []
+        d={}
         for index, key in enumerate(keys):
-            valrefs.append(int(key))
-            islinears.append(vals[index]=="true")
-        return dict(zip(valrefs, islinears))
+            d[str(key)] = (vals[index]=="true")
+        return d
     
-    def get_x_lin_values(self):
+    def get_x_lin_values(self, include_alias=True):
         """ 
-        Extract ValueReference and boolean value describing if variable 
+        Extract variable name and boolean value describing if variable 
         appears linearly in all equations and constraints for all 
         differentiated variables.
         
         Returns:
-            Dict with ValueReference as key and boolean isLinear as value.
+            Dict with variable name as key and boolean isLinear as value.
 
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"state\"] \
-            [../isLinear] [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/isLinear/text()[../../VariableCategory=\"state\"] \
-            [../../@alias=\"noAlias\"]")      
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"] \
+                [../isLinear]")
+            vals = self._xpatheval("//ScalarVariable/isLinear/text()[../../VariableCategory=\"state\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"] \
+                [../isLinear][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/isLinear/text()[../../VariableCategory=\"state\"]\
+                [../../@alias=\"noAlias\"]")      
+  
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        valrefs = []
-        islinears = []
+        d={}
         for index, key in enumerate(keys):
-            valrefs.append(int(key))
-            islinears.append(vals[index]=="true") 
-        return dict(zip(valrefs, islinears))
+            d[str(key)] = (vals[index]=="true")
+        return d
     
-    def get_p_opt_lin_values(self):
+    def get_p_opt_lin_values(self, include_alias=True):
         """ 
-        Extract ValueReference and boolean value describing if variable 
+        Extract variable name and boolean value describing if variable 
         appears linearly in all equations and constraints for all optimized 
         independent parameters.
         
         Returns:
-            Dict with ValueReference as key and boolean isLinear as value.
+            Dict with variable name as key and boolean isLinear as value.
 
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"independentParameter\"] \
-                               [../*/@free=\"true\"][../isLinear] [../@alias=\"noAlias\"]")
-        vals = self._xpatheval("//ScalarVariable/isLinear/text()[../../VariableCategory=\"independentParameter\"] \
-                               [../../*/@free=\"true\"] [../../@alias=\"noAlias\"]")                
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name\
+                [../VariableCategory=\"independentParameter\"][../*/@free=\"true\"][../isLinear]")
+            vals = self._xpatheval("//ScalarVariable/isLinear/text()\
+                [../../VariableCategory=\"independentParameter\"][../../*/@free=\"true\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"]\
+                [../*/@free=\"true\"][../isLinear][../@alias=\"noAlias\"]")
+            vals = self._xpatheval("//ScalarVariable/isLinear/text()[../../VariableCategory=\"independentParameter\"]\
+                [../../*/@free=\"true\"][../../@alias=\"noAlias\"]")                
+               
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        valrefs = []
-        islinears = []
+        d={}
         for index, key in enumerate(keys):
-            valrefs.append(int(key))
-            islinears.append(vals[index]=="true")    
-        return dict(zip(valrefs, islinears))
+            d[str(key)] = (vals[index]=="true")
+        return d
 
-    def get_w_lin_tp_values(self):
+    def get_w_lin_tp_values(self, include_alias=True):
         """ 
-        Extract ValueReference and linear timed variables for all algebraic 
+        Extract variable name and linear timed variables for all algebraic 
         variables.
         
         Returns:
-            Dict with ValueReference as key and boolean isLinear as value.
+            Dict with variable name as key and boolean isLinear as value.
 
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"algebraic\"] \
-            [../@causality!=\"input\"] [../isLinearTimedVariables] [../@alias=\"noAlias\"]")
-        vals = []
-        for key in keys:
-            tp = self._xpatheval("//ScalarVariable/isLinearTimedVariables/TimePoint/@isLinear[../../../VariableCategory=\"algebraic\"] \
-                [../../../@causality!=\"input\"] [../../../@valueReference="+key+"] [../../../@alias=\"noAlias\"]")
-            vals.append(tp)        
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"] \
+                [../@causality!=\"input\"] [../isLinearTimedVariables]")
+            vals = []
+            for key in keys:
+                tp = self._xpatheval("//ScalarVariable/isLinearTimedVariables/TimePoint/@isLinear\
+                    [../../../VariableCategory=\"algebraic\"][../../../@causality!=\"input\"] \
+                    [../../../@name=\""+key+"\"]")
+                vals.append(tp)
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"] \
+                [../@causality!=\"input\"] [../isLinearTimedVariables][../@alias=\"noAlias\"]")
+            vals = []
+            for key in keys:
+                tp = self._xpatheval("//ScalarVariable/isLinearTimedVariables/TimePoint/@isLinear\
+                    [../../../VariableCategory=\"algebraic\"][../../../@causality!=\"input\"] \
+                    [../../../@name=\""+key+"\"][../../../@alias=\"noAlias\"]")
+                vals.append(tp)            
+                  
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        valrefs = []
+        names = []
         timepoints_islinear = []
         
         for index, key in enumerate(keys):
-            valrefs.append(int(key))
+            names.append(str(key))
             # get list of timepoints for each valueref
             tps = vals[index]
             casted_tps = []
             for tp in tps:
                 casted_tps.append(tp == "true")    
             timepoints_islinear.append(casted_tps)             
-        return dict(zip(valrefs, timepoints_islinear))
+        return dict(zip(names, timepoints_islinear))
 
-    def get_u_lin_tp_values(self):
+    def get_u_lin_tp_values(self, include_alias=True):
         """ 
-        Extract ValueReference and linear timed variables for all input 
+        Extract variable name and linear timed variables for all input 
         variables.
         
         Returns:
-            Dict with ValueReference as key and list of linear time variables 
+            Dict with variable name as key and list of linear time variables 
             as value. 
         
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../@causality=\"input\"][../VariableCategory=\"algebraic\"] \
-            [../isLinearTimedVariables] [../@alias=\"noAlias\"]")
-        vals = []
-        for key in keys:
-            tp = self._xpatheval("//ScalarVariable/isLinearTimedVariables/TimePoint/@isLinear[../../../@causality=\"input\"] \
-                [../../../VariableCategory=\"algebraic\"] [../../../@valueReference="+key+"] [../../../@alias=\"noAlias\"]")
-            vals.append(tp)
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"]\
+                [../VariableCategory=\"algebraic\"][../isLinearTimedVariables]")
+            vals = []
+            for key in keys:
+                tp = self._xpatheval("//ScalarVariable/isLinearTimedVariables/TimePoint/@isLinear\
+                    [../../../@causality=\"input\"][../../../VariableCategory=\"algebraic\"]\
+                    [../../../@name=\""+key+"\"]")
+                vals.append(tp)
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"]\
+                [../VariableCategory=\"algebraic\"][../isLinearTimedVariables][../@alias=\"noAlias\"]")
+            vals = []
+            for key in keys:
+                tp = self._xpatheval("//ScalarVariable/isLinearTimedVariables/TimePoint/@isLinear\
+                    [../../../@causality=\"input\"][../../../VariableCategory=\"algebraic\"]\
+                    [../../../@name=\""+key+"\"][../../../@alias=\"noAlias\"]")
+                vals.append(tp)           
+            
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        valrefs = []
+        names = []
         timepoints_islinear = []
         
         for index, key in enumerate(keys):
-            valrefs.append(int(key))
+            names.append(str(key))
             # get list of timepoints for each valueref
             tps = vals[index]
             casted_tps = []
             for tp in tps:
                 casted_tps.append(tp == "true")
             timepoints_islinear.append(casted_tps)             
-        return dict(zip(valrefs, timepoints_islinear))
+        return dict(zip(names, timepoints_islinear))
     
-    def get_dx_lin_tp_values(self):
+    def get_dx_lin_tp_values(self, include_alias=True):
         """ 
-        Extract ValueReference and linear timed variables for all derivative 
+        Extract variable name and linear timed variables for all derivative 
         variables.
 
         Returns:
-            Dict with ValueReference as key and list of linear time variables 
+            Dict with variable name as key and list of linear time variables 
             as value. 
         
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"derivative\"] \
-            [../isLinearTimedVariables] [../@alias=\"noAlias\"]")
-        vals = []
-        for key in keys:
-            tp = self._xpatheval("//ScalarVariable/isLinearTimedVariables/TimePoint/@isLinear[../../../VariableCategory=\"derivative\"] \
-                [../../../@valueReference="+key+"] [../../../@alias=\"noAlias\"]")
-            vals.append(tp)        
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"] \
+                [../isLinearTimedVariables]")
+            vals = []
+            for key in keys:
+                tp = self._xpatheval("//ScalarVariable/isLinearTimedVariables/TimePoint/@isLinear\
+                    [../../../VariableCategory=\"derivative\"][../../../@name=\""+str(key)+"\"]")
+                vals.append(tp)
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"] \
+                [../isLinearTimedVariables][../@alias=\"noAlias\"]")
+            vals = []
+            for key in keys:
+                tp = self._xpatheval("//ScalarVariable/isLinearTimedVariables/TimePoint/@isLinear\
+                    [../../../VariableCategory=\"derivative\"][../../../@name=\""+str(key)+"\"][../../../@alias=\"noAlias\"]")
+                vals.append(tp)            
+                 
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        valrefs = []
+        names = []
         timepoints_islinear = []
         
         for index, key in enumerate(keys):
-            valrefs.append(int(key))
+            names.append(str(key))
             # get list of timepoints for each valueref
             tps = vals[index]
             casted_tps = []
             for tp in tps:
                 casted_tps.append(tp == "true")
             timepoints_islinear.append(casted_tps)             
-        return dict(zip(valrefs, timepoints_islinear))
+        return dict(zip(names, timepoints_islinear))
     
-    def get_x_lin_tp_values(self):
+    def get_x_lin_tp_values(self, include_alias=True):
         """ 
-        Extract ValueReference and linear timed variables for all 
+        Extract variable name and linear timed variables for all 
         differentiated variables.
 
         Returns:
-            Dict with ValueReference as key and list of linear time variables 
+            Dict with variable name as key and list of linear time variables 
             as value. 
         
         """
-        keys = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"state\"] \
-            [../isLinearTimedVariables] [../@alias=\"noAlias\"]")
-        vals = []        
-        for key in keys:
-            tp = self._xpatheval("//ScalarVariable/isLinearTimedVariables/TimePoint/@isLinear[../../../VariableCategory=\"state\"] \
-                [../../../@valueReference="+key+"] [../../../@alias=\"noAlias\"]")
-            vals.append(tp)
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"] \
+                [../isLinearTimedVariables]")
+            vals = []        
+            for key in keys:
+                tp = self._xpatheval("//ScalarVariable/isLinearTimedVariables/TimePoint/@isLinear\
+                    [../../../VariableCategory=\"state\"][../../../@name=\""+key+"\"]")
+                vals.append(tp)
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"] \
+                [../isLinearTimedVariables][../@alias=\"noAlias\"]")
+            vals = []        
+            for key in keys:
+                tp = self._xpatheval("//ScalarVariable/isLinearTimedVariables/TimePoint/@isLinear\
+                    [../../../VariableCategory=\"state\"][../../../@name=\""+key+"\"][../../../@alias=\"noAlias\"]")
+                vals.append(tp)            
+            
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
-        valrefs = []
+        names = []
         timepoints_islinear = []
         
         for index, key in enumerate(keys):
-            valrefs.append(int(key))
+            names.append(str(key))
             # get list of timepoints for each valueref
             tps = vals[index]
             casted_tps = []
             for tp in tps:
                 casted_tps.append(tp == "true")
             timepoints_islinear.append(casted_tps)             
-        return dict(zip(valrefs, timepoints_islinear))
+        return dict(zip(names, timepoints_islinear))
     
     def get_starttime(self):
         """ Extract the interval start time. """

@@ -559,37 +559,41 @@ class NLPInitialization(object):
 #                 p_opt_start[i_pi_opt] = values.get(ref)
         
         # dx: derivative
-        values = xmldoc.get_dx_start_attributes()
+        values = xmldoc.get_dx_start_attributes(include_alias=False)
         
-        refs = values.keys()
-        refs.sort(key=int)
+        #names = values.keys()
+        #names.sort(key=str)
         
-        for ref in refs:
-            (z_i, ptype) = jmi._translate_value_ref(ref)
+        for name in values.keys():
+            value_ref = xmldoc.get_valueref(name)
+            (z_i, ptype) = jmi._translate_value_ref(value_ref)
             i_dx = z_i - self._model._offs_dx.value
-            dx_start[i_dx] = values.get(ref)
+            dx_start[i_dx] = values.get(name)
         
         # x: differentiate
-        values = xmldoc.get_x_start_attributes()
+        values = xmldoc.get_x_start_attributes(include_alias=False)
         
-        refs = values.keys()
-        refs.sort(key=int)
+        #names = values.keys()
+        #names.sort(key=str)
         
-        for ref in refs:
-            (z_i, ptype) = jmi._translate_value_ref(ref)
+        for name in values.keys():
+            value_ref = xmldoc.get_valueref(name)
+            (z_i, ptype) = jmi._translate_value_ref(value_ref)
             i_x = z_i - self._model._offs_x.value
-            x_start[i_x] = values.get(ref)
+            x_start[i_x] = values.get(name)
                     
         # w: algebraic
-        values = xmldoc.get_w_start_attributes()
+        values = xmldoc.get_w_start_attributes(include_alias=False)
         
-        refs = values.keys()
-        refs.sort(key=int)
+        #names = values.keys()
+        #names.sort(key=str)
         
-        for ref in refs:
-            (z_i, ptype) = jmi._translate_value_ref(ref)
-            i_w = z_i - self._model._offs_w.value
-            w_start[i_w] = values.get(ref) 
+        for name in values.keys():
+            if not (xmldoc.is_alias(name)):
+                value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = jmi._translate_value_ref(value_ref)
+                i_w = z_i - self._model._offs_w.value
+                w_start[i_w] = values.get(name)
 
     def _set_lb_values(self, p_free_lb, dx_lb, x_lb, w_lb):
         
@@ -626,37 +630,40 @@ class NLPInitialization(object):
 #                 p_opt_lb[i_pi_opt] = values.get(ref)
 
         # dx: derivative
-        values = xmldoc.get_dx_lb_values()
+        values = xmldoc.get_dx_lb_values(include_alias=False)
         
-        refs = values.keys()
-        refs.sort(key=int)
+        #names = values.keys()
+        #names.sort(key=str)
         
-        for ref in refs:
-            (z_i, ptype) = jmi._translate_value_ref(ref)
+        for name in values.keys():
+            value_ref = xmldoc.get_valueref(name)
+            (z_i, ptype) = jmi._translate_value_ref(value_ref)
             i_dx = z_i - self._model._offs_dx.value
-            dx_lb[i_dx] = values.get(ref) 
+            dx_lb[i_dx] = values.get(name)
         
         # x: differentiate
-        values = xmldoc.get_x_lb_values()
+        values = xmldoc.get_x_lb_values(include_alias=False)
         
-        refs = values.keys()
-        refs.sort(key=int)
+        #names = values.keys()
+        #names.sort(key=str)
         
-        for ref in refs:
-            (z_i, ptype) = jmi._translate_value_ref(ref)
+        for name in values.keys():
+            value_ref = xmldoc.get_valueref(name)
+            (z_i, ptype) = jmi._translate_value_ref(value_ref)
             i_x = z_i - self._model._offs_x.value
-            x_lb[i_x] = values.get(ref)
+            x_lb[i_x] = values.get(name)
                     
         # w: algebraic
-        values = xmldoc.get_w_lb_values()
+        values = xmldoc.get_w_lb_values(include_alias=False)
         
-        refs = values.keys()
-        refs.sort(key=int)
+        #names = values.keys()
+        #names.sort(key=str)
         
-        for ref in refs:
-            (z_i, ptype) = jmi._translate_value_ref(ref)
+        for name in values.keys():
+            value_ref = xmldoc.get_valueref(name)
+            (z_i, ptype) = jmi._translate_value_ref(value_ref)
             i_w = z_i - self._model._offs_w.value
-            w_lb[i_w] = values.get(ref) 
+            w_lb[i_w] = values.get(name) 
 
     def _set_ub_values(self, p_free_ub, dx_ub, x_ub, w_ub):
         
@@ -693,36 +700,39 @@ class NLPInitialization(object):
 #                 p_opt_ub[i_pi_opt] = values.get(ref)
 
         # dx: derivative
-        values = xmldoc.get_dx_ub_values()
+        values = xmldoc.get_dx_ub_values(include_alias=False)
         
-        refs = values.keys()
-        refs.sort(key=int)
+        #names = values.keys()
+        #names.sort(key=str)
         
-        for ref in refs:
-            (z_i, ptype) = jmi._translate_value_ref(ref)
+        for name in values.keys():
+            value_ref = xmldoc.get_valueref(name)
+            (z_i, ptype) = jmi._translate_value_ref(value_ref)
             i_dx = z_i - self._model._offs_dx.value
-            dx_ub[i_dx] = values.get(ref) 
+            dx_ub[i_dx] = values.get(name)
         
         # x: differentiate
-        values = xmldoc.get_x_ub_values()
+        values = xmldoc.get_x_ub_values(include_alias=False)
         
-        refs = values.keys()
-        refs.sort(key=int)
+        #names = values.keys()
+        #names.sort(key=str)
         
-        for ref in refs:
-            (z_i, ptype) = jmi._translate_value_ref(ref)
+        for name in values.keys():
+            value_ref = xmldoc.get_valueref(name)
+            (z_i, ptype) = jmi._translate_value_ref(value_ref)
             i_x = z_i - self._model._offs_x.value
-            x_ub[i_x] = values.get(ref)
+            x_ub[i_x] = values.get(name)
             
         
         # w: algebraic
-        values = xmldoc.get_w_ub_values()
+        values = xmldoc.get_w_ub_values(include_alias=False)
         
-        refs = values.keys()
-        refs.sort(key=int)
+        #names = values.keys()
+        #names.sort(key=str)
         
-        for ref in refs:
-            (z_i, ptype) = jmi._translate_value_ref(ref)
+        for name in values.keys():
+            value_ref = xmldoc.get_valueref(name)
+            (z_i, ptype) = jmi._translate_value_ref(value_ref)
             i_w = z_i - self._model._offs_w.value
-            w_ub[i_w] = values.get(ref) 
+            w_ub[i_w] = values.get(name)
 

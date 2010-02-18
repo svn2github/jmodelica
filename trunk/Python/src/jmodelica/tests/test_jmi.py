@@ -85,22 +85,22 @@ class TestModel_VDP:
     @testattr(stddist = True)    
     def test_get_variable_names(self):
         names = self.vdp.get_variable_names()
-        ntools.assert_equal(names.get(0),"p1")
+        ntools.assert_equal(names.get('p1'),0)
         
     @testattr(stddist = True)
     def test_get_derivative_names(self):
         names = self.vdp.get_derivative_names()
-        ntools.assert_equal(names.get(4),"der(x2)")
+        ntools.assert_equal(names.get('der(x2)'),4)
     
     @testattr(stddist = True)
     def test_get_differentiated_variable_names(self):
         names = self.vdp.get_differentiated_variable_names()
-        ntools.assert_equal(names.get(8),"cost")
+        ntools.assert_equal(names.get('cost'),8)
     
     @testattr(stddist = True)
     def test_get_input_names(self):
         names = self.vdp.get_input_names()
-        ntools.assert_equal(names.get(9),"u")
+        ntools.assert_equal(names.get('u'),9)
     
     @testattr(stddist = True)
     def test_get_algebraic_variable_names(self):
@@ -418,7 +418,7 @@ class TestModel_RLC:
     @testattr(stddist = True)
     def test_get_variable_descriptions(self):
         descriptions = self.rlc.get_variable_descriptions()
-        ntools.assert_equal(descriptions.get(2),"Capacitance")
+        ntools.assert_equal(descriptions.get('capacitor.C'),"Capacitance")
 
     @testattr(stddist = True)
     def test_is_negated_alias(self):

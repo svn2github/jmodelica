@@ -14,6 +14,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from operator import itemgetter
+
 import ctypes as ct
 from ctypes import byref
 import numpy as N
@@ -371,27 +373,62 @@ class NLPCollocation(object):
                 Initial guess of interval final time. This argument is neglected
                 if the final time is fixed.
         """
-
         # Obtain the names
-        dx_names = self._model.get_derivative_names()
-        dx_name_value_refs = dx_names.keys()
-        dx_name_value_refs.sort(key=int)
+        dx_names_and_refs = self._model.get_derivative_names(include_alias=False)
+        #dx_names = dx_names_and_refs.keys()
+        # sort in value reference order
+        sorted_names = sorted(dx_names_and_refs.items(),key=itemgetter(1))
+        dx_names=[]
+        for t in sorted_names:
+            dx_names.append(t[0])
+        
 
-        x_names = self._model.get_differentiated_variable_names()
-        x_name_value_refs = x_names.keys()
-        x_name_value_refs.sort(key=int)
+        #dx_name_value_refs = dx_names.keys()
+        #dx_name_value_refs.sort(key=int)
 
-        u_names = self._model.get_input_names()
-        u_name_value_refs = u_names.keys()
-        u_name_value_refs.sort(key=int)
+        x_names_and_refs = self._model.get_differentiated_variable_names(include_alias=False)
+        #x_names = x_names_and_refs.keys()
+        # sort in value reference order
+        sorted_names = sorted(x_names_and_refs.items(),key=itemgetter(1))
+        x_names=[]
+        for t in sorted_names:
+            x_names.append(t[0])
 
-        w_names = self._model.get_algebraic_variable_names()
-        w_name_value_refs = w_names.keys()
-        w_name_value_refs.sort(key=int)
+        #x_name_value_refs = x_names.keys()
+        #x_name_value_refs.sort(key=int)
 
-        p_opt_names = self._model.get_p_opt_names()
-        p_opt_name_value_refs = p_opt_names.keys()
-        p_opt_name_value_refs.sort(key=int)
+        u_names_and_refs = self._model.get_input_names(include_alias=False)
+        #u_names = u_names_and_refs.keys()
+        # sort in value reference order
+        sorted_names = sorted(u_names_and_refs.items(),key=itemgetter(1))
+        u_names=[]
+        for t in sorted_names:
+            u_names.append(t[0])
+
+        #u_name_value_refs = u_names.keys()
+        #u_name_value_refs.sort(key=int)
+
+        w_names_and_refs = self._model.get_algebraic_variable_names(include_alias=False)
+        #w_names = w_names_and_refs.keys()
+        # sort in value reference order
+        sorted_names = sorted(w_names_and_refs.items(),key=itemgetter(1))
+        w_names=[]
+        for t in sorted_names:
+            w_names.append(t[0])
+
+        #w_name_value_refs = w_names.keys()
+        #w_name_value_refs.sort(key=int)
+
+        p_opt_names_and_refs = self._model.get_p_opt_names(include_alias=False)
+        #p_opt_names = p_opt_names_and_refs.keys()
+        # sort in value reference order
+        sorted_names = sorted(p_opt_names_and_refs.items(),key=itemgetter(1))
+        p_opt_names=[]
+        for t in sorted_names:
+            p_opt_names.append(t[0])
+
+        #p_opt_name_value_refs = p_opt_names.keys()
+        #p_opt_name_value_refs.sort(key=int)
 
         #print(dx_names)
         #print(x_names)
@@ -401,39 +438,39 @@ class NLPCollocation(object):
         # Obtain vector sizes
         n_points = 0
         if len(dx_names) > 0:
-            for ref in dx_name_value_refs:
+            for name in dx_names:
                 try:
-                    traj = res.get_variable_data(dx_names.get(ref))
+                    traj = res.get_variable_data(name)
                     if N.size(traj.x)>2:
                         break
                 except:
                     pass
 
         elif len(x_names) > 0:
-            for ref in x_name_value_refs:
+            for name in x_names:
                 try:
-                    traj = res.get_variable_data(x_names.get(ref))
+                    traj = res.get_variable_data(name)
                     if N.size(traj.x)>2:
                         break
                 except:
                     pass
 
         elif len(u_names) > 0:
-            for ref in u_name_value_refs:
+            for name in u_names:
                 try:
                     if N.size(traj.x)>2:
                         break
                 except:
-                    print u_names.get(ref)
+                    print name
                     pass
 
         elif len(w_names) > 0:
-            for ref in w_name_value_refs:
+            for name in w_names:
                 try:
                     if N.size(traj.x)>2:
                         break
                 except:
-                    print w_names.get(ref)
+                    print name
                     pass
         else:
             raise Exception("None of the model variables not found in result file.")
@@ -457,12 +494,13 @@ class NLPCollocation(object):
             self._model.jmimodel.opt_get_p_opt_indices(p_opt_indices)
             p_opt_indices = p_opt_indices.tolist()
 
-            for ref in p_opt_name_value_refs:
+            for name in p_opt_names:
                 try:
+                    ref = self._model.get_valueref(name)
                     (z_i, ptype) = jmi._translate_value_ref(ref)
                     i_pi = z_i - self._model._offs_pi.value
                     i_pi_opt = p_opt_indices.index(i_pi)
-                    traj = res.get_variable_data(p_opt_names.get(ref))
+                    traj = res.get_variable_data(name)
                     p_opt_data[i_pi_opt] = traj.x[0]
                 except:
                     print "Warning: Could not find value for parameter" + p_opt_names.get(ref)
@@ -472,43 +510,43 @@ class NLPCollocation(object):
         # Initialize variable names
         # Loop over all the names
         col_index = 1;
-        for ref in dx_name_value_refs:
+        for name in dx_names:
             try:
                 #print(dx_names.get(ref))
                 #print(col_index)
-                traj = res.get_variable_data(dx_names.get(ref))
+                traj = res.get_variable_data(name)
                 var_data[:,col_index] = traj.x
                 col_index = col_index + 1
             except:
                 col_index = col_index + 1
-                print "Warning: Could not find trajectory for variable " + dx_names.get(ref)
-        for ref in x_name_value_refs:
+                print "Warning: Could not find trajectory for variable " + name
+        for name in x_names:
             try:
                 #print(x_names.get(ref))
                 #print(col_index)
-                traj = res.get_variable_data(x_names.get(ref))
+                traj = res.get_variable_data(name)
                 var_data[:,col_index] = traj.x
                 col_index = col_index + 1
             except:
                 col_index = col_index + 1
-                print "Warning: Could not find trajectory for variable " + x_names.get(ref)
+                print "Warning: Could not find trajectory for variable " + name
 
-        for ref in u_name_value_refs:
+        for name in u_names:
             try:
                 #print(u_names.get(ref))
                 #print(col_index)
-                traj = res.get_variable_data(u_names.get(ref))
+                traj = res.get_variable_data(name)
                 var_data[:,col_index] = traj.x
                 col_index = col_index + 1
             except:
                 col_index = col_index + 1
-                print "Warning: Could not find trajectory for variable " + u_names.get(ref)
+                print "Warning: Could not find trajectory for variable " + name
 
-        for ref in w_name_value_refs:
+        for name in w_names:
             try:
                 #print(w_names.get(ref))
                 #print(col_index)
-                traj = res.get_variable_data(w_names.get(ref))
+                traj = res.get_variable_data(name)
                 if N.size(traj.x)==2:
                     var_data[:,col_index] = N.ones(n_points)*traj.x[0]
                 else:
@@ -516,7 +554,7 @@ class NLPCollocation(object):
                 col_index = col_index + 1
             except:
                 col_index = col_index + 1
-                print "Warning: Could not find trajectory for variable " + w_names.get(ref)
+                print "Warning: Could not find trajectory for variable " + name
 
         #print(var_data)
         #print(N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0])
