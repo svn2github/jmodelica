@@ -1604,24 +1604,40 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 
 	(*jmi_opt_sim)->jmi = jmi;
 
-	/*
+
 	// Set blocking factors
 	// Normalize blocking factors vector so that sum(blocking_factors(i)) = n_e
 
 	// Sum input blocking_factors
-	int n_b_f_input = 0;
-	int max_b_f_index = 0;
-	while (n_bf_input < n_e && max_b_f_indx<n_blocking_factors) {
-		n_b_f_input += blocking_factors[max_b_f_index];
-		max_b_f_index++;
-	}
+	if (n_blocking_factors>0) {
+		int n_b_f_input = 0;
+		int max_b_f_index = 0;
+		while (n_b_f_input + blocking_factors[max_b_f_index] < n_e &&
+				max_b_f_index + 1 < n_blocking_factors) {
+			n_b_f_input += blocking_factors[max_b_f_index];
+			max_b_f_index++;
+		}
 
-*/
+		(*jmi_opt_sim)->blocking_factors = (int*)calloc(max_b_f_index + 1,sizeof(int));
+		(*jmi_opt_sim)->n_blocking_factors = max_b_f_index + 1;
+		for (i=0;i<(*jmi_opt_sim)->n_blocking_factors - 1;i++) {
+			(*jmi_opt_sim)->blocking_factors[i] = blocking_factors[i];
+		}
+		(*jmi_opt_sim)->blocking_factors[(*jmi_opt_sim)->n_blocking_factors - 1] =
+			n_e - n_b_f_input;
 
-	(*jmi_opt_sim)->blocking_factors = (int*)calloc(n_blocking_factors,sizeof(int));
-	(*jmi_opt_sim)->n_blocking_factors = n_blocking_factors;
-	for (i=0;i<(*jmi_opt_sim)->n_blocking_factors;i++) {
-		(*jmi_opt_sim)->blocking_factors[i] = blocking_factors[i];
+		//printf("n_blocking_factors: %d\n",(*jmi_opt_sim)->n_blocking_factors);
+		(*jmi_opt_sim)->n_blocking_factor_constraints = 0;
+		for (i=0;i<(*jmi_opt_sim)->n_blocking_factors;i++) {
+			(*jmi_opt_sim)->n_blocking_factor_constraints +=
+				(*jmi_opt_sim)->blocking_factors[i] - 1;
+			//printf("%d, %d\n",i,(*jmi_opt_sim)->blocking_factors[i]);
+		}
+		//printf("n_blocking_factor_constraints: %d\n",(*jmi_opt_sim)->n_blocking_factor_constraints);
+
+	} else {
+		(*jmi_opt_sim)->blocking_factors = (int*)calloc(n_blocking_factors,sizeof(int));
+		(*jmi_opt_sim)->n_blocking_factors = n_blocking_factors;
 	}
 
 	(*jmi_opt_sim)->n_e = n_e;
