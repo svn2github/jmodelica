@@ -6,6 +6,7 @@ required by Assimulo.
 """
 
 import numpy as N
+import pylab as P
 import jmodelica.io as io
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
@@ -123,9 +124,19 @@ class JMIImplicit(Implicit_Problem):
             
         #Sets default values
         self.max_eIter = 50 #Maximum number of event iterations allowed.
-        self.eps = 1e-9 #Epsilon for adjusting the event indicators
-        self._initiate_problem = False
+        self.eps = 1e-9 #Epsilon for adjusting the event indicator.
+        self.log_events = False
     
+        #Sets internal options
+        self._initiate_problem = False
+        self._log_initiate_mode = False
+        self._log_information = []
+        self._f_nbr = f_nbr
+        self._g_nbr = g_nbr
+        self._pre = self.y0.copy()
+        self._iter = 0
+        
+        
     def f(self, t, y, yd, sw=None):
         """
         The residual function for an DAE problem.
@@ -139,6 +150,25 @@ class JMIImplicit(Implicit_Problem):
         #Evaluating the residual function
         residual = N.array([.0]*len(y))
         self._model.jmimodel.dae_F(residual)
+        
+        #Log information
+        if self._log_initiate_mode:
+            i = len(self._log_information)
+            j = len(self._log_information[i-1][1])
+            
+            self._log_information[i-1][5][j-1].append(residual.copy())
+            
+            sum=N.sum(y!=self._pre)
+            if sum == 1:
+                self._log_information[i-1][2][j-1].append(1e6)
+            else:
+                W = 1/(1e-6*N.abs(y)+1e-6)
+                RES = N.sqrt(N.sum(W*(N.abs(self._pre-y)**2)))
+                #self._log_information[i-1][2][j-1].append(N.max(N.abs(residual)))
+                self._log_information[i-1][2][j-1].append(RES)
+                self._pre = y.copy()
+            
+            
         
         return residual
         
@@ -182,19 +212,31 @@ class JMIImplicit(Implicit_Problem):
         This method is called when assimulo finds an event.
         """
         nbr_iteration = 0
-            
+        
+        if self.log_events:
+            self._log_information.append([solver.t[-1], [list(event_info)], [[]], [],[], [[]],[]])
+        
         while self.max_eIter > nbr_iteration: #Event Iteration
+            
+            if self.log_events:
+                if nbr_iteration > 0: #Used for logging
+                    i = len(self._log_information)
+                    self._log_information[i-1][1].append(event_info)
+                    self._log_information[i-1][2].append([])
+                    self._log_information[i-1][5].append([])
+                
             self.event_switch(solver, event_info) #Turns the switches
-            #print self.g(solver.t[-1], solver.y[-1], solver.yd[-1], solver.switches)
-            #print self.g_adjust(solver.t[-1], solver.y[-1], solver.yd[-1], solver.switches)
+
             b_mode = self.g(solver.t[-1], solver.y[-1], solver.yd[-1], solver.switches)
-            #b_mode -= self.eps_adjust #Adjust for the appended epsilon
             self.init_mode(solver) #Pass in the solver to the problem specified init_mode
-            
             a_mode = self.g(solver.t[-1], solver.y[-1], solver.yd[-1], solver.switches)
-            #a_mode -= self.eps_adjust #Adjust for the appended epsilon
-            #print self.g(solver.t[-1], solver.y[-1], solver.yd[-1], solver.switches)
-            
+
+            #Log information
+            if self.log_events:
+                i = len(self._log_information)
+                self._log_information[i-1][4].append(self._model.sw.copy()) #Switches
+                self._log_information[i-1][6].append([b_mode,a_mode])
+
             [event_info, iter] = self.check_eIter(b_mode, a_mode)
             
             if iter:
@@ -222,8 +264,6 @@ class JMIImplicit(Implicit_Problem):
         This is the default event handling.
         """
         for i in range(len(event_info)): #Loop across all event functions
-            #if event_info[i] != 0:
-            #    solver.switches[i] = not solver.switches[i] #Turn the switch
             if event_info[i] == -1:
                 solver.switches[i] = False
             if event_info[i] == 1:
@@ -236,27 +276,42 @@ class JMIImplicit(Implicit_Problem):
         """
         Initiates the new mode.
         """
-        self._model.sw = [int(x) for x in solver.switches]
-        
         if self._initiate_problem:
-            # Create DAE initialization object.
+            #Check wheter or not it involves event functions
+            if self._g_nbr > 0:
+                self._model.sw = [int(x) for x in solver.switches]
+                
+            #Initiate using IPOPT
             init_nlp = NLPInitialization(self._model)
-            # Create an Ipopt solver object for the DAE initialization system
             init_nlp_ipopt = InitializationOptimizer(init_nlp)
-            # Solve the DAE initialization system with Ipopt
             init_nlp_ipopt.init_opt_ipopt_solve()
             
+            #Used for logging
+            if self.log_events:
+                i = len(self._log_information)
+                self._log_information[i-1][3].append(True)
+            
+            #Sets the calculated values
             solver.y[-1] = N.append(self._model.x,self._model.w)
             solver.yd[-1] = N.append(self._model.dx,[0]*len(self._model.w)) 
         else:
+            self._model.sw = [int(x) for x in solver.switches]
+            
+            if self.log_events:
+                self._log_initiate_mode = True #Logg f evaluations
+                i = len(self._log_information) #Where to put the information
             try:
-                solver.make_consistency('IDA_YA_YDP_INIT')
+                solver.make_consistency('IDA_YA_YDP_INIT') #Calculate consistency
+                if self.log_events:
+                    self._log_information[i-1][3].append(True) #Success
             except Sundials_Exception, data:
                 print data
                 print 'Failed to calculate initial conditions. Trying to continue...'
+                if self.log_events:
+                    self._log_information[i-1][3].append(False) #Failure
+            
+            self._log_initiate_mode = False #Stop logging f
                 
-        #print max(self.f(solver.t[-1], solver.y[-1], solver.yd[-1], solver.switches))
-        
     def check_eIter(self, before, after):
         """
         Helper function for handle_event to determine if we have event
@@ -266,13 +321,10 @@ class JMIImplicit(Implicit_Problem):
             before and after we have changed mode of operations.
         """
         
-        #eIter = [False]*len(before)
         eIter = [0]*len(before)
         iter = False
         
         for i in range(len(before)):
-            #if (before[i] < 0.0 and after[i] >= 0.0) or (before[i] >= 0.0 and after[i] < 0.0):
-            #    eIter[i] = True
             if (before[i] < 0.0 and after[i] >= 0.0):
                 eIter[i] = 1
                 iter = True
@@ -347,3 +399,40 @@ class JMIImplicit(Implicit_Problem):
             self.init_mode(solver)
         
         self._initiate_problem = False 
+        
+    def print_log_info(self, switches=False):
+        """
+        Prints the log information from the events.
+        """
+        for i in range(len(self._log_information)):
+            print '\tTime, t = %e'%self._log_information[i][0]
+            for j in range(len(self._log_information[i][1])):
+                if switches:
+                    print '(%d,%d)'%(i,j),'\t\t Switch info: ', self._log_information[i][4][j], 'Newton/LineSearch Result: ', self._log_information[i][3][j]
+                else:
+                    print '(%d,%d)'%(i,j),'\t\t Event info: ', self._log_information[i][1][j], 'Newton/LineSearch Result: ', self._log_information[i][3][j]                
+        print '\nNumber of events: ',len(self._log_information)
+        
+    def plot_log_info(self, ind, iter=0, show_only_max=True, eq_ind=None):
+        """
+        Plots the maximum f of the index and iteration.
+        """
+        if show_only_max and eq_ind==None:
+            P.semilogy(self._log_information[ind][2][iter])
+        else:
+            for i in range(self._f_nbr) if eq_ind==None else eq_ind:
+                data_points = []
+                for j in range(len(self._log_information[ind][5][iter])):
+                    data_points.append(N.abs(self._log_information[ind][5][iter][j][i]) if N.abs(self._log_information[ind][5][iter][j][i])>1e-10 else 1e-10)
+                P.semilogy(data_points)
+        P.ylim(ymin=1e-10)
+        P.show()
+
+    def print_g_info(self, ind, iter=0):
+        """
+        Prints the values of the event functions, before and after.
+        """
+        
+        print 'Pre: ', self._log_information[ind][6][iter][0]
+        print 'After: ', self._log_information[ind][6][iter][1]
+        
