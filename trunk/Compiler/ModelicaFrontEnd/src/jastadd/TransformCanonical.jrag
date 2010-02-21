@@ -364,9 +364,21 @@ aspect TransformCanonical {
 				fv2 = (FVariable)afv2;
 				negated = true;
 			}
+		} else if ((getLeft() instanceof FDotAddExp &&  //  x + y = 0
+				((FDotAddExp)getLeft()).getLeft() instanceof FIdUseExp &&
+				((FDotAddExp)getLeft()).getRight() instanceof FIdUseExp) &&
+				(getRight() instanceof FLitExp && getRight().ceval().realValue() == 0)) {
+			afv1 = ((FIdUseExp)((FDotAddExp)getLeft()).getLeft()).myFV();
+			afv2 = ((FIdUseExp)((FDotAddExp)getLeft()).getRight()).myFV();
+			if (!afv1.isUnknown() && !afv2.isUnknown()) {
+				fv1 = (FVariable)afv1;
+				fv2 = (FVariable)afv2;
+				negated = true;
+			}
 		}
 		
-		if (fv1!=null && fv2!=null) {
+		if ((fv1!=null) && 
+				(fv2!=null)) {
 			return new AliasPair(fv1,fv2,negated);
 		} else {
 			return null;

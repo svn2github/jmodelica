@@ -488,11 +488,6 @@ public class ModelicaCompiler {
 		}
 	   	
 		fc.transformCanonical();
-
-		Collection<Problem> problems = fc.errorCheck();
-		if (problems.size()>0) {
-			handleCompilerProblems(problems);
-		}
 				
 		logger.info("Creating transformed .mof file...");
 	    	    	// Create file 
@@ -508,6 +503,11 @@ public class ModelicaCompiler {
 			logger.info("Diagnostics for transformed flattened model:");		
 			System.out.println(fc.diagnostics());
 			System.out.print(fc.prettyPrint(""));
+		}
+
+		Collection<Problem> problems = fc.errorCheck();
+		if (problems.size()>0) {
+			handleCompilerProblems(problems);
 		}
 		
 		return fc;

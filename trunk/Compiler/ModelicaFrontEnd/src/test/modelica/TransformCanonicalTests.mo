@@ -832,6 +832,32 @@ equation
  y = x+3;
 end AliasTest26;
 
+model AliasTest27
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="AliasTest27",
+        description="Test elimination of alias variables.",
+                                               flatModel=
+"
+fclass TransformCanonicalTests.AliasTest27
+ Real x1;
+equation
+ x1 = 1;
+end TransformCanonicalTests.AliasTest27;
+")})));
+
+ Real x1;
+ Real x2;
+ Real x3;
+ Real x4;
+ Real x5;
+equation
+ x4 = x5;
+ x1 = x3;
+ x2 = x4;
+ x3 = x5;
+ x3 =1;
+
+end AliasTest27;
 
 model ParameterBindingExpTest1_Err
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

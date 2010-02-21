@@ -234,10 +234,7 @@ aspect AliasVariables {
 		 */
 		public void addAliasVariables(FVariable fv1, FVariable fv2, 
 				boolean neg) {
-			
-			//System.out.println("AliasManager.addAliasVariables(): "
-			//		+ fv1.name() + " " + fv2.name() + " " + neg);
-			
+						
 			// Create alias variables with negated  = false
 			AliasVariable alias1 = new AliasVariable(fv1,false);
 			AliasVariable alias2 = new AliasVariable(fv2,false);
@@ -256,15 +253,18 @@ aspect AliasVariables {
 			 *  These rules are enforced by the algorithm below: if a
 			 *  rule is about to be broken an error message is generated.
 			 *  			
+			 *  Notice that LinkedHashSets are expected to be persistent, 
+			 *  therfore alias sets need to be temporarily removed from the
+			 *  set, then modified, then reinserted.
 			 */
-				
+			
 			// Create all combinations of alias variables, negated and 
 			// non-negated
 			LinkedHashSet<AliasVariable> as1 = getAliasSet(alias1);
 			LinkedHashSet<AliasVariable> as2 = getAliasSet(alias2);
 			LinkedHashSet<AliasVariable> as1n = getAliasSet(alias1n);
 			LinkedHashSet<AliasVariable> as2n = getAliasSet(alias2n);
-
+			
 			// Go through all the cases
 			if (as1!=null && as2!=null) { // -> as1n==null & as2n==null
 				if (as1==as2 && neg) {
@@ -277,13 +277,17 @@ aspect AliasVariables {
 				}
 				// Merge connection sets
 				if (neg) {
+					aliasSets.remove(as1);
 					for (AliasVariable a : as2) {
 						as1.add(new AliasVariable(a.getFVariable(),
 								!a.isNegated()));
 					}
+					aliasSets.add(as1);
 					aliasSets.remove(as2);
 				} else { 
+					aliasSets.remove(as1);
 					as1.addAll(as2);
+					aliasSets.add(as1);
 					aliasSets.remove(as2);
 				}				
 			} else if (as1!=null && as2n!=null) { // -> as1n==null & as2==null
@@ -297,13 +301,17 @@ aspect AliasVariables {
 				}
 				// Merge connection sets
 				if (neg) {
+					aliasSets.remove(as1);
 					as1.addAll(as2n);
+					aliasSets.add(as1);
 					aliasSets.remove(as2n);					
 				} else { 
+					aliasSets.remove(as1);
 					for (AliasVariable a : as2n) {
 						as1.add(new AliasVariable(a.getFVariable(),
 								!a.isNegated()));
 					}
+					aliasSets.add(as1);
 					aliasSets.remove(as2n);
 				}				
 			} else if (as1n!=null && as2!=null) { // -> as1==null & as2n==null
@@ -317,13 +325,17 @@ aspect AliasVariables {
 					return;
 				}					
 				if (neg) {
+					aliasSets.remove(as1n);
 					as1n.addAll(as2);
+					aliasSets.add(as1n);
 					aliasSets.remove(as2);					
 				} else { 
+					aliasSets.remove(as1n);
 					for (AliasVariable a : as2) {
 						as1n.add(new AliasVariable(a.getFVariable(),
 								!a.isNegated()));
 					}
+					aliasSets.add(as1n);
 					aliasSets.remove(as2);
 				}				
 
@@ -338,39 +350,59 @@ aspect AliasVariables {
 					return;
 				}
 				if (neg) {
+					aliasSets.remove(as1n);
 					for (AliasVariable a : as2n) {
 						as1n.add(new AliasVariable(a.getFVariable(),
 								!a.isNegated()));
 					}
+					aliasSets.add(as1n);
 					aliasSets.remove(as2n);
 				} else { 
+					aliasSets.remove(as1n);
 					as1n.addAll(as2n);
+					aliasSets.add(as1n);
 					aliasSets.remove(as2n);					
 				}				
 
 			} else if (as1==null && as1n==null && as2!=null) { // -> as2n==null
 				if (neg) {
+					aliasSets.remove(as2);
 					as2.add(alias1n);
+					aliasSets.add(as2);
 				} else {
+					aliasSets.remove(as2);
 					as2.add(alias1);
+					aliasSets.add(as2);
 				}
 			} else if (as1==null && as1n==null && as2n!=null) { // -> as2==null
 				if (neg) {
+					aliasSets.remove(as2n);
 					as2n.add(alias1);
+					aliasSets.add(as2n);
 				} else {
+					aliasSets.remove(as2n);
 					as2n.add(alias1n);
+					aliasSets.add(as2n);
 				}				
 			} else if (as2==null && as2n==null && as1!=null) { // -> as1n==null
 				if (neg) {
+					aliasSets.remove(as1);
 					as1.add(alias2n);
+					aliasSets.add(as1);
 				} else {
+					aliasSets.remove(as1);
 					as1.add(alias2);
+					aliasSets.add(as1);
 				}
 			} else if (as2==null && as2n==null && as1n!=null) { // -> as1==null
 				if (neg) {
+					aliasSets.remove(as1n);
 					as1n.add(alias2);
+					aliasSets.add(as1n);
 				} else {
+					aliasSets.remove(as1n);
 					as1n.add(alias2n);
+					aliasSets.add(as1n);
 				}				
 			} else {
 				LinkedHashSet<AliasVariable> as = 
@@ -384,10 +416,14 @@ aspect AliasVariables {
 				}
 				aliasSets.add(as);
 			}
+			//System.out.println(">>" + printAliasSets());
 		}
 		
 		public String printAliasSet(LinkedHashSet<AliasVariable> aliasSet) {
 			StringBuffer str = new StringBuffer();
+			//str.append(getIterationVariable(aliasSet).getFVariable().name());
+			//str.append("(" + getIterationVariable(aliasSet).getFVariable().varKind() + ")");
+			//str.append(":");
 			str.append("{");
 			int i=0;
 			for (AliasVariable alias : aliasSet) {
@@ -395,6 +431,7 @@ aspect AliasVariables {
 					str.append("-");
 				}
 				str.append(alias.getFVariable().name());
+				//str.append("(" + alias.getFVariable().varKind() + ")");
 				if ((i<(aliasSet.size())-1)) {
 					str.append(",");
 				}

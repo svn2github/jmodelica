@@ -466,6 +466,28 @@ aspect Names {
 
 aspect FlatNames {
 	
+	syn String FVariable.varKind() {
+		if (isIndependentConstant()) {
+			return "ci";
+		} else if (isDependentConstant()) {
+			return "cd";
+		} else if (isIndependentParameter()) {
+			return "pi";
+		} else if (isDependentParameter()) {
+			return "pd";
+		} else if (isDifferentiatedVariable()) {
+			return "x";
+		} else if (isDerivativeVariable()) {
+			return "dx";
+		} else if (isAlgebraicVariable()) {
+			return "w";
+		} else if (isInput()) {
+			return "u";
+		} else {
+			return "unknown";
+		}
+	}
+	
 	public FQName.FQName(String name) {
 		this(new List());
    		for (String part : name.split("\\."))
