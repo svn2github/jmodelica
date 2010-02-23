@@ -151,7 +151,7 @@ aspect Constructors {
 	 */
 	public FFunctionArray.FFunctionArray(FPrimitiveType type, String name) {
 		this(new Opt(), type, new Opt(), new FQName(name));
-		getFQName().setLastFArraySubscripts(type.size().newFArraySubscripts());
+		getFQName().setLastFArraySubscripts(type.size().flattenFArraySubscripts());
 	}
 	
 	/**
@@ -169,6 +169,13 @@ aspect Constructors {
 	}
 	
 	/**
+	 * \brief Create a new FExpSubscript with an integer literal as expression.
+	 */
+	public FExpSubscript.FExpSubscript(int i) {
+		this(new FIntegerLitExp(i));
+	}
+	
+	/**
 	 * \brief Create a new FArraySubscripts containing <code>n</code> {@link FColonSubscript}s.
 	 */
 	public static FArraySubscripts FArraySubscripts.createFColonSubscripts(int n) {
@@ -183,7 +190,7 @@ aspect Constructors {
 	 */
 	public static FArraySubscripts FArraySubscripts.createLiteralSubscripts(int i) {
 		List<FSubscript> l = new List<FSubscript>();
-		l.add(new FExpSubscript(new FIntegerLitExp(i)));
+		l.add(new FExpSubscript(i));
 		return new FArraySubscripts(l);
 	}
 	
@@ -193,7 +200,7 @@ aspect Constructors {
 	public static FArraySubscripts FArraySubscripts.createLiteralSubscripts(int[] index) {
 		List<FSubscript> l = new List<FSubscript>();
 		for (int i : index)
-			l.add(new FExpSubscript(new FIntegerLitExp(i)));
+			l.add(new FExpSubscript(i));
 		return new FArraySubscripts(l);
 	}
 	

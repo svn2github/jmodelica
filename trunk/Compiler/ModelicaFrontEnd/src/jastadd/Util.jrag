@@ -26,7 +26,7 @@ aspect RootAccess {
 	
 	inh lazy Root ASTNode.retrieveRoot();
 	eq SourceRoot.getChild().retrieveRoot() = this;
-	eq FlatRoot.getFClass().retrieveRoot() = this;
+	eq FlatRoot.getChild().retrieveRoot()   = this;
 	syn lazy Root ASTNode.root() = retrieveRoot();
 	eq Root.root() = this;
 	
@@ -855,6 +855,7 @@ aspect FlatFunctionUtils {
 	 inh boolean FAlgorithmBlock.inFunction();
 	 inh boolean FSubscript.inFunction();
 	 inh boolean FFunctionCallLeft.inFunction();
+	 inh boolean FPrimitiveType.inFunction();
 	 eq InstBaseClassDecl.getChild().inFunction() = isFunction();
 	 eq FFunctionDecl.getChild().inFunction()     = true;
 	 eq Root.getChild().inFunction()              = false;
@@ -878,10 +879,10 @@ aspect FlatFunctionUtils {
 	  *        or function call statement.
 	  */
 	 inh boolean FFunctionCall.isFunctionCallClause();
+	 inh boolean InstFunctionCall.isFunctionCallClause();
 	 eq ASTNode.getChild().isFunctionCallClause()              = false;
 	 eq FFunctionCallEquation.getCall().isFunctionCallClause() = true;
 	 eq FFunctionCallStmt.getCall().isFunctionCallClause()     = true;
-	 
 	 
 	 inh boolean FWhenStmt.insideBlockStmt();
 	 eq FAlgorithmBlock.getChild().insideBlockStmt() = false;

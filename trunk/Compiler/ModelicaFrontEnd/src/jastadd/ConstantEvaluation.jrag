@@ -131,7 +131,7 @@ aspect ConstantEvaluation {
 	    /**
 	     * \brief Check if there was an error in the evaluation.
 	     *
-	     * @return true if there was an error, otherwise true. 
+	     * @return true if there was an error, otherwise false. 
 	     */
 	    public boolean isUnknown() {
       		return false;
@@ -480,31 +480,39 @@ aspect ConstantEvaluation {
    * 
    * @return The constant value of the expression.
    */
-  syn CValue FExp.ceval() = new CValueUnknown();
+  syn CValue FExp.ceval() = isCircular() ? new CValueUnknown() : cevalCalc();
   
-  eq FDotAddExp.ceval() = type().add(getLeft().ceval(), getRight().ceval());
-  eq FDotSubExp.ceval() = type().sub(getLeft().ceval(), getRight().ceval());
-  eq FDotMulExp.ceval() = type().mul(getLeft().ceval(), getRight().ceval());
-  eq FDotDivExp.ceval() = type().div(getLeft().ceval(), getRight().ceval());
-  eq FDotPowExp.ceval() = type().pow(getLeft().ceval(), getRight().ceval());
+  /**
+   * \brief Delegate attribute for ceval().
+   * 
+   * This needs to be overridden for subclasses of FExp.
+   */
+  syn CValue FExp.cevalCalc() = new CValueUnknown();
   
-  eq FNegExp.ceval() = type().neg(getFExp().ceval());
+  eq FDotAddExp.cevalCalc() = type().add(getLeft().ceval(), getRight().ceval());
+  eq FDotSubExp.cevalCalc() = type().sub(getLeft().ceval(), getRight().ceval());
+  eq FDotMulExp.cevalCalc() = type().mul(getLeft().ceval(), getRight().ceval());
+  eq FDotDivExp.cevalCalc() = type().div(getLeft().ceval(), getRight().ceval());
+  eq FDotPowExp.cevalCalc() = type().pow(getLeft().ceval(), getRight().ceval());
   
-  eq FAndExp.ceval() = type().and(getLeft().ceval(), getRight().ceval());
-  eq FOrExp.ceval()  = type().or(getLeft().ceval(), getRight().ceval());
-  eq FNotExp.ceval() = type().not(getFExp().ceval());
+  eq FNegExp.cevalCalc() = type().neg(getFExp().ceval());
+  
+  eq FAndExp.cevalCalc() = type().and(getLeft().ceval(), getRight().ceval());
+  eq FOrExp.cevalCalc()  = type().or(getLeft().ceval(), getRight().ceval());
+  eq FNotExp.cevalCalc() = type().not(getFExp().ceval());
   
   // TODO: expand to handle boolean end enum index
-  eq FEndExp.ceval() = new CValueInteger(retrieveEnd());
+  eq FEndExp.cevalCalc() = new CValueInteger(retrieveEnd());
   
-  eq FSizeExp.ceval() {
+  eq FSizeExp.cevalCalc() {
 	  if (!hasDim())
 		  return new CValueUnknown();
 	  int dim = getDim().ceval().intValue() - 1;
-	  return new CValueInteger(getFExp().size().get(dim));
+	  int s = getFExp().size().get(dim);
+	  return (s == Size.UNKNOWN) ? new CValueUnknown() : new CValueInteger(s);
   }
   
-  eq FMinMaxExp.ceval() {
+  eq FMinMaxExp.cevalCalc() {
 	  if (hasY()) {
 		  CValue x = getX().ceval();
 		  CValue y = getY().ceval();
@@ -523,7 +531,7 @@ aspect ConstantEvaluation {
 	  }
   }
   
-  eq FSumExp.ceval() {
+  eq FSumExp.cevalCalc() {
 	  if (isArray())
 		  return new CValueUnknown();
 	  Iterator<FExp> it = getFExp().getArray().iteratorFExp();
@@ -541,20 +549,20 @@ aspect ConstantEvaluation {
   eq FExpSubscript.getChild().retrieveEnd() = mySize().get(0);
   eq Root.getChild().retrieveEnd()          = 0;
 
-  eq FRealLitExp.ceval() = new CValueReal(Double.parseDouble(getUNSIGNED_NUMBER()));
-  eq FIntegerLitExp.ceval() = new CValueInteger(Integer.parseInt(getUNSIGNED_INTEGER()));
-  eq FBooleanLitExpTrue.ceval() = new CValueBoolean(true);
-  eq FBooleanLitExpFalse.ceval() = new CValueBoolean(false);
-  eq FStringLitExp.ceval() = new CValueString(getString());
+  eq FRealLitExp.cevalCalc() = new CValueReal(Double.parseDouble(getUNSIGNED_NUMBER()));
+  eq FIntegerLitExp.cevalCalc() = new CValueInteger(Integer.parseInt(getUNSIGNED_INTEGER()));
+  eq FBooleanLitExpTrue.cevalCalc() = new CValueBoolean(true);
+  eq FBooleanLitExpFalse.cevalCalc() = new CValueBoolean(false);
+  eq FStringLitExp.cevalCalc() = new CValueString(getString());
   
-  eq FIdUseExp.ceval() {
+  eq FIdUseExp.cevalCalc() {
    	if (myFV()!=null && !myFV().isUnknown()) {
    		return myFV().ceval();
    	} else {
    		return new CValueUnknown();
    	}
   }
-  eq FInstAccessExp.ceval() = getInstAccess().ceval();
+  eq FInstAccessExp.cevalCalc() = getInstAccess().ceval();
   
   syn CValue InstAccess.ceval() = new CValueUnknown();
   eq InstDot.ceval()            = getRight().ceval();
@@ -566,21 +574,21 @@ aspect ConstantEvaluation {
 	  return new CValueUnknown();
   }
 
-  eq FSinExp.ceval() = new CValueReal(java.lang.Math.sin(getFExp().ceval().realValue()));
-  eq FCosExp.ceval() = new CValueReal(java.lang.Math.cos(getFExp().ceval().realValue()));
-  eq FTanExp.ceval() = new CValueReal(java.lang.Math.tan(getFExp().ceval().realValue()));	  
-  eq FAsinExp.ceval() = new CValueReal(java.lang.Math.asin(getFExp().ceval().realValue()));
-  eq FAcosExp.ceval() = new CValueReal(java.lang.Math.acos(getFExp().ceval().realValue()));
-  eq FAtanExp.ceval() = new CValueReal(java.lang.Math.atan(getFExp().ceval().realValue()));	  
-  eq FAtan2Exp.ceval() = new CValueReal(java.lang.Math.atan2(getFExp().ceval().realValue(),
+  eq FSinExp.cevalCalc() = new CValueReal(java.lang.Math.sin(getFExp().ceval().realValue()));
+  eq FCosExp.cevalCalc() = new CValueReal(java.lang.Math.cos(getFExp().ceval().realValue()));
+  eq FTanExp.cevalCalc() = new CValueReal(java.lang.Math.tan(getFExp().ceval().realValue()));	  
+  eq FAsinExp.cevalCalc() = new CValueReal(java.lang.Math.asin(getFExp().ceval().realValue()));
+  eq FAcosExp.cevalCalc() = new CValueReal(java.lang.Math.acos(getFExp().ceval().realValue()));
+  eq FAtanExp.cevalCalc() = new CValueReal(java.lang.Math.atan(getFExp().ceval().realValue()));	  
+  eq FAtan2Exp.cevalCalc() = new CValueReal(java.lang.Math.atan2(getFExp().ceval().realValue(),
 		                                                     getY().ceval().realValue()));	  
-  eq FSinhExp.ceval() = new CValueReal(java.lang.Math.sinh(getFExp().ceval().realValue()));
-  eq FCoshExp.ceval() = new CValueReal(java.lang.Math.cosh(getFExp().ceval().realValue()));
-  eq FTanhExp.ceval() = new CValueReal(java.lang.Math.tanh(getFExp().ceval().realValue()));	  
-  eq FExpExp.ceval() = new CValueReal(java.lang.Math.exp(getFExp().ceval().realValue()));
-  eq FLogExp.ceval() = new CValueReal(java.lang.Math.log(getFExp().ceval().realValue()));
-  eq FLog10Exp.ceval() = new CValueReal(java.lang.Math.log10(getFExp().ceval().realValue()));	  
-  eq FSqrtExp.ceval() = new CValueReal(java.lang.Math.sqrt(getFExp().ceval().realValue()));	  
+  eq FSinhExp.cevalCalc() = new CValueReal(java.lang.Math.sinh(getFExp().ceval().realValue()));
+  eq FCoshExp.cevalCalc() = new CValueReal(java.lang.Math.cosh(getFExp().ceval().realValue()));
+  eq FTanhExp.cevalCalc() = new CValueReal(java.lang.Math.tanh(getFExp().ceval().realValue()));	  
+  eq FExpExp.cevalCalc() = new CValueReal(java.lang.Math.exp(getFExp().ceval().realValue()));
+  eq FLogExp.cevalCalc() = new CValueReal(java.lang.Math.log(getFExp().ceval().realValue()));
+  eq FLog10Exp.cevalCalc() = new CValueReal(java.lang.Math.log10(getFExp().ceval().realValue()));	  
+  eq FSqrtExp.cevalCalc() = new CValueReal(java.lang.Math.sqrt(getFExp().ceval().realValue()));	  
 
 	/**
 	 * \brief Evaluation of a primitive instance node located in the instance
@@ -839,6 +847,8 @@ aspect ArrayConstantEvaluation {
 	syn int[] FSubscript.arrayIndices() = new int[0];
 	eq FExpSubscript.arrayIndices() {
 		int s = numIndices();
+		if (s < 0)
+			s = 0;
 		int ind[] = new int[s];
 		for (int i = 0; i < s; i++) 
 			ind[i] = i + 1;
@@ -937,22 +947,24 @@ aspect CircularExpressions {
 	
 
 	syn lazy boolean AbstractFVariable.isCircular() circular [true] = false;
-	eq FVariable.isCircular() {
-		if (hasBindingExp()) {
-		 	return getBindingExp().isCircular();
-		} else {
-		    return false;
-		}
-	}
+	eq FVariable.isCircular() = getFQName().isCircular() || (hasBindingExp() && getBindingExp().isCircular());
+	
+	syn boolean FQName.isCircular() = hasFArraySubscripts() && getLastFArraySubscripts().isCircular();
 	
 	syn lazy boolean InstComponentDecl.isCircular() circular [true] = false;
 	eq InstPrimitive.isCircular() {
-		if (myBindingInstExp()!=null) {
-		 	return myBindingInstExp().isCircular();
-		} else {
-		    return false;
-		}	
+		return (hasFArraySubscripts() && getFArraySubscripts().isCircular()) || 
+			(myBindingInstExp() != null && myBindingInstExp().isCircular());
 	}	
 	
+	syn boolean FArraySubscripts.isCircular() {
+		for (FSubscript fs : getFSubscripts())
+			if (fs.isCircular())
+				return true;
+		return false;
+	}
+	
+	syn boolean FSubscript.isCircular() = false;
+	eq FExpSubscript.isCircular() = getFExp().isCircular();
 
 }

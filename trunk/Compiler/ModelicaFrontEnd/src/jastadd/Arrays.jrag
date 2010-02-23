@@ -15,6 +15,7 @@
 */
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -338,25 +339,35 @@ aspect Arrays {
 	 * \brief Get the array sizes. 
 	 */
 	syn lazy Size FArraySubscripts.size() {
+		if (ndims() == 0)
+			return Size.SCALAR;
 		MutableSize s = new MutableSize(ndims());
 		for (FSubscript fs : getFSubscripts())
-			s.add(fs.declarationSize());
+			fs.addDeclarationSize(s);
 		return s;
 	}
 	
 	/**
-	 * \brief Get the size of the dimension denoted by this subscript when used 
-	 *        in a declaration. -1 means unknown size (legal in functions).
+	 * \brief Add the size of the dimension denoted by this subscript when used 
+	 *        in a declaration to the given Size.
 	 */
-	syn int FSubscript.declarationSize();
-	eq FExpSubscript.declarationSize()   = ceval().intValue();
-	eq FColonSubscript.declarationSize() = -1;
+	public abstract void FSubscript.addDeclarationSize(MutableSize s);
+	
+	public void FExpSubscript.addDeclarationSize(MutableSize s) {
+		s.add(getFExp());
+	}
+	
+	public void FColonSubscript.addDeclarationSize(MutableSize s) {
+		s.add(Size.UNKNOWN);
+	}
 
 	/**
 	 * \brief Get the array sizes when the array subscripts are used in an
 	 * access. See also documentation of accessNdims(). 
 	 */
 	syn lazy Size FArraySubscripts.accessSize() {
+		if (ndims() == 0)
+			return Size.SCALAR;
 		MutableSize s = new MutableSize(accessNdims());
 		for (FSubscript fs : getFSubscripts()) 
 			if (fs.ndims() == 1)
@@ -379,12 +390,20 @@ aspect Arrays {
 	 */
 	inh lazy Size FSubscript.mySize();
 	inh lazy Size FArraySubscripts.mySize();
-	eq FArraySubscripts.getFSubscript(int i).mySize() = new Size(mySize().has(i) ? mySize().get(i) : 0);
 	eq FIdUse.getChild().mySize()                     = myFV().size();
 	eq InstArrayAccess.getFArraySubscripts().mySize() = myInstComponentDecl().size();
 	eq FSubscriptedExp.getFArraySubscripts().mySize() = getFExp().size();
 	eq FlatRoot.getChild().mySize()                   = Size.SCALAR;
 	eq InstRoot.getChild().mySize()                   = Size.SCALAR;
+	
+	eq FArraySubscripts.getFSubscript(int i).mySize() {
+		MutableSize s = new MutableSize(1);
+		if (mySize().has(i))
+			s.set(0, mySize(), i);
+		else 
+			s.set(0, Size.UNKNOWN);
+		return s;
+	}
 	
 	/**
 	 * \brief Get the array sizes. 
@@ -406,22 +425,29 @@ aspect Arrays {
 			return getLeft().size();
 		MutableSize s = new MutableSize(ndims());
 		if (getLeft().ndims() == 2)
-			s.add(getLeft().size().get(0));
+			s.add(getLeft().size(), 0);
 		if (getRight().ndims() == 2)
-			s.add(getRight().size().get(1));
+			s.add(getRight().size(), 1);
 		return s;
 	}
 	
  	eq FRangeExp.size() {
-		double start = getFExp(0).ceval().realValue();
-		double step = 1.0;
-		double stop = getFExp(1).ceval().realValue();
-		if (getNumFExp() > 2) {
-			step = stop;
-			stop = getFExp(2).ceval().realValue();
-		}
-		int si = (int) ((stop - start) / step + 1.0);
-		return new Size((si < 0) ? 0 : si);
+ 		boolean hasStep = getNumFExp() > 2;
+ 		FExp startExp = getFExp(0);
+ 		FExp stopExp = getFExp(hasStep ? 2 : 1);
+ 		FExp stepExp = hasStep ? getFExp(1) : null;
+ 		
+ 		try {
+			double start = startExp.ceval().realValue();
+			double step = hasStep ? stepExp.ceval().realValue() : 1.0;
+			double stop = stopExp.ceval().realValue();
+			int si = (int) ((stop - start) / step + 1.0);
+			return new Size((si < 0) ? 0 : si);
+ 		} catch (UnsupportedOperationException e) {
+ 			// TODO: Create a MutableSize with an expression describing the size.
+ 			// Needs integer() operator.
+ 			throw e;
+ 		}
 	}
 	
 	eq FArray.size() {
@@ -446,33 +472,58 @@ aspect Arrays {
 	eq FTranspose.size() {
 		Size size = getFExp().size();
 		MutableSize s = new MutableSize(size.ndims());
-		s.add(size.get(1));
-		s.add(size.get(0));
+		s.add(size, 1);
+		s.add(size, 0);
 		for (int i = 2; i < s.ndims(); i++)
-			s.add(size.get(i));
+			s.add(size, i);
 		return s;
 	}
 	
 	eq FIdentity.size() {
-		int s = getFExp().ceval().intValue();
-		return new Size(new int[] { s, s });
+		MutableSize s = new MutableSize(2);
+		s.add(getFExp());
+		s.add(getFExp());
+		return s;
 	}
 	
 	eq FSizeExp.size() = hasDim() ? Size.SCALAR : new Size(getFExp().ndims());
 	
 	eq FInfArgsFunctionCall.size() {
-		try {
-			MutableSize s = new MutableSize(ndims());
-			for (FExp fe : getFExps()) 
-				s.add(fe.ceval().intValue());
+		MutableSize s = new MutableSize(ndims());
+		for (FExp fe : getFExps()) 
+			s.add(fe);
+		return s;
+	}
+	
+	inh Size FFunctionCallLeft.size();
+	eq FFunctionCallEquation.getLeft(int i).size() = getCall().sizeOfOutput(i);
+	eq FFunctionCallStmt.getLeft(int i).size()     = getCall().sizeOfOutput(i);
+	
+	syn Size FAbstractFunctionCall.sizeOfOutput(int i) = (i == 0) ? size() : Size.SCALAR;
+	
+	syn lazy Size InstFunctionCall.sizeOfOutput(int i) {
+		Size s = myOutputs().get(i).size();
+		if (!s.isUnknown())
 			return s;
+		
+		HashMap<ASTNode, FExp> varMap = new HashMap<ASTNode, FExp>();
+		for (int j = 0; j < getNumArg(); j++)
+			varMap.put(myInputs().get(j), getArg(j).getFExp());
+		
+		try {
+			MutableSize ms = new MutableSize(ndims());
+			for (int j = 0; j < s.ndims(); j++)
+				ms.add(dynamicFExp(s.createSizeFExp(j, varMap)));
+			return ms;
 		} catch (UnsupportedOperationException e) {
-			return Size.SCALAR;
+			return s;
 		}
 	}
 	
-	eq FFunctionCall.size()    = hasOutputs() ? expOutput().size() : Size.SCALAR;
-	eq InstFunctionCall.size() = hasOutputs() ? expOutput().size() : Size.SCALAR;
+	syn Size FFunctionCall.sizeOfOutput(int i) = getSizes()[i];
+	
+	eq FFunctionCall.size()    = hasOutputs() ? sizeOfOutput(0) : Size.SCALAR;
+	eq InstFunctionCall.size() = hasOutputs() ? sizeOfOutput(0) : Size.SCALAR;
 	
 	/**
 	 * \brief Get the array sizes. 
@@ -497,8 +548,8 @@ aspect Arrays {
 	 */
 	syn lazy Size InstPrimitive.size() {
 		Size s = declaredSize();
-		if (hasBindingFExp() && !s.isKnown())
-			s = s.createKnown(getBindingFExp().size());
+		if (hasBindingFExp() && s.isUnknown() && (!isInput() || !inFunction()))
+			s = s.createKnown(getBindingFExp());
 		return s;
 	}
 	
@@ -540,6 +591,84 @@ aspect Arrays {
 		} else {
 			return Size.SCALAR;
 		}
+	}
+	
+	/**
+	 * \brief Create a copy of this FExp with variable uses replaced with expressions 
+	 *        to allow calculations of unknown sizes.
+	 *        
+	 * For non-FExp nodes, this simply makes a full copy.
+	 *        
+	 * @param varMap  a map of variables to replace and expressions to replace them with.
+	 *                Also contains uses that have been replaced, to detect circularities.
+	 */
+	public FExp FExp.createSizeFExp(Map<ASTNode, FExp> varMap) {
+		FExp exp = (FExp) copy();
+		for (int i = 0; i < getNumChild(); i++) 
+			exp.setChild(getChild(i).createSizeFExp(varMap), i);
+		return exp;
+	}
+	
+	public FExp FIdUseExp.createSizeFExp(Map<ASTNode, FExp> varMap) {
+		return getFIdUse().createSizeFExp(varMap);
+	}
+	
+	public FExp FInstAccessExp.createSizeFExp(Map<ASTNode, FExp> varMap) {
+		return getInstAccess().createSizeFExp(varMap);
+	}
+	
+	public FExp FIdUseInstAccess.createSizeFExp(Map<ASTNode, FExp> varMap) {
+		return getInstAccess().createSizeFExp(varMap);
+	}
+	
+	public FExp InstAccess.createSizeFExp(Map<ASTNode, FExp> varMap) {
+		if (varMap.containsKey(this))
+			throw new UnsupportedOperationException();
+		varMap.put(this, null);
+		InstComponentDecl var = myInstComponentDecl();
+		FExp exp = varMap.get(var);
+		return (exp != null) ? exp : var.size().createDummyFExp(varMap);
+	}
+	
+	public FExp FIdUse.createSizeFExp(Map<ASTNode, FExp> varMap) {
+		if (varMap.containsKey(this))
+			throw new UnsupportedOperationException();
+		varMap.put(this, null);
+		AbstractFVariable var = myFV();
+		FExp exp = varMap.get(var);
+		return (exp != null) ? exp : var.size().createDummyFExp(varMap);
+	}
+	
+	public FExp FFunctionCall.createSizeFExp(Map<ASTNode, FExp> varMap) {
+		return size().createDummyFExp(varMap);
+	}
+	
+	public FExp InstFunctionCall.createSizeFExp(Map<ASTNode, FExp> varMap) {
+		return size().createDummyFExp(varMap);
+	}
+	
+	/**
+	 * \brief Create a copy of this FExp with variable uses replaced with expressions 
+	 *        to allow calculations of unknown sizes.
+	 *        
+	 * For non-FExp nodes, this simply makes a full copy.
+	 *        
+	 * @param varMap  a map of variables to replace and expressions to replace them with.
+	 *                Also contains uses that have been replaced, to detect circularities.
+	 */
+	public ASTNode ASTNode.createSizeFExp(Map<ASTNode, FExp> varMap) {
+		return fullCopy();
+	}
+	
+	public List List.createSizeFExp(Map<ASTNode, FExp> varMap) {
+		List node = new List();
+		for (ASTNode ch : this)
+			node.add(ch.createSizeFExp(varMap));
+		return node;
+	}
+	
+	public Opt Opt.createSizeFExp(Map<ASTNode, FExp> varMap) {
+		return getNumChild() == 0 ? new Opt() : new Opt(getChild(0).createSizeFExp(varMap));
 	}
 		
 	/**
@@ -869,7 +998,6 @@ aspect Arrays {
 			 * Based on an array access, say x, corresponding to the declaration
 			 * Real x[2], the array {x[1],x[2]} is generated. 
 			 */
-			// TODO: This does not support FIdUseInstAccess
 			boolean scalarize = !inFunction();
 			Array array = new Array(indices());
 			for (Index i : array.indices()) 
@@ -878,6 +1006,40 @@ aspect Arrays {
 		} else {
 			return new ScalarAsArray(this);
 		}
+	}
+
+	boolean InstAccess.scalarized = false;
+	
+	eq FInstAccessExp.getArray() {
+		if (isArray()) {
+			/*
+			 * Based on an array access, say x, corresponding to the declaration
+			 * Real x[2], the array {x[1],x[2]} is generated. 
+			 */
+			boolean scalarize = !inFunction();
+			Indices ind = indices();
+			Array array = new Array(ind);
+			for (Index i : ind) {
+				FInstAccessExp exp = fullCopy();
+				exp.getInstAccess().specify(ind.translate(i), scalarize);
+				array.set(i, exp);
+			}
+			return array;
+		} else {
+			return new ScalarAsArray(this);
+		}
+	}
+	
+	/**
+	 * \brief Returns a scalar FIdUseInstAccess, as specified by an index.
+	 * 
+	 * @param i          the Index specifying what array subscripts to use
+	 * @param scalarize  <code>true</code> if the use should be marked as scalarized 
+	 */
+	public FIdUseInstAccess FIdUseInstAccess.specify(Index i, boolean scalarize) {
+		FIdUseInstAccess res = fullCopy();
+		res.getInstAccess().specify(indices().translate(i), scalarize);
+		return res;
 	}
 	
 	/**
@@ -902,29 +1064,16 @@ aspect Arrays {
 		setLastFArraySubscripts(i.newFArraySubscripts());
 		scalarized = scalarize;
 	}
-
-	boolean InstAccess.scalarized = false;
 	
-	eq FInstAccessExp.getArray() {
-		if (isArray()) {
-			/*
-			 * Based on an array access, say x, corresponding to the declaration
-			 * Real x[2], the array {x[1],x[2]} is generated. 
-			 */
-			boolean scalarize = !inFunction();
-			Array array = new Array(indices());
-			Indices ind = array.indices();
-			for (Index i : ind) {
-				FInstAccessExp ia_tmp = (FInstAccessExp) fullCopy();
-				InstAccess ia = ia_tmp.getInstAccess();
-				ia.setLastFArraySubscripts(ind.translate(i).newFArraySubscripts());
-				ia.scalarized = scalarize;
-				array.set(i, ia_tmp);
-			}
-			return array;
-		} else {
-			return new ScalarAsArray(this);
-		}
+	/**
+	 * \brief Sets the last FArraySubscripts to the same as the Index.
+	 * 
+	 * @param i          the Index specifying what array subscripts to use
+	 * @param scalarize  <code>true</code> if the InstAccess should be marked as scalarized 
+	 */
+	public void InstAccess.specify(Index i, boolean scalarize) {
+		setLastFArraySubscripts(i.newFArraySubscripts());
+		scalarized = scalarize;
 	}
 
 	eq FRangeExp.getArray() {
@@ -1110,6 +1259,11 @@ aspect ArrayIndices {
 	public class Size {
 		
 		/**
+		 * \brief Used for unknown lengths.
+		 */
+		public static final int UNKNOWN = -1;
+		
+		/**
 		 * \brief Used to represent the size of scalar expressions.
 		 */
 		public static final Size SCALAR = new Size(new int[0]);
@@ -1169,51 +1323,101 @@ aspect ArrayIndices {
 		}
 		
 		/**
-		 * \brief Create a new FArraySubscripts object describing this size.
+		 * \brief Create a new flattened FArraySubscripts object describing this size.
 		 */
-		public FArraySubscripts newFArraySubscripts() {
-			return FArraySubscripts.createLiteralSubscripts(size);
+		public FArraySubscripts flattenFArraySubscripts() {
+			FArraySubscripts fas = new FArraySubscripts();
+			for (int i = 0; i < size.length; i++)
+				fas.addFSubscript(flattenFSubscript(i));
+			return fas;
 		}
 		
 		/**
-		 * \brief Check that all lengths are known.
+		 * \brief Create a new flattened FSubscript for dimension <code>i</code>.
 		 */
-		public boolean isKnown() {
+		protected FSubscript flattenFSubscript(int i) {
+			return size[i] == UNKNOWN ? new FColonSubscript() : new FExpSubscript(size[i]);
+		}
+		
+		/**
+		 * \brief Check if any lengths are unknown.
+		 */
+		public boolean isUnknown() {
 			for (int s : size)
-				if (s < 0)
-					return false;
-			return true;
+				if (s == UNKNOWN)
+					return true;
+			return false;
+		}
+		
+		/**
+		 * \brief Create a copy of this size.
+		 */
+		protected Size clone() {
+			return new Size(size.clone());
 		}
 		
 		/**
 		 * \brief Return a Size that have the same lengths as this size where they are known, 
-		 *        and any that are unknown copied from <code>other</code>. 
+		 *        and any that are unknown copied from the size of <code>exp</code>. 
 		 * 
-		 * If <code>other</code> have more dimensions, the last part is assumed to match this size.
+		 * If the size of <code>exp</code> have more dimensions, the last part is assumed to match this size.
 		 */
-		public Size createKnown(Size other) {
-			Size known = clone();
-			known.fillUnknownFrom(other);
+		public Size createKnown(FExp exp) {
+			Size known;
+			if (!exp.size().isUnknown() || this instanceof MutableSize) { 
+				known = clone();
+			} else {
+				known = new MutableSize(size.length);
+				System.arraycopy(size, 0, known.size, 0, size.length);
+			}
+			known.fillUnknownFrom(exp);
 			return known;
 		}
 		
 		/**
-		 * \brief For each unknown length, copy the equivalent length from <code>other</code>. 
+		 * \brief For each unknown length, copy the equivalent length from size of <code>exp</code>. 
 		 * 
-		 * If <code>other</code> have more dimensions, the last part is assumed to match this size.
+		 * If the size of <code>exp</code> have more dimensions, the last part is assumed to match this size.
 		 */
-		protected void fillUnknownFrom(Size other) {
+		protected void fillUnknownFrom(FExp exp) {
+			Size other = exp.size();
 			if (other.size.length >= size.length)
 				for (int i = 0, j = other.size.length - size.length; i < size.length; i++, j++) 
-					if (size[i] < 0)
-						size[i] = other.size[j];
+					if (size[i] == UNKNOWN)
+						copyFrom(i, exp, i);
+		}
+		
+		/**
+		 * \brief Copy value of dimension <code>d2</code> in <code>other</code> to dimension 
+		 *        <code>d1</code> in <code>this</code>.
+		 */
+		protected void copyFrom(int d1, FExp exp, int d2) {
+			size[d1] = exp.size().size[d2];
 		}
 		
 		/**
 		 * \brief Check if another object is equal to this one.
 		 */
 		public boolean equals(Object s) {
-			return s instanceof Size && Arrays.equals(size, ((Size) s).size) && isKnown();
+			return s instanceof Size && equivalent((Size) s, false);
+		}
+		
+		/**
+		 * \brief Check if another size is equivalent to this one.
+		 * 
+		 * @param allowUnknown  if <code>true</code>, consider unknown lengths equal to any length, 
+		 *                      otherwise consider unknown lengths to differ from all lengths, including
+		 *                      other unknown lengths
+		 */
+		public boolean equivalent(Size s, boolean allowUnknown) {
+			if (!allowUnknown)
+				return Arrays.equals(size, s.size) && !isUnknown();
+			if (size.length != s.size.length)
+				return false;
+			for (int i = 0; i < size.length; i++)
+				if (size[i] != s.size[i] && size[i] != UNKNOWN && s.size[i] != UNKNOWN)
+					return false;
+			return true;
 		}
 		
 		private static final String SEP = ", ";
@@ -1224,13 +1428,20 @@ aspect ArrayIndices {
 		public String toString() {
 			StringBuilder buf = new StringBuilder("[");
 			String prefix = "";
-			for (int s : size) {
+			for (int i = 0; i < size.length; i++) {
 				buf.append(prefix);
-				buf.append((s < 0) ? ":" : Integer.toString(s));
+				buf.append(toString(i));
 				prefix = SEP;
 			}
 			buf.append("]");
 			return buf.toString();
+		}
+		
+		/**
+		 * \brief Returns a string representation of a single length.
+		 */
+		protected String toString(int i) {
+			return (size[i] == UNKNOWN) ? ":" : Integer.toString(size[i]);
 		}
 		
 		/**
@@ -1262,22 +1473,36 @@ aspect ArrayIndices {
 			System.arraycopy(size, 0, ns, s.size.length, size.length);
 			return new Size(ns);
 		}
-
+		
 		/**
-		 * \brief Creates a copy of this size.
+		 * \brief Create an FExp that describes the length of dimension <code>d</code>, 
+		 *        given the supplied variable values.
+		 *        
+		 * @param varMap  a map of variables to replace and expressions to replace them with
 		 */
-		public Size clone() {
-			return new Size(size.clone());
+		public FExp createSizeFExp(int d, Map<ASTNode, FExp> varMap) {
+			return new FIntegerLitExp(size[d]);
+		}
+		
+		/**
+		 * \brief Ceate a dummy expression that has the size described by this Size.
+		 */
+		public FExp createDummyFExp(Map<ASTNode, FExp> varMap) {
+			FZeros z = new FZeros();
+			for (int i = 0; i < size.length; i++)
+				z.addFExp(createSizeFExp(i, varMap));
+			return z;
 		}
 		
 	}
 	
 	/**
-	 * \brief A mutable Size.
+	 * A mutable Size that can handle FExp sizes, possibly with unknown ceval().
 	 */
 	public class MutableSize extends Size {
 		
 		private int i;
+		private FExp[] exps;
 		
 		/**
 		 * \brief Constructs a new mutable Size of <code>ndims</code> dimensions.
@@ -1285,6 +1510,7 @@ aspect ArrayIndices {
 		public MutableSize(int ndims) {
 			super(new int[ndims]);
 			i = 0;
+			exps = new FExp[ndims];
 		}
 		
 		/**
@@ -1293,7 +1519,26 @@ aspect ArrayIndices {
 		 * May overwrite lengths set with <code>set()</code>.
 		 */
 		public void add(int s) {
-			size[i++] = s;
+			set(i++, s);
+		}
+		
+		/**
+		 * \brief Sets the next length to the value of <code>e</code>.
+		 * 
+		 * May overwrite lengths set with <code>set()</code>.
+		 */
+		public void add(FExp e) {
+			set(i++, e);
+		}
+		
+		/**
+		 * \brief Sets the next length to the length of dimension <code>d</code> 
+		 *        of <code>s</code>.
+		 * 
+		 * May overwrite lengths set with <code>set()</code>.
+		 */
+		public void add(Size s, int d) {
+			set(i++, s, d);
 		}
 		
 		/**
@@ -1302,8 +1547,18 @@ aspect ArrayIndices {
 		 * May overwrite lengths set with <code>set()</code>.
 		 */
 		public void add(Size s) {
-			for (int si : s.size)
-				size[i++] = si;
+			if (s instanceof MutableSize) {
+				MutableSize ms = (MutableSize) s;
+				for (int j = 0; j < ms.size.length; j++, i++) {
+					exps[i] = ms.exps[j];
+					size[i] = ms.size[j];
+				}
+			} else {
+				for (int si : s.size) {
+					exps[i] = null;
+					size[i++] = si;
+				}
+			}
 		}
 		
 		/**
@@ -1311,6 +1566,84 @@ aspect ArrayIndices {
 		 */
 		public void set(int i, int s) {
 			size[i] = s;
+			exps[i] = null;
+		}
+		
+		/**
+		 * \brief Sets length <code>d</code> to the value of <code>e</code>.
+		 */
+		public void set(int d, FExp e) {
+			try {
+				size[d] = e.ceval().intValue();
+				exps[d] = null;
+			} catch (UnsupportedOperationException uoe) {
+				size[d] = UNKNOWN;
+				exps[d] = e;
+			}
+		}
+		
+		/**
+		 * \brief Sets length <code>d1</code> to the length of dimension <code>d2</code> 
+		 *        of <code>s</code>.
+		 * 
+		 * May overwrite lengths set with <code>set()</code>.
+		 */
+		public void set(int d1, Size s, int d2) {
+			size[d1] = s.size[d2];
+			exps[d1] = (s instanceof MutableSize) ? ((MutableSize) s).exps[d2] : null;
+		}
+		
+		/**
+		 * \brief Copy value of dimension <code>d2</code> in <code>other</code> to dimension 
+		 *        <code>d1</code> in <code>this</code>.
+		 */
+		protected void copyFrom(int d1, FExp exp, int d2) {
+			set(d1, exp.size(), d2);
+			if (size[d1] == UNKNOWN && exps[d1] == null) {
+				FExp copyExp = (FExp) exp.fullCopy();
+				Opt dimExp = new Opt(new FIntegerLitExp(d2 + 1));
+				FSizeExp sizeExp  = new FSizeExp(copyExp, dimExp);
+				exps[d1] = exp.dynamicFExp(sizeExp);
+			}
+		}
+		
+		/**
+		 * \brief Creates a new Size that is a copy of this one, but with one more dimension.
+		 * 
+		 * @param s  the length of the new dimension
+		 */
+		public Size expand(int s) {
+			MutableSize ns = new MutableSize(size.length + 1);
+			ns.size[0] = s;
+			ns.exps[0] = null;
+			System.arraycopy(size, 0, ns.size, 1, size.length);
+			System.arraycopy(exps, 0, ns.exps, 1, size.length);
+			return ns;
+		}
+		
+		/**
+		 * \brief Creates a new Size that is a concatenation of <code>s</code> and this size.
+		 */
+		public Size expand(Size s) {
+			MutableSize ns = new MutableSize(size.length + s.size.length);
+			System.arraycopy(s.size, 0, ns.size, 0, s.size.length);
+			System.arraycopy(size, 0, ns.size, s.size.length, size.length);
+			if (s instanceof MutableSize) 
+				System.arraycopy(((MutableSize) s).exps, 0, ns.exps, 0, s.size.length);
+			System.arraycopy(exps, 0, ns.exps, s.size.length, size.length);
+			return ns;
+		}
+		
+		/**
+		 * \brief Create an FExp that describes the length of dimension <code>d</code>, 
+		 *        given the supplied variable values.
+		 *        
+		 * @param varMap  a map of variables to replace and expressions to replace them with
+		 */
+		public FExp createSizeFExp(int d, Map<ASTNode, FExp> varMap) {
+			return (exps[d] == null) ? 
+					super.createSizeFExp(d, varMap) : 
+					exps[d].createSizeFExp(varMap);
 		}
 		
 		/**
@@ -1318,8 +1651,33 @@ aspect ArrayIndices {
 		 * 
 		 * If <code>other</code> have more dimensions, the last part is assumed to match this size.
 		 */
-		public void makeKnown(Size other) {
-			fillUnknownFrom(other);
+		public void makeKnown(FExp exp) {
+			fillUnknownFrom(exp);
+		}
+		
+		/**
+		 * \brief Create a new flattened FSubscript for dimension <code>i</code>.
+		 */
+		protected FSubscript flattenFSubscript(int i) {
+			return exps[i] == null ? super.flattenFSubscript(i) : 
+				new FExpSubscript(exps[i].flatten(new FQName()));
+		}
+		
+		/**
+		 * \brief Returns a string representation of a single length.
+		 */
+		protected String toString(int i) {
+			return exps[i] == null ? super.toString(i) : exps[i].prettyPrint("");
+		}
+		
+		/**
+		 * \brief Create a copy of this size.
+		 */
+		protected MutableSize clone() {
+			MutableSize ms = new MutableSize(size.length);
+			System.arraycopy(size, 0, ms.size, 0, size.length);
+			System.arraycopy(exps, 0, ms.exps, 0, exps.length);
+			return ms;
 		}
 		
 	}
@@ -1826,7 +2184,7 @@ aspect ArrayIndices {
 		 */
 		protected Indices(Size size) {
 			ndims = size.ndims();
-			this.size = size.clone();
+			this.size = size;
 			hash = -1;
 			if (ndims < 4) {
 				int h = 0;

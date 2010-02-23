@@ -30,8 +30,9 @@ aspect FlatTypeCheck {
     		if (myBindingExpHasEach() && !inArrayComponent()) {
     			error("The 'each' keyword cannot be applied to members of non-array components");
      		} else {
-    			if (!bindingType().typeCompatible(bexp.type())) {
-    				if (!myBindingExpHasEach() && type().typeCompatible(bexp.type())) {
+     			boolean func = inFunction();
+    			if (!bindingType().typeCompatible(bexp.type(), func)) {
+    				if (!myBindingExpHasEach() && type().typeCompatible(bexp.type(), func)) {
 						warning("Assuming 'each' for the binding expression to the variable " + name());
     				} else if (!bindingType().scalarType().typeCompatible(bexp.type().scalarType())) {
     					error("The binding expression of the variable " + name() +
@@ -175,7 +176,7 @@ aspect FlatTypeCheck {
 	  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
 		  if (getLeft().isForIndex())
 			  error("Can not assign a value to a for loop index");
-		  else if (!getLeft().type().typeCompatible(getRight().type())) 
+		  else if (!getLeft().type().typeCompatible(getRight().type(), true)) 
 			  error("Types of right and left side of assignment are not compatible");		  
 	  }
   }
@@ -240,18 +241,22 @@ aspect FlatTypeCheck {
   eq FMinMaxExp.checkTypeAsExpression() = true;
   
   public void InstFunctionCall.typeCheck() {
+	  if (!isFunctionCallClause() && size().isUnknown())
+		  error("Could not evaluate array size of output " + expOutput().name());
 	  if (myOutputs().size() < myLefts().size())
 		  error("Too many components assigned from function call: " + getName().name() + 
 				  "() has " + myOutputs().size() + " output(s)");
   }
   
   public void FFunctionCallLeft.typeCheck() {
-	  if (hasFExp() && !type().isUnknown() && !myOutput().isUnknown()) { // Avoid duplicate error
+	  if (hasFExp() && !myOutput().isUnknown() && !type().isUnknown()) { // Avoid duplicate error
 		  if (getFExp() instanceof FIdUseExp) {  // Should never be false - add check? 
 			  FIdUse use = ((FIdUseExp) getFExp()).getFIdUse();
 			  if (use.isForIndex())
 				  error("Can not assign a value to a for loop index");
-			  else if (!type().typeCompatible(myOutput().type())) 
+			  else if (size().isUnknown())
+				  error("Could not evaluate array size of output " + myOutput().name());
+			  else if (!use.type().typeCompatible(type())) 
 				  error("Types of component " + use.name() + " and output " + 
 						  myOutput().name() + " are not compatible");
 		  }
@@ -262,7 +267,7 @@ aspect FlatTypeCheck {
 	  if (!getFExp().type().isUnknown() && (getBoundInput() == null || !getBoundInput().type().isUnknown())) {
 		  boolean typeOk;
 		  if (argumentDefinedTypeValid()) 
-			  typeOk = getBoundInput().type().typeCompatible(getFExp().type());
+			  typeOk = getBoundInput().type().typeCompatible(getFExp().type(), true);
 		  else
 			  typeOk = argumentTypeValid(getFExp().type());
 		  if (!typeOk) {
@@ -316,6 +321,6 @@ aspect FlatTypeCheck {
   eq FInfArgsFunctionCall.getChild().argumentTypeValid(FPrimitiveType type)  = true;
   eq FSumExp.getChild().argumentTypeValid(FPrimitiveType type)               = type.ndims() > 0;
   eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FPrimitiveType type) = 
-	  hasY() ^ getOriginalArg(i).getFExp().isArray();
+	  hasY() != getOriginalArg(i).getFExp().isArray();
   
 }

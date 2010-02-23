@@ -158,7 +158,7 @@ aspect InstFunctionBinding {
 		if (hasInstModification() && getInstModification() instanceof InstValueModification) {
 			InstValueModification mod = (InstValueModification) getInstModification();
 			FExp exp = (FExp) mod.getFExp().fullCopy();
-			arg = new InstDefaultArgument(new Opt(exp));
+			arg = new InstDefaultArgument(exp);
 		} else {
 			arg = new InstMissingArgument();
 		}

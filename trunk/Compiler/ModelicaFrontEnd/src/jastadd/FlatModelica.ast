@@ -763,12 +763,12 @@ abstract FAbstractFunctionCall : FExp;
 /**
  * \brief Generic function call expression.
  */
-FFunctionCall : FAbstractFunctionCall ::= Name:FIdUse Arg:FExp*;
+FFunctionCall : FAbstractFunctionCall ::= Name:FIdUse Arg:FExp* <Sizes:Size[]>;
 
 /**
  * \brief Generic function call expression in instance trees.
  */
-InstFunctionCall : FAbstractFunctionCall ::= Name:InstAccess Arg:InstFunctionArgument*;
+InstFunctionCall : FAbstractFunctionCall ::= Name:InstAccess Arg:InstFunctionArgument* /DynamicFExp:FExp*/;
 
 /**
  * \brief Base class for function call arguments in the instance tree.
@@ -803,7 +803,7 @@ InstMultipleBoundArgument : InstFunctionArgument ::= Arg:InstFunctionArgument*;
 /**
  * \brief Function call argument using default value in the instance tree.
  */
-InstDefaultArgument : InstFunctionArgument ::= [FExp];
+InstDefaultArgument : InstFunctionArgument ::= FExp;
 
 // Built in functions
 /**

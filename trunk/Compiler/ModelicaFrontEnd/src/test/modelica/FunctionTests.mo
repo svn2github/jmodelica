@@ -1225,7 +1225,10 @@ model BuiltInCallType10
          name="BuiltInCallType10",
          description="Built-in type checks: calling ones() with String literal as second argument",
          errorMessage="
-1 errors found:
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 1234, column 9:
+  Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [3, \"test\"]
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1223, column 24:
   Argument of ones() is not compatible with Integer: \"test\"
@@ -3564,6 +3567,248 @@ end FunctionTests.ArrayOutputScalarization17;
  
  Real x = f1();
 end ArrayOutputScalarization17;
+
+
+
+/* ======================= Unknown array sizes ======================*/
+
+model UnknownArray1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="UnknownArray1",
+         description="Using functions with unknown array sizes: basic type test",
+         flatModel="
+fclass FunctionTests.UnknownArray1
+ Real x[3] = FunctionTests.UnknownArray1.f({1,2,3});
+ Real y[2] = FunctionTests.UnknownArray1.f({4,5});
+
+ function FunctionTests.UnknownArray1.f
+  input Real[:] a;
+  output Real[size(a, 1)] b;
+ algorithm
+  b := a;
+  return;
+ end FunctionTests.UnknownArray1.f;
+end FunctionTests.UnknownArray1;
+")})));
+
+ function f
+  input Real a[:];
+  output Real b[size(a,1)];
+ algorithm
+  b := a;
+ end f;
+ 
+ Real x[3] = f({1,2,3});
+ Real y[2] = f({4,5});
+end UnknownArray1;
+
+
+model UnknownArray2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="UnknownArray2",
+         description="Using functions with unknown array sizes: size from binding exp",
+         flatModel="
+fclass FunctionTests.UnknownArray2
+ Real x[3] = FunctionTests.UnknownArray2.f({1,2,3});
+ Real y[2] = FunctionTests.UnknownArray2.f({4,5});
+
+ function FunctionTests.UnknownArray2.f
+  input Real[:] a;
+  output Real[size(a, 1)] b := a;
+ algorithm
+  return;
+ end FunctionTests.UnknownArray2.f;
+end FunctionTests.UnknownArray2;
+")})));
+
+ function f
+  input Real a[:];
+  output Real b[:] = a;
+ algorithm
+ end f;
+ 
+ Real x[3] = f({1,2,3});
+ Real y[2] = f({4,5});
+end UnknownArray2;
+
+
+model UnknownArray3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="UnknownArray3",
+         description="Using functions with unknown array sizes: indirect dependency",
+         flatModel="
+fclass FunctionTests.UnknownArray3
+ Real x[3] = FunctionTests.UnknownArray3.f({1,2,3});
+ Real y[2] = FunctionTests.UnknownArray3.f({4,5});
+
+ function FunctionTests.UnknownArray3.f
+  input Real[:] a;
+  output Real[size(c, 1)] b;
+  Real[size(a, 1)] c;
+ algorithm
+  b := a;
+  return;
+ end FunctionTests.UnknownArray3.f;
+end FunctionTests.UnknownArray3;
+")})));
+
+ function f
+  input Real a[:];
+  output Real b[size(c,1)];
+  protected Real c[size(a,1)];
+ algorithm
+  b := a;
+ end f;
+ 
+ Real x[3] = f({1,2,3});
+ Real y[2] = f({4,5});
+end UnknownArray3;
+
+
+model UnknownArray4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="UnknownArray4",
+         description="Using functions with unknown array sizes: indirect dependency from binding exp",
+         flatModel="
+fclass FunctionTests.UnknownArray4
+ Real x[3] = FunctionTests.UnknownArray4.f({1,2,3});
+ Real y[2] = FunctionTests.UnknownArray4.f({4,5});
+
+ function FunctionTests.UnknownArray4.f
+  input Real[:] a;
+  output Real[size(a, 1)] b := c;
+  Real[size(a, 1)] c := a;
+ algorithm
+  return;
+ end FunctionTests.UnknownArray4.f;
+end FunctionTests.UnknownArray4;
+")})));
+
+ function f
+  input Real a[:];
+  output Real b[:] = c;
+  protected Real c[:] = a;
+ algorithm
+ end f;
+ 
+ Real x[3] = f({1,2,3});
+ Real y[2] = f({4,5});
+end UnknownArray4;
+
+
+model UnknownArray5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="UnknownArray5",
+         description="Using functions with unknown array sizes: multiple outputs",
+         flatModel="
+fclass FunctionTests.UnknownArray5
+ Real x[3];
+ Real y[3];
+equation
+ (x, y) = FunctionTests.UnknownArray5.f({1,2,3});
+
+ function FunctionTests.UnknownArray5.f
+  input Real[:] a;
+  output Real[size(a, 1)] b := c;
+  output Real[size(a, 1)] c := a;
+ algorithm
+  return;
+ end FunctionTests.UnknownArray5.f;
+end FunctionTests.UnknownArray5;
+")})));
+
+ function f
+  input Real a[:];
+  output Real b[:] = c;
+  output Real c[:] = a;
+ algorithm
+ end f;
+ 
+ Real x[3];
+ Real y[3];
+equation
+ (x, y) = f({1,2,3});
+end UnknownArray5;
+
+
+model UnknownArray6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="UnknownArray6",
+         description="Using functions with unknown array sizes: wrong size",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 3747, column 7:
+  Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [3]
+")})));
+
+ function f
+  input Real a[:];
+  output Real b[:] = c;
+  output Real c[:] = a;
+ algorithm
+ end f;
+ 
+ Real x[2] = f({1,2,3});
+end UnknownArray6;
+
+
+model UnknownArray7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="UnknownArray7",
+         description="Using functions with unknown array sizes: wrong size",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 3773, column 2:
+  Types of component y and output c are not compatible
+")})));
+
+ function f
+  input Real a[:];
+  output Real b[:] = c;
+  output Real c[:] = a;
+ algorithm
+ end f;
+ 
+ Real x[3];
+ Real y[2];
+equation
+ (x, y) = f({1,2,3});
+end UnknownArray7;
+
+
+model UnknownArray8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="UnknownArray8",
+         description="Using functions with unknown array sizes: circular size",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 3796, column 7:
+  Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [size(b, 1)]
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 3796, column 14:
+  Could not evaluate array size of output b
+")})));
+
+ function f
+  input Real a[:];
+  output Real b[size(b,1)];
+ algorithm
+  b := {1,2};
+ end f;
+ 
+ Real x[2] = f({1,2,3});
+end UnknownArray8;
 
 
 

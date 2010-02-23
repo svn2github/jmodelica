@@ -1146,9 +1146,12 @@ model FillExp6
          name="FillExp6",
          description="Fill operator: too high variability of size arg",
          errorMessage="
-1 errors found:
+2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 930, column 26:
+Semantic error at line 1145, column 7:
+  Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [n]
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1145, column 26:
   Argument of fill() does not have constant or parameter variability: n
 ")})));
 

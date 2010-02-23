@@ -471,6 +471,7 @@ aspect InstanceTreeConstruction {
 	syn lazy List InstComponentRedeclare.getDynamicClassNameList() = new List();
 	syn lazy List InstConstrainingComponent.getDynamicClassNameList() = new List();
 	syn lazy List InstForIndex.getDynamicClassNameList() = new List();
+	syn lazy List InstFunctionCall.getDynamicFExpList() = new List();
 	
 	/**
 	 * \brief Dynamically places a class name in the tree under this InstNode.
@@ -500,6 +501,17 @@ aspect InstanceTreeConstruction {
 	 * @returns  the final version of the dynamically placed node.
 	 */
 	public FExp InstNode.dynamicFExp(FExp exp) {
+		getDynamicFExpList().add(exp);
+		return getDynamicFExp(getNumDynamicFExp() - 1);
+	}
+	
+	
+	/**
+	 * \brief Dynamically places an FExp in the tree under this InstFunctionCall.
+	 * 
+	 * @returns  the final version of the dynamically placed node.
+	 */
+	public FExp InstFunctionCall.dynamicFExp(FExp exp) {
 		getDynamicFExpList().add(exp);
 		return getDynamicFExp(getNumDynamicFExp() - 1);
 	}
@@ -627,21 +639,7 @@ aspect InstanceTreeConstruction {
 		return l;
 	}
 
-	eq InstPrimitive.getInstComponentDeclList() {
-		
-		if (isArrayDecl()) { // Take care of array declarations separately
-			// Loop over indices and create new InstArrayComponentDecls
-			List l = new List();
-			for (int i : getFArraySubscripts().getFSubscript(0).arrayIndices()) {
-				l.add(new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"), new Opt(), 
-					getComponentDecl(), new Opt(), new Opt(), i));
-			}
-			return l;
-		} else { // If not array, then proceed as usual
-			return emptyList();
-		}
-	}
-
+	eq InstPrimitive.getInstComponentDeclList() = emptyList();
 	eq InstPrimitive.getInstClassDeclList() = emptyList();
 //	eq InstPrimitive.getInstExtendsList() = emptyList();
 

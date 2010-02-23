@@ -149,9 +149,12 @@ aspect TransformCanonical {
 			
 			// Create function call equation and replace algorithm
 			List<FExp> args = new List<FExp>();
-			for (int i = 0, j = 0; i < inVars.size(); i++) 
+			for (int i = 0; i < inVars.size(); i++) 
 				args.add(inVars.get(i).createAlgorithmArgument(bothInVars.get(i) != null));
-			FFunctionCall call = new FFunctionCall(funcName.createFIdUse(), args);
+			Size[] sizes = new Size[outVars.size()];
+			for (int i = 0; i < outVars.size(); i++)
+				sizes[i] = outVars.get(i).size();
+			FFunctionCall call = new FFunctionCall(funcName.createFIdUse(), args, sizes);
 			List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
 			for (FVariable fv : outVars)
 				lefts.add(fv.getFQName().createFFunctionCallLeft());
@@ -1149,7 +1152,7 @@ aspect Scalarization {
 		List<FExp> args = new List<FExp>();
 		for (FExp arg : getArgs())
 			args.add(arg.scalarize(indexMap));
-		return new FFunctionCall((FIdUse) getName().fullCopy(), args); 
+		return new FFunctionCall((FIdUse) getName().fullCopy(), args, getSizes()); 
 	}
 	
 	public FExp FTimeExp.scalarizeExp(HashMap<String,Integer> indexMap) { return new FTimeExp(); }

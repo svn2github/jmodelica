@@ -144,8 +144,7 @@ public class ErrorTestCase extends TestCase {
 //	    	System.out.println("*");
 //	    	System.out.println(testErrorMsg);
 //	    	System.out.println("*");
-			if (testErrorMsg.equals(correctErrorMsg))
-	    		return true;
+			return testErrorMsg.equals(correctErrorMsg);
 	    }
 
 	    // No errors in first pass, check for errors after transform canonical
@@ -160,19 +159,17 @@ public class ErrorTestCase extends TestCase {
 	    	StringBuffer str_flat = new StringBuffer();
 	    	problems = fc.errorCheck();
 	    	if (problems.size()>0) {
-//	    		str.append("Errors found!\n");
+	//	    		str.append("Errors found!\n");
 	    		for (Problem p : problems) {
 	    			str_flat.append(p.toString()+"\n");
 	    		}
 	    		String testErrorMsg = filterErrorMessages(str_flat.toString());
 	    		String correctErrorMsg = filterErrorMessages(getErrorMessage());
-	    		if (testErrorMsg.equals(correctErrorMsg))
-	    			return true;
+				return testErrorMsg.equals(correctErrorMsg);
 	    	}
-	    } catch (Exception e) {
+	    } catch (ModelicaClassNotFoundException e) {
 	    	return false;
 	    }
-	    
 	    
 	    return false;
 	    		

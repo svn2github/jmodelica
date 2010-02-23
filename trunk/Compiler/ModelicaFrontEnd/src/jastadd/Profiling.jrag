@@ -169,7 +169,15 @@ aspect MemoryUse {
 		}
 
 		private static class Counter {
+			
+			public static int total;
+			
 			public int i = 1;
+			
+			public String toString() {
+				return i + " (" + Profiler.round(i * 100.0 / total) + "%)";
+			}
+			
 		}
 
 		/**
@@ -192,7 +200,7 @@ aspect MemoryUse {
 			list.addAll(names.entrySet());
 			Collections.sort(list, sorter);
 			for (Map.Entry<String, Counter> e : list) 
-				out.println("  " + e.getKey() + ": " + e.getValue().i);
+				out.println("  " + e.getKey() + ": " + e.getValue());
 		}
 		
 		/**
@@ -203,22 +211,22 @@ aspect MemoryUse {
 		/**
 		 * \brief Sort output by count, ascending.
 		 */
-		public static final Comparator<Entry<String, Counter>> SORT_COUNT_DESC = new CmpCount(false);
+		public static final CountSorter SORT_COUNT_DESC = new CmpCount(true);
 		
 		/**
 		 * \brief Sort output by count, descending.
 		 */
-		public static final Comparator<Entry<String, Counter>> SORT_COUNT_ASC  = new CmpCount(true);
+		public static final CountSorter SORT_COUNT_ASC  = new CmpCount(false);
 		
 		/**
 		 * \brief Sort output by class name, ascending.
 		 */
-		public static final Comparator<Entry<String, Counter>> SORT_CLASS_DESC = new CmpName(false);
+		public static final CountSorter SORT_CLASS_DESC = new CmpName(true);
 		
 		/**
 		 * \brief Sort output by class name, descending.
 		 */
-		public static final Comparator<Entry<String, Counter>> SORT_CLASS_ASC = new CmpName(true);
+		public static final CountSorter SORT_CLASS_ASC = new CmpName(false);
 		
 		private static class CmpCount extends CountSorter {
 			
@@ -229,7 +237,8 @@ aspect MemoryUse {
 			}
 
 			public int compare(Entry<String, Counter> o1, Entry<String, Counter> o2) {
-				return mul * (o1.getValue().i - o2.getValue().i);
+				int res = mul * (o1.getValue().i - o2.getValue().i);
+				return res == 0 ? o1.getKey().compareTo(o2.getKey()) : res;
 			}
 
 		}
@@ -279,16 +288,22 @@ aspect MemoryUse {
 			double scaledMem = mem;
 			for (i = 0; i < 4 && scaledMem >= 1000.0; i++)
 				scaledMem /= 1024.0;
-			double round = scaledMem < 10.0 ? 100.0 : 10.0;
-			scaledMem = Math.round(scaledMem * round) / round;
 			StringBuilder buf = new StringBuilder();
 			if (i == 0)
 				buf.append(mem);
 			else
-				buf.append(scaledMem);
+				buf.append(round(scaledMem));
 			buf.append(prefix[i]);
 			buf.append("B");
 			return buf.toString();
+		}
+
+		/**
+		 * \brief Round a number to 2 decimals if it is < 10, 1 decimal otherwise.
+		 */
+		public static double round(double val) {
+			double round = val < 10.0 ? 100.0 : 10.0;
+			return Math.round(val * round) / round;
 		}
 		
 		private static final String[] prefix = { "", "k", "M", "G" };

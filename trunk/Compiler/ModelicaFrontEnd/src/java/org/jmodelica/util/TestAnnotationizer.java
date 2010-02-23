@@ -92,7 +92,7 @@ abstract public class TestAnnotationizer {
 			Throwable cause = e.getCause();
 			String message = cause.getMessage();
 			if (message == null || !(cause instanceof ModelicaException))
-				cause.printStackTrace();
+				cause.printStackTrace(System.out);
 			else
 				System.out.println(message);
 			System.exit(1);
@@ -208,15 +208,13 @@ abstract public class TestAnnotationizer {
 	}
 	
 	protected String prepare(String str) {
-		String s1 = str.replaceAll("\\\\", "\\\\");
-		String s2 = s1.replaceAll("\"", "\\\"");
 		return str.replaceAll("\\\\", "\\\\").replaceAll("\"", "\\\\\"");	
 	}
 
 	protected FClass compile() throws Exception {
 		InstClassDecl icl = instantiate();		
 	    FClass fc = flatten(icl);
-	    fc.transformCanonical();
+	    transformCanonical(fc);
 	    return fc;
 	}
 
@@ -235,6 +233,11 @@ abstract public class TestAnnotationizer {
 		ipr.options = new OptionRegistry(root.options);
 		handleCompilerProblems(ipr.checkErrorsInInstClass(className));
 		return ipr.simpleLookupInstClassDecl(className);
+	}
+
+	protected void transformCanonical(FClass fc) throws Exception {
+		fc.transformCanonical();
+		handleCompilerProblems(fc.errorCheck());
 	}
 	
 	protected void handleCompilerProblems(Collection<Problem> problems) throws CompilerException {
@@ -334,7 +337,7 @@ abstract public class TestAnnotationizer {
 
 		public TransformCanonicalTestCase(String filePath, String className, String description, String data) throws Exception {
 			super(filePath, className, description, data);
-			fc.transformCanonical();
+			transformCanonical(fc);
 		}
 		
 	}
@@ -346,7 +349,7 @@ abstract public class TestAnnotationizer {
 		public ErrorTestCase(String filePath, String className, String description, String data) throws Exception {
 			super(filePath, className, description, data);
 			try {
-				mc.instantiateModel(root, className);
+				compile();
 				throw new ModelicaException("No errors reported in ErrorTestCase.");
 			} catch (CompilerException e) {
 				StringBuffer str = new StringBuffer();

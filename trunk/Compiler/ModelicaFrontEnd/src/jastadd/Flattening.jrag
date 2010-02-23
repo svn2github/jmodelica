@@ -130,7 +130,7 @@ aspect Flattening {
 			FExp e = flattenBindingFExp();
 			Opt eo = (e == null) ? new Opt() : new Opt(e);
 			FQName fqn = new FQName(getFQName());
-			fqn.setLastFArraySubscripts(size().newFArraySubscripts());
+			fqn.setLastFArraySubscripts(size().flattenFArraySubscripts());
 			FFunctionVariable ffv;
 			if (isArray())
 				ffv = new FFunctionArray(new Opt(), type(), eo, fqn);
@@ -225,7 +225,7 @@ aspect Flattening {
 				new FPublicVisibilityType() : new FProtectedVisibilityType();
 				
 		FQName fqn = new FQName(getFQName());
-		fqn.setLastFArraySubscripts(size().newFArraySubscripts());
+		fqn.setLastFArraySubscripts(size().flattenFArraySubscripts());
 				
 		if (isReal()) 
 			fv = new FRealVariable(fvt, tpo, new Opt(), attr, eo, new Opt(), fqn);
@@ -265,7 +265,7 @@ aspect Flattening {
 			InstValueModification im = myInstValueMod();
 			FExp fe = im.getFExp();
 			boolean hasEach = im.hasEach() || 
-				(declaredSize().isKnown() && type().typeCompatible(fe.type()));  // Assume each if types match
+				(!declaredSize().isUnknown() && type().typeCompatible(fe.type()));  // Assume each if types match
 			if (!hasEach && im.myInstNode() != this)
 				fe = splitBindingFExp(fe, im.myInstNode());
 			return (FExp) fe.unboundCopy();
@@ -792,19 +792,23 @@ aspect FlatExpressions {
 		
 	public FFunctionCall FFunctionCall.flatten(FQName prefix) {
 		List args = new List();
-		for (FExp e : getArgs()) {
+		for (FExp e : getArgs()) 
 			args.add(e.flatten(prefix));
-		}
-		return new FFunctionCall(getName().flatten(new FQName()), args);		
+		return new FFunctionCall(getName().flatten(new FQName()), args, getSizes());		
 	}
 
 	public FFunctionCall InstFunctionCall.flatten(FQName prefix) {
 		List args = new List();
-		for (InstFunctionArgument e : getArgs()) {
+		for (InstFunctionArgument e : getArgs()) 
 			args.add(e.flatten(prefix));
-		}
 		FIdUse name = new FIdUse(new FQName(getName().myInstClassDecl().qualifiedName()));
-		return new FFunctionCall(name, args);		
+		Size[] sizes = new Size[myOutputs().size()];
+		if (isFunctionCallClause()) 
+			for (int i = 0; i < myLefts().size(); i++)
+				sizes[i] = myLefts().get(i).hasFExp() ? sizeOfOutput(i) : null;
+		else
+			sizes[0] = size();
+		return new FFunctionCall(name, args, sizes);	
 	}
 
 	public FExp InstFunctionArgument.flatten(FQName prefix) {
