@@ -232,6 +232,78 @@ aspect NodeMethods {
 	public ASTNode ASTNode.unboundCopy() {
 		return (parent == null) ? this : fullCopy();
 	}
+	
+	/**
+	 * \brief Returns an iterable, that has an iterable that iterates over all direct FExp children.
+	 * 
+	 * The iterator passes through Lists and Opts.
+	 */
+	public Iterable<FExp> FExp.childFExps() {
+		return new ChildFExpIterable();
+	}
+	
+	public class FExp {
+		
+		private class ChildFExpIterable implements Iterable<FExp> {
+			public Iterator<FExp> iterator() {
+				return new ChildFExpIterator();
+			}
+		}
+		
+		
+		private class ChildFExpIterator implements Iterator<FExp> {
+			
+			Iterator<ASTNode> it1;
+			Iterator<ASTNode> it2;
+			FExp next = null;
+
+			public ChildFExpIterator() {
+				it1 = iterator();
+				it2 = null;
+				update();
+			}
+			
+			private void update() {
+				boolean cont = true;
+				ASTNode node = null;
+				while (cont) {
+					node = null;
+					if (it2 == null) {
+						if (it1.hasNext())
+							node = it1.next();
+						else 
+							cont = false;
+						if (node instanceof List || node instanceof Opt)
+							it2 = node.iterator();
+					} else {
+						if (it2.hasNext()) 
+							node = it2.next();
+						else 
+							it2 = null;
+					}
+					if (node instanceof FExp) 
+						cont = false;
+				}
+				next = (FExp) node;
+			}
+
+			public boolean hasNext() {
+				return next != null;
+			}
+
+			public FExp next() {
+				FExp res = next;
+				update();
+				return res;
+			}
+
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+			
+		}
+		
+	}
 
 }
 

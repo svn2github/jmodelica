@@ -94,16 +94,9 @@ aspect FlatTypeCheck {
   // Generic typeCheck() that calls typeError() if type is unknown and no FExp child has unknown type
   public void FExp.typeCheck() {
 	  if (type().isUnknown()) {
-		  for (ASTNode n : this) {
-			  if (isUnknownFExp(n))
+		  for (FExp exp : childFExps())
+			  if (exp.type().isUnknown())
 				  return;
-			  if (n instanceof List) 
-				  for (ASTNode n2 : (List<ASTNode>) n) 
-					  if (isUnknownFExp(n2))
-						  return;
-			  if (n instanceof Opt && n.getNumChild() > 0 && isUnknownFExp(n.getChild(0)))
-				  return;
-		  }
 		  typeError();
 	  }
   }

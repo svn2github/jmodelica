@@ -755,6 +755,7 @@ aspect FlatExpressions {
 	
 	public FIdentity  FIdentity.flatten(FQName prefix)  { return new FIdentity(getFExp().flatten(prefix)); }
 	public FTranspose FTranspose.flatten(FQName prefix) { return new FTranspose(getFExp().flatten(prefix)); }
+	public FCross     FCross.flatten(FQName prefix)     { return new FCross(getX().flatten(prefix), getY().flatten(prefix)); }
 	
 	public FMinMaxExp FMinMaxExp.flatten(FQName prefix) { 
 		return createNode(getX().flatten(prefix), hasY() ? getY().flatten(prefix) : null); 

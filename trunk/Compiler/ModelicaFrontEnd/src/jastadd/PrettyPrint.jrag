@@ -1289,62 +1289,21 @@ aspect FlattPrettyPrint {
 		str.print(")");		
 	}
 	
-	protected void FBuiltInFunctionCall.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {}
-
-	protected void FNoEventExp.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
-		p.toString(getFExp(),str,indent,o);
-	}
+	protected static final String FBuiltInFunctionCall.SEP = ", ";
 	
-	protected void FMathematicalFunctionCall.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
-		p.toString(getFExp(),str,indent,o);
-	}
-	
-	protected void FAtan2Exp.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
-		p.toString(getFExp(),str,indent,o);
-		str.print(", ");
-		p.toString(getY(),str,indent,o);
-	}
-	
-	protected void FSizeExp.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
-		p.toString(getFExp(),str,indent,o);
-		if (hasDim()) {
-			str.print(", ");
-			p.toString(getDim(),str,indent,o);
+	/**
+	 * \brief Pretty-print all arguments of function.
+	 * 
+	 * Default implementation prints all direct FExp children (including those in Lists and Opts), 
+	 * separated by {@link #SEP}.
+	 */
+	protected void FBuiltInFunctionCall.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
+		String pre = "";
+		for (FExp exp : childFExps()) {
+			str.print(pre);
+			p.toString(exp, str, indent, o);
+			pre = SEP;
 		}
-	}
-	
-	protected void FMinMaxExp.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
-		p.toString(getX(), str, indent, o);
-		if (hasY()) {
-			str.print(", ");
-			p.toString(getY(), str, indent, o);
-		}
-	}
-	
-	protected void FScalar.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
-		p.toString(getFExp(),str,indent,o);
-	}
-	
-	protected void FTranspose.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
-		p.toString(getFExp(),str,indent,o);
-	}
-	
-	protected void FIdentity.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
-		p.toString(getFExp(),str,indent,o);
-	}
-	
-	protected void FSumExp.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
-		p.toString(getFExp(),str,indent,o);
-	}
-	
-	protected void FInfArgsFunctionCall.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
-		getFExpList().prettyPrintWithSep(p, str, "", o, ", ");
-	}
-	
-	protected void FFillExp.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
-		p.toString(getFillExp(),str,indent,o);
-		str.print(", ");
-		getFExpList().prettyPrintWithSep(p, str, "", o, ", ");
 	}
 
 	syn String FBuiltInFunctionCall.builtInName();
@@ -1364,6 +1323,7 @@ aspect FlattPrettyPrint {
 	eq FSqrtExp.builtInName()    = "sqrt";
 	eq FScalar.builtInName()     = "scalar";
 	eq FTranspose.builtInName()  = "transpose";
+	eq FCross.builtInName()      = "cross";
 	eq FSizeExp.builtInName()    = "size";
 	eq FNoEventExp.builtInName() = "noEvent";
 	eq FIdentity.builtInName()   = "identity";

@@ -942,8 +942,8 @@ aspect CircularExpressions {
 		}
 		return false;
 	}
-	
-	
+	eq FTranspose.isCircular() = getFExp().isCircular();
+	eq FCross.isCircular()     = getX().isCircular() || getY().isCircular();
 	
 
 	syn lazy boolean AbstractFVariable.isCircular() circular [true] = false;

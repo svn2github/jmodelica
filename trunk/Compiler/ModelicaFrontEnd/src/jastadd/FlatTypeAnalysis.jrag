@@ -126,6 +126,8 @@ aspect FlatTypeAnalysis {
 			fUnknownType() : 
 			getFExp().type().arrayType(size());
 	
+	eq FCross.type() = getX().type().numericPromotion(getY().type());
+	
 	eq FSizeExp.type() {
 		if (hasDim()) {
 			if (!getDim().variability().lessOrEqual(fParameter()))

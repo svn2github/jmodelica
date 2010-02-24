@@ -305,6 +305,7 @@ aspect InheritedFactoryMethods {
 	public FSizeExp   FSizeExp.createEmptyNode()   { return new FSizeExp(); }
 	public FScalar    FScalar.createEmptyNode()    { return new FScalar(); }
 	public FTranspose FTranspose.createEmptyNode() { return new FTranspose(); }
+	public FCross     FCross.createEmptyNode()     { return new FCross(); }
 	public FIdentity  FIdentity.createEmptyNode()  { return new FIdentity(); }
 	public FOnes      FOnes.createEmptyNode()      { return new FOnes(); }
 	public FZeros     FZeros.createEmptyNode()     { return new FZeros(); }

@@ -180,6 +180,7 @@ aspect Arrays {
 	eq FSubscriptedExp.ndims() = getFArraySubscripts().accessNdims();
 	
 	eq FTranspose.ndims() = getFExp().ndims();
+	eq FCross.ndims() = 1;
 	eq FIdentity.ndims() = 2;
 	
 	eq FSizeExp.ndims() = hasDim() ? 0 : 1;
@@ -479,6 +480,8 @@ aspect Arrays {
 		return s;
 	}
 	
+	eq FCross.size() = new Size(3);
+	
 	eq FIdentity.size() {
 		MutableSize s = new MutableSize(2);
 		s.add(getFExp());
@@ -715,12 +718,12 @@ aspect Arrays {
 			return (Array) fullCopy();
 		Indices newIndices = Indices.create(forIndices);
 		Array arr = new Array(Indices.create(expandedSize(newIndices.size())));
-		HashMap<String,Integer> indexMap = new HashMap<String,Integer>();
+		HashMap<String,FExp> indexMap = new HashMap<String,FExp>();
 		for (Index i : newIndices) {
 			int j = 0;
 			int[] ii = newIndices.translate(i).index();
 			for (CommonForIndex fi : forIndices) {
-				indexMap.put(fi.name(), Integer.valueOf(ii[j]));
+				indexMap.put(fi.name(), new FIntegerLitExp(ii[j]));
 				j++;
 			}
 			fillSubset(arr, i, indexMap);
@@ -732,11 +735,11 @@ aspect Arrays {
 		return size().expand(size);
 	}
 	
-	protected void Array.fillSubset(Array arr, Index i, HashMap<String,Integer> indexMap) {
+	protected void Array.fillSubset(Array arr, Index i, HashMap<String,FExp> indexMap) {
 		for (Index i2 : indices())
 			arr.set(i.expand(i2), get(i2).scalarize(indexMap));
 	}
-	protected void ScalarAsArray.fillSubset(Array arr, Index i, HashMap<String,Integer> indexMap) {
+	protected void ScalarAsArray.fillSubset(Array arr, Index i, HashMap<String,FExp> indexMap) {
 		arr.set(i, get(i).scalarize(indexMap));
 	}
 	
@@ -901,6 +904,22 @@ aspect Arrays {
 		return res;
 	}
 	
+	eq FCross.getArray() {
+		Array res = new Array(indices());
+		Array x = getX().getArray();
+		Array y = getY().getArray();
+		Index j = new Index(new int[1]);
+		Index k = new Index(new int[1]);
+		for (Index i : res.indices()) {
+			j.set(0, i.first() % 3 + 1);
+			k.set(0, j.first() % 3 + 1);
+			FExp m1 = new FMulExp((FExp) x.get(j).fullCopy(), (FExp) y.get(k).fullCopy());
+			FExp m2 = new FMulExp((FExp) x.get(k).fullCopy(), (FExp) y.get(j).fullCopy());
+			res.set(i, new FSubExp(m1, m2));
+		}
+		return res;
+	}
+	
 	eq FIdentity.getArray() {
 		Array arr = new Array(indices());
 		for (Index i : arr.indices())
@@ -915,7 +934,7 @@ aspect Arrays {
 		Array arr = new Array(indices());
 		Size size = getFExp().size();
 		for (Index i : arr.indices())
-			arr.set(i, new FIntegerLitExp(size.get(i.first() - 1)));
+			arr.set(i, size.createFExp(i.first() - 1));
 		return arr;
 	}
 	
@@ -1481,6 +1500,15 @@ aspect ArrayIndices {
 		 * @param varMap  a map of variables to replace and expressions to replace them with
 		 */
 		public FExp createSizeFExp(int d, Map<ASTNode, FExp> varMap) {
+			return createFExp(d);
+		}
+		
+		/**
+		 * \brief Create an FExp that describes the length of dimension <code>d</code>.
+		 * 
+		 * the resulting expression is not expanded like createSizeFExp().
+		 */
+		public FExp createFExp(int d) {
 			return new FIntegerLitExp(size[d]);
 		}
 		
@@ -1647,6 +1675,17 @@ aspect ArrayIndices {
 		}
 		
 		/**
+		 * \brief Create an FExp that describes the length of dimension <code>d</code>.
+		 * 
+		 * the resulting expression is not expanded like createSizeFExp().
+		 */
+		public FExp createFExp(int d) {
+			return (exps[d] == null) ? 
+					super.createFExp(d) : 
+					(FExp) exps[d].unboundCopy();
+		}
+		
+		/**
 		 * \brief For each unknown length, copy the equivalent length from <code>other</code>. 
 		 * 
 		 * If <code>other</code> have more dimensions, the last part is assumed to match this size.
@@ -1807,7 +1846,7 @@ aspect ArrayIndices {
 	     * @param dim      the dimension to process, always use 1
 	     * 
 	     * @see #buildLiteral(boolean)
-	     * @see #buildScalarized(java.util.HashMap<String,Integer>)
+	     * @see #buildScalarized(java.util.HashMap<String,FExp>)
 	     */
 	    protected FExp buildFArray(Iterator<FExp> it, ElementBuilder builder, int dim) {
 	    	FArray arr = new FArray(new List<FExp>());
@@ -1914,7 +1953,7 @@ aspect ArrayIndices {
 	     * ScalarAsArray.
 	     * 
 	     * @see #buildLiteral(boolean)
-	     * @see #buildScalarized(java.util.HashMap<String,Integer>)
+	     * @see #buildScalarized(java.util.HashMap<String,FExp>)
 	     */
 	    protected FExp buildFArray(Iterator<FExp> it, ElementBuilder builder, int dim) {
 	    	return (FExp) builder.build(it.next()).unboundCopy();
@@ -1987,10 +2026,17 @@ aspect ArrayIndices {
 		}
 		
 		/**
-		 * \brief Returns the index for the <code>i</code>th dimension.
+		 * \brief Returns the index for the <code>i</code>th dimension (zero-based).
 		 */
 		public int get(int i) {
 			return index[i];
+		}
+		
+		/**
+		 * \brief Sets the index for the <code>i</code>th dimension (zero-based).
+		 */
+		public void set(int i, int index) {
+			this.index[i] = index;
 		}
 		
 		/**

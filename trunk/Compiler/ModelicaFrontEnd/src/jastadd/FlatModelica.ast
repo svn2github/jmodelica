@@ -909,6 +909,11 @@ FScalar : FBuiltInFunctionCall ::= FExp;
 FTranspose : FBuiltInFunctionCall ::= FExp;
 
 /**
+ * \brief Cross built-in function.
+ */
+FCross : FBuiltInFunctionCall ::= X:FExp Y:FExp;
+
+/**
  * \brief Identity built-in function.
  */
 FIdentity : FBuiltInFunctionCall ::= FExp;

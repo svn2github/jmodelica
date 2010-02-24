@@ -6345,5 +6345,134 @@ end Transpose7;
 
 
 
+model Cross1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="Cross1",
+         description="cross() operator: Real result",
+         flatModel="
+fclass ArrayTests.Cross1
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ x[1] = ( 2 ) * ( 6 ) - ( ( 3 ) * ( 5 ) );
+ x[2] = ( 3 ) * ( 4 ) - ( ( 1.0 ) * ( 6 ) );
+ x[3] = ( 1.0 ) * ( 5 ) - ( ( 2 ) * ( 4 ) );
+end ArrayTests.Cross1;
+")})));
+
+ Real x[3] = cross({1.0,2,3}, {4,5,6});
+end Cross1; 
+
+
+model Cross2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="Cross2",
+         description="cross() operator: Integer result",
+         flatModel="
+fclass ArrayTests.Cross2
+ Integer x[3] = cross({1,2,3}, {4,5,6});
+end ArrayTests.Cross2;
+")})));
+
+ Integer x[3] = cross({1,2,3}, {4,5,6});
+end Cross2; 
+
+
+model Cross3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="Cross3",
+         description="cross() operator: Real arg, assigning Integer component",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6359, column 10:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+
+ Integer x[3] = cross({1.0,2,3}, {4,5,6});
+end Cross3; 
+
+
+model Cross4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="Cross4",
+         description="cross() operator: scalar arguments",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6401, column 20:
+  Types of positional argument 1 and input x are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6401, column 23:
+  Types of positional argument 2 and input y are not compatible
+")})));
+
+ Integer x = cross(1, 2);
+end Cross4; 
+
+
+model Cross5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="Cross5",
+         description="cross() operator: Integer[4] arguments",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6437, column 23:
+  Types of positional argument 1 and input x are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6437, column 34:
+  Types of positional argument 2 and input y are not compatible
+")})));
+
+ Integer x[4] = cross({1,2,3,4}, {4,5,6,7});
+end Cross5; 
+
+
+model Cross6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="Cross6",
+         description="cross() operator: String[3] arguments",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6456, column 22:
+  Types of positional argument 1 and input x are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6456, column 37:
+  Types of positional argument 2 and input y are not compatible
+")})));
+
+ String x[3] = cross({"1","2","3"}, {"4","5","6"});
+end Cross6; 
+
+
+model Cross7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="Cross7",
+         description="cross() operator: too many dims",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6475, column 25:
+  Types of positional argument 1 and input x are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6475, column 52:
+  Types of positional argument 2 and input y are not compatible
+")})));
+
+ Integer x[3,3] = cross({{1,2,3},{1,2,3},{1,2,3}}, {{4,5,6},{4,5,6},{4,5,6}});
+end Cross7; 
+
+
+
   annotation (uses(Modelica(version="3.0.1")));
 end ArrayTests;

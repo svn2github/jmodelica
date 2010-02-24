@@ -198,6 +198,11 @@ aspect PredefinedTypes {
 +"  input Real A;\n"    // Type not used
 +"  output Real B;\n"   // Type not used
 +"end transpose;\n"
++"function cross\n"
++"  input Real x[3];\n"
++"  input Real y[3];\n"
++"  output Real z[3];\n"   // Type not used
++"end cross;\n"
 +"function outerProduct end outerProduct;\n"
 +"function diagonal end diagonal;\n"
 +"function identity\n"
@@ -225,7 +230,6 @@ aspect PredefinedTypes {
 +"end sum;\n"
 +"function product end product;\n"
 +"function symmetric end symmetric;\n"
-+"function cross end cross;\n"
 +"function skew end skew;\n"
 +"function sin \"sine\"\n"
 +"  input Modelica.SIunits.Angle u;\n"
