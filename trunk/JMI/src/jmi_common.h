@@ -209,6 +209,12 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 jmi_ad_var_t jmi_divide(jmi_ad_var_t num, jmi_ad_var_t den,const char msg[]);
 
 /**
+ * Function to get the absolute value.
+ * Is a separate function to avoid evaluating expressions several times.
+ */
+jmi_ad_var_t jmi_abs(jmi_ad_var_t v);
+
+/**
  * Function to get the smaller of two values.
  * Is a separate function to avoid evaluating expressions twice.
  */

@@ -748,6 +748,8 @@ aspect FlatExpressions {
 	public FBuiltInFunctionCall FMathematicalFunctionCall.flatten(FQName prefix) { return createNode(getFExp().flatten(prefix)); }
 	public FAtan2Exp            FAtan2Exp.flatten(FQName prefix)                 { return new FAtan2Exp(getFExp().flatten(prefix), getY().flatten(prefix)); }
 	
+	public FAbsExp FAbsExp.flatten(FQName prefix) { return new FAbsExp(getFExp().flatten(prefix)); }
+	
 	public FNoEventExp FNoEventExp.flatten(FQName prefix) { return new FNoEventExp(getFExp().flatten(prefix)); }
 	
 	// These used to delegate to standard implementation for FExp.flatten(FQName).

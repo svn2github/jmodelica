@@ -313,6 +313,7 @@ aspect InheritedFactoryMethods {
 	public FMinExp    FMinExp.createEmptyNode()    { return new FMinExp(); }
 	public FMaxExp    FMaxExp.createEmptyNode()    { return new FMaxExp(); }
 	public FSumExp    FSumExp.createEmptyNode()    { return new FSumExp(); }
+	public FAbsExp    FAbsExp.createEmptyNode()    { return new FAbsExp(); }
 	
 	/**
 	 * \brief Create new node of same class as this, with the specified 

@@ -222,12 +222,13 @@ aspect InstFunctionBinding {
 				map.put("transpose", new BuiltInCreator(false, new FTranspose(),  1));
 				map.put("cross",     new BuiltInCreator(false, new FCross(),      2));
 				map.put("sum",       new BuiltInCreator(false, new FSumExp(),     1));
+				map.put("abs",       new BuiltInCreator(false, new FAbsExp(),     1));
 				map.put("ones",  new InfArgsBuiltInCreator(new FOnes(),  0));
 				map.put("zeros", new InfArgsBuiltInCreator(new FZeros(), 0));
 				map.put("fill",  new InfArgsBuiltInCreator(new FFillExp(), 1));
-				map.put("size",  new VariableArgsBuiltInCreator(new FSizeExp(), 1, 2));
-				map.put("min",   new VariableArgsBuiltInCreator(new FMinExp(),  1, 2));
-				map.put("max",   new VariableArgsBuiltInCreator(new FMaxExp(),  1, 2));
+				map.put("size",  new VarArgsBuiltInCreator(new FSizeExp(), 1, 2));
+				map.put("min",   new VarArgsBuiltInCreator(new FMinExp(),  1, 2));
+				map.put("max",   new VarArgsBuiltInCreator(new FMaxExp(),  1, 2));
 			}
 			
 			private static class BuiltInCreator {
@@ -282,11 +283,11 @@ aspect InstFunctionBinding {
 				
 			}
 			
-			private static class VariableArgsBuiltInCreator extends BuiltInCreator {
+			private static class VarArgsBuiltInCreator extends BuiltInCreator {
 				
 				private int maxArgs;
 				
-				public VariableArgsBuiltInCreator(FBuiltInFunctionCall tmpl, int minArgs, int maxArgs) {
+				public VarArgsBuiltInCreator(FBuiltInFunctionCall tmpl, int minArgs, int maxArgs) {
 					super(false, tmpl, minArgs);
 					this.maxArgs = maxArgs;
 				}

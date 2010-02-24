@@ -1330,6 +1330,7 @@ aspect FlattPrettyPrint {
 	eq FOnes.builtInName()       = "ones";
 	eq FZeros.builtInName()      = "zeros";
 	eq FFillExp.builtInName()    = "fill";
+	eq FAbsExp.builtInName()     = "abs";
 	eq FMinExp.builtInName()     = "min";
 	eq FMaxExp.builtInName()     = "max";
 	eq FSumExp.builtInName()     = "sum";

@@ -305,4 +305,145 @@ Semantic error at line 263, column 15:
 end TypeRel6;
 
 
+
+model AbsType1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="AbsType1",
+         description="abs() operator: Real arg & result",
+         flatModel="
+fclass TypeTests.AbsType1
+ Real x = abs(y);
+ Real y =  - ( 2.0 );
+end TypeTests.AbsType1;
+")})));
+
+ Real x = abs(y);
+ Real y = -2.0;
+end AbsType1;
+
+
+model AbsType2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="AbsType2",
+         description="abs() operator: Real constant",
+         flatModel="
+fclass TypeTests.AbsType2
+ constant Real x1 = abs( - ( 2.0 ));
+ constant Real x2 = abs(2.0);
+ Real y1 = 2.0;
+ Real y2 = 2.0;
+end TypeTests.AbsType2;
+")})));
+
+ constant Real x1 = abs(-2.0);
+ constant Real x2 = abs(2.0);
+ Real y1 = x1;
+ Real y2 = x2;
+end AbsType2;
+
+
+model AbsType3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="AbsType3",
+         description="abs() operator: Integer arg & result",
+         flatModel="
+fclass TypeTests.AbsType3
+ Integer x = abs(y);
+ Integer y =  - ( 2 );
+end TypeTests.AbsType3;
+")})));
+
+ Integer x = abs(y);
+ Integer y = -2;
+end AbsType3;
+
+
+model AbsType4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="AbsType4",
+         description="abs() operator: Integer constant",
+         flatModel="
+fclass TypeTests.AbsType4
+ constant Integer x1 = abs( - ( 2 ));
+ constant Integer x2 = abs(2);
+ Integer y1 = 2;
+ Integer y2 = 2;
+end TypeTests.AbsType4;
+")})));
+
+ constant Integer x1 = abs(-2);
+ constant Integer x2 = abs(2);
+ Integer y1 = x1;
+ Integer y2 = x2;
+end AbsType4;
+
+
+model AbsType5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AbsType5",
+         description="abs() operator: String arg",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 338, column 17:
+  Types of positional argument 1 and input v are not compatible
+")})));
+
+ String x = abs("-1");
+end AbsType5;
+
+
+model AbsType6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AbsType6",
+         description="abs() operator: array arg",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 343, column 18:
+  Types of positional argument 1 and input v are not compatible
+")})));
+
+ Real x[2] = abs({1,-1});
+end AbsType6;
+
+
+model AbsType7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AbsType7",
+         description="abs() operator: too many args",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 348, column 17:
+  Too many positional arguments
+")})));
+
+ Real x = abs(1,-1);
+end AbsType7;
+
+
+model AbsType8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AbsType8",
+         description="abs() operator: no args",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 364, column 11:
+  Missing argument for required input v
+")})));
+
+ Real x = abs();
+end AbsType8;
+
+
 end TypeTests;

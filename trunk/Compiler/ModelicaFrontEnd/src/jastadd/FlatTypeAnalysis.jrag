@@ -128,6 +128,8 @@ aspect FlatTypeAnalysis {
 	
 	eq FCross.type() = getX().type().numericPromotion(getY().type());
 	
+	eq FAbsExp.type() = getFExp().type();
+	
 	eq FSizeExp.type() {
 		if (hasDim()) {
 			if (!getDim().variability().lessOrEqual(fParameter()))

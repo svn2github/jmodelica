@@ -36,6 +36,10 @@ jmi_ad_var_t jmi_divide(jmi_ad_var_t num, jmi_ad_var_t den,const char msg[]) {
   }
 }
 
+jmi_ad_var_t jmi_abs(jmi_ad_var_t v) {
+	return COND_EXP_GE(v, AD_WRAP_LITERAL(0), v, -v);
+}
+
 jmi_ad_var_t jmi_min(jmi_ad_var_t x, jmi_ad_var_t y) {
 	return COND_EXP_LT(x, y, x ,y);
 }

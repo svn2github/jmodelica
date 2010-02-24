@@ -819,6 +819,11 @@ abstract FBuiltInFunctionCall : FAbstractFunctionCall ::= /OriginalArg:InstFunct
 FNoEventExp : FBuiltInFunctionCall ::= FExp;
 
 /**
+ * \brief Abs built-in function.
+ */
+FAbsExp : FBuiltInFunctionCall ::= FExp;
+
+/**
  * \brief Base class for calls to built-in mathematical functions.
  */
 abstract FMathematicalFunctionCall : FBuiltInFunctionCall ::= FExp;

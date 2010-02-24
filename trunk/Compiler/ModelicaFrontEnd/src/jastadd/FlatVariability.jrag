@@ -135,6 +135,8 @@ aspect FlatVariability {
 	eq FTranspose.variability() = getFExp().variability();
 	eq FCross.variability() = getX().variability().combine(getY().variability());
 	
+	eq FAbsExp.variability() = getFExp().variability();
+	
 	eq FIfExp.variability() {
 		FTypePrefixVariability total = getThenExp().variability();
 		for (int i=0; i<getNumFElseIfExp(); i++) {

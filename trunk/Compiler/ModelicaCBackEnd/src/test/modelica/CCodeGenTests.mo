@@ -1697,4 +1697,21 @@ end CArrayOutputs5;
 
 
 
+model CAbsTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CAbsTest1",
+         description="C code generation for abs() operator",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
+    (*res)[0] = jmi_abs(_y_1) - (_x_0);
+    (*res)[1] =  - ( 2 ) - (_y_1);
+")})));
+
+ Real x = abs(y);
+ Real y = -2;
+end CAbsTest1;
+
+
+
 end CCodeGenTests;

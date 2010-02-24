@@ -529,7 +529,13 @@ aspect CCodeGen {
 		for (int i=0;i<end_parenthesis*2;i++) {
 			str.print(")");
 		}
-	}	
+	}
+	
+	public void FAbsExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("jmi_abs(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
+	}
 
 	public void FNoEventExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		p.toString(getFExp(),str,indent,o);
