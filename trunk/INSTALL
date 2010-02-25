@@ -52,8 +52,7 @@ The argument --with-ipopt is optional. Notice, however, that if it is
 not given, only parts of the software will be built. You may want to
 give additional arguments to configure. Type configure --help for
 information. By default, the installation directory (--prefix) is set
-to the current directory. It is recommended to set the --prefix
-argument to override this behavior.
+to /usr/local/jmodelica. 
 
 4. Build and install
 
