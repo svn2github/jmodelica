@@ -20,6 +20,8 @@ import matplotlib.pyplot as plt
 
 def run_demo(with_plots=True):
     """ Model predicitve control of the Hicks-Ray CSTR reactor.
+        This example demonstrates how to use the blocking factor
+        feature of the collocation algorithm.
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
@@ -82,7 +84,12 @@ def run_demo(with_plots=True):
     n_cp = 3; # Number of collocation points in each element
 
     # Create an NLP object
-    nlp = ipopt.NLPCollocationLagrangePolynomials(cstr,n_e,hs,n_cp)
+    # The lenght of the optimization interval is 50s and the
+    # number of elements is 50, which gives a blocking factor
+    # vector of 2*ones(n_e/2) to match the sampling interval
+    # of 2s.
+    nlp = ipopt.NLPCollocationLagrangePolynomials(cstr,n_e,hs,n_cp,
+                                                  blocking_factors=2*N.ones(n_e/2,dtype=N.int))
 
     # Create an Ipopt NLP object
     nlp_ipopt = ipopt.CollocationOptimizer(nlp)
@@ -142,10 +149,23 @@ def run_demo(with_plots=True):
         c_res=res.get_variable_data('cstr.c')
         T_res=res.get_variable_data('cstr.T')
         Tc_res=res.get_variable_data('cstr.Tc')
+
+#        plt.figure(100)
+#        plt.clf()
+#        plt.subplot(3,1,1)
+#        plt.plot(c_res.t,c_res.x,'b')
+#        plt.grid()
+#        plt.subplot(3,1,2)
+#        plt.plot(T_res.t,T_res.x,'b')
+#        plt.grid()
+#        plt.subplot(3,1,3)
+#        plt.plot(Tc_res.t,Tc_res.x,'b')
+#        plt.grid()
+#        plt.show()
+#        qq=raw_input("continue")
         
         # Get the first Tc sample
-        # Tc_ctrl = N.mean(Tc_res.x[0:3*h])
-        Tc_ctrl = Tc_res.x[h]
+        Tc_ctrl = Tc_res.x[0]
         
         # Solve initialization problem for simulation model
         sim_model.set_value('Tc',Tc_ctrl)

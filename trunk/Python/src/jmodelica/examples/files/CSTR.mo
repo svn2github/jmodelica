@@ -95,7 +95,7 @@ optimization CSTR_Opt_MPC(objective=(cost(finalTime)),
 equation
   der(cost) = q_c*(c_ref-cstr.c)^2 + q_T*(T_ref-cstr.T)^2 + 
                   q_Tc*(Tc_ref-cstr.Tc)^2 + 
-                  1000*(if cstr.T <= 345 then 0 else (cstr.T-345)^4);
+                  1000*(noEvent(if cstr.T <= 345 then 0 else (cstr.T-345)^4));
 constraint
   cstr.T<=350;
   u>=230;
