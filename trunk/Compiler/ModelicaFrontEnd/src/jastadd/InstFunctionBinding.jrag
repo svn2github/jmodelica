@@ -223,9 +223,10 @@ aspect InstFunctionBinding {
 				map.put("cross",     new BuiltInCreator(false, new FCross(),      2));
 				map.put("sum",       new BuiltInCreator(false, new FSumExp(),     1));
 				map.put("abs",       new BuiltInCreator(false, new FAbsExp(),     1));
-				map.put("ones",  new InfArgsBuiltInCreator(new FOnes(),  0));
-				map.put("zeros", new InfArgsBuiltInCreator(new FZeros(), 0));
-				map.put("fill",  new InfArgsBuiltInCreator(new FFillExp(), 1));
+				map.put("array", new InfArgsBuiltInCreator(new FParseArray(), 0));
+				map.put("ones",  new InfArgsBuiltInCreator(new FOnes(),       0));
+				map.put("zeros", new InfArgsBuiltInCreator(new FZeros(),      0));
+				map.put("fill",  new InfArgsBuiltInCreator(new FFillExp(),    1));
 				map.put("size",  new VarArgsBuiltInCreator(new FSizeExp(), 1, 2));
 				map.put("min",   new VarArgsBuiltInCreator(new FMinExp(),  1, 2));
 				map.put("max",   new VarArgsBuiltInCreator(new FMaxExp(),  1, 2));
@@ -391,5 +392,14 @@ aspect InstFunctionBinding {
 			return n;	
     	}
   	}
+	
+	/**
+	 * \brief Replace initial node for construct "array(...)" with permanent one.
+	 */
+	rewrite FParseArray {
+    	when (!isFunctionCallClause()) to FLongArray {
+    		return new FLongArray(getFExps());
+    	}
+	}
 	
 }

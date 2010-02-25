@@ -6474,5 +6474,96 @@ end Cross7;
 
 
 
+model LongArrayForm1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="LongArrayForm1",
+         description="Long form of array constructor",
+         flatModel="
+fclass ArrayTests.LongArrayForm1
+ Real x[3] = array(1,2,3);
+end ArrayTests.LongArrayForm1;
+")})));
+
+ Real x[3] = array(1, 2, 3);
+end LongArrayForm1;
+
+
+model LongArrayForm2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="LongArrayForm2",
+         description="Long form of array constructor",
+         flatModel="
+fclass ArrayTests.LongArrayForm2
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 3;
+end ArrayTests.LongArrayForm2;
+")})));
+
+ Real x[3] = array(1, 2, 3);
+end LongArrayForm2;
+
+
+model LongArrayForm3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="LongArrayForm3",
+         description="Long form of array constructor, array component parts",
+         flatModel="
+fclass ArrayTests.LongArrayForm3
+ Real x1[3] = array(1,2,3);
+ Real x2[3] = {4,5,6};
+ Real x3[3,3] = array(x1,x2,{7,8,9});
+end ArrayTests.LongArrayForm3;
+")})));
+
+ Real x1[3] = array(1,2,3);
+ Real x2[3] = {4,5,6};
+ Real x3[3,3] = array(x1,x2,{7,8,9});
+end LongArrayForm3;
+
+
+model LongArrayForm4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="LongArrayForm4",
+         description="Long form of array constructor, array component parts",
+         flatModel="
+fclass ArrayTests.LongArrayForm4
+ Real x3[1,1];
+ Real x3[1,2];
+ Real x3[1,3];
+ Real x3[2,1];
+ Real x3[2,2];
+ Real x3[2,3];
+ Real x3[3,1];
+ Real x3[3,2];
+ Real x3[3,3];
+equation
+ x3[1,1] = 1;
+ x3[1,2] = 2;
+ x3[1,3] = 3;
+ x3[2,1] = 4;
+ x3[2,2] = 5;
+ x3[2,3] = 6;
+ x3[3,1] = 7;
+ x3[3,2] = 8;
+ x3[3,3] = 9;
+end ArrayTests.LongArrayForm4;
+")})));
+
+ Real x1[3] = array(1,2,3);
+ Real x2[3] = {4,5,6};
+ Real x3[3,3] = array(x1,x2,{7,8,9});
+end LongArrayForm4;
+
+
+
   annotation (uses(Modelica(version="3.0.1")));
 end ArrayTests;

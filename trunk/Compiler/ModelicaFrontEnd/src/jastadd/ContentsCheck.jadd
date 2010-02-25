@@ -46,6 +46,11 @@ aspect ContentCheck {
 			error("For index without in expression isn't supported");
 	}
 	
+	public void FParseArray.contentCheck() {
+		// If not already rewritten to FLongArray, this is an error.
+		error("The array() operator may not be used in function call equations or function call statements.");
+	}
+	
 	inh boolean FIterExp.iterExpUseOK();
 	eq FExp.getChild().iterExpUseOK()       = false;
 	eq Root.getChild().iterExpUseOK()       = false;

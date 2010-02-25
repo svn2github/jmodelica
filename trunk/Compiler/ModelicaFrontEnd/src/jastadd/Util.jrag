@@ -950,8 +950,7 @@ aspect FlatFunctionUtils {
 	  * \brief Check if this function call is the call of a function call equation 
 	  *        or function call statement.
 	  */
-	 inh boolean FFunctionCall.isFunctionCallClause();
-	 inh boolean InstFunctionCall.isFunctionCallClause();
+	 inh boolean FAbstractFunctionCall.isFunctionCallClause();
 	 eq ASTNode.getChild().isFunctionCallClause()              = false;
 	 eq FFunctionCallEquation.getCall().isFunctionCallClause() = true;
 	 eq FFunctionCallStmt.getCall().isFunctionCallClause()     = true;

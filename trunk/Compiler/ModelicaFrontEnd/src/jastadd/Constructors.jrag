@@ -276,6 +276,8 @@ aspect InheritedFactoryMethods {
 	
 	// Array expressions
 	public FArray          FArray.createEmptyNode()          { return new FArray(); }
+	public FLongArray      FLongArray.createEmptyNode()      { return new FLongArray(); }
+	public FParseArray     FParseArray.createEmptyNode()     { return new FParseArray(); }
 	public FSubscriptedExp FSubscriptedExp.createEmptyNode() { return new FSubscriptedExp(); }
 	public FRangeExp       FRangeExp.createEmptyNode()       { return new FRangeExp(); }
 	public FEndExp         FEndExp.createEmptyNode()         { return new FEndExp(); }
@@ -384,6 +386,27 @@ aspect InheritedFactoryMethods {
 	 */
 	public FInfArgsFunctionCall FInfArgsFunctionCall.createNode(ArrayList<FExp> exps) {
 		FInfArgsFunctionCall node = createEmptyNode();
+		for (FExp e : exps)
+			node.addFExp(e);
+		return node;
+	}
+	
+	/**
+	 * \brief Create new node of same class as this, with the specified 
+	 *        children.
+	 */
+	public FArray FArray.createNode(List<FExp> exps) {
+		FArray node = createEmptyNode();
+		node.setFExpList(exps);
+		return node;
+	}
+	
+	/**
+	 * \brief Create new node of same class as this, with the specified 
+	 *        children.
+	 */
+	public FArray FArray.createNode(ArrayList<FExp> exps) {
+		FArray node = createEmptyNode();
 		for (FExp e : exps)
 			node.addFExp(e);
 		return node;

@@ -46,9 +46,11 @@ aspect FlatVariability {
 	/**
 	 * \brief An ordering of the variability types.
 	 * 
-	 *  To be used by methods for comparing variabilities. 
-	 *  Should <em>never</em> be compared to literals, only to the return value from other 
-	 *   FTypePrefixVariability objects. This simplifies adding new variabilities. 
+	 * To be used by methods for comparing variabilities. 
+	 * Should <em>never</em> be compared to literals, only to the return value from other 
+	 * FTypePrefixVariability objects. This simplifies adding new variabilities.
+	 *  
+	 * Also used to determine the behaviour of {@link #combine(FTypePrefixVariability)}.
 	 */
 	abstract protected int FTypePrefixVariability.variabilityLevel();
 	protected int FConstant.variabilityLevel()   { return VARIABILITY_LEVEL; }
@@ -106,6 +108,13 @@ aspect FlatVariability {
    		}
 	}
 	
+	public static FTypePrefixVariability FExp.combineFExpListVariability(Iterable<? extends FExp> exps) {
+		FTypePrefixVariability total = fConstant();
+		for (FExp exp : exps) 
+			total = total.combine(exp.variability());
+		return total;
+	}
+	
 	syn lazy FTypePrefixVariability InstComponentDecl.variability() = null;
 	eq InstPrimitive.variability() {
 		if (isContinuous())
@@ -139,11 +148,8 @@ aspect FlatVariability {
 	
 	eq FIfExp.variability() {
 		FTypePrefixVariability total = getThenExp().variability();
-		for (int i=0; i<getNumFElseIfExp(); i++) {
-			total = total.combine(getFElseIfExp(i).variability());
-		}
-		total = total.combine(getElseExp().variability());
-		return total;
+		total = total.combine(combineFExpListVariability(getFElseIfExps()));
+		return total.combine(getElseExp().variability());
 	}
 	
 	eq FElseIfExp.variability() = getThenExp().variability();
@@ -157,12 +163,7 @@ aspect FlatVariability {
 		return res;
 	}
 	
-	eq FFunctionCall.variability() {
-		FTypePrefixVariability total = fConstant();
-		for (FExp e : getArgs()) 
-			total = total.combine(e.variability());
-		return total;
-	}
+	eq FFunctionCall.variability() = combineFExpListVariability(getArgs());
 
 	eq InstFunctionCall.variability() {
 		FTypePrefixVariability total = fConstant();
@@ -190,31 +191,15 @@ aspect FlatVariability {
 		}
 	}
 
-	eq FRangeExp.variability() {
-		FTypePrefixVariability total = fConstant();
-		for (int i=0; i<getNumFExp(); i++) {
-			total = total.combine(getFExp(i).variability());
-		}
-		return total;		
-	}
+	eq FRangeExp.variability() = combineFExpListVariability(getFExps());
 	
-	eq FArray.variability() {
-		FTypePrefixVariability total = fConstant();
-		for (int i=0; i<getNumFExp(); i++) {
-			total = total.combine(getFExp(i).variability());
-		}
-		return total;
-	}
+	eq FArray.variability()      = combineFExpListVariability(getFExps());
+	eq FParseArray.variability() = combineFExpListVariability(getFExps());
 	
-	eq FIterExp.variability()    = getFExp().variability();
-	eq FSumExp.variability()     = getFExp().variability();
+	eq FIterExp.variability() = getFExp().variability();
+	eq FSumExp.variability()  = getFExp().variability();
 	
-	eq FSubscriptedExp.variability() {
-		FTypePrefixVariability total = fConstant();
-		for (FExp e : getArray().iterable())
-			total = total.combine(e.variability());
-		return total;		
-	}	
+	eq FSubscriptedExp.variability()  = combineFExpListVariability(getArray().iterable());
 	
 	eq FNoEventExp.variability() = getFExp().variability();
 	eq FIdentity.variability() = fConstant();

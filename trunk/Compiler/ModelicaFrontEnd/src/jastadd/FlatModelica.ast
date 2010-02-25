@@ -727,6 +727,20 @@ FInstAccessExp : FExp ::= InstAccess;
 FArray : FExp ::= FExp*;
 
 /**
+ * \brief Long form of array constructor expression.
+ *
+ * Rewritten to FArray immediately.
+ */
+FLongArray : FArray;
+
+/**
+ * \brief Initial node for long form of array constructor expression.
+ *
+ * Rewritten to FLongArray immediately.
+ */
+FParseArray : FInfArgsFunctionCall;
+
+/**
  * \brief Generated expression that applies array subscripts to any expression.
  *
  * Generated when slices are flattened.

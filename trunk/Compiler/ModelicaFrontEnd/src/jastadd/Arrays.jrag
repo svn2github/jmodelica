@@ -980,7 +980,10 @@ aspect Arrays {
 	 * \brief Add a copy of this expression to arr at position i. 
 	 */
 	public void FExp.fillArray(Array arr, Index i, int level) {
-		arr.set(i, (FExp) fullCopy());
+		if (isArray())
+			arr.set(i, (FExp) getArray().get(i.subIndex(level)).fullCopy());
+		else
+			arr.set(i, (FExp) fullCopy());
 	}
 	
 	/**
@@ -2037,6 +2040,18 @@ aspect ArrayIndices {
 		 */
 		public void set(int i, int index) {
 			this.index[i] = index;
+		}
+		
+		/**
+		 * \brief Creates a new Index that describes the last <code>ndims() - level</code>
+		 *        dimensions of this Index.
+		 * 
+		 * @param level  the first index to copy. Must be between 0 and ndims(), inclusive.
+		 */
+		public Index subIndex(int level) {
+			Index copy = new Index(index.length - level);
+			System.arraycopy(index, level, copy.index, 0, copy.index.length);
+			return copy;
 		}
 		
 		/**
