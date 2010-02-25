@@ -256,7 +256,7 @@ class ResultDymolaTextual:
         nLines = int(nLines[0])
         name = []
         for i in range(0,nLines):
-            name.append(fid.readline().strip())
+            name.append(fid.readline().strip().replace(" ",""))
         self.name = name
      
         # Read description section   
@@ -376,7 +376,7 @@ class ResultDymolaBinary:
         """
         self.raw = scipy.io.loadmat(fname,chars_as_strings=False)
         name = self.raw['name']
-        self.name = [array.array('u',name[:,i].tolist()).tounicode().rstrip() for i in range(0,name[0,:].size)]
+        self.name = [array.array('u',name[:,i].tolist()).tounicode().rstrip().replace(" ","") for i in range(0,name[0,:].size)]
         description = self.raw['description']
         self.description = [array.array('u',description[:,i].tolist()).tounicode().rstrip() for i in range(0,description[0,:].size)]
 	
