@@ -797,6 +797,21 @@ static int lp_radau_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res) {
 
 	jmi_opt_Heq(jmi_opt_sim->jmi,res + dh_Heq_eq_offs(jmi_opt_sim, 0));
 
+	// loop over all blocking factors
+	int el_ind = 0;
+	int constr_ind = 0;
+	for (i=0;i<jmi_opt_sim->n_blocking_factors;i++) {
+		// loop over each constraint
+		for (j=0;j<jmi_opt_sim->blocking_factors[i]-1;j++) {
+			for (k=0;k<jmi->n_u;k++) {
+				res[dh_Heq_eq_offs(jmi_opt_sim,0) + jmi->opt->Heq->n_eq_F + constr_ind] =
+					u_coll(jmi_opt_sim,el_ind,0,k) -
+					u_coll(jmi_opt_sim,el_ind+j+1,0,k);
+				constr_ind++;
+			}
+		}
+		el_ind += jmi_opt_sim->blocking_factors[i];
+	}
 
 	/*
 		for (i=0;i<jmi_opt_sim->n_h;i++) {
@@ -1263,7 +1278,32 @@ static int lp_radau_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac) {
 							jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp +
 							(nlp->dCeq_dp_n_nz + nlp->dCeq_ddx_dx_du_dw_n_nz + nlp->dCeq_ddx_p_dx_p_du_p_dw_p_n_nz)*
 							(1 + jmi_opt_sim->n_e*nlp->n_cp ));
-/*
+
+
+	// loop over all blocking factors
+	int jac_ind = nlp->dF0_n_nz +
+	(nlp->dF_dp_n_nz +
+			nlp->dF_ddx_dx_du_dw_n_nz)*(jmi_opt_sim->n_e*nlp->n_cp) +
+			jmi->n_x*2*jmi_opt_sim->n_e +
+			jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+			jmi->n_x*(nlp->n_cp + 2)*jmi_opt_sim->n_e*nlp->n_cp +
+			(jmi->n_x*(nlp->n_cp + 2) + jmi->n_x*(nlp->n_cp + 2) +
+					jmi->n_u*((jmi_opt_sim->n_blocking_factors>0)? 2 : (nlp->n_cp+1)) +
+					jmi->n_w*(nlp->n_cp + 1))*jmi->n_tp +
+					(nlp->dCeq_dp_n_nz + nlp->dCeq_ddx_dx_du_dw_n_nz + nlp->dCeq_ddx_p_dx_p_du_p_dw_p_n_nz)*
+					(1 + jmi_opt_sim->n_e*nlp->n_cp ) + jmi->opt->Heq->n_eq_F;
+	for (i=0;i<jmi_opt_sim->n_blocking_factors;i++) {
+		// loop over each constraint
+		for (j=0;j<jmi_opt_sim->blocking_factors[i]-1;j++) {
+			for (k=0;k<jmi->n_u;k++) {
+				jac[jac_ind++] = 1;
+				jac[jac_ind++] = -1;
+			}
+		}
+	}
+
+
+	/*
 	for (i=0;i<jmi_opt_sim->dh_n_nz;i++) {
 		printf("<<< dh[%d;%d,%d]=%f\n",i,jmi_opt_sim->dh_row[i],jmi_opt_sim->dh_col[i],jac[i]);
 	}
@@ -1604,7 +1644,6 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 
 	(*jmi_opt_sim)->jmi = jmi;
 
-
 	// Set blocking factors
 	// Normalize blocking factors vector so that sum(blocking_factors(i)) = n_e
 
@@ -1740,7 +1779,8 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 	jmi->n_u +                                    // Interpolation for u_0
 	(jmi->n_dx + jmi->n_x  + jmi->n_u + jmi->n_w)*jmi->n_tp +      // Pointwise equations
 	jmi->opt->Ceq->n_eq_F*(n_e*n_cp + 1) +               // Path constraints from optimization
-	jmi->opt->Heq->n_eq_F;                // Point constraints from optimization
+	jmi->opt->Heq->n_eq_F +                // Point constraints from optimization
+    (*jmi_opt_sim)->n_blocking_factor_constraints*jmi->n_u; // Number of blocking factor constraints
 
 	// if free element lengths:
 	// TODO: should be modeled explicitly in the Optimica code?
@@ -1861,7 +1901,8 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 					jmi->n_w*(n_cp+1))*jmi->n_tp +
 					(dCeq_dp_n_nz + dCeq_ddx_dx_du_dw_n_nz + // Equality path constraints
 							dCeq_ddx_p_dx_p_du_p_dw_p_n_nz)*(n_e*n_cp+1) +
-							(dHeq_dp_n_nz + dHeq_ddx_p_dx_p_du_p_dw_p_n_nz); // Equality point constraints
+							(dHeq_dp_n_nz + dHeq_ddx_p_dx_p_du_p_dw_p_n_nz) + // Equality point constraints
+			2*((*jmi_opt_sim)->n_blocking_factor_constraints)*jmi->n_u;
 			(*jmi_opt_sim)->dh_row = (int*)calloc((*jmi_opt_sim)->dh_n_nz,sizeof(int));
 			(*jmi_opt_sim)->dh_col = (int*)calloc((*jmi_opt_sim)->dh_n_nz,sizeof(int));
 
@@ -2477,6 +2518,30 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 				(*jmi_opt_sim)->dh_row[rc_ind] = dHeq_ddx_p_dx_p_du_p_dw_p_irow[j] + row_index;
 				(*jmi_opt_sim)->dh_col[rc_ind] = dHeq_ddx_p_dx_p_du_p_dw_p_icol[j] + col_index;
 				rc_ind++;
+			}
+
+			// loop over all blocking factors
+			row_index = jmi->init->F0->n_eq_F + jmi->dae->F->n_eq_F*n_e*n_cp + jmi->n_u + jmi->n_x*n_e +
+			jmi->n_x*n_e*n_cp + (jmi->n_x + jmi->n_dx + jmi->n_u + jmi->n_w)*jmi->n_tp +
+			jmi->opt->Ceq->n_eq_F*(n_e*n_cp + 1) +
+			jmi->opt->Heq->n_eq_F;
+			int el_ind = 0;
+			for (i=0;i<(*jmi_opt_sim)->n_blocking_factors;i++) {
+				// loop over each constraint
+				for (j=0;j<(*jmi_opt_sim)->blocking_factors[i]-1;j++) {
+					for (k=0;k<jmi->n_u;k++) {
+						(*jmi_opt_sim)->dh_row[rc_ind] = row_index + 1;
+						(*jmi_opt_sim)->dh_col[rc_ind] = offs_u_coll((*jmi_opt_sim),el_ind,0,k) + 1;
+						rc_ind++;
+
+						(*jmi_opt_sim)->dh_row[rc_ind] = row_index + 1;
+						(*jmi_opt_sim)->dh_col[rc_ind] = offs_u_coll((*jmi_opt_sim),el_ind+j+1,0,k) + 1;
+						rc_ind++;
+
+						row_index++;
+					}
+				}
+				el_ind += (*jmi_opt_sim)->blocking_factors[i];
 			}
 
 			FILE *f = fopen("sparsity.m","wt");

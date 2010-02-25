@@ -29,4 +29,5 @@ constraint
 
   w3 = x[1] + x[2];
   w4 = x[1] - x[2];
+  u2(finalTime) = 0.1;
 end BlockingTest;

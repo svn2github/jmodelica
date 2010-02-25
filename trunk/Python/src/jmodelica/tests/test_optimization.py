@@ -73,14 +73,14 @@ class TestBlockingFactors(OptimizationTest):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        blocking_factors=N.ones(50,dtype='int32')
+        blocking_factors = N.array([5,10,5,3])
         self.setup_base(nlp_args = (n_e, hs, n_cp, blocking_factors), options = { 'max_iter': 500 })
         self.run()
         self.load_expected_data('BlockingTest_result.txt')
 
     @testattr(stddist = True)
     def test_cost_end(self):
-        self.assert_end_value('cost', 7.3297101e-01)
+        self.assert_end_value('cost', 8.1819533e-01)
 
     @testattr(stddist = True)
     def test_trajectories(self):
