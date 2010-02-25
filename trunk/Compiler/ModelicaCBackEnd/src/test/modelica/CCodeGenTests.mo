@@ -172,7 +172,7 @@ model CCodeGenTest7
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
          name="CCodeGenTest7",
-         description="Test of code generation",
+         description="Test of code generation. Verify that no event indicators are generated from relational expressions inside noEvent operators.",
          template="
 $C_DAE_equation_residuals$
 $C_DAE_event_indicator_residuals$
@@ -180,12 +180,6 @@ $C_DAE_event_indicator_residuals$
          generatedCode="
     (*res)[0] = _y_1 - (_der_x_2);
     (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0)),AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0),(COND_EXP_EQ(COND_EXP_GE(AD_WRAP_LITERAL(3),AD_WRAP_LITERAL(4),AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0)),AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(1),(COND_EXP_EQ(COND_EXP_LT(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0)),AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(2),(COND_EXP_EQ(COND_EXP_GT(AD_WRAP_LITERAL(3),AD_WRAP_LITERAL(4),AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0)),AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(4),(COND_EXP_EQ(COND_EXP_EQ(AD_WRAP_LITERAL(4),AD_WRAP_LITERAL(3),AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0)),AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(4),AD_WRAP_LITERAL(7))))))))))) - (_y_1);
-
-    (*res)[0] = AD_WRAP_LITERAL(2) - (AD_WRAP_LITERAL(1));
-    (*res)[1] = AD_WRAP_LITERAL(3) - (AD_WRAP_LITERAL(4));
-    (*res)[2] = AD_WRAP_LITERAL(2) - (AD_WRAP_LITERAL(1));
-    (*res)[3] = AD_WRAP_LITERAL(3) - (AD_WRAP_LITERAL(4));
-    (*res)[4] = AD_WRAP_LITERAL(3) - (AD_WRAP_LITERAL(4));
 ")})));
 
   Real x(start=0);

@@ -627,7 +627,9 @@ aspect FlatAPI {
 	coll ArrayList<FBoolBinExp> FClass.relExpInEquations() 
 	  [new ArrayList<FBoolBinExp>()] with add root FlatRoot;
 	FBoolBinExp contributes
- 		this when inEquationSection()
+    // Only include relational in the equation section which are 
+    // not inside a noEvent operator
+ 		this when inEquationSection() && !inNoEventExp()
 	to FClass.relExpInEquations() for myFClass();	
 		
 	public int FBoolBinExp.relExpInEquationsIndex() {
@@ -665,7 +667,9 @@ aspect FlatAPI {
 	coll ArrayList<FBoolBinExp> FClass.relExpInInitialEquations() 
 	    [new ArrayList<FBoolBinExp>()] with add root FlatRoot;
 	FBoolBinExp contributes
- 		this when inInitialEquationSection()
+	    // Only include relational in the initial equation section which are 
+	    // not inside a noEvent operator
+ 		this when inInitialEquationSection() && !inNoEventExp()
 	    to FClass.relExpInInitialEquations() for myFClass();	
 
 	public int FBoolBinExp.relExpInInitialEquationsIndex() {
