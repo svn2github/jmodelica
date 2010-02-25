@@ -878,6 +878,94 @@
  *
  * \subsection jmi_opt_sim_hess Hessian of the Lagrangian
  *
+ * \subsection jmi_opt_sim_blocking_factors Blocking factors
+ * The collocation algorithm also supports blocking factors, which are used
+ * to obtain piecewise constant controls. The implementation of blocking
+ * factors is done in two steps. In the first step, constant controls in
+ * each finite element is introduced by eliminating all but the first control
+ * variable point in each element. In the second step, linear equality
+ * constraints are introduced to handle the situation where controls are
+ * constant over several elements.
+ *
+ * The vector of algebraic variables is then:
+ *
+ * \f$
+ *   \bar x=\left[
+ *   \begin{array}{l}
+ *     p^{opt}_1 \\
+ *     \vdots\\
+ *     p^{opt}_{n_{p^{opt}}} \\
+ *     \dot x_{0,0}\\
+ *     x_{0,0}\\
+ *     u_{0,0}\\
+ *     w_{0,0}\\
+ *     \dot x_{0,1}\\
+ *     x_{0,1}\\
+ *     u_{0,1}\\
+ *     w_{0,1}\\
+ *     \vdots\\
+ *     \dot x_{0,n_c}\\
+ *     x_{0,n_c}\\
+ *     w_{0,n_c}\\
+ *     \vdots\\
+ *     \dot x_{n_e-1,1}\\
+ *     x_{n_e-1,1}\\
+ *     u_{n_e-1,1}\\
+ *     w_{n_e-1,1}\\
+ *     \dot x_{n_e-1,n_c}\\
+ *     x_{n_e-1,n_c}\\
+ *     w_{n_e-1,n_c}\\
+ *     x_{1,0}\\
+ *     \vdots\\
+ *     x_{n_e,0}\\
+ *     \dot x^p_1\\
+ *     x^p_1\\
+ *     u^p_1\\
+ *     w^p_1\\
+ *     \vdots\\
+ *     \dot x^p_{n_{tp}}\\
+ *     x^p_{n_{tp}}\\
+ *     u^p_{n_{tp}}\\
+ *     w^p_{n_{tp}}\\
+ *     t_0\\
+ *     t_f
+ *   \end{array}
+ *   \right]
+ *  \f$
+ *
+ * where the two last elements are optional.
+ *
+ *  In total, this gives
+ *
+ *  \f$ n_{\bar x} = n_{p^{opt}} + (2n_x + n_w)(n_en_c + 1 + n_{tp})
+ *    + n_u(n_e+1+n_{tp}) +
+ *    n_xn_e + n_e + 2 \f$
+ *
+ * variables in the NLP, assuming that \f$n_{\dot x}=n_x\f$.
+ *
+ * Blocking factors are specified by a vector of integers, where each entry
+ * in the vector corresponds to the number of elements for which the control
+ * profile should be kept constant. For example, the blocking factor
+ * specification [2,1,5] means that \f$u_0=u_1\f$ and \f$u_3=u_4=u_5=u_6=u_7\f$ assuming
+ * that the number of elements is 8. Notice that specification of blocking
+ * factors implies that controls are present in only one collocation point (the first) in
+ * each element. The number of constant control levels in the optimization
+ * interval is equal to the length of the blocking factor vector. In the example
+ * above, this implies that there are three constant control levels. If the
+ * sum of the entries in the blocking factor vector is not equal to the number
+ * of elements, the vector is normalized, either by truncation (if the sum
+ * of the entries is larger than the number of element) or by increasing the
+ * last entry of the vector. For example, if the number of elements is 4, the
+ * normalized blocking factor vector in the example is [2,2]. If the number
+ * of elements is 10, then the normalized vector is [2,1,7].
+ *
+ * Specification of blocking factors may increase the number of equality
+ * constraints. Denoting the (normalized) blocking factor vector \f$\gamma\f$,
+ * the number of equality constraints becomes
+ *
+ * \f$2n_x+n_w+(n_x+n_w)n_en_c + n_xn_e + n_u + n_xn_en_c +
+ *   (2n_x+n_u+n_w)n_{tp} + n_u\sum_i(\gamma_i-1)\f$
+ *
  * \section jmi_opt_sim_lp_create Creation of a jmi_opt_sim_t struct
  *
  */
@@ -1020,6 +1108,8 @@ typedef struct {
  * Valid arguments are JMI_DER_SYMBOLIC and JMI_DER_CPPAD. Notice that if
  * JMI_DER_SYMBOLIC is used, then symbolic Jacobians need to be present in
  * in the generated code.
+ * @param n_blocking_factors Length of the blocking factor vector.
+ * @param blocking_factors Blocking factor vector.
  * @return Error code.
  */
 int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,

@@ -835,17 +835,37 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         """
         Constructor where main data structure is created. 
         
-        Initial guesses, lower and upper bounds and linearity information is 
-        set for optimized parameters, derivatives, states, inputs and 
-        algebraic variables. These values are taken from the XML files created 
-        at compilation.
+        Initial guesses, lower and upper bounds and linearity
+        information is set for optimized parameters, derivatives,
+        states, inputs and algebraic variables. These values are taken
+        from the XML files created at compilation.
+
+        Blocking factors are specified by a vector of integers, where
+        each entry in the vector corresponds to the number of elements
+        for which the control profile should be kept constant. For
+        example, the blocking factor specification [2,1,5] means that
+        u_0=u_1 and u_3=u_4=u_5=u_6=u_7 assuming that the
+        number of elements is 8. Notice that specification of blocking
+        factors implies that controls are present in only one
+        collocation point (the first) in each element. The number of
+        constant control levels in the optimization interval is equal
+        to the length of the blocking factor vector. In the example
+        above, this implies that there are three constant control
+        levels. If the sum of the entries in the blocking factor
+        vector is not equal to the number of elements, the vector is
+        normalized, either by truncation (if the sum of the entries is
+        larger than the number of element) or by increasing the last
+        entry of the vector. For example, if the number of elements is
+        4, the normalized blocking factor vector in the example is
+        [2,2]. If the number of elements is 10, then the normalized
+        vector is [2,1,7].
         
         Parameters:
             model -- The Model object.
             n_e -- Number of finite elements.
             hs -- Vector containing the normalized element lengths.
             n_cp -- Number of collocation points. 
-        
+            blocking_factors -- Blocking factor vector.
         """
         if len(hs) != n_e:
             raise jmi.JMIException("arg hs is not of length n_e")

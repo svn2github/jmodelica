@@ -265,7 +265,8 @@ struct jmi_opt_sim_t{
 	jmi_real_t *x_init;               // Initial starting point
 	int *blocking_factors;             // Specification of blocking factors
 	int n_blocking_factors;            // Number of blocking factors
-	int n_blocking_factor_constraints; // Number of constraints resulting from blocking factors
+	int n_blocking_factor_constraints; // Number of constraints resulting
+		                               // from blocking factors divided by the number of inputs
 	int dg_n_nz;
 	int dh_n_nz;
 	int *dg_row;
