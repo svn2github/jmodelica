@@ -8,6 +8,7 @@ required by Assimulo.
 import numpy as N
 import pylab as P
 import jmodelica.io as io
+import jmodelica.jmi as jmi
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
 
@@ -105,7 +106,7 @@ class JMIImplicit(Implicit_Problem):
     """
     An Assimulo Implicit Model extended to JMI interface.
     """
-    def __init__(self, model):
+    def __init__(self, model, jacobian=True):
         """
         Sets the initial values.
         """
@@ -125,14 +126,20 @@ class JMIImplicit(Implicit_Problem):
         #Sets default values
         self.max_eIter = 50 #Maximum number of event iterations allowed.
         self.eps = 1e-9 #Epsilon for adjusting the event indicator.
-        self.log_events = False
+        self.log_events = False #Are we to log the events?
+        
+        if jacobian: #Use JModelicas jacobian?
+            self.jac = self.j #Activates the jacobian
     
         #Sets internal options
-        self._initiate_problem = False
-        self._log_initiate_mode = False
-        self._log_information = []
-        self._f_nbr = f_nbr
-        self._g_nbr = g_nbr
+        self._initiate_problem = False #Used for initiation
+        self._log_initiate_mode = False #Used for logging
+        self._log_information = [] #List that handles log information
+        self._f_nbr = f_nbr #Number of equations
+        self._g_nbr = g_nbr #Number of event indicatiors
+        self._x_nbr = len(self._model.x) #Number of differentiated
+        self._w_nbr = len(self._model.w) #Number of algebraic
+        self._dx_nbr = len(self._model.dx) #Number of derivatives
         self._pre = self.y0.copy()
         self._iter = 0
         
@@ -143,12 +150,12 @@ class JMIImplicit(Implicit_Problem):
         """
         #Moving data to the model
         self._model.t = t
-        self._model.x = y[0:len(self._model.x)]
-        self._model.w = y[len(self._model.x):len(y)]
-        self._model.dx = yd[0:len(self._model.dx)]
+        self._model.x = y[0:self._x_nbr]
+        self._model.w = y[self._x_nbr:self._f_nbr]
+        self._model.dx = yd[0:self._dx_nbr]
 
         #Evaluating the residual function
-        residual = N.array([.0]*len(y))
+        residual = N.array([.0]*self._f_nbr)
         self._model.jmimodel.dae_F(residual)
         
         #Log information
@@ -167,10 +174,40 @@ class JMIImplicit(Implicit_Problem):
                 #self._log_information[i-1][2][j-1].append(N.max(N.abs(residual)))
                 self._log_information[i-1][2][j-1].append(RES)
                 self._pre = y.copy()
-            
-            
         
         return residual
+        
+    def j(self, c, t, y, yd, sw=None):
+        """
+        The jacobian function for an DAE problem.
+        """
+        #Moving data to the model
+        self._model.t = t
+        self._model.x = y[0:self._x_nbr]
+        self._model.w = y[self._x_nbr:self._f_nbr]
+        self._model.dx = yd[0:self._dx_nbr]
+        
+        #Evaluating the jacobian
+        #-Setting options
+        z_l = N.array([1]*len(self._model.z)) #Used to give independent_vars full control
+        independent_vars = [jmi.JMI_DER_DX, jmi.JMI_DER_X, jmi.JMI_DER_W] #Derivation with respect to these variables
+        sparsity = jmi.JMI_DER_DENSE_ROW_MAJOR
+        evaluation_options = jmi.JMI_DER_CPPAD#jmi.JMI_DER_SYMBOLIC
+        
+        #-Evaluating
+        Jac = N.zeros(self._f_nbr**2) #Matrix that hold information about dx and dw
+        self._model.jmimodel.dae_dF(evaluation_options, sparsity, independent_vars[1:], z_l, Jac) #Output dx+dw
+        
+        dx = N.zeros(len(self._model.dx)*self._f_nbr) #Matrix that hold information about dx'
+        self._model.jmimodel.dae_dF(evaluation_options, sparsity, independent_vars[0], z_l, dx) #Output dx'
+        dx = dx*c #Scale
+        
+        #-Vector manipulation
+        Jac = Jac.reshape(self._f_nbr,self._f_nbr)
+        dx = dx.reshape(self._f_nbr,self._dx_nbr)
+        Jac[:,0:self._dx_nbr] += dx
+        
+        return Jac
         
     def g(self, t, y, yd, sw):
         """
@@ -178,9 +215,9 @@ class JMIImplicit(Implicit_Problem):
         """
         #Moving data to the model
         self._model.t = t
-        self._model.x = y[0:len(self._model.x)]
-        self._model.w = y[len(self._model.x):len(y)]
-        self._model.dx = yd[0:len(self._model.dx)]
+        self._model.x = y[0:self._x_nbr]
+        self._model.w = y[self._x_nbr:self._f_nbr]
+        self._model.dx = yd[0:self._dx_nbr]
         
         #Evaluating the switching functions
         eventInd = N.array([.0]*len(sw))
@@ -383,7 +420,7 @@ class JMIImplicit(Implicit_Problem):
         """
         self._initiate_problem = True
         
-        if hasattr(self, 'switches0'):
+        if self._g_nbr > 0:
             
             sw_val = N.array([.0]*len(self._model.sw))
             self._model.jmimodel.dae_R(sw_val)
