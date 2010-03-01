@@ -212,6 +212,71 @@ equation
 
 end CCodeGenTest8;
 
+model CCodeGenTest9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenTest9",
+         description="Test of code generation",
+         template="$C_DAE_initial_equation_residuals$
+$C_DAE_initial_event_indicator_residuals$",
+         generatedCode="
+    (*res)[0] =  - ( _x_0 ) - (_der_x_3);
+    (*res)[1] =  - ( _y_1 ) - (_der_y_4);
+    (*res)[2] =  - ( _z_2 ) - (_der_z_5);
+    (*res)[3] = (COND_EXP_EQ(COND_EXP_GE(time,AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0)),AD_WRAP_LITERAL(1), - ( AD_WRAP_LITERAL(1) ) + _y_1, - ( _y_1 ))) - (_x_0);
+    (*res)[4] = _z_2 + _x_0 + (COND_EXP_EQ(COND_EXP_GE(_z_2, - ( AD_WRAP_LITERAL(1.5) ),AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0)),AD_WRAP_LITERAL(1), - ( AD_WRAP_LITERAL(3) ),AD_WRAP_L
+ITERAL(3))) - (_y_1);
+    (*res)[5] =  - ( _y_1 ) - ( _x_0 ) + (COND_EXP_EQ(_sw_init(0),AD_WRAP_LITERAL(1), - ( AD_WRAP_LITERAL(1) ),AD_WRAP_LITERAL(1))) - (_z_2);
+    (*res)[0] = _y_1 - (AD_WRAP_LITERAL(0.5));
+
+")})));
+
+  Real x(start=0);
+  Real y(start=1);
+  Real z(start=0);
+initial equation
+   x = noEvent(if time>=1 then (-1 + y) else  (- y));
+   y = noEvent(z + x +(if z>=-1.5 then -3 else 3));
+   z = -y  - x + (if y>=0.5 then -1 else 1);
+equation
+   der(x) = -x;
+   der(y) = -y;
+   der(z) = -z;
+end CCodeGenTest9;
+
+model CCodeGenTest10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenTest10",
+         description="Test of code generation",
+         template="$C_DAE_initial_equation_residuals$
+$C_DAE_initial_event_indicator_residuals$",
+         generatedCode="
+    (*res)[0] =  - ( _x_0 ) - (_der_x_3);
+    (*res)[1] =  - ( _y_1 ) - (_der_y_4);
+    (*res)[2] =  - ( _z_2 ) - (_der_z_5);
+    (*res)[3] = (COND_EXP_EQ(_sw_init(0),AD_WRAP_LITERAL(1), - ( AD_WRAP_LITERAL(1) ) + _y_1, - ( _y_1 ))) - (_x_0);
+    (*res)[4] = _z_2 + _x_0 + (COND_EXP_EQ(_sw_init(1),AD_WRAP_LITERAL(1), - ( AD_WRAP_LITERAL(3) ),AD_WRAP_LITERAL(3))) - (_y_1);
+    (*res)[5] =  - ( _y_1 ) - ( _x_0 ) + (COND_EXP_EQ(_sw_init(2),AD_WRAP_LITERAL(1), - ( AD_WRAP_LITERAL(1) ),AD_WRAP_LITERAL(1))) - (_z_2);
+    (*res)[0] = time - (AD_WRAP_LITERAL(1));
+    (*res)[1] = _z_2 - ( - ( AD_WRAP_LITERAL(1.5) ));
+    (*res)[2] = _y_1 - (AD_WRAP_LITERAL(0.5));
+
+")})));
+
+  Real x(start=0);
+  Real y(start=1);
+  Real z(start=0);
+initial equation
+   x = if time>=1 then (-1 + y) else  (- y);
+   y = z + x +(if z>=-1.5 then -3 else 3);
+   z = -y  - x + (if y>=0.5 then -1 else 1);
+equation
+   der(x) = -x;
+   der(y) = -y;
+   der(z) = -z;
+end CCodeGenTest10;
+
 
 model CCodeGenUniqueNames
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

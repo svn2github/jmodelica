@@ -550,8 +550,13 @@ aspect CCodeGen {
 			p.toString(getRight(),str,indent,o);
 			str.append(",AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0))");
 		} else {
-			str.append("_sw");
-			str.append("("+relExpInEquationsIndex()+")");
+			if (inEquationSection()) {
+				str.append("_sw");
+				str.append("("+relExpInEquationsIndex()+")");
+			} else {
+				str.append("_sw_init");
+				str.append("("+relExpInInitialEquationsIndex()+")");
+			}
 		}
 
 	}
