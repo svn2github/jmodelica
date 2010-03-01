@@ -576,6 +576,7 @@ int jmi_func_ad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 	}
 
 	// Iterate over all columns
+	int q;
 	for (i=0;i<jmi->n_z;i++) {
 		if (jmi_check_Jacobian_column_index(jmi, independent_vars, mask, i) == 1 ) {
 			//printf("Jopp %d\n",i);
@@ -585,13 +586,15 @@ int jmi_func_ad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 			d_z[i] = 0.;
 			switch (sparsity) {
 			case JMI_DER_DENSE_COL_MAJOR:
+				q = jmi_map_Jacobian_column_index(jmi,independent_vars,mask,i);
 				for(j=0;j<func->n_eq_F;j++) {
-					jac[jac_n*(jmi_map_Jacobian_column_index(jmi,independent_vars,mask,i)) + j] = jac_[j];
+					jac[jac_n*q + j] = jac_[j];
 				}
 				break;
 			case JMI_DER_DENSE_ROW_MAJOR:
+				q = jmi_map_Jacobian_column_index(jmi,independent_vars,mask,i);
 				for(j=0;j<func->n_eq_F;j++) {
-					jac[jac_m*j + (jmi_map_Jacobian_column_index(jmi,independent_vars,mask,i))] = jac_[j];
+					jac[jac_m*j + q] = jac_[j];
 				}
 				break;
 			case JMI_DER_SPARSE:
