@@ -539,7 +539,7 @@ aspect InstanceErrorCheck {
 				// Only check attributes, value modifications are checked above
 				if (im instanceof InstComponentModification) {
 					InstComponentModification icm = (InstComponentModification)im;
-					if (icm.getInstModification().hasInstValueMod()) {
+					if (icm.hasInstModification() && icm.getInstModification().hasInstValueMod()) {
 						FExp val_mod = icm.getInstModification().instValueMod();
 						val_mod.checkConstantExpression(this,"attribute",icm.getName().name());
 					}

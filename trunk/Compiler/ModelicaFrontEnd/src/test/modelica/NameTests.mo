@@ -533,6 +533,23 @@ parameter Real p = c;
 
 end NameTest16;
 
+model NameTest17
+     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="NameTest17",
+        description="Check that modifiers without binding expressions are accepted.",
+                                               flatModel=
+"
+fclass NameTests.NameTest17
+ Real x;
+equation
+ x = 2;
+end NameTests.NameTest17;
+")})));
+
+  Real x(fixed,start);
+equation
+  x=2;
+end NameTest17;
 
 
 /* Used for tests ConstantLookup1-3. */
