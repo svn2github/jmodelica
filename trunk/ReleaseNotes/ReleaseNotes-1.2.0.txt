@@ -1,0 +1,21 @@
+This document contains the release notes for the upcoming release
+1.2.0.
+
+NOTICE: This document is in preparation
+
+1. Compilers
+1.1. Modelica Compiler
+
+1.2. Optimica Compiler
+
+2. JModelica.org Model Interface (JMI)
+
+3. Optimization algorithm
+
+4. FMI compliance
+
+5. XML model export
+
+6. Symbolic framework
+
+7. Python integration
