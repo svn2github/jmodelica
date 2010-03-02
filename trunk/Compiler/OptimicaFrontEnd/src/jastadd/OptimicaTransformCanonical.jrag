@@ -1,8 +1,24 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 aspect OptimicaTransformCanonical {
 	
 	public void FOptClass.scalarize() {
 		
-		/* Notice that it is not ok to call super.scalarize() here, since
+		/* Note that it is not ok to call super.scalarize() here, since
 		 * then the scalarized variable lists will be set prior to
 		 * scalarizing the constraints and costfunctions, which will make
 		 * lookup in the constraint scalarization fail.
@@ -34,7 +50,7 @@ aspect OptimicaTransformCanonical {
 		// Scalarize constraints
 		List<FConstraint> constr = new List<FConstraint>();
 		for (FConstraint c : getFConstraints()) {
-			c.scalarize(constr,new HashMap<String,FExp>());
+			c.scalarize(constr, eqns, vars, new HashMap<String,FExp>());
 		}
 		setFConstraintList(constr);
 
@@ -58,9 +74,10 @@ aspect OptimicaTransformCanonical {
 	/**
 	 * \brief Scalarize constraint and put all scalarized equations in list eqns.
 	 */
-	public void FConstraint.scalarize(List<FConstraint> constr, 
-			HashMap<String,FExp> indexMap) {
+	public void FConstraint.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns, 
+			List<FVariable> vars, HashMap<String,FExp> indexMap) {
 		// TODO: Handle function calls with array output
+		createFunctionCallTemporaries(eqns, vars, indexMap, true);
 		//System.out.println("FEquation.scalarize() " + ndims());
 		if (ndims()==0) {
 			/**
