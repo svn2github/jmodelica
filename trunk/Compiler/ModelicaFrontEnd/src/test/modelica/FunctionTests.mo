@@ -3811,6 +3811,40 @@ Semantic error at line 3796, column 14:
 end UnknownArray8;
 
 
+model UnknownArray9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="UnknownArray9",
+         description="Unknown size calculated by adding sizes",
+         flatModel="
+fclass FunctionTests.UnknownArray9
+ Real x[5,2] = FunctionTests.UnknownArray9.f({{1,2},{3,4}}, {{5,6},{7,8},{9,0}});
+
+ function FunctionTests.UnknownArray9.f
+  input Real[:, :] a;
+  input Real[:, size(a, 2)] b;
+  output Real[size(d, 1), size(d, 2)] c;
+  Real[size(cat(1, a, b), 1), size(cat(1, a, b), 2)] d := cat(1, a, b);
+ algorithm
+  c := d;
+  return;
+ end FunctionTests.UnknownArray9.f;
+end FunctionTests.UnknownArray9;
+")})));
+
+ function f
+  input Real a[:,:];
+  input Real b[:,size(a,2)];
+  output Real c[size(d,1), size(d,2)];
+  protected Real d[:,:] = cat(1, a, b);
+ algorithm
+  c := d;
+ end f;
+ 
+ Real x[5,2] = f({{1,2},{3,4}}, {{5,6},{7,8},{9,0}});
+end UnknownArray9;
+
+
 
 /* =========================== Records =========================== */
 /*

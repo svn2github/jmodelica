@@ -734,6 +734,11 @@ FArray : FExp ::= FExp*;
 FLongArray : FArray;
 
 /**
+ * \brief Array constructor expression.
+ */
+FCatExp : FInfArgsFunctionCall ::= Dim:FExp;
+
+/**
  * \brief Initial node for long form of array constructor expression.
  *
  * Rewritten to FLongArray immediately.

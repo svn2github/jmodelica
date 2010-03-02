@@ -136,8 +136,8 @@ aspect FlatTypeAnalysis {
 				return fUnknownType();
 			if (!getDim().type().isScalar() || !getDim().type().isInteger())
 				return fUnknownType();
-			int dim = getDim().ceval().intValue();
-			if (dim < 1 || dim > getFExp().ndims())
+			int dim = dimension();
+			if (dim < 0 || dim > getFExp().ndims() - 1)
 				return fUnknownType();
 			return fIntegerScalarType();
 		} else {
@@ -229,6 +229,29 @@ aspect FlatTypeAnalysis {
 				return fUnknownType();
 			if (t.isNumeric()) 
 				t = t.numericPromotion(getFExp(i).type());
+		}
+		return t.arrayType(size());
+	}
+	
+	eq FCatExp.type() {
+		if (!dimensionIsOk())
+			return fUnknownType();
+		int dim = dimension();
+		
+		FPrimitiveType t = getFExp(0).type().scalarType();
+		Size s = getFExp(0).size();
+		boolean func = inFunction();
+		for (int i = 1; i < getNumFExp(); i++) {
+			// Check that the types of the elements are consistent
+			FPrimitiveType t2 = getFExp(i).type().scalarType();
+			if (!t.equivalentTo(t2)) 
+				return fUnknownType();
+			if (t.isNumeric()) 
+				t = t.numericPromotion(t2);
+			
+			// Check that the sizes are consistent
+			if (!s.equivalentExcept(getFExp(i).size(), func, dim))
+				return fUnknownType();
 		}
 		return t.arrayType(size());
 	}

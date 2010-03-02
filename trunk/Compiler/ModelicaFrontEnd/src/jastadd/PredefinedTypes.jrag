@@ -218,6 +218,9 @@ aspect PredefinedTypes {
 +"function fill\n"
 +"  input Real s;\n"      // Type not used
 +"end fill;\n"
++"function cat\n"
++"  input Real k;\n"      // Type not used
++"end cat;\n"
 +"function linspace end linspace;\n"
 +"function min\n"
 +"  input Real x;\n"      // Type not used

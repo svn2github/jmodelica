@@ -175,6 +175,7 @@ aspect Arrays {
 		// all brances are equal.
 		return getFExp(0).ndims() + 1;
 	}
+	eq FCatExp.ndims()         = getFExp(0).ndims();
 	eq FSumExp.ndims()         = getFExp().isIterExp() ? iterExp().ndims() : 0;
 	eq FIterExp.ndims()        = getFExp().ndims() + getNumForIndex();
 	eq FSubscriptedExp.ndims() = getFArraySubscripts().accessNdims();
@@ -355,11 +356,11 @@ aspect Arrays {
 	public abstract void FSubscript.addDeclarationSize(MutableSize s);
 	
 	public void FExpSubscript.addDeclarationSize(MutableSize s) {
-		s.add(getFExp());
+		s.append(getFExp());
 	}
 	
 	public void FColonSubscript.addDeclarationSize(MutableSize s) {
-		s.add(Size.UNKNOWN);
+		s.append(Size.UNKNOWN);
 	}
 
 	/**
@@ -372,7 +373,7 @@ aspect Arrays {
 		MutableSize s = new MutableSize(accessNdims());
 		for (FSubscript fs : getFSubscripts()) 
 			if (fs.ndims() == 1)
-				s.add(fs.size());
+				s.append(fs.size());
 		return s;
 	}
 
@@ -426,9 +427,9 @@ aspect Arrays {
 			return getLeft().size();
 		MutableSize s = new MutableSize(ndims());
 		if (getLeft().ndims() == 2)
-			s.add(getLeft().size(), 0);
+			s.append(getLeft().size(), 0);
 		if (getRight().ndims() == 2)
-			s.add(getRight().size(), 1);
+			s.append(getRight().size(), 1);
 		return s;
 	}
 	
@@ -457,14 +458,25 @@ aspect Arrays {
 		return getFExp(0).size().expand(getNumFExp());
 	}
 	
+	syn lazy int FCatExp.dimension()  = getDim().ceval().intValue() - 1;
+	syn lazy int FSizeExp.dimension() = getDim().ceval().intValue() - 1;
+	
+	eq FCatExp.size() {
+		int dim = dimension();
+		MutableSize ms = getFExp(0).size().mutableClone();
+		for (int i = 1; i < getNumFExp(); i++)
+			ms.add(dim, getFExp(i).size(), dim);
+		return ms;
+	}
+	
 	eq FSumExp.size() = getFExp().isIterExp() ? iterExp().size() : Size.SCALAR;
 	
 	eq FIterExp.size() {
 		MutableSize s = new MutableSize(ndims());
 		for (CommonForIndex fi : getForIndexList())
 			if (fi.hasFExp() && fi.getFExp().ndims() == 1)
-				s.add(fi.getFExp().size());
-		s.add(getFExp().size());
+				s.append(fi.getFExp().size());
+		s.append(getFExp().size());
 		return s;
 	}
 	
@@ -473,10 +485,10 @@ aspect Arrays {
 	eq FTranspose.size() {
 		Size size = getFExp().size();
 		MutableSize s = new MutableSize(size.ndims());
-		s.add(size, 1);
-		s.add(size, 0);
+		s.append(size, 1);
+		s.append(size, 0);
 		for (int i = 2; i < s.ndims(); i++)
-			s.add(size, i);
+			s.append(size, i);
 		return s;
 	}
 	
@@ -484,8 +496,8 @@ aspect Arrays {
 	
 	eq FIdentity.size() {
 		MutableSize s = new MutableSize(2);
-		s.add(getFExp());
-		s.add(getFExp());
+		s.append(getFExp());
+		s.append(getFExp());
 		return s;
 	}
 	
@@ -494,7 +506,7 @@ aspect Arrays {
 	eq FInfArgsFunctionCall.size() {
 		MutableSize s = new MutableSize(ndims());
 		for (FExp fe : getFExps()) 
-			s.add(fe);
+			s.append(fe);
 		return s;
 	}
 	
@@ -515,8 +527,8 @@ aspect Arrays {
 		
 		try {
 			MutableSize ms = new MutableSize(ndims());
-			for (int j = 0; j < s.ndims(); j++)
-				ms.add(dynamicFExp(s.createSizeFExp(j, varMap)));
+			for (int j = 0; j < s.ndims(); j++) 
+				ms.append(dynamicFExp(s.createSizeFExp(j, (HashMap) varMap.clone())));
 			return ms;
 		} catch (UnsupportedOperationException e) {
 			return s;
@@ -947,6 +959,19 @@ aspect Arrays {
 		return arr;
 	}
 	
+	eq FCatExp.getArray() {
+		Array arr = new Array(indices());
+		int dim = dimension();
+		int adj = 0;
+		for (FExp exp : getFExps()) {
+			Array expArr = exp.getArray();
+			for (Index i : expArr.indices()) 
+				arr.set(i.adjusted(dim, adj), expArr.get(i));
+			adj += exp.size().get(dim);
+		}
+		return arr;
+	}
+	
 	eq FSumExp.getArray() {
 		if (!isArray())
 			return super.getArray();
@@ -1339,9 +1364,9 @@ aspect ArrayIndices {
 		 */
 		public int numElements() {
 			int res = 1;
-			for (int i = 0; i < size.length; i++)
+			for (int i = 0; i < size.length && res > 0; i++)
 				res *= size[i];
-			return res;
+			return res < 0 ? 0 : res;
 		}
 		
 		/**
@@ -1372,10 +1397,36 @@ aspect ArrayIndices {
 		}
 		
 		/**
+		 * \brief Check if all lengths have a value (fix length or integer).
+		 */
+		public boolean isComplete() {
+			for (int i = 0; i < size.length; i++)
+				if (!hasValue(i))
+					return false;
+			return true;
+		}
+		
+		/**
+		 * \brief Check if the lengths in the given dimension has a value (fix length or integer).
+		 */
+		protected boolean hasValue(int dim) {
+			return size[dim] != UNKNOWN;
+		}
+		
+		/**
 		 * \brief Create a copy of this size.
 		 */
 		protected Size clone() {
 			return new Size(size.clone());
+		}
+		
+		/**
+		 * \brief Create a copy of this size as a MutableSize.
+		 */
+		public MutableSize mutableClone() {
+			MutableSize ms = new MutableSize(size.length);
+			System.arraycopy(size, 0, ms.size, 0, size.length);
+			return ms;
 		}
 		
 		/**
@@ -1432,13 +1483,28 @@ aspect ArrayIndices {
 		 *                      other unknown lengths
 		 */
 		public boolean equivalent(Size s, boolean allowUnknown) {
-			if (!allowUnknown)
-				return Arrays.equals(size, s.size) && !isUnknown();
+			return equivalentExcept(s, allowUnknown, -1);
+		}
+		
+		/**
+		 * \brief Check if another size is equivalent to this one, except in a given dimension.
+		 * 
+		 * @param allowUnknown  if <code>true</code>, consider unknown lengths equal to any length, 
+		 *                      otherwise consider unknown lengths to differ from all lengths, including
+		 *                      other unknown lengths
+		 * @param dim			dimension not to check
+		 */
+		public boolean equivalentExcept(Size s, boolean allowUnknown, int dim) {
 			if (size.length != s.size.length)
 				return false;
-			for (int i = 0; i < size.length; i++)
-				if (size[i] != s.size[i] && size[i] != UNKNOWN && s.size[i] != UNKNOWN)
-					return false;
+			for (int i = 0; i < size.length; i++) {
+				if (i != dim) {
+					boolean unknown = size[i] == UNKNOWN || s.size[i] == UNKNOWN;
+					boolean differ = size[i] != s.size[i];
+					if (allowUnknown ? (differ && !unknown) : (differ || unknown)) 
+						return false;
+				}
+			}
 			return true;
 		}
 		
@@ -1540,8 +1606,9 @@ aspect ArrayIndices {
 		 */
 		public MutableSize(int ndims) {
 			super(new int[ndims]);
-			i = 0;
+			Arrays.fill(size, UNKNOWN);
 			exps = new FExp[ndims];
+			i = 0;
 		}
 		
 		/**
@@ -1549,7 +1616,7 @@ aspect ArrayIndices {
 		 * 
 		 * May overwrite lengths set with <code>set()</code>.
 		 */
-		public void add(int s) {
+		public void append(int s) {
 			set(i++, s);
 		}
 		
@@ -1558,7 +1625,7 @@ aspect ArrayIndices {
 		 * 
 		 * May overwrite lengths set with <code>set()</code>.
 		 */
-		public void add(FExp e) {
+		public void append(FExp e) {
 			set(i++, e);
 		}
 		
@@ -1568,7 +1635,7 @@ aspect ArrayIndices {
 		 * 
 		 * May overwrite lengths set with <code>set()</code>.
 		 */
-		public void add(Size s, int d) {
+		public void append(Size s, int d) {
 			set(i++, s, d);
 		}
 		
@@ -1577,7 +1644,7 @@ aspect ArrayIndices {
 		 * 
 		 * May overwrite lengths set with <code>set()</code>.
 		 */
-		public void add(Size s) {
+		public void append(Size s) {
 			if (s instanceof MutableSize) {
 				MutableSize ms = (MutableSize) s;
 				for (int j = 0; j < ms.size.length; j++, i++) {
@@ -1622,6 +1689,51 @@ aspect ArrayIndices {
 		public void set(int d1, Size s, int d2) {
 			size[d1] = s.size[d2];
 			exps[d1] = (s instanceof MutableSize) ? ((MutableSize) s).exps[d2] : null;
+		}
+		
+		/**
+		 * \brief Adds <code>s</code> to length <code>d</code>.
+		 */
+		public void add(int d, int s) {
+			if (s == UNKNOWN) {
+				size[d] = UNKNOWN;
+				exps[d] = null;
+			} else if (size[d] != UNKNOWN) {
+				size[d] += s;
+			} else if (exps[d] != null) {
+				exps[d] = new FAddExp((FExp) exps[d].unboundCopy(), new FIntegerLitExp(s));
+			}
+		}
+		
+		/**
+		 * \brief Adds the value of <code>e</code> to length <code>d</code>.
+		 */
+		public void add(int d, FExp e) {
+			try {
+				add(d, e.ceval().intValue());
+			} catch (UnsupportedOperationException uoe) {
+				exps[d] = new FAddExp(createFExp(d), e);
+				size[d] = UNKNOWN;
+			}
+		}
+		
+		/**
+		 * \brief Adds the length of dimension <code>d2</code> of <code>s</code> 
+		 *        to length <code>d1</code> of this size.
+		 */
+		public void add(int d1, Size s, int d2) {
+			FExp e = (s instanceof MutableSize) ? ((MutableSize) s).exps[d2] : null;
+			if (e != null) 
+				add(d1, e);
+			else
+				add(d1, s.size[d2]);
+		}
+		
+		/**
+		 * \brief Check if the lengths in the given dimension has a value (fix length or integer).
+		 */
+		protected boolean hasValue(int dim) {
+			return size[dim] != UNKNOWN || exps[dim] != null;
 		}
 		
 		/**
@@ -1720,6 +1832,13 @@ aspect ArrayIndices {
 			System.arraycopy(size, 0, ms.size, 0, size.length);
 			System.arraycopy(exps, 0, ms.exps, 0, exps.length);
 			return ms;
+		}
+		
+		/**
+		 * \brief Create a copy of this size as a MutableSize.
+		 */
+		public MutableSize mutableClone() {
+			return clone();
 		}
 		
 	}
@@ -2051,6 +2170,18 @@ aspect ArrayIndices {
 		public Index subIndex(int level) {
 			Index copy = new Index(index.length - level);
 			System.arraycopy(index, level, copy.index, 0, copy.index.length);
+			return copy;
+		}
+		
+		/**
+		 * \brief Creates a new Index that is a copy of this Index, but with <code>adj</code>
+		 *        added to dimension <code>dim</code>.
+		 * 
+		 * The new Index will not be bound to any Indices object.
+		 */
+		public Index adjusted(int dim, int adj) {
+			Index copy = new Index(index.clone());
+			copy.index[dim] += adj;
 			return copy;
 		}
 		
@@ -2416,7 +2547,7 @@ aspect ArrayIndices {
 			MutableSize size = new MutableSize(n);
 			for (int[] i : ind)
 				if (i.length > 1 || !trim)
-					size.add(i.length);
+					size.append(i.length);
 			return size;
 		}
 		

@@ -507,7 +507,7 @@ aspect ConstantEvaluation {
   eq FSizeExp.cevalCalc() {
 	  if (!hasDim())
 		  return new CValueUnknown();
-	  int dim = getDim().ceval().intValue() - 1;
+	  int dim = dimension();
 	  int s = getFExp().size().get(dim);
 	  return (s == Size.UNKNOWN) ? new CValueUnknown() : new CValueInteger(s);
   }
@@ -881,44 +881,24 @@ aspect ArrayConstantEvaluation {
 
 aspect CircularExpressions {
 
-	syn lazy boolean FExp.isCircular() circular [true] = false;
-	
-	eq FBinExp.isCircular() = getLeft().isCircular() || getRight().isCircular();
-	eq FUnaryExp.isCircular() = getFExp().isCircular();
+	/**
+	 * \brief Check if expression is circular.
+	 * 
+	 * Default implemenation returns <code>true</code> if any direct FExp child 
+	 * is circular.
+	 */
+	syn lazy boolean FExp.isCircular() circular [true] {
+		for (FExp e : childFExps())
+			if (e.isCircular())
+				return true;
+		return false;
+	}
 	
 	eq FIdUseExp.isCircular() = myFV().isCircular();
 	eq FInstAccessExp.isCircular() = getInstAccess().myInstComponentDecl().isCircular();	
-	eq FFunctionCall.isCircular() {
-		for (FExp e : getArgs()) {
-			if (e.isCircular()) {
-				return true;
-			}
-		}
-		return false;
-	}
+
 	syn lazy boolean FForIndex.isCircular() circular [true] = hasFExp()? getFExp().isCircular(): false;
-	eq FIfExp.isCircular() {
-		if (getIfExp().isCircular() || getThenExp().isCircular() || getElseExp().isCircular()) {
-			return true;
-		} else {
-			for (FElseIfExp ee : getFElseIfExps()) {
-				if (ee.isCircular()) {
-					return true;
-				}
-			}
-		} 
-		return false;
-	}
-	eq FElseIfExp.isCircular() = getIfExp().isCircular() || getThenExp().isCircular();
-	eq FArray.isCircular() {
-		for (FExp e : getFExps()) {
-			if (e.isCircular()) {
-				return true;
-			}
-		}
-		return false;
-	}
-	eq FSumExp.isCircular() = getFExp().isCircular();
+
 	eq FIterExp.isCircular() {
 		if (getFExp().isCircular()) 
 			return true;
@@ -927,40 +907,6 @@ aspect CircularExpressions {
 				return true;
 		return false;
 	}	
-	
-	eq FRangeExp.isCircular() {
-		for (FExp e : getFExps()) {
-			if (e.isCircular()) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	eq FMathematicalFunctionCall.isCircular() = getFExp().isCircular();
-	eq FAtan2Exp.isCircular() = getFExp().isCircular() || getY().isCircular();
-	eq FSizeExp.isCircular() = getFExp().isCircular() || (hasDim() && getDim().isCircular());
-	eq FMinMaxExp.isCircular() = getX().isCircular() || (hasY() && getY().isCircular());
-	eq FOnes.isCircular() {
-		for (FExp e : getFExps()) {
-			if (e.isCircular()) {
-				return true;
-			}
-		}
-		return false;
-	}
-	eq FZeros.isCircular() {
-		for (FExp e : getFExps()) {
-			if (e.isCircular()) {
-				return true;
-			}
-		}
-		return false;
-	}
-	eq FTranspose.isCircular() = getFExp().isCircular();
-	eq FCross.isCircular()     = getX().isCircular() || getY().isCircular();
-	
-	eq FAbsExp.isCircular()    = getFExp().isCircular();
 	
 
 	syn lazy boolean AbstractFVariable.isCircular() circular [true] = false;

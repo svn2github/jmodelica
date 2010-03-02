@@ -227,9 +227,10 @@ aspect InstFunctionBinding {
 				map.put("ones",  new InfArgsBuiltInCreator(new FOnes(),       0));
 				map.put("zeros", new InfArgsBuiltInCreator(new FZeros(),      0));
 				map.put("fill",  new InfArgsBuiltInCreator(new FFillExp(),    1));
-				map.put("size",  new VarArgsBuiltInCreator(new FSizeExp(), 1, 2));
-				map.put("min",   new VarArgsBuiltInCreator(new FMinExp(),  1, 2));
-				map.put("max",   new VarArgsBuiltInCreator(new FMaxExp(),  1, 2));
+				map.put("cat",   new InfArgsBuiltInCreator(new FCatExp(),     1));
+				map.put("size", new VarArgsBuiltInCreator(new FSizeExp(), 1, 2));
+				map.put("min",  new VarArgsBuiltInCreator(new FMinExp(),  1, 2));
+				map.put("max",  new VarArgsBuiltInCreator(new FMaxExp(),  1, 2));
 			}
 			
 			private static class BuiltInCreator {
@@ -274,8 +275,8 @@ aspect InstFunctionBinding {
 					for (int i = numArgs; i < args.length; i++)
 						exps.add(args[i].getFExp());
 					res.setChild(exps, 0);
-					for (int i = 1; i < numArgs + 1; i++)
-						res.setChild(args[i - 1].getFExp(), i);
+					for (int i = 0; i < numArgs; i++)
+						res.setChild(args[i].getFExp(), i + 1);
 				}
 				
 				public boolean isInfArgs() {

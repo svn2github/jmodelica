@@ -1305,6 +1305,22 @@ aspect FlattPrettyPrint {
 			pre = SEP;
 		}
 	}
+	
+	protected void FInfArgsFunctionCall.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
+		getFExps().prettyPrintWithSep(p, str, indent, o, SEP);
+	}
+	
+	protected void FFillExp.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getFillExp(), str, indent, o);
+		str.print(SEP);
+		super.prettyPrintArguments(p, str, indent, o);
+	}
+	
+	protected void FCatExp.prettyPrintArguments(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getDim(), str, indent, o);
+		str.print(SEP);
+		super.prettyPrintArguments(p, str, indent, o);
+	}
 
 	syn String FBuiltInFunctionCall.builtInName();
 	eq FSinExp.builtInName()     = "sin";
@@ -1330,6 +1346,7 @@ aspect FlattPrettyPrint {
 	eq FOnes.builtInName()       = "ones";
 	eq FZeros.builtInName()      = "zeros";
 	eq FFillExp.builtInName()    = "fill";
+	eq FCatExp.builtInName()     = "cat";
 	eq FParseArray.builtInName() = "array";
 	eq FAbsExp.builtInName()     = "abs";
 	eq FMinExp.builtInName()     = "min";

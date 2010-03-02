@@ -790,6 +790,12 @@ aspect FlatExpressions {
 		return res;
 	}
 	
+	public FCatExp FCatExp.flatten(FQName prefix) {
+		FCatExp res = (FCatExp) super.flatten(prefix);
+		res.setDim(getDim().flatten(prefix));
+		return res;
+	}
+	
 	public FTimeExp FTimeExp.flatten(FQName prefix) { return new FTimeExp(); }
 	public FEndExp  FEndExp.flatten(FQName prefix)  { return new FEndExp(); }
 		

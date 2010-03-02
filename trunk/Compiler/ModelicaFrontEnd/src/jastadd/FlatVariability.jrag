@@ -58,9 +58,9 @@ aspect FlatVariability {
 	protected int FDiscrete.variabilityLevel()   { return VARIABILITY_LEVEL; }
 	protected int FContinuous.variabilityLevel() { return VARIABILITY_LEVEL; }
 	protected static final int FConstant.VARIABILITY_LEVEL   = 0;
-	protected static final int FParameter.VARIABILITY_LEVEL  = 1;
-	protected static final int FDiscrete.VARIABILITY_LEVEL   = 2;
-	protected static final int FContinuous.VARIABILITY_LEVEL = 3;
+	protected static final int FParameter.VARIABILITY_LEVEL  = 10;
+	protected static final int FDiscrete.VARIABILITY_LEVEL   = 20;
+	protected static final int FContinuous.VARIABILITY_LEVEL = 30;
 	
 	syn boolean FVariable.isConstant() = getFTypePrefixVariability().constantVariability();
     syn boolean FVariable.isParameter() = getFTypePrefixVariability().parameterVariability();
@@ -195,6 +195,7 @@ aspect FlatVariability {
 	
 	eq FArray.variability()      = combineFExpListVariability(getFExps());
 	eq FParseArray.variability() = combineFExpListVariability(getFExps());
+	eq FCatExp.variability()     = combineFExpListVariability(getFExps()).combine(getDim().variability());
 	
 	eq FIterExp.variability() = getFExp().variability();
 	eq FSumExp.variability()  = getFExp().variability();

@@ -1763,7 +1763,6 @@ model ArrayIterTest3
          description="Array constructor with iterators: without in",
          errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1529, column 28:
   For index without in expression isn't supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
@@ -6562,6 +6561,206 @@ end ArrayTests.LongArrayForm4;
  Real x2[3] = {4,5,6};
  Real x3[3,3] = array(x1,x2,{7,8,9});
 end LongArrayForm4;
+
+
+
+model ArrayCat1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayCat1",
+         description="cat() operator: basic test",
+         flatModel="
+fclass ArrayTests.ArrayCat1
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[3,1];
+ Real x[3,2];
+ Real x[4,1];
+ Real x[4,2];
+ Real x[5,1];
+ Real x[5,2];
+equation
+ x[1,1] = 1;
+ x[1,2] = 2;
+ x[2,1] = 3;
+ x[2,2] = 4;
+ x[3,1] = 5;
+ x[3,2] = 6;
+ x[4,1] = 7;
+ x[4,2] = 8;
+ x[5,1] = 9;
+ x[5,2] = 0;
+end ArrayTests.ArrayCat1;
+")})));
+
+ Real x[5,2] = cat(1, {{1,2},{3,4}}, {{5,6}}, {{7,8},{9,0}});
+end ArrayCat1;
+
+
+model ArrayCat2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayCat2",
+         description="cat() operator: basic test",
+         flatModel="
+fclass ArrayTests.ArrayCat2
+ Real x[1,1];
+ Real x[1,2];
+ Real x[1,3];
+ Real x[1,4];
+ Real x[1,5];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[2,3];
+ Real x[2,4];
+ Real x[2,5];
+equation
+ x[1,1] = 1.0;
+ x[1,2] = 2.0;
+ x[1,3] = 3;
+ x[1,4] = 4;
+ x[1,5] = 5;
+ x[2,1] = 6;
+ x[2,2] = 7;
+ x[2,3] = 8;
+ x[2,4] = 9;
+ x[2,5] = 0;
+end ArrayTests.ArrayCat2;
+")})));
+
+ Real x[2,5] = cat(2, {{1.0,2.0},{6,7}}, {{3},{8}}, {{4,5},{9,0}});
+end ArrayCat2;
+
+
+model ArrayCat3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ArrayCat3",
+         description="cat() operator: using strings",
+         flatModel="
+fclass ArrayTests.ArrayCat3
+ String x[2,5] = cat(2, {{\"1\",\"2\"},{\"6\",\"7\"}}, {{\"3\"},{\"8\"}}, {{\"4\",\"5\"},{\"9\",\"0\"}});
+end ArrayTests.ArrayCat3;
+")})));
+
+ String x[2,5] = cat(2, {{"1","2"},{"6","7"}}, {{"3"},{"8"}}, {{"4","5"},{"9","0"}});
+end ArrayCat3;
+
+
+model ArrayCat4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayCat4",
+         description="cat() operator: size mismatch",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6656, column 19:
+  The types of the arguments of cat() do not match
+")})));
+
+ Integer x[5,2] = cat(2, {{1,2},{3,4}}, {{5,6,0}}, {{7,8},{9,0}});
+end ArrayCat4;
+
+
+model ArrayCat5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayCat5",
+         description="cat() operator: size mismatch",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6672, column 19:
+  The types of the arguments of cat() do not match
+")})));
+
+ Integer x[2,5] = cat(2, {{1,2},{6,7}}, {{3},{8},{0}}, {{4,5},{9,0}});
+end ArrayCat5;
+
+
+model ArrayCat6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayCat6",
+         description="cat() operator: type mismatch",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6688, column 10:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+
+ Integer x[2,5] = cat(2, {{1.0,2},{6,7}}, {{3},{8}}, {{4,5},{9,0}});
+end ArrayCat6;
+
+
+model ArrayCat6b
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayCat6b",
+         description="cat() operator: type mismatch",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6704, column 19:
+  The types of the arguments of cat() do not match
+")})));
+
+ Integer x[2,5] = cat(2, {{"1","2"},{"6","7"}}, {{3},{8}}, {{4,5},{9,0}});
+end ArrayCat6b;
+
+
+model ArrayCat7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayCat7",
+         description="cat() operator: to high variability of dim",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6721, column 17:
+  Dimension argument of cat() does not have constant or parameter variability: d
+")})));
+
+ Integer d = 1;
+ Integer x[4] = cat(d, {1,2}, {4,5});
+end ArrayCat7;
+
+
+model ArrayCat8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ArrayCat8",
+         description="cat() operator: parameter dim",
+         flatModel="
+fclass ArrayTests.ArrayCat8
+ parameter Integer d = 1 /* 1 */;
+ Integer x[4] = cat(d, {1,2}, {4,5});
+end ArrayTests.ArrayCat8;
+")})));
+
+ parameter Integer d = 1;
+ Integer x[4] = cat(d, {1,2}, {4,5});
+end ArrayCat8;
+
+
+model ArrayCat9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayCat9",
+         description="cat() operator: non-Integer dim",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6743, column 17:
+  Dimension argument of cat() is not compatible with Integer: 1.0
+")})));
+
+ Integer x[4] = cat(1.0, {1,2}, {4,5});
+end ArrayCat9;
 
 
 

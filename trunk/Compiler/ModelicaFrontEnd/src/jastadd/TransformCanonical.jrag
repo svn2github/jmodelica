@@ -1109,7 +1109,7 @@ aspect Scalarization {
 	
 	public FExp FSizeExp.scalarizeExp(HashMap<String,FExp> indexMap) {
 		// Only the form with dim can be in the tree at this point
-		int dim = getDim().ceval().intValue() - 1;
+		int dim = dimension();
 		return getFExp().size().createFExp(dim);
 	}
 	

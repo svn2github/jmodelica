@@ -199,30 +199,44 @@ aspect FlatTypeCheck {
   
   public void FInfArgsFunctionCall.typeCheck() {
       super.typeCheck();
-      if (getNumOriginalArg() < minNumArgs()) {
+      if (getNumOriginalArg() < minNumArgs()) 
     	  error("Too few arguments to " + builtInName() + "(), must have at least " + minNumArgs());
-      } else {
-	      for (FExp exp : getFExps()) {
-	          if (!exp.type().isUnknown() && !typeOfArgIsOK(exp)) {
-	              exp.error("Argument of " + builtInName() + "() is not " + 
-	            		  getOKArgTypeString() + ": " + exp.prettyPrint(""));
-	          } else if (!variabilityOfArgIsOK(exp)) {
-	        	  exp.error("Argument of " + builtInName() + "() does not have " + 
-	        			  getOKArgVariabilityString() + " variability: " + exp.prettyPrint(""));
-	          }
-	      }
+      else 
+    	  typeCheckFExps();
+  }
+  
+  public void FInfArgsFunctionCall.typeCheckFExps() {
+      for (FExp exp : getFExps()) {
+          if (!exp.type().isUnknown() && !typeOfArgIsOK(exp)) {
+              exp.error("Argument of " + builtInName() + "() is not " + 
+            		  getOKArgTypeString() + ": " + exp);
+          } else if (!variabilityOfArgIsOK(exp)) {
+        	  exp.error("Argument of " + builtInName() + "() does not have " + 
+        			  getOKArgVariabilityString() + " variability: " + exp);
+          }
       }
+  }
+  
+  public void FCatExp.typeCheckFExps() {
+	  if (!getDim().type().isUnknown() && !fIntegerScalarType().typeCompatible(getDim().type()))
+		  error("Dimension argument of cat() is not compatible with Integer: " + getDim());
+	  else if (!getDim().type().isUnknown() && !getDim().variability().lessOrEqual(fParameter()))
+		  error("Dimension argument of cat() does not have constant or parameter variability: " + getDim());
+  }
+  
+  public void FCatExp.typeError() {
+	  error("The types of the arguments of cat() do not match");	  
   }
   
   syn int FInfArgsFunctionCall.minNumArgs() = 1;
   eq FFillExp.minNumArgs() = 2;
+  eq FCatExp.minNumArgs()  = 2;
   
-  syn boolean FInfArgsFunctionCall.typeOfArgIsOK(FExp exp) = fIntegerScalarType().typeCompatible(exp.type());
-  syn String FInfArgsFunctionCall.getOKArgTypeString() = "compatible with Integer";
-  
+  syn boolean FInfArgsFunctionCall.typeOfArgIsOK(FExp exp)        = fIntegerScalarType().typeCompatible(exp.type());
   syn boolean FInfArgsFunctionCall.variabilityOfArgIsOK(FExp exp) = exp.variability().lessOrEqual(fParameter());
-  syn String FInfArgsFunctionCall.getOKArgVariabilityString() = "constant or parameter";
-  
+  syn String FInfArgsFunctionCall.getOKArgTypeString()            = "compatible with Integer";
+  syn String FInfArgsFunctionCall.getOKArgVariabilityString()     = "constant or parameter";
+   
   public void FBuiltInFunctionCall.typeCheck() {
 	  if (checkTypeAsExpression())
 		  super.typeCheck();
@@ -232,8 +246,12 @@ aspect FlatTypeCheck {
   }
   
   syn boolean FBuiltInFunctionCall.checkTypeAsExpression() = false;
-  eq FSizeExp.checkTypeAsExpression() = true;
+  eq FSizeExp.checkTypeAsExpression()   = true;
   eq FMinMaxExp.checkTypeAsExpression() = true;
+  eq FCatExp.checkTypeAsExpression()    = dimensionIsOk();
+  
+  syn boolean FCatExp.dimensionIsOk() = getDim().variability().lessOrEqual(fParameter()) && 
+  										getDim().type().isInteger() && getDim().type().isScalar();
   
   public void InstFunctionCall.typeCheck() {
 	  if (!isFunctionCallClause() && size().isUnknown())
