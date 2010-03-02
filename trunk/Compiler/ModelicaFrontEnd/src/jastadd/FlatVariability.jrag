@@ -193,9 +193,10 @@ aspect FlatVariability {
 
 	eq FRangeExp.variability() = combineFExpListVariability(getFExps());
 	
-	eq FArray.variability()      = combineFExpListVariability(getFExps());
-	eq FParseArray.variability() = combineFExpListVariability(getFExps());
-	eq FCatExp.variability()     = combineFExpListVariability(getFExps()).combine(getDim().variability());
+	eq FArray.variability()       = combineFExpListVariability(getFExps());
+	eq FParseArray.variability()  = combineFExpListVariability(getFExps());
+	eq FAbstractCat.variability() = combineFExpListVariability(getFExps());
+	eq FCatExp.variability()      = super.variability().combine(getDim().variability());
 	
 	eq FIterExp.variability() = getFExp().variability();
 	eq FSumExp.variability()  = getFExp().variability();
@@ -203,10 +204,10 @@ aspect FlatVariability {
 	eq FSubscriptedExp.variability()  = combineFExpListVariability(getArray().iterable());
 	
 	eq FNoEventExp.variability() = getFExp().variability();
-	eq FIdentity.variability() = fConstant();
-	eq FOnes.variability() = fConstant();
-	eq FZeros.variability() = fConstant();
-	eq FFillExp.variability() = getFillExp().variability();
+	eq FIdentity.variability()   = fConstant();
+	eq FOnes.variability()       = fConstant();
+	eq FZeros.variability()      = fConstant();
+	eq FFillExp.variability()    = getFillExp().variability();
 	
    	public FTypePrefixVariability FTypePrefixVariability.combine(FTypePrefixVariability other) {   			
    		if (this instanceof FContinuous) {

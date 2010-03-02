@@ -392,8 +392,8 @@ AmbiguousAccess : ArrayAccess;
 ComponentAccess : ArrayAccess;
 
 ArrayConstructor : Exp ::= FunctionArguments;
-Matrix : Exp ::= ExpList*;
-ExpList : Exp ::= Exp*;
+Matrix : Exp ::= Row:MatrixRow*;
+MatrixRow : Exp ::= Exp*;
 
 ArraySubscripts ::= Subscript*;
 abstract Subscript;

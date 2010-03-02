@@ -175,6 +175,13 @@ aspect Arrays {
 		// all brances are equal.
 		return getFExp(0).ndims() + 1;
 	}
+	eq FAbstractCat.ndims() {
+		int ndims = 2;
+		for (FExp e : getFExps())
+			if (e.ndims() > ndims)
+				ndims = e.ndims();
+		return ndims;
+	}
 	eq FCatExp.ndims()         = getFExp(0).ndims();
 	eq FSumExp.ndims()         = getFExp().isIterExp() ? iterExp().ndims() : 0;
 	eq FIterExp.ndims()        = getFExp().ndims() + getNumForIndex();
@@ -458,14 +465,18 @@ aspect Arrays {
 		return getFExp(0).size().expand(getNumFExp());
 	}
 	
-	syn lazy int FCatExp.dimension()  = getDim().ceval().intValue() - 1;
+	syn lazy int FAbstractCat.dimension();
+	eq FCatExp.dimension()    = getDim().ceval().intValue() - 1;
+	eq FMatrix.dimension()    = 0;
+	eq FMatrixRow.dimension() = 1;
+	
 	syn lazy int FSizeExp.dimension() = getDim().ceval().intValue() - 1;
 	
-	eq FCatExp.size() {
+	eq FAbstractCat.size() {
 		int dim = dimension();
-		MutableSize ms = getFExp(0).size().mutableClone();
+		MutableSize ms = getFExp(0).size().promote(ndims()).mutableClone();
 		for (int i = 1; i < getNumFExp(); i++)
-			ms.add(dim, getFExp(i).size(), dim);
+			ms.add(dim, getFExp(i).size().promote(ndims()), dim);
 		return ms;
 	}
 	
@@ -959,15 +970,15 @@ aspect Arrays {
 		return arr;
 	}
 	
-	eq FCatExp.getArray() {
+	eq FAbstractCat.getArray() {
 		Array arr = new Array(indices());
 		int dim = dimension();
 		int adj = 0;
 		for (FExp exp : getFExps()) {
 			Array expArr = exp.getArray();
 			for (Index i : expArr.indices()) 
-				arr.set(i.adjusted(dim, adj), expArr.get(i));
-			adj += exp.size().get(dim);
+				arr.set(i.adjusted(dim, adj, ndims()), expArr.get(i));
+			adj += (exp.ndims() > dim) ? exp.size().get(dim) : 1;
 		}
 		return arr;
 	}
@@ -1430,6 +1441,18 @@ aspect ArrayIndices {
 		}
 		
 		/**
+		 * \brief Create a copy of this with <code>dim</code> dimensions, if necessary 
+		 *        adding dimensions of length 1 to the right side.
+		 */
+		public Size promote(int dim) {
+			if (dim <= size.length) 
+				return this;
+			Size ns = new Size(Arrays.copyOf(size, dim));
+			Arrays.fill(ns.size, size.length, dim, 1);
+			return ns;
+		}
+		
+		/**
 		 * \brief Return a Size that have the same lengths as this size where they are known, 
 		 *        and any that are unknown copied from the size of <code>exp</code>. 
 		 * 
@@ -1841,6 +1864,20 @@ aspect ArrayIndices {
 			return clone();
 		}
 		
+		/**
+		 * \brief Create a copy of this with <code>dim</code> dimensions, if necessary 
+		 *        adding dimensions of length 1 to the right side.
+		 */
+		public MutableSize promote(int dim) {
+			if (dim <= size.length) 
+				return this;
+			MutableSize ns = new MutableSize(dim);
+			System.arraycopy(size, 0, ns.size, 0, size.length);
+			System.arraycopy(exps, 0, ns.exps, 0, exps.length);
+			Arrays.fill(ns.size, size.length, dim, 1);
+			return ns;
+		}
+		
 	}
 	
 	public class Array {
@@ -2175,12 +2212,14 @@ aspect ArrayIndices {
 		
 		/**
 		 * \brief Creates a new Index that is a copy of this Index, but with <code>adj</code>
-		 *        added to dimension <code>dim</code>.
+		 *        added to dimension <code>dim</code> and promoted to <code>ndims</code> 
+		 *        dimensions by adding ones to the end.
 		 * 
 		 * The new Index will not be bound to any Indices object.
 		 */
-		public Index adjusted(int dim, int adj) {
-			Index copy = new Index(index.clone());
+		public Index adjusted(int dim, int adj, int ndims) {
+			Index copy = new Index(Arrays.copyOf(index, ndims));
+			Arrays.fill(copy.index, index.length, ndims, 1);
 			copy.index[dim] += adj;
 			return copy;
 		}
@@ -2423,6 +2462,8 @@ aspect ArrayIndices {
 				if (index.internal >= max)
 					throw new NoSuchElementException();
 				index.internal++;
+				if (ndims == 0)
+					return index;
 				int[] ind = index.index();
 				int i;
 				for (i = ndims - 1; i > 0 && ind[i] >= size.get(i); i--)

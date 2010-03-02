@@ -6658,7 +6658,7 @@ model ArrayCat4
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6656, column 19:
-  The types of the arguments of cat() do not match
+  Types does not match in array concatenation
 ")})));
 
  Integer x[5,2] = cat(2, {{1,2},{3,4}}, {{5,6,0}}, {{7,8},{9,0}});
@@ -6674,7 +6674,7 @@ model ArrayCat5
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6672, column 19:
-  The types of the arguments of cat() do not match
+  Types does not match in array concatenation
 ")})));
 
  Integer x[2,5] = cat(2, {{1,2},{6,7}}, {{3},{8},{0}}, {{4,5},{9,0}});
@@ -6706,7 +6706,7 @@ model ArrayCat6b
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6704, column 19:
-  The types of the arguments of cat() do not match
+  Types does not match in array concatenation
 ")})));
 
  Integer x[2,5] = cat(2, {{"1","2"},{"6","7"}}, {{3},{8}}, {{4,5},{9,0}});
@@ -6761,6 +6761,134 @@ Semantic error at line 6743, column 17:
 
  Integer x[4] = cat(1.0, {1,2}, {4,5});
 end ArrayCat9;
+
+
+
+model ArrayShortCat1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayShortCat1",
+         description="Shorthand array concatenation operator: basic test",
+         flatModel="
+fclass ArrayTests.ArrayShortCat1
+ Real x[1,1];
+ Real x[1,2];
+ Real x[1,3];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[2,3];
+equation
+ x[1,1] = 1;
+ x[1,2] = 2;
+ x[1,3] = 3;
+ x[2,1] = 4;
+ x[2,2] = 5;
+ x[2,3] = 6;
+end ArrayTests.ArrayShortCat1;
+")})));
+
+ Real x[2,3] = [1,2,3; 4,5,6];
+end ArrayShortCat1;
+
+model ArrayShortCat2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayShortCat2",
+         description="Shorthand array concatenation operator: different sizes",
+         flatModel="
+fclass ArrayTests.ArrayShortCat2
+ Real x[1,1];
+ Real x[1,2];
+ Real x[1,3];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[2,3];
+ Real x[3,1];
+ Real x[3,2];
+ Real x[3,3];
+equation
+ x[1,1] = 1;
+ x[1,2] = 2;
+ x[1,3] = 3;
+ x[2,1] = 4;
+ x[3,1] = 7;
+ x[2,2] = 5;
+ x[2,3] = 6;
+ x[3,2] = 8;
+ x[3,3] = 9;
+end ArrayTests.ArrayShortCat2;
+")})));
+
+ Real x[3,3] = [a, b; c, d];
+ Real a = 1;
+ Real b[1,2] = {{2,3}};
+ Real c[2] = {4,7};
+ Real d[2,2] = {{5,6},{8,9}};
+end ArrayShortCat2;
+
+
+model ArrayShortCat3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayShortCat3",
+         description="Shorthand array concatenation operator: more than 2 dimensions",
+         flatModel="
+fclass ArrayTests.ArrayShortCat3
+ Real x[1,1,1,1];
+ Real x[1,1,2,1];
+ Real x[1,2,1,1];
+ Real x[1,2,2,1];
+ Real x[2,1,1,1];
+ Real x[2,1,2,1];
+ Real x[2,2,1,1];
+ Real x[2,2,2,1];
+equation
+ x[1,1,1,1] = 1;
+ x[1,1,2,1] = 2;
+ x[1,2,1,1] = 3;
+ x[1,2,2,1] = 4;
+ x[2,1,1,1] = 5;
+ x[2,1,2,1] = 6;
+ x[2,2,1,1] = 7;
+ x[2,2,2,1] = 8;
+end ArrayTests.ArrayShortCat3;
+")})));
+
+ Real x[2,2,2,1] = [{{{{1},{2}}}}, {{{3,4}}}; {{{5,6}}}, {{{7,8}}}];
+end ArrayShortCat3;
+
+
+model ArrayShortCat4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayShortCat4",
+         description="Shorthand array concatenation operator:",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6862, column 16:
+  Types does not match in array concatenation
+")})));
+
+ Real x[2,3] = [{{1,2,3}}; {{4,5}}];
+end ArrayShortCat4;
+
+
+model ArrayShortCat5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayShortCat5",
+         description="Shorthand array concatenation operator:",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6878, column 17:
+  Types does not match in array concatenation
+")})));
+
+ Real x[3,2] = [{1,2,3}, {4,5}];
+end ArrayShortCat5;
+
 
 
 

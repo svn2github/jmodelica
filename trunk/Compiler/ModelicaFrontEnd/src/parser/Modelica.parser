@@ -1065,19 +1065,15 @@ NamedArgument named_argument =
   ;
   
 Matrix matrix = 
-  exp_list                    {: Matrix m = new Matrix();
-                                 m.addExpList(exp_list); 
-                                 return m; :}
-  | matrix SEMICOLON exp_list {: matrix.addExpList(exp_list); 
-                                 return matrix; :}      
+    matrix_row                   {: return new Matrix(new List().add(matrix_row)); :}
+  | matrix SEMICOLON matrix_row  {: matrix.addRow(matrix_row); 
+                                    return matrix; :}      
   ;  
   
-ExpList exp_list = 
-  exp                   {: ExpList e = new ExpList();
-                           e.addExp(exp); 
-                           return e; :}
-  | exp_list COMMA exp  {: exp_list.addExp(exp); 
-                           return exp_list; :}
+MatrixRow matrix_row = 
+    exp                   {: return new MatrixRow(new List().add(exp)); :}
+  | matrix_row COMMA exp  {: matrix_row.addExp(exp); 
+                             return matrix_row; :}
   ; 
   
 List arg_list = 

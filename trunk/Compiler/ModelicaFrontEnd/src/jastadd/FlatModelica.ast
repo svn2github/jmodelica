@@ -728,15 +728,8 @@ FArray : FExp ::= FExp*;
 
 /**
  * \brief Long form of array constructor expression.
- *
- * Rewritten to FArray immediately.
  */
 FLongArray : FArray;
-
-/**
- * \brief Array constructor expression.
- */
-FCatExp : FInfArgsFunctionCall ::= Dim:FExp;
 
 /**
  * \brief Initial node for long form of array constructor expression.
@@ -744,6 +737,26 @@ FCatExp : FInfArgsFunctionCall ::= Dim:FExp;
  * Rewritten to FLongArray immediately.
  */
 FParseArray : FInfArgsFunctionCall;
+
+/**
+ * \brief Abstract super class for all forms of array concatenation expression.
+ */
+abstract FAbstractCat : FInfArgsFunctionCall;
+ 
+/**
+ * \brief Array concatenation expression.
+ */
+FCatExp : FAbstractCat ::= Dim:FExp;
+
+/**
+ * \brief Short form for array concatenation expression.
+ */
+FMatrix : FAbstractCat;
+
+/**
+ * \brief Row in short form for array concatenation expression.
+ */
+FMatrixRow : FAbstractCat;
 
 /**
  * \brief Generated expression that applies array subscripts to any expression.

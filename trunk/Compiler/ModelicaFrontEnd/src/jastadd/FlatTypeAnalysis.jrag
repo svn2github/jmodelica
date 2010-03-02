@@ -233,13 +233,13 @@ aspect FlatTypeAnalysis {
 		return t.arrayType(size());
 	}
 	
-	eq FCatExp.type() {
+	eq FAbstractCat.type() {
 		if (!dimensionIsOk())
 			return fUnknownType();
 		int dim = dimension();
 		
 		FPrimitiveType t = getFExp(0).type().scalarType();
-		Size s = getFExp(0).size();
+		Size s = getFExp(0).size().promote(ndims());
 		boolean func = inFunction();
 		for (int i = 1; i < getNumFExp(); i++) {
 			// Check that the types of the elements are consistent
@@ -250,7 +250,7 @@ aspect FlatTypeAnalysis {
 				t = t.numericPromotion(t2);
 			
 			// Check that the sizes are consistent
-			if (!s.equivalentExcept(getFExp(i).size(), func, dim))
+			if (!s.equivalentExcept(getFExp(i).size().promote(ndims()), func, dim))
 				return fUnknownType();
 		}
 		return t.arrayType(size());

@@ -889,37 +889,6 @@ aspect FlatExpressions {
 		}
 	}
 
-/*	
-	
-	eq Matrix.flatten(FQName prefix) {
-		List l = new List();
-	    for (int i=0;i<getNumExpList();i++) {
-	   	  l.add(getExpList(i).instantiate((QName)decls.clone()));
-		}
-		return new FMatrix(l);
-	}
-	
-	eq ExpList.flatten(FQName prefix) {
-	   List l = new List();
-	   for (int i=0;i<getNumExp();i++)
-	   	 l.add(getExp(i).instantiate((QName)decls.clone()));
-	   return new FExpList(l);
-	}
-	
-	eq SizeExp.flatten(FQName prefix) {
-		return new FSizeExp((FIdUse)getAccess().instantiate(decls),getDim().instantiate(decls));
-	}
-	
-	public void FClass.cleanInputOutput() {
-	
-		for (int i=0;i<getNumFVariable();i++) {
-			if (getFVariable(i).getNumFQName()>1 && getFVariable(i).hasFTypePrefixInputOutput())
-				getFVariable(i).setFTypePrefixInputOutputOpt(new Opt());
-		}
-	
-	}
-*/
-
 }
 
 aspect InstantiatedExpressions {
@@ -1129,24 +1098,19 @@ aspect InstantiatedExpressions {
 		return copyLocationTo(n);
 	}
 
-
-/*	
-	
-	eq Matrix.instantiate() {
-		List l = new List();
-	    for (int i=0;i<getNumExpList();i++) {
-	   	  l.add(getExpList(i).instantiate((QName)decls.clone()));
-		}
-		return new FMatrix(l);
+	public FExp Matrix.instantiate() {
+		FMatrix m = new FMatrix();
+		for (MatrixRow r : getRows())
+			m.addFExp(r.instantiate());
+		return copyLocationTo(m);
 	}
 	
-	eq ExpList.instantiate() {
-	   List l = new List();
-	   for (int i=0;i<getNumExp();i++)
-	   	 l.add(getExp(i).instantiate((QName)decls.clone()));
-	   return new FExpList(l);
+	public FMatrixRow MatrixRow.instantiate() {
+		FMatrixRow r = new FMatrixRow();
+		for (Exp e : getExps())
+			r.addFExp(e.instantiate());
+		return copyLocationTo(r);
 	}
-	*/
 	
 	public FExp AddExp.instantiate() { 
 		return copyLocationTo(new FAddExp(getLeft().instantiate(),getRight().instantiate()));

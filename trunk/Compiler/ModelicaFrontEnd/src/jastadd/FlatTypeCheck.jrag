@@ -224,13 +224,16 @@ aspect FlatTypeCheck {
 		  error("Dimension argument of cat() does not have constant or parameter variability: " + getDim());
   }
   
-  public void FCatExp.typeError() {
-	  error("The types of the arguments of cat() do not match");	  
+  public void FAbstractCat.typeCheckFExps() {}
+  
+  public void FAbstractCat.typeError() {
+	  error("Types does not match in array concatenation");	  
   }
   
   syn int FInfArgsFunctionCall.minNumArgs() = 1;
-  eq FFillExp.minNumArgs() = 2;
-  eq FCatExp.minNumArgs()  = 2;
+  eq FFillExp.minNumArgs()     = 2;
+  eq FCatExp.minNumArgs()      = 2;
+  eq FAbstractCat.minNumArgs() = 0;
   
   syn boolean FInfArgsFunctionCall.typeOfArgIsOK(FExp exp)        = fIntegerScalarType().typeCompatible(exp.type());
   syn boolean FInfArgsFunctionCall.variabilityOfArgIsOK(FExp exp) = exp.variability().lessOrEqual(fParameter());
@@ -246,13 +249,16 @@ aspect FlatTypeCheck {
   }
   
   syn boolean FBuiltInFunctionCall.checkTypeAsExpression() = false;
-  eq FSizeExp.checkTypeAsExpression()   = true;
-  eq FMinMaxExp.checkTypeAsExpression() = true;
-  eq FCatExp.checkTypeAsExpression()    = dimensionIsOk();
+  eq FSizeExp.checkTypeAsExpression()     = true;
+  eq FMinMaxExp.checkTypeAsExpression()   = true;
+  eq FAbstractCat.checkTypeAsExpression() = dimensionIsOk();
   
-  syn boolean FCatExp.dimensionIsOk() = getDim().variability().lessOrEqual(fParameter()) && 
-  										getDim().type().isInteger() && getDim().type().isScalar();
-  
+  syn boolean FAbstractCat.dimensionIsOk(); 
+  eq FCatExp.dimensionIsOk()    = getDim().variability().lessOrEqual(fParameter()) && 
+  								  getDim().type().isInteger() && getDim().type().isScalar();
+  eq FMatrix.dimensionIsOk()    = true;
+  eq FMatrixRow.dimensionIsOk() = true;
+ 
   public void InstFunctionCall.typeCheck() {
 	  if (!isFunctionCallClause() && size().isUnknown())
 		  error("Could not evaluate array size of output " + expOutput().name());
