@@ -119,93 +119,68 @@
 				NoCacheCycle="false" ComponentCheck="true" visitcheck="false" LazyMaps="true" 
 				Deterministic="true" NoStatic="false" Debug="false">
 			<fileset dir="${local_ast}">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
+				<patternset id="jastadd.files">
+					<include name="*.ast" />
+					<include name="*.jadd" />
+					<include name="*.jrag" />
+				</patternset>
 			</fileset>
 			<fileset dir="${ast}">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
+				<patternset refid="jastadd.files"/>
 			</fileset>
 			<fileset dir="${ast}/codegen">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
+				<patternset refid="jastadd.files"/>
 			</fileset>
 			<fileset dir="${ast}/test-framework">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
+				<patternset refid="jastadd.files"/>
 			</fileset>
 			<fileset dir="${ast}/structural">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
+				<patternset refid="jastadd.files"/>
 			</fileset>
 			<fileset dir="${modelica_xml_back_end_ast}">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
-				<exclude name="TestFramework.jrag" />
+				<patternset id="jastadd.files.notestframework">
+					<include name="*.ast" />
+					<include name="*.jadd" />
+					<include name="*.jrag" />
+					<exclude name="TestFramework.jrag" />
+				</patternset>
 			</fileset>
 			<fileset dir="${modelica_xml_back_end_ast}/codegen">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
+				<patternset refid="jastadd.files"/>
 			</fileset>
 			<fileset dir="${modelica_xml_back_end_ast}/test-framework">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
+				<patternset refid="jastadd.files"/>
 			</fileset>
 			<fileset dir="${modelica_c_back_end_ast}">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
+				<patternset refid="jastadd.files"/>
 			</fileset>
 			<fileset dir="${modelica_c_back_end_ast}/codegen">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
+				<patternset refid="jastadd.files"/>
 			</fileset>
 			<fileset dir="${modelica_c_back_end_ast}/test-framework">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
+				<patternset refid="jastadd.files"/>
 			</fileset>
 			<fileset dir="${modelica_compiler_ast}">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
+				<patternset refid="jastadd.files"/>
 			</fileset>
 
 			<fileset dir="${optimica_front_end_ast}">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
+				<patternset refid="jastadd.files"/>
+			</fileset>
+			<fileset dir="${optimica_front_end_ast}/test-framework">
+				<patternset refid="jastadd.files"/>
 			</fileset>
 			<fileset dir="${optimica_xml_back_end_ast}">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
-				<exclude name="TestFramework.jrag" />
+				<patternset refid="jastadd.files.notestframework"/>
 			</fileset>
 			<fileset dir="${optimica_xml_back_end_ast}/codegen">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
-				<exclude name="TestFramework.jrag" />
+				<patternset refid="jastadd.files.notestframework"/>
 			</fileset>
 			<fileset dir="${optimica_c_back_end_ast}">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
+				<patternset refid="jastadd.files"/>
 			</fileset>
 			<fileset dir="${optimica_c_back_end_ast}/codegen">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
+				<patternset refid="jastadd.files"/>
 			</fileset>
 
 

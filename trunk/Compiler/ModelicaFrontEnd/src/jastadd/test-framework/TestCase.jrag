@@ -14,6 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+aspect TestCases {
 
 /**
  * @author jakesson
@@ -126,6 +127,10 @@ abstract public class TestCase {
 		return str_res;
 	}
 
+}
 	
-	
+	public static FClass TestCase.createFClass(InstClassDecl icd) {
+		return new FClass();
+	}
+
 }

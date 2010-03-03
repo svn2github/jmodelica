@@ -43,7 +43,7 @@ aspect OptimicaExpressions {
 	
 	refine InstNameClassification eq InstFunctionCall.getName().kind() = Kind.AMBIGUOUS_ACCESS;
 	
-	eq FStartTimeExp.ceval() {
+	eq FStartTimeExp.cevalCalc() {
 		if (myFOptClass().startTimeAttributeSet()) {
 			return myFOptClass().startTimeAttributeCValue();
 		} else if (myFOptClass().startTimeInitialGuessAttributeSet()) {
@@ -53,7 +53,7 @@ aspect OptimicaExpressions {
 		}
 	}
 
-	eq FFinalTimeExp.ceval() {
+	eq FFinalTimeExp.cevalCalc() {
 		if (myFOptClass().finalTimeAttributeSet()) {
 			return myFOptClass().finalTimeAttributeCValue();
 		} else if (myFOptClass().finalTimeInitialGuessAttributeSet()) {
@@ -62,34 +62,34 @@ aspect OptimicaExpressions {
 			return myFOptClass().finalTimeAttributeCValue();
 		}
 	}
+	
+	// TODO: Can the argument affect the constant value of a timed variable? Should only be constant if the variable is. 
+	eq FTimedVariable.cevalCalc()    = getName().ceval();
+	eq InstTimedVariable.cevalCalc() = getName().ceval();
+	
+	public void FTimedVariable.enableAliasRewrite() {
+		super.enableAliasRewrite();
+		rewriteAlias = true;
+		is$Final = false;
+	}
 		
-	boolean FTimedVariable.rewritten = false;
+	boolean FTimedVariable.rewriteAlias = false;
 	
 	/**
 	 * \brief FTimedVariables referring to alias variables need to be changed to 
 	 * FTimedVariables referring to their alias targets. 
 	 * 
-	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
-	 * is true. Notice that in order for the rewrite to be enable, the is$final
+	 * This is done by rewrites which are activated once enableAliasRewrite() has been 
+	 * called. Notice that in order for the rewrite to be enable, the is$final
 	 * field of FTimedVariables needs to be set to false: this is done by the recursive
 	 * method ASTNode.flushAllRecursiveClearFinal. 
 	 */
 	rewrite FTimedVariable {
-		when (!rewritten && myFClass() != null && 
-				myFClass().aliasVariablesEliminated &&
-				!getName().myFV().isUnknown() && getName().myFV().isAlias()) to FExp {
+		when (rewriteAlias && !getName().myFV().isUnknown() && getName().myFV().isAlias()) to FExp {
 			FQName new_name = (FQName)((FVariable)getName().myFV()).alias().getFQName().fullCopy();
-			//FQName old_name = getName().getFQName();
-			//System.out.println(" ************************************* FIdUseExp.rewrite " + old_name.name() + " -> " + new_name.name());
-
-			FExp new_exp = null;
-			FTimedVariable tv = new FTimedVariable(new FIdUse(new_name),getArg());
-			tv.rewritten = true;
-			if (getName().myFV().isNegated()) {
-				new_exp = new FNegExp(tv);
-			} else {
-				new_exp = tv;
-			}
+			FExp new_exp = new FTimedVariable(new FIdUse(new_name),getArg());
+			if (getName().myFV().isNegated()) 
+				new_exp = new FNegExp(new_exp);
 			return new_exp;
 		}
 	}
@@ -141,9 +141,8 @@ aspect OptimicaArrays {
 	 * @return Array dimension.
 	 */	
 	syn int FConstraint.ndims() {
-		if (getLeft().ndims() == getRight().ndims()) {
+		if (getLeft().ndims() == getRight().ndims()) 
 			return getLeft().ndims();
-		}
 		return -1;
 	}	
 	
@@ -175,30 +174,30 @@ aspect OptimicaArrays {
 
 	eq InstTimedVariable.size() = getName().size();
 	eq FTimedVariable.size() = getName().size();
-	eq FStartTimeExp.size() = null;
-	eq FFinalTimeExp.size() = null;
+	eq FStartTimeExp.size() = Size.SCALAR;
+	eq FFinalTimeExp.size() = Size.SCALAR;
 
-	eq InstTimedVariable.indices() = getName().indices();
-	eq FTimedVariable.indices() = getName().indices();
-	eq FStartTimeExp.indices() = null;
-	eq FFinalTimeExp.indices() = null;
+	eq InstTimedVariable.getArray() {
+		if (!isArray()) 
+			return super.getArray();
+		Array array = new Array(indices());
+		for (Index i : array.indices()) {
+			InstTimedVariable tv = fullCopy();
+			tv.getName().specify(i, true);
+			array.set(i, tv);
+		}
+		return array;
+	}
 
 	eq FTimedVariable.getArray() {
-		if (isArray()) {
-			Array array = new Array(indices());
-			Indices ind = array.indices();
-			for (Index i : ind) {
-				FTimedVariable ftv_tmp = (FTimedVariable) fullCopy();
-				FQName fqn = ftv_tmp.getName().getFQName();
-				fqn.setLastFArraySubscripts(ind.translate(i).newFArraySubscripts());
-				fqn.scalarized = true;
-				array.set(i, ftv_tmp);
-			}
-			return array;
-			
-		} else {
-			return new ScalarAsArray(this);
-		}
+		if (!isArray()) 
+			return super.getArray();
+		Array array = new Array(indices());
+		Indices ind = array.indices();
+		for (Index i : ind) 
+			array.set(i, new FTimedVariable(getName().specify(ind.translate(i), true), 
+					(FExp) getArg().fullCopy()));
+		return array;
 	}
 	
 }

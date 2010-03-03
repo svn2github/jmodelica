@@ -90,7 +90,7 @@ aspect OptimicaInitialTransformations {
  	     	                              getEndName(),
  	     	                              getClassModificationOpt(),
  	     	                              constr);
- 	     	fc.setStart(getRestriction().getStart());
+ 	     	fc.setLocation(getRestriction(), this);
  	     	return fc;
  	  	}
    	}

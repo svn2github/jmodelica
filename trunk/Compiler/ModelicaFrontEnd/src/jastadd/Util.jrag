@@ -234,7 +234,7 @@ aspect NodeMethods {
 	}
 	
 	/**
-	 * \brief Returns an iterable, that has an iterable that iterates over all direct FExp children.
+	 * \brief Returns an iterable, that has an iterator that iterates over all direct FExp children.
 	 * 
 	 * The iterator passes through Lists and Opts.
 	 */

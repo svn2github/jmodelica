@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2010 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,17 +14,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-aspect OptimicaFlatTypeAnalysis {
+aspect OptimicaTestCases {
 	
-	eq InstTimedVariable.type() {
-		if (!fRealScalarType().typeCompatible(getArg().type()))
-			return fUnknownType();
-		if (!getArg().variability().lessOrEqual(fParameter()))
-			return fUnknownType();
-		return getName().type();
+	refine TestCases 
+	public static FClass TestCase.createFClass(InstClassDecl icd) {
+		boolean opt = icd instanceof InstBaseClassDecl && 
+			((InstBaseClassDecl) icd).getInstRestriction() instanceof InstOptimizationClass;
+		return opt ? new FOptClass() : new FClass();
 	}
-
-	// TODO: It seems like this assumes that attributes of InstOptClassDecl always have correct dimensions.
-	eq InstOptClassDecl.attributeType(InstComponentModification icm) = icm.type();
 	
 }

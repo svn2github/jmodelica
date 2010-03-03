@@ -1154,13 +1154,13 @@ aspect FlattPrettyPrint {
 	eq FPowExp.priority()     = PRIO_POW;
 	eq FDotPowExp.priority()  = PRIO_POW;
 	
-	/* The reason for using getParent() here is that this attribute is intended to be used by 
+	/* The reason for using parent here is that this attribute is intended to be used by 
 	 * prettyPrint(), that is in turn used by toString(). Checking if our parent is null lets   
 	 * us use toString() on expressions that are not yet in the AST without getting a 
 	 * NullPointerException. This is useful e.g. when debugging. */
-	syn int FExp.parentPriority() = getParent() != null ? getParentPriority() : FExp.PRIO_LOWEST;
-	syn int List.parentPriority() = getParent() != null ? getParentPriority() : FExp.PRIO_LOWEST;
-	syn int Opt.parentPriority()  = getParent() != null ? getParentPriority() : FExp.PRIO_LOWEST;
+	syn int FExp.parentPriority() = parent != null ? getParentPriority() : FExp.PRIO_LOWEST;
+	syn int List.parentPriority() = parent != null ? getParentPriority() : FExp.PRIO_LOWEST;
+	syn int Opt.parentPriority()  = parent != null ? getParentPriority() : FExp.PRIO_LOWEST;
 	
 	inh int FExp.getParentPriority();
 	inh int List.getParentPriority();

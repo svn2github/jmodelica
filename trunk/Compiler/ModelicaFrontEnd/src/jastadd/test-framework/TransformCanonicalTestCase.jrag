@@ -163,12 +163,11 @@ public class TransformCanonicalTestCase extends TestCase {
 	    FlatRoot flatRoot = new FlatRoot();
 	    flatRoot.setFileName(getSourceFileName());
 	    
-	    FClass fc = new FClass();
+	    FClass fc = createFClass(ipr.simpleLookupInstClassDecl(getClassName()));
 	    flatRoot.options = new OptionRegistry(or);
 	   
 	    flatRoot.setFClass(fc);
 	    
-		//FClass fc = new FClass();
 	    InstNode ir;
 	    try {
 	    	ir= ipr.findFlattenInst(getClassName(), fc);
@@ -227,6 +226,4 @@ public class TransformCanonicalTestCase extends TestCase {
 		this.resultOnFile = resultOnFile;
 	}
     
-	
-	
 }

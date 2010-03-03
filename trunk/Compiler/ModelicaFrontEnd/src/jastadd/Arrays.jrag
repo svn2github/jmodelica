@@ -1447,7 +1447,8 @@ aspect ArrayIndices {
 		public Size promote(int dim) {
 			if (dim <= size.length) 
 				return this;
-			Size ns = new Size(Arrays.copyOf(size, dim));
+			Size ns = new Size(new int[dim]);
+			System.arraycopy(size, 0, ns.size, 0, size.length);
 			Arrays.fill(ns.size, size.length, dim, 1);
 			return ns;
 		}
@@ -2218,7 +2219,8 @@ aspect ArrayIndices {
 		 * The new Index will not be bound to any Indices object.
 		 */
 		public Index adjusted(int dim, int adj, int ndims) {
-			Index copy = new Index(Arrays.copyOf(index, ndims));
+			Index copy = new Index(new int[ndims]);
+			System.arraycopy(index, 0, copy.index, 0, index.length);
 			Arrays.fill(copy.index, index.length, ndims, 1);
 			copy.index[dim] += adj;
 			return copy;

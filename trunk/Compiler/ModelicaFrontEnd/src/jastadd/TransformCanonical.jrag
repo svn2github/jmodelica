@@ -456,13 +456,24 @@ aspect TransformCanonical {
 		getFEquationBlock(0).setFAbstractEquationList(eqns);
 		
 		aliasVariablesEliminated = true;
+		enableAliasRewrite();
 		
 		//root().flushAllRecursive();
-		flush();
+		flush();   // TODO: Is this still needed despite enableAliasRewrite()?
 	}
 	
+	public void ASTNode.enableAliasRewrite() {
+		for (ASTNode n : this)
+			n.enableAliasRewrite();
+	}
 	
-	boolean FIdUseExp.rewritten = false;
+	public void FIdUseExp.enableAliasRewrite() {
+		super.enableAliasRewrite();
+		rewriteAlias = true;
+		is$Final = false;
+	}
+	
+	boolean FIdUseExp.rewriteAlias = false;
 	
 	/**
 	 * \brief FIdUses referring to alias variables need to be changed to 
@@ -474,20 +485,11 @@ aspect TransformCanonical {
 	 * method ASTNode.flushAllRecursiveClearFinal. 
 	 */
 	rewrite FIdUseExp {
-		when (!rewritten && hasRoot() && myFClass() != null && 
-				myFClass().aliasVariablesEliminated &&
-				!myFV().isUnknown() && myFV().isAlias()) to FExp {
-			FQName new_name = (FQName)((FVariable)myFV()).alias().getFQName().fullCopy();
-			//FQName old_name = getFIdUse().getFQName();
-//			System.out.println(" ************************************* FIdUseExp.rewrite " + old_name.name() + " -> " + new_name.name());
-			FExp new_exp = null;
-			FIdUseExp id = new FIdUseExp(new FIdUse(new_name));
-			id.rewritten = true;
-			if (myFV().isNegated()) {
-				new_exp = new FNegExp(id);
-			} else {
-				new_exp = id;
-			}
+		when (rewriteAlias && !myFV().isUnknown() && myFV().isAlias()) to FExp {
+			FQName new_name = (FQName) ((FVariable) myFV()).alias().getFQName().fullCopy();
+			FExp new_exp = new FIdUseExp(new FIdUse(new_name));
+			if (myFV().isNegated()) 
+				new_exp = new FNegExp(new_exp);
 			return new_exp;
 		}
 	}
@@ -502,19 +504,11 @@ aspect TransformCanonical {
 	 * method ASTNode.flushAllRecursiveClearFinal. 
 	 */
 	rewrite FDerExp {
-		when (!rewritten && hasRoot() && myFClass() != null && 
-				myFClass().aliasVariablesEliminated &&
-				!getFIdUse().myFV().isUnknown() && getFIdUse().myFV().isAlias()) to FExp {
+		when (rewriteAlias && !getFIdUse().myFV().isUnknown() && getFIdUse().myFV().isAlias()) to FExp {
 			FQName new_name = (FQName)((FVariable)getFIdUse().myFV()).alias().getFQName().fullCopy();
-			//FQName old_name = getFIdUse().getFQName();
-			FExp new_exp = null;
-			FDerExp der_exp = new FDerExp(new FIdUse(new_name));
-			der_exp.rewritten = true;
-			if (getFIdUse().myFV().isNegated()) {
-				new_exp = new FNegExp(der_exp);
-			} else {
-				new_exp = der_exp;
-			}
+			FExp new_exp = new FDerExp(new FIdUse(new_name));
+			if (getFIdUse().myFV().isNegated()) 
+				new_exp = new FNegExp(new_exp);
 			return new_exp;
 		}
 	}

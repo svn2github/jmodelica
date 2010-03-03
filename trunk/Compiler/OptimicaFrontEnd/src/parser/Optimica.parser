@@ -17,17 +17,17 @@
 BaseClassDecl base_class_decl =               
   encapsulated? 
   partial? 
-  OPTIMIZATION
+  optimization_restriction
   id_decl.start 
   class_modification?
   string_comment? 
   composition 
-  END_ID.end   {:  String end_s = end.substring(3,end.length());
-	                end_s = removeWhitespace(end_s);
-                   return new PN_OptClassDecl(new UnknownVisibilityType(),
+  END_ID.end   {: String end_s = end.substring(3,end.length());
+	              end_s = removeWhitespace(end_s);
+                  return new PN_OptClassDecl(new UnknownVisibilityType(),
                                              encapsulated,
                                              partial,
-                                             new OptimizationClass(),
+                                             optimization_restriction,
                                              start,
                                              new Opt(),
                                              new Opt(),
@@ -43,6 +43,10 @@ BaseClassDecl base_class_decl =
 ;
 
 Clause composition_clause = constraint_clause;
+
+OptimizationClass optimization_restriction =
+  OPTIMIZATION   {: return new OptimizationClass(); :}
+  ;
 
 ConstraintClause constraint_clause = 
   CONSTRAINT

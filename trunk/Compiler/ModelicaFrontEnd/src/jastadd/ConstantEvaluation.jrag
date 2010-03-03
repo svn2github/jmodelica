@@ -555,13 +555,15 @@ aspect ConstantEvaluation {
   eq FBooleanLitExpFalse.cevalCalc() = new CValueBoolean(false);
   eq FStringLitExp.cevalCalc() = new CValueString(getString());
   
-  eq FIdUseExp.cevalCalc() {
-   	if (myFV()!=null && !myFV().isUnknown()) {
-   		return myFV().ceval();
-   	} else {
-   		return new CValueUnknown();
-   	}
+  syn CValue FIdUse.ceval() {
+	  if (myFV() != null && !myFV().isUnknown()) 
+		  return myFV().ceval();
+	  else
+		  return new CValueUnknown();
   }
+  eq FIdUseInstAccess.ceval() = getInstAccess().ceval();
+ 
+  eq FIdUseExp.cevalCalc()      = getFIdUse().ceval();
   eq FInstAccessExp.cevalCalc() = getInstAccess().ceval();
   
   syn CValue InstAccess.ceval() = new CValueUnknown();

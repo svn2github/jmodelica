@@ -154,7 +154,6 @@ y:
   end LinearityTest2;	
 
   optimization ArrayTest1 (objective=cost(finalTime),startTime=0,finalTime=2)
-/*
 	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest1",
         description="Test arrays in Optimica",
@@ -196,7 +195,6 @@ constraint
  x[2]>= - ( 1 );
 end OptimicaTransformCanonicalTests.ArrayTest1;
 ")})));
-*/
 
     Real cost(start=0,fixed=true);
     Real x[2](start={1,1},each fixed=true);
@@ -219,9 +217,8 @@ end OptimicaTransformCanonicalTests.ArrayTest1;
 
   optimization ArrayTest2 (objective=cost(finalTime)+x[1](finalTime)^2 + x[2](finalTime)^2,startTime=0,finalTime=2)
 
-/*
 	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest1",
+      JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest2",
         description="Test arrays in Optimica",
                                                flatModel=
 "
@@ -256,7 +253,6 @@ constraint
  u<=1;
 end OptimicaTransformCanonicalTests.ArrayTest2;
 ")})));
-*/
 
     Real cost(start=0,fixed=true);
     Real x[2](start={1,1},each fixed=true);
@@ -293,6 +289,93 @@ Semantic error at line 271, column 27:
     der(x) = -x;
   end ArrayTest3_Err;
 
+
+optimization TimedArrayTest1 (objective=y,startTime=0,finalTime=2)
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="TimedArrayTest1",
+         description="Timed array variables: basic test",
+         flatModel="
+optimization OptimicaTransformCanonicalTests.TimedArrayTest1(objective = y,startTime = 0,finalTime = 2)
+ Real x[2];
+ Real y;
+equation 
+ y = 1;
+ x[2] = 2;
+constraint 
+ y<=x[2](0);
+end OptimicaTransformCanonicalTests.TimedArrayTest1;
+")})));
+
+ Real x[2] = {1,2};
+ Real y = x[1];
+constraint
+ y <= x[2](0);
+end TimedArrayTest1;
+
+
+optimization TimedArrayTest2 (objective=y,startTime=0,finalTime=2)
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="TimedArrayTest2",
+         description="Timed array variables: scalarizing vector multiplication",
+         flatModel="
+optimization OptimicaTransformCanonicalTests.TimedArrayTest2(objective = y,startTime = 0,finalTime = 2)
+ Real x[1];
+ Real x[2];
+ Real y;
+equation 
+ x[1] = 1;
+ x[2] = 2;
+ y = x[1] + 3;
+constraint 
+ y<=( x[1](0) ) * ( 2 ) + ( x[2](0) ) * ( 3 );
+end OptimicaTransformCanonicalTests.TimedArrayTest2;
+")})));
+
+ Real x[2] = {1,2};
+ Real y = x[1] + 3;
+constraint
+ y <= x(0) * {2,3};
+end TimedArrayTest2;
+
+
+optimization TimedArrayTest3 (objective=y,startTime=0,finalTime=2)
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="TimedArrayTest3",
+         description="Type checking timed variables: string arg",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTransformCanonicalTests.mo':
+Semantic error at line 347, column 7:
+  Type error in expression
+")})));
+
+ Real x[2] = {1,2};
+ Real y = x[1] + 3;
+constraint
+ y <= x("0") * {2,3};
+end TimedArrayTest3;
+
+
+optimization TimedArrayTest4 (objective=y,startTime=0,finalTime=2)
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="TimedArrayTest4",
+         description="Type checking timed variables: continuous arg",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTransformCanonicalTests.mo':
+Semantic error at line 366, column 7:
+  Type error in expression
+")})));
+
+ Real x[2] = {1,2};
+ Real y = x[1] + 3;
+constraint
+ y <= x(y) * {2,3};
+end TimedArrayTest4;
 
 end OptimicaTransformCanonicalTests;
 

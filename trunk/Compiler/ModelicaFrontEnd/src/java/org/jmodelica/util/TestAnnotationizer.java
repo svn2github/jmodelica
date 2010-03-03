@@ -25,6 +25,7 @@ import java.io.PrintStream;
 import java.io.StringReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,28 +35,33 @@ import org.jmodelica.modelica.compiler.*;
 abstract public class TestAnnotationizer {
 
 	public static void main(String[] args) throws Exception {
-		if (args.length == 0) 
+		if (args.length == 0)
 			usageError(1);
 		
 		String filePath = args[0];
 		String testType = null;
-		String className = getPackageName(filePath);
+		String modelName = getPackageName(filePath);
 		String description = "";
 		String data = null;
 		boolean write = false;
+		boolean optimica = filePath.contains("Optimica");
 		
 		for (int i = 1; i < args.length; i++) {
 			String arg = (args[i].length() > 3) ? args[i].substring(3) : "";
 			if (args[i].startsWith("-t=")) 
 				testType = arg;
 			else if (args[i].startsWith("-c=")) 
-				className = composeClassName(className, arg);
+				modelName = composeModelName(modelName, arg);
 			else if (args[i].startsWith("-d=")) 
 				data = arg;
 			else if (args[i].equals("-w")) 
 				write = true;
 			else if (args[i].equals("-h")) 
 				usageError(0);
+			else if (args[i].equals("-o")) 
+				optimica = true;
+			else if (args[i].equals("-m")) 
+				optimica = false;
 			else if (args[i].startsWith("-")) 
 				System.err.println("Unrecognized option: " + args[i] + "\nUse -h for help.");
 			else
@@ -64,10 +70,10 @@ abstract public class TestAnnotationizer {
 		description = description.trim();
 		
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-		if (!className.contains(".")) {
+		if (!modelName.contains(".")) {
 			System.out.print("Enter class name: ");
 			System.out.flush();
-			className = composeClassName(className, in.readLine().trim());
+			modelName = composeModelName(modelName, in.readLine().trim());
 		}
 		if (testType == null) {
 			System.out.print("Enter type of test: ");
@@ -75,297 +81,45 @@ abstract public class TestAnnotationizer {
 			testType = in.readLine().trim();			
 		}
 		
-		try {
-			for (Class cl : TestAnnotationizer.class.getClasses()) {
-				if (cl.getSimpleName().equals(testType) && !Modifier.isAbstract(cl.getModifiers())) {
-					Constructor constructor = cl.getConstructor(String.class, String.class, String.class, String.class);
-					TestAnnotationizer ta = (TestAnnotationizer) constructor.newInstance(filePath, className, description, data);
-					if (write)
-						ta.writeAnnotation();
-					else
-						ta.printAnnotation();
-					System.exit(0);
-				}
-			}
-		} catch (InvocationTargetException e) {
-			System.out.println("Creating annotation failed:");
-			Throwable cause = e.getCause();
-			String message = cause.getMessage();
-			if (message == null || !(cause instanceof ModelicaException))
-				cause.printStackTrace(System.out);
-			else
-				System.out.println(message);
-			System.exit(1);
-		}
-		
-		System.out.println("Test type " + testType + " not found.");
-		System.exit(1);
+		doAnnotation(optimica, filePath, testType, modelName, description, data, write);
 	}
 
-	private static String composeClassName(String extracted, String entered) {
+	private static void doAnnotation(boolean optimica, String filePath,
+			String testType, String modelName, String description, String data,
+			boolean write) throws Exception {
+		Method m = getHelperClass(optimica ? OPTIMICA : MODELICA).getMethod("doAnnotation", 
+				String.class, String.class, String.class, String.class, String.class, boolean.class);
+		m.invoke(null, filePath, testType, modelName, description, data, write);
+	}
+
+	private static void usageError(int level) throws Exception {
+		getHelperClass(ANY).getMethod("usageError", int.class).invoke(null, Integer.valueOf(level));
+	}
+	
+	private static final String[] MODELICA = { "org.jmodelica.modelica.compiler.TestAnnotationizerHelper" };
+	private static final String[] OPTIMICA = { "org.jmodelica.optimica.compiler.TestAnnotationizerHelper" };
+	private static final String[] ANY      = { MODELICA[0], OPTIMICA[0] };
+	
+	private static Class getHelperClass(String[] names) {
+		for (String name : names) {
+			try {
+				return Class.forName(name);
+			} catch (Exception e) {}
+		}
+		System.err.println("Could not load helper class. Compiler classes must be on path.");
+		System.exit(1);
+		return null;
+	}
+
+	private static String composeModelName(String extracted, String entered) {
 		if (entered.contains("."))
 			return entered;
 		else
 			return extracted + "." + entered;
 	}
 
-	private static void usageError(int errorLevel) throws Exception {
-		System.out.println("Usage: java TestAnnotationizer <.mo file path> [options...] [<description>]");
-		System.out.println("  Options:");
-		System.out.println("    -w           write result to file instead of stdout");
-		System.out.println("    -t=<type>    set type of test, e.g. CCodeGenTestCase");
-		System.out.println("    -c=<class>   set name of class to generate annotation for, if name ");
-		System.out.println("                 does not contain a dot, base name of .mo file is prepended");
-		System.out.println("    -d=<data>    set extra data to send to the specific generator");
-		System.out.println("    -h           print this help");
-		System.out.println("  User will be prompted for type and/or class if not set with options.");
-		System.out.println("  Available test types:");
-		for (Class cl : TestAnnotationizer.class.getClasses()) 
-			if (!Modifier.isAbstract(cl.getModifiers()))
-				cl.getMethod("usage", String.class, String.class).invoke(null, cl.getSimpleName(), null);
-		System.exit(errorLevel);
-	}
-	
-	public static void usage(String cl, String extra) {
-		System.out.print("    " + cl);
-		if (extra != null && !extra.equals(""))
-			System.out.print(",  data = " + extra);
-		System.out.println();
-	}
-
 	private static String getPackageName(String filePath) {
 		String[] parts = filePath.split(File.separator);
 		return parts[parts.length - 1].split("\\.")[0];
 	}
-
-	protected String filePath;
-	protected String className;
-	protected String testName;
-	protected String description;
-	protected ModelicaCompiler mc;
-	protected SourceRoot root;
-	
-	public TestAnnotationizer(String filePath, String className, String description, String data) throws Exception {
-		this.filePath = filePath;
-		this.className = className;
-		this.description = prepare(description);
-		testName = className.substring(className.lastIndexOf('.') + 1);
-		
-		String filesep = File.separator;
-		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
-		OptionRegistry or = new OptionRegistry(optionsfile);
-		String modelicapath = System.getenv("JMODELICA_HOME")+filesep+"ThirdParty"+filesep+"MSL";
-		or.setStringOption("MODELICAPATH", modelicapath);
-		ModelicaCompiler.setLogLevel("JModelica.ModelicaCompiler", ModelicaCompiler.WARNING);
-		mc = new ModelicaCompiler(or, null, null, null);
-		root = mc.parseModel(new String[] { filePath });
-	}
-
-	public void printAnnotation() throws Exception {
-		System.out.println("Annotation:\n=====================");
-		outputAnnotation(System.out);
-		System.out.println("\n=====================");		
-	}
-
-	public void writeAnnotation() throws Exception {
-		File old = new File(filePath);
-		BufferedReader in = new BufferedReader(new FileReader(old));
-        File altered = File.createTempFile(className, ".mo");
-        PrintStream out = new PrintStream(altered);
-        for (int i = 0, n = getLine(); i < n; i++)
-        	out.println(in.readLine());
-        try {
-        	outputAnnotation(out);
-        } catch (Exception e) {
-    		out.close();
-			altered.delete();
-			throw e;
-       }
-		for (String line = in.readLine(); line != null; line = in.readLine())
-			out.println(line);
-		out.close();
-		if (!altered.renameTo(old)) {
-			in = new BufferedReader(new FileReader(altered));
-	        out = new PrintStream(old);
-			for (String line = in.readLine(); line != null; line = in.readLine())
-				out.println(line);
-			altered.delete();
-		}
-		System.out.println("File " + old.getName() + " updated.");
-	}
-
-	public void outputAnnotation(PrintStream out) throws Exception {
-		out.println(" annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={");
-		out.println("     JModelica.UnitTesting." + getClass().getSimpleName() + "(");
-		out.println("         name=\"" + testName + "\",");
-		out.println("         description=\"" + description + "\",");
-		printSpecific(out, "         ");
-		out.println(")})));\n");
-	}
-	
-	protected int getLine() throws Exception {
-		return root.getProgram().getInstProgramRoot().simpleLookupInstClassDecl(className).beginLine();
-	}
-	
-	protected String prepare(String str) {
-		return str.replaceAll("\\\\", "\\\\").replaceAll("\"", "\\\\\"");	
-	}
-
-	protected FClass compile() throws Exception {
-		InstClassDecl icl = instantiate();		
-	    FClass fc = flatten(icl);
-	    transformCanonical(fc);
-	    return fc;
-	}
-
-	protected FClass flatten(InstClassDecl icl) {
-		FlatRoot flatRoot = new FlatRoot();
-	    flatRoot.setFileName(filePath);
-	    FClass fc = new FClass();
-	    flatRoot.setFClass(fc);
-		flatRoot.options = new OptionRegistry(icl.root().options);
-		icl.flattenInstClassDecl(fc);
-		return fc;
-	}
-
-	protected InstClassDecl instantiate() throws Exception {
-		InstProgramRoot ipr = root.getProgram().getInstProgramRoot();
-		ipr.options = new OptionRegistry(root.options);
-		handleCompilerProblems(ipr.checkErrorsInInstClass(className));
-		return ipr.simpleLookupInstClassDecl(className);
-	}
-
-	protected void transformCanonical(FClass fc) throws Exception {
-		fc.transformCanonical();
-		handleCompilerProblems(fc.errorCheck());
-	}
-	
-	protected void handleCompilerProblems(Collection<Problem> problems) throws CompilerException {
-		CompilerException ce = new CompilerException();
-		for (Problem p : problems) 
-			if(p.severity() == Problem.Severity.ERROR) 
-				ce.addProblem(p);
-		if (!ce.getProblems().isEmpty())
-			throw ce;
-	}
-
-	abstract protected void printSpecific(PrintStream out, String indent) throws Exception;
-
-	public static abstract class CodeGenTestCase extends TestAnnotationizer {
-
-		protected String template;
-		protected String code;
-
-		public CodeGenTestCase(String filePath, String className, String description, String data) throws Exception {
-			super(filePath, className, description, data);
-			template = prepare(data.replaceAll("\\\\n", "\n"));
-			FClass fc = compile();
-			AbstractGenerator generator = createGenerator(fc);
-			ByteArrayOutputStream os = new ByteArrayOutputStream();
-			generator.generate(new StringReader(template), new PrintStream(os));
-			code = prepare(os.toString());
-		}
-		
-		public abstract AbstractGenerator createGenerator(FClass fc);
-
-		@Override
-		protected void printSpecific(PrintStream out, String indent) throws Exception {
-			out.print(indent + "template=\"");
-			if (template.indexOf('\n') < 0 && template.indexOf('\r') < 0) 
-				out.print(template);
-			else
-				out.print("\n" + template + "\n");
-			out.print("\",\n" + indent + "generatedCode=\"\n" + code);
-			out.print("\"");
-		}
-		
-	}
-
-	public static class CCodeGenTestCase extends CodeGenTestCase {
-
-		public CCodeGenTestCase(String filePath, String className, String description, String data) throws Exception {
-			super(filePath, className, description, data);
-		}
-		
-		public static void usage(String cl, String extra) {
-			TestAnnotationizer.usage(cl, "C code template");
-		}
-
-		@Override
-		public AbstractGenerator createGenerator(FClass fc) {
-			return new CGenerator(new PrettyPrinter(), '$', fc);
-		}
-		
-	}
-
-	public static class GenericCodeGenTestCase extends CodeGenTestCase {
-
-		public GenericCodeGenTestCase(String filePath, String className, String description, String data) throws Exception {
-			super(filePath, className, description, data);
-		}
-		
-		public static void usage(String cl, String extra) {
-			TestAnnotationizer.usage(cl, "generic code template");
-		}
-
-		@Override
-		public AbstractGenerator createGenerator(FClass fc) {
-			return new GenericGenerator(new PrettyPrinter(), '$', fc);
-		}
-		
-	}
-
-	public static class FlatteningTestCase extends TestAnnotationizer {
-		
-		protected FClass fc;
-
-		public FlatteningTestCase(String filePath, String className, String description, String data) throws Exception {
-			super(filePath, className, description, data);
-			fc = flatten(instantiate());
-		}
-
-		@Override
-		protected void printSpecific(PrintStream out, String indent) throws Exception {
-			out.println(indent + "flatModel=\"");
-			out.print(prepare(fc.prettyPrint("")));
-			out.print("\"");
-		}
-		
-	}
-
-	public static class TransformCanonicalTestCase extends FlatteningTestCase {
-
-		public TransformCanonicalTestCase(String filePath, String className, String description, String data) throws Exception {
-			super(filePath, className, description, data);
-			transformCanonical(fc);
-		}
-		
-	}
-
-	public static class ErrorTestCase extends TestAnnotationizer {
-
-		private String message;
-
-		public ErrorTestCase(String filePath, String className, String description, String data) throws Exception {
-			super(filePath, className, description, data);
-			try {
-				compile();
-				throw new ModelicaException("No errors reported in ErrorTestCase.");
-			} catch (CompilerException e) {
-				StringBuffer str = new StringBuffer();
-				str.append(e.getProblems().size() + " errors found:\n");
-				for (Problem p : e.getProblems()) {
-					str.append(p.toString()+"\n");
-				}
-				message = prepare(str.toString());
-			}
-		}
-
-		@Override
-		protected void printSpecific(PrintStream out, String indent) throws Exception {
-			out.print(indent + "errorMessage=\"\n" + message + "\"");
-		}
-
-	}
-
 }

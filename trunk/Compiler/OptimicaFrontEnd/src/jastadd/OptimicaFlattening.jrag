@@ -19,15 +19,13 @@ aspect OptimicaFlattening {
     public InstFullClassDecl OptClassDecl.newInstClassDecl() {
     	InstOptClassDecl fcd = new InstOptClassDecl(this, new Opt(), newInstRestriction(), new Opt());
 	    fcd.setInstConstrainingOpt(newInstConstrainingClassOpt());
-	    if (hasClassModification()) {
+	    if (hasClassModification()) 
 	    	fcd.setInstClassModification(getClassModification().newInstModification());
-	    }
-    	fcd.setStart(getStart());
-    	return fcd;
+    	return copyLocationTo(fcd);
     }
     
     public InstOptimizationClass OptimizationClass.newInstRestriction() {
-    	return new InstOptimizationClass();
+    	return copyLocationTo(new InstOptimizationClass());
     }
 	
     refine Flattening public InstNode InstProgramRoot.findFlattenInst(String className,FClass fc) throws ModelicaClassNotFoundException {
@@ -111,22 +109,22 @@ aspect OptimicaFlattening {
     public abstract FConstraint Constraint.instantiate();
 	
 	public FConstraintEq ConstraintEq.instantiate() {
-		return new FConstraintEq(getLeft().instantiate(),getRight().instantiate());
+		return copyLocationTo(new FConstraintEq(getLeft().instantiate(),getRight().instantiate()));
 	}
 
 	public FConstraintLeq ConstraintLeq.instantiate() {
-		return new FConstraintLeq(getLeft().instantiate(),getRight().instantiate());
+		return copyLocationTo(new FConstraintLeq(getLeft().instantiate(),getRight().instantiate()));
 	}
 
 	
 	
 	public FConstraintGeq ConstraintGeq.instantiate() {
-		return new FConstraintGeq(getLeft().instantiate(),getRight().instantiate());
+		return copyLocationTo(new FConstraintGeq(getLeft().instantiate(),getRight().instantiate()));
 	}
 
 	public FTimedVariable TimedVariable.instantiate() {
-		return new FTimedVariable(new FIdUseInstAccess(new FQName(),getName().newInstAccess()),
-		   getArg().instantiate());
+		FIdUseInstAccess name = new FIdUseInstAccess(new FQName(),getName().newInstAccess());
+		return copyLocationTo(new FTimedVariable(name, getArg().instantiate()));
 	}
 	
 	
