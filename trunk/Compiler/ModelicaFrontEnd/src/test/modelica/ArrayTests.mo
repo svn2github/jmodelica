@@ -1174,6 +1174,33 @@ Semantic error at line 1029, column 14:
 
  Real x[2] = fill();
 end FillExp7;
+
+
+model FillExp8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="FillExp8",
+         description="Fill operator: filling with array",
+         flatModel="
+fclass ArrayTests.FillExp8
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[3,1];
+ Real x[3,2];
+equation
+ x[1,1] = 1;
+ x[1,2] = 2;
+ x[2,1] = 1;
+ x[2,2] = 2;
+ x[3,1] = 1;
+ x[3,2] = 2;
+end ArrayTests.FillExp8;
+")})));
+
+ Real x[3,2] = fill({1,2}, 3);
+end FillExp8;
  
 
 
@@ -6923,7 +6950,7 @@ model ArrayEnd2
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(
          name="ArrayEnd2",
-         description="end operator:",
+         description="End operator: using in wrong place",
          errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
@@ -6934,6 +6961,8 @@ Semantic error at line 6924, column 15:
  Real x[4] = {1,2,3,4};
  Real y = 2 - end;
 end ArrayEnd2;
+
+// TODO: Add test with nestled array subscripts
 
 
 

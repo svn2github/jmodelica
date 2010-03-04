@@ -270,6 +270,7 @@ aspect FlatTypeAnalysis {
 
 	// TODO: Assumes same general functionality as zeros and ones - may need change for new subclasses
 	eq FInfArgsFunctionCall.type() = (size().ndims() > 0) ? fIntegerArrayType(size()) : fUnknownType();
+	eq FFillExp.type()             = (size().ndims() > 0) ? getFillExp().type().arrayType(size()) : fUnknownType();
 	
 	eq FIdUseExp.type() = getFIdUse().type();
 	eq FInstAccessExp.type() = getInstAccess().type();

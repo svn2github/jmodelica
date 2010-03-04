@@ -191,6 +191,7 @@ aspect Arrays {
 	eq FSizeExp.ndims() = hasDim() ? 0 : 1;
 	
 	eq FInfArgsFunctionCall.ndims() = getNumFExp();
+	eq FFillExp.ndims()             = getNumFExp() + getFillExp().ndims();
 	eq FFunctionCall.ndims()        = hasOutputs() ? expOutput().ndims() : -1;
 	eq InstFunctionCall.ndims()     = hasOutputs() ? expOutput().ndims() : -1;
 	
@@ -515,7 +516,13 @@ aspect Arrays {
 		MutableSize s = new MutableSize(ndims());
 		for (FExp fe : getFExps()) 
 			s.append(fe);
+		appendSpecificLengths(s);
 		return s;
+	}
+	
+	protected void FInfArgsFunctionCall.appendSpecificLengths(MutableSize s) {}
+	protected void FFillExp.appendSpecificLengths(MutableSize s) {
+		s.append(getFillExp().size());
 	}
 	
 	inh Size FFunctionCallLeft.size();
@@ -1972,11 +1979,20 @@ aspect ArrayIndices {
 		/**
 		 * \brief Set all expressions in Array to copies of <code>exp</code>.
 		 * 
+		 * If <code>exp</code> is an array, it is duplicated as many times as 
+		 * nessecary to fill this Array with scalar expressions.
+		 * 
 		 * @return <code>this</code> 
 		 */
 		public Array fill(FExp exp) {
-			for (int i = 0; i < length; i++)
-				setFExp((FExp) exp.fullCopy(), i);
+			if (exp.isArray()) {
+				int n = exp.size().numElements();
+				for (int i = 0; i < length; i++)
+					setFExp((FExp) exp.getArray().getFExp(i % n).fullCopy(), i);
+			} else {
+				for (int i = 0; i < length; i++)
+					setFExp((FExp) exp.fullCopy(), i);
+			}
 			return this;
 		}
 		
