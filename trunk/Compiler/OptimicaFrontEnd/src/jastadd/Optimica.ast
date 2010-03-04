@@ -19,11 +19,14 @@ PN_OptClassDecl : PN_FullClassDecl ::= [ClassModification];
 
 ConstraintClause : Clause ::= Constraint*;
 
-abstract Constraint ::= Left:Exp Right:Exp;
+abstract Constraint;
 
-ConstraintEq : Constraint;
-ConstraintLeq : Constraint;
-ConstraintGeq : Constraint;
+abstract RelationConstraint : Constraint ::= Left:Exp Right:Exp;
+ConstraintEq : RelationConstraint;
+ConstraintLeq : RelationConstraint;
+ConstraintGeq : RelationConstraint;
+
+ForClauseC : Constraint ::= ForIndex* Constraint*;
 
 OptimizationClass : Restriction ::=;
 

@@ -115,13 +115,22 @@ aspect OptimicaFlattening {
 	public FConstraintLeq ConstraintLeq.instantiate() {
 		return copyLocationTo(new FConstraintLeq(getLeft().instantiate(),getRight().instantiate()));
 	}
-
-	
 	
 	public FConstraintGeq ConstraintGeq.instantiate() {
 		return copyLocationTo(new FConstraintGeq(getLeft().instantiate(),getRight().instantiate()));
 	}
+	
+	public InstForClauseC ForClauseC.instantiate() {
+		List<InstForIndex> forIndex = new List();
+		List<FConstraint> cons = new List();
+		for (ForIndex fi : getForIndexs()) 
+    		forIndex.add(fi.instantiate());    	
+		for (Constraint c : getConstraints()) 
+			cons.add(c.instantiate());
+		return new InstForClauseC(forIndex, cons);
+	}
 
+	
 	public FTimedVariable TimedVariable.instantiate() {
 		FIdUseInstAccess name = new FIdUseInstAccess(new FQName(),getName().newInstAccess());
 		return copyLocationTo(new FTimedVariable(name, getArg().instantiate()));
@@ -144,12 +153,30 @@ aspect OptimicaFlattening {
 		FOptClass foc = (FOptClass)fc;
 		foc.addFConstraint(new FConstraintGeq(getLeft().flatten(prefix),getRight().flatten(prefix)));
 	}
-/*
+
+	public void InstForClauseC.flatten(FQName prefix, FClass fc) {
+		FOptClass foc = (FOptClass)fc;
+		List forIndex = new List();
+		List cons = new List();
+		for (InstForIndex ifi : getInstForIndexs()) 
+			forIndex.add(ifi.flatten(prefix));
+		
+		FOptClass focc = new FOptClass();
+		focc.setFQName(new FQName().append("tmp")); 
+		focc.setFConstraintList(cons);
+		for (FConstraint c : getFConstraints()) 
+			c.flatten(prefix, focc);
+		
+		foc.addFConstraint(new FForClauseC(forIndex, cons));
+	}
+
+	/*
 	public FExp FTimedVariable.flatten(FQName prefix) {
 		return new FTimedVariable(getName().flatten(prefix),
 		   getArg().flatten(prefix));
 	}
 	*/
+
 	syn nta List<FConstraint> InstNode.getFConstraintList()  { 
 	    List l = new List();
 	    for (Constraint c : constraints()) {

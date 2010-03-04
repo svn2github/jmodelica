@@ -49,21 +49,15 @@ OptimizationClass optimization_restriction =
   ;
 
 ConstraintClause constraint_clause = 
-  CONSTRAINT
-  oconstraint_list {: return new ConstraintClause(oconstraint_list); :}
+  CONSTRAINT oconstraint*  {: return new ConstraintClause(oconstraint); :}
   ;
   
-List oconstraint_list =
-              {: return new List(); :}
-  |oconstraint                           {: return new List().add(oconstraint); :}
-  | oconstraint_list oconstraint  {: oconstraint_list.add(oconstraint); 
-                                                 return oconstraint_list; :}
-   ;  
-  
 Constraint oconstraint =
-  artm_exp.a EQUALS artm_exp.b SEMICOLON{: return new ConstraintEq(a,b); :}
-  |  artm_exp.a LEQ artm_exp.b SEMICOLON{: return new ConstraintLeq(a,b); :}
-  |  artm_exp.a GEQ artm_exp.b SEMICOLON{: return new ConstraintGeq(a,b); :}
+    artm_exp.a EQUALS artm_exp.b SEMICOLON   {: return new ConstraintEq(a,b); :}
+  | artm_exp.a LEQ artm_exp.b SEMICOLON      {: return new ConstraintLeq(a,b); :}
+  | artm_exp.a GEQ artm_exp.b SEMICOLON      {: return new ConstraintGeq(a,b); :}
+  | FOR for_indices LOOP oconstraint* END_FOR SEMICOLON   
+                                             {: return new ForClauseC(for_indices, oconstraint); :}
   ;
 
   

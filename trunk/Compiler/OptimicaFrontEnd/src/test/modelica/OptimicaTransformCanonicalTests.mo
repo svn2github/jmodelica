@@ -185,14 +185,14 @@ equation
  y = ( C[1] ) * ( x[1] ) + ( C[2] ) * ( x[2] );
  der(cost) = y ^ 2 + u ^ 2;
 constraint 
- u>= - ( 1 );
- u<=1;
- x[1](finalTime)=0;
- x[2](finalTime)=0;
- x[1]<=1;
- x[2]<=1;
- x[1]>= - ( 1 );
- x[2]>= - ( 1 );
+ u >= - ( 1 );
+ u <= 1;
+ x[1](finalTime) = 0;
+ x[2](finalTime) = 0;
+ x[1] <= 1;
+ x[2] <= 1;
+ x[1] >= - ( 1 );
+ x[2] >= - ( 1 );
 end OptimicaTransformCanonicalTests.ArrayTest1;
 ")})));
 
@@ -211,8 +211,8 @@ end OptimicaTransformCanonicalTests.ArrayTest1;
     u >= -1;
     u <= 1;
     x(finalTime) = {0,0};
-    x<={1,1}; // This constraint has no effect but is added for testing
-    x>={-1,-1}; // This constraint has no effect but is added for testing
+    x <= {1,1}; // This constraint has no effect but is added for testing
+    x >= {-1,-1}; // This constraint has no effect but is added for testing
   end ArrayTest1;
 
   optimization ArrayTest2 (objective=cost(finalTime)+x[1](finalTime)^2 + x[2](finalTime)^2,startTime=0,finalTime=2)
@@ -249,8 +249,8 @@ equation
  y = ( C[1] ) * ( x[1] ) + ( C[2] ) * ( x[2] );
  der(cost) = y ^ 2 + u ^ 2;
 constraint 
- u>= - ( 1 );
- u<=1;
+ u >= - ( 1 );
+ u <= 1;
 end OptimicaTransformCanonicalTests.ArrayTest2;
 ")})));
 
@@ -303,7 +303,7 @@ equation
  y = 1;
  x[2] = 2;
 constraint 
- y<=x[2](0);
+ y <= x[2](0);
 end OptimicaTransformCanonicalTests.TimedArrayTest1;
 ")})));
 
@@ -329,7 +329,7 @@ equation
  x[2] = 2;
  y = x[1] + 3;
 constraint 
- y<=( x[1](0) ) * ( 2 ) + ( x[2](0) ) * ( 3 );
+ y <= ( x[1](0) ) * ( 2 ) + ( x[2](0) ) * ( 3 );
 end OptimicaTransformCanonicalTests.TimedArrayTest2;
 ")})));
 
@@ -376,6 +376,40 @@ Semantic error at line 366, column 7:
 constraint
  y <= x(y) * {2,3};
 end TimedArrayTest4;
+
+
+optimization ForConstraint1 (objective=sum(y),startTime=0,finalTime=2)
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ForConstraint1",
+         description="Scalarization of for constraints",
+         flatModel="
+optimization OptimicaTransformCanonicalTests.ForConstraint1(objective = y[1] + y[2],startTime = 0,finalTime = 2)
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation 
+ x[1] = 1;
+ x[2] = 2;
+ y[1] = 3 + x[1];
+ y[2] = 4 + x[2];
+constraint 
+ y[1] <= x[1];
+ y[1] <= x[2];
+ y[2] <= x[1];
+ y[2] <= x[2];
+end OptimicaTransformCanonicalTests.ForConstraint1;
+")})));
+
+ Real x[2] = {1,2};
+ Real y[2] = {3,4} + x;
+constraint
+ for i in 1:2, j in 1:2 loop
+  y[i] <= x[j];
+ end for;
+end ForConstraint1;
+
 
 end OptimicaTransformCanonicalTests;
 

@@ -112,8 +112,8 @@ aspect OptimicaInheritedFactoryMethods {
 	public FStartTimeExp FStartTimeExp.createEmptyNode() { return new FStartTimeExp(); }
 	public FFinalTimeExp FFinalTimeExp.createEmptyNode() { return new FFinalTimeExp(); }
 
-	public abstract FConstraint FConstraint.createEmptyNode();
-	public FConstraintEq FConstraintEq.createEmptyNode()   { return new FConstraintEq(); }
+	public abstract FRelationConstraint FRelationConstraint.createEmptyNode();
+	public FConstraintEq  FConstraintEq.createEmptyNode()  { return new FConstraintEq(); }
 	public FConstraintGeq FConstraintGeq.createEmptyNode() { return new FConstraintGeq(); }
 	public FConstraintLeq FConstraintLeq.createEmptyNode() { return new FConstraintLeq(); }
 	
@@ -121,8 +121,8 @@ aspect OptimicaInheritedFactoryMethods {
 	 * \brief Create new node of same class as this, with the specified 
 	 *        children.
 	 */
-	public FConstraint FConstraint.createNode(FExp left, FExp right) {
-		FConstraint node = createEmptyNode();
+	public FRelationConstraint FRelationConstraint.createNode(FExp left, FExp right) {
+		FRelationConstraint node = createEmptyNode();
 		node.setLeft(left);
 		node.setRight(right);
 		return node;
@@ -140,7 +140,7 @@ aspect OptimicaArrays {
 	 * 
 	 * @return Array dimension.
 	 */	
-	syn int FConstraint.ndims() {
+	syn int FRelationConstraint.ndims() {
 		if (getLeft().ndims() == getRight().ndims()) 
 			return getLeft().ndims();
 		return -1;
@@ -153,7 +153,7 @@ aspect OptimicaArrays {
 	 * corresponding array dimension size.
 	 * 
 	 */
-	syn Size FConstraint.size() {
+	syn Size FRelationConstraint.size() {
 		Size left = getLeft().size();
 		Size right = getRight().size();
 		return left.equals(right) ? left : Size.SCALAR;
@@ -165,7 +165,9 @@ aspect OptimicaArrays {
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn Indices FConstraint.indices() = getLeft().indices();
+	syn Indices FConstraint.indices()      = null;
+	eq FRelationConstraint.indices()       = getLeft().indices();
+	syn lazy Indices FForClauseC.indices() = Indices.create(getFForIndexs());
 	
 	eq InstTimedVariable.ndims() = getName().ndims();
 	eq FTimedVariable.ndims() = getName().ndims();

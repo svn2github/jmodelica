@@ -1183,34 +1183,6 @@ aspect Scalarization {
 		return new FRangeExp(exps);
 	}
 
-	/*
-	public FExp FFunctionCall.scalarize() {
-		List l = new List();
-		List args = new List();
-		for (FExp e : getArgss()) {
-			l.add(e.scalarize());
-		}
-		return new FFunctionCall(getName().flatten(new FQName()),l);		
-	}
-
-	*/
-	/*	
-	public void FForClauseE.flatten(FQName prefix, FClass fc) {
-		List forIndex = new List();
-		List eqns = new List();
-		for (int i=0;i<getNumFForIndex();i++)
-			forIndex.add(getFForIndex(i).scalarize());
-		FClass fcc = new FClass();
-		fcc.setFQName(new FQName().append("tmp")); 
-		fcc.addFEquationBlock(new FEquationBlock(new List()));
-		//fcc.dumpTree("");
-		for (int i=0;i<getNumForEqns();i++)
-			getForEqns(i).flatten(prefix,fcc);
-		for (int i=0;i<fcc.getFEquationBlock(0).getNumFAbstractEquation();i++)
-			eqns.add(fcc.getFEquationBlock(0).getFAbstractEquation(i));
-		fc.getFEquationBlock(0).addFAbstractEquation(new FForClauseE(forIndex,eqns));
-	}
-	*/
 }
 
 aspect ParameterSorting {

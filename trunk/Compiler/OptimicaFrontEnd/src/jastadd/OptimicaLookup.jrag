@@ -1,0 +1,46 @@
+/*
+    Copyright (C) 2010 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.util.HashMap;
+
+aspect OptimicaFlatNameBinding {
+	
+	inh AbstractFVariable FForClauseC.lookupFV(String name);
+	eq FForClauseC.getChild().lookupFV(String name) {
+		for (FForIndex fi : getFForIndexs()) {
+			if (fi.getFVariable().name().equals(name)) {
+				return fi.getFVariable();
+			}
+		}
+		return lookupFV(name);
+	}
+	
+}
+
+aspect OptimicaInstLookupComponents {
+	
+	inh lazy HashSet InstForClauseC.lookupInstComponent(String name);
+	eq InstForClauseC.getChild().lookupInstComponent(String name) {
+		HashSet set = new HashSet(4);
+		for (InstForIndex ifi : getInstForIndexs()) {
+			if (ifi.getInstPrimitive().name().equals(name)) {
+				set.add(ifi.getInstPrimitive());
+			}
+		}
+		return (set.size() > 0) ? set : lookupInstComponent(name);
+	}
+	
+}

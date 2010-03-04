@@ -75,8 +75,10 @@ aspect OptimicaTransformCanonical {
 	 * \brief Scalarize constraint and put all scalarized equations in list eqns.
 	 */
 	public void FConstraint.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns, 
+			List<FVariable> vars, HashMap<String,FExp> indexMap) {}
+	
+	public void FRelationConstraint.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns, 
 			List<FVariable> vars, HashMap<String,FExp> indexMap) {
-		// TODO: Handle function calls with array output
 		createFunctionCallTemporaries(eqns, vars, indexMap, true);
 		//System.out.println("FEquation.scalarize() " + ndims());
 		if (ndims()==0) {
@@ -98,41 +100,24 @@ aspect OptimicaTransformCanonical {
 			}
 		}
 	}
-
 	
-	/**
-	 * \brief Scalarize equation and put all scalarized equations in list eqns.
-	 */
-/*	public void FFunctionCallEquation.scalarize(List<FAbstractEquation> eqns, 
-			HashMap<String,FExp> indexMap) {
-		List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
-		for (FFunctionCallLeft id : getLefts())
-			lefts.add(id.scalarize(indexMap));
-		eqns.addChild(new FFunctionCallEquation(lefts, (FAbstractFunctionCall) getCall().scalarize(indexMap)));
-	}
-	*/
-	/*
-	public void FForClauseE.scalarize(List<FAbstractEquation> eqns,
-			HashMap<String,FExp> indexMap) {
-		Indices indices = Indices.create(getFForIndexs());
-		
+	public void FForClauseC.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns,
+			List<FVariable> vars, HashMap<String,FExp> indexMap) {
+		createFunctionCallTemporaries(eqns, vars, indexMap, true);
 		HashMap<String,FExp> myIndexMap = new HashMap<String,FExp>();
 		myIndexMap.putAll(indexMap);
+		Indices indices = indices();
 		for (Index i : indices) {
 			int j = 0;
 			int[] ii = indices.translate(i).index();
 			for (FForIndex fi : getFForIndexs()) {
-				myIndexMap.put(fi.getFVariable().name(), Integer.valueOf(ii[j]));
+				myIndexMap.put(fi.getFVariable().name(), new FIntegerLitExp(ii[j]));
 				j++;
 			}
-			
-			for (FAbstractEquation ae : getFAbstractEquations()) {
-				ae.scalarize(eqns, myIndexMap);
-			}
-		}		
+			for (FConstraint c : getFConstraints()) 
+				c.scalarize(constr, eqns, vars, myIndexMap);
+		}
 	}
-	
-	*/
 	
 	public FExp FTimedVariable.scalarize(HashMap<String,FExp> indexMap) { 
 		return new FTimedVariable(getName().scalarize(indexMap),getArg().scalarize(indexMap)); 

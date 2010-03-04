@@ -53,7 +53,7 @@ aspect OptimicaErrorCheck {
 	
 	}
   	
-	  public void FConstraint.typeCheck() {
+	  public void FRelationConstraint.typeCheck() {
 		  //System.out.println("FEquation.typeCheck(): " + getLeft().type() + " " + getRight().type());
 		  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
 			  if (!getLeft().type().equivalentTo(getRight().type())) {

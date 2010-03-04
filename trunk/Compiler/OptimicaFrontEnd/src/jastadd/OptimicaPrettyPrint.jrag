@@ -90,16 +90,24 @@ aspect OptimicaPrettyPrint {
 		str.print(indent + "end " + getName().getID());
 	} 
 	
-	public void Constraint.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
+	public void RelationConstraint.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
 		p.toString(getLeft(),str,indent,o);
 		str.print(op());
 		p.toString(getRight(),str,indent,o);
 	}
 
-	syn String Constraint.op();
-	eq ConstraintEq.op() = "=";
-	eq ConstraintLeq.op() = "<=";
-	eq ConstraintGeq.op() = ">=";
+	syn String RelationConstraint.op();
+	eq ConstraintEq.op()  = " = ";
+	eq ConstraintLeq.op() = " <= ";
+	eq ConstraintGeq.op() = " >= ";
+	
+	public void FForClauseC.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print(indent+"for ");
+		getFForIndexList().prettyPrintWithSep(p, str, indent, o, ", ");
+		str.print(" loop\n");
+		getFConstraints().prettyPrintWithFix(p, str, p.indent(indent), o, "", ";\n");
+		str.print(indent + "end for");
+	}
 
 	eq OptimizationClass.toString() = "optimization";
 
@@ -152,17 +160,17 @@ aspect FlatOptimicaPrettyPrint {
   		str.print(";\n");
 	}
 
-	public void FConstraint.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
+	public void FRelationConstraint.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
 		str.print(indent);
 		p.toString(getLeft(),str,indent,o);
 		str.print(op());
 		p.toString(getRight(),str,indent,o);
 	}
 
-	syn String FConstraint.op();
-	eq FConstraintEq.op() = "=";
-	eq FConstraintLeq.op() = "<=";
-	eq FConstraintGeq.op() = ">=";
+	syn String FRelationConstraint.op();
+	eq FConstraintEq.op()  = " = ";
+	eq FConstraintLeq.op() = " <= ";
+	eq FConstraintGeq.op() = " >= ";
 	
 	public void FTimedVariable.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		p.toString(getName(), str, indent, o);

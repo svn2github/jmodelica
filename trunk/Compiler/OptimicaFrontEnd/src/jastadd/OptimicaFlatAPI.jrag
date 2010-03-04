@@ -505,7 +505,7 @@ aspect OptimicaFlatAPI {
      */
 	coll ArrayList<FConstraint> FOptClass.constraints() 
 	  [new ArrayList<FConstraint>()] with add root FlatRoot;
-	FConstraint contributes this to FOptClass.constraints() for myFClass();
+	FRelationConstraint contributes this to FOptClass.constraints() for myFClass();
 	
 	/**
 	 * \brief Get the number of equality constraints.

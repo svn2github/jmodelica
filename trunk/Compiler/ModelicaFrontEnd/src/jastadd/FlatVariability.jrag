@@ -209,25 +209,10 @@ aspect FlatVariability {
 	eq FZeros.variability()      = fConstant();
 	eq FFillExp.variability()    = getFillExp().variability();
 	
-   	public FTypePrefixVariability FTypePrefixVariability.combine(FTypePrefixVariability other) {   			
-   		if (this instanceof FContinuous) {
-   			return this;
-   		} else if (other instanceof FContinuous) {
-   			return other;
-   		// neither is a continuous variable
-   		} else if (this instanceof FDiscrete) {
-   			return this;
-   		} else if (other instanceof FDiscrete) {
-   			return other;
-   	   		// neither is a continuous variable or discrete variable   			
-   		} else if (this instanceof FParameter) {
-   			return this;
-   		} else if (other instanceof FParameter) {
-   			return other;
-   		// neither is a continuous variable, discrete variable, or a parameter value
-   		} else {
-   			return this;
-   		}
+	syn int FTypePrefixVariability.combineLevel() = variabilityLevel() * 10;
+	
+   	public FTypePrefixVariability FTypePrefixVariability.combine(FTypePrefixVariability other) {
+   		return (other.combineLevel() > combineLevel()) ? other : this;
 	}	
 	
 }

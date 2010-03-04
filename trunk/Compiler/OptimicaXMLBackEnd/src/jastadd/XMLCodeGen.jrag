@@ -41,11 +41,11 @@ aspect XMLCodeGen_Optimica {
 		str.println(indent + "</"+ namespace + ":" + tag + ">");	
 	}
 	
-	public void FConstraint.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+	public void FRelationConstraint.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o) {
 		String namespace="opt";
 		String tag = xmlTag();	
-		ASTNode left = getChild(this,0);
-		ASTNode right= getChild(this,1);
+		ASTNode left = getLeft();
+		ASTNode right= getRight();
 		
 		str.println(indent + "<" + namespace + ":" + tag + ">");
 		left.prettyPrint_XML(str,p.indent(indent));
@@ -57,7 +57,7 @@ aspect XMLCodeGen_Optimica {
 
 aspect OptimicaXMLTagBinding{
 	
-		syn String FConstraint.xmlTag();
+		syn String FRelationConstraint.xmlTag();
 		eq FConstraintEq.xmlTag() = "ConstraintEq";
 		eq FConstraintGeq.xmlTag() = "ConstraintGeq";
 		eq FConstraintLeq.xmlTag() = "ConstraintLeq";

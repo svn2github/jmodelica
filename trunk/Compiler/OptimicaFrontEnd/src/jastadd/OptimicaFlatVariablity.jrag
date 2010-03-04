@@ -29,8 +29,10 @@ aspect OptimicaFlatVariability {
 	
 	protected int FTimed.variabilityLevel()        { return VARIABILITY_LEVEL; }
 	protected int FOptParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
-	protected static final int FTimed.VARIABILITY_LEVEL        = FParameter.VARIABILITY_LEVEL + 5;
+	protected static final int FTimed.VARIABILITY_LEVEL        = FDiscrete.VARIABILITY_LEVEL - 5;
 	protected static final int FOptParameter.VARIABILITY_LEVEL = FParameter.VARIABILITY_LEVEL;
+	
+	syn int FOptParameter.combineLevel() = variabilityLevel() * 10 + 5;
 	
 	// Notice that the attribute FVariable.isParameter is not redefined in order
 	// not to render a lot of attributes in FlatAPI to be redefined as a
@@ -56,46 +58,43 @@ aspect OptimicaFlatVariability {
    		}
 	}
 	
-   	refine FlatVariability public FTypePrefixVariability FTypePrefixVariability.combine(FTypePrefixVariability other) {   			
-   		if (this instanceof FContinuous) {
-   			return this;
-   		} else if (other instanceof FContinuous) {
-   			return other;
-   		// neither is a continuous variable
-   		} else if (this instanceof FDiscrete) {
-   			return this;
-   		} else if (other instanceof FDiscrete) {
-   			return other;
-   	   		// neither is a discrete variable or discrete variable   			
-   		} else if (this instanceof FTimed) {
-   			return this;
-   		} else if (other instanceof FTimed) {
-   			return other;
-   		} else if (this instanceof FOptParameter) {
-   			return this;
-   		} else if (other instanceof FOptParameter) {
-   			return other;
-   		// neither is a optimized parameter variable, discrete variable, or continuous value
-   		} else if (this instanceof FParameter) {
-   			return this;
-   		} else if (other instanceof FParameter) {
-   			return other;
-   		// neither is a continuous variable, discrete variable, or a parameter value
-   		} else {
-   			return this;
-   		}
-	}	
-
    	eq FTimed.toString() = "timed";
    	eq FOptParameter.toString() = "opt_parameter";
 	
-	syn boolean FConstraint.isTimed() = 
+   	// TODO: Perhaps FTypePrefixVariability.lessOrEqual() should be used here?
+	syn boolean FConstraint.isTimed();
+	eq FRelationConstraint.isTimed() = 
 		(getRight().isTimedExp() || getRight().isParameterExp() || getRight().isConstantExp()) & 
 		(getLeft().isTimedExp() || getLeft().isParameterExp() || getLeft().isConstantExp());
+	eq FForClauseC.isTimed() {
+		for (FConstraint c : getFConstraints())
+			if (!c.isTimed())
+				return false;
+		return true;
+	}
+	eq InstForClauseC.isTimed() {
+		for (FConstraint c : getFConstraints())
+			if (!c.isTimed())
+				return false;
+		return true;
+	}
 
-	syn boolean FConstraint.isParameter() = 
+	syn boolean FConstraint.isParameter();
+	eq FRelationConstraint.isParameter() = 
 		(getRight().isParameterExp() || getRight().isConstantExp()) & 
 		(getLeft().isParameterExp() || getLeft().isConstantExp());
+	eq InstForClauseC.isParameter() {
+		for (FConstraint c : getFConstraints())
+			if (!c.isParameter())
+				return false;
+		return true;
+	}
+	eq FForClauseC.isParameter() {
+		for (FConstraint c : getFConstraints())
+			if (!c.isParameter())
+				return false;
+		return true;
+	}
 
 	
 }

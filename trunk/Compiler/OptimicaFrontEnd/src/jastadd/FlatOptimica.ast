@@ -16,13 +16,17 @@
 
 FOptClass: FClass ::= FConstraint* FAttribute*;
 
-abstract FConstraint ::= Left:FExp Right:FExp;
-FConstraintEq : FConstraint;
-FConstraintLeq : FConstraint;
-FConstraintGeq : FConstraint;
+abstract FConstraint;
+
+abstract FRelationConstraint : FConstraint ::= Left:FExp Right:FExp;
+FConstraintEq : FRelationConstraint;
+FConstraintLeq : FRelationConstraint;
+FConstraintGeq : FRelationConstraint;
+
+FForClauseC : FConstraint ::= FForIndex* FConstraint*;
+InstForClauseC : FConstraint ::= InstForIndex* FConstraint*;
 
 FTimedVariable : FExp ::= Name:FIdUse Arg:FExp;
-
 InstTimedVariable : FExp ::= Name:InstAccess Arg:FExp;
 
 FTimed : FTypePrefixVariability;
