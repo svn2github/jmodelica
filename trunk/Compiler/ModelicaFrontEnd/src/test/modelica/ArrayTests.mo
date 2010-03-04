@@ -6891,6 +6891,51 @@ end ArrayShortCat5;
 
 
 
+model ArrayEnd1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayEnd1",
+         description="end operator: basic test",
+         flatModel="
+fclass ArrayTests.ArrayEnd1
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real x[4];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 3;
+ x[4] = 4;
+ y[1] = ( x[2] ) * ( 2 );
+ y[2] = ( x[3] ) * ( 2 );
+end ArrayTests.ArrayEnd1;
+")})));
+
+ Real x[4] = {1,2,3,4};
+ Real y[2] = x[2:end-1] * 2;
+end ArrayEnd1;
+
+
+model ArrayEnd2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayEnd2",
+         description="end operator:",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6924, column 15:
+  The end operator may only be used in array subscripts.
+")})));
+
+ Real x[4] = {1,2,3,4};
+ Real y = 2 - end;
+end ArrayEnd2;
+
+
 
   annotation (uses(Modelica(version="3.0.1")));
 end ArrayTests;

@@ -35,12 +35,9 @@ aspect Arrays {
 			null;
 
 	/**
-	 * \brief Check if an identifier is inside array subscripts.
-	 * 
-	 * @return If the identifier is in an array subscripts sub-AST then true
-	 * else false.
+	 * \brief Check if an expression is inside array subscripts.
 	 */
-	inh boolean FIdUseExp.inArraySubscripts();
+	inh boolean FExp.inArraySubscripts();
 	eq FArraySubscripts.getChild().inArraySubscripts() = true;
 	eq Root.getChild().inArraySubscripts() = false;
 	

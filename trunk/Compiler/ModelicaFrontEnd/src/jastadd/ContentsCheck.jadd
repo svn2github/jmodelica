@@ -51,6 +51,11 @@ aspect ContentCheck {
 		error("The array() operator may not be used in function call equations or function call statements.");
 	}
 	
+	public void FEndExp.contentCheck() {
+		if (!inArraySubscripts())
+			error("The end operator may only be used in array subscripts.");
+	}
+	
 	inh boolean FIterExp.iterExpUseOK();
 	eq FExp.getChild().iterExpUseOK()       = false;
 	eq Root.getChild().iterExpUseOK()       = false;
