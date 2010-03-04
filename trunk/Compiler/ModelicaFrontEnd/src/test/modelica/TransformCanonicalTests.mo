@@ -211,7 +211,9 @@ Differentiated variables:
 
 Derivative variables: 
 
-Algebraic variables: 
+Discrete variables:
+
+Algebraic real variables: 
 
 Input variables: 
 ")})));
@@ -253,7 +255,9 @@ Differentiated variables:
 
 Derivative variables: 
 
-Algebraic variables: 
+Discrete variables:
+
+Algebraic real variables: 
 
 Input variables: 
 
@@ -288,7 +292,9 @@ Differentiated variables:
 
 Derivative variables: 
 
-Algebraic variables: 
+Discrete variables:
+
+Algebraic real variables: 
  x1: number of uses: 2, isLinear: true, alias: no
  x2: number of uses: 2, isLinear: true, alias: no
  x3: number of uses: 2, isLinear: false, alias: no

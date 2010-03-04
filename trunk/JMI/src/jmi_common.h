@@ -443,21 +443,48 @@ struct jmi_func_ad_t{
  * jmi_t struct should not be repeated in the generated code.
  *
  * @param jmi (Output) A pointer to a jmi_t pointer.
- * @param n_ci Number of independent constants.
- * @param n_cd Number of dependent constants.
- * @param n_pi Number of independent parameters.
- * @param n_pd Number of dependent parameters.
- * @param n_dx Number of derivatives.
- * @param n_x Number of differentiated variables.
- * @param n_u Number of inputs.
- * @param n_w Number of algebraics.
+ * @param n_real_ci Number of real independent constants.
+ * @param n_real_cd Number of real dependent constants.
+ * @param n_real_pi Number of real independent parameters.
+ * @param n_real_pd Number of real dependent parameters.
+ * @param n_integer_ci Number of integer independent constants.
+ * @param n_integer_cd Number of integer dependent constants.
+ * @param n_integer_pi Number of integer independent parameters.
+ * @param n_integer_pd Number of integer dependent parameters.
+ * @param n_boolean_ci Number of boolean independent constants.
+ * @param n_boolean_cd Number of boolean dependent constants.
+ * @param n_boolean_pi Number of boolean independent parameters.
+ * @param n_boolean_pd Number of boolean dependent parameters.
+ * @param n_string_ci Number of string independent constants.
+ * @param n_string_cd Number of string dependent constants.
+ * @param n_string_pi Number of string independent parameters.
+ * @param n_string_pd Number of string dependent parameters.
+ * @param n_real_dx Number of real derivatives.
+ * @param n_real_x Number of real differentiated variables.
+ * @param n_real_u Number of real inputs.
+ * @param n_real_w Number of real algebraics.
  * @param n_tp Number of interpolation time points.
+ * @param n_real_d Number of real discrete parameters.
+ * @param n_integer_d Number of integer discrete parameters.
+ * @param n_integer_u Number of integer inputs.
+ * @param n_boolean_d Number of boolean discrete parameters.
+ * @param n_boolean_u Number of boolean inputs.
+ * @param n_string_d Number of string discrete parameters.
+ * @param n_string_u Number of string inputs.
  * @param n_sw Number of switching functions in DAE \$fF\$f.
  * @param n_sw_init Number of switching functions in DAE initialization system \$fF_0\$f.
  * @return Error code.
  */
-int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
-		int n_x, int n_u, int n_w, int n_tp, int n_sw, int n_sw_init);
+int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
+		int n_real_pd, int n_integer_ci, int n_integer_cd,
+		int n_integer_pi, int n_integer_pd,int n_boolean_ci, int n_boolean_cd,
+		int n_boolean_pi, int n_boolean_pd, int n_string_ci, int n_string_cd,
+		int n_string_pi, int n_string_pd,
+		int n_real_dx, int n_real_x, int n_real_u, int n_real_w,
+		int n_tp,int n_real_d,
+		int n_integer_d, int n_integer_u,
+		int n_boolean_d, int n_boolean_u,
+		int n_string_d, int n_string_u, int n_sw, int n_sw_init);
 
 /**
  * \brief Allocates a jmi_dae_t struct.
@@ -626,47 +653,99 @@ struct jmi_t{
 	jmi_init_t* init;                    ///< \brief A jmi_init_t struct pointer.
 	jmi_opt_t* opt;                      ///< \brief A jmi_opt_t struct pointer.
 
-	int n_ci;                            ///< \brief Number of independent constants.
-	int n_cd;                            ///< \brief Number of dependent constants.
-	int n_pi;                            ///< \brief Number of independent parameters.
-	int n_pd;                            ///< \brief Number of dependent parameters.
-	int n_dx;                            ///< \brief Number of derivatives.
-	int n_x;                             ///< \brief Number of differentiated states.
-	int n_u;                             ///< \brief Number of inputs.
-	int n_w;                             ///< \brief Number of algebraics.
+	int n_real_ci;                            ///< \brief Number of independent constants.
+	int n_real_cd;                            ///< \brief Number of dependent constants.
+	int n_real_pi;                            ///< \brief Number of independent parameters.
+	int n_real_pd;                            ///< \brief Number of dependent parameters.
+
+	int n_integer_ci;                    ///< \brief Number of integer independent constants.
+	int n_integer_cd;                    ///< \brief Number of integer dependent constants.
+	int n_integer_pi;                    ///< \brief Number of integer independent parameters.
+	int n_integer_pd;                    ///< \brief Number of integer dependent parameters.
+
+	int n_boolean_ci;                    ///< \brief Number of boolean independent constants.
+	int n_boolean_cd;                    ///< \brief Number of boolean dependent constants.
+	int n_boolean_pi;                    ///< \brief Number of boolean independent parameters.
+	int n_boolean_pd;                    ///< \brief Number of boolean dependent parameters.
+
+	int n_string_ci;                    ///< \brief Number of string independent constants.
+	int n_string_cd;                    ///< \brief Number of string dependent constants.
+	int n_string_pi;                    ///< \brief Number of string independent parameters.
+	int n_string_pd;                    ///< \brief Number of string dependent parameters.
+
+	int n_real_dx;                            ///< \brief Number of derivatives.
+	int n_real_x;                             ///< \brief Number of differentiated states.
+	int n_real_u;                             ///< \brief Number of inputs.
+	int n_real_w;                             ///< \brief Number of algebraics.
+	int n_tp;                            ///< \brief Number of time points included in the optimization problem
+
+	int n_real_d;                             ///< \brief Number of discrete variables.
+
+	int n_integer_d;                     ///< \brief Number of integer discrete variables.
+	int n_integer_u;                     ///< \brief Number of integer inputs.
+
+	int n_boolean_d;                     ///< \brief Number of boolean discrete variables.
+	int n_boolean_u;                     ///< \brief Number of boolean inputs.
+
+	int n_string_d;                     ///< \brief Number of string discrete variables.
+	int n_string_u;                     ///< \brief Number of string inputs.
+
 	int n_sw;                            ///< \brief Number of switching functions in the DAE \f$F\f$.
 	int n_sw_init;                       ///< \brief Number of switching functions in the DAE initialization system\f$F_0\f$.
 
 	int n_p;                             ///< \brief Number of elements in \f$p\f$.
 	int n_v;                             ///< \brief Number of elements in \f$v\f$.
 	int n_q;                             ///< \brief Number of elements in \f$q\f$.
+	int n_d;                             ///< \brief Number of elements in \f$d\f$.
+
 	int n_z;                             ///< \brief Number of elements in \f$z\f$.
 
-	int n_tp;                            ///< \brief Number of time points included in the optimization problem
 	jmi_real_t *tp;                      ///< \brief Time point values in the normalized interval [0..1].
 	                                     ///< A value \f$\leq 0\f$ corresponds to the initial time and
 	                                     ///< a value \f$\geq 1\f$ corresponds to the final time.
 
 	// Offset variables in the z vector, for convenience.
-	int offs_ci;                         ///< Offset of the independent constant vector in \f$z\f$.
-	int offs_cd;                         ///< Offset of the dependent constant vector in \f$z\f$.
-	int offs_pi;                         ///< Offset of the independent parameter vector in \f$z\f$.
-	int offs_pd;                         ///< Offset of the dependent parameter vector in \f$z\f$.
-	int offs_dx;                         ///< Offset of the derivative vector in \f$z\f$.
-	int offs_x;                          ///< Offset of the differentiated variable vector in \f$z\f$.
-	int offs_u;                          ///< Offset of the input vector in \f$z\f$.
-	int offs_w;                          ///< Offset of the algebraic variables vector in \f$z\f$.
+	int offs_real_ci;                         ///< Offset of the independent real constant vector in \f$z\f$.
+	int offs_real_cd;                         ///< Offset of the dependent real constant vector in \f$z\f$.
+	int offs_real_pi;                         ///< Offset of the independent real parameter vector in \f$z\f$.
+	int offs_real_pd;                         ///< Offset of the dependent real parameter vector in \f$z\f$.
+
+	int offs_integer_ci;                         ///< Offset of the independent integer constant vector in \f$z\f$.
+	int offs_integer_cd;                         ///< Offset of the dependent integer constant vector in \f$z\f$.
+	int offs_integer_pi;                         ///< Offset of the independent integer parameter vector in \f$z\f$.
+	int offs_integer_pd;                         ///< Offset of the dependent integer parameter vector in \f$z\f$.
+
+	int offs_boolean_ci;                         ///< Offset of the independent boolean constant vector in \f$z\f$.
+	int offs_boolean_cd;                         ///< Offset of the dependent boolean constant vector in \f$z\f$.
+	int offs_boolean_pi;                         ///< Offset of the independent boolean parameter vector in \f$z\f$.
+	int offs_boolean_pd;                         ///< Offset of the dependent boolean parameter vector in \f$z\f$.
+
+	int offs_real_dx;                         ///< Offset of the derivative real vector in \f$z\f$.
+	int offs_real_x;                          ///< Offset of the differentiated real variable vector in \f$z\f$.
+	int offs_real_u;                          ///< Offset of the input real vector in \f$z\f$.
+	int offs_real_w;                          ///< Offset of the algebraic real variables vector in \f$z\f$.
 	int offs_t;                          ///< Offset of the time entry in \f$z\f$.
-	int offs_dx_p;                       ///< Offset of the first time point derivative vector in \f$z\f$.
-	int offs_x_p;                        ///< Offset of the first time point differentiated variable vector in \f$z\f$.
-	int offs_u_p;                        ///< Offset of the first time point input vector in \f$z\f$.
-	int offs_w_p;                        ///< Offset of the first time point algebraic variable vector in \f$z\f$.
+
+	int offs_real_dx_p;                       ///< Offset of the first time point derivative vector in \f$z\f$.
+	int offs_real_x_p;                        ///< Offset of the first time point differentiated variable vector in \f$z\f$.
+	int offs_real_u_p;                        ///< Offset of the first time point input vector in \f$z\f$.
+	int offs_real_w_p;                        ///< Offset of the first time point algebraic variable vector in \f$z\f$.
+
+	int offs_real_d;                          ///< Offset of the discrete real variable vector in \f$z\f$.
+
+	int offs_integer_d;                          ///< Offset of the discrete integer variable vector in \f$z\f$.
+	int offs_integer_u;                          ///< Offset of the input integer vector in \f$z\f$.
+
+	int offs_boolean_d;                          ///< Offset of the discrete boolean variable vector in \f$z\f$.
+	int offs_boolean_u;                          ///< Offset of the input boolean vector in \f$z\f$.
+
 	int offs_sw;                        ///< Offset of the first switching function in the DAE \f$F\f$
 	int offs_sw_init;                        ///< Offset of the first switching function in the DAE initialization system \f$F_0\f$
 
 	int offs_p;                          ///< Offset of the \f$p\f$ vector in \f$z\f$.
 	int offs_v;                          ///< Offset of the \f$v\f$ vector in \f$z\f$.
-	int offs_q;                          ///< Offset of the \f$z\f$ vector in \f$z\f$.
+	int offs_q;                          ///< Offset of the \f$q\f$ vector in \f$z\f$.
+	int offs_d;                          ///< Offset of the \f$d\f$ vector in \f$z\f$.
 
 	jmi_ad_var_vec_p z;                  ///< This vector contains active AD objects in case of AD.
 	jmi_real_t** z_val;                  ///< This vector contains the actual values.

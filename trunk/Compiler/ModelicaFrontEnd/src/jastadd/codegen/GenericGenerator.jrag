@@ -309,20 +309,6 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	class DAETag_numAlgebraicVariables extends DAETag {
-		
-		public DAETag_numAlgebraicVariables(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_w","Number of algebraic variables",
-			  myGenerator,fclass);
-		}
-	
-		public void generate(PrintStream genPrinter) {
-			genPrinter.print(fclass.numAlgebraicVariables());
-		}
-	
-	}
-
 	class DAETag_numSwitchingFunctions extends DAETag {
 		
 		public DAETag_numSwitchingFunctions(AbstractGenerator myGenerator, 
@@ -365,44 +351,72 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	class DAETag_numAlgebraicIntegerVariables extends DAETag {
+	class DAETag_numDiscreteVariables extends DAETag {
 		
-		public DAETag_numAlgebraicIntegerVariables(AbstractGenerator myGenerator, 
+		public DAETag_numDiscreteVariables(AbstractGenerator myGenerator, 
 		  FClass fclass) {
-			super("n_integer_w","Number of algebraic integer variables",
+			super("n_d","Number of discrete variables",
 			  myGenerator,fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			genPrinter.print(fclass.numAlgebraicIntegerVariables());
+			genPrinter.print(fclass.numDiscreteVariables());
 		}
 	
 	}
 
-	class DAETag_numAlgebraicBooleanVariables extends DAETag {
+	class DAETag_numDiscreteRealVariables extends DAETag {
 		
-		public DAETag_numAlgebraicBooleanVariables(AbstractGenerator myGenerator, 
+		public DAETag_numDiscreteRealVariables(AbstractGenerator myGenerator, 
 		  FClass fclass) {
-			super("n_boolean_w","Number of algebraic boolean variables",
+			super("n_real_d","Number of discrete real variables",
 			  myGenerator,fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			genPrinter.print(fclass.numAlgebraicBooleanVariables());
+			genPrinter.print(fclass.numDiscreteRealVariables());
 		}
 	
 	}
 
-	class DAETag_numAlgebraicStringVariables extends DAETag {
+	class DAETag_numDiscreteIntegerVariables extends DAETag {
 		
-		public DAETag_numAlgebraicStringVariables(AbstractGenerator myGenerator, 
+		public DAETag_numDiscreteIntegerVariables(AbstractGenerator myGenerator, 
 		  FClass fclass) {
-			super("n_string_w","Number of algebraic string variables",
+			super("n_integer_d","Number of discrete integer variables",
 			  myGenerator,fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			genPrinter.print(fclass.numAlgebraicStringVariables());
+			genPrinter.print(fclass.numDiscreteIntegerVariables());
+		}
+	
+	}
+
+	class DAETag_numDiscreteBooleanVariables extends DAETag {
+		
+		public DAETag_numDiscreteBooleanVariables(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_boolean_d","Number of discrete boolean variables",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDiscreteBooleanVariables());
+		}
+	
+	}
+
+	class DAETag_numDiscreteStringVariables extends DAETag {
+		
+		public DAETag_numDiscreteStringVariables(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_string_d","Number of discrete string variables",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDiscreteStringVariables());
 		}
 	
 	}

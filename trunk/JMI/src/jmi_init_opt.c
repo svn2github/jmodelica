@@ -29,11 +29,11 @@ static void copy_v(jmi_init_opt_t *jmi_init_opt) {
 	jmi_t* jmi = jmi_init_opt->jmi;
 
 	jmi_real_t* v = jmi_get_dx(jmi);
-	for (i=0;i<jmi->n_dx+jmi->n_x;i++) {
+	for (i=0;i<jmi->n_real_dx+jmi->n_real_x;i++) {
 		v[i] = jmi_init_opt->x[i];
 	}
-	for (i=0;i<jmi->n_w;i++) {
-		v[i+jmi->n_dx+jmi->n_x+jmi->n_u] = jmi_init_opt->x[i+jmi->n_dx+jmi->n_x];
+	for (i=0;i<jmi->n_real_w;i++) {
+		v[i+jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u] = jmi_init_opt->x[i+jmi->n_real_dx+jmi->n_real_x];
 	}
 
 
@@ -63,7 +63,7 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 	jmi_init_opt->der_eval_alg = der_eval_alg;
 
 	// Set size of optimization vector
-	jmi_init_opt->n_x = n_p_free + jmi->n_dx + jmi->n_x +jmi->n_w;
+	jmi_init_opt->n_x = n_p_free + jmi->n_real_dx + jmi->n_real_x +jmi->n_real_w;
 
 	// Create mask for evaluation of Jacobians
 	jmi_init_opt->der_mask_v = (int*)calloc(jmi->n_z,sizeof(int));
@@ -93,24 +93,24 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 	}
 
 	// Copy values for derivatives
-	for (i=0;i<jmi->n_dx;i++) {
+	for (i=0;i<jmi->n_real_dx;i++) {
 		jmi_init_opt->x_init[i+n_p_free] = dx_init[i];
 		jmi_init_opt->x_lb[i+n_p_free] = dx_lb[i];
 		jmi_init_opt->x_ub[i+n_p_free] = dx_ub[i];
 	}
 
 	// Copy values for differentiated variables
-	for (i=0;i<jmi->n_x;i++) {
-		jmi_init_opt->x_init[i+n_p_free + jmi->n_dx] = x_init[i];
-		jmi_init_opt->x_lb[i+n_p_free + jmi->n_dx] = x_lb[i];
-		jmi_init_opt->x_ub[i+n_p_free + jmi->n_dx] = x_ub[i];
+	for (i=0;i<jmi->n_real_x;i++) {
+		jmi_init_opt->x_init[i+n_p_free + jmi->n_real_dx] = x_init[i];
+		jmi_init_opt->x_lb[i+n_p_free + jmi->n_real_dx] = x_lb[i];
+		jmi_init_opt->x_ub[i+n_p_free + jmi->n_real_dx] = x_ub[i];
 	}
 
 	// Copy values for the algebraics
-	for (i=0;i<jmi->n_w;i++) {
-		jmi_init_opt->x_init[i+n_p_free + jmi->n_dx + jmi->n_x] = w_init[i];
-		jmi_init_opt->x_lb[i+n_p_free + jmi->n_dx + jmi->n_x] = w_lb[i];
-		jmi_init_opt->x_ub[i+n_p_free + jmi->n_dx + jmi->n_x] = w_ub[i];
+	for (i=0;i<jmi->n_real_w;i++) {
+		jmi_init_opt->x_init[i+n_p_free + jmi->n_real_dx + jmi->n_real_x] = w_init[i];
+		jmi_init_opt->x_lb[i+n_p_free + jmi->n_real_dx + jmi->n_real_x] = w_lb[i];
+		jmi_init_opt->x_ub[i+n_p_free + jmi->n_real_dx + jmi->n_real_x] = w_ub[i];
 	}
 
 	// Copy initial point to optimization vector
@@ -213,13 +213,13 @@ int jmi_init_opt_delete(jmi_init_opt_t *jmi_init_opt) {
 
 }
 
-int jmi_init_opt_get_dimensions(jmi_init_opt_t *jmi_init_opt, int *n_x, int *n_h,
+int jmi_init_opt_get_dimensions(jmi_init_opt_t *jmi_init_opt, int *n_real_x, int *n_h,
 		int *dh_n_nz) {
 
 	if (jmi_init_opt->jmi->opt == NULL) {
 		return -1;
 	}
-	*n_x = jmi_init_opt->n_x;
+	*n_real_x = jmi_init_opt->n_x;
 	*n_h = jmi_init_opt->n_h;
 	*dh_n_nz = jmi_init_opt->dh_n_nz;
 

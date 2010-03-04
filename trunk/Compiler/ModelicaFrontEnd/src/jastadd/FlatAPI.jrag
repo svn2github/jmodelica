@@ -56,6 +56,10 @@ aspect FlatAPI {
 			return index + derivativeVariables().indexOf(fv);
 		} 		
 		index += numDerivativeVariables(); 
+		if (discreteRealVariables().indexOf(fv) >= 0) {
+			return index + discreteRealVariables().indexOf(fv);
+		} 
+		index += numDiscreteRealVariables(); 
 		if (differentiatedRealVariables().indexOf(fv) >= 0) {
 			return index + differentiatedRealVariables().indexOf(fv);
 		} 
@@ -89,8 +93,8 @@ aspect FlatAPI {
 			return index + integerInputs().indexOf(fv);
 		} 
 		index += numIntegerInputs();
-		if (algebraicIntegerVariables().indexOf(fv) >= 0) {
-			return index + algebraicIntegerVariables().indexOf(fv);
+		if (discreteIntegerVariables().indexOf(fv) >= 0) {
+			return index + discreteIntegerVariables().indexOf(fv);
 		} 
 		
 		index = 0x20000000; 
@@ -114,8 +118,8 @@ aspect FlatAPI {
 			return index + booleanInputs().indexOf(fv);
 		} 
 		index += numBooleanInputs();
-		if (algebraicBooleanVariables().indexOf(fv) >= 0) {
-			return index + algebraicBooleanVariables().indexOf(fv);
+		if (discreteBooleanVariables().indexOf(fv) >= 0) {
+			return index + discreteBooleanVariables().indexOf(fv);
 		} 
 
 		index = 0x30000000; 
@@ -139,8 +143,8 @@ aspect FlatAPI {
 			return index + stringInputs().indexOf(fv);
 		} 
 		index += numStringInputs();
-		if (algebraicStringVariables().indexOf(fv) >= 0) {
-			return index + algebraicStringVariables().indexOf(fv);
+		if (discreteStringVariables().indexOf(fv) >= 0) {
+			return index + discreteStringVariables().indexOf(fv);
 		} 
 
 		return index;
@@ -366,6 +370,47 @@ aspect FlatAPI {
      }
 	syn int FVariable.dependentStringParameterIndex() =
 		myFClass().dependentStringParameters().indexOf(this);
+
+	syn int FClass.numDiscreteRealVariables() = discreteRealVariables().size();
+	syn lazy ArrayList<FRealVariable> FClass.discreteRealVariables() {
+      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
+      set.addAll(reals());
+      set.retainAll(discreteVariables());
+      return set;
+     }
+	syn int FVariable.discreteRealVariableIndex() =
+		myFClass().discreteRealVariables().indexOf(this);
+
+	syn int FClass.numDiscreteIntegerVariables() = discreteIntegerVariables().size();
+	syn lazy ArrayList<FIntegerVariable> FClass.discreteIntegerVariables() {
+      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
+      set.addAll(integers());
+      set.retainAll(discreteVariables());
+      return set;
+     }
+	syn int FVariable.discreteIntegerVariableIndex() =
+		myFClass().discreteIntegerVariables().indexOf(this);
+
+	syn int FClass.numDiscreteBooleanVariables() = discreteBooleanVariables().size();
+	syn lazy ArrayList<FBooleanVariable> FClass.discreteBooleanVariables() {
+      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
+      set.addAll(booleans());
+      set.retainAll(discreteVariables());
+      return set;
+     }
+	syn int FVariable.discreteBooleanVariableIndex() =
+		myFClass().discreteBooleanVariables().indexOf(this);
+
+	syn int FClass.numDiscreteStringVariables() = discreteStringVariables().size();
+	syn lazy ArrayList<FStringVariable> FClass.discreteStringVariables() {
+      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
+      set.addAll(strings());
+      set.retainAll(discreteVariables());
+      return set;
+     }
+	syn int FVariable.discreteStringVariableIndex() =
+		myFClass().discreteStringVariables().indexOf(this);
+	
 	
     syn int FClass.numDifferentiatedRealVariables() = differentiatedRealVariables().size();
   	syn lazy ArrayList<FVariable> FClass.differentiatedRealVariables() {
@@ -400,6 +445,22 @@ aspect FlatAPI {
  		this when !isParameter() && !isConstant() && !isAlias()
 	to FClass.variables() for myFClass();
 
+    syn int FClass.numDiscreteVariables() = discreteVariables().size();
+	coll ArrayList<FVariable> FClass.discreteVariables() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	FRealVariable contributes
+		this when isDiscrete() && !isInput() && !isAlias()
+	to FClass.discreteVariables() for myFClass();	
+	FIntegerVariable contributes
+		this when !isParameter() && !isInput() && !isConstant() && !isAlias()
+	to FClass.discreteVariables() for myFClass();	
+	FBooleanVariable contributes
+		this when !isParameter() && !isInput() && !isConstant() && !isAlias()
+	to FClass.discreteVariables() for myFClass();	
+	FStringVariable contributes
+		this when !isParameter() && !isInput() && !isConstant() && !isAlias()
+	to FClass.discreteVariables() for myFClass();	
+	
     syn int FClass.numAliasVariables() = aliasVariables().size();
 	coll ArrayList<FVariable> FClass.aliasVariables() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
@@ -451,34 +512,32 @@ aspect FlatAPI {
       return set;
      }
 	
-    syn int FClass.numAlgebraicVariables() = algebraicVariables().size();
-	syn lazy ArrayList<FVariable> FClass.algebraicVariables() { 
+    syn int FClass.numAlgebraicRealVariables() = algebraicRealVariables().size();
+	syn lazy ArrayList<FVariable> FClass.algebraicRealVariables() { 
 	  ArrayList<FVariable> set = new ArrayList<FVariable>();
-  	  set.addAll(variables());
+  	  set.addAll(reals());
+  	  set.retainAll(variables());
   	  set.removeAll(differentiatedRealVariables());
   	  set.removeAll(derivativeVariables());
+  	  set.removeAll(discreteVariables());
   	  set.removeAll(inputs());
-  /*
-      for (FVariable fv : getFVariables()) {
-      	if (!fv.isParameter() && !fv.isConstant() && !fv.isInput() && 
-      	  !differentiatedRealVariables().contains(fv)) {
-      		set.add(fv);
-      	}
-      }
-    */
       return set;
 	}
-	
+	syn int FVariable.algebraicRealVariableIndex() =
+		myFClass().algebraicRealVariables().indexOf(this);
+
+	/*
     syn int FClass.numAlgebraicRealVariables() = algebraicRealVariables().size();
 	syn lazy ArrayList<FVariable> FClass.algebraicRealVariables() { 
 	  ArrayList<FVariable> set = new ArrayList<FVariable>();
 	  set.addAll(algebraicVariables());
 	  set.retainAll(reals());
+	  set.removeAll(discreteVariables());
       return set;
 	}
-	syn int FVariable.algebraicRealVariableIndex() =
-		myFClass().algebraicRealVariables().indexOf(this);
+	*/
 	
+	/*
     syn int FClass.numAlgebraicIntegerVariables() = algebraicIntegerVariables().size();
 	syn lazy ArrayList<FVariable> FClass.algebraicIntegerVariables() { 
 	  ArrayList<FVariable> set = new ArrayList<FVariable>();
@@ -508,7 +567,8 @@ aspect FlatAPI {
 	}
 	syn int FVariable.algebraicStringVariableIndex() =
 		myFClass().algebraicStringVariables().indexOf(this);
-
+*/
+	
     syn int FClass.numVariablesWithBindingExp() = variablesWithBindingExp().size();
 	coll ArrayList<FVariable> FClass.variablesWithBindingExp() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
@@ -730,7 +790,9 @@ aspect FlatAPI {
 	syn lazy boolean FVariable.isDerivativeVariable() = false;
 	eq FDerivativeVariable.isDerivativeVariable() = true;
 	syn lazy boolean FVariable.isAlgebraicVariable() = 
-	  myFClass().algebraicRealVariables().contains(this);
+		  myFClass().algebraicRealVariables().contains(this);
+	syn lazy boolean FVariable.isDiscreteVariable() = 
+		  myFClass().discreteVariables().contains(this);
 
 	inh FVariable FExp.inBindingExp();
 	eq FVariable.getBindingExp().inBindingExp() = this;
@@ -914,6 +976,17 @@ aspect FVariableUses {
 		FAbstractEquation.differentiatedVariables() for myFEquation();
 
 	/**
+	 * \brief Collection attribute returning all discrete variables (FVariables)
+	 * referenced in an equation.
+	 */
+	coll LinkedHashSet<FVariable> FAbstractEquation.discreteVariables() 
+		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
+
+	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
+	    !(getParent() instanceof FDerExp) && ((FVariable)myFV()).isDiscreteVariable() to 
+		FAbstractEquation.discreteVariables() for myFEquation();
+	
+	/**
 	 * \brief Get the differenetiated variabel (FVariable) corresponding to 
 	 * a derivative variable (FDerivativeVariable)
 	 */
@@ -1031,12 +1104,25 @@ aspect FlatDiagnostics {
 		  numDependentBooleanParameters() + "\n");
 		str.append("  Number of String dependent parameters:      " + 
 		  numDependentStringParameters() + "\n");
-		  
-		str.append("Number of differentiated variables:           " + 
+		
+		str.append("Number of variables :                         " + 
+				numVariables() + "\n");
+		str.append("  Number of Real variables:                   " + 
+				numRealVariables() + "\n");
+		str.append("  Number of Integer variables:                " + 
+				numIntegerVariables() + "\n");
+		str.append("  Number of Boolean variables:                " + 
+				numBooleanVariables() + "\n");
+		str.append("  Number of String variables:                 " + 
+				numStringVariables() + "\n");
+
+		str.append("Number of Real differentiated variables:      " + 
 				  numDifferentiatedRealVariables() + "\n"); 
-		str.append("Number of derivative variables:               " + 
+		str.append("Number of Real derivative variables:          " + 
 				  numDerivativeVariables() + "\n"); 
-		  
+		str.append("Number of Real algebraic variables:           " + 
+				  numAlgebraicRealVariables() + "\n");
+
 		str.append("Number of inputs:                             " + 
 		  numInputs() + "\n");
 		str.append("  Number of Real inputs:                      " + 
@@ -1047,29 +1133,18 @@ aspect FlatDiagnostics {
 		  numBooleanInputs() + "\n");
 		str.append("  Number of String inputs:                    " + 
 		  numStringInputs() + "\n");
+				
+		str.append("Number of discrete variables :                " + 
+				numDiscreteVariables() + "\n");
+		str.append("  Number of Real discrete variables:          " + 
+				numDiscreteRealVariables() + "\n");
+		str.append("  Number of Integer discrete variables:       " + 
+				numDiscreteIntegerVariables() + "\n");
+		str.append("  Number of Boolean discrete variables:       " + 
+				numDiscreteBooleanVariables() + "\n");
+		str.append("  Number of String discrete variables:        " + 
+				numDiscreteStringVariables() + "\n");
 		
-		str.append("Number of variables :                         " + 
-		  numVariables() + "\n");
-		str.append("  Number of Real variables:                   " + 
-		  numRealVariables() + "\n");
-		str.append("  Number of Integer variables:                " + 
-		  numIntegerVariables() + "\n");
-		str.append("  Number of Boolean variables:                " + 
-		  numBooleanVariables() + "\n");
-		str.append("  Number of String variables:                 " + 
-		  numStringVariables() + "\n");
-		
-		str.append("Number of algebraic variables :               " + 
-		  numAlgebraicVariables() + "\n");
-		str.append("  Number of Real algebraic variables:         " + 
-		  numAlgebraicRealVariables() + "\n");
-		str.append("  Number of Integer algebraic variables:      " + 
-		  numAlgebraicIntegerVariables() + "\n");
-		str.append("  Number of Boolean algebraic variables:      " + 
-		  numAlgebraicBooleanVariables() + "\n");
-		str.append("  Number of String algebraic variables:       " + 
-		  numAlgebraicStringVariables() + "\n");
-
 		str.append("Number of equations:                          " + 
 		  numEquations() + "\n");
 		
@@ -1204,7 +1279,25 @@ aspect FlatDiagnostics {
 		}
 		str.append("\n");  
 
-		str.append("Algebraic variables: \n");
+		str.append("Discrete variables: \n");
+		for (FVariable fv : discreteVariables()) {
+			str.append(" " + fv.name());
+			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
+					+ fv.isLinear());
+			str.append(", alias: ");
+			if (!fv.isAlias()) {
+				str.append("no");
+			} else {
+				if (fv.isNegated()) {
+					str.append("-");
+				}
+				str.append(fv.alias().valueReference());
+			}
+			str.append("\n");
+		}
+		str.append("\n");
+		
+		str.append("Algebraic real variables: \n");
 		for (FVariable fv : algebraicRealVariables()) {
 			str.append(" " + fv.name());
 			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
@@ -1250,6 +1343,7 @@ aspect FlatDiagnostics {
 				str.append(fv.name() + " ");
 			}
 			h = fe.algebraicVariables();
+			h.addAll(fe.discreteVariables());
 			for (FVariable fv : h) {
 				str.append(fv.name() + " ");
 			}

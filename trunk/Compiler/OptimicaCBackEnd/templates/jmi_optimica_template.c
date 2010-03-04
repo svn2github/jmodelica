@@ -21,14 +21,42 @@
 #include <jmi.h>
 
 
-static const int N_ci = $n_real_ci$;
-static const int N_cd = $n_real_cd$;
-static const int N_pi = $n_real_pi$;
-static const int N_pd = $n_real_pd$;
-static const int N_dx = $n_real_x$;
-static const int N_x = $n_real_x$;
-static const int N_u = $n_real_u$;
-static const int N_w = $n_real_w$;
+static const int N_real_ci = $n_real_ci$;
+static const int N_real_cd = $n_real_cd$;
+static const int N_real_pi = $n_real_pi$;
+static const int N_real_pd = $n_real_pd$;
+
+static const int N_integer_ci = $n_integer_ci$;
+static const int N_integer_cd = $n_integer_cd$;
+static const int N_integer_pi = $n_integer_pi$;
+static const int N_integer_pd = $n_integer_pd$;
+
+static const int N_boolean_ci = $n_boolean_ci$;
+static const int N_boolean_cd = $n_boolean_cd$;
+static const int N_boolean_pi = $n_boolean_pi$;
+static const int N_boolean_pd = $n_boolean_pd$;
+
+static const int N_string_ci = $n_string_ci$;
+static const int N_string_cd = $n_string_cd$;
+static const int N_string_pi = $n_string_pi$;
+static const int N_string_pd = $n_string_pd$;
+
+static const int N_real_dx = $n_real_x$;
+static const int N_real_x = $n_real_x$;
+static const int N_real_u = $n_real_u$;
+static const int N_real_w = $n_real_w$;
+
+static const int N_real_d = $n_real_d$;
+
+static const int N_integer_d = $n_integer_d$;
+static const int N_integer_u = $n_integer_u$;
+
+static const int N_boolean_d = $n_boolean_d$;
+static const int N_boolean_u = $n_boolean_u$;
+
+static const int N_string_d = $n_string_d$;
+static const int N_string_u = $n_string_u$;
+
 static const int N_sw = $n_switches$;
 static const int N_eq_F = $n_equations$;
 static const int N_eq_R = $n_event_indicators$;
@@ -49,23 +77,23 @@ $C_variable_aliases$
 
 $C_point_variable_aliases$
 
-#define _ci(i) ((*(jmi->z))[jmi->offs_ci+i])
-#define _cd(i) ((*(jmi->z))[jmi->offs_cd+i])
-#define _pi(i) ((*(jmi->z))[jmi->offs_pi+i])
-#define _pd(i) ((*(jmi->z))[jmi->offs_pd+i])
-#define _dx(i) ((*(jmi->z))[jmi->offs_dx+i])
-#define _x(i) ((*(jmi->z))[jmi->offs_x+i])
-#define _u(i) ((*(jmi->z))[jmi->offs_u+i])
-#define _w(i) ((*(jmi->z))[jmi->offs_w+i])
+#define _real_ci(i) ((*(jmi->z))[jmi->offs_real_ci+i])
+#define _real_cd(i) ((*(jmi->z))[jmi->offs_real_cd+i])
+#define _real_pi(i) ((*(jmi->z))[jmi->offs_real_pi+i])
+#define _real_pd(i) ((*(jmi->z))[jmi->offs_real_pd+i])
+#define _real_dx(i) ((*(jmi->z))[jmi->offs_real_dx+i])
+#define _real_x(i) ((*(jmi->z))[jmi->offs_real_x+i])
+#define _real_u(i) ((*(jmi->z))[jmi->offs_real_u+i])
+#define _real_w(i) ((*(jmi->z))[jmi->offs_real_w+i])
 #define _t ((*(jmi->z))[jmi->offs_t])
-#define _dx_p(j,i) ((*(jmi->z))[jmi->offs_dx_p + \
-  j*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)+ i])
-#define _x_p(j,i) ((*(jmi->z))[jmi->offs_x_p + \
-  j*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w) + i])
-#define _u_p(j,i) ((*(jmi->z))[jmi->offs_u_p + \
-  j*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w) + i])
-#define _w_p(j,i) ((*(jmi->z))[jmi->offs_w_p + \
-  j*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w) + i])
+#define _real_dx_p(j,i) ((*(jmi->z))[jmi->offs_real_dx_p + \
+  j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w)+ i])
+#define _real_real_x_p(j,i) ((*(jmi->z))[jmi->offs_real_x_p + \
+  j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) + i])
+#define _real_u_p(j,i) ((*(jmi->z))[jmi->offs_real_u_p + \
+  j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) + i])
+#define _real_w_p(j,i) ((*(jmi->z))[jmi->offs_real_w_p + \
+  j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) + i])
 #define _sw(i) ((*(jmi->z))[jmi->offs_sw + i])
 #define _sw_init(i) ((*(jmi->z))[jmi->offs_sw_init + i])
 
@@ -139,8 +167,13 @@ $C_Opt_point_inequality_constraints$
 
 int jmi_new(jmi_t** jmi) {
 
-	jmi_init(jmi, N_ci, N_cd, N_pi, N_pd, N_dx,
-		 N_x, N_u, N_w, N_t_p, N_sw, N_sw_init);
+  jmi_init(jmi, N_real_ci, N_real_cd, N_real_pi, N_real_pd, 
+	   N_integer_ci, N_integer_cd, N_integer_pi, N_integer_pd,
+	   N_boolean_ci, N_boolean_cd, N_boolean_pi, N_boolean_pd,
+	   N_string_ci, N_string_cd, N_string_pi, N_string_pd,
+	   N_real_dx,N_real_x, N_real_u, N_real_w,N_t_p, 
+	   N_real_d,N_integer_d,N_integer_u,N_boolean_d,N_boolean_u,
+	   N_string_d,N_string_u,N_sw,N_sw_init);
 
 	// Initialize the DAE interface
 	jmi_dae_init(*jmi, *model_dae_F, N_eq_F, NULL, 0, NULL, NULL,

@@ -415,8 +415,6 @@ aspect Names {
   syn String InstForIndex.name() = getInstPrimitive().name();
   syn String FForIndex.name()    = getFVariable().name();
  
-  
-  
   syn String InstAccess.enclosingName() = "";
   eq InstDot.enclosingName() = name().substring(0, name().lastIndexOf('.'));
   
@@ -533,7 +531,6 @@ aspect Names {
 	public void InstAccess.setLastFArraySubscripts(FArraySubscripts fas) {
 		((InstArrayAccess) getLastInstAccess()).setFArraySubscripts(fas);
 	}
-	
 }
 
 aspect FlatNames {
@@ -796,6 +793,18 @@ aspect FlatNames {
 		return new FIdUse(fullCopy()); 
 	}
 	
+	syn String FPrimitiveType.name();
+	eq FRealScalarType.name() = "Real";
+	eq FRealArrayType.name() = "Real";
+	eq FIntegerScalarType.name() = "Integer";
+	eq FIntegerArrayType.name() = "Integer";
+	eq FBooleanScalarType.name() = "Boolean";
+	eq FBooleanArrayType.name() = "Boolean";
+	eq FStringScalarType.name() = "String";
+	eq FStringArrayType.name() = "String";
+	eq FUnknownType.name() = "Unknown";
+	eq FUnknownScalarType.name() = "Unknown";
+	eq FUnknownArrayType.name() = "Unknown";
 }
 
 aspect DebugHelpers {

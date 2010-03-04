@@ -10,13 +10,13 @@ $C_variable_aliases$
 $C_DAE_equation_residuals$
 ",
          generatedCode="
-#define _p_3 ((*(jmi->z))[jmi->offs_pi+0])
-#define _der_x1_5 ((*(jmi->z))[jmi->offs_dx+0])
-#define _der_x2_6 ((*(jmi->z))[jmi->offs_dx+1])
-#define _x1_0 ((*(jmi->z))[jmi->offs_x+0])
-#define _x2_1 ((*(jmi->z))[jmi->offs_x+1])
-#define _u_2 ((*(jmi->z))[jmi->offs_u+0])
-#define _w_4 ((*(jmi->z))[jmi->offs_w+0])
+#define _p_3 ((*(jmi->z))[jmi->offs_real_pi+0])
+#define _der_x1_5 ((*(jmi->z))[jmi->offs_real_dx+0])
+#define _der_x2_6 ((*(jmi->z))[jmi->offs_real_dx+1])
+#define _x1_0 ((*(jmi->z))[jmi->offs_real_x+0])
+#define _x2_1 ((*(jmi->z))[jmi->offs_real_x+1])
+#define _u_2 ((*(jmi->z))[jmi->offs_real_u+0])
+#define _w_4 ((*(jmi->z))[jmi->offs_real_w+0])
 #define time ((*(jmi->z))[jmi->offs_t])
 
     (*res)[0] = ( 1 - ( pow(_x2_1,2) ) ) * ( _x1_0 ) - ( _x2_1 ) + ( _p_3 ) * ( _u_2 ) - (_der_x1_5);
@@ -47,12 +47,12 @@ $C_DAE_initial_equation_residuals$
 $C_DAE_initial_guess_equation_residuals$
 ",
          generatedCode="
-#define _der_z_4 ((*(jmi->z))[jmi->offs_dx+0])
-#define _der_v_5 ((*(jmi->z))[jmi->offs_dx+1])
-#define _z_1 ((*(jmi->z))[jmi->offs_x+0])
-#define _v_3 ((*(jmi->z))[jmi->offs_x+1])
-#define _y_0 ((*(jmi->z))[jmi->offs_w+0])
-#define _w_2 ((*(jmi->z))[jmi->offs_w+1])
+#define _der_z_4 ((*(jmi->z))[jmi->offs_real_dx+0])
+#define _der_v_5 ((*(jmi->z))[jmi->offs_real_dx+1])
+#define _z_1 ((*(jmi->z))[jmi->offs_real_x+0])
+#define _v_3 ((*(jmi->z))[jmi->offs_real_x+1])
+#define _y_0 ((*(jmi->z))[jmi->offs_real_w+0])
+#define _w_2 ((*(jmi->z))[jmi->offs_real_w+1])
 #define time ((*(jmi->z))[jmi->offs_t])
 
     (*res)[0] =  - ( _z_1 ) - (_der_z_4);
@@ -277,6 +277,73 @@ equation
    der(z) = -z;
 end CCodeGenTest10;
 
+model CCodeGenDiscreteVariables1
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenDiscreteVariables1",
+         description="Test C code generation of discrete variables.",
+         template="
+$C_variable_aliases$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+#define _c1_0 ((*(jmi->z))[jmi->offs_real_ci+0])
+#define _c2_1 ((*(jmi->z))[jmi->offs_real_ci+1])
+#define _p1_2 ((*(jmi->z))[jmi->offs_real_pi+0])
+#define _p2_15 ((*(jmi->z))[jmi->offs_real_pd+0])
+#define _ci1_6 ((*(jmi->z))[jmi->offs_integer_ci+0])
+#define _ci2_7 ((*(jmi->z))[jmi->offs_integer_ci+1])
+#define _pi1_8 ((*(jmi->z))[jmi->offs_integer_pi+0])
+#define _pi2_16 ((*(jmi->z))[jmi->offs_integer_pd+0])
+#define _cb1_10 ((*(jmi->z))[jmi->offs_boolean_ci+0])
+#define _cb2_11 ((*(jmi->z))[jmi->offs_boolean_ci+1])
+#define _pb1_12 ((*(jmi->z))[jmi->offs_boolean_pi+0])
+#define _pb2_17 ((*(jmi->z))[jmi->offs_boolean_pd+0])
+#define _der_x_14 ((*(jmi->z))[jmi->offs_real_dx+0])
+#define _x_4 ((*(jmi->z))[jmi->offs_real_x+0])
+#define _w_5 ((*(jmi->z))[jmi->offs_real_w+0])
+#define time ((*(jmi->z))[jmi->offs_t])
+#define _rd2_3 ((*(jmi->z))[jmi->offs_real_d+0])
+#define _rid2_9 ((*(jmi->z))[jmi->offs_integer_d+0])
+#define _rbd2_13 ((*(jmi->z))[jmi->offs_boolean_d+0])
+
+    (*res)[0] =  - ( _x_4 ) - (_der_x_14);
+    (*res)[1] = 4 - (_rd2_3);
+    (*res)[2] = 4 - (_w_5);
+    (*res)[3] = 4 - (_rid2_9);
+    (*res)[4] = JMI_FALSE - (_rbd2_13);
+
+
+")})));
+
+  constant Real c1 = 1;
+  constant Real c2 = c1;
+  parameter Real p1 = 1;
+  parameter Real p2 = p1;
+  discrete Real rd1 = 4;
+  discrete Real rd2 = rd1;
+  Real x(start=1);
+  Real w = 4;
+
+  constant Integer ci1 = 1;
+  constant Integer ci2 = ci1;
+  parameter Integer pi1 = 1;
+  parameter Integer pi2 = pi1;
+  discrete Integer rid1 = 4;
+  discrete Integer rid2 = rid1;
+
+  constant Boolean cb1 = true;
+  constant Boolean cb2 = cb1;
+  parameter Boolean pb1 = true;
+  parameter Boolean pb2 = pb1;
+  discrete Boolean rbd1 = false;
+  discrete Boolean rbd2 = rbd1;
+
+equation
+  der(x) = -x;
+
+end CCodeGenDiscreteVariables1;
 
 model CCodeGenUniqueNames
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -288,10 +355,10 @@ $C_variable_aliases$
 $C_DAE_equation_residuals$
 ",
          generatedCode="
-#define _der_x_y_3 ((*(jmi->z))[jmi->offs_dx+0])
-#define _x_y_0 ((*(jmi->z))[jmi->offs_x+0])
-#define _x_y_1 ((*(jmi->z))[jmi->offs_w+0])
-#define _der_x_y_2 ((*(jmi->z))[jmi->offs_w+1])
+#define _der_x_y_3 ((*(jmi->z))[jmi->offs_real_dx+0])
+#define _x_y_0 ((*(jmi->z))[jmi->offs_real_x+0])
+#define _x_y_1 ((*(jmi->z))[jmi->offs_real_w+0])
+#define _der_x_y_2 ((*(jmi->z))[jmi->offs_real_w+1])
 #define time ((*(jmi->z))[jmi->offs_t])
 
     (*res)[0] = 1 - (_x_y_0);

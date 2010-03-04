@@ -43,11 +43,12 @@ n_real_pd: $n_real_pd$
 n_integer_pd: $n_integer_pd$
 n_boolean_pd: $n_boolean_pd$
 n_string_pd: $n_string_pd$
-n_w: $n_w$
 n_real_w: $n_real_w$
-n_integer_w: $n_integer_w$
-n_boolean_w: $n_boolean_w$
-n_string_w: $n_string_w$
+n_d: $n_d$
+n_real_d: $n_real_d$
+n_integer_d: $n_integer_d$
+n_boolean_d: $n_boolean_d$
+n_string_d: $n_string_d$
 n_real_x: $n_real_x$
 n_u: $n_u$
 n_real_u: $n_real_u$
@@ -76,18 +77,19 @@ n_real_pd: 2
 n_integer_pd: 2
 n_boolean_pd: 2
 n_string_pd: 2
-n_w: 11
 n_real_w: 2
-n_integer_w: 3
-n_boolean_w: 3
-n_string_w: 3
+n_d: 9
+n_real_d: 0
+n_integer_d: 3
+n_boolean_d: 3
+n_string_d: 3
 n_real_x: 1
 n_u: 4
 n_real_u: 1
 n_integer_u: 1
 n_boolean_u: 1
 n_string_u: 1
-n_equations: 16
+n_equations: 12
 n_initial_equations: 0")})));
   
   
@@ -99,7 +101,7 @@ n_initial_equations: 0")})));
     Real r1(start=1);
     Real r2=3;
     Real r3;
-	input Real r4 = 5;
+	input Real r4;
 
   	parameter Integer ip1=1;
   	parameter Integer ip2=ip1;
@@ -109,7 +111,7 @@ n_initial_equations: 0")})));
     Integer i1(start=1);
     Integer i2=3;
   	Integer i3=4;
-	input Integer r4 = 5;
+	input Integer r4;
 
   	parameter Boolean bp1=true;
   	parameter Boolean bp2=bp1;
@@ -119,7 +121,7 @@ n_initial_equations: 0")})));
     Boolean b1(start=true);
     Boolean b2=true;
 	Boolean b3=true;
-	input Boolean b4 =true;
+	input Boolean b4;
 		
   	parameter String sp1="hello";
   	parameter String sp2=sp1;
@@ -129,7 +131,7 @@ n_initial_equations: 0")})));
     String s1(start="hello");
     String s2="hello";
 	String s3="hello";
-	input String s4="hello";
+	input String s4;
     
     equation 
      r1 = 1;

@@ -107,26 +107,26 @@ public class OptimicaCGenerator extends CGenerator {
 		public void generate(PrintStream genPrinter) {
 			for (FVariable fv : foptclass.derivativeVariables()) {
 				genPrinter.print("#define " + fv.name_C());
-				genPrinter.print("_p_(j) ((*(jmi->z))[jmi->offs_dx_p+" + 
-						"j*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w) +" +
+				genPrinter.print("_p_(j) ((*(jmi->z))[jmi->offs_real_dx_p+" + 
+						"j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) +" +
 						fv.derivativeVariableIndex() + "])\n");
 			}
 			for (FVariable fv : foptclass.differentiatedRealVariables()) {
 				genPrinter.print("#define " + fv.name_C());
-				genPrinter.print("_p_(j) ((*(jmi->z))[jmi->offs_x_p+" + 
-						"j*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w) +" +
+				genPrinter.print("_p_(j) ((*(jmi->z))[jmi->offs_real_x_p+" + 
+						"j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) +" +
 						fv.differentiatedRealVariableIndex() + "])\n");
 			}
 			for (FVariable fv : foptclass.realInputs()) {
 				genPrinter.print("#define " + fv.name_C());
-				genPrinter.print("_p_(j) ((*(jmi->z))[jmi->offs_u_p+" + 
-						"j*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w) +" +
+				genPrinter.print("_p_(j) ((*(jmi->z))[jmi->offs_real_u_p+" + 
+						"j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) +" +
 						fv.realInputIndex() + "])\n");
 			}
 			for (FVariable fv : foptclass.algebraicRealVariables()) {
 				genPrinter.print("#define " + fv.name_C());
-				genPrinter.print("_p_(j) ((*(jmi->z))[jmi->offs_w_p+" +
-						"j*(jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w) +" +
+				genPrinter.print("_p_(j) ((*(jmi->z))[jmi->offs_real_w_p+" +
+						"j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) +" +
 						fv.algebraicRealVariableIndex() + "])\n");
 			}
 		}

@@ -177,17 +177,17 @@ int jmi_func_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independent_
 
 }
 
-int jmi_get_sizes(jmi_t* jmi, int* n_ci, int* n_cd, int* n_pi, int* n_pd,
-		                        int* n_dx, int* n_x, int* n_u, int* n_w, int* n_tp, int* n_sw, int* n_sw_init, int* n_z) {
+int jmi_get_sizes(jmi_t* jmi, int* n_real_ci, int* n_real_cd, int* n_real_pi, int* n_real_pd,
+		                        int* n_real_dx, int* n_real_x, int* n_real_u, int* n_real_w, int* n_tp, int* n_sw, int* n_sw_init, int* n_z) {
 
-	*n_ci = jmi->n_ci;
-	*n_cd = jmi->n_cd;
-	*n_pi = jmi->n_pi;
-	*n_pd = jmi->n_pd;
-	*n_dx = jmi->n_dx;
-	*n_x = jmi->n_x;
-	*n_u = jmi->n_u;
-	*n_w = jmi->n_w;
+	*n_real_ci = jmi->n_real_ci;
+	*n_real_cd = jmi->n_real_cd;
+	*n_real_pi = jmi->n_real_pi;
+	*n_real_pd = jmi->n_real_pd;
+	*n_real_dx = jmi->n_real_dx;
+	*n_real_x = jmi->n_real_x;
+	*n_real_u = jmi->n_real_u;
+	*n_real_w = jmi->n_real_w;
     *n_tp = jmi->n_tp;
     *n_sw = jmi->n_sw;
     *n_sw_init = jmi->n_sw_init;
@@ -196,22 +196,22 @@ int jmi_get_sizes(jmi_t* jmi, int* n_ci, int* n_cd, int* n_pi, int* n_pd,
 	return 0;
 }
 
-int jmi_get_offsets(jmi_t* jmi, int* offs_ci, int* offs_cd, int* offs_pi, int* offs_pd,
-		int* offs_dx, int* offs_x, int* offs_u, int* offs_w, int *offs_t,
-		int* offs_dx_p, int* offs_x_p, int* offs_u_p, int* offs_w_p, int* offs_sw, int* offs_sw_init) {
-	*offs_ci = jmi->offs_ci;
-	*offs_cd = jmi->offs_cd;
-	*offs_pi = jmi->offs_pi;
-	*offs_pd = jmi->offs_pd;
-	*offs_dx = jmi->offs_dx;
-	*offs_x = jmi->offs_x;
-	*offs_u = jmi->offs_u;
-	*offs_w = jmi->offs_w;
+int jmi_get_offsets(jmi_t* jmi, int* offs_real_ci, int* offs_real_cd, int* offs_real_pi, int* offs_real_pd,
+		int* offs_real_dx, int* offs_real_x, int* offs_real_u, int* offs_real_w, int *offs_t,
+		int* offs_real_dx_p, int* offs_real_x_p, int* offs_real_u_p, int* offs_real_w_p, int* offs_sw, int* offs_sw_init) {
+	*offs_real_ci = jmi->offs_real_ci;
+	*offs_real_cd = jmi->offs_real_cd;
+	*offs_real_pi = jmi->offs_real_pi;
+	*offs_real_pd = jmi->offs_real_pd;
+	*offs_real_dx = jmi->offs_real_dx;
+	*offs_real_x = jmi->offs_real_x;
+	*offs_real_u = jmi->offs_real_u;
+	*offs_real_w = jmi->offs_real_w;
 	*offs_t = jmi->offs_t;
-	*offs_dx_p = jmi->offs_dx_p;
-	*offs_x_p = jmi->offs_x_p;
-	*offs_u_p = jmi->offs_u_p;
-	*offs_w_p = jmi->offs_w_p;
+	*offs_real_dx_p = jmi->offs_real_dx_p;
+	*offs_real_x_p = jmi->offs_real_x_p;
+	*offs_real_u_p = jmi->offs_real_u_p;
+	*offs_real_w_p = jmi->offs_real_w_p;
 	*offs_sw = jmi->offs_sw;
 	*offs_sw_init = jmi->offs_sw_init;
 
@@ -322,38 +322,38 @@ int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t J,
 int jmi_variable_type(jmi_t *jmi, int col_index) {
 	int i;
 
-    if (col_index>=jmi->offs_ci && col_index<jmi->offs_cd) {
+    if (col_index>=jmi->offs_real_ci && col_index<jmi->offs_real_cd) {
     	return JMI_DER_CI;
-    } else if (col_index >= jmi->offs_cd && col_index < jmi->offs_pi) {
+    } else if (col_index >= jmi->offs_real_cd && col_index < jmi->offs_real_pi) {
     	return JMI_DER_CD;
-    } else if (col_index>=jmi->offs_pi && col_index<jmi->offs_pd) {
+    } else if (col_index>=jmi->offs_real_pi && col_index<jmi->offs_real_pd) {
     	return JMI_DER_PI;
-    } else if (col_index>=jmi->offs_pd && col_index<jmi->offs_dx) {
+    } else if (col_index>=jmi->offs_real_pd && col_index<jmi->offs_real_dx) {
     	return JMI_DER_PD;
-    } else if (col_index>=jmi->offs_dx && col_index<jmi->offs_x) {
+    } else if (col_index>=jmi->offs_real_dx && col_index<jmi->offs_real_x) {
     	return JMI_DER_DX;
-    } else if (col_index>=jmi->offs_x && col_index<jmi->offs_u) {
+    } else if (col_index>=jmi->offs_real_x && col_index<jmi->offs_real_u) {
     	return JMI_DER_X;
-    } else if (col_index>=jmi->offs_u && col_index<jmi->offs_w) {
+    } else if (col_index>=jmi->offs_real_u && col_index<jmi->offs_real_w) {
     	return JMI_DER_U;
-    } else if (col_index>=jmi->offs_w && col_index<jmi->offs_t) {
+    } else if (col_index>=jmi->offs_real_w && col_index<jmi->offs_t) {
     	return JMI_DER_W;
     } else if (col_index==jmi->offs_t) {
     	return JMI_DER_T;
     }
 
     for (i=0;i<jmi->n_tp;i++) {
-    	if (col_index>=jmi->offs_dx_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i &&
-    			col_index<jmi->offs_x_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i) {
+    	if (col_index>=jmi->offs_real_dx_p + (jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w)*i &&
+    			col_index<jmi->offs_real_x_p + (jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w)*i) {
     		return JMI_DER_DX_P;
-    	} else if (col_index>=jmi->offs_x_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i &&
-    			col_index<jmi->offs_u_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i) {
+    	} else if (col_index>=jmi->offs_real_x_p + (jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w)*i &&
+    			col_index<jmi->offs_real_u_p + (jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w)*i) {
     		return JMI_DER_X_P;
-    	} else if (col_index>=jmi->offs_u_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i &&
-    			col_index<jmi->offs_w_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i) {
+    	} else if (col_index>=jmi->offs_real_u_p + (jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w)*i &&
+    			col_index<jmi->offs_real_w_p + (jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w)*i) {
     		return JMI_DER_U_P;
-    	} else if (col_index>=jmi->offs_w_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i &&
-    			col_index<jmi->offs_w_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i + jmi->n_w) {
+    	} else if (col_index>=jmi->offs_real_w_p + (jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w)*i &&
+    			col_index<jmi->offs_real_w_p + (jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w)*i + jmi->n_real_w) {
     		return JMI_DER_W_P;
     	}
     }
@@ -526,35 +526,35 @@ jmi_real_t* jmi_get_z(jmi_t* jmi) {
 }
 
 jmi_real_t* jmi_get_ci(jmi_t* jmi) {
-	return *(jmi->z_val) + jmi->offs_ci;
+	return *(jmi->z_val) + jmi->offs_real_ci;
 }
 
 jmi_real_t* jmi_get_cd(jmi_t* jmi) {
-	return *(jmi->z_val) + jmi->offs_cd;
+	return *(jmi->z_val) + jmi->offs_real_cd;
 }
 
 jmi_real_t* jmi_get_pi(jmi_t* jmi) {
-	return *(jmi->z_val) + jmi->offs_pi;
+	return *(jmi->z_val) + jmi->offs_real_pi;
 }
 
 jmi_real_t* jmi_get_pd(jmi_t* jmi) {
-	return *(jmi->z_val) + jmi->offs_pd;
+	return *(jmi->z_val) + jmi->offs_real_pd;
 }
 
 jmi_real_t* jmi_get_dx(jmi_t* jmi) {
-	return *(jmi->z_val) + jmi->offs_dx;
+	return *(jmi->z_val) + jmi->offs_real_dx;
 }
 
 jmi_real_t* jmi_get_x(jmi_t* jmi) {
-	return *(jmi->z_val) + jmi->offs_x;
+	return *(jmi->z_val) + jmi->offs_real_x;
 }
 
 jmi_real_t* jmi_get_u(jmi_t* jmi) {
-	return *(jmi->z_val) + jmi->offs_u;
+	return *(jmi->z_val) + jmi->offs_real_u;
 }
 
 jmi_real_t* jmi_get_w(jmi_t* jmi) {
-	return *(jmi->z_val) + jmi->offs_w;
+	return *(jmi->z_val) + jmi->offs_real_w;
 }
 
 jmi_real_t* jmi_get_t(jmi_t* jmi) {
@@ -562,19 +562,19 @@ jmi_real_t* jmi_get_t(jmi_t* jmi) {
 }
 
 jmi_real_t* jmi_get_dx_p(jmi_t* jmi, int i) {
-	return *(jmi->z_val) + jmi->offs_dx_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i;
+	return *(jmi->z_val) + jmi->offs_real_dx_p + (jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w)*i;
 }
 
 jmi_real_t* jmi_get_x_p(jmi_t* jmi, int i) {
-	return *(jmi->z_val) + jmi->offs_x_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i;
+	return *(jmi->z_val) + jmi->offs_real_x_p + (jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w)*i;
 }
 
 jmi_real_t* jmi_get_u_p(jmi_t* jmi, int i) {
-	return *(jmi->z_val) + jmi->offs_u_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i;
+	return *(jmi->z_val) + jmi->offs_real_u_p + (jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w)*i;
 }
 
 jmi_real_t* jmi_get_w_p(jmi_t* jmi, int i) {
-	return *(jmi->z_val) + jmi->offs_w_p + (jmi->n_dx + jmi->n_x + jmi->n_u + jmi->n_w)*i;
+	return *(jmi->z_val) + jmi->offs_real_w_p + (jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w)*i;
 }
 
 jmi_real_t* jmi_get_sw(jmi_t* jmi) {
@@ -587,14 +587,14 @@ jmi_real_t* jmi_get_sw_init(jmi_t* jmi) {
 
 
 void jmi_print_summary(jmi_t *jmi) {
-	printf("Number of interactive constants:               %d\n",jmi->n_ci);
-	printf("Number of dependent constants:                 %d\n",jmi->n_cd);
-	printf("Number of interactive parameters:              %d\n",jmi->n_pi);
-	printf("Number of dependent parameters:                %d\n",jmi->n_pd);
-	printf("Number of derivatives:                         %d\n",jmi->n_dx);
-	printf("Number of states:                              %d\n",jmi->n_x);
-	printf("Number of inputs:                              %d\n",jmi->n_u);
-	printf("Number of algebraics:                          %d\n",jmi->n_w);
+	printf("Number of interactive constants:               %d\n",jmi->n_real_ci);
+	printf("Number of dependent constants:                 %d\n",jmi->n_real_cd);
+	printf("Number of interactive parameters:              %d\n",jmi->n_real_pi);
+	printf("Number of dependent parameters:                %d\n",jmi->n_real_pd);
+	printf("Number of derivatives:                         %d\n",jmi->n_real_dx);
+	printf("Number of states:                              %d\n",jmi->n_real_x);
+	printf("Number of inputs:                              %d\n",jmi->n_real_u);
+	printf("Number of algebraics:                          %d\n",jmi->n_real_w);
 	printf("Number of time points:                         %d\n",jmi->n_tp);
 	printf("Number of switching functions in DAE:          %d\n",jmi->n_sw);
 	printf("Number of switching functions in DAE init:     %d\n",jmi->n_sw_init);

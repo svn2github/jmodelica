@@ -457,7 +457,7 @@ public class XMLGenerator extends GenericGenerator {
 		//genPrinter.print("declaredType=\"String\" ");
 		//start attribute
 		if ((booleanvariable.isDependentParameter() && !booleanvariable.startAttributeSet()) || booleanvariable.isIndependentConstant()) {
-			genPrinter.print("start=\"" +booleanvariable.getBindingExp().ceval().intValue() + "\" ");
+			genPrinter.print("start=\"" +booleanvariable.getBindingExp().ceval().booleanValue() + "\" ");
 		} else if(booleanvariable.startAttributeSet()) {
 			genPrinter.print("start" +booleanvariable.startAttribute()+"\" ");
 		}
@@ -472,7 +472,7 @@ public class XMLGenerator extends GenericGenerator {
 		//genPrinter.print("declaredType=\"String\" ");
 		//start attribute
 		if ((stringvariable.isDependentParameter() && !stringvariable.startAttributeSet()) || stringvariable.isIndependentConstant()) {
-			genPrinter.print("start=\"" +stringvariable.getBindingExp().ceval().intValue() + "\" ");
+			genPrinter.print("start=\"" +stringvariable.getBindingExp().ceval().stringValue() + "\" ");
 		} else if(stringvariable.startAttributeSet()) {
 			genPrinter.print("start=\""+stringvariable.startAttribute()+"\" ");
 		}

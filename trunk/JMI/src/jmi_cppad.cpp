@@ -42,8 +42,16 @@
 
 #include "jmi.h"
 
-int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
-		int n_x, int n_u, int n_w, int n_tp, int n_sw, int n_sw_init) {
+int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
+		int n_real_pd, int n_integer_ci, int n_integer_cd,
+		int n_integer_pi, int n_integer_pd,int n_boolean_ci, int n_boolean_cd,
+		int n_boolean_pi, int n_boolean_pd, int n_string_ci, int n_string_cd,
+		int n_string_pi, int n_string_pd,
+		int n_real_dx, int n_real_x, int n_real_u, int n_real_w,
+		int n_tp,int n_real_d,
+		int n_integer_d, int n_integer_u,
+		int n_boolean_d, int n_boolean_u,
+		int n_string_d, int n_string_u, int n_sw, int n_sw_init) {
 
 	// Create jmi struct
 	*jmi = (jmi_t*)calloc(1,sizeof(jmi_t));
@@ -54,47 +62,99 @@ int jmi_init(jmi_t** jmi, int n_ci, int n_cd, int n_pi, int n_pd, int n_dx,
 	jmi_->opt = NULL;
 
 	// Set sizes of dae vectors
-	jmi_->n_ci = n_ci;
-	jmi_->n_cd = n_cd;
-	jmi_->n_pi = n_pi;
-	jmi_->n_pd = n_pd;
-	jmi_->n_dx = n_dx;
-	jmi_->n_x = n_x;
-	jmi_->n_u = n_u;
-	jmi_->n_w = n_w;
+	jmi_->n_real_ci = n_real_ci;
+	jmi_->n_real_cd = n_real_cd;
+	jmi_->n_real_pi = n_real_pi;
+	jmi_->n_real_pd = n_real_pd;
+
+	jmi_->n_integer_ci = n_integer_ci;
+	jmi_->n_integer_cd = n_integer_cd;
+	jmi_->n_integer_pi = n_integer_pi;
+	jmi_->n_integer_pd = n_integer_pd;
+
+	jmi_->n_boolean_ci = n_boolean_ci;
+	jmi_->n_boolean_cd = n_boolean_cd;
+	jmi_->n_boolean_pi = n_boolean_pi;
+	jmi_->n_boolean_pd = n_boolean_pd;
+
+	jmi_->n_string_ci = n_string_ci;
+	jmi_->n_string_cd = n_string_cd;
+	jmi_->n_string_pi = n_string_pi;
+	jmi_->n_string_pd = n_string_pd;
+
+	jmi_->n_real_dx = n_real_dx;
+	jmi_->n_real_x = n_real_x;
+	jmi_->n_real_u = n_real_u;
+	jmi_->n_real_w = n_real_w;
 
 	jmi_->n_tp = n_tp;
-	jmi_->n_sw = n_sw;
 
-	jmi_->offs_ci = 0;
-	jmi_->offs_cd = n_ci;
-	jmi_->offs_pi = n_ci + n_cd;
-	jmi_->offs_pd = n_ci + n_cd + n_pi;
-	jmi_->offs_dx = n_ci + n_cd + n_pi + n_pd;
-	jmi_->offs_x = n_ci + n_cd + n_pi + n_pd + n_dx;
-	jmi_->offs_u = n_ci + n_cd + n_pi + n_pd + n_dx + n_x;
-	jmi_->offs_w = n_ci + n_cd + n_pi + n_pd + n_dx + n_x + n_u;
-	jmi_->offs_t = n_ci + n_cd + n_pi + n_pd + n_dx + n_x + n_u + n_w;
-	jmi_->offs_dx_p = jmi_->offs_t + (n_tp>0? 1: 0);
-	jmi_->offs_x_p = jmi_->offs_dx_p + (n_tp>0? n_dx: 0);
-	jmi_->offs_u_p = jmi_->offs_x_p + (n_tp>0? n_x: 0);
-	jmi_->offs_w_p = jmi_->offs_u_p + (n_tp>0? n_u: 0);
-	jmi_->offs_sw = jmi_->offs_t + 1 + (n_dx + n_x + n_w + n_u)*n_tp + (n_sw>0? 1: 0);
+	jmi_->n_real_d = n_real_d;
+
+	jmi_->n_integer_d = n_integer_d;
+	jmi_->n_integer_u = n_integer_u;
+
+	jmi_->n_boolean_d = n_boolean_d;
+	jmi_->n_boolean_u = n_boolean_u;
+
+	jmi_->n_string_d = n_string_d;
+	jmi_->n_string_u = n_string_u;
+
+	jmi_->n_sw = n_sw;
+	jmi_->n_sw_init = n_sw_init;
+
+	jmi_->offs_real_ci = 0;
+	jmi_->offs_real_cd = jmi_->offs_real_ci + n_real_ci;
+	jmi_->offs_real_pi = jmi_->offs_real_cd + n_real_cd;
+	jmi_->offs_real_pd = jmi_->offs_real_pi + n_real_pi;
+
+	jmi_->offs_integer_ci = jmi_->offs_real_pd + n_real_pd;
+	jmi_->offs_integer_cd = jmi_->offs_integer_ci + n_integer_ci;
+	jmi_->offs_integer_pi = jmi_->offs_integer_cd + n_integer_cd;
+	jmi_->offs_integer_pd = jmi_->offs_integer_pi + n_integer_pi;
+
+	jmi_->offs_boolean_ci = jmi_->offs_integer_pd + n_integer_pd;
+	jmi_->offs_boolean_cd = jmi_->offs_boolean_ci + n_boolean_ci;
+	jmi_->offs_boolean_pi = jmi_->offs_boolean_cd + n_boolean_cd;
+	jmi_->offs_boolean_pd = jmi_->offs_boolean_pi + n_boolean_pi;
+
+	jmi_->offs_real_dx = jmi_->offs_boolean_pd + n_boolean_pd;
+	jmi_->offs_real_x = jmi_->offs_real_dx + n_real_dx;
+	jmi_->offs_real_u = jmi_->offs_real_x + n_real_x;
+	jmi_->offs_real_w = jmi_->offs_real_u + n_real_u;
+	jmi_->offs_t = jmi_->offs_real_w + n_real_w;
+
+	jmi_->offs_real_dx_p = jmi_->offs_t + (n_tp>0? 1: 0);
+	jmi_->offs_real_x_p = jmi_->offs_real_dx_p + (n_tp>0? n_real_dx: 0);
+	jmi_->offs_real_u_p = jmi_->offs_real_x_p + (n_tp>0? n_real_x: 0);
+	jmi_->offs_real_w_p = jmi_->offs_real_u_p + (n_tp>0? n_real_u: 0);
+
+	jmi_->offs_real_d = jmi_->offs_t + 1 + (n_real_dx + n_real_x + n_real_w + n_real_u)*n_tp;
+
+	jmi_->offs_integer_d = jmi_->offs_real_d + n_real_d;
+	jmi_->offs_integer_u = jmi_->offs_integer_d + n_integer_d;
+
+	jmi_->offs_boolean_d = jmi_->offs_integer_u + n_integer_u;
+	jmi_->offs_boolean_u = jmi_->offs_boolean_d + n_boolean_d;
+
+	jmi_->offs_sw = jmi_->offs_boolean_u + n_boolean_u;
 	jmi_->offs_sw_init = jmi_->offs_sw + n_sw;
 
 	jmi_->offs_p = 0;
-	jmi_->offs_v = jmi_->offs_dx;
+	jmi_->offs_v = jmi_->offs_real_dx;
 	if (n_tp>0) {
 		jmi_->offs_q = jmi_->offs_t + 1;
 	} else {
 		jmi_->offs_q = jmi_->offs_t;
 	}
 
-	jmi_->n_p = n_ci + n_cd + n_pi + n_pd;
-	jmi_->n_v = n_dx + n_x + n_u + n_w + 1;
-	jmi_->n_q = (n_dx + n_x + n_u + n_w)*n_tp;
+	jmi_->n_p = jmi_->offs_real_dx;
+	jmi_->n_v = n_real_dx + n_real_x + n_real_u + n_real_w + 1;
+	jmi_->n_q = (n_real_dx + n_real_x + n_real_u + n_real_w)*n_tp;
+	jmi_->n_d = n_real_d + n_integer_d + n_integer_u + n_boolean_d +
+		n_boolean_u;
 
-	jmi_->n_z = jmi_->n_p + jmi_->n_v + jmi_->n_q + n_sw + n_sw_init;
+	jmi_->n_z = jmi_->n_p + jmi_->n_v + jmi_->n_q + jmi_->n_d + n_sw + n_sw_init;
 
 	jmi_->z = new jmi_ad_var_vec_t(jmi_->n_z);
 
@@ -782,21 +842,21 @@ int jmi_delete(jmi_t* jmi){
 
 int jmi_ode_f(jmi_t* jmi) {
 
-	if (jmi->n_w != 0) { // Check if not ODE
+	if (jmi->n_real_w != 0) { // Check if not ODE
 		return -1;
 	}
 
 	int i;
 	jmi_real_t* dx = jmi_get_dx(jmi);
-	for(i=0;i<jmi->n_dx;i++) {
+	for(i=0;i<jmi->n_real_dx;i++) {
 		dx[i]=0;
 	}
 
-	jmi_real_t* dx_res = (jmi_real_t*)calloc(jmi->n_x,sizeof(jmi_real_t));
+	jmi_real_t* dx_res = (jmi_real_t*)calloc(jmi->n_real_x,sizeof(jmi_real_t));
 
     int ret_val = jmi_func_F(jmi,jmi->dae->F, dx_res);
 
-	for(i=0;i<jmi->n_dx;i++) {
+	for(i=0;i<jmi->n_real_dx;i++) {
 		dx[i]=dx_res[i];
 	}
 
@@ -807,7 +867,7 @@ int jmi_ode_f(jmi_t* jmi) {
 
 int jmi_ode_df(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
 
-	if (jmi->n_w != 0) { // Check if not ODE
+	if (jmi->n_real_w != 0) { // Check if not ODE
 		return -1;
 	}
 
@@ -815,7 +875,7 @@ int jmi_ode_df(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int
 
 		int i;
 		jmi_real_t* dx = jmi_get_dx(jmi);
-		for(i=0;i<jmi->n_dx;i++) {
+		for(i=0;i<jmi->n_real_dx;i++) {
 			dx[i]=0;
 		}
 
@@ -826,7 +886,7 @@ int jmi_ode_df(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int
 
 		int i;
 		jmi_real_t* dx = jmi_get_dx(jmi);
-		for(i=0;i<jmi->n_dx;i++) {
+		for(i=0;i<jmi->n_real_dx;i++) {
 			dx[i]=0;
 		}
 
@@ -840,7 +900,7 @@ int jmi_ode_df(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int
 
 int jmi_ode_df_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
 
-	if (jmi->n_w != 0) { // Check if not ODE
+	if (jmi->n_real_w != 0) { // Check if not ODE
 		return -1;
 	}
 
@@ -878,7 +938,7 @@ int jmi_ode_df_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
 int jmi_ode_df_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
         int *mask, int* row, int* col) {
 
-	if (jmi->n_w != 0) { // Check if not ODE
+	if (jmi->n_real_w != 0) { // Check if not ODE
 		return -1;
 	}
 
@@ -898,7 +958,7 @@ int jmi_ode_df_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
 int jmi_ode_df_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *df_n_cols, int *df_n_nz) {
 
-	if (jmi->n_w != 0) { // Check if not ODE
+	if (jmi->n_real_w != 0) { // Check if not ODE
 		return -1;
 	}
 

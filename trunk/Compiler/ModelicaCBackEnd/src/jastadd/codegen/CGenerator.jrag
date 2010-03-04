@@ -156,6 +156,8 @@ public class CGenerator extends GenericGenerator {
 			genPrinter.print("#define ");
 			genPrinter.print(fv.name_C());
 			genPrinter.print(" ((*(jmi->z))[jmi->offs_");
+//			genPrinter.print(fv.type().name().toLowerCase());
+//			genPrinter.print("_");
 			genPrinter.print(offset);
 			genPrinter.print("+");
 			genPrinter.print(index);
@@ -164,30 +166,72 @@ public class CGenerator extends GenericGenerator {
 	
 		public void generate(PrintStream genPrinter) {
 			for (FVariable fv : fclass.independentRealConstants())
-				generateVar(genPrinter, fv, "ci", fv.independentRealConstantIndex());
+				generateVar(genPrinter, fv, "real_ci", fv.independentRealConstantIndex());
 			
 			for (FVariable fv : fclass.dependentRealConstants()) 
-				generateVar(genPrinter, fv, "cd", fv.dependentRealConstantIndex());
+				generateVar(genPrinter, fv, "real_cd", fv.dependentRealConstantIndex());
 			
 			for (FVariable fv : fclass.independentRealParameters()) 
-				generateVar(genPrinter, fv, "pi", fv.independentRealParameterIndex());
+				generateVar(genPrinter, fv, "real_pi", fv.independentRealParameterIndex());
 			
 			for (FVariable fv : fclass.dependentRealParameters()) 
-				generateVar(genPrinter, fv, "pd", fv.dependentRealParameterIndex());
+				generateVar(genPrinter, fv, "real_pd", fv.dependentRealParameterIndex());
+
+			for (FVariable fv : fclass.independentIntegerConstants())
+				generateVar(genPrinter, fv, "integer_ci", fv.independentIntegerConstantIndex());
 			
+			for (FVariable fv : fclass.dependentIntegerConstants()) 
+				generateVar(genPrinter, fv, "integer_cd", fv.dependentIntegerConstantIndex());
+			
+			for (FVariable fv : fclass.independentIntegerParameters()) 
+				generateVar(genPrinter, fv, "integer_pi", fv.independentIntegerParameterIndex());
+			
+			for (FVariable fv : fclass.dependentIntegerParameters()) 
+				generateVar(genPrinter, fv, "integer_pd", fv.dependentIntegerParameterIndex());
+
+			for (FVariable fv : fclass.independentBooleanConstants())
+				generateVar(genPrinter, fv, "boolean_ci", fv.independentBooleanConstantIndex());
+			
+			for (FVariable fv : fclass.dependentBooleanConstants()) 
+				generateVar(genPrinter, fv, "boolean_cd", fv.dependentBooleanConstantIndex());
+			
+			for (FVariable fv : fclass.independentBooleanParameters()) 
+				generateVar(genPrinter, fv, "boolean_pi", fv.independentBooleanParameterIndex());
+			
+			for (FVariable fv : fclass.dependentBooleanParameters()) 
+				generateVar(genPrinter, fv, "boolean_pd", fv.dependentBooleanParameterIndex());
+
 			for (FVariable fv : fclass.derivativeVariables()) 
-				generateVar(genPrinter, fv, "dx", fv.derivativeVariableIndex());
+				generateVar(genPrinter, fv, "real_dx", fv.derivativeVariableIndex());
 			
 			for (FVariable fv : fclass.differentiatedRealVariables()) 
-				generateVar(genPrinter, fv, "x", fv.differentiatedRealVariableIndex());
+				generateVar(genPrinter, fv, "real_x", fv.differentiatedRealVariableIndex());
 			
 			for (FVariable fv : fclass.realInputs()) 
-				generateVar(genPrinter, fv, "u", fv.realInputIndex());
+				generateVar(genPrinter, fv, "real_u", fv.realInputIndex());
 			
 			for (FVariable fv : fclass.algebraicRealVariables()) 
-				generateVar(genPrinter, fv, "w", fv.algebraicRealVariableIndex());
+				generateVar(genPrinter, fv, "real_w", fv.algebraicRealVariableIndex());
 			
 			genPrinter.print("#define time ((*(jmi->z))[jmi->offs_t])\n"); 
+
+			for (FVariable fv : fclass.discreteRealVariables()) 
+				generateVar(genPrinter, fv, "real_d", fv.discreteRealVariableIndex());
+						
+			for (FVariable fv : fclass.discreteIntegerVariables()) 
+				generateVar(genPrinter, fv, "integer_d", fv.discreteIntegerVariableIndex());
+						
+			for (FVariable fv : fclass.integerInputs()) 
+				generateVar(genPrinter, fv, "boolean_u", fv.booleanInputIndex());
+						
+			for (FVariable fv : fclass.discreteBooleanVariables()) 
+				generateVar(genPrinter, fv, "boolean_d", fv.discreteBooleanVariableIndex());
+						
+			for (FVariable fv : fclass.booleanInputs()) 
+				generateVar(genPrinter, fv, "boolean_u", fv.booleanInputIndex());
+
+			for (FVariable fv : fclass.integerInputs()) 
+				generateVar(genPrinter, fv, "boolean_u", fv.booleanInputIndex());
 			
 		}
 	}

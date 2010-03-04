@@ -573,6 +573,13 @@ aspect CCodeGen {
 		if (inIfCondition()) str.print(")");
 	}
 	
+	public void FBooleanLitExpTrue.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("JMI_TRUE");
+	}
+	
+	public void FBooleanLitExpFalse.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("JMI_FALSE");
+	}
 	
 	public void ASTNode.genTempArrays_C(Printer p, PrintStream str, String indent, Object o) {
 		for (ASTNode node : this)

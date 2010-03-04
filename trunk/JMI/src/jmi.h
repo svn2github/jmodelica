@@ -304,6 +304,10 @@ extern "C" {
 /**  \brief Evaluate derivatives w.r.t. all variables in \f$q\f$.*/
 #define JMI_DER_ALL_Q  JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | JMI_DER_W_P
 
+/**  \brief Definitions of boolean true and false literals.*/
+#define JMI_TRUE 1.0
+#define JMI_FALSE 0.0
+
 /* @} */
 
 /*
