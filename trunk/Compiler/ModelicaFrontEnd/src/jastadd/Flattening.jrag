@@ -680,7 +680,12 @@ aspect FlatExpressions {
 	
 	public FQName InstAccess.flatten(FQName prefix) { 
 		FQName myName = new FQName(prefix);
-		myName.append(this,prefix);
+		InstAccess fa = getFirstInstAccess();
+		do {
+			Opt as = fa.isInstArrayAccess() ? new Opt(fa.fArraySubscripts().flatten(prefix)) : new Opt();
+			myName.addFQNamePart(new FQNamePart(fa.name(), as));
+			fa = fa.getNextInstAccess();
+		} while (fa != null);
 		return myName;
 	}
 
@@ -844,7 +849,7 @@ aspect FlatExpressions {
 			forIndex.add(ifi.flatten(prefix));
 		}
 		FClass fcc = new FClass();
-		fcc.setFQName(new FQName().append("tmp")); 
+		fcc.setFQName(new FQName("tmp")); 
 		fcc.addFEquationBlock(new FEquationBlock(new List()));
 		//fcc.dumpTree("");
 		for (FAbstractEquation ae : getFAbstractEquations()) {
@@ -881,11 +886,10 @@ aspect FlatExpressions {
 		
 		for (InstComponentDecl icd : c1.containedInstComponents()) {
 			var1 = icd;
-			var2 = (InstComponentDecl)c2.memberInstComponent(var1.name()).iterator().next();
-			FQName fqn1 = new FQName().append(getConnector1().getInstAccess(),prefix);
-			FQName fqn2 = new FQName().append(getConnector2().getInstAccess(),prefix);
-			fc.getConnectionSetManager().addVars(var1,outside1,((FQName)prefix.fullCopy()).append(fqn1.append(var1.name())),
-			                                     var2,outside2,((FQName)prefix.fullCopy()).append(fqn2.append(var2.name())));
+			var2 = (InstComponentDecl) c2.memberInstComponent(var1.name()).iterator().next();
+			FQName fqn1 = getConnector1().getInstAccess().flatten(prefix).append(var1.name());
+			FQName fqn2 = getConnector2().getInstAccess().flatten(prefix).append(var2.name());
+			fc.getConnectionSetManager().addVars(var1, outside1, fqn1, var2, outside2, fqn2);
 		}
 	}
 

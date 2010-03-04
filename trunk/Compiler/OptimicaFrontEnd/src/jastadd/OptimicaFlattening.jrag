@@ -162,7 +162,7 @@ aspect OptimicaFlattening {
 			forIndex.add(ifi.flatten(prefix));
 		
 		FOptClass focc = new FOptClass();
-		focc.setFQName(new FQName().append("tmp")); 
+		focc.setFQName(new FQName("tmp")); 
 		focc.setFConstraintList(cons);
 		for (FConstraint c : getFConstraints()) 
 			c.flatten(prefix, focc);

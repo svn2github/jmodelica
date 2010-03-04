@@ -570,27 +570,6 @@ aspect FlatNames {
 		this((List)fqname.getFQNamePartList().fullCopy());
 	}
 
-	public FQName FQName.append(InstAccess access,FQName prefix) {
-		InstAccess fa = access.getFirstInstAccess();
-		Opt as = null;
-		if (fa.isInstArrayAccess()) {
-			as = new Opt(fa.fArraySubscripts().flatten(prefix));
-		} else {
-			as = new Opt();
-		}
-		addFQNamePart(new FQNamePart(fa.name(),as));
-		while (fa.getNextInstAccess()!=null) {
-			fa = fa.getNextInstAccess();
-			if (fa.isInstArrayAccess()) {
-				as = new Opt(fa.fArraySubscripts().flatten(prefix));
-			} else {
-				as = new Opt();
-			}
-			addFQNamePart(new FQNamePart(fa.name(),as));
-		}
-		return this;
-	}
-
 	public FQName FQName.append(String name) {
 		addFQNamePart(new FQNamePart(name, new Opt()));
 		return this;
