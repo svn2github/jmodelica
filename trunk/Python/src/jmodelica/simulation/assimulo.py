@@ -142,6 +142,7 @@ class JMIImplicit(Implicit_Problem):
         self._dx_nbr = len(self._model.dx) #Number of derivatives
         self._pre = self.y0.copy()
         self._iter = 0
+        self._temp_f = N.array([0.]*self._f_nbr)
         
         
     def f(self, t, y, yd, sw=None):
@@ -196,7 +197,7 @@ class JMIImplicit(Implicit_Problem):
         
         #-Evaluating
         Jac = N.zeros(self._f_nbr**2) #Matrix that hold information about dx and dw
-        self._model.jmimodel.dae_dF(evaluation_options, sparsity, independent_vars[1:], z_l, Jac) #Output dx+dw
+        self._model.jmimodel.dae_dF(evaluation_options, sparsity, independent_vars[1:], z_l, Jac) #Output x+w
         
         dx = N.zeros(len(self._model.dx)*self._f_nbr) #Matrix that hold information about dx'
         self._model.jmimodel.dae_dF(evaluation_options, sparsity, independent_vars[0], z_l, dx) #Output dx'
@@ -275,7 +276,7 @@ class JMIImplicit(Implicit_Problem):
                 self._log_information[i-1][6].append([b_mode,a_mode])
 
             [event_info, iter] = self.check_eIter(b_mode, a_mode)
-            
+
             if iter:
                 if solver.verbosity >= solver.NORMAL:
                     print '\nEvent iteration?: Yes'
@@ -362,12 +363,20 @@ class JMIImplicit(Implicit_Problem):
         iter = False
         
         for i in range(len(before)):
-            if (before[i] < 0.0 and after[i] >= 0.0):
-                eIter[i] = 1
-                iter = True
-            if (before[i] >= 0.0 and after[i] < 0.0):
-                eIter[i] = -1
-                iter = True
+            if N.abs(before[i]) < self.eps:
+                if after[i] >= self.eps:
+                    eIter[i] = 1
+                    iter = True
+                if after[i] <= -self.eps:
+                    eIter[i] = -1
+                    iter = True
+            else:
+                if (before[i] < 0.0 and after[i] >= self.eps):
+                    eIter[i] = 1
+                    iter = True
+                if (before[i] > 0.0 and after[i] <= -self.eps):
+                    eIter[i] = -1
+                    iter = True
                 
         return [eIter, iter]
 
@@ -462,7 +471,7 @@ class JMIImplicit(Implicit_Problem):
                 for j in range(len(self._log_information[ind][5][iter])):
                     data_points.append(N.abs(self._log_information[ind][5][iter][j][i]) if N.abs(self._log_information[ind][5][iter][j][i])>1e-10 else 1e-10)
                 P.semilogy(data_points)
-        P.ylim(ymin=1e-10)
+        P.ylim(ymin=1e-6)
         P.show()
 
     def print_g_info(self, ind, iter=0):
