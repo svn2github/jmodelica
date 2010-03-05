@@ -103,10 +103,12 @@ aspect MemoryUse {
 	 * @param minSize  the minimum memory size to display a node
 	 */
 	public void ASTNode.dumpMemoryUse(PrintStream out, boolean deep, int maxDepth, int minSize) {
+		Profiler.clear();   // Remove any stale data from profiler
 		ArrayList<String> rows = new ArrayList<String>();
 		gatherMemoryUse(rows, "", deep, maxDepth, minSize, 0);
 		for (int i = rows.size() - 1; i >= 0; i--)
 			out.println(rows.get(i));
+		Profiler.clear();   // Free any memory used by the profiler's cache
 	}
 	
 	/**
@@ -273,11 +275,17 @@ aspect MemoryUse {
 		 * @param deep  if the approximation should include the contents of non-ASTNode members
 		 */
 		public static int getNodeSize(ASTNode node, boolean deep) {
-			visited.clear();
 			if (deep)
 				return getObjectSize(node);
 			else 
 				return OBJECT_SHELL_SIZE + getTotalFieldSize(node.getClass());
+		}
+		
+		/**
+		 * \brief Clear cached data.
+		 */
+		public static void clear() {
+			visited.clear();
 		}
 		
 		/**
