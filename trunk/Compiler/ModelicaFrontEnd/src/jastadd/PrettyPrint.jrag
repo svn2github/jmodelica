@@ -1342,6 +1342,7 @@ aspect FlattPrettyPrint {
 	eq FScalar.builtInName()      = "scalar";
 	eq FTranspose.builtInName()   = "transpose";
 	eq FCross.builtInName()       = "cross";
+	eq FNdimsExp.builtInName()    = "ndims";
 	eq FSizeExp.builtInName()     = "size";
 	eq FNoEventExp.builtInName()  = "noEvent";
 	eq FIdentity.builtInName()    = "identity";

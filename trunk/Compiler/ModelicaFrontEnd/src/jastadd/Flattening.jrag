@@ -774,6 +774,10 @@ aspect FlatExpressions {
 		return createNode(getX().flatten(prefix), hasY() ? getY().flatten(prefix) : null); 
 	}
 	
+	public FNdimsExp  FNdimsExp.flatten(FQName prefix) {
+		return new FNdimsExp(getFExp().flatten(prefix)); 
+	}
+	
 	public FSizeExp   FSizeExp.flatten(FQName prefix) {
 		Opt<FExp> dim = hasDim() ? new Opt<FExp>(getDim().flatten(prefix)) : new Opt<FExp>();
 		return new FSizeExp(getFExp().flatten(prefix), dim); 

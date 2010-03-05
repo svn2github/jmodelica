@@ -130,6 +130,8 @@ aspect FlatTypeAnalysis {
 	
 	eq FAbsExp.type() = getFExp().type();
 	
+	eq FNdimsExp.type() = fIntegerScalarType();
+	
 	eq FSizeExp.type() {
 		if (hasDim()) {
 			if (!getDim().variability().lessOrEqual(fParameter()))

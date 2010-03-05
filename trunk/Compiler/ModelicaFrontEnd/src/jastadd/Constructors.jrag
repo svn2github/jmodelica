@@ -308,6 +308,7 @@ aspect InheritedFactoryMethods {
 	public FSqrtExp  FSqrtExp.createEmptyNode()  { return new FSqrtExp(); }
 	
 	// Built-in function calls and function call-like operators
+	public FNdimsExp  FNdimsExp.createEmptyNode()  { return new FNdimsExp(); }
 	public FSizeExp   FSizeExp.createEmptyNode()   { return new FSizeExp(); }
 	public FScalar    FScalar.createEmptyNode()    { return new FScalar(); }
 	public FTranspose FTranspose.createEmptyNode() { return new FTranspose(); }

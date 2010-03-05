@@ -931,6 +931,11 @@ FLog10Exp : FMathematicalFunctionCall ::= ;
 FSqrtExp : FMathematicalFunctionCall ::= ;
 
 /**
+ * \brief Ndims built-in function.
+ */
+FNdimsExp : FBuiltInFunctionCall ::= FExp;
+
+/**
  * \brief Size built-in function.
  */
 FSizeExp : FBuiltInFunctionCall ::= FExp [Dim:FExp];

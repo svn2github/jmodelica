@@ -154,6 +154,8 @@ aspect FlatVariability {
 	
 	eq FElseIfExp.variability() = getThenExp().variability();
 
+	eq FNdimsExp.variability() = fConstant();
+
 	eq FSizeExp.variability() = hasDim() ? getDim().variability() : fParameter();
 	
 	eq FMinMaxExp.variability() {

@@ -7102,5 +7102,25 @@ end Linspace5;
 
 
 
+model NdimsExp1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="NdimsExp1",
+         description="Ndims operator: basic test",
+         flatModel="
+fclass ArrayTests.NdimsExp1
+ constant Integer n = 2;
+ Integer x;
+equation
+ x = ( 2 ) * ( 2 );
+end ArrayTests.NdimsExp1;
+")})));
+
+ constant Integer n = ndims({{1,2},{3,4}});
+ Integer x = n * 2;
+end NdimsExp1;
+
+
+
   annotation (uses(Modelica(version="3.0.1")));
 end ArrayTests;

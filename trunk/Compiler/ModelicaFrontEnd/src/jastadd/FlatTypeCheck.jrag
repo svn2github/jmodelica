@@ -326,6 +326,7 @@ aspect FlatTypeCheck {
   eq FTranspose.getChild().argumentDefinedTypeValid()            = false;
   eq FMinMaxExp.getChild().argumentDefinedTypeValid()            = false;
   eq FSumExp.getChild().argumentDefinedTypeValid()               = false;
+  eq FNdimsExp.getOriginalArg(int i).argumentDefinedTypeValid()  = false;
   eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()   = i != 0;
   eq FInfArgsFunctionCall.getChild().argumentDefinedTypeValid()  = false;
 
@@ -337,6 +338,7 @@ aspect FlatTypeCheck {
   inh boolean InstFunctionArgument.argumentTypeValid(FPrimitiveType type);
   eq FAbstractFunctionCall.getChild().argumentTypeValid(FPrimitiveType type) = false;
   eq FTranspose.getChild().argumentTypeValid(FPrimitiveType type)            = type.ndims() >= 2;
+  eq FNdimsExp.getChild().argumentTypeValid(FPrimitiveType type)             = true;
   eq FSizeExp.getChild().argumentTypeValid(FPrimitiveType type)              = true;
   eq FInfArgsFunctionCall.getChild().argumentTypeValid(FPrimitiveType type)  = true;
   eq FSumExp.getChild().argumentTypeValid(FPrimitiveType type)               = type.ndims() > 0;

@@ -1107,6 +1107,10 @@ aspect Scalarization {
 		return getFExp().size().createFExp(dim);
 	}
 	
+	public FExp FNdimsExp.scalarizeExp(HashMap<String,FExp> indexMap) {
+		return ceval().buildLiteral();
+	}
+	
 	public FExp FMinMaxExp.scalarizeExp(HashMap<String,FExp> indexMap) {
 		if (hasY())
 			return createNode(getX().scalarize(indexMap), getY().scalarize(indexMap));

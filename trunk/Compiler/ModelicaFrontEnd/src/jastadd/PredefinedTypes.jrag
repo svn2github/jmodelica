@@ -188,7 +188,10 @@ aspect PredefinedTypes {
 +"function isPresent end isPresent;\n"
 +"function semiLinear end semiLinear;\n"
 +"function promote end promote;\n"
-+"function ndims end ndims;\n"
++"function ndims\n"
++"  input Real A;\n"      // Type not used
++"  output Real n;\n"
++"end ndims;\n"
 +"function size\n"
 +"  input Real A;\n"      // Type not used
 +"  input Real d = 0;\n"  // Default value not used
