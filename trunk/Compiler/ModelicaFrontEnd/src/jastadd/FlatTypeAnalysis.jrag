@@ -517,11 +517,11 @@ aspect FTypeCompatibility {
 	  * x=0
 	  * where x is declared as Real is ok.
 	  */
-	 syn boolean FPrimitiveType.equivalentTo(FPrimitiveType type) = false;
-	eq FRealScalarType.equivalentTo(FPrimitiveType type) = type.isReal() || type.isInteger();
-	eq FIntegerScalarType.equivalentTo(FPrimitiveType type) = type.isInteger() || type.isReal();
-	eq FBooleanScalarType.equivalentTo(FPrimitiveType type) = type.isBoolean();
-	eq FStringScalarType.equivalentTo(FPrimitiveType type) = type.isString();
+	syn boolean FPrimitiveType.equivalentTo(FPrimitiveType type) = false;
+	eq FRealScalarType.equivalentTo(FPrimitiveType type) = type.isScalar() && (type.isReal() || type.isInteger());
+	eq FIntegerScalarType.equivalentTo(FPrimitiveType type) = type.isScalar() && (type.isInteger() || type.isReal());
+	eq FBooleanScalarType.equivalentTo(FPrimitiveType type) = type.isScalar() && type.isBoolean();
+	eq FStringScalarType.equivalentTo(FPrimitiveType type) = type.isScalar() && type.isString();
 
 	eq FRealArrayType.equivalentTo(FPrimitiveType type) = 
 		(type.isReal() || type.isInteger()) && dimensionCompatible(type);
