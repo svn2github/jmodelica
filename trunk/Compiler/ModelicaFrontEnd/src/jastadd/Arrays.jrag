@@ -163,6 +163,7 @@ aspect Arrays {
 	syn lazy int FExp.ndims() = 0;
 	eq FInstAccessExp.ndims() = getInstAccess().ndims();
 	eq FRangeExp.ndims() = 1;
+	eq FLinspace.ndims() = 1;
 	eq FArray.ndims() {
 		if (isIterArray())
 			return getFExp(0).ndims();
@@ -456,6 +457,12 @@ aspect Arrays {
  			throw e;
  		}
 	}
+ 	
+ 	eq FLinspace.size() {
+		MutableSize s = new MutableSize(ndims());
+ 		s.append(getN());
+		return s;
+ 	}
 	
 	eq FArray.size() {
 		if (isIterArray())
@@ -1150,6 +1157,18 @@ aspect Arrays {
 			i1 += i2;
 		}
 		
+		return array;
+	}
+	
+	eq FLinspace.getArray() {
+		int n = size().get(0);
+		FExp len = new FSubExp((FExp) getStopExp().fullCopy(), (FExp) getStartExp().fullCopy());
+		FExp step = new FDivExp(len, new FIntegerLitExp(n - 1));
+		Array array = new Array(indices());
+		for (Index i : array.indices()) {
+			FExp part = new FMulExp(new FIntegerLitExp(i.first() - 1), (FExp) step.unboundCopy());
+			array.set(i, new FAddExp((FExp) getStartExp().fullCopy(), part));
+		}
 		return array;
 	}
 	
@@ -2143,7 +2162,7 @@ aspect ArrayIndices {
 		 * \brief Sets the single element wrapped by this Array to <code>exp</code>.
 		 */
 		public void set(Index i, FExp exp) {
-			setFExp(exp, 0);
+			setFExp((FExp) exp.unboundCopy(), 0);
 		}
 		
 	}

@@ -221,7 +221,12 @@ aspect PredefinedTypes {
 +"function cat\n"
 +"  input Real k;\n"      // Type not used
 +"end cat;\n"
-+"function linspace end linspace;\n"
++"function linspace\n" 
++"  input Real x1;\n"
++"  input Real x2;\n"
++"  input Integer n;\n"
++"  output Real z[1];\n"   // Size not used
++"end linspace;\n"
 +"function min\n"
 +"  input Real x;\n"      // Type not used
 +"  input Real y = 0;\n"  // Type and default value not used

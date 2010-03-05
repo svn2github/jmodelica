@@ -721,9 +721,15 @@ aspect FlatExpressions {
 
 	public FExp FRangeExp.flatten(FQName prefix) {
 		List l = new List();
-		for (int i=0;i<getNumFExp();i++)
-			l.add(getFExp(i).flatten(prefix));
+		for (FExp e : getFExps())
+			l.add(e.flatten(prefix));
 		return new FRangeExp(l);
+	}
+
+	public FLinspace FLinspace.flatten(FQName prefix) {
+		return new FLinspace(getStartExp().flatten(prefix), 
+				             getStopExp().flatten(prefix), 
+				             getN().flatten(prefix));
 	}
 
     public FExp FIfExp.flatten(FQName prefix) {

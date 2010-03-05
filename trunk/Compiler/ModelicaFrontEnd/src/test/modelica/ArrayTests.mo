@@ -6962,7 +6962,143 @@ Semantic error at line 6924, column 15:
  Real y = 2 - end;
 end ArrayEnd2;
 
-// TODO: Add test with nestled array subscripts
+
+model ArrayEnd3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayEnd3",
+         description="End operator: nestled array subscripts",
+         flatModel="
+fclass ArrayTests.ArrayEnd3
+ constant Integer x1[1] = 1;
+ constant Integer x1[2] = 2;
+ constant Integer x1[3] = 3;
+ constant Integer x1[4] = 4;
+ Real x2[1];
+ Real x2[4];
+ Real x2[5];
+ Real y[1];
+ Real y[2];
+equation
+ x2[1] = 5;
+ y[2] = 6;
+ y[1] = 7;
+ x2[4] = 8;
+ x2[5] = 9;
+end ArrayTests.ArrayEnd3;
+")})));
+
+ constant Integer x1[4] = {1,2,3,4};
+ Real x2[5] = {5,6,7,8,9};
+ Real y[2] = x2[end.-x1[2:end-1]];
+end ArrayEnd3;
+
+
+
+model Linspace1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="Linspace1",
+         description="Linspace operator: basic test",
+         flatModel="
+fclass ArrayTests.Linspace1
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real x[4];
+equation
+ x[1] = 1 + ( 0 ) * ( ( 3 - ( 1 ) ) / ( 3 ) );
+ x[2] = 1 + ( 1 ) * ( ( 3 - ( 1 ) ) / ( 3 ) );
+ x[3] = 1 + ( 2 ) * ( ( 3 - ( 1 ) ) / ( 3 ) );
+ x[4] = 1 + ( 3 ) * ( ( 3 - ( 1 ) ) / ( 3 ) );
+end ArrayTests.Linspace1;
+")})));
+
+ Real x[4] = linspace(1, 3, 4);
+end Linspace1;
+
+
+model Linspace2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="Linspace2",
+         description="Linspace operator: using parameter component as n",
+         flatModel="
+fclass ArrayTests.Linspace2
+ Real a;
+ Real b;
+ parameter Integer c = 3 /* 3 */;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ a = 1;
+ b = 2;
+ x[1] = a + ( 0 ) * ( ( b - ( a ) ) / ( 2 ) );
+ x[2] = a + ( 1 ) * ( ( b - ( a ) ) / ( 2 ) );
+ x[3] = a + ( 2 ) * ( ( b - ( a ) ) / ( 2 ) );
+end ArrayTests.Linspace2;
+")})));
+
+ Real a = 1;
+ Real b = 2;
+ parameter Integer c = 3;
+ Real x[3] = linspace(a, b, c);
+end Linspace2;
+
+
+model Linspace3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="Linspace3",
+         description="Linspace operator: wrong type of n",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 7033, column 29:
+  Types of positional argument 3 and input n are not compatible
+")})));
+
+ Real a = 1;
+ Real b = 2;
+ parameter Real c = 3;
+ Real x[3] = linspace(a, b, c);
+end Linspace3;
+
+
+model Linspace4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="Linspace4",
+         description="Linspace operator: wrong variability of n",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 7052, column 14:
+  Type error in expression
+")})));
+
+ Real a = 1;
+ Real b = 2;
+ Integer c = 3;
+ Real x[3] = linspace(a, b, c);
+end Linspace4;
+
+
+model Linspace5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="Linspace5",
+         description="Linspace operator: using result as Integer",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 7057, column 10:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+
+ Integer x[4] = linspace(1, 3, 3);
+end Linspace5;
 
 
 

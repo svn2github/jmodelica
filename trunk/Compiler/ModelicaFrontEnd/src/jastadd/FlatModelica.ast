@@ -956,6 +956,11 @@ FCross : FBuiltInFunctionCall ::= X:FExp Y:FExp;
 FIdentity : FBuiltInFunctionCall ::= FExp;
 
 /**
+ * \brief Identity built-in function.
+ */
+FLinspace : FBuiltInFunctionCall ::= StartExp:FExp StopExp:FExp N:FExp;
+
+/**
  * \brief Base class for function call-like operators with no maximum number of arguments.
  */
 abstract FInfArgsFunctionCall : FBuiltInFunctionCall ::= FExp*;

@@ -160,6 +160,12 @@ aspect FlatTypeAnalysis {
 		return tot.arrayType(size());
 	}
 	
+	eq FLinspace.type() {
+		if (!getN().variability().lessOrEqual(fParameter()) || getN().ceval().intValue() < 2)
+			return fUnknownType();
+		return fRealArrayType(size());
+	}
+	
 	eq FRelExp.type() {
 		FPrimitiveType left  = getLeft().type();
 		if (left.equivalentTo(getRight().type()) && left.isScalar())

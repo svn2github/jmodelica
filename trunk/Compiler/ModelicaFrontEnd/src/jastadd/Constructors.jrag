@@ -283,6 +283,7 @@ aspect InheritedFactoryMethods {
 	public FMatrixRow      FMatrixRow.createEmptyNode()      { return new FMatrixRow(); }
 	public FSubscriptedExp FSubscriptedExp.createEmptyNode() { return new FSubscriptedExp(); }
 	public FRangeExp       FRangeExp.createEmptyNode()       { return new FRangeExp(); }
+	public FLinspace       FLinspace.createEmptyNode()       { return new FLinspace(); }
 	public FEndExp         FEndExp.createEmptyNode()         { return new FEndExp(); }
 	public FIterExp        FIterExp.createEmptyNode()        { return new FIterExp(); }
 	

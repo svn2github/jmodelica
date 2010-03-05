@@ -203,6 +203,7 @@ aspect InstFunctionBinding {
 			
 			public BuiltInTranslator() {
 				map = new HashMap<String, BuiltInCreator>();
+				//       name                           math       node           # args
 				map.put("sin",       new BuiltInCreator(true,  new FSinExp(),     1));
 				map.put("cos",       new BuiltInCreator(true,  new FCosExp(),     1));
 				map.put("tan",       new BuiltInCreator(true,  new FTanExp(),     1));
@@ -223,14 +224,17 @@ aspect InstFunctionBinding {
 				map.put("cross",     new BuiltInCreator(false, new FCross(),      2));
 				map.put("sum",       new BuiltInCreator(false, new FSumExp(),     1));
 				map.put("abs",       new BuiltInCreator(false, new FAbsExp(),     1));
-				map.put("array", new InfArgsBuiltInCreator(new FParseArray(), 0));
-				map.put("ones",  new InfArgsBuiltInCreator(new FOnes(),       0));
-				map.put("zeros", new InfArgsBuiltInCreator(new FZeros(),      0));
-				map.put("fill",  new InfArgsBuiltInCreator(new FFillExp(),    1));
-				map.put("cat",   new InfArgsBuiltInCreator(new FCatExp(),     1));
-				map.put("size", new VarArgsBuiltInCreator(new FSizeExp(), 1, 2));
-				map.put("min",  new VarArgsBuiltInCreator(new FMinExp(),  1, 2));
-				map.put("max",  new VarArgsBuiltInCreator(new FMaxExp(),  1, 2));
+				map.put("linspace",  new BuiltInCreator(false, new FLinspace(),   3));
+				//       name                                      node           # fixed args
+				map.put("array",     new InfArgsBuiltInCreator(new FParseArray(), 0));
+				map.put("ones",      new InfArgsBuiltInCreator(new FOnes(),       0));
+				map.put("zeros",     new InfArgsBuiltInCreator(new FZeros(),      0));
+				map.put("fill",      new InfArgsBuiltInCreator(new FFillExp(),    1));
+				map.put("cat",       new InfArgsBuiltInCreator(new FCatExp(),     1));
+				//       name                                      node        min/max # args
+				map.put("size",      new VarArgsBuiltInCreator(new FSizeExp(), 1, 2));
+				map.put("min",       new VarArgsBuiltInCreator(new FMinExp(),  1, 2));
+				map.put("max",       new VarArgsBuiltInCreator(new FMaxExp(),  1, 2));
 			}
 			
 			private static class BuiltInCreator {

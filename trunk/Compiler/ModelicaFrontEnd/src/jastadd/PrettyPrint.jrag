@@ -1354,6 +1354,7 @@ aspect FlattPrettyPrint {
 	eq FMinExp.builtInName()      = "min";
 	eq FMaxExp.builtInName()      = "max";
 	eq FSumExp.builtInName()      = "sum";
+	eq FLinspace.builtInName()    = "linspace";
 	
 	
 	public void FForClauseE.prettyPrint(Printer p, PrintStream str, String indent, Object o) {

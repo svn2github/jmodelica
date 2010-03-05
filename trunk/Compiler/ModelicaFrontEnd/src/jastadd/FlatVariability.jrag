@@ -192,6 +192,7 @@ aspect FlatVariability {
 	}
 
 	eq FRangeExp.variability() = combineFExpListVariability(getFExps());
+	eq FLinspace.variability() = getStartExp().variability().combine(getStopExp().variability());
 	
 	eq FArray.variability()       = combineFExpListVariability(getFExps());
 	eq FParseArray.variability()  = combineFExpListVariability(getFExps());
