@@ -28,7 +28,7 @@ static void copy_v(jmi_init_opt_t *jmi_init_opt) {
 	int i;
 	jmi_t* jmi = jmi_init_opt->jmi;
 
-	jmi_real_t* v = jmi_get_dx(jmi);
+	jmi_real_t* v = jmi_get_real_dx(jmi);
 	for (i=0;i<jmi->n_real_dx+jmi->n_real_x;i++) {
 		v[i] = jmi_init_opt->x[i];
 	}

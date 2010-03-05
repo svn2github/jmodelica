@@ -329,15 +329,28 @@ class Model(object):
         self.jmimodel = JMIModel(libname, path)
 
         # sizes of all arrays
-        self._n_ci = ct.c_int()
-        self._n_cd = ct.c_int()
-        self._n_pi = ct.c_int()
-        self._n_pd = ct.c_int()
-        self._n_dx = ct.c_int()
-        self._n_x  = ct.c_int()
-        self._n_u  = ct.c_int()
-        self._n_w  = ct.c_int()
+        self._n_real_ci = ct.c_int()
+        self._n_real_cd = ct.c_int()
+        self._n_real_pi = ct.c_int()
+        self._n_real_pd = ct.c_int()
+        self._n_integer_ci = ct.c_int()
+        self._n_integer_cd = ct.c_int()
+        self._n_integer_pi = ct.c_int()
+        self._n_integer_pd = ct.c_int()
+        self._n_boolean_ci = ct.c_int()
+        self._n_boolean_cd = ct.c_int()
+        self._n_boolean_pi = ct.c_int()
+        self._n_boolean_pd = ct.c_int()
+        self._n_real_dx = ct.c_int()
+        self._n_real_x  = ct.c_int()
+        self._n_real_u  = ct.c_int()
+        self._n_real_w  = ct.c_int()
         self._n_tp = ct.c_int()
+        self._n_real_d = ct.c_int()
+        self._n_integer_d = ct.c_int()
+        self._n_integer_u = ct.c_int()
+        self._n_boolean_d = ct.c_int()
+        self._n_boolean_u = ct.c_int()
         self._n_sw = ct.c_int()
         self._n_sw_init = ct.c_int()
         self._n_z  = ct.c_int()
@@ -345,19 +358,32 @@ class Model(object):
         self.get_sizes()
 
         # offsets
-        self._offs_ci = ct.c_int()
-        self._offs_cd = ct.c_int()
-        self._offs_pi = ct.c_int()
-        self._offs_pd = ct.c_int()
-        self._offs_dx = ct.c_int()
-        self._offs_x = ct.c_int()
-        self._offs_u = ct.c_int()
-        self._offs_w = ct.c_int()
+        self._offs_real_ci = ct.c_int()
+        self._offs_real_cd = ct.c_int()
+        self._offs_real_pi = ct.c_int()
+        self._offs_real_pd = ct.c_int()
+        self._offs_integer_ci = ct.c_int()
+        self._offs_integer_cd = ct.c_int()
+        self._offs_integer_pi = ct.c_int()
+        self._offs_integer_pd = ct.c_int()
+        self._offs_boolean_ci = ct.c_int()
+        self._offs_boolean_cd = ct.c_int()
+        self._offs_boolean_pi = ct.c_int()
+        self._offs_boolean_pd = ct.c_int()
+        self._offs_real_dx = ct.c_int()
+        self._offs_real_x  = ct.c_int()
+        self._offs_real_u  = ct.c_int()
+        self._offs_real_w  = ct.c_int()
         self._offs_t = ct.c_int()
-        self._offs_dx_p = ct.c_int()
-        self._offs_x_p = ct.c_int()
-        self._offs_u_p = ct.c_int()
-        self._offs_w_p = ct.c_int()
+        self._offs_real_dx_p = ct.c_int()
+        self._offs_real_x_p = ct.c_int()
+        self._offs_real_u_p = ct.c_int()
+        self._offs_real_w_p = ct.c_int()
+        self._offs_real_d = ct.c_int()
+        self._offs_integer_d = ct.c_int()
+        self._offs_integer_u = ct.c_int()
+        self._offs_boolean_d = ct.c_int()
+        self._offs_boolean_u = ct.c_int()        
         self._offs_sw = ct.c_int()
         self._offs_sw_init = ct.c_int()
 
@@ -430,14 +456,14 @@ class Model(object):
         """
         Sets the dependent parameters of the model.
         """
-        pd_tmp = N.zeros(self._n_pd.value)
-        pd = N.zeros(self._n_pd.value)
-        for i in range(self._n_pd.value):
-            self.set_pd(pd)
+        pd_tmp = N.zeros(self._n_real_pd.value)
+        pd = N.zeros(self._n_real_pd.value)
+        for i in range(self._n_real_pd.value):
+            self.set_real_pd(pd)
             self.jmimodel.init_Fp(pd_tmp)
             pd[i] = pd_tmp[i]
             pd_tmp[:] = pd
-        self.set_pd(pd)
+        self.set_real_pd(pd)
                 
     def _set_initial_values(self, p_opt_init, dx_init, x_init, u_init, w_init):
         
@@ -467,7 +493,7 @@ class Model(object):
             for name in values.keys():
                 value_ref = xmldoc.get_valueref(name)
                 (z_i, ptype) = _translate_value_ref(value_ref)
-                i_pi = z_i - self._offs_pi.value
+                i_pi = z_i - self._offs_real_pi.value
                 i_pi_opt = p_opt_indices.index(i_pi)
                 p_opt_init[i_pi_opt] = values.get(name)
         
@@ -476,7 +502,7 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_dx = z_i - self._offs_dx.value
+            i_dx = z_i - self._offs_real_dx.value
             dx_init[i_dx] = values.get(name)
         
         # x: differentiate
@@ -484,7 +510,7 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_x = z_i - self._offs_x.value
+            i_x = z_i - self._offs_real_x.value
             x_init[i_x] = values.get(name)
             
         # u: input
@@ -492,7 +518,7 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_u = z_i - self._offs_u.value
+            i_u = z_i - self._offs_real_u.value
             u_init[i_u] = values.get(name)
         
         # w: algebraic
@@ -500,7 +526,7 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_w = z_i - self._offs_w.value
+            i_w = z_i - self._offs_real_w.value
             w_init[i_w] = values.get(name) 
 
     def _set_lb_values(self, p_opt_lb, dx_lb, x_lb, u_lb, w_lb):
@@ -531,7 +557,7 @@ class Model(object):
             for name in values.keys():
                 value_ref = xmldoc.get_valueref(name)
                 (z_i, ptype) = _translate_value_ref(value_ref)
-                i_pi = z_i - self._offs_pi.value
+                i_pi = z_i - self._offs_real_pi.value
                 i_pi_opt = p_opt_indices.index(i_pi)
                 p_opt_lb[i_pi_opt] = values.get(name)
 
@@ -540,7 +566,7 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_dx = z_i - self._offs_dx.value
+            i_dx = z_i - self._offs_real_dx.value
             dx_lb[i_dx] = values.get(name) 
         
         # x: differentiate
@@ -548,7 +574,7 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_x = z_i - self._offs_x.value
+            i_x = z_i - self._offs_real_x.value
             x_lb[i_x] = values.get(name)
             
         # u: input
@@ -556,7 +582,7 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_u = z_i - self._offs_u.value
+            i_u = z_i - self._offs_real_u.value
             u_lb[i_u] = values.get(name)
         
         # w: algebraic
@@ -564,7 +590,7 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_w = z_i - self._offs_w.value
+            i_w = z_i - self._offs_real_w.value
             #print("%d, %d" %(z_i,i_w))
             w_lb[i_w] = values.get(name) 
 
@@ -595,7 +621,7 @@ class Model(object):
             for name in values.keys():
                 value_ref = xmldoc.get_valueref(name)
                 (z_i, ptype) = _translate_value_ref(value_ref)
-                i_pi = z_i - self._offs_pi.value
+                i_pi = z_i - self._offs_real_pi.value
                 i_pi_opt = p_opt_indices.index(i_pi)
                 p_opt_ub[i_pi_opt] = values.get(name)
 
@@ -604,7 +630,7 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_dx = z_i - self._offs_dx.value
+            i_dx = z_i - self._offs_real_dx.value
             dx_ub[i_dx] = values.get(name) 
         
         # x: differentiate
@@ -612,7 +638,7 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_x = z_i - self._offs_x.value
+            i_x = z_i - self._offs_real_x.value
             x_ub[i_x] = values.get(name)
             
         # u: input
@@ -620,7 +646,7 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_u = z_i - self._offs_u.value
+            i_u = z_i - self._offs_real_u.value
             u_ub[i_u] = values.get(name)
         
         # w: algebraic
@@ -628,7 +654,7 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_w = z_i - self._offs_w.value
+            i_w = z_i - self._offs_real_w.value
             w_ub[i_w] = values.get(name)
 
     def _set_lin_values(self, p_opt_lin, dx_lin, x_lin, u_lin, w_lin, dx_tp_lin, x_tp_lin, u_tp_lin, w_tp_lin):
@@ -674,7 +700,7 @@ class Model(object):
             for name in values.keys():
                 value_ref = xmldoc.get_valueref(name)
                 (z_i, ptype) = _translate_value_ref(value_ref)
-                i_pi = z_i - self._offs_pi.value
+                i_pi = z_i - self._offs_real_pi.value
                 i_pi_opt = p_opt_indices.index(i_pi)
                 p_opt_lin[i_pi_opt] = int(values.get(name))
 
@@ -683,7 +709,7 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_dx = z_i - self._offs_dx.value
+            i_dx = z_i - self._offs_real_dx.value
             dx_lin[i_dx] = int(values.get(name))
         
         # x: differentiate
@@ -691,7 +717,7 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_x = z_i - self._offs_x.value
+            i_x = z_i - self._offs_real_x.value
             x_lin[i_x] = int(values.get(name))
             
         # u: input
@@ -699,7 +725,7 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_u = z_i - self._offs_u.value
+            i_u = z_i - self._offs_real_u.value
             u_lin[i_u] = int(values.get(name))
         
         # w: algebraic
@@ -707,7 +733,7 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_w = z_i - self._offs_w.value
+            i_w = z_i - self._offs_real_w.value
             w_lin[i_w] = int(values.get(name))
 
         # number of timepoints
@@ -723,7 +749,7 @@ class Model(object):
             for name in names:
                 value_ref = xmldoc.get_valueref(name)
                 (z_i, ptype) = _translate_value_ref(value_ref)
-                i_dx = z_i - self._offs_dx.value
+                i_dx = z_i - self._offs_real_dx.value
                 dx_tp_lin[i_dx+no_tp*len(names)] = int(values.get(name)[no_tp])
         
         # timepoints x: differentiate
@@ -736,7 +762,7 @@ class Model(object):
             for name in names:
                 value_ref = xmldoc.get_valueref(name)
                 (z_i, ptype) = _translate_value_ref(value_ref)
-                i_x = z_i - self._offs_x.value                
+                i_x = z_i - self._offs_real_x.value                
                 x_tp_lin[i_x+no_tp*len(names)] = int(values.get(name)[no_tp])
             
         # timepoints u: input
@@ -749,7 +775,7 @@ class Model(object):
             for name in names:
                 value_ref = xmldoc.get_valueref(name)
                 (z_i, ptype) = _translate_value_ref(value_ref)
-                i_u = z_i - self._offs_u.value                
+                i_u = z_i - self._offs_real_u.value                
                 u_tp_lin[i_u+no_tp*len(names)] = int(values.get(name)[no_tp])
         
         # timepoints w: algebraic
@@ -762,7 +788,7 @@ class Model(object):
             for name in names:
                 value_ref = xmldoc.get_valueref(name)
                 (z_i, ptype) = _translate_value_ref(value_ref)
-                i_w = z_i - self._offs_w.value
+                i_w = z_i - self._offs_real_w.value
                 w_tp_lin[i_w+no_tp*len(names)] = int(values.get(name)[no_tp])                
     
     def get_valueref(self, variablename):
@@ -847,47 +873,95 @@ class Model(object):
 
     def get_sizes(self):
         """Get and return a list of the sizes of the variable vectors."""
-        self.jmimodel.get_sizes(self._n_ci,
-                                self._n_cd,
-                                self._n_pi,
-                                self._n_pd,
-                                self._n_dx,
-                                self._n_x,
-                                self._n_u,
-                                self._n_w,
+        self.jmimodel.get_sizes(self._n_real_ci,
+                                self._n_real_cd,
+                                self._n_real_pi,
+                                self._n_real_pd,
+                                self._n_integer_ci,
+                                self._n_integer_cd,
+                                self._n_integer_pi,
+                                self._n_integer_pd,
+                                self._n_boolean_ci,
+                                self._n_boolean_cd,
+                                self._n_boolean_pi,
+                                self._n_boolean_pd,
+                                self._n_real_dx,
+                                self._n_real_x,
+                                self._n_real_u,
+                                self._n_real_w,
                                 self._n_tp,
+                                self._n_real_d,
+                                self._n_integer_u,
+                                self._n_integer_d,
+                                self._n_boolean_u,
+                                self._n_boolean_d,
                                 self._n_sw,
                                 self._n_sw_init,
                                 self._n_z)
         
-        l = [self._n_ci.value, self._n_cd.value, self._n_pi.value, self._n_pd.value, self._n_dx.value, 
-             self._n_x.value, self._n_u.value, self._n_w.value, self._n_tp.value, self._n_sw.value,
+        l = [self._n_real_ci.value, self._n_real_cd.value, \
+             self._n_real_pi.value, self._n_real_pd.value, \
+             self._n_integer_ci.value, self._n_integer_cd.value, \
+             self._n_integer_pi.value, self._n_integer_pd.value, \
+             self._n_boolean_ci.value, self._n_boolean_cd.value, \
+             self._n_boolean_pi.value, self._n_boolean_pd.value, \
+             self._n_real_dx.value, self._n_real_x.value, \
+             self._n_real_u.value, self._n_real_w.value, \
+             self._n_real_d.value, \
+             self._n_integer_d.value, self._n_integer_u.value,\
+             self._n_boolean_d.value, self._n_boolean_u.value,\
+             self._n_tp.value, self._n_sw.value,
              self._n_sw_init.value, self._n_z.value]
         return l
     
     def get_offsets(self):
         """Get and return a list of the offsets for the variable types in the z vector."""
         
-        self.jmimodel.get_offsets(self._offs_ci,
-                                  self._offs_cd,
-                                  self._offs_pi,
-                                  self._offs_pd,
-                                  self._offs_dx,
-                                  self._offs_x,
-                                  self._offs_u,
-                                  self._offs_w,
+        self.jmimodel.get_offsets(self._offs_real_ci,
+                                  self._offs_real_cd,
+                                  self._offs_real_pi,
+                                  self._offs_real_pd,
+                                  self._offs_integer_ci,
+                                  self._offs_integer_cd,
+                                  self._offs_integer_pi,
+                                  self._offs_integer_pd,
+                                  self._offs_boolean_ci,
+                                  self._offs_boolean_cd,
+                                  self._offs_boolean_pi,
+                                  self._offs_boolean_pd,
+                                  self._offs_real_dx,
+                                  self._offs_real_x,
+                                  self._offs_real_u,
+                                  self._offs_real_w,
                                   self._offs_t,
-                                  self._offs_dx_p,
-                                  self._offs_x_p,
-                                  self._offs_u_p,
-                                  self._offs_w_p,
+                                  self._offs_real_dx_p,
+                                  self._offs_real_x_p,
+                                  self._offs_real_u_p,
+                                  self._offs_real_w_p,
+                                  self._offs_real_d,
+                                  self._offs_integer_u,
+                                  self._offs_integer_d,
+                                  self._offs_boolean_u,
+                                  self._offs_boolean_d,
                                   self._offs_sw,
                                   self._offs_sw_init)
         
-        l = [self._offs_ci.value, self._offs_cd.value, self._offs_pi.value, self._offs_pd.value, 
-             self._offs_dx.value, self._offs_x.value, self._offs_u.value, self._offs_w.value, 
-             self._offs_t.value, self._offs_dx_p.value, self._offs_x_p.value, self._offs_u_p.value, 
-             self._offs_w_p.value, self._offs_sw.value, self._offs_sw_init.value]
+        l = [self._offs_real_ci.value, self._offs_real_cd.value, \
+             self._offs_real_pi.value, self._offs_real_pd.value, \
+             self._offs_integer_ci.value, self._offs_integer_cd.value, \
+             self._offs_integer_pi.value, self._offs_integer_pd.value, \
+             self._offs_boolean_ci.value, self._offs_boolean_cd.value, \
+             self._offs_boolean_pi.value, self._offs_boolean_pd.value, \
+             self._offs_real_dx.value, self._offs_real_x.value, \
+             self._offs_real_u.value, self._offs_real_w.value, \
+             self._offs_t.value, self._offs_real_dx_p.value, \
+             self._offs_real_x_p.value, self._offs_real_u_p.value, \
+             self._offs_real_w_p.value, \
+             self._offs_real_d.value, \
+             self._offs_integer_d.value, self._offs_integer_u.value,\
+             self._offs_boolean_d.value, self._offs_boolean_u.value,\
+             self._offs_sw.value,
+             self._offs_sw_init.value]
         return l
 
     def get_n_tp(self):
@@ -895,138 +969,166 @@ class Model(object):
         
         self.jmimodel.get_n_tp(self._n_tp)
         return self._n_tp.value
+
+    def get_real_ci(self):
+        """Returns a reference to the real independent constants vector."""
+        return self.jmimodel.get_real_ci()
+        
+    def set_real_ci(self, real_ci):
+        """Sets the real independent constants vector."""
+        self.jmimodel._real_ci[:] = real_ci
+        
+    real_ci = property(get_real_ci, set_real_ci, doc="The real independent constants vector.")
+
+    def get_real_cd(self):
+        """Returns a reference to the real dependent constants vector."""
+        return self.jmimodel.get_real_cd()
+
+    def set_real_cd(self, real_cd):
+        """Sets the dependent real constants vector."""
+        self.jmimodel._real_cd[:] = real_cd
+        
+    real_cd = property(get_real_cd, set_real_cd, doc="The real dependent constants vector.")
     
-    def get_pi(self):
-        """Returns a reference to the independent parameters vector."""
-        return self.jmimodel.get_pi()
+    def get_real_pi(self):
+        """Returns a reference to the real independent parameters vector."""
+        return self.jmimodel.get_real_pi()
         
-    def set_pi(self, pi):
-        """Sets the independent parameters vector."""
-        self.jmimodel._pi[:] = pi
+    def set_real_pi(self, real_pi):
+        """Sets the real independent parameters vector."""
+        self.jmimodel._real_pi[:] = real_pi
         
-    pi = property(get_pi, set_pi, doc="The independent parameter vector.")
+    real_pi = property(get_real_pi, set_real_pi, doc="The real independent parameter vector.")
 
-    def get_pd(self):
-        """Returns a reference to the dependent parameters vector."""
-        return self.jmimodel._pd
+    def get_real_pd(self):
+        """Returns a reference to the real dependent parameters vector."""
+        return self.jmimodel._real_pd
         
-    def set_pd(self, pd):
-        """Sets the dependent parameters vector."""
-        self.jmimodel._pd[:] = pd
+    def set_real_pd(self, real_pd):
+        """Sets the real dependent parameters vector."""
+        self.jmimodel._real_pd[:] = real_pd
         
-    pd = property(get_pd, set_pd, doc="The dependent paramenters vector.")
+    real_pd = property(get_real_pd, set_real_pd, doc="The real dependent paramenters vector.")
 
-    def get_cd(self):
-        """Returns a reference to the dependent constants vector."""
-        return self.jmimodel.get_cd()
+    def get_integer_ci(self):
+        """Returns a reference to the integer independent constants vector."""
+        return self.jmimodel.get_integer_ci()
         
-    def set_cd(self, cd):
-        """Sets the dependent constants vector."""
-        self.jmimodel._cd[:] = cd
+    def set_integer_ci(self, integer_ci):
+        """Sets the integer independent constants vector."""
+        self.jmimodel._integer_ci[:] = integer_ci
         
-    cd = property(get_cd, set_cd, doc="The dependent constants vector.")
+    integer_ci = property(get_integer_ci, set_integer_ci, doc="The integer independent constants vector.")
 
-    def get_ci(self):
-        """Returns a reference to the independent constants vector."""
-        return self.jmimodel.get_ci()
-        
-    def set_ci(self, ci):
-        """Sets the independent constants vector."""
-        self.jmimodel._ci[:] = ci
-        
-    ci = property(get_ci, set_ci, doc="The independent constants vector.")
+    def get_integer_cd(self):
+        """Returns a reference to the integer dependent constants vector."""
+        return self.jmimodel.get_integer_cd()
 
-    def get_dx(self):
+    def set_integer_cd(self, integer_cd):
+        """Sets the dependent integer constants vector."""
+        self.jmimodel._integer_cd[:] = integer_cd
+        
+    integer_cd = property(get_integer_cd, set_integer_cd, doc="The integer dependent constants vector.")
+    
+    def get_integer_pi(self):
+        """Returns a reference to the integer independent parameters vector."""
+        return self.jmimodel.get_integer_pi()
+        
+    def set_integer_pi(self, integer_pi):
+        """Sets the integer independent parameters vector."""
+        self.jmimodel._integer_pi[:] = integer_pi
+        
+    integer_pi = property(get_integer_pi, set_integer_pi, doc="The integer independent parameter vector.")
+
+    def get_integer_pd(self):
+        """Returns a reference to the integer dependent parameters vector."""
+        return self.jmimodel._integer_pd
+        
+    def set_integer_pd(self, integer_pd):
+        """Sets the integer dependent parameters vector."""
+        self.jmimodel._integer_pd[:] = integer_pd
+        
+    integer_pd = property(get_integer_pd, set_integer_pd, doc="The integer dependent paramenters vector.")
+
+    def get_boolean_ci(self):
+        """Returns a reference to the boolean independent constants vector."""
+        return self.jmimodel.get_boolean_ci()
+        
+    def set_boolean_ci(self, boolean_ci):
+        """Sets the integer independent constants vector."""
+        self.jmimodel._boolean_ci[:] = boolean_ci
+        
+    boolean_ci = property(get_boolean_ci, set_boolean_ci, doc="The boolean independent constants vector.")
+
+    def get_boolean_cd(self):
+        """Returns a reference to the boolean dependent constants vector."""
+        return self.jmimodel.get_boolean_cd()
+
+    def set_boolean_cd(self, boolean_cd):
+        """Sets the dependent boolean constants vector."""
+        self.jmimodel._boolean_cd[:] = boolean_cd
+        
+    boolean_cd = property(get_boolean_cd, set_boolean_cd, doc="The boolean dependent constants vector.")
+    
+    def get_boolean_pi(self):
+        """Returns a reference to the boolean independent parameters vector."""
+        return self.jmimodel.get_boolean_pi()
+        
+    def set_boolean_pi(self, boolean_pi):
+        """Sets the boolean independent parameters vector."""
+        self.jmimodel._boolean_pi[:] = boolean_pi
+        
+    boolean_pi = property(get_boolean_pi, set_boolean_pi, doc="The boolean independent parameter vector.")
+
+    def get_boolean_pd(self):
+        """Returns a reference to the boolean dependent parameters vector."""
+        return self.jmimodel._boolean_pd
+        
+    def set_boolean_pd(self, boolean_pd):
+        """Sets the boolean dependent parameters vector."""
+        self.jmimodel._boolean_pd[:] = boolean_pd
+        
+    boolean_pd = property(get_boolean_pd, set_boolean_pd, doc="The boolean dependent paramenters vector.")
+
+    def get_real_dx(self):
         """Returns a reference to the derivatives vector."""
-        return self.jmimodel.get_dx()
+        return self.jmimodel.get_real_dx()
         
-    def set_dx(self, dx):
+    def set_real_dx(self, real_dx):
         """Sets the derivatives vector."""
-        self.jmimodel._dx[:] = dx
+        self.jmimodel._real_dx[:] = real_dx
         
-    dx = property(get_dx, set_dx, doc="The derivatives vector.")
+    real_dx = property(get_real_dx, set_real_dx, doc="The derivatives vector.")
 
-    def get_dx_p(self, i):
-        """Returns a reference to the derivatives variables vector
-        corresponding to the i:th time point.
-        """
-        return self.jmimodel.get_dx_p(i)
-        
-    def set_dx_p(self, new_dx_p, i):
-        """Sets the derivatives variables vector corresponding to the i:th
-        time point.
-        """
-        dx_p = self.jmimodel.get_dx_p(i)
-        dx_p[:] = new_dx_p
-
-    def get_x(self):
+    def get_real_x(self):
         """Return a reference to the differentiated variables vector."""
-        return self.jmimodel.get_x()
+        return self.jmimodel.get_real_x()
         
-    def set_x(self, x):
+    def set_real_x(self, real_x):
         """Set the differentiated variables vector."""
-        self.jmimodel._x[:] = x
+        self.jmimodel._real_x[:] = real_x
         
-    x = property(get_x, set_x, doc="The differentiated variables vector.")
+    real_x = property(get_real_x, set_real_x, doc="The differentiated variables vector.")
 
-    def get_x_p(self, i):
-        """Returns a reference to the differentiated variables vector
-        corresponding to the i:th time point.
-        
-        """
-        return self.jmimodel.get_x_p(i)
-        
-    def set_x_p(self, new_x_p, i):
-        """Sets the differentiated variables vector corresponding to the i:th 
-        time point. 
-        
-        """
-        x_p = self.jmimodel.get_x_p(i)
-        x_p[:] = new_x_p
-
-    def get_u(self):
+    def get_real_u(self):
         """Returns a reference to the inputs vector."""
-        return self.jmimodel.get_u()
+        return self.jmimodel.get_real_u()
         
-    def set_u(self, u):
+    def set_real_u(self, real_u):
         """Sets the inputs vector."""
-        self.jmimodel._u[:] = u
+        self.jmimodel._real_u[:] = real_u
         
-    u = property(get_u, set_u, doc="The inputs vector.")
+    real_u = property(get_real_u, set_real_u, doc="The inputs vector.")
 
-    def get_u_p(self, i):
-        """Returns a reference to the inputs vector corresponding to the i:th time 
-        point.
-        """
-        return self.jmimodel.get_u_p(i)
-        
-    def set_u_p(self, new_u_p, i):
-        """Sets the inputs vector corresponding to the i:th time point."""
-        u_p = self.jmimodel.get_u_p(i)
-        u_p[:] = new_u_p
-
-    def get_w(self):
+    def get_real_w(self):
         """Returns a reference to the algebraic variables vector."""
-        return self.jmimodel.get_w()
+        return self.jmimodel.get_real_w()
         
-    def set_w(self, w):
+    def set_real_w(self, real_w):
         """Sets the algebraic variables vector."""
-        self.jmimodel._w[:] = w
+        self.jmimodel._real_w[:] = real_w
         
-    w = property(get_w, set_w, doc="The algebraic variables vector.")
-
-    def get_w_p(self, i):
-        """Returns a reference to the algebraic variables vector corresponding to 
-        the i:th time point.
-        """
-        return self.jmimodel.get_w_p(i)
-        
-    def set_w_p(self, new_w_p, i):
-        """Sets the algebraic variables vector corresponding to the i:th time 
-        point.
-        """
-        w_p = self.jmimodel.get_w_p(i)
-        w_p[:] = new_w_p
+    real_w = property(get_real_w, set_real_w, doc="The algebraic variables vector.")
 
     def get_t(self):
         """Returns a reference to the time value.
@@ -1043,6 +1145,109 @@ class Model(object):
         self.jmimodel._t[:] = t
         
     t = property(get_t, set_t, doc="The time value.")
+
+    def get_real_dx_p(self, i):
+        """Returns a reference to the derivatives variables vector
+        corresponding to the i:th time point.
+        """
+        return self.jmimodel.get_real_dx_p(i)
+        
+    def set_real_dx_p(self, real_dx_p, i):
+        """Sets the derivatives variables vector corresponding to the i:th
+        time point.
+        """
+        _real_dx_p = self.jmimodel.get_real_dx_p(i)
+        _real_dx_p[:] = real_dx_p
+
+    def get_real_x_p(self, i):
+        """Returns a reference to the differentiated variables vector
+        corresponding to the i:th time point.
+        
+        """
+        return self.jmimodel.get_real_x_p(i)
+        
+    def set_real_x_p(self, real_x_p, i):
+        """Sets the differentiated variables vector corresponding to the i:th 
+        time point. 
+        
+        """
+        _real_x_p = self.jmimodel.get_real_x_p(i)
+        _real_x_p[:] = real_x_p
+
+    def get_real_u_p(self, i):
+        """Returns a reference to the inputs vector corresponding to the i:th time 
+        point.
+        """
+        return self.jmimodel.get_real_u_p(i)
+        
+    def set_real_u_p(self, real_u_p, i):
+        """Sets the inputs vector corresponding to the i:th time point."""
+        _real_u_p = self.jmimodel.get_real_u_p(i)
+        _real_u_p[:] = real_u_p
+        
+    def get_real_w_p(self, i):
+        """Returns a reference to the algebraic variables vector corresponding to 
+        the i:th time point.
+        """
+        return self.jmimodel.get_real_w_p(i)
+        
+    def set_real_w_p(self, real_w_p, i):
+        """Sets the algebraic variables vector corresponding to the i:th time 
+        point.
+        """
+        _real_w_p = self.jmimodel.get_real_w_p(i)
+        _real_w_p[:] = real_w_p
+
+    def get_real_d(self):
+        """Return a reference to the discrete real variables vector."""
+        return self.jmimodel.get_real_d()
+        
+    def set_real_d(self, real_d):
+        """Set the discrete real variables vector."""
+        self.jmimodel._real_d[:] = real_d
+        
+    real_d = property(get_real_d, set_real_d, doc="The discrete real variables vector.")
+
+    def get_integer_d(self):
+        """Return a reference to the discrete integer variables vector."""
+        return self.jmimodel.get_integer_d()
+        
+    def set_integer_d(self, integer_d):
+        """Set the discrete integer variables vector."""
+        self.jmimodel._integer_d[:] = integer_d
+        
+    integer_d = property(get_integer_d, set_integer_d, doc="The discrete integer variables vector.")
+
+    def get_integer_u(self):
+        """Return a reference to the input integer variables vector."""
+        return self.jmimodel.get_integer_u()
+        
+    def set_integer_u(self, integer_u):
+        """Set the input integer variables vector."""
+        self.jmimodel._integer_u[:] = integer_u
+        
+    integer_u = property(get_integer_u, set_integer_u, doc="The discrete integer variables vector.")
+
+    def get_boolean_d(self):
+        """Return a reference to the discrete boolean variables vector."""
+        return self.jmimodel.get_boolean_d()
+        
+    def set_boolean_d(self, boolean_d):
+        """Set the discrete boolean variables vector."""
+        self.jmimodel._boolean_d[:] = boolean_d
+        
+    boolean_d = property(get_boolean_d, set_boolean_d, doc="The discrete boolean variables vector.")
+
+    def get_boolean_u(self):
+        """Return a reference to the input boolean variables vector."""
+        return self.jmimodel.get_boolean_u()
+        
+    def set_boolean_u(self, boolean_u):
+        """Set the input boolean variables vector."""
+        self.jmimodel._boolean_u[:] = boolean_u
+        
+    boolean_u = property(get_boolean_u, set_boolean_u, doc="The discrete boolean variables vector.")
+
 
     def get_sw(self):
         """Returns a reference to the switch function vector of the DAE.
@@ -1202,7 +1407,7 @@ class Model(object):
             refs.sort(key=int)            
             for ref in refs:
                 (z_i, ptype) = _translate_value_ref(ref)
-                p_opt_indices.append(z_i - self._offs_pi.value)
+                p_opt_indices.append(z_i - self._offs_real_pi.value)
                 n_p_opt = n_p_opt +1
             self._n_p_opt = n_p_opt
             self.jmimodel.opt_set_p_opt_indices(n_p_opt,N.array(p_opt_indices,dtype=int))
@@ -1332,7 +1537,7 @@ class Model(object):
         # get all indep parameters, translate index in z-vector
         # to valueref and save in dict with parameter value as value
         for i in range(len(pi)):
-            zi = i+self._offs_pi.value
+            zi = i+self._offs_real_pi.value
             # parameter type is real (ptype=0) -> z-vector -> index = valueref
             parameters[zi]=pi[i]
             
@@ -1423,7 +1628,7 @@ class Model(object):
         otherwise.
         """
         self.jmimodel.ode_f()
-        return self.dx
+        return self.real_dx
         
     def opt_eval_J(self):
         """Return the evaluted optimization cost function, J.
@@ -1501,15 +1706,28 @@ class JMIModel(object):
         # as they are pointing to a shared memory space used by
         # both the JMI DLL and us. Therefor Python properties are used
         # to ensure that they aren't reset, only modified.
-        self._x = self._dll.jmi_get_x(self._jmi);
-        self._pi = self._dll.jmi_get_pi(self._jmi);
-        self._cd = self._dll.jmi_get_cd(self._jmi)
-        self._ci = self._dll.jmi_get_ci(self._jmi)
-        self._dx = self._dll.jmi_get_dx(self._jmi)
-        self._pd = self._dll.jmi_get_pd(self._jmi)
-        self._u = self._dll.jmi_get_u(self._jmi)
-        self._w = self._dll.jmi_get_w(self._jmi)
+        self._real_ci = self._dll.jmi_get_real_ci(self._jmi)
+        self._real_cd = self._dll.jmi_get_real_cd(self._jmi)
+        self._real_pi = self._dll.jmi_get_real_pi(self._jmi)
+        self._real_pd = self._dll.jmi_get_real_pd(self._jmi)
+        self._integer_cd = self._dll.jmi_get_integer_cd(self._jmi)
+        self._integer_ci = self._dll.jmi_get_integer_ci(self._jmi)
+        self._integer_pd = self._dll.jmi_get_integer_pd(self._jmi)
+        self._integer_pi = self._dll.jmi_get_integer_pi(self._jmi)        
+        self._boolean_cd = self._dll.jmi_get_boolean_cd(self._jmi)
+        self._boolean_ci = self._dll.jmi_get_boolean_ci(self._jmi)
+        self._boolean_pd = self._dll.jmi_get_boolean_pd(self._jmi)
+        self._boolean_pi = self._dll.jmi_get_boolean_pi(self._jmi)        
+        self._real_dx = self._dll.jmi_get_real_dx(self._jmi)
+        self._real_x = self._dll.jmi_get_real_x(self._jmi)
+        self._real_u = self._dll.jmi_get_real_u(self._jmi)
+        self._real_w = self._dll.jmi_get_real_w(self._jmi)
         self._t = self._dll.jmi_get_t(self._jmi)
+        self._real_d = self._dll.jmi_get_real_d(self._jmi);
+        self._integer_d = self._dll.jmi_get_integer_d(self._jmi);
+        self._integer_u = self._dll.jmi_get_integer_u(self._jmi);
+        self._boolean_d = self._dll.jmi_get_boolean_d(self._jmi);
+        self._boolean_u = self._dll.jmi_get_boolean_u(self._jmi);        
         self._sw = self._dll.jmi_get_sw(self._jmi)
         self._sw_init = self._dll.jmi_get_sw_init(self._jmi)
         self._z = self._dll.jmi_get_z(self._jmi)
@@ -1519,28 +1737,54 @@ class JMIModel(object):
     def _set_jmimodel_typedefs(self):
         """ Type c-functions from JMI used by JMIModel."""
         # Initialize the global variables used throughout the tests.
-        n_ci = ct.c_int()
-        n_cd = ct.c_int()
-        n_pi = ct.c_int()
-        n_pd = ct.c_int()
-        n_dx = ct.c_int()
-        n_x  = ct.c_int()
-        n_u  = ct.c_int()
-        n_w  = ct.c_int()
+        n_real_ci = ct.c_int()
+        n_real_cd = ct.c_int()
+        n_real_pi = ct.c_int()
+        n_real_pd = ct.c_int()
+        n_integer_ci = ct.c_int()
+        n_integer_cd = ct.c_int()
+        n_integer_pi = ct.c_int()
+        n_integer_pd = ct.c_int()
+        n_boolean_ci = ct.c_int()
+        n_boolean_cd = ct.c_int()
+        n_boolean_pi = ct.c_int()
+        n_boolean_pd = ct.c_int()
+        n_real_dx = ct.c_int()
+        n_real_x  = ct.c_int()
+        n_real_u  = ct.c_int()
+        n_real_w  = ct.c_int()
         n_tp = ct.c_int()
+        n_real_d  = ct.c_int()
+        n_integer_d  = ct.c_int()
+        n_integer_u  = ct.c_int()
+        n_boolean_d  = ct.c_int()
+        n_boolean_u  = ct.c_int()
         n_sw = ct.c_int()
         n_sw_init = ct.c_int()
         n_z  = ct.c_int()
         assert self._dll.jmi_get_sizes(self._jmi,
-                                       byref(n_ci),
-                                       byref(n_cd),
-                                       byref(n_pi),
-                                       byref(n_pd),
-                                       byref(n_dx),
-                                       byref(n_x),
-                                       byref(n_u),
-                                       byref(n_w),
+                                       byref(n_real_ci),
+                                       byref(n_real_cd),
+                                       byref(n_real_pi),
+                                       byref(n_real_pd),
+                                       byref(n_integer_ci),
+                                       byref(n_integer_cd),
+                                       byref(n_integer_pi),
+                                       byref(n_integer_pd),
+                                       byref(n_boolean_ci),
+                                       byref(n_boolean_cd),
+                                       byref(n_boolean_pi),
+                                       byref(n_boolean_pd),
+                                       byref(n_real_dx),
+                                       byref(n_real_x),
+                                       byref(n_real_u),
+                                       byref(n_real_w),
                                        byref(n_tp),
+                                       byref(n_real_d),
+                                       byref(n_integer_d),
+                                       byref(n_integer_u),
+                                       byref(n_boolean_d),
+                                       byref(n_boolean_u),
                                        byref(n_sw),
                                        byref(n_sw_init),
                                        byref(n_z)) \
@@ -1548,19 +1792,32 @@ class JMIModel(object):
                "getting sizes failed"
            
         # Setting return type to numpy.array for some functions
-        int_res_funcs = [(self._dll.jmi_get_ci, n_ci.value),
-                         (self._dll.jmi_get_cd, n_cd.value),
-                         (self._dll.jmi_get_pi, n_pi.value),
-                         (self._dll.jmi_get_pd, n_pd.value),
-                         (self._dll.jmi_get_dx, n_dx.value),
-                         (self._dll.jmi_get_x, n_x.value),
-                         (self._dll.jmi_get_u, n_u.value),
-                         (self._dll.jmi_get_w, n_w.value),
+        int_res_funcs = [(self._dll.jmi_get_real_ci, n_real_ci.value),
+                         (self._dll.jmi_get_real_cd, n_real_cd.value),
+                         (self._dll.jmi_get_real_pi, n_real_pi.value),
+                         (self._dll.jmi_get_real_pd, n_real_pd.value),
+                         (self._dll.jmi_get_integer_ci, n_integer_ci.value),
+                         (self._dll.jmi_get_integer_cd, n_integer_cd.value),
+                         (self._dll.jmi_get_integer_pi, n_integer_pi.value),
+                         (self._dll.jmi_get_integer_pd, n_integer_pd.value),
+                         (self._dll.jmi_get_boolean_ci, n_boolean_ci.value),
+                         (self._dll.jmi_get_boolean_cd, n_boolean_cd.value),
+                         (self._dll.jmi_get_boolean_pi, n_boolean_pi.value),
+                         (self._dll.jmi_get_boolean_pd, n_boolean_pd.value),
+                         (self._dll.jmi_get_real_dx, n_real_dx.value),
+                         (self._dll.jmi_get_real_x, n_real_x.value),
+                         (self._dll.jmi_get_real_u, n_real_u.value),
+                         (self._dll.jmi_get_real_w, n_real_w.value),
                          (self._dll.jmi_get_t, 1),
-                         (self._dll.jmi_get_dx_p, n_dx.value),
-                         (self._dll.jmi_get_x_p, n_x.value),
-                         (self._dll.jmi_get_u_p, n_u.value),
-                         (self._dll.jmi_get_w_p, n_w.value),
+                         (self._dll.jmi_get_real_dx_p, n_real_dx.value),
+                         (self._dll.jmi_get_real_x_p, n_real_x.value),
+                         (self._dll.jmi_get_real_u_p, n_real_u.value),
+                         (self._dll.jmi_get_real_w_p, n_real_w.value),
+                         (self._dll.jmi_get_real_d, n_real_d.value),
+                         (self._dll.jmi_get_integer_d, n_integer_d.value),
+                         (self._dll.jmi_get_integer_u, n_integer_u.value),
+                         (self._dll.jmi_get_boolean_d, n_boolean_d.value),
+                         (self._dll.jmi_get_boolean_u, n_boolean_u.value),
                          (self._dll.jmi_get_sw, n_sw.value),
                          (self._dll.jmi_get_sw_init, n_sw_init.value),
                          (self._dll.jmi_get_z, n_z.value)]
@@ -1603,8 +1860,30 @@ class JMIModel(object):
                                             ct.POINTER(ct.c_int),
                                             ct.POINTER(ct.c_int),
                                             ct.POINTER(ct.c_int),
+                                            ct.POINTER(ct.c_int),                                            
+                                            ct.POINTER(ct.c_int),
+                                            ct.POINTER(ct.c_int),
+                                            ct.POINTER(ct.c_int),
+                                            ct.POINTER(ct.c_int),
+                                            ct.POINTER(ct.c_int),
+                                            ct.POINTER(ct.c_int),
+                                            ct.POINTER(ct.c_int),
+                                            ct.POINTER(ct.c_int),
+                                            ct.POINTER(ct.c_int),
+                                            ct.POINTER(ct.c_int),
+                                            ct.POINTER(ct.c_int),
+                                            ct.POINTER(ct.c_int),
                                             ct.POINTER(ct.c_int)]   
         self._dll.jmi_get_offsets.argtypes = [ct.c_void_p,
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
                                               ct.POINTER(ct.c_int),
                                               ct.POINTER(ct.c_int),
                                               ct.POINTER(ct.c_int),
@@ -1633,22 +1912,37 @@ class JMIModel(object):
                                                        shape=n_tp.value,
                                                        flags='C')]
         self._dll.jmi_get_z.argtypes    = [ct.c_void_p]
-        self._dll.jmi_get_ci.argtypes   = [ct.c_void_p]
-        self._dll.jmi_get_cd.argtypes   = [ct.c_void_p]
-        self._dll.jmi_get_pi.argtypes   = [ct.c_void_p]
-        self._dll.jmi_get_pd.argtypes   = [ct.c_void_p]
-        self._dll.jmi_get_dx.argtypes   = [ct.c_void_p]
-        self._dll.jmi_get_dx_p.argtypes = [ct.c_void_p, ct.c_int]
-        self._dll.jmi_get_x.argtypes    = [ct.c_void_p]
-        self._dll.jmi_get_x_p.argtypes  = [ct.c_void_p, ct.c_int]
-        self._dll.jmi_get_u.argtypes    = [ct.c_void_p]
-        self._dll.jmi_get_u_p.argtypes  = [ct.c_void_p, ct.c_int]
-        self._dll.jmi_get_w.argtypes    = [ct.c_void_p]
-        self._dll.jmi_get_w_p.argtypes  = [ct.c_void_p, ct.c_int]
+        self._dll.jmi_get_real_ci.argtypes   = [ct.c_void_p]
+        self._dll.jmi_get_real_cd.argtypes   = [ct.c_void_p]
+        self._dll.jmi_get_real_pi.argtypes   = [ct.c_void_p]
+        self._dll.jmi_get_real_pd.argtypes   = [ct.c_void_p]
+        self._dll.jmi_get_integer_ci.argtypes   = [ct.c_void_p]
+        self._dll.jmi_get_integer_cd.argtypes   = [ct.c_void_p]
+        self._dll.jmi_get_integer_pi.argtypes   = [ct.c_void_p]
+        self._dll.jmi_get_integer_pd.argtypes   = [ct.c_void_p]
+        self._dll.jmi_get_boolean_ci.argtypes   = [ct.c_void_p]
+        self._dll.jmi_get_boolean_cd.argtypes   = [ct.c_void_p]
+        self._dll.jmi_get_boolean_pi.argtypes   = [ct.c_void_p]
+        self._dll.jmi_get_boolean_pd.argtypes   = [ct.c_void_p]
+        self._dll.jmi_get_real_dx.argtypes   = [ct.c_void_p]
+        self._dll.jmi_get_real_x.argtypes    = [ct.c_void_p]
+        self._dll.jmi_get_real_u.argtypes    = [ct.c_void_p]
+        self._dll.jmi_get_real_w.argtypes    = [ct.c_void_p]
+        self._dll.jmi_get_t.argtypes    = [ct.c_void_p]
+        self._dll.jmi_get_real_dx_p.argtypes = [ct.c_void_p, ct.c_int]
+        self._dll.jmi_get_real_x_p.argtypes  = [ct.c_void_p, ct.c_int]
+        self._dll.jmi_get_real_u_p.argtypes  = [ct.c_void_p, ct.c_int]
+        self._dll.jmi_get_real_w_p.argtypes  = [ct.c_void_p, ct.c_int]
+
+        self._dll.jmi_get_real_d.argtypes   = [ct.c_void_p]
+        self._dll.jmi_get_integer_d.argtypes   = [ct.c_void_p]
+        self._dll.jmi_get_integer_u.argtypes   = [ct.c_void_p]
+        self._dll.jmi_get_boolean_d.argtypes   = [ct.c_void_p]
+        self._dll.jmi_get_boolean_u.argtypes   = [ct.c_void_p]
+        
         self._dll.jmi_get_sw.argtypes  = [ct.c_void_p]
         self._dll.jmi_get_sw_init.argtypes  = [ct.c_void_p]
-        self._dll.jmi_get_t.argtypes    = [ct.c_void_p]
-         
+
         # ODE interface
         self._dll.jmi_ode_f.argtypes  = [ct.c_void_p]
         self._dll.jmi_ode_df.argtypes = [ct.c_void_p,
@@ -2174,43 +2468,79 @@ class JMIModel(object):
                 # Error caused if constructor crashes
                 pass
                
-    def get_sizes(self, n_ci, n_cd, n_pi, n_pd, n_dx, n_x, n_u, n_w, n_tp, n_sw, n_sw_init, n_z):
+    def get_sizes(self, n_real_ci, n_real_cd, n_real_pi, n_real_pd,
+                  n_integer_ci, n_integer_cd, n_integer_pi, n_integer_pd,
+                  n_boolean_ci, n_boolean_cd, n_boolean_pi, n_boolean_pd,
+                  n_real_dx, n_real_x, n_real_u, n_real_w, n_tp,
+                  n_real_d,n_integer_d,n_integer_u,n_boolean_d,n_boolean_u,
+                  n_sw, n_sw_init, n_z):
         """Get the sizes of the variable vectors."""
         
         retval = self._dll.jmi_get_sizes(self._jmi,
-                                         byref(n_ci),
-                                         byref(n_cd),
-                                         byref(n_pi),
-                                         byref(n_pd),
-                                         byref(n_dx),
-                                         byref(n_x),
-                                         byref(n_u),
-                                         byref(n_w),
+                                         byref(n_real_ci),
+                                         byref(n_real_cd),
+                                         byref(n_real_pi),
+                                         byref(n_real_pd),
+                                         byref(n_integer_ci),
+                                         byref(n_integer_cd),
+                                         byref(n_integer_pi),
+                                         byref(n_integer_pd),
+                                         byref(n_boolean_ci),
+                                         byref(n_boolean_cd),
+                                         byref(n_boolean_pi),
+                                         byref(n_boolean_pd),
+                                         byref(n_real_dx),
+                                         byref(n_real_x),
+                                         byref(n_real_u),
+                                         byref(n_real_w),
                                          byref(n_tp),
+                                         byref(n_real_d),
+                                         byref(n_integer_d),
+                                         byref(n_integer_u),
+                                         byref(n_boolean_d),
+                                         byref(n_boolean_u),
                                          byref(n_sw),
                                          byref(n_sw_init),
                                          byref(n_z))
         if retval is not 0:
             raise JMIException("Getting sizes failed.")                     
             
-    def get_offsets(self, offs_ci, offs_cd, offs_pi, offs_pd, offs_dx, offs_x, offs_u, offs_w,
-                    offs_t, offs_dx_p, offs_x_p, offs_u_p, offs_w_p, offs_sw, offs_sw_init):
+    def get_offsets(self, offs_real_ci, offs_real_cd, offs_real_pi, offs_real_pd, \
+                    offs_integer_ci, offs_integer_cd, offs_integer_pi, offs_integer_pd, \
+                    offs_boolean_ci, offs_boolean_cd, offs_boolean_pi, offs_boolean_pd, \
+                    offs_real_dx, offs_real_x, offs_real_u, offs_real_w, \
+                    offs_t, offs_real_dx_p, offs_real_x_p, offs_real_u_p, offs_real_w_p, \
+                    offs_real_d,offs_integer_d,offs_integer_u,offs_boolean_d,offs_boolean_u, \
+                    offs_sw, offs_sw_init):
         """Get the offsets for the variable types in the z vector."""
         
         retval = self._dll.jmi_get_offsets(self._jmi,
-                                           byref(offs_ci),
-                                           byref(offs_cd),
-                                           byref(offs_pi),
-                                           byref(offs_pd),
-                                           byref(offs_dx),
-                                           byref(offs_x),
-                                           byref(offs_u),
-                                           byref(offs_w),
+                                           byref(offs_real_ci),
+                                           byref(offs_real_cd),
+                                           byref(offs_real_pi),
+                                           byref(offs_real_pd),
+                                           byref(offs_integer_ci),
+                                           byref(offs_integer_cd),
+                                           byref(offs_integer_pi),
+                                           byref(offs_integer_pd),
+                                           byref(offs_boolean_ci),
+                                           byref(offs_boolean_cd),
+                                           byref(offs_boolean_pi),
+                                           byref(offs_boolean_pd),
+                                           byref(offs_real_dx),
+                                           byref(offs_real_x),
+                                           byref(offs_real_u),
+                                           byref(offs_real_w),
                                            byref(offs_t),
-                                           byref(offs_dx_p),
-                                           byref(offs_x_p),
-                                           byref(offs_u_p),
-                                           byref(offs_w_p),
+                                           byref(offs_real_dx_p),
+                                           byref(offs_real_x_p),
+                                           byref(offs_real_u_p),
+                                           byref(offs_real_w_p),
+                                           byref(offs_real_d),
+                                           byref(offs_integer_d),
+                                           byref(offs_integer_u),
+                                           byref(offs_boolean_d),
+                                           byref(offs_boolean_u),
                                            byref(offs_sw),
                                            byref(offs_sw_init))
         if retval is not 0:
@@ -2243,37 +2573,69 @@ class JMIModel(object):
         """
         return self._z
     
-    def get_ci(self):
-        """Returns a reference to the independent constants vector."""
-        return self._ci
+    def get_real_ci(self):
+        """Returns a reference to the real independent constants vector."""
+        return self._real_ci
     
-    def get_cd(self):
-        """Returns a reference to the dependent constants vector."""
-        return self._cd
+    def get_real_cd(self):
+        """Returns a reference to the real dependent constants vector."""
+        return self._real_cd
     
-    def get_pi(self):
-        """Returns a reference to the independent parameters vector."""
-        return self._pi
+    def get_real_pi(self):
+        """Returns a reference to the real independent parameters vector."""
+        return self._real_pi
         
-    def get_pd(self):
-        """Returns a reference to the dependent parameters vector."""
-        return self._pd
+    def get_real_pd(self):
+        """Returns a reference to the real dependent parameters vector."""
+        return self._real_pd
 
-    def get_dx(self):
-        """Returns a reference to the derivatives vector."""
-        return self._dx 
+    def get_integer_ci(self):
+        """Returns a reference to the integer independent constants vector."""
+        return self._integer_ci
     
-    def get_x(self):
+    def get_integer_cd(self):
+        """Returns a reference to the integer dependent constants vector."""
+        return self._integer_cd
+    
+    def get_integer_pi(self):
+        """Returns a reference to the integer independent parameters vector."""
+        return self._integer_pi
+        
+    def get_integer_pd(self):
+        """Returns a reference to the integer dependent parameters vector."""
+        return self._integer_pd
+
+    def get_boolean_ci(self):
+        """Returns a reference to the boolean independent constants vector."""
+        return self._boolean_ci
+    
+    def get_boolean_cd(self):
+        """Returns a reference to the boolean dependent constants vector."""
+        return self._boolean_cd
+    
+    def get_boolean_pi(self):
+        """Returns a reference to the boolean independent parameters vector."""
+        return self._boolean_pi
+        
+    def get_boolean_pd(self):
+        """Returns a reference to the boolean dependent parameters vector."""
+        return self._boolean_pd
+
+    def get_real_dx(self):
+        """Returns a reference to the derivatives vector."""
+        return self._real_dx 
+    
+    def get_real_x(self):
         """Return a reference to the differentiated variables vector."""
-        return self._x
+        return self._real_x
         
-    def get_u(self):
+    def get_real_u(self):
         """Returns a reference to the inputs vector."""
-        return self._u
+        return self._real_u
         
-    def get_w(self):
+    def get_real_w(self):
         """Returns a reference to the algebraic variables vector."""
-        return self._w
+        return self._real_w
 
     def get_t(self):
         """Returns a reference to the time value.
@@ -2282,30 +2644,50 @@ class JMIModel(object):
         """
         return self._t
 
-    def get_dx_p(self, i):
+    def get_real_dx_p(self, i):
         """Returns a reference to the derivatives variables vector
         corresponding to the i:th time point.
         """
-        return self._dll.jmi_get_dx_p(self._jmi,i)
+        return self._dll.jmi_get_real_dx_p(self._jmi,i)
 
-    def get_x_p(self, i):
+    def get_real_x_p(self, i):
         """Returns a reference to the differentiated variables vector
         corresponding to the i:th time point.
         
         """
-        return self._dll.jmi_get_x_p(self._jmi, i)
+        return self._dll.jmi_get_real_x_p(self._jmi, i)
 
-    def get_u_p(self, i):
+    def get_real_u_p(self, i):
         """Returns a reference to the inputs vector corresponding to the i:th time 
         point.
         """
-        return self._dll.jmi_get_u_p(self._jmi, i)
+        return self._dll.jmi_get_real_u_p(self._jmi, i)
 
-    def get_w_p(self, i):
+    def get_real_w_p(self, i):
         """Returns a reference to the algebraic variables vector corresponding to 
         the i:th time point.
         """
-        return self._dll.jmi_get_w_p(self._jmi, i) 
+        return self._dll.jmi_get_real_w_p(self._jmi, i) 
+
+    def get_real_d(self):
+        """Return a reference to the discrete real variable vector."""
+        return self._real_d
+
+    def get_integer_d(self):
+        """Return a reference to the integer variable vector."""
+        return self._integer_d
+
+    def get_integer_u(self):
+        """Return a reference to the integer input vector."""
+        return self._integer_u
+
+    def get_boolean_d(self):
+        """Return a reference to the boolean variable vector."""
+        return self._boolean_d
+
+    def get_boolean_u(self):
+        """Return a reference to the boolean input vector."""
+        return self._boolean_u
 
     def get_sw(self):
         """Returns a reference to the switching function vector of the DAE.
@@ -2318,14 +2700,14 @@ class JMIModel(object):
         """Returns a reference to the switching function vector of the DAE initialization system.
         A switch value of 1 corresponds to true and 0 corresponds to false.
         """
-        return _self.sw_init
+        return _self._sw_init
         #return self._dll.jmi_get_sw_init(self._jmi) 
     
     def ode_f(self):
         """Evalutates the right hand side of the ODE.
         
         The results is saved to the internal states and can be accessed by
-        accessing 'my_model.x'.
+        accessing 'my_model.real_x'.
         
         """
         if self._dll.jmi_ode_f(self._jmi) is not 0:

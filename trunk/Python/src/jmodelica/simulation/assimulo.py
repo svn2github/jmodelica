@@ -39,13 +39,13 @@ def write_data(simulator):
         t = N.array(simulator.t)
         y = N.array(simulator.y)
         yd = N.array(simulator.yd)
-        u = N.ones((len(t),len(model.u)))*model.u
+        u = N.ones((len(t),len(model.real_u)))*model.real_u
         
         # extends the time array with the states columnwise
-        data = N.c_[t,yd[:,0:len(model.dx)]]
-        data = N.c_[data, y[:,0:len(model.x)]]
+        data = N.c_[t,yd[:,0:len(model.real_dx)]]
+        data = N.c_[data, y[:,0:len(model.real_x)]]
         data = N.c_[data, u]
-        data = N.c_[data, y[:,len(model.x):len(model.x)+len(model.w)]]
+        data = N.c_[data, y[:,len(model.real_x):len(model.real_x)+len(model.real_w)]]
 
         io.export_result_dymola(model,data)
     else:
@@ -63,7 +63,7 @@ class JMIExplicit(Explicit_Problem):
         """
         self._model = model
         
-        self.y0 = self._model.x
+        self.y0 = self._model.real_x
     
     def f(self, t, y, sw=None):
         """
@@ -71,11 +71,11 @@ class JMIExplicit(Explicit_Problem):
         """
         #Moving data to the model
         self._model.t = t
-        self._model.x = y
+        self._model.real_x = y
         
         #Evaluating the rhs
         self._model.eval_ode_f()
-        rhs = self._model.dx
+        rhs = self._model.real_dx
 
         return rhs
         
@@ -85,7 +85,7 @@ class JMIExplicit(Explicit_Problem):
         """
         #Moving data to the model
         self._model.t = t
-        self._model.x = y
+        self._model.real_x = y
         
         #Evaluating the switching functions
         #TODO
@@ -99,7 +99,7 @@ class JMIExplicit(Explicit_Problem):
         self._model.reset()
         self._model.t = self.t0 #Set time to the default value
         
-        self.y0 = self._model.x
+        self.y0 = self._model.real_x
  
     
 class JMIImplicit(Implicit_Problem):
@@ -112,9 +112,9 @@ class JMIImplicit(Implicit_Problem):
         """
         self._model = model
         
-        self.y0 = N.append(self._model.x,self._model.w)
-        self.yd0 = N.append(self._model.dx,[0]*len(self._model.w))
-        self.algvar = [1.0]*len(self._model.x) + [0.0]*len(self._model.w) #Sets the algebraic components of the model
+        self.y0 = N.append(self._model.real_x,self._model.real_w)
+        self.yd0 = N.append(self._model.real_dx,[0]*len(self._model.real_w))
+        self.algvar = [1.0]*len(self._model.real_x) + [0.0]*len(self._model.real_w) #Sets the algebraic components of the model
                 
         
         [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes() #Used for determine if there are discontinuities
@@ -137,9 +137,9 @@ class JMIImplicit(Implicit_Problem):
         self._log_information = [] #List that handles log information
         self._f_nbr = f_nbr #Number of equations
         self._g_nbr = g_nbr #Number of event indicatiors
-        self._x_nbr = len(self._model.x) #Number of differentiated
-        self._w_nbr = len(self._model.w) #Number of algebraic
-        self._dx_nbr = len(self._model.dx) #Number of derivatives
+        self._x_nbr = len(self._model.real_x) #Number of differentiated
+        self._w_nbr = len(self._model.real_w) #Number of algebraic
+        self._dx_nbr = len(self._model.real_dx) #Number of derivatives
         self._pre = self.y0.copy()
         self._iter = 0
         self._temp_f = N.array([0.]*self._f_nbr)
@@ -151,9 +151,9 @@ class JMIImplicit(Implicit_Problem):
         """
         #Moving data to the model
         self._model.t = t
-        self._model.x = y[0:self._x_nbr]
-        self._model.w = y[self._x_nbr:self._f_nbr]
-        self._model.dx = yd[0:self._dx_nbr]
+        self._model.real_x = y[0:self._x_nbr]
+        self._model.real_w = y[self._x_nbr:self._f_nbr]
+        self._model.real_dx = yd[0:self._dx_nbr]
 
         #Evaluating the residual function
         residual = N.array([.0]*self._f_nbr)
@@ -184,9 +184,9 @@ class JMIImplicit(Implicit_Problem):
         """
         #Moving data to the model
         self._model.t = t
-        self._model.x = y[0:self._x_nbr]
-        self._model.w = y[self._x_nbr:self._f_nbr]
-        self._model.dx = yd[0:self._dx_nbr]
+        self._model.real_x = y[0:self._x_nbr]
+        self._model.real_w = y[self._x_nbr:self._f_nbr]
+        self._model.real_dx = yd[0:self._dx_nbr]
         
         #Evaluating the jacobian
         #-Setting options
@@ -199,7 +199,7 @@ class JMIImplicit(Implicit_Problem):
         Jac = N.zeros(self._f_nbr**2) #Matrix that hold information about dx and dw
         self._model.jmimodel.dae_dF(evaluation_options, sparsity, independent_vars[1:], z_l, Jac) #Output x+w
         
-        dx = N.zeros(len(self._model.dx)*self._f_nbr) #Matrix that hold information about dx'
+        dx = N.zeros(len(self._model.real_dx)*self._f_nbr) #Matrix that hold information about dx'
         self._model.jmimodel.dae_dF(evaluation_options, sparsity, independent_vars[0], z_l, dx) #Output dx'
         dx = dx*c #Scale
         
@@ -216,9 +216,9 @@ class JMIImplicit(Implicit_Problem):
         """
         #Moving data to the model
         self._model.t = t
-        self._model.x = y[0:self._x_nbr]
-        self._model.w = y[self._x_nbr:self._f_nbr]
-        self._model.dx = yd[0:self._dx_nbr]
+        self._model.real_x = y[0:self._x_nbr]
+        self._model.real_w = y[self._x_nbr:self._f_nbr]
+        self._model.real_dx = yd[0:self._dx_nbr]
         
         #Evaluating the switching functions
         eventInd = N.array([.0]*len(sw))
@@ -330,8 +330,8 @@ class JMIImplicit(Implicit_Problem):
                 self._log_information[i-1][3].append(True)
             
             #Sets the calculated values
-            solver.y[-1] = N.append(self._model.x,self._model.w)
-            solver.yd[-1] = N.append(self._model.dx,[0]*len(self._model.w)) 
+            solver.y[-1] = N.append(self._model.real_x,self._model.real_w)
+            solver.yd[-1] = N.append(self._model.real_dx,[0]*len(self._model.real_w)) 
         else:
             self._model.sw = [int(x) for x in solver.switches]
             
@@ -387,8 +387,8 @@ class JMIImplicit(Implicit_Problem):
         self._model.reset()
         self._model.t = self.t0 #Set time to the default value
         
-        self.y0 = N.append(self._model.x,self._model.w)
-        self.yd0 = N.append(self._model.dx,[0]*len(self._model.w))
+        self.y0 = N.append(self._model.real_x,self._model.real_w)
+        self.yd0 = N.append(self._model.real_dx,[0]*len(self._model.real_w))
 
     def _set_max_eIteration(self, max_eIter):
         """

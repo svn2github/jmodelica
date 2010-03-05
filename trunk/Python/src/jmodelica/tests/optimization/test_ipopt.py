@@ -169,10 +169,10 @@ class TestNLP_VDP:
     def test_opt_sim_get_result(self):
         """ Test NLPCollocation.opt_sim_get_result"""
         timepoints = self.nlp.opt_sim_get_result_variable_vector_length()
-        res_dx = timepoints*self.cstr._n_dx.value
-        res_x = timepoints*self.cstr._n_x.value
-        res_u = timepoints*self.cstr._n_u.value
-        res_w = timepoints*self.cstr._n_w.value
+        res_dx = timepoints*self.cstr._n_real_dx.value
+        res_x = timepoints*self.cstr._n_real_x.value
+        res_u = timepoints*self.cstr._n_real_u.value
+        res_w = timepoints*self.cstr._n_real_w.value
         
         p_opt=N.zeros(self.cstr._n_p_opt)
         t=N.zeros(timepoints)

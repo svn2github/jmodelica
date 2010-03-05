@@ -44,12 +44,12 @@ def run_demo(with_plots=True):
 
     def res(y,t):
         for i in range(4):
-            qt.get_x()[i] = y[i]
+            qt.get_real_x()[i] = y[i]
         qt.jmimodel.ode_f()
-        return qt.get_dx()[0:4]
+        return qt.get_real_dx()[0:4]
 
     # Compute stationary state values for operating point A
-    qt.set_u(u_A)
+    qt.set_real_u(u_A)
     #qt.getPI()[21] = u_A[0]
     #qt.getPI()[22] = u_A[1]
     
@@ -67,7 +67,7 @@ def run_demo(with_plots=True):
         plt.grid()
     
     # Compute stationary state values for operating point A
-    qt.set_u(u_B)
+    qt.set_real_u(u_B)
     
     t_sim = N.linspace(0.,2000.,500)
     y_sim = int.odeint(res,x_0,t_sim)
@@ -82,17 +82,17 @@ def run_demo(with_plots=True):
         plt.grid()
         plt.show()
     
-    qt.get_pi()[13] = x_A[0]
-    qt.get_pi()[14] = x_A[1]
-    qt.get_pi()[15] = x_A[2]
-    qt.get_pi()[16] = x_A[3]
+    qt.get_real_pi()[13] = x_A[0]
+    qt.get_real_pi()[14] = x_A[1]
+    qt.get_real_pi()[15] = x_A[2]
+    qt.get_real_pi()[16] = x_A[3]
     
-    qt.get_pi()[17] = x_B[0]
-    qt.get_pi()[18] = x_B[1]
-    qt.get_pi()[19] = x_B[2]
-    qt.get_pi()[20] = x_B[3]
-    qt.get_pi()[21] = u_B[0]
-    qt.get_pi()[22] = u_B[1]
+    qt.get_real_pi()[17] = x_B[0]
+    qt.get_real_pi()[18] = x_B[1]
+    qt.get_real_pi()[19] = x_B[2]
+    qt.get_real_pi()[20] = x_B[3]
+    qt.get_real_pi()[21] = u_B[0]
+    qt.get_real_pi()[22] = u_B[1]
 
     # Solve optimal control problem
     

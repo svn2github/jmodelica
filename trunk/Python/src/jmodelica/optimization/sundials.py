@@ -91,9 +91,9 @@ def _shoot(model, start_time, end_time, sensi=True, time_step=0.2):
     sens = simulator.get_sensitivities()
     params = simulator.get_sensitivity_indices()
     
-    model.set_x_p(last_y, 0)
-    model.set_dx_p(model.dx, 0)
-    model.set_u_p(model.u, 0)
+    model.set_real_x_p(last_y, 0)
+    model.set_real_dx_p(model.dx, 0)
+    model.set_real_u_p(model.real_u, 0)
     
     if sensi:
         sens_rows = range(params.xinit_start, params.xinit_end) + \
@@ -147,16 +147,16 @@ def single_shooting(model, initial_u=0.4, plot=True):
                  with.
     
     """
-    assert len(model.u) == 1, "More than one control signal is " \
+    assert len(model.real_u) == 1, "More than one control signal is " \
                                          "not supported as of today."
     
     start_time = model.opt_interval_get_start_time()
     end_time = model.opt_interval_get_final_time()
     
-    u = model.u
+    u = model.real_u
     u0 = N.array([initial_u])
     print "Initial u:", u
-    model.u = initial_u
+    model.real_u = initial_u
     gradient = None
     gradient_u = None
     
@@ -167,9 +167,9 @@ def single_shooting(model, initial_u=0.4, plot=True):
         print "u is", u
         big_gradient, last_y, gradparams, sens = _shoot(model, start_time, end_time,sensi=False)
         
-        model.set_x_p(last_y, 0)
-        model.set_dx_p(model.dx, 0)
-        model.set_u_p(model.u, 0)
+        model.set_real_x_p(last_y, 0)
+        model.set_real_dx_p(model.real_dx, 0)
+        model.set_real_u_p(model.real_u, 0)
         cost = model.opt_eval_J()
         
         #gradient_u = cur_u.copy()
@@ -189,9 +189,9 @@ def single_shooting(model, initial_u=0.4, plot=True):
         print "u is", u
         big_gradient, last_y, gradparams, sens = _shoot(model, start_time, end_time)
         
-        model.set_x_p(last_y, 0)
-        model.set_dx_p(model.dx, 0)
-        model.set_u_p(model.u, 0)
+        model.set_real_x_p(last_y, 0)
+        model.set_real_dx_p(model.real_dx, 0)
+        model.set_real_u_p(model.real_u, 0)
         #cost = model.opt_eval_J()
         
         gradient_u = cur_u.copy()
@@ -360,10 +360,10 @@ class MultipleShooter:
             raise ShootingException('initial_u parameters must be the same '
                                     'length as grid segments.')
         self._initial_u = N.array(initial_u).reshape(
-                                          (len(grid), len(model.u)))
+                                          (len(grid), len(model.real_u)))
         
         # Assume the first initial_u is a feasible one
-        model.u = self._initial_u[0]
+        model.real_u = self._initial_u[0]
         
     def get_initial_u(self):
         """Returns the constant control/input signals, one segment per row."""
@@ -443,10 +443,10 @@ class MultipleShooter:
         """
         model = self.get_model()
         
-        if len(y0) != len(model.x):
+        if len(y0) != len(model.real_x):
             raise ShootingException('Wrong length to single segment: '
                                     '%s != %s' %
-                                    (len(y0), len(model.x)))
+                                    (len(y0), len(model.real_x)))
             
         seg_start_time = interval[0]
         seg_end_time = interval[1]
@@ -455,8 +455,8 @@ class MultipleShooter:
         y0 = y0.flatten()
         
         model.reset()
-        model.u = u
-        model.x = y0
+        model.real_u = u
+        model.real_x = y0
         
         seg_cost_gradient, seg_last_y, seg_gradparams, sens = \
                                          _shoot(model,
@@ -484,9 +484,9 @@ class MultipleShooter:
         costgradient, last_y, gradparams, sens = \
               self._shoot_single_segment(us[-1], ys[-1], grid[-1], sensi=False)
         
-        model.set_x_p(last_y, 0)
-        model.set_dx_p(model.dx, 0)
-        model.set_u_p(model.u, 0)
+        model.set_real_x_p(last_y, 0)
+        model.set_real_dx_p(model.real_dx, 0)
+        model.set_real_u_p(model.real_u, 0)
         cost = model.opt_eval_J()
         
         if self.get_log_level() >= MultipleShooter.WHISPER:
@@ -519,11 +519,11 @@ class MultipleShooter:
             # Comments:
             #  * The cost does not depend on the first initial states.
             #  * The cost does not depend on the first inputs/control signal
-            gradient = N.array([0] * len(model.x) * (len(grid) - 2)
+            gradient = N.array([0] * len(model.real_x) * (len(grid) - 2)
                                 + list(costgradient[gradparams['xinit_start'] :
                                                     gradparams['xinit_end']])
                                 + [0] * (len(grid) - 1) *
-                                                        len(model.u)
+                                                        len(model.real_u)
                                 + list(costgradient[gradparams['u_start'] :
                                                     gradparams['u_end']]))
         
@@ -577,8 +577,8 @@ class MultipleShooter:
         gradparams, sens = zip(*mapresults)
         
         NP = len(p)                  # number of elements in p
-        NOS = len(model.x) # Number Of States
-        NOI = len(model.u) # Number Of Inputs
+        NOS = len(model.real_x) # Number Of States
+        NOI = len(model.real_u) # Number Of Inputs
         NEQ = (len(grid) - 1) * NOS  # number of equality equations in h(p)
         
         r = N.zeros((NEQ, NP))
@@ -605,7 +605,7 @@ class MultipleShooter:
                 r[row_start:row_end, xinitsenscols_start:xinitsenscols_end] = \
                                       sens[segmentindex][sensxinitindices, :].T
             r[row_start : row_end, xinitcols_start : xinitcols_end] = \
-                                                 -N.eye(len(model.x))
+                                                 -N.eye(len(model.real_x))
             r[row_start : row_end, usenscols_start : usenscols_end] = \
                                           sens[segmentindex][sensuindices, :].T
         
@@ -651,15 +651,15 @@ class MultipleShooter:
 
         # Less than (-0.5 < u < 1)
         # TODO: These are currently hard coded. They shouldn't be.
-        #NLT = len(grid) * len(model.u)
+        #NLT = len(grid) * len(model.real_u)
         #Alt = N.zeros( (NLT, len(p0)) )
-        #Alt[:, (len(grid) - 1) * len(model.x):] = -N.eye(len(grid) *
-        #                                              len(model.u))
+        #Alt[:, (len(grid) - 1) * len(model.real_x):] = -N.eye(len(grid) *
+        #                                              len(model.real_u))
         #blt = -0.5*N.ones(NLT)
 
         # TODO: These are currently hard coded. They shouldn't be.
-        #N_xvars = (len(grid) - 1) * len(model.x)
-        #N_uvars = len(grid) * len(model.u)
+        #N_xvars = (len(grid) - 1) * len(model.real_x)
+        #N_uvars = len(grid) * len(model.real_u)
         #N_vars = N_xvars + N_uvars
         #Alt = -N.eye(N_vars)
         #blt = N.zeros(N_vars)
@@ -709,10 +709,10 @@ def _split_opt_x(model, gridsize, p, prepend_initials):
     one row per segment.
     """
     ys = N.concatenate( (prepend_initials,
-                         p[0 : (gridsize - 1) * len(model.x)]) )
-    ys = ys.reshape( (gridsize, len(model.x)) )
-    us = p[(gridsize - 1) * len(model.x) : ]
-    us = us.reshape( (gridsize, len(model.u)) )
+                         p[0 : (gridsize - 1) * len(model.real_x)]) )
+    ys = ys.reshape( (gridsize, len(model.real_x)) )
+    us = p[(gridsize - 1) * len(model.real_x) : ]
+    us = us.reshape( (gridsize, len(model.real_u)) )
     return ys, us
     
 
@@ -727,8 +727,8 @@ def _plot_control_solution(model, interval, initial_ys, us):
                   simulation.
     """
     model.reset()
-    model.x = initial_ys
-    model.u = us
+    model.real_x = initial_ys
+    model.real_u = us
 
     p.figure(1)
     p.subplot(211)
@@ -737,12 +737,12 @@ def _plot_control_solution(model, interval, initial_ys, us):
     simulator.run()
     T, Y = simulator.get_solution()
     p.hold(True)
-    for i in range(len(model.x)):
+    for i in range(len(model.real_x)):
         p.plot(T,Y[:,i],label="State #%s" % (i + 1), linewidth=2)
 
     p.subplot(212)
     p.hold(True)
-    for i in range(len(model.u)):
+    for i in range(len(model.real_u)):
         p.plot(interval, [us[i], us[i]], label="Input #%s" % (i + 1))
     p.hold(False)
 
@@ -766,7 +766,7 @@ def plot_control_solutions(model, grid, opt_p, doshow=True):
     The model will be reset when calling this!
     """
     model.reset()
-    initial_ys, us = _split_opt_x(model, len(grid), opt_p, model.x)
+    initial_ys, us = _split_opt_x(model, len(grid), opt_p, model.real_x)
     
     p.figure()
     p.hold(True)
@@ -791,7 +791,7 @@ def cost_graph(model):
     start_time = model.opt_interval_get_start_time()
     end_time = model.opt_interval_get_final_time()
     
-    u = model.u
+    u = model.real_u
     print "Initial u:", u
     
     costs = []
@@ -808,9 +808,9 @@ def cost_graph(model):
         simulation.run()
         T, ys = simulation.get_solution()
         
-        model.set_x_p(ys[-1], 0)
-        model.set_dx_p(model.dx, 0)
-        model.set_u_p(model.u, 0)
+        model.set_real_x_p(ys[-1], 0)
+        model.set_real_dx_p(model.real_dx, 0)
+        model.set_real_u_p(model.real_u, 0)
         
         cost = model.opt_eval_J()
         print "Cost:", cost

@@ -197,7 +197,7 @@ int jmi_ode_f(jmi_t* jmi) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
 
-	jmi_real_t* dx = jmi_get_dx(jmi);
+	jmi_real_t* dx = jmi_get_real_dx(jmi);
 	for(i=0;i<jmi->n_real_dx;i++) {
 		dx[i]=0;
 	}
@@ -225,7 +225,7 @@ int jmi_ode_df(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int
 	if (eval_alg & JMI_DER_SYMBOLIC) {
 
 		int i;
-		jmi_real_t* dx = jmi_get_dx(jmi);
+		jmi_real_t* dx = jmi_get_real_dx(jmi);
 		for(i=0;i<jmi->n_real_dx;i++) {
 			dx[i]=0;
 		}

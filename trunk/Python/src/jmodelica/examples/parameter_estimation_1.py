@@ -35,11 +35,11 @@ def run_demo(with_plots=True):
     model=jmi.Model("ParEst_ParEst")
     
     # Retreive parameter and variable vectors
-    pi = model.get_pi();
-    x = model.get_x();
-    dx = model.get_dx();
-    u = model.get_u();
-    w = model.get_w();
+    pi = model.get_real_pi();
+    x = model.get_real_x();
+    dx = model.get_real_dx();
+    u = model.get_real_u();
+    w = model.get_real_w();
     
     # Set model input
     w[0] = 1

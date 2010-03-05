@@ -178,17 +178,38 @@ int jmi_func_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independent_
 }
 
 int jmi_get_sizes(jmi_t* jmi, int* n_real_ci, int* n_real_cd, int* n_real_pi, int* n_real_pd,
-		                        int* n_real_dx, int* n_real_x, int* n_real_u, int* n_real_w, int* n_tp, int* n_sw, int* n_sw_init, int* n_z) {
+		int* n_integer_ci, int* n_integer_cd, int* n_integer_pi, int* n_integer_pd,
+		int* n_boolean_ci, int* n_boolean_cd, int* n_boolean_pi, int* n_boolean_pd,
+		int* n_real_dx, int* n_real_x, int* n_real_u, int* n_real_w,int* n_tp,
+		int* n_real_d, int* n_integer_d, int* n_integer_u, int* n_boolean_d, int* n_boolean_u,
+		int* n_sw, int* n_sw_init, int* n_z) {
 
 	*n_real_ci = jmi->n_real_ci;
 	*n_real_cd = jmi->n_real_cd;
 	*n_real_pi = jmi->n_real_pi;
 	*n_real_pd = jmi->n_real_pd;
+
+	*n_integer_ci = jmi->n_integer_ci;
+	*n_integer_cd = jmi->n_integer_cd;
+	*n_integer_pi = jmi->n_integer_pi;
+	*n_integer_pd = jmi->n_integer_pd;
+
+	*n_boolean_ci = jmi->n_boolean_ci;
+	*n_boolean_cd = jmi->n_boolean_cd;
+	*n_boolean_pi = jmi->n_boolean_pi;
+	*n_boolean_pd = jmi->n_boolean_pd;
+
 	*n_real_dx = jmi->n_real_dx;
 	*n_real_x = jmi->n_real_x;
 	*n_real_u = jmi->n_real_u;
 	*n_real_w = jmi->n_real_w;
-    *n_tp = jmi->n_tp;
+	*n_tp = jmi->n_tp;
+	*n_real_d = jmi->n_real_d;
+	*n_integer_d = jmi->n_integer_d;
+	*n_integer_u = jmi->n_integer_u;
+	*n_boolean_d = jmi->n_boolean_d;
+	*n_boolean_u = jmi->n_boolean_u;
+
     *n_sw = jmi->n_sw;
     *n_sw_init = jmi->n_sw_init;
     *n_z = jmi->n_z;
@@ -196,13 +217,35 @@ int jmi_get_sizes(jmi_t* jmi, int* n_real_ci, int* n_real_cd, int* n_real_pi, in
 	return 0;
 }
 
-int jmi_get_offsets(jmi_t* jmi, int* offs_real_ci, int* offs_real_cd, int* offs_real_pi, int* offs_real_pd,
-		int* offs_real_dx, int* offs_real_x, int* offs_real_u, int* offs_real_w, int *offs_t,
-		int* offs_real_dx_p, int* offs_real_x_p, int* offs_real_u_p, int* offs_real_w_p, int* offs_sw, int* offs_sw_init) {
+int jmi_get_offsets(jmi_t* jmi, int* offs_real_ci, int* offs_real_cd,
+		int* offs_real_pi, int* offs_real_pd,
+		int* offs_integer_ci, int* offs_integer_cd,
+		int* offs_integer_pi, int* offs_integer_pd,
+		int* offs_boolean_ci, int* offs_boolean_cd,
+		int* offs_boolean_pi, int* offs_boolean_pd,
+		int* offs_real_dx, int* offs_real_x, int* offs_real_u,
+		int* offs_real_w, int *offs_t,
+		int* offs_real_dx_p, int* offs_real_x_p,
+		int* offs_real_u_p, int* offs_real_w_p,
+		int* offs_real_d, int* offs_integer_d, int* offs_integer_u,
+		int* offs_boolean_d, int* offs_boolean_u,
+		int* offs_sw, int* offs_sw_init) {
+
 	*offs_real_ci = jmi->offs_real_ci;
 	*offs_real_cd = jmi->offs_real_cd;
 	*offs_real_pi = jmi->offs_real_pi;
 	*offs_real_pd = jmi->offs_real_pd;
+
+	*offs_integer_ci = jmi->offs_integer_ci;
+	*offs_integer_cd = jmi->offs_integer_cd;
+	*offs_integer_pi = jmi->offs_integer_pi;
+	*offs_integer_pd = jmi->offs_integer_pd;
+
+	*offs_boolean_ci = jmi->offs_boolean_ci;
+	*offs_boolean_cd = jmi->offs_boolean_cd;
+	*offs_boolean_pi = jmi->offs_boolean_pi;
+	*offs_boolean_pd = jmi->offs_boolean_pd;
+
 	*offs_real_dx = jmi->offs_real_dx;
 	*offs_real_x = jmi->offs_real_x;
 	*offs_real_u = jmi->offs_real_u;
@@ -212,6 +255,15 @@ int jmi_get_offsets(jmi_t* jmi, int* offs_real_ci, int* offs_real_cd, int* offs_
 	*offs_real_x_p = jmi->offs_real_x_p;
 	*offs_real_u_p = jmi->offs_real_u_p;
 	*offs_real_w_p = jmi->offs_real_w_p;
+
+	*offs_real_d = jmi->offs_real_d;
+
+	*offs_integer_d = jmi->offs_integer_d;
+	*offs_integer_u = jmi->offs_integer_u;
+
+	*offs_boolean_d = jmi->offs_boolean_d;
+	*offs_boolean_u = jmi->offs_boolean_u;
+
 	*offs_sw = jmi->offs_sw;
 	*offs_sw_init = jmi->offs_sw_init;
 
@@ -525,35 +577,67 @@ jmi_real_t* jmi_get_z(jmi_t* jmi) {
 	return *(jmi->z_val);
 }
 
-jmi_real_t* jmi_get_ci(jmi_t* jmi) {
+jmi_real_t* jmi_get_real_ci(jmi_t* jmi) {
 	return *(jmi->z_val) + jmi->offs_real_ci;
 }
 
-jmi_real_t* jmi_get_cd(jmi_t* jmi) {
+jmi_real_t* jmi_get_real_cd(jmi_t* jmi) {
 	return *(jmi->z_val) + jmi->offs_real_cd;
 }
 
-jmi_real_t* jmi_get_pi(jmi_t* jmi) {
+jmi_real_t* jmi_get_real_pi(jmi_t* jmi) {
 	return *(jmi->z_val) + jmi->offs_real_pi;
 }
 
-jmi_real_t* jmi_get_pd(jmi_t* jmi) {
+jmi_real_t* jmi_get_real_pd(jmi_t* jmi) {
 	return *(jmi->z_val) + jmi->offs_real_pd;
 }
 
-jmi_real_t* jmi_get_dx(jmi_t* jmi) {
+jmi_real_t* jmi_get_integer_ci(jmi_t* jmi) {
+	return *(jmi->z_val) + jmi->offs_integer_ci;
+}
+
+jmi_real_t* jmi_get_integer_cd(jmi_t* jmi) {
+	return *(jmi->z_val) + jmi->offs_integer_cd;
+}
+
+jmi_real_t* jmi_get_integer_pi(jmi_t* jmi) {
+	return *(jmi->z_val) + jmi->offs_integer_pi;
+}
+
+jmi_real_t* jmi_get_integer_pd(jmi_t* jmi) {
+	return *(jmi->z_val) + jmi->offs_integer_pd;
+}
+
+jmi_real_t* jmi_get_boolean_ci(jmi_t* jmi) {
+	return *(jmi->z_val) + jmi->offs_boolean_ci;
+}
+
+jmi_real_t* jmi_get_boolean_cd(jmi_t* jmi) {
+	return *(jmi->z_val) + jmi->offs_boolean_cd;
+}
+
+jmi_real_t* jmi_get_boolean_pi(jmi_t* jmi) {
+	return *(jmi->z_val) + jmi->offs_boolean_pi;
+}
+
+jmi_real_t* jmi_get_boolean_pd(jmi_t* jmi) {
+	return *(jmi->z_val) + jmi->offs_boolean_pd;
+}
+
+jmi_real_t* jmi_get_real_dx(jmi_t* jmi) {
 	return *(jmi->z_val) + jmi->offs_real_dx;
 }
 
-jmi_real_t* jmi_get_x(jmi_t* jmi) {
+jmi_real_t* jmi_get_real_x(jmi_t* jmi) {
 	return *(jmi->z_val) + jmi->offs_real_x;
 }
 
-jmi_real_t* jmi_get_u(jmi_t* jmi) {
+jmi_real_t* jmi_get_real_u(jmi_t* jmi) {
 	return *(jmi->z_val) + jmi->offs_real_u;
 }
 
-jmi_real_t* jmi_get_w(jmi_t* jmi) {
+jmi_real_t* jmi_get_real_w(jmi_t* jmi) {
 	return *(jmi->z_val) + jmi->offs_real_w;
 }
 
@@ -561,20 +645,40 @@ jmi_real_t* jmi_get_t(jmi_t* jmi) {
 	return *(jmi->z_val) + jmi->offs_t;
 }
 
-jmi_real_t* jmi_get_dx_p(jmi_t* jmi, int i) {
+jmi_real_t* jmi_get_real_dx_p(jmi_t* jmi, int i) {
 	return *(jmi->z_val) + jmi->offs_real_dx_p + (jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w)*i;
 }
 
-jmi_real_t* jmi_get_x_p(jmi_t* jmi, int i) {
+jmi_real_t* jmi_get_real_x_p(jmi_t* jmi, int i) {
 	return *(jmi->z_val) + jmi->offs_real_x_p + (jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w)*i;
 }
 
-jmi_real_t* jmi_get_u_p(jmi_t* jmi, int i) {
+jmi_real_t* jmi_get_real_u_p(jmi_t* jmi, int i) {
 	return *(jmi->z_val) + jmi->offs_real_u_p + (jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w)*i;
 }
 
-jmi_real_t* jmi_get_w_p(jmi_t* jmi, int i) {
+jmi_real_t* jmi_get_real_w_p(jmi_t* jmi, int i) {
 	return *(jmi->z_val) + jmi->offs_real_w_p + (jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w)*i;
+}
+
+jmi_real_t* jmi_get_real_d(jmi_t* jmi) {
+	return *(jmi->z_val) + jmi->offs_real_d;
+}
+
+jmi_real_t* jmi_get_integer_d(jmi_t* jmi) {
+	return *(jmi->z_val) + jmi->offs_integer_d;
+}
+
+jmi_real_t* jmi_get_integer_u(jmi_t* jmi) {
+	return *(jmi->z_val) + jmi->offs_integer_u;
+}
+
+jmi_real_t* jmi_get_boolean_d(jmi_t* jmi) {
+	return *(jmi->z_val) + jmi->offs_integer_d;
+}
+
+jmi_real_t* jmi_get_boolean_u(jmi_t* jmi) {
+	return *(jmi->z_val) + jmi->offs_integer_u;
 }
 
 jmi_real_t* jmi_get_sw(jmi_t* jmi) {

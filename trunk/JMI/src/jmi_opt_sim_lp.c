@@ -17,7 +17,6 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
  */
 
-
 #include "jmi_opt_sim.h"
 #include "jmi_opt_sim_lp.h"
 
@@ -323,7 +322,7 @@ static void lp_radau_copy_p(jmi_opt_sim_t *jmi_opt_sim) {
 	jmi_t *jmi = jmi_opt_sim->jmi;
 	int i;
 
-	jmi_real_t *pi = jmi_get_pi(jmi);
+	jmi_real_t *pi = jmi_get_real_pi(jmi);
 
 	for (i=0;i<jmi->opt->n_p_opt;i++) {
 		pi[jmi->opt->p_opt_indices[i]] = jmi_opt_sim->x[i];
@@ -339,22 +338,22 @@ static void lp_radau_copy_v(jmi_opt_sim_t *jmi_opt_sim, int i, int j) {
 	int k;
 	jmi_real_t *v;
 
-	v = jmi_get_dx(jmi);
+	v = jmi_get_real_dx(jmi);
 	for(k=0;k<jmi->n_real_dx;k++) {
 		v[k] = dx_coll(jmi_opt_sim, i, j, k);
 	}
 
-	v = jmi_get_x(jmi);
+	v = jmi_get_real_x(jmi);
 	for(k=0;k<jmi->n_real_x;k++) {
 		v[k] = x_coll(jmi_opt_sim, i, j, k);
 	}
 
-	v = jmi_get_u(jmi);
+	v = jmi_get_real_u(jmi);
 	for(k=0;k<jmi->n_real_u;k++) {
 		v[k] = u_coll(jmi_opt_sim, i, j, k);
 	}
 
-	v = jmi_get_w(jmi);
+	v = jmi_get_real_w(jmi);
 	for(k=0;k<jmi->n_real_w;k++) {
 		v[k] = w_coll(jmi_opt_sim, i, j, k);
 	}
@@ -388,10 +387,10 @@ static void lp_radau_copy_q(jmi_opt_sim_t *jmi_opt_sim) {
 	printf("]\n");
 	 */
 	for(i=0;i<jmi->n_tp;i++) {
-		_dx_p = jmi_get_dx_p(jmi,i);
-		_x_p = jmi_get_x_p(jmi,i);
-		_u_p = jmi_get_u_p(jmi,i);
-		_w_p = jmi_get_w_p(jmi,i);
+		_dx_p = jmi_get_real_dx_p(jmi,i);
+		_x_p = jmi_get_real_x_p(jmi,i);
+		_u_p = jmi_get_real_u_p(jmi,i);
+		_w_p = jmi_get_real_w_p(jmi,i);
 
 		for(j=0;j<jmi->n_real_dx;j++) {
 			_dx_p[j] = dx_p(jmi_opt_sim,i,j);
@@ -425,22 +424,22 @@ static void lp_radau_copy_initial_point(jmi_opt_sim_t *jmi_opt_sim) {
 	int k;
 	jmi_real_t *v;
 
-	v = jmi_get_dx(jmi);
+	v = jmi_get_real_dx(jmi);
 	for(k=0;k<jmi->n_real_dx;k++) {
 		v[k] = dx_0(jmi_opt_sim,k);
 	}
 
-	v = jmi_get_x(jmi);
+	v = jmi_get_real_x(jmi);
 	for(k=0;k<jmi->n_real_x;k++) {
 		v[k] = x_0(jmi_opt_sim,k);
 	}
 
-	v = jmi_get_u(jmi);
+	v = jmi_get_real_u(jmi);
 	for(k=0;k<jmi->n_real_u;k++) {
 		v[k] = u_0(jmi_opt_sim,k);
 	}
 
-	v = jmi_get_w(jmi);
+	v = jmi_get_real_w(jmi);
 	for(k=0;k<jmi->n_real_w;k++) {
 		v[k] = w_0(jmi_opt_sim,k);
 	}
@@ -1528,10 +1527,17 @@ static int lp_set_initial_from_trajectory(
 	int i;
 	int j;
 
-	int n_ci, n_cd, n_pi, n_pd, n_real_dx, n_x, n_real_u, n_real_w, n_tp, n_sw, n_sw_init, n_z;
+	int n_real_ci, n_real_cd, n_real_pi, n_real_pd, n_integer_ci, n_integer_cd, n_integer_pi, n_integer_pd,
+		n_boolean_ci, n_boolean_cd, n_boolean_pi, n_boolean_pd,
+		n_real_dx, n_x, n_real_u, n_real_w, n_tp,
+		n_real_d,n_integer_d,n_integer_u,n_boolean_d,n_boolean_u,n_sw, n_sw_init, n_z;
 
-	jmi_get_sizes(jmi, &n_ci, &n_cd, &n_pi, &n_pd,
-			&n_real_dx, &n_x, &n_real_u, &n_real_w, &n_tp, &n_sw, &n_sw_init, &n_z);
+	jmi_get_sizes(jmi, &n_real_ci, &n_real_cd, &n_real_pi, &n_real_pd,
+			&n_integer_ci, &n_integer_cd, &n_integer_pi, &n_integer_pd,
+			&n_boolean_ci, &n_boolean_cd, &n_boolean_pi, &n_boolean_pd,
+			&n_real_dx, &n_x, &n_real_u, &n_real_w, &n_tp,
+			&n_real_d,&n_integer_d,&n_integer_u,&n_boolean_d,&n_boolean_u,
+			&n_sw, &n_sw_init, &n_z);
 
 	jmi_real_t *tp = (jmi_real_t*)calloc(n_tp,sizeof(jmi_real_t));
 	jmi_get_tp(jmi,tp);

@@ -141,12 +141,12 @@ class NLPCollocation(object):
                                                                              ct.POINTER(ct.c_int),
                                                                              ct.POINTER(ct.c_int),
                                                                              ct.POINTER(ct.c_int)]
-            n_x = ct.c_int()
+            n_real_x = ct.c_int()
             n_g = ct.c_int()
             n_h = ct.c_int()
             dg_n_nz = ct.c_int()
             dh_n_nz = ct.c_int()
-            assert self._model.jmimodel._dll.jmi_opt_sim_get_dimensions(self._jmi_opt_sim, byref(n_x), byref(n_g),
+            assert self._model.jmimodel._dll.jmi_opt_sim_get_dimensions(self._jmi_opt_sim, byref(n_real_x), byref(n_g),
                                            byref(n_h), byref(dg_n_nz), byref(dh_n_nz)) \
             is 0, \
                "getting NLP problem dimensions failed"        
@@ -160,12 +160,12 @@ class NLPCollocation(object):
             self._model.jmimodel._dll.jmi_opt_sim_get_initial.argtypes = [ct.c_void_p,
                                                                           Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                         ndim=1,
-                                                                                        shape=n_x.value,
+                                                                                        shape=n_real_x.value,
                                                                                         flags='C')]
             self._model.jmimodel._dll.jmi_opt_sim_set_initial.argtypes =  [ct.c_void_p,
                                                                            Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                          ndim=1,
-                                                                                         shape=n_x.value,
+                                                                                         shape=n_real_x.value,
                                                                                          flags='C')]
             self._model.jmimodel._dll.jmi_opt_sim_set_initial_from_trajectory.argtypes = [ct.c_void_p,
                                                                                           Nct.ndpointer(dtype=c_jmi_real_t,
@@ -184,27 +184,27 @@ class NLPCollocation(object):
             self._model.jmimodel._dll.jmi_opt_sim_get_bounds.argtypes = [ct.c_void_p,
                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                        ndim=1,
-                                                                                       shape=n_x.value,
+                                                                                       shape=n_real_x.value,
                                                                                        flags='C'),
                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                        ndim=1,
-                                                                                       shape=n_x.value,
+                                                                                       shape=n_real_x.value,
                                                                                        flags='C')]
             self._model.jmimodel._dll.jmi_opt_sim_set_bounds.argtypes = [ct.c_void_p,
                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                        ndim=1,
-                                                                                       shape=n_x.value,
+                                                                                       shape=n_real_x.value,
                                                                                        flags='C'),
                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                        ndim=1,
-                                                                                       shape=n_x.value,
+                                                                                       shape=n_real_x.value,
                                                                                        flags='C')]
             self._model.jmimodel._dll.jmi_opt_sim_f.argtypes = [ct.c_void_p,
                                                                 ct.POINTER(c_jmi_real_t)]
             self._model.jmimodel._dll.jmi_opt_sim_df.argtypes = [ct.c_void_p,
                                                                  Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                ndim=1,
-                                                                               shape=n_x.value,
+                                                                               shape=n_real_x.value,
                                                                                flags='C')]
             self._model.jmimodel._dll.jmi_opt_sim_g.argtypes = [ct.c_void_p,
                                                                 Nct.ndpointer(dtype=c_jmi_real_t,
@@ -253,10 +253,10 @@ class NLPCollocation(object):
             is 0, \
                "getting number of points in the independent time vector failed"
 
-            res_dx = timepoints.value*self._model._n_dx.value
-            res_x = timepoints.value*self._model._n_x.value
-            res_u = timepoints.value*self._model._n_u.value
-            res_w = timepoints.value*self._model._n_w.value
+            res_dx = timepoints.value*self._model._n_real_dx.value
+            res_x = timepoints.value*self._model._n_real_x.value
+            res_u = timepoints.value*self._model._n_real_u.value
+            res_w = timepoints.value*self._model._n_real_w.value
             self._model.jmimodel._dll.jmi_opt_sim_get_result.argtypes = [ct.c_void_p,
                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                        ndim=1,
@@ -282,8 +282,8 @@ class NLPCollocation(object):
                                                                                        ndim=1,
                                                                                        shape=res_w,
                                                                                        flags='C')]
-            # n_x from jmi_opt_sim_get_dimensions
-            jmi._returns_ndarray(self._model.jmimodel._dll.jmi_opt_sim_get_x, c_jmi_real_t, n_x.value, order='C')
+            # n_real_x from jmi_opt_sim_get_dimensions
+            jmi._returns_ndarray(self._model.jmimodel._dll.jmi_opt_sim_get_x, c_jmi_real_t, n_real_x.value, order='C')
         except AttributeError, e:
             pass
        
@@ -305,33 +305,33 @@ class NLPCollocation(object):
         n_points = self.opt_sim_get_result_variable_vector_length()
 
         sizes = self._model.get_sizes()
-        n_dx = sizes[4]
-        n_x = sizes[5]
-        n_u = sizes[6]
-        n_w = sizes[7]
+        n_real_dx = sizes[12]
+        n_real_x = sizes[13]
+        n_real_u = sizes[14]
+        n_real_w = sizes[15]
         n_popt = self._model.jmimodel.opt_get_n_p_opt()
         
         # Create result data vectors
         p_opt = N.zeros(n_popt)
         t_ = N.zeros(n_points)
-        dx_ = N.zeros(n_dx*n_points)
-        x_ = N.zeros(n_x*n_points)
-        u_ = N.zeros(n_u*n_points)
-        w_ = N.zeros(n_w*n_points)
+        dx_ = N.zeros(n_real_dx*n_points)
+        x_ = N.zeros(n_real_x*n_points)
+        u_ = N.zeros(n_real_u*n_points)
+        w_ = N.zeros(n_real_w*n_points)
         
         # Get the result
         self.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
         
-        data = N.zeros((n_points,1+n_dx+n_x+n_u+n_w))
+        data = N.zeros((n_points,1+n_real_dx+n_real_x+n_real_u+n_real_w))
         data[:,0] = t_
-        for i in range(n_dx):
+        for i in range(n_real_dx):
             data[:,i+1] = dx_[i*n_points:(i+1)*n_points]
-        for i in range(n_x):
-            data[:,n_dx+i+1] = x_[i*n_points:(i+1)*n_points]
-        for i in range(n_u):
-            data[:,n_dx+n_x+i+1] = u_[i*n_points:(i+1)*n_points]
-        for i in range(n_w):
-            data[:,n_dx+n_x+n_u+i+1] = w_[i*n_points:(i+1)*n_points]
+        for i in range(n_real_x):
+            data[:,n_real_dx+i+1] = x_[i*n_points:(i+1)*n_points]
+        for i in range(n_real_u):
+            data[:,n_real_dx+n_real_x+i+1] = u_[i*n_points:(i+1)*n_points]
+        for i in range(n_real_w):
+            data[:,n_real_dx+n_real_x+n_real_u+i+1] = w_[i*n_points:(i+1)*n_points]
 
         return p_opt, data
     
@@ -498,12 +498,12 @@ class NLPCollocation(object):
                 try:
                     ref = self._model.get_valueref(name)
                     (z_i, ptype) = jmi._translate_value_ref(ref)
-                    i_pi = z_i - self._model._offs_pi.value
+                    i_pi = z_i - self._model._offs_real_pi.value
                     i_pi_opt = p_opt_indices.index(i_pi)
                     traj = res.get_variable_data(name)
                     p_opt_data[i_pi_opt] = traj.x[0]
                 except:
-                    print "Warning: Could not find value for parameter" + p_opt_names.get(ref)
+                    print "Warning: Could not find value for parameter " + name
                     
         #print(N.size(var_data))
 
@@ -574,15 +574,15 @@ class NLPCollocation(object):
             equality constraints respectively. 
             
         """
-        n_x = ct.c_int()
+        n_real_x = ct.c_int()
         n_g = ct.c_int()
         n_h = ct.c_int()
         dg_n_nz = ct.c_int()
         dh_n_nz = ct.c_int()
-        if self._model.jmimodel._dll.jmi_opt_sim_get_dimensions(self._jmi_opt_sim, byref(n_x), byref(n_g), 
+        if self._model.jmimodel._dll.jmi_opt_sim_get_dimensions(self._jmi_opt_sim, byref(n_real_x), byref(n_g), 
                                                         byref(n_h), byref(dg_n_nz), byref(dh_n_nz)) is not 0:
             raise jmi.JMIException("Getting the number of variables and constraints failed.")
-        return n_x.value, n_g.value, n_h.value, dg_n_nz.value, dh_n_nz.value
+        return n_real_x.value, n_g.value, n_h.value, dg_n_nz.value, dh_n_nz.value
 
     def opt_sim_get_interval_spec(self, start_time, start_time_free, final_time, final_time_free):
         """ 
@@ -653,8 +653,8 @@ class NLPCollocation(object):
             Initial guess of interval final time. This argument is neglected if
             the final time is fixed.
         """
-        # check sum (n_x, n_dx, n_u, n_w +1 (time)) mult with traj_n_points = size trajectory_data_init
-        sum = self._model._n_x.value + self._model._n_dx.value + self._model._n_u.value + self._model._n_w.value + 1
+        # check sum (n_real_x, n_real_dx, n_real_u, n_real_w +1 (time)) mult with traj_n_points = size trajectory_data_init
+        sum = self._model._n_real_x.value + self._model._n_real_dx.value + self._model._n_real_u.value + self._model._n_real_w.value + 1
         if sum*traj_n_points != len(trajectory_data_init):
             raise jmi.JMIException("trajectory_data_init vector has the wrong size.")        
         if self._model.jmimodel._dll.jmi_opt_sim_set_initial_from_trajectory(self._jmi_opt_sim, \
@@ -883,26 +883,26 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         
         # Initialization
         _p_opt_init = N.zeros(self.n_p_opt)
-        _dx_init = N.zeros(model._n_dx.value)
-        _x_init = N.zeros(model._n_x.value)
-        _u_init = N.zeros(model._n_u.value)
-        _w_init = N.zeros(model._n_w.value)
+        _dx_init = N.zeros(model._n_real_dx.value)
+        _x_init = N.zeros(model._n_real_x.value)
+        _u_init = N.zeros(model._n_real_u.value)
+        _w_init = N.zeros(model._n_real_w.value)
     
         # Bounds
         _p_opt_lb = -1.0e20*N.ones(self.n_p_opt)
-        _dx_lb = -1.0e20*N.ones(model._n_dx.value)
-        _x_lb = -1.0e20*N.ones(model._n_x.value)
-        _u_lb = -1.0e20*N.ones(model._n_u.value)
-        _w_lb = -1.0e20*N.ones(model._n_w.value)
+        _dx_lb = -1.0e20*N.ones(model._n_real_dx.value)
+        _x_lb = -1.0e20*N.ones(model._n_real_x.value)
+        _u_lb = -1.0e20*N.ones(model._n_real_u.value)
+        _w_lb = -1.0e20*N.ones(model._n_real_w.value)
         _t0_lb = 0.; # not yet supported
         _tf_lb = 0.; # not yet supported
         _hs_lb = N.zeros(n_e); # not yet supported
         
         _p_opt_ub = 1.0e20*N.ones(self.n_p_opt)
-        _dx_ub = 1.0e20*N.ones(model._n_dx.value)
-        _x_ub = 1.0e20*N.ones(model._n_x.value)
-        _u_ub = 1.0e20*N.ones(model._n_u.value)
-        _w_ub = 1.0e20*N.ones(model._n_w.value)
+        _dx_ub = 1.0e20*N.ones(model._n_real_dx.value)
+        _x_ub = 1.0e20*N.ones(model._n_real_x.value)
+        _u_ub = 1.0e20*N.ones(model._n_real_u.value)
+        _w_ub = 1.0e20*N.ones(model._n_real_w.value)
         _t0_ub = 0.; # not yet supported
         _tf_ub = 0.; # not yet supported
         _hs_ub = N.zeros(n_e); # not yet supported
@@ -916,14 +916,14 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 
         _linearity_information_provided = 1;
         _p_opt_lin = N.ones(self.n_p_opt,dtype=int)
-        _dx_lin = N.ones(model._n_dx.value,dtype=int)
-        _x_lin = N.ones(model._n_x.value,dtype=int)
-        _u_lin = N.ones(model._n_u.value,dtype=int)        
-        _w_lin = N.ones(model._n_w.value,dtype=int)
-        _dx_tp_lin = N.ones(model._n_dx.value*model._n_tp.value,dtype=int)
-        _x_tp_lin = N.ones(model._n_x.value*model._n_tp.value,dtype=int)
-        _u_tp_lin = N.ones(model._n_u.value*model._n_tp.value,dtype=int)        
-        _w_tp_lin = N.ones(model._n_w.value*model._n_tp.value,dtype=int)
+        _dx_lin = N.ones(model._n_real_dx.value,dtype=int)
+        _x_lin = N.ones(model._n_real_x.value,dtype=int)
+        _u_lin = N.ones(model._n_real_u.value,dtype=int)        
+        _w_lin = N.ones(model._n_real_w.value,dtype=int)
+        _dx_tp_lin = N.ones(model._n_real_dx.value*model._n_tp.value,dtype=int)
+        _x_tp_lin = N.ones(model._n_real_x.value*model._n_tp.value,dtype=int)
+        _u_tp_lin = N.ones(model._n_real_u.value*model._n_tp.value,dtype=int)        
+        _w_tp_lin = N.ones(model._n_real_w.value*model._n_tp.value,dtype=int)
 
         self._model._set_lin_values(_p_opt_lin, _dx_lin, _x_lin, _u_lin, _w_lin, _dx_tp_lin, _x_tp_lin, _u_tp_lin, _w_tp_lin)
 
@@ -975,19 +975,19 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
                                                                                    flags='C'),
                                                                      Nct.ndpointer(dtype=c_jmi_real_t,              # dx_init             
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_dx.value,   
+                                                                                   shape=self._model._n_real_dx.value,   
                                                                                    flags='C'),
                                                                      Nct.ndpointer(dtype=c_jmi_real_t,              # x_init
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_x.value,
+                                                                                   shape=self._model._n_real_x.value,
                                                                                    flags='C'),
                                                                      Nct.ndpointer(dtype=c_jmi_real_t,              # u_init              
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_u.value,
+                                                                                   shape=self._model._n_real_u.value,
                                                                                    flags='C'),
                                                                      Nct.ndpointer(dtype=c_jmi_real_t,              # w_init
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_w.value,
+                                                                                   shape=self._model._n_real_w.value,
                                                                                    flags='C'),
                                                                      Nct.ndpointer(dtype=c_jmi_real_t,              # p_opt_lb
                                                                                    ndim=1,
@@ -995,19 +995,19 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
                                                                                    flags='C'),
                                                                      Nct.ndpointer(dtype=c_jmi_real_t,              # dx_lb
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_dx.value,
+                                                                                   shape=self._model._n_real_dx.value,
                                                                                    flags='C'),
                                                                      Nct.ndpointer(dtype=c_jmi_real_t,              # x_lb
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_x.value,
+                                                                                   shape=self._model._n_real_x.value,
                                                                                    flags='C'),
                                                                      Nct.ndpointer(dtype=c_jmi_real_t,              # u_lb
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_u.value,
+                                                                                   shape=self._model._n_real_u.value,
                                                                                    flags='C'),
                                                                      Nct.ndpointer(dtype=c_jmi_real_t,              # w_lb
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_w.value,
+                                                                                   shape=self._model._n_real_w.value,
                                                                                    flags='C'),
                                                                      c_jmi_real_t,                                  # t0_lb
                                                                      c_jmi_real_t,                                  # tf_lb
@@ -1020,19 +1020,19 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
                                                                                    flags='C'),
                                                                      Nct.ndpointer(dtype=c_jmi_real_t,              # dx_ub
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_dx.value,
+                                                                                   shape=self._model._n_real_dx.value,
                                                                                    flags='C'),
                                                                      Nct.ndpointer(dtype=c_jmi_real_t,              # x_ub
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_x.value,
+                                                                                   shape=self._model._n_real_x.value,
                                                                                    flags='C'),
                                                                      Nct.ndpointer(dtype=c_jmi_real_t,              # u_ub
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_u.value,
+                                                                                   shape=self._model._n_real_u.value,
                                                                                    flags='C'),
                                                                      Nct.ndpointer(dtype=c_jmi_real_t,              # w_ub
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_w.value,
+                                                                                   shape=self._model._n_real_w.value,
                                                                                    flags='C'),
                                                                      c_jmi_real_t,                                  # t0_ub
                                                                      c_jmi_real_t,                                  # tf_ub
@@ -1046,35 +1046,35 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
                                                                                    flags='C'),                                           
                                                                      Nct.ndpointer(dtype=ct.c_int,                  # dx_lin
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_dx.value,
+                                                                                   shape=self._model._n_real_dx.value,
                                                                                    flags='C'),                                           
                                                                      Nct.ndpointer(dtype=ct.c_int,                  # x_lin
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_x.value,
+                                                                                   shape=self._model._n_real_x.value,
                                                                                    flags='C'),                                           
                                                                      Nct.ndpointer(dtype=ct.c_int,                  # u_lin
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_u.value,
+                                                                                   shape=self._model._n_real_u.value,
                                                                                    flags='C'),                                           
                                                                      Nct.ndpointer(dtype=ct.c_int,                  # w_lin
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_w.value,
+                                                                                   shape=self._model._n_real_w.value,
                                                                                    flags='C'),                                           
                                                                      Nct.ndpointer(dtype=ct.c_int,                  # dx_tp_lin
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_dx.value*self._model._n_tp.value,
+                                                                                   shape=self._model._n_real_dx.value*self._model._n_tp.value,
                                                                                    flags='C'),                                           
                                                                      Nct.ndpointer(dtype=ct.c_int,                  # x_tp_lin
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_x.value*self._model._n_tp.value,
+                                                                                   shape=self._model._n_real_x.value*self._model._n_tp.value,
                                                                                    flags='C'),                                           
                                                                      Nct.ndpointer(dtype=ct.c_int,                  # u_tp_lin
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_u.value*self._model._n_tp.value,
+                                                                                   shape=self._model._n_real_u.value*self._model._n_tp.value,
                                                                                    flags='C'),                                           
                                                                      Nct.ndpointer(dtype=ct.c_int,                  # w_tp_lin
                                                                                    ndim=1,
-                                                                                   shape=self._model._n_w.value*self._model._n_tp.value,
+                                                                                   shape=self._model._n_real_w.value*self._model._n_tp.value,
                                                                                    flags='C'),                                           
                                                                      ct.c_int,                                      # n_cp
                                                                      ct.c_int,                                      # der_eval_alg
@@ -1231,7 +1231,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #            
 #            for ref in refs:
 #                (z_i, ptype) = jmi._translate_value_ref(ref)
-#                i_pi = z_i - self._model._offs_pi.value
+#                i_pi = z_i - self._model._offs_real_pi.value
 #                i_pi_opt = p_opt_indices.index(i_pi)
 #                p_opt_init[i_pi_opt] = values.get(ref)
 #        
@@ -1243,7 +1243,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #        
 #        for ref in refs:
 #            (z_i, ptype) = jmi._translate_value_ref(ref)
-#            i_dx = z_i - self._model._offs_dx.value
+#            i_dx = z_i - self._model._offs_real_dx.value
 #            dx_init[i_dx] = values.get(ref)
 #        
 #        # x: differentiate
@@ -1254,7 +1254,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #        
 #        for ref in refs:
 #            (z_i, ptype) = jmi._translate_value_ref(ref)
-#            i_x = z_i - self._model._offs_x.value
+#            i_x = z_i - self._model._offs_real_x.value
 #            x_init[i_x] = values.get(ref)
 #            
 #        # u: input
@@ -1265,7 +1265,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #        
 #        for ref in refs:
 #            (z_i, ptype) = jmi._translate_value_ref(ref)
-#            i_u = z_i - self._model._offs_u.value
+#            i_u = z_i - self._model._offs_real_u.value
 #            u_init[i_u] = values.get(ref)
 #        
 #        # w: algebraic
@@ -1276,7 +1276,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #        
 #        for ref in refs:
 #            (z_i, ptype) = jmi._translate_value_ref(ref)
-#            i_w = z_i - self._model._offs_w.value
+#            i_w = z_i - self._model._offs_real_w.value
 #            w_init[i_w] = values.get(ref) 
 
 #    def _set_lb_values(self, p_opt_lb, dx_lb, x_lb, u_lb, w_lb):
@@ -1310,7 +1310,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #            
 #            for ref in refs:
 #                (z_i, ptype) = jmi._translate_value_ref(ref)
-#                i_pi = z_i - self._model._offs_pi.value
+#                i_pi = z_i - self._model._offs_real_pi.value
 #                i_pi_opt = p_opt_indices.index(i_pi)
 #                p_opt_lb[i_pi_opt] = values.get(ref)
 #
@@ -1322,7 +1322,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #        
 #        for ref in refs:
 #            (z_i, ptype) = jmi._translate_value_ref(ref)
-#            i_dx = z_i - self._model._offs_dx.value
+#            i_dx = z_i - self._model._offs_real_dx.value
 #            dx_lb[i_dx] = values.get(ref) 
 #        
 #        # x: differentiate
@@ -1333,7 +1333,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #        
 #        for ref in refs:
 #            (z_i, ptype) = jmi._translate_value_ref(ref)
-#            i_x = z_i - self._model._offs_x.value
+#            i_x = z_i - self._model._offs_real_x.value
 #            x_lb[i_x] = values.get(ref)
 #            
 #        # u: input
@@ -1344,7 +1344,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #        
 #        for ref in refs:
 #            (z_i, ptype) = jmi._translate_value_ref(ref)
-#            i_u = z_i - self._model._offs_u.value
+#            i_u = z_i - self._model._offs_real_u.value
 #            u_lb[i_u] = values.get(ref)
 #        
 #        # w: algebraic
@@ -1355,7 +1355,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #
 #        for ref in refs:
 #            (z_i, ptype) = jmi._translate_value_ref(ref)
-#            i_w = z_i - self._model._offs_w.value
+#            i_w = z_i - self._model._offs_real_w.value
 #            #print("%d, %d" %(z_i,i_w))
 #            w_lb[i_w] = values.get(ref) 
 #
@@ -1390,7 +1390,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #            
 #            for ref in refs:
 #                (z_i, ptype) = jmi._translate_value_ref(ref)
-#                i_pi = z_i - self._model._offs_pi.value
+#                i_pi = z_i - self._model._offs_real_pi.value
 #                i_pi_opt = p_opt_indices.index(i_pi)
 #                p_opt_ub[i_pi_opt] = values.get(ref)
 #
@@ -1403,7 +1403,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #        
 #        for ref in refs:
 #            (z_i, ptype) = jmi._translate_value_ref(ref)
-#            i_dx = z_i - self._model._offs_dx.value
+#            i_dx = z_i - self._model._offs_real_dx.value
 #            dx_ub[i_dx] = values.get(ref) 
 #        
 #        # x: differentiate
@@ -1414,7 +1414,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #        
 #        for ref in refs:
 #            (z_i, ptype) = jmi._translate_value_ref(ref)
-#            i_x = z_i - self._model._offs_x.value
+#            i_x = z_i - self._model._offs_real_x.value
 #            x_ub[i_x] = values.get(ref)
 #            
 #        # u: input
@@ -1425,7 +1425,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #        
 #        for ref in refs:
 #            (z_i, ptype) = jmi._translate_value_ref(ref)
-#            i_u = z_i - self._model._offs_u.value
+#            i_u = z_i - self._model._offs_real_u.value
 #            u_ub[i_u] = values.get(ref)
 #        
 #        # w: algebraic
@@ -1436,7 +1436,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #        
 #        for ref in refs:
 #            (z_i, ptype) = jmi._translate_value_ref(ref)
-#            i_w = z_i - self._model._offs_w.value
+#            i_w = z_i - self._model._offs_real_w.value
 #            w_ub[i_w] = values.get(ref) 
 #
 #    def _set_lin_values(self, p_opt_lin, dx_lin, x_lin, u_lin, w_lin, dx_tp_lin, x_tp_lin, u_tp_lin, w_tp_lin):
@@ -1485,7 +1485,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #
 #            for ref in refs:
 #                (z_i, ptype) = jmi._translate_value_ref(ref)
-#                i_pi = z_i - self._model._offs_pi.value
+#                i_pi = z_i - self._model._offs_real_pi.value
 #                i_pi_opt = p_opt_indices.index(i_pi)
 #                p_opt_lin[i_pi_opt] = int(values.get(ref))
 #
@@ -1497,7 +1497,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #        
 #        for ref in refs:
 #            (z_i, ptype) = jmi._translate_value_ref(ref)
-#            i_dx = z_i - self._model._offs_dx.value
+#            i_dx = z_i - self._model._offs_real_dx.value
 #            dx_lin[i_dx] = int(values.get(ref))
 #        
 #        # x: differentiate
@@ -1508,7 +1508,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #        
 #        for ref in refs:
 #            (z_i, ptype) = jmi._translate_value_ref(ref)
-#            i_x = z_i - self._model._offs_x.value
+#            i_x = z_i - self._model._offs_real_x.value
 #            x_lin[i_x] = int(values.get(ref))
 #            
 #        # u: input
@@ -1519,7 +1519,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #        
 #        for ref in refs:
 #            (z_i, ptype) = jmi._translate_value_ref(ref)
-#            i_u = z_i - self._model._offs_u.value
+#            i_u = z_i - self._model._offs_real_u.value
 #            u_lin[i_u] = int(values.get(ref))
 #        
 #        # w: algebraic
@@ -1530,7 +1530,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #        
 #        for ref in refs:
 #            (z_i, ptype) = jmi._translate_value_ref(ref)
-#            i_w = z_i - self._model._offs_w.value
+#            i_w = z_i - self._model._offs_real_w.value
 #            w_lin[i_w] = int(values.get(ref))
 #
 #
@@ -1546,7 +1546,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #        for no_tp in range(no_of_tp):
 #            for ref in refs:
 #                (z_i, ptype) = jmi._translate_value_ref(ref)
-#                i_dx = z_i - self._model._offs_dx.value
+#                i_dx = z_i - self._model._offs_real_dx.value
 #                dx_tp_lin[i_dx+no_tp*len(refs)] = int(values.get(ref)[no_tp])
 #        
 #        # timepoints x: differentiate
@@ -1558,7 +1558,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #        for no_tp in range(no_of_tp):
 #            for ref in refs:
 #                (z_i, ptype) = jmi._translate_value_ref(ref)
-#                i_x = z_i - self._model._offs_x.value
+#                i_x = z_i - self._model._offs_real_x.value
 #                
 #                x_tp_lin[i_x+no_tp*len(refs)] = int(values.get(ref)[no_tp])
 #            
@@ -1571,7 +1571,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #        for no_tp in range(no_of_tp):
 #            for ref in refs:
 #                (z_i, ptype) = jmi._translate_value_ref(ref)
-#                i_u = z_i - self._model._offs_u.value
+#                i_u = z_i - self._model._offs_real_u.value
 #                
 #                u_tp_lin[i_u+no_tp*len(refs)] = int(values.get(ref)[no_tp])
 #        
@@ -1584,5 +1584,5 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 #        for no_tp in range(no_of_tp):
 #            for ref in refs:
 #                (z_i, ptype) = jmi._translate_value_ref(ref)
-#                i_w = z_i - self._model._offs_w.value
+#                i_w = z_i - self._model._offs_real_w.value
 #                w_tp_lin[i_w+no_tp*len(refs)] = int(values.get(ref)[no_tp])                

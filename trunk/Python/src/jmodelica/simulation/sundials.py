@@ -74,18 +74,18 @@ class _SensivityIndices(object):
     
     def __init__(self, model):
         self.pi_start    = 0
-        self.pi_end      = len(model.pi)
+        self.pi_end      = len(model.real_pi)
         self.xinit_start = self.pi_end
-        self.xinit_end   = self.xinit_start + len(model.x)
+        self.xinit_end   = self.xinit_start + len(model.real_x)
         self.u_start     = self.xinit_end
-        self.u_end       = self.u_start + len(model.u)
+        self.u_end       = self.u_start + len(model.real_u)
         
-        pi_ctype = cvodes.realtype * (len(model.pi) + len(model.x) \
-                                                            + len(model.u))
+        pi_ctype = cvodes.realtype * (len(model.real_pi) + len(model.real_x) \
+                                                            + len(model.real_u))
         self.params    = pi_ctype()
-        self.params[:] = N.concatenate((model.pi,
-                                        model.x[:len(model.x)],
-                                        model.u,))
+        self.params[:] = N.concatenate((model.real_pi,
+                                        model.real_x[:len(model.real_x)],
+                                        model.real_u,))
 
 
 class SundialsODESimulator(ODESimulator):
@@ -204,13 +204,13 @@ class SundialsODESimulator(ODESimulator):
                 p = data.parameters
                 sundials_params = p.params
                 
-                model.pi = sundials_params[p.pi_start : p.pi_end]
-                model.u = sundials_params[p.u_start : p.u_end]
+                model.real_pi = sundials_params[p.pi_start : p.pi_end]
+                model.real_u = sundials_params[p.u_start : p.u_end]
                 
             # Copying from sundials space to model space and back again
-            model.x = x
+            model.real_x = x
             model.eval_ode_f()
-            dx[:] = model.dx
+            dx[:] = model.real_dx
             
             return 0
         
@@ -235,8 +235,8 @@ class SundialsODESimulator(ODESimulator):
             print "Running simulation with interval (%s, %s)." \
                     % (start_time, end_time)
         if verbose >= self.NORMAL:
-            print "Input before integration:", model.u
-            print "States:", model.x
+            print "Input before integration:", model.real_u
+            print "States:", model.real_x
             print start_time, "to", end_time
 
         class UserData:
@@ -264,7 +264,7 @@ class SundialsODESimulator(ODESimulator):
             ]
         
         # initial y (copying just in case)
-        y = cvodes.NVector(model.x.copy())
+        y = cvodes.NVector(model.real_x.copy())
 
         # converting tolerances to C types
         abstol = cvodes.realtype(self.abstol)
@@ -276,7 +276,7 @@ class SundialsODESimulator(ODESimulator):
         cvodes.CVodeMalloc(cvode_mem, self._sundials_f, t0, y, cvodes.CV_SS, reltol, 
                            abstol)
 
-        cvodes.CVDense(cvode_mem, len(model.x))
+        cvodes.CVDense(cvode_mem, len(model.real_x))
 
         # Set f_data
         data = UserData()
@@ -295,12 +295,12 @@ class SundialsODESimulator(ODESimulator):
         self._data = data
         
         if sensi:
-            NP = len(model.pi) # number of model parameters
-            NU = len(model.u) # number of control signals/inputs
-            NI = len(model.x) # number of initial states from
+            NP = len(model.real_pi) # number of model parameters
+            NU = len(model.real_u) # number of control signals/inputs
+            NI = len(model.real_x) # number of initial states from
                                       # which sensitivity is calculated
             NS      = NP + NI + NU # number of sensitivities to be calculated
-            NEQ     = len(model.x)
+            NEQ     = len(model.real_x)
             assert NEQ == NI, "yS must be modified below to handle the" \
                               " inequality NEQ != NI"
             err_con = False # Use sensisitity for error control
@@ -312,7 +312,7 @@ class SundialsODESimulator(ODESimulator):
             cvodes.CVodeSetSensErrCon(cvode_mem, err_con)
             cvodes.CVodeSetSensDQMethod(cvode_mem, cvodes.CV_CENTERED, 0)
             
-            model_parameters = model.pi
+            model_parameters = model.real_pi
             cvodes.CVodeSetSensParams(cvode_mem, data.parameters.params, None,
                                       None)
         
@@ -327,9 +327,9 @@ class SundialsODESimulator(ODESimulator):
         if return_last==False:
             num_samples = int(math.ceil((end_time - start_time) / time_step)) + 1
             T = N.zeros(num_samples, dtype=pyjmi.c_jmi_real_t)
-            ylist = N.zeros((num_samples, len(model.x)),
+            ylist = N.zeros((num_samples, len(model.real_x)),
                             dtype=pyjmi.c_jmi_real_t)
-            ylist[0] = model.x.copy()
+            ylist[0] = model.real_x.copy()
             T[0] = t0.value
             i = 1
         
@@ -432,8 +432,8 @@ class SundialsDAESimulator(DAESimulator):
         reltol = ida.realtype(self.reltol)
         
         # initial y,ydot (copying just in case)
-        y = ida.NVector(N.append(self.model.x,self.model.w))
-        ydot = ida.NVector(N.append(self.model.dx,[0]*len(self.model.w)))
+        y = ida.NVector(N.append(self.model.real_x,self.model.real_w))
+        ydot = ida.NVector(N.append(self.model.real_dx,[0]*len(self.model.real_w)))
         
         
         t0 = ida.realtype(start_time)
@@ -442,7 +442,7 @@ class SundialsDAESimulator(DAESimulator):
             self.solver_memory = ida.IDACreate()
         
             ida.IDAMalloc(self.solver_memory, self._sundials_res_f, t0, y, ydot, ida.IDA_SS, reltol, abstol)
-            ida.IDADense(self.solver_memory, len(self.model.x)+len(self.model.w))
+            ida.IDADense(self.solver_memory, len(self.model.real_x)+len(self.model.real_w))
             
         else:
 
@@ -471,13 +471,13 @@ class SundialsDAESimulator(DAESimulator):
             model = self.model
             model.t = t #(t - data.t_sim_start) / data.t_sim_duration
             
-            model.x = z[0:len(model.x)]
-            model.w = z[len(model.x):len(z)]
+            model.real_x = z[0:len(model.real_x)]
+            model.real_w = z[len(model.real_x):len(z)]
             
-            model.dx = dz[0:len(model.dx)]
+            model.real_dx = dz[0:len(model.real_dx)]
 
             if self._input!=None:
-                model.u = self._input.eval(t)[0,:]
+                model.real_u = self._input.eval(t)[0,:]
 
             #Evaluating the residual function
             temp = N.array(res_vector)
@@ -510,10 +510,10 @@ class SundialsDAESimulator(DAESimulator):
             print "Running simulation with interval (%s, %s) and time step %s" \
                     % (start_time, final_time, time_step)
         if verbose >= self.NORMAL:
-            print "Input before integration:", model.u
-            print "States dx:", model.dx
-            print "States x:", model.x
-            print "States w:", model.w
+            print "Input before integration:", model.real_u
+            print "States dx:", model.real_dx
+            print "States x:", model.real_x
+            print "States w:", model.real_w
             
         #Initiate the solver or reinitiate
         [y , ydot] = self.init_solver(start_time)
@@ -529,22 +529,22 @@ class SundialsDAESimulator(DAESimulator):
         if return_last==False:
             num_samples = int(math.ceil((final_time - start_time) / time_step)) + 1
             T = N.zeros(num_samples, dtype=pyjmi.c_jmi_real_t)
-            ylist = N.zeros((num_samples, len(model.dx)+len(model.x)+len(model.u)+len(model.w)),
+            ylist = N.zeros((num_samples, len(model.real_dx)+len(model.real_x)+len(model.real_u)+len(model.real_w)),
                             dtype=pyjmi.c_jmi_real_t)
             temp = N.array([])
-            for j in [model.dx.copy(), model.x.copy(), model.u.copy(), model.w.copy()]:
+            for j in [model.real_dx.copy(), model.real_x.copy(), model.real_u.copy(), model.real_w.copy()]:
                 if len(j) > 0:
                     temp = N.append(temp, j)
-            assert len(model.dx)+len(model.x)+len(model.u)+len(model.w) == len(temp)
+            assert len(model.real_dx)+len(model.real_x)+len(model.real_u)+len(model.real_w) == len(temp)
             ylist[0] = temp
             T[0] = start_time
             i = 1
         else:
-            ylist = N.zeros((1, len(model.dx)+len(model.x)+len(model.u)+len(model.w)),
+            ylist = N.zeros((1, len(model.real_dx)+len(model.real_x)+len(model.real_u)+len(model.real_w)),
                             dtype=pyjmi.c_jmi_real_t)
             
 
-        #ida.IDASetId(self.solver_memory,ida.NVector(N.append([1.0]*len(model.x),[0.0]*len(model.w))))
+        #ida.IDASetId(self.solver_memory,ida.NVector(N.append([1.0]*len(model.real_x),[0.0]*len(model.real_w))))
         #ida.IDASetSuppressAlg(ida_mem,suppress)
         #ida.IDACalcIC(self.solver_memory,ida.IDA_YA_YDP_INIT,ida.realtype(t.value+0.0001))
             
@@ -559,11 +559,11 @@ class SundialsDAESimulator(DAESimulator):
             """Used for return."""
             if return_last==False:
                 T[i] = t.value
-                u_tmp = model.u.copy()
+                u_tmp = model.real_u.copy()
                 if self._input!=None:
                     u_tmp = self._input.eval(t.value)[0,:]
                 temp = N.array([])
-                for j in [ydot[:len(model.dx)],y[:len(model.x)],u_tmp,y[len(model.x):len(y)]]:
+                for j in [ydot[:len(model.real_dx)],y[:len(model.real_x)],u_tmp,y[len(model.real_x):len(y)]]:
                     if len(j) > 0:
                         temp = N.append(temp,j)
                 ylist[i] = temp
@@ -589,15 +589,15 @@ class SundialsDAESimulator(DAESimulator):
             self.print_statistics()
         
         #Set the models values to the last of sundials calculated
-        model.dx = ydot[:len(model.dx)]
-        model.x = y[:len(model.x)]
-        model.w = y[len(model.x):len(y)]
+        model.real_dx = ydot[:len(model.real_dx)]
+        model.real_x = y[:len(model.real_x)]
+        model.real_w = y[len(model.real_x):len(y)]
         model.t = t.value
             
         
         if return_last:
             temp = N.array([])
-            for j in [ydot[:len(model.dx)],y[:len(model.x)],model.u.copy(),y[len(model.x):len(y)]]:
+            for j in [ydot[:len(model.real_dx)],y[:len(model.real_x)],model.real_u.copy(),y[len(model.real_x):len(y)]]:
                 if len(j) > 0:
                     temp = N.append(temp, j)
             ylist[0] = temp

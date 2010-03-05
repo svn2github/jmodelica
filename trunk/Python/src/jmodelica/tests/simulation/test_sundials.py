@@ -261,7 +261,7 @@ class TestSundialsDAESimulator:
         """Run a very basic DAE simulation."""
         
         simulator = self.simulator
-        x_before_simulation = simulator.get_model().x.copy()
+        x_before_simulation = simulator.get_model().real_x.copy()
         simulator.run()
         simulator.run(10.0,20.0)
         Ts, ys = simulator.get_solution()
@@ -270,7 +270,7 @@ class TestSundialsDAESimulator:
         assert len(Ts) == len(ys), "Time points and solution points must be " \
                                    "equal lengths."
         assert len(Ts) >= 5, "A solution was expected got less than 5 points."
-        assert not (x_before_simulation==simulator.get_model().x).all(), \
+        assert not (x_before_simulation==simulator.get_model().real_x).all(), \
                "Simulation does seem to have been performed."
         
         # Plotting
@@ -394,7 +394,7 @@ class TestSundialsODESimulator:
         """Run a very basic simulation."""
         
         simulator = self.simulator
-        x_before_simulation = simulator.get_model().x.copy()
+        x_before_simulation = simulator.get_model().real_x.copy()
         simulator.run()
         Ts, ys = simulator.get_solution()
         simulator.write_data()
@@ -402,7 +402,7 @@ class TestSundialsODESimulator:
         assert len(Ts) == len(ys), "Time points and solution points must be " \
                                    "equal lengths."
         assert len(Ts) >= 5, "A solution was expected got less than 5 points."
-        assert not (x_before_simulation==simulator.get_model().x).all(), \
+        assert not (x_before_simulation==simulator.get_model().real_x).all(), \
                "Simulation does seem to have been performed."
         
         # Plotting
@@ -550,8 +550,8 @@ class TestSundialsODESimulator:
         assert len(T) > 1
         
         self.m.reset()
-        self.m.u = [0.25 + SMALL]
-        self.m.x = self.m.x + SMALL
+        self.m.real_u = [0.25 + SMALL]
+        self.m.real_x = self.m.real_x + SMALL
         simulator.set_sensitivity_analysis(True)
         simulator.run()
         T2, ys2 = simulator.get_solution()

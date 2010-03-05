@@ -111,21 +111,29 @@
  *   types:
  *
  *   Parameters (denoted \f$p\f$):
- *    - \f$c_i\f$   independent constant
- *    - \f$c_d\f$   dependent constants
- *    - \f$p_i\f$   independent parameters
- *    - \f$p_d\f$   dependent parameters
+ *    - \f$c_i^r\f$   independent real constant
+ *    - \f$c_d^r\f$   dependent real constants
+ *    - \f$p_i^r\f$   independent real parameters
+ *    - \f$p_d^r\f$   dependent real parameters
+ *    - \f$c_i^i\f$   independent integer constant
+ *    - \f$c_d^i\f$   dependent integer constants
+ *    - \f$p_i^i\f$   independent integer parameters
+ *    - \f$p_d^i\f$   dependent integer parameters
+ *    - \f$c_i^b\f$   independent boolean constant
+ *    - \f$c_d^b\f$   dependent boolean constants
+ *    - \f$p_i^b\f$   independent boolean parameters
+ *    - \f$p_d^b\f$   dependent boolean parameters
  *
  *    with
  *
- *      \f$ p = [c_i^T, c_d^T, p_i^T, p_d^T]^T \f$
+ *      \f$ p = [{c_i^r}^T, {c_d^r}^T, {p_i^r}^T, {p_d^r}^T, {c_i^i}^T, {c_d^i}^T, {p_i^i}^T, {p_d^i}^T, {c_i^b}^T, {c_d^b}^T, {p_i^b}^T, {p_d^b}^T]^T \f$
  *
  *   Variables (denoted \f$v\f$):
  *
- *    - \f$\dot x\f$    differentiated variables
- *    - \f$x\f$     variables that appear differentiated
- *    - \f$u\f$     inputs
- *    - \f$w\f$     algebraic variables
+ *    - \f$\dot x\f$    differentiated real variables
+ *    - \f$x\f$     real variables that appear differentiated
+ *    - \f$u\f$     real inputs
+ *    - \f$w\f$     real algebraic variables
  *    - \f$t\f$     time
  *
  *    with
@@ -134,23 +142,36 @@
  *
  *   Variables defined at particular time instants (denoted \f$q\f$):
  *
- *      - \f$\dot x(t_i)\f$    differentiated variables evaluated at time \f$t_i, i \in 1..n_{tp}\f$
- *      - \f$x(t_i)\f$     variables that appear differentiated evaluated at time \f$t_i, t_i \in 1..n_{tp}\f$
- *      - \f$u(t_i)\f$     inputs evaluated at time \f$t_i, i \in 1..n_{tp}\f$
- *      - \f$w(t_i)\f$     algebraic variables evaluated at time \f$t_i, i \in 1..n_{tp}\f$
+ *      - \f$\dot x(t_i)\f$    differentiated real variables evaluated at time \f$t_i, i \in 1..n_{tp}\f$
+ *      - \f$x(t_i)\f$     real variables that appear differentiated evaluated at time \f$t_i, t_i \in 1..n_{tp}\f$
+ *      - \f$u(t_i)\f$     real inputs evaluated at time \f$t_i, i \in 1..n_{tp}\f$
+ *      - \f$w(t_i)\f$     real algebraic variables evaluated at time \f$t_i, i \in 1..n_{tp}\f$
  *
  *    \f$ q = [\dot x(t_1)^T, x(t_1)^T, u(t_1)^T, w(t_1)^T, ...,
  *           \dot x(t_{n_{tp}})^T, x(t_{n_{tp}})^T, u(t_{n_{tp}})^T, w(t_{n_{tp}})^T]^T\f$
  *
- *   All parameters, variables and point-wise evaluated variables are denoted z:
+ *   Discrete variables which may only change during events (denoted \f$d\f$);
  *
- *     \f$ z = [p^T, v^T, q^T]^T \f$
+ *      -  \f$d^r\f$  discrete real variables
+ *      -  \f$d^i\f$  integer variables
+ *      -  \f$u^i\f$  integer inputs
+ *      -  \f$d^b\f$  boolean variables
+ *      -  \f$u^b\f$  boolean inputs
+ *      -  \f$s\f$  boolean switches mapped from relational expressions Notice that these boolean variables
+ *      do not originate from boolean variable declarations, but from boolean valued expressions such as
+ *      x>=3.
+ *
+ *    \f$ d = [{d^r}^T, {d^i}^T, {u^i}^T, {d^b}^T, {d^b}^T,s]^T\f$
+ *
+ *   All parameters, variables, point-wise evaluated variables and discrete variables are denoted z:
+ *
+ *     \f$ z = [p^T, v^T, q^T, d^T]^T \f$
  *
  *   \subsection DAE The DAE interface
  *
- *   The DAE interface is defined by the residual function \f$F(p,v)\f$ where
+ *   The DAE interface is defined by the residual function \f$F(p,v,d)\f$ where
  *
- *     \f$ F(p,v) = 0 \f$
+ *     \f$ F(p,v,d) = 0 \f$
  *
  *	For details on the functions included in the DAE interface, see the <a href="group__DAE.html">DAE functions documentation. </a>
  *
@@ -158,8 +179,8 @@
  *
  *	 The DAE initialization interface is defined by the functions \f$F_0(p,v)\f$ and \f$F_1(p,v)\f$ where
  *
- *	  \f$  F_0(p,v) = 0 \f$<br>
- *	  \f$  F_1(p,v) = 0 \f$
+ *	  \f$  F_0(p,v,d) = 0 \f$<br>
+ *	  \f$  F_1(p,v,d) = 0 \f$
  *
  *   \f$F_0\f$ represents the DAE system augmented with additional initial equations
  *   and start values that are fixed. \f$F_1\f$ on the other hand contains equations for
@@ -168,10 +189,10 @@
  *
  *   In addition, a residual function for dependent parameters is provided
  *
- *	  \f$  F_p(ci,cd,pi,pd) = 0 \f$
+ *	  \f$  F_p(p) = 0 \f$
  *
- *   The iteration variables of this system are the elements in the \f$p_d\f$
- *   vector.
+ *   The iteration variables of this system are the elements in the \f$p_d^r\f$,
+ *   \f$p_d^i\f$, \f$p_d^b\f$ vectors.
  *
  *   For details on the functions included in the DAE initialization interface, see the
  *   <a href="group__Initialization.html">DAE initialization functions documentation. </a>
@@ -180,7 +201,7 @@
  *
  *   The ODE interace is defined by the relation
  *
- *   \f$\dot x = f(p,x,u,t). \f$
+ *   \f$\dot x = f(p,x,u,t,d). \f$
  *
  *   WARNING: The current version of the JMI interface supports only Modelica
  *   models which are written explicitly on ODE form. Accordingly, no
@@ -210,6 +231,8 @@
  *   The optimization problem is defined on the interval \f$[t_0,t_f]\f$, where \f$t_0\f$ and \f$t_f\f$,
  *   respectively, can be free or fixed.
  *
+ *   Notice that the optimization interface does not support discrete variables.
+ *
  * For details on the functions included in the optimization interface, see the
  * <a href="group__Optimization.html">optimization functions documentation. </a>
  *
@@ -236,6 +259,9 @@
  *                     mask i 1, then the corresponding Jacobian column will be evaluated.
  *                     The evaluated Jacobian columns are stored in the first
  *                     entries of the output argument jac.
+ *
+ *  Notice that only Jacobian evaluation w.r.t. real parameters and variables
+ *  is currently supported.
  *
  *  TODO: It may be interesting to include an additional layer that enables
  *  support for partially defined Jacobians. This would be beneficial if symbolic
@@ -272,27 +298,26 @@ extern "C" {
 #define JMI_DER_DENSE_ROW_MAJOR 4 /**<  \brief Dense evaluation (row major) of derivatives. */
 
 // Flags for evaluation of Jacobians w.r.t. parameters in the p vector
-#define JMI_DER_CI 1 /**<  \brief Evaluate derivatives w.r.t. independent constants, \f$c_i\f$.*/
-#define JMI_DER_CD 2 /**<  \brief Evaluate derivatives w.r.t. dependent constants, \f$c_d\f$.*/
-#define JMI_DER_PI 4 /**<  \brief Evaluate derivatives w.r.t. independent parameters, \f$p_i\f$.*/
-#define JMI_DER_PD 8 /**<  \brief Evaluate derivatives w.r.t. dependent constants, \f$p_d\f$.*/
+#define JMI_DER_CI 1 /**<  \brief Evaluate derivatives w.r.t. real independent constants, \f$c_i\f$.*/
+#define JMI_DER_CD 2 /**<  \brief Evaluate derivatives w.r.t. real dependent constants, \f$c_d\f$.*/
+#define JMI_DER_PI 4 /**<  \brief Evaluate derivatives w.r.t. real independent parameters, \f$p_i\f$.*/
+#define JMI_DER_PD 8 /**<  \brief Evaluate derivatives w.r.t. real dependent constants, \f$p_d\f$.*/
 // Flags for evaluation of Jacobians w.r.t. variables in the v vector
-#define JMI_DER_DX 16 /**<  \brief Evaluate derivatives w.r.t. derivatives, \f$\dot x\f$.*/
-#define JMI_DER_X 32 /**<  \brief Evaluate derivatives w.r.t. differentiated variables, \f$x\f$.*/
-#define JMI_DER_U 64 /**<  \brief Evaluate derivatives w.r.t. inputs, \f$u\f$.*/
-#define JMI_DER_W 128 /**<  \brief Evaluate derivatives w.r.t. algebraic variables, \f$w\f$.*/
-#define JMI_DER_T 256 /**<  \brief Evaluate derivatives w.r.t. time, \f$t\f$.*/
+#define JMI_DER_DX 16 /**<  \brief Evaluate derivatives w.r.t. real derivatives, \f$\dot x\f$.*/
+#define JMI_DER_X 32 /**<  \brief Evaluate derivatives w.r.t. real differentiated variables, \f$x\f$.*/
+#define JMI_DER_U 64 /**<  \brief Evaluate derivatives w.r.t. real inputs, \f$u\f$.*/
+#define JMI_DER_W 128 /**<  \brief Evaluate derivatives w.r.t. real algebraic variables, \f$w\f$.*/
+#define JMI_DER_T 256 /**<  \brief Evaluate derivatives w.r.t. real time, \f$t\f$.*/
 // Flags for evaluation of Jacobians w.r.t. variables in the q vector
-#define JMI_DER_DX_P 512 /**<  \brief Evaluate derivatives w.r.t. derivatives at time points, \f$\dot x_p\f$.*/
-#define JMI_DER_X_P 1024 /**<  \brief Evaluate derivatives w.r.t. differentiated variables at time points, \f$x_p\f$.*/
-#define JMI_DER_U_P 2048 /**<  \brief Evaluate derivatives w.r.t. inputs at time points, \f$u_p\f$.*/
-#define JMI_DER_W_P 4096 /**<  \brief Evaluate derivatives w.r.t. algebraic variables at time points, \f$w_p\f$.*/
+#define JMI_DER_DX_P 512 /**<  \brief Evaluate derivatives w.r.t. real derivatives at time points, \f$\dot x_p\f$.*/
+#define JMI_DER_X_P 1024 /**<  \brief Evaluate derivatives w.r.t. real differentiated variables at time points, \f$x_p\f$.*/
+#define JMI_DER_U_P 2048 /**<  \brief Evaluate derivatives w.r.t. real inputs at time points, \f$u_p\f$.*/
+#define JMI_DER_W_P 4096 /**<  \brief Evaluate derivatives w.r.t. real algebraic variables at time points, \f$w_p\f$.*/
 
 /** \brief Evaluate derivatives w.r.t. all variables, \f$z\f$.*/
 #define JMI_DER_ALL (JMI_DER_CI | JMI_DER_CD | JMI_DER_PI | JMI_DER_PD |\
 	JMI_DER_DX | JMI_DER_X | JMI_DER_U | JMI_DER_W |\
 	JMI_DER_T | JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | JMI_DER_W_P)
-
 
 /**  \brief Evaluate derivatives w.r.t. all variables in \f$p\f$.*/
 #define JMI_DER_ALL_P JMI_DER_CI | JMI_DER_CD | JMI_DER_PI | JMI_DER_PD
@@ -382,48 +407,88 @@ int jmi_delete(jmi_t* jmi);
  * \brief Get the sizes of the variable vectors.
  *
  * @param jmi The jmi_t struct.
- * @param n_ci (Output) number of independent constants.
- * @param n_cd (Output) number of dependent constants.
- * @param n_pi (Output) number of independent parameters.
- * @param n_pd (Output) number of dependent parameters.
- * @param n_dx (Output) number of derivatives.
- * @param n_x (Output) number of differentiated variables.
- * @param n_u (Output) number of inputs.
- * @param n_w (Output) number of algebraic variables.
+ * @param n_real_ci (Output) number of real independent constants.
+ * @param n_real_cd (Output) number of real dependent constants.
+ * @param n_real_pi (Output) number of real independent parameters.
+ * @param n_real_pd (Output) number of real dependent parameters.
+ * @param n_integer_ci (Output) number of integer independent constants.
+ * @param n_integer_cd (Output) number of integer dependent constants.
+ * @param n_integer_pi (Output) number of integer independent parameters.
+ * @param n_integer_pd (Output) number of integer dependent parameters.
+ * @param n_boolean_ci (Output) number of boolean independent constants.
+ * @param n_boolean_cd (Output) number of boolean dependent constants.
+ * @param n_boolean_pi (Output) number of boolean independent parameters.
+ * @param n_boolean_pd (Output) number of boolean dependent parameters.
+ * @param n_real_dx (Output) number of real derivatives.
+ * @param n_real_x (Output) number of real differentiated variables.
+ * @param n_real_u (Output) number of real inputs.
+ * @param n_real_w (Output) number of real algebraic variables.
+ * @param n_real_d (Output) number of real discrete variables.
  * @param n_tp (Output) number of time points included in the model.
+ * @param n_integer_d (Output) number of integer discrete variables.
+ * @param n_integer_u (Output) number of integer inputs.
+ * @param n_boolean_d (Output) number of boolean discrete variables.
+ * @param n_boolean_u (Output) number of boolean inputs.
  * @param n_sw (output) number of switching functions in the DAE \f$F\f$.
  * @param n_sw_init (output) number of switching functions in the initialization system \f$F_0\f$.
  * @param n_z (Output) total number of variables in the \f$z\f$ vector.
  * @return Error code.
  *
  */
-int jmi_get_sizes(jmi_t* jmi, int* n_ci, int* n_cd, int* n_pi, int* n_pd,
-		int* n_dx, int* n_x, int* n_u, int* n_w, int* n_tp, int* n_sw, int* n_sw_init, int* n_z);
+int jmi_get_sizes(jmi_t* jmi, int* n_real_ci, int* n_real_cd, int* n_real_pi, int* n_real_pd,
+		int* n_integer_ci, int* n_integer_cd, int* n_integer_pi, int* n_integer_pd,
+		int* n_boolean_ci, int* n_boolean_cd, int* n_boolean_pi, int* n_boolean_pd,
+		int* n_real_dx, int* n_real_x, int* n_real_u, int* n_real_w, int* n_tp,
+		int* n_real_d, int* n_integer_d, int* n_integer_u, int* n_boolean_d, int* n_boolean_u,
+		int* n_sw, int* n_sw_init, int* n_z);
 
 /**
  * \brief Get the offsets for the variable types in the \f$z\f$ vector.
  *
  * @param jmi The jmi_t struct.
- * @param offs_ci (Output) offset of independent constants.
- * @param offs_cd (Output) offset of dependent constants.
- * @param offs_pi (Output) offset of independent parameters.
- * @param offs_pd (Output) offset of dependent parameters.
- * @param offs_dx (Output) offset of derivatives.
- * @param offs_x (Output) offset of differentiated variables.
- * @param offs_u (Output) offset of inputs.
- * @param offs_w (Output) offset of algebraic variables.
+ * @param offs_real_ci (Output) offset of real independent constants.
+ * @param offs_real_cd (Output) offset of real dependent constants.
+ * @param offs_real_pi (Output) offset of real independent parameters.
+ * @param offs_real_pd (Output) offset of real dependent parameters.
+ * @param offs_integer_ci (Output) offset of integer independent constants.
+ * @param offs_integer_cd (Output) offset of integer dependent constants.
+ * @param offs_integer_pi (Output) offset of integer independent parameters.
+ * @param offs_integer_pd (Output) offset of integer dependent parameters.
+ * @param offs_boolean_ci (Output) offset of boolean independent constants.
+ * @param offs_boolean_cd (Output) offset of boolean dependent constants.
+ * @param offs_boolean_pi (Output) offset of boolean independent parameters.
+ * @param offs_boolean_pd (Output) offset of boolean dependent parameters.
+ * @param offs_real_dx (Output) offset of real derivatives.
+ * @param offs_real_x (Output) offset of real differentiated variables.
+ * @param offs_real_u (Output) offset of real inputs.
+ * @param offs_real_w (Output) offset of real algebraic variables.
  * @param offs_t (Output) offset of time.
- * @param offs_dx_p (Output) offset of the first derivatives in the time point part of \f$z\f$.
- * @param offs_x_p (Output) offset of the first differentiated variables in the time point part of \f$z\f$.
- * @param offs_u_p (Output) offset of the first inputs in the time point part of \f$z\f$.
- * @param offs_w_p (Output) offset of the first algebraic variables in the time point part of \f$z\f$.
+ * @param offs_real_dx_p (Output) offset of the first real  derivatives in the time point part of \f$z\f$.
+ * @param offs_real_x_p (Output) offset of the first real differentiated variables in the time point part of \f$z\f$.
+ * @param offs_real_u_p (Output) offset of the first real inputs in the time point part of \f$z\f$.
+ * @param offs_real_w_p (Output) offset of the first real algebraic variables in the time point part of \f$z\f$.
+ * @param offs_real_d (Output) offset of real discrete variables.
+ * @param offs_integer_d (Output) offset of integer discrete variables.
+ * @param offs_integer_u (Output) offset of integer input variables.
+ * @param offs_boolean_d (Output) offset of boolean discrete variables.
+ * @param offs_boolean_u (Output) offset of boolean input variables.
  * @param offs_sw (Output) offset of the first switching function in the DAE \f$F_0\f$.
  * @param offs_sw_init (Output) offset of the first switching function in the initialization system \f$F_0\f$.
  * @return Error code.
  */
-int jmi_get_offsets(jmi_t* jmi, int* offs_ci, int* offs_cd, int* offs_pi, int* offs_pd,
-		int* offs_dx, int* offs_x, int* offs_u, int* offs_w, int* offs_t,
-		int* offs_dx_p, int* offs_x_p, int* offs_u_p, int* offs_w_p, int* offs_sw, int* offs_sw_init);
+int jmi_get_offsets(jmi_t* jmi, int* offs_real_ci, int* offs_real_cd,
+		int* offs_real_pi, int* offs_real_pd,
+		int* offs_integer_ci, int* offs_integer_cd,
+		int* offs_integer_pi, int* offs_integer_pd,
+		int* offs_boolean_ci, int* offs_boolean_cd,
+		int* offs_boolean_pi, int* offs_boolean_pd,
+		int* offs_real_dx, int* offs_real_x, int* offs_real_u,
+		int* offs_real_w, int *offs_t,
+		int* offs_real_dx_p, int* offs_real_x_p,
+		int* offs_real_u_p, int* offs_real_w_p,
+		int* offs_real_d, int* offs_integer_d, int* offs_integer_u,
+		int* offs_boolean_d, int* offs_boolean_u,
+		int* offs_sw, int* offs_sw_init);
 
 /**
  * \brief Get the number of time points.
@@ -460,7 +525,7 @@ int jmi_set_tp(jmi_t *jmi, jmi_real_t *tp);
 int jmi_get_tp(jmi_t *jmi, jmi_real_t *tp);
 
 /**
- * \brief Get a pointer to the z vector containing all real variables.
+ * \brief Get a pointer to the z vector containing all variables.
  *
  * @param jmi The jmi_t struct.
  * @return A pointer to the \f$z\f$ vector.
@@ -468,51 +533,122 @@ int jmi_get_tp(jmi_t *jmi, jmi_real_t *tp);
  */
 jmi_real_t* jmi_get_z(jmi_t* jmi);
 
-
 /**
- * \brief Get a pointer to the independent constants vector.
+ * \brief Get a pointer to the real independent constants vector.
  *
  * @param jmi The jmi_t struct.
- * @return A pointer to the \f$c_i\f$ vector.
+ * @return A pointer to the \f$c_i^r\f$ vector.
  *
  */
-jmi_real_t* jmi_get_ci(jmi_t* jmi);
+jmi_real_t* jmi_get_real_ci(jmi_t* jmi);
 
 /**
- * \brief Get a pointer to the dependent constants vector.
+ * \brief Get a pointer to the real dependent constants vector.
  *
  * @param jmi The jmi_t struct.
- * @return A pointer to the \f$c_d\f$ vector.
+ * @return A pointer to the \f$c_d^r\f$ vector.
  *
  */
-jmi_real_t* jmi_get_cd(jmi_t* jmi);
+jmi_real_t* jmi_get_real_cd(jmi_t* jmi);
 
 /**
- * \brief Get a pointer to the independent parameter vector.
+ * \brief Get a pointer to the real independent parameter vector.
  *
  * @param jmi The jmi_t struct.
- * @return A pointer to the \f$p_i\f$ vector.
+ * @return A pointer to the \f$p_i^r\f$ vector.
  *
  */
-jmi_real_t* jmi_get_pi(jmi_t* jmi);
+jmi_real_t* jmi_get_real_pi(jmi_t* jmi);
 
 /**
- * \brief Get a pointer to the dependent parameters vector.
+ * \brief Get a pointer to the real dependent parameters vector.
  *
  * @param jmi The jmi_t struct.
- * @return A pointer to the \f$p_d\f$ vector.
+ * @return A pointer to the \f$p_d^r\f$ vector.
  *
  */
-jmi_real_t* jmi_get_pd(jmi_t* jmi);
+jmi_real_t* jmi_get_real_pd(jmi_t* jmi);
 
 /**
- * \brief Get a pointer to the derivatives vector.
+ * \brief Get a pointer to the integer independent constants vector.
+ *
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the \f$c_i^r\f$ vector.
+ *
+ */
+jmi_real_t* jmi_get_integer_ci(jmi_t* jmi);
+
+/**
+ * \brief Get a pointer to the integer dependent constants vector.
+ *
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the \f$c_d^i\f$ vector.
+ *
+ */
+jmi_real_t* jmi_get_integer_cd(jmi_t* jmi);
+
+/**
+ * \brief Get a pointer to the integer independent parameter vector.
+ *
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the \f$p_i^i\f$ vector.
+ *
+ */
+jmi_real_t* jmi_get_integer_pi(jmi_t* jmi);
+
+/**
+ * \brief Get a pointer to the integer dependent parameters vector.
+ *
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the \f$p_d^i\f$ vector.
+ *
+ */
+jmi_real_t* jmi_get_integer_pd(jmi_t* jmi);
+
+/**
+ * \brief Get a pointer to the boolean independent constants vector.
+ *
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the \f$c_i^r\f$ vector.
+ *
+ */
+jmi_real_t* jmi_get_boolean_ci(jmi_t* jmi);
+
+/**
+ * \brief Get a pointer to the boolean dependent constants vector.
+ *
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the \f$c_d^i\f$ vector.
+ *
+ */
+jmi_real_t* jmi_get_boolean_cd(jmi_t* jmi);
+
+/**
+ * \brief Get a pointer to the boolean independent parameter vector.
+ *
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the \f$p_i^i\f$ vector.
+ *
+ */
+jmi_real_t* jmi_get_boolean_pi(jmi_t* jmi);
+
+/**
+ * \brief Get a pointer to the boolean dependent parameters vector.
+ *
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the \f$p_d^i\f$ vector.
+ *
+ */
+jmi_real_t* jmi_get_boolean_pd(jmi_t* jmi);
+
+/**
+ * \brief Get a pointer to the real derivatives vector.
  *
  * @param jmi The jmi_t struct.
  * @return A pointer to the \f$dx\f$ vector.
  *
  */
-jmi_real_t* jmi_get_dx(jmi_t* jmi);
+jmi_real_t* jmi_get_real_dx(jmi_t* jmi);
 
 /**
  * \brief Get a pointer to the differentiated variables vector.
@@ -521,7 +657,7 @@ jmi_real_t* jmi_get_dx(jmi_t* jmi);
  * @return A pointer to the \f$x\f$ vector.
  *
  */
-jmi_real_t* jmi_get_x(jmi_t* jmi);
+jmi_real_t* jmi_get_real_x(jmi_t* jmi);
 
 /**
  * \brief Get a pointer to the inputs vector.
@@ -530,7 +666,7 @@ jmi_real_t* jmi_get_x(jmi_t* jmi);
  * @return A pointer to the \f$u\f$ vector.
  *
  */
-jmi_real_t* jmi_get_u(jmi_t* jmi);
+jmi_real_t* jmi_get_real_u(jmi_t* jmi);
 
 /**
  * \brief Get a pointer to the algebraic variables vector.
@@ -539,7 +675,7 @@ jmi_real_t* jmi_get_u(jmi_t* jmi);
  * @return A pointer to the \f$w\f$ vector.
  *
  */
-jmi_real_t* jmi_get_w(jmi_t* jmi);
+jmi_real_t* jmi_get_real_w(jmi_t* jmi);
 
 /**
  * \brief Get a pointer to the time value.
@@ -558,7 +694,7 @@ jmi_real_t* jmi_get_t(jmi_t* jmi);
  * @return A pointer to the \f$dx_{p,i}\f$ vector.
  *
  */
-jmi_real_t* jmi_get_dx_p(jmi_t* jmi,int i);
+jmi_real_t* jmi_get_real_dx_p(jmi_t* jmi,int i);
 
 /**
  * \brief Get a pointer to the differentiated variables corresponding to the i:th time point.
@@ -568,7 +704,7 @@ jmi_real_t* jmi_get_dx_p(jmi_t* jmi,int i);
  * @return A pointer to the \f$x_{p,i}\f$ vector.
  *
  */
-jmi_real_t* jmi_get_x_p(jmi_t* jmi, int i);
+jmi_real_t* jmi_get_real_x_p(jmi_t* jmi, int i);
 
 /**
  * \brief Get a pointer to the inputs corresponding to the i:th time point.
@@ -578,7 +714,7 @@ jmi_real_t* jmi_get_x_p(jmi_t* jmi, int i);
  * @return A pointer to the \f$u_{p,i}\f$ vector.
  *
  */
-jmi_real_t* jmi_get_u_p(jmi_t* jmi, int i);
+jmi_real_t* jmi_get_real_u_p(jmi_t* jmi, int i);
 
 /**
  * \brief Get a pointer to the algebraic variables corresponding to the i:th time point.
@@ -588,7 +724,52 @@ jmi_real_t* jmi_get_u_p(jmi_t* jmi, int i);
  * @return A pointer to the \f$w_{p,i}\f$ vector.
  *
  */
-jmi_real_t* jmi_get_w_p(jmi_t* jmi, int i);
+jmi_real_t* jmi_get_real_w_p(jmi_t* jmi, int i);
+
+/**
+ * \brief Get a pointer to the real discrete variables vector.
+ *
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the \f$d^r\f$ vector.
+ *
+ */
+jmi_real_t* jmi_get_real_d(jmi_t* jmi);
+
+/**
+ * \brief Get a pointer to the integer discrete variables vector.
+ *
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the \f$d^i\f$ vector.
+ *
+ */
+jmi_real_t* jmi_get_integer_d(jmi_t* jmi);
+
+/**
+ * \brief Get a pointer to the integer input variables vector.
+ *
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the \f$u^i\f$ vector.
+ *
+ */
+jmi_real_t* jmi_get_integer_u(jmi_t* jmi);
+
+/**
+ * \brief Get a pointer to the boolean discrete variables vector.
+ *
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the \f$d^i\f$ vector.
+ *
+ */
+jmi_real_t* jmi_get_boolean_d(jmi_t* jmi);
+
+/**
+ * \brief Get a pointer to the boolean input variables vector.
+ *
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the \f$u^i\f$ vector.
+ *
+ */
+jmi_real_t* jmi_get_boolean_u(jmi_t* jmi);
 
 /**
  * \brief Get a pointer to the first switching function in the DAE \$fF\$f.

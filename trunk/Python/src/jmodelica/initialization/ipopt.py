@@ -140,20 +140,20 @@ class NLPInitialization(object):
 
         # Initialization
         _p_free_start = N.zeros(_n_p_free) # Not supported
-        _dx_start = N.zeros(model._n_dx.value)
-        _x_start = N.zeros(model._n_x.value)
-        _w_start = N.zeros(model._n_w.value)
+        _dx_start = N.zeros(model._n_real_dx.value)
+        _x_start = N.zeros(model._n_real_x.value)
+        _w_start = N.zeros(model._n_real_w.value)
     
         # Bounds
         _p_free_lb = -1.0e20*N.ones(_n_p_free) # Not supported
-        _dx_lb = -1.0e20*N.ones(model._n_dx.value)
-        _x_lb = -1.0e20*N.ones(model._n_x.value)
-        _w_lb = -1.0e20*N.ones(model._n_w.value)
+        _dx_lb = -1.0e20*N.ones(model._n_real_dx.value)
+        _x_lb = -1.0e20*N.ones(model._n_real_x.value)
+        _w_lb = -1.0e20*N.ones(model._n_real_w.value)
         
         _p_free_ub = 1.0e20*N.ones(_n_p_free)
-        _dx_ub = 1.0e20*N.ones(model._n_dx.value)
-        _x_ub = 1.0e20*N.ones(model._n_x.value)
-        _w_ub = 1.0e20*N.ones(model._n_w.value)
+        _dx_ub = 1.0e20*N.ones(model._n_real_dx.value)
+        _x_ub = 1.0e20*N.ones(model._n_real_x.value)
+        _w_ub = 1.0e20*N.ones(model._n_real_w.value)
                         
         self._set_start_values(_p_free_start, _dx_start, _x_start, _w_start)
         self._set_lb_values(_p_free_lb, _dx_lb, _x_lb, _w_lb)
@@ -161,9 +161,9 @@ class NLPInitialization(object):
 
         _linearity_information_provided = 0; # Not supported
         _p_free_lin = N.ones(_n_p_free,dtype=int)
-        _dx_lin = N.ones(model._n_dx.value,dtype=int)
-        _x_lin = N.ones(model._n_x.value,dtype=int)
-        _w_lin = N.ones(model._n_w.value,dtype=int)
+        _dx_lin = N.ones(model._n_real_dx.value,dtype=int)
+        _x_lin = N.ones(model._n_real_x.value,dtype=int)
+        _w_lin = N.ones(model._n_real_w.value,dtype=int)
         
 #         self._set_lin_values(_p_opt_lin, _dx_lin, _x_lin,_w_lin)
         
@@ -201,45 +201,45 @@ class NLPInitialization(object):
                                                                             flags='C'),
                                                               Nct.ndpointer(dtype=c_jmi_real_t,     # dx_init
                                                                             ndim=1,
-                                                                            shape=self._model._n_dx.value,
+                                                                            shape=self._model._n_real_dx.value,
                                                                             flags='C'),
                                                               Nct.ndpointer(dtype=c_jmi_real_t,     # x_init
                                                                             ndim=1,
-                                                                            shape=self._model._n_x.value,
+                                                                            shape=self._model._n_real_x.value,
                                                                             flags='C'),
                                                               Nct.ndpointer(dtype=c_jmi_real_t,     # w_init
                                                                             ndim=1,
-                                                                            shape=self._model._n_w.value,
+                                                                            shape=self._model._n_real_w.value,
                                                                             flags='C'),
                                                               Nct.ndpointer(dtype=c_jmi_real_t,     # p_free_lb
                                                                             ndim=1,
                                                                             flags='C'),
                                                               Nct.ndpointer(dtype=c_jmi_real_t,     # dx_lb
                                                                             ndim=1,
-                                                                            shape=self._model._n_dx.value,
+                                                                            shape=self._model._n_real_dx.value,
                                                                             flags='C'),
                                                               Nct.ndpointer(dtype=c_jmi_real_t,     # x_lb
                                                                             ndim=1,
-                                                                            shape=self._model._n_x.value,
+                                                                            shape=self._model._n_real_x.value,
                                                                             flags='C'),
                                                               Nct.ndpointer(dtype=c_jmi_real_t,     # w_lb
                                                                             ndim=1,
-                                                                            shape=self._model._n_w.value,
+                                                                            shape=self._model._n_real_w.value,
                                                                             flags='C'),
                                                               Nct.ndpointer(dtype=c_jmi_real_t,     # p_free_ub
                                                                             ndim=1,
                                                                             flags='C'),
                                                               Nct.ndpointer(dtype=c_jmi_real_t,     # dx_ub
                                                                             ndim=1,
-                                                                            shape=self._model._n_dx.value,
+                                                                            shape=self._model._n_real_dx.value,
                                                                             flags='C'),
                                                               Nct.ndpointer(dtype=c_jmi_real_t,     # x_ub
                                                                             ndim=1,
-                                                                            shape=self._model._n_x.value,
+                                                                            shape=self._model._n_real_x.value,
                                                                             flags='C'),
                                                               Nct.ndpointer(dtype=c_jmi_real_t,     # w_ub
                                                                             ndim=1,
-                                                                            shape=self._model._n_w.value,
+                                                                            shape=self._model._n_real_w.value,
                                                                             flags='C'),
                                                               ct.c_int,                             # linearity_information_provided
                                                               Nct.ndpointer(dtype=ct.c_int,         # p_free_lin
@@ -247,15 +247,15 @@ class NLPInitialization(object):
                                                                             flags='C'),
                                                               Nct.ndpointer(dtype=ct.c_int,         # dx_lin
                                                                             ndim=1,
-                                                                            shape=self._model._n_dx.value,
+                                                                            shape=self._model._n_real_dx.value,
                                                                             flags='C'),
                                                               Nct.ndpointer(dtype=ct.c_int,         # x_lin
                                                                             ndim=1,
-                                                                            shape=self._model._n_x.value,
+                                                                            shape=self._model._n_real_x.value,
                                                                             flags='C'),
                                                               Nct.ndpointer(dtype=ct.c_int,         # w_lin
                                                                             ndim=1,
-                                                                            shape=self._model._n_w.value,
+                                                                            shape=self._model._n_real_w.value,
                                                                             flags='C'),
                                                               ct.c_int]                             # der_eval_alg            
         except AttributeError, e:
@@ -270,10 +270,10 @@ class NLPInitialization(object):
                                                                          ct.POINTER(ct.c_int)]    
             self._jmi_model._dll.jmi_init_opt_get_x.argtypes =[ct.c_void_p]
             
-            n_x = ct.c_int()
+            n_real_x = ct.c_int()
             n_h = ct.c_int()
             dh_n_nz = ct.c_int()
-            assert self._jmi_model._dll.jmi_init_opt_get_dimensions(self._jmi_init_opt, byref(n_x),
+            assert self._jmi_model._dll.jmi_init_opt_get_dimensions(self._jmi_init_opt, byref(n_real_x),
                                            byref(n_h), byref(dh_n_nz)) \
             is 0, \
                "getting NLP problem dimensions failed"        
@@ -281,30 +281,30 @@ class NLPInitialization(object):
             self._jmi_model._dll.jmi_init_opt_get_initial.argtypes = [ct.c_void_p,
                                                                       Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                     ndim=1,
-                                                                                    shape=n_x.value,
+                                                                                    shape=n_real_x.value,
                                                                                     flags='C')]            
             self._jmi_model._dll.jmi_init_opt_set_initial.argtypes =  [ct.c_void_p,
                                                                        Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                      ndim=1,
-                                                                                     shape=n_x.value,
+                                                                                     shape=n_real_x.value,
                                                                                      flags='C')]    
             self._jmi_model._dll.jmi_init_opt_get_bounds.argtypes = [ct.c_void_p,
                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                    ndim=1,
-                                                                                   shape=n_x.value,
+                                                                                   shape=n_real_x.value,
                                                                                    flags='C'),
                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                    ndim=1,
-                                                                                   shape=n_x.value,
+                                                                                   shape=n_real_x.value,
                                                                                    flags='C')]
             self._jmi_model._dll.jmi_init_opt_set_bounds.argtypes = [ct.c_void_p,
                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                    ndim=1,
-                                                                                   shape=n_x.value,
+                                                                                   shape=n_real_x.value,
                                                                                    flags='C'),
                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                    ndim=1,
-                                                                                   shape=n_x.value,
+                                                                                   shape=n_real_x.value,
                                                                                    flags='C')]
             self._jmi_model._dll.jmi_init_opt_f.argtypes = [ct.c_void_p,
                                                             Nct.ndpointer(dtype=c_jmi_real_t,
@@ -314,7 +314,7 @@ class NLPInitialization(object):
             self._jmi_model._dll.jmi_init_opt_df.argtypes = [ct.c_void_p,
                                                              Nct.ndpointer(dtype=c_jmi_real_t,
                                                                            ndim=1,
-                                                                           shape=n_x.value,
+                                                                           shape=n_real_x.value,
                                                                            flags='C')]
             self._jmi_model._dll.jmi_init_opt_h.argtypes = [ct.c_void_p,
                                                             Nct.ndpointer(dtype=c_jmi_real_t,
@@ -356,10 +356,10 @@ class NLPInitialization(object):
             #                                       Nct.ndpointer(dtype=c_jmi_real_t,
             #                                                     ndim=1,
             #                                                     flags='C')]
-            # This is not correct, the n_x referes to the wrong x vector
-            # In this case, n_x refers to the size of the optimization vector
+            # This is not correct, the n_real_x referes to the wrong x vector
+            # In this case, n_real_x refers to the size of the optimization vector
             # in the initialization problem not to the number of states.
-            # _returns_ndarray(dll.jmi_init_opt_get_x, c_jmi_real_t, n_x.value, order='C')
+            # _returns_ndarray(dll.jmi_init_opt_get_x, c_jmi_real_t, n_real_x.value, order='C')
         except AttributeError, e:
             pass                 
         
@@ -373,13 +373,13 @@ class NLPInitialization(object):
             and non-zeros in the Jacobian of the equality constraints respectively. 
             
         """
-        n_x = ct.c_int()
+        n_real_x = ct.c_int()
         n_h = ct.c_int()
         dh_n_nz = ct.c_int()
-        if self._jmi_model._dll.jmi_init_opt_get_dimensions(self._jmi_init_opt, byref(n_x), 
+        if self._jmi_model._dll.jmi_init_opt_get_dimensions(self._jmi_init_opt, byref(n_real_x), 
                                                         byref(n_h), byref(dh_n_nz)) is not 0:
             raise jmi.JMIException("Getting the number of variables and constraints failed.")
-        return n_x.value, n_h.value, dh_n_nz.value 
+        return n_real_x.value, n_h.value, dh_n_nz.value 
         
     def init_opt_get_x(self):
         """ Return the x vector of the NLP. """
@@ -567,7 +567,7 @@ class NLPInitialization(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = jmi._translate_value_ref(value_ref)
-            i_dx = z_i - self._model._offs_dx.value
+            i_dx = z_i - self._model._offs_real_dx.value
             dx_start[i_dx] = values.get(name)
         
         # x: differentiate
@@ -579,7 +579,7 @@ class NLPInitialization(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = jmi._translate_value_ref(value_ref)
-            i_x = z_i - self._model._offs_x.value
+            i_x = z_i - self._model._offs_real_x.value
             x_start[i_x] = values.get(name)
                     
         # w: algebraic
@@ -592,7 +592,7 @@ class NLPInitialization(object):
             if not (xmldoc.is_alias(name)):
                 value_ref = xmldoc.get_valueref(name)
                 (z_i, ptype) = jmi._translate_value_ref(value_ref)
-                i_w = z_i - self._model._offs_w.value
+                i_w = z_i - self._model._offs_real_w.value
                 w_start[i_w] = values.get(name)
 
     def _set_lb_values(self, p_free_lb, dx_lb, x_lb, w_lb):
@@ -638,7 +638,7 @@ class NLPInitialization(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = jmi._translate_value_ref(value_ref)
-            i_dx = z_i - self._model._offs_dx.value
+            i_dx = z_i - self._model._offs_real_dx.value
             dx_lb[i_dx] = values.get(name)
         
         # x: differentiate
@@ -650,7 +650,7 @@ class NLPInitialization(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = jmi._translate_value_ref(value_ref)
-            i_x = z_i - self._model._offs_x.value
+            i_x = z_i - self._model._offs_real_x.value
             x_lb[i_x] = values.get(name)
                     
         # w: algebraic
@@ -662,7 +662,7 @@ class NLPInitialization(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = jmi._translate_value_ref(value_ref)
-            i_w = z_i - self._model._offs_w.value
+            i_w = z_i - self._model._offs_real_w.value
             w_lb[i_w] = values.get(name) 
 
     def _set_ub_values(self, p_free_ub, dx_ub, x_ub, w_ub):
@@ -708,7 +708,7 @@ class NLPInitialization(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = jmi._translate_value_ref(value_ref)
-            i_dx = z_i - self._model._offs_dx.value
+            i_dx = z_i - self._model._offs_real_dx.value
             dx_ub[i_dx] = values.get(name)
         
         # x: differentiate
@@ -720,7 +720,7 @@ class NLPInitialization(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = jmi._translate_value_ref(value_ref)
-            i_x = z_i - self._model._offs_x.value
+            i_x = z_i - self._model._offs_real_x.value
             x_ub[i_x] = values.get(name)
             
         
@@ -733,6 +733,6 @@ class NLPInitialization(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = jmi._translate_value_ref(value_ref)
-            i_w = z_i - self._model._offs_w.value
+            i_w = z_i - self._model._offs_real_w.value
             w_ub[i_w] = values.get(name)
 
