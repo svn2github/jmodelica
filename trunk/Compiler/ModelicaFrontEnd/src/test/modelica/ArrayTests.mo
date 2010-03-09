@@ -6326,15 +6326,18 @@ model Transpose5
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(
          name="Transpose5",
-         description="Scalarization of transpose operator: Integer[2]",
+         description="Scalarization of transpose operator: too few dimensions of arg",
          errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 4886, column 24:
+Semantic error at line 6377, column 15:
   Types of positional argument 1 and input A are not compatible
 ")})));
 
- Real x[2] = transpose({1,2});
+  Real x[2] = {1,2};
+  Real y[2];
+equation
+  y=transpose(x)*x;
 end Transpose5;
 
 
