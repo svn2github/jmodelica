@@ -695,8 +695,10 @@ aspect FlatNames {
 
 	syn String FClass.name() = getFQName().name();
 	syn String FFunctionDecl.name() = getFQName().name();
-	syn String FVariable.name() = getFQName().name();
-	syn String FFunctionVariable.name() = getFQName().name();
+	
+	syn String AbstractFVariable.name() = null;
+	eq FVariable.name()         = getFQName().name();
+	eq FFunctionVariable.name() = getFQName().name();
 
 //	syn lazy String FQName.derName() = "der(" + name() + ")";
 	
@@ -996,6 +998,7 @@ aspect FlatFunctionUtils {
 	 }
 	 
 	 inh lazy String FFunctionCall.tempVarName();
+	 inh lazy String FExp.tempVarName();
 	 eq InstNode.getChild().tempVarName()      = null;
 	 eq FFunctionCall.getArray().tempVarName() = tempVarName();
 	 eq FClass.getChild().tempVarName()        = tempVarName();

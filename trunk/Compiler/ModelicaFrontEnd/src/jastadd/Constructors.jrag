@@ -84,21 +84,36 @@ aspect Constructors {
 	}
 	
 	/**
-	 * Constructs a boolean literal expression from a boolean.
+	 * \brief Constructs a boolean literal expression from a boolean.
 	 */
 	public static FBooleanLitExp FBooleanLitExp.create(boolean val) {
 		return val ? new FBooleanLitExpTrue() : new FBooleanLitExpFalse();
 	}
 	
 	/**
-	 * Constructs an FIdUse that refers to the variable with the given name.
+	 * \brief Constructs an FIdUse that refers to the variable with the given name.
 	 */
 	public FIdUse.FIdUse(String name) {
 		this(new FQName(name));
 	}
 	
 	/**
-	 * Constructs an FIdUseExp that refers to the variable with the given name.
+	 * \brief Constructs an FForIndex with a temporary index variable and a 
+	 *        range expression starting at 1 as the in expression.
+	 * 
+	 * @param name  the name of the index
+	 * @param end   the upper limit for the range expression
+	 */
+	public FForIndex.FForIndex(String name, FExp end) {
+		this();
+		FExp start = new FIntegerLitExp(1);
+		setFExp(new FRangeExp(new List().add(start).add(end)));
+		setFVariable(new FIntegerVariable(new FTemporaryVisibilityType(), fParameter(), 
+				new Opt(), new List(), new Opt(), new Opt(), new FQName(name)));
+	}
+	
+	/**
+	 * \brief Constructs an FIdUseExp that refers to the variable with the given name.
 	 */
 	public FIdUseExp.FIdUseExp(String name) {
 		this(new FIdUse(name));
@@ -152,6 +167,13 @@ aspect Constructors {
 	public FFunctionArray.FFunctionArray(FPrimitiveType type, String name) {
 		this(new Opt(), type, new Opt(), new FQName(name));
 		getFQName().setLastFArraySubscripts(type.size().flattenFArraySubscripts());
+	}
+	
+	/**
+	 * \brief Create an FFunctionVariable with the given name and type. 
+	 */
+	public FFunctionVariable.FFunctionVariable(FPrimitiveType type, String name) {
+		this(new Opt(), type, new Opt(), new FQName(name));
 	}
 	
 	/**

@@ -3845,6 +3845,340 @@ end FunctionTests.UnknownArray9;
 end UnknownArray9;
 
 
+model UnknownArray10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownArray10",
+         description="Scalarization of operations on arrays of unknown size: assignment",
+         flatModel="
+fclass FunctionTests.UnknownArray10
+ Real x[1];
+ Real x[2];
+equation
+ ({x[1],x[2]}) = FunctionTests.UnknownArray10.f({1,2});
+
+ function FunctionTests.UnknownArray10.f
+  input Real[:] a;
+  output Real[size(a, 1)] b;
+ algorithm
+  for i1 in 1:size(b, 1) loop
+   b[i1] := a[i1];
+  end for;
+  return;
+ end FunctionTests.UnknownArray10.f;
+end FunctionTests.UnknownArray10;
+")})));
+
+ function f
+  input Real a[:];
+  output Real b[size(a,1)];
+ algorithm
+  b := a;
+ end f;
+ 
+ Real x[2] = f({1,2});
+end UnknownArray10;
+
+
+model UnknownArray11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownArray11",
+         description="Scalarization of operations on arrays of unknown size: binding expression",
+         flatModel="
+fclass FunctionTests.UnknownArray11
+ Real x[1];
+ Real x[2];
+equation
+ ({x[1],x[2]}) = FunctionTests.UnknownArray11.f({1,2});
+
+ function FunctionTests.UnknownArray11.f
+  input Real[:] a;
+  output Real[size(a, 1)] b;
+ algorithm
+  for i1 in 1:size(b, 1) loop
+   b[i1] := a[i1];
+  end for;
+  return;
+ end FunctionTests.UnknownArray11.f;
+end FunctionTests.UnknownArray11;
+")})));
+
+ function f
+  input Real a[:];
+  output Real b[size(a,1)] = a;
+ algorithm
+ end f;
+ 
+ Real x[2] = f({1,2});
+end UnknownArray11;
+
+
+model UnknownArray12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownArray12",
+         description="Scalarization of operations on arrays of unknown size: element-wise expression",
+         flatModel="
+fclass FunctionTests.UnknownArray12
+ Real x[1];
+ Real x[2];
+equation
+ ({x[1],x[2]}) = FunctionTests.UnknownArray12.f({1,2}, {3,4}, 5);
+
+ function FunctionTests.UnknownArray12.f
+  input Real[:] a;
+  input Real[:] b;
+  input Real c;
+  output Real[size(a, 1)] o;
+ algorithm
+  for i1 in 1:size(o, 1) loop
+   o[i1] := ( c ) * ( a[i1] ) + ( 2 ) * ( b[i1] );
+  end for;
+  return;
+ end FunctionTests.UnknownArray12.f;
+end FunctionTests.UnknownArray12;
+")})));
+
+ function f
+  input Real a[:];
+  input Real b[:];
+  input Real c;
+  output Real o[size(a,1)];
+ algorithm
+  o := c * a + 2 * b;
+ end f;
+ 
+ Real x[2] = f({1,2}, {3,4}, 5);
+end UnknownArray12;
+
+
+model UnknownArray13
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownArray13",
+         description="Scalarization of operations on arrays of unknown size: element-wise binding expression",
+         flatModel="
+fclass FunctionTests.UnknownArray13
+ Real x[1];
+ Real x[2];
+equation
+ ({x[1],x[2]}) = FunctionTests.UnknownArray13.f({1,2}, {3,4}, 5);
+
+ function FunctionTests.UnknownArray13.f
+  input Real[:] a;
+  input Real[:] b;
+  input Real c;
+  output Real[size(a, 1)] o;
+ algorithm
+  for i1 in 1:size(o, 1) loop
+   o[i1] := ( c ) * ( a[i1] ) + ( 2 ) * ( b[i1] );
+  end for;
+  return;
+ end FunctionTests.UnknownArray13.f;
+end FunctionTests.UnknownArray13;
+")})));
+
+ function f
+  input Real a[:];
+  input Real b[:];
+  input Real c;
+  output Real o[size(a,1)] = c * a + 2 * b;
+ algorithm
+ end f;
+ 
+ Real x[2] = f({1,2}, {3,4}, 5);
+end UnknownArray13;
+
+
+model UnknownArray14
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownArray14",
+         description="Scalarization of operations on arrays of unknown size: matrix multiplication",
+         flatModel="
+fclass FunctionTests.UnknownArray14
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation
+ ({{x[1,1],x[1,2]},{x[2,1],x[2,2]}}) = FunctionTests.UnknownArray14.f({{1,2},{3,4}}, {{5,6},{7,8}});
+
+ function FunctionTests.UnknownArray14.f
+  input Real[:, :] a;
+  input Real[size(a, 2), :] b;
+  Real temp_1;
+  output Real[size(a, 1), size(b, 2)] o;
+ algorithm
+  for i1 in 1:size(o, 1) loop
+   for i2 in 1:size(o, 2) loop
+    temp_1 := 0.0;
+    for i3 in 1:size(a, 2) loop
+     temp_1 := temp_1 + ( a[i1,i3] ) * ( b[i3,i2] );
+    end for;
+    o[i1,i2] := temp_1;
+   end for;
+  end for;
+  return;
+ end FunctionTests.UnknownArray14.f;
+end FunctionTests.UnknownArray14;
+")})));
+
+ function f
+  input Real a[:,:];
+  input Real b[size(a,2),:];
+  output Real o[size(a,1),size(b,2)] = a * b;
+ algorithm
+ end f;
+ 
+ Real x[2,2] = f({{1,2},{3,4}}, {{5,6},{7,8}});
+end UnknownArray14;
+
+
+model UnknownArray15
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownArray15",
+         description="Scalarization of operations on arrays of unknown size: vector multiplication",
+         flatModel="
+fclass FunctionTests.UnknownArray15
+ Real x;
+equation
+ x = FunctionTests.UnknownArray15.f({1,2}, {3,4});
+
+ function FunctionTests.UnknownArray15.f
+  input Real[:] a;
+  input Real[size(a, 1)] b;
+  Real temp_1;
+  output Real o;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(a, 1) loop
+   temp_1 := temp_1 + ( a[i1] ) * ( b[i1] );
+  end for;
+  o := temp_1;
+  return;
+ end FunctionTests.UnknownArray15.f;
+end FunctionTests.UnknownArray15;
+")})));
+
+ function f
+  input Real a[:];
+  input Real b[size(a,1)];
+  output Real o = a * b;
+ algorithm
+ end f;
+ 
+ Real x = f({1,2}, {3,4});
+end UnknownArray15;
+
+
+model UnknownArray16
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownArray16",
+         description="Scalarization of operations on arrays of unknown size: outside assignment",
+         flatModel="
+fclass FunctionTests.UnknownArray16
+ Real x;
+equation
+ x = FunctionTests.UnknownArray16.f({1,2}, {3,4});
+
+ function FunctionTests.UnknownArray16.f
+  input Real[:] a;
+  input Real[size(a, 1)] b;
+  output Real o;
+  Real temp_1;
+ algorithm
+  o := 1;
+  temp_1 := 0.0;
+  for i1 in 1:size(a, 1) loop
+   temp_1 := temp_1 + ( a[i1] ) * ( b[i1] );
+  end for;
+  if temp_1 < 4 then
+   o := 2;
+  end if;
+  return;
+ end FunctionTests.UnknownArray16.f;
+end FunctionTests.UnknownArray16;
+")})));
+
+ function f
+  input Real a[:];
+  input Real b[size(a,1)];
+  output Real o = 1;
+ algorithm
+  if a * b < 4 then
+   o := 2;
+  end if;
+ end f;
+ 
+ Real x = f({1,2}, {3,4});
+end UnknownArray16;
+
+
+model UnknownArray17
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownArray17",
+         description="Scalarization of operations on arrays of unknown size: nestled multiplications",
+         flatModel="
+fclass FunctionTests.UnknownArray17
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation
+ y[1,1] = 1;
+ y[1,2] = 2;
+ y[2,1] = 3;
+ y[2,2] = 4;
+ ({{x[1,1],x[1,2]},{x[2,1],x[2,2]}}) = FunctionTests.UnknownArray17.f({{y[1,1],y[1,2]},{y[2,1],y[2,2]}}, {{y[1,1],y[1,2]},{y[2,1],y[2,2]}}, {{y[1,1],y[1,2]},{y[2,1],y[2,2]}});
+
+ function FunctionTests.UnknownArray17.f
+  input Real[:, :] a;
+  input Real[size(a, 2), :] b;
+  input Real[size(b, 2), :] c;
+  Real temp_1;
+  Real temp_2;
+  output Real[size(a, 1), 2] o;
+ algorithm
+  for i1 in 1:size(o, 1) loop
+   for i2 in 1:size(o, 2) loop
+    temp_1 := 0.0;
+    for i3 in 1:size(b, 2) loop
+     temp_2 := 0.0;
+     for i4 in 1:size(a, 2) loop
+      temp_2 := temp_2 + ( a[i1,i4] ) * ( b[i4,i3] );
+     end for;
+     temp_1 := temp_1 + ( temp_2 ) * ( c[i3,i2] );
+    end for;
+    o[i1,i2] := temp_1;
+   end for;
+  end for;
+  return;
+ end FunctionTests.UnknownArray17.f;
+end FunctionTests.UnknownArray17;
+")})));
+
+ function f
+  input Real a[:,:];
+  input Real b[size(a,2),:];
+  input Real c[size(b,2),:];
+  output Real[size(a, 1), 2] o = a * b * c;
+ algorithm
+ end f;
+ 
+ Real y[2,2] = {{1,2}, {3,4}};
+ Real x[2,2] = f(y, y, y);
+end UnknownArray17;
+
+
 
 /* =========================== Records =========================== */
 /*

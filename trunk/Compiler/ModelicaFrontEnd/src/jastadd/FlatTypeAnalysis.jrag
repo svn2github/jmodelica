@@ -76,9 +76,9 @@ aspect FlatTypeAnalysis {
 	syn lazy FPrimitiveType FExp.type() = fUnknownType();
 	
 	eq FUnaryExp.type()   = getFExp().type();
-	eq FArtmBinExp.type() = getLeft().type().looseNumericPromotion(getRight().type());
-	eq FAddExp.type()     = getLeft().type().numericPromotion(getRight().type());
-	eq FSubExp.type()     = getLeft().type().numericPromotion(getRight().type());
+	eq FArtmBinExp.type() = getLeft().type().looseNumericPromotion(getRight().type(), inFunction());
+	eq FAddExp.type()     = getLeft().type().numericPromotion(getRight().type(), inFunction());
+	eq FSubExp.type()     = getLeft().type().numericPromotion(getRight().type(), inFunction());
 	eq FNegExp.type()     = getFExp().type().isNumeric() ? getFExp().type() : fUnknownType();
 	
 	eq FNoEventExp.type() = getFExp().type();
@@ -97,7 +97,9 @@ aspect FlatTypeAnalysis {
 			return super.type();
 		Size left = getLeft().size();
 		Size right = getRight().size();
-		if (left.last() != right.get(0) || left.ndims() > 2 || right.ndims() > 2)
+		if (!left.equivalentDim(right, inFunction(), left.ndims() - 1, 0))
+			return fUnknownType();
+		if (left.ndims() > 2 || right.ndims() > 2)
 			return fUnknownType();
 		FPrimitiveType res = getLeft().type().scalarNumericPromotion(getRight().type());
 		if (left.ndims() == 1 && right.ndims() == 1) 
@@ -126,7 +128,7 @@ aspect FlatTypeAnalysis {
 			fUnknownType() : 
 			getFExp().type().arrayType(size());
 	
-	eq FCross.type() = getX().type().numericPromotion(getY().type());
+	eq FCross.type() = getX().type().numericPromotion(getY().type(), inFunction());
 	
 	eq FAbsExp.type() = getFExp().type();
 	
@@ -149,7 +151,7 @@ aspect FlatTypeAnalysis {
 	
 	eq FMinMaxExp.type() = 
 		hasY() ? 
-			getX().type().scalarType().typePromotion(getY().type().scalarType()) : 
+			getX().type().scalarType().typePromotion(getY().type().scalarType(), inFunction()) : 
 			getX().type().scalarType();
 	
 	eq FRangeExp.type() {
@@ -177,7 +179,7 @@ aspect FlatTypeAnalysis {
 	}
 	eq FLogBinExp.type() {
 		FPrimitiveType left = getLeft().type();
-		if (left.typeCompatible(getRight().type()) && left.isBoolean())
+		if (left.typeCompatible(getRight().type(), inFunction()) && left.isBoolean())
 			return left;
 		else
 			return fUnknownType();
@@ -188,9 +190,10 @@ aspect FlatTypeAnalysis {
 		if (!getIfExp().type().isBoolean() || !getIfExp().type().isScalar())
 			return fUnknownType();
 		FPrimitiveType tot = getThenExp().type();
+		boolean func = inFunction();
 		for (FElseIfExp e : getFElseIfExps())
-			tot = tot.typePromotion(e.type());
-		return tot.typePromotion(getElseExp().type());
+			tot = tot.typePromotion(e.type(), func);
+		return tot.typePromotion(getElseExp().type(), func);
 	}
 	
 	eq FElseIfExp.type() {
@@ -232,11 +235,12 @@ aspect FlatTypeAnalysis {
 		
 		// Check that the types of the elements are consistent
 		FPrimitiveType t = getFExp(0).type();
+		boolean func = inFunction();
 		for (int i = 1; i < getNumFExp(); i++) {
-			if (!t.equivalentTo(getFExp(i).type())) 
+			if (!t.equivalentTo(getFExp(i).type(), func)) 
 				return fUnknownType();
 			if (t.isNumeric()) 
-				t = t.numericPromotion(getFExp(i).type());
+				t = t.numericPromotion(getFExp(i).type(), func);
 		}
 		return t.arrayType(size());
 	}
@@ -252,10 +256,10 @@ aspect FlatTypeAnalysis {
 		for (int i = 1; i < getNumFExp(); i++) {
 			// Check that the types of the elements are consistent
 			FPrimitiveType t2 = getFExp(i).type().scalarType();
-			if (!t.equivalentTo(t2)) 
+			if (!t.equivalentTo(t2, func)) 
 				return fUnknownType();
 			if (t.isNumeric()) 
-				t = t.numericPromotion(t2);
+				t = t.numericPromotion(t2, func);
 			
 			// Check that the sizes are consistent
 			if (!s.equivalentExcept(getFExp(i).size().promote(ndims()), func, dim))
@@ -400,11 +404,8 @@ aspect TypePromotion {
 	 * If types are not compatible, the unknown type is returned.
 	 * An integer type combined with a real type results in a real type.
 	 */
-	syn FPrimitiveType FPrimitiveType.typePromotion(FPrimitiveType type) {
-		if (!equivalentTo(type))
-			return fUnknownType();
-		return isNumeric() ? numericPromotion(type) : this;
-	}
+	syn FPrimitiveType FPrimitiveType.typePromotion(FPrimitiveType type) = 
+		typePromotion(type, false);
 	
 	/**
 	 * \brief Combine two types to the broadest common numeric denominator.
@@ -413,7 +414,8 @@ aspect TypePromotion {
 	 * the unknown type is returned.
 	 * An integer type combined with a real type results in a real type.
 	 */
-	syn FPrimitiveType FPrimitiveType.numericPromotion(FPrimitiveType type) = fUnknownType();
+	syn FPrimitiveType FPrimitiveType.numericPromotion(FPrimitiveType type) = 
+		numericPromotion(type, false);
 	
 	/**
 	 * \brief Combine two types to the broadest common numeric denominator.
@@ -422,7 +424,8 @@ aspect TypePromotion {
 	 * the unknown type is returned. 
 	 * An integer type combined with a real type results in a real type.
 	 */
-	syn FPrimitiveType FPrimitiveType.looseNumericPromotion(FPrimitiveType type) = fUnknownType();
+	syn FPrimitiveType FPrimitiveType.looseNumericPromotion(FPrimitiveType type) = 
+		looseNumericPromotion(type, false);
 	
 	/**
 	 * \brief Combine two types to the broadest common scalar numeric denominator.
@@ -432,7 +435,47 @@ aspect TypePromotion {
 	 */
 	syn FPrimitiveType FPrimitiveType.scalarNumericPromotion(FPrimitiveType type) = fUnknownType();
 	
-	eq FPrimitiveScalarNumericType.numericPromotion(FPrimitiveType type) {
+	/**
+	 * \brief Combine two types to the broadest common denominator.
+	 * 
+	 * If types are not compatible, the unknown type is returned.
+	 * An integer type combined with a real type results in a real type.
+	 * If <code>allowUnknown</code> is <code>true</code>, then unknown 
+	 * lengths are considered equal to any length.
+	 */
+	syn FPrimitiveType FPrimitiveType.typePromotion(FPrimitiveType type, boolean allowUnknown) {
+		if (!equivalentTo(type, allowUnknown))
+			return fUnknownType();
+		return isNumeric() ? numericPromotion(type, allowUnknown) : this;
+	}
+	
+	/**
+	 * \brief Combine two types to the broadest common numeric denominator.
+	 * 
+	 * If either is non-numeric or if sizes doesn't match, 
+	 * the unknown type is returned.
+	 * An integer type combined with a real type results in a real type.
+	 * If <code>allowUnknown</code> is <code>true</code>, then unknown 
+	 * lengths are considered equal to any length.
+	 */
+	syn FPrimitiveType FPrimitiveType.numericPromotion(
+			FPrimitiveType type, boolean allowUnknown) = fUnknownType();
+	
+	/**
+	 * \brief Combine two types to the broadest common numeric denominator.
+	 * 
+	 * If either is non-numeric or if both are array and sizes doesn't match, 
+	 * the unknown type is returned. 
+	 * An integer type combined with a real type results in a real type.
+	 * If <code>allowUnknown</code> is <code>true</code>, then unknown 
+	 * lengths are considered equal to any length.
+	 */
+	syn FPrimitiveType FPrimitiveType.looseNumericPromotion(
+			FPrimitiveType type, boolean allowUnknown) = fUnknownType();
+	
+	
+	eq FPrimitiveScalarNumericType.numericPromotion(
+			FPrimitiveType type, boolean allowUnknown) {
 		if (type.isScalar()) {
 			return scalarNumericPromotion(type);
 		} else {
@@ -440,15 +483,17 @@ aspect TypePromotion {
 		}
 	}
 
-	eq FPrimitiveArrayNumericType.numericPromotion(FPrimitiveType type) {
-		if (dimensionCompatible(type)) {
+	eq FPrimitiveArrayNumericType.numericPromotion(
+			FPrimitiveType type, boolean allowUnknown) {
+		if (dimensionCompatible(type, allowUnknown)) {
 			return scalarNumericPromotion(type).arrayType(size());
 		} else {
 			return fUnknownType();
 		}
 	}
 	
-	eq FPrimitiveScalarNumericType.looseNumericPromotion(FPrimitiveType type) {
+	eq FPrimitiveScalarNumericType.looseNumericPromotion(
+			FPrimitiveType type, boolean allowUnknown) {
 		if (type.isScalar()) {
 			return scalarNumericPromotion(type);
 		} else {
@@ -456,8 +501,9 @@ aspect TypePromotion {
 		}
 	}
 
-	eq FPrimitiveArrayNumericType.looseNumericPromotion(FPrimitiveType type) {
-		if (type.isScalar() || dimensionCompatible(type)) {
+	eq FPrimitiveArrayNumericType.looseNumericPromotion(
+			FPrimitiveType type, boolean allowUnknown) {
+		if (type.isScalar() || dimensionCompatible(type, allowUnknown)) {
 			return scalarNumericPromotion(type).arrayType(size());
 		} else {
 			return fUnknownType();
@@ -517,21 +563,26 @@ aspect FTypeCompatibility {
 	  * x=0
 	  * where x is declared as Real is ok.
 	  */
-	syn boolean FPrimitiveType.equivalentTo(FPrimitiveType type) = false;
-	eq FRealScalarType.equivalentTo(FPrimitiveType type) = type.isScalar() && (type.isReal() || type.isInteger());
-	eq FIntegerScalarType.equivalentTo(FPrimitiveType type) = type.isScalar() && (type.isInteger() || type.isReal());
-	eq FBooleanScalarType.equivalentTo(FPrimitiveType type) = type.isScalar() && type.isBoolean();
-	eq FStringScalarType.equivalentTo(FPrimitiveType type) = type.isScalar() && type.isString();
+	syn boolean FPrimitiveType.equivalentTo(FPrimitiveType type) = equivalentTo(type, false);
 
-	eq FRealArrayType.equivalentTo(FPrimitiveType type) = 
-		(type.isReal() || type.isInteger()) && dimensionCompatible(type);
-	eq FIntegerArrayType.equivalentTo(FPrimitiveType type) = 
-		(type.isInteger() || type.isReal()) && dimensionCompatible(type);
-	eq FBooleanArrayType.equivalentTo(FPrimitiveType type) = 
-		type.isBoolean() && dimensionCompatible(type);
-	eq FStringArrayType.equivalentTo(FPrimitiveType type) = 
-		type.isString() && dimensionCompatible(type);
+	syn boolean FPrimitiveType.equivalentTo(FPrimitiveType type, boolean allowUnknown) = false;
+	eq FRealScalarType.equivalentTo(FPrimitiveType type, boolean allowUnknown) = 
+		type.isScalar() && (type.isReal() || type.isInteger());
+	eq FIntegerScalarType.equivalentTo(FPrimitiveType type, boolean allowUnknown) = 
+		type.isScalar() && (type.isInteger() || type.isReal());
+	eq FBooleanScalarType.equivalentTo(FPrimitiveType type, boolean allowUnknown) = 
+		type.isScalar() && type.isBoolean();
+	eq FStringScalarType.equivalentTo(FPrimitiveType type, boolean allowUnknown) = 
+		type.isScalar() && type.isString();
 
+	eq FRealArrayType.equivalentTo(FPrimitiveType type, boolean allowUnknown) = 
+		(type.isReal() || type.isInteger()) && dimensionCompatible(type, allowUnknown);
+	eq FIntegerArrayType.equivalentTo(FPrimitiveType type, boolean allowUnknown) = 
+		(type.isInteger() || type.isReal()) && dimensionCompatible(type, allowUnknown);
+	eq FBooleanArrayType.equivalentTo(FPrimitiveType type, boolean allowUnknown) = 
+		type.isBoolean() && dimensionCompatible(type, allowUnknown);
+	eq FStringArrayType.equivalentTo(FPrimitiveType type, boolean allowUnknown) = 
+		type.isString() && dimensionCompatible(type, allowUnknown);
  
  }
 
@@ -652,6 +703,15 @@ aspect FTypeCompatibility {
  	eq FStringScalarType.arrayType(Size size)   = fStringArrayType(size);
  	eq FBooleanScalarType.arrayType(Size size)  = fBooleanArrayType(size);
  	eq FUnknownScalarType.arrayType(Size size)  = fUnknownArrayType(size);
+ 	
+ 	/**
+ 	 * \brief Create a literal with the zero value for the given type.
+ 	 */
+ 	public FExp FPrimitiveType.zeroLiteral()     { return null; }
+ 	public FExp FRealScalarType.zeroLiteral()    { return new FRealLitExp(0.0); }
+ 	public FExp FIntegerScalarType.zeroLiteral() { return new FIntegerLitExp(0); }
+ 	public FExp FStringScalarType.zeroLiteral()  { return new FStringLitExp(""); }
+ 	public FExp FBooleanScalarType.zeroLiteral() { return new FBooleanLitExpFalse(); }
 
  }
  

@@ -19,7 +19,8 @@ import java.util.HashMap;
 aspect FlatNameBinding {
 	
 	inh AbstractFVariable FIdUse.lookupFV(String name);
-	inh AbstractFVariable FAssignStmt.lookupFV(String name);
+	inh AbstractFVariable FExp.lookupFV(String name);
+	inh AbstractFVariable FFunctionVariable.lookupFV(String name);
 	syn lazy AbstractFVariable FIdUse.myFV() = lookupFV(name());
 	
 	syn lazy AbstractFVariable FIdUseExp.myFV() = getFIdUse().lookupFV(name());

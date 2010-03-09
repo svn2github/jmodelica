@@ -1,3 +1,4 @@
+
 /*
     Copyright (C) 2009 Modelon AB
 
@@ -13,6 +14,10 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * \brief Contains transformations on the flattened model which converts
@@ -656,21 +661,272 @@ aspect Scalarization {
 	 */
 	public void FFunctionVariable.scalarizeBindingExp(
 			List<FFunctionVariable> vars, List<FStatement> stmts, HashMap<String,FExp> indexMap) {
-		createFunctionCallTemporaries(stmts, vars, indexMap, true);
+		createArrayTemporaries(stmts, vars, indexMap, true);
 		stmts.add(new FAssignStmt(new FIdUse(getFQName().fullCopy()), getBindingExp().scalarize(indexMap)));
 	}
 	
 	public void FFunctionArray.scalarizeBindingExp(
 			List<FFunctionVariable> vars, List<FStatement> stmts, HashMap<String,FExp> indexMap) {
-		createFunctionCallTemporaries(stmts, vars, indexMap, true);
-		FIdUse id = new FIdUse(new FQName(name()));
-		Array arr = getBindingExp().getArray();
-		for (Index i : arr.indices()) {
-			FExp exp = arr.get(i).scalarize(indexMap);
-			FIdUse nid = (FIdUse) id.fullCopy();
-			nid.getFQName().specify(i, false);
-			stmts.add(new FAssignStmt(nid, exp));
+		if (size().isUnknown()) {
+			scalarizeUnknownArrayAssignment(vars, stmts, indexMap, getBindingExp());
+		} else {
+			createArrayTemporaries(stmts, vars, indexMap, true);
+			FIdUse id = new FIdUse(new FQName(name()));
+			Array arr = getBindingExp().getArray();
+			for (Index i : arr.indices()) {
+				FExp exp = arr.get(i).scalarize(indexMap);
+				FIdUse nid = (FIdUse) id.fullCopy();
+				nid.getFQName().specify(i, false);
+				stmts.add(new FAssignStmt(nid, exp));
+			}
 		}
+	}
+	
+	/**
+	 * \brief A node that can look up variable names in the flat tree.
+	 */
+	public interface FlatLookupNode {
+		public AbstractFVariable lookupFV(String name);
+	}
+	public class FFunctionVariable implements FlatLookupNode {}
+	public class FExp implements FlatLookupNode {}
+	
+	/**
+	 * \brief Created and organizes names of for indices for generated for loops.
+	 */
+	public class ForNames implements Iterable<String> {
+		private ArrayList<String[]> names;
+		private int last;
+		private int pos;
+		
+		/**
+		 * \brief Standard constructor.
+		 */
+		public ForNames() {
+			names = new ArrayList<String[]>();
+			last = 0;
+		}
+		
+		/**
+		 * \brief Creates a new ForNames with a single layer with space for <code>n</code> names.
+		 */
+		public ForNames(int n) {
+			this();
+			addLayer(n);
+		}
+		
+		/**
+		 * \brief Add a new layer of names, that can be filled with new names or names 
+		 *        from the layer underneath.
+		 * 
+		 * @param n  the number of names in the new layer
+		 */
+		public void addLayer(int n) {
+			names.add(new String[n]);
+			pos = 0;
+		}
+		
+		/**
+		 * \brief Fills all empty spots in the top layer with newly created names.
+		 */
+		public void fillLayer(FlatLookupNode context) {
+			String[] top = topLayer();
+			for (int i = pos; i < top.length; i++) 
+				create(context);
+		}
+		
+		/**
+		 * \brief Removes the top layer, exposing the layer underneath.
+		 */
+		public void removeLayer() {
+			names.remove(names.size() - 1);
+		}
+
+		private String[] topLayer() {
+			return names.get(names.size() - 1);
+		}
+		
+		/**
+		 * \brief Gets name with index <code>i</code> in the top layer.
+		 */
+		public String get(int i) {
+			return topLayer()[i];
+		}
+		
+		/**
+		 * \brief Adds a name to the top layer.
+		 */
+		public void add(String name) {
+			topLayer()[pos++] = name;
+		}
+		
+		/**
+		 * \brief Creates a new name and adds it to the top layer.
+		 * 
+		 * @return the created name
+		 */
+		public String create(FlatLookupNode context) {
+			String name;
+			do {
+				name = "i" + (++last);
+			} while (!context.lookupFV(name).isUnknown()); 
+			add(name);
+			return name;
+		}
+		
+		/**
+		 * \brief Adds a name from the underlying layer to the top layer.
+		 * 
+		 * @param i  the index in the underlying layer
+		 */
+		public void promote(int i) {
+			add(names.get(names.size() - 2)[i]);
+		}
+		
+		/**
+		 * \brief Return the number of names in the top layer.
+		 */
+		public int size() {
+			return topLayer().length;
+		}
+		
+		/**
+		 * \brief Iterates over the top layer.
+		 */
+		public Iterator<String> iterator() {
+			return Arrays.asList(topLayer()).iterator();
+		}
+	}
+
+	/**
+	 * \brief Scalarize an assignment to an array of unknown size and put the resulting statements in 
+	 *        the list of statements.
+	 */
+	public void AbstractFVariable.scalarizeUnknownArrayAssignment(List<FFunctionVariable> vars, 
+			List<FStatement> stmts, HashMap<String,FExp> indexMap, FExp exp) {}
+
+	public void FFunctionArray.scalarizeUnknownArrayAssignment(List<FFunctionVariable> vars, 
+			List<FStatement> stmts, HashMap<String,FExp> indexMap, FExp exp) {
+		ForNames names = new ForNames(ndims());
+		names.fillLayer(this);
+		HashMap<String,FExp> myIndexMap = new HashMap<String,FExp>(indexMap);
+		exp.addArrayUsesToIndexMap(myIndexMap, names);
+		List<FStatement> cur = stmts;
+		for (int i = 0; i < names.size(); i++) {
+			FForStmt fs = new FForStmt(createFForIndex(names.get(i), i), new List());
+			cur.add(fs);
+			cur = fs.getForStmts();
+		}
+		exp.createArrayTemporaries(cur, vars, myIndexMap, true);
+		FIdUse use = createUseWithNamedSubscripts(names);
+		cur.add(new FAssignStmt(use, exp.scalarize(myIndexMap)));
+	}
+	
+	/**
+	 * \brief Create a for index that loops over this array variable.
+	 * 
+	 * @param name  the name of the new index
+	 * @param dim   the dimension to loop over
+	 */
+	public FForIndex FFunctionArray.createFForIndex(String name, int dim) {
+		FExp end = new FSizeExp(new FIdUseExp(name()), new Opt(new FIntegerLitExp(dim + 1)));
+		return new FForIndex(name, end);
+	}
+	
+	/**
+	 * \brief The names of the for indices of the surrounding generated for loops, if any.
+	 */
+	protected ForNames FExp.indexNames = null;
+	
+	/**
+	 * \brief Add translations of all uses of array variables to the index map. 
+	 *        The translations should add array subscripts that are uses of the given names.
+	 * 
+	 * Any expression node that needs it's own for loop(s) should override this method, 
+	 * save <code>names</code> and create it's for loop in createArrayTemporaries().
+	 */
+	public void ASTNode.addArrayUsesToIndexMap(HashMap<String,FExp> indexMap, ForNames names) {
+		for (ASTNode n : this)
+			n.addArrayUsesToIndexMap(indexMap, names);
+	}
+	
+	public void FIdUseExp.addArrayUsesToIndexMap(HashMap<String,FExp> indexMap, ForNames names) {
+		if (isArray()) {
+			FIdUse use = myFV().createUseWithNamedSubscripts(names);
+			indexMap.put(name(), new FIdUseExp(use));
+		}
+	}
+	
+	public void FMulExp.addArrayUsesToIndexMap(HashMap<String,FExp> indexMap, ForNames names) {
+		if (isArray() && !isElementWise())
+			indexNames = names;
+		else
+			super.addArrayUsesToIndexMap(indexMap, names);
+	}
+	
+	public void FMulExp.createArrayTemporaries(List clauses, List vars, 
+			HashMap<String,FExp> indexMap, boolean addVar) {
+		if (!isElementWise() && (getLeft().size().isUnknown() || getRight().size().isUnknown())) {
+			if (indexNames == null)
+				indexNames = new ForNames();
+			useTempVar = true;
+			
+			// Create temp
+			FPrimitiveType type = (FPrimitiveType) type().scalarType().fullCopy();
+			if (addVar) 
+				vars.add(new FFunctionVariable(type, tempVarName()));
+			clauses.add(new FAssignStmt(new FIdUse(tempVarName()), type.zeroLiteral()));
+			
+			// Set up indices for the left operand
+			FExp exp = getLeft();
+			indexNames.addLayer(exp.ndims());
+			if (indexNames.size() > 1)
+				indexNames.promote(0);
+			String i = indexNames.create(this);
+			HashMap<String,FExp> myIndexMap = new HashMap<String,FExp>(indexMap);
+			exp.addArrayUsesToIndexMap(myIndexMap, indexNames);
+			
+			// Create loop
+			FForStmt fs = new FForStmt(new FForIndex(i, getRight().size().createFExp(0)), new List());
+			clauses.add(fs);
+			List<FStatement> fsl = fs.getForStmts();
+			
+			// Scalarize left operand
+			exp.createArrayTemporaries(fsl, vars, myIndexMap, addVar);
+			FExp left = exp.scalarize(myIndexMap);
+			indexNames.removeLayer();
+			
+			// Set up indices and scalarize the right operand
+			exp = getRight();
+			indexNames.addLayer(exp.ndims());
+			indexNames.add(i);
+			if (indexNames.size() > 1)
+				indexNames.promote(ndims() - 1);
+			myIndexMap = new HashMap<String,FExp>(indexMap);
+			exp.addArrayUsesToIndexMap(myIndexMap, indexNames);
+			exp.createArrayTemporaries(fsl, vars, myIndexMap, addVar);
+			FExp right = exp.scalarize(myIndexMap);
+			indexNames.removeLayer();
+			
+			// Add statement updating temp var to loop
+			FExp mul = new FMulExp(left, right);
+			FExp add = new FAddExp(new FIdUseExp(tempVarName()), mul);
+			fsl.add(new FAssignStmt(new FIdUse(tempVarName()), add));
+		} else {
+			super.createArrayTemporaries(clauses, vars, indexMap, addVar);
+		}
+	}
+	
+	/**
+	 * \brief Create a new FIdUse of this variable with uses of <code>names</code> as array subscripts.
+	 */
+	public FIdUse AbstractFVariable.createUseWithNamedSubscripts(ForNames names) {
+		FArraySubscripts fas = new FArraySubscripts();
+		for (String name : names)
+			fas.addFSubscript(new FExpSubscript(new FIdUseExp(name)));
+		FIdUse use = new FIdUse(name());
+		use.getFQName().setLastFArraySubscripts(fas);
+		return use;
 	}
 	
 	/**
@@ -687,15 +943,9 @@ aspect Scalarization {
 		FIdUse left = getLeft();
 		FExp right = getRight();
 		if (right.size().isUnknown()) {
-			String[] names = new String[right.ndims()];
-			for (int i = 0, j = 0; i < names.length; i++, j++) {
-				names[i] = "i" + j;
-				while (!lookupFV(names[i]).isUnknown())
-					names[i] = "i" + (++j);
-			}
-			throw new UnsupportedOperationException(); // TODO: Implement this
+			left.myFV().scalarizeUnknownArrayAssignment(vars, stmts, indexMap, right);
 		} else {
-			right.createFunctionCallTemporaries(stmts, vars, indexMap, true);
+			right.createArrayTemporaries(stmts, vars, indexMap, true);
 			if (left.ndims() > 0) {
 				Array arr = right.getArray();
 				for (Index i : arr.indices()) {
@@ -703,7 +953,7 @@ aspect Scalarization {
 					stmts.add(new FAssignStmt(left.specify(i, false), exp));
 				}
 			} else {
-				FExp exp = getRight().scalarize(indexMap);
+				FExp exp = right.scalarize(indexMap);
 				stmts.add(new FAssignStmt(left.scalarize(indexMap), exp));
 			}
 		}
@@ -711,7 +961,7 @@ aspect Scalarization {
 	
 	public void FFunctionCallStmt.scalarize(List<FFunctionVariable> vars, List<FStatement> stmts, 
 			HashMap<String,FExp> indexMap) {
-		getCall().createFunctionCallTemporaries(stmts, vars, indexMap, true);
+		getCall().createArrayTemporaries(stmts, vars, indexMap, true);
 		FFunctionCallStmt stmt = new FFunctionCallStmt();
 		for (FFunctionCallLeft left : getLefts())
 			stmt.addLeft(left.scalarize(indexMap));
@@ -722,7 +972,7 @@ aspect Scalarization {
 	public void FIfWhenStmt.scalarize(List<FFunctionVariable> vars, List<FStatement> stmts, 
 			HashMap<String,FExp> indexMap) {
 		for (FIfWhenClause cl : getFIfWhenClauses())
-			cl.getTest().createFunctionCallTemporaries(stmts, vars, indexMap, true);
+			cl.getTest().createArrayTemporaries(stmts, vars, indexMap, true);
 		FIfWhenStmt stmt = createEmptyNode();
 		for (FIfWhenClause cl : getFIfWhenClauses())
 			stmt.addFIfWhenClause(cl.scalarize(vars, indexMap));
@@ -756,7 +1006,7 @@ aspect Scalarization {
 	
 	public void FForStmt.scalarize(List<FFunctionVariable> vars, List<FStatement> stmts, 
 			HashMap<String,FExp> indexMap) {
-		getIndex().createFunctionCallTemporaries(stmts, vars, indexMap, true);
+		getIndex().createArrayTemporaries(stmts, vars, indexMap, true);
 		FForStmt stmt = new FForStmt();
 		stmt.setIndex(getIndex().scalarize(indexMap));
 		for (FStatement fs : getForStmts())
@@ -766,12 +1016,12 @@ aspect Scalarization {
 	
 	public void FWhileStmt.scalarize(List<FFunctionVariable> vars, List<FStatement> stmts, 
 			HashMap<String,FExp> indexMap) {
-		getTest().createFunctionCallTemporaries(stmts, vars, indexMap, true);
+		getTest().createArrayTemporaries(stmts, vars, indexMap, true);
 		FWhileStmt stmt = new FWhileStmt();
 		stmt.setTest(getTest().scalarize(indexMap));
 		for (FStatement ws : getWhileStmts())
 			ws.scalarize(vars, stmt.getWhileStmtList(), indexMap);
-		getTest().createFunctionCallTemporaries(stmt.getWhileStmtList(), null, indexMap, false);
+		getTest().createArrayTemporaries(stmt.getWhileStmtList(), null, indexMap, false);
 		stmts.add(stmt);
 	}
 	
@@ -826,7 +1076,7 @@ aspect Scalarization {
 	public void FEquation.scalarize(List<FAbstractEquation> eqns, 
 			List<FVariable> vars, HashMap<String,FExp> indexMap) {
 		//System.out.println("FEquation.scalarize() " + ndims());
-		createFunctionCallTemporaries(eqns, vars, indexMap, true);
+		createArrayTemporaries(eqns, vars, indexMap, true);
 		if (ndims()==0) {
 			/*
 			 * If the equation is of dimension 0, i.e, already scalar,
@@ -884,7 +1134,8 @@ aspect Scalarization {
 	
 	/**
 	 * \brief Add temporary variables and an equation/statement giving them values for each function 
-	 *        call returning an array.
+	 *        call returning an array. Also add temporary variables and for loops for expressions 
+	 *        (not assignments) of unknown array sizes. 
 	 * 
 	 * Creates statement if in function, equation otherwise.
 	 * 
@@ -893,15 +1144,15 @@ aspect Scalarization {
 	 * @param indexMap  map of for indices to replace with literals
 	 * @param addVar    if <code>true</code> create and add temporary variable(s)
 	 */
-	public void ASTNode.createFunctionCallTemporaries(List clauses, 
+	public void ASTNode.createArrayTemporaries(List clauses, 
 			List vars, HashMap<String,FExp> indexMap, boolean addVar) {
 		for (ASTNode node : this)
-			node.createFunctionCallTemporaries(clauses, vars, indexMap, addVar);
+			node.createArrayTemporaries(clauses, vars, indexMap, addVar);
 	}
 	
-	public void FFunctionCall.createFunctionCallTemporaries(List clauses, 
+	public void FFunctionCall.createArrayTemporaries(List clauses, 
 			List vars, HashMap<String,FExp> indexMap, boolean addVar) {
-		super.createFunctionCallTemporaries(clauses, vars, indexMap, addVar);
+		super.createArrayTemporaries(clauses, vars, indexMap, addVar);
 		if (isArray() && !isFunctionCallClause()) {
 			boolean equation = !inFunction();
 			if (addVar) {
@@ -925,7 +1176,7 @@ aspect Scalarization {
 	}
 	
 	/**
-	 * \brief Creates a new temporary varable with the same name as the given FIdUseExp.
+	 * \brief Creates a new temporary varable with the given name.
 	 */
 	protected AbstractFVariable FFunctionCall.createTemporaryVariable(FIdUseExp idExp) {
 		FVisibilityType fvt = new FTemporaryVisibilityType();
@@ -976,6 +1227,11 @@ aspect Scalarization {
 			}
 	    }
 	}
+	
+	/**
+	 * \brief Flag that signals that this expression should be replaced with a use of a temporary variable.
+	 */
+	protected boolean FExp.useTempVar = false;
 
 	/**
 	 * \brief Scalarize expressions, replacing array expressions with FArrays of scalarized subexpressions.
@@ -983,13 +1239,15 @@ aspect Scalarization {
 	 * The FArrays are needed because function calls need arrays to be passed as arrays.
 	 */
 	public FExp FExp.scalarize(HashMap<String,FExp> indexMap) {
-		if (isArray() && !keepAsArray()) 
+		if (useTempVar) 
+			return new FIdUseExp(tempVarName());
+		else if (isArray() && !keepAsArray()) 
 			return getArray().buildScalarized(indexMap);
 		else
 			return scalarizeExp(indexMap);
 	}
 	
-	syn boolean FExp.keepAsArray() = canKeepAsArray() && canAcceptArray();
+	syn boolean FExp.keepAsArray() = canKeepAsArray() && canAcceptArray() || size().isUnknown();
 
 	syn boolean FExp.canKeepAsArray() = false;
 	eq FIdUseExp.canKeepAsArray()     = true;
