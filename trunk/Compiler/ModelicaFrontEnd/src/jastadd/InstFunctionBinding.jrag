@@ -226,6 +226,7 @@ aspect InstFunctionBinding {
 				map.put("abs",       new BuiltInCreator(false, new FAbsExp(),     1));
 				map.put("ndims",     new BuiltInCreator(false, new FNdimsExp(),   1));
 				map.put("linspace",  new BuiltInCreator(false, new FLinspace(),   3));
+				map.put("integer",   new BuiltInCreator(false, new FIntegerExp(), 1));
 				//       name                                      node           # fixed args
 				map.put("array",     new InfArgsBuiltInCreator(new FParseArray(), 0));
 				map.put("ones",      new InfArgsBuiltInCreator(new FOnes(),       0));

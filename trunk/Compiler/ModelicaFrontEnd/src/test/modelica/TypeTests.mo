@@ -446,4 +446,61 @@ Semantic error at line 364, column 11:
 end AbsType8;
 
 
+
+model IntegerExp1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IntegerExp1",
+         description="integer() operator: constant",
+         flatModel="
+fclass TypeTests.IntegerExp1
+ constant Integer x = integer(1.8);
+ Integer y;
+equation
+ y = 1;
+end TypeTests.IntegerExp1;
+")})));
+
+ constant Integer x = integer(1.8);
+ Integer y = x;
+end IntegerExp1;
+
+
+model IntegerExp2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IntegerExp2",
+         description="integer() operator: continous arg",
+         flatModel="
+fclass TypeTests.IntegerExp2
+ Real x;
+ Integer y;
+equation
+ x = 1.0;
+ y = integer(x);
+end TypeTests.IntegerExp2;
+")})));
+
+ Real x = 1.0;
+ Integer y = integer(x);
+end IntegerExp2;
+
+
+model IntegerExp3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="IntegerExp3",
+         description="integer() operator: array arg",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 490, column 19:
+  Types of positional argument 1 and input x are not compatible
+")})));
+
+ Real y = integer({1.0, 2.0});
+end IntegerExp3;
+
+
+
 end TypeTests;

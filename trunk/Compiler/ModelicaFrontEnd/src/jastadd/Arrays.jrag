@@ -440,22 +440,17 @@ aspect Arrays {
 	}
 	
  	eq FRangeExp.size() {
- 		boolean hasStep = getNumFExp() > 2;
- 		FExp startExp = getFExp(0);
- 		FExp stopExp = getFExp(hasStep ? 2 : 1);
- 		FExp stepExp = hasStep ? getFExp(1) : null;
- 		
- 		try {
-			double start = startExp.ceval().realValue();
-			double step = hasStep ? stepExp.ceval().realValue() : 1.0;
-			double stop = stopExp.ceval().realValue();
-			int si = (int) ((stop - start) / step + 1.0);
-			return new Size((si < 0) ? 0 : si);
- 		} catch (UnsupportedOperationException e) {
- 			// TODO: Create a MutableSize with an expression describing the size.
- 			// Needs integer() operator.
- 			throw e;
- 		}
+ 		MutableSize s = new MutableSize(1);
+		boolean hasStep = getNumFExp() > 2;
+ 		FExp start = (FExp) getFExp(0).fullCopy();
+ 		FExp stop = (FExp) getFExp(hasStep ? 2 : 1).fullCopy();
+ 		FExp step = hasStep ? (FExp) getFExp(1).fullCopy() : null;
+		FExp exp = new FSubExp(stop, start);
+		if (hasStep)
+			exp = new FDivExp(exp, step);
+		exp = new FAddExp(new FIntegerExp(exp), new FIntegerLitExp(1));
+		s.append(dynamicFExp(new FMaxExp(exp, new Opt(new FIntegerLitExp(0)))));
+		return s;
 	}
  	
  	eq FLinspace.size() {
@@ -1795,7 +1790,7 @@ aspect ArrayIndices {
 		}
 		
 		/**
-		 * \brief Copy value of dimension <code>d2</code> in <code>other</code> to dimension 
+		 * \brief Copy value of dimension <code>d2</code> in size of <code>exp</code> to dimension 
 		 *        <code>d1</code> in <code>this</code>.
 		 */
 		protected void copyFrom(int d1, FExp exp, int d2) {

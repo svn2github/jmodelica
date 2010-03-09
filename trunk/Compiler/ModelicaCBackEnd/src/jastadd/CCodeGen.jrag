@@ -445,7 +445,6 @@ aspect CCodeGen {
 			str.print("a[");
 			str.print(name);
 			str.print("i];\n");
-			
 		}
 	}
 	
@@ -453,7 +452,6 @@ aspect CCodeGen {
 	syn boolean FExp.needsForArray()      = true;
 	eq FRangeExp.needsForArray()          = false;
 	
-	// TODO: Add adjustment of end value to compensate for rounding errors?
 	public void FRangeExp.printForIndex_C(Printer p, PrintStream str, String indent, Object o, String name) {
 		boolean hasStep = getNumFExp() > 2;
 		str.print("jmi_ad_var_t ");
@@ -483,6 +481,20 @@ aspect CCodeGen {
 		str.print("; ");
 		str.print(name);
 		str.print("i++");
+	}
+	
+	public void FSizeExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		getFExp().prettyPrintSize_C(p, str, indent, o, dimension());
+	}
+	
+	public void FExp.prettyPrintSize_C(Printer p, PrintStream str, String indent, Object o, int dim) {}
+	
+	public void FIdUseExp.prettyPrintSize_C(Printer p, PrintStream str, String indent, Object o, int dim) {
+		str.print("jmi_array_size(");
+		str.print(getFIdUse().name_C());
+		str.print(", ");
+		str.print(dim);
+		str.print(")");
 	}
 	
 	syn String FBinExp.op_C() = op();
@@ -587,7 +599,7 @@ aspect CCodeGen {
 	}
 	
 	public void FExp.genTempArrays_C(Printer p, PrintStream str, String indent, Object o) {
-		if (isArray())
+		if (isArray() && !size().isUnknown())
 			getArray().genTempArrays_C(p, str, indent, o);
 		else
 			super.genTempArrays_C(p, str, indent, o);

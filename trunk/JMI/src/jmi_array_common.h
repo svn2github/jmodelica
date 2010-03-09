@@ -28,6 +28,9 @@
 #ifndef _JMI_ARRAY_COMMON_H
 #define _JMI_ARRAY_COMMON_H
 
+// Size macro - gives the size of array arr for dimension d
+#define jmi_array_size(arr, d) ((arr)->size[d])
+
 // Index macros - only for use in definitions of jmi_array_* functions & macros
 #define _JMI_ARR_I_1(arr, i1) i1-1
 #define _JMI_ARR_I_2(arr, i1, i2) (_JMI_ARR_I_1(arr, i1))*(arr)->size[0]+i2-1

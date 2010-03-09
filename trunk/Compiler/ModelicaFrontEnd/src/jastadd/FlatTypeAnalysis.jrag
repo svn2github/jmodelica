@@ -123,6 +123,8 @@ aspect FlatTypeAnalysis {
 		return getLeft().type();
 	}
 	
+	eq FIntegerExp.type() = fIntegerScalarType();
+	
 	eq FTranspose.type() = 
 		getFExp().ndims() < 2 ? 
 			fUnknownType() : 

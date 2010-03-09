@@ -90,6 +90,7 @@ aspect FlatVariability {
 	syn boolean FExp.isDiscreteExp() = variability().discreteVariability();
 	syn boolean FExp.isContinuousExp() = variability().continuousVariability();
 	
+	// TODO: Add standard implementation based on childFExp()?
 	syn lazy FTypePrefixVariability FExp.variability();
 	// TODO this must be fixed.
 	eq FInstAccessExp.variability() = getInstAccess().myInstComponentDecl().variability();
@@ -139,6 +140,8 @@ aspect FlatVariability {
 	
 	eq FMathematicalFunctionCall.variability() = getFExp().variability();
 	
+	eq FIntegerExp.variability() = getFExp().variability();
+
 	eq FScalar.variability() = getFExp().variability();
 	
 	eq FTranspose.variability() = getFExp().variability();

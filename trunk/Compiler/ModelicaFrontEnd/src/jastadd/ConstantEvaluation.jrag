@@ -504,8 +504,10 @@ aspect ConstantEvaluation {
   // TODO: expand to handle boolean end enum index
   eq FEndExp.cevalCalc() = new CValueInteger(retrieveEnd());
   
-  eq FNdimsExp.cevalCalc() = new CValueInteger(getFExp().ndims());
+  eq FIntegerExp.cevalCalc() = getFExp().ceval().convertInteger();
   
+  eq FNdimsExp.cevalCalc() = new CValueInteger(getFExp().ndims());
+ 
   eq FSizeExp.cevalCalc() {
 	  if (!hasDim())
 		  return new CValueUnknown();

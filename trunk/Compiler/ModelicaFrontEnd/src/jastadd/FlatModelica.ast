@@ -484,7 +484,7 @@ ScalarAsArray : Array;
 /**
  * \brief Abstract base class for all flattened expressions.
  */
-abstract FExp ::= /Array/;
+abstract FExp ::= /Array/ /DynamicFExp:FExp*/;
 
 /**
  * \brief Unsupported expression.
@@ -800,7 +800,7 @@ FFunctionCall : FAbstractFunctionCall ::= Name:FIdUse Arg:FExp* <Sizes:Size[]>;
 /**
  * \brief Generic function call expression in instance trees.
  */
-InstFunctionCall : FAbstractFunctionCall ::= Name:InstAccess Arg:InstFunctionArgument* /DynamicFExp:FExp*/;
+InstFunctionCall : FAbstractFunctionCall ::= Name:InstAccess Arg:InstFunctionArgument*;
 
 /**
  * \brief Base class for function call arguments in the instance tree.
@@ -939,6 +939,11 @@ FNdimsExp : FBuiltInFunctionCall ::= FExp;
  * \brief Size built-in function.
  */
 FSizeExp : FBuiltInFunctionCall ::= FExp [Dim:FExp];
+
+/**
+ * \brief integer() built-in function.
+ */
+FIntegerExp : FBuiltInFunctionCall ::= FExp;
 
 /**
  * \brief Scalar built-in function.

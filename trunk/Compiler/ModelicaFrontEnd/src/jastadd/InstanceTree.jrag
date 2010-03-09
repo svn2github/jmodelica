@@ -471,7 +471,7 @@ aspect InstanceTreeConstruction {
 	syn lazy List InstComponentRedeclare.getDynamicClassNameList() = new List();
 	syn lazy List InstConstrainingComponent.getDynamicClassNameList() = new List();
 	syn lazy List InstForIndex.getDynamicClassNameList() = new List();
-	syn lazy List InstFunctionCall.getDynamicFExpList() = new List();
+	syn lazy List FExp.getDynamicFExpList() = new List();
 	
 	/**
 	 * \brief Dynamically places a class name in the tree under this InstNode.
@@ -511,29 +511,12 @@ aspect InstanceTreeConstruction {
 	 * 
 	 * @returns  the final version of the dynamically placed node.
 	 */
-	public FExp InstFunctionCall.dynamicFExp(FExp exp) {
+	public FExp FExp.dynamicFExp(FExp exp) {
+		if (exp == this)
+			return exp;
 		getDynamicFExpList().add(exp);
 		return getDynamicFExp(getNumDynamicFExp() - 1);
 	}
-	
-	
-	/**
-	 * \brief Dynamically places an FExp in the tree under the closest 
-	 *        InstNode ancestor, if any.
-	 * 
-	 * @returns  the final version of the dynamically placed node.
-	 */
-	public FExp FExp.dynamicFExp(FExp exp) {
-		InstNode inst = ancestorInstNode();
-		return (inst == null) ? null : inst.dynamicFExp(exp);
-	}
-	
-	/**
-	 * \brief Find the closest InstNode ancestor.
-	 */
-	inh InstNode FExp.ancestorInstNode();
-	eq InstNode.getChild().ancestorInstNode() = this;
-	eq FlatRoot.getChild().ancestorInstNode() = null;
 	
 	
 	/**

@@ -1840,4 +1840,33 @@ end CAbsTest1;
 
 
 
+model CUnknownArray1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CUnknownArray1",
+         description="integer() operator:",
+         template="$C_functions$",
+         generatedCode="
+void func_CCodeGenTests_CUnknownArray1_f_def(jmi_array_t* a_a, jmi_array_t* b_a, jmi_array_t* o_a) {
+    JMI_ARRAY_DECL(o_ar, 0, size(a, 1));
+    if (o_a == NULL) o_a = o_ar;
+    for (jmi_ad_var_t i1_i = 1; i1_i <= jmi_array_size(o_a, 0); i1_i += 1) {
+        jmi_array_ref_1(o_a, i1_i) = jmi_array_val_1(a_a, i1_i) + jmi_array_val_1(b_a, i1_i);
+    }
+    return;
+}
+")})));
+
+ function f
+  input Real a[:];
+  input Real b[:];
+  output Real o[size(a,1)] = a + b;
+ algorithm
+ end f;
+ 
+ Real x[2] = f({1,2}, {3,4});
+end CUnknownArray1;
+
+
+
 end CCodeGenTests;

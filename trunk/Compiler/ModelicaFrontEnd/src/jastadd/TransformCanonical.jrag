@@ -1361,8 +1361,11 @@ aspect Scalarization {
 	
 	public FExp FSizeExp.scalarizeExp(HashMap<String,FExp> indexMap) {
 		// Only the form with dim can be in the tree at this point
-		int dim = dimension();
-		return getFExp().size().createFExp(dim);
+		FExp exp = getFExp();
+		if (exp instanceof FIdUseExp && exp.size().isUnknown())
+			return (FExp) fullCopy();
+		else
+			return dynamicFExp(getFExp().size().createFExp(dimension())).scalarize(indexMap);
 	}
 	
 	public FExp FNdimsExp.scalarizeExp(HashMap<String,FExp> indexMap) {
@@ -1408,6 +1411,8 @@ aspect Scalarization {
 	public FExp FDerExp.scalarizeExp(HashMap<String,FExp> indexMap) { return new FDerExp(getFIdUse().scalarize(indexMap)); }
 
 	public FExp FNoEventExp.scalarizeExp(HashMap<String,FExp> indexMap) { return new FNoEventExp(getFExp().scalarize(indexMap)); }
+
+	public FExp FIntegerExp.scalarizeExp(HashMap<String,FExp> indexMap) { return new FIntegerExp(getFExp().scalarize(indexMap)); }
 	
 	public FExp FFunctionCall.scalarizeExp(HashMap<String,FExp> indexMap) {
 		if (isArray() && functionCallIsExp())

@@ -474,8 +474,7 @@ aspect Names {
    
    	inh InstAccess InstAccess.getNextInstAccess();
    	eq InstDot.getLeft().getNextInstAccess() = getRight().getFirstInstAccess();
-   	eq SourceRoot.getProgram().getNextInstAccess() = null;
-    eq FlatRoot.getChild().getNextInstAccess() = null;
+   	eq ASTNode.getChild().getNextInstAccess() = null;
 
    	
    	/**

@@ -762,6 +762,8 @@ aspect FlatExpressions {
 	public FAbsExp FAbsExp.flatten(FQName prefix) { return new FAbsExp(getFExp().flatten(prefix)); }
 	
 	public FNoEventExp FNoEventExp.flatten(FQName prefix) { return new FNoEventExp(getFExp().flatten(prefix)); }
+
+	public FIntegerExp FIntegerExp.flatten(FQName prefix) { return new FIntegerExp(getFExp().flatten(prefix)); }
 	
 	// These used to delegate to standard implementation for FExp.flatten(FQName).
 	public FScalar    FScalar.flatten(FQName prefix)    { return null; }
