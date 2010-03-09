@@ -12,7 +12,7 @@
 %    You should have received a copy of the GNU General Public License
 %    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-cp_max = 10;
+cp_max = 40;
 
 for i=1:cp_max,
    cp{i} = radaupoints(i); 
@@ -109,7 +109,7 @@ fprintf('// Lagrange polynomial coefficients. Lagrange polynomials based on\n');
 fprintf('// Radau points plus the beginning of the interval. The first index\n');
 fprintf('// denotes polynomial and the second index denotes coefficient.\n');
 for i=1:cp_max,
-    fprintf('static jmi_real_t jmi_opt_sim_lpp_radau_coeffs_%d[%d][%d] = {',i+1,i+1,i+1);
+    fprintf('static jmi_real_t jmi_opt_sim_lpp_radau_coeffs_%d[%d][%d] = {',i,i+1,i+1);
     for j=1:i+1,
         fprintf('{');
         for k=1:i+1,
@@ -127,7 +127,7 @@ for i=1:cp_max,
 end;
 
 for i=1:cp_max,
-    fprintf('static jmi_real_t jmi_opt_sim_lpp_radau_dot_coeffs_%d[%d][%d] = {',i+1,i+1,i+1);
+    fprintf('static jmi_real_t jmi_opt_sim_lpp_radau_dot_coeffs_%d[%d][%d] = {',i,i+1,i+1);
     for j=1:i+1,
         fprintf('{');
         for k=1:i+1,
@@ -146,7 +146,7 @@ for i=1:cp_max,
 end;
 
 for i=1:cp_max,
-    fprintf('static jmi_real_t jmi_opt_sim_lpp_radau_dot_vals_%d[%d][%d] = {',i+1,i+1,i+1);
+    fprintf('static jmi_real_t jmi_opt_sim_lpp_radau_dot_vals_%d[%d][%d] = {',i,i+1,i+1);
     for j=1:i+1,
         fprintf('{');
         for k=1:i+1,

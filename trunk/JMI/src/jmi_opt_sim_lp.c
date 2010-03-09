@@ -3185,9 +3185,9 @@ int jmi_opt_sim_lp_get_pols(int n_cp, jmi_real_t *cp, jmi_real_t *cpp,
 
 		for (i=0;i<n_cp+1;i++) {
 			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_1[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_1[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_1[i][j];
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_1[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_1[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_1[i][j];
 			}
 		}
 
@@ -3211,9 +3211,9 @@ int jmi_opt_sim_lp_get_pols(int n_cp, jmi_real_t *cp, jmi_real_t *cpp,
 
 		for (i=0;i<n_cp+1;i++) {
 			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_2[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_2[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_2[i][j];
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_2[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_2[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_2[i][j];
 			}
 		}
 
@@ -3237,9 +3237,9 @@ int jmi_opt_sim_lp_get_pols(int n_cp, jmi_real_t *cp, jmi_real_t *cpp,
 
 		for (i=0;i<n_cp+1;i++) {
 			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_3[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_3[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_3[i][j];
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_3[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_3[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_3[i][j];
 			}
 		}
 		break;
@@ -3262,9 +3262,9 @@ int jmi_opt_sim_lp_get_pols(int n_cp, jmi_real_t *cp, jmi_real_t *cpp,
 
 		for (i=0;i<n_cp+1;i++) {
 			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_4[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_4[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_4[i][j];
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_4[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_4[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_4[i][j];
 			}
 		}
 		break;
@@ -3287,9 +3287,9 @@ int jmi_opt_sim_lp_get_pols(int n_cp, jmi_real_t *cp, jmi_real_t *cpp,
 
 		for (i=0;i<n_cp+1;i++) {
 			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_5[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_5[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_5[i][j];
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_5[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_5[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_5[i][j];
 			}
 		}
 		break;
@@ -3312,9 +3312,9 @@ int jmi_opt_sim_lp_get_pols(int n_cp, jmi_real_t *cp, jmi_real_t *cpp,
 
 		for (i=0;i<n_cp+1;i++) {
 			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_6[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_6[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_6[i][j];
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_6[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_6[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_6[i][j];
 			}
 		}
 		break;
@@ -3337,9 +3337,9 @@ int jmi_opt_sim_lp_get_pols(int n_cp, jmi_real_t *cp, jmi_real_t *cpp,
 
 		for (i=0;i<n_cp+1;i++) {
 			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_7[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_7[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_7[i][j];
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_7[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_7[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_7[i][j];
 			}
 		}
 		break;
@@ -3362,9 +3362,9 @@ int jmi_opt_sim_lp_get_pols(int n_cp, jmi_real_t *cp, jmi_real_t *cpp,
 
 		for (i=0;i<n_cp+1;i++) {
 			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_8[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_8[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_8[i][j];
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_8[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_8[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_8[i][j];
 			}
 		}
 		break;
@@ -3387,9 +3387,9 @@ int jmi_opt_sim_lp_get_pols(int n_cp, jmi_real_t *cp, jmi_real_t *cpp,
 
 		for (i=0;i<n_cp+1;i++) {
 			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_9[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_9[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_9[i][j];
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_9[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_9[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_9[i][j];
 			}
 		}
 		break;
@@ -3412,12 +3412,764 @@ int jmi_opt_sim_lp_get_pols(int n_cp, jmi_real_t *cp, jmi_real_t *cpp,
 
 		for (i=0;i<n_cp+1;i++) {
 			for (j=0;j<n_cp+1;j++) {
-				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_coeffs_10[i][j];
-				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_coeffs_10[i][j];
-				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_radau_dot_vals_10[i][j];
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_10[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_10[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_10[i][j];
 			}
 		}
 		break;
+
+	case 11:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_11[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_11[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_11[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_11[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_11[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_11[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_11[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_11[i][j];
+			}
+		}
+		break;
+	case 12:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_12[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_12[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_12[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_12[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_12[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_12[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_12[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_12[i][j];
+			}
+		}
+		break;
+	case 13:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_13[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_13[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_13[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_13[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_13[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_13[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_13[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_13[i][j];
+			}
+		}
+		break;
+	case 14:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_14[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_14[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_14[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_14[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_14[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_14[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_14[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_14[i][j];
+			}
+		}
+		break;
+	case 15:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_15[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_15[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_15[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_15[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_15[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_15[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_15[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_15[i][j];
+			}
+		}
+		break;
+	case 16:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_16[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_16[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_16[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_16[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_16[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_16[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_16[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_16[i][j];
+			}
+		}
+		break;
+	case 17:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_17[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_17[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_17[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_17[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_17[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_17[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_17[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_17[i][j];
+			}
+		}
+		break;
+	case 18:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_18[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_18[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_18[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_18[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_18[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_18[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_18[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_18[i][j];
+			}
+		}
+		break;
+	case 19:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_19[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_19[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_19[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_19[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_19[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_19[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_19[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_19[i][j];
+			}
+		}
+		break;
+	case 20:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_20[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_20[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_20[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_20[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_20[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_20[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_20[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_20[i][j];
+			}
+		}
+		break;
+	case 21:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_21[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_21[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_21[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_21[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_21[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_21[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_21[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_21[i][j];
+			}
+		}
+		break;
+	case 22:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_22[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_22[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_22[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_22[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_22[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_22[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_22[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_22[i][j];
+			}
+		}
+		break;
+	case 23:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_23[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_23[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_23[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_23[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_23[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_23[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_23[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_23[i][j];
+			}
+		}
+		break;
+	case 24:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_24[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_24[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_24[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_24[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_24[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_24[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_24[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_24[i][j];
+			}
+		}
+		break;
+	case 25:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_25[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_25[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_25[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_25[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_25[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_25[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_25[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_25[i][j];
+			}
+		}
+		break;
+	case 26:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_26[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_26[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_26[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_26[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_26[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_26[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_26[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_26[i][j];
+			}
+		}
+		break;
+	case 27:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_27[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_27[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_27[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_27[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_27[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_27[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_27[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_27[i][j];
+			}
+		}
+		break;
+	case 28:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_28[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_28[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_28[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_28[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_28[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_28[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_28[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_28[i][j];
+			}
+		}
+		break;
+	case 29:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_29[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_29[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_29[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_29[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_29[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_29[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_29[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_29[i][j];
+			}
+		}
+		break;
+	case 30:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_30[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_30[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_30[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_30[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_30[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_30[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_30[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_30[i][j];
+			}
+		}
+		break;
+	case 31:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_31[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_31[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_31[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_31[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_31[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_31[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_31[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_31[i][j];
+			}
+		}
+		break;
+	case 32:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_32[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_32[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_32[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_32[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_32[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_32[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_32[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_32[i][j];
+			}
+		}
+		break;
+	case 33:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_33[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_33[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_33[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_33[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_33[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_33[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_33[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_33[i][j];
+			}
+		}
+		break;
+	case 34:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_34[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_34[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_34[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_34[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_34[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_34[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_34[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_34[i][j];
+			}
+		}
+		break;
+	case 35:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_35[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_35[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_35[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_35[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_35[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_35[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_35[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_35[i][j];
+			}
+		}
+		break;
+	case 36:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_36[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_36[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_36[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_36[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_36[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_36[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_36[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_36[i][j];
+			}
+		}
+		break;
+	case 37:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_37[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_37[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_37[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_37[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_37[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_37[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_37[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_37[i][j];
+			}
+		}
+		break;
+	case 38:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_38[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_38[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_38[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_38[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_38[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_38[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_38[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_38[i][j];
+			}
+		}
+		break;
+	case 39:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_39[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_39[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_39[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_39[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_39[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_39[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_39[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_39[i][j];
+			}
+		}
+		break;
+	case 40:
+
+		for (i=0;i<n_cp;i++) {
+			cp[i] = jmi_opt_sim_lp_40[i];
+		}
+		for (i=0;i<n_cp+1;i++) {
+			cpp[i] = jmi_opt_sim_lp_p_40[i];
+		}
+
+		for (i=0;i<n_cp;i++) {
+			for (j=0;j<n_cp;j++) {
+				Lp_coeffs[j*n_cp + i] = jmi_opt_sim_lp_coeffs_40[i][j];
+				Lp_dot_coeffs[j*n_cp + i] = jmi_opt_sim_lp_dot_coeffs_40[i][j];
+				Lp_dot_vals[j*n_cp + i] = jmi_opt_sim_lp_dot_vals_40[i][j];
+			}
+		}
+
+		for (i=0;i<n_cp+1;i++) {
+			for (j=0;j<n_cp+1;j++) {
+				Lpp_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_coeffs_40[i][j];
+				Lpp_dot_coeffs[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_coeffs_40[i][j];
+				Lpp_dot_vals[j*(n_cp+1) + i] = jmi_opt_sim_lpp_dot_vals_40[i][j];
+			}
+		}
+		break;
+
 	default:
 		return -1;
 	}
