@@ -1373,7 +1373,11 @@ aspect ArrayIndices {
 		 * \brief Get length in the <code>i</code>th dimension.
 		 */
 		public int get(int i) {
-			return size[i];
+			try {
+				return size[i];
+			} catch (ArrayIndexOutOfBoundsException e) {
+				return UNKNOWN;
+			}
 		}
 		
 		/**

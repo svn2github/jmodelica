@@ -4179,6 +4179,68 @@ end FunctionTests.UnknownArray17;
 end UnknownArray17;
 
 
+model UnknownArray18
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownArray18",
+         description="Scalarization of operations on arrays of unknown size: already expressed as loop",
+         flatModel="
+fclass FunctionTests.UnknownArray18
+ Real x[1];
+ Real x[2];
+equation
+ ({x[1],x[2]}) = FunctionTests.UnknownArray18.f({1,2});
+
+ function FunctionTests.UnknownArray18.f
+  input Real[:] a;
+  output Real[size(a, 1)] o;
+ algorithm
+  for i in 1:size(a, 1) loop
+   o[i] := a[i] + i;
+  end for;
+  return;
+ end FunctionTests.UnknownArray18.f;
+end FunctionTests.UnknownArray18;
+")})));
+
+ function f
+  input Real a[:];
+  output Real o[size(a,1)];
+ algorithm
+  for i in 1:size(a,1) loop
+   o[i] := a[i] + i;
+  end for;
+ end f;
+ 
+  Real x[2] = f({1,2});
+end UnknownArray18;
+
+
+model UnknownArray19
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="UnknownArray19",
+         description="Function inputs of unknown size: using size() of non-existent component",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 4226, column 7:
+  Array size mismatch in declaration of x, size of declaration is [2, 2] and size of binding expression is [2, size(zeros(), 2)]
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 4226, column 16:
+  Could not evaluate array size of output c
+")})));
+
+ function f
+  input Real a[:,:];
+  output Real[size(a, 1), size(b, 2)] c = a;
+ algorithm
+ end f;
+ 
+ Real x[2,2] = f({{1,2}, {3,4}});
+end UnknownArray19;
+
+
 
 /* =========================== Records =========================== */
 /*
