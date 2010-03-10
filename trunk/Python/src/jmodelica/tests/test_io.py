@@ -25,7 +25,6 @@ fpath = os.path.join(jm_home,path_to_examples,model)
 cpath = "VDP_pack.VDP_Opt_Min_Time"
 fname = cpath.replace('.','_',1)
 
-
 def setup():
     """ 
     Setup test module. Compile test model (only needs to be done once) and 
@@ -35,6 +34,8 @@ def setup():
     oc.set_boolean_option('state_start_values_fixed',True)
     OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
     oc.compile_model(fpath, cpath, target='ipopt')
+    oc.compile_model(fpath, cpath, target='ipopt')
+
 
 
 @testattr(stddist = True)

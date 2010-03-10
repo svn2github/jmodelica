@@ -150,6 +150,9 @@ class NLPCollocation(object):
                                            byref(n_h), byref(dg_n_nz), byref(dh_n_nz)) \
             is 0, \
                "getting NLP problem dimensions failed"        
+
+            self._model.jmimodel._dll.jmi_opt_sim_get_n_e.argtypes = [ct.c_void_p,
+                                                                      ct.POINTER(ct.c_int)]
             
             self._model.jmimodel._dll.jmi_opt_sim_get_interval_spec.argtypes = [ct.c_void_p,
                                                                                 ct.POINTER(c_jmi_real_t),
@@ -282,6 +285,30 @@ class NLPCollocation(object):
                                                                                        ndim=1,
                                                                                        shape=res_w,
                                                                                        flags='C')]
+
+            self._model.jmimodel._dll.jmi_opt_sim_get_result_element_interpolation.argtypes = [ct.c_void_p,
+                                                                                               ct.c_int,
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       shape=self._model._n_p_opt,
+                                                                                       flags='C'),
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       flags='C'),
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       flags='C'),
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       flags='C'),
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       flags='C'),
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       flags='C')]
+
+
             # n_real_x from jmi_opt_sim_get_dimensions
             jmi._returns_ndarray(self._model.jmimodel._dll.jmi_opt_sim_get_x, c_jmi_real_t, n_real_x.value, order='C')
         except AttributeError, e:
@@ -289,7 +316,8 @@ class NLPCollocation(object):
        
     def get_result(self):
         """
-        Get the optimization results.
+        Get the optimization result. The result is given for the
+        collocation points used in the algorithm.
         
         Returns:
         p_opt --
@@ -301,7 +329,7 @@ class NLPCollocation(object):
             the inputs and the algebraic variables. The ordering is
             according to increasing value references.
         """
-
+        
         n_points = self.opt_sim_get_result_variable_vector_length()
 
         sizes = self._model.get_sizes()
@@ -334,10 +362,69 @@ class NLPCollocation(object):
             data[:,n_real_dx+n_real_x+n_real_u+i+1] = w_[i*n_points:(i+1)*n_points]
 
         return p_opt, data
+
+    def get_result_element_interpolation(self,n_interpolation_points=20):
+        """
+        Get the optimization results. The variable trajectories are
+        evaluated at n_interpolation points inside each finite
+        element. The interpolation points at which the variables
+        are computed are equally spaced, and includes the element
+        start and end points within each finite element. Interpolation
+        is used to compute the variables at each point.
+
+        Parameters:
+            n_interpolation_points -- Number of points in each finite
+            element at which the solution trajectories are evaluated.
+        
+        Returns:
+        p_opt --
+            A vector containing the values of the optimized parameters.
+        data --
+            A two dimensional array of variable trajectory data. The
+            first column represents the time vector. The following
+            colums contain, in order, the derivatives, the states,
+            the inputs and the algebraic variables. The ordering is
+            according to increasing value references.
+        """
+
+        n_points = self.opt_sim_get_n_e()*n_interpolation_points
+
+        sizes = self._model.get_sizes()
+        n_real_dx = sizes[12]
+        n_real_x = sizes[13]
+        n_real_u = sizes[14]
+        n_real_w = sizes[15]
+        n_popt = self._model.jmimodel.opt_get_n_p_opt()
+        
+        # Create result data vectors
+        p_opt = N.zeros(n_popt)
+        t_ = N.zeros(n_points)
+        dx_ = N.zeros(n_real_dx*n_points)
+        x_ = N.zeros(n_real_x*n_points)
+        u_ = N.zeros(n_real_u*n_points)
+        w_ = N.zeros(n_real_w*n_points)
+        
+        # Get the result
+        self.opt_sim_get_result_element_interpolation(n_interpolation_points,p_opt,t_,dx_,x_,u_,w_)
+        
+        data = N.zeros((n_points,1+n_real_dx+n_real_x+n_real_u+n_real_w))
+        data[:,0] = t_
+        for i in range(n_real_dx):
+            data[:,i+1] = dx_[i*n_points:(i+1)*n_points]
+        for i in range(n_real_x):
+            data[:,n_real_dx+i+1] = x_[i*n_points:(i+1)*n_points]
+        for i in range(n_real_u):
+            data[:,n_real_dx+n_real_x+i+1] = u_[i*n_points:(i+1)*n_points]
+        for i in range(n_real_w):
+            data[:,n_real_dx+n_real_x+n_real_u+i+1] = w_[i*n_points:(i+1)*n_points]
+
+        return p_opt, data
+
     
     def export_result_dymola(self, format='txt'):
         """
-        Export the opitimization result on Dymola format.
+        Export the optimization result in Dymola format. The function
+        export_result_dymola is used to retrieve the solution trajectories.
 
         Parameters:
             format --
@@ -350,6 +437,27 @@ class NLPCollocation(object):
 
         # Get results
         p_opt, data = self.get_result()
+        
+        # Write result
+        io.export_result_dymola(self._model,data)
+
+    def export_result_dymola_element_interpolation(self, n_interpolation_points=20, format='txt'):
+        """
+        Export the optimization result in Dymola format. The function
+        export_result_dymola_element_interpolation is used to retrieve the
+        solution trajectories.
+
+        Parameters:
+            format --
+                A string equal either to 'txt' for output to Dymola textual
+                format or 'mat' for output to Dymola binary Matlab format.
+
+        Limitations:
+            Only format='txt' is currently supported.
+        """
+
+        # Get results
+        p_opt, data = self.get_result_element_interpolation(n_interpolation_points)
         
         # Write result
         io.export_result_dymola(self._model,data)
@@ -583,6 +691,18 @@ class NLPCollocation(object):
                                                         byref(n_h), byref(dg_n_nz), byref(dh_n_nz)) is not 0:
             raise jmi.JMIException("Getting the number of variables and constraints failed.")
         return n_real_x.value, n_g.value, n_h.value, dg_n_nz.value, dh_n_nz.value
+
+    def opt_sim_get_n_e(self):
+        """ 
+        Get the number of finite elements.
+        
+        Returns
+            The number of inite elements         
+        """
+        n_e = ct.c_int()
+        if self._model.jmimodel._dll.jmi_opt_sim_get_n_e(self._jmi_opt_sim,byref(n_e)) is not 0:
+            raise jmi.JMIException("Getting the optimization interval data failed.")
+        return n_e.value
 
     def opt_sim_get_interval_spec(self, start_time, start_time_free, final_time, final_time_free):
         """ 
@@ -822,6 +942,26 @@ class NLPCollocation(object):
         """
         if self._model.jmimodel._dll.jmi_opt_sim_get_result(self._jmi_opt_sim, p_opt, t, dx, x, u, w) is not 0:
             raise jmi.JMIException("Getting the results failed.")
+
+    def opt_sim_get_result_element_interpolation(self, n_interpolation_points, p_opt, t, dx, x, u, w):
+        """ 
+        Get the results, stored in column major format.
+        
+        Parameters:
+            n_interpolation_points
+            p_opt -- Vector containing optimal parameter values. (Return)
+            t -- The time vector. (Return)
+            dx -- The derivatives. (Return)
+            x -- The states. (Return)
+            u -- The inputs. (Return)
+            w -- The algebraic variables. (Return)
+             
+        """
+        if self._model.jmimodel._dll.jmi_opt_sim_get_result_element_interpolation(self._jmi_opt_sim,
+                                                                                  n_interpolation_points,p_opt,
+                                                                                  t, dx, x, u, w) is not 0:
+            raise jmi.JMIException("Getting the results failed.")
+
 
 
 class NLPCollocationLagrangePolynomials(NLPCollocation):

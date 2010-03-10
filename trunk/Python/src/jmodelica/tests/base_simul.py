@@ -249,7 +249,7 @@ class OptimizationTest(_BaseSimOptTest):
         _BaseSimOptTest.setup_class_base(mo_file, class_name, compiler, options)
 
 
-    def setup_base(self, nlp_args = (), tolerance = 1.0e-4, options = {}):
+    def setup_base(self, nlp_args = (), tolerance = 1.0e-4, options = {}, result_mesh='default'):
         """ 
         Set up a new test case. Creates and configures the optimization.
         Call this with proper args from setUp(). 
@@ -260,6 +260,7 @@ class OptimizationTest(_BaseSimOptTest):
         _BaseSimOptTest.setup_base(self, tolerance)
 	self.nlp = ipopt.NLPCollocationLagrangePolynomials(self.model, *nlp_args)
         self.ipopt = ipopt.CollocationOptimizer(self.nlp)
+        self._result_mesh = result_mesh
         _set_ipopt_options(self.ipopt, options)
 
 
@@ -268,7 +269,10 @@ class OptimizationTest(_BaseSimOptTest):
         Run optimization and write result to file.
         """
         self.ipopt.opt_sim_ipopt_solve()
-        self.nlp.export_result_dymola()
+        if self._result_mesh=='element_interpolation':
+            self.nlp.export_result_dymola_element_interpolation()
+        else:
+            self.nlp.export_result_dymola()
 
 
 

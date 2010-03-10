@@ -132,6 +132,16 @@ typedef int (*jmi_opt_sim_get_result_t)(jmi_opt_sim_t *jmi_opt_sim,
 		jmi_real_t *p_opt, jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x,
 		jmi_real_t *u, jmi_real_t *w);
 
+typedef int (*jmi_opt_sim_get_result_mesh_interpolation_t)(jmi_opt_sim_t *jmi_opt_sim,
+		jmi_real_t *mesh, int n_mesh, jmi_real_t *p_opt,
+		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
+		jmi_real_t *w);
+
+typedef int (*jmi_opt_sim_get_result_element_interpolation_t)(jmi_opt_sim_t *jmi_opt_sim,
+		int n_interpolation_points, jmi_real_t *p_opt,
+		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
+		jmi_real_t *w);
+
 /* @} */
 
 /**
@@ -169,6 +179,15 @@ int jmi_opt_sim_get_dimensions(jmi_opt_sim_t *jmi_opt_sim, int *n_x, int *n_g,
 int jmi_opt_sim_get_interval_spec(jmi_opt_sim_t *jmi_opt_sim,
 		jmi_real_t *start_time, int *start_time_free,
 		jmi_real_t *final_time, int *final_time_free);
+
+/**
+ * \brief Get the number of finite elements
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param n_e (Output) Number of elements.
+ * \return Error code.
+ */
+int jmi_opt_sim_get_n_e(jmi_opt_sim_t *jmi_opt_sim,int *n_e);
 
 /**
  * \brief Get the x vector of the NLP.
@@ -293,6 +312,8 @@ struct jmi_opt_sim_t{
 	jmi_opt_sim_write_file_matlab_t write_file_matlab;
 	jmi_opt_sim_get_result_variable_vector_length_t get_result_variable_vector_length;
 	jmi_opt_sim_get_result_t get_result;
+	jmi_opt_sim_get_result_mesh_interpolation_t get_result_mesh_interpolation;
+	jmi_opt_sim_get_result_element_interpolation_t get_result_element_interpolation;
 };
 
 /**
@@ -462,6 +483,65 @@ int jmi_opt_sim_get_result_variable_vector_length(jmi_opt_sim_t
 int jmi_opt_sim_get_result(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *p_opt,
 		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
 		jmi_real_t *w);
+
+/**
+ * \brief Get the optimization results based on a user defined mesh.
+ *
+ * The output arguments corresponding to the derivatives, the states, the
+ * inputs and the algebraic variables are matrices (stored in column major
+ * format) where each row contains the variable values at a particular time
+ * point and were each column contains the trajectory of a particular variable.
+ * The number of rows of these matrices are given by the
+ * the length of the user provided mesh. The variable values are computed using
+ * interpolation.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param mesh Mesh used for computation of the result.
+ * @param n_mesh Length of the mesh.
+ * @param p_opt (Output) A vector containing the optimal values of the
+ * parameters.
+ * @param t (Output) The time vector.
+ * @param dx (Output) The derivatives.
+ * @param x (Output) The states.
+ * @param u (Output) The inputs.
+ * @param w (Output) The algebraic variables.
+ */
+int jmi_opt_sim_get_result_mesh_interpolation(jmi_opt_sim_t *jmi_opt_sim,
+		jmi_real_t *mesh, int n_mesh, jmi_real_t *p_opt,
+		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
+		jmi_real_t *w);
+
+/**
+ * \brief Get the optimization results based on interpolation within finite
+ * elements.
+ *
+ * The output arguments corresponding to the derivatives, the states, the
+ * inputs and the algebraic variables are matrices (stored in column major
+ * format) where each row contains the variable values at a particular time
+ * point and were each column contains the trajectory of a particular variable.
+ * The number of rows of these matrices are given by the
+ * the number of finite elements times the number of interpolation points
+ * specified by the user. The interpolation points at which the variables
+ * are computed are equally spaced, and includes the element start and end
+ * points within each finite element. Interpolation is used to compute the
+ * variables at each point.
+ *
+ * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param n_interpolation_points Number of interpolation points in each
+ * interval.
+ * @param p_opt (Output) A vector containing the optimal values of the
+ * parameters.
+ * @param t (Output) The time vector.
+ * @param dx (Output) The derivatives.
+ * @param x (Output) The states.
+ * @param u (Output) The inputs.
+ * @param w (Output) The algebraic variables.
+ */
+int jmi_opt_sim_get_result_element_interpolation(jmi_opt_sim_t *jmi_opt_sim,
+		int n_interpolation_points, jmi_real_t *p_opt,
+		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
+		jmi_real_t *w);
+
 
 #ifdef __cplusplus
 }

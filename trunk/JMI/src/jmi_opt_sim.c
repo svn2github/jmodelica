@@ -36,6 +36,15 @@ int jmi_opt_sim_get_dimensions(jmi_opt_sim_t *jmi_opt_sim, int *n_x, int *n_g, i
 	return 0;
 }
 
+int jmi_opt_sim_get_n_e(jmi_opt_sim_t *jmi_opt_sim,int *n_e) {
+	if (jmi_opt_sim->jmi->opt == NULL) {
+		return -1;
+	}
+	*n_e = jmi_opt_sim->n_e;
+	return 0;
+}
+
+
 jmi_real_t* jmi_opt_sim_get_x(jmi_opt_sim_t *jmi_opt_sim) {
 	return jmi_opt_sim->x;
 }
@@ -172,5 +181,22 @@ int jmi_opt_sim_get_result(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *p_opt,
 		jmi_real_t *w) {
 	return jmi_opt_sim->get_result(jmi_opt_sim, p_opt, t, dx, x, u, w);
 }
+
+int jmi_opt_sim_get_result_mesh_interpolation(jmi_opt_sim_t *jmi_opt_sim,
+		jmi_real_t *mesh, int n_mesh, jmi_real_t *p_opt,
+		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
+		jmi_real_t *w) {
+	return jmi_opt_sim->get_result_mesh_interpolation(jmi_opt_sim,
+			mesh, n_mesh, p_opt, t, dx, x, u, w);
+}
+
+int jmi_opt_sim_get_result_element_interpolation(jmi_opt_sim_t *jmi_opt_sim,
+		int n_interpolation_points, jmi_real_t *p_opt,
+		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
+		jmi_real_t *w) {
+	return jmi_opt_sim->get_result_element_interpolation(jmi_opt_sim,
+			n_interpolation_points, p_opt, t, dx, x, u, w);
+}
+
 
 
