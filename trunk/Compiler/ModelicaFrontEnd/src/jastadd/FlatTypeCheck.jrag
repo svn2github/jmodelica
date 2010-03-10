@@ -277,8 +277,8 @@ aspect FlatTypeCheck {
 			  else if (size().isUnknown())
 				  error("Could not evaluate array size of output " + myOutput().name());
 			  else if (!use.type().typeCompatible(type())) 
-				  error("Types of component " + use.name() + " and output " + 
-						  myOutput().name() + " are not compatible");
+				  error("Calling function " + funcName() + "(): types of component " + use.name() + 
+						  " and output " + myOutput().name() + " are not compatible");
 		  }
 	  }
   }
@@ -291,8 +291,8 @@ aspect FlatTypeCheck {
 		  else
 			  typeOk = argumentTypeValid(getFExp().type());
 		  if (!typeOk) {
-			  error("Types of " + argumentDesc() + " and input " + getBoundInput().name() + 
-					  " are not compatible");
+			  error("Calling function " + funcName() + "(): types of " + argumentDesc() + 
+					  " and input " + getBoundInput().name() + " are not compatible");
 		  }
 	  }
   }

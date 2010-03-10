@@ -391,7 +391,7 @@ model AbsType5
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 338, column 17:
-  Types of positional argument 1 and input v are not compatible
+  Calling function abs(): types of positional argument 1 and input v are not compatible
 ")})));
 
  String x = abs("-1");
@@ -407,7 +407,7 @@ model AbsType6
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 343, column 18:
-  Types of positional argument 1 and input v are not compatible
+  Calling function abs(): types of positional argument 1 and input v are not compatible
 ")})));
 
  Real x[2] = abs({1,-1});
@@ -495,7 +495,7 @@ model IntegerExp3
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 490, column 19:
-  Types of positional argument 1 and input x are not compatible
+  Calling function integer(): types of positional argument 1 and input x are not compatible
 ")})));
 
  Real y = integer({1.0, 2.0});

@@ -876,7 +876,7 @@ model FunctionType5
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Types of positional argument 2 and input i2 are not compatible
+  Calling function TestFunction2(): types of positional argument 2 and input i2 are not compatible
 ")})));
 
  Real x = TestFunction2(1, true);
@@ -891,7 +891,7 @@ model FunctionType6
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Types of positional argument 2 and input i2 are not compatible
+  Calling function TestFunction2(): types of positional argument 2 and input i2 are not compatible
 ")})));
 
  parameter Boolean a = true;
@@ -932,7 +932,7 @@ model FunctionType8
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Types of positional argument 1 and input i1 are not compatible
+  Calling function TestFunction1(): types of positional argument 1 and input i1 are not compatible
 ")})));
 
  parameter Integer a = 1;
@@ -989,7 +989,7 @@ model FunctionType11
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Types of positional argument 1 and input i1 are not compatible
+  Calling function TestFunctionString(): types of positional argument 1 and input i1 are not compatible
 ")})));
 
  String x = TestFunctionString(1);
@@ -1003,7 +1003,7 @@ model FunctionType12
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Types of component y and output o2 are not compatible
+  Calling function TestFunction2(): types of component y and output o2 are not compatible
 ")})));
 
  Real x;
@@ -1020,10 +1020,10 @@ model FunctionType13
 2 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Types of component x and output o1 are not compatible
+  Calling function TestFunction3(): types of component x and output o1 are not compatible
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Types of component z and output o3 are not compatible
+  Calling function TestFunction3(): types of component z and output o3 are not compatible
 ")})));
 
  Integer x;
@@ -1059,7 +1059,7 @@ model FunctionType15
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Types of component z and output o3 are not compatible
+  Calling function TestFunction3(): types of component z and output o3 are not compatible
 ")})));
 
  Real x;
@@ -1095,7 +1095,7 @@ model BuiltInCallType1
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Types of positional argument 1 and input u are not compatible
+  Calling function sin(): types of positional argument 1 and input u are not compatible
 ")})));
 
   Real x = sin(true);
@@ -1110,7 +1110,7 @@ model BuiltInCallType2
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Types of positional argument 1 and input x are not compatible
+  Calling function sqrt(): types of positional argument 1 and input x are not compatible
 ")})));
 
   Real x = sqrt("test");
@@ -1183,7 +1183,7 @@ model BuiltInCallType7
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Types of positional argument 2 and input u2 are not compatible
+  Calling function atan2(): types of positional argument 2 and input u2 are not compatible
 ")})));
 
   Real x = atan2(9.0, "test");
@@ -3768,7 +3768,7 @@ model UnknownArray7
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 3773, column 2:
-  Types of component y and output c are not compatible
+  Calling function f(): types of component y and output c are not compatible
 ")})));
 
  function f

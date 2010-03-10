@@ -695,6 +695,11 @@ aspect FlatNames {
 	syn String FClass.name() = getFQName().name();
 	syn String FFunctionDecl.name() = getFQName().name();
 	
+	syn String FAbstractFunctionCall.name();
+	eq InstFunctionCall.name()     = getName().name();
+	eq FFunctionCall.name()        = getName().name();
+	eq FBuiltInFunctionCall.name() = builtInName();
+	
 	syn String AbstractFVariable.name() = null;
 	eq FVariable.name()         = getFQName().name();
 	eq FFunctionVariable.name() = getFQName().name();
@@ -899,6 +904,12 @@ aspect FlatFunctionUtils {
 	 eq FFunctionDecl.getFAlgorithmBlock().returnDefinition() = returnDefinition();
 	 eq InstProgramRoot.getChild().returnDefinition()         = null;
 	 eq FClass.getChild().returnDefinition()                  = null;
+	 
+	 inh String InstFunctionArgument.funcName();
+	 inh String FFunctionCallLeft.funcName();
+	 eq FAbstractFunctionCall.getChild().funcName() = name();
+	 eq FFunctionCallEquation.getChild().funcName() = getCall().name();
+	 eq FFunctionCallStmt.getChild().funcName()     = getCall().name();
 	 
 	 /**
 	  * \brief Check if this function returns an array when used as an expression.
@@ -1186,20 +1197,6 @@ aspect ShortClassUtil {
 		return getInstExtends(0).getClassName().myInstClassDecl().isOutput();
 	}
 	
-}
-
-aspect Math {
-/*
-	public boolean FFunctionCall.rewrittenToExp = false;
-	rewrite FFunctionCall {
-		when (getName().name().equals("Modelica.Math.sin") && 
-		      !rewrittenToExp)
-		      to FFunctionCall {
-		      	rewrittenToExp = true;
-		      	return new FFunctionCall(new FIdUse("sin"),new List().add(getArgs(0)));
-		      }
-	}
-*/
 }
 
 aspect FlatExpressions {

@@ -954,7 +954,7 @@ Semantic error at line 809, column 11:
   Type error in expression
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 809, column 28:
-  Types of positional argument 2 and input d are not compatible
+  Calling function size(): types of positional argument 2 and input d are not compatible
 ")})));
 
  Real x = size(ones(2, 3), {1, 2});
@@ -1305,10 +1305,10 @@ model MinExp6
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 974, column 15:
-  Types of positional argument 1 and input x are not compatible
+  Calling function min(): types of positional argument 1 and input x are not compatible
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 974, column 22:
-  Types of positional argument 2 and input y are not compatible
+  Calling function min(): types of positional argument 2 and input y are not compatible
 ")})));
 
  Real x = min({1,2}, {3,4});
@@ -1324,7 +1324,7 @@ model MinExp7
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 993, column 15:
-  Types of positional argument 1 and input x are not compatible
+  Calling function min(): types of positional argument 1 and input x are not compatible
 ")})));
 
  Real x = min(1);
@@ -1520,10 +1520,10 @@ model MaxExp6
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 974, column 15:
-  Types of positional argument 1 and input x are not compatible
+  Calling function max(): types of positional argument 1 and input x are not compatible
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 974, column 22:
-  Types of positional argument 2 and input y are not compatible
+  Calling function max(): types of positional argument 2 and input y are not compatible
 ")})));
 
  Real x = max({1,2}, {3,4});
@@ -1539,7 +1539,7 @@ model MaxExp7
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 993, column 15:
-  Types of positional argument 1 and input x are not compatible
+  Calling function max(): types of positional argument 1 and input x are not compatible
 ")})));
 
  Real x = max(1);
@@ -1711,7 +1711,7 @@ model SumExp5
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1489, column 15:
-  Types of positional argument 1 and input A are not compatible
+  Calling function sum(): types of positional argument 1 and input A are not compatible
 ")})));
 
  Real x = sum(1);
@@ -6331,7 +6331,7 @@ model Transpose5
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6377, column 15:
-  Types of positional argument 1 and input A are not compatible
+  Calling function transpose(): types of positional argument 1 and input A are not compatible
 ")})));
 
   Real x[2] = {1,2};
@@ -6350,7 +6350,7 @@ model Transpose6
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 4876, column 24:
-  Types of positional argument 1 and input A are not compatible
+  Calling function transpose(): types of positional argument 1 and input A are not compatible
 ")})));
 
  Real x[2] = transpose(1);
@@ -6435,10 +6435,10 @@ model Cross4
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6401, column 20:
-  Types of positional argument 1 and input x are not compatible
+  Calling function cross(): types of positional argument 1 and input x are not compatible
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6401, column 23:
-  Types of positional argument 2 and input y are not compatible
+  Calling function cross(): types of positional argument 2 and input y are not compatible
 ")})));
 
  Integer x = cross(1, 2);
@@ -6454,10 +6454,10 @@ model Cross5
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6437, column 23:
-  Types of positional argument 1 and input x are not compatible
+  Calling function cross(): types of positional argument 1 and input x are not compatible
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6437, column 34:
-  Types of positional argument 2 and input y are not compatible
+  Calling function cross(): types of positional argument 2 and input y are not compatible
 ")})));
 
  Integer x[4] = cross({1,2,3,4}, {4,5,6,7});
@@ -6473,10 +6473,10 @@ model Cross6
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6456, column 22:
-  Types of positional argument 1 and input x are not compatible
+  Calling function cross(): types of positional argument 1 and input x are not compatible
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6456, column 37:
-  Types of positional argument 2 and input y are not compatible
+  Calling function cross(): types of positional argument 2 and input y are not compatible
 ")})));
 
  String x[3] = cross({"1","2","3"}, {"4","5","6"});
@@ -6492,10 +6492,10 @@ model Cross7
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6475, column 25:
-  Types of positional argument 1 and input x are not compatible
+  Calling function cross(): types of positional argument 1 and input x are not compatible
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6475, column 52:
-  Types of positional argument 2 and input y are not compatible
+  Calling function cross(): types of positional argument 2 and input y are not compatible
 ")})));
 
  Integer x[3,3] = cross({{1,2,3},{1,2,3},{1,2,3}}, {{4,5,6},{4,5,6},{4,5,6}});
@@ -7059,7 +7059,7 @@ model Linspace3
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 7033, column 29:
-  Types of positional argument 3 and input n are not compatible
+  Calling function linspace(): types of positional argument 3 and input n are not compatible
 ")})));
 
  Real a = 1;
