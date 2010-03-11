@@ -244,15 +244,13 @@ package Annotations "Annotations for Modelica 3.1"
   end OnMouseUpSetBoolean;
   
   record OnMouseMoveXSetReal 
-    Real xVariable "Name of variable to change when cursor moved
-    in x direction";
+    Real xVariable "Name of variable to change when cursor moved in x direction";
     Real minValue;
     Real maxValue;
   end OnMouseMoveXSetReal;
   
   record OnMouseMoveYSetReal 
-    Real yVariable "Name of variable to change when cursor moved
-    in y direction";
+    Real yVariable "Name of variable to change when cursor moved in y direction";
     Real minValue;
     Real maxValue;
   end OnMouseMoveYSetReal;
@@ -305,8 +303,7 @@ package Annotations "Annotations for Modelica 3.1"
     "Larger number is a more recent maintenance update";
   constant String dateModified 
     "UTC date and time of the latest change to the package in the following format (with one space between date and time): YYYY-MM-DD hh:mm:ssZ";
-  constant String revisionId "Revision identifier of the version management system used to manage this library. It marks the latest submitted change to
-any file belonging to the package";
+  constant String revisionId "Revision identifier of the version management system used to manage this library. It marks the latest submitted change to any file belonging to the package";
   
   /***************************************************************** 
      17.8 Annotations for Functions
