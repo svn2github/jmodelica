@@ -314,8 +314,11 @@ aspect PredefinedTypes {
    			Program p = sr.getProgram();
  //  			reader.close();
    			
-   			for (Element e : p.getUnstructuredEntity(0).getElements()) 
-    				l.add(e);	
+   			ExternalClause builtin = new ExternalClause(new Opt(new ExternalLanguage("builtin")), new Opt(), new Opt(), new Opt());
+   			for (Element e : p.getUnstructuredEntity(0).getElements()) {
+   				((FullClassDecl) e).setExternalClause(builtin.fullCopy());
+    			l.add(e);
+   			}
  		
  		} catch(Exception e){}
 			

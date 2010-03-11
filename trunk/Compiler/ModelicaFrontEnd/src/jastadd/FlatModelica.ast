@@ -38,9 +38,9 @@ FClass ::= FQName
 /**
  * \brief A flattened user-defined function.
  *
- * Results from a class with the restriction "function".
+ * Results from a class with the restriction "function" and an algorithm block.
  */
-FFunctionDecl ::= FQName FFunctionVariable* [FAlgorithmBlock];
+FFunctionDecl ::= FQName FFunctionVariable* FAlgorithmBlock;
 
 /**
  * \brief A list of equations corresponding to a BLT block.
@@ -458,6 +458,36 @@ FForStmt : FStatement ::= Index:FForIndex ForStmt:FStatement*;
  * \brief Flattened while statement.
  */
 FWhileStmt : FStatement ::= Test:FExp WhileStmt:FStatement*;
+
+/**
+ * \brief An external function interface in the flat tree. Implemented as a statement.
+ */
+FExternalStmt : FStatement ::= FExternalLanguage [ReturnVar:FIdUse] <Name> Arg:FExp*;
+
+/**
+ * \brief A language specification for an external function.
+ */
+abstract FExternalLanguage;
+
+/**
+ * \brief Language specification for "C".
+ */
+FCExternalLanguage : FExternalLanguage;
+
+/**
+ * \brief Language specification for "FORTRAN 77"
+ */
+FFortran77ExternalLanguage : FExternalLanguage;
+
+/**
+ * \brief Language specification for "builtin"
+ */
+FBuiltinExternalLanguage : FExternalLanguage;
+
+/**
+ * \brief Unknown language specification
+ */
+FUnknownExternalLanguage : FExternalLanguage ::= <Language>;
 
 
 /**

@@ -329,11 +329,11 @@ Each each =
 
     
 Composition composition = 
-  composition_clauses  pn_external_clause?
-  {: return new Composition(composition_clauses,pn_external_clause); :}
-  |elements composition_clauses  pn_external_clause?
-  {: composition_clauses.insertChild(new PublicElementList(elements),0);
-    return new Composition(composition_clauses,pn_external_clause); :}                             
+  composition_clauses  external_clause?
+               {: return new Composition(composition_clauses,external_clause); :}
+  | elements composition_clauses external_clause?
+               {: composition_clauses.insertChild(new PublicElementList(elements), 0);
+                  return new Composition(composition_clauses, external_clause); :}                             
   ;
 
 
@@ -361,34 +361,30 @@ Clause composition_clause =
    | algorithm               {: return algorithm; :}
    ;
    
-PN_ExternalClause pn_external_clause =
+ExternalClause external_clause =
 	EXTERNAL
-	string_wrapper?
-	pn_external_function_call?
+	external_language?
+	external_function_call?
 	annotation.a1?
 	SEMICOLON
-	annotation_sc.a2?  {:  return new PN_ExternalClause(string_wrapper,pn_external_function_call,a1,a2); :}
+	annotation_sc.a2?  {:  return new ExternalClause(external_language, external_function_call, a1, a2); :}
 	;
 		
 	
-StringWrapper string_wrapper =
-	STRING.s {: return new StringWrapper(s); :}
+ExternalLanguage external_language =
+	STRING.s {: return new ExternalLanguage(s); :}
 	;	
 	
 Annotation annotation_sc =
 	annotation SEMICOLON {: return annotation; :}
    	;
 
-PN_ExternalFunctionCall pn_external_function_call =
-	parse_access_eq
-	ID.id
-	LPAREN arg_list RPAREN  {: return new PN_ExternalFunctionCall(new Opt(parse_access_eq),
-	                                      new IdDecl(id),arg_list); :}
-	|
-	ID.id
-	LPAREN arg_list RPAREN  {: return new PN_ExternalFunctionCall(new Opt(),
-	                                      new IdDecl(id),arg_list); :}
-	;   	 	
+ExternalFunctionCall external_function_call =
+	parse_access_eq ID.id LPAREN arg_list RPAREN  
+	            {: return new ExternalFunctionCall(new Opt(parse_access_eq), new IdDecl(id), arg_list); :}
+  | ID.id LPAREN arg_list RPAREN  
+                {: return new ExternalFunctionCall(new Opt(), new IdDecl(id), arg_list); :}
+  ;   	 	
    	  	
 ParseAccess parse_access_eq =
 	parse_access

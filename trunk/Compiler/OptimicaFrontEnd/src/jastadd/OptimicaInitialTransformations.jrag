@@ -62,9 +62,7 @@ aspect OptimicaInitialTransformations {
 
 		  	}
   	
-  			Opt ext_clause = c.hasAbstractExternalClause()?
-  			                 new Opt((ExternalClause)c.getAbstractExternalClause()):
-  			                 new Opt();
+  			Opt ext_clause = c.hasExternalClause() ? new Opt(c.getExternalClause()) : new Opt();
   			
  	     	OptClassDecl fc = new OptClassDecl(visibility(),
  	     		                          getEncapsulatedOpt(),

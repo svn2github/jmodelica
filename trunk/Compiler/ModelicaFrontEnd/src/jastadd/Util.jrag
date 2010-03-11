@@ -921,10 +921,11 @@ aspect FlatFunctionUtils {
 	  */
 	 inh boolean FQName.inFunction();
 	 inh boolean InstPrimitive.inFunction();
+	 inh boolean InstExternal.inFunction();
 	 inh boolean FExp.inFunction();
 	 inh boolean FIdUse.inFunction();
 	 inh boolean FStatement.inFunction();
-	 inh boolean FAlgorithmBlock.inFunction();
+	 inh boolean FAbstractEquation.inFunction();
 	 inh boolean FSubscript.inFunction();
 	 inh boolean FFunctionCallLeft.inFunction();
 	 inh boolean FPrimitiveType.inFunction();

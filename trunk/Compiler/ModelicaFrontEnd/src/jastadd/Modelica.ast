@@ -172,25 +172,16 @@ PublicVisibilityType : VisibilityType ::=;
 ProtectedVisibilityType : VisibilityType ::=;
 UnknownVisibilityType : VisibilityType ::=;
 
-Composition ::= Clause* [AbstractExternalClause];
+Composition ::= Clause* [ExternalClause];
 
-abstract AbstractExternalClause::=;
-
-ExternalClause : AbstractExternalClause ::= [Language:StringWrapper] 
-                                            [ReturnVar:Access] 
-                                            [FunctionName:IdDecl]
-                                            Args:Exp* 
-                                            [Annotation1:Annotation] 
-                                            [Annotation2:Annotation];
-
-PN_ExternalClause : AbstractExternalClause ::= [Language:StringWrapper] 
-                                               [PN_ExternalFunctionCall]
-                                               [Annotation1:Annotation] 
-                                               [Annotation2:Annotation];
+ExternalClause ::= [ExternalLanguage] 
+                   [ExternalFunctionCall] 
+                   [Annotation1:Annotation] 
+                   [Annotation2:Annotation];
                    
-PN_ExternalFunctionCall ::= [ReturnVar:Access] FunctionName:IdDecl Args:Exp* ;
+ExternalFunctionCall ::= [ReturnVar:Access] FunctionName:IdDecl Arg:Exp*;
 
-StringWrapper ::= <STRING>;
+ExternalLanguage ::= <Language>;
 
 abstract Clause;
 

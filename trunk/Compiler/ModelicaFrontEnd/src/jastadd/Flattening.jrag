@@ -99,22 +99,69 @@ aspect Flattening {
 	
 	public void InstFullClassDecl.flattenThisFunction(FClass fc) {
    		FFunctionDecl ffd = new FFunctionDecl();
-
    		ffd.setFQName(new FQName(qualifiedName()));
 
    		for (InstComponentDecl icd : getInstComponentDecls())
 			icd.flattenInFunction(ffd);
 		
+   		FAlgorithmBlock fab;
    		if (getNumFAbstractEquation() > 0) {
-	   		FAlgorithmBlock fab = (FAlgorithmBlock) getFAbstractEquation(0);
+	   		fab = (FAlgorithmBlock) getFAbstractEquation(0);
 	   		fab = fab.flatten(new FQName());
-			ffd.setFAlgorithmBlock(fab);
-			fab.ensureReturn();
+   		} else {
+   			fab = new FAlgorithmBlock(new List());
    		}
+		ffd.setFAlgorithmBlock(fab);
+		if (hasInstExternal())
+			fab.addFStatement(getInstExternal().flatten(this, new FQName()));
+		fab.ensureReturn();
 
 		fc.addFFunctionDecl(ffd);
 		
 		flattenCalledFunctions(fc);
+	}
+	
+	public FExternalStmt InstExternal.flatten(InstClassDecl func, FQName prefix) {
+		FExternalStmt stmt = new FExternalStmt();
+		stmt.setFExternalLanguage(hasFExternalLanguage() ? 
+				(FExternalLanguage) getFExternalLanguage().fullCopy() : 
+				new FCExternalLanguage());
+		if (hasInstExternalCall()) {
+			InstExternalCall call = getInstExternalCall();
+			if (call.hasReturnVar())
+				stmt.setReturnVar(new FIdUse(call.getReturnVar().flatten(prefix)));
+			stmt.setName(call.getName());
+			for (FExp arg : call.getArgs())
+				stmt.addArg(arg.flatten(prefix));
+		} else {
+			boolean hasReturn = func.myOutputs().size() == 1 && 
+					func.myOutputs().get(0).canBeExternalReturn();
+			if (hasReturn)
+				stmt.setReturnVar(new FIdUse(func.myOutputs().get(0).name()));
+			stmt.setName(func.name());
+			for (InstComponentDecl arg : func.getInstComponentDecls())
+				if (!hasReturn || !arg.isOutput())
+					arg.flattenExternalArg(stmt.getArgs());
+		}
+		return stmt;
+	}
+	
+	//TODO: implement for records
+	public void InstComponentDecl.flattenExternalArg(List<FExp> args) {}
+	
+	public void InstPrimitive.flattenExternalArg(List<FExp> args) {
+		FIdUseExp use = new FIdUseExp(name());
+		args.add(use);
+		for (int i = 0; i < ndims(); i++)
+			args.add(new FSizeExp(use.fullCopy(), new Opt(new FIntegerLitExp(i + 1))));
+	}
+	
+	//TODO: implement for records
+	syn boolean InstComponentDecl.canBeExternalReturn() = false;
+	eq InstPrimitive.canBeExternalReturn() = !isArray();
+	
+	public FExternalStmt FExternalStmt.flatten(FQName prefix) {
+		return fullCopy();
 	}
 	
 	public void FAlgorithmBlock.ensureReturn() {
@@ -949,6 +996,39 @@ aspect InstantiatedExpressions {
 	public FAlgorithmBlock Algorithm.instantiate() {
 		List l = Statement.instantiateStatementList(getStatements());
 		return copyLocationTo(new FAlgorithmBlock(l));
+	}
+	
+	public InstExternal ExternalClause.instantiate() {
+		// TODO: Interpret annotations and add information to InstExternal
+		Opt lang = hasExternalLanguage() ? new Opt(getExternalLanguage().instantiate()) : new Opt();
+		Opt call = hasExternalFunctionCall() ? new Opt(getExternalFunctionCall().instantiate()) : new Opt();
+		return copyLocationTo(new InstExternal(lang, call));
+	}
+	
+	public static final String FCExternalLanguage.LANGUAGE_STRING         = "C";
+	public static final String FFortran77ExternalLanguage.LANGUAGE_STRING = "FORTRAN 77";
+	public static final String FBuiltinExternalLanguage.LANGUAGE_STRING   = "builtin";
+	
+	public FExternalLanguage ExternalLanguage.instantiate() {
+		String lang = getLanguage();
+		if (lang.equals(FCExternalLanguage.LANGUAGE_STRING))
+			return new FCExternalLanguage();
+		else if (lang.equals(FFortran77ExternalLanguage.LANGUAGE_STRING))
+			return new FFortran77ExternalLanguage();
+		else if (lang.equals(FBuiltinExternalLanguage.LANGUAGE_STRING))
+			return new FBuiltinExternalLanguage();
+		else 
+			return new FUnknownExternalLanguage(lang);
+	}
+	
+	public InstExternalCall ExternalFunctionCall.instantiate() {
+		InstExternalCall res = new InstExternalCall();
+		if (hasReturnVar())
+			res.setReturnVar(getReturnVar().newInstAccess());
+		res.setName(getFunctionName().name());
+		for (Exp e : getArgs())
+			res.addArg(e.instantiate());
+		return res;
 	}
 	
 	public static List Statement.instantiateStatementList(List<Statement> l) {

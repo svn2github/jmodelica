@@ -861,7 +861,7 @@ aspect FlattPrettyPrint {
     public void FFunctionDecl.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
     	str.print("\n" + indent + "function " + name() + "\n");
     	getFFunctionVariables().prettyPrintWithIndent(p, str, p.indent(indent), o, ";");
-    	p.toString(getFAlgorithmBlockOpt(), str, indent, o);
+    	p.toString(getFAlgorithmBlock(), str, indent, o);
     	str.print(indent + "end " + name() + ";\n");
     }
 
@@ -1018,6 +1018,49 @@ aspect FlattPrettyPrint {
 		str.print(indent);
 		str.print("end while");
 	}
+	
+	public void FExternalStmt.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("external ");
+		p.toString(getFExternalLanguage(), str, indent, o);
+		str.print(" ");
+		if (hasReturnVar()) {
+			p.toString(getReturnVar(), str, indent, o);
+			str.print(" = ");
+		}
+		str.print(getName());
+		str.print("(");
+		getArgs().prettyPrintWithSep(p, str, indent, o, ", ");
+		str.print(")");
+	}
+	
+	public void FExternalLanguage.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("\"");
+		str.print(getLanguage());
+		str.print("\"");
+	}
+	
+	public void InstExternal.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("external ");
+		p.toString(getFExternalLanguage(), str, indent, o);
+		str.print(" ");
+		p.toString(getInstExternalCall(), str, indent, o);
+	}
+	
+	public void InstExternalCall.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		if (hasReturnVar()) {
+			p.toString(getReturnVar(), str, indent, o);
+			str.print(" = ");
+		}
+		str.print(getName());
+		str.print("(");
+		getArgs().prettyPrintWithSep(p, str, indent, o, ", ");
+		str.print(")");
+	}
+	
+	syn String FExternalLanguage.getLanguage() = null;
+	eq FCExternalLanguage.getLanguage()         = LANGUAGE_STRING;
+	eq FFortran77ExternalLanguage.getLanguage() = LANGUAGE_STRING;
+	eq FBuiltinExternalLanguage.getLanguage()   = LANGUAGE_STRING;
 	
 	public void FDotAddExp.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
 		p.toString(getLeft(),str,indent,o);

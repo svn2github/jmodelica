@@ -6958,7 +6958,7 @@ model ArrayEnd2
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6924, column 15:
-  The end operator may only be used in array subscripts.
+  The end operator may only be used in array subscripts
 ")})));
 
  Real x[4] = {1,2,3,4};

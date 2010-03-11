@@ -542,10 +542,10 @@ model BadFunctionCall1
 2 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  The function NonExistingFunction is undeclared
+  The function NonExistingFunction() is undeclared
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  The function NonExistingFunction is undeclared
+  The function NonExistingFunction() is undeclared
 ")})));
 
   Real x = NonExistingFunction(1, 2);
@@ -561,10 +561,10 @@ model BadFunctionCall2
 2 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  The function notAFunction is undeclared
+  The function notAFunction() is undeclared
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  The function notAFunction is undeclared
+  The function notAFunction() is undeclared
 ")})));
 
   Real notAFunction = 0;
@@ -4239,6 +4239,288 @@ Semantic error at line 4226, column 16:
  
  Real x[2,2] = f({{1,2}, {3,4}});
 end UnknownArray19;
+
+
+
+model IncompleteFunc1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="IncompleteFunc1",
+         description="Wrong contents of called function: neither algorithm nor external",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 4251, column 11:
+  Calling function f(): can only call functions that have one algorithm section or external function specification
+")})));
+
+ function f
+  input Real x;
+  output Real y = x;
+ end f;
+ 
+ Real x = f(2);
+end IncompleteFunc1;
+
+
+model IncompleteFunc2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="IncompleteFunc2",
+         description="Wrong contents of called function: 2 algorithm",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 4276, column 11:
+  Calling function f(): can only call functions that have one algorithm section or external function specification
+")})));
+
+ function f
+  input Real x;
+  output Real y = x;
+ algorithm
+  y := y + 1;
+ algorithm
+  y := y + 1;
+ end f;
+ 
+ Real x = f(2);
+end IncompleteFunc2;
+
+
+model IncompleteFunc3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="IncompleteFunc3",
+         description="Wrong contents of called function: both algorithm and external",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 4300, column 11:
+  Calling function f(): can only call functions that have one algorithm section or external function specification
+")})));
+
+ function f
+  input Real x;
+  output Real y = x;
+ algorithm
+  y := y + 1;
+ external;
+ end f;
+ 
+ Real x = f(2);
+end IncompleteFunc3;
+
+
+
+model ExternalFunc1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ExternalFunc1",
+         description="External functions: simple func, all default",
+         flatModel="
+fclass FunctionTests.ExternalFunc1
+ Real x = FunctionTests.ExternalFunc1.f(2);
+
+ function FunctionTests.ExternalFunc1.f
+  input Real x;
+  output Real y;
+ algorithm
+  external \"C\" y = f(x);
+  return;
+ end FunctionTests.ExternalFunc1.f;
+end FunctionTests.ExternalFunc1;
+")})));
+
+ function f
+  input Real x;
+  output Real y;
+ external;
+ end f;
+ 
+ Real x = f(2);
+end ExternalFunc1;
+
+
+model ExternalFunc2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ExternalFunc2",
+         description="External functions: complex func, all default",
+         flatModel="
+fclass FunctionTests.ExternalFunc2
+ Real x = FunctionTests.ExternalFunc2.f({{1,2},{3,4}}, 5);
+
+ function FunctionTests.ExternalFunc2.f
+  input Real[:, 2] x;
+  input Real y;
+  output Real z;
+  output Real q;
+  Real a := y + 2;
+ algorithm
+  external \"C\" f(x, size(x, 1), size(x, 2), y, z, q, a);
+  return;
+ end FunctionTests.ExternalFunc2.f;
+end FunctionTests.ExternalFunc2;
+")})));
+
+ function f
+  input Real x[:,2];
+  input Real y;
+  output Real z;
+  output Real q;
+  protected Real a = y + 2;
+ external;
+ end f;
+ 
+ Real x = f({{1,2},{3,4}}, 5);
+end ExternalFunc2;
+
+
+model ExternalFunc3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ExternalFunc3",
+         description="External functions: complex func, call set",
+         flatModel="
+fclass FunctionTests.ExternalFunc3
+ Real x = FunctionTests.ExternalFunc3.f({{1,2},{3,4}}, 5);
+
+ function FunctionTests.ExternalFunc3.f
+  input Real[:, 2] x;
+  input Real y;
+  output Real z;
+  output Real q;
+ algorithm
+  external \"C\" foo(size(x, 1), 2, x, z, y, q);
+  return;
+ end FunctionTests.ExternalFunc3.f;
+end FunctionTests.ExternalFunc3;
+")})));
+
+ function f
+  input Real x[:,2];
+  input Real y;
+  output Real z;
+  output Real q;
+ external foo(size(x,1), 2, x, z, y, q);
+ end f;
+ 
+ Real x = f({{1,2},{3,4}}, 5);
+end ExternalFunc3;
+
+
+model ExternalFunc4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ExternalFunc4",
+         description="External functions: complex func, call and return set",
+         flatModel="
+fclass FunctionTests.ExternalFunc4
+ Real x = FunctionTests.ExternalFunc4.f({{1,2},{3,4}}, 5);
+
+ function FunctionTests.ExternalFunc4.f
+  input Real[:, 2] x;
+  input Real y;
+  output Real z;
+  output Real q;
+ algorithm
+  external \"C\" q = foo(size(x, 1), 2, x, z, y);
+  return;
+ end FunctionTests.ExternalFunc4.f;
+end FunctionTests.ExternalFunc4;
+")})));
+
+ function f
+  input Real x[:,2];
+  input Real y;
+  output Real z;
+  output Real q;
+ external q = foo(size(x,1), 2, x, z, y);
+ end f;
+ 
+ Real x = f({{1,2},{3,4}}, 5);
+end ExternalFunc4;
+
+
+model ExternalFunc5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ExternalFunc5",
+         description="External functions: simple func, language \"C\"",
+         flatModel="
+fclass FunctionTests.ExternalFunc5
+ Real x = FunctionTests.ExternalFunc5.f(2);
+
+ function FunctionTests.ExternalFunc5.f
+  input Real x;
+  output Real y;
+ algorithm
+  external \"C\" y = f(x);
+  return;
+ end FunctionTests.ExternalFunc5.f;
+end FunctionTests.ExternalFunc5;
+")})));
+
+ function f
+  input Real x;
+  output Real y;
+ external "C";
+ end f;
+ 
+ Real x = f(2);
+end ExternalFunc5;
+
+
+model ExternalFunc6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ExternalFunc6",
+         description="External functions: simple func, language \"FORTRAN 77\"",
+         flatModel="
+fclass FunctionTests.ExternalFunc6
+ Real x = FunctionTests.ExternalFunc6.f(2);
+
+ function FunctionTests.ExternalFunc6.f
+  input Real x;
+  output Real y;
+ algorithm
+  external \"FORTRAN 77\" y = f(x);
+  return;
+ end FunctionTests.ExternalFunc6.f;
+end FunctionTests.ExternalFunc6;
+")})));
+
+ function f
+  input Real x;
+  output Real y;
+ external "FORTRAN 77";
+ end f;
+ 
+ Real x = f(2);
+end ExternalFunc6;
+
+
+model ExternalFunc7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ExternalFunc7",
+         description="External functions: simple func, language \"C++\"",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 4508, column 2:
+  The external language specitication \"C++\" is not supported
+")})));
+
+ function f
+  input Real x;
+  output Real y;
+ external "C++";
+ end f;
+ 
+ Real x = f(2);
+end ExternalFunc7;
 
 
 

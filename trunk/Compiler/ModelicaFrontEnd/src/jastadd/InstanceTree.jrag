@@ -750,17 +750,22 @@ aspect InstanceTreeConstruction {
 
     public InstClassDecl ClassDecl.newInstClassDecl() {
     	return null;
-    }    
+    }
+    
+    public Opt<InstExternal> FullClassDecl.newInstExternalOpt() {
+    	return hasExternalClause() ? new Opt(getExternalClause().instantiate()) : new Opt();
+    }
 
     public InstFullClassDecl FullClassDecl.newInstClassDecl() {
-    	InstFullClassDecl fcd = new InstFullClassDecl(this,new Opt(), newInstRestriction());
+    	InstFullClassDecl fcd = new InstFullClassDecl(this, new Opt(), newInstRestriction(), newInstExternalOpt());
 	    fcd.setInstConstrainingOpt(newInstConstrainingClassOpt());
     	fcd.setLocation(this);
-   	return fcd;
+    	return fcd;
     }
 
     public InstExtendClassDecl ExtendClassDecl.newInstClassDecl() {
-    	InstExtendClassDecl ecd = new InstExtendClassDecl(this,new Opt(), newInstRestriction());
+    	// TODO: Shouldn't extending class decl be able to have an external clause?
+    	InstExtendClassDecl ecd = new InstExtendClassDecl(this, new Opt(), newInstRestriction(), new Opt());
 	    ecd.setInstConstrainingOpt(newInstConstrainingClassOpt());
     	ecd.setLocation(this);
     	return ecd;
@@ -774,7 +779,7 @@ aspect InstanceTreeConstruction {
     }
 
     public InstPrimitiveClassDecl PrimitiveClassDecl.newInstClassDecl() {
-    	return new InstPrimitiveClassDecl(this, new Opt(), newInstRestriction());
+    	return new InstPrimitiveClassDecl(this, new Opt(), newInstRestriction(), newInstExternalOpt());
     }
 
     public InstBuiltInClassDecl BuiltInClassDecl.newInstClassDecl() {
@@ -787,7 +792,8 @@ aspect InstanceTreeConstruction {
 
     public InstReplacingFullClassDecl FullClassDecl.newInstReplacingClass(ClassDecl replacingClass,InstClassRedeclare icr) {
     	InstRestriction ir = newInstRestriction();
-    	InstReplacingFullClassDecl fcd = new InstReplacingFullClassDecl(replacingClass, new Opt(), ir, this, icr);
+    	Opt<InstExternal> exto = newInstExternalOpt();
+    	InstReplacingFullClassDecl fcd = new InstReplacingFullClassDecl(replacingClass, new Opt(), ir, exto, this, icr);
 	    fcd.setInstConstrainingOpt(newInstConstrainingClassOpt()); //TODO: Should be constr clause of original or redeclared?
     	fcd.setLocation(this);
     	return fcd;
@@ -801,7 +807,8 @@ aspect InstanceTreeConstruction {
     }
     public InstReplacingFullClassDecl PrimitiveClassDecl.newInstReplacingClass(ClassDecl replacingClass,InstClassRedeclare icr) {
     	InstRestriction ir = newInstRestriction();
-        return new InstReplacingPrimitiveClassDecl(replacingClass, new Opt(), ir, this, icr);
+    	Opt<InstExternal> exto = newInstExternalOpt();
+        return new InstReplacingPrimitiveClassDecl(replacingClass, new Opt(), ir, exto, this, icr);
     }
     
     // Create InstRestriction

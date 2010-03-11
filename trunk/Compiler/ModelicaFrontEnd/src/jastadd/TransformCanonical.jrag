@@ -91,15 +91,15 @@ aspect TransformCanonical {
 	 * \brief Generate functions from algorithms.
 	 */
 	public void FClass.genAlgorithmFunctions() {
-		for (FAlgorithmBlock a : myAlgorithms()) {
+		for (FAlgorithmBlock alg : myAlgorithms()) {
 			// Create function declaration
 			List<FFunctionVariable> vars = new List<FFunctionVariable>();
-			FQName funcName = new FQName(a.generateFunctionName());
+			FQName funcName = new FQName(alg.generateFunctionName());
 			
 			// - Find inputs
 			ArrayList<FVariable> inVars = new ArrayList<FVariable>();
 			ArrayList<FFunctionVariable> bothInVars = new ArrayList<FFunctionVariable>();
-			for (FIdUse use : a.usedFIdUses()) {
+			for (FIdUse use : alg.usedFIdUses()) {
 				AbstractFVariable fv = use.myFV();
 				if (!fv.isUnknown() && !inVars.contains(fv) && !fv.isForIndex()) {
 					inVars.add((FVariable) fv);
@@ -109,7 +109,7 @@ aspect TransformCanonical {
 			
 			// - Create outputs, add to vars and locate those that are inputs as well
 			ArrayList<FVariable> outVars = new ArrayList<FVariable>();
-			for (FIdUse use : a.assignedFIdUses()) {
+			for (FIdUse use : alg.assignedFIdUses()) {
 				if (!use.myFV().isUnknown() && !outVars.contains(use.myFV())) {
 					FVariable fv = (FVariable) use.myFV();
 					FFunctionVariable ffv = fv.createFFunctionOutput();
@@ -163,11 +163,11 @@ aspect TransformCanonical {
 			List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
 			for (FVariable fv : outVars)
 				lefts.add(fv.getFQName().createFFunctionCallLeft());
-			replaceEquation(a, new FFunctionCallEquation(lefts, call));
+			replaceEquation(alg, new FFunctionCallEquation(lefts, call));
 			
 			// Add return statement, create function declaration and add it to FClass 
-			a.addFStatement(new FReturnStmt());
-			addFFunctionDecl(new FFunctionDecl(funcName, vars, new Opt(a)));
+			alg.addFStatement(new FReturnStmt());
+			addFFunctionDecl(new FFunctionDecl(funcName, vars, alg));
 		}
 	}
 	
@@ -1033,25 +1033,18 @@ aspect Scalarization {
 		HashMap<String,FExp> emptyIndexMap = new HashMap<String,FExp>();
 		List<FFunctionVariable> vars = new List<FFunctionVariable>();
 		List<FStatement> stmts = new List<FStatement>();
+		
 		for (FFunctionVariable var : getFFunctionVariables())
 			var.scalarize(vars, stmts, emptyIndexMap);
-		
-		if (hasFAlgorithmBlock())
-			for (FStatement stmt : getFAlgorithmBlock().getFStatements())
-				stmt.scalarize(vars, stmts, emptyIndexMap);
+		for (FStatement stmt : getFAlgorithmBlock().getFStatements())
+			stmt.scalarize(vars, stmts, emptyIndexMap);
 		
 		// During scalarization, FQNames got their scalarized flag set, we need to clear it
 		vars.clearScalarized();
 		stmts.clearScalarized();
 		
-		Opt<FAlgorithmBlock> alg;
-		if (stmts.getNumChild() > 0)
-			alg = new Opt<FAlgorithmBlock>(new FAlgorithmBlock(stmts));
-		else 
-			alg = new Opt<FAlgorithmBlock>();
-		
 		FQName name = (FQName) getFQName().fullCopy();
-		return new FFunctionDecl(name, vars, alg);
+		return new FFunctionDecl(name, vars, new FAlgorithmBlock(stmts));
 	}
 	
 	/**

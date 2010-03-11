@@ -241,7 +241,7 @@ aspect CCodeGen {
 			p.toString(ffv, str, next, o);
 		for (FFunctionVariable ffv : myOutputs())
 			ffv.printNullOutputReplacement_C(str, next);
-    	p.toString(getFAlgorithmBlockOpt(), str, next, o);
+    	p.toString(getFAlgorithmBlock(), str, next, o);
     	str.print(indent);
     	str.print("}\n\n");
     	

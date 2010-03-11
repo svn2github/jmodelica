@@ -458,7 +458,14 @@ aspect InstanceErrorCheck {
 				}
 			}
   		}
-  	}	
+  	}
+  	
+  	public void InstFullClassDecl.collectErrors() {
+    	if (!errorChecked) {
+            super.collectErrors();
+            getInstExternalOpt().collectErrors();
+    	}
+  	}
   	
 	boolean InstImport.errorChecked = false;
     public void InstImport.collectErrors() {
@@ -693,6 +700,23 @@ aspect InstanceErrorCheck {
 		}
 	}
 	
+	/**
+	 * \brief Check if class has exactly one algorithm section or external function declaration.
+	 */
+	public boolean InstClassDecl.isCompleteFunction() {
+		return (numFAlgorithmBlock() == 1) != hasInstExternal();
+	}
+	
+	syn boolean InstClassDecl.hasInstExternal() = false;
+	
+	syn int InstClassDecl.numFAlgorithmBlock() {
+		int n = 0;
+		for (FAbstractEquation e : getFAbstractEquations())
+			if (e instanceof FAlgorithmBlock)
+				n++;
+		return n;
+	}
+	
 	protected boolean FAbstractFunctionCall.errorChecked = false;
 	public void InstFunctionCall.collectErrors() {
 	    if (!errorChecked) {
@@ -703,11 +727,13 @@ aspect InstanceErrorCheck {
 	    		// Report that function does not exist
 		    	String name = getName().name();
 	    		if (func.isUnknown()) 
-	    			error("The function " + name + " is undeclared");
+	    			error("The function " + name + "() is undeclared");
 	    		else
 	    			error("The class " + name + " is not a function");
-	    		
-	    		// To avoid duplicate errors, don't check anything more
+	    	} else if (!func.isCompleteFunction()) {
+	    		// TODO: add check if function is partial?
+	    		error("Calling function " + getName().name() + 
+	    				"(): can only call functions that have one algorithm section or external function specification");
 	    	} else {
 	    		// Function exists, check everything
 	    		super.collectErrors();

@@ -24,9 +24,21 @@ aspect ContentCheck {
 	 */
 	public void ASTNode.contentCheck() {}
 	
+	public void FAbstractEquation.contentCheck() {
+		if (inFunction()) 
+			error("Equations are not allowed in functions");
+	}
+	
+	public void FAlgorithmBlock.contentCheck() {}
+	
 	public void InstDerExp.contentCheck() {
 		if (!(getFExp() instanceof FInstAccessExp))
 			error("Expressions within der() not supported");
+	}
+	
+	public void InstExternal.contentCheck() {
+		if (!inFunction())
+			error("External function declarations are only allowed in functions");
 	}
 	
 	public void FReturnStmt.contentCheck() {
@@ -48,12 +60,21 @@ aspect ContentCheck {
 	
 	public void FParseArray.contentCheck() {
 		// If not already rewritten to FLongArray, this is an error.
-		error("The array() operator may not be used in function call equations or function call statements.");
+		error("The array() operator may not be used in function call equations or function call statements");
 	}
 	
 	public void FEndExp.contentCheck() {
 		if (!inArraySubscripts())
-			error("The end operator may only be used in array subscripts.");
+			error("The end operator may only be used in array subscripts");
+	}
+	
+	// TODO: check if this is a builtin function, error otherwise
+//	public void FBuiltinExternalLanguage.contentCheck() {
+//		error("The \"builtin\" external language specitication may only be used for functions that are a part of the Modelica specification");
+//	}
+	
+	public void FUnknownExternalLanguage.contentCheck() {
+		error("The external language specitication \"" + getLanguage() + "\" is not supported");
 	}
 	
 	inh boolean FIterExp.iterExpUseOK();

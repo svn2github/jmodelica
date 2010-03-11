@@ -36,7 +36,7 @@ InstProgramRoot : InstRoot ::= <Program:Program>
 
 abstract InstClassDecl: InstNode ::= <ClassDecl:ClassDecl>;
 abstract InstBaseClassDecl : InstClassDecl ::= [InstConstraining] InstRestriction;
-InstFullClassDecl : InstBaseClassDecl ::= ;
+InstFullClassDecl : InstBaseClassDecl ::= [InstExternal];
 InstExtendClassDecl : InstFullClassDecl ::= ;
 InstShortClassDecl : InstBaseClassDecl ::= ;
 InstPrimitiveClassDecl : InstFullClassDecl;
@@ -57,7 +57,10 @@ InstMType : InstRestriction;
 InstMPackage : InstRestriction;
 InstFunction : InstRestriction;
 InstRecord : InstRestriction;
- 
+
+InstExternal ::= [FExternalLanguage] [InstExternalCall];
+InstExternalCall ::= [ReturnVar:InstAccess] <Name> Arg:FExp*;
+
 abstract InstImport ::= PackageName:InstAccess <ImportClause:ImportClause>;
 InstImportQualified : InstImport;
 InstImportUnqualified : InstImport;

@@ -86,8 +86,8 @@
 
 		  	}
   	
-  			Opt ext_clause = c.hasAbstractExternalClause()?
-  			                 new Opt((ExternalClause)c.getAbstractExternalClause()):
+  			Opt ext_clause = c.hasExternalClause()?
+  			                 new Opt(c.getExternalClause()):
   			                 new Opt();
   			
  	     	FullClassDecl fc = new FullClassDecl(visibility(),
@@ -271,26 +271,6 @@
       			return c;
   			}
   	}
-
-	rewrite PN_ExternalClause {
-		to ExternalClause {
-			if (hasPN_ExternalFunctionCall())
-				return new ExternalClause(getLanguageOpt(),
-				                          getPN_ExternalFunctionCall().getReturnVarOpt(),
-				                          new Opt(getPN_ExternalFunctionCall().getFunctionName()),
-				                          getPN_ExternalFunctionCall().getArgsList(),		
-		                                  getAnnotation1Opt(),
-		                                  getAnnotation2Opt());
-		    else
-		       return new ExternalClause(getLanguageOpt(),
-				                          new Opt(),
-				                          new Opt(),
-				                          new List(),		
-		                                  getAnnotation1Opt(),
-		                                  getAnnotation2Opt());
-		}
-	
-	}
 
 	// TODO: Dymola 6.0b does not support 'elseif'...
 	rewrite IfExp {
