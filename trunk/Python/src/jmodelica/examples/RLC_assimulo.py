@@ -35,6 +35,9 @@ def run_demo(with_plots=True):
     # Load the dynamic library and XML data
     model=jmi.Model(model_name)
     
+    global RLC_mod
+    global RLC_sim
+    
     RLC_mod = JMIImplicit(model)
     RLC_sim = IDA(RLC_mod)
     RLC_sim(30)

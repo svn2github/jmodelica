@@ -85,7 +85,7 @@ def run_demo(with_plots=True):
     #rtol and atol is by default 1.0e-6 the same as with pySundials
     assimulo = time()-time_begin #Elapsed time
     
-    SolAng_sim.stats_print() #Print statistics
+    SolAng_sim.print_statistics() #Print statistics
     
     write_data(SolAng_sim)
     

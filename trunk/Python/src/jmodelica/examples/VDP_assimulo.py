@@ -40,7 +40,7 @@ def run_demo(with_plots=True):
     VDP_sim.discr = 'BDF' #discretication method, default Adams
     VDP_sim.iter = 'Newton' #iteration method, default FixedPoint
     VDP_sim(20) #Runs the simulation
-    VDP_sim.stats_print() #Prints the integration statistics
+    VDP_sim.print_statistics() #Prints the integration statistics
     VDP_sim.plot() #Plots the solution
 
 if __name__=="__main__":
