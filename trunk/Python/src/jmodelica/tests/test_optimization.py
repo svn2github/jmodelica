@@ -106,3 +106,23 @@ class TestElementInterpolationResult(OptimizationTest):
     def test_trajectories(self):
         self.assert_all_trajectories(['x', 'v', 'w1', 'w2', 'u', 'cost'])
 
+class TestIntegersNBooleanParameters(OptimizationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        OptimizationTest.setup_class_base(
+            'ArrayIntBoolPars_Opt.mo', 'ArrayIntBoolPars_Opt')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        n_e = 50
+        hs = N.ones(n_e)*1./n_e
+        n_cp = 3
+        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 })
+        self.run()
+        self.load_expected_data('ArrayIntBoolPars_Opt_result.txt')
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['B', 'N', 'x[1]'])
+

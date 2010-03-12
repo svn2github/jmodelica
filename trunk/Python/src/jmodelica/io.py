@@ -25,6 +25,8 @@ import scipy.io
 
 from operator import itemgetter
 
+import jmodelica.jmi
+
 def export_result_dymola(model, data, file_name='', format='txt'):
     """
     Export an optimization or simulation result to file in Dymolas
@@ -136,14 +138,14 @@ def export_result_dymola(model, data, file_name='', format='txt'):
 
         # Write data meta information
         offs = model.get_offsets()
-        n_parameters = offs[4] # offs[4] = offs_dx
+        n_parameters = offs[12] # offs[12] = offs_dx
         f.write('int dataInfo(%d,%d)\n' % (num_vars + 1, 4))
         f.write('0 1 0 -1 # time\n')
 
         cnt_1 = 2
         cnt_2 = 2
         for name in all_names_without_alias:
-            ref = model.get_valueref(name)
+            (ref, typ) = jmodelica.jmi._translate_value_ref(model.get_valueref(name))
             if int(ref)<n_parameters: # Put parameters in data set
                 f.write('1 %d 0 -1 # ' % cnt_1 + name+'\n')                
                 # find out if variable has aliases

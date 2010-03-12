@@ -458,8 +458,8 @@ public class XMLGenerator extends GenericGenerator {
 		//start attribute
 		if ((booleanvariable.isDependentParameter() && !booleanvariable.startAttributeSet()) || booleanvariable.isIndependentConstant()) {
 			genPrinter.print("start=\"" +booleanvariable.getBindingExp().ceval().booleanValue() + "\" ");
-		} else if(booleanvariable.startAttributeSet()) {
-			genPrinter.print("start" +booleanvariable.startAttribute()+"\" ");
+		} else {
+			genPrinter.print("start=\"" +booleanvariable.startAttribute()+"\" ");
 		}
 		// fixed - unsupported
 	}

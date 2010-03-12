@@ -518,8 +518,9 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_u = z_i - self._offs_real_u.value
-            u_init[i_u] = values.get(name)
+            if ptype==0: # Only Reals supported here
+                i_u = z_i - self._offs_real_u.value
+                u_init[i_u] = values.get(name)
         
         # w: algebraic
         values = xmldoc.get_w_initial_guess_values(include_alias=False)
@@ -582,8 +583,9 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_u = z_i - self._offs_real_u.value
-            u_lb[i_u] = values.get(name)
+            if ptype==0: # Only reals supported here
+                i_u = z_i - self._offs_real_u.value
+                u_lb[i_u] = values.get(name)
         
         # w: algebraic
         values = xmldoc.get_w_lb_values(include_alias=False)
@@ -646,8 +648,9 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_u = z_i - self._offs_real_u.value
-            u_ub[i_u] = values.get(name)
+            if ptype==0: # Only Reals supported here
+                i_u = z_i - self._offs_real_u.value
+                u_ub[i_u] = values.get(name)
         
         # w: algebraic
         values = xmldoc.get_w_ub_values(include_alias=False)
@@ -725,16 +728,18 @@ class Model(object):
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_u = z_i - self._offs_real_u.value
-            u_lin[i_u] = int(values.get(name))
-        
+            if ptype==0: # Only Reals supported here
+                i_u = z_i - self._offs_real_u.value
+                u_lin[i_u] = int(values.get(name))
+                
         # w: algebraic
         values = xmldoc.get_w_lin_values(include_alias=False)
         for name in values.keys():
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
-            i_w = z_i - self._offs_real_w.value
-            w_lin[i_w] = int(values.get(name))
+            if ptype==0: # Only Reals supported here
+                i_w = z_i - self._offs_real_w.value
+                w_lin[i_w] = int(values.get(name))
 
         # number of timepoints
         no_of_tp = self._n_tp.value
@@ -775,8 +780,9 @@ class Model(object):
             for name in names:
                 value_ref = xmldoc.get_valueref(name)
                 (z_i, ptype) = _translate_value_ref(value_ref)
-                i_u = z_i - self._offs_real_u.value                
-                u_tp_lin[i_u+no_tp*len(names)] = int(values.get(name)[no_tp])
+                if ptype==0: # Only reals supported here
+                    i_u = z_i - self._offs_real_u.value                
+                    u_tp_lin[i_u+no_tp*len(names)] = int(values.get(name)[no_tp])
         
         # timepoints w: algebraic
         values = xmldoc.get_w_lin_tp_values(include_alias=False)
@@ -1357,16 +1363,16 @@ class Model(object):
             value = values.get(name)
             value_ref = variables.get(name)
             (i, ptype) = _translate_value_ref(value_ref)
-           
+
             if(ptype == 0):
-               # Primitive type is Real
-               z[i] = value
+                # Primitive type is Real
+                z[i] = value
             elif(ptype == 1):
                 # Primitive type is Integer
-                pass
+                z[i] = value
             elif(ptype == 2):
                 # Primitive type is Boolean
-                pass
+                z[i] = value
             elif(ptype == 3):
                 # Primitive type is String
                 pass

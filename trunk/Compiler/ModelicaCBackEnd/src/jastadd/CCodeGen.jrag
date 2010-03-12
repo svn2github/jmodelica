@@ -525,7 +525,7 @@ aspect CCodeGen {
 		
 		str.print("(COND_EXP_EQ(");
 		p.toString(getIfExp(),str,indent,o);
-		str.print(",AD_WRAP_LITERAL(1),");
+		str.print(",AD_WRAP_LITERAL(JMI_TRUE),");
 		p.toString(getThenExp(),str,indent,o);
 		str.print(",");
 		for (FElseIfExp el_if : getFElseIfExps()) {
@@ -533,7 +533,7 @@ aspect CCodeGen {
 
 			str.print("(COND_EXP_EQ(");
 			p.toString(el_if.getIfExp(),str,indent,o);
-			str.print(",AD_WRAP_LITERAL(1),");
+			str.print(",AD_WRAP_LITERAL(JMI_TRUE),");
 			p.toString(el_if.getThenExp(),str,indent,o);
 			str.print(",");			
 		}
@@ -560,7 +560,7 @@ aspect CCodeGen {
 			p.toString(getLeft(),str,indent,o);
 			str.append(",");
 			p.toString(getRight(),str,indent,o);
-			str.append(",AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(0))");
+			str.append(",AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(JMI_FALSE))");
 		} else {
 			if (inEquationSection()) {
 				str.append("_sw");

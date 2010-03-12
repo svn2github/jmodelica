@@ -52,27 +52,8 @@ aspect FlatAPI {
 			return index + dependentRealParameters().indexOf(fv);
 		} 
 		index += numDependentRealParameters();
-		if (derivativeVariables().indexOf(fv) >= 0) {
-			return index + derivativeVariables().indexOf(fv);
-		} 		
-		index += numDerivativeVariables(); 
-		if (discreteRealVariables().indexOf(fv) >= 0) {
-			return index + discreteRealVariables().indexOf(fv);
-		} 
-		index += numDiscreteRealVariables(); 
-		if (differentiatedRealVariables().indexOf(fv) >= 0) {
-			return index + differentiatedRealVariables().indexOf(fv);
-		} 
-		index += numDifferentiatedRealVariables();
-		if (realInputs().indexOf(fv) >= 0) {
-			return index + realInputs().indexOf(fv);
-		} 
-		index += numRealInputs();
-		if (algebraicRealVariables().indexOf(fv) >= 0) {
-			return index + algebraicRealVariables().indexOf(fv);
-		} 
-
-		index = 0x10000000; 
+		
+		index += 0x10000000; 
 		if (independentIntegerConstants().indexOf(fv) >= 0) {
 			return index + independentIntegerConstants().indexOf(fv);
 		} 
@@ -89,15 +70,9 @@ aspect FlatAPI {
 			return index + dependentIntegerParameters().indexOf(fv);
 		} 
 		index += numDependentIntegerParameters();
-		if (integerInputs().indexOf(fv) >= 0) {
-			return index + integerInputs().indexOf(fv);
-		} 
-		index += numIntegerInputs();
-		if (discreteIntegerVariables().indexOf(fv) >= 0) {
-			return index + discreteIntegerVariables().indexOf(fv);
-		} 
+		index -= 0x10000000; 
 		
-		index = 0x20000000; 
+		index += 0x20000000; 
 		if (independentBooleanConstants().indexOf(fv) >= 0) {
 			return index + independentBooleanConstants().indexOf(fv);
 		} 
@@ -114,14 +89,51 @@ aspect FlatAPI {
 			return index + dependentBooleanParameters().indexOf(fv);
 		} 
 		index += numDependentBooleanParameters();
+		index -= 0x20000000; 
+		
+		if (derivativeVariables().indexOf(fv) >= 0) {
+			return index + derivativeVariables().indexOf(fv);
+		} 		
+		index += numDerivativeVariables(); 
+		if (differentiatedRealVariables().indexOf(fv) >= 0) {
+			return index + differentiatedRealVariables().indexOf(fv);
+		} 
+		index += numDifferentiatedRealVariables();
+		if (realInputs().indexOf(fv) >= 0) {
+			return index + realInputs().indexOf(fv);
+		} 
+		index += numRealInputs();
+		if (algebraicRealVariables().indexOf(fv) >= 0) {
+			return index + algebraicRealVariables().indexOf(fv);
+		} 
+		index += numAlgebraicRealVariables();
+		if (discreteRealVariables().indexOf(fv) >= 0) {
+			return index + discreteRealVariables().indexOf(fv);
+		} 
+		index += numDiscreteRealVariables(); 
+
+		index += 0x10000000; 
+		if (discreteIntegerVariables().indexOf(fv) >= 0) {
+			return index + discreteIntegerVariables().indexOf(fv);
+		} 
+		index += numDiscreteIntegerVariables();
+		if (integerInputs().indexOf(fv) >= 0) {
+			return index + integerInputs().indexOf(fv);
+		} 
+		index += numIntegerInputs();
+		index -= 0x10000000; 
+		
+		index += 0x20000000; 
+		if (discreteBooleanVariables().indexOf(fv) >= 0) {
+			return index + discreteBooleanVariables().indexOf(fv);
+		} 
+		index += numDiscreteBooleanVariables();
 		if (booleanInputs().indexOf(fv) >= 0) {
 			return index + booleanInputs().indexOf(fv);
 		} 
 		index += numBooleanInputs();
-		if (discreteBooleanVariables().indexOf(fv) >= 0) {
-			return index + discreteBooleanVariables().indexOf(fv);
-		} 
-
+		index -= 0x20000000;
+		
 		index = 0x30000000; 
 		if (independentStringConstants().indexOf(fv) >= 0) {
 			return index + independentStringConstants().indexOf(fv);
