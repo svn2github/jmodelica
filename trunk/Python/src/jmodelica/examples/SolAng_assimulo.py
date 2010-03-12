@@ -29,8 +29,11 @@ from jmodelica.compiler import ModelicaCompiler
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
 
-from jmodelica.simulation.assimulo import JMIImplicit, write_data
-from Assimulo.Implicit_ODE import IDA
+try:
+    from jmodelica.simulation.assimulo import JMIImplicit, write_data
+    from Assimulo.Implicit_ODE import IDA
+except:
+    pass
 
 def run_demo(with_plots=True):
     """

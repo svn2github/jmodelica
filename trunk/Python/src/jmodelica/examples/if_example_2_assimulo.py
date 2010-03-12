@@ -23,9 +23,12 @@ import matplotlib
 import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.tests import get_example_path
-from jmodelica.simulation.assimulo import JMIImplicit, write_data
 from jmodelica.compiler import ModelicaCompiler
-from Assimulo.Implicit_ODE import IDA
+try:
+    from jmodelica.simulation.assimulo import JMIImplicit, write_data
+    from Assimulo.Implicit_ODE import IDA
+except:
+    pass
 
 def run_demo(with_plots=True):
     """

@@ -21,10 +21,12 @@ import pylab as p
 
 import jmodelica
 import jmodelica.jmi as jmi
-from jmodelica.simulation.assimulo import JMIExplicit
 from jmodelica.compiler import OptimicaCompiler
-from Assimulo.Explicit_ODE import CVode
-
+try:
+    from Assimulo.Explicit_ODE import CVode
+    from jmodelica.simulation.assimulo import JMIExplicit
+except:
+    pass
 
 def run_demo(with_plots=True):
     """
