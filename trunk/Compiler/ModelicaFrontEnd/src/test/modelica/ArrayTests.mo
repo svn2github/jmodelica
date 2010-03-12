@@ -7125,5 +7125,41 @@ end NdimsExp1;
 
 
 
+model ArrayIfExp1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayIfExp1",
+         description="Array if expressions",
+         flatModel="
+fclass ArrayTests.ArrayIfExp1
+ parameter Integer N = 3 /* 3 */;
+ parameter Real A[1,1] = 1 /* 1.0 */;
+ parameter Real A[1,2] = 0 /* 0.0 */;
+ parameter Real A[1,3] = 0 /* 0.0 */;
+ parameter Real A[2,1] = 0 /* 0.0 */;
+ parameter Real A[2,2] = 1 /* 1.0 */;
+ parameter Real A[2,3] = 0 /* 0.0 */;
+ parameter Real A[3,1] = 0 /* 0.0 */;
+ parameter Real A[3,2] = 0 /* 0.0 */;
+ parameter Real A[3,3] = 1 /* 1.0 */;
+ Real x[1](start = 1);
+ Real x[2](start = 1);
+ Real x[3](start = 1);
+equation
+ der(x[1]) = (if time >= 3 then ( ( A[1,1] ) * ( x[1] ) + ( A[1,2] ) * ( x[2] ) + ( A[1,3] ) * ( x[3] ) ) / ( N ) else ( (  - ( A[1,1] ) ) * ( x[1] ) + (  - ( A[1,2] ) ) * ( x[2] ) + (  - ( A[1,3] ) ) * ( x[3] ) ) / ( N ));
+ der(x[2]) = (if time >= 3 then ( ( A[2,1] ) * ( x[1] ) + ( A[2,2] ) * ( x[2] ) + ( A[2,3] ) * ( x[3] ) ) / ( N ) else ( (  - ( A[2,1] ) ) * ( x[1] ) + (  - ( A[2,2] ) ) * ( x[2] ) + (  - ( A[2,3] ) ) * ( x[3] ) ) / ( N ));
+ der(x[3]) = (if time >= 3 then ( ( A[3,1] ) * ( x[1] ) + ( A[3,2] ) * ( x[2] ) + ( A[3,3] ) * ( x[3] ) ) / ( N ) else ( (  - ( A[3,1] ) ) * ( x[1] ) + (  - ( A[3,2] ) ) * ( x[2] ) + (  - ( A[3,3] ) ) * ( x[3] ) ) / ( N ));
+end ArrayTests.ArrayIfExp1;
+")})));
+
+  parameter Integer N = 3;
+  parameter Real A[N,N] = identity(N);
+  Real x[N](each start = 1);
+equation
+  der(x) = if time>=3 then A*x/N else -A*x/N;
+end ArrayIfExp1;
+
+
+
   annotation (uses(Modelica(version="3.0.1")));
 end ArrayTests;

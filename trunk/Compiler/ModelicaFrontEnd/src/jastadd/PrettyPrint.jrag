@@ -1221,16 +1221,16 @@ aspect FlattPrettyPrint {
 	public void FIfExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		debugPrint("**************************** FIfExp.prettyPrint");
 		str.print("(if ");
-		p.toString(getIfExp(),str,indent,o);
+		p.toString(getIfExp(), str, indent, o);
 		str.print(" then ");
-		p.toString(getThenExp(),str,indent,o);
-		str.print("\n ");
-		for (int i=0;i<getNumFElseIfExp();i++) {
-			p.toString(getFElseIfExp(i),str,indent,o);
-			str.print("\n ");
+		p.toString(getThenExp(), str, indent, o);
+		str.print(" ");
+		for (FElseIfExp eie : getFElseIfExps()) {
+			p.toString(eie, str, indent, o);
+			str.print(" ");
 		}
 		str.print("else ");
-		p.toString(getElseExp(),str,indent,o);		
+		p.toString(getElseExp(), str, indent, o);		
 		str.print(")");
 	}
 	

@@ -213,6 +213,9 @@ aspect Arrays {
 		return left + right - 2;
 	}
 	
+	eq FIfExp.ndims()     = getThenExp().ndims();
+	eq FElseIfExp.ndims() = getThenExp().ndims();
+	
 	/**
 	 * \brief Check if multiplication is equivalent with an element-wise multiplication.
 	 * 
@@ -558,6 +561,9 @@ aspect Arrays {
 	
 	eq FFunctionCall.size()    = hasOutputs() ? sizeOfOutput(0) : Size.SCALAR;
 	eq InstFunctionCall.size() = hasOutputs() ? sizeOfOutput(0) : Size.SCALAR;
+	
+	eq FIfExp.size()     = getThenExp().size();
+	eq FElseIfExp.size() = getThenExp().size();
 	
 	/**
 	 * \brief Get the array sizes. 
@@ -1055,6 +1061,33 @@ aspect Arrays {
 			n.setLastFArraySubscripts(fas);
 			arr.set(i, new FIdUseExp(new FIdUse(n)));
 		}
+		return arr;
+	}
+	
+	eq FIfExp.getArray() {
+		if (!isArray())
+			return super.getArray();
+		
+		Array thenArr = getThenExp().getArray();
+		Array elseArr = getElseExp().getArray();
+		Array arr = new Array(indices());
+		for (Index i : arr.indices()) {
+			FExp ifExp = (FExp) getIfExp().fullCopy();
+			FIfExp exp = new FIfExp(ifExp, thenArr.get(i), new List(), elseArr.get(i));
+			for (FElseIfExp eie : getFElseIfExps())
+				exp.addFElseIfExp((FElseIfExp) eie.getArray().get(i));
+			arr.set(i, exp);
+		}
+		return arr;
+	}
+	
+	eq FElseIfExp.getArray() {
+		if (!isArray())
+			return super.getArray();
+		
+		Array arr = new Array(indices());
+		for (Index i : arr.indices()) 
+			arr.set(i, new FElseIfExp((FExp) getIfExp().fullCopy(), getThenExp().getArray().get(i)));
 		return arr;
 	}
 	
