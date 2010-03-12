@@ -668,18 +668,52 @@ aspect ConstantEvaluation {
 	 * @return The constant value.
 	 */
 	syn CValue InstPrimitive.ceval(Index i) {
-	    if ((isConstant() || isParameter()) && 
-	    		myBindingInstExp() != null &&
-	    		!myBindingInstExp().type().isUnknown() && 
-	    		indices().isValid(i)) {
-	    	CValue val = myBindingInstExp().getArray().get(i).ceval();
-	    	// Reals can be have a binding exp that is Integer - convert
-			if (isReal())
-				val = new CValueReal(val.realValue());
-			return val;
-		} else { 
-			return new CValueUnknown();
+    	CValue val = new CValueUnknown();
+	    if ((isConstant() || isParameter()) && indices().isValid(i)) {
+	    	if (myBindingInstExp() != null) {
+	    		if (!myBindingInstExp().type().isUnknown())
+	    			val = myBindingInstExp().getArray().get(i).ceval();
+	    	} else {
+	    		val = startAttributeCValue();
+	    	}
+	    	// Reals can have a binding exp that is Integer - convert
+			if (isReal() && !val.isUnknown())
+				val = val.convertReal();
 		}
+		return val;
+	}
+	
+	/**
+	 * \brief Find and evaluate the "start" attribute. If it is not found, use default value.
+	 */
+	syn lazy CValue InstPrimitive.startAttributeCValue() {
+		for (InstModification im : totalMergedEnvironment()) {
+			FExp exp = im.findStartAttribute();
+			if (exp != null)
+				return exp.ceval();
+		}
+		if (isReal())
+			return new CValueReal(0.0);
+		if (isInteger())
+			return new CValueInteger(0);
+		if (isBoolean())
+			return new CValueBoolean(false);
+		if (isString())
+			return new CValueString("");
+		return new CValueUnknown();
+	}
+	
+	/**
+	 * \brief Find the expression for the start attribute.
+	 */
+	public FExp InstModification.findStartAttribute() { 
+		return null; 
+	}
+	
+	public FExp InstComponentModification.findStartAttribute() {
+		if (getName().name().equals("start") && getInstModification().hasInstValueMod())
+			return getInstModification().getInstValueMod().instValueMod();
+		return null;
 	}
 
   /**
@@ -698,45 +732,19 @@ aspect ConstantEvaluation {
   eq FDerivativeVariable.ceval() = new CValueUnknown();
   eq FFunctionVariable.ceval() = new CValueUnknown(); // TODO: Can they be constant? maybe parameters? 
   eq FRealVariable.ceval() {
-	  if ((!isConstant() && !isParameter()) || !hasBindingExp()) {
+	  if (!isConstant() && !isParameter()) {
 		  return new CValueUnknown();
 	  } else {
-			CValue val = getBindingExp().ceval();
-			if (val.isNumeric()) {
-				return new CValueReal(val.realValue());
-			} else {
-				return new CValueUnknown();
-			}
+		  CValue val = hasBindingExp() ? getBindingExp().ceval() : startAttributeCValue();
+		  return val.convertReal();
 	  }
   }
 
-  eq FIntegerVariable.ceval() {
-	  if ((!isConstant() && !isParameter()) || !hasBindingExp()) {
+  eq FVariable.ceval() {
+	  if (!isConstant() && !isParameter()) 
 		  return new CValueUnknown();
-	  } else {
-			CValue val = getBindingExp().ceval();
-			if (val.isNumeric()) {
-				return new CValueInteger(val.intValue());
-			} else {
-				return new CValueUnknown();
-			}
-	  }
-  }
-
-  eq FBooleanVariable.ceval() {
-	  if ((!isConstant() && !isParameter()) || !hasBindingExp()) {
-		  return new CValueUnknown();
-	  } else {
-		  return getBindingExp().ceval();
-	  }
-  }
-
-  eq FStringVariable.ceval() {
-	  if ((!isConstant() && !isParameter()) || !hasBindingExp()) {
-		  return new CValueUnknown();
-	  } else {
-		  return getBindingExp().ceval();
-	  }
+	  else 
+		  return hasBindingExp() ? getBindingExp().ceval() : startAttributeCValue();
   }
   
   /**

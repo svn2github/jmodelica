@@ -668,4 +668,43 @@ end ConstCmpGt;
 
 
 
+model ParameterStart1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ParameterStart1",
+         description="Constant without binding expression: start set",
+         flatModel="
+fclass TypeTests.ParameterStart1
+ constant Real p(start = 2);
+ Real y;
+equation
+ y = 2.0;
+end TypeTests.ParameterStart1;
+")})));
+
+  constant Real p(start=2);
+  Real y = p;
+end ParameterStart1;
+
+
+model ParameterStart2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ParameterStart2",
+         description="Constant without binding expression: start",
+         flatModel="
+fclass TypeTests.ParameterStart2
+ constant Real p;
+ Real y;
+equation
+ y = 0.0;
+end TypeTests.ParameterStart2;
+")})));
+
+  constant Real p;
+  Real y = p;
+end ParameterStart2;
+
+
+
 end TypeTests;

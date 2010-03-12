@@ -846,7 +846,7 @@ aspect FlatTypes {
 }
 
 /**
- * \brief Evaluation of attriutes for primitive types.
+ * \brief Evaluation of attriubtes for primitive types.
  */
 aspect Attributes {
 	
