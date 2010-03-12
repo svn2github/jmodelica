@@ -7160,6 +7160,25 @@ equation
 end ArrayIfExp1;
 
 
+model ArrayIfExp2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayIfExp2",
+         description="Constant evaluation of if expression",
+         flatModel="
+fclass ArrayTests.ArrayIfExp2
+ constant Real a = (if 1 > 2 then 5 elseif 1 < 2 then 6 else 7);
+ Real b;
+equation
+ b = 6.0;
+end ArrayTests.ArrayIfExp2;
+")})));
+
+  constant Real a = if 1 > 2 then 5 elseif 1 < 2 then 6 else 7;
+  Real b = a;
+end ArrayIfExp2;
+
+
 
   annotation (uses(Modelica(version="3.0.1")));
 end ArrayTests;

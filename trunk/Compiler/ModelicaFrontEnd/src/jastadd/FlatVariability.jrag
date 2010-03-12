@@ -150,12 +150,12 @@ aspect FlatVariability {
 	eq FAbsExp.variability() = getFExp().variability();
 	
 	eq FIfExp.variability() {
-		FTypePrefixVariability total = getThenExp().variability();
+		FTypePrefixVariability total = getThenExp().variability().combine(getIfExp().variability());
 		total = total.combine(combineFExpListVariability(getFElseIfExps()));
 		return total.combine(getElseExp().variability());
 	}
 	
-	eq FElseIfExp.variability() = getThenExp().variability();
+	eq FElseIfExp.variability() = getThenExp().variability().combine(getIfExp().variability());
 
 	eq FNdimsExp.variability() = fConstant();
 

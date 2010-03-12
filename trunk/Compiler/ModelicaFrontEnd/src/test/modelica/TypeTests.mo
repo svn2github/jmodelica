@@ -503,4 +503,169 @@ end IntegerExp3;
 
 
 
+model ConstCmpEq
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ConstCmpEq",
+         description="Constant evaluation of comparisons: equals",
+         flatModel="
+fclass TypeTests.ConstCmpEq
+ constant Boolean a = 1 == 2;
+ constant Boolean b = 1 == 1;
+ Boolean x;
+ Boolean y;
+equation
+ x = false;
+ y = true;
+end TypeTests.ConstCmpEq;
+")})));
+
+ constant Boolean a = 1 == 2;
+ constant Boolean b = 1 == 1;
+ Boolean x = a;
+ Boolean y = b;
+end ConstCmpEq;
+
+
+model ConstCmpNeq
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ConstCmpNeq",
+         description="Constant evaluation of comparisons: not equal",
+         flatModel="
+fclass TypeTests.ConstCmpNeq
+ constant Boolean a = 1 <> 2;
+ constant Boolean b = 1 <> 1;
+ Boolean x;
+ Boolean y;
+equation
+ x = true;
+ y = false;
+end TypeTests.ConstCmpNeq;
+")})));
+
+ constant Boolean a = 1 <> 2;
+ constant Boolean b = 1 <> 1;
+ Boolean x = a;
+ Boolean y = b;
+end ConstCmpNeq;
+
+
+model ConstCmpLeq
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ConstCmpLeq",
+         description="Constant evaluation of comparisons: less or equal",
+         flatModel="
+fclass TypeTests.ConstCmpLeq
+ constant Boolean a = 1 <= 2;
+ constant Boolean b = 1 <= 1;
+ constant Boolean c = 2 <= 1;
+ Boolean x;
+ Boolean y;
+ Boolean z;
+equation
+ x = true;
+ y = true;
+ z = false;
+end TypeTests.ConstCmpLeq;
+")})));
+
+ constant Boolean a = 1 <= 2;
+ constant Boolean b = 1 <= 1;
+ constant Boolean c = 2 <= 1;
+ Boolean x = a;
+ Boolean y = b;
+ Boolean z = c;
+end ConstCmpLeq;
+
+
+model ConstCmpLt
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ConstCmpLt",
+         description="Constant evaluation of comparisons: less than",
+         flatModel="
+fclass TypeTests.ConstCmpLt
+ constant Boolean a = 1 < 2;
+ constant Boolean b = 1 < 1;
+ constant Boolean c = 2 < 1;
+ Boolean x;
+ Boolean y;
+ Boolean z;
+equation
+ x = true;
+ y = false;
+ z = false;
+end TypeTests.ConstCmpLt;
+")})));
+
+ constant Boolean a = 1 < 2;
+ constant Boolean b = 1 < 1;
+ constant Boolean c = 2 < 1;
+ Boolean x = a;
+ Boolean y = b;
+ Boolean z = c;
+end ConstCmpLt;
+
+
+model ConstCmpGeq
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ConstCmpGeq",
+         description="Constant evaluation of comparisons: greater or equal",
+         flatModel="
+fclass TypeTests.ConstCmpGeq
+ constant Boolean a = 1 >= 2;
+ constant Boolean b = 1 >= 1;
+ constant Boolean c = 2 >= 1;
+ Boolean x;
+ Boolean y;
+ Boolean z;
+equation
+ x = false;
+ y = true;
+ z = true;
+end TypeTests.ConstCmpGeq;
+")})));
+
+ constant Boolean a = 1 >= 2;
+ constant Boolean b = 1 >= 1;
+ constant Boolean c = 2 >= 1;
+ Boolean x = a;
+ Boolean y = b;
+ Boolean z = c;
+end ConstCmpGeq;
+
+
+model ConstCmpGt
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ConstCmpGt",
+         description="Constant evaluation of comparisons:greater than",
+         flatModel="
+fclass TypeTests.ConstCmpGt
+ constant Boolean a = 1 > 2;
+ constant Boolean b = 1 > 1;
+ constant Boolean c = 2 > 1;
+ Boolean x;
+ Boolean y;
+ Boolean z;
+equation
+ x = false;
+ y = false;
+ z = true;
+end TypeTests.ConstCmpGt;
+")})));
+
+ constant Boolean a = 1 > 2;
+ constant Boolean b = 1 > 1;
+ constant Boolean c = 2 > 1;
+ Boolean x = a;
+ Boolean y = b;
+ Boolean z = c;
+end ConstCmpGt;
+
+
+
 end TypeTests;

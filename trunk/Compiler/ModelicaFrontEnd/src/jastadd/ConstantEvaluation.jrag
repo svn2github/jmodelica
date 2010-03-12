@@ -309,6 +309,17 @@ aspect ConstantEvaluation {
         public boolean booleanValue() { 
         	return value; 
         }
+        
+        /**
+         * \brief Convert to int.
+         * 
+         * Used for array index and comparisons.
+	     * 
+	     * @return Value converted to int.
+         */
+        public int intValue() {
+        	return value ? 2 : 1;
+        }
 	    
 	    /**
 	     * \brief Convert to CValueBoolean.
@@ -500,6 +511,24 @@ aspect ConstantEvaluation {
   eq FAndExp.cevalCalc() = type().and(getLeft().ceval(), getRight().ceval());
   eq FOrExp.cevalCalc()  = type().or(getLeft().ceval(), getRight().ceval());
   eq FNotExp.cevalCalc() = type().not(getFExp().ceval());
+  
+  syn FPrimitiveType FRelExp.cevalType() = getLeft().type().typePromotion(getRight().type());
+  
+  eq FEqExp.cevalCalc()  = cevalType().equ(getLeft().ceval(), getRight().ceval());
+  eq FNeqExp.cevalCalc() = cevalType().neq(getLeft().ceval(), getRight().ceval());
+  eq FGtExp.cevalCalc()  = cevalType().gt(getLeft().ceval(), getRight().ceval());
+  eq FGeqExp.cevalCalc() = cevalType().geq(getLeft().ceval(), getRight().ceval());
+  eq FLtExp.cevalCalc()  = cevalType().lt(getLeft().ceval(), getRight().ceval());
+  eq FLeqExp.cevalCalc() = cevalType().leq(getLeft().ceval(), getRight().ceval());
+  
+  eq FIfExp.cevalCalc() {
+	  if (getIfExp().ceval().booleanValue())
+		  return getThenExp().ceval();
+	  for (FElseIfExp eie : getFElseIfExps())
+		  if (eie.getIfExp().ceval().booleanValue())
+			  return eie.getThenExp().ceval();
+	  return getElseExp().ceval();
+  }
   
   // TODO: expand to handle boolean end enum index
   eq FEndExp.cevalCalc() = new CValueInteger(retrieveEnd());
@@ -841,6 +870,96 @@ aspect ConstantEvaluation {
 	  new CValueBoolean(!v.booleanValue());
   
   /**
+   * \brief Equals comparison for constant values.
+   * 
+   * @param v1 Constant value of left operand.
+   * @param v2 Constant value of right operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FPrimitiveType.equ(CValue v1, CValue v2) = 
+	  new CValueUnknown();
+  eq FBooleanScalarType.equ(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.intValue() == v2.intValue());
+  eq FRealScalarType.equ(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.realValue() == v2.realValue());
+  eq FIntegerScalarType.equ(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.intValue() == v2.intValue());
+  eq FStringScalarType.equ(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) == 0);
+  
+  /**
+   * \brief Not equal comparison for constant values.
+   * 
+   * @param v1 Constant value of left operand.
+   * @param v2 Constant value of right operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FPrimitiveType.neq(CValue v1, CValue v2) = 
+	  new CValueUnknown();
+  eq FBooleanScalarType.neq(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.intValue() != v2.intValue());
+  eq FRealScalarType.neq(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.realValue() != v2.realValue());
+  eq FIntegerScalarType.neq(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.intValue() != v2.intValue());
+  eq FStringScalarType.neq(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) != 0);
+  
+  /**
+   * \brief Greater or equal than comparison for constant values.
+   * 
+   * @param v1 Constant value of left operand.
+   * @param v2 Constant value of right operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FPrimitiveType.geq(CValue v1, CValue v2) = 
+	  new CValueUnknown();
+  eq FBooleanScalarType.geq(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.intValue() >= v2.intValue());
+  eq FRealScalarType.geq(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.realValue() >= v2.realValue());
+  eq FIntegerScalarType.geq(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.intValue() >= v2.intValue());
+  eq FStringScalarType.geq(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) >= 0);
+  
+  /**
+   * \brief Greater than comparison for constant values.
+   * 
+   * @param v1 Constant value of left operand.
+   * @param v2 Constant value of right operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FPrimitiveType.gt(CValue v1, CValue v2) = 
+	  new CValueUnknown();
+  eq FBooleanScalarType.gt(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.intValue() > v2.intValue());
+  eq FRealScalarType.gt(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.realValue() > v2.realValue());
+  eq FIntegerScalarType.gt(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.intValue() > v2.intValue());
+  eq FStringScalarType.gt(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) > 0);
+  
+  /**
+   * \brief Less or equal than comparison for constant values.
+   * 
+   * @param v1 Constant value of left operand.
+   * @param v2 Constant value of right operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FPrimitiveType.leq(CValue v1, CValue v2) = 
+	  new CValueUnknown();
+  eq FBooleanScalarType.leq(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.intValue() <= v2.intValue());
+  eq FRealScalarType.leq(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.realValue() <= v2.realValue());
+  eq FIntegerScalarType.leq(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.intValue() <= v2.intValue());
+  eq FStringScalarType.leq(CValue v1, CValue v2) = 
+	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) <= 0);
+  
+  /**
    * \brief Less than comparison for constant values.
    * 
    * @param v1 Constant value of left operand.
@@ -850,7 +969,7 @@ aspect ConstantEvaluation {
   syn CValue FPrimitiveType.lt(CValue v1, CValue v2) = 
 	  new CValueUnknown();
   eq FBooleanScalarType.lt(CValue v1, CValue v2) = 
-	  new CValueBoolean(!v1.booleanValue() && v2.booleanValue());
+	  new CValueBoolean(v1.intValue() < v2.intValue());
   eq FRealScalarType.lt(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.realValue() < v2.realValue());
   eq FIntegerScalarType.lt(CValue v1, CValue v2) = 
