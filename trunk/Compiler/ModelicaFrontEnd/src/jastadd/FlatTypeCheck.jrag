@@ -54,8 +54,7 @@ aspect FlatTypeCheck {
     public void InstModification.typeCheckAttribute(InstNode owner) {}
 
     public void InstComponentModification.typeCheckAttribute(InstNode owner) {
-    	if (hasInstModification()) {
-		if (getInstModification().hasInstValueMod()) {
+    	if (hasInstModification() && getInstModification().hasInstValueMod()) {
 			FExp val_mod = getInstModification().instValueMod();
 			if (!type().isUnknown() && !val_mod.type().isUnknown()) {
 				FPrimitiveType attr_type = owner.attributeType(this);
@@ -79,7 +78,6 @@ aspect FlatTypeCheck {
 					}
 				}
 			}
-		}
     	}
     }
     

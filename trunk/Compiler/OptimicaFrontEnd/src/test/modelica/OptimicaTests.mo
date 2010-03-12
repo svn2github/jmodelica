@@ -31,19 +31,151 @@ model OptimicaTests
     y<=5;
   end ConstraintTest1;
 
+
+
   optimization ClassAttrTest1 (objective=x(finalTime)^2,startTime=3,finalTime=4)
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ClassAttrTest1",
+         description="Variability of objective class attribute: timed",
+         flatModel="
+optimization OptimicaTests.ClassAttrTest1(objective = ( x(finalTime) ) ^ 2,startTime = 3,finalTime = 4)
+ Real x;
+ Real y;
+equation 
+ x = 2;
+ y = 4;
+constraint 
+ x <= 3;
+ y >= 3;
+end OptimicaTests.ClassAttrTest1;
+")})));
+
     Real x;
     Real y;
   equation 
-   x=2;
-  constraint
-   x<=3;
-  equation
+    x=2;
     y=4;
-  constraint 
+  constraint
+    x<=3;
     y>=3;
-    
   end ClassAttrTest1;
+
+
+  optimization ClassAttrTest2 (objective=O,startTime=3,finalTime=4)
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ClassAttrTest2",
+         description="Variability of objective class attribute: parameter",
+         flatModel="
+optimization OptimicaTests.ClassAttrTest2(objective = O,startTime = 3,finalTime = 4)
+ Real x;
+ Real y;
+ parameter Real O = 1.0 /* 1.0 */;
+equation 
+ x = 2;
+ y = 4;
+constraint 
+ x <= 3;
+ y >= 3;
+end OptimicaTests.ClassAttrTest2;
+")})));
+
+    Real x;
+    Real y;
+    parameter Real O = 1.0;
+  equation 
+    x=2;
+    y=4;
+  constraint
+    x<=3;
+    y>=3;
+  end ClassAttrTest2;
+ 
+
+  optimization ClassAttrTest3 (objective=O,startTime=3,finalTime=4)
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ClassAttrTest3",
+         description="Variability of objective class attribute: constant",
+         flatModel="
+optimization OptimicaTests.ClassAttrTest3(objective = 1.0,startTime = 3,finalTime = 4)
+ Real x;
+ Real y;
+ constant Real O = 1.0;
+equation 
+ x = 2;
+ y = 4;
+constraint 
+ x <= 3;
+ y >= 3;
+end OptimicaTests.ClassAttrTest3;
+")})));
+
+    Real x;
+    Real y;
+    constant Real O = 1.0;
+  equation 
+    x=2;
+    y=4;
+  constraint
+    x<=3;
+    y>=3;
+  end ClassAttrTest3;
+  
+
+  optimization ClassAttrTest4 (objective=1.0,startTime=3,finalTime=4)
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ClassAttrTest4",
+         description="Variability of objective class attribute: constant",
+         flatModel="
+optimization OptimicaTests.ClassAttrTest4(objective = 1.0,startTime = 3,finalTime = 4)
+ Real x;
+ Real y;
+equation 
+ x = 2;
+ y = 4;
+constraint 
+ x <= 3;
+ y >= 3;
+end OptimicaTests.ClassAttrTest4;
+")})));
+
+    Real x;
+    Real y;
+  equation 
+    x=2;
+    y=4;
+  constraint
+    x<=3;
+    y>=3;
+  end ClassAttrTest4;
+  
+
+  optimization ClassAttrTest5 (objective=x,startTime=3,finalTime=4)
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ClassAttrTest5",
+         description="Variability of objective class attribute: continuous",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTests.mo':
+Semantic error at line 108, column 31:
+  The class attribute 'objective' must have parameter or timed variability.
+")})));
+
+    Real x;
+    Real y;
+  equation 
+    x=2;
+    y=4;
+  constraint
+    x<=3;
+    y>=3;
+  end ClassAttrTest5;
+  
+  
   
   optimization InstantValueTest1 
      (objective=x(finalTime)^2,startTime=0,finalTime(free=true,initialGuess=3))

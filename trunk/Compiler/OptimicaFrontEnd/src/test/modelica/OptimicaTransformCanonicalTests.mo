@@ -292,13 +292,13 @@ Semantic error at line 271, column 27:
   end ArrayTest3_Err;
 
 
-optimization TimedArrayTest1 (objective=y,startTime=0,finalTime=2)
+optimization TimedArrayTest1 (objective=y(finalTime),startTime=0,finalTime=2)
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="TimedArrayTest1",
          description="Timed array variables: basic test",
          flatModel="
-optimization OptimicaTransformCanonicalTests.TimedArrayTest1(objective = y,startTime = 0,finalTime = 2)
+optimization OptimicaTransformCanonicalTests.TimedArrayTest1(objective = y(finalTime),startTime = 0,finalTime = 2)
  Real x[2];
  Real y;
 equation 
@@ -316,13 +316,13 @@ constraint
 end TimedArrayTest1;
 
 
-optimization TimedArrayTest2 (objective=y,startTime=0,finalTime=2)
+optimization TimedArrayTest2 (objective=y(finalTime),startTime=0,finalTime=2)
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="TimedArrayTest2",
          description="Timed array variables: scalarizing vector multiplication",
          flatModel="
-optimization OptimicaTransformCanonicalTests.TimedArrayTest2(objective = y,startTime = 0,finalTime = 2)
+optimization OptimicaTransformCanonicalTests.TimedArrayTest2(objective = y(finalTime),startTime = 0,finalTime = 2)
  Real x[1];
  Real x[2];
  Real y;
@@ -342,7 +342,7 @@ constraint
 end TimedArrayTest2;
 
 
-optimization TimedArrayTest3 (objective=y,startTime=0,finalTime=2)
+optimization TimedArrayTest3 (objective=y(finalTime),startTime=0,finalTime=2)
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(
          name="TimedArrayTest3",
@@ -361,7 +361,7 @@ constraint
 end TimedArrayTest3;
 
 
-optimization TimedArrayTest4 (objective=y,startTime=0,finalTime=2)
+optimization TimedArrayTest4 (objective=y(finalTime),startTime=0,finalTime=2)
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(
          name="TimedArrayTest4",
@@ -380,13 +380,13 @@ constraint
 end TimedArrayTest4;
 
 
-optimization ForConstraint1 (objective=sum(y),startTime=0,finalTime=2)
+optimization ForConstraint1 (objective=sum(y(finalTime)),startTime=0,finalTime=2)
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="ForConstraint1",
          description="Scalarization of for constraints",
          flatModel="
-optimization OptimicaTransformCanonicalTests.ForConstraint1(objective = y[1] + y[2],startTime = 0,finalTime = 2)
+optimization OptimicaTransformCanonicalTests.ForConstraint1(objective = y[1](finalTime) + y[2](finalTime),startTime = 0,finalTime = 2)
  Real x[1];
  Real x[2];
  Real y[1];

@@ -150,7 +150,7 @@ public class ErrorTestCase extends TestCase {
 	    // No errors in first pass, check for errors after transform canonical
 	    FlatRoot flatRoot = new FlatRoot();
 	    flatRoot.setFileName(getSourceFileName());
-	    FClass fc = new FClass();
+	    FClass fc = createFClass(ipr.simpleLookupInstClassDecl(getClassName()));
 	    flatRoot.setFClass(fc);
 	    flatRoot.options = new OptionRegistry(or);
 	    try {

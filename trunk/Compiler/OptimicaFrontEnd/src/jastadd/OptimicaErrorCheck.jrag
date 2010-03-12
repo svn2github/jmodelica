@@ -21,10 +21,24 @@ aspect OptimicaErrorCheck {
     	getFConstraintList().collectErrors();
     	getInstClassModificationOpt().collectErrors();
     	
-    	// TODO: Need to examine if typeCheckAttribute really fits here
     	if (hasInstClassModification()) 
     		for (InstModification im : getInstClassModification().getInstArgumentList()) 
-    			im.typeCheckAttribute(this);
+    			im.checkOptimicaAttribute(this);
+  	}
+  	
+  	public void InstModification.checkOptimicaAttribute(InstOptClassDecl iocd) {
+     	// TODO: Need to examine if typeCheckAttribute really fits here
+ 		typeCheckAttribute(iocd);
+  	}
+  	
+  	public void InstComponentModification.checkOptimicaAttribute(InstOptClassDecl iocd) {
+     	super.checkOptimicaAttribute(iocd);
+     	if (hasInstModification() && getInstModification().hasInstValueMod()) {
+     		FExp exp = getInstModification().instValueMod();
+     		if (getName().name().equals("objective") && 
+	     			!(exp.variability().lessOrEqual(fTimed())))
+	     		error("The class attribute 'objective' must have parameter or timed variability.");
+     	}
   	}
 
 	public void FOptClass.checkFClassDimensions() {

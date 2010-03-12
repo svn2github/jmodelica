@@ -155,7 +155,7 @@ public class FlatteningTestCase extends TestCase {
 
 	    FlatRoot flatRoot = new FlatRoot();
 	    flatRoot.setFileName(getSourceFileName());
-	    FClass fc = new FClass();
+	    FClass fc = createFClass(ipr.simpleLookupInstClassDecl(getClassName()));
 	    flatRoot.setFClass(fc);
 	    flatRoot.options = new OptionRegistry(or);
 	    
