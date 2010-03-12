@@ -49,7 +49,19 @@ def write_data(simulator):
 
         io.export_result_dymola(model,data)
     else:
-        raise Simulator_Exception('Currently not supported for ODEs.')
+        model = simulator._problem._model
+        
+        t = N.array(simulator.t)
+        y = N.array(simulator.y)
+        u = N.ones((len(t),len(model.real_u)))*model.real_u
+        yd = N.array(map(simulator.f,t,y))
+        
+        # extends the time array with the states columnwise
+        data = N.c_[t,yd]
+        data = N.c_[data, y]
+        data = N.c_[data, u]
+        
+        io.export_result_dymola(model,data)
 
 class JMIExplicit(Explicit_Problem):
     """
@@ -240,7 +252,7 @@ class JMIImplicit(Implicit_Problem):
                 eps_adjust[i]=+self.eps
             else:
                 eps_adjust[i]=-self.eps
-        
+
         rp = r + eps_adjust
 
         return rp

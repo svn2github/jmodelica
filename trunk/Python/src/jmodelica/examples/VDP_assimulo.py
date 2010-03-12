@@ -24,7 +24,7 @@ import jmodelica.jmi as jmi
 from jmodelica.compiler import OptimicaCompiler
 try:
     from Assimulo.Explicit_ODE import CVode
-    from jmodelica.simulation.assimulo import JMIExplicit
+    from jmodelica.simulation.assimulo import JMIExplicit, write_data
 except:
     pass
 
@@ -57,7 +57,21 @@ def run_demo(with_plots=True):
     VDP_sim.iter = 'Newton' #iteration method, default FixedPoint
     VDP_sim(20) #Runs the simulation
     VDP_sim.print_statistics() #Prints the integration statistics
-    VDP_sim.plot() #Plots the solution
+    
+    write_data(VDP_sim)
+    
+    # Load the file we just wrote to file
+    res = jmodelica.io.ResultDymolaTextual('VDP_pack_VDP_Opt_result.txt')
+    
+    x1=res.get_variable_data('x1')
+    x2=res.get_variable_data('x2')
+    
+    if with_plots:
+        fig = p.figure()
+        p.plot(x1.t, x1.x, x2.t, x2.x)
+        p.legend(('x1','x2'))
+        p.show()
+        
 
 if __name__=="__main__":
     run_demo()
