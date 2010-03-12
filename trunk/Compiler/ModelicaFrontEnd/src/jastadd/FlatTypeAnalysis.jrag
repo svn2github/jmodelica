@@ -281,8 +281,13 @@ aspect FlatTypeAnalysis {
 			return fUnknownType();
 		return getFExp().type().arrayType(size());
 	}
+	
+	eq FIdentity.type() {
+		if (!getFExp().variability().lessOrEqual(fParameter()))
+			return fUnknownType();
+		return fIntegerArrayType(size());
+	}
 
-	// TODO: Assumes same general functionality as zeros and ones - may need change for new subclasses
 	eq FInfArgsFunctionCall.type() = (size().ndims() > 0) ? fIntegerArrayType(size()) : fUnknownType();
 	eq FFillExp.type()             = (size().ndims() > 0) ? getFillExp().type().arrayType(size()) : fUnknownType();
 	

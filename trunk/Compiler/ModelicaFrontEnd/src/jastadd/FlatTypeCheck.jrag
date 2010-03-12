@@ -251,6 +251,7 @@ aspect FlatTypeCheck {
   syn boolean FBuiltInFunctionCall.checkTypeAsExpression() = false;
   eq FSizeExp.checkTypeAsExpression()     = true;
   eq FMinMaxExp.checkTypeAsExpression()   = true;
+  eq FIdentity.checkTypeAsExpression()    = true;
   eq FLinspace.checkTypeAsExpression()    = true;
   eq FAbstractCat.checkTypeAsExpression() = dimensionIsOk();
   

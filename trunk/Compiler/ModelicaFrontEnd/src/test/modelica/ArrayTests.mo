@@ -7180,5 +7180,78 @@ end ArrayIfExp2;
 
 
 
+model Identity1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="Identity1",
+         description="identity() operator: basic test",
+         flatModel="
+fclass ArrayTests.Identity1
+ parameter Real A[1,1] = 1 /* 1.0 */;
+ parameter Real A[1,2] = 0 /* 0.0 */;
+ parameter Real A[1,3] = 0 /* 0.0 */;
+ parameter Real A[2,1] = 0 /* 0.0 */;
+ parameter Real A[2,2] = 1 /* 1.0 */;
+ parameter Real A[2,3] = 0 /* 0.0 */;
+ parameter Real A[3,1] = 0 /* 0.0 */;
+ parameter Real A[3,2] = 0 /* 0.0 */;
+ parameter Real A[3,3] = 1 /* 1.0 */;
+end ArrayTests.Identity1;
+")})));
+
+  parameter Real A[3,3] = identity(3);
+end Identity1;
+
+
+model Identity2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="Identity2",
+         description="identity() operator:",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 7207, column 18:
+  Array size mismatch in declaration of A, size of declaration is [] and size of binding expression is [3, 3]
+")})));
+
+  parameter Real A = identity(3);
+end Identity2;
+
+
+model Identity3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="Identity3",
+         description="identity() operator:",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 7224, column 27:
+  Type error in expression
+")})));
+
+  Integer n = 3;
+  parameter Real A[3,3] = identity(n);
+end Identity3;
+
+
+model Identity4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="Identity4",
+         description="identity() operator:",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 7240, column 36:
+  Calling function identity(): types of positional argument 1 and input n are not compatible
+")})));
+
+  parameter Real A[3,3] = identity(3.0);
+end Identity4;
+
+
+
   annotation (uses(Modelica(version="3.0.1")));
 end ArrayTests;
