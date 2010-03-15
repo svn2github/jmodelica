@@ -478,7 +478,7 @@ aspect ConstantEvaluation {
    * 
    *  - The primitive type of the expression is retreived using the type()
    *    attribute.
-   *  - The method add() defined for FPrimitiveType is invoked.
+   *  - The method add() defined for FType is invoked.
    *  - The resulting CValue is returned. 
    *  
    *  Using this strategy, a particular FExp node need not know the details of
@@ -512,7 +512,7 @@ aspect ConstantEvaluation {
   eq FOrExp.cevalCalc()  = type().or(getLeft().ceval(), getRight().ceval());
   eq FNotExp.cevalCalc() = type().not(getFExp().ceval());
   
-  syn FPrimitiveType FRelExp.cevalType() = getLeft().type().typePromotion(getRight().type());
+  syn FType FRelExp.cevalType() = getLeft().type().typePromotion(getRight().type());
   
   eq FEqExp.cevalCalc()  = cevalType().equ(getLeft().ceval(), getRight().ceval());
   eq FNeqExp.cevalCalc() = cevalType().neq(getLeft().ceval(), getRight().ceval());
@@ -754,11 +754,11 @@ aspect ConstantEvaluation {
    * @param v2 Constant value of right operand.
    * @return Resulting constant value.
    */
-  syn CValue FPrimitiveType.add(CValue v1, CValue v2) = 
+  syn CValue FType.add(CValue v1, CValue v2) = 
 	  new CValueUnknown();
-  eq FRealScalarType.add(CValue v1, CValue v2) = 
+  eq FRealType.add(CValue v1, CValue v2) = 
 	  new CValueReal(v1.realValue() + v2.realValue());
-  eq FIntegerScalarType.add(CValue v1, CValue v2) = 
+  eq FIntegerType.add(CValue v1, CValue v2) = 
 	  new CValueInteger(v1.intValue() + v2.intValue());
 
   /**
@@ -768,11 +768,11 @@ aspect ConstantEvaluation {
    * @param v2 Constant value of right operand.
    * @return Resulting constant value.
    */
-  syn CValue FPrimitiveType.sub(CValue v1, CValue v2) = 
+  syn CValue FType.sub(CValue v1, CValue v2) = 
 	  new CValueUnknown();
-  eq FRealScalarType.sub(CValue v1, CValue v2) = 
+  eq FRealType.sub(CValue v1, CValue v2) = 
 	  new CValueReal(v1.realValue() - v2.realValue());
-  eq FIntegerScalarType.sub(CValue v1, CValue v2) = 
+  eq FIntegerType.sub(CValue v1, CValue v2) = 
 	  new CValueInteger(v1.intValue() - v2.intValue());
 
   /**
@@ -782,11 +782,11 @@ aspect ConstantEvaluation {
    * @param v2 Constant value of right operand.
    * @return Resulting constant value.
    */
-  syn CValue FPrimitiveType.mul(CValue v1, CValue v2) = 
+  syn CValue FType.mul(CValue v1, CValue v2) = 
 	  new CValueUnknown();
-  eq FRealScalarType.mul(CValue v1, CValue v2) = 
+  eq FRealType.mul(CValue v1, CValue v2) = 
 	  new CValueReal(v1.realValue()*v2.realValue());
-  eq FIntegerScalarType.mul(CValue v1, CValue v2) = 
+  eq FIntegerType.mul(CValue v1, CValue v2) = 
 	  new CValueInteger(v1.intValue()*v2.intValue());
 
   /**
@@ -796,11 +796,11 @@ aspect ConstantEvaluation {
    * @param v2 Constant value of right operand.
    * @return Resulting constant value.
    */
-  syn CValue FPrimitiveType.div(CValue v1, CValue v2) = 
+  syn CValue FType.div(CValue v1, CValue v2) = 
 	  new CValueUnknown();
-  eq FRealScalarType.div(CValue v1, CValue v2) = 
+  eq FRealType.div(CValue v1, CValue v2) = 
 	  new CValueReal(v1.realValue()/v2.realValue());
-  eq FIntegerScalarType.div(CValue v1, CValue v2) = 
+  eq FIntegerType.div(CValue v1, CValue v2) = 
 	  new CValueReal(v1.realValue()/v2.realValue());
 
   /**
@@ -810,12 +810,12 @@ aspect ConstantEvaluation {
    * @param v2 Constant value of right operand.
    * @return Resulting constant value.
    */
-  syn CValue FPrimitiveType.pow(CValue v1, CValue v2) = 
+  syn CValue FType.pow(CValue v1, CValue v2) = 
 	  new CValueUnknown();
-  eq FRealScalarType.pow(CValue v1, CValue v2) =
+  eq FRealType.pow(CValue v1, CValue v2) =
 	  new CValueReal(java.lang.Math.pow(v1.realValue(),v2.realValue()));
   
-  eq FIntegerScalarType.pow(CValue v1, CValue v2) = 
+  eq FIntegerType.pow(CValue v1, CValue v2) = 
 	  new CValueReal(java.lang.Math.pow(v1.realValue(),v2.realValue()));
 
   /**
@@ -824,10 +824,10 @@ aspect ConstantEvaluation {
    * @param v Constant value of operand.
    * @return Resulting constant value.
    */
-  syn CValue FPrimitiveType.neg(CValue v) = 
+  syn CValue FType.neg(CValue v) = 
 	  new CValueUnknown();
-  eq FRealScalarType.neg(CValue v) = new CValueReal(-v.realValue());
-  eq FIntegerScalarType.neg(CValue v) = new CValueInteger(-v.intValue());
+  eq FRealType.neg(CValue v) = new CValueReal(-v.realValue());
+  eq FIntegerType.neg(CValue v) = new CValueInteger(-v.intValue());
 
   /**
    * \brief Abs expression for constant values.
@@ -835,11 +835,11 @@ aspect ConstantEvaluation {
    * @param v Constant value of operand.
    * @return Resulting constant value.
    */
-  syn CValue FPrimitiveType.abs(CValue v) = 
+  syn CValue FType.abs(CValue v) = 
 	  new CValueUnknown();
-  eq FRealScalarType.abs(CValue v) = 
+  eq FRealType.abs(CValue v) = 
 	  new CValueReal(Math.abs(v.realValue()));
-  eq FIntegerScalarType.abs(CValue v) = 
+  eq FIntegerType.abs(CValue v) = 
 	  new CValueInteger(Math.abs(v.intValue()));
 
   /**
@@ -849,9 +849,9 @@ aspect ConstantEvaluation {
    * @param v2 Constant value of right operand.
    * @return Resulting constant value.
    */
-  syn CValue FPrimitiveType.and(CValue v1, CValue v2) = 
+  syn CValue FType.and(CValue v1, CValue v2) = 
 	  new CValueUnknown();
-  eq FBooleanScalarType.and(CValue v1, CValue v2) = 
+  eq FBooleanType.and(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.booleanValue() && v2.booleanValue());
 
   /**
@@ -861,9 +861,9 @@ aspect ConstantEvaluation {
    * @param v2 Constant value of right operand.
    * @return Resulting constant value.
    */
-  syn CValue FPrimitiveType.or(CValue v1, CValue v2) = 
+  syn CValue FType.or(CValue v1, CValue v2) = 
 	  new CValueUnknown();
-  eq FBooleanScalarType.or(CValue v1, CValue v2) = 
+  eq FBooleanType.or(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.booleanValue() || v2.booleanValue());
 
   /**
@@ -872,9 +872,9 @@ aspect ConstantEvaluation {
    * @param v Constant value of operand.
    * @return Resulting constant value.
    */
-  syn CValue FPrimitiveType.not(CValue v) = 
+  syn CValue FType.not(CValue v) = 
 	  new CValueUnknown();
-  eq FBooleanScalarType.not(CValue v) = 
+  eq FBooleanType.not(CValue v) = 
 	  new CValueBoolean(!v.booleanValue());
   
   /**
@@ -884,15 +884,15 @@ aspect ConstantEvaluation {
    * @param v2 Constant value of right operand.
    * @return Resulting constant value.
    */
-  syn CValue FPrimitiveType.equ(CValue v1, CValue v2) = 
+  syn CValue FType.equ(CValue v1, CValue v2) = 
 	  new CValueUnknown();
-  eq FBooleanScalarType.equ(CValue v1, CValue v2) = 
+  eq FBooleanType.equ(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() == v2.intValue());
-  eq FRealScalarType.equ(CValue v1, CValue v2) = 
+  eq FRealType.equ(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.realValue() == v2.realValue());
-  eq FIntegerScalarType.equ(CValue v1, CValue v2) = 
+  eq FIntegerType.equ(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() == v2.intValue());
-  eq FStringScalarType.equ(CValue v1, CValue v2) = 
+  eq FStringType.equ(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) == 0);
   
   /**
@@ -902,15 +902,15 @@ aspect ConstantEvaluation {
    * @param v2 Constant value of right operand.
    * @return Resulting constant value.
    */
-  syn CValue FPrimitiveType.neq(CValue v1, CValue v2) = 
+  syn CValue FType.neq(CValue v1, CValue v2) = 
 	  new CValueUnknown();
-  eq FBooleanScalarType.neq(CValue v1, CValue v2) = 
+  eq FBooleanType.neq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() != v2.intValue());
-  eq FRealScalarType.neq(CValue v1, CValue v2) = 
+  eq FRealType.neq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.realValue() != v2.realValue());
-  eq FIntegerScalarType.neq(CValue v1, CValue v2) = 
+  eq FIntegerType.neq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() != v2.intValue());
-  eq FStringScalarType.neq(CValue v1, CValue v2) = 
+  eq FStringType.neq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) != 0);
   
   /**
@@ -920,15 +920,15 @@ aspect ConstantEvaluation {
    * @param v2 Constant value of right operand.
    * @return Resulting constant value.
    */
-  syn CValue FPrimitiveType.geq(CValue v1, CValue v2) = 
+  syn CValue FType.geq(CValue v1, CValue v2) = 
 	  new CValueUnknown();
-  eq FBooleanScalarType.geq(CValue v1, CValue v2) = 
+  eq FBooleanType.geq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() >= v2.intValue());
-  eq FRealScalarType.geq(CValue v1, CValue v2) = 
+  eq FRealType.geq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.realValue() >= v2.realValue());
-  eq FIntegerScalarType.geq(CValue v1, CValue v2) = 
+  eq FIntegerType.geq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() >= v2.intValue());
-  eq FStringScalarType.geq(CValue v1, CValue v2) = 
+  eq FStringType.geq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) >= 0);
   
   /**
@@ -938,15 +938,15 @@ aspect ConstantEvaluation {
    * @param v2 Constant value of right operand.
    * @return Resulting constant value.
    */
-  syn CValue FPrimitiveType.gt(CValue v1, CValue v2) = 
+  syn CValue FType.gt(CValue v1, CValue v2) = 
 	  new CValueUnknown();
-  eq FBooleanScalarType.gt(CValue v1, CValue v2) = 
+  eq FBooleanType.gt(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() > v2.intValue());
-  eq FRealScalarType.gt(CValue v1, CValue v2) = 
+  eq FRealType.gt(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.realValue() > v2.realValue());
-  eq FIntegerScalarType.gt(CValue v1, CValue v2) = 
+  eq FIntegerType.gt(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() > v2.intValue());
-  eq FStringScalarType.gt(CValue v1, CValue v2) = 
+  eq FStringType.gt(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) > 0);
   
   /**
@@ -956,15 +956,15 @@ aspect ConstantEvaluation {
    * @param v2 Constant value of right operand.
    * @return Resulting constant value.
    */
-  syn CValue FPrimitiveType.leq(CValue v1, CValue v2) = 
+  syn CValue FType.leq(CValue v1, CValue v2) = 
 	  new CValueUnknown();
-  eq FBooleanScalarType.leq(CValue v1, CValue v2) = 
+  eq FBooleanType.leq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() <= v2.intValue());
-  eq FRealScalarType.leq(CValue v1, CValue v2) = 
+  eq FRealType.leq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.realValue() <= v2.realValue());
-  eq FIntegerScalarType.leq(CValue v1, CValue v2) = 
+  eq FIntegerType.leq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() <= v2.intValue());
-  eq FStringScalarType.leq(CValue v1, CValue v2) = 
+  eq FStringType.leq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) <= 0);
   
   /**
@@ -974,15 +974,15 @@ aspect ConstantEvaluation {
    * @param v2 Constant value of right operand.
    * @return Resulting constant value.
    */
-  syn CValue FPrimitiveType.lt(CValue v1, CValue v2) = 
+  syn CValue FType.lt(CValue v1, CValue v2) = 
 	  new CValueUnknown();
-  eq FBooleanScalarType.lt(CValue v1, CValue v2) = 
+  eq FBooleanType.lt(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() < v2.intValue());
-  eq FRealScalarType.lt(CValue v1, CValue v2) = 
+  eq FRealType.lt(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.realValue() < v2.realValue());
-  eq FIntegerScalarType.lt(CValue v1, CValue v2) = 
+  eq FIntegerType.lt(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() < v2.intValue());
-  eq FStringScalarType.lt(CValue v1, CValue v2) = 
+  eq FStringType.lt(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) < 0);
 	  
 }

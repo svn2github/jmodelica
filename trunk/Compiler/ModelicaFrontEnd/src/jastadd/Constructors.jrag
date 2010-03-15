@@ -164,7 +164,7 @@ aspect Constructors {
 	 * \brief Create an FFunctionArray with the given name and type. 
 	 *        Extracts array subscripts from type.
 	 */
-	public FFunctionArray.FFunctionArray(FPrimitiveType type, String name) {
+	public FFunctionArray.FFunctionArray(FType type, String name) {
 		this(new Opt(), type, new Opt(), new FQName(name));
 		getFQName().setLastFArraySubscripts(type.size().flattenFArraySubscripts());
 	}
@@ -172,7 +172,7 @@ aspect Constructors {
 	/**
 	 * \brief Create an FFunctionVariable with the given name and type. 
 	 */
-	public FFunctionVariable.FFunctionVariable(FPrimitiveType type, String name) {
+	public FFunctionVariable.FFunctionVariable(FType type, String name) {
 		this(new Opt(), type, new Opt(), new FQName(name));
 	}
 	

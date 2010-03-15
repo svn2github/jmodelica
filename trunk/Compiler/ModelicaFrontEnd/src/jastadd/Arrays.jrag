@@ -377,7 +377,7 @@ aspect Arrays {
 	 * access. See also documentation of accessNdims(). 
 	 */
 	syn lazy Size FArraySubscripts.accessSize() {
-		if (ndims() == 0)
+		if (accessNdims() == 0)
 			return Size.SCALAR;
 		MutableSize s = new MutableSize(accessNdims());
 		for (FSubscript fs : getFSubscripts()) 
@@ -434,6 +434,8 @@ aspect Arrays {
 			return getRight().size();
 		if (!getRight().isArray())
 			return getLeft().size();
+		if (!isArray())
+			return Size.SCALAR;
 		MutableSize s = new MutableSize(ndims());
 		if (getLeft().ndims() == 2)
 			s.append(getLeft().size(), 0);
@@ -520,6 +522,8 @@ aspect Arrays {
 	eq FSizeExp.size() = hasDim() ? Size.SCALAR : new Size(getFExp().ndims());
 	
 	eq FInfArgsFunctionCall.size() {
+		if (!isArray())
+			return Size.SCALAR;
 		MutableSize s = new MutableSize(ndims());
 		for (FExp fe : getFExps()) 
 			s.append(fe);
@@ -1377,14 +1381,23 @@ aspect ArrayIndices {
 		/**
 		 * \brief Used to represent the size of scalar expressions.
 		 */
-		public static final Size SCALAR = new Size(new int[0]);
+		public static final Size SCALAR = new Size();
 		
 		protected int[] size;
+		
+		/**
+		 * \brief Private constructor that creates a scalar size.
+		 */
+		private Size() {
+			size = new int[0];
+		}
 		
 		/**
 		 * \brief Constructs a Size with the given lengths.
 		 */
 		public Size(int[] size) {
+			if (size.length == 0)
+				throw new IllegalArgumentException();
 			this.size = size;
 		}
 		
@@ -1392,6 +1405,8 @@ aspect ArrayIndices {
 		 * \brief Convenience constructor to create a on-dimensional size with the given length.
 		 */
 		public Size(int s) {
+			if (s == 0)
+				throw new IllegalArgumentException();
 			size = new int[] { s };
 		}
 		

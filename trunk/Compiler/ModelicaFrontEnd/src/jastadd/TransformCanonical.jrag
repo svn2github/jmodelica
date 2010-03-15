@@ -220,7 +220,7 @@ aspect TransformCanonical {
 	 * \brief Create an function variable representing this variable in a generated algorithm function.
 	 */
 	public FFunctionVariable FVariable.createFFunctionVariable(FTypePrefixInputOutput io) {
-		FPrimitiveType type = (FPrimitiveType) type().fullCopy();
+		FType type = (FType) type().fullCopy();
 		return new FFunctionVariable(new Opt(io), type, new Opt(), getFQName().fullCopy());
 	}
 
@@ -872,7 +872,7 @@ aspect Scalarization {
 			useTempVar = true;
 			
 			// Create temp
-			FPrimitiveType type = (FPrimitiveType) type().scalarType().fullCopy();
+			FType type = (FType) type().scalarType().fullCopy();
 			if (addVar) 
 				vars.add(new FFunctionVariable(type, tempVarName()));
 			clauses.add(new FAssignStmt(new FIdUse(tempVarName()), type.zeroLiteral()));
@@ -1153,7 +1153,7 @@ aspect Scalarization {
 					for (FExp e : getArray().iterable())
 						vars.add(createTemporaryVariable((FIdUseExp) e));
 				} else {
-					FPrimitiveType type = (FPrimitiveType) type().fullCopy();
+					FType type = (FType) type().fullCopy();
 					vars.add(new FFunctionArray(type, tempVarName()));
 				}
 			}

@@ -799,18 +799,13 @@ aspect FlatNames {
 		return new FIdUse(fullCopy()); 
 	}
 	
-	syn String FPrimitiveType.name();
-	eq FRealScalarType.name() = "Real";
-	eq FRealArrayType.name() = "Real";
-	eq FIntegerScalarType.name() = "Integer";
-	eq FIntegerArrayType.name() = "Integer";
-	eq FBooleanScalarType.name() = "Boolean";
-	eq FBooleanArrayType.name() = "Boolean";
-	eq FStringScalarType.name() = "String";
-	eq FStringArrayType.name() = "String";
-	eq FUnknownType.name() = "Unknown";
-	eq FUnknownScalarType.name() = "Unknown";
-	eq FUnknownArrayType.name() = "Unknown";
+	syn String FType.name();
+	eq FRealType.name()    = "Real";
+	eq FIntegerType.name() = "Integer";
+	eq FBooleanType.name() = "Boolean";
+	eq FStringType.name()  = "String";
+	eq FRecordType.name()  = getName();
+	eq FUnknownType.name() = "(unknown type)";
 }
 
 aspect DebugHelpers {
@@ -928,7 +923,6 @@ aspect FlatFunctionUtils {
 	 inh boolean FAbstractEquation.inFunction();
 	 inh boolean FSubscript.inFunction();
 	 inh boolean FFunctionCallLeft.inFunction();
-	 inh boolean FPrimitiveType.inFunction();
 	 eq InstBaseClassDecl.getChild().inFunction() = isFunction();
 	 eq FFunctionDecl.getChild().inFunction()     = true;
 	 eq Root.getChild().inFunction()              = false;

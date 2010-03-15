@@ -56,7 +56,7 @@ abstract AbstractFVariable;
  * \brief A flat variable in a function.
  */
 FFunctionVariable : AbstractFVariable ::= [FTypePrefixInputOutput]
-                                          Type:FPrimitiveType
+                                          Type:FType
                                           [BindingExp:FExp]
                                           FQName;
 
@@ -187,61 +187,59 @@ FProtectedVisibilityType : FVisibilityType ::=;
 FTemporaryVisibilityType : FPublicVisibilityType ::=;
 
 /**
+ * \brief Base class for all type nodes.
+ */
+abstract FType ::= <Size:Size>;
+
+/**
+ * \brief A record type.
+ */
+FRecordType : FType ::= <Name> Component:FRecordComponentType*;
+
+/**
+ * \brief The type discription of a record component.
+ */
+FRecordComponentType ::= <Name> FType;
+
+/**
  * \brief Base class for primitive type nodes.
  *
  * The flat type system is based on explicit representations of the primitive
  * types Real, Integer, Boolean and String, where each type corresponds to
  * an AST node. FPrimitiveType serves as base class for these AST nodes.
  */
-abstract FPrimitiveType;
-
-abstract FPrimitiveScalarType : FPrimitiveType;
-abstract FPrimitiveArrayType : FPrimitiveType ::= <Size:Size>;
-abstract FPrimitiveScalarNumericType : FPrimitiveScalarType;
-abstract FPrimitiveArrayNumericType : FPrimitiveArrayType;
+abstract FPrimitiveType : FType;
 
 /**
  * \brief Base class for the numeric types Real and Integer.
  */
-//abstract FNumericType : FPrimitiveType;
+abstract FPrimitiveNumericType : FPrimitiveType;
 
 /**
  * \brief Class representing the primitive type Real.
  */
-FRealScalarType : FPrimitiveScalarNumericType ::=;
-
-FRealArrayType : FPrimitiveArrayNumericType;
+FRealType : FPrimitiveNumericType;
 
 /**
  * \brief Class representing the primitive type Integer.
  */
-FIntegerScalarType : FPrimitiveScalarNumericType ::=; 
-
-FIntegerArrayType : FPrimitiveArrayNumericType;
+FIntegerType : FPrimitiveNumericType;
 
 /**
  * \brief Class representing the primitive type Boolean.
  */
-FBooleanScalarType : FPrimitiveScalarType ::=;
-
-FBooleanArrayType : FPrimitiveArrayType;
+FBooleanType : FPrimitiveType;
 
 /**
  * \brief Class representing the primitive type String.
  */
-FStringScalarType : FPrimitiveScalarType ::=;
-
-FStringArrayType : FPrimitiveArrayType;
+FStringType : FPrimitiveType;
 
 /**
  * \brief Class representing an unknown primitive type.
  *
  * Used to represent type errors. 
  */
-FUnknownScalarType : FPrimitiveScalarType ::=;
-
-FUnknownArrayType : FPrimitiveArrayType ::=;
-
 FUnknownType : FPrimitiveType;
 
 /**

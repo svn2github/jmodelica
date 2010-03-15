@@ -60,7 +60,7 @@
  * \package org.jmodelica.ast Package containing all AST classes.
  */
 
-abstract Root ::= /DynamicArrayType:FPrimitiveArrayType*/;
+abstract Root;
 
 ParserHandler;
 

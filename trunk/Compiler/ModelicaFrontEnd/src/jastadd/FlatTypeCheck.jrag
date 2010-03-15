@@ -57,7 +57,7 @@ aspect FlatTypeCheck {
     	if (hasInstModification() && getInstModification().hasInstValueMod()) {
 			FExp val_mod = getInstModification().instValueMod();
 			if (!type().isUnknown() && !val_mod.type().isUnknown()) {
-				FPrimitiveType attr_type = owner.attributeType(this);
+				FType attr_type = owner.attributeType(this);
 				if (!type().typeCompatible(val_mod.type().scalarType())) {
 					error("The type of the binding expression of the attribute " + name() +
 					  " does not match the declared type of the variable");
@@ -334,14 +334,11 @@ aspect FlatTypeCheck {
    * 
    * Only used if argumentDefinedTypeValid() returns <code>false</code>.
    */
-  inh boolean InstFunctionArgument.argumentTypeValid(FPrimitiveType type);
-  eq FAbstractFunctionCall.getChild().argumentTypeValid(FPrimitiveType type) = false;
-  eq FTranspose.getChild().argumentTypeValid(FPrimitiveType type)            = type.ndims() >= 2;
-  eq FNdimsExp.getChild().argumentTypeValid(FPrimitiveType type)             = true;
-  eq FSizeExp.getChild().argumentTypeValid(FPrimitiveType type)              = true;
-  eq FInfArgsFunctionCall.getChild().argumentTypeValid(FPrimitiveType type)  = true;
-  eq FSumExp.getChild().argumentTypeValid(FPrimitiveType type)               = type.ndims() > 0;
-  eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FPrimitiveType type) = 
-	  hasY() != getOriginalArg(i).getFExp().isArray();
+  inh boolean InstFunctionArgument.argumentTypeValid(FType type);
+  eq FAbstractFunctionCall.getChild().argumentTypeValid(FType type) = type.isPrimitive();
+  eq FTranspose.getChild().argumentTypeValid(FType type)            = type.ndims() >= 2 && type.isPrimitive();
+  eq FSumExp.getChild().argumentTypeValid(FType type)               = type.ndims() > 0 && type.hasAdd();
+  eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FType type) = 
+	  hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
   
 }
