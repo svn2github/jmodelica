@@ -68,13 +68,23 @@ aspect ContentCheck {
 			error("The end operator may only be used in array subscripts");
 	}
 	
-	// TODO: check if this is a builtin function, error otherwise
+	// TODO: check if this is a builtin function (with bad arguments), error otherwise
 //	public void FBuiltinExternalLanguage.contentCheck() {
 //		error("The \"builtin\" external language specitication may only be used for functions that are a part of the Modelica specification");
 //	}
 	
 	public void FUnknownExternalLanguage.contentCheck() {
 		error("The external language specitication \"" + getLanguage() + "\" is not supported");
+	}
+	
+	public void FIfWhenClause.contentCheck() {
+		if (!getTest().variability().lessOrEqual(fParameter()))
+			warning("Using if statements is currently not supported when compiling with CppAD, and can give erroneous results");
+	}
+	
+	public void FWhileStmt.contentCheck() {
+		if (!getTest().variability().lessOrEqual(fParameter()))
+			warning("Using while statements is currently not supported when compiling with CppAD, and can give erroneous results");
 	}
 	
 	inh boolean FIterExp.iterExpUseOK();

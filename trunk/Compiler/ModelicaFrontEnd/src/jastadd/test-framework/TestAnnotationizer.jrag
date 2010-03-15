@@ -202,7 +202,7 @@ abstract public class TestAnnotationizerHelper {
 	protected void handleCompilerProblems(Collection<Problem> problems) throws CompilerException {
 		CompilerException ce = new CompilerException();
 		for (Problem p : problems) 
-			if(p.severity() == Problem.Severity.ERROR) 
+			if (p.severity() == Problem.Severity.ERROR) 
 				ce.addProblem(p);
 		if (!ce.getProblems().isEmpty())
 			throw ce;
