@@ -62,7 +62,7 @@ from jmodelica.initialization.ipopt import InitializationOptimizer
 import numpy as N
 
     
-def optimize(model, file="", compiler_options={}, n_e=50, n_cp=3, max_iter=-1):
+def optimize(model, file="", compiler_options={}, n_e=50, n_cp=3, max_iter=-1, result_mesh='default', n_interpolation_points=20):
     """ Compact function for model optimization.
     
     Path to mo-file and model class must be provided. There are default values 
@@ -87,7 +87,11 @@ def optimize(model, file="", compiler_options={}, n_e=50, n_cp=3, max_iter=-1):
     # Solve the optimization problem                                       )
     nlp_ipopt.opt_sim_ipopt_solve()
     # Write to file.
-    nlp.export_result_dymola()
+    if result_mesh=='element_interpolation':
+        nlp.export_result_dymola_element_interpolation(n_interpolation_points)
+    else:
+        nlp.export_result_dymola()
+
     res = jmodelica.io.ResultDymolaTextual(model.get_name()+'_result.txt')
     
     return (model,res)
