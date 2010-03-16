@@ -34,7 +34,7 @@
 		 */
 		public void syntaxError(Symbol token) {
 			
-			StringBuffer s = new StringBuffer();
+			StringBuilder s = new StringBuilder();
 			//s.append("Syntax error at line "+ Symbol.getLine(token.getStart()) + ", column " + Symbol.getColumn(token.getStart()) + "\n");
 			if (token.value != null) {
 				s.append("   Unexpected token: \"" + token.value + "\"");
@@ -54,7 +54,7 @@
 		 */
 		public void scannerError(Scanner.Exception e) {
 			/*
-			StringBuffer s = new StringBuffer(e.getMessage());
+			StringBuilder s = new StringBuilder(e.getMessage());
 			s.append(" at line ");
 			s.append(e.line);
 			s.append(", column ");

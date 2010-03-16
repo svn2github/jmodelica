@@ -44,7 +44,7 @@ public class JunitGenerator {
 		this.ts = new TestSuite(fileName,className);
 	}
 	
-	public void dump(StringBuffer str) {
+	public void dump(StringBuilder str) {
 		ts.dump(str," ");
 	}
 	
@@ -56,7 +56,7 @@ public class JunitGenerator {
 		 * the generated test class is stored.
 		 */
 		JunitGenerator jg = new JunitGenerator(args[0],args[1]);
-		StringBuffer str = new StringBuffer();
+		StringBuilder str = new StringBuilder();
 		//jg.ts.printTests(str);
 		jg.ts.dumpJunit(args[0],args[2]);
 		//System.out.println(str.toString());

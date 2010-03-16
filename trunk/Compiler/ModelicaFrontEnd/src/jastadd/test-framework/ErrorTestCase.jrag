@@ -36,10 +36,10 @@ public class ErrorTestCase extends TestCase {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.jmodelica.test.ast.TestCase#dump(java.lang.StringBuffer, java.lang.String)
+	 * @see org.jmodelica.test.ast.TestCase#dump(java.lang.StringBuilder, java.lang.String)
 	 */
 	@Override
-	public void dump(StringBuffer str, String indent) {
+	public void dump(StringBuilder str, String indent) {
 		str.append(indent+"ErrorTestCase: \n");
 		if (testMe())
 			str.append("PASS\n");
@@ -53,7 +53,7 @@ public class ErrorTestCase extends TestCase {
 	}
 
 	public String toString() {
-		StringBuffer str = new StringBuffer();
+		StringBuilder str = new StringBuilder();
 		str.append("ErrorTestCase: \n");
 		str.append(" Name:                     "+getName()+"\n");
 		str.append(" Description:              "+getDescription()+"\n");
@@ -64,10 +64,10 @@ public class ErrorTestCase extends TestCase {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.jmodelica.test.ast.TestCase#printTest(java.lang.StringBuffer)
+	 * @see org.jmodelica.test.ast.TestCase#printTest(java.lang.StringBuilder)
 	 */
 	@Override
-	public boolean printTest(StringBuffer str) {
+	public boolean printTest(StringBuilder str) {
 		str.append("TestCase: " + getName() +": ");
 		if (testMe()) {
 			str.append("PASS\n");
@@ -125,7 +125,7 @@ public class ErrorTestCase extends TestCase {
 		
 		sr.setFileName(getSourceFileName());	
 		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-	    StringBuffer str = new StringBuffer();
+	    StringBuilder str = new StringBuilder();
 	    Collection<Problem> problems;
 	    try {
 	    	problems = ipr.checkErrorsInInstClass(getClassName());
@@ -156,7 +156,7 @@ public class ErrorTestCase extends TestCase {
 	    try {
 	    	ipr.findFlattenInst(getClassName(),fc);
 	    	fc.transformCanonical();
-	    	StringBuffer str_flat = new StringBuffer();
+	    	StringBuilder str_flat = new StringBuilder();
 	    	problems = fc.errorCheck();
 	    	if (problems.size()>0) {
 	//	    		str.append("Errors found!\n");
@@ -177,7 +177,7 @@ public class ErrorTestCase extends TestCase {
 	}
 
 	public String filterErrorMessages(String str) {
-		StringBuffer filteredStr = new StringBuffer();
+		StringBuilder filteredStr = new StringBuilder();
 		BufferedReader origStr = new BufferedReader(new StringReader(str));
 		String line;
 		

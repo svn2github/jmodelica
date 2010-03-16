@@ -848,7 +848,7 @@ aspect OptimicaFlatAPIDiagnostics {
 	 * \brief Print diagnostics for FOptClass.
 	 */
 	public String FOptClass.diagnostics() {
-		StringBuffer str = new StringBuffer();
+		StringBuilder str = new StringBuilder();
 		str.append(super.diagnostics() + "\n");
 		str.append("Cost function:   ");
 		if (objectiveExp()!=null) {
@@ -929,7 +929,7 @@ aspect OptimicaFlatAPIDiagnostics {
 	 * linearity.
 	 */
 	public String FOptClass.timedVariablesLinearityDiagnostics() {
-		StringBuffer str = new StringBuffer();
+		StringBuilder str = new StringBuilder();
 		str.append("Linearity of time points:\n");
 		for (FVariable fv : getFVariables()) {
 			str.append(fv.name() + ":\n");

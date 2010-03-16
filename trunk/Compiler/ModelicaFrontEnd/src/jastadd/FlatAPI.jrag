@@ -1070,7 +1070,7 @@ aspect LinearFVariables {
 aspect FlatDiagnostics {
 
 	syn String FClass.diagnostics() {
-		StringBuffer str = new StringBuffer();
+		StringBuilder str = new StringBuilder();
 		str.append("Diagnostics for flattened class " + name() + "\n");
 
 		str.append("Number of independent constants:              " + 
@@ -1203,7 +1203,7 @@ aspect FlatDiagnostics {
 	}
 
 	public String FClass.aliasDiagnostics() {
-		StringBuffer str = new StringBuffer();
+		StringBuilder str = new StringBuilder();
 		str.append("Alias sets:\n");
 		if (getAliasManager()!=null) {
 			str.append(getAliasManager().printAliasSets());
@@ -1223,7 +1223,7 @@ aspect FlatDiagnostics {
 
 	public String FClass.variableDiagnostics() {
 		
-		StringBuffer str = new StringBuffer();
+		StringBuilder str = new StringBuilder();
 		
 		str.append("Independent constants: \n");
 		for (FVariable fv : independentConstants()) {
@@ -1340,7 +1340,7 @@ aspect FlatDiagnostics {
 	}
 
 	public String FClass.incidence() {
-		StringBuffer str = new StringBuffer();
+		StringBuilder str = new StringBuilder();
 		
 		LinkedHashSet<FVariable> h;
 		LinkedHashSet<FDerivativeVariable> dh;
@@ -1368,7 +1368,7 @@ aspect FlatDiagnostics {
 	}
 	
 	public String FClass.dersAndDiffs() {
-		StringBuffer str = new StringBuffer();
+		StringBuilder str = new StringBuilder();
 		str.append("Derivatives and differentiated variables:\n");
 		for (FDerivativeVariable fdv : derivativeVariables()) {
 			if (fdv.myDifferentiatedVariable()!=null) {

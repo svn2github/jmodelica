@@ -43,7 +43,7 @@ import org.jmodelica.optimica.parser.OptimicaParser.Terminals;
 %{
   private HashMap<Integer, Integer> lineBreakMap;
 
-  StringBuffer string = new StringBuffer(128);
+  StringBuilder string = new StringBuilder(128);
 
   private Symbol newSymbol(short id) {
     return new Symbol(id, yyline + 1, yycolumn + 1, yylength(), yytext());

@@ -151,36 +151,35 @@ aspect Connections {
 		public void printConnectionSets() {
 		
 			System.out.println("Connection sets: " + list.size() + " sets");
-			StringBuffer str = new StringBuffer();
 			
 			// Print connection sets 
 			for(int i=0;i<list.size();i++) {
 				LinkedHashSet h = (LinkedHashSet)(list.get(i));
-				str.append("Connection set (");
+				System.out.print("Connection set (");
 				Iterator it = h.iterator();
 				if (((ConnectionSetEntry)it.next()).isFlow())
-					str.append("flow");
+					System.out.print("flow");
 				else
-					str.append("non flow");
-				str.append("): {");
+					System.out.print("non flow");
+				System.out.print("): {");
 				
 				for (Iterator iter=h.iterator();iter.hasNext();) {
 					
 					Object o = iter.next();
 					//System.out.println("printConnectionSets: " +o.getClass().getName());
 					ConnectionSetEntry cse = (ConnectionSetEntry)o;
-					str.append(cse.name());
+					System.out.print(cse.name());
 					if (cse.isOutside())
-						str.append("(o)");
+						System.out.print("(o)");
 					else
-						str.append("(i)");	
+						System.out.print("(i)");	
 					if (iter.hasNext())
-						str.append(", ");
+						System.out.print(", ");
 				}	
-				str.append("}\n");
+				System.out.println("}");
 			}
 			
-			System.out.println(str.toString());
+			System.out.println();
 		}
 	}
 

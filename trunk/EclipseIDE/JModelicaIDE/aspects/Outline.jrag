@@ -46,7 +46,7 @@ aspect Outline {
 	syn String Access.typeString() = getID();
 	eq Dot.typeString() = getLeft().typeString() + "." + getRight().typeString();
 	syn String ComponentDecl.typePrefixes() {
-		StringBuffer buf = new StringBuffer();
+		StringBuilder buf = new StringBuilder();
 		if (hasTypePrefixFlow()) {
 			buf.append(", ");
 			buf.append(getTypePrefixFlow());

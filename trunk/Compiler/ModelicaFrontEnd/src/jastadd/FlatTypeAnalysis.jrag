@@ -15,6 +15,7 @@
 */
 
 import java.util.Arrays;
+import java.util.TreeSet;
 
 aspect FlatTypeAnalysis {
 
@@ -28,8 +29,8 @@ aspect FlatTypeAnalysis {
 	eq UnknownFVariable.type()    = fUnknownType();
 
 	syn FType InstComponentModification.type() {
-		if (getName().myInstComponentDecl().isPrimitive()) {
-			InstPrimitive ip = ((InstPrimitive)getName().myInstComponentDecl());
+		if (getName().myInstComponentDecl().isAssignable()) {
+			InstAssignable ip = ((InstAssignable)getName().myInstComponentDecl());
 			return ip.type();
 		} else {
 			return fUnknownType();
@@ -47,6 +48,22 @@ aspect FlatTypeAnalysis {
 		else if (isString()) 
 			scalar = fStringScalarType();
 		return isArray() ? scalar.arrayType(size()) : scalar;
+	}
+	
+	syn FType InstRecord.type() {
+		TreeSet<FRecordComponentType> comps = new TreeSet<FRecordComponentType>();
+		for (InstComponentDecl icd : getInstComponentDecls()) 
+			comps.add(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
+		FRecordType type = new FRecordType(size(), getFQName().name(), new List());
+		for (FRecordComponentType comp : comps)
+			type.addComponent(comp);
+		return type;
+	}
+	
+	public class FRecordComponentType implements Comparable<FRecordComponentType> {
+		public int compareTo(FRecordComponentType other) {
+			return getName().compareTo(other.getName());
+		}
 	}
 	
 	syn lazy FType FExp.type() = fUnknownType();
@@ -274,8 +291,8 @@ aspect FlatTypeAnalysis {
 	eq FIdUseInstAccess.type() = getInstAccess().type();
 
 	syn lazy FType InstAccess.type() {
-		if (myInstComponentDecl().isPrimitive()) {
-			InstPrimitive ip = (InstPrimitive) myInstComponentDecl();
+		if (myInstComponentDecl().isAssignable()) {
+			InstAssignable ip = (InstAssignable) myInstComponentDecl();
 			FType t = ip.type().scalarType();
 			return isArray() ? t.arrayType(size()) : t.scalarType();
 		} else {
@@ -310,7 +327,7 @@ aspect InstBindingType {
 	/**
 	 * \brief Returns the type the binding expression should have.
 	 */
-	syn FType InstPrimitive.bindingType() {
+	syn FType InstAssignable.bindingType() {
 		InstNode decl = myInstValueMod().myInstNode();
 		if (myBindingExpHasEach() || decl == this) 
 			return type();
@@ -331,7 +348,7 @@ aspect InstBindingType {
 	 * \brief Constructs the type a specific attribute to this primitive should 
 	 *        have, given the scalar type of the attribute.
 	 */
-	eq InstPrimitive.attributeType(InstComponentModification icm) {
+	eq InstAssignable.attributeType(InstComponentModification icm) {
 		// TODO: This is only used to get the size of the type - perhaps it should return Size instead
 		FType res = icm.type();
 		InstNode decl = icm.myInstNode();
@@ -347,7 +364,7 @@ aspect InstBindingType {
 	 * \brief Add array dimensions for surrounding InstArrayComponentDecls to 
 	 *        type for binding expression.
 	 */
-	inh FType InstPrimitive.expandBindingType(FType type, InstNode node);
+	inh FType InstAssignable.expandBindingType(FType type, InstNode node);
 	inh FType InstArrayComponentDecl.expandBindingType(FType type, InstNode node);
 	inh FType InstComposite.expandBindingType(FType type, InstNode node);
 	
@@ -358,8 +375,10 @@ aspect InstBindingType {
 		expandBindingType(type.enclosingArrayType(childFSubscript(0).numIndices()), node);
 	eq InstComposite.getChild().expandBindingType(FType type, InstNode node) = 
 		(node == this) ? type : expandBindingType(type, node);
+	eq InstRecord.getChild().expandBindingType(FType type, InstNode node) = 
+		(node == this) ? type : expandBindingType(type, node);
 	
-	inh boolean InstPrimitive.inArrayComponent();
+	inh boolean InstAssignable.inArrayComponent();
 	eq InstClassDecl.getChild().inArrayComponent()          = false;
 	eq InstRoot.getChild().inArrayComponent()               = false;
 	eq FlatRoot.getChild().inArrayComponent()               = false;
@@ -663,5 +682,18 @@ aspect InstClassRestriction {
 	 */
 	syn boolean InstRestriction.isFunction() = false;
 	eq InstFunction.isFunction() = true;
+	
+	/**
+	 * \brief Is this class a record?
+	 */
+	syn boolean InstClassDecl.isRecord() = false;
+	eq InstBaseClassDecl.isRecord() = getInstRestriction().isRecord();
+	eq UnknownInstClassDecl.isRecord() = false;
+	
+	/**
+	 * \brief Is this restriction "record"?
+	 */
+	syn boolean InstRestriction.isRecord() = false;
+	eq InstMRecord.isRecord() = true;
 	
 }

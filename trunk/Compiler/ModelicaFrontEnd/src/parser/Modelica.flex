@@ -93,7 +93,7 @@
   
   private HashMap<Integer, Integer> lineBreakMap;
   
-  StringBuffer string = new StringBuffer(128);
+  StringBuilder string = new StringBuilder(128);
 
   private Symbol newSymbol(short id) {
     //System.out.println(id);

@@ -48,11 +48,11 @@ abstract public class TestCase {
 
 	abstract public boolean testMe();
 	
-	abstract public void dump(StringBuffer str, String indent);
+	abstract public void dump(StringBuilder str, String indent);
 	
-	abstract public boolean printTest(StringBuffer str);
+	abstract public boolean printTest(StringBuilder str);
 		
-	public void dumpJunit(StringBuffer str, int index) {
+	public void dumpJunit(StringBuilder str, int index) {
 		str.append("  @Test public void " + getName() + "() {\n");
 		str.append("    assertTrue(ts.get("+index+").getDescription(), ts.get("+index+").testMe());\n");
 	    str.append("  }\n\n");

@@ -668,7 +668,7 @@ aspect FlatNames {
 	eq SourceRoot.getProgram().retrieveFQName() = null;
 
 	syn lazy String FQName.name() {
-		StringBuffer str = new StringBuffer();
+		StringBuilder str = new StringBuilder();
 		for (Iterator<FQNamePart> it = getFQNameParts().iterator(); it.hasNext(); ) {
 			FQNamePart part = it.next();
 			str.append(part.getName());
@@ -711,7 +711,7 @@ aspect FlatNames {
 	syn String FIdUseExp.derName() = getFIdUse().derName();
 
 	syn lazy String FQName.derName() {
-		StringBuffer str = new StringBuffer();
+		StringBuilder str = new StringBuilder();
 		for (int i=0;i<getNumFQNamePart();i++) {
 			if (i==getNumFQNamePart()-1) {
 				str.append("der(");
@@ -734,7 +734,7 @@ aspect FlatNames {
 	//syn String FIdUseExp.derName2() = getFIdUse().derName2();
 	
 	syn lazy String FQName.nameUnderscore() {
-		StringBuffer str = new StringBuffer();
+		StringBuilder str = new StringBuilder();
 		for (int i=0;i<getNumFQNamePart();i++) {
 			str.append(getFQNamePart(i).getName());
 			if (i<getNumFQNamePart()-1 || isScalarized()) {
@@ -915,7 +915,7 @@ aspect FlatFunctionUtils {
 	  * \brief Check is this node is in a function.
 	  */
 	 inh boolean FQName.inFunction();
-	 inh boolean InstPrimitive.inFunction();
+	 inh boolean InstAssignable.inFunction();
 	 inh boolean InstExternal.inFunction();
 	 inh boolean FExp.inFunction();
 	 inh boolean FIdUse.inFunction();

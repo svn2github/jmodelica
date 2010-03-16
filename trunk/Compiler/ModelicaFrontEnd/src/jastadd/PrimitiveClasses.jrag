@@ -110,7 +110,14 @@ aspect UnknownDeclarations {
 	syn boolean InstComponentDecl.isPrimitive() = false;
 	eq InstPrimitive.isPrimitive() = true;
 
-
+	syn boolean InstClassDecl.isAssignable() = isPrimitive() || isRecord();
+	
+	syn boolean InstComponentDecl.isAssignable() = false;
+	eq InstPrimitive.isAssignable() = true;
+	eq InstRecord.isAssignable()    = true;
+	
+	syn boolean InstComponentDecl.isRecord() = false;
+	eq InstRecord.isRecord() = true;
 	
 	syn boolean InstAccess.isUnknown() = true;
 	eq InstComponentAccess.isUnknown() = myInstComponentDecl().isUnknown();

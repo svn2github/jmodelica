@@ -297,16 +297,16 @@ aspect Flattening {
 	}
 	
 	/**
-	 * \brief Retrieve the binding expression of an InstPrimitive node.
+	 * \brief Retrieve the binding expression of an InstAssignable node.
 	 */
-	syn FExp InstPrimitive.myBindingInstExp() = hasInstValueMod() ? myInstValueMod().getFExp() : null;
+	syn FExp InstAssignable.myBindingInstExp() = hasInstValueMod() ? myInstValueMod().getFExp() : null;
 
 	/**
-	 * \brief Check if this primitive has a binding expression.
+	 * \brief Check if this primitive or record has a binding expression.
 	 */
-	syn boolean InstPrimitive.hasBindingFExp() = myBindingInstExp() != null;
+	syn boolean InstAssignable.hasBindingFExp() = myBindingInstExp() != null;
 
-	syn lazy FExp InstPrimitive.getBindingFExp() {
+	syn lazy FExp InstAssignable.getBindingFExp() {
 		//System.out.println("In file: " + fileName() + " at line: " + beginLine() + ": " + prettyPrint(""));
 		if (hasInstValueMod()) {
 			InstValueModification im = myInstValueMod();
@@ -320,7 +320,7 @@ aspect Flattening {
 		return null;
 	}
 	
-	public FExp InstPrimitive.flattenBindingFExp() {
+	public FExp InstAssignable.flattenBindingFExp() {
 		if (hasInstValueMod()) {
 			InstValueModification im = myInstValueMod();
 			return getBindingFExp().flatten(im.myInstNode().getFQNamePrefix());
@@ -330,14 +330,14 @@ aspect Flattening {
 		
 	
 	/**
-	 * \brief Extract the part of a binding array expression that refers to this primitive.
+	 * \brief Extract the part of a binding array expression that refers to this primitive or record.
 	 * 
 	 * Will not create new nodes unless necessary.
 	 * 
 	 * @param fe    the expression to split
 	 * @param node  the node where the binding expression was declared 
 	 */
-	inh FExp InstPrimitive.splitBindingFExp(FExp fe, InstNode node);
+	inh FExp InstAssignable.splitBindingFExp(FExp fe, InstNode node);
 	inh FExp InstArrayComponentDecl.splitBindingFExp(FExp fe, InstNode node);
 	inh FExp InstComposite.splitBindingFExp(FExp fe, InstNode node);
 	
@@ -347,6 +347,8 @@ aspect Flattening {
 	eq InstArrayComponentDecl.getChild().splitBindingFExp(FExp fe, InstNode node) =
 		splitBindingFExp(fe, node).splitArrayExp(getIndex());
 	eq InstComposite.getChild().splitBindingFExp(FExp fe, InstNode node) =
+		(node == this) ? fe : splitBindingFExp(fe, node);
+	eq InstRecord.getChild().splitBindingFExp(FExp fe, InstNode node) =
 		(node == this) ? fe : splitBindingFExp(fe, node);
 	
 	/**
@@ -413,24 +415,24 @@ aspect Flattening {
 
 	// TODO: The names here needs to be clearer. (Down to and including getInstValueMod().)
 	/**
-	 * \brief Check if the binding expression of an InstPrimitive node is set 
+	 * \brief Check if the binding expression of an InstAssignable node is set 
 	 *        through a modification that is declared "each".
 	 */
-	syn lazy boolean InstPrimitive.myBindingExpHasEach() {
+	syn lazy boolean InstAssignable.myBindingExpHasEach() {
 		return hasInstValueMod() ? myInstValueMod().hasEach() : false;
 	}
 	
 	/**
-	 * \brief Check if this InstPrimitive node has an InstModification setting 
+	 * \brief Check if this InstAssignable node has an InstModification setting 
 	 *        its binding expression.
 	 */
-	syn boolean InstPrimitive.hasInstValueMod() = (myInstValueMod() != null);
+	syn boolean InstAssignable.hasInstValueMod() = (myInstValueMod() != null);
 	
 	/**
 	 * \brief Retrieve the InstModification setting the binding expression of 
-	 *        this InstPrimitive node.
+	 *        this InstAssignable node.
 	 */
-	syn lazy InstValueModification InstPrimitive.myInstValueMod() {
+	syn lazy InstValueModification InstAssignable.myInstValueMod() {
 		for (InstModification im : totalMergedEnvironment()) 
 			if (im.hasInstValueMod()) 
 				return im.getInstValueMod();

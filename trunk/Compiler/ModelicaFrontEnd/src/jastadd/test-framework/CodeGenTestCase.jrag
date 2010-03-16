@@ -59,7 +59,7 @@ public abstract class CodeGenTestCase extends TestCase {
 
 	public abstract AbstractGenerator createGenerator(FClass fc);
 	
-	public void dump(StringBuffer str,String indent) {
+	public void dump(StringBuilder str,String indent) {
 		str.append(indent+"CodeGenTestCase: \n");
 		if (testMe())
 			str.append("PASS\n");
@@ -77,7 +77,7 @@ public abstract class CodeGenTestCase extends TestCase {
 	}
 
 	public String toString() {
-		StringBuffer str = new StringBuffer();
+		StringBuilder str = new StringBuilder();
 		str.append("CodeGenTestCase: \n");
 		str.append(" Name:                     "+getName()+"\n");
 		str.append(" Description:              "+getDescription()+"\n");
@@ -90,7 +90,7 @@ public abstract class CodeGenTestCase extends TestCase {
 		return str.toString();
 	}
 	
-	public boolean printTest(StringBuffer str) {
+	public boolean printTest(StringBuilder str) {
 		str.append("TestCase: " + getName() +": ");
 		if (testMe()) {
 			str.append("PASS\n");

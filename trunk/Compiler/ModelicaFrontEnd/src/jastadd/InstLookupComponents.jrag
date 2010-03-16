@@ -35,11 +35,12 @@ aspect InstLookupComponents {
 
 	eq InstComponentDecl.getFArraySubscripts().lookupInstComponent(String name) = lookupInstComponent(name);
 	
-	eq InstPrimitive.getChild().lookupInstComponent(String name) = myInstClass().memberInstComponent(name); 
-	eq InstPrimitive.getInstModification().lookupInstComponent(String name) = lookupInstComponent(name);
-	eq InstPrimitive.getFArraySubscripts().lookupInstComponent(String name) = lookupInstComponent(name);
-	eq InstPrimitive.getBindingFExp().lookupInstComponent(String name) = lookupInstComponent(name);
-	eq InstPrimitive.getDynamicFExp().lookupInstComponent(String name) = lookupInstComponent(name);
+	// TODO: Make sure all of there applies to records as well as primitives
+	eq InstAssignable.getChild().lookupInstComponent(String name) = myInstClass().memberInstComponent(name); 
+	eq InstAssignable.getInstModification().lookupInstComponent(String name) = lookupInstComponent(name);
+	eq InstAssignable.getFArraySubscripts().lookupInstComponent(String name) = lookupInstComponent(name);
+	eq InstAssignable.getBindingFExp().lookupInstComponent(String name) = lookupInstComponent(name);
+	eq InstAssignable.getDynamicFExp().lookupInstComponent(String name) = lookupInstComponent(name);
 	
 	eq InstRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
 	
@@ -57,38 +58,32 @@ aspect InstLookupComponents {
 	inh lazy HashSet InstForClauseE.lookupInstComponent(String name);
 	eq InstForClauseE.getChild().lookupInstComponent(String name) {
 		HashSet set = new HashSet(4);
-		for (InstForIndex ifi : getInstForIndexs()) {
-			if (ifi.getInstPrimitive().name().equals(name)) {
-				set.add(ifi.getInstPrimitive());
-			}
-		}
+		for (InstForIndex ifi : getInstForIndexs()) 
+			ifi.matchInstComponent(name, set);
 		return (set.size() > 0) ? set : lookupInstComponent(name);
 	}
 	
 	inh lazy HashSet InstForStmt.lookupInstComponent(String name);
 	eq InstForStmt.getChild().lookupInstComponent(String name) {
 		HashSet set = new HashSet(4);
-		for (InstForIndex ifi : getInstForIndexs()) {
-			if (ifi.getInstPrimitive().name().equals(name)) {
-				set.add(ifi.getInstPrimitive());
-			}
-		}
+		for (InstForIndex ifi : getInstForIndexs()) 
+			ifi.matchInstComponent(name, set);
 		return (set.size() > 0) ? set : lookupInstComponent(name);
 	}
 	
 	inh lazy HashSet FIterExp.lookupInstComponent(String name);
 	eq FIterExp.getChild().lookupInstComponent(String name) {
 		HashSet set = new HashSet(4);
-		for (CommonForIndex fi : getForIndexs()) {
-			if (fi instanceof InstForIndex) {
-				InstForIndex ifi = (InstForIndex) fi;
-				if (ifi.getInstPrimitive().name().equals(name)) 
-					set.add(ifi.getInstPrimitive());
-			}
-		}
+		for (CommonForIndex fi : getForIndexs()) 
+			fi.matchInstComponent(name, set);
 		return (set.size() > 0) ? set : lookupInstComponent(name);
 	}
 
+	public void CommonForIndex.matchInstComponent(String name, HashSet set) {}
+	public void InstForIndex.matchInstComponent(String name, HashSet set) {
+		if (getInstPrimitive().name().equals(name)) 
+			set.add(getInstPrimitive());
+	}
 	
 	syn lazy HashSet InstNode.genericLookupInstComponent(String name) {
 		HashSet set = new HashSet(4);
@@ -207,8 +202,6 @@ aspect LookupInstComponentsInModifications {
 	eq InstConstrainingComponent.getInstClassModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name);
 	     
 	eq InstComponentDecl.getInstModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name); 
-	
-	eq InstPrimitive.getInstModification().lookupInstComponentInInstElement(String name) = getClassName().myInstClassDecl().memberInstComponent(name); 
 	
 	eq InstElementModification.getInstModification().lookupInstComponentInInstElement(String name) = getName().myInstComponentDecl().memberInstComponent(name);
     

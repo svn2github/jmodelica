@@ -101,7 +101,7 @@ aspect DumpTree {
   public void ComponentAccess.dumpTree(String indent) {
   	//super.dumpTree("");
   	ComponentDecl decl = myDecl();
-  	StringBuffer s = new StringBuffer();
+  	StringBuilder s = new StringBuilder();
     if (decl==null) {
   		s.append(": Undeclared");
   	} else {

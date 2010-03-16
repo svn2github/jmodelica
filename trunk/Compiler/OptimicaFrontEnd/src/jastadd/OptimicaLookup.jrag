@@ -35,11 +35,8 @@ aspect OptimicaInstLookupComponents {
 	inh lazy HashSet InstForClauseC.lookupInstComponent(String name);
 	eq InstForClauseC.getChild().lookupInstComponent(String name) {
 		HashSet set = new HashSet(4);
-		for (InstForIndex ifi : getInstForIndexs()) {
-			if (ifi.getInstPrimitive().name().equals(name)) {
-				set.add(ifi.getInstPrimitive());
-			}
-		}
+		for (InstForIndex ifi : getInstForIndexs()) 
+			ifi.matchInstComponent(name, set);
 		return (set.size() > 0) ? set : lookupInstComponent(name);
 	}
 	

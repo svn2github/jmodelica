@@ -149,7 +149,7 @@ import java.util.ArrayList;
 	   * Convert to error message.
 	   */
 	  public String getMessage() {
-		  StringBuffer str = new StringBuffer();
+		  StringBuilder str = new StringBuilder();
 		  str.append(problems.size() + " problems found:\n");
 		  for (Problem problem : problems)
 			  str.append(problem+"\n");
@@ -340,7 +340,7 @@ aspect ErrorCheck {
   
   /*
   public boolean ASTNode.errorCheck() {
- 	StringBuffer str = new StringBuffer();
+ 	StringBuilder str = new StringBuilder();
  	boolean errors = errorCheck(str);
  	System.out.println(str.toString());
  	return errors;
@@ -536,7 +536,7 @@ aspect InstanceErrorCheck {
 			}
 			// Check if the expressions of the attributes can be evaluated
 			// Notice that this check has to be done locally in the
-			// context of an InstPrimitive node in order to avoid
+			// context of an InstAssignable node in order to avoid
 			// evaluation of all value modifications also for non
 			// parameters.
 			for (InstModification im : totalMergedEnvironment()) {

@@ -689,7 +689,7 @@ public class ModelicaCompiler {
 			logger.severe("Could not find the class "+ cl);
 			System.exit(0);
 		} catch (CompilerException ce) {
-			StringBuffer str = new StringBuffer();
+			StringBuilder str = new StringBuilder();
 			str.append(ce.getProblems().size() + " errors found:\n");
 			for (Problem p : ce.getProblems()) {
 				str.append(p.toString()+"\n");

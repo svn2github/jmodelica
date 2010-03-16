@@ -104,7 +104,7 @@ public class TokenTester {
 		}
 		sr.setFileName(moFile);
 		
-		StringBuffer fm1_str = new StringBuffer();
+		StringBuilder fm1_str = new StringBuilder();
 		//fc1.prettyPrint(fm1_str, "");
 
 		try {
@@ -118,7 +118,7 @@ public class TokenTester {
 			System.exit(1);
 		} catch (Exception e) {e.printStackTrace();}
 		
-		StringBuffer fm2_str = new StringBuffer();
+		StringBuilder fm2_str = new StringBuilder();
 		fr.setFileName(mofFile);
 		//fr.prettyPrint(fm2_str, "");
 		

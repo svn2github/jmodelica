@@ -420,7 +420,7 @@ aspect AliasVariables {
 		}
 		
 		public String printAliasSet(LinkedHashSet<AliasVariable> aliasSet) {
-			StringBuffer str = new StringBuffer();
+			StringBuilder str = new StringBuilder();
 			//str.append(getIterationVariable(aliasSet).getFVariable().name());
 			//str.append("(" + getIterationVariable(aliasSet).getFVariable().varKind() + ")");
 			//str.append(":");
@@ -447,7 +447,7 @@ aspect AliasVariables {
 		 * @return A string containing the alias sets.
 		 */
 		public String printAliasSets() {
-			StringBuffer str = new StringBuffer();
+			StringBuilder str = new StringBuilder();
 			for (LinkedHashSet<AliasVariable> aliasSet : aliasSets) {
 				str.append(printAliasSet(aliasSet)+"\n");
 			}

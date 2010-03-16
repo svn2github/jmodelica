@@ -180,7 +180,7 @@ public abstract class AbstractGenerator {
 	 * \brief Prints out all registered tags in the generator.	
 	 */
 	public String toString() {
-		StringBuffer str = new StringBuffer();
+		StringBuilder str = new StringBuilder();
 		for (AbstractTag t : tagMap.values()) {
 			str.append(t.toString()+"\n");
 		}

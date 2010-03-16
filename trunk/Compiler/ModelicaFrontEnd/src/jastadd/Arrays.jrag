@@ -271,7 +271,7 @@ aspect Arrays {
 	 * 
 	 * @return Array dimension.
 	 */	
-	syn int InstPrimitive.ndims() = hasFArraySubscripts() ? getFArraySubscripts().ndims() : 0;
+	syn int InstAssignable.ndims() = hasFArraySubscripts() ? getFArraySubscripts().ndims() : 0;
 	
 	eq InstDot.ndims() = getRight().ndims() + getLeft().ndims();
 	
@@ -590,7 +590,7 @@ aspect Arrays {
 	/**
 	 * \brief Get the array sizes. 
 	 */
-	syn lazy Size InstPrimitive.size() {
+	syn lazy Size InstAssignable.size() {
 		Size s = declaredSize();
 		if (hasBindingFExp() && s.isUnknown() && (!isInput() || !inFunction()))
 			s = s.createKnown(getBindingFExp());
@@ -600,7 +600,7 @@ aspect Arrays {
 	/**
 	 * \brief Get the array sizes as declared. May be unknown. 
 	 */
-	syn Size InstPrimitive.declaredSize() = 
+	syn Size InstAssignable.declaredSize() = 
 		hasFArraySubscripts() ? getFArraySubscripts().size() : Size.SCALAR;
 	
 	/**
@@ -1284,7 +1284,7 @@ aspect Arrays {
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn lazy Indices InstPrimitive.indices() = Indices.create(size());
+	syn lazy Indices InstAssignable.indices() = Indices.create(size());
 
 	/**
 	 * \brief Get the set of all array indices of an FVariable. 

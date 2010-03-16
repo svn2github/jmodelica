@@ -32,11 +32,31 @@ aspect Types {
    // The double dispatch pattern applied to subtype testing.
    syn boolean InstNode.subType(InstNode t) = false;
    syn boolean InstNode.superTypeCompositeType(InstComposite subType) = false;
+   syn boolean InstNode.superTypeRecordType(InstRecord subType) = false;
    syn boolean InstNode.superTypeClassType(InstRoot subType) = false;
    syn boolean InstNode.superTypePrimitiveComponentType(InstPrimitive subType) = false;
    
    eq InstComposite.subType(InstNode t) = t.superTypeCompositeType(this);
+   eq InstRecord.subType(InstNode t) = t.superTypeRecordType(this);
    eq InstPrimitive.subType(InstNode t) = t.superTypePrimitiveComponentType(this);
+
+   eq InstRecord.superTypeRecordType(InstRecord subType) {
+       if (subType == this) return true;
+       if (subType.myInstClass().isUnknown()) return true;
+       InstRecord superType = this;
+   
+       // Check that all elements (here: components) in superType are in subType 
+       for (InstNode superTypeComponentInst : containedInstComponents()) {
+       	  // TODO: memberComponentInst should be switched for something in the general name analysis framework
+          HashSet<InstNode> set = subType.memberComponentInst(superTypeComponentInst.name());
+          if (set.size()!=1)
+          	return false;
+          InstNode subTypeComponentInst = set.iterator().next();
+          if (!subTypeComponentInst.subType(superTypeComponentInst))
+          	return false;
+	   }
+   	   return true;
+   }
 
    eq InstComposite.superTypeCompositeType(InstComposite subType) {
        if (subType == this) return true;
@@ -56,6 +76,7 @@ aspect Types {
    	   return true;
    }
    
+   eq UnknownInstComponentDecl.superTypeRecordType(InstRecord subType) = true;
    eq UnknownInstComponentDecl.superTypeCompositeType(InstComposite subType) = true;
    
    eq InstPrimitive.superTypePrimitiveComponentType(InstPrimitive subType) {
@@ -90,6 +111,8 @@ aspect Types {
     return l;
   }
   
+  // TODO: Shouldn't this be in TypeCheck.jrag?
+  // TODO: Does InstRecord need this?
   // InstNodes are type checked recursively, which means if a top level component
   // is type checked, then all sub-components are also type checked. Therefore a flag 
   // is introduced to detect this situation to avoid duplicate error messages.

@@ -131,7 +131,7 @@ import java.util.Random;
 		
 		
 		
-		  StringBuffer str =  new StringBuffer(  
+		  StringBuilder str =  new StringBuilder(  
 "connector Pin\n" +
 "  Real v;\n" +
 "  flow Real i;\n"+

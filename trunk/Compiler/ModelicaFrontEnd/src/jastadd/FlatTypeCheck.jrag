@@ -24,7 +24,7 @@ aspect FlatTypeCheck {
   }
  
  
-    public void InstPrimitive.typeCheck() {
+    public void InstAssignable.typeCheck() {
     	FExp bexp = myBindingInstExp();
     	if (bexp != null && !bexp.type().isUnknown()) {
     		if (myBindingExpHasEach() && !inArrayComponent()) {

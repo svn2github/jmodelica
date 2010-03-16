@@ -56,7 +56,7 @@ InstExpandableConnector : InstConnector;
 InstMType : InstRestriction;
 InstMPackage : InstRestriction;
 InstFunction : InstRestriction;
-InstRecord : InstRestriction;
+InstMRecord : InstRestriction;
 
 InstExternal ::= [FExternalLanguage] [InstExternalCall];
 InstExternalCall ::= [ReturnVar:InstAccess] <Name> Arg:FExp*;
@@ -74,7 +74,9 @@ InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl> /
 // redeclaration of classes.
 abstract InstComponentDecl : InstNode ::= ClassName:InstAccess [FArraySubscripts] <ComponentDecl:ComponentDecl> [InstModification] [InstConstraining];
 InstComposite : InstComponentDecl;
-InstPrimitive : InstComponentDecl ::= /BindingFExp:FExp/;
+abstract InstAssignable : InstComponentDecl ::= /BindingFExp:FExp/;
+InstPrimitive : InstAssignable;
+InstRecord : InstAssignable;
 InstBuiltIn : InstPrimitive;
 UnknownInstComponentDecl : InstComponentDecl;
 

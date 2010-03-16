@@ -76,7 +76,7 @@ public class TestSuite {
 		sr.collectTestCases(this,className);
 	}
 
-	public void dump(StringBuffer str,String indent) {
+	public void dump(StringBuilder str,String indent) {
 		str.append(indent+"TestSuite: " + name + "\n");
 		for (int i=0;i<l.size();i++) {
 			get(i).dump(str,indent+" ");
@@ -84,7 +84,7 @@ public class TestSuite {
 		}
 	}
 
-	public boolean printTests(StringBuffer str) {
+	public boolean printTests(StringBuilder str) {
 		int numFail = 0;
 		str.append("TestSuite: " + name + "\n");
 		for (int i=0;i<l.size();i++) {
@@ -100,7 +100,7 @@ public class TestSuite {
 	}
 	
 	public void dumpJunit(String testFile, String dir) {
-		StringBuffer str = new StringBuffer();
+		StringBuilder str = new StringBuilder();
 		str.append("package org.jmodelica.test.junitgenerated;\n\n");
 		str.append("import org.junit.*;\n");
 		str.append("import static org.junit.Assert.*;\n");
