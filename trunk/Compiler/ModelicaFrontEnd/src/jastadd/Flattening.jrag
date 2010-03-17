@@ -73,15 +73,14 @@ aspect Flattening {
 	}
 	
 	public void InstFunctionCall.flattenCalledFunctions(FClass fc) {
-		InstClassDecl icd = getName().myInstClassDecl();
-		if (icd instanceof InstFullClassDecl)
-			((InstFullClassDecl) icd).flattenFunction(fc);
+		getName().myInstClassDecl().flattenFunction(fc);
 		getArgs().flattenCalledFunctions(fc);
 	}
 	
 	// Flatten function if not already done
 	public void InstClassDecl.flattenFunction(FClass fc) {}
 	
+	// TODO: Shouldn't this be InstBaseClassDecl instead?
 	public void InstFullClassDecl.flattenFunction(FClass fc) {
 		getInstRestriction().flattenFunction(fc);
 	}
@@ -121,6 +120,35 @@ aspect Flattening {
 		flattenCalledFunctions(fc);
 	}
 	
+	// Flatten record if not already done
+	public void InstClassDecl.flattenRecord(FClass fc) {}
+	
+	// TODO: Shouldn't this be InstBaseClassDecl instead?
+	public void InstFullClassDecl.flattenRecord(FClass fc) {
+		getInstRestriction().flattenRecord(fc);
+	}
+	
+	public void InstRestriction.flattenRecord(FClass fc) {}
+	
+	private FClass InstMRecord.flatRecordAddedTo = null;
+	
+	public void InstMRecord.flattenRecord(FClass fc) {
+		if (flatRecordAddedTo != fc) {
+			flatRecordAddedTo = fc;
+			((InstFullClassDecl) getParent()).flattenThisRecord(fc);
+		}
+	}
+	
+	public void InstFullClassDecl.flattenThisRecord(FClass fc) {
+		FRecordDecl frd = new FRecordDecl();
+   		frd.setFQName(new FQName(qualifiedName()));
+   		
+   		for (InstComponentDecl icd : getInstComponentDecls())
+			icd.flattenInRecord(frd, fc);
+		
+		fc.addFRecordDecl(frd);
+	}
+	
 	public FExternalStmt InstExternal.flatten(InstClassDecl func, FQName prefix) {
 		FExternalStmt stmt = new FExternalStmt();
 		stmt.setFExternalLanguage(hasFExternalLanguage() ? 
@@ -135,7 +163,7 @@ aspect Flattening {
 				stmt.addArg(arg.flatten(prefix));
 		} else {
 			boolean hasReturn = func.myOutputs().size() == 1 && 
-					func.myOutputs().get(0).canBeExternalReturn();
+					func.myOutputs().get(0).canBeExternalReturn(stmt.getFExternalLanguage());
 			if (hasReturn)
 				stmt.setReturnVar(new FIdUse(func.myOutputs().get(0).name()));
 			stmt.setName(func.name());
@@ -146,19 +174,22 @@ aspect Flattening {
 		return stmt;
 	}
 	
-	//TODO: implement for records
 	public void InstComponentDecl.flattenExternalArg(List<FExp> args) {}
 	
-	public void InstPrimitive.flattenExternalArg(List<FExp> args) {
+	public void InstAssignable.flattenExternalArg(List<FExp> args) {
 		FIdUseExp use = new FIdUseExp(name());
 		args.add(use);
 		for (int i = 0; i < ndims(); i++)
 			args.add(new FSizeExp(use.fullCopy(), new Opt(new FIntegerLitExp(i + 1))));
 	}
 	
-	//TODO: implement for records
-	syn boolean InstComponentDecl.canBeExternalReturn() = false;
-	eq InstPrimitive.canBeExternalReturn() = !isArray();
+	syn boolean InstComponentDecl.canBeExternalReturn(FExternalLanguage lang) = false;
+	eq InstAssignable.canBeExternalReturn(FExternalLanguage lang) = 
+		!isArray() && lang.canBeReturn(type());
+	
+	syn boolean FExternalLanguage.canBeReturn(FType type) = !type.isArray();
+	eq FFortran77ExternalLanguage.canBeReturn(FType type) = 
+		!type.isArray() && !type.isString() && !type.isRecord();
 	
 	public FExternalStmt FExternalStmt.flatten(FQName prefix) {
 		return fullCopy();
@@ -172,7 +203,7 @@ aspect Flattening {
 	
 	public void InstComponentDecl.flattenInFunction(FFunctionDecl ffd) {}
 	
-	public void InstPrimitive.flattenInFunction(FFunctionDecl ffd) {
+	public void InstAssignable.flattenInFunction(FFunctionDecl ffd) {
 		if (!getComponentDecl().isConstant()) {
 			FExp e = flattenBindingFExp();
 			Opt eo = (e == null) ? new Opt() : new Opt(e);
@@ -209,6 +240,17 @@ aspect Flattening {
 	
 	public void InstClassDecl.flatten(FClass fc) {}
 	
+	public void InstComponentDecl.flattenInRecord(FRecordDecl frd, FClass fc) {}
+	
+	public void InstPrimitive.flattenInRecord(FRecordDecl frd, FClass fc) {
+		frd.addFVariable(createFVariable());
+	}
+	
+	public void InstRecord.flattenInRecord(FRecordDecl frd, FClass fc) {
+		frd.addFVariable(createFVariable());
+		myInstClassDecl().flattenRecord(fc);
+	}
+	
 	public void InstPrimitive.flatten(FClass fc) {
 		fc.addFVariable(createFVariable());
 		if (isFlow()) {
@@ -216,23 +258,34 @@ aspect Flattening {
 		}
 	}
 	
-	syn FVariable InstPrimitive.createFVariable() {
-		//System.out.println("**  " + name() + " = " + ceval());
-		FExp e = flattenBindingFExp();
-		List<FAttribute> attr = new List<FAttribute>();
-		AttributeExpRetriever mut = new AttributeExpRetriever() {
-			public FExp retrieve(InstValueModification im, boolean isEach) { 
-				FExp exp = super.retrieve(im, isEach);
-				InstNode decl = im.myInstNode();
-				return (isEach || decl == InstPrimitive.this || !enclosedBy(decl)) ? 
-						exp : exp.dynamicFExp(splitBindingFExp(exp, decl)); 
-			}
-		};
-		for (InstModification im : totalMergedEnvironment()) {
-//			System.out.println("createFVariable: " + qualifiedName() + ": " +
-//					im.prettyPrint("") + " " + im.myInstNode().getFQNamePrefix().name());		
-			im.collectAttributes(attr,im.myInstNode().getFQNamePrefix(), mut);
-		}
+	public void InstRecord.flatten(FClass fc) {
+		fc.addFVariable(createFVariable());
+		myInstClassDecl().flattenRecord(fc);
+	}
+	
+	public abstract FVariable InstAssignable.createEmptyFVariable();
+	
+	public FVariable InstPrimitive.createEmptyFVariable() {
+		if (isReal()) 
+			return new FRealVariable();
+		if (isInteger()) 
+			return new FIntegerVariable();
+		if (isBoolean()) 
+			return new FBooleanVariable();
+		if (isString()) 
+			return new FStringVariable();
+		return null;
+	}	
+	
+	public FVariable InstRecord.createEmptyFVariable() {
+		FRecordVariable rec = new FRecordVariable();
+		rec.setRecord(new FQName(myInstClassDecl().qualifiedName()));
+		return rec;
+	}
+	
+	public void InstAssignable.addParametersToFV(List<FAttribute> attr) {}
+	
+	public void InstPrimitive.addParametersToFV(List<FAttribute> attr) {
 		// Add default values for parameters from primitive class
 		// TODO: Maybe this needs a more generalized solution? Or to be moved to instantiation step?
 		PrimitiveClassDecl pcd = (PrimitiveClassDecl) myInstClass().getBaseInstClass().getClassDecl();
@@ -251,47 +304,50 @@ aspect Flattening {
 				}
 			}
 		}
+	}
+	
+	public void InstAssignable.addAttributesToFV(List<FAttribute> attr) {
+		AttributeExpRetriever mut = new AttributeExpRetriever() {
+			public FExp retrieve(InstValueModification im, boolean isEach) { 
+				FExp exp = super.retrieve(im, isEach);
+				InstNode decl = im.myInstNode();
+				return (isEach || decl == InstAssignable.this || !enclosedBy(decl)) ? 
+						exp : exp.dynamicFExp(splitBindingFExp(exp, decl)); 
+			}
+		};
+		// TODO: does this apply to records?
+		for (InstModification im : totalMergedEnvironment()) 
+			im.collectAttributes(attr, im.myInstNode().getFQNamePrefix(), mut);
+		addParametersToFV(attr);
+	}
+	
+	public FVariable InstAssignable.createFVariable() {
+		FVariable fv = createEmptyFVariable();
 		
-		// Check Variability
-		FTypePrefixVariability tpo = null;
-		if (getComponentDecl().isDiscrete()) {
-			tpo = new FDiscrete();	
-		} else if (getComponentDecl().isParameter()) {
-			tpo = new FParameter();
-		} else if (getComponentDecl().isConstant()) {
-			tpo = new FConstant();
-        } else {
-        	tpo = new FContinuous();
-        }		
+		fv.setFVisibilityType(getComponentDecl().isPublic() ? 
+				new FPublicVisibilityType() : new FProtectedVisibilityType());
 		
-		FVariable fv = null;
-		String primitiveName = myInstClass().finalClass().primitiveName();
-		Opt eo = e==null? new Opt(): new Opt(e);
-				
-		FVisibilityType fvt = getComponentDecl().isPublic()? 
-				new FPublicVisibilityType() : new FProtectedVisibilityType();
-				
-		FQName fqn = new FQName(getFQName());
-		fqn.setLastFArraySubscripts(size().flattenFArraySubscripts());
-				
-		if (isReal()) 
-			fv = new FRealVariable(fvt, tpo, new Opt(), attr, eo, new Opt(), fqn);
-		else if (isInteger()) 
-			fv = new FIntegerVariable(fvt,tpo, new Opt(), attr, eo, new Opt(), fqn);
-		else if (isBoolean()) 
-			fv = new FBooleanVariable(fvt,tpo, new Opt(), attr, eo, new Opt(), fqn);
-		else if (isString()) 
-			fv = new FStringVariable(fvt,tpo, new Opt(), attr, eo, new Opt(), fqn);
-		
+		fv.setFTypePrefixVariability((FTypePrefixVariability) variability().fullCopy());
+ 		
 		// Only set prefix for top level inputs and outputs
 		// TODO: Make sure that prefixes specified in short class declarations are propagated
 		if (isInput() && getFQName().getNumFQNamePart()==1)
 			fv.setFTypePrefixInputOutput(new FInput());
 		if (isOutput() && getFQName().getNumFQNamePart()==1)
 			fv.setFTypePrefixInputOutput(new FOutput());
-			
+		
+		addAttributesToFV(fv.getFAttributes());
+		
+		FExp e = flattenBindingFExp();
+		if (e != null)
+			fv.setBindingExp(e);
+		
 		if (getComponentDecl().getComment().hasStringComment())
 			fv.setFStringComment(new FStringComment(getComponentDecl().getComment().getStringComment().getComment()));
+				
+		FQName fqn = new FQName(getFQName());
+		fqn.setLastFArraySubscripts(size().flattenFArraySubscripts());
+		fv.setFQName(fqn);
 		
 		return fv;
 	}
@@ -710,7 +766,7 @@ aspect FlatExpressions {
 	public FExp FInstAccessExp.flatten(FQName prefix) {
 		// If the FInstAccess referes to a constant, then inline expression
 		// Checks in the instance tree ensures that constants always
-		// has binding expressions
+		// have binding expressions
 		if (getInstAccess().myInstComponentDecl() instanceof InstPrimitive) {
 			InstPrimitive ip = (InstPrimitive) getInstAccess().myInstComponentDecl();
 			if (ip.isConstant()) {

@@ -141,6 +141,21 @@ aspect FlatFunctionBinding {
 	
 }
 
+aspect FlatRecordBinding {
+	
+	syn FRecordDecl FRecordVariable.myFRecordDecl() = lookupFRec(getRecord().name());
+	inh FRecordDecl FRecordVariable.lookupFRec(String name);
+	eq Root.getChild().lookupFRec(String name) = null;
+	eq FClass.getChild().lookupFRec(String name) = lookupFRec(name);
+	syn FRecordDecl FClass.lookupFRec(String name) {
+		for (FRecordDecl r : getFRecordDecls())
+			if (r.name().equals(name))
+				return r;
+		return null;
+	}
+	
+}
+
 aspect UnknownFVariables {
 
 	syn UnknownFVariable FClass.getUnknownFVariable() = new UnknownFVariable();

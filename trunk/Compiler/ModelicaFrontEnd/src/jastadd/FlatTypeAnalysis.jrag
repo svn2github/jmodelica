@@ -24,10 +24,11 @@ aspect FlatTypeAnalysis {
 	eq FIntegerVariable.type()    = fIntegerType(size());
 	eq FBooleanVariable.type()    = fBooleanType(size());
 	eq FStringVariable.type()     = fStringType(size());
+	eq FRecordVariable.type()     = myFRecordDecl().type().sizedType(size());
 	eq FDerivativeVariable.type() = fRealScalarType();
 	eq FFunctionVariable.type()   = getType();
 	eq UnknownFVariable.type()    = fUnknownType();
-
+	
 	syn FType InstComponentModification.type() {
 		if (getName().myInstComponentDecl().isAssignable()) {
 			InstAssignable ip = ((InstAssignable)getName().myInstComponentDecl());
@@ -37,7 +38,9 @@ aspect FlatTypeAnalysis {
 		}
 	}
 	
-	syn FType InstPrimitive.type() {
+	syn lazy FType InstAssignable.type();
+	
+	eq InstPrimitive.type() {
 		FType scalar = fUnknownType();
 		if (isReal()) 
 			scalar = fRealScalarType();
@@ -50,7 +53,17 @@ aspect FlatTypeAnalysis {
 		return isArray() ? scalar.arrayType(size()) : scalar;
 	}
 	
-	syn FType InstRecord.type() {
+	syn lazy FType FRecordDecl.type() {
+		TreeSet<FRecordComponentType> comps = new TreeSet<FRecordComponentType>();
+		for (FVariable fv : getFVariables()) 
+			comps.add(new FRecordComponentType(fv.name(), (FType) fv.type().fullCopy()));
+		FRecordType type = new FRecordType(Size.SCALAR, name(), new List());
+		for (FRecordComponentType comp : comps)
+			type.addComponent(comp);
+		return type;
+	}
+	
+	eq InstRecord.type() {
 		TreeSet<FRecordComponentType> comps = new TreeSet<FRecordComponentType>();
 		for (InstComponentDecl icd : getInstComponentDecls()) 
 			comps.add(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
@@ -246,7 +259,7 @@ aspect FlatTypeAnalysis {
 		int dim = dimension();
 		
 		FType t = getFExp(0).type().scalarType();
-		Size s = getFExp(0).size().promote(ndims());
+		Size s = getFExp(0).size().promote(ndimsForArg(0));
 		boolean func = inFunction();
 		for (int i = 1; i < getNumFExp(); i++) {
 			// Check that the types of the elements are consistent
@@ -257,11 +270,14 @@ aspect FlatTypeAnalysis {
 				t = t.numericPromotion(t2, func);
 			
 			// Check that the sizes are consistent
-			if (!s.equivalentExcept(getFExp(i).size().promote(ndims()), func, dim))
+			if (!s.equivalentExcept(getFExp(i).size().promote(ndimsForArg(i)), func, dim))
 				return fUnknownType();
 		}
 		return t.arrayType(size());
 	}
+	
+	syn int FAbstractCat.ndimsForArg(int i) = ndims();
+	eq FCatExp.ndimsForArg(int i)           = getFExp(i).ndims();
 	
 	eq FSumExp.type() {
 		if (getFExp().isIterExp())
@@ -616,11 +632,18 @@ aspect BuiltInFlatTypes {
 	syn FType FType.sizedType(Size s) = 
 		(s == Size.SCALAR) ? scalarType() : arrayType(s);
  	
-	syn FType FType.scalarType()        = FUnknownType.SCALAR;
-	syn FType FRealType.scalarType()    = FRealType.SCALAR;
-	syn FType FIntegerType.scalarType() = FIntegerType.SCALAR;
-	syn FType FBooleanType.scalarType() = FBooleanType.SCALAR;
-	syn FType FStringType.scalarType()  = FStringType.SCALAR;
+	syn FType FType.scalarType() = FUnknownType.SCALAR;
+	eq FRealType.scalarType()    = FRealType.SCALAR;
+	eq FIntegerType.scalarType() = FIntegerType.SCALAR;
+	eq FBooleanType.scalarType() = FBooleanType.SCALAR;
+	eq FStringType.scalarType()  = FStringType.SCALAR;
+  	eq FRecordType.scalarType() {
+  		if (isScalar())
+  			return this;
+  		FRecordType copy = (FRecordType) fullCopy();
+  		copy.setSize(Size.SCALAR);
+  		return copy;
+  	}
  	
 	syn boolean FType.isUnknown() = false;
  	eq FUnknownType.isUnknown() = true;

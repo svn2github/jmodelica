@@ -225,7 +225,7 @@ aspect FlatTypeCheck {
   public void FAbstractCat.typeCheckFExps() {}
   
   public void FAbstractCat.typeError() {
-	  error("Types does not match in array concatenation");	  
+	  error("Types do not match in array concatenation");	  
   }
   
   syn int FInfArgsFunctionCall.minNumArgs() = 1;

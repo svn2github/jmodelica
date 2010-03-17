@@ -6688,7 +6688,7 @@ model ArrayCat4
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6656, column 19:
-  Types does not match in array concatenation
+  Types do not match in array concatenation
 ")})));
 
  Integer x[5,2] = cat(2, {{1,2},{3,4}}, {{5,6,0}}, {{7,8},{9,0}});
@@ -6704,7 +6704,7 @@ model ArrayCat5
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6672, column 19:
-  Types does not match in array concatenation
+  Types do not match in array concatenation
 ")})));
 
  Integer x[2,5] = cat(2, {{1,2},{6,7}}, {{3},{8},{0}}, {{4,5},{9,0}});
@@ -6736,7 +6736,7 @@ model ArrayCat6b
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6704, column 19:
-  Types does not match in array concatenation
+  Types do not match in array concatenation
 ")})));
 
  Integer x[2,5] = cat(2, {{"1","2"},{"6","7"}}, {{3},{8}}, {{4,5},{9,0}});
@@ -6791,6 +6791,22 @@ Semantic error at line 6743, column 17:
 
  Integer x[4] = cat(1.0, {1,2}, {4,5});
 end ArrayCat9;
+
+
+model ArrayCat10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayCat10",
+         description="Records:",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6797, column 15:
+  Types do not match in array concatenation
+")})));
+
+  Real x[2] = cat(1, {1}, 2);
+end ArrayCat10;
 
 
 
@@ -6897,7 +6913,7 @@ model ArrayShortCat4
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6862, column 16:
-  Types does not match in array concatenation
+  Types do not match in array concatenation
 ")})));
 
  Real x[2,3] = [{{1,2,3}}; {{4,5}}];
@@ -6913,7 +6929,7 @@ model ArrayShortCat5
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 6878, column 17:
-  Types does not match in array concatenation
+  Types do not match in array concatenation
 ")})));
 
  Real x[3,2] = [{1,2,3}, {4,5}];
@@ -7250,6 +7266,38 @@ Semantic error at line 7240, column 36:
 
   parameter Real A[3,3] = identity(3.0);
 end Identity4;
+
+
+
+model ScalarSize1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ScalarSize1",
+         description="Size of zero-length vector",
+         flatModel="
+fclass ArrayTests.ScalarSize1
+ Real x[1] = cat(1, {1}, size(3.141592653589793));
+end ArrayTests.ScalarSize1;
+")})));
+
+  Real x[1] = cat(1, {1}, size(Modelica.Constants.pi));
+end ScalarSize1;
+
+
+model ScalarSize2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ScalarSize2",
+         description="Size of scalar dotted access",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 7272, column 15:
+  Type error in expression
+")})));
+
+  Real x[1] = {1} + Modelica.Constants.pi;
+end ScalarSize2;
 
 
 

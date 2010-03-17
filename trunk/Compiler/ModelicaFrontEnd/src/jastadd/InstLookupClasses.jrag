@@ -465,6 +465,8 @@ aspect InstLookupClasses {
 	eq InstBuiltInClassDecl.matchInstClassDecl(String name) = name().equals(name); 
 	eq InstBaseClassDecl.matchInstClassDecl(String name) = name().equals(name);
 	
+	syn InstClassDecl InstComponentDecl.myInstClassDecl() = getClassName().myInstClassDecl();
+	
 	// This attribute should to be circular due to lookup in import-statements
 	// If the lookup is triggered by lookup of A in 'extends A', and
 	// there are import statements, evaluation might get back to the 

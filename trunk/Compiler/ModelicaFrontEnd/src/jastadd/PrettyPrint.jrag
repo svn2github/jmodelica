@@ -727,8 +727,8 @@ aspect FlattPrettyPrint {
 	    	}
 	    }
 	    
-	    for (FFunctionDecl ffd : getFFunctionDecls())
-	    	p.toString(ffd, str, p.indent(indent), o);
+    	p.toString(getFFunctionDecls(), str, p.indent(indent), o);
+    	p.toString(getFRecordDecls(), str, p.indent(indent), o);
 		
   		str.print(indent);
   		str.print("end ");
@@ -849,6 +849,12 @@ aspect FlattPrettyPrint {
     	str.print("\n" + indent + "function " + name() + "\n");
     	getFFunctionVariables().prettyPrintWithIndent(p, str, p.indent(indent), o, ";");
     	p.toString(getFAlgorithmBlock(), str, indent, o);
+    	str.print(indent + "end " + name() + ";\n");
+    }
+
+    public void FRecordDecl.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+    	str.print("\n" + indent + "record " + name() + "\n");
+    	getFVariables().prettyPrintWithIndent(p, str, p.indent(indent), o, ";");
     	str.print(indent + "end " + name() + ";\n");
     }
 

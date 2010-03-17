@@ -33,6 +33,7 @@ FClass ::= FQName
            FInitialEquation:FAbstractEquation*
            FEquationBlock*
            FFunctionDecl*
+           FRecordDecl*
            /UnknownFVariable/; 
 
 /**
@@ -41,6 +42,11 @@ FClass ::= FQName
  * Results from a class with the restriction "function" and an algorithm block.
  */
 FFunctionDecl ::= FQName FFunctionVariable* FAlgorithmBlock;
+
+/**
+ * \brief A flattenend record declaration.
+ */
+FRecordDecl ::= FQName FVariable*;
 
 /**
  * \brief A list of equations corresponding to a BLT block.
@@ -155,6 +161,11 @@ FBooleanVariable : FVariable;
  * \brief FVariable of type String.
  */
 FStringVariable : FVariable;
+
+/**
+ * \brief FVariable of a record type.
+ */
+FRecordVariable : FVariable ::= Record:FQName;
 
 /**
  * \brief FVariable corresponding to a derivative variable.

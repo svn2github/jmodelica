@@ -126,6 +126,12 @@ aspect FlatVariability {
 			return fParameter();
 		return fConstant();
 	}
+	eq InstRecord.variability() {
+		FTypePrefixVariability total = fConstant();
+		for (InstComponentDecl icd : getInstComponentDecls()) 
+			total = total.combine(icd.variability());
+		return total;
+	}
 	
 	eq FBinExp.variability() = getLeft().variability().combine(getRight().variability());
 	eq FUnaryExp.variability() = getFExp().variability();

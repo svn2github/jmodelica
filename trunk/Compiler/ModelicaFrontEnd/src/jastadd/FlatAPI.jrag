@@ -913,7 +913,7 @@ aspect Attributes {
 	syn boolean FVariable.startAttributeSet()           = attributeSet("start");
 	syn FExp    FVariable.startAttributeExp()           = attributeExp("start");
 	
-	syn CValue FVariable.startAttributeCValue();
+	syn CValue FVariable.startAttributeCValue()   = new CValueUnknown();
 	eq FRealVariable.startAttributeCValue()       = attributeCValueReal("start", 0.0);
 	eq FDerivativeVariable.startAttributeCValue() = new CValueReal(0.0);
 	eq FIntegerVariable.startAttributeCValue()    = attributeCValueInteger("start", 0);

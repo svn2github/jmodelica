@@ -606,9 +606,7 @@ aspect Arrays {
 	/**
 	 * \brief Get the array sizes. 
 	 */
-	eq InstDot.size() {
-		return getRight().size().expand(getLeft().size());
-	}
+	eq InstDot.size() = getRight().size().expand(getLeft().size());
 	
 	/**
 	 * \brief Get the array sizes. 
@@ -1405,8 +1403,6 @@ aspect ArrayIndices {
 		 * \brief Convenience constructor to create a on-dimensional size with the given length.
 		 */
 		public Size(int s) {
-			if (s == 0)
-				throw new IllegalArgumentException();
 			size = new int[] { s };
 		}
 		
@@ -1663,7 +1659,10 @@ aspect ArrayIndices {
 		 * \brief Creates a new Size that is a concatenation of <code>s</code> and this size.
 		 */
 		public Size expand(Size s) {
-			int[] ns = new int[size.length + s.size.length];
+			int ndims = size.length + s.size.length;
+			if (ndims == 0)
+				return Size.SCALAR;
+			int[] ns = new int[ndims];
 			System.arraycopy(s.size, 0, ns, 0, s.size.length);
 			System.arraycopy(size, 0, ns, s.size.length, size.length);
 			return new Size(ns);
@@ -1875,7 +1874,10 @@ aspect ArrayIndices {
 		 * \brief Creates a new Size that is a concatenation of <code>s</code> and this size.
 		 */
 		public Size expand(Size s) {
-			MutableSize ns = new MutableSize(size.length + s.size.length);
+			int ndims = size.length + s.size.length;
+			if (ndims == 0)
+				return Size.SCALAR;
+			MutableSize ns = new MutableSize(ndims);
 			System.arraycopy(s.size, 0, ns.size, 0, s.size.length);
 			System.arraycopy(size, 0, ns.size, s.size.length, size.length);
 			if (s instanceof MutableSize) 
