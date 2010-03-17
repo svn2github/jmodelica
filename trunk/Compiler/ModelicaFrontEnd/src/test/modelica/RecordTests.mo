@@ -388,8 +388,288 @@ end RecordType5;
 
 
 
-// TODO: Binding expressions
-// TODO: Arrays (inkl modifiers - each, etc)
+model RecordBinding1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RecordBinding1",
+         description="Records: binding expression, same record type",
+         flatModel="
+fclass RecordTests.RecordBinding1
+ RecordTests.RecordBinding1.A x = y;
+ RecordTests.RecordBinding1.A y;
+
+ record RecordTests.RecordBinding1.A
+    Real a;
+    Real b;
+ end RecordTests.RecordBinding1.A;
+end RecordTests.RecordBinding1;
+")})));
+
+ record A
+  Real a;
+  Real b;
+ end A;
+ 
+ A x = y;
+ A y;
+end RecordBinding1;
+
+
+model RecordBinding2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RecordBinding2",
+         description="Records: binding expression, equivalent record type",
+         flatModel="
+fclass RecordTests.RecordBinding2
+ RecordTests.RecordBinding2.A x = y;
+ RecordTests.RecordBinding2.B y;
+
+ record RecordTests.RecordBinding2.A
+    Real a;
+    Real b;
+ end RecordTests.RecordBinding2.A;
+
+ record RecordTests.RecordBinding2.B
+    Real a;
+    Real b;
+ end RecordTests.RecordBinding2.B;
+end RecordTests.RecordBinding2;
+")})));
+
+ record A
+  Real a;
+  Real b;
+ end A;
+
+ record B
+  Real a;
+  Real b;
+ end B;
+ 
+ A x = y;
+ B y;
+end RecordBinding2;
+
+
+model RecordBinding3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="RecordBinding3",
+         description="Records: binding expression, wrong type (incompatible record)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
+Semantic error at line 466, column 4:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+
+ record A
+  Real a;
+  Real b;
+ end A;
+
+ record B
+  Real a;
+  Real c;
+ end B;
+ 
+ A x = y;
+ B y;
+end RecordBinding3;
+
+
+model RecordBinding4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="RecordBinding4",
+         description="Records: binding expression, wrong type (array)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
+Semantic error at line 488, column 4:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+
+ record A
+  Real a;
+  Real b;
+ end A;
+ 
+ A x = y;
+ A y[2];
+end RecordBinding4;
+
+
+model RecordBinding5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="RecordBinding5",
+         description="Records: wrong type of binding exp of component",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
+Semantic error at line 507, column 8:
+  The binding expression of the variable b does not match the declared type of the variable
+")})));
+
+ record A
+  Real a;
+  Real b;
+ end A;
+ 
+ A x(a = 1, b = "foo");
+end RecordBinding5;
+
+
+
+model RecordArray1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RecordArray1",
+         description="Record containing array: modification",
+         flatModel="
+fclass RecordTests.RecordArray1
+ RecordTests.RecordArray1.A x(a = {1,2},b = 1);
+
+ record RecordTests.RecordArray1.A
+    Real a[2];
+    Real b;
+ end RecordTests.RecordArray1.A;
+end RecordTests.RecordArray1;
+")})));
+
+ record A
+  Real a[2];
+  Real b;
+ end A;
+ 
+ A x(a={1,2}, b=1);
+end RecordArray1;
+
+
+model RecordArray2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RecordArray2",
+         description="Record containing array: equation with access",
+         flatModel="
+fclass RecordTests.RecordArray2
+ RecordTests.RecordArray2.A x;
+equation
+ x.a[1] = 1;
+ x.a[2] = 2;
+ x.b = 1;
+
+ record RecordTests.RecordArray2.A
+    Real a[2];
+    Real b;
+ end RecordTests.RecordArray2.A;
+end RecordTests.RecordArray2;
+")})));
+
+ record A
+  Real a[2];
+  Real b;
+ end A;
+ 
+ A x;
+equation
+ x.a[1] = 1;
+ x.a[2] = 2;
+ x.b = 1;
+end RecordArray2;
+
+
+model RecordArray3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RecordArray3",
+         description="Record containing array: equation with other record",
+         flatModel="
+fclass RecordTests.RecordArray3
+ RecordTests.RecordArray3.A x;
+ RecordTests.RecordArray3.A y;
+equation
+ x = y;
+
+ record RecordTests.RecordArray3.A
+    Real a[2];
+    Real b;
+ end RecordTests.RecordArray3.A;
+end RecordTests.RecordArray3;
+")})));
+
+ record A
+  Real a[2];
+  Real b;
+ end A;
+ 
+ A x;
+ A y;
+equation
+ x = y;
+end RecordArray3;
+
+
+model RecordArray4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RecordArray4",
+         description="Array of records: modification",
+         flatModel="
+fclass RecordTests.RecordArray4
+ RecordTests.RecordArray4.A x[2](each a = 1,b = {1,2});
+
+ record RecordTests.RecordArray4.A
+    Real a;
+    Real b;
+ end RecordTests.RecordArray4.A;
+end RecordTests.RecordArray4;
+")})));
+
+ record A
+  Real a;
+  Real b;
+ end A;
+ 
+ A x[2](each a=1, b={1,2});
+end RecordArray4;
+
+
+model RecordArray5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RecordArray5",
+         description="Array of records: accesses",
+         flatModel="
+fclass RecordTests.RecordArray5
+ RecordTests.RecordArray5.A x[2];
+equation
+ x[1].a = 1;
+ x[1].b = 2;
+ x[2].a = 3;
+ x[2].b = 4;
+
+ record RecordTests.RecordArray5.A
+    Real a;
+    Real b;
+ end RecordTests.RecordArray5.A;
+end RecordTests.RecordArray5;
+")})));
+
+ record A
+  Real a;
+  Real b;
+ end A;
+ 
+ A x[2];
+equation
+ x[1].a = 1;
+ x[1].b = 2;
+ x[2].a = 3;
+ x[2].b = 4;
+end RecordArray5;
 
 
 

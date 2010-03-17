@@ -47,10 +47,16 @@ aspect FlatTypeCheck {
     		}
 	    }
 	  
-	    for (InstModification im : totalMergedEnvironment()) 
-	    	im.typeCheckAttribute(this);
+    	typeCheckAttributes();
     }
     
+    public void InstAssignable.typeCheckAttributes() {}
+    
+    public void InstPrimitive.typeCheckAttributes() {
+	    for (InstModification im : totalMergedEnvironment()) 
+	    	im.typeCheckAttribute(this);
+     }
+   
     public void InstModification.typeCheckAttribute(InstNode owner) {}
 
     public void InstComponentModification.typeCheckAttribute(InstNode owner) {

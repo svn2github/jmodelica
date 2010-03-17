@@ -127,8 +127,9 @@ aspect FlatVariability {
 		return fConstant();
 	}
 	eq InstRecord.variability() {
+		InstComponentDecl rec = isArray() ? getInstComponentDecl(0) : this;
 		FTypePrefixVariability total = fConstant();
-		for (InstComponentDecl icd : getInstComponentDecls()) 
+		for (InstComponentDecl icd : rec.getInstComponentDecls()) 
 			total = total.combine(icd.variability());
 		return total;
 	}
