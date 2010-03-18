@@ -9,7 +9,7 @@ import os, os.path
 import jmodelica.jmi as pyjmi
 
 
-__all__ = ['optimization','initialization','simulation']
+__all__ = ['optimization','initialization','simulation','linearization_tests']
 
 
 #create working directory for tests

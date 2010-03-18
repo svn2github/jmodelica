@@ -198,3 +198,91 @@ equation
       color={0,0,127},
       smooth=Smooth.None));
 end RLC_Circuit;
+
+
+model RLC_Circuit_Input
+
+  annotation (uses(Modelica(version="3.0.1")), Diagram(coordinateSystem(
+          preserveAspectRatio=true, extent={{-100,-100},{100,100}}), graphics));
+
+
+  Modelica.Electrical.Analog.Basic.Ground ground 
+    annotation (Placement(transformation(extent={{-54,-48},{-34,-28}})));
+  Modelica.Electrical.Analog.Basic.Resistor resistor(R=1) 
+    annotation (Placement(transformation(extent={{-4,36},{16,56}})));
+  Modelica.Electrical.Analog.Basic.Capacitor capacitor(C=1) annotation (
+      Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        rotation=90,
+        origin={44,28})));
+  Modelica.Electrical.Analog.Basic.Inductor inductor(L=1) 
+    annotation (Placement(transformation(extent={{0,-40},{20,-20}})));
+  Modelica.Electrical.Analog.Basic.Inductor inductor1(L=1) annotation (
+      Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        rotation=90,
+        origin={78,16})));
+  Modelica.Electrical.Analog.Basic.Resistor resistor1(R=1) annotation (
+      Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        rotation=90,
+        origin={-22,16})));
+  Modelica.Electrical.Analog.Sources.SignalVoltage signalVoltage annotation (
+      Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        rotation=90,
+        origin={-58,18})));
+  Modelica.Blocks.Interfaces.RealInput u;
+equation
+  connect(resistor.n, capacitor.n) annotation (Line(
+      points={{16,46},{44,46},{44,38}},
+      color={0,0,255},
+      smooth=Smooth.None));
+  connect(capacitor.p, inductor.n) annotation (Line(
+      points={{44,18},{44,-30},{20,-30}},
+      color={0,0,255},
+      smooth=Smooth.None));
+  connect(inductor1.n, capacitor.n) annotation (Line(
+      points={{78,26},{78,38},{44,38}},
+      color={0,0,255},
+      smooth=Smooth.None));
+  connect(inductor1.p, inductor.n) annotation (Line(
+      points={{78,6},{78,-30},{20,-30}},
+      color={0,0,255},
+      smooth=Smooth.None));
+  connect(resistor1.n, resistor.p) annotation (Line(
+      points={{-22,26},{-14,26},{-14,46},{-4,46}},
+      color={0,0,255},
+      smooth=Smooth.None));
+  connect(resistor1.p, inductor.p) annotation (Line(
+      points={{-22,6},{-12,6},{-12,-30},{-5.55112e-16,-30}},
+      color={0,0,255},
+      smooth=Smooth.None));
+  connect(inductor.p, ground.p) annotation (Line(
+      points={{-5.55112e-16,-30},{-22,-30},{-22,-28},{-44,-28}},
+      color={0,0,255},
+      smooth=Smooth.None));
+  connect(signalVoltage.n, resistor.p) annotation (Line(
+      points={{-58,28},{-58,46},{-4,46}},
+      color={0,0,255},
+      smooth=Smooth.None));
+  connect(signalVoltage.p, ground.p) annotation (Line(
+      points={{-58,8},{-58,-28},{-44,-28}},
+      color={0,0,255},
+      smooth=Smooth.None));
+  connect(u, signalVoltage.v) annotation (Line(
+      points={{-75,18},{-65,18}},
+      color={0,0,127},
+      smooth=Smooth.None));
+end RLC_Circuit_Input;
+
+model RLC_Circuit_Linearized
+  Real x[3];
+  Real u;
+  RLC_Circuit.Sine sine(freqHz=1);
+  parameter Real A[3,3] = {{0,1,-1},{-1,-1,0},{1,0,0}};
+  parameter Real B[3] = {0,1,0};  
+equation
+  der(x) = A*x + B*u;
+  u=sine.y;
+end RLC_Circuit_Linearized;

@@ -17,7 +17,8 @@
 
 
 __all__ = ['jmi', 'xmlparser', 'compiler','optimization',
-           'examples', 'tests','io','initialization','simulation']
+           'examples', 'tests','io','initialization','simulation',
+           'linearization']
 
 __version__=''
 
