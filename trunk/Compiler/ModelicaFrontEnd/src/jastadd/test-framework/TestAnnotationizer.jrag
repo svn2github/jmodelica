@@ -14,8 +14,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.jmodelica.util;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -28,6 +26,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+
+aspect TestAnnotationizer {
 
 abstract public class TestAnnotationizerHelper {
 
@@ -65,7 +65,7 @@ abstract public class TestAnnotationizerHelper {
 		System.out.println("  Options:");
 		System.out.println("    -w           write result to file instead of stdout");
 		System.out.println("    -m/-o        create annotation for Modelica/Optimica (default is infer from file path)");
-		System.out.println("    -t=<type>    set type of test, e.g. CCodeGenTestCase");
+		System.out.println("    -t=<type>    set type of test, e.g. ErrorTestCase");
 		System.out.println("    -c=<class>   set name of class to generate annotation for, if name ");
 		System.out.println("                 does not contain a dot, base name of .mo file is prepended");
 		System.out.println("    -d=<data>    set extra data to send to the specific generator");
@@ -240,23 +240,6 @@ abstract public class TestAnnotationizerHelper {
 		
 	}
 
-	public static class CCodeGenTestCase extends CodeGenTestCase {
-
-		public CCodeGenTestCase(String filePath, String className, String description, String data) throws Exception {
-			super(filePath, className, description, data);
-		}
-		
-		public static void usage(String cl, String extra) {
-			TestAnnotationizerHelper.usage(cl, "C code template");
-		}
-
-		@Override
-		public AbstractGenerator createGenerator(FClass fc) {
-			return new CGenerator(new PrettyPrinter(), '$', fc);
-		}
-		
-	}
-
 	public static class GenericCodeGenTestCase extends CodeGenTestCase {
 
 		public GenericCodeGenTestCase(String filePath, String className, String description, String data) throws Exception {
@@ -326,5 +309,7 @@ abstract public class TestAnnotationizerHelper {
 		}
 
 	}
+
+}
 
 }
