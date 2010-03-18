@@ -115,6 +115,12 @@ JMI_DER_ALL_V = JMI_DER_DX | JMI_DER_X | JMI_DER_U | JMI_DER_W | \
 """Evaluate derivatives w.r.t. all variables in \f$q\f$."""
 JMI_DER_ALL_Q = JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | JMI_DER_W_P
 
+"""No scaling. """
+JMI_SCALING_NONE =1
+
+"""Scale real variables by multiplying incoming variables in residual
+functions by the scaling factors in jmi_t->variable_scaling_factors  """
+JMI_SCALING_VARIABLES =2
 
 # ================================================================
 #                    ERROR HANDLING / EXCEPTIONS
@@ -1279,6 +1285,30 @@ class Model(object):
         
     sw_init = property(get_sw_init, set_sw_init, doc="The switching function vector of the DAE initialization system.")
 
+    def get_variable_scaling_factors(self):
+        """Returns a reference to the variable scaling factor vector. The scaling variable vector
+        has the same size as the z vector: scaling factors for booleans, integers and switches are ignored."""
+        return self.jmimodel.get_variable_scaling_factors()
+        
+    def set_variable_scaling_factors(self, variable_scaling_factors):
+        """Sets the variable scaling vector of the DAE initialization system. The scaling variable vector
+        has the same size as the z vector: scaling factors for booleans, integers and switches are ignored."""
+        self.jmimodel._variable_scaling_factors[:] = variable_scaling_factors
+        
+    variable_scaling_factors = property(get_variable_scaling_factors, set_variable_scaling_factors, doc="The variable scaling vector. The scaling variable vector has the same size as the z vector: scaling factors for booleans, integers and switches are ignored.")
+
+    def get_scaling_method(self):
+        """Get the scaling_method. Valid values are JMI_SCALING_NONE and
+        JMI_SCALING_VARIABLES."""
+        return self.jmimodel.get_scaling_method()
+        
+    def set_scaling_method(self, scaling_method):
+        """Set the scaling_method. Valid values are JMI_SCALING_NONE and
+        JMI_SCALING_VARIABLES."""
+        self.jmimodel.set_scaling_method(scaling_method)
+        
+    scaling_method = property(get_scaling_method, set_scaling_method, doc="Set and get the scaling_method. Valid values are JMI_SCALING_NONE and JMI_SCALING_VARIABLES.")
+
     def get_z(self):
         """Returns a reference to the vector containing all parameters,
         variables and point-wise evalutated variables vector.
@@ -1737,6 +1767,8 @@ class JMIModel(object):
         self._sw = self._dll.jmi_get_sw(self._jmi)
         self._sw_init = self._dll.jmi_get_sw_init(self._jmi)
         self._z = self._dll.jmi_get_z(self._jmi)
+        self._variable_scaling_factors = self._dll.jmi_get_variable_scaling_factors(self._jmi)
+        self._scaling_method = self._dll.jmi_get_scaling_method(self._jmi)
         
         #self.initAD()
         
@@ -1826,6 +1858,7 @@ class JMIModel(object):
                          (self._dll.jmi_get_boolean_u, n_boolean_u.value),
                          (self._dll.jmi_get_sw, n_sw.value),
                          (self._dll.jmi_get_sw_init, n_sw_init.value),
+                         (self._dll.jmi_get_variable_scaling_factors, n_z.value),
                          (self._dll.jmi_get_z, n_z.value)]
 
         for (func, length) in int_res_funcs:
@@ -1948,6 +1981,11 @@ class JMIModel(object):
         
         self._dll.jmi_get_sw.argtypes  = [ct.c_void_p]
         self._dll.jmi_get_sw_init.argtypes  = [ct.c_void_p]
+
+        self._dll.jmi_get_variable_scaling_factors.argtypes  = [ct.c_void_p]
+
+        self._dll.jmi_get_scaling_method.argtypes  = [ct.c_void_p]
+        self._dll.jmi_set_scaling_method.argtypes  = [ct.c_void_p,ct.c_int]
 
         # ODE interface
         self._dll.jmi_ode_f.argtypes  = [ct.c_void_p]
@@ -2700,14 +2738,24 @@ class JMIModel(object):
         A switch value of 1 corresponds to true and 0 corresponds to false.
         """
         return self._sw
-        #return self._dll.jmi_get_sw(self._jmi) 
 
     def get_sw_init(self):
         """Returns a reference to the switching function vector of the DAE initialization system.
         A switch value of 1 corresponds to true and 0 corresponds to false.
         """
-        return _self._sw_init
-        #return self._dll.jmi_get_sw_init(self._jmi) 
+        return self._sw_init
+
+    def get_variable_scaling_factors(self):
+        """Returns a reference to the variable scaling factor vector."""
+        return self._variable_scaling_factors
+
+    def get_scaling_method(self):
+        """Get the scaling method. Valid values are JMI_SCALING_NONE and JMI_SCALING_VARIABLES."""
+        return self._dll.jmi_get_scaling_method(self._jmi);
+
+    def set_scaling_method(self, scaling_method):
+        """Set the scaling method. Valid values are JMI_SCALING_NONE and JMI_SCALING_VARIABLES."""
+        return self._dll.jmi_set_scaling_method(self._jmi,scaling_method);
     
     def ode_f(self):
         """Evalutates the right hand side of the ODE.

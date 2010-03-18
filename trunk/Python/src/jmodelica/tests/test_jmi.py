@@ -331,7 +331,6 @@ class TestModel_VDP:
         u_new = N.ones(1)
         self.vdp.set_boolean_u(u_new)
         N.testing.assert_array_almost_equal(self.vdp.get_boolean_u(),N.zeros(0))
-
         
     @testattr(stddist = True)    
     def test_z_get_set(self):
@@ -340,6 +339,35 @@ class TestModel_VDP:
         z_new.itemset(0,2)
         self.vdp.set_z(z_new)
         N.testing.assert_array_almost_equal(self.vdp.get_z(),z_new)
+
+    @testattr(stddist = True)    
+    def test_get_sw(self):
+        """Test jmi.Model.set_sw(...) and jmi.Model.get_sw()."""
+        sw_new = self.vdp.get_sw()
+        self.vdp.set_sw(sw_new)
+        N.testing.assert_array_almost_equal(self.vdp.get_sw(),sw_new)
+
+    @testattr(stddist = True)    
+    def test_get_sw_init(self):
+        """Test jmi.Model.set_sw_init(...) and jmi.Model.get_sw_init()."""
+        sw_init_new = self.vdp.get_sw_init()
+        self.vdp.set_sw_init(sw_init_new)
+        N.testing.assert_array_almost_equal(self.vdp.get_sw_init(),sw_init_new)
+
+    @testattr(stddist = True)    
+    def test_variable_scaling_factors_get_set(self):
+        """Test jmi.Model.set_variable_scaling_factors(...) and jmi.Model.get_variable_scaling_factors()."""
+        variable_scaling_factors_new = self.vdp.get_variable_scaling_factors()
+        variable_scaling_factors_new.itemset(0,2)
+        self.vdp.set_variable_scaling_factors(variable_scaling_factors_new)
+        N.testing.assert_array_almost_equal(self.vdp.get_variable_scaling_factors(),variable_scaling_factors_new)
+
+    @testattr(stddist = True)    
+    def test_scaling_method_get_set(self):
+        """Test jmi.Model.set_scaling_method(...) and jmi.Model.get_scaling_method()."""
+        ntools.assert_equal(self.vdp.get_scaling_method(),jmi.JMI_SCALING_NONE)
+        self.vdp.set_scaling_method(jmi.JMI_SCALING_VARIABLES)
+        ntools.assert_equal(self.vdp.get_scaling_method(),jmi.JMI_SCALING_VARIABLES)
     
     @testattr(stddist = True)    
     def test_parameters(self):
@@ -781,7 +809,24 @@ class TestJMIModel_VDP:
         assert isinstance(self.vdp.jmimodel.get_boolean_u(), N.ndarray),\
             "JMIModel.get_boolean_u did not return numpy.ndarray. "
 
-    
+    @testattr(stddist = True)
+    def test_get_sw(self):
+        """ Test JMIModel.get_sw method. """
+        assert isinstance(self.vdp.jmimodel.get_sw(), N.ndarray),\
+            "JMIModel.get_sw did not return numpy.ndarray. "
+
+    @testattr(stddist = True)
+    def test_get_sw_init(self):
+        """ Test JMIModel.get_sw_init method. """
+        assert isinstance(self.vdp.jmimodel.get_sw_init(), N.ndarray),\
+            "JMIModel.get_sw_init did not return numpy.ndarray. "
+
+    @testattr(stddist = True)
+    def test_get_variable_scaling_factors(self):
+        """ Test JMIModel.get_scaling_factors method. """
+        assert isinstance(self.vdp.jmimodel.get_variable_scaling_factors(), N.ndarray),\
+            "JMIModel.get_variable_scaling_factors did not return numpy.ndarray."
+
     #@testattr(stddist = True)
     #def test_ode_f():
     #    """ Test JMIModel.ode_f method. """

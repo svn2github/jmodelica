@@ -333,6 +333,11 @@ extern "C" {
 #define JMI_TRUE 1.0
 #define JMI_FALSE 0.0
 
+/** \brief */
+#define JMI_SCALING_NONE 1 /**<  \brief No scaling.*/
+#define JMI_SCALING_VARIABLES 2 /**<  \brief Scale real variables by multiplying
+	incoming variables in residual functions by the scaling factors in jmi_t->variable_scaling_factors */
+
 /* @} */
 
 /*
@@ -789,6 +794,33 @@ jmi_real_t* jmi_get_sw(jmi_t* jmi);
  *
  */
 jmi_real_t* jmi_get_sw_init(jmi_t* jmi);
+
+/**
+ * \brief Get a pointer to the scaling factor vector.
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the scaling factor vector.
+ *
+ */
+jmi_real_t* jmi_get_variable_scaling_factors(jmi_t* jmi);
+
+/**
+ * \brief Get the scaling method. Alternatives are JMI_SCALING_NONE and
+ * JMI_SCALING_VARIABLES.
+ * @param jmi The jmi_t struct.
+ * @return An integer representing the scaling method used.
+ *
+ */
+int jmi_get_scaling_method(jmi_t* jmi);
+
+/**
+ * \brief Set the scaling method. Alternatives are JMI_SCALING_NONE and
+ * JMI_SCALING_VARIABLES.
+ * @param jmi The jmi_t struct.
+ * @param scaling_method An integer representing the scaling method.
+ * @return An integer representing the scaling method used.
+ *
+ */
+void jmi_set_scaling_method(jmi_t* jmi, int scaling_method);
 
 
 /* @} */
