@@ -245,6 +245,7 @@ aspect InheritedFactoryMethods {
 	public abstract FBinExp                   FBinExp.createEmptyNode();
 	public abstract FUnaryExp                 FUnaryExp.createEmptyNode();
 	public abstract FBooleanLitExp            FBooleanLitExp.createEmptyNode();   // No children, but can be useful
+	public abstract FBuiltInFunctionCall      FBuiltInFunctionCall.createEmptyNode();  // Used in BuiltInTranslator 
 	public abstract FMathematicalFunctionCall FMathematicalFunctionCall.createEmptyNode();
 	public abstract FInfArgsFunctionCall      FInfArgsFunctionCall.createEmptyNode();
 	public abstract FMinMaxExp      		  FMinMaxExp.createEmptyNode();
@@ -310,8 +311,9 @@ aspect InheritedFactoryMethods {
 	public FIterExp        FIterExp.createEmptyNode()        { return new FIterExp(); }
 	
 	// Function calls
-	public FFunctionCall    FFunctionCall.createEmptyNode()    { return new FFunctionCall(); }
-	public InstFunctionCall InstFunctionCall.createEmptyNode() { return new InstFunctionCall(); }
+	public FFunctionCall      FFunctionCall.createEmptyNode()      { return new FFunctionCall(); }
+	public InstFunctionCall   InstFunctionCall.createEmptyNode()   { return new InstFunctionCall(); }
+	public FRecordConstructor FRecordConstructor.createEmptyNode() { return new FRecordConstructor(); }
 	
 	// Calls to built-in mathematical functions
 	public FSinExp   FSinExp.createEmptyNode()   { return new FSinExp(); }

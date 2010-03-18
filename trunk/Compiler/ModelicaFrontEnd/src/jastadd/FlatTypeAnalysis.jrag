@@ -53,7 +53,8 @@ aspect FlatTypeAnalysis {
 		return isArray() ? scalar.arrayType(size()) : scalar;
 	}
 	
-	syn lazy FType FRecordDecl.type() {
+	// TODO: Reduce code duplication here
+	syn lazy FRecordType FRecordDecl.type() {
 		TreeSet<FRecordComponentType> comps = new TreeSet<FRecordComponentType>();
 		for (FVariable fv : getFVariables()) 
 			comps.add(new FRecordComponentType(fv.name(), (FType) fv.type().fullCopy()));
@@ -68,6 +69,16 @@ aspect FlatTypeAnalysis {
 		for (InstComponentDecl icd : getInstComponentDecls()) 
 			comps.add(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
 		FRecordType type = new FRecordType(size(), getFQName().name(), new List());
+		for (FRecordComponentType comp : comps)
+			type.addComponent(comp);
+		return type;
+	}
+	
+	syn lazy FRecordType InstClassDecl.recordType() {
+		TreeSet<FRecordComponentType> comps = new TreeSet<FRecordComponentType>();
+		for (InstComponentDecl icd : getInstComponentDecls()) 
+			comps.add(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
+		FRecordType type = new FRecordType(Size.SCALAR, getFQName().name(), new List());
 		for (FRecordComponentType comp : comps)
 			type.addComponent(comp);
 		return type;
@@ -130,6 +141,11 @@ aspect FlatTypeAnalysis {
 	}
 	
 	eq FIntegerExp.type() = fIntegerScalarType();
+	
+	eq FRecordConstructor.type() = getRecord().recordType();
+	
+	syn FRecordType FIdUse.recordType() = myFRecordDecl().type();
+	eq FIdUseInstAccess.recordType()    = getInstAccess().myInstClassDecl().recordType();
 	
 	eq FTranspose.type() = 
 		getFExp().ndims() < 2 ? 
@@ -217,7 +233,7 @@ aspect FlatTypeAnalysis {
 	eq FTimeExp.type() = fRealScalarType();
 	eq FDerExp.type() = fRealScalarType();
 
-	// TODO: expand to handle boolean end enum index
+	// TODO: expand to handle boolean and enum index
 	eq FEndExp.type() = fIntegerScalarType();
 	
 	/**
@@ -697,8 +713,8 @@ aspect InstClassRestriction {
 	 * \brief Is this class a function?
 	 */
 	syn boolean InstClassDecl.isFunction() = false;
-	eq InstBaseClassDecl.isFunction() = getInstRestriction().isFunction();
-	eq UnknownInstClassDecl.isFunction() = false;
+	eq InstBaseClassDecl.isFunction()      = getInstRestriction().isFunction();
+	eq UnknownInstClassDecl.isFunction()   = false;
 	
 	/**
 	 * \brief Is this restriction "function"?
@@ -710,13 +726,27 @@ aspect InstClassRestriction {
 	 * \brief Is this class a record?
 	 */
 	syn boolean InstClassDecl.isRecord() = false;
-	eq InstBaseClassDecl.isRecord() = getInstRestriction().isRecord();
-	eq UnknownInstClassDecl.isRecord() = false;
+	eq InstBaseClassDecl.isRecord()      = getInstRestriction().isRecord();
+	eq UnknownInstClassDecl.isRecord()   = false;
 	
 	/**
 	 * \brief Is this restriction "record"?
 	 */
 	syn boolean InstRestriction.isRecord() = false;
 	eq InstMRecord.isRecord() = true;
+	
+	/**
+	 * \brief Is this class a function or record?
+	 */
+	syn boolean InstClassDecl.isCallable() = false;
+	eq InstBaseClassDecl.isCallable()      = getInstRestriction().isCallable();
+	eq UnknownInstClassDecl.isCallable()   = false;
+	
+	/**
+	 * \brief Is this restriction "function" or "record"?
+	 */
+	syn boolean InstRestriction.isCallable() = false;
+	eq InstFunction.isCallable() = true;
+	eq InstMRecord.isCallable()  = true;
 	
 }

@@ -851,6 +851,16 @@ aspect FlatFunctionUtils {
 	 }
 	 
 	 /**
+	  * \brief Returns a list of all contained InstComponentDecls.
+	  */
+	 syn lazy ArrayList<InstComponentDecl> InstClassDecl.myComponents() {
+		 ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
+		 for (InstComponentDecl icd : getInstComponentDecls())
+			 l.add(icd);
+		 return l;
+	 }
+	 
+	 /**
 	  * \brief Returns a list of all FFunctionVariables declared as "input".
 	  */
 	 syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myInputs() {
@@ -883,7 +893,11 @@ aspect FlatFunctionUtils {
 		 return l;
 	 }
 	 
-	 syn ArrayList<InstComponentDecl> InstFunctionCall.myInputs()  = getName().myInstClassDecl().myInputs();
+	 syn ArrayList<InstComponentDecl> InstFunctionCall.myInputs() {
+		 InstClassDecl icd = getName().myInstClassDecl();
+		 // If class is a record, then function call is record constructor
+		 return icd.isRecord() ? icd.myComponents() : icd.myInputs();
+	 }
 	 syn ArrayList<InstComponentDecl> InstFunctionCall.myOutputs() = getName().myInstClassDecl().myOutputs();
 	 syn ArrayList<FFunctionVariable> FFunctionCall.myInputs()     = myFFunctionDecl().myInputs();
 	 syn ArrayList<FFunctionVariable> FFunctionCall.myOutputs()    = myFFunctionDecl().myOutputs();

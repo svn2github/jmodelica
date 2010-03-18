@@ -854,7 +854,7 @@ aspect FlattPrettyPrint {
 
     public void FRecordDecl.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
     	str.print("\n" + indent + "record " + name() + "\n");
-    	getFVariables().prettyPrintWithIndent(p, str, p.indent(indent), o, ";");
+    	getFVariables().prettyPrintWithFix(p, str, p.indent(indent), o, "", ";\n");
     	str.print(indent + "end " + name() + ";\n");
     }
 
@@ -1361,6 +1361,7 @@ aspect FlattPrettyPrint {
 	}
 
 	syn String FBuiltInFunctionCall.builtInName();
+	eq FRecordConstructor.builtInName() = getRecord().name();
 	eq FSinExp.builtInName()      = "sin";
 	eq FCosExp.builtInName()      = "cos";
 	eq FTanExp.builtInName()      = "tan";

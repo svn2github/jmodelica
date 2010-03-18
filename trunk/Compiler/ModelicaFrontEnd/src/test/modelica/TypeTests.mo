@@ -423,7 +423,7 @@ model AbsType7
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 348, column 17:
-  Too many positional arguments
+  Calling function abs(): too many positional arguments
 ")})));
 
  Real x = abs(1,-1);
@@ -439,7 +439,7 @@ model AbsType8
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 364, column 11:
-  Missing argument for required input v
+  Calling function abs(): missing argument for required input v
 ")})));
 
  Real x = abs();

@@ -166,6 +166,33 @@ aspect InstFunctionBinding {
 		return arg;
 	}
 	
+	/**
+	 * \brief Add a new argument to list of arguments. (Only valid for some subclasses.)
+	 * 
+	 * Default implementation does nothing.
+	 */
+	public void FAbstractFunctionCall.addArgument(InstFunctionArgument arg) {}
+	
+	/**
+	 * \brief Add a new argument to list of arguments.
+	 * 
+	 * This implementation adds the argument as a child.
+	 */
+	public void InstFunctionCall.addArgument(InstFunctionArgument arg) {
+		addArg(arg);
+	}
+	
+	/**
+	 * \brief Add a new argument to list of arguments.
+	 * 
+	 * This implementation adds the argument to the original arguments 
+	 * and the expression from the argument as a child.
+	 */
+	public void FRecordConstructor.addArgument(InstFunctionArgument arg) {
+		addArg((FExp) arg.getFExp().fullCopy());
+		addToOriginalArgs(arg);
+	}
+	
 	public class InstFunctionCall {
 		
 		private static BuiltInTranslator builtInTranslator = new BuiltInTranslator();
@@ -192,7 +219,7 @@ aspect InstFunctionBinding {
 				FBuiltInFunctionCall res = creator.create(args);
 				if (res != null)
 					for (InstFunctionArgument arg : args)
-						res.addToOriginalArgs((InstFunctionArgument) arg.unboundCopy());
+						res.addToOriginalArgs(arg);
 				return res;
 			}
 			
@@ -254,18 +281,22 @@ aspect InstFunctionBinding {
 				public FBuiltInFunctionCall create(InstFunctionArgument[] args) {
 					if (args.length < numArgs)
 						return null;
-					FBuiltInFunctionCall res = (FBuiltInFunctionCall) template.createEmptyNode();
+					FBuiltInFunctionCall res = template.createEmptyNode();
 					setArguments(res, args);
 					return res;
 				}
 				
 				protected void setArguments(FBuiltInFunctionCall res, InstFunctionArgument[] args) {
 					for (int i = 0; i < numArgs; i++)
-						res.setChild(args[i].getFExp(), i);
+						res.setChild(extractFExp(args[i]), i);
 				}
 				
 				public boolean isInfArgs() {
 					return false;
+				}
+				
+				protected static FExp extractFExp(InstFunctionArgument arg) {
+					return (FExp) arg.getFExp().fullCopy();
 				}
 				
 			}
@@ -279,10 +310,10 @@ aspect InstFunctionBinding {
 				protected void setArguments(FBuiltInFunctionCall res, InstFunctionArgument[] args) {
 					List<FExp> exps = new List<FExp>();
 					for (int i = numArgs; i < args.length; i++)
-						exps.add(args[i].getFExp());
+						exps.add(extractFExp(args[i]));
 					res.setChild(exps, 0);
 					for (int i = 0; i < numArgs; i++)
-						res.setChild(args[i].getFExp(), i + 1);
+						res.setChild(extractFExp(args[i]), i + 1);
 				}
 				
 				public boolean isInfArgs() {
@@ -303,7 +334,7 @@ aspect InstFunctionBinding {
 				protected void setArguments(FBuiltInFunctionCall res, InstFunctionArgument[] args) {
 					super.setArguments(res, args);
 					for (int i = numArgs; i < maxArgs; i++)
-						res.setChild(args[i].isGiven() ? new Opt(args[i].getFExp()) : new Opt(), i);
+						res.setChild(args[i].isGiven() ? new Opt(extractFExp(args[i])) : new Opt(), i);
 				}
 				
 			}
@@ -330,9 +361,10 @@ aspect InstFunctionBinding {
 		    // Make sure we only do this once.
 		    rewritten = true;
 		    
-		    /* If we can't resolve the name as a function, don't try to bind arguments, 
+		    /* If we can't resolve the name as a function or record, don't try to bind arguments, 
 		     * just leave it for the error check. */
-		    if (!getName().myInstClassDecl().isFunction())
+		    InstClassDecl target = getName().myInstClassDecl();
+		    if (!target.isCallable())
 		    	return this;
 
 		    // Get info
@@ -386,13 +418,17 @@ aspect InstFunctionBinding {
 		    if (argsOK) 
 		    	n = builtInTranslator.create(name, temp);
 		    if (n == null) {
-	    		List<InstFunctionArgument> args = new List<InstFunctionArgument>();
+				if (target.isRecord() && argsOK) {
+					FIdUse rec = new FIdUseInstAccess(new FQName(), getName());
+					n = new FRecordConstructor(rec, new List());
+				} else {
+			    	InstFunctionCall ifc = new InstFunctionCall(getName(), new List());
+					ifc.unbindableArgs = unbindableArgs;
+					ifc.rewritten = true;
+					n = ifc;
+				}
 				for (InstFunctionArgument arg : temp)
-					args.add(arg);
-		    	InstFunctionCall ifc = new InstFunctionCall(getName(), args);
-				ifc.unbindableArgs = unbindableArgs;
-				ifc.rewritten = true;
-				n = ifc;
+					n.addArgument(arg);
 			}
 			n.setLocation(this);
 			

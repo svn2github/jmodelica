@@ -17,6 +17,19 @@
 package XMLCodeGenTests
 
 
+  // TODO: Remove this test once a real test is added
+  model DummyTest
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="DummyTest",
+         description="",
+         flatModel="
+fclass XMLCodeGenTests.DummyTest
+end XMLCodeGenTests.DummyTest;
+")})));
+
+  end DummyTest;
+
   model XMLCodeGenTest1
     	  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.XMLCodeGenTestCase(name="XMLCodeGenTest1",

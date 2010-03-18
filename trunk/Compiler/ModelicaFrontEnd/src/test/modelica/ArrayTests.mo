@@ -1169,7 +1169,7 @@ model FillExp7
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1029, column 14:
-  Missing argument for required input s
+  Calling function fill(): missing argument for required input s
 ")})));
 
  Real x[2] = fill();

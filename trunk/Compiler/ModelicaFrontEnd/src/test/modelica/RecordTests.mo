@@ -31,8 +31,8 @@ equation
  y = x;
 
  record RecordTests.RecordFlat1.A
-    Real a;
-    Real b;
+  Real a;
+  Real b;
  end RecordTests.RecordFlat1.A;
 end RecordTests.RecordFlat1;
 ")})));
@@ -64,8 +64,8 @@ equation
  x.b = 2;
 
  record RecordTests.RecordFlat2.A
-    Real a;
-    Real b;
+  Real a;
+  Real b;
  end RecordTests.RecordFlat2.A;
 end RecordTests.RecordFlat2;
 ")})));
@@ -97,8 +97,8 @@ equation
  y = x;
 
  record RecordTests.RecordFlat3.A
-    Real a;
-    Real b;
+  Real a;
+  Real b;
  end RecordTests.RecordFlat3.A;
 end RecordTests.RecordFlat3;
 ")})));
@@ -126,13 +126,13 @@ fclass RecordTests.RecordFlat4
  RecordTests.RecordFlat4.A x;
 
  record RecordTests.RecordFlat4.B
-    Real c;
-    Real d;
+  Real c;
+  Real d;
  end RecordTests.RecordFlat4.B;
 
  record RecordTests.RecordFlat4.A
-    Real a;
-    Real b;
+  Real a;
+  Real b;
  end RecordTests.RecordFlat4.A;
 end RecordTests.RecordFlat4;
 ")})));
@@ -162,13 +162,13 @@ fclass RecordTests.RecordFlat5
  RecordTests.RecordFlat5.A x;
 
  record RecordTests.RecordFlat5.B
-    Real c;
-    Real d;
+  Real c;
+  Real d;
  end RecordTests.RecordFlat5.B;
 
  record RecordTests.RecordFlat5.A
-    Real a;
-    RecordTests.RecordFlat5.B b;
+  Real a;
+  RecordTests.RecordFlat5.B b;
  end RecordTests.RecordFlat5.A;
 end RecordTests.RecordFlat5;
 ")})));
@@ -201,13 +201,13 @@ equation
  y = x;
 
  record RecordTests.RecordType1.A
-    Real a;
-    Real b;
+  Real a;
+  Real b;
  end RecordTests.RecordType1.A;
 
  record RecordTests.RecordType1.B
-    Real a;
-    Real b;
+  Real a;
+  Real b;
  end RecordTests.RecordType1.B;
 end RecordTests.RecordType1;
 ")})));
@@ -300,23 +300,23 @@ equation
  y = x;
 
  record RecordTests.RecordType4.A
-    Real a;
-    Real b;
+  Real a;
+  Real b;
  end RecordTests.RecordType4.A;
 
  record RecordTests.RecordType4.C
-    RecordTests.RecordType4.A a;
-    Real e;
+  RecordTests.RecordType4.A a;
+  Real e;
  end RecordTests.RecordType4.C;
 
  record RecordTests.RecordType4.B
-    Real a;
-    Real b;
+  Real a;
+  Real b;
  end RecordTests.RecordType4.B;
 
  record RecordTests.RecordType4.D
-    RecordTests.RecordType4.B a;
-    Real e;
+  RecordTests.RecordType4.B a;
+  Real e;
  end RecordTests.RecordType4.D;
 end RecordTests.RecordType4;
 ")})));
@@ -399,8 +399,8 @@ fclass RecordTests.RecordBinding1
  RecordTests.RecordBinding1.A y;
 
  record RecordTests.RecordBinding1.A
-    Real a;
-    Real b;
+  Real a;
+  Real b;
  end RecordTests.RecordBinding1.A;
 end RecordTests.RecordBinding1;
 ")})));
@@ -426,13 +426,13 @@ fclass RecordTests.RecordBinding2
  RecordTests.RecordBinding2.B y;
 
  record RecordTests.RecordBinding2.A
-    Real a;
-    Real b;
+  Real a;
+  Real b;
  end RecordTests.RecordBinding2.A;
 
  record RecordTests.RecordBinding2.B
-    Real a;
-    Real b;
+  Real a;
+  Real b;
  end RecordTests.RecordBinding2.B;
 end RecordTests.RecordBinding2;
 ")})));
@@ -533,8 +533,8 @@ fclass RecordTests.RecordArray1
  RecordTests.RecordArray1.A x(a = {1,2},b = 1);
 
  record RecordTests.RecordArray1.A
-    Real a[2];
-    Real b;
+  Real a[2];
+  Real b;
  end RecordTests.RecordArray1.A;
 end RecordTests.RecordArray1;
 ")})));
@@ -562,8 +562,8 @@ equation
  x.b = 1;
 
  record RecordTests.RecordArray2.A
-    Real a[2];
-    Real b;
+  Real a[2];
+  Real b;
  end RecordTests.RecordArray2.A;
 end RecordTests.RecordArray2;
 ")})));
@@ -594,8 +594,8 @@ equation
  x = y;
 
  record RecordTests.RecordArray3.A
-    Real a[2];
-    Real b;
+  Real a[2];
+  Real b;
  end RecordTests.RecordArray3.A;
 end RecordTests.RecordArray3;
 ")})));
@@ -622,8 +622,8 @@ fclass RecordTests.RecordArray4
  RecordTests.RecordArray4.A x[2](each a = 1,b = {1,2});
 
  record RecordTests.RecordArray4.A
-    Real a;
-    Real b;
+  Real a;
+  Real b;
  end RecordTests.RecordArray4.A;
 end RecordTests.RecordArray4;
 ")})));
@@ -652,8 +652,8 @@ equation
  x[2].b = 4;
 
  record RecordTests.RecordArray5.A
-    Real a;
-    Real b;
+  Real a;
+  Real b;
  end RecordTests.RecordArray5.A;
 end RecordTests.RecordArray5;
 ")})));
@@ -670,6 +670,154 @@ equation
  x[2].a = 3;
  x[2].b = 4;
 end RecordArray5;
+
+
+
+model RecordConstructor1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RecordConstructor1",
+         description="Record constructors: basic test",
+         flatModel="
+fclass RecordTests.RecordConstructor1
+ RecordTests.RecordConstructor1.A x = A(1.0, 2, \"foo\");
+
+ record RecordTests.RecordConstructor1.A
+  Real a;
+  Integer b;
+  String c;
+ end RecordTests.RecordConstructor1.A;
+end RecordTests.RecordConstructor1;
+")})));
+
+ record A
+  Real a;
+  Integer b;
+  String c;
+ end A;
+ 
+ A x = A(1.0, 2, "foo");
+end RecordConstructor1;
+
+
+model RecordConstructor2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RecordConstructor2",
+         description="Record constructors: named args",
+         flatModel="
+fclass RecordTests.RecordConstructor2
+ RecordTests.RecordConstructor2.A x = A(1.0, 2, \"foo\");
+
+ record RecordTests.RecordConstructor2.A
+  Real a;
+  Integer b;
+  String c;
+ end RecordTests.RecordConstructor2.A;
+end RecordTests.RecordConstructor2;
+")})));
+
+ record A
+  Real a;
+  Integer b;
+  String c;
+ end A;
+ 
+ A x = A(c="foo", a=1.0, b=2);
+end RecordConstructor2;
+
+
+model RecordConstructor3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RecordConstructor3",
+         description="Record constructors: default args",
+         flatModel="
+fclass RecordTests.RecordConstructor3
+ RecordTests.RecordConstructor3.A x = A(1, 2, \"foo\");
+
+ record RecordTests.RecordConstructor3.A
+  Real a;
+  Integer b = 0;
+  String c = \"foo\";
+ end RecordTests.RecordConstructor3.A;
+end RecordTests.RecordConstructor3;
+")})));
+
+ record A
+  Real a;
+  Integer b = 0;
+  String c = "foo";
+ end A;
+ 
+ A x = A(1, 2);
+end RecordConstructor3;
+
+
+model RecordConstructor4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="RecordConstructor4",
+         description="Record constructors: wrong type of arg",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
+Semantic error at line 764, column 18:
+  Record constructor for A: types of positional argument 3 and input c are not compatible
+")})));
+
+ record A
+  Real a;
+  Integer b;
+  String c;
+ end A;
+ 
+ A x = A(1.0, 2, 3);
+end RecordConstructor4;
+
+
+model RecordConstructor5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="RecordConstructor5",
+         description="Record constructors: too few args",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
+Semantic error at line 786, column 8:
+  Record constructor for A: missing argument for required input c
+")})));
+
+ record A
+  Real a;
+  Integer b;
+  String c;
+ end A;
+ 
+ A x = A(1.0, 2);
+end RecordConstructor5;
+
+
+model RecordConstructor6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="RecordConstructor6",
+         description="Record constructors: too many args",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
+Semantic error at line 808, column 25:
+  Record constructor for A: too many positional arguments
+")})));
+
+ record A
+  Real a;
+  Integer b;
+  String c;
+ end A;
+ 
+ A x = A(1.0, 2, "foo", 0);
+end RecordConstructor6;
 
 
 

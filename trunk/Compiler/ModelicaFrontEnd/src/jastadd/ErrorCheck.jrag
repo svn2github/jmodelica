@@ -720,14 +720,14 @@ aspect InstanceErrorCheck {
 	    	errorChecked = true;
 	    	// Check that the function exists
 	    	InstClassDecl func = getName().myInstClassDecl();
-	    	if (!func.isFunction()) {
+	    	if (!func.isCallable()) {
 	    		// Report that function does not exist
 		    	String name = getName().name();
 	    		if (func.isUnknown()) 
 	    			error("The function " + name + "() is undeclared");
 	    		else
 	    			error("The class " + name + " is not a function");
-	    	} else if (!func.isCompleteFunction()) {
+	    	} else if (!func.isRecord() && !func.isCompleteFunction()) {
 	    		// TODO: add check if function is partial?
 	    		error("Calling function " + getName().name() + 
 	    				"(): can only call functions that have one algorithm section or external function specification");
@@ -740,25 +740,31 @@ aspect InstanceErrorCheck {
 	    	    
 	    	    // Check if there were any unbindable args
 			    boolean pos = true;
+			    String desc = functionCallDecription();
 			    for (InstFunctionArgument arg : unbindableArgs) 
-			    	pos = !arg.generateUnbindableError(pos) && pos;
+			    	pos = arg.generateUnbindableError(desc, pos) && pos;
 	    	}
 	    }
 	}
+	
+	syn String FAbstractFunctionCall.functionCallDecription() = "Calling function " + name() + "()";
+	eq FRecordConstructor.functionCallDecription() = "Record constructor for " + name();
+	eq InstFunctionCall.functionCallDecription()   = getName().myInstClassDecl().isRecord() ? 
+			"Record constructor for " + name() : super.functionCallDecription();
 	  
-	public boolean InstFunctionArgument.generateUnbindableError(boolean generateForPositional) {
+	public boolean InstFunctionArgument.generateUnbindableError(String desc, boolean genForPos) {
+		return genForPos;
+	}
+	  
+	public boolean InstPositionalArgument.generateUnbindableError(String desc, boolean genForPos) {
+		if (genForPos)
+			error(desc + ": too many positional arguments");
 		return false;
 	}
 	  
-	public boolean InstPositionalArgument.generateUnbindableError(boolean generateForPositional) {
-		if (generateForPositional)
-			error("Too many positional arguments");
-		return generateForPositional;
-	}
-	  
-	public boolean InstNamedArgument.generateUnbindableError(boolean generateForPositional) {
-		error("No input matching named argument " + getName().name() + " found");
-		return false;
+	public boolean InstNamedArgument.generateUnbindableError(String desc, boolean genForPos) {
+		error(desc + ": no input matching named argument " + getName().name() + " found");
+		return genForPos;
 	}
 	
 	public void FBuiltInFunctionCall.collectErrors() {

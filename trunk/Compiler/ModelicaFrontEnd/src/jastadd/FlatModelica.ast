@@ -761,6 +761,11 @@ FIdUseInstAccess : FIdUse ::= InstAccess;
 FInstAccessExp : FExp ::= InstAccess;
 
 /**
+ * \brief Record constructor.
+ */
+FRecordConstructor : FBuiltInFunctionCall ::= Record:FIdUse Arg:FExp*;
+
+/**
  * \brief Array constructor expression.
  */
 FArray : FExp ::= FExp*;

@@ -280,13 +280,20 @@ aspect FlatTypeCheck {
 			  if (use.isForIndex())
 				  error("Can not assign a value to a for loop index");
 			  else if (size().isUnknown())
-				  error("Could not evaluate array size of output " + myOutput().name());
+				  error(functionCallDecription() + ":could not evaluate array size of output " + 
+						  myOutput().name());
 			  else if (!use.type().typeCompatible(type())) 
-				  error("Calling function " + funcName() + "(): types of component " + use.name() + 
+				  error(functionCallDecription() + ": types of component " + use.name() + 
 						  " and output " + myOutput().name() + " are not compatible");
 		  }
 	  }
   }
+  
+  inh String InstFunctionArgument.functionCallDecription();
+  inh String FFunctionCallLeft.functionCallDecription();
+  eq FAbstractFunctionCall.getChild().functionCallDecription() = functionCallDecription();
+  eq FFunctionCallEquation.getChild().functionCallDecription() = getCall().functionCallDecription();
+  eq FFunctionCallStmt.getChild().functionCallDecription()     = getCall().functionCallDecription();
   
   public void InstFunctionArgument.typeCheck() {
 	  if (!getFExp().type().isUnknown() && (getBoundInput() == null || !getBoundInput().type().isUnknown())) {
@@ -296,18 +303,18 @@ aspect FlatTypeCheck {
 		  else
 			  typeOk = argumentTypeValid(getFExp().type());
 		  if (!typeOk) {
-			  error("Calling function " + funcName() + "(): types of " + argumentDesc() + 
+			  error(functionCallDecription() + ": types of " + argumentDesc() + 
 					  " and input " + getBoundInput().name() + " are not compatible");
 		  }
 	  }
   }
   
   public void InstMissingArgument.typeCheck() {
-	  error("Missing argument for required input " + getBoundInput().name());
+	  error(functionCallDecription() + ": missing argument for required input " + getBoundInput().name());
   }
   
   public void InstMultipleBoundArgument.typeCheck() {
-	  error("Multiple arguments matches input " + getBoundInput().name());
+	  error(functionCallDecription() + ": multiple arguments matches input " + getBoundInput().name());
   }
   
   public void InstDefaultArgument.typeCheck() {}

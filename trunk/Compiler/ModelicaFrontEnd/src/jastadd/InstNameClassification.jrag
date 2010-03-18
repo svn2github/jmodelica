@@ -33,17 +33,17 @@ aspect InstNameClassification {
     	public abstract Kind predKind();
     	
     	static protected class ClassAccess extends Kind {
-    		public Kind     predKind()      { return CLASS_ACCESS; }
+    		public Kind    predKind()      { return CLASS_ACCESS; }
     		public boolean isClassAccess() { return true; }
     	}
     	
     	static protected class ComponentAccess extends Kind {
-    		public Kind     predKind()          { return AMBIGUOUS_ACCESS; }
+    		public Kind    predKind()          { return AMBIGUOUS_ACCESS; }
     		public boolean isComponentAccess() { return true; }
     	}
     	
     	static protected class AmbigousAccess extends Kind {
-    		public Kind     predKind()         { return AMBIGUOUS_ACCESS; }
+    		public Kind    predKind()         { return AMBIGUOUS_ACCESS; }
     		public boolean isAmbigousAccess() { return true; }
     	}
     	

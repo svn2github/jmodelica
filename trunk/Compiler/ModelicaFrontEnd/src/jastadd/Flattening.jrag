@@ -920,7 +920,14 @@ aspect FlatExpressions {
 	
 	public FTimeExp FTimeExp.flatten(FQName prefix) { return new FTimeExp(); }
 	public FEndExp  FEndExp.flatten(FQName prefix)  { return new FEndExp(); }
-		
+	
+	public FRecordConstructor FRecordConstructor.flatten(FQName prefix) {
+		List args = new List();
+		for (FExp e : getArgs()) 
+			args.add(e.flatten(prefix));
+		return new FRecordConstructor(getRecord().flatten(new FQName()), args);		
+	}
+	
 	public FFunctionCall FFunctionCall.flatten(FQName prefix) {
 		List args = new List();
 		for (FExp e : getArgs()) 

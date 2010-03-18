@@ -90,8 +90,8 @@ aspect FlatVariability {
 	syn boolean FExp.isDiscreteExp() = variability().discreteVariability();
 	syn boolean FExp.isContinuousExp() = variability().continuousVariability();
 	
-	// TODO: Add standard implementation based on childFExp()?
-	syn lazy FTypePrefixVariability FExp.variability();
+	syn lazy FTypePrefixVariability FExp.variability() = combineFExpListVariability(childFExps());
+	
 	// TODO this must be fixed.
 	eq FInstAccessExp.variability() = getInstAccess().myInstComponentDecl().variability();
 	eq FUnsupportedExp.variability() = null;
@@ -110,9 +110,10 @@ aspect FlatVariability {
 	}
 	
 	public static FTypePrefixVariability FExp.combineFExpListVariability(Iterable<? extends FExp> exps) {
-		FTypePrefixVariability total = fConstant();
-		for (FExp exp : exps) 
-			total = total.combine(exp.variability());
+		Iterator<? extends FExp> it = exps.iterator();
+		FTypePrefixVariability total = it.hasNext() ? it.next().variability() : fConstant();
+		while (it.hasNext()) 
+			total = total.combine(it.next().variability());
 		return total;
 	}
 	
@@ -134,48 +135,13 @@ aspect FlatVariability {
 		return total;
 	}
 	
-	eq FBinExp.variability() = getLeft().variability().combine(getRight().variability());
-	eq FUnaryExp.variability() = getFExp().variability();
-	
-	eq FLitExp.variability() = fConstant();
-
-	eq FNoExp.variability() = fConstant();
-	
-	eq FTimeExp.variability() = fContinuous();
-	
-	eq FEndExp.variability() = fParameter();
-	
-	eq FMathematicalFunctionCall.variability() = getFExp().variability();
-	
-	eq FIntegerExp.variability() = getFExp().variability();
-
-	eq FScalar.variability() = getFExp().variability();
-	
-	eq FTranspose.variability() = getFExp().variability();
-	eq FCross.variability() = getX().variability().combine(getY().variability());
-	
-	eq FAbsExp.variability() = getFExp().variability();
-	
-	eq FIfExp.variability() {
-		FTypePrefixVariability total = getThenExp().variability().combine(getIfExp().variability());
-		total = total.combine(combineFExpListVariability(getFElseIfExps()));
-		return total.combine(getElseExp().variability());
-	}
-	
-	eq FElseIfExp.variability() = getThenExp().variability().combine(getIfExp().variability());
-
+	eq FLitExp.variability()   = fConstant();
+	eq FNoExp.variability()    = fConstant();
 	eq FNdimsExp.variability() = fConstant();
+	eq FEndExp.variability()   = fParameter();
+	eq FTimeExp.variability()  = fContinuous();
 
 	eq FSizeExp.variability() = hasDim() ? getDim().variability() : fParameter();
-	
-	eq FMinMaxExp.variability() {
-		FTypePrefixVariability res = getX().variability();
-		if (hasY())
-			res = res.combine(getY().variability());
-		return res;
-	}
-	
-	eq FFunctionCall.variability() = combineFExpListVariability(getArgs());
 
 	eq InstFunctionCall.variability() {
 		FTypePrefixVariability total = fConstant();
@@ -203,20 +169,10 @@ aspect FlatVariability {
 		}
 	}
 
-	eq FRangeExp.variability() = combineFExpListVariability(getFExps());
 	eq FLinspace.variability() = getStartExp().variability().combine(getStopExp().variability());
-	
-	eq FArray.variability()       = combineFExpListVariability(getFExps());
-	eq FParseArray.variability()  = combineFExpListVariability(getFExps());
-	eq FAbstractCat.variability() = combineFExpListVariability(getFExps());
-	eq FCatExp.variability()      = super.variability().combine(getDim().variability());
-	
-	eq FIterExp.variability() = getFExp().variability();
-	eq FSumExp.variability()  = getFExp().variability();
 	
 	eq FSubscriptedExp.variability()  = combineFExpListVariability(getArray().iterable());
 	
-	eq FNoEventExp.variability() = getFExp().variability();
 	eq FIdentity.variability()   = fConstant();
 	eq FOnes.variability()       = fConstant();
 	eq FZeros.variability()      = fConstant();

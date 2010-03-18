@@ -327,7 +327,7 @@ model FunctionBinding3
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Too many positional arguments
+  Calling function TestFunction1(): too many positional arguments
 ")})));
  Real x = TestFunction1(1, 2);
 end FunctionBinding3;
@@ -341,10 +341,10 @@ model FunctionBinding4
 2 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Missing argument for required input i1
+  Calling function TestFunction3(): missing argument for required input i1
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Missing argument for required input i2
+  Calling function TestFunction3(): missing argument for required input i2
 ")})));
 
  Real x = TestFunction3();
@@ -359,7 +359,7 @@ model FunctionBinding5
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Missing argument for required input i2
+  Calling function TestFunction3(): missing argument for required input i2
 ")})));
 
  Real x = TestFunction3(1);
@@ -460,7 +460,7 @@ model FunctionBinding10
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Missing argument for required input i2
+  Calling function TestFunction3(): missing argument for required input i2
 ")})));
 
  Real x = TestFunction3(1, i3=2);
@@ -475,7 +475,7 @@ model FunctionBinding11
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  No input matching named argument i3 found
+  Calling function TestFunction2(): no input matching named argument i3 found
 ")})));
 
  Real x = TestFunction2(i3=1);
@@ -490,7 +490,7 @@ model FunctionBinding12
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  No input matching named argument o1 found
+  Calling function TestFunction2(): no input matching named argument o1 found
 ")})));
 
  Real x = TestFunction2(o1=1);
@@ -505,7 +505,7 @@ model FunctionBinding13
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Multiple arguments matches input i1
+  Calling function TestFunction2(): multiple arguments matches input i1
 ")})));
 
  Real x = TestFunction2(1, 2, i1=3);
@@ -520,7 +520,7 @@ model FunctionBinding14
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Multiple arguments matches input i1
+  Calling function TestFunction2(): multiple arguments matches input i1
 ")})));
 
  Real x = TestFunction2(1, 2, i1=3, i1=3, i1=3);
@@ -1153,7 +1153,7 @@ model BuiltInCallType5
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Missing argument for required input u
+  Calling function sin(): missing argument for required input u
 ")})));
 
   Real x = sin();
@@ -1168,7 +1168,7 @@ model BuiltInCallType6
 1 error(s) found...
 In file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
-  Missing argument for required input u2
+  Calling function atan2(): missing argument for required input u2
 ")})));
 
   Real x = atan2(9.0);

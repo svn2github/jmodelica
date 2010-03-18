@@ -288,7 +288,16 @@
 				<fileset dir="${modelica_c_back_end_path}/src/test/modelica">
 					<include name="*.mo" />
 				</fileset>
+				<fileset dir="${modelica_xml_back_end_path}/src/test/modelica">
+					<include name="*.mo" />
+				</fileset>
 				<fileset dir="${optimica_front_end_path}/src/test/modelica">
+					<include name="*.mo" />
+				</fileset>
+				<fileset dir="${optimica_c_back_end_path}/src/test/modelica">
+					<include name="*.mo" />
+				</fileset>
+				<fileset dir="${optimica_xml_back_end_path}/src/test/modelica">
 					<include name="*.mo" />
 				</fileset>
 			</path>
