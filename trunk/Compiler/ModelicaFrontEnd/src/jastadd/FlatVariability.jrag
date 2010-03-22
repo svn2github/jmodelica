@@ -184,6 +184,10 @@ aspect FlatVariability {
    		return (other.combineLevel() > combineLevel()) ? other : this;
 	}	
 	
+   	public FTypePrefixVariability FTypePrefixVariability.combineDown(FTypePrefixVariability other) {
+   		return (other.combineLevel() < combineLevel()) ? other : this;
+	}	
+	
 }
 
 aspect VariabilitySingletons {

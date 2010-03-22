@@ -1061,7 +1061,7 @@ aspect Arrays {
 			FArraySubscripts fas = inFunc ? i.newFArraySubscripts() : 
 				FArraySubscripts.createLiteralSubscripts(fc.tempVarIndex());
 			n.setLastFArraySubscripts(fas);
-			arr.set(i, new FIdUseExp(new FIdUse(n)));
+			arr.set(i, new FIdUseExp(n));
 		}
 		return arr;
 	}
@@ -1234,6 +1234,13 @@ aspect Arrays {
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
+	syn lazy Indices FType.indices() = Indices.create(size());
+	
+	/**
+	 * \brief Get the set of all array indices of an array access. 
+	 * 
+	 * @return An Indices object containing all indices in each array dimension.
+	 */
 	syn Indices FExpSubscript.indices() = getFExp().indices();
 	
 	/**
@@ -1361,10 +1368,53 @@ aspect Arrays {
 		else
 			return new int[0]; // TODO: return 1..n, where n is given by use.
 	}
+	
+	/**
+	 * \brief Create an Index that describes the same array index as this.
+	 */
+	public Index FArraySubscripts.index() {
+		int[] i = new int[getNumFSubscript()];
+		for (int j = 0; j < i.length; j++)
+			i[j] = getFSubscript(j).ceval().intValue();
+		return new Index(i);
+	}
+	
+	/**
+	 * \brief Try to infer type of an expression from its surrounding Array.
+	 * 
+	 * An FExp that is the direct child of an Array always has the same type as the Array, except scalar.
+	 * 
+	 * @return  if this expression is in an Array, the inferred type, otherwise type()
+	 */
+	syn FType FExp.inferType() = inArray() ? inferredType() : type();
+	
+	/**
+	 * \brief Check if this expression is the direct child of an Array.
+	 */
+	inh boolean FExp.inArray();
+	inh boolean List.inArray();
+	eq List.getChild().inArray()    = inArray();
+	eq Array.getChild().inArray()   = true;
+	eq ASTNode.getChild().inArray() = false;
+	
+	/**
+	 * \brief Helper attribute to {@link FExp#inferType()}.
+	 */
+	inh FType FExp.inferredType();
+	inh FType List.inferredType();
+	eq List.getChild().inferredType()    = inferredType();
+	eq Array.getChild().inferredType()   = type().scalarType();
+	eq ASTNode.getChild().inferredType() = null;
 
+	/**
+	 * \brief The type of the expression this Array belongs to.
+	 */
+	inh FType Array.type();
+	eq FExp.getArray().type()             = type();
+	eq FExpSubscript.getExpanded().type() = type();
 }
 
-aspect ArrayIndices {
+aspect ArrayHelpers {
 	
 	/**
 	 * \brief An array size. Can be multi-dimensional.

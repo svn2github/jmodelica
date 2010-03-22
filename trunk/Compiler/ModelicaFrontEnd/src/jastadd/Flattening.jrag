@@ -780,7 +780,7 @@ aspect FlatExpressions {
 				}
 			}
 		} 
-		return new FIdUseExp(new FIdUse(getInstAccess().flatten(prefix)));
+		return new FIdUseExp(getInstAccess().flatten(prefix));
 	}
 	
 	public FQName InstAccess.flatten(FQName prefix) { 
@@ -925,7 +925,15 @@ aspect FlatExpressions {
 		List args = new List();
 		for (FExp e : getArgs()) 
 			args.add(e.flatten(prefix));
-		return new FRecordConstructor(getRecord().flatten(new FQName()), args);		
+		return new FRecordConstructor(getRecord().flattenRecordName(), args);		
+	}
+	
+	public FIdUse FIdUse.flattenRecordName() {
+		return flatten(new FQName());
+	}
+	
+	public FIdUse FIdUseInstAccess.flattenRecordName() {
+		return new FIdUse(getInstAccess().myInstClassDecl().qualifiedName());
 	}
 	
 	public FFunctionCall FFunctionCall.flatten(FQName prefix) {

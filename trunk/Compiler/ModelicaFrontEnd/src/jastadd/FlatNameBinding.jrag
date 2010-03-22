@@ -33,13 +33,7 @@ aspect FlatNameBinding {
 
 	eq FClass.getChild(int index).lookupFV(String name) {
 		FVariable variable = fullyQualifiedVariablesMap().get(name);
-		if (variable == null) {
-			//System.out.println("FClass.getChild().lookupFV: " + name + " " + variable);
-			return unknownFVariable();
-		} else {
-			//System.out.println("FClass.getChild().lookupFV: " + name + " " + variable+ " "+ variable.getParent());
-			return variable;
-		}		
+		return (variable == null) ? unknownFVariable() : variable;
 	}
 
 	eq FFunctionDecl.getChild(int index).lookupFV(String name) {
@@ -98,12 +92,24 @@ aspect FlatNameBinding {
 	
 	syn lazy HashMap<String,FVariable> FClass.fullyQualifiedVariablesMap() {
 		//System.out.println("FClass.fullyQualifiedVariablesMap()");
-		HashMap map = new HashMap();
+		HashMap<String,FVariable> map = new HashMap<String,FVariable>();
 		for (FVariable v : getFVariables()) 
-			map.put(v.name(), v);
+			v.addToFullyQualifiedVariablesMap(map, null);
 		for (FVariable v : getAliasVariables()) 
-			map.put(v.name(), v);
+			v.addToFullyQualifiedVariablesMap(map, null);
 		return map;
+	}
+	
+	public void FVariable.addToFullyQualifiedVariablesMap(HashMap<String,FVariable> map, String prefix) {
+		String name = (prefix == null) ? name() : prefix + "." + name();
+		map.put(name, this);
+	}
+	
+	public void FRecordVariable.addToFullyQualifiedVariablesMap(HashMap<String,FVariable> map, String prefix) {
+		String name = (prefix == null) ? name() : prefix + "." + name();
+		map.put(name, this);
+		for (FVariable v : myFRecordDecl().getFVariables())
+			v.addToFullyQualifiedVariablesMap(map, name);
 	}
 	
 	syn lazy HashMap<String, FFunctionVariable> FFunctionDecl.fullyQualifiedVariablesMap() {
@@ -143,8 +149,10 @@ aspect FlatFunctionBinding {
 
 aspect FlatRecordBinding {
 	
-	syn FRecordDecl FRecordVariable.myFRecordDecl() = lookupFRec(getRecord().name());
-	syn FRecordDecl FIdUse.myFRecordDecl()          = lookupFRec(name());
+	syn FRecordDecl AbstractFVariable.myFRecordDecl() = null;
+	eq FRecordVariable.myFRecordDecl() = lookupFRec(getRecord().name());
+	
+	syn FRecordDecl FIdUse.myFRecordDecl() = lookupFRec(name());
 	
 	inh FRecordDecl FRecordVariable.lookupFRec(String name);
 	inh FRecordDecl FIdUse.lookupFRec(String name);
@@ -155,6 +163,27 @@ aspect FlatRecordBinding {
 			if (r.name().equals(name))
 				return r;
 		return null;
+	}
+	
+	syn AbstractFVariable FRecordDecl.findComponent(FQName name) {
+		UnknownFVariable unknown = unknownFVariable();
+		FRecordDecl rec = this;
+		AbstractFVariable res = unknown;
+		for (FQNamePart p : name.getFQNameParts()) {
+			if (rec == null)
+				return unknown;
+			res = unknown;
+			for (FVariable v : rec.getFVariables()) {
+				if (v.getFQName().getFQNamePart(0).getName().equals(p.getName())) {
+					res = v;
+					rec = v.myFRecordDecl();
+					break;
+				}
+			}
+			if (res == unknown)
+				return unknown;
+		}
+		return res;
 	}
 	
 }

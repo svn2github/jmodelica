@@ -98,6 +98,20 @@ aspect Constructors {
 	}
 	
 	/**
+	 * \brief Constructs a flat FIdUseExp that refers to the variable with the given name.
+	 */
+	public FIdUseExp.FIdUseExp(String name) {
+		this(new FIdUse(name));
+	}
+	
+	/**
+	 * \brief Constructs an FIdUseExp that refers to the variable with the given name.
+	 */
+	public FIdUseExp.FIdUseExp(FQName name) {
+		this(new FIdUse(name));
+	}
+	
+	/**
 	 * \brief Constructs an FForIndex with a temporary index variable and a 
 	 *        range expression starting at 1 as the in expression.
 	 * 
@@ -110,13 +124,6 @@ aspect Constructors {
 		setFExp(new FRangeExp(new List().add(start).add(end)));
 		setFVariable(new FIntegerVariable(new FTemporaryVisibilityType(), fParameter(), 
 				new Opt(), new List(), new Opt(), new Opt(), new FQName(name)));
-	}
-	
-	/**
-	 * \brief Constructs an FIdUseExp that refers to the variable with the given name.
-	 */
-	public FIdUseExp.FIdUseExp(String name) {
-		this(new FIdUse(name));
 	}
 	
 	public ComponentDecl.ComponentDecl(boolean isParameter,

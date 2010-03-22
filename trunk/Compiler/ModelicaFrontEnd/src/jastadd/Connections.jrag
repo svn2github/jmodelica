@@ -31,78 +31,56 @@ aspect Connections {
 	public void FClass.genConnectionEquations() {
 	
 		debugPrint("<<<FClass.genConnectionEquations()");
-		ArrayList l = connectionSetManager.getConnectionSetList();
+		ArrayList<ConnectionSet> l = connectionSetManager.getConnectionSetList();
 		debugPrint("<<<FClass.genConnectionEquations(): "+ l.size() + " sets in manager");
 		getConnectionSetManager().printConnectionSets();
 		
-		for (int i=0; i<l.size();i++) {
-			LinkedHashSet h = (LinkedHashSet)(l.get(i));
-			
-			ConnectionSetEntry csee[] = new ConnectionSetEntry[1];
-			csee = (ConnectionSetEntry[])h.toArray(csee);
-			
+		for (ConnectionSet set : l) {
+			// TODO: use sorted data structure instead? would speed up use of ConnectionSetManager as well
+			ConnectionSetEntry csee[] = set.toArray(new ConnectionSetEntry[set.size()]);
 			java.util.Arrays.sort(csee);
 			
 			//System.out.println("*** Array size: " + csee.length);
 			
-			if (((ConnectionSetEntry)csee[0]).isFlow()) {
-				FExp e = new FNoExp();
+			if (csee[0].isFlow()) {
 				// Treat first element separately
-				ConnectionSetEntry cse = (ConnectionSetEntry)csee[0];
-				if (cse.isOutside()) 
-					e = new FNegExp(new FIdUseExp(new FIdUse((FQName)cse.getFQName().fullCopy())));
-				else
-					e = new FIdUseExp(new FIdUse((FQName)cse.getFQName().fullCopy())) ;		
+				FExp e = csee[0].getFQName().createFIdUseExp();
+				if (csee[0].isOutside()) 
+					e = new FNegExp(e);
 			
-				for (int j=1; j<csee.length;j++) {
-					cse = (ConnectionSetEntry)csee[j];
-					if (cse.isOutside())
-						e = new FSubExp(e,new FIdUseExp(new FIdUse((FQName)cse.getFQName().fullCopy())));
-					else
-						e = new FAddExp(e,new FIdUseExp(new FIdUse((FQName)cse.getFQName().fullCopy())));		
+				for (int j = 1; j < csee.length; j++) {
+					FExp e2 = csee[j].getFQName().createFIdUseExp();
+					e = csee[j].isOutside() ? new FSubExp(e, e2) : new FAddExp(e, e2);
 				}
-				getFEquationBlock(0).addFAbstractEquation(new FEquation(e,new FRealLitExp("0.0")));	
+				getFEquationBlock(0).addFAbstractEquation(new FEquation(e, new FRealLitExp("0.0")));	
 			} else {
 				// Treat first element separately
-				FExp e1=new FNoExp(),e2=new FNoExp();
-				ConnectionSetEntry cse = (ConnectionSetEntry)csee[0];
-				e1 = new FIdUseExp(new FIdUse((FQName)cse.getFQName().fullCopy()));
-				for (int j=1;j<csee.length;j++) {
-					cse = (ConnectionSetEntry)csee[j];
-					e2 = new FIdUseExp(new FIdUse((FQName)cse.getFQName().fullCopy()));
-					getFEquationBlock(0).addFAbstractEquation(new FEquation(e1,e2));
+				FExp e1 = csee[0].getFQName().createFIdUseExp();
+				for (int j = 1; j < csee.length; j++) {
+					FExp e2 = csee[j].getFQName().createFIdUseExp();
+					getFEquationBlock(0).addFAbstractEquation(new FEquation(e1, e2));
 					e1 = e2;
 				}
 			}
 
 		}
 	}
-
-	static public class MyLinkedHashSet extends LinkedHashSet {
-	
-		public boolean add(Object o) {
-			ConnectionSetEntry cse = (ConnectionSetEntry)o;
-			//System.out.println("nicfv added: " + cse.getVar().getName().getID());
-			super.add(cse);	
-			return true;
-		}
-	}
+		
+	public class ConnectionSet extends LinkedHashSet<ConnectionSetEntry> {}
 
 	static public class ConnectionSetManager {
 	
-		private ArrayList list = new ArrayList();
+		private ArrayList<ConnectionSet> list = new ArrayList<ConnectionSet>();
 		
-		public ArrayList getConnectionSetList() {
+		public ArrayList<ConnectionSet> getConnectionSetList() {
 			return list;
 		}
 			
 		public void addInsideFlowVar(InstComponentDecl var1, FQName namePrefix1) {
-			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1,false,namePrefix1);
-
-			LinkedHashSet h1 = getConnectionSet(cse1);
+			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1, false, namePrefix1);
 			
-			if (h1==null) {
-				LinkedHashSet h = new LinkedHashSet();
+			if (getConnectionSet(cse1) == null) {
+				ConnectionSet h = new ConnectionSet();
 				h.add(cse1);
 				list.add(h);
 			}
@@ -120,8 +98,8 @@ aspect Connections {
 			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1,outside1,namePrefix1);
 			ConnectionSetEntry cse2 = new ConnectionSetEntry(var2,outside2,namePrefix2);	
 
-			LinkedHashSet h1 = getConnectionSet(cse1);
-			LinkedHashSet h2 = getConnectionSet(cse2);
+			ConnectionSet h1 = getConnectionSet(cse1);
+			ConnectionSet h2 = getConnectionSet(cse2);
 			
 			if (h1!=null && h2==null)
 				h1.add(cse2);
@@ -133,18 +111,17 @@ aspect Connections {
 					list.remove(h2);
 				}
 			} else {
-				LinkedHashSet h = new LinkedHashSet();
+				ConnectionSet h = new ConnectionSet();
 				h.add(cse1);
 				h.add(cse2);
 				list.add(h);
 			}
 		}
 	
-		public LinkedHashSet getConnectionSet(ConnectionSetEntry cse) {
-			for (int i=0;i<list.size();i++) {
-				if (((LinkedHashSet)(list.get(i))).contains(cse))
-					return (LinkedHashSet)list.get(i);
-			}
+		public ConnectionSet getConnectionSet(ConnectionSetEntry cse) {
+			for (ConnectionSet set : list)
+				if (set.contains(cse))
+					return set;
 			return null;
 		}
 	
@@ -153,29 +130,15 @@ aspect Connections {
 			System.out.println("Connection sets: " + list.size() + " sets");
 			
 			// Print connection sets 
-			for(int i=0;i<list.size();i++) {
-				LinkedHashSet h = (LinkedHashSet)(list.get(i));
+			for(ConnectionSet set : list) {
 				System.out.print("Connection set (");
-				Iterator it = h.iterator();
-				if (((ConnectionSetEntry)it.next()).isFlow())
+				if (set.iterator().next().isFlow())
 					System.out.print("flow");
 				else
 					System.out.print("non flow");
 				System.out.print("): {");
-				
-				for (Iterator iter=h.iterator();iter.hasNext();) {
-					
-					Object o = iter.next();
-					//System.out.println("printConnectionSets: " +o.getClass().getName());
-					ConnectionSetEntry cse = (ConnectionSetEntry)o;
-					System.out.print(cse.name());
-					if (cse.isOutside())
-						System.out.print("(o)");
-					else
-						System.out.print("(i)");	
-					if (iter.hasNext())
-						System.out.print(", ");
-				}	
+				String str = set.toString();
+				System.out.print(str.substring(1, str.length() - 1));
 				System.out.println("}");
 			}
 			
@@ -184,7 +147,7 @@ aspect Connections {
 	}
 
 	
-	static public class ConnectionSetEntry implements Comparable{
+	static public class ConnectionSetEntry implements Comparable<ConnectionSetEntry> {
 	
 		private InstComponentDecl cd;
 		private boolean outside;
@@ -216,8 +179,8 @@ aspect Connections {
 		   return fqName.name();
 		}
 		
-		public String print() {
-			return fqName.name()+"("+(outside? "o": "i")+")";
+		public String toString() {
+			return fqName.name() + (outside ? "(o)" : "(i)");
 		}
 		
 		public FQName getFQName() {
@@ -225,6 +188,8 @@ aspect Connections {
 		}
 		
 		public int hashCode() {
+			// TODO: Wouldn't toString().hashCode() be better?
+			
 			//System.out.println("ConnectionSetEntry.hashCode");
 			String tr = "true";
 			String fa = "false";
@@ -233,26 +198,15 @@ aspect Connections {
 		
 		
 		public boolean equals(Object o) {
-			
-			//System.out.println("ConnectionSetEntry.equals");
-			
-			ConnectionSetEntry cse = (ConnectionSetEntry)o;
-			boolean res;
-						
-			if (name().equals(cse.name()) && outside==cse.isOutside())
-				res = true;
-			else
-				res = false;
-			
-			return res;
-		
+			if (o instanceof ConnectionSetEntry) {
+				ConnectionSetEntry cse = (ConnectionSetEntry) o;
+				return name().equals(cse.name()) && outside == cse.isOutside();
+			}
+			return false;
 		}
 	
-		public int compareTo(Object o) {
-		
-			ConnectionSetEntry cse = (ConnectionSetEntry)o;
+		public int compareTo(ConnectionSetEntry cse) {
 			return name().compareTo(cse.name());
-		
 		}
 	
 	}

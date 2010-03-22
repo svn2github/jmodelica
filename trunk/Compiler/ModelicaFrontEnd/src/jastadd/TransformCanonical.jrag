@@ -71,20 +71,43 @@ aspect TransformCanonical {
 	 */
 	public void FClass.genBindingEquations() {
 		for (FVariable fv : getFVariables()) {
-			if (fv.hasBindingExp() && !fv.isParameter() && !fv.isConstant()) {
-				FExp bexp = fv.getBindingExp();
-				fv.setBindingExpOpt(new Opt());
-				// Do not copy array indices
+			if (!fv.isParameter() && !fv.isConstant()) {
 				FQName var_name = fv.getFQName().fullCopy();
-				var_name.getFQNamePart(var_name.getNumFQNamePart()-1).
-				   setFArraySubscriptsOpt(new Opt());
-				FEquation feq = new FEquation(new FIdUseExp(
-						new FIdUse(var_name)),bexp);
-				getFEquationBlock(0).addFAbstractEquation(feq);
+				var_name.setLastFArraySubscripts(null);
+				if (fv.hasBindingExp()) {
+					FExp bexp = fv.getBindingExp();
+					fv.setBindingExpOpt(new Opt());
+					// Do not copy array indices
+					FEquation feq = new FEquation(new FIdUseExp(var_name), bexp);
+					addFEquation(feq);
+				} else if (fv.isRecord()) {
+					FRecordDecl rec = fv.myFRecordDecl();
+					for (FAttribute a : fv.getFAttributes()) 
+						a.genBindingEquations(this, rec, var_name);
+				}
 			}
 		}
 //		flush();
 		flushAllRecursive();
+	}
+	
+	/**
+	 * \brief Generate equations from an attribute of a record variable.
+	 */
+	public void FAttribute.genBindingEquations(FClass fc, FRecordDecl rec, FQName prefix) {
+		AbstractFVariable comp = rec.findComponent(getName().getFQName());
+		if (hasValue() && !comp.isUnknown()) {
+			// TODO: handle 'each'
+			FQName fqn = prefix.copyAndAppend(getName().getFQName());
+			FEquation feq = new FEquation(new FIdUseExp(fqn), getValue());
+			fc.addFEquation(feq);
+			setValueOpt(new Opt());
+			if (comp.isRecord()) {
+				FRecordDecl next = comp.myFRecordDecl();
+				for (FAttribute a : getFAttributes())
+					a.genBindingEquations(fc, next, fqn);
+			}
+		}
 	}
 	
 	/**
@@ -491,9 +514,9 @@ aspect TransformCanonical {
 	 */
 	rewrite FIdUseExp {
 		when (rewriteAlias && !myFV().isUnknown() && myFV().isAlias()) to FExp {
-			FQName new_name = (FQName) ((FVariable) myFV()).alias().getFQName().fullCopy();
-			FExp new_exp = new FIdUseExp(new FIdUse(new_name));
-			if (myFV().isNegated()) 
+			FVariable fv = (FVariable) myFV();
+			FExp new_exp = fv.alias().getFQName().createFIdUseExp();
+			if (fv.isNegated()) 
 				new_exp = new FNegExp(new_exp);
 			return new_exp;
 		}
@@ -598,7 +621,9 @@ aspect Scalarization {
 		HashMap<String,FExp> constIndexMap = null;
 		if (isParameter() || isConstant())
 			constIndexMap = new HashMap<String,FExp>();
-		if (isArray()) {
+		if (isRecord()) {
+			scalarRecordFVariables(vars, new FQName(), null);
+		} else if (isArray()) {
 			for (Index i : indices()) {
 				// Copy original declaration
 				FVariable fv_tmp = (FVariable) fullCopy();
@@ -622,6 +647,75 @@ aspect Scalarization {
 				fv_tmp.setBindingExp(getBindingExp().scalarize(constIndexMap));
 			fv_tmp.getFQName().scalarized = true;
 			vars.addChild(fv_tmp);
+		}
+	}
+	
+	/**
+	 * \brief Generate scalar FVariables for this record or record component.
+	 * 
+	 * @param vars    the list of FVariables to add the variables to
+	 * @param prefix  add this as a prefix to the name
+	 * @param last    an FVariable containing the attributes, variability, etc inherited from surrounding record
+	 */
+	public void FVariable.scalarRecordFVariables(List<FVariable> vars, FQName prefix, FVariable last) {
+		FQName name = prefix.fullCopy().append(getFQName());
+		if (isArray()) {
+			for (Index i : indices()) {
+				name.setLastFArraySubscripts(i.newFArraySubscripts());
+				scalarRecordCellFVariables(vars, name, last);
+			}
+		} else {
+			scalarRecordCellFVariables(vars, name, last);
+		}
+	}
+	
+	// TODO: Propagate variability, attributes, etc downwards
+	/**
+	 * \brief Generate scalar FVariables for a single array cell of this record or record component.
+	 * 
+	 * @param vars  the list of FVariables to add the variables to
+	 * @param name  the name of the new variable
+	 * @param last  an FVariable containing the attributes, variability, etc inherited from surrounding record
+	 */
+	public void FVariable.scalarRecordCellFVariables(List<FVariable> vars, FQName name, FVariable last) {
+		FVariable fv = (FVariable) fullCopy();
+		fv.inheritFrom(last);
+		fv.setFQName(name.fullCopy());
+		fv.getFQName().scalarized = true;
+		vars.add(fv);
+	}
+	
+	public void FRecordVariable.scalarRecordCellFVariables(List<FVariable> vars, FQName name, FVariable last) {
+		FVariable tmp = (FVariable) fullCopy();
+		tmp.inheritFrom(last);
+		for (FVariable comp : myFRecordDecl().getFVariables())
+			comp.scalarRecordFVariables(vars, name, tmp);
+	}
+	
+	/**
+	 * \brief Inherit prefixes and attributes from the FVariable representing the surrounding record.
+	 */
+	public void FVariable.inheritFrom(FVariable other) {
+		if (other == null)
+			return;
+		setFVisibilityType(other.getFVisibilityType());
+		setFTypePrefixVariability(getFTypePrefixVariability().combineDown(other.getFTypePrefixVariability()));
+		if (other.hasFTypePrefixInputOutput())
+			setFTypePrefixInputOutput(other.getFTypePrefixInputOutput());
+		String myName = getFQName().getFQNamePart(0).getName();
+		for (FAttribute a : other.getFAttributes()) {
+			// TODO: support attributes on single cell in array (#599)
+			String attrName = a.getName().getFQName().getFQNamePart(0).getName();
+			if (myName.equals(attrName)) {
+				if (a.getName().getFQName().getNumFQNamePart() > 1) {
+					FAttribute na = a.fullCopy();
+					na.getName().setFQName(a.getName().getFQName().copySuffix());
+					addFAttribute(na);
+				} else {
+					for (FAttribute ia : a.getFAttributes()) 
+						addFAttribute(ia);
+				}
+			}
 		}
 	}
 	
@@ -692,7 +786,7 @@ aspect Scalarization {
 	public class FExp implements FlatLookupNode {}
 	
 	/**
-	 * \brief Created and organizes names of for indices for generated for loops.
+	 * \brief Creates and organizes names of for indices for generated for loops.
 	 */
 	public class ForNames implements Iterable<String> {
 		private ArrayList<String[]> names;
@@ -1064,7 +1158,7 @@ aspect Scalarization {
 			List<FVariable> vars, HashMap<String,FExp> indexMap) {}
 	
 	/**
-	 * \brief Scalarize equation and put all scalarized equations in list eqns.
+	 * \brief Scalarize equation and put all resulting equations in list eqns.
 	 */
 	public void FEquation.scalarize(List<FAbstractEquation> eqns, 
 			List<FVariable> vars, HashMap<String,FExp> indexMap) {
@@ -1076,8 +1170,7 @@ aspect Scalarization {
 			 * the equations is "scalarized" into a simple equation where
 			 * e.g. built in functions are replaced by elementary operations.
 			 */
-			eqns.addChild(new FEquation(getLeft().scalarize(indexMap),
-					getRight().scalarize(indexMap)));
+			createScalarFEquations(eqns, indexMap, getLeft(), getRight());
 		} else if (ndims() > 0) {
 			/*
 			 * If the expression is an array expression, then the FExp.getArray()
@@ -1085,9 +1178,110 @@ aspect Scalarization {
 			 */
 			// Iterate over array elements and create scalarized equation for each
 			for (Index i : indices()) 
-				eqns.addChild(new FEquation((FExp) getLeft().getArray().get(i).scalarize(indexMap), 
-						(FExp) getRight().getArray().get(i).scalarize(indexMap)));
+				createScalarFEquations(eqns, indexMap, 
+						getLeft().getArray().get(i), getRight().getArray().get(i));
 		}
+	}
+	
+	/**
+	 * \brief Scalarize left and right expressions and create new scalar equations.
+	 */
+	public void FEquation.createScalarFEquations(
+			List<FAbstractEquation> eqns, HashMap<String,FExp> indexMap, FExp left, FExp right) {
+		if (left.inferType().isRecord()) 
+			left.inferType().scalarRecordFEquations(eqns, new FQName(), indexMap, left, right);
+		else
+			eqns.add(new FEquation(left.scalarize(indexMap), right.scalarize(indexMap)));
+	}
+
+	// TODO: Introduce parameter object?
+	/**
+	 * \brief Generate scalar FEquations for this record or record component.
+	 * 
+	 * @param eqns      the list of FEquations to add the equation to
+	 * @param suffix    add this as a suffix to the name of the uppermost record in uses
+	 * @param indexMap  translations for indices in the expressions
+	 * @param left      the left expression from the original equation
+	 * @param right     the right expression from the original equation
+	 */
+	public void FType.scalarRecordFEquations(
+			List<FAbstractEquation> eqns, FQName suffix, 
+			HashMap<String,FExp> indexMap, FExp left, FExp right) {
+		eqns.add(new FEquation(left.scalarRecordFExp(indexMap, suffix), 
+				right.scalarRecordFExp(indexMap, suffix)));
+	}
+	
+	public void FRecordType.scalarRecordFEquations(
+			List<FAbstractEquation> eqns, FQName suffix, 
+			HashMap<String,FExp> indexMap, FExp left, FExp right) {
+		for (FRecordComponentType comp : getComponents()) {
+			FQName next = suffix.copyAndAppend(comp.getName());
+			comp.getFType().scalarRecordComponentFEquations(eqns, next, indexMap, left, right);
+		}
+	}
+	
+	
+	/**
+	 * \brief Generate scalar FEquations for this record component.
+	 * 
+	 * @param eqns      the list of FEquations to add the equation to
+	 * @param suffix    add this as a suffix to the name of the uppermost record in uses
+	 * @param indexMap  translations for indices in the expressions
+	 * @param left      the left expression from the original equation
+	 * @param right     the right expression from the original equation
+	 */
+	public void FType.scalarRecordComponentFEquations(
+			List<FAbstractEquation> eqns, FQName suffix, 
+			HashMap<String,FExp> indexMap, FExp left, FExp right) {
+		if (isArray()) {
+			for (Index i : indices()) {
+				suffix.setLastFArraySubscripts(i.newFArraySubscripts());
+				scalarRecordFEquations(eqns, suffix, indexMap, left, right);
+			}
+		} else {
+			scalarRecordFEquations(eqns, suffix, indexMap, left, right);
+		}
+	}
+	
+	/**
+	 * \brief Create an FExp that represents a specific scalar component of this record.
+	 * 
+	 * @param indexMap  translations for indices in the expressions
+	 * @param suffix    the suffix to add to a use of the record to access the specific component
+	 */
+	public FExp FExp.scalarRecordFExp(HashMap<String,FExp> indexMap, FQName suffix) {
+		if (suffix.getNumFQNamePart() > 0)  // TODO: this can be removed later, but is here for debugging
+			throw new UnsupportedOperationException(getClass().getSimpleName() + " shouldn't have record type.");
+		return scalarizeExp(indexMap);
+	}
+	
+	public FExp FIdUseExp.scalarRecordFExp(HashMap<String,FExp> indexMap, FQName suffix) {
+		return scalarizeExp(indexMap).extractRecordFExp(suffix);
+	}
+	
+	public FExp FRecordConstructor.scalarRecordFExp(HashMap<String,FExp> indexMap, FQName suffix) {
+		FQNamePart first = suffix.getFQNamePart(0);
+		FExp arg = getArg(getRecord().myFRecordDecl().indexOf(first.getName()));
+		if (first.hasFArraySubscripts())
+			arg = arg.getArray().get(first.getFArraySubscripts().index());
+		return arg.scalarRecordFExp(indexMap, suffix.copySuffix());
+	}
+	
+	/**
+	 * \brief Create an FExp that represents a specific scalar component of this record.
+	 * 
+	 * Assumed that this expression is already scalarized.
+	 * 
+	 * @param suffix    the suffix to add to a use of the record to access the specific component
+	 */
+	public FExp FExp.extractRecordFExp(FQName suffix) {
+		return this;
+	}
+	
+	public FExp FIdUseExp.extractRecordFExp(FQName suffix) {
+		FQName name = getFIdUse().getFQName().append(suffix);
+		name.scalarized = true;
+		return new FIdUseExp(name);
 	}
 	
 	/**

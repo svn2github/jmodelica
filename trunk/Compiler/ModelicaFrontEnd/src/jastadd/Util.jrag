@@ -528,7 +528,8 @@ aspect Names {
 	 * \brief Set the array subscripts of the last name part.
 	 */
 	public void InstAccess.setLastFArraySubscripts(FArraySubscripts fas) {
-		((InstArrayAccess) getLastInstAccess()).setFArraySubscripts(fas);
+		Opt o = (fas == null) ? new Opt() : new Opt(fas);
+		((InstArrayAccess) getLastInstAccess()).setFArraySubscriptsOpt(o);
 	}
 }
 
@@ -610,7 +611,8 @@ aspect FlatNames {
 	 * \brief Set the array subscripts of the last name part.
 	 */
 	public void FQName.setLastFArraySubscripts(FArraySubscripts fas) {
-		lastFQNamePart().setFArraySubscripts(fas);
+		Opt o = (fas == null) ? new Opt() : new Opt(fas);
+		lastFQNamePart().setFArraySubscriptsOpt(o);
 	}
 	
 	syn lazy FQName InstNode.getFQNamePrefix() {
@@ -784,7 +786,24 @@ aspect FlatNames {
 	 * \brief Copy this FQName, append a String to the copy and return the copy.
 	 */
 	public FQName FQName.copyAndAppend(String name) {
-		return ((FQName)fullCopy()).append(name);
+		return fullCopy().append(name);
+	}
+	
+	/**
+	 * \brief Copy this FQName, append another FQName to the copy and return the copy.
+	 */
+	public FQName FQName.copyAndAppend(FQName name) {
+		return fullCopy().append(name);
+	}
+	
+	/**
+	 * \brief Create a copy of all parts but the first of this name.
+	 */
+	public FQName FQName.copySuffix() {
+		FQName res = new FQName();
+		for (int i = 1; i < getNumFQNamePart(); i++)
+			res.addFQNamePart(getFQNamePart(i).fullCopy());
+		return res;
 	}
 	
 	/**
@@ -808,6 +827,14 @@ aspect FlatNames {
 	eq FStringType.name()  = "String";
 	eq FRecordType.name()  = getName();
 	eq FUnknownType.name() = "(unknown type)";
+	
+	/**
+	 * \brief Add an equation to the first equation block.
+	 */
+	public void FClass.addFEquation(FAbstractEquation feq) {
+		getFEquationBlock(0).addFAbstractEquation(feq);
+	}
+	
 }
 
 aspect DebugHelpers {
@@ -851,10 +878,12 @@ aspect FlatFunctionUtils {
 	 }
 	 
 	 /**
-	  * \brief Returns a list of all contained InstComponentDecls.
+	  * \brief Returns a list of all contained InstComponentDecls that may be altered by a modification.
 	  */
-	 syn lazy ArrayList<InstComponentDecl> InstClassDecl.myComponents() {
+	 syn lazy ArrayList<InstComponentDecl> InstClassDecl.myModifiableComponents() {
 		 ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
+		 // TODO: Only add components that are not final or constant
+		 // TODO: Are there other reasons a component might not be modifiable?
 		 for (InstComponentDecl icd : getInstComponentDecls())
 			 l.add(icd);
 		 return l;
@@ -896,7 +925,7 @@ aspect FlatFunctionUtils {
 	 syn ArrayList<InstComponentDecl> InstFunctionCall.myInputs() {
 		 InstClassDecl icd = getName().myInstClassDecl();
 		 // If class is a record, then function call is record constructor
-		 return icd.isRecord() ? icd.myComponents() : icd.myInputs();
+		 return icd.isRecord() ? icd.myModifiableComponents() : icd.myInputs();
 	 }
 	 syn ArrayList<InstComponentDecl> InstFunctionCall.myOutputs() = getName().myInstClassDecl().myOutputs();
 	 syn ArrayList<FFunctionVariable> FFunctionCall.myInputs()     = myFFunctionDecl().myInputs();
@@ -975,7 +1004,7 @@ aspect FlatFunctionUtils {
 	 
 	 /**
 	  * \brief Return the index of the variable assigned by this FFunctionCallLeft among 
-	  *        all those assigned by the same FFUnctionCallEquation/Stmt
+	  *        all those assigned by the same FFunctionCallEquation/Stmt
 	  */
 	 syn lazy int FFunctionCallLeft.myIndex() = prevIndex() + (hasFExp() ? 1 : 0);
 	 inh int FFunctionCallLeft.prevIndex();

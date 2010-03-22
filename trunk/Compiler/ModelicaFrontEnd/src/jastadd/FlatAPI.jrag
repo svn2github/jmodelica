@@ -175,29 +175,29 @@ aspect FlatAPI {
     syn int FClass.numReals() = reals().size();
 	coll ArrayList<FRealVariable> FClass.reals() 
 	  [new ArrayList<FRealVariable>()] with add root FlatRoot;
-	FRealVariable contributes this when !isAlias() to FClass.reals() for myFClass();
+	FRealVariable contributes this when !isAlias() && !inRecord() to FClass.reals() for myFClass();
 //	FDerivativeVariable contributes this to FClass.reals() for myFClass();
 
     syn int FClass.numIntegers() = integers().size();
 	coll ArrayList<FIntegerVariable> FClass.integers() 
 	  [new ArrayList<FIntegerVariable>()] with add root FlatRoot;
-	FIntegerVariable contributes this when !isAlias() to FClass.integers() for myFClass();
+	FIntegerVariable contributes this when !isAlias() && !inRecord() to FClass.integers() for myFClass();
 
     syn int FClass.numBooleans() = booleans().size();
 	coll ArrayList<FBooleanVariable> FClass.booleans() 
 	  [new ArrayList<FBooleanVariable>()] with add root FlatRoot;
-	FBooleanVariable contributes this when !isAlias() to FClass.booleans() for myFClass();
+	FBooleanVariable contributes this when !isAlias() && !inRecord() to FClass.booleans() for myFClass();
 
     syn int FClass.numStrings() = strings().size();
 	coll ArrayList<FStringVariable> FClass.strings() 
 	  [new ArrayList<FStringVariable>()] with add root FlatRoot;
-	FStringVariable contributes this when !isAlias() to FClass.strings() for myFClass();
+	FStringVariable contributes this when !isAlias() && !inRecord() to FClass.strings() for myFClass();
 
     syn int FClass.numIndependentConstants() = independentConstants().size();
 	coll ArrayList<FVariable> FClass.independentConstants() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
- 		this when isIndependentConstant() && !isAlias() 
+ 		this when isIndependentConstant() && !isAlias() && !inRecord() 
 	to FClass.independentConstants() for myFClass();
 
 	syn int FClass.numIndependentRealConstants() = independentRealConstants().size();
@@ -293,7 +293,7 @@ aspect FlatAPI {
 	coll ArrayList<FVariable> FClass.independentParameters() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
- 		this when isIndependentParameter() && !isAlias()
+ 		this when isIndependentParameter() && !isAlias() && !inRecord()
 	to FClass.independentParameters() for myFClass();
 	
 	syn int FClass.numIndependentRealParameters() = independentRealParameters().size();
@@ -340,7 +340,7 @@ aspect FlatAPI {
 	coll ArrayList<FVariable> FClass.dependentParameters() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
- 		this when isDependentParameter() && !isAlias()
+ 		this when isDependentParameter() && !isAlias() && !inRecord()
 	to FClass.dependentParameters() for myFClass();
 
 	syn int FClass.numDependentRealParameters() = dependentRealParameters().size();
@@ -445,7 +445,7 @@ aspect FlatAPI {
 	coll ArrayList<FDerivativeVariable> FClass.derivativeVariables() 
 	  [new ArrayList<FDerivativeVariable>()] with add root FlatRoot;
 	FDerivativeVariable contributes
-		this when !isAlias()
+		this when !isAlias() && !inRecord()
 	to FClass.derivativeVariables() for myFClass();
 	syn int FVariable.derivativeVariableIndex() =
 		myFClass().derivativeVariables().indexOf(this);
@@ -454,23 +454,23 @@ aspect FlatAPI {
 	coll ArrayList<FVariable> FClass.variables() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
- 		this when !isParameter() && !isConstant() && !isAlias()
+ 		this when !isParameter() && !isConstant() && !isAlias() && !inRecord()
 	to FClass.variables() for myFClass();
 
     syn int FClass.numDiscreteVariables() = discreteVariables().size();
 	coll ArrayList<FVariable> FClass.discreteVariables() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FRealVariable contributes
-		this when isDiscrete() && !isInput() && !isAlias()
+		this when isDiscrete() && !isInput() && !isAlias() && !inRecord()
 	to FClass.discreteVariables() for myFClass();	
 	FIntegerVariable contributes
-		this when !isParameter() && !isInput() && !isConstant() && !isAlias()
+		this when !isParameter() && !isInput() && !isConstant() && !isAlias() && !inRecord()
 	to FClass.discreteVariables() for myFClass();	
 	FBooleanVariable contributes
-		this when !isParameter() && !isInput() && !isConstant() && !isAlias()
+		this when !isParameter() && !isInput() && !isConstant() && !isAlias() && !inRecord()
 	to FClass.discreteVariables() for myFClass();	
 	FStringVariable contributes
-		this when !isParameter() && !isInput() && !isConstant() && !isAlias()
+		this when !isParameter() && !isInput() && !isConstant() && !isAlias() && !inRecord()
 	to FClass.discreteVariables() for myFClass();	
 	
     syn int FClass.numAliasVariables() = aliasVariables().size();
@@ -586,7 +586,7 @@ aspect FlatAPI {
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
  		this when !isParameter() && !isConstant() &&
- 		  hasBindingExp() && !isAlias()
+ 		  hasBindingExp() && !isAlias() && !inRecord()
 	to FClass.variablesWithBindingExp() for myFClass();
 
 	syn int FClass.numRealVariablesWithBindingExp() = realVariablesWithBindingExp().size();
@@ -625,7 +625,7 @@ aspect FlatAPI {
 	coll ArrayList<FVariable> FClass.inputs() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
- 		this when isInput() && !isAlias()
+ 		this when isInput() && !isAlias() && !inRecord()
 	to FClass.inputs() for myFClass();
 
 	syn int FClass.numRealInputs() = realInputs().size();
@@ -842,7 +842,20 @@ aspect FlatTypes {
 	eq FBooleanVariable.isBoolean() = true;
 	syn boolean AbstractFVariable.isString() = false;
 	eq FStringVariable.isString() = true;
-		
+	syn boolean AbstractFVariable.isRecord() = false;
+	eq FRecordVariable.isRecord() = true;
+	
+	inh boolean FVariable.inRecord();
+	eq FRecordDecl.getChild().inRecord() = true;
+	eq FClass.getChild().inRecord()      = false;
+	eq FForIndex.getChild().inRecord()   = false;
+	
+	syn int FRecordDecl.indexOf(String name) {
+		for (int i = 0; i < getNumFVariable(); i++)
+			if (getFVariable(i).name().equals(name))
+				return i;
+		return -1;
+	}
 }
 
 /**
