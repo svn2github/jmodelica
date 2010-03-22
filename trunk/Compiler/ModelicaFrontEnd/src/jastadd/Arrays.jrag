@@ -1631,9 +1631,7 @@ aspect ArrayHelpers {
 		/**
 		 * \brief Check if another size is equivalent to this one, except in a given dimension.
 		 * 
-		 * @param allowUnknown  if <code>true</code>, consider unknown lengths equal to any length, 
-		 *                      otherwise consider unknown lengths to differ from all lengths, including
-		 *                      other unknown lengths
+		 * @param allowUnknown  if <code>true</code>, consider unknown lengths equal to any length
 		 * @param dim			dimension not to check
 		 */
 		public boolean equivalentExcept(Size s, boolean allowUnknown, int dim) {
@@ -1649,16 +1647,14 @@ aspect ArrayHelpers {
 		 * \brief Check if a specific dimension of another size is equivalent to a specific 
 		 *        dimension of this one.
 		 * 
-		 * @param allowUnknown  if <code>true</code>, consider unknown lengths equal to any length, 
-		 *                      otherwise consider unknown lengths to differ from all lengths, including
-		 *                      other unknown lengths
+		 * @param allowUnknown  if <code>true</code>, consider unknown lengths equal to any length
 		 * @param myDim         the dimension in this Size to compare
 		 * @param itsDim        the dimension in the other Size to compare
 		 */
 		public boolean equivalentDim(Size s, boolean allowUnknown, int myDim, int itsDim) {
 			boolean unknown = size[myDim] == UNKNOWN || s.size[itsDim] == UNKNOWN;
 			boolean differ = size[myDim] != s.size[itsDim];
-			return (allowUnknown ? (!differ || unknown) : (!differ && !unknown));
+			return !differ || (unknown && allowUnknown);
 		}
 		
 		private static final String SEP = ", ";

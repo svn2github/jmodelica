@@ -93,9 +93,9 @@ aspect FlatTypeAnalysis {
 	syn lazy FType FExp.type() = fUnknownType();
 	
 	eq FUnaryExp.type()   = getFExp().type();
-	eq FArtmBinExp.type() = getLeft().type().looseNumericPromotion(getRight().type(), inFunction());
-	eq FAddExp.type()     = getLeft().type().numericPromotion(getRight().type(), inFunction());
-	eq FSubExp.type()     = getLeft().type().numericPromotion(getRight().type(), inFunction());
+	eq FArtmBinExp.type() = getLeft().type().looseNumericPromotion(getRight().type());
+	eq FAddExp.type()     = getLeft().type().numericPromotion(getRight().type());
+	eq FSubExp.type()     = getLeft().type().numericPromotion(getRight().type());
 	eq FNegExp.type()     = getFExp().type().isNumeric() ? getFExp().type() : fUnknownType();
 	
 	eq FNoEventExp.type() = getFExp().type();
@@ -114,7 +114,7 @@ aspect FlatTypeAnalysis {
 			return super.type();
 		Size left = getLeft().size();
 		Size right = getRight().size();
-		if (!left.equivalentDim(right, inFunction(), left.ndims() - 1, 0))
+		if (!left.equivalentDim(right, false, left.ndims() - 1, 0))
 			return fUnknownType();
 		if (left.ndims() > 2 || right.ndims() > 2)
 			return fUnknownType();
@@ -152,7 +152,7 @@ aspect FlatTypeAnalysis {
 			fUnknownType() : 
 			getFExp().type().arrayType(size());
 	
-	eq FCross.type() = getX().type().numericPromotion(getY().type(), inFunction());
+	eq FCross.type() = getX().type().numericPromotion(getY().type());
 	
 	eq FAbsExp.type() = getFExp().type();
 	
@@ -175,7 +175,7 @@ aspect FlatTypeAnalysis {
 	
 	eq FMinMaxExp.type() = 
 		hasY() ? 
-			getX().type().scalarType().typePromotion(getY().type().scalarType(), inFunction()) : 
+			getX().type().scalarType().typePromotion(getY().type().scalarType()) : 
 			getX().type().scalarType();
 	
 	eq FRangeExp.type() {
@@ -203,7 +203,7 @@ aspect FlatTypeAnalysis {
 	}
 	eq FLogBinExp.type() {
 		FType left = getLeft().type();
-		if (left.typeCompatible(getRight().type(), inFunction()) && left.isBoolean())
+		if (left.typeCompatible(getRight().type()) && left.isBoolean())
 			return left;
 		else
 			return fUnknownType();

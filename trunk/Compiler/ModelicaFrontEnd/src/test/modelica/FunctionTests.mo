@@ -1085,6 +1085,29 @@ equation
  (x, y) = sin(1);
 end FunctionType16;
 
+model FunctionType17
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="FunctionType17",
+         description="Function type checks: combining known and unknown types",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 1094, column 8:
+  Type error in expression
+")})));
+
+ function f
+  input Real x[:,:];
+  input Real y[2,:];
+  output Real z[size(x,1),size(x,2)];
+ algorithm
+  z := x + y;
+ end f;
+  
+ Real x[2,2] = f({{1,2},{3,4}}, {{5,6},{7,8}});
+end FunctionType17;
+
 
 model BuiltInCallType1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -4146,7 +4169,7 @@ equation
   input Real[size(b, 2), :] c;
   Real temp_1;
   Real temp_2;
-  output Real[size(a, 1), 2] o;
+  output Real[size(a, 1), size(c, 2)] o;
  algorithm
   for i1 in 1:size(o, 1) loop
    for i2 in 1:size(o, 2) loop
@@ -4170,7 +4193,7 @@ end FunctionTests.UnknownArray17;
   input Real a[:,:];
   input Real b[size(a,2),:];
   input Real c[size(b,2),:];
-  output Real[size(a, 1), 2] o = a * b * c;
+  output Real[size(a, 1), size(c, 2)] o = a * b * c;
  algorithm
  end f;
  
@@ -4524,86 +4547,4 @@ end ExternalFunc7;
 
 
 
-/* =========================== Records =========================== */
-/*
-model RecordConstructorTest1 
-model FunctionTests.RecordConstructorTest1
-
-Real c1.re = 1;
-Real c1.im = 1;
-Real c2.re;
-Real c2.im;
-Real c3.re;
-Real c3.im;
-Real c4.re;
-Real c4.im;
-
-function FunctionTests.RecordConstructorTest1.Complex
-  input Real re;
-  input Real im;
-  output FunctionTests.RecordConstructorTest1.Complex _out := FunctionTests.RecordConstructorTest1.Complex
-    (
-    re = re, 
-    im = im
-  );
-
-algorithm 
-end FunctionTests.RecordConstructorTest1.Complex;
-function FunctionTests.RecordConstructorTest1.RestrictedComplex
-  input Real re;
-  input Real im := 0;
-  output FunctionTests.RecordConstructorTest1.RestrictedComplex _out := 
-    FunctionTests.RecordConstructorTest1.RestrictedComplex(
-    re = re, 
-    im = im
-  );
-
-algorithm 
-end FunctionTests.RecordConstructorTest1.RestrictedComplex;
-function FunctionTests.RecordConstructorTest1.add
-  input FunctionTests.RecordConstructorTest1.Complex u;
-  input FunctionTests.RecordConstructorTest1.Complex v;
-  output FunctionTests.RecordConstructorTest1.Complex w := FunctionTests.RecordConstructorTest1.Complex
-    (
-    re = u.re+v.re, 
-    im = u.im+v.im
-  );
-
-algorithm 
-end FunctionTests.RecordConstructorTest1.add;
-equation
-c2 = FunctionTests.RecordConstructorTest1.add(
-  c1, 
-  FunctionTests.RecordConstructorTest1.Complex(sin(time), cos(time)));
-c3 = FunctionTests.RecordConstructorTest1.add(
-  c1, 
-  c1);
-
-end FunctionTests.RecordConstructorTest1;
-
-
-  record Complex 
-     Real re;
-     Real im;
-  end Complex;
-    
-  record RestrictedComplex = Complex(im=0);
-    
-  function add 
-     input Complex u;
-     input Complex v;
-     output Complex w(re=u.re+v.re, im=u.im+v.im);
-  algorithm 
-  end add;
-    
-  Complex c1(re=1,im=1);
-  Complex c2;
-  Complex c3;
-  Complex c4 = RestrictedComplex(re=0);
-equation 
-  c2=add(c1,Complex(sin(time),cos(time)));
-c3=add(c1,c1);
-end RecordConstructorTest1;
-*/
-  
 end FunctionTests;
