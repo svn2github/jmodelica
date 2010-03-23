@@ -1015,8 +1015,8 @@ aspect FVariableUses {
 	 * \brief Get the differenetiated variabel (FVariable) corresponding to 
 	 * a derivative variable (FDerivativeVariable)
 	 */
-	syn FVariable FDerivativeVariable.myDifferentiatedVariable() =
-		myFClass().fullyQualifiedVariablesMap().get(getFQName().name());
+	syn FRealVariable FDerivativeVariable.myDifferentiatedVariable() =
+		(FRealVariable)myFClass().fullyQualifiedVariablesMap().get(getFQName().name());
 
 	/**
 	 * \brief Get the derivative variabel (FDerivativeVariable) corresponding to 

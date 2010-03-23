@@ -368,6 +368,29 @@ class XMLDoc(XMLBaseDoc):
                 pass
                 # enumeration not supported yet      
         return d
+
+    def get_nominal_attributes(self, include_alias=True):
+        """ 
+        Extract variable name and nominal attribute for all variables 
+        in the XML document.
+            
+        Returns:
+            Dict with variable name as key and Start attribute as value.
+             
+        """
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name[../*/@nominal]")
+            vals = self._xpatheval("//ScalarVariable/*/@nominal")
+        else:  
+            keys = self._xpatheval("//ScalarVariable/@name[../@alias=\"noAlias\"][../*/@nominal]")
+            vals = self._xpatheval("//ScalarVariable/*/@nominal[../../@alias=\"noAlias\"]")   
+        if len(keys)!=len(vals):
+            raise Exception("Number of vals does not equal number of keys. \
+                Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
+#        keys = map(N.int,keys)
+#        vals = map(N.float,vals)
+        return self._cast_values(keys, vals)
+
     
     def get_start_attributes(self, include_alias=True):
         """ 

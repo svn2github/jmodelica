@@ -404,6 +404,7 @@ class Model(object):
         self.jmimodel.initAD()
         self._set_dependent_parameters()
 
+
     def reset(self):
         """Reset the internal states of the DLL.
         
@@ -442,8 +443,9 @@ class Model(object):
         xml_file=libname+'.xml' 
         # assumes libname is name of model and xmlfile is located in the same dir as the dll
         self._set_XMLDoc(xmlparser.XMLDoc(os.path.join(path,xml_file)))
+        self._set_scaling_factors()
         self._set_start_attributes()
-        
+
         # set independent parameter values
         xml_values_file = libname+'_values.xml'
         self._set_XMLValuesDoc(xmlparser.XMLValuesDoc(os.path.join(path,xml_values_file)))
@@ -457,6 +459,31 @@ class Model(object):
         except etree.XPathEvalError, e:
             # Modelica model, opt specific data does not exist
             pass
+
+    def _set_scaling_factors(self):
+        """Load metadata saved in XML files.
+        
+        Meta data can be things like time points, initial states, initial cost
+        etc.
+        
+        """
+        xmldoc = self._get_XMLDoc()
+        nominal_attr = xmldoc.get_nominal_attributes(include_alias=False)
+        
+        #Real variables vector
+        sc = self.get_variable_scaling_factors()
+        
+        keys = nominal_attr.keys()
+        keys.sort(key=str)
+
+        for key in keys:
+            value_ref = xmldoc.get_valueref(key)
+            value = nominal_attr.get(key)
+            
+            (i, ptype) = _translate_value_ref(value_ref)
+            if(ptype == 0):
+                # Only set scaling factors for Reals
+                sc[i] = value
               
     def _set_dependent_parameters(self):
         """
@@ -1306,6 +1333,7 @@ class Model(object):
         """Set the scaling_method. Valid values are JMI_SCALING_NONE and
         JMI_SCALING_VARIABLES."""
         self.jmimodel.set_scaling_method(scaling_method)
+        self.reset()
         
     scaling_method = property(get_scaling_method, set_scaling_method, doc="Set and get the scaling_method. Valid values are JMI_SCALING_NONE and JMI_SCALING_VARIABLES.")
 
@@ -1356,6 +1384,7 @@ class Model(object):
         
         #Real variables vector
         z = self.get_z()
+        sc = self.get_variable_scaling_factors()
         
         keys = start_attr.keys()
         keys.sort(key=str)
@@ -1367,7 +1396,11 @@ class Model(object):
             (i, ptype) = _translate_value_ref(value_ref)
             if(ptype == 0):
                 # Primitive type is Real
-                z[i] = value
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0: 
+                    z[i] = value/sc[i]
+                else:
+                    z[i] = value
+                    
             elif(ptype == 1):
                 # Primitive type is Integer
                 pass
@@ -1389,6 +1422,8 @@ class Model(object):
         variables = xmldoc.get_variable_names(include_alias=False) # {variablename:value reference}
        
         z = self.get_z()       
+        sc = self.get_variable_scaling_factors()
+
         for name in values.keys():
             value = values.get(name)
             value_ref = variables.get(name)
@@ -1396,7 +1431,10 @@ class Model(object):
 
             if(ptype == 0):
                 # Primitive type is Real
-                z[i] = value
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0: 
+                    z[i] = value/sc[i]
+                else:
+                    z[i] = value
             elif(ptype == 1):
                 # Primitive type is Integer
                 z[i] = value
@@ -1462,13 +1500,20 @@ class Model(object):
         
         xmldoc = self._get_XMLDoc()
         valref = xmldoc.get_valueref(name.strip())
+        sc = self.get_variable_scaling_factors()
         value = None
         if valref != None:
             (z_i, ptype) = _translate_value_ref(valref)
             if xmldoc.is_negated_alias(name):
-                value = -(self.get_z()[z_i])
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0 and ptype==0: 
+                    value = -(self.get_z()[z_i])*sc[z_i]
+                else:
+                    value = -self.get_z()[z_i]
             else:
-                value = self.get_z()[z_i]
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0 and ptype==0: 
+                    value = (self.get_z()[z_i])*sc[z_i]
+                else:
+                    value = self.get_z()[z_i]
         else:
             raise Exception("Parameter or variable "+name.strip()+" could not be found in model.")
         return value
@@ -1502,14 +1547,21 @@ class Model(object):
         
         xmldoc = self._get_XMLDoc()
         valref = xmldoc.get_valueref(name)
+        sc = self.get_variable_scaling_factors()
         if valref != None:
             if xmldoc.is_constant(name):
                raise Exception("%s is a constant, it can not be modified." %name)
             (z_i, ptype) = _translate_value_ref(valref)
             if xmldoc.is_negated_alias(name):
-               self.get_z()[z_i] = -(value)
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0 and ptype==0: 
+                    self.get_z()[z_i] = -(value)/sc[z_i]
+                else:
+                    self.get_z()[z_i] = -(value)
             else:
-                self.get_z()[z_i] = value           
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0 and ptype==0: 
+                    self.get_z()[z_i] = (value)/sc[z_i]
+                else:
+                    self.get_z()[z_i] = (value)
         else:
             raise Exception("Parameter or variable "+name+" could not be found in model.")
     
@@ -1768,7 +1820,6 @@ class JMIModel(object):
         self._sw_init = self._dll.jmi_get_sw_init(self._jmi)
         self._z = self._dll.jmi_get_z(self._jmi)
         self._variable_scaling_factors = self._dll.jmi_get_variable_scaling_factors(self._jmi)
-        self._scaling_method = self._dll.jmi_get_scaling_method(self._jmi)
         
         #self.initAD()
         

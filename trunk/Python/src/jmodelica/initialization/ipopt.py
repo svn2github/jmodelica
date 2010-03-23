@@ -168,21 +168,21 @@ class NLPInitialization(object):
 #         self._set_lin_values(_p_opt_lin, _dx_lin, _x_lin,_w_lin)
         
         self._set_typedef_init_opt_new()
-        try:       
-            assert model.jmimodel._dll.jmi_init_opt_new(byref(self._jmi_init_opt), model.jmimodel._jmi,
-                                                        _n_p_free,_p_free_indices,
-                                     _p_free_start, _dx_start, _x_start,
-                                     _w_start,
-                                     _p_free_lb, _dx_lb, _x_lb,
-                                     _w_lb,
-                                     _p_free_ub, _dx_ub, _x_ub,
-                                      _w_ub,
-                                     _linearity_information_provided,                
-                                     _p_free_lin, _dx_lin, _x_lin, _w_lin,
-                                                          jmi.JMI_DER_CPPAD) is 0, \
-                                     " jmi_opt_lp_new returned non-zero."
-        except AttributeError,e:
-             raise jmi.JMIException("Can not create NLPInitialization object.")
+#        try:       
+        assert model.jmimodel._dll.jmi_init_opt_new(byref(self._jmi_init_opt), model.jmimodel._jmi,
+                                                    _n_p_free,_p_free_indices,
+                                                    _p_free_start, _dx_start, _x_start,
+                                                    _w_start,
+                                                    _p_free_lb, _dx_lb, _x_lb,
+                                                    _w_lb,
+                                                    _p_free_ub, _dx_ub, _x_ub,
+                                                    _w_ub,
+                                                    _linearity_information_provided,                
+                                                    _p_free_lin, _dx_lin, _x_lin, _w_lin,
+                                                    jmi.JMI_DER_CPPAD) is 0, \
+                                                    " jmi_opt_lp_new returned non-zero."
+        #        except AttributeError,e:
+#             raise jmi.JMIException("Can not create NLPInitialization object.")
         assert self._jmi_init_opt.value is not None, \
             "jmi_init_opt struct has not returned correctly."
             
@@ -527,7 +527,7 @@ class NLPInitialization(object):
     def _set_start_values(self, p_free_start, dx_start, x_start, w_start):
         
         """ 
-        Set initial guess values from the XML variables meta data file. 
+        Set initial guess values from the Model object
         
         Parameters:
             p_free_start -- The free parameters start value vector.
@@ -569,6 +569,7 @@ class NLPInitialization(object):
             (z_i, ptype) = jmi._translate_value_ref(value_ref)
             i_dx = z_i - self._model._offs_real_dx.value
             dx_start[i_dx] = values.get(name)
+            #dx_start[i_dx] = self._model.get_z()[z_i]
         
         # x: differentiate
         values = xmldoc.get_x_start_attributes(include_alias=False)
@@ -581,6 +582,7 @@ class NLPInitialization(object):
             (z_i, ptype) = jmi._translate_value_ref(value_ref)
             i_x = z_i - self._model._offs_real_x.value
             x_start[i_x] = values.get(name)
+            #x_start[i_x] = self._model.get_z()[z_i]
                     
         # w: algebraic
         values = xmldoc.get_w_start_attributes(include_alias=False)
@@ -594,6 +596,7 @@ class NLPInitialization(object):
                 (z_i, ptype) = jmi._translate_value_ref(value_ref)
                 i_w = z_i - self._model._offs_real_w.value
                 w_start[i_w] = values.get(name)
+#                w_start[i_w] = self._model.get_z()[z_i]
 
     def _set_lb_values(self, p_free_lb, dx_lb, x_lb, w_lb):
         

@@ -409,8 +409,16 @@ public class XMLGenerator extends GenericGenerator {
 			genPrinter.print("max=\""+realvariable.maxAttribute()+"\" ");
 		}
 		//nominal
-		if(realvariable.nominalAttributeSet()) {
-			genPrinter.print("nominal=\""+realvariable.nominalAttribute()+"\" ");
+		if (realvariable instanceof FDerivativeVariable) {
+			if(((FDerivativeVariable)realvariable).myDifferentiatedVariable().
+					nominalAttributeSet()) {
+				genPrinter.print("nominal=\""+((FDerivativeVariable)realvariable).
+						myDifferentiatedVariable().nominalAttribute()+"\" ");
+			}
+		} else {
+			if(realvariable.nominalAttributeSet()) {
+				genPrinter.print("nominal=\""+realvariable.nominalAttribute()+"\" ");
+			}
 		}
 		//start
 		if ((realvariable.isDependentParameter() && !realvariable.startAttributeSet()) || realvariable.isIndependentConstant()) {

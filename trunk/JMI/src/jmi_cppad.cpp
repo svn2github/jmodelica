@@ -609,6 +609,7 @@ int jmi_func_ad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 	}
 
 	int i,j;
+
 	for (i=0;i<jmi->n_z;i++) {
 		(*(func->ad->z_work))[i] = (*(jmi->z_val))[i];
 	}
