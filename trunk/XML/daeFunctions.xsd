@@ -11,20 +11,11 @@
 			<xs:sequence>
 				<xs:element name="OutputVariable" minOccurs="0" maxOccurs="unbounded">
 					<xs:complexType>
-						<xs:simpleContent>
-							<xs:extension base="xs:normalizedString">
-								<xs:attribute name="type" use="required">
-									<xs:simpleType>
-										<xs:restriction base="xs:normalizedString">
-											<xs:enumeration value="Real"/>
-											<xs:enumeration value="Integer"/>
-											<xs:enumeration value="Boolean"/>
-											<xs:enumeration value="String"/>
-										</xs:restriction>
-									</xs:simpleType>
-								</xs:attribute>
+						<xs:complexContent>
+							<xs:extension base="exp:Exp">
+								<xs:attribute name="type" type="xs:normalizedString" use="required"/>
 							</xs:extension>
-						</xs:simpleContent>
+						</xs:complexContent>
 					</xs:complexType>
 				</xs:element>
 				<xs:element name="InputVariable" minOccurs="0" maxOccurs="unbounded">
@@ -57,20 +48,11 @@
 									<xs:documentation>Output of the inverse function. The variable must be an input of the source function</xs:documentation>
 								</xs:annotation>
 								<xs:complexType>
-									<xs:simpleContent>
-										<xs:extension base="xs:normalizedString">
-											<xs:attribute name="type" use="required">
-												<xs:simpleType>
-													<xs:restriction base="xs:normalizedString">
-														<xs:enumeration value="Real"/>
-														<xs:enumeration value="Integer"/>
-														<xs:enumeration value="Boolean"/>
-														<xs:enumeration value="String"/>
-													</xs:restriction>
-												</xs:simpleType>
-											</xs:attribute>
+									<xs:complexContent>
+										<xs:extension base="exp:Exp">
+											<xs:attribute name="type" type="xs:normalizedString" use="required"/>
 										</xs:extension>
-									</xs:simpleContent>
+									</xs:complexContent>
 								</xs:complexType>
 							</xs:element>
 							<xs:element name="InputVariable" maxOccurs="unbounded">
@@ -107,20 +89,11 @@
 						<xs:sequence>
 							<xs:element name="OutputVariable" maxOccurs="unbounded">
 								<xs:complexType>
-									<xs:simpleContent>
-										<xs:extension base="xs:normalizedString">
-											<xs:attribute name="type" use="required">
-												<xs:simpleType>
-													<xs:restriction base="xs:normalizedString">
-														<xs:enumeration value="Real"/>
-														<xs:enumeration value="Integer"/>
-														<xs:enumeration value="Boolean"/>
-														<xs:enumeration value="String"/>
-													</xs:restriction>
-												</xs:simpleType>
-											</xs:attribute>
+									<xs:complexContent>
+										<xs:extension base="exp:Exp">
+											<xs:attribute name="type" type="xs:normalizedString" use="required"/>
 										</xs:extension>
-									</xs:simpleContent>
+									</xs:complexContent>
 								</xs:complexType>
 							</xs:element>
 							<xs:element name="InputVariable" maxOccurs="unbounded">
