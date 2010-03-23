@@ -3,7 +3,7 @@
 # Copy this file to somewhere in your PATH.
 # Change variables below (in the copy) to match your system.
 # Type "tests -h" for usage.
-# Requres Unix-like system with bash, grep, dc, mktemp and sed.
+# Requres Unix-like system with bash, grep, dc, mktemp, uname and sed.
 
 # ====== Variables to set ======
 
@@ -55,21 +55,29 @@ function python_tests() {
   TEST_DIR=$(mktemp -dqt)
   TESTS=${JMODELICA_HOME}/Python/jmodelica/tests
   PATTERN=----------------------------------------------------------------------
+  # Under Windows, run each test file separately
+  if [[ "$(uname -o)" == "Msys" ]]; then
+    TESTS="$(find ${TESTS} -name \*.py|grep -v __init__)"
+  fi
   print_name Python
   case ${OUTPUT} in
     v)
       if build_jmodelica; then
         cd ${TEST_DIR}
-        nosetests -a stddist -v ${TESTS}
+        for TEST in ${TESTS}; do
+          nosetests -a stddist -v ${TEST}
+        done
       fi
       ;;
     q)
       if build_jmodelica 2> /dev/null > /dev/null; then
         cd ${TEST_DIR}
-        nosetests -a stddist -v ${TESTS} 2>&1 \
-	  | egrep -v '^Exception .* ignored$' \
-	  | tail -n1 \
-	  | sed -e 's/OK/PASSED/' -e 's/FAILED/TEST FAILED /'
+        for TEST in ${TESTS}; do
+          nosetests -a stddist -v ${TEST} 2>&1 \
+	    | egrep -v '^Exception .* ignored$' \
+	    | tail -n1 \
+	    | sed -e 's/^OK$/PASSED/' -e 's/^FAILED/TEST FAILED /'
+        done | filter_python_separate
       else
         echo BUILD FAILED
       fi
@@ -77,9 +85,12 @@ function python_tests() {
     n)
       if build_jmodelica > /dev/null; then
         cd ${TEST_DIR}
-        nosetests -a stddist -v ${TESTS} 2>&1 \
-	  | egrep -v '^Exception .* ignored$' \
-	  | grep -B1 -A500 -e${PATTERN}
+        for TEST in ${TESTS}; do
+          nosetests -a stddist -v ${TEST} 2>&1 \
+	    | egrep -v '^Exception .* ignored$' \
+	    | grep -B1 -A500 -e${PATTERN} \
+	    | sed -e 's/^OK$/PASSED/' -e 's/^FAILED/TEST FAILED /'
+        done | filter_python_separate
       fi
       ;;
   esac
@@ -94,6 +105,20 @@ function print_name() {
   else
     echo ======= $1 =======
   fi
+}
+
+function filter_python_separate() {
+  TMP=$(mktemp -qt) 
+  tee ${TMP} | egrep -v "(PASSED|TEST FAILED)"
+  cat ${TMP} \
+  | fgrep -v PASSED \
+  | sed -n \
+        -e '1 i0' \
+        -e 's/^TEST FAILED(failures=\([0-9]*\))/\1+/' \
+        -e '$ ap' \
+  | dc \
+  | sed -e 's/^0$/PASSED/' \
+        -e 's/^\([0-9]*\)$/TEST FAILED(failures=\1)/'
 }
   
 function junit_test() {
