@@ -194,6 +194,30 @@ aspect XMLCodeGen {
 		str.println("</"+ namespace + ":" + tag + ">");
 	}
 	
+	public void FBuiltInFunctionCall.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		String namespace = "exp";
+		String tag = this.xmlTag();
+		
+		str.print(indent + "<" + namespace + ":" + tag + ">\n");
+		for (int i=0; i<this.getNumChild();i++)
+			getChild(i).prettyPrint_XML(str,p.indent(indent));
+		
+		str.println(indent + "</"+ namespace + ":" + tag + ">");	
+	}
+	
+	
+//	public void FMinMaxExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+//		String namespace = "exp";
+//		String tag = this.xmlTag();
+//		
+//		str.print(indent + "<" + namespace + ":" + tag + ">\n");
+//		this.getX().prettyPrint_XML(str,p.indent(indent));
+//		if(this.hasY())
+//			this.getY().prettyPrint_XML(str,p.indent(indent));
+//		str.println(indent + "</"+ namespace + ":" + tag + ">");
+//	}
+	
+	
 }
 
 
@@ -226,6 +250,9 @@ aspect XMLTagBinding{
 		eq FNotExp.xmlTag() = "Not";
 		eq FOrExp.xmlTag() = "Or";
 		eq FAndExp.xmlTag() = "And";
+		eq FMinExp.xmlTag() = "Min";
+		eq FMaxExp.xmlTag() = "Max";
+		eq FAbsExp.xmlTag() = "Abs";
 		eq FIntegerLitExp.xmlTag() = "IntegerLiteral";
 		eq FRealLitExp.xmlTag() = "RealLiteral";
 		eq FBooleanLitExpFalse.xmlTag() = "BooleanLiteral";

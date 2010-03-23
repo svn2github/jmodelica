@@ -46,6 +46,18 @@
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
+	<xs:complexType name="BuiltIn1or2Funct">
+		<xs:annotation>
+			<xs:documentation>Built-in function type with one argument and another optional one</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="exp:BuiltInFunct">
+				<xs:sequence>
+					<xs:any namespace="##targetNamespace" minOccurs="0"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
 	<xs:complexType name="FunctionCall">
 		<xs:annotation>
 			<xs:documentation>User-defined function call type</xs:documentation>
@@ -244,12 +256,12 @@
 			<xs:documentation>Built-in function: sign</xs:documentation>
 		</xs:annotation>
 	</xs:element>
-	<xs:element name="Min" type="exp:BuiltIn2Funct">
+	<xs:element name="Min" type="exp:BuiltIn1or2Funct">
 		<xs:annotation>
 			<xs:documentation>Built-in function: min(x,y) , (where x and y must be scalar)</xs:documentation>
 		</xs:annotation>
 	</xs:element>
-	<xs:element name="Max" type="exp:BuiltIn2Funct">
+	<xs:element name="Max" type="exp:BuiltIn1or2Funct">
 		<xs:annotation>
 			<xs:documentation>Built-in function: max(x,y) , (where x and y must be scalar)</xs:documentation>
 		</xs:annotation>
