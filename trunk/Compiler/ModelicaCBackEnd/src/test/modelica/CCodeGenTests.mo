@@ -1872,4 +1872,129 @@ end CUnknownArray1;
 
 
 
+model CRecordDecl1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl1",
+         description="C code generation for records: structs: basic test",
+         template="$C_records$",
+         generatedCode="
+typedef struct _A_0_rec {
+    jmi_ad_var_t a;
+    jmi_ad_var_t b;
+} A_0_rec;
+RECORD_ARRAY_TYPE(A_0_rec, A_0_recarr)
+
+")})));
+
+ record A
+  Real a;
+  Real b;
+ end A;
+ 
+ A x;
+equation
+ x.a = 1;
+ x.b = 2;
+end CRecordDecl1;
+
+
+model CRecordDecl2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl2",
+         description="C code generation for records: structs: nested records",
+         template="$C_records$",
+         generatedCode="
+typedef struct _B_0_rec {
+    jmi_ad_var_t c;
+} B_0_rec;
+RECORD_ARRAY_TYPE(B_0_rec, B_0_recarr)
+
+typedef struct _A_1_rec {
+    jmi_ad_var_t a;
+    B_0_rec* b;
+} A_1_rec;
+RECORD_ARRAY_TYPE(A_1_rec, A_1_recarr)
+
+")})));
+
+ record A
+  Real a;
+  B b;
+ end A;
+ 
+ record B
+  Real c;
+ end B;
+ 
+ A x;
+equation
+ x.a = 1;
+ x.b.c = 2;
+end CRecordDecl2;
+
+
+model CRecordDecl3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl3",
+         description="C code generation for records: structs: array in record",
+         template="$C_records$",
+         generatedCode="
+typedef struct _A_0_rec {
+    jmi_array_t* a;
+} A_0_rec;
+RECORD_ARRAY_TYPE(A_0_rec, A_0_recarr)
+
+")})));
+
+ record A
+  Real a[2];
+ end A;
+
+ A x;
+equation
+ x.a = {1,2};
+end CRecordDecl3;
+
+
+model CRecordDecl4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CRecordDecl4",
+         description="C code generation for records: structs: array of records",
+         template="$C_records$",
+         generatedCode="
+typedef struct _B_0_rec {
+    jmi_ad_var_t c;
+} B_0_rec;
+RECORD_ARRAY_TYPE(B_0_rec, B_0_recarr)
+
+typedef struct _A_1_rec {
+    jmi_ad_var_t a;
+    B_0_recarr* b;
+} A_1_rec;
+RECORD_ARRAY_TYPE(A_1_rec, A_1_recarr)
+
+")})));
+
+ record A
+  Real a;
+  B b[2];
+ end A;
+ 
+ record B
+  Real c;
+ end B;
+ 
+ A x;
+equation
+ x.a = 1;
+ x.b[1].c = 2;
+ x.b[2].c = 3;
+end CRecordDecl4;
+
+
+
 end CCodeGenTests;

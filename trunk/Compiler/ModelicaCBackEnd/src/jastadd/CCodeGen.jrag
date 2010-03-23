@@ -263,6 +263,43 @@ aspect CCodeGen {
 	 */
 	syn boolean FFunctionDecl.generateExpFunction() = hasOutputs() && !isArray();
 	
+	syn String FRecordDecl.name_C()      = getFQName().lastFQNamePart().getName() + "_" + recordIndex() + "_rec";
+	syn String FRecordDecl.nameArray_C() = name_C() + "arr";
+	syn String FRecordType.name_C()      = getFRecordDecl().name_C();
+	syn String FRecordType.nameArray_C() = getFRecordDecl().nameArray_C();
+	
+	// TODO: Handle arrays of records and arrays in records
+	public void FRecordDecl.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		// Record type (struct)
+		str.print(indent);
+		str.print("typedef struct _");
+		str.print(name_C());
+		str.print(" {\n");
+		String next = p.indent(indent);
+		for (FVariable fv : getFVariables())
+			fv.printInRecord_C(p, str, next, o);
+		str.print(indent);
+		str.print("} ");
+		str.print(name_C());
+		str.print(";\n");
+		
+		// Array record type
+		str.print(indent);
+		str.print("RECORD_ARRAY_TYPE(");
+		str.print(name_C());
+		str.print(", ");
+		str.print(nameArray_C());
+		str.print(")\n\n");
+	}
+	
+	public void FVariable.printInRecord_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print(indent);
+		str.print(type_C());
+		str.print(" ");
+		str.print(nameUnderscore());
+		str.print(";\n");
+	}
+	
 	syn String AbstractFVariable.name_C() = null;
 	eq FVariable.name_C()         = isForIndex() ? 
 			                        nameUnderscore() + "_i" :
@@ -272,9 +309,17 @@ aspect CCodeGen {
 	
 	syn String FFunctionVariable.nameReturn_C() = getFQName().nameUnderscore() + "_r";
 	syn String FFunctionArray.nameReturn_C()    = name_C();
-	// TODO: Delegate to Type to support other types than Real
-	syn String FFunctionVariable.type_C() = "jmi_ad_var_t";
-	eq FFunctionArray.type_C()            = "jmi_array_t*";
+	
+	syn String AbstractFVariable.type_C() = type().type_C();
+	
+	syn String FType.type_C() = isArray() ? arrayType_C() : scalarType_C();
+	
+	syn String FType.scalarType_C() = "jmi_ad_var_t";
+	eq FRecordType.scalarType_C()   = name_C() + "*";
+	
+	syn String FType.arrayType_C() = "jmi_array_t*";
+	eq FRecordType.arrayType_C()   = nameArray_C() + "*";
+
 	syn String FFunctionVariable.typeReturn_C() = type_C() + "*";
 	eq FFunctionArray.typeReturn_C()            = type_C();
 	
@@ -554,7 +599,6 @@ aspect CCodeGen {
 	}
 	
 	public void FBoolBinExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		
 		if (inNoEventExp()) {
 			str.append(macroC()+"(");
 			p.toString(getLeft(),str,indent,o);
@@ -570,7 +614,6 @@ aspect CCodeGen {
 				str.append("("+relExpInInitialEquationsIndex()+")");
 			}
 		}
-
 	}
 			 	
 	public void FRealLitExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {

@@ -780,7 +780,7 @@ aspect Scalarization {
 	 * \brief A node that can look up variable names in the flat tree.
 	 */
 	public interface FlatLookupNode {
-		public AbstractFVariable lookupFV(String name);
+		public AbstractFVariable lookupFV(FQName fqn);
 	}
 	public class FFunctionVariable implements FlatLookupNode {}
 	public class FExp implements FlatLookupNode {}
@@ -860,10 +860,13 @@ aspect Scalarization {
 		 * @return the created name
 		 */
 		public String create(FlatLookupNode context) {
+			FQNamePart part = new FQNamePart();
+			FQName fqn = new FQName(new List().add(part));
 			String name;
 			do {
 				name = "i" + (++last);
-			} while (!context.lookupFV(name).isUnknown()); 
+				part.setName(name);
+			} while (!context.lookupFV(fqn).isUnknown()); 
 			add(name);
 			return name;
 		}

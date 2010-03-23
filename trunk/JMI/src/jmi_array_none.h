@@ -36,6 +36,9 @@ struct jmi_array_t {
 
 #include "jmi_array_common.h"
 
+// Record array type declaration macro
+#define RECORD_ARRAY_TYPE(rec, arr) typedef rec* arr;
+
 // Array creation macro
 #define JMI_ARRAY_DECL(name, n, ...) int name##_size[] = { __VA_ARGS__ };\
                                      jmi_real_t name##_var[n];\

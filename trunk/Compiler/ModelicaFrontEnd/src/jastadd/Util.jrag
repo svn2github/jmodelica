@@ -669,20 +669,22 @@ aspect FlatNames {
 	eq InstRoot.getChild().retrieveFQName() = null;
 	eq SourceRoot.getProgram().retrieveFQName() = null;
 
-	syn lazy String FQName.name() {
+	syn String FQName.prefixName(int n) {
 		StringBuilder str = new StringBuilder();
-		for (Iterator<FQNamePart> it = getFQNameParts().iterator(); it.hasNext(); ) {
-			FQNamePart part = it.next();
+		for (int i = 0; i < n; i++) {
+			FQNamePart part = getFQNamePart(i);
 			str.append(part.getName());
-			if (it.hasNext() || isScalarized()) {
+			if (i < n-1 || isScalarized()) {
 				if (part.hasFArraySubscripts()) 
 					str.append(part.getFArraySubscripts());
-				if (it.hasNext()) 
+				if (i < n-1) 
 					str.append(".");
 			}
 		}
 		return str.toString();
 	}
+
+	syn lazy String FQName.name() = prefixName(getNumFQNamePart());
 	
 	syn String FQNamePart.name() = getName();
 
@@ -781,6 +783,9 @@ aspect FlatNames {
 	eq FClass.getAliasVariable(int i).variableIndex() = getNumFVariable() + i;
 	eq FForIndex.getFVariable().variableIndex()       = -1;
 	eq FRecordDecl.getFVariable().variableIndex()     = -1;
+
+	inh int FRecordDecl.recordIndex();
+	eq FClass.getFRecordDecl(int i).recordIndex() = i;
 	
 	/**
 	 * \brief Copy this FQName, append a String to the copy and return the copy.

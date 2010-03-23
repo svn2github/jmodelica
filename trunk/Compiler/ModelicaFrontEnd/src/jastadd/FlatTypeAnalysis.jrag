@@ -58,7 +58,7 @@ aspect FlatTypeAnalysis {
 		TreeSet<FRecordComponentType> comps = new TreeSet<FRecordComponentType>();
 		for (FVariable fv : getFVariables()) 
 			comps.add(new FRecordComponentType(fv.name(), (FType) fv.type().fullCopy()));
-		FRecordType type = new FRecordType(Size.SCALAR, name(), new List());
+		FRecordType type = new FRecordType(Size.SCALAR, name(), new List(), this);
 		for (FRecordComponentType comp : comps)
 			type.addComponent(comp);
 		return type;
@@ -68,7 +68,7 @@ aspect FlatTypeAnalysis {
 		TreeSet<FRecordComponentType> comps = new TreeSet<FRecordComponentType>();
 		for (InstComponentDecl icd : getInstComponentDecls()) 
 			comps.add(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
-		FRecordType type = new FRecordType(size(), myInstClassDecl().qualifiedName(), new List());
+		FRecordType type = new FRecordType(size(), myInstClassDecl().qualifiedName(), new List(), null);
 		for (FRecordComponentType comp : comps)
 			type.addComponent(comp);
 		return type;
@@ -78,7 +78,7 @@ aspect FlatTypeAnalysis {
 		TreeSet<FRecordComponentType> comps = new TreeSet<FRecordComponentType>();
 		for (InstComponentDecl icd : getInstComponentDecls()) 
 			comps.add(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
-		FRecordType type = new FRecordType(Size.SCALAR, qualifiedName(), new List());
+		FRecordType type = new FRecordType(Size.SCALAR, qualifiedName(), new List(), null);
 		for (FRecordComponentType comp : comps)
 			type.addComponent(comp);
 		return type;

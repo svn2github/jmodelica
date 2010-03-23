@@ -205,7 +205,7 @@ abstract FType ::= <Size:Size>;
 /**
  * \brief A record type.
  */
-FRecordType : FType ::= <Name> Component:FRecordComponentType*;
+FRecordType : FType ::= <Name> Component:FRecordComponentType* <FRecordDecl:FRecordDecl>;
 
 /**
  * \brief The type discription of a record component.

@@ -18,14 +18,15 @@ import java.util.HashMap;
 
 aspect OptimicaFlatNameBinding {
 	
-	inh AbstractFVariable FForClauseC.lookupFV(String name);
-	eq FForClauseC.getChild().lookupFV(String name) {
+	inh AbstractFVariable FForClauseC.lookupFV(FQName fqn);
+	eq FForClauseC.getChild().lookupFV(FQName fqn) {
+		String name = fqn.name();
 		for (FForIndex fi : getFForIndexs()) {
 			if (fi.getFVariable().name().equals(name)) {
 				return fi.getFVariable();
 			}
 		}
-		return lookupFV(name);
+		return lookupFV(fqn);
 	}
 	
 }
