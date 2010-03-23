@@ -568,8 +568,8 @@ class NLPInitialization(object):
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = jmi._translate_value_ref(value_ref)
             i_dx = z_i - self._model._offs_real_dx.value
-            dx_start[i_dx] = values.get(name)
-            #dx_start[i_dx] = self._model.get_z()[z_i]
+            #dx_start[i_dx] = values.get(name)
+            dx_start[i_dx] = self._model.get_z()[z_i]
         
         # x: differentiate
         values = xmldoc.get_x_start_attributes(include_alias=False)
@@ -581,8 +581,8 @@ class NLPInitialization(object):
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = jmi._translate_value_ref(value_ref)
             i_x = z_i - self._model._offs_real_x.value
-            x_start[i_x] = values.get(name)
-            #x_start[i_x] = self._model.get_z()[z_i]
+            #x_start[i_x] = values.get(name)
+            x_start[i_x] = self._model.get_z()[z_i]
                     
         # w: algebraic
         values = xmldoc.get_w_start_attributes(include_alias=False)
@@ -595,8 +595,8 @@ class NLPInitialization(object):
                 value_ref = xmldoc.get_valueref(name)
                 (z_i, ptype) = jmi._translate_value_ref(value_ref)
                 i_w = z_i - self._model._offs_real_w.value
-                w_start[i_w] = values.get(name)
-#                w_start[i_w] = self._model.get_z()[z_i]
+                #w_start[i_w] = values.get(name)
+                w_start[i_w] = self._model.get_z()[z_i]
 
     def _set_lb_values(self, p_free_lb, dx_lb, x_lb, w_lb):
         
