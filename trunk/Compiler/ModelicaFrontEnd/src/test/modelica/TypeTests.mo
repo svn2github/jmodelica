@@ -137,11 +137,11 @@ model TypeRel1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
          name="TypeRel1",
-         description="Type checks of relational operators: Real/Real",
+         description="Type checks of relational operators: Real/Real (Integer for ==/<>)",
          flatModel="
 fclass TypeTests.TypeRel1
- Boolean eq = 1.0 == 2.0;
- Boolean ne = 1.0 <> 2.0;
+ Boolean eq = 1 == 2;
+ Boolean ne = 1 <> 2;
  Boolean gt = 1.0 > 2.0;
  Boolean ge = 1.0 >= 2.0;
  Boolean lt = 1.0 < 2.0;
@@ -149,8 +149,8 @@ fclass TypeTests.TypeRel1
 end TypeTests.TypeRel1;
 ")})));
 
- Boolean eq = 1.0 == 2.0;
- Boolean ne = 1.0 <> 2.0;
+ Boolean eq = 1   == 2;
+ Boolean ne = 1   <> 2;
  Boolean gt = 1.0 >  2.0;
  Boolean ge = 1.0 >= 2.0;
  Boolean lt = 1.0 <  2.0;
@@ -165,8 +165,6 @@ model TypeRel2
          description="Type checks of relational operators: Real/Integer",
          flatModel="
 fclass TypeTests.TypeRel2
- Boolean eq = 1 == 2.0;
- Boolean ne = 1 <> 2.0;
  Boolean gt = 1 > 2.0;
  Boolean ge = 1 >= 2.0;
  Boolean lt = 1 < 2.0;
@@ -174,8 +172,6 @@ fclass TypeTests.TypeRel2
 end TypeTests.TypeRel2;
 ")})));
 
- Boolean eq = 1 == 2.0;
- Boolean ne = 1 <> 2.0;
  Boolean gt = 1 >  2.0;
  Boolean ge = 1 >= 2.0;
  Boolean lt = 1 <  2.0;
@@ -668,6 +664,91 @@ end ConstCmpGt;
 
 
 
+model RealEq1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="RealEq1",
+         description="Equality comparisons for reals: == outside function",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 672, column 14:
+  Type error in expression
+")})));
+
+ Boolean a = 1.0 == 2;
+end RealEq1;
+
+
+model RealEq2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="RealEq2",
+         description="Equality comparisons for reals: <> outside function",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 688, column 14:
+  Type error in expression
+")})));
+
+ Boolean a = 1.0 <> 2;
+end RealEq2;
+
+
+model RealEq3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RealEq3",
+         description="Equality comparisons for reals: == in function",
+         flatModel="
+fclass TypeTests.RealEq3
+ Boolean b = TypeTests.RealEq3.f();
+
+ function TypeTests.RealEq3.f
+  output Boolean a := 1.0 == 2;
+ algorithm
+  return;
+ end TypeTests.RealEq3.f;
+end TypeTests.RealEq3;
+")})));
+
+ function f
+  output Boolean a = 1.0 == 2;
+ algorithm
+ end f;
+ 
+ Boolean b = f();
+end RealEq3;
+
+
+model RealEq4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RealEq4",
+         description="Equality comparisons for reals: <> in function",
+         flatModel="
+fclass TypeTests.RealEq4
+ Boolean b = TypeTests.RealEq4.f();
+
+ function TypeTests.RealEq4.f
+  output Boolean a := 1.0 <> 2;
+ algorithm
+  return;
+ end TypeTests.RealEq4.f;
+end TypeTests.RealEq4;
+")})));
+
+ function f
+  output Boolean a = 1.0 <> 2;
+ algorithm
+ end f;
+ 
+ Boolean b = f();
+end RealEq4;
+
+
+
 model ParameterStart1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
@@ -691,7 +772,7 @@ model ParameterStart2
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="ParameterStart2",
-         description="Constant without binding expression: start",
+         description="Constant without binding expression: start not set",
          flatModel="
 fclass TypeTests.ParameterStart2
  constant Real p;

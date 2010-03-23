@@ -201,6 +201,11 @@ aspect FlatTypeAnalysis {
 		else
 			return fUnknownType();
 	}
+	eq FEqRelExp.type() {
+		if ((getLeft().type().isReal() || getRight().type().isReal()) && !inFunction())
+			return fUnknownType();
+		return super.type();
+	}
 	eq FLogBinExp.type() {
 		FType left = getLeft().type();
 		if (left.typeCompatible(getRight().type()) && left.isBoolean())

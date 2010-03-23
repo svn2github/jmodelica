@@ -633,14 +633,19 @@ FGtExp : FRelExp;
 FGeqExp : FRelExp;
 
 /**
+ * \brief Base class for equality expressions (== and <>).
+ */
+abstract FEqRelExp : FRelExp;
+
+/**
  * \brief Equality expression.
  */
-FEqExp : FRelExp;
+FEqExp : FEqRelExp;
 
 /**
  * \brief Inequality expression.
  */
-FNeqExp : FRelExp;
+FNeqExp : FEqRelExp;
 
 /**
  * \brief Not expression.

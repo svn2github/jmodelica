@@ -1305,8 +1305,8 @@ model AlgorithmFlatten3
                                                description="Flattening algorithms: if stmts",
                                                flatModel="
 fclass FunctionTests.AlgorithmFlatten3
- Real x;
- Real y;
+ Integer x;
+ Integer y;
 algorithm
  if x == 4 then
   x := 1;
@@ -1323,8 +1323,8 @@ algorithm
 end FunctionTests.AlgorithmFlatten3;
 ")})));
 
- Real x;
- Real y;
+ Integer x;
+ Integer y;
 algorithm
  if x == 4 then
   x := 1;
@@ -1346,8 +1346,8 @@ model AlgorithmFlatten4
                                                description="Flattening algorithms: when stmts",
                                                flatModel="
 fclass FunctionTests.AlgorithmFlatten4
- Real x;
- Real y;
+ Integer x;
+ Integer y;
 algorithm
  when x == 4 then
   x := 1;
@@ -1362,8 +1362,8 @@ algorithm
 end FunctionTests.AlgorithmFlatten4;
 ")})));
 
- Real x;
- Real y;
+ Integer x;
+ Integer y;
 algorithm
  when x == 4 then
   x := 1;
