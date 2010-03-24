@@ -170,13 +170,15 @@ typedef void jmi_ad_tape_t;                            ///< If JMI_AD_NONE: void
                                                        ///< If JMI_AD_CPPAD: an AD tape.
 typedef jmi_ad_tape_t *jmi_ad_tape_p;                  ///< If JMI_AD_NONE: a pointer to void (not used).<br>
 
+#define AD_WRAP_LITERAL(x) x ///< Macro for inserting an AD object based on a literal. Has no effect when compiling without CppAD  <br>
+
 #define COND_EXP_EQ(op1,op2,th,el) ((op1==op2)? (th): (el)) ///< Macro for conditional expression == <br>
 #define COND_EXP_LE(op1,op2,th,el) ((op1<=op2)? (th): (el)) ///< Macro for conditional expression <= <br>
 #define COND_EXP_LT(op1,op2,th,el) ((op1<op2)? (th): (el)) ///< Macro for conditional expression < <br>
 #define COND_EXP_GE(op1,op2,th,el) ((op1>=op2)? (th): (el)) ///< Macro for conditional expression >= <br>
 #define COND_EXP_GT(op1,op2,th,el) ((op1>op2)? (th): (el)) ///< Macro for conditional expression > <br>
 
-#define AD_WRAP_LITERAL(x) x ///< Macro for inserting an AD object based on a literal. Has no effect when compiling without CppAD  <br>
+#define LOG_EXP_OR(op1,op2) ((op1)+(op2)>JMI_FALSE) ///< Macro for logical expression or <br>
 
 #include "jmi_array_none.h"
 
@@ -189,19 +191,25 @@ typedef jmi_ad_var_vec_t *jmi_ad_var_vec_p;
 typedef CppAD::ADFun<jmi_real_t> jmi_ad_tape_t;
 typedef jmi_ad_tape_t *jmi_ad_tape_p;
 
+#define AD_WRAP_LITERAL(x) CppAD::AD<jmi_real_t>(x)
+
 #define COND_EXP_EQ(op1,op2,th,el) (CppAD::CondExpEq(op1,op2,th,el))
 #define COND_EXP_LE(op1,op2,th,el) (CppAD::CondExpLe(op1,op2,th,el))
 #define COND_EXP_LT(op1,op2,th,el) (CppAD::CondExpLt(op1,op2,th,el))
 #define COND_EXP_GE(op1,op2,th,el) (CppAD::CondExpGe(op1,op2,th,el))
 #define COND_EXP_GT(op1,op2,th,el) (CppAD::CondExpGt(op1,op2,th,el))
 
-#define AD_WRAP_LITERAL(x) CppAD::AD<jmi_real_t>(x)
+#define LOG_EXP_OR(op1,op2)  (COND_EXP_GT((op1)+(op2),JMI_FALSE,JMI_TRUE,JMI_FALSE))
 
 #include "jmi_array_cppad.h"
 
 #else
+// TODO: Shouldn't this error state that JMI_AD must be set to JMI_AD_NONE or JMI_AD_CPPAD?
 #error "The directive JMI_AD_NONE or JMI_AD_CPPAD must be set"
 #endif
+
+#define LOG_EXP_AND(op1,op2) ((op1)*(op2))           ///< Macro for logical expression and <br>
+#define LOG_EXP_NOT(op)      (JMI_TRUE-(op))         ///< Macro for logical expression not <br>
 
 /**
  * Function to wrap division and report errors.

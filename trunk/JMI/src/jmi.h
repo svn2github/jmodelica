@@ -330,8 +330,8 @@ extern "C" {
 #define JMI_DER_ALL_Q  JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | JMI_DER_W_P
 
 /**  \brief Definitions of boolean true and false literals.*/
-#define JMI_TRUE 1.0
-#define JMI_FALSE 0.0
+#define JMI_TRUE  AD_WRAP_LITERAL(1.0)
+#define JMI_FALSE AD_WRAP_LITERAL(0.0)
 
 /** \brief */
 #define JMI_SCALING_NONE 1 /**<  \brief No scaling.*/

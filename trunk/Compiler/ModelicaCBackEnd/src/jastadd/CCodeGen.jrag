@@ -557,20 +557,13 @@ aspect CCodeGen {
 		str.print("\"Divide by zero: "+prettyPrint("")+"\")");
 	}
 	
-	syn String FBoolBinExp.macroC() = "ERROR_IN_CONDITIONAL_EXPRESSION";
-	eq FEqExp.macroC() = "COND_EXP_EQ";
-	eq FLtExp.macroC() = "COND_EXP_LT";
-	eq FLeqExp.macroC() = "COND_EXP_LE";
-	eq FGtExp.macroC() = "COND_EXP_GT";
-	eq FGeqExp.macroC() = "COND_EXP_GE";
-	
 	public void FIfExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		
 		int end_parenthesis = 1;
 		
 		str.print("(COND_EXP_EQ(");
 		p.toString(getIfExp(),str,indent,o);
-		str.print(",AD_WRAP_LITERAL(JMI_TRUE),");
+		str.print(",JMI_TRUE,");
 		p.toString(getThenExp(),str,indent,o);
 		str.print(",");
 		for (FElseIfExp el_if : getFElseIfExps()) {
@@ -578,7 +571,7 @@ aspect CCodeGen {
 
 			str.print("(COND_EXP_EQ(");
 			p.toString(el_if.getIfExp(),str,indent,o);
-			str.print(",AD_WRAP_LITERAL(JMI_TRUE),");
+			str.print(",JMI_TRUE,");
 			p.toString(el_if.getThenExp(),str,indent,o);
 			str.print(",");			
 		}
@@ -598,34 +591,66 @@ aspect CCodeGen {
 		p.toString(getFExp(),str,indent,o);
 	}
 	
-	public void FBoolBinExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+	syn String FBoolBinExp.macro_C();
+	eq FEqExp.macro_C()  = "COND_EXP_EQ";
+	eq FNeqExp.macro_C() = "COND_EXP_EQ";
+	eq FLtExp.macro_C()  = "COND_EXP_LT";
+	eq FLeqExp.macro_C() = "COND_EXP_LE";
+	eq FGtExp.macro_C()  = "COND_EXP_GT";
+	eq FGeqExp.macro_C() = "COND_EXP_GE";
+	eq FAndExp.macro_C() = "LOG_EXP_AND";
+	eq FOrExp.macro_C()  = "LOG_EXP_OR";
+	
+	syn boolean FRelExp.relIsInverted_C() = false;
+	eq FNeqExp.relIsInverted_C() = true;
+	
+	public void FRelExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		if (inNoEventExp()) {
-			str.append(macroC()+"(");
-			p.toString(getLeft(),str,indent,o);
-			str.append(",");
-			p.toString(getRight(),str,indent,o);
-			str.append(",AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(JMI_FALSE))");
+			str.print(macro_C()+"(");
+			p.toString(getLeft(), str, indent, o);
+			str.print(", ");
+			p.toString(getRight(), str, indent, o);
+			str.print(relIsInverted_C() ? ", JMI_FALSE, JMI_TRUE)" : ", JMI_TRUE, JMI_FALSE)");
 		} else {
 			if (inEquationSection()) {
-				str.append("_sw");
-				str.append("("+relExpInEquationsIndex()+")");
+				str.print("_sw");
+				str.print("(" + relExpInEquationsIndex() + ")");
 			} else {
-				str.append("_sw_init");
-				str.append("("+relExpInInitialEquationsIndex()+")");
+				str.print("_sw_init");
+				str.print("(" + relExpInInitialEquationsIndex() + ")");
 			}
 		}
 	}
+	
+	public void FLogBinExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print(macro_C());
+		str.print("(");
+		p.toString(getLeft(), str, indent, o);
+		str.print(", ");
+		p.toString(getRight(), str, indent, o);
+		str.print(")");
+	}
+	
+	public void FNotExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("LOG_EXP_NOT(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
+	}
 			 	
 	public void FRealLitExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		if (inIfCondition()) str.print("AD_WRAP_LITERAL(");
+		if (inIfCondition()) 
+			str.print("AD_WRAP_LITERAL(");
 		str.print(getUNSIGNED_NUMBER());
-		if (inIfCondition()) str.print(")");
+		if (inIfCondition()) 
+			str.print(")");
 	}
 
 	public void FIntegerLitExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		if (inIfCondition()) str.print("AD_WRAP_LITERAL(");
+		if (inIfCondition()) 
+			str.print("AD_WRAP_LITERAL(");
 		str.print(getUNSIGNED_INTEGER());
-		if (inIfCondition()) str.print(")");
+		if (inIfCondition()) 
+			str.print(")");
 	}
 	
 	public void FBooleanLitExpTrue.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
@@ -796,7 +821,7 @@ aspect CCodeGen {
 			p.toString(this, str, indent, o);
 	}
 
-	public void FBoolBinExp.genResidual_C(int i, String indent, PrintStream str) {
+	public void FRelExp.genResidual_C(int i, String indent, PrintStream str) {
 		str.print(indent + "(*res)[" + i + "] = ");
 		getRight().prettyPrint_C(str,"");
 		str.print(" - (");

@@ -108,7 +108,7 @@ model CCodeGenTest4
          template="$C_DAE_equation_residuals$",
          generatedCode="
     (*res)[0] = _y_1 - (_der_x_2);
-    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(time,jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: ( 3.141592653589793 ) / ( 2 )\"),AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(JMI_FALSE)),AD_WRAP_LITERAL(JMI_TRUE),sin(time),_x_0)) - (_y_1);
+    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(time,jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: ( 3.141592653589793 ) / ( 2 )\"),JMI_TRUE,JMI_FALSE),JMI_TRUE,sin(time),_x_0)) - (_y_1);
 ")})));
 
   Real x(start=0);
@@ -126,7 +126,7 @@ model CCodeGenTest5
          template="$C_DAE_equation_residuals$",
          generatedCode="
     (*res)[0] = _y_3 - (_der_x_4);
-    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(time,_one_0,AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(JMI_FALSE)),AD_WRAP_LITERAL(JMI_TRUE),_x_2,(COND_EXP_EQ(COND_EXP_LE(time,_two_1,AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(JMI_FALSE)),AD_WRAP_LITERAL(JMI_TRUE),(  - ( AD_WRAP_LITERAL(2) ) ) * ( _x_2 ),( AD_WRAP_LITERAL(3) ) * ( _x_2 ))))) - (_y_3);
+    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(time,_one_0,JMI_TRUE,JMI_FALSE),JMI_TRUE,_x_2,(COND_EXP_EQ(COND_EXP_LE(time,_two_1,JMI_TRUE,JMI_FALSE),JMI_TRUE,(  - ( AD_WRAP_LITERAL(2) ) ) * ( _x_2 ),( AD_WRAP_LITERAL(3) ) * ( _x_2 ))))) - (_y_3);
 ")})));
 
   parameter Real one = 1;
@@ -179,11 +179,11 @@ $C_DAE_event_indicator_residuals$
 ",
          generatedCode="
     (*res)[0] = _y_1 - (_der_x_2);
-    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(JMI_FALSE)),AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(0),(CO
-ND_EXP_EQ(COND_EXP_GE(AD_WRAP_LITERAL(3),AD_WRAP_LITERAL(4),AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(JMI_FALSE)),AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(1),(COND_EXP_EQ(COND_EXP_
-LT(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(JMI_FALSE)),AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(2),(COND_EXP_EQ(COND_EXP_GT(AD_WRAP_LITERAL(
-3),AD_WRAP_LITERAL(4),AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(JMI_FALSE)),AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(4),(COND_EXP_EQ(COND_EXP_EQ(AD_WRAP_LITERAL(4),AD_WRAP_LITERAL(
-3),AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(JMI_FALSE)),AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(4),AD_WRAP_LITERAL(7))))))))))) - (_y_1);
+    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(2),JMI_TRUE,JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(0),(CO
+ND_EXP_EQ(COND_EXP_GE(AD_WRAP_LITERAL(3),AD_WRAP_LITERAL(4),JMI_TRUE,JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(1),(COND_EXP_EQ(COND_EXP_
+LT(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(2),JMI_TRUE,JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(2),(COND_EXP_EQ(COND_EXP_GT(AD_WRAP_LITERAL(
+3),AD_WRAP_LITERAL(4),JMI_TRUE,JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(4),(COND_EXP_EQ(COND_EXP_EQ(AD_WRAP_LITERAL(4),AD_WRAP_LITERAL(
+3),JMI_TRUE,JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(4),AD_WRAP_LITERAL(7))))))))))) - (_y_1);
 ")})));
 
   Real x(start=0);
@@ -201,9 +201,9 @@ model CCodeGenTest8
          description="Test of code generation",
          template="$C_DAE_equation_residuals$",
          generatedCode="
-    (*res)[0] = (COND_EXP_EQ(_sw(0),AD_WRAP_LITERAL(JMI_TRUE), - ( AD_WRAP_LITERAL(1) ) + _y_1, - ( _y_1 ))) - (_x_0);
-    (*res)[1] = _z_2 + _x_0 + (COND_EXP_EQ(_sw(1),AD_WRAP_LITERAL(JMI_TRUE), - ( AD_WRAP_LITERAL(3) ),AD_WRAP_LITERAL(3))) - (_y_1);
-    (*res)[2] =  - ( _y_1 ) - ( _x_0 ) + (COND_EXP_EQ(_sw(2),AD_WRAP_LITERAL(JMI_TRUE), - ( AD_WRAP_LITERAL(1) ),AD_WRAP_LITERAL(1))) - (_z_2);
+    (*res)[0] = (COND_EXP_EQ(_sw(0),JMI_TRUE, - ( AD_WRAP_LITERAL(1) ) + _y_1, - ( _y_1 ))) - (_x_0);
+    (*res)[1] = _z_2 + _x_0 + (COND_EXP_EQ(_sw(1),JMI_TRUE, - ( AD_WRAP_LITERAL(3) ),AD_WRAP_LITERAL(3))) - (_y_1);
+    (*res)[2] =  - ( _y_1 ) - ( _x_0 ) + (COND_EXP_EQ(_sw(2),JMI_TRUE, - ( AD_WRAP_LITERAL(1) ),AD_WRAP_LITERAL(1))) - (_z_2);
 ")})));
 
   Real x(start=0);
@@ -227,11 +227,11 @@ $C_DAE_initial_event_indicator_residuals$",
     (*res)[0] =  - ( _x_0 ) - (_der_x_3);
     (*res)[1] =  - ( _y_1 ) - (_der_y_4);
     (*res)[2] =  - ( _z_2 ) - (_der_z_5);
-    (*res)[3] = (COND_EXP_EQ(COND_EXP_GE(time,AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(JMI_FALSE)),AD_WRAP_LITERAL(JMI_TRUE), - ( AD_WRAP_LITERAL(1) ) + _y_1, - 
+    (*res)[3] = (COND_EXP_EQ(COND_EXP_GE(time,AD_WRAP_LITERAL(1),JMI_TRUE,JMI_FALSE),JMI_TRUE, - ( AD_WRAP_LITERAL(1) ) + _y_1, - 
 ( _y_1 ))) - (_x_0);
-    (*res)[4] = _z_2 + _x_0 + (COND_EXP_EQ(COND_EXP_GE(_z_2, - ( AD_WRAP_LITERAL(1.5) ),AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(JMI_FALSE)),AD_WRAP_LITERAL(JMI_TRUE), - ( AD_WRAP_
+    (*res)[4] = _z_2 + _x_0 + (COND_EXP_EQ(COND_EXP_GE(_z_2, - ( AD_WRAP_LITERAL(1.5) ),JMI_TRUE,JMI_FALSE),JMI_TRUE, - ( AD_WRAP_
 LITERAL(3) ),AD_WRAP_LITERAL(3))) - (_y_1);
-    (*res)[5] =  - ( _y_1 ) - ( _x_0 ) + (COND_EXP_EQ(_sw_init(0),AD_WRAP_LITERAL(JMI_TRUE), - ( AD_WRAP_LITERAL(1) ),AD_WRAP_LITERAL(1))) - (_z_2);
+    (*res)[5] =  - ( _y_1 ) - ( _x_0 ) + (COND_EXP_EQ(_sw_init(0),JMI_TRUE, - ( AD_WRAP_LITERAL(1) ),AD_WRAP_LITERAL(1))) - (_z_2);
     (*res)[0] = _y_1 - (AD_WRAP_LITERAL(0.5));
 ")})));
 
@@ -259,9 +259,9 @@ $C_DAE_initial_event_indicator_residuals$",
     (*res)[0] =  - ( _x_0 ) - (_der_x_3);
     (*res)[1] =  - ( _y_1 ) - (_der_y_4);
     (*res)[2] =  - ( _z_2 ) - (_der_z_5);
-    (*res)[3] = (COND_EXP_EQ(_sw_init(0),AD_WRAP_LITERAL(JMI_TRUE), - ( AD_WRAP_LITERAL(1) ) + _y_1, - ( _y_1 ))) - (_x_0);
-    (*res)[4] = _z_2 + _x_0 + (COND_EXP_EQ(_sw_init(1),AD_WRAP_LITERAL(JMI_TRUE), - ( AD_WRAP_LITERAL(3) ),AD_WRAP_LITERAL(3))) - (_y_1);
-    (*res)[5] =  - ( _y_1 ) - ( _x_0 ) + (COND_EXP_EQ(_sw_init(2),AD_WRAP_LITERAL(JMI_TRUE), - ( AD_WRAP_LITERAL(1) ),AD_WRAP_LITERAL(1))) - (_z_2);
+    (*res)[3] = (COND_EXP_EQ(_sw_init(0),JMI_TRUE, - ( AD_WRAP_LITERAL(1) ) + _y_1, - ( _y_1 ))) - (_x_0);
+    (*res)[4] = _z_2 + _x_0 + (COND_EXP_EQ(_sw_init(1),JMI_TRUE, - ( AD_WRAP_LITERAL(3) ),AD_WRAP_LITERAL(3))) - (_y_1);
+    (*res)[5] =  - ( _y_1 ) - ( _x_0 ) + (COND_EXP_EQ(_sw_init(2),JMI_TRUE, - ( AD_WRAP_LITERAL(1) ),AD_WRAP_LITERAL(1))) - (_z_2);
     (*res)[0] = time - (AD_WRAP_LITERAL(1));
     (*res)[1] = _z_2 - ( - ( AD_WRAP_LITERAL(1.5) ));
     (*res)[2] = _y_1 - (AD_WRAP_LITERAL(0.5));
@@ -279,6 +279,79 @@ equation
    der(y) = -y;
    der(z) = -z;
 end CCodeGenTest10;
+
+model CCodeGenTest11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenTest11",
+         description="C code generation: the '<>' operator",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
+    (*res)[0] = 1 - (_x_0);
+    (*res)[1] = 2 - (_y_1);
+    (*res)[2] = (COND_EXP_EQ(COND_EXP_EQ(_x_0, _y_1, JMI_FALSE, JMI_TRUE),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0))) - (_z_2);
+")})));
+
+ Integer x = 1;
+ Integer y = 2;
+ Real z = noEvent(if x <> y then 1.0 else 2.0);
+end CCodeGenTest11;
+
+
+
+model CLogExp1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CLogExp1",
+         description="C code generation for logical operators: and",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
+    (*res)[0] = JMI_TRUE - (_x_0);
+    (*res)[1] = JMI_FALSE - (_y_1);
+    (*res)[2] = (COND_EXP_EQ(LOG_EXP_AND(_x_0, _y_1),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0))) - (_z_2);
+")})));
+
+ Boolean x = true;
+ Boolean y = false;
+ Real z = noEvent(if x and y then 1.0 else 2.0);
+end CLogExp1;
+
+
+model CLogExp2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CLogExp2",
+         description="C code generation for logical operators: or",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
+    (*res)[0] = JMI_TRUE - (_x_0);
+    (*res)[1] = JMI_FALSE - (_y_1);
+    (*res)[2] = (COND_EXP_EQ(LOG_EXP_OR(_x_0, _y_1),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0))) - (_z_2);
+")})));
+
+ Boolean x = true;
+ Boolean y = false;
+ Real z = noEvent(if x or y then 1.0 else 2.0);
+end CLogExp2;
+
+
+model CLogExp3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CLogExp3",
+         description="C code generation for logical operators: not",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
+    (*res)[0] = JMI_TRUE - (_x_0);
+    (*res)[1] = (COND_EXP_EQ(LOG_EXP_NOT(_x_0),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0))) - (_y_1);
+")})));
+
+ Boolean x = true;
+ Real y = noEvent(if not x then 1.0 else 2.0);
+end CLogExp3;
+
+
+
 
 model CCodeGenDiscreteVariables1
 
@@ -1342,12 +1415,12 @@ void func_CCodeGenTests_CArrayInput6_f1_def(jmi_ad_var_t* out_r) {
     JMI_ARRAY_DECL(tmp_array_2, 2, 2);
     jmi_array_ref_1(tmp_array_2, 1) = 3.0;
     jmi_array_ref_1(tmp_array_2, 2) = 4.0;
-    if (COND_EXP_LT(func_CCodeGenTests_CArrayInput6_f2_exp(tmp_array_1),4,AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(JMI_FALSE))) {
+    if (COND_EXP_LT(func_CCodeGenTests_CArrayInput6_f2_exp(tmp_array_1),4,JMI_TRUE,JMI_FALSE)) {
         JMI_ARRAY_DECL(tmp_array_3, 2, 2);
         jmi_array_ref_1(tmp_array_3, 1) = 5.0;
         jmi_array_ref_1(tmp_array_3, 2) = 6.0;
         out_v = func_CCodeGenTests_CArrayInput6_f2_exp(tmp_array_3);
-    } else if (COND_EXP_GT(func_CCodeGenTests_CArrayInput6_f2_exp(tmp_array_2),5,AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(JMI_FALSE))) {
+    } else if (COND_EXP_GT(func_CCodeGenTests_CArrayInput6_f2_exp(tmp_array_2),5,JMI_TRUE,JMI_FALSE)) {
         JMI_ARRAY_DECL(tmp_array_4, 2, 2);
         jmi_array_ref_1(tmp_array_4, 1) = 7.0;
         jmi_array_ref_1(tmp_array_4, 2) = 8.0;
@@ -1427,7 +1500,7 @@ void func_CCodeGenTests_CArrayInput7_f1_def(jmi_ad_var_t* out_r) {
     jmi_array_ref_1(tmp_array_1, 1) = 1.0;
     jmi_array_ref_1(tmp_array_1, 2) = 2.0;
     jmi_array_ref_1(tmp_array_1, 3) = 3.0;
-    while (COND_EXP_LT(func_CCodeGenTests_CArrayInput7_f2_exp(tmp_array_1),2,AD_WRAP_LITERAL(JMI_TRUE),AD_WRAP_LITERAL(JMI_FALSE))) {
+    while (COND_EXP_LT(func_CCodeGenTests_CArrayInput7_f2_exp(tmp_array_1),2,JMI_TRUE,JMI_FALSE)) {
         JMI_ARRAY_DECL(tmp_array_2, 3, 3);
         jmi_array_ref_1(tmp_array_2, 1) = 4.0;
         jmi_array_ref_1(tmp_array_2, 2) = 5.0;

@@ -51,7 +51,7 @@ public class CGenerator extends GenericGenerator {
 	
 		public void generate(PrintStream genPrinter) {
 			int i=0;
-			for (FBoolBinExp e : fclass.relExpInEquations()) {
+			for (FRelExp e : fclass.relExpInEquations()) {
 				e.genResidual_C(i,"    ",genPrinter);				
 				i++;
 			}
@@ -90,11 +90,11 @@ public class CGenerator extends GenericGenerator {
 	
 		public void generate(PrintStream genPrinter) {
 			int i=0;
-			for (FBoolBinExp e : fclass.relExpInEquations()) {
+			for (FRelExp e : fclass.relExpInEquations()) {
 				e.genResidual_C(i,"    ",genPrinter);				
 				i++;
 			}
-			for (FBoolBinExp e : fclass.relExpInInitialEquations()) {
+			for (FRelExp e : fclass.relExpInInitialEquations()) {
 				e.genResidual_C(i,"    ",genPrinter);				
 				i++;
 			}

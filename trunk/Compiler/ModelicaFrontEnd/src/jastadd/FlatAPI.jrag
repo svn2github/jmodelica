@@ -696,15 +696,15 @@ aspect FlatAPI {
 	syn int FClass.numEventIndicators() = numRelExpInEquations();
 	
     syn int FClass.numRelExpInEquations() = relExpInEquations().size();
-	coll ArrayList<FBoolBinExp> FClass.relExpInEquations() 
-	  [new ArrayList<FBoolBinExp>()] with add root FlatRoot;
-	FBoolBinExp contributes
+	coll ArrayList<FRelExp> FClass.relExpInEquations() 
+	  [new ArrayList<FRelExp>()] with add root FlatRoot;
+	FRelExp contributes
     // Only include relational in the equation section which are 
     // not inside a noEvent operator
  		this when inEquationSection() && !inNoEventExp()
 	to FClass.relExpInEquations() for myFClass();	
 		
-	public int FBoolBinExp.relExpInEquationsIndex() {
+	public int FRelExp.relExpInEquationsIndex() {
 		return myFClass().relExpInEquations().indexOf(this);
 	}
 	
@@ -736,9 +736,9 @@ aspect FlatAPI {
 	syn int FClass.numInitialEventIndicators() = numRelExpInInitialEquations();
     syn int FClass.numRelExpInInitialEquations() = 
     	relExpInInitialEquations().size();
-	coll ArrayList<FBoolBinExp> FClass.relExpInInitialEquations() 
-	    [new ArrayList<FBoolBinExp>()] with add root FlatRoot;
-	FBoolBinExp contributes
+	coll ArrayList<FRelExp> FClass.relExpInInitialEquations() 
+	    [new ArrayList<FRelExp>()] with add root FlatRoot;
+	FRelExp contributes
 	    // Only include relational in the initial equation section which are 
 	    // not inside a noEvent operator
  		this when inInitialEquationSection() && !inNoEventExp()
