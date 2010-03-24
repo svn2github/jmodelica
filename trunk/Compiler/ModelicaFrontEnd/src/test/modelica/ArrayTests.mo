@@ -7301,5 +7301,33 @@ end ScalarSize2;
 
 
 
+model ForEquation1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ForEquation1",
+         description="Flattening of for equations: for equ in a component",
+         flatModel="
+fclass ArrayTests.ForEquation1
+ Real y.x[3];
+equation
+ for i in 1:3 loop
+  y.x[i] = ( i ) * ( i );
+ end for;
+end ArrayTests.ForEquation1;
+")})));
+
+ model A
+  Real x[3];
+ equation
+  for i in 1:3 loop
+   x[i] = i*i;
+  end for;
+ end A;
+ 
+ A y;
+end ForEquation1;
+
+
+
   annotation (uses(Modelica(version="3.0.1")));
 end ArrayTests;

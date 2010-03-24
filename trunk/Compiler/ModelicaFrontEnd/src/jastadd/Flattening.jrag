@@ -784,7 +784,7 @@ aspect FlatExpressions {
 	}
 	
 	public FQName InstAccess.flatten(FQName prefix) { 
-		FQName myName = new FQName(prefix);
+		FQName myName = isForIndex() ? new FQName() : new FQName(prefix);
 		InstAccess fa = getFirstInstAccess();
 		do {
 			Opt as = fa.isInstArrayAccess() ? new Opt(fa.fArraySubscripts().flatten(prefix)) : new Opt();
