@@ -9,11 +9,13 @@ import numpy as n
 
 from jmodelica.tests import testattr
 from jmodelica.compiler import OptimicaCompiler
+from jmodelica.compiler import ModelicaCompiler
 import jmodelica.xmlparser as xp
 
 
 jm_home = os.environ.get('JMODELICA_HOME')
 path_to_examples = os.path.join('Python','jmodelica','examples')
+path_to_schemas = os.path.join(jm_home,'XML')
 
 # cstr model
 cstr_model = os.path.join('files','CSTR.mo')
@@ -33,6 +35,10 @@ vdpmin_fpath = os.path.join(jm_home,path_to_examples,vdpmin_model)
 vdpmin_cpath = "VDP_pack.VDP_Opt_Min_Time"
 vdpmin_fname = vdpmin_cpath.replace('.','_',1)
 
+#compilers
+mc = ModelicaCompiler()
+oc = OptimicaCompiler()
+
 #type defs
 int = n.int32
 
@@ -42,7 +48,6 @@ def setup():
     set log level. 
     """
     OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
-    oc = OptimicaCompiler()
     oc.set_boolean_option('state_start_values_fixed',True)
     oc.set_boolean_option('eliminate_alias_variables',True)
     # cstr model
@@ -931,4 +936,115 @@ def t_get_timepoints(xmldoc):
     for tp in timepoints:
         assert tp.__class__ is float, \
             "timepoint is not float."
-    nose.tools.assert_equal(timepoints[0], 150.0) 
+    nose.tools.assert_equal(timepoints[0], 150.0)
+    
+@testattr(stddist = True)
+def test_fmi_schema():
+    """ Test that generated XML file validates with the fmi schema. """
+    mc.set_boolean_option('generate_fmi_xml', True)
+    mc.set_boolean_option('generate_xml_equations', False)
+    
+    model_mc = os.path.join('files', 'Pendulum_pack_no_opt.mo')
+    fpath_mc = os.path.join(jm_home,path_to_examples,model_mc)
+    cpath_mc = "Pendulum_pack.Pendulum"
+    
+    mc.compile_model(fpath_mc, cpath_mc)
+    fname = cpath_mc.replace('.','_',1)
+    filename = fname+'.xml'
+    
+    schema = 'fmiModelDescription.xsd'
+    path_to_schema = os.path.join(path_to_schemas,schema)
+    
+    xmldoc = xp.XMLDoc(filename,schemaname=path_to_schema)
+    
+    
+## Commented out tests due to #729
+    
+#@testattr(stddist = True)
+#def test_extended_fmi_schema():
+#    """ Test that generated XML file validates with the extended fmi schema. """
+#    mc.set_boolean_option('generate_fmi_xml', True)
+#    mc.set_boolean_option('generate_xml_equations', True)
+#    
+#    model_mc = os.path.join('files', 'Pendulum_pack_no_opt.mo')
+#    fpath_mc = os.path.join(jm_home,path_to_examples,model_mc)
+#    cpath_mc = "Pendulum_pack.Pendulum"
+#    
+#    mc.compile_model(fpath_mc, cpath_mc)
+#    fname = cpath_mc.replace('.','_',1)
+#    filename = fname+'.xml'
+#    
+#    schema = 'fmiExtendedModelDescription.xsd'
+#    path_to_schema = os.path.join(path_to_schemas,schema)
+#    
+#    xmldoc = xp.XMLDoc(filename,schemaname=path_to_schema)
+    
+#@testattr(stddist = True)
+#def test_jmodelica_schema():
+#    """ Test that generated XML file validates with the jmodelica schema. """
+#    mc.set_boolean_option('generate_fmi_xml', False)
+#    mc.set_boolean_option('generate_xml_equations', True)
+#    
+#    model_mc = os.path.join('files', 'Pendulum_pack_no_opt.mo')
+#    fpath_mc = os.path.join(jm_home,path_to_examples,model_mc)
+#    cpath_mc = "Pendulum_pack.Pendulum"
+#    
+#    mc.compile_model(fpath_mc, cpath_mc)
+#    fname = cpath_mc.replace('.','_',1)
+#    filename = fname+'.xml'
+#    
+#    schema = 'jmodelicaModelDescription.xsd'
+#    path_to_schema = os.path.join(path_to_schemas,schema)
+#    
+#    xmldoc = xp.XMLDoc(filename,schemaname=path_to_schema)
+#    
+#@testattr(stddist = True)
+#def test_jmodelica_schema_2():
+#    """ Test that generated XML file validates with the jmodelica schema. """
+#    mc.set_boolean_option('generate_fmi_xml', False)
+#    mc.set_boolean_option('generate_xml_equations', False)
+#    
+#    model_mc = os.path.join('files', 'Pendulum_pack_no_opt.mo')
+#    fpath_mc = os.path.join(jm_home,path_to_examples,model_mc)
+#    cpath_mc = "Pendulum_pack.Pendulum"
+#    
+#    mc.compile_model(fpath_mc, cpath_mc)
+#    fname = cpath_mc.replace('.','_',1)
+#    filename = fname+'.xml'
+#    
+#    schema = 'jmodelicaModelDescription.xsd'
+#    path_to_schema = os.path.join(path_to_schemas,schema)
+#    
+#    xmldoc = xp.XMLDoc(filename,schemaname=path_to_schema)
+    
+#@testattr(stddist = True)
+#def test_extended_fmi_schema_opt():
+#    """ Test that generated XML file validates with the extended fmi schema. """
+#    oc.set_boolean_option('generate_fmi_xml', True)
+#    oc.set_boolean_option('generate_xml_equations', True)
+#    oc.compile_model(parest_fpath, parest_cpath)
+#    fname = parest_cpath.replace('.','_',1)
+#    filename = fname+'.xml'
+#    
+#    schema = 'fmiExtendedModelDescription.xsd'
+#    path_to_schema = os.path.join(path_to_schemas,schema)
+#    
+#    xmldoc = xp.XMLDoc(filename,schemaname=path_to_schema)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
