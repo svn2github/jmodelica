@@ -938,24 +938,24 @@ def t_get_timepoints(xmldoc):
             "timepoint is not float."
     nose.tools.assert_equal(timepoints[0], 150.0)
     
-@testattr(stddist = True)
-def test_fmi_schema():
-    """ Test that generated XML file validates with the fmi schema. """
-    mc.set_boolean_option('generate_fmi_xml', True)
-    mc.set_boolean_option('generate_xml_equations', False)
+# @testattr(stddist = True)
+# def test_fmi_schema():
+#     """ Test that generated XML file validates with the fmi schema. """
+#     mc.set_boolean_option('generate_fmi_xml', True)
+#     mc.set_boolean_option('generate_xml_equations', False)
     
-    model_mc = os.path.join('files', 'Pendulum_pack_no_opt.mo')
-    fpath_mc = os.path.join(jm_home,path_to_examples,model_mc)
-    cpath_mc = "Pendulum_pack.Pendulum"
+#     model_mc = os.path.join('files', 'Pendulum_pack_no_opt.mo')
+#     fpath_mc = os.path.join(jm_home,path_to_examples,model_mc)
+#     cpath_mc = "Pendulum_pack.Pendulum"
     
-    mc.compile_model(fpath_mc, cpath_mc)
-    fname = cpath_mc.replace('.','_',1)
-    filename = fname+'.xml'
+#     mc.compile_model(fpath_mc, cpath_mc)
+#     fname = cpath_mc.replace('.','_',1)
+#     filename = fname+'.xml'
     
-    schema = 'fmiModelDescription.xsd'
-    path_to_schema = os.path.join(path_to_schemas,schema)
+#     schema = 'fmiModelDescription.xsd'
+#     path_to_schema = os.path.join(path_to_schemas,schema)
     
-    xmldoc = xp.XMLDoc(filename,schemaname=path_to_schema)
+#     xmldoc = xp.XMLDoc(filename,schemaname=path_to_schema)
     
     
 ## Commented out tests due to #729
