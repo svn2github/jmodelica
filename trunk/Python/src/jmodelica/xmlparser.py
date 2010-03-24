@@ -1260,11 +1260,11 @@ class XMLValuesDoc(XMLBaseDoc):
                 
     def get_iparam_values(self):
         """ 
-        Extract ValueReference and value for all independent parameters in the 
+        Extract name and value for all independent parameters in the 
         XML document.
         
         Returns:   
-            Dict with ValueReference as key and parameter as value.
+            Dict with variable name as key and parameter as value.
             
         """
         keys = self._xpatheval("//*/@name")

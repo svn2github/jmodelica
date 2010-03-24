@@ -1613,42 +1613,49 @@ class Model(object):
         
     def write_parameters_to_XML(self, filename="", path="."):
         """ 
-        Write parameter values (real) in pi vector to XML. The default 
-        behaviour is to overwrite the XML file created when model was 
-        compiled. To write to a new file, set parameters filename and 
-        path (if no path is set file is assumed to be in the 
-        current directory). 
+        Write parameter values (real, integer, boolean supported) in pi 
+        vector to XML. The default behaviour is to overwrite the XML file 
+        created when model was compiled. To write to a new file, set 
+        parameters filename and path (if no path is set file is assumed 
+        to be in the current directory). 
         
         Parameters:
             filename -- filename of XML file that should be loaded (optional)
             path -- directory where XML file is located (optional)
-        """
-        pi = self.get_pi()
-        parameters = {}
-        # get all indep parameters, translate index in z-vector
-        # to valueref and save in dict with parameter value as value
-        for i in range(len(pi)):
-            zi = i+self._offs_real_pi.value
-            # parameter type is real (ptype=0) -> z-vector -> index = valueref
-            parameters[zi]=pi[i]
+        """       
+        # get xmldoc and z-vector
+        xmldoc = self._get_XMLDoc()
+        z = self.get_z()
+        
+        # create new XMLValuesDoc from the xml values file
+        valuesfile = self.get_name()+'_values.xml'
+        xml_values_doc = xmlparser.XMLValuesDoc(valuesfile)        
+        # get all parameter elements
+        root = xml_values_doc._doc.getroot()
+        parameters = root.getchildren()
+        
+        for p in parameters:
+            #get value reference            
+            name = p.get('name')
+            valueref = xmldoc.get_valueref(name)
+            #get index in z-vector
+            index, type = _translate_value_ref(valueref) 
             
-        # get all parameters in XMLvaluesdoc, go through them all and 
-        # for each, find corresponding parameter in dict created above
-        # and set new value saved in dict (which comes from pi vector)
-        xmldoc = self._get_XMLValuesDoc()
-        elements=xmldoc._doc.findall("/RealParameter")
-        for e in elements:
-            ref = e.getchildren()[0]
-            val = e.getchildren()[1]
-            if parameters.has_key(int(ref.text)):
-                val.text=str(parameters[int(ref.text)])
+            # set value in xml values doc for name = name 
+            # to value from z-vector
+            if type == 2:
+                #is boolean
+                p.set('value',str(bool(z[index])))
+            else:
+                p.set('value',str(z[index]))
+            
         # finally, write to file
         if filename:
             if not os.path.exists(path):
                 os.mkdir(path)
-            xmldoc._doc.write(os.path.join(path,filename))
+            xml_values_doc._doc.write(os.path.join(path,filename))
         else:
-            xmldoc._doc.write(xmldoc._doc.docinfo.URL)
+            xml_values_doc._doc.write(xml_values_doc._doc.docinfo.URL)
             
     def get_aliases(self, variable):
         """ Return list of all alias variables belonging to the aliased 
