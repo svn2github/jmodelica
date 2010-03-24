@@ -14,12 +14,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <jmi.h>
-
 
 static const int N_real_ci = $n_real_ci$;
 static const int N_real_cd = $n_real_cd$;
@@ -72,6 +70,10 @@ static const int N_eq_Cineq = $n_cineq$;
 static const int N_eq_Heq = $n_heq$;
 static const int N_eq_Hineq = $n_hineq$;
 static const int N_t_p = $n_tp$;
+
+static const int Scaling_method = $C_DAE_scaling_method$;
+
+#define sf(i) (jmi->variable_scaling_factors[i])
 
 $C_variable_aliases$
 
@@ -173,7 +175,7 @@ int jmi_new(jmi_t** jmi) {
 	   N_string_ci, N_string_cd, N_string_pi, N_string_pd,
 	   N_real_dx,N_real_x, N_real_u, N_real_w,N_t_p, 
 	   N_real_d,N_integer_d,N_integer_u,N_boolean_d,N_boolean_u,
-	   N_string_d,N_string_u,N_sw,N_sw_init);
+	   N_string_d,N_string_u,N_sw,N_sw_init,Scaling_method);
 
 	// Initialize the DAE interface
 	jmi_dae_init(*jmi, *model_dae_F, N_eq_F, NULL, 0, NULL, NULL,

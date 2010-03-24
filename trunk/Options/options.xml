@@ -78,5 +78,12 @@
 				</Description>
 			</BooleanAttributes>
 		</Option>
+		<Option type="boolean">
+			<BooleanAttributes key="enable_variable_scaling" value="false">
+				<Description>
+                                     If this option is true (default is false), then the "nominal" attribute will be used to scale variables in the model. 
+				</Description>
+			</BooleanAttributes>
+		</Option>
 	</Options>	
 </OptionRegistry>

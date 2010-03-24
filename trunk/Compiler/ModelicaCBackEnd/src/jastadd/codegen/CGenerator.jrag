@@ -23,6 +23,24 @@ import java.io.*;
 
 public class CGenerator extends GenericGenerator {
 
+	class DAETag_C_scalingMethod extends DAETag {
+		
+		public DAETag_C_scalingMethod(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_scaling_method","C: scaling_method",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			if (fclass.root().options.getBooleanOption("enable_variable_scaling")) {
+				genPrinter.print("JMI_SCALING_VARIABLES");
+			} else {
+				genPrinter.print("JMI_SCALING_NONE");
+			}
+		}
+	
+	}
+	
 	class DAETag_C_equationResiduals extends DAETag {
 		
 		public DAETag_C_equationResiduals(AbstractGenerator myGenerator, 

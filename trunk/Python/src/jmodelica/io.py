@@ -169,17 +169,20 @@ def export_result_dymola(model, data, file_name='', format='txt'):
                         f.write('2 %d 0 -1 # ' % cnt_2 + alias +'\n')
                 cnt_2 = cnt_2 + 1
         f.write('\n')
+
+        sc = model.jmimodel.get_variable_scaling_factors()
+        z = model.get_z()
         
         # Write data
         # Write data set 1
         f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
         f.write("%12.12f" % data[0,0])
         for ref in range(n_parameters):
-            f.write(" %12.12f" % model.get_z()[ref])
+            f.write(" %12.12f" % (z[ref]*sc[ref]))
         f.write('\n')
         f.write("%12.12f" % data[-1,0])
         for ref in range(n_parameters):
-            f.write(" %12.12f" % model.get_z()[ref])
+            f.write(" %12.12f" % (z[ref]*sc[ref]))
         f.write('\n\n')
 
         # Write data set 2
@@ -188,7 +191,10 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         f.write('float data_2(%d,%d)\n' % (n_points, n_vars))
         for i in range(n_points):
             for ref in range(n_vars):
-                f.write(" %12.12f" % data[i,ref])
+                if ref==0: # Don't scale time
+                    f.write(" %12.12f" % data[i,ref])
+                else:
+                    f.write(" %12.12f" % (data[i,ref]*sc[ref-1+n_parameters]))
             f.write('\n')
 
         f.write('\n')

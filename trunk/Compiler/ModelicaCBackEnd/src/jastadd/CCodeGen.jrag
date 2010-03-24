@@ -81,14 +81,30 @@ aspect CCodeGen {
 	}
 		
 	public void FDerExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		str.print(myFV().name_C());
+		if (root().options.getBooleanOption("enable_variable_scaling")) {
+			str.print("(");
+			str.print(myFV().name_C());
+			str.print("*sf(");
+			str.print(myFV().valueReference());
+			str.print("))");
+		} else {
+			str.print(myFV().name_C());
+		}
 	}
 	
 	public void FIdUseExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		if (isArray() && keepAsArray())
 			str.print(getFIdUse().name_C());
 		else
-			p.toString(getFIdUse(), str, indent, o);
+			if (myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling")) {
+				str.print("(");
+				p.toString(getFIdUse(), str, indent, o);
+				str.print("*sf(");
+				str.print(myFV().valueReference());
+				str.print("))");
+			} else {
+				p.toString(getFIdUse(), str, indent, o);
+			}
 	}
 	
 	syn String FIdUse.name_C() = myFV().name_C();
@@ -846,15 +862,26 @@ aspect CCodeGen {
 	}	
 	
 	public void FRealVariable.genStartAttributeResidual_C(int i, String indent, PrintStream str) {
-		str.print(indent + "(*res)[" + i + "] = ");
-		if (startAttributeSet()) {
-			startAttributeExp().prettyPrint_C(str,"");
-		} else {
-			str.print("0.0");
+		if (!(this instanceof FDerivativeVariable)) {
+			str.print(indent + "(*res)[" + i + "] = ");
+			if (startAttributeSet()) {
+				if (root().options.getBooleanOption("enable_variable_scaling")) {
+					str.print("(");
+					startAttributeExp().prettyPrint_C(str,"");
+					str.print(")");
+					str.print("*sf(");
+					str.print(valueReference());
+					str.print(")");
+				} else {
+					startAttributeExp().prettyPrint_C(str,"");
+				}
+			} else {
+				str.print("0.0");
+			}
+			str.print(" - ");
+			str.print(name_C());
+			str.print(";\n");
 		}
-		str.print(" - ");
-		str.print(name_C());
-		str.print(";\n");
 	}
 
 	

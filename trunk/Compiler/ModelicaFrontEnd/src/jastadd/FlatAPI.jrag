@@ -31,7 +31,7 @@ aspect FlatAPI {
 	 * Bit 32 is left unused.
 	 *
 	 */
-	inh lazy int FVariable.valueReference();
+	inh lazy int AbstractFVariable.valueReference();
 	eq FClass.getFVariable(int i).valueReference() {
 		int index = 0;
 		index = 0x00000000; 

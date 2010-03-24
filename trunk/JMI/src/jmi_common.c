@@ -697,11 +697,6 @@ int jmi_get_scaling_method(jmi_t* jmi) {
 	return jmi->scaling_method;
 }
 
-void jmi_set_scaling_method(jmi_t* jmi, int scaling_method) {
-	jmi->scaling_method = scaling_method;
-}
-
-
 void jmi_print_summary(jmi_t *jmi) {
 	printf("Number of interactive constants:               %d\n",jmi->n_real_ci);
 	printf("Number of dependent constants:                 %d\n",jmi->n_real_cd);

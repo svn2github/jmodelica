@@ -812,16 +812,6 @@ jmi_real_t* jmi_get_variable_scaling_factors(jmi_t* jmi);
  */
 int jmi_get_scaling_method(jmi_t* jmi);
 
-/**
- * \brief Set the scaling method. Alternatives are JMI_SCALING_NONE and
- * JMI_SCALING_VARIABLES.
- * @param jmi The jmi_t struct.
- * @param scaling_method An integer representing the scaling method.
- * @return An integer representing the scaling method used.
- *
- */
-void jmi_set_scaling_method(jmi_t* jmi, int scaling_method);
-
 
 /* @} */
 

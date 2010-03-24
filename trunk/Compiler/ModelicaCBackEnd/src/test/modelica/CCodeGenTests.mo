@@ -69,8 +69,6 @@ $C_DAE_initial_guess_equation_residuals$
    (*res)[0] = 0.0 - _z_1;
    (*res)[1] = 1 - _w_2;
    (*res)[2] = 0.0 - _v_3;
-   (*res)[3] = 0.0 - _der_z_4;
-   (*res)[4] = 0.0 - _der_v_5;
 ")})));
 
 		Real x(start=1);

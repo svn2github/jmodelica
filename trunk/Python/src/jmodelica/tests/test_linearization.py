@@ -71,29 +71,28 @@ def test_linearization():
     assert (algebraic_names==algebraic_names2)==True, "Error in linearization: state names"
 
     small = 1e-4
-
-    assert ((A_ode-N.array([[ -0.00000000e+00,   1.00000000e+03,   6.00000000e+01],
+    assert (N.abs(A_ode-N.array([[ -0.00000000e+00,   1.00000000e+03,   6.00000000e+01],
  [ -0.00000000e+00,  -1.66821993e-02,  -1.19039519e+00],
  [ -0.00000000e+00,   3.48651310e-03,   2.14034026e-01]]))<=small).all()==True, "Error in linearization: A_ode"
-    assert ((B_ode-N.array([[  1.00000000e+02],
+    assert (N.abs(B_ode-N.array([[  1.00000000e+02],
  [ -0.00000000e+00],
  [  3.49859575e-02]]))<=small).all()==True, "Error in linearization: B_ode"
-    assert ((g_ode-N.array([[-0.],
+    assert (N.abs(g_ode-N.array([[-0.],
  [-0.],
  [-0.]]))<=small).all()==True, "Error in linearization: g_ode"
 
-    assert (E_dae-N.array(([[-1.,  0.,  0.],
+    assert N.abs(E_dae-N.array(([[-1.,  0.,  0.],
  [ 0., -1.,  0.],
  [ 0.,  0., -1.]]))<=small).all()==True, "Error in linearization: E_dae"
-    assert ((A_dae-N.array([[ -0.00000000e+00,  -1.00000000e+03,  -6.00000000e+01],
+    assert (N.abs(A_dae-N.array([[ -0.00000000e+00,  -1.00000000e+03,  -6.00000000e+01],
  [ -0.00000000e+00,   1.66821993e-02,   1.19039519e+00],
  [ -0.00000000e+00,  -3.48651310e-03,  -2.14034026e-01]]))<=small).all()==True, "Error in linearization: A_dae"
-    assert ((B_dae-N.array([[ -1.00000000e+02],
+    assert (N.abs(B_dae-N.array([[ -1.00000000e+02],
  [ -0.00000000e+00],
  [ -3.49859575e-02]]))<=small).all()==True, "Error in linearization: B_dae"
-    assert (g_dae==N.array([[-0.],
+    assert (N.abs(g_dae-N.array([[-0.],
  [-0.],
- [-0.]])).all()==True, "Error in linearization: q_dae"
+ [-0.]]))<=small).all()==True, "Error in linearization: g_dae"
 
     assert (state_names==['cost', 'cstr.c', 'cstr.T'])==True, "Error in linearization: state names"
     assert (input_names==['u'])==True, "Error in linearization: state names"

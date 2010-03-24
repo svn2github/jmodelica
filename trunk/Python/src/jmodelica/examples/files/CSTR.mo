@@ -17,8 +17,8 @@ model CSTR "A CSTR"
   parameter Modelica.SIunits.Volume V = 100 "Reactor Volume";
   parameter Modelica.SIunits.Concentration c_init = 1000;
   parameter Modelica.SIunits.Temp_K T_init = 350;
-  Real c(start=c_init,fixed=true);
-  Real T(start=T_init,fixed=true);
+  Real c(start=c_init,fixed=true,nominal=c0);
+  Real T(start=T_init,fixed=true,nominal=T0);
 equation 
   der(c) = F0*(c0-c)/V-k0*c*exp(-EdivR/T);
   der(T) = F0*(T0-T)/V-dH/(rho*Cp)*k0*c*exp(-EdivR/T)+2*U/(r*rho*Cp)*(Tc-T);

@@ -481,6 +481,7 @@ struct jmi_func_ad_t{
  * @param n_string_u Number of string inputs.
  * @param n_sw Number of switching functions in DAE \$fF\$f.
  * @param n_sw_init Number of switching functions in DAE initialization system \$fF_0\$f.
+ * @param scaling_method Scaling method. Options are JMI_SCALING_NONE or JMI_SCALING_VARIABLES.
  * @return Error code.
  */
 int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
@@ -492,7 +493,8 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_tp,int n_real_d,
 		int n_integer_d, int n_integer_u,
 		int n_boolean_d, int n_boolean_u,
-		int n_string_d, int n_string_u, int n_sw, int n_sw_init);
+		int n_string_d, int n_string_u, int n_sw, int n_sw_init,
+		int scaling_method);
 
 /**
  * \brief Allocates a jmi_dae_t struct.

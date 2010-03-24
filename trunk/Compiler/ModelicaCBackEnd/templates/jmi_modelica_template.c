@@ -72,6 +72,10 @@ static const int N_eq_Heq = 0;
 static const int N_eq_Hineq = 0;
 static const int N_t_p = 0;
 
+static const int Scaling_method = $C_DAE_scaling_method$;
+
+#define sf(i) (jmi->variable_scaling_factors[i])
+
 $C_variable_aliases$
 
 #define _real_ci(i) ((*(jmi->z))[jmi->offs_real_ci+i])
@@ -168,7 +172,7 @@ int jmi_new(jmi_t** jmi) {
 	   N_string_ci, N_string_cd, N_string_pi, N_string_pd,
 	   N_real_dx,N_real_x, N_real_u, N_real_w,N_t_p, 
 	   N_real_d,N_integer_d,N_integer_u,N_boolean_d,N_boolean_u,
-	   N_string_d,N_string_u,N_sw,N_sw_init);
+	   N_string_d,N_string_u,N_sw,N_sw_init,Scaling_method);
 
 	// Initialize the DAE interface
 	jmi_dae_init(*jmi, *model_dae_F, N_eq_F, NULL, 0, NULL, NULL,

@@ -34,7 +34,8 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_tp,int n_real_d,
 		int n_integer_d, int n_integer_u,
 		int n_boolean_d, int n_boolean_u,
-		int n_string_d, int n_string_u, int n_sw, int n_sw_init) {
+		int n_string_d, int n_string_u, int n_sw, int n_sw_init,
+		int scaling_method) {
 
 	// Create jmi struct
 	*jmi = (jmi_t*)calloc(1,sizeof(jmi_t));
@@ -156,6 +157,8 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 	}
 
 	jmi_->tp = (jmi_real_t*)calloc(jmi_->n_tp,sizeof(jmi_real_t));
+
+	jmi_->scaling_method = scaling_method;
 
 	return 0;
 

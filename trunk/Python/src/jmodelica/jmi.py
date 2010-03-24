@@ -516,6 +516,8 @@ class Model(object):
         
         xmldoc = self._get_XMLDoc()
 
+        sc = self.jmimodel.get_variable_scaling_factors()
+
         # p_opt: free variables
         values = xmldoc.get_p_opt_initial_guess_values(include_alias=False)
         n_p_opt = self.jmimodel.opt_get_n_p_opt()
@@ -530,7 +532,10 @@ class Model(object):
                 (z_i, ptype) = _translate_value_ref(value_ref)
                 i_pi = z_i - self._offs_real_pi.value
                 i_pi_opt = p_opt_indices.index(i_pi)
-                p_opt_init[i_pi_opt] = values.get(name)
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    p_opt_init[i_pi_opt] = values.get(name)/sc[z_i]
+                else:
+                    p_opt_init[i_pi_opt] = values.get(name)
         
         # dx: derivative
         values = xmldoc.get_dx_initial_guess_values(include_alias=False)
@@ -538,7 +543,10 @@ class Model(object):
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
             i_dx = z_i - self._offs_real_dx.value
-            dx_init[i_dx] = values.get(name)
+            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                dx_init[i_dx] = values.get(name)/sc[z_i]
+            else:
+                dx_init[i_dx] = values.get(name)
         
         # x: differentiate
         values = xmldoc.get_x_initial_guess_values(include_alias=False)
@@ -546,7 +554,10 @@ class Model(object):
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
             i_x = z_i - self._offs_real_x.value
-            x_init[i_x] = values.get(name)
+            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                x_init[i_x] = values.get(name)/sc[z_i]
+            else:
+                x_init[i_x] = values.get(name)
             
         # u: input
         values = xmldoc.get_u_initial_guess_values(include_alias=False)
@@ -555,7 +566,10 @@ class Model(object):
             (z_i, ptype) = _translate_value_ref(value_ref)
             if ptype==0: # Only Reals supported here
                 i_u = z_i - self._offs_real_u.value
-                u_init[i_u] = values.get(name)
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    u_init[i_u] = values.get(name)/sc[z_i]
+                else:
+                    u_init[i_u] = values.get(name)
         
         # w: algebraic
         values = xmldoc.get_w_initial_guess_values(include_alias=False)
@@ -563,7 +577,10 @@ class Model(object):
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
             i_w = z_i - self._offs_real_w.value
-            w_init[i_w] = values.get(name) 
+            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                w_init[i_w] = values.get(name)/sc[z_i]
+            else:
+                w_init[i_w] = values.get(name)
 
     def _set_lb_values(self, p_opt_lb, dx_lb, x_lb, u_lb, w_lb):
         
@@ -581,6 +598,8 @@ class Model(object):
         
         xmldoc = self._get_XMLDoc()
 
+        sc = self.jmimodel.get_variable_scaling_factors()
+
         # p_opt: free variables
         values = xmldoc.get_p_opt_lb_values(include_alias=False)
         n_p_opt = self.jmimodel.opt_get_n_p_opt()
@@ -595,7 +614,10 @@ class Model(object):
                 (z_i, ptype) = _translate_value_ref(value_ref)
                 i_pi = z_i - self._offs_real_pi.value
                 i_pi_opt = p_opt_indices.index(i_pi)
-                p_opt_lb[i_pi_opt] = values.get(name)
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    p_opt_lb[i_pi_opt] = values.get(name)/sc[z_i]
+                else:
+                    p_opt_lb[i_pi_opt] = values.get(name)
 
         # dx: derivative
         values = xmldoc.get_dx_lb_values(include_alias=False)
@@ -603,7 +625,10 @@ class Model(object):
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
             i_dx = z_i - self._offs_real_dx.value
-            dx_lb[i_dx] = values.get(name) 
+            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                dx_lb[i_dx] = values.get(name)/sc[z_i]
+            else:
+                dx_lb[i_dx] = values.get(name)
         
         # x: differentiate
         values = xmldoc.get_x_lb_values(include_alias=False)
@@ -611,7 +636,10 @@ class Model(object):
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
             i_x = z_i - self._offs_real_x.value
-            x_lb[i_x] = values.get(name)
+            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                x_lb[i_x] = values.get(name)/sc[z_i]
+            else:
+                x_lb[i_x] = values.get(name)
             
         # u: input
         values = xmldoc.get_u_lb_values(include_alias=False)
@@ -620,7 +648,10 @@ class Model(object):
             (z_i, ptype) = _translate_value_ref(value_ref)
             if ptype==0: # Only reals supported here
                 i_u = z_i - self._offs_real_u.value
-                u_lb[i_u] = values.get(name)
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    u_lb[i_u] = values.get(name)/sc[z_i]
+                else:
+                    u_lb[i_u] = values.get(name)
         
         # w: algebraic
         values = xmldoc.get_w_lb_values(include_alias=False)
@@ -628,8 +659,10 @@ class Model(object):
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
             i_w = z_i - self._offs_real_w.value
-            #print("%d, %d" %(z_i,i_w))
-            w_lb[i_w] = values.get(name) 
+            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                w_lb[i_w] = values.get(name)/sc[z_i]
+            else:
+                w_lb[i_w] = values.get(name)
 
     def _set_ub_values(self, p_opt_ub, dx_ub, x_ub, u_ub, w_ub):
         
@@ -646,6 +679,8 @@ class Model(object):
         """        
         xmldoc = self._get_XMLDoc()
 
+        sc = self.jmimodel.get_variable_scaling_factors()
+
         # p_opt: free variables
         values = xmldoc.get_p_opt_ub_values(include_alias=False)
         n_p_opt = self.jmimodel.opt_get_n_p_opt()
@@ -660,7 +695,10 @@ class Model(object):
                 (z_i, ptype) = _translate_value_ref(value_ref)
                 i_pi = z_i - self._offs_real_pi.value
                 i_pi_opt = p_opt_indices.index(i_pi)
-                p_opt_ub[i_pi_opt] = values.get(name)
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    p_opt_ub[i_pi_opt] = values.get(name)/sc[z_i]
+                else:
+                    p_opt_ub[i_pi_opt] = values.get(name)
 
         # dx: derivative
         values = xmldoc.get_dx_ub_values(include_alias=False)
@@ -668,7 +706,10 @@ class Model(object):
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
             i_dx = z_i - self._offs_real_dx.value
-            dx_ub[i_dx] = values.get(name) 
+            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                dx_ub[i_dx] = values.get(name)/sc[z_i]
+            else:
+                dx_ub[i_dx] = values.get(name)
         
         # x: differentiate
         values = xmldoc.get_x_ub_values(include_alias=False)
@@ -676,7 +717,10 @@ class Model(object):
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
             i_x = z_i - self._offs_real_x.value
-            x_ub[i_x] = values.get(name)
+            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                x_ub[i_x] = values.get(name)/sc[z_i]
+            else:
+                x_ub[i_x] = values.get(name)
             
         # u: input
         values = xmldoc.get_u_ub_values(include_alias=False)
@@ -685,7 +729,10 @@ class Model(object):
             (z_i, ptype) = _translate_value_ref(value_ref)
             if ptype==0: # Only Reals supported here
                 i_u = z_i - self._offs_real_u.value
-                u_ub[i_u] = values.get(name)
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    u_ub[i_u] = values.get(name)/sc[z_i]
+                else:
+                    u_ub[i_u] = values.get(name)
         
         # w: algebraic
         values = xmldoc.get_w_ub_values(include_alias=False)
@@ -693,7 +740,10 @@ class Model(object):
             value_ref = xmldoc.get_valueref(name)
             (z_i, ptype) = _translate_value_ref(value_ref)
             i_w = z_i - self._offs_real_w.value
-            w_ub[i_w] = values.get(name)
+            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                w_ub[i_w] = values.get(name)/sc[z_i]
+            else:
+                w_ub[i_w] = values.get(name)
 
     def _set_lin_values(self, p_opt_lin, dx_lin, x_lin, u_lin, w_lin, dx_tp_lin, x_tp_lin, u_tp_lin, w_tp_lin):
         
@@ -1331,14 +1381,6 @@ class Model(object):
         JMI_SCALING_VARIABLES."""
         return self.jmimodel.get_scaling_method()
         
-    def set_scaling_method(self, scaling_method):
-        """Set the scaling_method. Valid values are JMI_SCALING_NONE and
-        JMI_SCALING_VARIABLES."""
-        self.jmimodel.set_scaling_method(scaling_method)
-        self.reset()
-        
-    scaling_method = property(get_scaling_method, set_scaling_method, doc="Set and get the scaling_method. Valid values are JMI_SCALING_NONE and JMI_SCALING_VARIABLES.")
-
     def get_z(self):
         """Returns a reference to the vector containing all parameters,
         variables and point-wise evalutated variables vector.
@@ -2046,7 +2088,6 @@ class JMIModel(object):
         self._dll.jmi_get_variable_scaling_factors.argtypes  = [ct.c_void_p]
 
         self._dll.jmi_get_scaling_method.argtypes  = [ct.c_void_p]
-        self._dll.jmi_set_scaling_method.argtypes  = [ct.c_void_p,ct.c_int]
 
         # ODE interface
         self._dll.jmi_ode_f.argtypes  = [ct.c_void_p]
@@ -2813,10 +2854,6 @@ class JMIModel(object):
     def get_scaling_method(self):
         """Get the scaling method. Valid values are JMI_SCALING_NONE and JMI_SCALING_VARIABLES."""
         return self._dll.jmi_get_scaling_method(self._jmi);
-
-    def set_scaling_method(self, scaling_method):
-        """Set the scaling method. Valid values are JMI_SCALING_NONE and JMI_SCALING_VARIABLES."""
-        return self._dll.jmi_set_scaling_method(self._jmi,scaling_method);
     
     def ode_f(self):
         """Evalutates the right hand side of the ODE.

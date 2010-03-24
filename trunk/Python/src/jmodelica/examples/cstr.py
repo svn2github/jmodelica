@@ -82,6 +82,7 @@ def run_demo(with_plots=True):
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     # Create a Modelica compiler instance
     oc = OptimicaCompiler()
+    oc.set_boolean_option("enable_variable_scaling",True)
         
     # Compile the stationary initialization model into a DLL
     oc.compile_model(curr_dir+"/files/CSTR.mo", "CSTR.CSTR_Init", target='ipopt')
