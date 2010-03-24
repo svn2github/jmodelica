@@ -452,13 +452,15 @@ class Model(object):
         self._set_iparam_values()
         
         # set optimizataion interval, time points and optimization indices
-        try:
+        if self._is_optimica():
             self._set_opt_interval()
             self._set_timepoints()
             self._set_p_opt_indices()
-        except etree.XPathEvalError, e:
-            # Modelica model, opt specific data does not exist
-            pass
+        
+    def _is_optimica(self):
+        """ Find out if model is compiled with OptimicaCompiler. """
+        xmldoc = self._get_XMLDoc()
+        return xmldoc.get_starttime()!=None        
 
     def _set_scaling_factors(self):
         """Load metadata saved in XML files.
@@ -1458,7 +1460,8 @@ class Model(object):
             self.jmimodel.opt_set_optimization_interval(starttime, int(starttimefree),
                                                         finaltime, int(finaltimefree))
         else:
-            print "Could not set optimization interval. Optimization starttime and/or finaltime was None."
+            raise Exception("Optimica model needs a start and final time but no start \
+                or final time could be found in XML file.")
 
     def _set_timepoints(self):       
         """ Set the optimization timepoints (if Optimica). """
