@@ -421,7 +421,7 @@ class NLPCollocation(object):
         return p_opt, data
 
     
-    def export_result_dymola(self, format='txt'):
+    def export_result_dymola(self, file_name='', format='txt'):
         """
         Export the optimization result in Dymola format. The function
         export_result_dymola is used to retrieve the solution trajectories.
@@ -439,9 +439,9 @@ class NLPCollocation(object):
         p_opt, data = self.get_result()
         
         # Write result
-        io.export_result_dymola(self._model,data)
+        io.export_result_dymola(self._model,data, file_name=file_name, format=format)
 
-    def export_result_dymola_element_interpolation(self, n_interpolation_points=20, format='txt'):
+    def export_result_dymola_element_interpolation(self, n_interpolation_points=20, file_name='', format='txt'):
         """
         Export the optimization result in Dymola format. The function
         export_result_dymola_element_interpolation is used to retrieve the
@@ -460,7 +460,7 @@ class NLPCollocation(object):
         p_opt, data = self.get_result_element_interpolation(n_interpolation_points)
         
         # Write result
-        io.export_result_dymola(self._model,data)
+        io.export_result_dymola(self._model,data, file_name=file_name, format=format)
 
     def set_initial_from_dymola(self,res, hs_init, start_time_init, final_time_init):
         """
