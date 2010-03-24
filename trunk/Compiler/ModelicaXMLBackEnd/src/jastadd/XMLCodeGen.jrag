@@ -165,23 +165,22 @@ aspect XMLCodeGen {
 	
 	public void FIdUseExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
 		ASTNode child = getChild(this,0);
-		ASTNode idUse = child.getChild(0);
 		String namespace = "exp";
 		String tag = this.xmlTag();
 		
 		str.print(indent + "<" + namespace + ":" + tag + ">");
-		idUse.prettyPrint_XML(str,"");
+		str.print(this.name());
 		str.println("</" + namespace + ":" + tag + ">");		
 	}
 	
-	
+	//is it needed? check
 	public void FIdUse.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
 		ASTNode child = getChild(this,0);
 		String namespace = "exp";
 		String tag = this.xmlTag();
 		
 		str.print(indent + "<" + namespace + ":" + tag + ">");
-		child.prettyPrint_XML(str,"");
+		str.print(this.name());
 		str.println("</" + namespace + ":" + tag + ">");
 	}
 	
@@ -200,11 +199,19 @@ aspect XMLCodeGen {
 		
 		str.print(indent + "<" + namespace + ":" + tag + ">\n");
 		for (int i=0; i<this.getNumChild();i++)
-			getChild(i).prettyPrint_XML(str,p.indent(indent));
-		
+			getChild(i).prettyPrint_XML(str,p.indent(indent));		
 		str.println(indent + "</"+ namespace + ":" + tag + ">");	
 	}
 	
+	public void FArray.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		String namespace = "exp";
+		String tag = this.xmlTag();
+		
+		str.print(indent + "<" + namespace + ":" + tag + ">\n");
+		for (FExp e : this.getFExpList())
+			e.prettyPrint_XML(str,p.indent(indent));
+		str.println(indent + "</"+ namespace + ":" + tag + ">");
+	}
 	
 //	public void FMinMaxExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
 //		String namespace = "exp";
@@ -274,6 +281,7 @@ aspect XMLTagBinding{
 		eq FSqrtExp.xmlTag() = "Sqrt";
 		eq FAtan2Exp.xmlTag() = "Atan2";		
 		eq FTimeExp.xmlTag() = "Time";
+		eq FArray.xmlTag() = "Array";
 		
 		eq FExp.xmlTag() = "*** Not supported expression ***";
 		eq FUnsupportedExp.xmlTag() = "*** not supported tag ***";

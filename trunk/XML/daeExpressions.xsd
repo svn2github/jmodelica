@@ -69,12 +69,23 @@
 				</xs:annotation>
 				<xs:complexType>
 					<xs:sequence minOccurs="0" maxOccurs="unbounded">
-						<xs:any namespace="##targetNamespace" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:any namespace="##targetNamespace"/>
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
 		</xs:sequence>
 		<xs:attribute name="name" type="xs:normalizedString" use="required"/>
+	</xs:complexType>
+	<xs:complexType name="Array">
+		<xs:annotation>
+			<xs:documentation>Array complex type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:any namespace="##targetNamespace" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:normalizedString"/>
+		<xs:attribute name="type" type="xs:normalizedString"/>
+		<xs:attribute name="size" type="xs:unsignedInt"/>
 	</xs:complexType>
 	<xs:element name="Add" type="exp:BinaryOperation">
 		<xs:annotation>
@@ -290,6 +301,11 @@
 	<xs:element name="Time" type="xs:normalizedString">
 		<xs:annotation>
 			<xs:documentation>Time variable </xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Array" type="exp:Array">
+		<xs:annotation>
+			<xs:documentation>Array definition</xs:documentation>
 		</xs:annotation>
 	</xs:element>
 </xs:schema>
