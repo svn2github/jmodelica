@@ -893,6 +893,36 @@ aspect Scalarization {
 		public Iterator<String> iterator() {
 			return Arrays.asList(topLayer()).iterator();
 		}
+		
+		/**
+		 * \brief Creates nestled for loops over a single variable, using the top layer of names.
+		 *  
+		 * Adds the outermost for loop to a list of statements.
+		 * 
+		 * @param stmts  list to add the created for statements to
+		 * @param var    name of the variable to loop over
+		 * @return  the list of statements of the innermost loop
+		 */
+		public List<FStatement> createForLoops(List<FStatement> stmts, FQName var) {
+			List<FStatement> cur = stmts;
+			for (int i = 0; i < topLayer().length; i++) {
+				FForIndex ffi = new FForIndex(topLayer()[i], new FSizeExp(var, i));
+				FForStmt fs = new FForStmt(ffi, new List());
+				cur.add(fs);
+				cur = fs.getForStmts();
+			}
+			return cur;
+		}
+		
+		/**
+		 * \brief Creates a new FArraySubscripts with uses of the names in the top layer as subscripts.
+		 */
+		public FArraySubscripts createFArraySubscripts() {
+			FArraySubscripts fas = new FArraySubscripts();
+			for (String name : this)
+				fas.addFSubscript(new FExpSubscript(new FIdUseExp(name)));
+			return fas;
+		}
 	}
 
 	/**
@@ -908,26 +938,10 @@ aspect Scalarization {
 		names.fillLayer(this);
 		HashMap<String,FExp> myIndexMap = new HashMap<String,FExp>(indexMap);
 		exp.addArrayUsesToIndexMap(myIndexMap, names);
-		List<FStatement> cur = stmts;
-		for (int i = 0; i < names.size(); i++) {
-			FForStmt fs = new FForStmt(createFForIndex(names.get(i), i), new List());
-			cur.add(fs);
-			cur = fs.getForStmts();
-		}
-		exp.createArrayTemporaries(cur, vars, myIndexMap, true);
+		List<FStatement> inner = names.createForLoops(stmts, getFQName());
+		exp.createArrayTemporaries(inner, vars, myIndexMap, true);
 		FIdUse use = createUseWithNamedSubscripts(names);
-		cur.add(new FAssignStmt(use, exp.scalarize(myIndexMap)));
-	}
-	
-	/**
-	 * \brief Create a for index that loops over this array variable.
-	 * 
-	 * @param name  the name of the new index
-	 * @param dim   the dimension to loop over
-	 */
-	public FForIndex FFunctionArray.createFForIndex(String name, int dim) {
-		FExp end = new FSizeExp(new FIdUseExp(name()), new Opt(new FIntegerLitExp(dim + 1)));
-		return new FForIndex(name, end);
+		inner.add(new FAssignStmt(use, exp.scalarize(myIndexMap)));
 	}
 	
 	/**
@@ -1018,12 +1032,87 @@ aspect Scalarization {
 	 * \brief Create a new FIdUse of this variable with uses of <code>names</code> as array subscripts.
 	 */
 	public FIdUse AbstractFVariable.createUseWithNamedSubscripts(ForNames names) {
-		FArraySubscripts fas = new FArraySubscripts();
-		for (String name : names)
-			fas.addFSubscript(new FExpSubscript(new FIdUseExp(name)));
 		FIdUse use = new FIdUse(name());
-		use.getFQName().setLastFArraySubscripts(fas);
+		use.getFQName().setLastFArraySubscripts(names.createFArraySubscripts());
 		return use;
+	}
+	
+	/**
+	 * \brief Scalarize an assignment to a record and put the resulting statements in 
+	 *        the list of statements. 
+	 * 
+	 * This method delegates to scalarizeRecordAssignment() for each cell in the array, 
+	 * or for the entire scalar expression.
+	 */
+	public void FType.scalarizeRecordArrayAssignment(
+			List<FFunctionVariable> vars, List<FStatement> stmts, 
+			HashMap<String,FExp> indexMap, FQName left, FExp right) {
+		if (isArray()) {
+			FQName fqn = left.fullCopy();
+			if (size().isUnknown()) {
+				ForNames names = new ForNames(ndims());
+				names.fillLayer(right);
+				List<FStatement> inner = names.createForLoops(stmts, left);
+				fqn.setLastFArraySubscripts(names.createFArraySubscripts());
+				FExp exp = right.extractUnknownRecordArrayCell(names);
+				scalarizeRecordAssignment(vars, inner, indexMap, fqn, exp);
+			} else {
+				for (Index i : indices()) {
+					fqn.setLastFArraySubscripts(i.newFArraySubscripts());
+					FExp exp = right.getArray().get(i);
+					scalarizeRecordAssignment(vars, stmts, indexMap, fqn, exp);
+				}
+			}
+		} else {
+			scalarizeRecordAssignment(vars, stmts, indexMap, left, right);
+		}
+	}
+	
+	/**
+	 * \brief Scalarize an assignment to a record and put the resulting statements in 
+	 *        the list of statements.
+	 */
+	public void FType.scalarizeRecordAssignment(
+			List<FFunctionVariable> vars, List<FStatement> stmts, 
+			HashMap<String,FExp> indexMap, FQName left, FExp right) {
+		stmts.add(new FAssignStmt(new FIdUse(left.fullCopy()), (FExp) right.fullCopy()));
+	}
+	
+	/**
+	 * \brief Scalarize an assignment to a record and put the resulting statements in 
+	 *        the list of statements.
+	 */
+	public void FRecordType.scalarizeRecordAssignment(
+			List<FFunctionVariable> vars, List<FStatement> stmts, 
+			HashMap<String,FExp> indexMap, FQName left, FExp right) {
+		for (FRecordComponentType comp : getComponents()) {
+			FQName fqn = left.copyAndAppend(comp.getName());
+			FExp exp = right.scalarRecordFExp(indexMap, new FQName(comp.getName()));
+			comp.getFType().scalarizeRecordArrayAssignment(vars, stmts, indexMap, fqn, exp);
+		}
+	}
+	
+	/**
+	 * \brief Create an expression describing a specific cell of an unknown array.
+	 * 
+	 * @param names  the names of the for indices to use as array subscripts
+	 */
+	public FExp FExp.extractUnknownRecordArrayCell(ForNames names) {
+		return null; // TODO: Implement this for all possible subtypes (or replace with default impl)
+	}
+	
+	public FExp FFunctionCall.extractUnknownRecordArrayCell(ForNames names) {
+		FIdUseExp exp = new FIdUseExp(tempVarName());
+		FQName fqn = exp.getFIdUse().getFQName();
+		fqn.setLastFArraySubscripts(names.createFArraySubscripts());
+		return exp;
+	}
+	
+	public FExp FIdUseExp.extractUnknownRecordArrayCell(ForNames names) {
+		FIdUseExp exp = fullCopy();
+		FQName fqn = exp.getFIdUse().getFQName();
+		fqn.setLastFArraySubscripts(names.createFArraySubscripts());
+		return exp;
 	}
 	
 	/**
@@ -1039,7 +1128,10 @@ aspect Scalarization {
 			HashMap<String,FExp> indexMap) {
 		FIdUse left = getLeft();
 		FExp right = getRight();
-		if (right.size().isUnknown()) {
+		if (left.type().isRecord()) {
+			right.createArrayTemporaries(stmts, vars, indexMap, true);
+			left.type().scalarizeRecordArrayAssignment(vars, stmts, indexMap, left.getFQName(), right);
+		} else if (right.size().isUnknown()) {
 			left.myFV().scalarizeUnknownArrayAssignment(vars, stmts, indexMap, right);
 		} else {
 			right.createArrayTemporaries(stmts, vars, indexMap, true);
@@ -1456,7 +1548,7 @@ aspect Scalarization {
 	 * \brief Scalarize expressions.
 	 */
 	public FExp FExp.scalarizeExp(HashMap<String,FExp> indexMap) {
-		return null;
+		return (FExp) fullCopy();
 	}
 
 	public FSubscript FSubscript.scalarize(HashMap<String,FExp> indexMap) {

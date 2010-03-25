@@ -77,6 +77,17 @@ aspect Flattening {
 		getArgs().flattenCalledFunctions(fc);
 	}
 	
+	public void FRecordConstructor.flattenCalledFunctions(FClass fc) {
+		getRecord().flattenMyRecord(fc);
+		getArgs().flattenCalledFunctions(fc);
+	}
+	
+	public void FIdUse.flattenMyRecord(FClass fc) {}
+	
+	public void FIdUseInstAccess.flattenMyRecord(FClass fc) {
+		getInstAccess().myInstClassDecl().flattenRecord(fc);
+	}
+	
 	// Flatten function if not already done
 	public void InstClassDecl.flattenFunction(FClass fc) {}
 	
@@ -101,7 +112,7 @@ aspect Flattening {
    		ffd.setFQName(new FQName(qualifiedName()));
 
    		for (InstComponentDecl icd : getInstComponentDecls())
-			icd.flattenInFunction(ffd);
+			icd.flattenInFunction(ffd, fc);
 		
    		FAlgorithmBlock fab;
    		if (getNumFAbstractEquation() > 0) {
@@ -147,6 +158,8 @@ aspect Flattening {
 			icd.flattenInRecord(frd, fc);
 		
 		fc.addFRecordDecl(frd);
+		
+		flattenCalledFunctions(fc);
 	}
 	
 	public FExternalStmt InstExternal.flatten(InstClassDecl func, FQName prefix) {
@@ -201,27 +214,40 @@ aspect Flattening {
 			addFStatement(new FReturnStmt());
 	}
 	
-	public void InstComponentDecl.flattenInFunction(FFunctionDecl ffd) {}
+	public void InstComponentDecl.flattenInFunction(FFunctionDecl ffd, FClass fc) {}
 	
-	public void InstAssignable.flattenInFunction(FFunctionDecl ffd) {
+	public void InstAssignable.flattenInFunction(FFunctionDecl ffd, FClass fc) {
 		if (!getComponentDecl().isConstant()) {
 			FExp e = flattenBindingFExp();
 			Opt eo = (e == null) ? new Opt() : new Opt(e);
 			FQName fqn = new FQName(getFQName());
-			fqn.setLastFArraySubscripts(size().flattenFArraySubscripts());
-			FFunctionVariable ffv;
-			if (isArray())
-				ffv = new FFunctionArray(new Opt(), type(), eo, fqn);
-			else
-				ffv = new FFunctionVariable(new Opt(), type(), eo, fqn);
+			fqn.setLastFArraySubscripts(null);
+			FFunctionVariable ffv = createFFunctionVariable(eo, fqn);
 			if (isInput())
 				ffv.setFTypePrefixInputOutput(new FInput());
 			if (isOutput())
 				ffv.setFTypePrefixInputOutput(new FOutput());
 			ffd.addFFunctionVariable(ffv);
+			myInstClassDecl().flattenRecord(fc);
 		}
 	}
+	
+	public abstract FFunctionVariable InstAssignable.createFFunctionVariable(Opt eo, FQName fqn);
 
+	public FFunctionVariable InstPrimitive.createFFunctionVariable(Opt eo, FQName fqn) {
+		if (isArray())
+			return new FFunctionArray(new Opt(), type(), eo, fqn);
+		else
+			return new FFunctionVariable(new Opt(), type(), eo, fqn);
+	}
+
+	public FFunctionVariable InstRecord.createFFunctionVariable(Opt eo, FQName fqn) {
+		// TODO: if we need separate variable class for records, create it here
+		if (isArray())
+			return new FFunctionArray(new Opt(), type(), eo, fqn);
+		else
+			return new FFunctionVariable(new Opt(), type(), eo, fqn);
+	}
 
 	// Generic method for flattening	
 	public void ASTNode.flatten(FClass fc) {

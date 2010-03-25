@@ -686,6 +686,8 @@ aspect PrettyPrint {
 	eq Continuous.toString() = "";
 	
 	syn String FType.toString() = isArray() ? name() + size() : name();
+	
+	syn String FRecordComponentType.toString() = getName() + " " + getFType();
 
 }
 

@@ -120,10 +120,42 @@ aspect Constructors {
 	 */
 	public FForIndex.FForIndex(String name, FExp end) {
 		this();
-		FExp start = new FIntegerLitExp(1);
-		setFExp(new FRangeExp(new List().add(start).add(end)));
+		setFExp(new FRangeExp(new FIntegerLitExp(1), end));
 		setFVariable(new FIntegerVariable(new FTemporaryVisibilityType(), fParameter(), 
 				new Opt(), new List(), new Opt(), new Opt(), new FQName(name)));
+	}
+	
+	/**
+	 * \brief Constructs an FForIndex with a temporary index variable and loops 
+	 *        over the given variable.        
+	 * 
+	 * @param name  the name of the index
+	 * @param var   the name of the variable to loop over
+	 * @param dim   the dimension to loop over
+	 */
+	public FForIndex.FForIndex(String name, FQName var, int dim) {
+		this(name, new FSizeExp(var, dim));
+	}
+	
+	/**
+	 * \brief Constructs an FSizeExp giving the size in the given dimension for the given variable.
+	 */
+	public FSizeExp.FSizeExp(FQName var, int dim) {
+		this(new FIdUseExp(var), new Opt(new FIntegerLitExp(dim + 1)));
+	}
+	
+	/**
+	 * \brief Constructs an FRangeExp with the given start and stop expressions.
+	 */
+	public FRangeExp.FRangeExp(FExp start, FExp stop) {
+		this(new List().add(start).add(stop));
+	}
+	
+	/**
+	 * \brief Constructs an FRangeExp with the given start, step and and stop expressions.
+	 */
+	public FRangeExp.FRangeExp(FExp start, FExp step, FExp stop) {
+		this(new List().add(start).add(step).add(stop));
 	}
 	
 	public ComponentDecl.ComponentDecl(boolean isParameter,

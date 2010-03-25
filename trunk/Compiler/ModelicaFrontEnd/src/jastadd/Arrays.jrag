@@ -291,7 +291,7 @@ aspect Arrays {
 	syn int AbstractFVariable.ndims() = -1;
 	
 	eq FVariable.ndims()         = isScalarized()? 0 : getFQName().ndims();
-	eq FFunctionArray.ndims()    = getFQName().ndims();
+	eq FFunctionArray.ndims()    = getType().ndims();
 	eq FFunctionVariable.ndims() = 0;
 	
 	/**
@@ -621,7 +621,7 @@ aspect Arrays {
 	 */	
 	syn lazy Size AbstractFVariable.size() = Size.SCALAR;
 	eq FVariable.size()      = isScalarized()? Size.SCALAR: getFQName().size();
-	eq FFunctionArray.size() = getFQName().size();
+	eq FFunctionArray.size() = getType().size();
 		
 	/**
 	 * \brief Get the array sizes. 

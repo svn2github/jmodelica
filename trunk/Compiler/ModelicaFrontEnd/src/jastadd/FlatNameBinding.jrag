@@ -47,7 +47,7 @@ aspect FlatNameBinding {
 	
 	public static AbstractFVariable ASTNode.lookupFVFromMap(
 			HashMap<String, ? extends AbstractFVariable> map, FQName fqn, boolean der) {
-		// TODO: der() på medlemmar i records
+		// TODO: der() on members of records
 		AbstractFVariable variable = map.get(der ? fqn.derName() : fqn.name());
 		if (variable == null) {
 			int i = fqn.getNumFQNamePart();
@@ -63,14 +63,11 @@ aspect FlatNameBinding {
 	}
 	
 	public AbstractFVariable AbstractFVariable.lookupFVInRecord(FQName fqn, int part) {
-		return null;
-	}
-	
-	public AbstractFVariable FRecordVariable.lookupFVInRecord(FQName fqn, int part) {
 		AbstractFVariable res = null;
-		for (FVariable fv : myFRecordDecl().getFVariables())
-			if (fv.name().equals(fqn.getFQNamePart(part).getName()))
-				res = fv;
+		if (myFRecordDecl() != null)
+			for (FVariable fv : myFRecordDecl().getFVariables())
+				if (fv.name().equals(fqn.getFQNamePart(part).getName()))
+					res = fv;
 		if (part < fqn.getNumFQNamePart() - 1 && res != null)
 			res = res.lookupFVInRecord(fqn, part + 1);
 		return res;

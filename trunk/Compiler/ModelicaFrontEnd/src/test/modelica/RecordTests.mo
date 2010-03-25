@@ -1505,7 +1505,528 @@ end RecordTests.RecordScalarize18;
 end RecordScalarize18;
 
 // TODO: Add more complicated combinations of arrays, records and modifiers
-// TODO: Add modifier setting attributes
+
+
+
+model RecordFunc1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordFunc1",
+         description="Scalarization of records in functions: accesses of components",
+         flatModel="
+fclass RecordTests.RecordFunc1
+ Real q;
+equation
+ q = RecordTests.RecordFunc1.f(1, 2);
+
+ function RecordTests.RecordFunc1.f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  RecordTests.RecordFunc1.A z;
+ algorithm
+  z.x := ix;
+  z.y := iy;
+  o := ( z.x ) * ( z.y );
+  return;
+ end RecordTests.RecordFunc1.f;
+
+ record RecordTests.RecordFunc1.A
+  Real x;
+  Real y;
+ end RecordTests.RecordFunc1.A;
+end RecordTests.RecordFunc1;
+")})));
+
+ record A
+  Real x;
+  Real y;
+ end A;
+ 
+ function f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  protected A z;
+ algorithm
+  z.x := ix;
+  z.y := iy;
+  o := z.x * z.y;
+ end f;
+ 
+ Real q = f(1, 2);
+end RecordFunc1;
+
+
+model RecordFunc2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordFunc2",
+         description="Scalarization of records in functions: assignment",
+         flatModel="
+fclass RecordTests.RecordFunc2
+ Real q;
+equation
+ q = RecordTests.RecordFunc2.f(1, 2);
+
+ function RecordTests.RecordFunc2.f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  RecordTests.RecordFunc2.A z;
+  RecordTests.RecordFunc2.A w;
+ algorithm
+  z.x := ix;
+  z.y := iy;
+  w.x := z.x;
+  w.y := z.y;
+  o := ( w.x ) * ( w.y );
+  return;
+ end RecordTests.RecordFunc2.f;
+
+ record RecordTests.RecordFunc2.A
+  Real x;
+  Real y;
+ end RecordTests.RecordFunc2.A;
+end RecordTests.RecordFunc2;
+")})));
+
+ record A
+  Real x;
+  Real y;
+ end A;
+ 
+ function f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  protected A z;
+  protected A w;
+ algorithm
+  z.x := ix;
+  z.y := iy;
+  w := z;
+  o := w.x * w.y;
+ end f;
+ 
+ Real q = f(1, 2);
+end RecordFunc2;
+
+
+model RecordFunc3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordFunc3",
+         description="Scalarization of records in functions: record constructor",
+         flatModel="
+fclass RecordTests.RecordFunc3
+ Real q;
+equation
+ q = RecordTests.RecordFunc3.f(1, 2);
+
+ function RecordTests.RecordFunc3.f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  RecordTests.RecordFunc3.A z;
+ algorithm
+  z.x := ix;
+  z.y := iy;
+  o := ( z.x ) * ( z.y );
+  return;
+ end RecordTests.RecordFunc3.f;
+
+ record RecordTests.RecordFunc3.A
+  Real x;
+  Real y;
+ end RecordTests.RecordFunc3.A;
+end RecordTests.RecordFunc3;
+")})));
+
+ record A
+  Real x;
+  Real y;
+ end A;
+ 
+ function f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  protected A z;
+ algorithm
+  z := A(ix, iy);
+  o := z.x * z.y;
+ end f;
+ 
+ Real q = f(1, 2);
+end RecordFunc3;
+
+
+model RecordFunc3b
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordFunc3b",
+         description="Scalarization of records in functions: record constructor for equivalent record",
+         flatModel="
+fclass RecordTests.RecordFunc3b
+ Real q;
+equation
+ q = RecordTests.RecordFunc3b.f(1, 2);
+
+ function RecordTests.RecordFunc3b.f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  RecordTests.RecordFunc3b.A z;
+ algorithm
+  z.x := ix;
+  z.y := iy;
+  o := ( z.x ) * ( z.y );
+  return;
+ end RecordTests.RecordFunc3b.f;
+
+ record RecordTests.RecordFunc3b.A
+  Real x;
+  Real y;
+ end RecordTests.RecordFunc3b.A;
+
+ record RecordTests.RecordFunc3b.B
+  Real x;
+  Real y;
+ end RecordTests.RecordFunc3b.B;
+end RecordTests.RecordFunc3b;
+")})));
+
+ record A
+  Real x;
+  Real y;
+ end A;
+ 
+ record B
+  Real x;
+  Real y;
+ end B;
+ 
+ function f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  protected A z;
+ algorithm
+  z := B(ix, iy);
+  o := z.x * z.y;
+ end f;
+ 
+ Real q = f(1, 2);
+end RecordFunc3b;
+
+
+model RecordFunc4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordFunc4",
+         description="Scalarization of records in functions: inner array, access",
+         flatModel="
+fclass RecordTests.RecordFunc4
+ Real q;
+equation
+ q = RecordTests.RecordFunc4.f(1, 2);
+
+ function RecordTests.RecordFunc4.f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  RecordTests.RecordFunc4.A z;
+ algorithm
+  z.x[1] := ix;
+  z.x[2] := iy;
+  o := ( z.x[1] ) * ( z.x[2] );
+  return;
+ end RecordTests.RecordFunc4.f;
+
+ record RecordTests.RecordFunc4.A
+  Real x[2];
+ end RecordTests.RecordFunc4.A;
+end RecordTests.RecordFunc4;
+")})));
+
+ record A
+  Real x[2];
+ end A;
+ 
+ function f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  protected A z;
+ algorithm
+  z.x[1] := ix;
+  z.x[2] := iy;
+  o := z.x[1] * z.x[2];
+ end f;
+ 
+ Real q = f(1, 2);
+end RecordFunc4;
+
+
+model RecordFunc5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordFunc5",
+         description="Scalarization of records in functions: inner array, assignment",
+         flatModel="
+fclass RecordTests.RecordFunc5
+ Real q;
+equation
+ q = RecordTests.RecordFunc5.f(1, 2);
+
+ function RecordTests.RecordFunc5.f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  RecordTests.RecordFunc5.A z;
+  RecordTests.RecordFunc5.A w;
+ algorithm
+  z.x[1] := ix;
+  z.x[2] := iy;
+  w.x[1] := z.x;
+  w.x[2] := z.x;
+  o := ( w.x[1] ) * ( w.x[2] );
+  return;
+ end RecordTests.RecordFunc5.f;
+
+ record RecordTests.RecordFunc5.A
+  Real x[2];
+ end RecordTests.RecordFunc5.A;
+end RecordTests.RecordFunc5;
+")})));
+
+ record A
+  Real x[2];
+ end A;
+ 
+ function f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  protected A z;
+  protected A w;
+ algorithm
+  z.x[1] := ix;
+  z.x[2] := iy;
+  w := z;
+  o := w.x[1] * w.x[2];
+ end f;
+ 
+ Real q = f(1, 2);
+end RecordFunc5;
+
+
+model RecordFunc6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordFunc6",
+         description="Scalarization of records in functions: record constructor",
+         flatModel="
+fclass RecordTests.RecordFunc6
+ Real q;
+equation
+ q = RecordTests.RecordFunc6.f(1, 2);
+
+ function RecordTests.RecordFunc6.f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  RecordTests.RecordFunc6.A z;
+ algorithm
+  z.x[1] := ix;
+  z.x[2] := iy;
+  o := ( z.x[1] ) * ( z.x[2] );
+  return;
+ end RecordTests.RecordFunc6.f;
+
+ record RecordTests.RecordFunc6.A
+  Real x[2];
+ end RecordTests.RecordFunc6.A;
+end RecordTests.RecordFunc6;
+")})));
+
+ record A
+  Real x[2];
+ end A;
+ 
+ function f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  protected A z;
+ algorithm
+  z := A({ix, iy});
+  o := z.x[1] * z.x[2];
+ end f;
+ 
+ Real q = f(1, 2);
+end RecordFunc6;
+
+
+model RecordFunc7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordFunc7",
+         description="Scalarization of records in functions: array of records, access",
+         flatModel="
+fclass RecordTests.RecordFunc7
+ Real q;
+equation
+ q = RecordTests.RecordFunc7.f(1, 2);
+
+ function RecordTests.RecordFunc7.f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  RecordTests.RecordFunc7.A[2] z;
+ algorithm
+  z[1].x := ix;
+  z[2].x := iy;
+  o := ( z[1].x ) * ( z[2].x );
+  return;
+ end RecordTests.RecordFunc7.f;
+
+ record RecordTests.RecordFunc7.A
+  Real x;
+ end RecordTests.RecordFunc7.A;
+end RecordTests.RecordFunc7;
+")})));
+
+ record A
+  Real x;
+ end A;
+ 
+ function f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  protected A z[2];
+ algorithm
+  z[1].x := ix;
+  z[2].x := iy;
+  o := z[1].x * z[2].x;
+ end f;
+ 
+ Real q = f(1, 2);
+end RecordFunc7;
+
+
+model RecordFunc8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordFunc8",
+         description="Scalarization of records in functions: array of records, assignment",
+         flatModel="
+fclass RecordTests.RecordFunc8
+ Real q;
+equation
+ q = RecordTests.RecordFunc8.f(1, 2);
+
+ function RecordTests.RecordFunc8.f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  RecordTests.RecordFunc8.A[2] z;
+  RecordTests.RecordFunc8.A[2] w;
+ algorithm
+  z[1].x := ix;
+  z[1].y := iy;
+  z[2].x := ix;
+  z[2].y := iy;
+  w[1].x := z[1].x;
+  w[1].y := z[1].y;
+  w[2].x := z[2].x;
+  w[2].y := z[2].y;
+  o := ( w[1].x ) * ( w[2].x );
+  return;
+ end RecordTests.RecordFunc8.f;
+
+ record RecordTests.RecordFunc8.A
+  Real x;
+  Real y;
+ end RecordTests.RecordFunc8.A;
+end RecordTests.RecordFunc8;
+")})));
+
+ record A
+  Real x;
+  Real y;
+ end A;
+ 
+ function f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  protected A z[2];
+  protected A w[2];
+ algorithm
+  z[1].x := ix;
+  z[1].y := iy;
+  z[2].x := ix;
+  z[2].y := iy;
+  w := z;
+  o := w[1].x * w[2].x;
+ end f;
+ 
+ Real q = f(1, 2);
+end RecordFunc8;
+
+
+model RecordFunc9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordFunc9",
+         description="Scalarization of records in functions: array of records, constructor",
+         flatModel="
+fclass RecordTests.RecordFunc9
+ Real q;
+equation
+ q = RecordTests.RecordFunc9.f(1, 2);
+
+ function RecordTests.RecordFunc9.f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  RecordTests.RecordFunc9.A[2] z;
+ algorithm
+  z[1].x := ix;
+  z[1].y := iy;
+  z[2].x := ix + 2;
+  z[2].y := iy + 2;
+  o := ( z[1].x ) * ( z[2].x );
+  return;
+ end RecordTests.RecordFunc9.f;
+
+ record RecordTests.RecordFunc9.A
+  Real x;
+  Real y;
+ end RecordTests.RecordFunc9.A;
+end RecordTests.RecordFunc9;
+")})));
+
+ record A
+  Real x;
+  Real y;
+ end A;
+ 
+ function f
+  input Real ix;
+  input Real iy;
+  output Real o;
+  protected A z[2];
+ algorithm
+  z := {A(ix, iy), A(ix+2, iy+2)};
+  o := z[1].x * z[2].x;
+ end f;
+ 
+ Real q = f(1, 2);
+end RecordFunc9;
 
 
 
