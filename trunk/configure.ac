@@ -166,7 +166,7 @@ AC_ARG_WITH([cppad],
    [with_cppad=no])
 
 AS_IF([test "x$with_cppad" = xno],
-      [cppad="ThirdParty/CppAD/cppad-20090303.0/"])
+      [cppad="ThirdParty/CppAD/cppad-20100325/"])
 
 AS_IF([test "x$with_cppad" = xno],
       [AC_CHECK_FILE($srcdir/$cppad/cppad/cppad.hpp,
