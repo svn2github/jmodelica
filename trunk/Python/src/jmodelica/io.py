@@ -178,11 +178,17 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
         f.write("%12.12f" % data[0,0])
         for ref in range(n_parameters):
-            f.write(" %12.12f" % (z[ref]*sc[ref]))
+            if model.get_scaling_method() & jmodelica.jmi.JMI_SCALING_VARIABLES > 0:
+                f.write(" %12.12f" % (z[ref]*sc[ref]))
+            else:
+                f.write(" %12.12f" % (z[ref]))
         f.write('\n')
         f.write("%12.12f" % data[-1,0])
         for ref in range(n_parameters):
-            f.write(" %12.12f" % (z[ref]*sc[ref]))
+            if model.get_scaling_method() & jmodelica.jmi.JMI_SCALING_VARIABLES > 0:
+                f.write(" %12.12f" % (z[ref]*sc[ref]))
+            else:
+                f.write(" %12.12f" % (z[ref]))
         f.write('\n\n')
 
         # Write data set 2
@@ -194,7 +200,10 @@ def export_result_dymola(model, data, file_name='', format='txt'):
                 if ref==0: # Don't scale time
                     f.write(" %12.12f" % data[i,ref])
                 else:
-                    f.write(" %12.12f" % (data[i,ref]*sc[ref-1+n_parameters]))
+                    if model.get_scaling_method() & jmodelica.jmi.JMI_SCALING_VARIABLES > 0:
+                        f.write(" %12.12f" % (data[i,ref]*sc[ref-1+n_parameters]))
+                    else:
+                        f.write(" %12.12f" % (data[i,ref]))
             f.write('\n')
 
         f.write('\n')
