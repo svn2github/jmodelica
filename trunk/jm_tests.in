@@ -117,9 +117,11 @@ function filter_python_separate() {
   cat ${TMP} \
   | fgrep -v PASSED \
   | sed -n \
-        -e '1 i0' \
+        -e '1 i\
+            0' \
         -e 's/^TEST FAILED(errors=\([0-9]*\))/\1+/' \
-        -e '$ ap' \
+        -e '$ a\
+            p' \
   | dc \
   | sed -e 's/^0$/PASSED/' \
         -e 's/^\([0-9]*\)$/TEST FAILED(failures=\1)/'
@@ -136,12 +138,14 @@ function junit_test() {
       ant_test 2>&1 \
         | egrep "(\[(jastadd|junit)\]|BUILD FAILED|\[java\] Error when parsing file:)" \
 	| sed -n \
-	    -e '1 i0 0' \
+	    -e '1 i\
+                0 0' \
             -e 's/^.*\[jastadd\] \(Semantic errors\|Syntax error\).*$/BUILD FAILED/' \
 	    -e 's/^.*\[java\] Error when parsing file:.*$/BUILD FAILED/' \
 	    -e 's/^.*Failures: \([0-9]*\), Errors: \([0-9]*\),.*$/r\1+r\2+/p' \
 	    -e 's/^.*\(BUILD FAILED\).*$/[\1]pq/p' \
-	    -e '$ ar[failures=]nn[, errors=]np' \
+	    -e '$ a\
+                r[failures=]nn[, errors=]np' \
 	| dc \
 	| sed -e 's/failures=0, errors=0/PASSED/' \
 	    -e 's/\(failures=.*, errors=.*\)/TEST FAILED (\1)/'
