@@ -691,7 +691,7 @@ class NLPCollocation(object):
                     else:
                         var_data[:,col_index] = N.ones(n_points)*traj.x[0]
                 else:
-                    if self._modelget_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
+                    if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
                         var_data[:,col_index] = traj.x/sc_u[w_index]
                     else:
                         var_data[:,col_index] = traj.x
