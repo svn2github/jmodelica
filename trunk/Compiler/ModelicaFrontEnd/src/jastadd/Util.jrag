@@ -906,6 +906,17 @@ aspect FlatFunctionUtils {
 	 }
 	 
 	 /**
+	  * \brief Returns a list of all FFunctionVariables declared as "input".
+	  */
+	 syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myProtected() {
+		 ArrayList<FFunctionVariable> l = new ArrayList<FFunctionVariable>();
+		 for (FFunctionVariable var : myNonInputs())
+			 if (!var.isOutput())
+				 l.add(var);
+		 return l;
+	 }
+	 
+	 /**
 	  * \brief Returns a list of all FFunctionVariables not declared as "input".
 	  */
 	 syn lazy ArrayList<FFunctionVariable> FFunctionDecl.myNonInputs() {

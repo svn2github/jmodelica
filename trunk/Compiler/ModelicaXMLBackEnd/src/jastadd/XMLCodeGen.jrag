@@ -59,25 +59,7 @@ aspect XMLCodeGen {
 	    */
 	}
 	
-	//PrettyPrint of equation in residual form: expression1-expression2 = 0
-	public void FEquation.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
-		ASTNode left = getLeft();
-		ASTNode right = getRight();
-		String eqXMLtag = this.xmlTag();
-		FSubExp fsubexp = new FSubExp();
-		String subXMLtag = fsubexp.xmlTag();
-		String eqNamespace = "equ";
-		String expNamespace = "exp";
-		
-		str.println(indent+"<" +eqNamespace+ ":" + eqXMLtag + ">");
-		str.println(indent+"\t<" + expNamespace + ":" + subXMLtag + ">");
-		left.prettyPrint_XML(str,indent+"\t\t");
-		right.prettyPrint_XML(str,indent+"\t\t");
-		str.println(indent+"\t</" + expNamespace + ":" + subXMLtag + ">");
-		str.println(indent+"</" +eqNamespace+ ":" + eqXMLtag + ">");
-	}
-
-	
+	//------------------------ Expressions -------------------------
 	public void FLitExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
 		String namespace ="exp";
 		String tag = this.xmlTag();
@@ -213,82 +195,159 @@ aspect XMLCodeGen {
 		str.println(indent + "</"+ namespace + ":" + tag + ">");
 	}
 	
-//	public void FMinMaxExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
-//		String namespace = "exp";
-//		String tag = this.xmlTag();
-//		
-//		str.print(indent + "<" + namespace + ":" + tag + ">\n");
-//		this.getX().prettyPrint_XML(str,p.indent(indent));
-//		if(this.hasY())
-//			this.getY().prettyPrint_XML(str,p.indent(indent));
-//		str.println(indent + "</"+ namespace + ":" + tag + ">");
-//	}
+	//------------------------ Equations -------------------------
+	public void FEquation.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		ASTNode left = getLeft();
+		ASTNode right = getRight();
+		String eqXMLtag = this.xmlTag();
+		FSubExp fsubexp = new FSubExp();
+		String subXMLtag = fsubexp.xmlTag();
+		String eqNamespace = "equ";
+		String expNamespace = "exp";
+		
+		str.println(indent+"<" +eqNamespace+ ":" + eqXMLtag + ">");
+		str.println(indent+"\t<" + expNamespace + ":" + subXMLtag + ">");
+		left.prettyPrint_XML(str,indent+"\t\t");
+		right.prettyPrint_XML(str,indent+"\t\t");
+		str.println(indent+"\t</" + expNamespace + ":" + subXMLtag + ">");
+		str.println(indent+"</" +eqNamespace+ ":" + eqXMLtag + ">");
+	}
 	
-	
-}
-
+	//-------------------- Functions ---------------------------
+    public void FFunctionDecl.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+        String namespace="fun";
+        String tag = this.xmlTag();
+        String fName = this.name();
+        
+        str.print(indent + "<" + namespace + ":" + tag + "name=\"" + fName + "\">\n");
+        	
+        	for(FFunctionVariable var : this.myOutputs())
+        		var.prettyPrint_XML(str,p.indent(indent));
+        	for(FFunctionVariable var : this.myInputs())
+                var.prettyPrint_XML(str,p.indent(indent));
+            for(FFunctionVariable var : this.myProtected())
+                var.prettyPrint_XML(str,p.indent(indent));
+            
+            this.getFAlgorithmBlock().prettyPrint_XML(str,p.indent(indent));
+        
+        str.println(indent + "</"+ namespace + ":" + tag + ">");
+    }
+    
+    public void FFunctionVariable.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+        String namespace = "fun";
+        String tag = "";
+        String nameAttr = " name=\"" + this.name() + "\"";
+        String typeAttr = " type=\"" + this.getType().toString() + "\"";
+        String nilAttr = " xsi:nil=\"true\"";
+        	
+        if(this.isOutput()){
+        	tag = "OutputVariable";
+        }else{
+        	if(this.isInput()){
+        		tag="InputVariable";
+        	}else{
+        		tag="ProtectedVariable";
+        	}
+        }
+        
+        if(this.hasBindingExp()){
+        	str.print(indent + "<" + namespace + ":" + tag + nameAttr + typeAttr + ">\n");
+        	this.getBindingExp().prettyPrint_XML(str,p.indent(indent));
+        	str.println(indent + "</"+ namespace + ":" + tag + ">");
+        }else{
+        	str.print(indent + "<" + namespace + ":" + tag + nameAttr + typeAttr + nilAttr + "/>\n");
+        }      
+    }
+    
+    //-------------------- Algorithms ---------------------------
+    public void FAlgorithmBlock.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+        String namespace="fun";
+        String tag = this.xmlTag();
+        
+		str.print(indent + "<" + namespace + ":" + tag + ">");
+    	for (FStatement s : this.getFStatementList())
+    		s.prettyPrint_XML(str,p.indent(indent));
+		str.println("</"+ namespace + ":" + tag + ">");
+    }
+    
+    public void FStatement.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+    	return;
+    }
+    
+}//aspect end
 
 aspect XMLTagBinding{
-			
-		//XML tags definition for expressions
-		syn String FIdUse.xmlTag();
-		//syn String FIdUseExp.xmlTag();
-		syn String FExp.xmlTag();
-		
-		eq FIdUse.xmlTag() = "Identifier";
-		eq FIdUseExp.xmlTag() = "Identifier";
-		eq FAddExp.xmlTag() = "Add";
-		eq FSubExp.xmlTag() = "Sub";
-		eq FMulExp.xmlTag() = "Mul";
-		eq FDivExp.xmlTag() = "Div";
-		eq FPowExp.xmlTag() = "Pow";
-		eq FDotAddExp.xmlTag() = "DotAdd";
-		eq FDotSubExp.xmlTag() = "DotSub";
-		eq FDotMulExp.xmlTag() = "DotMul";
-		eq FDotDivExp.xmlTag() = "DotDiv";
-		eq FDotPowExp.xmlTag() = "DotPow";
-		eq FNegExp.xmlTag() = "Neg";
-		eq FLtExp.xmlTag() = "LogLt";
-		eq FLeqExp.xmlTag() = "LogLeq";
-		eq FGtExp.xmlTag() = "LogGt";
-		eq FGeqExp.xmlTag()= "LogGeq";
-		eq FEqExp.xmlTag()= "LogEq";
-		eq FNeqExp.xmlTag()= "LogNeq";
-		eq FNotExp.xmlTag() = "Not";
-		eq FOrExp.xmlTag() = "Or";
-		eq FAndExp.xmlTag() = "And";
-		eq FMinExp.xmlTag() = "Min";
-		eq FMaxExp.xmlTag() = "Max";
-		eq FAbsExp.xmlTag() = "Abs";
-		eq FIntegerLitExp.xmlTag() = "IntegerLiteral";
-		eq FRealLitExp.xmlTag() = "RealLiteral";
-		eq FBooleanLitExpFalse.xmlTag() = "BooleanLiteral";
-		eq FBooleanLitExpTrue.xmlTag() = "BooleanLiteral";
-		eq FStringLitExp.xmlTag() = "StringLiteral";
-		eq FDerExp.xmlTag() = "Der";
-		eq FSinExp.xmlTag() = "Sin";
-		eq FCosExp.xmlTag() = "Cos";
-		eq FTanExp.xmlTag() = "Tan";
-		eq FAsinExp.xmlTag() = "Asin";
-		eq FAcosExp.xmlTag() = "Acos";
-		eq FAtanExp.xmlTag() = "Atan";
-		eq FSinhExp.xmlTag() = "Sinh";
-		eq FCoshExp.xmlTag() = "Cosh";
-		eq FTanhExp.xmlTag() = "Tanh";
-		eq FExpExp.xmlTag() = "Exp";
-		eq FLogExp.xmlTag() = "Log";
-		eq FLog10Exp.xmlTag() = "Log10";
-		eq FSqrtExp.xmlTag() = "Sqrt";
-		eq FAtan2Exp.xmlTag() = "Atan2";		
-		eq FTimeExp.xmlTag() = "Time";
-		eq FArray.xmlTag() = "Array";
-		
-		eq FExp.xmlTag() = "*** Not supported expression ***";
-		eq FUnsupportedExp.xmlTag() = "*** not supported tag ***";
-		
-		syn String FEquation.xmlTag();
-		eq FEquation.xmlTag() = "Equation";
-				
-		//System.out.println("Warning: the model can cointains unsopported expressions and the generated XML document can be unvalid");
-	
+           
+        //XML tags definition for expressions
+        syn String FIdUse.xmlTag();
+        syn String FExp.xmlTag();
+       
+        //literals and identifiers
+        eq FIdUse.xmlTag() = "Identifier";
+        eq FIdUseExp.xmlTag() = "Identifier";
+        eq FIntegerLitExp.xmlTag() = "IntegerLiteral";
+        eq FRealLitExp.xmlTag() = "RealLiteral";
+        eq FBooleanLitExpFalse.xmlTag() = "BooleanLiteral";
+        eq FBooleanLitExpTrue.xmlTag() = "BooleanLiteral";
+        eq FStringLitExp.xmlTag() = "StringLiteral";
+        //operators
+        eq FAddExp.xmlTag() = "Add";
+        eq FSubExp.xmlTag() = "Sub";
+        eq FMulExp.xmlTag() = "Mul";
+        eq FDivExp.xmlTag() = "Div";
+        eq FPowExp.xmlTag() = "Pow";
+        eq FDotAddExp.xmlTag() = "DotAdd";
+        eq FDotSubExp.xmlTag() = "DotSub";
+        eq FDotMulExp.xmlTag() = "DotMul";
+        eq FDotDivExp.xmlTag() = "DotDiv";
+        eq FDotPowExp.xmlTag() = "DotPow";
+        eq FNegExp.xmlTag() = "Neg";
+        eq FLtExp.xmlTag() = "LogLt";
+        eq FLeqExp.xmlTag() = "LogLeq";
+        eq FGtExp.xmlTag() = "LogGt";
+        eq FGeqExp.xmlTag()= "LogGeq";
+        eq FEqExp.xmlTag()= "LogEq";
+        eq FNeqExp.xmlTag()= "LogNeq";
+        eq FNotExp.xmlTag() = "Not";
+        eq FOrExp.xmlTag() = "Or";
+        eq FAndExp.xmlTag() = "And";
+        //built-in functions
+        eq FMinExp.xmlTag() = "Min";
+        eq FMaxExp.xmlTag() = "Max";
+        eq FAbsExp.xmlTag() = "Abs";
+        eq FDerExp.xmlTag() = "Der";
+        eq FSinExp.xmlTag() = "Sin";
+        eq FCosExp.xmlTag() = "Cos";
+        eq FTanExp.xmlTag() = "Tan";
+        eq FAsinExp.xmlTag() = "Asin";
+        eq FAcosExp.xmlTag() = "Acos";
+        eq FAtanExp.xmlTag() = "Atan";
+        eq FSinhExp.xmlTag() = "Sinh";
+        eq FCoshExp.xmlTag() = "Cosh";
+        eq FTanhExp.xmlTag() = "Tanh";
+        eq FExpExp.xmlTag() = "Exp";
+        eq FLogExp.xmlTag() = "Log";
+        eq FLog10Exp.xmlTag() = "Log10";
+        eq FSqrtExp.xmlTag() = "Sqrt";
+        eq FAtan2Exp.xmlTag() = "Atan2";       
+        eq FTimeExp.xmlTag() = "Time";
+        //other expressions
+        eq FArray.xmlTag() = "Array";   
+        eq FFunctionCall.xmlTag() = "FunctionCall";
+        //unsupported expressions       
+        eq FExp.xmlTag() = "*** Not supported expression ***";
+        eq FUnsupportedExp.xmlTag() = "*** not supported tag ***";
+       
+        //equations
+        syn String FEquation.xmlTag();
+        eq FEquation.xmlTag() = "Equation";
+       
+        //functions
+        syn String FFunctionDecl.xmlTag();
+        eq FFunctionDecl.xmlTag() = "Function";
+        syn String FAlgorithmBlock.xmlTag();
+        eq FAlgorithmBlock.xmlTag() = "Algorithm";
+       
+        //System.out.println("Warning: the model can cointains unsopported expressions and the generated XML document can be unvalid");
+   
 }
