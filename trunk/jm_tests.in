@@ -8,17 +8,17 @@
 # ====== Variables to set ======
 
 # You must change these
-JMODELICA_HOME=/path/to/jmodelica/install/dir
-JMODELICA_SRC=/path/to/jmodelica/source/root
-IPOPT_HOME=/path/to/ipopt/install/dir
+JMODELICA_HOME=@prefix@
+JMODELICA_SRC=@abs_top_srcdir@
+IPOPT_HOME=@IPOPT_HOME@
 
 # You may need to change these
 JAVA_HOME=/opt/java/jdk1.6.0_04/
-PYTHON_HOME=/opt/python/python2.6/
-BUILD=${JMODELICA_SRC}/build
+PYTHON_HOME=/opt/python/python2.5/
+BUILD=@abs_builddir@
 
 # You most likely don't need to change these
-CPPAD_HOME=${JMODELICA_SRC}/ThirdParty/CppAD/cppad-20090303.0/
+CPPAD_HOME=${JMODELICA_HOME}/ThirdParty/CppAD/
 PYTHONPATH=${PYTHON_HOME}:${JMODELICA_HOME}/Python/ 
 LD_LIBRARY_PATH=/lib:${IPOPT_HOME}/lib 
 

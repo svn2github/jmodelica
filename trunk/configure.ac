@@ -257,6 +257,7 @@ AC_CONFIG_FILES([
  docbook/UsersGuide/Makefile
  Python/jm_ipython.sh
  Python/jm_python.sh
+ jm_tests
 ])
 
 
