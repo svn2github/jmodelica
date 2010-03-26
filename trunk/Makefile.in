@@ -885,7 +885,7 @@ bindist: bindistdir
 
 test: install
 	mkdir -p test_tmp
-	cd test_tmp; $(prefix)/jm_tests -o -p -n
+	cd test_tmp; $(prefix)/jm_tests 
 	rm -rf test_tmp
 
 # clean-local: clean-jmi-examples clean-frontends
