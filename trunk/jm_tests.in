@@ -8,7 +8,7 @@
 # ====== Variables to set ======
 
 # You may need to change these
-JAVA_HOME=/opt/java/jdk1.6.0_04/
+JAVA_HOME=@JAVA_HOME@
 PYTHON_HOME=/opt/python/python2.5/
 
 # Variables set by configure script

@@ -158,6 +158,10 @@ AM_CONDITIONAL([WITH_MINGW],[test "x$with_mingw" != xno])
 AC_SUBST(MINGW_HOME)
 MINGW_HOME=$mingw
 
+# Detect Java home directory
+AC_SUBST(JAVA_HOME)
+JAVA_HOME=`$(dirname $0)/java_home.sh`
+
 # Detect CppAD
 AC_ARG_WITH([cppad],
    [AS_HELP_STRING([--with-cppad],
