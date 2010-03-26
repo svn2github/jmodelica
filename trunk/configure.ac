@@ -160,7 +160,18 @@ MINGW_HOME=$mingw
 
 # Detect Java home directory
 AC_SUBST(_JAVA_HOME_)
-_JAVA_HOME_=`$(dirname $0)/java_home.sh`
+
+
+
+case $build in
+  *-mingw*)
+	_JAVA_HOME_=
+    ;;
+  *)
+	_JAVA_HOME_=`$(dirname $0)/java_home.sh`
+    ;;  
+esac
+
 
 # Detect CppAD
 AC_ARG_WITH([cppad],
