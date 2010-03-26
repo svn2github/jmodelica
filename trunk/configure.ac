@@ -159,8 +159,8 @@ AC_SUBST(MINGW_HOME)
 MINGW_HOME=$mingw
 
 # Detect Java home directory
-AC_SUBST(JAVA_HOME)
-JAVA_HOME=`$(dirname $0)/java_home.sh`
+AC_SUBST(_JAVA_HOME_)
+_JAVA_HOME_=`$(dirname $0)/java_home.sh`
 
 # Detect CppAD
 AC_ARG_WITH([cppad],

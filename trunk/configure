@@ -802,7 +802,7 @@ WITH_CPPAD
 CPPAD_HOME
 COMPILE_WITH_CPPAD_FALSE
 COMPILE_WITH_CPPAD_TRUE
-JAVA_HOME
+_JAVA_HOME_
 MINGW_HOME
 WITH_MINGW_FALSE
 WITH_MINGW_TRUE
@@ -16158,7 +16158,7 @@ MINGW_HOME=$mingw
 
 # Detect Java home directory
 
-JAVA_HOME=`$(dirname $0)/java_home.sh`
+_JAVA_HOME_=`$(dirname $0)/java_home.sh`
 
 # Detect CppAD
 
