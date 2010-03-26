@@ -865,22 +865,21 @@ aspect CCodeGen {
 		if (!(this instanceof FDerivativeVariable)) {
 			str.print(indent + "(*res)[" + i + "] = ");
 			if (startAttributeSet()) {
-				startAttributeExp().prettyPrint_C(str,"");
+				if (root().options.getBooleanOption("enable_variable_scaling")) {
+					str.print("(");
+					startAttributeExp().prettyPrint_C(str,"");					
+					str.print(")");
+					str.print("/sf(");
+					str.print(valueReference());
+					str.print(")");
+				} else {
+					startAttributeExp().prettyPrint_C(str,"");					
+				}
 			} else {
 				str.print("0.0");
 			}
 			str.print(" - ");
-			if (root().options.getBooleanOption("enable_variable_scaling")) {
-				str.print("(");
-				str.print(name_C());
-				str.print(")");
-				str.print("*sf(");
-				str.print(valueReference());
-				str.print(")");
-			} else {
-				str.print(name_C());
-			}
-			
+			str.print(name_C());	
 			str.print(";\n");
 		}
 	}
