@@ -50,15 +50,19 @@ public class JunitGenerator {
 	
 	public static void main(String args[]) {
 		/* The first argument is the name of the .mo file to
-		 * generate a Junit test class from, the second argument is
-		 * the name of the class in this file, and the final
+		 * generate a Junit test class from and the final
 		 * argument is the name of the directory in which
-		 * the generated test class is stored.
+		 * the generated test class is stored. The name of 
+		 * the class in the fale is assumed to be the same as 
+		 * the filename, without the ".mo" suffix.
 		 */
-		JunitGenerator jg = new JunitGenerator(args[0],args[1]);
+		String sep = System.getProperty("file.separator");
+		String fileName = args[0];
+		String className = fileName.substring(fileName.lastIndexOf(sep) + 1, fileName.lastIndexOf('.'));
+		JunitGenerator jg = new JunitGenerator(fileName, className);
 		StringBuilder str = new StringBuilder();
 		//jg.ts.printTests(str);
-		jg.ts.dumpJunit(args[0],args[2]);
+		jg.ts.dumpJunit(fileName, args[1]);
 		//System.out.println(str.toString());
 	}
 	

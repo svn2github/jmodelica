@@ -204,14 +204,12 @@
 
 	<!-- Generates tests from a single .mo file -->
 	<target name="gen-test-file">
-		<propertyregex property="gen-test_class" input="${gen-test_path}" regexp="^.*/([^/]*).mo$" replace="\1" />
 		<trycatch>
 			<try>
 				<java classname="org.jmodelica.optimica.compiler.JunitGenerator" 
 						classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar:bin/util.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" 
 						fork="true" failonerror="true" dir="." maxmemory="512M">
 					<arg value="${gen-test_path}" />
-					<arg value="${gen-test_class}" />
 					<arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated" />
 				</java>
 			</try>
