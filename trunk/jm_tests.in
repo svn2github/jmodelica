@@ -7,8 +7,11 @@
 
 # ====== Variables to set ======
 
+if [[ "$(uname -o)" != "Msys" ]]; then
+  JAVA_HOME=@_JAVA_HOME_@
+fi
+
 # You may need to change these
-JAVA_HOME=@_JAVA_HOME_@
 PYTHON_HOME=/opt/python/python2.5/
 
 # Variables set by configure script
