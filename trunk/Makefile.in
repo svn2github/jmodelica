@@ -691,7 +691,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-generic clean-libtool clean-local mostlyclean-am
+clean-am: clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -764,20 +764,20 @@ uninstall-am:
 
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am all-local am--refresh check check-am clean \
-	clean-generic clean-libtool clean-local ctags ctags-recursive \
-	dist dist-all dist-bzip2 dist-gzip dist-lzma dist-shar \
-	dist-tarZ dist-xz dist-zip distcheck distclean \
-	distclean-generic distclean-hdr distclean-libtool \
-	distclean-tags distcleancheck distdir distuninstallcheck dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-exec-local install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
-	ps ps-am tags tags-recursive uninstall uninstall-am
+	clean-generic clean-libtool ctags ctags-recursive dist \
+	dist-all dist-bzip2 dist-gzip dist-lzma dist-shar dist-tarZ \
+	dist-xz dist-zip distcheck distclean distclean-generic \
+	distclean-hdr distclean-libtool distclean-tags distcleancheck \
+	distdir distuninstallcheck dvi dvi-am html html-am info \
+	info-am install install-am install-data install-data-am \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-exec-local install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs installdirs-am maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
+	uninstall uninstall-am
 
 
 all-local:
@@ -883,21 +883,26 @@ bindist: bindistdir
 	rm -rf $(bindistdir)
 	rm -rf $(bindistdir).tar
 
-clean-local: clean-jmi-examples clean-frontends
+test: install
+	mkdir -p test_tmp
+	cd test_tmp; $(prefix)/jm_tests -o -p -n
+	rm -rf test_tmp
 
-jmi-examples: install
-	cd JMI/examples/Vdp; $(MAKE) all
-	cd JMI/examples/Vdp_cppad; $(MAKE) all
-	cd JMI/examples/FurutaPendulum; $(MAKE) all
-	cd JMI/examples/CSTR; $(MAKE) all
-	cd JMI/examples/CSTR2; $(MAKE) all
+# clean-local: clean-jmi-examples clean-frontends
 
-clean-jmi-examples: 
-	cd JMI/examples/Vdp; $(MAKE) clean
-	cd JMI/examples/Vdp_cppad; $(MAKE) clean
-	cd JMI/examples/FurutaPendulum; $(MAKE) clean
-	cd JMI/examples/CSTR; $(MAKE) clean
-	cd JMI/examples/CSTR2; $(MAKE) clean
+# jmi-examples: install
+# 	cd JMI/examples/Vdp; $(MAKE) all
+# 	cd JMI/examples/Vdp_cppad; $(MAKE) all
+# 	cd JMI/examples/FurutaPendulum; $(MAKE) all
+# 	cd JMI/examples/CSTR; $(MAKE) all
+# 	cd JMI/examples/CSTR2; $(MAKE) all
+
+# clean-jmi-examples: 
+# 	cd JMI/examples/Vdp; $(MAKE) clean
+# 	cd JMI/examples/Vdp_cppad; $(MAKE) clean
+# 	cd JMI/examples/FurutaPendulum; $(MAKE) clean
+# 	cd JMI/examples/CSTR; $(MAKE) clean
+# 	cd JMI/examples/CSTR2; $(MAKE) clean
 
 clean-frontends:
 #	cd $(abs_top_srcdir)/Compiler/ModelicaFrontEnd; \

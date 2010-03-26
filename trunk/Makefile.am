@@ -134,21 +134,26 @@ bindist: bindistdir
 	rm -rf $(bindistdir)
 	rm -rf $(bindistdir).tar
 
-clean-local: clean-jmi-examples clean-frontends
+test: install
+	mkdir -p test_tmp
+	cd test_tmp; $(prefix)/jm_tests -o -p -n
+	rm -rf test_tmp
 
-jmi-examples: install
-	cd JMI/examples/Vdp; $(MAKE) all
-	cd JMI/examples/Vdp_cppad; $(MAKE) all
-	cd JMI/examples/FurutaPendulum; $(MAKE) all
-	cd JMI/examples/CSTR; $(MAKE) all
-	cd JMI/examples/CSTR2; $(MAKE) all
+# clean-local: clean-jmi-examples clean-frontends
 
-clean-jmi-examples: 
-	cd JMI/examples/Vdp; $(MAKE) clean
-	cd JMI/examples/Vdp_cppad; $(MAKE) clean
-	cd JMI/examples/FurutaPendulum; $(MAKE) clean
-	cd JMI/examples/CSTR; $(MAKE) clean
-	cd JMI/examples/CSTR2; $(MAKE) clean
+# jmi-examples: install
+# 	cd JMI/examples/Vdp; $(MAKE) all
+# 	cd JMI/examples/Vdp_cppad; $(MAKE) all
+# 	cd JMI/examples/FurutaPendulum; $(MAKE) all
+# 	cd JMI/examples/CSTR; $(MAKE) all
+# 	cd JMI/examples/CSTR2; $(MAKE) all
+
+# clean-jmi-examples: 
+# 	cd JMI/examples/Vdp; $(MAKE) clean
+# 	cd JMI/examples/Vdp_cppad; $(MAKE) clean
+# 	cd JMI/examples/FurutaPendulum; $(MAKE) clean
+# 	cd JMI/examples/CSTR; $(MAKE) clean
+# 	cd JMI/examples/CSTR2; $(MAKE) clean
 
 clean-frontends:
 if HAVE_ANT
