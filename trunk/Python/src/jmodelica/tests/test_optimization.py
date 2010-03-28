@@ -148,3 +148,33 @@ class TestIntegersNBooleanParameters(OptimizationTest):
     def test_trajectories(self):
         self.assert_all_trajectories(['B', 'N', 'x[1]'])
 
+class TestNominal(OptimizationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        OptimizationTest.setup_class_base(
+            'NominalTest.mo', 'NominalTests.NominalOptTest2',
+            options={"enable_variable_scaling":True})
+
+    @testattr(stddist = True)
+    def setUp(self):
+        n_e = 50
+        hs = N.ones(n_e)*1./n_e
+        n_cp = 3
+        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 })
+        self.run()
+        self.load_expected_data('NominalTests_NominalOptTest2_result.txt')
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['x', 'der(x)', 'u'])
+
+    @testattr(stddist = True)
+    def test_initialization_from_data(self):       
+        n_e = 50
+        hs = N.ones(n_e)*1./n_e
+        self.nlp.set_initial_from_dymola(self.expected,hs,0,1)
+        self.nlp.export_result_dymola()
+        self.data = ResultDymolaTextual("NominalTests_NominalOptTest2_result.txt")
+        self.assert_all_trajectories(['x', 'der(x)', 'u'])
+

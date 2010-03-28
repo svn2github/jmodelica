@@ -270,7 +270,6 @@ class OptimizationTest(_BaseSimOptTest):
         Run optimization and write result to file.
         """
         self.ipopt.opt_sim_ipopt_solve()
-        print self._result_mesh
         if self._result_mesh=='element_interpolation':
             print "hej"
             self.nlp.export_result_dymola_element_interpolation(**self._result_arguments)
@@ -278,7 +277,6 @@ class OptimizationTest(_BaseSimOptTest):
             print "hopp"
             self.nlp.export_result_dymola_mesh_interpolation(**self._result_arguments)
         else:
-            print "hepp"
             self.nlp.export_result_dymola()
 
 
