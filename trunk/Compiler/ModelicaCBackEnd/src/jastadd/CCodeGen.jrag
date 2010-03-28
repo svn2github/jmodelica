@@ -65,11 +65,25 @@ aspect CCodeGen {
 	}
 	
 	public void FDotPowExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		str.print("pow(");
-		p.toString(getLeft(),str,indent,o); 
-		str.print(",");
-		p.toString(getRight(),str,indent,o);
-		str.print(")");
+		if (getRight().variability().lessOrEqual(fParameter()) && getRight().type().isInteger()) {
+			str.print("(");
+			int exponent = getRight().ceval().intValue();
+			for (int i=0;i<exponent;i++) {
+				str.print("(");
+				p.toString(getLeft(),str,indent,o); 
+				str.print(")");
+				if (i<exponent-1) {
+					str.print("*");
+				}
+			}
+			str.print(")");
+		} else {
+			str.print("pow(");
+			p.toString(getLeft(),str,indent,o); 
+			str.print(",");
+			p.toString(getRight(),str,indent,o);
+			str.print(")");
+		}
 	}
 	
 	public void FMinMaxExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {

@@ -19,7 +19,7 @@ $C_DAE_equation_residuals$
 #define _w_4 ((*(jmi->z))[jmi->offs_real_w+0])
 #define time ((*(jmi->z))[jmi->offs_t])
 
-    (*res)[0] = ( 1 - ( pow(_x2_1,2) ) ) * ( _x1_0 ) - ( _x2_1 ) + ( _p_3 ) * ( _u_2 ) - (_der_x1_5);
+    (*res)[0] = ( 1 - ( ((_x2_1)*(_x2_1)) ) ) * ( _x1_0 ) - ( _x2_1 ) + ( _p_3 ) * ( _u_2 ) - (_der_x1_5);
     (*res)[1] = _x1_0 - (_der_x2_6);
     (*res)[2] = _x1_0 + _x2_1 - (_w_4);
 ")})));
@@ -295,7 +295,22 @@ model CCodeGenTest11
  Real z = noEvent(if x <> y then 1.0 else 2.0);
 end CCodeGenTest11;
 
+model CCodeGenTest12
 
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenTest12",
+         description="C code generation: test that x^2 is represented by x*x in the generated code. ",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
+    (*res)[0] = pow(_x_0 - ( 0.3 ),0.3) + ((_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(
+_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))) - (_der_x_1);
+")})));
+
+  Real x(start=1,fixed=true);
+equation
+  der(x) = (x-0.3)^0.3 + (x-0.3)^10;
+end CCodeGenTest12;
 
 model CLogExp1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
