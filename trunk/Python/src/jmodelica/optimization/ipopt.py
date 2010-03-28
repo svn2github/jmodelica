@@ -307,6 +307,31 @@ class NLPCollocation(object):
                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                        ndim=1,
                                                                                        flags='C')]
+            
+            self._model.jmimodel._dll.jmi_opt_sim_get_result_mesh_interpolation.argtypes = [ct.c_void_p,
+                                                                                            Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                                          ndim=1,
+                                                                                                          flags='C'),
+                                                                                               ct.c_int,
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       shape=self._model._n_p_opt,
+                                                                                       flags='C'),
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       flags='C'),
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       flags='C'),
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       flags='C'),
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       flags='C'),
+                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                                                       ndim=1,
+                                                                                       flags='C')]
 
 
             # n_real_x from jmi_opt_sim_get_dimensions
@@ -369,12 +394,14 @@ class NLPCollocation(object):
         evaluated at n_interpolation points inside each finite
         element. The interpolation points at which the variables
         are computed are equally spaced, and includes the element
-        start and end points within each finite element. Interpolation
-        is used to compute the variables at each point.
+        start and end points within each finite element. The collocation
+        interpolation polynomials are used to compute the value of the
+        variable trajectories at each point.
 
         Parameters:
-            n_interpolation_points -- Number of points in each finite
-            element at which the solution trajectories are evaluated.
+            n_interpolation_points --
+                Number of points in each finite element at which the
+                solution trajectories are evaluated.
         
         Returns:
         p_opt --
@@ -420,13 +447,71 @@ class NLPCollocation(object):
 
         return p_opt, data
 
+    def get_result_mesh_interpolation(self,mesh):
+        """
+        Get the optimization results. The result is given at a user
+        defined mesh of time points. The collocation interpolation
+        polynomials are used to compute the value of the variable
+        trajectories at eachpoint.
+
+        Parameters:
+            mesh --
+                Vector of time points.
+        
+        Returns:
+        p_opt --
+            A vector containing the values of the optimized parameters.
+        data --
+            A two dimensional array of variable trajectory data. The
+            first column represents the time vector. The following
+            colums contain, in order, the derivatives, the states,
+            the inputs and the algebraic variables. The ordering is
+            according to increasing value references.
+        """
+
+        n_points = len(mesh)
+
+        sizes = self._model.get_sizes()
+        n_real_dx = sizes[12]
+        n_real_x = sizes[13]
+        n_real_u = sizes[14]
+        n_real_w = sizes[15]
+        n_popt = self._model.jmimodel.opt_get_n_p_opt()
+        
+        # Create result data vectors
+        p_opt = N.zeros(n_popt)
+        t_ = N.zeros(n_points)
+        dx_ = N.zeros(n_real_dx*n_points)
+        x_ = N.zeros(n_real_x*n_points)
+        u_ = N.zeros(n_real_u*n_points)
+        w_ = N.zeros(n_real_w*n_points)
+        
+        # Get the result
+        self.opt_sim_get_result_mesh_interpolation(mesh,n_points,p_opt,t_,dx_,x_,u_,w_)
+        
+        data = N.zeros((n_points,1+n_real_dx+n_real_x+n_real_u+n_real_w))
+        data[:,0] = t_
+        for i in range(n_real_dx):
+            data[:,i+1] = dx_[i*n_points:(i+1)*n_points]
+        for i in range(n_real_x):
+            data[:,n_real_dx+i+1] = x_[i*n_points:(i+1)*n_points]
+        for i in range(n_real_u):
+            data[:,n_real_dx+n_real_x+i+1] = u_[i*n_points:(i+1)*n_points]
+        for i in range(n_real_w):
+            data[:,n_real_dx+n_real_x+n_real_u+i+1] = w_[i*n_points:(i+1)*n_points]
+
+        return p_opt, data
+
     
     def export_result_dymola(self, file_name='', format='txt'):
         """
         Export the optimization result in Dymola format. The function
         export_result_dymola is used to retrieve the solution trajectories.
+        The result is given at the collocation points.
 
         Parameters:
+            file_name --
+                Name of the result file.
             format --
                 A string equal either to 'txt' for output to Dymola textual
                 format or 'mat' for output to Dymola binary Matlab format.
@@ -445,9 +530,14 @@ class NLPCollocation(object):
         """
         Export the optimization result in Dymola format. The function
         export_result_dymola_element_interpolation is used to retrieve the
-        solution trajectories.
-
+        solution trajectories. 
+        
         Parameters:
+            n_interpolation_points --
+                The number of points in each finite element at which the result
+                is returned.
+            file_name --
+                Name of the result file.
             format --
                 A string equal either to 'txt' for output to Dymola textual
                 format or 'mat' for output to Dymola binary Matlab format.
@@ -461,6 +551,32 @@ class NLPCollocation(object):
         
         # Write result
         io.export_result_dymola(self._model,data, file_name=file_name, format=format)
+
+    def export_result_dymola_mesh_interpolation(self, mesh, file_name='', format='txt'):
+        """
+        Export the optimization result in Dymola format. The function
+        export_result_dymola_element_interpolation is used to retrieve the
+        solution trajectories. 
+
+        Parameters:
+            mesh --
+                A vector of time points at wich the result is given. 
+            file_name --
+                Name of the result file.
+            format --
+                A string equal either to 'txt' for output to Dymola textual
+                format or 'mat' for output to Dymola binary Matlab format.
+
+        Limitations:
+            Only format='txt' is currently supported.
+        """
+
+        # Get results
+        p_opt, data = self.get_result_mesh_interpolation(mesh)
+        
+        # Write result
+        io.export_result_dymola(self._model,data, file_name=file_name, format=format)
+
 
     def set_initial_from_dymola(self,res, hs_init, start_time_init, final_time_init):
         """
@@ -986,7 +1102,7 @@ class NLPCollocation(object):
         Get the results, stored in column major format.
         
         Parameters:
-            n_interpolation_points
+            n_interpolation_points -- Number of time points in each element.
             p_opt -- Vector containing optimal parameter values. (Return)
             t -- The time vector. (Return)
             dx -- The derivatives. (Return)
@@ -997,6 +1113,25 @@ class NLPCollocation(object):
         """
         if self._model.jmimodel._dll.jmi_opt_sim_get_result_element_interpolation(self._jmi_opt_sim,
                                                                                   n_interpolation_points,p_opt,
+                                                                                  t, dx, x, u, w) is not 0:
+            raise jmi.JMIException("Getting the results failed.")
+
+    def opt_sim_get_result_mesh_interpolation(self, mesh, n_mesh, p_opt, t, dx, x, u, w):
+        """ 
+        Get the results, stored in column major format.
+        
+        Parameters:
+            mesh -- Mesh of time points.
+            p_opt -- Vector containing optimal parameter values. (Return)
+            t -- The time vector. (Return)
+            dx -- The derivatives. (Return)
+            x -- The states. (Return)
+            u -- The inputs. (Return)
+            w -- The algebraic variables. (Return)
+             
+        """
+        if self._model.jmimodel._dll.jmi_opt_sim_get_result_mesh_interpolation(self._jmi_opt_sim,
+                                                                                  mesh,n_mesh,p_opt,
                                                                                   t, dx, x, u, w) is not 0:
             raise jmi.JMIException("Getting the results failed.")
 

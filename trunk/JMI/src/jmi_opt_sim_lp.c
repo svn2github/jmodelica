@@ -1521,9 +1521,98 @@ static int lp_radau_get_result_mesh_interpolation(jmi_opt_sim_t *jmi_opt_sim,
 		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
 		jmi_real_t *w) {
 
+	// Compute element indices and taus
+	// Compute elements and taus of time points
+	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
+	jmi_t *jmi = jmi_opt_sim->jmi;
+	int i,j,k,l;
 
+	// optimization parameters
+	for (i=0;i<jmi->opt->n_p_opt;i++) {
+		p_opt_[i] = p_opt(jmi_opt_sim,i);
+	}
 
-	return -1;
+	int* t_e = (int*)calloc(n_mesh,sizeof(int));
+	jmi_real_t* t_tau = (jmi_real_t*)calloc(n_mesh,sizeof(jmi_real_t));
+
+	jmi_real_t ti = 0;
+	jmi_real_t mesh_norm = 0;
+	for (i=0;i<n_mesh;i++) {
+		t[i] = mesh[i];
+		ti = 0;
+		if (mesh[i]<=jmi->opt->start_time) {
+			mesh_norm = 0.;
+		} else if (mesh[i]>=jmi->opt->final_time) {
+			mesh_norm = 1.;
+		} else {
+			mesh_norm = mesh[i]/(jmi->opt->final_time-jmi->opt->start_time);
+		}
+		for (j=0;j<jmi_opt_sim->n_e;j++) {
+			ti += jmi_opt_sim->hs[j];
+			if (mesh_norm<=ti) {
+				t_e[i] = j;
+				t_tau[i] = (mesh_norm - (ti - jmi_opt_sim->hs[j]))/(jmi_opt_sim->hs[j]);
+				break;
+			}
+			t_e[i] = jmi_opt_sim->n_e-1;
+			t_tau[i] = 1.0;
+		}
+	}
+
+	// Loop over all the time points
+	jmi_real_t el_length;
+	for (i=0;i<n_mesh;i++) {
+		// Compute element length, taking into account if the initial or
+		// terminal time, or the element lengths are free.
+		if (jmi->opt->final_time_free == 0 &&
+				jmi->opt->start_time_free == 0 &&
+				jmi_opt_sim->hs_free ==0) {
+			el_length = jmi_opt_sim->hs[t_e[i]]*(jmi->opt->final_time - jmi->opt->start_time);
+		} else { // TODO: Take care of the other cases
+			el_length=0;
+		}
+
+		// Interpolation equations for dx
+		for (k=0;k<jmi->n_real_dx;k++) {
+			dx[i+k*n_mesh] = 0;
+			for (l=0;l<nlp->n_cp+1;l++) {
+				dx[i+k*n_mesh] += jmi_opt_sim_lp_eval_pol(t_tau[i],nlp->n_cp+1, nlp->Lpp_dot_coeffs, l)*
+					x_coll(jmi_opt_sim,t_e[i],l,k)/el_length;
+			}
+		}
+
+		// Interpolation equations for x
+		for (k=0;k<jmi->n_real_x;k++) {
+			x[i+k*n_mesh] = 0;
+			for (l=0;l<nlp->n_cp+1;l++) {
+				x[i+k*n_mesh] += jmi_opt_sim_lp_eval_pol(t_tau[i],nlp->n_cp+1, nlp->Lpp_coeffs, l)*
+					x_coll(jmi_opt_sim,t_e[i],l,k);
+			}
+		}
+
+		// Interpolation equations for u
+		for (k=0;k<jmi->n_real_u;k++) {
+			u[i+k*n_mesh] = 0;
+			for (l=0;l<nlp->n_cp;l++) {
+				u[i+k*n_mesh] += jmi_opt_sim_lp_eval_pol(t_tau[i],nlp->n_cp, nlp->Lp_coeffs, l)*
+					u_coll(jmi_opt_sim,t_e[i],l+1,k);
+			}
+		}
+
+		// Interpolation equations for w
+		for (k=0;k<jmi->n_real_w;k++) {
+			w[i+k*n_mesh] = 0;
+			for (l=0;l<nlp->n_cp;l++) {
+				w[i+k*n_mesh] += jmi_opt_sim_lp_eval_pol(t_tau[i],nlp->n_cp, nlp->Lp_coeffs, l)*
+					w_coll(jmi_opt_sim,t_e[i],l+1,k);
+			}
+		}
+	}
+
+	free(t_e);
+	free(t_tau);
+
+	return 0;
 }
 
 static int lp_radau_get_result_element_interpolation(jmi_opt_sim_t *jmi_opt_sim,

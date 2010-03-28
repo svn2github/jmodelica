@@ -98,9 +98,31 @@ class TestElementInterpolationResult(OptimizationTest):
         n_e = 8
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 },result_mesh='element_interpolation')
+        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 },
+                        result_mesh='element_interpolation')
         self.run()
-        self.load_expected_data('DI_opt_result.txt')
+        self.load_expected_data('DI_opt_element_interpolation_result.txt')
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['x', 'v', 'w1', 'w2', 'u', 'cost'])
+
+class TestMeshInterpolationResult(OptimizationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        OptimizationTest.setup_class_base(
+            'DI_opt.mo', 'DI_opt')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        n_e = 8
+        hs = N.ones(n_e)*1./n_e
+        n_cp = 3
+        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 },
+                        result_mesh='mesh_interpolation',result_arguments={"mesh":N.linspace(-0.1,2.2,50)})
+        self.run()
+        self.load_expected_data('DI_opt_mesh_interpolation_result.txt')
 
     @testattr(stddist = True)
     def test_trajectories(self):
