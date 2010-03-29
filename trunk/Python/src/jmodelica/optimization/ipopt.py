@@ -661,10 +661,12 @@ class NLPCollocation(object):
         
         # Obtain vector sizes
         n_points = 0
+        num_name_hits = 0
         if len(dx_names) > 0:
             for name in dx_names:
                 try:
                     traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
                     if N.size(traj.x)>2:
                         break
                 except:
@@ -674,6 +676,7 @@ class NLPCollocation(object):
             for name in x_names:
                 try:
                     traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
                     if N.size(traj.x)>2:
                         break
                 except:
@@ -682,24 +685,29 @@ class NLPCollocation(object):
         elif len(u_names) > 0:
             for name in u_names:
                 try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
                     if N.size(traj.x)>2:
                         break
                 except:
-                    print name
                     pass
 
         elif len(w_names) > 0:
             for name in w_names:
                 try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
                     if N.size(traj.x)>2:
                         break
                 except:
-                    print name
                     pass
         else:
             raise Exception("None of the model variables not found in result file.")
 
-        #print(traj.t)
+        if num_name_hits==0:
+            raise Exception("None of the model variables not found in result file.")
+        
+        print(traj.t)
 
         n_points = N.size(traj.t,0)
         n_cols = 1+len(dx_names)+len(x_names)+len(u_names)+len(w_names)
