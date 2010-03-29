@@ -1058,9 +1058,7 @@ aspect Arrays {
 		Array arr = new Array(indices());
 		for (Index i : arr.indices()) {
 			FQName n = new FQName(tempVarName());
-			FArraySubscripts fas = inFunc ? i.newFArraySubscripts() : 
-				FArraySubscripts.createLiteralSubscripts(fc.tempVarIndex());
-			n.setLastFArraySubscripts(fas);
+			n.setLastFArraySubscripts(i.newFArraySubscripts());
 			arr.set(i, new FIdUseExp(n));
 		}
 		return arr;

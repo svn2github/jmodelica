@@ -1,4 +1,3 @@
-
 /*
     Copyright (C) 2009 Modelon AB
 
@@ -669,7 +668,6 @@ aspect Scalarization {
 		}
 	}
 	
-	// TODO: Propagate variability, attributes, etc downwards
 	/**
 	 * \brief Generate scalar FVariables for a single array cell of this record or record component.
 	 * 
@@ -756,12 +754,17 @@ aspect Scalarization {
 	public void FFunctionVariable.scalarizeBindingExp(
 			List<FFunctionVariable> vars, List<FStatement> stmts, HashMap<String,FExp> indexMap) {
 		createArrayTemporaries(stmts, vars, indexMap, true);
-		stmts.add(new FAssignStmt(new FIdUse(getFQName().fullCopy()), getBindingExp().scalarize(indexMap)));
+		if (type().isRecord()) 
+			type().scalarizeRecordArrayAssignment(vars, stmts, indexMap, getFQName(), getBindingExp());
+		else
+			stmts.add(new FAssignStmt(new FIdUse(getFQName().fullCopy()), getBindingExp().scalarize(indexMap)));
 	}
 	
 	public void FFunctionArray.scalarizeBindingExp(
 			List<FFunctionVariable> vars, List<FStatement> stmts, HashMap<String,FExp> indexMap) {
-		if (size().isUnknown()) {
+		if (type().isRecord()) {
+			type().scalarizeRecordArrayAssignment(vars, stmts, indexMap, getFQName(), getBindingExp());
+		} else if (size().isUnknown()) {
 			scalarizeUnknownArrayAssignment(vars, stmts, indexMap, getBindingExp());
 		} else {
 			createArrayTemporaries(stmts, vars, indexMap, true);
@@ -1341,6 +1344,9 @@ aspect Scalarization {
 	/**
 	 * \brief Create an FExp that represents a specific scalar component of this record.
 	 * 
+	 * If <code>suffix</code> denotes a record expression, not a scalar, then the returned expression 
+	 * might not be scalarized.
+	 * 
 	 * @param indexMap  translations for indices in the expressions
 	 * @param suffix    the suffix to add to a use of the record to access the specific component
 	 */
@@ -1355,11 +1361,17 @@ aspect Scalarization {
 	}
 	
 	public FExp FRecordConstructor.scalarRecordFExp(HashMap<String,FExp> indexMap, FQName suffix) {
+		if (suffix.getNumFQNamePart() == 0)
+			return this; // Not scalarized, see javadoc comment.
 		FQNamePart first = suffix.getFQNamePart(0);
 		FExp arg = getArg(getRecord().myFRecordDecl().indexOf(first.getName()));
 		if (first.hasFArraySubscripts())
 			arg = arg.getArray().get(first.getFArraySubscripts().index());
 		return arg.scalarRecordFExp(indexMap, suffix.copySuffix());
+	}
+	
+	public FExp FFunctionCall.scalarRecordFExp(HashMap<String,FExp> indexMap, FQName suffix) {
+		return scalarizeExp(indexMap).extractRecordFExp(suffix);
 	}
 	
 	/**
@@ -1435,50 +1447,173 @@ aspect Scalarization {
 	public void FFunctionCall.createArrayTemporaries(List clauses, 
 			List vars, HashMap<String,FExp> indexMap, boolean addVar) {
 		super.createArrayTemporaries(clauses, vars, indexMap, addVar);
-		if (isArray() && !isFunctionCallClause()) {
+		if (!isFunctionCallClause()) {
 			boolean equation = !inFunction();
-			if (addVar) {
+			FExp temp = null;
+			if (type().isRecord()) {
+				if (addVar)
+					type().createRecordTemporaries(vars, equation, tempVarName());
+				if (equation)
+					temp = type().createRecordConstructor(new FQName(tempVarName()));
+				else
+					temp = new FIdUseExp(tempVarName());
+			} else if (isArray()) {
 				if (equation) {
-					for (FExp e : getArray().iterable())
-						vars.add(createTemporaryVariable((FIdUseExp) e));
+					if (addVar)
+						type().createTempFVariables(vars, new FQName(tempVarName()));
+					temp = getArray().buildScalarized(indexMap, this);
 				} else {
-					FType type = (FType) type().fullCopy();
-					vars.add(new FFunctionArray(type, tempVarName()));
+					if (addVar)
+						vars.add(new FFunctionArray((FType) type().fullCopy(), tempVarName()));
+					temp = new FIdUseExp(tempVarName());
 				}
 			}
-			FExp temp = equation ? 
-					getArray().buildScalarized(indexMap) : 
-					new FIdUseExp(tempVarName());
-			List lefts = new List().add(new FFunctionCallLeft(new Opt(temp)));
-			if (equation)
-				clauses.add(new FFunctionCallEquation(lefts, scalarizeFunction(indexMap)));
-			else
-				clauses.add(new FFunctionCallStmt(lefts, scalarizeFunction(indexMap)));
+			if (temp != null) {
+				List lefts = new List().add(new FFunctionCallLeft(new Opt(temp)));
+				if (equation)
+					clauses.add(new FFunctionCallEquation(lefts, scalarizeFunction(indexMap)));
+				else
+					clauses.add(new FFunctionCallStmt(lefts, scalarizeFunction(indexMap)));
+			}
 		}
 	}
 	
 	/**
-	 * \brief Creates a new temporary varable with the given name.
+	 * \brief Creates temporary varables for a record with the given name.
+	 * 
+	 * @param vars      list of variable to add the new variables to
+	 * @param equation  if <code>true</code>, generate FVariables, otherwise a FFunctionVariable
+	 * @param name      the name of the record variable
 	 */
-	protected AbstractFVariable FFunctionCall.createTemporaryVariable(FIdUseExp idExp) {
-		FVisibilityType fvt = new FTemporaryVisibilityType();
-		FQName n = (FQName) idExp.getFIdUse().getFQName().fullCopy();
-		n.scalarized = true;
-		if (type().isReal()) {
-			return new FRealVariable(
-					fvt, new FContinuous(), new Opt(), new List(), new Opt(), new Opt(), n);
-		} else if (type().isInteger()) {
-			return new FIntegerVariable(
-					fvt, new FDiscrete(),   new Opt(), new List(), new Opt(), new Opt(), n);
-		} else if (type().isBoolean()) {
-			return new FBooleanVariable(
-					fvt, new FDiscrete(),   new Opt(), new List(), new Opt(), new Opt(), n);
-		} else if (type().isString()) {
-			return new FStringVariable(
-					fvt, new FDiscrete(),   new Opt(), new List(), new Opt(), new Opt(), n);
+	public void FType.createRecordTemporaries(List vars, boolean equation, String name) {}	
+	
+	public void FRecordType.createRecordTemporaries(List vars, boolean equation, String name) {
+		if (equation) {
+			createTempFVariables(vars, new FQName(name));
+		} else {
+			FFunctionVariable var = isArray() ? new FFunctionArray() : new FFunctionVariable();
+			var.setType(fullCopy());
+			var.setFQName(new FQName(name));
+			vars.add(var);
 		}
+	}	
+	
+	/**
+	 * \brief Create a record constructor (or FArray of record constructors),  
+	 *        with the arguments taken from a record variable with the given name.
+	 */
+	public FExp FType.createRecordConstructor(FQName name) {
+		if (isArray()) {
+			FQName fqn = name.fullCopy();
+			FArray arr = new FArray();
+			for (Index i : indices()) {
+				fqn.setLastFArraySubscripts(i.newFArraySubscripts());
+				arr.addFExp(createRecordConstructorCell(fqn));
+			}
+			return arr;
+		} else {
+			return createRecordConstructorCell(name);
+		}
+	}
+	
+	/**
+	 * \brief Create a record constructor with the arguments taken from a record 
+	 *        variable with the given name.
+	 * 
+	 * Assumes that <code>name</code> refers to a non-array variable 
+	 * (or a specific cell in an array variable).
+	 */
+	public FExp FType.createRecordConstructorCell(FQName name) {
+		FQName fqn = name.fullCopy();
+		fqn.scalarized = true;
+		return new FIdUseExp(fqn);
+	}
+	
+	public FExp FRecordType.createRecordConstructorCell(FQName name) {
+		FRecordConstructor rc = new FRecordConstructor(new FIdUse(getName()), new List());
+		for (FRecordComponentType comp : getComponents()) {
+			FQName next = name.copyAndAppend(comp.getName());
+			rc.addArg(comp.getFType().createRecordConstructor(next));
+		}
+		return rc;
+	}
+	
+	/**
+	 * \brief Creates a new temporary varable with the given name.
+	 *        If this is an array, variables are created for each cell.
+	 * 
+	 * @param vars  list of variable to add the new variable to
+	 * @param name  the name of the new variable
+	 */
+	public void FType.createTempFVariables(List vars, FQName name) {
+		if (isArray()) {
+			FQName fqn = name.fullCopy();
+			for (Index i : indices()) {
+				fqn.setLastFArraySubscripts(i.newFArraySubscripts());
+				createTempCellFVariables(vars, fqn);
+			}
+		} else {
+			createTempCellFVariables(vars, name);
+		}
+	}
+	
+	/**
+	 * \brief Creates a new temporary variable with the given name.
+	 * 
+	 * @param vars  list of variable to add the new variable to
+	 * @param name  the name of the new variable
+	 */
+	public void FType.createTempCellFVariables(List vars, FQName name) {
+		FQName fqn = name.fullCopy();
+		fqn.scalarized = true;
+		vars.add(createFVariable(new FTemporaryVisibilityType(), fqn));
+	}
+	
+	
+	/**
+	 * \brief Creates a new variable with the given visibility and name.
+	 * 
+	 * All optional children in the new variable are empty.
+	 * 
+	 * Default implementation returns <code>null</code>.
+	 */
+	public FVariable FType.createFVariable(FVisibilityType fvt, FQName name) {
 		return null;
 	}
+		
+	public FVariable FRealType.createFVariable(FVisibilityType fvt, FQName name) {
+		return new FRealVariable(fvt, new FContinuous(), 
+				new Opt(), new List(), new Opt(), new Opt(), name);
+	}	
+	
+	public FVariable FIntegerType.createFVariable(FVisibilityType fvt, FQName name) {
+		return new FIntegerVariable(fvt, new FDiscrete(), 
+				new Opt(), new List(), new Opt(), new Opt(), name);
+	}	
+	
+	public FVariable FBooleanType.createFVariable(FVisibilityType fvt, FQName name) {
+		return new FBooleanVariable(fvt, new FDiscrete(), 
+				new Opt(), new List(), new Opt(), new Opt(), name);
+	}	
+	
+	public FVariable FStringType.createFVariable(FVisibilityType fvt, FQName name) {
+		return new FStringVariable(fvt, new FDiscrete(), 
+				new Opt(), new List(), new Opt(), new Opt(), name);
+	}	
+	
+	/**
+	 * \brief Creates temporary variables for a record with the given name.
+	 * 
+	 * @param vars  list of variable to add the new variables to
+	 * @param name  the name of the record variable
+	 */
+	public void FRecordType.createTempCellFVariables(List vars, FQName name) {
+		for (FRecordComponentType comp : getComponents()) {
+			FQName next = name.copyAndAppend(comp.getName());
+			comp.getFType().createTempFVariables(vars, next);
+		}
+	}
+	
 	
 	/* Scalarization of expressions is needed in order to compute a simple
 	 * scalar expression from an expression with ndims==0. For example, an
@@ -1489,8 +1624,8 @@ aspect Scalarization {
 	/**
 	 * \brief Create an FArray containing scalarized subexpressions.
 	 */
-	public FExp Array.buildScalarized(HashMap<String,FExp> indexMap) {
-    	return buildFArray(iteratorFExp(), new ScalarizedBuilder(indexMap), 1);
+	public FExp Array.buildScalarized(HashMap<String,FExp> indexMap, FExp context) {
+    	return buildFArray(iteratorFExp(), new ScalarizedBuilder(indexMap, context), 1);
     }
     
 	public static class Array {
@@ -1499,13 +1634,15 @@ aspect Scalarization {
 	     */
 	    protected class ScalarizedBuilder implements ElementBuilder {
 	    	private HashMap<String,FExp> indexMap;
+	    	private FExp context;
 	    	
-	    	public ScalarizedBuilder(HashMap<String,FExp> indexMap) {
+	    	public ScalarizedBuilder(HashMap<String,FExp> indexMap, FExp context) {
 	    		this.indexMap = indexMap;
+	    		this.context = context;
 	    	}
 	    	
 			public FExp build(FExp e) {
-				return e.scalarize(indexMap);
+				return context.dynamicFExp(e).scalarize(indexMap);
 			}
 	    }
 	}
@@ -1523,10 +1660,28 @@ aspect Scalarization {
 	public FExp FExp.scalarize(HashMap<String,FExp> indexMap) {
 		if (useTempVar) 
 			return new FIdUseExp(tempVarName());
-		else if (isArray() && !keepAsArray()) 
-			return getArray().buildScalarized(indexMap);
+    	if (type().isRecord() && wantsRecordCon())
+    		return buildRecordConstructor(indexMap);
+ 		else if (isArray() && !keepAsArray()) 
+			return getArray().buildScalarized(indexMap, this);
 		else
 			return scalarizeExp(indexMap);
+	}
+	
+	/**
+	 * \brief Create a record constructor (or FArray of record constructors) 
+	 *        describing this record expression.
+	 */
+	public FExp FExp.buildRecordConstructor(HashMap<String,FExp> indexMap) {
+		return type().createRecordConstructor(new FQName(tempVarName()));
+	}
+	
+	public FExp FIdUseExp.buildRecordConstructor(HashMap<String,FExp> indexMap) {
+		return type().createRecordConstructor(getFIdUse().getFQName().scalarize(indexMap));
+	}
+	
+	public FExp FRecordConstructor.buildRecordConstructor(HashMap<String,FExp> indexMap) {
+		return scalarizeExp(indexMap);
 	}
 	
 	syn boolean FExp.keepAsArray() = canKeepAsArray() && canAcceptArray() || size().isUnknown();
@@ -1590,6 +1745,14 @@ aspect Scalarization {
     	return new FIdUseExp(getFIdUse().scalarize(indexMap));
     }
     
+	inh boolean FExp.wantsRecordCon();
+	inh boolean List.wantsRecordCon();
+	inh boolean Opt.wantsRecordCon();
+	eq ASTNode.getChild().wantsRecordCon()          = false;
+	eq List.getChild().wantsRecordCon()             = wantsRecordCon();
+	eq Opt.getChild().wantsRecordCon()              = wantsRecordCon();
+	eq FFunctionCall.getArg().wantsRecordCon()      = !inFunction();
+    
     /* These are needed because scalarize() is reused in Array.createExpanded(), that 
      * might be called on an instance tree.
      */
@@ -1636,7 +1799,7 @@ aspect Scalarization {
 	
 	public FExp FMulExp.scalarizeExp(HashMap<String,FExp> indexMap) {
 		if (getLeft().isArray() && !isArray()) 
-			return composeScalarCellExp(Index.NULL).scalarize(indexMap);
+			return dynamicFExp(composeScalarCellExp(Index.NULL)).scalarize(indexMap);
 		else
 			return super.scalarizeExp(indexMap);
 	}
@@ -1697,17 +1860,24 @@ aspect Scalarization {
 	public FExp FIntegerExp.scalarizeExp(HashMap<String,FExp> indexMap) { return new FIntegerExp(getFExp().scalarize(indexMap)); }
 	
 	public FExp FFunctionCall.scalarizeExp(HashMap<String,FExp> indexMap) {
-		if (isArray() && functionCallIsExp())
+		if ((isArray() || type().isRecord()) && functionCallIsExp())
 			return new FIdUseExp(tempVarName());
 		else
 			return scalarizeFunction(indexMap);
+	}
+	
+	public FExp FRecordConstructor.scalarizeExp(HashMap<String,FExp> indexMap) {
+		FRecordConstructor rc = new FRecordConstructor(getRecord().scalarize(indexMap), new List());
+		for (FExp arg : getArgs())
+			rc.addArg(arg.scalarize(indexMap));
+		return rc;
 	}
 	
 	public FFunctionCall FFunctionCall.scalarizeFunction(HashMap<String,FExp> indexMap) {
 		List<FExp> args = new List<FExp>();
 		for (FExp arg : getArgs())
 			args.add(arg.scalarize(indexMap));
-		return new FFunctionCall((FIdUse) getName().fullCopy(), args, getSizes()); 
+		return new FFunctionCall(getName().fullCopy(), args, getSizes()); 
 	}
 	
 	public FExp FTimeExp.scalarizeExp(HashMap<String,FExp> indexMap) { return new FTimeExp(); }

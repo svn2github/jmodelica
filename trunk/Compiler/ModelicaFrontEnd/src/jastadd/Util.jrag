@@ -1031,8 +1031,25 @@ aspect FlatFunctionUtils {
 	 
 	 /**
 	  * \brief Get the number of scalar variables assigned by this FFunctionCallLeft.
+	  * 
+	  * Only valid after scalarization.
 	  */
-	 syn int FFunctionCallLeft.numScalarVars() = (hasFExp() ? getFExp().size().numElements() : 0);
+	 syn int FFunctionCallLeft.numScalarVars() = (hasFExp() ? getFExp().numScalarVars() : 0);
+	 
+	 /**
+	  * \brief Get the number of scalar variables assigned by this a FFunctionCallLeft with this 
+	  *        FExp as its expression.
+	  * 
+	  * Only valid after scalarization.
+	  */
+	 syn int FExp.numScalarVars() = 1;
+	 eq FArray.numScalarVars()    = getNumFExp() * getFExp(0).numScalarVars();
+	 eq FRecordConstructor.numScalarVars() {
+		 int n = 0;
+		 for (FExp e : getArgs())
+			 n += e.numScalarVars();
+		 return n;
+	 }
 	 
 	 inh lazy InstComponentDecl FFunctionCallLeft.myOutput();
 	 eq FFunctionCallEquation.getLeft(int i).myOutput() = getCall().findOutput(i);
@@ -1055,19 +1072,17 @@ aspect FlatFunctionUtils {
 	 eq FFunctionCallEquation.getCall().myLefts() = getLefts().toArrayList();
 	 eq FFunctionCallStmt.getCall().myLefts()     = getLefts().toArrayList();
 
-	 syn lazy String FClass.tempVarName() {
-		 String name = "temp";
-		 HashMap<String,FVariable> vars = fullyQualifiedVariablesMap();
-		 for (int n = 1; vars.get(name) != null; n++)
-			 name = "temp_" + n;
-		 return name;
-	 }
-	 
-	 inh lazy String FFunctionCall.tempVarName();
 	 inh lazy String FExp.tempVarName();
 	 eq InstNode.getChild().tempVarName()      = null;
 	 eq FFunctionCall.getArray().tempVarName() = tempVarName();
-	 eq FClass.getChild().tempVarName()        = tempVarName();
+	 eq FClass.getChild().tempVarName() {
+		 HashMap<String,FVariable> vars = fullyQualifiedVariablesMap();
+		 String name;
+		 do {
+			 name = "temp_" + nextTempVarIndex++;
+		 } while (vars.get(name) != null);
+		 return name;
+	 }
 	 eq FFunctionDecl.getChild().tempVarName() {
 		 HashMap<String,FFunctionVariable> vars = fullyQualifiedVariablesMap();
 		 String name;
@@ -1079,7 +1094,6 @@ aspect FlatFunctionUtils {
 	 
 	 private int FFunctionDecl.nextTempVarIndex = 1;
 	 private int FClass.nextTempVarIndex = 1;
-	 public int FClass.tempVarIndex() { return nextTempVarIndex++; }
 }
 
 aspect Visibility {

@@ -2837,12 +2837,12 @@ model ArrayOutputScalarization2
 fclass FunctionTests.ArrayOutputScalarization2
  Real x[1];
  Real x[2];
- Real temp[1];
- Real temp[2];
+ Real temp_1[1];
+ Real temp_1[2];
 equation
- ({temp[1],temp[2]}) = FunctionTests.ArrayOutputScalarization2.f();
- x[1] = 3 + temp[1];
- x[2] = 4 + temp[2];
+ ({temp_1[1],temp_1[2]}) = FunctionTests.ArrayOutputScalarization2.f();
+ x[1] = 3 + temp_1[1];
+ x[2] = 4 + temp_1[2];
 
  function FunctionTests.ArrayOutputScalarization2.f
   output Real[2] x;
@@ -3437,11 +3437,11 @@ model ArrayOutputScalarization14
          flatModel="
 fclass FunctionTests.ArrayOutputScalarization14
  Real x;
- Real temp[1];
- Real temp[2];
+ Real temp_1[1];
+ Real temp_1[2];
 equation
- ({temp[1],temp[2]}) = FunctionTests.ArrayOutputScalarization14.f();
- x = ( temp[1] ) * ( 3 ) + ( temp[2] ) * ( 4 );
+ ({temp_1[1],temp_1[2]}) = FunctionTests.ArrayOutputScalarization14.f();
+ x = ( temp_1[1] ) * ( 3 ) + ( temp_1[2] ) * ( 4 );
 
  function FunctionTests.ArrayOutputScalarization14.f
   output Real[2] x;

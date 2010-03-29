@@ -1702,9 +1702,9 @@ void func_CCodeGenTests_CArrayOutputs2_f_def(jmi_array_t* o_a) {
 
     JMI_ARRAY_DECL(tmp_array_1, 2, 2);
     func_CCodeGenTests_CArrayOutputs2_f_def(tmp_array_1);
-    (*res)[0] = jmi_array_val_1(tmp_array_1, 1) - (_temp_1_1);
-    (*res)[1] = jmi_array_val_1(tmp_array_1, 2) - (_temp_2_2);
-    (*res)[2] = ( _temp_1_1 ) * ( 3 ) + ( _temp_2_2 ) * ( 4 ) - (_x_0);
+    (*res)[0] = jmi_array_val_1(tmp_array_1, 1) - (_temp_1_1_1);
+    (*res)[1] = jmi_array_val_1(tmp_array_1, 2) - (_temp_1_2_2);
+    (*res)[2] = ( _temp_1_1_1 ) * ( 3 ) + ( _temp_1_2_2 ) * ( 4 ) - (_x_0);
 ")})));
 
  function f
