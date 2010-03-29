@@ -2666,7 +2666,7 @@ fclass FunctionTests.ArrayExpInFunc7
  Real x[2];
  Real x[3];
 equation
- (x[3]) = FunctionTests.ArrayExpInFunc7.algorithm_1(o);
+ ({x[1], x[2], x[3]}) = FunctionTests.ArrayExpInFunc7.algorithm_1(o);
  o = 1.0;
 
  function FunctionTests.ArrayExpInFunc7.algorithm_1

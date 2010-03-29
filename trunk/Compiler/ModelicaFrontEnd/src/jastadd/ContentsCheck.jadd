@@ -77,16 +77,6 @@ aspect ContentCheck {
 		error("The external language specitication \"" + getLanguage() + "\" is not supported");
 	}
 	
-	public void FIfWhenClause.contentCheck() {
-		if (!getTest().variability().lessOrEqual(fParameter()))
-			warning("Using if statements is currently not supported when compiling with CppAD, and can give erroneous results");
-	}
-	
-	public void FWhileStmt.contentCheck() {
-		if (!getTest().variability().lessOrEqual(fParameter()))
-			warning("Using while statements is currently not supported when compiling with CppAD, and can give erroneous results");
-	}
-	
 	inh boolean FIterExp.iterExpUseOK();
 	eq FExp.getChild().iterExpUseOK()       = false;
 	eq Root.getChild().iterExpUseOK()       = false;

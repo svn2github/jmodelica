@@ -32,18 +32,8 @@ import java.util.ArrayList;
       }
       return 0;
     }
-    public static class Severity {
-      public static final Severity ERROR = new Severity();
-      public static final Severity WARNING = new Severity();
-      private Severity() { }
-    }
-    public static class Kind {
-      public static final Kind OTHER = new Kind();
-      public static final Kind LEXICAL = new Kind();
-      public static final Kind SYNTACTIC = new Kind();
-      public static final Kind SEMANTIC = new Kind();
-      private Kind() { }
-    }
+    public enum Severity { ERROR, WARNING }
+    public enum Kind { OTHER, LEXICAL, SYNTACTIC, SEMANTIC, COMPLIANCE }
     protected int beginLine = 0;
     protected int beginColumn = 0;
     public int beginLine() { return beginLine; }
@@ -78,31 +68,27 @@ import java.util.ArrayList;
         this.kind = kind;
         this.beginLine = beginLine;
         this.beginColumn = beginColumn;
-    }    
+    }
+    
+    public boolean isTestError() {
+    	return severity == Severity.ERROR && kind != Kind.COMPLIANCE;
+    }
   
     public boolean equals(Object o) {
     	return (o instanceof Problem) && (compareTo(o) == 0);
     }
+    
+    private static String name(Object o) {
+		String name = o.toString();
+		return name.charAt(0) + name.substring(1).toLowerCase();
+    }
   
     public String toString() {
-      String s = "";
-      String lineData = "line "+beginLine+", column "+beginColumn+":\n";
-      if(this.kind == Kind.LEXICAL) {
-        s = "Lexical error at "+lineData;
-      } else if(this.kind == Kind.SYNTACTIC) {
-        s = "Syntactic error at "+lineData;
-      } else if(this.kind == Kind.SEMANTIC) {
-        s = "Semantic error at "+lineData;
-      } else {
-    	  s = "At " + lineData;
-      }
-      
-      if (this.severity == Severity.ERROR) {
-    	  return "Error: in file '"+fileName + "':\n" + s +"  "+ message;
-      } else {
-    	  return "Warning: in file '"+fileName + "':\n" + s +"  "+ message;
-      }
-     }
+    	String kindStr = (kind == Kind.OTHER) ? "At " : name(kind) + " error at ";
+    	return name(severity) + ": in file '" + fileName + "':\n" + 
+    			kindStr + "line " + beginLine + ", column " + beginColumn + ":\n" + 
+    			"  " + message;
+    }
   }
   
   
@@ -181,23 +167,40 @@ import java.util.ArrayList;
    */
   interface IErrorHandler {
 	  /**
-	   * Called when a semantic error is found. 
+	   * \brief Called when a semantic error is found. 
+	   * 
 	   * @param s	error message.
 	   * @param n	the node the error originated from.
-	   * @see ASTNode.error(String)
+	   * @see ASTNode#error(String)
 	   */
 	  public void error(String s, ASTNode n);
+	  
 	  /**
-	   * Called when a warning about unimplemented features is issued during semantic error checking.
+	   * \brief Called when a compiler compliance error is found.
+	   * 
+	   * These errors are generated when compiling code that is legal Modelica, 
+	   * but uses features that aren't implemented. Compliance errors are ignored 
+	   * by test cases (except ComplianceErrorTestCase).
+	   *  
+	   * @param s	error message.
+	   * @param n	the node the error originated from.
+	   * @see ASTNode#compliance(String)
+	   */
+	  public void compliance(String s, ASTNode n);
+	  
+	  /**
+	   * \brief Called when a warning is issued during semantic error checking.
+	   * 
 	   * @param s	warning message.
 	   * @param n	the node the warning originated from.
-	   * @see ASTNode.warning(String)
+	   * @see ASTNode#warning(String)
 	   */
 	  public void warning(String s, ASTNode n);
   }
   
   /**
-   * Default implementation of {@link IErrorHandler}. 
+   * \brief Default implementation of {@link IErrorHandler}.
+   *  
    * Collects a list of {@link Problem} for all found errors.
    */
   class DefaultErrorHandler implements IErrorHandler {
@@ -208,28 +211,40 @@ import java.util.ArrayList;
 	  }
 
 	  /**
-	   * Creates a new {@link Problem} and adds it to root.errors, ignoring duplicates.
+	   * \brief Creates a new {@link Problem} and adds it to root.errors, ignoring duplicates.
+	   * 
 	   * @param s	error message.
 	   * @param n	the node the error originated from.
 	   */
 	  public void error(String s, ASTNode n) {
-		  Problem p = new Problem(n.fileName(), s, Problem.Severity.ERROR, Problem.Kind.SEMANTIC, 
-				  n.lineNumber(), n.columnNumber());
-		  if (!root.errors.contains(p)) {
-			  root.errors.add(p);
-		  }
+		  problem(s, n, root.errors, Problem.Severity.ERROR, Problem.Kind.SEMANTIC);
 	  }
 
 	  /**
-	   * Creates a new {@link Problem} and adds it to root.warnings, ignoring duplicates.
+	   * \brief Creates a new {@link Problem} with kind COMPLIANCE 
+	   *        and adds it to root.errors, ignoring duplicates.
+	   * 
+	   * @param s	error message.
+	   * @param n	the node the error originated from.
+	   */
+	  public void compliance(String s, ASTNode n) {
+		  problem(s, n, root.errors, Problem.Severity.ERROR, Problem.Kind.COMPLIANCE);
+	  }
+
+	  /**
+	   * \brief Creates a new {@link Problem} and adds it to root.warnings, ignoring duplicates.
+	   * 
 	   * @param s	warning message.
 	   * @param n	the node the warning originated from.
 	   */
 	  public void warning(String s, ASTNode n) {
-		  Problem p = new Problem(n.fileName(), s, Problem.Severity.WARNING, Problem.Kind.OTHER,
-				  n.lineNumber(), n.columnNumber());
-		  if (!root.warnings.contains(p))
-			  root.warnings.add(p);
+		  problem(s, n, root.warnings, Problem.Severity.WARNING, Problem.Kind.OTHER);
+	  }
+	  
+	  private void problem(String s, ASTNode n, ArrayList<Problem> list, Problem.Severity sev, Problem.Kind kind) {
+		  Problem p = new Problem(n.fileName(), s, sev, kind, n.lineNumber(), n.columnNumber());
+		  if (!list.contains(p))
+			  list.add(p);
 	  }
   }
 
@@ -237,16 +252,6 @@ aspect ErrorCheck {
 
   public ArrayList<Problem> Root.errors = new ArrayList<Problem>();
   public ArrayList<Problem> Root.warnings = new ArrayList<Problem>();
-  
-  public String ASTNode.errorPrefix() {
-    return fileName() + ":\n" + "  *** Semantic Error: ";
-  }
-  public String ASTNode.warningPrefix() {
-    return fileName() + ":\n" + "  *** Warning: ";
-  }
-
-  static final int ASTNode.ERRORS = 0;
-  static final int ASTNode.WARNINGS = 1;  
 
   private IErrorHandler Root.errorHandler = new DefaultErrorHandler(this);
   
@@ -278,6 +283,14 @@ aspect ErrorCheck {
   }
 
   /**
+   * Register a compliance error. Delegates to an {@link IErrorHandler}.
+   * @param s	the error message.
+   */
+  void ASTNode.compliance(String s) {
+	  root().getErrorHandler().compliance(s, this);
+  }
+
+  /**
    * Register a warning. Delegates to an {@link IErrorHandler}.
    * @param s	the warning message.
    */
@@ -295,6 +308,7 @@ aspect ErrorCheck {
 	  nameCheck();
 	  typeCheck();
 	  contentCheck();	  
+	  complianceCheck();	  
   }
   
   public void ASTNode.collectErrors() {
@@ -789,11 +803,11 @@ aspect InstanceErrorCheck {
 aspect FlatExpressionErrorCheck {
 
 	public void FUnsupportedEquation.collectErrors() {
-		error("Unsupported equation type");
+		compliance("Unsupported equation type");
 	}
 
 	public void FUnsupportedExp.collectErrors() {
-		error("Unsupported expression type");
+		compliance("Unsupported expression type");
 	}
 	
 }

@@ -1319,6 +1319,11 @@ fclass ModificationTests.ArrayModifications27
  Real x[1].yb[2](start = ( 1 ) * ( 20 ) + ( 2 ) * ( 40 ));
  Real x[2].yb[1](start = ( 3 ) * ( 10 ) + ( 4 ) * ( 30 ));
  Real x[2].yb[2](start = ( 3 ) * ( 20 ) + ( 4 ) * ( 40 ));
+equation
+ x[1].yb[1] = 1;
+ x[1].yb[2] = 2;
+ x[2].yb[1] = 3;
+ x[2].yb[2] = 4;
 end ModificationTests.ArrayModifications27;
 ")})));
 
@@ -1326,7 +1331,7 @@ end ModificationTests.ArrayModifications27;
   Real yb[2];
  end B;
  
- B x[2](yb(start={{1,2},{3,4}}*{{10,20},{30,40}}));
+ B x[2](yb(start={{1,2},{3,4}}*{{10,20},{30,40}}) = {{1,2},{3,4}});
 end ArrayModifications27;
 
 
@@ -1349,6 +1354,11 @@ fclass ModificationTests.ArrayModifications28
  constant Real z[1,2] = 20;
  constant Real z[2,1] = 30;
  constant Real z[2,2] = 40;
+equation
+ x[1].yb[1] = 1;
+ x[1].yb[2] = 2;
+ x[2].yb[1] = 3;
+ x[2].yb[2] = 4;
 end ModificationTests.ArrayModifications28;
 ")})));
 
@@ -1356,7 +1366,7 @@ end ModificationTests.ArrayModifications28;
   Real yb[2];
  end B;
  
- B x[2](yb(start=y*z));
+ B x[2](yb(start=y*z) = {{1,2},{3,4}});
  constant Real y[2,2] = {{1,2},{3,4}};
  constant Real z[2,2] = {{10,20},{30,40}};
 end ArrayModifications28;
@@ -1458,11 +1468,20 @@ fclass ModificationTests.ArrayModifications32
  Real x[2].y[1].x[2](start = 2);
  Real x[2].y[2].x[1](start = 1);
  Real x[2].y[2].x[2](start = 2);
+equation
+ x[1].y[1].x[1] = 3;
+ x[1].y[1].x[2] = 4;
+ x[1].y[2].x[1] = 3;
+ x[1].y[2].x[2] = 4;
+ x[2].y[1].x[1] = 3;
+ x[2].y[1].x[2] = 4;
+ x[2].y[2].x[1] = 3;
+ x[2].y[2].x[2] = 4;
 end ModificationTests.ArrayModifications32;
 ")})));
 
  model C
-  Real x[2](start={1,2});
+  Real x[2](start={1,2}) = {3,4};
  end C;
  
  model B
@@ -1527,11 +1546,20 @@ fclass ModificationTests.ArrayModifications34
  Real x[2].y[1].x[2](start = 2);
  Real x[2].y[2].x[1](start = 3);
  Real x[2].y[2].x[2](start = 4);
+equation
+ x[1].y[1].x[1] = 3;
+ x[1].y[1].x[2] = 4;
+ x[1].y[2].x[1] = 3;
+ x[1].y[2].x[2] = 4;
+ x[2].y[1].x[1] = 3;
+ x[2].y[1].x[2] = 4;
+ x[2].y[2].x[1] = 3;
+ x[2].y[2].x[2] = 4;
 end ModificationTests.ArrayModifications34;
 ")})));
 
  model C
-  Real x[2];
+  Real x[2] = {3,4};
  end C;
  
  model B
@@ -1806,10 +1834,13 @@ model ArrayModifications45
 fclass ModificationTests.ArrayModifications45
  Real x[1](start = 0);
  Real x[2](start = 0);
+equation
+ x[1] = 1;
+ x[2] = 2;
 end ModificationTests.ArrayModifications45;
 ")})));
 
- Real x[2](start=0);
+ Real x[2](start=0) = {1,2};
 end ArrayModifications45;
 
 

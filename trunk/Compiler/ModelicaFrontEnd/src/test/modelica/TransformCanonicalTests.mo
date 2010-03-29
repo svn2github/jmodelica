@@ -297,11 +297,11 @@ Discrete variables:
 Algebraic real variables: 
  x1: number of uses: 2, isLinear: true, alias: no
  x2: number of uses: 2, isLinear: true, alias: no
- x3: number of uses: 2, isLinear: false, alias: no
+ x3: number of uses: 3, isLinear: false, alias: no
  x4: number of uses: 2, isLinear: true, alias: no
- x5: number of uses: 2, isLinear: false, alias: no
+ x5: number of uses: 3, isLinear: false, alias: no
  x6: number of uses: 3, isLinear: true, alias: no
- x7: number of uses: 1, isLinear: false, alias: no
+ x7: number of uses: 2, isLinear: false, alias: no
 
 Input variables: 
   ")})));
@@ -323,6 +323,7 @@ Input variables:
   	x4 = p1/x5;
   	x5 = x6-x6;
   	x6 = sin(x7);
+  	x7 = x3*x5;
   
   end LinearityTest1;
 
@@ -902,7 +903,7 @@ end ParameterBindingExpTest2_Err;
 model ParameterBindingExpTest3_Warn
 
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="ParameterBindingExpTest3_Warn",
+      JModelica.UnitTesting.WarningTestCase(name="ParameterBindingExpTest3_Warn",
         description="Test errors in binding expressions.",
                                                errorMessage=
 "

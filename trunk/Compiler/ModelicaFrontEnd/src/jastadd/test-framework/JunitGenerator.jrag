@@ -44,10 +44,6 @@ public class JunitGenerator {
 		this.ts = new TestSuite(fileName,className);
 	}
 	
-	public void dump(StringBuilder str) {
-		ts.dump(str," ");
-	}
-	
 	public static void main(String args[]) {
 		/* The first argument is the name of the .mo file to
 		 * generate a Junit test class from and the final

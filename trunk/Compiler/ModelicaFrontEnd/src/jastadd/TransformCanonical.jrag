@@ -204,7 +204,9 @@ aspect TransformCanonical {
 	 * \brief Create an FFunctionCallLeft using a copy of this name.
 	 */
 	public FFunctionCallLeft FQName.createFFunctionCallLeft() {
-		return new FFunctionCallLeft(new Opt(new FIdUseExp(createFIdUse())));
+		FQName fqn = fullCopy();
+		fqn.setLastFArraySubscripts(null);
+		return new FFunctionCallLeft(new Opt(new FIdUseExp(fqn)));
 	}
 
 	/**

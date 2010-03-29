@@ -2031,34 +2031,46 @@ model SubscriptExpression7
          description="Type checking array subscripts: using min in subscripts",
          flatModel="
 fclass ArrayTests.SubscriptExpression7
- Real x[1];
- Real x[2];
- Real x[3];
- Real x[4];
+ Real x[1,1];
+ Real x[1,2];
+ Real x[1,3];
+ Real x[1,4];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[2,3];
+ Real x[2,4];
+ Real x[3,1];
+ Real x[3,2];
+ Real x[3,3];
+ Real x[3,4];
+ Real x[4,1];
+ Real x[4,2];
+ Real x[4,3];
+ Real x[4,4];
 equation
- x[1] = 1 + ( 1 ) * ( 2 );
- x[2] = 1 + ( 2 ) * ( 2 );
- x[3] = 1 + ( 3 ) * ( 2 );
- x[4] = 1 + ( 4 ) * ( 2 );
- x[2] = 2 + ( 1 ) * ( 2 );
- x[2] = 2 + ( 2 ) * ( 2 );
- x[3] = 2 + ( 3 ) * ( 2 );
- x[4] = 2 + ( 4 ) * ( 2 );
- x[3] = 3 + ( 1 ) * ( 2 );
- x[3] = 3 + ( 2 ) * ( 2 );
- x[3] = 3 + ( 3 ) * ( 2 );
- x[4] = 3 + ( 4 ) * ( 2 );
- x[4] = 4 + ( 1 ) * ( 2 );
- x[4] = 4 + ( 2 ) * ( 2 );
- x[4] = 4 + ( 3 ) * ( 2 );
- x[4] = 4 + ( 4 ) * ( 2 );
+ x[1,1] = 1 + ( 1 ) * ( 2 );
+ x[1,2] = 1 + ( 2 ) * ( 2 );
+ x[1,3] = 1 + ( 3 ) * ( 2 );
+ x[1,4] = 1 + ( 4 ) * ( 2 );
+ x[2,2] = 2 + ( 1 ) * ( 2 );
+ x[2,2] = 2 + ( 2 ) * ( 2 );
+ x[2,3] = 2 + ( 3 ) * ( 2 );
+ x[2,4] = 2 + ( 4 ) * ( 2 );
+ x[3,3] = 3 + ( 1 ) * ( 2 );
+ x[3,3] = 3 + ( 2 ) * ( 2 );
+ x[3,3] = 3 + ( 3 ) * ( 2 );
+ x[3,4] = 3 + ( 4 ) * ( 2 );
+ x[4,4] = 4 + ( 1 ) * ( 2 );
+ x[4,4] = 4 + ( 2 ) * ( 2 );
+ x[4,4] = 4 + ( 3 ) * ( 2 );
+ x[4,4] = 4 + ( 4 ) * ( 2 );
 end ArrayTests.SubscriptExpression7;
 ")})));
 
- Real x[4];
+ Real x[4,4];
 equation
  for i in 1:4, j in 1:4 loop
-  x[j + i - min(i, j)] = i + j * 2;
+  x[i, j + i - min(i, j)] = i + j * 2;
  end for;
 end SubscriptExpression7;
 

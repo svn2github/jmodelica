@@ -75,29 +75,6 @@ public class TestSuite {
 
 		sr.collectTestCases(this,className);
 	}
-
-	public void dump(StringBuilder str,String indent) {
-		str.append(indent+"TestSuite: " + name + "\n");
-		for (int i=0;i<l.size();i++) {
-			get(i).dump(str,indent+" ");
-			str.append("\n");
-		}
-	}
-
-	public boolean printTests(StringBuilder str) {
-		int numFail = 0;
-		str.append("TestSuite: " + name + "\n");
-		for (int i=0;i<l.size();i++) {
-			if (!get(i).printTest(str))
-				numFail++;
-		}
-		str.append("Summary: ");
-		if (numFail==0)
-			str.append("All tests in test suite passed\n");
-		else
-			str.append(numFail + " of " + l.size() +" test in test suite failed\n");
-		return numFail==0;
-	}
 	
 	public void dumpJunit(String testFile, String dir) {
 		StringBuilder str = new StringBuilder();

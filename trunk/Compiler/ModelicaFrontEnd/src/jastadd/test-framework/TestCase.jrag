@@ -14,6 +14,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.util.Iterator;
+
 aspect TestCases {
 
 /**
@@ -45,12 +47,6 @@ abstract public class TestCase {
 		this.sourceFileName = sourceFileName;
 		this.className = className;
 	}
-
-	abstract public boolean testMe();
-	
-	abstract public void dump(StringBuilder str, String indent);
-	
-	abstract public boolean printTest(StringBuilder str);
 		
 	public void dumpJunit(StringBuilder str, int index) {
 		str.append("  @Test public void " + getName() + "() {\n");
@@ -125,6 +121,168 @@ abstract public class TestCase {
     	str_res = str_res.replaceAll("\\n", "");
     	str_res = str_res.replaceAll(" ", "");
 		return str_res;
+	}
+	
+	/**
+	 * \brief Thrown when the options file could not be openend.
+	 */
+	public static class CouldNotLoadOptionsException extends RuntimeException {
+		public CouldNotLoadOptionsException(Throwable t) {
+			super(t);
+		}
+	}
+	
+	/**
+	 * \brief Describes the result of a test performed by a method called by testMe().
+	 */
+	protected enum Result { PASS, FAIL, CONTINUE }
+	
+	public boolean testMe() {
+		// Parse
+		ParserHandler ph = new ParserHandler();
+		SourceRoot sr = null;
+		try {
+			sr = ph.parseFile(getSourceFileName());
+		} catch (Exception e) {
+			return false;
+		}
+		
+		String filesep = System.getProperty("file.separator");
+		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
+		OptionRegistry or;
+		try {
+			or = new OptionRegistry(optionsfile);
+		} catch (Exception e) {
+			throw new CouldNotLoadOptionsException(e);
+		}
+		String modelica_path = System.getenv("JMODELICA_HOME")+filesep+"ThirdParty/MSL";
+		or.setStringOption("MODELICAPATH",modelica_path);
+		sr.options = or;
+		
+		sr.setFileName(getSourceFileName());
+		
+		
+		// Instantiate and check for errors
+	    InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
+	    Collection<Problem> problems;
+	    try {
+	    	problems = ipr.checkErrorsInInstClass(getClassName());
+	    } catch (ModelicaClassNotFoundException e) {
+	    	return false;
+	    }
+	    
+		Result res = testSemanticProblems(problems);
+		if (res != Result.CONTINUE)
+			return res == Result.PASS;
+		
+		
+		// Flatten class and test it
+	    FlatRoot flatRoot = new FlatRoot();
+	    flatRoot.setFileName(getSourceFileName());
+	    FClass fc = createFClass(ipr.simpleLookupInstClassDecl(getClassName()));
+	    flatRoot.setFClass(fc);
+	    flatRoot.options = new OptionRegistry(or);
+	    
+	    InstNode ir;
+	    try {
+	    	ir = ipr.findFlattenInst(getClassName(), fc);
+	    } catch (ModelicaClassNotFoundException e) {
+	    	return false;
+	    }
+	    
+	    res = testFlattened(fc);
+		if (res != Result.CONTINUE)
+			return res == Result.PASS;
+		
+		
+		// Transform canonical and check for errors again
+	    fc.transformCanonical();
+		problems = fc.errorCheck();
+		
+		res = testTransformedProblems(problems);
+		if (res != Result.CONTINUE)
+			return res == Result.PASS;
+		
+		
+		// Test transformed class
+	    res = testTransformed(fc);
+		if (res != Result.CONTINUE)
+			return res == Result.PASS;
+		
+		
+		// No test has returned FAIL
+		return true;
+	}
+
+	/**
+	 * \brief Perform tests on the set of semantic problems found in the instance tree.
+	 * 
+	 * Default implementation returns FAIL if any errors other than COMPLIANCE were found, CONTINUE otherwise.
+	 */
+	protected Result testSemanticProblems(Collection<Problem> problems) {
+		return testProblems(problems);
+	}
+	
+	/**
+	 * \brief Perform tests on flattened class.
+	 */
+	protected Result testFlattened(FClass fc) {
+		return Result.CONTINUE;
+	}
+
+	/**
+	 * \brief Perform tests on flat class after transform canonical step.
+	 */
+	protected Result testTransformed(FClass fc) {
+		return Result.CONTINUE;
+	}
+
+	/**
+	 * \brief Perform tests on the set of semantic problems found after transform canonical step.
+	 * 
+	 * Default implementation returns FAIL if any errors other than COMPLIANCE were found, CONTINUE otherwise.
+	 */
+	protected Result testTransformedProblems(Collection<Problem> problems) {
+		return testProblems(problems);
+	}
+	
+	/**
+	 * \brief Perform tests on a set of semantic problems.
+	 * 
+	 * Default implementation returns FAIL if any errors other than COMPLIANCE were found, CONTINUE otherwise.
+	 */
+	protected Result testProblems(Collection<Problem> problems) {
+		filterProblems(problems);
+		return (problems.size() > 0) ? Result.FAIL : Result.CONTINUE;
+	}
+	
+	/**
+	 * \brief Filters out any uninteresting problems from a set of semantic problems.
+	 * 
+	 * Default implementation removes any warnings and any COMPLIANCE errors.
+	 */
+	protected void filterProblems(Collection<Problem> problems) {
+		for (Iterator<Problem> it = problems.iterator(); it.hasNext(); )
+			if (!it.next().isTestError())
+				it.remove();
+	}
+	
+	/**
+	 * \brief Compare a flat class to a pretty-printed correct model and return PASS or FAIL.
+	 */
+	protected Result testPrettyPrint(FClass fc, String correct) {
+		TokenTester tt = new TokenTester();
+		String test = fc.prettyPrint("");
+		return tt.test(test, correct) ? Result.PASS : Result.FAIL;
+	}
+	
+	/**
+	 * \brief Transforms any CONTINUE result into FAIL.
+	 * 
+	 * @see Result
+	 */
+	protected Result stop(Result res) {
+		return (res == Result.CONTINUE) ? Result.FAIL : res;
 	}
 
 }

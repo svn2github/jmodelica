@@ -58,143 +58,18 @@ public abstract class CodeGenTestCase extends TestCase {
 	}
 
 	public abstract AbstractGenerator createGenerator(FClass fc);
-	
-	public void dump(StringBuilder str,String indent) {
-		str.append(indent+"CodeGenTestCase: \n");
-		if (testMe())
-			str.append("PASS\n");
-		else
-			str.append("FAIL\n");
-		str.append(indent+" Name:                     "+getName()+"\n");
-		str.append(indent+" Description:              "+getDescription()+"\n");
-		str.append(indent+" Source file:              "+getSourceFileName()+"\n");
-		str.append(indent+" Class name:               "+getClassName()+"\n");
-		if (!isResultOnFile())
-			str.append(indent+" Generated code:\n"+getGenCode()+"\n");
-		else
-			str.append(indent+" Generated code file name: "+getGenCodeFileName()+"\n");
-		
-	}
 
-	public String toString() {
-		StringBuilder str = new StringBuilder();
-		str.append("CodeGenTestCase: \n");
-		str.append(" Name:                     "+getName()+"\n");
-		str.append(" Description:              "+getDescription()+"\n");
-		str.append(" Source file:              "+getSourceFileName()+"\n");
-		str.append(" Class name:               "+getClassName()+"\n");
-		if (!isResultOnFile())
-			str.append(" Generated code:\n"+getGenCode()+"\n");
-		else
-			str.append(" Generated code file name: "+getGenCodeFileName()+"\n");
-		return str.toString();
-	}
-	
-	public boolean printTest(StringBuilder str) {
-		str.append("TestCase: " + getName() +": ");
-		if (testMe()) {
-			str.append("PASS\n");
-			return true;
-		}else {
-			str.append("FAIL\n");
-			return false;
-		}
-	}
-	
-	public boolean testMe() {
-        System.out.println("Running test: " + getClassName());
-		ParserHandler ph = new ParserHandler();
-		SourceRoot sr = null;
-		try {
-			sr = ph.parseFile(getSourceFileName());
-		} catch (Exception e) {
-			System.out.println("Error when parsing file: " + getSourceFileName());
-		}
-		String filesep = System.getProperty("file.separator");
-		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
-		OptionRegistry or = null;
-		try {
-			or = new OptionRegistry(optionsfile);
-		} catch(XPathExpressionException e) {
-			System.out.println("The options XML file could not be loaded.");
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			return false;
-		} catch(ParserConfigurationException e) {
-			System.out.println("The options XML file could not be loaded.");
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			return false;
-		} catch(IOException e) {
-			System.out.println("The options XML file could not be loaded.");
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			return false;
-		} catch(SAXException e) {
-			System.out.println("The options XML file could not be loaded.");
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			return false;
-		}
-		
-		String modelica_path = System.getenv("JMODELICA_HOME")+filesep+"ThirdParty/MSL";
-		or.setStringOption("MODELICAPATH",modelica_path);
-		
-		sr.options = or;
-
-		sr.setFileName(getSourceFileName());
-	    InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-	    
-	    try {
-	    	Collection<Problem> problems = 
-	    		ipr.checkErrorsInInstClass(getClassName());
-		    // Just warnings or errors too?
-		    for (Problem p : problems) {
-		    	if (p.severity() == Problem.Severity.ERROR) {
-		    		return false;
-		    	}
-		    }
-/*
-	    	if (problems.size()>0) {
-	    		System.out.println("***** Errors in Class!");
-	    		for (Problem p : problems) {
-	    			System.out.println(p.toString() + " \n");
-	    		}
-	    		return false;
-	    	} 
-	    	*/
-	    }catch (ModelicaClassNotFoundException e) {
-	    	return false;
-	    }
-	    
-//	    System.out.println("Hej");
-	    
-	    FlatRoot flatRoot = new FlatRoot();
-	    flatRoot.setFileName(getSourceFileName());
-	    FClass fc = new FClass();
-	    flatRoot.setFClass(fc);
-	    flatRoot.options = new OptionRegistry(or);
-	    
-		//FClass fc = new FClass();
-	    InstNode ir;
-	    try {
-	    	ir = ipr.findFlattenInst(getClassName(), fc);
-	    } catch (ModelicaClassNotFoundException e) {
-	    	System.out.println("Modelica class " + getClassName() + " not found.");
-	    	return false;
-	    }
-   	  	fc.transformCanonical();
-   	  	// Assume that result and template is not on file.
+	/**
+	 * \brief Perform tests on flat class after transform canonical step.
+	 */
+	protected Result testTransformed(FClass fc) {
    	  	ByteArrayOutputStream os = new ByteArrayOutputStream();
   	    AbstractGenerator generator = createGenerator(fc);
 	    generator.generate(new BufferedReader(new StringReader(getTemplate())),
 	    		           new PrintStream(os));
-	    
-//	    System.out.println(os.toString().trim());
-//	    System.out.println("**");
-//	    System.out.println(getGenCode().trim());
-	    
-		return removeWhitespace(os.toString()).compareTo(removeWhitespace(getGenCode()))==0;
+	    String test = removeWhitespace(os.toString());
+	    String correct = removeWhitespace(getGenCode());
+	    return test.equals(correct) ? Result.PASS : Result.FAIL;
 	}
 	
 	public String getGenCode() {

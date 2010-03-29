@@ -54,150 +54,29 @@ public class FClassMethodTestCase extends TestCase {
 		
 	}
 
-	public void dump(StringBuilder str,String indent) {
-		str.append(indent+"FClassMethodTestCase: \n");
-		if (testMe())
-			str.append("PASS\n");
-		else
-			str.append("FAIL\n");
-		str.append(indent+" Name:                     "+getName()+"\n");
-		str.append(indent+" Description:              "+getDescription()+"\n");
-		str.append(indent+" Source file:              "+getSourceFileName()+"\n");
-		str.append(indent+" Class name:               "+getClassName()+"\n");
-		if (!isResultOnFile())
-			str.append(indent+" Output:\n"+getOutput()+"\n");
-		else
-			str.append(indent+" Output file name: "+getOutputFileName()+"\n");
-		
-	}
-
-	public String toString() {
-		StringBuilder str = new StringBuilder();
-		str.append("FClassMethodTestCase: \n");
-		str.append(" Name:                     "+getName()+"\n");
-		str.append(" Description:              "+getDescription()+"\n");
-		str.append(" Source file:              "+getSourceFileName()+"\n");
-		str.append(" Class name:               "+getClassName()+"\n");
-		if (!isResultOnFile())
-			str.append(" Output:\n"+getOutput()+"\n");
-		else
-			str.append(" Output file name: "+getOutputFileName()+"\n");
-		return str.toString();
-	}
-	
-	public boolean printTest(StringBuilder str) {
-		str.append("TestCase: " + getName() +": ");
-		if (testMe()) {
-			str.append("PASS\n");
-			return true;
-		}else {
-			str.append("FAIL\n");
-			return false;
-		}
-	}
-	
-	public boolean testMe() {
-        System.out.println("Running test: " + getClassName());
-		ParserHandler ph = new ParserHandler();
-		SourceRoot sr = null;
-		try {
-			sr = ph.parseFile(getSourceFileName());
-		} catch (Exception e) {
-			System.out.println("Error when parsing file: " + getSourceFileName());
-		}
-		String filesep = System.getProperty("file.separator");
-		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
-		OptionRegistry or = null;
-		try {
-			or = new OptionRegistry(optionsfile);
-		} catch(XPathExpressionException e) {
-			System.out.println("The options XML file could not be loaded.");
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			return false;
-		} catch(ParserConfigurationException e) {
-			System.out.println("The options XML file could not be loaded.");
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			return false;
-		} catch(IOException e) {
-			System.out.println("The options XML file could not be loaded.");
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			return false;
-		} catch(SAXException e) {
-			System.out.println("The options XML file could not be loaded.");
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			return false;
-		}
-		
-		String modelica_path = System.getenv("JMODELICA_HOME")+filesep+"ThirdParty/MSL";
-		or.setStringOption("MODELICAPATH",modelica_path);
-		
-		sr.options = or;
-		
-		sr.setFileName(getSourceFileName());
-		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-		Collection<Problem> problems;
-		try {
-			problems = ipr.checkErrorsInInstClass(getClassName());
-		} catch (ModelicaClassNotFoundException e) {
-			return false;
-		}
-	    // Just warnings or errors too?
-	    for (Problem p : problems) {
-	    	if (p.severity() == Problem.Severity.ERROR) {
-	    		return false;
-	    	}
-	    }
-	    FlatRoot flatRoot = new FlatRoot();
-	    flatRoot.setFileName(getSourceFileName());
-	    FClass fc = ph.newFClass();
-	    flatRoot.setFClass(fc);
-	    flatRoot.options = new OptionRegistry(or);
-	    
-	    InstNode ir;
+	/**
+	 * \brief Perform tests on flat class after transform canonical step.
+	 */
+	protected Result testTransformed(FClass fc) {
 	    try {
-	    	ir = ipr.findFlattenInst(getClassName(), fc);
-	    } catch (ModelicaClassNotFoundException e) {
-	    	return false;
-	    }
-	    
-	    fc.transformCanonical();
-	    
-	    try {
-	    	
-	    	Method method = null;
+	    	Method method;
 	    	
 	    	// First try to find method in subclass (typically FOptClass)
 	    	try {
-	    		method = fc.getClass().getDeclaredMethod(getMethodName(), 
-		    			new Class[] {});
+	    		method = fc.getClass().getDeclaredMethod(getMethodName());
 	    	} catch (NoSuchMethodException e) { // If not found, try with super class
-	    		method = fc.getClass().getSuperclass().getDeclaredMethod(getMethodName(), 
-		    			new Class[] {});
+	    		method = fc.getClass().getSuperclass().getDeclaredMethod(getMethodName());
 	    	}
 	    		    	
-	    	Object args[] = new Object[0];
-	    	String testResult =((String)method.invoke(fc, args));
-	    	testResult = removeWhitespace(testResult);
-	    	String outp = removeWhitespace(getOutput());
+	    	String test = removeWhitespace((String) method.invoke(fc));
+	    	String correct = removeWhitespace(getOutput());
 
-	    	/*
-	    	System.out.println("test ****  \n" +testResult);
-	    	System.out.println("fixture ****  \n" +outp);
-	    	for (int i=0;i<testResult.length();i++) {
-	    		System.out.println(outp.substring(i,i+1) + " | " +
-	    				testResult.substring(i,i+1));
-	    	}
-	    	*/
-	    	return testResult.compareTo(outp)==0;
+	    	if (test.equals(correct))
+	    		return Result.PASS;
 	    } catch (Exception e) {
-	    	e.printStackTrace();
 	    }
-	    return false;    	
-	}	
+    	return Result.FAIL;
+	}
 	
 	/**
 	 * @return the output

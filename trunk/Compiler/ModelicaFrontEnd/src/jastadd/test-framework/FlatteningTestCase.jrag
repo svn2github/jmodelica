@@ -26,6 +26,8 @@ public class FlatteningTestCase extends TestCase {
 	private String flatModel = "";
     private String flatModelFileName = "";
     private boolean resultOnFile = false;
+    
+    // TODO: Use or remove resultOnFile
 	
 	public FlatteningTestCase() {}
     
@@ -53,129 +55,12 @@ public class FlatteningTestCase extends TestCase {
 		}
 		
 	}
-
-	public void dump(StringBuilder str,String indent) {
-		str.append(indent+"FlatteningTestCase: \n");
-		if (testMe())
-			str.append("PASS\n");
-		else
-			str.append("FAIL\n");
-		str.append(indent+" Name:                     "+getName()+"\n");
-		str.append(indent+" Description:              "+getDescription()+"\n");
-		str.append(indent+" Source file:              "+getSourceFileName()+"\n");
-		str.append(indent+" Class name:               "+getClassName()+"\n");
-		if (!isResultOnFile())
-			str.append(indent+" Flat model:\n"+getFlatModel()+"\n");
-		else
-			str.append(indent+" Flat model file name: "+getFlatModelFileName()+"\n");
-		
-	}
-
-	public String toString() {
-		StringBuilder str = new StringBuilder();
-		str.append("FlatteningTestCase: \n");
-		str.append(" Name:                     "+getName()+"\n");
-		str.append(" Description:              "+getDescription()+"\n");
-		str.append(" Source file:              "+getSourceFileName()+"\n");
-		str.append(" Class name:               "+getClassName()+"\n");
-		if (!isResultOnFile())
-			str.append(" Flat model:\n"+getFlatModel()+"\n");
-		else
-			str.append(" Flat model file name: "+getFlatModelFileName()+"\n");
-		return str.toString();
-	}
 	
-	public boolean printTest(StringBuilder str) {
-		str.append("TestCase: " + getName() +": ");
-		if (testMe()) {
-			str.append("PASS\n");
-			return true;
-		}else {
-			str.append("FAIL\n");
-			return false;
-		}
-	}
-	
-	public boolean testMe() {
-        System.out.println("Running test: " + getClassName());
-		ParserHandler ph = new ParserHandler();
-		SourceRoot sr = null;
-		try {
-			sr = ph.parseFile(getSourceFileName());
-		} catch (Exception e) {
-			System.out.println("Error when parsing file: " + getSourceFileName());
-		}
-		String filesep = System.getProperty("file.separator");
-		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
-		OptionRegistry or = null;
-		try {
-			or = new OptionRegistry(optionsfile);
-		} catch(XPathExpressionException e) {
-			System.out.println("The options XML file could not be loaded.");
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			return false;
-		} catch(ParserConfigurationException e) {
-			System.out.println("The options XML file could not be loaded.");
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			return false;
-		} catch(IOException e) {
-			System.out.println("The options XML file could not be loaded.");
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			return false;
-		} catch(SAXException e) {
-			System.out.println("The options XML file could not be loaded.");
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			return false;
-		}
-		
-		String modelica_path = System.getenv("JMODELICA_HOME")+filesep+"ThirdParty/MSL";
-		or.setStringOption("MODELICAPATH",modelica_path);
-		
-		sr.options = or;
-		
-		sr.setFileName(getSourceFileName());
-		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-		Collection<Problem> problems;
-		try {
-			problems = ipr.checkErrorsInInstClass(getClassName());
-		} catch (ModelicaClassNotFoundException e) {
-			return false;
-		}
-	    // Just warnings or errors too?
-	    for (Problem p : problems) {
-	    	if (p.severity() == Problem.Severity.ERROR) {
-	    		System.out.println("Error found in model");
-	    		return false;
-	    	}
-	    }
-
-	    FlatRoot flatRoot = new FlatRoot();
-	    flatRoot.setFileName(getSourceFileName());
-	    FClass fc = createFClass(ipr.simpleLookupInstClassDecl(getClassName()));
-	    flatRoot.setFClass(fc);
-	    flatRoot.options = new OptionRegistry(or);
-	    
-	    InstNode ir;
-	    try {
-	    	ir = ipr.findFlattenInst(getClassName(), fc);
-	    } catch (ModelicaClassNotFoundException e) {
-	    	return false;
-	    }
-	 	TokenTester tt = new TokenTester();
-		String testModel = fc.prettyPrint("");
-		String correctModel = getFlatModel();
-		
-		System.out.println("Test model:");
-		System.out.println(testModel);
-		System.out.println("Correct model:");
-		System.out.println(correctModel);	
-		
-		boolean result =  tt.test(testModel,correctModel);
-		return result;
+	/**
+	 * \brief Test that the flattened model matches the correct one.
+	 */
+	protected Result testFlattened(FClass fc) {
+		return testPrettyPrint(fc, getFlatModel());
 	}
 	
 	/**
