@@ -28,8 +28,8 @@ Derivative variables:
 Discrete variables: 
 
 Algebraic real variables: 
- x1: number of uses: 2, isLinear: true, alias: no
- x2: number of uses: 2, isLinear: true, alias: no
+ x1: number of uses: 3, isLinear: true, alias: no
+ x2: number of uses: 3, isLinear: true, alias: no
  x3: number of uses: 2, isLinear: false, alias: no
  x4: number of uses: 2, isLinear: true, alias: no
  x5: number of uses: 2, isLinear: false, alias: no
@@ -63,11 +63,13 @@ Input variables:
   	x4 = p1/x5;
   	x5 = x6-x6;
   	x6 = sin(x7);
-	x7 = x8*p2;  
+	x7 = x8*p2;
+	x1 = x2;
 
   end LinearityTest1;
 
 
+/*
   optimization LinearityTest2 (objective = x(finalTime)^2,
                                startTime=0,
                                finalTime=5)
@@ -154,6 +156,7 @@ y:
         x(t4)*x(t4) <= 1;
 
   end LinearityTest2;	
+*/
 
   optimization ArrayTest1 (objective=cost(finalTime),startTime=0,finalTime=2)
 	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
