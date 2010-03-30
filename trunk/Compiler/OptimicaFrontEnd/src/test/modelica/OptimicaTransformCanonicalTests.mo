@@ -69,7 +69,6 @@ Input variables:
   end LinearityTest1;
 
 
-/*
   optimization LinearityTest2 (objective = x(finalTime)^2,
                                startTime=0,
                                finalTime=5)
@@ -152,11 +151,11 @@ y:
         x = y(t0)+y(t1)^2 + sin(y(t2));
 
      constraint
+        x = 3;
         x(t3) >= 1;
         x(t4)*x(t4) <= 1;
 
   end LinearityTest2;	
-*/
 
   optimization ArrayTest1 (objective=cost(finalTime),startTime=0,finalTime=2)
 	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
