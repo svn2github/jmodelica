@@ -36,7 +36,7 @@ import jmodelica as jm
 # note that startJVM() fails after shutdownJVM(), hence, only one start
 if not jpype.isJVMStarted():
     _jvm_args = string.split(jm.environ['JVM_ARGS'],' ')
-    _jvm_class_path = jm.environ['MC_JAR'] + os.pathsep + jm.environ['OC_JAR']+ os.pathsep + jm.environ['UTIL_JAR']
+    _jvm_class_path = jm.environ['MC_JAR'] + os.pathsep + jm.environ['OC_JAR']+ os.pathsep + jm.environ['UTIL_JAR'] + os.pathsep + jm.environ['GRAPHS_JAR']
     _jvm_ext_dirs = jm.environ['BEAVER_PATH']
     jpype.startJVM(jm.environ['JVM_PATH'],
                    '-Djava.class.path=%s' % _jvm_class_path,

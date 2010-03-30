@@ -17,6 +17,7 @@ Required keys:
   'MC_JAR' : Path to ModelicaCompiler jar file
   'OC_JAR' : Path to OptimicaCompiler jar file
   'UTIL_JAR' : Path to org.jmodelica.Util jar file
+  'GRAPHS_JAR' : Path to org.jmodelica.graphs jar file
   'BEAVER_LIB' : Path to Beaver lib directory
   'CLASSPATH' : Java CLASSPATH
   'JVM_PATH' : Path to JVM dll file
@@ -45,6 +46,7 @@ _defaults = [('IPOPT_HOME','',True),
              ('MC_JAR',os.path.join(_jm_home,'lib','OptimicaCompiler.jar'),True),
              ('OC_JAR',os.path.join(_jm_home,'lib','ModelicaCompiler.jar'),True),
              ('UTIL_JAR',os.path.join(_jm_home,'lib','util.jar'),True),
+             ('GRAPHS_JAR',os.path.join(_jm_home,'lib','graphs.jar'),True),
              ('BEAVER_PATH',os.path.join(_jm_home,'ThirdParty','Beaver','lib'),True),
              ('MODELICAPATH',os.path.join(_jm_home,'ThirdParty','MSL'),True),
              ('JVM_PATH',jpype.getDefaultJVMPath(),True),

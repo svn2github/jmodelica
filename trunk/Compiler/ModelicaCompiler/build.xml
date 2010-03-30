@@ -84,7 +84,11 @@
 				<include name="org/jmodelica/util/*.class" />
 			</fileset>
 		</jar>
-
+		<jar destfile="${jar_output_dir}/graphs.jar">
+			<fileset dir="bin">
+				<include name="org/jmodelica/graphs/*.class" />
+			</fileset>
+		</jar>
 	</target>
 
 	<target name="compile-ast" depends="gen,gen-parser">

@@ -16,6 +16,12 @@
 
 import java.util.ArrayList;
 
+/* This causes conflicts
+import org.jmodelica.graphs.EquationSystem;
+import org.jmodelica.graphs.Equation;
+import org.jmodelica.graphs.Variable;
+*/
+
 /**
  * \brief Contains transformations on the flattened model which converts
  * it into a canonical form.
@@ -58,8 +64,61 @@ aspect TransformCanonical {
 		addFDerivativeVariables();
 		genInitialEquations();
 		sortDependentParameters();
-		//System.out.println(prettyPrint(""));
-		root().flushAllRecursive();
+
+		if (root().options.getBooleanOption("index_reduction")) {
+            System.out.println("Index reduction");    
+
+            org.jmodelica.graphs.EquationSystem eqSys = 
+                        new org.jmodelica.graphs.EquationSystem("Index reduction graph");
+
+
+            int k = 1;
+            for (FAbstractEquation e : equations()) {
+                String eqName = "(" + k + ")";
+
+                System.out.println("Equation: " + eqName);
+
+                org.jmodelica.graphs.Equation eqn = eqSys.addEquation(eqName);
+
+                for (FVariable y : e.algebraicVariables()) {
+                    System.out.println("  Algebraic: " + y.name());
+
+                    org.jmodelica.graphs.Variable v = eqSys.addVariable(y.name());    
+                    eqn.addVariable(v);
+                }
+
+                for (FVariable x : e.differentiatedVariables()) {
+                    System.out.println("  State: " + x.name());
+
+                    org.jmodelica.graphs.Variable v = eqSys.addVariable(x.name());    
+                    eqn.addVariable(v);
+                }
+
+                for (FDerivativeVariable dx : e.derivativeVariables()) {
+                    FVariable x = dx.myDifferentiatedVariable();
+                    System.out.println("  Diffed state: " + x.name());
+
+                    org.jmodelica.graphs.Variable v = eqSys.addVariable(x.name(), 1);    
+                    eqn.addVariable(v);
+                }
+
+                ++k;
+            }
+            System.out.println("--------------------");
+
+            eqSys.dumpGraph();
+
+            System.out.println("--------------------");
+            eqSys.cheapAssignment();
+            int index = eqSys.pantelides();
+
+            System.out.println("Index = " + index);
+            eqSys.dumpGraph();
+        } else {
+            System.out.println("NO index reduction");    
+        }  
+
+        root().flushAllRecursive();
 		
 	}
 		

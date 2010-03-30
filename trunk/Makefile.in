@@ -789,6 +789,7 @@ all-local:
 install-exec-local:
 @HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
 @HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/util.jar $(DESTDIR)$(prefix)/lib/
+@HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/graphs.jar $(DESTDIR)$(prefix)/lib/
 @HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/OptimicaCompiler/bin/OptimicaCompiler.jar $(DESTDIR)$(prefix)/lib/
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/LICENSE $(DESTDIR)$(prefix)/ 
 	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/lib/
