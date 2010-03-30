@@ -62,7 +62,7 @@ function python_tests() {
   TESTS=${JMODELICA_HOME}/Python/jmodelica/tests
   PATTERN=----------------------------------------------------------------------
   # Under Windows, run each test file separately
-  if [[ "$(uname -o)" == "Msys" ]]; then
+  if [[ "$(uname | sed -n -e 's!^MINGW!1!p')" != "" ]]; then
     TESTS="$(find ${TESTS} -name \*.py|grep -v __init__)"
   fi
   print_name Python
@@ -80,7 +80,7 @@ function python_tests() {
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
           nosetests -a stddist -v ${TEST} 2>&1 \
-	    | sed -e 's/^OK$/PASSED/' -e 's/^FAILED/TEST FAILED /'
+	    | sed -e 's!^OK$!PASSED!' -e 's!^FAILED!TEST FAILED !'
         done | filter_python_separate
       else
         echo BUILD FAILED
@@ -93,7 +93,7 @@ function python_tests() {
           nosetests -a stddist -v ${TEST} 2>&1 \
 	    | egrep -v '^Exception .* ignored$' \
 	    | grep -B1 -A500 -e${PATTERN} \
-	    | sed -e 's/^OK$/PASSED/' -e 's/^FAILED/TEST FAILED /'
+	    | sed -e 's!^OK$!PASSED!' -e 's!^FAILED!TEST FAILED !'
         done | filter_python_separate
       fi
       ;;
@@ -118,11 +118,11 @@ function filter_python_separate() {
   | sed -n \
         -e '1 i\
             0' \
-        -e 's/^TEST FAILED(errors=\([0-9]*\))/\1+/' \
+        -e 's!^TEST FAILED(errors=\([0-9]*\))!\1+!' \
         -e '$ a\
             p' \
   | dc \
-  | sed -e 's/^0$/PASSED/' \
+  | sed -e 's!^0$!PASSED!' \
         -e 's/^\([0-9]*\)$/TEST FAILED(failures=\1)/'
   rm -f ${TMP}
 }
@@ -140,14 +140,14 @@ function junit_test() {
 	| sed -n \
 	    -e '1 i\
                 0 0' \
-            -e 's/^.*\[jastadd\] \(Semantic errors\|Syntax error\).*$/BUILD FAILED/' \
-	    -e 's/^.*\[java\] Error when parsing file:.*$/BUILD FAILED/' \
-	    -e 's/^.*Failures: \([0-9]*\), Errors: \([0-9]*\),.*$/r\1+r\2+/p' \
-	    -e 's/^.*\(BUILD FAILED\).*$/[\1]pq/p' \
+            -e 's!^.*\[jastadd\] \(Semantic errors\|Syntax error\).*$!BUILD FAILED!' \
+	    -e 's!^.*\[java\] Error when parsing file:.*$!BUILD FAILED!' \
+	    -e 's!^.*Failures: \([0-9]*\), Errors: \([0-9]*\),.*$!r\1+r\2+!p' \
+	    -e 's!^.*\(BUILD FAILED\).*$![\1]pq!p' \
 	    -e '$ a\
                 r[failures=]nn[, errors=]np' \
 	| dc \
-	| sed -e 's/failures=0, errors=0/PASSED/' \
+	| sed -e 's!failures=0, errors=0!PASSED!' \
 	    -e 's/\(failures=.*, errors=.*\)/TEST FAILED (\1)/'
       ;;
     n)
@@ -193,7 +193,7 @@ export JAVA_HOME JMODELICA_HOME IPOPT_HOME CPPAD_HOME PYTHONPATH LD_LIBRARY_PATH
 TIME=$(date +%s)
 
 for a in ${DEFAULT_ARGS} $*; do
-  for b in $(echo "" ${a}|sed 's/\(.\)/\1 /g'); do
+  for b in $(echo "" ${a}|sed 's!\(.\)!\1 !g'); do
     case ${b} in
       -)
         ;;
