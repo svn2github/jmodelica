@@ -2,7 +2,9 @@ package org.jmodelica.graphs;
 
 import java.util.LinkedList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Stack;
 import java.util.Collection;
 
@@ -16,8 +18,8 @@ public class EquationSystem {
 
     public EquationSystem(String name) {
         equations = new LinkedList<Equation>();
-        variables = new HashMap<String, Variable>();
-        activeVariables = new HashMap<String, Variable>();
+        variables = new LinkedHashMap<String, Variable>();
+        activeVariables = new LinkedHashMap<String, Variable>();
         this.name = name;
     }
 

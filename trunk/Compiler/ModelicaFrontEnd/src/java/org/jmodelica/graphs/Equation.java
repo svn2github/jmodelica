@@ -1,6 +1,7 @@
 package org.jmodelica.graphs;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Iterator;
 
 public class Equation {
@@ -22,7 +23,7 @@ public class Equation {
         this.timesDiffed = timesDiffed;
         this.id = id;
 
-        variables = new HashSet<Variable>();
+        variables = new LinkedHashSet<Variable>();
         varIterator = null;
         match = null;
     }
