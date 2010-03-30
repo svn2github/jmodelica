@@ -29,7 +29,7 @@ Discrete variables:
 
 Algebraic real variables: 
  x1: number of uses: 3, isLinear: true, alias: no
- x2: number of uses: 3, isLinear: true, alias: no
+ x2: number of uses: 2, isLinear: true, alias: no
  x3: number of uses: 2, isLinear: false, alias: no
  x4: number of uses: 2, isLinear: true, alias: no
  x5: number of uses: 2, isLinear: false, alias: no
@@ -64,7 +64,7 @@ Input variables:
   	x5 = x6-x6;
   	x6 = sin(x7);
 	x7 = x8*p2;
-	x1 = x2;
+	x1 = 1;
 
   end LinearityTest1;
 
