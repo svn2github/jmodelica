@@ -812,6 +812,16 @@ aspect FlatNames {
 	}
 	
 	/**
+	 * \brief Create a copy of the first part of this name.
+	 */
+	public FQName FQName.copyPrefix() {
+		FQName res = new FQName();
+		if (getNumFQNamePart() > 0)
+			res.addFQNamePart(getFQNamePart(0).fullCopy());
+		return res;
+	}
+	
+	/**
 	 * \brief Create an FIdUseExp using a copy of this name.
 	 */
 	public FIdUseExp FQName.createFIdUseExp() {

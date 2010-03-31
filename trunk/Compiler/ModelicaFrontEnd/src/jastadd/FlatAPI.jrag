@@ -834,18 +834,13 @@ aspect FlatCausality {
 
 aspect FlatTypes {
 
-	syn boolean AbstractFVariable.isReal() = false;
-	eq FRealVariable.isReal() = true;
-	syn boolean AbstractFVariable.isInteger() = false;
-	eq FIntegerVariable.isInteger() = true;
-	syn boolean AbstractFVariable.isBoolean() = false;
-	eq FBooleanVariable.isBoolean() = true;
-	syn boolean AbstractFVariable.isString() = false;
-	eq FStringVariable.isString() = true;
-	syn boolean AbstractFVariable.isRecord() = false;
-	eq FRecordVariable.isRecord() = true;
+	syn boolean AbstractFVariable.isReal()    = type().isReal();
+	syn boolean AbstractFVariable.isInteger() = type().isInteger();
+	syn boolean AbstractFVariable.isBoolean() = type().isBoolean();
+	syn boolean AbstractFVariable.isString()  = type().isString();
+	syn boolean AbstractFVariable.isRecord()  = type().isRecord();
 	
-	inh boolean FVariable.inRecord();
+	inh boolean AbstractFVariable.inRecord();
 	eq FRecordDecl.getChild().inRecord() = true;
 	eq FClass.getChild().inRecord()      = false;
 	eq FForIndex.getChild().inRecord()   = false;

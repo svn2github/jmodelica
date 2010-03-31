@@ -29,7 +29,6 @@
 #define _JMI_ARRAY_CPPAD_H
 
 #include <cppad/cppad.hpp>
-#include <vector>
 
 typedef struct jmi_array_t jmi_array_t;
 struct jmi_array_t {
@@ -39,14 +38,12 @@ struct jmi_array_t {
 
 typedef CppAD::VecAD<jmi_real_t>::reference jmi_ad_array_ref_t;
 
-// Record array type declaration macro
-#define RECORD_ARRAY_TYPE(rec, arr) typedef std::vector<rec> arr;
-
 // Array creation macro
-#define JMI_ARRAY_DECL(name, n, ...) int name##_size[] = { __VA_ARGS__ };\
-                                     CppAD::VecAD<jmi_real_t> name##_var(n);\
-                                     jmi_array_t name##_arr = { name##_size, &name##_var };\
-                                     jmi_array_t* name = &name##_arr;
+#define JMI_ARRAY_DECL(name, n, ...) \
+	int name##_size[] = { __VA_ARGS__ };\
+    CppAD::VecAD<jmi_real_t> name##_var(n);\
+    jmi_array_t name##_arr = { name##_size, &name##_var };\
+    jmi_array_t* name = &name##_arr;
 
 // Access functions
 jmi_ad_var_t jmi_array_val_1(jmi_array_t* arr, jmi_ad_var_t i1);

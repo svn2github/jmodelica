@@ -165,7 +165,7 @@ FStringVariable : FVariable;
 /**
  * \brief FVariable of a record type.
  */
-FRecordVariable : FVariable ::= Record:FQName;
+FRecordVariable : FVariable ::= Record:FQName /Type:FType/;
 
 /**
  * \brief FVariable corresponding to a derivative variable.
@@ -205,7 +205,7 @@ abstract FType ::= <Size:Size>;
 /**
  * \brief A record type.
  */
-FRecordType : FType ::= <Name> Component:FRecordComponentType* <FRecordDecl:FRecordDecl>;
+FRecordType : FType ::= <Name> Component:FRecordComponentType*;
 
 /**
  * \brief The type discription of a record component.
@@ -768,7 +768,7 @@ FInstAccessExp : FExp ::= InstAccess;
 /**
  * \brief Record constructor.
  */
-FRecordConstructor : FBuiltInFunctionCall ::= Record:FIdUse Arg:FExp*;
+FRecordConstructor : FBuiltInFunctionCall ::= Record:FIdUse Arg:FExp* /Type:FType/;
 
 /**
  * \brief Array constructor expression.

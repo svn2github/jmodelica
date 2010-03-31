@@ -24,10 +24,12 @@ aspect FlatTypeAnalysis {
 	eq FIntegerVariable.type()    = fIntegerType(size());
 	eq FBooleanVariable.type()    = fBooleanType(size());
 	eq FStringVariable.type()     = fStringType(size());
-	eq FRecordVariable.type()     = myFRecordDecl().type().sizedType(size());
+	eq FRecordVariable.type()     = getType();
 	eq FDerivativeVariable.type() = fRealScalarType();
 	eq FFunctionVariable.type()   = getType();
 	eq UnknownFVariable.type()    = fUnknownType();
+	
+	syn FType FRecordVariable.getType() = myFRecordDecl().type().sizedType(size());
 	
 	syn FType InstComponentModification.type() {
 		if (getName().myInstComponentDecl().isAssignable()) {
@@ -58,7 +60,7 @@ aspect FlatTypeAnalysis {
 		TreeSet<FRecordComponentType> comps = new TreeSet<FRecordComponentType>();
 		for (FVariable fv : getFVariables()) 
 			comps.add(new FRecordComponentType(fv.name(), (FType) fv.type().fullCopy()));
-		FRecordType type = new FRecordType(Size.SCALAR, name(), new List(), this);
+		FRecordType type = new FRecordType(Size.SCALAR, name(), new List());
 		for (FRecordComponentType comp : comps)
 			type.addComponent(comp);
 		return type;
@@ -69,7 +71,7 @@ aspect FlatTypeAnalysis {
 		InstComponentDecl root = isArray() ? getInstComponentDecl(0) : this;
 		for (InstComponentDecl icd : root.getInstComponentDecls()) 
 			comps.add(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
-		FRecordType type = new FRecordType(size(), myInstClassDecl().qualifiedName(), new List(), null);
+		FRecordType type = new FRecordType(size(), myInstClassDecl().qualifiedName(), new List());
 		for (FRecordComponentType comp : comps)
 			type.addComponent(comp);
 		return type;
@@ -79,7 +81,7 @@ aspect FlatTypeAnalysis {
 		TreeSet<FRecordComponentType> comps = new TreeSet<FRecordComponentType>();
 		for (InstComponentDecl icd : getInstComponentDecls()) 
 			comps.add(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
-		FRecordType type = new FRecordType(Size.SCALAR, qualifiedName(), new List(), null);
+		FRecordType type = new FRecordType(Size.SCALAR, qualifiedName(), new List());
 		for (FRecordComponentType comp : comps)
 			type.addComponent(comp);
 		return type;
@@ -143,7 +145,8 @@ aspect FlatTypeAnalysis {
 	
 	eq FIntegerExp.type() = fIntegerScalarType();
 	
-	eq FRecordConstructor.type() = getRecord().recordType();
+	syn FType FRecordConstructor.type() = getType();
+	syn FType FRecordConstructor.getType() = getRecord().recordType();
 	
 	syn FRecordType FIdUse.recordType() = myFRecordDecl().type();
 	eq FIdUseInstAccess.recordType()    = getInstAccess().myInstClassDecl().recordType();

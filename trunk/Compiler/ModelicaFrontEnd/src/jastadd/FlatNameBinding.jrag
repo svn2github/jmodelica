@@ -170,12 +170,24 @@ aspect FlatFunctionBinding {
 
 aspect FlatRecordBinding {
 	
-	syn FRecordDecl AbstractFVariable.myFRecordDecl() = null;
-	eq FRecordVariable.myFRecordDecl() = lookupFRec(getRecord().name());
+	/**
+	 * \brief Get the outermost record variable of this access.
+	 * 
+	 * Access is assumed to be refering to a member of a record and be in a function.
+	 */
+	syn AbstractFVariable FIdUse.myRecordFV() = lookupFV(getFQName().copyPrefix());
 	
-	syn FRecordDecl FIdUse.myFRecordDecl() = lookupFRec(name());
+	syn lazy FRecordDecl AbstractFVariable.myFRecordDecl() = null;
+	eq FRecordVariable.myFRecordDecl()   = lookupFRec(getRecord().name());
+	eq FFunctionVariable.myFRecordDecl() = type().myFRecordDecl();
+	
+	syn lazy FRecordDecl FIdUse.myFRecordDecl() = lookupFRec(name());
+	
+	syn lazy FRecordDecl FType.myFRecordDecl() = null;
+	eq FRecordType.myFRecordDecl() = lookupFRec(getName());
 	
 	inh FRecordDecl FRecordVariable.lookupFRec(String name);
+	inh FRecordDecl FRecordType.lookupFRec(String name);
 	inh FRecordDecl FIdUse.lookupFRec(String name);
 	eq Root.getChild().lookupFRec(String name) = null;
 	eq FClass.getChild().lookupFRec(String name) = lookupFRec(name);
