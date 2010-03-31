@@ -786,6 +786,207 @@ end TypeTests.ParameterStart2;
   Real y = p;
 end ParameterStart2;
 
+model ArrayTypeTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayTypeTest1",
+         description="Check that short type declarations with array indices are expanded correctly.",
+         flatModel="fclass TypeTests.ArrayTypeTest1
+ Real x[1](unit = \"m\");
+ Real x[2](unit = \"m\");
+ Real x[3](unit = \"m\");
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 4;
+end TypeTests.ArrayTypeTest1;
+")})));
+
+
+  type T = Real[3](unit="m");
+  T x = {1,2,4};
+end ArrayTypeTest1;
+
+model ArrayTypeTest2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayTypeTest2",
+         description="Check that short type declarations with array indices are expanded correctly.",
+         flatModel="fclass TypeTests.ArrayTypeTest2
+ Real x[1](unit = \"l\");
+ Real x[2](unit = \"l\");
+ Real x[3](unit = \"l\");
+ Real y[1,1](start = 3,unit = \"m\");
+ Real y[1,2](start = 3,unit = \"m\");
+ Real y[1,3](start = 3,unit = \"m\");
+ Real y[2,1](start = 3,unit = \"m\");
+ Real y[2,2](start = 3,unit = \"m\");
+ Real y[2,3](start = 3,unit = \"m\");
+ Real y[3,1](start = 3,unit = \"m\");
+ Real y[3,2](start = 3,unit = \"m\");
+ Real y[3,3](start = 3,unit = \"m\");
+ Real y[4,1](start = 3,unit = \"m\");
+ Real y[4,2](start = 3,unit = \"m\");
+ Real y[4,3](start = 3,unit = \"m\");
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 4;
+ y[1,1] = 0;
+ y[1,2] = 0;
+ y[1,3] = 0;
+ y[2,1] = 0;
+ y[2,2] = 0;
+ y[2,3] = 0;
+ y[3,1] = 0;
+ y[3,2] = 0;
+ y[3,3] = 0;
+ y[4,1] = 0;
+ y[4,2] = 0;
+ y[4,3] = 0;
+end TypeTests.ArrayTypeTest2;
+")})));
+
+  type S = T[4](start=3,unit="m");
+  type T = Real[3](unit="l");
+  T x = {1,2,4};
+  S y = zeros(4,3);
+end ArrayTypeTest2;
+
+model ArrayTypeTest3
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayTypeTest3",
+         description="Check that short type declarations with array indices are expanded correctly.",
+         flatModel="fclass TypeTests.ArrayTypeTest3
+ Real y[1].x(start = 1);
+ Real y[2].x(start = 1);
+ Real y[3].x(start = 1);
+ Real z[1].x;
+ Real z[2].x;
+ Real z[3].x;
+ Real w.x;
+equation
+ y[1].x = 1;
+ y[2].x = 1;
+ y[3].x = 1;
+ z[1].x = 1;
+ z[2].x = 1;
+ z[3].x = 1;
+ w.x = 1;
+end TypeTests.ArrayTypeTest3;
+")})));
+
+ model A
+  Real x = 1;
+ end A;
+
+ model B = A(x(start=1));
+
+ model C
+ extends A;
+ end C; 
+
+  B y[3];
+  C z[3];
+  C w;
+end ArrayTypeTest3;
+
+model ArrayTypeTest4
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayTypeTest4",
+         description="Check that short type declarations with array indices are expanded correctly.",
+         flatModel="fclass TypeTests.ArrayTypeTest4
+ Real y[1,1].x(start = 1);
+ Real y[1,2].x(start = 1);
+ Real y[2,1].x(start = 1);
+ Real y[2,2].x(start = 1);
+ Real y[3,1].x(start = 1);
+ Real y[3,2].x(start = 1);
+ Real z[1].x;
+ Real z[2].x;
+ Real z[3].x;
+ Real w.x;
+equation
+ y[1,1].x = 1;
+ y[1,2].x = 1;
+ y[2,1].x = 1;
+ y[2,2].x = 1;
+ y[3,1].x = 1;
+ y[3,2].x = 1;
+ z[1].x = 1;
+ z[2].x = 1;
+ z[3].x = 1;
+ w.x = 1;
+end TypeTests.ArrayTypeTest4;
+")})));
+
+ model A
+  Real x = 1;
+
+ end A;
+
+ model B = A[2](x(start=1));
+
+ model C
+ extends A;
+ end C; 
+
+  B y[3];
+  C z[3];
+  C w;
+end ArrayTypeTest4;
+
+model ArrayTypeTest5
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayTypeTest5",
+         description="Check that short type declarations with array indices are expanded correctly.",
+         flatModel="fclass TypeTests.ArrayTypeTest5
+ Real y[1,1].x(start = 1);
+ Real y[1,2].x(start = 1);
+ Real y[2,1].x(start = 1);
+ Real y[2,2].x(start = 1);
+ Real y[3,1].x(start = 1);
+ Real y[3,2].x(start = 1);
+ Real z[1].x;
+ Real z[2].x;
+ Real z[3].x;
+ Real w.x;
+equation
+ y[1,1].x = 3;
+ y[1,2].x = 3;
+ y[2,1].x = 3;
+ y[2,2].x = 3;
+ y[3,1].x = 3;
+ y[3,2].x = 3;
+ z[1].x = 3;
+ z[2].x = 3;
+ z[3].x = 3;
+ w.x = 3;
+end TypeTests.ArrayTypeTest5;
+")})));
+
+ model A
+  Real x;
+  equation
+   x = 3;
+ end A;
+
+ model B = A[2](x(start=1));
+
+ model C
+ extends A;
+ end C; 
+
+  B y[3];
+  C z[3];
+  C w;
+end ArrayTypeTest5;
 
 
 end TypeTests;

@@ -27,7 +27,6 @@ aspect Flattening {
     	InstClassDecl icd = simpleLookupInstClassDecl(className);
     	if (!icd.isUnknown()) {
     		icd.flattenInstClassDecl(fc);
-    		
     	} else {
         	throw new ModelicaClassNotFoundException(className);
     	}

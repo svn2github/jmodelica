@@ -38,7 +38,7 @@ abstract InstClassDecl: InstNode ::= <ClassDecl:ClassDecl>;
 abstract InstBaseClassDecl : InstClassDecl ::= [InstConstraining] InstRestriction;
 InstFullClassDecl : InstBaseClassDecl ::= [InstExternal];
 InstExtendClassDecl : InstFullClassDecl ::= ;
-InstShortClassDecl : InstBaseClassDecl ::= ;
+InstShortClassDecl : InstBaseClassDecl ::= [FArraySubscripts];
 InstPrimitiveClassDecl : InstFullClassDecl;
 InstBuiltInClassDecl : InstClassDecl ::=;
 UnknownInstClassDecl : InstFullClassDecl;
@@ -72,7 +72,7 @@ InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl> /
 
 // The class to expand may differ from the declared class of the component due to 
 // redeclaration of classes.
-abstract InstComponentDecl : InstNode ::= ClassName:InstAccess [FArraySubscripts] <ComponentDecl:ComponentDecl> [InstModification] [InstConstraining];
+abstract InstComponentDecl : InstNode ::= ClassName:InstAccess [LocalFArraySubscripts:FArraySubscripts] <ComponentDecl:ComponentDecl> [InstModification] [InstConstraining] /FArraySubscripts/;
 InstComposite : InstComponentDecl;
 abstract InstAssignable : InstComponentDecl ::= /BindingFExp:FExp/;
 InstPrimitive : InstAssignable;

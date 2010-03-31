@@ -564,9 +564,14 @@ aspect InstanceTreeConstruction {
 	}
 
 	eq InstComponentDecl.getInstComponentDeclList() {
+		//System.out.println( " : " + getClass().getName() + " : "+ myFSubscripts().size());
 		if (isArrayDecl()) { // Take care of array declarations separately
 			// Loop over indices and create new InstArrayComponentDecls
 			List l = new List();
+			// Only the first FSubscript is used to create the first layer
+			// of InstaArrayComponentDecls. The remaining are used when
+			// InstArrayComponentDecls are created further down in the tree.
+			//for (int i : getFArraySubscripts().getFSubscript(0).arrayIndices()) 
 			for (int i : getFArraySubscripts().getFSubscript(0).arrayIndices()) 
 				l.add(new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"), new Opt(), 
 						getComponentDecl(), new Opt(), new Opt(), i));
@@ -577,6 +582,7 @@ aspect InstanceTreeConstruction {
 	}
 
 	eq InstArrayComponentDecl.getInstComponentDeclList() {
+		// Get the FSubscript corresponding to this InstArrayComponentDecl
 		FSubscript fs = childFSubscript(1);
 		if (fs != null) {
 			// Loop over indices and create new InstArrayComponentDecls
@@ -611,17 +617,40 @@ aspect InstanceTreeConstruction {
 	}
 
 	syn lazy List InstNode.getInstExtendsList() {
-	
+			
 		List l = new List();
-		ArrayList<ExtendsClause> supers = superClasses();	
-
-		for (ExtendsClause e : supers) {
-		    l.add(createInstExtends(e));
-		}				
+		for (ExtendsClause e : superClasses()) {
+			l.add(createInstExtends(e));
+		}
 		
 		return l;
 	}
 
+	
+	syn lazy List InstComponentDecl.getInstExtendsList() {
+		List l = new List();
+		if (!isArrayDecl()) {
+			for (ExtendsClause e : superClasses()) {
+				l.add(createInstExtends(e));
+			}
+		}
+		
+		return l;
+	}
+
+	eq InstArrayComponentDecl.getInstExtendsList() {
+		// Get the FSubscript corresponding to this InstArrayComponentDecl
+		FSubscript fs = childFSubscript(1);
+		List l = new List();
+		if (fs == null) {
+			// Loop over indices and create new 
+			for (ExtendsClause e : superClasses()) {
+				l.add(createInstExtends(e));
+			}			
+		} 
+		return l;
+	}
+	
 	eq InstPrimitive.getInstComponentDeclList() = emptyList();
 	eq InstPrimitive.getInstClassDeclList() = emptyList();
 //	eq InstPrimitive.getInstExtendsList() = emptyList();
@@ -676,8 +705,11 @@ aspect InstanceTreeConstruction {
 
 	public InstComponentDecl InstBaseClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
 		Opt fas_opt = new Opt();
-		if (cd.hasVarArraySubscripts()) 
-			fas_opt.setChild(cd.getVarArraySubscripts().instantiate(), 0);
+		FArraySubscripts fas = null;
+		if (cd.hasVarArraySubscripts()) { 
+			fas = cd.getVarArraySubscripts().instantiate();
+		}
+		fas_opt.setChild(fas,0);
 		InstAccess name = className.newInstAccess();
 		InstComponentDecl icd;
 		if (isRecord()) 
@@ -768,7 +800,12 @@ aspect InstanceTreeConstruction {
     }
 
     public InstShortClassDecl ShortClassDecl.newInstClassDecl() {
-    	InstShortClassDecl scd =  new InstShortClassDecl(this, new Opt(), newInstRestriction());
+		Opt fas_opt = new Opt();
+		if (getExtendsClauseShortClass().hasArraySubscripts()) {
+			fas_opt.setChild(getExtendsClauseShortClass().getArraySubscripts().instantiate(),0);
+		}
+    	InstShortClassDecl scd =  new InstShortClassDecl(this, new Opt(), 
+    			newInstRestriction(),fas_opt);
 	    scd.setInstConstrainingOpt(newInstConstrainingClassOpt());    	
     	scd.setLocation(this);
     	return scd;
@@ -795,8 +832,12 @@ aspect InstanceTreeConstruction {
     	return fcd;
     }
     public InstReplacingShortClassDecl ShortClassDecl.newInstReplacingClass(ClassDecl replacingClass,InstClassRedeclare icr) {
+		Opt fas_opt = new Opt();
+		if (getExtendsClauseShortClass().hasArraySubscripts()) {
+			fas_opt.setChild(getExtendsClauseShortClass().getArraySubscripts().instantiate(),0);
+		}
     	InstRestriction ir = newInstRestriction();
-      	InstReplacingShortClassDecl scd =  new InstReplacingShortClassDecl(replacingClass, new Opt(), ir, this, icr);
+      	InstReplacingShortClassDecl scd =  new InstReplacingShortClassDecl(replacingClass, new Opt(), ir, fas_opt, this, icr);
 	    scd.setInstConstrainingOpt(newInstConstrainingClassOpt());    	
     	scd.setLocation(this);
    	return scd;
@@ -1033,6 +1074,8 @@ aspect InstanceAST_API {
 	syn lazy ArrayList<ExtendsClause> InstNode.superClasses() = new ArrayList<ExtendsClause>();
 	eq InstClassRoot.superClasses() = getClassDecl().superClasses();
 	eq InstComponentDecl.superClasses() = myInstClass().superClasses();
+	eq InstArrayComponentDecl.superClasses() = instComponentDecl().isPrimitive()? 
+			new ArrayList<ExtendsClause>() : instComponentDecl().superClasses();
 	eq InstExtends.superClasses() = getClassName().myInstClassDecl().superClasses();
     eq InstBaseClassDecl.superClasses() = getBaseClassDecl().superClasses();
 
@@ -1238,7 +1281,52 @@ aspect InstArrays {
 	eq InstRoot.getChild().instComponentDecl() = null;
 	
 	syn boolean InstComponentDecl.isArrayDecl() = hasFArraySubscripts() && 
-	getFArraySubscripts().getNumFSubscript()>0;
+		getFArraySubscripts().getNumFSubscript()>0;
+	
+	syn lazy ArrayList<FSubscript> InstClassDecl.myFSubscripts() {
+		return new ArrayList<FSubscript>();
+	}
+	eq InstShortClassDecl.myFSubscripts() {
+		ArrayList<FSubscript> l = new ArrayList<FSubscript>();
+		if (hasFArraySubscripts()) {
+			for (FSubscript fs : getFArraySubscripts().getFSubscripts()) {
+				l.add(fs);
+			}
+		}
+		l.addAll(getInstExtends(0).myInstClass().myFSubscripts());
+		return l;
+	}
+	
+	syn lazy ArrayList<FSubscript> InstComponentDecl.myFSubscripts() {
+		ArrayList<FSubscript> l = new ArrayList<FSubscript>();
+		if (hasLocalFArraySubscripts()) {
+			for (FSubscript fs : getLocalFArraySubscripts().getFSubscripts()) {
+				l.add(fs);
+			}
+		}
+		l.addAll(myInstClassDecl().myFSubscripts());
+		return l;
+	}
+
+	/**
+	 * This is the definition of an NTA that collects both the local
+	 * array subscripts given a component declaration and array subscripts
+	 * given on the declaration's class (in the case o short
+	 * class declarations).
+	 */
+	syn lazy FArraySubscripts InstComponentDecl.getFArraySubscripts() {
+		FArraySubscripts fas = new FArraySubscripts();
+		for (FSubscript fs : myFSubscripts()) {
+			fas.addFSubscript((FSubscript)fs.fullCopy());
+		}
+		if (fas.getNumChild()>0) {
+			return fas;
+		} else {
+			return null;
+		}
+	}
+	
+	syn boolean InstComponentDecl.hasFArraySubscripts() = getFArraySubscripts()!=null;
 	
 }
 

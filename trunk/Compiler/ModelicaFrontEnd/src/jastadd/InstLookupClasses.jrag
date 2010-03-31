@@ -493,7 +493,6 @@ aspect InstLookupClasses {
 	eq InstExtends.myInstClass() = getClassName().myInstClassDecl();
 	eq UnknownInstComponentDecl.myInstClass() = unknownInstClassDecl();	
 
-	
 }
 
 aspect InstLookupImport {
