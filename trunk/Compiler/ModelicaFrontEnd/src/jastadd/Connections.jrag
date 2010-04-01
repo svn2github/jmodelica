@@ -33,7 +33,7 @@ aspect Connections {
 		debugPrint("<<<FClass.genConnectionEquations()");
 		ArrayList<ConnectionSet> l = connectionSetManager.getConnectionSetList();
 		debugPrint("<<<FClass.genConnectionEquations(): "+ l.size() + " sets in manager");
-		getConnectionSetManager().printConnectionSets();
+		//getConnectionSetManager().printConnectionSets();
 		
 		for (ConnectionSet set : l) {
 			// TODO: use sorted data structure instead? would speed up use of ConnectionSetManager as well
@@ -125,24 +125,26 @@ aspect Connections {
 			return null;
 		}
 	
-		public void printConnectionSets() {
+		public String printConnectionSets() {
 		
-			System.out.println("Connection sets: " + list.size() + " sets");
+			StringBuffer str = new StringBuffer();
+			
+			str.append("Connection sets: " + list.size() + " sets\n");
 			
 			// Print connection sets 
 			for(ConnectionSet set : list) {
-				System.out.print("Connection set (");
+				str.append("Connection set (");
 				if (set.iterator().next().isFlow())
-					System.out.print("flow");
+					str.append("flow");
 				else
-					System.out.print("non flow");
-				System.out.print("): {");
-				String str = set.toString();
-				System.out.print(str.substring(1, str.length() - 1));
-				System.out.println("}");
+					str.append("non flow");
+				str.append("): {");
+				String set_str = set.toString();
+				str.append(set_str.substring(1, set_str.length() - 1));
+				str.append("}\n");
 			}
-			
-			System.out.println();
+
+			return str.toString();
 		}
 	}
 

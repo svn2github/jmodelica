@@ -1207,6 +1207,10 @@ aspect FlatDiagnostics {
 		
 //		str.append(dersAndDiffs());
 		
+		str.append("\n");  
+		
+		str.append(getConnectionSetManager().printConnectionSets());
+		
 		return str.toString();
 	}
 
