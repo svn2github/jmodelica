@@ -147,10 +147,8 @@ y:
 	Real x;
         Real y;
 
-     equation
-        x = y(t0)+y(t1)^2 + sin(y(t2));
-
      constraint
+        x = y(t0)+y(t1)^2 + sin(y(t2));
         x = 3;
         x(t3) >= 1;
         x(t4)*x(t4) <= 1;

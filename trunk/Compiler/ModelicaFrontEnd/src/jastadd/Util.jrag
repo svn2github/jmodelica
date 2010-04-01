@@ -1298,6 +1298,10 @@ aspect FlatExpressions {
 	eq FClass.getFInitialEquation().inInitialEquationSection() = true;
 	eq Root.getChild().inInitialEquationSection() = false;
 
+	inh lazy boolean FExp.inEquation();
+	eq FAbstractEquation.getChild().inEquation() = true;
+	eq Root.getChild().inEquation() = false;
+	
 	inh boolean FExp.inNoEventExp();
 	eq FNoEventExp.getChild().inNoEventExp() = true;
 	eq FAlgorithmBlock.getChild().inNoEventExp() = true;

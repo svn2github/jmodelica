@@ -174,9 +174,7 @@ Semantic error at line 108, column 31:
     x<=3;
     y>=3;
   end ClassAttrTest5;
-  
-  
-  
+    
   optimization InstantValueTest1 
      (objective=x(finalTime)^2,startTime=0,finalTime(free=true,initialGuess=3))
     Real x(start=0);
@@ -204,6 +202,42 @@ Semantic error at line 108, column 31:
     finalTime<=10;
   end InstantValueTest2;
   
+  optimization InstantValueTest3_Err (objective=x(finalTime),startTime=0,finalTime=1)
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="InstantValueTest3_Err",
+         description="Test that error messages are generated if timed variables are used in equations.",
+         errorMessage="
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTests.mo':
+Semantic error at line 217, column 10:
+  Timed variables are not allowed in equations.
+")})));
+    
+    Real x;
+  equation
+    x  + x(finalTime)=2;
+  end InstantValueTest3_Err;
+/*
+  optimization InstantValueTest4_Err (objective=x(finalTime),startTime=0,finalTime=1)
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="InstantValueTest4_Err",
+         description="Test that error messages are generated when the argument to a timed variable is larger than parameter",
+         errorMessage="Error: in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTests.mo':
+Semantic error at line 234, column 10:
+  The argument of a timed variable must have variability less than or equal to parameter variability.
+")})));
+    
+    Real y = 1;
+    Real x;
+  constraint
+    x  + x(y)=2;
+    x<=5;
+  end InstantValueTest4_Err;
+
+*/
   model DoubleIntegrator
   	Real x(start=0);
   	Real v(start=0);

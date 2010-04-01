@@ -779,6 +779,8 @@ aspect OptimicaFlatAPI {
 	eq FOptClass.getChild().myFOptClass() = this;
 	eq Root.getChild().myFOptClass() = null; 
 	
+	eq FOptClass.getFEquationBlock().inEquationSection() = true;
+	
 }
 
 aspect OptimicaFVariableUses {
