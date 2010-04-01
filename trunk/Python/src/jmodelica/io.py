@@ -172,20 +172,22 @@ def export_result_dymola(model, data, file_name='', format='txt'):
 
         sc = model.jmimodel.get_variable_scaling_factors()
         z = model.get_z()
-        
+
+        scaling_method = model.get_scaling_method()
+
         # Write data
         # Write data set 1
         f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
         f.write("%12.12f" % data[0,0])
         for ref in range(n_parameters):
-            if model.get_scaling_method() & jmodelica.jmi.JMI_SCALING_VARIABLES > 0:
+            if scaling_method & jmodelica.jmi.JMI_SCALING_VARIABLES > 0:
                 f.write(" %12.12f" % (z[ref]*sc[ref]))
             else:
                 f.write(" %12.12f" % (z[ref]))
         f.write('\n')
         f.write("%12.12f" % data[-1,0])
         for ref in range(n_parameters):
-            if model.get_scaling_method() & jmodelica.jmi.JMI_SCALING_VARIABLES > 0:
+            if scaling_method & jmodelica.jmi.JMI_SCALING_VARIABLES > 0:
                 f.write(" %12.12f" % (z[ref]*sc[ref]))
             else:
                 f.write(" %12.12f" % (z[ref]))
@@ -196,15 +198,16 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         n_points = len(data[:,0])
         f.write('float data_2(%d,%d)\n' % (n_points, n_vars))
         for i in range(n_points):
+            str = ''
             for ref in range(n_vars):
                 if ref==0: # Don't scale time
-                    f.write(" %12.12f" % data[i,ref])
+                    str = str + (" %12.12f" % data[i,ref])
                 else:
-                    if model.get_scaling_method() & jmodelica.jmi.JMI_SCALING_VARIABLES > 0:
-                        f.write(" %12.12f" % (data[i,ref]*sc[ref-1+n_parameters]))
+                    if scaling_method & jmodelica.jmi.JMI_SCALING_VARIABLES > 0:
+                        str = str + (" %12.12f" % (data[i,ref]*sc[ref-1+n_parameters]))
                     else:
-                        f.write(" %12.12f" % (data[i,ref]))
-            f.write('\n')
+                        str = str + (" %12.12f" % data[i,ref])
+            f.write(str+'\n')
 
         f.write('\n')
 
