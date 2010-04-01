@@ -200,8 +200,7 @@ aspect Flattening {
 		!isArray() && lang.canBeReturn(type());
 	
 	syn boolean FExternalLanguage.canBeReturn(FType type) = !type.isArray();
-	eq FFortran77ExternalLanguage.canBeReturn(FType type) = 
-		!type.isArray() && !type.isString() && !type.isRecord();
+	eq FFortran77ExternalLanguage.canBeReturn(FType type) = !type.isComposite() && !type.isString();
 	
 	public FExternalStmt FExternalStmt.flatten(FQName prefix) {
 		return fullCopy();

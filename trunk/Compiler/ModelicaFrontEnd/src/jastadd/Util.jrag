@@ -983,6 +983,16 @@ aspect FlatFunctionUtils {
 	 syn boolean FFunctionDecl.isArray() = hasOutputs() ? expOutput().isArray() : false;
 	 
 	 /**
+	  * \brief Check if this function returns a record when used as an expression.
+	  */
+	 syn boolean FFunctionDecl.isRecord() = hasOutputs() ? expOutput().type().isRecord() : false;
+	 
+	 /**
+	  * \brief Check if this function returns a non-primitive when used as an expression.
+	  */
+	 syn boolean FFunctionDecl.isComposite() = hasOutputs() ? expOutput().isComposite() : false;
+	 
+	 /**
 	  * \brief Check is this node is in a function.
 	  */
 	 inh boolean FQName.inFunction();

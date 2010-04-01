@@ -840,6 +840,10 @@ aspect FlatTypes {
 	syn boolean AbstractFVariable.isString()  = type().isString();
 	syn boolean AbstractFVariable.isRecord()  = type().isRecord();
 	
+	syn boolean FExp.isComposite()              = isArray() || type().isRecord();
+	syn boolean FType.isComposite()             = isArray() || isRecord();
+	syn boolean AbstractFVariable.isComposite() = isArray() || isRecord();
+	
 	inh boolean AbstractFVariable.inRecord();
 	eq FRecordDecl.getChild().inRecord() = true;
 	eq FClass.getChild().inRecord()      = false;

@@ -1175,6 +1175,7 @@ aspect Scalarization {
 	eq Opt.getChild().canAcceptArray()              = canAcceptArray();
 	eq FFunctionCallLeft.getFExp().canAcceptArray() = inFunction();
 	eq FFunctionCall.getArg().canAcceptArray()      = inFunction();
+	eq FSizeExp.getFExp().canAcceptArray()          = inFunction();
 	
 	/**
 	 * \brief Scalarize expressions.
@@ -1337,7 +1338,7 @@ aspect Scalarization {
 	public FExp FIntegerExp.scalarizeExp(HashMap<String,FExp> indexMap) { return new FIntegerExp(getFExp().scalarize(indexMap)); }
 	
 	public FExp FFunctionCall.scalarizeExp(HashMap<String,FExp> indexMap) {
-		if ((isArray() || type().isRecord()) && functionCallIsExp())
+		if (isComposite() && functionCallIsExp())
 			return new FIdUseExp(tempVarName());
 		else
 			return scalarizeFunction(indexMap);

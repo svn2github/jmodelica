@@ -1732,6 +1732,13 @@ aspect ArrayHelpers {
 		}
 		
 		/**
+		 * \brief Create an FExp that describes the number of elements of this size.
+		 */
+		public FExp createNumElementsFExp() {
+			return new FIntegerLitExp(numElements());
+		}
+		
+		/**
 		 * \brief Ceate a dummy expression that has the size described by this Size.
 		 */
 		public FExp createDummyFExp(Map<ASTNode, FExp> varMap) {
@@ -1951,6 +1958,27 @@ aspect ArrayHelpers {
 			return (exps[d] == null) ? 
 					super.createFExp(d) : 
 					(FExp) exps[d].unboundCopy();
+		}
+		
+		/**
+		 * \brief Create an FExp that describes the number of elements of this size.
+		 */
+		public FExp createNumElementsFExp() {
+			int known = 1;
+			FExp res = null;
+			for (int i = 0; i < size.length; i++) {
+				if (size[i] == UNKNOWN) {
+					FExp e = (FExp) exps[i].unboundCopy();
+					res = (res == null) ? e : new FMulExp(res, e);
+				} else {
+					known *= size[i];
+				}
+			}
+			if (res == null)
+				res = new FIntegerLitExp(known);
+			else if (known > 1)
+				res = new FMulExp(res, new FIntegerLitExp(known));
+			return res;
 		}
 		
 		/**

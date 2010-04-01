@@ -28,7 +28,10 @@
 #ifndef _JMI_ARRAY_CPPAD_H
 #define _JMI_ARRAY_CPPAD_H
 
+#include "jmi_array_common.h"
+
 #include <cppad/cppad.hpp>
+#include <vector>
 
 typedef struct jmi_array_t jmi_array_t;
 struct jmi_array_t {
@@ -38,12 +41,92 @@ struct jmi_array_t {
 
 typedef CppAD::VecAD<jmi_real_t>::reference jmi_ad_array_ref_t;
 
+// Record array type declaration macro
+#define JMI_RECORD_ARRAY_TYPE(rec, arr) \
+	typedef arr struct _##arr {\
+		int* size;\
+		vector<rec>* var;\
+	};
+
 // Array creation macro
-#define JMI_ARRAY_DECL(name, n, ...) \
+#define JMI_ARRAY_STATIC(name, n, ...) \
 	int name##_size[] = { __VA_ARGS__ };\
     CppAD::VecAD<jmi_real_t> name##_var(n);\
     jmi_array_t name##_arr = { name##_size, &name##_var };\
     jmi_array_t* name = &name##_arr;
+
+// Record array creation macro
+#define JMI_RECORD_ARRAY_STATIC(type, arr, name, n, ...) \
+	int name##_size[] = { __VA_ARGS__ };\
+	vector<type> name##_var(n);\
+	arr name##_rec = { name##_size, &name##_var };\
+	arr* name = &name##_rec;
+
+// Dynamic array creation macro
+#define JMI_ARRAY_DYNAMIC(name, n, ...) \
+	int name##_size[] = { __VA_ARGS__ };\
+	CppAD::VecAD<jmi_real_t>* name##_var = new CppAD::VecAD<jmi_real_t>(n);\
+	JMI_DYNAMIC_ADD_POINTER(name##_var)\
+	jmi_array_t name##_arr = { name##_size, name##_var };\
+	jmi_array_t* name = &name##_arr;
+
+// Dynamic record array creation macro
+#define JMI_RECORD_ARRAY_DYNAMIC(type, arr, name, n, ...) \
+	int name##_size[] = { __VA_ARGS__ };\
+	vector<type>* name##_var = new vector<type>(n);\
+	JMI_DYNAMIC_ADD_POINTER(name##_var)\
+	arr name##_rec = { name##_size, name##_var };\
+	arr* name = &name##_rec;
+
+// Macro for declaring dynamic list variable - should be called at beginning of function
+#define JMI_DYNAMIC_INIT() \
+	jmi_dynamic_list* jmi_dynamic_first = new jmi_dynamic_list;\
+	jmi_dynamic_first->data = 0;\
+	jmi_dynamic_first->next = 0;\
+	jmi_dynamic_list* jmi_dynamic_last = jmi_dynamic_first;
+
+// Macro for adding a pointer to dynamic list - only for use in other macros
+#define JMI_DYNAMIC_ADD_POINTER(pointer) \
+	jmi_dynamic_last->next = new jmi_dynamic_list;\
+	jmi_dynamic_last = jmi_dynamic_last->next;\
+	jmi_dynamic_last->data = pointer;\
+	jmi_dynamic_last->next = 0;
+
+// Dynamic deallocation of all dynamically allocated arrays and record arrays - should be called before return
+#define JMI_DYNAMIC_FREE() \
+	jmi_dynamic_list* prev = jmi_dynamic_first;\
+	for (jmi_dynamic_list* cur = prev->next; cur; prev = cur, cur = cur->next) {\
+		delete prev;\
+		delete cur->data;\
+	}\
+	delete prev;
+
+// Record array access macros
+#define jmi_array_rec_1(arr, i1) (*((&((arr)->var))[(int) i1]))
+#define jmi_array_rec_2(arr, i1, i2) (*((&((arr)->var))[(int) _JMI_ARR_I_2(arr, i1, i2)]))
+#define jmi_array_rec_3(arr, i1, i2, i3) (*((&((arr)->var))[(int) _JMI_ARR_I_3(arr, i1, i2, i3)]))
+#define jmi_array_rec_4(arr, i1, i2, i3, i4) (*((&((arr)->var))[(int) _JMI_ARR_I_4(arr, i1, i2, i3, i4)]))
+#define jmi_array_rec_5(arr, i1, i2, i3, i4, i5) (*((&((arr)->var))[(int) _JMI_ARR_I_5(arr, i1, i2, i3, i4, i5)]))
+#define jmi_array_rec_6(arr, i1, i2, i3, i4, i5, i6) (*((&((arr)->var))[(int) _JMI_ARR_I_6(arr, i1, i2, i3, i4, i5, i6)]))
+#define jmi_array_rec_7(arr, i1, i2, i3, i4, i5, i6, i7) (*((&((arr)->var))[(int) _JMI_ARR_I_7(arr, i1, i2, i3, i4, i5, i6, i7)]))
+#define jmi_array_rec_8(arr, i1, i2, i3, i4, i5, i6, i7, i8) (*((&((arr)->var))[(int) _JMI_ARR_I_8(arr, i1, i2, i3, i4, i5, i6, i7, i8)]))
+#define jmi_array_rec_9(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9) (*((&((arr)->var))[(int) _JMI_ARR_I_9(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9)]))
+#define jmi_array_rec_10(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10) (*((&((arr)->var))[(int) _JMI_ARR_I_10(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10)]))
+#define jmi_array_rec_11(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11) (*((&((arr)->var))[(int) _JMI_ARR_I_11(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11)]))
+#define jmi_array_rec_12(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12) (*((&((arr)->var))[(int) _JMI_ARR_I_12(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12)]))
+#define jmi_array_rec_13(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13) (*((&((arr)->var))[(int) _JMI_ARR_I_13(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13)]))
+#define jmi_array_rec_14(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14) (*((&((arr)->var))[(int) _JMI_ARR_I_14(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14)]))
+#define jmi_array_rec_15(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15) (*((&((arr)->var))[(int) _JMI_ARR_I_15(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15)]))
+#define jmi_array_rec_16(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16) (*((&((arr)->var))[(int) _JMI_ARR_I_16(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16)]))
+#define jmi_array_rec_17(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17) (*((&((arr)->var))[(int) _JMI_ARR_I_17(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17)]))
+#define jmi_array_rec_18(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18) (*((&((arr)->var))[(int) _JMI_ARR_I_18(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18)]))
+#define jmi_array_rec_19(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19) (*((&((arr)->var))[(int) _JMI_ARR_I_19(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19)]))
+#define jmi_array_rec_20(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20) (*((&((arr)->var))[(int) _JMI_ARR_I_20(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20)]))
+#define jmi_array_rec_21(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21) (*((&((arr)->var))[(int) _JMI_ARR_I_21(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21)]))
+#define jmi_array_rec_22(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22) (*((&((arr)->var))[(int) _JMI_ARR_I_22(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22)]))
+#define jmi_array_rec_23(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23) (*((&((arr)->var))[(int) _JMI_ARR_I_23(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23)]))
+#define jmi_array_rec_24(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24) (*((&((arr)->var))[(int) _JMI_ARR_I_24(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24)]))
+#define jmi_array_rec_25(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25) (*((&((arr)->var))[(int) _JMI_ARR_I_25(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25)]))
 
 // Access functions
 jmi_ad_var_t jmi_array_val_1(jmi_array_t* arr, jmi_ad_var_t i1);

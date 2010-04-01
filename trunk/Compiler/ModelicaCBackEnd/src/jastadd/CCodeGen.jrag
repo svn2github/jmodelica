@@ -295,10 +295,12 @@ aspect CCodeGen {
 		// Print definition
 		prettyPrintHead_C(p, str, indent, o, "void", C_SUFFIX_DEF, true);
 		str.print(" {\n");
+		// TODO: Check if there are any dynamic declarations first
+		str.print(next + "JMI_DYNAMIC_INIT()\n");
 		for (FFunctionVariable ffv : myNonInputs())
 			p.toString(ffv, str, next, o);
 		for (FFunctionVariable ffv : myOutputs())
-			ffv.printNullOutputReplacement_C(p, str, next);
+			ffv.printNullOutputReplacement_C(p, str, next, o);
     	p.toString(getFAlgorithmBlock(), str, next, o);
     	str.print(indent);
     	str.print("}\n\n");
@@ -319,7 +321,7 @@ aspect CCodeGen {
 	/**
 	 * \brief Check if we need to generate a wrapper for expressions for this function.
 	 */
-	syn boolean FFunctionDecl.generateExpFunction() = hasOutputs() && !isArray();
+	syn boolean FFunctionDecl.generateExpFunction() = hasOutputs() && !isComposite();
 	
 	syn String FRecordDecl.name_C()      = getFQName().lastFQNamePart().getName() + "_" + 
 										       recordIndex() + "_" + C_SUFFIX_RECORD;
@@ -428,69 +430,103 @@ aspect CCodeGen {
 		str.print(name_C());
 	}
 	
+	public void FFunctionVariable.printDecl_C(Printer p, PrintStream str, String indent, Object o, String name) {
+		// This is a rather ugly hack, but we temporarily need an FExp that is in the tree
+		FExp dummy = null;
+		if (!hasBindingExp())
+			setBindingExp(dummy = new FNoExp());
+		type().printDecl_C(p, str, indent, o, name, getBindingExp());
+		if (dummy != null)
+			setBindingExpOpt(new Opt());
+	}	
+	
 	public void FFunctionVariable.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		if (!isOutput() || !isRecord())
-			type().printDecl_C(str, indent, name_C());
+			printDecl_C(p, str, indent, o, name_C());
 	}
 	
 	public void FFunctionArray.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		if (!isOutput()) 
-			type().printDecl_C(str, indent, name_C());
+			printDecl_C(p, str, indent, o, name_C());
 	}
 	
-	public void FFunctionVariable.printNullOutputReplacement_C(Printer p, PrintStream str, String indent) {
-		if (isArray() || isRecord()) {
+	public void FFunctionVariable.printNullOutputReplacement_C(Printer p, PrintStream str, String indent, Object o) {
+		if (isComposite()) {
 			String name_C = name_C();
 			String name_r = name_C + C_SUFFIX_NULL;
 			String next = p.indent(indent);
 			str.print(indent + "if (" + name_C + " == NULL) {\n");
-			type().printDecl_C(str, next, name_r);
+			printDecl_C(p, str, next, o, name_r);
 			str.print(next + name_C + " = " + name_r + ";\n");
 			str.print(indent + "}\n");
 		}
 	}
 	
-	public void FType.printDecl_C(PrintStream str, String indent, String name) {
+	public void FType.printDecl_C(Printer p, PrintStream str, String indent, Object o, String name, FExp src) {
 		str.print(indent);
 		if (isArray()) {
-			str.print("JMI_ARRAY_DECL(" + name);
-			size().printArrayDeclEnd_C(str);
+			String dyn = size().isUnknown() ? "DYNAMIC" : "STATIC";
+			str.print("JMI_ARRAY_" + dyn + "(" + name);
+			size().printArrayDeclEnd_C(p, str, indent, o, src);
 		} else {
 			str.print(type_C() + " " + name + ";\n");
 		}
 	}
 	
-	public void FRecordType.printDecl_C(PrintStream str, String indent, String name) {
+	public void FRecordType.printDecl_C(Printer p, PrintStream str, String indent, Object o, String name, FExp src) {
 		str.print(indent);
 		if (isArray()) {
-			str.print("JMI_RECORD_ARRAY_DECL(" + name_C() + ", " + nameArray_C() + ", " + name);
-			size().printArrayDeclEnd_C(str);
+			String dyn = size().isUnknown() ? "DYNAMIC" : "STATIC";
+			str.print("JMI_RECORD_ARRAY_" + dyn + "(" + name_C() + ", " + nameArray_C() + ", " + name);
+			size().printArrayDeclEnd_C(p, str, indent, o, src);
 			String pre = "jmi_array_rec_" + ndims() + "(" + name + ", ";
 			for (Index i : indices())
-				printChildDecls_C(str, indent, pre + i.toUnclosedString() + ")");
+				printChildDecls_C(p, str, indent, o, pre + i.toUnclosedString() + ")", src);
 		} else {
-			str.print("JMI_RECORD_DECL(" + name_C() + ", " + name + ")\n");
-			printChildDecls_C(str, indent, name);
+			str.print("JMI_RECORD_STATIC(" + name_C() + ", " + name + ")\n");
+			printChildDecls_C(p, str, indent, o, name, src);
 		}
 	}
 	
-	public void FRecordType.printChildDecls_C(PrintStream str, String indent, String name) {
+	public void FRecordType.printChildDecls_C(Printer p, PrintStream str, String indent, Object o, String name, FExp src) {
 		for (FRecordComponentType comp : getComponents()) {
-			if (comp.getFType().isRecord() || comp.getFType().isArray()) {
+			if (comp.getFType().isComposite()) {
 				String compName = name + "->" + comp.getName();
 				String tempName = "tmp_" + nextTempNbr_C();
-				comp.getFType().printDecl_C(str, indent, tempName);
+				comp.getFType().printDecl_C(p, str, indent, o, tempName, src);
 				str.print(indent + compName + " = " + tempName + ";\n");
 			}
 		}
 	}
 	
-	public void Size.printArrayDeclEnd_C(PrintStream str) {
+	public void Size.printArrayDeclEnd_C(Printer p, PrintStream str, String indent, Object o, FExp src) {
 		str.print(", ");
 		str.print(numElements());
 		str.print(", ");
 		str.print(toUnclosedString());
 		str.print(")\n");
+	}
+	
+	public void MutableSize.printArrayDeclEnd_C(Printer p, PrintStream str, String indent, Object o, FExp src) {
+		if (isUnknown()) {
+			str.print(", ");
+			// TODO: These FExps aren't in any tree - that might make this fail
+			FQName empty = new FQName();
+			FExp numElem = src.dynamicFExp(createNumElementsFExp().flatten(empty));
+			p.toString(numElem, str, indent, o);
+			for (int i = 0; i < size.length; i++) {
+				str.print(", ");
+				if (exps[i] == null) {
+					str.print(size[i]);
+				} else {
+					FExp exp = src.dynamicFExp(exps[i].flatten(empty));
+					p.toString(exp, str, indent, o);
+				}
+			}
+			str.print(")\n");
+		} else {
+			super.printArrayDeclEnd_C(p, str, indent, o, src);
+		}
 	}
 	
 	public void FAlgorithmBlock.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
@@ -515,8 +551,9 @@ aspect CCodeGen {
 	
 	public void FReturnStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		returnDefinition().printReturnWrite_C(str, indent);
-		str.print(indent);
-		str.print("return;\n");
+		// TODO: Check if there are any dynamic declarations first
+		str.print(indent + "JMI_DYNAMIC_FREE()\n");
+		str.print(indent + "return;\n");
 	}
 	
 	public void FIfWhenStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
@@ -805,9 +842,9 @@ aspect CCodeGen {
 	eq FFunctionDecl.getChild().nextTempNbr_C() = nextTempNbr_C++;
 	
 	public void FExp.genTempInput_C(Printer p, PrintStream str, String indent, Object o) {
-		if (type().isRecord() || isArray()) {
+		if (isComposite()) {
 			String name = tempName_C();
-			type().printDecl_C(str, indent, name);
+			type().printDecl_C(p, str, indent, o, name, this);
 			type().genTempInputAssigns_C(p, str, indent, o, name, this);
 		}
 	}
@@ -861,11 +898,11 @@ aspect CCodeGen {
 	public void FExp.genTempOutput_C(Printer p, PrintStream str, String indent, Object o) {}
 	
 	public void FArray.genTempOutput_C(Printer p, PrintStream str, String indent, Object o) {
-		type().printDecl_C(str, indent, tempName_C());
+		type().printDecl_C(p, str, indent, o, tempName_C(), this);
 	}
 	
 	public void FRecordConstructor.genTempOutput_C(Printer p, PrintStream str, String indent, Object o) {
-		type().printDecl_C(str, indent, tempName_C());
+		type().printDecl_C(p, str, indent, o, tempName_C(), this);
 	}
 	
 	
@@ -898,7 +935,7 @@ aspect CCodeGen {
 	}
 	syn String FFunctionCallLeft.name_C() {
 		// TODO: use getFExp().tempName_C() instead of first case as well?
-		if (equationIndex >= 0 && !getFExp().isArray() && !getFExp().type().isRecord()) {
+		if (equationIndex >= 0 && !getFExp().isComposite()) {
 			StringBuilder b = new StringBuilder();
 			b.append("tmp_var_");
 			b.append(equationIndex);
@@ -911,7 +948,7 @@ aspect CCodeGen {
 	}
 	
 	public void FFunctionCallLeft.genTempVar_C(String indent, PrintStream str) {
-		if (hasFExp() && !getFExp().isArray() && !getFExp().type().isRecord()) {
+		if (hasFExp() && !getFExp().isComposite()) {
 			str.print(indent);
 			str.print(type_C());
 			str.print(" ");
@@ -922,7 +959,7 @@ aspect CCodeGen {
 	
 	public void FFunctionCallLeft.genArgument_C(PrintStream str) {
 		if (hasFExp()) {
-			if (!getFExp().isArray() && !getFExp().type().isRecord())
+			if (!getFExp().isComposite())
 				str.print("&");
 			str.print(name_C());
 		} else {
@@ -973,7 +1010,7 @@ aspect CCodeGen {
 	}
 	
 	public void FExp.genArgument_C(Printer p, PrintStream str, String indent, Object o) {
-		if ((isArray() || type().isRecord()) && !keepAsArray())
+		if (isComposite() && !keepAsArray())
 			str.print(tempName_C());
 		else
 			p.toString(this, str, indent, o);

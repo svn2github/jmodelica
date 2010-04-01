@@ -211,6 +211,11 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 #define LOG_EXP_AND(op1,op2) ((op1)*(op2))           ///< Macro for logical expression and <br>
 #define LOG_EXP_NOT(op)      (JMI_TRUE-(op))         ///< Macro for logical expression not <br>
 
+// Record creation macro
+#define JMI_RECORD_STATIC(type, name) \
+	type name##_rec;\
+	type* name = &name##_rec;
+
 /**
  * Function to wrap division and report errors.
  */
