@@ -115,7 +115,7 @@ aspect TransformCanonical {
             System.out.println("Index = " + index);
             eqSys.dumpGraph();
         } else {
-            System.out.println("NO index reduction");    
+            //System.out.println("NO index reduction");    
         }  
 
         root().flushAllRecursive();

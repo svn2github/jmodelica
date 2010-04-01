@@ -111,7 +111,8 @@ public class ModelicaCompiler {
 		this.options = options;
 		this.xmlTpl = xmlTpl;
 		this.xmlValuesTpl = xmlValuesTpl;
-		this.cTemplatefile = cTemplatefile;				
+		this.cTemplatefile = cTemplatefile;		
+		setLogLevel(logger.getName(),WARNING);
 	}
 	
 	public String getStringOption(String key) throws UnknownOptionException {
