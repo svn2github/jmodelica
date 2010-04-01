@@ -574,7 +574,7 @@ aspect InstanceTreeConstruction {
 			//for (int i : getFArraySubscripts().getFSubscript(0).arrayIndices()) 
 			for (int i : getFArraySubscripts().getFSubscript(0).arrayIndices()) 
 				l.add(new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"), new Opt(), 
-						getComponentDecl(), new Opt(), new Opt(), i));
+						getComponentDecl(), new Opt(), new Opt(), new Opt(), i));
 			return l;
 		} else { // If not array, then proceed as usual
 			return super.getInstComponentDeclList();
@@ -589,7 +589,7 @@ aspect InstanceTreeConstruction {
 			List l = new List();
 			for (int i : fs.arrayIndices()) 
 				l.add(new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"), new Opt(), 
-						instComponentDecl(). getComponentDecl(), new Opt(), new Opt(), i));
+						instComponentDecl(). getComponentDecl(), new Opt(), new Opt(), new Opt(), i));
 			return l;
 		} else {
 			List l = new List();
@@ -710,14 +710,18 @@ aspect InstanceTreeConstruction {
 			fas = cd.getVarArraySubscripts().instantiate();
 		}
 		fas_opt.setChild(fas,0);
+		Opt cond_attr_opt = new Opt();
+		if (cd.hasConditionalAttribute()) {
+			cond_attr_opt.setChild(cd.getConditionalAttribute().getExp().instantiate(),0);
+		}
 		InstAccess name = className.newInstAccess();
 		InstComponentDecl icd;
 		if (isRecord()) 
-			icd = new InstRecord(name, fas_opt, cd, new Opt(), new Opt());
+			icd = new InstRecord(name, fas_opt, cd, new Opt(), new Opt(),cond_attr_opt);
 		else if (!extendsPrimitive()) 
-			icd = new InstComposite(name, fas_opt, cd, new Opt(), new Opt());
+			icd = new InstComposite(name, fas_opt, cd, new Opt(), new Opt(),cond_attr_opt);
 		else
-			icd = new InstPrimitive(name, fas_opt, cd, new Opt(), new Opt());
+			icd = new InstPrimitive(name, fas_opt, cd, new Opt(), new Opt(),cond_attr_opt);
 		if (cd.hasModification())
 			icd.setInstModification(cd.getModification().newInstModification());
 		icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
@@ -730,7 +734,11 @@ aspect InstanceTreeConstruction {
 		if (cd.hasVarArraySubscripts()) {
 			fas_opt.setChild(cd.getVarArraySubscripts().instantiate(),0);
 		}
-		InstPrimitive ipr = new InstPrimitive(className.newInstAccess(),fas_opt,cd,new Opt(),new Opt());
+		Opt cond_attr_opt = new Opt();
+		if (cd.hasConditionalAttribute()) {
+			cond_attr_opt.setChild(cd.getConditionalAttribute().getExp().instantiate(),0);
+		}		
+		InstPrimitive ipr = new InstPrimitive(className.newInstAccess(),fas_opt,cd,new Opt(),new Opt(),cond_attr_opt);
 		if (cd.hasModification())
 			ipr.setInstModification(cd.getModification().newInstModification());
 		ipr.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
@@ -739,7 +747,7 @@ aspect InstanceTreeConstruction {
 	}
 
 	public InstComponentDecl InstBuiltInClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
-		return new InstBuiltIn(className.newInstAccess(),new Opt(),cd,new Opt(),new Opt());
+		return new InstBuiltIn(className.newInstAccess(),new Opt(),cd,new Opt(),new Opt(),new Opt());
 	}
 
 	public abstract InstComponentDecl InstClassDecl.newInstReplacingComponent(ComponentDecl replacingDecl,
@@ -750,16 +758,21 @@ aspect InstanceTreeConstruction {
 		Opt fas_opt = new Opt();
 		if (replacingDecl.hasVarArraySubscripts()) {
 			fas_opt.setChild(replacingDecl.getVarArraySubscripts().instantiate(),0);
+		}		
+		Opt cond_attr_opt = new Opt();
+		if (replacingDecl.hasConditionalAttribute()) {
+			cond_attr_opt.setChild(replacingDecl.getConditionalAttribute().getExp().instantiate(),0);
 		}
+
 		if (!extendsPrimitive()){
-			InstReplacingComposite icd = new InstReplacingComposite(replacingDecl.newInstClassAccess(),fas_opt,replacingDecl,new Opt(),new Opt(),originalDecl,icr);
+			InstReplacingComposite icd = new InstReplacingComposite(replacingDecl.newInstClassAccess(),fas_opt,replacingDecl,new Opt(),new Opt(),cond_attr_opt,originalDecl,icr);
 			if (originalDecl.hasModification()) //TODO: should this really be originalDecl
 				icd.setInstModification(originalDecl.getModification().newInstModification());
 			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
 			icd.setLocation(originalDecl);
 			return icd;
 		} else {
-			InstReplacingPrimitive icd = new InstReplacingPrimitive(replacingDecl.newInstClassAccess(),fas_opt,replacingDecl,new Opt(),new Opt(),originalDecl,icr);
+			InstReplacingPrimitive icd = new InstReplacingPrimitive(replacingDecl.newInstClassAccess(),fas_opt,replacingDecl,new Opt(),new Opt(),cond_attr_opt,originalDecl,icr);
 			if (originalDecl.hasModification()) //TODO: should this really be originalDecl
 				icd.setInstModification(originalDecl.getModification().newInstModification());
 			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());

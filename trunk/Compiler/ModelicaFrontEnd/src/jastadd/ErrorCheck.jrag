@@ -800,14 +800,3 @@ aspect InstanceErrorCheck {
 	
 }
 
-aspect FlatExpressionErrorCheck {
-
-	public void FUnsupportedEquation.collectErrors() {
-		compliance("Unsupported equation type");
-	}
-
-	public void FUnsupportedExp.collectErrors() {
-		compliance("Unsupported expression type");
-	}
-	
-}

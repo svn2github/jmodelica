@@ -72,7 +72,7 @@ InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl> /
 
 // The class to expand may differ from the declared class of the component due to 
 // redeclaration of classes.
-abstract InstComponentDecl : InstNode ::= ClassName:InstAccess [LocalFArraySubscripts:FArraySubscripts] <ComponentDecl:ComponentDecl> [InstModification] [InstConstraining] /FArraySubscripts/;
+abstract InstComponentDecl : InstNode ::= ClassName:InstAccess [LocalFArraySubscripts:FArraySubscripts] <ComponentDecl:ComponentDecl> [InstModification] [InstConstraining] /FArraySubscripts/ [ConditionalAttribute:FExp];
 InstComposite : InstComponentDecl;
 abstract InstAssignable : InstComponentDecl ::= /BindingFExp:FExp/;
 InstPrimitive : InstAssignable;

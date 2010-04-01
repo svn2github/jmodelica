@@ -177,4 +177,27 @@ algorithm
  return;
 end ReturnOutsideFunction;
 
+model IfEquTest_ComplErr
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ComplianceErrorTestCase(name="IfEquTest_ComplErr",
+        description="If equation",
+                                               errorMessage=
+"
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Compliance error at line 1139, column 2:
+  Unsupported equation type
+")})));
+
+
+ Real x;
+equation
+ if true then
+   x=3;
+ else
+   x=5;
+ end if;
+
+end IfEquTest_ComplErr;
+
+
 end ForbiddenOperationsTests;

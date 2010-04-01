@@ -1393,28 +1393,6 @@ equation
 
 end EndExpTest1;
 
-model IfEquTest1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ComplianceErrorTestCase(name="IfEquTest1",
-        description="If equation",
-                                               errorMessage=
-"
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Compliance error at line 1139, column 2:
-  Unsupported equation type
-")})));
-
-
- Real x;
-equation
- if true then
-   x=3;
- else
-   x=5;
- end if;
-
-end IfEquTest1;
-
 model ForTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FlatteningTestCase(name="ForTest1",

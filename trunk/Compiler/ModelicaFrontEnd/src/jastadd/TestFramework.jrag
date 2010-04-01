@@ -186,6 +186,34 @@ aspect TestFramework {
 						etc.setDescription(((StringLitExp)na.getExp()).getSTRING());	
 					else if (na.getName().name().equals("errorMessage"))
 						etc.setErrorMessage(((StringLitExp)na.getExp()).getSTRING().replace("\\\"","\""));		
+				} 
+				etc.setSourceFileName(root().fileName());
+				etc.setClassName(enclosingClassDecl().qualifiedName());
+				ts.add(etc);
+			}else if (name.equals("JModelica.UnitTesting.ComplianceErrorTestCase")) {
+				ComplianceErrorTestCase etc = new ComplianceErrorTestCase();
+				for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
+					NamedArgument na = getFunctionArguments().getNamedArgument(i);
+					if (na.getName().name().equals("name"))
+						etc.setName(((StringLitExp)na.getExp()).getSTRING());
+					else if (na.getName().name().equals("description"))
+						etc.setDescription(((StringLitExp)na.getExp()).getSTRING());	
+					else if (na.getName().name().equals("errorMessage"))
+						etc.setErrorMessage(((StringLitExp)na.getExp()).getSTRING().replace("\\\"","\""));		
+				}
+				etc.setSourceFileName(root().fileName());
+				etc.setClassName(enclosingClassDecl().qualifiedName());
+				ts.add(etc);
+			} else if (name.equals("JModelica.UnitTesting.WarningTestCase")) {
+				WarningTestCase etc = new WarningTestCase();
+				for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
+					NamedArgument na = getFunctionArguments().getNamedArgument(i);
+					if (na.getName().name().equals("name"))
+						etc.setName(((StringLitExp)na.getExp()).getSTRING());
+					else if (na.getName().name().equals("description"))
+						etc.setDescription(((StringLitExp)na.getExp()).getSTRING());	
+					else if (na.getName().name().equals("errorMessage"))
+						etc.setErrorMessage(((StringLitExp)na.getExp()).getSTRING().replace("\\\"","\""));		
 				}
 				etc.setSourceFileName(root().fileName());
 				etc.setClassName(enclosingClassDecl().qualifiedName());
@@ -201,6 +229,8 @@ aspect TestFramework {
 				getExp().collectTestCasesFC("JModelica.UnitTesting.FlatteningTestCase",ts);
 				getExp().collectTestCasesFC("JModelica.UnitTesting.TransformCanonicalTestCase",ts);
 				getExp().collectTestCasesFC("JModelica.UnitTesting.ErrorTestCase",ts);
+				getExp().collectTestCasesFC("JModelica.UnitTesting.WarningTestCase",ts);
+				getExp().collectTestCasesFC("JModelica.UnitTesting.ComplianceErrorTestCase",ts);
 				getExp().collectTestCasesFC("JModelica.UnitTesting.GenericCodeGenTestCase",ts);
 				getExp().collectTestCasesFC("JModelica.UnitTesting.FClassMethodTestCase",ts);
 			}

@@ -16,6 +16,8 @@
 
 public class ComplianceErrorTestCase extends ErrorTestCase {
 	
+	public ComplianceErrorTestCase() {}
+	
 	public ComplianceErrorTestCase(String errorMessage) {
 		super(errorMessage);
 	}

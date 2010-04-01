@@ -34,4 +34,29 @@ aspect ComplianceCheck {
 			warning("Using while statements is currently not supported when compiling with CppAD, and can give erroneous results");
 	}
 	
+
+	public void FUnsupportedEquation.collectErrors() {
+		compliance("Unsupported equation type");
+	}
+
+	public void FUnsupportedExp.collectErrors() {
+		compliance("Unsupported expression type");
+	}
+	
+	public void InstPrimitive.complianceCheck() {
+		super.complianceCheck();
+		if (isString())
+			compliance("String variables are not supported");
+		if (isInteger() && !variability().lessOrEqual(fParameter()))
+			compliance("Integer variables are not supported, only constants and parameters");
+		if (isBoolean() && !variability().lessOrEqual(fParameter()))
+			compliance("Boolean variables are not supported, only constants and parameters");		
+	}
+
+	public void InstComponentDecl.complianceCheck() {
+		if (hasConditionalAttribute())
+			compliance("Conditional components are not supported");
+	}
+	
+	
 }
