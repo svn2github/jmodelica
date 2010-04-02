@@ -62,15 +62,16 @@ function python_tests() {
   TESTS=${JMODELICA_HOME}/Python/jmodelica/tests
   PATTERN=----------------------------------------------------------------------
   # Under Windows, run each test file separately
-  if [[ "$(uname | sed -n -e 's!^MINGW!1!p')" != "" ]]; then
-    TESTS="$(find ${TESTS} -name \*.py|grep -v __init__)"
-  fi
+  #if [[ "$(uname | sed -n -e 's!^MINGW!1!p')" != "" ]]; then
+  TESTS="$(find ${TESTS} -name \*.py| grep test_ | grep -v __init__)"
+  #fi
   print_name Python
   case ${OUTPUT} in
     v)
       if build_jmodelica; then
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
+	  echo ${TEST}
           nosetests -a stddist -v ${TEST}
         done
       fi
@@ -90,6 +91,7 @@ function python_tests() {
       if build_jmodelica > /dev/null; then
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
+          echo ${TEST}
           nosetests -a stddist -v ${TEST} 2>&1 \
 	    | egrep -v '^Exception .* ignored$' \
 	    | grep -B1 -A500 -e${PATTERN} \
