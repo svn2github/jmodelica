@@ -15,6 +15,9 @@
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:complexType name="DerivativeInputVariable">
+		<xs:annotation>
+			<xs:documentation>Input variable used by derivative functions</xs:documentation>
+		</xs:annotation>
 		<xs:complexContent>
 			<xs:extension base="fun:FunctionVariable">
 				<xs:attribute name="default" type="xs:anySimpleType"/>

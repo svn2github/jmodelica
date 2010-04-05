@@ -1,3 +1,6 @@
+//import java.awt.List;
+//import java.util.List;
+//import java.util.ArrayList;
 import java.io.PrintStream;
 import java.io.ByteArrayOutputStream;
 
@@ -274,6 +277,135 @@ aspect XMLCodeGen {
     	return;
     }
     
+    public void FBreakStmt.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+        String namespace="fun";
+        String tag = this.xmlTag();
+        str.print(indent + "<" + namespace + ":" + tag + "/>");        
+    }
+    
+    public void FReturnStmt.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+        String namespace="fun";
+        String tag = this.xmlTag();
+        str.print(indent + "<" + namespace + ":" + tag + "/>");        
+    }
+    
+    public void FAssignStmt.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+        String namespace="fun";
+        String tag = this.xmlTag();
+        String rightTag = "Expression";
+        
+        str.print(indent + "<" + namespace + ":" + tag + ">"); 
+        this.getLeft().prettyPrint_XML(str,p.indent(indent));
+        str.print(indent + "\t<" + namespace + ":" + rightTag + ">"); 
+        this.getRight().prettyPrint_XML(str,p.indent(indent));
+        str.print(indent + "\t<" + namespace + ":" + rightTag + "/>"); 
+        str.print(indent + "<" + namespace + ":" + tag + "/>");        
+    }
+    
+    public void FIfStmt.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+        String namespace="fun";
+        String tag = this.xmlTag();
+        String elseIfTag = "ElseIf";
+        String elseTag = "Else";
+        
+        //opening tag
+        str.print(indent + "<" + namespace + ":" + tag + ">"); 
+        
+        //then branch
+        this.getFIfWhenClause(1).prettyPrint_XML(str,p.indent(indent));
+        
+        //else branches
+        if(this.getNumFIfWhenClause()>1){
+        	for (int i=2; i<= this.getNumFIfWhenClause(); i++){
+        		str.print(indent + "\t<" + namespace + ":" + elseIfTag + ">");
+        		this.getFIfWhenClause(i).prettyPrint_XML(str,p.indent(indent));
+        		str.print(indent + "\t<" + namespace + ":" + elseIfTag + "/>");
+        	}
+        }
+        
+       //elseif branch
+        str.print(indent + "\t<" + namespace + ":" + elseTag + ">");
+    	for (FStatement s : this.getElseStmtList())
+    		s.prettyPrint_XML(str,p.indent(indent));
+		str.print(indent + "\t<" + namespace + ":" + elseTag + "/>");
+		
+		//closing tag
+        str.print(indent + "<" + namespace + ":" + tag + "/>");        
+    }
+    
+    public void FIfWhenClause.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+        String namespace="fun";
+        String testTag = "Condition";
+        String stmtTag = "Statements";
+        
+        str.print(indent + "<" + namespace + ":" + testTag + ">"); 
+        this.getTest().prettyPrint_XML(str,p.indent(indent));
+        str.print(indent + "<" + namespace + ":" + testTag + "/>");  
+        
+        str.print(indent + "<" + namespace + ":" + stmtTag + ">"); 
+    	for (FStatement s : this.getFStatementList())
+    		s.prettyPrint_XML(str,p.indent(indent));
+        str.print(indent + "<" + namespace + ":" + stmtTag + "/>");  
+    }
+    
+    public void FForStmt.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+        String namespace="fun";
+        String tag = this.xmlTag();
+        String stmtTag = "Statements";
+        
+        str.print(indent + "<" + namespace + ":" + tag + ">"); 
+        //Index
+        this.getIndex().prettyPrint_XML(str,p.indent(indent));
+        //Statements
+    	for (FStatement s : this.getForStmtList())
+    		s.prettyPrint_XML(str,p.indent(indent));
+        str.print(indent + "<" + namespace + ":" + tag + "/>"); 
+     
+    }
+    
+    public void FForIndex.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+        String namespace="fun";
+        String tag = "Index";
+        
+        String nameAttr = " name=\"" + this.getFVariable().name() + "\"";
+        
+        str.print(indent + "<" + namespace + ":" + tag + nameAttr + ">"); 
+        if (this.hasFExp())
+        	this.getFExp().prettyPrint_XML(str,p.indent(indent));
+        str.print(indent + "<" + namespace + ":" + tag + "/>"); 
+     
+    }
+    
+    public void FWhileStmt.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+        String namespace="fun";
+        String tag = this.xmlTag();
+        String testTag = "Condition";
+        String stmtTag = "Statements";
+        
+        str.print(indent + "<" + namespace + ":" + tag + ">"); 
+        //test
+        str.print(indent + "<" + namespace + ":" + testTag + ">"); 
+        this.getTest().prettyPrint_XML(str,p.indent(indent));
+        str.print(indent + "<" + namespace + ":" + testTag + "/>");  
+        //statements
+        str.print(indent + "<" + namespace + ":" + stmtTag + ">"); 
+    	for (FStatement s : this.getWhileStmtList())
+    		s.prettyPrint_XML(str,p.indent(indent));
+        str.print(indent + "<" + namespace + ":" + stmtTag + "/>"); 
+        
+        str.print(indent + "<" + namespace + ":" + tag + "/>"); 
+    }
+    
+    public void FFunctionCallStmt.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+        String namespace="fun";
+        String tag = this.xmlTag();
+        
+        str.print(indent + "<" + namespace + ":" + tag + ">"); 
+
+        str.print(indent + "<" + namespace + ":" + tag + "/>"); 
+     
+    }
+    
 }//aspect end
 
 aspect XMLTagBinding{
@@ -347,7 +479,19 @@ aspect XMLTagBinding{
         eq FFunctionDecl.xmlTag() = "Function";
         syn String FAlgorithmBlock.xmlTag();
         eq FAlgorithmBlock.xmlTag() = "Algorithm";
-       
+        syn String FStatement.xmlTag();
+        eq FBreakStmt.xmlTag() = "Break";
+        eq FReturnStmt.xmlTag() = "Return";
+        eq FAssignStmt.xmlTag() = "Assign";
+        eq FFunctionCallStmt.xmlTag() = "FunctionCall";
+        eq FIfStmt.xmlTag() = "If";
+        eq FForStmt.xmlTag() = "For";
+        eq FWhileStmt.xmlTag() = "While";
+        
+        eq InstForStmt.xmlTag() = "For";
+        eq InstAssignStmt.xmlTag() = "Assign";
+        eq FExternalStmt.xmlTag() = "--- Not Supported Statement ---";
+        eq FWhenStmt.xmlTag() = "--- Not Supported Statement ---";
         //System.out.println("Warning: the model can cointains unsopported expressions and the generated XML document can be unvalid");
    
 }
