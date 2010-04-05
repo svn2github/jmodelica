@@ -103,13 +103,11 @@
 						<xs:documentation>Iteration index</xs:documentation>
 					</xs:annotation>
 					<xs:complexType>
-						<xs:simpleContent>
-							<xs:extension base="xs:normalizedString">
-								<xs:attribute name="StartValue" use="required"/>
-								<xs:attribute name="FinalValue" use="required"/>
-								<xs:attribute name="Step"/>
+						<xs:complexContent>
+							<xs:extension base="exp:Exp">
+								<xs:attribute name="name" type="xs:normalizedString" use="required"/>
 							</xs:extension>
-						</xs:simpleContent>
+						</xs:complexContent>
 					</xs:complexType>
 				</xs:element>
 				<xs:element name="Statements">
