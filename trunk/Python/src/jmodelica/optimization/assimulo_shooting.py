@@ -36,14 +36,14 @@ class Multiple_Shooting(object):
         self.model = simulator._problem._model
         self.gridsize = gridsize
         
-        self.nbr_us = len(self.model.u)
-        self.nbr_ys = len(self.model.x)
+        self.nbr_us = len(self.model.real_u)
+        self.nbr_ys = len(self.model.real_x)
         
         self.start_time = self.model.opt_interval_get_start_time()
         self.final_time = self.model.opt_interval_get_final_time()
     
         self.initial_u = initial_u
-        self.initial_y = self.model.x.copy()
+        self.initial_y = self.model.real_x.copy()
         
         #Sets the verbosity, default=NORMAL
         self.verbosity = Multiple_Shooting.NORMAL
@@ -114,14 +114,14 @@ class Multiple_Shooting(object):
 
         self.simulator.reset() #Reset the simulator before creating the initial guess for the ys
         
-        self.model.u = u[0:self.nbr_us]
+        self.model.real_u = u[0:self.nbr_us]
         
         for i in range(self.gridsize-1):
             #Make a simulation across the interval to get an initial guess for the ys
             final_time = (self.final_time-self.start_time)/self.gridsize*(i+1)
             
             [ts, ys] = self.simulator(final_time)
-            self.model.u = u[self.nbr_us*(i+1):self.nbr_us*(i+2)]
+            self.model.real_u = u[self.nbr_us*(i+1):self.nbr_us*(i+2)]
             self.simulator.re_init(final_time,ys[-1]) #Re initiates the solver to the new values
 
             y = N.append(y,ys[-1].flatten())
@@ -157,22 +157,21 @@ class Multiple_Shooting(object):
         start_time = (self.final_time-self.start_time)/self.gridsize*(self.gridsize-1)
 
         try:
-            self.model.u = u[-1]
+            self.model.real_u = u[-1]
             self.simulator.re_init(start_time,y[-1]) #Re initiates the solver to the new values
             [ts, ys] = self.simulator(self.final_time,1) #Run the simulation to final time
             
-            self.model.u = u[-1]
-            self.model.x = ys[-1]
+            self.model.real_u = u[-1]
+            self.model.real_x = ys[-1]
             
             #Set values for calculation of the cost function
-            self.model.set_x_p(ys[-1], 0)
-            self.model.set_dx_p(self.model.dx, 0)
-            self.model.set_u_p(u[-1], 0)
+            self.model.set_real_x_p(ys[-1], 0)
+            self.model.set_real_dx_p(self.model.real_dx, 0)
+            self.model.set_real_u_p(u[-1], 0)
             
             cost = self.model.opt_eval_J() #Evaluate the cost function
         except:
             cost = N.array(N.nan)
-
         
         if  self.verbosity >= Multiple_Shooting.WHISPER:
             print 'Evaluating cost:', cost
@@ -200,7 +199,7 @@ class Multiple_Shooting(object):
             start_time = (self.final_time-self.start_time)/self.gridsize*i
             final_time = (self.final_time-self.start_time)/self.gridsize*(i+1)
             
-            self.model.u = u[i]
+            self.model.real_u = u[i]
             self.simulator.re_init(start_time, y[i])
             try:
                 [t, y_sol] = self.simulator(final_time, 1)

@@ -63,7 +63,7 @@ def write_data(simulator):
         
         io.export_result_dymola(model,data)
 
-class JMIExplicit(Explicit_Problem):
+class JMIODE(Explicit_Problem):
     """
     An Assimulo Explicit Model extended to JMI interface.
     
@@ -114,7 +114,7 @@ class JMIExplicit(Explicit_Problem):
         self.y0 = self._model.real_x
  
     
-class JMIImplicit(Implicit_Problem):
+class JMIDAE(Implicit_Problem):
     """
     An Assimulo Implicit Model extended to JMI interface.
     """

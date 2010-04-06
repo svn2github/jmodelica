@@ -9,7 +9,7 @@ from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
 
 try:
-    from jmodelica.simulation.assimulo import JMIExplicit, JMIImplicit, JMIModel_Exception
+    from jmodelica.simulation.assimulo import JMIODE, JMIDAE, JMIModel_Exception
 except NameError:
     print 'Could not load Assimulo module.'
 
@@ -22,7 +22,7 @@ oc = OptimicaCompiler()
 oc.set_boolean_option('state_start_values_fixed',True)
 
 
-class Test_JMI_Explicit:
+class Test_JMI_ODE:
     """
     This class tests jmodelica.simulation.assimulo.JMIExplicit
     """
@@ -47,7 +47,7 @@ class Test_JMI_Explicit:
         self.m_ODE = jmi.Model(package_ODE)
         
         # Creates the solvers
-        self.ODE = JMIExplicit(self.m_ODE)
+        self.ODE = JMIODE(self.m_ODE)
         
     def test_init(self):
         """
@@ -92,7 +92,7 @@ class Test_JMI_Explicit:
         #This is not implemented in JMIExplicit yet.
         pass
         
-class Test_JMI_Implicit:
+class Test_JMI_DAE:
     """
     This class tests jmodelica.simulation.assimulo.JMIImplicit
     """
@@ -127,8 +127,8 @@ class Test_JMI_Implicit:
         self.m_DISC = jmi.Model(package_DISC)
         
         # Creates the solvers
-        self.DAE = JMIImplicit(self.m_DAE)
-        self.DISC = JMIImplicit(self.m_DISC)
+        self.DAE = JMIDAE(self.m_DAE)
+        self.DISC = JMIDAE(self.m_DISC)
         
     def test_eps(self):
         """

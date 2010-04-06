@@ -24,7 +24,7 @@ import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.tests import get_example_path
 try:
-    from jmodelica.simulation.assimulo import JMIImplicit, write_data
+    from jmodelica.simulation.assimulo import JMIDAE, write_data
     from Assimulo.Implicit_ODE import IDA
 except:
     pass
@@ -56,7 +56,7 @@ def run_demo(with_plots=True):
     global RLC_mod
     global RLC_sim
     
-    RLC_mod = JMIImplicit(model)
+    RLC_mod = JMIDAE(model)
     RLC_sim = IDA(RLC_mod)
     RLC_sim(30)
     #RLC_sim.plot()

@@ -24,7 +24,7 @@ import jmodelica.jmi as jmi
 from jmodelica.compiler import OptimicaCompiler
 try:
     from Assimulo.Explicit_ODE import CVode
-    from jmodelica.simulation.assimulo import JMIExplicit, write_data
+    from jmodelica.simulation.assimulo import JMIODE, write_data
 except:
     pass
 
@@ -50,7 +50,7 @@ def run_demo(with_plots=True):
     # Load the dynamic library and XML data
     model=jmi.Model(package)
     
-    VDP_mod = JMIExplicit(model)
+    VDP_mod = JMIODE(model)
     
     VDP_sim = CVode(VDP_mod)
     VDP_sim.discr = 'BDF' #discretication method, default Adams

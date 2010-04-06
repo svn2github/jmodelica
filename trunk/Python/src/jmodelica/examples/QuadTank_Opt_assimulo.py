@@ -23,7 +23,7 @@ import matplotlib
 import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.tests import get_example_path
-from jmodelica.simulation.assimulo import JMIExplicit
+from jmodelica.simulation.assimulo import JMIODE
 from jmodelica.compiler import OptimicaCompiler
 from jmodelica.optimization.assimulo_shooting import Multiple_Shooting
 from Assimulo.Explicit_ODE import CVode
@@ -49,7 +49,7 @@ def run_demo(with_plots=True):
 
     # Load the dynamic library and XML data
     model=jmi.Model(package)
-    Quad_mod = JMIExplicit(model)
+    Quad_mod = JMIODE(model)
     
     Quad_sim = CVode(Quad_mod)
     Quad_sim.discr = 'BDF'
@@ -57,7 +57,7 @@ def run_demo(with_plots=True):
     Quad_sim.atol = Quad_sim.rtol = 1e-6
 
     Quad_shoot = Multiple_Shooting(Quad_sim, gridsize=10, initial_u=[2.5,2.5])
-    Quad_shoot.verbosity = Multiple_Shooting.QUIET
+    Quad_shoot.verbosity = Multiple_Shooting.SCREAM
     Quad_shoot.optMethod = 'scipy_slsqp'
 
     sol = Quad_shoot.run(True)

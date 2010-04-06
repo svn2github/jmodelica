@@ -25,7 +25,7 @@ import jmodelica.jmi as jmi
 from jmodelica.tests import get_example_path
 from jmodelica.compiler import ModelicaCompiler
 try:
-    from jmodelica.simulation.assimulo import JMIImplicit, write_data
+    from jmodelica.simulation.assimulo import JMIDAE, write_data
     from Assimulo.Implicit_ODE import IDA
 except:
     pass
@@ -56,7 +56,7 @@ def run_demo(with_plots=True):
     model.set_sw(N.array([1,1]))
     
     #Simulate
-    if_mod = JMIImplicit(model)
+    if_mod = JMIDAE(model)
     if_sim = IDA(if_mod)
     if_sim(5.0)
     

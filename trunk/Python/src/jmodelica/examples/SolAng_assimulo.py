@@ -30,7 +30,7 @@ from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
 
 try:
-    from jmodelica.simulation.assimulo import JMIImplicit, write_data
+    from jmodelica.simulation.assimulo import JMIDAE, write_data
     from Assimulo.Implicit_ODE import IDA
 except:
     pass
@@ -91,7 +91,7 @@ def run_demo(with_plots=True):
     p.show()
     
     #Simulation with the new package
-    SolAng_mod = JMIImplicit(model)
+    SolAng_mod = JMIDAE(model)
     SolAng_sim = IDA(SolAng_mod)
     SolAng_sim.reset() #Resets to the initial values from the model
     SolAng_sim.make_consistency('IDA_YA_YDP_INIT') #Calculates initial values
