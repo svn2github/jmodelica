@@ -117,7 +117,7 @@ aspect FlatVariability {
 		return total;
 	}
 	
-	syn lazy FTypePrefixVariability InstComponentDecl.variability() = null;
+	syn lazy FTypePrefixVariability InstComponentDecl.variability() = fConstant();
 	eq InstPrimitive.variability() {
 		if (isContinuous())
 			return fContinuous();

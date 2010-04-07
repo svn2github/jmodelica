@@ -174,6 +174,23 @@ Semantic error at line 108, column 31:
     x<=3;
     y>=3;
   end ClassAttrTest5;
+
+  
+  optimization ClassAttrTest6(objective=x,startTime=0,finalTime=1)
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ClassAttrTest6",
+         description="Using missing variable in class attribute",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTests.mo':
+Semantic error at line 179, column 41:
+  Cannot find class or component declaration for x
+")})));
+
+  end ClassAttrTest6;
+
+
     
   optimization InstantValueTest1 
      (objective=x(finalTime)^2,startTime=0,finalTime(free=true,initialGuess=3))
