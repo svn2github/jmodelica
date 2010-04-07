@@ -28,13 +28,6 @@
 #ifndef _JMI_ARRAY_COMMON_H
 #define _JMI_ARRAY_COMMON_H
 
-// Linked list for saving pointers to be feed at return
-typedef struct _jmi_dynamic_list jmi_dynamic_list;
-struct _jmi_dynamic_list {
-	void* data;
-	jmi_dynamic_list* next;
-};
-
 // Size macro - gives the size of array arr for dimension d
 #define jmi_array_size(arr, d) ((arr)->size[d])
 

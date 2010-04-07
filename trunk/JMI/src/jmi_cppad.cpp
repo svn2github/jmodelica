@@ -1598,6 +1598,13 @@ int jmi_opt_dHineq_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_v
 #include "jmi_array_cppad.h"
 #include "jmi_array_common.h"
 
+jmi_dynamic_list::~jmi_dynamic_list() {
+	delete next;
+}
+jmi_dynamic_list_arr::~jmi_dynamic_list_arr() {
+	delete data;
+}
+
 jmi_ad_var_t jmi_array_val_1(jmi_array_t* arr, jmi_ad_var_t i1) {
     printf("jmi_array_val_1: i1 = %f, i = %f, size = %d\n", Value(i1), Value(_JMI_ARR_I_1(arr, i1)), arr->size[0]);
     return (*(arr->var))[_JMI_ARR_I_1(arr, i1)];

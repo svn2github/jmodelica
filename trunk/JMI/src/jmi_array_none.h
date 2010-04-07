@@ -38,6 +38,13 @@ struct jmi_array_t {
     jmi_real_t* var;
 };
 
+// Linked list for saving pointers to be freed at return
+typedef struct _jmi_dynamic_list jmi_dynamic_list;
+struct _jmi_dynamic_list {
+	void* data;
+	jmi_dynamic_list* next;
+};
+
 // Record array type declaration macro
 #define JMI_RECORD_ARRAY_TYPE(rec, arr) \
 	typedef arr struct _##arr {\
