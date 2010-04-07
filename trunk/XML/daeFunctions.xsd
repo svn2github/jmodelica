@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- edited with XMLSpy v2010 (http://www.altova.com) by Magnus Gäfvert (Modelon AB) -->
 <xs:schema xmlns:fun="https://svn.jmodelica.org/trunk/XML/daeFunctions.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:alg="https://svn.jmodelica.org/trunk/XML/daeAlgorithms.xsd" xmlns:exp="https://svn.jmodelica.org/trunk/XML/daeExpressions.xsd" targetNamespace="https://svn.jmodelica.org/trunk/XML/daeFunctions.xsd" elementFormDefault="qualified" attributeFormDefault="unqualified">
-	<xs:import namespace="https://svn.jmodelica.org/trunk/XML/daeAlgorithms.xsd" schemaLocation="daeAlgorithms.xsd"/>
 	<xs:import namespace="https://svn.jmodelica.org/trunk/XML/daeExpressions.xsd" schemaLocation="daeExpressions.xsd"/>
+	<xs:redefine schemaLocation="daeAlgorithms.xsd"/>
 	<xs:complexType name="FunctionVariable">
 		<xs:annotation>
 			<xs:documentation>Variable used by the function</xs:documentation>
@@ -44,7 +44,7 @@
 				<xs:element name="OutputVariable" type="fun:FunctionVariable" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element name="InputVariable" type="fun:FunctionVariable" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element name="ProtectedVariable" type="fun:FunctionVariable" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
-				<xs:element name="Algorithm" type="alg:Algorithm" minOccurs="0"/>
+				<xs:element name="Algorithm" type="fun:Algorithm" minOccurs="0"/>
 				<xs:element name="InverseFunction" minOccurs="0" maxOccurs="unbounded">
 					<xs:annotation>
 						<xs:documentation>Declaration of the inverse of a function (that must have one output only)</xs:documentation>
@@ -62,7 +62,7 @@
 								</xs:annotation>
 							</xs:element>
 							<xs:element name="ProtectedVariable" type="fun:FunctionVariable" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
-							<xs:element name="Algorithm" type="alg:Algorithm" minOccurs="0"/>
+							<xs:element name="Algorithm" type="fun:Algorithm" minOccurs="0"/>
 						</xs:sequence>
 						<xs:attribute name="name" type="xs:normalizedString" use="required"/>
 					</xs:complexType>
@@ -80,7 +80,7 @@
 								</xs:annotation>
 							</xs:element>
 							<xs:element name="ProtectedVariable" type="fun:FunctionVariable" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
-							<xs:element name="Algorithm" type="alg:Algorithm" minOccurs="0"/>
+							<xs:element name="Algorithm" type="fun:Algorithm" minOccurs="0"/>
 						</xs:sequence>
 						<xs:attribute name="name" type="xs:normalizedString" use="required"/>
 					</xs:complexType>

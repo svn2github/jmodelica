@@ -625,32 +625,32 @@ public class XMLGenerator extends GenericGenerator {
 	
 	
 	/**
-	 * Internal class used to generate the tags for initial equations.
+	 * Internal class used to generate the tags for user-defined functions declaration.
 	 * 
 	 * @see DAETag
 	 */
-//	class DAETag_XML_functions extends DAETag {
-//		
-//		public DAETag_XML_functions (
-//		  AbstractGenerator myGenerator, FClass fclass) {
-//			super("XML_Functions","Functions Declaration",
-//			  myGenerator,fclass);
-//		}
-//		
-//		/*
-//		 * (non-Javadoc)
-//		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
-//		 */
-//		public void generate(PrintStream genPrinter) {
-//			Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
-//			if(generateEqu) {
-//				genPrinter.println("<fun:FunctionList>");			
-//				for(FFunctionDecl f : fclass.getFFunctionDeclList())
-//					f.prettyPrint_XML(genPrinter,"\t\t",f);								
-//				genPrinter.println("\t</fun:FunctionList>");
-//			}
-//		}
-//	}
+	class DAETag_XML_functions extends DAETag {
+		
+		public DAETag_XML_functions (
+		  AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_Functions","Functions Declaration",
+			  myGenerator,fclass);
+		}
+		
+		/*
+		 * (non-Javadoc)
+		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
+		 */
+		public void generate(PrintStream genPrinter) {
+			Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
+			if(generateEqu) {
+				genPrinter.println("<fun:FunctionsList>");			
+				for(FFunctionDecl f : fclass.getFFunctionDeclList())
+					f.prettyPrint_XML(genPrinter,"\t\t",f);								
+				genPrinter.println("\t</fun:FunctionsList>");
+			}
+		}
+	}
 	
 	/**
 	 * Constructor.

@@ -149,23 +149,21 @@ aspect XMLCodeGen {
 	}
 	
 	public void FIdUseExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
-		ASTNode child = getChild(this,0);
 		String namespace = "exp";
 		String tag = this.xmlTag();
 		
 		str.print(indent + "<" + namespace + ":" + tag + ">");
-		str.print(this.name());
+		str.print(this.toString());
 		str.println("</" + namespace + ":" + tag + ">");		
 	}
 	
-	//is it needed? check
+	
 	public void FIdUse.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
-		ASTNode child = getChild(this,0);
 		String namespace = "exp";
 		String tag = this.xmlTag();
 		
 		str.print(indent + "<" + namespace + ":" + tag + ">");
-		str.print(this.name());
+		str.print(this.toString());
 		str.println("</" + namespace + ":" + tag + ">");
 	}
 	
@@ -198,6 +196,17 @@ aspect XMLCodeGen {
 		str.println(indent + "</"+ namespace + ":" + tag + ">");
 	}
 	
+    public void FRangeExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		String namespace = "exp";
+		String tag = this.xmlTag();
+		
+		str.println(indent + "<" + namespace + ":" + tag + ">");
+		for (FExp e : this.getFExpList())
+			e.prettyPrint_XML(str,p.indent(indent));
+		str.println(indent + "</" + namespace + ":" + tag + ">");
+     
+    }
+	
 	//------------------------ Equations -------------------------
 	public void FEquation.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
 		ASTNode left = getLeft();
@@ -215,6 +224,16 @@ aspect XMLCodeGen {
 		str.println(indent+"\t</" + expNamespace + ":" + subXMLtag + ">");
 		str.println(indent+"</" +eqNamespace+ ":" + eqXMLtag + ">");
 	}
+		
+	public void FFunctionCallEquation.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		String tag = this.xmlTag();
+		String namespace = "equ";
+		
+		str.println(indent + "<" + namespace + ":" + tag  + ">");
+		str.println(indent + "</" + namespace + ":" + tag  + ">");
+		
+		
+	}
 	
 	//-------------------- Functions ---------------------------
     public void FFunctionDecl.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
@@ -222,7 +241,7 @@ aspect XMLCodeGen {
         String tag = this.xmlTag();
         String fName = this.name();
         
-        str.print(indent + "<" + namespace + ":" + tag + "name=\"" + fName + "\">\n");
+        str.print(indent + "<" + namespace + ":" + tag + " name=\"" + fName + "\">\n");
         	
         	for(FFunctionVariable var : this.myOutputs())
         		var.prettyPrint_XML(str,p.indent(indent));
@@ -267,10 +286,10 @@ aspect XMLCodeGen {
         String namespace="fun";
         String tag = this.xmlTag();
         
-		str.print(indent + "<" + namespace + ":" + tag + ">");
+		str.println(indent + "<" + namespace + ":" + tag + ">");
     	for (FStatement s : this.getFStatementList())
     		s.prettyPrint_XML(str,p.indent(indent));
-		str.println("</"+ namespace + ":" + tag + ">");
+		str.println(indent + "</"+ namespace + ":" + tag + ">");
     }
     
     public void FStatement.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
@@ -280,13 +299,13 @@ aspect XMLCodeGen {
     public void FBreakStmt.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
         String namespace="fun";
         String tag = this.xmlTag();
-        str.print(indent + "<" + namespace + ":" + tag + "/>");        
+        str.println(indent + "<" + namespace + ":" + tag + "/>");        
     }
     
     public void FReturnStmt.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
         String namespace="fun";
         String tag = this.xmlTag();
-        str.print(indent + "<" + namespace + ":" + tag + "/>");        
+        str.println(indent + "<" + namespace + ":" + tag + "/>");        
     }
     
     public void FAssignStmt.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
@@ -294,12 +313,12 @@ aspect XMLCodeGen {
         String tag = this.xmlTag();
         String rightTag = "Expression";
         
-        str.print(indent + "<" + namespace + ":" + tag + ">"); 
+        str.println(indent + "<" + namespace + ":" + tag + ">"); 
         this.getLeft().prettyPrint_XML(str,p.indent(indent));
-        str.print(indent + "\t<" + namespace + ":" + rightTag + ">"); 
-        this.getRight().prettyPrint_XML(str,p.indent(indent));
-        str.print(indent + "\t<" + namespace + ":" + rightTag + "/>"); 
-        str.print(indent + "<" + namespace + ":" + tag + "/>");        
+        str.println(indent + "\t<" + namespace + ":" + rightTag + ">"); 
+        this.getRight().prettyPrint_XML(str,p.indent(indent+"\t"));
+        str.println(indent + "\t</" + namespace + ":" + rightTag + ">"); 
+        str.println(indent + "</" + namespace + ":" + tag + ">");        
     }
     
     public void FIfStmt.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
@@ -309,28 +328,30 @@ aspect XMLCodeGen {
         String elseTag = "Else";
         
         //opening tag
-        str.print(indent + "<" + namespace + ":" + tag + ">"); 
+        str.println(indent + "<" + namespace + ":" + tag + ">"); 
         
         //then branch
-        this.getFIfWhenClause(1).prettyPrint_XML(str,p.indent(indent));
+        this.getFIfWhenClause(0).prettyPrint_XML(str,p.indent(indent));
         
-        //else branches
+        //elseif branches
         if(this.getNumFIfWhenClause()>1){
-        	for (int i=2; i<= this.getNumFIfWhenClause(); i++){
-        		str.print(indent + "\t<" + namespace + ":" + elseIfTag + ">");
-        		this.getFIfWhenClause(i).prettyPrint_XML(str,p.indent(indent));
-        		str.print(indent + "\t<" + namespace + ":" + elseIfTag + "/>");
+        	for (int i=1; i< this.getNumFIfWhenClause(); i++){
+        		str.println(indent + "\t<" + namespace + ":" + elseIfTag + ">");
+        		this.getFIfWhenClause(i).prettyPrint_XML(str,p.indent(indent+"\t"));
+        		str.println(indent + "\t</" + namespace + ":" + elseIfTag + ">");
         	}
         }
         
-       //elseif branch
-        str.print(indent + "\t<" + namespace + ":" + elseTag + ">");
-    	for (FStatement s : this.getElseStmtList())
-    		s.prettyPrint_XML(str,p.indent(indent));
-		str.print(indent + "\t<" + namespace + ":" + elseTag + "/>");
-		
+       //else branch
+        if (this.getNumElseStmt()!=0){
+            str.println(indent + "\t<" + namespace + ":" + elseTag + ">");
+        	for (FStatement s : this.getElseStmtList())
+        		s.prettyPrint_XML(str,p.indent(indent+"\t"));
+    		str.println(indent + "\t</" + namespace + ":" + elseTag + ">");
+        }
+	
 		//closing tag
-        str.print(indent + "<" + namespace + ":" + tag + "/>");        
+        str.println(indent + "</" + namespace + ":" + tag + ">");        
     }
     
     public void FIfWhenClause.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
@@ -338,14 +359,14 @@ aspect XMLCodeGen {
         String testTag = "Condition";
         String stmtTag = "Statements";
         
-        str.print(indent + "<" + namespace + ":" + testTag + ">"); 
+        str.println(indent + "<" + namespace + ":" + testTag + ">"); 
         this.getTest().prettyPrint_XML(str,p.indent(indent));
-        str.print(indent + "<" + namespace + ":" + testTag + "/>");  
+        str.println(indent + "</" + namespace + ":" + testTag + ">");  
         
-        str.print(indent + "<" + namespace + ":" + stmtTag + ">"); 
+        str.println(indent + "<" + namespace + ":" + stmtTag + ">"); 
     	for (FStatement s : this.getFStatementList())
     		s.prettyPrint_XML(str,p.indent(indent));
-        str.print(indent + "<" + namespace + ":" + stmtTag + "/>");  
+        str.println(indent + "</" + namespace + ":" + stmtTag + ">");  
     }
     
     public void FForStmt.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
@@ -353,13 +374,16 @@ aspect XMLCodeGen {
         String tag = this.xmlTag();
         String stmtTag = "Statements";
         
-        str.print(indent + "<" + namespace + ":" + tag + ">"); 
+        str.println(indent + "<" + namespace + ":" + tag + ">"); 
         //Index
         this.getIndex().prettyPrint_XML(str,p.indent(indent));
         //Statements
+        str.println(indent + "\t<" + namespace + ":" + stmtTag + ">");
     	for (FStatement s : this.getForStmtList())
-    		s.prettyPrint_XML(str,p.indent(indent));
-        str.print(indent + "<" + namespace + ":" + tag + "/>"); 
+    		s.prettyPrint_XML(str,p.indent(indent+"\t"));
+		str.println(indent + "\t</" + namespace + ":" + stmtTag + ">");;
+    	
+        str.println(indent + "</" + namespace + ":" + tag + ">"); 
      
     }
     
@@ -367,14 +391,19 @@ aspect XMLCodeGen {
         String namespace="fun";
         String tag = "Index";
         
-        String nameAttr = " name=\"" + this.getFVariable().name() + "\"";
+        String nameAttr = " IterationVariable=\"" + this.getFVariable().name() + "\"";
+        String expTag = "IterationSet";
         
-        str.print(indent + "<" + namespace + ":" + tag + nameAttr + ">"); 
-        if (this.hasFExp())
-        	this.getFExp().prettyPrint_XML(str,p.indent(indent));
-        str.print(indent + "<" + namespace + ":" + tag + "/>"); 
+        str.println(indent + "<" + namespace + ":" + tag + nameAttr + ">"); 
+        if (this.hasFExp()){
+        	str.println(indent + "\t<" + namespace + ":" + expTag + ">");
+        	this.getFExp().prettyPrint_XML(str,p.indent(indent+"\t"));
+        	str.println(indent + "\t</" + namespace + ":" + expTag + ">");
+        }     	
+        str.println(indent + "</" + namespace + ":" + tag + ">"); 
      
     }
+    
     
     public void FWhileStmt.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
         String namespace="fun";
@@ -382,27 +411,27 @@ aspect XMLCodeGen {
         String testTag = "Condition";
         String stmtTag = "Statements";
         
-        str.print(indent + "<" + namespace + ":" + tag + ">"); 
+        str.println(indent + "<" + namespace + ":" + tag + ">"); 
         //test
-        str.print(indent + "<" + namespace + ":" + testTag + ">"); 
-        this.getTest().prettyPrint_XML(str,p.indent(indent));
-        str.print(indent + "<" + namespace + ":" + testTag + "/>");  
+        str.println(indent + "\t<" + namespace + ":" + testTag + ">"); 
+        this.getTest().prettyPrint_XML(str,p.indent(indent+"\t"));
+        str.println(indent + "\t</" + namespace + ":" + testTag + ">");  
         //statements
-        str.print(indent + "<" + namespace + ":" + stmtTag + ">"); 
+        str.println(indent + "\t<" + namespace + ":" + stmtTag + ">"); 
     	for (FStatement s : this.getWhileStmtList())
-    		s.prettyPrint_XML(str,p.indent(indent));
-        str.print(indent + "<" + namespace + ":" + stmtTag + "/>"); 
+    		s.prettyPrint_XML(str,p.indent(indent+"\t"));
+        str.println(indent + "\t</" + namespace + ":" + stmtTag + ">"); 
         
-        str.print(indent + "<" + namespace + ":" + tag + "/>"); 
+        str.println(indent + "</" + namespace + ":" + tag + ">"); 
     }
     
     public void FFunctionCallStmt.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
         String namespace="fun";
         String tag = this.xmlTag();
         
-        str.print(indent + "<" + namespace + ":" + tag + ">"); 
+        str.println(indent + "<" + namespace + ":" + tag + ">"); 
 
-        str.print(indent + "<" + namespace + ":" + tag + "/>"); 
+        str.println(indent + "</" + namespace + ":" + tag + ">"); 
      
     }
     
@@ -463,6 +492,7 @@ aspect XMLTagBinding{
         eq FSqrtExp.xmlTag() = "Sqrt";
         eq FAtan2Exp.xmlTag() = "Atan2";       
         eq FTimeExp.xmlTag() = "Time";
+        eq FRangeExp.xmlTag() = "Range";
         //other expressions
         eq FArray.xmlTag() = "Array";   
         eq FFunctionCall.xmlTag() = "FunctionCall";
@@ -473,6 +503,8 @@ aspect XMLTagBinding{
         //equations
         syn String FEquation.xmlTag();
         eq FEquation.xmlTag() = "Equation";
+        syn String FFunctionCallEquation.xmlTag();
+        eq FFunctionCallEquation.xmlTag() = "FunctionCallEquation";
        
         //functions
         syn String FFunctionDecl.xmlTag();

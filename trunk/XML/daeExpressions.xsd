@@ -308,4 +308,14 @@
 			<xs:documentation>Array definition</xs:documentation>
 		</xs:annotation>
 	</xs:element>
+	<xs:element name="Range">
+		<xs:annotation>
+			<xs:documentation>Expression representing values in a range</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence minOccurs="2" maxOccurs="3">
+				<xs:any namespace="##targetNamespace"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
 </xs:schema>

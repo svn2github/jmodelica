@@ -26,4 +26,5 @@ $XML_rootAttributes$>
 	$XML_Equations$
 	$XML_initialEquations$
 	$XML_Optimization$
+	$XML_Functions$
 </jmodelicaModelDescription>
