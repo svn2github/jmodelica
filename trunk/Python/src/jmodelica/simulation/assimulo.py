@@ -69,13 +69,16 @@ class JMIODE(Explicit_Problem):
     
     Not extended with handling for discontinuities.
     """
-    def __init__(self, model):
+    def __init__(self, model,jacobian=True):
         """
         Sets the initial values.
         """
         self._model = model
         
         self.y0 = self._model.real_x
+        
+        if jacobian: #Use JModelicas jacobian?
+            self.jac = self.j #Activates the jacobian
     
     def f(self, t, y, sw=None):
         """
@@ -91,6 +94,30 @@ class JMIODE(Explicit_Problem):
 
         return rhs
         
+    def j(self, t, y, sw=None):
+        """
+        The jacobian function for an ODE problem.
+        """
+        #Moving data to the model
+        self._model.t = t
+        self._model.real_x = y
+        
+        #Evaluating the jacobian
+        #-Setting options
+        z_l = N.array([1]*len(self._model.z)) #Used to give independent_vars full control
+        independent_vars = [jmi.JMI_DER_X] #Derivation with respect to X
+        sparsity = jmi.JMI_DER_DENSE_ROW_MAJOR
+        evaluation_options = jmi.JMI_DER_CPPAD #Determine to use CPPAD
+        
+        #-Evaluating
+        Jac = N.zeros(len(y)**2) #Matrix that holds the information
+        self._model.jmimodel.ode_df(evaluation_options, sparsity, independent_vars, z_l, Jac) #Output Jac
+        
+        #-Vector manipulation
+        Jac = Jac.reshape(len(y),len(y)) #Reshape to a matrix
+        
+        return Jac
+    
     def g(self, t, y, sw):
         """
         The event indicator function for a ODE problem.
