@@ -66,6 +66,11 @@ def run_demo(with_plots=True):
     x1=res.get_variable_data('x1')
     x2=res.get_variable_data('x2')
     
+    assert N.abs(x1.x[-1] + 0.736680243) < 1e-5, \
+           "Wrong value in simulation result in VDP_assimulo.py" 
+    assert N.abs(x2.x[-1] - 1.57833994) < 1e-5, \
+           "Wrong value in simulation result in VDP_assimulo.py" 
+    
     if with_plots:
         fig = p.figure()
         p.plot(x1.t, x1.x, x2.t, x2.x)

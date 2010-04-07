@@ -39,7 +39,7 @@ oc.set_boolean_option('state_start_values_fixed',True)
 
 class Test_JMI_ODE:
     """
-    This class tests jmodelica.simulation.assimulo.JMIExplicit
+    This class tests jmodelica.simulation.assimulo.JMIODE
     """
     
     @classmethod
@@ -66,7 +66,7 @@ class Test_JMI_ODE:
         
     def test_init(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIExplicit.__init__
+        Tests jmodelica.simulation.assimulo.JMIODE.__init__
         """
         assert self.m_ODE == self.ODE._model
         
@@ -75,7 +75,7 @@ class Test_JMI_ODE:
     
     def test_f(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIExplicit.f
+        Tests jmodelica.simulation.assimulo.JMIODE.f
         """
         test_x = N.array([1.,1.,1.])
         test_t = 2
@@ -85,10 +85,29 @@ class Test_JMI_ODE:
         assert temp_rhs[0] == -1.0
         assert temp_rhs[1] == 1.0
         nose.tools.assert_almost_equal(temp_rhs[2], 14.77811, 5)
+    
+    def test_j(self):
+        """
+        Tests jmodelica.simulation.assimulo.JMIODE.j
+        """
+        test_x = N.array([1.,1.,1.])
+        test_t = 2
         
+        temp_j = self.ODE.j(test_t,test_x)
+        print temp_j
+        assert temp_j[0,0] == 0.0
+        assert temp_j[0,1] == -3.0
+        assert temp_j[0,2] == 0.0
+        assert temp_j[1,0] == 1.0
+        assert temp_j[1,1] == 0.0
+        assert temp_j[1,2] == 0.0
+        nose.tools.assert_almost_equal(temp_j[2,0], 14.7781122, 5)
+        nose.tools.assert_almost_equal(temp_j[2,1], 14.7781122, 5)
+        assert temp_j[2,2] == 0.0
+    
     def test_reset(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIExplicit.reset
+        Tests jmodelica.simulation.assimulo.JMIODE.reset
         """
         self.ODE.t0 = 10.0
         self.ODE._model.real_x = N.array([2.,2.,2.])
@@ -102,14 +121,14 @@ class Test_JMI_ODE:
         
     def test_g(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIExplicit.g
+        Tests jmodelica.simulation.assimulo.JMIODE.g
         """
-        #This is not implemented in JMIExplicit yet.
+        #This is not implemented in JMIODE yet.
         pass
         
 class Test_JMI_DAE:
     """
-    This class tests jmodelica.simulation.assimulo.JMIImplicit
+    This class tests jmodelica.simulation.assimulo.JMIDAE
     """
     
     @classmethod
@@ -147,7 +166,7 @@ class Test_JMI_DAE:
         
     def test_eps(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIImplicit.get/set_eps
+        Tests jmodelica.simulation.assimulo.JMIDAE.get/set_eps
         """
         nose.tools.assert_raises(JMIModel_Exception, self.DAE._set_eps, 'Test')
         nose.tools.assert_raises(JMIModel_Exception, self.DAE._set_eps, -1)
@@ -161,7 +180,7 @@ class Test_JMI_DAE:
         
     def test_max_eIteration(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIImplicit.get/set_max_eIteration
+        Tests jmodelica.simulation.assimulo.JMIDAE.get/set_max_eIteration
         """
         nose.tools.assert_raises(JMIModel_Exception, self.DAE._set_max_eIteration, 'Test')
         nose.tools.assert_raises(JMIModel_Exception, self.DAE._set_max_eIteration, -1)
@@ -175,7 +194,7 @@ class Test_JMI_DAE:
         
     def test_check_eIter(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIImplicit.check_eIter
+        Tests jmodelica.simulation.assimulo.JMIDAE.check_eIter
         """
         self.DAE.eps = 1e-4
         
@@ -201,7 +220,7 @@ class Test_JMI_DAE:
         
     def test_event_switch(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIImplicit.event_switch
+        Tests jmodelica.simulation.assimulo.JMIDAE.event_switch
         """
         solver = lambda x:1
         solver.verbosity = 1
@@ -217,7 +236,7 @@ class Test_JMI_DAE:
         
     def test_f(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIImplicit.f
+        Tests jmodelica.simulation.assimulo.JMIDAE.f
         """
         test_x = N.array([1.,1.,1.,1.])
         test_dx = N.array([2.,2.,2.,2.])
@@ -232,7 +251,7 @@ class Test_JMI_DAE:
         
     def test_g(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIImplicit.g
+        Tests jmodelica.simulation.assimulo.JMIDAE.g
         """
         temp_g = self.DISC.g(2.,[1.,2.],[2.,0],[0,0])
         
@@ -241,7 +260,7 @@ class Test_JMI_DAE:
         
     def test_g_adjust(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIImplicit.g
+        Tests jmodelica.simulation.assimulo.JMIDAE.g
         """
         self.DISC.eps = 2.0
 
@@ -258,7 +277,7 @@ class Test_JMI_DAE:
 
     def test_init(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIImplicit.__init__
+        Tests jmodelica.simulation.assimulo.JMIDAE.__init__
         """
         assert self.m_DAE == self.DAE._model
         assert self.DAE.max_eIter == 50
@@ -280,7 +299,7 @@ class Test_JMI_DAE:
         
     def test_reset(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIImplicit.reset
+        Tests jmodelica.simulation.assimulo.JMIDAE.reset
         """   
         self.DAE.t0 = 10.0
         self.DAE._model.real_x = N.array([2.,2.,2.,2.])
@@ -301,7 +320,7 @@ class Test_JMI_DAE:
 
     def test_j(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIImplicit.j
+        Tests jmodelica.simulation.assimulo.JMIDAE.j
         """
         
         test_x = N.array([1.,1.,1.,1.])
@@ -317,7 +336,7 @@ class Test_JMI_DAE:
         
     def test_handle_event(self):
         """
-        Tests jmodelica.simulation.assimulo.JMIImplicit.handle_event
+        Tests jmodelica.simulation.assimulo.JMIDAE.handle_event
         """
         solver = lambda x:1
         solver.verbosity = 1
