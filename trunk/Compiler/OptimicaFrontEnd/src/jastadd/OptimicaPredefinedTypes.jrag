@@ -22,7 +22,7 @@ aspect OptimicaPredefinedTypes {
 	 * which contains a list of predefined PrimitiveClassDef:s.
 	 */
 	refine PredefinedTypes eq Program.getPredefinedTypeList() {
-        debugPrint("Optimica: Program.getPredefinedTypeList()");
+        log.debug("Optimica: Program.getPredefinedTypeList()");
 		List l = PredefinedTypes.Program.getPredefinedTypeList();
 		for (int i=0;i<l.getNumChild();i++) {
 			PrimitiveClassDecl cd = (PrimitiveClassDecl)l.getChild(i);

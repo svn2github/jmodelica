@@ -129,7 +129,7 @@ aspect Arrays {
 	 * @return Array dimension.
 	 */	
 	syn lazy int FArraySubscripts.accessNdims() { 
-		//System.out.println("FArraySubscripts.accessNdims()");
+		//log.debug("FArraySubscripts.accessNdims()");
 		// Need to check if each individual subscript increases 
 		// dimension. (ndims(x[1])=0)
 		int nd = 0;
@@ -1176,7 +1176,7 @@ aspect Arrays {
 	}
 
 	eq FRangeExp.getArray() {
-		//System.out.println("FRangeExp.getArray(): size = " + size().get(0));	
+		//log.debug("FRangeExp.getArray(): size = " + size().get(0));	
 		double i1 = getFExp(0).ceval().realValue();
 		double i2 = 1.0;
 		if (getNumFExp() > 2) 

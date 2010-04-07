@@ -123,7 +123,7 @@ aspect FlatNameBinding {
 	*/
 	
 	syn lazy HashMap<String,FVariable> FClass.fullyQualifiedVariablesMap() {
-		//System.out.println("FClass.fullyQualifiedVariablesMap()");
+		//log.debug("FClass.fullyQualifiedVariablesMap()");
 		HashMap<String,FVariable> map = new HashMap<String,FVariable>();
 		for (FVariable v : getFVariables()) 
 			map.put(v.name(), v);

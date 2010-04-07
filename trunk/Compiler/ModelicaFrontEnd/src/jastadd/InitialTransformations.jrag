@@ -49,7 +49,7 @@
      */
    	rewrite PN_FullClassDecl {
  	  	to FullClassDecl { 
- 	   		 //System.out.println("****  rewrite PN_FullClassDecl: "+getClass().getName()+": "+ name());
+ 	   		 //log.debug("****  rewrite PN_FullClassDecl: "+getClass().getName()+": "+ name());
  	   		
  	   		Composition c = getComposition();
   	
@@ -159,7 +159,7 @@
  	     	                                        getConstrainingClauseOpt(),
  	     	                                        getComment());
  		 	c.setLocation(this);
-		 	//System.out.println("PN_ComponentClause->ComponentClause.getStart() = "+c.getStart());
+		 	//log.debug("PN_ComponentClause->ComponentClause.getStart() = "+c.getStart());
  		 	return c;
  		}
    	}
@@ -224,7 +224,7 @@
        					                                        (Opt)getConstrainingClauseOpt().fullCopy(),
        					                                        (Comment)getComment().fullCopy());
        					c.setLocation(this);
-      					//System.out.println("ComponentClause->ComponentClause.getStart() = "+c.getStart());
+      					//log.debug("ComponentClause->ComponentClause.getStart() = "+c.getStart());
        					l.add(c);
        				}
      			return l;
@@ -267,7 +267,7 @@
       			                                    getConstrainingClauseOpt(),
       			                                    getComment());
       			c.setLocation(getName(0), this);
-     			//System.out.println("ComponentClause->ComponentDecl.getStart() = "+c.getStart());
+     			//log.debug("ComponentClause->ComponentDecl.getStart() = "+c.getStart());
       			return c;
   			}
   	}
@@ -276,12 +276,12 @@
 	rewrite IfExp {
 		when (getElseExpNoTransform() instanceof IfExp)
 			to IfExp {
-				//System.out.println("-------------IfExp rewritten: " +getElseIfExpList().getNumChild());
-				//System.out.println(getIfExp()._prettyPrint(""));
+				//log.debug("-------------IfExp rewritten: " +getElseIfExpList().getNumChild());
+				//log.debug(getIfExp()._prettyPrint(""));
 				IfExp e = (IfExp)getElseExpNoTransform();
 				List l = getElseIfExpList();
 				l.add(new ElseIfExp(e.getIfExp(),e.getThenExp()));
-				//System.out.println(l.getNumChild());
+				//log.debug(l.getNumChild());
 				//l.dumpTree("");
 				return new IfExp(getIfExp(),getThenExp(),
 				                 l,
@@ -293,7 +293,7 @@
 	rewrite ComponentModification {
     	when (getName().isQualified())
     	to ComponentModification{
-    		debugPrint("ComponentModification -> ComponentModification: " + getName().qualifiedName());
+    		log.debug("ComponentModification -> ComponentModification: " + getName().qualifiedName());
     		ComponentModification e = new ComponentModification(new Opt(),
     				                       new Opt(),
     				                       getName().getFirstAccess(),

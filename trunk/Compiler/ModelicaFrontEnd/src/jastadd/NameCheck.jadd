@@ -28,14 +28,14 @@ aspect InstanceNameCheck {
 	
 	
 	public void InstComponentAccess.nameCheck() {
-    	//System.out.println("InstComponentAccess.nameCheck(): " + name() + " " + myInstComponentDecl().name());
+    	//log.debug("InstComponentAccess.nameCheck(): " + name() + " " + myInstComponentDecl().name());
 		if (myInstComponentDecl().isUnknown()) 
        		error("The component "+qualifiedName()+" is undeclared");
     }
   
     
     public void InstClassAccess.nameCheck() {
-    	//System.out.println("InstClassAccess.nameCheck(): " + name() + " " + myInstClassDecl().name());
+    	//log.debug("InstClassAccess.nameCheck(): " + name() + " " + myInstClassDecl().name());
 		if (myInstClassDecl().isUnknown()) {
 			//getParent().dumpTree("");
 			error("The class "+qualifiedName()+" is undeclared");

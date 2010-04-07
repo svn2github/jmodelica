@@ -17,7 +17,7 @@ DEFAULT_TESTS="optimica python"
 # Default arguments - always parse these arguments before command line
 DEFAULT_ARGS=""
 
-# You may need to change these
+# You may need to change this - only needed on some systems
 PYTHON_HOME=/opt/python/python2.5/
 
 # Variables set by configure script
@@ -59,19 +59,15 @@ function optimica_tests() {
 
 function python_tests() {
   TEST_DIR=$(mktemp -dqt)
-  TESTS=${JMODELICA_HOME}/Python/jmodelica/tests
+  TESTS="$(find ${JMODELICA_HOME}/Python/jmodelica/tests -name \*.py | grep test_)"
   PATTERN=----------------------------------------------------------------------
-  # Under Windows, run each test file separately
-  #if [[ "$(uname | sed -n -e 's!^MINGW!1!p')" != "" ]]; then
-  TESTS="$(find ${TESTS} -name \*.py| grep test_ | grep -v __init__)"
-  #fi
   print_name Python
   case ${OUTPUT} in
     v)
       if build_jmodelica; then
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
-	  echo ${TEST}
+	  echo ${TEST} | sed -e 's!^.*jmodelica.tests.!Running !'
           nosetests -a stddist -v ${TEST}
         done
       fi
@@ -80,19 +76,20 @@ function python_tests() {
       if build_jmodelica 2> /dev/null > /dev/null; then
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
-          nosetests -a stddist -v ${TEST} 2>&1 \
-	    | sed -e 's!^OK$!PASSED!' -e 's!^FAILED!TEST FAILED !'
+          nosetests -a stddist -v ${TEST} 2> /dev/null \
+	    | sed -n -e 's!^OK$!PASSED!ip' -e 's!^FAILED!TEST FAILED !p'
         done | filter_python_separate
       else
         echo BUILD FAILED
       fi
       ;;
     n)
+      echo Building...
       if build_jmodelica > /dev/null; then
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
-          echo ${TEST}
-          nosetests -a stddist -v ${TEST} 2>&1 \
+          echo ${TEST} | sed -e 's!^.*jmodelica.tests.!Running !'
+          nosetests -a stddist -v ${TEST} 2> /dev/null \
 	    | egrep -v '^Exception .* ignored$' \
 	    | grep -B1 -A500 -e${PATTERN} \
 	    | sed -e 's!^OK$!PASSED!' -e 's!^FAILED!TEST FAILED !'

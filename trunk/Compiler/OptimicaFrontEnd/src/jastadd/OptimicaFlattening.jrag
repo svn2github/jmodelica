@@ -56,12 +56,12 @@ aspect OptimicaFlattening {
 		
 		fc.genConnectionEquations();
 
-		//System.out.println(fc.prettyPrint(""));
+		//log.debug(fc.prettyPrint(""));
 		//fc.dumpTree("");
 				
 		HashSet<InstAccess> instAccesses = fc.collectInstAccesses();
 		if (instAccesses.size()>0) {
-			System.out.println("Flat model contains InstAccesses!!!");
+			log.error("Flat model contains InstAccesses!!!");
 			//return null;
 		}
 	 	

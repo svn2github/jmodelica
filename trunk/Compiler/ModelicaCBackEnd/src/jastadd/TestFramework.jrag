@@ -2,7 +2,7 @@
 
 aspect TestFramework_C {
 	refine TestFramework public void FunctionCall.collectTestCasesFC(String name, TestSuite ts) {
-		//System.out.println("+FunctionCall.collectTestCasesFC: " + name);
+		//log.debug("+FunctionCall.collectTestCasesFC: " + name);
 		if (name.equals(getName().qualifiedName())) {
 			if (name.equals("JModelica.UnitTesting"))
 				getFunctionArguments().collectTestCasesNA("testCase",ts);
@@ -18,8 +18,8 @@ aspect TestFramework_C {
 						ftc.setFlatModel((((StringLitExp)na.getExp()).getSTRING()).replace("\\\"","\""));		
 						//ftc.setFlatModel((((StringLitExp)na.getExp()).getSTRING()));		
 				}
-				debugPrint(">>>>>>>>");
-				debugPrint(ftc.getFlatModel());
+				log.debug(">>>>>>>>");
+				log.debug(ftc.getFlatModel());
 				ftc.setSourceFileName(root().fileName());
 				ftc.setClassName(enclosingClassDecl().qualifiedName());
 				ts.add(ftc);
@@ -37,7 +37,7 @@ aspect TestFramework_C {
 						ftc.setOutput((((StringLitExp)na.getExp()).getSTRING()).replace("\\\"","\""));		
 						//ftc.setFlatModel((((StringLitExp)na.getExp()).getSTRING()));		
 				}
-				debugPrint(">>>>>>>>");
+				log.debug(">>>>>>>>");
 				ftc.setSourceFileName(root().fileName());
 				ftc.setClassName(enclosingClassDecl().qualifiedName());
 				ts.add(ftc);
@@ -54,7 +54,7 @@ aspect TestFramework_C {
 					else if (na.getName().name().equals("template"))
 						cgtc.setTemplate((((StringLitExp)na.getExp()).getSTRING()).replace("\\\"","\""));			
 				}
-				debugPrint(">>>>>>>>");
+				log.debug(">>>>>>>>");
 				cgtc.setSourceFileName(root().fileName());
 				cgtc.setClassName(enclosingClassDecl().qualifiedName());
 				ts.add(cgtc);
@@ -86,7 +86,7 @@ aspect TestFramework_C {
 					else if (na.getName().name().equals("template"))
 						cgtc.setTemplate((((StringLitExp)na.getExp()).getSTRING()).replace("\\\"","\""));			
 				}
-				debugPrint(">>>>>>>>");
+				log.debug(">>>>>>>>");
 				cgtc.setSourceFileName(root().fileName());
 				cgtc.setClassName(enclosingClassDecl().qualifiedName());
 				ts.add(cgtc);
@@ -137,7 +137,7 @@ aspect TestFramework_C {
 	}
 
 	refine TestFramework public void NamedArgument.collectTestCasesNA(String name, TestSuite ts) {
-		debugPrint("+NamedArgument.collectTestCasesNA: "+name);
+		log.debug("+NamedArgument.collectTestCasesNA: "+name);
 		if (name.equals(getName().qualifiedName())) {
 			if (name.equals("testCase")) {
 				getExp().collectTestCasesFC("JModelica.UnitTesting.FlatteningTestCase",ts);

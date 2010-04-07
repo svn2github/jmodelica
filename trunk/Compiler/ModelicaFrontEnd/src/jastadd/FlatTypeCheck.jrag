@@ -87,7 +87,7 @@ aspect FlatTypeCheck {
     }
     
   public void FEquation.typeCheck() {
-	  //System.out.println("FEquation.typeCheck(): " + getLeft().type() + " " + getRight().type());
+	  //log.debug("FEquation.typeCheck(): " + getLeft().type() + " " + getRight().type());
 	  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
 		  if (!getLeft().type().equivalentTo(getRight().type())) {
 			  error("The right and left expression types of equation are" +
@@ -166,7 +166,7 @@ aspect FlatTypeCheck {
   
   
   public void InstComponentAccess.typeCheck() {
-	//  System.out.println("InstComponentAccess.typeCheck: " + printSlice());
+	//  log.debug("InstComponentAccess.typeCheck: " + printSlice());
   }
   
   

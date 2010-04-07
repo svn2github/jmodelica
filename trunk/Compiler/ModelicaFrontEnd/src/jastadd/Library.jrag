@@ -37,7 +37,7 @@ aspect Library {
 		   		b. Return the resulting FullClassDecl  	 
 		*/
 	
-		//System.out.println("LibNode.getStoredDefinition: "+ getName() + " enter");
+		//log.debug("LibNode.getStoredDefinition: "+ getName() + " enter");
 		/*
 		if (getName().equals("Utilities")) {
 			throw new RuntimeException("Wow");
@@ -60,7 +60,7 @@ aspect Library {
 	   			}
 				
 				if (package_mo_present) {
-				    System.out.println("Reading file: " + dirName+"/package.mo...");
+				    log.info("Reading file: " + dirName+"/package.mo...");
 				    ParserHandler ph = new ParserHandler();
 				    SourceRoot sr = ph.parseFile(dirName+"/package.mo");
 				    FullClassDecl fcd = (FullClassDecl)sr.getProgram().getUnstructuredEntity(0).getElement(0);
@@ -74,22 +74,22 @@ aspect Library {
 	   				List libnodes = new List();
 	   			
 	   				File[] filesUnStructured = baseDir.listFiles(new UnStructuredEntriesFilenameFilter());
-	   				debugPrint("Scanning directory: " + dirName);
-	   				debugPrint(" Unstructured entries: ");
+	   				log.debug("Scanning directory: " + dirName);
+	   				log.debug(" Unstructured entries: ");
 	   				for (int i=0;i<filesUnStructured.length;i++) {
-	   					debugPrint("*** " + filesUnStructured[i].getName().substring(0,filesUnStructured[i].getName().length()-3));
-	   					debugPrint("  "+filesUnStructured[i]);
+	   					log.debug("*** " + filesUnStructured[i].getName().substring(0,filesUnStructured[i].getName().length()-3));
+	   					log.debug("  "+filesUnStructured[i]);
    						libnodes.add(new LibNode(filesUnStructured[i].toString(),
 	   				                         filesUnStructured[i].getName().substring(0,filesUnStructured[i].getName().length()-3),
 	   				                         false));	
 	   					
 	   				}
 	   				File[] dirs = baseDir.listFiles();
-	   				debugPrint(" Structured entries: ");
+	   				log.debug(" Structured entries: ");
 		   			for (int i=0;i<dirs.length;i++) {
 		   				if (dirs[i].isDirectory()){
-		   					debugPrint("  " +dirs[i]);
-		   					debugPrint("*** " + dirs[i].getName());
+		   					log.debug("  " +dirs[i]);
+		   					log.debug("*** " + dirs[i].getName());
 		   							   						   					
 	   						// Check if the directory contains a package.mo
 	   						// if not, do not add a LibNode
@@ -97,7 +97,7 @@ aspect Library {
 							File[] allFiles_tmp = baseDir_tmp.listFiles();
 							package_mo_present = false;
 							for (int k=0;k<allFiles_tmp.length;k++) {
-								debugPrint("   # " + allFiles_tmp[k].toString());
+								log.debug("   # " + allFiles_tmp[k].toString());
 	   							if (allFiles_tmp[k].toString().length()>10)
 	   								if (allFiles_tmp[k].toString().substring(allFiles_tmp[k].toString().length()-10).equals("package.mo"))
 	   									package_mo_present = true;
@@ -108,45 +108,45 @@ aspect Library {
 		   				                         dirs[i].getName(),
 		   				                         true));
 							} else {
-								debugPrint("*** " + dirs[i].getName() + " Not added: no package.mo present");
+								log.debug("*** " + dirs[i].getName() + " Not added: no package.mo present");
 							}
 						}
 	   			
 		   			}
 					lcd.setLibNodeList(libnodes);
 					sr.getProgram().getUnstructuredEntity(0).setElement(lcd,0);
-					//System.out.println("LibNode.getStoredDefinition: "+ getName() + " exit1");
+					//log.debug("LibNode.getStoredDefinition: "+ getName() + " exit1");
 	   				return sr.getProgram().getUnstructuredEntity(0);
 	   			}
 			} catch (ParserException e) {
 				e.getProblem().setFileName(getFileName());
-				System.out.println(e.getProblem().toString()+"\n");
+				log.error(e.getProblem().toString());
 				return createErrorStoredDefinition();		        
 			} catch (Exception e) {
-				System.out.println("Error when parsing file: '"+ dirName+"/package.mo"+ "':");
-				System.out.println("   " + e.getClass().getName());
-				System.err.println(e.getMessage());
+				log.error("Error when parsing file: '" + dirName + "/package.mo':\n" + 
+						"   " + e.getClass().getName() + "\n" + 
+						"   " + e.getMessage());
 				return createErrorStoredDefinition();		        
 			} 		
 			
 		} else {
 			try {
-				System.out.println("Reading file: " + getFileName() + "...");
+				log.info("Reading file: " + getFileName() + "...");
 				ParserHandler ph = new ParserHandler();
 				SourceRoot sr = ph.parseFile(getFileName());
 				for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
 					sd.setFileName(getFileName());
 				}
-				//System.out.println("LibNode.getStoredDefinition: "+ getName() + " exit2");
+				//log.debug("LibNode.getStoredDefinition: "+ getName() + " exit2");
 				return sr.getProgram().getUnstructuredEntity(0);
 			} catch (ParserException e) {
 				e.getProblem().setFileName(getFileName());
-				System.out.println(e.getProblem().toString()+"\n");
+				log.error(e.getProblem().toString()+"\n");
 				return createErrorStoredDefinition();		        
 			} catch (Exception e) {
-				System.out.println("Error when parsing file: '"+ getFileName()+ "':");
-				System.out.println("   " + e.getClass().getName());
-				System.err.println(e.getMessage());
+				log.error("Error when parsing file: '" + getFileName() + "':\n" + 
+						"   " + e.getClass().getName() + "\n" + 
+						"   " + e.getMessage());
 				return createErrorStoredDefinition();		        
 			} 
 		}
@@ -211,13 +211,13 @@ aspect Library {
 
 		
 		
-		System.out.println("MODELICAPATH="+modelicaPath);
+		log.info("MODELICAPATH="+modelicaPath);
 		
 		
 		// Find the correct separator of path elements: ':' or ';'
 		String pathSeparator;
 		String os = System.getProperty("os.name").toLowerCase();
-		//System.out.println(os);
+		//log.debug(os);
 		if (os.indexOf("win") >= 0) {
 			pathSeparator = ";";
 		} else {
@@ -264,6 +264,7 @@ aspect Library {
 
 				}						        
 			} catch (Exception e) {
+				// TODO: Replace with a good log.debug or just pass the exception on, perhaps wrapped in a RuntimeException
 				System.err.println(e.getMessage());
 				e.printStackTrace();
 			} 		
@@ -277,7 +278,7 @@ aspect Library {
 	static class UnStructuredEntriesFilenameFilter implements FilenameFilter {
 	
 			public boolean accept(File dir, String name) {
-				//System.out.println(" * " +name);
+				//log.debug(" * " +name);
 				
 				if (name.equals("package.mo"))
 					return false;

@@ -191,9 +191,9 @@ aspect Constructors {
 			try {
 				bexp_ast = ph.parseExpString(bexp);
 			} catch (Exception e) {	
-				System.out.println("Error when parsing string");	
+				log.error("Error when parsing string");	
 			}
-			//debugPrint("ComponentDecl.ComponentDecl");
+			//log.debug("ComponentDecl.ComponentDecl");
 			//bexp_ast.dumpTreeBasic("");	
 		    this.setModification(new ValueModification(bexp_ast));
         }                     	

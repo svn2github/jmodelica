@@ -524,6 +524,6 @@ aspect XMLTagBinding{
         eq InstAssignStmt.xmlTag() = "Assign";
         eq FExternalStmt.xmlTag() = "--- Not Supported Statement ---";
         eq FWhenStmt.xmlTag() = "--- Not Supported Statement ---";
-        //System.out.println("Warning: the model can cointains unsopported expressions and the generated XML document can be unvalid");
+        //log.warning("Warning: the model can cointains unsopported expressions and the generated XML document can be unvalid");
    
 }

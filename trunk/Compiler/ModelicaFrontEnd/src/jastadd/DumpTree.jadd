@@ -24,7 +24,7 @@ aspect DumpTree {
  
  
   	public void ASTNode.dumpTree(String indent) {
-     	//debugPrint("*** ASTNode.dumpTree(): " + toString());
+     	//log.debug("*** ASTNode.dumpTree(): " + toString());
     	System.out.println(indent + dump() + " at line: " + beginLine());
     	for(int i = 0; i < getNumChild(); i++)
     		if (getChild(i) instanceof ASTNode)
@@ -35,7 +35,7 @@ aspect DumpTree {
   	 * 
   	 */
   	public String ASTNode.dump() {
-    	//debugPrint("*** ASTNode.dump(): " + toString());
+    	//log.debug("*** ASTNode.dump(): " + toString());
     	String str = getClass().getName();
 		return str.substring(str.lastIndexOf('.')+1);
   	}
@@ -129,7 +129,7 @@ aspect DumpTree {
   }
 
   public void FunctionCall.dumpTree(String indent) {
-  	debugPrint("** FunctionCall.dumpTree");
+  	log.debug("** FunctionCall.dumpTree");
   	super.dumpTree(indent);
   }
 
@@ -364,7 +364,7 @@ aspect FlatDumpTree {
 	
 	
 	public void FQName.dumpTree(String indent) {
-		debugPrint("FQName.dumpTree");
+		log.debug("FQName.dumpTree");
 		String s = indent + dump() +": " + name() + " at line: " + beginLine();
 		System.out.println(s);
 		for(int i = 0; i < getNumChild(); i++)
@@ -374,7 +374,7 @@ aspect FlatDumpTree {
 	
 	
 	public void FSubExp.dumpTree(String indent) {
-		debugPrint("FSubExp.dumpTree, Left: "+
+		log.debug("FSubExp.dumpTree, Left: "+
 		            getLeftNoTransform().getClass().getName()+ " Right: "+
 		            getRightNoTransform().getClass().getName());
 		for(int i = 0; i < getNumChild(); i++)

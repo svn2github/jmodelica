@@ -35,22 +35,22 @@ aspect TestAnnotations {
 						//}
 						for (int i=0;i<fa.getNumNamedArgument();i++) {
 							if (fa.getNamedArgument(i).getName().name().equals("name")) {
-								debugPrint("### rewrite ParseAnnotation: name found");
+								log.debug("### rewrite ParseAnnotation: name found");
 								//tc.setName(((StringLitExp)fa.getNamedArgument(i).getExp()).getSTRING());
 								tc.setName((StringLitExp)((StringLitExp)fa.getNamedArgument(i).getExp()).fullCopy());
 							} else if (fa.getNamedArgument(i).getName().name().equals("description")) {
-								debugPrint("### rewrite ParseAnnotation: description found");
+								log.debug("### rewrite ParseAnnotation: description found");
 								//tc.setDescription(((StringLitExp)fa.getNamedArgument(i).getExp()).getSTRING());
 								tc.setDescription((StringLitExp)((StringLitExp)fa.getNamedArgument(i).getExp()).fullCopy());
 							} else if (fa.getNamedArgument(i).getName().name().equals("flatModel")) {
-								debugPrint("### rewrite ParseAnnotation: flatModel found");
+								log.debug("### rewrite ParseAnnotation: flatModel found");
 								//tc.setFlatModel(((StringLitExp)fa.getNamedArgument(i).getExp()).getSTRING());	
 								tc.setFlatModel((StringLitExp)((StringLitExp)fa.getNamedArgument(i).getExp()).fullCopy());	
 							}
 						}
-						//debugPrint("### rewrite ParseAnnotation: check name: "+tc.getName());
-						//debugPrint("### rewrite ParseAnnotation: check description: "+tc.getDescription());
-						//debugPrint("### rewrite ParseAnnotation: check flatModel: "+tc.getFlatModel());
+						//log.debug("### rewrite ParseAnnotation: check name: "+tc.getName());
+						//log.debug("### rewrite ParseAnnotation: check description: "+tc.getDescription());
+						//log.debug("### rewrite ParseAnnotation: check flatModel: "+tc.getFlatModel());
 
 						//tc.dumpTreeBasic("");
 						ut.addATestCase(tc);	

@@ -19,7 +19,7 @@ aspect OptimicaInitialTransformations {
    	rewrite PN_OptClassDecl {
  	  	to OptClassDecl { 
  	   		
- 	   		//System.out.println("****  rewrite PN_OptClassDecl");
+ 	   		//log.debug("****  rewrite PN_OptClassDecl");
  	   		
  	   		Composition c = getComposition();
   	

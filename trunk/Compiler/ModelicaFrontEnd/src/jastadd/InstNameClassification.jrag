@@ -56,19 +56,19 @@ aspect InstNameClassification {
 	rewrite InstParseAccess {
 		to InstAccess {
 			if (kind().isComponentAccess()) {
-				//System.out.println("rewrite InstParseAccess " + name() + " component");
+				//log.debug("rewrite InstParseAccess " + name() + " component");
 				    InstComponentAccess a = new InstComponentAccess(getID(),getFArraySubscriptsOpt());
 					a.setStart(getStart());
 					a.setEnd(getEnd());
 					return a;
 			} else if (kind().isClassAccess()) {
-				//System.out.println("rewrite InstParseAccess " + name() + " class");
+				//log.debug("rewrite InstParseAccess " + name() + " class");
 					InstClassAccess a =  new InstClassAccess(getID());
 					a.setStart(getStart());
 					a.setEnd(getEnd());
 					return a;
 			} else {
-				//System.out.println("rewrite InstParseAccess " + name() + " ambiguous");
+				//log.debug("rewrite InstParseAccess " + name() + " ambiguous");
 					InstAmbiguousAccess a = new InstAmbiguousAccess(getID(),getFArraySubscriptsOpt());
 					a.setStart(getStart());
 					a.setEnd(getEnd());
@@ -131,23 +131,23 @@ aspect InstResolveAmbiguousNames {
 	rewrite InstAmbiguousAccess {
 	    when(!rewritten) 
 	    to InstAccess {
-	    	//System.out.println("rewrite InstAmbiguousAccess begin " + name());
+	    	//log.debug("rewrite InstAmbiguousAccess begin " + name());
 	  		if (!lookupInstComponent(name()).isEmpty()) {
-		    	//System.out.println("rewrite InstAmbiguousAccess " + name() + " component");
+		    	//log.debug("rewrite InstAmbiguousAccess " + name() + " component");
      		    InstComponentAccess c = new InstComponentAccess(name(),getFArraySubscriptsOpt());
   	 			c.setStart(getStart());
   	 			c.setEnd(getEnd());
   	 			return c;
   		} else 
             if(!lookupInstClass(name()).isEmpty()) {		
-    	    	//System.out.println("rewrite InstAmbiguousAccess " + name() + " class");
+    	    	//log.debug("rewrite InstAmbiguousAccess " + name() + " class");
             	InstClassAccess t = new InstClassAccess(name()); 
     			t.setStart(getStart());
     			t.setEnd(getEnd());
   	 			return t;
   			}
   			rewritten = true;
-	    	//System.out.println("rewrite InstAmbiguousAccess end " + name());
+	    	//log.debug("rewrite InstAmbiguousAccess end " + name());
   			return this;
   		}
   	}

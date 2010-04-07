@@ -127,7 +127,7 @@ aspect FlatOptimicaPrettyPrint {
 		str.print("\n");
 		
 		for (int i=0;i<getNumFVariable();i++) {
-			debugPrint("FClass.prettyPrint(): FVariable: " + getFVariable(i).name() + " is$Final: " + is$Final);
+			log.debug("FClass.prettyPrint(): FVariable: " + getFVariable(i).name() + " is$Final: " + is$Final);
 	  		p.toString(getFVariable(i), str, p.indent(indent), o);
 	  		str.print(";\n");  
 		}
@@ -135,7 +135,7 @@ aspect FlatOptimicaPrettyPrint {
 		if (getNumFInitialEquation()>0)
 			str.print(indent + "initial equation \n");
 	    for (int j=0;j<getNumFInitialEquation();j++) {
-			debugPrint("FClass.prettyPrint(): Equation nr: " + j);
+			log.debug("FClass.prettyPrint(): Equation nr: " + j);
 	  		p.toString(getFInitialEquation(j), str, p.indent(indent), o);
 			str.print(";\n");
 		}
@@ -143,14 +143,14 @@ aspect FlatOptimicaPrettyPrint {
 		str.print(indent + "equation \n");
 	  	for (int i=0;i<getNumFEquationBlock();i++) {
 			for (int j=0;j<getFEquationBlock(i).getNumFAbstractEquation();j++) {
-				//debugPrint("FClass.prettyPrint(): Equation nr: " + j);
+				//log.debug("FClass.prettyPrint(): Equation nr: " + j);
 	  			p.toString(getFEquationBlock(i).getFAbstractEquation(j), str, p.indent(indent), o);
 				str.print(";\n");
 			}
 		}
 		str.print(indent + "constraint \n");
 	  	for (int j=0;j<getNumFConstraint();j++) {
-			//debugPrint("FClass.prettyPrint(): Equation nr: " + j);
+			//log.debug("FClass.prettyPrint(): Equation nr: " + j);
 	  		p.toString(getFConstraint(j), str, p.indent(indent), o);
 			str.print(";\n");
 		}

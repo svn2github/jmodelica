@@ -60,13 +60,13 @@ aspect TransformCanonical {
 			genAlias();
 			eliminateAliasVariables();
 		}
-//		System.out.println(prettyPrint(""));
+//		log.debug(prettyPrint(""));
 		addFDerivativeVariables();
 		genInitialEquations();
 		sortDependentParameters();
 
 		if (root().options.getBooleanOption("index_reduction")) {
-            System.out.println("Index reduction");    
+            log.debug("Index reduction");    
 
             org.jmodelica.graphs.EquationSystem eqSys = 
                         new org.jmodelica.graphs.EquationSystem("Index reduction graph");
@@ -76,19 +76,19 @@ aspect TransformCanonical {
             for (FAbstractEquation e : equations()) {
                 String eqName = "(" + k + ")";
 
-                System.out.println("Equation: " + eqName);
+                log.debug("Equation: " + eqName);
 
                 org.jmodelica.graphs.Equation eqn = eqSys.addEquation(eqName);
 
                 for (FVariable y : e.algebraicVariables()) {
-                    System.out.println("  Algebraic: " + y.name());
+                    log.debug("  Algebraic: " + y.name());
 
                     org.jmodelica.graphs.Variable v = eqSys.addVariable(y.name());    
                     eqn.addVariable(v);
                 }
 
                 for (FVariable x : e.differentiatedVariables()) {
-                    System.out.println("  State: " + x.name());
+                    log.debug("  State: " + x.name());
 
                     org.jmodelica.graphs.Variable v = eqSys.addVariable(x.name());    
                     eqn.addVariable(v);
@@ -96,7 +96,7 @@ aspect TransformCanonical {
 
                 for (FDerivativeVariable dx : e.derivativeVariables()) {
                     FVariable x = dx.myDifferentiatedVariable();
-                    System.out.println("  Diffed state: " + x.name());
+                    log.debug("  Diffed state: " + x.name());
 
                     org.jmodelica.graphs.Variable v = eqSys.addVariable(x.name(), 1);    
                     eqn.addVariable(v);
@@ -104,18 +104,18 @@ aspect TransformCanonical {
 
                 ++k;
             }
-            System.out.println("--------------------");
+            log.debug("--------------------");
 
             eqSys.dumpGraph();
 
-            System.out.println("--------------------");
+            log.debug("--------------------");
             eqSys.cheapAssignment();
             int index = eqSys.pantelides();
 
-            System.out.println("Index = " + index);
+            log.debug("Index = " + index);
             eqSys.dumpGraph();
         } else {
-            //System.out.println("NO index reduction");    
+            //log.debug("NO index reduction");    
         }  
 
         root().flushAllRecursive();
@@ -346,7 +346,7 @@ aspect TransformCanonical {
 						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp("0.0")));
 			}	
 		}
-//		System.out.println(prettyPrint(""));
+//		log.debug(prettyPrint(""));
 		for (FIntegerVariable fv : integerVariables()) {
 			if (fv.fixedAttribute()) {
 				addFInitialEquation(new FEquation(new FIdUseExp(
@@ -517,7 +517,7 @@ aspect TransformCanonical {
 		List<FVariable> aliasVars = new List<FVariable>();
 		List<FAbstractEquation> eqns = new List<FAbstractEquation>();
 		
-		//System.out.println("FClass.eliminateAliasVariables(): l1 " + nonAliasVars + " l2 " + aliasVars);
+		//log.debug("FClass.eliminateAliasVariables(): l1 " + nonAliasVars + " l2 " + aliasVars);
 		
 		// Go through all variables and insert in correct list
 		for (FVariable fv : getFVariables()) {

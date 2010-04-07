@@ -94,12 +94,12 @@ class ModelicaCompiler():
     @classmethod
     def set_log_level(self,level):
         """ Set the level of log prints. """
-        self.ModelicaCompiler.setLogLevel(self.ModelicaCompiler.logger.getName(), level)
+        self.ModelicaCompiler.setLogLevel(self.ModelicaCompiler.log, level)
 
     @classmethod
     def get_log_level(self):
         """ Get the level of log prints. """
-        return self.ModelicaCompiler.getLogLevel(self.ModelicaCompiler.logger.getName())
+        return self.ModelicaCompiler.getLogLevel(self.ModelicaCompiler.log)
         
     def get_modelicapath(self):
         """ Return the modelicapath set for this compiler."""
@@ -566,12 +566,12 @@ class OptimicaCompiler(ModelicaCompiler):
     @classmethod
     def set_log_level(self,level):
         """ Set the level of log prints. """
-        self.OptimicaCompiler.setLogLevel(self.OptimicaCompiler.logger.getName(), level)
+        self.OptimicaCompiler.setLogLevel(self.OptimicaCompiler.log, level)
 
     @classmethod
     def get_log_level(self):
         """ Get the level of log prints. """
-        return self.OptimicaCompiler.getLogLevel(self.ModelicaCompiler.logger.getName())
+        return self.OptimicaCompiler.getLogLevel(self.ModelicaCompiler.log)
 
     def set_boolean_option(self, key, value, description=""):
         try:

@@ -46,11 +46,11 @@ aspect Flattening {
 		
 		fc.genConnectionEquations();
 
-		//System.out.println(fc.prettyPrint(""));
+		//log.debug(fc.prettyPrint(""));
 		//fc.dumpTree("");
 		HashSet<InstAccess> instAccesses = fc.collectInstAccesses();
 		if (instAccesses.size()>0) {
-			System.out.println("Flat model contains InstAccesses!!!");
+			log.error("Flat model contains InstAccesses!!!");
 			//return null;
 		}
     }
@@ -387,7 +387,7 @@ aspect Flattening {
 	syn boolean InstAssignable.hasBindingFExp() = myBindingInstExp() != null;
 
 	syn lazy FExp InstAssignable.getBindingFExp() {
-		//System.out.println("In file: " + fileName() + " at line: " + beginLine() + ": " + prettyPrint(""));
+		//log.debug("In file: " + fileName() + " at line: " + beginLine() + ": " + prettyPrint(""));
 		if (hasInstValueMod()) {
 			InstValueModification im = myInstValueMod();
 			FExp fe = im.getFExp();

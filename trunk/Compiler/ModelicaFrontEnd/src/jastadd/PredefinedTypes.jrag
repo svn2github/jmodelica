@@ -40,7 +40,7 @@ aspect PredefinedTypes {
 	 * which contains a list of predefined PrimitiveClassDef:s.
 	 */
 	syn lazy List Program.getPredefinedTypeList() {
-		//debugPrint("Program.getPredefinedTypeList()");
+		//log.debug("Program.getPredefinedTypeList()");
 		List l = new List();
 
 	    // Build a string with a Modelica class corresponding to Real
@@ -100,7 +100,7 @@ aspect PredefinedTypes {
  //  			builtInDefReader.close();
    			
    			for (int i=0;i<p.getUnstructuredEntity(0).getNumElement();i++) {
-   			//debugPrint("Program.getPredefinedTypeList(): Hepp!: " + i);
+   			//log.debug("Program.getPredefinedTypeList(): Hepp!: " + i);
   			FullClassDecl cd = (FullClassDecl)(p.getUnstructuredEntity(0).getElement(i));	
 
   			pcd = new PrimitiveClassDecl(new PublicVisibilityType(),
@@ -131,7 +131,7 @@ aspect PredefinedTypes {
  		
  		} catch(Exception e){e.printStackTrace();}
 			
-		//debugPrint("Program.getPredefinedTypeList(): "+l.getNumChild());
+		//log.debug("Program.getPredefinedTypeList(): "+l.getNumChild());
 		
 		return l;
 		

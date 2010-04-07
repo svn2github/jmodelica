@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.logging.Level;
 
 aspect RootAccess {
 	
@@ -103,20 +104,55 @@ aspect RootAccess {
 		org.jmodelica.modelica.parser.ModelicaParser parser = 
 			new org.jmodelica.modelica.parser.ModelicaParser();
 		exp = (Exp)parser.parse(scanner,org.jmodelica.modelica.parser.ModelicaParser.AltGoals.exp);
-		//System.out.println("ModelicaParser.parseExpString: "+str);
+		//log.debug("ModelicaParser.parseExpString: "+str);
 		//exp.dumpTreeBasic("");
 		return exp;
 	}
 	
 }
 
-aspect DebugPrint {
+aspect Logging {
 
-	public static final int ASTNode.printLevel = 0;
-	public void ASTNode.debugPrint(Object msg) {
-		if (printLevel>0)
-			System.out.println(msg);
+	/**
+	 * \brief Base class for logging messages from the tree.
+	 * 
+	 * This implementation discards all messages.
+	 */
+	public class ModelicaLogger {
+	    /**
+	     * \brief Log <code>message</code> on log level <code>level</code>.
+	     * 
+	     * This implementation discards all messages.
+	     * 
+	     * Override this method to provide log facilities.
+	     */
+	    public void log(Level level, String message) {}
+	    
+	    /**
+	     * \brief Get the current log level.
+	     * 
+	     * This implementation returns null.
+	     * 
+	     * Override this method to provide log facilities.
+	     */
+	    public Level getLevel() { return null; }
+	    
+	    /**
+	     * \brief Set the current log level.
+	     * 
+	     * This implementation does nothing.
+	     * 
+	     * Override this method to provide log facilities.
+	     */
+	    public void setLevel(Level lv) { }
+
+	    public void debug(String message)   { log(Level.FINE,    message); }
+	    public void info(String message)    { log(Level.INFO,    message); }
+	    public void warning(String message) { log(Level.WARNING, message); }
+	    public void error(String message)   { log(Level.SEVERE,   message); }
 	}
+
+	public static ModelicaLogger ASTNode.log = new ModelicaLogger();
 	
 }
 

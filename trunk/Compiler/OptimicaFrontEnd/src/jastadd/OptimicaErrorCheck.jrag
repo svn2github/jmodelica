@@ -68,23 +68,23 @@ aspect OptimicaErrorCheck {
 	}
   	
   	public void InstTimedVariable.collectErrors() {
-  		System.out.println("InstTimedVariable.collectErrors: " + getName().name());
+  		log.debug("InstTimedVariable.collectErrors: " + getName().name());
     	super.collectErrors();
     	/* TODO: This check is done somewhere else with a less intuitive message - where?
     	if (!getArg().variability().lessOrEqual(fParameter())) {
-      		System.out.println("InstTimedVariable.collectErrors: " + getName().name() + " hepp");
+      		log.debug("InstTimedVariable.collectErrors: " + getName().name() + " hepp");
     		error("The argument of a timed variable must have variability less than or equal to parameter variability.");
     	}
     	*/
     	if (inEquation()) {
-      		System.out.println("InstTimedVariable.collectErrors: " + getName().name() + " hopp");
+      		log.debug("InstTimedVariable.collectErrors: " + getName().name() + " hopp");
     		error("Timed variables are not allowed in equations.");
     	}
     
   	}
 	
 	  public void FRelationConstraint.typeCheck() {
-		  //System.out.println("FEquation.typeCheck(): " + getLeft().type() + " " + getRight().type());
+		  //log.debug("FEquation.typeCheck(): " + getLeft().type() + " " + getRight().type());
 		  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
 			  if (!getLeft().type().equivalentTo(getRight().type())) {
 				  error("The right and left expression types of constraint are" +

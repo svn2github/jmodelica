@@ -80,7 +80,7 @@ aspect OptimicaTransformCanonical {
 	public void FRelationConstraint.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns, 
 			List<FVariable> vars, HashMap<String,FExp> indexMap) {
 		createArrayTemporaries(eqns, vars, indexMap, true);
-		//System.out.println("FEquation.scalarize() " + ndims());
+		//log.debug("FEquation.scalarize() " + ndims());
 		if (ndims()==0) {
 			/**
 			 * If the constraint is of dimension 0, i.e, already scalar,

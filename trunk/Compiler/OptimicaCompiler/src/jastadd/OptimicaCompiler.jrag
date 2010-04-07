@@ -106,7 +106,7 @@ public class OptimicaCompiler extends ModelicaCompiler{
 	 */
 	public void compileModel(String name[], String cl) 
 	  throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		logger.info("======= Compiling model =======");
+		log.info("======= Compiling model =======");
 		
 		// build source tree
 		SourceRoot sr = parseModel(name);
@@ -122,9 +122,16 @@ public class OptimicaCompiler extends ModelicaCompiler{
 			generateCode(fc);
 		}
 		
-		logger.info("====== Model compiled successfully =======");
+		log.info("====== Model compiled successfully =======");
 	}
 
+	
+	/**
+	 * \brief Create a new FOptClass object.
+	 */
+	protected FOptClass createFClass() {
+		return new FOptClass();
+	}
 
 	/**
 	 * Computes the flattened model representation from a model instance node.
@@ -142,214 +149,34 @@ public class OptimicaCompiler extends ModelicaCompiler{
 	 *             If the Modelica class to flatten is not found.
 	 */
 	public FOptClass flattenModel(InstClassDecl icd) 
-		throws CompilerException, ModelicaClassNotFoundException, IOException {
-		FlatRoot flatRoot = new FlatRoot();
-		flatRoot.setFileName(icd.qualifiedName()+".mof");
-		FOptClass fc = new FOptClass();
-		flatRoot.setFClass(fc);
-		flatRoot.options = new OptionRegistry(icd.root().options);
-		
-		logger.info("Flattening starts...");
-		
-		icd.flattenInstClassDecl(fc);
-		
-		// Output the untransformed flattened model
-		logger.info("Creating raw .mof file...");
-	    	    	// Create file 
-	   	FileWriter fstream = new FileWriter(icd.qualifiedName()+".mof");
-	   	BufferedWriter out = new BufferedWriter(fstream);
-	   	out.write(fc.prettyPrint(""));
-	   	//Close the output stream
-	   	out.close();
-
-	   	logger.info("...raw .mof file created.");
-
-		if(getLogLevel("JModelica.ModelicaCompiler").equals("INFO")) {
-			logger.info("Raw flattened model:");		
-			System.out.print(fc.prettyPrint(""));
-		}
-	   	
-		fc.transformCanonical();
-
-		Collection<Problem> problems = fc.errorCheck();
-		if (problems.size()>0) {
-			super.handleCompilerProblems(problems);
-		}
-				
-		logger.info("Creating transformed .mof file...");
-	    	    	// Create file 
-	   	fstream = new FileWriter(icd.qualifiedName()+"_transformed.mof");
-	   	out = new BufferedWriter(fstream);
-	   	out.write(fc.prettyPrint(""));
-	   	//Close the output stream
-	   	out.close();
-	   
-	    logger.info("... transformed .mof file created.");
-	    
-		if(getLogLevel(logger.getName()).equals("INFO")) {
-			System.out.println(fc.diagnostics());
-			System.out.print(fc.prettyPrint(""));
-		}
-		
-		return fc;
+			throws CompilerException, ModelicaClassNotFoundException, IOException {
+		return (FOptClass) super.flattenModel(icd);
 	}
-
+	
 	/**
-	 * 
-	 * Generates XML and c code for a flattened Optimica model represented as an
-	 * instance of FOptClass using template files. The XML and c files are given
-	 * the default names <modelname>.xml, <modelname>_values.xml and 
-	 * <modelname>.c respectively.
-	 * 
-	 * @param fc
-	 *            The FOptClass instance for which the code generation should be
-	 *            computed.
-	 *            
-	 * @throws FileNotFoundException
-	 *             Throws the exception if either of the four template files 
-	 *             can not be found.
+	 * \brief Create a new OptimicaXMLGenerator object.
 	 */
-	public void generateCode(FOptClass fc) throws FileNotFoundException {
-		logger.info("Generating code...");
-
-		OptimicaXMLGenerator xmlgenerator = new OptimicaXMLGenerator(new PrettyPrinter(), '$', fc);
-		String output = fc.nameUnderscore() + ".xml";
-		xmlgenerator.generate(super.getXMLTpl(), output);
-
-		XMLValueGenerator valuegenerator = new XMLValueGenerator(new PrettyPrinter(), '$', fc);
-		output = fc.nameUnderscore() + "_values.xml";
-		valuegenerator.generate(super.getXMLValuesTpl(), output);
-
-		OptimicaCGenerator cgenerator = new OptimicaCGenerator(new PrettyPrinter(), '$', fc);
-		output = fc.nameUnderscore() + ".c";
-		cgenerator.generate(super.getCTemplate(), output);
-
-		logger.info("...code generated.");
+	protected OptimicaXMLGenerator createXMLGenerator(FClass fc) {
+		return new OptimicaXMLGenerator(new PrettyPrinter(), '$', (FOptClass) fc);
+	}
+	
+	/**
+	 * \brief Create a new OptimicaCGenerator object.
+	 */
+	protected OptimicaCGenerator createCGenerator(FClass fc) {
+		return new OptimicaCGenerator(new PrettyPrinter(), '$', (FOptClass) fc);
 	}
 
+	protected OptimicaCompiler(String[] args, Hashtable<String, String> programarguments) {
+		super("OptimicaCompiler", args, programarguments);
+	}
+	
 	public static void main(String args[]) {
-		String filesep = System.getProperty("file.separator");
-		if(args.length < 1) {
-			logger.severe("OptimicaCompiler expects the command line arguments: \n" +
-					"[-options] <file name> <class name> [<xml model description template> <xml model values template> <c template>]\n" +
-					"where options could be: \n" +
-					"-log=<i or w or e> \n" +
-					"-modelicapath=<path to modelica library> \n"+
-					"-optfile=<path to XML options file>");
-			System.exit(1);
-		}
-		
-		int arg = 0;
-		String modelicapath = null;
-		
-		//get any options set
-		Hashtable<String, String> programarguments = extractProgramArguments(args, arg);
-		if(programarguments.get("log")!=null) {
-			setLogLevel(logger.getName(),programarguments.get("log"));
-		}else {
-			setLogLevel(logger.getName(),ModelicaCompiler.ERROR);
-		}
-		modelicapath = programarguments.get("modelicapath");
-		
-		arg = programarguments.size();
-		if (args.length < arg+2) {
-			logger.severe("OptimicaCompiler expects a file name and a class name as " +
-					"command line arguments.");
-			System.exit(1);
-		}		
-		
-		String[] name = args[arg].split(",");
-		String cl = args[arg+1];
-		String xmlTpl = null;
-		String xmlValuesTpl = null;
-		String ctempl = null;
-		
-		if (args.length >= arg+5) {
-			xmlTpl = args[arg+2];
-			xmlValuesTpl = args[arg+3];
-			ctempl = args[arg+4];
-		}
-
-		String optionsfile = null;
-		//look for options.xml in $JMODELICA_HOME/Options/ and program arguments
-		if(programarguments.get("optfile")!=null) {
-			optionsfile = programarguments.get("optfile");
-		}else{
-			optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
-		}		
-		
-//		//look for options.xml in $JMODELICA_HOME/Options/
-//		String filesep = System.getProperty("file.separator");
-//		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
-		OptionRegistry or = null;
-		try {
-			or = new OptionRegistry(optionsfile);
-		} catch(XPathExpressionException e) {
-			logger.severe("The options XML file could not be loaded.");
-			logger.severe(e.getMessage());
-			e.printStackTrace();
-			System.exit(0);
-		} catch(ParserConfigurationException e) {
-			logger.severe("The options XML file could not be loaded.");
-			logger.severe(e.getMessage());
-			e.printStackTrace();
-			System.exit(0);
-		} catch(IOException e) {
-			logger.severe("The options XML file could not be loaded.");
-			logger.severe(e.getMessage());
-			e.printStackTrace();
-			System.exit(0);
-		} catch(SAXException e) {
-			logger.severe("The options XML file could not be loaded.");
-			logger.severe(e.getMessage());
-			e.printStackTrace();
-			System.exit(0);
-		}
-		
-		//add modelicapath to optionregistry
-		if(modelicapath==null) {
-			//modelicapath was not set in program arguments -> check envir variable or via JMODELICA_HOME
-			if(System.getenv("MODELICAPATH")!=null) {
-				modelicapath=System.getenv("MODELICAPATH");
-			} else {
-				modelicapath=System.getenv("JMODELICA_HOME")+filesep+"ThirdParty"+filesep+"MSL";
-			}
-		}
-		or.setStringOption("MODELICAPATH", modelicapath);
-		
-		OptimicaCompiler oc = new OptimicaCompiler(or, xmlTpl, xmlValuesTpl, ctempl);
-		
-		try {
-			oc.compileModel(name, cl);
-		} catch  (ModelicaClassNotFoundException e){
-			logger.severe("Could not find the class "+ cl);
-			System.exit(0);
-		} catch (CompilerException ce) {
-			StringBuilder str = new StringBuilder();
-			str.append(ce.getProblems().size() + " errors found:\n");
-			for (Problem p : ce.getProblems()) {
-				str.append(p.toString()+"\n");
-			}
-			logger.severe(str.toString());
-			System.exit(0);
-		} catch (Error e) {
-			for(int i=0; i<name.length; i++) {
-				logger.severe("In file: '" + name[i] + "':"+e.getMessage());
-			}
-			System.exit(0);
-		} catch (FileNotFoundException e) {
-			for(int i=0; i<name.length; i++) {
-				logger.severe("Could not find file: " + name[i]);
-			}
-			System.exit(0);
-		} catch (IOException e) {
-			logger.severe(e.getMessage());
-			e.printStackTrace();
-			System.exit(0);
-		} catch (Exception e) {
-			logger.severe(e.getMessage());
-			e.printStackTrace();
-			System.exit(0);
-		}
+		// Get any program options set
+		Hashtable<String, String> programarguments = extractProgramArguments(args, 0);
+		// Create compiler
+		OptimicaCompiler oc = new OptimicaCompiler(args, programarguments);
+		// Compile model
+		oc.compileModelFromCommandLine(args, programarguments);
 	}	
 }

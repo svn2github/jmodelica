@@ -73,7 +73,7 @@ aspect OptimicaRootAccess {
 		org.jmodelica.optimica.parser.ModelicaParser parser = 
 			new org.jmodelica.optimica.parser.ModelicaParser();
 		exp = (Exp)parser.parse(scanner,org.jmodelica.optimica.parser.ModelicaParser.AltGoals.exp);
-		//System.out.println("ModelicaParser.parseExpString: "+str);
+		//log.debug("ModelicaParser.parseExpString: "+str);
 		//exp.dumpTreeBasic("");
 		return exp;
 	}
@@ -107,7 +107,7 @@ aspect OptimicaRootAccess {
 		OptimicaScanner scanner = new OptimicaScanner(new StringReader(str));
 		OptimicaParser parser = new OptimicaParser();
 		exp = (Exp)parser.parse(scanner,OptimicaParser.AltGoals.exp);
-		//System.out.println("OptimicaParser.parseExpString: "+str);
+		//log.debug("OptimicaParser.parseExpString: "+str);
 		//exp.dumpTreeBasic("");		
 		return exp;
 	}

@@ -34,7 +34,7 @@ aspect Scalarization {
 	public void FClass.scalarize() {
 		List<FVariable> vars = new List<FVariable>();
 		List<FVariable> alias_vars = new List<FVariable>();
-		//System.out.println("FClass.scalarize(): l1 " + vars + " l2 " + alias_vars);
+		//log.debug("FClass.scalarize(): l1 " + vars + " l2 " + alias_vars);
 		// Scalarize all non-alias variables
 		for (FVariable fv : getFVariables()) {
 			fv.scalarize(vars);
@@ -737,7 +737,7 @@ aspect Scalarization {
 	 */
 	public void FEquation.scalarize(List<FAbstractEquation> eqns, 
 			List<FVariable> vars, HashMap<String,FExp> indexMap) {
-		//System.out.println("FEquation.scalarize() " + ndims());
+		//log.debug("FEquation.scalarize() " + ndims());
 		createArrayTemporaries(eqns, vars, indexMap, true);
 		if (ndims()==0) {
 			/*

@@ -351,15 +351,6 @@ aspect ErrorCheck {
     
     return problems;
   }
-  
-  /*
-  public boolean ASTNode.errorCheck() {
- 	StringBuilder str = new StringBuilder();
- 	boolean errors = errorCheck(str);
- 	System.out.println(str.toString());
- 	return errors;
-  }
-*/
 
  
     syn lazy FullClassDecl ASTNode.retrieveFullClassDecl(String className) {
@@ -394,7 +385,7 @@ aspect InstanceErrorCheck {
     }   
   	
   	eq InstFullClassDecl.retrieveInstFullClassDecl(String className) {
-  	    debugPrint(" ### InstFullClassDecl.retrieveInstFullClassDecl: " + 
+  	    log.debug(" ### InstFullClassDecl.retrieveInstFullClassDecl: " + 
   	      qualifiedName() + " looking for " + className);
 	   	if (className.equals(qualifiedName())) {
 	   		return this;
@@ -423,7 +414,7 @@ aspect InstanceErrorCheck {
 
 
   public void InstNode.collectErrors() {
-    debugPrint(prettyPrint("   #### ") + " errorChecked="+errorChecked);
+    log.debug(prettyPrint("   #### ") + " errorChecked="+errorChecked);
     if (!errorChecked) {
       errorChecked = true;
 	  allChecks();
@@ -434,8 +425,8 @@ aspect InstanceErrorCheck {
 	  for(InstNode n : getInstExtendss()) 
 		  n.collectErrors();
 	  for(FAbstractEquation e : getFAbstractEquations()) {
-		  debugPrint(" mmmm ");
-		      debugPrint(prettyPrint("   ####>> "));
+		  log.debug(" mmmm ");
+		      log.debug(prettyPrint("   ####>> "));
 		  e.prettyPrint(">>> ");
 		  e.collectErrors();
 	  }
@@ -443,7 +434,7 @@ aspect InstanceErrorCheck {
   }
 
   	public void InstBaseClassDecl.collectErrors() {
-  	    debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+  	    log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
     	if (!errorChecked) {
 //    	errorChecked = true;
         super.collectErrors();
@@ -466,7 +457,7 @@ aspect InstanceErrorCheck {
 //    	getComponentDeclList().collectErrors();
 			if (getBaseClassDecl() instanceof FullClassDecl) { 	
 				FullClassDecl fcd = (FullClassDecl)getBaseClassDecl();
-				//System.out.println(fcd.getName().getID() +  " " + fcd.getEndName());
+				//log.debug(fcd.getName().getID() +  " " + fcd.getEndName());
 				if (!(fcd.getName().getID().equals(fcd.getEndName()))) {
 					error("The declaration and end names of a class should be the same");
 				}
@@ -483,7 +474,7 @@ aspect InstanceErrorCheck {
   	
 	boolean InstImport.errorChecked = false;
     public void InstImport.collectErrors() {
-    	debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+    	log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
     	if (!errorChecked) {
     		errorChecked = true;
 			getPackageName().collectErrors();
@@ -491,7 +482,7 @@ aspect InstanceErrorCheck {
 	}
 	
 	public void InstComponentDecl.collectErrors() {
-    //System.out.println(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+    //log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
     if (!errorChecked) {
 		super.collectErrors();
 		getClassName().collectErrors();
@@ -524,17 +515,17 @@ aspect InstanceErrorCheck {
 	
 	public void FExp.checkConstantExpression(ASTNode node, String varKind, String varName) {
 		if (ndims() == 0) {
-//			System.out.println("FExp.checkConstantExpression ndims=0, "+getClass().getName());
+//			log.debug("FExp.checkConstantExpression ndims=0, "+getClass().getName());
 			checkConstantScalarExpression(node,varKind,varName);
 		} else {
-//			System.out.println("FExp.checkConstantExpression ndims="+ndims() + " "+getClass().getName());
+//			log.debug("FExp.checkConstantExpression ndims="+ndims() + " "+getClass().getName());
 			for (Index i : getArray().indices())  
 				getArray().get(i).checkConstantScalarExpression(node, varKind, varName);
 		}
 	}
 	
 	public void InstPrimitive.collectErrors() {
-		//System.out.println(toString());
+		//log.debug(toString());
         if (!errorChecked) {
         	super.collectErrors();
 	
@@ -574,7 +565,7 @@ aspect InstanceErrorCheck {
 	}
 	
 	public void InstExtends.collectErrors() {
-    debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+    log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
     if (!errorChecked) {
 		super.collectErrors();
 		getClassName().collectErrors();
@@ -585,9 +576,9 @@ aspect InstanceErrorCheck {
 	}	
 	
 	public void InstExtendsShortClass.collectErrors() {
-        debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+        log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
     if (!errorChecked) {
-      debugPrint(prettyPrint("   ### "));
+      log.debug(prettyPrint("   ### "));
       errorChecked = true;
 	  allChecks();
       // Normally the class modifications in an InstExtendsShortClass
@@ -612,7 +603,7 @@ aspect InstanceErrorCheck {
 	//public void InstPrimitiveClassDecl.collectErrors() {}
 
 	public void InstShortClassDecl.collectErrors() {
-        debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+        log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
 	    if (!errorChecked) {
 		  super.collectErrors();
 		  // The localInstModifications should only be checked if
@@ -631,7 +622,7 @@ aspect InstanceErrorCheck {
     public void InstReplacingShortClassDecl.collectInstModificationErrors() { }
 
 	public void InstReplacingShortClassDecl.collectErrors() {
-	    debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);    
+	    log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);    
 	    if (!errorChecked) {
 		  super.collectErrors();
 		  getOriginalInstClass().collectErrors();
@@ -640,7 +631,7 @@ aspect InstanceErrorCheck {
 	}
 
 	public void InstReplacingFullClassDecl.collectErrors() {
-	    debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+	    log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
 	    if (!errorChecked) {
 		  super.collectErrors();
 		  getOriginalInstClass().collectErrors();
@@ -666,7 +657,7 @@ aspect InstanceErrorCheck {
 
 	boolean InstAccess.errorChecked = false;
 	public void InstDot.collectErrors() {
-	    //debugPrint(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+	    //log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
 	    if (!errorChecked) {	
 			errorChecked = true;
 			getLeft().collectErrors();
@@ -676,7 +667,7 @@ aspect InstanceErrorCheck {
 	}
 
 	public void InstClassAccess.collectErrors() {
-        //System.out.println(prettyPrint("   ### ") + " errorChecked="+errorChecked);
+        //log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
 	    if (!errorChecked) {
 		    //super.collectErrors();
 		    nameCheck();

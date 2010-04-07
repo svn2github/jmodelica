@@ -72,7 +72,7 @@ aspect PrettyPrint {
 
 	// dump node names
 	public void ASTNode._dumpTree(Printer p, PrintStream str, String indent, Object o) {
- 		str.print(indent + getClass().getName() + "\n");
+ 		str.print(indent + getClass().getSimpleName() + "\n");
  		for(int i = 0; i < getNumChild(); i++)
    			p.toString(getChild(i),str,p.indent(indent),o); // distpatch through Printer
 	}
@@ -696,7 +696,7 @@ aspect FlattPrettyPrint {
 	public void FClass.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print(indent+"fclass "+ name() +"\n");
 		for (int i=0;i<getNumFVariable();i++) {
-			debugPrint("FClass.prettyPrint(): FVariable: " + getFVariable(i).name() + " is$Final: " + is$Final);
+			log.debug("FClass.prettyPrint(): FVariable: " + getFVariable(i).name() + " is$Final: " + is$Final);
 	  		if (!getFVariable(i).isDerivativeVariable()) {
 	  			p.toString(getFVariable(i),str,indent+" ",o);
 	  		str.print(";\n");  
@@ -706,7 +706,7 @@ aspect FlattPrettyPrint {
 		if (getNumFInitialEquation()>0)
 			str.print(indent + "initial equation \n");
 	    for (int j=0;j<getNumFInitialEquation();j++) {
-			debugPrint("FClass.prettyPrint(): Equation nr: " + j);
+			log.debug("FClass.prettyPrint(): Equation nr: " + j);
 	  		p.toString(getFInitialEquation(j),str, indent+" ",o);
 			str.print(";\n");
 		}
@@ -1214,7 +1214,7 @@ aspect FlattPrettyPrint {
 	}
 	
 	public void FIfExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		debugPrint("**************************** FIfExp.prettyPrint");
+		log.debug("**************************** FIfExp.prettyPrint");
 		str.print("(if ");
 		p.toString(getIfExp(), str, indent, o);
 		str.print(" then ");
@@ -1266,7 +1266,7 @@ aspect FlattPrettyPrint {
 	}
 	
 	public void FIdUse.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		debugPrint("FIdUse.prettyPrint(): " + name());
+		log.debug("FIdUse.prettyPrint(): " + name());
 		if (getFQName().isScalarized())
 			str.print(name());
 		else 
@@ -1274,7 +1274,7 @@ aspect FlattPrettyPrint {
 	}
 
 	public void FIdUseExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		debugPrint("FIdUse.prettyPrint(): " + getFIdUse().name());
+		log.debug("FIdUse.prettyPrint(): " + getFIdUse().name());
 		str.print(getFIdUse().name());
 		if (getFIdUse().hasFArraySubscripts()) {
 			p.toString(getFIdUse().getFArraySubscripts(),str,indent,o);
@@ -1282,7 +1282,7 @@ aspect FlattPrettyPrint {
 	}
 
 	public void FInstAccessExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		debugPrint("FIdUse.prettyPrint(): " + name());
+		log.debug("FIdUse.prettyPrint(): " + name());
 		p.toString(getInstAccess(), str, indent, o);
 	}
 	
@@ -1297,7 +1297,7 @@ aspect FlattPrettyPrint {
 	}
 	
 	public void FDerExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		debugPrint("FDerExp.prettyPrint");
+		log.debug("FDerExp.prettyPrint");
 		str.print(name());
 	}
 
@@ -1308,7 +1308,7 @@ aspect FlattPrettyPrint {
 	}
 	
 	public void FFunctionCall.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		debugPrint("FFunctionCall.prettyPrint:");
+		log.debug("FFunctionCall.prettyPrint:");
 		str.print(getName().name());
 		str.print("(");
 		getArgs().prettyPrintWithSep(p, str, "", o, ", ");

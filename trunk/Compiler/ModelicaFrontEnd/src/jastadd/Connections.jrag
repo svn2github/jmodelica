@@ -30,9 +30,9 @@ aspect Connections {
 
 	public void FClass.genConnectionEquations() {
 	
-		debugPrint("<<<FClass.genConnectionEquations()");
+		log.debug("<<<FClass.genConnectionEquations()");
 		ArrayList<ConnectionSet> l = connectionSetManager.getConnectionSetList();
-		debugPrint("<<<FClass.genConnectionEquations(): "+ l.size() + " sets in manager");
+		log.debug("<<<FClass.genConnectionEquations(): "+ l.size() + " sets in manager");
 		//getConnectionSetManager().printConnectionSets();
 		
 		for (ConnectionSet set : l) {
@@ -40,7 +40,7 @@ aspect Connections {
 			ConnectionSetEntry csee[] = set.toArray(new ConnectionSetEntry[set.size()]);
 			java.util.Arrays.sort(csee);
 			
-			//System.out.println("*** Array size: " + csee.length);
+			//log.debug("*** Array size: " + csee.length);
 			
 			if (csee[0].isFlow()) {
 				// Treat first element separately
@@ -90,10 +90,10 @@ aspect Connections {
 		public void addVars(InstComponentDecl var1, boolean outside1, FQName namePrefix1,
 		                    InstComponentDecl var2, boolean outside2, FQName namePrefix2) {
 
-//			System.out.println("ConnectionSetManager.addVars");
+//			log.debug("ConnectionSetManager.addVars");
 		
-//		    System.out.println(namePrefix1.name()+" . "+var1.name() + " outside: " + outside1);
-//		    System.out.println(namePrefix2.name()+" . "+var2.name() + " outside: " + outside2);
+//		    log.debug(namePrefix1.name()+" . "+var1.name() + " outside: " + outside1);
+//		    log.debug(namePrefix2.name()+" . "+var2.name() + " outside: " + outside2);
 		
 			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1,outside1,namePrefix1);
 			ConnectionSetEntry cse2 = new ConnectionSetEntry(var2,outside2,namePrefix2);	
@@ -157,7 +157,7 @@ aspect Connections {
 		//private boolean flow;
 		
 		public ConnectionSetEntry(InstComponentDecl cd, boolean outside, FQName fqName) {
-			//System.out.println("Created ConnectionSetEntry: " + cd.getName().getID());
+			//log.debug("Created ConnectionSetEntry: " + cd.getName().getID());
 			this.cd = cd;
 			this.outside = outside;
 			this.fqName = (FQName)fqName.fullCopy();
@@ -192,7 +192,7 @@ aspect Connections {
 		public int hashCode() {
 			// TODO: Wouldn't toString().hashCode() be better?
 			
-			//System.out.println("ConnectionSetEntry.hashCode");
+			//log.debug("ConnectionSetEntry.hashCode");
 			String tr = "true";
 			String fa = "false";
 			return name().intern().hashCode() + (outside? tr.intern().hashCode() : fa.intern().hashCode());

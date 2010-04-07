@@ -416,7 +416,7 @@ aspect AliasVariables {
 				}
 				aliasSets.add(as);
 			}
-			//System.out.println(">>" + printAliasSets());
+			//log.debug(">>" + printAliasSets());
 		}
 		
 		public String printAliasSet(LinkedHashSet<AliasVariable> aliasSet) {
