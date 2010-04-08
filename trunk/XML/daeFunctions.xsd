@@ -7,12 +7,11 @@
 		<xs:annotation>
 			<xs:documentation>Variable used by the function</xs:documentation>
 		</xs:annotation>
-		<xs:complexContent>
-			<xs:extension base="exp:Exp">
-				<xs:attribute name="name" type="xs:normalizedString" use="required"/>
-				<xs:attribute name="type" type="xs:normalizedString" use="required"/>
-			</xs:extension>
-		</xs:complexContent>
+		<xs:sequence>
+			<xs:element name="BindingExpression" type="exp:Exp" minOccurs="0"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:normalizedString" use="required"/>
+		<xs:attribute name="type" type="xs:normalizedString" use="required"/>
 	</xs:complexType>
 	<xs:complexType name="DerivativeInputVariable">
 		<xs:annotation>

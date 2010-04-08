@@ -34,6 +34,25 @@
 		</xs:sequence>
 		<xs:attribute name="IterationVariable" type="xs:string" use="required"/>
 	</xs:complexType>
+	<xs:complexType name="VectorOfIdentifiers">
+		<xs:annotation>
+			<xs:documentation>A vector of variable identifiers</xs:documentation>
+		</xs:annotation>
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element ref="exp:Identifier"/>
+			<xs:element name="VectorOfIdentifiers" type="fun:VectorOfIdentifiers"/>
+		</xs:choice>
+	</xs:complexType>
+	<xs:complexType name="FunctionCallOutputVariable">
+		<xs:annotation>
+			<xs:documentation>Output variable of a function call</xs:documentation>
+		</xs:annotation>
+		<xs:choice>
+			<xs:element ref="exp:Identifier"/>
+			<xs:element name="VectorOfIdentifiers" type="fun:VectorOfIdentifiers"/>
+			<xs:element name="EmptyOutputArgument" fixed=""/>
+		</xs:choice>
+	</xs:complexType>
 	<xs:complexType name="Algorithm">
 		<xs:annotation>
 			<xs:documentation>algorithm complex type</xs:documentation>
@@ -122,10 +141,16 @@
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="FunctionCall" type="exp:FunctionCall">
+	<xs:element name="FunctionCall">
 		<xs:annotation>
 			<xs:documentation>Function call statement</xs:documentation>
 		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="OutputVariable" type="fun:FunctionCallOutputVariable" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="SourceFunction" type="exp:FunctionCall"/>
+			</xs:sequence>
+		</xs:complexType>
 	</xs:element>
 	<xs:element name="Assertion">
 		<xs:annotation>

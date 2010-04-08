@@ -19,6 +19,34 @@
 			<xs:element name="BindingExp" type="exp:Exp"/>
 		</xs:sequence>
 	</xs:complexType>
+	<xs:complexType name="VectorOfIdentifiers">
+		<xs:annotation>
+			<xs:documentation>A vector of variable identifiers</xs:documentation>
+		</xs:annotation>
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element ref="exp:Identifier"/>
+			<xs:element name="VectorOfIdentifiers" type="equ:VectorOfIdentifiers"/>
+		</xs:choice>
+	</xs:complexType>
+	<xs:complexType name="FunctionCallEquationLeft">
+		<xs:annotation>
+			<xs:documentation>Left hand side of a function call equation</xs:documentation>
+		</xs:annotation>
+		<xs:choice>
+			<xs:element ref="exp:Identifier"/>
+			<xs:element name="VectorOfIdentifiers" type="equ:VectorOfIdentifiers"/>
+			<xs:element name="EmptyOutputArgument" fixed=""/>
+		</xs:choice>
+	</xs:complexType>
+	<xs:complexType name="FunctionCallEquation">
+		<xs:annotation>
+			<xs:documentation>Set of scalar equations produced by a function call</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="OutputVariable" type="equ:FunctionCallEquationLeft" maxOccurs="unbounded"/>
+			<xs:element name="SourceFunction" type="exp:FunctionCall"/>
+		</xs:sequence>
+	</xs:complexType>
 	<xs:element name="DynamicEquations">
 		<xs:annotation>
 			<xs:documentation>List of flat dynamic equations of the model</xs:documentation>
@@ -26,14 +54,7 @@
 		<xs:complexType>
 			<xs:choice minOccurs="0" maxOccurs="unbounded">
 				<xs:element name="Equation" type="equ:AbstractEquation"/>
-				<xs:element name="FunctionCallEquation">
-					<xs:complexType>
-						<xs:sequence>
-							<xs:element name="ScalarOutput" type="xs:normalizedString" maxOccurs="unbounded"/>
-							<xs:element name="SourceFunction" type="exp:FunctionCall"/>
-						</xs:sequence>
-					</xs:complexType>
-				</xs:element>
+				<xs:element name="FunctionCallEquation" type="equ:FunctionCallEquation"/>
 			</xs:choice>
 		</xs:complexType>
 	</xs:element>
