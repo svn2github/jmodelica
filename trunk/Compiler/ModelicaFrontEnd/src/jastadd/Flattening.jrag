@@ -229,22 +229,38 @@ aspect Flattening {
 			myInstClassDecl().flattenRecord(fc);
 		}
 	}
-	
-	public abstract FFunctionVariable InstAssignable.createFFunctionVariable(Opt eo, FQName fqn);
 
-	public FFunctionVariable InstPrimitive.createFFunctionVariable(Opt eo, FQName fqn) {
+	public FFunctionVariable InstAssignable.createFFunctionVariable(Opt eo, FQName fqn) {
+		// TODO: if we need separate variable class for records, overide this
+		FType type =(FType) type().fullCopy();
+		type.flattenSize(new FQName());
 		if (isArray())
-			return new FFunctionArray(new Opt(), type(), eo, fqn);
+			return new FFunctionArray(new Opt(), type, eo, fqn);
 		else
-			return new FFunctionVariable(new Opt(), type(), eo, fqn);
+			return new FFunctionVariable(new Opt(), type, eo, fqn);
 	}
-
-	public FFunctionVariable InstRecord.createFFunctionVariable(Opt eo, FQName fqn) {
-		// TODO: if we need separate variable class for records, create it here
-		if (isArray())
-			return new FFunctionArray(new Opt(), type(), eo, fqn);
-		else
-			return new FFunctionVariable(new Opt(), type(), eo, fqn);
+	
+	public void FType.flattenSize(FQName prefix) {
+		setSize(getSize().flatten(prefix));
+	}
+	
+	public void FRecordType.flattenSize(FQName prefix) {
+		super.flattenSize(prefix);
+		for (FRecordComponentType comp : getComponents())
+			comp.getFType().flattenSize(prefix);
+	}
+	
+	public Size Size.flatten(FQName prefix) {
+		return this;
+	}
+	
+	public MutableSize MutableSize.flatten(FQName prefix) {
+		MutableSize res = new MutableSize(size.length);
+		System.arraycopy(size, 0, res.size, 0, size.length);
+		for (int i = 0; i < exps.length; i++)
+			if (exps[i] != null)
+				res.exps[i] = exps[i].flatten(prefix);
+		return res;
 	}
 
 	// Generic method for flattening	

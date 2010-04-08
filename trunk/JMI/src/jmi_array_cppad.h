@@ -50,7 +50,7 @@ public:
 private:
 	jmi_dynamic_list* next;
 };
-class jmi_dynamic_list_arr : jmi_dynamic_list {
+class jmi_dynamic_list_arr : public jmi_dynamic_list {
 public:
 	jmi_dynamic_list_arr(jmi_dynamic_list* n, CppAD::VecAD<jmi_real_t>* d) : jmi_dynamic_list(n) { data = d; }
 	virtual ~jmi_dynamic_list_arr();
@@ -64,7 +64,7 @@ private:
 		int* size;\
 		vector<rec>* var;\
 	};\
-	class jmi_dynamic_list_arr_##arr : jmi_dynamic_list {\
+	class jmi_dynamic_list_arr_##arr : public jmi_dynamic_list {\
 	public:\
 		jmi_dynamic_list_arr_##arr(jmi_dynamic_list* n, vector<rec>* d) : jmi_dynamic_list(n) { data = d; }\
 		virtual ~jmi_dynamic_list_arr_##arr();\

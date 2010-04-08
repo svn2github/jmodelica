@@ -27,6 +27,14 @@ aspect OptimicaFlattening {
     public InstOptimizationClass OptimizationClass.newInstRestriction() {
     	return copyLocationTo(new InstOptimizationClass());
     }
+    
+    public void InstOptClassDecl.flattenCalledFunctions(FClass fc) {
+		getInstComponentDecls().flattenCalledFunctions(fc);
+		getFAbstractEquations().flattenCalledFunctions(fc);
+		getFConstraints().flattenCalledFunctions(fc);
+		if (hasInstClassModification()) 
+			getInstClassModification().flattenCalledFunctions(fc);
+    }
         
     refine Flattening void InstClassDecl.flattenInstClassDecl(FClass fc) {
 		fc.setFQName(new FQName(qualifiedName())); 
@@ -36,16 +44,13 @@ aspect OptimicaFlattening {
 		}
 		getInstComponentDeclList().flatten(fc);
 		getInstExtendsList().flatten(fc);
-		
-		getInstComponentDeclList().flattenCalledFunctions(fc);
-		getFAbstractEquationList().flattenCalledFunctions(fc);
+		flattenCalledFunctions(fc);
 		
 		if (this instanceof InstOptClassDecl) {
 			FOptClass foc = (FOptClass)fc;
 			InstOptClassDecl iocd = (InstOptClassDecl)this;
-			for (FConstraint c : iocd.getFConstraints()) {
+			for (FConstraint c : iocd.getFConstraints()) 
 			       c.flatten(iocd.getFQName(),foc);
-			    }
 			OptClassDecl ocd = (OptClassDecl)iocd.getClassDecl();
 			if (iocd.hasInstClassModification()) {
 				List attr = new List();

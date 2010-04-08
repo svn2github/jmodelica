@@ -67,6 +67,12 @@ aspect OptimicaTransformCanonical {
 		eqns.makeSubscriptsLiteral();
 		ieqns.makeSubscriptsLiteral();
 		constr.makeSubscriptsLiteral();
+		
+		// Scalarize functions
+		List<FFunctionDecl> funcs = new List<FFunctionDecl>();
+		for (FFunctionDecl f : getFFunctionDecls()) 
+			funcs.add(f.scalarize());
+		setFFunctionDeclList(funcs);
 
 		flush();		
 	}

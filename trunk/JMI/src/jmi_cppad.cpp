@@ -1606,7 +1606,6 @@ jmi_dynamic_list_arr::~jmi_dynamic_list_arr() {
 }
 
 jmi_ad_var_t jmi_array_val_1(jmi_array_t* arr, jmi_ad_var_t i1) {
-    printf("jmi_array_val_1: i1 = %f, i = %f, size = %d\n", Value(i1), Value(_JMI_ARR_I_1(arr, i1)), arr->size[0]);
     return (*(arr->var))[_JMI_ARR_I_1(arr, i1)];
 }
 jmi_ad_var_t jmi_array_val_2(jmi_array_t* arr, jmi_ad_var_t i1, jmi_ad_var_t i2) {
@@ -1683,7 +1682,6 @@ jmi_ad_var_t jmi_array_val_25(jmi_array_t* arr, jmi_ad_var_t i1, jmi_ad_var_t i2
 }
 
 jmi_ad_array_ref_t jmi_array_ref_1(jmi_array_t* arr, jmi_ad_var_t i1) {
-    printf("jmi_array_ref_1: i1 = %f, i = %f, size = %d\n", Value(i1), Value(_JMI_ARR_I_1(arr, i1)), arr->size[0]);
     return (*(arr->var))[_JMI_ARR_I_1(arr, i1)];
 }
 jmi_ad_array_ref_t jmi_array_ref_2(jmi_array_t* arr, jmi_ad_var_t i1, jmi_ad_var_t i2) {

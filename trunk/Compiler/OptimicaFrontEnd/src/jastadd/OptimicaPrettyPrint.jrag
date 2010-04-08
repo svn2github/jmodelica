@@ -154,7 +154,11 @@ aspect FlatOptimicaPrettyPrint {
 	  		p.toString(getFConstraint(j), str, p.indent(indent), o);
 			str.print(";\n");
 		}
-		str.print(indent);
+	    
+    	p.toString(getFFunctionDecls(), str, p.indent(indent), o);
+    	p.toString(getFRecordDecls(), str, p.indent(indent), o);
+
+    	str.print(indent);
   		str.print("end ");
   		str.print(name());
   		str.print(";\n");
