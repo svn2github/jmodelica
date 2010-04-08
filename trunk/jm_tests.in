@@ -76,8 +76,8 @@ function python_tests() {
       if build_jmodelica 2> /dev/null > /dev/null; then
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
-          nosetests -a stddist -v ${TEST} 2> /dev/null \
-	    | sed -n -e 's!^OK$!PASSED!ip' -e 's!^FAILED!TEST FAILED !p'
+          nosetests -a stddist -v ${TEST} 2>&1 \
+	    | sed -n -e 's!^OK$!PASSED!ip' -e 's!^FAILED !TEST FAILED!p'
         done | filter_python_separate
       else
         echo BUILD FAILED
@@ -89,10 +89,10 @@ function python_tests() {
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
           echo ${TEST} | sed -e 's!^.*jmodelica.tests.!Running !'
-          nosetests -a stddist -v ${TEST} 2> /dev/null \
+          nosetests -a stddist -v ${TEST} 2>&1 \
 	    | egrep -v '^Exception .* ignored$' \
 	    | grep -B1 -A500 -e${PATTERN} \
-	    | sed -e 's!^OK$!PASSED!' -e 's!^FAILED!TEST FAILED !'
+	    | sed -e 's!^OK$!PASSED!' -e 's!^FAILED !TEST FAILED!'
         done | filter_python_separate
       fi
       ;;
@@ -116,13 +116,15 @@ function filter_python_separate() {
   cat ${TMP} \
   | sed -n \
         -e '1 i\
-            0' \
-        -e 's!^TEST FAILED(errors=\([0-9]*\))!\1+!' \
+            0 0' \
+        -e 's!^TEST FAILED(errors=\([0-9]*\))!\1+!p' \
+        -e 's!^TEST FAILED(failures=\([0-9]*\))!r\1+r!p' \
+        -e 's!^TEST FAILED(errors=\([0-9]*\), failures=\([0-9]*\))!\1+r\2+r!p' \
         -e '$ a\
-            p' \
+            [errors=]nn[, failures=]np' \
   | dc \
-  | sed -e 's!^0$!PASSED!' \
-        -e 's/^\([0-9]*\)$/TEST FAILED(failures=\1)/'
+  | sed -e 's!errors=0, failures=0!PASSED!' \
+	-e 's!\(errors=.*, failures=.*\)!TEST FAILED (\1)!'
   rm -f ${TMP}
 }
   
@@ -144,10 +146,10 @@ function junit_test() {
 	    -e 's!^.*Failures: \([0-9]*\), Errors: \([0-9]*\),.*$!r\1+r\2+!p' \
 	    -e 's!^.*\(BUILD FAILED\).*$![\1]pq!p' \
 	    -e '$ a\
-                r[failures=]nn[, errors=]np' \
+                [errors=]nn[, failures=]np' \
 	| dc \
-	| sed -e 's!failures=0, errors=0!PASSED!' \
-	    -e 's/\(failures=.*, errors=.*\)/TEST FAILED (\1)/'
+	| sed -e 's!errors=0, failures=0!PASSED!' \
+	    -e 's!\(errors=.*, failures=.*\)!TEST FAILED (\1)!'
       ;;
     n)
       ant_test | egrep "(\[junit\]|\[(java|jastadd)\].*([Ee]rror|[A-Za-z.]*:[1-9][0-9]*))"
