@@ -8,9 +8,9 @@
 			<xs:documentation>Variable used by the function</xs:documentation>
 		</xs:annotation>
 		<xs:sequence>
+			<xs:element name="Name" type="exp:QualifiedName"/>
 			<xs:element name="BindingExpression" type="exp:Exp" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute name="name" type="xs:normalizedString" use="required"/>
 		<xs:attribute name="type" type="xs:normalizedString" use="required"/>
 	</xs:complexType>
 	<xs:complexType name="DerivativeInputVariable">
@@ -40,6 +40,7 @@
 		</xs:annotation>
 		<xs:complexType>
 			<xs:sequence>
+				<xs:element name="Name" type="exp:QualifiedName"/>
 				<xs:element name="OutputVariable" type="fun:FunctionVariable" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element name="InputVariable" type="fun:FunctionVariable" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element name="ProtectedVariable" type="fun:FunctionVariable" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
@@ -85,7 +86,6 @@
 					</xs:complexType>
 				</xs:element>
 			</xs:sequence>
-			<xs:attribute name="name" type="xs:normalizedString" use="required"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="ExternalFunction">
@@ -93,19 +93,19 @@
 			<xs:documentation>Function definition calling external algorithm procedural code. Element includes the path</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
-			<xs:simpleContent>
-				<xs:extension base="xs:normalizedString">
-					<xs:attribute name="name" type="xs:ID" use="required"/>
+			<xs:complexContent>
+				<xs:extension base="exp:QualifiedName">
 					<xs:attribute name="language" default="C">
 						<xs:simpleType>
 							<xs:restriction base="xs:normalizedString">
 								<xs:enumeration value="C"/>
 								<xs:enumeration value="Modelica"/>
+								<xs:enumeration value="Fortran77"/>
 							</xs:restriction>
 						</xs:simpleType>
 					</xs:attribute>
 				</xs:extension>
-			</xs:simpleContent>
+			</xs:complexContent>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="FunctionsList">

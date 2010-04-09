@@ -15,7 +15,7 @@
 			<xs:documentation>Timed variable type definition</xs:documentation>
 		</xs:annotation>
 		<xs:sequence>
-			<xs:element name="Identifier" type="xs:normalizedString"/>
+			<xs:element name="Identifier" type="opt:QualifiedName"/>
 			<xs:element name="Instant" type="xs:float"/>
 		</xs:sequence>
 	</xs:complexType>

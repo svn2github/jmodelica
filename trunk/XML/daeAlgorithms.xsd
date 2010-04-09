@@ -30,9 +30,9 @@
 			<xs:documentation>an index used by iteration statements</xs:documentation>
 		</xs:annotation>
 		<xs:sequence>
+			<xs:element name="IterationVariable" type="exp:QualifiedName"/>
 			<xs:element name="IterationSet" type="exp:Exp" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute name="IterationVariable" type="xs:string" use="required"/>
 	</xs:complexType>
 	<xs:complexType name="VectorOfIdentifiers">
 		<xs:annotation>
@@ -141,14 +141,14 @@
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="FunctionCall">
+	<xs:element name="FunctionCallStatement">
 		<xs:annotation>
 			<xs:documentation>Function call statement</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="OutputVariable" type="fun:FunctionCallOutputVariable" minOccurs="0" maxOccurs="unbounded"/>
-				<xs:element name="SourceFunction" type="exp:FunctionCall"/>
+				<xs:element name="OutputArgument" type="fun:FunctionCallOutputVariable" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="exp:FunctionCall"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>

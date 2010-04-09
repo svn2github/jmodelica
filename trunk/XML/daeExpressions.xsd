@@ -63,6 +63,7 @@
 			<xs:documentation>User-defined function call type</xs:documentation>
 		</xs:annotation>
 		<xs:sequence>
+			<xs:element name="Name" type="exp:QualifiedName"/>
 			<xs:element name="Arguments">
 				<xs:annotation>
 					<xs:documentation>Arguments of the function call</xs:documentation>
@@ -74,7 +75,6 @@
 				</xs:complexType>
 			</xs:element>
 		</xs:sequence>
-		<xs:attribute name="name" type="xs:normalizedString" use="required"/>
 	</xs:complexType>
 	<xs:complexType name="Array">
 		<xs:annotation>
@@ -83,9 +83,30 @@
 		<xs:sequence>
 			<xs:any namespace="##targetNamespace" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>
-		<xs:attribute name="name" type="xs:normalizedString"/>
 		<xs:attribute name="type" type="xs:normalizedString"/>
 		<xs:attribute name="size" type="xs:unsignedInt"/>
+	</xs:complexType>
+	<xs:complexType name="QualifiedName">
+		<xs:annotation>
+			<xs:documentation>Qualified name</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="QualifiedNamePart" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="ArraySubscripts" minOccurs="0">
+							<xs:complexType>
+								<xs:choice minOccurs="0" maxOccurs="unbounded">
+									<xs:element name="UndefinedDimension" fixed=""/>
+									<xs:element name="IndexExpression" type="exp:Exp"/>
+								</xs:choice>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="name" type="xs:normalizedString" use="required"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
 	</xs:complexType>
 	<xs:element name="Add" type="exp:BinaryOperation">
 		<xs:annotation>
@@ -277,21 +298,10 @@
 			<xs:documentation>Built-in function: max(x,y) , (where x and y must be scalar)</xs:documentation>
 		</xs:annotation>
 	</xs:element>
-	<xs:element name="Identifier">
+	<xs:element name="Identifier" type="exp:QualifiedName">
 		<xs:annotation>
 			<xs:documentation>Identifier</xs:documentation>
 		</xs:annotation>
-		<xs:complexType>
-			<xs:simpleContent>
-				<xs:extension base="xs:normalizedString">
-					<xs:attribute name="argumentValue" type="xs:anySimpleType">
-						<xs:annotation>
-							<xs:documentation>to be used when the identifier is an argument of a function call</xs:documentation>
-						</xs:annotation>
-					</xs:attribute>
-				</xs:extension>
-			</xs:simpleContent>
-		</xs:complexType>
 	</xs:element>
 	<xs:element name="FunctionCall" type="exp:FunctionCall">
 		<xs:annotation>

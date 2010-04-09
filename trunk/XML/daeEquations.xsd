@@ -15,7 +15,7 @@
 			<xs:documentation>Definition of the equation type for binding expressions in form parameter=expression</xs:documentation>
 		</xs:annotation>
 		<xs:sequence>
-			<xs:element name="Parameter" type="xs:normalizedString"/>
+			<xs:element name="Parameter" type="exp:QualifiedName"/>
 			<xs:element name="BindingExp" type="exp:Exp"/>
 		</xs:sequence>
 	</xs:complexType>
@@ -43,8 +43,8 @@
 			<xs:documentation>Set of scalar equations produced by a function call</xs:documentation>
 		</xs:annotation>
 		<xs:sequence>
-			<xs:element name="OutputVariable" type="equ:FunctionCallEquationLeft" maxOccurs="unbounded"/>
-			<xs:element name="SourceFunction" type="exp:FunctionCall"/>
+			<xs:element name="OutputArgument" type="equ:FunctionCallEquationLeft" maxOccurs="unbounded"/>
+			<xs:element ref="exp:FunctionCall"/>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:element name="DynamicEquations">

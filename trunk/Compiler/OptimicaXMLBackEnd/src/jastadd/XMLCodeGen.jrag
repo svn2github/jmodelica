@@ -23,19 +23,18 @@ aspect XMLCodeGen_Optimica {
 		String tagId = "Identifier";
 		String tagExp = "Instant";
 		
-		ASTNode name = getChild(this,0);
-		FExp arg= (FExp)getChild(this,1);
+		FIdUse iduse = this.getName();
+		FExp arg = this.getArg();
 		
 		str.println(indent + "<" + namespace + ":" + tag + ">");
 		
 		//Identifier
 		str.print(indent+"\t<" + namespace + ":" + tagId + ">");		
-		name.prettyPrint(str,p.indent(indent));
+		iduse.prettyPrint_XML(str,p.indent(indent));
 		str.println("</" + namespace + ":" + tagId + ">");
 		//Expression argument
 		str.print(indent+"\t<" + namespace + ":" + tagExp + ">");		
 		str.print(arg.ceval().realValue());
-		//arg.prettyPrint_XML(str,p.indent(indent));
 		str.println("</" + namespace + ":" + tagExp + ">");
 		
 		str.println(indent + "</"+ namespace + ":" + tag + ">");	
@@ -44,8 +43,8 @@ aspect XMLCodeGen_Optimica {
 	public void FRelationConstraint.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o) {
 		String namespace="opt";
 		String tag = xmlTag();	
-		ASTNode left = getLeft();
-		ASTNode right= getRight();
+		FExp left = getLeft();
+		FExp right= getRight();
 		
 		str.println(indent + "<" + namespace + ":" + tag + ">");
 		left.prettyPrint_XML(str,p.indent(indent));

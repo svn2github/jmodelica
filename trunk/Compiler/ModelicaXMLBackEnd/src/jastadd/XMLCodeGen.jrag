@@ -147,23 +147,19 @@ aspect XMLCodeGen {
 		str.println(indent + "</"+ namespace + ":" + tag + ">");
 	}
 	
-	public void FIdUseExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
-		String namespace = "exp";
-		String tag = this.xmlTag();
-		
-		str.print(indent + "<" + namespace + ":" + tag + ">");
-		str.print(this.toString());
-		str.println("</" + namespace + ":" + tag + ">");		
+	public void FIdUseExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){	
+		this.getFIdUse().prettyPrint_XML(str,p.indent(indent));
 	}
 	
 	
 	public void FIdUse.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
 		String namespace = "exp";
 		String tag = this.xmlTag();
+		FQName qname = this.getFQName();
 		
-		str.print(indent + "<" + namespace + ":" + tag + ">");
-		str.print(this.toString());
-		str.println("</" + namespace + ":" + tag + ">");
+		str.println(indent + "<" + namespace + ":" + tag + ">");
+		qname.prettyPrint_XML(str,p.indent(indent));
+		str.println(indent + "</" + namespace + ":" + tag + ">");
 	}
 	
 	public void FTimeExp.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
@@ -209,13 +205,18 @@ aspect XMLCodeGen {
 	public void FFunctionCall.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
 		String tag = this.xmlTag();
 		String namespace = "exp";
-		String nameAttr = " name=\"" + this.getName().toString() + " \"";
+		FQName qname = this.getName().getFQName(); 
+		str.println(indent + "<" + namespace + ":" + tag + ">");
 		
-		str.println(indent + "<" + namespace + ":" + tag  + nameAttr + ">");
+		str.println(indent + "\t<" + namespace + ":Name>");
+		qname.prettyPrint_XML(str,p.indent(indent+"\t"));
+		str.println(indent + "\t</" + namespace + ":Name>");
+		
 		str.println(indent + "\t<" + namespace + ":Arguments>");
 		for (FExp e : this.getArgList())
 			e.prettyPrint_XML(str,p.indent(indent+"\t"));
 		str.println(indent + "\t</" + namespace + ":Arguments>");
+		
 		str.println(indent + "</" + namespace + ":" + tag  + ">");	
 	}
 	
@@ -241,12 +242,12 @@ aspect XMLCodeGen {
 		FFunctionCall call = (FFunctionCall)this.getCall();
 		String tag = this.xmlTag();
 		String namespace = "equ";
-		String funNameAttr = " name=\"" + call.getName().toString() + " \"";
-		
+
 		str.println(indent + "<" + namespace + ":" + tag  + ">");
 		
+		//output arguments
 		for (FFunctionCallLeft f : this.getLeftList()){
-			str.println(indent + "\t<" + namespace + ":OutputVariable>");
+			str.println(indent + "\t<" + namespace + ":OutputArgument>");
 			
 			if(!f.hasFExp()){
 				str.println(indent + "\t<" + namespace + ":EmptyOutputArgument/>");
@@ -262,17 +263,12 @@ aspect XMLCodeGen {
 				}				
 			}
 			
-			str.println(indent + "\t</" + namespace + ":OutputVariable>");
+			str.println(indent + "\t</" + namespace + ":OutputArgument>");
 		}
-
-				
-		str.println(indent + "<" + namespace + ":SourceFunction" + funNameAttr + ">");
-		str.println(indent + "\t<exp:Arguments>");
-		for (FExp e : call.getArgList())
-			e.prettyPrint_XML(str,p.indent(indent+"\t"));
-		str.println(indent + "\t</exp:Arguments>");
-		str.println(indent + "</" + namespace + ":SourceFunction>");
 		
+		//function call
+		call.prettyPrint_XML(str,p.indent(indent+"\t"));
+				
 		str.println(indent + "</" + namespace + ":" + tag  + ">");	
 	}
 	
@@ -280,10 +276,14 @@ aspect XMLCodeGen {
     public void FFunctionDecl.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
         String namespace="fun";
         String tag = this.xmlTag();
-        String fName = this.name();
+        FQName fName = this.getFQName();
         
-        str.print(indent + "<" + namespace + ":" + tag + " name=\"" + fName + "\">\n");
-        	
+        str.print(indent + "<" + namespace + ":" + tag + ">\n");
+        
+        str.print(indent + "<" + namespace + ":Name>\n");
+        fName.prettyPrint_XML(str,p.indent(indent));
+        str.print(indent + "</" + namespace + ":Name>\n");
+        
         	for(FFunctionVariable var : this.myOutputs())
         		var.prettyPrint_XML(str,p.indent(indent));
         	for(FFunctionVariable var : this.myInputs())
@@ -299,7 +299,7 @@ aspect XMLCodeGen {
     public void FFunctionVariable.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
         String namespace = "fun";
         String tag = "";
-        String nameAttr = " name=\"" + this.name() + "\"";
+        FQName name = this.getFQName();
         String typeAttr = " type=\"" + this.getType().toString() + "\"";
         	
         if(this.isOutput()){
@@ -311,18 +311,21 @@ aspect XMLCodeGen {
         		tag="ProtectedVariable";
         	}
         }
-        
-        if(this.hasBindingExp()){
-        	str.print(indent + "<" + namespace + ":" + tag + nameAttr + typeAttr + ">\n");
+              
+        	str.print(indent + "<" + namespace + ":" + tag + typeAttr + ">\n");
         	
-        	str.print(indent + "<" + namespace + ":BindingExpression>\n");
-        	this.getBindingExp().prettyPrint_XML(str,p.indent(indent));
-        	str.println(indent + "</"+ namespace + ":BindingExpression>");
+        	str.print(indent + "<" + namespace + ":Name>\n");
+        	name.prettyPrint_XML(str,p.indent(indent));
+        	str.println(indent + "</"+ namespace + ":Name>");
         	
+        	if(this.hasBindingExp()){
+            	str.print(indent + "<" + namespace + ":BindingExpression>\n");
+            	this.getBindingExp().prettyPrint_XML(str,p.indent(indent));
+            	str.println(indent + "</"+ namespace + ":BindingExpression>");
+        	}
+     	
         	str.println(indent + "</"+ namespace + ":" + tag + ">");
-        }else{
-        	str.print(indent + "<" + namespace + ":" + tag + nameAttr + typeAttr + "/>\n");
-        }      
+            
     }
     
     //-------------------- Algorithms ---------------------------
@@ -433,12 +436,17 @@ aspect XMLCodeGen {
     
     public void FForIndex.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
         String namespace="fun";
-        String tag = "Index";
+        String tag = "Index";      
+        String varTag = "IterationVariable";
+        FQName qVarName = this.getFVariable().getFQName();
+        String expTag = "IterationSet";       
         
-        String nameAttr = " IterationVariable=\"" + this.getFVariable().name() + "\"";
-        String expTag = "IterationSet";
+        str.println(indent + "<" + namespace + ":" + tag + ">"); 
         
-        str.println(indent + "<" + namespace + ":" + tag + nameAttr + ">"); 
+        str.println(indent + "\t<" + namespace + ":" + varTag + ">"); 
+        qVarName.prettyPrint_XML(str,p.indent(indent+"\t"));
+        str.println(indent + "\t</" + namespace + ":" + varTag + ">"); 
+        
         if (this.hasFExp()){
         	str.println(indent + "\t<" + namespace + ":" + expTag + ">");
         	this.getFExp().prettyPrint_XML(str,p.indent(indent+"\t"));
@@ -447,8 +455,7 @@ aspect XMLCodeGen {
         str.println(indent + "</" + namespace + ":" + tag + ">"); 
      
     }
-    
-    
+      
     public void FWhileStmt.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
         String namespace="fun";
         String tag = this.xmlTag();
@@ -473,13 +480,12 @@ aspect XMLCodeGen {
 		FFunctionCall call = (FFunctionCall)this.getCall();
 		String tag = this.xmlTag();
 		String namespace = "fun";
-		String funNameAttr = " name=\"" + call.getName().toString() + " \"";
 		
 		str.println(indent + "<" + namespace + ":" + tag  + ">");
 		
 		for (FFunctionCallLeft f : this.getLeftList()){
 			
-			str.println(indent + "\t<" + namespace + ":OutputVariable>");
+			str.println(indent + "\t<" + namespace + ":OutputArgument>");
 			
 			if(!f.hasFExp()){
 				str.println(indent + "\t\t<" + namespace + ":EmptyOutputArgument/>");
@@ -494,19 +500,71 @@ aspect XMLCodeGen {
 				}				
 			}
 			
-			str.println(indent + "\t</" + namespace + ":OutputVariable>");
+			str.println(indent + "\t</" + namespace + ":OutputArgument>");
 		}
 		
-		str.println(indent + "<" + namespace + ":SourceFunction" + funNameAttr + ">");
-		str.println(indent + "\t<exp:Arguments>");
-		for (FExp e : call.getArgList())
-			e.prettyPrint_XML(str,p.indent(indent+"\t"));
-		str.println(indent + "\t</exp:Arguments>");
-		str.println(indent + "</" + namespace + ":SourceFunction>");
-		
+		call.prettyPrint_XML(str,p.indent(indent+"\t"));
+	
 		str.println(indent + "</" + namespace + ":" + tag  + ">");	
 	}
+	
+	//-------------------- Qualified Names ---------------------------
+	
+	public void FQName.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		
+		for (FQNamePart np : this.getFQNamePartList())
+			np.prettyPrint_XML(str,p.indent(indent));
+		
+	}
+	
+	public void FQNamePart.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		String namespace = "exp";
+		String tag = this.xmlTag();
+		String nameAttr = " name=\"" + this.getName() + "\"";
+		
+		if (this.hasFArraySubscripts()){
+			str.println(indent + "<" + namespace + ":" + tag + nameAttr + ">");
+			this.getFArraySubscripts().prettyPrint_XML(str,p.indent(indent));	
+			str.println(indent + "</" + namespace + ":" + tag + ">");
+		}else{
+			str.println(indent + "<" + namespace + ":" + tag + nameAttr + "/>");
+		}
+
+	}
+	
+	public void FArraySubscripts.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		String namespace = "exp";
+		String tag = this.xmlTag();
+		
+		str.println(indent + "<" + namespace + ":" + tag + ">");
+		
+		for (FSubscript s : this.getFSubscriptList())
+			s.prettyPrint_XML(str,p.indent(indent+"\t"));
+		
+		str.println(indent + "</" + namespace + ":" + tag + ">");
+	}
     
+	public void FSubscript.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		return;
+	}
+	
+	public void FColonSubscript.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		String namespace = "exp";
+		String tag = this.xmlTag();
+		
+		str.println(indent + "<" + namespace + ":" + tag + "/>");
+	}
+	
+	public void FExpSubscript.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
+		String namespace = "exp";
+		String tag = this.xmlTag();
+		
+		str.println(indent + "<" + namespace + ":" + tag +  ">");
+		this.getFExp().prettyPrint_XML(str,p.indent(indent));
+		str.println(indent + "</" + namespace + ":" + tag +  ">");
+			
+	}
+	
 }//aspect end
 
 aspect XMLTagBinding{
@@ -587,10 +645,21 @@ aspect XMLTagBinding{
         eq FBreakStmt.xmlTag() = "Break";
         eq FReturnStmt.xmlTag() = "Return";
         eq FAssignStmt.xmlTag() = "Assign";
-        eq FFunctionCallStmt.xmlTag() = "FunctionCall";
+        eq FFunctionCallStmt.xmlTag() = "FunctionCallStatement";
         eq FIfStmt.xmlTag() = "If";
         eq FForStmt.xmlTag() = "For";
         eq FWhileStmt.xmlTag() = "While";
+        
+        //qualified names
+        syn String FQName.xmlTag();
+        eq FQName.xmlTag() = "QualifiedName";
+        syn String FQNamePart.xmlTag();
+        eq FQNamePart.xmlTag() = "QualifiedNamePart";
+        syn String FArraySubscripts.xmlTag();
+        eq FArraySubscripts.xmlTag() = "ArraySubscripts";
+        syn String FSubscript.xmlTag();
+        eq FColonSubscript.xmlTag() = "UndefinedDimension";
+        eq FExpSubscript.xmlTag() = "IndexExpression";
         
         eq InstForStmt.xmlTag() = "For";
         eq InstAssignStmt.xmlTag() = "Assign";
