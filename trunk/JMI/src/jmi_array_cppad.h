@@ -60,16 +60,16 @@ private:
 
 // Record array type declaration macro
 #define JMI_RECORD_ARRAY_TYPE(rec, arr) \
-	typedef arr struct _##arr {\
+	typedef struct _##arr {\
 		int* size;\
-		vector<rec>* var;\
-	};\
+		std::vector<rec>* var;\
+	} arr;\
 	class jmi_dynamic_list_arr_##arr : public jmi_dynamic_list {\
 	public:\
-		jmi_dynamic_list_arr_##arr(jmi_dynamic_list* n, vector<rec>* d) : jmi_dynamic_list(n) { data = d; }\
+		jmi_dynamic_list_arr_##arr(jmi_dynamic_list* n, std::vector<rec>* d) : jmi_dynamic_list(n) { data = d; }\
 		virtual ~jmi_dynamic_list_arr_##arr();\
 	private:\
-		vector<rec>* data;\
+		std::vector<rec>* data;\
 	};\
 	jmi_dynamic_list_arr_##arr::~jmi_dynamic_list_arr_##arr() {\
 		delete data;\
@@ -85,7 +85,7 @@ private:
 // Record array creation macro
 #define JMI_RECORD_ARRAY_STATIC(type, arr, name, n, ...) \
 	int name##_size[] = { __VA_ARGS__ };\
-	vector<type> name##_var(n);\
+	std::vector<type> name##_var(n);\
 	arr name##_rec = { name##_size, &name##_var };\
 	arr* name = &name##_rec;
 
@@ -100,7 +100,7 @@ private:
 // Dynamic record array creation macro
 #define JMI_RECORD_ARRAY_DYNAMIC(type, arr, name, n, ...) \
 	int name##_size[] = { __VA_ARGS__ };\
-	vector<type>* name##_var = new vector<type>(n);\
+	std::vector<type>* name##_var = new std::vector<type>(n);\
 	JMI_DYNAMIC_ADD_POINTER(name##_var, jmi_dynamic_list_arr_##arr)\
 	arr name##_rec = { name##_size, name##_var };\
 	arr* name = &name##_rec;

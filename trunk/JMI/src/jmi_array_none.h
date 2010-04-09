@@ -47,10 +47,10 @@ struct _jmi_dynamic_list {
 
 // Record array type declaration macro
 #define JMI_RECORD_ARRAY_TYPE(rec, arr) \
-	typedef arr struct _##arr {\
+	typedef struct _##arr {\
 		int* size;\
 		rec* var;\
-	};
+	} arr;
 
 // Array creation macro
 #define JMI_ARRAY_STATIC(name, n, ...) \

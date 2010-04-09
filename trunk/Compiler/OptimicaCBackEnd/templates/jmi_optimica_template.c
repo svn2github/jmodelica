@@ -99,6 +99,11 @@ $C_point_variable_aliases$
 #define _sw(i) ((*(jmi->z))[jmi->offs_sw + i])
 #define _sw_init(i) ((*(jmi->z))[jmi->offs_sw_init + i])
 
+
+$C_records$
+
+$C_function_headers$
+
 $C_functions$
 
 /*
@@ -169,11 +174,11 @@ $C_Opt_point_inequality_constraints$
 
 int jmi_new(jmi_t** jmi) {
 
-  jmi_init(jmi, N_real_ci, N_real_cd, N_real_pi, N_real_pd, 
+  jmi_init(jmi, N_real_ci, N_real_cd, N_real_pi, N_real_pd,
 	   N_integer_ci, N_integer_cd, N_integer_pi, N_integer_pd,
 	   N_boolean_ci, N_boolean_cd, N_boolean_pi, N_boolean_pd,
 	   N_string_ci, N_string_cd, N_string_pi, N_string_pd,
-	   N_real_dx,N_real_x, N_real_u, N_real_w,N_t_p, 
+	   N_real_dx,N_real_x, N_real_u, N_real_w,N_t_p,
 	   N_real_d,N_integer_d,N_integer_u,N_boolean_d,N_boolean_u,
 	   N_string_d,N_string_u,N_sw,N_sw_init,Scaling_method);
 

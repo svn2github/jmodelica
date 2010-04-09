@@ -199,4 +199,25 @@ class TestFunction1(OptimizationTest):
     def test_trajectories(self):
         vars = ['x[%d]' % i for i in range(1, 4)]
         self.assert_all_trajectories(vars, same_span=True)
-    
+ 
+
+class TestFunction1(OptimizationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        OptimizationTest.setup_class_base(
+            'FunctionAR_opt.mo', 'FunctionAR.FuncRecord1')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        n_e = 50
+        hs = N.ones(n_e)*1./n_e
+        n_cp = 3
+        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 }, rel_tol=1.0e-2)
+        self.run()
+        self.load_expected_data('FuncRecord.txt')
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['x', 'r.a'], same_span=True)
+   
