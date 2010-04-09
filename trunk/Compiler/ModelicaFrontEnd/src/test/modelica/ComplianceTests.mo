@@ -70,4 +70,25 @@ Compliance error at line 124, column 7:
 end ConditionalComponents_ComplErr;
 
 
+model ArrayOfRecords_Warn
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.WarningTestCase(
+         name="ArrayOfRecords_Warn",
+         description="Warning for using array of records",
+         errorMessage="
+1 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+At line 79, column 4:
+  Using arrays of records is currently not supported when compiling with CppAD, and can give erroneous results
+")})));
+
+ record R
+  Real a;
+  Real b;
+ end R;
+ 
+ R x[2];
+end ArrayOfRecords_Warn;
+
+
 end ComplianceTests;
