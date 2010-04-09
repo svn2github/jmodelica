@@ -72,6 +72,18 @@ class Test_JMI_ODE:
         
         for i in range(len(self.ODE.y0)):
             assert self.m_ODE.real_x[i] == self.ODE.y0[i]
+            
+        #Test for algebraic variables
+        modelf_DAE = 'files' + sep + 'RLC_Circuit.mo'
+        fpath_DAE = os.path.join(path_to_examples, modelf_DAE)
+        cpath_DAE = 'RLC_Circuit'
+        fname_DAE = cpath_DAE.replace('.','_',1)
+        mc.compile_model(fpath_DAE, cpath_DAE)
+        package_DAE = 'RLC_Circuit'
+        # Load the dynamic library and XML data
+        m_DAE = jmi.Model(package_DAE)
+        
+        nose.tools.assert_raises(JMIModel_Exception, JMIODE, m_DAE)
     
     def test_f(self):
         """

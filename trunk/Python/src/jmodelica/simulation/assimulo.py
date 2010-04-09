@@ -82,8 +82,13 @@ class JMIODE(Explicit_Problem):
     """
     An Assimulo Explicit Model extended to JMI interface.
     
-    Not extended with handling for discontinuities.
+        Not extended with handling for discontinuities.
+    
+        To use an explicit solver the problem have to be defined
+        in specific way, namely: der(x) = f(t,x) in the modelica
+        model. See http://www.jmodelica.org/page/10
     """
+    
     def __init__(self, model):
         """
         Sets the initial values.
@@ -91,6 +96,9 @@ class JMIODE(Explicit_Problem):
         self._model = model
         
         self.y0 = self._model.real_x
+        
+        if len(self._model.real_w):
+            raise JMIModel_Exception('There can be no algebraic variables when using an ODE solver.')
         
         self.jac = self.j #Activates the jacobian
     
