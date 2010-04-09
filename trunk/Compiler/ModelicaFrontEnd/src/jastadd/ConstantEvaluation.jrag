@@ -531,7 +531,10 @@ aspect ConstantEvaluation {
   }
   
   // TODO: expand to handle boolean end enum index
-  eq FEndExp.cevalCalc() = new CValueInteger(retrieveEnd());
+  eq FEndExp.cevalCalc() {
+	  int end = mySize().has(0) ? mySize().get(0) : Size.UNKNOWN;
+	  return end != Size.UNKNOWN ? new CValueInteger(end) : new CValueUnknown();
+  }
   
   eq FIntegerExp.cevalCalc() = getFExp().ceval().convertInteger();
   
@@ -577,10 +580,6 @@ aspect ConstantEvaluation {
   syn boolean FMinMaxExp.selectLesser();
   eq FMinExp.selectLesser() = true;
   eq FMaxExp.selectLesser() = false;
-  
-  inh int FEndExp.retrieveEnd();
-  eq FExpSubscript.getChild().retrieveEnd() = mySize().get(0);
-  eq Root.getChild().retrieveEnd()          = 0;
 
   eq FRealLitExp.cevalCalc() = new CValueReal(Double.parseDouble(getUNSIGNED_NUMBER()));
   eq FIntegerLitExp.cevalCalc() = new CValueInteger(Integer.parseInt(getUNSIGNED_INTEGER()));

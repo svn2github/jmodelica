@@ -4264,6 +4264,41 @@ Semantic error at line 4226, column 16:
 end UnknownArray19;
 
 
+model UnknownArray20
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownArray20",
+         description="Function inputs of unknown size: scalarizing end",
+         flatModel="
+fclass FunctionTests.UnknownArray20
+ Real x[1];
+ Real x[2];
+equation
+ ({x[1],x[2]}) = FunctionTests.UnknownArray20.f({{1,2},{3,4}});
+
+ function FunctionTests.UnknownArray20.f
+  input Real[:, :] a;
+  output Real[2] c;
+ algorithm
+  c[1] := a[1,1];
+  c[2] := a[size(a, 1),size(a, 2)];
+  return;
+ end FunctionTests.UnknownArray20.f;
+end FunctionTests.UnknownArray20;
+")})));
+
+ function f
+  input Real a[:,:];
+  output Real[2] c;
+ algorithm
+  c[1] := a[1,1];
+  c[end] := a[end,end];
+ end f;
+ 
+ Real x[2] = f({{1,2}, {3,4}});
+end UnknownArray20;
+
+
 
 model IncompleteFunc1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

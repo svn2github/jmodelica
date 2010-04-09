@@ -399,11 +399,13 @@ aspect Arrays {
 	/**
 	 * \brief Get the size this subscript(s) would have if all subscripts were colons.
 	 */
+	inh lazy Size FEndExp.mySize();
 	inh lazy Size FSubscript.mySize();
 	inh lazy Size FArraySubscripts.mySize();
 	eq FIdUse.getChild().mySize()                     = myFV().size();
 	eq InstArrayAccess.getFArraySubscripts().mySize() = myInstComponentDecl().size();
 	eq FSubscriptedExp.getFArraySubscripts().mySize() = getFExp().size();
+	eq FExpSubscript.getFExp().mySize()               = mySize();
 	eq FlatRoot.getChild().mySize()                   = Size.SCALAR;
 	eq InstRoot.getChild().mySize()                   = Size.SCALAR;
 	

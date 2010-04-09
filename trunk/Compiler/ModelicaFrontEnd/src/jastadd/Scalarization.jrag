@@ -1359,8 +1359,27 @@ aspect Scalarization {
 	}
 	
 	public FExp FTimeExp.scalarizeExp(HashMap<String,FExp> indexMap) { return new FTimeExp(); }
-	public FExp FEndExp.scalarizeExp(HashMap<String,FExp> indexMap) { return new FEndExp(); }
+	
+	public FExp FEndExp.scalarizeExp(HashMap<String,FExp> indexMap) {
+		return mySize().isUnknown() ? createFSizeExp() : mySize().createFExp(0);
+	}
+	
+	inh FSizeExp FEndExp.createFSizeExp();
+	eq FArraySubscripts.getFSubscript(int i).createFSizeExp() = createFSizeExp(i);
+	eq FlatRoot.getChild().createFSizeExp()                   = null;
+	eq InstRoot.getChild().createFSizeExp()                   = null;
+	
+	inh FSizeExp FArraySubscripts.createFSizeExp(int dim);
+	eq FlatRoot.getChild().createFSizeExp(int dim) = null;
+	eq InstRoot.getChild().createFSizeExp(int dim) = null;
+	eq FQName.getChild().createFSizeExp(int dim) {
+		FQName fqn = fullCopy();
+		fqn.setLastFArraySubscripts(null);
+		FExp dimExp = new FIntegerLitExp(dim + 1);
+		return new FSizeExp(new FIdUseExp(fqn), new Opt(dimExp));
+	}
 
+	
 	public FForIndex FForIndex.scalarize(HashMap<String,FExp> indexMap) {
 		return new FForIndex(hasFExp() ? new Opt(getFExp().scalarizeIndexExp(indexMap)) : new Opt(), 
 				(FVariable) getFVariable().fullCopy());
