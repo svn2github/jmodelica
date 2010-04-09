@@ -71,6 +71,7 @@ def run_demo(with_plots=True):
 
     assert N.abs(resistor_v.x[-1] - 0.159255008028) < 1e-3, \
            "Wrong value in simulation result in RLC.py"
+    assert RLC_sim.stats['Number of F-Eval During Jac-Eval         '] == 0
     
     #Ts, ys = simulator.get_solution('sine.y','resistor.v','inductor1.i')
     fig = p.figure()

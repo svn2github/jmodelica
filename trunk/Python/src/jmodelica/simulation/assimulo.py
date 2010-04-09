@@ -84,7 +84,7 @@ class JMIODE(Explicit_Problem):
     
     Not extended with handling for discontinuities.
     """
-    def __init__(self, model,jacobian=True):
+    def __init__(self, model):
         """
         Sets the initial values.
         """
@@ -92,8 +92,7 @@ class JMIODE(Explicit_Problem):
         
         self.y0 = self._model.real_x
         
-        if jacobian: #Use JModelicas jacobian?
-            self.jac = self.j #Activates the jacobian
+        self.jac = self.j #Activates the jacobian
     
     def f(self, t, y, sw=None):
         """
@@ -160,7 +159,7 @@ class JMIDAE(Implicit_Problem):
     """
     An Assimulo Implicit Model extended to JMI interface.
     """
-    def __init__(self, model, jacobian=True):
+    def __init__(self, model):
         """
         Sets the initial values.
         """
@@ -182,9 +181,8 @@ class JMIDAE(Implicit_Problem):
         self.eps = 1e-9 #Epsilon for adjusting the event indicator.
         self.log_events = False #Are we to log the events?
         
-        if jacobian: #Use JModelicas jacobian?
-            self.jac = self.j #Activates the jacobian
-    
+        self.jac = self.j #Activates the jacobian
+        
         #Sets internal options
         self._initiate_problem = False #Used for initiation
         self._log_initiate_mode = False #Used for logging
