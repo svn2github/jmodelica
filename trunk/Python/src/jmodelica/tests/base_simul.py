@@ -23,6 +23,8 @@ class _BaseSimOptTest:
     """
     Base class for simulation and optimization tests.
     Actual test classes should inherit SimulationTest or OptimizationTest.
+    All assertion methods consider a value correct if it falls within either tolerance 
+    limit, absolute or relative.
     """
 
     @classmethod
@@ -35,24 +37,26 @@ class _BaseSimOptTest:
           options     - a dict of options to set in the compiler, defaults to no options
           compiler    - the compiler to use
         """
-	global _model_name, _tests_path
-	_model_name = class_name.replace('.','_')
-	path = os.path.join(_tests_path, 'files', mo_file)
+        global _model_name, _tests_path
+        _model_name = class_name.replace('.','_')
+        path = os.path.join(_tests_path, 'files', mo_file)
         _set_compiler_options(compiler, options)
-	compiler.compile_model(path, class_name, target='ipopt')
+        compiler.compile_model(path, class_name, target='ipopt')
 
 
-    def setup_base(self, tolerance):
+    def setup_base(self, rel_tol, abs_tol):
         """ 
         Set up a new test case. Configures test and creates model.
         Call this with proper args from setUp(). 
-	  tolerance -  the relative error tolerance when comparing values, default is 1.0e-3
-	Any other named args are passed to the NLP constructor.
+          rel_tol -  the relative error tolerance when comparing values
+          abs_tol -  the absolute error tolerance when comparing values
+        Any other named args are passed to the NLP constructor.
         """
-	global _model_name
-	self.tolerance = tolerance
-	self.model_name = _model_name
-	self.model = jmi.Model(self.model_name);
+        global _model_name
+        self.rel_tol = rel_tol
+        self.abs_tol = abs_tol
+        self.model_name = _model_name
+        self.model = jmi.Model(self.model_name);
 
 
     def run(self):
@@ -61,7 +65,7 @@ class _BaseSimOptTest:
         Call this from setUp() or within a test depending if all tests should run simulation.
         """
         self._run_and_write_data()
-	self.data = ResultDymolaTextual(self.model_name + '_result.txt')
+        self.data = ResultDymolaTextual(self.model_name + '_result.txt')
 
 
     def load_expected_data(self, name):
@@ -69,81 +73,90 @@ class _BaseSimOptTest:
         Load the expected data to use for assert_all_paths() and assert_all_end_values().
           name -  the file name of the results file, relative to files dir
         """
-	path = os.path.join(_tests_path, 'files', name)
+        path = os.path.join(_tests_path, 'files', name)
         self.expected = ResultDymolaTextual(path)
 
 
-    def assert_all_inital_values(self, variables, tolerance = None):
+    def assert_all_inital_values(self, variables, rel_tol = None, abs_tol = None):
         """
         Assert that all given variables match expected intial values loaded by a call to 
         load_expected_data().
           variables -  list of the names of the variables to test
-          tolerance -  the relative error tolerance, defaults to the value set with setup_base()
+          rel_tol -  the relative error tolerance, defaults to the value set with setup_base()
+          abs_tol -  the absolute error tolerance, defaults to the value set with setup_base()
         """
-        self._assert_all_spec_values(variables, 0, tolerance)
+        self._assert_all_spec_values(variables, 0, rel_tol, abs_tol)
 
 
-    def assert_all_end_values(self, variables, tolerance = None):
+    def assert_all_end_values(self, variables, rel_tol = None, abs_tol = None):
         """
         Assert that all given variables match expected end values loaded by a call to 
         load_expected_data().
           variables -  list of the names of the variables to test
-          tolerance -  the relative error tolerance, defaults to the value set with setup_base()
+          rel_tol -  the relative error tolerance, defaults to the value set with setup_base()
+          abs_tol -  the absolute error tolerance, defaults to the value set with setup_base()
         """
-        self._assert_all_spec_values(variables, -1, tolerance)
+        self._assert_all_spec_values(variables, -1, rel_tol, abs_tol)
 
 
-    def assert_all_trajectories(self, variables, same_span = True, tolerance = None):
+    def assert_all_trajectories(self, variables, same_span = True, rel_tol = None, abs_tol = None):
         """
         Assert that the trajectories of all given variables match expected trajectories 
         loaded by a call to load_expected_data().
           variables -  list of the names of the variables to test
           same_span -  if True, require that the paths span the same time interval
                        if False, only compare overlapping part, default True
-          tolerance -  the relative error tolerance, defaults to the value set with setup_base()
+          rel_tol -  the relative error tolerance, defaults to the value set with setup_base()
+          abs_tol -  the absolute error tolerance, defaults to the value set with setup_base()
         """
         for var in variables:
             expected = self.expected.get_variable_data(var)
-            self.assert_trajectory(var, expected, same_span, tolerance)
+            self.assert_trajectory(var, expected, same_span, rel_tol, abs_tol)
 
 
-    def assert_initial_value(self, variable, value, tolerance = None):
+    def assert_initial_value(self, variable, value, rel_tol = None, abs_tol = None):
         """
         Assert that the inital value for a simulation variable matches expected value. 
           variable  -  the name of the variable
           value     -  the expected value
-          tolerance -  the relative error tolerance, defaults to the value set with setup_base()
+          rel_tol -  the relative error tolerance, defaults to the value set with setup_base()
+          abs_tol -  the absolute error tolerance, defaults to the value set with setup_base()
         """
-        self._assert_value(variable, value, 0, tolerance)
+        self._assert_value(variable, value, 0, rel_tol, abs_tol)
 
 
-    def assert_end_value(self, variable, value, tolerance = None):
+    def assert_end_value(self, variable, value, rel_tol = None, abs_tol = None):
         """
         Assert that the end result for a simulation variable matches expected value. 
           variable  -  the name of the variable
           value     -  the expected value
-          tolerance -  the relative error tolerance, defaults to the value set with setup_base()
+          rel_tol -  the relative error tolerance, defaults to the value set with setup_base()
+          abs_tol -  the absolute error tolerance, defaults to the value set with setup_base()
         """
-        self._assert_value(variable, value, -1, tolerance)
+        self._assert_value(variable, value, -1, rel_tol, abs_tol)
 
     
-    def assert_trajectory(self, variable, expected, same_span = True, tolerance = None):
+    def assert_trajectory(self, variable, expected, same_span = True, rel_tol = None, abs_tol = None):
         """
         Assert that the trajectory of a simulation variable matches expected trajectory. 
           variable  -  the name of the variable
           expected  -  the expected trajectory
           same_span -  if True, require that the paths span the same time interval
                        if False, only compare overlapping part, default True
-          tolerance -  the relative error tolerance, defaults to the value set with setup_base()
+          rel_tol -  the relative error tolerance, defaults to the value set with setup_base()
+          abs_tol -  the absolute error tolerance, defaults to the value set with setup_base()
         """
-	if tolerance is None:
-	    tolerance = self.tolerance
-	ans = expected
-	res = self.data.get_variable_data(variable)
+        if rel_tol is None:
+            rel_tol = self.rel_tol
+        if abs_tol is None:
+            abs_tol = self.abs_tol
+        ans = expected
+        res = self.data.get_variable_data(variable)
 
-	if same_span:
-	    assert _rel_error(ans.t[0], res.t[0]) < tolerance
-	    assert _rel_error(ans.t[-1], res.t[-1]) < tolerance
+        if same_span:
+            msg = 'paths do not span the same time interval for ' + variable
+            assert _check_error(ans.t[0], res.t[0], rel_tol, abs_tol), msg
+            assert _check_error(ans.t[-1], res.t[-1], rel_tol, abs_tol), msg
 
         # Merge the time lists
         time = list(set(ans.t) | set(res.t))
@@ -154,36 +167,46 @@ class _BaseSimOptTest:
         # Remove values outside overlap
         time = filter((lambda t: t >= t1 and t <= t2), time)
 
-        # Calc the relative error for each time point
-        rel_error = [_eval_and_calc_rel_error(ans, res, t) for t in time]
-	assert max(rel_error) < tolerance
+        # Check error for each time point
+        for t in time:
+            ans_x = _trajectory_eval(ans, t)
+            res_x = _trajectory_eval(res, t)
+            (rel, abs) = _error(ans_x, res_x)
+            msg = 'error of %s at time %f is too large (rel=%f, abs=%f)' % (variable, t, rel, abs)
+            assert (rel <= rel_tol or abs <= abs_tol), msg
 
 
-    def _assert_all_spec_values(self, variables, index, tolerance = None):
+    def _assert_all_spec_values(self, variables, index, rel_tol = None, abs_tol = None):
         """
         Assert that all given variables match expected values loaded by a call to 
         load_expected_data(), for a given index in the value arrays.
           variables -  list of the names of the variables to test
           index     -  the index in the array holding the values, 0 is initial, -1 is end
-          tolerance -  the relative error tolerance, defaults to the value set with setup_base()
+          rel_tol -  the relative error tolerance, defaults to the value set with setup_base()
+          abs_tol -  the absolute error tolerance, defaults to the value set with setup_base()
         """
         for var in variables:
             value = self.expected.get_variable_data(var).x[index]
-            self._assert_value(var, value, index, tolerance)
+            self._assert_value(var, value, index, rel_tol, abs_tol)
 
 
-    def _assert_value(self, variable, value, index, tolerance = None):
+    def _assert_value(self, variable, value, index, rel_tol = None, abs_tol = None):
         """
         Assert that a specific value for a simulation variable matches expected value. 
           variable  -  the name of the variable
           value     -  the expected value
           index     -  the index in the array holding the values, 0 is initial, -1 is end
-          tolerance -  the relative error tolerance, defaults to the value set with setup_base()
+          rel_tol -  the relative error tolerance, defaults to the value set with setup_base()
+          abs_tol -  the absolute error tolerance, defaults to the value set with setup_base()
         """
-	if tolerance is None:
-	    tolerance = self.tolerance
-	res = self.data.get_variable_data(variable)
-	assert _rel_error(value, res.x[index]) <= tolerance
+        if rel_tol is None:
+            rel_tol = self.rel_tol
+        if abs_tol is None:
+            abs_tol = self.abs_tol
+        res = self.data.get_variable_data(variable)
+        (rel, abs) = _error(value, res.x[index])
+        msg = 'error of %s at index %i is too large (rel=%f, abs=%f)' % (variable, index, rel, abs)
+        assert (rel <= rel_tol or abs <= abs_tol), msg
 
 
 
@@ -207,26 +230,27 @@ class SimulationTest(_BaseSimOptTest):
         _BaseSimOptTest.setup_class_base(mo_file, class_name, compiler, options)
 
 
-    def setup_base(self, tolerance = 1.0e-4, **args):
+    def setup_base(self, rel_tol = 1.0e-4, abs_tol = 1.0e-6, **args):
         """ 
         Set up a new test case. Creates and configures the simulation.
         Call this with proper args from setUp(). 
-	  tolerance -  the relative error tolerance when comparing values, default is 1.0e-4
-	Any other named args are passed to sundials.
+          rel_tol -  the relative error tolerance when comparing values, default is 1.0e-4
+          abs_tol -  the absolute error tolerance when comparing values, default is 1.0e-6
+        Any other named args are passed to sundials.
         """
-        _BaseSimOptTest.setup_base(self, tolerance)
-	ipopt_nlp = ipopt_init.NLPInitialization(self.model)
+        _BaseSimOptTest.setup_base(self, rel_tol, abs_tol)
+        ipopt_nlp = ipopt_init.NLPInitialization(self.model)
         ipopt_opt = ipopt_init.InitializationOptimizer(ipopt_nlp)
         ipopt_opt.init_opt_ipopt_solve()
-	self.sundials = SundialsDAESimulator(self.model, **args)
+        self.sundials = SundialsDAESimulator(self.model, **args)
 
 
     def _run_and_write_data(self):
         """
         Run optimization and write result to file.
         """
-	self.sundials.run()
-	self.sundials.write_data()
+        self.sundials.run()
+        self.sundials.write_data()
 
 
 class OptimizationTest(_BaseSimOptTest):
@@ -249,16 +273,17 @@ class OptimizationTest(_BaseSimOptTest):
         _BaseSimOptTest.setup_class_base(mo_file, class_name, compiler, options)
 
 
-    def setup_base(self, nlp_args = (), tolerance = 1.0e-4, options = {}, result_mesh='default', result_arguments = {}):
+    def setup_base(self, nlp_args = (), rel_tol = 1.0e-4, abs_tol = 1.0e-6, options = {}, result_mesh='default', result_arguments = {}):
         """ 
         Set up a new test case. Creates and configures the optimization.
         Call this with proper args from setUp(). 
           nlp_args  -  arguments to pass to the NLP constructor besides the model
-	  tolerance -  the relative error tolerance when comparing values, default is 1.0e-4
+          rel_tol -  the relative error tolerance when comparing values, default is 1.0e-4
+          abs_tol -  the absolute error tolerance when comparing values, default is 1.0e-6
           options   -  a dict of options to set in the optimizer, defaults to no options
         """
-        _BaseSimOptTest.setup_base(self, tolerance)
-	self.nlp = ipopt.NLPCollocationLagrangePolynomials(self.model, *nlp_args)
+        _BaseSimOptTest.setup_base(self, rel_tol, abs_tol)
+        self.nlp = ipopt.NLPCollocationLagrangePolynomials(self.model, *nlp_args)
         self.ipopt = ipopt.CollocationOptimizer(self.nlp)
         self._result_mesh = result_mesh
         self._result_arguments = result_arguments
@@ -313,19 +338,21 @@ def _set_compiler_options(cmp, opts):
             cmp.set_string_option(k, v)
 
 
-def _rel_error(v1, v2):
+def _error(v1, v2):
     """
-    Calculates the relative error between two values.
+    Calculates the relative and absolute error between two values.
     """
     if v1 == v2:
-        return 0.0
-    return abs(v1 - v2) / max(abs(v1), abs(v2))
+        return (0.0, 0.0)
+    abs_err = abs(v1 - v2)
+    return (abs_err / max(abs(v1), abs(v2)), abs_err)
 
-def _eval_and_calc_rel_error(ans, res, t):
+def _check_error(ans, res, rel_tol, abs_tol):
     """
-    Evaluate both ans and res at time t and calculate the relative error.
+    Check that error is within tolerance.
     """
-    return _rel_error(_trajectory_eval(ans, t), _trajectory_eval(res, t))
+    (rel, abs) = _error(ans, res)
+    return rel <= rel_tol or abs <= abs_tol
 
 
 def _trajectory_eval(var, t):

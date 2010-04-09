@@ -22,3 +22,23 @@ class TestNominal(SimulationTest):
     @testattr(stddist = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['x', 'y', 'z', 'der(x)', 'der(y)'])
+
+
+class TestFunction1(SimulationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'FunctionAR.mo', 'FunctionAR.UnknownArray1')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(verbosity=3, start_time=0.0, final_time=1.0, time_step = 0.002, rel_tol=1.0e-2, abs_tol=1.0e-2)
+        self.run()
+        self.load_expected_data('UnknownArray.txt')
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        vars = ['x[%d]' % i for i in range(1, 4)]
+        self.assert_all_trajectories(vars, same_span=True)
+
