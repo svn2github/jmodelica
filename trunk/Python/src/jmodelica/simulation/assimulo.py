@@ -54,7 +54,10 @@ def write_data(simulator):
         t = N.array(simulator.t)
         y = N.array(simulator.y)
         yd = N.array(simulator.yd)
-        u = N.ones((len(t),len(model.real_u)))*model.real_u
+        if simulator._problem._input:
+            u = simulator._problem._input.eval(t)
+        else:
+            u = N.ones((len(t),len(model.real_u)))*model.real_u
         
         # extends the time array with the states columnwise
         data = N.c_[t,yd[:,0:len(model.real_dx)]]
@@ -167,11 +170,12 @@ class JMIDAE(Implicit_Problem):
     """
     An Assimulo Implicit Model extended to JMI interface.
     """
-    def __init__(self, model):
+    def __init__(self, model, input=None):
         """
         Sets the initial values.
         """
         self._model = model
+        self._input = input
         
         self.y0 = N.append(self._model.real_x,self._model.real_w)
         self.yd0 = N.append(self._model.real_dx,[0]*len(self._model.real_w))
@@ -214,6 +218,10 @@ class JMIDAE(Implicit_Problem):
         self._model.real_x = y[0:self._x_nbr]
         self._model.real_w = y[self._x_nbr:self._f_nbr]
         self._model.real_dx = yd[0:self._dx_nbr]
+        
+        #Sets the inputs, if any
+        if self._input!=None:
+            self._model.real_u = self._input.eval(t)[0,:]
 
         #Evaluating the residual function
         residual = N.array([.0]*self._f_nbr)
@@ -247,6 +255,10 @@ class JMIDAE(Implicit_Problem):
         self._model.real_x = y[0:self._x_nbr]
         self._model.real_w = y[self._x_nbr:self._f_nbr]
         self._model.real_dx = yd[0:self._dx_nbr]
+        
+        #Sets the inputs, if any
+        if self._input!=None:
+            self._model.real_u = self._input.eval(t)[0,:]
         
         #Evaluating the jacobian
         #-Setting options
@@ -542,3 +554,83 @@ class JMIDAE(Implicit_Problem):
         print 'Pre: ', self._log_information[ind][6][iter][0]
         print 'After: ', self._log_information[ind][6][iter][1]
         
+
+
+class Trajectory:
+    """
+    Base class for representation of trajectories.
+    """
+    
+    def __init__(self, abscissa, ordinate):
+        """
+        Default constructor for creating a tracjectory object.
+
+        Parameters:
+            abscissa -- One dimensional numpy array containing
+                        the n abscissa (independent) values
+            ordinate -- Two dimensional n x m numpy matrix containing
+                        the ordiate values. The matrix has the same
+                        number of rows as the abscissa has elements.
+                        The number of columns is equal to the number of
+                        output variables.
+        """
+        self._abscissa = abscissa
+        self._ordinate = ordinate
+        self._n = N.size(abscissa)
+        self._x0 = abscissa[0]
+        self._xf = abscissa[-1]
+
+    def eval(self,x):
+        """
+        Evaluate the trajectory at a specifed abscissa.
+
+        Parameters:
+            x -- One dimensional numpy array, or scalar number,
+                 containing n abscissa value(s).
+
+        Returns:
+            Two dimensional n x m matrix containing the
+            ordinate values corresponding to the argument x.
+        """
+        pass
+
+    def set_abscissa(self, absscissa):
+        """ Set the abscissa of the trajectory."""
+        self._abscissa[:] = abscissa
+
+    def get_abscissa(self):
+        """ Get the abscissa of the trajectory."""
+        return self._abscissa
+
+    abscissa = property(get_abscissa, set_abscissa, doc="Abscissa")
+
+    def set_ordinate(self, absscissa):
+        """ Set the ordinate of the trajectory."""
+        self._ordinate[:] = ordinate
+
+    def get_ordinate(self):
+        """ Get the ordinate of the trajectory."""
+        return self._ordinate
+
+    ordinate = property(get_ordinate, set_ordinate, doc="Ordinate")
+
+
+
+class TrajectoryLinearInterpolation(Trajectory):
+
+    def eval(self,x):
+        """
+        Evaluate the trajectory at a specifed abscissa.
+
+        Parameters:
+            x -- One dimensional numpy array, or scalar number,
+                 containing n abscissa value(s).
+
+        Returns:
+            Two dimensional n x m matrix containing the
+            ordinate values corresponding to the argument x.
+        """        
+        y = N.zeros([N.size(x),N.size(self.ordinate,1)])
+        for i in range(N.size(y,1)):
+            y[:,i] = N.interp(x,self.abscissa,self.ordinate[:,i])
+        return y
