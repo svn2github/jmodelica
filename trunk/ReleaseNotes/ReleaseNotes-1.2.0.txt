@@ -9,10 +9,9 @@ NOTICE: This document is in preparation
 
 1.1.1 Arrays
 
-Arrays are now fully supported. This includes all arithmetic operations and  
-use of arrays in all places allowed in the language specification. The only 
-exception is inputs to functions with one or more dimensions declared with 
-":", where support is only partial.
+Arrays are now almost fully supported. This includes all arithmetic operations and  
+use of arrays in all places allowed in the language specification. The only exception 
+is slice operations, that are only supported for the last component in an access.
 
 1.1.2 Function-like operators
 
