@@ -262,7 +262,7 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 		return retval;
 	}
 
-	print_problem_stats(jmi_init_opt);
+	//print_problem_stats(jmi_init_opt);
 
 	free(merged_p_free_init);
 	free(merged_p_free_lb);

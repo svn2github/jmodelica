@@ -3171,7 +3171,7 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 			(*jmi_opt_sim)->get_result_element_interpolation =
 				*lp_radau_get_result_element_interpolation;
 			//print_lp_pols(*jmi_opt_sim);
-			print_problem_stats(*jmi_opt_sim);
+			//print_problem_stats(*jmi_opt_sim);
 			return 0;
 }
 
