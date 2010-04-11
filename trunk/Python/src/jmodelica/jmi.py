@@ -499,6 +499,88 @@ class Model(object):
             pd[i] = pd_tmp[i]
             pd_tmp[:] = pd
         self.set_real_pd(pd)
+
+    def _set_start_values(self, p_opt_start, dx_start, x_start, u_start, w_start):
+        
+        """ 
+        Set start values from the XML meta data file. 
+        
+        Parameters:
+            p_opt_start -- The optimized parameters start value vector.
+            dx_start -- The derivatives start value vector.
+            x_start -- The states start value vector.
+            u_start -- The input start value vector.
+            w_start -- The algebraic variables start value vector.
+        
+        """
+        
+        xmldoc = self._get_XMLDoc()
+
+        sc = self.jmimodel.get_variable_scaling_factors()
+
+        # p_opt: free variables
+        values = xmldoc.get_p_opt_start_attributes(include_alias=False)
+        n_p_opt = self.jmimodel.opt_get_n_p_opt()
+        if n_p_opt > 0:
+            p_opt_indices = N.zeros(n_p_opt, dtype=int)
+        
+            self.jmimodel.opt_get_p_opt_indices(p_opt_indices)
+            p_opt_indices = p_opt_indices.tolist()
+            
+            for name in values.keys():
+                value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(value_ref)
+                i_pi = z_i - self._offs_real_pi.value
+                i_pi_opt = p_opt_indices.index(i_pi)
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    p_opt_start[i_pi_opt] = values.get(name)/sc[z_i]
+                else:
+                    p_opt_start[i_pi_opt] = values.get(name)
+        
+        # dx: derivative
+        values = xmldoc.get_dx_start_attributes(include_alias=False)
+        for name in values.keys():
+            value_ref = xmldoc.get_valueref(name)
+            (z_i, ptype) = _translate_value_ref(value_ref)
+            i_dx = z_i - self._offs_real_dx.value
+            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                dx_start[i_dx] = values.get(name)/sc[z_i]
+            else:
+                dx_start[i_dx] = values.get(name)
+        
+        # x: differentiate
+        values = xmldoc.get_x_start_attributes(include_alias=False)
+        for name in values.keys():
+            value_ref = xmldoc.get_valueref(name)
+            (z_i, ptype) = _translate_value_ref(value_ref)
+            i_x = z_i - self._offs_real_x.value
+            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                x_start[i_x] = values.get(name)/sc[z_i]
+            else:
+                x_start[i_x] = values.get(name)
+            
+        # u: input
+        values = xmldoc.get_u_start_attributes(include_alias=False)
+        for name in values.keys():
+            value_ref = xmldoc.get_valueref(name)
+            (z_i, ptype) = _translate_value_ref(value_ref)
+            if ptype==0: # Only Reals supported here
+                i_u = z_i - self._offs_real_u.value
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    u_start[i_u] = values.get(name)/sc[z_i]
+                else:
+                    u_start[i_u] = values.get(name)
+        
+        # w: algebraic
+        values = xmldoc.get_w_start_attributes(include_alias=False)
+        for name in values.keys():
+            value_ref = xmldoc.get_valueref(name)
+            (z_i, ptype) = _translate_value_ref(value_ref)
+            i_w = z_i - self._offs_real_w.value
+            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                w_start[i_w] = values.get(name)/sc[z_i]
+            else:
+                w_start[i_w] = values.get(name)
                 
     def _set_initial_values(self, p_opt_init, dx_init, x_init, u_init, w_init):
         

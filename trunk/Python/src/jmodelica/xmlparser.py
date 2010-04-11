@@ -414,6 +414,32 @@ class XMLDoc(XMLBaseDoc):
 #        vals = map(N.float,vals)
         return self._cast_values(keys, vals)
 
+    def get_p_opt_start_attributes(self, include_alias=True):
+        """ 
+        Extract variable name and start values for all optimized 
+        independent parameters.
+        
+        Returns:
+            Dict with variable name as key and start attribute as value.
+        
+        """
+        if include_alias:
+            keys = self._xpatheval("//ScalarVariable/@name\
+                [../VariableCategory=\"independentParameter\"][../*/@free=\"true\"][../*/@start]")
+            vals = self._xpatheval("//ScalarVariable/*/@start\
+                [../../VariableCategory=\"independentParameter\"][../../*/@free=\"true\"]")
+        else:
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"]\
+                [../*/@free=\"true\"][../@alias=\"noAlias\"][../*/@start]")
+            vals = self._xpatheval("//ScalarVariable/*/@start[../../VariableCategory=\"independentParameter\"]\
+                [../../*/@free=\"true\"][../../@alias=\"noAlias\"]")
+
+        if len(keys)!=len(vals):
+            raise Exception("Number of vals does not equal number of keys. \
+                Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
+        return self._cast_values(keys, vals)
+
+
     def get_dx_start_attributes(self, include_alias=True):
         """ 
         Extract variable name and Start attribute for all derivatives in the 
@@ -536,12 +562,12 @@ class XMLDoc(XMLBaseDoc):
         """
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"] \
-                [../@causality!=\"input\"]")
+                [../@causality!=\"input\"][../*/@initialGuess]")
             vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../VariableCategory=\"algebraic\"] \
                 [../../@causality!=\"input\"]")
         else:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"] \
-                [../@causality!=\"input\"][../@alias=\"noAlias\"]")
+                [../@causality!=\"input\"][../@alias=\"noAlias\"][../*/@initialGuess]")
             vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../VariableCategory=\"algebraic\"] \
                 [../../@causality!=\"input\"][../../@alias=\"noAlias\"]")
 
@@ -561,12 +587,12 @@ class XMLDoc(XMLBaseDoc):
         """
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"]\
-                [../VariableCategory=\"algebraic\"]")
+                [../VariableCategory=\"algebraic\"][../*/@initialGuess]")
             vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../@causality=\"input\"] \
                 [../../VariableCategory=\"algebraic\"]")
         else:
             keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"]\
-                [../VariableCategory=\"algebraic\"][../@alias=\"noAlias\"]")
+                [../VariableCategory=\"algebraic\"][../@alias=\"noAlias\"][../*/@initialGuess]")
             vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../@causality=\"input\"] \
                 [../../VariableCategory=\"algebraic\"][../../@alias=\"noAlias\"]")
             
@@ -585,12 +611,12 @@ class XMLDoc(XMLBaseDoc):
             
         """
         if include_alias:
-            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"]")
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"][../*/@initialGuess]")
             vals = self._xpatheval("//ScalarVariable/*/@initialGuess\
                 [../../VariableCategory=\"derivative\"]")
         else:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"]\
-                [../@alias=\"noAlias\"]")
+                [../@alias=\"noAlias\"][../*/@initialGuess]")
             vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../VariableCategory=\"derivative\"]\
                 [../../@alias=\"noAlias\"]")
 
@@ -609,12 +635,12 @@ class XMLDoc(XMLBaseDoc):
             
         """
         if include_alias:
-            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"]")
+            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"][../*/@initialGuess]")
             vals = self._xpatheval("//ScalarVariable/*/@initialGuess\
                 [../../VariableCategory=\"state\"]")
         else:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"]\
-                [../@alias=\"noAlias\"]")
+                [../@alias=\"noAlias\"][../*/@initialGuess]")
             vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../VariableCategory=\"state\"]\
                 [../../@alias=\"noAlias\"]")
 
@@ -634,12 +660,12 @@ class XMLDoc(XMLBaseDoc):
         """
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name\
-                [../VariableCategory=\"independentParameter\"][../*/@free=\"true\"]")
+                [../VariableCategory=\"independentParameter\"][../*/@free=\"true\"][../*/@initialGuess]")
             vals = self._xpatheval("//ScalarVariable/*/@initialGuess\
                 [../../VariableCategory=\"independentParameter\"][../../*/@free=\"true\"]")
         else:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"]\
-                [../*/@free=\"true\"][../@alias=\"noAlias\"]")
+                [../*/@free=\"true\"][../@alias=\"noAlias\"][../*/@initialGuess]")
             vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../VariableCategory=\"independentParameter\"]\
                 [../../*/@free=\"true\"][../../@alias=\"noAlias\"]")
 

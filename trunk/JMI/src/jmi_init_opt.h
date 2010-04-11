@@ -142,6 +142,7 @@ struct jmi_init_opt_t{
 	int dF_dv_n_nz;
 	int *der_mask_v;
 	int der_eval_alg;
+	int stat;
 };
 
 /**
@@ -149,15 +150,15 @@ struct jmi_init_opt_t{
  */
 int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 		int n_p_free, int *p_free_indices,
-		jmi_real_t *p_free_init, jmi_real_t *dx_init, jmi_real_t *x_init,
-		jmi_real_t *w_init,
-		jmi_real_t *p_free_lb, jmi_real_t *dx_lb, jmi_real_t *x_lb,
-		jmi_real_t *w_lb,
-		jmi_real_t *p_free_ub, jmi_real_t *dx_ub, jmi_real_t *x_ub,
-		jmi_real_t *w_ub,
+		jmi_real_t *p_opt_init, jmi_real_t *p_free_init, jmi_real_t *dx_init,
+		jmi_real_t *x_init, jmi_real_t *w_init,
+		jmi_real_t *p_opt_lb, jmi_real_t *p_free_lb, jmi_real_t *dx_lb,
+		jmi_real_t *x_lb, jmi_real_t *w_lb,
+		jmi_real_t *p_opt_ub, jmi_real_t *p_free_ub, jmi_real_t *dx_ub,
+		jmi_real_t *x_ub, jmi_real_t *w_ub,
 		int linearity_information_provided,
-		int* p_free_lin, int* dx_lin, int* x_lin, int* w_lin,
-		int der_eval_alg) ;
+		int* p_opt_lin, int* p_free_lin, int* dx_lin, int* x_lin, int* w_lin,
+		int der_eval_alg, int stat) ;
 
 /**
  * \brief Delete a jmi_init_opt_t struct.

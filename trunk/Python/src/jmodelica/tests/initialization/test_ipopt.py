@@ -126,9 +126,6 @@ class TestNLPInitWrappers:
         self.init_nlp.init_opt_dh_nz_indices(irow,icol)
 
 
-
-
-
 class TestNLPInit:
     """ Test evaluation of function in NLPInitialization and solution
     of initialization problems.
@@ -167,9 +164,10 @@ class TestNLPInit:
         n_x, n_h, dh_n_nz = self.init_nlp.init_opt_get_dimensions()
     
         # Test init_opt_get_x_init
-        res_x_init = N.array([0,0,3,4,1,0.3,0,0])
+        res_x_init = N.array([0,0,3,4,1,0,0,0])
         x_init = N.zeros(n_x)
         self.init_nlp.init_opt_get_initial(x_init)
+        #print x_init
         assert N.sum(N.abs(res_x_init-x_init))<1e-3, \
                "test_jmi.py: test_init_opt: init_opt_get_x_init returns wrong values." 
     
@@ -215,9 +213,10 @@ class TestNLPInit:
         n_x, n_h, dh_n_nz = self.init_nlp.init_opt_get_dimensions()
     
         # Test init_opt_f
-        res_f = N.array([0.045])
+        res_f = N.array([0.0])
         f = N.zeros(1)
         self.init_nlp.init_opt_f(f)
+        #print f
         assert N.sum(N.abs(res_f-f))<1e-3, \
                "test_jmi.py: test_init_opt: init_opt_f returns wrong value" 
 
@@ -227,9 +226,10 @@ class TestNLPInit:
         n_x, n_h, dh_n_nz = self.init_nlp.init_opt_get_dimensions()
 
         # Test init_opt_df
-        res_df = N.array([0.,0,0,0,0,0.3,0,0])
+        res_df = N.array([0.,0,0,0,0,0,0,0])
         df = N.ones(n_x)
         self.init_nlp.init_opt_df(df)
+        #print df
         assert N.sum(N.abs(res_df-df))<1e-3, \
                "test_jmi.py: test_init_opt: init_opt_df returns wrong value" 
 
@@ -238,10 +238,11 @@ class TestNLPInit:
 
         n_x, n_h, dh_n_nz = self.init_nlp.init_opt_get_dimensions()
         # Test init_opt_h
-        res_h = N.array([-1.98158529e+02,  -2.43197505e-01,   5.11700000e+02,   5.00000000e+00,
-                         4.27379880e-01,   0.00000000e+00,   0.00000000e+00,   0.00000000e+00,])
+        res_h = N.array([ -1.98158529e+02,  -2.43197505e-01,   5.12000000e+02,   5.00000000e+00,
+                          1.41120008e-01,   0.00000000e+00,   0.00000000e+00,   0.00000000e+00])
         h = N.zeros(n_h)
         self.init_nlp.init_opt_h(h)
+        #print h
         assert N.sum(N.abs(res_h-h))<1e-3, \
                "test_jmi.py: test_init_opt: init_opt_h returns wrong value" 
 
@@ -250,12 +251,12 @@ class TestNLPInit:
         n_x, n_h, dh_n_nz = self.init_nlp.init_opt_get_dimensions()
 
         # Test init_opt_dh
-        res_dh = N.array([  -1.,           -1.,         -135.,          192.,          -0.90407214,
-                            -1.,          -48.,            0.65364362,   -1.,            0.54030231,
-                            -2.,           -1.,           -1.,            0.90407214,  192.,           -1.,
-                            -1. ])
+        res_dh = N.array([ -1.,           -1.,         -135.,          192.,           -0.9899925,    -1.,
+                           -48.,            0.65364362,   -1.,            0.54030231,   -2.,           -1.,
+                           -1.,            0.9899925,   192.,           -1.,           -1.,        ])
         dh = N.ones(dh_n_nz)
         self.init_nlp.init_opt_dh(dh)
+        #print dh
         assert N.sum(N.abs(res_dh-dh))<1e-3, \
                "test_jmi.py: test_init_opt: init_opt_dh returns wrong value" 
 

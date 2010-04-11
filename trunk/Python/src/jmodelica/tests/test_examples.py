@@ -35,6 +35,13 @@ def test_quadtank():
     quadtank.run_demo(False)
 
 @testattr(stddist = True)
+def test_quadtank_static_opt():
+    """
+    Test the quadtank static optimization example
+    """
+    quadtank_static_opt.run_demo(False)
+
+@testattr(stddist = True)
 def test_cstr():
     """
     Test the cstr example

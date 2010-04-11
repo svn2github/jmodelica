@@ -33,12 +33,30 @@ aspect OptimicaErrorCheck {
   	
   	public void InstComponentModification.checkOptimicaAttribute(InstOptClassDecl iocd) {
      	super.checkOptimicaAttribute(iocd);
-     	if (hasInstModification() && getInstModification().hasInstValueMod()) {
-     		FExp exp = getInstModification().instValueMod();
-     		if (getName().name().equals("objective") && 
-	     			!(exp.variability().lessOrEqual(fTimed())))
-	     		error("The class attribute 'objective' must have parameter or timed variability.");
-     	}
+    	boolean stat = false;
+    	// This digging around is necessary since the check of the objective
+    	// class attribute is dependent on the static class attribute
+    	// Also, modifications for class attributes are not merged, and therefore
+    	// lookup of the static class attribute declaration node and then evaluation
+    	// of the binding expression does not work. TODO: implement proper
+    	// merging of class modifications.
+    	if (iocd.hasInstClassModification()) { 
+    		for (InstModification im : iocd.getInstClassModification().getInstArgumentList()) { 
+    			try {
+    				if (im instanceof InstComponentModification && ((InstComponentModification)im).getName().name().equals("static")) {
+    					if (((InstComponentModification)im).getInstModification().instValueMod().ceval().booleanValue()) {
+    						stat = true;
+    					}
+    				}
+    			} catch(Exception e) {}
+    		}
+    	}
+
+     	if (!stat && getName().name().equals("objective") && 
+     			!(getInstModification().instValueMod().variability().lessOrEqual(fTimed()))) {
+     				error("The class attribute 'objective' must have parameter or timed variability.");
+ 		}
+ 
   	}
 
 	public void FOptClass.checkFClassDimensions() {

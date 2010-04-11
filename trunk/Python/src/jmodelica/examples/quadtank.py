@@ -23,6 +23,7 @@ import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.compiler import OptimicaCompiler
 from jmodelica.optimization import ipopt
+from jmodelica.initialization.ipopt import *
 
 # Import numerical libraries
 import numpy as N
@@ -35,8 +36,7 @@ def run_demo(with_plots=True):
     """Optimal control of the quadruple tank process."""
 
     oc = OptimicaCompiler()
-    oc.set_boolean_option('state_start_values_fixed',True)
-    
+
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     
     # Compile the Optimica model first to C code and
@@ -58,9 +58,9 @@ def run_demo(with_plots=True):
 
     def res(y,t):
         for i in range(4):
-            qt.get_real_x()[i] = y[i]
+            qt.get_real_x()[i+1] = y[i]
         qt.jmimodel.ode_f()
-        return qt.get_real_dx()[0:4]
+        return qt.get_real_dx()[1:5]
 
     # Compute stationary state values for operating point A
     qt.set_real_u(u_A)
@@ -96,17 +96,18 @@ def run_demo(with_plots=True):
         plt.grid()
         plt.show()
     
-    qt.get_real_pi()[13] = x_A[0]
-    qt.get_real_pi()[14] = x_A[1]
-    qt.get_real_pi()[15] = x_A[2]
-    qt.get_real_pi()[16] = x_A[3]
-    
-    qt.get_real_pi()[17] = x_B[0]
-    qt.get_real_pi()[18] = x_B[1]
-    qt.get_real_pi()[19] = x_B[2]
-    qt.get_real_pi()[20] = x_B[3]
-    qt.get_real_pi()[21] = u_B[0]
-    qt.get_real_pi()[22] = u_B[1]
+    qt.set_value("x1_0",x_A[0])
+    qt.set_value("x2_0",x_A[1])
+    qt.set_value("x3_0",x_A[2])
+    qt.set_value("x4_0",x_A[3])
+
+    qt.set_value("x1_r",x_B[0])
+    qt.set_value("x2_r",x_B[1])
+    qt.set_value("x3_r",x_B[2])
+    qt.set_value("x4_r",x_B[3])
+
+    qt.set_value("u1_r",u_B[0])
+    qt.set_value("u2_r",u_B[1])
 
     # Solve optimal control problem
     

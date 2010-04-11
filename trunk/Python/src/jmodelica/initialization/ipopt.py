@@ -118,7 +118,7 @@ class NLPInitialization(object):
     NLP interface for a DAE initialization optimization
     problem.    
     """    
-    def __init__(self, model):
+    def __init__(self, model, stat = 0):
         """
         Constructor where main data structure is created. 
         
@@ -135,32 +135,58 @@ class NLPInitialization(object):
         self._model = model
         self._jmi_model = model.jmimodel
 
-        _n_p_free = 0
-        _p_free_indices = N.ones(_n_p_free,dtype=int)
+        self._n_p_free = 0
+        self._p_free_indices = N.ones(self._n_p_free,dtype=int)
+
+        self._n_p_opt=model.jmimodel.opt_get_n_p_opt()
 
         # Initialization
-        _p_free_start = N.zeros(_n_p_free) # Not supported
+        _p_opt_start = N.zeros(self._n_p_opt) 
+        _p_free_start = N.zeros(self._n_p_free) # Not supported
         _dx_start = N.zeros(model._n_real_dx.value)
         _x_start = N.zeros(model._n_real_x.value)
+        _u_start = N.zeros(model._n_real_u.value)
         _w_start = N.zeros(model._n_real_w.value)
     
         # Bounds
-        _p_free_lb = -1.0e20*N.ones(_n_p_free) # Not supported
+        _p_opt_lb = N.zeros(self._n_p_opt) 
+        _p_free_lb = -1.0e20*N.ones(self._n_p_free) # Not supported
         _dx_lb = -1.0e20*N.ones(model._n_real_dx.value)
         _x_lb = -1.0e20*N.ones(model._n_real_x.value)
+        _u_lb = -1.0e20*N.ones(model._n_real_u.value)
         _w_lb = -1.0e20*N.ones(model._n_real_w.value)
-        
-        _p_free_ub = 1.0e20*N.ones(_n_p_free)
+
+        _p_opt_ub = N.zeros(self._n_p_opt) 
+        _p_free_ub = 1.0e20*N.ones(self._n_p_free)
         _dx_ub = 1.0e20*N.ones(model._n_real_dx.value)
         _x_ub = 1.0e20*N.ones(model._n_real_x.value)
+        _u_ub = 1.0e20*N.ones(model._n_real_u.value)
         _w_ub = 1.0e20*N.ones(model._n_real_w.value)
-                        
-        self._set_start_values(_p_free_start, _dx_start, _x_start, _w_start)
-        self._set_lb_values(_p_free_lb, _dx_lb, _x_lb, _w_lb)
-        self._set_ub_values(_p_free_ub, _dx_ub, _x_ub, _w_ub)
 
+
+        # Bounds
+        _p_opt_lb = -1.0e20*N.ones(self._n_p_opt)
+        _dx_lb = -1.0e20*N.ones(model._n_real_dx.value)
+        _x_lb = -1.0e20*N.ones(model._n_real_x.value)
+        _u_lb = -1.0e20*N.ones(model._n_real_u.value)
+        _w_lb = -1.0e20*N.ones(model._n_real_w.value)
+        
+        _p_opt_ub = 1.0e20*N.ones(self._n_p_opt)
+        _dx_ub = 1.0e20*N.ones(model._n_real_dx.value)
+        _x_ub = 1.0e20*N.ones(model._n_real_x.value)
+        _u_ub = -1.0e20*N.ones(model._n_real_u.value)
+        _w_ub = 1.0e20*N.ones(model._n_real_w.value)
+
+        if stat==0:
+            self._model._set_start_values(_p_opt_start, _dx_start, _x_start, _u_start, _w_start)
+        else:
+            self._model._set_initial_values(_p_opt_start, _dx_start, _x_start, _u_start, _w_start)
+        self._model._set_lb_values(_p_opt_lb, _dx_lb, _x_lb, _u_lb, _w_lb)
+        self._model._set_ub_values(_p_opt_ub, _dx_ub, _x_ub, _u_ub, _w_ub)
+                    
         _linearity_information_provided = 0; # Not supported
-        _p_free_lin = N.ones(_n_p_free,dtype=int)
+        _p_opt_lin = N.ones(self._n_p_opt,dtype=int)
+        _p_free_lin = N.ones(self._n_p_free,dtype=int)
         _dx_lin = N.ones(model._n_real_dx.value,dtype=int)
         _x_lin = N.ones(model._n_real_x.value,dtype=int)
         _w_lin = N.ones(model._n_real_w.value,dtype=int)
@@ -170,16 +196,16 @@ class NLPInitialization(object):
         self._set_typedef_init_opt_new()
 #        try:       
         assert model.jmimodel._dll.jmi_init_opt_new(byref(self._jmi_init_opt), model.jmimodel._jmi,
-                                                    _n_p_free,_p_free_indices,
-                                                    _p_free_start, _dx_start, _x_start,
+                                                    self._n_p_free,self._p_free_indices,
+                                                    _p_opt_start, _p_free_start, _dx_start, _x_start,
                                                     _w_start,
-                                                    _p_free_lb, _dx_lb, _x_lb,
+                                                    _p_opt_lb, _p_free_lb, _dx_lb, _x_lb,
                                                     _w_lb,
-                                                    _p_free_ub, _dx_ub, _x_ub,
+                                                    _p_opt_ub, _p_free_ub, _dx_ub, _x_ub,
                                                     _w_ub,
                                                     _linearity_information_provided,                
-                                                    _p_free_lin, _dx_lin, _x_lin, _w_lin,
-                                                    jmi.JMI_DER_CPPAD) is 0, \
+                                                    _p_opt_lin, _p_free_lin, _dx_lin, _x_lin, _w_lin,
+                                                    jmi.JMI_DER_CPPAD,stat) is 0, \
                                                     " jmi_opt_lp_new returned non-zero."
         #        except AttributeError,e:
 #             raise jmi.JMIException("Can not create NLPInitialization object.")
@@ -194,6 +220,9 @@ class NLPInitialization(object):
                                                               ct.c_void_p,                          # jmi 
                                                               ct.c_int,                             # n_p_free
                                                               Nct.ndpointer(dtype=ct.c_int,         # p_free_indices
+                                                                            ndim=1,
+                                                                            flags='C'),
+                                                              Nct.ndpointer(dtype=c_jmi_real_t,     # p_opt_init
                                                                             ndim=1,
                                                                             flags='C'),
                                                               Nct.ndpointer(dtype=c_jmi_real_t,     # p_free_init
@@ -211,6 +240,9 @@ class NLPInitialization(object):
                                                                             ndim=1,
                                                                             shape=self._model._n_real_w.value,
                                                                             flags='C'),
+                                                              Nct.ndpointer(dtype=c_jmi_real_t,     # p_opt_lb
+                                                                            ndim=1,
+                                                                            flags='C'),
                                                               Nct.ndpointer(dtype=c_jmi_real_t,     # p_free_lb
                                                                             ndim=1,
                                                                             flags='C'),
@@ -225,6 +257,9 @@ class NLPInitialization(object):
                                                               Nct.ndpointer(dtype=c_jmi_real_t,     # w_lb
                                                                             ndim=1,
                                                                             shape=self._model._n_real_w.value,
+                                                                            flags='C'),
+                                                              Nct.ndpointer(dtype=c_jmi_real_t,     # p_opt_ub
+                                                                            ndim=1,
                                                                             flags='C'),
                                                               Nct.ndpointer(dtype=c_jmi_real_t,     # p_free_ub
                                                                             ndim=1,
@@ -242,6 +277,9 @@ class NLPInitialization(object):
                                                                             shape=self._model._n_real_w.value,
                                                                             flags='C'),
                                                               ct.c_int,                             # linearity_information_provided
+                                                              Nct.ndpointer(dtype=ct.c_int,         # p_opt_lin
+                                                                            ndim=1,
+                                                                            flags='C'),
                                                               Nct.ndpointer(dtype=ct.c_int,         # p_free_lin
                                                                             ndim=1,
                                                                             flags='C'),
@@ -257,7 +295,8 @@ class NLPInitialization(object):
                                                                             ndim=1,
                                                                             shape=self._model._n_real_w.value,
                                                                             flags='C'),
-                                                              ct.c_int]                             # der_eval_alg            
+                                                              ct.c_int,                             # der_eval_alg
+                                                              ct.c_int]                             # stat            
         except AttributeError, e:
             pass        
             
@@ -524,24 +563,25 @@ class NLPInitialization(object):
 #         if self._jmi_model._dll.jmi_init_opt_get_result(self._jmi_init_opt, p_opt, t, dx, x, u, w) is not 0:
 #             raise JMIException("Getting the results failed.")
 
-    def _set_start_values(self, p_free_start, dx_start, x_start, w_start):
+#     def _set_start_values(self,p_opt_start, p_free_start, dx_start, x_start, w_start):
         
-        """ 
-        Set initial guess values from the Model object
+#         """ 
+#         Set initial guess values from the Model object
         
-        Parameters:
-            p_free_start -- The free parameters start value vector.
-            dx_start -- The derivatives start value vector.
-            x_start -- The states start value vector.
-            w_start -- The algebraic variable start value vector.
+#         Parameters:
+#             p_free_start -- The free parameters start value vector.
+#             dx_start -- The derivatives start value vector.
+#             x_start -- The states start value vector.
+#             w_start -- The algebraic variable start value vector.
         
-        """
+#         """
         
-        xmldoc = self._model._get_XMLDoc()
+#         xmldoc = self._model._get_XMLDoc()
 
-        # p_free: free variables, not supported
-        #values = xmldoc.get_p_free_startial_guess_values()
-        
+#         # p_free: free variables, not supported
+# #        values = xmldoc.get_p_free_initial_guess_values()
+#         values = xmldoc.get_p_opt_initial_guess_values(include_alias=False)
+
 #         refs = values.keys()
 #         refs.sort(key=int)
 
@@ -554,66 +594,66 @@ class NLPInitialization(object):
             
 #             for ref in refs:
 #                 (z_i, ptype) = _translate_value_ref(ref)
-#                 i_pi = z_i - self._model._offs_pi.value
+#                 i_pi = z_i - self._model._offs_real_pi.value
 #                 i_pi_opt = p_opt_indices.index(i_pi)
 #                 p_opt_start[i_pi_opt] = values.get(ref)
         
-        # dx: derivative
-        values = xmldoc.get_dx_start_attributes(include_alias=False)
+#         # dx: derivative
+#         values = xmldoc.get_dx_start_attributes(include_alias=False)
         
-        #names = values.keys()
-        #names.sort(key=str)
+#         #names = values.keys()
+#         #names.sort(key=str)
         
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = jmi._translate_value_ref(value_ref)
-            i_dx = z_i - self._model._offs_real_dx.value
-            #dx_start[i_dx] = values.get(name)
-            dx_start[i_dx] = self._model.get_z()[z_i]
+#         for name in values.keys():
+#             value_ref = xmldoc.get_valueref(name)
+#             (z_i, ptype) = jmi._translate_value_ref(value_ref)
+#             i_dx = z_i - self._model._offs_real_dx.value
+#             #dx_start[i_dx] = values.get(name)
+#             dx_start[i_dx] = self._model.get_z()[z_i]
         
-        # x: differentiate
-        values = xmldoc.get_x_start_attributes(include_alias=False)
+#         # x: differentiate
+#         values = xmldoc.get_x_start_attributes(include_alias=False)
         
-        #names = values.keys()
-        #names.sort(key=str)
+#         #names = values.keys()
+#         #names.sort(key=str)
         
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = jmi._translate_value_ref(value_ref)
-            i_x = z_i - self._model._offs_real_x.value
-            #x_start[i_x] = values.get(name)
-            x_start[i_x] = self._model.get_z()[z_i]
+#         for name in values.keys():
+#             value_ref = xmldoc.get_valueref(name)
+#             (z_i, ptype) = jmi._translate_value_ref(value_ref)
+#             i_x = z_i - self._model._offs_real_x.value
+#             #x_start[i_x] = values.get(name)
+#             x_start[i_x] = self._model.get_z()[z_i]
                     
-        # w: algebraic
-        values = xmldoc.get_w_start_attributes(include_alias=False)
+#         # w: algebraic
+#         values = xmldoc.get_w_start_attributes(include_alias=False)
         
-        #names = values.keys()
-        #names.sort(key=str)
+#         #names = values.keys()
+#         #names.sort(key=str)
         
-        for name in values.keys():
-            if not (xmldoc.is_alias(name)):
-                value_ref = xmldoc.get_valueref(name)
-                (z_i, ptype) = jmi._translate_value_ref(value_ref)
-                i_w = z_i - self._model._offs_real_w.value
-                #w_start[i_w] = values.get(name)
-                w_start[i_w] = self._model.get_z()[z_i]
+#         for name in values.keys():
+#             if not (xmldoc.is_alias(name)):
+#                 value_ref = xmldoc.get_valueref(name)
+#                 (z_i, ptype) = jmi._translate_value_ref(value_ref)
+#                 i_w = z_i - self._model._offs_real_w.value
+#                 #w_start[i_w] = values.get(name)
+#                 w_start[i_w] = self._model.get_z()[z_i]
 
-    def _set_lb_values(self, p_free_lb, dx_lb, x_lb, w_lb):
+#     def _set_lb_values(self, p_opt_lb, p_free_lb, dx_lb, x_lb, w_lb):
         
-        """ 
-        Set lower bounds from the XML variables meta data file. 
+#         """ 
+#         Set lower bounds from the XML variables meta data file. 
         
-        Parameters:
-            p_free_lb -- The free parameters lower bounds vector.
-            dx_lb -- The derivatives lower bounds vector.
-            x_lb -- The states lower bounds vector.
-            w_lb -- The algebraic variables lower bounds vector.        
+#         Parameters:
+#             p_free_lb -- The free parameters lower bounds vector.
+#             dx_lb -- The derivatives lower bounds vector.
+#             x_lb -- The states lower bounds vector.
+#             w_lb -- The algebraic variables lower bounds vector.        
         
-        """
+#         """
         
-        xmldoc = self._model._get_XMLDoc()
+#         xmldoc = self._model._get_XMLDoc()
 
-#         # p_free: free parameters
+# #         # p_free: free parameters
 #         values = xmldoc.get_p_free_lb_values()
         
 #         refs = values.keys()
@@ -622,68 +662,68 @@ class NLPInitialization(object):
 #         n_p_opt = self._model.jmimodel.opt_get_n_p_opt()
 #         if n_p_opt > 0:
 #             p_opt_indices = N.zeros(n_p_opt, dtype=int)
-        
+      
 #             self._model.jmimodel.opt_get_p_opt_indices(p_opt_indices)
 #             p_opt_indices = p_opt_indices.tolist()
-            
+          
 #             for ref in refs:
 #                 (z_i, ptype) = _translate_value_ref(ref)
-#                 i_pi = z_i - self._model._offs_pi.value
+#                 i_pi = z_i - self._model._offs_real_pi.value
 #                 i_pi_opt = p_opt_indices.index(i_pi)
 #                 p_opt_lb[i_pi_opt] = values.get(ref)
 
-        # dx: derivative
-        values = xmldoc.get_dx_lb_values(include_alias=False)
+#         # dx: derivative
+#         values = xmldoc.get_dx_lb_values(include_alias=False)
         
-        #names = values.keys()
-        #names.sort(key=str)
+#         #names = values.keys()
+#         #names.sort(key=str)
         
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = jmi._translate_value_ref(value_ref)
-            i_dx = z_i - self._model._offs_real_dx.value
-            dx_lb[i_dx] = values.get(name)
+#         for name in values.keys():
+#             value_ref = xmldoc.get_valueref(name)
+#             (z_i, ptype) = jmi._translate_value_ref(value_ref)
+#             i_dx = z_i - self._model._offs_real_dx.value
+#             dx_lb[i_dx] = values.get(name)
         
-        # x: differentiate
-        values = xmldoc.get_x_lb_values(include_alias=False)
+#         # x: differentiate
+#         values = xmldoc.get_x_lb_values(include_alias=False)
         
-        #names = values.keys()
-        #names.sort(key=str)
+#         #names = values.keys()
+#         #names.sort(key=str)
         
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = jmi._translate_value_ref(value_ref)
-            i_x = z_i - self._model._offs_real_x.value
-            x_lb[i_x] = values.get(name)
+#         for name in values.keys():
+#             value_ref = xmldoc.get_valueref(name)
+#             (z_i, ptype) = jmi._translate_value_ref(value_ref)
+#             i_x = z_i - self._model._offs_real_x.value
+#             x_lb[i_x] = values.get(name)
                     
-        # w: algebraic
-        values = xmldoc.get_w_lb_values(include_alias=False)
+#         # w: algebraic
+#         values = xmldoc.get_w_lb_values(include_alias=False)
         
-        #names = values.keys()
-        #names.sort(key=str)
+#         #names = values.keys()
+#         #names.sort(key=str)
         
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = jmi._translate_value_ref(value_ref)
-            i_w = z_i - self._model._offs_real_w.value
-            w_lb[i_w] = values.get(name) 
+#         for name in values.keys():
+#             value_ref = xmldoc.get_valueref(name)
+#             (z_i, ptype) = jmi._translate_value_ref(value_ref)
+#             i_w = z_i - self._model._offs_real_w.value
+#             w_lb[i_w] = values.get(name) 
 
-    def _set_ub_values(self, p_free_ub, dx_ub, x_ub, w_ub):
+#     def _set_ub_values(self, p_opt_ub, p_free_ub, dx_ub, x_ub, w_ub):
         
-        """ 
-        Set upper bounds from the XML variables meta data file. 
+#         """ 
+#         Set upper bounds from the XML variables meta data file. 
         
-        Parameters:
-            p_free_ub -- The free parameters upper bounds vector.
-            dx_ub -- The derivatives upper bounds vector.
-            x_ub -- The states upper bounds vector.
-            w_ub -- The algebraic variables upper bounds vector.        
+#         Parameters:
+#             p_free_ub -- The free parameters upper bounds vector.
+#             dx_ub -- The derivatives upper bounds vector.
+#             x_ub -- The states upper bounds vector.
+#             w_ub -- The algebraic variables upper bounds vector.        
         
-        """
+#         """
         
-        xmldoc = self._model._get_XMLDoc()
+#         xmldoc = self._model._get_XMLDoc()
 
-#         # p_free: free parameters
+# #         # p_free: free parameters
 #         values = xmldoc.get_p_opt_ub_values()
         
 #         refs = values.keys()
@@ -692,50 +732,50 @@ class NLPInitialization(object):
 #         n_p_opt = self._model.jmimodel.opt_get_n_p_opt()
 #         if n_p_opt > 0:
 #             p_opt_indices = N.zeros(n_p_opt, dtype=int)
-        
+      
 #             self._model.jmimodel.opt_get_p_opt_indices(p_opt_indices)
 #             p_opt_indices = p_opt_indices.tolist()
-            
+          
 #             for ref in refs:
 #                 (z_i, ptype) = _translate_value_ref(ref)
-#                 i_pi = z_i - self._model._offs_pi.value
+#                 i_pi = z_i - self._model._offs_real_pi.value
 #                 i_pi_opt = p_opt_indices.index(i_pi)
 #                 p_opt_ub[i_pi_opt] = values.get(ref)
 
-        # dx: derivative
-        values = xmldoc.get_dx_ub_values(include_alias=False)
+#         # dx: derivative
+#         values = xmldoc.get_dx_ub_values(include_alias=False)
         
-        #names = values.keys()
-        #names.sort(key=str)
+#         #names = values.keys()
+#         #names.sort(key=str)
         
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = jmi._translate_value_ref(value_ref)
-            i_dx = z_i - self._model._offs_real_dx.value
-            dx_ub[i_dx] = values.get(name)
+#         for name in values.keys():
+#             value_ref = xmldoc.get_valueref(name)
+#             (z_i, ptype) = jmi._translate_value_ref(value_ref)
+#             i_dx = z_i - self._model._offs_real_dx.value
+#             dx_ub[i_dx] = values.get(name)
         
-        # x: differentiate
-        values = xmldoc.get_x_ub_values(include_alias=False)
+#         # x: differentiate
+#         values = xmldoc.get_x_ub_values(include_alias=False)
         
-        #names = values.keys()
-        #names.sort(key=str)
+#         #names = values.keys()
+#         #names.sort(key=str)
         
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = jmi._translate_value_ref(value_ref)
-            i_x = z_i - self._model._offs_real_x.value
-            x_ub[i_x] = values.get(name)
+#         for name in values.keys():
+#             value_ref = xmldoc.get_valueref(name)
+#             (z_i, ptype) = jmi._translate_value_ref(value_ref)
+#             i_x = z_i - self._model._offs_real_x.value
+#             x_ub[i_x] = values.get(name)
             
         
-        # w: algebraic
-        values = xmldoc.get_w_ub_values(include_alias=False)
+#         # w: algebraic
+#         values = xmldoc.get_w_ub_values(include_alias=False)
         
-        #names = values.keys()
-        #names.sort(key=str)
+#         #names = values.keys()
+#         #names.sort(key=str)
         
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = jmi._translate_value_ref(value_ref)
-            i_w = z_i - self._model._offs_real_w.value
-            w_ub[i_w] = values.get(name)
+#         for name in values.keys():
+#             value_ref = xmldoc.get_valueref(name)
+#             (z_i, ptype) = jmi._translate_value_ref(value_ref)
+#             i_w = z_i - self._model._offs_real_w.value
+#             w_ub[i_w] = values.get(name)
 

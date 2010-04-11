@@ -776,6 +776,7 @@ aspect OptimicaFlatAPI {
 	inh FOptClass FVariable.myFOptClass();
 	inh FOptClass FExp.myFOptClass();
 	inh FOptClass FIdUse.myFOptClass();
+	inh FOptClass InstComponentModification.myFOptClass();
 	eq FOptClass.getChild().myFOptClass() = this;
 	eq Root.getChild().myFOptClass() = null; 
 	

@@ -22,11 +22,11 @@ import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
-from jmodelica.simulation.assimulo import TrajectoryLinearInterpolation
 from jmodelica.optimization import ipopt
 from jmodelica.compiler import OptimicaCompiler
 
 try:
+    from jmodelica.simulation.assimulo import TrajectoryLinearInterpolation
     from jmodelica.simulation.assimulo import JMIDAE, write_data
     from Assimulo.Implicit_ODE import IDA
 except:
