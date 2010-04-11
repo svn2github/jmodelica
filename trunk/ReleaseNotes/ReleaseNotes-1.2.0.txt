@@ -4,14 +4,68 @@ This document contains the release notes for the upcoming release
 NOTICE: This document is in preparation
 
 1. Compilers
+
 1.1. Modelica Compiler
+
 1.1.1 Arrays
+
+Arrays are now fully supported. This includes all arithmetic operations and  
+use of arrays in all places allowed in the language specification. The only 
+exception is inputs to functions with one or more dimensions declared with 
+":", where support is only partial.
 
 1.1.2 Function-like operators
 
-1.1.3 User-defined functions
+Most function-like operators are now supported. The following list contains 
+the function-like operators that are *not* supported:
+
+ * sign(v) 
+ * Integer(e) 
+ * String(...)
+ * div(x,y) 
+ * mod(x,y) 
+ * rem(x,y) 
+ * ceil(x) 
+ * floor(x) 
+ * integer(x)
+ * delay(...) 
+ * cardinality()
+ * semiLinear(...) 
+ * Subtask.decouple(v)
+ * initial() 
+ * terminal() 
+ * smooth(p, expr) 
+ * sample(start, interval) 
+ * pre(y) 
+ * edge(b) 
+ * reinit(x, expr)
+ * scalar(A) 
+ * vector(A) 
+ * matrix(A) 
+ * diagonal(v) 
+ * product(...) 
+ * outerProduct(v1, v2) 
+ * symmetric(A) 
+ * skew(x)
+
+1.1.3 Functions & algorithms
+
+Both algorithms and pure Modelica functions are supported, except for a few features. 
+
+ * Use of control structures (if, for, etc.) with test of loop expressions with 
+   variability that is higher than parameter is not supported when compiling for 
+   CppAD.
+ * Indexes to arrays of records with variability that is higher than parameter is 
+   not supported when compiling for CppAD.
+ * Support for inputs to functions with one or more dimensions declared with ":" 
+   is only partial.
+   
+External functions are not supported.
 
 1.2. Optimica Compiler
+
+The support for arrays, function-like operators, functions and algorithms in 
+the Modelica compiler applies to the Optimica compiler as well.
 
 2. JModelica.org Model Interface (JMI)
 
