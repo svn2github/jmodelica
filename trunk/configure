@@ -16033,9 +16033,9 @@ if test "x$with_sundials" = xno; then
   { $as_echo "$as_me:$LINENO: result: SUNDIALS installation not specified." >&5
 $as_echo "SUNDIALS installation not specified." >&6; }
 else
-  as_ac_File=`$as_echo "ac_cv_file_$sundials/bin/sundials-config" | $as_tr_sh`
-{ $as_echo "$as_me:$LINENO: checking for $sundials/bin/sundials-config" >&5
-$as_echo_n "checking for $sundials/bin/sundials-config... " >&6; }
+  as_ac_File=`$as_echo "ac_cv_file_$sundials/lib/libsundials_cvode.a" | $as_tr_sh`
+{ $as_echo "$as_me:$LINENO: checking for $sundials/lib/libsundials_cvode.a" >&5
+$as_echo_n "checking for $sundials/lib/libsundials_cvode.a... " >&6; }
 if { as_var=$as_ac_File; eval "test \"\${$as_var+set}\" = set"; }; then
   $as_echo_n "(cached) " >&6
 else
@@ -16043,7 +16043,7 @@ else
   { { $as_echo "$as_me:$LINENO: error: cannot check for file existence when cross compiling" >&5
 $as_echo "$as_me: error: cannot check for file existence when cross compiling" >&2;}
    { (exit 1); exit 1; }; }
-if test -r "$sundials/bin/sundials-config"; then
+if test -r "$sundials/lib/libsundials_cvode.a"; then
   eval "$as_ac_File=yes"
 else
   eval "$as_ac_File=no"

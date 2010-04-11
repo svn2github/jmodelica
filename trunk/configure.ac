@@ -124,7 +124,7 @@ AC_ARG_WITH([sundials],
 
 AS_IF([test "x$with_sundials" = xno],
       [AC_MSG_RESULT([SUNDIALS installation not specified.])],
-      [AC_CHECK_FILE($sundials/bin/sundials-config,
+      [AC_CHECK_FILE($sundials/lib/libsundials_cvode.a,
                      [],
                      [AC_MSG_FAILURE([SUNDIALS installation specifed, but seems to be corrupt!])])])
 
