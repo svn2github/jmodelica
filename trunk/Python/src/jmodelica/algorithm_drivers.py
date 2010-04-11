@@ -1,7 +1,7 @@
 """ Module for optimization and simulation algorithms to be used together with 
 jmodelica.optimize and jmodelica.simulate
 """
-from abc import ABCMeta, abstractmethod
+#from abc import ABCMeta, abstractmethod
 import warnings
 import numpy as N
 
@@ -21,20 +21,19 @@ int = N.int32
 N.int = N.int32
 
 class AlgorithmBase:
-    __metaclass__=ABCMeta
+#    __metaclass__=ABCMeta
     
-    @abstractmethod
+#    @abstractmethod
     def __init__(self, model, alg_args): pass
     
-    @abstractmethod        
+#    @abstractmethod        
     def set_solver_options(self, solver_args): pass
     
-    @abstractmethod
+#    @abstractmethod
     def solve(self): pass
     
-    @abstractmethod
+#    @abstractmethod
     def write_result(self): pass
-
 
 class AssimuloAlg(AlgorithmBase):
     """ Simulation algorithm using the Assimulo package. """
