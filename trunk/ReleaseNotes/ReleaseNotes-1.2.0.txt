@@ -50,9 +50,9 @@ the function-like operators that are *not* supported:
 
 1.1.3 Functions & algorithms
 
-Both algorithms and pure Modelica functions are supported, except for a few features. 
+Both algorithms and pure Modelica functions are supported, with a few exceptions: 
 
- * Use of control structures (if, for, etc.) with test of loop expressions with 
+ * Use of control structures (if, for, etc.) with test or loop expressions with 
    variability that is higher than parameter is not supported when compiling for 
    CppAD.
  * Indexes to arrays of records with variability that is higher than parameter is 
@@ -62,10 +62,15 @@ Both algorithms and pure Modelica functions are supported, except for a few feat
    
 External functions are not supported.
 
+1.1.4 Miscellaneous
+
+ * Record constructors are now supported.
+ * The error checking has been expanded to cover more errors.
+
 1.2. Optimica Compiler
 
-The support for arrays, function-like operators, functions and algorithms in 
-the Modelica compiler applies to the Optimica compiler as well.
+All support mentioned for the Modelica compiler applies to the Optimica compiler 
+as well.
 
 2. JModelica.org Model Interface (JMI)
 
