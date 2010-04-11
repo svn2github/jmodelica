@@ -328,9 +328,15 @@ public class XMLGenerator extends GenericGenerator {
 				
 				//direct dependency - not supported
                				
-				//is linear?
+				
 				Boolean generateFMI = fclass.root().options.getBooleanOption("generate_fmi_xml");
 				if(!generateFMI) {
+					//qualified name
+					genPrinter.print("\n\t\t\t <QualifiedName>");
+					variable.getFQName().prettyPrint_XML(genPrinter,"\t\t\t");
+					genPrinter.print("\n\t\t\t </QualifiedName>");
+					
+					//is linear?
 					addLinearInfo(genPrinter, variable);
 				
 					//variable category
