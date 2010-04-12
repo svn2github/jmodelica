@@ -145,8 +145,8 @@
 
 		<!-- generate flat Modelica scanner -->
 		<concat destfile="${parser_output}/FlatModelica_all.flex" force="no">
-			<filelist dir="." files="${parser}/FlatModelica_header.flex" />
-			<filelist dir="${parser}" files="FlatModelica.flex" />
+			<filelist dir="." files="${parser_dir}/FlatModelica_header.flex" />
+			<filelist dir="${parser_dir}" files="FlatModelica.flex" />
 		</concat>
 		<jflex file="${parser_output}/FlatModelica_all.flex" outdir="${parser_output}" nobak="yes" />
 
