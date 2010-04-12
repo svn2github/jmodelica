@@ -318,6 +318,15 @@ public class XMLGenerator extends GenericGenerator {
 					genPrinter.print("\n\t\t\t <String ");
 					addStringAttributes(genPrinter, (FStringVariable)variable);
 					genPrinter.print("/>");
+					
+					Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
+					if(generateEqu){
+						//qualified name
+						genPrinter.print("\n\t\t\t <QualifiedName>");
+						variable.getFQName().prettyPrint_XML(genPrinter,"\t\t\t");
+						genPrinter.print("\n\t\t\t </QualifiedName>");
+					}
+					
 				} else if(false) {
 //					TODO: Enumeration variable
 				}
@@ -330,12 +339,7 @@ public class XMLGenerator extends GenericGenerator {
                				
 				
 				Boolean generateFMI = fclass.root().options.getBooleanOption("generate_fmi_xml");
-				if(!generateFMI) {
-					//qualified name
-					genPrinter.print("\n\t\t\t <QualifiedName>");
-					variable.getFQName().prettyPrint_XML(genPrinter,"\t\t\t");
-					genPrinter.print("\n\t\t\t </QualifiedName>");
-					
+				if(!generateFMI) {				
 					//is linear?
 					addLinearInfo(genPrinter, variable);
 				
