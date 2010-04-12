@@ -30,7 +30,7 @@ import org.jmodelica.modelica.parser.ModelicaParser;
 public class CompletionProcessor implements IContentAssistProcessor {
 
 public final static ModelicaCompiler compiler = 
-    new ModelicaCompiler(new ModelicaParser.CollectingReport());
+    new ModelicaCompiler();
 
 public final Editor editor;
 

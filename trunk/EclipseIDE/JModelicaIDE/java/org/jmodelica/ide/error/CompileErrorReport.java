@@ -27,91 +27,47 @@ import beaver.Parser.Events;
 
 public class CompileErrorReport extends Events {
 	
-	
 	public static final String[] EXPECTED = new String[Terminals.NAMES.length];
 	{
 		EXPECTED[Terminals.EOF] = "end-of-file";
 		EXPECTED[Terminals.ID] = "identifier";
 		EXPECTED[Terminals.STRING] = "string";
-		EXPECTED[Terminals.ANNOTATION] = "\"annotation\"";
-		EXPECTED[Terminals.SEMICOLON] = "\";\"";
-		EXPECTED[Terminals.COMMA] = "\",\"";
-		EXPECTED[Terminals.IF] = "\"if\"";
-		EXPECTED[Terminals.RPAREN] = "\"(\"";
-		EXPECTED[Terminals.LPAREN] = "\")\"";
-		EXPECTED[Terminals.END] = "\"end\"";
-		EXPECTED[Terminals.PLUS] = "\"+\"";
-		EXPECTED[Terminals.FOR] = "\"for\"";
-		EXPECTED[Terminals.MINUS] = "\"-\"";
-		EXPECTED[Terminals.INITIAL] = "\"initial\"";
-		EXPECTED[Terminals.CONSTRAINEDBY] = "\"constrainedby\"";
-		EXPECTED[Terminals.ELSE] = "\"else\"";
-		EXPECTED[Terminals.ELSEIF] = "\"elseif\"";
-		EXPECTED[Terminals.LBRACK] = "\"[\"";
-		EXPECTED[Terminals.ASSIGN] = "\"=\"";
-		EXPECTED[Terminals.RBRACE] = "\"}\"";
-		EXPECTED[Terminals.LBRACE] = "\"{\"";
 		EXPECTED[Terminals.UNSIGNED_NUMBER] = "number";
 		EXPECTED[Terminals.UNSIGNED_INTEGER] = "integer";
-		EXPECTED[Terminals.TRUE] = "\"true\"";
-		EXPECTED[Terminals.FALSE] = "\"false\"";
-		EXPECTED[Terminals.TIME] = "\"time\"";
-		EXPECTED[Terminals.COLON] = "\":\"";
-		EXPECTED[Terminals.THEN] = "\"then\"";
-		EXPECTED[Terminals.LOOP] = "\"loop\"";
-		EXPECTED[Terminals.RBRACK] = "\"]\"";
-		EXPECTED[Terminals.INPUT] = "\"input\"";
-		EXPECTED[Terminals.OUTPUT] = "\"output\"";
-		EXPECTED[Terminals.EXTERNAL] = "\"external\"";
-		EXPECTED[Terminals.PUBLIC] = "\"public\"";
-		EXPECTED[Terminals.PROTECTED] = "\"protected\"";
-		EXPECTED[Terminals.EQUATION] = "\"equation\"";
-		EXPECTED[Terminals.INITIAL_EQUATION] = "\"initial equation\"";
-		EXPECTED[Terminals.ALGORITHM] = "\"algorithm\"";
-		EXPECTED[Terminals.INITIAL_ALGORITHM] = "\"initial algorithm\"";
-		EXPECTED[Terminals.CONNECTOR] = "\"connector\"";
-		EXPECTED[Terminals.EXPANDABLE] = "\"expandable\"";
-		EXPECTED[Terminals.CLASS] = "\"class\"";
-		EXPECTED[Terminals.MODEL] = "\"model\"";
-		EXPECTED[Terminals.BLOCK] = "\"block\"";
-		EXPECTED[Terminals.TYPE] = "\"type\"";
-		EXPECTED[Terminals.PACKAGE] = "\"package\"";
-		EXPECTED[Terminals.FUNCTION] = "\"function\"";
-		EXPECTED[Terminals.RECORD] = "\"record\"";
-		EXPECTED[Terminals.NOT] = "\"not\"";
-		EXPECTED[Terminals.PARTIAL] = "\"partial\"";
-		EXPECTED[Terminals.DISCRETE] = "\"discrete\"";
-		EXPECTED[Terminals.PARAMETER] = "\"parameter\"";
-		EXPECTED[Terminals.CONSTANT] = "\"constant\"";
-		EXPECTED[Terminals.ENCAPSULATED] = "\"encapsulated\"";
-		EXPECTED[Terminals.WHEN] = "\"when\"";
-		EXPECTED[Terminals.OR] = "\"or\"";
-		EXPECTED[Terminals.AND] = "\"and\"";
-		EXPECTED[Terminals.FLOW] = "\"flow\"";
-		EXPECTED[Terminals.REPLACEABLE] = "\"replaceable\"";
-		EXPECTED[Terminals.LT] = "\"<\"";
-		EXPECTED[Terminals.LEQ] = "\"<=\"";
-		EXPECTED[Terminals.GT] = "\">\"";
-		EXPECTED[Terminals.GEQ] = "\">=\"";
-		EXPECTED[Terminals.EQ] = "\"==\"";
-		EXPECTED[Terminals.NEQ] = "\"<>\"";
-		EXPECTED[Terminals.MULT] = "\"*\"";
-		EXPECTED[Terminals.ELSEWHEN] = "\"elsewhen\"";
-		EXPECTED[Terminals.DIV] = "\"/\"";
-		EXPECTED[Terminals.EXTENDS] = "\"extends\"";
-		EXPECTED[Terminals.FINAL] = "\"final\"";
-		EXPECTED[Terminals.OUTER] = "\"outer\"";
-		EXPECTED[Terminals.WHILE] = "\"while\"";
-		EXPECTED[Terminals.RETURN] = "\"return\"";
-		EXPECTED[Terminals.INNER] = "\"inner\"";
-		EXPECTED[Terminals.POW] = "\"^\"";
-		EXPECTED[Terminals.REDECLARE] = "\"redeclare\"";
-		EXPECTED[Terminals.IMPORT] = "\"import\"";
-		EXPECTED[Terminals.CONNECT] = "\"connect\"";
-		EXPECTED[Terminals.DOT] = "\".\"";
-		EXPECTED[Terminals.EACH] = "\"each\"";
-		EXPECTED[Terminals.IN] = "\"in\"";
-		EXPECTED[Terminals.WITHIN] = "\"within\"";
+		EXPECTED[Terminals.SEMICOLON] = "';'";
+		EXPECTED[Terminals.COLON] = "':'";
+		EXPECTED[Terminals.DOT] = "'.'";
+		EXPECTED[Terminals.COMMA] = "','";
+		EXPECTED[Terminals.RPAREN] = "'('";
+		EXPECTED[Terminals.LPAREN] = "')'";
+		EXPECTED[Terminals.RBRACK] = "']'";
+		EXPECTED[Terminals.LBRACK] = "'['";
+		EXPECTED[Terminals.RBRACE] = "'}'";
+		EXPECTED[Terminals.LBRACE] = "'{'";
+		EXPECTED[Terminals.PLUS] = "'+'";
+		EXPECTED[Terminals.MINUS] = "'-'";
+		EXPECTED[Terminals.MULT] = "'*'";
+		EXPECTED[Terminals.DIV] = "'/'";
+		EXPECTED[Terminals.POW] = "'^'";
+		EXPECTED[Terminals.DOTPLUS] = "'.+'";
+		EXPECTED[Terminals.DOTMINUS] = "'.-'";
+		EXPECTED[Terminals.DOTMULT] = "'.*'";
+		EXPECTED[Terminals.DOTDIV] = "'./'";
+		EXPECTED[Terminals.DOTPOW] = "'.^'";
+		EXPECTED[Terminals.EQUALS] = "'='";
+		EXPECTED[Terminals.ASSIGN] = "':='";
+		EXPECTED[Terminals.LT] = "'<'";
+		EXPECTED[Terminals.LEQ] = "'<='";
+		EXPECTED[Terminals.GT] = "'>'";
+		EXPECTED[Terminals.GEQ] = "'>='";
+		EXPECTED[Terminals.EQ] = "'=='";
+		EXPECTED[Terminals.NEQ] = "'<>'";
+
+		EXPECTED[Terminals.END_ID] = "'end <identifier>'";
+		
+		for (int i = 0; i < EXPECTED.length; i++) 
+			if (EXPECTED[i] == null)
+				EXPECTED[i] = Terminals.NAMES[i].toLowerCase().replace('_', ' ');
 	}
 
 	private ModelicaScanner.Symbol lastSyntaxError;
@@ -188,10 +144,12 @@ public class CompileErrorReport extends Events {
 		if (lastSyntaxError.getId() == Terminals.STRING) {
 			msg.append("string ");
 			msg.append(lastSyntaxError.value);
+		} else if (lastSyntaxError.getId() == Terminals.EOF) {
+			msg.append("end-of-file");
 		} else {
-			msg.append("token \"");
+			msg.append("token '");
 			msg.append(lastSyntaxError.value);
-			msg.append('"');
+			msg.append("'");
 		}
 		return msg;
 	}

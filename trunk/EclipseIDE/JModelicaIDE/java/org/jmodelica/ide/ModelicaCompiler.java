@@ -40,22 +40,13 @@ import org.jmodelica.modelica.parser.ModelicaParser;
 public class ModelicaCompiler extends AbstractCompiler {
 
 public static final String ERROR_MARKER_ID = IDEConstants.ERROR_MARKER_ID;
-public final Maybe<? extends ModelicaParser.Report> report;
-
-public ModelicaCompiler() { 
-    this(null);
-}
-
-public ModelicaCompiler(ModelicaParser.Report report) {
-    this.report = new Maybe<ModelicaParser.Report>(report);
-}
 
 @Override
 protected IASTNode compileToProjectAST(IProject project,
         IProgressMonitor monitor) {
     return 
         recursiveCompile(
-            newCompilationRoot(project), 
+            new CompilationRoot(project), 
             project, 
             monitor)
         .root();
@@ -77,12 +68,12 @@ private CompilationRoot recursiveCompile(
             
             switch (resource.getType()) {
             case IResource.FOLDER:
-                /* do nothing right now*/
+                /* do nothing right now */
                 break;
             case IResource.FILE:
                 IFile file = (IFile)resource;
                 if (IDEConstants.FILE_EXT.equals(file.getFileExtension()))
-                    lasr = lasr.parseFile(file);
+                     lasr.parseFile(file);
                 break;
             }
             
@@ -110,15 +101,10 @@ public IASTNode compileToAST(
     IRegion region,
     IFile file) 
 {
-    file = 
-        defaultToMock(file); 
-        
-    return 
-        newCompilationRoot(file.getProject())
-        .parseFile(
-            new DocumentReader(document), 
-            file)
-        .getStoredDefinition();
+    file = defaultToMock(file); 
+    CompilationRoot lasr = new CompilationRoot(file.getProject());
+    lasr.parseFile(new DocumentReader(document), file);
+    return lasr.getStoredDefinition();
 }
 
 public Maybe<ASTNode<?>> recompile(IDocument doc, IFile file) {
@@ -130,12 +116,11 @@ public Maybe<ASTNode<?>> recompile(IDocument doc, IFile file) {
 }
 
 public StoredDefinition recompile(String doc, IFile file) {
-    file =
-        defaultToMock(file);
-    return 
-        newCompilationRoot(file.getProject())
-        .parseDoc(doc, file)
-        .getStoredDefinition();
+    file = defaultToMock(file);
+    
+    CompilationRoot lasr = new CompilationRoot(file.getProject());
+    lasr.parseDoc(doc, file);
+    return lasr.getStoredDefinition();
 }
 
 @Override
@@ -148,17 +133,10 @@ protected IASTNode compileToAST(IFile file) {
 }
 
 public ASTNode<?> compileFile(IFile file) {
-    file =
-        defaultToMock(file);
-    return 
-        newCompilationRoot(file.getProject())
-        .parseFile(file)
-        .getStoredDefinition();
-}
-
-private CompilationRoot newCompilationRoot(IProject project) {
-    return 
-        new CompilationRoot(report, project);
+    file = defaultToMock(file);
+    CompilationRoot lasr = new CompilationRoot(file.getProject());
+    lasr.parseFile(file);
+    return lasr.getStoredDefinition();
 }
 
 @Override

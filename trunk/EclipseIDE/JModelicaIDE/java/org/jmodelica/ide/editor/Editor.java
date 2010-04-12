@@ -310,19 +310,16 @@ public void projectASTChanged(IProject project) {
  * Updates the outline and the view
  */
 protected void update() {
-
-    if (compResult.failed())
-        return;
-
     if (document() == null) 
         return; 
     
     setupDocumentPartitioner(document());
 
+    if (compResult.failed())
+        return;
+
     // Update outline
     fSourceOutlinePage.updateAST(compResult.root());
-    System.out.println("-------------------------");
-    System.out.println("Came here!");
     fInstanceOutlinePage.updateAST(compResult.root());
     goToDeclaration.updateAST(compResult.root());
 

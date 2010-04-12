@@ -1,6 +1,5 @@
 package org.jmodelica.ide.namecomplete;
 
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.Document;
 import org.jmodelica.ide.ModelicaCompiler;
@@ -15,37 +14,28 @@ import org.jmodelica.modelica.parser.ModelicaParser;
 
 public class Recompiler {
 
-public final static ModelicaCompiler compiler =
-    new ModelicaCompiler(new ModelicaParser.CollectingReport());
+	public final static ModelicaCompiler compiler = new ModelicaCompiler();
 
-/**
- * Recompile active file and add new AST to project AST
- */
-public StoredDefinition recompilePartial(
-    OffsetDocument d, 
-    Maybe<SourceRoot> mProjectRoot,
-    IFile file) 
-{
-    
-    /* remove the current (partial) line when compiling to make error
-       recovery easier */
-    String fileContents = 
-        new DocUtil(
-            new Document(d.get()))
-        .replaceLineAt(d.offset, "")
-        .get();
+	/**
+	 * Recompile active file and add new AST to project AST
+	 */
+	public StoredDefinition recompilePartial(OffsetDocument d,
+			Maybe<SourceRoot> mProjectRoot, IFile file) {
 
-    /* re-parse and add new AST to project AST */
-    StoredDefinition def
-        = compiler.recompile(fileContents, file);
+		/* remove the current (partial) line when compiling to make error
+		 * recovery easier
+		 */
+		String fileContents = new DocUtil(new Document(d.get())).replaceLineAt(
+				d.offset, "").get();
 
-    if (mProjectRoot.hasValue()) {
-        new Proxy(
-            mProjectRoot.value(), 
-            new List<StoredDefinition>(def));
-    }
+		/* re-parse and add new AST to project AST */
+		StoredDefinition def = compiler.recompile(fileContents, file);
 
-    return def;
-}
+		if (mProjectRoot.hasValue()) {
+			new Proxy(mProjectRoot.value(), new List<StoredDefinition>(def));
+		}
+
+		return def;
+	}
 
 }

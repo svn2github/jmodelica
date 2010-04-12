@@ -25,8 +25,9 @@ public StoredDefinition make(String[] otherFiles, String file) {
     ASTRegistry reg =
         new ASTRegistry();
     
-    SourceRoot root = 
-        new CompilationRoot(proj).parseDocs(otherFiles, new MockFile(proj)).root();
+    CompilationRoot cr = new CompilationRoot(proj);
+    cr.parseDocs(otherFiles, new MockFile(proj));
+    SourceRoot root = cr.root();
 
     reg.updateProjectAST(root, proj);
     

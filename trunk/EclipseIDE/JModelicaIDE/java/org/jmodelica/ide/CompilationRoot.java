@@ -21,192 +21,127 @@ import org.jmodelica.modelica.parser.ModelicaScanner;
 
 import beaver.Parser;
 
-
 /**
  * 
  * Represents a SourceRoot capable of compiling and adding more
  * StoredDefinitions.
  * 
- * @author philip 
+ * @author philip
  * 
  */
 public class CompilationRoot {
 
-private final ModelicaParser PARSER = 
-    new ModelicaParser();
-private final ModelicaScanner SCANNER =  
-    new ModelicaScanner(System.in); // Dummy stream
-private final CompileErrorReport errorReport =
-    new CompileErrorReport();
+	private final ModelicaParser PARSER = new ModelicaParser();
+	private final ModelicaScanner SCANNER = new ModelicaScanner(System.in); // Dummy stream
+	private final CompileErrorReport errorReport = new CompileErrorReport();
 
-private final SourceRoot root; 
-private final List<StoredDefinition> list;
-private final InstanceErrorHandler handler;
+	private final SourceRoot root;
+	private final List<StoredDefinition> list;
+	private final InstanceErrorHandler handler;
 
-/**
- * Create an empty CompilationRoot 
- * @param report ErrorReport implementation for parser to use. Defaults to
- *            {@link ModelicaParser.AbortingReport} if Nothing is passed.
- */
-public CompilationRoot(
-        Maybe<? extends ModelicaParser.Report> report, 
-        IProject project) 
-{
-    this.list = 
-        new List<StoredDefinition>();
-    this.root = 
-        new SourceRoot(
-            new Program(list));
-    this.handler = 
-        new InstanceErrorHandler();
-    
-    root.setErrorHandler(handler);
-    
-    if (report.hasValue())
-        PARSER.setReport(report.value());
+	/**
+	 * Create an empty CompilationRoot
+	 * 
+	 * @param report
+	 *            ErrorReport implementation for parser to use. Defaults to
+	 *            {@link ModelicaParser.AbortingReport} if Nothing is passed.
+	 */
+	public CompilationRoot(IProject project) {
+		this.list = new List<StoredDefinition>();
+		this.root = new SourceRoot(new Program(list));
+		this.handler = new InstanceErrorHandler();
 
-    root.options =
-        new IDEOptions(project);
-    
-    root.getProgram().getInstProgramRoot().options =
-        root.options;
+		PARSER.setReport(errorReport);
+		root.setErrorHandler(handler);
+		
+		root.options = new IDEOptions(project);
+		root.getProgram().getInstProgramRoot().options = root.options;
 
-}
+	}
 
-public CompilationRoot(IProject project) {
-    this(
-        Maybe.Just(new ModelicaParser.CollectingReport()),
-        project);
-}
+	/**
+	 * Returns the StoredDefinition for the first compilation. Really supposed
+	 * to be used when you want to only compile a single file.
+	 * 
+	 * @return StoredDefinition from the first compilation, or null if no
+	 *         successful compilation has been performed.
+	 */
+	public StoredDefinition getStoredDefinition() {
+		assert list.getNumChild() <= 1;
+		return list.getNumChild() > 0 ? list.getChild(0) : null;
+	}
 
-/**
- * Returns the StoredDefinition for the first compilation. Really supposed to be
- * used when you want to only compile a single file.
- * 
- * @return StoredDefinition from the first compilation, or null if no successful
- *         compilation has been performed.
- */
-public StoredDefinition getStoredDefinition() {
-    assert list.getNumChild() <= 1;
-    return list.getNumChild() > 0 ? list.getChild(0) : null;
-}
+	protected StoredDefinition annotatedDefinition(StoredDefinition def, IFile file) {
+		def.setFile(file);
+		def.setFileName(file.getRawLocation().toOSString());
+		def.setLineBreakMap(SCANNER.getLineBreakMap());
 
-protected StoredDefinition annotatedDefinition(
-        StoredDefinition def,
-        IFile file) {
-    
-    def.setFile(file);
-    def.setFileName(file.getRawLocation().toOSString());
-    def.setLineBreakMap(SCANNER.getLineBreakMap());
-    
-    return def;
-}
+		return def;
+	}
 
-/**
- * Returns internal SourceRoot.
- * @return internal SourceRoot
- */
-public SourceRoot root() {
-    return root;
-}
+	/**
+	 * Returns internal SourceRoot.
+	 */
+	public SourceRoot root() {
+		return root;
+	}
 
-/**
- * Compile and add AST from string.
- * 
- * @param doc string to compile
- * @param file eclipse file handle. Used as a key to identify the resulting
- *            StoredDefinition.
- * @return this
- */
-public CompilationRoot parseDoc(String doc, IFile file) {
-    return parseFile(new StringReader(doc), file);
-}
+	/**
+	 * Compile and add AST from string.
+	 * 
+	 * @param doc   string to compile
+	 * @param file  eclipse file handle. Used as a key to identify the resulting
+	 *              StoredDefinition.
+	 * @return this
+	 */
+	public void parseDoc(String doc, IFile file) {
+		parseFile(new StringReader(doc), file);
+	}
 
-public CompilationRoot parseDocs(String[] docs, IFile file) {
-    for (String doc : docs)
-        parseDoc(doc, file);
-    return this;
-}
+	public void parseDocs(String[] docs, IFile file) {
+		for (String doc : docs)
+			parseDoc(doc, file);
+	}
 
-/** 
- * Parse content and add to source root.
- */
-public CompilationRoot parseFile(IFile file) {
-    
-    try {
-        parseFile(
-            new FileReader(
-                file.getRawLocation().toOSString()), 
-            file);
+	/**
+	 * Parse content and add to source root.
+	 */
+	public void parseFile(IFile file) {
+		try {
+			parseFile(new FileReader(file.getRawLocation().toOSString()), file);
+		} catch (IOException e) {
+			addBadDef(file);
+		}
+	}
 
-    } catch (IOException e) {
-        
-        addBadDef(file);
-        
-    }
-    
-    return this;
-}
+	public void parseFile(Reader reader, IFile file) {
 
+		errorReport.setFile(file);
+		SCANNER.reset(reader);
 
-public CompilationRoot parseFile(Reader reader, IFile file) {
+		try {
+			SourceRoot localRoot = (SourceRoot) PARSER.parse(SCANNER);
+			for (StoredDefinition def : localRoot.getProgram().getUnstructuredEntitys()) 
+				list.add(annotatedDefinition(def, file));
+		} catch (Parser.Exception e) {
+			addBadDef(file);
+		} catch (ParserException e) {
+			addBadDef(file);
+		} catch (IOException e) {
+			addBadDef(file);
+		} finally {
+			errorReport.cleanUp();
 
-    errorReport.setFile(file);
-    SCANNER.reset(reader);
-    
-    try {
-        
-        SourceRoot localRoot = 
-            (SourceRoot) PARSER.parse(SCANNER);
-        
-        for (StoredDefinition def 
-                : localRoot.getProgram().getUnstructuredEntitys()) 
-        {
-            list.add(annotatedDefinition(def, file));
-        }
-        
-    } catch (Parser.Exception e) {
-        
-        System.out.println(
-            "Parse unsuccessful: " + 
-            file.getRawLocation().toOSString());
-        
-        addBadDef(file);
-        
-    } catch (ParserException e) {
-       
-        System.out.println(
-            "Parse unsuccessful: " + 
-            file.getRawLocation().toOSString());
-        
-        addBadDef(file);
-        
-    } catch (IOException e) { 
-        
-        e.printStackTrace();
-        
-        addBadDef(file);
-        
-    } finally {
-        
-        errorReport.cleanUp();
-        
-        try {
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    return this;
-}
+			try {
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
-private void addBadDef(IFile file) {
-    
-    list.add(
-        annotatedDefinition(
-            new BadDefinition(),
-            file));
-}
+	private void addBadDef(IFile file) {
+		list.add(annotatedDefinition(new BadDefinition(), file));
+	}
 
 }
