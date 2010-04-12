@@ -68,8 +68,6 @@ ParserHandler;
  * A class representing the root node of a source AST.
  */
 SourceRoot : Root ::= Program ;
-
-Proxy   ::= <SourceRoot:SourceRoot> Node:StoredDefinition*;
  
 
 Program ::= UnstructuredEntity:StoredDefinition* 

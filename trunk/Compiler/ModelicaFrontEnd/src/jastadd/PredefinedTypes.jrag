@@ -16,12 +16,8 @@
 
 aspect PredefinedTypes {
 
-    public List SourceRoot.computePredefinedType() {
-        return getProgram().getPredefinedTypeList();
-    }
-    
 	inh List FullClassDecl.getPredefinedType();
-	eq SourceRoot.getProgram().getPredefinedType() = computePredefinedType();
+	eq SourceRoot.getProgram().getPredefinedType() = getProgram().getPredefinedTypeList();
 	eq Root.getChild().getPredefinedType() = null;
 
 	
@@ -346,13 +342,8 @@ aspect PredefinedTypes {
 		return l;
 	}
 	
-	public ClassDecl SourceRoot.doLookupBuiltInFunction(String name) {
-	    return unknownClassDecl();
-	}
-	
-    	
 	inh ClassDecl Exp.lookupBuiltInFunction(String name);
-	eq SourceRoot.getProgram().lookupBuiltInFunction(String name) = doLookupBuiltInFunction(name);
+	eq SourceRoot.getProgram().lookupBuiltInFunction(String name) = unknownClassDecl();
 	eq Root.getChild().lookupBuiltInFunction(String name) = null;
 	
 	/*

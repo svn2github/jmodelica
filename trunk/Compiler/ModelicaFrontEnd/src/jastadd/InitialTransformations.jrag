@@ -32,18 +32,13 @@
   	inh VisibilityType ClassDecl.visibility(); 
   	inh VisibilityType PN_ComponentClause.visibility();
   	inh VisibilityType PN_ExtendsClause.visibility();
-    
-  	// Added for proxy solution in JModelica IDE
-  	public VisibilityType SourceRoot.computeVisibility() {
-  	    return new PublicVisibilityType();
-  	}
   	
   	/**
   	 *  Equations defining public or protected visibility of elements 
   	 */
   	eq PublicElementList.getElement().visibility() = new PublicVisibilityType();
   	eq ProtectedElementList.getElement().visibility() = new ProtectedVisibilityType();
-  	eq SourceRoot.getProgram().visibility() = computeVisibility(); 
+  	eq SourceRoot.getProgram().visibility() = new PublicVisibilityType(); 
   	eq Root.getChild().visibility() = new PublicVisibilityType(); 
   	
   	eq ClassRedeclare.getBaseClassDecl().visibility() = new PublicVisibilityType();
