@@ -33,7 +33,7 @@ if WITH_SUNDIALS
 	cd $(abs_top_srcdir)/Assimulo; \
 	python setup_source.py clean; \
 	rm -rf build/*; \
-	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --prefix=$(abs_builddir)/Assimulo_install
+	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --prefix=Assimulo_install
 endif
 
 install-exec-local:
@@ -67,12 +67,17 @@ endif
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python
 	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python
 if WITH_SUNDIALS
-	if [ -e $(abs_builddir)/Assimulo_install/lib/python2.5/site-packages/ ]; \
+	if [ -e $(abs_top_srcdir)/Assimulo/Assimulo_install/lib/python2.5/site-packages/ ]; \
 	then \
-	cd $(abs_builddir)/Assimulo_install/lib/python2.5/site-packages/; \
+	cd $(abs_top_srcdir)/Assimulo/Assimulo_install/lib/python2.5/site-packages/; \
+	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
+	fi
+	if [ -e $(abs_top_srcdir)/Assimulo/Assimulo_install/lib/python2.6/site-packages/ ];\
+	then \
+	cd $(abs_top_srcdir)/Assimulo/Assimulo_install/lib/python2.6/site-packages/; \
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 	else \
-	cd $(abs_builddir)/Assimulo_install/lib/python2.6/site-packages/; \
+	cd $(abs_top_srcdir)/Assimulo/Assimulo_install/Lib/site-packages/; \
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 	fi
 endif 
