@@ -67,8 +67,15 @@ endif
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python
 	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python
 if WITH_SUNDIALS
-	[ -e $(abs_builddir)/Assimulo_install/lib/python2.5/site-packages/ ] && cd $(abs_builddir)/Assimulo_install/lib/python2.5/site-packages/; find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python || cd $(abs_builddir)/Assimulo_install/lib/python2.6/site-packages/; find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python
-endif
+	if [ -e $(abs_builddir)/Assimulo_install/lib/python2.5/site-packages/ ]; \
+	then \
+	cd $(abs_builddir)/Assimulo_install/lib/python2.5/site-packages/; \
+	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
+	else \
+	cd $(abs_builddir)/Assimulo_install/lib/python2.6/site-packages/; \
+	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
+	fi
+endif 
 	[ -e $(DESTDIR)$(prefix)/Python/jm_python.sh ] && echo "File exists, don't copy jm_python.sh" || cp Python/jm_python.sh $(DESTDIR)$(prefix)/Python/jm_python.sh
 	[ -e $(DESTDIR)$(prefix)/Python/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/Python/jm_ipython.sh
 	cp $(abs_top_srcdir)/Python/src/startup.py $(DESTDIR)$(prefix)/
