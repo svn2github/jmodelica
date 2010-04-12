@@ -421,7 +421,12 @@ aspect Names {
                                                       name(): classNamePrefix() + "." + name();
   eq BuiltInClassDecl.qualifiedName() = getName().getID();
   
-  eq SourceRoot.getProgram().classNamePrefix() = "";
+  // For proxy
+  public String SourceRoot.computeClassNamePrefix() {
+      return "";
+  }
+  
+  eq SourceRoot.getProgram().classNamePrefix() = computeClassNamePrefix();
   eq Root.getChild().classNamePrefix() = "";
     
   syn String InstClassDecl.qualifiedName();
@@ -495,10 +500,15 @@ aspect Names {
      */
     syn Access Access.getFirstAccess() = this;
     eq Dot.getFirstAccess() = getLeft().getFirstAccess();
-   
+
+    // For proxy
+    public Access SourceRoot.computeNextAccess() {
+        return null;
+    }
+    
    	inh Access Access.getNextAccess();
    	eq Dot.getLeft().getNextAccess() = getRight().getFirstAccess();
-   	eq SourceRoot.getProgram().getNextAccess() = null;
+   	eq SourceRoot.getProgram().getNextAccess() = computeNextAccess();
    	eq Root.getChild().getNextAccess() = null;
 
     /**

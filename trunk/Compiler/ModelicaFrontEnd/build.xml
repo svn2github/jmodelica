@@ -209,7 +209,7 @@
 		</if>
 		<javac compiler="javac1.5" debug="true" destdir="bin" classpath="${junit_dir}/junit-4.5.jar">
 			<src path="${test_junit-gen_dir}/" />
-			<include name="org/jmodelica/test/junitgenerated/*.java" />
+n			<include name="org/jmodelica/test/junitgenerated/*.java" />
 			<exclude name="**/*.aj" />
 		</javac>
 		<jar destfile="bin/junit-tests.jar">
