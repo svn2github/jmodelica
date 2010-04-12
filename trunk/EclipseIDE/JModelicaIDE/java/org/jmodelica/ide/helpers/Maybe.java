@@ -101,7 +101,7 @@ public String toString() {
 }
 
 /**
- * While this class is immutable and thus clearly could be co-variant in the
+ * While this class is immutable and thus clearly could be covariant in the
  * type parameter, this is not possible to declare in Java. This creates a new
  * Maybe<T>, with T <: E.
  * 

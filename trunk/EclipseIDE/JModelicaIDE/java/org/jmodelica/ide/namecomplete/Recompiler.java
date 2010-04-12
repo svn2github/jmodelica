@@ -7,6 +7,8 @@ import org.jmodelica.ide.ModelicaCompiler;
 import org.jmodelica.ide.OffsetDocument;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.ide.indent.DocUtil;
+import org.jmodelica.modelica.compiler.List;
+import org.jmodelica.modelica.compiler.Proxy;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 import org.jmodelica.modelica.parser.ModelicaParser;
@@ -25,7 +27,7 @@ public StoredDefinition recompilePartial(
     IFile file) 
 {
     
-    /* remove the current (partial) line when compiling, to make error
+    /* remove the current (partial) line when compiling to make error
        recovery easier */
     String fileContents = 
         new DocUtil(
@@ -36,11 +38,12 @@ public StoredDefinition recompilePartial(
     /* re-parse and add new AST to project AST */
     StoredDefinition def
         = compiler.recompile(fileContents, file);
-    if (mProjectRoot.hasValue())
-        mProjectRoot
-        .value()
-        .getProgram()
-        .dynamicAddStoredDefinition(def);
+
+    if (mProjectRoot.hasValue()) {
+        new Proxy(
+            mProjectRoot.value(), 
+            new List<StoredDefinition>(def));
+    }
 
     return def;
 }

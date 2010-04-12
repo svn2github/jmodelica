@@ -17,7 +17,7 @@ public void makeTest(
         new Context(new OffsetDocument(context + '^'));
     
     assertEquals(
-        c.qualifiedPart(), 
+        c.qualified(), 
         expectedQpart);
     assertEquals(
         c.filter().filter, 

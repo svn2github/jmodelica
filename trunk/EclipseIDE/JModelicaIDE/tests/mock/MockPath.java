@@ -1,6 +1,6 @@
 package mock;
 
-import java.io.File;
+import java.io.File; 
 
 import org.eclipse.core.runtime.IPath;
 
@@ -15,7 +15,7 @@ public class MockPath implements IPath {
     public MockPath(String path) {
         this.path = path;
     }
-
+ 
     public MockPath clone() {
         return null;
     }

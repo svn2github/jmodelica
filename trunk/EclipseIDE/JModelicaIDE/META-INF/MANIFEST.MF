@@ -15,7 +15,7 @@ Require-Bundle: org.eclipse.jface.text,
  org.eclipse.ui.ide,
  org.eclipse.ui.editors,
  org.eclipse.ui.views,
- org.eclipse.ui.navigator,
  org.jmodelica.folding;bundle-version="0.1.2",
  org.jastadd.plugin;bundle-version="1.0.8"
-Import-Package: junit.framework
+Import-Package: junit.framework,
+ org.eclipse.ui.navigator

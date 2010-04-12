@@ -5,20 +5,20 @@ import org.jmodelica.ide.OffsetDocument;
 
 public class Context {
 
-final String           qualifiedPart;
+final String           qualified;
 final CompletionFilter filter;
 
 /**
- * Get context leading caret.
+ * Get context around offset.
  * 
- * The context is determined by the text leading <code>caretOffset</code>. Two
+ * The context is determined by the text leading <code>doc.offset</code>. Two
  * values, context and filter are returned, where context represents a complete
  * qualified name, and filter represent a prefix.
  * 
- * E.g., leading text on the form 'a.b.prefix' results in
+ * E.g., text on the form 'a.b.prefix^' results in
  * 
- * context = "a.b" 
- * filter = "prefix"
+ * qualified := "a.b" 
+ * filter    := "prefix"
  * 
  * @param doc document
  * @param caretOffset offset to lookup context at
@@ -53,12 +53,12 @@ public Context(OffsetDocument doc) {
         e.printStackTrace();
     }   
    
-    this.qualifiedPart = qPart;
+    this.qualified = qPart;
     this.filter = new CompletionFilter(fPart);
 }
 
-public String qualifiedPart() { 
-    return qualifiedPart;
+public String qualified() { 
+    return qualified;
 }
 
 public CompletionFilter filter() {

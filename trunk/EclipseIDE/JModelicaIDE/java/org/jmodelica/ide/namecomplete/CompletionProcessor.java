@@ -49,9 +49,6 @@ public CompletionProcessor(Editor editor) {
  */
 public ArrayList<CompletionNode> suggestedDecls(OffsetDocument doc) {
 
-    Context context = 
-        new Context(doc);
-
     StoredDefinition def = 
         new Recompiler()
         .recompilePartial(
@@ -59,10 +56,13 @@ public ArrayList<CompletionNode> suggestedDecls(OffsetDocument doc) {
             projectRoot(),
             getFile());
     
+    Context context = 
+        new Context(doc);
+
     Maybe<InstNode> decl = 
         new Lookup(def)
         .lookupQualifiedName(
-            context.qualifiedPart(), 
+            context.qualified(), 
             doc);
 
     return decl.isNothing()
@@ -71,7 +71,7 @@ public ArrayList<CompletionNode> suggestedDecls(OffsetDocument doc) {
           .value()
           .completionProposals(
               context.filter(),
-              context.qualifiedPart().equals(""));
+              context.qualified().length() > 0);
 }
 
 protected IFile getFile() {

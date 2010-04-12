@@ -1,6 +1,6 @@
 package org.jmodelica.ide.editor;
 
-import mock.MockFile;
+import mock.MockFile; 
 import mock.MockProject;
 
 import org.eclipse.core.resources.IFile;

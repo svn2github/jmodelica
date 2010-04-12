@@ -24,21 +24,27 @@ aspect Util {
 			getInstClassDecl(index).getClassDecl().getDefinition();
 	eq InstNode.getInstComponentDecl(int index).getDefinition() = 
 			getInstComponentDecl(index).getComponentDecl().getDefinition();
-	
+
    public Object List.getLast() {
        if (getNumChild() > 0)
            return getChild(getNumChild() - 1);
        return null; 
    } 
    
-	// Add a isKnown() method. I hate double negating things! :)
-	
+	//I hate double negating things :p
 	public boolean InstClassDecl.isKnown() {
 	    return !isUnknown();
 	}
 	
 	public boolean InstComponentDecl.isKnown() {
 	    return !isUnknown();
+	}
+	
+	public List.List(T... ts) {
+	    super();
+	    for (T t : ts) {
+	        add(t);
+	    }
 	}
 	
 }

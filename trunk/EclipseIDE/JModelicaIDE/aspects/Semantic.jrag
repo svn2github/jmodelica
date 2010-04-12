@@ -226,6 +226,10 @@ aspect Completion {
         return decls;
     }
 
+    eq InstNode.getChild().outerClassDecls() {
+        return new ArrayList<CompletionNode>();
+    }
+    
     /**
      * Completion proposals for InstComponentDecl:s are only components. 
      */
@@ -355,12 +359,12 @@ aspect NADebugging {
         for (ASTNode node : this) 
             node.printDebugInfo(ind + "  ", p);
     }
-//    
-//    public String ASTNode.toString() {
-//        ByteArrayOutputStream b = new ByteArrayOutputStream();
-//        printDebugInfo("", new PrintStream(b));
-//        return b.toString();
-//    }
-    
+
+    public String ASTNode.toStringPrim() {
+        ByteArrayOutputStream b = new ByteArrayOutputStream();
+        printDebugInfo("", new PrintStream(b));
+        return b.toString();
+    }
+
 }
 
