@@ -155,6 +155,7 @@
 
 	<!-- remove generated and copied java files -->
 	<target name="cleanGen" depends="clean">
+		<delete dir="${package_dir}/generated" />
 		<delete dir="${package_dir}/modelica" />
 		<delete dir="${package_dir}/util" />
 		<delete dir="${package_dir}/graph" />
