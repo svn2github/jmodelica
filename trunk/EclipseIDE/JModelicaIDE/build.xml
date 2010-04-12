@@ -84,18 +84,11 @@
 
 	<!-- Copy required files from JModelica -->
 	<target name="copy">
-		<!--
 		<copy todir="${java_dir}">
-			<fileset dir="${jmodelica_test_framework}">
-				<include name="**/*.java" />
-			</fileset>
+            <fileset dir="${jmodelica_dir}/java">
+            <include name="**/*" />
+            </fileset>
 		</copy>
-		<copy todir="${java_dir}">
-			<fileset dir="${jmodelica_java}">
-				<include name="**/codegen/*.java" />
-			</fileset>
-		</copy>
--->
 		<copy todir="${lib_dir}">
 			<fileset dir="${beaver_dir}">
 				<include name="beaver-rt*" />
@@ -132,12 +125,6 @@
          </concat>
         <jflex file="${parser_output}/Modelica_all.flex" outdir="${parser_output}" nobak="yes"/>
 
-        <concat destfile="${parser_output}/FlatModelica_all.flex" force="no">
-          <filelist dir="${parser_dir}" files="FlatModelica_header.flex"/>
-          <filelist dir="${parser_dir}" files="FlatModelica.flex" />    
-         </concat>
-        <jflex file="${parser_output}/FlatModelica_all.flex" outdir="${parser_output}" nobak="yes"/>
-
 		
 		<!-- Modelica parser -->
 		<!-- generate the parser phase 1, translating .lalr to .beaver -->
@@ -155,34 +142,6 @@
 		</concat>
 		<!-- generate the parser phase 2, translating .beaver to .java -->
 		<beaver file="${parser_output}/ModelicaParser.beaver" terminalNames="yes" compress="no" useSwitch="yes" />
-
-		<!-- copy options registry -->
-		<copy todir="./java/org/jmodelica/util">
-            <fileset dir="${jmodelica_dir}/java/org/jmodelica/util">
-            <include name="*" />
-            </fileset>
-		</copy>
-		
-		<!-- Flat Modelica parser -->
-		<!-- generate the parser phase 1, translating .lalr to .beaver -->
-
-		<concat destfile="${parser_output}/FlatModelica_all.parser" force="no">
-			  <filelist dir="${parser_dir}" files="FlatModelica_header.parser"/>
-		      <filelist dir="${parser_dir}" files="FlatModelica.parser" />  
-		</concat>
-
-		<java classpath="${jastadd_dir}/JastAddParser.jar:${beaver_dir}/lib/beaver-rt.jar" classname="Main">
-			<arg line="${parser_output}/FlatModelica_all.parser ${parser_output}/FlatModelicaParser_raw.beaver" />
-		</java>
-		
-
-		<concat destfile="${parser_output}/FlatModelicaParser.beaver" force="no">
-			<filelist dir="." files="${parser_dir}/beaver.flat.input" />
-			<filelist dir="${parser_output}" files="FlatModelicaParser_raw.beaver" />
-		</concat>
-
-		<!-- generate the parser phase 2, translating .beaver to .java -->
-		<beaver file="${parser_output}/FlatModelicaParser.beaver" terminalNames="yes" compress="no" useSwitch="yes" />
 		
 
 		<!-- clean up intermediate files -->
@@ -197,6 +156,8 @@
 	<!-- remove generated and copied java files -->
 	<target name="cleanGen" depends="clean">
 		<delete dir="${package_dir}/modelica" />
+		<delete dir="${package_dir}/util" />
+		<delete dir="${package_dir}/graph" />
 		<delete file="${lib_dir}/beaver-rt.jar" />
 		<delete file="${lib_dir}/beaver-rt-src.jar" />
 	</target>

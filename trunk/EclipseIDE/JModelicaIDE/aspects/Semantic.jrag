@@ -198,6 +198,8 @@ aspect Completion {
     
     inh ArrayList<CompletionNode> InstClassDecl.outerClassDecls();
     
+    eq Root.getChild().outerClassDecls() = new ArrayList<CompletionNode>();
+    
     eq InstClassDecl.getChild().outerClassDecls() {
         
         ArrayList<CompletionNode> decls = 
@@ -353,12 +355,12 @@ aspect NADebugging {
         for (ASTNode node : this) 
             node.printDebugInfo(ind + "  ", p);
     }
-    
-    public String ASTNode.toString() {
-        ByteArrayOutputStream b = new ByteArrayOutputStream();
-        printDebugInfo("", new PrintStream(b));
-        return b.toString();
-    }
+//    
+//    public String ASTNode.toString() {
+//        ByteArrayOutputStream b = new ByteArrayOutputStream();
+//        printDebugInfo("", new PrintStream(b));
+//        return b.toString();
+//    }
     
 }
 

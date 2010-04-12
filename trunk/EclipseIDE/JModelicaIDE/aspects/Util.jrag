@@ -24,13 +24,6 @@ aspect Util {
 			getInstClassDecl(index).getClassDecl().getDefinition();
 	eq InstNode.getInstComponentDecl(int index).getDefinition() = 
 			getInstComponentDecl(index).getComponentDecl().getDefinition();
- 
-	public ArrayList<T> List.toArrayList() {
-        ArrayList<T> a = new ArrayList<T>();
-        for (T t : this)
-            a.add(t);
-        return a;
-    }
 	
    public Object List.getLast() {
        if (getNumChild() > 0)

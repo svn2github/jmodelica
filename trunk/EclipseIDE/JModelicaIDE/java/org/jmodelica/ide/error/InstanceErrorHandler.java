@@ -42,9 +42,14 @@ public class InstanceErrorHandler implements IErrorHandler {
 		}
 	}
 
+	@Override
+	public void compliance(String s, ASTNode n) {
+		error(s, n);  // TODO: Perhaps these should be handled differently? issued for unimplemented features
+	}
+
 	@SuppressWarnings("unchecked")
     public void warning(String s, ASTNode n) {
-		// Ignore for now - warnings are invoked for things that aren't implemented in compiler
+		// TODO: We should probably handle these now
 	}
 	
 	public void reset() {
