@@ -142,7 +142,13 @@
 		</concat>
 		<!-- generate the parser phase 2, translating .beaver to .java -->
 		<beaver file="${parser_output}/ModelicaParser.beaver" terminalNames="yes" compress="no" useSwitch="yes" />
-		
+
+		<!-- generate flat Modelica scanner -->
+		<concat destfile="${parser_output}/FlatModelica_all.flex" force="no">
+			<filelist dir="." files="${parser}/FlatModelica_header.flex" />
+			<filelist dir="${parser}" files="FlatModelica.flex" />
+		</concat>
+		<jflex file="${parser_output}/FlatModelica_all.flex" outdir="${parser_output}" nobak="yes" />
 
 		<!-- clean up intermediate files -->
 		<delete>
