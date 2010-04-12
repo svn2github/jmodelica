@@ -102,6 +102,11 @@ class JMIODE(Explicit_Problem):
         
         if len(self._model.real_w):
             raise JMIModel_Exception('There can be no algebraic variables when using an ODE solver.')
+            
+        [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes() #Used for determine if there are discontinuities
+        
+        if g_nbr > 0:
+            raise JMIModel_Exception('There is no support for discontinuities when using an ODE solver.')
         
         self.jac = self.j #Activates the jacobian
     

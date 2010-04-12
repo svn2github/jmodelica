@@ -84,6 +84,19 @@ class Test_JMI_ODE:
         m_DAE = jmi.Model(package_DAE)
         
         nose.tools.assert_raises(JMIModel_Exception, JMIODE, m_DAE)
+        
+
+        #Test for discontinious model
+        modelf_DISC = 'files' + sep + 'IfExpExamples.mo'
+        fpath_DISC = os.path.join(path_to_examples, modelf_DISC)
+        cpath_DISC = 'IfExpExamples.IfExpExample2'
+        fname_DISC = cpath_DISC.replace('.','_',1)
+        mc.compile_model(fpath_DISC, cpath_DISC)
+        package_DISC = 'IfExpExamples_IfExpExample2'
+        # Load the dynamic library and XML data
+        m_DISC = jmi.Model(package_DISC)
+        
+        nose.tools.assert_raises(JMIModel_Exception, JMIODE, m_DISC)
     
     def test_f(self):
         """
