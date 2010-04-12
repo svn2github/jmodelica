@@ -6,14 +6,15 @@ import warnings
 import numpy as N
 
 from jmodelica.optimization import ipopt
-#from jmodelica.simulation.sundials import SundialsDAESimulator
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
 
 try:
     from jmodelica.simulation.assimulo import JMIDAE, JMIODE, write_data
-    from Assimulo.Implicit_ODE import IDA
-    from Assimulo.Explicit_ODE import CVode
+    from Assimulo import Implicit_ODE
+    from Assimulo import Explicit_ODE
+    from Assimulo.Implicit_ODE import *
+    from Assimulo.Explicit_ODE import *
 except:
     pass
 
@@ -38,29 +39,34 @@ class AlgorithmBase:
 class AssimuloAlg(AlgorithmBase):
     """ Simulation algorithm using the Assimulo package. """
     
-    def __init__(self, model, alg_args={}, start_time=0.0, final_time=10.0, abstol=1.0e-6, reltol=1.0e-6,time_step=0.01):
-        self.model = model
-        self.alg_args=alg_args
-        self.start_time = start_time
-        self.final_time = final_time
-        self.abstol=abstol
-        self.reltol=reltol
-        self.time_step=time_step
+    def __init__(self, 
+                 model, 
+                 alg_args={}):
+        self._set_alg_args(**alg_args)
+        if issubclass(self.solver, Implicit_ODE):
+            probl = JMIDAE(model)
+        else:
+            probl = JMIODE(model)
+        self.simulator = self.solver(probl, t0=self.start_time)
         
-    def set_solver_options(self, solver_args):
-        self.solver_args=solver_args
+    def _set_alg_args(self,
+                      start_time=0.0,
+                      final_time=1.0,
+                      num_communication_points=500,
+                      solver=IDA):
+        self.start_time=start_time
+        self.final_time=final_time
+        self.num_communication_points=num_communication_points
+        self.solver=solver
+        
+    def set_solver_options(self, 
+                           solver_args={}):
+        #loop solver_args and set properties of solver
+        for k, v in solver_args.iteritems():
+            self.simulator.setattr(self, k, v)
         
     def solve(self):
-        if self.alg_args.get('solver')=='ODE':
-            probl = JMIODE(self.model, **self.solver_args)
-            self.simulator = CVode(probl, t0=self.start_time)
-        else:
-            probl = JMIDAE(self.model, **self.solver_args)
-            self.simulator = IDA(probl, t0=self.start_time)
-            
-        self.simulator.atol = self.abstol
-        self.simulator.rtol = self.reltol
-        self.simulator(self.final_time, int((self.final_time-self.start_time)/self.time_step))
+        self.simulator(self.final_time, self.num_communication_points)
     
     def write_result(self):
         write_data(self.simulator)
@@ -69,7 +75,9 @@ class AssimuloAlg(AlgorithmBase):
 class CollocationLagrangePolynomialsAlg(AlgorithmBase):
     """ Optimization algorithm using CollocationLagrangePolynomials method. """
     
-    def __init__(self, model, alg_args):
+    def __init__(self, 
+                 model, 
+                 alg_args={}):
         """ Create a CollocationLagrangePolynomials algorithm.
         
         model -- 
@@ -78,10 +86,26 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
             dict with algorithm arguments. This algorithm expects the dict keys n_e, hs and n_cp to be set.
             
         """
-        self.nlp = ipopt.NLPCollocationLagrangePolynomials(model,**alg_args)
+        # set alg_args
+        self._set_alg_args(**alg_args)                
+        self.nlp = ipopt.NLPCollocationLagrangePolynomials(model,self.n_e, self.hs, self.n_cp)
         self.nlp_ipopt = ipopt.CollocationOptimizer(self.nlp)
         
-    def set_solver_options(self, solver_args):
+    def _set_alg_args(self, 
+                      n_e=50, 
+                      n_cp=3, 
+                      hs=N.ones(50)*1./50, 
+                      result_mesh='default', 
+                      result_file_name='', 
+                      result_format='txt'):
+        self.n_e=n_e
+        self.n_cp=n_cp
+        self.hs=hs
+        self.result_mesh=result_mesh
+        self.result_args = dict(file_name=result_file_name, format=result_format)
+        
+    def set_solver_options(self, 
+                           solver_args):
         """ Set options for the solver.
         
         solver_args --
@@ -99,11 +123,11 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         """ Solve the optimization problem using ipopt solver. """
         self.nlp_ipopt.opt_sim_ipopt_solve()
     
-    def write_result(self, result_mesh='default', result_args={}):
+    def write_result(self):
         """ Write result to file. """
-        if result_mesh=='element_interpolation':
-            self.nlp.export_result_dymola_element_interpolation(**result_args)
-        elif result_mesh=='mesh_interpolation':
-            self.nlp.export_result_dymola_mesh_interpolation(**result_args)
+        if self.result_mesh=='element_interpolation':
+            self.nlp.export_result_dymola_element_interpolation(**self.result_args)
+        elif self.result_mesh=='mesh_interpolation':
+            self.nlp.export_result_dymola_mesh_interpolation(**self.result_args)
         else:
-            self.nlp.export_result_dymola(**result_args)
+            self.nlp.export_result_dymola(**self.result_args)

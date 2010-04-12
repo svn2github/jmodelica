@@ -81,7 +81,7 @@ def test_simulate():
     fpath_rlc = os.path.join(jm_home, path_to_examples, mofile_rlc)
     cpath_rlc = "RLC_Circuit"
     
-    (model,res) = jmodelica.simulate(cpath_rlc, fpath_rlc, final_time=30.0)
+    (model,res) = jmodelica.simulate(cpath_rlc, fpath_rlc, alg_args={'final_time':30.0})
     resistor_v = res.get_variable_data('resistor.v')
     
     assert N.abs(resistor_v.x[-1] - 0.159255008028) < 1e-3, \

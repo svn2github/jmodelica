@@ -63,40 +63,59 @@ int = N.int32
 N.int = N.int32
 
 
-def optimize(model, file_name='', compiler_target='ipopt', compiler_options={}, 
+def optimize(model, 
+             file_name='', 
+             compiler_target='ipopt', 
+             compiler_options={}, 
              algorithm=CollocationLagrangePolynomialsAlg, 
-             alg_args={'n_e':50, 'n_cp':3,'hs':N.ones(50)*1./50}, 
-             solver_args={'max_iter':-1}, result_mesh='default', 
-             result_args={'file_name':'', 'format':'txt'}):
+             alg_args={}, 
+             solver_args={}):
     """ Compact function for model optimization.
     
     Path to mo-file and model class must be provided. There are default values 
     for all other settings. These can be changed in function call.
     
     """
-    if not issubclass(algorithm, AlgorithmBase):
-        raise Exception(str(algorithm)+
-                        " must be a subclass of jmodelica.algorithm_drivers.AlgorithmBase")
-        
-    if not isinstance(model, jmodelica.jmi.Model):
-        model = _compile(model, file_name, compiler='optimica', compiler_target=compiler_target, 
-                         compiler_options=compiler_options)
-     
-    # initialize algorithm    
-    alg = algorithm(model, alg_args)
-    # set arguments to solver, if any    
-    alg.set_solver_options(solver_args)
-    # solve optimization problem
-    alg.solve()
-    # write result to file
-    alg.write_result(result_mesh=result_mesh, result_args=result_args)
-    # load result file
-    res = jmodelica.io.ResultDymolaTextual(model.get_name()+'_result.txt')
-    return (model,res)
+    compiler='optimica'
+    return _exec_algorithm(model, 
+                           file_name,
+                           compiler,
+                           compiler_options,
+                           compiler_target,
+                           algorithm,
+                           alg_args,
+                           solver_args)
 
-def simulate(model, file_name='', compiler='modelica', compiler_options={}, compiler_target='ipopt', 
-              algorithm=AssimuloAlg, alg_args={'solver':'DAE'}, start_time=0.0, final_time=10.0, 
-              abstol=1.0e-6, reltol=1.0e-6, time_step=0.01, solver_args={'jacobian':True}):
+#
+#    if not issubclass(algorithm, AlgorithmBase):
+#        raise Exception(str(algorithm)+
+#                        " must be a subclass of jmodelica.algorithm_drivers.AlgorithmBase")
+#        
+#    if not isinstance(model, jmodelica.jmi.Model):
+#        model = _compile(model, file_name, compiler='optimica', compiler_target=compiler_target, 
+#                         compiler_options=compiler_options)
+#     
+#    # initialize algorithm
+#    alg = algorithm(model, alg_args)
+#    # set arguments to solver, if any    
+#    alg.set_solver_options(solver_args)
+#    # solve optimization problem
+#    alg.solve()
+#    # write result to file
+#    alg.write_result()
+#       
+#    # load result file
+#    res = jmodelica.io.ResultDymolaTextual(model.get_name()+'_result.txt')
+#    return (model,res)
+
+def simulate(model, 
+             file_name='', 
+             compiler='modelica', 
+             compiler_options={}, 
+             compiler_target='ipopt', 
+             algorithm=AssimuloAlg, 
+             alg_args={}, 
+             solver_args={}):
     """ Compact function for model simulation.
     
     Pass a jmi.Model object or path to mo-file and model class if model 
@@ -104,24 +123,59 @@ def simulate(model, file_name='', compiler='modelica', compiler_options={}, comp
     These can be changed in function call.
     
     """
+    return _exec_algorithm(model, 
+                           file_name,
+                           compiler,
+                           compiler_options,
+                           compiler_target,
+                           algorithm,
+                           alg_args,
+                           solver_args)
+   
+#    if not issubclass(algorithm, AlgorithmBase):
+#        raise Exception(str(algorithm)+
+#                        " must be a subclass of jmodelica.algorithm_drivers.AlgorithmBase")
+#
+#    if not isinstance(model, jmodelica.jmi.Model):
+#        # model class and mo-file must be set
+#         model = _compile(model, file_name, compiler=compiler, 
+#                          compiler_options=compiler_options, 
+#                          compiler_target=compiler_target)
+#
+#    alg = algorithm(model, alg_args)
+#    alg.set_solver_options(solver_args)
+#    alg.solve()
+#    alg.write_result()
+#    res = jmodelica.io.ResultDymolaTextual(model.get_name()+'_result.txt')
+#    return (model,res)
+   
+def _exec_algorithm(model, 
+             file_name, 
+             compiler, 
+             compiler_options, 
+             compiler_target, 
+             algorithm, 
+             alg_args, 
+             solver_args):
+
     if not issubclass(algorithm, AlgorithmBase):
         raise Exception(str(algorithm)+
                         " must be a subclass of jmodelica.algorithm_drivers.AlgorithmBase")
 
     if not isinstance(model, jmodelica.jmi.Model):
         # model class and mo-file must be set
-         model = _compile(model, file_name, compiler=compiler, compiler_options=compiler_options, 
+         model = _compile(model, file_name, compiler=compiler, 
+                          compiler_options=compiler_options, 
                           compiler_target=compiler_target)
 
-    alg = algorithm(model, alg_args=alg_args, start_time=start_time, final_time=final_time, 
-                    abstol=abstol, reltol=reltol, time_step=time_step)
+    alg = algorithm(model, alg_args)
     alg.set_solver_options(solver_args)
     alg.solve()
     alg.write_result()
     res = jmodelica.io.ResultDymolaTextual(model.get_name()+'_result.txt')
     return (model,res)
     
-    
+
 #def optimize(model, file="", compiler_options={}, n_e=50, n_cp=3, max_iter=-1, result_mesh='default', n_interpolation_points=20):
 #    """ Compact function for model optimization.
 #    
