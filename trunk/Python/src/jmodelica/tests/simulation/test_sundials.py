@@ -48,7 +48,7 @@ class TestSimulator:
         self.m = jmi.Model(package)
         self.simulator = SundialsODESimulator(self.m,start_time=0.0, final_time=20.0)
         
-    @testattr(stddist = True)    
+   
     def test_set_get_model(self):
         """Test the model setter/getter."""
         simulator = self.simulator
@@ -72,7 +72,7 @@ class TestSimulator:
         simulator.model = another_model # testing property
         assert another_model == simulator.get_model()
         
-    @testattr(stddist = True)                             
+                           
     def test_absolute_tolerance(self):
         """Basic testing of setting absolute tolerance.
         
@@ -101,7 +101,7 @@ class TestSimulator:
         nose.tools.assert_raises(jmodelica.simulation.SimulationException,
                                  simulator.set_absolute_tolerance, 0)
     
-    @testattr(stddist = True)                             
+                            
     def test_relative_tolerance(self):
         """Basic testing of setting relative tolerance.
         
@@ -130,7 +130,7 @@ class TestSimulator:
         nose.tools.assert_raises(jmodelica.simulation.SimulationException,
                                  simulator.set_relative_tolerance, 0)
                                  
-    @testattr(stddist = True)    
+   
     def test_set_get_verbosity(self):
         """Test the verbosity setter/getter.
         
@@ -157,7 +157,7 @@ class TestSimulator:
         nose.tools.assert_raises(jmodelica.simulation.SimulationException,
                                  simulator.set_verbosity, -5465)
 
-    @testattr(stddist = True)                             
+                            
     def test_time_steps(self):
         simulator = self.simulator
         
@@ -181,7 +181,7 @@ class TestSimulator:
         nose.tools.assert_raises(jmodelica.simulation.SimulationException,
                                  simulator.set_time_step, -3)
     
-    @testattr(stddist = True)    
+   
     def test_simulation_intervals(self):
         simulator = self.simulator
         
@@ -219,7 +219,7 @@ class TestSundialsDAESimulator:
 
         mc.compile_model(fpath, cpath)
         
-    @testattr(stddist = True)
+
     def setUp(self):
         """Load the test model for DAE."""
         package = "Pendulum_pack_Pendulum"
@@ -229,11 +229,11 @@ class TestSundialsDAESimulator:
 
         self.simulator = SundialsDAESimulator(self.m, start_time=0.0, final_time=10.0)
     
-    @testattr(stddist = True)    
+    
     def test_is_simulator(self):
         assert isinstance(self.simulator, jmodelica.simulation.Simulator)
     
-    @testattr(stddist = True)    
+  
     def test_constructor_parameters(self):
         """Assert that a couple of different parameters exists in the
            DAE constructor.
@@ -255,8 +255,7 @@ class TestSundialsDAESimulator:
         assert simulator.return_last == True
         assert simulator.get_start_time() == 1
         assert simulator.get_final_time() == 20
-    
-    @testattr(stddist = True)    
+      
     def test_simulation(self):
         """Run a very basic DAE simulation."""
         
@@ -278,8 +277,7 @@ class TestSundialsDAESimulator:
         p.plot(Ts, ys)
         p.title('testDAESimulation(...) output')
         fig.savefig('TestSundialsDAESimulator_test_simulation.png')
-    
-    @testattr(stddist = True)    
+      
     def test_simulation_with_algebraic_variables(self):
         """Run a simulation with a model with algebraic variables"""
  
@@ -362,12 +360,10 @@ class TestSundialsODESimulator:
         # Load the dynamic library and XML data
         self.m = jmi.Model(package)
         self.simulator = SundialsODESimulator(self.m,start_time=0.0, final_time=20.0)
-    
-    @testattr(stddist = True)    
+      
     def test_is_simulator(self):
         assert isinstance(self.simulator, jmodelica.simulation.Simulator)
-    
-    @testattr(stddist = True)    
+      
     def test_constructor_parameters(self):
         """Assert that a couple of different parameters exists in the
            constructor.
@@ -388,8 +384,7 @@ class TestSundialsODESimulator:
         assert simulator.return_last == True
         assert simulator.get_start_time() == 1
         assert simulator.get_final_time() == 20
-    
-    @testattr(stddist = True)                                         
+                                            
     def test_simulation(self):
         """Run a very basic simulation."""
         
@@ -411,7 +406,7 @@ class TestSundialsODESimulator:
         p.title('testFixedSimulation(...) output')
         fig.savefig('TestSundialsODESimulator_test_simulation.png')
     
-    @testattr(stddist = True)           
+         
     def test_return_last(self):
         """Testing the 'return_last'.
         
@@ -458,8 +453,7 @@ class TestSundialsODESimulator:
         T, Y = simulator.get_solution()
         nose.tools.assert_raises(TypeError, len, T) # Assert scalar
         nose.tools.assert_equal(len(Y), 3)
-        
-    @testattr(stddist = True)    
+           
     def test_simulation_with_sensivity(self):
         """Run simulation with sensitivity analysis."""
         
@@ -524,8 +518,7 @@ class TestSundialsODESimulator:
     
     
     
-    
-    @testattr(stddist = True)    
+      
     def test_simulation_with_sensivity(self, SMALL=0.3):
         """Testing simulation with sensivity, plotting a guesstimate."""
         

@@ -23,11 +23,16 @@ import matplotlib
 import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.tests import get_example_path
-from jmodelica.simulation.sundials import SundialsDAESimulator
-from jmodelica.simulation.sundials import TrajectoryLinearInterpolation
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
+
+try:
+    from jmodelica.simulation.assimulo import JMIDAE, write_data
+    from jmodelica.simulation.assimulo import TrajectoryLinearInterpolation
+    from Assimulo.Implicit_ODE import IDA
+except:
+    raise ImportError('Could not find Assimulo package.')
 
 def run_demo(with_plots=True):
     """
@@ -55,20 +60,15 @@ def run_demo(with_plots=True):
     model=jmi.Model(model_name)
 
     model.set_value('u',u_traj.eval(0.)[0])
-
-    # Create DAE initialization object.
-    init_nlp = NLPInitialization(model)
     
-    # Create an Ipopt solver object for the DAE initialization system
-    init_nlp_ipopt = InitializationOptimizer(init_nlp)
-        
-    # Solve the DAE initialization system with Ipopt
-    init_nlp_ipopt.init_opt_ipopt_solve()
-
-    simulator = SundialsDAESimulator(model, verbosity=3, start_time=0.0, final_time=30.0, time_step=0.01,input=u_traj)
-    simulator.run()
-        
-    simulator.write_data()
+    mod = JMIDAE(model, input=u_traj) #Create an assimulo DAE model
+    sim = IDA(mod) #Create an IDA solver
+    
+    sim.initiate() #Calculate initial conditions
+    sim.simulate(30,3000) #Simulate 30 seconds with 3000 communication points
+    
+    
+    write_data(sim) #Writes data
 
     # Load the file we just wrote to file
     res = jmodelica.io.ResultDymolaTextual('SecondOrder_result.txt')

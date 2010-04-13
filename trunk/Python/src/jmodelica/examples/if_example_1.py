@@ -23,10 +23,15 @@ import matplotlib
 import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.tests import get_example_path
-from jmodelica.simulation.sundials import SundialsDAESimulator
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
+
+try:
+    from jmodelica.simulation.assimulo import JMIDAE, write_data
+    from Assimulo.Implicit_ODE import IDA
+except:
+    raise ImportError('Could not find Assimulo package.')
 
 def run_demo(with_plots=True):
     """
@@ -50,20 +55,13 @@ def run_demo(with_plots=True):
 
     # Load the dynamic library and XML data
     model=jmi.Model(compiled_model_name)
-
-    # Create DAE initialization object.
-    init_nlp = NLPInitialization(model)
     
-    # Create an Ipopt solver object for the DAE initialization system
-    init_nlp_ipopt = InitializationOptimizer(init_nlp)
-        
-    # Solve the DAE initialization system with Ipopt
-    init_nlp_ipopt.init_opt_ipopt_solve()
+    disc_mod = JMIDAE(model) #Create an Assimulo problem
+    disc_sim = IDA(disc_mod) #Create an IDA solver
+    disc_sim.initiate() #Calculate initial conditions
+    disc_sim.simulate(5,500) #Simulate 5 seconds with 500 communication points
 
-    simulator = SundialsDAESimulator(model, verbosity=3, start_time=0.0, final_time=5.0, time_step=0.01)
-    simulator.run()
-        
-    simulator.write_data()
+    write_data(disc_sim)
 
     # Load the file we just wrote to file
     res = jmodelica.io.ResultDymolaTextual('IfExpExamples_IfExpExample1_result.txt')
@@ -75,8 +73,6 @@ def run_demo(with_plots=True):
     assert N.abs(u.x[-1] - (-0.2836625)) < 1e-3, \
             "Wrong value, last value of u in if_example.py"            
 
-    #assert N.abs(resistor_v.x[-1] - 0.159255008028) < 1e-3, \
-#           "Wrong value in simulation result in RLC.py"
     if with_plots:
         fig = p.figure()
         p.plot(x.t, x.x, u.t, u.x)

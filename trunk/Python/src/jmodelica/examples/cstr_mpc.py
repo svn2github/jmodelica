@@ -21,10 +21,15 @@ import os.path
 import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.compiler import OptimicaCompiler
-from jmodelica.simulation.sundials import SundialsDAESimulator
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
 from jmodelica.optimization import ipopt
+
+try:
+    from jmodelica.simulation.assimulo import JMIDAE, write_data
+    from Assimulo.Implicit_ODE import IDA
+except:
+    raise ImportError('Could not find Assimulo package.')
 
 import numpy as N
 import scipy as S
@@ -131,11 +136,12 @@ def run_demo(with_plots=True):
     sim_model.set_value('c_init',c_0_A)
     sim_model.set_value('T_init',T_0_A)
     
-    # Create DAE initialization object.
-    sim_init_nlp = NLPInitialization(sim_model)
     
-    # Create an Ipopt solver object for the DAE initialization system
-    sim_init_nlp_ipopt = InitializationOptimizer(sim_init_nlp)
+    global cstr_mod
+    global cstr_sim
+    
+    cstr_mod = JMIDAE(sim_model) #Create an Assimulo problem
+    cstr_sim = IDA(cstr_mod) #Create an IDA solver
     
     i = 0
     
@@ -163,50 +169,33 @@ def run_demo(with_plots=True):
         c_res=res.get_variable_data('cstr.c')
         T_res=res.get_variable_data('cstr.T')
         Tc_res=res.get_variable_data('cstr.Tc')
-
-#        plt.figure(100)
-#        plt.clf()
-#        plt.subplot(3,1,1)
-#        plt.plot(c_res.t,c_res.x,'b')
-#        plt.grid()
-#        plt.subplot(3,1,2)
-#        plt.plot(T_res.t,T_res.x,'b')
-#        plt.grid()
-#        plt.subplot(3,1,3)
-#        plt.plot(Tc_res.t,Tc_res.x,'b')
-#        plt.grid()
-#        plt.show()
-#        qq=raw_input("continue")
         
         # Get the first Tc sample
         Tc_ctrl = Tc_res.x[0]
         
         # Solve initialization problem for simulation model
         sim_model.set_value('Tc',Tc_ctrl)
-        sim_init_nlp_ipopt.init_opt_ipopt_solve()
         
-        # Simulate one sample
-        simulator = SundialsDAESimulator(sim_model, verbosity=3, \
-                                         start_time=t_mpc[i], \
-                                         final_time=t_mpc[i+1], \
-                                         time_step=0.1)
-        simulator.run()
-        c_sim = simulator._Y[:,2]
-        T_sim = simulator._Y[:,3]
-        t_T_sim = simulator._T
+        cstr_sim.re_init(t_mpc[i],cstr_sim.y[-1],cstr_sim.yd[-1]) #Re initiates the problem
+        
+      
+        cstr_sim.initiate() #Calculate initial conditions
+        cstr_sim.simulate(t_mpc[i+1]) #Simulate
+        
+        t_T_sim = cstr_sim.t
         
         # Set terminal values of the states
-        cstr.set_value('cstr.c_init',c_sim[-1])
-        cstr.set_value('cstr.T_init',T_sim[-1])
-        sim_model.set_value('c_init',c_sim[-1])
-        sim_model.set_value('T_init',T_sim[-1])
+        cstr.set_value('cstr.c_init',cstr_sim.y[-1][0])
+        cstr.set_value('cstr.T_init',cstr_sim.y[-1][1])
+        sim_model.set_value('c_init',cstr_sim.y[-1][0])
+        sim_model.set_value('T_init',cstr_sim.y[-1][1])
         plt.figure(4)
         plt.subplot(3,1,1)
-        plt.plot(t_T_sim,c_sim,'b')
+        plt.plot(t_T_sim,N.array(cstr_sim.y)[:,0],'b')
         plt.show()
         
         plt.subplot(3,1,2)
-        plt.plot(t_T_sim,T_sim,'b')
+        plt.plot(t_T_sim,N.array(cstr_sim.y)[:,1],'b')
         plt.show()
         
         if t_mpc[i]==0:
@@ -236,12 +225,8 @@ def run_demo(with_plots=True):
     plt.plot([0,T_final],[Tc_0_B,Tc_0_B],'--')
     plt.grid()
     plt.xlabel('t')
-    
 
 
-
-
-
-
-
+if __name__ == "__main__":
+    run_demo()
 

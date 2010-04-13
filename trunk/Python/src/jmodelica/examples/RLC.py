@@ -23,10 +23,13 @@ import matplotlib
 import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.tests import get_example_path
-from jmodelica.simulation.sundials import SundialsDAESimulator
+try:
+    from jmodelica.simulation.assimulo import JMIDAE, write_data
+    from Assimulo.Implicit_ODE import IDA
+except:
+    raise ImportError('Could not find Assimulo package.')
 from jmodelica.compiler import ModelicaCompiler
-from jmodelica.initialization.ipopt import NLPInitialization
-from jmodelica.initialization.ipopt import InitializationOptimizer
+
 
 def run_demo(with_plots=True):
     """
@@ -49,20 +52,15 @@ def run_demo(with_plots=True):
 
     # Load the dynamic library and XML data
     model=jmi.Model(model_name)
-
-    # Create DAE initialization object.
-    init_nlp = NLPInitialization(model)
     
-    # Create an Ipopt solver object for the DAE initialization system
-    init_nlp_ipopt = InitializationOptimizer(init_nlp)
-        
-    # Solve the DAE initialization system with Ipopt
-    init_nlp_ipopt.init_opt_ipopt_solve()
+    global RLC_mod
+    global RLC_sim
+    
+    RLC_mod = JMIDAE(model)
+    RLC_sim = IDA(RLC_mod)
+    RLC_sim.simulate(30) #Simulate 30 seconds
 
-    simulator = SundialsDAESimulator(model, verbosity=3, start_time=0.0, final_time=30.0, time_step=0.01)
-    simulator.run()
-        
-    simulator.write_data()
+    write_data(RLC_sim)
 
     # Load the file we just wrote to file
     res = jmodelica.io.ResultDymolaTextual('RLC_Circuit_result.txt')
@@ -72,9 +70,9 @@ def run_demo(with_plots=True):
 
     assert N.abs(resistor_v.x[-1] - 0.159255008028) < 1e-3, \
            "Wrong value in simulation result in RLC.py"
+    assert RLC_sim.stats['Number of F-Eval During Jac-Eval         '] == 0
     
     if with_plots:
-        #Ts, ys = simulator.get_solution('sine.y','resistor.v','inductor1.i')
         fig = p.figure()
         p.plot(sine_y.t, sine_y.x, resistor_v.t, resistor_v.x, inductor1_i.t, inductor1_i.x)
         p.legend(('sine.y','resistor.v','inductor1.i'))

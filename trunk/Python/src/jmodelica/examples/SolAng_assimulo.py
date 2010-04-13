@@ -24,7 +24,6 @@ import jmodelica
 import jmodelica.jmi as jmi
 from time import time
 from jmodelica.tests import get_example_path
-from jmodelica.simulation.sundials import SundialsDAESimulator
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
@@ -33,12 +32,12 @@ try:
     from jmodelica.simulation.assimulo import JMIDAE, write_data
     from Assimulo.Implicit_ODE import IDA
 except:
-    pass
+    raise ImportError('Could not find Assimulo package.')
 
 def run_demo(with_plots=True):
     """
     An example on how to simulate a model using a DAE simulator with 
-    pySundials and with Assimulo. The model used is made by Maja Djačić.
+    Assimulo. The model used is made by Maja Djačić.
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
@@ -55,42 +54,8 @@ def run_demo(with_plots=True):
 
     # Load the dynamic library and XML data
     model=jmi.Model(m_name)
-
-    # Create DAE initialization object
-    init_nlp = NLPInitialization(model)
     
-    # Create an Ipopt solver object for the DAE initialization system
-    init_nlp_ipopt = InitializationOptimizer(init_nlp)
-        
-    # Solve the DAE initialization system with Ipopt
-    init_nlp_ipopt.init_opt_ipopt_solve()
-
-    simulator = SundialsDAESimulator(model, verbosity=3, start_time=0.0, final_time=86400.0, time_step=1.0)
-    
-    #Time the run method for pySundials
-    time_begin = time()
-    simulator.run()
-    pySundials = time()-time_begin #Elapsed time
-    
-    simulator.write_data()
-    
-    # Load the data we just wrote to file
-    res = jmodelica.io.ResultDymolaTextual('SolAngles_result.txt')
-    theta = res.get_variable_data('theta')
-    azim = res.get_variable_data('azim')
-    N_day = res.get_variable_data('N_day')
-
-    
-    # Plot results
-    p.figure(1)
-    p.plot(theta.t, theta.x)
-    p.xlabel('time [s]')
-    p.ylabel('theta [deg]')
-    p.title('Angle of Incidence on Surface')
-    p.grid()
-    p.show()
-    
-    #Simulation with the new package
+    #Simulation with the new package, Assimulo
     SolAng_mod = JMIDAE(model)
     SolAng_sim = IDA(SolAng_mod)
     SolAng_sim.reset() #Resets to the initial values from the model
@@ -102,8 +67,6 @@ def run_demo(with_plots=True):
     #rtol and atol is by default 1.0e-6 the same as with pySundials
     assimulo = time()-time_begin #Elapsed time
     
-    SolAng_sim.print_statistics() #Print statistics
-    
     write_data(SolAng_sim)
     
     # Load the data we just wrote to file
@@ -114,17 +77,17 @@ def run_demo(with_plots=True):
 
     
     # Plot results
-    p.figure(2)
-    p.plot(theta.t, theta.x)
-    p.xlabel('time [s]')
-    p.ylabel('theta [deg]')
-    p.title('Angle of Incidence on Surface')
-    p.grid()
-    p.show()
+    if with_plots:
+        p.figure(1)
+        p.plot(theta.t, theta.x)
+        p.xlabel('time [s]')
+        p.ylabel('theta [deg]')
+        p.title('Angle of Incidence on Surface')
+        p.grid()
+        p.show()
     
     #Print the statistics for the timing
     print '\nElapsed time:'
-    print 'pySundials: %e' %pySundials
     print 'Assimulo: %e' %assimulo
 
 if __name__=="__main__":

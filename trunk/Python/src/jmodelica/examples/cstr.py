@@ -22,10 +22,15 @@ import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
-from jmodelica.simulation.sundials import TrajectoryLinearInterpolation
-from jmodelica.simulation.sundials import SundialsDAESimulator
 from jmodelica.optimization import ipopt
 from jmodelica.compiler import OptimicaCompiler
+
+try:
+    from jmodelica.simulation.assimulo import TrajectoryLinearInterpolation
+    from jmodelica.simulation.assimulo import JMIDAE, write_data
+    from Assimulo.Implicit_ODE import IDA
+except:
+    raise ImportError('Could not find Assimulo package.')
 
 import numpy as N
 import scipy as S
@@ -160,24 +165,15 @@ def run_demo(with_plots=True):
     init_sim_model.set_value('c_ref',c_0_B)
     init_sim_model.set_value('T_ref',T_0_B)
     init_sim_model.set_value('Tc_ref',u_traj.eval(0.)[0])
-
-    # Create DAE initialization object.
-    init_nlp = NLPInitialization(init_sim_model)
     
-    # Create an Ipopt solver object for the DAE initialization system
-    init_nlp_ipopt = InitializationOptimizer(init_nlp)
-        
-    # Solve the DAE initialization system with Ipopt
-    init_nlp_ipopt.init_opt_ipopt_solve()
-
-    # Create a simulator
-    simulator = SundialsDAESimulator(init_sim_model, verbosity=3, start_time=0.0, \
-                                     final_time=150, time_step=0.01,input=u_traj)
-    # Run simulation
-    simulator.run()
+    cstr_mod = JMIDAE(init_sim_model, input=u_traj) #Create the Assimulo problem
+    cstr_sim = IDA(cstr_mod) #Create the Assimulo solver
     
-    # Write data to file 
-    simulator.write_data()
+    cstr_sim.initiate() #Calculate initial conditions
+    cstr_sim(150,15000) #Simulate 150 seconds with 15000 points
+    
+    # Write data
+    write_data(cstr_sim)
 
     # Load the file we just wrote to file
     res = jmodelica.io.ResultDymolaTextual('CSTR_CSTR_Init_Optimization_result.txt')
@@ -304,24 +300,16 @@ def run_demo(with_plots=True):
     sim_model.set_value('c_init',c_0_A)
     sim_model.set_value('T_init',T_0_A)
     sim_model.set_value('Tc',u_traj.eval(0.)[0])
-
-    # Create DAE initialization object.
-    init_nlp = NLPInitialization(sim_model)
     
-    # Create an Ipopt solver object for the DAE initialization system
-    init_nlp_ipopt = InitializationOptimizer(init_nlp)
-        
-    # Solve the DAE initialization system with Ipopt
-    init_nlp_ipopt.init_opt_ipopt_solve()
-
-    simulator = SundialsDAESimulator(sim_model, verbosity=3, start_time=0.0, \
-                                     final_time=150, time_step=0.01,input=u_traj)
-    # Run simulation
-    simulator.run()
-
-    # Store simulation data to file    
-    simulator.write_data()
-
+    cstr_mod = JMIDAE(sim_model,input=u_traj) #Create the Assimulo model
+    cstr_sim = IDA(cstr_mod) #Create the Assimulo solver
+    
+    cstr_sim.initiate() #Calculate initial conditions
+    cstr_sim(150,15000) #Simulate 150 seconds with 15000 points
+    
+    # Write data
+    write_data(cstr_sim)
+    
     # Load the file we just wrote to file
     res = jmodelica.io.ResultDymolaTextual('CSTR_CSTR_result.txt')
 
