@@ -23,6 +23,13 @@ aspect Library {
 	
 	syn lazy List InstProgramRoot.getInstLibClassDeclList() = new List();
 
+	public static boolean LibNode.packageMoPresentIn(File[] files) {
+	    for (File f : files)
+	        if (f.toString().endsWith("package.mo"))
+	            return true;
+	    return false;
+	}
+	
 	syn lazy StoredDefinition LibNode.getStoredDefinition() {
 		
 		/* If structured
@@ -43,6 +50,8 @@ aspect Library {
 			throw new RuntimeException("Wow");
 		}
 		*/
+	    
+	    
 		if (getStructured()) {
 			String dirName = getFileName();
 			try {
@@ -52,14 +61,7 @@ aspect Library {
 					return createErrorStoredDefinition();
 				} 
 				
-				boolean package_mo_present = false;
-				for (int i=0;i<allFiles.length;i++) {
-	   				if (allFiles[i].toString().length()>10)
-	   					if (allFiles[i].toString().substring(allFiles[i].toString().length()-10).equals("package.mo"))
-	   						package_mo_present = true;
-	   			}
-				
-				if (package_mo_present) {
+				if (packageMoPresentIn(allFiles)) {
 				    log.info("Reading file: " + dirName+"/package.mo...");
 				    ParserHandler ph = new ParserHandler();
 				    SourceRoot sr = ph.parseFile(dirName+"/package.mo");
@@ -95,15 +97,8 @@ aspect Library {
 	   						// if not, do not add a LibNode
 	   						File baseDir_tmp = new File(dirs[i].getAbsolutePath());			
 							File[] allFiles_tmp = baseDir_tmp.listFiles();
-							package_mo_present = false;
-							for (int k=0;k<allFiles_tmp.length;k++) {
-								log.debug("   # " + allFiles_tmp[k].toString());
-	   							if (allFiles_tmp[k].toString().length()>10)
-	   								if (allFiles_tmp[k].toString().substring(allFiles_tmp[k].toString().length()-10).equals("package.mo"))
-	   									package_mo_present = true;
-	   						}
-	   					
-	   						if (package_mo_present) {
+							
+	   						if (packageMoPresentIn(allFiles_tmp)) {
 		   						libnodes.add(new LibNode(dirs[i].toString(),
 		   				                         dirs[i].getName(),
 		   				                         true));
@@ -204,93 +199,72 @@ aspect Library {
 	}
 	
 	syn lazy List Program.getLibNodeList() {
-		List libnodes = new List();
-		// Retrieve MODELICAPATH
-//		String modelicaPath = System.getenv("MODELICAPATH");
-		 String modelicaPath = root().options.getStringOption("MODELICAPATH");
 
-		
-		
-		log.info("MODELICAPATH="+modelicaPath);
-		
-		
-		// Find the correct separator of path elements: ':' or ';'
-		String pathSeparator;
-		String os = System.getProperty("os.name").toLowerCase();
-		//log.debug(os);
-		if (os.indexOf("win") >= 0) {
-			pathSeparator = ";";
-		} else {
-			pathSeparator = ":";
-		}
-		// Get list of directories from MODELICAPATH
-		String[] modelicaPathElements = modelicaPath.split(pathSeparator);
-		// For each directory detect all libraries
-		for (int i=0;i<modelicaPathElements.length;i++) {
-			try {
-				File baseDir = new File(modelicaPathElements[i]);
-				File[] allFiles = baseDir.listFiles();
-				if (allFiles!=null) {
-					// Get all Unstructured entities:
-	   				File[] filesUnStructured = baseDir.listFiles(new UnStructuredEntriesFilenameFilter());
-	   				for (int j=0;j<filesUnStructured.length;j++) {
-   						libnodes.add(new LibNode(filesUnStructured[j].toString(),
-	   				                         filesUnStructured[j].getName().substring(0,filesUnStructured[j].getName().length()-3),
-	   				                         false));			
-	   				}
-	   				// Get all Structured entities:
-	   				File[] dirs = baseDir.listFiles();
-		   			for (int j=0;j<dirs.length;j++) {
-		   				if (dirs[j].isDirectory()){
-	   						// Check if the directory contains a package.mo
-	   						// if not, do not add a LibNode
-	   						File baseDir_tmp = new File(dirs[j].getAbsolutePath());			
-							File[] allFiles_tmp = baseDir_tmp.listFiles();
-							boolean package_mo_present = false;
-							for (int k=0;k<allFiles_tmp.length;k++) {
-	   							if (allFiles_tmp[k].toString().length()>10)
-	   								if (allFiles_tmp[k].toString().substring(allFiles_tmp[k].toString().length()-10).equals("package.mo"))
-	   									package_mo_present = true;
-	   						}
-	   					
-	   						if (package_mo_present) {
-		   						libnodes.add(new LibNode(dirs[j].toString(),
-		   				                         dirs[j].getName(),
-		   				                         true));
-							} 
-						}
-	   			
-		   			}
+        List libnodes = new List();
+        String modelicaPath = root().options.getStringOption("MODELICAPATH");
 
-				}						        
-			} catch (Exception e) {
-				// TODO: Replace with a good log.debug or just pass the exception on, perhaps wrapped in a RuntimeException
-				System.err.println(e.getMessage());
-				e.printStackTrace();
-			} 		
+        log.info("MODELICAPATH=" + modelicaPath);
+        
+        // Find the correct separator of path elements: ':' or ';'
+          String pathSeparator = 
+                System.getProperty("os.name").toLowerCase().indexOf("win") >= 0 
+                    ? ";"
+                    : ":";
+                
+        // For each directory detect all libraries
+        for (String pathElement : modelicaPath.split(pathSeparator)) {
+            try {
+                
+                File baseDir = new File(pathElement);
+                
+                if (baseDir.listFiles() == null) 
+                    continue;
+                
+                // Get all Unstructured entities:
+                File[] filesUnStructured = baseDir.listFiles(
+                        new UnStructuredEntriesFilenameFilter());
+                for (File file : filesUnStructured){
+                    String name = file.getName().substring(0,file.getName().length()-3); 
+                    libnodes.add(
+                        new LibNode(file.toString(),
+                        name,
+                        false));            
+                }
+                
+                for (File dir : baseDir.listFiles()) {
+                    
+                    if (!dir.isDirectory())
+                        continue;
+                    
+                    File baseDir_tmp = new File(dir.getAbsolutePath());         
+                
+                    if (LibNode.packageMoPresentIn(baseDir_tmp.listFiles())) {
+                        libnodes.add(
+                            new LibNode(dir.toString(),
+                            dir.getName(),
+                            true));
+                    } 
+                }
+            } catch (Exception e) {
+                // TODO: Replace with a good log.debug or just pass the exception on, 
+                // perhaps wrapped in a RuntimeException
+                System.err.println(e.getMessage());
+                e.printStackTrace();
+            }       
+        }
+                  
+        return libnodes;
 
-		}
-					
-		return libnodes;
-				
 	}
 	
 	static class UnStructuredEntriesFilenameFilter implements FilenameFilter {
 	
 			public boolean accept(File dir, String name) {
-				//log.debug(" * " +name);
 				
 				if (name.equals("package.mo"))
 					return false;
-					
-				if (name.length()<=3)
-					return false;
-					 
-				if (name.substring(name.length()-3,name.length()).equals(".mo")) {
-					return true;
-				} else { 
-					return false;
-				}	
+				
+				return name.endsWith(".mo");
 			}
 		
 		}
