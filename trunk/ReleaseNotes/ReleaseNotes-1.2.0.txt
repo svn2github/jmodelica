@@ -47,7 +47,7 @@ the function-like operators that are *not* supported:
  * symmetric(A) 
  * skew(x)
 
-1.1.3 Functions & algorithms
+1.1.3 Functions and algorithms
 
 Both algorithms and pure Modelica functions are supported, with a few exceptions: 
 
@@ -64,7 +64,13 @@ External functions are not supported.
 1.1.4 Miscellaneous
 
  * Record constructors are now supported.
+ * Limited support for constructs generating events, if expressions, 
+   is provided.
+ * The noEvent operator is supported.
+ * Integer and boolean parameters
  * The error checking has been expanded to cover more errors.
+ * Modelica compliance errors are reported for legal but 
+   unsupported language constructs.
 
 1.2. Optimica Compiler
 
@@ -73,7 +79,64 @@ as well.
 
 2. JModelica.org Model Interface (JMI)
 
-3. Optimization algorithm
+2.1 General
+
+2.1.1 Automatic scaling based on the 'nominal' attribute
+
+The Modelica attribute 'nominal' can be used to scale variables. This
+is particularly important when solving optimization problems where
+poorly scaled systems may result in lack of convergence. Automatic
+scaling is turned off by default since it introduces a slight
+computational overhead: setting the compiler option
+'enable_variable_scaling' to 'true' enables this feature.
+
+2.1.2 Support for event indicator functions 
+
+Support for event indicator functions and switching functions are now
+provided. These features are used by the new simulation package
+Assimulo to simulate systems with events. Notice that limitations in
+the compiler front-end applies, see above
+
+2.1.3 Integer and boolean parameters 
+
+Integer and boolean parameters and constants, as well as relational
+and boolean expressions are supported. Neither boolean, nor integer
+variables are supported.
+
+2.1.4 Linearization
+
+A function for linearization of DAE models is provided. The linearized
+models are computed using automatic differentiation which gives
+results at machine precision. Also, for index-1 systems, linearized
+DAEs can be converted into linear ODE form suitable for e.g., control
+design.
+
+2.2 Optimization algorithm
+
+2.2.1 Piecewise constant control signals
+
+In control applications, in particular model predictive control, it is
+common to assume piecewise constant control variables, sometimes
+referred to as blocking factors. Blocking factors are now supported by
+the collocation-based optimization algorithm, see
+jmodelica.examples.cstr_mpc for an example.
+
+2.2.2 Free initial conditions allowed 
+
+The restriction that all state initial conditions should be fixed has
+been relaxed in the optimization algorithm. This enables more flexible
+formulation of optimization problems.
+
+2.2.3 Dense output of optimization result 
+
+Functions for retrieving the optimization result from the
+collocation-based algorithm in a dense format are now provided. Two
+options are available: either a user defined mesh is provided or the
+result is given for a user defined number of points inside each finite
+element. Interpolation of the collocation polynomials are used to
+obtain the dense output.
+
+3. New simulation package: Assimulo
 
 4. FMI compliance
 
@@ -82,3 +145,5 @@ as well.
 6. Symbolic framework
 
 7. Python integration
+
+7.1 New high-level functions for optimization and simulation
