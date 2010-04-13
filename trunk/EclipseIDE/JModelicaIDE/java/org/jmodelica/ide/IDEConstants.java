@@ -78,4 +78,10 @@ public class IDEConstants {
 	}
 
 	public static final String PACKAGE_FILE = "package.mo";
+	
+	
+	public static final String PATH_SEP = 
+	    System.getProperty("os.name").indexOf("win") >= 0 
+	        ? ";"
+	        : ":";
 }

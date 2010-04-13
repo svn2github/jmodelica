@@ -28,6 +28,8 @@ public IDEOptions(IProject project) {
                     IDEConstants.PROPTERTY_OPTIONS_PATH)
                 + File.separatorChar
                 + "options.xml"));
+    } catch (NullPointerException e ) {
+        System.out.println("Null project. Not copying options.");
     } catch (Exception e) {
         e.printStackTrace();
     }
@@ -36,10 +38,11 @@ public IDEOptions(IProject project) {
         setStringOption(
             "MODELICAPATH", 
             Library.makeModelicaPath(
-                project
-                .getPersistentProperty(
+                project.getPersistentProperty(
                     IDEConstants.PROPERTY_LIBRARIES_ID)));
        
+    } catch (NullPointerException e ) {
+        System.out.println("Null project. Not setting MODELICAPATH.");
     } catch (Exception e ) {
         e.printStackTrace();
     }

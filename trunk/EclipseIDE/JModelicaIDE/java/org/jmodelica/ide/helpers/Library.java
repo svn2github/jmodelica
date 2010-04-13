@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jmodelica.ide.IDEConstants;
+
 public class Library {
 
     public static final String PART_SEPARATOR = File.pathSeparator;
@@ -143,13 +145,12 @@ public class Library {
 	    for (Library lib : libs)
 	        paths.add(lib.path);
 	    
-	    paths.add(
-	        new Maybe<String>(
-                System.getenv("MODELICAPATH"))
-	        .defaultTo(""));
+	    String path = System.getenv("MODELICAPATH");
+	    if (path != null)
+	        paths.add(path);
 	    
 	    return 
-	        Util.implode(";", paths); 
+	        Util.implode(IDEConstants.PATH_SEP, paths); 
 	}
 	
 }

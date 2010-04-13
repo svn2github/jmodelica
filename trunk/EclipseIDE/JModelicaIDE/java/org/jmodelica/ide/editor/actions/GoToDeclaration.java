@@ -54,7 +54,6 @@ public void run() {
         ed.selectNode(iNode.value());
 
     } catch (Exception e) { 
-        // fucka yuuuu dorphiiiin
         e.printStackTrace(); 
     }
     

@@ -1,7 +1,6 @@
 package org.jmodelica.ide.editor;
 
-import mock.MockFile; 
-import mock.MockProject;
+import mock.MockFile;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.Position;
@@ -37,7 +36,7 @@ public EditorFile(IEditorInput input) {
             i.getFile();
         path = 
             file.getRawLocation().toOSString();
-        
+
     } else if (input instanceof IURIEditorInput) {
         
         IURIEditorInput i = 
