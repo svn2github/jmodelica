@@ -11,9 +11,13 @@ import jmodelica.initialization.ipopt as ipopt_init
 from jmodelica.optimization import ipopt
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
-from jmodelica.simulation.sundials import SundialsDAESimulator
 from jmodelica.io import ResultDymolaTextual
 
+try:
+    from jmodelica.simulation.assimulo import JMIDAE, write_data
+    from Assimulo.Implicit_ODE import IDA
+except:
+    raise ImportError('Could not find Assimulo package.')
 
 _jm_home = os.environ.get('JMODELICA_HOME')
 _tests_path = os.path.join(_jm_home, "Python", "jmodelica", "tests")
@@ -56,7 +60,8 @@ class _BaseSimOptTest:
         self.rel_tol = rel_tol
         self.abs_tol = abs_tol
         self.model_name = _model_name
-        self.model = jmi.Model(self.model_name);
+        self.model = jmi.Model(self.model_name)
+        self.mod_assimulo = JMIDAE(self.model)
 
 
     def run(self):
@@ -230,7 +235,7 @@ class SimulationTest(_BaseSimOptTest):
         _BaseSimOptTest.setup_class_base(mo_file, class_name, compiler, options)
 
 
-    def setup_base(self, rel_tol = 1.0e-4, abs_tol = 1.0e-6, **args):
+    def setup_base(self, rel_tol = 1.0e-4, abs_tol = 1.0e-6, start_time=0.0, final_time=10.0, time_step=0.01):
         """ 
         Set up a new test case. Creates and configures the simulation.
         Call this with proper args from setUp(). 
@@ -239,18 +244,25 @@ class SimulationTest(_BaseSimOptTest):
         Any other named args are passed to sundials.
         """
         _BaseSimOptTest.setup_base(self, rel_tol, abs_tol)
-        ipopt_nlp = ipopt_init.NLPInitialization(self.model)
-        ipopt_opt = ipopt_init.InitializationOptimizer(ipopt_nlp)
-        ipopt_opt.init_opt_ipopt_solve()
-        self.sundials = SundialsDAESimulator(self.model, **args)
+        
+        self.final_time = final_time
+        self.ncp = int((final_time-start_time)/time_step)
 
+        self.sundials = IDA(self.mod_assimulo, t0=start_time)
+        self.sundials.rtol = self.rel_tol
+        self.sundials.atol = self.abs_tol
+        self.sundials.initiate()
+        
+        print self.ncp
+        print self.sundials.rtol
+        print self.sundials.atol
 
     def _run_and_write_data(self):
         """
         Run optimization and write result to file.
         """
-        self.sundials.run()
-        self.sundials.write_data()
+        self.sundials.simulate(self.final_time,self.ncp)
+        write_data(self.sundials)
 
 
 class OptimizationTest(_BaseSimOptTest):

@@ -9,7 +9,7 @@ class TestFunctionTest1(SimulationTest):
 
     @testattr(stddist = True)
     def setUp(self):
-        self.setup_base(verbosity=3, start_time=0.0, final_time=2.0, time_step=0.01)
+        self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run()
         self.load_expected_data('FunctionTest1+2_res.txt')
 
@@ -29,7 +29,7 @@ class TestFunctionTest2(SimulationTest):
 
     @testattr(stddist = True)
     def setUp(self):
-        self.setup_base(verbosity=3, start_time=0.0, final_time=2.0, time_step=0.01)
+        self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run()
         self.load_expected_data('FunctionTest1+2_res.txt')
 

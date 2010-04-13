@@ -15,7 +15,7 @@ class TestNominal(SimulationTest):
 
     @testattr(stddist = True)
     def setUp(self):
-        self.setup_base(verbosity=3, start_time=0.0, final_time=10.0, time_step = 0.1)
+        self.setup_base(start_time=0.0, final_time=10.0, time_step = 0.1)
         self.run()
         self.load_expected_data('NominalTests_NominalTest1_result.txt')
 
@@ -33,7 +33,7 @@ class TestFunction1(SimulationTest):
 
     @testattr(stddist = True)
     def setUp(self):
-        self.setup_base(verbosity=3, start_time=0.0, final_time=1.0, time_step = 0.002, rel_tol=1.0e-2, abs_tol=1.0e-2)
+        self.setup_base(start_time=0.0, final_time=1.0, time_step = 0.002, rel_tol=1.0e-2, abs_tol=1.0e-2)
         self.run()
         self.load_expected_data('UnknownArray.txt')
 
@@ -52,7 +52,7 @@ class TestFunction2(SimulationTest):
 
     @testattr(stddist = True)
     def setUp(self):
-        self.setup_base(verbosity=3, start_time=0.0, final_time=1.0, time_step = 0.002, rel_tol=1.0e-2)
+        self.setup_base(start_time=0.0, final_time=1.0, time_step = 0.002, rel_tol=1.0e-2)
         self.run()
         self.load_expected_data('FuncRecord.txt')
 
