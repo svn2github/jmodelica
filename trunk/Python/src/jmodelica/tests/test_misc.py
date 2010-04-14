@@ -24,7 +24,9 @@ import nose.tools
 
 import jmodelica
 from jmodelica.tests import testattr
-from jmodelica.simulation.sundials import TrajectoryLinearInterpolation
+from jmodelica.algorithm_drivers import InvalidAlgorithmArgumentException
+from jmodelica.algorithm_drivers import InvalidSolverArgumentException
+from Assimulo.Explicit_ODE import *
 
 int = N.int32
 N.int = N.int32
@@ -58,25 +60,75 @@ def test_optimize():
         "Wrong value of cost function using jmodelica.optimize with vdp."
    
 
-#@testattr(stddist = True)
-#def test_optimize_2():
-#    """ Test the jmodelica.optimize function and set some
-#        default parameters.
-#    """
-#    mofile_vdp = os.path.join('files', 'VDP.mo')
-#    fpath_vdp = os.path.join(jm_home, path_to_examples, mofile_vdp)
-#    cpath_vdp = "VDP_pack.VDP_Opt"
-#    
-#    (model,res) = jmodelica.optimize(cpath_vdp, fpath_vdp, max_iter=500, 
-#                                     compiler_options={'state_start_values_fixed':True})
-#    cost=res.get_variable_data('cost')
-#    
-#    assert N.abs(cost.x[-1] - 2.3469089e+01) < 1e-3, \
-#            "Wrong value of cost function using jmodelica.optimize with vdp."
-#            
+@testattr(stddist = True)
+def test_optimize_set_n_cp():
+    """ Test the jmodelica.optimize function and setting n_cp in alg_args.
+    """
+    mofile_vdp = os.path.join('files', 'VDP.mo')
+    fpath_vdp = os.path.join(jm_home, path_to_examples, mofile_vdp)
+    cpath_vdp = "VDP_pack.VDP_Opt"
+    
+    (model,res) = jmodelica.optimize(cpath_vdp, fpath_vdp, 
+                                     compiler_options={'state_start_values_fixed':True},
+                                     alg_args={'n_cp':10})
+    cost=res.get_variable_data('cost')
+    
+    assert N.abs(cost.x[-1] - 2.34602647e+01 ) < 1e-3, \
+            "Wrong value of cost function using jmodelica.optimize with vdp. \
+            cost.x[-1] was: "+str(cost.x[-1])
+            
+@testattr(stddist = True)
+def test_optimize_set_args():
+    """Test the jmodelica.optimize function and setting some algorithm and solver args.
+    """
+    mofile_vdp = os.path.join('files', 'VDP.mo')
+    fpath_vdp = os.path.join(jm_home, path_to_examples, mofile_vdp)
+    cpath_vdp = "VDP_pack.VDP_Opt"
+    
+    res_file_name = 'test_optimize_set_result_mesh.txt'
+    (model,res) = jmodelica.optimize(cpath_vdp, fpath_vdp, 
+                                     compiler_options={'state_start_values_fixed':True},
+                                     alg_args={'result_mesh':'element_interpolation', 
+                                               'result_file_name':res_file_name},
+                                     solver_args={'max_iter':100})
+    cost=res.get_variable_data('cost')
+    
+    assert N.abs(cost.x[-1] - 2.3469089e+01) < 1e-3, \
+            "Wrong value of cost function using jmodelica.optimize with vdp."
+
+
+@testattr(stddist = True)
+def test_optimize_invalid_argument():
+    """ Test that the jmodelica.optimize function raises exception for an 
+        invalid algorithm argument.
+    """
+    mofile_vdp = os.path.join('files', 'VDP.mo')
+    fpath_vdp = os.path.join(jm_home, path_to_examples, mofile_vdp)
+    cpath_vdp = "VDP_pack.VDP_Opt"
+    
+    nose.tools.assert_raises(jmodelica.algorithm_drivers.InvalidAlgorithmArgumentException,
+                             jmodelica.optimize,
+                             cpath_vdp, 
+                             fpath_vdp, 
+                             compiler_options={'state_start_values_fixed':True},
+                             alg_args={'ne':10})  
+            
 @testattr(stddist = True)
 def test_simulate():
     """ Test the jmodelica.simulate function using all default parameters."""
+    mofile_rlc = os.path.join('files','RLC_Circuit.mo')
+    fpath_rlc = os.path.join(jm_home, path_to_examples, mofile_rlc)
+    cpath_rlc = "RLC_Circuit"
+    
+    (model,res) = jmodelica.simulate(cpath_rlc, fpath_rlc)
+    resistor_v = res.get_variable_data('resistor.v')
+    
+    assert N.abs(resistor_v.x[-1] - 0.138037041741) < 1e-3, \
+        "Wrong value in simulation result using jmodelica.simulate with rlc."
+        
+@testattr(stddist = True)
+def test_simulate_set_alg_arg():
+    """ Test the jmodelica.simulate function and setting an algorithm argument."""
     mofile_rlc = os.path.join('files','RLC_Circuit.mo')
     fpath_rlc = os.path.join(jm_home, path_to_examples, mofile_rlc)
     cpath_rlc = "RLC_Circuit"
@@ -86,76 +138,35 @@ def test_simulate():
     
     assert N.abs(resistor_v.x[-1] - 0.159255008028) < 1e-3, \
         "Wrong value in simulation result using jmodelica.simulate with rlc."
-        
-#@testattr(stddist = True)
-#def test_simulate_2():
-#    """ Test first simulate -> change model and set input -> 
-#        simulate without recompiling.
-#    """
-#    model_name = 'SecondOrder'
-#    mofile = os.path.join('files','SecondOrder.mo')
-#    fpath=os.path.join(jm_home, path_to_examples, mofile)
-#    
-#    (model,res)=jmodelica.simulate(model_name, fpath)
-#    
-#    x1_sim = res.get_variable_data('x1')
-#    x2_sim = res.get_variable_data('x2')
-#    u_sim = res.get_variable_data('u')
-#    assert N.abs(x1_sim.x[-1] - 0.0) < 1e-3, \
-#            "Wrong value of x1_sim function in simulation_with_input.py"
-#
-#    assert N.abs(x2_sim.x[-1] - 0.0) < 1e-3, \
-#            "Wrong value of x2_sim function in simulation_with_input.py"  
-#
-#    assert N.abs(u_sim.x[-1] - 0.0) < 1e-3, \
-#            "Wrong value of u_sim function in simulation_with_input.py"
-#            
-#    # Generate input
-#    t = N.linspace(0.,10.,100) 
-#    u = N.cos(t)
-#    u = N.array([u])
-#    u = N.transpose(u)
-#    u_traj = TrajectoryLinearInterpolation(t,u)
-#
-#    model.set_value('u',u_traj.eval(0.)[0])
-#
-#    (model,res) = jmodelica.simulate(model,final_time=30.0,input=u_traj)
-#    
-#    x1_sim = res.get_variable_data('x1')
-#    x2_sim = res.get_variable_data('x2')
-#    u_sim = res.get_variable_data('u')
-#    
-#    assert N.abs(x1_sim.x[-1]*1.e1 - (-8.3999640)) < 1e-3, \
-#            "Wrong value of x1_sim function in simulation_with_input.py"
-#
-#    assert N.abs(x2_sim.x[-1]*1.e1 - (-5.0691179)) < 1e-3, \
-#            "Wrong value of x2_sim function in simulation_with_input.py"  
-#
-#    assert N.abs(u_sim.x[-1]*1.e1 - (-8.3907153)) < 1e-3, \
-#            "Wrong value of u_sim function in simulation_with_input.py"
-#            
-#@testattr(stddist=True)
-#def test_simulate_3():
-#    """ Test simulate without initialize."""
-#    mofile = os.path.join("files", "Pendulum_pack_no_opt.mo")
-#    fpath = os.path.join(jm_home, path_to_examples, mofile)
-#    cpath = "Pendulum_pack.Pendulum"
-#    
-#    (model,res) = jmodelica.simulate(cpath, fpath, do_initialize=False)
-#
-#    theta = res.get_variable_data('theta')
-#    assert N.abs(theta.x[-1] -  6.0979443) < 1e-3, \
-#            "Wrong value of x1_sim function in simulation_with_input.py"
-#            
-#@testattr(stddist = True)
-#def test_exception_raised():
-#    """ Test compact functions without passing mofile raises exception."""
-#    cpath = "Pendulum_pack.Pendulum"
-#    nose.tools.assert_raises(Exception, jmodelica.initialize, cpath)
-#    
-#    nose.tools.assert_raises(Exception, jmodelica.simulate, cpath)
-#
-#    nose.tools.assert_raises(Exception, jmodelica.optimize, cpath)
+       
+@testattr(stddist=True)
+def test_simulate_w_ode():
+    """ Test jmodelica.simulate with ODE problem and setting solver args."""
+    mofile_vdp = os.path.join('files', 'VDP.mo')
+    fpath_vdp = os.path.join(jm_home, path_to_examples, mofile_vdp)
+    cpath_vdp = "VDP_pack.VDP_Opt"
+
+    (model,res) = jmodelica.simulate(cpath_vdp, 
+                                     fpath_vdp,
+                                     compiler='optimica',
+                                     compiler_options={'state_start_values_fixed':True},
+                                     compiler_target='model',
+                                     alg_args={'solver':CVode, 'final_time':20, 'num_communication_points':0},
+                                     solver_args={'discr':'BDF', 'iter':'Newton'})
+    x1=res.get_variable_data('x1')
+    x2=res.get_variable_data('x2')
+    
+    assert N.abs(x1.x[-1] + 0.736680243) < 1e-5, \
+           "Wrong value in simulation result in VDP_assimulo.py" 
+    assert N.abs(x2.x[-1] - 1.57833994) < 1e-5, \
+           "Wrong value in simulation result in VDP_assimulo.py"
+
+@testattr(stddist = True)
+def test_exception_raised():
+    """ Test compact functions without passing mofile raises exception."""
+    cpath = "Pendulum_pack.Pendulum"   
+    nose.tools.assert_raises(Exception, jmodelica.simulate, cpath)
+    nose.tools.assert_raises(Exception, jmodelica.optimize, cpath)
     
 
    

@@ -86,28 +86,6 @@ def optimize(model,
                            alg_args,
                            solver_args)
 
-#
-#    if not issubclass(algorithm, AlgorithmBase):
-#        raise Exception(str(algorithm)+
-#                        " must be a subclass of jmodelica.algorithm_drivers.AlgorithmBase")
-#        
-#    if not isinstance(model, jmodelica.jmi.Model):
-#        model = _compile(model, file_name, compiler='optimica', compiler_target=compiler_target, 
-#                         compiler_options=compiler_options)
-#     
-#    # initialize algorithm
-#    alg = algorithm(model, alg_args)
-#    # set arguments to solver, if any    
-#    alg.set_solver_options(solver_args)
-#    # solve optimization problem
-#    alg.solve()
-#    # write result to file
-#    alg.write_result()
-#       
-#    # load result file
-#    res = jmodelica.io.ResultDymolaTextual(model.get_name()+'_result.txt')
-#    return (model,res)
-
 def simulate(model, 
              file_name='', 
              compiler='modelica', 
@@ -131,24 +109,7 @@ def simulate(model,
                            algorithm,
                            alg_args,
                            solver_args)
-   
-#    if not issubclass(algorithm, AlgorithmBase):
-#        raise Exception(str(algorithm)+
-#                        " must be a subclass of jmodelica.algorithm_drivers.AlgorithmBase")
-#
-#    if not isinstance(model, jmodelica.jmi.Model):
-#        # model class and mo-file must be set
-#         model = _compile(model, file_name, compiler=compiler, 
-#                          compiler_options=compiler_options, 
-#                          compiler_target=compiler_target)
-#
-#    alg = algorithm(model, alg_args)
-#    alg.set_solver_options(solver_args)
-#    alg.solve()
-#    alg.write_result()
-#    res = jmodelica.io.ResultDymolaTextual(model.get_name()+'_result.txt')
-#    return (model,res)
-   
+      
 def _exec_algorithm(model, 
              file_name, 
              compiler, 
@@ -167,12 +128,17 @@ def _exec_algorithm(model,
          model = _compile(model, file_name, compiler=compiler, 
                           compiler_options=compiler_options, 
                           compiler_target=compiler_target)
-
+         
+    # initialize algorithm
     alg = algorithm(model, alg_args)
+    # set arguments to solver, if any
     alg.set_solver_options(solver_args)
+    # solve optimization problem/simulate
     alg.solve()
-    alg.write_result()
-    res = jmodelica.io.ResultDymolaTextual(model.get_name()+'_result.txt')
+    # write result to file and get file name in return
+    result_file_name = alg.write_result()
+    # load result file
+    res = jmodelica.io.ResultDymolaTextual(result_file_name)
     return (model,res)
     
 
