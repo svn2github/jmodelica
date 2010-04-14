@@ -40,7 +40,7 @@ JModelica.org-SDK installer.
 
 3. Get Sundials 
 
-Download Ipopt from
+Download Sundials from
 https://computation.llnl.gov/casc/sundials/main.html. Unzip the
 tar-ball and put in a directory that does not hold any spaces nor ~
 character in its path. Build the package according to its
@@ -99,7 +99,7 @@ In order to run the JModelica.org compilers from Python, the packages
  - lxml (http://codespeak.net/lxml/) 
  - NumPy 1.2.0 (http://numpy.scipy.org/)
  - SciPy 0.7 (http://www.scipy.org/)
- - PySundials 2.3 (http://sourceforge.net/projects/pysundials/)
+ - Cython 1.2 (http://www.cython.org/)
  - pyreadline >=1.5 (http://ipython.scipy.org/dist/)
  - Matplotlib (http://matplotlib.sourceforge.net/)
  - Nose (http://code.google.com/p/python-nose/) (Only needed to run
@@ -154,7 +154,14 @@ change a variable there.
 
 8. Test the distribution
 
-Start Python or IPython. Type 
+Run 
+
+ > make test 
+
+to run the JModelica.org test suites.
+
+To test that the Python packages are working, start Python or
+IPython. Type
 
  > import jmodelica.examples.cstr as cstr
  > cstr.run_demo()
