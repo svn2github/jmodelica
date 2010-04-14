@@ -40,8 +40,8 @@ def run_demo(with_plots=True):
     
     # Comile the Optimica model first to C code and
     # then to a dynamic library
-    oc.compile_model(curr_dir+"/files/Pendulum_pack.mo",
-                 "Pendulum_pack.Pendulum_Opt",
+    oc.compile_model("Pendulum_pack.Pendulum_Opt",
+                 curr_dir+"/files/Pendulum_pack.mo",
                  target='ipopt')
 
     # Load the dynamic library and XML data

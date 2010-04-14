@@ -57,7 +57,7 @@ def run_demo(with_plots=True):
     mc = ModelicaCompiler()
 
     # Compile the stationary initialization model into a DLL
-    mc.compile_model(curr_dir+"/files/DISTLib.mo", "DISTLib.Binary_Dist_initial", target='ipopt')
+    mc.compile_model("DISTLib.Binary_Dist_initial", curr_dir+"/files/DISTLib.mo", target='ipopt')
 
     # Load a model instance into Python
     init_model = jmi.Model("DISTLib_Binary_Dist_initial")
@@ -117,8 +117,9 @@ def run_demo(with_plots=True):
     oc.set_boolean_option('state_start_values_fixed',True)
 
     # Compil the Model
-    oc.compile_model((curr_dir+"/files/DISTLib.mo",
-                  curr_dir+"/files/DISTLib_Opt.mo"), "DISTLib_Opt.Binary_Dist_Opt1", target='ipopt')
+    oc.compile_model("DISTLib_Opt.Binary_Dist_Opt1", 
+                     (curr_dir+"/files/DISTLib.mo",curr_dir+"/files/DISTLib_Opt.mo"), 
+                     target='ipopt')
 
     # Load the dynamic library and XML data
     model = jmi.Model("DISTLib_Opt_Binary_Dist_Opt1")

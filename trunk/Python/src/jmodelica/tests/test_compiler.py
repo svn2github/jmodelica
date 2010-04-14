@@ -49,7 +49,7 @@ def test_compile():
     else:
         suffix = '.so'
         
-    mc.compile_model(fpath_mc, cpath_mc)
+    mc.compile_model(cpath_mc,fpath_mc)
     
     fname = cpath_mc.replace('.','_',1)
     assert os.access(fname+'.xml',os.F_OK) == True, \
@@ -83,7 +83,7 @@ def test_optimica_compile():
     else:
         suffix = '.so'
         
-    oc.compile_model(fpath_oc, cpath_oc)
+    oc.compile_model(cpath_oc, fpath_oc)
     
     fname = cpath_oc.replace('.','_',1)
     assert os.access(fname+'.xml',os.F_OK) == True, \
@@ -104,22 +104,22 @@ def test_optimica_compile():
 @testattr(stddist = True)
 def test_compile_wtarget_alg():
     """ Test that it is possible to compile (compiler.py) with target algorithms. """
-    mc.compile_model(fpath_mc, cpath_mc, target='algorithms')
+    mc.compile_model(cpath_mc, fpath_mc, target='algorithms')
     
 @testattr(stddist = True)
 def test_optimica_compile_wtarget_alg():
     """ Test that it is possible to compile (optimicacompiler.py) with target algorithms. """
-    oc.compile_model(fpath_oc, cpath_oc, target='algorithms')
+    oc.compile_model(cpath_oc, fpath_oc, target='algorithms')
 
 @testattr(stddist = True)
 def test_compile_wtarget_ipopt():
     """ Test that it is possible to compile (compiler.py) with target ipopt. """
-    mc.compile_model(fpath_mc, cpath_mc, target='ipopt')    
+    mc.compile_model(cpath_mc, fpath_mc, target='ipopt')    
 
 @testattr(stddist = True)
 def test_optimica_compile_wtarget_ipopt():
     """ Test that it is possible to compile (optimicacompiler.py) with target ipopt. """
-    oc.compile_model(fpath_oc, cpath_oc, target='ipopt')
+    oc.compile_model(cpath_oc, fpath_oc, target='ipopt')
 
 @testattr(stddist = True)
 def test_stepbystep():
@@ -143,23 +143,23 @@ def test_compiler_error():
     corruptmodel = os.path.join('files','CorruptCodeGenTests.mo')
     path = os.path.join(jm_home,path_to_examples,corruptmodel)
     cl = 'CorruptCodeGenTests.CorruptTest1'
-    nose.tools.assert_raises(jm.compiler.CompilerError, mc.compile_model, path, cl)
-    nose.tools.assert_raises(jm.compiler.CompilerError, oc.compile_model, path, cl) 
+    nose.tools.assert_raises(jm.compiler.CompilerError, mc.compile_model, cl, path)
+    nose.tools.assert_raises(jm.compiler.CompilerError, oc.compile_model, cl, path) 
 
 @testattr(stddist = True)
 def test_class_not_found_error():
     """ Test that a ModelicaClassNotFoundError is raised if model class is not found. """
     errorcl = 'NonExisting.Class'
-    nose.tools.assert_raises(jm.compiler.ModelicaClassNotFoundError, mc.compile_model, fpath_mc, errorcl)
-    nose.tools.assert_raises(jm.compiler.OptimicaClassNotFoundError, oc.compile_model, fpath_oc, errorcl)
+    nose.tools.assert_raises(jm.compiler.ModelicaClassNotFoundError, mc.compile_model, errorcl, fpath_mc)
+    nose.tools.assert_raises(jm.compiler.OptimicaClassNotFoundError, oc.compile_model, errorcl, fpath_oc)
 
 @testattr(stddist = True)
 def test_IO_error():
     """ Test that an IOError is raised if the model file is not found. """          
     errormodel = os.path.join('files','NonExistingModel.mo')
     errorpath = os.path.join(jm_home,path_to_examples,errormodel)
-    nose.tools.assert_raises(IOError, mc.compile_model, errorpath, cpath_mc)
-    nose.tools.assert_raises(IOError, oc.compile_model, errorpath, cpath_oc)
+    nose.tools.assert_raises(IOError, mc.compile_model, cpath_mc, errorpath)
+    nose.tools.assert_raises(IOError, oc.compile_model, cpath_oc, errorpath)
 
 @testattr(stddist = True)
 def test_setget_modelicapath():
@@ -224,7 +224,7 @@ def test_compile_multiple():
     """ Test that it is possible to compile two model files. """
     lib = os.path.join(jm_home,path_to_examples,'files','CSTRLib.mo')
     opt = os.path.join(jm_home,path_to_examples, 'files','CSTR2_Opt.mo')
-    oc.compile_model([lib,opt],'CSTR2_Opt')
+    oc.compile_model('CSTR2_Opt', [lib,opt])
 
 @testattr(stddist = True)
 def test_setget_boolean_option():
@@ -351,7 +351,7 @@ def TO_ADDtest_MODELICAPATH():
 
     comp_res = 1
     try:
-        oc.compile_model(fpath, cpath, target='ipopt')
+        oc.compile_model(cpath, fpath, target='ipopt')
     except:
         comp_res = 0
 

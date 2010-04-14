@@ -41,7 +41,7 @@ model = os.path.join('files','CSTR.mo')
 fpath = os.path.join(jm_home, path_to_examples, model)
 cpath = "CSTR.CSTR_Init"
 fname = cpath.replace('.','_')
-oc.compile_model(fpath, cpath, 'ipopt')
+oc.compile_model(cpath, fpath, 'ipopt')
 
 model_daeinit = os.path.join("files", "DAEInitTest.mo")
 fpath_daeinit = os.path.join(path_to_tests, model_daeinit)
@@ -49,7 +49,7 @@ cpath_daeinit = "DAEInitTest"
 fname_daeinit = cpath_daeinit.replace('.','_',1)
         
 oc.set_boolean_option('state_start_values_fixed',True)
-oc.compile_model(fpath_daeinit, cpath_daeinit, target='ipopt')
+oc.compile_model(cpath_daeinit, fpath_daeinit, target='ipopt')
 
 class TestNLPInitWrappers:
     """ Tests for NLPInitialization wrapper methods.

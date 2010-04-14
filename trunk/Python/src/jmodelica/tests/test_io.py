@@ -33,8 +33,8 @@ def setup():
     oc = OptimicaCompiler()
     oc.set_boolean_option('state_start_values_fixed',True)
     OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
-    oc.compile_model(fpath, cpath, target='ipopt')
-    oc.compile_model(fpath, cpath, target='ipopt')
+    oc.compile_model(cpath, fpath, target='ipopt')
+    oc.compile_model(cpath, fpath, target='ipopt')
 
 
 

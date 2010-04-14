@@ -66,7 +66,7 @@ def run_demo(with_plots=True):
     mc = ModelicaCompiler()
     
     # Compile the stationary initialization model into a DLL
-    mc.compile_model(curr_dir+"/files/CSTRLib.mo", "CSTRLib.Components.Two_CSTRs_stat_init", target='ipopt')
+    mc.compile_model("CSTRLib.Components.Two_CSTRs_stat_init", curr_dir+"/files/CSTRLib.mo", target='ipopt')
 
     # Load a model instance into Python
     init_model = jmi.Model("CSTRLib_Components_Two_CSTRs_stat_init")
@@ -131,8 +131,9 @@ def run_demo(with_plots=True):
     oc = OptimicaCompiler()
 
     # Compil the Model
-    oc.compile_model((curr_dir+"/files/CSTRLib.mo",
-                      curr_dir+"/files/CSTR2_Opt.mo"), "CSTR2_Opt", target='ipopt')
+    oc.compile_model("CSTR2_Opt", 
+                     (curr_dir+"/files/CSTRLib.mo", curr_dir+"/files/CSTR2_Opt.mo"),
+                     target='ipopt')
 
     # Load the dynamic library and XML data
     model = jmi.Model("CSTR2_Opt")

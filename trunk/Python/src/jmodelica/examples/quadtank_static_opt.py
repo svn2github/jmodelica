@@ -39,8 +39,8 @@ def run_demo(with_plots=True):
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     
-    oc.compile_model(curr_dir+"/files/QuadTank.mo",
-                     "QuadTank_pack.QuadTank_Static",
+    oc.compile_model("QuadTank_pack.QuadTank_Static",
+                     curr_dir+"/files/QuadTank.mo",
                      target='ipopt')
 
     # Load static calibration model

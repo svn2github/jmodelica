@@ -39,7 +39,7 @@ fpath_vdp = os.path.join(path_to_examples, model_vdp)
 cpath_vdp = "VDP_pack.VDP_Opt"
 fname_vdp = cpath_vdp.replace('.','_',1)
 oc.set_boolean_option('state_start_values_fixed',True)
-oc.compile_model(fpath_vdp, cpath_vdp, target='ipopt')
+oc.compile_model(cpath_vdp, fpath_vdp, target='ipopt')
 
 # constants used in TestJMIModel
 eval_alg = jmi.JMI_DER_CPPAD
@@ -52,7 +52,7 @@ fpath_rlc = os.path.join(path_to_examples, model_rlc)
 cpath_rlc = "RLC_Circuit"
 fname_rlc = cpath_rlc.replace('.','_',1)      
 mc.set_boolean_option('eliminate_alias_variables', True)
-mc.compile_model(fpath_rlc, cpath_rlc, target='ipopt')
+mc.compile_model(cpath_rlc, fpath_rlc, target='ipopt')
 
 class TestModel_VDP:
     """Test the high level model class, jmi.Model.
@@ -1164,7 +1164,7 @@ class TestJMIModel_VDP:
         
         mc.set_boolean_option('state_start_values_fixed',False)
     
-        mc.compile_model(fpath, cpath)
+        mc.compile_model(cpath, fpath)
     
         # Load the dynamic library and XML data
         vdp = jmi.Model(fname)

@@ -61,7 +61,7 @@ class TestMultipleShooterLazy:
         cpath = "VDP_pack.VDP_Opt"
         fname = cpath.replace('.','_',1)
 
-        oc.compile_model(fpath, cpath, target='ipopt')
+        oc.compile_model(cpath, fpath, target='ipopt')
         #oc.compile_model(fpath, cpath)
 
         # Load the dynamic library and XML data
@@ -113,7 +113,7 @@ class TestShootingHardcore:
         cpath = "VDP_pack.VDP_Opt"
         fname = cpath.replace('.','_',1)
 
-        oc.compile_model(fpath, cpath, target='ipopt')
+        oc.compile_model(cpath, fpath, target='ipopt')
 
         # Load the dynamic library and XML data
         model = jmi.Model(fname)
@@ -272,7 +272,7 @@ def test_f_gradient_elements(certainindex=None):
     cpath = "VDP_pack.VDP_Opt"
     fname = cpath.replace('.','_',1)
 
-    oc.compile_model(fpath, cpath, target='ipopt')
+    oc.compile_model(cpath, fpath, target='ipopt')
 
     # Load the dynamic library and XML data
     m = jmi.Model(fname)
@@ -325,7 +325,7 @@ def test_plot_control_solutions():
     cpath = "VDP_pack.VDP_Opt"
     fname = cpath.replace('.','_',1)
 
-    oc.compile_model(fpath, cpath, target='ipopt')
+    oc.compile_model(cpath, fpath, target='ipopt')
 
     # Load the dynamic library and XML data
     m = jmi.Model(fname)
@@ -368,7 +368,7 @@ def test_control_solution_variations():
     cpath = "VDP_pack.VDP_Opt"
     fname = cpath.replace('.','_',1)
 
-    oc.compile_model(fpath, cpath, target='ipopt')
+    oc.compile_model(cpath, fpath, target='ipopt')
 
     # Load the dynamic library and XML data
     m = jmi.Model(fname)

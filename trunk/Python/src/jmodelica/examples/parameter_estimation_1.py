@@ -41,8 +41,8 @@ def run_demo(with_plots=True):
 
     # Compile the Optimica model first to C code and
     # then to a dynamic library
-    oc.compile_model(curr_dir+"/files/ParameterEstimation_1.mo",
-                     "ParEst.ParEst",
+    oc.compile_model("ParEst.ParEst",
+                     curr_dir+"/files/ParameterEstimation_1.mo",
                      target='ipopt')
     
     # Load the dynamic library and XML data

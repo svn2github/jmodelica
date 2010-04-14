@@ -241,8 +241,8 @@ class ModelicaCompiler():
         self._compiler.setCTemplate(template)
 
     def compile_model(self,
-                      model_file_name,
                       model_class_name,
+                      model_file_name,
                       target = "model"):
     
         """ 
@@ -258,11 +258,11 @@ class ModelicaCompiler():
         See makefile in install folder for details.
 
         Parameters:
+            model_class_name -- 
+                Name of model class in the model file to compile.
             model_file_name -- 
                 Path to file or list of paths to files in which the model is 
                 contained.
-            model_class_name -- 
-                Name of model class in the model file to compile.
             target -- 
                 The build target.
 

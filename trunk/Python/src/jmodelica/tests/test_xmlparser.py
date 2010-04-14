@@ -51,11 +51,11 @@ def setup():
     oc.set_boolean_option('state_start_values_fixed',True)
     oc.set_boolean_option('eliminate_alias_variables',True)
     # cstr model
-    oc.compile_model(cstr_fpath, cstr_cpath)
+    oc.compile_model(cstr_cpath, cstr_fpath)
     # parameter est model
-    oc.compile_model(parest_fpath, parest_cpath)
+    oc.compile_model(parest_cpath, parest_fpath)
     # vdp min time model
-    oc.compile_model(vdpmin_fpath, vdpmin_cpath,'ipopt')
+    oc.compile_model(vdpmin_cpath, vdpmin_fpath, 'ipopt')
     
         
 @testattr(stddist = True)

@@ -40,14 +40,14 @@ model_cstr = os.path.join('files','CSTR.mo')
 fpath_cstr = os.path.join(jm_home, path_to_examples, model_cstr)
 cpath_cstr = "CSTR.CSTR_Opt"
 fname_cstr = cpath_cstr.replace('.','_')
-oc.compile_model(fpath_cstr, cpath_cstr, 'ipopt')
+oc.compile_model(cpath_cstr, fpath_cstr, 'ipopt')
 
 # compile vdp
 model_vdp = os.path.join("files","VDP.mo")
 fpath_vdp = os.path.join(jm_home, path_to_examples, model_vdp)
 cpath_vdp = "VDP_pack.VDP_Opt_Min_Time"
 fname_vdp = cpath_vdp.replace('.','_',1)
-oc.compile_model(fpath_vdp, cpath_vdp, target='ipopt')
+oc.compile_model(cpath_vdp, fpath_vdp, target='ipopt')
 
 class TestNLP_VDP:
     """ Tests for NLPCollocation wrapper methods using the CSTR model.

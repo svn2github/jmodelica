@@ -72,8 +72,33 @@ def optimize(model,
              solver_args={}):
     """ Compact function for model optimization.
     
-    Path to mo-file and model class must be provided. There are default values 
-    for all other settings. These can be changed in function call.
+    Path to mo-file and model class or jmodelica.jmi.Model object must be provided. 
+    There are default values for all other settings. These can be changed in function 
+    call.
+    
+    Parameters:
+        model -- 
+            Model object or model class name (if class name then mo-file must be provided)
+        file_name --
+            Name of mo-file. 
+            Default: empty string
+        compiler_target --
+            Target argument to compiler. 
+            Default: 'ipopt'
+        compiler_options --
+            Dict with compiler options listed. 
+            Default: empty dict
+        algorithm --
+            The algorithm to use is specified by passing class name in this argument. 
+            The algorithm class can be any class which implements the abstract class 
+            jmodelica.algorithm_drivers.AlgorithmBase.
+            Default: CollocationLagrangePolynomialsAlg
+        alg_args --
+            All arguments for the chosen algorithm should be listed in this dict.
+            Default: empty dict
+        solver_args --
+            All arguments for the chosen solver should be listed in this dict.
+            Default: empty dict
     
     """
     compiler='optimica'
@@ -140,95 +165,6 @@ def _exec_algorithm(model,
     # load result file
     res = jmodelica.io.ResultDymolaTextual(result_file_name)
     return (model,res)
-    
-
-#def optimize(model, file="", compiler_options={}, n_e=50, n_cp=3, max_iter=-1, result_mesh='default', n_interpolation_points=20):
-#    """ Compact function for model optimization.
-#    
-#    Path to mo-file and model class must be provided. There are default values 
-#    for all other settings. These can be changed in function call.
-#    
-#    """
-#    recompile = True
-#    if isinstance(model, jmodelica.jmi.Model):
-#        #don't recompile
-#        recompile = False
-#
-#    if recompile:
-#        model = _compile(model, file, compiler='optimica', compiler_options=compiler_options)
-#        
-#    # Create an NLP object
-#    hs = N.ones(n_e)*1./n_e # Equidistant points
-#    nlp = ipopt.NLPCollocationLagrangePolynomials(model,n_e,hs,n_cp)
-#    # Create an Ipopt NLP object
-#    nlp_ipopt = ipopt.CollocationOptimizer(nlp)
-#    if max_iter > 0:
-#        nlp_ipopt.opt_sim_ipopt_set_int_option("max_iter",max_iter)
-#    # Solve the optimization problem                                       )
-#    nlp_ipopt.opt_sim_ipopt_solve()
-#    # Write to file.
-#    if result_mesh=='element_interpolation':
-#        nlp.export_result_dymola_element_interpolation(n_interpolation_points)
-#    else:
-#        nlp.export_result_dymola()
-#
-#    res = jmodelica.io.ResultDymolaTextual(model.get_name()+'_result.txt')
-#    
-#    return (model,res)
-
-#def simulate(model, file="", compiler='modelica', compiler_options={}, do_initialize=True,
-#             verbosity=3, start_time=0.0,final_time=10.0, abstol=1.0e-6, reltol=1.0e-6, 
-#             time_step=0.01, return_last=False, sensitivity_analysis=False, input=None):
-#    """ Compact function for model simulation.
-#    
-#    Pass a jmi.Model object or path to mo-file and model class if model 
-#    should be (re)compiled. There are default values for all other settings. 
-#    These can be changed in function call.
-#    
-#    """
-#    recompile = True
-#    if isinstance(model, jmodelica.jmi.Model):
-#        #don't recompile
-#        recompile = False
-#    
-#    if recompile:
-#        # model class and mo-file must be set
-#         model = _compile(model, file, compiler, compiler_options)
-#    
-#    if do_initialize:
-#        model = initialize(model)
-#         
-#    simulator = SundialsDAESimulator(model, verbosity=verbosity, start_time=start_time, 
-#                                     final_time=final_time, abstol=abstol, reltol=reltol,
-#                                     time_step=time_step, return_last=return_last, 
-#                                     sensitivity_analysis=sensitivity_analysis, input=input)
-#    simulator.run()
-#    simulator.write_data()
-#    res = jmodelica.io.ResultDymolaTextual(model.get_name()+'_result.txt')
-#    
-#    return (model,res)
-#
-#def initialize(model, file="", compiler='modelica',compiler_options={}):
-#    """ Compact function for model initialization.
-#    
-#    """
-#    recompile = True
-#    if isinstance(model, jmodelica.jmi.Model):
-#        #don't recompile
-#        recompile = False
-#    
-#    if recompile:
-#        # model class and mo-file must be set
-#        model = _compile(model, file, compiler, compiler_options)
-#             
-#    # Create DAE initialization object.
-#    init_nlp = NLPInitialization(model)
-#    # Create an Ipopt solver object for the DAE initialization system
-#    init_nlp_ipopt = InitializationOptimizer(init_nlp)
-#    # Solve the DAE initialization system with Ipopt
-#    init_nlp_ipopt.init_opt_ipopt_solve()
-#
-#    return model
 
 
 def _compile(model_name, file_name, compiler='modelica', compiler_target = "ipopt", compiler_options={}):
@@ -252,7 +188,7 @@ def _compile(model_name, file_name, compiler='modelica', compiler_target = "ipop
                 warnings.warn("Unknown compiler option: %s. " %key)
                 
         #compile model
-        comp.compile_model(file_name, model_name, target=compiler_target)
+        comp.compile_model(model_name, file_name, target=compiler_target)
         # Load the dynamic library and XML data
         compiled_name = model_name.replace('.','_',1)
         model = jmi.Model(compiled_name)

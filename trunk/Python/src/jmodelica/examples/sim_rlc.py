@@ -41,8 +41,8 @@ def run_demo(with_plots=True):
     path = get_example_path()
     os.chdir(path)
 
-    mc.compile_model(os.path.join(path, mofile),
-                     optpackage,
+    mc.compile_model(optpackage,
+                     os.path.join(path, mofile),
                      target='ipopt')
 
     # Load the dynamic library and XML data

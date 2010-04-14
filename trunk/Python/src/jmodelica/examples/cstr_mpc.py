@@ -49,7 +49,7 @@ def run_demo(with_plots=True):
     oc = OptimicaCompiler()
     
     # Compile the stationary initialization model into a DLL
-    oc.compile_model(curr_dir+"/files/CSTR.mo", "CSTR.CSTR_Init", target='ipopt')
+    oc.compile_model("CSTR.CSTR_Init", curr_dir+"/files/CSTR.mo", target='ipopt')
 
     # Load a model instance into Python
     init_model = jmi.Model("CSTR_CSTR_Init")
@@ -86,7 +86,7 @@ def run_demo(with_plots=True):
     print('c = %f' % c_0_B)
     print('T = %f' % T_0_B)
     
-    oc.compile_model(curr_dir+"/files/CSTR.mo", "CSTR.CSTR_Opt_MPC", target='ipopt')
+    oc.compile_model("CSTR.CSTR_Opt_MPC", curr_dir+"/files/CSTR.mo", target='ipopt')
 
     cstr = jmi.Model("CSTR_CSTR_Opt_MPC")
 
@@ -128,7 +128,7 @@ def run_demo(with_plots=True):
     cstr.set_value('cstr.T_init',T_0_A)
     
     # Compile the simulation model into a DLL
-    oc.compile_model(curr_dir+"/files/CSTR.mo", "CSTR.CSTR", target='ipopt')
+    oc.compile_model("CSTR.CSTR", curr_dir+"/files/CSTR.mo", target='ipopt')
     
     # Load a model instance into Python
     sim_model = jmi.Model("CSTR_CSTR")

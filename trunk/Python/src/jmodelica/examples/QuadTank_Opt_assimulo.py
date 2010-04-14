@@ -45,7 +45,7 @@ def run_demo(with_plots=True):
     
     # Comile the Modelica model first to C code and
     # then to a dynamic library
-    oc.compile_model(mofile,model_name,target='ipopt')
+    oc.compile_model(model_name,mofile,target='ipopt')
 
     # Load the dynamic library and XML data
     model=jmi.Model(package)

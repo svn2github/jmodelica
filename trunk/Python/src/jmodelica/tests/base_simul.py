@@ -45,7 +45,7 @@ class _BaseSimOptTest:
         _model_name = class_name.replace('.','_')
         path = os.path.join(_tests_path, 'files', mo_file)
         _set_compiler_options(compiler, options)
-        compiler.compile_model(path, class_name, target='ipopt')
+        compiler.compile_model(class_name, path, target='ipopt')
 
 
     def setup_base(self, rel_tol, abs_tol):

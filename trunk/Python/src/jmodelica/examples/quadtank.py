@@ -41,8 +41,8 @@ def run_demo(with_plots=True):
     
     # Compile the Optimica model first to C code and
     # then to a dynamic library
-    oc.compile_model(curr_dir+"/files/QuadTank.mo",
-                     "QuadTank_pack.QuadTank_Opt",
+    oc.compile_model("QuadTank_pack.QuadTank_Opt",
+                     curr_dir+"/files/QuadTank.mo",
                      target='ipopt')
 
     # Load the dynamic library and XML data

@@ -53,7 +53,7 @@ class Test_JMI_ODE:
         cpath_ODE = 'VDP_pack.VDP_Opt'
         fname_ODE = cpath_ODE.replace('.','_',1)
         
-        oc.compile_model(fpath_ODE, cpath_ODE)
+        oc.compile_model(cpath_ODE, fpath_ODE)
         
     def setUp(self):
         """Load the test model."""
@@ -80,7 +80,7 @@ class Test_JMI_ODE:
         fpath_DAE = os.path.join(path_to_examples, modelf_DAE)
         cpath_DAE = 'RLC_Circuit'
         fname_DAE = cpath_DAE.replace('.','_',1)
-        mc.compile_model(fpath_DAE, cpath_DAE)
+        mc.compile_model(cpath_DAE, fpath_DAE)
         package_DAE = 'RLC_Circuit'
         # Load the dynamic library and XML data
         m_DAE = jmi.Model(package_DAE)
@@ -93,7 +93,7 @@ class Test_JMI_ODE:
         fpath_DISC = os.path.join(path_to_examples, modelf_DISC)
         cpath_DISC = 'IfExpExamples.IfExpExample2'
         fname_DISC = cpath_DISC.replace('.','_',1)
-        mc.compile_model(fpath_DISC, cpath_DISC)
+        mc.compile_model(cpath_DISC, fpath_DISC)
         package_DISC = 'IfExpExamples_IfExpExample2'
         # Load the dynamic library and XML data
         m_DISC = jmi.Model(package_DISC)
@@ -173,14 +173,14 @@ class Test_JMI_DAE:
         cpath_DAE = 'Pendulum_pack.Pendulum'
         fname_DAE = cpath_DAE.replace('.','_',1)
 
-        mc.compile_model(fpath_DAE, cpath_DAE)
+        mc.compile_model(cpath_DAE, fpath_DAE)
         
         modelf_DISC = 'files' + sep + 'IfExpExamples.mo'
         fpath_DISC = os.path.join(path_to_examples, modelf_DISC)
         cpath_DISC = 'IfExpExamples.IfExpExample2'
         fname_DISC = cpath_DISC.replace('.','_',1)
 
-        mc.compile_model(fpath_DISC, cpath_DISC)
+        mc.compile_model(cpath_DISC, fpath_DISC)
         
     def setUp(self):
         """Load the test model."""

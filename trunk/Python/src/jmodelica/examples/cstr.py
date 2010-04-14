@@ -90,7 +90,7 @@ def run_demo(with_plots=True):
     oc.set_boolean_option("enable_variable_scaling",True)
         
     # Compile the stationary initialization model into a DLL
-    oc.compile_model(curr_dir+"/files/CSTR.mo", "CSTR.CSTR_Init", target='ipopt')
+    oc.compile_model("CSTR.CSTR_Init", curr_dir+"/files/CSTR.mo", target='ipopt')
 
     # Load a model instance into Python
     init_model = jmi.Model("CSTR_CSTR_Init")
@@ -153,7 +153,7 @@ def run_demo(with_plots=True):
 
     # Comile the Modelica model first to C code and
     # then to a dynamic library
-    oc.compile_model(curr_dir+"/files/CSTR.mo","CSTR.CSTR_Init_Optimization",target='ipopt')
+    oc.compile_model("CSTR.CSTR_Init_Optimization",curr_dir+"/files/CSTR.mo",target='ipopt')
 
     # Load the dynamic library and XML data
     init_sim_model=jmi.Model("CSTR_CSTR_Init_Optimization")
@@ -206,7 +206,7 @@ def run_demo(with_plots=True):
         plt.show()
 
     # Solve optimal control problem    
-    oc.compile_model(curr_dir+"/files/CSTR.mo", "CSTR.CSTR_Opt", target='ipopt')
+    oc.compile_model("CSTR.CSTR_Opt", curr_dir+"/files/CSTR.mo", target='ipopt')
 
     cstr = jmi.Model("CSTR_CSTR_Opt")
 
@@ -292,7 +292,7 @@ def run_demo(with_plots=True):
     
     # Comile the Modelica model first to C code and
     # then to a dynamic library
-    oc.compile_model(curr_dir+"/files/CSTR.mo","CSTR.CSTR",target='ipopt')
+    oc.compile_model("CSTR.CSTR",curr_dir+"/files/CSTR.mo",target='ipopt')
 
     # Load the dynamic library and XML data
     sim_model=jmi.Model("CSTR_CSTR")
