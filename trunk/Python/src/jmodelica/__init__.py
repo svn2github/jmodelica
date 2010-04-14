@@ -72,9 +72,9 @@ def optimize(model,
              solver_args={}):
     """ Compact function for model optimization.
     
-    Path to mo-file and model class or jmodelica.jmi.Model object must be provided. 
-    There are default values for all other settings. These can be changed in function 
-    call.
+    Pass a jmi.Model object or path to mo-file and model class if model 
+    should be (re)compiled. There are default values for all other settings. 
+    These can be changed in function call.
     
     Parameters:
         model -- 
@@ -89,9 +89,9 @@ def optimize(model,
             Dict with compiler options listed. 
             Default: empty dict
         algorithm --
-            The algorithm to use is specified by passing class name in this argument. 
-            The algorithm class can be any class which implements the abstract class 
-            jmodelica.algorithm_drivers.AlgorithmBase.
+            The optimization algorithm to use is specified by passing class name in 
+            this argument. The algorithm class can be any class which implements the 
+            abstract class algorithm_drivers.AlgorithmBase.
             Default: CollocationLagrangePolynomialsAlg
         alg_args --
             All arguments for the chosen algorithm should be listed in this dict.
@@ -125,6 +125,37 @@ def simulate(model,
     should be (re)compiled. There are default values for all other settings. 
     These can be changed in function call.
     
+    Parameters:
+        model -- 
+            Model object or model class name (if class name then mo-file must be provided)
+        file_name --
+            Name of mo-file. 
+            Default: empty string
+        compiler --
+            Set compiler that model should be compiled with.
+            Default: 'modelica'
+        compiler_target --
+            Target argument to compiler. 
+            Default: 'ipopt'
+        compiler_options --
+            Dict with compiler options listed. 
+            Default: empty dict
+        algorithm --
+            The simulation algorithm to use is specified by passing class name in 
+            this argument. The algorithm class can be any class which implements the 
+            abstract class algorithm_drivers.AlgorithmBase.
+            Default: AssimuloAlg
+        alg_args --
+            All arguments for the chosen algorithm should be listed in this dict.
+            Default: empty dict
+        solver_args --
+            All arguments for the chosen solver should be listed in this dict.
+            Default: empty dict
+            
+    Returns:
+        model -- The jmi.Model object
+        res -- The loaded result file.
+    
     """
     return _exec_algorithm(model, 
                            file_name,
@@ -143,6 +174,10 @@ def _exec_algorithm(model,
              algorithm, 
              alg_args, 
              solver_args):
+    """ Helper function which performs all steps of an algorithm run.
+    
+    Throws exception if algorithm is not a subclass of algorithm_drivers.AlgorithmBase.
+    """
 
     if not issubclass(algorithm, AlgorithmBase):
         raise Exception(str(algorithm)+
@@ -168,6 +203,10 @@ def _exec_algorithm(model,
 
 
 def _compile(model_name, file_name, compiler='modelica', compiler_target = "ipopt", compiler_options={}):
+    """ Helper function which performs compilation of chosen model.
+    
+    Returns jmi.Model object.
+    """
     if isinstance(model_name, str) and file_name.strip():
         comp=None
         if compiler.lower() == 'modelica':

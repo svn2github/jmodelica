@@ -22,6 +22,8 @@ int = N.int32
 N.int = N.int32
 
 class AlgorithmBase:
+    """ Abstract class which all algorithms that are to be used with 
+    jmodelica.optimize or jmodelica.simulate must implement."""
 #    __metaclass__=ABCMeta
     
 #    @abstractmethod
@@ -42,6 +44,16 @@ class AssimuloAlg(AlgorithmBase):
     def __init__(self, 
                  model, 
                  alg_args={}):
+        """ Create a simulation algorithm using Assimulo.
+        
+        Parameters:
+            model -- 
+                jmi.Model object representation of the model
+            alg_args -- 
+                All arguments for the algorithm. See _set_alg_args
+                function call for names and default values.
+        
+        """
         self.model = model
         
         #try to set algorithm arguments
@@ -61,6 +73,24 @@ class AssimuloAlg(AlgorithmBase):
                       final_time=1.0,
                       num_communication_points=500,
                       solver=IDA):
+        """ Set arguments for Assimulo algorithm.
+        
+        Parameters:
+            start_time -- 
+                Simulation start time.
+                Default: 0.0
+            final_time --
+                Simulation stop time.
+                Default: 0.0
+            num_communication_points -- 
+                Number of points where the solution is returned.
+                Default: 500 (if = 0 then integrator will return at it's internal steps)
+            solver --
+                Set which solver to use with class name. This determines whether a DAE or 
+                ODE problem will be created.
+                Default: IDA 
+                
+        """
         self.start_time=start_time
         self.final_time=final_time
         self.num_communication_points=num_communication_points
@@ -68,6 +98,14 @@ class AssimuloAlg(AlgorithmBase):
         
     def set_solver_options(self, 
                            solver_args={}):
+        """ Set options for the solver.
+        
+        Parameters:
+            solver_args --
+                dict with list of solver arguments. Arguments must be a property of 
+                the solver. An InvalidSolverArgumentException is raised if an 
+                argument can not be found for the chosen solver.
+         """
         #loop solver_args and set properties of solver
         for k, v in solver_args.iteritems():
             try:
@@ -76,9 +114,11 @@ class AssimuloAlg(AlgorithmBase):
                 raise InvalidSolverArgumentException(v)
                 
     def solve(self):
+        """ Runs the simulation. """
         self.simulator(self.final_time, self.num_communication_points)
     
     def write_result(self):
+        """ Writes result to file and returns the file name."""
         write_data(self.simulator)
         return self.model.get_name()+'_result.txt'
 
@@ -91,10 +131,12 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                  alg_args={}):
         """ Create a CollocationLagrangePolynomials algorithm.
         
-        model -- 
-            jmodelica.jmi.Model model object
-        alg_args -- 
-            dict with algorithm arguments. This algorithm expects the dict keys n_e, hs and n_cp to be set.
+        Parameters:      
+            model -- 
+                jmodelica.jmi.Model model object
+            alg_args -- 
+                dict with algorithm arguments. See _set_alg_args function call for 
+                names and default values.
             
         """
         self.model = model
@@ -120,6 +162,39 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                       result_file_name='', 
                       result_format='txt',
                       n_interpolation_points=None):
+        """ Set arguments for CollocationLagrangePolynomials algorithm.
+        
+        Parameters:
+            n_e -- 
+                Number of finite elements.
+                Default:50
+            hs -- 
+                Vector containing the normalized element lengths.
+                Default: 3
+            n_cp -- 
+                Number of collocation points.
+            res --
+                A reference to an object of type ResultDymolaTextual or
+                ResultDymolaBinary.
+                Default: None (i.e. not used, set this argument to activate initialization)
+            result_mesh --
+                Determines which function will be used to get the solution 
+                trajectories. Possible values are, 'element_interpolation', 
+                'mesh_interpolation' or 'default'. See optimization.ipopt for 
+                more info.
+                Default: 'default'
+            result_file_name --
+                Name of result file.
+                Default: empty string (default generated file name will be used)
+            result_format --
+                Format of result file.
+                Default: 'txt'
+            n_interpolation_points --
+                The number of points in each finite element at which the result
+                is returned. Only available for result_mesh = 'element_interpolation'.
+                Default: None
+        
+        """
         self.n_e=n_e
         self.n_cp=n_cp
         self.hs=hs
@@ -134,8 +209,9 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                            solver_args):
         """ Set options for the solver.
         
-        solver_args --
-            dict with int, real or string options
+        Parameters:
+            solver_args --
+                dict with int, real or string options for the solver ipopt
         """
         for k, v in solver_args.iteritems():
             if isinstance(v, int):
