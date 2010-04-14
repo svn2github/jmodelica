@@ -12,6 +12,7 @@
 	<property name="ant-contrib_dir" value="${jmodelica_root}/ThirdParty/Ant-Contrib/ant-contrib-1.0b3"/>  
 
 	<property name="java_dir" value="java" />
+	<property name="tests_dir" value="tests" />
 	<property name="bin_dir" value="bin" />
 	<property name="output_dir" value="site" />
 
@@ -19,6 +20,11 @@
 	<condition property="core_dir" value="../org.jastadd.plugin" else="${jastadd_dir}/org.jastadd.plugin">
 		<available file="../org.jastadd.plugin" type="dir" property=""/>
 	</condition>
+	<property name="folding_dir" value="../org.jmodelica.folding" />
+	
+	<property name="core_java_dir" value="${core_dir}/src" />
+	<property name="folding_java_dir" value="${folding_dir}/src" />
+	
 
 	<property name="package" value="org.jmodelica" />
 	<property name="ast_package" value="${package}.modelica.compiler" />
@@ -29,6 +35,12 @@
 	-->
 	<property name="scanner_dir" value="flex" />
 
+	<path id="plugin_classpath">
+		<pathelement location="${lib_dir}/beaver-rt.jar"/>
+		<fileset dir="${eclipse_path}/plugins">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
 	
     <property name="parser_output" value="${package_dir}/modelica/parser" />	
 	<!--<property name="parser_output" value="${package_dir}/modelica/parser" />-->
@@ -171,6 +183,19 @@
 
 	<!-- remove compiled files -->
 	<target name="clean">
+	</target>
+	
+	<!-- compile built files -->
+	<target name="compile" depends="gen">
+		<mkdir dir="${bin_dir}" />
+		<javac compiler="javac1.5" debug="true" destdir="${bin_dir}">
+			<classpath refid="plugin_classpath"/>
+			<src path="${java_dir}"/>
+			<src path="${tests_dir}"/>
+			<src path="${core_java_dir}"/>
+			<src path="${folding_java_dir}"/>
+			<include name="**/*.java" />
+		</javac>
 	</target>
 </project>
 

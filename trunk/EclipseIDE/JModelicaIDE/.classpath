@@ -4,6 +4,6 @@
 	<classpathentry exported="true" kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="java"/>
 	<classpathentry kind="src" path="tests"/>
-	<classpathentry exported="true" kind="lib" path="/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry exported="true" kind="lib" path="/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar" sourcepath="/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt-src.jar"/>
+	<classpathentry kind="output" path="bin-eclipse"/>
 </classpath>
