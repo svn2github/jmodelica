@@ -133,6 +133,23 @@ AM_CONDITIONAL([WITH_SUNDIALS],[test "x$with_sundials" != xno])
 AC_SUBST(SUNDIALS_HOME)
 SUNDIALS_HOME=$sundials
 
+AC_ARG_WITH([eclipse],
+   [AS_HELP_STRING([--with-eclipse],
+     [Eclipse installation directory @<:@default=check@:>@])],
+   [eclipse=$withval],
+   [with_eclipse=no])
+
+AS_IF([test "x$with_eclipse" = xno],
+      [AC_MSG_RESULT([Eclipse installation not specified.])],
+      [AC_CHECK_FILE($eclipse/eclipse,
+                     [],
+                     [AC_MSG_FAILURE([Eclipse installation specifed, but seems to be corrupt!])])])
+
+AM_CONDITIONAL([WITH_ECLIPSE],[test "x$with_eclipse" != xno])
+
+AC_SUBST(ECLIPSE_HOME)
+ECLIPSE_HOME=$eclipse
+
 # Checks for mingw.
 AC_ARG_WITH([mingw],
    [AS_HELP_STRING([--with-mingw],

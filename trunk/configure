@@ -806,6 +806,9 @@ _JAVA_HOME_
 MINGW_HOME
 WITH_MINGW_FALSE
 WITH_MINGW_TRUE
+ECLIPSE_HOME
+WITH_ECLIPSE_FALSE
+WITH_ECLIPSE_TRUE
 SUNDIALS_HOME
 WITH_SUNDIALS_FALSE
 WITH_SUNDIALS_TRUE
@@ -942,6 +945,7 @@ with_gnu_ld
 enable_libtool_lock
 with_ipopt
 with_sundials
+with_eclipse
 with_mingw
 with_cppad
 '
@@ -1604,6 +1608,7 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-ipopt            IPOPT installation directory [default=check]
   --with-sundials         SUNDIALS installation directory [default=check]
+  --with-eclipse          Eclipse installation directory [default=check]
   --with-mingw            MinGW installation directory. [default=check]
   --with-cppad            CppAD installation directory [default=check]
 
@@ -5560,13 +5565,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:5563: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:5568: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5566: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:5571: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5569: output\"" >&5)
+  (eval echo "\"\$as_me:5574: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -6769,7 +6774,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6772 "configure"' > conftest.$ac_ext
+  echo '#line 6777 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9358,11 +9363,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9361: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9366: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9365: \$? = $ac_status" >&5
+   echo "$as_me:9370: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9697,11 +9702,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9700: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9705: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9704: \$? = $ac_status" >&5
+   echo "$as_me:9709: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9802,11 +9807,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9805: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9810: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9809: \$? = $ac_status" >&5
+   echo "$as_me:9814: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9857,11 +9862,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9860: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9865: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9864: \$? = $ac_status" >&5
+   echo "$as_me:9869: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12660,7 +12665,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12663 "configure"
+#line 12668 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12756,7 +12761,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12759 "configure"
+#line 12764 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14776,11 +14781,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14779: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14784: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14783: \$? = $ac_status" >&5
+   echo "$as_me:14788: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14875,11 +14880,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14878: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14883: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14882: \$? = $ac_status" >&5
+   echo "$as_me:14887: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14927,11 +14932,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14930: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14935: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14934: \$? = $ac_status" >&5
+   echo "$as_me:14939: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16082,6 +16087,68 @@ fi
 
 SUNDIALS_HOME=$sundials
 
+
+# Check whether --with-eclipse was given.
+if test "${with_eclipse+set}" = set; then
+  withval=$with_eclipse; eclipse=$withval
+else
+  with_eclipse=no
+fi
+
+
+if test "x$with_eclipse" = xno; then
+  { $as_echo "$as_me:$LINENO: result: Eclipse installation not specified." >&5
+$as_echo "Eclipse installation not specified." >&6; }
+else
+  as_ac_File=`$as_echo "ac_cv_file_$eclipse/eclipse" | $as_tr_sh`
+{ $as_echo "$as_me:$LINENO: checking for $eclipse/eclipse" >&5
+$as_echo_n "checking for $eclipse/eclipse... " >&6; }
+if { as_var=$as_ac_File; eval "test \"\${$as_var+set}\" = set"; }; then
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  { { $as_echo "$as_me:$LINENO: error: cannot check for file existence when cross compiling" >&5
+$as_echo "$as_me: error: cannot check for file existence when cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+if test -r "$eclipse/eclipse"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+ac_res=`eval 'as_val=${'$as_ac_File'}
+		 $as_echo "$as_val"'`
+	       { $as_echo "$as_me:$LINENO: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+as_val=`eval 'as_val=${'$as_ac_File'}
+		 $as_echo "$as_val"'`
+   if test "x$as_val" = x""yes; then
+  :
+else
+  { { $as_echo "$as_me:$LINENO: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+{ { $as_echo "$as_me:$LINENO: error: Eclipse installation specifed, but seems to be corrupt!
+See \`config.log' for more details." >&5
+$as_echo "$as_me: error: Eclipse installation specifed, but seems to be corrupt!
+See \`config.log' for more details." >&2;}
+   { (exit 1); exit 1; }; }; }
+fi
+
+fi
+
+
+ if test "x$with_eclipse" != xno; then
+  WITH_ECLIPSE_TRUE=
+  WITH_ECLIPSE_FALSE='#'
+else
+  WITH_ECLIPSE_TRUE='#'
+  WITH_ECLIPSE_FALSE=
+fi
+
+
+
+ECLIPSE_HOME=$eclipse
+
 # Checks for mingw.
 
 # Check whether --with-mingw was given.
@@ -17214,6 +17281,13 @@ if test -z "${WITH_SUNDIALS_TRUE}" && test -z "${WITH_SUNDIALS_FALSE}"; then
   { { $as_echo "$as_me:$LINENO: error: conditional \"WITH_SUNDIALS\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 $as_echo "$as_me: error: conditional \"WITH_SUNDIALS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${WITH_ECLIPSE_TRUE}" && test -z "${WITH_ECLIPSE_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"WITH_ECLIPSE\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"WITH_ECLIPSE\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
