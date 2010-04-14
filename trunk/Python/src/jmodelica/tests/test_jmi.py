@@ -449,52 +449,51 @@ class TestModel_VDP:
         for index, val in enumerate(new_values):
             nose.tools.assert_equal(val, self.vdp.get_value(parameters[index]))
             
-#     @testattr(stddist = True)
-#     def test_writeload_parameters_from_XML(self):
-#         original_values = self.vdp.get_real_pi()
-#         new_values = N.ones(len(original_values))
-#         self.vdp.set_real_pi(new_values)
- 
-#         # new values are set
-#         N.testing.assert_array_equal(self.vdp.get_real_pi(),new_values)
-        
-#         #load original values, pi are now = old values
-#         self.vdp.load_parameters_from_XML()
-#         N.testing.assert_array_equal(self.vdp.get_real_pi(),original_values)
-         
-#         # set new values and write to xml
-#         self.vdp.set_real_pi(new_values)
-#         self.vdp.write_parameters_to_XML()
-         
-#         #load values, pi are now = new values
-#         self.vdp.load_parameters_from_XML()
-#         N.testing.assert_array_equal(self.vdp.get_real_pi(),new_values)
+    @testattr(stddist = True)
+    def test_writeload_parameters_from_XML(self):
+        original_values = self.vdp.get_real_pi()
+        new_values = N.ones(len(original_values))
+        self.vdp.set_real_pi(new_values)
 
-#### This test was added in r1153 but results in seg fault on Mac
-#    @testattr(stddist = True)
-#    def test_writeload_params_new_file(self):
-#        original_values = self.vdp.get_real_pi()
-#        new_values = N.ones(len(original_values))
-#        self.vdp.set_real_pi(new_values)
-#
-#        # new values are set
-#        N.testing.assert_array_equal(self.vdp.get_real_pi(),new_values)
-#       
-#        #load original values, pi are now = old values
-#        self.vdp.load_parameters_from_XML()
-#        N.testing.assert_array_equal(self.vdp.get_real_pi(),original_values)
-#        
-#        # set new values and write to xml
-#        self.vdp.set_real_pi(new_values)
-#        self.vdp.write_parameters_to_XML("test_jmi.xml")
-#        
-#        #load values, pi are now = new values
-#        self.vdp.load_parameters_from_XML("test_jmi.xml")
-#        N.testing.assert_array_equal(self.vdp.get_real_pi(),new_values)
-#        
-#        #load original values, pi are now = old values
-#        self.vdp.load_parameters_from_XML()
-#        N.testing.assert_array_equal(self.vdp.get_real_pi(),original_values)          
+        # new values are set
+        N.testing.assert_array_equal(self.vdp.get_real_pi(),new_values)
+      
+        #load original values, pi are now = old values
+        self.vdp.load_parameters_from_XML()
+        N.testing.assert_array_equal(self.vdp.get_real_pi(),original_values)
+       
+        # set new values and write to xml
+        self.vdp.set_real_pi(new_values)
+        self.vdp.write_parameters_to_XML()
+       
+        #load values, pi are now = new values
+        self.vdp.load_parameters_from_XML()
+        N.testing.assert_array_equal(self.vdp.get_real_pi(),new_values)
+
+    @testattr(stddist = True)
+    def test_writeload_params_new_file(self):
+        original_values = self.vdp.get_real_pi()
+        new_values = N.ones(len(original_values))
+        self.vdp.set_real_pi(new_values)
+
+        # new values are set
+        N.testing.assert_array_equal(self.vdp.get_real_pi(),new_values)
+       
+        #load original values, pi are now = old values
+        self.vdp.load_parameters_from_XML()
+        N.testing.assert_array_equal(self.vdp.get_real_pi(),original_values)
+        
+        # set new values and write to xml
+        self.vdp.set_real_pi(new_values)
+        self.vdp.write_parameters_to_XML("test_jmi.xml")
+        
+        #load values, pi are now = new values
+        self.vdp.load_parameters_from_XML("test_jmi.xml")
+        N.testing.assert_array_equal(self.vdp.get_real_pi(),new_values)
+        
+        #load original values, pi are now = old values
+        self.vdp.load_parameters_from_XML()
+        N.testing.assert_array_equal(self.vdp.get_real_pi(),original_values)          
             
     @testattr(stddist = True)        
     def test_get_name(self):
