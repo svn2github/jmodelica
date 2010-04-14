@@ -183,6 +183,7 @@
 
 	<!-- remove compiled files -->
 	<target name="clean">
+		<delete dir="${bin_dir}" />
 	</target>
 	
 	<!-- compile built files -->
