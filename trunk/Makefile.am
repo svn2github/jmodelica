@@ -158,8 +158,7 @@ bindist: bindistdir
 	rm -rf $(bindistdir).tar
 
 test: install
-	mkdir -p test_tmp
-	cd test_tmp; $(prefix)/jm_tests 
+	$(prefix)/jm_tests 
 	rm -rf test_tmp
 
 # clean-local: clean-jmi-examples clean-frontends
