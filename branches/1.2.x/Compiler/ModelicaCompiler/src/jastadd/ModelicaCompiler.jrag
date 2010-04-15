@@ -1,0 +1,891 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+import java.util.Set;
+import java.util.Iterator;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+
+import org.jmodelica.util.OptionRegistry;
+import org.jmodelica.util.OptionRegistry.UnknownOptionException;
+import org.xml.sax.SAXException;
+
+//import beaver.Parser.Exception;
+
+/**
+ * 
+ * Main compiler class which bundles the tasks needed to compile a Modelica
+ * model.
+ * <p>
+ * There are two usages with this class:
+ * -# Compile in one step either from the command line or by calling the static 
+ * method <compileModel> in your own class.
+ * -# Split compilation into several steps by calling the static methods
+ * in your own class.
+ * <p>
+ * Use (1) for a simple and compact way of compiling a Modelica model. As a
+ * minimum, provide the modelfile name and class name as command line arguments.
+ * Optional arguments are XML template and c template files which are needed for
+ * code generation. If any of these are ommitted no code generation will be
+ * performed.
+ * <p>
+ * Command line example without code generation:<br>
+ * <code>org.jmodelica.applications.ModelicaCompiler myModels/models.mo models.model1</code>
+ * <p>
+ * Command line example with code generation: <br>
+ * <code>org.jmodelica.applications.ModelicaCompiler myModels/models.mo models.model1
+ * XMLtemplate1.xml XMLtemplate2.xml cppTemplate.cpp</code>
+ * <p>
+ * Logging can be set with the optional argument -log=i, w or e where:
+ * <p>
+ *  - -d : log debug, info, warning and error messages
+ * 	- -i : log info, warning and error messages
+ * 	- -w : log warning and error messages (default if the log option is not used)
+ * 	- -e : log error messages only
+ * <p>
+ * Example with log level set to INFO: <br>
+ * <code>org.jmodelica.applications.ModelicaCompiler -i myModels/models.mo 
+ * models.model1</code>
+ * <p>
+ * The logs will be printed to standard out.
+ * <p>
+ * 
+ * For method (2), the compilation steps are divided into 4 tasks which can be
+ * used via the methods:
+ * -# parseModel (source code -> attributed source representation)  
+ * -# instantiateModel (source representation -> instance model) 
+ * -# flattenModel (instance model -> flattened model) 
+ * -# generateCode (flattened model -> c code and XML code)
+ * <p>
+ * They must be called in this order. Use provided methods to get/set logging
+ * level.
+ * 
+ */
+public class ModelicaCompiler {	
+	protected static final ModelicaLogger log = ModelicaLoggers.getConsoleLogger("JModelica.ModelicaCompiler");
+	{
+		System.out.println("ModelicaCompiler.static");
+		ASTNode.log = log;
+	}
+	
+	public static final String DEBUG = "d";
+	public static final String INFO = "i";
+	public static final String WARNING = "w";
+	public static final String ERROR = "e";
+	public static final String INHERITED = "inh";
+	protected static final HashMap<String, Level> levels = new HashMap<String, Level>();
+	{
+		levels.put(DEBUG,   Level.FINE);
+		levels.put(INFO,    Level.INFO);
+		levels.put(WARNING, Level.WARNING);
+		levels.put(ERROR,   Level.SEVERE);
+	}
+	public static final String DEFAULT_LEVEL = ERROR;
+	
+	private String xmlTpl=null;
+	private String xmlValuesTpl=null;
+	private String cTemplatefile=null;
+	private OptionRegistry options = null;
+	
+	
+	public ModelicaCompiler(OptionRegistry options, String xmlTpl, String xmlValuesTpl, String cTemplatefile) {
+		this.options = options;
+		this.xmlTpl = xmlTpl;
+		this.xmlValuesTpl = xmlValuesTpl;
+		this.cTemplatefile = cTemplatefile;		
+	}
+	
+	public String getStringOption(String key) throws UnknownOptionException {
+		return options.getStringOption(key);
+	}
+	
+	public void setStringOption(String key, String value) throws UnknownOptionException {
+		options.setStringOption(key,value);
+	}
+	
+	public void setStringOption(String key, String value, String description) throws UnknownOptionException {
+		options.setStringOption(key, value, description);
+	}
+	
+	public int getIntegerOption(String key) throws UnknownOptionException {
+		return options.getIntegerOption(key);
+	}
+	
+	public void setIntegerOption(String key, int value) throws UnknownOptionException {
+		options.setIntegerOption(key, value);
+	}
+	
+	public void setIntegerOption(String key, int value, String description) throws UnknownOptionException {
+		options.setIntegerOption(key, value, description);
+	}	
+	
+	public double getRealOption(String key) throws UnknownOptionException {
+		return options.getRealOption(key);
+	}
+	
+	public void setRealOption(String key, double value) throws UnknownOptionException {
+		options.setRealOption(key, value);
+	}
+
+	public void setRealOption(String key, double value, String description) throws UnknownOptionException {
+		options.setRealOption(key, value, description);
+	}
+	
+	public boolean getBooleanOption(String key) throws UnknownOptionException{
+		return options.getBooleanOption(key);
+	}
+	
+	public void setBooleanOption(String key, boolean value) throws UnknownOptionException {
+		options.setBooleanOption(key, value);
+	}
+
+	public void setBooleanOption(String key, boolean value, String description) throws UnknownOptionException {
+		options.setBooleanOption(key, value, description);
+	}
+	
+	public String getOptionDescription(String key) throws UnknownOptionException {
+		return options.getDescription(key);
+	}
+
+	/**
+	 * Returns the modelicapath attribute set for this compiler instance.
+	 * 
+	 * @return Reference to the modelicapath attribute. 
+	 * 
+	 */
+	public String getModelicapath() {
+		return options.getStringOption("MODELICAPATH");
+	}
+	
+	/**
+	 * Set the modelicapath attribute.
+	 * 
+	 * @param path The new modelicapath.
+	 */
+	public void setModelicapath(String path) {
+		options.setStringOption("MODELICAPATH", path);
+	}
+	
+	/**
+	 * Returns the XML model description template file path set for this compiler instance.
+	 * 
+	 * @return Reference to the XML variables template file path attribute. 
+	 * 
+	 */
+	public String getXMLTpl() {
+		return this.xmlTpl;
+	}
+
+	/**
+	 * Set the XML model description template file path attribute.
+	 * 
+	 * @param template The new XML variables template file path.
+	 */
+	public void setXMLTpl(String template) {
+		this.xmlTpl = template;
+	}
+	
+	/**
+	 * Returns the XML values template file path set for this compiler instance.
+	 * 
+	 * @return Reference to the XML values template file path attribute.
+	 * 
+	 */
+	public String getXMLValuesTpl() {
+		return this.xmlValuesTpl;
+	}
+
+	/**
+	 * Set the XML values template file path attribute.
+	 * 
+	 * @param template The new XML values template file path.
+	 */
+	public void setXMLValuesTpl(String template) {
+		this.xmlValuesTpl = template;
+	}
+
+	/**
+	 * Returns the c template file path set for this compiler instance.
+	 * 
+	 * @return Reference to the c template file path attribute. 
+	 * 
+	 */
+	public String getCTemplate() {
+		return this.cTemplatefile;
+	}
+	
+	/**
+	 * Set the c template file path attribute.
+	 * 
+	 * @param template The new c template file path.
+	 */
+	public void setCTemplate(String template) {
+		this.cTemplatefile = template;
+	}
+			
+	/**
+	 * Compiles a Modelica model. A model file name and class must be provided.
+	 * Prints an error and returns without completion if, for example, a file 
+	 * can not be found or if the parsing fails. Supports multiple model files.
+	 * 
+	 * @param name
+	 *            Array of names of the model files.
+	 * @param cl
+	 *            The name of the class in the model file to compile.
+	 * @throws beaver.Parser.Exception
+	 *             If there was an Beaver parsing exception.
+	 * @throws CompilerException
+	 *             If errors have been found during the parsing, instantiation
+	 *             or flattening.
+	 * @throws FileNotFoundException
+	 *             If the model file can not be found.
+	 * @throws IOException
+	 *             If there was an error reading the model file. (Beaver
+	 *             exception.)
+	 * @throws IOException
+	 *             If there was an error creating the .mof file.
+	 * @throws ModelicaClassNotFoundException
+	 *             If the Modelica class to parse, instantiate or flatten is not
+	 *             found.
+	 * 
+	 */
+	public void compileModel(String name[], String cl)
+	  throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		log.info("======= Compiling model =======");		
+		// build source tree
+		SourceRoot sr = parseModel(name);
+		
+		// compute instance tree
+		InstClassDecl icl = instantiateModel(sr, cl);
+		
+		// flattening
+		FClass fc = flattenModel(icl);
+
+		// Generate code?
+		if (this.xmlTpl != null && this.xmlValuesTpl !=null && this.cTemplatefile != null) {
+			generateCode(fc);
+		}		
+		log.info("====== Model compiled successfully =======");
+	}
+
+	/**
+	 * 
+	 * Parses a model and returns a reference to the root of the source tree.
+	 * Options related to the compilation are also loaded here and added to the
+	 * source tree representation.
+	 * 
+	 * @param name
+	 *            The name of the model file.
+	 *            
+	 * @return The root of the source tree.
+	 * 
+	 * @throws beaver.Parser.Exception
+	 *             If there was an Beaver parsing exception.
+	 * @throws CompilerException
+	 *             If errors have been found during the parsing.
+	 * @throws FileNotFoundException
+	 *             If the model file can not be found.
+	 * @throws IOException
+	 *             If there was an error reading the model file. (Beaver exception.)
+	 */
+	private SourceRoot parseModel(String name) 
+	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
+//		ModelicaParser parser = new ModelicaParser();
+//		ModelicaParser.CollectingReport report = new ModelicaParser.CollectingReport();
+//		parser.setReport(report);
+//		Reader reader = new FileReader(name);
+//		ModelicaScanner scanner = new ModelicaScanner(new BufferedReader(reader));
+	/*
+		if (report.hasErrors()) {
+			CompilerException ce = new CompilerException();
+			for (Problem p : report.getErrors()) {
+				ce.addProblem(p);
+			}
+			throw ce;
+		}
+		*/
+		ParserHandler ph = new ParserHandler();
+		log.info("Parsing " + name + "...");
+		SourceRoot sr;
+		try {
+//			sr = (SourceRoot) parser.parse(scanner);
+			sr = ph.parseFile(name);
+		} catch (ParserException e) {
+			e.getProblem().setFileName(name);
+			CompilerException ce = new CompilerException();
+			ce.addProblem(e.getProblem());
+			throw ce;
+		}
+		//loadOptions(sr);
+		for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
+			sd.setFileName(name);
+		}
+		return sr;
+	}
+
+	/**
+	 * 
+	 * Parses a set of files and returns a reference to the root of a source tree
+     * where the content of all files is contained. Each file is parsed using
+     * the parseModel method.
+	 * 
+	 * @param name
+	 *            An array of file names.
+	 *            
+	 * @return The root of the source tree.
+	 * 
+	 * @throws beaver.Parser.Exception
+	 *             If there was an Beaver parsing exception.
+	 * @throws CompilerException
+	 *             If errors have been found during the parsing.
+	 * @throws FileNotFoundException
+	 *             If the model file can not be found.
+	 * @throws IOException
+	 *             If there was an error reading the model file. (Beaver exception.)
+	 */
+	public SourceRoot parseModel(String name[]) 
+	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
+		SourceRoot sr = null;
+		for (int i=0;i<name.length;i++) {
+			SourceRoot sr_tmp = parseModel(name[i]);
+			//copy options from local optionregistry to sourceroot optionregistry
+			sr_tmp.options.copyAllOptions(this.options);
+			if (i==0) {
+				sr = sr_tmp;
+			} else {
+				for(StoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) {
+					sr.getProgram().addUnstructuredEntity(sd);
+				}
+			}
+		}
+		return sr;
+	}
+	
+	/**
+	 * 
+	 * Computes a model instance tree from a source tree. Some error checks such
+	 * as type checking is performed during the computation.
+	 * 
+	 * @param sr
+	 *            The reference to the model source root.
+	 * @param cl
+	 *            The name of the class in the model file to compile.
+	 * 
+	 * @return The instance node corresponding to the instantiated model.
+	 * 
+	 * @throws CompilerException
+	 *             If errors have been found during the instantiation.
+	 * @throws ModelicaClassNotFoundException
+	 *             If the Modelica class to instantiate is not found.
+	 */
+	public InstClassDecl instantiateModel(SourceRoot sr, String cl) 
+		throws ModelicaClassNotFoundException, CompilerException{
+		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
+		ipr.options = new OptionRegistry(sr.options);
+		
+		log.info("Checking for errors...");
+		Collection<Problem> problems = ipr.checkErrorsInInstClass(cl);
+		if (problems.size()>0) {
+			handleCompilerProblems(problems);
+		}
+		
+		return ipr.simpleLookupInstClassDecl(cl);		
+	}
+	
+	protected void handleCompilerProblems(Collection<Problem> problems) throws CompilerException{
+		ArrayList<Problem> warnings = new ArrayList<Problem>();
+		ArrayList<Problem> errors = new ArrayList<Problem>();
+		for (Problem p : problems) {
+			if (p.severity() == Problem.Severity.ERROR) 
+				errors.add(p);
+			else
+				warnings.add(p);
+		}
+		
+		if (errors.size() > 0 || (warnings.size() > 0 && options.getBooleanOption("halt_on_warning"))) {
+			// there are errors -> add errors and possible warnings and throw exception or
+			// there are only warnings but compiler option sais throw exception
+			
+			CompilerException ce = new CompilerException();
+			for (Problem e : errors) 
+				ce.addProblem(e);
+			for (Problem w: warnings) 
+				ce.addProblem(w);
+			throw ce;
+		} else {
+			// there are only warnings and halt_on_warning = false so just send them to logger
+			log.warning("------- Compiler Warnings -------");
+			for (Problem p:warnings) 
+				log.warning(p.toString());
+			log.warning("--------------------------------");
+		}
+	}
+	
+	/**
+	 * \brief Create a new FClass object.
+	 * 
+	 * Override for subclasses needing a subclass of FClass.
+	 */
+	protected FClass createFClass() {
+		return new FClass();
+	}
+	
+	/**
+	 * Computes the flattened model representation from a model instance.
+	 * 
+	 * @param icd
+	 *            A reference to the model instance node.
+	 * 
+	 * @return FClass object representing the flattened model.
+	 * 
+	 * @throws CompilerException
+	 *             If errors have been found during the flattening.
+	 * @throws IOException
+	 *             If there was an error creating the .mof file.
+	 * @throws ModelicaClassNotFoundException
+	 *             If the Modelica class to flatten is not found.
+	 */
+	public FClass flattenModel(InstClassDecl icl) 
+			throws CompilerException, ModelicaClassNotFoundException, IOException {
+		FlatRoot flatRoot = new FlatRoot();
+		flatRoot.setFileName(icl.qualifiedName()+".mof");
+		FClass fc = createFClass();
+		flatRoot.setFClass(fc);
+		flatRoot.options = new OptionRegistry(icl.root().options);
+		
+		log.info("Flattening model...");
+		
+		icl.flattenInstClassDecl(fc);
+
+		// Output the untransformed flattened model
+		log.debug("Creating raw .mof file...");
+		PrintStream out = new PrintStream(icl.qualifiedName() + ".mof");
+		fc.prettyPrint(out, "");
+	   	out.close();
+	   	log.debug("... raw .mof file created.");
+
+		log.info("Raw flattened model:");		
+		log.info(fc.prettyPrint(""));
+	   	
+		fc.transformCanonical();
+				
+		log.debug("Creating transformed .mof file...");
+		out = new PrintStream(icl.qualifiedName() + "_transformed.mof");
+	   	fc.prettyPrint(out, "");
+	   	out.close();
+	   	log.debug("... transformed .mof file created.");
+	    
+		log.info("Diagnostics for transformed flattened model:");		
+		log.info(fc.diagnostics());
+		
+		log.info("Transformed flattened model:");		
+		log.info(fc.prettyPrint(""));
+
+		Collection<Problem> problems = fc.errorCheck();
+		if (problems.size() > 0) 
+			handleCompilerProblems(problems);
+		
+		return fc;
+	}
+	
+	/**
+	 * \brief Create a new XMLGenerator object.
+	 * 
+	 * Override for subclasses needing another subclass of XMLGenerator.
+	 */
+	protected XMLGenerator createXMLGenerator(FClass fc) {
+		return new XMLGenerator(new PrettyPrinter(), '$', fc);
+	}
+	
+	/**
+	 * \brief Create a new XMLValueGenerator object.
+	 * 
+	 * Override for subclasses needing another subclass of XMLValueGenerator.
+	 */
+	protected XMLValueGenerator createXMLValueGenerator(FClass fc) {
+		return new XMLValueGenerator(new PrettyPrinter(), '$', fc);
+	}
+	
+	/**
+	 * \brief Create a new CGenerator object.
+	 * 
+	 * Override for subclasses needing another subclass of CGenerator.
+	 */
+	protected CGenerator createCGenerator(FClass fc) {
+		return new CGenerator(new PrettyPrinter(), '$', fc);
+	}
+
+	/**
+	 * 
+	 * Generates XML and c code for a flattened model represented as an instance
+	 * of FClass using template files. The XML variables, XML values and c files
+	 * are given the default names <modelname>.xml, <modelname>_values.xml and 
+	 * <modelname>.c respectively.
+	 * 
+	 * @param fc
+	 *            The FClass instance for which the code generation should be
+	 *            computed.
+	 * @throws FileNotFoundException
+	 *             If either of the three template files can not be found.
+	 */
+	public void generateCode(FClass fc) throws FileNotFoundException {
+		log.info("Generating code...");
+		
+		XMLGenerator xmlgenerator = createXMLGenerator(fc);
+		String output = fc.nameUnderscore() + ".xml";
+		xmlgenerator.generate(this.xmlTpl, output);
+
+		XMLValueGenerator valuegenerator = createXMLValueGenerator(fc);
+		output = fc.nameUnderscore() + "_values.xml";
+		valuegenerator.generate(this.xmlValuesTpl, output);
+		
+		CGenerator cgenerator = createCGenerator(fc);
+		output = fc.nameUnderscore() + ".c";
+		cgenerator.generate(this.cTemplatefile, output);
+
+		log.debug("... code generated.");
+	}
+	
+	/**
+	 * Sets logging to the level specified. Valid values are:
+	 * ModelicaCompiler.DEBUG, ModelicaCompiler.INFO, ModelicaCompiler.WARNING or ModelicaCompiler.ERROR
+	 * 
+	 * Default log level setting is ERROR. Messages will be printed to the
+	 * standard out.
+	 * 
+	 * @param level
+	 *            The level of logging to use as of now.
+	 */
+	public static void setLogLevel(ModelicaLogger logger, String level) {
+		if (logger != null) {
+			Level lv = levels.get(level);
+			if (lv == null)
+				lv = levels.get(DEFAULT_LEVEL);
+			log.setLevel(lv);
+		}
+	}
+	
+	/**
+	 * Returns the log level that is currently set.
+	 * 
+	 * @return Log level setting for this class.
+	 */
+	public static String getLogLevel(ModelicaLogger logger) {
+		Level lv = logger != null ? logger.getLevel() : null;
+		return lv != null ? lv.toString() : ModelicaCompiler.INHERITED;
+	}
+	
+	/**
+	 * Sets logging to the level specified. Valid values are:
+	 * ModelicaCompiler.DEBUG, ModelicaCompiler.INFO, ModelicaCompiler.WARNING or ModelicaCompiler.ERROR
+	 * 
+	 * Default log level setting is ERROR. Messages will be printed to the
+	 * standard out.
+	 * 
+	 * @param level
+	 *            The level of logging to use as of now.
+	 */
+	public static void setLogLevel(String logger, String level) {
+		setLogLevel(ModelicaLoggers.getLogger(logger), level);
+	}
+	
+	/**
+	 * Returns the log level that is currently set.
+	 * 
+	 * @return Log level setting for this class.
+	 */
+	public static String getLogLevel(String logger) {
+		return getLogLevel(ModelicaLoggers.getLogger(logger));
+	}
+	
+	protected static Hashtable<String, String> extractProgramArguments(String[] args, int pos) {
+		Hashtable<String, String> programargs = new Hashtable<String,String>();		
+		
+		while(pos < args.length && args[pos].trim().substring(0,1).equals("-")) {
+			String progarg = args[pos].trim().substring(1, args[pos].trim().indexOf("="));
+			if(args[pos].trim().indexOf("=")+1 <= args[pos].trim().length()) {
+				programargs.put(progarg, args[pos].trim().substring(args[pos].trim().indexOf("=")+1));
+			}
+			pos++;
+		}
+		return programargs;
+	}
+	
+	/**
+	 * \brief Convenience constructor intended to be called from main method.
+	 */
+	protected ModelicaCompiler(String compilerName, String[] args, Hashtable<String, String> programarguments) {
+		String filesep = System.getProperty("file.separator");
+		if (args.length < 1) {
+			log.error(compilerName + " expects the command line arguments: \n" +
+					"[-options] <file name> <class name> [<xml model description template> <xml model values template> <c template>]\n" +
+					"where options could be: \n" +
+					"-log=<d or i or w or e> \n" +
+					"-modelicapath=<path to modelica library> \n" +
+					"-optfile=<path to XML options file>");
+			System.exit(1);
+		}
+		
+		int arg = 0;
+		String modelicapath = null;
+		
+		//log option
+		if (programarguments.get("log") != null) {
+			setLogLevel(log, programarguments.get("log"));
+		} else {
+			setLogLevel(log, ModelicaCompiler.ERROR);
+		}
+		//modelicapath option
+		modelicapath = programarguments.get("modelicapath");
+		
+		arg = programarguments.size();
+		if (args.length < arg+2) {
+			log.error(compilerName + " expects a file name and a class name as " +
+					"command line arguments.");
+			System.exit(1);
+		}				
+		
+		if (args.length >= arg+5) {
+			xmlTpl = args[arg+2];
+			xmlValuesTpl = args[arg+3];
+			cTemplatefile = args[arg+4];
+		}
+		
+		String optionsfile = null;
+		//look for options.xml in $JMODELICA_HOME/Options/ and program arguments
+		if (programarguments.get("optfile") != null) {
+			optionsfile = programarguments.get("optfile");
+		} else {
+			optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
+		}
+
+		try {
+			options = new OptionRegistry(optionsfile);
+		} catch(Exception e) {
+			handleException(e, "The options XML file could not be loaded.");
+		}
+		
+		//add modelicapath to optionregistry
+		if (modelicapath == null) {
+			//modelicapath was not set in program arguments -> check envir variable or via JMODELICA_HOME
+			if (System.getenv("MODELICAPATH") != null) { 
+				modelicapath=System.getenv("MODELICAPATH");
+			} else {
+				modelicapath=System.getenv("JMODELICA_HOME")+filesep+"ThirdParty"+filesep+"MSL";
+			}
+		}
+		options.setStringOption("MODELICAPATH", modelicapath);
+	}
+	
+	public static void main(String[] args) {
+		// TODO: Add a class representing the arguments of the program, with getX methods for arguments.
+		// Get any program options set
+		Hashtable<String, String> programarguments = extractProgramArguments(args, 0);
+		// Create compiler
+		ModelicaCompiler mc = new ModelicaCompiler("ModelicaCompiler", args, programarguments);
+		// Compile model
+		mc.compileModelFromCommandLine(args, programarguments);
+	}
+	
+	/**
+	 * \brief Compile model given in command line options and  and print any error messages.
+	 */
+	protected void compileModelFromCommandLine(String[] args, Hashtable<String, String> programarguments) {
+		// Get files and class
+		int arg = programarguments.size();
+		String[] name = args[arg].split(",");
+		String cl = args[arg+1];
+		
+		// Compile model
+		try {
+			compileModel(name, cl);
+		} catch  (ModelicaClassNotFoundException e){
+			log.error("Could not find the class "+ cl);
+			System.exit(1);
+		} catch (CompilerException ce) {
+			StringBuilder str = new StringBuilder();
+			str.append(ce.getProblems().size() + " errors found:\n");
+			for (Problem p : ce.getProblems()) 
+				str.append(p.toString()+"\n");
+			log.error(str.toString());
+			System.exit(1);
+		} catch (Error e) {
+			// TODO: This prints the error message once for each file - perhaps it would be better to ignore file names here?
+			for (int i=0; i<name.length; i++) {
+				log.error("In file: '" + name[i] + "': "+e.getMessage());
+			}			
+			System.exit(1);
+		} catch (FileNotFoundException e) {
+			log.error("Could not find file: " + e.getMessage());
+			System.exit(1);
+		} catch (Exception e) {
+			handleException(e);
+		}
+	}
+	
+	/**
+	 * \brief Log error message for exception and exit.
+	 */
+	protected void handleException(Exception e, String msg) {
+		log.error(msg);
+		handleException(e);
+	}
+	
+	/**
+	 * \brief Log error message for exception and exit.
+	 */
+	protected void handleException(Exception e) {
+		log.error(e.getMessage());
+		StringWriter str = new StringWriter();
+		PrintWriter print = new PrintWriter(str);
+		print.print(e);
+		e.printStackTrace(print);
+		log.debug(str.toString());
+		System.exit(1);
+	}
+
+	/**
+	 * Class which can be used to fetch static loggers with different purposes.
+	 * 
+	 * This is an attempt to have a general Logger class which contains loggers
+	 * for different purposes. It is then possible to have each logger specially
+	 * configured for its indended use. Right now there is only one logger class
+	 * which is a console logger. It has a specific loglevel and a certain
+	 * formatting. Another useful logger could be a filelogger which has a
+	 * loglevel and an output formatting which suits logging to file.
+	 * 
+	 */
+	protected static class ModelicaLoggers {
+		
+		public static final HashMap<String, ModelicaLogger> logs = new HashMap<String, ModelicaLogger>();
+		
+		/**
+		 * Returns a logger with a certain name which prints logs to the
+		 * console. If the name is encountered for the first time a new logger
+		 * is created otherwise the already created logger with the specific
+		 * name is returned. The log outputs are formatted to suit a console.
+		 * The default log level is Level.WARNING.
+		 * 
+		 * @param name  The name of the logger.
+		 * @return A logger which prints log messages to the console.
+		 */
+		public static ModelicaLogger getConsoleLogger(String name) {
+			ModelicaLogger ml = logs.get(name);
+			if (ml == null) {
+				Logger l = Logger.getLogger(name);
+				l.setUseParentHandlers(false);
+				if (l.getHandlers().length == 0) {  // Workaround for buggy java-in-python library
+					ConsoleHandler ch = new ConsoleHandler();
+					ch.setFormatter(new ConsoleFormatter());
+					l.addHandler(ch);
+				}
+				l.setLevel(Level.WARNING);
+				ml = new LoggerInModelicaLogger(l);
+				logs.put(name, ml);
+			}
+			return ml;
+		}
+		
+		/**
+		 * Returns a previously created logger. If no logger with 
+		 * the specified name exists, <code>null</code> is returned.
+		 * 
+		 * @param name  The name of the logger.
+		 */
+		public static ModelicaLogger getLogger(String name) {
+			return logs.get(name);
+		}
+		
+		/**
+		 * Private formatting helper class for the console logger. Formats
+		 * log messages to suit a console output.
+		 * 
+		 */
+		private static class ConsoleFormatter extends SimpleFormatter {
+			public ConsoleFormatter() {
+				super();
+			}
+			@Override
+			public String format(LogRecord record) {
+				return record.getMessage()+"\n";
+			}
+		
+		}
+		
+		/**
+		 * \brief Wrapper class to make java.util.logging.Logger conform to ModelicaLogger.
+		 */
+		private static class LoggerInModelicaLogger extends ModelicaLogger {
+			
+			private Logger logger;
+			
+			public LoggerInModelicaLogger(Logger logger) {
+				this.logger = logger;
+			}
+			
+		    /**
+		     * \brief Log <code>message</code> on log level <code>level</code>.
+		     * 
+		     * This implementation delegates to the selected Logger.
+		     */
+		    public void log(Level level, String message) {
+		    	logger.log(level, message);
+		    }
+		    
+		    /**
+		     * \brief Get the current log level.
+		     * 
+		     * This implementation delegates to the selected Logger.
+		     */
+		    public Level getLevel() { 
+		    	return logger.getLevel(); 
+		    }
+		    
+		    /**
+		     * \brief Set the current log level.
+		     * 
+		     * This implementation delegates to the selected Logger.
+		     */
+		    public void setLevel(Level lv) { 
+		    	logger.setLevel(lv);
+		    }
+			
+		}
+	}
+}

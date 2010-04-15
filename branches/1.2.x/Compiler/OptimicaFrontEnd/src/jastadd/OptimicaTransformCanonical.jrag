@@ -1,0 +1,135 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+aspect OptimicaTransformCanonical {
+	
+	public void FOptClass.scalarize() {
+		
+		/* Note that it is not ok to call super.scalarize() here, since
+		 * then the scalarized variable lists will be set prior to
+		 * scalarizing the constraints and costfunctions, which will make
+		 * lookup in the constraint scalarization fail.
+		 */
+				
+		List<FVariable> vars = new List<FVariable>();
+		List<FVariable> alias_vars = new List<FVariable>();
+		// Scalarize all non-alias variables
+		for (FVariable fv : getFVariables()) {
+			fv.scalarize(vars);
+		}
+		// Scalarize alias variables
+		for (FVariable fv : getAliasVariables()) {
+			fv.scalarize(alias_vars);
+		}
+		
+		// Scalarize equations
+		List<FAbstractEquation> eqns = new List<FAbstractEquation>();
+		for (FAbstractEquation ae : getFEquationBlock(0).getFAbstractEquations()) {
+			ae.scalarize(eqns, vars, new HashMap<String,FExp>());
+		}
+		getFEquationBlock(0).setFAbstractEquationList(eqns);
+		List<FAbstractEquation> ieqns = new List<FAbstractEquation>();
+		for (FAbstractEquation ae : getFInitialEquations()) {
+			ae.scalarize(ieqns, vars, new HashMap<String,FExp>());
+		}
+		setFInitialEquationList(ieqns);		
+		
+		// Scalarize constraints
+		List<FConstraint> constr = new List<FConstraint>();
+		for (FConstraint c : getFConstraints()) {
+			c.scalarize(constr, eqns, vars, new HashMap<String,FExp>());
+		}
+		setFConstraintList(constr);
+
+		// Scalarize class attributes
+		// Iterate over all attributes and scalarize.
+		for (FAttribute a : getFAttributes()) 
+			a.scalarize(Index.NULL);
+		
+		// Replace variables
+		setFVariableList(vars);
+		setAliasVariableList(alias_vars);
+		
+		// Replace subscript expressions with literals
+		eqns.makeSubscriptsLiteral();
+		ieqns.makeSubscriptsLiteral();
+		constr.makeSubscriptsLiteral();
+		
+		// Scalarize functions
+		List<FFunctionDecl> funcs = new List<FFunctionDecl>();
+		for (FFunctionDecl f : getFFunctionDecls()) 
+			funcs.add(f.scalarize());
+		setFFunctionDeclList(funcs);
+
+		flush();		
+	}
+	
+	/**
+	 * \brief Scalarize constraint and put all scalarized equations in list eqns.
+	 */
+	public void FConstraint.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns, 
+			List<FVariable> vars, HashMap<String,FExp> indexMap) {}
+	
+	public void FRelationConstraint.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns, 
+			List<FVariable> vars, HashMap<String,FExp> indexMap) {
+		createArrayTemporaries(eqns, vars, indexMap, true);
+		//log.debug("FEquation.scalarize() " + ndims());
+		if (ndims()==0) {
+			/**
+			 * If the constraint is of dimension 0, i.e, already scalar,
+			 * the constraint is "scalarized" into a simple constraint where
+			 * e.g. built in functions are replaced by elementary operations.
+			 */
+			constr.add(createNode(getLeft().scalarize(indexMap), getRight().scalarize(indexMap)));
+		} else if (ndims() > 0) {
+			/**
+			 * If the expression is an array expression, then the FExp.getArray()
+			 * element is used to generate scalar constraints.
+			 */
+			// Iterate over array elements and create scalarized equation for each
+			for (Index i : indices()) {
+				constr.add(createNode(getLeft().getArray().get(i).scalarize(indexMap), 
+						getRight().getArray().get(i).scalarize(indexMap)));
+			}
+		}
+	}
+	
+	public void FForClauseC.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns,
+			List<FVariable> vars, HashMap<String,FExp> indexMap) {
+		createArrayTemporaries(eqns, vars, indexMap, true);
+		HashMap<String,FExp> myIndexMap = new HashMap<String,FExp>();
+		myIndexMap.putAll(indexMap);
+		Indices indices = indices();
+		for (Index i : indices) {
+			int j = 0;
+			int[] ii = indices.translate(i).index();
+			for (FForIndex fi : getFForIndexs()) {
+				myIndexMap.put(fi.getFVariable().name(), new FIntegerLitExp(ii[j]));
+				j++;
+			}
+			for (FConstraint c : getFConstraints()) 
+				c.scalarize(constr, eqns, vars, myIndexMap);
+		}
+	}
+	
+	public FExp FTimedVariable.scalarize(HashMap<String,FExp> indexMap) { 
+		return new FTimedVariable(getName().scalarize(indexMap),getArg().scalarize(indexMap)); 
+	}
+	
+	public FExp FStartTimeExp.scalarize(HashMap<String,FExp> indexMap) { return new FStartTimeExp(); } 
+	public FExp FFinalTimeExp.scalarize(HashMap<String,FExp> indexMap) { return new FFinalTimeExp(); } 
+	
+}

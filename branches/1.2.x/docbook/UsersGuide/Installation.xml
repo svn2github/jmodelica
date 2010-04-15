@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Installation</title>
+
+  <section>
+    <title>Supported platforms</title>
+
+    <para>JModelica.org can be installed on Linux, Mac OS X, and Windows (XP,
+    Vista, 7) with 32-bit or 64-bit architectures. Most development work is
+    carried out on 32-bit Mac OS X and Windows XP, so these platforms tend to
+    be best tested.</para>
+  </section>
+
+  <section>
+    <title>Binary distribution</title>
+
+    <para>Pre-built binary distributions for Windows are available in the
+    Download section of <link
+    xlink:href="www.jmodelica.org">www.jmodelica.org</link>.</para>
+
+    <section>
+      <title>Linux</title>
+
+      <para>Currently, no pre-built binary distributions are provided for
+      Linux.</para>
+    </section>
+
+    <section>
+      <title>Mac OS X</title>
+
+      <para>Currently, no pre-built binary distributions are provided for Mac
+      OS X.</para>
+    </section>
+
+    <section>
+      <title>Windows</title>
+
+      <para>The JModelica.org Windows installer contains a binary distribution
+      of JModelica.org built using the JModelica.org-SDK, bundled with
+      required third-party software components. The JModelica windows
+      installer sets up a pre-configured complete environment with convenient
+      start menu shortcuts.</para>
+
+      <section>
+        <title>Prerequisites</title>
+
+        <para>Make sure to install the required software components listed in
+        this section before installing JModelica.org.</para>
+
+        <section>
+          <title>Java</title>
+
+          <para>It is required to have a Java Runtime Environment (JRE)
+          version 6 installed on your computer.</para>
+
+          <task>
+            <title>To install JRE</title>
+
+            <procedure>
+              <step>
+                <para>Get a JRE installer suitable for your platform <link
+                xlink:href="http://www.java.com/en/download/index.jsp">here</link>.</para>
+              </step>
+
+              <step>
+                <para>Run the installer.</para>
+              </step>
+            </procedure>
+          </task>
+        </section>
+
+        <section>
+          <title>Python</title>
+
+          <para>Python 2.6 with the following additional packages are
+          required:</para>
+
+          <variablelist>
+            <varlistentry>
+              <term><link
+              xlink:href="http://numpy.scipy.org/">NumPy</link></term>
+
+              <listitem>
+                <para>The fundamental package needed for scientific computing
+                with Python.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term><link
+              xlink:href="http://www.scipy.org/">SciPy</link></term>
+
+              <listitem>
+                <para>A library of algorithms and mathematical tools for
+                Python.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term><link
+              xlink:href="http://matplotlib.sourceforge.net/">matplotlib</link></term>
+
+              <listitem>
+                <para>A plotting library for Python, with a MATLAB like
+                interface.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term><link
+              xlink:href="http://ipython.scipy.org/moin/PyReadline/Intro">PyReadline</link></term>
+
+              <listitem>
+                <para>A readline for Windows required by IPython.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term><link
+              xlink:href="http://ipython.scipy.org/moin/">IPython</link></term>
+
+              <listitem>
+                <para>An interactive shell for Python with additional shell
+                syntax, code highlighting, tab completion, string completion,
+                and rich history.</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+
+          <para>There are two options to install the necessary Python
+          components, as described below.</para>
+
+          <task>
+            <title>Separate installation of Python prerequisites for Windows
+            binary installer</title>
+
+            <procedure>
+              <step>
+                <para>Download and install <link
+                xlink:href="http://www.python.org/download/releases/2.6.4/">Python
+                2.6</link>.</para>
+              </step>
+
+              <step>
+                <para>Download and install the additional packages (be sure to
+                select a version for Python 2.6 when applicable):<orderedlist>
+                    <listitem>
+                      <para><link
+                      xlink:href="http://sourceforge.net/projects/numpy/files/">NumPy</link>
+                      version 1.2.0 or higher.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para><link
+                      xlink:href="http://sourceforge.net/projects/scipy/files/">SciPy</link></para>
+                    </listitem>
+
+                    <listitem>
+                      <para><link
+                      xlink:href="http://sourceforge.net/projects/matplotlib/files/">matplotlib</link></para>
+                    </listitem>
+
+                    <listitem>
+                      <para><link
+                      xlink:href="https://launchpad.net/pyreadline/+download">PyReadline</link>
+                      version 1.5</para>
+                    </listitem>
+
+                    <listitem>
+                      <para><link
+                      xlink:href="http://ipython.scipy.org/moin/Download">IPython</link>
+                      version 0.10 or higher</para>
+                    </listitem>
+                  </orderedlist></para>
+              </step>
+            </procedure>
+          </task>
+
+          <para><link xlink:href="http://www.pythonxy.com/">Python(x,y)</link>
+          is a scientific-oriented Python distribution that includes all
+          necessary dependencies (an a lot more!).</para>
+
+          <task>
+            <title>Python(x,y) installation of Python prerequisites for
+            Windows binary installer</title>
+
+            <procedure>
+              <step>
+                <para>Download a <link
+                xlink:href="http://www.pythonxy.com/download.php">Python(x,y)</link>
+                installer for Python 2.6.</para>
+              </step>
+
+              <step>
+                <para>Run the installer and select a full installation (or
+                select the required packages manually for a smaller
+                footprint).</para>
+              </step>
+            </procedure>
+          </task>
+
+          <para></para>
+        </section>
+      </section>
+
+      <section>
+        <title>Windows installer</title>
+
+        <para><task>
+            <title>To install JModelica.org from Windows installer</title>
+
+            <taskprerequisites>
+              <para>Make sure that all prerequisite components are installed
+              before continuing.</para>
+            </taskprerequisites>
+
+            <procedure>
+              <step>
+                <para>Download a <link
+                xlink:href="http://www.jmodelica.org/page/12">JModelica.org
+                Windows binary installer</link>.</para>
+              </step>
+
+              <step>
+                <para>Run the installer and follow the wizard.<itemizedlist>
+                    <listitem>
+                      <para>Choose to install the additional Python packages
+                      when prompted, unless the are already installed.</para>
+                    </listitem>
+                  </itemizedlist></para>
+              </step>
+            </procedure>
+          </task></para>
+      </section>
+    </section>
+  </section>
+
+  <section>
+    <title>From sources</title>
+
+    <para></para>
+
+    <section>
+      <title>General prerequisites</title>
+
+      <para><blockquote>
+          <note>
+            <para>This is a note that spans multiple multiple multiple
+            multiple multiple multiple multiple multiple multiple multiple
+            multiple multiple multiple multiple multiple multiple multiple
+            multiple multiple multiple multiple multiple multiple multiple
+            multiple multiple multiple multiple multiple multiple multiple
+            multiple multiple multiple multiple multiple multiple multiple
+            multiple multiple multiple multiple multiple multiple multiple
+            multiple multiple multiple multiple multiple multiple multiple
+            multiple multiple multiple multiple multiple multiple multiple
+            multiple multiple multiple multiple multiple multiple multiple
+            multiple multiple multiple multiple multiple multiple multiple
+            multiple multiple multiple multiple multiple multiple
+            lines.</para>
+          </note>
+        </blockquote><tip>
+          <para>This is a tip.</para>
+        </tip><important>
+          <para>This is important.</para>
+        </important><warning>
+          <para>This is a warning.</para>
+        </warning></para>
+
+      <section>
+        <title>Software</title>
+
+        <para>JModelica.org is based on Java, C, and Python technology.</para>
+
+        <section>
+          <title>Java</title>
+
+          <para>To build JModelica.org from sources you will need the Java SE
+          Development Kit (JDK) version 6. (The JDK also includes the
+          JRE.)<procedure>
+              <title>To install JDK</title>
+
+              <step>
+                <para>Get a <link
+                xlink:href="http://java.sun.com/javase/downloads/index.jsp#jdk">JDK
+                installer</link> suitable for your platform.</para>
+              </step>
+
+              <step>
+                <para>Run the installer.</para>
+              </step>
+            </procedure></para>
+        </section>
+
+        <section>
+          <title>C</title>
+
+          <para></para>
+        </section>
+
+        <section>
+          <title>Python</title>
+
+          <para></para>
+        </section>
+      </section>
+    </section>
+
+    <section>
+      <title></title>
+
+      <para></para>
+    </section>
+  </section>
+</chapter>
