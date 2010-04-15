@@ -1,5 +1,4 @@
 
-
 """
 Module for writing optimization and simulation results to file.
 """

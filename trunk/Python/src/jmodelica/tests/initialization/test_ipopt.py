@@ -306,6 +306,13 @@ class TestNLPInit:
     @testattr(stddist = True)    
     def test_init_opt_write_result(self):
 
+        # Test optimization of initialization system
+        self.init_nlp_ipopt = InitializationOptimizer(self.init_nlp)
+    
+        # self.init_nlp_ipopt.init_opt_ipopt_set_string_option("derivative_test","first-order")
+        
+        self.init_nlp_ipopt.init_opt_ipopt_solve()
+
         self.init_nlp.export_result_dymola()
         res = io.ResultDymolaTextual(fname_daeinit + "_result.txt")
 

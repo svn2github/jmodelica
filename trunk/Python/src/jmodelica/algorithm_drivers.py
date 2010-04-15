@@ -38,6 +38,84 @@ class AlgorithmBase:
 #    @abstractmethod
     def write_result(self): pass
 
+class IpoptInitializationAlg(AlgorithmBase):
+    """ Initialization of a model using Ipopt. """
+    
+    def __init__(self, 
+                 model, 
+                 alg_args={}):
+        """ Create algorithm objects.
+        
+        Parameters:
+            model -- 
+                jmi.Model object representation of the model
+            alg_args -- 
+                All arguments for the algorithm. See _set_alg_args
+                function call for names and default values.        
+        """
+        
+        self.model = model
+        #try to set algorithm arguments
+        try:
+            self._set_alg_args(**alg_args)
+        except TypeError, e:
+            raise InvalidAlgorithmArgumentException(e)
+        
+        self.nlp = NLPInitialization(model,self.stat)            
+        self.nlp_ipopt = InitializationOptimizer(self.nlp)
+            
+    def _set_alg_args(self,
+                      stat=False,
+                      result_file_name='', 
+                      result_format='txt'):
+        """ Set arguments for initialization algorithm.
+        
+        Parameters:
+            stat -- 
+                Solve a static optimization problem if True.
+                Default: False
+            result_file_name --
+                Name of result file.
+                Default: empty string (default generated file name will be used)
+            result_format --
+                Format of result file.
+                Default: 'txt'
+
+        """
+        self.stat=stat
+        self.result_args = dict(file_name=result_file_name, format=result_format)
+                
+    def set_solver_options(self, 
+                           solver_args):
+        """ Set options for the solver.
+        
+        Parameters:
+            solver_args --
+                dict with int, real or string options for the solver ipopt
+        """
+        for k, v in solver_args.iteritems():
+            if isinstance(v, int):
+                self.nlp_ipopt.opt_sim_ipopt_set_int_option(k, v)
+            elif isinstance(v, float):
+                self.nlp_ipopt.opt_sim_ipopt_set_num_option(k, v)
+            elif isinstance(v, str):
+                self.nlp_ipopt.opt_sim_ipopt_set_string_option(k, v)
+                        
+    def solve(self):
+        """ Solve the initialization problem using ipopt solver. """
+        self.nlp_ipopt.init_opt_ipopt_solve()
+    
+    def write_result(self):
+        """ Write result to file. Returns name of result file."""
+
+        self.nlp.export_result_dymola(**self.result_args)
+        
+        # return name of result file
+        resultfile = self.result_args['file_name']
+        if not resultfile:
+            resultfile=self.model.get_name()+'_result.txt'
+        return resultfile
+
 class AssimuloAlg(AlgorithmBase):
     """ Simulation algorithm using the Assimulo package. """
     
@@ -63,10 +141,10 @@ class AssimuloAlg(AlgorithmBase):
             raise InvalidAlgorithmArgumentException(e)
         
         if issubclass(self.solver, Implicit_ODE):
-            probl = JMIDAE(model)
+            self.probl = JMIDAE(model)
         else:
-            probl = JMIODE(model)
-        self.simulator = self.solver(probl, t0=self.start_time)
+            self.probl = JMIODE(model)
+        self.simulator = self.solver(self.probl, t0=self.start_time)
         
     def _set_alg_args(self,
                       start_time=0.0,
@@ -111,12 +189,16 @@ class AssimuloAlg(AlgorithmBase):
             try:
                 getattr(self.simulator,k)
             except AttributeError:
+#                try:
+#                    setattr(self.probl,k,v)
+        #except AttributeError:
                 raise InvalidSolverArgumentException(v)
             setattr(self.simulator, k, v)
                 
     def solve(self):
         """ Runs the simulation. """
-        self.simulator(self.final_time, self.num_communication_points)
+        self.simulator.initiate()
+        self.simulator.simulate(self.final_time, self.num_communication_points)
     
     def write_result(self):
         """ Writes result to file and returns the file name."""

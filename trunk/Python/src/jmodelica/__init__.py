@@ -62,7 +62,6 @@ import numpy as N
 int = N.int32
 N.int = N.int32
 
-
 def optimize(model, 
              file_name='', 
              compiler_target='ipopt', 
@@ -132,7 +131,7 @@ def simulate(model,
             Name of mo-file. 
             Default: empty string
         compiler --
-            Set compiler that model should be compiled with.
+            Set compiler that model should be compiled with, either 'modelica' or 'optimica'.
             Default: 'modelica'
         compiler_target --
             Target argument to compiler. 
@@ -165,6 +164,62 @@ def simulate(model,
                            algorithm,
                            alg_args,
                            solver_args)
+
+def initialize(model, 
+               file_name='', 
+               compiler='modelica', 
+               compiler_options={}, 
+               compiler_target='ipopt', 
+               algorithm=IpoptInitializationAlg, 
+               alg_args={}, 
+               solver_args={}):
+    """ Compact function for model initialization.
+    
+    Pass a jmi.Model object or path to mo-file and model class if model 
+    should be (re)compiled. There are default values for all other settings. 
+    These can be changed in function call.
+    
+    Parameters:
+        model -- 
+            Model object or model class name (if class name then mo-file must be provided)
+        file_name --
+            Name of mo-file. 
+            Default: empty string
+        compiler --
+            Set compiler that model should be compiled with, either 'modelica' or 'optimica'.
+            Default: 'modelica'
+        compiler_target --
+            Target argument to compiler. 
+            Default: 'ipopt'
+        compiler_options --
+            Dict with compiler options listed. 
+            Default: empty dict
+        algorithm --
+            The simulation algorithm to use is specified by passing class name in 
+            this argument. The algorithm class can be any class which implements the 
+            abstract class algorithm_drivers.AlgorithmBase.
+            Default: AssimuloAlg
+        alg_args --
+            All arguments for the chosen algorithm should be listed in this dict.
+            Default: empty dict
+        solver_args --
+            All arguments for the chosen solver should be listed in this dict.
+            Default: empty dict
+            
+    Returns:
+        model -- The jmi.Model object
+        res -- The loaded result file.
+    
+    """
+    return _exec_algorithm(model, 
+                           file_name,
+                           compiler,
+                           compiler_options,
+                           compiler_target,
+                           algorithm,
+                           alg_args,
+                           solver_args)
+
       
 def _exec_algorithm(model, 
              file_name, 
@@ -200,7 +255,6 @@ def _exec_algorithm(model,
     # load result file
     res = jmodelica.io.ResultDymolaTextual(result_file_name)
     return (model,res)
-
 
 def _compile(model_name, file_name, compiler='modelica', compiler_target = "ipopt", compiler_options={}):
     """ Helper function which performs compilation of chosen model.

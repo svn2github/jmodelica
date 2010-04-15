@@ -72,6 +72,40 @@ model_vdp = jmi.Model(dll_vdp)
 #    
 #
 @testattr(stddist = True)
+def test_initialize():
+    """ Test the jmodelica.initialize function using all default parameters. """
+    mofile_pend = os.path.join('files','Pendulum_pack.mo')
+    fpath_pend = os.path.join(jm_home,path_to_examples,mofile_pend)
+    cpath_pend = "Pendulum_pack.Pendulum"
+    
+    (model,res) = jmodelica.initialize(cpath_pend, fpath_pend,compiler='optimica')
+    theta=res.get_variable_data('theta')
+    dtheta=res.get_variable_data('dtheta')
+    x=res.get_variable_data('x')
+    dx=res.get_variable_data('dx')
+    _dtheta=res.get_variable_data('der(theta)')
+    ddtheta=res.get_variable_data('der(dtheta)')
+    _dx=res.get_variable_data('der(x)')
+    ddx=res.get_variable_data('der(dx)')
+
+    assert N.abs(theta.x[-1] - 0.1) < 1e-3, \
+        "Wrong value of variable theta using jmodelica.initialize."
+    assert N.abs(dtheta.x[-1] - 0.) < 1e-3, \
+        "Wrong value of variable dtheta using jmodelica.initialize."
+    assert N.abs(x.x[-1] - 0) < 1e-3, \
+        "Wrong value of variable x using jmodelica.initialize."
+    assert N.abs(dx.x[-1] - 0) < 1e-3, \
+        "Wrong value of variable dx using jmodelica.initialize."
+    assert N.abs(_dtheta.x[-1] - 0) < 1e-3, \
+        "Wrong value of variable der(theta) using jmodelica.initialize."
+    assert N.abs(ddtheta.x[-1] - 0.09983341) < 1e-3, \
+        "Wrong value of variable der(dtheta) using jmodelica.initialize."
+    assert N.abs(_dx.x[-1] - 0) < 1e-3, \
+        "Wrong value of variable der(x) using jmodelica.initialize."
+    assert N.abs(ddx.x[-1] - 0) < 1e-3, \
+        "Wrong value of variable der(dx) using jmodelica.initialize."
+
+@testattr(stddist = True)
 def test_optimize():
     """ Test the jmodelica.optimize function using all default parameters. """
     mofile_pend = os.path.join('files','Pendulum_pack.mo')
