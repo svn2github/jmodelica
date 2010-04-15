@@ -61,16 +61,6 @@ oc.compile_model(cpath_vdp, fpath_vdp, target='ipopt')
 model_rlc = jmi.Model(dll_rlc)
 model_vdp = jmi.Model(dll_vdp)
 
-
-#@testattr(stddist = True)
-#def test_initialize():
-#    """ Test the jmodelica.initialize function. """
-#    mofile_cstr = os.path.join('files','CSTR.mo')
-#    fpath_cstr = os.path.join(jm_home,path_to_examples,mofile_cstr)
-#    cpath_cstr = "CSTR.CSTR_Init"
-#    model = jmodelica.initialize(cpath_cstr, fpath_cstr, compiler='optimica')
-#    
-#
 @testattr(stddist = True)
 def test_initialize():
     """ Test the jmodelica.initialize function using all default parameters. """
@@ -125,7 +115,6 @@ def test_optimize_set_n_cp():
     """ Test the jmodelica.optimize function and setting n_cp in alg_args.
     """
     (model,res) = jmodelica.optimize(model_vdp, 
-                                     compiler_options={'state_start_values_fixed':True},
                                      alg_args={'n_cp':10})
     cost=res.get_variable_data('cost')
     
@@ -143,7 +132,6 @@ def test_optimize_set_args():
     
     res_file_name = 'test_optimize_set_result_mesh.txt'
     (model,res) = jmodelica.optimize(model_vdp, 
-                                     compiler_options={'state_start_values_fixed':True},
                                      alg_args={'result_mesh':'element_interpolation', 
                                                'result_file_name':res_file_name},
                                      solver_args={'max_iter':100})
@@ -164,8 +152,7 @@ def test_optimize_invalid_algorithm_arg():
     
     nose.tools.assert_raises(jmodelica.algorithm_drivers.InvalidAlgorithmArgumentException,
                              jmodelica.optimize,
-                             model_vdp, 
-                             compiler_options={'state_start_values_fixed':True},
+                             model_vdp,
                              alg_args={'ne':10})
 
 @testattr(stddist = True)
@@ -191,6 +178,17 @@ def test_simulate_set_alg_arg():
         "Wrong value in simulation result using jmodelica.simulate with rlc."
         
 @testattr(stddist = True)
+def test_simulate_set_probl_arg():
+    """ Test that it is possible to set properties in assimulo and that an 
+        exception is raised if the argument is invalid. """
+    (model,res) = jmodelica.simulate(model_rlc, solver_args={'max_eIter':100, 'maxh':0.1})
+    
+    nose.tools.assert_raises(jmodelica.algorithm_drivers.InvalidSolverArgumentException,
+                             jmodelica.simulate,
+                             model_rlc,
+                             solver_args={'maxeter':10})   
+        
+@testattr(stddist = True)
 def test_simulate_invalid_solver_arg():
     """ Test that the jmodelica.simulate function raises an exception for an 
         invalid solver argument.
@@ -198,7 +196,6 @@ def test_simulate_invalid_solver_arg():
     nose.tools.assert_raises(jmodelica.algorithm_drivers.InvalidSolverArgumentException,
                              jmodelica.simulate,
                              model_rlc,
-                             compiler_options={'state_start_values_fixed':True},
                              solver_args={'mxiter':10})
 
 @testattr(stddist = True)
@@ -209,7 +206,6 @@ def test_simulate_invalid_algorithm_arg():
     nose.tools.assert_raises(jmodelica.algorithm_drivers.InvalidAlgorithmArgumentException,
                              jmodelica.simulate,
                              model_rlc,
-                             compiler_options={'state_start_values_fixed':True},
                              alg_args={'starttime':10})
       
 @testattr(stddist=True)

@@ -189,10 +189,10 @@ class AssimuloAlg(AlgorithmBase):
             try:
                 getattr(self.simulator,k)
             except AttributeError:
-#                try:
-#                    setattr(self.probl,k,v)
-        #except AttributeError:
-                raise InvalidSolverArgumentException(v)
+                try:
+                    getattr(self.probl,k)
+                except AttributeError:
+                    raise InvalidSolverArgumentException(v)
             setattr(self.simulator, k, v)
                 
     def solve(self):
