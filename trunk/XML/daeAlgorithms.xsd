@@ -34,22 +34,13 @@
 			<xs:element name="IterationSet" type="exp:Exp" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
-	<xs:complexType name="VectorOfIdentifiers">
+	<xs:complexType name="FunctionCallLeft">
 		<xs:annotation>
-			<xs:documentation>A vector of variable identifiers</xs:documentation>
-		</xs:annotation>
-		<xs:choice minOccurs="0" maxOccurs="unbounded">
-			<xs:element ref="exp:Identifier"/>
-			<xs:element name="VectorOfIdentifiers" type="fun:VectorOfIdentifiers"/>
-		</xs:choice>
-	</xs:complexType>
-	<xs:complexType name="FunctionCallOutputVariable">
-		<xs:annotation>
-			<xs:documentation>Output variable of a function call</xs:documentation>
+			<xs:documentation>Element of the left part of a function call equation</xs:documentation>
 		</xs:annotation>
 		<xs:choice>
 			<xs:element ref="exp:Identifier"/>
-			<xs:element name="VectorOfIdentifiers" type="fun:VectorOfIdentifiers"/>
+			<xs:element ref="exp:Array"/>
 			<xs:element name="EmptyOutputArgument" fixed=""/>
 		</xs:choice>
 	</xs:complexType>
@@ -147,7 +138,7 @@
 		</xs:annotation>
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="OutputArgument" type="fun:FunctionCallOutputVariable" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="OutputArgument" type="fun:FunctionCallLeft" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="exp:FunctionCall"/>
 			</xs:sequence>
 		</xs:complexType>

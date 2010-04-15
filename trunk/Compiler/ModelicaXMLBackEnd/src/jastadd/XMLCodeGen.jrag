@@ -252,15 +252,7 @@ aspect XMLCodeGen {
 			if(!f.hasFExp()){
 				str.println(indent + "\t<" + namespace + ":EmptyOutputArgument/>");
 			}else{
-				if(f.getFExp().isArray()){
-					FArray a = (FArray)f.getFExp();
-					str.println(indent + "\t<" + namespace + ":VectorOfIdentifiers>");
-					for (FExp e : a.getFExpList())
-						e.prettyPrint_XML(str,p.indent(indent+"\t"));
-					str.println(indent + "\t</" + namespace + ":VectorOfIdentifiers>");
-				}else{
-					f.getFExp().prettyPrint_XML(str,p.indent(indent+"\t"));
-				}				
+				f.getFExp().prettyPrint_XML(str,p.indent(indent+"\t"));
 			}
 			
 			str.println(indent + "\t</" + namespace + ":OutputArgument>");
@@ -280,9 +272,9 @@ aspect XMLCodeGen {
         
         str.print(indent + "<" + namespace + ":" + tag + ">\n");
         
-        str.print(indent + "<" + namespace + ":Name>\n");
-        fName.prettyPrint_XML(str,p.indent(indent));
-        str.print(indent + "</" + namespace + ":Name>\n");
+        str.print(indent + "\t<" + namespace + ":Name>\n");
+        fName.prettyPrint_XML(str,p.indent(indent+"\t"));
+        str.print(indent + "\t</" + namespace + ":Name>\n");
         
         	for(FFunctionVariable var : this.myOutputs())
         		var.prettyPrint_XML(str,p.indent(indent));
@@ -502,14 +494,7 @@ aspect XMLCodeGen {
 			if(!f.hasFExp()){
 				str.println(indent + "\t\t<" + namespace + ":EmptyOutputArgument/>");
 			}else{
-				if(f.getFExp().isArray()){
-					str.println(indent + "\t\t<" + namespace + ":VectorOfIdentifiers>");
-						for (FExp e : f.getFExp().childFExps())
-							e.prettyPrint_XML(str,p.indent(indent+"\t\t"));
-					str.println(indent + "\t\t</" + namespace + ":VectorOfIdentifiers>");
-				}else{
-					f.getFExp().prettyPrint_XML(str,p.indent(indent+"\t"));
-				}				
+				f.getFExp().prettyPrint_XML(str,p.indent(indent+"\t"));
 			}
 			
 			str.println(indent + "\t</" + namespace + ":OutputArgument>");
