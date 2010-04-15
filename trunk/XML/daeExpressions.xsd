@@ -97,8 +97,12 @@
 						<xs:element name="ArraySubscripts" minOccurs="0">
 							<xs:complexType>
 								<xs:choice minOccurs="0" maxOccurs="unbounded">
-									<xs:element name="UndefinedDimension" fixed=""/>
-									<xs:element name="IndexExpression" type="exp:Exp"/>
+									<xs:element name="IndexExpression" type="exp:Exp">
+										<xs:annotation>
+											<xs:documentation>Array index</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element ref="exp:UndefinedDimension"/>
 								</xs:choice>
 							</xs:complexType>
 						</xs:element>
@@ -305,7 +309,7 @@
 	</xs:element>
 	<xs:element name="FunctionCall" type="exp:FunctionCall">
 		<xs:annotation>
-			<xs:documentation>User-defined function call</xs:documentation>
+			<xs:documentation>User-defined function call expression</xs:documentation>
 		</xs:annotation>
 	</xs:element>
 	<xs:element name="Time" type="xs:normalizedString">
@@ -327,5 +331,10 @@
 				<xs:any namespace="##targetNamespace"/>
 			</xs:sequence>
 		</xs:complexType>
+	</xs:element>
+	<xs:element name="UndefinedDimension" fixed="">
+		<xs:annotation>
+			<xs:documentation>Expression to be used in array definition, for undefined sizes</xs:documentation>
+		</xs:annotation>
 	</xs:element>
 </xs:schema>

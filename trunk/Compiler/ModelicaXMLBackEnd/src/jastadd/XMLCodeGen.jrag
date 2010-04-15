@@ -300,7 +300,7 @@ aspect XMLCodeGen {
         String namespace = "fun";
         String tag = "";
         FQName name = this.getFQName();
-        String typeAttr = " type=\"" + this.getType().toString() + "\"";
+        String typeAttr = " type=\"" + this.getType().scalarType().toString() + "\"";
         	
         if(this.isOutput()){
         	tag = "OutputVariable";
@@ -314,18 +314,30 @@ aspect XMLCodeGen {
               
         	str.print(indent + "<" + namespace + ":" + tag + typeAttr + ">\n");
         	
-        	str.print(indent + "<" + namespace + ":Name>\n");
-        	name.prettyPrint_XML(str,p.indent(indent));
-        	str.println(indent + "</"+ namespace + ":Name>");
+        	str.print(indent + "\t<" + namespace + ":Name>\n");
+        	name.prettyPrint_XML(str,p.indent(indent+"\t"));
+        	str.println(indent + "\t</"+ namespace + ":Name>");
+        	
+        	for(int j=0; j<this.size().ndims();j++){
+        		str.print(indent + "\t<" + namespace + ":Size>\n");
+            	
+        		if(this.size().isComplete()){
+        			this.size().createFExp(j).prettyPrint_XML(str,p.indent(indent+"\t"));
+            	}else{
+            		str.println(indent + "\t\t<exp:UndefinedDimension/>");
+            	}
+           
+            	str.println(indent + "\t</"+ namespace + ":Size>");
+        	}
         	
         	if(this.hasBindingExp()){
-            	str.print(indent + "<" + namespace + ":BindingExpression>\n");
-            	this.getBindingExp().prettyPrint_XML(str,p.indent(indent));
-            	str.println(indent + "</"+ namespace + ":BindingExpression>");
+            	str.print(indent + "\t<" + namespace + ":BindingExpression>\n");
+            	this.getBindingExp().prettyPrint_XML(str,p.indent(indent+"\t"));
+            	str.println(indent + "\t</"+ namespace + ":BindingExpression>");
         	}
-     	
+          
+        	
         	str.println(indent + "</"+ namespace + ":" + tag + ">");
-            
     }
     
     //-------------------- Algorithms ---------------------------

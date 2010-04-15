@@ -9,9 +9,19 @@
 		</xs:annotation>
 		<xs:sequence>
 			<xs:element name="Name" type="exp:QualifiedName"/>
+			<xs:element name="Size" type="exp:Exp" minOccurs="0" maxOccurs="unbounded"/>
 			<xs:element name="BindingExpression" type="exp:Exp" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute name="type" type="xs:normalizedString" use="required"/>
+		<xs:attribute name="type" use="required">
+			<xs:simpleType>
+				<xs:restriction base="xs:normalizedString">
+					<xs:enumeration value="Real"/>
+					<xs:enumeration value="Integer"/>
+					<xs:enumeration value="Boolean"/>
+					<xs:enumeration value="String"/>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
 	</xs:complexType>
 	<xs:complexType name="DerivativeInputVariable">
 		<xs:annotation>

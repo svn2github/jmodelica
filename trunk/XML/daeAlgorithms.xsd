@@ -126,7 +126,7 @@
 		</xs:annotation>
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="Index" type="fun:IterationIndex">
+				<xs:element name="Index" type="fun:IterationIndex" maxOccurs="unbounded">
 					<xs:annotation>
 						<xs:documentation>Iteration index</xs:documentation>
 					</xs:annotation>
