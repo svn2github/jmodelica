@@ -27,6 +27,7 @@ from jmodelica.compiler import OptimicaCompiler
 from jmodelica import jmi
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
+from jmodelica import io
 
 int = N.int32
 N.int = N.int32
@@ -302,5 +303,39 @@ class TestNLPInit:
         assert max(N.abs(res_Z-self.dae_init_test.get_z()))<1e-3, \
                "test_jmi.py: test_init_opt: Wrong solution to initialization system." 
         
+    @testattr(stddist = True)    
+    def test_init_opt_write_result(self):
 
+        self.init_nlp.export_result_dymola()
+        res = io.ResultDymolaTextual(fname_daeinit + "_result.txt")
+
+        res_Z = N.array([5.,
+                         -198.1585290151921,
+                         -0.2431975046920718,
+                         3.0,
+                         4.0,
+                         1.0,
+                         2197.0,
+                         5.0,
+                         -0.92009689684513785,
+                         0.])
+
+        assert N.abs(res_Z[0] - res.get_variable_data("p").x[0])<1e-3, \
+               "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable p." 
+        assert N.abs(res_Z[1] - res.get_variable_data("der(x1)").x[0])<1e-3, \
+               "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable der(x1)." 
+        assert N.abs(res_Z[2] - res.get_variable_data("der(x2)").x[0])<1e-3, \
+               "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable der(x2)." 
+        assert N.abs(res_Z[3] - res.get_variable_data("x1").x[0])<1e-3, \
+               "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable x1." 
+        assert N.abs(res_Z[4] - res.get_variable_data("x2").x[0])<1e-3, \
+               "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable x2." 
+        assert N.abs(res_Z[5] - res.get_variable_data("u").x[0])<1e-3, \
+               "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable u." 
+        assert N.abs(res_Z[6] - res.get_variable_data("y1").x[0])<1e-3, \
+               "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable y1." 
+        assert N.abs(res_Z[7] - res.get_variable_data("y2").x[0])<1e-3, \
+               "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable y2." 
+        assert N.abs(res_Z[8] - res.get_variable_data("y3").x[0])<1e-3, \
+               "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable y3."
         

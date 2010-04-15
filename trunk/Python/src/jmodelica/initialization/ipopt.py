@@ -20,6 +20,7 @@ import numpy as N
 import numpy.ctypeslib as Nct
 
 from jmodelica import jmi
+from jmodelica import io
 
 int = N.int32
 N.int = N.int32
@@ -529,253 +530,39 @@ class NLPInitialization(object):
         if self._jmi_model._dll.jmi_init_opt_dh_nz_indices(self._jmi_init_opt, irow, icol) is not 0:
             raise jmi.JMIException("Getting the indices of the non-zeros in the equality constraint Jacobian failed.")
 
-#     def init_opt_write_file_matlab(self, file_name):
-#         """ 
-#         Write the optimization result to file in Matlab format.
-        
-#         Parameters:
-#             file_name -- Name of file to write to.
-        
-#         """
-#         if self._jmi_model._dll.jmi_init_opt_write_file_matlab(self._jmi_init_opt, file_name) is not 0:
-#             raise JMIException("Writing the optimization result to file in Matlab format failed.")
-        
-#     def init_opt_get_result_variable_vector_length(self):
-#         """ Return the length of the result variable vectors. """
-#         n = ct.c_int()
-#         if self._jmi_model._dll.jmi_init_opt_get_result_variable_vector_length(self._jmi_init_opt, byref(n)) is not 0:
-#             raise JMIException("Getting the length of the result variable vectors failed.")
-#         return n
-        
-#     def init_opt_get_result(self, p_opt, t, dx, x, u, w):
-#         """ 
-#         Get the results, stored in column major format.
-        
-#         Parameters:
-#             p_opt -- Vector containing optimal parameter values. (Return)
-#             t -- The time vector. (Return)
-#             dx -- The derivatives. (Return)
-#             x -- The states. (Return)
-#             u -- The inputs. (Return)
-#             w -- The algebraic variables. (Return)
-             
-#         """
-#         if self._jmi_model._dll.jmi_init_opt_get_result(self._jmi_init_opt, p_opt, t, dx, x, u, w) is not 0:
-#             raise JMIException("Getting the results failed.")
+    def export_result_dymola(self, file_name='', format='txt'):
+        """
+        Export the initialization result in Dymola format. 
 
-#     def _set_start_values(self,p_opt_start, p_free_start, dx_start, x_start, w_start):
-        
-#         """ 
-#         Set initial guess values from the Model object
-        
-#         Parameters:
-#             p_free_start -- The free parameters start value vector.
-#             dx_start -- The derivatives start value vector.
-#             x_start -- The states start value vector.
-#             w_start -- The algebraic variable start value vector.
-        
-#         """
-        
-#         xmldoc = self._model._get_XMLDoc()
+        Parameters:
+            file_name --
+                Name of the result file.
+            format --
+                A string equal either to 'txt' for output to Dymola textual
+                format or 'mat' for output to Dymola binary Matlab format.
 
-#         # p_free: free variables, not supported
-# #        values = xmldoc.get_p_free_initial_guess_values()
-#         values = xmldoc.get_p_opt_initial_guess_values(include_alias=False)
+        Limitations:
+            Only format='txt' is currently supported.
+        """
 
-#         refs = values.keys()
-#         refs.sort(key=int)
+        n_dx = self._model._n_real_dx.value
+        n_x = self._model._n_real_x.value
+        n_u = self._model._n_real_u.value
+        n_w = self._model._n_real_w.value
 
-#         n_p_opt = self._model.jmimodel.opt_get_n_p_opt()
-#         if n_p_opt > 0:
-#             p_opt_indices = N.zeros(n_p_opt, dtype=int)
-        
-#             self._model.jmimodel.opt_get_p_opt_indices(p_opt_indices)
-#             p_opt_indices = p_opt_indices.tolist()
-            
-#             for ref in refs:
-#                 (z_i, ptype) = _translate_value_ref(ref)
-#                 i_pi = z_i - self._model._offs_real_pi.value
-#                 i_pi_opt = p_opt_indices.index(i_pi)
-#                 p_opt_start[i_pi_opt] = values.get(ref)
-        
-#         # dx: derivative
-#         values = xmldoc.get_dx_start_attributes(include_alias=False)
-        
-#         #names = values.keys()
-#         #names.sort(key=str)
-        
-#         for name in values.keys():
-#             value_ref = xmldoc.get_valueref(name)
-#             (z_i, ptype) = jmi._translate_value_ref(value_ref)
-#             i_dx = z_i - self._model._offs_real_dx.value
-#             #dx_start[i_dx] = values.get(name)
-#             dx_start[i_dx] = self._model.get_z()[z_i]
-        
-#         # x: differentiate
-#         values = xmldoc.get_x_start_attributes(include_alias=False)
-        
-#         #names = values.keys()
-#         #names.sort(key=str)
-        
-#         for name in values.keys():
-#             value_ref = xmldoc.get_valueref(name)
-#             (z_i, ptype) = jmi._translate_value_ref(value_ref)
-#             i_x = z_i - self._model._offs_real_x.value
-#             #x_start[i_x] = values.get(name)
-#             x_start[i_x] = self._model.get_z()[z_i]
-                    
-#         # w: algebraic
-#         values = xmldoc.get_w_start_attributes(include_alias=False)
-        
-#         #names = values.keys()
-#         #names.sort(key=str)
-        
-#         for name in values.keys():
-#             if not (xmldoc.is_alias(name)):
-#                 value_ref = xmldoc.get_valueref(name)
-#                 (z_i, ptype) = jmi._translate_value_ref(value_ref)
-#                 i_w = z_i - self._model._offs_real_w.value
-#                 #w_start[i_w] = values.get(name)
-#                 w_start[i_w] = self._model.get_z()[z_i]
-
-#     def _set_lb_values(self, p_opt_lb, p_free_lb, dx_lb, x_lb, w_lb):
-        
-#         """ 
-#         Set lower bounds from the XML variables meta data file. 
-        
-#         Parameters:
-#             p_free_lb -- The free parameters lower bounds vector.
-#             dx_lb -- The derivatives lower bounds vector.
-#             x_lb -- The states lower bounds vector.
-#             w_lb -- The algebraic variables lower bounds vector.        
-        
-#         """
-        
-#         xmldoc = self._model._get_XMLDoc()
-
-# #         # p_free: free parameters
-#         values = xmldoc.get_p_free_lb_values()
-        
-#         refs = values.keys()
-#         refs.sort(key=int)
-
-#         n_p_opt = self._model.jmimodel.opt_get_n_p_opt()
-#         if n_p_opt > 0:
-#             p_opt_indices = N.zeros(n_p_opt, dtype=int)
-      
-#             self._model.jmimodel.opt_get_p_opt_indices(p_opt_indices)
-#             p_opt_indices = p_opt_indices.tolist()
-          
-#             for ref in refs:
-#                 (z_i, ptype) = _translate_value_ref(ref)
-#                 i_pi = z_i - self._model._offs_real_pi.value
-#                 i_pi_opt = p_opt_indices.index(i_pi)
-#                 p_opt_lb[i_pi_opt] = values.get(ref)
-
-#         # dx: derivative
-#         values = xmldoc.get_dx_lb_values(include_alias=False)
-        
-#         #names = values.keys()
-#         #names.sort(key=str)
-        
-#         for name in values.keys():
-#             value_ref = xmldoc.get_valueref(name)
-#             (z_i, ptype) = jmi._translate_value_ref(value_ref)
-#             i_dx = z_i - self._model._offs_real_dx.value
-#             dx_lb[i_dx] = values.get(name)
-        
-#         # x: differentiate
-#         values = xmldoc.get_x_lb_values(include_alias=False)
-        
-#         #names = values.keys()
-#         #names.sort(key=str)
-        
-#         for name in values.keys():
-#             value_ref = xmldoc.get_valueref(name)
-#             (z_i, ptype) = jmi._translate_value_ref(value_ref)
-#             i_x = z_i - self._model._offs_real_x.value
-#             x_lb[i_x] = values.get(name)
-                    
-#         # w: algebraic
-#         values = xmldoc.get_w_lb_values(include_alias=False)
-        
-#         #names = values.keys()
-#         #names.sort(key=str)
-        
-#         for name in values.keys():
-#             value_ref = xmldoc.get_valueref(name)
-#             (z_i, ptype) = jmi._translate_value_ref(value_ref)
-#             i_w = z_i - self._model._offs_real_w.value
-#             w_lb[i_w] = values.get(name) 
-
-#     def _set_ub_values(self, p_opt_ub, p_free_ub, dx_ub, x_ub, w_ub):
-        
-#         """ 
-#         Set upper bounds from the XML variables meta data file. 
-        
-#         Parameters:
-#             p_free_ub -- The free parameters upper bounds vector.
-#             dx_ub -- The derivatives upper bounds vector.
-#             x_ub -- The states upper bounds vector.
-#             w_ub -- The algebraic variables upper bounds vector.        
-        
-#         """
-        
-#         xmldoc = self._model._get_XMLDoc()
-
-# #         # p_free: free parameters
-#         values = xmldoc.get_p_opt_ub_values()
-        
-#         refs = values.keys()
-#         refs.sort(key=int)
-
-#         n_p_opt = self._model.jmimodel.opt_get_n_p_opt()
-#         if n_p_opt > 0:
-#             p_opt_indices = N.zeros(n_p_opt, dtype=int)
-      
-#             self._model.jmimodel.opt_get_p_opt_indices(p_opt_indices)
-#             p_opt_indices = p_opt_indices.tolist()
-          
-#             for ref in refs:
-#                 (z_i, ptype) = _translate_value_ref(ref)
-#                 i_pi = z_i - self._model._offs_real_pi.value
-#                 i_pi_opt = p_opt_indices.index(i_pi)
-#                 p_opt_ub[i_pi_opt] = values.get(ref)
-
-#         # dx: derivative
-#         values = xmldoc.get_dx_ub_values(include_alias=False)
-        
-#         #names = values.keys()
-#         #names.sort(key=str)
-        
-#         for name in values.keys():
-#             value_ref = xmldoc.get_valueref(name)
-#             (z_i, ptype) = jmi._translate_value_ref(value_ref)
-#             i_dx = z_i - self._model._offs_real_dx.value
-#             dx_ub[i_dx] = values.get(name)
-        
-#         # x: differentiate
-#         values = xmldoc.get_x_ub_values(include_alias=False)
-        
-#         #names = values.keys()
-#         #names.sort(key=str)
-        
-#         for name in values.keys():
-#             value_ref = xmldoc.get_valueref(name)
-#             (z_i, ptype) = jmi._translate_value_ref(value_ref)
-#             i_x = z_i - self._model._offs_real_x.value
-#             x_ub[i_x] = values.get(name)
-            
-        
-#         # w: algebraic
-#         values = xmldoc.get_w_ub_values(include_alias=False)
-        
-#         #names = values.keys()
-#         #names.sort(key=str)
-        
-#         for name in values.keys():
-#             value_ref = xmldoc.get_valueref(name)
-#             (z_i, ptype) = jmi._translate_value_ref(value_ref)
-#             i_w = z_i - self._model._offs_real_w.value
-#             w_ub[i_w] = values.get(name)
+        # Create data matrix
+        data = N.zeros((1,1+n_dx+ \
+                        n_x + \
+                        n_u + \
+                        n_w))
+        data[0,:] = self._model.get_t()
+        data[0,1:1+n_dx] = self._model.get_real_dx()
+        data[0,1+n_dx:1+n_dx + n_x] = self._model.get_real_x()
+        data[0,1+n_dx + n_x:1+n_dx + n_x + n_u] = self._model.get_real_u()
+        data[0,1+n_dx + n_x + n_u: \
+             1+n_dx + n_x + \
+             n_u + n_w] = self._model.get_real_w()
+                        
+        # Write result
+        io.export_result_dymola(self._model,data, file_name=file_name, format=format)
 
