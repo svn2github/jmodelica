@@ -109,9 +109,10 @@ class AssimuloAlg(AlgorithmBase):
         #loop solver_args and set properties of solver
         for k, v in solver_args.iteritems():
             try:
-                setattr(self.simulator, k, v)
+                getattr(self.simulator,k)
             except AttributeError:
                 raise InvalidSolverArgumentException(v)
+            setattr(self.simulator, k, v)
                 
     def solve(self):
         """ Runs the simulation. """
