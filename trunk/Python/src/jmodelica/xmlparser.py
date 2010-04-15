@@ -70,6 +70,49 @@ def _parse_XML(filename, schemaname=''):
         
     return xmldoc
 
+class XMLFunctionCache:
+    def __init__(self):
+        self.cache={}
+        
+    def add(self, obj, function, key=None):
+        #print "####  XMLFunctionCache: add with function: "+str(function)+" and key: "+str(key)
+        f = getattr(obj, function)
+        if key!=None:
+            result = f(key, ignore_cache=True)
+        else:
+            result = f(ignore_cache=True)
+        #print "Result is: "+str(result)
+        if not self.cache.has_key(function):
+            #print "Function "+str(function)+" not in cache"
+            if key!=None:
+                self.cache[function] = {key:result}
+            else:
+                self.cache[function] = result
+        else:
+            #print "adding result for key "+str(key)+" to cache"
+            values = self.cache.get(function)
+            if key!=None:
+                values[key]=result
+            else:
+                result=values
+        return result                        
+                    
+    def get(self, obj, function, key=None):
+        #print "####  XMLFunctionCache: get with function: "+str(function)+" and key: "+str(key)
+        values = self.cache.get(function)
+        if values!=None:
+            #print "Function "+str(function)+" found in cache"
+            if key is None:
+                return values
+                
+            result = values.get(key)               
+            if result!=None:
+                #print "Result of function "+str(function)+" found: "+str(result)
+                #print " ******** current cache: "+str(self.cache)
+                return result
+        #print " ******** current cache: "+str(self.cache)
+        return self.add(obj, function, key)        
+
 class XMLBaseDoc:
     
     """ Base class representing a parsed XML file."""
@@ -85,13 +128,33 @@ class XMLBaseDoc:
         the XML.
          
         """
+        self.function_cache = XMLFunctionCache()
         self._doc = _parse_XML(filename, schemaname)
         root = self._doc.getroot()
         self._xpatheval = etree.XPathEvaluator(self._doc, namespaces=root.nsmap)
 
 class XMLDoc(XMLBaseDoc):
     """ Class representing a parsed XML file containing model variable meta data. """
-    
+        
+#    def get_valueref(self, variablename, ignore_cache=False):
+#        """
+#        Extract the ValueReference given a variable name.
+#        
+#        Parameters:
+#            variablename -- the name of the variable
+#            
+#        Returns:
+#            The ValueReference for the variable passed as argument.
+#        """
+#        if not ignore_cache:
+#            return self.function_cache.get(self, 'get_valueref', variablename)
+#            
+#        ref = self._xpatheval("//ScalarVariable/@valueReference [../@name=\""+variablename+"\"]")
+#        if len(ref) > 0:
+#            return int(ref[0])
+#        else:
+#            return None
+
     def get_valueref(self, variablename):
         """
         Extract the ValueReference given a variable name.
@@ -102,43 +165,49 @@ class XMLDoc(XMLBaseDoc):
         Returns:
             The ValueReference for the variable passed as argument.
         """
-        ref = self._xpatheval("//ScalarVariable/@valueReference [../@name=\""+variablename+"\"]")
-        if len(ref) > 0:
-            return int(ref[0])
-        else:
-            return None
+        names_and_refs = self.get_variable_names()
+        return names_and_refs.get(variablename)
         
-    def is_alias(self, variablename):
+    def is_alias(self, variablename, ignore_cache=False):
         """ Return true is variable is an alias or negated alias. """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'is_alias', variablename)
+
         alias = self._xpatheval("//ScalarVariable/@alias[../@name=\""+str(variablename)+"\"]")
         if len(alias)>0:
             return (alias[0] == "alias" or alias[0] == "negatedAlias")
         else:
             raise Exception("The variable: "+str(variablename)+" can not be found in XML document.")
         
-    def is_negated_alias(self, variablename):
+    def is_negated_alias(self, variablename, ignore_cache=False):
         """ Return if variable is a negated alias or not. 
         
             Raises exception if variable is not found in XML document.
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'is_negated_alias', variablename)
+
         negated_alias = self._xpatheval("//ScalarVariable/@alias[../@name=\""+str(variablename)+"\"]")
         if len(negated_alias)>0:
             return (negated_alias[0] == "negatedAlias")
         else:
             raise Exception("The variable: "+str(variablename)+" can not be found in XML document.")
         
-    def is_constant(self, variablename):
+    def is_constant(self, variablename, ignore_cache=False):
         """ Find out if variable is a constant.
         
         Raises exception if variable is not found in XML document.
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'is_constant', variablename)
+
         variability = self._xpatheval("//ScalarVariable/@variability[../@name=\""+str(variablename)+"\"]")
         if len(variability) > 0:
             return (variability[0] == "constant")
         else:
             raise Exception("The variable: "+str(variablename)+" can not be found in XML document.")
         
-    def get_aliases(self, aliased_variable):
+    def get_aliases(self, aliased_variable, ignore_cache=False):
         """ Return list of all alias variables belonging to the aliased 
             variable along with a list of booleans indicating whether the 
             alias variable should be negated or not.
@@ -151,6 +220,9 @@ class XMLDoc(XMLBaseDoc):
                 alias is negated.
 
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_aliases', aliased_variable)
+
         # get value reference of aliased variable
         val_ref = self.get_valueref(aliased_variable)
         if val_ref!=None:
@@ -167,30 +239,66 @@ class XMLDoc(XMLBaseDoc):
         else:
             raise Exception("The variable: "+str(aliased_variable)+" can not be found in model.")
         
+#    def get_variable_description(self, variablename, ignore_cache=False):
+#        """ Return the description of a variable. """
+#        if not ignore_cache:
+#            return self.function_cache.get(self, 'get_variable_description', variablename)
+#
+#        description= self._xpatheval("//ScalarVariable/@description[../@name=\""+str(variablename)+"\"]")
+#        if len(description)>0:
+#            return str(description[0])
+#        else:
+#            None
+            
     def get_variable_description(self, variablename):
         """ Return the description of a variable. """
-        description= self._xpatheval("//ScalarVariable/@description[../@name=\""+str(variablename)+"\"]")
-        if len(description)>0:
-            return str(description[0])
-        else:
-            None
+        descriptions = self.get_variable_descriptions()
+        return descriptions.get(variablename)
     
+#    def get_data_type(self, variablename, ignore_cache=False):
+#        """ Get data type of variable. """
+#        if not ignore_cache:
+#            return self.function_cache.get(self, 'get_data_type', variablename)
+#
+#        node=self._xpatheval("//ScalarVariable[@name=\""+str(variablename)+"\"]")
+#        if len(node)>0:
+#            children=node[0].getchildren()
+#            if len(children)>0:
+#                return children[0].tag
+#        return None
+
     def get_data_type(self, variablename):
         """ Get data type of variable. """
-        node=self._xpatheval("//ScalarVariable[@name=\""+str(variablename)+"\"]")
-        if len(node)>0:
-            children=node[0].getchildren()
-            if len(children)>0:
-                return children[0].tag
-        return None
+        types = self.get_data_types()
+        return types.get(variablename)
+        
+    def get_data_types(self, ignore_cache=False):
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_data_types')
 
-    def get_variable_names(self, include_alias=True):
+        nodes=self._xpatheval("//ScalarVariable")
+        keys = self._xpatheval("//ScalarVariable/@name")
+        
+        vals = []
+        for node in nodes:
+            children=node.getchildren()
+            vals.append(children[0].tag)
+        d={}
+        for index, key in enumerate(keys):
+            d[str(key)]=str(vals[index])
+        return d
+       
+
+    def get_variable_names(self, include_alias=True, ignore_cache=False):
         """
         Extract the names of the variables in a model.
 
         Returns:
             Dict with variable name as key and value reference as value.
         """
+        if not ignore_cache:
+            return self.function_cache.get(self,'get_variable_names',include_alias)
+        
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name")
             vals = self._xpatheval("//ScalarVariable/@valueReference")
@@ -207,13 +315,16 @@ class XMLDoc(XMLBaseDoc):
         return d
 
 
-    def get_derivative_names(self, include_alias=True):
+    def get_derivative_names(self, include_alias=True, ignore_cache=False):
         """
         Extract the names of the derivatives in a model.
 
         Returns:
             Dict with variable name as key and value reference as value.
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_derivative_names', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"]")
             vals = self._xpatheval("//ScalarVariable/@valueReference [../VariableCategory=\"derivative\"]")
@@ -229,13 +340,16 @@ class XMLDoc(XMLBaseDoc):
             d[str(key)]=int(vals[index])
         return d
         
-    def get_differentiated_variable_names(self, include_alias=True):
+    def get_differentiated_variable_names(self, include_alias=True, ignore_cache=False):
         """
         Extract the names of the differentiated variables in a model.
 
         Returns:
             Dict with variable name as key and value reference as value.
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_differentiated_variable_names', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"]")
             vals = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"state\"]")
@@ -251,13 +365,16 @@ class XMLDoc(XMLBaseDoc):
             d[str(key)] = int(vals[index])
         return d
 
-    def get_input_names(self, include_alias=True):
+    def get_input_names(self, include_alias=True, ignore_cache=False):
         """
         Extract the names of the inputs in a model.
 
         Returns:
             Dict with ValueReference as key and name as value.
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_input_names', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"]\
                 [../VariableCategory=\"algebraic\"]")
@@ -277,13 +394,16 @@ class XMLDoc(XMLBaseDoc):
             d[str(key)] = int(vals[index])
         return d
 
-    def get_algebraic_variable_names(self, include_alias=True):
+    def get_algebraic_variable_names(self, include_alias=True, ignore_cache=False):
         """
         Extract the names of the algebraic variables in a model.
 
         Returns:
             Dict with ValueReference as key and name as value.
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_algebraic_variable_names', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"]\
                 [../@causality!=\"input\"]")
@@ -303,7 +423,7 @@ class XMLDoc(XMLBaseDoc):
             d[str(key)] = int(vals[index])
         return d
 
-    def get_p_opt_names(self, include_alias=True):
+    def get_p_opt_names(self, include_alias=True, ignore_cache=False):
         """ 
         Extract the names for all optimized independent parameters.
         
@@ -311,6 +431,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with ValueReference as key and name as value.
             
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_p_opt_names', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"]\
                 [../*/@free=\"true\"]")
@@ -330,13 +453,16 @@ class XMLDoc(XMLBaseDoc):
             d[str(key)] = int(vals[index])
         return d
 
-    def get_variable_descriptions(self, include_alias=True):
+    def get_variable_descriptions(self, include_alias=True, ignore_cache=False):
         """
         Extract the descriptions of the variables in a model.
 
         Returns:
             Dict with name as key and description as value.
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_variable_descriptions', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../@description]")
             vals = self._xpatheval("//ScalarVariable/@description[../@description]")
@@ -369,7 +495,7 @@ class XMLDoc(XMLBaseDoc):
                 # enumeration not supported yet      
         return d
 
-    def get_nominal_attributes(self, include_alias=True):
+    def get_nominal_attributes(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and nominal attribute for all variables 
         in the XML document.
@@ -378,6 +504,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and Start attribute as value.
              
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_nominal_attributes', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../*/@nominal]")
             vals = self._xpatheval("//ScalarVariable/*/@nominal")
@@ -392,7 +521,7 @@ class XMLDoc(XMLBaseDoc):
         return self._cast_values(keys, vals)
 
     
-    def get_start_attributes(self, include_alias=True):
+    def get_start_attributes(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and Start attribute for all variables 
         in the XML document.
@@ -401,6 +530,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and Start attribute as value.
              
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_start_attributes', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name")
             vals = self._xpatheval("//ScalarVariable/*/@start")
@@ -414,7 +546,7 @@ class XMLDoc(XMLBaseDoc):
 #        vals = map(N.float,vals)
         return self._cast_values(keys, vals)
 
-    def get_p_opt_start_attributes(self, include_alias=True):
+    def get_p_opt_start_attributes(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and start values for all optimized 
         independent parameters.
@@ -423,6 +555,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and start attribute as value.
         
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_p_opt_start_attributes', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name\
                 [../VariableCategory=\"independentParameter\"][../*/@free=\"true\"][../*/@start]")
@@ -440,7 +575,7 @@ class XMLDoc(XMLBaseDoc):
         return self._cast_values(keys, vals)
 
 
-    def get_dx_start_attributes(self, include_alias=True):
+    def get_dx_start_attributes(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and Start attribute for all derivatives in the 
         XML document.
@@ -449,6 +584,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and Start attribute as value.
              
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_dx_start_attributes', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"][../*/@start]")
             vals = self._xpatheval("//ScalarVariable/*/@start[../../VariableCategory=\"derivative\"]")
@@ -463,7 +601,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
 
-    def get_x_start_attributes(self, include_alias=True):
+    def get_x_start_attributes(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and Start attribute for all differentiated 
         variables in the XML document.
@@ -472,6 +610,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and Start attribute as value.
              
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_x_start_attributes', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"][../*/@start]")
             vals = self._xpatheval("//ScalarVariable/*/@start[../../VariableCategory=\"state\"]")
@@ -486,7 +627,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
 
-    def get_u_start_attributes(self, include_alias=True):
+    def get_u_start_attributes(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and Start attribute for all inputs in the XML 
         document.
@@ -495,6 +636,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and Start attribute as value.
              
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_u_start_attributes', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"] \
                 [../VariableCategory=\"algebraic\"][../*/@start]")
@@ -511,7 +655,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
 
-    def get_w_start_attributes(self, include_alias=True):
+    def get_w_start_attributes(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and Start attribute for all algebraic variables 
         in the XML document.
@@ -520,6 +664,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and Start attribute as value.
              
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_w_start_attributes', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"]\
                 [../@causality!=\"input\"][../*/@start]")
@@ -536,7 +683,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
     
-    def get_p_opt_variable_refs(self):
+    def get_p_opt_variable_refs(self, ignore_cache=False):
         """ 
         Extract value reference for all optimized independent parameters.
         
@@ -544,6 +691,9 @@ class XMLDoc(XMLBaseDoc):
             List of value reference for all optimized independent parameters.
             
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_p_opt_variable_refs', None)
+
         refs = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"independentParameter\"]\
             [../*/@free=\"true\"]")
         valrefs=[]
@@ -551,7 +701,7 @@ class XMLDoc(XMLBaseDoc):
             valrefs.append(int(ref))
         return valrefs
     
-    def get_w_initial_guess_values(self, include_alias=True):
+    def get_w_initial_guess_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and InitialGuess values for all algebraic 
         variables.
@@ -560,6 +710,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and InitialGuess as value.
         
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_w_initial_guess_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"] \
                 [../@causality!=\"input\"][../*/@initialGuess]")
@@ -576,7 +729,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
     
-    def get_u_initial_guess_values(self, include_alias=True):
+    def get_u_initial_guess_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and InitialGuess values for all input 
         variables.
@@ -585,6 +738,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and InitialGuess as value.
             
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_u_initial_guess_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"]\
                 [../VariableCategory=\"algebraic\"][../*/@initialGuess]")
@@ -601,7 +757,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
     
-    def get_dx_initial_guess_values(self, include_alias=True):
+    def get_dx_initial_guess_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and InitialGuess values for all derivative 
         variables.
@@ -610,6 +766,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and InitialGuess as value.
             
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_dx_initial_guess_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"][../*/@initialGuess]")
             vals = self._xpatheval("//ScalarVariable/*/@initialGuess\
@@ -625,7 +784,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
     
-    def get_x_initial_guess_values(self, include_alias=True):
+    def get_x_initial_guess_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and InitialGuess values for all differentiated 
         variables.
@@ -634,6 +793,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and InitialGuess as value.
             
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_x_initial_guess_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"][../*/@initialGuess]")
             vals = self._xpatheval("//ScalarVariable/*/@initialGuess\
@@ -649,7 +811,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))        
         return self._cast_values(keys, vals)
     
-    def get_p_opt_initial_guess_values(self, include_alias=True):
+    def get_p_opt_initial_guess_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and InitialGuess values for all optimized 
         independent parameters.
@@ -658,6 +820,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and InitialGuess as value.
         
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_p_opt_initial_guess_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name\
                 [../VariableCategory=\"independentParameter\"][../*/@free=\"true\"][../*/@initialGuess]")
@@ -674,7 +839,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
 
-    def get_w_lb_values(self, include_alias=True):
+    def get_w_lb_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and lower bound values for all algebraic 
         variables.
@@ -683,6 +848,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and lower bound as value.
         
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_w_lb_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"] \
                                    [../@causality!=\"input\"] [../*/@min]")
@@ -699,7 +867,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
     
-    def get_u_lb_values(self, include_alias=True):
+    def get_u_lb_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and lower bound values for all input 
         variables.
@@ -708,6 +876,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and lower bound as value.
             
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_u_lb_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"] \
                 [../VariableCategory=\"algebraic\"] [../*/@min]")
@@ -724,7 +895,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))            
         return self._cast_values(keys, vals)
     
-    def get_dx_lb_values(self, include_alias=True):
+    def get_dx_lb_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and lower bound values for all derivative 
         variables.
@@ -733,6 +904,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and lower bound as value.
             
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_dx_lb_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"] \
                 [../*/@min]")
@@ -748,7 +922,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))        
         return self._cast_values(keys, vals)
     
-    def get_x_lb_values(self, include_alias=True):
+    def get_x_lb_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and lower bound values for all differentiated 
         variables.
@@ -757,6 +931,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and lower bound as value.
             
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_x_lb_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"]\
                 [../*/@min]")
@@ -772,7 +949,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
     
-    def get_p_opt_lb_values(self, include_alias=True):
+    def get_p_opt_lb_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and lower bound values for all optimized 
         independent parameters.
@@ -781,6 +958,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and lower bound as value.
             
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_p_opt_lb_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"] \
                                    [../*/@free=\"true\"] [../*/@min]")
@@ -797,7 +977,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
 
-    def get_w_ub_values(self, include_alias=True):
+    def get_w_ub_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and upper bound values for all algebraic 
         variables.
@@ -806,6 +986,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and upper bound as value.
             
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_w_ub_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"] \
                 [../@causality!=\"input\"] [../*/@max]")
@@ -822,7 +1005,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))           
         return self._cast_values(keys, vals)
 
-    def get_u_ub_values(self, include_alias=True):
+    def get_u_ub_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and upper bound values for all input variables.
         
@@ -830,6 +1013,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and upper bound as value.
             
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_u_ub_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"] \
                 [../VariableCategory=\"algebraic\"] [../*/@max]")
@@ -846,7 +1032,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
     
-    def get_dx_ub_values(self, include_alias=True):
+    def get_dx_ub_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and upper bound values for all derivative 
         variables.
@@ -855,6 +1041,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and upper bound as value.
             
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_dx_ub_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"] \
                 [../*/@max]")
@@ -870,7 +1059,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         return self._cast_values(keys, vals)
     
-    def get_x_ub_values(self, include_alias=True):
+    def get_x_ub_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and upper bound values for all differentiated 
         variables.
@@ -879,6 +1068,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and upper bound as value.
             
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_x_ub_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"] \
                 [../*/@max]")
@@ -894,7 +1086,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))        
         return self._cast_values(keys, vals)
     
-    def get_p_opt_ub_values(self, include_alias=True):
+    def get_p_opt_ub_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and upper bound values for all optimized 
         independent parameters.
@@ -903,6 +1095,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and upper bound as value.
             
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_p_opt_ub_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"] \
                                    [../*/@free=\"true\"] [../*/@max]")
@@ -920,7 +1115,7 @@ class XMLDoc(XMLBaseDoc):
         return self._cast_values(keys, vals)
     
 
-    def get_w_lin_values(self, include_alias=True):
+    def get_w_lin_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and boolean value describing if variable 
         appears linearly in all equations and constraints for all algebraic 
@@ -930,6 +1125,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and boolean isLinear as value.
             
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_w_lin_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"] \
                 [../@causality!=\"input\"] [../isLinear]")
@@ -949,7 +1147,7 @@ class XMLDoc(XMLBaseDoc):
             d[str(key)] = (vals[index]=="true")
         return d
 
-    def get_u_lin_values(self, include_alias=True):
+    def get_u_lin_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and boolean value describing if variable 
         appears linearly in all equations and constraints for all input 
@@ -959,6 +1157,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and boolean isLinear as value.
 
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_u_lin_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"] \
                 [../VariableCategory=\"algebraic\"] [../isLinear]")
@@ -978,7 +1179,7 @@ class XMLDoc(XMLBaseDoc):
             d[str(key)] = (vals[index]=="true")
         return d
    
-    def get_dx_lin_values(self, include_alias=True):
+    def get_dx_lin_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and boolean value describing if variable 
         appears linearly in all equations and constraints for all derivative 
@@ -988,6 +1189,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and boolean isLinear as value.
 
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_dx_lin_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"] \
                 [../isLinear]")
@@ -1007,7 +1211,7 @@ class XMLDoc(XMLBaseDoc):
             d[str(key)] = (vals[index]=="true")
         return d
     
-    def get_x_lin_values(self, include_alias=True):
+    def get_x_lin_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and boolean value describing if variable 
         appears linearly in all equations and constraints for all 
@@ -1017,6 +1221,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and boolean isLinear as value.
 
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_x_lin_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"] \
                 [../isLinear]")
@@ -1035,7 +1242,7 @@ class XMLDoc(XMLBaseDoc):
             d[str(key)] = (vals[index]=="true")
         return d
     
-    def get_p_opt_lin_values(self, include_alias=True):
+    def get_p_opt_lin_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and boolean value describing if variable 
         appears linearly in all equations and constraints for all optimized 
@@ -1045,6 +1252,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and boolean isLinear as value.
 
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_p_opt_lin_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name\
                 [../VariableCategory=\"independentParameter\"][../*/@free=\"true\"][../isLinear]")
@@ -1064,7 +1274,7 @@ class XMLDoc(XMLBaseDoc):
             d[str(key)] = (vals[index]=="true")
         return d
 
-    def get_w_lin_tp_values(self, include_alias=True):
+    def get_w_lin_tp_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and linear timed variables for all algebraic 
         variables.
@@ -1073,6 +1283,9 @@ class XMLDoc(XMLBaseDoc):
             Dict with variable name as key and boolean isLinear as value.
 
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_w_lin_tp_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"algebraic\"] \
                 [../@causality!=\"input\"] [../isLinearTimedVariables]")
@@ -1108,7 +1321,7 @@ class XMLDoc(XMLBaseDoc):
             timepoints_islinear.append(casted_tps)             
         return dict(zip(names, timepoints_islinear))
 
-    def get_u_lin_tp_values(self, include_alias=True):
+    def get_u_lin_tp_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and linear timed variables for all input 
         variables.
@@ -1118,6 +1331,9 @@ class XMLDoc(XMLBaseDoc):
             as value. 
         
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_u_lin_tp_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../@causality=\"input\"]\
                 [../VariableCategory=\"algebraic\"][../isLinearTimedVariables]")
@@ -1153,7 +1369,7 @@ class XMLDoc(XMLBaseDoc):
             timepoints_islinear.append(casted_tps)             
         return dict(zip(names, timepoints_islinear))
     
-    def get_dx_lin_tp_values(self, include_alias=True):
+    def get_dx_lin_tp_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and linear timed variables for all derivative 
         variables.
@@ -1163,6 +1379,9 @@ class XMLDoc(XMLBaseDoc):
             as value. 
         
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_dx_lin_tp_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"derivative\"] \
                 [../isLinearTimedVariables]")
@@ -1196,7 +1415,7 @@ class XMLDoc(XMLBaseDoc):
             timepoints_islinear.append(casted_tps)             
         return dict(zip(names, timepoints_islinear))
     
-    def get_x_lin_tp_values(self, include_alias=True):
+    def get_x_lin_tp_values(self, include_alias=True, ignore_cache=False):
         """ 
         Extract variable name and linear timed variables for all 
         differentiated variables.
@@ -1206,6 +1425,9 @@ class XMLDoc(XMLBaseDoc):
             as value. 
         
         """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_x_lin_tp_values', include_alias)
+
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"state\"] \
                 [../isLinearTimedVariables]")
@@ -1239,36 +1461,51 @@ class XMLDoc(XMLBaseDoc):
             timepoints_islinear.append(casted_tps)             
         return dict(zip(names, timepoints_islinear))
     
-    def get_starttime(self):
+    def get_starttime(self, ignore_cache=False):
         """ Extract the interval start time. """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_starttime', None)
+
         time = self._xpatheval("//opt:IntervalStartTime/opt:Value/text()")
         if len(time) > 0:
             return float(time[0])
         return None
 
-    def get_starttime_free(self):
+    def get_starttime_free(self, ignore_cache=False):
         """ Extract the start time free attribute value. """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_starttime_free', None)
+
         free = self._xpatheval("//opt:IntervalStartTime/opt:Free/text()")
         if len(free) > 0:
             return (free[0]=="true")
         return None
     
-    def get_finaltime(self):
+    def get_finaltime(self, ignore_cache=False):
         """ Extract the interval final time. """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_finaltime', None)
+
         time = self._xpatheval("//opt:IntervalFinalTime/opt:Value/text()")
         if len(time) > 0:
             return float(time[0])
         return None
 
-    def get_finaltime_free(self):
+    def get_finaltime_free(self, ignore_cache=False):
         """ Extract the final time free attribute value. """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_finaltime_free', None)
+
         free = self._xpatheval("//opt:IntervalFinalTime/opt:Free/text()")
         if len(free) > 0:
             return (free[0]=="true")
         return None
 
-    def get_timepoints(self):
+    def get_timepoints(self, ignore_cache=False):
         """ Extract all time points. """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_timepoints', None)
+
         vals = self._xpatheval("//opt:TimePoints/opt:Value/text()")
         timepoints = []
         for tp in vals:
