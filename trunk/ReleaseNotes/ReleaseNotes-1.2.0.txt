@@ -149,6 +149,12 @@ http://www.jmodelica.org/assimulo
 
 5. XML model export
 
+Models are now exported in XML format. The XML documents contain information 
+on the set of variables, the equations, the user defined functions and for 
+the Optimica´s optimization problems definition of the flattened model. 
+Documents can be validated by a schema designed as an extension of the FMI 
+XML schema.
+
 6. Symbolic framework
 
 7. Python integration
