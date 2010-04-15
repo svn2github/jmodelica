@@ -55,7 +55,7 @@ mc.set_boolean_option('state_start_values_fixed',True)
 oc = OptimicaCompiler()
 oc.set_boolean_option('state_start_values_fixed',True)
 
-mc.compile_model(cpath_rlc, fpath_rlc)
+mc.compile_model(cpath_rlc, fpath_rlc, target='ipopt')
 oc.compile_model(cpath_vdp, fpath_vdp, target='ipopt')
 
 model_rlc = jmi.Model(dll_rlc)
