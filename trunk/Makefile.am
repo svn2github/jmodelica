@@ -29,10 +29,7 @@ if HAVE_ANT
 	$(ANT_OPTS) $(ANT)
 endif
 if WITH_SUNDIALS
-	mkdir -p Assimulo_install
 	cd $(abs_top_srcdir)/Assimulo; \
-	python setup_source.py clean; \
-	rm -rf build/*; \
 	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --prefix=Assimulo_install
 endif
 
