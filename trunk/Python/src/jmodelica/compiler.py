@@ -30,7 +30,7 @@ import subprocess
 import jpype
 import string
 import jmodelica as jm
-
+import jmodelica.jmi as jmi
 
 #start JVM
 # note that startJVM() fails after shutdownJVM(), hence, only one start
@@ -266,6 +266,9 @@ class ModelicaCompiler():
             target -- 
                 The build target.
 
+        Returns:
+            A jmi.Model object.
+
         Exceptions:
             CompilerError -- 
                 Raised if one or more error is found during compilation.
@@ -292,6 +295,8 @@ class ModelicaCompiler():
 
         except jpype.JavaException, ex:
             self._handle_exception(ex)
+
+        return jmi.Model(c_file)
 
     def parse_model(self,model_file_name):   
         """ 
