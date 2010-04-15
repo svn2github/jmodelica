@@ -54,8 +54,8 @@ def write_data(simulator):
         t = N.array(simulator.t)
         y = N.array(simulator.y)
         yd = N.array(simulator.yd)
-        if simulator._problem._input:
-            u = simulator._problem._input.eval(t)
+        if simulator._problem.input:
+            u = simulator._problem.input.eval(t)
         else:
             u = N.ones((len(t),len(model.real_u)))*model.real_u
         
@@ -180,7 +180,7 @@ class JMIDAE(Implicit_Problem):
         Sets the initial values.
         """
         self._model = model
-        self._input = input
+        self.input = input
         
         self.y0 = N.append(self._model.real_x,self._model.real_w)
         self.yd0 = N.append(self._model.real_dx,[0]*len(self._model.real_w))
@@ -225,8 +225,8 @@ class JMIDAE(Implicit_Problem):
         self._model.real_dx = yd[0:self._dx_nbr]
         
         #Sets the inputs, if any
-        if self._input!=None:
-            self._model.real_u = self._input.eval(t)[0,:]
+        if self.input!=None:
+            self._model.real_u = self.input.eval(t)[0,:]
 
         #Evaluating the residual function
         residual = N.array([.0]*self._f_nbr)
@@ -262,8 +262,8 @@ class JMIDAE(Implicit_Problem):
         self._model.real_dx = yd[0:self._dx_nbr]
         
         #Sets the inputs, if any
-        if self._input!=None:
-            self._model.real_u = self._input.eval(t)[0,:]
+        if self.input!=None:
+            self._model.real_u = self.input.eval(t)[0,:]
         
         #Evaluating the jacobian
         #-Setting options
@@ -483,6 +483,21 @@ class JMIDAE(Implicit_Problem):
         
     max_eIterdocstring='Maximum number of event iterations allowed.'
     max_eIter = property(_get_max_eIteration, _set_max_eIteration, doc=max_eIterdocstring)
+    
+    def _set_input(self, input):
+        """
+        Sets the input.
+        """
+        self.__input = input
+        
+    def _get_input(self):
+        """
+        Returns the input.
+        """
+        return self.__input
+        
+    inputdocstring='The input.'
+    input = property(_get_input, _set_input, doc=inputdocstring)
 
     def _set_eps(self, eps):
         """
