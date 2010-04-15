@@ -707,8 +707,8 @@ class NLPCollocation(object):
         if num_name_hits==0:
             raise Exception("None of the model variables not found in result file.")
         
-        print(traj.t)
-
+        #print(traj.t)
+        
         n_points = N.size(traj.t,0)
         n_cols = 1+len(dx_names)+len(x_names)+len(u_names)+len(w_names)
 

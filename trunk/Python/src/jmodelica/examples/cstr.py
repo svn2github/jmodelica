@@ -17,25 +17,14 @@
 
 # Import library for path manipulations
 import os.path
+from jmodelica import initialize
+from jmodelica import simulate
+from jmodelica import optimize
 
-import jmodelica
 import jmodelica.jmi as jmi
-from jmodelica.initialization.ipopt import NLPInitialization
-from jmodelica.initialization.ipopt import InitializationOptimizer
-from jmodelica.optimization import ipopt
 from jmodelica.compiler import OptimicaCompiler
 
-try:
-    from jmodelica.simulation.assimulo import TrajectoryLinearInterpolation
-    from jmodelica.simulation.assimulo import JMIDAE, write_data
-    from Assimulo.Implicit_ODE import IDA
-except:
-    raise ImportError('Could not find Assimulo package.')
-
 import numpy as N
-import scipy as S
-import scipy.optimize as opt
-import ctypes as ct
 import matplotlib.pyplot as plt
 
 def run_demo(with_plots=True):
@@ -90,30 +79,18 @@ def run_demo(with_plots=True):
     oc.set_boolean_option("enable_variable_scaling",True)
         
     # Compile the stationary initialization model into a DLL
-    oc.compile_model("CSTR.CSTR_Init", curr_dir+"/files/CSTR.mo", target='ipopt')
-
-    # Load a model instance into Python
-    init_model = jmi.Model("CSTR_CSTR_Init")
-    
-    # Create DAE initialization object.
-    init_nlp = NLPInitialization(init_model)
-    
-    # Create an Ipopt solver object for the DAE initialization system
-    init_nlp_ipopt = InitializationOptimizer(init_nlp)
-    
+    init_model = oc.compile_model("CSTR.CSTR_Init", curr_dir+"/files/CSTR.mo", target='ipopt')
+        
     # Set inputs for Stationary point A
     Tc_0_A = 250
     init_model.set_value('Tc',Tc_0_A)
-    
-    # init_nlp_ipopt.init_opt_ipopt_set_string_option("derivative_test","first-order")
-    # init_nlp_ipopt.init_opt_ipopt_set_int_option("max_iter",5)
-    
+        
     # Solve the DAE initialization system with Ipopt
-    init_nlp_ipopt.init_opt_ipopt_solve()
+    (init_model, init_result) = initialize(init_model)
     
     # Store stationary point A
-    c_0_A = init_model.get_value('c')
-    T_0_A = init_model.get_value('T')
+    c_0_A = init_result.get_variable_data('c').x[0]
+    T_0_A = init_result.get_variable_data('T').x[0]
     
     # Print some data for stationary point A
     print(' *** Stationary point A ***')
@@ -126,12 +103,12 @@ def run_demo(with_plots=True):
     init_model.set_value('Tc',Tc_0_B)
         
     # Solve the DAE initialization system with Ipopt
-    init_nlp_ipopt.init_opt_ipopt_solve()
+    (init_model, init_result) = initialize(init_model)
     
-    # Store stationary point A
-    c_0_B = init_model.get_value('c')
-    T_0_B = init_model.get_value('T')
-    
+    # Store stationary point B
+    c_0_B = init_result.get_variable_data('c').x[0]
+    T_0_B = init_result.get_variable_data('T').x[0]
+
     # Print some data for stationary point B
     print(' *** Stationary point B ***')
     print('Tc = %f' % Tc_0_B)
@@ -146,17 +123,11 @@ def run_demo(with_plots=True):
     # target input value is here increased in order to get a
     # better initial guess.
     u = (Tc_0_B+35)*N.ones(N.size(t,0))
-    u = N.array([u])
-    u = N.transpose(u)
-    # Create a Trajectory object that can be passed to the simulator
-    u_traj = TrajectoryLinearInterpolation(t,u)
+    u_traj = N.transpose(N.vstack((t,u)))
 
     # Comile the Modelica model first to C code and
     # then to a dynamic library
-    oc.compile_model("CSTR.CSTR_Init_Optimization",curr_dir+"/files/CSTR.mo",target='ipopt')
-
-    # Load the dynamic library and XML data
-    init_sim_model=jmi.Model("CSTR_CSTR_Init_Optimization")
+    init_sim_model = oc.compile_model("CSTR.CSTR_Init_Optimization",curr_dir+"/files/CSTR.mo",target='ipopt')
 
     # Set model parameters
     init_sim_model.set_value('cstr.c_init',c_0_A)
@@ -164,20 +135,12 @@ def run_demo(with_plots=True):
     init_sim_model.set_value('Tc_0',Tc_0_A)
     init_sim_model.set_value('c_ref',c_0_B)
     init_sim_model.set_value('T_ref',T_0_B)
-    init_sim_model.set_value('Tc_ref',u_traj.eval(0.)[0])
-    
-    cstr_mod = JMIDAE(init_sim_model, input=u_traj) #Create the Assimulo problem
-    cstr_sim = IDA(cstr_mod) #Create the Assimulo solver
-    
-    cstr_sim.initiate() #Calculate initial conditions
-    cstr_sim(150,15000) #Simulate 150 seconds with 15000 points
-    
-    # Write data
-    write_data(cstr_sim)
+    init_sim_model.set_value('Tc_ref',u[0])
 
-    # Load the file we just wrote to file
-    res = jmodelica.io.ResultDymolaTextual('CSTR_CSTR_Init_Optimization_result.txt')
-
+    (init_sim_model,res) = simulate(init_sim_model,compiler='optimica',
+                                    alg_args={'start_time':0.,'final_time':150.,
+                                              'input_trajectory':u_traj})
+    
     # Extract variable profiles
     c_init_sim=res.get_variable_data('cstr.c')
     T_init_sim=res.get_variable_data('cstr.T')
@@ -205,10 +168,11 @@ def run_demo(with_plots=True):
         plt.xlabel('time')
         plt.show()
 
-    # Solve optimal control problem    
-    oc.compile_model("CSTR.CSTR_Opt", curr_dir+"/files/CSTR.mo", target='ipopt')
 
-    cstr = jmi.Model("CSTR_CSTR_Opt")
+    # Solve optimal control problem    
+    cstr = oc.compile_model("CSTR.CSTR_Opt", curr_dir+"/files/CSTR.mo", target='ipopt')
+
+    #cstr = jmi.Model("CSTR_CSTR_Opt")
 
     cstr.set_value('Tc_ref',Tc_0_B)
     cstr.set_value('c_ref',c_0_B)
@@ -217,31 +181,11 @@ def run_demo(with_plots=True):
     cstr.set_value('cstr.c_init',c_0_A)
     cstr.set_value('cstr.T_init',T_0_A)
 
-    # Initialize the mesh
     n_e = 100 # Number of elements 
     hs = N.ones(n_e)*1./n_e # Equidistant points
     n_cp = 3; # Number of collocation points in each element
-    
-    # Create an NLP object
-    nlp = ipopt.NLPCollocationLagrangePolynomials(cstr,n_e,hs,n_cp)
 
-    # Use the simulated trajectories to initialize the model
-    nlp.set_initial_from_dymola(res, hs, 0, 0)
-    
-    # Create an Ipopt NLP object
-    nlp_ipopt = ipopt.CollocationOptimizer(nlp)
-       
-    nlp_ipopt.opt_sim_ipopt_set_int_option("max_iter",500)
-
-    # Solve the optimization problem
-    nlp_ipopt.opt_sim_ipopt_solve()
-    
-    # Write to file. The resulting file (CSTR_CSTR_Opt_result.txt) can also be
-    # loaded into Dymola.
-    nlp.export_result_dymola()
-    
-    # Load the file we just wrote to file
-    res = jmodelica.io.ResultDymolaTextual('CSTR_CSTR_Opt_result.txt')
+    (cstr,res) = optimize(cstr,alg_args={'n_e':n_e,'hs':hs,'n_cp':n_cp,'res':res})
 
     # Extract variable profiles
     c_res=res.get_variable_data('cstr.c')
@@ -286,33 +230,20 @@ def run_demo(with_plots=True):
     # Set up input trajectory
     t = Tc_res.t 
     u = Tc_res.x
-    u = N.array([u])
-    u = N.transpose(u)
-    u_traj = TrajectoryLinearInterpolation(t,u)
+    u_traj = N.transpose(N.vstack((t,u)))
     
     # Comile the Modelica model first to C code and
     # then to a dynamic library
-    oc.compile_model("CSTR.CSTR",curr_dir+"/files/CSTR.mo",target='ipopt')
-
-    # Load the dynamic library and XML data
-    sim_model=jmi.Model("CSTR_CSTR")
+    sim_model = oc.compile_model("CSTR.CSTR",curr_dir+"/files/CSTR.mo",target='ipopt')
 
     sim_model.set_value('c_init',c_0_A)
     sim_model.set_value('T_init',T_0_A)
-    sim_model.set_value('Tc',u_traj.eval(0.)[0])
-    
-    cstr_mod = JMIDAE(sim_model,input=u_traj) #Create the Assimulo model
-    cstr_sim = IDA(cstr_mod) #Create the Assimulo solver
-    
-    cstr_sim.initiate() #Calculate initial conditions
-    cstr_sim(150,15000) #Simulate 150 seconds with 15000 points
-    
-    # Write data
-    write_data(cstr_sim)
-    
-    # Load the file we just wrote to file
-    res = jmodelica.io.ResultDymolaTextual('CSTR_CSTR_result.txt')
+    sim_model.set_value('Tc',u[0])
 
+    (sim_model,res) = simulate(sim_model,compiler='optimica',
+                               alg_args={'start_time':0.,'final_time':150.,
+                                         'input_trajectory':u_traj})
+    
     # Extract variable profiles
     c_sim=res.get_variable_data('c')
     T_sim=res.get_variable_data('T')
