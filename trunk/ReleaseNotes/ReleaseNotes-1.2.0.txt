@@ -138,6 +138,13 @@ obtain the dense output.
 
 3. New simulation package: Assimulo
 
+The simulation based on pySundials have been removed and replaced by
+the Assimulo package which is also using the Sundials solvers. The main
+difference between the two is that Assimulo is using Cython to connect
+to Sundials. This has substantially improved the simulation speed. For
+more info regarding Assimulo and its features, see:
+http://www.jmodelica.org/assimulo
+
 4. FMI compliance
 
 5. XML model export
