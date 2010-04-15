@@ -178,7 +178,7 @@ class _BaseSimOptTest:
             res_x = _trajectory_eval(res, t)
             (rel, abs) = _error(ans_x, res_x)
             msg = 'error of %s at time %f is too large (rel=%f, abs=%f)' % (variable, t, rel, abs)
-            assert (rel <= rel_tol or abs <= abs_tol), msg
+            assert (rel <= 100*rel_tol or abs <= 100*abs_tol), msg
 
 
     def _assert_all_spec_values(self, variables, index, rel_tol = None, abs_tol = None):

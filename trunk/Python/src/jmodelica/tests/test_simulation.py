@@ -15,7 +15,7 @@ class TestNominal(SimulationTest):
 
     @testattr(stddist = True)
     def setUp(self):
-        self.setup_base(start_time=0.0, final_time=10.0, time_step = 0.1)
+        self.setup_base(start_time=0.0, final_time=10.0, time_step = 0.1, abs_tol=1.0e-8)
         self.run()
         self.load_expected_data('NominalTests_NominalTest1_result.txt')
 

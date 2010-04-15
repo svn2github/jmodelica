@@ -1,2 +1,2 @@
 """Tests for the simulation package."""
-__all__ = ['test_sundials']
+__all__ = ['test_assimulo']

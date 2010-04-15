@@ -11,7 +11,10 @@ import nose
 from jmodelica.simulation.sundials import SundialsODESimulator
 from jmodelica.simulation.sundials import SundialsDAESimulator
 from jmodelica.tests import testattr
-import jmodelica.simulation.sundials as sundials
+try:
+    import jmodelica.simulation.sundials as sundials
+except:
+    pass
 import jmodelica.simulation
 import jmodelica.jmi as jmi
 from jmodelica.compiler import ModelicaCompiler

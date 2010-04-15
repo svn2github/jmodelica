@@ -20,7 +20,12 @@ import jmodelica.io
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
 from jmodelica.optimization import ipopt
-from jmodelica.simulation.sundials import SundialsODESimulator
+
+try:
+    from jmodelica.simulation.assimulo import JMIODE
+    from Assimulo.Explicit_ODE import CVode
+except:
+    raise ImportError('Could not find Assimulo package.')
 
 int = N.int32
 N.int = N.int32
@@ -405,9 +410,11 @@ class TestModel_VDP:
             
     def test_optimization_cost_eval(self):
         """Test evaluation of optimization cost function."""
-        simulator = SundialsODESimulator(self.m)
-        simulator.run()
-        T, ys = simulator.get_solution()
+        simulator_mod = JMIODE(self.m)
+        simulator = CVode(simulator_mod)
+        simulator.simulate(10)
+
+        T, ys = [simulator.t, simulator.y]
         
         self.vdp.set_x_p(ys[-1], 0)
         self.vdp.set_dx_p(self.vdp.real_dx, 0)
@@ -420,9 +427,11 @@ class TestModel_VDP:
         Note:
         This test is model specific for the VDP oscillator.
         """
-        simulator = SundialsODESimulator(self.m)
-        simulator.run()
-        T, ys = simulator.get_solution()
+        simulator_mod = JMIODE(self.m)
+        simulator = CVode(simulator_mod)
+        simulator.simulate(10)
+
+        T, ys = [simulator.t, simulator.y]
         
         self.vdp.set_x_p(ys[-1], 0)
         self.vdp.set_dx_p(self.vdp.real_dx, 0)
@@ -1196,8 +1205,11 @@ class TestModelSimulation:
         This test is model specific and not generic as most other
         tests in this class.
         """
-        simulator = SundialsODESimulator(self.vdp)
-        simulator.run()
+        simulator_mod = JMIODE(self.m)
+        simulator = CVode(simulator_mod)
+        simulator.simulate(10)
+
+        T, ys = [simulator.t, simulator.y]
         
         assert self.vdp.jmimodel._n_z > 0, "Length of z should be greater than zero."
         print 'n_z.value:', self.vdp.jmimodel._n_z.value

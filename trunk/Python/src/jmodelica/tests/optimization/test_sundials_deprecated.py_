@@ -12,13 +12,16 @@ import nose
 from jmodelica.compiler import OptimicaCompiler
 from jmodelica.tests import testattr
 from jmodelica import jmi
-from jmodelica.optimization.sundials import construct_grid
-from jmodelica.optimization.sundials import MultipleShooter
-from jmodelica.optimization.sundials import construct_grid
-from jmodelica.optimization.sundials import _check_normgrid_consistency
-from jmodelica.optimization.sundials import _split_opt_x
-from jmodelica.optimization.sundials import plot_control_solutions
-from jmodelica.optimization.sundials import single_shooting
+try:
+    from jmodelica.optimization.sundials import construct_grid
+    from jmodelica.optimization.sundials import MultipleShooter
+    from jmodelica.optimization.sundials import construct_grid
+    from jmodelica.optimization.sundials import _check_normgrid_consistency
+    from jmodelica.optimization.sundials import _split_opt_x
+    from jmodelica.optimization.sundials import plot_control_solutions
+    from jmodelica.optimization.sundials import single_shooting
+except:
+    pass
 
 jm_home = os.environ.get('JMODELICA_HOME')
 path_to_examples = os.path.join(jm_home, "Python", "jmodelica", "examples")
