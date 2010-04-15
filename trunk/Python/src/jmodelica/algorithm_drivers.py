@@ -11,6 +11,7 @@ from jmodelica.initialization.ipopt import InitializationOptimizer
 
 try:
     from jmodelica.simulation.assimulo import JMIDAE, JMIODE, write_data
+    from jmodelica.simulation.assimulo import TrajectoryLinearInterpolation
     from Assimulo import Implicit_ODE
     from Assimulo import Explicit_ODE
     from Assimulo.Implicit_ODE import *
@@ -139,18 +140,27 @@ class AssimuloAlg(AlgorithmBase):
             self._set_alg_args(**alg_args)
         except TypeError, e:
             raise InvalidAlgorithmArgumentException(e)
-        
+
         if issubclass(self.solver, Implicit_ODE):
-            self.probl = JMIDAE(model)
+            if (N.size(self.input_trajectory)==0):
+                self.probl = JMIDAE(model)
+            else:
+                self.probl = JMIDAE(model,TrajectoryLinearInterpolation(self.input_trajectory[:,0], \
+                                                                        self.input_trajectory[:,1:]))
         else:
-            self.probl = JMIODE(model)
+            if (N.size(self.input_trajectory)==0):
+                self.probl = JMIODE(model)
+            else:
+                self.probl = JMIODE(model,TrajectoryLinearInterpolation(self.input_trajectory[:,0], \
+                                                                        self.input_trajectory[:,1:]))
         self.simulator = self.solver(self.probl, t0=self.start_time)
         
     def _set_alg_args(self,
                       start_time=0.0,
                       final_time=1.0,
                       num_communication_points=500,
-                      solver=IDA):
+                      solver=IDA,
+                      input_trajectory = N.array([])):
         """ Set arguments for Assimulo algorithm.
         
         Parameters:
@@ -166,13 +176,19 @@ class AssimuloAlg(AlgorithmBase):
             solver --
                 Set which solver to use with class name. This determines whether a DAE or 
                 ODE problem will be created.
-                Default: IDA 
+                Default: IDA
+            input_trajectory --
+                Trajectory data for model inputs. The argument should be a matrix
+                where the first column represents time and the following columns
+                represents input trajectory data. 
+                Default: An empty matrix, i.e., no input trajectories.
                 
         """
-        self.start_time=start_time
-        self.final_time=final_time
-        self.num_communication_points=num_communication_points
-        self.solver=solver
+        self.start_time = start_time
+        self.final_time = final_time
+        self.num_communication_points = num_communication_points
+        self.solver = solver
+        self.input_trajectory = input_trajectory
         
     def set_solver_options(self, 
                            solver_args={}):
@@ -231,7 +247,7 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         
         self.nlp = ipopt.NLPCollocationLagrangePolynomials(model,self.n_e, self.hs, self.n_cp)
         if self.res:
-            nlp.set_initial_from_dymola(self.res, self.hs, 0, 0) 
+            self.nlp.set_initial_from_dymola(self.res, self.hs, 0, 0) 
             
         self.nlp_ipopt = ipopt.CollocationOptimizer(self.nlp)
             
