@@ -1,5 +1,6 @@
 package org.jmodelica.ide;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -7,10 +8,11 @@ import java.io.StringReader;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.jmodelica.ide.error.CompileErrorReport;
 import org.jmodelica.ide.error.InstanceErrorHandler;
-import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.modelica.compiler.BadDefinition;
+import org.jmodelica.modelica.compiler.LibNode;
 import org.jmodelica.modelica.compiler.List;
 import org.jmodelica.modelica.compiler.ParserException;
 import org.jmodelica.modelica.compiler.Program;
@@ -47,8 +49,8 @@ public class CompilationRoot {
 	 *            {@link ModelicaParser.AbortingReport} if Nothing is passed.
 	 */
 	public CompilationRoot(IProject project) {
-		this.list = new List<StoredDefinition>();
-		this.root = new SourceRoot(new Program(list));
+		this.list    = new List<StoredDefinition>();
+		this.root    = new SourceRoot(new Program(list));
 		this.handler = new InstanceErrorHandler();
 
 		PARSER.setReport(errorReport);
@@ -67,7 +69,9 @@ public class CompilationRoot {
 	 *         successful compilation has been performed.
 	 */
 	public StoredDefinition getStoredDefinition() {
-		assert list.getNumChild() <= 1;
+
+	    assert list.getNumChild() > 0; 
+		
 		return list.getNumChild() > 0 ? list.getChild(0) : null;
 	}
 
@@ -94,8 +98,9 @@ public class CompilationRoot {
 	 *              StoredDefinition.
 	 * @return this
 	 */
-	public void parseDoc(String doc, IFile file) {
+	public CompilationRoot parseDoc(String doc, IFile file) {
 		parseFile(new StringReader(doc), file);
+		return this;
 	}
 
 	public void parseDocs(String[] docs, IFile file) {
@@ -106,12 +111,13 @@ public class CompilationRoot {
 	/**
 	 * Parse content and add to source root.
 	 */
-	public void parseFile(IFile file) {
+	public CompilationRoot parseFile(IFile file) {
 		try {
 			parseFile(new FileReader(file.getRawLocation().toOSString()), file);
 		} catch (IOException e) {
 			addBadDef(file);
 		}
+		return this;
 	}
 
 	public void parseFile(Reader reader, IFile file) {
@@ -121,13 +127,17 @@ public class CompilationRoot {
 
 		try {
 			SourceRoot localRoot = (SourceRoot) PARSER.parse(SCANNER);
-			for (StoredDefinition def : localRoot.getProgram().getUnstructuredEntitys()) 
+			for (StoredDefinition def : localRoot.getProgram().getUnstructuredEntitys()) { 
 				list.add(annotatedDefinition(def, file));
+			}
 		} catch (Parser.Exception e) {
 			addBadDef(file);
+			e.printStackTrace();
 		} catch (ParserException e) {
+		    e.printStackTrace();
 			addBadDef(file);
 		} catch (IOException e) {
+		    e.printStackTrace();
 			addBadDef(file);
 		} finally {
 			errorReport.cleanUp();
@@ -138,6 +148,33 @@ public class CompilationRoot {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public void addPackageDirectory(IResource dir) {
+	    
+        try {
+            File file =
+                new File(dir.getRawLocation().toOSString());
+            
+            if (file.isDirectory() && 
+                LibNode.packageMoPresentIn(file.listFiles())) 
+            {
+                String path =
+                    root.options.getStringOption("PACKAGEPATHS");
+                
+                path += 
+                    file.getAbsolutePath();
+            
+                root.options.setStringOption(
+                        "PACKAGEPATHS",
+                        path);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+	   
 	}
 
 	private void addBadDef(IFile file) {

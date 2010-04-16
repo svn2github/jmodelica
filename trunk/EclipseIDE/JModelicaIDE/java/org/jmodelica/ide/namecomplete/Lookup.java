@@ -29,7 +29,8 @@ public Lookup(ASTNode<?> root) {
 public InstClassDecl instClassDeclFromQualifiedName(String qualifiedName) {
     SourceRoot sourceRoot =
         (SourceRoot) root.root();
-    return
+    
+   return
         sourceRoot
         .getProgram()
         .getInstProgramRoot()
@@ -66,7 +67,7 @@ public Maybe<InstNode> declarationFromAccessAt(
     OffsetDocument d) 
 {
     Maybe<InstClassDecl> enclosingClass = 
-        instEnclosingClassAt(d);
+        instEnclosingClassAt(d);    
     Maybe<Access> access = 
         root.getAccessAt(d, d.offset);
     
@@ -106,7 +107,7 @@ protected Maybe<InstNode> tryAddClassDecl(
         enclosingInstClass
         .addClassDynamic(instAccess)
         .myInstClassDecl();
-            
+
     return Maybe.<InstNode>guard(node, node.isKnown()); 
 }
 

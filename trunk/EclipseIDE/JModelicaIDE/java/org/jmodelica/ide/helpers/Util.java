@@ -114,7 +114,10 @@ public class Util {
 	public static void addErrorMarker(IResource resource, IError error) {
 		try {
 			IMarker marker = resource.createMarker(ERROR_MARKER_ID);
-
+			
+			if (marker == null)
+			    return;
+			
 			String message = error.getMessage();
 			int severity = error.getSeverity();
 			int line = error.getLine();

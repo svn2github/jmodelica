@@ -27,7 +27,6 @@ public GlobalCompilationResult(EditorFile ef, Editor editor) {
         root = (ASTNode<?>) registry.lookupAST(key, project);
     
     registry.addListener(editor, project, key);
-
 }
 
 public void update(IProject projChanged, String keyChanged) {

@@ -1,6 +1,7 @@
 package testcases;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 import junit.framework.TestCase;
@@ -12,9 +13,13 @@ import org.jmodelica.ide.indent.IndentedSection;
 
 public class EndOfBlockAdderTest extends TestCase {
 
+public String read(String filename) throws FileNotFoundException {
+    return new Scanner(new File(filename)).useDelimiter("\\Z").next();
+}
+
 public void testEndOfBlockAdder(String filename) throws Exception {
 
-    String doc = new Scanner(new File(filename)).useDelimiter("\\Z").next();
+    String doc = read(filename);
 
     int caretOffset = doc.indexOf('^');
     Document d = new Document(doc.replace("^", ""));
@@ -23,8 +28,7 @@ public void testEndOfBlockAdder(String filename) throws Exception {
     eoba.addEndIfNotPresent(eoba.endStatementString( d.get(0, caretOffset)),
             d, caretOffset);
     
-    assertEquals(new Scanner(new File(filename + ".wanted"))
-            .useDelimiter("\\Z").next(), d.get());
+    assertEquals(read(filename + ".wanted"), d.get());
 
 }
 

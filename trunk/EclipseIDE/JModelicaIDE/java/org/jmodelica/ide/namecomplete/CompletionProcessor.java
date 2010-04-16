@@ -13,12 +13,11 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.jastadd.plugin.registry.ASTRegistry;
 import org.jmodelica.ide.ModelicaCompiler;
 import org.jmodelica.ide.OffsetDocument;
-import org.jmodelica.ide.editor.Editor;
+import org.jmodelica.ide.editor.EditorWithFile;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.modelica.compiler.InstNode;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
-import org.jmodelica.modelica.parser.ModelicaParser;
 
 
 /**
@@ -32,9 +31,9 @@ public class CompletionProcessor implements IContentAssistProcessor {
 public final static ModelicaCompiler compiler = 
     new ModelicaCompiler();
 
-public final Editor editor;
+public final EditorWithFile editor;
 
-public CompletionProcessor(Editor editor) {
+public CompletionProcessor(EditorWithFile editor) {
     this.editor = editor;
 }
 
@@ -47,13 +46,15 @@ public CompletionProcessor(Editor editor) {
  * @param offset caret offset
  * @return instance nodes of completion proposals
  */
-public ArrayList<CompletionNode> suggestedDecls(OffsetDocument doc) {
+public ArrayList<CompletionNode> suggestedDecls(
+        OffsetDocument doc,
+        Maybe<SourceRoot> root) {
 
     StoredDefinition def = 
         new Recompiler()
         .recompilePartial(
             doc,
-            projectRoot(),
+            root,
             getFile());
     
     Context context = 
@@ -71,7 +72,7 @@ public ArrayList<CompletionNode> suggestedDecls(OffsetDocument doc) {
           .value()
           .completionProposals(
               context.filter(),
-              context.qualified().length() > 0);
+              context.qualified().trim().length() == 0);
 }
 
 protected IFile getFile() {
@@ -111,7 +112,7 @@ public ICompletionProposal[] computeCompletionProposals(
             offset);
     
     List<CompletionNode> proposals = 
-        suggestedDecls(doc);
+        suggestedDecls(doc, projectRoot());
 
     int filterLength = 
         new Context(doc)

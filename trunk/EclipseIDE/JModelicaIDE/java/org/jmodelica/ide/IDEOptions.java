@@ -19,6 +19,10 @@ public IDEOptions(IProject project) {
     setStringOption(
         "MODELICAPATH", 
         "");
+
+    setStringOption(
+        "PACKAGEPATHS", 
+        "");
     
     try {
         copyAllOptions(
@@ -28,8 +32,10 @@ public IDEOptions(IProject project) {
                     IDEConstants.PROPTERTY_OPTIONS_PATH)
                 + File.separatorChar
                 + "options.xml"));
+
     } catch (NullPointerException e ) {
         System.out.println("Null project. Not copying options.");
+
     } catch (Exception e) {
         e.printStackTrace();
     }
@@ -43,10 +49,11 @@ public IDEOptions(IProject project) {
        
     } catch (NullPointerException e ) {
         System.out.println("Null project. Not setting MODELICAPATH.");
+    
     } catch (Exception e ) {
         e.printStackTrace();
     }
-   
+
 }
 
 }

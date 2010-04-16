@@ -32,16 +32,11 @@ public StoredDefinition recompilePartial(
             new Document(d.get()))
         .replaceLineAt(d.offset, "")
         .get();
-
+    
     /* re-parse and add new AST to project AST */
     StoredDefinition def
         = compiler.recompile(fileContents, file);
 
-    System.out.println("--------------");
-    System.out.println(mProjectRoot);
-    System.out.println(mProjectRoot.getClass());
-    System.out.println("--------------");
-    
     if (mProjectRoot.hasValue()) {
         new Proxy(
             mProjectRoot.value(), 

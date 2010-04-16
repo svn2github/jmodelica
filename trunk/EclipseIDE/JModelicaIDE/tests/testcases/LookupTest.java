@@ -35,7 +35,7 @@ public void testInstEnclosingClassAt(String path, String fail) {
 
 public void testInstEnclosingClassAt() {
     String format = "test_data/lookup/instEnclosingClassAt%d.mo";
-    int nbrTestCases = ModelicaTestCase.nbrTestCasesMatchin(format);
+    int nbrTestCases = ModelicaTestCase.nbrTestCasesMatching(format);
     
     assertTrue(nbrTestCases > 0);
     
@@ -48,12 +48,17 @@ public void testInstEnclosingClassAt() {
 
 public void testDeclFromAccessAt(String path, String failMessage) {
     
-    ModelicaTestCase m = new ModelicaTestCase(path);
+    ModelicaTestCase m = 
+        new ModelicaTestCase(path);
     
+    m.root.options.setStringOption("MODELICAPATH", "");
+
     Maybe<InstNode> node = 
         new Lookup(m.root).declarationFromAccessAt(m.document);
     
-    Maybe<String> expected = m.expected();
+    Maybe<String> expected =
+        m.expected();
+    
     
     assertTrue(
             failMessage,
@@ -72,7 +77,7 @@ public void testDeclFromAccessAt(String path, String failMessage) {
 public void testDeclFromAccessAt() {
 
     String format = "test_data/lookup/declFromAccessAt%d.mo";
-    int nbrTestCases = ModelicaTestCase.nbrTestCasesMatchin(format);
+    int nbrTestCases = ModelicaTestCase.nbrTestCasesMatching(format);
     
     assertTrue(nbrTestCases > 0);
     

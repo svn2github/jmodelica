@@ -37,6 +37,10 @@ public class MockFile implements IFile {
         this(project, "");
     }
 
+    public MockFile(String path) {
+        this(new MockProject(), path);
+    }
+    
     public MockFile(IProject project, String path) {
         this.project = project;
         this.path = path;

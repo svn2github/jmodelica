@@ -4,7 +4,7 @@ import org.eclipse.jface.action.Action;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.OffsetDocument;
 import org.jmodelica.ide.editor.Editor;
-import org.jmodelica.ide.helpers.EclipseSucks;
+import org.jmodelica.ide.helpers.EclipseUtil;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.ide.namecomplete.Lookup;
 import org.jmodelica.modelica.compiler.ASTNode;
@@ -46,8 +46,8 @@ public void run() {
     try {
         
         Editor ed = 
-            EclipseSucks.getModelicaEditorForFile(
-                EclipseSucks
+            EclipseUtil.getModelicaEditorForFile(
+                EclipseUtil
                     .getFileForPath(pathToDecl)
                     .value())
             .value();

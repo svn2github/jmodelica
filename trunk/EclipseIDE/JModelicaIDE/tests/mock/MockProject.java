@@ -30,6 +30,8 @@ public class MockProject implements IProject {
 public final static MockProject PROJECT = 
     new MockProject();
 
+
+
 public void build(int kind, IProgressMonitor monitor) throws CoreException {
         
     }

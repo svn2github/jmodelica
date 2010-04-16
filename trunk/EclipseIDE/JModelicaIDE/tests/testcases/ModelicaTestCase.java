@@ -2,7 +2,10 @@ package testcases;
 
 import java.io.File;
 import java.io.StringReader;
+import java.util.Arrays;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.jface.text.Document;
 import org.jmodelica.ide.OffsetDocument;
@@ -74,23 +77,32 @@ public class ModelicaTestCase {
      * // Just 'id' (if class with name 'id' is expected.
      * 
      */
-    public Maybe<String> expected() {
+    public Set<String> expectedSet() {
         String expected = 
             new DocUtil(document).getLine(0);
-        boolean nothingExpected = 
-            expected.matches("//\\s*Nothing.*");
-        String name = "";
-        if (!nothingExpected) 
-            name = expected.substring(expected.indexOf("Just") + 4) .trim();
+
+        if (expected.matches("//\\s*Nothing.*")) {
+            return new TreeSet<String>();
+        }
         
-        return Maybe.guard(name, !nothingExpected);    
+        String name = 
+            expected.substring(expected.indexOf("Just") + 4).trim();
+        
+        return 
+            new TreeSet<String>(
+                Arrays.asList(name.split(",\\s*")));
     }
 
+    
+    public Maybe<String> expected() {
+        Set<String> set = expectedSet();
+        return Maybe.guard(new DocUtil(document).getLine(0), !set.isEmpty());
+    }
 
     /**
      * Counts number of test cases matching format % i, for i = 1..
      */
-    public static int nbrTestCasesMatchin(String format) {
+    public static int nbrTestCasesMatching(String format) {
         
         int i = 0;
         while ((new File(String.format(format, i+1))).exists())

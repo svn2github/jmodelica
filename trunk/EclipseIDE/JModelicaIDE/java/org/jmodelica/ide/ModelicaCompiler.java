@@ -15,10 +15,12 @@
  */
 package org.jmodelica.ide;
  
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 
 import mock.MockFile;
+import mock.MockProject;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -34,16 +36,18 @@ import org.jastadd.plugin.compiler.ast.IASTNode;
 import org.jmodelica.ide.helpers.DocumentReader;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
-import org.jmodelica.modelica.parser.ModelicaParser;
  
 public class ModelicaCompiler extends AbstractCompiler {
 
 public static final String ERROR_MARKER_ID = IDEConstants.ERROR_MARKER_ID;
 
 @Override
-protected IASTNode compileToProjectAST(IProject project,
-        IProgressMonitor monitor) {
+public IASTNode compileToProjectAST(
+    IProject project,
+    IProgressMonitor monitor) 
+{
     return 
         recursiveCompile(
             new CompilationRoot(project), 
@@ -53,10 +57,10 @@ protected IASTNode compileToProjectAST(IProject project,
 }
  
 private CompilationRoot recursiveCompile(
-        CompilationRoot lasr, 
-        IContainer parent,
-        IProgressMonitor monitor) {
-
+    CompilationRoot compilationRoot, 
+    IContainer parent,
+    IProgressMonitor monitor) 
+{
     try {
         
         IResource[] resources = parent.members();
@@ -68,12 +72,18 @@ private CompilationRoot recursiveCompile(
             
             switch (resource.getType()) {
             case IResource.FOLDER:
-                /* do nothing right now */
+                
+                compilationRoot.addPackageDirectory(resource);
+
                 break;
             case IResource.FILE:
-                IFile file = (IFile)resource;
+                
+                IFile file = 
+                    (IFile)resource;
+                
                 if (IDEConstants.FILE_EXT.equals(file.getFileExtension()))
-                     lasr.parseFile(file);
+                     compilationRoot.parseFile(file);
+
                 break;
             }
             
@@ -84,14 +94,14 @@ private CompilationRoot recursiveCompile(
         e.printStackTrace();
     }
     
-    return lasr;
+    return compilationRoot;
 }
 
 protected IFile defaultToMock(IFile file) {
     return
         new Maybe<IFile>(file)
         .defaultTo(
-            new MockFile(null));
+            new MockFile(null, ""));
 }
 
 @Override
@@ -102,9 +112,9 @@ public IASTNode compileToAST(
     IFile file) 
 {
     file = defaultToMock(file); 
-    CompilationRoot lasr = new CompilationRoot(file.getProject());
-    lasr.parseFile(new DocumentReader(document), file);
-    return lasr.getStoredDefinition();
+    CompilationRoot compilationRoot = new CompilationRoot(file.getProject());
+    compilationRoot.parseFile(new DocumentReader(document), file);
+    return compilationRoot.getStoredDefinition();
 }
 
 public Maybe<ASTNode<?>> recompile(IDocument doc, IFile file) {
@@ -116,29 +126,57 @@ public Maybe<ASTNode<?>> recompile(IDocument doc, IFile file) {
 }
 
 public StoredDefinition recompile(String doc, IFile file) {
-    file = defaultToMock(file);
-    
-    CompilationRoot lasr = new CompilationRoot(file.getProject());
+    file = 
+        defaultToMock(file);
+    CompilationRoot lasr =
+        new CompilationRoot(file.getProject());
+
     lasr.parseDoc(doc, file);
-    return lasr.getStoredDefinition();
+    
+    return 
+        lasr.getStoredDefinition();
 }
 
 @Override
 protected IASTNode compileToAST(IFile file) {
-    file =
-        defaultToMock(file);
     return 
         compileFile(
-            file);
+            defaultToMock(file));
 }
 
-public ASTNode<?> compileFile(IFile file) {
+public StoredDefinition compileFile(IFile file) {
     file = defaultToMock(file);
-    CompilationRoot lasr = new CompilationRoot(file.getProject());
-    lasr.parseFile(file);
-    return lasr.getStoredDefinition();
+    CompilationRoot compilationRoot = 
+        new CompilationRoot(file.getProject());
+    
+    compilationRoot.parseFile(file);
+    
+    return compilationRoot.getStoredDefinition();
 }
 
+
+public SourceRoot compileDirectory(File dir) {
+
+    CompilationRoot cRoot = new CompilationRoot(MockProject.PROJECT);
+    
+    for (File f : dir.listFiles()) {
+
+        if (f.isDirectory())
+            compileDirectory(f);
+        else 
+            cRoot.parseFile(
+                new MockFile(f.getAbsolutePath()));
+    }
+    
+    return cRoot.root();
+}
+
+public StoredDefinition compileString(String content) {
+    return 
+        new CompilationRoot(new MockProject())
+            .parseDoc(content, new MockFile())
+            .getStoredDefinition();
+}
 @Override
 protected Collection<String> acceptedFileExtensions() {
     return Arrays.asList(IDEConstants.ALL_FILE_EXTENSIONS);

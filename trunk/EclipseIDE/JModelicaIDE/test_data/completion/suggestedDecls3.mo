@@ -1,11 +1,12 @@
-// Just SI
+// Just A, m, OuterModel1, OuterModel2, Modelica
 // line above is expected output
 
 // test renamed import
 
 model m
 	
-	import SI = Modelica.Media.Air.DryAirNasa.thermalConductivity;
+	class A
+	end A;
 	
 	^
 	

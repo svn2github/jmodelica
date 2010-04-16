@@ -8,7 +8,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IURIEditorInput;
 import org.jmodelica.ide.folding.IFilePosition;
-import org.jmodelica.ide.helpers.EclipseSucks;
+import org.jmodelica.ide.helpers.EclipseUtil;
 import org.jmodelica.ide.helpers.Util;
 
 /**
@@ -45,12 +45,10 @@ public EditorFile(IEditorInput input) {
         path = 
             i.getURI().getRawPath();
         
-        IFile tmp = 
-            EclipseSucks
+        file = 
+            EclipseUtil
             .getFileForPath(path)
             .value();
-        
-        file = tmp;
         
     } else {
         throw new IllegalArgumentException();
@@ -90,7 +88,6 @@ public String path() {
  * @return file resource of file
  */
 public IFile iFile() {
-    System.out.println(file);
     return file;
 }
 

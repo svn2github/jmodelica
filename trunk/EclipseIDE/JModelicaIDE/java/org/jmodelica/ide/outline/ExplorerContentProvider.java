@@ -212,9 +212,13 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		private void readLibraries() {
 			IASTNode ast = registry.lookupAST(null, project);
 			if (ast instanceof SourceRoot) {
-				List<LibNode> libNodes = ((SourceRoot) ast).getProgram().getLibNodes();
-				int n = libNodes.getNumChild();
-				if (n > 0) {
+				
+			    List<LibNode> libNodes = 
+				    ((SourceRoot) ast).getProgram().getLibNodes();
+				
+			    int n = libNodes.getNumChild();
+				
+			    if (n > 0) {
 					libraries = new LibNode[n];
 					for (int i = 0; i < n; i++) {
 						libraries[i] = libNodes.getChild(i);

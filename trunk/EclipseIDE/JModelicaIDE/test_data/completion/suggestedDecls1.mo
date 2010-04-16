@@ -6,9 +6,9 @@
 model m
 	model A
 
-		model shoul_not_be_in_completion
+		model should_not_be_in_completion
 			
-		end shoul_not_be_in_completion;
+		end should_not_be_in_completion;
 		
 		Real a;
 		Real b;

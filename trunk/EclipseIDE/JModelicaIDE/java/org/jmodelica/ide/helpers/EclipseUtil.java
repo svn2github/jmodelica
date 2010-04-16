@@ -17,7 +17,7 @@ import org.jmodelica.ide.editor.Editor;
  * @author philip
  *
  */
-public class EclipseSucks {
+public class EclipseUtil {
 
 public static Maybe<Editor> getModelicaEditorForFile(IFile file) {
 

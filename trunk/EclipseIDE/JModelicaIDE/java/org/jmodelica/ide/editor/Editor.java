@@ -72,7 +72,7 @@ import org.jmodelica.modelica.compiler.ASTNode;
  * Modelica source editor.
  */
 public class Editor extends AbstractDecoratedTextEditor implements
-        IASTRegistryListener {
+        IASTRegistryListener, EditorWithFile {
 
 private final OutlinePage fSourceOutlinePage;
 private final InstanceOutlinePage fInstanceOutlinePage;
@@ -82,7 +82,7 @@ private IDocumentPartitioner fPartitioner;
 private AnnotationDrawer annotationDrawer; // For folding
 
 private CompilationResult compResult;
-private EditorFile file;
+public  EditorFile file;
 
 private final ErrorCheckAction errorCheckAction;
 private final ToggleAnnotationsAction toggleAnnotationsAction;
@@ -315,8 +315,11 @@ protected void update() {
     
     setupDocumentPartitioner(document());
 
-    if (compResult.failed())
+    if (compResult.failed()) {
+        System.out.println("Compilation Failed: " + this.file.path());
+        System.out.println(compResult.root);
         return;
+    }
 
     // Update outline
     fSourceOutlinePage.updateAST(compResult.root());
