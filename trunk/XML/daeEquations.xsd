@@ -4,7 +4,7 @@
 	<xs:import namespace="https://svn.jmodelica.org/trunk/XML/daeExpressions.xsd" schemaLocation="daeExpressions.xsd"/>
 	<xs:complexType name="AbstractEquation">
 		<xs:annotation>
-			<xs:documentation>Definition of the equation type in residual form</xs:documentation>
+			<xs:documentation>Definition of the equation type in residual form exp=0</xs:documentation>
 		</xs:annotation>
 		<xs:sequence>
 			<xs:element ref="exp:Sub"/>
@@ -21,7 +21,7 @@
 	</xs:complexType>
 	<xs:complexType name="FunctionCallLeft">
 		<xs:annotation>
-			<xs:documentation>Element of the left part of a function call equation</xs:documentation>
+			<xs:documentation>Element of the left hand side of a function call equation</xs:documentation>
 		</xs:annotation>
 		<xs:choice>
 			<xs:element ref="exp:Identifier"/>

@@ -9,8 +9,16 @@
 		</xs:annotation>
 		<xs:sequence>
 			<xs:element name="Name" type="exp:QualifiedName"/>
-			<xs:element name="Record" type="exp:QualifiedName" minOccurs="0"/>
-			<xs:element name="Size" type="exp:Exp" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="Record" type="exp:QualifiedName" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Qualified Name of the record type (in case the variable is a Record)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Size" type="exp:Exp" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Array size index expressions</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 			<xs:element name="BindingExpression" type="exp:Exp" minOccurs="0"/>
 		</xs:sequence>
 		<xs:attribute name="type" use="required">
@@ -24,11 +32,15 @@
 				</xs:restriction>
 			</xs:simpleType>
 		</xs:attribute>
-		<xs:attribute name="variability">
+		<xs:attribute name="variability" default="continuous">
+			<xs:annotation>
+				<xs:documentation>To be filled if the variable is a constant or a parameter</xs:documentation>
+			</xs:annotation>
 			<xs:simpleType>
 				<xs:restriction base="xs:normalizedString">
 					<xs:enumeration value="parameter"/>
 					<xs:enumeration value="constant"/>
+					<xs:enumeration value="continuous"/>
 				</xs:restriction>
 			</xs:simpleType>
 		</xs:attribute>
