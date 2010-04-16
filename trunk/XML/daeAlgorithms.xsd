@@ -41,6 +41,7 @@
 		<xs:choice>
 			<xs:element ref="exp:Identifier"/>
 			<xs:element ref="exp:Array"/>
+			<xs:element ref="exp:RecordConstructor"/>
 			<xs:element name="EmptyOutputArgument" fixed=""/>
 		</xs:choice>
 	</xs:complexType>
