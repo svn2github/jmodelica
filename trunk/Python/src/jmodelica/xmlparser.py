@@ -71,26 +71,56 @@ def _parse_XML(filename, schemaname=''):
     return xmldoc
 
 class XMLFunctionCache:
+    """ Class representing cache for loaded XML doc.
+    
+        Function return values from function calls in XMLDoc are 
+        saved in a dict structure. The first time a function call is
+        made for a particular instance of XMLDoc will result in a 
+        new entry in the internal cache (dict). If the function has an 
+        argument, the function entry will get the value equal to a new 
+        dict with return values dependent on function argument.
+        
+        Note: The current version only supports functions with no or one 
+        argument.
+    
+    """
+    
     def __init__(self):
+        """ Create internal cache (dict). """
         self.cache={}
         
     def add(self, obj, function, key=None):
-        #print "####  XMLFunctionCache: add with function: "+str(function)+" and key: "+str(key)
+        """ Add a function call to cache and save result dependent on 
+            the argument key. If key is None, the function has no arguments 
+            and the dict entry will simply contain one value which is the 
+            return value for the specific function. If key is not none, the 
+            value of the dict entry will contain yet another dict with an entry 
+            for each argument to the function.
+        """
+        # load xmlparser-function
         f = getattr(obj, function)
+        # check if there is a key (argument to function f)
+        # and get result (call function)
         if key!=None:
             result = f(key, ignore_cache=True)
         else:
             result = f(ignore_cache=True)
-        #print "Result is: "+str(result)
+        # check if function is already in cache
         if not self.cache.has_key(function):
-            #print "Function "+str(function)+" not in cache"
+            # function is not in cache so add both function 
+            # and return result which is either a dict or 
+            # "normal" value entry dependent on key
             if key!=None:
                 self.cache[function] = {key:result}
             else:
                 self.cache[function] = result
         else:
-            #print "adding result for key "+str(key)+" to cache"
+            # function is in cache so add result for the 
+            # specific argument
             values = self.cache.get(function)
+            # ...should not have to do this check, 
+            # have we got this far key can not be = None
+            # but keep for now
             if key!=None:
                 values[key]=result
             else:
@@ -98,19 +128,24 @@ class XMLFunctionCache:
         return result                        
                     
     def get(self, obj, function, key=None):
-        #print "####  XMLFunctionCache: get with function: "+str(function)+" and key: "+str(key)
+        """ Get the function return value (cached value) for 
+            the specific function and key.
+            
+        """
+        # Get function result value/values from cache
         values = self.cache.get(function)
+        # check if function could be found in cache
         if values!=None:
-            #print "Function "+str(function)+" found in cache"
+            # if key is none then values is = the function return value
             if key is None:
                 return values
-                
-            result = values.get(key)               
+            # otherwise, use the key (function arg) to get the correct value   
+            result = values.get(key)
+            # check if found in cache             
             if result!=None:
-                #print "Result of function "+str(function)+" found: "+str(result)
-                #print " ******** current cache: "+str(self.cache)
+                #return result is found
                 return result
-        #print " ******** current cache: "+str(self.cache)
+        # result was not found - add to cache
         return self.add(obj, function, key)        
 
 class XMLBaseDoc:
