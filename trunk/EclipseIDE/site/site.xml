@@ -3,7 +3,13 @@
    <description url=".">
       JModelica Update Site
    </description>
-   <feature url="features/org.jmodelica.ide_0.3.4.r786.jar" id="org.jmodelica.ide" version="0.3.4.r786">
+   <feature url="features/org.jastadd.plugin_1.0.8.jar" id="org.jastadd.plugin" version="1.0.8">
+      <category name="org.jmodelica.ide.category"/>
+   </feature>
+   <feature url="features/org.jmodelica.folding_0.1.2.jar" id="org.jmodelica.folding" version="0.1.2">
+      <category name="org.jmodelica.ide.category"/>
+   </feature>
+   <feature url="features/org.jmodelica.ide_0.3.4.r999.jar" id="org.jmodelica.ide" version="0.3.4.r999">
       <category name="org.jmodelica.ide.category"/>
    </feature>
    <category-def name="org.jmodelica.ide.category" label="JModelica">

@@ -328,7 +328,9 @@
 
 		<!-- build jars for features -->
 		<emptyDir dir="${bin_dir}/features" />
-		<jm_buildFeature projectName="feature" />
+		<jm_buildFeature projectName="org.jmodelica.ide.feature" />
+		<jm_buildFeature projectName="org.jmodelica.folding.feature" />
+		<jm_buildFeature projectName="org.jastadd.plugin.feature" />
 
 		<!-- build update site -->
 		<emptyDir dir="${output_dir}" />
@@ -345,5 +347,3 @@
 		<delete dir="${bin_dir}/bundles"/>
 	</target>
 </project>
-
-
