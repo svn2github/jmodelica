@@ -386,4 +386,14 @@ public class OptionRegistry {
 			super(message);
 		}		
 	}
+	
+	/** 
+	 * Find the correct separator of path elements: ':' or ';'
+	 */
+	public static String getPathSeparator() {
+        return
+            System.getProperty("os.name").toLowerCase().indexOf("win") >= 0 
+                ? ";"
+                : ":";
+	}
 }
