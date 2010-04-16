@@ -293,20 +293,25 @@
 			<src path="${core_java_dir}" />
 			<src path="${folding_java_dir}" />
 			<include name="**/*.java" />
-			<!-- add excludes for mock and testcases once #774 is done -->
 		</javac>
+	</target>
+
+	<!-- build plugins, features and site -->
+	<target name="build" depends="compile">
 		<!-- collect class files for org.jastadd.plugin -->
 		<copy todir="${bin_dir}/bundles/org.jastadd.plugin">
 			<fileset dir="${bin_dir}/classes">
 				<include name="org/jastadd/**/*" />
 			</fileset>
 		</copy>
+		
 		<!-- collect class files for org.jmodelica.folding -->
 		<copy todir="${bin_dir}/bundles/org.jmodelica.folding">
 			<fileset dir="${bin_dir}/classes">
 				<include name="org/jmodelica/folding/**/*" />
 			</fileset>
 		</copy>
+		
 		<!-- collect class files for JModelicaIDE -->
 		<copy todir="${bin_dir}/bundles/JModelicaIDE">
 			<fileset dir="${bin_dir}/classes">
@@ -316,10 +321,7 @@
 				<include name="testcases/**/*" /> <!-- remove once #774 is done -->
 			</fileset>
 		</copy>
-	</target>
-
-	<!-- build plugins, features and site -->
-	<target name="build" depends="compile">
+		
 		<!-- build jars for plugins -->
 		<emptyDir dir="${bin_dir}/plugins" />
 		<jm_buildPlugin projectName="JModelicaIDE" />
@@ -344,6 +346,6 @@
 		<jm_buildSite dir="${output_dir}" name="JModelica" />
 
 		<!-- delete temp dir -->
-		<delete dir="${bin_dir}/bundles"/>
+		<delete dir="${bin_dir}"/>
 	</target>
 </project>

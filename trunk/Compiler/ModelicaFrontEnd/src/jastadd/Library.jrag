@@ -240,8 +240,10 @@ aspect Library {
 		try {
 			String packagePath = root().options.getStringOption("PACKAGEPATHS");
 			for (String pathElement : packagePath.split(File.pathSeparator)) {
-				File dir = new File(pathElement);
-                libnodes.add(new LibNode(dir.toString(), dir.getName(), true));
+				if (!pathElement.equals("")) {
+					File dir = new File(pathElement);
+	                libnodes.add(new LibNode(dir.toString(), dir.getName(), true));
+				}
 			}
 		} catch (OptionRegistry.UnknownOptionException e1) {
 		}

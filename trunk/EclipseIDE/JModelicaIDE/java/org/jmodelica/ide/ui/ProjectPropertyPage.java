@@ -217,15 +217,16 @@ public class ProjectPropertyPage extends PropertyPage {
 
 		try {
 			libStr = proj.getPersistentProperty(IDEConstants.PROPERTY_LIBRARIES_ID);
-			defaultMSL = proj.getPersistentProperty(IDEConstants.PROPERTY_DEFAULT_MSL_ID);
-			String optionsPathStr = proj.getPersistentProperty(IDEConstants.PROPTERTY_OPTIONS_PATH);
-			optionsPath = new Maybe<String>(optionsPathStr).defaultTo("");
+			optionsPath = proj.getPersistentProperty(IDEConstants.PROPTERTY_OPTIONS_PATH);
+			if (optionsPath == null)
+				optionsPath = "";
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
 
 		library_paths = new ArrayList();
-		library_paths.addAll(Arrays.asList(libStr.split(IDEConstants.PATH_SEP)));
+		if (libStr != null)
+			library_paths.addAll(Arrays.asList(libStr.split(IDEConstants.PATH_SEP)));
 	}
 
 	private void saveProperties() {
@@ -234,7 +235,6 @@ public class ProjectPropertyPage extends PropertyPage {
 		try {
 			String libStr = Util.implode(IDEConstants.PATH_SEP, library_paths);
 			proj.setPersistentProperty(IDEConstants.PROPERTY_LIBRARIES_ID, libStr);
-			proj.setPersistentProperty(IDEConstants.PROPERTY_DEFAULT_MSL_ID, defaultMSL);
 			proj.setPersistentProperty(IDEConstants.PROPTERTY_OPTIONS_PATH, text.getText());
 
 			if (changed)
@@ -316,19 +316,6 @@ public class ProjectPropertyPage extends PropertyPage {
 
 		public void widgetSelected(SelectionEvent e) {
 			delLibraryButton.setEnabled(e.item != null);
-		}
-
-	}
-
-	public class DefMSLListener implements SelectionListener {
-
-		public void widgetDefaultSelected(SelectionEvent e) {
-			widgetSelected(e);
-		}
-
-		public void widgetSelected(SelectionEvent e) {
-			defaultMSL = defMSLCombo.getItem(defMSLCombo.getSelectionIndex());
-			changed = true;
 		}
 
 	}

@@ -248,7 +248,7 @@ protected void doSetInput(IEditorInput input) throws CoreException {
     file = new EditorFile(input);
 
     compResult = 
-        file.inWorkspace() 
+        file.inModelicaProject()
             ? new GlobalCompilationResult(file, this)
             : new LocalCompilationResult(file, this);
 
